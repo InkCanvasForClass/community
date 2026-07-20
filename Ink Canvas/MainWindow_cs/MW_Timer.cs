@@ -1454,7 +1454,8 @@ namespace Ink_Canvas
                     try
                     {
                         if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
-                        Dispatcher.Invoke(() => { Application.Current.Shutdown(); });
+                        // 使用 BeginInvoke 避免在 Invoke 闭包内同步等待自身调度导致 UI 死锁
+                        Dispatcher.BeginInvoke(new Action(() => { Application.Current.Shutdown(); }));
                     }
                     catch (Exception) { }
                 }

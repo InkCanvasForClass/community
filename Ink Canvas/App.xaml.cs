@@ -956,8 +956,10 @@ namespace Ink_Canvas
                 SetSplashMessage("正在启动 Ink Canvas...");
                 SetSplashProgress(25);
 
-                // 强制刷新UI，确保启动画面显示
-                Application.Current.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
+                // 强制刷新UI，确保启动画面显示。
+                // 注意：在 App 构造阶段同步调用 Dispatcher.Invoke 会让当前线程等待自身调度，
+                // 形成可见卡顿甚至死锁。此处直接返回，依靠 Splash 自身 Loaded 事件完成首帧渲染即可。
+                Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
             }
             RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 

@@ -114,11 +114,16 @@ namespace Ink_Canvas.Helpers
             {
                 if (_config.UseHardwareAcceleration)
                 {
-                    // 使用硬件加速的同步版本（使用异步等待避免阻塞）
+                    // 使用硬件加速的同步版本（异步等待，超时则放弃硬件路径，使用原始笔画）
                     var task = _hardwareProcessor.SmoothStrokeWithGPU(originalStroke);
                     if (task.Wait(5000)) // 5秒超时
                     {
-                        result = task.Result;
+                        try { result = task.GetAwaiter().GetResult(); }
+                        catch (Exception hwEx)
+                        {
+                            Debug.WriteLine($"硬件加速平滑失败，回退原始笔画: {hwEx.Message}");
+                            result = originalStroke;
+                        }
                     }
                     else
                     {
