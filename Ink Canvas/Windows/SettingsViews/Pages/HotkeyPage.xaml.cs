@@ -159,6 +159,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void LoadMouseModeSetting()
         {
             CardEnableHotkeysInMouseMode.IsOn = SettingsManager.Settings.Appearance.EnableHotkeysInMouseMode;
+            CardPassThroughMouseWheelInDrawingMode.IsOn = SettingsManager.Settings.Appearance.PassThroughMouseWheelInDrawingMode;
         }
 
         private void ToggleSwitchEnableHotkeysInMouseMode_Toggled(object sender, RoutedEventArgs e)
@@ -186,6 +187,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"更新鼠标模式快捷键设置时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void ToggleSwitchPassThroughMouseWheelInDrawingMode_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            try
+            {
+                bool newState = CardPassThroughMouseWheelInDrawingMode.IsOn;
+                SettingsManager.Settings.Appearance.PassThroughMouseWheelInDrawingMode = newState;
+                SettingsManager.SaveSettingsToFile();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新绘制模式滚轮穿透设置时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
