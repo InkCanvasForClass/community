@@ -983,18 +983,26 @@ namespace Ink_Canvas.Plugins
                     }
                 }
 
+<<<<<<< HEAD
+                // 2. 先尝试从默认上下文（主程序）加载，共享主程序集（SDK、WPF 等必须共享以保持类型身份一致）
+=======
                 // 2. 尝试从默认上下文（主程序）加载，共享主程序集
+>>>>>>> 12fecbec72992b1788ae7ec5847ef18848b12da9
                 try
                 {
                     var defaultAssembly = Default.LoadFromAssemblyName(assemblyName);
                     if (defaultAssembly != null) return defaultAssembly;
                 }
+<<<<<<< HEAD
+                catch { }
+=======
                 catch (FileNotFoundException)
                 {
                     // 默认上下文没有该程序集，继续从插件目录解析外部依赖。
                 }
+>>>>>>> 12fecbec72992b1788ae7ec5847ef18848b12da9
 
-                // 3. 从插件目录解析依赖
+                // 3. 主程序没有该程序集时，再从插件目录解析
                 var assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
                 if (assemblyPath != null)
                 {
@@ -1004,7 +1012,7 @@ namespace Ink_Canvas.Plugins
                 }
 
                 return null;
-            }
+            }   //亲爱的开发者，你真细心，这是我留的彩蛋，我猜cjk是肯定不会发现这里的（）
 
             protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
             {
