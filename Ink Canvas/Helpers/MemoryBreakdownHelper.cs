@@ -107,135 +107,26 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// Force a full GC pass. Captures Working Set / Private Usage / GC Heap / Finalization Pending
-        /// before & after, writes a multi-line summary to the log file, and returns the summary text.
-        /// </summary>        /// <summary>
-        /// Force a full GC pass. Captures Working Set / Private Usage / GC Heap / Finalization Pending
-        /// before & after, writes a multi-line summary to the log file, and returns the summary text.
+        /// Forces a full GC pass for diagnostics. The detailed report is generated separately
+        /// by DumpToFile; this action intentionally does not create a second GcDiff file.
         /// </summary>
         public static string ForceFullGc()
         {
-            // 采样前
-            var before = SampleMemorySnapshot();
-
             try
             {
                 GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
                 GC.WaitForPendingFinalizers();
                 GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
                 GC.WaitForPendingFinalizers();
+                const string summary = "GC completed";
+                LogHelper.WriteLogToFile("[MemoryBreakdown] 强制 GC 完成", LogHelper.LogType.Info);
+                return summary;
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"[MemoryBreakdown] ForceFullGc 异常: {ex.Message}", LogHelper.LogType.Warning);
+                return "GC failed: " + ex.Message;
             }
-
-            var after = SampleMemorySnapshot();
-            var summary = FormatDiff(before, after);
-
-            // 把这次 GC 单独写入一份带时间戳的对照报告,便于追踪
-            try
-            {
-                var logsDir = Path.Combine(App.RootPath, FolderName);
-                if (!Directory.Exists(logsDir)) Directory.CreateDirectory(logsDir);
-                var fileName = $"GcDiff_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
-                var fullPath = Path.Combine(logsDir, fileName);
-                File.WriteAllText(fullPath, summary, Encoding.UTF8);
-                LogHelper.WriteLogToFile(
-                    $"[MemoryBreakdown] GC 对照报告: {fullPath}",
-                    LogHelper.LogType.Info);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[MemoryBreakdown] 写入 GcDiff 失败: {ex.Message}", LogHelper.LogType.Warning);
-            }
-
-            return summary;
-        }
-
-        private struct MemorySnapshot
-        {
-            public long WorkingSetMb;
-            public long PrivateUsageMb;
-            public long ManagedHeapMb;
-            public int PinnedObjects;
-            public int FinalizationPending;
-        }
-
-        private static MemorySnapshot SampleMemorySnapshot()
-        {
-            var snap = new MemorySnapshot
-            {
-                WorkingSetMb = Environment.WorkingSet / (1024L * 1024L),
-                ManagedHeapMb = GC.GetTotalMemory(forceFullCollection: false) / (1024L * 1024L),
-            };
-
-            try
-            {
-                using var p = Process.GetCurrentProcess();
-                p.Refresh();
-                var counters = new PROCESS_MEMORY_COUNTERS { cb = (uint)Marshal.SizeOf<PROCESS_MEMORY_COUNTERS>() };
-                if (GetProcessMemoryInfo(p.Handle, out counters, counters.cb))
-                {
-                    snap.PrivateUsageMb = counters.PrivateUsage.ToInt64() / (1024L * 1024L);
-                }
-            }
-            catch { }
-
-            try
-            {
-                var info = GC.GetGCMemoryInfo();
-                snap.PinnedObjects = (int)info.PinnedObjectsCount;
-                snap.FinalizationPending = (int)info.FinalizationPendingCount;
-            }
-            catch { }
-
-            return snap;
-        }
-
-        private static string FormatDiff(MemorySnapshot b, MemorySnapshot a)
-        {
-            long dWS = a.WorkingSetMb - b.WorkingSetMb;
-            long dPriv = a.PrivateUsageMb - b.PrivateUsageMb;
-            long dHeap = a.ManagedHeapMb - b.ManagedHeapMb;
-            int dPinned = a.PinnedObjects - b.PinnedObjects;
-            int dFin = a.FinalizationPending - b.FinalizationPending;
-
-            var sb = new StringBuilder(512);
-            sb.AppendLine("=== MemoryBreakdown GC Diff ===");
-            sb.AppendLine($"Time: {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}");
-            sb.AppendLine();
-            sb.AppendLine($"  {"Metric",-24} {"Before",12} {"After",12} {"Delta",12}");
-            sb.AppendLine($"  {new string('-', 60)}");
-            sb.AppendLine($"  {"Working Set (MB)",-24} {b.WorkingSetMb,12} {a.WorkingSetMb,12} {dWS,+12}");
-            sb.AppendLine($"  {"Private Usage (MB)",-24} {b.PrivateUsageMb,12} {a.PrivateUsageMb,12} {dPriv,+12}");
-            sb.AppendLine($"  {"Managed Heap (MB)",-24} {b.ManagedHeapMb,12} {a.ManagedHeapMb,12} {dHeap,+12}");
-            sb.AppendLine($"  {"Pinned Objects",-24} {b.PinnedObjects,12} {a.PinnedObjects,12} {dPinned,+12}");
-            sb.AppendLine($"  {"Finalization Pending",-24} {b.FinalizationPending,12} {a.FinalizationPending,12} {dFin,+12}");
-            sb.AppendLine();
-            sb.AppendLine(InterpretDiff(dWS, dPriv, dHeap));
-            return sb.ToString();
-        }
-
-        private static string InterpretDiff(long dWS, long dPriv, long dHeap)
-        {
-            if (dPriv <= 0 && dHeap <= 0)
-            {
-                return "  ✓ GC 释放了内存:私有占用下降,GC 堆压缩成功。";
-            }
-            if (dPriv > 0 && dHeap < 0)
-            {
-                return "  ⚠️ GC 堆释放但私有占用增加:通常为 compressing:true 触发的页重新分配,实际 Working Set 会随后回落。";
-            }
-            if (dPriv > 0 && dHeap > 0)
-            {
-                return "  ⚠️ GC 后内存反而上升:可能有钉住对象(Pinned)/终结器队列残留/分页抖动。";
-            }
-            if (dPriv < 0 && dHeap > 0)
-            {
-                return "  ℹ️ 私有占用下降但托管堆略增:非托管缓冲区被回收,GC 效果正常。";
-            }
-            return "  ? 未变化,可能 GC 已是稳态或对象全部长生命周期。";
         }
 
         #region Section builders
@@ -330,7 +221,16 @@ namespace Ink_Canvas.Helpers
                 long totalDescendants = 0;
                 long peakDescendants = 0;
                 string peakWindow = null;
-                var visualTypeCounts = new Dictionary<string, int>(StringComparer.Ordinal);
+                var visualTypeCounts = new Dictionary<string, int>(StringComparer.Ordinal)
+                {
+                    ["Image"] = 0,
+                    ["MediaElement"] = 0,
+                    ["InkCanvas"] = 0,
+                    ["D3DImage"] = 0,
+                    ["WriteableBitmap"] = 0,
+                    ["Popup"] = 0,
+                    ["Adorner"] = 0
+                };
 
                 foreach (Window w in Application.Current?.Windows ?? new WindowCollection())
                 {
@@ -429,6 +329,7 @@ namespace Ink_Canvas.Helpers
                 string tmField = null;
                 long tmCount = ReadTimeMachineCount(mainWindow, out tmField);
                 sb.AppendLine($"  TimeMachine 历史                         : {tmCount} 条{(string.IsNullOrEmpty(tmField) ? "" : $"  (字段: {tmField})")}");
+                AppendStrokeSection(sb, mainWindow);
             }
             catch (Exception ex)
             {
@@ -625,6 +526,75 @@ namespace Ink_Canvas.Helpers
         private static string Truncate(string s, int max) =>
             string.IsNullOrEmpty(s) ? string.Empty : (s.Length <= max ? s : s.Substring(0, max) + "…");
 
+        private static void AppendStrokeSection(StringBuilder sb, Ink_Canvas.MainWindow mw)
+        {
+            try
+            {
+                long strokeCount = 0;
+                long strokeCollectionCount = 0;
+                long stylusPointCount = 0;
+
+                foreach (var field in mw.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public))
+                {
+                    object value;
+                    try { value = field.GetValue(mw); } catch { continue; }
+                    CountStrokeValue(value, ref strokeCount, ref strokeCollectionCount, ref stylusPointCount);
+                }
+
+                var timeMachineField = mw.GetType().GetField("timeMachine", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                if (timeMachineField?.GetValue(mw) is object timeMachine)
+                {
+                    foreach (var field in timeMachine.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public))
+                    {
+                        object value;
+                        try { value = field.GetValue(timeMachine); } catch { continue; }
+                        CountStrokeValue(value, ref strokeCount, ref strokeCollectionCount, ref stylusPointCount);
+                    }
+                }
+
+                sb.AppendLine("  Ink Stroke Statistics:");
+                sb.AppendLine($"    StrokeCollection       : {strokeCollectionCount}");
+                sb.AppendLine($"    Stroke                  : {strokeCount}");
+                sb.AppendLine($"    StylusPoint             : {stylusPointCount}");
+            }
+            catch (Exception ex)
+            {
+                sb.AppendLine($"  Ink Stroke Statistics: 读取失败 ({ex.Message})");
+            }
+        }
+
+        private static void CountStrokeValue(object value, ref long strokeCount, ref long collectionCount, ref long pointCount)
+        {
+            if (value is System.Windows.Ink.StrokeCollection collection)
+            {
+                collectionCount++;
+                foreach (System.Windows.Ink.Stroke stroke in collection)
+                {
+                    strokeCount++;
+                    try { pointCount += stroke.StylusPoints.Count; } catch { }
+                }
+                return;
+            }
+
+            if (value is System.Windows.Ink.Stroke strokeValue)
+            {
+                strokeCount++;
+                try { pointCount += strokeValue.StylusPoints.Count; } catch { }
+                return;
+            }
+
+            if (value is System.Collections.IEnumerable items && !(value is string))
+            {
+                foreach (var item in items)
+                {
+                    if (item is System.Windows.Ink.StrokeCollection || item is System.Windows.Ink.Stroke)
+                    {
+                        CountStrokeValue(item, ref strokeCount, ref collectionCount, ref pointCount);
+                    }
+                }
+            }
+        }
+
         private static void AppendPptStreamSection(StringBuilder sb, Ink_Canvas.MainWindow mw)
         {
             try
@@ -657,6 +627,17 @@ namespace Ink_Canvas.Helpers
             if (root == null) return;
 
             string typeName = root.GetType().Name;
+            if (root is System.Windows.Controls.Image)
+                counts["Image"]++;
+            if (root is System.Windows.Controls.MediaElement)
+                counts["MediaElement"]++;
+            if (root is System.Windows.Controls.InkCanvas)
+                counts["InkCanvas"]++;
+            if (root is System.Windows.Controls.Primitives.Popup)
+                counts["Popup"]++;
+            if (root is System.Windows.Documents.Adorner)
+                counts["Adorner"]++;
+
             if (counts.ContainsKey(typeName))
             {
                 counts[typeName]++;
