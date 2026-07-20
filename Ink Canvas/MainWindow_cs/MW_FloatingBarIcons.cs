@@ -421,6 +421,7 @@ namespace Ink_Canvas
                 _popupManager.RegisterPopup(BoardImageOptionsPanel);
                 _popupManager.RegisterPopup(TwoFingerGestureBorder);
                 _popupManager.RegisterPopup(BoardTwoFingerGestureBorder);
+                _popupManager.RegisterPopup(BoardRoamingPopup);
                 _popupManager.RegisterPopup(BackgroundPalette);
 
                 _popupManager.Initialize(this);
@@ -521,6 +522,7 @@ namespace Ink_Canvas
             BoardImageOptionsPanel.IsOpen = false;
             TwoFingerGestureBorder.IsOpen = false;
             BoardTwoFingerGestureBorder.IsOpen = false;
+            BoardRoamingPopup.IsOpen = false;
             // 添加隐藏图形工具的二级菜单面板
             BorderDrawShape.IsOpen = false;
             BoardBorderDrawShape.IsOpen = false;
@@ -620,6 +622,8 @@ namespace Ink_Canvas
             AnimationsHelper.HidePopupWithSlideAndFade(BoardImageOptionsPanel);
             AnimationsHelper.HidePopupWithSlideAndFade(TwoFingerGestureBorder);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardTwoFingerGestureBorder);
+            // 漫游弹窗必须同步关闭，避免关闭动画的 Completed 在重新打开后再次将其关闭。
+            BoardRoamingPopup.IsOpen = false;
 
             AnimationsHelper.HidePopupWithSlideAndFade(BackgroundPalette);
 

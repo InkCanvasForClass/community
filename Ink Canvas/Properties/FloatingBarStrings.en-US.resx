@@ -93,6 +93,15 @@
   <data name="Board_Roaming" xml:space="preserve">
     <value>Pan</value>
   </data>
+  <data name="Board_RoamingPanelTitle" xml:space="preserve">
+    <value>Pan overview</value>
+  </data>
+  <data name="Board_RoamingPanelHint" xml:space="preserve">
+    <value>Drag the blue viewport to move this page quickly</value>
+  </data>
+  <data name="Board_RoamingPanelScale" xml:space="preserve">
+    <value>{0}× canvas area</value>
+  </data>
   <data name="Board_PreviousPage" xml:space="preserve">
     <value>Previous</value>
   </data>

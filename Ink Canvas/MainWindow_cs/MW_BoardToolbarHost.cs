@@ -242,6 +242,7 @@ namespace Ink_Canvas
         private void BindPopupPlacementTargets()
         {
             SetPopupPlacementTarget(BoardTwoFingerGestureBorder, "board.gesture");
+            SetPopupPlacementTarget(BoardRoamingPopup, "board.roaming");
             SetPopupPlacementTarget(BackgroundPalette, "board.backgroundColor");
             SetPopupPlacementTarget(BoardPenPalette, "board.pen");
             SetPopupPlacementTarget(BoardEraserSizePanel, "board.eraser");

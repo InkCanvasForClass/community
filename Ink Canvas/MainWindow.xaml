@@ -675,6 +675,10 @@
                     <Popup x:Name="BoardTwoFingerGestureBorder" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
                         <localControls:GesturePopupContent x:Name="BoardGesturePopupContent" />
                     </Popup>
+                    <!--漫游导航-->
+                    <Popup x:Name="BoardRoamingPopup" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
+                        <localControls:BoardRoamingPopupContent x:Name="BoardRoamingPopupContent" />
+                    </Popup>
                     <!--背景菜单-->
                     <Popup x:Name="BackgroundPalette" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
                         <localControls:BackgroundPalettePopupContent x:Name="BackgroundPalettePopupContent" />
