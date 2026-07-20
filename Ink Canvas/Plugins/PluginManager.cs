@@ -307,6 +307,26 @@ namespace Ink_Canvas.Plugins
             }
         }
 
+        private static bool IsValidPluginId(string pluginId)
+        {
+            if (string.IsNullOrWhiteSpace(pluginId) || pluginId == "." || pluginId == "..") return false;
+            if (pluginId.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) return false;
+            return pluginId.IndexOf(Path.DirectorySeparatorChar) < 0
+                && pluginId.IndexOf(Path.AltDirectorySeparatorChar) < 0;
+        }
+
+        private string GetPluginPath(string pluginId)
+        {
+            if (!IsValidPluginId(pluginId))
+                throw new ArgumentException("Invalid plugin id.", nameof(pluginId));
+
+            var root = Path.GetFullPath(_pluginsDirectory).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+            var path = Path.GetFullPath(Path.Combine(root, pluginId));
+            if (!path.StartsWith(root, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Plugin path escapes the plugin directory.");
+            return path;
+        }
+
         #region Plugin Package Installation
 
         /// <summary>
@@ -336,13 +356,35 @@ namespace Ink_Canvas.Plugins
                     }
 
                     var manifest = JsonSerializer.Deserialize<PluginManifest>(manifestText);
-                    if (manifest == null || string.IsNullOrEmpty(manifest.Id))
+                    if (manifest == null || string.IsNullOrEmpty(manifest.Id) || !IsValidPluginId(manifest.Id))
                     {
-                        Log(string.Format("Package {0} has invalid manifest, skipping", Path.GetFileName(pkgPath)));
+                        Log(string.Format("Package {0} has invalid manifest or plugin id, skipping", Path.GetFileName(pkgPath)));
                         continue;
                     }
 
-                    var targetPath = Path.Combine(_pluginsDirectory, manifest.Id);
+                    if (_securityCheck == null)
+                    {
+                        Log(string.Format("Package {0} cannot be installed automatically before security services are initialized", Path.GetFileName(pkgPath)));
+                        continue;
+                    }
+
+                    var verdict = _securityCheck.EvaluatePackage(pkgPath, null, manifest.Id);
+                    if (_securityCheck.RequiresUserConfirmation(verdict))
+                    {
+                        Log(string.Format("Package {0} is not trusted, skipping automatic installation: {1}",
+                            Path.GetFileName(pkgPath), string.Join(" ", verdict.Reasons)));
+                        continue;
+                    }
+
+                    var targetPath = GetPluginPath(manifest.Id);
+                    var targetRoot = targetPath.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+                    foreach (var entry in pkg.Entries)
+                    {
+                        var entryPath = Path.GetFullPath(Path.Combine(targetPath, entry.FullName));
+                        if (!entryPath.StartsWith(targetRoot, StringComparison.OrdinalIgnoreCase))
+                            throw new InvalidDataException("Plugin package contains an entry outside the plugin directory.");
+                    }
+
                     if (Directory.Exists(targetPath))
                     {
                         // 释放门控锁后删除旧版本
@@ -496,39 +538,67 @@ namespace Ink_Canvas.Plugins
         {
             if (node.IsDiscovered) return;
 
-            if (walking.Contains(node))
+            var cycleStart = walking.IndexOf(node);
+            if (cycleStart >= 0)
             {
-                node.Plugin.LoadStatus = PluginLoadStatus.Error;
-                node.Plugin.Exception = new InvalidOperationException(
-                    string.Format("Circular dependency detected: {0}", string.Join(" -> ", walking.Select(x => x.Plugin.Id))));
+                var cycle = walking.Skip(cycleStart).Concat(new[] { node }).ToList();
+                var exception = new InvalidOperationException(
+                    string.Format("Circular dependency detected: {0}", string.Join(" -> ", cycle.Select(x => x.Plugin.Id))));
+                foreach (var cycleNode in cycle.Distinct())
+                {
+                    cycleNode.Plugin.LoadStatus = PluginLoadStatus.Error;
+                    cycleNode.Plugin.Exception = exception;
+                    cycleNode.IsDiscovered = true;
+                }
                 return;
             }
 
-            node.IsDiscovered = true;
-            var depth = 0;
-
-            if (node.Plugin.Manifest?.Dependencies != null)
+            walking.Add(node);
+            try
             {
-                foreach (var dep in node.Plugin.Manifest.Dependencies)
+                var depth = 0;
+                if (node.Plugin.Manifest?.Dependencies != null)
                 {
-                    if (!allNodes.TryGetValue(dep.Id, out var depNode) || depNode.Plugin.LoadStatus != PluginLoadStatus.NotLoaded)
+                    foreach (var dep in node.Plugin.Manifest.Dependencies)
                     {
-                        if (dep.IsRequired)
+                        if (!allNodes.TryGetValue(dep.Id, out var depNode))
                         {
-                            node.Plugin.LoadStatus = PluginLoadStatus.Error;
-                            node.Plugin.Exception = new InvalidOperationException(
-                                string.Format("Plugin {0} requires missing dependency {1}", node.Plugin.Id, dep.Id));
-                            return;
+                            if (dep.IsRequired)
+                            {
+                                node.Plugin.LoadStatus = PluginLoadStatus.Error;
+                                node.Plugin.Exception = new InvalidOperationException(
+                                    string.Format("Plugin {0} requires missing dependency {1}", node.Plugin.Id, dep.Id));
+                                return;
+                            }
+                            continue;
                         }
-                        continue;
+
+                        ResolveDependencyNode(allNodes, depNode, walking);
+                        if (depNode.Plugin.LoadStatus == PluginLoadStatus.Error ||
+                            depNode.Plugin.LoadStatus == PluginLoadStatus.Disabled)
+                        {
+                            if (dep.IsRequired)
+                            {
+                                node.Plugin.LoadStatus = PluginLoadStatus.Error;
+                                node.Plugin.Exception = new InvalidOperationException(
+                                    string.Format("Plugin {0} depends on unavailable plugin {1}", node.Plugin.Id, dep.Id),
+                                    depNode.Plugin.Exception);
+                                return;
+                            }
+                            continue;
+                        }
+
+                        depth = Math.Max(depth, depNode.Depth);
                     }
-
-                    ResolveDependencyNode(allNodes, depNode, walking);
-                    depth = Math.Max(depth, depNode.Depth);
                 }
-            }
 
-            node.Depth = depth + 1;
+                node.Depth = depth + 1;
+                node.IsDiscovered = true;
+            }
+            finally
+            {
+                walking.Remove(node);
+            }
         }
 
         private class DependencyNode

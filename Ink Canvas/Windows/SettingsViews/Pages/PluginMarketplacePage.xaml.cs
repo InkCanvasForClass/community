@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -20,13 +21,28 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private List<MergedPluginInfo> _allPlugins = new List<MergedPluginInfo>();
         private MergedPluginInfo _selectedPlugin;
 
+        private bool _marketSubscribed;
+
         public PluginMarketplacePage()
         {
             InitializeComponent();
-            _market.PropertyChanged += Market_PropertyChanged;
+            SubscribeMarket();
         }
 
-        private async void Page_Loaded(object sender, RoutedEventArgs e)
+        private void SubscribeMarket()
+        {
+            if (_marketSubscribed) return;
+            _market.PropertyChanged += Market_PropertyChanged;
+            _marketSubscribed = true;
+        }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            SubscribeMarket();
+            _ = LoadPageAsync();
+        }
+
+        private async Task LoadPageAsync()
         {
             try
             {
@@ -65,7 +81,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             foreach (var src in _market.Sources.Sources)
             {
                 SourceCombo.Items.Add(PluginMarketSourcesService.DisplayNameOf(src));
-                if (src.Id == active.Id) selected = idx;
+                if (src.Id == active.Id) selected = idx + 1;
                 idx++;
             }
             // 官方源始终可见在最前

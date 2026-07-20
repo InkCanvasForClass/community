@@ -174,17 +174,10 @@ namespace Ink_Canvas
             // 初始化全局异常和进程结束处理
             InitializeCrashListeners();
 
-            // 仅在崩溃后操作为静默重启时才启动看门狗
-            // 在更新模式下不启动看门狗，避免干扰更新流程
-            args = Environment.GetCommandLineArgs();
-            bool isUpdateMode = args.Contains("--update-mode");
-            bool isFinalApp = args.Contains("--final-app");
+            // 看门狗必须在 App_Startup 读取 Settings.json 并同步 CrashAction 后启动。
+            // 构造函数阶段仍使用默认 CrashAction，不能在此处做判断。
 
-            if (CrashAction == CrashActionType.SilentRestart && !isUpdateMode && !isFinalApp)
-            {
-                StartWatchdogIfNeeded();
-            }
-            Exit += App_Exit; // 注册退出事件
+            args = Environment.GetCommandLineArgs();
         }
 
         /// <summary>
@@ -204,7 +197,6 @@ namespace Ink_Canvas
                 (typeof(Plugins.INotificationService),    new Plugins.NotificationService(mainWindow)),
                 (typeof(Plugins.IFileAssociationService),      new Plugins.FileAssociationService()),
                 (typeof(Plugins.IWindowOverviewService),        new Plugins.WindowOverviewService(mainWindow.WindowOverviewModel)),
-                (typeof(Plugins.IWindowOverviewService),         new Plugins.WindowOverviewService(mainWindow.WindowOverviewModel)),
             };
 
             foreach (var (iface, impl) in services)
@@ -1018,6 +1010,12 @@ namespace Ink_Canvas
 
             // 处理更新模式启动
             bool isUpdateMode = AutoUpdateHelper.HandleUpdateModeStartup(e.Args);
+
+            // 配置已加载后再启动看门狗，避免使用默认的 CrashAction 覆盖用户设置。
+            if (!isUpdateMode && !isFinalApp && CrashAction == CrashActionType.SilentRestart)
+            {
+                StartWatchdogIfNeeded();
+            }
 
             // 如果是更新模式，不显示主窗口但保持应用运行
             if (isUpdateMode)
