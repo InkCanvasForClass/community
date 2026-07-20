@@ -551,7 +551,7 @@ namespace Ink_Canvas.Helpers
             }
 
             // 白板菜单
-            if (name == "BoardTwoFingerGestureBorder" || name == "BackgroundPalette"
+            if (name == "BoardTwoFingerGestureBorder" || name == "BoardRoamingPopup" || name == "BackgroundPalette"
                 || name == "BoardPenPalette" || name == "BoardEraserSizePanel"
                 || name == "BoardBorderDrawShape" || name == "BoardImageOptionsPanel"
                 || name == "BoardBorderToolsPopup")

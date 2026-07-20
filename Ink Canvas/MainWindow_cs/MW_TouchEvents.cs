@@ -1952,14 +1952,17 @@ namespace Ink_Canvas
                 }
                 else if (dec.Count == 0)
                 {
-                    isSingleFingerDragMode = false;
                     isWaitUntilNextTouchDown = false;
 
-                    if (inkCanvas.EditingMode == InkCanvasEditingMode.None &&
-                        lastInkCanvasEditingMode != InkCanvasEditingMode.None &&
-                        lastInkCanvasEditingMode != InkCanvasEditingMode.EraseByPoint)
+                    if (!IsBoardRoamingMode)
                     {
-                        inkCanvas.EditingMode = lastInkCanvasEditingMode;
+                        isSingleFingerDragMode = false;
+                        if (inkCanvas.EditingMode == InkCanvasEditingMode.None &&
+                            lastInkCanvasEditingMode != InkCanvasEditingMode.None &&
+                            lastInkCanvasEditingMode != InkCanvasEditingMode.EraseByPoint)
+                        {
+                            inkCanvas.EditingMode = lastInkCanvasEditingMode;
+                        }
                     }
 
                     if (isPalmEraserActive)
@@ -2028,15 +2031,18 @@ namespace Ink_Canvas
                 {
                     dec.Clear();
                 }
-                isSingleFingerDragMode = false;
-
-                if (drawingShapeMode == 0
-                    && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
-                    && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
-                    && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
+                if (!IsBoardRoamingMode)
                 {
-                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                    lastInkCanvasEditingMode = InkCanvasEditingMode.Ink;
+                    isSingleFingerDragMode = false;
+
+                    if (drawingShapeMode == 0
+                        && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
+                        && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
+                        && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
+                    {
+                        inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                        lastInkCanvasEditingMode = InkCanvasEditingMode.Ink;
+                    }
                 }
             }
         }
@@ -2080,12 +2086,13 @@ namespace Ink_Canvas
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
                 return;
 
-            if (isInMultiTouchMode || !Settings.Gesture.IsEnableTwoFingerGesture) return;
+            if (isInMultiTouchMode || (!Settings.Gesture.IsEnableTwoFingerGesture && !IsBoardRoamingMode)) return;
 
             bool hasMultipleManipulators = e.Manipulators.Count() >= 2;
             bool shouldUseTwoFingerGesture = (dec.Count >= 2 && hasMultipleManipulators &&
                                              (Settings.PowerPointSettings.IsEnableTwoFingerGestureInPresentationMode ||
                                               !ArePPTControlsVisible)) ||
+                                            IsBoardRoamingMode ||
                                             isSingleFingerDragMode;
 
             if (shouldUseTwoFingerGesture)
@@ -2096,10 +2103,10 @@ namespace Ink_Canvas
                 var m = new Matrix();
 
                 bool isBoardMode = currentMode == 1;
-                bool enableTranslate = isBoardMode ? Settings.Gesture.IsEnableTwoFingerTranslateBoard : Settings.Gesture.IsEnableTwoFingerTranslate;
-                bool enableRotate = isBoardMode ? Settings.Gesture.IsEnableTwoFingerRotationBoard : Settings.Gesture.IsEnableTwoFingerRotation;
-                bool enableZoom = isBoardMode ? Settings.Gesture.IsEnableTwoFingerZoomBoard : Settings.Gesture.IsEnableTwoFingerZoom;
-                bool enableGestureTranslateOrRotate = (isBoardMode
+                bool enableTranslate = IsBoardRoamingMode || (isBoardMode ? Settings.Gesture.IsEnableTwoFingerTranslateBoard : Settings.Gesture.IsEnableTwoFingerTranslate);
+                bool enableRotate = !IsBoardRoamingMode && (isBoardMode ? Settings.Gesture.IsEnableTwoFingerRotationBoard : Settings.Gesture.IsEnableTwoFingerRotation);
+                bool enableZoom = !IsBoardRoamingMode && (isBoardMode ? Settings.Gesture.IsEnableTwoFingerZoomBoard : Settings.Gesture.IsEnableTwoFingerZoom);
+                bool enableGestureTranslateOrRotate = IsBoardRoamingMode || (isBoardMode
                     ? (Settings.Gesture.IsEnableTwoFingerTranslateBoard || Settings.Gesture.IsEnableTwoFingerRotationBoard)
                     : (Settings.Gesture.IsEnableTwoFingerTranslate || Settings.Gesture.IsEnableTwoFingerRotation));
 

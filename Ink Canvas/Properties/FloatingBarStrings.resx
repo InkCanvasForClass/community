@@ -90,6 +90,18 @@
   <data name="Board_Pen" xml:space="preserve">
     <value>笔</value>
   </data>
+  <data name="Board_Roaming" xml:space="preserve">
+    <value>漫游</value>
+  </data>
+  <data name="Board_RoamingPanelTitle" xml:space="preserve">
+    <value>漫游导航</value>
+  </data>
+  <data name="Board_RoamingPanelHint" xml:space="preserve">
+    <value>拖动蓝色框可快速移动当前页面</value>
+  </data>
+  <data name="Board_RoamingPanelScale" xml:space="preserve">
+    <value>{0}× 画布范围</value>
+  </data>
   <data name="Board_PreviousPage" xml:space="preserve">
     <value>上一页</value>
   </data>

@@ -90,6 +90,18 @@
   <data name="Board_Pen" xml:space="preserve">
     <value>神笔</value>
   </data>
+  <data name="Board_Roaming" xml:space="preserve">
+    <value>乾坤大挪移</value>
+  </data>
+  <data name="Board_RoamingPanelTitle" xml:space="preserve">
+    <value>乾坤导航盘</value>
+  </data>
+  <data name="Board_RoamingPanelHint" xml:space="preserve">
+    <value>拖着蓝框发动乾坤大挪移</value>
+  </data>
+  <data name="Board_RoamingPanelScale" xml:space="preserve">
+    <value>{0}× 江山范围</value>
+  </data>
   <data name="Board_PreviousPage" xml:space="preserve">
     <value>倒带</value>
   </data>
