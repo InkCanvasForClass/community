@@ -43,7 +43,7 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="Plugin_Title" xml:space="preserve">
-    <value>🎨 Plugin Management</value>
+    <value>Plugin Management</value>
   </data>
   <data name="Plugin_Loading" xml:space="preserve">
     <value>Loading plugins...</value>
@@ -62,5 +62,202 @@
   </data>
   <data name="Plugin_Settings" xml:space="preserve">
     <value>Plugin Settings</value>
+  </data>
+  <data name="Market_Title" xml:space="preserve">
+    <value>Plugin Marketplace</value>
+  </data>
+  <data name="Market_SearchPlaceholder" xml:space="preserve">
+    <value>Search plugins...</value>
+  </data>
+  <data name="Market_TabMarket" xml:space="preserve">
+    <value>Marketplace</value>
+  </data>
+  <data name="Market_TabInstalled" xml:space="preserve">
+    <value>Installed</value>
+  </data>
+  <data name="Market_Refresh" xml:space="preserve">
+    <value>Refresh plugin source</value>
+  </data>
+  <data name="Market_OpenPluginsFolder" xml:space="preserve">
+    <value>Open plugins folder</value>
+  </data>
+  <data name="Market_InstallFromLocal" xml:space="preserve">
+    <value>Install from local file</value>
+  </data>
+  <data name="Market_Install" xml:space="preserve">
+    <value>Install</value>
+  </data>
+  <data name="Market_Update" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="Market_UpdateAvailable" xml:space="preserve">
+    <value>Update available</value>
+  </data>
+  <data name="Market_RestartRequired" xml:space="preserve">
+    <value>Restart needed</value>
+  </data>
+  <data name="Market_RestartToApply" xml:space="preserve">
+    <value>Restart to apply</value>
+  </data>
+  <data name="Market_SelectPluginHint" xml:space="preserve">
+    <value>Select a plugin on the left to view details</value>
+  </data>
+  <data name="Market_ProjectHomepage" xml:space="preserve">
+    <value>Project homepage</value>
+  </data>
+  <data name="Market_TabOverview" xml:space="preserve">
+    <value>Overview</value>
+  </data>
+  <data name="Market_TabDependencies" xml:space="preserve">
+    <value>Dependencies</value>
+  </data>
+  <data name="Market_ReadmeLoading" xml:space="preserve">
+    <value>Loading documentation...</value>
+  </data>
+  <data name="Market_ReadmeLoadFailed" xml:space="preserve">
+    <value>Failed to load documentation.</value>
+  </data>
+  <data name="Market_NoReadme" xml:space="preserve">
+    <value>No documentation available for this plugin.</value>
+  </data>
+  <data name="Market_DependencyWarning" xml:space="preserve">
+    <value>This plugin depends on the following plugins, which will be installed together: {0}
+
+Continue?</value>
+  </data>
+  <data name="Market_DependencyTitle" xml:space="preserve">
+    <value>Install Dependencies</value>
+  </data>
+  <data name="Market_InstallLocalSuccess" xml:space="preserve">
+    <value>Plugin has been added to the install queue. Restart to take effect.</value>
+  </data>
+  <data name="Market_InstallLocalFailed" xml:space="preserve">
+    <value>Installation failed: {0}</value>
+  </data>
+  <data name="Market_RestartMessage" xml:space="preserve">
+    <value>The app needs to restart to complete plugin installation/update. Restart now?</value>
+  </data>
+  <data name="Market_RestartTitle" xml:space="preserve">
+    <value>Restart Confirmation</value>
+  </data>
+  <data name="Market_RestartFailed" xml:space="preserve">
+    <value>Restart failed: {0}</value>
+  </data>
+  <data name="Plugin_Update" xml:space="preserve">
+    <value>Update</value>
+  </data>
+  <data name="Plugin_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Plugin_DeleteConfirm" xml:space="preserve">
+    <value>Are you sure you want to delete plugin "{0}"? A restart is required to take effect.</value>
+  </data>
+  <data name="Plugin_DeleteTitle" xml:space="preserve">
+    <value>Delete Plugin</value>
+  </data>
+  <data name="Plugin_UpdateAvailable" xml:space="preserve">
+    <value>Update available: v{0}</value>
+  </data>
+  <data name="Plugin_ErrorTitle" xml:space="preserve">
+    <value>Plugin Error</value>
+  </data>
+  <data name="Plugin_ErrorAutoDisabled" xml:space="preserve">
+    <value>Plugin auto-disabled: {1} failures within {0} minutes. Reset manually to re-enable.</value>
+  </data>
+  <data name="Plugin_ErrorReset" xml:space="preserve">
+    <value>Reset &#38; reload</value>
+  </data>
+  <data name="Plugin_ExportConfig" xml:space="preserve">
+    <value>Export Config</value>
+  </data>
+  <data name="Plugin_ImportConfig" xml:space="preserve">
+    <value>Import Config</value>
+  </data>
+  <data name="Plugin_ExportTitle" xml:space="preserve">
+    <value>Export plugin configuration</value>
+  </data>
+  <data name="Plugin_ExportSuccess" xml:space="preserve">
+    <value>Plugin configuration exported to: {0}</value>
+  </data>
+  <data name="Plugin_ExportFailed" xml:space="preserve">
+    <value>Export failed: {0}</value>
+  </data>
+  <data name="Plugin_ImportTitle" xml:space="preserve">
+    <value>Import plugin configuration</value>
+  </data>
+  <data name="Plugin_ImportSuccess" xml:space="preserve">
+    <value>Import succeeded, overwrote {0} files.</value>
+  </data>
+  <data name="Plugin_ImportFailed" xml:space="preserve">
+    <value>Import failed: {0}</value>
+  </data>
+  <data name="Market_SecurityWarning" xml:space="preserve">
+    <value>This plugin comes from an unknown source. Continuing may be risky. Please confirm you trust the source.</value>
+  </data>
+  <data name="Market_SecurityTitle" xml:space="preserve">
+    <value>Security Notice</value>
+  </data>
+  <data name="Market_OpenLogsFolder" xml:space="preserve">
+    <value>Open plugin logs folder</value>
+  </data>
+  <data name="Market_LoadErrorOnInstall" xml:space="preserve">
+    <value>The following issues were detected with this plugin. Please review before installing:</value>
+  </data>
+  <data name="Market_ManageSources" xml:space="preserve">
+    <value>Plugin Sources</value>
+  </data>
+  <data name="Market_ActiveSource" xml:space="preserve">
+    <value>Active source</value>
+  </data>
+  <data name="Market_AddSource" xml:space="preserve">
+    <value>Add source</value>
+  </data>
+  <data name="Market_EditSource" xml:space="preserve">
+    <value>Edit source</value>
+  </data>
+  <data name="Market_RemoveSource" xml:space="preserve">
+    <value>Remove source</value>
+  </data>
+  <data name="Market_SourceIdLabel" xml:space="preserve">
+    <value>Source name</value>
+  </data>
+  <data name="Market_SourceUrlLabel" xml:space="preserve">
+    <value>Index URL</value>
+  </data>
+  <data name="Market_SourceOfficial" xml:space="preserve">
+    <value>Official source (read-only)</value>
+  </data>
+  <data name="Market_MirrorGroup" xml:space="preserve">
+    <value>Download mirror</value>
+  </data>
+  <data name="Market_NoMirrors" xml:space="preserve">
+    <value>This index does not provide download mirrors</value>
+  </data>
+  <data name="Market_MirrorAuto" xml:space="preserve">
+    <value>Auto (default)</value>
+  </data>
+  <data name="Market_SaveSource" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Market_CancelSource" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Market_SourceInvalidUrl" xml:space="preserve">
+    <value>URL must start with http:// or https://</value>
+  </data>
+  <data name="Market_SourceDuplicate" xml:space="preserve">
+    <value>A source with this id already exists</value>
+  </data>
+  <data name="Market_SourceRemoved" xml:space="preserve">
+    <value>Source removed</value>
+  </data>
+  <data name="Market_SourceSaved" xml:space="preserve">
+    <value>Source saved</value>
+  </data>
+  <data name="Market_SourceNameRequired" xml:space="preserve">
+    <value>Please enter a source name</value>
+  </data>
+  <data name="Market_RemoveSourceConfirmation" xml:space="preserve">
+    <value>Remove source “{0}”?</value>
   </data>
 </root>

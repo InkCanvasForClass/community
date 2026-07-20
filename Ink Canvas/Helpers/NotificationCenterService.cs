@@ -11,8 +11,8 @@ namespace Ink_Canvas.Helpers
         private static readonly List<NotificationMessage> Queue = new List<NotificationMessage>();
         private static readonly List<NotificationMessage> History = new List<NotificationMessage>();
         private static bool isShowing;
-        private static ushort DedupMessageIndex { get; set; }
-        private const short DeduplicationWindowSeconds = 2;
+        private static bool _isFirstDuplicateInCurrentSequence;
+        private const short _deduplicationWindowSeconds = 2;
         private class LastMessageInfo
         {
             public string Title { get; set; }
@@ -30,12 +30,11 @@ namespace Ink_Canvas.Helpers
             
             TimeSpan interval = message.CreatedAt - _lastMessage.Time;
             double totalSeconds = interval.TotalSeconds;
-            if (_lastMessage.Title == message.Title && totalSeconds <= DeduplicationWindowSeconds && message.Source == _lastMessage.Source && message.Summary == _lastMessage.Summary)
+            if (_lastMessage.Title == message.Title && totalSeconds <= _deduplicationWindowSeconds && message.Source == _lastMessage.Source && message.Summary == _lastMessage.Summary)
             {
                 _lastMessage.Time = message.CreatedAt;
-                if (DedupMessageIndex == 0) LogHelper.WriteLogToFile($"{message.Source}发送的标题为{message.Title}的消息已被消息去重拦截",LogHelper.LogType.Info);
-                if (DedupMessageIndex >= 65000) DedupMessageIndex = 1;
-                ++DedupMessageIndex;
+                if (_isFirstDuplicateInCurrentSequence == true) LogHelper.WriteLogToFile($"{message.Source}发送的标题为{message.Title}的消息已被消息去重拦截",LogHelper.LogType.Info);
+                _isFirstDuplicateInCurrentSequence = false;
                 return true;
             }
             
@@ -73,7 +72,7 @@ namespace Ink_Canvas.Helpers
                 if (!string.IsNullOrEmpty(message.Title))
                 {
                     //只有非空消息才做去重
-                    DedupMessageIndex = 0;
+                    _isFirstDuplicateInCurrentSequence = true;
                     _lastMessage.Title = message.Title;
                     _lastMessage.Time = message.CreatedAt;
                     _lastMessage.Source = message.Source;

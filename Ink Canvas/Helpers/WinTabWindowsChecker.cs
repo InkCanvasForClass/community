@@ -47,7 +47,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 // 获取Win+Tab预览中的窗口
-                
+
                 AutomationElementCollection windows = AutomationElement.RootElement.FindAll(
                     TreeScope.Children, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Window));
 

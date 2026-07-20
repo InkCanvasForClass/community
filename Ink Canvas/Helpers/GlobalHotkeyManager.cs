@@ -1359,27 +1359,8 @@ namespace Ink_Canvas.Helpers
                     }
                 }
 
-                // 如果无法获取任何状态信息，则回退到原来的判断逻辑
-
-                // 通过反射访问主窗口的currentMode字段（作为最后的备用方案）
-                var currentModeField = _mainWindow.GetType().GetField("currentMode",
-                    BindingFlags.NonPublic | BindingFlags.Instance);
-
-                if (currentModeField != null)
-                {
-                    var currentMode = currentModeField.GetValue(_mainWindow);
-                    if (currentMode != null)
-                    {
-                        var modeValue = currentMode.ToString();
-                        // 注意：这里的逻辑需要修正
-                        // currentMode == 0 表示屏幕模式（PPT放映），此时应该允许快捷键
-                        // currentMode == 1 表示黑板/白板模式，此时也应该允许快捷键
-                        var isSelectMode = false; // 修正：所有模式都应该允许快捷键
-                        return isSelectMode;
-                    }
-                }
-
-                return false; // 默认允许快捷键
+                // 如果无法获取任何状态信息，则默认允许快捷键。
+                return false;
             }
             catch (Exception ex)
             {

@@ -17,7 +17,7 @@ mc:Ignorable="d">
                     <!--笔锋-->
                     <ikw:SimpleStackPanel Orientation="Horizontal">
                         <Label Content="{x:Static props:FloatingBarStrings.FloatingBar_PenTipStyle}"
-                               Foreground="{DynamicResource FloatBarForeground}"
+                               Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                FontSize="16" FontWeight="Bold"
                                VerticalAlignment="Center" />
                         <ComboBox VerticalAlignment="Center"
@@ -56,24 +56,24 @@ mc:Ignorable="d">
                                FontSize="17" VerticalAlignment="Center" Visibility="Hidden" />
                         <UniformGrid Rows="1" Columns="5" Width="245">
                             <Button Tag="2" Click="PenWidthPresetButton_Click" Padding="8,2" Margin="0,0,6,0" MinWidth="40" ToolTip="1"
-                                    Foreground="{DynamicResource FloatBarForeground}" BorderThickness="0" Background="Transparent">
-                                <Ellipse Width="4" Height="4" Fill="{DynamicResource FloatBarForeground}" />
+                                    Foreground="{DynamicResource FloatingBarForegroundBrush}" BorderThickness="0" Background="Transparent">
+                                <Ellipse Width="4" Height="4" Fill="{DynamicResource FloatingBarForegroundBrush}" />
                             </Button>
                             <Button Tag="5" Click="PenWidthPresetButton_Click" Padding="8,2" Margin="0,0,6,0" MinWidth="40" ToolTip="2.5"
-                                    Foreground="{DynamicResource FloatBarForeground}" BorderThickness="0" Background="Transparent">
-                                <Ellipse Width="7" Height="7" Fill="{DynamicResource FloatBarForeground}" />
+                                    Foreground="{DynamicResource FloatingBarForegroundBrush}" BorderThickness="0" Background="Transparent">
+                                <Ellipse Width="7" Height="7" Fill="{DynamicResource FloatingBarForegroundBrush}" />
                             </Button>
                             <Button Tag="10" Click="PenWidthPresetButton_Click" Padding="8,2" Margin="0,0,6,0" MinWidth="40" ToolTip="5"
-                                    Foreground="{DynamicResource FloatBarForeground}" BorderThickness="0" Background="Transparent">
-                                <Ellipse Width="10" Height="10" Fill="{DynamicResource FloatBarForeground}" />
+                                    Foreground="{DynamicResource FloatingBarForegroundBrush}" BorderThickness="0" Background="Transparent">
+                                <Ellipse Width="10" Height="10" Fill="{DynamicResource FloatingBarForegroundBrush}" />
                             </Button>
                             <Button Tag="20" Click="PenWidthPresetButton_Click" Padding="8,2" Margin="0,0,6,0" MinWidth="40" ToolTip="10"
-                                    Foreground="{DynamicResource FloatBarForeground}" BorderThickness="0" Background="Transparent">
-                                <Ellipse Width="14" Height="14" Fill="{DynamicResource FloatBarForeground}" />
+                                    Foreground="{DynamicResource FloatingBarForegroundBrush}" BorderThickness="0" Background="Transparent">
+                                <Ellipse Width="14" Height="14" Fill="{DynamicResource FloatingBarForegroundBrush}" />
                             </Button>
                             <Button Tag="35" Click="PenWidthPresetButton_Click" Padding="8,2" MinWidth="44" ToolTip="17.5"
-                                    Foreground="{DynamicResource FloatBarForeground}" BorderThickness="0" Background="Transparent">
-                                <Ellipse Width="18" Height="18" Fill="{DynamicResource FloatBarForeground}" />
+                                    Foreground="{DynamicResource FloatingBarForegroundBrush}" BorderThickness="0" Background="Transparent">
+                                <Ellipse Width="18" Height="18" Fill="{DynamicResource FloatingBarForegroundBrush}" />
                             </Button>
                         </UniformGrid>
                     </StackPanel>
@@ -133,7 +133,7 @@ mc:Ignorable="d">
                 <ikw:SimpleStackPanel x:Name="_DefaultPenColorsPanel" HorizontalAlignment="Center" Spacing="5">
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
                         <Border x:Name="_ColorThemeSwitch"
-                                BorderBrush="{DynamicResource FloatBarBorderBrush}"
+                                BorderBrush="{DynamicResource FloatingBarBorderBrush}"
                                 BorderThickness="1"
                                 CornerRadius="100" Width="45" Height="45">
                             <Grid Margin="3">
@@ -145,7 +145,7 @@ mc:Ignorable="d">
                                 <TextBlock Margin="0,0,0,2"
                                             x:Name="ColorThemeSwitchTextBlock"
                                             Text="{x:Static props:FloatingBarStrings.FloatingBar_ColorThemeLight}"
-                                            Foreground="{DynamicResource FloatBarForeground}"
+                                            Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                             VerticalAlignment="Bottom"
                                             HorizontalAlignment="Center"
                                             FontSize="11" />
@@ -185,7 +185,7 @@ mc:Ignorable="d">
                 <ikw:SimpleStackPanel x:Name="_LaserPenColorsPanel" HorizontalAlignment="Center" Spacing="5">
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
                         <Border x:Name="_LaserPenColorThemeSwitch"
-                                BorderBrush="{DynamicResource FloatBarBorderBrush}"
+                                BorderBrush="{DynamicResource FloatingBarBorderBrush}"
                                 BorderThickness="1"
                                 CornerRadius="100" Width="45" Height="45">
                             <Grid Margin="3">
@@ -197,7 +197,7 @@ mc:Ignorable="d">
                                 <TextBlock Margin="0,0,0,2"
                                             x:Name="_LaserPenColorThemeSwitchTextBlock"
                                             Text="{x:Static props:FloatingBarStrings.FloatingBar_ColorThemeLight}"
-                                            Foreground="{DynamicResource FloatBarForeground}"
+                                            Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                             VerticalAlignment="Bottom"
                                             HorizontalAlignment="Center"
                                             FontSize="11" />

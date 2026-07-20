@@ -218,6 +218,8 @@ namespace Ink_Canvas.Properties
 
         public static string ToolbarPage_Center => ResourceManager.GetString(nameof(ToolbarPage_Center), _resourceCulture);
 
+        public static string ToolbarPage_CloseGroupChildren => ResourceManager.GetString(nameof(ToolbarPage_CloseGroupChildren), _resourceCulture);
+
         public static string ToolbarPage_ComponentLibrary => ResourceManager.GetString(nameof(ToolbarPage_ComponentLibrary), _resourceCulture);
 
         public static string ToolbarPage_ComponentLibraryHint => ResourceManager.GetString(nameof(ToolbarPage_ComponentLibraryHint), _resourceCulture);

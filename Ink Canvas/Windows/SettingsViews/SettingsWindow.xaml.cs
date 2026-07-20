@@ -1,5 +1,6 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
+using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Pages;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
@@ -7,8 +8,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Navigation;
+using System.Windows.Threading;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using Screen = System.Windows.Forms.Screen;
 
@@ -16,7 +22,7 @@ namespace Ink_Canvas.Windows.SettingsViews
 {
     public partial class SettingsWindow : Window
     {
-        private static readonly Dictionary<string, Type> _staticPageTypes = new Dictionary<string, Type>
+        private readonly Dictionary<string, Type> _pageTypes = new Dictionary<string, Type>
         {
             { "HomePage", typeof(HomePage) },
             { "StartupPage", typeof(StartupPage) },
@@ -25,13 +31,17 @@ namespace Ink_Canvas.Windows.SettingsViews
             { "SecurityPage", typeof(SecurityPage) },
             { "WindowPage", typeof(WindowPage) },
             { "AppearancePage", typeof(AppearancePage) },
+            { "SidebarPage", typeof(SidebarPage) },
             { "HotkeyPage", typeof(HotkeyPage) },
             { "ToolbarPage", typeof(ToolbarPage) },
             { "ToolbarAppearancePage", typeof(ToolbarAppearancePage) },
+            { "FloatingBarThemePage", typeof(FloatingBarThemePage) },
+            { "FloatingBarThemeMarketPage", typeof(FloatingBarThemeMarketPage) },
             { "ToolbarMenuPage", typeof(ToolbarMenuPage) },
             { "BoardToolbarPage", typeof(BoardToolbarPage) },
             { "BoardAppearancePage", typeof(BoardAppearancePage) },
             { "BoardMenuPage", typeof(BoardMenuPage) },
+            { "WhiteboardTipsPage", typeof(WhiteboardTipsPage) },
             { "UpdatePage", typeof(UpdatePage) },
             { "NotificationPage", typeof(NotificationPage) },
             { "AnnouncementCenterPage", typeof(AnnouncementCenterPage) },
@@ -51,9 +61,10 @@ namespace Ink_Canvas.Windows.SettingsViews
             { "AboutPage", typeof(AboutPage) },
             { "Settings", typeof(SettingsPage) },
             { "PluginPage", typeof(PluginPage) },
-            { "PluginSettingsPage", typeof(PluginSettingsPage) }
+            { "PluginSettingsPage", typeof(PluginSettingsPage) },
+            { "PluginMarketplacePage", typeof(PluginMarketplacePage) },
+            { "PPTPageFlipPreviewPage", typeof(PPTPageFlipPreviewPage) }
         };
-        private Dictionary<string, Type> _pageTypes;
         private readonly Dictionary<string, object> _pages = new Dictionary<string, object>();
         private readonly Dictionary<string, Ink_Canvas.Plugins.PluginInfo> _pluginPages = new Dictionary<string, Ink_Canvas.Plugins.PluginInfo>();
 
@@ -68,6 +79,31 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         private bool _isNavigating = false;
         private bool _updateBadgeDismissed = false;
+
+        /// <summary>
+        /// 若为 true，则跳过 Loaded 中默认导航到 HomePage 的行为。
+        /// 用于 URI 打开设置窗口时由调用方在 Show() 之前设置，避免覆盖外部指定的目标页。
+        /// </summary>
+        public bool SuppressInitialNavigation { get; set; }
+
+        /// <summary>
+        /// 待应用的设置项高亮 key。由外部（URI 处理器）设置，在页面 Loaded 完成后触发高亮。
+        /// </summary>
+        private string _pendingHighlightKey;
+
+        /// <summary>
+        /// 由 URI 处理器调用：设置挂起的高亮 key。
+        /// 若当前页面已加载，则立即触发；否则推迟到 OnRootFrameNavigated 中的 TryApplyPendingHighlight 处理。
+        /// </summary>
+        public void SetPendingHighlightKey(string key)
+        {
+            _pendingHighlightKey = key;
+            // 若页面已加载（窗口已打开但用户再次导航），尝试立即触发
+            if (rootFrame?.Content is FrameworkElement page && page.IsLoaded)
+            {
+                TryApplyPendingHighlight();
+            }
+        }
 
         public SettingsWindow()
         {
@@ -86,13 +122,17 @@ namespace Ink_Canvas.Windows.SettingsViews
                 { "SecurityPage", typeof(SecurityPage) },
                 { "WindowPage", typeof(WindowPage) },
                 { "AppearancePage", typeof(AppearancePage) },
+                { "SidebarPage", typeof(SidebarPage) },
                 { "HotkeyPage", typeof(HotkeyPage) },
                 { "ToolbarPage", typeof(ToolbarPage) },
                 { "ToolbarAppearancePage", typeof(ToolbarAppearancePage) },
+            { "FloatingBarThemePage", typeof(FloatingBarThemePage) },
+            { "FloatingBarThemeMarketPage", typeof(FloatingBarThemeMarketPage) },
                 { "ToolbarMenuPage", typeof(ToolbarMenuPage) },
                 { "BoardToolbarPage", typeof(BoardToolbarPage) },
                 { "BoardAppearancePage", typeof(BoardAppearancePage) },
                 { "BoardMenuPage", typeof(BoardMenuPage) },
+                { "WhiteboardTipsPage", typeof(WhiteboardTipsPage) },
                 { "UpdatePage", typeof(UpdatePage) },
                 { "NotificationPage", typeof(NotificationPage) },
                 { "AnnouncementCenterPage", typeof(AnnouncementCenterPage) },
@@ -112,7 +152,9 @@ namespace Ink_Canvas.Windows.SettingsViews
                 { "AboutPage", typeof(AboutPage) },
                 { "Settings", typeof(SettingsPage) },
                 { "PluginPage", typeof(PluginPage) },
-                { "PluginSettingsPage", typeof(PluginSettingsPage) }
+                { "PluginSettingsPage", typeof(PluginSettingsPage) },
+                { "PluginMarketplacePage", typeof(PluginMarketplacePage) },
+                { "PPTPageFlipPreviewPage", typeof(PPTPageFlipPreviewPage) }
             };
 
             // 默认选中首页
@@ -132,9 +174,12 @@ namespace Ink_Canvas.Windows.SettingsViews
 
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    NavigateToPage("HomePage");
-                    NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems[0];
-                    NavigationViewControl.Header = NavStrings.Nav_Home;
+                    if (!SuppressInitialNavigation)
+                    {
+                        NavigateToPage("HomePage");
+                        NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems[0];
+                        NavigationViewControl.Header = NavStrings.Nav_Home;
+                    }
 
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
@@ -401,6 +446,8 @@ namespace Ink_Canvas.Windows.SettingsViews
                     pluginSettingsPage.CurrentPlugin = pluginInfo;
                 }
 
+
+
                 rootFrame.NavigationUIVisibility = NavigationUIVisibility.Hidden;
                 rootFrame.RemoveBackEntry();
                 rootFrame.Navigate(cachedPage);
@@ -423,19 +470,27 @@ namespace Ink_Canvas.Windows.SettingsViews
             }
         }
 
+
         private void OnNavigationViewBackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
         {
             if (rootFrame.CanGoBack) rootFrame.GoBack();
         }
-
         private void OnRootFrameNavigated(object sender, NavigationEventArgs e)
         {
+            Type currentPageType = rootFrame.SourcePageType;
+            if (currentPageType == typeof(PPTPageFlipPreviewPage))
+            {
+                NavigationViewControl.PaneDisplayMode = iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode.LeftMinimal;
+            }
+            else
+            {
+                NavigationViewControl.PaneDisplayMode = iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode.Auto;
+            }
+
             if (_isNavigating)
             {
                 return;
             }
-
-            Type currentPageType = rootFrame.SourcePageType;
 
             // 处理设置项的选中状态
             if (currentPageType == typeof(SettingsPage))
@@ -460,7 +515,73 @@ namespace Ink_Canvas.Windows.SettingsViews
                 }
             }
 
+            // 重置当前页面的选中设置项（页面可在 Loaded 中再设置）
+
             ApplySmoothScrollingToPage(e.Content as FrameworkElement);
+            HookSettingsCardInputHandlers(e.Content as FrameworkElement);
+
+            // 应用 URI 处理器留下的待处理高亮 key（等待页面 Loaded 完成，确保可视树已构建）
+            TryApplyPendingHighlight();
+        }
+
+        /// <summary>
+        /// 如果有挂起的高亮 key，等待设置窗口 + 页面都加载并渲染完成后才触发高亮。
+        /// </summary>
+        private void TryApplyPendingHighlight()
+        {
+            if (string.IsNullOrEmpty(_pendingHighlightKey)) return;
+            if (rootFrame?.Content is not FrameworkElement page) return;
+
+            var pendingKey = _pendingHighlightKey;
+            _pendingHighlightKey = null;
+
+            // 等窗口与页面都 Loaded 后，再依次延迟到 ContextIdle（模板应用完）+ Background（渲染完）才触发高亮
+            void TriggerHighlight()
+            {
+                // 第一段延迟：等模板/子元素生成完
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    // 第二段延迟：等渲染稳定
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        // 第三段延迟：再让出一帧，保证滚动条 BringIntoView 已生效
+                        Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            HighlightSetting(pendingKey);
+                        }), DispatcherPriority.Background);
+                    }), DispatcherPriority.ContextIdle);
+                }), DispatcherPriority.ContextIdle);
+            }
+
+            void OnPageLoaded(object s, RoutedEventArgs e)
+            {
+                page.Loaded -= OnPageLoaded;
+                TriggerHighlight();
+            }
+
+            if (page.IsLoaded && this.IsLoaded)
+            {
+                TriggerHighlight();
+            }
+            else
+            {
+                page.Loaded += OnPageLoaded;
+                // 兜底：若页面已 Loaded 但窗口未 Loaded，等待窗口 Loaded
+                if (!page.IsLoaded)
+                {
+                    // nothing — page.Loaded 会触发
+                }
+                else if (!this.IsLoaded)
+                {
+                    RoutedEventHandler onWindowLoaded = null;
+                    onWindowLoaded = (ws, we) =>
+                    {
+                        this.Loaded -= onWindowLoaded;
+                        TriggerHighlight();
+                    };
+                    this.Loaded += onWindowLoaded;
+                }
+            }
         }
 
         private void ApplySmoothScrollingToPage(FrameworkElement root)
@@ -567,6 +688,7 @@ namespace Ink_Canvas.Windows.SettingsViews
         {
             public string Text;
             public string PageTag;
+            public string SettingKey;
             public WeakReference<FrameworkElement> Target;
         }
 
@@ -652,10 +774,12 @@ namespace Ink_Canvas.Windows.SettingsViews
 
                 if (!string.IsNullOrWhiteSpace(header) && target != null)
                 {
+                    var key = SettingsNavigator.GetSettingsKey(target);
                     _searchIndex.Add(new SearchEntry
                     {
                         Text = header.Trim(),
                         PageTag = pageTag,
+                        SettingKey = string.IsNullOrEmpty(key) ? null : key,
                         Target = new WeakReference<FrameworkElement>(target)
                     });
                 }
@@ -809,6 +933,418 @@ namespace Ink_Canvas.Windows.SettingsViews
         {
             return NavigationViewControl;
         }
+
+        /// <summary>
+        /// 构造当前页面（或指定页面）的设置导航 URL。
+        /// </summary>
+        public string BuildSettingsUri(string pageTag = null, string settingKey = null)
+        {
+            pageTag = string.IsNullOrEmpty(pageTag) ? GetCurrentPageTag() : pageTag;
+            if (string.IsNullOrEmpty(pageTag)) pageTag = "HomePage";
+
+            string url = "icc://settings/" + Uri.EscapeDataString(pageTag);
+            if (!string.IsNullOrEmpty(settingKey))
+            {
+                url += "?key=" + Uri.EscapeDataString(settingKey);
+            }
+            return url;
+        }
+
+        /// <summary>
+        /// 获取当前 Frame 显示的页面 tag（与 _pageTypes 一致）。
+        /// </summary>
+        private string GetCurrentPageTag()
+        {
+            var t = rootFrame?.SourcePageType;
+            if (t == null) return null;
+            foreach (var kv in _pageTypes)
+            {
+                if (kv.Value == t) return kv.Key;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 滚动到目标设置项并临时高亮。优先按 SettingsNavigator.SettingsKey 查找；若未找到则按 Header 文本匹配。
+        /// </summary>
+        public void HighlightSetting(string settingKey)
+        {
+            if (string.IsNullOrEmpty(settingKey) || rootFrame?.Content is not FrameworkElement root)
+                return;
+
+            try
+            {
+                EnsureSearchIndexBuilt();
+
+                var entry = _searchIndex?.FirstOrDefault(e =>
+                    string.Equals(e.PageTag, GetCurrentPageTag(), StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(e.SettingKey, settingKey, StringComparison.OrdinalIgnoreCase));
+
+                if (entry != null && entry.Target != null && entry.Target.TryGetTarget(out var fe))
+                {
+                    FlashHighlight(fe);
+                    return;
+                }
+
+                // 退路 1：手动遍历当前页面逻辑树，按 SettingsKey 匹配
+                FrameworkElement match = null;
+                foreach (var node in EnumerateLogicalDescendants(root))
+                {
+                    if (node is FrameworkElement fe2)
+                    {
+                        var key = SettingsNavigator.GetSettingsKey(fe2);
+                        if (string.Equals(key, settingKey, StringComparison.OrdinalIgnoreCase))
+                        {
+                            match = fe2;
+                            break;
+                        }
+                    }
+                }
+
+                if (match != null)
+                {
+                    FlashHighlight(match);
+                    return;
+                }
+
+                // 退路 2：按 Header 文本匹配（用于无 SettingsKey 的设置项）
+                foreach (var node in EnumerateLogicalDescendants(root))
+                {
+                    if (node is FrameworkElement fe3)
+                    {
+                        var header = GetSettingsHeaderText(fe3);
+                        if (!string.IsNullOrEmpty(header) &&
+                            string.Equals(header, settingKey, StringComparison.OrdinalIgnoreCase))
+                        {
+                            FlashHighlight(fe3);
+                            return;
+                        }
+                    }
+                }
+
+                LogHelper.WriteLogToFile($"HighlightSetting: 未在当前页找到设置项 [{settingKey}]", LogHelper.LogType.Warning);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"HighlightSetting 异常: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        private void FlashHighlight(FrameworkElement target)
+        {
+            try { target.BringIntoView(); } catch { }
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    var layer = AdornerLayer.GetAdornerLayer(target);
+                    if (layer == null)
+                    {
+                        // 退路：无 AdornerLayer 时使用 Effect 闪两次
+                        FlashWithEffect(target);
+                        return;
+                    }
+
+                    var adorner = new HighlightAdorner(target);
+                    layer.Add(adorner);
+
+                    int count = 0;
+                    var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(400) };
+                    timer.Tick += (s, e) =>
+                    {
+                        try
+                        {
+                            count++;
+                            // 切换可见性：1=隐藏 2=显示 3=隐藏 4=移除（共闪两次）
+                            if (count == 1 || count == 3)
+                            {
+                                adorner.Visibility = Visibility.Hidden;
+                            }
+                            else if (count == 2)
+                            {
+                                adorner.Visibility = Visibility.Visible;
+                            }
+                            else if (count >= 4)
+                            {
+                                timer.Stop();
+                                layer.Remove(adorner);
+                            }
+                        }
+                        catch { }
+                    };
+                    timer.Start();
+                }
+                catch { }
+            }), DispatcherPriority.Background);
+        }
+
+        /// <summary>
+        /// 退路：用 DropShadowEffect 闪烁两次。适用于无 AdornerLayer 的元素。
+        /// </summary>
+        private void FlashWithEffect(FrameworkElement target)
+        {
+            try
+            {
+                var originalEffect = target.Effect;
+                System.Windows.Media.Effects.DropShadowEffect MakeGlow() => new()
+                {
+                    Color = Colors.OrangeRed,
+                    BlurRadius = 30,
+                    ShadowDepth = 0,
+                    Opacity = 1
+                };
+
+                target.Effect = MakeGlow();
+                int count = 0;
+                var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(400) };
+                timer.Tick += (s, e) =>
+                {
+                    count++;
+                    if (count == 1 || count == 3)
+                        target.Effect = originalEffect;
+                    else if (count == 2)
+                        target.Effect = MakeGlow();
+                    else
+                    {
+                        timer.Stop();
+                        target.Effect = originalEffect;
+                    }
+                };
+                timer.Start();
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// Adorner：在目标元素上绘制橙色高亮边框。
+        /// </summary>
+        private sealed class HighlightAdorner : System.Windows.Documents.Adorner
+        {
+            private readonly Pen _pen;
+            private readonly Brush _fill;
+
+            public HighlightAdorner(UIElement adornedElement) : base(adornedElement)
+            {
+                _pen = new Pen(new SolidColorBrush(Color.FromRgb(255, 140, 0)), 3);
+                _pen.Freeze();
+                _fill = new SolidColorBrush(Color.FromArgb(40, 255, 140, 0));
+                _fill.Freeze();
+                IsHitTestVisible = false;
+            }
+
+            protected override void OnRender(System.Windows.Media.DrawingContext drawingContext)
+            {
+                var rect = new Rect(new Point(0, 0), AdornedElement.RenderSize);
+                drawingContext.DrawRectangle(_fill, _pen, rect);
+            }
+        }
+
+        #region 右键/长按复制设置项 URL
+
+        // 长按计时器与判定阈值
+        private const int LongPressThresholdMs = 600;
+        private const double LongPressMoveTolerance = 10.0;
+        private DispatcherTimer _longPressTimer;
+        private TouchPoint _longPressStartPoint;
+        private bool _longPressFired;
+
+        /// <summary>
+        /// 为已导航页面挂载 SettingsCard / SettingsExpander / LabeledSettingsCard 的右键和触摸长按事件。
+        /// </summary>
+        private void HookSettingsCardInputHandlers(FrameworkElement root)
+        {
+            if (root == null) return;
+            try
+            {
+                root.PreviewMouseRightButtonUp -= SettingsCard_RightButtonUp;
+                root.PreviewMouseRightButtonUp += SettingsCard_RightButtonUp;
+
+                root.PreviewTouchDown -= SettingsCard_TouchDown;
+                root.PreviewTouchDown += SettingsCard_TouchDown;
+
+                root.PreviewTouchMove -= SettingsCard_TouchMove;
+                root.PreviewTouchMove += SettingsCard_TouchMove;
+
+                root.PreviewTouchUp -= SettingsCard_TouchUp;
+                root.PreviewTouchUp += SettingsCard_TouchUp;
+            }
+            catch { }
+        }
+
+        private void SettingsCard_RightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                var source = e.OriginalSource as DependencyObject;
+                var target = FindSettingsContainer(source);
+                if (target == null) return;
+
+                // 不阻止默认右键菜单行为完全（如未来需要保留右键菜单），仅触发复制动作
+                CopySettingUriFromElement(target);
+                e.Handled = true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"右键复制设置 URL 失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        private void SettingsCard_TouchDown(object sender, TouchEventArgs e)
+        {
+            try
+            {
+                var source = e.OriginalSource as DependencyObject;
+                var target = FindSettingsContainer(source);
+                if (target == null) return;
+
+                _longPressFired = false;
+                _longPressStartPoint = e.GetTouchPoint(null);
+
+                _longPressTimer?.Stop();
+                _longPressTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(LongPressThresholdMs) };
+                _longPressTimer.Tick += (s, args) =>
+                {
+                    _longPressTimer?.Stop();
+                    if (_longPressFired) return;
+                    _longPressFired = true;
+
+                    try
+                    {
+                        // 长按触发后取消后续的触摸提升（避免立即触发点击）
+                        e.TouchDevice.Capture(null);
+                    }
+                    catch { }
+
+                    CopySettingUriFromElement(target);
+                };
+                _longPressTimer.Start();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"触摸长按起始处理失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        private void SettingsCard_TouchMove(object sender, TouchEventArgs e)
+        {
+            try
+            {
+                if (_longPressTimer == null || !_longPressTimer.IsEnabled) return;
+                var current = e.GetTouchPoint(null);
+                if (_longPressStartPoint == null) return;
+
+                double dx = current.Position.X - _longPressStartPoint.Position.X;
+                double dy = current.Position.Y - _longPressStartPoint.Position.Y;
+                if (Math.Sqrt(dx * dx + dy * dy) > LongPressMoveTolerance)
+                {
+                    _longPressTimer.Stop();
+                }
+            }
+            catch { }
+        }
+
+        private void SettingsCard_TouchUp(object sender, TouchEventArgs e)
+        {
+            try
+            {
+                _longPressTimer?.Stop();
+                _longPressTimer = null;
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// 沿可视树向上查找最近的 SettingsCard / SettingsExpander / LabeledSettingsCard。
+        /// </summary>
+        private FrameworkElement FindSettingsContainer(DependencyObject source)
+        {
+            var current = source;
+            while (current != null)
+            {
+                if (current is Ink_Canvas.Controls.LabeledSettingsCard lsc)
+                    return lsc;
+                if (current is iNKORE.UI.WPF.Modern.Controls.SettingsCard sc)
+                    return sc;
+                if (current is iNKORE.UI.WPF.Modern.Controls.SettingsExpander se)
+                    return se;
+
+                current = VisualTreeHelper.GetParent(current);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 提取 Header 文本（或 SettingsKey），构造 URL 并复制到剪贴板，弹出通知。
+        /// </summary>
+        private void CopySettingUriFromElement(FrameworkElement target)
+        {
+            try
+            {
+                string key = SettingsNavigator.GetSettingsKey(target);
+                if (string.IsNullOrEmpty(key))
+                {
+                    key = GetSettingsHeaderText(target);
+                }
+
+                string pageTag = GetCurrentPageTag();
+                string uri = BuildSettingsUri(pageTag, key);
+
+                try { Clipboard.SetText(uri); } catch { }
+
+                ShowCopyUriInfoBar();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"复制设置项 URL 失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        private static string GetSettingsHeaderText(FrameworkElement target)
+        {
+            try
+            {
+                if (target is Ink_Canvas.Controls.LabeledSettingsCard lsc)
+                    return lsc.Header?.Trim();
+                if (target is iNKORE.UI.WPF.Modern.Controls.SettingsCard sc)
+                    return (sc.Header as string)?.Trim() ?? sc.Header?.ToString()?.Trim();
+                if (target is iNKORE.UI.WPF.Modern.Controls.SettingsExpander se)
+                    return (se.Header as string)?.Trim() ?? se.Header?.ToString()?.Trim();
+            }
+            catch { }
+            return null;
+        }
+
+        private DispatcherTimer _copyUriInfoBarTimer;
+
+        private void ShowCopyUriInfoBar()
+        {
+            try
+            {
+                if (CopyUriInfoBar == null) return;
+
+                CopyUriInfoBar.Message = NavStrings.Nav_CopySettingsUri_Copied;
+                CopyUriInfoBar.IsOpen = true;
+                CopyUriInfoBar.Visibility = Visibility.Visible;
+
+                _copyUriInfoBarTimer?.Stop();
+                _copyUriInfoBarTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2.5) };
+                _copyUriInfoBarTimer.Tick += (s, e) =>
+                {
+                    _copyUriInfoBarTimer.Stop();
+                    try
+                    {
+                        CopyUriInfoBar.IsOpen = false;
+                        CopyUriInfoBar.Visibility = Visibility.Collapsed;
+                    }
+                    catch { }
+                };
+                _copyUriInfoBarTimer.Start();
+            }
+            catch { }
+        }
+
+        #endregion
 
         private async System.Threading.Tasks.Task PreloadAllPagesAsync()
         {

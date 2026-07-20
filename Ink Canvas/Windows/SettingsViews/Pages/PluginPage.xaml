@@ -12,7 +12,12 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto" PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
             <StackPanel Margin="24">
-                <TextBlock Text="{x:Static props:PluginStrings.Plugin_Title}" Style="{DynamicResource TitleTextBlockStyle}" Margin="0,0,0,16" />
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Puzzle}" FontSize="20" Margin="0,0,8,0"
+                        VerticalAlignment="Center"/>
+                    <TextBlock Text="{x:Static props:PluginStrings.Plugin_Title}" Style="{DynamicResource TitleTextBlockStyle}"
+                        VerticalAlignment="Center"/>
+                </StackPanel>
 
                 <Border x:Name="StatusBorder" Background="{DynamicResource InfoAcrylicFillColorDefaultBrush}" Padding="12" CornerRadius="8" Margin="0,0,0,20">
                     <TextBlock x:Name="PluginCountText" Text="{x:Static props:PluginStrings.Plugin_Loading}" Foreground="{DynamicResource InfoTextFillColorPrimaryBrush}" />

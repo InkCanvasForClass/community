@@ -56,6 +56,12 @@ namespace Ink_Canvas.Properties
 
         public static string EnhancedPreviewHint => ResourceManager.GetString(nameof(EnhancedPreviewHint), _resourceCulture);
 
+        public static string EnhancedPreviewLoadingAnimation => ResourceManager.GetString(nameof(EnhancedPreviewLoadingAnimation), _resourceCulture);
+
+        public static string EnhancedPreviewLoadingAnimationHint => ResourceManager.GetString(nameof(EnhancedPreviewLoadingAnimationHint), _resourceCulture);
+
+        public static string LoadingPPT => ResourceManager.GetString(nameof(LoadingPPT), _resourceCulture);
+
         public static string Enhancement => ResourceManager.GetString(nameof(Enhancement), _resourceCulture);
 
         public static string EnterAnnotationOnShow => ResourceManager.GetString(nameof(EnterAnnotationOnShow), _resourceCulture);
@@ -203,5 +209,9 @@ namespace Ink_Canvas.Properties
         public static string PPT_ModePrompt_Title => ResourceManager.GetString(nameof(PPT_ModePrompt_Title), _resourceCulture);
 
         public static string PPT_SlidesNotFound => ResourceManager.GetString(nameof(PPT_SlidesNotFound), _resourceCulture);
+
+        public static string SmartMode => ResourceManager.GetString(nameof(SmartMode), _resourceCulture);
+
+        public static string SmartModeHint => ResourceManager.GetString(nameof(SmartModeHint), _resourceCulture);
     }
 }

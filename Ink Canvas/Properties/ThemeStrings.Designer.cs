@@ -116,6 +116,8 @@ namespace Ink_Canvas.Properties
 
         public static string Theme_GroupTitle => ResourceManager.GetString(nameof(Theme_GroupTitle), _resourceCulture);
 
+        public static string Theme_SidebarGroupTitle => ResourceManager.GetString(nameof(Theme_SidebarGroupTitle), _resourceCulture);
+
         public static string Theme_Label => ResourceManager.GetString(nameof(Theme_Label), _resourceCulture);
 
         public static string Theme_Language_ChineseSimplified => ResourceManager.GetString(nameof(Theme_Language_ChineseSimplified), _resourceCulture);
@@ -137,6 +139,8 @@ namespace Ink_Canvas.Properties
         public static string Theme_QuickPalette_SingleRow => ResourceManager.GetString(nameof(Theme_QuickPalette_SingleRow), _resourceCulture);
 
         public static string Theme_QuickPanelBottomOffset => ResourceManager.GetString(nameof(Theme_QuickPanelBottomOffset), _resourceCulture);
+
+        public static string Theme_QuickPanelBottomOffset_Description => ResourceManager.GetString(nameof(Theme_QuickPanelBottomOffset_Description), _resourceCulture);
 
         public static string Theme_QuoteSource => ResourceManager.GetString(nameof(Theme_QuoteSource), _resourceCulture);
 
@@ -200,6 +204,18 @@ namespace Ink_Canvas.Properties
 
         public static string Theme_HideFloatingBarBorderHint => ResourceManager.GetString(nameof(Theme_HideFloatingBarBorderHint), _resourceCulture);
 
+        public static string Theme_FloatingBarBorderColor => ResourceManager.GetString(nameof(Theme_FloatingBarBorderColor), _resourceCulture);
+
+        public static string Theme_FloatingBarBorderColorHint => ResourceManager.GetString(nameof(Theme_FloatingBarBorderColorHint), _resourceCulture);
+
+        public static string Theme_FloatingBarBorderColorReset => ResourceManager.GetString(nameof(Theme_FloatingBarBorderColorReset), _resourceCulture);
+
+        public static string Theme_FloatingBarBorderColor_Default => ResourceManager.GetString(nameof(Theme_FloatingBarBorderColor_Default), _resourceCulture);
+
+        public static string Theme_FloatingBarBorderColor_FollowBackground => ResourceManager.GetString(nameof(Theme_FloatingBarBorderColor_FollowBackground), _resourceCulture);
+
+        public static string Theme_FloatingBarBorderColor_Custom => ResourceManager.GetString(nameof(Theme_FloatingBarBorderColor_Custom), _resourceCulture);
+
         public static string Theme_WindowBackdrop => ResourceManager.GetString(nameof(Theme_WindowBackdrop), _resourceCulture);
 
         public static string Theme_WindowBackdrop_Acrylic => ResourceManager.GetString(nameof(Theme_WindowBackdrop_Acrylic), _resourceCulture);
@@ -222,7 +238,18 @@ namespace Ink_Canvas.Properties
 
         public static string Theme_SelectCustomSplashImage => ResourceManager.GetString(nameof(Theme_SelectCustomSplashImage), _resourceCulture);
 
-        public static string Theme_HitokotoCategory_Animation => ResourceManager.GetString(nameof(Theme_HitokotoCategory_Animation), _resourceCulture);
+        public static string Theme_FloatingBarThemesTitle => ResourceManager.GetString(nameof(Theme_FloatingBarThemesTitle), _resourceCulture);
+        public static string Theme_FloatingBarThemeMarketTitle => ResourceManager.GetString(nameof(Theme_FloatingBarThemeMarketTitle), _resourceCulture);
+        public static string Theme_FloatingBarThemeMarketRefresh => ResourceManager.GetString(nameof(Theme_FloatingBarThemeMarketRefresh), _resourceCulture);
+        public static string Theme_FloatingBarThemeMarketInstall => ResourceManager.GetString(nameof(Theme_FloatingBarThemeMarketInstall), _resourceCulture);
+
+        public static string Theme_FloatingBarThemesDescription => ResourceManager.GetString(nameof(Theme_FloatingBarThemesDescription), _resourceCulture);
+        public static string Theme_FloatingBarThemesFolder => ResourceManager.GetString(nameof(Theme_FloatingBarThemesFolder), _resourceCulture);
+        public static string Theme_FloatingBarThemesOpenFolder => ResourceManager.GetString(nameof(Theme_FloatingBarThemesOpenFolder), _resourceCulture);
+        public static string Theme_FloatingBarThemesReload => ResourceManager.GetString(nameof(Theme_FloatingBarThemesReload), _resourceCulture);
+        public static string Theme_FloatingBarThemesApply => ResourceManager.GetString(nameof(Theme_FloatingBarThemesApply), _resourceCulture);
+        public static string Theme_FloatingBarThemesApplyFailed => ResourceManager.GetString(nameof(Theme_FloatingBarThemesApplyFailed), _resourceCulture);
+
 
         public static string Theme_HitokotoCategory_Manga => ResourceManager.GetString(nameof(Theme_HitokotoCategory_Manga), _resourceCulture);
 
@@ -269,5 +296,53 @@ namespace Ink_Canvas.Properties
         public static string Theme_FloatingBarMenuOpacityInPPT => ResourceManager.GetString(nameof(Theme_FloatingBarMenuOpacityInPPT), _resourceCulture);
 
         public static string Theme_BoardMenuOpacity => ResourceManager.GetString(nameof(Theme_BoardMenuOpacity), _resourceCulture);
+
+        public static string Theme_Tips_GlobalSettings => ResourceManager.GetString(nameof(Theme_Tips_GlobalSettings), _resourceCulture);
+
+        public static string Theme_Tips_GlobalSettingsHint => ResourceManager.GetString(nameof(Theme_Tips_GlobalSettingsHint), _resourceCulture);
+
+        public static string Theme_Tips_AutoRotation => ResourceManager.GetString(nameof(Theme_Tips_AutoRotation), _resourceCulture);
+
+        public static string Theme_Tips_AutoRotationHint => ResourceManager.GetString(nameof(Theme_Tips_AutoRotationHint), _resourceCulture);
+
+        public static string Theme_Tips_RotationInterval => ResourceManager.GetString(nameof(Theme_Tips_RotationInterval), _resourceCulture);
+
+        public static string Theme_Tips_RotationIntervalHint => ResourceManager.GetString(nameof(Theme_Tips_RotationIntervalHint), _resourceCulture);
+
+        public static string Theme_Tips_Import => ResourceManager.GetString(nameof(Theme_Tips_Import), _resourceCulture);
+
+        public static string Theme_Tips_Create => ResourceManager.GetString(nameof(Theme_Tips_Create), _resourceCulture);
+
+        public static string Theme_Tips_Edit => ResourceManager.GetString(nameof(Theme_Tips_Edit), _resourceCulture);
+
+        public static string Theme_Tips_Export => ResourceManager.GetString(nameof(Theme_Tips_Export), _resourceCulture);
+
+        public static string Theme_Tips_SelectTxtFile => ResourceManager.GetString(nameof(Theme_Tips_SelectTxtFile), _resourceCulture);
+
+        public static string Theme_Tips_SchemeName => ResourceManager.GetString(nameof(Theme_Tips_SchemeName), _resourceCulture);
+
+        public static string Theme_Tips_SchemeContent => ResourceManager.GetString(nameof(Theme_Tips_SchemeContent), _resourceCulture);
+
+        public static string Theme_Tips_CancelConfirm => ResourceManager.GetString(nameof(Theme_Tips_CancelConfirm), _resourceCulture);
+
+        public static string Theme_Tips_Abandon => ResourceManager.GetString(nameof(Theme_Tips_Abandon), _resourceCulture);
+
+        public static string Theme_Tips_SelectSchemeFirst => ResourceManager.GetString(nameof(Theme_Tips_SelectSchemeFirst), _resourceCulture);
+
+        public static string Theme_Tips_PresetLocked => ResourceManager.GetString(nameof(Theme_Tips_PresetLocked), _resourceCulture);
+
+        public static string Theme_Tips_NewDialogTitle => ResourceManager.GetString(nameof(Theme_Tips_NewDialogTitle), _resourceCulture);
+
+        public static string Theme_Tips_ImportDialogTitle => ResourceManager.GetString(nameof(Theme_Tips_ImportDialogTitle), _resourceCulture);
+
+        public static string Theme_Tips_EditDialogTitle => ResourceManager.GetString(nameof(Theme_Tips_EditDialogTitle), _resourceCulture);
+
+        public static string Theme_Tips_NameRequired => ResourceManager.GetString(nameof(Theme_Tips_NameRequired), _resourceCulture);
+
+        public static string Theme_Tips_ContentRequired => ResourceManager.GetString(nameof(Theme_Tips_ContentRequired), _resourceCulture);
+
+        public static string Theme_Tips_NameExists => ResourceManager.GetString(nameof(Theme_Tips_NameExists), _resourceCulture);
+
+        public static string Theme_Tips_Title => ResourceManager.GetString(nameof(Theme_Tips_Title), _resourceCulture);
     }
 }

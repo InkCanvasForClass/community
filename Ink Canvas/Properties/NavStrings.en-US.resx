@@ -105,6 +105,12 @@
   <data name="Nav_Home_Tooltip" xml:space="preserve">
     <value>Quick navigation</value>
   </data>
+  <data name="Nav_CopySettingsUri_Tooltip" xml:space="preserve">
+    <value>Copy a link to this settings page</value>
+  </data>
+  <data name="Nav_CopySettingsUri_Copied" xml:space="preserve">
+    <value>Settings item link copied</value>
+  </data>
   <data name="Nav_ICCSettings" xml:space="preserve">
     <value>ICC CE Settings</value>
   </data>
@@ -158,6 +164,12 @@
   </data>
   <data name="Nav_Window_Tooltip" xml:space="preserve">
     <value>Window settings</value>
+  </data>
+  <data name="Nav_Sidebar" xml:space="preserve">
+    <value>Sidebar</value>
+  </data>
+  <data name="Nav_Sidebar_Tooltip" xml:space="preserve">
+    <value>Sidebar settings</value>
   </data>
   <data name="Nav_Toolbar" xml:space="preserve">
     <value>Toolbar</value>

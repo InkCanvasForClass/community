@@ -45,6 +45,13 @@ mc:Ignorable="d"
                     IsOn="False"
                     Toggled="ToggleSwitchPPTComDebugProbe_Toggled"/>
 
+                <controls:LabeledSettingsCard x:Name="ToggleSwitchPPTPageFlipPreview"
+                    Header="{x:Static props:AdvancedStrings.Debug_PPTPreviewVisible_Header}"
+                    Description="{x:Static props:AdvancedStrings.Debug_PPTPreviewVisible_Desc}"
+                    Icon="{x:Static ui:SegoeFluentIcons.View}"
+                    IsOn="False" d:IsOn="True"
+                    Toggled="ToggleSwitchPPTPageFlipPreview_Toggled"/>
+
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                     Text="{x:Static props:AdvancedStrings.Debug_CrashTest_Section}" />
 

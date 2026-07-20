@@ -179,17 +179,19 @@ private void SomeFloatSlider_ValueChanged(object sender, RoutedPropertyChangedEv
 
 **IsExpanded 属性规则：**
 
-4. **有开关的 SettingsExpander**：`IsExpanded` 必须绑定到开关的 `IsOn` 属性，实现"开则展开，关则折叠"：
+4. **有开关的 SettingsExpander**：`IsExpanded` 必须绑定到开关的 `IsOn` 属性，实现"开则展开，关则折叠"。同时，直接内容区域的 `ui:ToggleSwitch`（非 `SettingsExpander.Items` 内的）必须加上 `d:IsOn="True"`，确保在 Visual Studio 设计器预览中处于展开状态：
 
 ```xml
 <ui:SettingsExpander Header="托盘图标"
                      IsExpanded="{Binding IsOn, ElementName=ToggleSwitchTrayIcon, Mode=OneWay}">
-    <ui:ToggleSwitch x:Name="ToggleSwitchTrayIcon" ... />
+    <ui:ToggleSwitch x:Name="ToggleSwitchTrayIcon" d:IsOn="True" ... />
     <ui:SettingsExpander.Items>
         <!-- 子项 -->
     </ui:SettingsExpander.Items>
 </ui:SettingsExpander>
 ```
+
+> 注：`d:IsOn` 属于设计时命名空间（`xmlns:d="http://schemas.microsoft.com/expression/blend/2008"`，需配合 `mc:Ignorable="d"`），仅影响设计器预览，不影响运行时行为。
 
 5. **无开关的 SettingsExpander**：`IsExpanded` 必须设为 `True`，默认展开：
 

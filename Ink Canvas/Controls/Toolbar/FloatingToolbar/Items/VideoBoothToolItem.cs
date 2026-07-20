@@ -1,6 +1,6 @@
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using System.Windows.Input;
 using FluentSystemIcons = iNKORE.UI.WPF.Modern.Common.IconKeys.FluentSystemIcons;
 
@@ -19,7 +19,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         {
             host.Window.Dispatcher.Invoke(() =>
             {
-                var mw = host.Window as MainWindow;
+                var mw = host.Window;
                 if (mw == null) return;
 
                 if (MainWindow.Settings?.Canvas?.LaunchSeewoVideoShowcaseForWhiteboardBooth == true)

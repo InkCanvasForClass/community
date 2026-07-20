@@ -220,16 +220,28 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 强制重绘
+        /// 强制重绘。当点数回退（如停顿拉直替换 StylusPoints）时清除全部视觉重建；
+        /// 否则只清除活跃区段，保留已提交的视觉缓存。
         /// </summary>
         public void ForceRedraw()
         {
-            if (_visualCanvas != null)
+            if (Stroke == null || _visualCanvas == null) return;
+
+            var currentPointCount = Stroke.StylusPoints.Count;
+
+            // 点数回退（笔画被替换/缩短），必须清除全部已提交视觉重建
+            if (currentPointCount < _lastCommittedPointCount)
             {
                 _visualCanvas.Clear();
+                _activeVisual = null;
+                _lastCommittedPointCount = 0;
             }
-            _activeVisual = null;
-            _lastCommittedPointCount = 0;
+            else if (_activeVisual != null)
+            {
+                _visualCanvas.RemoveVisual(_activeVisual);
+                _activeVisual = null;
+            }
+
             Redraw();
         }
 

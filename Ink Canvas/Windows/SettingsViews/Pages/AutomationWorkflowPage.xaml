@@ -23,7 +23,6 @@
         <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
         <sys:Double x:Key="SettingsCardHeaderIconMaxSize">24</sys:Double>
 
-        <!-- 状态指示器样式（与 ClassIsland RulesetControl 一致） -->
         <Style TargetType="Ellipse" x:Key="StateIndicatorStyle">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding State, Mode=OneWay}" Value="2">
@@ -50,71 +49,93 @@
         </Grid.ColumnDefinitions>
 
         <!-- ==================== 左侧：导航列表 ==================== -->
-        <Grid Grid.Column="0" Margin="8">
+        <Grid Grid.Column="0" Margin="16,8">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- 标题 -->
-            <TextBlock Grid.Row="0" Text="自动化" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,8"/>
-
             <!-- 添加按钮 -->
-            <Button Grid.Row="1" x:Name="BtnAddWorkflow"
+            <Button Grid.Row="0" x:Name="BtnAddWorkflow"
                     Content="添加自动化"
                     Click="BtnAddWorkflow_Click"
                     Padding="12,6" Margin="0,0,0,8" HorizontalAlignment="Left"/>
 
             <!-- 导航列表 -->
-            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
-                <ListBox x:Name="NavigationListBox"
+            <ui:ListView Grid.Row="1"
+                         x:Name="NavigationListBox"
+                         Background="Transparent"
+                         BorderThickness="0"
                          SelectionChanged="NavigationListBox_SelectionChanged"
                          HorizontalContentAlignment="Stretch"
                          dd:DragDrop.IsDragSource="True"
                          dd:DragDrop.IsDropTarget="True"
                          touch:TouchAwareDragDropHelper.IsEnabled="True">
-                    <!-- 预设自动化固定项 -->
-                    <ListBoxItem x:Name="NavPresetItem" Padding="8">
-                        <StackPanel Orientation="Horizontal">
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="预设自动化" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </ListBoxItem>
-                    <!-- 工作流项通过 DataTemplate 渲染 -->
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
+                <ui:ListView.Template>
+                    <ControlTemplate TargetType="ui:ListView">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                                          VerticalScrollBarVisibility="Auto">
+                                <ItemsPresenter HorizontalAlignment="Stretch"/>
+                            </ScrollViewer>
+                        </Border>
+                    </ControlTemplate>
+                </ui:ListView.Template>
+                <ui:ListView.ItemContainerStyle>
+                    <Style TargetType="ui:ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Padding" Value="8,4"/>
+                        <Setter Property="MinHeight" Value="36"/>
+                    </Style>
+                </ui:ListView.ItemContainerStyle>
+                <ui:ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel/>
+                    </ItemsPanelTemplate>
+                </ui:ListView.ItemsPanel>
+                <!-- 预设自动化固定项 -->
+                <ui:ListViewItem x:Name="NavPresetItem">
+                    <StackPanel Orientation="Horizontal">
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="预设自动化" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </ui:ListViewItem>
+                <!-- 工作流项通过 DataTemplate 渲染 -->
+                <ui:ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-                                <Border Grid.Column="0" touch:TouchAwareDragDropHelper.IsGripHandle="True"
-                                        Background="Transparent" Padding="2,4" Margin="0,0,4,0"
-                                        Cursor="SizeAll">
-                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Rename}" Width="16" Height="16"
-                                                 VerticalAlignment="Center"/>
-                                </Border>
-                                <TextBlock Grid.Column="1" Text="{Binding ActionSet.Name}"
-                                           VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-                                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                    <ui:ToggleSwitch IsOn="{Binding ActionSet.IsEnabled}"
-                                                     Toggled="ToggleWorkflowEnabled_Toggled"
-                                                     Width="44" Height="24" Margin="0,0,4,0"/>
-                                    <Button Content="⧉" Click="BtnDuplicateWorkflow_Click"
-                                            Padding="4,0" Tag="{Binding}" Margin="0,0,4,0"
-                                            ToolTip="复制"/>
-                                    <Button Content="✕" Click="BtnRemoveWorkflow_Click"
-                                            Padding="4,0" Tag="{Binding}"
-                                            ToolTip="删除"/>
-                                </StackPanel>
-                            </Grid>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </ScrollViewer>
+                            <Border Grid.Column="0" touch:TouchAwareDragDropHelper.IsGripHandle="True"
+                                    Background="Transparent" Padding="2,4" Margin="0,0,4,0"
+                                    Cursor="SizeAll">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Rename}" Width="16" Height="16"
+                                             VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Grid.Column="1" Text="{Binding ActionSet.Name}"
+                                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                <ui:ToggleSwitch IsOn="{Binding ActionSet.IsEnabled}"
+                                                 Toggled="ToggleWorkflowEnabled_Toggled"
+                                                 MinWidth="0" OnContent="" OffContent=""
+                                                 Margin="0,0,8,0"/>
+                                <Button Content="⧉" Click="BtnDuplicateWorkflow_Click"
+                                        Padding="4,0" Tag="{Binding}" Margin="0,0,4,0"
+                                        ToolTip="复制"/>
+                                <Button Content="✕" Click="BtnRemoveWorkflow_Click"
+                                        Padding="4,0" Tag="{Binding}"
+                                        ToolTip="删除"/>
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ui:ListView.ItemTemplate>
+            </ui:ListView>
         </Grid>
 
         <GridSplitter Grid.Column="1" Width="1" Background="{DynamicResource ControlStrokeColorDefaultBrush}"/>
@@ -124,7 +145,7 @@
 
             <!-- ========== 预设自动化面板 ========== -->
             <ScrollViewer x:Name="PresetPanel" PanningMode="VerticalFirst">
-                <Grid Margin="59,0,59,0">
+                <Grid Margin="20,0,20,0">
                     <FrameworkElement.Resources>
                         <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
                         <sys:Double x:Key="SettingsCardHeaderIconMaxSize">24</sys:Double>

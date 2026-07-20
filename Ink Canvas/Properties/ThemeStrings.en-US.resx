@@ -94,7 +94,7 @@
     <value>Dark</value>
   </data>
   <data name="Theme_EnableQuickPanel" xml:space="preserve">
-    <value>Enable quick panel in docked mode</value>
+    <value>Show sidebar after clicking unfold button</value>
   </data>
   <data name="Theme_EnableSplash" xml:space="preserve">
     <value>Enable startup animation</value>
@@ -156,6 +156,9 @@
   <data name="Theme_GroupTitle" xml:space="preserve">
     <value>Personalization</value>
   </data>
+  <data name="Theme_SidebarGroupTitle" xml:space="preserve">
+    <value>Sidebar</value>
+  </data>
   <data name="Theme_Label" xml:space="preserve">
     <value>Theme</value>
   </data>
@@ -187,7 +190,10 @@
     <value>Single row (6 colors)</value>
   </data>
   <data name="Theme_QuickPanelBottomOffset" xml:space="preserve">
-    <value>Quick panel vertical offset</value>
+    <value>Offset between unfold button and sidebar</value>
+  </data>
+  <data name="Theme_QuickPanelBottomOffset_Description" xml:space="preserve">
+    <value>Adjust the vertical offset of the sidebar (right-top, left-bottom)</value>
   </data>
   <data name="Theme_QuoteSource" xml:space="preserve">
     <value>Where is the quote from?</value>
@@ -259,7 +265,7 @@
     <value>Follow system</value>
   </data>
   <data name="Theme_UnfoldButtonIcon" xml:space="preserve">
-    <value>Un-dock button icon</value>
+    <value>Unfold button icon</value>
   </data>
   <data name="Theme_UnfoldIcon_Arrow" xml:space="preserve">
     <value>Arrow</value>
@@ -274,7 +280,7 @@
     <value>Stripe</value>
   </data>
   <data name="Theme_AllowDragSidePanel" xml:space="preserve">
-    <value>Allow adjusting side panel position by dragging</value>
+    <value>Allow dragging unfold button to adjust offset</value>
   </data>
   <data name="Theme_Upload" xml:space="preserve">
     <value>Upload</value>
@@ -297,6 +303,50 @@
   <data name="Theme_HideFloatingBarBorderHint" xml:space="preserve">
     <value>Sets the floating bar border thickness to 0 for a borderless look.</value>
   </data>
+  <data name="Theme_FloatingBarBorderColor" xml:space="preserve">
+    <value>Floating bar border color</value>
+  </data>
+  <data name="Theme_FloatingBarBorderColorHint" xml:space="preserve">
+    <value>Sets the floating toolbar border color. Default uses the theme color, Follow background blends with the background, Custom lets you pick any color.</value>
+  </data>
+  <data name="Theme_FloatingBarBorderColorReset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="Theme_FloatingBarBorderColor_Default" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="Theme_FloatingBarBorderColor_FollowBackground" xml:space="preserve">
+    <value>Follow background color</value>
+  </data>
+  <data name="Theme_FloatingBarBorderColor_Custom" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="Theme_FloatingBarThemeMarketTitle" xml:space="preserve"><value>Floating Bar Theme Market</value></data>
+  <data name="Theme_FloatingBarThemeMarketRefresh" xml:space="preserve"><value>Refresh market</value></data>
+  <data name="Theme_FloatingBarThemeMarketInstall" xml:space="preserve"><value>Install theme</value></data>
+
+  <data name="Theme_FloatingBarThemesTitle" xml:space="preserve">
+    <value>Floating Bar Themes</value>
+  </data>
+  <data name="Theme_FloatingBarThemesDescription" xml:space="preserve">
+    <value>Manage floating bar theme packages, backgrounds, colors, and visual styles.</value>
+  </data>
+  <data name="Theme_FloatingBarThemesFolder" xml:space="preserve">
+    <value>Theme management</value>
+  </data>
+  <data name="Theme_FloatingBarThemesOpenFolder" xml:space="preserve">
+    <value>Open theme folder</value>
+  </data>
+  <data name="Theme_FloatingBarThemesReload" xml:space="preserve">
+    <value>Reload themes</value>
+  </data>
+  <data name="Theme_FloatingBarThemesApply" xml:space="preserve">
+    <value>Apply theme</value>
+  </data>
+  <data name="Theme_FloatingBarThemesApplyFailed" xml:space="preserve">
+    <value>Failed to apply the theme. Please check the theme files.</value>
+  </data>
+
   <data name="Theme_WindowBackdrop" xml:space="preserve">
     <value>Window background style</value>
   </data>
@@ -373,10 +423,10 @@
     <value>Sidebar opacity</value>
   </data>
   <data name="Theme_AutoCollapseQuickPanel" xml:space="preserve">
-    <value>Auto-collapse sidebar when clicking elsewhere</value>
+    <value>Auto-collapse sidebar after opening</value>
   </data>
   <data name="Theme_AutoCollapseQuickPanelDelay" xml:space="preserve">
-    <value>Auto-collapse delay</value>
+    <value>Wait time before auto-collapse</value>
   </data>
   <data name="Theme_FloatingBarMenuOpacity" xml:space="preserve">
     <value>Floating bar menu opacity</value>
@@ -386,5 +436,77 @@
   </data>
   <data name="Theme_BoardMenuOpacity" xml:space="preserve">
     <value>Whiteboard menu opacity</value>
+  </data>
+  <data name="Theme_Tips_GlobalSettings" xml:space="preserve">
+    <value>Global Settings</value>
+  </data>
+  <data name="Theme_Tips_GlobalSettingsHint" xml:space="preserve">
+    <value>Manage faith source display, sources and auto-rotation</value>
+  </data>
+  <data name="Theme_Tips_AutoRotation" xml:space="preserve">
+    <value>Auto-rotate Tips</value>
+  </data>
+  <data name="Theme_Tips_AutoRotationHint" xml:space="preserve">
+    <value>When enabled, tips in the whiteboard will automatically rotate at the set interval</value>
+  </data>
+  <data name="Theme_Tips_RotationInterval" xml:space="preserve">
+    <value>Rotation interval (seconds)</value>
+  </data>
+  <data name="Theme_Tips_RotationIntervalHint" xml:space="preserve">
+    <value>Must enter a positive integer >= 5</value>
+  </data>
+  <data name="Theme_Tips_Import" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="Theme_Tips_Create" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="Theme_Tips_Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Theme_Tips_Export" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="Theme_Tips_SelectTxtFile" xml:space="preserve">
+    <value>+ Select a txt file</value>
+  </data>
+  <data name="Theme_Tips_SchemeName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Theme_Tips_SchemeContent" xml:space="preserve">
+    <value>Content</value>
+  </data>
+  <data name="Theme_Tips_CancelConfirm" xml:space="preserve">
+    <value>This cannot be undone after cancellation. Are you sure?</value>
+  </data>
+  <data name="Theme_Tips_Abandon" xml:space="preserve">
+    <value>Discard</value>
+  </data>
+  <data name="Theme_Tips_SelectSchemeFirst" xml:space="preserve">
+    <value>Please select a scheme from the list first</value>
+  </data>
+  <data name="Theme_Tips_PresetLocked" xml:space="preserve">
+    <value>Preset schemes cannot be modified</value>
+  </data>
+  <data name="Theme_Tips_NewDialogTitle" xml:space="preserve">
+    <value>New Scheme</value>
+  </data>
+  <data name="Theme_Tips_ImportDialogTitle" xml:space="preserve">
+    <value>Import Scheme</value>
+  </data>
+  <data name="Theme_Tips_EditDialogTitle" xml:space="preserve">
+    <value>Edit Scheme</value>
+  </data>
+  <data name="Theme_Tips_NameRequired" xml:space="preserve">
+    <value>Please enter a scheme name</value>
+  </data>
+  <data name="Theme_Tips_ContentRequired" xml:space="preserve">
+    <value>Please enter scheme content</value>
+  </data>
+  <data name="Theme_Tips_NameExists" xml:space="preserve">
+    <value>A scheme with this name already exists. Please use a different name.</value>
+  </data>
+  <data name="Theme_Tips_Title" xml:space="preserve">
+    <value>Tips</value>
   </data>
 </root>

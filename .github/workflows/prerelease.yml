@@ -340,20 +340,16 @@ jobs:
         run: |
           # 创建临时目录用于下载文件
           New-Item -ItemType Directory -Path "temp_lang" -Force
-
-          # 下载英语英国版语言文件
-          Invoke-WebRequest -Uri "https://github.com/jrsoftware/issrc/raw/refs/heads/main/Files/Languages/Unofficial/EnglishBritish.isl" -OutFile "temp_lang/EnglishBritish.isl"
-
-          # 下载简体中文版语言文件
-          Invoke-WebRequest -Uri "https://github.com/jrsoftware/issrc/raw/refs/heads/main/Files/Languages/Unofficial/ChineseSimplified.isl" -OutFile "temp_lang/ChineseSimplified.isl"
-
+          # 英国英语：依然在 Unofficial 目录下
+          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/Unofficial/EnglishBritish.isl" -OutFile "temp_lang/EnglishBritish.isl"
+          # 简体中文：已经转正，移除了 Unofficial 目录
+          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/ChineseSimplified.isl" -OutFile "temp_lang/ChineseSimplified.isl"
           # 将文件移动到 Inno Setup 的语言目录
           Move-Item -Path "temp_lang/EnglishBritish.isl" -Destination "C:/Program Files (x86)/Inno Setup 6/Languages/EnglishBritish.isl" -Force
           Move-Item -Path "temp_lang/ChineseSimplified.isl" -Destination "C:/Program Files (x86)/Inno Setup 6/Languages/ChineseSimplified.isl" -Force
-
           # 清理临时目录
           Remove-Item -Path "temp_lang" -Recurse -Force
-
+          
       - name: Create Release Archive
         id: create_archive
         if: steps.check-exe.outputs.build_success == 'true'

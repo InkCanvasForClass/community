@@ -79,6 +79,7 @@
                                     <ColumnDefinition x:Name="BarCustomCol" Width="0*"/>
                                     <ColumnDefinition x:Name="BarPluginsCol" Width="0*"/>
                                     <ColumnDefinition x:Name="BarUpdateCol" Width="0*"/>
+                                    <ColumnDefinition x:Name="BarThemeCol" Width="0*"/>
                                     <ColumnDefinition x:Name="BarOtherCol" Width="0*"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
@@ -89,7 +90,8 @@
                                 <Rectangle Grid.Column="4" Fill="#EC4899"/>
                                 <Rectangle Grid.Column="5" Fill="#06B6D4"/>
                                 <Rectangle Grid.Column="6" Fill="#EF4444"/>
-                                <Rectangle Grid.Column="7" Fill="#6B7280"/>
+                                <Rectangle Grid.Column="7" Fill="#A855F7"/>
+                                <Rectangle Grid.Column="8" Fill="#6B7280"/>
                             </Grid>
                         </Border>
 
@@ -122,6 +124,10 @@
                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                 <Border Width="10" Height="10" CornerRadius="2" Background="#EF4444"/>
                                 <TextBlock Text="{x:Static props:StorageStrings.Storage_Legend_Update}" FontSize="12"/>
+                            </ikw:SimpleStackPanel>
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                                <Border Width="10" Height="10" CornerRadius="2" Background="#A855F7"/>
+                                <TextBlock Text="{x:Static props:StorageStrings.Storage_Legend_Theme}" FontSize="12"/>
                             </ikw:SimpleStackPanel>
                             <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                 <Border Width="10" Height="10" CornerRadius="2" Background="#6B7280"/>
@@ -232,6 +238,22 @@
                         <Button x:Name="BtnCleanUpdate" Content="{x:Static props:StorageStrings.Storage_Clean}" Click="BtnCleanUpdate_Click"/>
                     </ikw:SimpleStackPanel>
                 </ui:SettingsCard>
+
+                <!-- 主题 -->
+                <ui:SettingsExpander x:Name="ThemeExpander"
+                                     Header="{x:Static props:StorageStrings.Storage_Legend_Theme}"
+                                     Description="{x:Static props:StorageStrings.Storage_Theme_Desc}"
+                                     IsExpanded="True">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Color}"/>
+                    </ui:SettingsExpander.HeaderIcon>
+                    <TextBlock x:Name="ThemeSizeText" Text="—" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <ui:SettingsExpander.Items>
+                        <ui:SettingsCard Description="{x:Static props:StorageStrings.Storage_Theme_Hint}">
+                            <Button x:Name="BtnCleanTheme" Content="{x:Static props:StorageStrings.Storage_Clean}" Click="BtnCleanTheme_Click"/>
+                        </ui:SettingsCard>
+                    </ui:SettingsExpander.Items>
+                </ui:SettingsExpander>
 
                 <!-- 其他 -->
                 <ui:SettingsCard x:Name="OtherExpander"

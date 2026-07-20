@@ -1,0 +1,16 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Early fallback values prevent DynamicResource lookup warnings before the selected theme is applied. -->
+    <SolidColorBrush x:Key="FloatingBarBackgroundBrush" Color="#1A1C1E" />
+    <SolidColorBrush x:Key="FloatingBarForegroundBrush" Color="White" />
+    <SolidColorBrush x:Key="FloatingBarBorderBrush" Color="White" />
+    <SolidColorBrush x:Key="FloatingBarAccentBrush" Color="#2563EB" />
+    <SolidColorBrush x:Key="FloatingBarButtonHoverBrush" Color="#2266CCFF" />
+    <SolidColorBrush x:Key="FloatingBarButtonPressedBrush" Color="#4466CCFF" />
+    <SolidColorBrush x:Key="FloatingBarPopupBackgroundBrush" Color="#1F1F1F" />
+    <SolidColorBrush x:Key="FloatingBarPopupInnerBackgroundBrush" Color="#2A2A2A" />
+    <SolidColorBrush x:Key="FloatingBarPopupInnerBorderBrush" Color="#404040" />
+    <SolidColorBrush x:Key="FloatingBarPopupTitleForegroundBrush" Color="#60A5FA" />
+    <SolidColorBrush x:Key="FloatingBarPopupCloseBrush" Color="#DC2626" />
+    <SolidColorBrush x:Key="FloatingBarPopupHoverBrush" Color="#2266CCFF" />
+</ResourceDictionary>

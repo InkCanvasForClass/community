@@ -195,8 +195,20 @@
   <data name="Storage_Legend_Update" xml:space="preserve">
     <value>Update</value>
   </data>
+  <data name="Storage_Legend_Theme" xml:space="preserve">
+    <value>Themes</value>
+  </data>
   <data name="Storage_Legend_Plugins" xml:space="preserve">
     <value>Plugins</value>
+  </data>
+  <data name="Storage_Theme_Desc" xml:space="preserve">
+    <value>Theme packages located under the FloatingBarThemes directory. Cleanable.</value>
+  </data>
+  <data name="Storage_Theme_Header" xml:space="preserve">
+    <value>Themes</value>
+  </data>
+  <data name="Storage_Theme_Hint" xml:space="preserve">
+    <value>Manage themes via the Floating Bar Theme page.</value>
   </data>
   <data name="Storage_Logs_Desc" xml:space="preserve">
     <value>.txt logs and crash reports under Logs / Crashes. Cleanable.</value>

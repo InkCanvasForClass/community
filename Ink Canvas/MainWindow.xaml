@@ -27,7 +27,7 @@
         Height="1080" Width="1920"
         FontFamily="Microsoft YaHei UI"
         MouseWheel="Window_MouseWheel"
-        Foreground="{DynamicResource FloatBarForeground}"
+        Foreground="{DynamicResource FloatingBarForegroundBrush}"
         SizeChanged="MainWindow_OnSizeChanged"
         MouseMove="MainWindow_OnMouseMove"
         Stylus.IsPressAndHoldEnabled="False"
@@ -124,7 +124,7 @@
             </Style>
 
             <Style x:Key="AutoFitGestureOptionLabel10" TargetType="Label">
-                <Setter Property="Foreground" Value="{DynamicResource FloatBarForeground}" />
+                <Setter Property="Foreground" Value="{DynamicResource FloatingBarForegroundBrush}" />
                 <Setter Property="FontWeight" Value="Normal" />
                 <Setter Property="Padding" Value="0" />
                 <Setter Property="HorizontalContentAlignment" Value="Left" />
@@ -271,9 +271,9 @@
             <Border Name="BorderStrokeSelectionControl"
                     HorizontalAlignment="Left" VerticalAlignment="Top" Margin="800,400,0,0"
                     CornerRadius="5" Height="80"
-                    Background="{DynamicResource FloatBarBackground}" d:BorderBrush="Red" d:Background="Green"
+                    Background="{DynamicResource FloatingBarBackgroundBrush}" d:BorderBrush="Red" d:Background="Green"
                     Visibility="{Binding ElementName=GridInkCanvasSelectionCover, Path=Visibility}"
-                    BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}">
+                    BorderThickness="1" BorderBrush="{DynamicResource FloatingBarBorderBrush}">
                 <Viewbox Margin="0,-2.5">
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10" Height="60">
                         <Border Name="BorderStrokeSelectionClone" Margin="0,2,-9,2" Background="Transparent"
@@ -282,7 +282,7 @@
                             <ikw:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                                 <Image Source="{DynamicResource StrokeSelectionCloneIcon}"
                                        RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
-                                <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextClone}" FontSize="10" Foreground="{DynamicResource FloatBarForeground}"
+                                <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextClone}" FontSize="10" Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                            HorizontalAlignment="Center" />
                             </ikw:SimpleStackPanel>
                         </Border>
@@ -294,7 +294,7 @@
                             <ikw:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                                 <Image Source="{DynamicResource StrokeSelectionCloneToNewBoardIcon}"
                                        RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
-                                <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextCloneToNewPage}" FontSize="8" Foreground="{DynamicResource FloatBarForeground}"
+                                <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextCloneToNewPage}" FontSize="8" Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                            HorizontalAlignment="Center" />
                             </ikw:SimpleStackPanel>
                         </Border>
@@ -306,12 +306,12 @@
                             <ikw:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                                 <Image Source="{DynamicResource QuickPanelBlackboardIcon}"
                                        RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
-                                <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextInsertToWhiteboard}" FontSize="8" Foreground="{DynamicResource FloatBarForeground}"
+                                <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextInsertToWhiteboard}" FontSize="8" Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                            HorizontalAlignment="Center" />
                             </ikw:SimpleStackPanel>
                         </Border>
-                        <Border Width="1" Height="45" BorderBrush="{DynamicResource FloatBarForeground}"
-                                Background="{DynamicResource FloatBarForeground}" />
+                        <Border Width="1" Height="45" BorderBrush="{DynamicResource FloatingBarForegroundBrush}"
+                                Background="{DynamicResource FloatingBarForegroundBrush}" />
                         <Border CornerRadius="{Binding ElementName=BorderStrokeSelectionControl, Path=CornerRadius}"
                                 Height="40">
                             <ikw:SimpleStackPanel VerticalAlignment="Center" Spacing="5" Margin="0,-10">
@@ -322,11 +322,11 @@
                                            MouseDown="Border_MouseDown" MouseUp="ImageRotate90_MouseUp" />
                                 </ikw:SimpleStackPanel>
                                 <TextBlock Text="{x:Static props:BoothStrings.Rotate}" FontSize="10" HorizontalAlignment="Center"
-                                           Foreground="{DynamicResource FloatBarForeground}" />
+                                           Foreground="{DynamicResource FloatingBarForegroundBrush}" />
                             </ikw:SimpleStackPanel>
                         </Border>
-                        <Border Width="1" Height="45" BorderBrush="{DynamicResource FloatBarForeground}"
-                                Background="{DynamicResource FloatBarForeground}" />
+                        <Border Width="1" Height="45" BorderBrush="{DynamicResource FloatingBarForegroundBrush}"
+                                Background="{DynamicResource FloatingBarForegroundBrush}" />
                         <Border CornerRadius="{Binding ElementName=BorderStrokeSelectionControl, Path=CornerRadius}"
                                 Height="40">
                             <ikw:SimpleStackPanel VerticalAlignment="Center" Margin="0,-10">
@@ -339,11 +339,11 @@
                                            RenderOptions.BitmapScalingMode="HighQuality" Height="30" Width="30" />
                                 </ikw:SimpleStackPanel>
                                 <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextFlip}" FontSize="10" HorizontalAlignment="Center"
-                                           Foreground="{DynamicResource FloatBarForeground}" />
+                                           Foreground="{DynamicResource FloatingBarForegroundBrush}" />
                             </ikw:SimpleStackPanel>
                         </Border>
-                        <Border Width="1" Height="45" BorderBrush="{DynamicResource FloatBarForeground}"
-                                Background="{DynamicResource FloatBarForeground}" />
+                        <Border Width="1" Height="45" BorderBrush="{DynamicResource FloatingBarForegroundBrush}"
+                                Background="{DynamicResource FloatingBarForegroundBrush}" />
                         <Border CornerRadius="{Binding ElementName=BorderStrokeSelectionControl, Path=CornerRadius}"
                                 Height="40">
                             <ikw:SimpleStackPanel VerticalAlignment="Center" Spacing="5" Margin="0,-10">
@@ -351,14 +351,14 @@
                                     <Grid MouseDown="Border_MouseDown" MouseUp="GridPenWidthDecrease_MouseUp">
                                         <Image Source="{DynamicResource StrokeSelectionPenWidthIcon}"
                                                RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
-                                        <TextBlock Text="-" Foreground="{DynamicResource FloatBarForeground}"
+                                        <TextBlock Text="-" Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                                    VerticalAlignment="Bottom" HorizontalAlignment="Right"
                                                    Margin="0,0,-2,-7" FontSize="15" />
                                     </Grid>
                                     <Grid MouseDown="Border_MouseDown" MouseUp="GridPenWidthIncrease_MouseUp">
                                         <Image Source="{DynamicResource StrokeSelectionPenWidthIcon}"
                                                RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
-                                        <TextBlock Text="+" Foreground="{DynamicResource FloatBarForeground}"
+                                        <TextBlock Text="+" Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                                    VerticalAlignment="Bottom" HorizontalAlignment="Right"
                                                    Margin="0,0,-3,-4" FontSize="11" />
                                     </Grid>
@@ -371,11 +371,11 @@
                                     </Grid>
                                 </ikw:SimpleStackPanel>
                                 <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextBrushSize}" FontSize="10" HorizontalAlignment="Center"
-                                           Foreground="{DynamicResource FloatBarForeground}" />
+                                           Foreground="{DynamicResource FloatingBarForegroundBrush}" />
                             </ikw:SimpleStackPanel>
                         </Border>
-                        <Border Width="1" Height="45" BorderBrush="{DynamicResource FloatBarForeground}"
-                                Background="{DynamicResource FloatBarForeground}" />
+                        <Border Width="1" Height="45" BorderBrush="{DynamicResource FloatingBarForegroundBrush}"
+                                Background="{DynamicResource FloatingBarForegroundBrush}" />
                         <Border Margin="-8,0,0,0"
                                 CornerRadius="{Binding ElementName=BorderStrokeSelectionControl, Path=CornerRadius}"
                                 Width="40" MouseDown="Border_MouseDown" MouseUp="BorderStrokeSelectionDelete_MouseUp">
@@ -383,7 +383,7 @@
                                 <Image Source="{DynamicResource StrokeSelectionDeleteIcon}"
                                        RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
                                 <TextBlock Margin="0,5,0,0" Text="{x:Static props:MainWindowStrings.Main_ContextDelete}" FontSize="10"
-                                           Foreground="{DynamicResource FloatBarForeground}"
+                                           Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                            HorizontalAlignment="Center" />
                             </ikw:SimpleStackPanel>
                         </Border>
@@ -394,9 +394,9 @@
             <Border Name="BorderImageSelectionControl"
                     HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,0"
                     CornerRadius="5" Height="80"
-                    Background="{DynamicResource FloatBarBackground}"
+                    Background="{DynamicResource FloatingBarBackgroundBrush}"
                     Visibility="Collapsed"  d:Visibility="Visible"
-                    BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}">
+                    BorderThickness="1" BorderBrush="{DynamicResource FloatingBarBorderBrush}">
                 <Viewbox Margin="0,-2.5">
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10" Height="60">
                         <Border Name="BorderImageClone" Margin="0,2,-9,2" Background="Transparent"
@@ -405,7 +405,7 @@
                             <ikw:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                                 <Image Source="{DynamicResource ImageSelectionCloneIcon}"
                                        RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
-                                <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextClone}" FontSize="10" Foreground="{DynamicResource FloatBarForeground}"
+                                <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextClone}" FontSize="10" Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                            HorizontalAlignment="Center" />
                             </ikw:SimpleStackPanel>
                         </Border>
@@ -425,14 +425,14 @@
                                        Width="25" />
                                 <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextCloneToNewPage}"
                                            FontSize="8"
-                                           Foreground="{DynamicResource FloatBarForeground}"
+                                           Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                            HorizontalAlignment="Center" />
                             </ikw:SimpleStackPanel>
                         </Border>
                         <Border Width="1" 
                                 Height="45" 
-                                BorderBrush="{DynamicResource FloatBarForeground}"
-                                Background="{DynamicResource FloatBarForeground}" />
+                                BorderBrush="{DynamicResource FloatingBarForegroundBrush}"
+                                Background="{DynamicResource FloatingBarForegroundBrush}" />
                         <Border CornerRadius="{Binding ElementName=BorderImageSelectionControl, Path=CornerRadius}"
                                 Height="40">
                             <ikw:SimpleStackPanel VerticalAlignment="Center" 
@@ -452,11 +452,11 @@
                                 <TextBlock Text="{x:Static props:BoothStrings.Rotate}"
                                            FontSize="10"
                                            HorizontalAlignment="Center"
-                                           Foreground="{DynamicResource FloatBarForeground}" />
+                                           Foreground="{DynamicResource FloatingBarForegroundBrush}" />
                             </ikw:SimpleStackPanel>
                         </Border>
-                        <Border Width="1" Height="45" BorderBrush="{DynamicResource FloatBarForeground}"
-                                Background="{DynamicResource FloatBarForeground}" />
+                        <Border Width="1" Height="45" BorderBrush="{DynamicResource FloatingBarForegroundBrush}"
+                                Background="{DynamicResource FloatingBarForegroundBrush}" />
                         <Border CornerRadius="{Binding ElementName=BorderImageSelectionControl, Path=CornerRadius}"
                                 Height="40">
                             <ikw:SimpleStackPanel VerticalAlignment="Center" Spacing="5" Margin="0,-10">
@@ -464,24 +464,24 @@
                                     <Grid MouseDown="Border_MouseDown" MouseUp="GridImageScaleDecrease_MouseUp">
                                         <Image Source="{DynamicResource ImageSelectionScaleIcon1}"
                                                RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
-                                        <TextBlock Text="-" Foreground="{DynamicResource FloatBarForeground}"
+                                        <TextBlock Text="-" Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                                    VerticalAlignment="Bottom" HorizontalAlignment="Right"
                                                    Margin="0,0,-2,-7" FontSize="15" />
                                     </Grid>
                                     <Grid MouseDown="Border_MouseDown" MouseUp="GridImageScaleIncrease_MouseUp">
                                         <Image Source="{DynamicResource ImageSelectionScaleIcon2}"
                                                RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
-                                        <TextBlock Text="+" Foreground="{DynamicResource FloatBarForeground}"
+                                        <TextBlock Text="+" Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                                    VerticalAlignment="Bottom" HorizontalAlignment="Right"
                                                    Margin="0,0,-3,-4" FontSize="11" />
                                     </Grid>
                                 </ikw:SimpleStackPanel>
                                 <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextZoom}" FontSize="10" HorizontalAlignment="Center"
-                                           Foreground="{DynamicResource FloatBarForeground}" />
+                                           Foreground="{DynamicResource FloatingBarForegroundBrush}" />
                             </ikw:SimpleStackPanel>
                         </Border>
-                        <Border Width="1" Height="45" BorderBrush="{DynamicResource FloatBarForeground}"
-                                Background="{DynamicResource FloatBarForeground}" />
+                        <Border Width="1" Height="45" BorderBrush="{DynamicResource FloatingBarForegroundBrush}"
+                                Background="{DynamicResource FloatingBarForegroundBrush}" />
                         <Border Margin="-8,0,0,0"
                                 CornerRadius="{Binding ElementName=BorderImageSelectionControl, Path=CornerRadius}"
                                 Width="40" MouseDown="Border_MouseDown" MouseUp="BorderImageDelete_MouseUp">
@@ -489,7 +489,7 @@
                                 <Image Source="{DynamicResource ImageSelectionDeleteIcon}"
                                        RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
                                 <TextBlock Margin="0,5,0,0" Text="{x:Static props:MainWindowStrings.Main_ContextDelete}" FontSize="10"
-                                           Foreground="{DynamicResource FloatBarForeground}"
+                                           Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                            HorizontalAlignment="Center" />
                             </ikw:SimpleStackPanel>
                         </Border>
@@ -503,7 +503,7 @@
                     Margin="0,0,0,0"
                     Width="64"
                     CornerRadius="8"
-                    Background="{DynamicResource FloatBarBackground}"
+                    Background="{DynamicResource FloatingBarBackgroundBrush}"
                     BorderBrush="#33FFFFFF"
                     BorderThickness="1"
                     SnapsToDevicePixels="True"
@@ -546,7 +546,7 @@
                                    FontSize="10"
                                    FontWeight="SemiBold"
                                    HorizontalAlignment="Center"
-                                   Foreground="{DynamicResource FloatBarForeground}"
+                                   Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                    Opacity="0.78" />
                         <Border CornerRadius="4"
                                 Padding="8,6"
@@ -560,7 +560,7 @@
                                        VerticalAlignment="Center"
                                        HorizontalAlignment="Center"
                                        TextAlignment="Center"
-                                       Foreground="{DynamicResource FloatBarForeground}"
+                                       Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                        Opacity="0.55" />
                         </Border>
                         <Border Name="BorderPdfSidebarPagePrev"
@@ -574,7 +574,7 @@
                                          FontSize="14"
                                          HorizontalAlignment="Center"
                                          VerticalAlignment="Center"
-                                         Foreground="{DynamicResource FloatBarForeground}" />
+                                         Foreground="{DynamicResource FloatingBarForegroundBrush}" />
                         </Border>
                         <Border Name="BorderPdfSidebarPageNext"
                                 Style="{StaticResource PdfSidebarNavButtonStyle}"
@@ -587,12 +587,12 @@
                                          FontSize="14"
                                          HorizontalAlignment="Center"
                                          VerticalAlignment="Center"
-                                         Foreground="{DynamicResource FloatBarForeground}" />
+                                         Foreground="{DynamicResource FloatingBarForegroundBrush}" />
                         </Border>
                         <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextPageTurn}"
                                    FontSize="9"
                                    HorizontalAlignment="Center"
-                                   Foreground="{DynamicResource FloatBarForeground}"
+                                   Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                    Opacity="0.55" />
                     </ikw:SimpleStackPanel>
                 </Grid>
@@ -609,16 +609,16 @@
                 <Viewbox Margin="10" Height="50" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="5">
                         <Border Width="36" Height="36" CornerRadius="5"
-                                Background="{DynamicResource FloatBarBackground}" BorderThickness="1" d:BorderBrush="Red" d:Background="Green"
-                                BorderBrush="{DynamicResource FloatBarBorderBrush}">
+                                Background="{DynamicResource FloatingBarBackgroundBrush}" BorderThickness="1" d:BorderBrush="Red" d:Background="Green"
+                                BorderBrush="{DynamicResource FloatingBarBorderBrush}">
                             <Grid Margin="6" MouseUp="GridPPTControlPrevious_MouseUp">
                                 <Image
                                     Source="{DynamicResource ResourceKey=SeewoImageSource.HorizontalPreviousSlideNormal}" />
                             </Grid>
                         </Border>
                         <Border Visibility="{Binding ElementName=PPTNavigationBtn, Path=Visibility}" Width="36"
-                                Height="36" CornerRadius="5" Background="{DynamicResource FloatBarBackground}" d:BorderBrush="Red" d:Background="Green"
-                                BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}">
+                                Height="36" CornerRadius="5" Background="{DynamicResource FloatingBarBackgroundBrush}" d:BorderBrush="Red" d:Background="Green"
+                                BorderThickness="1" BorderBrush="{DynamicResource FloatingBarBorderBrush}">
                             <Grid MouseUp="PPTNavigationBtn_MouseUp">
                                 <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
                                            Foreground="{Binding ElementName=PPTNavigationTextBlock, Path=Foreground}"
@@ -627,8 +627,8 @@
                             </Grid>
                         </Border>
                         <Border Width="36" Height="36" CornerRadius="5"
-                                Background="{DynamicResource FloatBarBackground}" BorderThickness="1" d:BorderBrush="Red" d:Background="Green"
-                                BorderBrush="{DynamicResource FloatBarBorderBrush}">
+                                Background="{DynamicResource FloatingBarBackgroundBrush}" BorderThickness="1" d:BorderBrush="Red" d:Background="Green"
+                                BorderBrush="{DynamicResource FloatingBarBorderBrush}">
                             <Grid Margin="6" MouseUp="GridPPTControlNext_MouseUp">
                                 <Image
                                     Source="{DynamicResource ResourceKey=SeewoImageSource.HorizontalNextSlideNormal}" />
@@ -722,14 +722,14 @@
                                      Visibility="Collapsed"  d:Visibility="Visible">
                     <Button Name="BtnWhiteBoardAdd"
                             Width="50" Height="48" FontSize="26" Click="BtnWhiteBoardAdd_Click"
-                            Foreground="{DynamicResource FloatBarForeground}"
-                            Background="{DynamicResource FloatBarBackground}">
+                            Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                            Background="{DynamicResource FloatingBarBackgroundBrush}">
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" />
                     </Button>
                     <Button Name="BtnWhiteBoardSwitchPrevious" FontFamily="Symbol"
                             Width="50" Height="48" FontSize="25" Click="BtnWhiteBoardSwitchPrevious_Click"
-                            Foreground="{DynamicResource FloatBarForeground}"
-                            Background="{DynamicResource FloatBarBackground}"
+                            Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                            Background="{DynamicResource FloatingBarBackgroundBrush}"
                             VerticalContentAlignment="Center"
                             IsEnabled="False" IsEnabledChanged="Btn_IsEnabledChanged">
                         <Image RenderTransformOrigin="0.5,0.5" Opacity="0.25">
@@ -746,7 +746,7 @@
                                     <DrawingImage.Drawing>
                                         <DrawingGroup ClipGeometry="M0,0 V64 H64 V0 H0 Z">
                                             <DrawingGroup Opacity="1">
-                                                <GeometryDrawing Brush="{DynamicResource FloatBarForeground}"
+                                                <GeometryDrawing Brush="{DynamicResource FloatingBarForegroundBrush}"
                                                                  Geometry="F1 M64,64z M0,0z M32,26.41L16.566,41.844 14.439,39.717 32,22.156 49.561,39.717 47.434,41.844 32,26.41z" />
                                             </DrawingGroup>
                                         </DrawingGroup>
@@ -758,15 +758,15 @@
                     <Border Height="48" CornerRadius="2" Margin="3,0">
                         <TextBlock Name="TextBlockWhiteBoardIndexInfo"
                                    Text="1/1"
-                                   Foreground="{DynamicResource FloatBarForeground}"
+                                   Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                    VerticalAlignment="Center" HorizontalAlignment="Center"
                                   
                                    FontSize="18" />
                     </Border>
                     <Button Name="BtnWhiteBoardSwitchNext" FontFamily="Symbol"
                             Width="50" Height="48" FontSize="25" Click="BtnWhiteBoardSwitchNext_Click"
-                            Foreground="{DynamicResource FloatBarForeground}"
-                            Background="{DynamicResource FloatBarBackground}"
+                            Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                            Background="{DynamicResource FloatingBarBackgroundBrush}"
                             VerticalContentAlignment="Center"
                             IsEnabled="True" IsEnabledChanged="Btn_IsEnabledChanged">
                         <Image RenderTransformOrigin="0.5,0.5" Opacity="0.25">
@@ -783,7 +783,7 @@
                                     <DrawingImage.Drawing>
                                         <DrawingGroup ClipGeometry="M0,0 V64 H64 V0 H0 Z">
                                             <DrawingGroup Opacity="1">
-                                                <GeometryDrawing Brush="{DynamicResource FloatBarForeground}"
+                                                <GeometryDrawing Brush="{DynamicResource FloatingBarForegroundBrush}"
                                                                  Geometry="F1 M64,64z M0,0z M32,26.41L16.566,41.844 14.439,39.717 32,22.156 49.561,39.717 47.434,41.844 32,26.41z" />
                                             </DrawingGroup>
                                         </DrawingGroup>
@@ -794,8 +794,8 @@
                     </Button>
                     <Button Name="BtnWhiteBoardDelete" Click="BtnWhiteBoardDelete_Click"
                             Width="50" Height="48" FontSize="26"
-                            Foreground="{DynamicResource FloatBarForeground}"
-                            Background="{DynamicResource FloatBarBackground}"
+                            Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                            Background="{DynamicResource FloatingBarBackgroundBrush}"
                             IsEnabled="False">
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" />
                     </Button>
@@ -862,10 +862,10 @@
                     <ikw:SimpleStackPanel Name="StackPanelFloatingBarRoot" Orientation="Horizontal" >
                         <Border Name="BorderFloatingBarMoveControls" Margin="0" Padding="0"
                                 Width="58" Height="58"
-                                Background="{DynamicResource FloatBarBackground}"
+                                Background="{DynamicResource FloatingBarBackgroundBrush}"
                                 CornerRadius="8"
                                 BorderThickness="2"
-                                BorderBrush="{DynamicResource FloatBarBorderBrush}"
+                                BorderBrush="{DynamicResource FloatingBarBorderBrush}"
                                 MouseDown="SymbolIconEmoji_MouseDown"
                                 MouseUp="SymbolIconEmoji_MouseUp">
                             <Image Name="FloatingbarHeadIconImg" Margin="0.5"
@@ -925,7 +925,7 @@
                        EditingMode="None" Background="Transparent" />
             <Border Name="BorderInkReplayToolBox" Width="386" Height="48" HorizontalAlignment="Center"
                     Visibility="Collapsed"  d:Visibility="Visible"
-                    VerticalAlignment="Bottom" Margin="0,0,0,16" Background="{DynamicResource FloatBarBackground}" CornerRadius="5"
+                    VerticalAlignment="Bottom" Margin="0,0,0,16" Background="{DynamicResource FloatingBarBackgroundBrush}" CornerRadius="5"
                     BorderBrush="#a1a1aa" BorderThickness="1">
                 <ikw:SimpleStackPanel Orientation="Horizontal">
                     <Border CornerRadius="5,0,0,5" Margin="-1" Padding="12" Background="#b91c1c">
@@ -1069,7 +1069,7 @@
                         </Border>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Name="InkReplaySpeedTextBlock" Margin="4,0,0,0" FontSize="13"
-                                       Foreground="{DynamicResource FloatBarForeground}" Text="1.0x" VerticalAlignment="Center">
+                                       Foreground="{DynamicResource FloatingBarForegroundBrush}" Text="1.0x" VerticalAlignment="Center">
                             </TextBlock>
                         </StackPanel>
 
@@ -1084,8 +1084,8 @@
         <!--收纳下的快捷面板//左-->
         <Viewbox Width="50" Visibility="Collapsed"  d:Visibility="Visible" Name="LeftUnFoldButtonQuickPanel" Margin="-60,0,0,-150" d:Margin="-60,0,0,500"
                  HorizontalAlignment="Left" VerticalAlignment="Center">
-            <Border x:Name="LeftQuickPanelBorder" ClipToBounds="False" Visibility="Visible" CornerRadius="6" Background="{DynamicResource FloatBarBackground}" Opacity="1"
-                    BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}" d:BorderBrush="Red" d:Background="Green" Width="32">
+            <Border x:Name="LeftQuickPanelBorder" ClipToBounds="False" Visibility="Visible" CornerRadius="6" Background="{DynamicResource FloatingBarBackgroundBrush}" Opacity="1"
+                    BorderThickness="1" BorderBrush="{DynamicResource FloatingBarBorderBrush}" d:BorderBrush="Red" d:Background="Green" Width="32">
                 <Border.Effect>
                     <DropShadowEffect x:Name="LeftQuickPanelShadow" BlurRadius="16" ShadowDepth="2" Direction="270" Opacity="0.3" Color="#000000" />
                 </Border.Effect>
@@ -1108,8 +1108,8 @@
         <!--收纳下的快捷面板//右-->
         <Viewbox Width="50" Visibility="Collapsed"  d:Visibility="Visible" Name="RightUnFoldButtonQuickPanel" Margin="0,0,-60,-150" d:Margin="0,0,-60,500"
                  HorizontalAlignment="Right" VerticalAlignment="Center">
-            <Border x:Name="RightQuickPanelBorder" ClipToBounds="False" Visibility="Visible" CornerRadius="6" Background="{DynamicResource FloatBarBackground}" Opacity="1"
-                    BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}" d:BorderBrush="Red" d:Background="Green" Width="32">
+            <Border x:Name="RightQuickPanelBorder" ClipToBounds="False" Visibility="Visible" CornerRadius="6" Background="{DynamicResource FloatingBarBackgroundBrush}" Opacity="1"
+                    BorderThickness="1" BorderBrush="{DynamicResource FloatingBarBorderBrush}" d:BorderBrush="Red" d:Background="Green" Width="32">
                 <Border.Effect>
                     <DropShadowEffect x:Name="RightQuickPanelShadow" BlurRadius="16" ShadowDepth="2" Direction="270" Opacity="0.3" Color="#000000" />
                 </Border.Effect>
@@ -1134,8 +1134,8 @@
             Width="350"
             HorizontalAlignment="Left"
             VerticalAlignment="Stretch"
-            Background="{DynamicResource FloatBarBackground}"
-            BorderBrush="{DynamicResource FloatBarBorderBrush}"
+            Background="{DynamicResource FloatingBarBackgroundBrush}"
+            BorderBrush="{DynamicResource FloatingBarBorderBrush}"
             BorderThickness="0,0,1,0"
             Visibility="Collapsed"  d:Visibility="Visible"
             Panel.ZIndex="996">
@@ -1161,7 +1161,7 @@
                         VerticalAlignment="Center"
                         FontSize="16"
                         FontWeight="Bold"
-                        Foreground="{DynamicResource FloatBarForeground}"
+                        Foreground="{DynamicResource FloatingBarForegroundBrush}"
                         Text="{x:Static props:BoothStrings.Title}" />
                     <Button
                         Grid.Column="1"
@@ -1191,14 +1191,14 @@
                 </Border>
 
                 <!-- 照片显示区域 -->
-                <Border Grid.Row="2" Margin="10,2,10,2" Padding="10" CornerRadius="6" Background="{DynamicResource FloatBarBackground}">
+                <Border Grid.Row="2" Margin="10,2,10,2" Padding="10" CornerRadius="6" Background="{DynamicResource FloatingBarBackgroundBrush}">
                     <StackPanel>
                         <TextBlock
                             Margin="0,0,0,8"
                             HorizontalAlignment="Left"
                             FontSize="12"
                             FontWeight="SemiBold"
-                            Foreground="{DynamicResource FloatBarForeground}"
+                            Foreground="{DynamicResource FloatingBarForegroundBrush}"
                             Text="{x:Static props:BoothStrings.CapturedPhotos}" />
                         <ScrollViewer
                             x:Name="CapturedPhotosScrollViewer"
@@ -1211,14 +1211,14 @@
                 </Border>
 
                 <!-- 设备选择区域 -->
-                <Border Grid.Row="3" Margin="10,2,10,5" Padding="10" CornerRadius="6" Background="{DynamicResource FloatBarBackground}">
+                <Border Grid.Row="3" Margin="10,2,10,5" Padding="10" CornerRadius="6" Background="{DynamicResource FloatingBarBackgroundBrush}">
                     <StackPanel>
                         <TextBlock
                             Margin="0,0,0,8"
                             HorizontalAlignment="Left"
                             FontSize="12"
                             FontWeight="SemiBold"
-                            Foreground="{DynamicResource FloatBarForeground}"
+                            Foreground="{DynamicResource FloatingBarForegroundBrush}"
                             Text="{x:Static props:BoothStrings.CameraDevices}" />
                         <ScrollViewer
                             x:Name="CameraDevicesScrollViewer"
@@ -1242,51 +1242,51 @@
                             Width="70"
                             Height="40"
                             Margin="2,0"
-                            Background="{DynamicResource FloatBarBackground}"
-                            BorderBrush="{DynamicResource FloatBarBorderBrush}"
+                            Background="{DynamicResource FloatingBarBackgroundBrush}"
+                            BorderBrush="{DynamicResource FloatingBarBorderBrush}"
                             BorderThickness="1"
                             Checked="BtnToggleVideoPresenterLiveOnCanvas_Checked"
                             Unchecked="BtnToggleVideoPresenterLiveOnCanvas_Unchecked">
-                            <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatBarForeground}" Text="{x:Static props:BoothStrings.Present}" />
+                            <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatingBarForegroundBrush}" Text="{x:Static props:BoothStrings.Present}" />
                         </ToggleButton>
                         <ToggleButton
                             x:Name="ToggleBtnPhotoCorrection"
                             Width="70"
                             Height="40"
                             Margin="2,0"
-                            Background="{DynamicResource FloatBarBackground}"
-                            BorderBrush="{DynamicResource FloatBarBorderBrush}"
+                            Background="{DynamicResource FloatingBarBackgroundBrush}"
+                            BorderBrush="{DynamicResource FloatingBarBorderBrush}"
                             BorderThickness="1"
                             Checked="ToggleBtnPhotoCorrection_Checked"
                             Unchecked="ToggleBtnPhotoCorrection_Unchecked">
-                            <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatBarForeground}" Text="{x:Static props:BoothStrings.Correction}" />
+                            <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatingBarForegroundBrush}" Text="{x:Static props:BoothStrings.Correction}" />
                         </ToggleButton>
                         <Button
                             x:Name="BtnCapturePhoto"
                             Width="70"
                             Height="40"
                             Margin="2,0"
-                            Background="{DynamicResource FloatBarBackground}"
-                            BorderBrush="{DynamicResource FloatBarBorderBrush}"
+                            Background="{DynamicResource FloatingBarBackgroundBrush}"
+                            BorderBrush="{DynamicResource FloatingBarBorderBrush}"
                             BorderThickness="1"
                             Click="BtnCapturePhoto_Click">
-                            <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatBarForeground}" Text="{x:Static props:BoothStrings.Capture}" />
+                            <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatingBarForegroundBrush}" Text="{x:Static props:BoothStrings.Capture}" />
                         </Button>
                         <Button
                             x:Name="BtnRotateImage"
                             Width="70"
                             Height="40"
                             Margin="2,0"
-                            Background="{DynamicResource FloatBarBackground}"
-                            BorderBrush="{DynamicResource FloatBarBorderBrush}"
+                            Background="{DynamicResource FloatingBarBackgroundBrush}"
+                            BorderBrush="{DynamicResource FloatingBarBorderBrush}"
                             BorderThickness="1"
                             Click="BtnRotateImage_Click">
-                            <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatBarForeground}" Text="{x:Static props:BoothStrings.Rotate}" />
+                            <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatingBarForegroundBrush}" Text="{x:Static props:BoothStrings.Rotate}" />
                         </Button>
                     </StackPanel>
                     <!-- 分辨率 Tab -->
                     <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="10,6,10,4">
-                        <Border Background="{DynamicResource FloatBarBackground}" 
+                        <Border Background="{DynamicResource FloatingBarBackgroundBrush}" 
                                 CornerRadius="8" BorderThickness="1" BorderBrush="#616161"
                                 Width="282" Height="40" ToolTip="{x:Static props:BoothStrings.Resolution_Tooltip}">
                             <Grid>
@@ -1299,7 +1299,7 @@
                                 <Grid>
                                     <Button x:Name="BtnBoothResolution720" Width="70" Height="40" Background="Transparent" BorderThickness="0" 
                                             Click="BoothResolutionTab_Click" Tag="1280,720" Cursor="Hand" HorizontalAlignment="Left">
-                                        <TextBlock Text="720p" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatBarForeground}" Opacity="0.7"/>
+                                        <TextBlock Text="720p" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatingBarForegroundBrush}" Opacity="0.7"/>
                                     </Button>
                                     <Button x:Name="BtnBoothResolution1080" Width="70" Height="40" Background="Transparent" BorderThickness="0" 
                                             Click="BoothResolutionTab_Click" Tag="1920,1080" Cursor="Hand" HorizontalAlignment="Left" Margin="70,0,0,0">
@@ -1307,11 +1307,11 @@
                                     </Button>
                                     <Button x:Name="BtnBoothResolution2K" Width="70" Height="40" Background="Transparent" BorderThickness="0" 
                                             Click="BoothResolutionTab_Click" Tag="2560,1440" Cursor="Hand" HorizontalAlignment="Left" Margin="140,0,0,0">
-                                        <TextBlock Text="2K" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatBarForeground}" Opacity="0.7"/>
+                                        <TextBlock Text="2K" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatingBarForegroundBrush}" Opacity="0.7"/>
                                     </Button>
                                     <Button x:Name="BtnBoothResolution4K" Width="70" Height="40" Background="Transparent" BorderThickness="0" 
                                             Click="BoothResolutionTab_Click" Tag="3840,2160" Cursor="Hand" HorizontalAlignment="Left" Margin="210,0,0,0">
-                                        <TextBlock Text="4K" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatBarForeground}" Opacity="0.7"/>
+                                        <TextBlock Text="4K" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatingBarForegroundBrush}" Opacity="0.7"/>
                                     </Button>
                                 </Grid>
                             </Grid>
@@ -1346,6 +1346,34 @@
                 Panel.ZIndex="1100"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Top" />
+        <!-- PPT 增强预览全屏加载动画 -->
+        <Grid x:Name="PPTEnhancedPreviewLoadingOverlay"
+                Panel.ZIndex="1200"
+                Visibility="Collapsed" d:Visibility="Visible"
+                Background="#B0000000">
+            <ikw:SimpleStackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Orientation="Vertical" Spacing="16">
+                <!-- 自定义圆环进度指示器 -->
+                <Grid Width="64" Height="64">
+                    <!-- 轨道 -->
+                    <Ellipse Stroke="#33FFFFFF" StrokeThickness="4"
+                             HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                    <!-- 进度弧 -->
+                    <Path x:Name="PPTLoadingRing"
+                            Stroke="White" StrokeThickness="4" Fill="Transparent"
+                            Stretch="None"
+                            RenderTransformOrigin="0.5,0.5">
+                        <Path.RenderTransform>
+                            <RotateTransform x:Name="PPTLoadingArcRotate"/>
+                        </Path.RenderTransform>
+                    </Path>
+                </Grid>
+                <TextBlock x:Name="PPTLoadingProgressText"
+                        Foreground="White" FontSize="14"
+                        HorizontalAlignment="Center"
+                        Text="{x:Static props:PPTStrings.LoadingPPT}"/>
+            </ikw:SimpleStackPanel>
+        </Grid>
         <!-- 内联对话框根容器 -->
         <Grid x:Name="InlineDialogRoot"
                 Panel.ZIndex="9999"

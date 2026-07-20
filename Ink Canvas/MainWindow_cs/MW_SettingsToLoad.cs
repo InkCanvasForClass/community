@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OSVersionExtension;
@@ -51,7 +52,7 @@ namespace Ink_Canvas
                 {
                     try
                     {
-                        string text = File.ReadAllText(App.RootPath + settingsFileName);
+                        string text = App.CachedSettingsJson ?? File.ReadAllText(App.RootPath + settingsFileName);
                         Settings = JsonConvert.DeserializeObject<Settings>(text);
 
                         if (Settings != null)
@@ -147,6 +148,9 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
             }
+
+            // Migrate legacy chicken soup source setting to new multi-source format
+            SettingsManager.MigrateChickenSoupSettings();
 
             try
             {
@@ -749,6 +753,7 @@ namespace Ink_Canvas
                     string cleanedJson = userConfigObj.ToString(Formatting.Indented);
                     Settings = JsonConvert.DeserializeObject<Settings>(cleanedJson);
                     SaveSettingsToFile();
+                    App.UpdateCachedSettingsJson(cleanedJson);
                     LogHelper.WriteLogToFile("已清理过期配置项", LogHelper.LogType.Event);
                 }
             }

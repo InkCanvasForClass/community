@@ -92,6 +92,8 @@ namespace Ink_Canvas
 
         private static readonly Lazy<object> HitokotoHttpClient = new Lazy<object>(CreateHitokotoClient, System.Threading.LazyThreadSafetyMode.ExecutionAndPublication);
 
+        private DispatcherTimer _chickenSoupAutoRotationTimer;
+
         /// <summary>
         /// 创建用于获取一言（Hitokoto）数据的HttpClient
         /// </summary>
@@ -136,8 +138,11 @@ namespace Ink_Canvas
         /// 根据当前外观设置更新白板水印的名言文本。
         /// </summary>
         /// <remarks>
-        /// 当配置为内置来源时（0：OSUPlayer、1：名言警句、2：高考俗语）从对应数组中随机选择一条并设置为水印文本；
-        /// 当配置为一言（3）时会异步请求 Hitokoto API 并在请求中显示占位提示，成功时将返回文本设为水印，失败时记录警告日志并设置可读的失败提示文本。此方法会修改 BlackBoardWaterMark.Text，并在发生异常时记录日志且设置合适的回退文本。
+        /// 汇总所有启用的来源（预设来源 + 自定义方案），从中随机选取一个：
+        /// 若选中预设为 osu/mottos/gaokao/phigros，从对应数组中随机选择一条；
+        /// 若选中预设为 hitokoto，则异步请求 Hitokoto API，并在请求中显示占位提示，成功时将返回文本设为水印，失败时记录警告日志并设置可读的失败提示文本；
+        /// 若选中的是自定义方案，则按行拆分其 Content 并随机选取一行。
+        /// 当启用列表为空时直接返回，不修改当前文本。
         /// </remarks>
         internal async Task UpdateChickenSoupTextAsync()
         {
@@ -148,22 +153,40 @@ namespace Ink_Canvas
                     return;
                 }
 
-                if (Settings.Appearance.ChickenSoupSource == 0)
+                // 汇总所有启用的方案
+                var enabledSchemes = new List<TipsScheme>();
+
+                var enabledPresets = Settings.Appearance.EnabledPresetTipsSources;
+                foreach (var preset in ChickenSoup.GetPresetSchemes())
                 {
-                    int randChickenSoupIndex = new Random().Next(ChickenSoup.OSUPlayerYuLu.Length);
-                    BlackBoardWaterMark.Text = ChickenSoup.OSUPlayerYuLu[randChickenSoupIndex];
+                    if (enabledPresets != null && enabledPresets.Contains(preset.PresetId))
+                    {
+                        enabledSchemes.Add(preset);
+                    }
                 }
-                else if (Settings.Appearance.ChickenSoupSource == 1)
+
+                var customSchemes = Settings.Appearance.CustomTipsSchemes;
+                if (customSchemes != null)
                 {
-                    int randChickenSoupIndex = new Random().Next(ChickenSoup.MingYanJingJu.Length);
-                    BlackBoardWaterMark.Text = ChickenSoup.MingYanJingJu[randChickenSoupIndex];
+                    foreach (var custom in customSchemes)
+                    {
+                        if (custom != null && custom.IsEnabled)
+                        {
+                            enabledSchemes.Add(custom);
+                        }
+                    }
                 }
-                else if (Settings.Appearance.ChickenSoupSource == 2)
+
+                if (enabledSchemes.Count == 0)
                 {
-                    int randChickenSoupIndex = new Random().Next(ChickenSoup.GaoKaoPhrases.Length);
-                    BlackBoardWaterMark.Text = ChickenSoup.GaoKaoPhrases[randChickenSoupIndex];
+                    return;
                 }
-                else if (Settings.Appearance.ChickenSoupSource == 3)
+
+                var rnd = new Random();
+                var selected = enabledSchemes[rnd.Next(enabledSchemes.Count)];
+
+                // Hitokoto 预设走 HTTP API
+                if (selected.IsPreset && selected.PresetId == "hitokoto")
                 {
                     BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_Loading;
 
@@ -215,17 +238,39 @@ namespace Ink_Canvas
                         LogHelper.WriteLogToFile($"一言 API 请求失败: {ex.Message}", LogHelper.LogType.Warning);
                         BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_Unavailable;
                     }
+                    return;
                 }
-                else if (Settings.Appearance.ChickenSoupSource == 4)
+
+                // 其它预设来源
+                if (selected.IsPreset && !string.IsNullOrEmpty(selected.PresetId))
                 {
-                    int randChickenSoupIndex = new Random().Next(ChickenSoup.PhigrosTips.Length);
-                    BlackBoardWaterMark.Text = ChickenSoup.PhigrosTips[randChickenSoupIndex];
+                    var tips = ChickenSoup.GetTipsFromPreset(selected.PresetId);
+                    if (tips != null && tips.Length > 0)
+                    {
+                        BlackBoardWaterMark.Text = tips[rnd.Next(tips.Length)];
+                    }
+                    return;
+                }
+
+                // 自定义方案
+                if (!selected.IsPreset)
+                {
+                    if (string.IsNullOrWhiteSpace(selected.Content))
+                    {
+                        return;
+                    }
+                    var lines = selected.Content.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    if (lines.Length == 0)
+                    {
+                        return;
+                    }
+                    BlackBoardWaterMark.Text = lines[rnd.Next(lines.Length)];
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"更新白板名言时出错: {ex.Message}", LogHelper.LogType.Warning);
-                if (Settings.Appearance.ChickenSoupSource == 3 && BlackBoardWaterMark != null)
+                if (BlackBoardWaterMark != null)
                 {
                     try { BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_Unavailable; } catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
                 }
@@ -400,6 +445,44 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 启动白板名言自动轮换计时器。
+        /// </summary>
+        internal void StartChickenSoupAutoRotation()
+        {
+            if (!Settings.Appearance.EnableChickenSoupInWhiteboardMode) return;
+            if (!Settings.Appearance.EnableChickenSoupAutoRotation) return;
+
+            if (_chickenSoupAutoRotationTimer == null)
+            {
+                _chickenSoupAutoRotationTimer = new DispatcherTimer();
+                _chickenSoupAutoRotationTimer.Tick += async (s, e) => await UpdateChickenSoupTextAsync();
+            }
+
+            _chickenSoupAutoRotationTimer.Interval = TimeSpan.FromSeconds(Settings.Appearance.ChickenSoupAutoRotationInterval);
+            _chickenSoupAutoRotationTimer.Start();
+        }
+
+        /// <summary>
+        /// 停止白板名言自动轮换计时器。
+        /// </summary>
+        internal void StopChickenSoupAutoRotation()
+        {
+            if (_chickenSoupAutoRotationTimer != null)
+            {
+                _chickenSoupAutoRotationTimer.Stop();
+            }
+        }
+
+        /// <summary>
+        /// 重启白板名言自动轮换计时器。
+        /// </summary>
+        internal void RestartChickenSoupAutoRotation()
+        {
+            StopChickenSoupAutoRotation();
+            StartChickenSoupAutoRotation();
+        }
+
+        /// <summary>
         /// 更新组合框中的自定义图标选项
         /// </summary>
         /// <remarks>
@@ -500,20 +583,53 @@ namespace Ink_Canvas
         {
             if (_pptUIManager != null && IsInPPTPresentationMode)
             {
-                _pptUIManager.PPTButtonsDisplayOption = Settings.PowerPointSettings.PPTButtonsDisplayOption;
-                _pptUIManager.PPTSButtonsOption = Settings.PowerPointSettings.PPTSButtonsOption;
-                _pptUIManager.PPTBButtonsOption = Settings.PowerPointSettings.PPTBButtonsOption;
-                _pptUIManager.PPTLSButtonPosition = Settings.PowerPointSettings.PPTLSButtonPosition;
-                _pptUIManager.PPTRSButtonPosition = Settings.PowerPointSettings.PPTRSButtonPosition;
-                _pptUIManager.PPTLBButtonPosition = Settings.PowerPointSettings.PPTLBButtonPosition;
-                _pptUIManager.PPTRBButtonPosition = Settings.PowerPointSettings.PPTRBButtonPosition;
-                _pptUIManager.EnablePPTButtonPageClickable = Settings.PowerPointSettings.EnablePPTButtonPageClickable;
-                _pptUIManager.EnablePPTButtonLongPressPageTurn = Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn;
-                _pptUIManager.PPTLSButtonOpacity = Settings.PowerPointSettings.PPTLSButtonOpacity;
-                _pptUIManager.PPTRSButtonOpacity = Settings.PowerPointSettings.PPTRSButtonOpacity;
-                _pptUIManager.PPTLBButtonOpacity = Settings.PowerPointSettings.PPTLBButtonOpacity;
-                _pptUIManager.PPTRBButtonOpacity = Settings.PowerPointSettings.PPTRBButtonOpacity;
-                _pptUIManager.PPTNavBarScale = Settings.PowerPointSettings.PPTNavBarScale;
+                var ppt = Settings.PowerPointSettings;
+
+                // 计算有效值：位置 i 若 UseGlobalSettings=true，则采用全局字段值，否则采用位置自身字段值
+                // 偏移按位置类型区分：侧边(左侧/右侧)用全局侧边偏移，底部(左下/右下)用全局底部偏移
+                _pptUIManager.PPTLSButtonPosition = ppt.PPTLSUseGlobalSettings ? ppt.PPTGlobalSideButtonPosition : ppt.PPTLSButtonPosition;
+                _pptUIManager.PPTRSButtonPosition = ppt.PPTRSUseGlobalSettings ? ppt.PPTGlobalSideButtonPosition : ppt.PPTRSButtonPosition;
+                _pptUIManager.PPTLBButtonPosition = ppt.PPTLBUseGlobalSettings ? ppt.PPTGlobalBottomButtonPosition : ppt.PPTLBButtonPosition;
+                _pptUIManager.PPTRBButtonPosition = ppt.PPTRBUseGlobalSettings ? ppt.PPTGlobalBottomButtonPosition : ppt.PPTRBButtonPosition;
+
+                _pptUIManager.PPTLSButtonOpacity = ppt.PPTLSUseGlobalSettings ? ppt.PPTGlobalButtonOpacity : ppt.PPTLSButtonOpacity;
+                _pptUIManager.PPTRSButtonOpacity = ppt.PPTRSUseGlobalSettings ? ppt.PPTGlobalButtonOpacity : ppt.PPTRSButtonOpacity;
+                _pptUIManager.PPTLBButtonOpacity = ppt.PPTLBUseGlobalSettings ? ppt.PPTGlobalButtonOpacity : ppt.PPTLBButtonOpacity;
+                _pptUIManager.PPTRBButtonOpacity = ppt.PPTRBUseGlobalSettings ? ppt.PPTGlobalButtonOpacity : ppt.PPTRBButtonOpacity;
+
+                _pptUIManager.PPTLSButtonScale = ppt.PPTLSUseGlobalSettings ? ppt.PPTNavBarScale : ppt.PPTLSButtonScale;
+                _pptUIManager.PPTRSButtonScale = ppt.PPTRSUseGlobalSettings ? ppt.PPTNavBarScale : ppt.PPTRSButtonScale;
+                _pptUIManager.PPTLBButtonScale = ppt.PPTLBUseGlobalSettings ? ppt.PPTNavBarScale : ppt.PPTLBButtonScale;
+                _pptUIManager.PPTRBButtonScale = ppt.PPTRBUseGlobalSettings ? ppt.PPTNavBarScale : ppt.PPTRBButtonScale;
+
+                // 计算有效的 PPTButtonsDisplayOption：UseGlobalSettings 的位由 PPTGlobalButtonEnabled 决定
+                string str = ppt.PPTButtonsDisplayOption.ToString("D4");
+                if (str.Length < 4) str = "2222";
+                char[] c = str.ToCharArray();
+                // display option index: 0=LB, 1=RB, 2=LS, 3=RS
+                if (ppt.PPTLBUseGlobalSettings) c[0] = ppt.PPTGlobalButtonEnabled ? '2' : '1';
+                if (ppt.PPTRBUseGlobalSettings) c[1] = ppt.PPTGlobalButtonEnabled ? '2' : '1';
+                if (ppt.PPTLSUseGlobalSettings) c[2] = ppt.PPTGlobalButtonEnabled ? '2' : '1';
+                if (ppt.PPTRSUseGlobalSettings) c[3] = ppt.PPTGlobalButtonEnabled ? '2' : '1';
+                _pptUIManager.PPTButtonsDisplayOption = int.Parse(new string(c));
+
+                _pptUIManager.PPTSButtonsOption = ppt.PPTSButtonsOption;
+                _pptUIManager.PPTBButtonsOption = ppt.PPTBButtonsOption;
+                _pptUIManager.EnablePPTButtonPageClickable = ppt.EnablePPTButtonPageClickable;
+                _pptUIManager.EnablePPTButtonLongPressPageTurn = ppt.EnablePPTButtonLongPressPageTurn;
+                _pptUIManager.PPTNavBarScale = ppt.PPTNavBarScale;
+
+                // 有效的显示页码 / 黑色背景通过 PPTSButtonsOption / PPTBButtonsOption 间接传递（原有机制）
+                // 这里同步各位置的 ShowPageNumber / BlackBackground 字段（UseGlobalSettings 时用全局值覆盖位置字段，保证下游读取一致）
+                if (ppt.PPTLSUseGlobalSettings) ppt.PPTLSShowPageNumber = ppt.PPTGlobalShowPageNumber;
+                if (ppt.PPTRSUseGlobalSettings) ppt.PPTRSShowPageNumber = ppt.PPTGlobalShowPageNumber;
+                if (ppt.PPTLBUseGlobalSettings) ppt.PPTLBShowPageNumber = ppt.PPTGlobalShowPageNumber;
+                if (ppt.PPTRBUseGlobalSettings) ppt.PPTRBShowPageNumber = ppt.PPTGlobalShowPageNumber;
+                if (ppt.PPTLSUseGlobalSettings) ppt.PPTLSBlackBackground = ppt.PPTGlobalBlackBackground;
+                if (ppt.PPTRSUseGlobalSettings) ppt.PPTRSBlackBackground = ppt.PPTGlobalBlackBackground;
+                if (ppt.PPTLBUseGlobalSettings) ppt.PPTLBBlackBackground = ppt.PPTGlobalBlackBackground;
+                if (ppt.PPTRBUseGlobalSettings) ppt.PPTRBBlackBackground = ppt.PPTGlobalBlackBackground;
+
                 _pptUIManager.UpdateNavigationPanelsVisibility();
                 _pptUIManager.UpdateNavigationButtonStyles();
             }
@@ -1030,6 +1146,7 @@ namespace Ink_Canvas
             Settings.PowerPointSettings.IsEnableFingerGestureSlideShowControl = false;
             Settings.PowerPointSettings.IsSupportWPS = false;
             Settings.PowerPointSettings.EnablePPTButtonEnhancedPreview = false;
+            Settings.PowerPointSettings.ShowPPTEnhancedPreviewLoadingAnimation = true;
 
             Settings.Canvas.InkWidth = 2.5;
             Settings.Canvas.IsShowCursor = false;
@@ -1074,6 +1191,7 @@ namespace Ink_Canvas
             Settings.Startup.AutoUpdateWithSilenceStartTime = "06:00";
             Settings.Startup.AutoUpdateWithSilenceEndTime = "22:00";
             Settings.Startup.IsFoldAtStartup = false;
+            Settings.Startup.EnableFastStartup = false;
         }
 
         /// <summary>

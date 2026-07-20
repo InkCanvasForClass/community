@@ -1,3 +1,5 @@
+using Ink_Canvas.Helpers;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,14 +28,32 @@ namespace Ink_Canvas.Plugins
         }
 
         private readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();
+        private readonly ServiceCollection _serviceCollection = new ServiceCollection();
+        private ServiceProvider _serviceProvider;
         private readonly string _pluginsDirectory;
         private readonly string _pluginPackagesDirectory;
         private readonly string _pluginConfigsDirectory;
         private readonly List<PluginInfo> _plugins = new List<PluginInfo>();
         private readonly Dictionary<string, PluginLoadContext> _assemblyContexts = new Dictionary<string, PluginLoadContext>();
+        private readonly HashSet<string> _disabledPlugins = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private readonly string _disabledPluginsFile;
+        private readonly string _pluginLogsDirectory;
+
+        // 子服务
+        private readonly PluginErrorRecoveryService _errorRecovery;
+        private readonly PluginDependencyResolver _dependencyResolver = new PluginDependencyResolver();
+        private readonly PluginConfigIo _configIo;
+        private PluginSecurityCheck _securityCheck;
+        private PluginLogger _logger;
+        private PluginIpcService _ipc;
 
         public static readonly string ManifestFileName = "manifest.json";
         public static readonly string PluginPackageExtension = ".icpx";
+
+        /// <summary>
+        /// 已禁用的插件 ID 列表。
+        /// </summary>
+        public IReadOnlyCollection<string> DisabledPlugins => _disabledPlugins;
 
         public IReadOnlyList<PluginInfo> Plugins
         {
@@ -50,10 +70,38 @@ namespace Ink_Canvas.Plugins
             _pluginsDirectory = Path.Combine(basePath, "Plugins");
             _pluginPackagesDirectory = Path.Combine(basePath, "PluginPackages");
             _pluginConfigsDirectory = Path.Combine(basePath, "PluginConfigs");
+            _disabledPluginsFile = Path.Combine(basePath, "Configs", "disabled_plugins.json");
+            _pluginLogsDirectory = Path.Combine(basePath, "PluginLogs");
 
             EnsureDirectoryExists(_pluginsDirectory);
             EnsureDirectoryExists(_pluginPackagesDirectory);
             EnsureDirectoryExists(_pluginConfigsDirectory);
+            EnsureDirectoryExists(_pluginLogsDirectory);
+            LoadDisabledPlugins();
+
+            _errorRecovery = new PluginErrorRecoveryService(basePath);
+            _configIo = new PluginConfigIo();
+            _logger = new PluginLogger(_pluginLogsDirectory, "host");
+        }
+
+        /// <summary>
+        /// 待外部在市场服务初始化后注入。
+        /// </summary>
+        public void InitializeAdvancedServices(PluginMarketService market)
+        {
+            _securityCheck = new PluginSecurityCheck(market);
+        }
+
+        /// <summary>
+        /// 启动 IPC 总线。可由 MainWindow 在适当时机调用一次。
+        /// </summary>
+        public void StartIpc()
+        {
+            if (_ipc == null)
+            {
+                _ipc = new PluginIpcService();
+            }
+            _ipc.Start();
         }
 
         private static void EnsureDirectoryExists(string path)
@@ -64,10 +112,99 @@ namespace Ink_Canvas.Plugins
             }
         }
 
+        #region 禁用插件管理
+
+        private void LoadDisabledPlugins()
+        {
+            try
+            {
+                if (!File.Exists(_disabledPluginsFile)) return;
+                var json = File.ReadAllText(_disabledPluginsFile);
+                var list = System.Text.Json.JsonSerializer.Deserialize<List<string>>(json);
+                if (list != null)
+                {
+                    _disabledPlugins.Clear();
+                    foreach (var id in list) _disabledPlugins.Add(id);
+                }
+            }
+            catch { }
+        }
+
+        private void SaveDisabledPlugins()
+        {
+            try
+            {
+                var dir = Path.GetDirectoryName(_disabledPluginsFile);
+                if (dir != null) EnsureDirectoryExists(dir);
+                File.WriteAllText(_disabledPluginsFile,
+                    System.Text.Json.JsonSerializer.Serialize(_disabledPlugins.ToList(),
+                    new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// 禁用插件（下次启动生效）。
+        /// </summary>
+        public void DisablePlugin(string pluginId)
+        {
+            _disabledPlugins.Add(pluginId);
+            SaveDisabledPlugins();
+        }
+
+        /// <summary>
+        /// 启用已禁用的插件（下次启动生效）。
+        /// </summary>
+        public void EnablePlugin(string pluginId)
+        {
+            _disabledPlugins.Remove(pluginId);
+            SaveDisabledPlugins();
+        }
+
+        /// <summary>
+        /// 检查插件是否被禁用。
+        /// </summary>
+        public bool IsPluginDisabled(string pluginId)
+        {
+            return _disabledPlugins.Contains(pluginId);
+        }
+
+        #endregion
+
+        #region 插件独立日志
+
+        /// <summary>
+        /// 写入插件独立日志。
+        /// </summary>
+        public void LogPlugin(string pluginId, string level, string message)
+        {
+            try
+            {
+                var logFile = Path.Combine(_pluginLogsDirectory, pluginId + ".log");
+                var line = string.Format("[{0:yyyy-MM-dd HH:mm:ss}] [{1}] {2}{3}",
+                    DateTime.Now, level, message, Environment.NewLine);
+                File.AppendAllText(logFile, line);
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// 获取插件日志文件路径。
+        /// </summary>
+        public string GetPluginLogPath(string pluginId)
+        {
+            return Path.Combine(_pluginLogsDirectory, pluginId + ".log");
+        }
+
+        #endregion
+
         public async Task LoadAllAsync()
         {
             try
             {
+                // 0. 清理标记为卸载的插件目录
+                CleanupUninstalledPlugins();
+
                 // 1. 处理待安装的 .icpx 插件包
                 ProcessPluginPackages();
 
@@ -83,6 +220,14 @@ namespace Ink_Canvas.Plugins
                     var info = _plugins.FirstOrDefault(p => p.Id == pluginId);
                     if (info == null || info.LoadStatus != PluginLoadStatus.NotLoaded) continue;
 
+                    // 跳过已禁用的插件
+                    if (IsPluginDisabled(pluginId))
+                    {
+                        info.LoadStatus = PluginLoadStatus.Disabled;
+                        Log(string.Format("Plugin {0} is disabled, skipping", info.Name));
+                        continue;
+                    }
+
                     try
                     {
                         LoadPlugin(info);
@@ -96,6 +241,7 @@ namespace Ink_Canvas.Plugins
                 }
 
                 _plugins.Sort((a, b) => a.Order.CompareTo(b.Order));
+                BuildServiceProvider();
                 Log(string.Format("Plugin loading complete. Loaded {0} plugins", _plugins.Count(p => p.LoadStatus == PluginLoadStatus.Loaded)));
             }
             catch (Exception ex)
@@ -104,6 +250,59 @@ namespace Ink_Canvas.Plugins
             }
 
             await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// 安装 PluginPackages 中待安装的插件包并立即加载。可在运行时调用。
+        /// </summary>
+        public void InstallPendingPackages()
+        {
+            ProcessPluginPackages();
+            DiscoverPlugins();
+            var loadOrder = ResolveLoadOrder();
+            foreach (var pluginId in loadOrder)
+            {
+                var info = _plugins.FirstOrDefault(p => p.Id == pluginId && p.LoadStatus == PluginLoadStatus.NotLoaded);
+                if (info == null) continue;
+                try { LoadPlugin(info); }
+                catch (Exception ex)
+                {
+                    info.LoadStatus = PluginLoadStatus.Error;
+                    info.Exception = ex;
+                    LogError(string.Format("Failed to load plugin {0}", info.Name), ex);
+                }
+            }
+            _plugins.Sort((a, b) => a.Order.CompareTo(b.Order));
+        }
+
+        /// <summary>
+        /// 清理标记为 .uninstall 的插件目录（上次卸载时 DLL 被锁定，本次启动时清理）。
+        /// </summary>
+        private void CleanupUninstalledPlugins()
+        {
+            if (!Directory.Exists(_pluginsDirectory)) return;
+
+            foreach (var subDir in Directory.GetDirectories(_pluginsDirectory))
+            {
+                var marker = Path.Combine(subDir, ".uninstall");
+                if (!File.Exists(marker)) continue;
+
+                try
+                {
+                    // 释放门控锁后删除
+                    ProcessProtectionManager.ReleaseLocksForPath(subDir);
+                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
+                    GC.WaitForPendingFinalizers();
+
+                    Directory.Delete(subDir, true);
+
+                    Log(string.Format("Cleaned up uninstalled plugin: {0}", Path.GetFileName(subDir)));
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"PluginManager | CleanupUninstalled: {Path.GetFileName(subDir)} - 删除失败: {ex.Message}", LogHelper.LogType.Error);
+                }
+            }
         }
 
         #region Plugin Package Installation
@@ -144,6 +343,8 @@ namespace Ink_Canvas.Plugins
                     var targetPath = Path.Combine(_pluginsDirectory, manifest.Id);
                     if (Directory.Exists(targetPath))
                     {
+                        // 释放门控锁后删除旧版本
+                        ProcessProtectionManager.ReleaseLocksForPath(targetPath);
                         Directory.Delete(targetPath, true);
                     }
                     Directory.CreateDirectory(targetPath);
@@ -177,6 +378,10 @@ namespace Ink_Canvas.Plugins
             // 1. 扫描带 manifest.json 的插件目录
             foreach (var subDir in Directory.GetDirectories(_pluginsDirectory))
             {
+                // 跳过标记为待卸载的插件
+                if (File.Exists(Path.Combine(subDir, ".uninstall")))
+                    continue;
+
                 var manifestPath = Path.Combine(subDir, ManifestFileName);
                 if (!File.Exists(manifestPath)) continue;
 
@@ -344,6 +549,33 @@ namespace Ink_Canvas.Plugins
         {
             Log(string.Format("Loading plugin: {0}", info.Name));
 
+            // 错误恢复：如果之前被自动禁用，先跳过加载
+            if (_errorRecovery.IsAutoDisabled(info.Id))
+            {
+                info.LoadStatus = PluginLoadStatus.Disabled;
+                var rec = _errorRecovery.GetRecord(info.Id);
+                info.Exception = new InvalidOperationException(
+                    rec != null
+                        ? $"插件已自动禁用（最近错误：{rec.LastErrorMessage}）。请在插件列表中重置后再加载。"
+                        : "插件已被自动禁用。");
+                LogError(string.Format("Skipping auto-disabled plugin {0}", info.Name));
+                return;
+            }
+
+            // 版本兼容检查（基于 PluginCompatibility）
+            if (info.Manifest != null)
+            {
+                var compat = PluginCompatibility.Check(info.Manifest);
+                if (!compat.IsCompatible)
+                {
+                    info.LoadStatus = PluginLoadStatus.Error;
+                    info.Exception = new InvalidOperationException(compat.Reason);
+                    LogError(string.Format("Plugin {0} incompatible: {1}", info.Name, compat.Reason));
+                    TrackFailure(info, info.Exception);
+                    return;
+                }
+            }
+
             string assemblyPath;
             if (info.Manifest != null && !string.IsNullOrEmpty(info.Manifest.EntranceAssembly))
             {
@@ -361,6 +593,7 @@ namespace Ink_Canvas.Plugins
             {
                 info.LoadStatus = PluginLoadStatus.Error;
                 info.Exception = new FileNotFoundException("Plugin assembly not found", assemblyPath);
+                TrackFailure(info, info.Exception);
                 return;
             }
 
@@ -375,6 +608,7 @@ namespace Ink_Canvas.Plugins
                     info.LoadStatus = PluginLoadStatus.Error;
                     info.Exception = new InvalidOperationException("No plugin entrance class found in assembly");
                     loadContext.Unload();
+                    TrackFailure(info, info.Exception);
                     return;
                 }
 
@@ -384,6 +618,7 @@ namespace Ink_Canvas.Plugins
                     info.LoadStatus = PluginLoadStatus.Error;
                     info.Exception = new InvalidOperationException("Failed to create plugin instance");
                     loadContext.Unload();
+                    TrackFailure(info, info.Exception);
                     return;
                 }
 
@@ -415,12 +650,66 @@ namespace Ink_Canvas.Plugins
                 Log(string.Format("Plugin loaded: {0} v{1} by {2}", info.Name, info.Version, info.Author));
                 OnPluginLoaded(info);
             }
-            catch
+            catch (Exception ex)
             {
                 loadContext.Unload();
-                throw;
+                info.LoadStatus = PluginLoadStatus.Error;
+                info.Exception = ex;
+                TrackFailure(info, ex);
+                LogError(string.Format("Failed to load plugin {0}", info.Name), ex);
             }
         }
+
+        /// <summary>
+        /// 上报一次失败，并按 ClassIsland 风格触发自动禁用（参考 ClassIsland 的插件错误恢复机制）。
+        /// </summary>
+        private void TrackFailure(PluginInfo info, Exception ex)
+        {
+            if (info == null || string.IsNullOrEmpty(info.Id)) return;
+            var report = _errorRecovery.ReportFailure(info.Id, info.Name, ex);
+            if (report.AutoDisabled)
+            {
+                LogError(string.Format("Plugin {0} auto-disabled after {1} failures within {2} minutes",
+                    info.Name,
+                    PluginErrorRecoveryService.FailureThreshold,
+                    PluginErrorRecoveryService.FailureWindowMinutes));
+                info.LoadStatus = PluginLoadStatus.Disabled;
+                // 自动禁用后立即写入 disabled_plugins 列表
+                if (!IsPluginDisabled(info.Id))
+                {
+                    _disabledPlugins.Add(info.Id);
+                    SaveDisabledPlugins();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 显式重置插件的错误记录并清除禁用状态，下次重新加载。
+        /// </summary>
+        public bool ResetPluginFailure(string pluginId)
+        {
+            if (string.IsNullOrEmpty(pluginId)) return false;
+            _errorRecovery.Reset(pluginId);
+            if (IsPluginDisabled(pluginId))
+            {
+                _disabledPlugins.Remove(pluginId);
+                SaveDisabledPlugins();
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 获取插件错误记录（用于 UI 展示错误详情）。
+        /// </summary>
+        public PluginErrorRecord GetPluginError(string pluginId)
+        {
+            return string.IsNullOrEmpty(pluginId) ? null : _errorRecovery.GetRecord(pluginId);
+        }
+
+        /// <summary>
+        /// 当前 IPC 服务实例。
+        /// </summary>
+        public IPluginIpcBus Ipc => _ipc;
 
         /// <summary>
         /// 在程序集中查找插件入口类。优先查找带 [PluginEntrance] 特性的类，其次查找 IPlugin 实现类。
@@ -484,8 +773,13 @@ namespace Ink_Canvas.Plugins
 
         #region IPluginHost Implementation
 
+        public IServiceCollection Services => _serviceCollection;
+
+        public IServiceProvider ServiceProvider => _serviceProvider;
+
         public void Log(string message)
         {
+            _logger?.Info("PluginManager", message);
             OnLogMessage(message);
             System.Diagnostics.Debug.WriteLine(string.Format("[Plugin] {0}", message));
         }
@@ -493,6 +787,7 @@ namespace Ink_Canvas.Plugins
         public void LogError(string message, Exception ex = null)
         {
             var fullMessage = ex != null ? string.Format("{0}: {1}", message, ex.Message) : message;
+            _logger?.Error("PluginManager", message, ex);
             OnLogMessage(string.Format("ERROR: {0}", fullMessage));
             System.Diagnostics.Debug.WriteLine(string.Format("[Plugin ERROR] {0}", fullMessage));
             if (ex != null)
@@ -503,9 +798,16 @@ namespace Ink_Canvas.Plugins
 
         public T GetService<T>() where T : class
         {
-            if (_services.TryGetValue(typeof(T), out var service))
+            // 优先从 DI 容器解析
+            if (_serviceProvider != null)
             {
-                return service as T;
+                var service = _serviceProvider.GetService<T>();
+                if (service != null) return service;
+            }
+            // 回退到旧字典
+            if (_services.TryGetValue(typeof(T), out var legacyService))
+            {
+                return legacyService as T;
             }
             return null;
         }
@@ -513,6 +815,25 @@ namespace Ink_Canvas.Plugins
         public void RegisterService<T>(T service) where T : class
         {
             _services[typeof(T)] = service;
+            _serviceCollection.AddSingleton(typeof(T), service);
+        }
+
+        /// <summary>
+        /// 非泛型注册服务，支持 Type 参数批量注册。
+        /// </summary>
+        public void RegisterService(Type serviceType, object service)
+        {
+            _services[serviceType] = service;
+            _serviceCollection.AddSingleton(serviceType, service);
+        }
+
+        /// <summary>
+        /// 构建 DI 服务提供者。在所有插件 Initialize 完成后调用。
+        /// </summary>
+        internal void BuildServiceProvider()
+        {
+            _serviceProvider?.Dispose();
+            _serviceProvider = _serviceCollection.BuildServiceProvider();
         }
 
         public void RegisterToolbarItem(PluginToolbarItemInfo itemInfo)
@@ -529,6 +850,63 @@ namespace Ink_Canvas.Plugins
                 LogError(string.Format("Failed to register toolbar item {0}", itemInfo.Id), ex);
             }
         }
+
+        /// <summary>
+        /// 注册 IPC 处理函数。
+        /// </summary>
+        public void RegisterIpcHandler(string method, Func<System.Text.Json.JsonElement?, object> handler)
+        {
+            if (_ipc == null)
+            {
+                _ipc = new PluginIpcService();
+                _ipc.Start();
+            }
+            _ipc.RegisterHandler(method, handler);
+        }
+
+        /// <summary>
+        /// 调用 <see cref="PluginSecurityCheck"/> 评估即将安装的插件包。
+        /// </summary>
+        public SecurityVerdict EvaluateTrust(string packagePath, string expectedSha256, string declaredPluginId)
+        {
+            if (_securityCheck == null)
+            {
+                return new SecurityVerdict
+                {
+                    PackagePath = packagePath,
+                    PluginId = declaredPluginId,
+                    TrustLevel = PluginTrustLevel.Unknown,
+                };
+            }
+
+            return _securityCheck.EvaluatePackage(packagePath, expectedSha256, declaredPluginId);
+        }
+
+        /// <summary>
+        /// 获取宿主 IPC 实例。仅在 <see cref="StartIpc"/> 之后可用。
+        /// </summary>
+        public IPluginIpcBus IpcService => _ipc;
+
+        /// <summary>
+        /// 按 pluginId 获取独立的 <see cref="PluginLogger"/>。
+        /// </summary>
+        public PluginLogger GetLogger(string pluginId)
+        {
+            return new PluginLogger(_pluginLogsDirectory, pluginId);
+        }
+
+        /// <summary>
+        /// 暴露给 UI/插件的依赖分析入口。
+        /// </summary>
+        public DependencyAnalysis AnalyzeDependencies()
+        {
+            return _dependencyResolver.Analyze(_plugins);
+        }
+
+        /// <summary>
+        /// 暴露给 UI 的配置导入导出器。
+        /// </summary>
+        public PluginConfigIo ConfigIo => _configIo;
 
         #endregion
 

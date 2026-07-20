@@ -313,6 +313,7 @@ namespace Ink_Canvas
                 SetToolbarHeadPosition(position);
 
                 ApplyHideFloatingBarBorder(Settings.Appearance.HideFloatingBarBorder);
+                ApplyFloatingBarBorderColor();
             }
             catch (Exception ex)
             {
@@ -431,6 +432,7 @@ namespace Ink_Canvas
                 SetFloatingBarHighlightPosition(_currentToolMode);
                 ApplyCompactFloatingBarMode(Settings.Appearance.CompactFloatingBar);
                 ApplyHideFloatingBarBorder(Settings.Appearance.HideFloatingBarBorder);
+                ApplyFloatingBarBorderColor();
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     UpdateQuickColorPaletteIndicator(inkCanvas.DefaultDrawingAttributes.Color);
@@ -511,6 +513,85 @@ namespace Ink_Canvas
                 {
                     border.BorderThickness = original;
                 }
+            }
+        }
+
+        /// <summary>
+        /// 边框颜色模式：0=默认（主题色），1=跟随背景颜色，2=自定义。
+        /// </summary>
+        private const int BorderColorMode_Default = 0;
+        private const int BorderColorMode_FollowBackground = 1;
+        private const int BorderColorMode_Custom = 2;
+
+        /// <summary>
+        /// 标记是否曾应用过非默认边框颜色，用于判断"默认"模式下是否需要恢复。
+        /// 从未修改过时保持 false，"默认"模式完全不动 BorderBrush，与修改前行为完全一致。
+        /// </summary>
+        private bool _hasAppliedNonDefaultFloatingBarBorderColor = false;
+
+        /// <summary>
+        /// 应用浮动栏边框颜色：根据模式设置 BorderBrush。
+        /// - 默认：若从未应用过非默认色则完全不操作（与修改前一致），否则恢复主题资源绑定 FloatBarBorderBrush
+        /// - 跟随背景颜色：绑定 FloatBarBackground（亮色白/暗色深色），与背景融为一体
+        /// - 自定义：直接使用用户保存的 hex 颜色
+        /// 仅作用于浮动栏拖动图标 Border 及 ToolbarRegistry 创建的内容 Border，与 ApplyHideFloatingBarBorder 作用域一致。
+        /// </summary>
+        internal void ApplyFloatingBarBorderColor()
+        {
+            if (StackPanelFloatingBarRoot == null) return;
+
+            int mode = Settings.Appearance.FloatingBarBorderColorMode;
+            if (mode < 0 || mode > 2) mode = BorderColorMode_Default;
+
+            // 默认模式下，若从未应用过非默认色，完全不操作 BorderBrush，保持修改前的原始行为
+            if (mode == BorderColorMode_Default && !_hasAppliedNonDefaultFloatingBarBorderColor) return;
+
+            _hasAppliedNonDefaultFloatingBarBorderColor = (mode != BorderColorMode_Default);
+
+            foreach (var border in FindVisualChildren<System.Windows.Controls.Border>(StackPanelFloatingBarRoot))
+            {
+                if (border.Tag as string != Controls.Toolbar.FloatingToolbar.ToolbarRegistry.ContentBorderTag
+                    && border != BorderFloatingBarMoveControls) continue;
+
+                switch (mode)
+                {
+                    case BorderColorMode_FollowBackground:
+                        border.SetResourceReference(
+                            System.Windows.Controls.Border.BorderBrushProperty, "FloatingBarBackgroundBrush");
+                        break;
+                    case BorderColorMode_Custom:
+                        var customColor = TryParseFloatingBarBorderColor(Settings.Appearance.FloatingBarBorderColor);
+                        if (customColor.HasValue)
+                            border.BorderBrush = new System.Windows.Media.SolidColorBrush(customColor.Value);
+                        else
+                            border.SetResourceReference(
+                                System.Windows.Controls.Border.BorderBrushProperty, "FloatingBarBorderBrush");
+                        break;
+                    default:
+                        border.SetResourceReference(
+                            System.Windows.Controls.Border.BorderBrushProperty, "FloatingBarBorderBrush");
+                        break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 解析用户保存的浮动栏边框颜色 hex 字符串，失败返回 null。
+        /// </summary>
+        private static System.Windows.Media.Color? TryParseFloatingBarBorderColor(string saved)
+        {
+            if (string.IsNullOrWhiteSpace(saved)) return null;
+            try
+            {
+                var text = saved.Trim();
+                if (text.StartsWith("#")) text = text.Substring(1);
+                if (text.Length == 6)
+                    text = "FF" + text;
+                return (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#" + text);
+            }
+            catch
+            {
+                return null;
             }
         }
 

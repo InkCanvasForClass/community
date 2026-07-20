@@ -49,6 +49,15 @@
                              Toggled="ToggleSwitchFoldAtStartup_Toggled" />
         </ui:SettingsCard>
 
+        <ui:SettingsCard Header="{x:Static props:StartupStrings.FastStartup}"
+                         Description="{x:Static props:StartupStrings.FastStartupHint}">
+            <ui:SettingsCard.HeaderIcon>
+                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
+            </ui:SettingsCard.HeaderIcon>
+            <ui:ToggleSwitch x:Name="ToggleSwitchFastStartup"
+                             Toggled="ToggleSwitchFastStartup_Toggled" />
+        </ui:SettingsCard>
+
                     <ui:SettingsCard Header="{x:Static props:StartupStrings.ExternalProtocol}"
                             Description="{x:Static props:StartupStrings.ExternalProtocolHint}">
                         <ui:SettingsCard.HeaderIcon>

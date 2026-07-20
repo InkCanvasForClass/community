@@ -953,6 +953,7 @@ namespace Ink_Canvas
                         }
                     }
                 }, TaskScheduler.FromCurrentSynchronizationContext());
+                StartChickenSoupAutoRotation();
 
                 if (Settings.Canvas.UsingWhiteboard)
                 {
@@ -1016,6 +1017,7 @@ namespace Ink_Canvas
 
                 if (GetSelectionBGLeft() != 28) PenIcon_Click(null, null);
 
+                StopChickenSoupAutoRotation();
                 WaterMarkTime.Visibility = Visibility.Collapsed;
                 WaterMarkDate.Visibility = Visibility.Collapsed;
                 BlackBoardWaterMark.Visibility = Visibility.Collapsed;
@@ -1390,10 +1392,10 @@ namespace Ink_Canvas
             // 根据设置决定使用哪个点名窗口
             if (Settings.RandSettings.UseNewRollCallUI)
             {
-                // 使用新点名UI - 随机抽模式
+                // 使用新点名UI - 随机抽模式（非模态，可与主窗口同时操作）
                 var rollCallWindow = new NewStyleRollCallWindow(Settings, false);
                 rollCallWindow.Owner = this;
-                rollCallWindow.ShowDialog();
+                rollCallWindow.Show();
             }
             else
             {
@@ -1466,9 +1468,9 @@ namespace Ink_Canvas
                     // 调用失败时回退到相应的点名窗口
                     if (Settings.RandSettings.UseNewRollCallUI)
                     {
-                        var rollCallWindow = new NewStyleRollCallWindow(Settings, true); // 单次抽模式
+                        var rollCallWindow = new NewStyleRollCallWindow(Settings, true); // 单次抽模式（非模态）
                         rollCallWindow.Owner = this;
-                        rollCallWindow.ShowDialog();
+                        rollCallWindow.Show();
                     }
                     else
                     {
@@ -1483,10 +1485,10 @@ namespace Ink_Canvas
                 // 根据设置决定使用哪个点名窗口
                 if (Settings.RandSettings.UseNewRollCallUI)
                 {
-                    // 使用新点名UI - 单次抽模式
+                    // 使用新点名UI - 单次抽模式（非模态，可与主窗口同时操作）
                     var rollCallWindow = new NewStyleRollCallWindow(Settings, true);
                     rollCallWindow.Owner = this;
-                    rollCallWindow.ShowDialog();
+                    rollCallWindow.Show();
                 }
                 else
                 {
@@ -4363,7 +4365,9 @@ namespace Ink_Canvas
         {
             _forceCloseFromExitOrRestartButton = true;
             App.IsAppExitByUser = true;
-            Close();
+            // 直接调用 Application.Shutdown：可绕过 H.NotifyIcon.TaskbarIcon 隐藏消息窗口
+            // 滞留导致 WPF 默认 OnLastWindowClose 下无法退出的问题。
+            Application.Current.Shutdown();
         }
 
         /// <summary>
@@ -4514,8 +4518,6 @@ namespace Ink_Canvas
             }
         }
 
-
-        internal int currentMode;
 
         // 退出批注模式时的全屏还原处理
         private void RestoreFullScreenOnExitAnnotationMode()

@@ -729,6 +729,9 @@ namespace Ink_Canvas.Properties
             dict["PPT_ConflictWithAutoFold"] = ("PPTStrings", "ConflictWithAutoFold");
             dict["PPT_EnhancedPreview"] = ("PPTStrings", "EnhancedPreview");
             dict["PPT_EnhancedPreviewHint"] = ("PPTStrings", "EnhancedPreviewHint");
+            dict["PPT_EnhancedPreviewLoadingAnimation"] = ("PPTStrings", "EnhancedPreviewLoadingAnimation");
+            dict["PPT_EnhancedPreviewLoadingAnimationHint"] = ("PPTStrings", "EnhancedPreviewLoadingAnimationHint");
+            dict["PPT_LoadingPPT"] = ("PPTStrings", "LoadingPPT");
             dict["PPT_Enhancement"] = ("PPTStrings", "Enhancement");
             dict["PPT_EnterAnnotationOnShow"] = ("PPTStrings", "EnterAnnotationOnShow");
             dict["PPT_FingerGestureSlide"] = ("PPTStrings", "FingerGestureSlide");
@@ -885,6 +888,8 @@ namespace Ink_Canvas.Properties
             dict["Nav_MainInterface_Tooltip"] = ("NavStrings", "Nav_MainInterface_Tooltip");
             dict["Nav_Window"] = ("NavStrings", "Nav_Window");
             dict["Nav_Window_Tooltip"] = ("NavStrings", "Nav_Window_Tooltip");
+            dict["Nav_Sidebar"] = ("NavStrings", "Nav_Sidebar");
+            dict["Nav_Sidebar_Tooltip"] = ("NavStrings", "Nav_Sidebar_Tooltip");
             dict["Nav_Toolbar"] = ("NavStrings", "Nav_Toolbar");
             dict["Nav_Toolbar_Tooltip"] = ("NavStrings", "Nav_Toolbar_Tooltip");
             dict["Nav_CanvasAndInk_Tooltip"] = ("NavStrings", "Nav_CanvasAndInk_Tooltip");
@@ -990,6 +995,10 @@ namespace Ink_Canvas.Properties
             dict["Storage_Legend_Ink"] = ("StorageStrings", "Storage_Legend_Ink");
             dict["Storage_Legend_Other"] = ("StorageStrings", "Storage_Legend_Other");
             dict["Storage_Legend_Update"] = ("StorageStrings", "Storage_Legend_Update");
+            dict["Storage_Legend_Theme"] = ("StorageStrings", "Storage_Legend_Theme");
+            dict["Storage_Theme_Desc"] = ("StorageStrings", "Storage_Theme_Desc");
+            dict["Storage_Theme_Header"] = ("StorageStrings", "Storage_Theme_Header");
+            dict["Storage_Theme_Hint"] = ("StorageStrings", "Storage_Theme_Hint");
             dict["Storage_Logs_Desc"] = ("StorageStrings", "Storage_Logs_Desc");
             dict["Storage_Logs_Header"] = ("StorageStrings", "Storage_Logs_Header");
             dict["Storage_NavTooltip"] = ("StorageStrings", "Storage_NavTooltip");
@@ -1037,6 +1046,7 @@ namespace Ink_Canvas.Properties
             dict["Theme_FloatingIcon_IccWhiteTransparent"] = ("ThemeStrings", "Theme_FloatingIcon_IccWhiteTransparent");
             dict["Theme_FloatingIcon_TiebaEmoji"] = ("ThemeStrings", "Theme_FloatingIcon_TiebaEmoji");
             dict["Theme_GroupTitle"] = ("ThemeStrings", "Theme_GroupTitle");
+            dict["Theme_SidebarGroupTitle"] = ("ThemeStrings", "Theme_SidebarGroupTitle");
             dict["Theme_Label"] = ("ThemeStrings", "Theme_Label");
             dict["Theme_Language_ChineseSimplified"] = ("ThemeStrings", "Theme_Language_ChineseSimplified");
             dict["Theme_Language_English"] = ("ThemeStrings", "Theme_Language_English");
@@ -1048,6 +1058,7 @@ namespace Ink_Canvas.Properties
             dict["Theme_QuickPalette_DoubleRow"] = ("ThemeStrings", "Theme_QuickPalette_DoubleRow");
             dict["Theme_QuickPalette_SingleRow"] = ("ThemeStrings", "Theme_QuickPalette_SingleRow");
             dict["Theme_QuickPanelBottomOffset"] = ("ThemeStrings", "Theme_QuickPanelBottomOffset");
+            dict["Theme_QuickPanelBottomOffset_Description"] = ("ThemeStrings", "Theme_QuickPanelBottomOffset_Description");
             dict["Theme_QuoteSource"] = ("ThemeStrings", "Theme_QuoteSource");
             dict["Theme_QuoteSource_GaokaoBless"] = ("ThemeStrings", "Theme_QuoteSource_GaokaoBless");
             dict["Theme_QuoteSource_Hitokoto"] = ("ThemeStrings", "Theme_QuoteSource_Hitokoto");
@@ -1224,6 +1235,7 @@ namespace Ink_Canvas.Properties
             dict["ToolbarPage_AddedComponents"] = ("FloatingBarStrings", "ToolbarPage_AddedComponents");
             dict["ToolbarPage_GroupChildren"] = ("FloatingBarStrings", "ToolbarPage_GroupChildren");
             dict["ToolbarPage_GroupChildrenHint"] = ("FloatingBarStrings", "ToolbarPage_GroupChildrenHint");
+            dict["ToolbarPage_CloseGroupChildren"] = ("FloatingBarStrings", "ToolbarPage_CloseGroupChildren");
             dict["ToolbarPage_ComponentLibrary"] = ("FloatingBarStrings", "ToolbarPage_ComponentLibrary");
             dict["ToolbarPage_ComponentLibraryHint"] = ("FloatingBarStrings", "ToolbarPage_ComponentLibraryHint");
             dict["ToolbarPage_ComponentSettings"] = ("FloatingBarStrings", "ToolbarPage_ComponentSettings");

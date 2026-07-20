@@ -249,6 +249,9 @@
   <data name="ToolbarPage_GroupChildrenHint" xml:space="preserve">
     <value>把组件库里的组件拖过来添加，或者拖动已有组件排序。</value>
   </data>
+  <data name="ToolbarPage_CloseGroupChildren" xml:space="preserve">
+    <value>收起分组内组件</value>
+  </data>
   <data name="ToolbarPage_ComponentLibrary" xml:space="preserve">
     <value>组件库</value>
   </data>
@@ -611,5 +614,17 @@
   </data>
   <data name="BoardToolbarPage_Title" xml:space="preserve">
     <value>白板工具栏</value>
+  </data>
+  <data name="MiniWhiteboard_Settings_Enable" xml:space="preserve">
+    <value>启用小白板</value>
+  </data>
+  <data name="MiniWhiteboard_Settings_SyncPPT" xml:space="preserve">
+    <value>页面与PPT联动</value>
+  </data>
+  <data name="MiniWhiteboard_Settings_DefaultSize" xml:space="preserve">
+    <value>默认大小</value>
+  </data>
+  <data name="MiniWhiteboard_Settings_Opacity" xml:space="preserve">
+    <value>不透明度</value>
   </data>
 </root>

@@ -43,7 +43,7 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="Plugin_Title" xml:space="preserve">
-    <value>🎨 插件管理</value>
+    <value>插件管理</value>
   </data>
   <data name="Plugin_Loading" xml:space="preserve">
     <value>正在加载插件...</value>
@@ -62,5 +62,202 @@
   </data>
   <data name="Plugin_Settings" xml:space="preserve">
     <value>插件设置</value>
+  </data>
+  <data name="Market_Title" xml:space="preserve">
+    <value>插件市场</value>
+  </data>
+  <data name="Market_SearchPlaceholder" xml:space="preserve">
+    <value>搜索插件...</value>
+  </data>
+  <data name="Market_TabMarket" xml:space="preserve">
+    <value>市场</value>
+  </data>
+  <data name="Market_TabInstalled" xml:space="preserve">
+    <value>已安装</value>
+  </data>
+  <data name="Market_Refresh" xml:space="preserve">
+    <value>刷新插件源</value>
+  </data>
+  <data name="Market_OpenPluginsFolder" xml:space="preserve">
+    <value>打开插件目录</value>
+  </data>
+  <data name="Market_InstallFromLocal" xml:space="preserve">
+    <value>从本地安装</value>
+  </data>
+  <data name="Market_Install" xml:space="preserve">
+    <value>安装</value>
+  </data>
+  <data name="Market_Update" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="Market_UpdateAvailable" xml:space="preserve">
+    <value>可更新</value>
+  </data>
+  <data name="Market_RestartRequired" xml:space="preserve">
+    <value>需重启</value>
+  </data>
+  <data name="Market_RestartToApply" xml:space="preserve">
+    <value>重启以应用</value>
+  </data>
+  <data name="Market_SelectPluginHint" xml:space="preserve">
+    <value>在左侧选择一个插件以查看详情</value>
+  </data>
+  <data name="Market_ProjectHomepage" xml:space="preserve">
+    <value>项目主页</value>
+  </data>
+  <data name="Market_TabOverview" xml:space="preserve">
+    <value>概览</value>
+  </data>
+  <data name="Market_TabDependencies" xml:space="preserve">
+    <value>依赖项</value>
+  </data>
+  <data name="Market_ReadmeLoading" xml:space="preserve">
+    <value>正在加载说明文档...</value>
+  </data>
+  <data name="Market_ReadmeLoadFailed" xml:space="preserve">
+    <value>无法加载说明文档。</value>
+  </data>
+  <data name="Market_NoReadme" xml:space="preserve">
+    <value>该插件暂无说明文档。</value>
+  </data>
+  <data name="Market_DependencyWarning" xml:space="preserve">
+    <value>此插件依赖以下插件，将一并安装：{0}
+
+是否继续？</value>
+  </data>
+  <data name="Market_DependencyTitle" xml:space="preserve">
+    <value>安装依赖</value>
+  </data>
+  <data name="Market_InstallLocalSuccess" xml:space="preserve">
+    <value>插件已添加到安装队列，重启后生效。</value>
+  </data>
+  <data name="Market_InstallLocalFailed" xml:space="preserve">
+    <value>安装失败：{0}</value>
+  </data>
+  <data name="Market_RestartMessage" xml:space="preserve">
+    <value>需要重启应用以完成插件安装/更新。是否立即重启？</value>
+  </data>
+  <data name="Market_RestartTitle" xml:space="preserve">
+    <value>重启确认</value>
+  </data>
+  <data name="Market_RestartFailed" xml:space="preserve">
+    <value>重启失败：{0}</value>
+  </data>
+  <data name="Plugin_Update" xml:space="preserve">
+    <value>更新</value>
+  </data>
+  <data name="Plugin_Delete" xml:space="preserve">
+    <value>删除</value>
+  </data>
+  <data name="Plugin_DeleteConfirm" xml:space="preserve">
+    <value>确定要删除插件「{0}」吗？删除后需要重启应用生效。</value>
+  </data>
+  <data name="Plugin_DeleteTitle" xml:space="preserve">
+    <value>删除插件</value>
+  </data>
+  <data name="Plugin_UpdateAvailable" xml:space="preserve">
+    <value>有新版本: v{0}</value>
+  </data>
+  <data name="Plugin_ErrorTitle" xml:space="preserve">
+    <value>插件错误</value>
+  </data>
+  <data name="Plugin_ErrorAutoDisabled" xml:space="preserve">
+    <value>插件已自动禁用：在 {0} 分钟内连续 {1} 次加载失败。请手动重置后再启用。</value>
+  </data>
+  <data name="Plugin_ErrorReset" xml:space="preserve">
+    <value>重置错误并重新加载</value>
+  </data>
+  <data name="Plugin_ExportConfig" xml:space="preserve">
+    <value>导出配置</value>
+  </data>
+  <data name="Plugin_ImportConfig" xml:space="preserve">
+    <value>导入配置</value>
+  </data>
+  <data name="Plugin_ExportTitle" xml:space="preserve">
+    <value>导出插件配置</value>
+  </data>
+  <data name="Plugin_ExportSuccess" xml:space="preserve">
+    <value>插件配置已导出到：{0}</value>
+  </data>
+  <data name="Plugin_ExportFailed" xml:space="preserve">
+    <value>导出失败：{0}</value>
+  </data>
+  <data name="Plugin_ImportTitle" xml:space="preserve">
+    <value>导入插件配置</value>
+  </data>
+  <data name="Plugin_ImportSuccess" xml:space="preserve">
+    <value>导入成功，覆盖了 {0} 个文件。</value>
+  </data>
+  <data name="Plugin_ImportFailed" xml:space="preserve">
+    <value>导入失败：{0}</value>
+  </data>
+  <data name="Market_SecurityWarning" xml:space="preserve">
+    <value>此插件来源未经验证，继续安装存在风险。请确认你信任该来源。</value>
+  </data>
+  <data name="Market_SecurityTitle" xml:space="preserve">
+    <value>安全提示</value>
+  </data>
+  <data name="Market_OpenLogsFolder" xml:space="preserve">
+    <value>打开日志目录</value>
+  </data>
+  <data name="Market_LoadErrorOnInstall" xml:space="preserve">
+    <value>此插件检测到以下问题，建议继续安装前确认：</value>
+  </data>
+  <data name="Market_ManageSources" xml:space="preserve">
+    <value>插件源</value>
+  </data>
+  <data name="Market_ActiveSource" xml:space="preserve">
+    <value>当前源</value>
+  </data>
+  <data name="Market_AddSource" xml:space="preserve">
+    <value>添加源</value>
+  </data>
+  <data name="Market_EditSource" xml:space="preserve">
+    <value>编辑源</value>
+  </data>
+  <data name="Market_RemoveSource" xml:space="preserve">
+    <value>删除源</value>
+  </data>
+  <data name="Market_SourceIdLabel" xml:space="preserve">
+    <value>源名称</value>
+  </data>
+  <data name="Market_SourceUrlLabel" xml:space="preserve">
+    <value>索引 URL</value>
+  </data>
+  <data name="Market_SourceOfficial" xml:space="preserve">
+    <value>官方源（不可编辑）</value>
+  </data>
+  <data name="Market_MirrorGroup" xml:space="preserve">
+    <value>下载镜像</value>
+  </data>
+  <data name="Market_NoMirrors" xml:space="preserve">
+    <value>该索引未提供下载镜像</value>
+  </data>
+  <data name="Market_MirrorAuto" xml:space="preserve">
+    <value>自动（默认）</value>
+  </data>
+  <data name="Market_SaveSource" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="Market_CancelSource" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="Market_SourceInvalidUrl" xml:space="preserve">
+    <value>URL 必须以 http:// 或 https:// 开头</value>
+  </data>
+  <data name="Market_SourceDuplicate" xml:space="preserve">
+    <value>已存在同名源</value>
+  </data>
+  <data name="Market_SourceRemoved" xml:space="preserve">
+    <value>源已删除</value>
+  </data>
+  <data name="Market_SourceSaved" xml:space="preserve">
+    <value>源已保存</value>
+  </data>
+  <data name="Market_SourceNameRequired" xml:space="preserve">
+    <value>请输入源名称</value>
+  </data>
+  <data name="Market_RemoveSourceConfirmation" xml:space="preserve">
+    <value>确定要删除源“{0}”吗？</value>
   </data>
 </root>

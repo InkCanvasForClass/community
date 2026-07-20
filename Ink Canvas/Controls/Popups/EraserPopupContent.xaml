@@ -20,7 +20,7 @@
                                      VerticalAlignment="Center"
                                      HorizontalAlignment="Center">
                     <Label Content="{x:Static props:FloatingBarStrings.Board_Size}" FontWeight="Bold"
-                           Foreground="{DynamicResource FloatBarForeground}" FontSize="16"
+                           Foreground="{DynamicResource FloatingBarForegroundBrush}" FontSize="16"
                            VerticalAlignment="Center" />
                     <ComboBox x:Name="ComboBoxEraserSize"
                                   SelectedIndex="2">

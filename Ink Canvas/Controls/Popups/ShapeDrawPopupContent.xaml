@@ -44,7 +44,7 @@ mc:Ignorable="d">
                                           
                                           VerticalAlignment="Center">
                         <Label Content="{x:Static props:CanvasStrings.Canvas_ShowCircleCenter}"
-                               Foreground="{DynamicResource FloatBarForeground}"
+                               Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                VerticalAlignment="Center"
                                Padding="0" />
                         <ui:ToggleSwitch x:Name="ToggleSwitchShowCircleCenter"

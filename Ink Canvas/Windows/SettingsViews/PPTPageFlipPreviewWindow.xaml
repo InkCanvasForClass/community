@@ -1,0 +1,20 @@
+<Window x:Class="Ink_Canvas.Windows.SettingsViews.PPTPageFlipPreviewWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+        xmlns:localControls="clr-namespace:Ink_Canvas.Controls"
+        Title="PPT Page Flip Preview"
+        WindowStyle="None"
+        WindowState="Normal"
+        Background="Black"
+        ShowInTaskbar="False"
+        Topmost="True"
+        AllowsTransparency="True"
+        WindowStartupLocation="Manual">
+
+    <Grid x:Name="RootGrid" Background="Black">
+        <!-- PPT Slideshow Background (Uniform centered, black filled outer space) -->
+        <Image Source="/Resources/PresentationExample/page.jpg" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    </Grid>
+</Window>

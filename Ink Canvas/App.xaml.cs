@@ -58,6 +58,8 @@ namespace Ink_Canvas
         public static bool StartWithBoardMode = false;
         // 新增：标记是否通过--show参数启动
         public static bool StartWithShowMode = false;
+        // 新增：是否启用快速启动模式（默认关闭）
+        public static bool IsFastStartupEnabled { get; private set; }
         // 新增：保存看门狗进程对象
         public static Process watchdogProcess;
         // 新增：标记是否为软件内主动退出
@@ -161,8 +163,8 @@ namespace Ink_Canvas
                 return;
             }
 
-            // 启动时优先同步设置，确保CrashAction为最新
-            SyncCrashActionFromSettings();
+            // CrashAction 的值将在 App_Startup 中通过缓存的 Settings.json 同步，
+            // 构造函数中先用默认值（ShowCrashWindow），LoadSettings 运行后会被覆盖。
 
             Startup += App_Startup;
             SessionEnding += App_SessionEnding;
@@ -183,6 +185,39 @@ namespace Ink_Canvas
                 StartWatchdogIfNeeded();
             }
             Exit += App_Exit; // 注册退出事件
+        }
+
+        /// <summary>
+        /// 统一注册所有插件服务到 PluginManager。
+        /// </summary>
+        private void RegisterPluginServices(MainWindow mainWindow)
+        {
+            var host = Plugins.PluginManager.Instance;
+            var services = new (Type iface, object impl)[]
+            {
+                (typeof(Plugins.IAppRestartService),      new Plugins.AppRestartService()),
+                (typeof(Plugins.IWindowService),          new Plugins.WindowService(mainWindow)),
+                (typeof(Plugins.IPowerPointService),      new Plugins.PowerPointService(mainWindow)),
+                (typeof(Plugins.IEventService),           new Plugins.EventService(mainWindow)),
+                (typeof(Plugins.ISettingsService),        new Plugins.SettingsService()),
+                (typeof(Plugins.IHotkeyService),          new Plugins.HotkeyService(mainWindow.GlobalHotkeyManagerInstance)),
+                (typeof(Plugins.INotificationService),    new Plugins.NotificationService(mainWindow)),
+                (typeof(Plugins.IFileAssociationService),      new Plugins.FileAssociationService()),
+                (typeof(Plugins.IWindowOverviewService),        new Plugins.WindowOverviewService(mainWindow.WindowOverviewModel)),
+                (typeof(Plugins.IWindowOverviewService),         new Plugins.WindowOverviewService(mainWindow.WindowOverviewModel)),
+            };
+
+            foreach (var (iface, impl) in services)
+            {
+                try
+                {
+                    host.RegisterService(iface, impl);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"Failed to register plugin service {iface.Name}: {ex.Message}", LogHelper.LogType.Error);
+                }
+            }
         }
 
         // 配置TLS协议以支持Windows 7
@@ -713,32 +748,6 @@ namespace Ink_Canvas
             }
         }
 
-        private static bool ShouldShowSplashScreen()
-        {
-            try
-            {
-                // 检查设置文件中的启动动画开关
-                var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs", "Settings.json");
-                if (File.Exists(settingsPath))
-                {
-                    var json = File.ReadAllText(settingsPath);
-                    dynamic obj = JsonConvert.DeserializeObject(json);
-                    if (obj?["appearance"]?["enableSplashScreen"] != null)
-                    {
-                        return (bool)obj["appearance"]["enableSplashScreen"];
-                    }
-                }
-
-                // 如果设置文件不存在或没有该设置，返回默认值false
-                return false;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"检查启动动画设置失败: {ex.Message}", LogHelper.LogType.Warning);
-                return false;
-            }
-        }
-
         private static bool IsLaunchByFileOrUri(string[] args)
         {
             if (args == null || args.Length == 0) return false;
@@ -816,6 +825,17 @@ namespace Ink_Canvas
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+        }
+
+        private static void SyncCrashActionFromParsed(dynamic parsedSettings)
+        {
+            try
+            {
+                int crashAction = 2;
+                try { crashAction = (int)(parsedSettings?["startup"]?["crashAction"] ?? 2); } catch { }
+                CrashAction = (CrashActionType)crashAction;
+            }
+            catch { }
         }
 
         private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
@@ -922,14 +942,24 @@ namespace Ink_Canvas
             appStartupStartTime = DateTime.Now;
             startupStopwatch.Restart();
 
-            TryApplyPreferredLanguageFromSettings();
+            // 启动阶段跳过昂贵的 StackTrace 采集
+            LogHelper.SuppressCallerInfo = true;
 
-            // 同步 Common_On/Common_Off 等本地化资源到 Application.Resources
-            Helpers.LocalizationHelper.SyncCommonResources();
+            // 一次性读取并解析 Settings.json，避免重复 I/O + dynamic 反序列化
+            dynamic parsedSettings = ReadSettingsJsonOnce();
 
-            // 根据设置决定是否显示启动画面
-            if (ShouldShowSplashScreen() && !IsLaunchByFileOrUri(e.Args))
+            // 从缓存设置同步 CrashAction（替代原构造函数中的 SyncCrashActionFromSettings）
+            SyncCrashActionFromParsed(parsedSettings);
+            IsFastStartupEnabled = IsFastStartupEnabledFromParsed(parsedSettings);
+            LogHelper.WriteLogToFile($"App | 快速启动模式: {(IsFastStartupEnabled ? "启用" : "关闭")}");
+
+            TryApplyPreferredLanguageFromParsedSettings(parsedSettings);
+
+            // 根据设置决定是否显示启动画面（复用已解析的设置对象）
+            if (ShouldShowSplashScreenFromParsed(parsedSettings) && !IsLaunchByFileOrUri(e.Args))
             {
+                // 注入缓存 JSON 给 SplashScreen，避免其构造期间重复读取 + 解析 Settings.json
+                SplashScreen.CachedSettingsJson = CachedSettingsJson;
                 ShowSplashScreen();
                 SetSplashMessage("正在启动 Ink Canvas...");
                 SetSplashProgress(25);
@@ -937,8 +967,6 @@ namespace Ink_Canvas
                 // 强制刷新UI，确保启动画面显示
                 Application.Current.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
             }
-
-            await Task.Delay(100);
             RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
             var version = Assembly.GetExecutingAssembly().GetName().Version;
@@ -986,7 +1014,6 @@ namespace Ink_Canvas
             {
                 SetSplashMessage("正在加载配置...");
                 SetSplashProgress(50);
-                await Task.Delay(100);
             }
 
             // 处理更新模式启动
@@ -1247,7 +1274,7 @@ namespace Ink_Canvas
                 mutex = new Mutex(true, mutexName, out bool tempRet);
 
                 // 额外等待一小段时间确保更新进程完全退出
-                await Task.Delay(1000);
+                await Task.Delay(100);
                 LogHelper.WriteLogToFile("App | 特殊模式等待完成，继续启动");
             }
 
@@ -1264,25 +1291,10 @@ namespace Ink_Canvas
             var mainWindow = new MainWindow();
             MainWindow = mainWindow;
 
-            // 注册 InkCanvas 服务供插件使用
-            try
+            // 注册插件服务。快速启动模式下将服务注册延迟到首帧显示之后，避免插件相关对象阻塞主窗口创建。
+            if (!IsFastStartupEnabled)
             {
-                var inkCanvasService = new Plugins.InkCanvasService(mainWindow);
-                Plugins.PluginManager.Instance.RegisterService<Plugins.IInkCanvasService>(inkCanvasService);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"Failed to register InkCanvasService: {ex.Message}", LogHelper.LogType.Error);
-            }
-
-            try
-            {
-                var appRestartService = new Plugins.AppRestartService();
-                Plugins.PluginManager.Instance.RegisterService<Plugins.IAppRestartService>(appRestartService);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"Failed to register AppRestartService: {ex.Message}", LogHelper.LogType.Error);
+                RegisterPluginServices(mainWindow);
             }
 
             // 主窗口加载完成后关闭启动画面
@@ -1290,6 +1302,9 @@ namespace Ink_Canvas
             {
                 isStartupComplete = true;
                 startupCompleteHeartbeat = DateTime.Now;
+
+                // 启动完成，恢复日志调用栈采集
+                LogHelper.SuppressCallerInfo = false;
 
                 // 启动成功，重置崩溃重启计数器
                 StartupCount.Reset();
@@ -1323,12 +1338,17 @@ namespace Ink_Canvas
             };
 
             mainWindow.Show();
-            WindowTopmostManager.Initialize(mainWindow);
-            _ = Task.Run(async () =>
+
+            if (IsFastStartupEnabled)
             {
-                await Task.Delay(600);
-                Dispatcher.Invoke(() => _taskbar?.ForceCreate());
-            });
+                _ = RunFastStartupPostRenderTasksAsync(mainWindow);
+                _ = Dispatcher.BeginInvoke(new Action(() => _taskbar?.ForceCreate()), DispatcherPriority.ContextIdle);
+            }
+            else
+            {
+                WindowTopmostManager.Initialize(mainWindow, skipScan: true);
+                _ = Task.Run(() => Dispatcher.Invoke(() => _taskbar?.ForceCreate()));
+            }
 
             // 处理启动时的URI参数
             string startupUriArg = e.Args.FirstOrDefault(a => a.StartsWith("icc:", StringComparison.OrdinalIgnoreCase));
@@ -1346,14 +1366,30 @@ namespace Ink_Canvas
             }
 
             _ = RunDeferredStartupTasksAsync();
+        }
 
+        private async Task RunFastStartupPostRenderTasksAsync(MainWindow mainWindow)
+        {
+            try
+            {
+                await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ContextIdle);
+                await Task.Delay(1000);
+
+                RegisterPluginServices(mainWindow);
+                WindowTopmostManager.Initialize(mainWindow, skipScan: true);
+                LogHelper.WriteLogToFile("App | 快速启动模式的应用级延迟任务已开始");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"App | 快速启动模式延迟初始化失败: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private async Task RunDeferredStartupTasksAsync()
         {
             try
             {
-                await Task.Delay(400);
+                await Task.Delay(IsFastStartupEnabled ? 1200 : 400);
 
                 try
                 {
@@ -1414,7 +1450,17 @@ namespace Ink_Canvas
                 try
                 {
                     LogHelper.WriteLogToFile("开始加载插件");
+                    PluginManager.Instance.InitializeAdvancedServices(PluginMarketService.Instance);
                     await PluginManager.Instance.LoadAllAsync();
+                    try
+                    {
+                        PluginManager.Instance.StartIpc();
+                        LogHelper.WriteLogToFile("插件 IPC 总线已启动");
+                    }
+                    catch (Exception ipcEx)
+                    {
+                        LogHelper.WriteLogToFile($"启动插件 IPC 总线失败: {ipcEx.Message}", LogHelper.LogType.Warning);
+                    }
                     LogHelper.WriteLogToFile(string.Format("插件加载完成，共加载 {0} 个插件", PluginManager.Instance.Plugins.Count));
                 }
                 catch (Exception ex)
@@ -1442,24 +1488,89 @@ namespace Ink_Canvas
             }
         }
 
-        private void TryApplyPreferredLanguageFromSettings()
+        private static dynamic _cachedParsedSettings;
+        /// <summary>
+        /// 缓存 Settings.json 原始文本，供 LoadSettings 复用，避免启动阶段重复磁盘 I/O。
+        /// </summary>
+        internal static string CachedSettingsJson { get; private set; }
+
+        /// <summary>
+        /// 使用已规范化的设置内容更新启动缓存，确保同一启动流程中的后续设置加载不会再次使用旧配置。
+        /// </summary>
+        internal static void UpdateCachedSettingsJson(string json)
         {
+            CachedSettingsJson = json;
+            _cachedParsedSettings = JsonConvert.DeserializeObject(json);
+        }
+
+        /// <summary>
+        /// 一次性读取并缓存 Settings.json 的解析结果，避免启动阶段重复 I/O + dynamic 反序列化。
+        /// 同时缓存原始 JSON 文本供 LoadSettings 使用。
+        /// </summary>
+        private static dynamic ReadSettingsJsonOnce()
+        {
+            if (_cachedParsedSettings != null) return _cachedParsedSettings;
             try
             {
                 var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs", "Settings.json");
-                if (!File.Exists(settingsPath)) return;
+                if (File.Exists(settingsPath))
+                {
+                    var json = File.ReadAllText(settingsPath);
+                    UpdateCachedSettingsJson(json);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"读取 Settings.json 失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+            return _cachedParsedSettings;
+        }
 
-                var json = File.ReadAllText(settingsPath);
-                dynamic obj = JsonConvert.DeserializeObject(json);
-                string preferredLanguage = obj?["appearance"]?["language"]?.ToString();
+        private static bool IsFastStartupEnabledFromParsed(dynamic parsedSettings)
+        {
+            try
+            {
+                return parsedSettings?["startup"]?["enableFastStartup"] != null &&
+                       (bool)parsedSettings["startup"]["enableFastStartup"];
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"检查快速启动设置失败: {ex.Message}", LogHelper.LogType.Warning);
+                return false;
+            }
+        }
+
+        private void TryApplyPreferredLanguageFromParsedSettings(dynamic parsedSettings)
+        {
+            try
+            {
+                string preferredLanguage = parsedSettings?["appearance"]?["language"]?.ToString();
                 if (!string.IsNullOrWhiteSpace(preferredLanguage))
                 {
                     LocalizationHelper.TrySetCulture(preferredLanguage);
+                    // TrySetCulture → CurrentCulture setter 内部已调用 SyncCommonResources()，无需重复调用
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"启动时预加载语言失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private static bool ShouldShowSplashScreenFromParsed(dynamic parsedSettings)
+        {
+            try
+            {
+                if (parsedSettings?["appearance"]?["enableSplashScreen"] != null)
+                {
+                    return (bool)parsedSettings["appearance"]["enableSplashScreen"];
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"检查启动动画设置失败: {ex.Message}", LogHelper.LogType.Warning);
+                return false;
             }
         }
 

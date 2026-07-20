@@ -1,7 +1,11 @@
+using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace Ink_Canvas.Plugins
 {
+    /// <summary>
+    /// 插件抽象基类。参考 ClassIsland 的 PluginBase 设计。
+    /// </summary>
     public abstract class PluginBase : IPlugin
     {
         protected IPluginHost Host { get; private set; }
@@ -28,9 +32,31 @@ namespace Ink_Canvas.Plugins
         public virtual string Author => Manifest?.Author ?? "";
         public virtual int Order => 0;
 
+        /// <summary>
+        /// 初始化插件（旧版签名，保持向后兼容）。
+        /// 新插件请使用 Initialize(IPluginHost, IServiceCollection) 重载。
+        /// </summary>
         public virtual void Initialize(IPluginHost host)
         {
             Host = host;
+        }
+
+        /// <summary>
+        /// 初始化插件（新版签名，支持 DI 服务注册）。
+        /// 默认调用旧版 Initialize(host) 以保持兼容。
+        /// 新插件应重写此方法。
+        /// </summary>
+        public virtual void Initialize(IPluginHost host, IServiceCollection services)
+        {
+            Initialize(host);
+        }
+
+        /// <summary>
+        /// IPlugin.Initialize 的显式实现，转发到新签名。
+        /// </summary>
+        void IPlugin.Initialize(IPluginHost host)
+        {
+            Initialize(host, host.Services);
         }
 
         public virtual void Shutdown()

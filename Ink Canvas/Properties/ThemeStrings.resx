@@ -94,7 +94,7 @@
     <value>深色主题</value>
   </data>
   <data name="Theme_EnableQuickPanel" xml:space="preserve">
-    <value>在收纳模式下启用快速面板</value>
+    <value>点击展开按钮后显示侧边栏</value>
   </data>
   <data name="Theme_EnableSplash" xml:space="preserve">
     <value>启用启动动画</value>
@@ -156,6 +156,9 @@
   <data name="Theme_GroupTitle" xml:space="preserve">
     <value>个性化</value>
   </data>
+  <data name="Theme_SidebarGroupTitle" xml:space="preserve">
+    <value>侧边栏</value>
+  </data>
   <data name="Theme_Label" xml:space="preserve">
     <value>主题</value>
   </data>
@@ -187,7 +190,10 @@
     <value>单行显示（6 种颜色）</value>
   </data>
   <data name="Theme_QuickPanelBottomOffset" xml:space="preserve">
-    <value>快捷面板垂直偏移</value>
+    <value>展开按钮与侧边栏的位置偏移</value>
+  </data>
+  <data name="Theme_QuickPanelBottomOffset_Description" xml:space="preserve">
+    <value>调整侧边栏在垂直方向上的偏移，右上左下</value>
   </data>
   <data name="Theme_QuoteSource" xml:space="preserve">
     <value>信仰の源出自 Where？</value>
@@ -259,7 +265,7 @@
     <value>跟随系统</value>
   </data>
   <data name="Theme_UnfoldButtonIcon" xml:space="preserve">
-    <value>取消收纳按钮图标</value>
+    <value>展开按钮图标</value>
   </data>
   <data name="Theme_UnfoldIcon_Arrow" xml:space="preserve">
     <value>箭头</value>
@@ -274,7 +280,7 @@
     <value>条形</value>
   </data>
   <data name="Theme_AllowDragSidePanel" xml:space="preserve">
-    <value>允许通过拖动调整侧边栏位置</value>
+    <value>允许拖动展开按钮调整偏移</value>
   </data>
   <data name="Theme_Upload" xml:space="preserve">
     <value>上传</value>
@@ -297,6 +303,50 @@
   <data name="Theme_HideFloatingBarBorderHint" xml:space="preserve">
     <value>开启后将浮动栏边框厚度设为 0，实现无白边效果。</value>
   </data>
+  <data name="Theme_FloatingBarBorderColor" xml:space="preserve">
+    <value>浮动栏边框颜色</value>
+  </data>
+  <data name="Theme_FloatingBarBorderColorHint" xml:space="preserve">
+    <value>设置浮动工具栏的边框颜色。默认使用主题色，跟随背景颜色可与背景融为一体，自定义可指定任意颜色。</value>
+  </data>
+  <data name="Theme_FloatingBarBorderColorReset" xml:space="preserve">
+    <value>重置</value>
+  </data>
+  <data name="Theme_FloatingBarBorderColor_Default" xml:space="preserve">
+    <value>默认</value>
+  </data>
+  <data name="Theme_FloatingBarBorderColor_FollowBackground" xml:space="preserve">
+    <value>跟随背景颜色</value>
+  </data>
+  <data name="Theme_FloatingBarBorderColor_Custom" xml:space="preserve">
+    <value>自定义</value>
+  </data>
+  <data name="Theme_FloatingBarThemeMarketTitle" xml:space="preserve"><value>浮动栏主题市场</value></data>
+  <data name="Theme_FloatingBarThemeMarketRefresh" xml:space="preserve"><value>刷新市场</value></data>
+  <data name="Theme_FloatingBarThemeMarketInstall" xml:space="preserve"><value>安装主题</value></data>
+
+  <data name="Theme_FloatingBarThemesTitle" xml:space="preserve">
+    <value>浮动栏主题</value>
+  </data>
+  <data name="Theme_FloatingBarThemesDescription" xml:space="preserve">
+    <value>管理浮动栏的主题包、背景、颜色和视觉样式。</value>
+  </data>
+  <data name="Theme_FloatingBarThemesFolder" xml:space="preserve">
+    <value>主题管理</value>
+  </data>
+  <data name="Theme_FloatingBarThemesOpenFolder" xml:space="preserve">
+    <value>打开主题文件夹</value>
+  </data>
+  <data name="Theme_FloatingBarThemesReload" xml:space="preserve">
+    <value>重新加载主题</value>
+  </data>
+  <data name="Theme_FloatingBarThemesApply" xml:space="preserve">
+    <value>应用主题</value>
+  </data>
+  <data name="Theme_FloatingBarThemesApplyFailed" xml:space="preserve">
+    <value>主题应用失败，请检查主题文件。</value>
+  </data>
+
   <data name="Theme_WindowBackdrop" xml:space="preserve">
     <value>窗口背景样式</value>
   </data>
@@ -373,10 +423,10 @@
     <value>侧边栏透明度</value>
   </data>
   <data name="Theme_AutoCollapseQuickPanel" xml:space="preserve">
-    <value>点击屏幕其他区域自动收起侧栏</value>
+    <value>打开侧边栏后自动收起</value>
   </data>
   <data name="Theme_AutoCollapseQuickPanelDelay" xml:space="preserve">
-    <value>自动收起延迟时间</value>
+    <value>自动收起前的等待时间</value>
   </data>
   <data name="Theme_FloatingBarMenuOpacity" xml:space="preserve">
     <value>浮动栏菜单透明度</value>
@@ -386,5 +436,77 @@
   </data>
   <data name="Theme_BoardMenuOpacity" xml:space="preserve">
     <value>白板菜单透明度</value>
+  </data>
+  <data name="Theme_Tips_GlobalSettings" xml:space="preserve">
+    <value>全局设置</value>
+  </data>
+  <data name="Theme_Tips_GlobalSettingsHint" xml:space="preserve">
+    <value>管理信仰の源的显示、来源与自动轮换</value>
+  </data>
+  <data name="Theme_Tips_AutoRotation" xml:space="preserve">
+    <value>自动轮换 Tips</value>
+  </data>
+  <data name="Theme_Tips_AutoRotationHint" xml:space="preserve">
+    <value>启用后，白板中的 Tips 将按设定间隔自动切换</value>
+  </data>
+  <data name="Theme_Tips_RotationInterval" xml:space="preserve">
+    <value>轮换间隔（秒）</value>
+  </data>
+  <data name="Theme_Tips_RotationIntervalHint" xml:space="preserve">
+    <value>必须输入>=5的正整数哦</value>
+  </data>
+  <data name="Theme_Tips_Import" xml:space="preserve">
+    <value>导入</value>
+  </data>
+  <data name="Theme_Tips_Create" xml:space="preserve">
+    <value>新建</value>
+  </data>
+  <data name="Theme_Tips_Edit" xml:space="preserve">
+    <value>编辑</value>
+  </data>
+  <data name="Theme_Tips_Export" xml:space="preserve">
+    <value>导出</value>
+  </data>
+  <data name="Theme_Tips_SelectTxtFile" xml:space="preserve">
+    <value>+ 选择一个 txt 文件</value>
+  </data>
+  <data name="Theme_Tips_SchemeName" xml:space="preserve">
+    <value>名称</value>
+  </data>
+  <data name="Theme_Tips_SchemeContent" xml:space="preserve">
+    <value>内容</value>
+  </data>
+  <data name="Theme_Tips_CancelConfirm" xml:space="preserve">
+    <value>取消之后不可恢复，确定吗？</value>
+  </data>
+  <data name="Theme_Tips_Abandon" xml:space="preserve">
+    <value>放弃</value>
+  </data>
+  <data name="Theme_Tips_SelectSchemeFirst" xml:space="preserve">
+    <value>请先在列表中选择一个方案</value>
+  </data>
+  <data name="Theme_Tips_PresetLocked" xml:space="preserve">
+    <value>预设方案不可修改</value>
+  </data>
+  <data name="Theme_Tips_NewDialogTitle" xml:space="preserve">
+    <value>新建方案</value>
+  </data>
+  <data name="Theme_Tips_ImportDialogTitle" xml:space="preserve">
+    <value>导入方案</value>
+  </data>
+  <data name="Theme_Tips_EditDialogTitle" xml:space="preserve">
+    <value>编辑方案</value>
+  </data>
+  <data name="Theme_Tips_NameRequired" xml:space="preserve">
+    <value>请输入方案名称</value>
+  </data>
+  <data name="Theme_Tips_ContentRequired" xml:space="preserve">
+    <value>请输入方案内容</value>
+  </data>
+  <data name="Theme_Tips_NameExists" xml:space="preserve">
+    <value>已存在同名方案，请更换名称</value>
+  </data>
+  <data name="Theme_Tips_Title" xml:space="preserve">
+    <value>信仰の源</value>
   </data>
 </root>

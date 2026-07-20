@@ -89,7 +89,7 @@ namespace Ink_Canvas.Helpers
 
         public object GetCurrentActivePresentation() => null;
 
-        public List<PPTSlideThumbnail> ExportSlideThumbnails(int width, int height)
+        public List<PPTSlideThumbnail> ExportSlideThumbnails(int width, int height, IProgress<double> progress = null)
         {
             var response = _client?.SendRequest<ExportSlideThumbnailsResponse>(
                 PPTCommands.ExportSlideThumbnails,
@@ -98,10 +98,19 @@ namespace Ink_Canvas.Helpers
             if (response?.Slides == null)
                 return new List<PPTSlideThumbnail>();
 
-            return response.Slides
+            var result = response.Slides
                 .Where(s => s != null && s.PngBytes != null)
                 .Select(s => new PPTSlideThumbnail { SlideNumber = s.SlideNumber, PngBytes = s.PngBytes })
                 .ToList();
+
+            progress?.Report(1.0);
+            return result;
+        }
+
+        public SmartRegionsResponse GetSmartRegions()
+        {
+            return _client?.SendRequest<SmartRegionsResponse>(PPTCommands.GetSmartRegions)
+                   ?? new SmartRegionsResponse();
         }
 
         private bool Send(string command, object data = null)

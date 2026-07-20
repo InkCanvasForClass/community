@@ -1,0 +1,39 @@
+<Window x:Class="Ink_Canvas.Windows.SettingsViews.PPTPageFlipPreviewOverlayWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:localControls="clr-namespace:Ink_Canvas.Controls"
+        Title="PPT Page Flip Preview Overlay"
+        WindowStyle="None"
+        WindowState="Normal"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        Topmost="True"
+        AllowsTransparency="True"
+        WindowStartupLocation="Manual">
+
+    <Grid x:Name="RootGrid" Background="Transparent">
+        <!-- Left side bar -->
+        <localControls:PPTNavBar x:Name="LeftSidePanelForPPTNavigation"
+                                 Direction="LeftSide"
+                                 Margin="6,0,0,0"
+                                 HorizontalAlignment="Left" VerticalAlignment="Center"/>
+
+        <!-- Right side bar -->
+        <localControls:PPTNavBar x:Name="RightSidePanelForPPTNavigation"
+                                 Direction="RightSide"
+                                 Margin="0,0,6,0"
+                                 HorizontalAlignment="Right" VerticalAlignment="Center"/>
+
+        <!-- Left bottom bar -->
+        <localControls:PPTNavBar x:Name="LeftBottomPanelForPPTNavigation"
+                                 Direction="LeftBottom"
+                                 Margin="6,0,0,6"
+                                 HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
+
+        <!-- Right bottom bar -->
+        <localControls:PPTNavBar x:Name="RightBottomPanelForPPTNavigation"
+                                 Direction="RightBottom"
+                                 Margin="0,0,6,6"
+                                 HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+    </Grid>
+</Window>

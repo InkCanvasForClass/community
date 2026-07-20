@@ -249,6 +249,9 @@
   <data name="ToolbarPage_GroupChildrenHint" xml:space="preserve">
     <value>Drag components from the library here to add, or drag to reorder.</value>
   </data>
+  <data name="ToolbarPage_CloseGroupChildren" xml:space="preserve">
+    <value>Collapse group components</value>
+  </data>
   <data name="ToolbarPage_ComponentLibrary" xml:space="preserve">
     <value>Library</value>
   </data>

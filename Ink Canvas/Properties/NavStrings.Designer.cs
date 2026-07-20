@@ -82,6 +82,10 @@ namespace Ink_Canvas.Properties
 
         public static string Nav_Home_Tooltip => ResourceManager.GetString(nameof(Nav_Home_Tooltip), _resourceCulture);
 
+        public static string Nav_CopySettingsUri_Tooltip => ResourceManager.GetString(nameof(Nav_CopySettingsUri_Tooltip), _resourceCulture);
+
+        public static string Nav_CopySettingsUri_Copied => ResourceManager.GetString(nameof(Nav_CopySettingsUri_Copied), _resourceCulture);
+
         public static string Nav_ICCSettings => ResourceManager.GetString(nameof(Nav_ICCSettings), _resourceCulture);
 
         public static string Nav_Basic => ResourceManager.GetString(nameof(Nav_Basic), _resourceCulture);
@@ -117,6 +121,10 @@ namespace Ink_Canvas.Properties
         public static string Nav_Window => ResourceManager.GetString(nameof(Nav_Window), _resourceCulture);
 
         public static string Nav_Window_Tooltip => ResourceManager.GetString(nameof(Nav_Window_Tooltip), _resourceCulture);
+
+        public static string Nav_Sidebar => ResourceManager.GetString(nameof(Nav_Sidebar), _resourceCulture);
+
+        public static string Nav_Sidebar_Tooltip => ResourceManager.GetString(nameof(Nav_Sidebar_Tooltip), _resourceCulture);
 
         public static string Nav_Toolbar => ResourceManager.GetString(nameof(Nav_Toolbar), _resourceCulture);
 
@@ -181,5 +189,9 @@ namespace Ink_Canvas.Properties
         public static string Nav_Performance => ResourceManager.GetString(nameof(Nav_Performance), _resourceCulture);
 
         public static string Nav_Performance_Tooltip => ResourceManager.GetString(nameof(Nav_Performance_Tooltip), _resourceCulture);
+
+        public static string Nav_WhiteboardTips => ResourceManager.GetString(nameof(Nav_WhiteboardTips), _resourceCulture);
+
+        public static string Nav_WhiteboardTips_Tooltip => ResourceManager.GetString(nameof(Nav_WhiteboardTips_Tooltip), _resourceCulture);
     }
 }

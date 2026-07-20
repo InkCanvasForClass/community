@@ -138,6 +138,8 @@ namespace Ink_Canvas.Properties
 
         public static string Random_RollCall_Stop => ResourceManager.GetString(nameof(Random_RollCall_Stop), _resourceCulture);
 
+        public static string Random_RollCall_Reset => ResourceManager.GetString(nameof(Random_RollCall_Reset), _resourceCulture);
+
         public static string Random_RollCall_ReadyToDraw => ResourceManager.GetString(nameof(Random_RollCall_ReadyToDraw), _resourceCulture);
 
         public static string Random_RollCall_SingleDrawMode => ResourceManager.GetString(nameof(Random_RollCall_SingleDrawMode), _resourceCulture);

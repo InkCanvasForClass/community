@@ -97,8 +97,21 @@ namespace Ink_Canvas.Helpers
                 var salt = Convert.FromBase64String(settings.Security.PasswordSalt);
                 var expected = Convert.FromBase64String(settings.Security.PasswordHash);
 
+                // 优先用 SHA256 验证（新 hash）
                 var actual = DeriveKey(password, salt, expected.Length);
-                return FixedTimeEquals(actual, expected);
+                if (FixedTimeEquals(actual, expected)) return true;
+
+                // 兼容旧版 HMACSHA1 hash：匹配后自动升级为 SHA256
+                var legacyActual = DeriveKeyLegacy(password, salt, expected.Length);
+                if (FixedTimeEquals(legacyActual, expected))
+                {
+                    // 自动迁移：用 SHA256 重新派生并更新存储
+                    var upgradedHash = DeriveKey(password, salt, expected.Length);
+                    settings.Security.PasswordHash = Convert.ToBase64String(upgradedHash);
+                    return true;
+                }
+
+                return false;
             }
             catch
             {
@@ -608,16 +621,22 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 使用 PBKDF2（Rfc2898）从给定的密码和盐派生指定长度的密钥字节。
+        /// 使用 PBKDF2（Rfc2898）从给定的密码和盐派生指定长度的密钥字节（SHA256）。
         /// </summary>
-        /// <param name="password">用于派生的密码字符串。</param>
-        /// <param name="salt">用于派生的盐字节数组（不可为 null）。</param>
-        /// <param name="keyBytes">要返回的密钥字节长度（以字节为单位）。</param>
-        /// <returns>派生出的密钥字节数组，长度等于 <paramref name="keyBytes"/>。</returns>
         private static byte[] DeriveKey(string password, byte[] salt, int keyBytes)
         {
-            // 注意：Rfc2898DeriveBytes 在 net472 默认 HMACSHA1
-            using (var kdf = new Rfc2898DeriveBytes(password, salt, Pbkdf2Iterations))
+            using (var kdf = new Rfc2898DeriveBytes(password, salt, Pbkdf2Iterations, HashAlgorithmName.SHA256))
+            {
+                return kdf.GetBytes(keyBytes);
+            }
+        }
+
+        /// <summary>
+        /// 使用旧版 PBKDF2（HMACSHA1）派生密钥，仅用于验证历史遗留的密码哈希。
+        /// </summary>
+        private static byte[] DeriveKeyLegacy(string password, byte[] salt, int keyBytes)
+        {
+            using (var kdf = new Rfc2898DeriveBytes(password, salt, Pbkdf2Iterations, HashAlgorithmName.SHA1))
             {
                 return kdf.GetBytes(keyBytes);
             }
@@ -647,7 +666,7 @@ namespace Ink_Canvas.Helpers
             if (BitConverter.IsLittleEndian)
                 Array.Reverse(counter);
 
-            using (var hmac = new HMACSHA1(secret))
+            using (var hmac = new HMACSHA256(secret))
             {
                 var hash = hmac.ComputeHash(counter);
                 int offset = hash[hash.Length - 1] & 0x0f;

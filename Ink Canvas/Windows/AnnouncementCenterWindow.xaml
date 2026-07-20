@@ -21,11 +21,37 @@ Title="{x:Static props:AnnouncementStrings.CenterTitle}"
                    FontWeight="SemiBold"
                    Margin="0,0,0,16" />
 
-        <ListBox x:Name="AnnouncementListBox"
-                 Grid.Row="1"
-                 BorderThickness="0"
-                 SelectionChanged="AnnouncementListBox_SelectionChanged">
-            <ListBox.ItemTemplate>
+        <ui:ListView x:Name="AnnouncementListBox"
+                     Grid.Row="1"
+                     BorderThickness="0"
+                     Background="Transparent"
+                     HorizontalContentAlignment="Stretch"
+                     SelectionChanged="AnnouncementListBox_SelectionChanged">
+            <ui:ListView.Template>
+                <ControlTemplate TargetType="ui:ListView">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                                      VerticalScrollBarVisibility="Auto">
+                            <ItemsPresenter HorizontalAlignment="Stretch" />
+                        </ScrollViewer>
+                    </Border>
+                </ControlTemplate>
+            </ui:ListView.Template>
+            <ui:ListView.ItemContainerStyle>
+                <Style TargetType="ui:ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="MinHeight" Value="36" />
+                </Style>
+            </ui:ListView.ItemContainerStyle>
+            <ui:ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel />
+                </ItemsPanelTemplate>
+            </ui:ListView.ItemsPanel>
+            <ui:ListView.ItemTemplate>
                 <DataTemplate>
                     <Border Padding="12"
                             Margin="0,0,0,8"
@@ -52,8 +78,8 @@ Title="{x:Static props:AnnouncementStrings.CenterTitle}"
                         </StackPanel>
                     </Border>
                 </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+            </ui:ListView.ItemTemplate>
+        </ui:ListView>
 
         <TextBlock x:Name="EmptyTextBlock"
                    Grid.Row="1"

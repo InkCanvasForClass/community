@@ -1,8 +1,8 @@
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Plugins;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -391,8 +391,12 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             }
         }
 
+        private static volatile bool _defaultConfigEnsured;
+
         public static void EnsureDefaultConfigExists()
         {
+            if (_defaultConfigEnsured) return;
+
             var dir = GetConfigDirectory();
             if (!Directory.Exists(dir))
                 ProcessProtectionManager.WithWriteAccess(dir, () => Directory.CreateDirectory(dir));
@@ -404,6 +408,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 SaveConfigFile("default", layout);
                 LogHelper.WriteLogToFile("ToolbarRegistry: 首次启动，创建 default.json", LogHelper.LogType.Info);
             }
+
+            _defaultConfigEnsured = true;
         }
 
         public static ToolbarLayoutSettings LoadActiveConfig()
@@ -470,7 +476,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     if (group.Rules == null) continue;
                     foreach (var rule in group.Rules)
                     {
-                        if (rule.ConditionId != null && ConditionIdRenames.TryGetValue(rule.ConditionId, out var newName))
+                        if (rule.ConditionId != null && ConditionIdRenames.TryGetValue(rule.ConditionId, out var newName)
+                            && !string.Equals(rule.ConditionId, newName, StringComparison.Ordinal))
                         {
                             LogHelper.WriteLogToFile(
                                 $"ToolbarRegistry: 修正 ConditionId [{rule.ConditionId}] -> [{newName}]",
@@ -780,8 +787,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 Child = contentPanel,
                 Tag = ContentBorderTag
             };
-            border.SetResourceReference(Border.BackgroundProperty, "FloatBarBackground");
-            border.SetResourceReference(Border.BorderBrushProperty, "FloatBarBorderBrush");
+            border.SetResourceReference(Border.BackgroundProperty, "FloatingBarBackgroundBrush");
+            border.SetResourceReference(Border.BorderBrushProperty, "FloatingBarBorderBrush");
 
             return border;
         }
@@ -817,8 +824,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     Child = contentPanel,
                     Tag = ContentBorderTag
                 };
-                wrapper.SetResourceReference(Border.BackgroundProperty, "FloatBarBackground");
-                wrapper.SetResourceReference(Border.BorderBrushProperty, "FloatBarBorderBrush");
+                wrapper.SetResourceReference(Border.BackgroundProperty, "FloatingBarBackgroundBrush");
+                wrapper.SetResourceReference(Border.BorderBrushProperty, "FloatingBarBorderBrush");
 
                 view.HorizontalAlignment = HorizontalAlignment.Center;
                 view.VerticalAlignment = VerticalAlignment.Center;
@@ -849,8 +856,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     Child = contentPanel,
                     Tag = ContentBorderTag
                 };
-                wrapper.SetResourceReference(Border.BackgroundProperty, "FloatBarBackground");
-                wrapper.SetResourceReference(Border.BorderBrushProperty, "FloatBarBorderBrush");
+                wrapper.SetResourceReference(Border.BackgroundProperty, "FloatingBarBackgroundBrush");
+                wrapper.SetResourceReference(Border.BorderBrushProperty, "FloatingBarBorderBrush");
 
                 view.HorizontalAlignment = HorizontalAlignment.Center;
                 view.VerticalAlignment = VerticalAlignment.Center;

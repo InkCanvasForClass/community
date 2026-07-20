@@ -2,6 +2,7 @@ using Microsoft.Win32.SafeHandles;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -76,6 +77,49 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
+        /// 直接释放进程保护对指定路径下所有文件和目录的锁定句柄（不经过写入门控）。
+        /// 用于启动时清理待卸载插件等需要立即释放锁的场景。
+        /// </summary>
+        public static void ReleaseLocksForPath(string targetPath)
+        {
+            if (string.IsNullOrWhiteSpace(targetPath)) return;
+            var normPath = NormalizePath(targetPath);
+            if (string.IsNullOrWhiteSpace(normPath)) return;
+
+            lock (_lock)
+            {
+                // 释放目录锁
+                var dirsToRelease = _lockedDirs.Keys
+                    .Where(d => d.Equals(normPath, StringComparison.OrdinalIgnoreCase)
+                             || d.StartsWith(normPath + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+                             || normPath.StartsWith(d + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+                foreach (var d in dirsToRelease)
+                {
+                    if (_lockedDirs.TryGetValue(d, out var handle))
+                    {
+                        _lockedDirs.Remove(d);
+                        try { handle.Dispose(); } catch { }
+                    }
+                }
+
+                // 释放文件锁
+                var filesToRelease = _lockedFiles.Keys
+                    .Where(k => k.Equals(normPath, StringComparison.OrdinalIgnoreCase)
+                             || k.StartsWith(normPath + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+                foreach (var fp in filesToRelease)
+                {
+                    if (_lockedFiles.TryGetValue(fp, out var fs))
+                    {
+                        _lockedFiles.Remove(fp);
+                        try { fs.Dispose(); } catch { }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// 在受进程保护的上下文中执行对指定目标的写入操作；在执行时会在必要情况下临时释放针对目标路径及其父目录的锁，执行完成后恢复这些锁。
         /// </summary>
         /// <param name="targetPath">目标文件或目录的路径，用于确定需要临时释放和随后恢复的锁。</param>
@@ -128,10 +172,20 @@ namespace Ink_Canvas.Helpers
                             }
                         }
 
-                        if (!string.IsNullOrWhiteSpace(normPath) && File.Exists(normPath) && _lockedFiles.TryGetValue(normPath, out var fs))
+                        // 释放目标路径本身及路径下所有文件的锁
+                        var filesToRelease = _lockedFiles.Keys
+                            .Where(k => k.Equals(normPath, StringComparison.OrdinalIgnoreCase)
+                                     || k.StartsWith(normPath + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+                            .ToList();
+                        System.Diagnostics.Debug.WriteLine($"[ProcessProtectionManager] WithWriteAccess: normPath={normPath}, lockedFiles={_lockedFiles.Count}, filesToRelease={filesToRelease.Count}");
+                        foreach (var fp in filesToRelease)
                         {
-                            _lockedFiles.Remove(normPath);
-                            fallbackFiles[normPath] = fs;
+                            if (_lockedFiles.TryGetValue(fp, out var fs))
+                            {
+                                _lockedFiles.Remove(fp);
+                                fallbackFiles[fp] = fs;
+                                System.Diagnostics.Debug.WriteLine($"[ProcessProtectionManager] WithWriteAccess: 释放文件锁 {fp}");
+                            }
                         }
                     }
 
@@ -149,6 +203,10 @@ namespace Ink_Canvas.Helpers
                             try { kv.Value.Dispose(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                         }
                     }
+
+                    // 强制回收以释放文件句柄
+                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
+                    GC.WaitForPendingFinalizers();
 
                     action();
                 }
@@ -209,6 +267,10 @@ namespace Ink_Canvas.Helpers
                         try { kv.Value.Dispose(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                     }
                 }
+
+                // 强制回收以释放文件句柄
+                GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
+                GC.WaitForPendingFinalizers();
 
                 action();
             }

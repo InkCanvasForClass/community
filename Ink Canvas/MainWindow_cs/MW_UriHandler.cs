@@ -264,6 +264,12 @@ namespace Ink_Canvas
                     return;
                 }
 
+                if (pathLower == "settings" || pathLower.StartsWith("settings/"))
+                {
+                    HandleUriSettingsNavigation(uri);
+                    return;
+                }
+
                 LogHelper.WriteLogToFile($"未知的 URI 命令: {command}", LogHelper.LogType.Warning);
             }
             catch (Exception ex)
@@ -366,6 +372,134 @@ namespace Ink_Canvas
             {
                 try { File.WriteAllText(resultPath, "error: " + ex.Message, System.Text.Encoding.UTF8); } catch { }
                 LogHelper.WriteLogToFile($"URI 切换配置方案失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 打开设置窗口并导航到指定页面 / 设置项。
+        /// URI 形式：icc://settings[ /&lt;PageTag&gt;][?key=&lt;SettingsJsonKey&gt;]
+        /// 例如：icc://settings/CanvasPage?key=inkFadeSpeedMultiplier
+        /// </summary>
+        private void HandleUriSettingsNavigation(string uri)
+        {
+            try
+            {
+                if (!Uri.TryCreate(uri, UriKind.Absolute, out Uri parsed))
+                {
+                    LogHelper.WriteLogToFile($"URI 设置导航失败：无法解析 {uri}", LogHelper.LogType.Warning);
+                    return;
+                }
+
+                // 提取页面 tag：路径首段去掉前导 '/'
+                string pageTag = parsed.AbsolutePath?.Trim('/') ?? string.Empty;
+                if (string.IsNullOrEmpty(pageTag))
+                {
+                    pageTag = "HomePage";
+                }
+
+                string settingKey = GetUriQueryValue(uri, "key");
+
+                // 优先复用已打开的设置窗口
+                Windows.SettingsViews.SettingsWindow window = null;
+                if (Application.Current != null)
+                {
+                    foreach (Window w in Application.Current.Windows)
+                    {
+                        if (w is Windows.SettingsViews.SettingsWindow sw)
+                        {
+                            window = sw;
+                            break;
+                        }
+                    }
+                }
+                if (window == null)
+                {
+                    window = new Windows.SettingsViews.SettingsWindow();
+                    // 跳过 Loaded 中默认导航到 HomePage 的行为，由本方法指定目标页
+                    window.SuppressInitialNavigation = true;
+                    window.Show();
+                    // 强制窗口处于正常可见状态（避免新窗口被意外最小化）
+                    if (window.WindowState == WindowState.Minimized)
+                        window.WindowState = WindowState.Normal;
+                    window.Activate();
+                    // 同步到 BtnSettings_Click 使用的静态字段，避免软件按钮再开一个新窗口
+                    _settingsWindow = window;
+                    window.Closed += (s, args) =>
+                    {
+                        if (ReferenceEquals(_settingsWindow, window))
+                            _settingsWindow = null;
+                    };
+                }
+                else
+                {
+                    if (window.WindowState == WindowState.Minimized)
+                        window.WindowState = WindowState.Normal;
+                    window.Activate();
+                    // 同步静态引用，确保软件按钮也能复用此窗口
+                    if (_settingsWindow == null)
+                    {
+                        _settingsWindow = window;
+                        window.Closed += (s, args) =>
+                        {
+                            if (ReferenceEquals(_settingsWindow, window))
+                                _settingsWindow = null;
+                        };
+                    }
+                }
+
+                window.NavigateToPage(pageTag);
+
+                // 选中对应导航项（菜单 + 子菜单 + 底部菜单）
+                var navView = window.GetNavigationView();
+                iNKORE.UI.WPF.Modern.Controls.NavigationViewItem navItem = null;
+                foreach (var item in navView.MenuItems)
+                {
+                    if (item is iNKORE.UI.WPF.Modern.Controls.NavigationViewItem ni)
+                    {
+                        if ((ni.Tag as string) == pageTag)
+                        {
+                            navItem = ni;
+                            break;
+                        }
+                        foreach (var child in ni.MenuItems)
+                        {
+                            if (child is iNKORE.UI.WPF.Modern.Controls.NavigationViewItem cni
+                                && (cni.Tag as string) == pageTag)
+                            {
+                                ni.IsExpanded = true;
+                                navItem = cni;
+                                break;
+                            }
+                        }
+                        if (navItem != null) break;
+                    }
+                }
+                if (navItem == null)
+                {
+                    foreach (var item in navView.FooterMenuItems)
+                    {
+                        if (item is iNKORE.UI.WPF.Modern.Controls.NavigationViewItem ni
+                            && (ni.Tag as string) == pageTag)
+                        {
+                            navItem = ni;
+                            break;
+                        }
+                    }
+                }
+                if (navItem != null)
+                {
+                    navView.SelectedItem = navItem;
+                }
+
+                if (!string.IsNullOrEmpty(settingKey))
+                {
+                    // 设置挂起的高亮 key，等页面 Loaded 后再触发，避免可视树尚未构建导致高亮失效
+                    window.SetPendingHighlightKey(settingKey);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"URI 设置导航失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
     }
