@@ -176,21 +176,23 @@ namespace Ink_Canvas.Helpers
                 // 计算5次贝塞尔的控制点
                 var controlPoints = CalculateQuinticControlPoints(p0, p1, p2, p3, p4, p5);
 
-                // 生成插值点
+                // 生成插值点。基础插值步数由配置控制，自适应模式根据局部曲率增加采样。
+                int interpolationSteps = GetQuinticInterpolationSteps(p1, p2, p3, p4);
+
                 if (i == 0)
                 {
-                    // 第一个窗口：生成更多插值点
-                    for (int j = 1; j <= 4; j++)
+                    // 第一个窗口生成完整的局部曲线采样点。
+                    for (int j = 1; j < interpolationSteps; j++)
                     {
-                        double t = (double)j / 5;
+                        double t = (double)j / interpolationSteps;
                         var bezierPoint = CalculateQuinticBezierPoint(p0, controlPoints, p5, t);
                         result.Add(bezierPoint);
                     }
                 }
                 else
                 {
-                    // 后续窗口：只生成最后一个插值点，避免重复
-                    double t = 4.0 / 5.0; // 只取最后一个插值点
+                    // 后续窗口只取靠近窗口末端的采样点，避免滑动窗口产生重复点。
+                    double t = (double)(interpolationSteps - 1) / interpolationSteps;
                     var bezierPoint = CalculateQuinticBezierPoint(p0, controlPoints, p5, t);
                     result.Add(bezierPoint);
                 }
@@ -205,8 +207,39 @@ namespace Ink_Canvas.Helpers
             return RemoveDuplicatePointsLoose(result.ToArray());
         }
 
+        private int GetQuinticInterpolationSteps(
+            StylusPoint p1,
+            StylusPoint p2,
+            StylusPoint p3,
+            StylusPoint p4)
+        {
+            int steps = Math.Clamp(InterpolationSteps, 2, 24);
+
+            if (!UseAdaptiveInterpolation)
+            {
+                return steps;
+            }
+
+            var v1 = new Vector(p2.X - p1.X, p2.Y - p1.Y);
+            var v2 = new Vector(p4.X - p3.X, p4.Y - p3.Y);
+            if (v1.Length < 1e-6 || v2.Length < 1e-6)
+            {
+                return steps;
+            }
+
+            v1.Normalize();
+            v2.Normalize();
+            double directionChange = Math.Acos(
+                Math.Clamp(Vector.Multiply(v1, v2), -1.0, 1.0)) / Math.PI;
+
+            return Math.Clamp(
+                steps + (int)Math.Round(directionChange * steps),
+                steps,
+                24);
+        }
+
         /// <summary>
-        /// 5次贝塞尔曲线控制点计算
+        /// 计算五次贝塞尔曲线控制点
         /// </summary>
         private (Point cp1, Point cp2, Point cp3, Point cp4) CalculateQuinticControlPoints(
             StylusPoint p0, StylusPoint p1, StylusPoint p2, StylusPoint p3, StylusPoint p4, StylusPoint p5)
@@ -217,11 +250,17 @@ namespace Ink_Canvas.Helpers
             double dist3 = Math.Sqrt((p4.X - p3.X) * (p4.X - p3.X) + (p4.Y - p3.Y) * (p4.Y - p3.Y));
             double dist4 = Math.Sqrt((p5.X - p4.X) * (p5.X - p4.X) + (p5.Y - p4.Y) * (p5.Y - p4.Y));
 
-            // 使用更小的控制点距离，产生超平滑的曲线
-            double controlDist1 = dist1 * 0.15;
-            double controlDist2 = dist2 * 0.15;
-            double controlDist3 = dist3 * 0.15;
-            double controlDist4 = dist4 * 0.15;
+            // 平滑强度控制控制点长度，曲线张力用于调节控制点影响。
+            // 两者共同决定曲线的弯曲程度，避免配置项只保存但不参与计算。
+            double controlFactor = Math.Clamp(
+                SmoothingStrength * (0.5 + CurveTension),
+                0.05,
+                0.6);
+
+            double controlDist1 = dist1 * controlFactor;
+            double controlDist2 = dist2 * controlFactor;
+            double controlDist3 = dist3 * controlFactor;
+            double controlDist4 = dist4 * controlFactor;
 
             // 计算控制点方向 - 使用更平滑的方向计算
             double dir1X = p2.X - p0.X;

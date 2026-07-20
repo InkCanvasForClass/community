@@ -35,6 +35,8 @@ namespace Ink_Canvas.Helpers
                 InterpolationSteps = _config.InterpolationSteps,
                 UseHardwareAcceleration = _config.UseHardwareAcceleration,
                 MaxConcurrentTasks = _config.MaxConcurrentTasks,
+                UseAdaptiveInterpolation = _config.UseAdaptiveInterpolation,
+                CurveTension = _config.CurveTension,
                 PerformanceMonitor = _performanceMonitor
             };
 
@@ -164,6 +166,8 @@ namespace Ink_Canvas.Helpers
             _asyncSmoothing.InterpolationSteps = newConfig.InterpolationSteps;
             _asyncSmoothing.UseHardwareAcceleration = newConfig.UseHardwareAcceleration;
             _asyncSmoothing.MaxConcurrentTasks = newConfig.MaxConcurrentTasks;
+            _asyncSmoothing.UseAdaptiveInterpolation = newConfig.UseAdaptiveInterpolation;
+            _asyncSmoothing.CurveTension = newConfig.CurveTension;
         }
 
         /// <summary>
