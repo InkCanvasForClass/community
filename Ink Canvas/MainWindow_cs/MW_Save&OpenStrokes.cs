@@ -536,9 +536,10 @@ namespace Ink_Canvas
                         else
                         {
                             // 保存为二进制格式
-                            var fs = new FileStream(savePathWithName, FileMode.Create);
-                            inkCanvas.Strokes.Save(fs);
-                            fs.Close();
+                            using (var fs = new FileStream(savePathWithName, FileMode.Create))
+                            {
+                                inkCanvas.Strokes.Save(fs);
+                            }
                             if (newNotice)
                             {
                                 Task.Delay(100).ContinueWith(t =>
@@ -928,9 +929,10 @@ namespace Ink_Canvas
                             bitmap.Save(imagePathWithName, ImageFormat.Png);
 
                             // 仍然保存墨迹文件以兼容旧版本
-                            var fs = new FileStream(savePathWithName, FileMode.Create);
-                            inkCanvas.Strokes.Save(fs);
-                            fs.Close();
+                            using (var fs = new FileStream(savePathWithName, FileMode.Create))
+                            {
+                                inkCanvas.Strokes.Save(fs);
+                            }
 
                             _ = Task.Run(async () =>
                             {

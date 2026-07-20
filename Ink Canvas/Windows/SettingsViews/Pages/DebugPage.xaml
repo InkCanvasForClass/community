@@ -9,7 +9,7 @@
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
 mc:Ignorable="d"
-      Title="Debug">
+      Title="{x:Static props:AdvancedStrings.Debug_PageTitle}">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
@@ -29,7 +29,7 @@ mc:Ignorable="d"
                 Spacing="{StaticResource SettingsCardSpacing}">
 
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                    Text="Debug" />
+                    Text="{x:Static props:AdvancedStrings.Debug_PageHeader}" />
 
                 <controls:LabeledSettingsCard x:Name="ToggleSwitchDebugConsole"
                     Header="{x:Static props:AdvancedStrings.Debug_ShowConsole_Header}"
@@ -94,11 +94,11 @@ mc:Ignorable="d"
                         <ui:FontIcon Glyph="&#xE91B;"/>
                     </ui:SettingsExpander.HeaderIcon>
 
-                    <controls:CopyButton Text="You can override the Left indention of a SettingsCard by overriding the SettingsCardLeftIndention"/>
+                    <controls:CopyButton Text="{x:Static props:AdvancedStrings.Debug_SettingsExpanderExample_Desc}"/>
 
                     <ui:SettingsExpander.Items>
-                        <ui:SettingsCard Description="You can override the Left indention of a SettingsCard by overriding the SettingsCardLeftIndention"
-                            Header="Customization">
+                        <ui:SettingsCard Description="{x:Static props:AdvancedStrings.Debug_SettingsExpanderExample_Desc}"
+                            Header="{x:Static props:AdvancedStrings.Debug_SettingsExpanderExample_Header}">
                             <ui:SettingsCard.Resources>
                                 <sys:Double x:Key="SettingsCardLeftIndention">0</sys:Double>
                             </ui:SettingsCard.Resources>

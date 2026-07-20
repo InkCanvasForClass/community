@@ -15,14 +15,26 @@ namespace Ink_Canvas.WorkflowAutomation.Abstractions
         static Dictionary<string, ActionRegistryInfo> Actions { get; } = new();
 
         /// <summary>
-        /// 注册行动处理程序
+        /// 注册行动处理程序。
+        /// 同一 handler 注册多次将自动去重，避免重复触发。
         /// </summary>
         void RegisterActionHandler(string id, ActionRegistryInfo.HandleDelegate handler);
 
         /// <summary>
-        /// 注册行动恢复处理程序
+        /// 取消注册行动处理程序。
+        /// </summary>
+        void UnregisterActionHandler(string id, ActionRegistryInfo.HandleDelegate handler);
+
+        /// <summary>
+        /// 注册行动恢复处理程序。
+        /// 同一 handler 注册多次将自动去重。
         /// </summary>
         void RegisterRevertHandler(string id, ActionRegistryInfo.HandleDelegate handler);
+
+        /// <summary>
+        /// 取消注册行动恢复处理程序。
+        /// </summary>
+        void UnregisterRevertHandler(string id, ActionRegistryInfo.HandleDelegate handler);
 
         /// <summary>
         /// 触发行动组

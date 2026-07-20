@@ -74,7 +74,16 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             if (!IActionService.Actions.TryGetValue(id, out var actionRegistryInfo))
                 throw new KeyNotFoundException($"找不到行动 {id}。");
 
+            // 幂等：同一 handler 注册多次直接返回，避免累加触发
+            if (actionRegistryInfo.Handle == handler) return;
             actionRegistryInfo.Handle += handler;
+        }
+
+        public void UnregisterActionHandler(string id, ActionRegistryInfo.HandleDelegate handler)
+        {
+            if (!IActionService.Actions.TryGetValue(id, out var actionRegistryInfo)) return;
+            if (actionRegistryInfo.Handle == null) return;
+            actionRegistryInfo.Handle -= handler;
         }
 
         /// <summary>
@@ -86,7 +95,16 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             if (!IActionService.Actions.TryGetValue(id, out var actionRegistryInfo))
                 throw new KeyNotFoundException($"找不到行动 {id}。");
 
+            // 幂等：同一 handler 注册多次直接返回
+            if (actionRegistryInfo.RevertHandle == handler) return;
             actionRegistryInfo.RevertHandle += handler;
+        }
+
+        public void UnregisterRevertHandler(string id, ActionRegistryInfo.HandleDelegate handler)
+        {
+            if (!IActionService.Actions.TryGetValue(id, out var actionRegistryInfo)) return;
+            if (actionRegistryInfo.RevertHandle == null) return;
+            actionRegistryInfo.RevertHandle -= handler;
         }
 
         /// <summary>

@@ -202,7 +202,16 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             if (!IRulesetService.Rules.TryGetValue(id, out var ruleRegistryInfo))
                 throw new KeyNotFoundException($"找不到规则 {id}。");
 
+            // 幂等：同一 handler 注册多次直接返回，避免累加触发
+            if (ruleRegistryInfo.Handle == handler) return;
             ruleRegistryInfo.Handle += handler;
+        }
+
+        public void UnregisterRuleHandler(string id, RuleRegistryInfo.HandleDelegate handler)
+        {
+            if (!IRulesetService.Rules.TryGetValue(id, out var ruleRegistryInfo)) return;
+            if (ruleRegistryInfo.Handle == null) return;
+            ruleRegistryInfo.Handle -= handler;
         }
 
         /// <summary>

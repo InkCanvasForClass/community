@@ -1219,57 +1219,73 @@ namespace Ink_Canvas
 
         private async Task<FrameworkElement> CreateAndCompressImageAsync(string filePath)
         {
-            string fileExtension = Path.GetExtension(filePath);
-            if (string.Equals(fileExtension, ".pdf", StringComparison.OrdinalIgnoreCase))
-                return await CreateAndCompressImageFromPdfAsync(filePath);
-
-            string savePath = Path.Combine(Settings.Automation.AutoSavedStrokesLocation, "File Dependency");
-            if (!Directory.Exists(savePath))
+            try
             {
-                Directory.CreateDirectory(savePath);
+                if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+                {
+                    LogHelper.WriteLogToFile($"插入图片失败：文件不存在或路径为空: {filePath}", LogHelper.LogType.Warning);
+                    ShowNotification("无法插入图片：文件不存在或已被移动。");
+                    return null;
+                }
+
+                string fileExtension = Path.GetExtension(filePath);
+                if (string.Equals(fileExtension, ".pdf", StringComparison.OrdinalIgnoreCase))
+                    return await CreateAndCompressImageFromPdfAsync(filePath);
+
+                string savePath = Path.Combine(Settings.Automation.AutoSavedStrokesLocation, "File Dependency");
+                if (!Directory.Exists(savePath))
+                {
+                    Directory.CreateDirectory(savePath);
+                }
+
+                string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
+                string newFilePath = Path.Combine(savePath, timestamp + fileExtension);
+
+                await Task.Run(() => File.Copy(filePath, newFilePath, true));
+
+                return await Dispatcher.InvokeAsync(() =>
+                {
+                    BitmapImage bitmapImage = new BitmapImage();
+                    bitmapImage.BeginInit();
+                    bitmapImage.UriSource = new Uri(newFilePath);
+                    bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmapImage.EndInit();
+
+                    int width = bitmapImage.PixelWidth;
+                    int height = bitmapImage.PixelHeight;
+
+                    Image image = new Image();
+                    // 设置拉伸模式为Fill，支持任意比例缩放
+                    image.Stretch = Stretch.Fill;
+
+                    if (isLoaded && Settings.Canvas.IsCompressPicturesUploaded && (width > 1920 || height > 1080))
+                    {
+                        double scaleX = 1920.0 / width;
+                        double scaleY = 1080.0 / height;
+                        double scale = Math.Min(scaleX, scaleY);
+
+                        TransformedBitmap transformedBitmap = new TransformedBitmap(bitmapImage, new ScaleTransform(scale, scale));
+
+                        image.Source = transformedBitmap;
+                        image.Width = transformedBitmap.PixelWidth;
+                        image.Height = transformedBitmap.PixelHeight;
+                    }
+                    else
+                    {
+                        image.Source = bitmapImage;
+                        image.Width = width;
+                        image.Height = height;
+                    }
+
+                    return image;
+                });
             }
-
-            string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
-            string newFilePath = Path.Combine(savePath, timestamp + fileExtension);
-
-            await Task.Run(() => File.Copy(filePath, newFilePath, true));
-
-            return await Dispatcher.InvokeAsync(() =>
+            catch (Exception ex)
             {
-                BitmapImage bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.UriSource = new Uri(newFilePath);
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.EndInit();
-
-                int width = bitmapImage.PixelWidth;
-                int height = bitmapImage.PixelHeight;
-
-                Image image = new Image();
-                // 设置拉伸模式为Fill，支持任意比例缩放
-                image.Stretch = Stretch.Fill;
-
-                if (isLoaded && Settings.Canvas.IsCompressPicturesUploaded && (width > 1920 || height > 1080))
-                {
-                    double scaleX = 1920.0 / width;
-                    double scaleY = 1080.0 / height;
-                    double scale = Math.Min(scaleX, scaleY);
-
-                    TransformedBitmap transformedBitmap = new TransformedBitmap(bitmapImage, new ScaleTransform(scale, scale));
-
-                    image.Source = transformedBitmap;
-                    image.Width = transformedBitmap.PixelWidth;
-                    image.Height = transformedBitmap.PixelHeight;
-                }
-                else
-                {
-                    image.Source = bitmapImage;
-                    image.Width = width;
-                    image.Height = height;
-                }
-
-                return image;
-            });
+                LogHelper.WriteLogToFile($"插入图片失败: {ex.Message}", LogHelper.LogType.Error);
+                ShowNotification("无法插入图片：文件可能已损坏或格式不受支持。");
+                return null;
+            }
         }
 
         /// <summary>
