@@ -193,4 +193,25 @@
   <data name="Debug_SettingsExpanderExample_Desc" xml:space="preserve">
     <value>You can override the Left indention of a SettingsCard by overriding the SettingsCardLeftIndention</value>
   </data>
+  <data name="Debug_MemoryBreakdownSection" xml:space="preserve">
+    <value>内存占用清单（诊断）</value>
+  </data>
+  <data name="Debug_MemoryBreakdownDump_Header" xml:space="preserve">
+    <value>输出当前进程的详细内存占用清单到日志</value>
+  </data>
+  <data name="Debug_MemoryBreakdownDump_Desc" xml:space="preserve">
+    <value>写入进程内存/GC 堆/WPF 元素/缓存/程序集到 Logs 目录，便于排查内存占用问题。</value>
+  </data>
+  <data name="Debug_MemoryBreakdownDump_Button" xml:space="preserve">
+    <value>输出内存清单</value>
+  </data>
+  <data name="Debug_MemoryBreakdownForceGC_Header" xml:space="preserve">
+    <value>强制 GC 回收</value>
+  </data>
+  <data name="Debug_MemoryBreakdownForceGC_Desc" xml:space="preserve">
+    <value>调用 GC.Collect + GC.WaitForPendingFinalizers + GC.Collect，尝试释放可回收对象。仅在排查时使用。</value>
+  </data>
+  <data name="Debug_MemoryBreakdownForceGC_Button" xml:space="preserve">
+    <value>强制 GC</value>
+  </data>
 </root>

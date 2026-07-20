@@ -59,6 +59,13 @@ namespace Ink_Canvas.Properties
             dict["Advanced_EdgeGestureUtil"] = ("AdvancedStrings", "EdgeGestureUtil");
             dict["Advanced_EdgeGestureUtilHint_Part1"] = ("AdvancedStrings", "EdgeGestureUtilHint_Part1");
             dict["Advanced_EdgeGestureUtilHint_Part2"] = ("AdvancedStrings", "EdgeGestureUtilHint_Part2");
+            dict["Debug_MemoryBreakdownSection"] = ("AdvancedStrings", "Debug_MemoryBreakdownSection");
+            dict["Debug_MemoryBreakdownDump_Header"] = ("AdvancedStrings", "Debug_MemoryBreakdownDump_Header");
+            dict["Debug_MemoryBreakdownDump_Desc"] = ("AdvancedStrings", "Debug_MemoryBreakdownDump_Desc");
+            dict["Debug_MemoryBreakdownDump_Button"] = ("AdvancedStrings", "Debug_MemoryBreakdownDump_Button");
+            dict["Debug_MemoryBreakdownForceGC_Header"] = ("AdvancedStrings", "Debug_MemoryBreakdownForceGC_Header");
+            dict["Debug_MemoryBreakdownForceGC_Desc"] = ("AdvancedStrings", "Debug_MemoryBreakdownForceGC_Desc");
+            dict["Debug_MemoryBreakdownForceGC_Button"] = ("AdvancedStrings", "Debug_MemoryBreakdownForceGC_Button");
             dict["Advanced_EraserBindTouchHint"] = ("AdvancedStrings", "EraserBindTouchHint");
             dict["Advanced_EraserBindTouchMultiplier"] = ("AdvancedStrings", "EraserBindTouchMultiplier");
             dict["Advanced_Experimental"] = ("AdvancedStrings", "Experimental");

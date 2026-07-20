@@ -1,5 +1,7 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
+using System;
+using System.IO;
 using System.Windows;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
@@ -78,6 +80,50 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             StartupCount.Reset();
             LogHelper.WriteLogToFile("[Debug] 熔断计数器已手动重置", LogHelper.LogType.Warning);
             MessageBox.Show("熔断计数器已重置为 0。", "重置完成", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        // Issue #546 排查辅助:输出详细内存占用清单到 Logs 目录并写一行摘要到 LogHelper。
+        private void BtnDumpMemory_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                BtnDumpMemory.IsEnabled = false;
+                var path = MemoryBreakdownHelper.DumpToFile();
+                if (!string.IsNullOrEmpty(path))
+                {
+                    var sizeKb = new System.IO.FileInfo(path).Length / 1024;
+                    LogHelper.WriteLogToFile(
+                        $"[MemoryBreakdown] 用户触发的内存清单已保存: {path} ({sizeKb} KB)",
+                        LogHelper.LogType.Info);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[MemoryBreakdown] 用户触发输出异常: {ex.Message}", LogHelper.LogType.Error);
+            }
+            finally
+            {
+                BtnDumpMemory.IsEnabled = true;
+            }
+        }
+
+        // Issue #546 排查辅助:强制 GC 一次,记录前后 Working Set。不可滥用,仅用于诊断。
+        private void BtnForceGC_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                BtnForceGC.IsEnabled = false;
+                var summary = MemoryBreakdownHelper.ForceFullGc();
+                LogHelper.WriteLogToFile($"[MemoryBreakdown] 强制 GC 触发 - {summary}", LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[MemoryBreakdown] 强制 GC 异常: {ex.Message}", LogHelper.LogType.Error);
+            }
+            finally
+            {
+                BtnForceGC.IsEnabled = true;
+            }
         }
     }
 }
