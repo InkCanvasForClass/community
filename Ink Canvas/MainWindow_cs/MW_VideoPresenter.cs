@@ -25,7 +25,7 @@ namespace Ink_Canvas
         // 标记：用于在保存/恢复白板内容时排除“展台实时上屏”画面
         private const string VideoPresenterLiveFrameTag = "__VideoPresenterLiveFrame";
 
-        private CameraService _cameraService;
+        private ICameraService _cameraService;
         private readonly object _videoPresenterFrameLock = new object();
         private Bitmap _lastFrame;
 
@@ -95,7 +95,8 @@ namespace Ink_Canvas
             EnsureCameraService();
             if (BtnCapturePhoto != null) BtnCapturePhoto.IsEnabled = false;
             RefreshVideoPresenterDeviceList();
-            UpdateBoothResolutionTabState();
+            // ComboBox 会在 StartVideoPresenterPreview 完成后被填充
+            RefreshBoothResolutionComboBox();
 
             if (ToggleBtnPhotoCorrection != null)
             {
@@ -199,7 +200,7 @@ namespace Ink_Canvas
         {
             if (_cameraService != null) return;
 
-            _cameraService = new CameraService();
+            _cameraService = CameraServiceFactory.Create();
             _cameraService.FrameReceived += CameraService_FrameReceived;
             _cameraService.ErrorOccurred += CameraService_ErrorOccurred;
             SyncBoothResolutionToCameraService();
@@ -207,9 +208,60 @@ namespace Ink_Canvas
 
         internal void SyncBoothResolutionToCameraService()
         {
+            // 接口已改为通过 SelectedResolutionIndex 切换分辨率，
+            // 这里把底层枚举的 native 分辨率同步到 UI ComboBox
+            RefreshBoothResolutionComboBox();
+        }
+
+        /// <summary>把当前摄像头的 native 分辨率列表填充到 ComboBox，并选中当前生效的分辨率。</summary>
+        private void RefreshBoothResolutionComboBox()
+        {
+            if (BoothResolutionComboBox == null) return;
             if (_cameraService == null) return;
-            _cameraService.ResolutionWidth = BoothResolutionWidth;
-            _cameraService.ResolutionHeight = BoothResolutionHeight;
+
+            try
+            {
+                _isBoothComboBoxUpdating = true;
+                BoothResolutionComboBox.Items.Clear();
+
+                var resolutions = _cameraService.NativeResolutions;
+                if (resolutions == null || resolutions.Count == 0)
+                {
+                    BoothResolutionComboBox.Items.Add("加载中…");
+                    BoothResolutionComboBox.SelectedIndex = 0;
+                    LogHelper.WriteLogToFile(
+                        "RefreshBoothResolutionComboBox: NativeResolutions 为空，ComboBox 显示占位文本",
+                        LogHelper.LogType.Warning);
+                    return;
+                }
+
+                foreach (var r in resolutions)
+                {
+                    BoothResolutionComboBox.Items.Add(r);
+                }
+
+                int sel = _cameraService.SelectedResolutionIndex;
+                if (sel >= 0 && sel < resolutions.Count)
+                {
+                    BoothResolutionComboBox.SelectedIndex = sel;
+                    // 同步 MainWindow 持有的旧字段（被 BoothResolutionWidth/Height 暴露给其他模块）
+                    var r = resolutions[sel];
+                    _boothResolutionWidth = r.Width;
+                    _boothResolutionHeight = r.Height;
+                }
+
+                LogHelper.WriteLogToFile(
+                    $"RefreshBoothResolutionComboBox: 填充 {resolutions.Count} 项，选中索引 {sel}",
+                    LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"RefreshBoothResolutionComboBox 异常: {ex.Message}", LogHelper.LogType.Error);
+            }
+            finally
+            {
+                _isBoothComboBoxUpdating = false;
+            }
         }
 
         /// <summary>
@@ -228,42 +280,33 @@ namespace Ink_Canvas
         /// <summary>
         /// 处理来自摄像头的单帧图像，用于更新预览、缓存最新帧并刷新当前页的实时画面显示。
         /// </summary>
-        /// <param name="frame">来自摄像头的位图帧；为 null 时忽略。</param>
+        /// <param name="e">来自摄像头服务的帧事件参数；Frame 为 null 时忽略。</param>
         /// <remarks>
-        /// 缓存该帧为最新帧，并通过 CameraService 提供的 BitmapSource 直接更新预览与实时上屏
+        /// 通过 ICameraService.GetCurrentFrameAsBitmap 拉取一份 Bitmap 用于拍照缓存，
+        /// 通过 e.Frame 更新预览与实时上屏。
         /// </remarks>
-        private void CameraService_FrameReceived(object sender, Bitmap frame)
+        private void CameraService_FrameReceived(object sender, FrameEventArgs e)
         {
-            if (frame == null) return;
+            if (e?.Frame == null) return;
 
             try
             {
-                Bitmap serviceCopy;
-                try
+                // 拉取一份 GDI+ Bitmap 副本作为拍照缓存
+                var photoCache = _cameraService?.GetCurrentFrameAsBitmap();
+                if (photoCache != null)
                 {
-                    serviceCopy = (Bitmap)frame.Clone();
+                    lock (_videoPresenterFrameLock)
+                    {
+                        _lastFrame?.Dispose();
+                        _lastFrame = photoCache;
+                    }
                 }
-                catch
-                {
-                    // 可能在下一帧到来时被 CameraService 释放，直接忽略这一帧
-                    return;
-                }
-
-                lock (_videoPresenterFrameLock)
-                {
-                    _lastFrame?.Dispose();
-                    _lastFrame = (Bitmap)serviceCopy.Clone();
-                }
-
-                var previewSource = _cameraService?.GetCurrentFrameAsBitmapSource();
-                serviceCopy.Dispose();
-                if (previewSource == null) return;
 
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     if (VideoPresenterPreviewImage != null)
                     {
-                        VideoPresenterPreviewImage.Source = previewSource;
+                        VideoPresenterPreviewImage.Source = e.Frame;
                     }
 
                     if (BtnCapturePhoto != null)
@@ -272,7 +315,7 @@ namespace Ink_Canvas
                     }
 
                     // 实时上屏：刷新当前页的画面元素
-                    TryUpdateLiveFrameOnCanvas(previewSource);
+                    TryUpdateLiveFrameOnCanvas(e.Frame);
                 }));
             }
             catch
@@ -400,12 +443,32 @@ namespace Ink_Canvas
         /// <remarks>
         /// 若未检测到摄像头，会在面板中显示提示文本；若存在设备，则为每个设备创建一个用于选择的单选按钮，选择某项会启动对应的摄像头预览。函数在列表生成后会尝试恢复并启动当前页面在 _cameraIndexByPage 中存储的摄像头索引，仅当没有保存的索引时才会选择并启动第一个可用设备。保存的每页选择优先于默认选择第一个设备。
         /// </remarks>
-        private void RefreshVideoPresenterDeviceList()
+        private async void RefreshVideoPresenterDeviceList()
         {
             if (_cameraService == null) return;
             if (CameraDevicesStackPanel == null) return;
 
-            _cameraService.RefreshCameraList();
+            CameraDevicesStackPanel.Children.Clear();
+            // 占位文本，等待异步枚举完成
+            var loadingTb = new TextBlock
+            {
+                Text = "正在检测摄像头…",
+                FontSize = 12,
+                Margin = new Thickness(5),
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+            loadingTb.SetResourceReference(TextBlock.ForegroundProperty, "FloatBarForeground");
+            CameraDevicesStackPanel.Children.Add(loadingTb);
+
+            try
+            {
+                await _cameraService.RefreshCameraListAsync();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"RefreshVideoPresenterDeviceList: 刷新摄像头列表失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+
             CameraDevicesStackPanel.Children.Clear();
 
             if (_cameraService.AvailableCameras == null || _cameraService.AvailableCameras.Count == 0)
@@ -463,16 +526,27 @@ namespace Ink_Canvas
         /// 为当前白板页开始指定摄像头的预览并保存该页的摄像头选择。
         /// </summary>
         /// <param name="cameraIndex">要启动的摄像头在设备列表中的索引。</param>
-        /// <remarks>预览成功时会允许拍照按钮可用。</remarks>
-        private void StartVideoPresenterPreview(int cameraIndex)
+        /// <remarks>预览成功时会允许拍照按钮可用，并刷新分辨率 ComboBox。</remarks>
+        private async void StartVideoPresenterPreview(int cameraIndex)
         {
             try
             {
                 EnsureCameraService();
                 _cameraIndexByPage[GetCurrentPageIndex()] = cameraIndex;
-                if (_cameraService.StartPreview(cameraIndex))
+                LogHelper.WriteLogToFile(
+                    $"StartVideoPresenterPreview: cameraIndex={cameraIndex}，IsCapturing={_cameraService.IsCapturing}",
+                    LogHelper.LogType.Info);
+                if (await _cameraService.StartPreviewAsync(cameraIndex))
                 {
                     if (BtnCapturePhoto != null) BtnCapturePhoto.IsEnabled = true;
+                    // 启动成功后填充当前摄像头的 native 分辨率
+                    RefreshBoothResolutionComboBox();
+                }
+                else
+                {
+                    LogHelper.WriteLogToFile(
+                        "StartVideoPresenterPreview: StartPreview 返回 false",
+                        LogHelper.LogType.Warning);
                 }
             }
             catch (Exception ex)
@@ -547,7 +621,7 @@ namespace Ink_Canvas
             }
         }
 
-        private void StartVideoPresenterPreviewForCurrentPageIfNeeded()
+        private async void StartVideoPresenterPreviewForCurrentPageIfNeeded()
         {
             try
             {
@@ -563,7 +637,7 @@ namespace Ink_Canvas
 
                 if (_cameraService.AvailableCameras == null || _cameraService.AvailableCameras.Count == 0)
                 {
-                    _cameraService.RefreshCameraList();
+                    await _cameraService.RefreshCameraListAsync();
                 }
 
                 if (_cameraService.AvailableCameras == null || _cameraService.AvailableCameras.Count == 0)
@@ -572,7 +646,7 @@ namespace Ink_Canvas
                 }
 
                 idx = Math.Max(0, Math.Min(idx, _cameraService.AvailableCameras.Count - 1));
-                _cameraService.StartPreview(idx);
+                await _cameraService.StartPreviewAsync(idx);
             }
             catch (Exception ex)
             {
@@ -642,7 +716,7 @@ namespace Ink_Canvas
                     && _cameraIndexByPage.TryGetValue(page, out int idx))
                 {
                     EnsureCameraService();
-                    _cameraService?.StartPreview(idx);
+                    _ = _cameraService?.StartPreviewAsync(idx);
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }

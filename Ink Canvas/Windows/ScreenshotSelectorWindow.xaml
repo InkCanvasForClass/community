@@ -299,13 +299,7 @@
                             <TextBlock Text="{x:Static props:MainWindowStrings.Main_Screenshot_Resolution}" Foreground="White" VerticalAlignment="Center" Margin="0,0,4,0" FontSize="12"/>
                             <ComboBox Name="ResolutionComboBox" Margin="2,0"
                                      Background="#2d2d2d" Foreground="White" BorderBrush="#404040"
-                                     SelectionChanged="ResolutionComboBox_SelectionChanged">
-                                <ComboBoxItem Content="640x480" Tag="640,480"/>
-                                <ComboBoxItem Content="800x600" Tag="800,600"/>
-                                <ComboBoxItem Content="1024x768" Tag="1024,768"/>
-                                <ComboBoxItem Content="1280x720" Tag="1280,720"/>
-                                <ComboBoxItem Content="1920x1080" Tag="1920,1080"/>
-                            </ComboBox>
+                                     SelectionChanged="ResolutionComboBox_SelectionChanged" />
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
