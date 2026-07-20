@@ -98,7 +98,9 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Style="{StaticResource BodyStrongTextBlockStyle}"
                                    Text="{x:Static props:ThemeStrings.Theme_QuoteSource}" />
-                        <ikw:SimpleStackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                            <ikw:SimpleStackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                            <Button x:Name="BtnCustomizeHitokoto" Content="{x:Static props:ThemeStrings.Theme_Hitokoto_CustomizeTitle}"
+                                    Padding="14,4" Click="BtnCustomizeHitokoto_Click" />
                             <Button x:Name="BtnImport" Content="{x:Static props:ThemeStrings.Theme_Tips_Import}"
                                     Padding="14,4" Click="BtnImport_Click" />
                             <Button x:Name="BtnCreate" Content="{x:Static props:ThemeStrings.Theme_Tips_Create}"
