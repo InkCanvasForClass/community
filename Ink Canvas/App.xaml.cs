@@ -23,7 +23,7 @@ using System.Windows.Threading;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
 using SplashScreen = Ink_Canvas.Windows.SplashScreen;
-using Timer = System.Threading.Timer;
+using Timer = System.Threading.Timer;   
 
 namespace Ink_Canvas
 {
