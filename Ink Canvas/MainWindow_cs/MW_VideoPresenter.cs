@@ -3,6 +3,7 @@ using AForge.Imaging.Filters;
 using AForge.Math.Geometry;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Models;
+using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -425,6 +426,7 @@ namespace Ink_Canvas
             // 左上角侧栏预览已移除（VideoPresenterPreviewImage 已从 XAML 删除），
             // 不再需要清理 Image.Source。clearPreviewImage 参数保留用于调用方语义兼容。
 
+            try { VideoPresenterFullCanvasImage?.Stop(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
             try { _cameraService?.StopPreview(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
             lock (_videoPresenterFrameLock)
             {
@@ -886,10 +888,15 @@ namespace Ink_Canvas
                 return;
             }
 
-            // 检测到摄像头：隐藏占位文字（预览会随后启动）
+            // 检测到摄像头：不在这里隐藏 SearchingText！
+            // 之前立即隐藏会导致用户看到"正在查找..."闪一下消失，然后纯黑屏直到 MediaOpened 触发。
+            // 现在改为：StartVideoCaptureElementPreviewAsync 会把文字改为"正在启动摄像头..."，
+            // 直到 MediaOpened 事件触发（画面真的出来）才隐藏。
+            // 只把文字从"正在查找..."改为"已找到，正在启动..."让用户知道进度。
             if (VideoPresenterSearchingText != null)
             {
-                VideoPresenterSearchingText.Visibility = Visibility.Collapsed;
+                VideoPresenterSearchingText.Text = "正在启动摄像头...";
+                VideoPresenterSearchingText.Visibility = Visibility.Visible;
             }
 
             for (int i = 0; i < _cameraService.AvailableCameras.Count; i++)
@@ -897,10 +904,27 @@ namespace Ink_Canvas
                 CameraDevicesComboBox.Items.Add(_cameraService.AvailableCameras[i].Name);
             }
 
-            // 预选该页已保存的摄像头，否则使用第一个
+            // 预选摄像头优先级：
+            //   1. Settings.Canvas.VideoPresenterLastCameraName（跨会话持久化，用 DsDevice.Name 匹配）
+            //   2. _cameraIndexByPage[当前页]（会话级按页保存的索引）
+            //   3. 第一个摄像头（默认）
             int currentPage = GetCurrentPageIndex();
             int cameraToSelect = 0;
-            if (_cameraIndexByPage.TryGetValue(currentPage, out int savedIdx) && savedIdx >= 0 && savedIdx < _cameraService.AvailableCameras.Count)
+            string savedName = Settings?.Canvas?.VideoPresenterLastCameraName;
+            if (!string.IsNullOrWhiteSpace(savedName))
+            {
+                for (int i = 0; i < _cameraService.AvailableCameras.Count; i++)
+                {
+                    if (string.Equals(_cameraService.AvailableCameras[i].Name, savedName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        cameraToSelect = i;
+                        break;
+                    }
+                }
+            }
+            if (cameraToSelect == 0
+                && _cameraIndexByPage.TryGetValue(currentPage, out int savedIdx)
+                && savedIdx >= 0 && savedIdx < _cameraService.AvailableCameras.Count)
             {
                 cameraToSelect = savedIdx;
             }
@@ -925,8 +949,96 @@ namespace Ink_Canvas
                     LogHelper.LogType.Warning);
             }
 
+            // 持久化恢复分辨率：从 Settings.Canvas.VideoPresenterLastResolutionKey 读取，
+            // 用 "WxH@FPS" 格式匹配 NativeResolutions 中的项，找不到则保持默认（最接近 1920×1080）
+            TryRestoreResolutionFromSettings();
+
             // 立即启动预览
             StartVideoPresenterPreview(cameraToSelect);
+        }
+
+        /// <summary>
+        /// 从 Settings.Canvas.VideoPresenterLastResolutionKey 恢复上次选中的分辨率。
+        /// 用 "WxH@FPS" 格式匹配 NativeResolutions，找到则通过 SetSelectedResolutionIndexSilent
+        /// 更新 _cameraService.SelectedResolutionIndex（不触发 RestartWithNewResolutionAsync 抢占设备），
+        /// 并同步 BoothResolutionComboBox 选中项。
+        /// 找不到则保持 EnumerateResolutionsAsync 设置的默认值（最接近 1920×1080）。
+        /// </summary>
+        private void TryRestoreResolutionFromSettings()
+        {
+            try
+            {
+                string key = Settings?.Canvas?.VideoPresenterLastResolutionKey;
+                if (string.IsNullOrWhiteSpace(key)) return;
+                var resolutions = _cameraService?.NativeResolutions;
+                if (resolutions == null || resolutions.Count == 0) return;
+
+                // 解析 "WxH@FPS"
+                int parsedW = 0, parsedH = 0, parsedFps = 0;
+                int atIdx = key.IndexOf('@');
+                string whPart = atIdx > 0 ? key.Substring(0, atIdx) : key;
+                string fpsPart = atIdx > 0 && atIdx < key.Length - 1 ? key.Substring(atIdx + 1) : null;
+                int xIdx = whPart.IndexOf('x', StringComparison.OrdinalIgnoreCase);
+                if (xIdx <= 0 || xIdx >= whPart.Length - 1) return;
+                if (!int.TryParse(whPart.Substring(0, xIdx), out parsedW) || parsedW <= 0) return;
+                if (!int.TryParse(whPart.Substring(xIdx + 1), out parsedH) || parsedH <= 0) return;
+                if (fpsPart != null && !int.TryParse(fpsPart, out parsedFps)) parsedFps = 0;
+
+                // 在 NativeResolutions 中查找匹配项
+                int matchedIdx = -1;
+                for (int i = 0; i < resolutions.Count; i++)
+                {
+                    var r = resolutions[i];
+                    if (r.Width == parsedW && r.Height == parsedH)
+                    {
+                        if (parsedFps <= 0 || r.FrameRate == parsedFps)
+                        {
+                            matchedIdx = i;
+                            break;
+                        }
+                    }
+                }
+                if (matchedIdx < 0) return;
+
+                // 用 Silent 版本更新索引（不触发 RestartWithNewResolutionAsync 抢占设备），
+                // 因为特殊模式下预览由 VideoCaptureElement 接管，_cameraService 不应启动预览
+                _cameraService.SetSelectedResolutionIndexSilent(matchedIdx);
+
+                // 同步 BoothResolutionComboBox 选中项（在 _isBoothComboBoxUpdating 保护下，避免触发 SelectionChanged）
+                if (BoothResolutionComboBox != null)
+                {
+                    bool prevUpdating = _isBoothComboBoxUpdating;
+                    _isBoothComboBoxUpdating = true;
+                    try
+                    {
+                        // BoothResolutionComboBox 的项是 ResolutionInfo，需要按 W/H/FPS 匹配
+                        for (int i = 0; i < BoothResolutionComboBox.Items.Count; i++)
+                        {
+                            if (BoothResolutionComboBox.Items[i] is ResolutionInfo ri)
+                            {
+                                if (ri.Width == parsedW && ri.Height == parsedH
+                                    && (parsedFps <= 0 || ri.FrameRate == parsedFps))
+                                {
+                                    BoothResolutionComboBox.SelectedIndex = i;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        _isBoothComboBoxUpdating = prevUpdating;
+                    }
+                }
+
+                LogHelper.WriteLogToFile(
+                    $"[VideoPresenter] TryRestoreResolutionFromSettings: 恢复 {key} 成功（matchedIdx={matchedIdx}）",
+                    LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"TryRestoreResolutionFromSettings 异常: {ex.Message}", LogHelper.LogType.Warning);
+            }
         }
 
         private async void CameraDevicesComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -935,6 +1047,21 @@ namespace Ink_Canvas
             if (_cameraService == null) return;
             int idx = CameraDevicesComboBox.SelectedIndex;
             if (idx < 0 || idx >= _cameraService.AvailableCameras.Count) return;
+
+            // 持久化：保存选中的摄像头设备名到 Settings，下次启动时自动恢复
+            try
+            {
+                string camName = _cameraService.AvailableCameras[idx].Name;
+                if (Settings?.Canvas != null && Settings.Canvas.VideoPresenterLastCameraName != camName)
+                {
+                    Settings.Canvas.VideoPresenterLastCameraName = camName;
+                    SettingsManager.SaveSettingsToFile();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"保存摄像头设备名到 Settings 失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
 
             // 切换摄像头时先重新枚举新设备的分辨率（不抢占设备），再启动预览，
             // 确保分辨率 ComboBox 能立刻反映新设备的能力。
@@ -948,6 +1075,10 @@ namespace Ink_Canvas
                     $"CameraDevicesComboBox_SelectionChanged: EnumerateResolutionsAsync 失败: {ex.Message}",
                     LogHelper.LogType.Warning);
             }
+
+            // 切换摄像头后，新设备的 NativeResolutions 不同，旧分辨率 key 不再适用，
+            // 尝试用持久化的分辨率 key 在新设备上匹配；匹配不到则用默认（最接近 1920×1080）
+            TryRestoreResolutionFromSettings();
 
             StartVideoPresenterPreview(idx);
         }
@@ -1256,12 +1387,15 @@ namespace Ink_Canvas
         /// </summary>
         private Task<bool> StartVideoCaptureElementPreviewAsync(int cameraIndex)
         {
-            // 无条件隐藏占位文字（即使后续 early return 或 Play 失败也不应继续显示"正在查找展台设备"）
-            // —— 之前放在 BeginInvoke 内，若 VideoPresenterFullCanvasImage 为 null 或 cameraIndex 越界
-            //    直接 return false，BeginInvoke 永远不会被调度，SearchingText 永远卡住（Q1 根因）。
+            // 不要在这里隐藏 SearchingText：
+            // Play() 后到 MediaOpened 触发前有 500-1500ms 的 D3DImage 分配/FilterGraph 构建延迟，
+            // 这段时间用户看到的是纯深色背景，没有任何提示，会以为卡住了。
+            // 改为把提示文字改为"正在启动摄像头..."（设备已找到，只是启动预览），
+            // 只在 MediaOpened 事件触发时（画面真的出来）才隐藏提示。
             if (VideoPresenterSearchingText != null)
             {
-                VideoPresenterSearchingText.Visibility = Visibility.Collapsed;
+                VideoPresenterSearchingText.Text = "正在启动摄像头...";
+                VideoPresenterSearchingText.Visibility = Visibility.Visible;
             }
 
             if (VideoPresenterFullCanvasImage == null)
@@ -1277,14 +1411,34 @@ namespace Ink_Canvas
                 return Task.FromResult(false);
             }
 
+            // 确保 VideoCaptureElement 可见：
+            // InsertPhotoToCanvas 拍照后会把 VideoCaptureElement.Visibility 设为 Collapsed（替换为冻结照片）。
+            // 如果用户在冻结状态下直接切换摄像头/分辨率，而不先点击侧栏缩略图返回实时画面，
+            // VideoCaptureElement 仍是 Collapsed —— 即使 StartVideoCaptureElementPreviewAsync 成功启动预览、
+            // MediaOpened 触发，用户也看不到画面（被 Collapsed 隐藏）。
+            // 这里在启动预览前强制恢复可见性，并清除冻结状态，确保预览画面能显示。
+            if (VideoPresenterFullCanvasImage.Visibility != Visibility.Visible)
+            {
+                LogHelper.WriteLogToFile(
+                    "[VideoPresenter] StartVideoCaptureElementPreviewAsync: VideoCaptureElement 当前不可见，先清除冻结画面并恢复可见性",
+                    LogHelper.LogType.Info);
+                ClearFrozenFrame();
+                VideoPresenterFullCanvasImage.Visibility = Visibility.Visible;
+                // 重置缩放/平移为默认状态（照片上的缩放不继承到实时画面）
+                _boothPreviewScale = 1.0;
+                _boothPreviewTranslateX = 0;
+                _boothPreviewTranslateY = 0;
+                ApplyBoothPreviewTransform();
+            }
+
             var tcs = new TaskCompletionSource<bool>();
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                // 再次隐藏（保证 BeginInvoke 排队期间不会被其他代码重新显示）
-                if (VideoPresenterSearchingText != null
-                    && VideoPresenterSearchingText.Visibility == Visibility.Visible)
+                // 再次设置提示文字（保证 BeginInvoke 排队期间不会被其他代码改回）
+                if (VideoPresenterSearchingText != null)
                 {
-                    VideoPresenterSearchingText.Visibility = Visibility.Collapsed;
+                    VideoPresenterSearchingText.Text = "正在启动摄像头...";
+                    VideoPresenterSearchingText.Visibility = Visibility.Visible;
                 }
 
                 try
@@ -1321,80 +1475,130 @@ namespace Ink_Canvas
 
                     // 若已在播放同一设备，先停止
                     try { VideoPresenterFullCanvasImage.Stop(); } catch { }
-
-                    // ISupportInitialize 模式设置设备和参数
-                    ((System.ComponentModel.ISupportInitialize)VideoPresenterFullCanvasImage).BeginInit();
-                    VideoPresenterFullCanvasImage.VideoCaptureDevice = device;
-                    // EnableSampleGrabbing=false：VMR9 Renderless 模式下 SampleGrabber 无法连入图，
-                    //  启用反而可能导致图构建失败或 NewVideoSample 不触发。
-                    //  拍照路径改用 CaptureCurrentFrame() 从 D3DImage.CopyBackBuffer 直接拿帧。
-                    VideoPresenterFullCanvasImage.EnableSampleGrabbing = false;
-                    VideoPresenterFullCanvasImage.UseYuv = false;
-                    VideoPresenterFullCanvasImage.LoadedBehavior = WpfMediaKitMediaState.Manual;
-
-                    // 应用当前选中的 native capability（W,H,FPS 组合）
-                    int selIdx = _cameraService?.SelectedResolutionIndex ?? -1;
-                    var resolutions = _cameraService?.NativeResolutions;
-                    if (selIdx >= 0 && selIdx < (resolutions?.Count ?? 0))
+                    // 关键：显式将 VideoCaptureDevice 置为 null，强制依赖属性变化回调触发 CleanUp()。
+                    // 否则后续 VideoCaptureDevice = device（同一个 DsDevice 引用）会被 WPF 依赖属性系统判定为
+                    // "未变化"，OnVideoCaptureDeviceChanged 不触发，WPFMediaKit 不会重建 FilterGraph，
+                    // 导致切换分辨率/帧率时 DesiredPixelWidth/Height/FPS 不生效（仍是旧分辨率）。
+                    try { VideoPresenterFullCanvasImage.VideoCaptureDevice = null; } catch { }
+                    // 等待 FilterGraph 完全释放设备占用：
+                    // WPFMediaKit 的 Stop() + CleanUp() 是异步的，FilterGraph 释放需要时间。
+                    // 立即 BeginInit/EndInit/Play 会导致设备仍被占用，新图构建失败，
+                    // MediaOpened 不触发，SearchingText 卡在"正在启动摄像头..."。
+                    // 用 DispatcherTimer 异步延迟 250ms，避免阻塞 UI 线程。
+                    var stopDelayTimer = new System.Windows.Threading.DispatcherTimer
                     {
-                        var r = resolutions[selIdx];
-                        VideoPresenterFullCanvasImage.DesiredPixelWidth = r.Width;
-                        VideoPresenterFullCanvasImage.DesiredPixelHeight = r.Height;
-                        VideoPresenterFullCanvasImage.FPS = r.FrameRate > 0 ? r.FrameRate : 30;
-                    }
-                    else
+                        Interval = TimeSpan.FromMilliseconds(250)
+                    };
+                    stopDelayTimer.Tick += (senderDelay, argsDelay) =>
                     {
-                        // 默认 1280×720@30
-                        VideoPresenterFullCanvasImage.DesiredPixelWidth = 1280;
-                        VideoPresenterFullCanvasImage.DesiredPixelHeight = 720;
-                        VideoPresenterFullCanvasImage.FPS = 30;
-                    }
-
-                    // 同步旋转（LayoutTransform）—— 旋转角度跟随 _cameraService.RotationAngle
-                    if (VideoPresenterFullCanvasRotation != null && _cameraService != null)
-                    {
-                        VideoPresenterFullCanvasRotation.Angle = _cameraService.RotationAngle * 90.0;
-                    }
-
-                    ((System.ComponentModel.ISupportInitialize)VideoPresenterFullCanvasImage).EndInit();
-                    VideoPresenterFullCanvasImage.Play();
-
-                    // 拍照按钮启用策略（双重保险）：
-                    // 主路径：MediaOpened 事件在 D3D 表面分配完成时触发，立即启用按钮
-                    // 兜底路径：Play() 后 800ms 延迟启用 —— 防止 MediaOpened 在某些场景不触发
-                    // （WPFMediaKit 的 VideoCaptureElement 在 Stop→Play 快速切换、Visibility 变更、
-                    //   设备抢占恢复等情况下可能跳过 MediaOpened 事件，导致按钮一直禁用）
-                    // 延迟时长 800ms 足以让 D3DImage 完成分配（实测 < 500ms）
-                    var btnRef = BtnCapturePhoto;
-                    if (btnRef != null)
-                    {
-                        var fallbackTimer = new System.Windows.Threading.DispatcherTimer
+                        stopDelayTimer.Stop();
+                        try
                         {
-                            Interval = TimeSpan.FromMilliseconds(800)
-                        };
-                        fallbackTimer.Tick += (s, _) =>
-                        {
-                            try
+                            // ISupportInitialize 模式设置设备和参数
+                            // 此时 VideoCaptureDevice 已为 null，下面 device 赋值会触发
+                            // OnVideoCaptureDeviceChanged（null → device），强制 Setup() 重建 FilterGraph，
+                            // 并使用当前 DesiredPixelWidth/Height/FPS 进行新图协商。
+                            ((System.ComponentModel.ISupportInitialize)VideoPresenterFullCanvasImage).BeginInit();
+                            VideoPresenterFullCanvasImage.VideoCaptureDevice = device;
+                            // EnableSampleGrabbing=false：VMR9 Renderless 模式下 SampleGrabber 无法连入图，
+                            //  启用反而可能导致图构建失败或 NewVideoSample 不触发。
+                            //  拍照路径改用 CaptureCurrentFrame() 从 D3DImage.CopyBackBuffer 直接拿帧。
+                            VideoPresenterFullCanvasImage.EnableSampleGrabbing = false;
+                            VideoPresenterFullCanvasImage.UseYuv = false;
+                            VideoPresenterFullCanvasImage.LoadedBehavior = WpfMediaKitMediaState.Manual;
+
+                            // 应用当前选中的 native capability（W,H,FPS 组合）
+                            int selIdx = _cameraService?.SelectedResolutionIndex ?? -1;
+                            var resolutions = _cameraService?.NativeResolutions;
+                            if (selIdx >= 0 && selIdx < (resolutions?.Count ?? 0))
                             {
-                                fallbackTimer.Stop();
-                                if (VideoPresenterFullCanvasImage != null
-                                    && VideoPresenterFullCanvasImage.Visibility == Visibility.Visible
-                                    && VideoPresenterSearchingText != null
-                                    && VideoPresenterSearchingText.Visibility != Visibility.Visible)
-                                {
-                                    btnRef.IsEnabled = true;
-                                }
+                                var r = resolutions[selIdx];
+                                VideoPresenterFullCanvasImage.DesiredPixelWidth = r.Width;
+                                VideoPresenterFullCanvasImage.DesiredPixelHeight = r.Height;
+                                VideoPresenterFullCanvasImage.FPS = r.FrameRate > 0 ? r.FrameRate : 30;
                             }
-                            catch { }
-                        };
-                        fallbackTimer.Start();
-                    }
+                            else
+                            {
+                                // 默认 1280×720@30
+                                VideoPresenterFullCanvasImage.DesiredPixelWidth = 1280;
+                                VideoPresenterFullCanvasImage.DesiredPixelHeight = 720;
+                                VideoPresenterFullCanvasImage.FPS = 30;
+                            }
 
-                    LogHelper.WriteLogToFile(
-                        $"[VideoPresenter] StartVideoCaptureElementPreviewAsync 成功: {curCamera.Name}, selIdx={selIdx}, resolutions={resolutions?.Count ?? 0}",
-                        LogHelper.LogType.Info);
+                            // 同步旋转（LayoutTransform）—— 旋转角度跟随 _cameraService.RotationAngle
+                            if (VideoPresenterFullCanvasRotation != null && _cameraService != null)
+                            {
+                                VideoPresenterFullCanvasRotation.Angle = _cameraService.RotationAngle * 90.0;
+                            }
 
-                    tcs.SetResult(true);
+                            ((System.ComponentModel.ISupportInitialize)VideoPresenterFullCanvasImage).EndInit();
+                            VideoPresenterFullCanvasImage.Play();
+
+                            // 拍照按钮启用策略（双重保险）：
+                            // 主路径：MediaOpened 事件在 D3D 表面分配完成时触发，立即启用按钮
+                            // 兜底路径：Play() 后 1500ms 检查 —— 防止 MediaOpened 在某些场景不触发
+                            // （WPFMediaKit 的 VideoCaptureElement 在 Stop→Play 快速切换、Visibility 变更、
+                            //   设备抢占恢复等情况下可能跳过 MediaOpened 事件，导致按钮一直禁用 + SearchingText 卡住）
+                            // 延迟时长 1500ms 足以让 D3DImage 完成分配（实测 < 500ms）+ 设备驱动恢复缓冲
+                            // 兜底逻辑：
+                            //   - 如果 SearchingText 已隐藏（MediaOpened 触发过）→ 只启用按钮
+                            //   - 如果 SearchingText 仍可见（MediaOpened 没触发，预览可能卡住）→ 重试一次重启
+                            var btnRef = BtnCapturePhoto;
+                            if (btnRef != null)
+                            {
+                                var fallbackTimer = new System.Windows.Threading.DispatcherTimer
+                                {
+                                    Interval = TimeSpan.FromMilliseconds(1500)
+                                };
+                                fallbackTimer.Tick += (senderFallback, argsFallback) =>
+                                {
+                                    try
+                                    {
+                                        fallbackTimer.Stop();
+                                        if (VideoPresenterFullCanvasImage == null
+                                            || VideoPresenterFullCanvasImage.Visibility != Visibility.Visible)
+                                            return;
+
+                                        // MediaOpened 已触发：SearchingText 已隐藏，只需启用按钮
+                                        if (VideoPresenterSearchingText != null
+                                            && VideoPresenterSearchingText.Visibility != Visibility.Visible)
+                                        {
+                                            btnRef.IsEnabled = true;
+                                            return;
+                                        }
+
+                                        // MediaOpened 没触发（SearchingText 仍可见）：重试一次重启预览
+                                        // 首次 Stop→Play 可能因为设备占用/FILTER_GRAPH 状态不稳导致 MediaOpened 丢失
+                                        LogHelper.WriteLogToFile(
+                                            "[VideoPresenter] 兜底定时器：MediaOpened 1.5s 未触发，重试重启预览",
+                                            LogHelper.LogType.Warning);
+                                        int camIdx = FindCurrentCameraIndex();
+                                        if (camIdx >= 0)
+                                        {
+                                            _ = StartVideoCaptureElementPreviewAsync(camIdx).ConfigureAwait(false);
+                                        }
+                                    }
+                                    catch { }
+                                };
+                                fallbackTimer.Start();
+                            }
+
+                            LogHelper.WriteLogToFile(
+                                $"[VideoPresenter] StartVideoCaptureElementPreviewAsync 成功: {curCamera.Name}, selIdx={selIdx}, resolutions={resolutions?.Count ?? 0}",
+                                LogHelper.LogType.Info);
+
+                            tcs.SetResult(true);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"StartVideoCaptureElementPreviewAsync 异常: {ex.Message}",
+                                LogHelper.LogType.Error);
+                            ErrorOccurredRelay?.Invoke(this, $"VideoCaptureElement 启动失败: {ex.Message}");
+                            tcs.SetResult(false);
+                        }
+                    };
+                    stopDelayTimer.Start();
+                    return; // stopDelayTimer.Tick 内会设置 tcs.SetResult
                 }
                 catch (Exception ex)
                 {

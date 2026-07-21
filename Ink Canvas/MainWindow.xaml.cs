@@ -2898,7 +2898,20 @@ namespace Ink_Canvas
                     int capIdx = _cameraService.FindCapabilityIndex(res.Width, res.Height, res.FrameRate);
                     if (capIdx >= 0)
                     {
-                        _cameraService.SelectedResolutionIndex = capIdx;
+                        // 特殊模式下 VideoCaptureElement 接管预览，不能用 SelectedResolutionIndex setter
+                        // （它会在 _isCapturing=true 时触发 RestartWithNewResolutionAsync，让 _cameraService
+                        //  抢占摄像头设备，导致 VideoCaptureElement 无法启动）。
+                        // 用 SetSelectedResolutionIndexSilent 只更新索引，不触发重启，
+                        // 后续 StartVideoCaptureElementPreviewAsync 会从 SelectedResolutionIndex 读取新值
+                        // 并应用到 VideoCaptureElement。
+                        if (_isVideoPresenterSpecialMode)
+                        {
+                            _cameraService.SetSelectedResolutionIndexSilent(capIdx);
+                        }
+                        else
+                        {
+                            _cameraService.SelectedResolutionIndex = capIdx;
+                        }
                         _boothResolutionWidth = res.Width;
                         _boothResolutionHeight = res.Height;
                     }
@@ -2911,6 +2924,22 @@ namespace Ink_Canvas
                         {
                             _ = StartVideoCaptureElementPreviewAsync(camIdx);
                         }
+                    }
+
+                    // 持久化：保存选中的分辨率 key 到 Settings（格式 "WxH@FPS"），下次启动时自动恢复
+                    // 即使切换到不同摄像头，下次切回同款摄像头时也能恢复
+                    try
+                    {
+                        string resKey = $"{res.Width}x{res.Height}@{res.FrameRate}";
+                        if (Settings?.Canvas != null && Settings.Canvas.VideoPresenterLastResolutionKey != resKey)
+                        {
+                            Settings.Canvas.VideoPresenterLastResolutionKey = resKey;
+                            SettingsManager.SaveSettingsToFile();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"保存分辨率 key 到 Settings 失败: {ex.Message}", LogHelper.LogType.Warning);
                     }
                 }
             }

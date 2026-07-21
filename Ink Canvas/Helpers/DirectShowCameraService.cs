@@ -83,6 +83,20 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        /// <summary>
+        /// 静默更新 SelectedResolutionIndex（不触发 RestartWithNewResolutionAsync）。
+        /// 用于特殊模式下 VideoCaptureElement 接管预览时，_cameraService 不应抢占摄像头设备，
+        /// 调用者（MainWindow）会直接重新启动 VideoCaptureElement 应用新分辨率。
+        /// </summary>
+        public void SetSelectedResolutionIndexSilent(int value)
+        {
+            if (value == _selectedResolutionIndex) return;
+            if (value < -1 || value >= _nativeResolutions.Count)
+                throw new ArgumentOutOfRangeException(nameof(value));
+            _selectedResolutionIndex = value;
+            SyncDerivedIndicesFromCapability();
+        }
+
         /// <summary>去重后的分辨率列表（按 W,H 分组，FrameRate 取最大值，便于 ComboBox 显示）。</summary>
         public IReadOnlyList<ResolutionInfo> UniqueResolutions { get; } = new List<ResolutionInfo>();
 

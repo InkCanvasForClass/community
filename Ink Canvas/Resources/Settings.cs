@@ -358,6 +358,22 @@ namespace Ink_Canvas
         public bool LaunchSeewoVideoShowcaseForWhiteboardBooth { get; set; } = false;
 
         /// <summary>
+        /// 视频展台持久化：上次选中的摄像头设备名（DsDevice.Name）。
+        /// 下次启动展台时优先选中同名设备；找不到则回退到第一个。
+        /// 用设备名而非索引，因为索引会随设备热插拔变化。
+        /// </summary>
+        [JsonProperty("videoPresenterLastCameraName")]
+        public string VideoPresenterLastCameraName { get; set; } = null;
+
+        /// <summary>
+        /// 视频展台持久化：上次选中的分辨率键，格式 "WxH@FPS"（例如 "1920x1080@30"）。
+        /// 下次启动展台时优先选中相同键的 capability；找不到则回退到默认（最接近 1920×1080 的项）。
+        /// 用字符串键而非索引，因为索引会随驱动 capability 列表顺序变化。
+        /// </summary>
+        [JsonProperty("videoPresenterLastResolutionKey")]
+        public string VideoPresenterLastResolutionKey { get; set; } = null;
+
+        /// <summary>
         /// 是否在书写位置贴近画布边缘时显示"扩展画布"提示按钮。
         /// 默认关闭，避免在 PPT 演示、桌面批注等场景干扰；开启后在白板书写时贴近边缘会自动浮现提示。
         /// </summary>
