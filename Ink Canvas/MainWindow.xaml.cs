@@ -30,7 +30,6 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Application = System.Windows.Application;
 using Brushes = System.Windows.Media.Brushes;
-using Button = System.Windows.Controls.Button;
 using Cursor = System.Windows.Input.Cursor;
 using Cursors = System.Windows.Input.Cursors;
 using DpiChangedEventArgs = System.Windows.DpiChangedEventArgs;

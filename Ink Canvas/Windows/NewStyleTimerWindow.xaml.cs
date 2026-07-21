@@ -1269,43 +1269,43 @@ namespace Ink_Canvas.Windows
 
         private void ApplyResetTimerState()
         {
-                // 停止计时器
-                if (isTimerRunning)
+            // 停止计时器
+            if (isTimerRunning)
+            {
+                timer.Stop();
+                isTimerRunning = false;
+                isPaused = false;
+
+                if (hideTimer != null)
                 {
-                    timer.Stop();
-                    isTimerRunning = false;
-                    isPaused = false;
-
-                    if (hideTimer != null)
-                    {
-                        hideTimer.Stop();
-                    }
+                    hideTimer.Stop();
                 }
+            }
 
-                // 重置时间到默认值
-                hour = cachedStartHour;
-                minute = cachedStartMinute;
-                second = cachedStartSecond;
+            // 重置时间到默认值
+            hour = cachedStartHour;
+            minute = cachedStartMinute;
+            second = cachedStartSecond;
 
-                // 更新显示
-                UpdateDigitDisplays();
-                SetColonDisplay(false);
+            // 更新显示
+            UpdateDigitDisplays();
+            SetColonDisplay(false);
 
-                // 重置图标
-                if (StartPauseIcon != null)
-                {
-                    StartPauseIcon.Data = Geometry.Parse(PlayIconData);
-                }
+            // 重置图标
+            if (StartPauseIcon != null)
+            {
+                StartPauseIcon.Data = Geometry.Parse(PlayIconData);
+            }
 
-                // 重置状态标志
-                isOvertimeMode = false;
-                hasPlayedProgressiveReminder = false;
+            // 重置状态标志
+            isOvertimeMode = false;
+            hasPlayedProgressiveReminder = false;
 
-                // 禁用全屏按钮
-                if (FullscreenBtn != null)
-                {
-                    FullscreenBtn.IsEnabled = false;
-                }
+            // 禁用全屏按钮
+            if (FullscreenBtn != null)
+            {
+                FullscreenBtn.IsEnabled = false;
+            }
         }
 
         private NewStyleMinimizedTimerWindow _minimizedWindow;

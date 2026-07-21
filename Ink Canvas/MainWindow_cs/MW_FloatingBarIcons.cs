@@ -787,7 +787,7 @@ namespace Ink_Canvas
                                 if (boardEraser != null) { boardEraser.Background = Brushes.Transparent; boardEraser.IconGeometryDrawing.Brush = boardThemeForeground; boardEraser.Foreground = boardThemeForeground; }
                                 if (boardStrokeEraser != null) { boardStrokeEraser.Background = Brushes.Transparent; boardStrokeEraser.IconGeometryDrawing.Brush = boardThemeForeground; boardStrokeEraser.Foreground = boardThemeForeground; }
                                 if (boardSelect != null) { boardSelect.Background = Brushes.Transparent; boardSelect.IconGeometryDrawing.Brush = boardThemeForeground; boardSelect.Foreground = boardThemeForeground; }
-                        if (boardRoaming != null) { boardRoaming.Background = Brushes.Transparent; boardRoaming.IconGeometryDrawing.Brush = boardThemeForeground; boardRoaming.Foreground = boardThemeForeground; }
+                                if (boardRoaming != null) { boardRoaming.Background = Brushes.Transparent; boardRoaming.IconGeometryDrawing.Brush = boardThemeForeground; boardRoaming.Foreground = boardThemeForeground; }
 
                                 if (BoardInkFreezeBtn != null)
                                 {
@@ -802,7 +802,7 @@ namespace Ink_Canvas
                                 if (boardEraser != null) { boardEraser.Background = Brushes.Transparent; boardEraser.IconGeometryDrawing.Brush = boardThemeForeground; boardEraser.Foreground = boardThemeForeground; }
                                 if (boardStrokeEraser != null) { boardStrokeEraser.Background = Brushes.Transparent; boardStrokeEraser.IconGeometryDrawing.Brush = boardThemeForeground; boardStrokeEraser.Foreground = boardThemeForeground; }
                                 if (boardSelect != null) { boardSelect.Background = Brushes.Transparent; boardSelect.IconGeometryDrawing.Brush = boardThemeForeground; boardSelect.Foreground = boardThemeForeground; }
-                        if (boardRoaming != null) { boardRoaming.Background = Brushes.Transparent; boardRoaming.IconGeometryDrawing.Brush = boardThemeForeground; boardRoaming.Foreground = boardThemeForeground; }
+                                if (boardRoaming != null) { boardRoaming.Background = Brushes.Transparent; boardRoaming.IconGeometryDrawing.Brush = boardThemeForeground; boardRoaming.Foreground = boardThemeForeground; }
 
                                 if (BoardInkFreezeBtn != null)
                                 {

@@ -1,5 +1,3 @@
-using Newtonsoft.Json;
-
 namespace Ink_Canvas.Helpers
 {
     internal static class FloatingBarThemeSettingsExtensions

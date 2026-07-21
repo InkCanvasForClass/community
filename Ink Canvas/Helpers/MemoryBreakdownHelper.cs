@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
@@ -200,7 +198,7 @@ namespace Ink_Canvas.Helpers
                 }
 
                 sb.AppendLine($"  Total Allocated     : {ToMb(GC.GetTotalMemory(forceFullCollection: false)):F1} MB");
-                sb.AppendLine($"  Total Allocated(FC) : {ToMb(GC.GetTotalMemory(forceFullCollection: true)) :F1} MB");
+                sb.AppendLine($"  Total Allocated(FC) : {ToMb(GC.GetTotalMemory(forceFullCollection: true)):F1} MB");
                 gcHeapMb = ToMb(info.HeapSizeBytes);
             }
             catch (Exception ex)
