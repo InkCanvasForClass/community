@@ -2680,6 +2680,9 @@ namespace Ink_Canvas
                 {
                     SetFloatingBarHighlightPosition(_currentToolMode);
                 }
+
+                // Issue #285：动画会重新显示完整浮动栏，若此时应处于迷你栏状态则重新接管
+                RefreshIdleMiniBarState();
             });
         }
 
@@ -6082,6 +6085,9 @@ namespace Ink_Canvas
             {
                 System.Diagnostics.Debug.WriteLine($"Failed to toggle EnablePointerSupport: {ex}");
             }
+
+            // Issue #285 更小批注栏：根据当前工具模式刷新迷你栏显示状态
+            RefreshIdleMiniBarState();
         }
 
         #endregion

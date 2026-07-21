@@ -651,4 +651,22 @@
   <data name="Canvas_EdgeExpandHint_Settings_TranslateStep" xml:space="preserve">
     <value>一下腾出多少地方（像素）</value>
   </data>
+  <data name="IdleMiniBar_StartAnnotate" xml:space="preserve">
+    <value>写点啥</value>
+  </data>
+  <data name="IdleMiniBar_Annotate" xml:space="preserve">
+    <value>接着写</value>
+  </data>
+  <data name="IdleMiniBar_ClearPage" xml:space="preserve">
+    <value>擦干净</value>
+  </data>
+  <data name="IdleMiniBar_Whiteboard" xml:space="preserve">
+    <value>小黑板</value>
+  </data>
+  <data name="IdleMiniBar_More" xml:space="preserve">
+    <value>还有啥</value>
+  </data>
+  <data name="IdleMiniBar_Expand" xml:space="preserve">
+    <value>摊开</value>
+  </data>
 </root>

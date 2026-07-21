@@ -512,4 +512,16 @@
   <data name="Theme_Tips_Title" xml:space="preserve">
     <value>Tips</value>
   </data>
+  <data name="Theme_IdleMiniBar" xml:space="preserve">
+    <value>Compact idle bar</value>
+  </data>
+  <data name="Theme_IdleMiniBarHint" xml:space="preserve">
+    <value>When idle (cursor mode), replace the floating bar with a compact rounded bar that auto-docks to screen edges to minimize obstruction</value>
+  </data>
+  <data name="Theme_IdleMiniBarOpacity" xml:space="preserve">
+    <value>Compact idle bar opacity</value>
+  </data>
+  <data name="Theme_IdleMiniBarAutoRestore" xml:space="preserve">
+    <value>Auto-restore delay after edge collapse (s)</value>
+  </data>
 </root>

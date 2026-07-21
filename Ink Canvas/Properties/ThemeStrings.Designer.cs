@@ -218,6 +218,14 @@ namespace Ink_Canvas.Properties
 
         public static string Theme_FloatingBarBorderColor_Custom => ResourceManager.GetString(nameof(Theme_FloatingBarBorderColor_Custom), _resourceCulture);
 
+        public static string Theme_IdleMiniBar => ResourceManager.GetString(nameof(Theme_IdleMiniBar), _resourceCulture);
+
+        public static string Theme_IdleMiniBarHint => ResourceManager.GetString(nameof(Theme_IdleMiniBarHint), _resourceCulture);
+
+        public static string Theme_IdleMiniBarOpacity => ResourceManager.GetString(nameof(Theme_IdleMiniBarOpacity), _resourceCulture);
+
+        public static string Theme_IdleMiniBarAutoRestore => ResourceManager.GetString(nameof(Theme_IdleMiniBarAutoRestore), _resourceCulture);
+
         public static string Theme_WindowBackdrop => ResourceManager.GetString(nameof(Theme_WindowBackdrop), _resourceCulture);
 
         public static string Theme_WindowBackdrop_Acrylic => ResourceManager.GetString(nameof(Theme_WindowBackdrop_Acrylic), _resourceCulture);

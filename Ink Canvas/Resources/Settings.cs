@@ -688,6 +688,16 @@ namespace Ink_Canvas
 
         [JsonProperty("disableToolbarAnimation")]
         public bool DisableToolbarAnimation { get; set; } = false;
+
+        // Issue #285 —— 更小批注栏（闲置状态下的紧凑圆角批注栏）
+        [JsonProperty("enableIdleMiniBar")]
+        public bool EnableIdleMiniBar { get; set; } = false;
+
+        [JsonProperty("idleMiniBarOpacity")]
+        public double IdleMiniBarOpacity { get; set; } = 0.5;
+
+        [JsonProperty("idleMiniBarAutoRestoreSeconds")]
+        public double IdleMiniBarAutoRestoreSeconds { get; set; } = 60.0;
     }
 
     public enum PPTLinkMode
