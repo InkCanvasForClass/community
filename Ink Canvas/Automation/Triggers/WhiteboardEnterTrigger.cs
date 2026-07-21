@@ -62,12 +62,20 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
         {
             try
             {
-                return System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                var dispatcher = System.Windows.Application.Current?.Dispatcher;
+                if (dispatcher != null && dispatcher.CheckAccess())
                 {
                     var mw = System.Windows.Application.Current.MainWindow as MainWindow;
                     if (mw == null) return false;
                     return mw.currentMode == 1;
-                });
+                }
+
+                return dispatcher?.Invoke(() =>
+                {
+                    var mw = System.Windows.Application.Current.MainWindow as MainWindow;
+                    if (mw == null) return false;
+                    return mw.currentMode == 1;
+                }) ?? false;
             }
             catch
             {

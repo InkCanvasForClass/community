@@ -28,12 +28,20 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
             {
                 try
                 {
-                    return Application.Current.Dispatcher.Invoke(() =>
+                    var dispatcher = Application.Current?.Dispatcher;
+                    if (dispatcher != null && dispatcher.CheckAccess())
                     {
                         var mw = Application.Current.MainWindow as MainWindow;
                         if (mw == null) return false;
                         return mw.isFloatingBarFolded;
-                    });
+                    }
+
+                    return dispatcher?.Invoke(() =>
+                    {
+                        var mw = Application.Current.MainWindow as MainWindow;
+                        if (mw == null) return false;
+                        return mw.isFloatingBarFolded;
+                    }) ?? false;
                 }
                 catch
                 {
@@ -48,12 +56,20 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
         {
             try
             {
-                return Application.Current.Dispatcher.Invoke(() =>
+                var dispatcher = Application.Current?.Dispatcher;
+                if (dispatcher != null && dispatcher.CheckAccess())
                 {
                     var mw = Application.Current.MainWindow as MainWindow;
                     if (mw == null) return false;
                     return mw.isFloatingBarFolded;
-                });
+                }
+
+                return dispatcher?.Invoke(() =>
+                {
+                    var mw = Application.Current.MainWindow as MainWindow;
+                    if (mw == null) return false;
+                    return mw.isFloatingBarFolded;
+                }) ?? false;
             }
             catch
             {

@@ -50,6 +50,10 @@ namespace Ink_Canvas.Properties
 
         public static string Hotkey_EnableHotkeysInMouseModeHint => ResourceManager.GetString(nameof(Hotkey_EnableHotkeysInMouseModeHint), _resourceCulture);
 
+        public static string Hotkey_PassThroughMouseWheelInDrawingMode => ResourceManager.GetString(nameof(Hotkey_PassThroughMouseWheelInDrawingMode), _resourceCulture);
+
+        public static string Hotkey_PassThroughMouseWheelInDrawingModeHint => ResourceManager.GetString(nameof(Hotkey_PassThroughMouseWheelInDrawingModeHint), _resourceCulture);
+
         public static string Hotkey_BasicOperations => ResourceManager.GetString(nameof(Hotkey_BasicOperations), _resourceCulture);
 
         public static string Hotkey_UndoDesc => ResourceManager.GetString(nameof(Hotkey_UndoDesc), _resourceCulture);

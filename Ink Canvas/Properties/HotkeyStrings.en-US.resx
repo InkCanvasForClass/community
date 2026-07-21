@@ -57,6 +57,12 @@
   <data name="Hotkey_EnableHotkeysInMouseModeHint" xml:space="preserve">
     <value>When on, hotkeys will work even in mouse mode</value>
   </data>
+  <data name="Hotkey_PassThroughMouseWheelInDrawingMode" xml:space="preserve">
+    <value>Pass-through mouse wheel in drawing mode</value>
+  </data>
+  <data name="Hotkey_PassThroughMouseWheelInDrawingModeHint" xml:space="preserve">
+    <value>When on, scrolling the mouse wheel in annotation/drawing mode is forwarded to the window underneath (e.g. PowerPoint, Word), no need to switch to mouse mode</value>
+  </data>
   <data name="Hotkey_BasicOperations" xml:space="preserve">
     <value>Basic Operations</value>
   </data>

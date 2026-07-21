@@ -54,6 +54,15 @@ namespace Ink_Canvas.Controls
 
         public void Initialize(string sourcePath, string displayName = null)
         {
+            if (string.IsNullOrWhiteSpace(sourcePath))
+                throw new ArgumentException("Media source path cannot be empty.", nameof(sourcePath));
+
+            if (!File.Exists(sourcePath))
+                throw new FileNotFoundException("Media source file was not found.", sourcePath);
+
+            if (!Uri.TryCreate(Path.GetFullPath(sourcePath), UriKind.Absolute, out var sourceUri))
+                throw new ArgumentException("Media source path is invalid.", nameof(sourcePath));
+
             SourcePath = sourcePath;
             DisplayName = string.IsNullOrWhiteSpace(displayName) ? Path.GetFileName(sourcePath) : displayName;
             IsAudioOnly = IsAudioFile(sourcePath);
@@ -72,7 +81,7 @@ namespace Ink_Canvas.Controls
                 Width = Width > 0 ? Width : 800;
                 Height = Height > 0 ? Height : 520;
             }
-            Player.Source = new Uri(sourcePath);
+            Player.Source = sourceUri;
             Player.Volume = VolumeSlider.Value;
             ApplySelectedSpeed();
             UpdateLocalizedTexts();

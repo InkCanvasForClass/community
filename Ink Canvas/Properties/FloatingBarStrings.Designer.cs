@@ -72,6 +72,14 @@ namespace Ink_Canvas.Properties
 
         public static string Board_Pen => ResourceManager.GetString(nameof(Board_Pen), _resourceCulture);
 
+        public static string Board_Roaming => ResourceManager.GetString(nameof(Board_Roaming), _resourceCulture);
+
+        public static string Board_RoamingPanelTitle => ResourceManager.GetString(nameof(Board_RoamingPanelTitle), _resourceCulture);
+
+        public static string Board_RoamingPanelHint => ResourceManager.GetString(nameof(Board_RoamingPanelHint), _resourceCulture);
+
+        public static string Board_RoamingPanelScale => ResourceManager.GetString(nameof(Board_RoamingPanelScale), _resourceCulture);
+
         public static string Board_PreviousPage => ResourceManager.GetString(nameof(Board_PreviousPage), _resourceCulture);
 
         public static string Board_Redo => ResourceManager.GetString(nameof(Board_Redo), _resourceCulture);
@@ -445,5 +453,25 @@ namespace Ink_Canvas.Properties
         public static string MiniWhiteboard_Settings_DefaultSize => ResourceManager.GetString(nameof(MiniWhiteboard_Settings_DefaultSize), _resourceCulture);
 
         public static string MiniWhiteboard_Settings_Opacity => ResourceManager.GetString(nameof(MiniWhiteboard_Settings_Opacity), _resourceCulture);
+
+        public static string Canvas_EdgeExpandHint_Button => ResourceManager.GetString(nameof(Canvas_EdgeExpandHint_Button), _resourceCulture);
+
+        public static string Canvas_EdgeExpandHint_Settings_Enable => ResourceManager.GetString(nameof(Canvas_EdgeExpandHint_Settings_Enable), _resourceCulture);
+
+        public static string Canvas_EdgeExpandHint_Settings_Threshold => ResourceManager.GetString(nameof(Canvas_EdgeExpandHint_Settings_Threshold), _resourceCulture);
+
+        public static string Canvas_EdgeExpandHint_Settings_TranslateStep => ResourceManager.GetString(nameof(Canvas_EdgeExpandHint_Settings_TranslateStep), _resourceCulture);
+
+        public static string IdleMiniBar_StartAnnotate => ResourceManager.GetString(nameof(IdleMiniBar_StartAnnotate), _resourceCulture);
+
+        public static string IdleMiniBar_Annotate => ResourceManager.GetString(nameof(IdleMiniBar_Annotate), _resourceCulture);
+
+        public static string IdleMiniBar_ClearPage => ResourceManager.GetString(nameof(IdleMiniBar_ClearPage), _resourceCulture);
+
+        public static string IdleMiniBar_Whiteboard => ResourceManager.GetString(nameof(IdleMiniBar_Whiteboard), _resourceCulture);
+
+        public static string IdleMiniBar_More => ResourceManager.GetString(nameof(IdleMiniBar_More), _resourceCulture);
+
+        public static string IdleMiniBar_Expand => ResourceManager.GetString(nameof(IdleMiniBar_Expand), _resourceCulture);
     }
 }

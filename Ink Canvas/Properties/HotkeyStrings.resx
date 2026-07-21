@@ -57,6 +57,12 @@
   <data name="Hotkey_EnableHotkeysInMouseModeHint" xml:space="preserve">
     <value>开启后，即使在鼠标模式下快捷键也会生效</value>
   </data>
+  <data name="Hotkey_PassThroughMouseWheelInDrawingMode" xml:space="preserve">
+    <value>绘制模式下滚轮穿透</value>
+  </data>
+  <data name="Hotkey_PassThroughMouseWheelInDrawingModeHint" xml:space="preserve">
+    <value>开启后，批注/绘制模式下滚动鼠标滚轮会直接传给下方窗口（例如 PPT/Word），不再需要切换到鼠标模式</value>
+  </data>
   <data name="Hotkey_BasicOperations" xml:space="preserve">
     <value>基本操作</value>
   </data>

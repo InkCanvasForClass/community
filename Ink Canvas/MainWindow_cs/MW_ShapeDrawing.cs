@@ -2638,6 +2638,16 @@ namespace Ink_Canvas
             if (TryBlockInkInputOverFloatingBar(e.GetPosition(this), e))
                 return;
 
+            if (IsBoardRoamingMode && e.ChangedButton == MouseButton.Left)
+            {
+                inkCanvas.CaptureMouse();
+                ViewboxFloatingBar.IsHitTestVisible = false;
+                BlackboardUIGridForInkReplay.IsHitTestVisible = false;
+                BeginBoardRoaming(e.GetPosition(inkCanvas));
+                e.Handled = true;
+                return;
+            }
+
             if (e.ChangedButton == MouseButton.Left && ShouldUseRealtimeVelocityBrushTipForMouse() && drawingShapeMode == 0)
             {
                 _isMouseRealtimeInking = true;
@@ -2674,6 +2684,14 @@ namespace Ink_Canvas
             if (_isBoothMouseDragging)
             {
                 VideoPresenterSpecialMode_HandleMouseMove(e);
+                e.Handled = true;
+                return;
+            }
+
+            // 板漫游：鼠标拖动移动整个板内容
+            if (_isBoardRoamingPointerDown)
+            {
+                MoveBoardRoaming(e.GetPosition(inkCanvas));
                 e.Handled = true;
                 return;
             }
@@ -2727,6 +2745,18 @@ namespace Ink_Canvas
             if (_isBoothMouseDragging)
             {
                 VideoPresenterSpecialMode_HandleMouseUp(e);
+                e.Handled = true;
+                return;
+            }
+
+            // 板漫游：结束拖动
+            if (_isBoardRoamingPointerDown)
+            {
+                EndBoardRoaming();
+                inkCanvas.ReleaseMouseCapture();
+                ViewboxFloatingBar.IsHitTestVisible = true;
+                BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+                e.Handled = true;
                 return;
             }
 

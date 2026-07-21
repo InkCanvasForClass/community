@@ -355,6 +355,22 @@ namespace Ink_Canvas
             var handwritingRawPointsForRecognizer =
                 CloneStylusPointCollectionForHandwritingInput(e.Stroke?.StylusPoints);
 
+            // Issue #286 — 边缘扩展画布提示：在笔画收集后立即判断位置。
+            // HandleEdgeExpandHintAfterStroke 内部已做 eligible 检查与异常吞咽。
+            try
+            {
+                if (e.Stroke?.StylusPoints != null && e.Stroke.StylusPoints.Count > 0)
+                {
+                    var strokePoints = new System.Collections.Generic.List<Point>(e.Stroke.StylusPoints.Count);
+                    foreach (var sp in e.Stroke.StylusPoints) strokePoints.Add(sp.ToPoint());
+                    HandleEdgeExpandHintAfterStroke(strokePoints);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"边缘扩展提示判定失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+
             if (Settings.Canvas.EnableInkFade)
             {
                 // 获取墨迹的起点和终点

@@ -115,8 +115,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 string backupDir = Path.Combine(App.RootPath, "Backups");
                 if (!Directory.Exists(backupDir))
                 {
-                    Directory.CreateDirectory(backupDir);
-                    LogHelper.WriteLogToFile($"创建备份目录: {backupDir}");
                     MessageBox.Show(StorageStrings.Restore_NoBackupFound, StorageStrings.Restore_FailedTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
@@ -131,7 +129,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     string backupJson = File.ReadAllText(dlg.FileName);
                     Settings backupSettings = Newtonsoft.Json.JsonConvert.DeserializeObject<Settings>(backupJson);
 
-                    if (backupSettings != null)
+                    if (backupSettings != null && IsBackupSettingsStructurallyValid(backupSettings))
                     {
                         if (MessageBox.Show(StorageStrings.Restore_ConfirmMsg, StorageStrings.Restore_ConfirmTitle,
                                 MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
@@ -160,6 +158,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 LogHelper.WriteLogToFile($"还原设置备份时出错: {ex.Message}", LogHelper.LogType.Error);
                 MessageBox.Show(string.Format(StorageStrings.Restore_FailedMsg, ex.Message), StorageStrings.Restore_FailedTitle, MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        /// <summary>
+        /// 校验反序列化后的 Settings 是否包含必要的顶级 section。
+        /// 防止备份被截断或来自严重不兼容版本导致覆盖后设置全空。
+        /// </summary>
+        private static bool IsBackupSettingsStructurallyValid(Settings s)
+        {
+            if (s == null) return false;
+            // 至少要求核心 section 存在；空对象不会同时具备所有顶级 section
+            return s.Appearance != null
+                   && s.Canvas != null
+                   && s.Startup != null
+                   && s.InkToShape != null
+                   && s.PowerPointSettings != null;
         }
     }
 }

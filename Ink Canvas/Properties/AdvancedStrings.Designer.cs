@@ -131,5 +131,32 @@ namespace Ink_Canvas.Properties
         public static string Debug_ResetStartupCount_Desc => ResourceManager.GetString(nameof(Debug_ResetStartupCount_Desc), _resourceCulture);
 
         public static string Debug_ResetStartupCount_Button => ResourceManager.GetString(nameof(Debug_ResetStartupCount_Button), _resourceCulture);
+
+        // Hand-added to mirror the four new keys appended to AdvancedStrings.resx.
+        // ResXFileCodeGenerator re-runs on the next explicit resgen pass; until then the
+        // XAML compiler cannot see these new keys via x:Static. They are still loaded from
+        // the same ResourceManager at runtime, so once the generator is rerun these manual
+        // properties are safe to delete (they will be reproduced identically).
+        public static string Debug_PageTitle => ResourceManager.GetString(nameof(Debug_PageTitle), _resourceCulture);
+
+        public static string Debug_PageHeader => ResourceManager.GetString(nameof(Debug_PageHeader), _resourceCulture);
+
+        public static string Debug_SettingsExpanderExample_Header => ResourceManager.GetString(nameof(Debug_SettingsExpanderExample_Header), _resourceCulture);
+
+        public static string Debug_SettingsExpanderExample_Desc => ResourceManager.GetString(nameof(Debug_SettingsExpanderExample_Desc), _resourceCulture);
+
+        public static string Debug_MemoryBreakdownSection => ResourceManager.GetString(nameof(Debug_MemoryBreakdownSection), _resourceCulture);
+
+        public static string Debug_MemoryBreakdownDump_Header => ResourceManager.GetString(nameof(Debug_MemoryBreakdownDump_Header), _resourceCulture);
+
+        public static string Debug_MemoryBreakdownDump_Desc => ResourceManager.GetString(nameof(Debug_MemoryBreakdownDump_Desc), _resourceCulture);
+
+        public static string Debug_MemoryBreakdownDump_Button => ResourceManager.GetString(nameof(Debug_MemoryBreakdownDump_Button), _resourceCulture);
+
+        public static string Debug_MemoryBreakdownForceGC_Header => ResourceManager.GetString(nameof(Debug_MemoryBreakdownForceGC_Header), _resourceCulture);
+
+        public static string Debug_MemoryBreakdownForceGC_Desc => ResourceManager.GetString(nameof(Debug_MemoryBreakdownForceGC_Desc), _resourceCulture);
+
+        public static string Debug_MemoryBreakdownForceGC_Button => ResourceManager.GetString(nameof(Debug_MemoryBreakdownForceGC_Button), _resourceCulture);
     }
 }

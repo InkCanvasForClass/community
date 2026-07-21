@@ -90,6 +90,18 @@
   <data name="Board_Pen" xml:space="preserve">
     <value>笔</value>
   </data>
+  <data name="Board_Roaming" xml:space="preserve">
+    <value>漫游</value>
+  </data>
+  <data name="Board_RoamingPanelTitle" xml:space="preserve">
+    <value>漫游导航</value>
+  </data>
+  <data name="Board_RoamingPanelHint" xml:space="preserve">
+    <value>拖动蓝色框可快速移动当前页面</value>
+  </data>
+  <data name="Board_RoamingPanelScale" xml:space="preserve">
+    <value>{0}× 画布范围</value>
+  </data>
   <data name="Board_PreviousPage" xml:space="preserve">
     <value>上一页</value>
   </data>
@@ -653,5 +665,35 @@
   </data>
   <data name="MiniWhiteboard_Settings_Opacity" xml:space="preserve">
     <value>不透明度</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Button" xml:space="preserve">
+    <value>扩展画布</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_Enable" xml:space="preserve">
+    <value>书写贴近边缘时提示扩展画布</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_Threshold" xml:space="preserve">
+    <value>触发阈值（像素）</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_TranslateStep" xml:space="preserve">
+    <value>单次扩展像素</value>
+  </data>
+  <data name="IdleMiniBar_StartAnnotate" xml:space="preserve">
+    <value>开始批注</value>
+  </data>
+  <data name="IdleMiniBar_Annotate" xml:space="preserve">
+    <value>批注</value>
+  </data>
+  <data name="IdleMiniBar_ClearPage" xml:space="preserve">
+    <value>清页</value>
+  </data>
+  <data name="IdleMiniBar_Whiteboard" xml:space="preserve">
+    <value>白板</value>
+  </data>
+  <data name="IdleMiniBar_More" xml:space="preserve">
+    <value>更多</value>
+  </data>
+  <data name="IdleMiniBar_Expand" xml:space="preserve">
+    <value>展开</value>
   </data>
 </root>

@@ -30,13 +30,22 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
             {
                 try
                 {
-                    return Application.Current.Dispatcher.Invoke(() =>
+                    var dispatcher = Application.Current?.Dispatcher;
+                    if (dispatcher != null && dispatcher.CheckAccess())
                     {
                         var mw = Application.Current.MainWindow as MainWindow;
                         if (mw == null) return false;
                         if (mw.currentMode != 1) return false;
                         return mw.IsVisible;
-                    });
+                    }
+
+                    return dispatcher?.Invoke(() =>
+                    {
+                        var mw = Application.Current.MainWindow as MainWindow;
+                        if (mw == null) return false;
+                        if (mw.currentMode != 1) return false;
+                        return mw.IsVisible;
+                    }) ?? false;
                 }
                 catch
                 {
@@ -51,13 +60,22 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
         {
             try
             {
-                return Application.Current.Dispatcher.Invoke(() =>
+                var dispatcher = Application.Current?.Dispatcher;
+                if (dispatcher != null && dispatcher.CheckAccess())
                 {
                     var mw = Application.Current.MainWindow as MainWindow;
                     if (mw == null) return false;
                     if (mw.currentMode != 1) return false;
                     return mw.IsVisible;
-                });
+                }
+
+                return dispatcher?.Invoke(() =>
+                {
+                    var mw = Application.Current.MainWindow as MainWindow;
+                    if (mw == null) return false;
+                    if (mw.currentMode != 1) return false;
+                    return mw.IsVisible;
+                }) ?? false;
             }
             catch
             {

@@ -1,12 +1,16 @@
 using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Windows.Input;
-
+using System.Windows.Interop;
+using Ink_Canvas.Helpers;
 namespace Ink_Canvas
 {
     public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
         /// <summary>
         /// 鼠标滚轮事件处理，用于PPT翻页
+        /// 在批注/绘制模式下，若开启滚轮穿透，则把滚轮事件转发到下方窗口
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">鼠标滚轮事件参数</param>
@@ -21,16 +25,205 @@ namespace Ink_Canvas
                 return;
             }
 
-            if (!IsInPPTPresentationMode || currentMode != 0) return;
-            if (e.Delta >= 120)
+            // 滚轮事件来源：
+            //   - IsAnnotating=true（画笔/橡皮/选择工具）→ 绘制模式，应用穿透（issue #572）
+            //   - IsAnnotating=false（鼠标模式）→ 直接 return，保留原 PPT 翻页逻辑
+            bool passthrough = IsAnnotating
+                               && Settings.Appearance.PassThroughMouseWheelInDrawingMode;
+
+            try
             {
-                BtnPPTSlidesUp_Click(null, null);
+                LogHelper.WriteLogToFile(
+                    $"[MouseWheel] enter delta={e.Delta} isPPT={IsInPPTPresentationMode} currentMode={currentMode} isAnnotating={IsAnnotating} passSetting={Settings?.Appearance?.PassThroughMouseWheelInDrawingMode} -> passthrough={passthrough}",
+                    LogHelper.LogType.Trace);
             }
-            else if (e.Delta <= -120)
+            catch { }
+
+            if (passthrough)
             {
-                BtnPPTSlidesDown_Click(null, null);
+                ForwardMouseWheelToUnderlyingWindow(e);
+                e.Handled = true;
+                return;
+            }
+
+            // 鼠标模式 + PPT 放映：保留原 PPT 翻页逻辑
+            if (IsInPPTPresentationMode && !IsAnnotating)
+            {
+                if (e.Delta >= 120) BtnPPTSlidesUp_Click(null, null);
+                else if (e.Delta <= -120) BtnPPTSlidesDown_Click(null, null);
             }
         }
+
+        #region 滚轮穿透：用 SendInput 重新注入一次滚轮事件
+        // 关键点：批注模式下我们窗口的浮在最上层，必须用 SendInput 注入同方向滚轮，
+        // 系统会按 Z 序把它路由到鼠标下方的目标窗口（PPT/Word 等）。
+        // 但 PPT/Office 等"焦点窗口才会滚"的应用，必须先把焦点切到下层目标，
+        // 再发送滚轮，否则注入的滚轮仍会被当前焦点（可能是我们的透明窗口）吞掉。
+        // 因此这里采用：临时把自己切到"鼠标点击穿透"（WS_EX_TRANSPARENT）+ 自身置底，
+        // 然后用 SendInput 注入滚轮 —— 系统命中测试会绕过我们，找到真实目标。
+
+        private const uint MOUSEEVENTF_WHEEL = 0x0800;
+        private const int WHEEL_DELTA = 120;
+        private const int GWL_EXSTYLE = -20;
+        private const long WS_EX_TRANSPARENT = 0x00000020L;
+        private const long WS_EX_TOPMOST = 0x00000008L;
+        private const long WS_EX_LAYERED = 0x00080000L;
+        private const long WS_EX_TOOLWINDOW = 0x00000080L;
+        private const int HWND_BOTTOM = 1;
+        private const uint SWP_NOACTIVATE = 0x0010;
+        private const uint SWP_NOMOVE = 0x0002;
+        private const uint SWP_NOSIZE = 0x0001;
+
+        private long _lastForwardedWheelTick; // 防止回环触发
+        private bool _wheelPassthroughInProgress;
+
+        [DllImport("user32.dll", EntryPoint = "GetForegroundWindow")]
+        private static extern IntPtr ForwardWheelGetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll", EntryPoint = "GetWindow")]
+        private static extern IntPtr ForwardWheelGetWindow(IntPtr hWnd, uint uCmd);
+
+        [DllImport("user32.dll", EntryPoint = "GetWindowLong")]
+        private static extern int GetWindowLong32(IntPtr hWnd, int nIndex);
+
+        [DllImport("user32.dll", EntryPoint = "GetWindowLongPtr")]
+        private static extern IntPtr GetWindowLongPtr64(IntPtr hWnd, int nIndex);
+
+        private static IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex)
+        {
+            return IntPtr.Size == 8 ? GetWindowLongPtr64(hWnd, nIndex) : new IntPtr(GetWindowLong32(hWnd, nIndex));
+        }
+
+        [DllImport("user32.dll", EntryPoint = "SetWindowLong")]
+        private static extern int SetWindowLong32(IntPtr hWnd, int nIndex, int dwNewLong);
+
+        [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr")]
+        private static extern IntPtr SetWindowLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+        private static IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
+        {
+            return IntPtr.Size == 8
+                ? SetWindowLongPtr64(hWnd, nIndex, dwNewLong)
+                : new IntPtr(SetWindowLong32(hWnd, nIndex, dwNewLong.ToInt32()));
+        }
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct MOUSEINPUT
+        {
+            public int dx;
+            public int dy;
+            public uint mouseData;
+            public uint dwFlags;
+            public uint time;
+            public IntPtr dwExtraInfo;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct INPUT
+        {
+            public uint type;
+            public MOUSEINPUT mi;
+        }
+
+        private const uint INPUT_MOUSE = 0;
+
+        /// <summary>
+        /// 通过 Win32 SendInput 重新注入一次同方向的滚轮事件。
+        /// 注入前临时给自身加 WS_EX_TRANSPARENT 并用 SetWindowPos(HWND_BOTTOM) 让自己绕过命中测试，
+        /// 然后注入滚轮，注入完成后再恢复原来的扩展样式和位置。
+        /// </summary>
+        private void ForwardMouseWheelToUnderlyingWindow(MouseWheelEventArgs e)
+        {
+            if (_wheelPassthroughInProgress) { e.Handled = true; return; }
+            long now = Environment.TickCount64;
+            if (now - _lastForwardedWheelTick < 16) { e.Handled = true; return; }
+
+            IntPtr handle = new WindowInteropHelper(this).Handle;
+            if (handle == IntPtr.Zero) return;
+
+            _wheelPassthroughInProgress = true;
+            _lastForwardedWheelTick = now;
+            IntPtr prevExStyle = IntPtr.Zero;
+            bool exStyleChanged = false;
+
+            try
+            {
+                // 记录原始 ExStyle
+                prevExStyle = GetWindowLongPtr(handle, GWL_EXSTYLE);
+                long originalStyle = prevExStyle.ToInt64();
+                try { LogHelper.WriteLogToFile($"[MouseWheel] origExStyle=0x{originalStyle:X}", LogHelper.LogType.Trace); } catch { }
+
+                // 1) 加 WS_EX_TRANSPARENT，让命中测试能临时"看穿"我们到下层
+                long newStyle = originalStyle | WS_EX_TRANSPARENT;
+                if (newStyle != originalStyle)
+                {
+                    SetWindowLongPtr(handle, GWL_EXSTYLE, new IntPtr(newStyle));
+                    exStyleChanged = true;
+                    long after = GetWindowLongPtr(handle, GWL_EXSTYLE).ToInt64();
+                    try { LogHelper.WriteLogToFile($"[MouseWheel] afterExStyle=0x{after:X}", LogHelper.LogType.Trace); } catch { }
+                }
+
+                // 2) 注入滚轮事件（系统会按 Z 序派发到下层，因为我们已 WS_EX_TRANSPARENT）
+                // 注意：不再切 Z 序到 HWND_BOTTOM，那是闪烁的最大来源。
+                var input = new INPUT
+                {
+                    type = INPUT_MOUSE,
+                    mi = new MOUSEINPUT
+                    {
+                        dx = 0,
+                        dy = 0,
+                        mouseData = unchecked((uint)e.Delta),
+                        dwFlags = MOUSEEVENTF_WHEEL,
+                        time = 0,
+                        dwExtraInfo = IntPtr.Zero
+                    }
+                };
+                bool ok = SendInput(1, new[] { input }, Marshal.SizeOf(typeof(INPUT)));
+                try { LogHelper.WriteLogToFile($"[MouseWheel] SendInput ret={ok} delta={e.Delta}", LogHelper.LogType.Trace); } catch { }
+
+                e.Handled = true;
+            }
+            catch (Exception ex)
+            {
+                try { LogHelper.WriteLogToFile($"[MouseWheel] 注入滚轮失败: {ex.Message}", LogHelper.LogType.Error); } catch { }
+            }
+            finally
+            {
+                // 3) 恢复扩展样式（延迟一两帧，确保系统已完成滚轮派发）
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        if (exStyleChanged)
+                        {
+                            SetWindowLongPtr(handle, GWL_EXSTYLE, prevExStyle);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        try { LogHelper.WriteLogToFile($"[MouseWheel] 恢复窗口样式失败: {ex.Message}", LogHelper.LogType.Error); } catch { }
+                    }
+                    finally
+                    {
+                        _wheelPassthroughInProgress = false;
+                    }
+                }), System.Windows.Threading.DispatcherPriority.Background);
+            }
+        }
+
+        #endregion
 
         /// <summary>
         /// 键盘按键预览事件处理，用于PPT翻页

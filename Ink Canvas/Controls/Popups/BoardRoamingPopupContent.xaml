@@ -1,0 +1,49 @@
+<UserControl x:Class="Ink_Canvas.Controls.BoardRoamingPopupContent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:props="clr-namespace:Ink_Canvas.Properties"
+             xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+             mc:Ignorable="d"
+             d:DesignWidth="380" d:DesignHeight="300">
+    <Grid>
+        <controls:PopupShellContent x:Name="Shell" Title="{x:Static props:FloatingBarStrings.Board_RoamingPanelTitle}" d:Visibility="Collapsed" />
+        <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
+            <StackPanel Margin="10">
+                <TextBlock Text="{x:Static props:FloatingBarStrings.Board_RoamingPanelHint}"
+                           Margin="0,0,0,8"
+                           Foreground="{DynamicResource TextForeground}"
+                           FontSize="12" />
+                <Border x:Name="PreviewFrame"
+                        Width="352" Height="198"
+                        ClipToBounds="True"
+                        CornerRadius="5"
+                        Background="{DynamicResource FloatingBarPopupInnerBackgroundBrush}"
+                        BorderBrush="{DynamicResource FloatingBarPopupInnerBorderBrush}"
+                        BorderThickness="1">
+                    <Canvas x:Name="PreviewCanvas"
+                            Width="352" Height="198"
+                            Background="Transparent">
+                        <Image x:Name="PreviewImage"
+                               Width="352" Height="198"
+                               Stretch="Fill"
+                               IsHitTestVisible="False" />
+                        <Border x:Name="ViewportBorder"
+                                BorderBrush="#FF2563EB"
+                                BorderThickness="2"
+                                Background="#202563EB"
+                                CornerRadius="2"
+                                Cursor="SizeAll" />
+                    </Canvas>
+                </Border>
+                <TextBlock x:Name="ScaleHintText"
+                           Margin="0,8,0,0"
+                           HorizontalAlignment="Center"
+                           Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                           Opacity="0.72"
+                           FontSize="11" />
+            </StackPanel>
+        </ContentControl>
+    </Grid>
+</UserControl>

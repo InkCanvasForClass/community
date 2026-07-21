@@ -166,9 +166,14 @@ namespace Ink_Canvas
             // CrashAction 的值将在 App_Startup 中通过缓存的 Settings.json 同步，
             // 构造函数中先用默认值（ShowCrashWindow），LoadSettings 运行后会被覆盖。
 
+            // 注意：Exit 事件在 Application.Shutdown() 或 Application.Run() 正常返回时触发，
+            // 用于释放 mutex、清理 IpcIACoreClient、卸载插件、写看门狗退出信号、记录设备退出等。
+            // 若不挂载此事件，App_Exit 中已实现的所有清理与看门狗通知逻辑都不会执行，
+            // 软件正常关闭后会被看门狗误判为崩溃并触发重复重启。
             Startup += App_Startup;
             SessionEnding += App_SessionEnding;
             DispatcherUnhandledException += App_DispatcherUnhandledException;
+            Exit += App_Exit;
             StartHeartbeatMonitor();
 
             // 初始化全局异常和进程结束处理
@@ -956,8 +961,10 @@ namespace Ink_Canvas
                 SetSplashMessage("正在启动 Ink Canvas...");
                 SetSplashProgress(25);
 
-                // 强制刷新UI，确保启动画面显示
-                Application.Current.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
+                // 强制刷新UI，确保启动画面显示。
+                // 注意：在 App 构造阶段同步调用 Dispatcher.Invoke 会让当前线程等待自身调度，
+                // 形成可见卡顿甚至死锁。此处直接返回，依靠 Splash 自身 Loaded 事件完成首帧渲染即可。
+                Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
             }
             RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 

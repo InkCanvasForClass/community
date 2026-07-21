@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Ink_Canvas.Helpers;
 using ProcessProtectionManager = Ink_Canvas.Helpers.ProcessProtectionManager;
 
 namespace Ink_Canvas.Windows.SettingsViews.Helpers
@@ -45,7 +46,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 var path = Path.Combine(App.RootPath, SettingsFileName);
                 ProcessProtectionManager.WithWriteAccess(path, () => File.WriteAllText(path, text));
             }
-            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+            catch (Exception ex)
+            {
+                // 设置保存失败不能静默：用户感知不到 = 下次启动设置丢失
+                try
+                {
+                    LogHelper.WriteLogToFile($"保存 Settings.json 失败: {ex.Message}", LogHelper.LogType.Error);
+                }
+                catch
+                {
+                    System.Diagnostics.Debug.WriteLine(ex);
+                }
+            }
         }
 
         public static void MigrateChickenSoupSettings()

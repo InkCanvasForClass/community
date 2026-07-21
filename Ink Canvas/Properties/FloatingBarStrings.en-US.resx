@@ -90,6 +90,18 @@
   <data name="Board_Pen" xml:space="preserve">
     <value>Pen</value>
   </data>
+  <data name="Board_Roaming" xml:space="preserve">
+    <value>Pan</value>
+  </data>
+  <data name="Board_RoamingPanelTitle" xml:space="preserve">
+    <value>Pan overview</value>
+  </data>
+  <data name="Board_RoamingPanelHint" xml:space="preserve">
+    <value>Drag the blue viewport to move this page quickly</value>
+  </data>
+  <data name="Board_RoamingPanelScale" xml:space="preserve">
+    <value>{0}× canvas area</value>
+  </data>
   <data name="Board_PreviousPage" xml:space="preserve">
     <value>Previous</value>
   </data>
@@ -653,5 +665,35 @@
   </data>
   <data name="MiniWhiteboard_Settings_Opacity" xml:space="preserve">
     <value>Opacity</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Button" xml:space="preserve">
+    <value>Expand</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_Enable" xml:space="preserve">
+    <value>Show expand-canvas hint near edges</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_Threshold" xml:space="preserve">
+    <value>Edge threshold (px)</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_TranslateStep" xml:space="preserve">
+    <value>Expand step (px)</value>
+  </data>
+  <data name="IdleMiniBar_StartAnnotate" xml:space="preserve">
+    <value>Annotate</value>
+  </data>
+  <data name="IdleMiniBar_Annotate" xml:space="preserve">
+    <value>Annotate</value>
+  </data>
+  <data name="IdleMiniBar_ClearPage" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="IdleMiniBar_Whiteboard" xml:space="preserve">
+    <value>Whiteboard</value>
+  </data>
+  <data name="IdleMiniBar_More" xml:space="preserve">
+    <value>More</value>
+  </data>
+  <data name="IdleMiniBar_Expand" xml:space="preserve">
+    <value>Expand</value>
   </data>
 </root>

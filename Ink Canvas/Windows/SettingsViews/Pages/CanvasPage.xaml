@@ -136,6 +136,12 @@
                             SwitchName="ToggleSwitchLaunchSeewoVideoShowcaseForWhiteboardBooth"
                             helpers:SettingsBinder.PropertyPath="Canvas.LaunchSeewoVideoShowcaseForWhiteboardBooth" />
 
+                    <controls:LabeledSettingsCard
+                            Header="{x:Static props:FloatingBarStrings.Canvas_EdgeExpandHint_Settings_Enable}"
+                            Icon="{x:Static ui:SegoeFluentIcons.FullScreen}"
+                            SwitchName="ToggleSwitchEdgeExpandHint"
+                            helpers:SettingsBinder.PropertyPath="Canvas.IsEnableEdgeExpandHint" />
+
                     <!-- 简单下拉：声明式绑定 -->
                     <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_KeepAsymptote}"
                             Description="{x:Static props:CanvasStrings.Canvas_HyperbolaAsymptoteHint}">

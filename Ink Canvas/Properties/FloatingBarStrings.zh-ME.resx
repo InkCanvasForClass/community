@@ -90,6 +90,18 @@
   <data name="Board_Pen" xml:space="preserve">
     <value>神笔</value>
   </data>
+  <data name="Board_Roaming" xml:space="preserve">
+    <value>乾坤大挪移</value>
+  </data>
+  <data name="Board_RoamingPanelTitle" xml:space="preserve">
+    <value>乾坤导航盘</value>
+  </data>
+  <data name="Board_RoamingPanelHint" xml:space="preserve">
+    <value>拖着蓝框发动乾坤大挪移</value>
+  </data>
+  <data name="Board_RoamingPanelScale" xml:space="preserve">
+    <value>{0}× 江山范围</value>
+  </data>
   <data name="Board_PreviousPage" xml:space="preserve">
     <value>倒带</value>
   </data>
@@ -626,5 +638,35 @@
   </data>
   <data name="MiniWhiteboard_Settings_Opacity" xml:space="preserve">
     <value>隐身值</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Button" xml:space="preserve">
+    <value>扩大画布</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_Enable" xml:space="preserve">
+    <value>写嗨了想往下写？自动提示要不要换块地方</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_Threshold" xml:space="preserve">
+    <value>多近才弹提示（像素）</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_TranslateStep" xml:space="preserve">
+    <value>一下腾出多少地方（像素）</value>
+  </data>
+  <data name="IdleMiniBar_StartAnnotate" xml:space="preserve">
+    <value>写点啥</value>
+  </data>
+  <data name="IdleMiniBar_Annotate" xml:space="preserve">
+    <value>接着写</value>
+  </data>
+  <data name="IdleMiniBar_ClearPage" xml:space="preserve">
+    <value>擦干净</value>
+  </data>
+  <data name="IdleMiniBar_Whiteboard" xml:space="preserve">
+    <value>小黑板</value>
+  </data>
+  <data name="IdleMiniBar_More" xml:space="preserve">
+    <value>还有啥</value>
+  </data>
+  <data name="IdleMiniBar_Expand" xml:space="preserve">
+    <value>摊开</value>
   </data>
 </root>

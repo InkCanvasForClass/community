@@ -291,6 +291,9 @@
   <data name="Theme_ShowPenColorOnFloatingBarIcon" xml:space="preserve">
     <value>批注图标显示当前画笔颜色</value>
   </data>
+  <data name="Theme_ShowPenColorOnBoardToolbarIcon" xml:space="preserve">
+    <value>白板画笔图标显示当前画笔颜色</value>
+  </data>
   <data name="Theme_CompactFloatingBar" xml:space="preserve">
     <value>紧凑浮动栏模式</value>
   </data>
@@ -508,5 +511,17 @@
   </data>
   <data name="Theme_Tips_Title" xml:space="preserve">
     <value>信仰の源</value>
+  </data>
+  <data name="Theme_IdleMiniBar" xml:space="preserve">
+    <value>更小批注栏</value>
+  </data>
+  <data name="Theme_IdleMiniBarHint" xml:space="preserve">
+    <value>闲置（光标）状态下将浮动栏替换为可自动吸边的紧凑圆角批注栏，尽量减少对内容的遮挡</value>
+  </data>
+  <data name="Theme_IdleMiniBarOpacity" xml:space="preserve">
+    <value>更小批注栏不透明度</value>
+  </data>
+  <data name="Theme_IdleMiniBarAutoRestore" xml:space="preserve">
+    <value>贴边收起后自动恢复时间（秒）</value>
   </data>
 </root>

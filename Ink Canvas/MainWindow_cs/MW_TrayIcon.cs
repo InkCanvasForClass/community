@@ -470,10 +470,9 @@ namespace Ink_Canvas
             if (mainWin != null && mainWin.IsLoaded)
             {
                 var isInPPTPresentationMode = false;
-                Dispatcher.Invoke(() =>
-                {
-                    isInPPTPresentationMode = mainWin.IsInPPTPresentationMode;
-                });
+                // 托盘菜单的 Click 事件可能在 UI 线程触发；此处读取主窗口属性已在 UI 线程完成，
+                // 改为本地直接读取，避免在 UI 线程上同步等待自身的 Dispatcher.Invoke 形成自锁。
+                isInPPTPresentationMode = mainWin.IsInPPTPresentationMode;
                 if (!mainWin.isFloatingBarFolded)
                 {
                     // 清空保存的状态，强制动画走默认位置分支

@@ -637,6 +637,8 @@ namespace Ink_Canvas
 
             // 更新浮动栏批注图标颜色
             UpdatePenIconColor();
+            // 更新白板工具栏画笔图标颜色
+            UpdateBoardPenIconColor();
         }
 
         /// <summary>

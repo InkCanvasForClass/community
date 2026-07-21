@@ -5,8 +5,10 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Controls;
 using ContentDialog = iNKORE.UI.WPF.Modern.Controls.ContentDialog;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
@@ -52,6 +54,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ComboBoxRotationInterval.Text = _lastValidInterval.ToString();
 
             CardRotationInterval.Visibility = CardEnableAutoRotation.IsOn ? Visibility.Visible : Visibility.Collapsed;
+            BtnCustomizeHitokoto.IsEnabled = CardEnableChickenSoupInWhiteboardMode.IsOn;
 
             UpdateChildControlsEnabled();
 
@@ -83,6 +86,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ListViewSchemes.IsEnabled = master;
             BtnImport.IsEnabled = master;
             BtnCreate.IsEnabled = master;
+            BtnCustomizeHitokoto.IsEnabled = master;
 
             // Edit/Export/Delete buttons are now per-item in the ListView
         }
@@ -150,6 +154,103 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.Settings.Appearance.ChickenSoupAutoRotationInterval = val;
             SettingsManager.SaveSettingsToFile();
             SettingsActionHub.OnChickenSoupAutoRotationChanged();
+        }
+
+        private async void BtnCustomizeHitokoto_Click(object sender, RoutedEventArgs e)
+        {
+            var categories = new Dictionary<string, string>
+            {
+                { "a", "动画" },
+                { "b", ThemeStrings.Theme_HitokotoCategory_Manga },
+                { "c", ThemeStrings.Theme_HitokotoCategory_Game },
+                { "d", ThemeStrings.Theme_HitokotoCategory_Literature },
+                { "e", ThemeStrings.Theme_HitokotoCategory_Original },
+                { "f", ThemeStrings.Theme_HitokotoCategory_FromWeb },
+                { "g", "其他" },
+                { "h", ThemeStrings.Theme_HitokotoCategory_Movie },
+                { "i", ThemeStrings.Theme_HitokotoCategory_Poetry },
+                { "j", ThemeStrings.Theme_HitokotoCategory_NeteaseCloud },
+                { "k", ThemeStrings.Theme_HitokotoCategory_Philosophy },
+                { "l", ThemeStrings.Theme_HitokotoCategory_Humor }
+            };
+
+            var selectedCategories = SettingsManager.Settings.Appearance.HitokotoCategories;
+            if (selectedCategories == null || selectedCategories.Count == 0)
+                selectedCategories = categories.Keys.ToList();
+
+            var checkBoxes = new Dictionary<string, CheckBox>();
+            var panel = new StackPanel { Margin = new Thickness(20) };
+            var selectAll = new CheckBox
+            {
+                Content = ThemeStrings.Theme_Hitokoto_SelectAll,
+                Margin = new Thickness(0, 0, 0, 8)
+            };
+            panel.Children.Add(selectAll);
+            panel.Children.Add(new Separator { Margin = new Thickness(0, 8, 0, 8) });
+
+            bool updating = false;
+            foreach (var category in categories)
+            {
+                var checkBox = new CheckBox
+                {
+                    Content = category.Value,
+                    Tag = category.Key,
+                    IsChecked = selectedCategories.Contains(category.Key),
+                    Margin = new Thickness(0, 0, 0, 8)
+                };
+                checkBoxes[category.Key] = checkBox;
+                panel.Children.Add(checkBox);
+                checkBox.Checked += (_, _) => UpdateSelectAll();
+                checkBox.Unchecked += (_, _) => UpdateSelectAll();
+            }
+
+            void UpdateSelectAll()
+            {
+                if (!updating)
+                    selectAll.IsChecked = checkBoxes.Values.All(x => x.IsChecked == true);
+            }
+
+            selectAll.Checked += (_, _) =>
+            {
+                if (updating) return;
+                updating = true;
+                foreach (var checkBox in checkBoxes.Values) checkBox.IsChecked = true;
+                updating = false;
+            };
+            selectAll.Unchecked += (_, _) =>
+            {
+                if (updating) return;
+                updating = true;
+                foreach (var checkBox in checkBoxes.Values) checkBox.IsChecked = false;
+                updating = false;
+            };
+            UpdateSelectAll();
+
+            var dialog = new ContentDialog
+            {
+                Title = ThemeStrings.Theme_Hitokoto_CustomizeTitle,
+                Content = new ScrollViewer
+                {
+                    Content = panel,
+                    MaxHeight = 400,
+                    VerticalScrollBarVisibility = ScrollBarVisibility.Auto
+                },
+                PrimaryButtonText = "确定",
+                SecondaryButtonText = "取消",
+                DefaultButton = ContentDialogButton.Primary
+            };
+
+            if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
+
+            SettingsManager.Settings.Appearance.HitokotoCategories = checkBoxes
+                .Where(x => x.Value.IsChecked == true)
+                .Select(x => x.Key)
+                .ToList();
+            if (SettingsManager.Settings.Appearance.HitokotoCategories.Count == 0)
+                SettingsManager.Settings.Appearance.HitokotoCategories = categories.Keys.ToList();
+
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnChickenSoupSchemesChanged();
         }
 
         #endregion

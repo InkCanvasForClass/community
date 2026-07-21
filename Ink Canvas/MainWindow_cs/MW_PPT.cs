@@ -1606,8 +1606,17 @@ namespace Ink_Canvas
                 _smartModeRegions = null;
             }
 
-            // 将磅值坐标转换为 WPF 窗口坐标（必须在 UI 线程执行）
-            Application.Current.Dispatcher.Invoke(() => BuildSmartModeRects());
+            // 将磅值坐标转换为 WPF 窗口坐标（必须在 UI 线程执行）。
+            // RefreshSmartModeRegions 会被 UI 线程和后台线程（Dispatcher.InvokeAsync）共同调用，
+            // 这里用 CheckAccess 守卫避免在 UI 线程上同步等待自身调度形成死锁。
+            if (Dispatcher.CheckAccess())
+            {
+                BuildSmartModeRects();
+            }
+            else
+            {
+                Application.Current.Dispatcher.InvokeAsync(() => BuildSmartModeRects());
+            }
         }
 
         /// <summary>
@@ -3392,7 +3401,9 @@ namespace Ink_Canvas
                 var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
                 if (currentSlide > 0)
                 {
-                    Application.Current.Dispatcher.Invoke(() =>
+                    // ExitPPTPresentation 通常在 UI 线程上调用。直接在当前线程保存墨迹，
+                    // 避免 Dispatcher.Invoke 在 UI 线程等待自身调度形成自锁。
+                    if (Dispatcher.CheckAccess())
                     {
                         if (inkCanvas?.Strokes != null && inkCanvas.Strokes.Count > 0)
                         {
@@ -3404,7 +3415,23 @@ namespace Ink_Canvas
                             _memoryStreams[currentSlide] = ms;
                         }
                         timeMachine.ClearStrokeHistory();
-                    });
+                    }
+                    else
+                    {
+                        await Dispatcher.InvokeAsync(() =>
+                        {
+                            if (inkCanvas?.Strokes != null && inkCanvas.Strokes.Count > 0)
+                            {
+                                var ms = new MemoryStream();
+                                inkCanvas.Strokes.Save(ms);
+                                ms.Position = 0;
+                                if (_memoryStreams.ContainsKey(currentSlide))
+                                    _memoryStreams[currentSlide]?.Dispose();
+                                _memoryStreams[currentSlide] = ms;
+                            }
+                            timeMachine.ClearStrokeHistory();
+                        });
+                    }
                 }
 
                 await Application.Current.Dispatcher.InvokeAsync(() =>

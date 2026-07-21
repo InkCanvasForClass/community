@@ -27,12 +27,22 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
             {
                 try
                 {
-                    return System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    // Automation 引擎可能在 UI 线程上同步评估规则；
+                    // 在 UI 线程上直接读取 MainWindow 状态，避免 Dispatcher.Invoke 自锁。
+                    var dispatcher = System.Windows.Application.Current?.Dispatcher;
+                    if (dispatcher != null && dispatcher.CheckAccess())
                     {
                         var mw = System.Windows.Application.Current.MainWindow as MainWindow;
                         if (mw == null) return false;
                         return mw.inkCanvas?.EditingMode == System.Windows.Controls.InkCanvasEditingMode.Ink;
-                    });
+                    }
+
+                    return dispatcher?.Invoke(() =>
+                    {
+                        var mw = System.Windows.Application.Current.MainWindow as MainWindow;
+                        if (mw == null) return false;
+                        return mw.inkCanvas?.EditingMode == System.Windows.Controls.InkCanvasEditingMode.Ink;
+                    }) ?? false;
                 }
                 catch
                 {
@@ -47,12 +57,20 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
         {
             try
             {
-                return System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                var dispatcher = System.Windows.Application.Current?.Dispatcher;
+                if (dispatcher != null && dispatcher.CheckAccess())
                 {
                     var mw = System.Windows.Application.Current.MainWindow as MainWindow;
                     if (mw == null) return false;
                     return mw.inkCanvas?.EditingMode == System.Windows.Controls.InkCanvasEditingMode.Ink;
-                });
+                }
+
+                return dispatcher?.Invoke(() =>
+                {
+                    var mw = System.Windows.Application.Current.MainWindow as MainWindow;
+                    if (mw == null) return false;
+                    return mw.inkCanvas?.EditingMode == System.Windows.Controls.InkCanvasEditingMode.Ink;
+                }) ?? false;
             }
             catch
             {

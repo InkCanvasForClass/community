@@ -129,6 +129,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                                     new BoardToolbarComponentEntry { Id = "board.select" },
                                     new BoardToolbarComponentEntry { Id = "board.pen" },
                                     new BoardToolbarComponentEntry { Id = "board.inkFreeze" },
+                                    new BoardToolbarComponentEntry { Id = "board.roaming" },
                                     new BoardToolbarComponentEntry { Id = "board.eraser" },
                                     new BoardToolbarComponentEntry { Id = "board.strokeEraser" },
                                     new BoardToolbarComponentEntry { Id = "board.shape" },

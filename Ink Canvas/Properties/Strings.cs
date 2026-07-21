@@ -59,6 +59,13 @@ namespace Ink_Canvas.Properties
             dict["Advanced_EdgeGestureUtil"] = ("AdvancedStrings", "EdgeGestureUtil");
             dict["Advanced_EdgeGestureUtilHint_Part1"] = ("AdvancedStrings", "EdgeGestureUtilHint_Part1");
             dict["Advanced_EdgeGestureUtilHint_Part2"] = ("AdvancedStrings", "EdgeGestureUtilHint_Part2");
+            dict["Debug_MemoryBreakdownSection"] = ("AdvancedStrings", "Debug_MemoryBreakdownSection");
+            dict["Debug_MemoryBreakdownDump_Header"] = ("AdvancedStrings", "Debug_MemoryBreakdownDump_Header");
+            dict["Debug_MemoryBreakdownDump_Desc"] = ("AdvancedStrings", "Debug_MemoryBreakdownDump_Desc");
+            dict["Debug_MemoryBreakdownDump_Button"] = ("AdvancedStrings", "Debug_MemoryBreakdownDump_Button");
+            dict["Debug_MemoryBreakdownForceGC_Header"] = ("AdvancedStrings", "Debug_MemoryBreakdownForceGC_Header");
+            dict["Debug_MemoryBreakdownForceGC_Desc"] = ("AdvancedStrings", "Debug_MemoryBreakdownForceGC_Desc");
+            dict["Debug_MemoryBreakdownForceGC_Button"] = ("AdvancedStrings", "Debug_MemoryBreakdownForceGC_Button");
             dict["Advanced_EraserBindTouchHint"] = ("AdvancedStrings", "EraserBindTouchHint");
             dict["Advanced_EraserBindTouchMultiplier"] = ("AdvancedStrings", "EraserBindTouchMultiplier");
             dict["Advanced_Experimental"] = ("AdvancedStrings", "Experimental");
@@ -207,6 +214,7 @@ namespace Ink_Canvas.Properties
             dict["Board_NextPage"] = ("FloatingBarStrings", "Board_NextPage");
             dict["Board_Page"] = ("FloatingBarStrings", "Board_Page");
             dict["Board_Pen"] = ("FloatingBarStrings", "Board_Pen");
+            dict["Board_Roaming"] = ("FloatingBarStrings", "Board_Roaming");
             dict["Board_PreviousPage"] = ("FloatingBarStrings", "Board_PreviousPage");
             dict["Board_Redo"] = ("FloatingBarStrings", "Board_Redo");
             dict["Board_Screenshot"] = ("FloatingBarStrings", "Board_Screenshot");
@@ -426,6 +434,16 @@ namespace Ink_Canvas.Properties
             dict["MiniWhiteboard_Settings_SyncPPT"] = ("FloatingBarStrings", "MiniWhiteboard_Settings_SyncPPT");
             dict["MiniWhiteboard_Settings_DefaultSize"] = ("FloatingBarStrings", "MiniWhiteboard_Settings_DefaultSize");
             dict["MiniWhiteboard_Settings_Opacity"] = ("FloatingBarStrings", "MiniWhiteboard_Settings_Opacity");
+            dict["Canvas_EdgeExpandHint_Button"] = ("FloatingBarStrings", "Canvas_EdgeExpandHint_Button");
+            dict["Canvas_EdgeExpandHint_Settings_Enable"] = ("FloatingBarStrings", "Canvas_EdgeExpandHint_Settings_Enable");
+            dict["Canvas_EdgeExpandHint_Settings_Threshold"] = ("FloatingBarStrings", "Canvas_EdgeExpandHint_Settings_Threshold");
+            dict["Canvas_EdgeExpandHint_Settings_TranslateStep"] = ("FloatingBarStrings", "Canvas_EdgeExpandHint_Settings_TranslateStep");
+            dict["IdleMiniBar_StartAnnotate"] = ("FloatingBarStrings", "IdleMiniBar_StartAnnotate");
+            dict["IdleMiniBar_Annotate"] = ("FloatingBarStrings", "IdleMiniBar_Annotate");
+            dict["IdleMiniBar_ClearPage"] = ("FloatingBarStrings", "IdleMiniBar_ClearPage");
+            dict["IdleMiniBar_Whiteboard"] = ("FloatingBarStrings", "IdleMiniBar_Whiteboard");
+            dict["IdleMiniBar_More"] = ("FloatingBarStrings", "IdleMiniBar_More");
+            dict["IdleMiniBar_Expand"] = ("FloatingBarStrings", "IdleMiniBar_Expand");
             dict["FloatingInterceptor_App_ChangYanClass"] = ("AutomationStrings", "FloatingInterceptor_App_ChangYanClass");
             dict["FloatingInterceptor_App_ChangYanPPT"] = ("AutomationStrings", "FloatingInterceptor_App_ChangYanPPT");
             dict["FloatingInterceptor_App_HiteAnnotation"] = ("AutomationStrings", "FloatingInterceptor_App_HiteAnnotation");
@@ -536,6 +554,8 @@ namespace Ink_Canvas.Properties
             dict["Hotkey_MouseMode"] = ("HotkeyStrings", "Hotkey_MouseMode");
             dict["Hotkey_EnableHotkeysInMouseMode"] = ("HotkeyStrings", "Hotkey_EnableHotkeysInMouseMode");
             dict["Hotkey_EnableHotkeysInMouseModeHint"] = ("HotkeyStrings", "Hotkey_EnableHotkeysInMouseModeHint");
+            dict["Hotkey_PassThroughMouseWheelInDrawingMode"] = ("HotkeyStrings", "Hotkey_PassThroughMouseWheelInDrawingMode");
+            dict["Hotkey_PassThroughMouseWheelInDrawingModeHint"] = ("HotkeyStrings", "Hotkey_PassThroughMouseWheelInDrawingModeHint");
             dict["Hotkey_BasicOperations"] = ("HotkeyStrings", "Hotkey_BasicOperations");
             dict["Hotkey_UndoDesc"] = ("HotkeyStrings", "Hotkey_UndoDesc");
             dict["Hotkey_RedoDesc"] = ("HotkeyStrings", "Hotkey_RedoDesc");
