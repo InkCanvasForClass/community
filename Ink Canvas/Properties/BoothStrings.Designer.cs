@@ -44,6 +44,16 @@ namespace Ink_Canvas.Properties
 
         public static string Capture => ResourceManager.GetString(nameof(Capture), _resourceCulture);
 
+        public static string Acceleration => ResourceManager.GetString(nameof(Acceleration), _resourceCulture);
+
+        public static string Acceleration_Tooltip => ResourceManager.GetString(nameof(Acceleration_Tooltip), _resourceCulture);
+
+        public static string AccelerationCpu => ResourceManager.GetString(nameof(AccelerationCpu), _resourceCulture);
+
+        public static string AccelerationOpenCL => ResourceManager.GetString(nameof(AccelerationOpenCL), _resourceCulture);
+
+        public static string AccelerationCUDA => ResourceManager.GetString(nameof(AccelerationCUDA), _resourceCulture);
+
         public static string CapturedPhotos => ResourceManager.GetString(nameof(CapturedPhotos), _resourceCulture);
 
         public static string Close => ResourceManager.GetString(nameof(Close), _resourceCulture);

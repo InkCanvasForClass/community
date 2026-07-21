@@ -13,7 +13,7 @@ namespace Ink_Canvas.Helpers
 {
     /// <summary>
     /// 基于 DirectShow (DirectShowLib) FilterGraph + SampleGrabber 的摄像头服务实现。
-    /// 不依赖 AForge.Video / WinRT，纯 DirectShow + GDI+。兼容 Win7 SP1+。
+    /// 纯 DirectShow + GDI+，兼容 Win7 SP1+。
     /// ScreenshotSelectorWindow 使用此实现（不创建 UI 控件，纯帧事件路径）。
     /// 视频展台特殊模式（全屏预览）仍走 MainWindow.VideoPresenterFullCanvasImage (WPFMediaKit VideoCaptureElement)。
     /// </summary>

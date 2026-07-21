@@ -48,6 +48,21 @@
   <data name="Capture" xml:space="preserve">
     <value>咔嚓留念</value>
   </data>
+  <data name="Acceleration" xml:space="preserve">
+    <value>加速模式</value>
+  </data>
+  <data name="Acceleration_Tooltip" xml:space="preserve">
+    <value>照片矯正的計算加速方式。CPU 相容性最好；OpenCL 通用 GPU 加速（推薦）；CUDA 透過 NVIDIA OpenCL 強制使用 NVIDIA 顯卡（切換需重啟）</value>
+  </data>
+  <data name="AccelerationCpu" xml:space="preserve">
+    <value>CPU（相容）</value>
+  </data>
+  <data name="AccelerationOpenCL" xml:space="preserve">
+    <value>OpenCL（GPU 推薦）</value>
+  </data>
+  <data name="AccelerationCUDA" xml:space="preserve">
+    <value>CUDA（NVIDIA OpenCL）</value>
+  </data>
   <data name="Close" xml:space="preserve">
     <value>撤退</value>
   </data>

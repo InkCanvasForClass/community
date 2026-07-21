@@ -48,6 +48,21 @@
   <data name="Capture" xml:space="preserve">
     <value>Capture</value>
   </data>
+  <data name="Acceleration" xml:space="preserve">
+    <value>Acceleration</value>
+  </data>
+  <data name="Acceleration_Tooltip" xml:space="preserve">
+    <value>Compute acceleration for photo correction. CPU best compatibility; OpenCL general GPU (recommended); CUDA forces NVIDIA OpenCL platform (restart required on switch)</value>
+  </data>
+  <data name="AccelerationCpu" xml:space="preserve">
+    <value>CPU (compatible)</value>
+  </data>
+  <data name="AccelerationOpenCL" xml:space="preserve">
+    <value>OpenCL (GPU recommended)</value>
+  </data>
+  <data name="AccelerationCUDA" xml:space="preserve">
+    <value>CUDA (NVIDIA OpenCL)</value>
+  </data>
   <data name="Close" xml:space="preserve">
     <value>Close</value>
   </data>

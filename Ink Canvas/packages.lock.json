@@ -2,25 +2,6 @@
   "version": 1,
   "dependencies": {
     "net10.0-windows10.0.19041": {
-      "AForge.Imaging": {
-        "type": "Direct",
-        "requested": "[2.2.5, )",
-        "resolved": "2.2.5",
-        "contentHash": "n8l7Zdsm89EFW9Uz4uCO3D428Gu4Q56YxixSMJPruen1c30R8R9Mm8AreTdoOi2XjN5id04JwFFlXYTk8pIIfw==",
-        "dependencies": {
-          "AForge": "2.2.5",
-          "AForge.Math": "2.2.5"
-        }
-      },
-      "AForge.Math": {
-        "type": "Direct",
-        "requested": "[2.2.5, )",
-        "resolved": "2.2.5",
-        "contentHash": "pmT1WobVv13vMxwXhCu8sRunxjiUHyURWS0+dsW/aBPi06xiyYIdCLHI6jph9Axb4QoLIlb85eBI6zd2EAbGIg==",
-        "dependencies": {
-          "AForge": "2.2.5"
-        }
-      },
       "CommunityToolkit.Mvvm": {
         "type": "Direct",
         "requested": "[8.4.0, )",
@@ -64,15 +45,6 @@
         "contentHash": "nGwuuVul+TcLCTgPmaAZCc0fYFqUpCNZ8PiulVT3gZnsWt/AvxMZ0DSPpuyI/iRPc/NhFIg9lSIR7uaHWV0I/Q==",
         "dependencies": {
           "iNKORE.UI.WPF": "1.2.8"
-        }
-      },
-      "JerryShaw.WPFMediaKit": {
-        "type": "Direct",
-        "requested": "[1.0.1, )",
-        "resolved": "1.0.1",
-        "contentHash": "t4yTVIKP/dABO7lpflH6hDlI7B4C4MKcj3LI22yu5LKo+ppTkirUefnpdZK5l95LDsqmdn1jMovCHEN2bSrGDg==",
-        "dependencies": {
-          "JerryShaw.DirectShowLib": "1.0.1"
         }
       },
       "MdXaml": {
@@ -139,6 +111,26 @@
           "NHotkey": "4.0.0"
         }
       },
+      "OpenCvSharp4.Extensions": {
+        "type": "Direct",
+        "requested": "[4.13.0.20260627, )",
+        "resolved": "4.13.0.20260627",
+        "contentHash": "X3dZv/bewNFAGneNYZHMMDEkf6M0HKQBrXIkQYs8nrKrWqJhOSZnyn4bW76CrzCVIDIjAKD27AaaKuQYmzkPOA==",
+        "dependencies": {
+          "OpenCvSharp4": "4.13.0.20260627"
+        }
+      },
+      "OpenCvSharp4.Windows": {
+        "type": "Direct",
+        "requested": "[4.13.0.20260627, )",
+        "resolved": "4.13.0.20260627",
+        "contentHash": "YYJAej4HZYPmN+fG2MCUFDZ/hxsb66PJxAxKuVLFolysGl6opszhILRT2NO/ZEagnlqZ3mlUYGiOjCN0Jj276A==",
+        "dependencies": {
+          "OpenCvSharp4": "4.13.0.20260627",
+          "OpenCvSharp4.WpfExtensions": "4.13.0.20260627",
+          "OpenCvSharp4.runtime.win": "4.13.0.20260627"
+        }
+      },
       "OSVersionExt": {
         "type": "Direct",
         "requested": "[4.1.0, )",
@@ -175,15 +167,25 @@
         "resolved": "2.9.0",
         "contentHash": "GLhd1tQAJeuVO1sj3Wm/dkg0GEVWxk+XGl6rdegMSMHenZuOaWQw4PifWDsjNEC1dtV1/C8JJfK0qfdkM+VIgA=="
       },
-      "AForge": {
-        "type": "Transitive",
-        "resolved": "2.2.5",
-        "contentHash": "clkumhM9DggqIzEXAHgVLeWO4arG5YfoPr7J4jfjJx35AoeEIJSSm49J25bwp/9mXQYLwi7y1Wunc8qgYJsGxg=="
+      "WPFMediaKit": {
+        "type": "Direct",
+        "requested": "[3.0.1, )",
+        "resolved": "3.0.1",
+        "contentHash": "6DH89pTjXkSms63vX5p6MamQR/XIFETYdjWgkrnCvs+JpIalDR/T3d+Nu3FsEUYdMnWhSxZIErC6ePwnNGXMjw==",
+        "dependencies": {
+          "DirectShowLib.Net": "3.0.0",
+          "System.Data.DataSetExtensions": "4.5.0"
+        }
       },
       "AvalonEdit": {
         "type": "Transitive",
         "resolved": "6.3.0.90",
         "contentHash": "WVTb5MxwGqKdeasd3nG5udlV4t6OpvkFanziwI133K0/QJ5FvZmfzRQgpAjGTJhQfIA8GP7AzKQ3sTY9JOFk8Q=="
+      },
+      "DirectShowLib.Net": {
+        "type": "Transitive",
+        "resolved": "3.0.0",
+        "contentHash": "3/8e6+5veSibAfYrcGNmQZjtfxSK7OBPwC2TlVVs+kbkV+Phm94Dj1EEOCLu6/YWjCcPUrNihGxMHnWpoamyYA=="
       },
       "Fody": {
         "type": "Transitive",
@@ -203,11 +205,6 @@
           "H.GeneratedIcons.System.Drawing": "2.0.131"
         }
       },
-      "JerryShaw.DirectShowLib": {
-        "type": "Transitive",
-        "resolved": "1.0.1",
-        "contentHash": "NtMCJKHRnYtD2Z8T/ZMWd7AjqzOQvT2mjiJFplOls/dTjojO4gdkEDxRa+ewKhG/3bobQf9ZSTYWtK/gMF/NRg=="
-      },
       "MdXaml.Plugins": {
         "type": "Transitive",
         "resolved": "1.27.0",
@@ -222,6 +219,24 @@
         "type": "Transitive",
         "resolved": "4.0.0",
         "contentHash": "5HKzttVKWeKoDQKJd3+J7Dy1MW6gbNNYfftkVufe2ddFQD0kXjnT1IN3ZJBfF6QVEQmHpQSp+/PT7Jo2YyHFcw=="
+      },
+      "OpenCvSharp4": {
+        "type": "Transitive",
+        "resolved": "4.13.0.20260627",
+        "contentHash": "nYk95jkyYY9f0sF5KqZ3OB1SWkmqsfV7eN0ROiQds/rxpSn0v1G0QIedMbwuqbdPhvQnOIG2DDmpkLnHEJMh8Q=="
+      },
+      "OpenCvSharp4.runtime.win": {
+        "type": "Transitive",
+        "resolved": "4.13.0.20260627",
+        "contentHash": "POIxR+CTpwHJIdam6wd8U2fprWv5QnIUw50jw79WEGb37He3T1h11SdtwSj9p2PLSfrzonMjO2t71wqi5uFsoQ=="
+      },
+      "OpenCvSharp4.WpfExtensions": {
+        "type": "Transitive",
+        "resolved": "4.13.0.20260627",
+        "contentHash": "6cxOJWTuwUGFPgeyrjCQGVtulK25ej1G6f+wW5fVUrgPSNKlUCOOpPAkgq1kHFJ22mNJAlIR8OrKpafBtS8kCA==",
+        "dependencies": {
+          "OpenCvSharp4": "4.13.0.20260627"
+        }
       },
       "inkcanvas.controls": {
         "type": "Project",
@@ -246,6 +261,21 @@
         "requested": "[6.0.2, )",
         "resolved": "6.0.2",
         "contentHash": "s6c9x2Kghd+ncEDnT6ApYVOacDXr/Y57oSUSx6wjegMOfKxhtrXn3PdASPNU59y3kB9OJ1yb3l5k6uKr3bhqew=="
+      },
+      "WPFMediaKit": {
+        "type": "Direct",
+        "requested": "[3.0.1, )",
+        "resolved": "3.0.1",
+        "contentHash": "6DH89pTjXkSms63vX5p6MamQR/XIFETYdjWgkrnCvs+JpIalDR/T3d+Nu3FsEUYdMnWhSxZIErC6ePwnNGXMjw==",
+        "dependencies": {
+          "DirectShowLib.Net": "3.0.0",
+          "System.Data.DataSetExtensions": "4.5.0"
+        }
+      },
+      "OpenCvSharp4.runtime.win": {
+        "type": "Transitive",
+        "resolved": "4.13.0.20260627",
+        "contentHash": "POIxR+CTpwHJIdam6wd8U2fprWv5QnIUw50jw79WEGb37He3T1h11SdtwSj9p2PLSfrzonMjO2t71wqi5uFsoQ=="
       }
     },
     "net10.0-windows10.0.19041/win-x64": {
@@ -254,6 +284,21 @@
         "requested": "[6.0.2, )",
         "resolved": "6.0.2",
         "contentHash": "s6c9x2Kghd+ncEDnT6ApYVOacDXr/Y57oSUSx6wjegMOfKxhtrXn3PdASPNU59y3kB9OJ1yb3l5k6uKr3bhqew=="
+      },
+      "WPFMediaKit": {
+        "type": "Direct",
+        "requested": "[3.0.1, )",
+        "resolved": "3.0.1",
+        "contentHash": "6DH89pTjXkSms63vX5p6MamQR/XIFETYdjWgkrnCvs+JpIalDR/T3d+Nu3FsEUYdMnWhSxZIErC6ePwnNGXMjw==",
+        "dependencies": {
+          "DirectShowLib.Net": "3.0.0",
+          "System.Data.DataSetExtensions": "4.5.0"
+        }
+      },
+      "OpenCvSharp4.runtime.win": {
+        "type": "Transitive",
+        "resolved": "4.13.0.20260627",
+        "contentHash": "POIxR+CTpwHJIdam6wd8U2fprWv5QnIUw50jw79WEGb37He3T1h11SdtwSj9p2PLSfrzonMjO2t71wqi5uFsoQ=="
       }
     },
     "net10.0-windows10.0.19041/win-x86": {
@@ -262,6 +307,21 @@
         "requested": "[6.0.2, )",
         "resolved": "6.0.2",
         "contentHash": "s6c9x2Kghd+ncEDnT6ApYVOacDXr/Y57oSUSx6wjegMOfKxhtrXn3PdASPNU59y3kB9OJ1yb3l5k6uKr3bhqew=="
+      },
+      "WPFMediaKit": {
+        "type": "Direct",
+        "requested": "[3.0.1, )",
+        "resolved": "3.0.1",
+        "contentHash": "6DH89pTjXkSms63vX5p6MamQR/XIFETYdjWgkrnCvs+JpIalDR/T3d+Nu3FsEUYdMnWhSxZIErC6ePwnNGXMjw==",
+        "dependencies": {
+          "DirectShowLib.Net": "3.0.0",
+          "System.Data.DataSetExtensions": "4.5.0"
+        }
+      },
+      "OpenCvSharp4.runtime.win": {
+        "type": "Transitive",
+        "resolved": "4.13.0.20260627",
+        "contentHash": "POIxR+CTpwHJIdam6wd8U2fprWv5QnIUw50jw79WEGb37He3T1h11SdtwSj9p2PLSfrzonMjO2t71wqi5uFsoQ=="
       }
     }
   }

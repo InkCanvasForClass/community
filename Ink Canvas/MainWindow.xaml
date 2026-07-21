@@ -208,6 +208,10 @@
                                FontSize="24"
                                Foreground="#CCCCCC"
                                Text="正在查找展台设备..." />
+                    <!-- A4 纸实时识别框覆盖层：仅当矫正开关开启时显示，不拦截鼠标/触摸事件 -->
+                    <Canvas x:Name="PaperDetectOverlayCanvas"
+                            IsHitTestVisible="False"
+                            Visibility="Collapsed" />
                 </Grid>
             </Grid>
         </Grid>

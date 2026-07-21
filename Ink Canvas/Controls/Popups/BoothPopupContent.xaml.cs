@@ -14,6 +14,7 @@ namespace Ink_Canvas.Controls
     {
         public ComboBox CameraDevicesComboBoxControl => CameraDevicesComboBoxCtrl;
         public ComboBox BoothResolutionComboBoxControl => BoothResolutionComboBoxCtrl;
+        public ComboBox PhotoCorrectionAccelerationComboBox => PhotoCorrectionAccelerationComboBoxCtrl;
         public Button CapturePhotoButton => CapturePhotoButtonCtrl;
         public Button RotateImageButton => RotateImageButtonCtrl;
         public Button ExitVideoPresenterButton => ExitVideoPresenterButtonCtrl;

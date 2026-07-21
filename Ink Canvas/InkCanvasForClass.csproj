@@ -123,14 +123,14 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="NHotkey.Wpf" Version="4.0.0" />
     <PackageReference Include="OSVersionExt" Version="4.1.0" />
-    <!-- AForge.Imaging / AForge.Math 仅用于照片校正（Grayscale/CannyEdgeDetector/BlobCounter/QuadrilateralTransformation）；摄像头采集已切换到 DirectShow（DirectShowLib） -->
-    <PackageReference Include="AForge.Imaging" Version="2.2.5" />
-    <PackageReference Include="AForge.Math" Version="2.2.5" />
+    <!-- 照片校正：OpenCvSharp4（OpenCV 4.13 封装，.NET 10 原生、MIT 免费），用于纸张角点检测 + 透视矫正 -->
+    <PackageReference Include="OpenCvSharp4.Windows" Version="4.13.0.20260627" />
+    <PackageReference Include="OpenCvSharp4.Extensions" Version="4.13.0.20260627" />
     <PackageReference Include="WebDav.Client" Version="2.9.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <!-- 视频展台：DirectShow + VMR9 Renderless + D3DImage 零拷贝 GPU 渲染（兼容 Win7 SP1+ 和 Win10+） -->
-    <PackageReference Include="JerryShaw.WPFMediaKit" Version="1.0.1" />
+    <!-- 视频展台：DirectShow + VMR9 Renderless + D3DImage 零拷贝 GPU 渲染 -->
+    <PackageReference Include="WPFMediaKit" Version="3.0.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\InkCanvas.PluginSdk\InkCanvas.PluginSdk.csproj" />

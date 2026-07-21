@@ -48,6 +48,21 @@
   <data name="Capture" xml:space="preserve">
     <value>拍照</value>
   </data>
+  <data name="Acceleration" xml:space="preserve">
+    <value>加速模式</value>
+  </data>
+  <data name="Acceleration_Tooltip" xml:space="preserve">
+    <value>照片矫正的计算加速方式。CPU 兼容性最好；OpenCL 通用 GPU 加速（推荐）；CUDA 通过 NVIDIA OpenCL 强制使用 NVIDIA 显卡（切换需重启）</value>
+  </data>
+  <data name="AccelerationCpu" xml:space="preserve">
+    <value>CPU（兼容）</value>
+  </data>
+  <data name="AccelerationOpenCL" xml:space="preserve">
+    <value>OpenCL（GPU 推荐）</value>
+  </data>
+  <data name="AccelerationCUDA" xml:space="preserve">
+    <value>CUDA（NVIDIA OpenCL）</value>
+  </data>
   <data name="Close" xml:space="preserve">
     <value>关闭</value>
   </data>

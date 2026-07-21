@@ -949,6 +949,10 @@ namespace Ink_Canvas
             IsFastStartupEnabled = IsFastStartupEnabledFromParsed(parsedSettings);
             LogHelper.WriteLogToFile($"App | 快速启动模式: {(IsFastStartupEnabled ? "启用" : "关闭")}");
 
+            // 照片矫正加速模式：CUDA 模式下设置 OPENCV_OPENCL_DEVICE 强制使用 NVIDIA OpenCL 平台。
+            // 必须在 OpenCV 第一次创建 UMat 之前设置才能生效（OpenCL 上下文进程级别单初始化）。
+            ApplyPhotoCorrectionAccelerationFromParsed(parsedSettings);
+
             TryApplyPreferredLanguageFromParsedSettings(parsedSettings);
 
             // 根据设置决定是否显示启动画面（复用已解析的设置对象）
@@ -1547,6 +1551,32 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"检查快速启动设置失败: {ex.Message}", LogHelper.LogType.Warning);
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// 根据 Settings.json 中的 photoCorrectionAcceleration 设置 OPENCV_OPENCL_DEVICE 环境变量。
+        /// CUDA 模式（值=2）下强制使用 NVIDIA OpenCL 平台（NVIDIA OpenCL 底层由 CUDA 驱动）。
+        /// 必须在 OpenCV 第一次创建 UMat 之前调用——OpenCL 上下文一旦初始化无法重置。
+        /// </summary>
+        private static void ApplyPhotoCorrectionAccelerationFromParsed(dynamic parsedSettings)
+        {
+            try
+            {
+                int mode = 0; // 默认 CPU
+                var v = parsedSettings?["automation"]?["photoCorrectionAcceleration"];
+                if (v != null) mode = (int)v;
+                if (mode == 2) // CUDA = NVIDIA OpenCL
+                {
+                    Environment.SetEnvironmentVariable("OPENCV_OPENCL_DEVICE", "NVIDIA:GPU:");
+                    LogHelper.WriteLogToFile(
+                        "App | 照片矫正加速: CUDA 模式，已设置 OPENCV_OPENCL_DEVICE=NVIDIA:GPU: 强制 NVIDIA OpenCL 平台",
+                        LogHelper.LogType.Trace);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"App | 应用照片矫正加速设置失败: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
 

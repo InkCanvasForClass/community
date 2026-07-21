@@ -3,7 +3,7 @@ namespace Ink_Canvas.Helpers
     /// <summary>
     /// 摄像头服务工厂。
     /// 统一返回 <see cref="DirectShowCameraService"/>（基于 DirectShowLib + SampleGrabber），
-    /// 不再依赖 AForge.Video / WinRT MediaFrameReader。
+    /// 不依赖 WinRT MediaFrameReader。
     /// 视频展台特殊模式（全屏预览）走 MainWindow.VideoPresenterFullCanvasImage（WPFMediaKit VideoCaptureElement）。
     /// </summary>
     public static class CameraServiceFactory

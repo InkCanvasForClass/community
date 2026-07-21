@@ -1016,6 +1016,18 @@ namespace Ink_Canvas
         public bool EnableSmartMode { get; set; } = false;
     }
 
+    /// <summary>
+    /// 照片矫正加速模式。CPU：纯 CPU 计算，兼容性最好。
+    /// OpenCL：GPU 通用加速（NVIDIA/AMD/Intel 集显均可，需驱动支持）。
+    /// CUDA：仅 NVIDIA 显卡，需 OpenCvSharp4WithCuda 包 + 本地 CUDA runtime，否则自动回退到 OpenCL。
+    /// </summary>
+    public enum PhotoCorrectionAccelerationMode
+    {
+        Cpu = 0,
+        OpenCL = 1,
+        CUDA = 2
+    }
+
     public class Automation
     {
         [JsonIgnore]
@@ -1140,6 +1152,13 @@ namespace Ink_Canvas
 
         [JsonProperty("isEnablePhotoCorrection")]
         public bool IsEnablePhotoCorrection { get; set; } = false;
+
+        /// <summary>
+        /// 照片矫正加速模式：CPU（兼容性最好）/ OpenCL（GPU 通用，推荐）/ CUDA（仅 NVIDIA）。
+        /// 若所选模式在运行时不可用（如无 OpenCL/CUDA 驱动），自动回退到 CPU。
+        /// </summary>
+        [JsonProperty("photoCorrectionAcceleration")]
+        public PhotoCorrectionAccelerationMode PhotoCorrectionAcceleration { get; set; } = PhotoCorrectionAccelerationMode.Cpu;
 
         [JsonProperty("isAutoClearWhenExitingWritingMode")]
         public bool IsAutoClearWhenExitingWritingMode { get; set; }

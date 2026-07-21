@@ -468,6 +468,7 @@ namespace Ink_Canvas
 
             content.CameraDevicesComboBoxControl.SelectionChanged += CameraDevicesComboBox_SelectionChanged;
             content.BoothResolutionComboBoxControl.SelectionChanged += BoothResolutionComboBox_SelectionChanged;
+            content.PhotoCorrectionAccelerationComboBox.SelectionChanged += PhotoCorrectionAccelerationComboBox_SelectionChanged;
             content.CapturePhotoButton.Click += BtnCapturePhoto_Click;
             content.RotateImageButton.Click += BtnRotateImage_Click;
             content.ExitVideoPresenterButton.Click += BtnExitVideoPresenter_Click;
@@ -480,6 +481,15 @@ namespace Ink_Canvas
                 if (BoothPopup != null)
                     AnimationsHelper.HidePopupWithSlideAndFade(BoothPopup);
             };
+
+            // 恢复矫正加速模式选中项（ComboBox 索引与枚举值一致：0=CPU, 1=OpenCL, 2=CUDA）
+            try
+            {
+                int accelIdx = (int)(Settings?.Automation?.PhotoCorrectionAcceleration ?? PhotoCorrectionAccelerationMode.Cpu);
+                if (accelIdx >= 0 && accelIdx < content.PhotoCorrectionAccelerationComboBox.Items.Count)
+                    content.PhotoCorrectionAccelerationComboBox.SelectedIndex = accelIdx;
+            }
+            catch { }
         }
 
         /// <summary>

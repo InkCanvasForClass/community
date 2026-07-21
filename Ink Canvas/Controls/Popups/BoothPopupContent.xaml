@@ -31,6 +31,21 @@
                               ToolTip="{x:Static props:BoothStrings.Resolution_Tooltip}" />
                 </ikw:SimpleStackPanel>
 
+                <!-- 加速模式：CPU / OpenCL / CUDA -->
+                <ikw:SimpleStackPanel Orientation="Vertical" Spacing="3">
+                    <TextBlock Text="{x:Static props:BoothStrings.Acceleration}"
+                               Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                               FontSize="13" FontWeight="SemiBold" />
+                    <ComboBox x:Name="PhotoCorrectionAccelerationComboBoxCtrl"
+                              MinWidth="260"
+                              ToolTip="{x:Static props:BoothStrings.Acceleration_Tooltip}"
+                              SelectedIndex="0">
+                        <ComboBoxItem Content="{x:Static props:BoothStrings.AccelerationCpu}" />
+                        <ComboBoxItem Content="{x:Static props:BoothStrings.AccelerationOpenCL}" />
+                        <ComboBoxItem Content="{x:Static props:BoothStrings.AccelerationCUDA}" />
+                    </ComboBox>
+                </ikw:SimpleStackPanel>
+
                 <!-- 4 个操作按钮：矫正 / 拍照 / 旋转 / 关闭 -->
                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
                     <ToggleButton x:Name="PhotoCorrectionToggleCtrl"
