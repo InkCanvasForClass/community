@@ -357,6 +357,32 @@ namespace Ink_Canvas
         [JsonProperty("launchSeewoVideoShowcaseForWhiteboardBooth")]
         public bool LaunchSeewoVideoShowcaseForWhiteboardBooth { get; set; } = false;
 
+        /// <summary>
+        /// 是否在书写位置贴近画布边缘时显示"扩展画布"提示按钮。
+        /// 默认关闭，避免在 PPT 演示、桌面批注等场景干扰；开启后在白板书写时贴近边缘会自动浮现提示。
+        /// </summary>
+        [JsonProperty("isEnableEdgeExpandHint")]
+        public bool IsEnableEdgeExpandHint { get; set; } = false;
+
+        /// <summary>
+        /// 触发"扩展画布"提示按钮的边缘阈值（像素）。当笔画的任意触点距画布四边的距离小于该值时，提示按钮会浮现。
+        /// 默认 80 像素，便于教师日常书写时容易触发。
+        /// </summary>
+        [JsonProperty("edgeExpandThreshold")]
+        public double EdgeExpandThreshold { get; set; } = 80;
+
+        /// <summary>
+        /// 点击"扩展画布"按钮时一次性平移墨迹的像素距离。值越大，单击腾出的书写空间越大。
+        /// </summary>
+        [JsonProperty("edgeExpandTranslateStep")]
+        public double EdgeExpandTranslateStep { get; set; } = 220;
+
+        /// <summary>
+        /// "扩展画布"按钮在无新触发后保持可见的时长（毫秒）。超过后自动隐藏。
+        /// </summary>
+        [JsonProperty("edgeExpandAutoHideMs")]
+        public double EdgeExpandAutoHideMs { get; set; } = 5000;
+
     }
 
     public enum OptionalOperation

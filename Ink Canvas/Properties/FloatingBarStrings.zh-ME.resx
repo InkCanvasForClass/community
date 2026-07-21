@@ -639,4 +639,16 @@
   <data name="MiniWhiteboard_Settings_Opacity" xml:space="preserve">
     <value>隐身值</value>
   </data>
+  <data name="Canvas_EdgeExpandHint_Button" xml:space="preserve">
+    <value>扩大画布</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_Enable" xml:space="preserve">
+    <value>写嗨了想往下写？自动提示要不要换块地方</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_Threshold" xml:space="preserve">
+    <value>多近才弹提示（像素）</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_TranslateStep" xml:space="preserve">
+    <value>一下腾出多少地方（像素）</value>
+  </data>
 </root>

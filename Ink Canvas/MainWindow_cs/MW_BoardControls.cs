@@ -176,6 +176,9 @@ namespace Ink_Canvas
             if (isErasedByCode) _currentCommitType = CommitReason.CodeInput;
 
             inkCanvas.Strokes.Clear();
+            // 只隐藏 hint，不暂停（ClearStrokes 在切换页面、保存加载时都会被调用，
+            // 设置 _edgeExpandHintSuspended 会导致后续书写永远无法触发提示）。
+            HideEdgeExpandHint();
 
             _currentCommitType = CommitReason.UserInput;
         }

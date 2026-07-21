@@ -174,17 +174,17 @@
                        ClipToBounds="False" 
                        Background="Transparent" />
 
-            <Canvas x:Name="EraserOverlayCanvas" 
-                    Background="Transparent" 
+            <Canvas x:Name="EraserOverlayCanvas"
+                    Background="Transparent"
                     IsHitTestVisible="False"
                     Loaded="EraserOverlayCanvas_Loaded"
                     Panel.ZIndex="1000">
                 <!-- 橡皮擦视觉反馈图像 -->
-                <Image x:Name="EraserFeedback" 
-                       Canvas.Left="0" 
-                       Canvas.Top="0" 
-                       RenderTransformOrigin="0,0" 
-                       Width="0" 
+                <Image x:Name="EraserFeedback"
+                       Canvas.Left="0"
+                       Canvas.Top="0"
+                       RenderTransformOrigin="0,0"
+                       Width="0"
                        Height="0"
                        Visibility="Collapsed"  d:Visibility="Visible">
                     <Image.RenderTransform>
@@ -192,6 +192,37 @@
                     </Image.RenderTransform>
                 </Image>
             </Canvas>
+
+            <!-- 边缘扩展画布提示按钮（书写贴近边缘时浮现）。
+                 用 Popup 实现，确保永远在最顶层且不被 InkCanvasGridForInkReplay 的兄弟节点
+                 （如 GridInkCanvasSelectionCover）遮挡命中测试。PlacementTarget 设为 inkCanvas，
+                 Placement=RelativePoint 让 HorizontalOffset/VerticalOffset 直接对应画布坐标。 -->
+            <Popup x:Name="EdgeExpandHintPopup"
+                   Placement="RelativePoint"
+                   PlacementTarget="{Binding ElementName=inkCanvas}"
+                   AllowsTransparency="True"
+                   StaysOpen="True"
+                   IsOpen="False"
+                   PopupAnimation="None"
+                   HorizontalOffset="0"
+                   VerticalOffset="0">
+                <Button x:Name="EdgeExpandHintButton"
+                        Content="..."
+                        Width="64" Height="64"
+                        Padding="0"
+                        FontSize="14"
+                        FontWeight="SemiBold"
+                        Foreground="White"
+                        Background="#CC2D2D30"
+                        BorderBrush="#992D2D30"
+                        BorderThickness="1"
+                        Visibility="Visible"
+                        IsHitTestVisible="True"
+                        Cursor="Hand"
+                        Click="EdgeExpandHintButton_Click"
+                        Opacity="0.9"
+                        ToolTip="扩展画布" />
+            </Popup>
 
             <!-- 快抽悬浮按钮 -->
             <localControls:QuickDrawFloatingButtonControl x:Name="QuickDrawFloatingButton"

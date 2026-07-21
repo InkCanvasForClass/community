@@ -666,4 +666,16 @@
   <data name="MiniWhiteboard_Settings_Opacity" xml:space="preserve">
     <value>不透明度</value>
   </data>
+  <data name="Canvas_EdgeExpandHint_Button" xml:space="preserve">
+    <value>扩展画布</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_Enable" xml:space="preserve">
+    <value>书写贴近边缘时提示扩展画布</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_Threshold" xml:space="preserve">
+    <value>触发阈值（像素）</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_TranslateStep" xml:space="preserve">
+    <value>单次扩展像素</value>
+  </data>
 </root>
