@@ -845,6 +845,9 @@ namespace Ink_Canvas
         /// </remarks>
         private void MainWindow_TouchDown(object sender, TouchEventArgs e)
         {
+            // 视频展台特殊模式：所有触摸交给 VideoPresenterSpecialModeContainer 的 Manipulation 处理，
+            // 不进入下面的 EditingMode 切换逻辑（避免把 Ink 切到 None 干扰预览绘制）。
+            if (_isVideoPresenterSpecialMode) return;
 
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
                 || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke
@@ -1469,6 +1472,14 @@ namespace Ink_Canvas
         /// </remarks>
         private void Main_Grid_TouchDown(object sender, TouchEventArgs e)
         {
+            // 视频展台特殊模式：不在此处切换 EditingMode，
+            // PreviewTouchDown 已临时切到 None 抑制 InkCanvas 框选/绘制；
+            // 这里再切会覆盖 None → Ink，导致特殊模式下仍画出墨迹（Q7 真正根因）。
+            if (_isVideoPresenterSpecialMode)
+            {
+                return;
+            }
+
             // 检查触摸是否发生在浮动栏区域，如果是则允许事件传播到浮动栏按钮
             var touchPoint = e.GetTouchPoint(this);
             if (TryBlockInkInputOverFloatingBar(touchPoint.Position, e))
@@ -1560,6 +1571,33 @@ namespace Ink_Canvas
             var touchPointForBar = e.GetTouchPoint(this);
             if (TryBlockInkInputOverFloatingBar(touchPointForBar.Position, e))
                 return;
+
+            // 视频展台特殊模式：
+            //   - 笔模式（Ink）：让 InkCanvas 正常处理触摸绘制墨迹
+            //   - 选择/橡皮擦模式：临时把 EditingMode 切到 None 抑制 InkCanvas 内部框选/橡皮擦逻辑，
+            //     触摸事件正常冒泡并被 WPF 提升为 Manipulation，由 Main_Grid_ManipulationDelta 转发到
+            //     VideoPresenterSpecialMode_ManipulationDelta 处理摄像头画面拖动/缩放。
+            // 注意：不能用 e.Handled = true —— 这样会同时阻断 Manipulation 事件的提升，
+            //      导致 VideoPresenterSpecialMode_ManipulationDelta 永远收不到事件（Q7 根因）。
+            // 仍维护 dec，保证 InkCanvas_PreviewTouchUp 中的 dec.Remove 配对。
+            if (_isVideoPresenterSpecialMode)
+            {
+                dec.Add(e.TouchDevice.Id);
+                if (inkCanvas != null
+                    && inkCanvas.EditingMode != InkCanvasEditingMode.Ink
+                    && inkCanvas.EditingMode != InkCanvasEditingMode.None)
+                {
+                    // 仅在第一次按下时保存用户选择的模式（避免第二次按下覆盖）
+                    if (!_boothTouchSavedInkEditingMode.HasValue)
+                    {
+                        _boothTouchSavedInkEditingMode = inkCanvas.EditingMode;
+                    }
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                }
+                // 不设置 e.Handled = true，让 WPF 把触摸提升为 Manipulation 事件
+                return;
+            }
+
             CaptureInkCanvasTouchIfNeeded(touchPointForBar.Position, e.TouchDevice);
 
             if (IsCurrentPageFrozen)
@@ -1830,6 +1868,27 @@ namespace Ink_Canvas
         /// </remarks>
         private void InkCanvas_PreviewTouchUp(object sender, TouchEventArgs e)
         {
+            // 视频展台特殊模式：所有手指抬起后恢复用户原本的 EditingMode
+            // （PreviewTouchDown 中为了抑制 InkCanvas 内部框选临时切到了 None）
+            if (_isVideoPresenterSpecialMode)
+            {
+                dec.Remove(e.TouchDevice.Id);
+                if (dec.Count == 0 && _boothTouchSavedInkEditingMode.HasValue && inkCanvas != null)
+                {
+                    try
+                    {
+                        inkCanvas.EditingMode = _boothTouchSavedInkEditingMode.Value;
+                    }
+                    catch { }
+                    _boothTouchSavedInkEditingMode = null;
+                }
+                // 仍然执行常规清理（释放触摸捕获、恢复浮动栏可见性等）
+                inkCanvas?.ReleaseAllTouchCaptures();
+                if (ViewboxFloatingBar != null) ViewboxFloatingBar.IsHitTestVisible = true;
+                if (BlackboardUIGridForInkReplay != null) BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+                return;
+            }
+
             var touchId = e.TouchDevice.Id;
             if (_activeRealtimeTouchStrokeIds.Contains(touchId))
             {
@@ -2022,6 +2081,13 @@ namespace Ink_Canvas
         /// </remarks>
         private void Main_Grid_ManipulationCompleted(object sender, ManipulationCompletedEventArgs e)
         {
+            // 视频展台特殊模式：不在此处恢复 EditingMode，
+            // PreviewTouchUp 已经在所有手指抬起后恢复用户原本的模式
+            if (_isVideoPresenterSpecialMode)
+            {
+                return;
+            }
+
             if (e.Manipulators.Count() == 0)
             {
                 if (dec.Count > 0)
@@ -2070,6 +2136,18 @@ namespace Ink_Canvas
         /// </remarks>
         private void Main_Grid_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
         {
+            // 视频展台特殊模式：
+            //   - 笔模式（Ink）：用户在预览画面上绘制墨迹批注，走正常墨迹绘制路径，不拦截
+            //   - 选择模式（Select/EraseByPoint/EraseByStroke）：触摸手势用于拖动/缩放预览画面
+            // 必须在 Select 模式下拦截，因为 VideoPresenterSpecialModeContainer 在 Z 顺序最底层，
+            // 触摸事件被 inkCanvas 拦截，根本到不了 Container 上的处理器。
+            if (_isVideoPresenterSpecialMode && inkCanvas != null
+                && inkCanvas.EditingMode != InkCanvasEditingMode.Ink)
+            {
+                VideoPresenterSpecialMode_ManipulationDelta(sender, e);
+                return;
+            }
+
             if (IsCurrentPageFrozen)
             {
                 TryBlockFrozenPageMutation("移动或缩放内容");

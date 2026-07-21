@@ -12,6 +12,15 @@ namespace Ink_Canvas
         /// <param name="e">鼠标滚轮事件参数</param>
         private void Window_MouseWheel(object sender, MouseWheelEventArgs e)
         {
+            // 视频展台特殊模式：滚轮用于缩放预览图。
+            // 必须在这里拦截，因为 VideoPresenterSpecialModeContainer 在 Z 顺序最底层，
+            // 鼠标事件被上层 inkCanvas 拦截，冒泡到 Window 后由这里转发到缩放处理器。
+            if (_isVideoPresenterSpecialMode)
+            {
+                VideoPresenterSpecialMode_MouseWheel(sender, e);
+                return;
+            }
+
             if (!IsInPPTPresentationMode || currentMode != 0) return;
             if (e.Delta >= 120)
             {

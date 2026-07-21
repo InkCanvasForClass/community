@@ -124,14 +124,15 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="NHotkey.Wpf" Version="4.0.0" />
     <PackageReference Include="OSVersionExt" Version="4.1.0" />
-    <PackageReference Include="AForge.Video" Version="2.2.5" />
-    <PackageReference Include="AForge.Video.DirectShow" Version="2.2.5" />
+    <!-- AForge.Imaging / AForge.Math 仅用于照片校正（Grayscale/CannyEdgeDetector/BlobCounter/QuadrilateralTransformation）；摄像头采集已切换到 DirectShow（DirectShowLib） -->
     <PackageReference Include="AForge.Imaging" Version="2.2.5" />
     <PackageReference Include="AForge.Math" Version="2.2.5" />
     <PackageReference Include="System.Private.Uri" Version="4.3.2" />
     <PackageReference Include="WebDav.Client" Version="2.9.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <!-- 视频展台：DirectShow + VMR9 Renderless + D3DImage 零拷贝 GPU 渲染（兼容 Win7 SP1+ 和 Win10+） -->
+    <PackageReference Include="JerryShaw.WPFMediaKit" Version="1.0.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\InkCanvas.PluginSdk\InkCanvas.PluginSdk.csproj" />

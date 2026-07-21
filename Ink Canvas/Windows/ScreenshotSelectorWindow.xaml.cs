@@ -164,7 +164,7 @@ namespace Ink_Canvas
         {
             try
             {
-                // 通过工厂创建：Win10+ 用 WinRT，Win7 用 AForge
+                // 通过工厂创建：统一走 DirectShow（DirectShowLib + SampleGrabber）
                 var cameraSettings = MainWindow.Settings.Camera;
                 _cameraService = CameraServiceFactory.Create();
                 _cameraService.RotationAngle = cameraSettings.RotationAngle;
@@ -213,7 +213,7 @@ namespace Ink_Canvas
                 CameraSelectionComboBox.Items.Add("正在检测摄像头…");
                 CameraSelectionComboBox.SelectedIndex = 0;
 
-                // 等待异步枚举完成（AForge 同步返回，WinRT 异步）
+                // 等待异步枚举完成（DirectShow 同步返回，但走 Task 防止意外阻塞）
                 if (_cameraService.AvailableCameras.Count == 0)
                 {
                     await _cameraService.RefreshCameraListAsync();

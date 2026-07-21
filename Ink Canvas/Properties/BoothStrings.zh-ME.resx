@@ -48,6 +48,9 @@
   <data name="Capture" xml:space="preserve">
     <value>咔嚓留念</value>
   </data>
+  <data name="Close" xml:space="preserve">
+    <value>撤退</value>
+  </data>
   <data name="CapturedPhotos" xml:space="preserve">
     <value>作案现场存档</value>
   </data>
