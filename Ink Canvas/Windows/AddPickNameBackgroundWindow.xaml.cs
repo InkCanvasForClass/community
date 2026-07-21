@@ -104,9 +104,6 @@ namespace Ink_Canvas
                 // 添加到主窗口的设置中
                 MainWindow.Settings.RandSettings.CustomPickNameBackgrounds.Add(customBackground);
 
-                // 更新ComboBox
-                mainWindow.UpdatePickNameBackgroundsInComboBox();
-
                 // 保存设置
                 MainWindow.SaveSettingsToFile();
 

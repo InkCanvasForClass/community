@@ -181,8 +181,6 @@ namespace Ink_Canvas
 
             // 看门狗必须在 App_Startup 读取 Settings.json 并同步 CrashAction 后启动。
             // 构造函数阶段仍使用默认 CrashAction，不能在此处做判断。
-
-            args = Environment.GetCommandLineArgs();
         }
 
         /// <summary>
