@@ -66,6 +66,11 @@ namespace Ink_Canvas
         private readonly List<CapturedImage> _capturedPhotos = new List<CapturedImage>();
         private const int MaxCapturedPhotos = 50; // 容量上限：比 UI 显示的 30 项多一些，避免频繁清理
 
+        // 直播页墨迹快照：与每张照片的 CapturedImage.Strokes 对应，
+        // 切换页码时把当前 inkCanvas.Strokes 保存到当前槽位，再从目标槽位恢复。
+        // 直播页的墨迹槽位独立存放（不与任何照片绑定），用户在直播页画的批注不会因切到照片页而丢失。
+        private System.Windows.Ink.StrokeCollection _liveStrokesSnapshot = new System.Windows.Ink.StrokeCollection();
+
         // 按页绑定：每一页对应一个“实时画面”元素与布局/设备信息
         private readonly Dictionary<int, System.Windows.Controls.Image> _liveFrameImageByPage = new Dictionary<int, System.Windows.Controls.Image>();
         private readonly HashSet<int> _liveEnabledPages = new HashSet<int>();
@@ -429,6 +434,13 @@ namespace Ink_Canvas
                     inkCanvas.Strokes.Clear();
                     inkCanvas.EditingMode = _inkEditingModeBeforeSpecialMode;
                 }
+                // 同步清空直播页墨迹快照与每张照片的 Strokes，
+                // 避免下次进入特殊模式时残留上一次的批注
+                _liveStrokesSnapshot.Clear();
+                foreach (var p in _capturedPhotos)
+                {
+                    try { p?.Strokes?.Clear(); } catch { }
+                }
 
                 // 清理鼠标拖动状态（防止退出时鼠标仍被捕获）
                 if (_isBoothMouseDragging)
@@ -491,6 +503,97 @@ namespace Ink_Canvas
             if (VideoPresenterFrozenFrameScale != null) VideoPresenterFrozenFrameScale.ScaleY = _boothPreviewScale;
             if (VideoPresenterFrozenFrameTranslate != null) VideoPresenterFrozenFrameTranslate.X = _boothPreviewTranslateX;
             if (VideoPresenterFrozenFrameTranslate != null) VideoPresenterFrozenFrameTranslate.Y = _boothPreviewTranslateY;
+        }
+
+        /// <summary>
+        /// 把当前 inkCanvas.Strokes 保存到当前槽位：
+        /// 若当前在照片预览页（_boothCurrentPhotoIndex >= 0），保存到对应 CapturedImage.Strokes；
+        /// 若当前在直播页（_boothCurrentPhotoIndex == -1），保存到 _liveStrokesSnapshot。
+        /// 切换页码前调用，避免墨迹串台。
+        /// </summary>
+        private void SaveCurrentBoothStrokesToSlot()
+        {
+            if (inkCanvas == null) return;
+            try
+            {
+                var current = inkCanvas.Strokes;
+                System.Windows.Ink.StrokeCollection target;
+                if (_boothCurrentPhotoIndex >= 0 && _boothCurrentPhotoIndex < _capturedPhotos.Count)
+                {
+                    target = _capturedPhotos[_boothCurrentPhotoIndex].Strokes;
+                }
+                else
+                {
+                    target = _liveStrokesSnapshot;
+                }
+                target.Clear();
+                if (current != null && current.Count > 0)
+                {
+                    // Clone 避免后续 inkCanvas.Strokes.Clear() 影响快照
+                    foreach (var s in current) target.Add(s.Clone());
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"保存当前页墨迹失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        /// <summary>
+        /// 从指定槽位恢复墨迹到 inkCanvas.Strokes：
+        /// photoIndex >= 0 时从对应照片的 Strokes 恢复；&lt; 0 时从直播页快照恢复。
+        /// 切换页码后调用，让墨迹跟着照片切换。
+        /// </summary>
+        private void RestoreBoothStrokesFromSlot(int photoIndex)
+        {
+            if (inkCanvas == null) return;
+            try
+            {
+                System.Windows.Ink.StrokeCollection source;
+                if (photoIndex >= 0 && photoIndex < _capturedPhotos.Count)
+                {
+                    source = _capturedPhotos[photoIndex].Strokes;
+                }
+                else
+                {
+                    source = _liveStrokesSnapshot;
+                }
+                inkCanvas.Strokes.Clear();
+                if (source != null && source.Count > 0)
+                {
+                    // Clone 避免后续编辑影响快照
+                    foreach (var s in source) inkCanvas.Strokes.Add(s.Clone());
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"恢复页墨迹失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        /// <summary>
+        /// 把 inkCanvas.Strokes 绕画布中心旋转指定角度（增量旋转）。
+        /// 用于照片预览页旋转照片时同步旋转墨迹，避免墨迹不跟随。
+        /// </summary>
+        private void RotateBoothStrokes(double deltaAngle)
+        {
+            if (inkCanvas == null || inkCanvas.Strokes.Count == 0) return;
+            if (deltaAngle == 0) return;
+            double w = inkCanvas.ActualWidth;
+            double h = inkCanvas.ActualHeight;
+            if (w <= 0 || h <= 0) return;
+            double cx = w / 2.0;
+            double cy = h / 2.0;
+            try
+            {
+                var matrix = new System.Windows.Media.Matrix();
+                matrix.RotateAt(deltaAngle, cx, cy);
+                inkCanvas.Strokes.Transform(matrix, false);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"旋转墨迹失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
         }
 
         /// <summary>
@@ -2130,8 +2233,11 @@ namespace Ink_Canvas
                     && VideoPresenterFrozenFrameImage.Visibility == Visibility.Visible
                     && VideoPresenterFrozenFrameRotation != null)
                 {
-                    VideoPresenterFrozenFrameRotation.Angle =
-                        (VideoPresenterFrozenFrameRotation.Angle + 90.0) % 360.0;
+                    double oldAngle = VideoPresenterFrozenFrameRotation.Angle;
+                    double newAngle = (oldAngle + 90.0) % 360.0;
+                    VideoPresenterFrozenFrameRotation.Angle = newAngle;
+                    // 同步旋转墨迹：以 inkCanvas 中心为旋转中心，让批注跟着照片一起转
+                    RotateBoothStrokes(newAngle - oldAngle);
                     return;
                 }
 
@@ -2597,6 +2703,10 @@ namespace Ink_Canvas
                 return;
             }
 
+            // 切换前保存当前页墨迹到当前槽位（直播页快照或旧照片的 Strokes），
+            // 避免新照片显示旧墨迹或当前墨迹丢失。
+            SaveCurrentBoothStrokesToSlot();
+
             _boothCurrentPhotoIndex = photoIndex;
 
             // 按需计算照片在冻结画面上的布局参数（每张照片尺寸可能不同）
@@ -2675,6 +2785,9 @@ namespace Ink_Canvas
             var rightPageListView = FindView("board.pageList.right") as System.Windows.Controls.ListView;
             if (leftPageListView != null) leftPageListView.SelectedIndex = selectedIndex;
             if (rightPageListView != null) rightPageListView.SelectedIndex = selectedIndex;
+
+            // 切换后恢复该照片的墨迹（每张照片独立保存，互不干扰）
+            RestoreBoothStrokesFromSlot(photoIndex);
         }
 
         /// <summary>
@@ -2683,6 +2796,9 @@ namespace Ink_Canvas
         /// </summary>
         private void SwitchBoothToLivePage()
         {
+            // 返回直播前保存当前照片的墨迹到该照片槽位，避免丢失批注
+            SaveCurrentBoothStrokesToSlot();
+
             _boothCurrentPhotoIndex = -1;
 
             // 清除冻结照片
@@ -2731,6 +2847,9 @@ namespace Ink_Canvas
             var rightPageListView = FindView("board.pageList.right") as System.Windows.Controls.ListView;
             if (leftPageListView != null) leftPageListView.SelectedIndex = 0;
             if (rightPageListView != null) rightPageListView.SelectedIndex = 0;
+
+            // 恢复直播页墨迹快照（与照片页墨迹相互独立）
+            RestoreBoothStrokesFromSlot(-1);
         }
 
         /// <summary>
