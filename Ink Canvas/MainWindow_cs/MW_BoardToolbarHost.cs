@@ -541,6 +541,18 @@ namespace Ink_Canvas
             viewboxFactory.SetValue(Viewbox.HeightProperty, 120.0);
             viewboxFactory.SetValue(Viewbox.StretchProperty, Stretch.Uniform);
 
+            // Viewbox 是 Decorator，只能有一个子级。用 Grid 作为容器，叠加 InkCanvas/Image/TextBlock
+            // 三个元素，通过 Visibility 绑定互斥显示：
+            //   - 普通白板页：InkCanvas 可见
+            //   - 视频展台照片项：Image 可见（显示照片缩略图）
+            //   - 视频展台文字项：TextBlock 可见（居中显示"再次点击返回直播画面"）
+            var viewboxContentFactory = new FrameworkElementFactory(typeof(Grid));
+
+            // 共享的 BooleanToVisibilityConverter：用于根据 ShowInk/ShowImage/ShowText 控制 InkCanvas/Image/TextBlock 可见性
+            // 使用 WPF 内置的 System.Windows.Controls.BooleanToVisibilityConverter（true=>Visible, false=>Collapsed）
+            var boolToVis = new System.Windows.Controls.BooleanToVisibilityConverter();
+
+            // 1) InkCanvas：普通白板页可见（ShowInk=true），视频展台项隐藏
             var inkCanvasFactory = new FrameworkElementFactory(typeof(System.Windows.Controls.InkCanvas));
             inkCanvasFactory.SetValue(System.Windows.Controls.InkCanvas.EditingModeProperty, InkCanvasEditingMode.None);
             inkCanvasFactory.SetBinding(System.Windows.Controls.InkCanvas.BackgroundProperty,
@@ -551,7 +563,36 @@ namespace Ink_Canvas
                 new System.Windows.Data.Binding("ActualWidth") { Source = inkCanvas, Mode = System.Windows.Data.BindingMode.OneWay });
             inkCanvasFactory.SetBinding(FrameworkElement.HeightProperty,
                 new System.Windows.Data.Binding("ActualHeight") { Source = inkCanvas, Mode = System.Windows.Data.BindingMode.OneWay });
-            viewboxFactory.AppendChild(inkCanvasFactory);
+            // ShowInk=true => Visible；视频展台项 ShowInk=false => Collapsed
+            inkCanvasFactory.SetBinding(UIElement.VisibilityProperty,
+                new System.Windows.Data.Binding("ShowInk") { Converter = boolToVis });
+            viewboxContentFactory.AppendChild(inkCanvasFactory);
+
+            // 2) Image：仅视频展台照片项可见（ShowImage=true）
+            var boothImageFactory = new FrameworkElementFactory(typeof(System.Windows.Controls.Image));
+            boothImageFactory.SetValue(System.Windows.Controls.Image.StretchProperty, Stretch.Uniform);
+            boothImageFactory.SetBinding(System.Windows.Controls.Image.SourceProperty,
+                new System.Windows.Data.Binding("BoothImage"));
+            boothImageFactory.SetBinding(UIElement.VisibilityProperty,
+                new System.Windows.Data.Binding("ShowImage") { Converter = boolToVis });
+            viewboxContentFactory.AppendChild(boothImageFactory);
+
+            // 3) TextBlock：仅视频展台文字项可见（ShowText=true），居中显示提示文字（如"再次点击返回直播画面"）
+            var boothTextFactory = new FrameworkElementFactory(typeof(TextBlock));
+            boothTextFactory.SetValue(TextBlock.TextWrappingProperty, TextWrapping.Wrap);
+            boothTextFactory.SetValue(TextBlock.TextAlignmentProperty, TextAlignment.Center);
+            boothTextFactory.SetValue(TextBlock.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+            boothTextFactory.SetValue(TextBlock.VerticalAlignmentProperty, VerticalAlignment.Center);
+            boothTextFactory.SetValue(TextBlock.FontSizeProperty, 13.0);
+            boothTextFactory.SetValue(TextBlock.FontWeightProperty, FontWeights.SemiBold);
+            boothTextFactory.SetValue(TextBlock.ForegroundProperty, Brushes.White);
+            boothTextFactory.SetValue(TextBlock.PaddingProperty, new Thickness(6));
+            boothTextFactory.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("BoothText"));
+            boothTextFactory.SetBinding(UIElement.VisibilityProperty,
+                new System.Windows.Data.Binding("ShowText") { Converter = boolToVis });
+            viewboxContentFactory.AppendChild(boothTextFactory);
+
+            viewboxFactory.AppendChild(viewboxContentFactory);
 
             var indexBorderFactory = new FrameworkElementFactory(typeof(Border));
             indexBorderFactory.SetValue(Border.MarginProperty, new Thickness(4));

@@ -26,9 +26,6 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
-        private static readonly SolidColorBrush BoothButtonHighlightBrush = new SolidColorBrush((System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FF66CCFF"));
-        private bool _boothButtonPressHandlersAttached;
-
         // 标记：用于在保存/恢复白板内容时排除“展台实时上屏”画面
         private const string VideoPresenterLiveFrameTag = "__VideoPresenterLiveFrame";
 
@@ -38,6 +35,18 @@ namespace Ink_Canvas
 
         // 视频展台特殊模式：开启后整个白板进入深色背景模式，预览铺满画布
         private bool _isVideoPresenterSpecialMode;
+        // 视频展台虚拟分页：是否当前在照片预览页（true=照片页，false=直播页）
+        // 进入特殊模式=直播页，点击侧栏缩略图=切换到照片页，再次点击=返回直播页
+        private bool _isBoothOnPhotoPage;
+        // 视频展台虚拟分页：是否有已拍照的照片（0=无照片，1=有照片）
+        // 进入特殊模式=0，拍照后=1
+        private bool _boothHasPhoto;
+        // 视频展台虚拟分页：最后一次拍的照片，用于点击侧栏缩略图时显示到冻结画面
+        private CapturedImage _boothLastCapturedPhoto;
+        // 照片页冻结画面的居中偏移（拍照时预计算，切换到照片页时应用到 TranslateTransform）
+        // 与直播页的 _boothPreviewTranslateX/Y 分离，避免互相干扰
+        private double _boothFrozenFrameTranslateX;
+        private double _boothFrozenFrameTranslateY;
         private bool _isBoothCameraComboBoxUpdating;
         // 进入特殊模式前 inkCanvas 的 EditingMode，退出时恢复
         private InkCanvasEditingMode _inkEditingModeBeforeSpecialMode = InkCanvasEditingMode.Ink;
@@ -108,34 +117,38 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 切换视频演示侧栏的显示状态并在显示时初始化相关控件与状态。
+        /// 切换视频演示菜单的显示状态并在显示时初始化相关控件与状态。
         /// </summary>
         /// <remarks>
-        /// 当侧栏被显示时：确保摄像头服务已初始化、暂时禁用拍照按钮、刷新可用摄像头列表，并将“照片校正”和当前页面的“上屏（live on canvas）”开关同步为保存的设置或页面状态；
-        /// 当侧栏被隐藏时：将其折叠并停止进一步初始化操作。
+        /// 当菜单被显示时：确保摄像头服务已初始化、暂时禁用拍照按钮、刷新可用摄像头列表，并将“照片校正”开关同步为保存的设置；
+        /// 当菜单被隐藏时：将其关闭并停止进一步初始化操作。
+        /// 原本通过显示 VideoPresenterSidebar 实现，现已改为弹出 BoothPopupContent 菜单；
+        /// VideoPresenterSidebar 仍保留在 XAML 中作为容器（用于冻结画面缩略图等辅助 UI），但不再通过按钮触发显示。
         /// </remarks>
         private void ToggleVideoPresenterSidebar()
         {
-            if (VideoPresenterSidebar == null) return;
+            if (BoothPopup == null) return;
 
-            if (VideoPresenterSidebar.Visibility == Visibility.Visible)
+            if (BoothPopup.IsOpen)
             {
-                // 侧栏可见时点击视频展台按钮 = 完全退出（与底部"关闭"按钮一致）
-                ExitVideoPresenterSpecialMode();
-                CloseVideoPresenterSidebarAndReleaseResources();
+                // 菜单可见时点击视频展台按钮 = 仅关闭菜单（与右上角 X 一致），
+                // 不退出视频展台模式。完全退出由菜单内"关闭"按钮（BtnExitVideoPresenter_Click）负责。
+                AnimationsHelper.HidePopupWithSlideAndFade(BoothPopup);
                 return;
             }
 
-            // 侧栏不可见：两种情况
+            // 菜单不可见：两种情况
             //  1. 完全没进入特殊模式（首次打开） -> 进入特殊模式 + 启动预览
-            //  2. 已在特殊模式但侧栏被右上角 X 折叠 -> 只展开侧栏，不重启预览（避免设备抖动）
+            //  2. 已在特殊模式但菜单被关闭按钮折叠 -> 只展开菜单，不重启预览（避免设备抖动）
             if (_isVideoPresenterSpecialMode)
             {
-                VideoPresenterSidebar.Visibility = Visibility.Visible;
+                AnimationsHelper.ShowPopupWithSlideAndFade(BoothPopup);
+                _popupManager?.BringToFront(BoothPopup);
                 return;
             }
 
-            VideoPresenterSidebar.Visibility = Visibility.Visible;
+            AnimationsHelper.ShowPopupWithSlideAndFade(BoothPopup);
+            _popupManager?.BringToFront(BoothPopup);
             EnsureCameraService();
             if (BtnCapturePhoto != null) BtnCapturePhoto.IsEnabled = false;
 
@@ -152,10 +165,91 @@ namespace Ink_Canvas
             {
                 ToggleBtnPhotoCorrection.IsChecked = Settings?.Automation?.IsEnablePhotoCorrection ?? false;
             }
+        }
 
-            if (!_boothButtonPressHandlersAttached)
+        /// <summary>
+        /// 视频展台虚拟分页页码显示覆盖。
+        /// 在特殊模式下把白板页码显示从正常的"当前页/总页数"改为虚拟分页：
+        ///   进入特殊模式(无照片)：0/0
+        ///   拍照后(直播页)：0/1
+        ///   切换到照片页：1/1
+        ///   返回直播页：0/1
+        /// 该方法直接覆盖 TextBlockWhiteBoardIndexInfo 和 board.pageInfo.* 三个 TextBlock 的文本，
+        /// 不修改 CurrentWhiteboardIndex/WhiteboardTotalCount（避免破坏正常白板分页状态）。
+        /// </summary>
+        private void UpdateBoothPageInfoDisplay()
+        {
+            if (!_isVideoPresenterSpecialMode) return;
+
+            int current = _isBoothOnPhotoPage ? 1 : 0;
+            int total = _boothHasPhoto ? 1 : 0;
+            string text = $"{current}/{total}";
+
+            // 立即同步更新一次（覆盖 UpdateIndexInfoDisplay 中 TextBlockWhiteBoardIndexInfo.Text = "x/x" 的设置）
+            ApplyBoothPageText(text);
+
+            // 特殊模式下禁用翻页/添加/删除按钮（避免破坏虚拟分页状态）
+            // 0/0（无照片）和 0/1（有照片但未选中）都禁用，因为视频展台模式不应翻页
+            SetBoothPagingButtonsEnabled(false);
+
+            // 异步再覆盖一次：UpdateBoardToolbarState() 内部用 Dispatcher.BeginInvoke 异步调用 UpdatePageInfo()，
+            // 会把文本设回 "CurrentWhiteboardIndex/WhiteboardTotalCount"。
+            // 这里用 DispatcherPriority.Background 确保在 UpdatePageInfo 之后执行，
+            // 最终页码文本一定是虚拟分页格式（0/0、0/1、1/1）。
+            Dispatcher.BeginInvoke(new Action(() =>
             {
-                AttachBoothButtonPressHandlers();
+                ApplyBoothPageText(text);
+            }), System.Windows.Threading.DispatcherPriority.Background);
+        }
+
+        /// <summary>把虚拟分页文本应用到所有页码 TextBlock（TextBlockWhiteBoardIndexInfo + board.pageInfo.*）。</summary>
+        private void ApplyBoothPageText(string text)
+        {
+            if (TextBlockWhiteBoardIndexInfo != null)
+            {
+                TextBlockWhiteBoardIndexInfo.Text = text;
+            }
+
+            // board.pageInfo.* 在 BoardToolbarRegistry 中会被覆盖注册为 Border（不是 TextBlock），
+            // 需要用 FindTextBlockInVisualTree 在视觉树中查找实际的 TextBlock（与 UpdatePageInfo 逻辑一致）
+            foreach (var key in new[] { "board.pageInfo.left", "board.pageInfo.right", "board.pageInfo.center" })
+            {
+                var view = FindView(key);
+                if (view == null) continue;
+                if (view is System.Windows.Controls.TextBlock tb)
+                {
+                    tb.Text = text;
+                }
+                else
+                {
+                    var innerTb = FindTextBlockInVisualTree(view);
+                    if (innerTb != null)
+                    {
+                        innerTb.Text = text;
+                    }
+                }
+            }
+        }
+
+        /// <summary>视频展台特殊模式下统一启用/禁用翻页相关按钮（上一页/下一页/添加页/删除页）。</summary>
+        private void SetBoothPagingButtonsEnabled(bool enabled)
+        {
+            // 旧版 MainWindow 中的按钮
+            if (BtnWhiteBoardSwitchPrevious != null) BtnWhiteBoardSwitchPrevious.IsEnabled = enabled;
+            if (BtnWhiteBoardSwitchNext != null) BtnWhiteBoardSwitchNext.IsEnabled = enabled;
+            if (BtnWhiteBoardAdd != null) BtnWhiteBoardAdd.IsEnabled = enabled;
+            if (BtnWhiteBoardDelete != null) BtnWhiteBoardDelete.IsEnabled = enabled;
+
+            // 新版 BoardToolbar 中的按钮
+            foreach (var key in new[] {
+                "board.previousPage.left", "board.previousPage.right",
+                "board.nextPage.left", "board.nextPage.right",
+                "board.addPage.left", "board.addPage.right",
+                "board.deletePage.left", "board.deletePage.right"
+            })
+            {
+                if (FindView(key) is Controls.BoardToolbarButton btn)
+                    btn.IsEnabled = enabled;
             }
         }
 
@@ -164,6 +258,11 @@ namespace Ink_Canvas
         {
             if (_isVideoPresenterSpecialMode) return;
             _isVideoPresenterSpecialMode = true;
+
+            // 重置虚拟分页状态：进入特殊模式时在直播页，无照片
+            _isBoothOnPhotoPage = false;
+            _boothHasPhoto = false;
+            _boothLastCapturedPhoto = null;
 
             try
             {
@@ -216,6 +315,11 @@ namespace Ink_Canvas
                 _boothPreviewTranslateX = 0;
                 _boothPreviewTranslateY = 0;
                 ApplyBoothPreviewTransform();
+
+                // 虚拟分页：进入特殊模式时页码显示 0/0（无照片）
+                UpdateBoothPageInfoDisplay();
+                // 刷新侧栏页码列表：填充第 0 项（直播页，文字"再次点击返回直播画面"）
+                RefreshBoothPageListView();
             }
             catch (Exception ex)
             {
@@ -228,6 +332,11 @@ namespace Ink_Canvas
         {
             if (!_isVideoPresenterSpecialMode) return;
             _isVideoPresenterSpecialMode = false;
+
+            // 重置虚拟分页状态
+            _isBoothOnPhotoPage = false;
+            _boothHasPhoto = false;
+            _boothLastCapturedPhoto = null;
 
             try
             {
@@ -269,6 +378,16 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"ExitVideoPresenterSpecialMode 异常: {ex.Message}", LogHelper.LogType.Error);
             }
+
+            // 退出特殊模式后恢复白板正常页码显示
+            UpdateIndexInfoDisplay();
+            // 恢复白板侧栏页码列表（覆盖视频展台虚拟分页项，重新填充实际白板页）
+            RefreshBlackBoardSidePageListView();
+
+            // 恢复翻页/添加/删除按钮可用状态（UpdateIndexInfoDisplay 内部的 UpdateBoardToolbarState
+            // 会异步根据 CurrentWhiteboardIndex/WhiteboardTotalCount 重新计算 IsEnabled，
+            // 这里再强制同步一次确保按钮恢复可用）
+            SetBoothPagingButtonsEnabled(true);
         }
 
         /// <summary>隐藏所有选择框（墨迹选择框、图片选择框、图片缩放手柄）。</summary>
@@ -346,58 +465,21 @@ namespace Ink_Canvas
             catch { }
         }
 
-        private void AttachBoothButtonPressHandlers()
-        {
-            if (BtnCapturePhoto == null || BtnRotateImage == null) return;
-            BtnCapturePhoto.PreviewMouseDown += BoothButton_PreviewMouseDown;
-            BtnCapturePhoto.PreviewMouseUp += BoothButton_PreviewMouseUp;
-            BtnCapturePhoto.LostMouseCapture += BoothButton_PreviewMouseUp;
-            BtnRotateImage.PreviewMouseDown += BoothButton_PreviewMouseDown;
-            BtnRotateImage.PreviewMouseUp += BoothButton_PreviewMouseUp;
-            BtnRotateImage.LostMouseCapture += BoothButton_PreviewMouseUp;
-            _boothButtonPressHandlersAttached = true;
-        }
-
-        private void BoothButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (sender is Control c) ApplyBoothButtonHighlight(c, true);
-        }
-
-        private void BoothButton_PreviewMouseUp(object sender, EventArgs e)
-        {
-            if (sender is Control c) ApplyBoothButtonHighlight(c, false);
-        }
-
-        private static void ApplyBoothButtonHighlight(Control control, bool highlight)
-        {
-            if (control == null) return;
-            if (highlight)
-            {
-                control.Background = BoothButtonHighlightBrush;
-                control.BorderBrush = BoothButtonHighlightBrush;
-            }
-            else
-            {
-                control.SetResourceReference(Control.BackgroundProperty, "FloatBarBackground");
-                control.SetResourceReference(Control.BorderBrushProperty, "FloatBarBorderBrush");
-            }
-        }
-
         /// <summary>
-        /// 视频展台关闭按钮（右上角 X）：只折叠侧栏菜单，不退出视频展台模式。
-        /// 视频展台预览（特殊模式）继续运行，用户可以再次点击视频展台按钮重新展开侧栏。
+        /// 视频展台关闭按钮（右上角 X）：只关闭弹窗菜单，不退出视频展台模式。
+        /// 视频展台预览（特殊模式）继续运行，用户可以再次点击视频展台按钮重新打开菜单。
         /// 完全退出视频展台模式由底部"关闭"按钮（BtnExitVideoPresenter_Click）负责。
         /// </summary>
         private void BtnCloseVideoPresenter_Click(object sender, RoutedEventArgs e)
         {
-            if (VideoPresenterSidebar != null)
+            if (BoothPopup != null)
             {
-                VideoPresenterSidebar.Visibility = Visibility.Collapsed;
+                AnimationsHelper.HidePopupWithSlideAndFade(BoothPopup);
             }
         }
 
         /// <summary>
-        /// 底部"关闭"按钮：完全退出视频展台模式（退出特殊模式 + 折叠侧栏 + 停止预览）。
+        /// 底部"关闭"按钮：完全退出视频展台模式（退出特殊模式 + 关闭菜单 + 停止预览）。
         /// 调用后 _isVideoPresenterSpecialMode = false，白板恢复正常模式。
         /// </summary>
         private void BtnExitVideoPresenter_Click(object sender, RoutedEventArgs e)
@@ -408,9 +490,9 @@ namespace Ink_Canvas
 
         private void CloseVideoPresenterSidebarAndReleaseResources()
         {
-            if (VideoPresenterSidebar != null)
+            if (BoothPopup != null)
             {
-                VideoPresenterSidebar.Visibility = Visibility.Collapsed;
+                AnimationsHelper.HidePopupWithSlideAndFade(BoothPopup);
             }
 
             StopVideoPresenterPreviewAndFrameCache(clearPreviewImage: true);
@@ -1693,8 +1775,8 @@ namespace Ink_Canvas
             {
                 int page = GetCurrentPageIndex();
 
-                // 按页摄像头索引：仅在展台侧栏可见时，切页后自动切回该页的摄像头
-                if (VideoPresenterSidebar?.Visibility == Visibility.Visible
+                // 按页摄像头索引：仅在展台菜单可见时，切页后自动切回该页的摄像头
+                if (BoothPopup?.IsOpen == true
                     && _cameraIndexByPage.TryGetValue(page, out int idx))
                 {
                     EnsureCameraService();
@@ -1956,7 +2038,6 @@ namespace Ink_Canvas
         /// </summary>
         private void ToggleBtnPhotoCorrection_Checked(object sender, RoutedEventArgs e)
         {
-            ApplyBoothButtonHighlight(ToggleBtnPhotoCorrection, true);
             if (Settings?.Automation == null) return;
             Settings.Automation.IsEnablePhotoCorrection = true;
             SaveSettingsToFile();
@@ -1967,7 +2048,6 @@ namespace Ink_Canvas
         /// </summary>
         private void ToggleBtnPhotoCorrection_Unchecked(object sender, RoutedEventArgs e)
         {
-            ApplyBoothButtonHighlight(ToggleBtnPhotoCorrection, false);
             if (Settings?.Automation == null) return;
             Settings.Automation.IsEnablePhotoCorrection = false;
             SaveSettingsToFile();
@@ -2029,23 +2109,18 @@ namespace Ink_Canvas
         {
             if (photo?.Image == null) return;
 
-                    // 特殊模式：把照片显示到冻结画面 Image 上，覆盖实时预览
+            // 特殊模式：虚拟分页 - 拍照后不立即显示冻结照片，继续显示直播画面。
+            // 照片保存到侧栏缩略图，用户点击侧栏缩略图才切换到照片预览页（页码 1/1，拍照按钮变灰）。
             if (_isVideoPresenterSpecialMode && VideoPresenterFrozenFrameImage != null)
             {
                 try
                 {
-                    VideoPresenterFrozenFrameImage.Source = photo.Image;
-                    VideoPresenterFrozenFrameImage.Visibility = Visibility.Visible;
-                    // 根据.photo.Image 实际宽高比设置 Image 的 Width/Height，并居中显示：
-                    // 之前 Image 用 Stretch="Uniform" + 容器 1920×1080，当照片是纵向（如旋转后拍照的 1080×1920）时，
-                    // Stretch 会让照片按高度适配，宽度只占容器中间一小块，但 Image 元素本身仍是 1920×1080。
-                    // RenderTransformOrigin="0,0" 是相对于 Image 元素的 (0,0)，不是相对于照片显示区域，
-                    // 导致 ScaleTransform 缩放中心偏离照片中心，缩放感觉"怪怪的"。
-                    // 修复：把 Image 的 Width/Height 设置为照片按 Uniform 适配后的实际显示大小，
-                    //       并用 HorizontalAlignment/VerticalAlignment=Center 让 Image 居中。
-                    //       这样 Image 元素边框 = 照片显示区域，ScaleTransform 相对于 (0,0) 缩放时
-                    //       就是相对于照片左上角，配合 ManipulationDelta 的锚点公式能正确缩放。
-                    //       参考 EasiCamera TransformSlide.MakeElementAdaptToSlide 的做法。
+                    // 保存当前照片引用，点击侧栏缩略图时用于显示到冻结画面
+                    _boothLastCapturedPhoto = photo;
+                    _boothHasPhoto = true;
+
+                    // 预计算照片在冻结画面上的布局参数并缓存到 VideoPresenterFrozenFrameImage，
+                    // 但不设置 Visibility=Visible（延迟到用户点击侧栏缩略图切换到照片页时才显示）
                     double containerWidth = VideoPresenterSpecialModeContainer?.ActualWidth ?? 0;
                     double containerHeight = VideoPresenterSpecialModeContainer?.ActualHeight ?? 0;
                     double imgWidth, imgHeight;
@@ -2063,66 +2138,42 @@ namespace Ink_Canvas
                     {
                         double ratioW = containerWidth / imgWidth;
                         double ratioH = containerHeight / imgHeight;
-                        double fitRatio = Math.Min(ratioW, ratioH); // Uniform 适配比例
+                        double fitRatio = Math.Min(ratioW, ratioH);
                         double displayWidth = imgWidth * fitRatio;
                         double displayHeight = imgHeight * fitRatio;
+                        VideoPresenterFrozenFrameImage.Source = photo.Image;
                         VideoPresenterFrozenFrameImage.Width = displayWidth;
                         VideoPresenterFrozenFrameImage.Height = displayHeight;
-                        // 用 Left/Top 对齐 + 初始 TranslateTransform 居中，而不是 Center 对齐：
-                        // Center 对齐让 Image 左上角偏离容器 (0,0)（比如纵向照片在 1920 宽容器中居中后左上角 X=656），
-                        // 但缩放公式 translate_new = origin - (origin - translate_old) * ratio 假设 Image 左上角在 (0,0)。
-                        // 偏离会导致缩放中心偏离用户手指位置（先旋转再拍照时照片是纵向，问题明显）。
-                        // 用 Left/Top + TranslateTransform 居中后，Image 左上角始终在容器 (0,0)，
-                        // 缩放公式对所有照片方向都正确。
                         VideoPresenterFrozenFrameImage.HorizontalAlignment = HorizontalAlignment.Left;
                         VideoPresenterFrozenFrameImage.VerticalAlignment = VerticalAlignment.Top;
-                        // 居中偏移作为初始 translate（让 Image 在容器中居中显示）
-                        _boothPreviewTranslateX = (containerWidth - displayWidth) / 2.0;
-                        _boothPreviewTranslateY = (containerHeight - displayHeight) / 2.0;
+                        // 缓存居中偏移，切换到照片页时应用
+                        _boothFrozenFrameTranslateX = (containerWidth - displayWidth) / 2.0;
+                        _boothFrozenFrameTranslateY = (containerHeight - displayHeight) / 2.0;
                     }
                     else
                     {
-                        // 兜底：清除 Width/Height，让 Stretch="Uniform" 自己适配
+                        VideoPresenterFrozenFrameImage.Source = photo.Image;
                         VideoPresenterFrozenFrameImage.Width = double.NaN;
                         VideoPresenterFrozenFrameImage.Height = double.NaN;
                         VideoPresenterFrozenFrameImage.HorizontalAlignment = HorizontalAlignment.Stretch;
                         VideoPresenterFrozenFrameImage.VerticalAlignment = VerticalAlignment.Stretch;
-                        _boothPreviewTranslateX = 0;
-                        _boothPreviewTranslateY = 0;
+                        _boothFrozenFrameTranslateX = 0;
+                        _boothFrozenFrameTranslateY = 0;
                     }
-                    _boothPreviewScale = 1.0;
-                    ApplyBoothPreviewTransform();
-                    // 冻结照片的 LayoutTransform 必须设为 0：
-                    // 拍照时 BtnCapturePhoto_Click 已通过 photoCache.RotateFlip 把照片内容旋转到正向
-                    // （photo.Image 本身就是用户看到的正向画面），显示时不需要再通过 LayoutTransform 旋转。
-                    // 之前这里设为 _cameraService.RotationAngle * 90.0 会导致"双重旋转"——
-                    // 照片内容旋转一次 + LayoutTransform 旋转一次，最终方向错误。
                     if (VideoPresenterFrozenFrameRotation != null)
                         VideoPresenterFrozenFrameRotation.Angle = 0;
-                    // 不再显示全屏蒙版（会遮挡冻结画面，用户无法批注）
-                    // 改为在侧栏显示小预览缩略图 + 蒙版 + "点击返回摄像头"文字，
-                    // 用户点击侧栏小预览即可返回实时画面，全屏冻结画面保持可批注。
-                    if (VideoPresenterFrozenThumbnail != null)
-                    {
-                        if (VideoPresenterFrozenThumbnailImage != null)
-                        {
-                            VideoPresenterFrozenThumbnailImage.Source = photo.Image;
-                        }
-                        VideoPresenterFrozenThumbnail.Visibility = Visibility.Visible;
-                    }
-                    // 真正"替换"：停止并隐藏 VideoCaptureElement，只显示冻结照片画面。
-                    // 之前是"叠加"（冻结 Image 盖在 VideoCaptureElement 之上），Stretch="Uniform" 留黑边时
-                    // 黑边处会看到底层实时画面或停止后的黑色背景，造成视觉混乱。
-                    // 替换后黑边处显示容器背景色 #333333，是照片本身的留白，符合预期。
-                    if (VideoPresenterFullCanvasImage != null)
-                    {
-                        try { VideoPresenterFullCanvasImage.Stop(); } catch { }
-                        VideoPresenterFullCanvasImage.Visibility = Visibility.Collapsed;
-                    }
+
+                    // 拍照后仍在直播页，不停止/隐藏 VideoCaptureElement，页码显示 0/1
+                    // （不调用 ApplyBoothPreviewTransform，因为当前仍在直播页，缩放状态应保持直播页的状态）
+                    // 不再显示侧栏小预览缩略图（VideoPresenterFrozenThumbnail），
+                    // 照片通过页码列表项显示，用户点击页码列表第 1 项切换到照片预览页
+                    UpdateBoothPageInfoDisplay();
+                    // 刷新侧栏页码列表：第 0 项（直播页文字）+ 第 1 项（新增的照片缩略图）
+                    RefreshBoothPageListView();
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.WriteLogToFile($"冻结画面显示失败: {ex.Message}", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile($"拍照后保存照片引用失败: {ex.Message}", LogHelper.LogType.Error);
                 }
                 return;
             }
@@ -2178,62 +2229,123 @@ namespace Ink_Canvas
                 {
                     VideoPresenterFrozenOverlay.Visibility = Visibility.Collapsed;
                 }
-                // 清除侧栏小预览缩略图
-                if (VideoPresenterFrozenThumbnail != null)
-                {
-                    VideoPresenterFrozenThumbnail.Visibility = Visibility.Collapsed;
-                    if (VideoPresenterFrozenThumbnailImage != null)
-                    {
-                        VideoPresenterFrozenThumbnailImage.Source = null;
-                    }
-                }
+                // 侧栏小预览缩略图（VideoPresenterFrozenThumbnail）已废弃，
+                // 照片通过页码列表项显示，不再需要清理
             }
             catch { }
         }
 
-        /// <summary>点击侧栏小预览返回摄像头实时画面：清除冻结照片，恢复 VideoCaptureElement 实时预览。
-        /// 冻结时已停止 VideoCaptureElement 防止黑边处露出实时画面；返回时需要重新启动预览。
-        /// 全屏冻结画面保持可批注，用户点击侧栏小预览的蒙版+文字区域返回实时画面。</summary>
+        /// <summary>
+        /// 侧栏小预览缩略图（VideoPresenterFrozenThumbnail）已废弃，照片切换改由页码列表项点击处理。
+        /// 保留此方法仅为了 XAML 事件绑定兼容（VideoPresenterFrozenThumbnail 始终 Collapsed，不会被点击到）。
+        /// </summary>
         private void VideoPresenterFrozenThumbnail_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            try
+            // 空实现：照片切换通过 HandleBoothPageListClick 处理
+        }
+
+        /// <summary>
+        /// 从直播页切换到照片预览页。
+        /// 显示冻结照片、停止实时预览、页码 1/1、拍照按钮变灰。
+        /// </summary>
+        private void SwitchBoothToPhotoPage()
+        {
+            if (_boothLastCapturedPhoto?.Image == null)
             {
-                ClearFrozenFrame();
-                // 重启 VideoCaptureElement 实时预览：
-                // InsertPhotoToCanvas 冻结画面时已将 VideoCaptureElement.Visibility = Collapsed（替换为照片），
-                // 这里返回摄像头时必须先恢复可见性，再重启预览，否则即使重启了画面也看不到。
-                if (_isVideoPresenterSpecialMode && VideoPresenterFullCanvasImage != null && _cameraService != null)
+                ShowBoothTransientMessage("还没有可查看的照片");
+                return;
+            }
+
+            _isBoothOnPhotoPage = true;
+
+            // 显示冻结照片（InsertPhotoToCanvas 已预计算布局参数）
+            if (VideoPresenterFrozenFrameImage != null)
+            {
+                VideoPresenterFrozenFrameImage.Visibility = Visibility.Visible;
+                // 应用照片页的缩放/平移状态（与直播页分离）
+                _boothPreviewScale = 1.0;
+                _boothPreviewTranslateX = _boothFrozenFrameTranslateX;
+                _boothPreviewTranslateY = _boothFrozenFrameTranslateY;
+                ApplyBoothPreviewTransform();
+            }
+
+            // 停止并隐藏 VideoCaptureElement，只显示冻结照片
+            // （Stretch=Uniform 留黑边处会看到底层实时画面，必须停止+隐藏）
+            if (VideoPresenterFullCanvasImage != null)
+            {
+                try { VideoPresenterFullCanvasImage.Stop(); } catch { }
+                VideoPresenterFullCanvasImage.Visibility = Visibility.Collapsed;
+            }
+
+            // 拍照按钮变灰（在照片预览页不允许拍照）
+            if (BtnCapturePhoto != null)
+            {
+                BtnCapturePhoto.IsEnabled = false;
+            }
+
+            // 页码显示 1/1
+            UpdateBoothPageInfoDisplay();
+            // 同步侧栏页码列表 SelectedIndex 到照片项（index=1）
+            var leftPageListView = FindView("board.pageList.left") as System.Windows.Controls.ListView;
+            var rightPageListView = FindView("board.pageList.right") as System.Windows.Controls.ListView;
+            if (leftPageListView != null) leftPageListView.SelectedIndex = 1;
+            if (rightPageListView != null) rightPageListView.SelectedIndex = 1;
+        }
+
+        /// <summary>
+        /// 从照片预览页返回直播页。
+        /// 清除冻结照片、恢复实时预览、页码 0/1、拍照按钮恢复。
+        /// </summary>
+        private void SwitchBoothToLivePage()
+        {
+            _isBoothOnPhotoPage = false;
+
+            // 清除冻结照片
+            if (VideoPresenterFrozenFrameImage != null)
+            {
+                VideoPresenterFrozenFrameImage.Visibility = Visibility.Collapsed;
+            }
+
+            // 恢复 VideoCaptureElement 实时预览
+            if (VideoPresenterFullCanvasImage != null && _cameraService != null)
+            {
+                VideoPresenterFullCanvasImage.Visibility = Visibility.Visible;
+                // 重置缩放/平移为默认状态（直播页与照片页缩放状态不通用）
+                _boothPreviewScale = 1.0;
+                _boothPreviewTranslateX = 0;
+                _boothPreviewTranslateY = 0;
+                ApplyBoothPreviewTransform();
+
+                int page = GetCurrentPageIndex();
+                int camIdx = -1;
+                if (_cameraIndexByPage.TryGetValue(page, out int savedIdx)
+                    && savedIdx >= 0 && savedIdx < _cameraService.AvailableCameras.Count)
                 {
-                    VideoPresenterFullCanvasImage.Visibility = Visibility.Visible;
-                    // 重置缩放/平移为默认状态：
-                    // 用户在照片上做的缩放/平移已累积到 _boothPreviewScale，返回摄像头时不应继承
-                    // （实时画面与照片是不同内容，缩放状态不通用）
-                    _boothPreviewScale = 1.0;
-                    _boothPreviewTranslateX = 0;
-                    _boothPreviewTranslateY = 0;
-                    ApplyBoothPreviewTransform();
-                    int page = GetCurrentPageIndex();
-                    int camIdx = -1;
-                    if (_cameraIndexByPage.TryGetValue(page, out int savedIdx)
-                        && savedIdx >= 0 && savedIdx < _cameraService.AvailableCameras.Count)
-                    {
-                        camIdx = savedIdx;
-                    }
-                    if (camIdx < 0 && _cameraService.AvailableCameras.Count > 0)
-                    {
-                        camIdx = 0;
-                    }
-                    if (camIdx >= 0)
-                    {
-                        _ = StartVideoCaptureElementPreviewAsync(camIdx);
-                    }
+                    camIdx = savedIdx;
                 }
-                e.Handled = true;
+                if (camIdx < 0 && _cameraService.AvailableCameras.Count > 0)
+                {
+                    camIdx = 0;
+                }
+                if (camIdx >= 0)
+                {
+                    _ = StartVideoCaptureElementPreviewAsync(camIdx);
+                }
             }
-            catch (Exception ex)
+
+            // 拍照按钮恢复可用（MediaOpened 事件会再次设置 IsEnabled=true，这里先恢复）
+            if (BtnCapturePhoto != null && _cameraService != null)
             {
-                LogHelper.WriteLogToFile($"返回摄像头失败: {ex.Message}", LogHelper.LogType.Error);
+                BtnCapturePhoto.IsEnabled = true;
             }
+
+            // 页码显示 0/1
+            UpdateBoothPageInfoDisplay();
+            // 同步侧栏页码列表 SelectedIndex 到直播页项（index=0）
+            var leftPageListView = FindView("board.pageList.left") as System.Windows.Controls.ListView;
+            var rightPageListView = FindView("board.pageList.right") as System.Windows.Controls.ListView;
+            if (leftPageListView != null) leftPageListView.SelectedIndex = 0;
+            if (rightPageListView != null) rightPageListView.SelectedIndex = 0;
         }
 
         /// <summary>旧的全屏蒙版点击处理器（已废弃，保留以兼容 XAML 中的事件绑定）。

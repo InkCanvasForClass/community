@@ -528,6 +528,7 @@ namespace Ink_Canvas
             BoardBorderDrawShape.IsOpen = false;
 
             BackgroundPalette.IsOpen = false;
+            BoothPopup.IsOpen = false;
         }
 
         /// <summary>
@@ -626,6 +627,9 @@ namespace Ink_Canvas
             BoardRoamingPopup.IsOpen = false;
 
             AnimationsHelper.HidePopupWithSlideAndFade(BackgroundPalette);
+
+            // 视频展台弹窗也属于"子面板"，HideSubPanels 时一并隐藏
+            AnimationsHelper.HidePopupWithSlideAndFade(BoothPopup);
 
             if (mode != null)
             {

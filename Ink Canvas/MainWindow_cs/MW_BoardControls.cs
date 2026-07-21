@@ -423,13 +423,22 @@ namespace Ink_Canvas
                 else
                 {
                     AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
-                    RefreshBlackBoardSidePageListView();
+                    // 视频展台特殊模式：刷新虚拟分页项（直播页文字 + 照片缩略图），不刷新普通白板页
+                    // 否则 RefreshBlackBoardSidePageListView 会用普通白板页的墨迹预览覆盖虚拟分页项
+                    if (_isVideoPresenterSpecialMode)
+                        RefreshBoothPageListView();
+                    else
+                        RefreshBlackBoardSidePageListView();
                     AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderLeftPageListView);
                     await Task.Delay(1);
                     if (BlackBoardLeftSidePageListView != null)
                     {
+                        // 特殊模式下滚动到当前虚拟页（0=直播页，1=照片页），而非 CurrentWhiteboardIndex - 1
+                        int scrollIndex = _isVideoPresenterSpecialMode
+                            ? (_isBoothOnPhotoPage ? 1 : 0)
+                            : CurrentWhiteboardIndex - 1;
                         var leftContainer = BlackBoardLeftSidePageListView.ItemContainerGenerator.ContainerFromIndex(
-                            CurrentWhiteboardIndex - 1) as ListViewItem;
+                            scrollIndex) as ListViewItem;
                         if (leftContainer != null)
                         {
                             ScrollViewToVerticalTop(leftContainer, BlackBoardLeftSidePageListScrollViewer);
@@ -446,13 +455,20 @@ namespace Ink_Canvas
                 else
                 {
                     AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
-                    RefreshBlackBoardSidePageListView();
+                    // 视频展台特殊模式：刷新虚拟分页项（直播页文字 + 照片缩略图），不刷新普通白板页
+                    if (_isVideoPresenterSpecialMode)
+                        RefreshBoothPageListView();
+                    else
+                        RefreshBlackBoardSidePageListView();
                     AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderRightPageListView);
                     await Task.Delay(1);
                     if (BlackBoardRightSidePageListView != null)
                     {
+                        int scrollIndex = _isVideoPresenterSpecialMode
+                            ? (_isBoothOnPhotoPage ? 1 : 0)
+                            : CurrentWhiteboardIndex - 1;
                         var rightContainer = BlackBoardRightSidePageListView.ItemContainerGenerator.ContainerFromIndex(
-                            CurrentWhiteboardIndex - 1) as ListViewItem;
+                            scrollIndex) as ListViewItem;
                         if (rightContainer != null)
                         {
                             ScrollViewToVerticalTop(rightContainer, BlackBoardRightSidePageListScrollViewer);
@@ -797,6 +813,13 @@ namespace Ink_Canvas
             BtnWhiteBoardDelete.IsEnabled = WhiteboardTotalCount != 1;
             UpdateInkFreezeButtonState();
             UpdateBoardToolbarState();
+
+            // 视频展台特殊模式下覆盖页码显示为虚拟分页（0/0、0/1、1/1）
+            // 不 return，因为上面还需要更新翻页按钮状态
+            if (_isVideoPresenterSpecialMode)
+            {
+                UpdateBoothPageInfoDisplay();
+            }
         }
 
         /// <summary>

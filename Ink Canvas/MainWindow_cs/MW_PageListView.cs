@@ -15,6 +15,20 @@ namespace Ink_Canvas
         {
             public int Index { get; set; }
             public StrokeCollection Strokes { get; set; }
+
+            // 视频展台特殊模式专用字段（非特殊模式时均为 null/false，DataTemplate 用这些字段决定显示 InkCanvas/Image/TextBlock）
+            /// <summary>视频展台照片缩略图源；非 null 时 DataTemplate 显示 Image 元素而非 InkCanvas。</summary>
+            public ImageSource BoothImage { get; set; }
+            /// <summary>视频展台提示文字（如"再次点击返回直播画面"）；非空时 DataTemplate 显示 TextBlock 而非 InkCanvas。</summary>
+            public string BoothText { get; set; }
+            /// <summary>是否为视频展台特殊模式项（非普通白板页）。</summary>
+            public bool IsBoothItem => BoothImage != null || !string.IsNullOrEmpty(BoothText);
+            /// <summary>DataTemplate 中 InkCanvas 是否可见（普通白板页可见，视频展台项不可见）。</summary>
+            public bool ShowInk => !IsBoothItem;
+            /// <summary>DataTemplate 中 Image 是否可见（仅视频展台照片项可见）。</summary>
+            public bool ShowImage => BoothImage != null;
+            /// <summary>DataTemplate 中 TextBlock 是否可见（仅视频展台文字项可见）。</summary>
+            public bool ShowText => !string.IsNullOrEmpty(BoothText);
         }
 
         ObservableCollection<PageListViewItem> blackBoardSidePageListViewObservableCollection = new ObservableCollection<PageListViewItem>();
@@ -74,6 +88,101 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 视频展台特殊模式专用：刷新侧栏页面列表，按虚拟分页状态显示"直播页 / 照片页"两项。
+        /// 进入特殊模式时（无照片）：列表只有 1 项（第 0 项=直播页，文字"再次点击返回直播画面"）。
+        /// 拍照后（有照片）：列表有 2 项（第 0 项=直播页文字，第 1 项=照片缩略图）。
+        /// </summary>
+        /// <remarks>
+        /// 该方法会重置 <see cref="blackBoardSidePageListViewObservableCollection"/> 的内容，
+        /// 并根据 <see cref="_isBoothOnPhotoPage"/> 同步左右两侧 ListView 的 SelectedIndex。
+        /// </remarks>
+        private void RefreshBoothPageListView()
+        {
+            var leftPageListView = FindView("board.pageList.left") as ListView;
+            var rightPageListView = FindView("board.pageList.right") as ListView;
+
+            blackBoardSidePageListViewObservableCollection.Clear();
+
+            // 第 0 项：直播页，显示提示文字（点击会切换回直播画面）
+            blackBoardSidePageListViewObservableCollection.Add(new PageListViewItem
+            {
+                Index = 0,
+                Strokes = null,
+                BoothText = "再次点击返回直播画面",
+            });
+
+            // 第 1 项：照片页（仅当有照片时才添加）
+            if (_boothHasPhoto && _boothLastCapturedPhoto?.Image != null)
+            {
+                blackBoardSidePageListViewObservableCollection.Add(new PageListViewItem
+                {
+                    Index = 1,
+                    Strokes = null,
+                    BoothImage = _boothLastCapturedPhoto.Image,
+                });
+            }
+
+            // 同步左右两侧 SelectedIndex：在照片页=1，在直播页=0
+            int selectedIndex = _isBoothOnPhotoPage ? 1 : 0;
+            // 确保 SelectedIndex 不越界（_boothHasPhoto=false 时列表只有 1 项， selectedIndex 应为 0）
+            if (selectedIndex >= blackBoardSidePageListViewObservableCollection.Count)
+                selectedIndex = blackBoardSidePageListViewObservableCollection.Count - 1;
+            if (leftPageListView != null) leftPageListView.SelectedIndex = selectedIndex;
+            if (rightPageListView != null) rightPageListView.SelectedIndex = selectedIndex;
+        }
+
+        /// <summary>
+        /// 视频展台特殊模式：处理侧栏页面列表项点击，根据点击的项索引切换直播页/照片页。
+        /// - index=0（直播页项）：切回直播页（页码 0/1，拍照按钮恢复可用）。
+        /// - index=1（照片项）：切到照片预览页（页码 1/1，拍照按钮变灰）。
+        /// </summary>
+        /// <param name="index">被点击的项索引（0 或 1）。</param>
+        /// <param name="leftPageListView">左侧 ListView（用于同步 SelectedIndex）。</param>
+        /// <param name="rightPageListView">右侧 ListView（用于同步 SelectedIndex）。</param>
+        private void HandleBoothPageListClick(int index, ListView leftPageListView, ListView rightPageListView)
+        {
+            if (index < 0 || index >= blackBoardSidePageListViewObservableCollection.Count) return;
+
+            if (index == 0)
+            {
+                // 点击直播页项 -> 确保在直播页（如已在直播页则保持，页码 0/1，拍照按钮恢复）
+                if (_isBoothOnPhotoPage)
+                {
+                    SwitchBoothToLivePage();
+                }
+                else
+                {
+                    // 已在直播页，仅刷新页码与按钮状态
+                    if (BtnCapturePhoto != null && _cameraService != null)
+                        BtnCapturePhoto.IsEnabled = true;
+                    UpdateBoothPageInfoDisplay();
+                }
+            }
+            else if (index == 1)
+            {
+                // 点击照片项 -> 切到照片预览页（页码 1/1，拍照按钮变灰）
+                if (!_isBoothOnPhotoPage)
+                {
+                    SwitchBoothToPhotoPage();
+                }
+                else
+                {
+                    // 已在照片页，仅刷新页码与按钮状态
+                    if (BtnCapturePhoto != null)
+                        BtnCapturePhoto.IsEnabled = false;
+                    UpdateBoothPageInfoDisplay();
+                }
+            }
+
+            // 同步左右两侧 SelectedIndex
+            int selectedIndex = _isBoothOnPhotoPage ? 1 : 0;
+            if (selectedIndex >= blackBoardSidePageListViewObservableCollection.Count)
+                selectedIndex = blackBoardSidePageListViewObservableCollection.Count - 1;
+            if (leftPageListView != null) leftPageListView.SelectedIndex = selectedIndex;
+            if (rightPageListView != null) rightPageListView.SelectedIndex = selectedIndex;
+        }
+
+        /// <summary>
         /// 根据传入相对于 <paramref name="scrollViewer"/> 的点，查找并选中列表中对应的缩略图项；在需要时切换当前白板页并更新画布状态与左右侧缩略图选择状态。
         /// </summary>
         /// <param name="listView">承载页面缩略图的 ListView。</param>
@@ -82,6 +191,7 @@ namespace Ink_Canvas
         /// <remarks>
         /// - 如果命中到 ListViewItem，会隐藏左右侧页面边框、在必要时保存/清空/恢复画笔笔迹并更新 CurrentWhiteboardIndex 与显示信息；还会将左右两侧 ListView 的 SelectedIndex 同步为命中项索引。 
         /// - 在查找命中或切换过程中发生的异常将被捕获并忽略，不会向上抛出。
+        /// - 视频展台特殊模式下：不走普通白板分页切换逻辑，转走 <see cref="HandleBoothPageListClick"/>。
         /// </remarks>
         private void TrySwitchWhiteboardPageByTouchPoint(ListView listView, ScrollViewer scrollViewer, Point pointInScrollViewer)
         {
@@ -105,6 +215,14 @@ namespace Ink_Canvas
                 if (item == null) return;
                 if (leftBorder != null) AnimationsHelper.HideWithSlideAndFade(leftBorder);
                 if (rightBorder != null) AnimationsHelper.HideWithSlideAndFade(rightBorder);
+
+                // 视频展台特殊模式：走虚拟分页点击切换，不走普通白板分页逻辑
+                if (_isVideoPresenterSpecialMode)
+                {
+                    HandleBoothPageListClick(index, leftPageListView, rightPageListView);
+                    return;
+                }
+
                 if (index + 1 != CurrentWhiteboardIndex)
                 {
                     if (currentSelectedElement != null)
@@ -193,6 +311,7 @@ namespace Ink_Canvas
             var leftBorder = FindView("board.pageList.leftBorder") as Border;
             var rightBorder = FindView("board.pageList.rightBorder") as Border;
             var leftPageListView = FindView("board.pageList.left") as ListView;
+            var rightPageListView = FindView("board.pageList.right") as ListView;
             if (leftPageListView == null) return;
 
             if (leftBorder != null) AnimationsHelper.HideWithSlideAndFade(leftBorder);
@@ -201,6 +320,13 @@ namespace Ink_Canvas
             var index = leftPageListView.SelectedIndex;
             if (item != null)
             {
+                // 视频展台特殊模式：走虚拟分页点击切换，不走普通白板分页逻辑
+                if (_isVideoPresenterSpecialMode)
+                {
+                    HandleBoothPageListClick(index, leftPageListView, rightPageListView);
+                    return;
+                }
+
                 if (index + 1 != CurrentWhiteboardIndex)
                 {
                     if (currentSelectedElement != null)
@@ -243,6 +369,7 @@ namespace Ink_Canvas
         {
             var leftBorder = FindView("board.pageList.leftBorder") as Border;
             var rightBorder = FindView("board.pageList.rightBorder") as Border;
+            var leftPageListView = FindView("board.pageList.left") as ListView;
             var rightPageListView = FindView("board.pageList.right") as ListView;
             if (rightPageListView == null) return;
 
@@ -252,6 +379,13 @@ namespace Ink_Canvas
             var index = rightPageListView.SelectedIndex;
             if (item != null)
             {
+                // 视频展台特殊模式：走虚拟分页点击切换，不走普通白板分页逻辑
+                if (_isVideoPresenterSpecialMode)
+                {
+                    HandleBoothPageListClick(index, leftPageListView, rightPageListView);
+                    return;
+                }
+
                 if (index + 1 != CurrentWhiteboardIndex)
                 {
                     if (currentSelectedElement != null)

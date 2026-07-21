@@ -128,6 +128,31 @@ namespace Ink_Canvas
         internal ToolMenuButton ManualToolBtn => MainToolsPopupContent?.ManualBtn;
         internal ToolMenuButton SettingsToolBtn => MainToolsPopupContent?.SettingsBtn;
 
+        // 视频展台 ComboBox / 按钮原本由 VideoPresenterSidebar 中 XAML 自动生成字段，
+        // 现已迁移到 BoothPopupContent 弹窗菜单，这里通过转发属性保持 MW_VideoPresenter.cs
+        // 中所有引用（CameraDevicesComboBox、BtnCapturePhoto 等）不变。
+        internal System.Windows.Controls.ComboBox CameraDevicesComboBox => BoothPopupContent?.CameraDevicesComboBoxControl;
+        internal System.Windows.Controls.ComboBox BoothResolutionComboBox => BoothPopupContent?.BoothResolutionComboBoxControl;
+        internal System.Windows.Controls.Button BtnCapturePhoto => BoothPopupContent?.CapturePhotoButton;
+        internal System.Windows.Controls.Button BtnRotateImage => BoothPopupContent?.RotateImageButton;
+        internal System.Windows.Controls.Button BtnExitVideoPresenter => BoothPopupContent?.ExitVideoPresenterButton;
+        internal System.Windows.Controls.Primitives.ToggleButton ToggleBtnPhotoCorrection => BoothPopupContent?.PhotoCorrectionToggle;
+
+        /// <summary>
+        /// 设置视频展台弹窗的 PlacementTarget。
+        /// CustomPopupPlacementCallback 中的 targetSize 来自 PlacementTarget，
+        /// 若不设置会退化为父级 Grid（充满屏幕）尺寸，导致菜单定位到屏幕顶部中心上方（大部分在屏幕外）。
+        /// 由视频展台按钮（BoardVideoBoothToolItem / VideoBoothToolItem）在 OnClick 时调用，
+        /// 把按钮自身作为 PlacementTarget，让菜单出现在按钮上方。
+        /// </summary>
+        public void SetBoothPopupPlacementTarget(System.Windows.FrameworkElement target)
+        {
+            if (BoothPopup != null && target != null)
+            {
+                BoothPopup.PlacementTarget = target;
+            }
+        }
+
         internal Image LeftUnFoldBtnImgChevron => LeftSidePanel?.ChevronIcon;
         internal Image RightUnFoldBtnImgChevron => RightSidePanel?.ChevronIcon;
 
@@ -429,6 +454,36 @@ namespace Ink_Canvas
             content.ShowCircleCenterToggle.Toggled += ToggleSwitchShowCircleCenter_Toggled;
         }
 
+        private bool _boothPopupEventsWired;
+
+        /// <summary>
+        /// 将 BoothPopupContent 中各个控件的事件转发到 MainWindow 中已有的处理方法，
+        /// 这些方法原本由 XAML 中的 Click/SelectionChanged 直接绑定，迁移到 BoothPopupContent 后改为代码订阅。
+        /// </summary>
+        private void WireUpBoothPopupContentEvents()
+        {
+            if (_boothPopupEventsWired) return;
+            _boothPopupEventsWired = true;
+
+            var content = BoothPopupContent;
+            if (content == null) return;
+
+            content.CameraDevicesComboBoxControl.SelectionChanged += CameraDevicesComboBox_SelectionChanged;
+            content.BoothResolutionComboBoxControl.SelectionChanged += BoothResolutionComboBox_SelectionChanged;
+            content.CapturePhotoButton.Click += BtnCapturePhoto_Click;
+            content.RotateImageButton.Click += BtnRotateImage_Click;
+            content.ExitVideoPresenterButton.Click += BtnExitVideoPresenter_Click;
+            content.PhotoCorrectionToggle.Checked += ToggleBtnPhotoCorrection_Checked;
+            content.PhotoCorrectionToggle.Unchecked += ToggleBtnPhotoCorrection_Unchecked;
+            // X 关闭按钮：只关闭菜单（隐藏 Popup），不退出视频展台模式。
+            // 完全退出由菜单内"关闭"按钮（BtnExitVideoPresenter_Click）负责。
+            content.CloseButtonControl.Click += (s, e) =>
+            {
+                if (BoothPopup != null)
+                    AnimationsHelper.HidePopupWithSlideAndFade(BoothPopup);
+            };
+        }
+
         /// <summary>
         /// 初始化主窗口实例，构建并配置界面元素、初始页面和应用程序运行时状态。
         /// </summary>
@@ -581,6 +636,15 @@ namespace Ink_Canvas
                         new Point((targetSize.Width - popupSize.Width) / 2, -popupSize.Height - 5),
                         PopupPrimaryAxis.Vertical)
                 };
+
+            BoothPopup.CustomPopupPlacementCallback =
+                (popupSize, targetSize, offset) => new[]
+                {
+                    new CustomPopupPlacement(
+                        new Point((targetSize.Width - popupSize.Width) / 2, -popupSize.Height - 5),
+                        PopupPrimaryAxis.Vertical)
+                };
+            WireUpBoothPopupContentEvents();
 
             BlackboardLeftSide.Visibility = Visibility.Collapsed;
             BlackboardCenterSide.Visibility = Visibility.Collapsed;

@@ -145,7 +145,7 @@
     <Grid x:Name="Main_Grid">
         <!--黑/白 板幕布-->
         <Grid Name="GridBackgroundCoverHolder">
-            <Grid Name="GridBackgroundCover" Visibility="Collapsed"  d:Visibility="Visible" Background="#1F1F1F">
+            <Grid Name="GridBackgroundCover" Visibility="Collapsed" Background="#1F1F1F">
                 <Image Name="ICCWaterMarkWhite" Source="Resources/Icons-png/icc-transparent.png" Width="648"
                        Height="648" Opacity="0.035" />
                 <Image Name="ICCWaterMarkDark" Source="Resources/Icons-png/icc-transparent-dark.png" Width="648"
@@ -218,8 +218,8 @@
             </Grid>
         </Grid>
         <Grid Name="GridTransparencyFakeBackground" Opacity="0" />
-        <Label Name="Label" Visibility="Collapsed"  d:Visibility="Visible" Foreground="Gray" Content="0" />
-        <Grid Name="InkCanvasGridForInkReplay">
+        <Label Name="Label" Visibility="Collapsed" Foreground="Gray" Content="0" />
+        <Grid Name="InkCanvasGridForInkReplay" d:Visibility="Collapsed">
             <InkCanvas x:Name="inkCanvas" ForceCursor="True" UseCustomCursor="True"
                        TouchDown="Main_Grid_TouchDown"
                        TouchMove="inkCanvas_TouchMove"
@@ -240,7 +240,7 @@
                        ClipToBounds="False" 
                        Background="Transparent" />
 
-            <Canvas x:Name="EraserOverlayCanvas"
+            <Canvas x:Name="EraserOverlayCanvas" d:Visibility="Collapsed"
                     Background="Transparent"
                     IsHitTestVisible="False"
                     Loaded="EraserOverlayCanvas_Loaded"
@@ -252,7 +252,7 @@
                        RenderTransformOrigin="0,0"
                        Width="0"
                        Height="0"
-                       Visibility="Collapsed"  d:Visibility="Visible">
+                       Visibility="Collapsed">
                     <Image.RenderTransform>
                         <TranslateTransform x:Name="EraserFeedbackTranslateTransform"/>
                     </Image.RenderTransform>
@@ -321,7 +321,7 @@
                   TouchDown="GridInkCanvasSelectionCover_TouchDown"
                   TouchUp="GridInkCanvasSelectionCover_TouchUp"
                   TouchMove="GridInkCanvasSelectionCover_TouchMove"
-                  Background="#01FFFFFF" Opacity="0.01" Visibility="Collapsed"  d:Visibility="Visible" Margin="1,0,-1,0">
+                  Background="#01FFFFFF" Opacity="0.01" Visibility="Collapsed" Margin="1,0,-1,0">
 
                 <!-- 选择框 -->
                 <Rectangle Name="SelectionRectangle"
@@ -767,7 +767,7 @@
                     </Grid>
                 </Viewbox>
                 <!--菜单-->
-                <Grid>
+                <Grid d:Visibility="Collapsed">
                     <!--手势菜单-->
                     <Popup x:Name="BoardTwoFingerGestureBorder" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
                         <localControls:GesturePopupContent x:Name="BoardGesturePopupContent" />
@@ -775,6 +775,10 @@
                     <!--漫游导航-->
                     <Popup x:Name="BoardRoamingPopup" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
                         <localControls:BoardRoamingPopupContent x:Name="BoardRoamingPopupContent" />
+                    </Popup>
+                    <!--视频展台菜单：摄像头设备 / 分辨率 / 4 个操作按钮（矫正、拍照、旋转、关闭）-->
+                    <Popup x:Name="BoothPopup" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
+                        <localControls:BoothPopupContent x:Name="BoothPopupContent" />
                     </Popup>
                     <!--背景菜单-->
                     <Popup x:Name="BackgroundPalette" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
@@ -917,8 +921,8 @@
                        Text="{x:Static props:NotificationStrings.TestText}" />
         </Grid>
         <!--// PPT 底部翻页按钮 //-->
-        <Grid>
-            <Grid Visibility="Visible">
+        <Grid d:Visibility="Collapsed">
+            <Grid Visibility="Visible" d:Visibility="Collapsed">
                 <localControls:PPTNavBar x:Name="LeftBottomPanelForPPTNavigation"
                                          Visibility="Collapsed"  d:Visibility="Visible"
                                          Direction="LeftBottom"
@@ -932,7 +936,7 @@
             </Grid>
         </Grid>
         <!-- 隐藏的全局页码源:旧代码与 PPTUIManager 通过 PPTBtnPageNow/Total 设置文字 -->
-        <ikw:SimpleStackPanel Visibility="Collapsed"  d:Visibility="Visible">
+        <ikw:SimpleStackPanel Visibility="Collapsed">
             <TextBlock Name="PPTBtnPageNow" Text="?"/>
             <TextBlock Name="PPTBtnPageTotal" Text="/ ?"/>
         </ikw:SimpleStackPanel>
@@ -949,7 +953,7 @@
                                  Margin="0,0,6,0"
                                  HorizontalAlignment="Right" VerticalAlignment="Center"/>
         <!--浮动工具栏-->
-        <Grid Name="FloatingbarUIForInkReplay">
+        <Grid Name="FloatingbarUIForInkReplay" d:Visibility="Collapsed">
             <Viewbox Name="ViewboxFloatingBar" Margin="-500,0,0,0" Cursor="Arrow"
                      Visibility="Collapsed"  d:Visibility="Visible"
                      HorizontalAlignment="Left" VerticalAlignment="Top"
@@ -1061,7 +1065,7 @@
             </Border>
         </Grid>
         <!--浮动工具栏菜单-->
-        <Grid>
+        <Grid d:Visibility="Collapsed">
             <Popup x:Name="PenPalette" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
                 <localControls:PenPalettePopupContent x:Name="PenPalettePopupContent" />
             </Popup>
@@ -1086,11 +1090,11 @@
                 <localControls:WhiteboardModeSelectionPopupContent x:Name="InsertToWhiteboardContent" />
             </Popup>
         </Grid>
-        <Grid Name="GridForFloatingBarDraging" Background="#01000000" Visibility="Collapsed"  d:Visibility="Visible"
+        <Grid Name="GridForFloatingBarDraging" Background="#01000000" Visibility="Collapsed"
               MouseMove="SymbolIconEmoji_MouseMove" MouseUp="SymbolIconEmoji_MouseUp" />
         <!--墨迹重播-->
-        <Grid>
-            <InkCanvas Name="InkCanvasForInkReplay" MouseDown="InkCanvasForInkReplay_MouseDown" Visibility="Collapsed"  d:Visibility="Visible"
+        <Grid d:Visibility="Collapsed">
+            <InkCanvas Name="InkCanvasForInkReplay" MouseDown="InkCanvasForInkReplay_MouseDown" Visibility="Collapsed"
                        EditingMode="None" Background="Transparent" />
             <Border Name="BorderInkReplayToolBox" Width="386" Height="48" HorizontalAlignment="Center"
                     Visibility="Collapsed"  d:Visibility="Visible"
@@ -1305,7 +1309,6 @@
             VerticalAlignment="Stretch"
             Background="{DynamicResource FloatingBarBackgroundBrush}"
             BorderBrush="{DynamicResource FloatingBarBorderBrush}"
-            BorderThickness="0,0,1,0"
             Visibility="Collapsed"  d:Visibility="Visible"
             Panel.ZIndex="996">
             <Grid>
@@ -1325,32 +1328,14 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock
                         Grid.Column="0"
-                        Margin="15,0,0,0"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
-                        FontSize="16"
-                        FontWeight="Bold"
                         Foreground="{DynamicResource FloatingBarForegroundBrush}"
                         Text="{x:Static props:BoothStrings.Title}" />
                     <Button
-                        Grid.Column="1"
-                        Width="50"
-                        Height="50"
-                        Padding="0"
-                        BorderThickness="0"
-                        Background="Transparent"
+                        Grid.Column="1" Height="48" Width="48"
                         Click="BtnCloseVideoPresenter_Click">
-                        <Path
-                            Stroke="{DynamicResource IconForeground}"
-                            StrokeThickness="2"
-                            StrokeStartLineCap="Round"
-                            StrokeEndLineCap="Round"
-                            Width="16"
-                            Height="16"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Stretch="Uniform"
-                            Data="M4.5 4.5L11.5 11.5M11.5 4.5L4.5 11.5" />
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChromeCloseContrast}" />
                     </Button>
                 </Grid>
 
@@ -1363,14 +1348,9 @@
                      冻结画面本身仍全屏显示在白板上供用户批注，这里只是侧栏的缩略图指示。 -->
                 <Border x:Name="VideoPresenterFrozenThumbnail"
                         Grid.Row="1"
-                        Height="120"
-                        Margin="10,2,10,2"
-                        Padding="0"
-                        CornerRadius="6"
                         Background="#1A1A1A"
                         BorderBrush="#3D3D3D"
-                        BorderThickness="1"
-                        Visibility="Collapsed"
+                        Visibility="Collapsed" d:Visibility="Visible"
                         MouseLeftButtonDown="VideoPresenterFrozenThumbnail_MouseLeftButtonDown">
                     <Grid>
                         <!-- 冻结图片缩略图（保持长宽比，居中） -->
@@ -1391,116 +1371,23 @@
                 </Border>
 
                 <!-- 照片显示区域 -->
-                <Border Grid.Row="2" Margin="10,2,10,2" Padding="10" CornerRadius="6" Background="{DynamicResource FloatingBarBackgroundBrush}">
+                <Border Grid.Row="2" Background="{DynamicResource FloatingBarBackgroundBrush}">
                     <StackPanel>
                         <TextBlock
-                            Margin="0,0,0,8"
                             HorizontalAlignment="Left"
-                            FontSize="12"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource FloatingBarForegroundBrush}"
                             Text="{x:Static props:BoothStrings.CapturedPhotos}" />
                         <ScrollViewer
                             x:Name="CapturedPhotosScrollViewer"
-                            MaxHeight="280"
                             VerticalScrollBarVisibility="Auto"
                             PanningMode="VerticalFirst">
-                            <StackPanel x:Name="CapturedPhotosStackPanel" Margin="0,0,0,5" />
+                            <StackPanel x:Name="CapturedPhotosStackPanel" />
                         </ScrollViewer>
                     </StackPanel>
                 </Border>
 
-                <!-- 设备选择区域 -->
-                <Border Grid.Row="3" Margin="10,2,10,5" Padding="10" CornerRadius="6" Background="{DynamicResource FloatingBarBackgroundBrush}">
-                    <StackPanel>
-                        <TextBlock
-                            Margin="0,0,0,8"
-                            HorizontalAlignment="Left"
-                            FontSize="12"
-                            FontWeight="SemiBold"
-                            Foreground="{DynamicResource FloatingBarForegroundBrush}"
-                            Text="{x:Static props:BoothStrings.CameraDevices}" />
-                        <ComboBox x:Name="CameraDevicesComboBox"
-                                  Height="36"
-                                  FontSize="12"
-                                  Background="{DynamicResource FloatingBarBackgroundBrush}"
-                                  BorderBrush="#616161"
-                                  BorderThickness="1"
-                                  Foreground="{DynamicResource FloatingBarForegroundBrush}"
-                                  SelectionChanged="CameraDevicesComboBox_SelectionChanged" />
-                    </StackPanel>
-                </Border>
-
-                <!-- 底部按钮区域 -->
-                <Grid Grid.Row="4" Margin="0,0,0,6">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10,4,10,2">
-                        <ToggleButton
-                            x:Name="ToggleBtnPhotoCorrection"
-                            Width="70"
-                            Height="40"
-                            Margin="2,0"
-                            Background="{DynamicResource FloatingBarBackgroundBrush}"
-                            BorderBrush="{DynamicResource FloatingBarBorderBrush}"
-                            BorderThickness="1"
-                            Checked="ToggleBtnPhotoCorrection_Checked"
-                            Unchecked="ToggleBtnPhotoCorrection_Unchecked">
-                            <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatingBarForegroundBrush}" Text="{x:Static props:BoothStrings.Correction}" />
-                        </ToggleButton>
-                        <Button
-                            x:Name="BtnCapturePhoto"
-                            Width="70"
-                            Height="40"
-                            Margin="2,0"
-                            Background="{DynamicResource FloatingBarBackgroundBrush}"
-                            BorderBrush="{DynamicResource FloatingBarBorderBrush}"
-                            BorderThickness="1"
-                            Click="BtnCapturePhoto_Click">
-                            <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatingBarForegroundBrush}" Text="{x:Static props:BoothStrings.Capture}" />
-                        </Button>
-                        <Button
-                            x:Name="BtnRotateImage"
-                            Width="70"
-                            Height="40"
-                            Margin="2,0"
-                            Background="{DynamicResource FloatingBarBackgroundBrush}"
-                            BorderBrush="{DynamicResource FloatingBarBorderBrush}"
-                            BorderThickness="1"
-                            Click="BtnRotateImage_Click">
-                            <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatingBarForegroundBrush}" Text="{x:Static props:BoothStrings.Rotate}" />
-                        </Button>
-                        <!-- 关闭视频展台：完全退出（退出特殊模式 + 折叠侧栏 + 停止预览）。
-                             与右上角 X 不同：X 只折叠侧栏菜单，预览继续运行；此按钮关闭整个视频展台模式。 -->
-                        <Button
-                            x:Name="BtnExitVideoPresenter"
-                            Width="70"
-                            Height="40"
-                            Margin="2,0"
-                            Background="{DynamicResource FloatingBarBackgroundBrush}"
-                            BorderBrush="{DynamicResource FloatingBarBorderBrush}"
-                            BorderThickness="1"
-                            Click="BtnExitVideoPresenter_Click">
-                            <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatingBarForegroundBrush}" Text="{x:Static props:BoothStrings.Close}" />
-                        </Button>
-                    </StackPanel>
-                    <!-- 摄像头分辨率@帧率 组合选择（单个 ComboBox 显示所有有效的 W×H@FPS 组合） -->
-                    <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="10,6,10,4">
-                        <ComboBox x:Name="BoothResolutionComboBox"
-                                  Width="282" Height="40"
-                                  Padding="10,0,12,0"
-                                  FontSize="12"
-                                  FontWeight="SemiBold"
-                                  Background="{DynamicResource FloatingBarBackgroundBrush}"
-                                  BorderBrush="#616161"
-                                  BorderThickness="1"
-                                  Foreground="{DynamicResource FloatingBarForegroundBrush}"
-                                  ToolTip="{x:Static props:BoothStrings.Resolution_Tooltip}"
-                                  SelectionChanged="BoothResolutionComboBox_SelectionChanged" />
-                    </Grid>
-                </Grid>
+                <!-- 设备选择区域与底部按钮区域已迁移到 BoothPopupContent 弹窗菜单 -->
+                <Border Grid.Row="3" Background="{DynamicResource FloatingBarBackgroundBrush}" />
+                <Grid Grid.Row="4" />
             </Grid>
         </Border>
         <!-- 包装层：PPT 时间胶囊容器，承载 ScaleTransform 与屏幕四角定位，非死代码 -->
@@ -1532,7 +1419,7 @@
         <!-- PPT 增强预览全屏加载动画 -->
         <Grid x:Name="PPTEnhancedPreviewLoadingOverlay"
                 Panel.ZIndex="1200"
-                Visibility="Collapsed" d:Visibility="Visible"
+                Visibility="Collapsed"
                 Background="#B0000000">
             <ikw:SimpleStackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
                     Orientation="Vertical" Spacing="16">
@@ -1560,7 +1447,7 @@
         <!-- 内联对话框根容器 -->
         <Grid x:Name="InlineDialogRoot"
                 Panel.ZIndex="9999"
-                Visibility="Collapsed" d:Visibility="Visible"
+                Visibility="Collapsed"
                 Background="{DynamicResource ContentDialogSmokeFill}">
             <Border x:Name="InlineDialogCard"
                     MinWidth="{DynamicResource ContentDialogMinWidth}"
