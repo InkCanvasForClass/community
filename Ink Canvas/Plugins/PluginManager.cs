@@ -417,7 +417,9 @@ namespace Ink_Canvas.Plugins
         /// </summary>
         private void DiscoverPlugins()
         {
-            var loadedIds = new HashSet<string>();
+            var loadedIds = new HashSet<string>(
+                _plugins.Select(plugin => plugin.Id),
+                StringComparer.OrdinalIgnoreCase);
 
             // 1. 扫描带 manifest.json 的插件目录
             foreach (var subDir in Directory.GetDirectories(_pluginsDirectory))
