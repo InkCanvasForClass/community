@@ -433,9 +433,9 @@ namespace Ink_Canvas
                     await Task.Delay(1);
                     if (BlackBoardLeftSidePageListView != null)
                     {
-                        // 特殊模式下滚动到当前虚拟页（0=直播页，1=照片页），而非 CurrentWhiteboardIndex - 1
+                        // 特殊模式下滚动到当前虚拟页（-1=直播页→0，0..N-1=照片页→index+1）
                         int scrollIndex = _isVideoPresenterSpecialMode
-                            ? (_isBoothOnPhotoPage ? 1 : 0)
+                            ? (_boothCurrentPhotoIndex + 1)
                             : CurrentWhiteboardIndex - 1;
                         var leftContainer = BlackBoardLeftSidePageListView.ItemContainerGenerator.ContainerFromIndex(
                             scrollIndex) as ListViewItem;
@@ -465,7 +465,7 @@ namespace Ink_Canvas
                     if (BlackBoardRightSidePageListView != null)
                     {
                         int scrollIndex = _isVideoPresenterSpecialMode
-                            ? (_isBoothOnPhotoPage ? 1 : 0)
+                            ? (_boothCurrentPhotoIndex + 1)
                             : CurrentWhiteboardIndex - 1;
                         var rightContainer = BlackBoardRightSidePageListView.ItemContainerGenerator.ContainerFromIndex(
                             scrollIndex) as ListViewItem;
@@ -490,6 +490,17 @@ namespace Ink_Canvas
 
         private void BtnWhiteBoardSwitchPrevious_Click(object sender, RoutedEventArgs e)
         {
+            // 视频展台特殊模式：虚拟分页导航
+            if (_isVideoPresenterSpecialMode)
+            {
+                if (_boothCurrentPhotoIndex < 0) return; // 已在直播页，不能上一页
+                if (_boothCurrentPhotoIndex == 0)
+                    SwitchBoothToLivePage(); // 照片0 → 直播页
+                else
+                    SwitchBoothToPhotoPage(_boothCurrentPhotoIndex - 1); // 照片k → 照片k-1
+                return;
+            }
+
             if (CurrentWhiteboardIndex <= 1) return;
 
             // 隐藏图片选择工具栏
@@ -526,6 +537,15 @@ namespace Ink_Canvas
 
         private void BtnWhiteBoardSwitchNext_Click(object sender, RoutedEventArgs e)
         {
+            // 视频展台特殊模式：虚拟分页导航
+            if (_isVideoPresenterSpecialMode)
+            {
+                if (_boothCurrentPhotoIndex >= _capturedPhotos.Count - 1) return; // 已在最后一张，不能下一页
+                // 直播页(-1) → 照片0，照片k → 照片k+1
+                SwitchBoothToPhotoPage(_boothCurrentPhotoIndex + 1);
+                return;
+            }
+
             if (CurrentWhiteboardIndex < WhiteboardTotalCount &&
                 Settings.Automation.IsAutoSaveScreenshotAtClear &&
                 inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
@@ -752,6 +772,14 @@ namespace Ink_Canvas
 
             UpdatePageInfo();
 
+            // 视频展台特殊模式：按钮文字/IsEnabled 由 UpdateBoothPagingButtonsState 统一管理，
+            // 跳过白板分页的按钮逻辑（否则 isLastPage/CanAddNewPage 会错误启用"下一页"/改成"新页面"文字）
+            if (_isVideoPresenterSpecialMode)
+            {
+                UpdateBoothPageInfoDisplay();
+                return;
+            }
+
             bool isLastPage = CurrentWhiteboardIndex == WhiteboardTotalCount;
             bool isMaxPage = WhiteboardTotalCount >= 99;
 
@@ -813,13 +841,6 @@ namespace Ink_Canvas
             BtnWhiteBoardDelete.IsEnabled = WhiteboardTotalCount != 1;
             UpdateInkFreezeButtonState();
             UpdateBoardToolbarState();
-
-            // 视频展台特殊模式下覆盖页码显示为虚拟分页（0/0、0/1、1/1）
-            // 不 return，因为上面还需要更新翻页按钮状态
-            if (_isVideoPresenterSpecialMode)
-            {
-                UpdateBoothPageInfoDisplay();
-            }
         }
 
         /// <summary>

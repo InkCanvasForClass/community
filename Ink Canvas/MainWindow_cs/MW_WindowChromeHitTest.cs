@@ -283,8 +283,7 @@ namespace Ink_Canvas
                    || ContainsPoint(QuickDrawFloatingButton, windowPoint)
                    || ContainsPoint(BorderInkReplayToolBox, windowPoint)
                    || ContainsPoint(PPTTimeCapsuleContainer, windowPoint)
-                   || ContainsPoint(PPTQuickPanelContainer, windowPoint)
-                   || ContainsPoint(VideoPresenterSidebar, windowPoint);
+                   || ContainsPoint(PPTQuickPanelContainer, windowPoint);
         }
 
         private bool ContainsPoint(FrameworkElement element, Point windowPoint)

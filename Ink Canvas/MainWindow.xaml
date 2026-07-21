@@ -201,12 +201,6 @@
                             </TransformGroup>
                         </Image.RenderTransform>
                     </Image>
-                    <!-- 全屏蒙版已废弃：改为在侧栏显示小预览缩略图 + 蒙版 + 文字（VideoPresenterFrozenThumbnail）。
-                         全屏蒙版会遮挡冻结画面，导致用户无法在拍照后的画面上批注。
-                         此处仅保留元素以兼容旧代码引用，不再显示。 -->
-                    <Grid x:Name="VideoPresenterFrozenOverlay"
-                          Visibility="Collapsed"
-                          Background="Transparent" />
                     <!-- 没找到摄像头时的占位文字 -->
                     <TextBlock x:Name="VideoPresenterSearchingText"
                                HorizontalAlignment="Center"
@@ -1301,95 +1295,8 @@
                 </ikw:SimpleStackPanel>
             </Border>
         </Viewbox>
-        <!--视频展台侧栏-->
-        <Border
-            x:Name="VideoPresenterSidebar"
-            Width="350"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Stretch"
-            Background="{DynamicResource FloatingBarBackgroundBrush}"
-            BorderBrush="{DynamicResource FloatingBarBorderBrush}"
-            Visibility="Collapsed"  d:Visibility="Visible"
-            Panel.ZIndex="996">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="50" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="110" />
-                </Grid.RowDefinitions>
-
-                <!-- 顶部标题栏 -->
-                <Grid Grid.Row="0" Height="50">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="50" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock
-                        Grid.Column="0"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        Foreground="{DynamicResource FloatingBarForegroundBrush}"
-                        Text="{x:Static props:BoothStrings.Title}" />
-                    <Button
-                        Grid.Column="1" Height="48" Width="48"
-                        Click="BtnCloseVideoPresenter_Click">
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChromeCloseContrast}" />
-                    </Button>
-                </Grid>
-
-                <!-- 预览区域已移除：特殊模式下 VideoCaptureElement 全屏预览已铺满白板，
-                     不再需要左上角侧栏的小预览（两个预览不能同时显示）。RowDefinition Height="Auto"
-                     在无内容时会自动塌缩为 0，不影响下方各 Row 的 Grid.Row 索引。 -->
-
-                <!-- 拍照冻结后的侧栏小预览：显示冻结图片缩略图 + 半透明蒙版 + "点击返回摄像头"文字。
-                     点击此区域清除冻结，返回实时画面。
-                     冻结画面本身仍全屏显示在白板上供用户批注，这里只是侧栏的缩略图指示。 -->
-                <Border x:Name="VideoPresenterFrozenThumbnail"
-                        Grid.Row="1"
-                        Background="#1A1A1A"
-                        BorderBrush="#3D3D3D"
-                        Visibility="Collapsed" d:Visibility="Visible"
-                        MouseLeftButtonDown="VideoPresenterFrozenThumbnail_MouseLeftButtonDown">
-                    <Grid>
-                        <!-- 冻结图片缩略图（保持长宽比，居中） -->
-                        <Image x:Name="VideoPresenterFrozenThumbnailImage"
-                               Stretch="Uniform"
-                               HorizontalAlignment="Stretch"
-                               VerticalAlignment="Stretch" />
-                        <!-- 半透明黑蒙版 -->
-                        <Grid Background="#80000000" IsHitTestVisible="False">
-                            <TextBlock HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       FontSize="14"
-                                       FontWeight="SemiBold"
-                                       Foreground="#FFFFFF"
-                                       Text="点击返回摄像头" />
-                        </Grid>
-                    </Grid>
-                </Border>
-
-                <!-- 照片显示区域 -->
-                <Border Grid.Row="2" Background="{DynamicResource FloatingBarBackgroundBrush}">
-                    <StackPanel>
-                        <TextBlock
-                            HorizontalAlignment="Left"
-                            Text="{x:Static props:BoothStrings.CapturedPhotos}" />
-                        <ScrollViewer
-                            x:Name="CapturedPhotosScrollViewer"
-                            VerticalScrollBarVisibility="Auto"
-                            PanningMode="VerticalFirst">
-                            <StackPanel x:Name="CapturedPhotosStackPanel" />
-                        </ScrollViewer>
-                    </StackPanel>
-                </Border>
-
-                <!-- 设备选择区域与底部按钮区域已迁移到 BoothPopupContent 弹窗菜单 -->
-                <Border Grid.Row="3" Background="{DynamicResource FloatingBarBackgroundBrush}" />
-                <Grid Grid.Row="4" />
-            </Grid>
-        </Border>
+        <!-- 视频展台侧栏（VideoPresenterSidebar）已移除：设备选择/按钮迁移到 BoothPopupContent 弹窗菜单，
+             照片预览迁移到白板右下角页码列表（RefreshBoothPageListView）。 -->
         <!-- 包装层：PPT 时间胶囊容器，承载 ScaleTransform 与屏幕四角定位，非死代码 -->
         <Border x:Name="PPTTimeCapsuleContainer"
                 Visibility="Collapsed"  d:Visibility="Visible"

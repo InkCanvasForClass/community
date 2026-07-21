@@ -29,6 +29,8 @@ namespace Ink_Canvas
             public bool ShowImage => BoothImage != null;
             /// <summary>DataTemplate 中 TextBlock 是否可见（仅视频展台文字项可见）。</summary>
             public bool ShowText => !string.IsNullOrEmpty(BoothText);
+            /// <summary>删除按钮是否可见。直播页（纯文字项）不显示删除，其余（照片项/普通白板页）显示。</summary>
+            public bool ShowDeleteButton => !(BoothImage == null && !string.IsNullOrEmpty(BoothText));
         }
 
         ObservableCollection<PageListViewItem> blackBoardSidePageListViewObservableCollection = new ObservableCollection<PageListViewItem>();
@@ -88,14 +90,9 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 视频展台特殊模式专用：刷新侧栏页面列表，按虚拟分页状态显示"直播页 / 照片页"两项。
-        /// 进入特殊模式时（无照片）：列表只有 1 项（第 0 项=直播页，文字"再次点击返回直播画面"）。
-        /// 拍照后（有照片）：列表有 2 项（第 0 项=直播页文字，第 1 项=照片缩略图）。
+        /// 视频展台特殊模式专用：刷新页码列表，按虚拟分页状态显示"直播页 + N 张照片"。
+        /// 第 0 项=直播页（文字"再次点击，返回直播"），第 1..N 项=各照片缩略图。
         /// </summary>
-        /// <remarks>
-        /// 该方法会重置 <see cref="blackBoardSidePageListViewObservableCollection"/> 的内容，
-        /// 并根据 <see cref="_isBoothOnPhotoPage"/> 同步左右两侧 ListView 的 SelectedIndex。
-        /// </remarks>
         private void RefreshBoothPageListView()
         {
             var leftPageListView = FindView("board.pageList.left") as ListView;
@@ -108,23 +105,25 @@ namespace Ink_Canvas
             {
                 Index = 0,
                 Strokes = null,
-                BoothText = "再次点击返回直播画面",
+                BoothText = "再次点击，返回直播",
             });
 
-            // 第 1 项：照片页（仅当有照片时才添加）
-            if (_boothHasPhoto && _boothLastCapturedPhoto?.Image != null)
+            // 第 1..N 项：各照片缩略图
+            for (int i = 0; i < _capturedPhotos.Count; i++)
             {
+                var img = _capturedPhotos[i]?.Image;
+                if (img == null) continue;
                 blackBoardSidePageListViewObservableCollection.Add(new PageListViewItem
                 {
-                    Index = 1,
+                    Index = i + 1,
                     Strokes = null,
-                    BoothImage = _boothLastCapturedPhoto.Image,
+                    BoothImage = img,
                 });
             }
 
-            // 同步左右两侧 SelectedIndex：在照片页=1，在直播页=0
-            int selectedIndex = _isBoothOnPhotoPage ? 1 : 0;
-            // 确保 SelectedIndex 不越界（_boothHasPhoto=false 时列表只有 1 项， selectedIndex 应为 0）
+            // 同步左右两侧 SelectedIndex：直播页=0，照片页=index+1
+            int selectedIndex = _boothCurrentPhotoIndex + 1;
+            if (selectedIndex < 0) selectedIndex = 0;
             if (selectedIndex >= blackBoardSidePageListViewObservableCollection.Count)
                 selectedIndex = blackBoardSidePageListViewObservableCollection.Count - 1;
             if (leftPageListView != null) leftPageListView.SelectedIndex = selectedIndex;
@@ -132,21 +131,18 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 视频展台特殊模式：处理侧栏页面列表项点击，根据点击的项索引切换直播页/照片页。
-        /// - index=0（直播页项）：切回直播页（页码 0/1，拍照按钮恢复可用）。
-        /// - index=1（照片项）：切到照片预览页（页码 1/1，拍照按钮变灰）。
+        /// 视频展台特殊模式：处理页码列表项点击。
+        /// - index=0（直播页项）：切回直播页。
+        /// - index>=1（照片项）：切到对应照片预览页。
         /// </summary>
-        /// <param name="index">被点击的项索引（0 或 1）。</param>
-        /// <param name="leftPageListView">左侧 ListView（用于同步 SelectedIndex）。</param>
-        /// <param name="rightPageListView">右侧 ListView（用于同步 SelectedIndex）。</param>
         private void HandleBoothPageListClick(int index, ListView leftPageListView, ListView rightPageListView)
         {
             if (index < 0 || index >= blackBoardSidePageListViewObservableCollection.Count) return;
 
             if (index == 0)
             {
-                // 点击直播页项 -> 确保在直播页（如已在直播页则保持，页码 0/1，拍照按钮恢复）
-                if (_isBoothOnPhotoPage)
+                // 点击直播页项 -> 切回直播页
+                if (_boothCurrentPhotoIndex >= 0)
                 {
                     SwitchBoothToLivePage();
                 }
@@ -158,16 +154,17 @@ namespace Ink_Canvas
                     UpdateBoothPageInfoDisplay();
                 }
             }
-            else if (index == 1)
+            else
             {
-                // 点击照片项 -> 切到照片预览页（页码 1/1，拍照按钮变灰）
-                if (!_isBoothOnPhotoPage)
+                // 点击照片项 -> 切到对应照片预览页（index-1 = _capturedPhotos 索引）
+                int photoIndex = index - 1;
+                if (_boothCurrentPhotoIndex != photoIndex)
                 {
-                    SwitchBoothToPhotoPage();
+                    SwitchBoothToPhotoPage(photoIndex);
                 }
                 else
                 {
-                    // 已在照片页，仅刷新页码与按钮状态
+                    // 已在该照片页，仅刷新状态
                     if (BtnCapturePhoto != null)
                         BtnCapturePhoto.IsEnabled = false;
                     UpdateBoothPageInfoDisplay();
@@ -175,7 +172,8 @@ namespace Ink_Canvas
             }
 
             // 同步左右两侧 SelectedIndex
-            int selectedIndex = _isBoothOnPhotoPage ? 1 : 0;
+            int selectedIndex = _boothCurrentPhotoIndex + 1;
+            if (selectedIndex < 0) selectedIndex = 0;
             if (selectedIndex >= blackBoardSidePageListViewObservableCollection.Count)
                 selectedIndex = blackBoardSidePageListViewObservableCollection.Count - 1;
             if (leftPageListView != null) leftPageListView.SelectedIndex = selectedIndex;
@@ -407,13 +405,40 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 预览列表中某页的“删除”按钮点击：删除该页，并阻止事件继续冒泡（避免触发选中/切页）。
+        /// 预览列表中某页的"删除"按钮点击：删除该页，并阻止事件继续冒泡（避免触发选中/切页）。
+        /// 视频展台特殊模式下：删除对应照片（index>=1），而非白板页。
         /// </summary>
         private void WhiteBoardPageListItem_DeleteClick(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
-            if (sender is FrameworkElement fe && fe.DataContext is PageListViewItem item)
-                DeleteWhiteBoardPageByIndex(item.Index);
+            if (!(sender is FrameworkElement fe && fe.DataContext is PageListViewItem item))
+                return;
+
+            if (_isVideoPresenterSpecialMode)
+            {
+                // 特殊模式：item.Index>=1 对应 _capturedPhotos[item.Index-1]
+                int photoIndex = item.Index - 1;
+                if (photoIndex < 0 || photoIndex >= _capturedPhotos.Count) return;
+
+                _capturedPhotos.RemoveAt(photoIndex);
+
+                // 如果当前正在看被删的照片，切回直播页
+                if (_boothCurrentPhotoIndex == photoIndex)
+                {
+                    SwitchBoothToLivePage();
+                }
+                else if (_boothCurrentPhotoIndex > photoIndex)
+                {
+                    // 当前在看被删照片之后的照片，索引前移
+                    _boothCurrentPhotoIndex--;
+                }
+
+                UpdateBoothPageInfoDisplay();
+                RefreshBoothPageListView();
+                return;
+            }
+
+            DeleteWhiteBoardPageByIndex(item.Index);
         }
     }
 }

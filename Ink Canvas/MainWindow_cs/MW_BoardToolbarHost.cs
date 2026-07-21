@@ -263,6 +263,17 @@ namespace Ink_Canvas
 
         private void UpdateBoardToolbarState()
         {
+            // 视频展台特殊模式：按钮状态由 UpdateBoothPagingButtonsState 管理，
+            // 跳过白板分页的按钮逻辑（否则 CanAddNewPage 会错误启用"下一页"）
+            if (_isVideoPresenterSpecialMode)
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    UpdatePageInfo();
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
+                return;
+            }
+
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 UpdatePageInfo();
@@ -547,6 +558,10 @@ namespace Ink_Canvas
             //   - 视频展台照片项：Image 可见（显示照片缩略图）
             //   - 视频展台文字项：TextBlock 可见（居中显示"再次点击返回直播画面"）
             var viewboxContentFactory = new FrameworkElementFactory(typeof(Grid));
+            // 给 Grid 设深色背景：视频展台文字项（白字）需要深色底才能看见，
+            // 普通白板页的 InkCanvas 会覆盖此背景，照片项的 Image 也会覆盖
+            viewboxContentFactory.SetValue(Grid.BackgroundProperty,
+                new SolidColorBrush(Color.FromRgb(0x33, 0x33, 0x33)));
 
             // 共享的 BooleanToVisibilityConverter：用于根据 ShowInk/ShowImage/ShowText 控制 InkCanvas/Image/TextBlock 可见性
             // 使用 WPF 内置的 System.Windows.Controls.BooleanToVisibilityConverter（true=>Visible, false=>Collapsed）
@@ -625,6 +640,9 @@ namespace Ink_Canvas
             deleteBtnFactory.SetValue(Button.BorderThicknessProperty, new Thickness(0));
             deleteBtnFactory.SetValue(Button.PaddingProperty, new Thickness(0));
             deleteBtnFactory.SetValue(Button.CursorProperty, System.Windows.Input.Cursors.Hand);
+            // 绑定 Visibility 到 ShowDeleteButton（直播页=false→Collapsed，照片项/普通白板页=true→Visible）
+            deleteBtnFactory.SetBinding(UIElement.VisibilityProperty,
+                new System.Windows.Data.Binding("ShowDeleteButton") { Converter = boolToVis });
 
             var fontIconFactory = new FrameworkElementFactory(typeof(iNKORE.UI.WPF.Modern.Controls.FontIcon));
             fontIconFactory.SetValue(iNKORE.UI.WPF.Modern.Controls.FontIcon.IconProperty,

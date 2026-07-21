@@ -128,9 +128,8 @@ namespace Ink_Canvas
         internal ToolMenuButton ManualToolBtn => MainToolsPopupContent?.ManualBtn;
         internal ToolMenuButton SettingsToolBtn => MainToolsPopupContent?.SettingsBtn;
 
-        // 视频展台 ComboBox / 按钮原本由 VideoPresenterSidebar 中 XAML 自动生成字段，
-        // 现已迁移到 BoothPopupContent 弹窗菜单，这里通过转发属性保持 MW_VideoPresenter.cs
-        // 中所有引用（CameraDevicesComboBox、BtnCapturePhoto 等）不变。
+        // 视频展台 ComboBox / 按钮由 BoothPopupContent 弹窗菜单提供，
+        // 这里通过转发属性保持 MW_VideoPresenter.cs 中所有引用（CameraDevicesComboBox、BtnCapturePhoto 等）不变。
         internal System.Windows.Controls.ComboBox CameraDevicesComboBox => BoothPopupContent?.CameraDevicesComboBoxControl;
         internal System.Windows.Controls.ComboBox BoothResolutionComboBox => BoothPopupContent?.BoothResolutionComboBoxControl;
         internal System.Windows.Controls.Button BtnCapturePhoto => BoothPopupContent?.CapturePhotoButton;
