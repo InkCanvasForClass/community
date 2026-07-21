@@ -1,12 +1,12 @@
-name: Sync net6 to net8
+name: Sync net6 to net10
 
-# 当 net6 分支有提交时，自动合并到 net8 分支
-# 如果编译失败（可能是 net6 新增的包不支持 net8），则自动升级 NuGet 包到最新稳定版并重试
+# 当 net6 分支有提交时，自动合并到 net10 分支
+# 如果编译失败（可能是 net6 新增的包不支持 net10），则自动升级 NuGet 包到最新稳定版并重试
 #
 # 策略：
-#   1. 合并 net6 → net8（冲突自动解决：csproj 取 net6 + TFM 改回 net8）
+#   1. 合并 net6 → net10（冲突自动解决：csproj 取 net6 + TFM 改回 net10）
 #   2. 删除旧 packages.lock.json
-#   3. 先尝试 restore + build（大多数包同时支持 net6/net8，无需升级）
+#   3. 先尝试 restore + build（大多数包同时支持 net6/net10，无需升级）
 #   4. 如果 build 失败 → 升级所有 NuGet 包到最新稳定版 → 重新 restore + build
 #   5. 编译通过才推送，否则中止报警
 
@@ -20,18 +20,18 @@ permissions:
   actions: write
 
 concurrency:
-  group: sync-net6-to-net8
+  group: sync-net6-to-net10
   cancel-in-progress: false
 
 jobs:
   sync:
-    name: Merge net6 → net8
+    name: Merge net6 → net10
     runs-on: windows-latest
     steps:
-      - name: Checkout net8 branch
+      - name: Checkout net10 branch
         uses: actions/checkout@v6
         with:
-          ref: net8
+          ref: net10
           fetch-depth: 0
           persist-credentials: true
 
@@ -40,10 +40,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Setup .NET 8 SDK
+      - name: Setup .NET 10 SDK
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Fetch net6 and merge
         shell: pwsh
@@ -69,13 +69,13 @@ jobs:
             Write-Host "冲突文件列表:"
             $conflicted | ForEach-Object { Write-Host "  $_" }
 
-            # 1) csproj 冲突：取 net6 版本（ theirs ），然后把 TFM 改回 net8
+            # 1) csproj 冲突：取 net6 版本（ theirs ），然后把 TFM 改回 net10
             $csprojConflicts = $conflicted | Where-Object { $_ -match "\.csproj\s*$" }
             foreach ($line in $csprojConflicts) {
               $path = ($line -replace "^.{2}\s+", "").Trim()
               Write-Host "解决 csproj 冲突（取 net6 + 改 TFM）: $path"
               git checkout --theirs $path
-              (Get-Content $path -Raw) -replace 'net6\.0-windows10\.0\.19041\.0', 'net8.0-windows10.0.19041.0' | Set-Content $path -NoNewline
+              (Get-Content $path -Raw) -replace 'net6\.0-windows10\.0\.19041\.0', 'net10.0-windows10.0.19041.0' | Set-Content $path -NoNewline
               git add $path
             }
 
@@ -88,11 +88,11 @@ jobs:
               if (Test-Path $path) { Remove-Item $path -Force }
             }
 
-            # 3) .yml workflow 冲突：取 net8 版本（ ours ），保留 net8 的触发分支配置
+            # 3) .yml workflow 冲突：取 net10 版本（ ours ），保留 net10 的触发分支配置
             $ymlConflicts = $conflicted | Where-Object { $_ -match "\.ya?ml\s*$" }
             foreach ($line in $ymlConflicts) {
               $path = ($line -replace "^.{2}\s+", "").Trim()
-              Write-Host "解决 yml 冲突（取 net8 版本）: $path"
+              Write-Host "解决 yml 冲突（取 net10 版本）: $path"
               git checkout --ours $path 2>$null
               git add $path 2>$null
             }
@@ -129,13 +129,13 @@ jobs:
             $content = Get-Content $csproj.FullName -Raw
             if ($content -match 'net6\.0-windows10\.0\.19041\.0') {
               Write-Host "检测到 $($csproj.Name) 的 TFM 被带回 net6，正在修复..."
-              $content -replace 'net6\.0-windows10\.0\.19041\.0', 'net8.0-windows10.0.19041.0' | Set-Content $csproj.FullName -NoNewline
+              $content -replace 'net6\.0-windows10\.0\.19041\.0', 'net10.0-windows10.0.19041.0' | Set-Content $csproj.FullName -NoNewline
               $tfmChanged = $true
             }
           }
           if ($tfmChanged) {
             git add -A
-            git commit -m "fix: restore net8.0 TFM after merge from net6 [skip ci]"
+            git commit -m "fix: restore net10.0 TFM after merge from net6 [skip ci]"
           }
 
       - name: Delete stale packages.lock.json
@@ -161,7 +161,7 @@ jobs:
           }
           dotnet build "Ink Canvas.sln" -c Release -p:Platform=x64 --no-restore --verbosity minimal
           if ($LASTEXITCODE -ne 0) {
-            Write-Host "::warning::初次编译失败，可能 net6 新增的包不支持 net8，将尝试升级包"
+            Write-Host "::warning::初次编译失败，可能 net6 新增的包不支持 net10，将尝试升级包"
             exit 1
           }
           Write-Host "::notice::初次编译通过，无需升级 NuGet 包"
@@ -212,12 +212,12 @@ jobs:
           Write-Host "=== 升级后重新 restore + build ==="
           dotnet restore "Ink Canvas.sln" --verbosity minimal
           if ($LASTEXITCODE -ne 0) {
-            Write-Error "::error::升级后 restore 仍失败，NuGet 包可能不兼容 net8"
+            Write-Error "::error::升级后 restore 仍失败，NuGet 包可能不兼容 net10"
             exit 1
           }
           dotnet build "Ink Canvas.sln" -c Release -p:Platform=x64 --no-restore --verbosity minimal
           if ($LASTEXITCODE -ne 0) {
-            Write-Error "::error::升级后 .NET 8 编译仍失败，需要人工介入解决兼容性问题"
+            Write-Error "::error::升级后 .NET 10 编译仍失败，需要人工介入解决兼容性问题"
             exit 1
           }
           Write-Host "::notice::升级后编译通过"
@@ -230,22 +230,22 @@ jobs:
           git add -A
           $workdirChanges = git status --porcelain
           if ($workdirChanges) {
-            git commit -m "chore(sync): apply net8 adjustments after merge from net6 [skip ci]"
+            git commit -m "chore(sync): apply net10 adjustments after merge from net6 [skip ci]"
           }
 
-          # 关键：检测本地 HEAD 是否领先于 origin/net8（merge commit 可能已自动提交）
+          # 关键：检测本地 HEAD 是否领先于 origin/net10（merge commit 可能已自动提交）
           # 用 rev-list 计算未推送的提交数
-          $unpushed = git rev-list --count origin/net8..HEAD
+          $unpushed = git rev-list --count origin/net10..HEAD
           Write-Host "未推送的提交数: $unpushed"
           if ([int]$unpushed -gt 0) {
             Write-Host "=== 未推送的提交 ==="
-            git log origin/net8..HEAD --oneline
-            Write-Host "=== 推送到 net8 ==="
-            git push origin net8
-            Write-Host "::notice::同步完成，已推送到 net8"
+            git log origin/net10..HEAD --oneline
+            Write-Host "=== 推送到 net10 ==="
+            git push origin net10
+            Write-Host "::notice::同步完成，已推送到 net10"
             echo "pushed=true" >> $env:GITHUB_OUTPUT
           } else {
-            Write-Host "::notice::无变更需要推送（本地与 origin/net8 一致）"
+            Write-Host "::notice::无变更需要推送（本地与 origin/net10 一致）"
             echo "pushed=false" >> $env:GITHUB_OUTPUT
           }
 
@@ -257,7 +257,7 @@ jobs:
             // GITHUB_TOKEN 推送的 commit 不会自动触发其他 workflow，
             // 所以这里用 workflow_dispatch 主动触发 dotnet-desktop 构建
             const workflowId = 'dotnet-desktop.yml';
-            const ref = 'net8';
+            const ref = 'net10';
             core.info(`触发 ${workflowId} 在 ${ref} 分支上运行...`);
             try {
               const resp = await github.rest.actions.createWorkflowDispatch({
@@ -267,7 +267,7 @@ jobs:
                 ref: ref,
               });
               core.info(`已触发，HTTP ${resp.status}`);
-              core.notice(`已触发 .NET Build & Package workflow 在 net8 分支上运行`);
+              core.notice(`已触发 .NET Build & Package workflow 在 net10 分支上运行`);
             } catch (err) {
               core.error(`触发失败: ${err.message}`);
               core.setFailed(`无法触发 build workflow: ${err.message}`);
@@ -278,7 +278,7 @@ jobs:
         shell: bash
         run: |
           {
-            echo "# Sync net6 → net8 Summary"
+            echo "# Sync net6 → net10 Summary"
             echo ""
             if [ "${{ job.status }}" = "success" ]; then
               echo "## ✅ Sync Successful"
@@ -287,9 +287,9 @@ jobs:
               echo "**Run:** #${{ github.run_number }}"
               echo ""
               if [ "${{ steps.try_build.outcome }}" = "success" ]; then
-                echo "net6 的提交已自动合并到 net8，编译验证通过（无需升级 NuGet 包）。"
+                echo "net6 的提交已自动合并到 net10，编译验证通过（无需升级 NuGet 包）。"
               else
-                echo "net6 的提交已自动合并到 net8，NuGet 包已升级到最新稳定版，编译验证通过。"
+                echo "net6 的提交已自动合并到 net10，NuGet 包已升级到最新稳定版，编译验证通过。"
               fi
             else
               echo "## ❌ Sync Failed"
@@ -299,7 +299,7 @@ jobs:
               echo ""
               echo "自动同步失败，请检查日志处理冲突或兼容性问题："
               echo "- csproj 冲突：检查是否需要手动调整 TFM 或包引用"
-              echo "- NuGet 包不兼容：检查 net6 新增的包是否支持 net8"
+              echo "- NuGet 包不兼容：检查 net6 新增的包是否支持 net10"
               echo "- 编译失败：检查代码兼容性"
             fi
           } >> "$GITHUB_STEP_SUMMARY"
