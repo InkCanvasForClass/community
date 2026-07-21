@@ -348,13 +348,17 @@ namespace Ink_Canvas
 
         private void AttachBoothButtonPressHandlers()
         {
-            if (BtnCapturePhoto == null || BtnRotateImage == null) return;
+            if (BtnCapturePhoto == null || BtnRotateImage == null || BtnExitVideoPresenter == null) return;
             BtnCapturePhoto.PreviewMouseDown += BoothButton_PreviewMouseDown;
             BtnCapturePhoto.PreviewMouseUp += BoothButton_PreviewMouseUp;
             BtnCapturePhoto.LostMouseCapture += BoothButton_PreviewMouseUp;
             BtnRotateImage.PreviewMouseDown += BoothButton_PreviewMouseDown;
             BtnRotateImage.PreviewMouseUp += BoothButton_PreviewMouseUp;
             BtnRotateImage.LostMouseCapture += BoothButton_PreviewMouseUp;
+            // 关闭按钮同样在按下/松开时切换高亮（视觉与拍照/旋转一致）
+            BtnExitVideoPresenter.PreviewMouseDown += BoothButton_PreviewMouseDown;
+            BtnExitVideoPresenter.PreviewMouseUp += BoothButton_PreviewMouseUp;
+            BtnExitVideoPresenter.LostMouseCapture += BoothButton_PreviewMouseUp;
             _boothButtonPressHandlersAttached = true;
         }
 
@@ -373,13 +377,18 @@ namespace Ink_Canvas
             if (control == null) return;
             if (highlight)
             {
+                // 按下：临时切到青绿高亮
                 control.Background = BoothButtonHighlightBrush;
                 control.BorderBrush = BoothButtonHighlightBrush;
             }
             else
             {
-                control.SetResourceReference(Control.BackgroundProperty, "FloatBarBackground");
-                control.SetResourceReference(Control.BorderBrushProperty, "FloatBarBorderBrush");
+                // 松开：恢复 XAML 中 DynamicResource 绑定的 FloatingBarBackgroundBrush / FloatingBarBorderBrush。
+                // 之前 SetResourceReference 绑到 "FloatBarBackground" / "FloatBarBorderBrush"（小写 t），
+                // 这两个键不存在或指向不透明纯色，导致"按钮点击后样式丢失"。
+                // 显式指回 XAML 实际使用的资源键，能让按钮回到 FloatingBarThemeService 派生的半透明笔刷。
+                control.SetResourceReference(Control.BackgroundProperty, "FloatingBarBackgroundBrush");
+                control.SetResourceReference(Control.BorderBrushProperty, "FloatingBarBorderBrush");
             }
         }
 
