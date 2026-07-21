@@ -120,38 +120,102 @@ namespace Ink_Canvas.Helpers
 
         private static Rect GetWorkingArea(Rect windowRect)
         {
-            // 获取所有显示器
-            var screens = Screen.AllScreens;
-
-            // 确定窗口主要位于哪个显示器上
-            Screen targetScreen = null;
-            double maxIntersection = 0;
-
-            foreach (var screen in screens)
+            try
             {
-                var screenRect = new Rect(
-                    screen.WorkingArea.X,
-                    screen.WorkingArea.Y,
-                    screen.WorkingArea.Width,
-                    screen.WorkingArea.Height);
-
-                var intersection = Rect.Intersect(windowRect, screenRect);
-                if (intersection.Width * intersection.Height > maxIntersection)
+                // 上下分布（多屏垂直堆叠，X 重叠、Y 接缝）时，仅看 WorkingArea 重叠面积并列时易在两屏之间反复切换，
+                // 导致 AvoidFullScreen 钩子把窗口在两屏间来回拉。先交给 Win32 MonitorFromRect/MonitorFromWindow
+                // （System.Windows.Forms.Screen 内部即用此 API），让系统决定真正"该归哪个显示器"。
+                if (windowRect.Width > 0 && windowRect.Height > 0)
                 {
-                    maxIntersection = intersection.Width * intersection.Height;
-                    targetScreen = screen;
+                    var bounds = new System.Drawing.Rectangle(
+                        (int)windowRect.X, (int)windowRect.Y,
+                        (int)windowRect.Width, (int)windowRect.Height);
+                    var byRect = Screen.FromRectangle(bounds);
+                    if (byRect != null)
+                    {
+                        return ToRect(byRect.WorkingArea);
+                    }
                 }
+
+                // 退化路径：仅依据工作区重叠面积挑选候选屏幕。
+                // 在并列情况下按"中心点距离 + WorkingArea 包含性"做 tie-break，避免上下分布时抖动翻屏。
+                var screens = Screen.AllScreens;
+                Screen targetScreen = null;
+                double maxIntersection = 0;
+
+                foreach (var screen in screens)
+                {
+                    var screenRect = new Rect(
+                        screen.WorkingArea.X,
+                        screen.WorkingArea.Y,
+                        screen.WorkingArea.Width,
+                        screen.WorkingArea.Height);
+
+                    var intersection = Rect.Intersect(windowRect, screenRect);
+                    var area = intersection.Width * intersection.Height;
+                    if (area > maxIntersection)
+                    {
+                        maxIntersection = area;
+                        targetScreen = screen;
+                    }
+                    else if (area == maxIntersection && area > 0 && targetScreen != null)
+                    {
+                        // 并列时选更"贴近"目标矩形的屏幕：中心点距窗口中心更近者优先。
+                        if (IsBetterCandidate(screen, targetScreen, windowRect))
+                        {
+                            targetScreen = screen;
+                        }
+                    }
+                }
+
+                if (targetScreen == null)
+                    targetScreen = Screen.PrimaryScreen;
+
+                return ToRect(targetScreen.WorkingArea);
             }
+            catch
+            {
+                return ToRect(Screen.PrimaryScreen.WorkingArea);
+            }
+        }
 
-            // 如果没找到，使用主显示器
-            if (targetScreen == null)
-                targetScreen = Screen.PrimaryScreen;
+        private static Rect ToRect(System.Drawing.Rectangle r)
+        {
+            return new Rect(r.X, r.Y, r.Width, r.Height);
+        }
 
-            return new Rect(
-                targetScreen.WorkingArea.X,
-                targetScreen.WorkingArea.Y,
-                targetScreen.WorkingArea.Width,
-                targetScreen.WorkingArea.Height);
+        private static bool IsBetterCandidate(Screen candidate, Screen current, Rect windowRect)
+        {
+            // WorkingArea 完全包含目标矩形的中心 => 显然更合适。
+            bool candidateContains = ContainsCenter(candidate, windowRect);
+            bool currentContains = ContainsCenter(current, windowRect);
+            if (candidateContains != currentContains) return candidateContains;
+
+            // 否则按中心点距离比较。
+            double candDist = DistanceFromCenter(candidate, windowRect);
+            double curDist = DistanceFromCenter(current, windowRect);
+            return candDist < curDist;
+        }
+
+        private static bool ContainsCenter(Screen screen, Rect windowRect)
+        {
+            double cx = windowRect.X + windowRect.Width / 2.0;
+            double cy = windowRect.Y + windowRect.Height / 2.0;
+            var wa = screen.WorkingArea;
+            return cx >= wa.X && cx < wa.X + wa.Width
+                && cy >= wa.Y && cy < wa.Y + wa.Height;
+        }
+
+        private static double DistanceFromCenter(Screen screen, Rect windowRect)
+        {
+            double cx = windowRect.X + windowRect.Width / 2.0;
+            double cy = windowRect.Y + windowRect.Height / 2.0;
+            var wa = screen.WorkingArea;
+            double sx = wa.X + wa.Width / 2.0;
+            double sy = wa.Y + wa.Height / 2.0;
+            double dx = cx - sx;
+            double dy = cy - sy;
+            return dx * dx + dy * dy;
         }
 
         private static Rect AdjustRectToWorkingArea(Rect windowRect, Rect workingArea)
