@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media;
 using System.Windows.Controls;
 using ContentDialog = iNKORE.UI.WPF.Modern.Controls.ContentDialog;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;

@@ -230,33 +230,33 @@ namespace Ink_Canvas.Windows
         {
             LoadingText.Text = message;
 
-                // 根据实际启动动画样式调整加载文本样式
-                if (actualSplashStyle == 6) // 马年限定
-                {
-                    // 马年限定样式
-                    LoadingText.FontSize = 12;
-                    LoadingText.FontWeight = FontWeights.SemiBold;
-                    LoadingText.Foreground = Brushes.White;
-                    LoadingText.HorizontalAlignment = HorizontalAlignment.Center;
-                    LoadingText.Margin = new Thickness(0, 200, 140, 4);
-                }
-                else if (actualSplashStyle == 7) // 自定义图片
-                {
-                    // 自定义图片样式 - 不改变 HorizontalAlignment，由 ApplyCustomTextPosition 决定
-                    LoadingText.FontSize = 12;
-                    LoadingText.FontWeight = FontWeights.SemiBold;
-                    LoadingText.Foreground = Brushes.White;
-                    // 不覆盖 HorizontalAlignment 和 Margin，保留 ApplyCustomTextPosition 的设置
-                }
-                else
-                {
-                    // 默认样式
-                    LoadingText.FontSize = 18;
-                    LoadingText.FontWeight = FontWeights.SemiBold;
-                    LoadingText.Foreground = Brushes.White;
-                    LoadingText.HorizontalAlignment = HorizontalAlignment.Center;
-                    LoadingText.Margin = new Thickness(0, 200, 0, 0);
-                }
+            // 根据实际启动动画样式调整加载文本样式
+            if (actualSplashStyle == 6) // 马年限定
+            {
+                // 马年限定样式
+                LoadingText.FontSize = 12;
+                LoadingText.FontWeight = FontWeights.SemiBold;
+                LoadingText.Foreground = Brushes.White;
+                LoadingText.HorizontalAlignment = HorizontalAlignment.Center;
+                LoadingText.Margin = new Thickness(0, 200, 140, 4);
+            }
+            else if (actualSplashStyle == 7) // 自定义图片
+            {
+                // 自定义图片样式 - 不改变 HorizontalAlignment，由 ApplyCustomTextPosition 决定
+                LoadingText.FontSize = 12;
+                LoadingText.FontWeight = FontWeights.SemiBold;
+                LoadingText.Foreground = Brushes.White;
+                // 不覆盖 HorizontalAlignment 和 Margin，保留 ApplyCustomTextPosition 的设置
+            }
+            else
+            {
+                // 默认样式
+                LoadingText.FontSize = 18;
+                LoadingText.FontWeight = FontWeights.SemiBold;
+                LoadingText.Foreground = Brushes.White;
+                LoadingText.HorizontalAlignment = HorizontalAlignment.Center;
+                LoadingText.Margin = new Thickness(0, 200, 0, 0);
+            }
         }
 
         /// <summary>

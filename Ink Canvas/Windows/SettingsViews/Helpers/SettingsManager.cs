@@ -1,9 +1,9 @@
+using Ink_Canvas.Helpers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Ink_Canvas.Helpers;
 using ProcessProtectionManager = Ink_Canvas.Helpers.ProcessProtectionManager;
 
 namespace Ink_Canvas.Windows.SettingsViews.Helpers
