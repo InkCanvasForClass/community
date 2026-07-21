@@ -32,6 +32,13 @@ namespace Ink_Canvas.Helpers
         int SelectedResolutionIndex { get; set; }
 
         /// <summary>
+        /// 静默更新 SelectedResolutionIndex（不触发 RestartWithNewResolutionAsync）。
+        /// 用于特殊模式下 VideoCaptureElement 接管预览时，_cameraService 不应抢占摄像头设备。
+        /// 调用者负责后续重新启动 VideoCaptureElement 预览。
+        /// </summary>
+        void SetSelectedResolutionIndexSilent(int value);
+
+        /// <summary>
         /// 去重后的分辨率列表（同 W,H 合并；FrameRate 取该分辨率下最大值）。
         /// 用于分辨率 ComboBox 填充。
         /// </summary>
