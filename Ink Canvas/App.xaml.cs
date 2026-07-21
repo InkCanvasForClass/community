@@ -1454,6 +1454,15 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile("开始加载插件");
                     PluginManager.Instance.InitializeAdvancedServices(PluginMarketService.Instance);
                     await PluginManager.Instance.LoadAllAsync();
+
+                    // 主窗口在 Window_Loaded 阶段已先构建浮动栏；插件随后才在延迟任务中注册组件。
+                    // 插件加载完成后必须重建一次，确保启动时立即显示插件工具栏项。
+                    await Dispatcher.InvokeAsync(() =>
+                    {
+                        if (Current.MainWindow is MainWindow window)
+                            window.RebuildToolbar();
+                    }, DispatcherPriority.Loaded);
+
                     try
                     {
                         PluginManager.Instance.StartIpc();
