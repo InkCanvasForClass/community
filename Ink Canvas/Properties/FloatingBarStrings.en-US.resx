@@ -666,4 +666,16 @@
   <data name="MiniWhiteboard_Settings_Opacity" xml:space="preserve">
     <value>Opacity</value>
   </data>
+  <data name="Canvas_EdgeExpandHint_Button" xml:space="preserve">
+    <value>Expand</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_Enable" xml:space="preserve">
+    <value>Show expand-canvas hint near edges</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_Threshold" xml:space="preserve">
+    <value>Edge threshold (px)</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_TranslateStep" xml:space="preserve">
+    <value>Expand step (px)</value>
+  </data>
 </root>

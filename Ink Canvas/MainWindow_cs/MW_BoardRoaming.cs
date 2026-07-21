@@ -36,6 +36,7 @@ namespace Ink_Canvas
                 return;
             }
 
+            HideEdgeExpandHint();
             ResetTouchStates();
             CancelSingleFingerDragMode();
             drawingShapeMode = 0;

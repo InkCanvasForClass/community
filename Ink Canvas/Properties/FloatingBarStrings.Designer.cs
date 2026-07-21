@@ -453,5 +453,13 @@ namespace Ink_Canvas.Properties
         public static string MiniWhiteboard_Settings_DefaultSize => ResourceManager.GetString(nameof(MiniWhiteboard_Settings_DefaultSize), _resourceCulture);
 
         public static string MiniWhiteboard_Settings_Opacity => ResourceManager.GetString(nameof(MiniWhiteboard_Settings_Opacity), _resourceCulture);
+
+        public static string Canvas_EdgeExpandHint_Button => ResourceManager.GetString(nameof(Canvas_EdgeExpandHint_Button), _resourceCulture);
+
+        public static string Canvas_EdgeExpandHint_Settings_Enable => ResourceManager.GetString(nameof(Canvas_EdgeExpandHint_Settings_Enable), _resourceCulture);
+
+        public static string Canvas_EdgeExpandHint_Settings_Threshold => ResourceManager.GetString(nameof(Canvas_EdgeExpandHint_Settings_Threshold), _resourceCulture);
+
+        public static string Canvas_EdgeExpandHint_Settings_TranslateStep => ResourceManager.GetString(nameof(Canvas_EdgeExpandHint_Settings_TranslateStep), _resourceCulture);
     }
 }
