@@ -21,7 +21,17 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar.Items
             host.Window.Dispatcher.Invoke(() =>
             {
                 var mw = host.Window;
-                mw?.ToggleVideoPresenterSidebarPublic();
+                if (mw == null) return;
+
+                // 把按钮自身作为 BoothPopup 的 PlacementTarget，
+                // 让 CustomPopupPlacementCallback 中的 targetSize 取按钮尺寸，
+                // 菜单才能定位到按钮上方（否则会退化为父级 Grid 屏幕尺寸，菜单跑到屏幕顶部中心上方）
+                if (sender is System.Windows.FrameworkElement fe)
+                {
+                    mw.SetBoothPopupPlacementTarget(fe);
+                }
+
+                mw.ToggleVideoPresenterSidebarPublic();
             });
         }
 

@@ -138,9 +138,14 @@ namespace Ink_Canvas.Controls
 
         private void UpdateIconOpacity(bool isEnabled)
         {
+            double opacity = isEnabled ? 1.0 : 0.4;
             if (ButtonImage != null)
             {
-                ButtonImage.Opacity = isEnabled ? 1.0 : 0.4;
+                ButtonImage.Opacity = opacity;
+            }
+            if (LabelTextBlock != null)
+            {
+                LabelTextBlock.Opacity = opacity;
             }
         }
 

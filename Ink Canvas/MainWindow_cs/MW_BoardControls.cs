@@ -423,13 +423,22 @@ namespace Ink_Canvas
                 else
                 {
                     AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
-                    RefreshBlackBoardSidePageListView();
+                    // 视频展台特殊模式：刷新虚拟分页项（直播页文字 + 照片缩略图），不刷新普通白板页
+                    // 否则 RefreshBlackBoardSidePageListView 会用普通白板页的墨迹预览覆盖虚拟分页项
+                    if (_isVideoPresenterSpecialMode)
+                        RefreshBoothPageListView();
+                    else
+                        RefreshBlackBoardSidePageListView();
                     AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderLeftPageListView);
                     await Task.Delay(1);
                     if (BlackBoardLeftSidePageListView != null)
                     {
+                        // 特殊模式下滚动到当前虚拟页（-1=直播页→0，0..N-1=照片页→index+1）
+                        int scrollIndex = _isVideoPresenterSpecialMode
+                            ? (_boothCurrentPhotoIndex + 1)
+                            : CurrentWhiteboardIndex - 1;
                         var leftContainer = BlackBoardLeftSidePageListView.ItemContainerGenerator.ContainerFromIndex(
-                            CurrentWhiteboardIndex - 1) as ListViewItem;
+                            scrollIndex) as ListViewItem;
                         if (leftContainer != null)
                         {
                             ScrollViewToVerticalTop(leftContainer, BlackBoardLeftSidePageListScrollViewer);
@@ -446,13 +455,20 @@ namespace Ink_Canvas
                 else
                 {
                     AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
-                    RefreshBlackBoardSidePageListView();
+                    // 视频展台特殊模式：刷新虚拟分页项（直播页文字 + 照片缩略图），不刷新普通白板页
+                    if (_isVideoPresenterSpecialMode)
+                        RefreshBoothPageListView();
+                    else
+                        RefreshBlackBoardSidePageListView();
                     AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderRightPageListView);
                     await Task.Delay(1);
                     if (BlackBoardRightSidePageListView != null)
                     {
+                        int scrollIndex = _isVideoPresenterSpecialMode
+                            ? (_boothCurrentPhotoIndex + 1)
+                            : CurrentWhiteboardIndex - 1;
                         var rightContainer = BlackBoardRightSidePageListView.ItemContainerGenerator.ContainerFromIndex(
-                            CurrentWhiteboardIndex - 1) as ListViewItem;
+                            scrollIndex) as ListViewItem;
                         if (rightContainer != null)
                         {
                             ScrollViewToVerticalTop(rightContainer, BlackBoardRightSidePageListScrollViewer);
@@ -474,6 +490,17 @@ namespace Ink_Canvas
 
         private void BtnWhiteBoardSwitchPrevious_Click(object sender, RoutedEventArgs e)
         {
+            // 视频展台特殊模式：虚拟分页导航
+            if (_isVideoPresenterSpecialMode)
+            {
+                if (_boothCurrentPhotoIndex < 0) return; // 已在直播页，不能上一页
+                if (_boothCurrentPhotoIndex == 0)
+                    SwitchBoothToLivePage(); // 照片0 → 直播页
+                else
+                    SwitchBoothToPhotoPage(_boothCurrentPhotoIndex - 1); // 照片k → 照片k-1
+                return;
+            }
+
             if (CurrentWhiteboardIndex <= 1) return;
 
             // 隐藏图片选择工具栏
@@ -510,6 +537,15 @@ namespace Ink_Canvas
 
         private void BtnWhiteBoardSwitchNext_Click(object sender, RoutedEventArgs e)
         {
+            // 视频展台特殊模式：虚拟分页导航
+            if (_isVideoPresenterSpecialMode)
+            {
+                if (_boothCurrentPhotoIndex >= _capturedPhotos.Count - 1) return; // 已在最后一张，不能下一页
+                // 直播页(-1) → 照片0，照片k → 照片k+1
+                SwitchBoothToPhotoPage(_boothCurrentPhotoIndex + 1);
+                return;
+            }
+
             if (CurrentWhiteboardIndex < WhiteboardTotalCount &&
                 Settings.Automation.IsAutoSaveScreenshotAtClear &&
                 inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
@@ -735,6 +771,14 @@ namespace Ink_Canvas
                 $"{CurrentWhiteboardIndex}/{WhiteboardTotalCount}";
 
             UpdatePageInfo();
+
+            // 视频展台特殊模式：按钮文字/IsEnabled 由 UpdateBoothPagingButtonsState 统一管理，
+            // 跳过白板分页的按钮逻辑（否则 isLastPage/CanAddNewPage 会错误启用"下一页"/改成"新页面"文字）
+            if (_isVideoPresenterSpecialMode)
+            {
+                UpdateBoothPageInfoDisplay();
+                return;
+            }
 
             bool isLastPage = CurrentWhiteboardIndex == WhiteboardTotalCount;
             bool isMaxPage = WhiteboardTotalCount >= 99;
