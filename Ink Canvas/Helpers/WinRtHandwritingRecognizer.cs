@@ -122,7 +122,6 @@ namespace Ink_Canvas.Helpers
                     if (group.Count == 0)
                         continue;
 
-                    var wbr = word.BoundingRect;
                     var wpfRect = GetOriginalStrokeBounds(group);
                     var analysisText = word.RecognizedText ?? string.Empty;
 
