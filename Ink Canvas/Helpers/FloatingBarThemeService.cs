@@ -115,9 +115,9 @@ namespace Ink_Canvas.Helpers
                     };
 
                 var resources = Application.Current.Resources;
-            if (_themeDictionary != null) resources.MergedDictionaries.Remove(_themeDictionary);
-            _themeDictionary = dictionary;
-            resources.MergedDictionaries.Add(dictionary);
+                if (_themeDictionary != null) resources.MergedDictionaries.Remove(_themeDictionary);
+                _themeDictionary = dictionary;
+                resources.MergedDictionaries.Add(dictionary);
 
                 MainWindow.Settings.Appearance.FloatingBarThemeId = theme.Id;
                 SettingsManager.SaveSettingsToFile();

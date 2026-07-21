@@ -1,6 +1,7 @@
 using AForge.Imaging;
 using AForge.Imaging.Filters;
 using AForge.Math.Geometry;
+using DirectShowLib;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Models;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
@@ -16,11 +17,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using System.Windows.Ink;
 using WPFMediaKit.DirectShow.Controls;
 using WPFMediaKit.DirectShow.MediaPlayers;
 using WpfMediaKitMediaState = WPFMediaKit.DirectShow.MediaPlayers.MediaState;
-using DirectShowLib;
 
 namespace Ink_Canvas
 {
@@ -2038,7 +2037,7 @@ namespace Ink_Canvas
         {
             if (photo?.Image == null) return;
 
-                    // 特殊模式：把照片显示到冻结画面 Image 上，覆盖实时预览
+            // 特殊模式：把照片显示到冻结画面 Image 上，覆盖实时预览
             if (_isVideoPresenterSpecialMode && VideoPresenterFrozenFrameImage != null)
             {
                 try

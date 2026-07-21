@@ -1,9 +1,8 @@
+using Ink_Canvas.Helpers;
 using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows.Input;
 using System.Windows.Interop;
-using Ink_Canvas.Helpers;
 namespace Ink_Canvas
 {
     public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin

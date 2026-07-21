@@ -1,5 +1,4 @@
 using Ink_Canvas.Helpers;
-using Ink_Canvas.Properties;
 using System;
 using System.IO;
 using System.Linq;
