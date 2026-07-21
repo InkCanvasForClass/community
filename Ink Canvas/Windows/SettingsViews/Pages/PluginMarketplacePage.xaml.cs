@@ -548,18 +548,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     await _market.RequestDownloadPluginAsync(dep);
             }
 
-            // 安全检查：在写入下载前评估。对于已经位于市场索引（理论上已被评估过）的条目仍然把它跑一次以防镜像替换。
+            // 下载前仅检查当前插件是否存在于市场索引。实际文件的 SHA256 会在下载完成后校验。
             try
             {
-                var verdict = PluginManager.Instance.EvaluateTrust(null, merged.MarketEntry?.DownloadSha256, id);
-                if (verdict.TrustLevel == PluginTrustLevel.Unknown && verdict.Reasons.Count > 0)
+                if (merged.MarketEntry == null)
                 {
-                    var confirmMsg = PluginStrings.Market_SecurityWarning + Environment.NewLine + string.Join(Environment.NewLine, verdict.Reasons);
-                    var securityResult = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(confirmMsg,
-                        PluginStrings.Market_SecurityTitle,
-                        MessageBoxButton.YesNo,
-                        MessageBoxImage.Warning);
-                    if (securityResult != MessageBoxResult.Yes) return;
+                    var verdict = PluginManager.Instance.EvaluateTrust(null, null, id);
+                    if (verdict.TrustLevel == PluginTrustLevel.Unknown && verdict.Reasons.Count > 0)
+                    {
+                        var confirmMsg = PluginStrings.Market_SecurityWarning + Environment.NewLine + string.Join(Environment.NewLine, verdict.Reasons);
+                        var securityResult = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(confirmMsg,
+                            PluginStrings.Market_SecurityTitle,
+                            MessageBoxButton.YesNo,
+                            MessageBoxImage.Warning);
+                        if (securityResult != MessageBoxResult.Yes) return;
+                    }
                 }
             }
             catch
