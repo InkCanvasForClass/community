@@ -289,7 +289,9 @@ namespace Ink_Canvas.Helpers
             return col;
         }
 
-        /// <summary>供 WinRT 手写等模块复用：将 WPF <see cref="Stroke"/> 转为 WinRT <see cref="global::Windows.UI.Input.Inking.InkStroke"/>。</summary>
+        /// <summary>供 WinRT 手写等模块复用：将 WPF <see cref="Stroke"/> 转为 WinRT <see cref="global::Windows.UI.Input.Inking.InkStroke"/>。
+        /// 显式保留 InkAnalysis 手写笔触的推荐配置（FitToCurve=true、IgnorePressure=false），与官方 Convert-ink-to-text 示例一致，
+        /// 不附加 PencilProperties（普通笔杆场景；铅笔纹理/软边/透明不应继承到手写识别输入）。</summary>
         internal static global::Windows.UI.Input.Inking.InkStroke CreateInkStrokeFromWpf(Stroke stroke)
         {
             if (stroke?.StylusPoints == null || stroke.StylusPoints.Count == 0)
@@ -299,12 +301,9 @@ namespace Ink_Canvas.Helpers
             if (da == null)
                 return null;
 
-            var wda = new global::Windows.UI.Input.Inking.InkDrawingAttributes
-            {
-                PenTip = global::Windows.UI.Input.Inking.PenTipShape.Circle,
-                Color = global::Windows.UI.Color.FromArgb(da.Color.A, da.Color.R, da.Color.G, da.Color.B),
-                Size = new global::Windows.Foundation.Size((float)da.Width, (float)da.Height)
-            };
+            var wda = CreateRecognizerDrawingAttributes(da);
+            if (wda == null)
+                return null;
 
             var builder = new global::Windows.UI.Input.Inking.InkStrokeBuilder();
             builder.SetDefaultDrawingAttributes(wda);
@@ -320,6 +319,30 @@ namespace Ink_Canvas.Helpers
                 return null;
 
             return builder.CreateStroke(points);
+        }
+
+        /// <summary>
+        /// 直接构造一份标准的 WinRT <see cref="global::Windows.UI.Input.Inking.InkDrawingAttributes"/> 而不调用
+        /// <c>CreateForPencil</c>。返回的对象同时供形状与手写识别共用，必须保证：
+        /// <list type="bullet">
+        ///   <item><description><c>FitToCurve = true</c>：让 WinRT InkAnalysis 自己进行曲线平滑。</description></item>
+        ///   <item><description><c>IgnorePressure = false</c>：明确不忽略压力，与官方示例一致。</description></item>
+        ///   <item><description><c>PenTip = Circle</c>：保持与既有行为兼容，普通笔画不必切到矩形笔尖。</description></item>
+        /// </list>
+        /// </summary>
+        internal static global::Windows.UI.Input.Inking.InkDrawingAttributes CreateRecognizerDrawingAttributes(DrawingAttributes wpfDa)
+        {
+            if (wpfDa == null)
+                return null;
+
+            return new global::Windows.UI.Input.Inking.InkDrawingAttributes
+            {
+                PenTip = global::Windows.UI.Input.Inking.PenTipShape.Circle,
+                Color = global::Windows.UI.Color.FromArgb(wpfDa.Color.A, wpfDa.Color.R, wpfDa.Color.G, wpfDa.Color.B),
+                Size = new global::Windows.Foundation.Size((float)wpfDa.Width, (float)wpfDa.Height),
+                FitToCurve = true,
+                IgnorePressure = false
+            };
         }
 
         internal static global::Windows.UI.Input.Inking.Analysis.InkAnalysisInkDrawing FindPrimaryDrawing(

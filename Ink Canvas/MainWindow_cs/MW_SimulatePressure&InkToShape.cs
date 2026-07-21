@@ -62,7 +62,7 @@ namespace Ink_Canvas
         /// <summary>每次收笔并入批次时递增；防抖 Tick 携带快照，识别过程中若又有新笔则放弃本轮替换。</summary>
         private ulong _handwritingBeautifyScheduleRevision;
 
-        /// <summary>画布笔画 → 手写纠正的识别输入（收笔时、笔锋/首段压感合成前的点集副本；替换墨迹时仍移除画布上的原笔画）。</summary>
+        /// <summary>画布笔画 → 手写纠正的独立识别快照；快照使用最终画布几何，不与可变画布笔画共享点集。</summary>
         private readonly Dictionary<Stroke, Stroke> _handwritingBeautifyInkInputByCanvasStroke =
             new Dictionary<Stroke, Stroke>();
 
@@ -352,9 +352,7 @@ namespace Ink_Canvas
         {
             var strokeDrawingAttributes = e.Stroke?.DrawingAttributes;
 
-            var handwritingRawPointsForRecognizer =
-                CloneStylusPointCollectionForHandwritingInput(e.Stroke?.StylusPoints);
-
+            // 手写识别输入在收笔尾部从最终画布 Stroke 复制，避免使用压感/平滑前快照。
             // Issue #286 — 边缘扩展画布提示：在笔画收集后立即判断位置。
             // HandleEdgeExpandHintAfterStroke 内部已做 eligible 检查与异常吞咽。
             try
@@ -423,7 +421,6 @@ namespace Ink_Canvas
 
             // 标记是否进行了直线拉直
             bool wasStraightened = false;
-            StylusPointCollection preBrushHandwritingPoints = null;
             Stroke strokeForHandwritingBeautify = null;
 
             if (Settings.Canvas.FitToCurve) drawingAttributes.FitToCurve = false;
@@ -432,7 +429,6 @@ namespace Ink_Canvas
             {
                 inkCanvas.Opacity = 1;
                 var touchPressureSimulationApplied = false;
-                preBrushHandwritingPoints = handwritingRawPointsForRecognizer;
 
                 if (Settings.Canvas.DisablePressure)
                 {
@@ -972,7 +968,6 @@ namespace Ink_Canvas
                         // InkToShapeProcessCoreAsync 同步 GetResult() 会长时间阻塞 UI 线程（抬笔卡顿）；
                         // WinRT 路径若同步等待还可能与贴回 UI 的延续死锁（见类注释 InkToShapeSerial）。
                         var strokeHw = strokeForHandwritingBeautify;
-                        var preBrushHwPts = preBrushHandwritingPoints;
                         var wsTail = wasStraightened;
                         // ApplicationIdle：在更高优先级（布局/输入/本帧渲染）之后执行，减轻抬笔瞬间主线程“顶死”感。
                         Dispatcher.BeginInvoke(new Action(async () =>
@@ -984,9 +979,7 @@ namespace Ink_Canvas
                                 if (Settings.InkToShape.EnableWinRtHandwritingStrokeBeautify)
                                 {
                                     var canvasStrokeForHw = wsTail ? strokeHw : strokeAfterTail;
-                                    ScheduleHandwritingGlyphReplaceAfterStrokeCollected(
-                                        canvasStrokeForHw,
-                                        preBrushHwPts);
+                                    ScheduleHandwritingGlyphReplaceAfterStrokeCollected(canvasStrokeForHw);
                                 }
                             }
                             catch (Exception ex)
@@ -1010,9 +1003,7 @@ namespace Ink_Canvas
                     ShapeRecognitionRouter.FromSettingsInt(Settings.InkToShape.ShapeRecognitionEngine)))
             {
                 var canvasStrokeForHw = wasStraightened ? strokeForHandwritingBeautify : strokeAfterTailSync;
-                ScheduleHandwritingGlyphReplaceAfterStrokeCollected(
-                    canvasStrokeForHw,
-                    preBrushHandwritingPoints);
+                ScheduleHandwritingGlyphReplaceAfterStrokeCollected(canvasStrokeForHw);
             }
         }
 
@@ -1059,8 +1050,9 @@ namespace Ink_Canvas
                             inkCanvas.Strokes.Add(smoothed);
                             _currentCommitType = CommitReason.UserInput;
                         }
-                        // 收笔尾部仍以 original 登记手写批次；异步平滑后画布对象变为 smoothed，须迁移引用，否则防抖识别时字典 miss 会退回画布几何（非实时笔锋常见）。
-                        MigrateHandwritingBeautifyCanvasStrokeReference(original, smoothed);
+                            // 平滑后的识别快照由回调在画布替换完成后生成，避免防抖线程读取平滑前的旧点。
+                            MigrateHandwritingBeautifyCanvasStrokeReference(original, smoothed);
+                            UpdateHandwritingBeautifyRecognitionSnapshot(smoothed);
                     }
                     else
                     {
@@ -3036,7 +3028,38 @@ namespace Ink_Canvas
             _handwritingBeautifyDebounceTimer.Tick += HandwritingBeautifyDebounceTimer_Tick;
         }
 
-        /// <summary>深拷贝点集，供手写纠正识别输入（与笔锋/二次压感合成前的画布数据一致）。</summary>
+        /// <summary>
+        /// 把当前画布笔画复制为不可变的手写识别输入。识别快照只保留几何与压力，避免 WinRT await 期间画布 Stroke 被修改。
+        /// </summary>
+        private static Stroke CloneStrokeForHandwritingInput(Stroke source)
+        {
+            if (source?.StylusPoints == null || source.StylusPoints.Count == 0)
+                return null;
+
+            var points = CloneStylusPointCollectionForHandwritingInput(source.StylusPoints);
+            if (points == null || points.Count == 0)
+                return null;
+
+            return new Stroke(points)
+            {
+                DrawingAttributes = source.DrawingAttributes?.Clone() ?? new DrawingAttributes()
+            };
+        }
+
+        /// <summary>平滑替换后刷新对应识别快照，使异步平滑路径与同步路径使用相同的最终几何。</summary>
+        private void UpdateHandwritingBeautifyRecognitionSnapshot(Stroke canvasStroke)
+        {
+            if (canvasStroke == null || !Settings.InkToShape.EnableWinRtHandwritingStrokeBeautify)
+                return;
+
+            var snapshot = CloneStrokeForHandwritingInput(canvasStroke);
+            if (snapshot != null)
+                _handwritingBeautifyInkInputByCanvasStroke[canvasStroke] = snapshot;
+            else
+                _handwritingBeautifyInkInputByCanvasStroke.Remove(canvasStroke);
+        }
+
+        /// <summary>深拷贝点集，供手写纠正识别输入。</summary>
         private static StylusPointCollection CloneStylusPointCollectionForHandwritingInput(StylusPointCollection source)
         {
             if (source == null || source.Count == 0)
@@ -3047,11 +3070,8 @@ namespace Ink_Canvas
             return copy;
         }
 
-        /// <summary>并入批次并重置 1s 计时器（多笔需停笔满延迟后才矫正）。</summary>
-        /// <param name="preBrushHandwritingPoints">笔锋与后续 InkStyle 压感合成前的点集；为 null 时识别输入与画布笔画一致（兼容旧行为）。</param>
-        private void ScheduleHandwritingGlyphReplaceAfterStrokeCollected(
-            Stroke strokeForBeautify,
-            StylusPointCollection preBrushHandwritingPoints = null)
+        /// <summary>并入批次并重置停笔防抖计时器。识别输入始终从最终画布几何复制。</summary>
+        private void ScheduleHandwritingGlyphReplaceAfterStrokeCollected(Stroke strokeForBeautify)
         {
             if (!Settings.InkToShape.EnableWinRtHandwritingStrokeBeautify)
                 return;
@@ -3061,27 +3081,7 @@ namespace Ink_Canvas
                 return;
 
             _handwritingBeautifyScheduleRevision++;
-
-            if (preBrushHandwritingPoints != null && preBrushHandwritingPoints.Count > 0)
-            {
-                // 再拷贝一份给识别专用 Stroke，避免与外部 StylusPointCollection 或 WPF Stroke 内部共享后被改写。
-                var ptsForRecognizer = CloneStylusPointCollectionForHandwritingInput(preBrushHandwritingPoints);
-                if (ptsForRecognizer != null && ptsForRecognizer.Count > 0)
-                {
-                    _handwritingBeautifyInkInputByCanvasStroke[strokeForBeautify] = new Stroke(ptsForRecognizer)
-                    {
-                        DrawingAttributes = strokeForBeautify.DrawingAttributes.Clone()
-                    };
-                }
-                else
-                {
-                    _handwritingBeautifyInkInputByCanvasStroke.Remove(strokeForBeautify);
-                }
-            }
-            else
-            {
-                _handwritingBeautifyInkInputByCanvasStroke.Remove(strokeForBeautify);
-            }
+            UpdateHandwritingBeautifyRecognitionSnapshot(strokeForBeautify);
 
             var alreadyInBatch = false;
             foreach (Stroke x in _handwritingRecentStrokesForBeautify)
@@ -3151,7 +3151,7 @@ namespace Ink_Canvas
                     else
                     {
                         LogHelper.WriteLogToFile(
-                            "[手写体] 批次识别输入回退为画布笔画（未命中原始点快照）。画布点数=" +
+                            "[手写体] 批次识别输入回退为当前画布笔画（未命中最终几何快照）。画布点数=" +
                             (s.StylusPoints?.Count ?? 0),
                             LogHelper.LogType.Info);
                         recognitionInput.Add(s);

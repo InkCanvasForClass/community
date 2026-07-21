@@ -60,14 +60,15 @@ namespace Ink_Canvas.Helpers
 
                 var analyzer = new WinAnalysis.InkAnalyzer();
                 var idToWpf = new Dictionary<uint, Stroke>();
+                var handwritingInputs = CreateNormalizedHandwritingInputs(strokes);
 
-                foreach (Stroke s in strokes)
+                foreach (var input in handwritingInputs)
                 {
-                    var ink = WinRtInkShapeRecognizer.CreateInkStrokeFromWpf(s);
+                    var ink = WinRtInkShapeRecognizer.CreateInkStrokeFromWpf(input.Analysis);
                     if (ink == null) continue;
                     analyzer.AddDataForStroke(ink);
                     analyzer.SetStrokeDataKind(ink.Id, WinAnalysis.InkAnalysisStrokeKind.Writing);
-                    idToWpf[ink.Id] = s;
+                    idToWpf[ink.Id] = input.Original;
                 }
 
                 if (idToWpf.Count == 0)
@@ -84,9 +85,9 @@ namespace Ink_Canvas.Helpers
                         LogHandwriting(
                             "识别：AnalyzeAsync 未得到 Updated，Status=" +
                             (analysisResult == null ? "null" : analysisResult.Status.ToString()) +
-                            "，有效笔画数=" + idToWpf.Count +
-                            "，尝试整批 RecognizeAsync 回退。");
-                    return await RecognizeHandwritingWholeInkAsync(strokes, traceRecognition).ConfigureAwait(true);
+                            "，有效笔画数=" + idToWpf.Count + "，不再执行整批 RecognizeAsync 回退，返回空结果。",
+                            LogHelper.LogType.Warning);
+                    return HandwritingRecognitionResult.Empty;
                 }
 
                 var wordNodes = analyzer.AnalysisRoot?.FindNodes(WinAnalysis.InkAnalysisNodeKind.InkWord);
@@ -94,9 +95,10 @@ namespace Ink_Canvas.Helpers
                 {
                     if (traceRecognition)
                         LogHandwriting(
-                            "识别：未找到 InkWord 节点（墨迹分析常将非横平笔划判为绘图），有效笔画数=" + idToWpf.Count +
-                            "，改用整批 RecognizeAsync 回退。");
-                    return await RecognizeHandwritingWholeInkAsync(strokes, traceRecognition).ConfigureAwait(true);
+                            "识别：未找到 InkWord 节点（有效笔画数=" + idToWpf.Count +
+                            "），不再执行整批 RecognizeAsync 回退，返回空结果。",
+                            LogHelper.LogType.Warning);
+                    return HandwritingRecognitionResult.Empty;
                 }
 
                 var segments = new List<HandwritingWordSegment>();
@@ -121,7 +123,7 @@ namespace Ink_Canvas.Helpers
                         continue;
 
                     var wbr = word.BoundingRect;
-                    var wpfRect = new Rect(wbr.X, wbr.Y, wbr.Width, wbr.Height);
+                    var wpfRect = GetOriginalStrokeBounds(group);
                     var analysisText = word.RecognizedText ?? string.Empty;
 
                     IReadOnlyList<string> candList = Array.Empty<string>();
@@ -147,18 +149,24 @@ namespace Ink_Canvas.Helpers
                                 if (rr != null && rr.Count > 0 && rr[0] != null)
                                 {
                                     var cands = rr[0].GetTextCandidates();
-                                    if (cands != null && cands.Count > 0)
-                                        candList = cands.ToList();
+                            if (cands != null && cands.Count > 0)
+                            {
+                                candList = cands
+                                    .Where(c => !string.IsNullOrWhiteSpace(c))
+                                    .ToList();
+                            }
                                 }
                             }
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        if (traceRecognition)
+                            LogHandwriting("识别：分词候选获取失败，保留 InkWord.RecognizedText。异常=" + ex.Message, LogHelper.LogType.Warning);
                         candList = Array.Empty<string>();
                     }
 
-                    var primary = candList.Count > 0 ? candList[0] : analysisText;
+                    var primary = candList.FirstOrDefault(c => !string.IsNullOrWhiteSpace(c)) ?? analysisText;
                     var mergedCandidates = new List<string>();
                     if (candList.Count > 0)
                     {
@@ -172,7 +180,7 @@ namespace Ink_Canvas.Helpers
                     if (!string.IsNullOrEmpty(analysisText) && !mergedCandidates.Contains(analysisText))
                         mergedCandidates.Insert(0, analysisText);
 
-                    if (mergedCandidates.Count == 0 && !string.IsNullOrEmpty(primary))
+                    if (mergedCandidates.Count == 0 && !string.IsNullOrWhiteSpace(primary))
                         mergedCandidates.Add(primary);
 
                     segments.Add(new HandwritingWordSegment(
@@ -376,80 +384,125 @@ namespace Ink_Canvas.Helpers
             return ui;
         }
 
-        private static async Task<HandwritingRecognitionResult> RecognizeHandwritingWholeInkAsync(
-            StrokeCollection strokes,
-            bool traceRecognition)
+        private sealed class NormalizedHandwritingInput
         {
+            public Stroke Original { get; set; }
+            public Stroke Analysis { get; set; }
+        }
+
+        private static List<NormalizedHandwritingInput> CreateNormalizedHandwritingInputs(StrokeCollection strokes)
+        {
+            var inputs = new List<NormalizedHandwritingInput>();
             if (strokes == null || strokes.Count == 0)
-                return HandwritingRecognitionResult.Empty;
+                return inputs;
 
-            var container = new WinRtInk.InkStrokeContainer();
-            foreach (Stroke s in strokes)
-            {
-                var ink = WinRtInkShapeRecognizer.CreateInkStrokeFromWpf(s);
-                if (ink != null)
-                    container.AddStroke(ink);
-            }
+            var valid = strokes.Cast<Stroke>()
+                .Where(s => s?.StylusPoints != null && s.StylusPoints.Count > 0)
+                .ToList();
+            if (valid.Count == 0)
+                return inputs;
 
-            var winStrokes = container.GetStrokes();
-            if (winStrokes == null || winStrokes.Count == 0)
-            {
-                if (traceRecognition)
-                    LogHandwriting("整批回退：无有效 WinRT 笔画。");
-                return HandwritingRecognitionResult.Empty;
-            }
+            var heights = valid.Select(s => Math.Max(1.0, s.GetBounds().Height)).OrderBy(h => h).ToList();
+            var referenceHeight = heights[heights.Count / 2];
+            var ordered = valid.OrderBy(s => s.GetBounds().Top + s.GetBounds().Height / 2.0).ToList();
+            var rows = new List<List<Stroke>>();
+            var rowCenters = new List<double>();
+            var rowTolerance = Math.Max(12.0, referenceHeight * 0.9);
 
-            var reco = new WinRtInk.InkRecognizerContainer();
-            TryApplyPreferredHandwritingRecognizer(reco, false);
-
-            IReadOnlyList<WinRtInk.InkRecognitionResult> rr;
-            try
+            foreach (var stroke in ordered)
             {
-                rr = await reco
-                    .RecognizeAsync(container, WinRtInk.InkRecognitionTarget.All)
-                    .AsTask()
-                    .ConfigureAwait(true);
-            }
-            catch (Exception ex)
-            {
-                if (traceRecognition)
-                    LogHandwriting("整批回退：RecognizeAsync 异常：" + ex.Message);
-                return HandwritingRecognitionResult.Empty;
-            }
-
-            if (rr == null || rr.Count == 0 || rr[0] == null)
-            {
-                if (traceRecognition)
-                    LogHandwriting("整批回退：RecognizeAsync 无结果。");
-                return HandwritingRecognitionResult.Empty;
-            }
-
-            var cands = rr[0].GetTextCandidates();
-            var primary = (cands != null && cands.Count > 0) ? cands[0] : string.Empty;
-            if (string.IsNullOrWhiteSpace(primary))
-            {
-                if (traceRecognition)
-                    LogHandwriting("整批回退：候选文本为空。");
-                return HandwritingRecognitionResult.Empty;
-            }
-
-            var merged = new List<string>();
-            if (cands != null)
-            {
-                foreach (var c in cands)
+                var bounds = stroke.GetBounds();
+                var centerY = bounds.Top + bounds.Height / 2.0;
+                var bestRow = -1;
+                var bestDistance = double.MaxValue;
+                for (var i = 0; i < rowCenters.Count; i++)
                 {
-                    if (!string.IsNullOrEmpty(c) && !merged.Contains(c))
-                        merged.Add(c);
+                    var distance = Math.Abs(centerY - rowCenters[i]);
+                    if (distance <= rowTolerance && distance < bestDistance)
+                    {
+                        bestRow = i;
+                        bestDistance = distance;
+                    }
+                }
+
+                if (bestRow < 0)
+                {
+                    bestRow = rows.Count;
+                    rows.Add(new List<Stroke>());
+                    rowCenters.Add(centerY);
+                }
+
+                rows[bestRow].Add(stroke);
+                rowCenters[bestRow] = rowCenters[bestRow] +
+                    (centerY - rowCenters[bestRow]) / rows[bestRow].Count;
+            }
+
+            foreach (var row in rows)
+            {
+                var rowBounds = Rect.Empty;
+                foreach (var stroke in row)
+                    rowBounds = rowBounds.IsEmpty ? stroke.GetBounds() : Rect.Union(rowBounds, stroke.GetBounds());
+
+                var rowHeight = Math.Max(1.0, rowBounds.Height);
+                var scaleY = Math.Max(0.5, Math.Min(2.0, referenceHeight / rowHeight));
+                var rowCenter = rowBounds.Top + rowBounds.Height / 2.0;
+                var angle = GetRowAngle(row);
+                var rotate = Math.Abs(angle) > 20.0 * Math.PI / 180.0;
+                var transform = new Matrix();
+                transform.Translate(-rowBounds.Left, -rowCenter);
+                if (rotate)
+                    transform.Rotate(-angle * 180.0 / Math.PI);
+                transform.Scale(1.0, scaleY);
+                transform.Translate(rowBounds.Left, rowCenter);
+
+                foreach (var original in row)
+                {
+                    var analysis = CloneStrokeForRecognition(original, transform);
+                    if (analysis != null)
+                        inputs.Add(new NormalizedHandwritingInput { Original = original, Analysis = analysis });
                 }
             }
 
-            var bounds = UnionStrokeBounds(strokes);
-            var group = new List<Stroke>();
-            foreach (Stroke s in strokes)
-                group.Add(s);
+            return inputs;
+        }
 
-            var seg = new HandwritingWordSegment(primary, merged, bounds, group);
-            return new HandwritingRecognitionResult(new List<HandwritingWordSegment> { seg });
+        private static Stroke CloneStrokeForRecognition(Stroke source, Matrix transform)
+        {
+            var clone = CloneStroke(source);
+            if (clone == null)
+                return null;
+            clone.Transform(transform, false);
+            return clone;
+        }
+
+        private static Stroke CloneStroke(Stroke source)
+        {
+            if (source?.StylusPoints == null || source.StylusPoints.Count == 0)
+                return null;
+            return new Stroke(new StylusPointCollection(source.StylusPoints.ToArray()))
+            {
+                DrawingAttributes = source.DrawingAttributes?.Clone() ?? new DrawingAttributes()
+            };
+        }
+
+        private static double GetRowAngle(IReadOnlyList<Stroke> row)
+        {
+            if (row == null || row.Count == 0)
+                return 0;
+            var first = row[0].StylusPoints[0].ToPoint();
+            var lastStroke = row[row.Count - 1];
+            var last = lastStroke.StylusPoints[lastStroke.StylusPoints.Count - 1].ToPoint();
+            return Math.Atan2(last.Y - first.Y, last.X - first.X);
+        }
+
+        private static Rect GetOriginalStrokeBounds(IReadOnlyList<Stroke> strokes)
+        {
+            if (strokes == null || strokes.Count == 0)
+                return Rect.Empty;
+            var bounds = strokes[0].GetBounds();
+            for (var i = 1; i < strokes.Count; i++)
+                bounds = Rect.Union(bounds, strokes[i].GetBounds());
+            return bounds;
         }
 
         private static Rect UnionStrokeBounds(StrokeCollection strokes)
