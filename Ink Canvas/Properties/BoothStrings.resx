@@ -48,6 +48,9 @@
   <data name="Capture" xml:space="preserve">
     <value>拍照</value>
   </data>
+  <data name="Close" xml:space="preserve">
+    <value>关闭</value>
+  </data>
   <data name="CapturedPhotos" xml:space="preserve">
     <value>拍摄照片</value>
   </data>

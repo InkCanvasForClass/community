@@ -11,6 +11,7 @@
         xmlns:localControls="clr-namespace:Ink_Canvas.Controls"
         xmlns:Windows="clr-namespace:Ink_Canvas.Windows"
         xmlns:helpers="clr-namespace:Ink_Canvas.Helpers"
+        xmlns:wmk="clr-namespace:WPFMediaKit.DirectShow.Controls;assembly=WPFMediaKit"
         xmlns:icons="clr-namespace:Ink_Canvas"
         mc:Ignorable="d"
         WindowStyle="None"
@@ -149,6 +150,71 @@
                        Height="648" Opacity="0.035" />
                 <Image Name="ICCWaterMarkDark" Source="Resources/Icons-png/icc-transparent-dark.png" Width="648"
                        Height="648" Opacity="0.055" />
+
+                <!-- 视频展台特殊模式：全屏预览层 + 居中占位文字 -->
+                <Grid Name="VideoPresenterSpecialModeContainer"
+                      Visibility="Collapsed"
+                      Background="#333333"
+                      IsManipulationEnabled="True"
+                      ManipulationDelta="VideoPresenterSpecialMode_ManipulationDelta"
+                      ManipulationStarting="VideoPresenterSpecialMode_ManipulationStarting"
+                      MouseWheel="VideoPresenterSpecialMode_MouseWheel">
+                    <!-- 全屏摄像头预览：VideoCaptureElement 自动 VMR9 + D3DImage 零拷贝 GPU 渲染
+                         （DirectShow 采集 + D3D9 表面 + D3DImage，无 CPU 拷贝，无 OOM）
+                         RenderTransformOrigin 必须为 (0,0)：
+                         缩放公式 translate_new = origin - (origin - translate_old) * ratio 只在 (0,0) 下成立，
+                         与 EasiCamera TranslateZoomRotateExtensionBehavior.EnsureTransform 的设计一致。 -->
+                    <helpers:CapturableVideoCaptureElement x:Name="VideoPresenterFullCanvasImage"
+                                             Stretch="Uniform"
+                                             UseYuv="False"
+                                             EnableSampleGrabbing="False"
+                                             LoadedBehavior="Manual"
+                                             UnloadedBehavior="Stop"
+                                             MediaOpened="VideoPresenterFullCanvasImage_MediaOpened"
+                                             MediaFailed="VideoPresenterFullCanvasImage_MediaFailed"
+                                             RenderTransformOrigin="0,0">
+                        <!-- LayoutTransform 用于旋转：旋转 90/270 时 WPF 自动重新布局（宽高交换），
+                             避免画面被裁剪；缩放/位移仍走 RenderTransform -->
+                        <helpers:CapturableVideoCaptureElement.LayoutTransform>
+                            <RotateTransform x:Name="VideoPresenterFullCanvasRotation" Angle="0" />
+                        </helpers:CapturableVideoCaptureElement.LayoutTransform>
+                        <helpers:CapturableVideoCaptureElement.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform x:Name="VideoPresenterFullCanvasScale" ScaleX="1" ScaleY="1" />
+                                <TranslateTransform x:Name="VideoPresenterFullCanvasTranslate" X="0" Y="0" />
+                            </TransformGroup>
+                        </helpers:CapturableVideoCaptureElement.RenderTransform>
+                    </helpers:CapturableVideoCaptureElement>
+                    <!-- 拍照后冻结画面：覆盖在 VideoCaptureElement 之上，显示拍照的照片，
+                         让用户在照片上批注。LayoutTransform/RenderTransform 与 VideoCaptureElement 同步。 -->
+                    <Image x:Name="VideoPresenterFrozenFrameImage"
+                           Stretch="Uniform"
+                           RenderTransformOrigin="0,0"
+                           Visibility="Collapsed">
+                        <Image.LayoutTransform>
+                            <RotateTransform x:Name="VideoPresenterFrozenFrameRotation" Angle="0" />
+                        </Image.LayoutTransform>
+                        <Image.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform x:Name="VideoPresenterFrozenFrameScale" ScaleX="1" ScaleY="1" />
+                                <TranslateTransform x:Name="VideoPresenterFrozenFrameTranslate" X="0" Y="0" />
+                            </TransformGroup>
+                        </Image.RenderTransform>
+                    </Image>
+                    <!-- 全屏蒙版已废弃：改为在侧栏显示小预览缩略图 + 蒙版 + 文字（VideoPresenterFrozenThumbnail）。
+                         全屏蒙版会遮挡冻结画面，导致用户无法在拍照后的画面上批注。
+                         此处仅保留元素以兼容旧代码引用，不再显示。 -->
+                    <Grid x:Name="VideoPresenterFrozenOverlay"
+                          Visibility="Collapsed"
+                          Background="Transparent" />
+                    <!-- 没找到摄像头时的占位文字 -->
+                    <TextBlock x:Name="VideoPresenterSearchingText"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="24"
+                               Foreground="#CCCCCC"
+                               Text="正在查找展台设备..." />
+                </Grid>
             </Grid>
         </Grid>
         <Grid Name="GridTransparencyFakeBackground" Opacity="0" />
@@ -1288,9 +1354,40 @@
                     </Button>
                 </Grid>
 
-                <!-- 预览区域 -->
-                <Border Grid.Row="1" Margin="10,10,10,2" Padding="10" CornerRadius="6" Background="#1f2328">
-                    <Image x:Name="VideoPresenterPreviewImage" Stretch="Uniform" Height="180" />
+                <!-- 预览区域已移除：特殊模式下 VideoCaptureElement 全屏预览已铺满白板，
+                     不再需要左上角侧栏的小预览（两个预览不能同时显示）。RowDefinition Height="Auto"
+                     在无内容时会自动塌缩为 0，不影响下方各 Row 的 Grid.Row 索引。 -->
+
+                <!-- 拍照冻结后的侧栏小预览：显示冻结图片缩略图 + 半透明蒙版 + "点击返回摄像头"文字。
+                     点击此区域清除冻结，返回实时画面。
+                     冻结画面本身仍全屏显示在白板上供用户批注，这里只是侧栏的缩略图指示。 -->
+                <Border x:Name="VideoPresenterFrozenThumbnail"
+                        Grid.Row="1"
+                        Height="120"
+                        Margin="10,2,10,2"
+                        Padding="0"
+                        CornerRadius="6"
+                        Background="#1A1A1A"
+                        BorderBrush="#3D3D3D"
+                        BorderThickness="1"
+                        Visibility="Collapsed"
+                        MouseLeftButtonDown="VideoPresenterFrozenThumbnail_MouseLeftButtonDown">
+                    <Grid>
+                        <!-- 冻结图片缩略图（保持长宽比，居中） -->
+                        <Image x:Name="VideoPresenterFrozenThumbnailImage"
+                               Stretch="Uniform"
+                               HorizontalAlignment="Stretch"
+                               VerticalAlignment="Stretch" />
+                        <!-- 半透明黑蒙版 -->
+                        <Grid Background="#80000000" IsHitTestVisible="False">
+                            <TextBlock HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       FontSize="14"
+                                       FontWeight="SemiBold"
+                                       Foreground="#FFFFFF"
+                                       Text="点击返回摄像头" />
+                        </Grid>
+                    </Grid>
                 </Border>
 
                 <!-- 照片显示区域 -->
@@ -1323,13 +1420,14 @@
                             FontWeight="SemiBold"
                             Foreground="{DynamicResource FloatingBarForegroundBrush}"
                             Text="{x:Static props:BoothStrings.CameraDevices}" />
-                        <ScrollViewer
-                            x:Name="CameraDevicesScrollViewer"
-                            MaxHeight="120"
-                            VerticalScrollBarVisibility="Auto"
-                            PanningMode="VerticalFirst">
-                            <StackPanel x:Name="CameraDevicesStackPanel" />
-                        </ScrollViewer>
+                        <ComboBox x:Name="CameraDevicesComboBox"
+                                  Height="36"
+                                  FontSize="12"
+                                  Background="{DynamicResource FloatingBarBackgroundBrush}"
+                                  BorderBrush="#616161"
+                                  BorderThickness="1"
+                                  Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                                  SelectionChanged="CameraDevicesComboBox_SelectionChanged" />
                     </StackPanel>
                 </Border>
 
@@ -1340,18 +1438,6 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="10,4,10,2">
-                        <ToggleButton
-                            x:Name="BtnToggleVideoPresenterLiveOnCanvas"
-                            Width="70"
-                            Height="40"
-                            Margin="2,0"
-                            Background="{DynamicResource FloatingBarBackgroundBrush}"
-                            BorderBrush="{DynamicResource FloatingBarBorderBrush}"
-                            BorderThickness="1"
-                            Checked="BtnToggleVideoPresenterLiveOnCanvas_Checked"
-                            Unchecked="BtnToggleVideoPresenterLiveOnCanvas_Unchecked">
-                            <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatingBarForegroundBrush}" Text="{x:Static props:BoothStrings.Present}" />
-                        </ToggleButton>
                         <ToggleButton
                             x:Name="ToggleBtnPhotoCorrection"
                             Width="70"
@@ -1386,8 +1472,21 @@
                             Click="BtnRotateImage_Click">
                             <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatingBarForegroundBrush}" Text="{x:Static props:BoothStrings.Rotate}" />
                         </Button>
+                        <!-- 关闭视频展台：完全退出（退出特殊模式 + 折叠侧栏 + 停止预览）。
+                             与右上角 X 不同：X 只折叠侧栏菜单，预览继续运行；此按钮关闭整个视频展台模式。 -->
+                        <Button
+                            x:Name="BtnExitVideoPresenter"
+                            Width="70"
+                            Height="40"
+                            Margin="2,0"
+                            Background="{DynamicResource FloatingBarBackgroundBrush}"
+                            BorderBrush="{DynamicResource FloatingBarBorderBrush}"
+                            BorderThickness="1"
+                            Click="BtnExitVideoPresenter_Click">
+                            <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource FloatingBarForegroundBrush}" Text="{x:Static props:BoothStrings.Close}" />
+                        </Button>
                     </StackPanel>
-                    <!-- 摄像头原生分辨率选择 ComboBox -->
+                    <!-- 摄像头分辨率@帧率 组合选择（单个 ComboBox 显示所有有效的 W×H@FPS 组合） -->
                     <Grid Grid.Row="1" HorizontalAlignment="Center" Margin="10,6,10,4">
                         <ComboBox x:Name="BoothResolutionComboBox"
                                   Width="282" Height="40"

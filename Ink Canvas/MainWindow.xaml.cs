@@ -2334,6 +2334,13 @@ namespace Ink_Canvas
         // 鼠标输入
         private void inkCanvas_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
+            // 视频展台特殊模式：非 Ink 模式下，鼠标左键拖动应该移动摄像头预览画面，
+            // 而不是触发 InkCanvas 内部框选逻辑。这里拦截事件，启动鼠标拖动。
+            if (VideoPresenterSpecialMode_HandleMouseDown(e))
+            {
+                return;
+            }
+
             var point = e.GetPosition(this);
             if (TryBlockInkInputOverFloatingBar(point, e))
                 return;
@@ -2887,16 +2894,55 @@ namespace Ink_Canvas
             {
                 if (_cameraService != null)
                 {
-                    // 通过 SelectedResolutionIndex 触发底层实现切换
-                    _cameraService.SelectedResolutionIndex = BoothResolutionComboBox.SelectedIndex;
-                    _boothResolutionWidth = res.Width;
-                    _boothResolutionHeight = res.Height;
+                    // 单 ComboBox 直接选中 (W, H, FPS) 组合，用 res.FrameRate 精确找 capability index
+                    int capIdx = _cameraService.FindCapabilityIndex(res.Width, res.Height, res.FrameRate);
+                    if (capIdx >= 0)
+                    {
+                        _cameraService.SelectedResolutionIndex = capIdx;
+                        _boothResolutionWidth = res.Width;
+                        _boothResolutionHeight = res.Height;
+                    }
+
+                    // 特殊模式下：VideoCaptureElement 也要重新应用新分辨率（重新 BeginInit/EndInit/Play）
+                    if (_isVideoPresenterSpecialMode)
+                    {
+                        int camIdx = FindCurrentCameraIndex();
+                        if (camIdx >= 0)
+                        {
+                            _ = StartVideoCaptureElementPreviewAsync(camIdx);
+                        }
+                    }
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"切换 native 分辨率失败: {ex.Message}", LogHelper.LogType.Error);
             }
+        }
+
+        /// <summary>旧的帧率 ComboBox 事件处理器（已废弃）。
+        /// XAML 已移除 BoothFramerateComboBox，此方法保留以兼容代码中可能的事件订阅。</summary>
+        private void BoothFramerateComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            // 已废弃：单 ComboBox 直接选中 (W, H, FPS) 组合
+        }
+
+        /// <summary>在 _cameraService.AvailableCameras 中查找 CurrentCamera 的索引；找不到返回 -1。</summary>
+        private int FindCurrentCameraIndex()
+        {
+            if (_cameraService?.AvailableCameras == null || _cameraService.CurrentCamera == null)
+                return -1;
+            var cams = _cameraService.AvailableCameras;
+            var cur = _cameraService.CurrentCamera;
+            for (int i = 0; i < cams.Count; i++)
+            {
+                if (string.Equals(cams[i].MonikerString, cur.MonikerString, StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(cams[i].Name, cur.Name, StringComparison.Ordinal))
+                {
+                    return i;
+                }
+            }
+            return -1;
         }
 
         private bool _isBoothComboBoxUpdating;

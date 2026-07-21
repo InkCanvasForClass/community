@@ -21,24 +21,6 @@
           "AForge": "2.2.5"
         }
       },
-      "AForge.Video": {
-        "type": "Direct",
-        "requested": "[2.2.5, )",
-        "resolved": "2.2.5",
-        "contentHash": "XqzcOXtBUagEPRqg/00oayxlCPmxP4284SdM62mVotsNoD03fs19BrzdMBfhUOOYPyd0B/IXH7tEWnSDmc2gxA==",
-        "dependencies": {
-          "AForge": "2.2.5"
-        }
-      },
-      "AForge.Video.DirectShow": {
-        "type": "Direct",
-        "requested": "[2.2.5, )",
-        "resolved": "2.2.5",
-        "contentHash": "pEch6felU/RGAbl0A7yjaQjsGxwiRFU9R+qBqR92wQo++XhzPLeQaZHnAPIBYaG7MfoqtjgCDkK4z3Tra4VQ3w==",
-        "dependencies": {
-          "AForge.Video": "2.2.5"
-        }
-      },
       "CommunityToolkit.Mvvm": {
         "type": "Direct",
         "requested": "[8.4.0, )",
@@ -82,6 +64,15 @@
         "contentHash": "nGwuuVul+TcLCTgPmaAZCc0fYFqUpCNZ8PiulVT3gZnsWt/AvxMZ0DSPpuyI/iRPc/NhFIg9lSIR7uaHWV0I/Q==",
         "dependencies": {
           "iNKORE.UI.WPF": "1.2.8"
+        }
+      },
+      "JerryShaw.WPFMediaKit": {
+        "type": "Direct",
+        "requested": "[1.0.1, )",
+        "resolved": "1.0.1",
+        "contentHash": "t4yTVIKP/dABO7lpflH6hDlI7B4C4MKcj3LI22yu5LKo+ppTkirUefnpdZK5l95LDsqmdn1jMovCHEN2bSrGDg==",
+        "dependencies": {
+          "JerryShaw.DirectShowLib": "1.0.1"
         }
       },
       "MdXaml": {
@@ -243,6 +234,11 @@
         "dependencies": {
           "H.GeneratedIcons.System.Drawing": "2.0.131"
         }
+      },
+      "JerryShaw.DirectShowLib": {
+        "type": "Transitive",
+        "resolved": "1.0.1",
+        "contentHash": "NtMCJKHRnYtD2Z8T/ZMWd7AjqzOQvT2mjiJFplOls/dTjojO4gdkEDxRa+ewKhG/3bobQf9ZSTYWtK/gMF/NRg=="
       },
       "MdXaml.Plugins": {
         "type": "Transitive",

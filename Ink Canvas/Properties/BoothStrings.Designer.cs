@@ -46,6 +46,8 @@ namespace Ink_Canvas.Properties
 
         public static string CapturedPhotos => ResourceManager.GetString(nameof(CapturedPhotos), _resourceCulture);
 
+        public static string Close => ResourceManager.GetString(nameof(Close), _resourceCulture);
+
         public static string Correction => ResourceManager.GetString(nameof(Correction), _resourceCulture);
 
         public static string Present => ResourceManager.GetString(nameof(Present), _resourceCulture);
