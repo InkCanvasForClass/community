@@ -214,7 +214,7 @@ namespace Ink_Canvas
         /// 5. 异步上传保存的文件到Dlass
         /// 6. 保存元素信息
         /// </remarks>
-        private void SaveInkCanvasStrokes(bool newNotice = true, bool saveByUser = false)
+        public void SaveInkCanvasStrokes(bool newNotice = true, bool saveByUser = false)
         {
             try
             {

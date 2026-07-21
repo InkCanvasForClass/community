@@ -349,9 +349,6 @@ namespace Ink_Canvas
                 {
                     // PPT监控将在Window_Loaded中启动
                 }
-
-                UpdatePPTBtnSlidersStatus();
-                UpdatePPTBtnPreview();
             }
             else
             {

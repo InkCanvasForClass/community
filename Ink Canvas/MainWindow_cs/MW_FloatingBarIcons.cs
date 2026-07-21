@@ -5799,13 +5799,6 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 更新形状绘制面板（BorderDrawShape）的弹出位置，使其水平中心对齐形状按钮。
-        /// </summary>
-        private void UpdateBorderDrawShapePosition()
-        {
-        }
-
-        /// <summary>
         /// 更新手势面板（TwoFingerGestureBorder）的弹出位置，使其水平中心对齐手势按钮。
         /// </summary>
         private void UpdateTwoFingerGestureBorderPosition()

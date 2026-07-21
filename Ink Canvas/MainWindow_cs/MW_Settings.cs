@@ -528,54 +528,6 @@ namespace Ink_Canvas
             }
         }
 
-
-
-        //[Obsolete]
-        //private void ToggleSwitchShowButtonPPTNavigation_OnToggled(object sender, RoutedEventArgs e) {
-        //    if (!isLoaded) return;
-        //    Settings.PowerPointSettings.IsShowPPTNavigation = ToggleSwitchShowButtonPPTNavigation.IsOn;
-        //    var vis = Settings.PowerPointSettings.IsShowPPTNavigation ? Visibility.Visible : Visibility.Collapsed;
-        //    PPTLBPageButton.Visibility = vis;
-        //    PPTRBPageButton.Visibility = vis;
-        //    PPTLSPageButton.Visibility = vis;
-        //    PPTRSPageButton.Visibility = vis;
-        //    SaveSettingsToFile();
-        //}
-
-        //[Obsolete]
-        //private void ToggleSwitchShowBottomPPTNavigationPanel_OnToggled(object sender, RoutedEventArgs e) {
-        //    if (!isLoaded) return;
-        //    Settings.PowerPointSettings.IsShowBottomPPTNavigationPanel = ToggleSwitchShowBottomPPTNavigationPanel.IsOn;
-        //    if (IsInPPTPresentationMode)
-        //        //BottomViewboxPPTSidesControl.Visibility = Settings.PowerPointSettings.IsShowBottomPPTNavigationPanel
-        //        //    ? Visibility.Visible
-        //        //    : Visibility.Collapsed;
-        //    SaveSettingsToFile();
-        //}
-
-        //[Obsolete]
-        //private void ToggleSwitchShowSidePPTNavigationPanel_OnToggled(object sender, RoutedEventArgs e) {
-        //    if (!isLoaded) return;
-        //    Settings.PowerPointSettings.IsShowSidePPTNavigationPanel = ToggleSwitchShowSidePPTNavigationPanel.IsOn;
-        //    if (IsInPPTPresentationMode) {
-        //        LeftSidePanelForPPTNavigation.Visibility = Settings.PowerPointSettings.IsShowSidePPTNavigationPanel
-        //            ? Visibility.Visible
-        //            : Visibility.Collapsed;
-        //        RightSidePanelForPPTNavigation.Visibility = Settings.PowerPointSettings.IsShowSidePPTNavigationPanel
-        //            ? Visibility.Visible
-        //            : Visibility.Collapsed;
-        //    }
-
-        //    SaveSettingsToFile();
-        //}
-
-
-
-        public void UpdatePPTBtnSlidersStatus()
-        {
-        }
-
-
         /// <summary>
         /// 更新PPT UI管理器设置的通用方法
         /// </summary>
@@ -634,20 +586,6 @@ namespace Ink_Canvas
                 _pptUIManager.UpdateNavigationButtonStyles();
             }
         }
-
-        public void UpdatePPTBtnPreview()
-        {
-        }
-
-
-
-
-
-
-
-
-
-
 
         #endregion
 

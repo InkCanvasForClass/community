@@ -657,10 +657,6 @@ namespace Ink_Canvas
             BoardBorderDrawShape.IsOpen = false;
             GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
 
-            //if (!App.StartArgs.Contains("-o"))
-
-            // Old UI removed: ViewBoxStackPanelMain.Visibility = Visibility.Collapsed;
-            // Old UI removed: ViewBoxStackPanelShapes.Visibility = Visibility.Collapsed;
             var workingArea = Screen.PrimaryScreen.WorkingArea;
 
             double dpiScaleX = 1, dpiScaleY = 1;
@@ -1526,14 +1522,6 @@ namespace Ink_Canvas
             }
         }
 
-        public void UpdatePickNameBackgroundsInComboBox()
-        {
-        }
-
-        public void UpdatePickNameBackgroundDisplay()
-        {
-        }
-
         public string _lastAppliedProfileName;
         private bool isLoaded;
         private bool forcePointEraser;
@@ -1685,9 +1673,6 @@ namespace Ink_Canvas
 
             // 处理命令行参数中的文件路径
             HandleCommandLineFileOpen();
-
-            // 初始化文件关联状态显示
-            InitializeFileAssociationStatus();
 
             // 检查模式设置并应用
             CheckMainWindowVisibility();
@@ -3325,13 +3310,6 @@ namespace Ink_Canvas
             }
         }
 
-
-        /// <summary>
-        /// 初始化文件关联状态显示
-        /// </summary>
-        private void InitializeFileAssociationStatus()
-        {
-        }
 
         /// <summary>
         /// 处理命令行参数中的文件路径

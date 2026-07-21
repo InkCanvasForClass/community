@@ -597,7 +597,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 mw.PPTUIManager.ShowPPTButton = isOn;
                 mw.PPTUIManager.UpdateNavigationPanelsVisibility();
             }
-            mw?.UpdatePPTBtnPreview();
         }
 
         public static void OnShowPPTSidebarByDefaultChanged()
@@ -610,9 +609,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         public static void OnPPTButtonPositionChanged()
         {
             var mw = GetMainWindow();
-            mw?.UpdatePPTBtnSlidersStatus();
             mw?.UpdatePPTUIManagerSettings();
-            mw?.UpdatePPTBtnPreview();
         }
 
         public static void OnPPTButtonOpacityChanged(string buttonKey, double value)
@@ -629,7 +626,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 }
                 mw.PPTUIManager.UpdateNavigationButtonStyles();
             }
-            mw?.UpdatePPTBtnPreview();
         }
 
         public static void OnPPTButtonsDisplayOptionChanged()
@@ -640,7 +636,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 mw.PPTUIManager.PPTButtonsDisplayOption = SettingsManager.Settings.PowerPointSettings.PPTButtonsDisplayOption;
                 mw.PPTUIManager.UpdateNavigationPanelsVisibility();
             }
-            mw?.UpdatePPTBtnPreview();
         }
 
         public static void OnPPTSButtonsOptionChanged()
@@ -651,7 +646,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 mw.PPTUIManager.PPTSButtonsOption = SettingsManager.Settings.PowerPointSettings.PPTSButtonsOption;
                 mw.PPTUIManager.UpdateNavigationButtonStyles();
             }
-            mw?.UpdatePPTBtnPreview();
         }
 
         public static void OnPPTSButtonsOptionWithOpacityChanged()
@@ -665,7 +659,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 mw.PPTUIManager.PPTRSButtonOpacity = ppt.PPTRSButtonOpacity;
                 mw.PPTUIManager.UpdateNavigationButtonStyles();
             }
-            mw?.UpdatePPTBtnPreview();
         }
 
         public static void OnPPTBButtonsOptionChanged()
@@ -676,7 +669,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 mw.PPTUIManager.PPTBButtonsOption = SettingsManager.Settings.PowerPointSettings.PPTBButtonsOption;
                 mw.PPTUIManager.UpdateNavigationButtonStyles();
             }
-            mw?.UpdatePPTBtnPreview();
         }
 
         public static void OnPPTBButtonsOptionWithOpacityChanged()
@@ -690,7 +682,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 mw.PPTUIManager.PPTRBButtonOpacity = ppt.PPTRBButtonOpacity;
                 mw.PPTUIManager.UpdateNavigationButtonStyles();
             }
-            mw?.UpdatePPTBtnPreview();
         }
 
         public static void OnPPTTimeCapsuleChanged()
@@ -738,7 +729,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 mw.PPTUIManager.PPTNavBarScale = scale;
                 mw.PPTUIManager.UpdateNavigationButtonStyles();
             }
-            mw?.UpdatePPTBtnPreview();
         }
 
         /// <summary>
@@ -749,8 +739,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         {
             var mw = GetMainWindow();
             mw?.UpdatePPTUIManagerSettings();
-            mw?.UpdatePPTBtnPreview();
-            PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+                        PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
         }
 
         #endregion

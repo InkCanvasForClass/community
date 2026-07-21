@@ -34,9 +34,6 @@ namespace Ink_Canvas
                 // 更新设置
                 MainWindow.Settings.RandSettings.SelectedBackgroundIndex = index;
 
-                // 更新UI
-                mainWindow.UpdatePickNameBackgroundDisplay();
-
                 // 保存设置
                 MainWindow.SaveSettingsToFile();
 
@@ -73,11 +70,7 @@ namespace Ink_Canvas
                         if (selectedIndex > 0 && selectedIndex - 1 >= MainWindow.Settings.RandSettings.CustomPickNameBackgrounds.Count)
                         {
                             MainWindow.Settings.RandSettings.SelectedBackgroundIndex = 0;
-                            mainWindow.UpdatePickNameBackgroundDisplay();
                         }
-
-                        // 更新ComboBox
-                        mainWindow.UpdatePickNameBackgroundsInComboBox();
 
                         // 保存设置
                         MainWindow.SaveSettingsToFile();
