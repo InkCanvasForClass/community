@@ -512,4 +512,16 @@
   <data name="Theme_Tips_Title" xml:space="preserve">
     <value>信仰の源</value>
   </data>
+  <data name="Theme_IdleMiniBar" xml:space="preserve">
+    <value>迷你批注栏</value>
+  </data>
+  <data name="Theme_IdleMiniBarHint" xml:space="preserve">
+    <value>不写字的时候把工具栏缩成一小条圆角，自动往边上贴，少挡点东西</value>
+  </data>
+  <data name="Theme_IdleMiniBarOpacity" xml:space="preserve">
+    <value>迷你栏透明度</value>
+  </data>
+  <data name="Theme_IdleMiniBarAutoRestore" xml:space="preserve">
+    <value>贴太深后过几秒自己弹回来（秒）</value>
+  </data>
 </root>

@@ -52,6 +52,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             FloatingBarMenuOpacitySlider.Value = settings.Appearance.FloatingBarMenuOpacity;
             FloatingBarMenuOpacityInPPTSlider.Value = settings.Appearance.FloatingBarMenuOpacityInPPT;
 
+            // 加载更小批注栏（Issue #285）设置
+            if (ToggleSwitchEnableIdleMiniBar != null)
+                ToggleSwitchEnableIdleMiniBar.IsOn = settings.Appearance.EnableIdleMiniBar;
+            if (IdleMiniBarOpacitySlider != null)
+                IdleMiniBarOpacitySlider.Value = settings.Appearance.IdleMiniBarOpacity;
+            if (IdleMiniBarAutoRestoreSlider != null)
+                IdleMiniBarAutoRestoreSlider.Value = settings.Appearance.IdleMiniBarAutoRestoreSeconds;
+
             // 加载工具栏位置
             string positionTag = settings.Appearance.ToolbarPosition.ToString();
             foreach (ComboBoxItem item in ToolbarPositionComboBox.Items)
@@ -117,6 +125,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdateSliderText(ViewboxFloatingBarOpacityInPPTValueSlider, ViewboxFloatingBarOpacityInPPTText, "{0:F2}");
             UpdateSliderText(FloatingBarMenuOpacitySlider, FloatingBarMenuOpacityText, "{0:F2}");
             UpdateSliderText(FloatingBarMenuOpacityInPPTSlider, FloatingBarMenuOpacityInPPTText, "{0:F2}");
+            UpdateSliderText(IdleMiniBarOpacitySlider, IdleMiniBarOpacityText, "{0:F2}");
+            UpdateSliderText(IdleMiniBarAutoRestoreSlider, IdleMiniBarAutoRestoreText, "{0:F0}s");
             UpdateFloatingBarActualScaleText();
         }
 
@@ -394,6 +404,48 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.Settings.Appearance.FloatingBarMenuOpacityInPPT = val;
             SettingsManager.SaveSettingsToFile();
             SettingsActionHub.OnFloatingBarMenuOpacityInPPTChanged(val);
+        }
+
+        // —— 更小批注栏（Issue #285）——
+
+        private void ToggleSwitchEnableIdleMiniBar_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            if (ToggleSwitchEnableIdleMiniBar == null) return;
+            SettingsManager.Settings.Appearance.EnableIdleMiniBar = ToggleSwitchEnableIdleMiniBar.IsOn;
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnEnableIdleMiniBarChanged(ToggleSwitchEnableIdleMiniBar.IsOn);
+        }
+
+        private void IdleMiniBarOpacitySlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            UpdateSliderText(IdleMiniBarOpacitySlider, IdleMiniBarOpacityText, "{0:F2}");
+            if (!_isLoaded) return;
+            var slider = IdleMiniBarOpacitySlider;
+            var val = Math.Round(slider.Value, 2);
+            if (slider.Value != val)
+            {
+                slider.Value = val;
+                return;
+            }
+            SettingsManager.Settings.Appearance.IdleMiniBarOpacity = val;
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnIdleMiniBarOpacityChanged(val);
+        }
+
+        private void IdleMiniBarAutoRestoreSlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            UpdateSliderText(IdleMiniBarAutoRestoreSlider, IdleMiniBarAutoRestoreText, "{0:F0}s");
+            if (!_isLoaded) return;
+            var slider = IdleMiniBarAutoRestoreSlider;
+            var val = Math.Round(slider.Value, 0);
+            if (slider.Value != val)
+            {
+                slider.Value = val;
+                return;
+            }
+            SettingsManager.Settings.Appearance.IdleMiniBarAutoRestoreSeconds = val;
+            SettingsManager.SaveSettingsToFile();
         }
 
         #region Floating Bar Icon

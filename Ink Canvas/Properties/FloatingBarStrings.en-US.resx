@@ -678,4 +678,22 @@
   <data name="Canvas_EdgeExpandHint_Settings_TranslateStep" xml:space="preserve">
     <value>Expand step (px)</value>
   </data>
+  <data name="IdleMiniBar_StartAnnotate" xml:space="preserve">
+    <value>Annotate</value>
+  </data>
+  <data name="IdleMiniBar_Annotate" xml:space="preserve">
+    <value>Annotate</value>
+  </data>
+  <data name="IdleMiniBar_ClearPage" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="IdleMiniBar_Whiteboard" xml:space="preserve">
+    <value>Whiteboard</value>
+  </data>
+  <data name="IdleMiniBar_More" xml:space="preserve">
+    <value>More</value>
+  </data>
+  <data name="IdleMiniBar_Expand" xml:space="preserve">
+    <value>Expand</value>
+  </data>
 </root>

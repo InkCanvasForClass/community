@@ -370,6 +370,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             if (mw != null) mw.ApplyFloatingBarBorderColor();
         }
 
+        public static void OnEnableIdleMiniBarChanged(bool isOn)
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.ApplyIdleMiniBarEnabled(isOn);
+        }
+
+        public static void OnIdleMiniBarOpacityChanged(double value)
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.ApplyIdleMiniBarOpacity(value);
+        }
+
         #endregion
 
         #region Advanced

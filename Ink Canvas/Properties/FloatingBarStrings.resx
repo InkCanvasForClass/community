@@ -678,4 +678,22 @@
   <data name="Canvas_EdgeExpandHint_Settings_TranslateStep" xml:space="preserve">
     <value>单次扩展像素</value>
   </data>
+  <data name="IdleMiniBar_StartAnnotate" xml:space="preserve">
+    <value>开始批注</value>
+  </data>
+  <data name="IdleMiniBar_Annotate" xml:space="preserve">
+    <value>批注</value>
+  </data>
+  <data name="IdleMiniBar_ClearPage" xml:space="preserve">
+    <value>清页</value>
+  </data>
+  <data name="IdleMiniBar_Whiteboard" xml:space="preserve">
+    <value>白板</value>
+  </data>
+  <data name="IdleMiniBar_More" xml:space="preserve">
+    <value>更多</value>
+  </data>
+  <data name="IdleMiniBar_Expand" xml:space="preserve">
+    <value>展开</value>
+  </data>
 </root>

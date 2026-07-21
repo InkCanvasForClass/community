@@ -925,6 +925,74 @@
                     </Canvas>
                 </Grid>
             </Viewbox>
+            <!-- Issue #285 更小批注栏：闲置状态下替代浮动栏的紧凑圆角批注栏，可自动吸边 -->
+            <Border Name="IdleMiniBar"
+                    Visibility="Collapsed" d:Visibility="Visible"
+                    HorizontalAlignment="Left" VerticalAlignment="Top"
+                    Margin="-500,0,0,0"
+                    Height="44" MinWidth="44"
+                    CornerRadius="22"
+                    Padding="6,0"
+                    Cursor="Arrow"
+                    Background="{DynamicResource FloatingBarBackgroundBrush}"
+                    BorderBrush="{DynamicResource FloatingBarBorderBrush}"
+                    BorderThickness="1"
+                    Opacity="0.5"
+                    MouseDown="IdleMiniBar_MouseDown"
+                    MouseMove="IdleMiniBar_MouseMove"
+                    MouseUp="IdleMiniBar_MouseUp"
+                    MouseEnter="IdleMiniBar_MouseEnter"
+                    MouseLeave="IdleMiniBar_MouseLeave">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- 深度贴边收起后仅显示的展开按钮 -->
+                    <Button Name="IdleMiniBarExpandButton"
+                            Visibility="Collapsed"
+                            Width="32" Height="32" Padding="0" Margin="0"
+                            Background="Transparent" BorderThickness="0"
+                            ToolTip="{x:Static props:FloatingBarStrings.IdleMiniBar_Expand}"
+                            Click="IdleMiniBarExpand_Click">
+                        <ui:FontIcon Name="IdleMiniBarExpandIcon" Icon="{x:Static ui:SegoeFluentIcons.ChevronRight}" FontSize="16" />
+                    </Button>
+                    <!-- 常规内容 -->
+                    <StackPanel Name="IdleMiniBarButtons" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Name="IdleMiniBarAnnotateButton"
+                                Height="34" Padding="10,0" Margin="0"
+                                Background="Transparent" BorderThickness="0"
+                                Click="IdleMiniBarAnnotate_Click">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" FontSize="15" />
+                                <TextBlock Name="IdleMiniBarAnnotateText" Margin="6,0,0,0"
+                                           VerticalAlignment="Center" FontSize="13"
+                                           Text="{x:Static props:FloatingBarStrings.IdleMiniBar_StartAnnotate}" />
+                            </StackPanel>
+                        </Button>
+                        <Button Name="IdleMiniBarClearButton"
+                                Visibility="Collapsed"
+                                Width="34" Height="34" Padding="0" Margin="2,0,0,0"
+                                Background="Transparent" BorderThickness="0"
+                                ToolTip="{x:Static props:FloatingBarStrings.IdleMiniBar_ClearPage}"
+                                Click="IdleMiniBarClear_Click">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" FontSize="15" />
+                        </Button>
+                        <Border Width="1" Height="20" Margin="4,0" VerticalAlignment="Center"
+                                Background="{DynamicResource FloatingBarBorderBrush}" Opacity="0.5" />
+                        <Button Name="IdleMiniBarWhiteboardButton"
+                                Width="34" Height="34" Padding="0" Margin="0"
+                                Background="Transparent" BorderThickness="0"
+                                ToolTip="{x:Static props:FloatingBarStrings.IdleMiniBar_Whiteboard}"
+                                Click="IdleMiniBarWhiteboard_Click">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Draw}" FontSize="15" />
+                        </Button>
+                        <Button Name="IdleMiniBarMoreButton"
+                                Width="34" Height="34" Padding="0" Margin="2,0,0,0"
+                                Background="Transparent" BorderThickness="0"
+                                ToolTip="{x:Static props:FloatingBarStrings.IdleMiniBar_More}"
+                                Click="IdleMiniBarMore_Click">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.More}" FontSize="15" />
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
         </Grid>
         <!--浮动工具栏菜单-->
         <Grid>
