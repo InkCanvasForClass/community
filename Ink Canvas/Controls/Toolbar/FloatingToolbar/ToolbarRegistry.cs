@@ -234,15 +234,52 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         public static void RegisterPluginItem(PluginToolbarItemInfo itemInfo)
         {
             if (itemInfo == null || string.IsNullOrEmpty(itemInfo.Id)) return;
+            if (_pluginItems.Any(item => string.Equals(item.Id, itemInfo.Id, StringComparison.OrdinalIgnoreCase))) return;
 
             _pluginItems.Add(itemInfo);
             LogHelper.WriteLogToFile($"ToolbarRegistry: 插件注册工具栏项 [{itemInfo.Id}]", LogHelper.LogType.Info);
 
-            // 如果 Discover 已经被调用过，需要重置缓存
+            EnsurePluginItemInActiveConfig(itemInfo.Id);
+
             if (_items != null)
             {
                 _items.Add(new PluginToolbarItemWrapper(itemInfo));
             }
+        }
+
+        private static void EnsurePluginItemInActiveConfig(string itemId)
+        {
+            EnsureDefaultConfigExists();
+
+            var configName = SettingsManager.Settings?.ToolbarConfigName;
+            if (string.IsNullOrWhiteSpace(configName))
+                configName = "default";
+
+            var layout = LoadActiveConfig() ?? CreateDefaultLayout();
+            layout.Components ??= new List<ToolbarComponentEntry>();
+            if (ContainsComponent(layout.Components, itemId)) return;
+
+            layout.Components.Add(new ToolbarComponentEntry
+            {
+                Id = itemId,
+                HidingRuleset = ToolbarRuleset.AlwaysShow().WithHideOnCollapsed()
+            });
+            SaveConfigFile(configName, layout);
+            LogHelper.WriteLogToFile(
+                $"ToolbarRegistry: 已将插件组件 [{itemId}] 加入当前配置 [{configName}]",
+                LogHelper.LogType.Info);
+        }
+
+        private static bool ContainsComponent(IEnumerable<ToolbarComponentEntry> entries, string itemId)
+        {
+            foreach (var entry in entries ?? Enumerable.Empty<ToolbarComponentEntry>())
+            {
+                if (string.Equals(entry.Id, itemId, StringComparison.OrdinalIgnoreCase))
+                    return true;
+                if (entry.Children != null && ContainsComponent(entry.Children, itemId))
+                    return true;
+            }
+            return false;
         }
 
         public static IReadOnlyList<PluginToolbarItemInfo> GetPluginItems() => _pluginItems.AsReadOnly();
@@ -1174,6 +1211,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     Name = "PluginPopup_" + _info.Id.Replace('.', '_'),
                     AllowsTransparency = true,
                     StaysOpen = true,
+                    Focusable = true,
                     IsOpen = false,
                     PlacementTarget = btn,
                     Placement = System.Windows.Controls.Primitives.PlacementMode.Custom
@@ -1218,6 +1256,15 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                             mw.CloseAllPopups();
                         }
                         AnimationsHelper.ShowPopupWithSlideAndFade(popup);
+                        popup.Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            if (popup.Child is UIElement child)
+                            {
+                                child.Focus();
+                                Keyboard.Focus(child);
+                                child.MoveFocus(new TraversalRequest(FocusNavigationDirection.First));
+                            }
+                        }), System.Windows.Threading.DispatcherPriority.Input);
                     }
                 };
 
