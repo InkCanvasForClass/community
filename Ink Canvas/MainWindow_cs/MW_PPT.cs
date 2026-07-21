@@ -2465,51 +2465,6 @@ namespace Ink_Canvas
         #endregion
 
         /// <summary>
-        /// 发起一次手动的 PowerPoint 连接检查并在短延迟后报告结果。
-        /// </summary>
-        /// <remarks>
-        /// 如果尚未初始化 PPT 管理器则先进行初始化，然后重载连接并启动监控；
-        /// 延迟约 800 毫秒后在 UI 线程上检查连接状态：若已连接仅记录事件日志，若未连接则弹出提示并记录警告；
-        /// 若过程中抛出异常则记录错误日志、将 UI 连接状态置为断开并提示用户未找到幻灯片。
-        /// </remarks>
-        private void BtnCheckPPT_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                // 使用新的PPT管理器进行连接检查
-                if (_pptManager == null)
-                {
-                    InitializePPTManagers();
-                }
-
-                _pptManager?.ReloadConnection();
-                _pptManager?.StartMonitoring();
-
-                Task.Delay(800).ContinueWith(_ =>
-                {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        if (_pptManager?.IsConnected == true)
-                        {
-                            LogHelper.WriteLogToFile("手动PPT连接检查成功", LogHelper.LogType.Event);
-                        }
-                        else
-                        {
-                            MessageBox.Show(Properties.PPTStrings.PPT_SlidesNotFound);
-                            LogHelper.WriteLogToFile("手动PPT连接检查失败", LogHelper.LogType.Warning);
-                        }
-                    });
-                });
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"手动检查PPT应用程序失败: {ex}", LogHelper.LogType.Error);
-                _pptUIManager?.UpdateConnectionStatus(false);
-                MessageBox.Show(Properties.PPTStrings.PPT_SlidesNotFound);
-            }
-        }
-
-        /// <summary>
         /// 处理PowerPoint增强功能开关的切换事件
         /// </summary>
         /// <param name="sender">事件的来源对象</param>

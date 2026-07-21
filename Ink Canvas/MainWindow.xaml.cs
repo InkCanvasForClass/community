@@ -2595,14 +2595,6 @@ namespace Ink_Canvas
             await ExitPPTPresentation();
         }
 
-        private void HistoryRollbackButton_Click(object sender, RoutedEventArgs e)
-        {
-            var settingsWindow = new Windows.SettingsViews.SettingsWindow();
-            settingsWindow.Owner = this;
-            settingsWindow.Show();
-            settingsWindow.NavigateToPage("UpdatePage");
-        }
-
         private DispatcherTimer autoSaveStrokesTimer;
 
         public void ApplyNoFocusMode()
