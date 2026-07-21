@@ -597,6 +597,55 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 按当前 VideoPresenterFrozenFrameRotation.Angle 重新计算冻结照片的 fit 缩放和居中偏移。
+        /// 旋转 90/270 时视觉宽高互换，fitRatio 必须按旋转后的视觉尺寸算，否则照片会超出容器被裁剪。
+        /// Image.Width/Height 是 LayoutTransform 旋转前的 layout 尺寸，
+        /// LayoutTransform 会自动把 (W,H) 旋转成 (H,W) 的视觉占用，无需手动交换 Width/Height。
+        /// </summary>
+        private void ReapplyBoothFrozenLayout()
+        {
+            if (VideoPresenterFrozenFrameImage == null) return;
+            if (VideoPresenterFrozenFrameImage.Visibility != Visibility.Visible) return;
+            if (!(VideoPresenterFrozenFrameImage.Source is BitmapSource bs)) return;
+
+            double angle = (VideoPresenterFrozenFrameRotation?.Angle ?? 0) % 360.0;
+            if (angle < 0) angle += 360.0;
+            double containerW = VideoPresenterSpecialModeContainer?.ActualWidth ?? 0;
+            double containerH = VideoPresenterSpecialModeContainer?.ActualHeight ?? 0;
+            double imgW = bs.PixelWidth;
+            double imgH = bs.PixelHeight;
+            if (containerW <= 0 || containerH <= 0 || imgW <= 0 || imgH <= 0) return;
+
+            // 旋转 90/270 时视觉宽高互换（参考 EasiCamera MakeSlideAdaptToBoard 第 83-87 行）
+            bool rotated = Math.Abs(angle % 180.0) > 0.01;
+            double visualW = rotated ? imgH : imgW;
+            double visualH = rotated ? imgW : imgH;
+
+            // fitRatio 按旋转后视觉尺寸算，确保旋转后照片完整显示不被裁剪
+            double fitRatio = Math.Min(containerW / visualW, containerH / visualH);
+
+            // Image.Width/Height 是 LayoutTransform 旋转前的 layout 尺寸
+            // LayoutTransform 旋转 90/270 后视觉占用 = (Height, Width)
+            // 所以 (imgW*fitRatio, imgH*fitRatio) 旋转后视觉 = (imgH*fitRatio, imgW*fitRatio) = (visualW*fitRatio, visualH*fitRatio)
+            VideoPresenterFrozenFrameImage.Width = imgW * fitRatio;
+            VideoPresenterFrozenFrameImage.Height = imgH * fitRatio;
+
+            // 旋转后实际视觉尺寸
+            double actualVisualW = visualW * fitRatio;
+            double actualVisualH = visualH * fitRatio;
+
+            // 居中偏移：Translate 作用在 RenderTransform，即旋转后的视觉边界
+            // RenderTransformOrigin="0,0" 让 Translate 直接对应视觉左上角的位移
+            VideoPresenterFrozenFrameImage.HorizontalAlignment = HorizontalAlignment.Left;
+            VideoPresenterFrozenFrameImage.VerticalAlignment = VerticalAlignment.Top;
+            _boothPreviewScale = 1.0;
+            _boothPreviewTranslateX = (containerW - actualVisualW) / 2.0;
+            _boothPreviewTranslateY = (containerH - actualVisualH) / 2.0;
+
+            ApplyBoothPreviewTransform();
+        }
+
+        /// <summary>
         /// 在视频展台预览层上短暂显示一条提示消息（2.5s 后自动隐藏）。
         /// 复用 VideoPresenterSearchingText 元素：临时改写 Text 并显示，计时后恢复"正在查找展台设备..."文本并隐藏。
         /// 用于拍照失败等场景给用户可见反馈。
@@ -2238,6 +2287,8 @@ namespace Ink_Canvas
                     VideoPresenterFrozenFrameRotation.Angle = newAngle;
                     // 同步旋转墨迹：以 inkCanvas 中心为旋转中心，让批注跟着照片一起转
                     RotateBoothStrokes(newAngle - oldAngle);
+                    // 旋转 90/270 后视觉宽高互换，必须重新算 fit 和居中，
+                    ReapplyBoothFrozenLayout();
                     return;
                 }
 
@@ -2248,7 +2299,11 @@ namespace Ink_Canvas
                 // （旋转 90/270 时 LayoutTransform 会让 WPF 自动交换宽高，避免画面被裁剪）
                 if (_isVideoPresenterSpecialMode && VideoPresenterFullCanvasRotation != null)
                 {
+                    double oldAngle = VideoPresenterFullCanvasRotation.Angle;
                     VideoPresenterFullCanvasRotation.Angle = _cameraService.RotationAngle * 90.0;
+                    double newAngle = VideoPresenterFullCanvasRotation.Angle;
+                    // 同步旋转墨迹：直播页旋转时墨迹也要跟着转（修复第0页旋转墨迹不跟随）
+                    RotateBoothStrokes(newAngle - oldAngle);
                     // 冻结画面 Image 的 LayoutTransform 始终保持 0（照片内容已正向），
                     // 不跟随实时画面旋转，避免双重旋转。
                     if (VideoPresenterFrozenFrameRotation != null)
