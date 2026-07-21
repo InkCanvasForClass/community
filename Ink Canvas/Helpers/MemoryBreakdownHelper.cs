@@ -191,7 +191,7 @@ namespace Ink_Canvas.Helpers
                 for (int gen = 0; gen <= GC.MaxGeneration; gen++)
                 {
                     GCGenerationInfo genInfo = default;
-                    if (info.GenerationInfo != null && gen < info.GenerationInfo.Length)
+                    if (gen < info.GenerationInfo.Length)
                     {
                         genInfo = info.GenerationInfo[gen];
                     }

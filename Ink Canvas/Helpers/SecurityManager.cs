@@ -625,10 +625,7 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         private static byte[] DeriveKey(string password, byte[] salt, int keyBytes)
         {
-            using (var kdf = new Rfc2898DeriveBytes(password, salt, Pbkdf2Iterations, HashAlgorithmName.SHA256))
-            {
-                return kdf.GetBytes(keyBytes);
-            }
+            return Rfc2898DeriveBytes.Pbkdf2(password, salt, Pbkdf2Iterations, HashAlgorithmName.SHA256, keyBytes);
         }
 
         /// <summary>
@@ -636,10 +633,7 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         private static byte[] DeriveKeyLegacy(string password, byte[] salt, int keyBytes)
         {
-            using (var kdf = new Rfc2898DeriveBytes(password, salt, Pbkdf2Iterations, HashAlgorithmName.SHA1))
-            {
-                return kdf.GetBytes(keyBytes);
-            }
+            return Rfc2898DeriveBytes.Pbkdf2(password, salt, Pbkdf2Iterations, HashAlgorithmName.SHA1, keyBytes);
         }
 
         /// <summary>

@@ -228,7 +228,8 @@ namespace Ink_Canvas
 
                 if (isWindows7)
                 {
-
+                    // Win7 专用旧式网络栈配置；net10 不再支持 Win7，此分支仅为历史遗留兼容而保留
+#pragma warning disable SYSLIB0014
                     // 启用所有TLS版本以支持Windows 7
                     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
@@ -236,7 +237,7 @@ namespace Ink_Canvas
                     ServicePointManager.DefaultConnectionLimit = 10;
                     ServicePointManager.Expect100Continue = false;
                     ServicePointManager.UseNagleAlgorithm = false;
-
+#pragma warning restore SYSLIB0014
                 }
                 else
                 {
