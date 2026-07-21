@@ -1631,7 +1631,7 @@ namespace Ink_Canvas
             try
             {
                 // 优先使用管理器持有的 COM 实例（ROT 模式下静态字段 pptApplication 为 null）。
-                object appObj = _pptManager?.PPTApplication ?? (object)pptApplication;
+                object appObj = _pptManager?.PPTApplication ?? pptApplication;
                 if (appObj == null)
                 {
                     LogHelper.WriteLogToFile("[SmartMode] COM 获取失败: 未找到 PowerPoint 应用程序实例", LogHelper.LogType.Warning);
@@ -1645,7 +1645,7 @@ namespace Ink_Canvas
                 if (pres == null) return null;
 
                 Microsoft.Office.Interop.PowerPoint.SlideShowWindow ssw = null;
-                try { ssw = pres.SlideShowWindow as Microsoft.Office.Interop.PowerPoint.SlideShowWindow; } catch { return null; }
+                try { ssw = pres.SlideShowWindow; } catch { return null; }
                 if (ssw == null) return null;
 
                 dynamic view = null;

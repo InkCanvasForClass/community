@@ -129,8 +129,8 @@ namespace Ink_Canvas
                     if (!ToolbarRegistry.GetUseRedStyle(Gesture_Icon))
                     {
                         Gesture_Icon.IconBrush = isDarkTheme
-                            ? (Brush)new SolidColorBrush(Color.FromRgb(244, 244, 245))
-                            : (Brush)new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                            ? new SolidColorBrush(Color.FromRgb(244, 244, 245))
+                            : new SolidColorBrush(Color.FromRgb(24, 24, 27));
                     }
                 }
             }

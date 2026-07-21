@@ -739,7 +739,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         {
             var mw = GetMainWindow();
             mw?.UpdatePPTUIManagerSettings();
-                        PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
+            PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
         }
 
         #endregion
