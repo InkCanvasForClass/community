@@ -716,32 +716,6 @@ namespace Ink_Canvas
         {
             if (isProgramChangeStrokeSelection) return;
 
-            // 优先级最高：如果当前已选中图片/PDF/媒体元素（包括视频展台上屏画面），
-            // 永远不显示墨迹选择框，避免点击 Image 时 InkCanvas 先触发空 SelectionChanged
-            // 导致出现"4角+4边"的墨迹选择框闪烁，要点第二次才显示绿色图片选择框。
-            if (currentSelectedElement != null && IsBitmapLikeCanvasElement(currentSelectedElement))
-            {
-                // 仅当本次 SelectionChanged 真的选中了墨迹时才让位给墨迹选择
-                if (inkCanvas.GetSelectedStrokes().Count == 0)
-                {
-                    GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-                    HideSelectionDisplay();
-
-                    // 如果 SelectionChanged 是由点击空白触发的（currentSelectedElement
-                    // 既不在 InkCanvas 的 SelectedElements 里也不在 SelectedStrokes 里），
-                    // 取消选中图片元素，否则点空白后图片选择框会一直挂着不消失。
-                    var currentSelectedElements = inkCanvas.GetSelectedElements();
-                    bool stillSelected = currentSelectedElements.Contains(currentSelectedElement);
-                    if (!stillSelected)
-                    {
-                        var prev = currentSelectedElement;
-                        currentSelectedElement = null;
-                        try { UnselectElement(prev); } catch { }
-                    }
-                    return;
-                }
-            }
-
             // 优先检查墨迹选择状态
             if (inkCanvas.GetSelectedStrokes().Count > 0)
             {
