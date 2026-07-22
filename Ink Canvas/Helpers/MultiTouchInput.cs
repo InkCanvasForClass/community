@@ -24,11 +24,13 @@ namespace Ink_Canvas.Helpers
 
         public VisualCanvas()
         {
-            CacheMode = new BitmapCache();
+            // Avoid parent BitmapCache while active drawing is mutated every frame.
+            // It can force expensive full-subtree recache during touch ink.
+            CacheMode = null;
 
-            RenderOptions.SetBitmapScalingMode(this, BitmapScalingMode.HighQuality);
+            RenderOptions.SetBitmapScalingMode(this, BitmapScalingMode.LowQuality);
             RenderOptions.SetEdgeMode(this, EdgeMode.Aliased);
-            RenderOptions.SetCachingHint(this, CachingHint.Cache);
+            RenderOptions.SetCachingHint(this, CachingHint.Unspecified);
         }
 
         public void AddVisual(DrawingVisual visual)
@@ -63,7 +65,7 @@ namespace Ink_Canvas.Helpers
     public class StrokeVisual
     {
         private int _lastCommittedPointCount = 0;
-        private const int COMMIT_POINT_THRESHOLD = 24;
+        private const int COMMIT_POINT_THRESHOLD = 48;
         private DrawingVisual _activeVisual;
         private VisualCanvas _visualCanvas;
         private readonly Dictionary<Color, SolidColorBrush> _brushCache =
@@ -203,9 +205,9 @@ namespace Ink_Canvas.Helpers
         private DrawingVisual CreateDrawingVisual()
         {
             var visual = new DrawingVisual();
-            RenderOptions.SetBitmapScalingMode(visual, BitmapScalingMode.HighQuality);
+            RenderOptions.SetBitmapScalingMode(visual, BitmapScalingMode.LowQuality);
             RenderOptions.SetEdgeMode(visual, EdgeMode.Aliased);
-            RenderOptions.SetCachingHint(visual, CachingHint.Cache);
+            RenderOptions.SetCachingHint(visual, CachingHint.Unspecified);
             return visual;
         }
 

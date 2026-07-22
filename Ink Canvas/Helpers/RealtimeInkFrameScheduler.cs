@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Windows.Media;
 
 namespace Ink_Canvas.Helpers
@@ -25,8 +24,30 @@ namespace Ink_Canvas.Helpers
 
         private static readonly Dictionary<StrokeVisual, PendingRedraw> PendingRedraws =
             new Dictionary<StrokeVisual, PendingRedraw>();
+        private static readonly List<KeyValuePair<StrokeVisual, PendingRedraw>> PendingSnapshot =
+            new List<KeyValuePair<StrokeVisual, PendingRedraw>>(8);
         private static bool IsRenderingSubscribed;
         private static long LastRenderingAt;
+        private static int ActiveStrokeSessions;
+        private static bool KeepRenderingSubscribed;
+
+        public static void BeginStrokeSession()
+        {
+            ActiveStrokeSessions++;
+            KeepRenderingSubscribed = true;
+            EnsureRenderingSubscribed();
+        }
+
+        public static void EndStrokeSession()
+        {
+            if (ActiveStrokeSessions > 0)
+                ActiveStrokeSessions--;
+            if (ActiveStrokeSessions == 0)
+            {
+                KeepRenderingSubscribed = false;
+                UnsubscribeIfIdle();
+            }
+        }
 
         public static void RequestRedraw(StrokeVisual strokeVisual)
         {
@@ -74,7 +95,10 @@ namespace Ink_Canvas.Helpers
         public static void Clear()
         {
             PendingRedraws.Clear();
+            PendingSnapshot.Clear();
             LastRenderingAt = 0L;
+            ActiveStrokeSessions = 0;
+            KeepRenderingSubscribed = false;
             if (!IsRenderingSubscribed)
                 return;
 
@@ -91,11 +115,12 @@ namespace Ink_Canvas.Helpers
             {
                 if (requestKind == RedrawRequestKind.Force)
                     pending.Kind = RedrawRequestKind.Force;
+                EnsureRenderingSubscribed();
                 return;
             }
 
             var isMonitoring = PerformanceMonitorHelper.IsMonitoring;
-            var request = new PendingRedraw
+            PendingRedraws[strokeVisual] = new PendingRedraw
             {
                 Kind = requestKind,
                 RequestedAt = isMonitoring ? Stopwatch.GetTimestamp() : 0L,
@@ -103,10 +128,8 @@ namespace Ink_Canvas.Helpers
                 Gen1CollectionCountStart = isMonitoring ? GC.CollectionCount(1) : -1,
                 Gen2CollectionCountStart = isMonitoring ? GC.CollectionCount(2) : -1
             };
-            PendingRedraws[strokeVisual] = request;
-            if (isMonitoring)
-                strokeVisual.BeginDispatcherProbe(request.RequestedAt);
-            strokeVisual.InvalidateVisual();
+            // Keep the rendering subscription sticky while strokes are active.
+            // Avoid per-request InvalidateVisual/BeginInvoke work that stalls the UI queue.
             EnsureRenderingSubscribed();
         }
 
@@ -121,7 +144,7 @@ namespace Ink_Canvas.Helpers
 
         private static void UnsubscribeIfIdle()
         {
-            if (PendingRedraws.Count != 0 || !IsRenderingSubscribed)
+            if (KeepRenderingSubscribed || PendingRedraws.Count != 0 || !IsRenderingSubscribed)
                 return;
 
             CompositionTarget.Rendering -= OnRendering;
@@ -130,10 +153,14 @@ namespace Ink_Canvas.Helpers
 
         private static void OnRendering(object sender, EventArgs e)
         {
-            if (IsRenderingSubscribed)
+            if (PendingRedraws.Count == 0)
             {
-                CompositionTarget.Rendering -= OnRendering;
-                IsRenderingSubscribed = false;
+                if (!KeepRenderingSubscribed)
+                {
+                    CompositionTarget.Rendering -= OnRendering;
+                    IsRenderingSubscribed = false;
+                }
+                return;
             }
 
             var renderedAt = Stopwatch.GetTimestamp();
@@ -143,10 +170,13 @@ namespace Ink_Canvas.Helpers
             if (renderingIntervalMs > 100)
                 renderingIntervalMs = 0;
             LastRenderingAt = renderedAt;
-            var pending = PendingRedraws.ToArray();
+
+            PendingSnapshot.Clear();
+            foreach (var pair in PendingRedraws)
+                PendingSnapshot.Add(pair);
             PendingRedraws.Clear();
 
-            foreach (var pair in pending)
+            foreach (var pair in PendingSnapshot)
             {
                 if (pair.Value.RequestedAt != 0L)
                     RealtimeInkPerformanceMonitor.RecordFrameWait(
@@ -155,13 +185,19 @@ namespace Ink_Canvas.Helpers
                         pair.Value.Gen0CollectionCountStart,
                         pair.Value.Gen1CollectionCountStart,
                         pair.Value.Gen2CollectionCountStart,
-                        pair.Key.DispatcherProbeDelayMs,
+                        0,
                         renderingIntervalMs);
                 ExecuteRedraw(pair.Key, pair.Value.Kind);
             }
 
-            if (PendingRedraws.Count > 0)
+            PendingSnapshot.Clear();
+            if (PendingRedraws.Count > 0 || KeepRenderingSubscribed)
                 EnsureRenderingSubscribed();
+            else if (IsRenderingSubscribed)
+            {
+                CompositionTarget.Rendering -= OnRendering;
+                IsRenderingSubscribed = false;
+            }
         }
 
         private static double ToMilliseconds(long elapsedTicks)

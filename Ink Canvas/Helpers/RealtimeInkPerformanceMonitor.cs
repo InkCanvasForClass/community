@@ -166,7 +166,12 @@ namespace Ink_Canvas.Helpers
 
         public static void BeginStroke(StrokeVisual strokeVisual, RealtimeInkInputKind inputKind)
         {
-            if (!PerformanceMonitorHelper.IsMonitoring || strokeVisual == null)
+            if (strokeVisual == null)
+                return;
+
+            RealtimeInkFrameScheduler.BeginStrokeSession();
+
+            if (!PerformanceMonitorHelper.IsMonitoring)
                 return;
 
             lock (SyncRoot)
@@ -292,7 +297,12 @@ namespace Ink_Canvas.Helpers
         public static void EndStroke(StrokeVisual strokeVisual)
         {
             if (strokeVisual == null)
+            {
+                RealtimeInkFrameScheduler.EndStrokeSession();
                 return;
+            }
+
+            RealtimeInkFrameScheduler.EndStrokeSession();
 
             StrokeStats stats;
             lock (SyncRoot)

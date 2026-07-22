@@ -341,10 +341,11 @@ namespace Ink_Canvas
                 yield return p;
         }
 
-        private static int GetTouchInterpolationStepCount(double distance, double spacing)
+        private static int GetTouchInterpolationStepCount(double distance, double spacing, int maxSteps = 24)
         {
             var safeSpacing = Math.Max(0.1, spacing);
-            return Math.Min(24, Math.Max(1, (int)Math.Ceiling(distance / safeSpacing)));
+            var cappedMaxSteps = Math.Max(1, maxSteps);
+            return Math.Min(cappedMaxSteps, Math.Max(1, (int)Math.Ceiling(distance / safeSpacing)));
         }
 
         private static Point GetTouchInterpolationPoint(
@@ -379,17 +380,24 @@ namespace Ink_Canvas
             return new Point(from.X + chord.X * t, from.Y + chord.Y * t);
         }
 
-        private static double GetTouchVelocityInterpolationSpacing(
+        // Target Added/Raw about 2x-4x for TouchVelocity: hard-cap steps and use larger spacing.
+        private static void GetTouchVelocityInterpolationParams(
             RealtimeBrushTipState state,
             Point to,
-            double speed)
+            double speed,
+            out double spacing,
+            out int maxSteps)
         {
             var chord = to - state.LastTouchPoint;
             var distance = chord.Length;
             if (distance < 0.1)
-                return 1.2;
+            {
+                spacing = 2.0;
+                maxSteps = 1;
+                return;
+            }
 
-            var turnAngle = 0.0;
+            var turnAngleDegrees = 0.0;
             if (state.HasTouchDirection && state.LastTouchDirection.LengthSquared > 0.0001)
             {
                 var previous = state.LastTouchDirection;
@@ -397,23 +405,34 @@ namespace Ink_Canvas
                 var current = chord;
                 current.Normalize();
                 var dot = Math.Max(-1, Math.Min(1, previous.X * current.X + previous.Y * current.Y));
-                turnAngle = Math.Acos(dot);
+                turnAngleDegrees = Math.Acos(dot) * 180.0 / Math.PI;
             }
 
-            var speedSpacing = speed < 400.0
-                ? 1.2
-                : speed < 1200.0
-                    ? 1.8
-                    : 2.8;
-
-            var turnAngleDegrees = turnAngle * 180.0 / Math.PI;
-            if (turnAngleDegrees <= 15.0)
-                return speedSpacing;
+            // Straight motion: sparse samples. Curves keep denser samples but still hard-capped.
             if (turnAngleDegrees >= 35.0)
-                return 1.2;
+            {
+                spacing = 1.6;
+                maxSteps = 5;
+                return;
+            }
 
-            var curvatureFactor = (turnAngleDegrees - 15.0) / 20.0;
-            return speedSpacing + (1.2 - speedSpacing) * curvatureFactor;
+            if (speed < 300.0)
+                spacing = 2.0;
+            else if (speed < 900.0)
+                spacing = 3.2;
+            else
+                spacing = 4.5;
+
+            if (turnAngleDegrees > 18.0)
+            {
+                var curvatureFactor = Math.Min(1.0, (turnAngleDegrees - 18.0) / 17.0);
+                spacing = spacing + (1.6 - spacing) * curvatureFactor;
+                maxSteps = 5;
+            }
+            else
+            {
+                maxSteps = 3;
+            }
         }
 
         private static void UpdateTouchInterpolationState(RealtimeBrushTipState state, Point point)
@@ -617,7 +636,8 @@ namespace Ink_Canvas
             float rawPressure = 0.5f,
             float? motionSpeed = null,
             float? motionDt = null,
-            bool updateSampleRate = true)
+            bool updateSampleRate = true,
+            bool useMidPointChain = true)
         {
             var allow = strokeId == MouseRealtimeStrokeId
                 ? ShouldUseRealtimeVelocityBrushTipForMouse()
@@ -684,12 +704,21 @@ namespace Ink_Canvas
                 state.LastSmoothPressure = pressure;
                 strokeVisual.Add(new StylusPoint(filteredX, filteredY, pressure));
             }
-            else
+            else if (useMidPointChain)
             {
+                // Stylus/mouse keep midpoint chain to reduce jaggedness.
                 var midX = (state.LastSmoothX + filteredX) * 0.5f;
                 var midY = (state.LastSmoothY + filteredY) * 0.5f;
                 var midPressure = (state.LastSmoothPressure + pressure) * 0.5f;
                 strokeVisual.Add(new StylusPoint(midX, midY, midPressure));
+                state.LastSmoothX = filteredX;
+                state.LastSmoothY = filteredY;
+                state.LastSmoothPressure = pressure;
+            }
+            else
+            {
+                // TouchVelocity already pre-interpolates geometrically; avoid another midpoint expansion.
+                strokeVisual.Add(new StylusPoint(filteredX, filteredY, pressure));
                 state.LastSmoothX = filteredX;
                 state.LastSmoothY = filteredY;
                 state.LastSmoothPressure = pressure;
@@ -738,8 +767,16 @@ namespace Ink_Canvas
                     }
 
                     var eventSpeed = (float)(eventChord.Length / eventDt);
-                    var interpolationSpacing = GetTouchVelocityInterpolationSpacing(state, point, eventSpeed);
-                    var stepCount = GetTouchInterpolationStepCount(eventChord.Length, interpolationSpacing);
+                    GetTouchVelocityInterpolationParams(
+                        state,
+                        point,
+                        eventSpeed,
+                        out var interpolationSpacing,
+                        out var maxSteps);
+                    var stepCount = GetTouchInterpolationStepCount(
+                        eventChord.Length,
+                        interpolationSpacing,
+                        maxSteps);
                     var pointDt = eventDt / stepCount;
                     var sampleRate = 1f / eventDt;
                     state.SmoothedSampleRateHz = state.SmoothedSampleRateHz * 0.85f + sampleRate * 0.15f;
@@ -757,6 +794,7 @@ namespace Ink_Canvas
                             rawPressure,
                             eventSpeed,
                             pointDt,
+                            false,
                             false);
                     }
                     UpdateTouchInterpolationState(state, point);
