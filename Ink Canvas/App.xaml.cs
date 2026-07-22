@@ -1899,6 +1899,16 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile($"保存性能监测数据失败: {perfEx.Message}", LogHelper.LogType.Warning);
                 }
 
+                // 实时笔迹详细调试日志独立写盘（仅 Debug 页开启过时才会落盘）
+                try
+                {
+                    RealtimeInkPerformanceMonitor.StopAndSave();
+                }
+                catch (Exception inkPerfEx)
+                {
+                    LogHelper.WriteLogToFile($"保存实时笔迹调试日志失败: {inkPerfEx.Message}", LogHelper.LogType.Warning);
+                }
+
                 // 记录应用退出（设备标识符）
                 try
                 {

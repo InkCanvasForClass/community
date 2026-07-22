@@ -108,7 +108,7 @@ namespace Ink_Canvas.Helpers
                     _cpuSamples.Clear();
                     _memorySamples.Clear();
                 }
-                RealtimeInkPerformanceMonitor.Reset();
+                // Realtime ink detailed debug log is independent; do not reset it here.
                 _cachedSmoothingStats = null;
                 var mainWindow = System.Windows.Application.Current?.MainWindow as MainWindow;
                 mainWindow?.InkSmoothingManagerInstance?.ResetPerformanceStats();
@@ -164,7 +164,8 @@ namespace Ink_Canvas.Helpers
                         SampleCount = SampleCount
                     };
 
-                    // 记录墨迹平滑统计
+                    // 仅写性能页历史需要的平滑摘要；不落盘逐条 stage sample / 中间阶段细节。
+                    // 实时笔迹超级详细日志由 Debug 页开关控制，RealtimeInkPerformanceMonitor 单独写盘。
                     if (_cachedSmoothingStats != null && _cachedSmoothingStats.SampleCount > 0)
                     {
                         record.SmoothingSampleCount = _cachedSmoothingStats.SampleCount;
@@ -172,57 +173,9 @@ namespace Ink_Canvas.Helpers
                         record.SmoothingMaxTotalMs = Math.Round(_cachedSmoothingStats.MaxTotalMs, 2);
                         record.SmoothingAvgBezierMs = Math.Round(_cachedSmoothingStats.AvgBezierMs, 2);
                         record.SmoothingAvgResampleMs = Math.Round(_cachedSmoothingStats.AvgResampleMs, 2);
-                        record.SmoothingAvgSemaphoreWaitMs = Math.Round(_cachedSmoothingStats.AvgSemaphoreWaitMs, 3);
-                        record.SmoothingMaxSemaphoreWaitMs = Math.Round(_cachedSmoothingStats.MaxSemaphoreWaitMs, 3);
-                        record.SmoothingAvgThreadPoolQueueMs = Math.Round(_cachedSmoothingStats.AvgThreadPoolQueueMs, 3);
-                        record.SmoothingMaxThreadPoolQueueMs = Math.Round(_cachedSmoothingStats.MaxThreadPoolQueueMs, 3);
-                        record.SmoothingAvgComputeMs = Math.Round(_cachedSmoothingStats.AvgComputeMs, 3);
-                        record.SmoothingMaxComputeMs = Math.Round(_cachedSmoothingStats.MaxComputeMs, 3);
-                        record.SmoothingAvgPointCopyMs = Math.Round(_cachedSmoothingStats.AvgPointCopyMs, 3);
-                        record.SmoothingMaxPointCopyMs = Math.Round(_cachedSmoothingStats.MaxPointCopyMs, 3);
-                        record.SmoothingAvgStrokeConstructionMs = Math.Round(_cachedSmoothingStats.AvgStrokeConstructionMs, 3);
-                        record.SmoothingMaxStrokeConstructionMs = Math.Round(_cachedSmoothingStats.MaxStrokeConstructionMs, 3);
-                        record.SmoothingAvgDispatcherWaitMs = Math.Round(_cachedSmoothingStats.AvgDispatcherWaitMs, 3);
-                        record.SmoothingMaxDispatcherWaitMs = Math.Round(_cachedSmoothingStats.MaxDispatcherWaitMs, 3);
-                        record.SmoothingAvgUiCallbackMs = Math.Round(_cachedSmoothingStats.AvgUiCallbackMs, 3);
-                        record.SmoothingMaxUiCallbackMs = Math.Round(_cachedSmoothingStats.MaxUiCallbackMs, 3);
-                        record.SmoothingStageSamples = _cachedSmoothingStats.Samples;
                         record.SmoothingAvgInputPoints = Math.Round(_cachedSmoothingStats.AvgInputPoints, 0);
                         record.SmoothingAvgOutputPoints = Math.Round(_cachedSmoothingStats.AvgOutputPoints, 0);
                     }
-
-                    // 记录墨迹实时输入和预览绘制统计
-                    var realtimeInkSnapshot = RealtimeInkPerformanceMonitor.GetSnapshot();
-                    record.RealtimeInkStrokeCount = realtimeInkSnapshot.StrokeCount;
-                    record.RealtimeInkInputEventCount = realtimeInkSnapshot.InputEventCount;
-                    record.RealtimeInkRawInputPointCount = realtimeInkSnapshot.RawInputPointCount;
-                    record.RealtimeInkAddedPointCount = realtimeInkSnapshot.AddedPointCount;
-                    record.RealtimeInkRedrawCount = realtimeInkSnapshot.RedrawCount;
-                    record.RealtimeInkCommitCount = realtimeInkSnapshot.CommitCount;
-                    record.RealtimeInkForceRedrawCount = realtimeInkSnapshot.ForceRedrawCount;
-                    record.RealtimeInkTotalInputProcessingMs = Math.Round(realtimeInkSnapshot.TotalInputProcessingMs, 3);
-                    record.RealtimeInkMaxInputProcessingMs = Math.Round(realtimeInkSnapshot.MaxInputProcessingMs, 3);
-                    record.RealtimeInkTotalRedrawMs = Math.Round(realtimeInkSnapshot.TotalRedrawMs, 3);
-                    record.RealtimeInkMaxRedrawMs = Math.Round(realtimeInkSnapshot.MaxRedrawMs, 3);
-                    record.RealtimeInkFrameWaitSampleCount = realtimeInkSnapshot.FrameWaitSampleCount;
-                    record.RealtimeInkTotalFrameWaitMs = Math.Round(realtimeInkSnapshot.TotalFrameWaitMs, 3);
-                    record.RealtimeInkMaxFrameWaitMs = Math.Round(realtimeInkSnapshot.MaxFrameWaitMs, 3);
-                    record.RealtimeInkSlowInputOver1MsCount = realtimeInkSnapshot.SlowInputOver1MsCount;
-                    record.RealtimeInkSlowRedrawOver1MsCount = realtimeInkSnapshot.SlowRedrawOver1MsCount;
-                    record.RealtimeInkSlowRedrawOver3MsCount = realtimeInkSnapshot.SlowRedrawOver3MsCount;
-                    record.RealtimeInkSlowRedrawOver5MsCount = realtimeInkSnapshot.SlowRedrawOver5MsCount;
-                    record.RealtimeInkNormalRedrawCount = realtimeInkSnapshot.NormalRedrawCount;
-                    record.RealtimeInkTotalNormalRedrawMs = Math.Round(realtimeInkSnapshot.TotalNormalRedrawMs, 3);
-                    record.RealtimeInkMaxNormalRedrawMs = Math.Round(realtimeInkSnapshot.MaxNormalRedrawMs, 3);
-                    record.RealtimeInkTotalForceRedrawMs = Math.Round(realtimeInkSnapshot.TotalForceRedrawMs, 3);
-                    record.RealtimeInkMaxForceRedrawMs = Math.Round(realtimeInkSnapshot.MaxForceRedrawMs, 3);
-                    record.RealtimeInkTotalCommitRedrawMs = Math.Round(realtimeInkSnapshot.TotalCommitRedrawMs, 3);
-                    record.RealtimeInkMaxCommitRedrawMs = Math.Round(realtimeInkSnapshot.MaxCommitRedrawMs, 3);
-                    record.RealtimeInkActiveRedrawCount = realtimeInkSnapshot.ActiveRedrawCount;
-                    record.RealtimeInkTotalActiveRedrawMs = Math.Round(realtimeInkSnapshot.TotalActiveRedrawMs, 3);
-                    record.RealtimeInkMaxActiveRedrawMs = Math.Round(realtimeInkSnapshot.MaxActiveRedrawMs, 3);
-                    record.RealtimeInkByInputKind = realtimeInkSnapshot.ByInputKind;
-                    record.RealtimeInkSlowEvents = realtimeInkSnapshot.SlowEvents;
 
                     AppendRecord(record);
                 }
@@ -393,7 +346,12 @@ namespace Ink_Canvas.Helpers
                 if (!Directory.Exists(dir))
                     Directory.CreateDirectory(dir);
 
-                var json = JsonConvert.SerializeObject(history, Formatting.Indented);
+                var json = JsonConvert.SerializeObject(history, Formatting.Indented,
+                    new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore,
+                        DefaultValueHandling = DefaultValueHandling.Ignore
+                    });
                 File.WriteAllText(path, json);
             }
             catch (Exception ex)

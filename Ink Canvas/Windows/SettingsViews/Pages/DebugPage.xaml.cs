@@ -19,6 +19,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ToggleSwitchDebugConsole.IsOn = SettingsManager.Settings.Advanced.IsDebugConsoleEnabled;
                 ToggleSwitchPPTComDebugProbe.IsOn = SettingsManager.Settings.Advanced.IsPPTComDebugProbeEnabled;
                 ToggleSwitchPPTPageFlipPreview.IsOn = SettingsManager.Settings.Advanced.IsPPTPageFlipPreviewVisible;
+                ToggleSwitchRealtimeInkDebugLog.IsOn = SettingsManager.Settings.Advanced.IsRealtimeInkDebugLogEnabled;
                 _isLoaded = true;
             };
             Unloaded += (s, e) => _isLoaded = false;
@@ -47,6 +48,23 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             SettingsManager.Settings.Advanced.IsPPTPageFlipPreviewVisible = ToggleSwitchPPTPageFlipPreview.IsOn;
             SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchRealtimeInkDebugLog_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            bool isOn = ToggleSwitchRealtimeInkDebugLog.IsOn;
+            SettingsManager.Settings.Advanced.IsRealtimeInkDebugLogEnabled = isOn;
+            if (MainWindow.Settings?.Advanced != null)
+                MainWindow.Settings.Advanced.IsRealtimeInkDebugLogEnabled = isOn;
+            SettingsManager.SaveSettingsToFile();
+            RealtimeInkPerformanceMonitor.SetDebugLoggingEnabled(isOn);
+
+            LogHelper.WriteLogToFile(
+                isOn
+                    ? "[Debug] 实时笔迹详细调试日志已开启（落笔后查看 Configs/RealtimeInkDebugLive.json / PerformanceHistory.json）"
+                    : "[Debug] 实时笔迹详细调试日志已关闭并尝试保存历史",
+                LogHelper.LogType.Info);
         }
 
         private void BtnTestCrash_Click(object sender, RoutedEventArgs e)

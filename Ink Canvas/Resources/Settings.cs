@@ -95,6 +95,11 @@ namespace Ink_Canvas
         public string LastTestTime { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// One session record in Configs/PerformanceHistory.json.
+    /// Default serialization omits zeros/nulls so normal CPU history stays compact.
+    /// Super-detailed realtime-ink fields are only populated when Debug 页开关开启.
+    /// </summary>
     public class PerformanceRunRecord
     {
         [JsonProperty("startTime")]
@@ -103,182 +108,136 @@ namespace Ink_Canvas
         [JsonProperty("endTime")]
         public string EndTime { get; set; } = string.Empty;
 
-        [JsonProperty("durationSeconds")]
+        [JsonProperty("durationSeconds", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double DurationSeconds { get; set; }
 
-        [JsonProperty("avgCpuPercent")]
+        [JsonProperty("avgCpuPercent", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double AvgCpuPercent { get; set; }
 
-        [JsonProperty("peakCpuPercent")]
+        [JsonProperty("peakCpuPercent", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double PeakCpuPercent { get; set; }
 
-        [JsonProperty("avgMemoryMb")]
+        [JsonProperty("avgMemoryMb", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double AvgMemoryMb { get; set; }
 
-        [JsonProperty("peakMemoryMb")]
+        [JsonProperty("peakMemoryMb", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double PeakMemoryMb { get; set; }
 
-        [JsonProperty("sampleCount")]
+        [JsonProperty("sampleCount", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int SampleCount { get; set; }
 
-        [JsonProperty("smoothingSampleCount")]
+        // —— 墨迹平滑摘要（性能页历史展示用；不含逐条 stage sample）——
+        [JsonProperty("smoothingSampleCount", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int SmoothingSampleCount { get; set; }
 
-        [JsonProperty("smoothingAvgTotalMs")]
+        [JsonProperty("smoothingAvgTotalMs", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double SmoothingAvgTotalMs { get; set; }
 
-        [JsonProperty("smoothingMaxTotalMs")]
+        [JsonProperty("smoothingMaxTotalMs", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double SmoothingMaxTotalMs { get; set; }
 
-        [JsonProperty("smoothingAvgBezierMs")]
+        [JsonProperty("smoothingAvgBezierMs", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double SmoothingAvgBezierMs { get; set; }
 
-        [JsonProperty("smoothingAvgResampleMs")]
+        [JsonProperty("smoothingAvgResampleMs", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double SmoothingAvgResampleMs { get; set; }
 
-        [JsonProperty("smoothingAvgSemaphoreWaitMs")]
-        public double SmoothingAvgSemaphoreWaitMs { get; set; }
-
-        [JsonProperty("smoothingMaxSemaphoreWaitMs")]
-        public double SmoothingMaxSemaphoreWaitMs { get; set; }
-
-        [JsonProperty("smoothingAvgThreadPoolQueueMs")]
-        public double SmoothingAvgThreadPoolQueueMs { get; set; }
-
-        [JsonProperty("smoothingMaxThreadPoolQueueMs")]
-        public double SmoothingMaxThreadPoolQueueMs { get; set; }
-
-        [JsonProperty("smoothingAvgComputeMs")]
-        public double SmoothingAvgComputeMs { get; set; }
-
-        [JsonProperty("smoothingMaxComputeMs")]
-        public double SmoothingMaxComputeMs { get; set; }
-
-        [JsonProperty("smoothingAvgPointCopyMs")]
-        public double SmoothingAvgPointCopyMs { get; set; }
-
-        [JsonProperty("smoothingMaxPointCopyMs")]
-        public double SmoothingMaxPointCopyMs { get; set; }
-
-        [JsonProperty("smoothingAvgStrokeConstructionMs")]
-        public double SmoothingAvgStrokeConstructionMs { get; set; }
-
-        [JsonProperty("smoothingMaxStrokeConstructionMs")]
-        public double SmoothingMaxStrokeConstructionMs { get; set; }
-
-        [JsonProperty("smoothingAvgDispatcherWaitMs")]
-        public double SmoothingAvgDispatcherWaitMs { get; set; }
-
-        [JsonProperty("smoothingMaxDispatcherWaitMs")]
-        public double SmoothingMaxDispatcherWaitMs { get; set; }
-
-        [JsonProperty("smoothingAvgUiCallbackMs")]
-        public double SmoothingAvgUiCallbackMs { get; set; }
-
-        [JsonProperty("smoothingMaxUiCallbackMs")]
-        public double SmoothingMaxUiCallbackMs { get; set; }
-
-        [JsonProperty("smoothingStageSamples")]
-        public List<InkSmoothingPipelineSample> SmoothingStageSamples { get; set; }
-            = new List<InkSmoothingPipelineSample>();
-
-        [JsonProperty("smoothingAvgInputPoints")]
+        [JsonProperty("smoothingAvgInputPoints", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double SmoothingAvgInputPoints { get; set; }
 
-        [JsonProperty("smoothingAvgOutputPoints")]
+        [JsonProperty("smoothingAvgOutputPoints", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double SmoothingAvgOutputPoints { get; set; }
 
-        [JsonProperty("realtimeInkStrokeCount")]
+        // —— 以下字段仅 Debug 页「实时笔迹详细调试日志」开启时写入 ——
+        [JsonProperty("realtimeInkStrokeCount", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long RealtimeInkStrokeCount { get; set; }
 
-        [JsonProperty("realtimeInkInputEventCount")]
+        [JsonProperty("realtimeInkInputEventCount", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long RealtimeInkInputEventCount { get; set; }
 
-        [JsonProperty("realtimeInkRawInputPointCount")]
+        [JsonProperty("realtimeInkRawInputPointCount", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long RealtimeInkRawInputPointCount { get; set; }
 
-        [JsonProperty("realtimeInkAddedPointCount")]
+        [JsonProperty("realtimeInkAddedPointCount", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long RealtimeInkAddedPointCount { get; set; }
 
-        [JsonProperty("realtimeInkRedrawCount")]
+        [JsonProperty("realtimeInkRedrawCount", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long RealtimeInkRedrawCount { get; set; }
 
-        [JsonProperty("realtimeInkCommitCount")]
+        [JsonProperty("realtimeInkCommitCount", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long RealtimeInkCommitCount { get; set; }
 
-        [JsonProperty("realtimeInkForceRedrawCount")]
+        [JsonProperty("realtimeInkForceRedrawCount", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long RealtimeInkForceRedrawCount { get; set; }
 
-        [JsonProperty("realtimeInkTotalInputProcessingMs")]
+        [JsonProperty("realtimeInkTotalInputProcessingMs", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double RealtimeInkTotalInputProcessingMs { get; set; }
 
-        [JsonProperty("realtimeInkMaxInputProcessingMs")]
+        [JsonProperty("realtimeInkMaxInputProcessingMs", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double RealtimeInkMaxInputProcessingMs { get; set; }
 
-        [JsonProperty("realtimeInkTotalRedrawMs")]
+        [JsonProperty("realtimeInkTotalRedrawMs", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double RealtimeInkTotalRedrawMs { get; set; }
 
-        [JsonProperty("realtimeInkMaxRedrawMs")]
+        [JsonProperty("realtimeInkMaxRedrawMs", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double RealtimeInkMaxRedrawMs { get; set; }
 
-        [JsonProperty("realtimeInkFrameWaitSampleCount")]
+        [JsonProperty("realtimeInkFrameWaitSampleCount", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long RealtimeInkFrameWaitSampleCount { get; set; }
 
-        [JsonProperty("realtimeInkTotalFrameWaitMs")]
+        [JsonProperty("realtimeInkTotalFrameWaitMs", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double RealtimeInkTotalFrameWaitMs { get; set; }
 
-        [JsonProperty("realtimeInkMaxFrameWaitMs")]
+        [JsonProperty("realtimeInkMaxFrameWaitMs", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double RealtimeInkMaxFrameWaitMs { get; set; }
 
-        [JsonProperty("realtimeInkSlowInputOver1MsCount")]
+        [JsonProperty("realtimeInkSlowInputOver1MsCount", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long RealtimeInkSlowInputOver1MsCount { get; set; }
 
-        [JsonProperty("realtimeInkSlowRedrawOver1MsCount")]
+        [JsonProperty("realtimeInkSlowRedrawOver1MsCount", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long RealtimeInkSlowRedrawOver1MsCount { get; set; }
 
-        [JsonProperty("realtimeInkSlowRedrawOver3MsCount")]
+        [JsonProperty("realtimeInkSlowRedrawOver3MsCount", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long RealtimeInkSlowRedrawOver3MsCount { get; set; }
 
-        [JsonProperty("realtimeInkSlowRedrawOver5MsCount")]
+        [JsonProperty("realtimeInkSlowRedrawOver5MsCount", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long RealtimeInkSlowRedrawOver5MsCount { get; set; }
 
-        [JsonProperty("realtimeInkNormalRedrawCount")]
+        [JsonProperty("realtimeInkNormalRedrawCount", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long RealtimeInkNormalRedrawCount { get; set; }
 
-        [JsonProperty("realtimeInkTotalNormalRedrawMs")]
+        [JsonProperty("realtimeInkTotalNormalRedrawMs", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double RealtimeInkTotalNormalRedrawMs { get; set; }
 
-        [JsonProperty("realtimeInkMaxNormalRedrawMs")]
+        [JsonProperty("realtimeInkMaxNormalRedrawMs", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double RealtimeInkMaxNormalRedrawMs { get; set; }
 
-        [JsonProperty("realtimeInkTotalForceRedrawMs")]
+        [JsonProperty("realtimeInkTotalForceRedrawMs", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double RealtimeInkTotalForceRedrawMs { get; set; }
 
-        [JsonProperty("realtimeInkMaxForceRedrawMs")]
+        [JsonProperty("realtimeInkMaxForceRedrawMs", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double RealtimeInkMaxForceRedrawMs { get; set; }
 
-        [JsonProperty("realtimeInkTotalCommitRedrawMs")]
+        [JsonProperty("realtimeInkTotalCommitRedrawMs", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double RealtimeInkTotalCommitRedrawMs { get; set; }
 
-        [JsonProperty("realtimeInkMaxCommitRedrawMs")]
+        [JsonProperty("realtimeInkMaxCommitRedrawMs", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double RealtimeInkMaxCommitRedrawMs { get; set; }
 
-        [JsonProperty("realtimeInkActiveRedrawCount")]
+        [JsonProperty("realtimeInkActiveRedrawCount", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long RealtimeInkActiveRedrawCount { get; set; }
 
-        [JsonProperty("realtimeInkTotalActiveRedrawMs")]
+        [JsonProperty("realtimeInkTotalActiveRedrawMs", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double RealtimeInkTotalActiveRedrawMs { get; set; }
 
-        [JsonProperty("realtimeInkMaxActiveRedrawMs")]
+        [JsonProperty("realtimeInkMaxActiveRedrawMs", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public double RealtimeInkMaxActiveRedrawMs { get; set; }
 
-        [JsonProperty("realtimeInkByInputKind")]
+        [JsonProperty("realtimeInkByInputKind", NullValueHandling = NullValueHandling.Ignore)]
         public Dictionary<string, RealtimeInkInputPerformanceSnapshot> RealtimeInkByInputKind { get; set; }
-            = new Dictionary<string, RealtimeInkInputPerformanceSnapshot>();
 
-        [JsonProperty("realtimeInkSlowEvents")]
+        [JsonProperty("realtimeInkSlowEvents", NullValueHandling = NullValueHandling.Ignore)]
         public List<RealtimeInkSlowEventSnapshot> RealtimeInkSlowEvents { get; set; }
-            = new List<RealtimeInkSlowEventSnapshot>();
     }
 
     public class NotificationSettings
@@ -1418,6 +1377,12 @@ namespace Ink_Canvas
 
         [JsonProperty("isPPTPageFlipPreviewVisible")]
         public bool IsPPTPageFlipPreviewVisible { get; set; } = false;
+
+        /// <summary>
+        /// 实时笔迹超级详细调试日志（FrameWait/Redraw/点数等），独立于性能监测开关，默认关闭。
+        /// </summary>
+        [JsonProperty("isRealtimeInkDebugLogEnabled")]
+        public bool IsRealtimeInkDebugLogEnabled { get; set; } = false;
 
         [JsonProperty("isEnableFullScreenHelper")]
         public bool IsEnableFullScreenHelper { get; set; }

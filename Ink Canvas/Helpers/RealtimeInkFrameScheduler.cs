@@ -145,7 +145,7 @@ namespace Ink_Canvas.Helpers
                 return;
 
             var now = Stopwatch.GetTimestamp();
-            var isMonitoring = PerformanceMonitorHelper.IsMonitoring;
+            var isMonitoring = RealtimeInkPerformanceMonitor.IsDebugLoggingEnabled;
 
             if (PendingRedraws.TryGetValue(strokeVisual, out var pending))
             {
@@ -208,7 +208,7 @@ namespace Ink_Canvas.Helpers
             IdleEmptyFrameCount = 0;
             LastKickAt = nowTicks;
             strokeVisual.InvalidateVisual();
-            if (PerformanceMonitorHelper.IsMonitoring)
+            if (RealtimeInkPerformanceMonitor.IsDebugLoggingEnabled)
                 BeginGlobalDispatcherProbe(strokeVisual.Dispatcher, nowTicks);
         }
 

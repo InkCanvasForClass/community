@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using Ink_Canvas.Windows.SettingsViews.Helpers;
+using Newtonsoft.Json;
 
 namespace Ink_Canvas.Helpers
 {
@@ -164,6 +167,306 @@ namespace Ink_Canvas.Helpers
         private const int MaxSlowEventCount = 64;
         private const double SlowEventThresholdMs = 5;
 
+        // Hot-path gate for the detailed realtime-ink debug log. Independent of CPU monitoring.
+        private static volatile bool _isDebugLoggingEnabled;
+        private static DateTime _sessionStart = DateTime.MinValue;
+        private static string _sessionStartKey = string.Empty;
+        private static int _endStrokeSinceLastFlush;
+        private const string HistoryFileName = "Configs/PerformanceHistory.json";
+        private const string LiveStatusFileName = "Configs/RealtimeInkDebugLive.json";
+        private const int MaxHistoryCount = 30;
+        // 每完成 N 笔抬笔刷新一次落盘，保证开关开启期间就能看到 realtimeInk* 字段。
+        private const int FlushEveryEndStrokeCount = 1;
+
+        private static readonly JsonSerializerSettings CompactJsonSettings = new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            DefaultValueHandling = DefaultValueHandling.Ignore,
+            Formatting = Formatting.Indented
+        };
+
+        /// <summary>
+        /// Whether super-detailed realtime ink debug logging is active.
+        /// Controlled by Advanced.IsRealtimeInkDebugLogEnabled (Debug page), default off.
+        /// </summary>
+        public static bool IsDebugLoggingEnabled => _isDebugLoggingEnabled;
+
+        /// <summary>
+        /// Enable or disable detailed realtime-ink debug logging at runtime.
+        /// Enabling resets the current session; disabling saves one history record then stops.
+        /// </summary>
+        public static void SetDebugLoggingEnabled(bool enabled)
+        {
+            if (enabled)
+            {
+                if (_isDebugLoggingEnabled)
+                    return;
+                Reset();
+                _sessionStart = DateTime.Now;
+                _sessionStartKey = _sessionStart.ToString("yyyy-MM-dd HH:mm:ss");
+                _endStrokeSinceLastFlush = 0;
+                _isDebugLoggingEnabled = true;
+                try
+                {
+                    WriteLiveStatus(GetSnapshot(), isActive: true);
+                    LogHelper.WriteLogToFile(
+                        $"[RealtimeInkDebug] 已启用详细日志。实时状态: {GetLiveStatusPath()} ；关闭/退出时写入 {GetHistoryPath()}",
+                        LogHelper.LogType.Info);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[RealtimeInkDebug] 启用时写状态失败: {ex.Message}", LogHelper.LogType.Warning);
+                }
+                return;
+            }
+
+            if (!_isDebugLoggingEnabled)
+                return;
+
+            try
+            {
+                StopAndSave();
+            }
+            finally
+            {
+                _isDebugLoggingEnabled = false;
+                Reset();
+                _sessionStart = DateTime.MinValue;
+                _sessionStartKey = string.Empty;
+                _endStrokeSinceLastFlush = 0;
+                try
+                {
+                    WriteLiveStatus(new RealtimeInkPerformanceSnapshot(), isActive: false);
+                }
+                catch
+                {
+                    // ignore
+                }
+            }
+        }
+
+        /// <summary>
+        /// Call once at app startup after settings are loaded.
+        /// </summary>
+        public static void StartIfEnabled()
+        {
+            try
+            {
+                var enabled = MainWindow.Settings?.Advanced?.IsRealtimeInkDebugLogEnabled == true
+                    || SettingsManager.Settings?.Advanced?.IsRealtimeInkDebugLogEnabled == true;
+                if (enabled)
+                    SetDebugLoggingEnabled(true);
+                else
+                {
+                    _isDebugLoggingEnabled = false;
+                    WriteLiveStatus(new RealtimeInkPerformanceSnapshot(), isActive: false);
+                }
+            }
+            catch (Exception ex)
+            {
+                _isDebugLoggingEnabled = false;
+                LogHelper.WriteLogToFile($"[RealtimeInkDebug] StartIfEnabled 失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        /// <summary>
+        /// Stop detailed logging and append/update one PerformanceHistory record (ink fields only).
+        /// No-op when the debug log was never enabled and has no session.
+        /// </summary>
+        public static void StopAndSave()
+        {
+            if (!_isDebugLoggingEnabled && _sessionStart == DateTime.MinValue)
+                return;
+
+            try
+            {
+                var snapshot = GetSnapshot();
+                if (snapshot.InputEventCount <= 0 && snapshot.StrokeCount <= 0 && snapshot.SlowEvents.Count <= 0)
+                {
+                    LogHelper.WriteLogToFile(
+                        "[RealtimeInkDebug] 会话结束但无笔迹采样（可能未走实时笔迹路径或未落笔）",
+                        LogHelper.LogType.Warning);
+                    return;
+                }
+
+                UpsertSessionHistoryRecord(snapshot, finalize: true);
+                LogHelper.WriteLogToFile(
+                    $"[RealtimeInkDebug] 已保存: strokes={snapshot.StrokeCount}, events={snapshot.InputEventCount}, " +
+                    $"raw={snapshot.RawInputPointCount}, added={snapshot.AddedPointCount}, redraws={snapshot.RedrawCount} -> {GetHistoryPath()}",
+                    LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[RealtimeInkDebug] StopAndSave 失败: {ex.Message}", LogHelper.LogType.Error);
+                Debug.WriteLine($"RealtimeInkPerformanceMonitor.StopAndSave: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 抬笔后增量刷新：更新 Live 状态文件，并 upsert 到 PerformanceHistory。
+        /// </summary>
+        private static void FlushAfterEndStroke()
+        {
+            if (!_isDebugLoggingEnabled)
+                return;
+
+            _endStrokeSinceLastFlush++;
+            if (_endStrokeSinceLastFlush < FlushEveryEndStrokeCount)
+                return;
+            _endStrokeSinceLastFlush = 0;
+
+            try
+            {
+                var snapshot = GetSnapshot();
+                WriteLiveStatus(snapshot, isActive: true);
+                if (snapshot.StrokeCount > 0 || snapshot.InputEventCount > 0)
+                    UpsertSessionHistoryRecord(snapshot, finalize: false);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"RealtimeInkPerformanceMonitor.FlushAfterEndStroke: {ex.Message}");
+            }
+        }
+
+        private static PerformanceRunRecord BuildRecord(RealtimeInkPerformanceSnapshot snapshot, bool finalize)
+        {
+            var started = _sessionStart == DateTime.MinValue ? DateTime.Now : _sessionStart;
+            var startKey = string.IsNullOrEmpty(_sessionStartKey)
+                ? started.ToString("yyyy-MM-dd HH:mm:ss")
+                : _sessionStartKey;
+
+            return new PerformanceRunRecord
+            {
+                StartTime = startKey,
+                EndTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                DurationSeconds = Math.Max(0, (DateTime.Now - started).TotalSeconds),
+                RealtimeInkStrokeCount = snapshot.StrokeCount,
+                RealtimeInkInputEventCount = snapshot.InputEventCount,
+                RealtimeInkRawInputPointCount = snapshot.RawInputPointCount,
+                RealtimeInkAddedPointCount = snapshot.AddedPointCount,
+                RealtimeInkRedrawCount = snapshot.RedrawCount,
+                RealtimeInkCommitCount = snapshot.CommitCount,
+                RealtimeInkForceRedrawCount = snapshot.ForceRedrawCount,
+                RealtimeInkTotalInputProcessingMs = Math.Round(snapshot.TotalInputProcessingMs, 3),
+                RealtimeInkMaxInputProcessingMs = Math.Round(snapshot.MaxInputProcessingMs, 3),
+                RealtimeInkTotalRedrawMs = Math.Round(snapshot.TotalRedrawMs, 3),
+                RealtimeInkMaxRedrawMs = Math.Round(snapshot.MaxRedrawMs, 3),
+                RealtimeInkFrameWaitSampleCount = snapshot.FrameWaitSampleCount,
+                RealtimeInkTotalFrameWaitMs = Math.Round(snapshot.TotalFrameWaitMs, 3),
+                RealtimeInkMaxFrameWaitMs = Math.Round(snapshot.MaxFrameWaitMs, 3),
+                RealtimeInkSlowInputOver1MsCount = snapshot.SlowInputOver1MsCount,
+                RealtimeInkSlowRedrawOver1MsCount = snapshot.SlowRedrawOver1MsCount,
+                RealtimeInkSlowRedrawOver3MsCount = snapshot.SlowRedrawOver3MsCount,
+                RealtimeInkSlowRedrawOver5MsCount = snapshot.SlowRedrawOver5MsCount,
+                RealtimeInkNormalRedrawCount = snapshot.NormalRedrawCount,
+                RealtimeInkTotalNormalRedrawMs = Math.Round(snapshot.TotalNormalRedrawMs, 3),
+                RealtimeInkMaxNormalRedrawMs = Math.Round(snapshot.MaxNormalRedrawMs, 3),
+                RealtimeInkTotalForceRedrawMs = Math.Round(snapshot.TotalForceRedrawMs, 3),
+                RealtimeInkMaxForceRedrawMs = Math.Round(snapshot.MaxForceRedrawMs, 3),
+                RealtimeInkTotalCommitRedrawMs = Math.Round(snapshot.TotalCommitRedrawMs, 3),
+                RealtimeInkMaxCommitRedrawMs = Math.Round(snapshot.MaxCommitRedrawMs, 3),
+                RealtimeInkActiveRedrawCount = snapshot.ActiveRedrawCount,
+                RealtimeInkTotalActiveRedrawMs = Math.Round(snapshot.TotalActiveRedrawMs, 3),
+                RealtimeInkMaxActiveRedrawMs = Math.Round(snapshot.MaxActiveRedrawMs, 3),
+                RealtimeInkByInputKind = snapshot.ByInputKind != null && snapshot.ByInputKind.Count > 0
+                    ? snapshot.ByInputKind
+                    : null,
+                // 仅会话结束时落盘慢事件列表，避免抬笔时频繁写大数组
+                RealtimeInkSlowEvents = finalize && snapshot.SlowEvents != null && snapshot.SlowEvents.Count > 0
+                    ? snapshot.SlowEvents
+                    : null
+            };
+        }
+
+        private static void UpsertSessionHistoryRecord(RealtimeInkPerformanceSnapshot snapshot, bool finalize)
+        {
+            var record = BuildRecord(snapshot, finalize);
+            var path = GetHistoryPath();
+            EnsureParentDirectory(path);
+
+            var history = LoadHistoryList(path);
+            var startKey = record.StartTime;
+            var existingIndex = history.FindIndex(r =>
+                r != null
+                && r.StartTime == startKey
+                && r.SampleCount == 0
+                && r.AvgCpuPercent == 0
+                && r.RealtimeInkStrokeCount >= 0);
+
+            // 优先匹配本会话（无 CPU 采样、同 StartTime）的 ink-only 记录
+            if (existingIndex < 0)
+            {
+                existingIndex = history.FindLastIndex(r =>
+                    r != null
+                    && r.StartTime == startKey
+                    && r.SampleCount == 0
+                    && Math.Abs(r.AvgCpuPercent) < 0.0001
+                    && Math.Abs(r.AvgMemoryMb) < 0.0001);
+            }
+
+            if (existingIndex >= 0)
+                history[existingIndex] = record;
+            else
+                history.Add(record);
+
+            while (history.Count > MaxHistoryCount)
+                history.RemoveAt(0);
+
+            File.WriteAllText(path, JsonConvert.SerializeObject(history, CompactJsonSettings));
+        }
+
+        private static List<PerformanceRunRecord> LoadHistoryList(string path)
+        {
+            if (!File.Exists(path))
+                return new List<PerformanceRunRecord>();
+            try
+            {
+                var existing = JsonConvert.DeserializeObject<List<PerformanceRunRecord>>(File.ReadAllText(path));
+                return existing ?? new List<PerformanceRunRecord>();
+            }
+            catch
+            {
+                return new List<PerformanceRunRecord>();
+            }
+        }
+
+        private static void WriteLiveStatus(RealtimeInkPerformanceSnapshot snapshot, bool isActive)
+        {
+            var path = GetLiveStatusPath();
+            EnsureParentDirectory(path);
+            var payload = new
+            {
+                active = isActive,
+                sessionStart = string.IsNullOrEmpty(_sessionStartKey) ? null : _sessionStartKey,
+                updatedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                strokeCount = snapshot?.StrokeCount ?? 0,
+                inputEventCount = snapshot?.InputEventCount ?? 0,
+                rawInputPointCount = snapshot?.RawInputPointCount ?? 0,
+                addedPointCount = snapshot?.AddedPointCount ?? 0,
+                redrawCount = snapshot?.RedrawCount ?? 0,
+                commitCount = snapshot?.CommitCount ?? 0,
+                forceRedrawCount = snapshot?.ForceRedrawCount ?? 0,
+                maxInputProcessingMs = Math.Round(snapshot?.MaxInputProcessingMs ?? 0, 3),
+                maxRedrawMs = Math.Round(snapshot?.MaxRedrawMs ?? 0, 3),
+                maxFrameWaitMs = Math.Round(snapshot?.MaxFrameWaitMs ?? 0, 3),
+                frameWaitSampleCount = snapshot?.FrameWaitSampleCount ?? 0,
+                slowRedrawOver5MsCount = snapshot?.SlowRedrawOver5MsCount ?? 0,
+                byInputKind = snapshot?.ByInputKind,
+                historyPath = GetHistoryPath()
+            };
+            File.WriteAllText(path, JsonConvert.SerializeObject(payload, CompactJsonSettings));
+        }
+
+        private static string GetHistoryPath() => Path.Combine(App.RootPath ?? string.Empty, HistoryFileName);
+        private static string GetLiveStatusPath() => Path.Combine(App.RootPath ?? string.Empty, LiveStatusFileName);
+
+        private static void EnsureParentDirectory(string path)
+        {
+            var dir = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+        }
+
         public static void BeginStroke(StrokeVisual strokeVisual, RealtimeInkInputKind inputKind)
         {
             if (strokeVisual == null)
@@ -171,7 +474,7 @@ namespace Ink_Canvas.Helpers
 
             RealtimeInkFrameScheduler.BeginStrokeSession();
 
-            if (!PerformanceMonitorHelper.IsMonitoring)
+            if (!_isDebugLoggingEnabled)
                 return;
 
             lock (SyncRoot)
@@ -190,7 +493,7 @@ namespace Ink_Canvas.Helpers
             long addedPointCount,
             long elapsedTicks)
         {
-            if (!PerformanceMonitorHelper.IsMonitoring || strokeVisual == null)
+            if (!RealtimeInkPerformanceMonitor.IsDebugLoggingEnabled || strokeVisual == null)
                 return;
 
             var safeRawPointCount = Math.Max(0, rawInputPointCount);
@@ -216,7 +519,7 @@ namespace Ink_Canvas.Helpers
             int gen1CollectionCountStart = -1,
             int gen2CollectionCountStart = -1)
         {
-            if (!PerformanceMonitorHelper.IsMonitoring || strokeVisual == null)
+            if (!RealtimeInkPerformanceMonitor.IsDebugLoggingEnabled || strokeVisual == null)
                 return;
 
             var elapsedMs = ToMilliseconds(elapsedTicks);
@@ -244,7 +547,7 @@ namespace Ink_Canvas.Helpers
 
         public static void RecordForceRedraw(StrokeVisual strokeVisual)
         {
-            if (!PerformanceMonitorHelper.IsMonitoring || strokeVisual == null)
+            if (!RealtimeInkPerformanceMonitor.IsDebugLoggingEnabled || strokeVisual == null)
                 return;
 
             lock (SyncRoot)
@@ -267,7 +570,7 @@ namespace Ink_Canvas.Helpers
             double dispatcherProbeDelayMs = 0,
             double renderingIntervalMs = 0)
         {
-            if (!PerformanceMonitorHelper.IsMonitoring || strokeVisual == null)
+            if (!RealtimeInkPerformanceMonitor.IsDebugLoggingEnabled || strokeVisual == null)
                 return;
 
             var elapsedMs = ToMilliseconds(elapsedTicks);
@@ -315,7 +618,7 @@ namespace Ink_Canvas.Helpers
                 GetInputAggregate(stats.InputKind).StrokeCount++;
             }
 
-            if (PerformanceMonitorHelper.IsMonitoring)
+            if (RealtimeInkPerformanceMonitor.IsDebugLoggingEnabled)
             {
                 Debug.WriteLine(
                     $"RealtimeInkPerf [{stats.InputKind}] "
@@ -324,6 +627,7 @@ namespace Ink_Canvas.Helpers
                     + $"commits={stats.CommitCount}, forceRedraws={stats.ForceRedrawCount}, "
                     + $"processMs={stats.TotalInputProcessingMs:F3}/max:{stats.MaxInputProcessingMs:F3}, "
                     + $"redrawMs={stats.TotalRedrawMs:F3}/max:{stats.MaxRedrawMs:F3}");
+                FlushAfterEndStroke();
             }
         }
 

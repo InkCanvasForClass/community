@@ -1444,9 +1444,11 @@ namespace Ink_Canvas
             // 加载设置
             LoadSettings(true);
             // 启动性能监测（如果已启用）。快速启动模式下延迟到首帧之后。
+            // 实时笔迹详细调试日志独立于性能监测，由 Debug 页开关控制，默认关闭。
             if (!App.IsFastStartupEnabled)
             {
                 PerformanceMonitorHelper.StartIfEnabled();
+                RealtimeInkPerformanceMonitor.StartIfEnabled();
             }
             // 根据ToolbarPosition设置更新工具栏结构和位置
             UpdateToolbarPosition();
@@ -2542,6 +2544,7 @@ namespace Ink_Canvas
                 {
                     InitializePopupManager();
                     PerformanceMonitorHelper.StartIfEnabled();
+                    RealtimeInkPerformanceMonitor.StartIfEnabled();
                 }
                 catch (Exception ex)
                 {

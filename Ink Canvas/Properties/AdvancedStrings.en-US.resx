@@ -144,6 +144,12 @@
   <data name="Debug_PPTPreviewVisible_Header" xml:space="preserve">
     <value>Show PPT page-flip button preview</value>
   </data>
+  <data name="Debug_RealtimeInkLog_Header" xml:space="preserve">
+    <value>Enable detailed realtime ink debug log</value>
+  </data>
+  <data name="Debug_RealtimeInkLog_Desc" xml:space="preserve">
+    <value>When enabled, records realtime-ink input/redraw/FrameWait/slow events. Updates Configs/RealtimeInkDebugLive.json after each stroke and writes realtimeInk* fields into Configs/PerformanceHistory.json; finalizes on toggle-off or exit. Off by default; enable only while diagnosing realtime ink (TouchVelocity / realtime brush tip). Independent of the Performance page toggle. Built-in InkCanvas ink is not counted.</value>
+  </data>
   <data name="Debug_IconSettings" xml:space="preserve">
     <value>Icon Settings</value>
   </data>

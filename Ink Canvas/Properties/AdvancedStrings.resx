@@ -145,6 +145,12 @@
   <data name="Debug_PPTPreviewVisible_Header" xml:space="preserve">
     <value>显示PPT翻页按钮预览</value>
   </data>
+  <data name="Debug_RealtimeInkLog_Header" xml:space="preserve">
+    <value>启用实时笔迹详细调试日志</value>
+  </data>
+  <data name="Debug_RealtimeInkLog_Desc" xml:space="preserve">
+    <value>开启后采集实时笔迹输入/重绘/FrameWait/慢事件。落笔后立刻更新 Configs/RealtimeInkDebugLive.json，并写入 Configs/PerformanceHistory.json 的 realtimeInk* 字段；关闭开关或退出时收尾。默认关闭；仅排查实时笔迹（TouchVelocity/实时笔锋）性能时临时开启。不依赖「性能」页监测开关。普通 InkCanvas 自带笔迹不会计入。</value>
+  </data>
   <data name="Debug_IconSettings" xml:space="preserve">
     <value>图标设置</value>
   </data>

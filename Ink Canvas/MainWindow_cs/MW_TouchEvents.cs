@@ -450,7 +450,7 @@ namespace Ink_Canvas
         private void AppendInterpolatedTouchPoints(StrokeVisual strokeVisual, int strokeId, Point point)
         {
             if (strokeVisual == null) return;
-            var startedAt = PerformanceMonitorHelper.IsMonitoring ? Stopwatch.GetTimestamp() : 0L;
+            var startedAt = RealtimeInkPerformanceMonitor.IsDebugLoggingEnabled ? Stopwatch.GetTimestamp() : 0L;
             var initialPointCount = strokeVisual.Stroke?.StylusPoints.Count ?? 0;
             try
             {
@@ -501,7 +501,7 @@ namespace Ink_Canvas
             if (stylusPointCollection == null || stylusPointCollection.Count == 0)
                 return true;
 
-            var startedAt = PerformanceMonitorHelper.IsMonitoring ? Stopwatch.GetTimestamp() : 0L;
+            var startedAt = RealtimeInkPerformanceMonitor.IsDebugLoggingEnabled ? Stopwatch.GetTimestamp() : 0L;
             var addedPointCount = 0L;
             try
             {
@@ -609,7 +609,7 @@ namespace Ink_Canvas
 
         private bool TryAppendRealtimeVelocityBrushTipPoint(StrokeVisual strokeVisual, int strokeId, Point point, float rawPressure = 0.5f)
         {
-            var startedAt = PerformanceMonitorHelper.IsMonitoring ? Stopwatch.GetTimestamp() : 0L;
+            var startedAt = RealtimeInkPerformanceMonitor.IsDebugLoggingEnabled ? Stopwatch.GetTimestamp() : 0L;
             var initialPointCount = strokeVisual?.Stroke?.StylusPoints.Count ?? 0;
             try
             {
@@ -735,7 +735,7 @@ namespace Ink_Canvas
             if (!_realtimeBrushTipStates.TryGetValue(strokeId, out var state))
                 return TryAppendRealtimeVelocityBrushTipPoint(strokeVisual, strokeId, point, rawPressure);
 
-            var startedAt = PerformanceMonitorHelper.IsMonitoring ? Stopwatch.GetTimestamp() : 0L;
+            var startedAt = RealtimeInkPerformanceMonitor.IsDebugLoggingEnabled ? Stopwatch.GetTimestamp() : 0L;
             var initialPointCount = strokeVisual?.Stroke?.StylusPoints.Count ?? 0;
             try
             {

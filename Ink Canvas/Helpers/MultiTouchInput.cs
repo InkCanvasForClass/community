@@ -264,7 +264,7 @@ namespace Ink_Canvas.Helpers
             var currentPointCount = Stroke.StylusPoints.Count;
             if (currentPointCount == 0) return;
 
-            var startedAt = PerformanceMonitorHelper.IsMonitoring ? Stopwatch.GetTimestamp() : 0L;
+            var startedAt = RealtimeInkPerformanceMonitor.IsDebugLoggingEnabled ? Stopwatch.GetTimestamp() : 0L;
             var gen0CollectionCountStart = startedAt != 0L ? GC.CollectionCount(0) : -1;
             var gen1CollectionCountStart = startedAt != 0L ? GC.CollectionCount(1) : -1;
             var gen2CollectionCountStart = startedAt != 0L ? GC.CollectionCount(2) : -1;
