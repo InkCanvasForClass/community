@@ -1,6 +1,7 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -17,7 +18,6 @@ namespace Ink_Canvas.Controls
         private const string PlayIconGeometry = "M16.7501 8.41185L41.1672 21.1167C42.7595 21.9452 43.3786 23.9076 42.5501 25.4999C42.2421 26.0919 41.7592 26.5747 41.1672 26.8828L16.7501 39.5876C15.1579 40.4161 13.1954 39.797 12.3669 38.2047C12.1259 37.7414 12 37.2268 12 36.7045V11.2949C12 9.5 13.4551 8.04492 15.25 8.04492C15.6977 8.04492 16.1397 8.13739 16.5486 8.31562L16.7501 8.41185ZM15.5962 10.6296L15.4857 10.5829C15.4099 10.5578 15.3303 10.5449 15.25 10.5449C14.8358 10.5449 14.5 10.8807 14.5 11.2949V36.7045C14.5 36.8251 14.529 36.9438 14.5847 37.0507C14.7759 37.4182 15.2287 37.5611 15.5962 37.3699L40.0132 24.6651C40.1499 24.594 40.2613 24.4825 40.3324 24.3459C40.5236 23.9785 40.3807 23.5256 40.0132 23.3344L15.5962 10.6296Z";
         private const string PauseIconGeometry = "M11.75 6C9.67893 6 8 7.67893 8 9.75V38.25C8 40.3211 9.67893 42 11.75 42H18.25C20.3211 42 22 40.3211 22 38.25V9.75C22 7.67893 20.3211 6 18.25 6H11.75ZM10.5 9.75C10.5 9.05964 11.0596 8.5 11.75 8.5H18.25C18.9404 8.5 19.5 9.05964 19.5 9.75V38.25C19.5 38.9404 18.9404 39.5 18.25 39.5H11.75C11.0596 39.5 10.5 38.9404 10.5 38.25V9.75ZM29.75 6C27.6789 6 26 7.67893 26 9.75V38.25C26 40.3211 27.6789 42 29.75 42H36.25C38.3211 42 40 40.3211 40 38.25V9.75C40 7.67893 38.3211 6 36.25 6H29.75ZM28.5 9.75C28.5 9.05964 29.0596 8.5 29.75 8.5H36.25C36.9404 8.5 37.5 9.05964 37.5 9.75V38.25C37.5 38.9404 36.9404 39.5 36.25 39.5H29.75C29.0596 39.5 28.5 38.9404 28.5 38.25V9.75Z";
 
-        private readonly DispatcherTimer _positionTimer;
         private bool _isDraggingProgress;
         private bool _isMediaOpened;
         private bool _isPlaying;
@@ -27,18 +27,36 @@ namespace Ink_Canvas.Controls
         private double _pendingSpeedRatio = 1.0;
         private bool _suppressNestedSelection;
 
+        // Render-loop hook for lyric/progress updates. We piggy-back on CompositionTarget.Rendering
+        // (vsync-aligned) instead of a DispatcherTimer so the per-character karaoke highlight is
+        // as smooth as the WPF render pipeline can deliver.
+        private bool _renderingHooked;
+
         // LRC lyrics state
         private LrcData _lrcData;
         private int _currentLrcIndex = -1;
 
+        // Per-line highlight animation state
+        // _sungColor:    color of glyphs that have already been sung (full white)
+        // _pendingColor: color of glyphs still ahead (dimmer white)
+        // _charFadeDuration: how long the active glyph's in-word sweep takes.
+        // The active glyph uses a 4-stop LinearGradientBrush in RelativeToBoundingBox mode so
+        // the highlight walks from the left edge of the *glyph* to the right edge — that's the
+        // "each part of the character lit up in sequence" karaoke feel.
+        private static readonly Color _sungColor = Color.FromRgb(0xFF, 0xFF, 0xFF);
+        private static readonly Color _pendingColor = Color.FromArgb(0x66, 0xFF, 0xFF, 0xFF);
+        private static readonly TimeSpan _charFadeDuration = TimeSpan.FromMilliseconds(220);
+
+        // Width of the soft transition band inside the active glyph, expressed as a fraction of
+        // its bounding-box width (0..1). Larger = softer sweep glow; smaller = crisper lit edge.
+        private const double ActiveGlyphSoftBand = 0.25;
+
         public CanvasMediaControl()
         {
             InitializeComponent();
-            _positionTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(250)
-            };
-            _positionTimer.Tick += PositionTimer_Tick;
+            // Drive progress + per-char sweep from CompositionTarget.Rendering so updates land
+            // on each vsync instead of an arbitrary DispatcherTimer cadence — that's what gives
+            // the lyric highlight its smooth karaoke feel under real WPF rendering pressure.
             Loaded += CanvasMediaControl_Loaded;
             Unloaded += CanvasMediaControl_Unloaded;
             AudioPlaceholder.Visibility = Visibility.Collapsed;
@@ -152,7 +170,7 @@ namespace Ink_Canvas.Controls
         {
             try
             {
-                _positionTimer.Stop();
+                StopRenderHook();
                 Player.Stop();
                 _isPlaying = false;
                 UpdatePlayPauseGlyph();
@@ -170,7 +188,7 @@ namespace Ink_Canvas.Controls
         {
             try
             {
-                _positionTimer.Stop();
+                StopRenderHook();
                 Player.Stop();
                 Player.Source = null;
             }
@@ -229,14 +247,32 @@ namespace Ink_Canvas.Controls
 
         private void CanvasMediaControl_Unloaded(object sender, RoutedEventArgs e)
         {
-            _positionTimer.Stop();
+            StopRenderHook();
         }
 
-        private void PositionTimer_Tick(object sender, EventArgs e)
+        private void OnRendering(object sender, EventArgs e)
         {
             if (!_isMediaOpened || _isDraggingProgress) return;
             UpdateProgressFromPlayer();
             UpdateLyricsHighlight();
+        }
+
+        private void StartRenderHook()
+        {
+            if (_renderingHooked) return;
+            // System.Windows.Media.CompositionTarget.Rendering fires once per vsync (typically
+            // ~60 fps on a modern display, capped by monitor refresh). That makes the karaoke
+            // sweep render in lockstep with the display instead of the DispatcherTimer cadence
+            // which can drift and look choppy under heavy UI work.
+            System.Windows.Media.CompositionTarget.Rendering += OnRendering;
+            _renderingHooked = true;
+        }
+
+        private void StopRenderHook()
+        {
+            if (!_renderingHooked) return;
+            System.Windows.Media.CompositionTarget.Rendering -= OnRendering;
+            _renderingHooked = false;
         }
 
         private void Player_MediaOpened(object sender, RoutedEventArgs e)
@@ -256,7 +292,7 @@ namespace Ink_Canvas.Controls
         private void Player_MediaEnded(object sender, RoutedEventArgs e)
         {
             _isPlaying = false;
-            _positionTimer.Stop();
+            StopRenderHook();
             try
             {
                 Player.Stop();
@@ -281,13 +317,13 @@ namespace Ink_Canvas.Controls
                 {
                     Player.Pause();
                     _isPlaying = false;
-                    _positionTimer.Stop();
+                    StopRenderHook();
                 }
                 else
                 {
                     Player.Play();
                     _isPlaying = true;
-                    _positionTimer.Start();
+                    StartRenderHook();
                 }
                 UpdatePlayPauseGlyph();
             }
@@ -347,7 +383,7 @@ namespace Ink_Canvas.Controls
             SeekTo(target);
             if (_isPlaying)
             {
-                _positionTimer.Start();
+                StartRenderHook();
             }
         }
 
@@ -492,6 +528,10 @@ namespace Ink_Canvas.Controls
             _currentLrcIndex = -1;
             if (LyricsPanel != null) LyricsPanel.Visibility = Visibility.Collapsed;
             if (LyricTextBlock != null) LyricTextBlock.Text = string.Empty;
+            if (LyricPerCharHost != null) LyricPerCharHost.Visibility = Visibility.Collapsed;
+            if (LyricSungPrefix != null) LyricSungPrefix.Text = string.Empty;
+            if (LyricActiveChar != null) LyricActiveChar.Text = string.Empty;
+            if (LyricPendingSuffix != null) LyricPendingSuffix.Text = string.Empty;
             if (LyricTranslationBlock != null)
             {
                 LyricTranslationBlock.Text = string.Empty;
@@ -504,6 +544,10 @@ namespace Ink_Canvas.Controls
             if (data == null || data.Lines.Count == 0)
                 return;
 
+            // Build per-character timings: prefer inline <mm:ss.xx> tags; for any line missing them,
+            // distribute evenly between the previous and next line time (or a 4s default).
+            FillCharTimings(data.Lines);
+
             _lrcData = data;
             if (LyricsPanel != null) LyricsPanel.Visibility = Visibility.Visible;
             // Adjust height for bilingual lyrics
@@ -513,32 +557,238 @@ namespace Ink_Canvas.Controls
             }
         }
 
+        /// <summary>
+        /// For each line, ensure the Chars list is populated. Lines without inline timestamps
+        /// get an even slice of (nextLineStart - lineStart).
+        /// </summary>
+        private static void FillCharTimings(List<LrcLine> lines)
+        {
+            if (lines == null) return;
+            var defaultDuration = TimeSpan.FromSeconds(4);
+            for (int i = 0; i < lines.Count; i++)
+            {
+                var line = lines[i];
+                if (string.IsNullOrEmpty(line.Text)) continue;
+                var nextStart = i + 1 < lines.Count ? (TimeSpan?)lines[i + 1].Time : null;
+                LrcParser.EnsureCharTimings(line, nextStart, defaultDuration);
+            }
+        }
+
         private void UpdateLyricsHighlight()
         {
             if (_lrcData == null || _lrcData.Lines.Count == 0) return;
 
             var position = Player.Position;
             var newIndex = LrcParser.GetCurrentLineIndex(_lrcData.Lines, position);
-            if (newIndex == _currentLrcIndex) return;
 
-            _currentLrcIndex = newIndex;
-
-            if (newIndex >= 0 && newIndex < _lrcData.Lines.Count)
+            if (newIndex != _currentLrcIndex)
             {
-                var line = _lrcData.Lines[newIndex];
-                LyricTextBlock.Text = line.Text;
+                _currentLrcIndex = newIndex;
+                if (newIndex < 0 || newIndex >= _lrcData.Lines.Count)
+                {
+                    ClearLyricsDisplay();
+                    return;
+                }
 
-                if (!string.IsNullOrEmpty(line.Translation))
-                {
-                    LyricTranslationBlock.Text = line.Translation;
-                    LyricTranslationBlock.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    LyricTranslationBlock.Text = string.Empty;
-                    LyricTranslationBlock.Visibility = Visibility.Collapsed;
-                }
+                var line = _lrcData.Lines[newIndex];
+                RebuildLyricTriplets(line);
+                UpdateTranslation(line);
+                return;
             }
+
+            // Same line still active: refresh the active glyph's blend.
+            if (_currentLrcIndex >= 0 && _currentLrcIndex < _lrcData.Lines.Count)
+            {
+                UpdateActiveGlyph(_lrcData.Lines[_currentLrcIndex], position);
+            }
+        }
+
+        private void ClearLyricsDisplay()
+        {
+            if (LyricTextBlock != null) LyricTextBlock.Text = string.Empty;
+            if (LyricSungPrefix != null) LyricSungPrefix.Text = string.Empty;
+            if (LyricActiveChar != null) LyricActiveChar.Text = string.Empty;
+            if (LyricPendingSuffix != null) LyricPendingSuffix.Text = string.Empty;
+            if (LyricPerCharHost != null) LyricPerCharHost.Visibility = Visibility.Collapsed;
+        }
+
+        private void UpdateTranslation(LrcLine line)
+        {
+            if (LyricTranslationBlock == null) return;
+            if (string.IsNullOrEmpty(line.Translation))
+            {
+                LyricTranslationBlock.Text = string.Empty;
+                LyricTranslationBlock.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                LyricTranslationBlock.Text = line.Translation;
+                LyricTranslationBlock.Visibility = Visibility.Visible;
+            }
+        }
+
+        // Cached brush reused while the active glyph's progress animates. We rebuild it only when
+        // the playhead advances to a different glyph (idx changes) — intra-glyph progress just
+        // shifts the two middle GradientStops in place, so we keep the same brush instance.
+        private LinearGradientBrush _activeGlyphBrush;
+        private System.Windows.Documents.Run _activeGlyphRun;
+
+        /// <summary>
+        /// Rehydrates the sung/active/pending triplet for the new lyric line. Each TextBlock's
+        /// Text is set once; subsequent frames only adjust the active glyph's gradient stops.
+        /// </summary>
+        private void RebuildLyricTriplets(LrcLine line)
+        {
+            if (LyricSungPrefix == null || LyricActiveChar == null || LyricPendingSuffix == null
+                || LyricPerCharHost == null) return;
+
+            var chars = line.Chars;
+            if (chars == null || chars.Count == 0)
+            {
+                LyricPerCharHost.Visibility = Visibility.Collapsed;
+                if (LyricTextBlock != null) LyricTextBlock.Text = line.Text;
+                return;
+            }
+
+            if (LyricTextBlock != null) LyricTextBlock.Text = string.Empty;
+            LyricPerCharHost.Visibility = Visibility.Visible;
+
+            // Active TextBlock always hosts exactly one Run with the gradient brush; the Run is
+            // rebuilt on every glyph change so it owns a fresh unsubscribed brush reference.
+            LyricSungPrefix.Text = string.Empty;
+            LyricPendingSuffix.Text = ConcatText(chars, 1);
+            _activeGlyphRun = new System.Windows.Documents.Run(chars[0].Text);
+            _activeGlyphBrush = BuildActiveGlyphBrush(0);
+            _activeGlyphRun.Foreground = _activeGlyphBrush;
+            LyricActiveChar.Inlines.Clear();
+            LyricActiveChar.Inlines.Add(_activeGlyphRun);
+
+            UpdateActiveGlyph(line, Player.Position);
+        }
+
+        /// <summary>
+        /// Recomputes the sung prefix boundary and slides the in-word sweep across the active
+        /// glyph for the current playhead position.
+        /// </summary>
+        private void UpdateActiveGlyph(LrcLine line, TimeSpan position)
+        {
+            if (LyricSungPrefix == null || LyricActiveChar == null || LyricPendingSuffix == null) return;
+
+            var chars = line.Chars;
+            if (chars == null || chars.Count == 0) return;
+
+            var relative = position - line.Time;
+            int activeIdx = -1;
+            for (int i = 0; i < chars.Count; i++)
+            {
+                if (chars[i].StartOffset <= relative) activeIdx = i;
+                else break;
+            }
+
+            // Build prefix / active / suffix text for the current index.
+            string prefix = activeIdx >= 0 ? ConcatText(chars, 0, activeIdx) : string.Empty;
+            string suffix = ConcatText(chars, activeIdx + 1);
+
+            if (!string.Equals(LyricSungPrefix.Text, prefix, StringComparison.Ordinal))
+            {
+                LyricSungPrefix.Text = prefix;
+            }
+            if (!string.Equals(LyricPendingSuffix.Text, suffix, StringComparison.Ordinal))
+            {
+                LyricPendingSuffix.Text = suffix;
+            }
+
+            // When the active glyph changes, rebuild its Run + brush so a new bounding-box brush
+            // is in effect. Otherwise just shift the existing brush's stops.
+            if (activeIdx < 0)
+            {
+                // No active glyph yet — show nothing in the active slot.
+                if (!string.IsNullOrEmpty(LyricActiveChar.Text))
+                {
+                    LyricActiveChar.Inlines.Clear();
+                    _activeGlyphRun = null;
+                    _activeGlyphBrush = null;
+                }
+                return;
+            }
+
+            var newRunText = chars[activeIdx].Text;
+            var progress = ComputeActiveProgress(chars[activeIdx], relative);
+
+            if (_activeGlyphRun == null || !string.Equals(_activeGlyphRun.Text, newRunText, StringComparison.Ordinal))
+            {
+                _activeGlyphBrush = BuildActiveGlyphBrush(progress);
+                _activeGlyphRun = new System.Windows.Documents.Run(newRunText) { Foreground = _activeGlyphBrush };
+                LyricActiveChar.Inlines.Clear();
+                LyricActiveChar.Inlines.Add(_activeGlyphRun);
+            }
+            else if (_activeGlyphBrush != null)
+            {
+                SetActiveGlyphProgress(_activeGlyphBrush, progress);
+            }
+        }
+
+        private double ComputeActiveProgress(LrcChar ch, TimeSpan relative)
+        {
+            var intoChar = relative - ch.StartOffset;
+            var charDur = ch.Duration ?? _charFadeDuration;
+            if (charDur <= TimeSpan.Zero) return 1;
+            var progress = intoChar.TotalMilliseconds / charDur.TotalMilliseconds;
+            if (progress < 0) progress = 0;
+            else if (progress > 1) progress = 1;
+            return progress;
+        }
+
+        /// <summary>
+        /// Builds a 4-stop horizontal LinearGradientBrush in the glyph's own bounding box, with
+        /// stops 1/2 acting as the sung/pending boundary swept by the playhead.
+        /// </summary>
+        private static LinearGradientBrush BuildActiveGlyphBrush(double progress)
+        {
+            // The painted glyph is structured so that 0..left is fully sung, right..1 is fully
+            // pending, and only the band around progress softens the transition. The left/right
+            // symmetric soft band collapses to a single point when progress==0 or progress==1,
+            // so the brush never leaks pending color into the lit half of the glyph.
+            var softBand = Math.Min(ActiveGlyphSoftBand, progress);
+            softBand = Math.Min(softBand, 1 - progress);
+            var left = progress - softBand;
+            var right = progress + softBand;
+
+            var brush = new LinearGradientBrush
+            {
+                StartPoint = new System.Windows.Point(0, 0.5),
+                EndPoint = new System.Windows.Point(1, 0.5),
+                MappingMode = BrushMappingMode.RelativeToBoundingBox,
+                SpreadMethod = GradientSpreadMethod.Pad
+            };
+            brush.GradientStops.Add(new GradientStop(_sungColor, 0.0));
+            brush.GradientStops.Add(new GradientStop(_sungColor, left));
+            brush.GradientStops.Add(new GradientStop(_pendingColor, right));
+            brush.GradientStops.Add(new GradientStop(_pendingColor, 1.0));
+            return brush;
+        }
+
+        /// <summary>
+        /// Updates the middle GradientStop offsets on an existing active-glyph brush without
+        /// rebuilding the brush itself — cheapest possible way to slide the lit edge.
+        /// </summary>
+        private static void SetActiveGlyphProgress(LinearGradientBrush brush, double progress)
+        {
+            if (brush == null || brush.GradientStops.Count < 4) return;
+            var softBand = Math.Min(ActiveGlyphSoftBand, progress);
+            softBand = Math.Min(softBand, 1 - progress);
+            brush.GradientStops[1].Offset = progress - softBand;
+            brush.GradientStops[2].Offset = progress + softBand;
+        }
+
+        private static string ConcatText(List<LrcChar> chars, int from, int to = int.MaxValue)
+        {
+            if (chars == null || from >= chars.Count) return string.Empty;
+            if (to > chars.Count) to = chars.Count;
+            if (to <= from) return string.Empty;
+            var sb = new System.Text.StringBuilder(to - from);
+            for (int i = from; i < to; i++) sb.Append(chars[i].Text);
+            return sb.ToString();
         }
 
         private static T FindAncestor<T>(DependencyObject current) where T : DependencyObject
