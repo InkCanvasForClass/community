@@ -3479,10 +3479,13 @@ namespace Ink_Canvas
             inkCanvas.Select(new StrokeCollection());
             GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
 
-            if (currentMode != 0)
+            // 视频展台特殊模式下不执行 SaveStrokes/RestoreStrokes，
+            // 否则会清空 timeMachine 历史并 Children.Clear() 移除直播帧，
+            // 导致撤销变灰色且视频预览消失
+            if (currentMode != 0 && !_isVideoPresenterSpecialMode)
             {
                 SaveStrokes();
-                RestoreStrokes(true);
+                RestoreStrokes();
             }
 
             if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
@@ -3745,7 +3748,8 @@ namespace Ink_Canvas
                 else
                 {
                     // 切换到批注模式时，确保保存当前图片信息
-                    if (currentMode != 0)
+                    // 视频展台特殊模式下不执行 SaveStrokes，否则会清空 timeMachine 历史
+                    if (currentMode != 0 && !_isVideoPresenterSpecialMode)
                     {
                         SaveStrokes();
                     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Input;
+using System.Windows.Media;
 
 // Added for UIElement
 
@@ -164,6 +165,37 @@ namespace Ink_Canvas.Helpers
 
         /// <summary>当前历史是否允许重做。</summary>
         public bool CanRedo => _currentStrokeHistory.Count > 0 && _currentStrokeHistory.Count - _currentIndex - 1 > 0;
+
+        /// <summary>
+        /// 对当前页历史中所有不在画布上的 Stroke 应用变换矩阵。
+        /// 用于视频展台模式：旋转/移动/缩放摄像头预览时，画布上的笔画已被
+        /// inkCanvas.Strokes.Transform 变换，但历史中已移出画布的 Stroke
+        /// （如形状识别的 ReplacedStroke、已撤销的 CurrentStroke）不会被变换。
+        /// 撤销/重做时这些 Stroke 加回画布会出现在旧位置，因此需要同步变换。
+        /// 注意：同一个 Stroke 可能出现在多个历史条目中（如条目1的 CurrentStroke
+        /// 和条目2的 ReplacedStroke 是同一引用），用 HashSet 去重避免双重变换。
+        /// </summary>
+        public void TransformStrokesInHistory(Matrix matrix, StrokeCollection canvasStrokes)
+        {
+            var transformed = new HashSet<Stroke>();
+            foreach (var item in _currentStrokeHistory)
+            {
+                TransformStrokeCollectionIfNotOnCanvas(item.ReplacedStroke, matrix, canvasStrokes, transformed);
+                TransformStrokeCollectionIfNotOnCanvas(item.CurrentStroke, matrix, canvasStrokes, transformed);
+            }
+        }
+
+        private static void TransformStrokeCollectionIfNotOnCanvas(StrokeCollection strokes, Matrix matrix, StrokeCollection canvasStrokes, HashSet<Stroke> transformed)
+        {
+            if (strokes == null) return;
+            foreach (Stroke stroke in strokes)
+            {
+                if (!canvasStrokes.Contains(stroke) && transformed.Add(stroke))
+                {
+                    stroke.Transform(matrix, false);
+                }
+            }
+        }
     }
 
     public class TimeMachineHistory

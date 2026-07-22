@@ -290,21 +290,13 @@ namespace Ink_Canvas
                             if (smoothedStroke != e.Stroke)
                             {
                                 SetNewBackupOfStroke();
-                                if (Settings.Canvas.MergeInkSmoothingWithUndo)
-                                {
-                                    _currentCommitType = CommitReason.CodeInput;
-                                    inkCanvas.Strokes.Remove(e.Stroke);
-                                    inkCanvas.Strokes.Add(smoothedStroke);
-                                    timeMachine.TryReplaceLastUserInputHistory(new StrokeCollection { smoothedStroke });
-                                    _currentCommitType = CommitReason.UserInput;
-                                }
-                                else
-                                {
-                                    _currentCommitType = CommitReason.ShapeRecognition;
-                                    inkCanvas.Strokes.Remove(e.Stroke);
-                                    inkCanvas.Strokes.Add(smoothedStroke);
-                                    _currentCommitType = CommitReason.UserInput;
-                                }
+                                // 平滑始终走 TryReplaceLastUserInputHistory（1步撤销），
+                                // 替换原笔画为平滑后笔画，撤销时直接撤销整笔（不区分平滑前/后）。
+                                _currentCommitType = CommitReason.CodeInput;
+                                inkCanvas.Strokes.Remove(e.Stroke);
+                                inkCanvas.Strokes.Add(smoothedStroke);
+                                timeMachine.TryReplaceLastUserInputHistory(new StrokeCollection { smoothedStroke });
+                                _currentCommitType = CommitReason.UserInput;
                                 handwritingScheduleStroke = smoothedStroke;
                             }
                         }
@@ -1035,24 +1027,16 @@ namespace Ink_Canvas
                     {
                         Debug.WriteLine("异步替换原始笔画为平滑后的笔画");
                         SetNewBackupOfStroke();
-                        if (Settings.Canvas.MergeInkSmoothingWithUndo)
-                        {
-                            _currentCommitType = CommitReason.CodeInput;
-                            inkCanvas.Strokes.Remove(original);
-                            inkCanvas.Strokes.Add(smoothed);
-                            timeMachine.TryReplaceLastUserInputHistory(new StrokeCollection { smoothed });
-                            _currentCommitType = CommitReason.UserInput;
-                        }
-                        else
-                        {
-                            _currentCommitType = CommitReason.ShapeRecognition;
-                            inkCanvas.Strokes.Remove(original);
-                            inkCanvas.Strokes.Add(smoothed);
-                            _currentCommitType = CommitReason.UserInput;
-                        }
-                            // 平滑后的识别快照由回调在画布替换完成后生成，避免防抖线程读取平滑前的旧点。
-                            MigrateHandwritingBeautifyCanvasStrokeReference(original, smoothed);
-                            UpdateHandwritingBeautifyRecognitionSnapshot(smoothed);
+                        // 平滑始终走 TryReplaceLastUserInputHistory（1步撤销），
+                        // 替换原笔画为平滑后笔画，撤销时直接撤销整笔（不区分平滑前/后）。
+                        _currentCommitType = CommitReason.CodeInput;
+                        inkCanvas.Strokes.Remove(original);
+                        inkCanvas.Strokes.Add(smoothed);
+                        timeMachine.TryReplaceLastUserInputHistory(new StrokeCollection { smoothed });
+                        _currentCommitType = CommitReason.UserInput;
+                        // 平滑后的识别快照由回调在画布替换完成后生成，避免防抖线程读取平滑前的旧点。
+                        MigrateHandwritingBeautifyCanvasStrokeReference(original, smoothed);
+                        UpdateHandwritingBeautifyRecognitionSnapshot(smoothed);
                     }
                     else
                     {

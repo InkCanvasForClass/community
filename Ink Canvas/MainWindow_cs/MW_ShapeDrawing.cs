@@ -1144,7 +1144,8 @@ namespace Ink_Canvas
         private void inkCanvas_TouchMove(object sender, TouchEventArgs e)
         {
             // 视频展台特殊模式：触摸移动交给 VideoPresenterSpecialModeContainer 的 Manipulation 处理
-            if (_isVideoPresenterSpecialMode) return;
+            // 图形绘制模式例外：需要走正常绘制流程
+            if (_isVideoPresenterSpecialMode && drawingShapeMode == 0) return;
 
             if (isSingleFingerDragMode) return;
             if (drawingShapeMode != 0)

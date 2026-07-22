@@ -635,6 +635,22 @@ namespace Ink_Canvas
                 return;
             }
 
+            // 视频展台旋转墨迹时（_isApplyingRotationToStrokes=true），不提交操作历史，
+            // 否则撤销/重做会尝试恢复旋转前的墨迹位置，与已旋转的视频画面不同步。
+            // 旋转后 StrokeInitialHistory 已在 RotateBoothStrokesFromBaseline 中更新。
+            if (_isApplyingRotationToStrokes)
+                return;
+
+            // 视频展台模式：拖动/缩放摄像头预览导致的墨迹变换是视图操作，不是墨迹编辑，
+            // 不提交到 TimeMachine。撤销应直接撤销绘制（在当前位置删除墨迹），
+            // 而不是先回退移动/旋转再撤销绘制。
+            // 只更新 StrokeInitialHistory 为当前位置，避免后续退出展台后操作初始值错误。
+            if (_isVideoPresenterSpecialMode)
+            {
+                StrokeInitialHistory[sender as Stroke] = (sender as Stroke).StylusPoints.Clone();
+                return;
+            }
+
             var selectedStrokes = inkCanvas.GetSelectedStrokes();
             var count = selectedStrokes.Count;
             if (count == 0) count = inkCanvas.Strokes.Count;
@@ -649,18 +665,29 @@ namespace Ink_Canvas
                     (sender as Stroke).StylusPoints.Clone());
             if ((StrokeManipulationHistory.Count == count || sender == null) && dec.Count == 0)
             {
-                timeMachine.CommitStrokeManipulationHistory(StrokeManipulationHistory);
-                foreach (var item in StrokeManipulationHistory)
-                {
-                    StrokeInitialHistory[item.Key] = item.Value.Item2;
-                }
-
-                StrokeManipulationHistory = null;
-
-                // 视频展台模式：墨迹被移动/缩放后，旋转基准已过期，重置以便下次旋转重新保存
-                if (_isVideoPresenterSpecialMode && !_isApplyingRotationToStrokes)
-                    ResetRotationBaseline();
+                CommitPendingStrokeManipulationHistory();
             }
+        }
+
+        /// <summary>
+        /// 提交待处理的墨迹操作历史（拖动/缩放结束后调用）。
+        /// 将 StrokeManipulationHistory 一次性提交到 TimeMachine，避免逐帧提交产生大量历史条目。
+        /// </summary>
+        private void CommitPendingStrokeManipulationHistory()
+        {
+            if (StrokeManipulationHistory == null || StrokeManipulationHistory.Count == 0) return;
+
+            timeMachine.CommitStrokeManipulationHistory(StrokeManipulationHistory);
+            foreach (var item in StrokeManipulationHistory)
+            {
+                StrokeInitialHistory[item.Key] = item.Value.Item2;
+            }
+
+            StrokeManipulationHistory = null;
+
+            // 视频展台模式：墨迹被移动/缩放后，旋转基准已过期，重置以便下次旋转重新保存
+            if (_isVideoPresenterSpecialMode && !_isApplyingRotationToStrokes)
+                ResetRotationBaseline();
         }
     }
 }

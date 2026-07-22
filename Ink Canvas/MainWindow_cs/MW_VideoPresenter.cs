@@ -441,6 +441,9 @@ namespace Ink_Canvas
                 if (inkCanvas != null)
                 {
                     inkCanvas.Strokes.Clear();
+                    // 同步清空 timeMachine 历史，避免 SaveStrokes 保存脏引用
+                    // （strokes 已从画布移除但 history 中仍有引用）
+                    timeMachine?.ClearStrokeHistory();
                     inkCanvas.EditingMode = _inkEditingModeBeforeSpecialMode;
                 }
                 // 重置旋转基准
@@ -637,34 +640,47 @@ namespace Ink_Canvas
         private void RotateBoothStrokesFromBaseline(double targetAngleDegrees)
         {
             if (inkCanvas == null) return;
-            if (_rotationBaselineStrokes == null || _rotationBaselineStrokes.Count == 0) return;
+            if (inkCanvas.Strokes.Count == 0) return;
             try
             {
                 double containerW = VideoPresenterSpecialModeContainer?.ActualWidth ?? inkCanvas.ActualWidth;
                 double containerH = VideoPresenterSpecialModeContainer?.ActualHeight ?? inkCanvas.ActualHeight;
                 if (containerW <= 0 || containerH <= 0) return;
 
-                // 从基准角度变换到目标角度：delta = M_baseline^(-1) * M_target
-                var baselineMatrix = GetBoothRotationMatrix(_rotationBaselineAngle, containerW, containerH);
+                // 从当前角度变换到目标角度：delta = M_current^(-1) * M_target
+                // _rotationBaselineAngle 在每次旋转后更新为当前画布墨迹对应的角度
+                var currentMatrix = GetBoothRotationMatrix(_rotationBaselineAngle, containerW, containerH);
                 var targetMatrix = GetBoothRotationMatrix(targetAngleDegrees, containerW, containerH);
-                if (!baselineMatrix.HasInverse) return;
-                var baselineInv = baselineMatrix;
-                baselineInv.Invert();
-                var delta = baselineInv * targetMatrix;
+                if (!currentMatrix.HasInverse) return;
+                var currentInv = currentMatrix;
+                currentInv.Invert();
+                var delta = currentInv * targetMatrix;
 
                 _isApplyingRotationToStrokes = true;
                 var prevCommitType = _currentCommitType;
                 _currentCommitType = CommitReason.CodeInput;
                 try
                 {
-                    inkCanvas.Strokes = _rotationBaselineStrokes.Clone();
+                    // 原地变换：保留 Stroke 对象引用，使 TimeMachine 历史中的 Stroke 引用与画布一致
                     inkCanvas.Strokes.Transform(delta, false);
+                    // 同步变换历史中不在画布上的笔画（如形状识别的 ReplacedStroke）
+                    timeMachine?.TransformStrokesInHistory(delta, inkCanvas.Strokes);
+
+                    // 更新 StrokeInitialHistory 为旋转后的状态，避免后续用户操作（拖动/缩放墨迹）
+                    // 时用旋转前的旧坐标作为初始值，导致撤销恢复到错误位置
+                    foreach (var stroke in inkCanvas.Strokes)
+                    {
+                        StrokeInitialHistory[stroke] = stroke.StylusPoints.Clone();
+                    }
                 }
                 finally
                 {
                     _isApplyingRotationToStrokes = false;
                     _currentCommitType = prevCommitType;
                 }
+
+                // 更新当前角度，供下次旋转计算 delta
+                _rotationBaselineAngle = (int)(targetAngleDegrees % 360.0 + 360.0) % 360;
             }
             catch (Exception ex)
             {
@@ -1506,6 +1522,8 @@ namespace Ink_Canvas
                         {
                             stroke.Transform(translateMatrix, false);
                         }
+                        // 同步变换历史中不在画布上的笔画（如形状识别的 ReplacedStroke）
+                        timeMachine?.TransformStrokesInHistory(translateMatrix, inkCanvas.Strokes);
                         // 墨迹位置已改变，旋转基准过期，重置以便下次旋转重新保存
                         ResetRotationBaseline();
                     }
@@ -1593,6 +1611,8 @@ namespace Ink_Canvas
             if (inkCanvas == null) return false;
             // Ink 模式下让 InkCanvas 正常绘制墨迹
             if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink) return false;
+            // 图形绘制模式下让正常绘制流程处理（不拦截为拖动）
+            if (drawingShapeMode != 0) return false;
 
             // 非 Ink 模式（Select/None 等）：阻止 InkCanvas 框选，启动鼠标拖动
             _isBoothMouseDragging = true;
@@ -1647,6 +1667,8 @@ namespace Ink_Canvas
                         {
                             stroke.Transform(translateMatrix, false);
                         }
+                        // 同步变换历史中不在画布上的笔画（如形状识别的 ReplacedStroke）
+                        timeMachine?.TransformStrokesInHistory(translateMatrix, inkCanvas.Strokes);
                         // 墨迹位置已改变，旋转基准过期，重置以便下次旋转重新保存
                         ResetRotationBaseline();
                     }
@@ -1692,6 +1714,8 @@ namespace Ink_Canvas
                 var matrix = new System.Windows.Media.Matrix();
                 matrix.ScaleAt(ratio, ratio, inkOrigin.X, inkOrigin.Y);
                 inkCanvas.Strokes.Transform(matrix, false);
+                // 同步变换历史中不在画布上的笔画（如形状识别的 ReplacedStroke）
+                timeMachine?.TransformStrokesInHistory(matrix, inkCanvas.Strokes);
                 // 墨迹大小已改变，旋转基准过期，重置以便下次旋转重新保存
                 ResetRotationBaseline();
             }
