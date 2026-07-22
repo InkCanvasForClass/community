@@ -2636,9 +2636,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockInkInputOverFloatingBar(e.GetPosition(this), e))
-                return;
-
             if (IsBoardRoamingMode && e.ChangedButton == MouseButton.Left)
             {
                 inkCanvas.CaptureMouse();
@@ -2657,8 +2654,9 @@ namespace Ink_Canvas
                 CancelPauseStraightenTimer(MouseRealtimeStrokeId);
                 InitializeRealtimeBrushTipStateFromPoint(MouseRealtimeStrokeId, p);
                 var sv = GetStrokeVisual(MouseRealtimeStrokeId);
+                RealtimeInkPerformanceMonitor.BeginStroke(sv, RealtimeInkInputKind.Mouse);
                 TryAppendRealtimeVelocityBrushTipPoint(sv, MouseRealtimeStrokeId, p);
-                sv.ForceRedraw();
+                RealtimeInkFrameScheduler.RequestRedraw(sv);
             }
 
             inkCanvas.CaptureMouse();
@@ -2702,7 +2700,7 @@ namespace Ink_Canvas
                 var sv = GetStrokeVisual(MouseRealtimeStrokeId);
                 if (TryAppendRealtimeVelocityBrushTipPoint(sv, MouseRealtimeStrokeId, e.GetPosition(inkCanvas)))
                 {
-                    sv.ForceRedraw();
+                    RealtimeInkFrameScheduler.RequestRedraw(sv);
                     ResetPauseStraightenTimer(MouseRealtimeStrokeId);
                 }
                 else
@@ -2763,10 +2761,11 @@ namespace Ink_Canvas
 
             if (_isMouseRealtimeInking)
             {
+                StrokeVisual sv = null;
                 try
                 {
-                    var sv = GetStrokeVisual(MouseRealtimeStrokeId);
-                    sv?.ForceRedraw();
+                    sv = GetStrokeVisual(MouseRealtimeStrokeId);
+                    RealtimeInkFrameScheduler.Flush(sv);
                     var stroke = sv?.Stroke;
                     if (stroke != null)
                     {
@@ -2782,6 +2781,7 @@ namespace Ink_Canvas
                 }
                 finally
                 {
+                    RealtimeInkFrameScheduler.Cancel(sv);
                     if (VisualCanvasList.TryGetValue(MouseRealtimeStrokeId, out var vc) && inkCanvas.Children.Contains(vc))
                         inkCanvas.Children.Remove(vc);
                     StrokeVisualList.Remove(MouseRealtimeStrokeId);
@@ -2789,6 +2789,7 @@ namespace Ink_Canvas
                     TouchDownPointsList.Remove(MouseRealtimeStrokeId);
                     CleanupRealtimeBrushTipState(MouseRealtimeStrokeId);
                     CancelPauseStraightenTimer(MouseRealtimeStrokeId);
+                    RealtimeInkPerformanceMonitor.EndStroke(sv);
                     _isMouseRealtimeInking = false;
                 }
             }

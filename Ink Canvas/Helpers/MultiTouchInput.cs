@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace Ink_Canvas.Helpers
 {
@@ -22,11 +24,13 @@ namespace Ink_Canvas.Helpers
 
         public VisualCanvas()
         {
-            CacheMode = new BitmapCache();
+            // Avoid parent BitmapCache while active drawing is mutated every frame.
+            // It can force expensive full-subtree recache during touch ink.
+            CacheMode = null;
 
-            RenderOptions.SetBitmapScalingMode(this, BitmapScalingMode.HighQuality);
+            RenderOptions.SetBitmapScalingMode(this, BitmapScalingMode.LowQuality);
             RenderOptions.SetEdgeMode(this, EdgeMode.Aliased);
-            RenderOptions.SetCachingHint(this, CachingHint.Cache);
+            RenderOptions.SetCachingHint(this, CachingHint.Unspecified);
         }
 
         public void AddVisual(DrawingVisual visual)
@@ -61,9 +65,17 @@ namespace Ink_Canvas.Helpers
     public class StrokeVisual
     {
         private int _lastCommittedPointCount = 0;
-        private const int COMMIT_POINT_THRESHOLD = 24;
+        private const int COMMIT_POINT_THRESHOLD = 48;
         private DrawingVisual _activeVisual;
         private VisualCanvas _visualCanvas;
+        private readonly Dictionary<Color, SolidColorBrush> _brushCache =
+            new Dictionary<Color, SolidColorBrush>();
+        private readonly Dictionary<(Color Color, long ThicknessBits), Pen> _activePenCache =
+            new Dictionary<(Color Color, long ThicknessBits), Pen>();
+        private readonly Action _dispatcherProbeAction;
+        private DispatcherOperation _dispatcherProbeOperation;
+        private long _dispatcherProbeStartedAt;
+        private double _dispatcherProbeDelayMs;
 
         /// <summary>
         ///     创建显示笔迹的类
@@ -85,12 +97,44 @@ namespace Ink_Canvas.Helpers
         public StrokeVisual(DrawingAttributes drawingAttributes)
         {
             _drawingAttributes = drawingAttributes;
+            _dispatcherProbeAction = CompleteDispatcherProbe;
         }
 
         /// <summary>
         /// 设置或获取显示的笔迹
         /// </summary>
         public Stroke Stroke { set; get; }
+
+        internal int PointCount => Stroke?.StylusPoints.Count ?? 0;
+        internal int ActivePointCount => Math.Max(0, PointCount - _lastCommittedPointCount);
+        internal int LastCommittedPointCount => _lastCommittedPointCount;
+
+        internal Dispatcher Dispatcher => _visualCanvas?.Dispatcher;
+
+        internal void BeginDispatcherProbe(long startedAt)
+        {
+            if (_dispatcherProbeOperation?.Status == DispatcherOperationStatus.Pending)
+                _dispatcherProbeOperation.Abort();
+            _dispatcherProbeStartedAt = startedAt;
+            _dispatcherProbeDelayMs = 0;
+            _dispatcherProbeOperation = Dispatcher?.BeginInvoke(
+                DispatcherPriority.Render,
+                _dispatcherProbeAction);
+        }
+
+        internal double DispatcherProbeDelayMs => _dispatcherProbeDelayMs;
+
+        private void CompleteDispatcherProbe()
+        {
+            var startedAt = _dispatcherProbeStartedAt;
+            if (startedAt != 0L)
+                _dispatcherProbeDelayMs = (Stopwatch.GetTimestamp() - startedAt) * 1000.0 / Stopwatch.Frequency;
+        }
+
+        internal void InvalidateVisual()
+        {
+            _visualCanvas?.InvalidateVisual();
+        }
 
         /// <summary>
         /// 设置关联的VisualCanvas
@@ -128,12 +172,42 @@ namespace Ink_Canvas.Helpers
             return Math.Max(0.22, Math.Min(2.1, 0.42 + 1.16 * pressureFactor));
         }
 
+        private SolidColorBrush GetBrush(Color color)
+        {
+            if (_brushCache.TryGetValue(color, out var brush))
+                return brush;
+
+            brush = new SolidColorBrush(color);
+            if (brush.CanFreeze)
+                brush.Freeze();
+            _brushCache[color] = brush;
+            return brush;
+        }
+
+        private Pen GetPen(Color color, double thickness)
+        {
+            var key = (color, BitConverter.DoubleToInt64Bits(thickness));
+            if (_activePenCache.TryGetValue(key, out var pen))
+                return pen;
+
+            pen = new Pen(GetBrush(color), thickness)
+            {
+                StartLineCap = PenLineCap.Round,
+                EndLineCap = PenLineCap.Round,
+                LineJoin = PenLineJoin.Round
+            };
+            if (pen.CanFreeze)
+                pen.Freeze();
+            _activePenCache[key] = pen;
+            return pen;
+        }
+
         private DrawingVisual CreateDrawingVisual()
         {
             var visual = new DrawingVisual();
-            RenderOptions.SetBitmapScalingMode(visual, BitmapScalingMode.HighQuality);
+            RenderOptions.SetBitmapScalingMode(visual, BitmapScalingMode.LowQuality);
             RenderOptions.SetEdgeMode(visual, EdgeMode.Aliased);
-            RenderOptions.SetCachingHint(visual, CachingHint.Cache);
+            RenderOptions.SetCachingHint(visual, CachingHint.Unspecified);
             return visual;
         }
 
@@ -157,21 +231,14 @@ namespace Ink_Canvas.Helpers
                         var s0 = PressureToVisualScale(points[i].PressureFactor, ignorePressure);
                         var s1 = PressureToVisualScale(points[i + 1].PressureFactor, ignorePressure);
                         var thickness = Math.Max(0.35, (drawingAttributes.Width * s0 + drawingAttributes.Width * s1) / 2.0);
-                        var pen = new Pen(new SolidColorBrush(drawingAttributes.Color), thickness)
-                        {
-                            StartLineCap = PenLineCap.Round,
-                            EndLineCap = PenLineCap.Round,
-                            LineJoin = PenLineJoin.Round
-                        };
-                        dc.DrawLine(pen, startPoint, endPoint);
+                        dc.DrawLine(GetPen(drawingAttributes.Color, thickness), startPoint, endPoint);
                     }
                 }
                 else if (endIndex - startIndex == 1 && startIndex < points.Count)
                 {
-                    var brush = new SolidColorBrush(drawingAttributes.Color);
                     var point = points[startIndex];
                     var s = PressureToVisualScale(point.PressureFactor, ignorePressure);
-                    dc.DrawEllipse(brush, null, new Point(point.X, point.Y),
+                    dc.DrawEllipse(GetBrush(drawingAttributes.Color), null, new Point(point.X, point.Y),
                         drawingAttributes.Width * s / 2, drawingAttributes.Height * s / 2);
                 }
             }
@@ -179,25 +246,29 @@ namespace Ink_Canvas.Helpers
 
         private void CommitActiveVisual(int currentPointCount)
         {
-            if (currentPointCount <= _lastCommittedPointCount + 1) return;
+            if (_activeVisual == null || currentPointCount <= _lastCommittedPointCount + 1)
+                return;
 
-            var committedVisual = CreateDrawingVisual();
-            var startIndex = _lastCommittedPointCount == 0 ? 0 : _lastCommittedPointCount - 1;
-            DrawSegment(committedVisual, startIndex, currentPointCount);
-            _visualCanvas.AddVisual(committedVisual);
             _lastCommittedPointCount = currentPointCount;
+            _activeVisual = null;
+            _activePenCache.Clear();
         }
 
         /// <summary>
         /// 重新画出笔迹
         /// </summary>
-        public void Redraw()
+        public void Redraw(bool forceRedraw = false)
         {
             if (Stroke == null || _visualCanvas == null) return;
 
             var currentPointCount = Stroke.StylusPoints.Count;
             if (currentPointCount == 0) return;
 
+            var startedAt = RealtimeInkPerformanceMonitor.IsDebugLoggingEnabled ? Stopwatch.GetTimestamp() : 0L;
+            var gen0CollectionCountStart = startedAt != 0L ? GC.CollectionCount(0) : -1;
+            var gen1CollectionCountStart = startedAt != 0L ? GC.CollectionCount(1) : -1;
+            var gen2CollectionCountStart = startedAt != 0L ? GC.CollectionCount(2) : -1;
+            var committed = false;
             try
             {
                 if (_activeVisual == null)
@@ -211,12 +282,23 @@ namespace Ink_Canvas.Helpers
 
                 if (currentPointCount - _lastCommittedPointCount >= COMMIT_POINT_THRESHOLD)
                 {
-                    _visualCanvas.RemoveVisual(_activeVisual);
-                    _activeVisual = null;
                     CommitActiveVisual(currentPointCount);
+                    committed = true;
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+            finally
+            {
+                if (startedAt != 0L)
+                    RealtimeInkPerformanceMonitor.RecordRedraw(
+                        this,
+                        Stopwatch.GetTimestamp() - startedAt,
+                        committed,
+                        forceRedraw,
+                        gen0CollectionCountStart,
+                        gen1CollectionCountStart,
+                        gen2CollectionCountStart);
+            }
         }
 
         /// <summary>
@@ -227,6 +309,7 @@ namespace Ink_Canvas.Helpers
         {
             if (Stroke == null || _visualCanvas == null) return;
 
+            RealtimeInkPerformanceMonitor.RecordForceRedraw(this);
             var currentPointCount = Stroke.StylusPoints.Count;
 
             // 点数回退（笔画被替换/缩短），必须清除全部已提交视觉重建
@@ -234,15 +317,17 @@ namespace Ink_Canvas.Helpers
             {
                 _visualCanvas.Clear();
                 _activeVisual = null;
+                _activePenCache.Clear();
                 _lastCommittedPointCount = 0;
             }
             else if (_activeVisual != null)
             {
                 _visualCanvas.RemoveVisual(_activeVisual);
                 _activeVisual = null;
+                _activePenCache.Clear();
             }
 
-            Redraw();
+            Redraw(true);
         }
 
         private readonly DrawingAttributes _drawingAttributes;

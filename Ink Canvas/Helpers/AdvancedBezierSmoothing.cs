@@ -11,14 +11,199 @@ using System.Windows.Threading;
 
 namespace Ink_Canvas.Helpers
 {
+    public sealed class InkSmoothingPipelineSample
+    {
+        public string StartedAt { get; set; } = string.Empty;
+        public string ThreadPoolStartedAt { get; set; } = string.Empty;
+        public string ComputeCompletedAt { get; set; } = string.Empty;
+        public string DispatcherQueuedAt { get; set; } = string.Empty;
+        public string UiCallbackStartedAt { get; set; } = string.Empty;
+        public string UiCallbackCompletedAt { get; set; } = string.Empty;
+        public string CompletedAt { get; set; } = string.Empty;
+        public double TotalMs { get; set; }
+        public double SemaphoreWaitMs { get; set; }
+        public double ThreadPoolQueueMs { get; set; }
+        public double ComputeMs { get; set; }
+        public double PointCopyMs { get; set; }
+        public double BezierMs { get; set; }
+        public double ResampleMs { get; set; }
+        public double StrokeConstructionMs { get; set; }
+        public double DispatcherWaitMs { get; set; }
+        public double UiCallbackMs { get; set; }
+        public int InputPointCount { get; set; }
+        public int OutputPointCount { get; set; }
+        public int MaxConcurrentTasks { get; set; }
+        public int Gen0CollectionCountStart { get; set; }
+        public int Gen0CollectionCountEnd { get; set; }
+        public int Gen1CollectionCountStart { get; set; }
+        public int Gen1CollectionCountEnd { get; set; }
+        public int Gen2CollectionCountStart { get; set; }
+        public int Gen2CollectionCountEnd { get; set; }
+        public long ManagedMemoryBytesStart { get; set; }
+        public long ManagedMemoryBytesEnd { get; set; }
+        public bool WasCancelled { get; set; }
+    }
+
+    internal sealed class SmoothingComputationResult
+    {
+        public Stroke Stroke { get; set; }
+        public double PointCopyMs { get; set; }
+        public double BezierMs { get; set; }
+        public double ResampleMs { get; set; }
+        public double StrokeConstructionMs { get; set; }
+        public int InputPointCount { get; set; }
+        public int OutputPointCount { get; set; }
+    }
+
+    internal sealed class DynamicConcurrencyLimiter : IDisposable
+    {
+        private sealed class Waiter
+        {
+            public TaskCompletionSource<IDisposable> Completion { get; } =
+                new TaskCompletionSource<IDisposable>(TaskCreationOptions.RunContinuationsAsynchronously);
+            public bool IsQueued = true;
+        }
+
+        private sealed class Lease : IDisposable
+        {
+            private DynamicConcurrencyLimiter _owner;
+
+            public Lease(DynamicConcurrencyLimiter owner)
+            {
+                _owner = owner;
+            }
+
+            public void Dispose()
+            {
+                Interlocked.Exchange(ref _owner, null)?.Release();
+            }
+        }
+
+        private readonly object _syncRoot = new object();
+        private readonly Queue<Waiter> _waiters = new Queue<Waiter>();
+        private int _limit;
+        private int _activeCount;
+        private bool _disposed;
+
+        public DynamicConcurrencyLimiter(int limit)
+        {
+            _limit = Math.Max(1, limit);
+        }
+
+        public async Task<IDisposable> AcquireAsync(CancellationToken cancellationToken)
+        {
+            Waiter waiter;
+            lock (_syncRoot)
+            {
+                if (_disposed)
+                    throw new ObjectDisposedException(nameof(DynamicConcurrencyLimiter));
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (_activeCount < _limit)
+                {
+                    _activeCount++;
+                    return new Lease(this);
+                }
+
+                waiter = new Waiter();
+                _waiters.Enqueue(waiter);
+            }
+
+            using (cancellationToken.Register(() => CancelWaiter(waiter, cancellationToken)))
+                return await waiter.Completion.Task.ConfigureAwait(false);
+        }
+
+        public void SetLimit(int limit)
+        {
+            List<Waiter> ready;
+            lock (_syncRoot)
+            {
+                if (_disposed)
+                    return;
+                _limit = Math.Max(1, limit);
+                ready = TakeReadyWaiters();
+            }
+            CompleteReadyWaiters(ready);
+        }
+
+        private void Release()
+        {
+            List<Waiter> ready;
+            lock (_syncRoot)
+            {
+                if (_activeCount > 0)
+                    _activeCount--;
+                if (_disposed)
+                    return;
+                ready = TakeReadyWaiters();
+            }
+            CompleteReadyWaiters(ready);
+        }
+
+        private List<Waiter> TakeReadyWaiters()
+        {
+            var ready = new List<Waiter>();
+            while (_activeCount < _limit && _waiters.Count > 0)
+            {
+                var waiter = _waiters.Dequeue();
+                if (!waiter.IsQueued)
+                    continue;
+
+                waiter.IsQueued = false;
+                _activeCount++;
+                ready.Add(waiter);
+            }
+            return ready;
+        }
+
+        private void CompleteReadyWaiters(List<Waiter> ready)
+        {
+            foreach (var waiter in ready)
+                waiter.Completion.TrySetResult(new Lease(this));
+        }
+
+        private void CancelWaiter(Waiter waiter, CancellationToken cancellationToken)
+        {
+            lock (_syncRoot)
+            {
+                if (!waiter.IsQueued)
+                    return;
+                waiter.IsQueued = false;
+            }
+            waiter.Completion.TrySetCanceled(cancellationToken);
+        }
+
+        public void Dispose()
+        {
+            List<Waiter> pending;
+            lock (_syncRoot)
+            {
+                if (_disposed)
+                    return;
+                _disposed = true;
+                pending = _waiters.ToList();
+                _waiters.Clear();
+                foreach (var waiter in pending)
+                    waiter.IsQueued = false;
+            }
+
+            foreach (var waiter in pending)
+            {
+                waiter.Completion.TrySetException(
+                    new ObjectDisposedException(nameof(DynamicConcurrencyLimiter)));
+            }
+        }
+    }
+
     /// <summary>
     /// 改进的异步硬件加速墨迹平滑处理器，使用优化的三次贝塞尔曲线拟合
     /// </summary>
     public class AsyncAdvancedBezierSmoothing
     {
-        private readonly SemaphoreSlim _processingSemaphore;
+        private readonly DynamicConcurrencyLimiter _processingLimiter;
         private readonly ConcurrentDictionary<Stroke, CancellationTokenSource> _processingTasks;
         private readonly Dispatcher _uiDispatcher;
+        private int _maxConcurrentTasks;
 
         /// <summary>
         /// 可选的性能监控器，由 InkSmoothingManager 注入
@@ -28,7 +213,8 @@ namespace Ink_Canvas.Helpers
         public AsyncAdvancedBezierSmoothing(Dispatcher uiDispatcher)
         {
             _uiDispatcher = uiDispatcher;
-            _processingSemaphore = new SemaphoreSlim(Environment.ProcessorCount, Environment.ProcessorCount);
+            _maxConcurrentTasks = Math.Max(1, Environment.ProcessorCount);
+            _processingLimiter = new DynamicConcurrencyLimiter(_maxConcurrentTasks);
             _processingTasks = new ConcurrentDictionary<Stroke, CancellationTokenSource>();
         }
 
@@ -36,7 +222,16 @@ namespace Ink_Canvas.Helpers
         public double ResampleInterval { get; set; } = 2.5; // 适中的重采样间隔
         public int InterpolationSteps { get; set; } = 12; // 增加插值步数提高精度
         public bool UseHardwareAcceleration { get; set; } = true;
-        public int MaxConcurrentTasks { get; set; } = Environment.ProcessorCount;
+        public int MaxConcurrentTasks
+        {
+            get => Volatile.Read(ref _maxConcurrentTasks);
+            set
+            {
+                var safeValue = Math.Max(1, value);
+                if (Interlocked.Exchange(ref _maxConcurrentTasks, safeValue) != safeValue)
+                    _processingLimiter.SetLimit(safeValue);
+            }
+        }
         public bool UseAdaptiveInterpolation { get; set; } = true; // 自适应插值
         public double CurveTension { get; set; } = 0.3; // 曲线张力参数
 
@@ -59,62 +254,122 @@ namespace Ink_Canvas.Helpers
 
             var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             _processingTasks[originalStroke] = cts;
-
-            bool semaphoreAcquired = false;
+            var managedMemoryBytesStart = GC.GetTotalMemory(false);
+            var startedAt = DateTime.Now;
+            var totalWatch = System.Diagnostics.Stopwatch.StartNew();
+            var sample = new InkSmoothingPipelineSample
+            {
+                StartedAt = startedAt.ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                MaxConcurrentTasks = MaxConcurrentTasks,
+                Gen0CollectionCountStart = GC.CollectionCount(0),
+                Gen1CollectionCountStart = GC.CollectionCount(1),
+                Gen2CollectionCountStart = GC.CollectionCount(2),
+                ManagedMemoryBytesStart = managedMemoryBytesStart
+            };
+            IDisposable limiterLease = null;
 
             try
             {
-                await _processingSemaphore.WaitAsync(cts.Token);
-                semaphoreAcquired = true;
+                var semaphoreWatch = System.Diagnostics.Stopwatch.StartNew();
+                limiterLease = await _processingLimiter.AcquireAsync(cts.Token).ConfigureAwait(false);
+                semaphoreWatch.Stop();
+                sample.SemaphoreWaitMs = semaphoreWatch.Elapsed.TotalMilliseconds;
 
-                var smoothedStroke = await Task.Run(() =>
-                    ProcessStrokeInternal(originalStroke, cts.Token), cts.Token);
+                var queueStartedAt = System.Diagnostics.Stopwatch.GetTimestamp();
+                var computation = await Task.Run(() =>
+                {
+                    sample.ThreadPoolStartedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                    sample.ThreadPoolQueueMs = ToMilliseconds(
+                        System.Diagnostics.Stopwatch.GetTimestamp() - queueStartedAt);
+                    var computeWatch = System.Diagnostics.Stopwatch.StartNew();
+                    var result = ProcessStrokeInternal(originalStroke, cts.Token);
+                    computeWatch.Stop();
+                    sample.ComputeMs = computeWatch.Elapsed.TotalMilliseconds;
+                    sample.ComputeCompletedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                    return result;
+                }, cts.Token).ConfigureAwait(false);
 
-                // 在UI线程上执行回调
+                sample.PointCopyMs = computation.PointCopyMs;
+                sample.BezierMs = computation.BezierMs;
+                sample.ResampleMs = computation.ResampleMs;
+                sample.StrokeConstructionMs = computation.StrokeConstructionMs;
+                sample.InputPointCount = computation.InputPointCount;
+                sample.OutputPointCount = computation.OutputPointCount;
+
                 if (onCompleted != null && !cts.Token.IsCancellationRequested)
                 {
-                    await _uiDispatcher.InvokeAsync(() => onCompleted(originalStroke, smoothedStroke));
+                    var dispatcherQueuedAt = System.Diagnostics.Stopwatch.GetTimestamp();
+                    sample.DispatcherQueuedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                    await _uiDispatcher.InvokeAsync(() =>
+                    {
+                        sample.UiCallbackStartedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                        sample.DispatcherWaitMs = ToMilliseconds(
+                            System.Diagnostics.Stopwatch.GetTimestamp() - dispatcherQueuedAt);
+                        var callbackWatch = System.Diagnostics.Stopwatch.StartNew();
+                        try
+                        {
+                            onCompleted(originalStroke, computation.Stroke);
+                        }
+                        finally
+                        {
+                            callbackWatch.Stop();
+                            sample.UiCallbackMs = callbackWatch.Elapsed.TotalMilliseconds;
+                            sample.UiCallbackCompletedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                        }
+                    });
                 }
 
-                return smoothedStroke;
+                return computation.Stroke;
             }
             catch (OperationCanceledException)
             {
+                sample.WasCancelled = true;
                 return originalStroke;
             }
             finally
             {
-                if (semaphoreAcquired)
-                {
-                    _processingSemaphore.Release();
-                }
+                limiterLease?.Dispose();
+                totalWatch.Stop();
+                sample.TotalMs = totalWatch.Elapsed.TotalMilliseconds;
+                sample.CompletedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                sample.Gen0CollectionCountEnd = GC.CollectionCount(0);
+                sample.Gen1CollectionCountEnd = GC.CollectionCount(1);
+                sample.Gen2CollectionCountEnd = GC.CollectionCount(2);
+                sample.ManagedMemoryBytesEnd = GC.GetTotalMemory(false);
+                PerformanceMonitor?.RecordPipelineSample(sample);
 
-                _processingTasks.TryRemove(originalStroke, out _);
+                ((ICollection<KeyValuePair<Stroke, CancellationTokenSource>>)_processingTasks)
+                    .Remove(new KeyValuePair<Stroke, CancellationTokenSource>(originalStroke, cts));
                 cts.Dispose();
             }
         }
 
-        private Stroke ProcessStrokeInternal(Stroke stroke, CancellationToken cancellationToken)
+        private SmoothingComputationResult ProcessStrokeInternal(Stroke stroke, CancellationToken cancellationToken)
         {
+            var result = new SmoothingComputationResult { Stroke = stroke };
+            var pointCopyWatch = System.Diagnostics.Stopwatch.StartNew();
             var originalPoints = stroke.StylusPoints.ToArray();
+            pointCopyWatch.Stop();
+            result.PointCopyMs = pointCopyWatch.Elapsed.TotalMilliseconds;
+            result.InputPointCount = originalPoints.Length;
 
-            // 如果点数太少，直接返回原始笔画
             if (originalPoints.Length < 3)
-                return stroke;
+            {
+                result.OutputPointCount = originalPoints.Length;
+                return result;
+            }
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            // 使用改进的贝塞尔曲线拟合（计时）
             var bezierWatch = System.Diagnostics.Stopwatch.StartNew();
             var smoothedPoints = ApplyImprovedBezierSmoothing(originalPoints);
             bezierWatch.Stop();
-            PerformanceMonitor?.RecordBezierTime(bezierWatch.Elapsed);
+            result.BezierMs = bezierWatch.Elapsed.TotalMilliseconds;
 
             System.Diagnostics.Debug.WriteLine($"AsyncAdvancedBezierSmoothing: 原始点数={originalPoints.Length}, 平滑后点数={smoothedPoints.Length}");
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            // 重采样为等距点，保证笔画均匀，同时限制输出点数
             var resampleWatch = System.Diagnostics.Stopwatch.StartNew();
             int maxOutputPoints = Math.Max(originalPoints.Length + 1, originalPoints.Length * 3);
             smoothedPoints = ResampleEquidistantOptimized(
@@ -122,33 +377,37 @@ namespace Ink_Canvas.Helpers
                 ResampleInterval,
                 maxOutputPoints);
             resampleWatch.Stop();
-            PerformanceMonitor?.RecordResampleTime(resampleWatch.Elapsed);
-
-            // 记录输入/输出点数
-            PerformanceMonitor?.RecordPointCounts(originalPoints.Length, smoothedPoints.Length);
+            result.ResampleMs = resampleWatch.Elapsed.TotalMilliseconds;
+            result.OutputPointCount = smoothedPoints.Length;
 
             System.Diagnostics.Debug.WriteLine(
                 $"AsyncAdvancedBezierSmoothing: 重采样后点数={smoothedPoints.Length}, " +
                 $"最大允许点数={maxOutputPoints}");
 
-            // 只有异常结果才回退，正常的长笔画不再因为点数超限而丢弃平滑结果
             if (smoothedPoints.Length < 2 || smoothedPoints.Any(p =>
                 double.IsNaN(p.X) || double.IsNaN(p.Y) ||
                 double.IsInfinity(p.X) || double.IsInfinity(p.Y)))
             {
                 System.Diagnostics.Debug.WriteLine(
                     "AsyncAdvancedBezierSmoothing: 重采样结果无效，返回原始笔画");
-                return stroke;
+                return result;
             }
 
-            // 创建平滑后的笔画
-            var smoothedStroke = new Stroke(new StylusPointCollection(smoothedPoints))
+            var constructionWatch = System.Diagnostics.Stopwatch.StartNew();
+            result.Stroke = new Stroke(new StylusPointCollection(smoothedPoints))
             {
                 DrawingAttributes = stroke.DrawingAttributes.Clone()
             };
+            constructionWatch.Stop();
+            result.StrokeConstructionMs = constructionWatch.Elapsed.TotalMilliseconds;
 
-            System.Diagnostics.Debug.WriteLine($"AsyncAdvancedBezierSmoothing: 成功创建平滑笔画");
-            return smoothedStroke;
+            System.Diagnostics.Debug.WriteLine("AsyncAdvancedBezierSmoothing: 成功创建平滑笔画");
+            return result;
+        }
+
+        private static double ToMilliseconds(long elapsedTicks)
+        {
+            return elapsedTicks * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
         }
 
         /// <summary>
@@ -867,7 +1126,7 @@ namespace Ink_Canvas.Helpers
         public void Dispose()
         {
             CancelAllTasks();
-            _processingSemaphore?.Dispose();
+            _processingLimiter?.Dispose();
         }
     }
 
@@ -1185,116 +1444,88 @@ namespace Ink_Canvas.Helpers
     /// </summary>
     public class InkSmoothingPerformanceMonitor
     {
-        private readonly Queue<TimeSpan> _processingTimes = new Queue<TimeSpan>();
-        private readonly Queue<TimeSpan> _bezierTimes = new Queue<TimeSpan>();
-        private readonly Queue<TimeSpan> _resampleTimes = new Queue<TimeSpan>();
-        private readonly Queue<int> _inputPointCounts = new Queue<int>();
-        private readonly Queue<int> _outputPointCounts = new Queue<int>();
+        private readonly Queue<InkSmoothingPipelineSample> _samples =
+            new Queue<InkSmoothingPipelineSample>();
         private readonly object _lock = new object();
         private const int MaxSamples = 100;
 
+        public void RecordPipelineSample(InkSmoothingPipelineSample sample)
+        {
+            if (sample == null)
+                return;
+
+            lock (_lock)
+            {
+                _samples.Enqueue(sample);
+                while (_samples.Count > MaxSamples)
+                    _samples.Dequeue();
+            }
+        }
+
         public void RecordProcessingTime(TimeSpan time)
         {
-            lock (_lock)
+            RecordPipelineSample(new InkSmoothingPipelineSample
             {
-                _processingTimes.Enqueue(time);
-                if (_processingTimes.Count > MaxSamples)
-                    _processingTimes.Dequeue();
-            }
+                StartedAt = DateTime.Now.Subtract(time).ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                CompletedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                TotalMs = time.TotalMilliseconds
+            });
         }
 
-        public void RecordBezierTime(TimeSpan time)
-        {
-            lock (_lock)
-            {
-                _bezierTimes.Enqueue(time);
-                if (_bezierTimes.Count > MaxSamples)
-                    _bezierTimes.Dequeue();
-            }
-        }
+        public double GetAverageProcessingTimeMs() => Average(sample => sample.TotalMs);
+        public double GetMaxProcessingTimeMs() => Maximum(sample => sample.TotalMs);
+        public double GetAverageBezierTimeMs() => Average(sample => sample.BezierMs);
+        public double GetAverageResampleTimeMs() => Average(sample => sample.ResampleMs);
+        public double GetAverageInputPointCount() => Average(sample => sample.InputPointCount);
+        public double GetAverageOutputPointCount() => Average(sample => sample.OutputPointCount);
+        public double GetAverageSemaphoreWaitMs() => Average(sample => sample.SemaphoreWaitMs);
+        public double GetMaxSemaphoreWaitMs() => Maximum(sample => sample.SemaphoreWaitMs);
+        public double GetAverageThreadPoolQueueMs() => Average(sample => sample.ThreadPoolQueueMs);
+        public double GetMaxThreadPoolQueueMs() => Maximum(sample => sample.ThreadPoolQueueMs);
+        public double GetAverageComputeMs() => Average(sample => sample.ComputeMs);
+        public double GetMaxComputeMs() => Maximum(sample => sample.ComputeMs);
+        public double GetAveragePointCopyMs() => Average(sample => sample.PointCopyMs);
+        public double GetMaxPointCopyMs() => Maximum(sample => sample.PointCopyMs);
+        public double GetAverageStrokeConstructionMs() => Average(sample => sample.StrokeConstructionMs);
+        public double GetMaxStrokeConstructionMs() => Maximum(sample => sample.StrokeConstructionMs);
+        public double GetAverageDispatcherWaitMs() => Average(sample => sample.DispatcherWaitMs);
+        public double GetMaxDispatcherWaitMs() => Maximum(sample => sample.DispatcherWaitMs);
+        public double GetAverageUiCallbackMs() => Average(sample => sample.UiCallbackMs);
+        public double GetMaxUiCallbackMs() => Maximum(sample => sample.UiCallbackMs);
 
-        public void RecordResampleTime(TimeSpan time)
+        public List<InkSmoothingPipelineSample> GetSamples()
         {
             lock (_lock)
-            {
-                _resampleTimes.Enqueue(time);
-                if (_resampleTimes.Count > MaxSamples)
-                    _resampleTimes.Dequeue();
-            }
-        }
-
-        public void RecordPointCounts(int inputCount, int outputCount)
-        {
-            lock (_lock)
-            {
-                _inputPointCounts.Enqueue(inputCount);
-                _outputPointCounts.Enqueue(outputCount);
-                if (_inputPointCounts.Count > MaxSamples)
-                    _inputPointCounts.Dequeue();
-                if (_outputPointCounts.Count > MaxSamples)
-                    _outputPointCounts.Dequeue();
-            }
-        }
-
-        public double GetAverageProcessingTimeMs()
-        {
-            lock (_lock)
-            {
-                return _processingTimes.Count > 0 ?
-                    _processingTimes.Average(t => t.TotalMilliseconds) : 0;
-            }
-        }
-
-        public double GetMaxProcessingTimeMs()
-        {
-            lock (_lock)
-            {
-                return _processingTimes.Count > 0 ?
-                    _processingTimes.Max(t => t.TotalMilliseconds) : 0;
-            }
-        }
-
-        public double GetAverageBezierTimeMs()
-        {
-            lock (_lock)
-            {
-                return _bezierTimes.Count > 0 ?
-                    _bezierTimes.Average(t => t.TotalMilliseconds) : 0;
-            }
-        }
-
-        public double GetAverageResampleTimeMs()
-        {
-            lock (_lock)
-            {
-                return _resampleTimes.Count > 0 ?
-                    _resampleTimes.Average(t => t.TotalMilliseconds) : 0;
-            }
-        }
-
-        public double GetAverageInputPointCount()
-        {
-            lock (_lock)
-            {
-                return _inputPointCounts.Count > 0 ?
-                    _inputPointCounts.Average() : 0;
-            }
-        }
-
-        public double GetAverageOutputPointCount()
-        {
-            lock (_lock)
-            {
-                return _outputPointCounts.Count > 0 ?
-                    _outputPointCounts.Average() : 0;
-            }
+                return _samples.ToList();
         }
 
         public int GetSampleCount()
         {
             lock (_lock)
+                return _samples.Count(sample => !sample.WasCancelled);
+        }
+
+        public void Reset()
+        {
+            lock (_lock)
+                _samples.Clear();
+        }
+
+        private double Average(Func<InkSmoothingPipelineSample, double> selector)
+        {
+            lock (_lock)
             {
-                return _processingTimes.Count;
+                var completedSamples = _samples.Where(sample => !sample.WasCancelled).ToList();
+                return completedSamples.Count > 0 ? completedSamples.Average(selector) : 0;
+            }
+        }
+
+        private double Maximum(Func<InkSmoothingPipelineSample, double> selector)
+        {
+            lock (_lock)
+            {
+                var completedSamples = _samples.Where(sample => !sample.WasCancelled).ToList();
+                return completedSamples.Count > 0 ? completedSamples.Max(selector) : 0;
             }
         }
     }

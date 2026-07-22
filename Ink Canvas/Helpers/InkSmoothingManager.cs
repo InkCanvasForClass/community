@@ -92,7 +92,8 @@ namespace Ink_Canvas.Helpers
             finally
             {
                 stopwatch.Stop();
-                _performanceMonitor.RecordProcessingTime(stopwatch.Elapsed);
+                if (!_config.UseAsyncProcessing)
+                    _performanceMonitor.RecordProcessingTime(stopwatch.Elapsed);
                 PerformanceMonitorHelper.UpdateSmoothingStats(GetDetailedStats());
             }
 
@@ -190,6 +191,12 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public InkSmoothingPerformanceMonitor PerformanceMonitor => _performanceMonitor;
 
+        public void ResetPerformanceStats()
+        {
+            _performanceMonitor.Reset();
+            PerformanceMonitorHelper.UpdateSmoothingStats(GetDetailedStats());
+        }
+
         /// <summary>
         /// 获取详细的墨迹纠正性能统计
         /// </summary>
@@ -202,8 +209,23 @@ namespace Ink_Canvas.Helpers
                 MaxTotalMs = _performanceMonitor.GetMaxProcessingTimeMs(),
                 AvgBezierMs = _performanceMonitor.GetAverageBezierTimeMs(),
                 AvgResampleMs = _performanceMonitor.GetAverageResampleTimeMs(),
+                AvgSemaphoreWaitMs = _performanceMonitor.GetAverageSemaphoreWaitMs(),
+                MaxSemaphoreWaitMs = _performanceMonitor.GetMaxSemaphoreWaitMs(),
+                AvgThreadPoolQueueMs = _performanceMonitor.GetAverageThreadPoolQueueMs(),
+                MaxThreadPoolQueueMs = _performanceMonitor.GetMaxThreadPoolQueueMs(),
+                AvgComputeMs = _performanceMonitor.GetAverageComputeMs(),
+                MaxComputeMs = _performanceMonitor.GetMaxComputeMs(),
+                AvgPointCopyMs = _performanceMonitor.GetAveragePointCopyMs(),
+                MaxPointCopyMs = _performanceMonitor.GetMaxPointCopyMs(),
+                AvgStrokeConstructionMs = _performanceMonitor.GetAverageStrokeConstructionMs(),
+                MaxStrokeConstructionMs = _performanceMonitor.GetMaxStrokeConstructionMs(),
+                AvgDispatcherWaitMs = _performanceMonitor.GetAverageDispatcherWaitMs(),
+                MaxDispatcherWaitMs = _performanceMonitor.GetMaxDispatcherWaitMs(),
+                AvgUiCallbackMs = _performanceMonitor.GetAverageUiCallbackMs(),
+                MaxUiCallbackMs = _performanceMonitor.GetMaxUiCallbackMs(),
                 AvgInputPoints = _performanceMonitor.GetAverageInputPointCount(),
-                AvgOutputPoints = _performanceMonitor.GetAverageOutputPointCount()
+                AvgOutputPoints = _performanceMonitor.GetAverageOutputPointCount(),
+                Samples = _performanceMonitor.GetSamples()
             };
         }
 
@@ -317,7 +339,23 @@ namespace Ink_Canvas.Helpers
         public double MaxTotalMs { get; set; }
         public double AvgBezierMs { get; set; }
         public double AvgResampleMs { get; set; }
+        public double AvgSemaphoreWaitMs { get; set; }
+        public double MaxSemaphoreWaitMs { get; set; }
+        public double AvgThreadPoolQueueMs { get; set; }
+        public double MaxThreadPoolQueueMs { get; set; }
+        public double AvgComputeMs { get; set; }
+        public double MaxComputeMs { get; set; }
+        public double AvgPointCopyMs { get; set; }
+        public double MaxPointCopyMs { get; set; }
+        public double AvgStrokeConstructionMs { get; set; }
+        public double MaxStrokeConstructionMs { get; set; }
+        public double AvgDispatcherWaitMs { get; set; }
+        public double MaxDispatcherWaitMs { get; set; }
+        public double AvgUiCallbackMs { get; set; }
+        public double MaxUiCallbackMs { get; set; }
         public double AvgInputPoints { get; set; }
         public double AvgOutputPoints { get; set; }
+        public System.Collections.Generic.List<InkSmoothingPipelineSample> Samples { get; set; }
+            = new System.Collections.Generic.List<InkSmoothingPipelineSample>();
     }
 }

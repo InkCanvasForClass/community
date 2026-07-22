@@ -144,6 +144,12 @@
   <data name="Debug_PPTPreviewVisible_Header" xml:space="preserve">
     <value>显示 PPT 翻页按钮预览</value>
   </data>
+  <data name="Debug_RealtimeInkLog_Header" xml:space="preserve">
+    <value>开启笔迹性能显微镜日志</value>
+  </data>
+  <data name="Debug_RealtimeInkLog_Desc" xml:space="preserve">
+    <value>打开后会记录实时笔迹输入/重绘/等帧/慢事件。每抬一笔就刷新 Configs/RealtimeInkDebugLive.json，并往 Configs/PerformanceHistory.json 写 realtimeInk*；关掉或退出时收尾。默认关着；只在查实时笔迹（TouchVelocity/实时笔锋）卡顿时临时开。跟性能页监测开关无关。普通自带 Ink 笔迹不进这本账。</value>
+  </data>
   <data name="Debug_IconSettings" xml:space="preserve">
     <value>换装间</value>
   </data>
