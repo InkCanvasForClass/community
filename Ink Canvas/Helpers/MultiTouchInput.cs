@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace Ink_Canvas.Helpers
 {
@@ -69,6 +70,10 @@ namespace Ink_Canvas.Helpers
             new Dictionary<Color, SolidColorBrush>();
         private readonly Dictionary<(Color Color, long ThicknessBits), Pen> _activePenCache =
             new Dictionary<(Color Color, long ThicknessBits), Pen>();
+        private readonly Action _dispatcherProbeAction;
+        private DispatcherOperation _dispatcherProbeOperation;
+        private long _dispatcherProbeStartedAt;
+        private double _dispatcherProbeDelayMs;
 
         /// <summary>
         ///     创建显示笔迹的类
@@ -90,6 +95,7 @@ namespace Ink_Canvas.Helpers
         public StrokeVisual(DrawingAttributes drawingAttributes)
         {
             _drawingAttributes = drawingAttributes;
+            _dispatcherProbeAction = CompleteDispatcherProbe;
         }
 
         /// <summary>
@@ -100,6 +106,28 @@ namespace Ink_Canvas.Helpers
         internal int PointCount => Stroke?.StylusPoints.Count ?? 0;
         internal int ActivePointCount => Math.Max(0, PointCount - _lastCommittedPointCount);
         internal int LastCommittedPointCount => _lastCommittedPointCount;
+
+        internal Dispatcher Dispatcher => _visualCanvas?.Dispatcher;
+
+        internal void BeginDispatcherProbe(long startedAt)
+        {
+            if (_dispatcherProbeOperation?.Status == DispatcherOperationStatus.Pending)
+                _dispatcherProbeOperation.Abort();
+            _dispatcherProbeStartedAt = startedAt;
+            _dispatcherProbeDelayMs = 0;
+            _dispatcherProbeOperation = Dispatcher?.BeginInvoke(
+                DispatcherPriority.Render,
+                _dispatcherProbeAction);
+        }
+
+        internal double DispatcherProbeDelayMs => _dispatcherProbeDelayMs;
+
+        private void CompleteDispatcherProbe()
+        {
+            var startedAt = _dispatcherProbeStartedAt;
+            if (startedAt != 0L)
+                _dispatcherProbeDelayMs = (Stopwatch.GetTimestamp() - startedAt) * 1000.0 / Stopwatch.Frequency;
+        }
 
         internal void InvalidateVisual()
         {

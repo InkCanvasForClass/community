@@ -25,6 +25,8 @@ namespace Ink_Canvas.Helpers
         public int LastCommittedPointCount { get; internal set; }
         public bool Committed { get; internal set; }
         public bool ForceRedraw { get; internal set; }
+        public double DispatcherProbeDelayMs { get; internal set; }
+        public double RenderingIntervalMs { get; internal set; }
         public int Gen0CollectionCountStart { get; internal set; }
         public int Gen0CollectionCountEnd { get; internal set; }
         public int Gen1CollectionCountStart { get; internal set; }
@@ -256,7 +258,9 @@ namespace Ink_Canvas.Helpers
             long elapsedTicks,
             int gen0CollectionCountStart = -1,
             int gen1CollectionCountStart = -1,
-            int gen2CollectionCountStart = -1)
+            int gen2CollectionCountStart = -1,
+            double dispatcherProbeDelayMs = 0,
+            double renderingIntervalMs = 0)
         {
             if (!PerformanceMonitorHelper.IsMonitoring || strokeVisual == null)
                 return;
@@ -279,7 +283,9 @@ namespace Ink_Canvas.Helpers
                         false,
                         gen0CollectionCountStart,
                         gen1CollectionCountStart,
-                        gen2CollectionCountStart));
+                        gen2CollectionCountStart,
+                        dispatcherProbeDelayMs,
+                        renderingIntervalMs));
             }
         }
 
@@ -431,7 +437,9 @@ namespace Ink_Canvas.Helpers
             bool forceRedraw,
             int gen0CollectionCountStart,
             int gen1CollectionCountStart,
-            int gen2CollectionCountStart)
+            int gen2CollectionCountStart,
+            double dispatcherProbeDelayMs = 0,
+            double renderingIntervalMs = 0)
         {
             var completedAt = DateTime.Now;
             var startedAt = completedAt.AddMilliseconds(-elapsedMs);
@@ -448,6 +456,8 @@ namespace Ink_Canvas.Helpers
                 LastCommittedPointCount = strokeVisual.LastCommittedPointCount,
                 Committed = committed,
                 ForceRedraw = forceRedraw,
+                DispatcherProbeDelayMs = dispatcherProbeDelayMs,
+                RenderingIntervalMs = renderingIntervalMs,
                 Gen0CollectionCountStart = gen0CollectionCountStart,
                 Gen0CollectionCountEnd = GC.CollectionCount(0),
                 Gen1CollectionCountStart = gen1CollectionCountStart,

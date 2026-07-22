@@ -26,6 +26,7 @@ namespace Ink_Canvas.Helpers
         private static readonly Dictionary<StrokeVisual, PendingRedraw> PendingRedraws =
             new Dictionary<StrokeVisual, PendingRedraw>();
         private static bool IsRenderingSubscribed;
+        private static long LastRenderingAt;
 
         public static void RequestRedraw(StrokeVisual strokeVisual)
         {
@@ -73,6 +74,7 @@ namespace Ink_Canvas.Helpers
         public static void Clear()
         {
             PendingRedraws.Clear();
+            LastRenderingAt = 0L;
             if (!IsRenderingSubscribed)
                 return;
 
@@ -93,7 +95,7 @@ namespace Ink_Canvas.Helpers
             }
 
             var isMonitoring = PerformanceMonitorHelper.IsMonitoring;
-            PendingRedraws[strokeVisual] = new PendingRedraw
+            var request = new PendingRedraw
             {
                 Kind = requestKind,
                 RequestedAt = isMonitoring ? Stopwatch.GetTimestamp() : 0L,
@@ -101,6 +103,9 @@ namespace Ink_Canvas.Helpers
                 Gen1CollectionCountStart = isMonitoring ? GC.CollectionCount(1) : -1,
                 Gen2CollectionCountStart = isMonitoring ? GC.CollectionCount(2) : -1
             };
+            PendingRedraws[strokeVisual] = request;
+            if (isMonitoring)
+                strokeVisual.BeginDispatcherProbe(request.RequestedAt);
             strokeVisual.InvalidateVisual();
             EnsureRenderingSubscribed();
         }
@@ -132,6 +137,12 @@ namespace Ink_Canvas.Helpers
             }
 
             var renderedAt = Stopwatch.GetTimestamp();
+            var renderingIntervalMs = LastRenderingAt != 0L
+                ? ToMilliseconds(renderedAt - LastRenderingAt)
+                : 0;
+            if (renderingIntervalMs > 100)
+                renderingIntervalMs = 0;
+            LastRenderingAt = renderedAt;
             var pending = PendingRedraws.ToArray();
             PendingRedraws.Clear();
 
@@ -143,12 +154,19 @@ namespace Ink_Canvas.Helpers
                         renderedAt - pair.Value.RequestedAt,
                         pair.Value.Gen0CollectionCountStart,
                         pair.Value.Gen1CollectionCountStart,
-                        pair.Value.Gen2CollectionCountStart);
+                        pair.Value.Gen2CollectionCountStart,
+                        pair.Key.DispatcherProbeDelayMs,
+                        renderingIntervalMs);
                 ExecuteRedraw(pair.Key, pair.Value.Kind);
             }
 
             if (PendingRedraws.Count > 0)
                 EnsureRenderingSubscribed();
+        }
+
+        private static double ToMilliseconds(long elapsedTicks)
+        {
+            return elapsedTicks * 1000.0 / Stopwatch.Frequency;
         }
 
         private static void ExecuteRedraw(StrokeVisual strokeVisual, RedrawRequestKind requestKind)
