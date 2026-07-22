@@ -605,33 +605,38 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 在旋转前保存当前墨迹为基准（若尚未保存），并记录当前角度。
+        /// 必须在修改 Rotation.Angle 之前调用，否则记录的基准角度会是目标角度导致 delta=Identity。
+        /// </summary>
+        private void EnsureRotationBaseline()
+        {
+            if (_rotationBaselineStrokes != null) return;
+            if (inkCanvas == null || inkCanvas.Strokes.Count == 0) return;
+            _rotationBaselineStrokes = inkCanvas.Strokes.Clone();
+            double currentAngle = 0;
+            if (VideoPresenterFrozenFrameImage != null && VideoPresenterFrozenFrameImage.Visibility == Visibility.Visible)
+                currentAngle = VideoPresenterFrozenFrameRotation?.Angle ?? 0;
+            else
+                currentAngle = VideoPresenterFullCanvasRotation?.Angle ?? 0;
+            _rotationBaselineAngle = (int)(currentAngle % 360.0 + 360.0) % 360;
+        }
+
+        /// <summary>
         /// 从基准墨迹重新变换到目标角度，避免 delta 累积导致越来越小。
         /// 基准墨迹在保存时记录对应角度，每次旋转从基准重新算：
         /// delta = Transform(baselineAngle)^(-1) * Transform(targetAngle)
         /// 用户画新墨迹后基准重置（StrokesChanged 触发 ResetRotationBaseline）。
+        /// 调用前必须先 EnsureRotationBaseline()（在修改角度前）。
         /// </summary>
         private void RotateBoothStrokesFromBaseline(double targetAngleDegrees)
         {
             if (inkCanvas == null) return;
+            if (_rotationBaselineStrokes == null || _rotationBaselineStrokes.Count == 0) return;
             try
             {
                 double containerW = VideoPresenterSpecialModeContainer?.ActualWidth ?? inkCanvas.ActualWidth;
                 double containerH = VideoPresenterSpecialModeContainer?.ActualHeight ?? inkCanvas.ActualHeight;
                 if (containerW <= 0 || containerH <= 0) return;
-
-                // 首次旋转：保存当前墨迹为基准，记录当前角度
-                if (_rotationBaselineStrokes == null && inkCanvas.Strokes.Count > 0)
-                {
-                    _rotationBaselineStrokes = inkCanvas.Strokes.Clone();
-                    // 推断基准角度：照片页用 FrozenFrameRotation，直播页用 FullCanvasRotation
-                    double currentAngle = 0;
-                    if (VideoPresenterFrozenFrameImage != null && VideoPresenterFrozenFrameImage.Visibility == Visibility.Visible)
-                        currentAngle = VideoPresenterFrozenFrameRotation?.Angle ?? 0;
-                    else
-                        currentAngle = VideoPresenterFullCanvasRotation?.Angle ?? 0;
-                    _rotationBaselineAngle = (int)(currentAngle % 360.0 + 360.0) % 360;
-                }
-                if (_rotationBaselineStrokes == null || _rotationBaselineStrokes.Count == 0) return;
 
                 // 从基准角度变换到目标角度：delta = M_baseline^(-1) * M_target
                 var baselineMatrix = GetBoothRotationMatrix(_rotationBaselineAngle, containerW, containerH);
@@ -642,6 +647,8 @@ namespace Ink_Canvas
                 var delta = baselineInv * targetMatrix;
 
                 _isApplyingRotationToStrokes = true;
+                var prevCommitType = _currentCommitType;
+                _currentCommitType = CommitReason.CodeInput;
                 try
                 {
                     inkCanvas.Strokes = _rotationBaselineStrokes.Clone();
@@ -650,6 +657,7 @@ namespace Ink_Canvas
                 finally
                 {
                     _isApplyingRotationToStrokes = false;
+                    _currentCommitType = prevCommitType;
                 }
             }
             catch (Exception ex)
@@ -2355,6 +2363,7 @@ namespace Ink_Canvas
                 {
                     // 照片预览页旋转：从基准重新变换到目标角度
                     // 90°/270° 时视频视觉缩小（LayoutTransform 旋转后元素 fit 容器），墨迹跟着缩放
+                    EnsureRotationBaseline();
                     VideoPresenterFrozenFrameRotation.Angle = (VideoPresenterFrozenFrameRotation.Angle + 90.0) % 360.0;
                     ReapplyBoothFrozenLayout();
                     RotateBoothStrokesFromBaseline(VideoPresenterFrozenFrameRotation.Angle);
@@ -2370,6 +2379,7 @@ namespace Ink_Canvas
                 {
                     // 直播页旋转：从基准重新变换到目标角度
                     // 90°/270° 时视频视觉缩小（LayoutTransform 旋转后元素 fit 容器），墨迹跟着缩放
+                    EnsureRotationBaseline();
                     VideoPresenterFullCanvasRotation.Angle = _cameraService.RotationAngle * 90.0;
                     RotateBoothStrokesFromBaseline(VideoPresenterFullCanvasRotation.Angle);
                     // 冻结画面 Image 的 LayoutTransform 始终保持 0（照片内容已正向），
