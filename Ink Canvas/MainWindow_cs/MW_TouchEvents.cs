@@ -113,7 +113,7 @@ namespace Ink_Canvas
             public float LastRawX { get; set; }
             public float LastRawY { get; set; }
             public long LastTimestampMs { get; set; }
-            public long LastTouchInputTimestampMs { get; set; }
+            public long LastTouchInputTimestampTicks { get; set; }
             public float SmoothedSampleRateHz { get; set; } = 120f;
             public bool SawPressureVariation { get; set; }
             public bool HasSeed { get; set; }
@@ -234,7 +234,7 @@ namespace Ink_Canvas
                 LastRawX = (float)startPoint.X,
                 LastRawY = (float)startPoint.Y,
                 LastTimestampMs = RealtimeNowMs(),
-                LastTouchInputTimestampMs = RealtimeNowMs(),
+                LastTouchInputTimestampTicks = Stopwatch.GetTimestamp(),
                 HasTouchPoint = true,
                 LastTouchPoint = startPoint
             };
@@ -258,7 +258,7 @@ namespace Ink_Canvas
                 LastRawX = (float)startPoint.X,
                 LastRawY = (float)startPoint.Y,
                 LastTimestampMs = RealtimeNowMs(),
-                LastTouchInputTimestampMs = RealtimeNowMs(),
+                LastTouchInputTimestampTicks = Stopwatch.GetTimestamp(),
                 HasTouchPoint = true,
                 LastTouchPoint = startPoint
             };
@@ -341,22 +341,25 @@ namespace Ink_Canvas
                 yield return p;
         }
 
+        private static double SmoothStep(double edge0, double edge1, double value)
+        {
+            if (edge1 <= edge0)
+                return value >= edge1 ? 1.0 : 0.0;
+            var t = Math.Max(0.0, Math.Min(1.0, (value - edge0) / (edge1 - edge0)));
+            return t * t * (3.0 - 2.0 * t);
+        }
+
         private static double GetTouchVelocityInterpolationSpacing(
             RealtimeBrushTipState state,
             Point to,
-            long nowMs)
+            double speed)
         {
             var chord = to - state.LastTouchPoint;
             var distance = chord.Length;
             if (distance < 0.1)
                 return 1.2;
 
-            var elapsedMs = state.LastTouchInputTimestampMs > 0
-                ? Math.Max(1, nowMs - state.LastTouchInputTimestampMs)
-                : 16;
-            var speed = distance * 1000.0 / elapsedMs;
-
-            var curvatureFactor = 0.0;
+            var turnAngle = 0.0;
             if (state.HasTouchDirection && state.LastTouchDirection.LengthSquared > 0.0001)
             {
                 var previous = state.LastTouchDirection;
@@ -364,12 +367,15 @@ namespace Ink_Canvas
                 var current = chord;
                 current.Normalize();
                 var dot = Math.Max(-1, Math.Min(1, previous.X * current.X + previous.Y * current.Y));
-                var angle = Math.Acos(dot);
-                curvatureFactor = Math.Min(1.0, angle / (Math.PI / 3.0));
+                turnAngle = Math.Acos(dot);
             }
 
-            var speedFactor = Math.Max(0.0, Math.Min(1.0, (speed - 300.0) / 1500.0));
-            return 1.2 + speedFactor * (1.0 - curvatureFactor) * 1.0;
+            var speedFactor = SmoothStep(400.0, 1800.0, speed);
+            var curvatureFactor = SmoothStep(
+                Math.PI / 18.0,
+                Math.PI * 35.0 / 180.0,
+                turnAngle);
+            return 1.2 + speedFactor * (1.0 - curvatureFactor) * 2.6;
         }
 
         private static void UpdateTouchInterpolationState(RealtimeBrushTipState state, Point point)
@@ -566,7 +572,14 @@ namespace Ink_Canvas
             }
         }
 
-        private bool TryAppendRealtimeVelocityBrushTipPointCore(StrokeVisual strokeVisual, int strokeId, Point point, float rawPressure = 0.5f)
+        private bool TryAppendRealtimeVelocityBrushTipPointCore(
+            StrokeVisual strokeVisual,
+            int strokeId,
+            Point point,
+            float rawPressure = 0.5f,
+            float? motionSpeed = null,
+            float? motionDt = null,
+            bool updateSampleRate = true)
         {
             var allow = strokeId == MouseRealtimeStrokeId
                 ? ShouldUseRealtimeVelocityBrushTipForMouse()
@@ -578,10 +591,13 @@ namespace Ink_Canvas
 
             var mix = RealtimeClamp((float)Settings.Canvas.VelocityBrushTipMix, 0f, 1f);
             var nowMs = RealtimeNowMs();
-            var dtMs = Math.Max(1L, nowMs - state.LastTimestampMs);
-            var dt = dtMs / 1000f;
-            var sampleRate = 1f / Math.Max(1e-4f, dt);
-            state.SmoothedSampleRateHz = state.SmoothedSampleRateHz * 0.85f + sampleRate * 0.15f;
+            var measuredDt = Math.Max(1L, nowMs - state.LastTimestampMs) / 1000f;
+            var dt = Math.Max(1e-4f, motionDt ?? measuredDt);
+            if (updateSampleRate)
+            {
+                var sampleRate = 1f / dt;
+                state.SmoothedSampleRateHz = state.SmoothedSampleRateHz * 0.85f + sampleRate * 0.15f;
+            }
             var baseWidth = (float)Math.Max(0.35,
                 strokeVisual.Stroke?.DrawingAttributes?.Width ?? inkCanvas.DefaultDrawingAttributes.Width);
 
@@ -590,7 +606,7 @@ namespace Ink_Canvas
             var dx = rawX - state.LastRawX;
             var dy = rawY - state.LastRawY;
             var dist = (float)Math.Sqrt(dx * dx + dy * dy);
-            var speed = dist / dt;
+            var speed = Math.Max(0f, motionSpeed ?? dist / dt);
 
             var filteredX = state.FilterX.Filter(rawX, dt, speed);
             var filteredY = state.FilterY.Filter(rawY, dt, speed);
@@ -661,20 +677,52 @@ namespace Ink_Canvas
                 {
                     state.HasTouchPoint = true;
                     state.LastTouchPoint = point;
-                    state.LastTouchInputTimestampMs = RealtimeNowMs();
+                    state.LastTouchInputTimestampTicks = Stopwatch.GetTimestamp();
                     return TryAppendRealtimeVelocityBrushTipPointCore(strokeVisual, strokeId, point, rawPressure);
                 }
 
-                var touchInputTimestampMs = RealtimeNowMs();
-                var interpolationSpacing = _activeRealtimeTouchStrokeIds.Contains(strokeId)
-                    ? GetTouchVelocityInterpolationSpacing(state, point, touchInputTimestampMs)
-                    : 1.2;
-                foreach (var p in InterpolateTouchPoints(state, point, interpolationSpacing))
+                var touchInputTimestampTicks = Stopwatch.GetTimestamp();
+                var eventDt = state.LastTouchInputTimestampTicks > 0
+                    ? Math.Max(
+                        0.001f,
+                        (float)((touchInputTimestampTicks - state.LastTouchInputTimestampTicks)
+                                / (double)Stopwatch.Frequency))
+                    : 1f / 60f;
+                var eventChord = point - state.LastTouchPoint;
+                var eventSpeed = (float)(eventChord.Length / eventDt);
+                var isTouchVelocity = _activeRealtimeTouchStrokeIds.Contains(strokeId);
+                if (isTouchVelocity)
                 {
-                    appended |= TryAppendRealtimeVelocityBrushTipPointCore(strokeVisual, strokeId, p, rawPressure);
+                    var interpolationSpacing = GetTouchVelocityInterpolationSpacing(state, point, eventSpeed);
+                    var interpolatedPoints = InterpolateTouchPoints(state, point, interpolationSpacing).ToList();
+                    var pointDt = eventDt / Math.Max(1, interpolatedPoints.Count);
+                    var sampleRate = 1f / eventDt;
+                    state.SmoothedSampleRateHz = state.SmoothedSampleRateHz * 0.85f + sampleRate * 0.15f;
+                    foreach (var p in interpolatedPoints)
+                    {
+                        appended |= TryAppendRealtimeVelocityBrushTipPointCore(
+                            strokeVisual,
+                            strokeId,
+                            p,
+                            rawPressure,
+                            eventSpeed,
+                            pointDt,
+                            false);
+                    }
+                }
+                else
+                {
+                    foreach (var p in InterpolateTouchPoints(state, point))
+                    {
+                        appended |= TryAppendRealtimeVelocityBrushTipPointCore(
+                            strokeVisual,
+                            strokeId,
+                            p,
+                            rawPressure);
+                    }
                 }
                 UpdateTouchInterpolationState(state, point);
-                state.LastTouchInputTimestampMs = touchInputTimestampMs;
+                state.LastTouchInputTimestampTicks = touchInputTimestampTicks;
                 return appended;
             }
             finally

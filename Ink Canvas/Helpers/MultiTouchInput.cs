@@ -65,6 +65,10 @@ namespace Ink_Canvas.Helpers
         private const int COMMIT_POINT_THRESHOLD = 24;
         private DrawingVisual _activeVisual;
         private VisualCanvas _visualCanvas;
+        private readonly Dictionary<Color, SolidColorBrush> _brushCache =
+            new Dictionary<Color, SolidColorBrush>();
+        private readonly Dictionary<(Color Color, long ThicknessBits), Pen> _activePenCache =
+            new Dictionary<(Color Color, long ThicknessBits), Pen>();
 
         /// <summary>
         ///     创建显示笔迹的类
@@ -96,6 +100,11 @@ namespace Ink_Canvas.Helpers
         internal int PointCount => Stroke?.StylusPoints.Count ?? 0;
         internal int ActivePointCount => Math.Max(0, PointCount - _lastCommittedPointCount);
         internal int LastCommittedPointCount => _lastCommittedPointCount;
+
+        internal void InvalidateVisual()
+        {
+            _visualCanvas?.InvalidateVisual();
+        }
 
         /// <summary>
         /// 设置关联的VisualCanvas
@@ -133,6 +142,36 @@ namespace Ink_Canvas.Helpers
             return Math.Max(0.22, Math.Min(2.1, 0.42 + 1.16 * pressureFactor));
         }
 
+        private SolidColorBrush GetBrush(Color color)
+        {
+            if (_brushCache.TryGetValue(color, out var brush))
+                return brush;
+
+            brush = new SolidColorBrush(color);
+            if (brush.CanFreeze)
+                brush.Freeze();
+            _brushCache[color] = brush;
+            return brush;
+        }
+
+        private Pen GetPen(Color color, double thickness)
+        {
+            var key = (color, BitConverter.DoubleToInt64Bits(thickness));
+            if (_activePenCache.TryGetValue(key, out var pen))
+                return pen;
+
+            pen = new Pen(GetBrush(color), thickness)
+            {
+                StartLineCap = PenLineCap.Round,
+                EndLineCap = PenLineCap.Round,
+                LineJoin = PenLineJoin.Round
+            };
+            if (pen.CanFreeze)
+                pen.Freeze();
+            _activePenCache[key] = pen;
+            return pen;
+        }
+
         private DrawingVisual CreateDrawingVisual()
         {
             var visual = new DrawingVisual();
@@ -162,21 +201,14 @@ namespace Ink_Canvas.Helpers
                         var s0 = PressureToVisualScale(points[i].PressureFactor, ignorePressure);
                         var s1 = PressureToVisualScale(points[i + 1].PressureFactor, ignorePressure);
                         var thickness = Math.Max(0.35, (drawingAttributes.Width * s0 + drawingAttributes.Width * s1) / 2.0);
-                        var pen = new Pen(new SolidColorBrush(drawingAttributes.Color), thickness)
-                        {
-                            StartLineCap = PenLineCap.Round,
-                            EndLineCap = PenLineCap.Round,
-                            LineJoin = PenLineJoin.Round
-                        };
-                        dc.DrawLine(pen, startPoint, endPoint);
+                        dc.DrawLine(GetPen(drawingAttributes.Color, thickness), startPoint, endPoint);
                     }
                 }
                 else if (endIndex - startIndex == 1 && startIndex < points.Count)
                 {
-                    var brush = new SolidColorBrush(drawingAttributes.Color);
                     var point = points[startIndex];
                     var s = PressureToVisualScale(point.PressureFactor, ignorePressure);
-                    dc.DrawEllipse(brush, null, new Point(point.X, point.Y),
+                    dc.DrawEllipse(GetBrush(drawingAttributes.Color), null, new Point(point.X, point.Y),
                         drawingAttributes.Width * s / 2, drawingAttributes.Height * s / 2);
                 }
             }
@@ -184,13 +216,12 @@ namespace Ink_Canvas.Helpers
 
         private void CommitActiveVisual(int currentPointCount)
         {
-            if (currentPointCount <= _lastCommittedPointCount + 1) return;
+            if (_activeVisual == null || currentPointCount <= _lastCommittedPointCount + 1)
+                return;
 
-            var committedVisual = CreateDrawingVisual();
-            var startIndex = _lastCommittedPointCount == 0 ? 0 : _lastCommittedPointCount - 1;
-            DrawSegment(committedVisual, startIndex, currentPointCount);
-            _visualCanvas.AddVisual(committedVisual);
             _lastCommittedPointCount = currentPointCount;
+            _activeVisual = null;
+            _activePenCache.Clear();
         }
 
         /// <summary>
@@ -221,8 +252,6 @@ namespace Ink_Canvas.Helpers
 
                 if (currentPointCount - _lastCommittedPointCount >= COMMIT_POINT_THRESHOLD)
                 {
-                    _visualCanvas.RemoveVisual(_activeVisual);
-                    _activeVisual = null;
                     CommitActiveVisual(currentPointCount);
                     committed = true;
                 }
@@ -258,12 +287,14 @@ namespace Ink_Canvas.Helpers
             {
                 _visualCanvas.Clear();
                 _activeVisual = null;
+                _activePenCache.Clear();
                 _lastCommittedPointCount = 0;
             }
             else if (_activeVisual != null)
             {
                 _visualCanvas.RemoveVisual(_activeVisual);
                 _activeVisual = null;
+                _activePenCache.Clear();
             }
 
             Redraw(true);

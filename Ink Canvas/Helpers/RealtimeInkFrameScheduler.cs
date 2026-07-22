@@ -101,6 +101,7 @@ namespace Ink_Canvas.Helpers
                 Gen1CollectionCountStart = isMonitoring ? GC.CollectionCount(1) : -1,
                 Gen2CollectionCountStart = isMonitoring ? GC.CollectionCount(2) : -1
             };
+            strokeVisual.InvalidateVisual();
             EnsureRenderingSubscribed();
         }
 
