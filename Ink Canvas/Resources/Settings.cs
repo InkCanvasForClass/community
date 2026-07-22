@@ -136,6 +136,52 @@ namespace Ink_Canvas
         [JsonProperty("smoothingAvgResampleMs")]
         public double SmoothingAvgResampleMs { get; set; }
 
+        [JsonProperty("smoothingAvgSemaphoreWaitMs")]
+        public double SmoothingAvgSemaphoreWaitMs { get; set; }
+
+        [JsonProperty("smoothingMaxSemaphoreWaitMs")]
+        public double SmoothingMaxSemaphoreWaitMs { get; set; }
+
+        [JsonProperty("smoothingAvgThreadPoolQueueMs")]
+        public double SmoothingAvgThreadPoolQueueMs { get; set; }
+
+        [JsonProperty("smoothingMaxThreadPoolQueueMs")]
+        public double SmoothingMaxThreadPoolQueueMs { get; set; }
+
+        [JsonProperty("smoothingAvgComputeMs")]
+        public double SmoothingAvgComputeMs { get; set; }
+
+        [JsonProperty("smoothingMaxComputeMs")]
+        public double SmoothingMaxComputeMs { get; set; }
+
+        [JsonProperty("smoothingAvgPointCopyMs")]
+        public double SmoothingAvgPointCopyMs { get; set; }
+
+        [JsonProperty("smoothingMaxPointCopyMs")]
+        public double SmoothingMaxPointCopyMs { get; set; }
+
+        [JsonProperty("smoothingAvgStrokeConstructionMs")]
+        public double SmoothingAvgStrokeConstructionMs { get; set; }
+
+        [JsonProperty("smoothingMaxStrokeConstructionMs")]
+        public double SmoothingMaxStrokeConstructionMs { get; set; }
+
+        [JsonProperty("smoothingAvgDispatcherWaitMs")]
+        public double SmoothingAvgDispatcherWaitMs { get; set; }
+
+        [JsonProperty("smoothingMaxDispatcherWaitMs")]
+        public double SmoothingMaxDispatcherWaitMs { get; set; }
+
+        [JsonProperty("smoothingAvgUiCallbackMs")]
+        public double SmoothingAvgUiCallbackMs { get; set; }
+
+        [JsonProperty("smoothingMaxUiCallbackMs")]
+        public double SmoothingMaxUiCallbackMs { get; set; }
+
+        [JsonProperty("smoothingStageSamples")]
+        public List<InkSmoothingPipelineSample> SmoothingStageSamples { get; set; }
+            = new List<InkSmoothingPipelineSample>();
+
         [JsonProperty("smoothingAvgInputPoints")]
         public double SmoothingAvgInputPoints { get; set; }
 
@@ -229,6 +275,10 @@ namespace Ink_Canvas
         [JsonProperty("realtimeInkByInputKind")]
         public Dictionary<string, RealtimeInkInputPerformanceSnapshot> RealtimeInkByInputKind { get; set; }
             = new Dictionary<string, RealtimeInkInputPerformanceSnapshot>();
+
+        [JsonProperty("realtimeInkSlowEvents")]
+        public List<RealtimeInkSlowEventSnapshot> RealtimeInkSlowEvents { get; set; }
+            = new List<RealtimeInkSlowEventSnapshot>();
     }
 
     public class NotificationSettings

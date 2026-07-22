@@ -18,6 +18,9 @@ namespace Ink_Canvas.Helpers
         {
             public RedrawRequestKind Kind;
             public long RequestedAt;
+            public int Gen0CollectionCountStart;
+            public int Gen1CollectionCountStart;
+            public int Gen2CollectionCountStart;
         }
 
         private static readonly Dictionary<StrokeVisual, PendingRedraw> PendingRedraws =
@@ -47,7 +50,10 @@ namespace Ink_Canvas.Helpers
                 if (pending.RequestedAt != 0L)
                     RealtimeInkPerformanceMonitor.RecordFrameWait(
                         strokeVisual,
-                        Stopwatch.GetTimestamp() - pending.RequestedAt);
+                        Stopwatch.GetTimestamp() - pending.RequestedAt,
+                        pending.Gen0CollectionCountStart,
+                        pending.Gen1CollectionCountStart,
+                        pending.Gen2CollectionCountStart);
                 PendingRedraws.Remove(strokeVisual);
             }
 
@@ -86,10 +92,14 @@ namespace Ink_Canvas.Helpers
                 return;
             }
 
+            var isMonitoring = PerformanceMonitorHelper.IsMonitoring;
             PendingRedraws[strokeVisual] = new PendingRedraw
             {
                 Kind = requestKind,
-                RequestedAt = PerformanceMonitorHelper.IsMonitoring ? Stopwatch.GetTimestamp() : 0L
+                RequestedAt = isMonitoring ? Stopwatch.GetTimestamp() : 0L,
+                Gen0CollectionCountStart = isMonitoring ? GC.CollectionCount(0) : -1,
+                Gen1CollectionCountStart = isMonitoring ? GC.CollectionCount(1) : -1,
+                Gen2CollectionCountStart = isMonitoring ? GC.CollectionCount(2) : -1
             };
             EnsureRenderingSubscribed();
         }
@@ -129,7 +139,10 @@ namespace Ink_Canvas.Helpers
                 if (pair.Value.RequestedAt != 0L)
                     RealtimeInkPerformanceMonitor.RecordFrameWait(
                         pair.Key,
-                        renderedAt - pair.Value.RequestedAt);
+                        renderedAt - pair.Value.RequestedAt,
+                        pair.Value.Gen0CollectionCountStart,
+                        pair.Value.Gen1CollectionCountStart,
+                        pair.Value.Gen2CollectionCountStart);
                 ExecuteRedraw(pair.Key, pair.Value.Kind);
             }
 

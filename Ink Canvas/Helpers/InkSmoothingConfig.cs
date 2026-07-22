@@ -23,6 +23,7 @@ namespace Ink_Canvas.Helpers
         public bool UseHardwareAcceleration { get; set; } = true;
         public bool UseAsyncProcessing { get; set; } = true;
         public int MaxConcurrentTasks { get; set; } = Environment.ProcessorCount;
+        private bool HasExplicitMaxConcurrentTasks { get; set; }
         public int MaxPointsPerStroke { get; set; } = 10000;
 
         // 质量设置
@@ -58,8 +59,10 @@ namespace Ink_Canvas.Helpers
                     config.Quality = (SmoothingQuality)MainWindow.Settings.Canvas.InkSmoothingQuality;
                     config.UseHardwareAcceleration = MainWindow.Settings.Canvas.UseHardwareAcceleration;
                     config.UseAsyncProcessing = MainWindow.Settings.Canvas.UseAsyncInkSmoothing;
-                    config.MaxConcurrentTasks = MainWindow.Settings.Canvas.MaxConcurrentSmoothingTasks > 0 ?
-                        MainWindow.Settings.Canvas.MaxConcurrentSmoothingTasks : Environment.ProcessorCount;
+                    config.HasExplicitMaxConcurrentTasks = MainWindow.Settings.Canvas.MaxConcurrentSmoothingTasks > 0;
+                    config.MaxConcurrentTasks = config.HasExplicitMaxConcurrentTasks
+                        ? MainWindow.Settings.Canvas.MaxConcurrentSmoothingTasks
+                        : Environment.ProcessorCount;
                 }
             }
             catch (Exception ex)
@@ -77,6 +80,7 @@ namespace Ink_Canvas.Helpers
         {
             // 保存用户设置的异步处理偏好
             bool userAsyncPreference = UseAsyncProcessing;
+            var explicitMaxConcurrentTasks = MaxConcurrentTasks;
 
             switch (Quality)
             {
@@ -112,6 +116,11 @@ namespace Ink_Canvas.Helpers
                     UseHardwareAcceleration = true;
                     UseAsyncProcessing = userAsyncPreference;
                     break;
+            }
+
+            if (HasExplicitMaxConcurrentTasks)
+            {
+                MaxConcurrentTasks = Math.Max(1, explicitMaxConcurrentTasks);
             }
         }
 

@@ -113,6 +113,7 @@ namespace Ink_Canvas
             public float LastRawX { get; set; }
             public float LastRawY { get; set; }
             public long LastTimestampMs { get; set; }
+            public long LastTouchInputTimestampMs { get; set; }
             public float SmoothedSampleRateHz { get; set; } = 120f;
             public bool SawPressureVariation { get; set; }
             public bool HasSeed { get; set; }
@@ -233,6 +234,7 @@ namespace Ink_Canvas
                 LastRawX = (float)startPoint.X,
                 LastRawY = (float)startPoint.Y,
                 LastTimestampMs = RealtimeNowMs(),
+                LastTouchInputTimestampMs = RealtimeNowMs(),
                 HasTouchPoint = true,
                 LastTouchPoint = startPoint
             };
@@ -256,6 +258,7 @@ namespace Ink_Canvas
                 LastRawX = (float)startPoint.X,
                 LastRawY = (float)startPoint.Y,
                 LastTimestampMs = RealtimeNowMs(),
+                LastTouchInputTimestampMs = RealtimeNowMs(),
                 HasTouchPoint = true,
                 LastTouchPoint = startPoint
             };
@@ -275,12 +278,13 @@ namespace Ink_Canvas
             return baseMinDist * scale;
         }
 
-        private static IEnumerable<Point> InterpolateTouchPoints(Point from, Point to)
+        private static IEnumerable<Point> InterpolateTouchPoints(Point from, Point to, double spacing = 1.2)
         {
             var dx = to.X - from.X;
             var dy = to.Y - from.Y;
             var distance = Math.Sqrt(dx * dx + dy * dy);
-            var steps = Math.Min(24, Math.Max(1, (int)Math.Ceiling(distance / 1.2)));
+            var safeSpacing = Math.Max(0.1, spacing);
+            var steps = Math.Min(24, Math.Max(1, (int)Math.Ceiling(distance / safeSpacing)));
             for (var i = 1; i <= steps; i++)
             {
                 var t = (double)i / steps;
@@ -288,11 +292,14 @@ namespace Ink_Canvas
             }
         }
 
-        private static IEnumerable<Point> InterpolateTouchPoints(RealtimeBrushTipState state, Point to)
+        private static IEnumerable<Point> InterpolateTouchPoints(
+            RealtimeBrushTipState state,
+            Point to,
+            double spacing = 1.2)
         {
             if (!state.HasTouchDirection)
             {
-                foreach (var p in InterpolateTouchPoints(state.LastTouchPoint, to))
+                foreach (var p in InterpolateTouchPoints(state.LastTouchPoint, to, spacing))
                     yield return p;
                 yield break;
             }
@@ -316,7 +323,8 @@ namespace Ink_Canvas
                     var tangentLength = Math.Min(distance * 0.45, 18);
                     var c1 = from + incoming * tangentLength;
                     var c2 = to - current * tangentLength;
-                    var steps = Math.Min(24, Math.Max(1, (int)Math.Ceiling(distance / 1.2)));
+                    var safeSpacing = Math.Max(0.1, spacing);
+                    var steps = Math.Min(24, Math.Max(1, (int)Math.Ceiling(distance / safeSpacing)));
                     for (var i = 1; i <= steps; i++)
                     {
                         var t = (double)i / steps;
@@ -329,8 +337,39 @@ namespace Ink_Canvas
                 }
             }
 
-            foreach (var p in InterpolateTouchPoints(from, to))
+            foreach (var p in InterpolateTouchPoints(from, to, spacing))
                 yield return p;
+        }
+
+        private static double GetTouchVelocityInterpolationSpacing(
+            RealtimeBrushTipState state,
+            Point to,
+            long nowMs)
+        {
+            var chord = to - state.LastTouchPoint;
+            var distance = chord.Length;
+            if (distance < 0.1)
+                return 1.2;
+
+            var elapsedMs = state.LastTouchInputTimestampMs > 0
+                ? Math.Max(1, nowMs - state.LastTouchInputTimestampMs)
+                : 16;
+            var speed = distance * 1000.0 / elapsedMs;
+
+            var curvatureFactor = 0.0;
+            if (state.HasTouchDirection && state.LastTouchDirection.LengthSquared > 0.0001)
+            {
+                var previous = state.LastTouchDirection;
+                previous.Normalize();
+                var current = chord;
+                current.Normalize();
+                var dot = Math.Max(-1, Math.Min(1, previous.X * current.X + previous.Y * current.Y));
+                var angle = Math.Acos(dot);
+                curvatureFactor = Math.Min(1.0, angle / (Math.PI / 3.0));
+            }
+
+            var speedFactor = Math.Max(0.0, Math.Min(1.0, (speed - 300.0) / 1500.0));
+            return 1.2 + speedFactor * (1.0 - curvatureFactor) * 1.0;
         }
 
         private static void UpdateTouchInterpolationState(RealtimeBrushTipState state, Point point)
@@ -622,14 +661,20 @@ namespace Ink_Canvas
                 {
                     state.HasTouchPoint = true;
                     state.LastTouchPoint = point;
+                    state.LastTouchInputTimestampMs = RealtimeNowMs();
                     return TryAppendRealtimeVelocityBrushTipPointCore(strokeVisual, strokeId, point, rawPressure);
                 }
 
-                foreach (var p in InterpolateTouchPoints(state, point))
+                var touchInputTimestampMs = RealtimeNowMs();
+                var interpolationSpacing = _activeRealtimeTouchStrokeIds.Contains(strokeId)
+                    ? GetTouchVelocityInterpolationSpacing(state, point, touchInputTimestampMs)
+                    : 1.2;
+                foreach (var p in InterpolateTouchPoints(state, point, interpolationSpacing))
                 {
                     appended |= TryAppendRealtimeVelocityBrushTipPointCore(strokeVisual, strokeId, p, rawPressure);
                 }
                 UpdateTouchInterpolationState(state, point);
+                state.LastTouchInputTimestampMs = touchInputTimestampMs;
                 return appended;
             }
             finally

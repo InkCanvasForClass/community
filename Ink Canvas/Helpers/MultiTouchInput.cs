@@ -93,6 +93,10 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public Stroke Stroke { set; get; }
 
+        internal int PointCount => Stroke?.StylusPoints.Count ?? 0;
+        internal int ActivePointCount => Math.Max(0, PointCount - _lastCommittedPointCount);
+        internal int LastCommittedPointCount => _lastCommittedPointCount;
+
         /// <summary>
         /// 设置关联的VisualCanvas
         /// </summary>
@@ -200,6 +204,9 @@ namespace Ink_Canvas.Helpers
             if (currentPointCount == 0) return;
 
             var startedAt = PerformanceMonitorHelper.IsMonitoring ? Stopwatch.GetTimestamp() : 0L;
+            var gen0CollectionCountStart = startedAt != 0L ? GC.CollectionCount(0) : -1;
+            var gen1CollectionCountStart = startedAt != 0L ? GC.CollectionCount(1) : -1;
+            var gen2CollectionCountStart = startedAt != 0L ? GC.CollectionCount(2) : -1;
             var committed = false;
             try
             {
@@ -224,7 +231,14 @@ namespace Ink_Canvas.Helpers
             finally
             {
                 if (startedAt != 0L)
-                    RealtimeInkPerformanceMonitor.RecordRedraw(this, Stopwatch.GetTimestamp() - startedAt, committed, forceRedraw);
+                    RealtimeInkPerformanceMonitor.RecordRedraw(
+                        this,
+                        Stopwatch.GetTimestamp() - startedAt,
+                        committed,
+                        forceRedraw,
+                        gen0CollectionCountStart,
+                        gen1CollectionCountStart,
+                        gen2CollectionCountStart);
             }
         }
 

@@ -109,6 +109,9 @@ namespace Ink_Canvas.Helpers
                     _memorySamples.Clear();
                 }
                 RealtimeInkPerformanceMonitor.Reset();
+                _cachedSmoothingStats = null;
+                var mainWindow = System.Windows.Application.Current?.MainWindow as MainWindow;
+                mainWindow?.InkSmoothingManagerInstance?.ResetPerformanceStats();
                 SampleCount = 0;
                 CurrentAvgCpu = 0;
                 CurrentMemoryMb = 0;
@@ -169,6 +172,21 @@ namespace Ink_Canvas.Helpers
                         record.SmoothingMaxTotalMs = Math.Round(_cachedSmoothingStats.MaxTotalMs, 2);
                         record.SmoothingAvgBezierMs = Math.Round(_cachedSmoothingStats.AvgBezierMs, 2);
                         record.SmoothingAvgResampleMs = Math.Round(_cachedSmoothingStats.AvgResampleMs, 2);
+                        record.SmoothingAvgSemaphoreWaitMs = Math.Round(_cachedSmoothingStats.AvgSemaphoreWaitMs, 3);
+                        record.SmoothingMaxSemaphoreWaitMs = Math.Round(_cachedSmoothingStats.MaxSemaphoreWaitMs, 3);
+                        record.SmoothingAvgThreadPoolQueueMs = Math.Round(_cachedSmoothingStats.AvgThreadPoolQueueMs, 3);
+                        record.SmoothingMaxThreadPoolQueueMs = Math.Round(_cachedSmoothingStats.MaxThreadPoolQueueMs, 3);
+                        record.SmoothingAvgComputeMs = Math.Round(_cachedSmoothingStats.AvgComputeMs, 3);
+                        record.SmoothingMaxComputeMs = Math.Round(_cachedSmoothingStats.MaxComputeMs, 3);
+                        record.SmoothingAvgPointCopyMs = Math.Round(_cachedSmoothingStats.AvgPointCopyMs, 3);
+                        record.SmoothingMaxPointCopyMs = Math.Round(_cachedSmoothingStats.MaxPointCopyMs, 3);
+                        record.SmoothingAvgStrokeConstructionMs = Math.Round(_cachedSmoothingStats.AvgStrokeConstructionMs, 3);
+                        record.SmoothingMaxStrokeConstructionMs = Math.Round(_cachedSmoothingStats.MaxStrokeConstructionMs, 3);
+                        record.SmoothingAvgDispatcherWaitMs = Math.Round(_cachedSmoothingStats.AvgDispatcherWaitMs, 3);
+                        record.SmoothingMaxDispatcherWaitMs = Math.Round(_cachedSmoothingStats.MaxDispatcherWaitMs, 3);
+                        record.SmoothingAvgUiCallbackMs = Math.Round(_cachedSmoothingStats.AvgUiCallbackMs, 3);
+                        record.SmoothingMaxUiCallbackMs = Math.Round(_cachedSmoothingStats.MaxUiCallbackMs, 3);
+                        record.SmoothingStageSamples = _cachedSmoothingStats.Samples;
                         record.SmoothingAvgInputPoints = Math.Round(_cachedSmoothingStats.AvgInputPoints, 0);
                         record.SmoothingAvgOutputPoints = Math.Round(_cachedSmoothingStats.AvgOutputPoints, 0);
                     }
@@ -204,6 +222,7 @@ namespace Ink_Canvas.Helpers
                     record.RealtimeInkTotalActiveRedrawMs = Math.Round(realtimeInkSnapshot.TotalActiveRedrawMs, 3);
                     record.RealtimeInkMaxActiveRedrawMs = Math.Round(realtimeInkSnapshot.MaxActiveRedrawMs, 3);
                     record.RealtimeInkByInputKind = realtimeInkSnapshot.ByInputKind;
+                    record.RealtimeInkSlowEvents = realtimeInkSnapshot.SlowEvents;
 
                     AppendRecord(record);
                 }

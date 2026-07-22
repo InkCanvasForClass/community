@@ -12,6 +12,28 @@ namespace Ink_Canvas.Helpers
         Mouse
     }
 
+    public sealed class RealtimeInkSlowEventSnapshot
+    {
+        public string Timestamp { get; internal set; } = string.Empty;
+        public string StartedAt { get; internal set; } = string.Empty;
+        public string CompletedAt { get; internal set; } = string.Empty;
+        public string EventType { get; internal set; } = string.Empty;
+        public string InputKind { get; internal set; } = string.Empty;
+        public double ElapsedMs { get; internal set; }
+        public int PointCount { get; internal set; }
+        public int ActivePointCount { get; internal set; }
+        public int LastCommittedPointCount { get; internal set; }
+        public bool Committed { get; internal set; }
+        public bool ForceRedraw { get; internal set; }
+        public int Gen0CollectionCountStart { get; internal set; }
+        public int Gen0CollectionCountEnd { get; internal set; }
+        public int Gen1CollectionCountStart { get; internal set; }
+        public int Gen1CollectionCountEnd { get; internal set; }
+        public int Gen2CollectionCountStart { get; internal set; }
+        public int Gen2CollectionCountEnd { get; internal set; }
+        public long ManagedMemoryBytes { get; internal set; }
+    }
+
     public sealed class RealtimeInkInputPerformanceSnapshot
     {
         public long StrokeCount { get; internal set; }
@@ -76,6 +98,8 @@ namespace Ink_Canvas.Helpers
         public double MaxActiveRedrawMs { get; internal set; }
         public Dictionary<string, RealtimeInkInputPerformanceSnapshot> ByInputKind { get; internal set; }
             = new Dictionary<string, RealtimeInkInputPerformanceSnapshot>();
+        public List<RealtimeInkSlowEventSnapshot> SlowEvents { get; internal set; }
+            = new List<RealtimeInkSlowEventSnapshot>();
     }
 
     internal static class RealtimeInkPerformanceMonitor
@@ -133,6 +157,10 @@ namespace Ink_Canvas.Helpers
         private static readonly Dictionary<RealtimeInkInputKind, AggregateStats> ByInputKind =
             new Dictionary<RealtimeInkInputKind, AggregateStats>();
         private static readonly AggregateStats Aggregate = new AggregateStats();
+        private static readonly Queue<RealtimeInkSlowEventSnapshot> SlowEvents =
+            new Queue<RealtimeInkSlowEventSnapshot>();
+        private const int MaxSlowEventCount = 64;
+        private const double SlowEventThresholdMs = 5;
 
         public static void BeginStroke(StrokeVisual strokeVisual, RealtimeInkInputKind inputKind)
         {
@@ -176,7 +204,10 @@ namespace Ink_Canvas.Helpers
             StrokeVisual strokeVisual,
             long elapsedTicks,
             bool committed,
-            bool forceRedraw)
+            bool forceRedraw,
+            int gen0CollectionCountStart = -1,
+            int gen1CollectionCountStart = -1,
+            int gen2CollectionCountStart = -1)
         {
             if (!PerformanceMonitorHelper.IsMonitoring || strokeVisual == null)
                 return;
@@ -190,6 +221,17 @@ namespace Ink_Canvas.Helpers
                 AddRedraw(stats, elapsedMs, committed, forceRedraw);
                 AddRedraw(Aggregate, elapsedMs, committed, forceRedraw);
                 AddRedraw(GetInputAggregate(stats.InputKind), elapsedMs, committed, forceRedraw);
+                if (elapsedMs > SlowEventThresholdMs)
+                    AddSlowEvent(CreateSlowEvent(
+                        strokeVisual,
+                        "Redraw",
+                        stats.InputKind,
+                        elapsedMs,
+                        committed,
+                        forceRedraw,
+                        gen0CollectionCountStart,
+                        gen1CollectionCountStart,
+                        gen2CollectionCountStart));
             }
         }
 
@@ -209,7 +251,12 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        public static void RecordFrameWait(StrokeVisual strokeVisual, long elapsedTicks)
+        public static void RecordFrameWait(
+            StrokeVisual strokeVisual,
+            long elapsedTicks,
+            int gen0CollectionCountStart = -1,
+            int gen1CollectionCountStart = -1,
+            int gen2CollectionCountStart = -1)
         {
             if (!PerformanceMonitorHelper.IsMonitoring || strokeVisual == null)
                 return;
@@ -222,6 +269,17 @@ namespace Ink_Canvas.Helpers
 
                 AddFrameWait(Aggregate, elapsedMs);
                 AddFrameWait(GetInputAggregate(stats.InputKind), elapsedMs);
+                if (elapsedMs > SlowEventThresholdMs)
+                    AddSlowEvent(CreateSlowEvent(
+                        strokeVisual,
+                        "FrameWait",
+                        stats.InputKind,
+                        elapsedMs,
+                        false,
+                        false,
+                        gen0CollectionCountStart,
+                        gen1CollectionCountStart,
+                        gen2CollectionCountStart));
             }
         }
 
@@ -260,6 +318,7 @@ namespace Ink_Canvas.Helpers
                 var snapshot = ToSnapshot(Aggregate);
                 foreach (var pair in ByInputKind)
                     snapshot.ByInputKind[pair.Key.ToString()] = ToPublicSnapshot(pair.Value);
+                snapshot.SlowEvents = new List<RealtimeInkSlowEventSnapshot>(SlowEvents);
                 return snapshot;
             }
         }
@@ -270,6 +329,7 @@ namespace Ink_Canvas.Helpers
             {
                 ActiveStrokes.Clear();
                 ByInputKind.Clear();
+                SlowEvents.Clear();
                 ResetAggregate(Aggregate);
             }
         }
@@ -353,6 +413,49 @@ namespace Ink_Canvas.Helpers
             stats.FrameWaitSampleCount++;
             stats.TotalFrameWaitMs += elapsedMs;
             stats.MaxFrameWaitMs = Math.Max(stats.MaxFrameWaitMs, elapsedMs);
+        }
+
+        private static void AddSlowEvent(RealtimeInkSlowEventSnapshot slowEvent)
+        {
+            SlowEvents.Enqueue(slowEvent);
+            while (SlowEvents.Count > MaxSlowEventCount)
+                SlowEvents.Dequeue();
+        }
+
+        private static RealtimeInkSlowEventSnapshot CreateSlowEvent(
+            StrokeVisual strokeVisual,
+            string eventType,
+            RealtimeInkInputKind inputKind,
+            double elapsedMs,
+            bool committed,
+            bool forceRedraw,
+            int gen0CollectionCountStart,
+            int gen1CollectionCountStart,
+            int gen2CollectionCountStart)
+        {
+            var completedAt = DateTime.Now;
+            var startedAt = completedAt.AddMilliseconds(-elapsedMs);
+            return new RealtimeInkSlowEventSnapshot
+            {
+                Timestamp = completedAt.ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                StartedAt = startedAt.ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                CompletedAt = completedAt.ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                EventType = eventType,
+                InputKind = inputKind.ToString(),
+                ElapsedMs = elapsedMs,
+                PointCount = strokeVisual.PointCount,
+                ActivePointCount = strokeVisual.ActivePointCount,
+                LastCommittedPointCount = strokeVisual.LastCommittedPointCount,
+                Committed = committed,
+                ForceRedraw = forceRedraw,
+                Gen0CollectionCountStart = gen0CollectionCountStart,
+                Gen0CollectionCountEnd = GC.CollectionCount(0),
+                Gen1CollectionCountStart = gen1CollectionCountStart,
+                Gen1CollectionCountEnd = GC.CollectionCount(1),
+                Gen2CollectionCountStart = gen2CollectionCountStart,
+                Gen2CollectionCountEnd = GC.CollectionCount(2),
+                ManagedMemoryBytes = GC.GetTotalMemory(false)
+            };
         }
 
         private static AggregateStats GetInputAggregate(RealtimeInkInputKind inputKind)
