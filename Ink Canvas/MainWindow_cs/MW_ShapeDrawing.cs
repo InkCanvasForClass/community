@@ -2635,9 +2635,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockInkInputOverFloatingBar(e.GetPosition(this), e))
-                return;
-
             if (IsBoardRoamingMode && e.ChangedButton == MouseButton.Left)
             {
                 inkCanvas.CaptureMouse();

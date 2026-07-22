@@ -6072,17 +6072,6 @@ namespace Ink_Canvas
             _currentToolMode = NormalizeToolModeForFreeze(mode);
             UpdateBoardRoamingButtonState();
 
-            // 动态切换 EnablePointerSupport：仅在画笔批注模式下启用 WM_POINTER 触摸栈，
-            // 其他模式下禁用以避免 DragMove/DoDragDrop 在模拟触摸屏下假死。
-            try
-            {
-                AppContext.SetSwitch("Switch.System.Windows.Input.Stylus.EnablePointerSupport", _currentToolMode == "pen");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Failed to toggle EnablePointerSupport: {ex}");
-            }
-
             // Issue #285 更小批注栏：根据当前工具模式刷新迷你栏显示状态
             RefreshIdleMiniBarState();
         }
