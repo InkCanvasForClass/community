@@ -1769,13 +1769,16 @@ namespace Ink_Canvas
                 if (element == null || element.ActualWidth <= 0 || element.ActualHeight <= 0)
                 {
                     // 如果元素尺寸无效，等待加载完成后再处理
-                    element.Loaded += (sender, e) =>
+                    RoutedEventHandler loadedHandler = null;
+                    loadedHandler = (sender, e) =>
                     {
+                        element.Loaded -= loadedHandler;  // 一次性订阅，解除后释放 lambda 闭包
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
                             CenterAndScaleElement(element);
                         }), DispatcherPriority.Loaded);
                     };
+                    element.Loaded += loadedHandler;
                     return;
                 }
 

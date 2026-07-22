@@ -181,6 +181,8 @@ namespace Ink_Canvas.Windows
 
                 if (inkCanvas != null && inkCanvas.Children is INotifyCollectionChanged notifyCollection)
                 {
+                    // 订阅前先解绑，防止重复订阅导致委托累积
+                    notifyCollection.CollectionChanged -= InkCanvasChildren_CollectionChanged;
                     notifyCollection.CollectionChanged += InkCanvasChildren_CollectionChanged;
                 }
             }

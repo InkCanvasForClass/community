@@ -47,8 +47,11 @@ namespace Ink_Canvas.Windows
 
             Closed += (s, e) =>
             {
+                // 解除订阅，避免窗口反复开关时委托累积
+                updateTimer.Elapsed -= UpdateTimer_Elapsed;
                 updateTimer.Stop();
                 updateTimer.Dispose();
+                _clickCheckTimer.Tick -= ClickCheckTimer_Tick;
                 _clickCheckTimer.Stop();
             };
         }

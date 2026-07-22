@@ -804,8 +804,10 @@ namespace Ink_Canvas
                     {
                         Interval = TimeSpan.FromMilliseconds(500)
                     };
-                    oobeTimer.Tick += (s, e) =>
+                    EventHandler oobeTickHandler = null;
+                    oobeTickHandler = (s, e) =>
                     {
+                        oobeTimer.Tick -= oobeTickHandler;  // 解除订阅，打破循环引用
                         oobeTimer.Stop();
                         oobeTimer = null;
                         try
@@ -838,6 +840,7 @@ namespace Ink_Canvas
                             }
                         }
                     };
+                    oobeTimer.Tick += oobeTickHandler;
                     oobeTimer.Start();
                 }
             }

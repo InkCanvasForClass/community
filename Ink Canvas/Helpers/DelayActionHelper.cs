@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Timers;
 
@@ -19,11 +19,15 @@ namespace Ink_Canvas.Helpers
                 if (_timerDebounce == null)
                 {
                     _timerDebounce = new Timer(timeMs) { AutoReset = false };
-                    _timerDebounce.Elapsed += (o, e) =>
+                    ElapsedEventHandler elapsedHandler = null;
+                    elapsedHandler = (o, e) =>
                     {
+                        // 解除订阅，打破 timer.Elapsed → lambda → timer 循环引用
+                        _timerDebounce.Elapsed -= elapsedHandler;
                         _timerDebounce.Stop(); _timerDebounce.Close(); _timerDebounce = null;
                         InvokeAction(action, inv);
                     };
+                    _timerDebounce.Elapsed += elapsedHandler;
                 }
                 _timerDebounce.Stop();
                 _timerDebounce.Start();
