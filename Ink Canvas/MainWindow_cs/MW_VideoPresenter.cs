@@ -141,6 +141,11 @@ namespace Ink_Canvas
         {
             if (BoothPopup == null) return;
 
+            // 打开 BoothPopup 前同步加速模式 ComboBox 选中项。
+            // WireUpBoothPopupContentEvents 在 LoadSettings 之前调用，无法读到用户保存的值，
+            // 必须在此处（LoadSettings 已完成）同步，避免 ComboBox 始终显示 CPU。
+            SyncPhotoCorrectionAccelerationComboBox();
+
             if (BoothPopup.IsOpen)
             {
                 // 菜单可见时点击视频展台按钮 = 仅关闭菜单（与右上角 X 一致），
@@ -2462,6 +2467,24 @@ namespace Ink_Canvas
             Settings.Automation.IsEnablePhotoCorrection = false;
             SaveSettingsToFile();
             StopPaperDetectTimer();
+        }
+
+        /// <summary>
+        /// 从 Settings 同步加速模式 ComboBox 选中项。
+        /// 因 WireUpBoothPopupContentEvents 早于 LoadSettings 执行，需在 BoothPopup 打开时补同步。
+        /// SelectionChanged 处理函数内有 early return（Settings == newMode 时不保存），故设置 SelectedIndex 安全。
+        /// </summary>
+        private void SyncPhotoCorrectionAccelerationComboBox()
+        {
+            try
+            {
+                var cb = BoothPopupContent?.PhotoCorrectionAccelerationComboBox;
+                if (cb == null) return;
+                int accelIdx = (int)(Settings?.Automation?.PhotoCorrectionAcceleration ?? PhotoCorrectionAccelerationMode.Cpu);
+                if (accelIdx >= 0 && accelIdx < cb.Items.Count && cb.SelectedIndex != accelIdx)
+                    cb.SelectedIndex = accelIdx;
+            }
+            catch { }
         }
 
         /// <summary>

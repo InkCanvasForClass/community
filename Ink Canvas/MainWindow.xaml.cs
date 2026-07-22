@@ -481,15 +481,9 @@ namespace Ink_Canvas
                 if (BoothPopup != null)
                     AnimationsHelper.HidePopupWithSlideAndFade(BoothPopup);
             };
-
-            // 恢复矫正加速模式选中项（ComboBox 索引与枚举值一致：0=CPU, 1=OpenCL, 2=CUDA）
-            try
-            {
-                int accelIdx = (int)(Settings?.Automation?.PhotoCorrectionAcceleration ?? PhotoCorrectionAccelerationMode.Cpu);
-                if (accelIdx >= 0 && accelIdx < content.PhotoCorrectionAccelerationComboBox.Items.Count)
-                    content.PhotoCorrectionAccelerationComboBox.SelectedIndex = accelIdx;
-            }
-            catch { }
+            // 注意：此处不恢复 PhotoCorrectionAccelerationComboBox.SelectedIndex，
+            // 因为 WireUpBoothPopupContentEvents 在 LoadSettings 之前调用，Settings 仍为默认值。
+            // 改为在 ToggleVideoPresenterSidebar 打开 BoothPopup 时同步，确保读到已加载的设置。
         }
 
         /// <summary>
