@@ -656,6 +656,10 @@ namespace Ink_Canvas
                 }
 
                 StrokeManipulationHistory = null;
+
+                // 视频展台模式：墨迹被移动/缩放后，旋转基准已过期，重置以便下次旋转重新保存
+                if (_isVideoPresenterSpecialMode && !_isApplyingRotationToStrokes)
+                    ResetRotationBaseline();
             }
         }
     }

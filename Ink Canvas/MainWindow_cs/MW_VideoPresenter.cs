@@ -583,13 +583,19 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 计算指定角度下视频画面的变换矩阵（绕容器中心旋转 + 90/270 缩小 fit 容器）。
+        /// 计算指定角度下视频画面的变换矩阵（绕画面视觉中心旋转 + 90/270 缩小 fit 容器）。
+        /// 画面视觉中心 = 容器中心经 RenderTransform 缩放和平移后的位置：
+        ///   cx = containerW/2 * previewScale + previewTranslateX
+        ///   cy = containerH/2 * previewScale + previewTranslateY
+        /// 墨迹在 inkCanvas 坐标系（容器坐标），移动时已同步平移，所以旋转中心必须用画面视觉中心，
+        /// 否则移动后旋转墨迹会绕容器中心转，与画面不同步。
         /// 0°/180°：scale=1.0；90°/270°：scale=min(W/H, H/W)。
         /// </summary>
         private System.Windows.Media.Matrix GetBoothRotationMatrix(double angleDegrees, double containerW, double containerH)
         {
-            double cx = containerW / 2.0;
-            double cy = containerH / 2.0;
+            // 画面视觉中心：考虑 RenderTransform 的缩放和平移
+            double cx = (containerW / 2.0) * _boothPreviewScale + _boothPreviewTranslateX;
+            double cy = (containerH / 2.0) * _boothPreviewScale + _boothPreviewTranslateY;
             double angle = angleDegrees % 360.0;
             if (angle < 0) angle += 360.0;
             bool rotated = Math.Abs(angle - 90.0) < 0.01 || Math.Abs(angle - 270.0) < 0.01;
@@ -1500,6 +1506,8 @@ namespace Ink_Canvas
                         {
                             stroke.Transform(translateMatrix, false);
                         }
+                        // 墨迹位置已改变，旋转基准过期，重置以便下次旋转重新保存
+                        ResetRotationBaseline();
                     }
                     catch { }
                 }
@@ -1639,6 +1647,8 @@ namespace Ink_Canvas
                         {
                             stroke.Transform(translateMatrix, false);
                         }
+                        // 墨迹位置已改变，旋转基准过期，重置以便下次旋转重新保存
+                        ResetRotationBaseline();
                     }
                     catch { }
                 }
@@ -1682,6 +1692,8 @@ namespace Ink_Canvas
                 var matrix = new System.Windows.Media.Matrix();
                 matrix.ScaleAt(ratio, ratio, inkOrigin.X, inkOrigin.Y);
                 inkCanvas.Strokes.Transform(matrix, false);
+                // 墨迹大小已改变，旋转基准过期，重置以便下次旋转重新保存
+                ResetRotationBaseline();
             }
             catch (Exception ex)
             {
