@@ -108,11 +108,13 @@ namespace Ink_Canvas.Helpers
                     _cpuSamples.Clear();
                     _memorySamples.Clear();
                 }
+                RealtimeInkPerformanceMonitor.Reset();
                 SampleCount = 0;
                 CurrentAvgCpu = 0;
                 CurrentMemoryMb = 0;
                 _isMonitoring = true;
 
+                RealtimeInkPerformanceMonitor.StartFrameTracking();
                 _samplingTimer = new Timer(OnSample, null, SamplingIntervalMs, SamplingIntervalMs);
             }
             catch (Exception ex)
@@ -141,6 +143,7 @@ namespace Ink_Canvas.Helpers
             {
                 _samplingTimer?.Dispose();
                 _samplingTimer = null;
+                RealtimeInkPerformanceMonitor.StopFrameTracking();
                 _isMonitoring = false;
 
                 // Take one final sample
@@ -172,6 +175,38 @@ namespace Ink_Canvas.Helpers
                         record.SmoothingAvgOutputPoints = Math.Round(_cachedSmoothingStats.AvgOutputPoints, 0);
                     }
 
+                    // 记录墨迹实时输入和预览绘制统计
+                    var realtimeInkSnapshot = RealtimeInkPerformanceMonitor.GetSnapshot();
+                    record.RealtimeInkStrokeCount = realtimeInkSnapshot.StrokeCount;
+                    record.RealtimeInkInputEventCount = realtimeInkSnapshot.InputEventCount;
+                    record.RealtimeInkRawInputPointCount = realtimeInkSnapshot.RawInputPointCount;
+                    record.RealtimeInkAddedPointCount = realtimeInkSnapshot.AddedPointCount;
+                    record.RealtimeInkRedrawCount = realtimeInkSnapshot.RedrawCount;
+                    record.RealtimeInkCommitCount = realtimeInkSnapshot.CommitCount;
+                    record.RealtimeInkForceRedrawCount = realtimeInkSnapshot.ForceRedrawCount;
+                    record.RealtimeInkTotalInputProcessingMs = Math.Round(realtimeInkSnapshot.TotalInputProcessingMs, 3);
+                    record.RealtimeInkMaxInputProcessingMs = Math.Round(realtimeInkSnapshot.MaxInputProcessingMs, 3);
+                    record.RealtimeInkTotalRedrawMs = Math.Round(realtimeInkSnapshot.TotalRedrawMs, 3);
+                    record.RealtimeInkMaxRedrawMs = Math.Round(realtimeInkSnapshot.MaxRedrawMs, 3);
+                    record.RealtimeInkFrameWaitSampleCount = realtimeInkSnapshot.FrameWaitSampleCount;
+                    record.RealtimeInkTotalFrameWaitMs = Math.Round(realtimeInkSnapshot.TotalFrameWaitMs, 3);
+                    record.RealtimeInkMaxFrameWaitMs = Math.Round(realtimeInkSnapshot.MaxFrameWaitMs, 3);
+                    record.RealtimeInkSlowInputOver1MsCount = realtimeInkSnapshot.SlowInputOver1MsCount;
+                    record.RealtimeInkSlowRedrawOver1MsCount = realtimeInkSnapshot.SlowRedrawOver1MsCount;
+                    record.RealtimeInkSlowRedrawOver3MsCount = realtimeInkSnapshot.SlowRedrawOver3MsCount;
+                    record.RealtimeInkSlowRedrawOver5MsCount = realtimeInkSnapshot.SlowRedrawOver5MsCount;
+                    record.RealtimeInkNormalRedrawCount = realtimeInkSnapshot.NormalRedrawCount;
+                    record.RealtimeInkTotalNormalRedrawMs = Math.Round(realtimeInkSnapshot.TotalNormalRedrawMs, 3);
+                    record.RealtimeInkMaxNormalRedrawMs = Math.Round(realtimeInkSnapshot.MaxNormalRedrawMs, 3);
+                    record.RealtimeInkTotalForceRedrawMs = Math.Round(realtimeInkSnapshot.TotalForceRedrawMs, 3);
+                    record.RealtimeInkMaxForceRedrawMs = Math.Round(realtimeInkSnapshot.MaxForceRedrawMs, 3);
+                    record.RealtimeInkTotalCommitRedrawMs = Math.Round(realtimeInkSnapshot.TotalCommitRedrawMs, 3);
+                    record.RealtimeInkMaxCommitRedrawMs = Math.Round(realtimeInkSnapshot.MaxCommitRedrawMs, 3);
+                    record.RealtimeInkActiveRedrawCount = realtimeInkSnapshot.ActiveRedrawCount;
+                    record.RealtimeInkTotalActiveRedrawMs = Math.Round(realtimeInkSnapshot.TotalActiveRedrawMs, 3);
+                    record.RealtimeInkMaxActiveRedrawMs = Math.Round(realtimeInkSnapshot.MaxActiveRedrawMs, 3);
+                    record.RealtimeInkByInputKind = realtimeInkSnapshot.ByInputKind;
+
                     AppendRecord(record);
                 }
             }
@@ -188,6 +223,7 @@ namespace Ink_Canvas.Helpers
         {
             _samplingTimer?.Dispose();
             _samplingTimer = null;
+            RealtimeInkPerformanceMonitor.StopFrameTracking();
             _isMonitoring = false;
             CurrentAvgCpu = 0;
             CurrentMemoryMb = 0;

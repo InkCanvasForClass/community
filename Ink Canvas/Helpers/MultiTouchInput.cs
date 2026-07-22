@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Input;
@@ -191,13 +192,15 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 重新画出笔迹
         /// </summary>
-        public void Redraw()
+        public void Redraw(bool forceRedraw = false)
         {
             if (Stroke == null || _visualCanvas == null) return;
 
             var currentPointCount = Stroke.StylusPoints.Count;
             if (currentPointCount == 0) return;
 
+            var startedAt = PerformanceMonitorHelper.IsMonitoring ? Stopwatch.GetTimestamp() : 0L;
+            var committed = false;
             try
             {
                 if (_activeVisual == null)
@@ -214,9 +217,15 @@ namespace Ink_Canvas.Helpers
                     _visualCanvas.RemoveVisual(_activeVisual);
                     _activeVisual = null;
                     CommitActiveVisual(currentPointCount);
+                    committed = true;
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+            finally
+            {
+                if (startedAt != 0L)
+                    RealtimeInkPerformanceMonitor.RecordRedraw(this, Stopwatch.GetTimestamp() - startedAt, committed, forceRedraw);
+            }
         }
 
         /// <summary>
@@ -227,6 +236,7 @@ namespace Ink_Canvas.Helpers
         {
             if (Stroke == null || _visualCanvas == null) return;
 
+            RealtimeInkPerformanceMonitor.RecordForceRedraw(this);
             var currentPointCount = Stroke.StylusPoints.Count;
 
             // 点数回退（笔画被替换/缩短），必须清除全部已提交视觉重建
@@ -242,7 +252,7 @@ namespace Ink_Canvas.Helpers
                 _activeVisual = null;
             }
 
-            Redraw();
+            Redraw(true);
         }
 
         private readonly DrawingAttributes _drawingAttributes;

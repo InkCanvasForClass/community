@@ -1,4 +1,5 @@
 using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
+using Ink_Canvas.Helpers;
 using Newtonsoft.Json;
 using OSVersionExtension;
 using System;
@@ -140,6 +141,94 @@ namespace Ink_Canvas
 
         [JsonProperty("smoothingAvgOutputPoints")]
         public double SmoothingAvgOutputPoints { get; set; }
+
+        [JsonProperty("realtimeInkStrokeCount")]
+        public long RealtimeInkStrokeCount { get; set; }
+
+        [JsonProperty("realtimeInkInputEventCount")]
+        public long RealtimeInkInputEventCount { get; set; }
+
+        [JsonProperty("realtimeInkRawInputPointCount")]
+        public long RealtimeInkRawInputPointCount { get; set; }
+
+        [JsonProperty("realtimeInkAddedPointCount")]
+        public long RealtimeInkAddedPointCount { get; set; }
+
+        [JsonProperty("realtimeInkRedrawCount")]
+        public long RealtimeInkRedrawCount { get; set; }
+
+        [JsonProperty("realtimeInkCommitCount")]
+        public long RealtimeInkCommitCount { get; set; }
+
+        [JsonProperty("realtimeInkForceRedrawCount")]
+        public long RealtimeInkForceRedrawCount { get; set; }
+
+        [JsonProperty("realtimeInkTotalInputProcessingMs")]
+        public double RealtimeInkTotalInputProcessingMs { get; set; }
+
+        [JsonProperty("realtimeInkMaxInputProcessingMs")]
+        public double RealtimeInkMaxInputProcessingMs { get; set; }
+
+        [JsonProperty("realtimeInkTotalRedrawMs")]
+        public double RealtimeInkTotalRedrawMs { get; set; }
+
+        [JsonProperty("realtimeInkMaxRedrawMs")]
+        public double RealtimeInkMaxRedrawMs { get; set; }
+
+        [JsonProperty("realtimeInkFrameWaitSampleCount")]
+        public long RealtimeInkFrameWaitSampleCount { get; set; }
+
+        [JsonProperty("realtimeInkTotalFrameWaitMs")]
+        public double RealtimeInkTotalFrameWaitMs { get; set; }
+
+        [JsonProperty("realtimeInkMaxFrameWaitMs")]
+        public double RealtimeInkMaxFrameWaitMs { get; set; }
+
+        [JsonProperty("realtimeInkSlowInputOver1MsCount")]
+        public long RealtimeInkSlowInputOver1MsCount { get; set; }
+
+        [JsonProperty("realtimeInkSlowRedrawOver1MsCount")]
+        public long RealtimeInkSlowRedrawOver1MsCount { get; set; }
+
+        [JsonProperty("realtimeInkSlowRedrawOver3MsCount")]
+        public long RealtimeInkSlowRedrawOver3MsCount { get; set; }
+
+        [JsonProperty("realtimeInkSlowRedrawOver5MsCount")]
+        public long RealtimeInkSlowRedrawOver5MsCount { get; set; }
+
+        [JsonProperty("realtimeInkNormalRedrawCount")]
+        public long RealtimeInkNormalRedrawCount { get; set; }
+
+        [JsonProperty("realtimeInkTotalNormalRedrawMs")]
+        public double RealtimeInkTotalNormalRedrawMs { get; set; }
+
+        [JsonProperty("realtimeInkMaxNormalRedrawMs")]
+        public double RealtimeInkMaxNormalRedrawMs { get; set; }
+
+        [JsonProperty("realtimeInkTotalForceRedrawMs")]
+        public double RealtimeInkTotalForceRedrawMs { get; set; }
+
+        [JsonProperty("realtimeInkMaxForceRedrawMs")]
+        public double RealtimeInkMaxForceRedrawMs { get; set; }
+
+        [JsonProperty("realtimeInkTotalCommitRedrawMs")]
+        public double RealtimeInkTotalCommitRedrawMs { get; set; }
+
+        [JsonProperty("realtimeInkMaxCommitRedrawMs")]
+        public double RealtimeInkMaxCommitRedrawMs { get; set; }
+
+        [JsonProperty("realtimeInkActiveRedrawCount")]
+        public long RealtimeInkActiveRedrawCount { get; set; }
+
+        [JsonProperty("realtimeInkTotalActiveRedrawMs")]
+        public double RealtimeInkTotalActiveRedrawMs { get; set; }
+
+        [JsonProperty("realtimeInkMaxActiveRedrawMs")]
+        public double RealtimeInkMaxActiveRedrawMs { get; set; }
+
+        [JsonProperty("realtimeInkByInputKind")]
+        public Dictionary<string, RealtimeInkInputPerformanceSnapshot> RealtimeInkByInputKind { get; set; }
+            = new Dictionary<string, RealtimeInkInputPerformanceSnapshot>();
     }
 
     public class NotificationSettings
