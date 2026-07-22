@@ -7,6 +7,22 @@ using System.Text.RegularExpressions;
 namespace Ink_Canvas.Helpers
 {
     /// <summary>
+    /// Represents a single timed character within a lyric line.
+    /// Used for per-character highlight animation (already-sung / pending chars).
+    /// </summary>
+    public class LrcChar
+    {
+        /// <summary>Character glyph (may be a single Han character, Latin letter, or punctuation).</summary>
+        public string Text { get; set; } = string.Empty;
+
+        /// <summary>Offset from the line start when this character starts being sung.</summary>
+        public TimeSpan StartOffset { get; set; }
+
+        /// <summary>Duration the character is held; <c>null</c> means the line end is used.</summary>
+        public TimeSpan? Duration { get; set; }
+    }
+
+    /// <summary>
     /// Represents a single lyric line with timing information.
     /// </summary>
     public class LrcLine
@@ -19,6 +35,12 @@ namespace Ink_Canvas.Helpers
 
         /// <summary>Translated lyric text (if available).</summary>
         public string Translation { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Per-character timing inside this line. Empty when the LRC only provides line-level
+        /// timestamps; an evenly-distributed fallback can be computed on demand.
+        /// </summary>
+        public List<LrcChar> Chars { get; set; } = new List<LrcChar>();
     }
 
     /// <summary>
@@ -46,6 +68,18 @@ namespace Ink_Canvas.Helpers
         // Matches metadata tags like [ti:Title], [ar:Artist], etc.
         private static readonly Regex MetaTagRegex = new Regex(
             @"\[(\w+):(.*?)\]",
+            RegexOptions.Compiled);
+
+        // Matches inline per-character timestamps like <12:34.56> or <34.56> following LRC extensions.
+        // Captures: minutes (optional), seconds, fraction (optional).
+        private static readonly Regex CharTimeTagRegex = new Regex(
+            @"<(\d{1,3})?:?(\d{1,2})(?:\.(\d{1,3}))?>",
+            RegexOptions.Compiled);
+
+        // Splits the lyric body into "segments" of tagged or untagged runs.
+        // Example: "你<00:00.50>好<00:01.20>世 界" → ["你", "<00:00.50>", "好", "<00:01.20>", "世 界"]
+        private static readonly Regex CharSegmentRegex = new Regex(
+            @"<[^>]+>|[^<]+",
             RegexOptions.Compiled);
 
         /// <summary>
@@ -142,6 +176,7 @@ namespace Ink_Canvas.Helpers
                     if (!timeSpan.HasValue) continue;
 
                     var time = timeSpan.Value;
+                    var charTimings = ParseCharTimings(text);
 
                     if (!lyricMap.ContainsKey(time))
                     {
@@ -150,7 +185,8 @@ namespace Ink_Canvas.Helpers
                         {
                             Time = time,
                             Text = text,
-                            Translation = inlineTranslation ?? string.Empty
+                            Translation = inlineTranslation ?? string.Empty,
+                            Chars = charTimings
                         };
                     }
                     else
@@ -181,6 +217,244 @@ namespace Ink_Canvas.Helpers
             // Sort by time and return
             lrc.Lines = lyricMap.Values.OrderBy(e => e.Time).ToList();
             return lrc.Lines.Count > 0 ? lrc : null;
+        }
+
+        /// <summary>
+        /// Parses inline per-character timestamps embedded in the lyric body.
+        /// Expected format: literal text with optional "&lt;mm:ss.xx&gt;" tags interleaved before each
+        /// character/segment, e.g. "&lt;00:00.50&gt;你&lt;00:01.20&gt;好 世&lt;00:01.80&gt;界".
+        /// Returns an empty list when the body does not contain any inline timestamp tags
+        /// (caller can then fall back to evenly-distributed timings).
+        /// </summary>
+        public static List<LrcChar> ParseCharTimings(string body)
+        {
+            var result = new List<LrcChar>();
+            if (string.IsNullOrWhiteSpace(body)) return result;
+
+            // First pass: scan tag/text segments and materialize them.
+            var segments = new List<(bool IsTag, string Content)>();
+            bool anyTag = false;
+            foreach (Match seg in CharSegmentRegex.Matches(body))
+            {
+                var piece = seg.Value;
+                if (string.IsNullOrEmpty(piece)) continue;
+                var isTag = piece.Length >= 2 && piece[0] == '<' && piece[piece.Length - 1] == '>';
+                if (isTag) anyTag = true;
+                segments.Add((isTag, piece));
+            }
+            if (segments.Count == 0 || !anyTag) return result;
+
+            // Second pass: walk segments. The first tag establishes the timeline origin;
+            // each following tag shifts "currentOffset" forward to that timestamp. Every
+            // text chunk between two tags shares the active offset, with characters in that
+            // chunk given micro-offsets so adjacent chars have start times slightly different
+            // (1/10 of the gap to the next tag), which preserves smooth per-char animation
+            // even when an LRC author groups multi-char words under one tag.
+            TimeSpan currentOffset = TimeSpan.Zero;
+            TimeSpan nextTagOffset = TimeSpan.Zero;
+            bool nextTagPending = false;
+
+            for (int i = 0; i < segments.Count; i++)
+            {
+                var (isTag, content) = segments[i];
+
+                if (isTag)
+                {
+                    var ts = ParseInlineCharTimeTag(content);
+                    if (ts.HasValue)
+                    {
+                        // If we're sitting at the start of a chunk, this tag is the chunk's
+                        // anchor; otherwise it becomes the next pending anchor.
+                        if (result.Count == 0 || i == 0)
+                        {
+                            currentOffset = ts.Value;
+                        }
+                        else
+                        {
+                            nextTagOffset = ts.Value;
+                            nextTagPending = true;
+                        }
+                    }
+                    continue;
+                }
+
+                // Text chunk
+                var chars = ToDisplayChars(content).ToList();
+                if (chars.Count == 0) continue;
+
+                // Span between current offset and the next tag (or end of string).
+                TimeSpan chunkEnd = nextTagPending ? nextTagOffset : currentOffset + TimeSpan.FromMilliseconds(500);
+                if (chunkEnd < currentOffset) chunkEnd = currentOffset + TimeSpan.FromMilliseconds(500);
+                var chunkSpan = chunkEnd - currentOffset;
+                var perChar = TimeSpan.FromMilliseconds(chars.Count > 0
+                    ? chunkSpan.TotalMilliseconds / chars.Count
+                    : 0);
+
+                for (int k = 0; k < chars.Count; k++)
+                {
+                    result.Add(new LrcChar
+                    {
+                        Text = chars[k],
+                        StartOffset = currentOffset + TimeSpan.FromMilliseconds(perChar.TotalMilliseconds * k)
+                    });
+                }
+
+                currentOffset = chunkEnd;
+                nextTagPending = false;
+            }
+
+            // Normalize so the first character starts at zero offset.
+            if (result.Count > 0)
+            {
+                var first = result[0].StartOffset;
+                if (first > TimeSpan.Zero)
+                {
+                    foreach (var c in result) c.StartOffset -= first;
+                }
+                else if (first < TimeSpan.Zero)
+                {
+                    foreach (var c in result) c.StartOffset = TimeSpan.Zero;
+                }
+            }
+
+            // Compute per-character durations from successive offsets.
+            for (int i = 0; i < result.Count; i++)
+            {
+                if (i + 1 < result.Count && result[i + 1].StartOffset > result[i].StartOffset)
+                {
+                    result[i].Duration = result[i + 1].StartOffset - result[i].StartOffset;
+                }
+            }
+
+            return result;
+        }
+
+        private static TimeSpan? ParseInlineCharTimeTag(string piece)
+        {
+            var match = CharTimeTagRegex.Match(piece);
+            if (!match.Success) return null;
+
+            bool hasMinutes = !string.IsNullOrEmpty(match.Groups[1].Value);
+            int minutes = 0;
+            int seconds;
+            int milliseconds = 0;
+
+            if (hasMinutes && !int.TryParse(match.Groups[1].Value, out minutes)) return null;
+            if (!int.TryParse(match.Groups[2].Value, out seconds)) return null;
+
+            if (match.Groups[3].Success)
+            {
+                var msStr = match.Groups[3].Value;
+                if (msStr.Length == 1) msStr += "00";
+                else if (msStr.Length == 2) msStr += "0";
+                int.TryParse(msStr, out milliseconds);
+            }
+
+            return new TimeSpan(0, 0, minutes, seconds, milliseconds);
+        }
+
+        /// <summary>
+        /// Splits a segment into display characters using grapheme clusters when possible;
+        /// falls back to enumerating the string char-by-char for surrogate pairs.
+        /// </summary>
+        private static IEnumerable<string> ToDisplayChars(string segment)
+        {
+            if (string.IsNullOrEmpty(segment)) yield break;
+
+            var enumerator = System.Globalization.StringInfo.GetTextElementEnumerator(segment);
+            while (enumerator.MoveNext())
+            {
+                yield return (string)enumerator.Current;
+            }
+        }
+
+        /// <summary>
+        /// Returns per-character timings for a line, evenly distributing across the next line's
+        /// start (or <paramref name="defaultDuration"/> if no neighbour is available). Use when the
+        /// LRC body itself does not provide inline "&lt;...&gt;" timestamps.
+        /// </summary>
+        public static void EnsureCharTimings(LrcLine line, TimeSpan? nextLineStart, TimeSpan defaultDuration)
+        {
+            if (line == null) return;
+
+            // Inline timings already present? Nothing to do.
+            if (line.Chars != null && line.Chars.Count > 0)
+            {
+                // Still fill in the trailing character duration if missing.
+                if (line.Chars.Count > 0 && line.Chars[line.Chars.Count - 1].Duration == null)
+                {
+                    var lineDur = (nextLineStart ?? (line.Time + defaultDuration)) - line.Time;
+                    if (lineDur < TimeSpan.Zero) lineDur = defaultDuration;
+                    for (int i = 0; i < line.Chars.Count; i++)
+                    {
+                        var c = line.Chars[i];
+                        if (c.Duration == null)
+                        {
+                            if (i + 1 < line.Chars.Count && line.Chars[i + 1].StartOffset > c.StartOffset)
+                            {
+                                c.Duration = line.Chars[i + 1].StartOffset - c.StartOffset;
+                            }
+                            else
+                            {
+                                c.Duration = lineDur - c.StartOffset;
+                                if (c.Duration < TimeSpan.Zero) c.Duration = TimeSpan.Zero;
+                            }
+                        }
+                    }
+                }
+                return;
+            }
+
+            var displayChars = ToDisplayChars(line.Text ?? string.Empty).ToList();
+            if (displayChars.Count == 0)
+            {
+                line.Chars = new List<LrcChar>();
+                return;
+            }
+
+            var lineDuration = defaultDuration;
+            if (nextLineStart.HasValue && nextLineStart.Value > line.Time)
+            {
+                lineDuration = nextLineStart.Value - line.Time;
+                if (lineDuration <= TimeSpan.Zero) lineDuration = defaultDuration;
+            }
+
+            // Average per-char slice
+            var totalMs = lineDuration.TotalMilliseconds;
+            var stepMs = totalMs / displayChars.Count;
+
+            var chars = new List<LrcChar>(displayChars.Count);
+            for (int i = 0; i < displayChars.Count; i++)
+            {
+                chars.Add(new LrcChar
+                {
+                    Text = displayChars[i],
+                    StartOffset = TimeSpan.FromMilliseconds(stepMs * i),
+                    Duration = TimeSpan.FromMilliseconds(i + 1 < displayChars.Count ? stepMs : Math.Max(0, totalMs - stepMs * i))
+                });
+            }
+            line.Chars = chars;
+        }
+
+        /// <summary>
+        /// Computes the per-character highlight progress for the current playback position.
+        /// Returns a value in [0, 1] where 0 means "no chars sung yet" and 1 means "all chars sung".
+        /// Useful for animating a sweep gradient inside the active line.
+        /// </summary>
+        public static double GetLineProgress(LrcLine line, TimeSpan position)
+        {
+            if (line == null) return 0;
+            var relative = position - line.Time;
+            if (relative <= TimeSpan.Zero) return 0;
+            var last = line.Chars != null && line.Chars.Count > 0 ? line.Chars[line.Chars.Count - 1] : null;
+            if (last == null) return 0;
+            var lastDur = last.Duration ?? TimeSpan.Zero;
+            var total = last.StartOffset + lastDur;
+            if (total <= TimeSpan.Zero) return 1;
+            var ratio = relative.TotalMilliseconds / total.TotalMilliseconds;
+            if (ratio < 0) return 0;
+            if (ratio > 1) return 1;
+            return ratio;
         }
 
         /// <summary>

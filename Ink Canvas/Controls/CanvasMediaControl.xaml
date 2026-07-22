@@ -57,8 +57,36 @@
                                        FontSize="15"
                                        Foreground="#FFF5F5F5"
                                        HorizontalAlignment="Center"
+                                       TextAlignment="Center"
                                        TextTrimming="CharacterEllipsis"
-                                       MaxWidth="460"/>
+                                       MaxWidth="460"
+                                       ToolTip="LRC 歌词"/>
+                            <!-- Karaoke triple: sung prefix (full white) + currently-singing char
+                                 (in-word sweep: a horizontal LinearGradientBrush that walks
+                                 from pending on the left to sung on the right of the glyph)
+                                 + pending suffix (dimmer white). Each is a plain TextBlock
+                                 containing a single Run for the active glyph. -->
+                            <Grid x:Name="LyricPerCharHost"
+                                  HorizontalAlignment="Center"
+                                  MaxWidth="460"
+                                  Visibility="Collapsed">
+                                <StackPanel x:Name="LyricPerCharPanel"
+                                            Orientation="Horizontal"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                    <TextBlock x:Name="LyricSungPrefix"
+                                               FontSize="15"
+                                               FontWeight="SemiBold"
+                                               Foreground="#FFFFFFFF"/>
+                                    <TextBlock x:Name="LyricActiveChar"
+                                               FontSize="15"
+                                               FontWeight="SemiBold"/>
+                                    <TextBlock x:Name="LyricPendingSuffix"
+                                               FontSize="15"
+                                               FontWeight="SemiBold"
+                                               Foreground="#66FFFFFF"/>
+                                </StackPanel>
+                            </Grid>
                             <TextBlock x:Name="LyricTranslationBlock"
                                        FontSize="12"
                                        Foreground="#CCFFFFFF"
