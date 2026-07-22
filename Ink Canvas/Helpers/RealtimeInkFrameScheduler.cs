@@ -30,23 +30,37 @@ namespace Ink_Canvas.Helpers
 
         private static readonly Action GlobalDispatcherProbeAction = CompleteGlobalDispatcherProbe;
         private static DispatcherOperation GlobalDispatcherProbeOperation;
-        private static Dispatcher GlobalProbeDispatcher;
         private static long GlobalProbeStartedAt;
         private static double GlobalProbeDelayMs;
 
         private static bool IsRenderingSubscribed;
         private static long LastRenderingAt;
+        private static long LastKickAt;
         private static int ActiveStrokeSessions;
         private static int IdleEmptyFrameCount;
         private static bool FrameKickPending;
 
-        private const int IdleEmptyFrameUnbindThreshold = 3;
-        private const double StalledRenderKickMs = 28.0;
+        // Input-side coalesce window: multiple TouchMove requests within this window
+        // share one render pass without forcing another kick.
+        private const double CoalesceWindowMs = 10.0;
+        // If Rendering has not run for this long while dirty, force another kick.
+        private const double StalledRenderKickMs = 24.0;
+        // Keep a short warm subscription after strokes go idle, then unbind.
+        private const int IdleEmptyFrameUnbindThreshold = 2;
 
         public static void BeginStrokeSession()
         {
+            var wasIdle = ActiveStrokeSessions == 0;
             ActiveStrokeSessions++;
             EnsureRenderingSubscribed();
+            if (wasIdle)
+            {
+                // Reset stall clocks so the first dirty request of a new stroke session
+                // always takes the immediate-kick path.
+                LastKickAt = 0;
+                IdleEmptyFrameCount = 0;
+                FrameKickPending = false;
+            }
         }
 
         public static void EndStrokeSession()
@@ -109,6 +123,7 @@ namespace Ink_Canvas.Helpers
             PendingRedraws.Clear();
             PendingSnapshot.Clear();
             LastRenderingAt = 0L;
+            LastKickAt = 0L;
             ActiveStrokeSessions = 0;
             IdleEmptyFrameCount = 0;
             FrameKickPending = false;
@@ -117,7 +132,6 @@ namespace Ink_Canvas.Helpers
             if (GlobalDispatcherProbeOperation?.Status == DispatcherOperationStatus.Pending)
                 GlobalDispatcherProbeOperation.Abort();
             GlobalDispatcherProbeOperation = null;
-            GlobalProbeDispatcher = null;
             if (!IsRenderingSubscribed)
                 return;
 
@@ -130,31 +144,23 @@ namespace Ink_Canvas.Helpers
             if (strokeVisual == null)
                 return;
 
-            var now = PerformanceMonitorHelper.IsMonitoring || LastRenderingAt != 0L
-                ? Stopwatch.GetTimestamp()
-                : 0L;
+            var now = Stopwatch.GetTimestamp();
+            var isMonitoring = PerformanceMonitorHelper.IsMonitoring;
 
             if (PendingRedraws.TryGetValue(strokeVisual, out var pending))
             {
                 if (requestKind == RedrawRequestKind.Force)
                     pending.Kind = RedrawRequestKind.Force;
-                // Already dirty: only re-kick WPF if the render loop looks stalled.
-                if (LastRenderingAt != 0L
-                    && ToMilliseconds(now - LastRenderingAt) >= StalledRenderKickMs)
-                {
+
+                // Already dirty: re-kick only if the render loop looks stalled.
+                if (ShouldForceKick(now))
                     KickRender(strokeVisual, now);
-                }
                 else
-                {
                     EnsureRenderingSubscribed();
-                }
                 return;
             }
 
-            var isMonitoring = PerformanceMonitorHelper.IsMonitoring;
             var wasEmpty = PendingRedraws.Count == 0;
-            if (isMonitoring && now == 0L)
-                now = Stopwatch.GetTimestamp();
             PendingRedraws[strokeVisual] = new PendingRedraw
             {
                 Kind = requestKind,
@@ -164,11 +170,35 @@ namespace Ink_Canvas.Helpers
                 Gen2CollectionCountStart = isMonitoring ? GC.CollectionCount(2) : -1
             };
 
-            // First dirty stroke of this frame (or any new dirty when empty): force one render pass.
-            if (wasEmpty || !FrameKickPending)
-                KickRender(strokeVisual, now != 0L ? now : Stopwatch.GetTimestamp());
+            if (wasEmpty || ShouldForceKick(now))
+            {
+                // First dirty of a batch, or coalesce window expired / render stalled.
+                KickRender(strokeVisual, now);
+            }
             else
+            {
+                // Inside coalesce window: mark dirty only. The already-kicked frame
+                // (or sticky Rendering subscription) will pick it up.
                 EnsureRenderingSubscribed();
+            }
+        }
+
+        private static bool ShouldForceKick(long nowTicks)
+        {
+            if (!IsRenderingSubscribed || !FrameKickPending)
+                return true;
+
+            // No render observed yet after a kick — wait unless stalled.
+            if (LastKickAt != 0L && (LastRenderingAt == 0L || LastRenderingAt < LastKickAt))
+            {
+                return ToMilliseconds(nowTicks - LastKickAt) >= StalledRenderKickMs;
+            }
+
+            // Render has run since last kick: only force a new kick after coalesce window.
+            if (LastKickAt != 0L)
+                return ToMilliseconds(nowTicks - LastKickAt) >= CoalesceWindowMs;
+
+            return true;
         }
 
         private static void KickRender(StrokeVisual strokeVisual, long nowTicks)
@@ -176,6 +206,7 @@ namespace Ink_Canvas.Helpers
             EnsureRenderingSubscribed();
             FrameKickPending = true;
             IdleEmptyFrameCount = 0;
+            LastKickAt = nowTicks;
             strokeVisual.InvalidateVisual();
             if (PerformanceMonitorHelper.IsMonitoring)
                 BeginGlobalDispatcherProbe(strokeVisual.Dispatcher, nowTicks);
@@ -189,7 +220,6 @@ namespace Ink_Canvas.Helpers
             if (GlobalDispatcherProbeOperation?.Status == DispatcherOperationStatus.Pending)
                 GlobalDispatcherProbeOperation.Abort();
 
-            GlobalProbeDispatcher = dispatcher;
             GlobalProbeStartedAt = startedAt;
             GlobalProbeDelayMs = 0;
             GlobalDispatcherProbeOperation = dispatcher.BeginInvoke(
@@ -232,7 +262,6 @@ namespace Ink_Canvas.Helpers
             if (PendingRedraws.Count == 0)
             {
                 IdleEmptyFrameCount++;
-                // While a stroke is active, keep a short warm window; then unbind to avoid burning frames.
                 if (ActiveStrokeSessions == 0 || IdleEmptyFrameCount >= IdleEmptyFrameUnbindThreshold)
                 {
                     if (IsRenderingSubscribed)
@@ -270,8 +299,7 @@ namespace Ink_Canvas.Helpers
             }
             PendingRedraws.Clear();
 
-            // One FrameWait sample per render pass (earliest dirty). Multi-touch must not multiply
-            // a single render stall into N identical long waits.
+            // One FrameWait sample per render pass (earliest dirty).
             if (earliest.HasValue)
             {
                 var earliestPair = earliest.Value;
@@ -290,12 +318,12 @@ namespace Ink_Canvas.Helpers
 
             PendingSnapshot.Clear();
 
-            // New dirty arrived during redraw — keep subscribed and kick next frame.
             if (PendingRedraws.Count > 0)
             {
+                // Dirty arrived during redraw — schedule next frame once.
                 EnsureRenderingSubscribed();
                 FrameKickPending = true;
-                // Use any pending visual to invalidate; first key is fine.
+                LastKickAt = renderedAt;
                 foreach (var pair in PendingRedraws)
                 {
                     pair.Key.InvalidateVisual();
@@ -306,10 +334,9 @@ namespace Ink_Canvas.Helpers
             {
                 UnsubscribeIfIdle();
             }
-            // Active strokes with no pending: stay subscribed for a few idle frames then unbind
-            // via the empty-frame path above.
             else
             {
+                // Keep a short warm window while strokes are active.
                 EnsureRenderingSubscribed();
             }
         }
