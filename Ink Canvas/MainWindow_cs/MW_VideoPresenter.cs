@@ -71,6 +71,15 @@ namespace Ink_Canvas
         // 直播页的墨迹槽位独立存放（不与任何照片绑定），用户在直播页画的批注不会因切到照片页而丢失。
         private System.Windows.Ink.StrokeCollection _liveStrokesSnapshot = new System.Windows.Ink.StrokeCollection();
 
+        // 旋转基准墨迹快照：用户在某个角度画墨迹时，保存一份"该角度下的原始墨迹"。
+        // 旋转时不再累积 delta（累积会导致 0->90 缩小后 90->180 在缩小基础上再变换，越来越小），
+        // 而是每次旋转都从基准墨迹重新变换到目标角度，避免累积误差。
+        // _rotationBaselineAngle 记录基准墨迹对应的角度（0/90/180/270）。
+        private System.Windows.Ink.StrokeCollection _rotationBaselineStrokes = null;
+        private int _rotationBaselineAngle = 0;
+        // 程序正在替换墨迹时设为 true，避免 StrokesChanged 重置基准
+        private bool _isApplyingRotationToStrokes = false;
+
         // 按页绑定：每一页对应一个“实时画面”元素与布局/设备信息
         private readonly Dictionary<int, System.Windows.Controls.Image> _liveFrameImageByPage = new Dictionary<int, System.Windows.Controls.Image>();
         private readonly HashSet<int> _liveEnabledPages = new HashSet<int>();
@@ -434,6 +443,8 @@ namespace Ink_Canvas
                     inkCanvas.Strokes.Clear();
                     inkCanvas.EditingMode = _inkEditingModeBeforeSpecialMode;
                 }
+                // 重置旋转基准
+                ResetRotationBaseline();
                 // 同步清空直播页墨迹快照与每张照片的 Strokes，
                 // 避免下次进入特殊模式时残留上一次的批注
                 _liveStrokesSnapshot.Clear();
@@ -572,28 +583,88 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 把 inkCanvas.Strokes 绕画布中心旋转指定角度（增量旋转）。
-        /// 用于照片预览页旋转照片时同步旋转墨迹，避免墨迹不跟随。
+        /// 计算指定角度下视频画面的变换矩阵（绕容器中心旋转 + 90/270 缩小 fit 容器）。
+        /// 0°/180°：scale=1.0；90°/270°：scale=min(W/H, H/W)。
         /// </summary>
-        private void RotateBoothStrokes(double deltaAngle)
+        private System.Windows.Media.Matrix GetBoothRotationMatrix(double angleDegrees, double containerW, double containerH)
         {
-            if (inkCanvas == null || inkCanvas.Strokes.Count == 0) return;
-            if (deltaAngle == 0) return;
-            double w = inkCanvas.ActualWidth;
-            double h = inkCanvas.ActualHeight;
-            if (w <= 0 || h <= 0) return;
-            double cx = w / 2.0;
-            double cy = h / 2.0;
+            double cx = containerW / 2.0;
+            double cy = containerH / 2.0;
+            double angle = angleDegrees % 360.0;
+            if (angle < 0) angle += 360.0;
+            bool rotated = Math.Abs(angle - 90.0) < 0.01 || Math.Abs(angle - 270.0) < 0.01;
+            double scale = 1.0;
+            if (rotated && containerW > 0 && containerH > 0)
+                scale = Math.Min(containerW / containerH, containerH / containerW);
+
+            var m = System.Windows.Media.Matrix.Identity;
+            m.RotateAt(angle, cx, cy);
+            var s = System.Windows.Media.Matrix.Identity;
+            s.ScaleAt(scale, scale, cx, cy);
+            return m * s;
+        }
+
+        /// <summary>
+        /// 从基准墨迹重新变换到目标角度，避免 delta 累积导致越来越小。
+        /// 基准墨迹在保存时记录对应角度，每次旋转从基准重新算：
+        /// delta = Transform(baselineAngle)^(-1) * Transform(targetAngle)
+        /// 用户画新墨迹后基准重置（StrokesChanged 触发 ResetRotationBaseline）。
+        /// </summary>
+        private void RotateBoothStrokesFromBaseline(double targetAngleDegrees)
+        {
+            if (inkCanvas == null) return;
             try
             {
-                var matrix = new System.Windows.Media.Matrix();
-                matrix.RotateAt(deltaAngle, cx, cy);
-                inkCanvas.Strokes.Transform(matrix, false);
+                double containerW = VideoPresenterSpecialModeContainer?.ActualWidth ?? inkCanvas.ActualWidth;
+                double containerH = VideoPresenterSpecialModeContainer?.ActualHeight ?? inkCanvas.ActualHeight;
+                if (containerW <= 0 || containerH <= 0) return;
+
+                // 首次旋转：保存当前墨迹为基准，记录当前角度
+                if (_rotationBaselineStrokes == null && inkCanvas.Strokes.Count > 0)
+                {
+                    _rotationBaselineStrokes = inkCanvas.Strokes.Clone();
+                    // 推断基准角度：照片页用 FrozenFrameRotation，直播页用 FullCanvasRotation
+                    double currentAngle = 0;
+                    if (VideoPresenterFrozenFrameImage != null && VideoPresenterFrozenFrameImage.Visibility == Visibility.Visible)
+                        currentAngle = VideoPresenterFrozenFrameRotation?.Angle ?? 0;
+                    else
+                        currentAngle = VideoPresenterFullCanvasRotation?.Angle ?? 0;
+                    _rotationBaselineAngle = (int)(currentAngle % 360.0 + 360.0) % 360;
+                }
+                if (_rotationBaselineStrokes == null || _rotationBaselineStrokes.Count == 0) return;
+
+                // 从基准角度变换到目标角度：delta = M_baseline^(-1) * M_target
+                var baselineMatrix = GetBoothRotationMatrix(_rotationBaselineAngle, containerW, containerH);
+                var targetMatrix = GetBoothRotationMatrix(targetAngleDegrees, containerW, containerH);
+                if (!baselineMatrix.HasInverse) return;
+                var baselineInv = baselineMatrix;
+                baselineInv.Invert();
+                var delta = baselineInv * targetMatrix;
+
+                _isApplyingRotationToStrokes = true;
+                try
+                {
+                    inkCanvas.Strokes = _rotationBaselineStrokes.Clone();
+                    inkCanvas.Strokes.Transform(delta, false);
+                }
+                finally
+                {
+                    _isApplyingRotationToStrokes = false;
+                }
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"旋转墨迹失败: {ex.Message}", LogHelper.LogType.Warning);
+                LogHelper.WriteLogToFile($"从基准变换墨迹失败: {ex.Message}", LogHelper.LogType.Warning);
             }
+        }
+
+        /// <summary>
+        /// 重置旋转基准（用户在非 0° 画新墨迹后，或切换页面/退出展台时调用）。
+        /// 下次旋转会重新保存基准。
+        /// </summary>
+        private void ResetRotationBaseline()
+        {
+            _rotationBaselineStrokes = null;
         }
 
         /// <summary>
@@ -2282,13 +2353,11 @@ namespace Ink_Canvas
                     && VideoPresenterFrozenFrameImage.Visibility == Visibility.Visible
                     && VideoPresenterFrozenFrameRotation != null)
                 {
-                    double oldAngle = VideoPresenterFrozenFrameRotation.Angle;
-                    double newAngle = (oldAngle + 90.0) % 360.0;
-                    VideoPresenterFrozenFrameRotation.Angle = newAngle;
-                    // 同步旋转墨迹：以 inkCanvas 中心为旋转中心，让批注跟着照片一起转
-                    RotateBoothStrokes(newAngle - oldAngle);
-                    // 旋转 90/270 后视觉宽高互换，必须重新算 fit 和居中，
+                    // 照片预览页旋转：从基准重新变换到目标角度
+                    // 90°/270° 时视频视觉缩小（LayoutTransform 旋转后元素 fit 容器），墨迹跟着缩放
+                    VideoPresenterFrozenFrameRotation.Angle = (VideoPresenterFrozenFrameRotation.Angle + 90.0) % 360.0;
                     ReapplyBoothFrozenLayout();
+                    RotateBoothStrokesFromBaseline(VideoPresenterFrozenFrameRotation.Angle);
                     return;
                 }
 
@@ -2299,11 +2368,10 @@ namespace Ink_Canvas
                 // （旋转 90/270 时 LayoutTransform 会让 WPF 自动交换宽高，避免画面被裁剪）
                 if (_isVideoPresenterSpecialMode && VideoPresenterFullCanvasRotation != null)
                 {
-                    double oldAngle = VideoPresenterFullCanvasRotation.Angle;
+                    // 直播页旋转：从基准重新变换到目标角度
+                    // 90°/270° 时视频视觉缩小（LayoutTransform 旋转后元素 fit 容器），墨迹跟着缩放
                     VideoPresenterFullCanvasRotation.Angle = _cameraService.RotationAngle * 90.0;
-                    double newAngle = VideoPresenterFullCanvasRotation.Angle;
-                    // 同步旋转墨迹：直播页旋转时墨迹也要跟着转（修复第0页旋转墨迹不跟随）
-                    RotateBoothStrokes(newAngle - oldAngle);
+                    RotateBoothStrokesFromBaseline(VideoPresenterFullCanvasRotation.Angle);
                     // 冻结画面 Image 的 LayoutTransform 始终保持 0（照片内容已正向），
                     // 不跟随实时画面旋转，避免双重旋转。
                     if (VideoPresenterFrozenFrameRotation != null)
@@ -2761,6 +2829,8 @@ namespace Ink_Canvas
             // 切换前保存当前页墨迹到当前槽位（直播页快照或旧照片的 Strokes），
             // 避免新照片显示旧墨迹或当前墨迹丢失。
             SaveCurrentBoothStrokesToSlot();
+            // 切换页面重置旋转基准（新页面的墨迹需要新的基准）
+            ResetRotationBaseline();
 
             _boothCurrentPhotoIndex = photoIndex;
 
@@ -2853,6 +2923,8 @@ namespace Ink_Canvas
         {
             // 返回直播前保存当前照片的墨迹到该照片槽位，避免丢失批注
             SaveCurrentBoothStrokesToSlot();
+            // 切换页面重置旋转基准
+            ResetRotationBaseline();
 
             _boothCurrentPhotoIndex = -1;
 

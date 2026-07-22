@@ -433,6 +433,13 @@ namespace Ink_Canvas
         /// </remarks>
         private void StrokesOnStrokesChanged(object sender, StrokeCollectionChangedEventArgs e)
         {
+            // 视频展台旋转时程序替换墨迹，不重置基准
+            if (_isVideoPresenterSpecialMode && !_isApplyingRotationToStrokes)
+            {
+                // 用户手动绘制/擦除墨迹，重置旋转基准，下次旋转重新保存基准
+                ResetRotationBaseline();
+            }
+
             if (IsCurrentPageFrozen && _currentCommitType != CommitReason.CodeInput)
             {
                 var previousCommitType = _currentCommitType;
