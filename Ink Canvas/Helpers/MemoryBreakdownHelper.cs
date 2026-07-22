@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace Ink_Canvas.Helpers
 {
@@ -44,6 +45,76 @@ namespace Ink_Canvas.Helpers
         }
 
         private const string FolderName = "Logs";
+        private const double AutomaticDumpThresholdMb = 500;
+        private static readonly TimeSpan AutomaticCheckInterval = TimeSpan.FromSeconds(5);
+        private static readonly TimeSpan AutomaticDumpInterval = TimeSpan.FromMinutes(1);
+        private static DispatcherTimer _automaticDumpTimer;
+        private static DateTime _lastAutomaticDumpTime = DateTime.MinValue;
+        private static bool _wasAboveAutomaticDumpThreshold;
+
+        public static void StartAutomaticDumpMonitor()
+        {
+            if (_automaticDumpTimer != null)
+            {
+                return;
+            }
+
+            _lastAutomaticDumpTime = DateTime.MinValue;
+            _wasAboveAutomaticDumpThreshold = false;
+            _automaticDumpTimer = new DispatcherTimer(DispatcherPriority.Background)
+            {
+                Interval = AutomaticCheckInterval
+            };
+            _automaticDumpTimer.Tick += AutomaticDumpTimer_Tick;
+            _automaticDumpTimer.Start();
+        }
+
+        public static void StopAutomaticDumpMonitor()
+        {
+            if (_automaticDumpTimer == null)
+            {
+                return;
+            }
+
+            _automaticDumpTimer.Stop();
+            _automaticDumpTimer.Tick -= AutomaticDumpTimer_Tick;
+            _automaticDumpTimer = null;
+            _lastAutomaticDumpTime = DateTime.MinValue;
+            _wasAboveAutomaticDumpThreshold = false;
+        }
+
+        private static void AutomaticDumpTimer_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                using var process = Process.GetCurrentProcess();
+                process.Refresh();
+                double memoryMb = process.PrivateMemorySize64 / (1024.0 * 1024.0);
+                bool isAboveThreshold = memoryMb > AutomaticDumpThresholdMb;
+
+                if (!isAboveThreshold)
+                {
+                    _wasAboveAutomaticDumpThreshold = false;
+                    _lastAutomaticDumpTime = DateTime.MinValue;
+                    return;
+                }
+
+                var now = DateTime.Now;
+                if (!_wasAboveAutomaticDumpThreshold || now - _lastAutomaticDumpTime >= AutomaticDumpInterval)
+                {
+                    _wasAboveAutomaticDumpThreshold = true;
+                    _lastAutomaticDumpTime = now;
+                    LogHelper.WriteLogToFile(
+                        $"[MemoryBreakdown] 检测到进程内存占用 {memoryMb:F1} MB，超过 {AutomaticDumpThresholdMb:F0} MB，自动输出内存清单",
+                        LogHelper.LogType.Warning);
+                    DumpToFile();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[MemoryBreakdown] 自动监测异常: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
 
         /// <summary>
         /// Build the report. Does NOT mutate process state (no GC, no file IO).

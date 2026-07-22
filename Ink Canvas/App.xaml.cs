@@ -1338,6 +1338,7 @@ namespace Ink_Canvas
             };
 
             mainWindow.Show();
+            MemoryBreakdownHelper.StartAutomaticDumpMonitor();
 
             if (IsFastStartupEnabled)
             {
@@ -1845,6 +1846,7 @@ namespace Ink_Canvas
 
             try { heartbeatTimer?.Stop(); } catch { }
             try { watchdogTimer?.Change(Timeout.Infinite, Timeout.Infinite); watchdogTimer?.Dispose(); } catch { }
+            MemoryBreakdownHelper.StopAutomaticDumpMonitor();
 
             CleanupTerminationMonitoring();
 
