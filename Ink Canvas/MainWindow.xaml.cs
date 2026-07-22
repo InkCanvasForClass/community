@@ -1944,6 +1944,7 @@ namespace Ink_Canvas
         /// <param name="e">关闭事件的参数（未使用）。</param>
         private void Window_Closed(object sender, EventArgs e)
         {
+            RealtimeInkFrameScheduler.Clear();
             SystemEvents.DisplaySettingsChanged -= SystemEventsOnDisplaySettingsChanged;
 
             try

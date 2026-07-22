@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Windows.Media;
 
 namespace Ink_Canvas.Helpers
 {
@@ -128,22 +127,12 @@ namespace Ink_Canvas.Helpers
             public double MaxActiveRedrawMs;
         }
 
-        private sealed class PendingFrame
-        {
-            public long StartedAt;
-            public RealtimeInkInputKind InputKind;
-        }
-
         private static readonly object SyncRoot = new object();
         private static readonly Dictionary<StrokeVisual, StrokeStats> ActiveStrokes =
             new Dictionary<StrokeVisual, StrokeStats>();
-        private static readonly Dictionary<StrokeVisual, PendingFrame> PendingFrames =
-            new Dictionary<StrokeVisual, PendingFrame>();
         private static readonly Dictionary<RealtimeInkInputKind, AggregateStats> ByInputKind =
             new Dictionary<RealtimeInkInputKind, AggregateStats>();
         private static readonly AggregateStats Aggregate = new AggregateStats();
-        private static bool IsFrameTrackingEnabled;
-        private static bool IsRenderingSubscribed;
 
         public static void BeginStroke(StrokeVisual strokeVisual, RealtimeInkInputKind inputKind)
         {
@@ -193,7 +182,6 @@ namespace Ink_Canvas.Helpers
                 return;
 
             var elapsedMs = ToMilliseconds(elapsedTicks);
-            var completedAt = Stopwatch.GetTimestamp();
             lock (SyncRoot)
             {
                 if (!ActiveStrokes.TryGetValue(strokeVisual, out var stats))
@@ -202,12 +190,6 @@ namespace Ink_Canvas.Helpers
                 AddRedraw(stats, elapsedMs, committed, forceRedraw);
                 AddRedraw(Aggregate, elapsedMs, committed, forceRedraw);
                 AddRedraw(GetInputAggregate(stats.InputKind), elapsedMs, committed, forceRedraw);
-                PendingFrames[strokeVisual] = new PendingFrame
-                {
-                    StartedAt = completedAt,
-                    InputKind = stats.InputKind
-                };
-                EnsureRenderingSubscribed();
             }
         }
 
@@ -224,6 +206,22 @@ namespace Ink_Canvas.Helpers
                 stats.ForceRedrawCount++;
                 Aggregate.ForceRedrawCount++;
                 GetInputAggregate(stats.InputKind).ForceRedrawCount++;
+            }
+        }
+
+        public static void RecordFrameWait(StrokeVisual strokeVisual, long elapsedTicks)
+        {
+            if (!PerformanceMonitorHelper.IsMonitoring || strokeVisual == null)
+                return;
+
+            var elapsedMs = ToMilliseconds(elapsedTicks);
+            lock (SyncRoot)
+            {
+                if (!ActiveStrokes.TryGetValue(strokeVisual, out var stats))
+                    return;
+
+                AddFrameWait(Aggregate, elapsedMs);
+                AddFrameWait(GetInputAggregate(stats.InputKind), elapsedMs);
             }
         }
 
@@ -268,69 +266,11 @@ namespace Ink_Canvas.Helpers
 
         public static void Reset()
         {
-            StopFrameTracking();
             lock (SyncRoot)
             {
                 ActiveStrokes.Clear();
-                PendingFrames.Clear();
                 ByInputKind.Clear();
                 ResetAggregate(Aggregate);
-            }
-        }
-
-        public static void StartFrameTracking()
-        {
-            lock (SyncRoot)
-                IsFrameTrackingEnabled = PerformanceMonitorHelper.IsMonitoring;
-        }
-
-        public static void StopFrameTracking()
-        {
-            lock (SyncRoot)
-            {
-                IsFrameTrackingEnabled = false;
-                PendingFrames.Clear();
-                if (!IsRenderingSubscribed)
-                    return;
-
-                CompositionTarget.Rendering -= OnRendering;
-                IsRenderingSubscribed = false;
-            }
-        }
-
-        private static void EnsureRenderingSubscribed()
-        {
-            if (!IsFrameTrackingEnabled || IsRenderingSubscribed)
-                return;
-
-            CompositionTarget.Rendering += OnRendering;
-            IsRenderingSubscribed = true;
-        }
-
-        private static void OnRendering(object sender, EventArgs e)
-        {
-            var renderedAt = Stopwatch.GetTimestamp();
-            lock (SyncRoot)
-            {
-                if (IsRenderingSubscribed)
-                {
-                    CompositionTarget.Rendering -= OnRendering;
-                    IsRenderingSubscribed = false;
-                }
-
-                if (!IsFrameTrackingEnabled || !PerformanceMonitorHelper.IsMonitoring)
-                {
-                    PendingFrames.Clear();
-                    return;
-                }
-
-                foreach (var pending in PendingFrames.Values)
-                {
-                    var elapsedMs = ToMilliseconds(renderedAt - pending.StartedAt);
-                    AddFrameWait(Aggregate, elapsedMs);
-                    AddFrameWait(GetInputAggregate(pending.InputKind), elapsedMs);
-                }
-                PendingFrames.Clear();
             }
         }
 

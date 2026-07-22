@@ -1040,6 +1040,8 @@ namespace Ink_Canvas
                 && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
                 && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
             {
+                if (StrokeVisualList.TryGetValue(stylusId, out var staleVisual))
+                    RealtimeInkFrameScheduler.Cancel(staleVisual);
                 if (VisualCanvasList.TryGetValue(stylusId, out var staleCanvas) && inkCanvas.Children.Contains(staleCanvas))
                     inkCanvas.Children.Remove(staleCanvas);
                 StrokeVisualList.Remove(stylusId);
@@ -1061,7 +1063,7 @@ namespace Ink_Canvas
                 var sv = GetStrokeVisual(stylusId);
                 RealtimeInkPerformanceMonitor.BeginStroke(sv, RealtimeInkInputKind.Stylus);
                 TryAppendRealtimeVelocityBrushTipInterpolatedPoints(sv, stylusId, p);
-                sv.Redraw();
+                RealtimeInkFrameScheduler.RequestRedraw(sv);
                 _pauseStraightenInkModeStartPos = p;
                 _pauseStraightenInkModeTracking = true;
                 TouchDownPointsList[stylusId] = InkCanvasEditingMode.None;
@@ -1112,7 +1114,7 @@ namespace Ink_Canvas
                 try
                 {
                     sv = GetStrokeVisual(stylusId);
-                    sv?.ForceRedraw();
+                    RealtimeInkFrameScheduler.Flush(sv);
                     var stroke = sv?.Stroke;
                     if (stroke != null)
                     {
@@ -1129,6 +1131,7 @@ namespace Ink_Canvas
                 }
                 finally
                 {
+                    RealtimeInkFrameScheduler.Cancel(sv);
                     if (VisualCanvasList.TryGetValue(stylusId, out var visualCanvas) && inkCanvas.Children.Contains(visualCanvas))
                         inkCanvas.Children.Remove(visualCanvas);
                     StrokeVisualList.Remove(stylusId);
@@ -1192,7 +1195,9 @@ namespace Ink_Canvas
 
             try
             {
-                var stroke = GetStrokeVisual(e.StylusDevice.Id).Stroke;
+                var strokeVisual = GetStrokeVisual(e.StylusDevice.Id);
+                RealtimeInkFrameScheduler.Flush(strokeVisual);
+                var stroke = strokeVisual.Stroke;
 
                 if (stroke != null)
                 {
@@ -1217,6 +1222,8 @@ namespace Ink_Canvas
 
             try
             {
+                if (StrokeVisualList.TryGetValue(e.StylusDevice.Id, out var strokeVisual))
+                    RealtimeInkFrameScheduler.Cancel(strokeVisual);
                 StrokeVisualList.Remove(e.StylusDevice.Id);
                 VisualCanvasList.Remove(e.StylusDevice.Id);
                 TouchDownPointsList.Remove(e.StylusDevice.Id);
@@ -1234,6 +1241,8 @@ namespace Ink_Canvas
                             inkCanvas.Children.Remove(canvas);
                         }
                     }
+                    foreach (var pendingStrokeVisual in StrokeVisualList.Values.ToList())
+                        RealtimeInkFrameScheduler.Cancel(pendingStrokeVisual);
                     StrokeVisualList.Clear();
                     VisualCanvasList.Clear();
                     TouchDownPointsList.Clear();
@@ -1288,7 +1297,7 @@ namespace Ink_Canvas
                         var p = e.GetPosition(inkCanvas);
                         var sv = GetStrokeVisual(stylusId);
                         if (TryAppendRealtimeVelocityBrushTipInterpolatedPoints(sv, stylusId, p))
-                            sv.Redraw();
+                            RealtimeInkFrameScheduler.RequestRedraw(sv);
                         ResetPauseStraightenTimer(stylusId);
                         e.Handled = true;
                     }
@@ -1325,7 +1334,7 @@ namespace Ink_Canvas
 
                 ResetPauseStraightenTimer(e.StylusDevice.Id);
 
-                strokeVisual.Redraw();
+                RealtimeInkFrameScheduler.RequestRedraw(strokeVisual);
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
@@ -1488,7 +1497,7 @@ namespace Ink_Canvas
             }
             newPoints.Add(new StylusPoint(end.X, end.Y, 0.5f));
             stroke.StylusPoints = newPoints;
-            strokeVisual.ForceRedraw();
+            RealtimeInkFrameScheduler.Flush(strokeVisual, true);
         }
 
         /// <summary>
@@ -1742,7 +1751,7 @@ namespace Ink_Canvas
                     var sv = GetStrokeVisual(touchId);
                     RealtimeInkPerformanceMonitor.BeginStroke(sv, RealtimeInkInputKind.TouchVelocity);
                     TryAppendRealtimeVelocityBrushTipInterpolatedPoints(sv, touchId, p);
-                    sv.Redraw();
+                    RealtimeInkFrameScheduler.RequestRedraw(sv);
                 }
                 catch (Exception ex)
                 {
@@ -1767,7 +1776,7 @@ namespace Ink_Canvas
                     var sv = GetStrokeVisual(touchId);
                     RealtimeInkPerformanceMonitor.BeginStroke(sv, RealtimeInkInputKind.TouchInterpolated);
                     AppendInterpolatedTouchPoints(sv, touchId, p);
-                    sv.Redraw();
+                    RealtimeInkFrameScheduler.RequestRedraw(sv);
                 }
                 catch (Exception ex)
                 {
@@ -1897,7 +1906,7 @@ namespace Ink_Canvas
                     var p = e.GetTouchPoint(inkCanvas).Position;
                     var sv = GetStrokeVisual(touchId);
                     if (TryAppendRealtimeVelocityBrushTipInterpolatedPoints(sv, touchId, p))
-                        sv.Redraw();
+                        RealtimeInkFrameScheduler.RequestRedraw(sv);
                 }
                 catch (Exception ex)
                 {
@@ -1914,7 +1923,7 @@ namespace Ink_Canvas
                     var p = e.GetTouchPoint(inkCanvas).Position;
                     sv = GetStrokeVisual(touchId);
                     AppendInterpolatedTouchPoints(sv, touchId, p);
-                    sv.Redraw();
+                    RealtimeInkFrameScheduler.RequestRedraw(sv);
                 }
                 catch (Exception ex)
                 {
@@ -1975,7 +1984,7 @@ namespace Ink_Canvas
                 try
                 {
                     sv = GetStrokeVisual(touchId);
-                    sv?.ForceRedraw();
+                    RealtimeInkFrameScheduler.Flush(sv);
                     var stroke = sv?.Stroke;
                     if (stroke != null)
                     {
@@ -1991,6 +2000,7 @@ namespace Ink_Canvas
                 }
                 finally
                 {
+                    RealtimeInkFrameScheduler.Cancel(sv);
                     if (VisualCanvasList.TryGetValue(touchId, out var visualCanvas) && inkCanvas.Children.Contains(visualCanvas))
                         inkCanvas.Children.Remove(visualCanvas);
                     StrokeVisualList.Remove(touchId);
@@ -2009,7 +2019,7 @@ namespace Ink_Canvas
                 try
                 {
                     sv = GetStrokeVisual(touchId);
-                    sv?.Redraw();
+                    RealtimeInkFrameScheduler.Flush(sv);
                     var stroke = sv?.Stroke;
                     if (stroke != null)
                     {
@@ -2023,6 +2033,7 @@ namespace Ink_Canvas
                 }
                 finally
                 {
+                    RealtimeInkFrameScheduler.Cancel(sv);
                     if (VisualCanvasList.TryGetValue(touchId, out var visualCanvas) && inkCanvas.Children.Contains(visualCanvas))
                         inkCanvas.Children.Remove(visualCanvas);
                     StrokeVisualList.Remove(touchId);

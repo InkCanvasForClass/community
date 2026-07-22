@@ -114,7 +114,6 @@ namespace Ink_Canvas.Helpers
                 CurrentMemoryMb = 0;
                 _isMonitoring = true;
 
-                RealtimeInkPerformanceMonitor.StartFrameTracking();
                 _samplingTimer = new Timer(OnSample, null, SamplingIntervalMs, SamplingIntervalMs);
             }
             catch (Exception ex)
@@ -143,7 +142,6 @@ namespace Ink_Canvas.Helpers
             {
                 _samplingTimer?.Dispose();
                 _samplingTimer = null;
-                RealtimeInkPerformanceMonitor.StopFrameTracking();
                 _isMonitoring = false;
 
                 // Take one final sample
@@ -223,7 +221,6 @@ namespace Ink_Canvas.Helpers
         {
             _samplingTimer?.Dispose();
             _samplingTimer = null;
-            RealtimeInkPerformanceMonitor.StopFrameTracking();
             _isMonitoring = false;
             CurrentAvgCpu = 0;
             CurrentMemoryMb = 0;
