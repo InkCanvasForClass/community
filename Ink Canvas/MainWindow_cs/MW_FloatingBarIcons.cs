@@ -5307,6 +5307,7 @@ namespace Ink_Canvas
         private ToolbarImageButton _lastHighlightButton;
         private int _indicatorAnimationGeneration;
         private Storyboard _activeIndicatorStoryboard;
+        private EventHandler _activeIndicatorCompletedHandler;
         private string _pendingHighlightMode;
         private int _highlightPositionVersion;
         private int _highlightLayoutRetryCount;
@@ -5605,7 +5606,17 @@ namespace Ink_Canvas
                 {
                     var oldStoryboard = _activeIndicatorStoryboard;
                     _activeIndicatorStoryboard = null;
-                    try { oldStoryboard.Stop(indicatorBar); } catch { }
+                    try
+                    {
+                        oldStoryboard.Stop(indicatorBar);
+                        // 解除 Completed 订阅，避免 lambda 闭包持有 indicatorBar 长期存活
+                        if (_activeIndicatorCompletedHandler != null)
+                        {
+                            oldStoryboard.Completed -= _activeIndicatorCompletedHandler;
+                            _activeIndicatorCompletedHandler = null;
+                        }
+                    }
+                    catch { }
                     indicatorBar.RenderTransform = null;
                     indicatorBar.Opacity = 1.0;
                 }
@@ -5688,12 +5699,17 @@ namespace Ink_Canvas
 
                 int currentGeneration = _indicatorAnimationGeneration;
                 _activeIndicatorStoryboard = storyboard;
-                storyboard.Completed += (s, e) =>
+                EventHandler completedHandler = null;
+                completedHandler = (s, e) =>
                 {
+                    storyboard.Completed -= completedHandler;
+                    _activeIndicatorCompletedHandler = null;
                     if (currentGeneration != _indicatorAnimationGeneration) return;
                     _activeIndicatorStoryboard = null;
                     indicatorBar.RenderTransform = null;
                 };
+                _activeIndicatorCompletedHandler = completedHandler;
+                storyboard.Completed += completedHandler;
 
                 storyboard.Begin(indicatorBar, true);
                 storyboard.Pause(indicatorBar);
