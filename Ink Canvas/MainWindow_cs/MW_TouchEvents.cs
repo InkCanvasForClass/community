@@ -53,6 +53,9 @@ namespace Ink_Canvas
         private InkCanvasEditingMode palmEraserPreviousEditingMode = InkCanvasEditingMode.None;
         private readonly Dictionary<int, RealtimeBrushTipState> _realtimeBrushTipStates = new Dictionary<int, RealtimeBrushTipState>();
         private readonly Guid RealtimeVelocityBrushTipAppliedGuid = new Guid("74E57D95-945F-4A8C-B52A-7D3EF2D4FD5B");
+        // 原生湿墨管线提交的 Stroke 标记，与 WpfStrokeCommitter.NativeWetInkCommittedGuid 同值。
+        // 干墨后处理据此跳过触摸压感模拟/速度笔锋等会重写 PressureFactor 的步骤，避免抬笔闪变。
+        private readonly Guid NativeWetInkCommittedGuid = new Guid("B1F0A3C7-2D64-49B0-9E1A-7A4F8C2D5E60");
         internal const int MouseRealtimeStrokeId = -100001;
         private readonly HashSet<int> _activeRealtimeTouchStrokeIds = new HashSet<int>();
         private readonly HashSet<int> _activeRealtimeStylusStrokeIds = new HashSet<int>();

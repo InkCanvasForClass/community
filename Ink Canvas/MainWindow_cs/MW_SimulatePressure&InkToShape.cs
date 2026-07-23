@@ -439,7 +439,19 @@ namespace Ink_Canvas
                 inkCanvas.Opacity = 1;
                 var touchPressureSimulationApplied = false;
 
-                if (Settings.Canvas.DisablePressure)
+                // 原生湿墨管线提交的 Stroke：其 StylusPoint 压感已与实时预览一致。
+                // 跳过所有会重写 PressureFactor 的干墨后处理（屏蔽压感归一化、触摸压感
+                // 模拟、速度笔锋），否则抬笔瞬间线条粗细会跳变，产生“烘干闪变”。
+                var isNativeWetInkCommitted =
+                    e.Stroke != null
+                    && e.Stroke.ContainsPropertyData(NativeWetInkCommittedGuid);
+
+                if (isNativeWetInkCommitted)
+                {
+                    // 原生提交：保持 PressureFactor 不变。仍允许后续拉直/形状识别等不依赖
+                    // 压感粗细的处理。
+                }
+                else if (Settings.Canvas.DisablePressure)
                 {
                     var uniformPoints = new StylusPointCollection();
                     foreach (StylusPoint point in e.Stroke.StylusPoints)

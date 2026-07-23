@@ -159,12 +159,13 @@ namespace Ink_Canvas.Ink.Native
 
         /// <summary>
         /// True while any session still renders wet ink that is not yet represented
-        /// by a committed dry stroke. Drives overlay visibility so the transparent
-        /// overlay HWND is hidden when there is nothing to render, letting the
-        /// main window's own WPF content receive input normally. Once a stroke is
-        /// committed to the WPF InkCanvas (DryCommittedAwaitingWpfFrame) the dry
-        /// stroke owns the visual, so the overlay hides even while the native
-        /// session is still being retired.
+        /// by a committed-and-painted dry stroke. This covers the whole handoff:
+        /// from the moment a stroke begins until its native wet visual is retired
+        /// (after the WPF frame fence confirms the dry stroke has been painted).
+        /// During <see cref="NativeInkSessionState.DryCommittedAwaitingWpfFrame"/>
+        /// and <see cref="NativeInkSessionState.RetiringWetVisual"/> the dry stroke
+        /// is not yet on screen, so the wet overlay must stay visible to avoid a
+        /// "drying" flash where the whole line disappears for a frame.
         /// </summary>
         public bool HasLiveWetVisual()
         {
@@ -172,7 +173,9 @@ namespace Ink_Canvas.Ink.Native
             {
                 var state = session.State;
                 if (state == NativeInkSessionState.Active
-                    || state == NativeInkSessionState.Ending)
+                    || state == NativeInkSessionState.Ending
+                    || state == NativeInkSessionState.DryCommittedAwaitingWpfFrame
+                    || state == NativeInkSessionState.RetiringWetVisual)
                 {
                     return true;
                 }
