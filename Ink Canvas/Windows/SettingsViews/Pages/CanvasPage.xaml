@@ -85,6 +85,13 @@
                             SwitchName="ToggleSwitchDisablePressure"
                             Toggled="ToggleSwitchDisablePressure_Toggled" />
 
+                    <controls:LabeledSettingsCard
+                            Header="{x:Static props:CanvasStrings.Canvas_EnableNativeInkPrediction}"
+                            Description="{x:Static props:CanvasStrings.Canvas_EnableNativeInkPredictionHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Edit}"
+                            SwitchName="ToggleSwitchEnableNativeInkPrediction"
+                            helpers:SettingsBinder.PropertyPath="Canvas.EnableNativeInkPrediction" />
+
                     <!-- 简单下拉：声明式绑定 -->
                     <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_EraserSize}"
                             Description="{x:Static props:CanvasStrings.Canvas_EraserSizeHint}">

@@ -1704,7 +1704,7 @@ namespace Ink_Canvas
 
                     if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
                     {
-                        inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                        EnsureNativePenPhysicalEditingMode();
                     }
 
                     ResetTouchStates();
@@ -1752,7 +1752,7 @@ namespace Ink_Canvas
 
                 if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
                 {
-                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                    EnsureNativePenPhysicalEditingMode();
                 }
 
                 ResetTouchStates();
@@ -6048,6 +6048,11 @@ namespace Ink_Canvas
                 }
                 else if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
                 {
+                    // Native freehand keeps physical EditingMode at None while logical
+                    // tool remains pen/color. Prefer cached mode; fall back to cursor.
+                    if (!string.IsNullOrEmpty(_currentToolMode)
+                        && !string.Equals(_currentToolMode, "cursor", StringComparison.OrdinalIgnoreCase))
+                        return _currentToolMode;
                     return "cursor";
                 }
                 else if (drawingShapeMode != 0)

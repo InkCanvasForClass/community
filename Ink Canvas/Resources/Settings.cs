@@ -386,6 +386,8 @@ namespace Ink_Canvas
         public bool EnablePressureTouchMode { get; set; } // 是否启用压感触屏模式
         [JsonProperty("disablePressure")]
         public bool DisablePressure { get; set; } // 是否屏蔽压感
+        [JsonProperty("enableNativeInkPrediction")]
+        public bool EnableNativeInkPrediction { get; set; } // 原生湿墨预测笔尾（仅实时预览，不进入提交/撤销/保存）
         [JsonProperty("autoStraightenLine")]
         public bool AutoStraightenLine { get; set; } = true; // 是否启用直线自动拉直
         [JsonProperty("autoStraightenLineThreshold")]

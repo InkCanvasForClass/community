@@ -114,6 +114,15 @@
   <data name="Canvas_EnablePressureTouchHint" xml:space="preserve">
     <value>开启后触屏设备也能压感，专治支持压感但系统装死的触屏，薛定谔的压感。</value>
   </data>
+  <data name="Canvas_EnableNativeInkPrediction" xml:space="preserve">
+    <value>开启预言之笔</value>
+  </data>
+  <data name="Canvas_EnableNativeInkPredictionHint" xml:space="preserve">
+    <value>只给实时预览加一小段动态笔尾，预言点不进保存/撤销/识别，纯表演型选手。</value>
+  </data>
+  <data name="Canvas_WetInkRendererFailed" xml:space="preserve">
+    <value>实时书写渲染器翻车了，自由书写先关掉。界面和擦除/选择还能用，别慌。</value>
+  </data>
   <data name="Canvas_EraserSize" xml:space="preserve">
     <value>橡皮杀伤力</value>
   </data>

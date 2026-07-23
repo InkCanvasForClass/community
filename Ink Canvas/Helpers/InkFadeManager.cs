@@ -72,10 +72,7 @@ namespace Ink_Canvas.Helpers
 
             try
             {
-                if (_mainWindow.inkCanvas.EditingMode != InkCanvasEditingMode.Ink)
-                {
-                    _mainWindow.inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                }
+                // Native freehand keeps physical EditingMode at None; do not force WPF Ink.
 
                 _strokeStartPoints[stroke] = startPoint;
                 _strokeEndPoints[stroke] = endPoint;

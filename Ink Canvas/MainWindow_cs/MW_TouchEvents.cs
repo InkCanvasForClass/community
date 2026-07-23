@@ -38,7 +38,7 @@ namespace Ink_Canvas
         /// <summary>
         /// 上次的InkCanvas编辑模式
         /// </summary>
-        private InkCanvasEditingMode lastInkCanvasEditingMode = InkCanvasEditingMode.Ink;
+        private InkCanvasEditingMode lastInkCanvasEditingMode = InkCanvasEditingMode.None;
         /// <summary>
         /// 上次触摸按下的时间
         /// </summary>
@@ -50,7 +50,7 @@ namespace Ink_Canvas
         private bool isMultiTouchTimerActive;
         private bool isPalmEraserActive;
         private bool palmEraserWasEnabledBeforeMultiTouch;
-        private InkCanvasEditingMode palmEraserPreviousEditingMode = InkCanvasEditingMode.Ink;
+        private InkCanvasEditingMode palmEraserPreviousEditingMode = InkCanvasEditingMode.None;
         private readonly Dictionary<int, RealtimeBrushTipState> _realtimeBrushTipStates = new Dictionary<int, RealtimeBrushTipState>();
         private readonly Guid RealtimeVelocityBrushTipAppliedGuid = new Guid("74E57D95-945F-4A8C-B52A-7D3EF2D4FD5B");
         internal const int MouseRealtimeStrokeId = -100001;
@@ -198,26 +198,12 @@ namespace Ink_Canvas
         {
             if (inkCanvas == null) return;
 
+            // Freehand is owned by the native WM_POINTER + DirectComposition pipeline.
+            // Never re-subscribe WPF Stylus freehand handlers or re-enable EditingMode.Ink.
             inkCanvas.StylusDown -= MainWindow_StylusDown;
             inkCanvas.StylusMove -= MainWindow_StylusMove;
             inkCanvas.StylusUp -= MainWindow_StylusUp;
-
-            inkCanvas.StylusDown += MainWindow_StylusDown;
-            inkCanvas.StylusMove += MainWindow_StylusMove;
-            inkCanvas.StylusUp += MainWindow_StylusUp;
-
-            if (ShouldUseRealtimeVelocityBrushTip()
-                && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
-                && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
-                && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
-            {
-                inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            }
-            else if (!ShouldUseRealtimeVelocityBrushTip()
-                     && inkCanvas.EditingMode == InkCanvasEditingMode.None)
-            {
-                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-            }
+            EnsureNativePenPhysicalEditingMode();
         }
 
         private void InitializeRealtimeBrushTipState(int stylusId, StylusDownEventArgs e)
@@ -1037,7 +1023,7 @@ namespace Ink_Canvas
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
                     && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
                 {
-                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None; EnsureNativePenPhysicalEditingMode();
                 }
                 // 保存非笔画元素（如图片）
                 var preservedElements = PreserveNonStrokeElements();
@@ -1542,16 +1528,8 @@ namespace Ink_Canvas
         /// </remarks>
         private StrokeVisual GetStrokeVisual(int id)
         {
-            if (StrokeVisualList.TryGetValue(id, out var visual)) return visual;
-
-            var strokeVisual = new StrokeVisual(inkCanvas.DefaultDrawingAttributes.Clone());
-            StrokeVisualList[id] = strokeVisual;
-            var visualCanvas = new VisualCanvas();
-            strokeVisual.SetVisualCanvas(visualCanvas);
-            VisualCanvasList[id] = visualCanvas;
-            inkCanvas.Children.Add(visualCanvas);
-
-            return strokeVisual;
+            // Legacy DrawingVisual wet-ink path is retired.
+            return StrokeVisualList.TryGetValue(id, out var visual) ? visual : null;
         }
 
         /// <summary>
@@ -1632,7 +1610,7 @@ namespace Ink_Canvas
 
             // Commit current stroke by briefly switching mode
             inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+            inkCanvas.EditingMode = InkCanvasEditingMode.None; EnsureNativePenPhysicalEditingMode();
 
             // The just-committed stroke should now be last in inkCanvas.Strokes
             if (inkCanvas.Strokes.Count == 0) return;
@@ -1807,7 +1785,7 @@ namespace Ink_Canvas
             if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
                 && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
             {
-                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None; EnsureNativePenPhysicalEditingMode();
             }
         }
 
@@ -2394,8 +2372,8 @@ namespace Ink_Canvas
                         && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
                         && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
                     {
-                        inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                        lastInkCanvasEditingMode = InkCanvasEditingMode.Ink;
+                        inkCanvas.EditingMode = InkCanvasEditingMode.None; EnsureNativePenPhysicalEditingMode();
+                        lastInkCanvasEditingMode = InkCanvasEditingMode.None;
                     }
                 }
             }

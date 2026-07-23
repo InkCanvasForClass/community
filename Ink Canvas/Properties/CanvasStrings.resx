@@ -114,6 +114,15 @@
   <data name="Canvas_EnablePressureTouchHint" xml:space="preserve">
     <value>开启后，触屏设备也将支持压感效果，适用于部分支持压感但无法被系统识别的触屏设备。</value>
   </data>
+  <data name="Canvas_EnableNativeInkPrediction" xml:space="preserve">
+    <value>启用实时书写预测</value>
+  </data>
+  <data name="Canvas_EnableNativeInkPredictionHint" xml:space="preserve">
+    <value>仅影响实时预览的一小段动态笔尾，预测点不会进入保存、撤销或识别结果。</value>
+  </data>
+  <data name="Canvas_WetInkRendererFailed" xml:space="preserve">
+    <value>实时书写渲染器初始化失败，自由书写已暂时禁用。界面与擦除/选择仍可使用。</value>
+  </data>
   <data name="Canvas_EraserSize" xml:space="preserve">
     <value>橡皮大小</value>
   </data>

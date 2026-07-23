@@ -114,6 +114,15 @@
   <data name="Canvas_EnablePressureTouchHint" xml:space="preserve">
     <value>When on, touch screens that support pressure will show pressure; for devices not recognized by the system.</value>
   </data>
+  <data name="Canvas_EnableNativeInkPrediction" xml:space="preserve">
+    <value>Enable live ink prediction</value>
+  </data>
+  <data name="Canvas_EnableNativeInkPredictionHint" xml:space="preserve">
+    <value>Affects only a short live preview tail. Predicted points are never saved, undone, or recognized.</value>
+  </data>
+  <data name="Canvas_WetInkRendererFailed" xml:space="preserve">
+    <value>The live ink renderer failed to start. Freehand writing is temporarily disabled. UI, erase, and select still work.</value>
+  </data>
   <data name="Canvas_EraserSize" xml:space="preserve">
     <value>Eraser size</value>
   </data>

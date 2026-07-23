@@ -350,6 +350,20 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_StrokeCollected(object sender, InkCanvasStrokeCollectedEventArgs e)
         {
+            if (e?.Stroke != null)
+                ProcessCommittedStroke(e.Stroke);
+        }
+
+        /// <summary>
+        /// Shared dry-ink post-process entry for WPF StrokeCollected and native wet-ink commit.
+        /// Keeps fade / pressure / velocity tip / straighten / shape / handwriting / edge expand order.
+        /// </summary>
+        private void ProcessCommittedStroke(Stroke stroke)
+        {
+            if (stroke == null)
+                return;
+
+            var e = new InkCanvasStrokeCollectedEventArgs(stroke);
             var strokeDrawingAttributes = e.Stroke?.DrawingAttributes;
 
             // 手写识别输入在收笔尾部从最终画布 Stroke 复制，避免使用压感/平滑前快照。
@@ -375,10 +389,8 @@ namespace Ink_Canvas
                 var startPoint = e.Stroke.StylusPoints.Count > 0 ? e.Stroke.StylusPoints[0].ToPoint() : new Point();
                 var endPoint = e.Stroke.StylusPoints.Count > 0 ? e.Stroke.StylusPoints[e.Stroke.StylusPoints.Count - 1].ToPoint() : new Point();
 
-                if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink)
-                {
-                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                }
+                // Native freehand keeps physical EditingMode at None; do not re-enable WPF wet ink.
+                EnsureNativePenPhysicalEditingMode();
 
                 // 添加到墨迹渐隐管理器
                 if (_inkFadeManager != null)
@@ -400,10 +412,7 @@ namespace Ink_Canvas
                 {
                     try
                     {
-                        if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink)
-                        {
-                            inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                        }
+                        EnsureNativePenPhysicalEditingMode();
 
                         if (inkCanvas.Strokes.Contains(e.Stroke))
                         {

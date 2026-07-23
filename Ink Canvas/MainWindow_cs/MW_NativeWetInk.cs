@@ -1,0 +1,1226 @@
+using Ink_Canvas.Helpers;
+using Ink_Canvas.Ink.Native;
+using System;
+using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Ink;
+using System.Windows.Input;
+using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Threading;
+
+namespace Ink_Canvas
+{
+    public partial class MainWindow
+    {
+        private WetInkCommandMailbox _nativeWetInkMailbox;
+        private NativeInkSessionManager _nativeInkSessions;
+        private NativeInkController _nativeInkController;
+        private NativePointerInputSource _nativePointerInputSource;
+        private WetInkWindowHost _wetInkWindowHost;
+        private WpfRenderFrameFence _wpfRenderFrameFence;
+
+        private readonly Dictionary<uint, NativeInkRouteDecision> _nativeCapturedRoutes =
+            new Dictionary<uint, NativeInkRouteDecision>();
+        private readonly HashSet<uint> _nativeActiveTouchPointers = new HashSet<uint>();
+
+        private bool _nativeWetInkStarted;
+        private bool _nativeWetInkDisabled;
+        private bool _nativeWetInkDeviceFailureNotified;
+        private long _nativeCoordinateGeneration = 1;
+        private EventHandler _nativeWetInkLocationChangedHandler;
+        private DependencyPropertyChangedEventHandler _nativeWetInkIsVisibleChangedHandler;
+        private readonly Dictionary<long, DispatcherTimer> _nativePauseStraightenTimers =
+            new Dictionary<long, DispatcherTimer>();
+
+        private void TryStartNativeWetInkPipeline()
+        {
+            if (_nativeWetInkStarted || _nativeWetInkDisabled)
+                return;
+
+            try
+            {
+                var hwnd = new WindowInteropHelper(this).Handle;
+                if (hwnd == IntPtr.Zero)
+                    return;
+
+                var hwndSource = HwndSource.FromHwnd(hwnd);
+                if (hwndSource == null)
+                    return;
+
+                var dpi = GetNativeDpiScales();
+                _nativeWetInkMailbox = new WetInkCommandMailbox();
+                _nativeInkSessions = new NativeInkSessionManager();
+                _nativeInkController = new NativeInkController(_nativeInkSessions, _nativeWetInkMailbox);
+                _wpfRenderFrameFence = new WpfRenderFrameFence(Dispatcher);
+
+                _wetInkWindowHost = new WetInkWindowHost(
+                    hwnd,
+                    _nativeWetInkMailbox,
+                    OnNativeWetInkRetired,
+                    OnNativeWetInkDeviceLost,
+                    OnNativeWetInkFatalError);
+                _wetInkWindowHost.Start(BuildWetInkTargetSnapshot());
+
+                _nativePointerInputSource = new NativePointerInputSource(
+                    hwndSource,
+                    OnNativePointerInput,
+                    dpi.X,
+                    dpi.Y);
+
+                WireNativeWetInkGeometryListeners();
+                EnsureNativePenPhysicalEditingMode();
+                _nativeWetInkStarted = true;
+                // The overlay window is created visible; hide it until there is
+                // actually wet ink to render so it never blocks input in cursor mode.
+                RefreshOverlayVisibility();
+                LogHelper.WriteLogToFile(
+                    "[WetInk] Native WM_POINTER + DirectComposition wet-ink pipeline started.",
+                    LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[WetInk] Failed to start native wet-ink pipeline: {ex}",
+                    LogHelper.LogType.Error);
+                DisableNativeWetInkAfterFailure(ex, notify: true);
+            }
+        }
+
+        private void ShutdownNativeWetInkPipeline()
+        {
+            UnwireNativeWetInkGeometryListeners();
+
+            try { _wpfRenderFrameFence?.CancelAll(); }
+            catch { /* best-effort */ }
+
+            try { _nativeInkController?.CancelAll(); }
+            catch { /* best-effort */ }
+
+            try { _wetInkWindowHost?.SignalWork(); }
+            catch { /* best-effort */ }
+
+            try { _nativePointerInputSource?.Dispose(); }
+            catch { /* best-effort */ }
+            _nativePointerInputSource = null;
+
+            try { _wetInkWindowHost?.Dispose(); }
+            catch { /* best-effort */ }
+            _wetInkWindowHost = null;
+
+            try { _wpfRenderFrameFence?.Dispose(); }
+            catch { /* best-effort */ }
+            _wpfRenderFrameFence = null;
+
+            _nativeInkController = null;
+            _nativeInkSessions = null;
+            _nativeWetInkMailbox = null;
+            _nativeCapturedRoutes.Clear();
+            _nativeActiveTouchPointers.Clear();
+            _nativeWetInkStarted = false;
+        }
+
+        private void WireNativeWetInkGeometryListeners()
+        {
+            if (_nativeWetInkLocationChangedHandler == null)
+            {
+                _nativeWetInkLocationChangedHandler = (_, __) => UpdateNativeWetInkTarget();
+                LocationChanged += _nativeWetInkLocationChangedHandler;
+            }
+
+            if (_nativeWetInkIsVisibleChangedHandler == null)
+            {
+                _nativeWetInkIsVisibleChangedHandler = (_, __) => UpdateNativeWetInkTarget();
+                IsVisibleChanged += _nativeWetInkIsVisibleChangedHandler;
+            }
+
+            StateChanged -= NativeWetInk_StateChanged;
+            StateChanged += NativeWetInk_StateChanged;
+        }
+
+        private void UnwireNativeWetInkGeometryListeners()
+        {
+            if (_nativeWetInkLocationChangedHandler != null)
+            {
+                LocationChanged -= _nativeWetInkLocationChangedHandler;
+                _nativeWetInkLocationChangedHandler = null;
+            }
+
+            if (_nativeWetInkIsVisibleChangedHandler != null)
+            {
+                IsVisibleChanged -= _nativeWetInkIsVisibleChangedHandler;
+                _nativeWetInkIsVisibleChangedHandler = null;
+            }
+
+            StateChanged -= NativeWetInk_StateChanged;
+        }
+
+        private void NativeWetInk_StateChanged(object sender, EventArgs e)
+        {
+            UpdateNativeWetInkTarget();
+        }
+
+        private void UpdateNativeWetInkDpi()
+        {
+            if (!_nativeWetInkStarted || _nativePointerInputSource == null)
+                return;
+
+            var dpi = GetNativeDpiScales();
+            try
+            {
+                _nativePointerInputSource.UpdateDpi(dpi.X, dpi.Y);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[WetInk] UpdateDpi failed: {ex.Message}",
+                    LogHelper.LogType.Warning);
+            }
+
+            _nativeCoordinateGeneration++;
+            UpdateNativeWetInkTarget();
+        }
+
+        private void UpdateNativeWetInkTarget()
+        {
+            if (!_nativeWetInkStarted || _wetInkWindowHost == null || _nativeWetInkDisabled)
+                return;
+
+            try
+            {
+                _wetInkWindowHost.UpdateTarget(BuildWetInkTargetSnapshot());
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[WetInk] UpdateTarget failed: {ex}",
+                    LogHelper.LogType.Error);
+            }
+        }
+
+        private void CancelAllNativeWetInkSessions(string reason = null)
+        {
+            if (_nativeInkController == null)
+                return;
+
+            try
+            {
+                _wpfRenderFrameFence?.CancelAll();
+                _nativeInkController.CancelAll();
+                StopAllPauseStraightenTimers();
+                RefreshOverlayVisibility();
+                _wetInkWindowHost?.SignalWork();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[WetInk] CancelAll failed ({reason}): {ex.Message}",
+                    LogHelper.LogType.Warning);
+            }
+
+            _nativeCapturedRoutes.Clear();
+            _nativeActiveTouchPointers.Clear();
+        }
+
+        private void SetOverlayVisible(bool visible)
+        {
+            try { _wetInkWindowHost?.SetOverlayVisible(visible); }
+            catch { /* best-effort */ }
+        }
+
+        private void RefreshOverlayVisibility()
+        {
+            if (_nativeInkController == null)
+            {
+                SetOverlayVisible(false);
+                return;
+            }
+
+            var visible = _nativeInkController.HasLiveWetVisual();
+            SetOverlayVisible(visible);
+        }
+
+        #region Pause straightening (mid-stroke)
+
+        private void ResetPauseStraightenTimerForPointer(uint pointerId)
+        {
+            if (!Settings.Canvas.PauseStraightenLine
+                || _nativeInkController == null
+                || !_nativeInkController.TryGetSession(pointerId, out var session)
+                || session.State != NativeInkSessionState.Active)
+            {
+                return;
+            }
+
+            ResetPauseStraightenTimer(session.SessionId);
+        }
+
+        private void StopPauseStraightenTimerForPointer(uint pointerId)
+        {
+            if (_nativeInkController != null
+                && _nativeInkController.TryGetSession(pointerId, out var session))
+            {
+                StopPauseStraightenTimer(session.SessionId);
+            }
+        }
+
+            private void ResetPauseStraightenTimer(long sessionId)
+        {
+            if (!Settings.Canvas.PauseStraightenLine)
+                return;
+
+            if (!_nativePauseStraightenTimers.TryGetValue(sessionId, out var timer))
+            {
+                timer = new DispatcherTimer
+                {
+                    Interval = TimeSpan.FromMilliseconds(Settings.Canvas.PauseStraightenDelay)
+                };
+                timer.Tick += (_, __) => OnPauseStraightenTimerElapsed(sessionId);
+                _nativePauseStraightenTimers[sessionId] = timer;
+            }
+
+            timer.Stop();
+            timer.Start();
+        }
+
+        private void OnPauseStraightenTimerElapsed(long sessionId)
+        {
+            StopPauseStraightenTimer(sessionId);
+            try
+            {
+                if (_nativeInkController != null
+                    && _nativeInkController.TryStraightenSession(sessionId))
+                {
+                    _wetInkWindowHost?.SignalWork();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[WetInk] Pause straighten failed for session {sessionId}: {ex.Message}",
+                    LogHelper.LogType.Warning);
+            }
+        }
+
+        private void StopPauseStraightenTimer(long sessionId)
+        {
+            if (_nativePauseStraightenTimers.TryGetValue(sessionId, out var timer))
+            {
+                timer.Stop();
+                _nativePauseStraightenTimers.Remove(sessionId);
+            }
+        }
+
+        private void StopAllPauseStraightenTimers()
+        {
+            foreach (var timer in _nativePauseStraightenTimers.Values)
+                timer.Stop();
+            _nativePauseStraightenTimers.Clear();
+        }
+
+        #endregion
+
+        private bool OnNativePointerInput(NativePointerInputBatch batch)
+        {
+            try
+            {
+                switch (batch.MessageKind)
+                {
+                    case NativePointerMessageKind.Down:
+                        return HandleNativePointerDown(batch);
+                    case NativePointerMessageKind.Update:
+                        return HandleNativePointerUpdate(batch);
+                    case NativePointerMessageKind.Up:
+                        return HandleNativePointerUp(batch);
+                    case NativePointerMessageKind.CaptureLost:
+                        return HandleNativePointerCaptureLost(batch);
+                    default:
+                        return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[WetInk] Pointer handler failed ({batch.MessageKind}): {ex}",
+                    LogHelper.LogType.Error);
+                try { _nativeInkController.Cancel(batch.PointerId); }
+                catch { /* best-effort */ }
+                _nativeCapturedRoutes.Remove(batch.PointerId);
+                if (batch.InputKind == NativeInkInputKind.Touch)
+                    _nativeActiveTouchPointers.Remove(batch.PointerId);
+                _wetInkWindowHost?.SignalWork();
+                return false;
+            }
+        }
+
+        private bool HandleNativePointerDown(NativePointerInputBatch batch)
+        {
+            if (batch.InputKind == NativeInkInputKind.Touch)
+                _nativeActiveTouchPointers.Add(batch.PointerId);
+
+            var facts = CreatePointerFacts(batch);
+            var context = BuildRouteContext(facts);
+            var decision = NativeInkInputRouter.DecideDown(facts, context);
+            _nativeCapturedRoutes[batch.PointerId] = decision;
+
+            LogHelper.WriteLogToFile(
+                $"[WetInk] Down id={batch.PointerId} kind={batch.InputKind} tool={context.Tool} " +
+                $"hit={context.HitZone} route={decision.Route} consume={decision.ConsumeNativeMessage} " +
+                $"xy=({facts.XDip:F1},{facts.YDip:F1}) samples={batch.SamplesNewestFirst.Count} " +
+                $"promoted={batch.IsPromotedMouse} mode={_currentToolMode}",
+                LogHelper.LogType.Event);
+
+            if (decision.Route == NativeInputRoute.BlockedFrozen)
+            {
+                TryBlockFrozenPageMutation("书写");
+                return decision.ConsumeNativeMessage;
+            }
+
+            if (decision.Route != NativeInputRoute.Ink || decision.SuppressPointEmission)
+                return decision.ConsumeNativeMessage;
+
+            var style = CaptureStrokeStyleSnapshot();
+            var processorSettings = CaptureProcessorSettings(style);
+            var startedAt = batch.SamplesNewestFirst.Count > 0
+                ? batch.SamplesNewestFirst[batch.SamplesNewestFirst.Count - 1].TimestampMicroseconds
+                : DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() * 1000L;
+
+            var canvasSamples = ToInkCanvasSamples(batch.SamplesNewestFirst);
+            var session = _nativeInkController.Begin(
+                batch.PointerId,
+                batch.InputKind,
+                style,
+                processorSettings,
+                startedAt,
+                canvasSamples);
+
+            if (session != null)
+            {
+                _stylusDownTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                RefreshOverlayVisibility();
+                _wetInkWindowHost?.SignalWork();
+                LogHelper.WriteLogToFile(
+                    $"[WetInk] Begin session={session.SessionId} pointsInHistory={batch.SamplesNewestFirst.Count} " +
+                    $"color=0x{style.ColorArgb:X8} w={style.Width:F2}",
+                    LogHelper.LogType.Event);
+            }
+
+            return decision.ConsumeNativeMessage;
+        }
+
+        private bool HandleNativePointerUpdate(NativePointerInputBatch batch)
+        {
+            if (!_nativeCapturedRoutes.TryGetValue(batch.PointerId, out var captured))
+                return false;
+
+            var facts = CreatePointerFacts(batch);
+            var context = BuildRouteContext(facts);
+            var decision = NativeInkInputRouter.DecideCaptured(facts, context, captured);
+
+            if (decision.Route == NativeInputRoute.BlockedFrozen
+                || decision.Route == NativeInputRoute.CanvasGesture
+                || HasCanceledFlag(facts))
+            {
+                if (_nativeInkController.Cancel(batch.PointerId))
+                {
+                    RefreshOverlayVisibility();
+                    _wetInkWindowHost?.SignalWork();
+                }
+                StopPauseStraightenTimerForPointer(batch.PointerId);
+                _nativeCapturedRoutes.Remove(batch.PointerId);
+                if (batch.InputKind == NativeInkInputKind.Touch)
+                    _nativeActiveTouchPointers.Remove(batch.PointerId);
+                if (decision.Route == NativeInputRoute.BlockedFrozen)
+                    TryBlockFrozenPageMutation("书写");
+                return decision.ConsumeNativeMessage || captured.ConsumeNativeMessage;
+            }
+
+            if (decision.Route == NativeInputRoute.Ink && !decision.SuppressPointEmission)
+            {
+                if (_nativeInkController.Update(batch.PointerId, ToInkCanvasSamples(batch.SamplesNewestFirst)))
+                {
+                    ResetPauseStraightenTimerForPointer(batch.PointerId);
+                    _wetInkWindowHost?.SignalWork();
+                }
+            }
+
+            return decision.ConsumeNativeMessage || captured.ConsumeNativeMessage;
+        }
+
+        private bool HandleNativePointerUp(NativePointerInputBatch batch)
+        {
+            _nativeCapturedRoutes.TryGetValue(batch.PointerId, out var captured);
+            _nativeCapturedRoutes.Remove(batch.PointerId);
+            if (batch.InputKind == NativeInkInputKind.Touch)
+                _nativeActiveTouchPointers.Remove(batch.PointerId);
+
+            if (captured.Route != NativeInputRoute.Ink)
+                return captured.Route != default && captured.ConsumeNativeMessage;
+
+            // 抬笔：停止该笔的停顿拉直计时器。
+            StopPauseStraightenTimerForPointer(batch.PointerId);
+
+            var facts = CreatePointerFacts(batch);
+            if (HasCanceledFlag(facts))
+            {
+                if (_nativeInkController.Cancel(batch.PointerId))
+                    _wetInkWindowHost?.SignalWork();
+                return true;
+            }
+
+            var endedAt = batch.SamplesNewestFirst.Count > 0
+                ? batch.SamplesNewestFirst[0].TimestampMicroseconds
+                : DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() * 1000L;
+
+            var payload = _nativeInkController.End(
+                batch.PointerId,
+                endedAt,
+                ToInkCanvasSamples(batch.SamplesNewestFirst));
+            RefreshOverlayVisibility();
+            _wetInkWindowHost?.SignalWork();
+
+            if (payload == null)
+                return true;
+
+            CommitNativeStrokePayload(payload);
+            return true;
+        }
+
+        private bool HandleNativePointerCaptureLost(NativePointerInputBatch batch)
+        {
+            _nativeCapturedRoutes.Remove(batch.PointerId);
+            if (batch.InputKind == NativeInkInputKind.Touch)
+                _nativeActiveTouchPointers.Remove(batch.PointerId);
+
+            if (_nativeInkController.Cancel(batch.PointerId))
+            {
+                RefreshOverlayVisibility();
+                _wetInkWindowHost?.SignalWork();
+                StopPauseStraightenTimerForPointer(batch.PointerId);
+                return true;
+            }
+
+            StopPauseStraightenTimerForPointer(batch.PointerId);
+            return false;
+        }
+
+        private void CommitNativeStrokePayload(NativeStrokeCommitPayload payload)
+        {
+            if (payload == null)
+                return;
+
+            if (IsCurrentPageFrozen)
+            {
+                TryBlockFrozenPageMutation("书写");
+                _nativeInkController.Cancel(payload.PointerId);
+                RefreshOverlayVisibility();
+                _wetInkWindowHost?.SignalWork();
+                return;
+            }
+
+            Stroke stroke;
+            try
+            {
+                stroke = WpfStrokeCommitter.CreateStroke(payload);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[WetInk] CreateStroke failed: {ex}",
+                    LogHelper.LogType.Error);
+                _nativeInkController.Cancel(payload.PointerId);
+                _wetInkWindowHost?.SignalWork();
+                return;
+            }
+
+            try
+            {
+                LogHelper.WriteLogToFile(
+                    $"[WetInk] Commit session={payload.SessionId} points={payload.Points.Count} " +
+                    $"first=({payload.Points[0].X:F1},{payload.Points[0].Y:F1}) " +
+                    $"last=({payload.Points[payload.Points.Count - 1].X:F1},{payload.Points[payload.Points.Count - 1].Y:F1})",
+                    LogHelper.LogType.Event);
+
+                // Dry ink is the single source of truth. Add first so StrokesChanged /
+                // TimeMachine / dirty-page hooks fire before post-processing.
+                inkCanvas.Strokes.Add(stroke);
+                _nativeInkController.MarkDryCommitted(payload.SessionId);
+                // The dry stroke now owns the visual; hide the wet overlay so it
+                // stops covering the main window's own content.
+                RefreshOverlayVisibility();
+                ProcessCommittedStroke(stroke);
+
+                // Keep wet ink until the next WPF composition frame paints the dry stroke.
+                inkCanvas.InvalidateVisual();
+                var sessionId = payload.SessionId;
+                _wpfRenderFrameFence.Arm(sessionId, () =>
+                {
+                    try
+                    {
+                        if (_nativeInkController == null)
+                            return;
+                        _nativeInkController.MarkWpfFrameRendered(sessionId);
+                        _wetInkWindowHost?.SignalWork();
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile(
+                            $"[WetInk] Fence callback failed: {ex}",
+                            LogHelper.LogType.Error);
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[WetInk] Dry commit failed: {ex}",
+                    LogHelper.LogType.Error);
+                try
+                {
+                    if (inkCanvas.Strokes.Contains(stroke))
+                        inkCanvas.Strokes.Remove(stroke);
+                }
+                catch { /* best-effort */ }
+
+                try
+                {
+                    _wpfRenderFrameFence?.Cancel(payload.SessionId);
+                    _nativeInkController?.Cancel(payload.PointerId);
+                    _wetInkWindowHost?.SignalWork();
+                }
+                catch { /* best-effort */ }
+            }
+        }
+
+        private void OnNativeWetInkRetired(WetInkRetirementAck ack)
+        {
+            void Apply()
+            {
+                try
+                {
+                    _nativeInkController?.TryMarkWetVisualRetired(ack.SessionId, ack.Version);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"[WetInk] TryMarkWetVisualRetired failed: {ex.Message}",
+                        LogHelper.LogType.Warning);
+                }
+                // A retired session may be the last live wet visual; hide the
+                // overlay so it stops covering the main window's own content.
+                RefreshOverlayVisibility();
+            }
+
+            if (Dispatcher.CheckAccess())
+                Apply();
+            else
+                Dispatcher.BeginInvoke((Action)Apply, DispatcherPriority.Send);
+        }
+
+        private void OnNativeWetInkDeviceLost()
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                DisableNativeWetInkAfterFailure(
+                    new InvalidOperationException("Direct3D / DirectComposition device lost."),
+                    notify: true);
+            }), DispatcherPriority.Send);
+        }
+
+        private void OnNativeWetInkFatalError(Exception ex)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                DisableNativeWetInkAfterFailure(ex, notify: true);
+            }), DispatcherPriority.Send);
+        }
+
+        private void DisableNativeWetInkAfterFailure(Exception ex, bool notify)
+        {
+            _nativeWetInkDisabled = true;
+            try
+            {
+                CancelAllNativeWetInkSessions("device-failure");
+            }
+            catch { /* best-effort */ }
+
+            if (notify && !_nativeWetInkDeviceFailureNotified)
+            {
+                _nativeWetInkDeviceFailureNotified = true;
+                try
+                {
+                    ShowNotification(Properties.CanvasStrings.Canvas_WetInkRendererFailed);
+                }
+                catch { /* never throw from failure path */ }
+            }
+
+            LogHelper.WriteLogToFile(
+                $"[WetInk] Freehand disabled after pipeline failure: {ex}",
+                LogHelper.LogType.Error);
+        }
+
+        private NativePointerFacts CreatePointerFacts(NativePointerInputBatch batch)
+        {
+            var sample = batch.SamplesNewestFirst.Count > 0
+                ? batch.SamplesNewestFirst[0]
+                : default;
+
+            // Hit-testing is done in window client DIP space (same as the HWND hook).
+            var windowPoint = ToWindowClientPoint(sample.X, sample.Y);
+
+            var dpi = GetNativeDpiScales();
+            var contactWidthDip = sample.ContactWidthPixels > 0
+                ? sample.ContactWidthPixels / dpi.X
+                : 0;
+            var contactHeightDip = sample.ContactHeightPixels > 0
+                ? sample.ContactHeightPixels / dpi.Y
+                : 0;
+
+            return new NativePointerFacts(
+                batch.PointerId,
+                batch.InputKind,
+                sample.Flags,
+                batch.SecondaryBarrelButtonDown,
+                batch.IsPromotedMouse,
+                windowPoint.X,
+                windowPoint.Y,
+                contactWidthDip,
+                contactHeightDip);
+        }
+
+        /// <summary>
+        /// Native samples are window-client DIPs. Wet overlay and dry InkCanvas both use
+        /// the same client origin in ICC's full-screen layout; when the canvas is offset
+        /// (e.g. future layout changes), convert into inkCanvas local space.
+        /// </summary>
+        private IReadOnlyList<RawInkSample> ToInkCanvasSamples(IReadOnlyList<RawInkSample> windowSamples)
+        {
+            if (windowSamples == null || windowSamples.Count == 0 || inkCanvas == null)
+                return windowSamples ?? Array.Empty<RawInkSample>();
+
+            Point inkOriginInWindow;
+            try
+            {
+                inkOriginInWindow = inkCanvas.TransformToAncestor(this)
+                    .Transform(new Point(0, 0));
+            }
+            catch
+            {
+                return windowSamples;
+            }
+
+            if (Math.Abs(inkOriginInWindow.X) < 0.01 && Math.Abs(inkOriginInWindow.Y) < 0.01)
+                return windowSamples;
+
+            var converted = new RawInkSample[windowSamples.Count];
+            for (var i = 0; i < windowSamples.Count; i++)
+            {
+                var s = windowSamples[i];
+                converted[i] = new RawInkSample(
+                    s.PointerId,
+                    s.InputKind,
+                    s.X - inkOriginInWindow.X,
+                    s.Y - inkOriginInWindow.Y,
+                    s.Pressure,
+                    s.HasPressure,
+                    s.TimestampMicroseconds,
+                    s.FrameId,
+                    s.Flags,
+                    s.ContactWidthPixels,
+                    s.ContactHeightPixels);
+            }
+
+            return converted;
+        }
+
+        private Point ToWindowClientPoint(double xDip, double yDip)
+        {
+            // Samples are already window-client DIPs from NativePointerInputSource.
+            return new Point(xDip, yDip);
+        }
+
+        private NativeInkRouteContext BuildRouteContext(NativePointerFacts pointer)
+        {
+            var hitZone = ResolveHitZone(pointer.XDip, pointer.YDip);
+            var tool = ResolveLogicalInkTool();
+            var multiTouchWriting = currentMode == 0
+                ? Settings.Gesture.IsEnableMultiTouchMode || isInMultiTouchMode
+                : Settings.Gesture.IsEnableMultiTouchModeBoard || isInMultiTouchMode;
+            var twoFingerAllowed = ResolveTwoFingerGestureAllowed();
+            var activeTouchCount = Math.Max(dec.Count, _nativeActiveTouchPointers.Count);
+            var palm = BuildPalmRoutePolicy();
+
+            return new NativeInkRouteContext(
+                hitZone,
+                tool,
+                canvasInputEnabled: IsEnabled && IsVisible && inkCanvas != null,
+                pageFrozen: IsCurrentPageFrozen,
+                videoPresenter: _isVideoPresenterSpecialMode,
+                multiTouchWriting: multiTouchWriting,
+                twoFingerGestureAllowed: twoFingerAllowed,
+                activeTouchCount: activeTouchCount,
+                palm: palm);
+        }
+
+        private LogicalInkTool ResolveLogicalInkTool()
+        {
+            if (IsBoardRoamingMode)
+                return LogicalInkTool.BoardRoam;
+            if (drawingShapeMode != 0
+                || string.Equals(_currentToolMode, "shape", StringComparison.OrdinalIgnoreCase))
+                return LogicalInkTool.Shape;
+
+            switch (_currentToolMode)
+            {
+                case "pen":
+                case "color":
+                    return LogicalInkTool.Pen;
+                case "eraser":
+                    return LogicalInkTool.PointEraser;
+                case "eraserByStrokes":
+                    return LogicalInkTool.StrokeEraser;
+                case "select":
+                    return LogicalInkTool.Select;
+                case "roaming":
+                    return LogicalInkTool.BoardRoam;
+                case "cursor":
+                default:
+                    return LogicalInkTool.Cursor;
+            }
+        }
+
+        private bool ResolveTwoFingerGestureAllowed()
+        {
+            if (IsInPPTPresentationMode)
+                return Settings.PowerPointSettings.IsEnableTwoFingerGestureInPresentationMode
+                       && Settings.Gesture.IsEnableTwoFingerGesture;
+            return Settings.Gesture.IsEnableTwoFingerGesture;
+        }
+
+        private PalmRoutePolicy BuildPalmRoutePolicy()
+        {
+            var canvas = Settings.Canvas;
+            var advanced = Settings.Advanced;
+            var isNib = Settings.Startup.IsEnableNibMode;
+
+            double sensitivityMultiplier;
+            switch (canvas.PalmEraserSensitivity)
+            {
+                case 0:
+                    sensitivityMultiplier = 3.0;
+                    break;
+                case 1:
+                    sensitivityMultiplier = 2.5;
+                    break;
+                default:
+                    sensitivityMultiplier = 2.0;
+                    break;
+            }
+
+            return new PalmRoutePolicy(
+                enabled: canvas.EnablePalmEraser,
+                isActive: isPalmEraserActive,
+                isQuadIr: advanced.IsQuadIR,
+                isSpecialScreen: advanced.IsSpecialScreen,
+                boundsWidthDip: BoundsWidth,
+                thresholdFactor: isNib
+                    ? advanced.NibModeBoundsWidthThresholdValue
+                    : advanced.FingerModeBoundsWidthThresholdValue,
+                sensitivityMultiplier: sensitivityMultiplier,
+                eraserSizeFactor: isNib
+                    ? advanced.NibModeBoundsWidthEraserSize
+                    : advanced.FingerModeBoundsWidthEraserSize,
+                touchMultiplier: advanced.TouchMultiplier);
+        }
+
+        private CanvasHitZone ResolveHitZone(double xDip, double yDip)
+        {
+            if (inkCanvas == null)
+                return CanvasHitZone.Outside;
+
+            try
+            {
+                var windowPoint = new Point(xDip, yDip);
+                if (windowPoint.X < 0 || windowPoint.Y < 0
+                    || windowPoint.X > ActualWidth || windowPoint.Y > ActualHeight)
+                {
+                    return CanvasHitZone.Outside;
+                }
+
+                // Conservative model: for Pen freehand, default to the writing
+                // surface and only override when a known UI element is explicitly hit.
+                var hit = InputHitTest(windowPoint) as DependencyObject;
+
+                // Eraser overlay sits above the canvas and owns its input.
+                if (hit != null
+                    && (IsUnderNamed(hit, "EraserOverlayCanvas")
+                        || IsUnderElement(hit, EraserOverlayCanvas)))
+                {
+                    return CanvasHitZone.EraserOverlay;
+                }
+
+                // The selection cover only blocks input while it is actually visible.
+                if (hit != null)
+                {
+                    var selectionCover = FindName("GridInkCanvasSelectionCover") as FrameworkElement;
+                    if (selectionCover != null
+                        && selectionCover.Visibility == Visibility.Visible
+                        && (IsUnderNamed(hit, "GridInkCanvasSelectionCover")
+                            || IsUnderElement(hit, selectionCover)))
+                    {
+                        return CanvasHitZone.SelectionOverlay;
+                    }
+                }
+
+                // Floating bar / board chrome / replay controls are explicit UI.
+                if (hit != null && IsUiChromeHit(hit))
+                    return CanvasHitZone.UiChrome;
+
+                // Everything else over the window is the writing surface for Pen.
+                return CanvasHitZone.CanvasSurface;
+            }
+            catch
+            {
+                return CanvasHitZone.CanvasSurface;
+            }
+        }
+
+        private bool IsUiChromeHit(DependencyObject hit)
+        {
+            if (hit == null)
+                return false;
+
+            if (IsUnderNamed(hit, "ViewboxFloatingBar")
+                || IsUnderNamed(hit, "ViewboxBlackboardLeftSide")
+                || IsUnderNamed(hit, "ViewboxBlackboardCenterSide")
+                || IsUnderNamed(hit, "ViewboxBlackboardRightSide")
+                || IsUnderNamed(hit, "BlackboardLeftSide")
+                || IsUnderNamed(hit, "BlackboardCenterSide")
+                || IsUnderNamed(hit, "BlackboardRightSide")
+                || IsUnderNamed(hit, "BorderInkReplayToolBox")
+                || IsUnderNamed(hit, "IdleMiniBar")
+                || IsUnderNamed(hit, "EdgeExpandHint")
+                || IsUnderNamed(hit, "PPTControlsGrid")
+                || IsUnderNamed(hit, "GridPPTControlLeft")
+                || IsUnderNamed(hit, "GridPPTControlRight"))
+            {
+                return true;
+            }
+
+            var current = hit;
+            while (current != null)
+            {
+                if (current is Button
+                    || current is System.Windows.Controls.Primitives.Thumb
+                    || current is Slider
+                    || current is System.Windows.Controls.Primitives.ToggleButton
+                    || current is System.Windows.Controls.Primitives.ScrollBar)
+                {
+                    return true;
+                }
+
+                current = VisualTreeHelper.GetParent(current)
+                          ?? (current as FrameworkElement)?.Parent as DependencyObject;
+            }
+
+            return false;
+        }
+
+        private InkStrokeStyleSnapshot CaptureStrokeStyleSnapshot()
+        {
+            var attrs = inkCanvas.DefaultDrawingAttributes;
+            var color = attrs.Color;
+            uint colorArgb = ((uint)color.A << 24)
+                             | ((uint)color.R << 16)
+                             | ((uint)color.G << 8)
+                             | color.B;
+
+            var useVelocity = ShouldUseRealtimeVelocityBrushTip()
+                              && penType != 1
+                              && drawingShapeMode == 0
+                              && !isPalmEraserActive;
+            var tipShape = attrs.StylusTip == StylusTip.Rectangle
+                           || attrs.IsHighlighter
+                           || penType == 1
+                ? InkStylusTipShape.Rectangle
+                : InkStylusTipShape.Ellipse;
+
+            return new InkStrokeStyleSnapshot(
+                colorArgb,
+                Math.Max(0.1, attrs.Width),
+                Math.Max(0.1, attrs.Height),
+                ignorePressure: Settings.Canvas.DisablePressure || attrs.IgnorePressure,
+                isHighlighter: attrs.IsHighlighter || penType == 1,
+                useVelocityBrushTip: useVelocity,
+                velocityBrushTipMix: (float)Settings.Canvas.VelocityBrushTipMix,
+                minimumDistanceScale: (float)Settings.Canvas.RealtimeBrushTipMinDistanceScale,
+                coordinateGeneration: _nativeCoordinateGeneration,
+                pageGeneration: CurrentWhiteboardIndex,
+                stylusTipShape: tipShape);
+        }
+
+        private InkSampleProcessorSettings CaptureProcessorSettings(InkStrokeStyleSnapshot style)
+        {
+            return new InkSampleProcessorSettings
+            {
+                DisablePressure = Settings.Canvas.DisablePressure || style.IgnorePressure,
+                EnablePressureForTouch = Settings.Canvas.EnablePressureTouchMode,
+                UseVelocityBrushTip = style.UseVelocityBrushTip,
+                VelocityBrushTipMix = style.VelocityBrushTipMix,
+                MinimumDistanceScale = style.MinimumDistanceScale,
+                BaseWidth = style.Width
+            };
+        }
+
+        private WetInkTargetSnapshot BuildWetInkTargetSnapshot()
+        {
+            var dpi = GetNativeDpiScales();
+            var widthDip = Math.Max(1.0, ActualWidth);
+            var heightDip = Math.Max(1.0, ActualHeight);
+            Point topLeft;
+            try
+            {
+                topLeft = PointToScreen(new Point(0, 0));
+            }
+            catch
+            {
+                topLeft = new Point(Left, Top);
+            }
+
+            var screenBounds = new WetInkPixelRect(
+                (int)Math.Round(topLeft.X),
+                (int)Math.Round(topLeft.Y),
+                Math.Max(1, (int)Math.Round(widthDip * dpi.X)),
+                Math.Max(1, (int)Math.Round(heightDip * dpi.Y)));
+
+            var visible = IsVisible
+                          && WindowState != WindowState.Minimized
+                          && Opacity > 0.01
+                          && ActualWidth > 0
+                          && ActualHeight > 0;
+
+            return new WetInkTargetSnapshot(
+                screenBounds,
+                (float)(96.0 * dpi.X),
+                (float)(96.0 * dpi.Y),
+                visible,
+                BuildExclusionRects(dpi, topLeft));
+        }
+
+        private IReadOnlyList<WetInkPixelRect> BuildExclusionRects(
+            (double X, double Y) dpi,
+            Point windowTopLeftScreen)
+        {
+            var list = new List<WetInkPixelRect>(8);
+            TryAddElementExclusion(list, FindName("ViewboxFloatingBar") as FrameworkElement, dpi, windowTopLeftScreen);
+            TryAddElementExclusion(list, FindName("ViewboxBlackboardLeftSide") as FrameworkElement, dpi, windowTopLeftScreen);
+            TryAddElementExclusion(list, FindName("ViewboxBlackboardCenterSide") as FrameworkElement, dpi, windowTopLeftScreen);
+            TryAddElementExclusion(list, FindName("ViewboxBlackboardRightSide") as FrameworkElement, dpi, windowTopLeftScreen);
+            TryAddElementExclusion(list, FindName("BlackboardLeftSide") as FrameworkElement, dpi, windowTopLeftScreen);
+            TryAddElementExclusion(list, FindName("BlackboardCenterSide") as FrameworkElement, dpi, windowTopLeftScreen);
+            TryAddElementExclusion(list, FindName("BlackboardRightSide") as FrameworkElement, dpi, windowTopLeftScreen);
+            TryAddElementExclusion(list, EraserOverlayCanvas, dpi, windowTopLeftScreen);
+            return list;
+        }
+
+        private static void TryAddElementExclusion(
+            List<WetInkPixelRect> list,
+            FrameworkElement element,
+            (double X, double Y) dpi,
+            Point windowTopLeftScreen)
+        {
+            if (element == null
+                || element.Visibility != Visibility.Visible
+                || element.ActualWidth <= 0
+                || element.ActualHeight <= 0)
+            {
+                return;
+            }
+
+            try
+            {
+                var topLeft = element.PointToScreen(new Point(0, 0));
+                var width = Math.Max(1, (int)Math.Round(element.ActualWidth * dpi.X));
+                var height = Math.Max(1, (int)Math.Round(element.ActualHeight * dpi.Y));
+                list.Add(new WetInkPixelRect(
+                    (int)Math.Round(topLeft.X),
+                    (int)Math.Round(topLeft.Y),
+                    width,
+                    height));
+            }
+            catch
+            {
+                // Element may not be connected to a presentation source yet.
+            }
+        }
+
+        private (double X, double Y) GetNativeDpiScales()
+        {
+            try
+            {
+                var source = PresentationSource.FromVisual(this);
+                if (source?.CompositionTarget != null)
+                {
+                    var m = source.CompositionTarget.TransformToDevice;
+                    return (m.M11 > 0 ? m.M11 : 1.0, m.M22 > 0 ? m.M22 : 1.0);
+                }
+            }
+            catch { /* fall through */ }
+
+            var scale = GetDpiScale();
+            return (scale > 0 ? scale : 1.0, scale > 0 ? scale : 1.0);
+        }
+
+        /// <summary>
+        /// Logical Pen freehand uses the native wet-ink pipeline, so the physical
+        /// InkCanvas editing mode must stay None to block WPF automatic stroke capture.
+        /// Erase/Select keep their WPF modes.
+        /// </summary>
+        private void EnsureNativePenPhysicalEditingMode()
+        {
+            if (inkCanvas == null)
+                return;
+
+            var tool = ResolveLogicalInkTool();
+            if (tool != LogicalInkTool.Pen)
+                return;
+
+            if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+        }
+
+        private static bool HasCanceledFlag(NativePointerFacts facts)
+        {
+            return (facts.Flags & NativeInkSampleFlags.Canceled) != 0;
+        }
+
+        private static bool IsPointOverElement(FrameworkElement element, Point windowPoint)
+        {
+            if (element == null || element.Visibility != Visibility.Visible)
+                return false;
+
+            try
+            {
+                var window = Window.GetWindow(element);
+                if (window == null)
+                    return false;
+                var topLeftInWindow = element.TranslatePoint(new Point(0, 0), window);
+                var rect = new Rect(
+                    topLeftInWindow,
+                    new Size(element.ActualWidth, element.ActualHeight));
+                return rect.Contains(windowPoint);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static bool IsInteractiveCanvasChild(DependencyObject hit)
+        {
+            // True only for user-placed interactive children (images, media, PDF),
+            // NOT the InkCanvas's own template parts (InkPresenter / AdornerDecorator /
+            // AdornerLayer / Adorner), which are ContentControls but belong to the canvas.
+            var current = hit;
+            while (current != null)
+            {
+                if (current is Image
+                    || current is MediaElement)
+                {
+                    return true;
+                }
+
+                if (current is FrameworkElement fe)
+                {
+                    var typeName = current.GetType().Name;
+                    if (string.Equals(typeName, "InkPresenter", StringComparison.Ordinal)
+                        || typeName.IndexOf("Adorner", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        return false;
+                    }
+
+                    if (fe.IsHitTestVisible
+                        && current is ContentControl
+                        && !string.IsNullOrEmpty(typeName)
+                        && typeName.IndexOf("Adorner", StringComparison.OrdinalIgnoreCase) < 0)
+                    {
+                        return true;
+                    }
+
+                    if (typeName.IndexOf("Pdf", StringComparison.OrdinalIgnoreCase) >= 0
+                        || typeName.IndexOf("Media", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        return true;
+                    }
+                }
+
+                current = VisualTreeHelper.GetParent(current)
+                          ?? (current as FrameworkElement)?.Parent as DependencyObject;
+            }
+
+            return false;
+        }
+
+        private static bool IsUnderElement(DependencyObject hit, DependencyObject ancestor)
+        {
+            if (hit == null || ancestor == null)
+                return false;
+            var current = hit;
+            while (current != null)
+            {
+                if (ReferenceEquals(current, ancestor))
+                    return true;
+                current = VisualTreeHelper.GetParent(current)
+                          ?? (current as FrameworkElement)?.Parent as DependencyObject;
+            }
+            return false;
+        }
+
+        private static bool IsUnderNamed(DependencyObject hit, string name)
+        {
+            var current = hit;
+            while (current != null)
+            {
+                if (current is FrameworkElement fe
+                    && string.Equals(fe.Name, name, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+
+                current = VisualTreeHelper.GetParent(current)
+                          ?? (current as FrameworkElement)?.Parent as DependencyObject;
+            }
+            return false;
+        }
+
+        private static DependencyObject FindVisualParentByTypeName(DependencyObject child, string typeName)
+        {
+            var current = child;
+            while (current != null)
+            {
+                if (current.GetType().Name.IndexOf(typeName, StringComparison.OrdinalIgnoreCase) >= 0)
+                    return current;
+                current = VisualTreeHelper.GetParent(current)
+                          ?? (current as FrameworkElement)?.Parent as DependencyObject;
+            }
+            return null;
+        }
+
+        private static DependencyObject FindVisualParent(
+            DependencyObject child,
+            Func<DependencyObject, bool> predicate)
+        {
+            var current = VisualTreeHelper.GetParent(child)
+                          ?? (child as FrameworkElement)?.Parent as DependencyObject;
+            while (current != null)
+            {
+                if (predicate(current))
+                    return current;
+                current = VisualTreeHelper.GetParent(current)
+                          ?? (current as FrameworkElement)?.Parent as DependencyObject;
+            }
+            return null;
+        }
+    }
+}

@@ -1498,6 +1498,9 @@ namespace Ink_Canvas
 
             isLoaded = true;
 
+            // Start native wet-ink (WM_POINTER + DirectComposition) after HWND is ready.
+            TryStartNativeWetInkPipeline();
+
             // 应用颜色主题，这将考虑自定义背景色
             CheckColorTheme(true);
             ApplyFloatingBarTheme();
@@ -1613,6 +1616,7 @@ namespace Ink_Canvas
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e)
         {
+            UpdateNativeWetInkTarget();
             if (!Settings.Advanced.IsEnableResolutionChangeDetection) return;
             ShowNotification(string.Format(Properties.MainWindowStrings.Main_DisplayChanged, Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height));
             HandleFloatingBarRecovery();
@@ -1620,6 +1624,8 @@ namespace Ink_Canvas
 
         private void MainWindow_OnDpiChanged(object sender, DpiChangedEventArgs e)
         {
+            UpdateNativeWetInkDpi();
+
             if (e.OldDpi.DpiScaleX != e.NewDpi.DpiScaleX && e.OldDpi.DpiScaleY != e.NewDpi.DpiScaleY && Settings.Advanced.IsEnableDPIChangeDetection)
             {
                 ShowNotification(string.Format(Properties.MainWindowStrings.Main_DPIChanged, e.OldDpi.DpiScaleX, e.OldDpi.DpiScaleY, e.NewDpi.DpiScaleX, e.NewDpi.DpiScaleY));
@@ -1822,6 +1828,8 @@ namespace Ink_Canvas
 
         private void MainWindow_OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
+            UpdateNativeWetInkTarget();
+
             if (Settings.Advanced.IsEnableForceFullScreen)
             {
                 if (isLoaded) ShowNotification(
@@ -1841,7 +1849,7 @@ namespace Ink_Canvas
         /// <param name="e">关闭事件的参数（未使用）。</param>
         private void Window_Closed(object sender, EventArgs e)
         {
-            RealtimeInkFrameScheduler.Clear();
+            ShutdownNativeWetInkPipeline();
             SystemEvents.DisplaySettingsChanged -= SystemEventsOnDisplaySettingsChanged;
 
             try
@@ -3248,10 +3256,17 @@ namespace Ink_Canvas
                     DisableEraserOverlay();
                 }
 
-                // 执行模式切换
-                inkCanvas.EditingMode = newMode;
+                // Logical Pen freehand is owned by the native wet-ink pipeline.
+                // Keep physical EditingMode at None so WPF never auto-collects wet strokes.
+                var physicalMode = newMode;
+                if (physicalMode == InkCanvasEditingMode.Ink)
+                    physicalMode = InkCanvasEditingMode.None;
 
-                // 根据模式确定是否为鼠标模式（无工具模式）
+                // 执行模式切换
+                inkCanvas.EditingMode = physicalMode;
+                EnsureNativePenPhysicalEditingMode();
+
+                // Hotkeys key off the requested logical mode. Physical None is used for native Pen freehand.
                 bool isMouseMode = newMode == InkCanvasEditingMode.None;
 
                 // 更新快捷键状态

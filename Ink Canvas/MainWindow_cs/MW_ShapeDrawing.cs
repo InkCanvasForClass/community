@@ -255,7 +255,8 @@ namespace Ink_Canvas
             if (TryBlockFrozenPageMutation("切换到画笔")) return;
             forceEraser = false;
             drawingShapeMode = 0;
-            inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+            inkCanvas.EditingMode = InkCanvasEditingMode.None;
+            EnsureNativePenPhysicalEditingMode();
             inkCanvas.IsManipulationEnabled = true;
             CancelSingleFingerDragMode();
             isLongPressSelected = false;
@@ -2645,7 +2646,8 @@ namespace Ink_Canvas
                 return;
             }
 
-            if (e.ChangedButton == MouseButton.Left && ShouldUseRealtimeVelocityBrushTipForMouse() && drawingShapeMode == 0)
+            // Mouse freehand is owned by the native wet-ink pipeline.
+            if (false && e.ChangedButton == MouseButton.Left && ShouldUseRealtimeVelocityBrushTipForMouse() && drawingShapeMode == 0)
             {
                 _isMouseRealtimeInking = true;
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;

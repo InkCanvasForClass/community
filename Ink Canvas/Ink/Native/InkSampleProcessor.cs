@@ -1,0 +1,185 @@
+using System;
+using System.Collections.Generic;
+
+namespace Ink_Canvas.Ink.Native
+{
+    internal sealed class InkSampleProcessorSettings
+    {
+        public bool DisablePressure { get; init; }
+        public bool EnablePressureForTouch { get; init; }
+        public bool UseVelocityBrushTip { get; init; }
+        public float VelocityBrushTipMix { get; init; }
+        public float MinimumDistanceScale { get; init; } = 0.5f;
+        public double BaseWidth { get; init; } = 2.5;
+    }
+
+    internal sealed class InkSampleProcessor
+    {
+        private sealed class OneEuroFilter
+        {
+            private readonly float _minimumCutoff;
+            private readonly float _beta;
+            private readonly float _derivativeCutoff;
+            private bool _initialized;
+            private float _previousValue;
+            private float _previousDerivative;
+
+            public OneEuroFilter(float minimumCutoff, float beta, float derivativeCutoff)
+            {
+                _minimumCutoff = minimumCutoff;
+                _beta = beta;
+                _derivativeCutoff = derivativeCutoff;
+            }
+
+            public float Filter(float value, float deltaSeconds, float speed)
+            {
+                if (!_initialized)
+                {
+                    _initialized = true;
+                    _previousValue = value;
+                    return value;
+                }
+
+                var derivative = (value - _previousValue) / Math.Max(0.000001f, deltaSeconds);
+                var derivativeAlpha = Alpha(_derivativeCutoff, deltaSeconds);
+                _previousDerivative = Lerp(_previousDerivative, derivative, derivativeAlpha);
+                var valueAlpha = Alpha(_minimumCutoff + _beta * speed, deltaSeconds);
+                _previousValue = Lerp(_previousValue, value, valueAlpha);
+                return _previousValue;
+            }
+
+            private static float Alpha(float cutoff, float deltaSeconds)
+            {
+                var tau = 1f / (2f * (float)Math.PI * Math.Max(0.001f, cutoff));
+                return 1f / (1f + tau / Math.Max(0.000001f, deltaSeconds));
+            }
+
+            private static float Lerp(float from, float to, float amount) => from + (to - from) * amount;
+        }
+
+        private readonly InkSampleProcessorSettings _settings;
+        private readonly OneEuroFilter _filterX = new OneEuroFilter(1.2f, 0.015f, 1f);
+        private readonly OneEuroFilter _filterY = new OneEuroFilter(1.2f, 0.015f, 1f);
+        private readonly OneEuroFilter _filterPressure = new OneEuroFilter(1f, 0.02f, 1f);
+        private bool _hasPrevious;
+        private bool _sawPressureVariation;
+        private float _lastRawX;
+        private float _lastRawY;
+        private float _lastSmoothX;
+        private float _lastSmoothY;
+        private float _lastSmoothPressure = 0.5f;
+        private long _lastTimestampMicroseconds;
+        private float _smoothedSampleRate = 120f;
+
+        public InkSampleProcessor(InkSampleProcessorSettings settings)
+        {
+            _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+        }
+
+        public bool VelocityBrushTipApplied { get; private set; }
+
+        public void Append(IReadOnlyList<RawInkSample> samples, List<RealInkPoint> destination)
+        {
+            if (samples == null) throw new ArgumentNullException(nameof(samples));
+            if (destination == null) throw new ArgumentNullException(nameof(destination));
+
+            for (var i = 0; i < samples.Count; i++)
+                Append(samples[i], destination);
+        }
+
+        private void Append(RawInkSample sample, List<RealInkPoint> destination)
+        {
+            var rawX = (float)sample.X;
+            var rawY = (float)sample.Y;
+            if (!_hasPrevious)
+            {
+                // 落笔首点：不参与速度笔锋调制（speed=0 会让宽度乘子取近最大值，形成"粗点"），
+                // 直接使用硬件压感/默认 0.5，使起笔宽度与笔画主体接近。
+                var initialPressure = ResolvePressure(sample, 0, 1f / 120f, applyVelocityModulation: false);
+                destination.Add(new RealInkPoint(sample.X, sample.Y, initialPressure, sample.TimestampMicroseconds));
+                _hasPrevious = true;
+                _lastRawX = rawX;
+                _lastRawY = rawY;
+                _lastSmoothX = rawX;
+                _lastSmoothY = rawY;
+                _lastSmoothPressure = initialPressure;
+                _lastTimestampMicroseconds = sample.TimestampMicroseconds;
+                return;
+            }
+
+            var deltaSeconds = Math.Max(0.0001f, (sample.TimestampMicroseconds - _lastTimestampMicroseconds) / 1_000_000f);
+            var deltaX = rawX - _lastRawX;
+            var deltaY = rawY - _lastRawY;
+            var distance = (float)Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
+            var speed = distance / deltaSeconds;
+            var sampleRate = 1f / deltaSeconds;
+            _smoothedSampleRate = _smoothedSampleRate * 0.85f + sampleRate * 0.15f;
+
+            var filteredX = _filterX.Filter(rawX, deltaSeconds, speed);
+            var filteredY = _filterY.Filter(rawY, deltaSeconds, speed);
+            var pressure = ResolvePressure(sample, speed, deltaSeconds);
+            var minimumDistance = GetMinimumDistance();
+
+            _lastRawX = rawX;
+            _lastRawY = rawY;
+            _lastTimestampMicroseconds = sample.TimestampMicroseconds;
+            if (distance < minimumDistance)
+                return;
+
+            var pointX = (_lastSmoothX + filteredX) * 0.5f;
+            var pointY = (_lastSmoothY + filteredY) * 0.5f;
+            var pointPressure = (_lastSmoothPressure + pressure) * 0.5f;
+            destination.Add(new RealInkPoint(pointX, pointY, pointPressure, sample.TimestampMicroseconds));
+            _lastSmoothX = filteredX;
+            _lastSmoothY = filteredY;
+            _lastSmoothPressure = pressure;
+        }
+
+        private float ResolvePressure(RawInkSample sample, float speed, float deltaSeconds, bool applyVelocityModulation = true)
+        {
+            if (_settings.DisablePressure)
+                return 0.5f;
+
+            var rawPressure = sample.HasPressure ? Clamp(sample.Pressure, 0f, 1f) : 0.5f;
+            if (sample.HasPressure && Math.Abs(rawPressure - 0.5f) > 0.02f)
+                _sawPressureVariation = true;
+
+            var useHardwarePressure = sample.InputKind == NativeInkInputKind.Pen
+                                      ? _sawPressureVariation && rawPressure > 0
+                                      : _settings.EnablePressureForTouch && _sawPressureVariation && rawPressure > 0;
+            if (!_settings.UseVelocityBrushTip)
+                return useHardwarePressure ? rawPressure : 0.5f;
+
+            var width = (float)Math.Max(0.35, _settings.BaseWidth);
+            if (useHardwarePressure)
+                width *= 0.25f + 0.75f * rawPressure;
+            var speedNormalization = 1800f + _smoothedSampleRate * 3.5f;
+            if (applyVelocityModulation)
+                width *= Clamp(1.15f - speed / speedNormalization, 0.45f, 1.25f);
+            var speedPressure = WidthToPressure(width, (float)Math.Max(0.35, _settings.BaseWidth));
+            var mix = Clamp(_settings.VelocityBrushTipMix, 0f, 1f);
+            var pressure = useHardwarePressure
+                ? (1f - mix) * rawPressure + mix * speedPressure
+                : speedPressure;
+            VelocityBrushTipApplied = true;
+            return _filterPressure.Filter(Clamp(pressure, 0.08f, 1f), deltaSeconds, speed);
+        }
+
+        private float GetMinimumDistance()
+        {
+            var baseDistance = _smoothedSampleRate > 160f ? 0.35f : _smoothedSampleRate > 90f ? 0.25f : 0.15f;
+            return baseDistance * Clamp(_settings.MinimumDistanceScale, 0f, 2f);
+        }
+
+        private static float WidthToPressure(float width, float baseWidth)
+        {
+            return Clamp((width / baseWidth - 0.42f) / 1.16f, 0.08f, 1f);
+        }
+
+        private static float Clamp(float value, float minimum, float maximum)
+        {
+            if (value < minimum) return minimum;
+            return value > maximum ? maximum : value;
+        }
+    }
+}
