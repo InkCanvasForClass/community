@@ -601,9 +601,10 @@ namespace Ink_Canvas
         ///   cy = containerH/2 * previewScale + previewTranslateY
         /// 墨迹在 inkCanvas 坐标系（容器坐标），移动时已同步平移，所以旋转中心必须用画面视觉中心，
         /// 否则移动后旋转墨迹会绕容器中心转，与画面不同步。
-        /// 0°/180°：scale=1.0；90°/270°：scale=min(W/H, H/W)。
+        /// 0°/180°：scale=1.0；90°/270°：scale=min(H/imgW, W/imgH)/min(W/imgW, H/imgH)。
+        /// 当 imgW/imgH=0 时回退到老公式 min(W/H, H/W)（适用于横屏视频，video=1920x1080）。
         /// </summary>
-        private System.Windows.Media.Matrix GetBoothRotationMatrix(double angleDegrees, double containerW, double containerH)
+        private System.Windows.Media.Matrix GetBoothRotationMatrix(double angleDegrees, double containerW, double containerH, double imgW = 0, double imgH = 0)
         {
             // 画面视觉中心：考虑 RenderTransform 的缩放和平移
             double cx = (containerW / 2.0) * _boothPreviewScale + _boothPreviewTranslateX;
@@ -613,7 +614,23 @@ namespace Ink_Canvas
             bool rotated = Math.Abs(angle - 90.0) < 0.01 || Math.Abs(angle - 270.0) < 0.01;
             double scale = 1.0;
             if (rotated && containerW > 0 && containerH > 0)
-                scale = Math.Min(containerW / containerH, containerH / containerW);
+            {
+                if (imgW > 0 && imgH > 0)
+                {
+                    // 按图像实际比例算缩放：
+                    // 0° 时 Stretch scale = min(W/iw, H/ih)
+                    // 90° 时（容器交换 HxW）Stretch scale = min(H/iw, W/ih)
+                    // delta scale = s_90 / s_0
+                    double s0 = Math.Min(containerW / imgW, containerH / imgH);
+                    double s90 = Math.Min(containerH / imgW, containerW / imgH);
+                    if (s0 > 0) scale = s90 / s0;
+                }
+                else
+                {
+                    // 老公式：适用于横屏视频（image aspect ≈ container aspect）
+                    scale = Math.Min(containerW / containerH, containerH / containerW);
+                }
+            }
 
             var m = System.Windows.Media.Matrix.Identity;
             m.RotateAt(angle, cx, cy);
@@ -631,9 +648,31 @@ namespace Ink_Canvas
             if (_rotationBaselineStrokes != null) return;
             if (inkCanvas == null || inkCanvas.Strokes.Count == 0) return;
             _rotationBaselineStrokes = inkCanvas.Strokes.Clone();
-            // 照片预览页共享 VideoPresenterFullCanvasRotation，始终从这里取当前角度
-            double currentAngle = VideoPresenterFullCanvasRotation?.Angle ?? 0;
-            _rotationBaselineAngle = (int)(currentAngle % 360.0 + 360.0) % 360;
+            // 记录墨迹当前对应的"实时画面视觉角度"：
+            // - 实时画面：VideoPresenterFullCanvasRotation.Angle（= cameraRotation*90）
+            // - 照片预览：照片内容是实时画面旋转 cameraRotation*90° 后的样子，
+            //   Angle 被重置为 0，但墨迹对应实时 cameraRotation*90° 状态，
+            //   所以视觉角度 = cameraRotation*90 + Angle（照片预览旋转的增量）
+            _rotationBaselineAngle = GetBoothVisualAngle();
+        }
+
+        /// <summary>
+        /// 获取墨迹当前对应的"实时画面视觉角度"。
+        /// 实时画面：= VideoPresenterFullCanvasRotation.Angle。
+        /// 照片预览：照片内容是实时画面旋转 cameraRotation*90° 后的样子，
+        ///   Angle 从 0 开始（照片预览自身的旋转增量），视觉角度 = cameraRotation*90 + Angle。
+        /// </summary>
+        /// <summary>
+        /// 获取墨迹当前对应的旋转角度。
+        /// 照片预览页：照片位图在拍照时已 RotateFlip 旋转到正向，Angle=0 即"正向显示"，
+        ///   所以缩放系数只取决于 Angle（LayoutTransform 旋转角）和照片实际比例，与 cameraService 无关。
+        /// 实时画面：Angle = cameraService.RotationAngle*90（由旋转按钮同步设置）。
+        /// 两种场景都直接返回 VideoPresenterFullCanvasRotation.Angle。
+        /// </summary>
+        private int GetBoothVisualAngle()
+        {
+            double angle = VideoPresenterFullCanvasRotation?.Angle ?? 0;
+            return (int)(angle % 360.0 + 360.0) % 360;
         }
 
         /// <summary>
@@ -653,10 +692,20 @@ namespace Ink_Canvas
                 double containerH = VideoPresenterSpecialModeContainer?.ActualHeight ?? inkCanvas.ActualHeight;
                 if (containerW <= 0 || containerH <= 0) return;
 
+                // 获取当前图像实际尺寸（照片预览页用照片位图尺寸，实时画面用 0 走老公式回退）
+                double imgW = 0, imgH = 0;
+                bool photoVisible = VideoPresenterFrozenFrameImage != null
+                    && VideoPresenterFrozenFrameImage.Visibility == Visibility.Visible;
+                if (photoVisible && VideoPresenterFrozenFrameImage.Source is BitmapSource bs)
+                {
+                    imgW = bs.PixelWidth;
+                    imgH = bs.PixelHeight;
+                }
+
                 // 从当前角度变换到目标角度：delta = M_current^(-1) * M_target
                 // _rotationBaselineAngle 在每次旋转后更新为当前画布墨迹对应的角度
-                var currentMatrix = GetBoothRotationMatrix(_rotationBaselineAngle, containerW, containerH);
-                var targetMatrix = GetBoothRotationMatrix(targetAngleDegrees, containerW, containerH);
+                var currentMatrix = GetBoothRotationMatrix(_rotationBaselineAngle, containerW, containerH, imgW, imgH);
+                var targetMatrix = GetBoothRotationMatrix(targetAngleDegrees, containerW, containerH, imgW, imgH);
                 if (!currentMatrix.HasInverse) return;
                 var currentInv = currentMatrix;
                 currentInv.Invert();
@@ -665,13 +714,11 @@ namespace Ink_Canvas
                 // 诊断日志：照片预览页时记录墨迹变换矩阵
                 try
                 {
-                    bool photoVisible4Log = VideoPresenterFrozenFrameImage != null
-                        && VideoPresenterFrozenFrameImage.Visibility == Visibility.Visible;
-                    if (photoVisible4Log)
+                    if (photoVisible)
                     {
                         LogHelper.WriteLogToFile(
                             $"[BoothDiag] RotateStrokesFromBaseline: baselineAngle={_rotationBaselineAngle}, targetAngle={targetAngleDegrees}, " +
-                            $"container={containerW}x{containerH}, scale={_boothPreviewScale}, translate=({_boothPreviewTranslateX},{_boothPreviewTranslateY}), " +
+                            $"container={containerW}x{containerH}, imgSize={imgW}x{imgH}, scale={_boothPreviewScale}, translate=({_boothPreviewTranslateX},{_boothPreviewTranslateY}), " +
                             $"currentM22={currentMatrix.M22}, targetM22={targetMatrix.M22}, " +
                             $"delta=[{delta.M11},{delta.M12},{delta.M21},{delta.M22}|{delta.OffsetX},{delta.OffsetY}], " +
                             $"strokesCount={inkCanvas.Strokes.Count}",
@@ -685,6 +732,12 @@ namespace Ink_Canvas
                 _currentCommitType = CommitReason.CodeInput;
                 try
                 {
+                    // 旋转前墨迹 bbox（容器坐标）
+                    System.Windows.Rect beforeBBox = inkCanvas.Strokes.GetBounds();
+                    // 旋转前照片视觉中心
+                    double cx = (containerW / 2.0) * _boothPreviewScale + _boothPreviewTranslateX;
+                    double cy = (containerH / 2.0) * _boothPreviewScale + _boothPreviewTranslateY;
+
                     // 原地变换：保留 Stroke 对象引用，使 TimeMachine 历史中的 Stroke 引用与画布一致
                     inkCanvas.Strokes.Transform(delta, false);
                     // 同步变换历史中不在画布上的笔画（如形状识别的 ReplacedStroke）
@@ -696,6 +749,19 @@ namespace Ink_Canvas
                     {
                         StrokeInitialHistory[stroke] = stroke.StylusPoints.Clone();
                     }
+
+                    // 旋转后墨迹 bbox
+                    System.Windows.Rect afterBBox = inkCanvas.Strokes.GetBounds();
+                    try
+                    {
+                        LogHelper.WriteLogToFile(
+                            $"[BoothDiag] StrokesBBox: before=[{beforeBBox.X:F1},{beforeBBox.Y:F1},{beforeBBox.Width:F1}x{beforeBBox.Height:F1}], " +
+                            $"after=[{afterBBox.X:F1},{afterBBox.Y:F1},{afterBBox.Width:F1}x{afterBBox.Height:F1}], " +
+                            $"visualCenter=({cx:F1},{cy:F1}), beforeCenter=({beforeBBox.X+beforeBBox.Width/2:F1},{beforeBBox.Y+beforeBBox.Height/2:F1}), " +
+                            $"afterCenter=({afterBBox.X+afterBBox.Width/2:F1},{afterBBox.Y+afterBBox.Height/2:F1})",
+                            LogHelper.LogType.Info);
+                    }
+                    catch { }
                 }
                 finally
                 {
@@ -2396,7 +2462,9 @@ namespace Ink_Canvas
                     }
                     catch { }
                     VideoPresenterFullCanvasRotation.Angle = (VideoPresenterFullCanvasRotation.Angle + 90.0) % 360.0;
-                    RotateBoothStrokesFromBaseline(VideoPresenterFullCanvasRotation.Angle);
+                    // 传视觉角度（cameraRotation*90 + Angle）给墨迹变换，
+                    // 因为 GetBoothRotationMatrix 按"实时画面 0° 基准"算缩放，照片预览需用视觉角度
+                    RotateBoothStrokesFromBaseline(GetBoothVisualAngle());
                     // 诊断日志：旋转后状态
                     try
                     {
