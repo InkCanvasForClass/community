@@ -77,6 +77,10 @@ namespace Ink_Canvas
         // _rotationBaselineAngle 记录基准墨迹对应的角度（0/90/180/270）。
         private System.Windows.Ink.StrokeCollection _rotationBaselineStrokes = null;
         private int _rotationBaselineAngle = 0;
+        // 照片预览页：把 FillImage 的 LayoutTransform/RenderTransform 替换为 VideoCaptureElement 的同名实例，
+        // 让照片预览完全复用实时画面的变换管线（旋转/缩放/移动走同一条代码路径）。
+        // _frozenFrameOriginalRenderTransform 保存照片 Image 原始的 RenderTransform，返回直播页时恢复。
+        private System.Windows.Media.TransformGroup _frozenFrameOriginalRenderTransform = null;
         // 程序正在替换墨迹时设为 true，避免 StrokesChanged 重置基准
         private bool _isApplyingRotationToStrokes = false;
 
@@ -627,11 +631,8 @@ namespace Ink_Canvas
             if (_rotationBaselineStrokes != null) return;
             if (inkCanvas == null || inkCanvas.Strokes.Count == 0) return;
             _rotationBaselineStrokes = inkCanvas.Strokes.Clone();
-            double currentAngle = 0;
-            if (VideoPresenterFrozenFrameImage != null && VideoPresenterFrozenFrameImage.Visibility == Visibility.Visible)
-                currentAngle = VideoPresenterFrozenFrameRotation?.Angle ?? 0;
-            else
-                currentAngle = VideoPresenterFullCanvasRotation?.Angle ?? 0;
+            // 照片预览页共享 VideoPresenterFullCanvasRotation，始终从这里取当前角度
+            double currentAngle = VideoPresenterFullCanvasRotation?.Angle ?? 0;
             _rotationBaselineAngle = (int)(currentAngle % 360.0 + 360.0) % 360;
         }
 
@@ -660,6 +661,24 @@ namespace Ink_Canvas
                 var currentInv = currentMatrix;
                 currentInv.Invert();
                 var delta = currentInv * targetMatrix;
+
+                // 诊断日志：照片预览页时记录墨迹变换矩阵
+                try
+                {
+                    bool photoVisible4Log = VideoPresenterFrozenFrameImage != null
+                        && VideoPresenterFrozenFrameImage.Visibility == Visibility.Visible;
+                    if (photoVisible4Log)
+                    {
+                        LogHelper.WriteLogToFile(
+                            $"[BoothDiag] RotateStrokesFromBaseline: baselineAngle={_rotationBaselineAngle}, targetAngle={targetAngleDegrees}, " +
+                            $"container={containerW}x{containerH}, scale={_boothPreviewScale}, translate=({_boothPreviewTranslateX},{_boothPreviewTranslateY}), " +
+                            $"currentM22={currentMatrix.M22}, targetM22={targetMatrix.M22}, " +
+                            $"delta=[{delta.M11},{delta.M12},{delta.M21},{delta.M22}|{delta.OffsetX},{delta.OffsetY}], " +
+                            $"strokesCount={inkCanvas.Strokes.Count}",
+                            LogHelper.LogType.Info);
+                    }
+                }
+                catch { }
 
                 _isApplyingRotationToStrokes = true;
                 var prevCommitType = _currentCommitType;
@@ -700,55 +719,6 @@ namespace Ink_Canvas
         private void ResetRotationBaseline()
         {
             _rotationBaselineStrokes = null;
-        }
-
-        /// <summary>
-        /// 按当前 VideoPresenterFrozenFrameRotation.Angle 重新计算冻结照片的 fit 缩放和居中偏移。
-        /// 旋转 90/270 时视觉宽高互换，fitRatio 必须按旋转后的视觉尺寸算，否则照片会超出容器被裁剪。
-        /// Image.Width/Height 是 LayoutTransform 旋转前的 layout 尺寸，
-        /// LayoutTransform 会自动把 (W,H) 旋转成 (H,W) 的视觉占用，无需手动交换 Width/Height。
-        /// </summary>
-        private void ReapplyBoothFrozenLayout()
-        {
-            if (VideoPresenterFrozenFrameImage == null) return;
-            if (VideoPresenterFrozenFrameImage.Visibility != Visibility.Visible) return;
-            if (!(VideoPresenterFrozenFrameImage.Source is BitmapSource bs)) return;
-
-            double angle = (VideoPresenterFrozenFrameRotation?.Angle ?? 0) % 360.0;
-            if (angle < 0) angle += 360.0;
-            double containerW = VideoPresenterSpecialModeContainer?.ActualWidth ?? 0;
-            double containerH = VideoPresenterSpecialModeContainer?.ActualHeight ?? 0;
-            double imgW = bs.PixelWidth;
-            double imgH = bs.PixelHeight;
-            if (containerW <= 0 || containerH <= 0 || imgW <= 0 || imgH <= 0) return;
-
-            // 旋转 90/270 时视觉宽高互换（参考 EasiCamera MakeSlideAdaptToBoard 第 83-87 行）
-            bool rotated = Math.Abs(angle % 180.0) > 0.01;
-            double visualW = rotated ? imgH : imgW;
-            double visualH = rotated ? imgW : imgH;
-
-            // fitRatio 按旋转后视觉尺寸算，确保旋转后照片完整显示不被裁剪
-            double fitRatio = Math.Min(containerW / visualW, containerH / visualH);
-
-            // Image.Width/Height 是 LayoutTransform 旋转前的 layout 尺寸
-            // LayoutTransform 旋转 90/270 后视觉占用 = (Height, Width)
-            // 所以 (imgW*fitRatio, imgH*fitRatio) 旋转后视觉 = (imgH*fitRatio, imgW*fitRatio) = (visualW*fitRatio, visualH*fitRatio)
-            VideoPresenterFrozenFrameImage.Width = imgW * fitRatio;
-            VideoPresenterFrozenFrameImage.Height = imgH * fitRatio;
-
-            // 旋转后实际视觉尺寸
-            double actualVisualW = visualW * fitRatio;
-            double actualVisualH = visualH * fitRatio;
-
-            // 居中偏移：Translate 作用在 RenderTransform，即旋转后的视觉边界
-            // RenderTransformOrigin="0,0" 让 Translate 直接对应视觉左上角的位移
-            VideoPresenterFrozenFrameImage.HorizontalAlignment = HorizontalAlignment.Left;
-            VideoPresenterFrozenFrameImage.VerticalAlignment = VerticalAlignment.Top;
-            _boothPreviewScale = 1.0;
-            _boothPreviewTranslateX = (containerW - actualVisualW) / 2.0;
-            _boothPreviewTranslateY = (containerH - actualVisualH) / 2.0;
-
-            ApplyBoothPreviewTransform();
         }
 
         /// <summary>
@@ -2397,17 +2367,45 @@ namespace Ink_Canvas
             {
                 // 图片预览状态：直接旋转冻结照片，不返回直播
                 // （冻结照片内容已通过拍照时 RotateFlip 旋转到正向，这里仅旋转 LayoutTransform 即可）
+                // 照片预览页已共享 VideoPresenterFullCanvasRotation，旋转它即可同时旋转照片。
                 if (_isVideoPresenterSpecialMode
                     && VideoPresenterFrozenFrameImage != null
                     && VideoPresenterFrozenFrameImage.Visibility == Visibility.Visible
-                    && VideoPresenterFrozenFrameRotation != null)
+                    && VideoPresenterFullCanvasRotation != null)
                 {
-                    // 照片预览页旋转：从基准重新变换到目标角度
-                    // 90°/270° 时视频视觉缩小（LayoutTransform 旋转后元素 fit 容器），墨迹跟着缩放
+                    // 与直播页逻辑完全一致：只设 Rotation.Angle，不重置缩放/平移。
+                    // 照片用 FillImage 填满容器，LayoutTransform 旋转后 WPF 自动用交换的 constraint 重算 fit，
+                    // 行为与 VideoCaptureElement 一致。
+                    double beforeAngle = VideoPresenterFullCanvasRotation.Angle;
                     EnsureRotationBaseline();
-                    VideoPresenterFrozenFrameRotation.Angle = (VideoPresenterFrozenFrameRotation.Angle + 90.0) % 360.0;
-                    ReapplyBoothFrozenLayout();
-                    RotateBoothStrokesFromBaseline(VideoPresenterFrozenFrameRotation.Angle);
+                    // 诊断日志：旋转前状态
+                    try
+                    {
+                        double containerW = VideoPresenterSpecialModeContainer?.ActualWidth ?? 0;
+                        double containerH = VideoPresenterSpecialModeContainer?.ActualHeight ?? 0;
+                        double imgW = 0, imgH = 0;
+                        if (VideoPresenterFrozenFrameImage.Source is BitmapSource bs)
+                        { imgW = bs.PixelWidth; imgH = bs.PixelHeight; }
+                        LogHelper.WriteLogToFile(
+                            $"[BoothDiag] BtnRotate BEFORE: beforeAngle={beforeAngle}, " +
+                            $"container={containerW}x{containerH}, imgSize={imgW}x{imgH}, " +
+                            $"baselineAngle={_rotationBaselineAngle}, baselineStrokes={_rotationBaselineStrokes?.Count ?? 0}, " +
+                            $"canvasStrokes={inkCanvas?.Strokes?.Count ?? 0}, " +
+                            $"scale={_boothPreviewScale}, translate=({_boothPreviewTranslateX},{_boothPreviewTranslateY})",
+                            LogHelper.LogType.Info);
+                    }
+                    catch { }
+                    VideoPresenterFullCanvasRotation.Angle = (VideoPresenterFullCanvasRotation.Angle + 90.0) % 360.0;
+                    RotateBoothStrokesFromBaseline(VideoPresenterFullCanvasRotation.Angle);
+                    // 诊断日志：旋转后状态
+                    try
+                    {
+                        LogHelper.WriteLogToFile(
+                            $"[BoothDiag] BtnRotate AFTER: afterAngle={VideoPresenterFullCanvasRotation.Angle}, " +
+                            $"photo.ActualSize={VideoPresenterFrozenFrameImage.ActualWidth}x{VideoPresenterFrozenFrameImage.ActualHeight}",
+                            LogHelper.LogType.Info);
+                    }
+                    catch { }
                     return;
                 }
 
@@ -2870,6 +2868,11 @@ namespace Ink_Canvas
                 VideoPresenterFrozenFrameImage.Height = double.NaN;
                 VideoPresenterFrozenFrameImage.HorizontalAlignment = HorizontalAlignment.Stretch;
                 VideoPresenterFrozenFrameImage.VerticalAlignment = VerticalAlignment.Stretch;
+                // 解除与 VideoCaptureElement 的变换共享，恢复照片 Image 自己的变换实例
+                if (VideoPresenterFrozenFrameRotation != null)
+                    VideoPresenterFrozenFrameImage.LayoutTransform = VideoPresenterFrozenFrameRotation;
+                if (_frozenFrameOriginalRenderTransform != null)
+                    VideoPresenterFrozenFrameImage.RenderTransform = _frozenFrameOriginalRenderTransform;
                 // VideoPresenterFrozenOverlay（旧全屏蒙版）和 VideoPresenterFrozenThumbnail（侧栏小预览）均已从 XAML 移除
             }
             catch { }
@@ -2903,58 +2906,70 @@ namespace Ink_Canvas
 
             _boothCurrentPhotoIndex = photoIndex;
 
-            // 按需计算照片在冻结画面上的布局参数（每张照片尺寸可能不同）
+            // 照片预览页直接复用实时画面的变换管线：把 FillImage 的 LayoutTransform/RenderTransform
+            // 替换为 VideoCaptureElement 的同名实例（VideoPresenterFullCanvasRotation/Scale/Translate）。
+            // FillImage 重写了 MeasureOverride 返回 availableSize，与 VideoCaptureElement 行为一致
+            // （填满容器，Stretch=Uniform 内部按比例缩放居中），所以旋转/缩放/移动与实时画面走完全相同代码路径。
             if (VideoPresenterFrozenFrameImage != null)
             {
+                // 诊断日志：进入照片预览页前的状态
+                try
+                {
+                    double containerW = VideoPresenterSpecialModeContainer?.ActualWidth ?? 0;
+                    double containerH = VideoPresenterSpecialModeContainer?.ActualHeight ?? 0;
+                    double imgW = 0, imgH = 0;
+                    if (photo.Image is BitmapSource bs) { imgW = bs.PixelWidth; imgH = bs.PixelHeight; }
+                    LogHelper.WriteLogToFile(
+                        $"[BoothDiag] SwitchBoothToPhotoPage ENTER: photoIndex={photoIndex}, " +
+                        $"container={containerW}x{containerH}, imgSize={imgW}x{imgH}, " +
+                        $"liveRotation.Angle={VideoPresenterFullCanvasRotation?.Angle ?? -1}, " +
+                        $"cameraService.RotationAngle={_cameraService?.RotationAngle ?? -1}, " +
+                        $"strokesCount={inkCanvas?.Strokes?.Count ?? 0}",
+                        LogHelper.LogType.Info);
+                }
+                catch { }
+
+                VideoPresenterFrozenFrameImage.Source = photo.Image;
                 VideoPresenterFrozenFrameImage.Visibility = Visibility.Visible;
+                // FillImage 填满容器，不需要显式 Width/Height 和对齐方式
+                VideoPresenterFrozenFrameImage.Width = double.NaN;
+                VideoPresenterFrozenFrameImage.Height = double.NaN;
+                VideoPresenterFrozenFrameImage.HorizontalAlignment = HorizontalAlignment.Stretch;
+                VideoPresenterFrozenFrameImage.VerticalAlignment = VerticalAlignment.Stretch;
 
-                double containerWidth = VideoPresenterSpecialModeContainer?.ActualWidth ?? 0;
-                double containerHeight = VideoPresenterSpecialModeContainer?.ActualHeight ?? 0;
-                double imgWidth, imgHeight;
-                if (photo.Image is BitmapSource bs)
-                {
-                    imgWidth = bs.PixelWidth;
-                    imgHeight = bs.PixelHeight;
-                }
-                else
-                {
-                    imgWidth = photo.Image.Width;
-                    imgHeight = photo.Image.Height;
-                }
+                // 保存照片 Image 原始的 RenderTransform（仅首次），返回直播页时恢复
+                if (_frozenFrameOriginalRenderTransform == null)
+                    _frozenFrameOriginalRenderTransform = VideoPresenterFrozenFrameImage.RenderTransform as System.Windows.Media.TransformGroup;
+                // 共享实时画面的变换实例：LayoutTransform + RenderTransform 都指向 VideoCaptureElement 的同名对象
+                if (VideoPresenterFullCanvasRotation != null)
+                    VideoPresenterFrozenFrameImage.LayoutTransform = VideoPresenterFullCanvasRotation;
+                if (VideoPresenterFullCanvasImage?.RenderTransform != null)
+                    VideoPresenterFrozenFrameImage.RenderTransform = VideoPresenterFullCanvasImage.RenderTransform;
 
-                if (containerWidth > 0 && containerHeight > 0 && imgWidth > 0 && imgHeight > 0)
-                {
-                    double ratioW = containerWidth / imgWidth;
-                    double ratioH = containerHeight / imgHeight;
-                    double fitRatio = Math.Min(ratioW, ratioH);
-                    double displayWidth = imgWidth * fitRatio;
-                    double displayHeight = imgHeight * fitRatio;
-                    VideoPresenterFrozenFrameImage.Source = photo.Image;
-                    VideoPresenterFrozenFrameImage.Width = displayWidth;
-                    VideoPresenterFrozenFrameImage.Height = displayHeight;
-                    VideoPresenterFrozenFrameImage.HorizontalAlignment = HorizontalAlignment.Left;
-                    VideoPresenterFrozenFrameImage.VerticalAlignment = VerticalAlignment.Top;
-                    // 居中偏移
-                    _boothPreviewScale = 1.0;
-                    _boothPreviewTranslateX = (containerWidth - displayWidth) / 2.0;
-                    _boothPreviewTranslateY = (containerHeight - displayHeight) / 2.0;
-                }
-                else
-                {
-                    VideoPresenterFrozenFrameImage.Source = photo.Image;
-                    VideoPresenterFrozenFrameImage.Width = double.NaN;
-                    VideoPresenterFrozenFrameImage.Height = double.NaN;
-                    VideoPresenterFrozenFrameImage.HorizontalAlignment = HorizontalAlignment.Stretch;
-                    VideoPresenterFrozenFrameImage.VerticalAlignment = VerticalAlignment.Stretch;
-                    _boothPreviewScale = 1.0;
-                    _boothPreviewTranslateX = 0;
-                    _boothPreviewTranslateY = 0;
-                }
+                // 重置变换：与直播页初始状态一致（Scale=1, Translate=0，Stretch 自动 fit 居中）
+                _boothPreviewScale = 1.0;
+                _boothPreviewTranslateX = 0;
+                _boothPreviewTranslateY = 0;
 
-                if (VideoPresenterFrozenFrameRotation != null)
-                    VideoPresenterFrozenFrameRotation.Angle = 0;
+                // 照片内容已在拍照时旋转到正向，预览旋转从 0° 开始
+                // （共享的 VideoPresenterFullCanvasRotation 同时影响已 Collapsed 的 VideoCaptureElement，不影响显示）
+                if (VideoPresenterFullCanvasRotation != null)
+                    VideoPresenterFullCanvasRotation.Angle = 0;
 
                 ApplyBoothPreviewTransform();
+
+                // 诊断日志：共享变换后的状态
+                try
+                {
+                    LogHelper.WriteLogToFile(
+                        $"[BoothDiag] SwitchBoothToPhotoPage SHARED: " +
+                        $"photo.LayoutTransform={VideoPresenterFrozenFrameImage.LayoutTransform?.GetType().Name ?? "null"}, " +
+                        $"photo.RenderTransform={VideoPresenterFrozenFrameImage.RenderTransform?.GetType().Name ?? "null"}, " +
+                        $"isSharedWithLive={(VideoPresenterFrozenFrameImage.RenderTransform == VideoPresenterFullCanvasImage?.RenderTransform)}, " +
+                        $"photo.ActualSize={VideoPresenterFrozenFrameImage.ActualWidth}x{VideoPresenterFrozenFrameImage.ActualHeight}",
+                        LogHelper.LogType.Info);
+                }
+                catch { }
             }
 
             // 停止并隐藏 VideoCaptureElement，只显示冻结照片
@@ -2997,16 +3012,26 @@ namespace Ink_Canvas
 
             _boothCurrentPhotoIndex = -1;
 
-            // 清除冻结照片
+            // 清除冻结照片，并恢复照片 Image 原始的变换实例（解除与 VideoCaptureElement 的共享）
             if (VideoPresenterFrozenFrameImage != null)
             {
                 VideoPresenterFrozenFrameImage.Visibility = Visibility.Collapsed;
+                // 恢复照片 Image 自己的 LayoutTransform / RenderTransform，
+                // 避免后续直播页操作通过共享实例意外影响照片 Image
+                if (VideoPresenterFrozenFrameRotation != null)
+                    VideoPresenterFrozenFrameImage.LayoutTransform = VideoPresenterFrozenFrameRotation;
+                if (_frozenFrameOriginalRenderTransform != null)
+                    VideoPresenterFrozenFrameImage.RenderTransform = _frozenFrameOriginalRenderTransform;
             }
 
             // 恢复 VideoCaptureElement 实时预览
             if (VideoPresenterFullCanvasImage != null && _cameraService != null)
             {
                 VideoPresenterFullCanvasImage.Visibility = Visibility.Visible;
+                // 照片预览页共享了 VideoPresenterFullCanvasRotation，退出时恢复直播画面角度
+                // （_cameraService.RotationAngle 在照片预览期间未变，直接用它的角度）
+                if (VideoPresenterFullCanvasRotation != null)
+                    VideoPresenterFullCanvasRotation.Angle = _cameraService.RotationAngle * 90.0;
                 // 重置缩放/平移为默认状态（直播页与照片页缩放状态不通用）
                 _boothPreviewScale = 1.0;
                 _boothPreviewTranslateX = 0;

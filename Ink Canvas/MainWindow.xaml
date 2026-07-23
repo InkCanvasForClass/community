@@ -186,21 +186,23 @@
                         </helpers:CapturableVideoCaptureElement.RenderTransform>
                     </helpers:CapturableVideoCaptureElement>
                     <!-- 拍照后冻结画面：覆盖在 VideoCaptureElement 之上，显示拍照的照片，
-                         让用户在照片上批注。LayoutTransform/RenderTransform 与 VideoCaptureElement 同步。 -->
-                    <Image x:Name="VideoPresenterFrozenFrameImage"
+                         让用户在照片上批注。用 FillImage（重写 MeasureOverride 返回 availableSize）
+                         让照片像 VideoCaptureElement 一样填满容器，使 LayoutTransform 旋转、
+                         RenderTransform 缩放/平移、墨迹旋转中心都和实时画面走完全相同的管线。 -->
+                    <helpers:FillImage x:Name="VideoPresenterFrozenFrameImage"
                            Stretch="Uniform"
                            RenderTransformOrigin="0,0"
                            Visibility="Collapsed">
-                        <Image.LayoutTransform>
+                        <helpers:FillImage.LayoutTransform>
                             <RotateTransform x:Name="VideoPresenterFrozenFrameRotation" Angle="0" />
-                        </Image.LayoutTransform>
-                        <Image.RenderTransform>
+                        </helpers:FillImage.LayoutTransform>
+                        <helpers:FillImage.RenderTransform>
                             <TransformGroup>
                                 <ScaleTransform x:Name="VideoPresenterFrozenFrameScale" ScaleX="1" ScaleY="1" />
                                 <TranslateTransform x:Name="VideoPresenterFrozenFrameTranslate" X="0" Y="0" />
                             </TransformGroup>
-                        </Image.RenderTransform>
-                    </Image>
+                        </helpers:FillImage.RenderTransform>
+                    </helpers:FillImage>
                     <!-- 没找到摄像头时的占位文字 -->
                     <TextBlock x:Name="VideoPresenterSearchingText"
                                HorizontalAlignment="Center"
