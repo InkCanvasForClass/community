@@ -45,6 +45,7 @@ namespace Ink_Canvas.Ink.Native
         private InkStrokeStyleSnapshot _style;
         private bool _initialized;
         private long _geometryGeneration;
+        private bool _firstPointCorrected;
 
         public WetInkStrokeGeometryState(WetInkGeometryBuilder builder)
         {
@@ -185,13 +186,28 @@ namespace Ink_Canvas.Ink.Native
                     "Real wet ink points cannot shrink within a session.");
             }
 
-            for (var i = 0; i < _lastRealPoints.Length; i++)
+            // 首点回修：落笔后按首段速度修正首点压感（避免起笔闪变），允许首点压感在
+            // 发布后被修正一次。此修正仅在点数从 1 增至 2 时发生，之后首点固定。
+            var allowFirstPointCorrection = !_firstPointCorrected
+                                            && _lastRealPoints.Length == 1
+                                            && points.Count >= 2;
+            var checkEnd = allowFirstPointCorrection
+                ? _lastRealPoints.Length - 1
+                : _lastRealPoints.Length;
+
+            for (var i = 0; i < checkEnd; i++)
             {
                 if (!SamePoint(_lastRealPoints[i], points[i]))
                 {
                     throw new InvalidOperationException(
                         "Previously published real wet ink points cannot change.");
                 }
+            }
+
+            if (allowFirstPointCorrection && points.Count >= 1
+                && !SamePoint(_lastRealPoints[0], points[0]))
+            {
+                _firstPointCorrected = true;
             }
         }
 

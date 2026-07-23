@@ -257,9 +257,11 @@ namespace Ink_Canvas.Ink.Native
             out float radiusX,
             out float radiusY)
         {
+            // 与原版 ICC 湿墨 PressureToVisualScale 一致：压感 0.5 对应标称宽度（scale=1.0），
+            // 压低变细、抬高变粗。这样湿墨预览与抬笔后 WPF 干墨的视觉粗细一致，避免湿转干闪变。
             var pressureScale = style.IgnorePressure
                 ? 1f
-                : 0.25f + 0.75f * Clamp(pressure, 0f, 1f);
+                : Math.Max(0.22f, Math.Min(2.1f, 0.42f + 1.16f * Clamp(pressure, 0f, 1f)));
             radiusX = Math.Max(
                 MinimumRadius,
                 (float)Math.Max(0.35, style.Width)

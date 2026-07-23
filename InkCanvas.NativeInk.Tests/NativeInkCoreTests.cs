@@ -53,6 +53,7 @@ namespace InkCanvas.NativeInk.Tests
             Run(nameof(GeometryStateRejectsInvalidPredictions), GeometryStateRejectsInvalidPredictions);
             Run(nameof(GeometryStateResetsOnGenerationChange), GeometryStateResetsOnGenerationChange);
             Run(nameof(SessionStraightenReplacesPointsAndBumpsGeneration), SessionStraightenReplacesPointsAndBumpsGeneration);
+            Run(nameof(FirstPointLookAheadMatchesSegmentSpeed), FirstPointLookAheadMatchesSegmentSpeed);
             Console.WriteLine($"Native ink contract tests passed: {_passed}.");
         }
 
@@ -764,6 +765,43 @@ namespace InkCanvas.NativeInk.Tests
             single.StraightenToLine();
             Equal(1, single.RealPoints.Count);
             True(single.GeometryGeneration == 0);
+        }
+
+        private static void FirstPointLookAheadMatchesSegmentSpeed()
+        {
+            // 高速书写：第二点到达后，首点压感应按首段速度回修（与第二点一致），避免起笔粗点闪变。
+            var settings = new InkSampleProcessorSettings
+            {
+                UseVelocityBrushTip = true,
+                VelocityBrushTipMix = 1.0f,
+                BaseWidth = 2.5,
+                DisablePressure = false,
+                EnablePressureForTouch = false,
+                MinimumDistanceScale = 0.5f,
+            };
+            var processor = new InkSampleProcessor(settings);
+            var points = new List<RealInkPoint>();
+
+            // 首点 (0,0)
+            processor.Append(new[] { RawSample(0, 0, 0) }, points);
+            Equal(1, points.Count);
+            var firstPressureBefore = points[0].Pressure;
+
+            // 第二点快速移动到 (100,0)，时间差 8ms (~120Hz) → 高速
+            processor.Append(new[] { RawSample(100, 0, 8000) }, points);
+            Equal(2, points.Count);
+
+            // 首点已被回修：其压感应与第二点接近（均按高速计算），不再保持默认 0.5。
+            var firstPressureAfter = points[0].Pressure;
+            var secondPressure = points[1].Pressure;
+            True(Math.Abs(firstPressureAfter - secondPressure) < 0.05);
+            // 高速下压感应偏低（细），回修后的首点压感应低于回修前的默认值。
+            True(firstPressureAfter < firstPressureBefore);
+        }
+
+        private static RawInkSample RawSample(double x, double y, long timestamp, float pressure = 0.5f)
+        {
+            return new RawInkSample(7, NativeInkInputKind.Mouse, x, y, pressure, false, timestamp, 0, NativeInkSampleFlags.None);
         }
 
         private static RealInkPoint[] Points(int count)

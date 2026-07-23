@@ -70,6 +70,8 @@ namespace Ink_Canvas.Ink.Native
         private float _lastSmoothPressure = 0.5f;
         private long _lastTimestampMicroseconds;
         private float _smoothedSampleRate = 120f;
+        private RawInkSample _firstSample;
+        private bool _hasFirstSample;
 
         public InkSampleProcessor(InkSampleProcessorSettings settings)
         {
@@ -93,8 +95,10 @@ namespace Ink_Canvas.Ink.Native
             var rawY = (float)sample.Y;
             if (!_hasPrevious)
             {
-                // 落笔首点：不参与速度笔锋调制（speed=0 会让宽度乘子取近最大值，形成"粗点"），
-                // 直接使用硬件压感/默认 0.5，使起笔宽度与笔画主体接近。
+                _firstSample = sample;
+                _hasFirstSample = true;
+                // 落笔首点：暂用硬件压感/默认 0.5。待第二点到达后，按首段速度回修首点压感，
+                // 使落笔点与笔画主体宽度一致，避免起笔闪变。
                 var initialPressure = ResolvePressure(sample, 0, 1f / 120f, applyVelocityModulation: false);
                 destination.Add(new RealInkPoint(sample.X, sample.Y, initialPressure, sample.TimestampMicroseconds));
                 _hasPrevious = true;
@@ -114,6 +118,19 @@ namespace Ink_Canvas.Ink.Native
             var speed = distance / deltaSeconds;
             var sampleRate = 1f / deltaSeconds;
             _smoothedSampleRate = _smoothedSampleRate * 0.85f + sampleRate * 0.15f;
+
+            // 首点回修：第二点到达时，按首段真实速度重算首点压感，使落笔点融入笔画。
+            if (_hasFirstSample && destination.Count == 1)
+            {
+                var firstPressure = ResolvePressure(_firstSample, speed, deltaSeconds, applyVelocityModulation: true);
+                destination[0] = new RealInkPoint(
+                    destination[0].X,
+                    destination[0].Y,
+                    firstPressure,
+                    destination[0].TimestampMicroseconds);
+                _lastSmoothPressure = firstPressure;
+                _hasFirstSample = false;
+            }
 
             var filteredX = _filterX.Filter(rawX, deltaSeconds, speed);
             var filteredY = _filterY.Filter(rawY, deltaSeconds, speed);
