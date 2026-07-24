@@ -546,13 +546,14 @@ namespace Ink_Canvas
                 // TimeMachine / dirty-page hooks fire before post-processing.
                 inkCanvas.Strokes.Add(stroke);
                 _nativeInkController.MarkDryCommitted(payload.SessionId);
-                // 不要在此处隐藏湿墨 overlay：WPF 尚未把干墨绘制到下一帧，若此时隐藏
+                // 不要在此处移走湿墨 overlay：WPF 尚未把干墨绘制到下一帧，若此时移走
                 // 湿墨会出现“干墨未画、湿墨已消失”的空档，导致烘干闪变（整条墨迹闪一下）。
-                // 保持湿墨 overlay 可见，直到 WPF 渲染帧栅栏确认干墨已绘制且原生湿墨
-                // 会话退休（OnNativeWetInkRetired → RefreshOverlayVisibility）。
+                // 保持湿墨 overlay 在屏上，直到多帧 WPF 渲染栅栏确认干墨已合成，再退休湿墨
+                // （OnNativeWetInkRetired → RefreshOverlayVisibility → 移到屏外）。
                 ProcessCommittedStroke(stroke);
 
-                // Keep wet ink until the next WPF composition frame paints the dry stroke.
+                // Keep wet ink until several WPF composition frames paint the dry stroke.
+                // The first Rendering callback often still precedes dry-stroke DWM compose.
                 inkCanvas.InvalidateVisual();
                 var sessionId = payload.SessionId;
                 _wpfRenderFrameFence.Arm(sessionId, () =>

@@ -10,12 +10,24 @@ namespace Ink_Canvas.Ink.Native
         public static readonly Guid RealtimeVelocityBrushTipAppliedGuid =
             new Guid("74E57D95-945F-4A8C-B52A-7D3EF2D4FD5B");
 
+        /// <summary>
+        /// Marks a dry Stroke that was produced by the native wet-ink pipeline.
+        /// Dry post-process must not rewrite PressureFactor for these strokes —
+        /// wet preview already baked the final pressure, and rewriting it at
+        /// pen-up causes a wet→dry flash.
+        /// Must stay identical to MainWindow.NativeWetInkCommittedGuid.
+        /// </summary>
+        public static readonly Guid NativeWetInkCommittedGuid =
+            new Guid("B1F0A3C7-2D64-49B0-9E1A-7A4F8C2D5E60");
+
         public static Stroke CreateStroke(NativeStrokeCommitPayload payload)
         {
             if (payload == null)
                 throw new ArgumentNullException(nameof(payload));
             if (payload.Points == null || payload.Points.Count == 0)
                 throw new ArgumentException("Commit payload must contain real points.", nameof(payload));
+
+            var style = payload.Style;
 
             var points = new StylusPointCollection(payload.Points.Count);
             for (var i = 0; i < payload.Points.Count; i++)
@@ -24,8 +36,6 @@ namespace Ink_Canvas.Ink.Native
                 var pressure = ClampPressure(point.Pressure);
                 points.Add(new StylusPoint(point.X, point.Y, pressure));
             }
-
-            var style = payload.Style;
             var attributes = new DrawingAttributes
             {
                 Color = ColorFromArgb(style.ColorArgb),
@@ -40,6 +50,8 @@ namespace Ink_Canvas.Ink.Native
             };
 
             var stroke = new Stroke(points, attributes);
+            if (!stroke.ContainsPropertyData(NativeWetInkCommittedGuid))
+                stroke.AddPropertyData(NativeWetInkCommittedGuid, true);
             if (payload.VelocityBrushTipApplied
                 && !stroke.ContainsPropertyData(RealtimeVelocityBrushTipAppliedGuid))
             {

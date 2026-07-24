@@ -23,10 +23,9 @@ namespace Ink_Canvas.Ink.Native
         private const uint SwpNoActivate = 0x0010;
         private const uint SwpNoZOrder = 0x0004;
         private const uint SwpShowWindow = 0x0040;
-        private const uint SwpHideWindow = 0x0080;
-        private const uint SwpNoMove = 0x0002;
-        private const uint SwpNoSize = 0x0001;
-        private static readonly IntPtr HwndTop = new IntPtr(0);
+        // 不使用 ShowWindow/HideWindow：SWP_HIDEWINDOW 会触发 DWM 合成重排，
+        // 湿转干交接时整屏会闪一下。改成始终保持 WS_VISIBLE，无湿墨时移到屏外。
+        private const int HiddenPosition = -100000;
 
         private static readonly object ClassSync = new object();
         private static bool _classRegistered;
@@ -126,11 +125,9 @@ namespace Ink_Canvas.Ink.Native
         }
 
         /// <summary>
-        /// Shows the overlay when there is wet ink to render and hides it when
-        /// there is none. A visible-but-empty overlay would otherwise sit on top
-        /// of the main window's own content (floating bar, toolbar) and steal
-        /// activation / interfere with hit-testing even though mouse messages
-        /// pass through it.
+        /// Places the overlay over the main window when wet ink is live, otherwise
+        /// parks it far off-screen. Avoids ShowWindow/HideWindow so DWM does not
+        /// flash during wet→dry handoff.
         /// </summary>
         public void SetOverlayVisible(bool visible)
         {
@@ -143,20 +140,42 @@ namespace Ink_Canvas.Ink.Native
 
         private void ApplyOverlayVisibility()
         {
-            var flags = SwpNoActivate | SwpNoZOrder | SwpNoMove | SwpNoSize;
-            if (_overlayShouldBeVisible)
-                flags |= SwpShowWindow;
-            else
-                flags |= SwpHideWindow;
+            WetInkTargetSnapshot target;
+            lock (_targetSync)
+            {
+                target = _pendingTarget;
+            }
 
+            if (target == null)
+                return;
+
+            PlaceOverlay(target);
+        }
+
+        private void PlaceOverlay(WetInkTargetSnapshot target)
+        {
+            if (_overlayHwnd == IntPtr.Zero || target == null)
+                return;
+
+            var bounds = target.ScreenBounds;
+            var shouldShowOnScreen = _overlayShouldBeVisible
+                                     && target.IsVisible
+                                     && !bounds.IsEmpty;
+            var x = shouldShowOnScreen ? bounds.X : HiddenPosition;
+            var y = shouldShowOnScreen ? bounds.Y : HiddenPosition;
+            var width = Math.Max(1, bounds.Width);
+            var height = Math.Max(1, bounds.Height);
+
+            // Always keep the HWND visible (WS_VISIBLE) so Present/DComp stay warm;
+            // only the screen position changes.
             NativeWindowHelper.SetWindowPos(
                 _overlayHwnd,
                 IntPtr.Zero,
-                0,
-                0,
-                0,
-                0,
-                flags);
+                x,
+                y,
+                width,
+                height,
+                SwpNoActivate | SwpNoZOrder | SwpShowWindow);
         }
 
         public void SignalWork()
@@ -372,7 +391,9 @@ namespace Ink_Canvas.Ink.Native
         private void CreateOverlayWindow(WetInkTargetSnapshot target)
         {
             var bounds = target.ScreenBounds;
-            var style = WsPopup | (target.IsVisible && _overlayShouldBeVisible ? WsVisible : 0);
+            // Always create WS_VISIBLE so DComp swapchain stays attached; park
+            // off-screen until the first wet stroke begins.
+            var style = WsPopup | WsVisible;
             var exStyle = WsExNoActivate
                 | WsExTransparent
                 | WsExToolWindow
@@ -383,8 +404,8 @@ namespace Ink_Canvas.Ink.Native
                 WindowClassName,
                 "ICC Wet Ink Overlay",
                 style,
-                bounds.X,
-                bounds.Y,
+                HiddenPosition,
+                HiddenPosition,
                 Math.Max(1, bounds.Width),
                 Math.Max(1, bounds.Height),
                 _ownerHwnd,
@@ -395,49 +416,12 @@ namespace Ink_Canvas.Ink.Native
             if (_overlayHwnd == IntPtr.Zero)
                 throw new Win32Exception(Marshal.GetLastWin32Error(), "CreateWindowEx failed for wet ink overlay.");
 
-            // Owned popups stay above their owner; only force visibility/position.
-            NativeWindowHelper.SetWindowPos(
-                _overlayHwnd,
-                HwndTop,
-                bounds.X,
-                bounds.Y,
-                Math.Max(1, bounds.Width),
-                Math.Max(1, bounds.Height),
-                SwpNoActivate | SwpShowWindow | SwpNoZOrder);
+            PlaceOverlay(target);
         }
 
         private void RepositionOverlay(WetInkTargetSnapshot target)
         {
-            if (_overlayHwnd == IntPtr.Zero)
-                return;
-
-            var bounds = target.ScreenBounds;
-            var flags = SwpNoActivate | SwpNoZOrder;
-            if (target.IsVisible && _overlayShouldBeVisible)
-                flags |= SwpShowWindow;
-            else
-                flags |= SwpHideWindow;
-
-            NativeWindowHelper.SetWindowPos(
-                _overlayHwnd,
-                IntPtr.Zero,
-                bounds.X,
-                bounds.Y,
-                Math.Max(1, bounds.Width),
-                Math.Max(1, bounds.Height),
-                flags);
-
-            if (!target.IsVisible)
-            {
-                NativeWindowHelper.SetWindowPos(
-                    _overlayHwnd,
-                    IntPtr.Zero,
-                    0,
-                    0,
-                    0,
-                    0,
-                    SwpNoActivate | SwpNoMove | SwpNoSize | SwpHideWindow);
-            }
+            PlaceOverlay(target);
         }
 
         private void DestroyOverlayWindow()

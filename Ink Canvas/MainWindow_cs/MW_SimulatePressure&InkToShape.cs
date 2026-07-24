@@ -180,8 +180,12 @@ namespace Ink_Canvas
                 }
                 catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
-                // 「屏蔽压感」已在收笔主路径将点集归一成 0.5；此处若再跑 InkStyle 0/1 会重写 PressureFactor，造成假压感。
-                if (!Settings.Canvas.DisablePressure)
+                // 原生湿墨提交：湿预览压感已是最终值。此处再跑 InkStyle 0/1 会重写
+                // PressureFactor（尤其是 InkStyle 0 的收笔变细），抬笔瞬间干墨变样 → 烘干闪变。
+                // 「屏蔽压感」已在收笔主路径将点集归一成 0.5；此处若再跑 InkStyle 0/1 同样造成假压感。
+                var isNativeWetInkCommitted =
+                    e.Stroke.ContainsPropertyData(NativeWetInkCommittedGuid);
+                if (!Settings.Canvas.DisablePressure && !isNativeWetInkCommitted)
                 {
                     switch (Settings.Canvas.InkStyle)
                     {
