@@ -2000,6 +2000,41 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// Rotates all booth annotation strokes clockwise by 90 degrees around the
+        /// InkCanvas center. LayoutTransform rotates the camera preview only, so dry
+        /// ink must receive the equivalent geometry transform explicitly.
+        /// </summary>
+        private void RotateInkCanvasStrokesClockwise90()
+        {
+            if (inkCanvas == null)
+                return;
+
+            // Active native wet ink is still expressed in the previous orientation;
+            // cancel it rather than committing into the newly rotated coordinate space.
+            CancelAllNativeWetInkSessions("video-presenter-rotate");
+
+            if (inkCanvas.Strokes.Count == 0)
+                return;
+
+            try
+            {
+                var center = new System.Windows.Point(
+                    inkCanvas.ActualWidth / 2.0,
+                    inkCanvas.ActualHeight / 2.0);
+                var matrix = new System.Windows.Media.Matrix();
+                matrix.RotateAt(90.0, center.X, center.Y);
+                inkCanvas.Strokes.Transform(matrix, false);
+                inkCanvas.InvalidateVisual();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"视频展台旋转墨迹失败: {ex.Message}",
+                    LogHelper.LogType.Warning);
+            }
+        }
+
+        /// <summary>
         /// 将当前相机预览的显示角度顺时针旋转 90°（在四个方向间切换）。
         /// </summary>
         /// <remarks>
@@ -2048,6 +2083,10 @@ namespace Ink_Canvas
                             }
                         }
                     }
+
+                    // 先把已有墨迹跟着画面顺时针旋转 90°（绕画布中心），
+                    // 再更新预览 LayoutTransform，避免画面已转、批注仍停在旧朝向。
+                    RotateInkCanvasStrokesClockwise90();
 
                     VideoPresenterFullCanvasRotation.Angle = _cameraService.RotationAngle * 90.0;
                     // 冻结画面 Image 的 LayoutTransform 始终保持 0（照片内容已正向），
