@@ -17,6 +17,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Windows.Win32;
+using Windows.Win32.Graphics.Gdi;
 using WPFMediaKit.DirectShow.Controls;
 using WPFMediaKit.DirectShow.MediaPlayers;
 using WpfMediaKitMediaState = WPFMediaKit.DirectShow.MediaPlayers.MediaState;
@@ -835,12 +837,12 @@ namespace Ink_Canvas
             }
             finally
             {
-                if (hBmp != IntPtr.Zero) DeleteObject(hBmp);
+                if (hBmp != IntPtr.Zero) PInvoke.DeleteObject(new HGDIOBJ(hBmp));
             }
         }
 
-        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
-        private static extern bool DeleteObject(IntPtr hObject);
+        //[System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        //private static extern bool DeleteObject(IntPtr hObject);
 
         /// <summary>
         /// 获取当前白板页索引（确保返回值至少为 1）。

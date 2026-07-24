@@ -28,14 +28,14 @@ namespace Ink_Canvas.Windows.SettingsViews
         private readonly Window _settingsWindow;
         private DispatcherTimer _zOrderTimer;
 
-        [DllImport("user32.dll")]
-        private static extern int GetWindowLong(IntPtr hwnd, int index);
+        //[DllImport("user32.dll")]
+        //private static extern int GetWindowLong(IntPtr hwnd, int index);
 
-        [DllImport("user32.dll")]
-        private static extern int SetWindowLong(IntPtr hwnd, int index, int newStyle);
+        //[DllImport("user32.dll")]
+        //private static extern int SetWindowLong(IntPtr hwnd, int index, int newStyle);
 
-        [DllImport("user32.dll")]
-        private static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+        //[DllImport("user32.dll")]
+        //private static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
 
         public PPTPageFlipPreviewOverlayWindow(Window settingsWindow)
         {
@@ -63,8 +63,8 @@ namespace Ink_Canvas.Windows.SettingsViews
             try
             {
                 var hwnd = new WindowInteropHelper(this).Handle;
-                int extendedStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-                SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle | WS_EX_TRANSPARENT | WS_EX_NOACTIVATE);
+                int extendedStyle = PInvoke.GetWindowLong(new HWND(hwnd), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
+                PInvoke.SetWindowLong(new HWND(hwnd), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, extendedStyle | WS_EX_TRANSPARENT | WS_EX_NOACTIVATE);
 
                 // 精确定位到主屏幕整个边界（与 MainWindow / PreviewWindow 一致）
                 var screen = System.Windows.Forms.Screen.PrimaryScreen;
@@ -72,7 +72,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 Top = screen.Bounds.Y;
                 Width = screen.Bounds.Width;
                 Height = screen.Bounds.Height;
-                MoveWindow(hwnd, screen.Bounds.X, screen.Bounds.Y, screen.Bounds.Width, screen.Bounds.Height, true);
+                PInvoke.MoveWindow(new HWND(hwnd), screen.Bounds.X, screen.Bounds.Y, screen.Bounds.Width, screen.Bounds.Height, true);
 
                 // 启动 Z 序维持定时器：周期性将 Overlay 置于 SettingsWindow 之上。
                 // WindowTopmostManager 重排 SettingsWindow（SetTopmost）会把它提到 TOPMOST 顶，
