@@ -92,6 +92,13 @@
                             SwitchName="ToggleSwitchEnableNativeInkPrediction"
                             helpers:SettingsBinder.PropertyPath="Canvas.EnableNativeInkPrediction" />
 
+                    <controls:LabeledSettingsCard x:Name="CardUseLegacyWetInk"
+                            Header="{x:Static props:CanvasStrings.Canvas_UseLegacyWetInk}"
+                            Description="{x:Static props:CanvasStrings.Canvas_UseLegacyWetInkHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.InkingTool}"
+                            SwitchName="ToggleSwitchUseLegacyWetInk"
+                            Toggled="ToggleSwitchUseLegacyWetInk_Toggled" />
+
                     <!-- 简单下拉：声明式绑定 -->
                     <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_EraserSize}"
                             Description="{x:Static props:CanvasStrings.Canvas_EraserSizeHint}">

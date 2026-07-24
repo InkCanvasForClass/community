@@ -120,6 +120,15 @@
   <data name="Canvas_EnableNativeInkPredictionHint" xml:space="preserve">
     <value>Affects only a short live preview tail. Predicted points are never saved, undone, or recognized.</value>
   </data>
+  <data name="Canvas_UseLegacyWetInk" xml:space="preserve">
+    <value>Use legacy wet-ink system</value>
+  </data>
+  <data name="Canvas_UseLegacyWetInkHint" xml:space="preserve">
+    <value>On the next launch, pen, touch, and mouse input will all use the legacy WPF wet-ink system.</value>
+  </data>
+  <data name="Canvas_UseLegacyWetInkRestartNotice" xml:space="preserve">
+    <value>Wet-ink system setting saved. It will take effect the next time the app starts.</value>
+  </data>
   <data name="Canvas_WetInkRendererFailed" xml:space="preserve">
     <value>The live ink renderer failed to start. Freehand writing is temporarily disabled. UI, erase, and select still work.</value>
   </data>

@@ -827,7 +827,12 @@ namespace Ink_Canvas
                     int currentDrawingShapeMode = drawingShapeMode;
                     bool currentForceEraser = forceEraser;
 
-                    // Native freehand owns stylus input; do not re-bind WPF Stylus freehand handlers.
+                    if (Settings.Canvas.UseLegacyWetInk)
+                    {
+                        inkCanvas.StylusDown += MainWindow_StylusDown;
+                        inkCanvas.StylusMove += MainWindow_StylusMove;
+                        inkCanvas.StylusUp += MainWindow_StylusUp;
+                    }
                     inkCanvas.TouchDown += MainWindow_TouchDown;
                     inkCanvas.TouchDown -= Main_Grid_TouchDown;
 
@@ -844,13 +849,21 @@ namespace Ink_Canvas
                     Settings.Canvas.EnablePalmEraser = false;
                     SaveSettingsToFile();
 
-                    // 恢复到之前的编辑状态（Ink forced to None for native freehand）
-                    inkCanvas.EditingMode = currentEditingMode == InkCanvasEditingMode.Ink
-                        ? InkCanvasEditingMode.None
-                        : currentEditingMode;
+                    // 恢复到之前的编辑状态
+                    if (Settings.Canvas.UseLegacyWetInk)
+                    {
+                        inkCanvas.EditingMode = currentEditingMode;
+                    }
+                    else
+                    {
+                        // 原生自由书写时 Ink 映射为 None
+                        inkCanvas.EditingMode = currentEditingMode == InkCanvasEditingMode.Ink
+                            ? InkCanvasEditingMode.None
+                            : currentEditingMode;
+                        EnsureNativePenPhysicalEditingMode();
+                    }
                     drawingShapeMode = currentDrawingShapeMode;
                     forceEraser = currentForceEraser;
-                    EnsureNativePenPhysicalEditingMode();
                 }
             }
             else

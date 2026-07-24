@@ -43,6 +43,14 @@ namespace Ink_Canvas
 
         private void TryStartNativeWetInkPipeline()
         {
+            if (Settings?.Canvas?.UseLegacyWetInk == true)
+            {
+                LogHelper.WriteLogToFile(
+                    "[WetInk] Legacy WPF wet-ink input system is enabled; native pipeline skipped.",
+                    LogHelper.LogType.Event);
+                return;
+            }
+
             if (_nativeWetInkStarted || _nativeWetInkDisabled)
                 return;
 
