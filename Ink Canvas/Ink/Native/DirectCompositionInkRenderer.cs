@@ -570,6 +570,10 @@ namespace Ink_Canvas.Ink.Native
                 var path = factory.CreatePathGeometry();
                 using (var sink = path.Open())
                 {
+                    // Ribbon outlines self-intersect on sharp turns / segment overlaps.
+                    // Alternate (even-odd) fill punches transparent holes there; winding
+                    // keeps the union of the stroke solid like WPF ink.
+                    sink.SetFillMode(Vortice.Direct2D1.FillMode.Winding);
                     var first = geometry.Outline[0];
                     sink.BeginFigure(new Vector2(first.X, first.Y), FigureBegin.Filled);
                     for (var i = 1; i < geometry.Outline.Count; i++)
