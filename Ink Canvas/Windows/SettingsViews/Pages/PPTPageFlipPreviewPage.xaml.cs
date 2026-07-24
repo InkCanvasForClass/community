@@ -4,6 +4,9 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.WindowsAndMessaging;
 using NavigationViewPaneDisplayMode = iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
 
@@ -71,8 +74,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 MainWindow.MoveWindow(mwHwnd, 0, 0, screen.Bounds.Width, screen.Bounds.Height, true);
 
                 // Set WS_EX_NOACTIVATE on MainWindow so clicking it does not take focus away from SettingsWindow
-                _originalMainWindowExStyle = NativeWindowHelper.GetWindowLong(mwHwnd, NativeWindowHelper.GWL_EXSTYLE);
-                NativeWindowHelper.SetWindowLong(mwHwnd, NativeWindowHelper.GWL_EXSTYLE, _originalMainWindowExStyle | NativeWindowHelper.WS_EX_NOACTIVATE);
+                _originalMainWindowExStyle = PInvoke.GetWindowLong(new HWND(mwHwnd), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
+                PInvoke.SetWindowLong(new HWND(mwHwnd), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, _originalMainWindowExStyle | NativeWindowHelper.WS_EX_NOACTIVATE);
 
                 // Block/intercept preview input events to disable standard clicks on MainWindow without grey-out and without click-through
                 mw.PreviewMouseDown += BlockPreviewInput;
@@ -125,7 +128,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 // Restore original styles
                 var mwHwnd = new WindowInteropHelper(mw).Handle;
-                NativeWindowHelper.SetWindowLong(mwHwnd, NativeWindowHelper.GWL_EXSTYLE, _originalMainWindowExStyle);
+                PInvoke.SetWindowLong(new HWND(mwHwnd), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, _originalMainWindowExStyle);
 
                 mw.IsInPPTPresentationMode = _originalIsInPPTPresentationMode;
                 SettingsManager.Settings.Appearance.ToolbarPosition = _originalToolbarPosition;

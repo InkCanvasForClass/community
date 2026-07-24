@@ -43,6 +43,8 @@ BringWindowToTop
 OpenProcess
 CloseHandle
 GetProcessImageFileName
+SetWindowLong
+GetWindowInfo
 GetMonitorInfo
 MonitorFromWindow
 MonitorFromRect

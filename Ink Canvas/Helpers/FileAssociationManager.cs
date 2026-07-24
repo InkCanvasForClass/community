@@ -8,6 +8,8 @@ using System.Security;
 using System.Text;
 using System.Threading;
 using System.Windows;
+using Windows.Win32;
+using Windows.Win32.UI.Shell;
 
 namespace Ink_Canvas.Helpers
 {
@@ -172,7 +174,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 // 通知系统文件关联已更改
-                SHChangeNotify(0x08000000, 0, IntPtr.Zero, IntPtr.Zero);
+                unsafe { PInvoke.SHChangeNotify(SHCNE_ID.SHCNE_ASSOCCHANGED, 0, null, null); }
             }
             catch (Exception ex)
             {
@@ -720,7 +722,7 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        [DllImport("shell32.dll")]
-        private static extern void SHChangeNotify(uint wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);
+        //[DllImport("shell32.dll")]
+        //private static extern void SHChangeNotify(uint wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);
     }
 }

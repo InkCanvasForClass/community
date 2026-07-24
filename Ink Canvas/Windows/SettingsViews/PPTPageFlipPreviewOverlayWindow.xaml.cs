@@ -5,6 +5,9 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Ink_Canvas.Windows.SettingsViews
 {
@@ -107,8 +110,8 @@ namespace Ink_Canvas.Windows.SettingsViews
             // 改用 HWND_TOPMOST 绝对置顶 + 100ms 高频刷新，确保 Overlay 始终压在 SettingsWindow 之上。
             // Overlay 为 WS_EX_TRANSPARENT 点击穿透，不会阻挡 SettingsWindow 的鼠标操作，
             // 且 4 个按钮位于屏幕边缘，对设置区中央的 Popup 影响极小。
-            NativeWindowHelper.SetWindowPos(overlayHandle, NativeWindowHelper.HWND_TOPMOST, 0, 0, 0, 0,
-                NativeWindowHelper.SWP_NOMOVE | NativeWindowHelper.SWP_NOSIZE | NativeWindowHelper.SWP_NOACTIVATE | NativeWindowHelper.SWP_NOOWNERZORDER);
+            PInvoke.SetWindowPos(new HWND(overlayHandle), new HWND(NativeWindowHelper.HWND_TOPMOST), 0, 0, 0, 0,
+                SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE | SET_WINDOW_POS_FLAGS.SWP_NOOWNERZORDER);
         }
 
         private void PPTPageFlipPreviewOverlayWindow_Closed(object sender, EventArgs e)

@@ -7,6 +7,11 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Threading;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.WindowsAndMessaging;
+using Windows.Win32.Graphics.Dwm;
+using Windows.Win32.Graphics.Gdi;
 
 namespace Ink_Canvas.Helpers
 {
@@ -17,101 +22,101 @@ namespace Ink_Canvas.Helpers
     {
         #region Windows API Declarations
 
-        [DllImport("user32.dll")]
-        private static extern bool EnumWindows(EnumWindowsProc enumProc, IntPtr lParam);
+        //[DllImport("user32.dll")]
+        //private static extern bool EnumWindows(EnumWindowsProc enumProc, IntPtr lParam);
 
-        [DllImport("user32.dll")]
-        private static extern bool EnumChildWindows(IntPtr hWndParent, EnumWindowsProc enumProc, IntPtr lParam);
+        //[DllImport("user32.dll")]
+        //private static extern bool EnumChildWindows(IntPtr hWndParent, EnumWindowsProc enumProc, IntPtr lParam);
 
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
+        //[DllImport("user32.dll")]
+        //private static extern IntPtr GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
 
-        [DllImport("user32.dll")]
-        private static extern bool IsWindowVisible(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //private static extern bool IsWindowVisible(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+        //[DllImport("user32.dll")]
+        //private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
 
-        [DllImport("user32.dll")]
-        private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
+        //[DllImport("user32.dll")]
+        //private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
 
-        [DllImport("user32.dll")]
-        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        //[DllImport("user32.dll")]
+        //private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
-        [DllImport("user32.dll")]
-        private static extern bool IsIconic(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //private static extern bool IsIconic(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetWindow(IntPtr hWnd, uint uCmd);
+        //[DllImport("user32.dll")]
+        //private static extern IntPtr GetWindow(IntPtr hWnd, uint uCmd);
 
-        [DllImport("user32.dll")]
-        private static extern uint GetWindowLong(IntPtr hWnd, int nIndex);
+        //[DllImport("user32.dll")]
+        //private static extern uint GetWindowLong(IntPtr hWnd, int nIndex);
 
-        [DllImport("user32.dll")]
-        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+        //[DllImport("user32.dll")]
+        //private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
-        [DllImport("user32.dll")]
-        private static extern bool IsWindow(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //private static extern bool IsWindow(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        private static extern bool GetWindowRect(IntPtr hWnd, out ForegroundWindowInfo.RECT lpRect);
+        //[DllImport("user32.dll")]
+        //private static extern bool GetWindowRect(IntPtr hWnd, out ForegroundWindowInfo.RECT lpRect);
 
-        [DllImport("user32.dll")]
-        private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+        //[DllImport("user32.dll")]
+        //private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 
-        [DllImport("dwmapi.dll")]
-        private static extern int DwmGetWindowAttribute(IntPtr hWnd, int dwAttribute, out ForegroundWindowInfo.RECT pvAttribute, int cbAttribute);
+        //[DllImport("dwmapi.dll")]
+        //private static extern int DwmGetWindowAttribute(IntPtr hWnd, int dwAttribute, out ForegroundWindowInfo.RECT pvAttribute, int cbAttribute);
 
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetDC(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //private static extern IntPtr GetDC(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        private static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
+        //[DllImport("user32.dll")]
+        //private static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
 
-        [DllImport("gdi32.dll")]
-        private static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
+        //[DllImport("gdi32.dll")]
+        //private static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
 
-        [DllImport("user32.dll")]
-        private static extern bool SetForegroundWindow(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //private static extern bool SetForegroundWindow(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        private static extern bool BringWindowToTop(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //private static extern bool BringWindowToTop(IntPtr hWnd);
 
-        [DllImport("kernel32.dll")]
-        private static extern IntPtr OpenProcess(uint dwDesiredAccess, bool bInheritHandle, uint dwProcessId);
+        //[DllImport("kernel32.dll")]
+        //private static extern IntPtr OpenProcess(uint dwDesiredAccess, bool bInheritHandle, uint dwProcessId);
 
-        [DllImport("kernel32.dll")]
-        private static extern bool CloseHandle(IntPtr hObject);
+        //[DllImport("kernel32.dll")]
+        //private static extern bool CloseHandle(IntPtr hObject);
 
-        [DllImport("kernel32.dll")]
-        private static extern int GetProcessImageFileName(IntPtr hProcess, StringBuilder lpImageFileName, int nSize);
+        //[DllImport("kernel32.dll")]
+        //private static extern int GetProcessImageFileName(IntPtr hProcess, StringBuilder lpImageFileName, int nSize);
 
-        private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+        //private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 
-        private const int SW_HIDE = 0;
-        private const int SW_SHOW = 1;
-        private const int SW_SHOWNORMAL = 1;
-        private const int SW_MINIMIZE = 6;
-        private const int SW_RESTORE = 9;
+        //private const int SW_HIDE = 0;
+        //private const int SW_SHOW = 1;
+        //private const int SW_SHOWNORMAL = 1;
+        //private const int SW_MINIMIZE = 6;
+        //private const int SW_RESTORE = 9;
 
-        private const int GWL_STYLE = -16;
-        private const int GWL_EXSTYLE = -20;
-        private const uint WS_EX_TOOLWINDOW = 0x00000080;
-        private const uint WS_EX_APPWINDOW = 0x00040000;
+        //private const int GWL_STYLE = -16;
+        //private const int GWL_EXSTYLE = -20;
+        //private const uint WS_EX_TOOLWINDOW = 0x00000080;
+        //private const uint WS_EX_APPWINDOW = 0x00040000;
 
-        private const uint SWP_NOMOVE = 0x0002;
-        private const uint SWP_NOSIZE = 0x0001;
-        private const uint SWP_NOZORDER = 0x0004;
-        private const uint SWP_HIDEWINDOW = 0x0080;
-        private const uint SWP_SHOWWINDOW = 0x0040;
+        //private const uint SWP_NOMOVE = 0x0002;
+        //private const uint SWP_NOSIZE = 0x0001;
+        //private const uint SWP_NOZORDER = 0x0004;
+        //private const uint SWP_HIDEWINDOW = 0x0080;
+        //private const uint SWP_SHOWWINDOW = 0x0040;
 
-        private const uint PROCESS_QUERY_INFORMATION = 0x0400;
-        private const uint PROCESS_VM_READ = 0x0010;
+        //private const uint PROCESS_QUERY_INFORMATION = 0x0400;
+        //private const uint PROCESS_VM_READ = 0x0010;
 
-        private const uint WM_CLOSE = 0x0010;
-        private const int DWMWA_EXTENDED_FRAME_BOUNDS = 9;
-        private const int LOGPIXELSX = 88;
-        private const int LOGPIXELSY = 90;
+        //private const uint WM_CLOSE = 0x0010;
+        //private const int DWMWA_EXTENDED_FRAME_BOUNDS = 9;
+        //private const int LOGPIXELSX = 88;
+        //private const int LOGPIXELSY = 90;
 
 
         #endregion
@@ -835,7 +840,7 @@ namespace Ink_Canvas.Helpers
 
             foreach (var hWnd in windowsToRestore)
             {
-                if (RestoreWindow(hWnd))
+                if (RestoreWindow(new HWND(hWnd)))
                 {
                     restoredCount++;
                 }
@@ -860,7 +865,7 @@ namespace Ink_Canvas.Helpers
             var restoredCount = 0;
             foreach (var hWnd in windowsToRestore)
             {
-                if (RestoreWindow(hWnd))
+                if (RestoreWindow(new HWND(hWnd)))
                 {
                     restoredCount++;
                 }
@@ -876,21 +881,22 @@ namespace Ink_Canvas.Helpers
             if (!_interceptedWindows.ContainsKey(hWnd)) return false;
 
             var interceptType = _interceptedWindows[hWnd];
+            var hwnd = new HWND(hWnd);
 
-            if (IsWindow(hWnd))
+            if (PInvoke.IsWindow(hwnd))
             {
                 // 使用多种方法确保窗口恢复显示
-                ShowWindow(hWnd, SW_RESTORE);
-                ShowWindow(hWnd, SW_SHOW);
-                ShowWindow(hWnd, SW_SHOWNORMAL);
+                PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_RESTORE);
+                PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_SHOW);
+                PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_SHOWNORMAL);
 
                 // 将窗口置于前台并显示
-                SetWindowPos(hWnd, IntPtr.Zero, 0, 0, 0, 0,
-                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+                PInvoke.SetWindowPos(hwnd, HWND.Null, 0, 0, 0, 0,
+                    SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOZORDER | SET_WINDOW_POS_FLAGS.SWP_SHOWWINDOW);
 
                 // 强制将窗口带到前台
-                BringWindowToTop(hWnd);
-                SetForegroundWindow(hWnd);
+                PInvoke.BringWindowToTop(hwnd);
+                PInvoke.SetForegroundWindow(hwnd);
 
                 _interceptedWindows.Remove(hWnd);
 
@@ -921,7 +927,7 @@ namespace Ink_Canvas.Helpers
             foreach (var kvp in _interceptedWindows)
             {
                 var hWnd = kvp.Key;
-                if (!IsWindow(hWnd))
+                if (!PInvoke.IsWindow(new HWND(hWnd)))
                 {
                     invalidWindows.Add(hWnd);
                 }
@@ -952,7 +958,7 @@ namespace Ink_Canvas.Helpers
                 }
 
                 // 枚举所有窗口
-                EnumWindows(EnumWindowsCallback, IntPtr.Zero);
+                PInvoke.EnumWindows(EnumWindowsCallback, IntPtr.Zero);
 
                 // 处理找到的窗口
                 foreach (var rule in _interceptRules.Values)
@@ -960,7 +966,7 @@ namespace Ink_Canvas.Helpers
                     if (rule.IsEnabled && rule.foundHwnd && rule.outHwnd != IntPtr.Zero)
                     {
                         bool shouldIntercept = !_interceptedWindows.ContainsKey(rule.outHwnd) ||
-                                             (_interceptedWindows.ContainsKey(rule.outHwnd) && IsWindowVisible(rule.outHwnd));
+                                             (_interceptedWindows.ContainsKey(rule.outHwnd) && PInvoke.IsWindowVisible(new HWND(rule.outHwnd)));
 
                         if (shouldIntercept)
                         {
@@ -989,15 +995,15 @@ namespace Ink_Canvas.Helpers
         }
 
 
-        private bool EnumWindowsCallback(IntPtr hWnd, IntPtr lParam)
+        private BOOL EnumWindowsCallback(HWND hWnd, LPARAM lParam)
         {
             try
             {
                 // 递归枚举子窗口
-                EnumChildWindows(hWnd, EnumWindowsCallback, lParam);
+                PInvoke.EnumChildWindows(hWnd, EnumWindowsCallback, lParam);
 
                 // 基本检查
-                if (!IsWindow(hWnd) || !IsWindowVisible(hWnd)) return true;
+                if (!PInvoke.IsWindow(hWnd) || !PInvoke.IsWindowVisible(hWnd)) return true;
 
                 // 检查每个启用的规则
                 foreach (var rule in _interceptRules.Values)
@@ -1024,8 +1030,9 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
+                HWND hwnd = new HWND(hWnd);
                 // 获取进程ID
-                GetWindowThreadProcessId(hWnd, out uint processId);
+                PInvoke.GetWindowThreadProcessId(hwnd, out uint processId);
                 if (processId == 0) return null;
 
                 // 获取进程信息
@@ -1034,11 +1041,11 @@ namespace Ink_Canvas.Helpers
 
                 // 获取窗口标题
                 var titleBuilder = new StringBuilder(256);
-                GetWindowText(hWnd, titleBuilder, titleBuilder.Capacity);
+                PInvoke.GetWindowText(hwnd, new Span<char>(titleBuilder.ToString().ToCharArray()));
 
                 // 获取窗口类名
                 var classBuilder = new StringBuilder(256);
-                GetClassName(hWnd, classBuilder, classBuilder.Capacity);
+                PInvoke.GetClassName(hwnd, new Span<char>(classBuilder.ToString().ToCharArray()));
 
                 return new WindowInfo
                 {
@@ -1063,11 +1070,12 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
+                HWND hwnd = new HWND(hWnd);
                 // 检查类名
                 if (!string.IsNullOrEmpty(rule.ClassNamePattern))
                 {
                     var className = new StringBuilder(256);
-                    GetClassName(hWnd, className, className.Capacity);
+                    PInvoke.GetClassName(hwnd, new Span<char>(className.ToString().ToCharArray()));
                     var classNameStr = className.ToString();
 
                     if (rule.ExactClassNameMatch)
@@ -1086,7 +1094,7 @@ namespace Ink_Canvas.Helpers
                 if (!string.IsNullOrEmpty(rule.WindowTitlePattern))
                 {
                     var windowTitle = new StringBuilder(256);
-                    GetWindowText(hWnd, windowTitle, windowTitle.Capacity);
+                    PInvoke.GetWindowText(hwnd, new Span<char>(windowTitle.ToString().ToCharArray()));
                     var titleStr = windowTitle.ToString();
 
                     if (rule.ExactTitleMatch)
@@ -1104,7 +1112,7 @@ namespace Ink_Canvas.Helpers
                 // 检查窗口样式
                 if (rule.HasWindowStyle)
                 {
-                    var style = GetWindowLong(hWnd, GWL_STYLE);
+                    var style = PInvoke.GetWindowLong(hwnd, WINDOW_LONG_PTR_INDEX.GWL_STYLE);
                     if (style != rule.WindowStyle)
                         return false;
                 }
@@ -1112,21 +1120,21 @@ namespace Ink_Canvas.Helpers
                 // 检查窗口尺寸
                 if (rule.HasWindowSize)
                 {
-                    var rect = new ForegroundWindowInfo.RECT();
-                    if (DwmGetWindowAttribute(hWnd, DWMWA_EXTENDED_FRAME_BOUNDS, out rect, Marshal.SizeOf(rect)) == 0)
+                    var rect = new RECT();
+                    if (PInvoke.DwmGetWindowAttribute(hwnd, DWMWINDOWATTRIBUTE.DWMWA_EXTENDED_FRAME_BOUNDS, new Span<byte>(new byte[Marshal.SizeOf(rect)])) == 0)
                     {
-                        var width = rect.Right - rect.Left;
-                        var height = rect.Bottom - rect.Top;
+                        var width = rect.right - rect.left;
+                        var height = rect.bottom - rect.top;
 
                         // 检查精确匹配
                         if (rule.WindowWidth == width && rule.WindowHeight == height)
                             return true;
 
                         // 检查缩放匹配
-                        var hdc = GetDC(IntPtr.Zero);
-                        var horizontalDPI = GetDeviceCaps(hdc, LOGPIXELSX);
-                        var verticalDPI = GetDeviceCaps(hdc, LOGPIXELSY);
-                        ReleaseDC(IntPtr.Zero, hdc);
+                        var hdc = PInvoke.GetDC(HWND.Null);
+                        var horizontalDPI = PInvoke.GetDeviceCaps(hdc, GET_DEVICE_CAPS_INDEX.LOGPIXELSX);
+                        var verticalDPI = PInvoke.GetDeviceCaps(hdc, GET_DEVICE_CAPS_INDEX.LOGPIXELSY);
+                        PInvoke.ReleaseDC(HWND.Null, hdc);
 
                         var scale = (horizontalDPI + verticalDPI) / 2.0f / 96.0f;
                         var scaledWidth = (int)(rule.WindowWidth * scale);
@@ -1157,7 +1165,8 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                if (!IsWindow(hWnd) || !IsWindowVisible(hWnd))
+                HWND hwnd = new HWND(hWnd);
+                if (!PInvoke.IsWindow(hwnd) || !PInvoke.IsWindowVisible(hwnd))
                 {
                     if (_interceptedWindows.ContainsKey(hWnd))
                     {
@@ -1167,7 +1176,7 @@ namespace Ink_Canvas.Helpers
                 }
 
                 // 直接隐藏窗口，不发送关闭消息
-                ShowWindow(hWnd, SW_HIDE);
+                PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_HIDE);
 
                 // 记录拦截的窗口
                 _interceptedWindows[hWnd] = rule.Type;
@@ -1193,7 +1202,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 var titleBuilder = new StringBuilder(256);
-                GetWindowText(hWnd, titleBuilder, titleBuilder.Capacity);
+                PInvoke.GetWindowText(new HWND(hWnd), new Span<char>(titleBuilder.ToString().ToCharArray()));
                 return titleBuilder.ToString();
             }
             catch
@@ -1206,13 +1215,14 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
+                HWND hwnd=new HWND(hWnd);
                 // 检查是否有父窗口
-                var parent = GetWindow(hWnd, 4); // GW_OWNER
+                var parent = PInvoke.GetWindow(hwnd,GET_WINDOW_CMD.GW_OWNER);
                 if (parent != IntPtr.Zero) return false;
 
                 // 检查窗口样式
-                var style = GetWindowLong(hWnd, -16); // GWL_STYLE
-                var exStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
+                var style = PInvoke.GetWindowLong(hwnd, WINDOW_LONG_PTR_INDEX.GWL_STYLE);
+                var exStyle = PInvoke.GetWindowLong(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
 
                 // 主窗口通常有 WS_CAPTION 和 WS_SYSMENU
                 const uint WS_CAPTION = 0x00C00000;
@@ -1224,10 +1234,10 @@ namespace Ink_Canvas.Helpers
                 }
 
                 // 检查窗口大小，主窗口通常比较大
-                var rect = new ForegroundWindowInfo.RECT();
-                GetWindowRect(hWnd, out rect);
-                var width = rect.Right - rect.Left;
-                var height = rect.Bottom - rect.Top;
+                //var rect = new ForegroundWindowInfo.RECT();
+                PInvoke.GetWindowRect(hwnd, out RECT rect);
+                var width = rect.right - rect.left;
+                var height = rect.bottom - rect.top;
 
                 // 如果窗口很大，可能是主窗口
                 if (width > 800 && height > 600)
