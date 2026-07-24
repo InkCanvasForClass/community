@@ -23,6 +23,9 @@ namespace InkCanvas.NativeInk.Tests
             Run(nameof(CancelAllDropsConcurrentSessions), CancelAllDropsConcurrentSessions);
             Run(nameof(DisablePressurePersistsUniformPressure), DisablePressurePersistsUniformPressure);
             Run(nameof(VelocityBrushTipMarksProcessedStroke), VelocityBrushTipMarksProcessedStroke);
+            Run(nameof(PointSetBrushTipTapersAtPenUp), PointSetBrushTipTapersAtPenUp);
+            Run(nameof(RateBrushTipVariesWithPointSpeed), RateBrushTipVariesWithPointSpeed);
+            Run(nameof(SessionFinalBrushTipRebuildsWetGeometry), SessionFinalBrushTipRebuildsWetGeometry);
             Run(nameof(RouterDefersUiAndSelectionContent), RouterDefersUiAndSelectionContent);
             Run(nameof(RouterBlocksFrozenMutationButAllowsRoam), RouterBlocksFrozenMutationButAllowsRoam);
             Run(nameof(RouterIgnoresPromotedMouse), RouterIgnoresPromotedMouse);
@@ -214,12 +217,76 @@ namespace InkCanvas.NativeInk.Tests
             {
                 UseVelocityBrushTip = true,
                 VelocityBrushTipMix = 0.5f,
-                BaseWidth = 5
+                BaseWidth = 5,
+                InkStyle = 3
             });
             var points = new List<RealInkPoint>();
             processor.Append(new[] { Sample(10, 1, 0), Sample(20_000, 2, 10) }, points);
             True(processor.VelocityBrushTipApplied);
             True(points.Count != 0);
+        }
+
+        private static void PointSetBrushTipTapersAtPenUp()
+        {
+            var processor = new InkSampleProcessor(new InkSampleProcessorSettings
+            {
+                InkStyle = 0
+            });
+            var points = new List<RealInkPoint>();
+            for (var i = 0; i < 20; i++)
+                points.Add(new RealInkPoint(i * 5, 0, 0.5f, i * 1000));
+
+            processor.ApplyFinalBrushTip(points);
+
+            True(processor.FinalBrushTipApplied);
+            Equal(20, points.Count);
+            Equal(0.5f, points[0].Pressure);
+            True(points[points.Count - 1].Pressure < points[points.Count - 2].Pressure);
+            True(Math.Abs(points[points.Count - 1].Pressure - 0.1f) < 0.001f);
+        }
+
+        private static void RateBrushTipVariesWithPointSpeed()
+        {
+            var processor = new InkSampleProcessor(new InkSampleProcessorSettings
+            {
+                InkStyle = 1
+            });
+            var points = new List<RealInkPoint>
+            {
+                new RealInkPoint(0, 0, 0.5f, 0),
+                new RealInkPoint(1, 0, 0.5f, 1000),
+                new RealInkPoint(2, 0, 0.5f, 2000),
+                new RealInkPoint(50, 0, 0.5f, 3000),
+                new RealInkPoint(100, 0, 0.5f, 4000)
+            };
+
+            processor.ApplyFinalBrushTip(points);
+
+            True(processor.FinalBrushTipApplied);
+            True(points[1].Pressure > points[3].Pressure);
+        }
+
+        private static void SessionFinalBrushTipRebuildsWetGeometry()
+        {
+            var settings = new InkSampleProcessorSettings
+            {
+                InkStyle = 0
+            };
+            var session = new NativeInkSessionManager().Begin(
+                7,
+                NativeInkInputKind.Mouse,
+                Style(),
+                settings,
+                0);
+            for (var i = 0; i < 20; i++)
+                session.AppendReverseChronologicalHistory(new[] { RawSample(i * 5, 0, i * 1000) });
+            var generationBefore = session.GeometryGeneration;
+
+            var payload = session.End(20_000);
+
+            True(payload.FinalBrushTipApplied);
+            True(session.GeometryGeneration == generationBefore + 1);
+            True(payload.Points[payload.Points.Count - 1].Pressure < payload.Points[0].Pressure);
         }
 
         private static void RouterDefersUiAndSelectionContent()

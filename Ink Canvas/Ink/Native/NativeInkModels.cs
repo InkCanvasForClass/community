@@ -153,7 +153,8 @@ namespace Ink_Canvas.Ink.Native
             IReadOnlyList<RealInkPoint> points,
             long startedAtMicroseconds,
             long endedAtMicroseconds,
-            bool velocityBrushTipApplied)
+            bool velocityBrushTipApplied,
+            bool finalBrushTipApplied = false)
         {
             if (points == null) throw new ArgumentNullException(nameof(points));
             if (points.Count == 0) throw new ArgumentException("A committed stroke must contain at least one real point.", nameof(points));
@@ -165,6 +166,7 @@ namespace Ink_Canvas.Ink.Native
             StartedAtMicroseconds = startedAtMicroseconds;
             EndedAtMicroseconds = endedAtMicroseconds;
             VelocityBrushTipApplied = velocityBrushTipApplied;
+            FinalBrushTipApplied = finalBrushTipApplied;
             _points = new RealInkPoint[points.Count];
             for (var i = 0; i < points.Count; i++)
                 _points[i] = points[i];
@@ -178,5 +180,7 @@ namespace Ink_Canvas.Ink.Native
         public long StartedAtMicroseconds { get; }
         public long EndedAtMicroseconds { get; }
         public bool VelocityBrushTipApplied { get; }
+        /// <summary>InkStyle 0/1 tip applied at pen-up; dry stroke must honor PressureFactor.</summary>
+        public bool FinalBrushTipApplied { get; }
     }
 }

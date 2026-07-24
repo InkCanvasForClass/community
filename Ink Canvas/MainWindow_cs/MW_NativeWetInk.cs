@@ -948,11 +948,14 @@ namespace Ink_Canvas
                 ? InkStylusTipShape.Rectangle
                 : InkStylusTipShape.Ellipse;
 
+            // 笔锋相关样式必须按 PressureFactor 渲染。不要 OR attrs.IgnorePressure：
+            // 无压感设备上系统可能把 DefaultDrawingAttributes.IgnorePressure 置 true，
+            // 会让点集/速率/实时笔锋全部无效。
             return new InkStrokeStyleSnapshot(
                 colorArgb,
                 Math.Max(0.1, attrs.Width),
                 Math.Max(0.1, attrs.Height),
-                ignorePressure: Settings.Canvas.DisablePressure || attrs.IgnorePressure,
+                ignorePressure: Settings.Canvas.DisablePressure,
                 isHighlighter: attrs.IsHighlighter || penType == 1,
                 useVelocityBrushTip: useVelocity,
                 velocityBrushTipMix: (float)Settings.Canvas.VelocityBrushTipMix,
@@ -966,12 +969,13 @@ namespace Ink_Canvas
         {
             return new InkSampleProcessorSettings
             {
-                DisablePressure = Settings.Canvas.DisablePressure || style.IgnorePressure,
+                DisablePressure = Settings.Canvas.DisablePressure,
                 EnablePressureForTouch = Settings.Canvas.EnablePressureTouchMode,
                 UseVelocityBrushTip = style.UseVelocityBrushTip,
                 VelocityBrushTipMix = style.VelocityBrushTipMix,
                 MinimumDistanceScale = style.MinimumDistanceScale,
-                BaseWidth = style.Width
+                BaseWidth = style.Width,
+                InkStyle = Settings.Canvas.InkStyle
             };
         }
 

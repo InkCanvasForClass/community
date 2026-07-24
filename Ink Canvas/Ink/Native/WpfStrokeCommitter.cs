@@ -36,13 +36,17 @@ namespace Ink_Canvas.Ink.Native
                 var pressure = ClampPressure(point.Pressure);
                 points.Add(new StylusPoint(point.X, point.Y, pressure));
             }
+            // 笔锋写入的 PressureFactor 必须被 WPF 采纳；点集/速率/实时笔锋都强制开启压感渲染。
+            var honorPressure = payload.VelocityBrushTipApplied
+                                || payload.FinalBrushTipApplied
+                                || style.UseVelocityBrushTip;
             var attributes = new DrawingAttributes
             {
                 Color = ColorFromArgb(style.ColorArgb),
                 Width = Math.Max(0.1, style.Width),
                 Height = Math.Max(0.1, style.Height),
                 IsHighlighter = style.IsHighlighter,
-                IgnorePressure = style.IgnorePressure,
+                IgnorePressure = honorPressure ? false : style.IgnorePressure,
                 FitToCurve = false,
                 StylusTip = style.StylusTipShape == InkStylusTipShape.Rectangle
                     ? StylusTip.Rectangle

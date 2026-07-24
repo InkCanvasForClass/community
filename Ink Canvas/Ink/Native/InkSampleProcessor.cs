@@ -11,6 +11,11 @@ namespace Ink_Canvas.Ink.Native
         public float VelocityBrushTipMix { get; init; }
         public float MinimumDistanceScale { get; init; } = 0.5f;
         public double BaseWidth { get; init; } = 2.5;
+        /// <summary>
+        /// Canvas.InkStyle: 0 点集笔锋, 1 速率笔锋, 2 关闭, 3 实时笔锋.
+        /// 0/1 在抬笔时整笔改写 Pressure；3 在书写过程中实时写入.
+        /// </summary>
+        public int InkStyle { get; init; } = 2;
     }
 
     internal sealed class InkSampleProcessor
@@ -80,6 +85,12 @@ namespace Ink_Canvas.Ink.Native
 
         public bool VelocityBrushTipApplied { get; private set; }
 
+        /// <summary>
+        /// True after a final (point-set / rate) brush-tip pass rewrote pressures at pen-up.
+        /// Dry stroke must honor PressureFactor when this is set.
+        /// </summary>
+        public bool FinalBrushTipApplied { get; private set; }
+
         public void Append(IReadOnlyList<RawInkSample> samples, List<RealInkPoint> destination)
         {
             if (samples == null) throw new ArgumentNullException(nameof(samples));
@@ -87,6 +98,114 @@ namespace Ink_Canvas.Ink.Native
 
             for (var i = 0; i < samples.Count; i++)
                 Append(samples[i], destination);
+        }
+
+        /// <summary>
+        /// Applies InkStyle 0 (point-set tip) / 1 (rate tip) to the full point list at pen-up.
+        /// Realtime velocity tip (InkStyle 3) is already applied during Append.
+        /// Mirrors the legacy dry-ink post-process so native freehand keeps the same brush tip.
+        /// </summary>
+        public void ApplyFinalBrushTip(List<RealInkPoint> points)
+        {
+            if (points == null || points.Count == 0)
+                return;
+            if (_settings.DisablePressure)
+                return;
+            // 实时笔锋已在 Append 中完成；关闭(2)不处理。
+            if (_settings.InkStyle != 0 && _settings.InkStyle != 1)
+                return;
+            if (points.Count < 2)
+                return;
+
+            if (_settings.InkStyle == 1)
+            {
+                ApplyRateBasedBrushTip(points);
+                FinalBrushTipApplied = true;
+                return;
+            }
+
+            ApplyPointSetBrushTip(points);
+            FinalBrushTipApplied = true;
+        }
+
+        private static void ApplyRateBasedBrushTip(List<RealInkPoint> points)
+        {
+            var n = points.Count - 1;
+            for (var i = 0; i <= n; i++)
+            {
+                var prev = points[Math.Max(i - 1, 0)];
+                var cur = points[i];
+                var next = points[Math.Min(i + 1, n)];
+                var speed = GetLegacyPointSpeed(prev, cur, next);
+                var pressure = RateBasedPressureFactorFromPointSpeed(speed);
+                points[i] = new RealInkPoint(cur.X, cur.Y, pressure, cur.TimestampMicroseconds);
+            }
+        }
+
+        private static void ApplyPointSetBrushTip(List<RealInkPoint> points)
+        {
+            var n = points.Count - 1;
+            if (n == 1)
+                return;
+
+            const double taperPressure = 0.1;
+            const int taperCount = 10;
+            var rewritten = new List<RealInkPoint>(points.Count);
+
+            if (n >= taperCount)
+            {
+                for (var i = 0; i < n - taperCount; i++)
+                {
+                    var p = points[i];
+                    rewritten.Add(new RealInkPoint(p.X, p.Y, 0.5f, p.TimestampMicroseconds));
+                }
+
+                for (var i = n - taperCount; i <= n; i++)
+                {
+                    var p = points[i];
+                    var pressure = (float)((0.5 - taperPressure) * (n - i) / taperCount + taperPressure);
+                    rewritten.Add(new RealInkPoint(p.X, p.Y, pressure, p.TimestampMicroseconds));
+                }
+            }
+            else
+            {
+                for (var i = 0; i <= n; i++)
+                {
+                    var p = points[i];
+                    var pressure = (float)(0.4 * (n - i) / n + taperPressure);
+                    rewritten.Add(new RealInkPoint(p.X, p.Y, pressure, p.TimestampMicroseconds));
+                }
+            }
+
+            points.Clear();
+            points.AddRange(rewritten);
+        }
+
+        /// <summary>
+        /// Legacy GetPointSpeed used by InkStyle 0/1 dry post-process
+        /// (sum of segment lengths / 20, not time-based).
+        /// </summary>
+        private static double GetLegacyPointSpeed(
+            RealInkPoint point1,
+            RealInkPoint point2,
+            RealInkPoint point3)
+        {
+            var d12 = Math.Sqrt(
+                (point1.X - point2.X) * (point1.X - point2.X)
+                + (point1.Y - point2.Y) * (point1.Y - point2.Y));
+            var d32 = Math.Sqrt(
+                (point3.X - point2.X) * (point3.X - point2.X)
+                + (point3.Y - point2.Y) * (point3.Y - point2.Y));
+            return (d12 + d32) / 20.0;
+        }
+
+        private static float RateBasedPressureFactorFromPointSpeed(double speed)
+        {
+            if (speed >= 0.25)
+                return (float)(0.5 - 0.3 * (Math.Min(speed, 1.5) - 0.3) / 1.2);
+            if (speed >= 0.05)
+                return 0.5f;
+            return (float)(0.5 + 0.4 * (0.05 - speed) / 0.05);
         }
 
         private void Append(RawInkSample sample, List<RealInkPoint> destination)

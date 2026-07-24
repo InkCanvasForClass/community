@@ -136,6 +136,12 @@ namespace Ink_Canvas.Ink.Native
                 return null;
             }
 
+            // 点集/速率笔锋在抬笔时整笔写入，与旧 WPF 干墨后处理一致；
+            // 实时笔锋已在 Append 过程中写入。
+            Processor.ApplyFinalBrushTip(_realPoints);
+            if (Processor.FinalBrushTipApplied)
+                _geometryGeneration++;
+
             State = NativeInkSessionState.Ending;
             return new NativeStrokeCommitPayload(
                 SessionId,
@@ -145,7 +151,8 @@ namespace Ink_Canvas.Ink.Native
                 _realPoints,
                 StartedAtMicroseconds,
                 endedAtMicroseconds,
-                Processor.VelocityBrushTipApplied);
+                Processor.VelocityBrushTipApplied,
+                Processor.FinalBrushTipApplied);
         }
 
         public void SetRetirementVersion(long version)
