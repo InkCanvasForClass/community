@@ -1333,6 +1333,7 @@ namespace Ink_Canvas
         {
             var inkCanvas1 = sender as InkCanvas;
             if (inkCanvas1 == null) return;
+
             NotifyPluginPenModeChanged(inkCanvas1.EditingMode);
 
             if (IsCurrentPageFrozen && IsFreezeMutatingMode(inkCanvas1.EditingMode))
@@ -3258,8 +3259,10 @@ namespace Ink_Canvas
 
                 // Logical Pen freehand is owned by the native wet-ink pipeline.
                 // Keep physical EditingMode at None so WPF never auto-collects wet strokes.
+                // 但仅当原生湿墨迹管线可用时才映射 Ink→None；管线不可用时回退到 WPF 内置 Ink 收集，
+                // 否则 EditingMode=None 会导致既无原生笔输入也无 WPF 墨迹，UI 显示笔但无法绘制。
                 var physicalMode = newMode;
-                if (physicalMode == InkCanvasEditingMode.Ink)
+                if (physicalMode == InkCanvasEditingMode.Ink && IsNativeWetInkPipelineAvailable)
                     physicalMode = InkCanvasEditingMode.None;
 
                 // 执行模式切换

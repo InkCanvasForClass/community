@@ -102,6 +102,13 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 原生湿墨迹管线是否可用（已启动且未被禁用）。
+        /// SetCurrentToolMode / EnsureNativePenPhysicalEditingMode 据此决定是否将 Ink→None 映射；
+        /// 管线不可用时应保持 WPF 内置 Ink 收集，避免"UI 显示笔但无法绘制"。
+        /// </summary>
+        private bool IsNativeWetInkPipelineAvailable => _nativeWetInkStarted && !_nativeWetInkDisabled;
+
         private void ShutdownNativeWetInkPipeline()
         {
             UnwireNativeWetInkGeometryListeners();
@@ -730,6 +737,19 @@ namespace Ink_Canvas
             }
             catch { /* best-effort */ }
 
+            // 管线失败后，若当前逻辑模式是笔且物理模式被设成了 None（原生笔），
+            // 回退到 WPF 内置 Ink 收集，避免"UI 显示笔但无法绘制"。
+            try
+            {
+                if (inkCanvas != null
+                    && inkCanvas.EditingMode == InkCanvasEditingMode.None
+                    && ResolveLogicalInkTool() == LogicalInkTool.Pen)
+                {
+                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                }
+            }
+            catch { /* best-effort */ }
+
             if (notify && !_nativeWetInkDeviceFailureNotified)
             {
                 _nativeWetInkDeviceFailureNotified = true;
@@ -1173,6 +1193,10 @@ namespace Ink_Canvas
 
             var tool = ResolveLogicalInkTool();
             if (tool != LogicalInkTool.Pen)
+                return;
+
+            // 仅当原生管线可用时才将 Ink→None；管线不可用时保持 WPF 内置 Ink 收集
+            if (!IsNativeWetInkPipelineAvailable)
                 return;
 
             if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)

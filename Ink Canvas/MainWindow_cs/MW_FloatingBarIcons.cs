@@ -1131,6 +1131,23 @@ namespace Ink_Canvas
 
             SwitchToDefaultPen(null, null);
             CheckColorTheme(true);
+
+            // 进入白板模式后刷新页码按钮状态：启动时硬编码的禁用色不随主题切换，
+            // 需要在此用当前主题的 IconForeground 重新计算上一页按钮的灰色画刷，否则深色主题下图标不可见
+            if (currentMode != 0)
+            {
+                UpdateIndexInfoDisplay();
+
+                // 进入白板模式时显式切换到笔模式：SwitchBackground 不会更新 _currentToolMode，
+                // 导致原生湿墨迹管线 ResolveLogicalInkTool() 返回 Cursor 而非 Pen，
+                // 笔输入被当光标处理（route=PassThrough），UI 显示笔但无法绘制。
+                // PenIcon_Click 会正确设置 _currentToolMode="pen" 并触发管线路由到 Ink 路径。
+                if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink
+                    && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
+                {
+                    PenIcon_Click(null, null);
+                }
+            }
         }
 
         #endregion

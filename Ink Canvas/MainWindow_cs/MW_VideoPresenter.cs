@@ -16,6 +16,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Ink;
 using System.Windows.Threading;
 using WPFMediaKit.DirectShow.Controls;
 using WPFMediaKit.DirectShow.MediaPlayers;
@@ -62,6 +63,11 @@ namespace Ink_Canvas
 
         private readonly List<CapturedImage> _capturedPhotos = new List<CapturedImage>();
         private const int MaxCapturedPhotos = 50; // 容量上限：比 UI 显示的 30 项多一些，避免频繁清理
+
+        // 视频展台虚拟分页的 per-page 墨迹存储：key = _boothCurrentPhotoIndex（-1=直播页，0..N-1=照片页）。
+        // 切换虚拟页时保存当前墨迹、恢复目标页墨迹；退出特殊模式时整体清空（booth 墨迹不持久化到白板）。
+        // 不接入 timeMachine：booth 墨迹退出即丢弃，不需要撤销/重做。
+        private readonly Dictionary<int, StrokeCollection> _boothStrokesByPage = new Dictionary<int, StrokeCollection>();
 
         // 按页绑定：每一页对应一个“实时画面”元素与布局/设备信息
         private readonly Dictionary<int, System.Windows.Controls.Image> _liveFrameImageByPage = new Dictionary<int, System.Windows.Controls.Image>();
@@ -392,6 +398,8 @@ namespace Ink_Canvas
             // 重置虚拟分页状态
             _boothCurrentPhotoIndex = -1;
             _capturedPhotos.Clear();
+            // 清空 booth per-page 墨迹存储（退出即丢弃，不持久化到白板）
+            _boothStrokesByPage.Clear();
 
             try
             {
@@ -2316,6 +2324,52 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 保存当前虚拟页的墨迹到 _boothStrokesByPage，并清空画布墨迹。
+        /// 在切换虚拟页（直播页↔照片页、照片页↔照片页）之前调用。
+        /// 不接入 timeMachine：booth 墨迹仅在特殊模式内有效，退出即丢弃。
+        /// </summary>
+        private void SaveBoothStrokes()
+        {
+            if (inkCanvas == null) return;
+            try
+            {
+                var snapshot = new StrokeCollection();
+                foreach (var s in inkCanvas.Strokes)
+                    snapshot.Add(s);
+                _boothStrokesByPage[_boothCurrentPhotoIndex] = snapshot;
+                inkCanvas.Strokes.Clear();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"SaveBoothStrokes 异常: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 从 _boothStrokesByPage 恢复目标虚拟页的墨迹到画布。
+        /// 在切换虚拟页并更新 _boothCurrentPhotoIndex 之后调用。
+        /// </summary>
+        private void RestoreBoothStrokes()
+        {
+            if (inkCanvas == null) return;
+            try
+            {
+                inkCanvas.Strokes.Clear();
+                if (_boothStrokesByPage.TryGetValue(_boothCurrentPhotoIndex, out var snapshot) && snapshot != null)
+                {
+                    var restored = new StrokeCollection();
+                    foreach (var s in snapshot)
+                        restored.Add(s);
+                    inkCanvas.Strokes = restored;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"RestoreBoothStrokes 异常: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
         /// 从直播页切换到照片预览页。
         /// 显示指定照片、停止实时预览、页码 (photoIndex+1)/N、拍照按钮变灰。
         /// </summary>
@@ -2335,7 +2389,10 @@ namespace Ink_Canvas
                 return;
             }
 
+            // 保存当前虚拟页墨迹，再切换到目标照片页（更新 _boothCurrentPhotoIndex 后恢复）
+            SaveBoothStrokes();
             _boothCurrentPhotoIndex = photoIndex;
+            RestoreBoothStrokes();
 
             // 按需计算照片在冻结画面上的布局参数（每张照片尺寸可能不同）
             if (VideoPresenterFrozenFrameImage != null)
@@ -2421,7 +2478,10 @@ namespace Ink_Canvas
         /// </summary>
         private void SwitchBoothToLivePage()
         {
+            // 保存当前虚拟页墨迹，再切换到直播页（更新 _boothCurrentPhotoIndex 后恢复）
+            SaveBoothStrokes();
             _boothCurrentPhotoIndex = -1;
+            RestoreBoothStrokes();
 
             // 清除冻结照片
             if (VideoPresenterFrozenFrameImage != null)
