@@ -3,6 +3,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Windows.Win32;
 
 namespace Ink_Canvas.WorkflowAutomation.Rules
 {
@@ -24,11 +25,11 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
     {
         public const string RuleId = "inkcanvas.foregroundwindowprocess";
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern IntPtr GetForegroundWindow();
+        //[DllImport("user32.dll", SetLastError = true)]
+        //private static extern IntPtr GetForegroundWindow();
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
+        //[DllImport("user32.dll", SetLastError = true)]
+        //private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
 
         public static RuleRegistryInfo Register()
         {
@@ -44,11 +45,11 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
 
                 try
                 {
-                    var handle = GetForegroundWindow();
+                    var handle = PInvoke.GetForegroundWindow();
                     if (handle == IntPtr.Zero) return false;
 
                     uint pid;
-                    GetWindowThreadProcessId(handle, out pid);
+                    PInvoke.GetWindowThreadProcessId(handle, out pid);
                     if (pid == 0) return false;
 
                     var process = Process.GetProcessById((int)pid);
@@ -77,10 +78,10 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
             if (s == null || string.IsNullOrEmpty(s.ProcessName)) return false;
             try
             {
-                var handle = GetForegroundWindow();
+                var handle = PInvoke.GetForegroundWindow();
                 if (handle == IntPtr.Zero) return false;
                 uint pid;
-                GetWindowThreadProcessId(handle, out pid);
+                PInvoke.GetWindowThreadProcessId(handle, out pid);
                 if (pid == 0) return false;
                 var process = Process.GetProcessById((int)pid);
                 return string.Equals(process.ProcessName, s.ProcessName, StringComparison.OrdinalIgnoreCase);
