@@ -18,12 +18,19 @@ namespace Ink_Canvas
         private NativeInkSessionManager _nativeInkSessions;
         private NativeInkController _nativeInkController;
         private NativePointerInputSource _nativePointerInputSource;
+        private WpfPointerInputSource _wpfPointerInputSource;
         private WetInkWindowHost _wetInkWindowHost;
         private WpfRenderFrameFence _wpfRenderFrameFence;
 
         private readonly Dictionary<uint, NativeInkRouteDecision> _nativeCapturedRoutes =
             new Dictionary<uint, NativeInkRouteDecision>();
         private readonly HashSet<uint> _nativeActiveTouchPointers = new HashSet<uint>();
+        private readonly Dictionary<uint, NativeInkInputKind> _nativeHardwarePointers =
+            new Dictionary<uint, NativeInkInputKind>();
+        private readonly Dictionary<uint, NativeInkInputKind> _wpfFallbackPointers =
+            new Dictionary<uint, NativeInkInputKind>();
+        private long _lastNativePenInputTimestamp;
+        private long _lastNativeTouchInputTimestamp;
 
         private bool _nativeWetInkStarted;
         private bool _nativeWetInkDisabled;
@@ -68,6 +75,13 @@ namespace Ink_Canvas
                     OnNativePointerInput,
                     dpi.X,
                     dpi.Y);
+                // Legacy WPF stylus stack can consume pen/touch before WM_POINTER reaches
+                // the HWND (common on touch films). Bridge those samples into the same
+                // native controller; no legacy wet renderer is re-enabled.
+                _wpfPointerInputSource = new WpfPointerInputSource(
+                    this,
+                    inkCanvas,
+                    OnNativePointerInput);
 
                 WireNativeWetInkGeometryListeners();
                 EnsureNativePenPhysicalEditingMode();
@@ -101,6 +115,10 @@ namespace Ink_Canvas
             try { _wetInkWindowHost?.SignalWork(); }
             catch { /* best-effort */ }
 
+            try { _wpfPointerInputSource?.Dispose(); }
+            catch { /* best-effort */ }
+            _wpfPointerInputSource = null;
+
             try { _nativePointerInputSource?.Dispose(); }
             catch { /* best-effort */ }
             _nativePointerInputSource = null;
@@ -118,6 +136,8 @@ namespace Ink_Canvas
             _nativeWetInkMailbox = null;
             _nativeCapturedRoutes.Clear();
             _nativeActiveTouchPointers.Clear();
+            _nativeHardwarePointers.Clear();
+            _wpfFallbackPointers.Clear();
             _nativeWetInkStarted = false;
         }
 
@@ -321,10 +341,73 @@ namespace Ink_Canvas
 
         #endregion
 
+        private bool ShouldAcceptPointerBatch(NativePointerInputBatch batch)
+        {
+            if (batch == null)
+                return false;
+            if (batch.InputKind == NativeInkInputKind.Mouse)
+                return true;
+
+            var now = System.Diagnostics.Stopwatch.GetTimestamp();
+            ref var lastNativeTimestamp = ref batch.InputKind == NativeInkInputKind.Pen
+                ? ref _lastNativePenInputTimestamp
+                : ref _lastNativeTouchInputTimestamp;
+
+            if (!batch.IsWpfFallback)
+            {
+                // If WPF delivered Down first, keep that source for the whole stroke;
+                // switching sources mid-contact would create a duplicate / broken stroke.
+                if (ContainsInputKind(_wpfFallbackPointers, batch.InputKind))
+                    return false;
+
+                lastNativeTimestamp = now;
+                _nativeHardwarePointers[batch.PointerId] = batch.InputKind;
+                if (batch.MessageKind == NativePointerMessageKind.Up
+                    || batch.MessageKind == NativePointerMessageKind.CaptureLost)
+                {
+                    _nativeHardwarePointers.Remove(batch.PointerId);
+                }
+                return true;
+            }
+
+            // WPF legacy input is a fallback only. If the HWND is actively receiving or
+            // recently received the same physical input kind, this routed event is its mirror.
+            if (ContainsInputKind(_nativeHardwarePointers, batch.InputKind))
+                return false;
+            var elapsedMilliseconds = lastNativeTimestamp == 0
+                ? double.MaxValue
+                : (now - lastNativeTimestamp) * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+            if (elapsedMilliseconds <= 100)
+                return false;
+
+            _wpfFallbackPointers[batch.PointerId] = batch.InputKind;
+            if (batch.MessageKind == NativePointerMessageKind.Up
+                || batch.MessageKind == NativePointerMessageKind.CaptureLost)
+            {
+                _wpfFallbackPointers.Remove(batch.PointerId);
+            }
+            return true;
+        }
+
+        private static bool ContainsInputKind(
+            Dictionary<uint, NativeInkInputKind> pointers,
+            NativeInkInputKind inputKind)
+        {
+            foreach (var pair in pointers)
+            {
+                if (pair.Value == inputKind)
+                    return true;
+            }
+            return false;
+        }
+
         private bool OnNativePointerInput(NativePointerInputBatch batch)
         {
             try
             {
+                if (!ShouldAcceptPointerBatch(batch))
+                    return false;
+
                 switch (batch.MessageKind)
                 {
                     case NativePointerMessageKind.Down:

@@ -23,7 +23,8 @@ namespace Ink_Canvas.Ink.Native
             bool secondaryBarrelButtonDown,
             bool isPromotedMouse,
             bool historyComplete,
-            int historyReadError = 0)
+            int historyReadError = 0,
+            bool isWpfFallback = false)
         {
             if (samplesNewestFirst == null)
                 throw new ArgumentNullException(nameof(samplesNewestFirst));
@@ -37,6 +38,7 @@ namespace Ink_Canvas.Ink.Native
             IsPromotedMouse = isPromotedMouse;
             HistoryComplete = historyComplete;
             HistoryReadError = historyReadError;
+            IsWpfFallback = isWpfFallback;
             _samplesNewestFirst = new RawInkSample[samplesNewestFirst.Count];
             for (var i = 0; i < samplesNewestFirst.Count; i++)
                 _samplesNewestFirst[i] = samplesNewestFirst[i];
@@ -50,6 +52,8 @@ namespace Ink_Canvas.Ink.Native
         public bool IsPromotedMouse { get; }
         public bool HistoryComplete { get; }
         public int HistoryReadError { get; }
+        /// <summary>True when samples came from WPF Stylus/Touch because WM_POINTER was unavailable.</summary>
+        public bool IsWpfFallback { get; }
     }
 
     internal delegate bool NativePointerInputHandler(NativePointerInputBatch batch);
