@@ -231,15 +231,18 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             return _items;
         }
 
-        public static void RegisterPluginItem(PluginToolbarItemInfo itemInfo)
+        public static void RegisterPluginItem(PluginToolbarItemInfo itemInfo, bool autoAddToActiveConfig = true)
         {
             if (itemInfo == null || string.IsNullOrEmpty(itemInfo.Id)) return;
             if (_pluginItems.Any(item => string.Equals(item.Id, itemInfo.Id, StringComparison.OrdinalIgnoreCase))) return;
 
             _pluginItems.Add(itemInfo);
-            LogHelper.WriteLogToFile($"ToolbarRegistry: 插件注册工具栏项 [{itemInfo.Id}]", LogHelper.LogType.Info);
+            LogHelper.WriteLogToFile($"ToolbarRegistry: 插件注册工具栏项 [{itemInfo.Id}] (autoAddToActiveConfig={autoAddToActiveConfig})", LogHelper.LogType.Info);
 
-            EnsurePluginItemInActiveConfig(itemInfo.Id);
+            if (autoAddToActiveConfig)
+            {
+                EnsurePluginItemInActiveConfig(itemInfo.Id);
+            }
 
             if (_items != null)
             {
