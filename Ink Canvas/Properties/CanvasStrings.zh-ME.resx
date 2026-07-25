@@ -118,7 +118,7 @@
     <value>开启预言之笔</value>
   </data>
   <data name="Canvas_EnableNativeInkPredictionHint" xml:space="preserve">
-    <value>只给实时预览加一小段动态笔尾，预言点不进保存/撤销/识别，纯表演型选手。</value>
+    <value>开启后笔尖前方会甩出一段动态预测笔尾，抬笔时预言段会写进真实墨迹（可保存/撤销），快写时最明显。</value>
   </data>
   <data name="Canvas_UseLegacyWetInk" xml:space="preserve">
     <value>召回旧版湿墨迹系统</value>

@@ -18,6 +18,7 @@ namespace InkCanvas.NativeInk.Tests
             Run(nameof(ControllerKeepsEndingSessionAcrossPointerReuse), ControllerKeepsEndingSessionAcrossPointerReuse);
             Run(nameof(ControllerRetiresOnlyAfterDryAndWpfFences), ControllerRetiresOnlyAfterDryAndWpfFences);
             Run(nameof(PredictionNeverEntersCommitPayload), PredictionNeverEntersCommitPayload);
+            Run(nameof(PredictionBakedIntoCommitPayload), PredictionBakedIntoCommitPayload);
             Run(nameof(CommitFenceTransitionsAreOrdered), CommitFenceTransitionsAreOrdered);
             Run(nameof(InvalidCommitFenceTransitionIsRejected), InvalidCommitFenceTransitionIsRejected);
             Run(nameof(CancelAllDropsConcurrentSessions), CancelAllDropsConcurrentSessions);
@@ -159,12 +160,31 @@ namespace InkCanvas.NativeInk.Tests
             var session = manager.Begin(4, NativeInkInputKind.Pen, Style(), new InkSampleProcessorSettings(), 10);
             session.AppendReverseChronologicalHistory(new[] { Sample(20, 2, 2, 4), Sample(10, 1, 1, 4) });
             session.ReplacePrediction(new[] { new PredictedInkPoint(99, 99, 0.5f, 30) });
-            var payload = session.End(40);
+            // 默认不烘焙：预测点不得进入干墨提交。
+            var payload = session.End(40, bakePredictionIntoRealInk: false);
             NotNull(payload);
             Equal(2, payload.Points.Count);
             Equal(0, session.PredictedPoints.Count);
             for (var i = 0; i < payload.Points.Count; i++)
                 True(payload.Points[i].X != 99);
+        }
+
+        private static void PredictionBakedIntoCommitPayload()
+        {
+            var manager = new NativeInkSessionManager();
+            var session = manager.Begin(4, NativeInkInputKind.Pen, Style(), new InkSampleProcessorSettings(), 10);
+            session.AppendReverseChronologicalHistory(new[] { Sample(20, 2, 2, 4), Sample(10, 1, 1, 4) });
+            session.ReplacePrediction(new[]
+            {
+                new PredictedInkPoint(30, 2, 0.4f, 30),
+                new PredictedInkPoint(40, 2, 0.3f, 40),
+            });
+            var payload = session.End(50, bakePredictionIntoRealInk: true);
+            NotNull(payload);
+            Equal(4, payload.Points.Count);
+            Equal(0, session.PredictedPoints.Count);
+            Equal(30.0, payload.Points[2].X);
+            Equal(40.0, payload.Points[3].X);
         }
 
         private static void CommitFenceTransitionsAreOrdered()

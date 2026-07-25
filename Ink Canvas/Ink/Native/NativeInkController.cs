@@ -44,6 +44,20 @@ namespace Ink_Canvas.Ink.Native
             {
                 _snapshotVersions.Add(session.SessionId, 0);
                 AppendWithoutPublishing(session, newestFirstHistory);
+                // 落笔时如果已有足够点且开启预测，立即附上笔尾，避免首帧无预测。
+                if (session.RealPoints.Count >= 2)
+                {
+                    try
+                    {
+                        var predicted = InkTailPredictor.Build(session.RealPoints);
+                        if (predicted.Count > 0)
+                            session.ReplacePrediction(predicted);
+                    }
+                    catch
+                    {
+                        // prediction is best-effort on begin
+                    }
+                }
                 var snapshot = CreateNextSnapshot(session);
                 _mailbox.PublishBegin(
                     new WetInkBoundaryCommand(
@@ -71,6 +85,33 @@ namespace Ink_Canvas.Ink.Native
             return true;
         }
 
+        /// <summary>
+        /// 原子地追加真实点并替换预测笔尾，避免“Update 清空预测 → 下一帧再重建”
+        /// 造成的一帧空窗。predictionEnabled 为 false 时行为与 Update 一致。
+        /// </summary>
+        public bool UpdateWithPrediction(
+            uint pointerId,
+            IReadOnlyList<RawInkSample> newestFirstHistory,
+            bool predictionEnabled)
+        {
+            if (!_sessions.TryGet(pointerId, out var session))
+                return false;
+
+            var appended = AppendWithoutPublishing(session, newestFirstHistory);
+            if (predictionEnabled && session.State == NativeInkSessionState.Active)
+            {
+                var predicted = InkTailPredictor.Build(session.RealPoints);
+                session.ReplacePrediction(predicted);
+                // 只要预测启用，即使本帧没有新真实点，也要发布一次，保持笔尾连续。
+                PublishSnapshot(session);
+                return true;
+            }
+
+            if (appended != 0)
+                PublishSnapshot(session);
+            return appended != 0;
+        }
+
         public bool ReplacePrediction(
             uint pointerId,
             IReadOnlyList<PredictedInkPoint> points)
@@ -85,13 +126,15 @@ namespace Ink_Canvas.Ink.Native
         public NativeStrokeCommitPayload End(
             uint pointerId,
             long endedAtMicroseconds,
-            IReadOnlyList<RawInkSample> newestFirstHistory)
+            IReadOnlyList<RawInkSample> newestFirstHistory,
+            bool bakePredictionIntoRealInk = false)
         {
             if (!_sessions.TryGet(pointerId, out var session))
                 return null;
 
             AppendAndPublish(session, newestFirstHistory);
-            var payload = session.End(endedAtMicroseconds);
+            // bakePredictionIntoRealInk=true 时，预测笔尾会写入真实点并进入干墨提交。
+            var payload = session.End(endedAtMicroseconds, bakePredictionIntoRealInk);
             _sessions.DetachActivePointer(pointerId, session);
             if (payload == null)
             {

@@ -118,7 +118,7 @@
     <value>Enable live ink prediction</value>
   </data>
   <data name="Canvas_EnableNativeInkPredictionHint" xml:space="preserve">
-    <value>Affects only a short live preview tail. Predicted points are never saved, undone, or recognized.</value>
+    <value>When enabled, freehand drawing shows a predictive tail ahead of the pen tip; on pen-up that tail is baked into the real stroke (saved/undoable). Best seen during fast strokes.</value>
   </data>
   <data name="Canvas_UseLegacyWetInk" xml:space="preserve">
     <value>Use legacy wet-ink system</value>

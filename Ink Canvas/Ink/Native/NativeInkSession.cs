@@ -126,10 +126,71 @@ namespace Ink_Canvas.Ink.Native
             }
         }
 
-        public NativeStrokeCommitPayload End(long endedAtMicroseconds)
+        /// <summary>
+        /// 将当前预测笔尾烘焙进真实点集，使其进入干墨提交/撤销/保存。
+        /// 调用后预测缓冲会被清空。
+        /// </summary>
+        public int BakePredictionIntoRealPoints()
         {
             EnsureState(NativeInkSessionState.Active);
+            if (_predictedPoints.Length == 0)
+                return 0;
+
+            var previousTimestamp = _realPoints.Count == 0
+                ? long.MinValue
+                : _realPoints[_realPoints.Count - 1].TimestampMicroseconds;
+            var baked = 0;
+            for (var i = 0; i < _predictedPoints.Length; i++)
+            {
+                var point = _predictedPoints[i];
+                if (!IsFinite(point.X)
+                    || !IsFinite(point.Y)
+                    || !IsFinite(point.Pressure)
+                    || point.TimestampMicroseconds <= previousTimestamp)
+                {
+                    continue;
+                }
+
+                _realPoints.Add(new RealInkPoint(
+                    point.X,
+                    point.Y,
+                    Math.Clamp(point.Pressure, 0.05f, 1f),
+                    point.TimestampMicroseconds));
+                previousTimestamp = point.TimestampMicroseconds;
+                LastAcceptedTimestampMicroseconds = point.TimestampMicroseconds;
+                baked++;
+            }
+
             _predictedPoints = Array.Empty<PredictedInkPoint>();
+            if (baked > 0)
+                _geometryGeneration++;
+            return baked;
+        }
+
+        public NativeStrokeCommitPayload End(long endedAtMicroseconds, bool bakePredictionIntoRealInk = false)
+        {
+            EnsureState(NativeInkSessionState.Active);
+            if (bakePredictionIntoRealInk)
+            {
+                // 抬笔前若预测缓冲为空，按最终真实点再算一次，保证预览与干墨一致。
+                if (_predictedPoints.Length == 0 && _realPoints.Count >= 2)
+                {
+                    try
+                    {
+                        ReplacePrediction(InkTailPredictor.Build(_realPoints));
+                    }
+                    catch
+                    {
+                        // best-effort
+                    }
+                }
+                BakePredictionIntoRealPoints();
+            }
+            else
+            {
+                _predictedPoints = Array.Empty<PredictedInkPoint>();
+            }
+
             if (_realPoints.Count == 0)
             {
                 State = NativeInkSessionState.Canceled;

@@ -536,7 +536,12 @@ namespace Ink_Canvas
 
             if (decision.Route == NativeInputRoute.Ink && !decision.SuppressPointEmission)
             {
-                if (_nativeInkController.Update(batch.PointerId, ToInkCanvasSamples(batch.SamplesNewestFirst)))
+                // 真实点 + 预测笔尾同一快照发布，避免“Update 清空预测”造成的空窗。
+                var predictionEnabled = Settings?.Canvas?.EnableNativeInkPrediction == true;
+                if (_nativeInkController.UpdateWithPrediction(
+                        batch.PointerId,
+                        ToInkCanvasSamples(batch.SamplesNewestFirst),
+                        predictionEnabled))
                 {
                     ResetPauseStraightenTimerForPointer(batch.PointerId);
                     _wetInkWindowHost?.SignalWork();
@@ -571,10 +576,13 @@ namespace Ink_Canvas
                 ? batch.SamplesNewestFirst[0].TimestampMicroseconds
                 : DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() * 1000L;
 
+            // 开启实时书写预测时，抬笔把当前预测笔尾烘焙进真实干墨（进入保存/撤销）。
+            var bakePrediction = Settings?.Canvas?.EnableNativeInkPrediction == true;
             var payload = _nativeInkController.End(
                 batch.PointerId,
                 endedAt,
-                ToInkCanvasSamples(batch.SamplesNewestFirst));
+                ToInkCanvasSamples(batch.SamplesNewestFirst),
+                bakePredictionIntoRealInk: bakePrediction);
             RefreshOverlayVisibility();
             _wetInkWindowHost?.SignalWork();
 
