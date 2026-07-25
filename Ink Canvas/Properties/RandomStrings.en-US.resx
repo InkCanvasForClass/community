@@ -360,6 +360,96 @@ If not installed, please download and install it from the official website. If a
   <data name="Random_AddBg_SaveFailedFormat" xml:space="preserve">
     <value>Error saving background: {0}</value>
   </data>
+  <data name="Random_Roster_Title" xml:space="preserve">
+    <value>Student Roster Schemes</value>
+  </data>
+  <data name="Random_Roster_SectionHeader" xml:space="preserve">
+    <value>Student Roster</value>
+  </data>
+  <data name="Random_Roster_SelectLabel" xml:space="preserve">
+    <value>Current scheme:</value>
+  </data>
+  <data name="Random_Roster_None" xml:space="preserve">
+    <value>No scheme selected</value>
+  </data>
+  <data name="Random_Roster_Manage" xml:space="preserve">
+    <value>Manage schemes</value>
+  </data>
+  <data name="Random_Roster_ManageWindowTitle" xml:space="preserve">
+    <value>Manage Student Roster Schemes</value>
+  </data>
+  <data name="Random_Roster_ManageTitle" xml:space="preserve">
+    <value>Manage student roster schemes (edit list / add / delete / rename)</value>
+  </data>
+  <data name="Random_Roster_SetAsCurrent" xml:space="preserve">
+    <value>Set as current</value>
+  </data>
+  <data name="Random_Roster_SaveCurrent" xml:space="preserve">
+    <value>Save current list</value>
+  </data>
+  <data name="Random_Roster_Edit" xml:space="preserve">
+    <value>Edit list</value>
+  </data>
+  <data name="Random_Roster_Rename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="Random_Roster_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Random_Roster_Add" xml:space="preserve">
+    <value>New scheme</value>
+  </data>
+  <data name="Random_Roster_AddPrompt" xml:space="preserve">
+    <value>Enter a name for the new scheme:</value>
+  </data>
+  <data name="Random_Roster_AddTitle" xml:space="preserve">
+    <value>New Scheme</value>
+  </data>
+  <data name="Random_Roster_RenamePrompt" xml:space="preserve">
+    <value>Enter a new name for the scheme:</value>
+  </data>
+  <data name="Random_Roster_RenameTitle" xml:space="preserve">
+    <value>Rename Scheme</value>
+  </data>
+  <data name="Random_Roster_SetSuccessFormat" xml:space="preserve">
+    <value>Switched to scheme "{0}" and updated the current list</value>
+  </data>
+  <data name="Random_Roster_SetSuccessTitle" xml:space="preserve">
+    <value>Switched</value>
+  </data>
+  <data name="Random_Roster_SaveSuccessFormat" xml:space="preserve">
+    <value>Saved the current list to scheme "{0}"</value>
+  </data>
+  <data name="Random_Roster_SaveSuccessTitle" xml:space="preserve">
+    <value>Saved</value>
+  </data>
+  <data name="Random_Roster_DeleteConfirmFormat" xml:space="preserve">
+    <value>Are you sure you want to delete scheme "{0}"?</value>
+  </data>
+  <data name="Random_Roster_DeleteConfirmTitle" xml:space="preserve">
+    <value>Confirm Delete</value>
+  </data>
+  <data name="Random_Roster_DeleteFailedFormat" xml:space="preserve">
+    <value>Error deleting scheme: {0}</value>
+  </data>
+  <data name="Random_Roster_EmptyName" xml:space="preserve">
+    <value>Scheme name cannot be empty</value>
+  </data>
+  <data name="Random_Roster_DuplicateNameFormat" xml:space="preserve">
+    <value>A scheme with this name already exists: {0}</value>
+  </data>
+  <data name="Random_Roster_Hint" xml:space="preserve">
+    <value>Different classes can be saved as separate schemes. Switching a scheme replaces the current list files (Names.txt / Replace.txt).</value>
+  </data>
+  <data name="Random_Roster_SwitchLabel" xml:space="preserve">
+    <value>Scheme</value>
+  </data>
+  <data name="Random_Roster_SwitchTooltip" xml:space="preserve">
+    <value>Switch student roster scheme</value>
+  </data>
+  <data name="Random_Roster_OperationFailedFormat" xml:space="preserve">
+    <value>Operation failed: {0}</value>
+  </data>
   <data name="Random_CustomIcon_Title" xml:space="preserve">
     <value>Custom Floating Bar Icon Management</value>
   </data>

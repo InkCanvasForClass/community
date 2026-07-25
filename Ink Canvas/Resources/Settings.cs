@@ -1521,6 +1521,36 @@ namespace Ink_Canvas
         public double MLAvoidanceWeight { get; set; } = 1.0;
         [JsonProperty("enableQuickDraw")]
         public bool EnableQuickDraw { get; set; } = true;
+        [JsonProperty("nameRosters")]
+        public List<NameRoster> NameRosters { get; set; } = new List<NameRoster>();
+        [JsonProperty("selectedNameRosterGuid")]
+        public string SelectedNameRosterGuid { get; set; } = "";
+    }
+
+    public class NameRoster
+    {
+        [JsonProperty("guid")]
+        public string Guid { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        // 名单内容（每行一人），与 Names.txt 的格式保持一致
+        [JsonProperty("namesContent")]
+        public string NamesContent { get; set; } = "";
+
+        // 替换规则内容（每行一条），与 Replace.txt 的格式保持一致
+        [JsonProperty("replaceContent")]
+        public string ReplaceContent { get; set; } = "";
+
+        public NameRoster(string guid, string name)
+        {
+            Guid = guid;
+            Name = name;
+        }
+
+        // 用于JSON序列化
+        public NameRoster() { }
     }
 
     public class CustomPickNameBackground

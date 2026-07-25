@@ -1,0 +1,60 @@
+<UserControl x:Class="Ink_Canvas.ManageNameRostersWindow"
+             xmlns:props="clr-namespace:Ink_Canvas.Properties"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignWidth="640" d:DesignHeight="360"
+             Width="640" Height="360">
+    <Grid Margin="0,4,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Margin="0,0,0,8"
+                   Text="{x:Static props:RandomStrings.Random_Roster_ManageTitle}"
+                   Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                   TextWrapping="Wrap" />
+        <!-- 固定高度 + 仅纵向滚动：禁用横向滚动，避免操作列被裁切 -->
+        <ListView Name="RostersListView" Grid.Row="1"
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto"
+                  ScrollViewer.CanContentScroll="True">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="{x:Static props:RandomStrings.Random_Name}" Width="200" DisplayMemberBinding="{Binding Name}"/>
+                    <GridViewColumn Header="{x:Static props:RandomStrings.Random_Roster_SectionHeader}" Width="90">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding PeopleCountText}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="{x:Static props:NotificationStrings.ActionsTitle}" Width="320">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Content="{x:Static props:RandomStrings.Random_Roster_Edit}"
+                                            MinWidth="72" Padding="8,2" Margin="0,0,4,0"
+                                            Click="EditButton_Click" Tag="{Binding}"/>
+                                    <Button Content="{x:Static props:RandomStrings.Random_Roster_Rename}"
+                                            MinWidth="56" Padding="8,2" Margin="0,0,4,0"
+                                            Click="RenameButton_Click" Tag="{Binding}"/>
+                                    <Button Content="{x:Static props:RandomStrings.Random_Roster_Delete}"
+                                            MinWidth="48" Padding="8,2"
+                                            Click="DeleteButton_Click" Tag="{Binding}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <Button Grid.Row="2" Name="ButtonAddRoster" Margin="0,12,0,0"
+                HorizontalAlignment="Left" MinWidth="120" Padding="16,6"
+                Content="{x:Static props:RandomStrings.Random_Roster_Add}"
+                Click="ButtonAddRoster_Click" />
+    </Grid>
+</UserControl>
