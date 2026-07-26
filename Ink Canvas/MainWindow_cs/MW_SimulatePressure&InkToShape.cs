@@ -2520,6 +2520,32 @@ namespace Ink_Canvas
 
             try
             {
+                // 坐标防御：画布在视频展台等场景被反复 ScaleAt 缩放后，WinRT/IACore 返回的
+                // Centroid/HotPoints/ShapeWidth/Height 可能非有限或巨量。这类结果直接拒绝，
+                // 保留原笔画，避免后续 GeneratePointsBetween/GenerateEllipseGeometry 生成海量/NaN 点导致 OOM 卡死。
+                if (!double.IsFinite(result.ShapeWidth) || !double.IsFinite(result.ShapeHeight) ||
+                    result.ShapeWidth <= 0 || result.ShapeHeight <= 0 ||
+                    !double.IsFinite(result.Centroid.X) || !double.IsFinite(result.Centroid.Y))
+                    return false;
+
+                // 形状比画布大得离谱（>8 倍画布尺寸）说明坐标系已被极端缩放，纠正无意义且易 OOM。
+                var canvasW = inkCanvas?.ActualWidth ?? 0;
+                var canvasH = inkCanvas?.ActualHeight ?? 0;
+                if (canvasW > 0 && canvasH > 0)
+                {
+                    if (result.ShapeWidth > canvasW * 8 || result.ShapeHeight > canvasH * 8)
+                        return false;
+                }
+
+                if (result.HotPoints != null)
+                {
+                    for (int i = 0; i < result.HotPoints.Count; i++)
+                    {
+                        if (!double.IsFinite(result.HotPoints[i].X) || !double.IsFinite(result.HotPoints[i].Y))
+                            return false;
+                    }
+                }
+
                 var name = result.ShapeName ?? string.Empty;
 
                 // 椭圆/圆：用 PCA 主轴系算代数残差 + 闭合度
@@ -2762,6 +2788,21 @@ namespace Ink_Canvas
         private StylusPointCollection GeneratePointsBetween(Point start, Point end, float startPressure, float endPressure, double minPointInterval = 8.0)
         {
             var result = new StylusPointCollection();
+
+            // 防御：坐标非有限（画布被缩放/平移到极端时识别出的形状坐标可能爆掉）直接退化成两点，
+            // 否则下方 pointCount = distance/interval 会爆炸式分配点导致 OOM 卡死。
+            if (!double.IsFinite(start.X) || !double.IsFinite(start.Y) ||
+                !double.IsFinite(end.X) || !double.IsFinite(end.Y))
+            {
+                result.Add(new StylusPoint(
+                    double.IsFinite(start.X) ? start.X : 0,
+                    double.IsFinite(start.Y) ? start.Y : 0, startPressure));
+                result.Add(new StylusPoint(
+                    double.IsFinite(end.X) ? end.X : 0,
+                    double.IsFinite(end.Y) ? end.Y : 0, endPressure));
+                return result;
+            }
+
             double distance = GetDistance(start, end);
 
             if (distance < minPointInterval)
@@ -2771,7 +2812,14 @@ namespace Ink_Canvas
                 return result;
             }
 
+            // 防御：画布在视频展台等场景被反复 ScaleAt 缩放后，笔画坐标空间可能远超屏幕，
+            // 形状边长随之放大，未限制时 pointCount 可达数万~数百万 → OOM。
+            // 单条边最多 4096 个采样点（8px 间隔下覆盖约 32768px，足够任何可视形状），
+            // 超出则按比例拉大采样间隔，渲染结果对肉眼无差别但内存可控。
+            const int MaxPointsPerEdge = 4096;
             int pointCount = Math.Max(2, (int)(distance / minPointInterval) + 1);
+            if (pointCount > MaxPointsPerEdge)
+                pointCount = MaxPointsPerEdge;
 
             result.Add(new StylusPoint(start.X, start.Y, startPressure));
 
