@@ -57,6 +57,22 @@ namespace Ink_Canvas
         /// <summary>手写体矫正：停笔后延迟执行（毫秒），多笔一字时等用户写完再识别。</summary>
         private const int HandwritingBeautifyDebounceMs = 1000;
 
+        /// <summary>
+        /// 运行时停笔防抖值：取 settings（300-5000），缺失或越界时回退到 <see cref="HandwritingBeautifyDebounceMs"/>。
+        /// 每次并入批次时由 <see cref="ScheduleHandwritingGlyphReplaceAfterStrokeCollected"/> 读取，
+        /// 因此改设置后下一批立即生效，无需失效通知。
+        /// </summary>
+        private static int CurrentHandwritingBeautifyDebounceMs
+        {
+            get
+            {
+                var configured = MainWindow.Settings?.InkToShape?.HandwritingBeautifyDebounceMs ?? 0;
+                if (configured < 300 || configured > 5000)
+                    return HandwritingBeautifyDebounceMs;
+                return configured;
+            }
+        }
+
         private DispatcherTimer _handwritingBeautifyDebounceTimer;
 
         /// <summary>每次收笔并入批次时递增；防抖 Tick 携带快照，识别过程中若又有新笔则放弃本轮替换。</summary>
@@ -3261,7 +3277,7 @@ namespace Ink_Canvas
                 return;
             _handwritingBeautifyDebounceTimer = new DispatcherTimer(DispatcherPriority.Background, Dispatcher)
             {
-                Interval = TimeSpan.FromMilliseconds(HandwritingBeautifyDebounceMs)
+                Interval = TimeSpan.FromMilliseconds(CurrentHandwritingBeautifyDebounceMs)
             };
             _handwritingBeautifyDebounceTimer.Tick += HandwritingBeautifyDebounceTimer_Tick;
         }
@@ -3344,7 +3360,7 @@ namespace Ink_Canvas
 
             EnsureHandwritingBeautifyDebounceTimer();
             _handwritingBeautifyDebounceTimer.Stop();
-            _handwritingBeautifyDebounceTimer.Interval = TimeSpan.FromMilliseconds(HandwritingBeautifyDebounceMs);
+            _handwritingBeautifyDebounceTimer.Interval = TimeSpan.FromMilliseconds(CurrentHandwritingBeautifyDebounceMs);
             _handwritingBeautifyDebounceTimer.Start();
         }
 

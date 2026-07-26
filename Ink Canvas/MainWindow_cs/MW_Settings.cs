@@ -1135,6 +1135,8 @@ namespace Ink_Canvas
             Settings.InkToShape.IsInkToShapeRounded = true;
             Settings.InkToShape.EnableWinRtHandwritingStrokeBeautify = false;
             Settings.InkToShape.HandwritingCorrectionFontFamily = "Ink Free,KaiTi,Segoe Script";
+            Settings.InkToShape.HandwritingLanguageOverrideLcid = 0;
+            Settings.InkToShape.HandwritingBeautifyDebounceMs = 2000;
 
             Settings.Startup.IsEnableNibMode = false;
             Settings.Startup.IsAutoUpdate = true;

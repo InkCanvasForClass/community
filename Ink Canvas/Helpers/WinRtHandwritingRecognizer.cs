@@ -18,9 +18,6 @@ namespace Ink_Canvas.Helpers
     /// </summary>
     internal static class WinRtHandwritingRecognizer
     {
-        private static WinRtInk.InkRecognizer _preferredHandwritingRecognizer;
-        private static bool _preferredHandwritingRecognizerResolved;
-
         private static void LogHandwriting(string message, LogHelper.LogType logType = LogHelper.LogType.Info)
         {
             LogHelper.WriteLogToFile("[手写体] " + message, logType);
@@ -56,6 +53,10 @@ namespace Ink_Canvas.Helpers
             try
             {
                 var recognizer = new WinRtInk.InkRecognizerContainer();
+                // 把 settings 中的 LCID 覆盖推到 Tuning（LCID 变化时自动失效缓存重解析）。
+                HandwritingRecognitionTuning.ApplyFromSettings(
+                    MainWindow.Settings?.InkToShape?.HandwritingLanguageOverrideLcid ??
+                    HandwritingRecognitionTuning.LcidFollowSystem);
                 TryApplyPreferredHandwritingRecognizer(recognizer, traceRecognition);
 
                 var analyzer = new WinAnalysis.InkAnalyzer();
@@ -237,150 +238,8 @@ namespace Ink_Canvas.Helpers
             WinRtInk.InkRecognizerContainer container,
             bool logDetail)
         {
-            if (container == null)
-                return;
-            try
-            {
-                if (!_preferredHandwritingRecognizerResolved)
-                {
-                    _preferredHandwritingRecognizerResolved = true;
-                    var all = container.GetRecognizers();
-                    _preferredHandwritingRecognizer = SelectBestInkRecognizer(all);
-                    if (logDetail)
-                    {
-                        if (_preferredHandwritingRecognizer != null)
-                            LogHandwriting("识别器：已选用 \"" + _preferredHandwritingRecognizer.Name + "\"。");
-                        else if (all != null && all.Count > 0)
-                            LogHandwriting("识别器：未匹配到与 UI/区域语言对应的引擎，使用系统默认（共 " + all.Count + " 个）。");
-                    }
-                }
-
-                if (_preferredHandwritingRecognizer != null)
-                    container.SetDefaultRecognizer(_preferredHandwritingRecognizer);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile("[手写体] 设置默认手写识别器失败: " + ex.Message, LogHelper.LogType.Warning);
-            }
-        }
-
-        private static WinRtInk.InkRecognizer SelectBestInkRecognizer(
-            IReadOnlyList<WinRtInk.InkRecognizer> list)
-        {
-            if (list == null || list.Count == 0)
-                return null;
-
-            var culture = PrimaryHandwritingCulture();
-            var lang = (culture?.TwoLetterISOLanguageName ?? string.Empty).ToLowerInvariant();
-            var name = culture?.Name ?? string.Empty;
-
-            bool wantZhHans = lang == "zh" &&
-                              (name.IndexOf("hans", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                               name.Equals("zh-cn", StringComparison.OrdinalIgnoreCase) ||
-                               name.Equals("zh-sg", StringComparison.OrdinalIgnoreCase) ||
-                               (name.IndexOf("hant", StringComparison.OrdinalIgnoreCase) < 0 &&
-                                !name.Equals("zh-tw", StringComparison.OrdinalIgnoreCase) &&
-                                !name.Equals("zh-hk", StringComparison.OrdinalIgnoreCase) &&
-                                !name.Equals("zh-mo", StringComparison.OrdinalIgnoreCase)));
-
-            bool wantZhHant = lang == "zh" &&
-                              (name.IndexOf("hant", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                               name.Equals("zh-tw", StringComparison.OrdinalIgnoreCase) ||
-                               name.Equals("zh-hk", StringComparison.OrdinalIgnoreCase) ||
-                               name.Equals("zh-mo", StringComparison.OrdinalIgnoreCase));
-
-            WinRtInk.InkRecognizer Pick(Func<string, bool> match)
-            {
-                foreach (var r in list)
-                {
-                    var n = r?.Name;
-                    if (string.IsNullOrEmpty(n))
-                        continue;
-                    if (match(n))
-                        return r;
-                }
-
-                return null;
-            }
-
-            if (wantZhHans)
-            {
-                var r = Pick(n =>
-                    n.IndexOf("简体", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    n.IndexOf("簡體", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    (n.IndexOf("中文", StringComparison.OrdinalIgnoreCase) >= 0 &&
-                     (n.IndexOf("简体", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                      n.IndexOf("簡體", StringComparison.OrdinalIgnoreCase) >= 0)) ||
-                    (n.IndexOf("Chinese", StringComparison.OrdinalIgnoreCase) >= 0 &&
-                     (n.IndexOf("Simplified", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                      n.IndexOf("Hans", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                      n.IndexOf("PRC", StringComparison.OrdinalIgnoreCase) >= 0)));
-                if (r != null)
-                    return r;
-                r = Pick(n =>
-                    n.IndexOf("中文", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    n.IndexOf("Chinese", StringComparison.OrdinalIgnoreCase) >= 0);
-                if (r != null)
-                    return r;
-            }
-            else if (wantZhHant)
-            {
-                var r = Pick(n =>
-                    n.IndexOf("繁体", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    n.IndexOf("繁體", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    (n.IndexOf("中文", StringComparison.OrdinalIgnoreCase) >= 0 &&
-                     (n.IndexOf("繁体", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                      n.IndexOf("繁體", StringComparison.OrdinalIgnoreCase) >= 0)) ||
-                    (n.IndexOf("Chinese", StringComparison.OrdinalIgnoreCase) >= 0 &&
-                     (n.IndexOf("Traditional", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                      n.IndexOf("Hant", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                      n.IndexOf("Taiwan", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                      n.IndexOf("Hong Kong", StringComparison.OrdinalIgnoreCase) >= 0)));
-                if (r != null)
-                    return r;
-                r = Pick(n =>
-                    n.IndexOf("中文", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    n.IndexOf("Chinese", StringComparison.OrdinalIgnoreCase) >= 0);
-                if (r != null)
-                    return r;
-            }
-            else if (lang == "ja")
-            {
-                var r = Pick(n =>
-                    n.IndexOf("Japanese", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    n.IndexOf("日本語", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    n.IndexOf("日语", StringComparison.OrdinalIgnoreCase) >= 0);
-                if (r != null)
-                    return r;
-            }
-            else if (lang == "en")
-            {
-                var r = Pick(n => n.IndexOf("English", StringComparison.OrdinalIgnoreCase) >= 0);
-                if (r != null)
-                    return r;
-            }
-
-            if (lang == "zh")
-            {
-                var r = Pick(n =>
-                    n.IndexOf("中文", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    n.IndexOf("Chinese", StringComparison.OrdinalIgnoreCase) >= 0);
-                if (r != null)
-                    return r;
-            }
-
-            return null;
-        }
-
-        private static CultureInfo PrimaryHandwritingCulture()
-        {
-            var ui = CultureInfo.CurrentUICulture;
-            var ct = CultureInfo.CurrentCulture;
-            if (string.Equals(ui.TwoLetterISOLanguageName, "zh", StringComparison.OrdinalIgnoreCase))
-                return ui;
-            if (string.Equals(ct.TwoLetterISOLanguageName, "zh", StringComparison.OrdinalIgnoreCase))
-                return ct;
-            return ui;
+            // 识别器选择/LCID/FOD/缓存统一在 HandwritingRecognitionTuning 内；本方法仅做日志门面。
+            HandwritingRecognitionTuning.TryApplyPreferredRecognizer(container, logDetail);
         }
 
         private sealed class NormalizedHandwritingInput
@@ -726,7 +585,10 @@ namespace Ink_Canvas.Helpers
 
             var typeface = ResolveHandwritingTypeface(fontFamilyList);
             var culture = CultureInfo.CurrentCulture;
-            var em = Math.Max(6.0, placeRect.Height * 0.72);
+            // 先按高度给 em（CJK 方块字、单字场景应填满高度），再仅在宽度溢出时按比例缩 em，
+            // 避免「多字词被原 14 次 0.9 缩放过度缩小」的问题。最小 em 取 box 高度 40%（相对下限，替代原绝对 4.5px）。
+            var minEm = Math.Max(4.5, placeRect.Height * 0.40);
+            var em = Math.Max(minEm, placeRect.Height * 0.92);
             FormattedText ft = null;
 
             for (var i = 0; i < 14; i++)
@@ -742,20 +604,23 @@ namespace Ink_Canvas.Helpers
                     TextFormattingMode.Display,
                     pixelsPerDip);
 
-                if (ft.Width <= placeRect.Width * 0.96 && ft.Height <= placeRect.Height * 0.96)
+                // 高度必然 ≤ box（em 由 height 派生）；只需保证宽度不超过 box 的 1.05 倍（允许轻微外溢，
+                // 因为识别词的实际包围框可能比理想字形略窄）。
+                if (ft.Width <= placeRect.Width * 1.05)
                     break;
 
                 em *= 0.9;
-                if (em < 4.5)
+                if (em < minEm)
                     break;
             }
 
             if (ft == null || ft.Width < 0.5 || ft.Height < 0.5)
                 return list;
 
-            var scale = Math.Min(
-                placeRect.Width * 0.94 / Math.Max(1e-6, ft.Width),
-                placeRect.Height * 0.94 / Math.Max(1e-6, ft.Height));
+            // 最终等比缩放：以高度为主轴填满 box，宽度超 box 时按宽度收紧；二者取小。
+            var scaleByHeight = placeRect.Height * 0.94 / Math.Max(1e-6, ft.Height);
+            var scaleByWidth = placeRect.Width * 0.94 / Math.Max(1e-6, ft.Width);
+            var scale = Math.Min(scaleByHeight, scaleByWidth);
             var tx = placeRect.Left + (placeRect.Width - ft.Width * scale) / 2.0;
             var ty = placeRect.Top + (placeRect.Height - ft.Height * scale) / 2.0;
 

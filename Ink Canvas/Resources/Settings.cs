@@ -1473,6 +1473,12 @@ namespace Ink_Canvas
         public bool EnableWinRtHandwritingStrokeBeautify { get; set; }
         [JsonProperty("handwritingCorrectionFontFamily")]
         public string HandwritingCorrectionFontFamily { get; set; } = "Ink Free,KaiTi,Segoe Script";
+        /// <summary>手写识别器语言覆盖 LCID。0=跟随系统；其余值见 HandwritingRecognitionTuning 支持。</summary>
+        [JsonProperty("handwritingLanguageOverrideLcid")]
+        public int HandwritingLanguageOverrideLcid { get; set; }
+        /// <summary>收笔后延迟识别的毫秒数（300-5000，默认 2000），多笔一字时等用户写完再识别。</summary>
+        [JsonProperty("handwritingBeautifyDebounceMs")]
+        public int HandwritingBeautifyDebounceMs { get; set; } = 2000;
     }
 
     public class RandSettings
