@@ -11,6 +11,7 @@
     <Compile Include="..\Ink Canvas\Ink\Native\NativeInkModels.cs" Link="Ink\Native\NativeInkModels.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\InkSampleHistoryNormalizer.cs" Link="Ink\Native\InkSampleHistoryNormalizer.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\InkSampleProcessor.cs" Link="Ink\Native\InkSampleProcessor.cs" />
+    <Compile Include="..\Ink Canvas\Ink\Native\InkTailPredictor.cs" Link="Ink\Native\InkTailPredictor.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\NativeInkSession.cs" Link="Ink\Native\NativeInkSession.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\NativeInkController.cs" Link="Ink\Native\NativeInkController.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\NativeInkInputRouter.cs" Link="Ink\Native\NativeInkInputRouter.cs" />
