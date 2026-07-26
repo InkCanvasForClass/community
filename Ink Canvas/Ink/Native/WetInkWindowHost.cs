@@ -1,8 +1,8 @@
+using Ink_Canvas.Helpers;
 using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Ink_Canvas.Helpers;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.WindowsAndMessaging;

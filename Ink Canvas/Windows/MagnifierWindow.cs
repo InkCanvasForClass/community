@@ -1,6 +1,5 @@
 using Ink_Canvas.Properties;
 using System;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,7 +9,6 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-using Windows.Foundation;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.Magnification;
@@ -471,7 +469,7 @@ namespace Ink_Canvas.Windows
                 HWND pHandle = new HWND(_hwndSource.Handle);
                 PInvoke.MagSetWindowFilterList(new HWND(_magHwnd), MW_FILTERMODE.MW_FILTERMODE_EXCLUDE, 1, ref pHandle);
             }
-                
+
 
             _timer = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(33) };
             _timer.Tick += OnTick;
@@ -483,15 +481,15 @@ namespace Ink_Canvas.Windows
             if (_magHwnd == IntPtr.Zero) return;
             var m = new MAGTRANSFORM();
 
-            m.v[0] = _zoom; 
-            m.v[1] = 0f;    
-            m.v[2] = 0f;    
-            m.v[3] = 0f;    
-            m.v[4] = _zoom; 
-            m.v[5] = 0f;    
-            m.v[6] = 0f;    
-            m.v[7] = 0f;    
-            m.v[8] = 1.0f;  
+            m.v[0] = _zoom;
+            m.v[1] = 0f;
+            m.v[2] = 0f;
+            m.v[3] = 0f;
+            m.v[4] = _zoom;
+            m.v[5] = 0f;
+            m.v[6] = 0f;
+            m.v[7] = 0f;
+            m.v[8] = 1.0f;
             PInvoke.MagSetWindowTransform(new HWND(_magHwnd), ref m);
         }
 

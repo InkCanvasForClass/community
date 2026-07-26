@@ -148,12 +148,12 @@ namespace Ink_Canvas.Helpers
                                 if (rr != null && rr.Count > 0 && rr[0] != null)
                                 {
                                     var cands = rr[0].GetTextCandidates();
-                            if (cands != null && cands.Count > 0)
-                            {
-                                candList = cands
-                                    .Where(c => !string.IsNullOrWhiteSpace(c))
-                                    .ToList();
-                            }
+                                    if (cands != null && cands.Count > 0)
+                                    {
+                                        candList = cands
+                                            .Where(c => !string.IsNullOrWhiteSpace(c))
+                                            .ToList();
+                                    }
                                 }
                             }
                         }

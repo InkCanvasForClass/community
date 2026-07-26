@@ -181,7 +181,7 @@ namespace Ink_Canvas.Helpers
                 hr = PInvoke.SHGetPropertyStoreForWindow(new HWND(hwnd), ptr, out object pPS);
                 pPropStore = (IPropertyStore)pPS;
             }
-            
+
             if (hr == 0)
             {
                 PropertyKey propKey = new PropertyKey();

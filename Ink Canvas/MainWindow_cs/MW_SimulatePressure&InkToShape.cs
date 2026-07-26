@@ -1075,9 +1075,9 @@ namespace Ink_Canvas
                             inkCanvas.Strokes.Add(smoothed);
                             _currentCommitType = CommitReason.UserInput;
                         }
-                            // 平滑后的识别快照由回调在画布替换完成后生成，避免防抖线程读取平滑前的旧点。
-                            MigrateHandwritingBeautifyCanvasStrokeReference(original, smoothed);
-                            UpdateHandwritingBeautifyRecognitionSnapshot(smoothed);
+                        // 平滑后的识别快照由回调在画布替换完成后生成，避免防抖线程读取平滑前的旧点。
+                        MigrateHandwritingBeautifyCanvasStrokeReference(original, smoothed);
+                        UpdateHandwritingBeautifyRecognitionSnapshot(smoothed);
                     }
                     else
                     {

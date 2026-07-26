@@ -528,85 +528,85 @@ namespace Ink_Canvas
 
                 foreach (StylusPoint rawPoint in stylusPointCollection)
                 {
-                var nowMs = RealtimeNowMs();
-                var dtMs = Math.Max(1L, nowMs - state.LastTimestampMs);
-                var dt = dtMs / 1000f;
-                var sampleRate = 1f / Math.Max(1e-4f, dt);
-                state.SmoothedSampleRateHz = state.SmoothedSampleRateHz * 0.85f + sampleRate * 0.15f;
+                    var nowMs = RealtimeNowMs();
+                    var dtMs = Math.Max(1L, nowMs - state.LastTimestampMs);
+                    var dt = dtMs / 1000f;
+                    var sampleRate = 1f / Math.Max(1e-4f, dt);
+                    state.SmoothedSampleRateHz = state.SmoothedSampleRateHz * 0.85f + sampleRate * 0.15f;
 
-                var rawX = (float)rawPoint.X;
-                var rawY = (float)rawPoint.Y;
-                var dx = rawX - state.LastRawX;
-                var dy = rawY - state.LastRawY;
-                var dist = (float)Math.Sqrt(dx * dx + dy * dy);
-                var speed = dist / dt;
+                    var rawX = (float)rawPoint.X;
+                    var rawY = (float)rawPoint.Y;
+                    var dx = rawX - state.LastRawX;
+                    var dy = rawY - state.LastRawY;
+                    var dist = (float)Math.Sqrt(dx * dx + dy * dy);
+                    var speed = dist / dt;
 
-                var filteredX = state.FilterX.Filter(rawX, dt, speed);
-                var filteredY = state.FilterY.Filter(rawY, dt, speed);
+                    var filteredX = state.FilterX.Filter(rawX, dt, speed);
+                    var filteredY = state.FilterY.Filter(rawY, dt, speed);
 
-                var hwPressure = RealtimeClamp((float)rawPoint.PressureFactor, 0f, 1f);
-                if (Math.Abs(hwPressure - 0.5f) > 0.02f)
-                    state.SawPressureVariation = true;
-                var usePressure = state.SawPressureVariation && hwPressure > 0f;
+                    var hwPressure = RealtimeClamp((float)rawPoint.PressureFactor, 0f, 1f);
+                    if (Math.Abs(hwPressure - 0.5f) > 0.02f)
+                        state.SawPressureVariation = true;
+                    var usePressure = state.SawPressureVariation && hwPressure > 0f;
 
-                var width = baseWidth;
-                if (usePressure)
-                    width *= 0.25f + 0.75f * hwPressure;
-                var speedNormalization = 1800f + state.SmoothedSampleRateHz * 3.5f;
-                width *= RealtimeClamp(1.15f - (speed / speedNormalization), 0.45f, 1.25f);
-                var speedPressure = WidthToPressure(width, baseWidth);
+                    var width = baseWidth;
+                    if (usePressure)
+                        width *= 0.25f + 0.75f * hwPressure;
+                    var speedNormalization = 1800f + state.SmoothedSampleRateHz * 3.5f;
+                    width *= RealtimeClamp(1.15f - (speed / speedNormalization), 0.45f, 1.25f);
+                    var speedPressure = WidthToPressure(width, baseWidth);
 
-                var pressure = usePressure
-                    ? ((1f - mix) * hwPressure + mix * speedPressure)
-                    : speedPressure;
-                pressure = RealtimeClamp(pressure, 0.08f, 1f);
-                pressure = state.FilterPressure.Filter(pressure, dt, speed);
+                    var pressure = usePressure
+                        ? ((1f - mix) * hwPressure + mix * speedPressure)
+                        : speedPressure;
+                    pressure = RealtimeClamp(pressure, 0.08f, 1f);
+                    pressure = state.FilterPressure.Filter(pressure, dt, speed);
 
-                var minDist = GetRealtimeBrushTipMinDistance(state.SmoothedSampleRateHz);
-                if (dist < minDist && state.HasSeed)
-                {
+                    var minDist = GetRealtimeBrushTipMinDistance(state.SmoothedSampleRateHz);
+                    if (dist < minDist && state.HasSeed)
+                    {
+                        state.LastRawX = rawX;
+                        state.LastRawY = rawY;
+                        state.LastTimestampMs = nowMs;
+                        continue;
+                    }
+
+                    if (!state.HasSeed)
+                    {
+                        state.HasSeed = true;
+                        state.LastSmoothX = filteredX;
+                        state.LastSmoothY = filteredY;
+                        state.LastSmoothPressure = pressure;
+                        strokeVisual.Add(new StylusPoint(filteredX, filteredY, pressure));
+                        addedPointCount++;
+                    }
+                    else
+                    {
+                        // 采用中点链减抖：保持实时笔锋同时降低折线锯齿
+                        var midX = (state.LastSmoothX + filteredX) * 0.5f;
+                        var midY = (state.LastSmoothY + filteredY) * 0.5f;
+                        var midPressure = (state.LastSmoothPressure + pressure) * 0.5f;
+                        strokeVisual.Add(new StylusPoint(midX, midY, midPressure));
+                        addedPointCount++;
+                        state.LastSmoothX = filteredX;
+                        state.LastSmoothY = filteredY;
+                        state.LastSmoothPressure = pressure;
+                    }
+
                     state.LastRawX = rawX;
                     state.LastRawY = rawY;
                     state.LastTimestampMs = nowMs;
-                    continue;
+                    appended = true;
                 }
 
-                if (!state.HasSeed)
+                var committedStroke = strokeVisual.Stroke;
+                if (appended && committedStroke != null)
                 {
-                    state.HasSeed = true;
-                    state.LastSmoothX = filteredX;
-                    state.LastSmoothY = filteredY;
-                    state.LastSmoothPressure = pressure;
-                    strokeVisual.Add(new StylusPoint(filteredX, filteredY, pressure));
-                    addedPointCount++;
+                    if (committedStroke.DrawingAttributes != null)
+                        committedStroke.DrawingAttributes.IgnorePressure = false;
+                    if (!committedStroke.ContainsPropertyData(RealtimeVelocityBrushTipAppliedGuid))
+                        committedStroke.AddPropertyData(RealtimeVelocityBrushTipAppliedGuid, true);
                 }
-                else
-                {
-                    // 采用中点链减抖：保持实时笔锋同时降低折线锯齿
-                    var midX = (state.LastSmoothX + filteredX) * 0.5f;
-                    var midY = (state.LastSmoothY + filteredY) * 0.5f;
-                    var midPressure = (state.LastSmoothPressure + pressure) * 0.5f;
-                    strokeVisual.Add(new StylusPoint(midX, midY, midPressure));
-                    addedPointCount++;
-                    state.LastSmoothX = filteredX;
-                    state.LastSmoothY = filteredY;
-                    state.LastSmoothPressure = pressure;
-                }
-
-                state.LastRawX = rawX;
-                state.LastRawY = rawY;
-                state.LastTimestampMs = nowMs;
-                appended = true;
-            }
-
-            var committedStroke = strokeVisual.Stroke;
-            if (appended && committedStroke != null)
-            {
-                if (committedStroke.DrawingAttributes != null)
-                    committedStroke.DrawingAttributes.IgnorePressure = false;
-                if (!committedStroke.ContainsPropertyData(RealtimeVelocityBrushTipAppliedGuid))
-                    committedStroke.AddPropertyData(RealtimeVelocityBrushTipAppliedGuid, true);
-            }
 
                 return true;
             }

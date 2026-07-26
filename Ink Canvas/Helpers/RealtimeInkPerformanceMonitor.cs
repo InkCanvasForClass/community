@@ -1,9 +1,9 @@
+using Ink_Canvas.Windows.SettingsViews.Helpers;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using Ink_Canvas.Windows.SettingsViews.Helpers;
-using Newtonsoft.Json;
 
 namespace Ink_Canvas.Helpers
 {

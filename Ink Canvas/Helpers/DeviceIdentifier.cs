@@ -4,11 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using Windows.Win32;
-using Windows.Win32.Foundation;
 
 namespace Ink_Canvas.Helpers
 {
@@ -257,7 +255,7 @@ namespace Ink_Canvas.Helpers
                     return null;
                 }
 
-                if (PInvoke.GetVolumeInformation(rootPath,null,out uint serialNumber, out _,out _,null))
+                if (PInvoke.GetVolumeInformation(rootPath, null, out uint serialNumber, out _, out _, null))
                 {
                     return serialNumber.ToString("X8");
                 }

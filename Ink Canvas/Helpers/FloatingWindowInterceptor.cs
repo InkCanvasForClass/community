@@ -9,9 +9,9 @@ using System.Threading;
 using System.Windows.Threading;
 using Windows.Win32;
 using Windows.Win32.Foundation;
-using Windows.Win32.UI.WindowsAndMessaging;
 using Windows.Win32.Graphics.Dwm;
 using Windows.Win32.Graphics.Gdi;
+using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Ink_Canvas.Helpers
 {
@@ -1215,9 +1215,9 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                HWND hwnd=new HWND(hWnd);
+                HWND hwnd = new HWND(hWnd);
                 // 检查是否有父窗口
-                var parent = PInvoke.GetWindow(hwnd,GET_WINDOW_CMD.GW_OWNER);
+                var parent = PInvoke.GetWindow(hwnd, GET_WINDOW_CMD.GW_OWNER);
                 if (parent != IntPtr.Zero) return false;
 
                 // 检查窗口样式

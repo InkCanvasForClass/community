@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
-using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -300,7 +299,7 @@ namespace Ink_Canvas
             }
         }
 
-            private void ResetPauseStraightenTimer(long sessionId)
+        private void ResetPauseStraightenTimer(long sessionId)
         {
             if (!Settings.Canvas.PauseStraightenLine)
                 return;
@@ -723,7 +722,7 @@ namespace Ink_Canvas
             if (Dispatcher.CheckAccess())
                 Apply();
             else
-                Dispatcher.BeginInvoke((Action)Apply, DispatcherPriority.Send);
+                Dispatcher.BeginInvoke(Apply, DispatcherPriority.Send);
         }
 
         private void OnNativeWetInkDeviceLost()
@@ -1042,7 +1041,7 @@ namespace Ink_Canvas
                 }
 
                 current = VisualTreeHelper.GetParent(current)
-                          ?? (current as FrameworkElement)?.Parent as DependencyObject;
+                          ?? (current as FrameworkElement)?.Parent;
             }
 
             return false;
@@ -1285,7 +1284,7 @@ namespace Ink_Canvas
                 }
 
                 current = VisualTreeHelper.GetParent(current)
-                          ?? (current as FrameworkElement)?.Parent as DependencyObject;
+                          ?? (current as FrameworkElement)?.Parent;
             }
 
             return false;
@@ -1301,7 +1300,7 @@ namespace Ink_Canvas
                 if (ReferenceEquals(current, ancestor))
                     return true;
                 current = VisualTreeHelper.GetParent(current)
-                          ?? (current as FrameworkElement)?.Parent as DependencyObject;
+                          ?? (current as FrameworkElement)?.Parent;
             }
             return false;
         }
@@ -1318,7 +1317,7 @@ namespace Ink_Canvas
                 }
 
                 current = VisualTreeHelper.GetParent(current)
-                          ?? (current as FrameworkElement)?.Parent as DependencyObject;
+                          ?? (current as FrameworkElement)?.Parent;
             }
             return false;
         }
@@ -1331,7 +1330,7 @@ namespace Ink_Canvas
                 if (current.GetType().Name.IndexOf(typeName, StringComparison.OrdinalIgnoreCase) >= 0)
                     return current;
                 current = VisualTreeHelper.GetParent(current)
-                          ?? (current as FrameworkElement)?.Parent as DependencyObject;
+                          ?? (current as FrameworkElement)?.Parent;
             }
             return null;
         }
@@ -1341,13 +1340,13 @@ namespace Ink_Canvas
             Func<DependencyObject, bool> predicate)
         {
             var current = VisualTreeHelper.GetParent(child)
-                          ?? (child as FrameworkElement)?.Parent as DependencyObject;
+                          ?? (child as FrameworkElement)?.Parent;
             while (current != null)
             {
                 if (predicate(current))
                     return current;
                 current = VisualTreeHelper.GetParent(current)
-                          ?? (current as FrameworkElement)?.Parent as DependencyObject;
+                          ?? (current as FrameworkElement)?.Parent;
             }
             return null;
         }

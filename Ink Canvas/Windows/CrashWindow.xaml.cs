@@ -1,7 +1,6 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using System;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;

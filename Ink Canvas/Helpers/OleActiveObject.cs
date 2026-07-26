@@ -19,7 +19,7 @@ namespace Ink_Canvas.Helpers
         {
             int hr = PInvoke.CLSIDFromProgID(progId, out Guid clsid);
             Marshal.ThrowExceptionForHR(hr);
-             hr = PInvoke.GetActiveObject(clsid, null, out object obj); 
+            hr = PInvoke.GetActiveObject(clsid, null, out object obj);
             Marshal.ThrowExceptionForHR(hr);
             return obj;
         }

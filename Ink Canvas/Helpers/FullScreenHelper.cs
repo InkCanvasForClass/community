@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
-using Windows.Foundation;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.Graphics.Dwm;
@@ -91,7 +90,7 @@ namespace Ink_Canvas.Helpers
                 //禁用 DWM 过渡动画 忽略返回值，若DWM关闭不做处理
                 unsafe
                 {
-                    PInvoke.DwmSetWindowAttribute(new HWND(hwnd), DWMWINDOWATTRIBUTE.DWMWA_TRANSITIONS_FORCEDISABLED, (void*)1,sizeof(int));
+                    PInvoke.DwmSetWindowAttribute(new HWND(hwnd), DWMWINDOWATTRIBUTE.DWMWA_TRANSITIONS_FORCEDISABLED, (void*)1, sizeof(int));
                 }
 
                 //添加Hook，在窗口尺寸位置等要发生变化时，确保全屏
@@ -251,7 +250,7 @@ namespace Ink_Canvas.Helpers
                         }
 
                         //使用目标矩形获取显示器信息
-                        var monitor = PInvoke.MonitorFromRect(targetRect,MONITOR_FROM_FLAGS.MONITOR_DEFAULTTOPRIMARY);
+                        var monitor = PInvoke.MonitorFromRect(targetRect, MONITOR_FROM_FLAGS.MONITOR_DEFAULTTOPRIMARY);
                         var info = new MONITORINFO();
                         info.cbSize = (uint)Marshal.SizeOf(info);
                         if (PInvoke.GetMonitorInfo(monitor, ref info))
