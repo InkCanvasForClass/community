@@ -678,7 +678,7 @@ namespace Ink_Canvas
 
         private static ulong ToUInt64(FILETIME fileTime)
         {
-            return ((ulong)fileTime.dwHighDateTime << 32) | ((ulong)fileTime.dwLowDateTime);
+            return ((ulong)(uint)fileTime.dwHighDateTime << 32) | (uint)fileTime.dwLowDateTime;
         }
 
         private static string FormatCpuUsagePercent(double? cpuUsagePercent)

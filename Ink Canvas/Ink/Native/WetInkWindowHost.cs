@@ -3,6 +3,9 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Ink_Canvas.Helpers;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Ink_Canvas.Ink.Native
 {
@@ -20,9 +23,6 @@ namespace Ink_Canvas.Ink.Native
         private const int WsExNoRedirectionBitmap = 0x00200000;
         private const int GwlpWndProc = -4;
         private const int ErrorClassAlreadyExists = 1410;
-        private const uint SwpNoActivate = 0x0010;
-        private const uint SwpNoZOrder = 0x0004;
-        private const uint SwpShowWindow = 0x0040;
         // 不使用 ShowWindow/HideWindow：SWP_HIDEWINDOW 会触发 DWM 合成重排，
         // 湿转干交接时整屏会闪一下。改成始终保持 WS_VISIBLE，无湿墨时移到屏外。
         private const int HiddenPosition = -100000;
@@ -168,14 +168,14 @@ namespace Ink_Canvas.Ink.Native
 
             // Always keep the HWND visible (WS_VISIBLE) so Present/DComp stay warm;
             // only the screen position changes.
-            NativeWindowHelper.SetWindowPos(
-                _overlayHwnd,
-                IntPtr.Zero,
+            PInvoke.SetWindowPos(
+                new HWND(_overlayHwnd),
+                HWND.Null,
                 x,
                 y,
                 width,
                 height,
-                SwpNoActivate | SwpNoZOrder | SwpShowWindow);
+                SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE | SET_WINDOW_POS_FLAGS.SWP_NOZORDER | SET_WINDOW_POS_FLAGS.SWP_SHOWWINDOW);
         }
 
         public void SignalWork()
