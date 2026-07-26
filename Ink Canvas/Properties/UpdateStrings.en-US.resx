@@ -57,6 +57,21 @@
   <data name="Msg_UpdateDownloadFailed" xml:space="preserve">
     <value>Update download failed. Please check your network and try again.</value>
   </data>
+  <data name="Msg_UpdateIntegrityFailed" xml:space="preserve">
+    <value>Update package integrity check failed: the downloaded file is corrupted. Please try downloading again.</value>
+  </data>
+  <data name="Msg_UpdateFileInUse" xml:space="preserve">
+    <value>The update file is locked by another program and could not be written. Please close programs that may lock it (such as antivirus software) and try again.</value>
+  </data>
+  <data name="Msg_UpdateMergeFailed" xml:space="preserve">
+    <value>Failed to merge update file: {0}</value>
+  </data>
+  <data name="Msg_UpdateMergeFailedNoDetail" xml:space="preserve">
+    <value>Failed to merge update file. Please try again.</value>
+  </data>
+  <data name="Msg_UpdateCancelled" xml:space="preserve">
+    <value>Update download has been cancelled.</value>
+  </data>
   <data name="Update_Beta" xml:space="preserve">
     <value>Beta</value>
   </data>

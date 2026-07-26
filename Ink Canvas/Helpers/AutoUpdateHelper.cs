@@ -41,33 +41,55 @@ namespace Ink_Canvas.Helpers
         {
             "runtimes"
         };
-        // 全局下载取消令牌；UI 通过 RequestCancelDownload 取消当前下载
-        private static CancellationTokenSource _activeDownloadCts;
+        // 全局下载取消令牌集合；UI 通过 RequestCancelDownload 取消所有进行中的下载。
+        // 并发下载会话互不取消（避免静默更新定时器二次触发把正在进行的下载误判为用户取消）。
+        private static readonly HashSet<CancellationTokenSource> _activeDownloadSessions = new HashSet<CancellationTokenSource>();
         private static readonly object _activeDownloadLock = new object();
+
+        // 下载失败原因分类，供 UI 展示精确提示（避免把完整性/文件占用错误统一显示为"网络错误"）
+        public enum DownloadFailureReason
+        {
+            None,
+            NetworkOrAllLinesFailed,
+            IntegrityCheckFailed,
+            FileInUse,
+            MergeFailed,
+            Cancelled
+        }
+
+        public static DownloadFailureReason LastDownloadFailure { get; private set; } = DownloadFailureReason.None;
+
+        private static void SetDownloadFailure(DownloadFailureReason reason)
+        {
+            LastDownloadFailure = reason;
+        }
 
         public static void RequestCancelDownload()
         {
             lock (_activeDownloadLock)
             {
-                try { _activeDownloadCts?.Cancel(); } catch { }
+                foreach (var cts in _activeDownloadSessions)
+                {
+                    try { cts?.Cancel(); } catch { }
+                }
             }
         }
 
         private static CancellationTokenSource BeginDownloadSession()
         {
+            var cts = new CancellationTokenSource();
             lock (_activeDownloadLock)
             {
-                try { _activeDownloadCts?.Cancel(); } catch { }
-                _activeDownloadCts = new CancellationTokenSource();
-                return _activeDownloadCts;
+                _activeDownloadSessions.Add(cts);
             }
+            return cts;
         }
 
         private static void EndDownloadSession(CancellationTokenSource cts)
         {
             lock (_activeDownloadLock)
             {
-                if (ReferenceEquals(_activeDownloadCts, cts)) _activeDownloadCts = null;
+                _activeDownloadSessions.Remove(cts);
             }
             try { cts?.Dispose(); } catch { }
         }
@@ -1224,6 +1246,7 @@ namespace Ink_Canvas.Helpers
         // 使用多线路组下载新版（支持自动切换）
         public static async Task<bool> DownloadSetupFileWithFallback(string version, List<UpdateLineGroup> groups, Action<double, string> progressCallback = null)
         {
+            SetDownloadFailure(DownloadFailureReason.None);
             var session = BeginDownloadSession();
             try
             {
@@ -1259,11 +1282,7 @@ namespace Ink_Canvas.Helpers
                 }
 
                 // 依次尝试每个线路组
-                CancellationToken groupLoopToken;
-                lock (_activeDownloadLock)
-                {
-                    groupLoopToken = _activeDownloadCts?.Token ?? CancellationToken.None;
-                }
+                CancellationToken groupLoopToken = session.Token;
                 foreach (var group in groups)
                 {
                     if (groupLoopToken.IsCancellationRequested)
@@ -1305,7 +1324,7 @@ namespace Ink_Canvas.Helpers
                     }
                     LogHelper.WriteLogToFile($"AutoUpdate | 尝试从线路组 {group.GroupName} 下载: {url}");
 
-                    bool downloadSuccess = await DownloadFile(url, zipFilePath, progressCallback);
+                    bool downloadSuccess = await DownloadFile(url, zipFilePath, progressCallback, session.Token);
 
                     if (groupLoopToken.IsCancellationRequested)
                     {
@@ -1326,6 +1345,8 @@ namespace Ink_Canvas.Helpers
 
                 LogHelper.WriteLogToFile("AutoUpdate | 所有线路组下载均失败", LogHelper.LogType.Error);
                 progressCallback?.Invoke(0, "所有线路组下载均失败");
+                if (LastDownloadFailure == DownloadFailureReason.None)
+                    SetDownloadFailure(DownloadFailureReason.NetworkOrAllLinesFailed);
                 return false;
             }
             catch (OperationCanceledException)
@@ -1333,6 +1354,7 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile("AutoUpdate | 下载已被用户取消", LogHelper.LogType.Warning);
                 SaveDownloadStatus(false);
                 progressCallback?.Invoke(0, "下载已取消");
+                SetDownloadFailure(DownloadFailureReason.Cancelled);
                 return false;
             }
             catch (Exception ex)
@@ -1345,6 +1367,8 @@ namespace Ink_Canvas.Helpers
 
                 SaveDownloadStatus(false);
                 progressCallback?.Invoke(0, $"下载异常: {ex.Message}");
+                if (LastDownloadFailure == DownloadFailureReason.None)
+                    SetDownloadFailure(DownloadFailureReason.NetworkOrAllLinesFailed);
                 return false;
             }
             finally
@@ -1354,17 +1378,20 @@ namespace Ink_Canvas.Helpers
         }
 
         // 下载文件的具体实现
-        public static async Task<bool> DownloadFile(string fileUrl, string destinationPath, Action<double, string> progressCallback = null)
+        public static async Task<bool> DownloadFile(string fileUrl, string destinationPath, Action<double, string> progressCallback = null, CancellationToken externalToken = default)
         {
             LogHelper.WriteLogToFile($"AutoUpdate | 正在尝试多线程下载: {fileUrl}");
             int maxRetry = 3;
             // 降低并发数，减少网络压力
             int[] threadOptions = { 32, 16, 8, 4, 1 };
 
-            CancellationToken externalToken;
-            lock (_activeDownloadLock)
+            if (externalToken == default)
             {
-                externalToken = _activeDownloadCts?.Token ?? CancellationToken.None;
+                lock (_activeDownloadLock)
+                {
+                    // 兼容无显式令牌的调用：取任一进行中的会话令牌；无会话则不可取消
+                    externalToken = _activeDownloadSessions.FirstOrDefault()?.Token ?? CancellationToken.None;
+                }
             }
 
             // 检查服务器是否支持Range分块下载
@@ -1409,7 +1436,7 @@ namespace Ink_Canvas.Helpers
             {
                 LogHelper.WriteLogToFile("AutoUpdate | 服务器不支持分块下载，自动降级为单线程下载");
                 progressCallback?.Invoke(0, "服务器不支持分块下载，自动降级为单线程下载");
-                return await DownloadSingleThread(fileUrl, destinationPath, totalSize, progressCallback);
+                return await DownloadSingleThread(fileUrl, destinationPath, totalSize, progressCallback, externalToken);
             }
 
             foreach (int threadCount in threadOptions)
@@ -1424,6 +1451,7 @@ namespace Ink_Canvas.Helpers
                 if (totalSize <= 0)
                 {
                     progressCallback?.Invoke(0, "无法获取文件大小，取消下载");
+                    SetDownloadFailure(DownloadFailureReason.NetworkOrAllLinesFailed);
                     return false;
                 }
 
@@ -1598,7 +1626,7 @@ namespace Ink_Canvas.Helpers
                         // 已经是最后一次尝试，降级为单线程
                         LogHelper.WriteLogToFile("AutoUpdate | 所有多线程尝试失败，降级为单线程下载");
                         progressCallback?.Invoke(0, "所有多线程尝试失败，降级为单线程下载");
-                        return await DownloadSingleThread(fileUrl, destinationPath, totalSize, progressCallback);
+                        return await DownloadSingleThread(fileUrl, destinationPath, totalSize, progressCallback, externalToken);
                     }
 
                     LogHelper.WriteLogToFile($"AutoUpdate | {threadCount}线程下载失败，尝试降级为{threadOptions[Array.IndexOf(threadOptions, threadCount) + 1]}线程");
@@ -1606,80 +1634,130 @@ namespace Ink_Canvas.Helpers
                     continue;
                 }
 
-                // 合并所有块
-                try
+                // 合并所有块（带文件锁重试，避免杀软扫描或残留句柄导致占用失败）
+                Exception mergeError = null;
+                for (int mergeAttempt = 0; mergeAttempt < 3; mergeAttempt++)
                 {
-                    using (var output = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                    try
                     {
-                        for (int i = 0; i < blockCount; i++)
+                        // 合并前清理可能残留的目标文件（上一轮失败可能留下被占用的半成品）
+                        if (mergeAttempt > 0)
                         {
-                            string tempPath = destinationPath + $".part{i}";
-                            if (!File.Exists(tempPath))
-                            {
-                                throw new FileNotFoundException($"分块文件不存在: {tempPath}");
-                            }
-
-                            using (var input = new FileStream(tempPath, FileMode.Open, FileAccess.Read))
-                            {
-                                await input.CopyToAsync(output);
-                            }
-                            File.Delete(tempPath);
+                            try { await Task.Delay(1000, externalToken); }
+                            catch (OperationCanceledException) { return false; }
+                            TryDeleteFileWithRetry(destinationPath);
                         }
-                    }
 
-                    progressCallback?.Invoke(100, $"多线程下载完成({threadCount}线程)");
-                    LogHelper.WriteLogToFile($"AutoUpdate | 多线程下载完成({threadCount}线程)");
-
-                    // 文件大小校验
-                    FileInfo fileInfo = new FileInfo(destinationPath);
-                    if (fileInfo.Length != totalSize)
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 文件大小校验失败，本地：{fileInfo.Length}，服务器：{totalSize}", LogHelper.LogType.Error);
-                        File.Delete(destinationPath);
-                        progressCallback?.Invoke(0, "文件大小校验失败，已删除损坏文件");
-                        return false;
-                    }
-
-                    // ZIP文件完整性校验
-                    if (destinationPath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
-                    {
-                        try
+                        using (var output = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None))
                         {
-                            ZipFile.OpenRead(destinationPath).Dispose();
+                            for (int i = 0; i < blockCount; i++)
+                            {
+                                string tempPath = destinationPath + $".part{i}";
+                                if (!File.Exists(tempPath))
+                                {
+                                    throw new FileNotFoundException($"分块文件不存在: {tempPath}");
+                                }
+
+                                using (var input = new FileStream(tempPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                                {
+                                    await input.CopyToAsync(output);
+                                }
+                                TryDeleteFileWithRetry(tempPath);
+                            }
                         }
-                        catch
+
+                        progressCallback?.Invoke(100, $"多线程下载完成({threadCount}线程)");
+                        LogHelper.WriteLogToFile($"AutoUpdate | 多线程下载完成({threadCount}线程)");
+
+                        // 文件大小校验
+                        FileInfo fileInfo = new FileInfo(destinationPath);
+                        if (fileInfo.Length != totalSize)
                         {
-                            LogHelper.WriteLogToFile("AutoUpdate | ZIP文件解压测试失败，文件可能已损坏", LogHelper.LogType.Error);
-                            File.Delete(destinationPath);
-                            progressCallback?.Invoke(0, "ZIP文件解压测试失败，已删除损坏文件");
+                            LogHelper.WriteLogToFile($"AutoUpdate | 文件大小校验失败，本地：{fileInfo.Length}，服务器：{totalSize}", LogHelper.LogType.Error);
+                            TryDeleteFileWithRetry(destinationPath);
+                            progressCallback?.Invoke(0, UpdateStrings.Msg_UpdateIntegrityFailed);
+                            SetDownloadFailure(DownloadFailureReason.IntegrityCheckFailed);
                             return false;
                         }
+
+                        // ZIP文件完整性校验
+                        if (destinationPath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+                        {
+                            try
+                            {
+                                ZipFile.OpenRead(destinationPath).Dispose();
+                            }
+                            catch (Exception zipEx)
+                            {
+                                LogHelper.WriteLogToFile($"AutoUpdate | ZIP文件解压测试失败，文件可能已损坏: {zipEx.Message}", LogHelper.LogType.Error);
+                                TryDeleteFileWithRetry(destinationPath);
+                                progressCallback?.Invoke(0, UpdateStrings.Msg_UpdateIntegrityFailed);
+                                SetDownloadFailure(DownloadFailureReason.IntegrityCheckFailed);
+                                return false;
+                            }
+                        }
+                        return true;
                     }
-                    return true;
+                    catch (Exception ex)
+                    {
+                        mergeError = ex;
+                        LogHelper.WriteLogToFile($"AutoUpdate | 合并分块文件时出错(第{mergeAttempt + 1}次): {ex.Message}", LogHelper.LogType.Warning);
+                        TryDeleteFileWithRetry(destinationPath);
+                        if (externalToken.IsCancellationRequested)
+                        {
+                            progressCallback?.Invoke(0, "下载已取消");
+                            SetDownloadFailure(DownloadFailureReason.Cancelled);
+                            return false;
+                        }
+                        // 仅对文件占用类异常重试；其它异常重试一次后放弃
+                        bool isFileLock = ex is IOException && ex.Message != null &&
+                            (ex.Message.Contains("being used by another process", StringComparison.OrdinalIgnoreCase) ||
+                             ex.Message.Contains("正由另一进程使用", StringComparison.OrdinalIgnoreCase));
+                        if (!isFileLock) break;
+                    }
                 }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"AutoUpdate | 合并分块文件时出错: {ex.Message}", LogHelper.LogType.Error);
-                    File.Delete(destinationPath);
-                    progressCallback?.Invoke(0, $"合并分块文件时出错: {ex.Message}");
-                    return false;
-                }
+                LogHelper.WriteLogToFile($"AutoUpdate | 合并分块文件最终失败: {mergeError?.Message}", LogHelper.LogType.Error);
+                bool finalFileLock = mergeError is IOException && mergeError.Message != null &&
+                    (mergeError.Message.Contains("being used by another process", StringComparison.OrdinalIgnoreCase) ||
+                     mergeError.Message.Contains("正由另一进程使用", StringComparison.OrdinalIgnoreCase));
+                progressCallback?.Invoke(0, finalFileLock
+                        ? UpdateStrings.Msg_UpdateFileInUse
+                        : string.Format(UpdateStrings.Msg_UpdateMergeFailed, mergeError?.Message ?? ""));
+                SetDownloadFailure(finalFileLock ? DownloadFailureReason.FileInUse : DownloadFailureReason.MergeFailed);
+                return false;
             }
             return false;
         }
 
+        /// <summary>
+        /// 删除文件并对文件占用异常做有限重试，避免杀软扫描或残留句柄导致删除失败。
+        /// </summary>
+        private static void TryDeleteFileWithRetry(string path, int maxRetry = 3)
+        {
+            if (string.IsNullOrEmpty(path) || !File.Exists(path)) return;
+            for (int i = 0; i < maxRetry; i++)
+            {
+                try { File.Delete(path); return; }
+                catch (IOException) { try { Thread.Sleep(500); } catch { } }
+                catch { return; }
+            }
+        }
+
         // 单线程下载方法
-        private static async Task<bool> DownloadSingleThread(string fileUrl, string destinationPath, long totalSize, Action<double, string> progressCallback = null)
+        private static async Task<bool> DownloadSingleThread(string fileUrl, string destinationPath, long totalSize, Action<double, string> progressCallback = null, CancellationToken externalToken = default)
         {
             try
             {
                 LogHelper.WriteLogToFile($"AutoUpdate | 开始单线程下载: {fileUrl}");
                 progressCallback?.Invoke(0, "开始单线程下载");
 
-                CancellationToken token;
-                lock (_activeDownloadLock)
+                CancellationToken token = externalToken;
+                if (token == default)
                 {
-                    token = _activeDownloadCts?.Token ?? CancellationToken.None;
+                    lock (_activeDownloadLock)
+                    {
+                        token = _activeDownloadSessions.FirstOrDefault()?.Token ?? CancellationToken.None;
+                    }
                 }
 
                 using (var client = new HttpClient())
@@ -1727,12 +1805,19 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile("AutoUpdate | 单线程下载已被取消", LogHelper.LogType.Warning);
                 progressCallback?.Invoke(0, "下载已取消");
                 try { if (File.Exists(destinationPath)) File.Delete(destinationPath); } catch { }
+                SetDownloadFailure(DownloadFailureReason.Cancelled);
                 return false;
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"AutoUpdate | 单线程下载失败: {ex.Message}", LogHelper.LogType.Error);
-                progressCallback?.Invoke(0, $"单线程下载失败: {ex.Message}");
+                bool isFileLock = ex is IOException && ex.Message != null &&
+                    (ex.Message.Contains("being used by another process", StringComparison.OrdinalIgnoreCase) ||
+                     ex.Message.Contains("正由另一进程使用", StringComparison.OrdinalIgnoreCase));
+                progressCallback?.Invoke(0, isFileLock
+                    ? UpdateStrings.Msg_UpdateFileInUse
+                    : $"单线程下载失败: {ex.Message}");
+                SetDownloadFailure(isFileLock ? DownloadFailureReason.FileInUse : DownloadFailureReason.NetworkOrAllLinesFailed);
                 return false;
             }
         }

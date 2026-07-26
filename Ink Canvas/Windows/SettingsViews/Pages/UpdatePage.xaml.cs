@@ -647,7 +647,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 if (!ok)
                 {
-                    ApplyState(UpdateUiState.NetworkError, UpdateStrings.Msg_UpdateDownloadFailed);
+                    ApplyState(UpdateUiState.NetworkError, GetDownloadFailureMessage());
                     return;
                 }
 
@@ -671,7 +671,28 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"Error in UpdateNowButton_Click: {ex.Message}", LogHelper.LogType.Error);
-                ApplyState(UpdateUiState.NetworkError, ex.Message);
+                ApplyState(UpdateUiState.NetworkError, GetDownloadFailureMessage(ex.Message));
+            }
+        }
+
+        private static string GetDownloadFailureMessage(string fallback = null)
+        {
+            switch (AutoUpdateHelper.LastDownloadFailure)
+            {
+                case AutoUpdateHelper.DownloadFailureReason.IntegrityCheckFailed:
+                    return UpdateStrings.Msg_UpdateIntegrityFailed;
+                case AutoUpdateHelper.DownloadFailureReason.FileInUse:
+                    return UpdateStrings.Msg_UpdateFileInUse;
+                case AutoUpdateHelper.DownloadFailureReason.MergeFailed:
+                    return string.IsNullOrEmpty(fallback)
+                        ? UpdateStrings.Msg_UpdateMergeFailedNoDetail
+                        : string.Format(UpdateStrings.Msg_UpdateMergeFailed, fallback);
+                case AutoUpdateHelper.DownloadFailureReason.Cancelled:
+                    return UpdateStrings.Msg_UpdateCancelled;
+                default:
+                    return string.IsNullOrEmpty(fallback)
+                        ? UpdateStrings.Msg_UpdateDownloadFailed
+                        : fallback;
             }
         }
 
@@ -690,7 +711,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 if (!ok)
                 {
-                    ApplyState(UpdateUiState.NetworkError, UpdateStrings.Msg_UpdateDownloadFailed);
+                    ApplyState(UpdateUiState.NetworkError, GetDownloadFailureMessage());
                     return;
                 }
 
@@ -706,7 +727,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"Error in UpdateLaterButton_Click: {ex.Message}", LogHelper.LogType.Error);
-                ApplyState(UpdateUiState.NetworkError, ex.Message);
+                ApplyState(UpdateUiState.NetworkError, GetDownloadFailureMessage(ex.Message));
             }
         }
 

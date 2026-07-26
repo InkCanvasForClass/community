@@ -57,6 +57,21 @@
   <data name="Msg_UpdateDownloadFailed" xml:space="preserve">
     <value>更新下载失败，请检查网络连接后重试。</value>
   </data>
+  <data name="Msg_UpdateIntegrityFailed" xml:space="preserve">
+    <value>更新包完整性校验失败，下载文件已损坏，请重新尝试下载。</value>
+  </data>
+  <data name="Msg_UpdateFileInUse" xml:space="preserve">
+    <value>更新文件被其他程序占用，无法完成写入，请关闭可能占用该文件的程序（如杀毒软件）后重试。</value>
+  </data>
+  <data name="Msg_UpdateMergeFailed" xml:space="preserve">
+    <value>合并更新文件时出错：{0}</value>
+  </data>
+  <data name="Msg_UpdateMergeFailedNoDetail" xml:space="preserve">
+    <value>合并更新文件时出错，请重试。</value>
+  </data>
+  <data name="Msg_UpdateCancelled" xml:space="preserve">
+    <value>更新下载已取消。</value>
+  </data>
   <data name="Update_Beta" xml:space="preserve">
     <value>测试版 (Beta)</value>
   </data>

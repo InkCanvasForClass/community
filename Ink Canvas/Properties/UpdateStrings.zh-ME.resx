@@ -57,6 +57,21 @@
   <data name="Msg_UpdateDownloadFailed" xml:space="preserve">
     <value>更新下载翻车了，网线被猫咬了？</value>
   </data>
+  <data name="Msg_UpdateIntegrityFailed" xml:space="preserve">
+    <value>下载的更新包坏掉了，完整性校验没过，重新下一次试试。</value>
+  </data>
+  <data name="Msg_UpdateFileInUse" xml:space="preserve">
+    <value>更新文件被别的程序死死抱住了写不了，把占用的程序（比如杀软）关了再试。</value>
+  </data>
+  <data name="Msg_UpdateMergeFailed" xml:space="preserve">
+    <value>合并更新文件翻车了：{0}</value>
+  </data>
+  <data name="Msg_UpdateMergeFailedNoDetail" xml:space="preserve">
+    <value>合并更新文件翻车了，再来一次试试。</value>
+  </data>
+  <data name="Msg_UpdateCancelled" xml:space="preserve">
+    <value>更新下载被鸽了。</value>
+  </data>
   <data name="Update_Beta" xml:space="preserve">
     <value>Beta 小白鼠版</value>
   </data>

@@ -50,6 +50,16 @@ namespace Ink_Canvas.Properties
 
         public static string Msg_UpdateDownloadFailed => ResourceManager.GetString(nameof(Msg_UpdateDownloadFailed), _resourceCulture);
 
+        public static string Msg_UpdateIntegrityFailed => ResourceManager.GetString(nameof(Msg_UpdateIntegrityFailed), _resourceCulture);
+
+        public static string Msg_UpdateFileInUse => ResourceManager.GetString(nameof(Msg_UpdateFileInUse), _resourceCulture);
+
+        public static string Msg_UpdateMergeFailed => ResourceManager.GetString(nameof(Msg_UpdateMergeFailed), _resourceCulture);
+
+        public static string Msg_UpdateMergeFailedNoDetail => ResourceManager.GetString(nameof(Msg_UpdateMergeFailedNoDetail), _resourceCulture);
+
+        public static string Msg_UpdateCancelled => ResourceManager.GetString(nameof(Msg_UpdateCancelled), _resourceCulture);
+
         public static string Update_Beta => ResourceManager.GetString(nameof(Update_Beta), _resourceCulture);
 
         public static string Update_Channel => ResourceManager.GetString(nameof(Update_Channel), _resourceCulture);
