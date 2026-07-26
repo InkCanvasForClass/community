@@ -58,6 +58,12 @@ namespace InkCanvas.NativeInk.Tests
             Run(nameof(GeometryStateResetsOnGenerationChange), GeometryStateResetsOnGenerationChange);
             Run(nameof(SessionStraightenReplacesPointsAndBumpsGeneration), SessionStraightenReplacesPointsAndBumpsGeneration);
             Run(nameof(FirstPointLookAheadMatchesSegmentSpeed), FirstPointLookAheadMatchesSegmentSpeed);
+            Run(nameof(PredictionHorizonStaysWithinAdaptiveBounds), PredictionHorizonStaysWithinAdaptiveBounds);
+            Run(nameof(PredictionHorizonGrowsWithSpeed), PredictionHorizonGrowsWithSpeed);
+            Run(nameof(PredictionHorizonShrinksOnSharpTurn), PredictionHorizonShrinksOnSharpTurn);
+            Run(nameof(PredictionHorizonShrinksOnStaleSamples), PredictionHorizonShrinksOnStaleSamples);
+            Run(nameof(PredictionIsEmptyBelowMinimumSpeed), PredictionIsEmptyBelowMinimumSpeed);
+            Run(nameof(PredictionStaysChronologicalAndFinite), PredictionStaysChronologicalAndFinite);
             Console.WriteLine($"Native ink contract tests passed: {_passed}.");
         }
 
