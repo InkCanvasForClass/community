@@ -24,7 +24,9 @@ namespace Ink_Canvas.Ink.Native
         private const int MaxPointCount = 12;
 
         private const double MaxPredictionSpeedPxPerSecond = 8_000.0;
-        private const double MinPredictionSpeedPxPerSecond = 40.0;
+        // 真实速度低于此值时不再强制返回空，而是按一档极小速度继续外推，
+        // 避免加速度/减速阶段的帧间笔尾闪烁消失。`Build` 仍会在点数不足、停驻、完全 NaN 时返回空。
+        private const double MinEffectiveSpeedPxPerSecond = 5.0;
         private const double MaxPredictionDistancePx = 140.0;
 
         // 速度→视界映射的两端。起点取最低预测速度，让超低速一离开门限就开始增长。
@@ -248,8 +250,21 @@ namespace Ink_Canvas.Ink.Native
                 out var accelerationY);
 
             var speed = Math.Sqrt(velocityX * velocityX + velocityY * velocityY);
-            if (speed < MinPredictionSpeedPxPerSecond)
-                return false;
+
+            // 真实速度趋零（停驻、纯抖动）时没有可信方向，不外推；
+            // 有方向但速度偏低（加减速阶段）时钳到最小有效速度继续外推一段短笔尾，
+            // 避免笔尖变慢时笔尾整段闪烁消失。对数视界映射会在该速度下给出接近下限的短视界。
+            if (speed < MinEffectiveSpeedPxPerSecond)
+            {
+                if (speed < 0.5)
+                    return false;
+                var clampScale = MinEffectiveSpeedPxPerSecond / speed;
+                velocityX *= clampScale;
+                velocityY *= clampScale;
+                accelerationX *= clampScale;
+                accelerationY *= clampScale;
+                speed = MinEffectiveSpeedPxPerSecond;
+            }
 
             if (speed > MaxPredictionSpeedPxPerSecond)
             {
