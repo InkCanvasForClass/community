@@ -65,6 +65,8 @@ namespace InkCanvas.NativeInk.Tests
             Run(nameof(PredictionHorizonShrinksOnSharpTurn), PredictionHorizonShrinksOnSharpTurn);
             Run(nameof(PredictionHorizonShrinksOnStaleSamples), PredictionHorizonShrinksOnStaleSamples);
             Run(nameof(PredictionIsEmptyBelowMinimumSpeed), PredictionIsEmptyBelowMinimumSpeed);
+            Run(nameof(PredictionCrawlingProducesShortTail), PredictionCrawlingProducesShortTail);
+            Run(nameof(PredictionSurvivesSpeedDip), PredictionSurvivesSpeedDip);
             Run(nameof(PredictionStaysChronologicalAndFinite), PredictionStaysChronologicalAndFinite);
             Console.WriteLine($"Native ink contract tests passed: {_passed}.");
         }
@@ -1145,14 +1147,11 @@ namespace InkCanvas.NativeInk.Tests
         }
 
         /// <summary>
-        /// 低于最低预测速度（含笔尖停驻）时不产生任何预测点。
+        /// 仅在真正无方向（停驻）或输入退化时返回空；低速爬行仍产出短笔尾，避免加减速阶段闪烁。
         /// </summary>
         private static void PredictionIsEmptyBelowMinimumSpeed()
         {
-            // 约 12px/s，远低于 40px/s 门限。
-            var crawling = StraightStroke(6, 0.1, 8);
-            Equal(0, InkTailPredictor.Build(crawling).Count);
-
+            // 笔尖停驻：没有可信方向，不外推。
             var stationary = new[]
             {
                 new RealInkPoint(10, 10, 0.5f, 0),
@@ -1161,8 +1160,42 @@ namespace InkCanvas.NativeInk.Tests
             };
             Equal(0, InkTailPredictor.Build(stationary).Count);
 
+            // 输入退化：空集或单点。
             Equal(0, InkTailPredictor.Build(new RealInkPoint[0]).Count);
             Equal(0, InkTailPredictor.Build(new[] { new RealInkPoint(0, 0, 0.5f, 0) }).Count);
+        }
+
+        /// <summary>
+        /// 低速爬行（曾因低于旧硬门限而整帧返回空）现在仍产出笔尾，但视界与外推距离都极小。
+        /// </summary>
+        private static void PredictionCrawlingProducesShortTail()
+        {
+            // 约 50px/s：曾返回空，现在应产出短笔尾。
+            var crawling = StraightStroke(8, 0.4, 8);
+            var predicted = InkTailPredictor.Build(crawling);
+            True(predicted.Count > 0);
+            True(HorizonMs(crawling, predicted) <= 15.0);
+            True(Reach(crawling, predicted) <= 2.0);
+        }
+
+        /// <summary>
+        /// 速度低于旧硬门限（曾整帧返回空）时仍产出短笔尾，避免加减速阶段笔尾闪烁消失。
+        /// </summary>
+        private static void PredictionSurvivesSpeedDip()
+        {
+            // 约 18px/s：曾低于 40px/s 硬门限返回空，现在钳到最小有效速度产出短尾。
+            var slowButMoving = StraightStroke(8, 0.15, 8);
+            var predicted = InkTailPredictor.Build(slowButMoving);
+            True(predicted.Count > 0);
+            True(HorizonMs(slowButMoving, predicted) <= InkTailPredictor.MinHorizonMilliseconds + 2.0);
+            // 速度极低，外推距离必须是子像素级，不会“甩”出去。
+            True(Reach(slowButMoving, predicted) <= 1.0);
+
+            // 约 50px/s：同样曾返回空。
+            var crawling = StraightStroke(8, 0.4, 8);
+            var crawlPredicted = InkTailPredictor.Build(crawling);
+            True(crawlPredicted.Count > 0);
+            True(Reach(crawling, crawlPredicted) <= 2.0);
         }
 
         /// <summary>
