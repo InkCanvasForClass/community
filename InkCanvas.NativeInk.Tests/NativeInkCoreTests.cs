@@ -1051,11 +1051,11 @@ namespace InkCanvas.NativeInk.Tests
         }
 
         /// <summary>
-        /// 慢写贴近下限、快写显著变长（快写时另受最大外推距离约束）。
+        /// 视界随速度单调变长；慢写不再贴死下限，但仍明显短于快写。
         /// </summary>
         private static void PredictionHorizonGrowsWithSpeed()
         {
-            // 约 250px/s：刚过最低预测速度，应贴近下限。
+            // 约 250px/s：慢写，应高于下限但仍属短视界。
             var slow = StraightStroke(8, 2, 8);
             // 约 1250px/s：中速。
             var medium = StraightStroke(8, 10, 8);
@@ -1066,10 +1066,11 @@ namespace InkCanvas.NativeInk.Tests
             var mediumHorizon = HorizonMs(medium, InkTailPredictor.Build(medium));
             var fastHorizon = HorizonMs(fast, InkTailPredictor.Build(fast));
 
-            True(slowHorizon > 0);
             True(mediumHorizon > slowHorizon);
             True(fastHorizon > mediumHorizon);
-            True(slowHorizon <= 15.0);
+            // 慢写要比下限有可感知的余量，否则等同于关掉低速预测。
+            True(slowHorizon >= InkTailPredictor.MinHorizonMilliseconds + 4.0);
+            True(slowHorizon <= 22.0);
             True(fastHorizon >= 45.0);
         }
 

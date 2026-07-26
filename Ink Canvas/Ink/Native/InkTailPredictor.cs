@@ -27,8 +27,8 @@ namespace Ink_Canvas.Ink.Native
         private const double MinPredictionSpeedPxPerSecond = 40.0;
         private const double MaxPredictionDistancePx = 140.0;
 
-        // 速度→视界映射：慢写只需最小视界，快写才需要更长的延迟补偿。
-        private const double SlowSpeedPxPerSecond = 150.0;
+        // 速度→视界映射：起点贴近最低预测速度，慢写也能拿到可感知的预测量。
+        private const double SlowSpeedPxPerSecond = 60.0;
         private const double FastSpeedPxPerSecond = 2_500.0;
 
         // 拐弯抑制：夹角在自由角内不抑制，超过满抑制角按最小比例保留。
@@ -139,7 +139,9 @@ namespace Ink_Canvas.Ink.Native
             var speedT = Clamp01(
                 (motion.Speed - SlowSpeedPxPerSecond)
                 / (FastSpeedPxPerSecond - SlowSpeedPxPerSecond));
-            speedT = SmoothStep(speedT);
+            // 缓出曲线：低速段上升快，慢写也能拿到中段视界；高速段自然收敛到上限。
+            // smoothstep 在起点过于平坦，会把慢写压在下限上。
+            speedT = EaseOut(speedT);
 
             var horizon = MinHorizonMilliseconds
                 + (MaxHorizonMilliseconds - MinHorizonMilliseconds) * speedT;
@@ -365,6 +367,15 @@ namespace Ink_Canvas.Ink.Native
         }
 
         private static double SmoothStep(double t) => t * t * (3.0 - 2.0 * t);
+
+        /// <summary>
+        /// 缓出曲线（1-(1-t)^2）：起点斜率最大，终点平滑收敛。
+        /// </summary>
+        private static double EaseOut(double t)
+        {
+            var inverse = 1.0 - t;
+            return 1.0 - inverse * inverse;
+        }
 
         private static double Clamp01(double value) => Math.Clamp(value, 0.0, 1.0);
 
