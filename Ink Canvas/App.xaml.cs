@@ -120,7 +120,6 @@ namespace Ink_Canvas
             // （gong-wpf-dragdrop 库内部使用）的模态消息循环无法接收触摸释放消息。
             // 在模拟触摸屏（UU 远程、spacedesk 等远程控制软件注入的虚拟触摸）下，
             // 拖动操作会进入假死状态，直到呼出鼠标或点击其他窗口生成真实鼠标消息才解除。
-            // ClassIsland 项目同样注释掉了该开关，参考其做法保持一致。
             // AppContext.SetSwitch("Switch.System.Windows.Input.Stylus.EnablePointerSupport", true);
 
             try

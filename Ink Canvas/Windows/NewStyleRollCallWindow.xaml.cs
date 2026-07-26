@@ -218,6 +218,7 @@ namespace Ink_Canvas
             InitializeSingleDrawMode();
             InitializeModeSelection();
             InitializeExternalCallerSelection();
+            UpdateNameRosterComboBox();
         }
 
         private void InitializeSingleDrawMode()
@@ -1223,6 +1224,91 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"加载名单文件失败: {ex.Message}", LogHelper.LogType.Error);
                 nameList.Clear();
+            }
+        }
+
+        private bool _isUpdatingNameRosterComboBox = false;
+
+        private void UpdateNameRosterComboBox()
+        {
+            if (NameRosterComboBox == null) return;
+
+            _isUpdatingNameRosterComboBox = true;
+            try
+            {
+                NameRosterComboBox.Items.Clear();
+
+                var noneItem = new ComboBoxItem
+                {
+                    Content = Properties.RandomStrings.Random_Roster_None,
+                    Tag = ""
+                };
+                NameRosterComboBox.Items.Add(noneItem);
+
+                string selectedGuid = MainWindow.Settings?.RandSettings?.SelectedNameRosterGuid ?? "";
+                int selectedIndex = 0;
+                var rosters = MainWindow.Settings?.RandSettings?.NameRosters;
+                if (rosters != null)
+                {
+                    for (int i = 0; i < rosters.Count; i++)
+                    {
+                        var roster = rosters[i];
+                        NameRosterComboBox.Items.Add(new ComboBoxItem
+                        {
+                            Content = roster.Name,
+                            Tag = roster.Guid ?? ""
+                        });
+                        if (!string.IsNullOrEmpty(selectedGuid) &&
+                            string.Equals(roster.Guid, selectedGuid, StringComparison.OrdinalIgnoreCase))
+                        {
+                            selectedIndex = i + 1;
+                        }
+                    }
+                }
+
+                NameRosterComboBox.SelectedIndex = selectedIndex;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"刷新点名方案下拉框失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+            finally
+            {
+                _isUpdatingNameRosterComboBox = false;
+            }
+        }
+
+        private void NameRosterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isUpdatingNameRosterComboBox) return;
+            if (isRollCalling) return;
+            if (!(NameRosterComboBox?.SelectedItem is ComboBoxItem selectedItem)) return;
+
+            string guid = selectedItem.Tag as string ?? "";
+            try
+            {
+                if (string.IsNullOrEmpty(guid))
+                {
+                    if (MainWindow.Settings?.RandSettings != null)
+                    {
+                        MainWindow.Settings.RandSettings.SelectedNameRosterGuid = "";
+                        MainWindow.SaveSettingsToFile();
+                    }
+                    return;
+                }
+
+                NameRosterManager.SelectAndApply(guid);
+                LoadNamesFromFile();
+                UpdateListCountDisplay();
+                UpdateStatusDisplay(string.Format(
+                    Properties.RandomStrings.Random_Roster_SetSuccessFormat,
+                    selectedItem.Content));
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format(Properties.RandomStrings.Random_Roster_OperationFailedFormat, ex.Message),
+                    Properties.RandomStrings.Random_Error, MessageBoxButton.OK, MessageBoxImage.Error);
+                LogHelper.WriteLogToFile($"切换点名方案失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 

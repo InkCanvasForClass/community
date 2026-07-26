@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -421,6 +422,18 @@ namespace Ink_Canvas
                 if (photoIndex < 0 || photoIndex >= _capturedPhotos.Count) return;
 
                 _capturedPhotos.RemoveAt(photoIndex);
+
+                // 同步移除被删照片的墨迹，并把后续照片页的墨迹 key 前移
+                _boothStrokesByPage.Remove(photoIndex);
+                var reindexed = new Dictionary<int, StrokeCollection>();
+                foreach (var kv in _boothStrokesByPage)
+                {
+                    int newKey = kv.Key > photoIndex ? kv.Key - 1 : kv.Key;
+                    reindexed[newKey] = kv.Value;
+                }
+                _boothStrokesByPage.Clear();
+                foreach (var kv in reindexed)
+                    _boothStrokesByPage[kv.Key] = kv.Value;
 
                 // 如果当前正在看被删的照片，切回直播页
                 if (_boothCurrentPhotoIndex == photoIndex)

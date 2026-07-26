@@ -136,6 +136,10 @@
     <PackageReference Include="WebDav.Client" Version="2.9.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Vortice.Direct2D1" Version="3.2.0" />
+    <PackageReference Include="Vortice.Direct3D11" Version="3.2.0" />
+    <PackageReference Include="Vortice.DirectComposition" Version="3.2.0" />
+    <PackageReference Include="Vortice.DXGI" Version="3.2.0" />
     <!-- 视频展台：DirectShow + VMR9 Renderless + D3DImage 零拷贝 GPU 渲染（兼容 Win7 SP1+ 和 Win10+） -->
     <PackageReference Include="JerryShaw.WPFMediaKit" Version="1.0.1" />
   </ItemGroup>
@@ -254,6 +258,7 @@
     <Resource Include="Resources\DeveloperAvatars\PrefacedCorg.jpg" />
     <Resource Include="Resources\DeveloperAvatars\PANDA-JSR.jpg" />
     <Resource Include="Resources\DeveloperAvatars\Super-Yyt.png" />
+    <Resource Include="Resources\DeveloperAvatars\AstrZero.png" />
   </ItemGroup>
 <ItemGroup>
     <Resource Include="Resources\Icons-png\EasiCamera.png" />

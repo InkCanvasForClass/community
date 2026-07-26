@@ -16,6 +16,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Ink;
 using System.Windows.Threading;
 using Windows.Win32;
 using Windows.Win32.Graphics.Gdi;
@@ -65,12 +66,24 @@ namespace Ink_Canvas
         private readonly List<CapturedImage> _capturedPhotos = new List<CapturedImage>();
         private const int MaxCapturedPhotos = 50; // 容量上限：比 UI 显示的 30 项多一些，避免频繁清理
 
+        // 视频展台虚拟分页的 per-page 墨迹存储：key = _boothCurrentPhotoIndex（-1=直播页，0..N-1=照片页）。
+        // 切换虚拟页时保存当前墨迹、恢复目标页墨迹；退出特殊模式时整体清空（booth 墨迹不持久化到白板）。
+        // 不接入 timeMachine：booth 墨迹退出即丢弃，不需要撤销/重做。
+        private readonly Dictionary<int, StrokeCollection> _boothStrokesByPage = new Dictionary<int, StrokeCollection>();
+
         // 按页绑定：每一页对应一个“实时画面”元素与布局/设备信息
         private readonly Dictionary<int, System.Windows.Controls.Image> _liveFrameImageByPage = new Dictionary<int, System.Windows.Controls.Image>();
         private readonly HashSet<int> _liveEnabledPages = new HashSet<int>();
         private readonly Dictionary<int, int> _cameraIndexByPage = new Dictionary<int, int>();
         private readonly Dictionary<int, (double left, double top, double width)> _liveFrameLayoutByPage =
             new Dictionary<int, (double left, double top, double width)>();
+
+        // 旋转基准：保存首次旋转前的画布快照，下次旋转用 M_baseline⁻¹ · M_target 直接重放，
+        // 避免每次旋转都叠加 fit 缩放导致墨迹持续缩小。
+        private System.Windows.Ink.StrokeCollection _rotationBaselineStrokes;
+        private int _rotationBaselineAngle;
+        // 旋转过程中（程序在变换墨迹）设为 true，避免 StrokesChanged 把基准当作用户编辑重置。
+        private bool _isApplyingRotationToStrokes;
 
         private DateTime _lastCaptureTime = DateTime.MinValue;
         private const int VideoPresenterCaptureCooldownMs = 1000;
@@ -387,6 +400,8 @@ namespace Ink_Canvas
             // 重置虚拟分页状态
             _boothCurrentPhotoIndex = -1;
             _capturedPhotos.Clear();
+            // 清空 booth per-page 墨迹存储（退出即丢弃，不持久化到白板）
+            _boothStrokesByPage.Clear();
 
             try
             {
@@ -1252,6 +1267,8 @@ namespace Ink_Canvas
                         {
                             stroke.Transform(translateMatrix, false);
                         }
+                        timeMachine?.TransformStrokesInHistory(translateMatrix, inkCanvas.Strokes);
+                        ResetRotationBaseline();
                     }
                     catch { }
                 }
@@ -1391,6 +1408,8 @@ namespace Ink_Canvas
                         {
                             stroke.Transform(translateMatrix, false);
                         }
+                        timeMachine?.TransformStrokesInHistory(translateMatrix, inkCanvas.Strokes);
+                        ResetRotationBaseline();
                     }
                     catch { }
                 }
@@ -1434,6 +1453,8 @@ namespace Ink_Canvas
                 var matrix = new System.Windows.Media.Matrix();
                 matrix.ScaleAt(ratio, ratio, inkOrigin.X, inkOrigin.Y);
                 inkCanvas.Strokes.Transform(matrix, false);
+                timeMachine?.TransformStrokesInHistory(matrix, inkCanvas.Strokes);
+                ResetRotationBaseline();
             }
             catch (Exception ex)
             {
@@ -2002,6 +2023,169 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 计算指定角度下视频画面的变换矩阵：绕画面视觉中心（含 RenderTransform 缩放/平移）
+        /// 旋转，并在 90°/270° 时按真实图像比例 + 容器比例计算一次 fit 缩放，使墨迹与
+        /// 预览的 Stretch 行为保持一致。实时画面用相机分辨率作为图像尺寸，照片预览用位图尺寸。
+        /// </summary>
+        private System.Windows.Media.Matrix GetBoothRotationMatrix(
+            double angleDegrees,
+            double containerW,
+            double containerH,
+            double imgW,
+            double imgH)
+        {
+            double centerX = (containerW / 2.0) * _boothPreviewScale + _boothPreviewTranslateX;
+            double centerY = (containerH / 2.0) * _boothPreviewScale + _boothPreviewTranslateY;
+            double angle = angleDegrees % 360.0;
+            if (angle < 0) angle += 360.0;
+            bool rotated90 = Math.Abs(angle - 90.0) < 0.01 || Math.Abs(angle - 270.0) < 0.01;
+
+            double scale = 1.0;
+            if (rotated90 && containerW > 0 && containerH > 0 && imgW > 0 && imgH > 0)
+            {
+                double s0 = Math.Min(containerW / imgW, containerH / imgH);
+                double s90 = Math.Min(containerH / imgW, containerW / imgH);
+                if (s0 > 0) scale = s90 / s0;
+            }
+
+            var rotate = System.Windows.Media.Matrix.Identity;
+            rotate.RotateAt(angle, centerX, centerY);
+            var scaleMatrix = System.Windows.Media.Matrix.Identity;
+            scaleMatrix.ScaleAt(scale, scale, centerX, centerY);
+            return rotate * scaleMatrix;
+        }
+
+        /// <summary>当前画布墨迹对应的视觉角度（0/90/180/270）。</summary>
+        private int GetBoothVisualAngle()
+        {
+            var angle = VideoPresenterFullCanvasRotation?.Angle ?? 0;
+            return ((int)(angle % 360.0) + 360) % 360;
+        }
+
+        /// <summary>旋转前保存当前画布快照作为基准（仅保存一次）。</summary>
+        private void EnsureRotationBaseline()
+        {
+            if (_rotationBaselineStrokes != null) return;
+            if (inkCanvas == null || inkCanvas.Strokes.Count == 0) return;
+            _rotationBaselineStrokes = inkCanvas.Strokes.Clone();
+            _rotationBaselineAngle = GetBoothVisualAngle();
+        }
+
+        /// <summary>用户编辑/移动/缩放/切页后基准过期，下次旋转重新保存。</summary>
+        private void ResetRotationBaseline()
+        {
+            _rotationBaselineStrokes = null;
+        }
+
+        /// <summary>
+        /// 从基准快照按 delta = M_baseline⁻¹ · M_target 一次性变换墨迹到目标角度，
+        /// 不再每转一次都叠加缩放。旋转中心用预览视觉中心（含 RenderTransform）。
+        /// </summary>
+        private void RotateBoothStrokesFromBaseline(double targetAngleDegrees)
+        {
+            if (inkCanvas == null || inkCanvas.Strokes.Count == 0) return;
+            try
+            {
+                double containerW = VideoPresenterSpecialModeContainer?.ActualWidth ?? inkCanvas.ActualWidth;
+                double containerH = VideoPresenterSpecialModeContainer?.ActualHeight ?? inkCanvas.ActualHeight;
+                if (containerW <= 0 || containerH <= 0) return;
+
+                double imgW, imgH;
+                if (VideoPresenterFrozenFrameImage != null
+                    && VideoPresenterFrozenFrameImage.Visibility == Visibility.Visible
+                    && VideoPresenterFrozenFrameImage.Source is BitmapSource bs)
+                {
+                    imgW = bs.PixelWidth;
+                    imgH = bs.PixelHeight;
+                }
+                else
+                {
+                    // 实时画面：用相机分辨率作为图像尺寸，90°/270° 时墨迹跟着画面一起缩小。
+                    imgW = _boothResolutionWidth;
+                    imgH = _boothResolutionHeight;
+                }
+
+                var currentMatrix = GetBoothRotationMatrix(_rotationBaselineAngle, containerW, containerH, imgW, imgH);
+                var targetMatrix = GetBoothRotationMatrix(targetAngleDegrees, containerW, containerH, imgW, imgH);
+                if (!currentMatrix.HasInverse) return;
+                var currentInv = currentMatrix;
+                currentInv.Invert();
+                var delta = currentInv * targetMatrix;
+
+                try
+                {
+                    LogHelper.WriteLogToFile(
+                        $"[BoothDiag] Rotate: baseline={_rotationBaselineAngle}, target={targetAngleDegrees}, " +
+                        $"container={containerW}x{containerH}, imgSize={imgW}x{imgH}, " +
+                        $"delta=[{delta.M11:F3},{delta.M12:F3}|{delta.M21:F3},{delta.M22:F3}|{delta.OffsetX:F2},{delta.OffsetY:F2}]",
+                        LogHelper.LogType.Info);
+                }
+                catch { }
+
+                _isApplyingRotationToStrokes = true;
+                try
+                {
+                    inkCanvas.Strokes.Transform(delta, false);
+                    timeMachine?.TransformStrokesInHistory(delta, inkCanvas.Strokes);
+                }
+                finally
+                {
+                    _isApplyingRotationToStrokes = false;
+                }
+
+                _rotationBaselineAngle = ((int)(targetAngleDegrees % 360.0) + 360) % 360;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"从基准旋转墨迹失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        /// <summary>
+        /// 旋转按钮入口：把预览 LayoutTransform 与画布墨迹一起转到目标角度，
+        /// 走基准重放管线避免持续缩小。冻结照片先回退到实时画面再旋转。
+        /// </summary>
+        private void HandleBoothRotation(double targetAngleDegrees)
+        {
+            if (!_isVideoPresenterSpecialMode || VideoPresenterFullCanvasRotation == null)
+                return;
+
+            // 冻结照片内容已被 RotateFlip 转正，再用 LayoutTransform 旋转会双重旋转；先回实时画面。
+            if (VideoPresenterFrozenFrameImage != null
+                && VideoPresenterFrozenFrameImage.Visibility == Visibility.Visible)
+            {
+                ClearFrozenFrame();
+                if (VideoPresenterFullCanvasImage != null)
+                {
+                    VideoPresenterFullCanvasImage.Visibility = Visibility.Visible;
+                    int page = GetCurrentPageIndex();
+                    int camIdx = -1;
+                    if (_cameraIndexByPage.TryGetValue(page, out int savedIdx)
+                        && savedIdx >= 0 && savedIdx < _cameraService.AvailableCameras.Count)
+                        camIdx = savedIdx;
+                    if (camIdx < 0 && _cameraService.AvailableCameras.Count > 0)
+                        camIdx = 0;
+                    if (camIdx >= 0)
+                        _ = StartVideoCaptureElementPreviewAsync(camIdx);
+                }
+            }
+
+            EnsureRotationBaseline();
+            CancelAllNativeWetInkSessions("video-presenter-rotate");
+            VideoPresenterFullCanvasRotation.Angle = targetAngleDegrees;
+            RotateBoothStrokesFromBaseline(targetAngleDegrees);
+
+            if (VideoPresenterFrozenFrameRotation != null)
+                VideoPresenterFrozenFrameRotation.Angle = 0;
+
+            lock (_videoPresenterFrameLock)
+            {
+                _lastFrame?.Dispose();
+                _lastFrame = null;
+            }
+        }
+
+        /// <summary>
         /// 将当前相机预览的显示角度顺时针旋转 90°（在四个方向间切换）。
         /// </summary>
         /// <remarks>
@@ -2016,48 +2200,11 @@ namespace Ink_Canvas
                 EnsureCameraService();
                 _cameraService.RotationAngle = (_cameraService.RotationAngle + 1) % 4;
 
-                // 特殊模式下：同步旋转 VideoCaptureElement 的 LayoutTransform
-                // （旋转 90/270 时 LayoutTransform 会让 WPF 自动交换宽高，避免画面被裁剪）
-                if (_isVideoPresenterSpecialMode && VideoPresenterFullCanvasRotation != null)
+                if (_isVideoPresenterSpecialMode)
                 {
-                    // 若当前在冻结照片状态，先清除冻结照片：
-                    // 冻结照片的内容已通过拍照时的 RotateFlip 旋转到正向，不能再通过 LayoutTransform 旋转；
-                    // 直接改 LayoutTransform 会让照片显示到错误方向（双重旋转）。
-                    // 清除冻结照片后，旋转操作应用到实时画面，用户可以重新拍照。
-                    if (VideoPresenterFrozenFrameImage != null
-                        && VideoPresenterFrozenFrameImage.Visibility == Visibility.Visible)
-                    {
-                        ClearFrozenFrame();
-                        // 恢复 VideoCaptureElement 可见性并重启预览
-                        // （InsertPhotoToCanvas 冻结时把 VideoCaptureElement.Visibility 设为 Collapsed 并 Stop）
-                        if (VideoPresenterFullCanvasImage != null)
-                        {
-                            VideoPresenterFullCanvasImage.Visibility = Visibility.Visible;
-                            int page = GetCurrentPageIndex();
-                            int camIdx = -1;
-                            if (_cameraIndexByPage.TryGetValue(page, out int savedIdx)
-                                && savedIdx >= 0 && savedIdx < _cameraService.AvailableCameras.Count)
-                            {
-                                camIdx = savedIdx;
-                            }
-                            if (camIdx < 0 && _cameraService.AvailableCameras.Count > 0)
-                            {
-                                camIdx = 0;
-                            }
-                            if (camIdx >= 0)
-                            {
-                                _ = StartVideoCaptureElementPreviewAsync(camIdx);
-                            }
-                        }
-                    }
-
-                    VideoPresenterFullCanvasRotation.Angle = _cameraService.RotationAngle * 90.0;
-                    // 冻结画面 Image 的 LayoutTransform 始终保持 0（照片内容已正向），
-                    // 不跟随实时画面旋转，避免双重旋转。
-                    if (VideoPresenterFrozenFrameRotation != null)
-                    {
-                        VideoPresenterFrozenFrameRotation.Angle = 0;
-                    }
+                    // 基准重放管线：墨迹与预览一起旋转/缩小，不会每转一次都叠加缩放。
+                    HandleBoothRotation(_cameraService.RotationAngle * 90.0);
+                    return;
                 }
 
                 // 旋转后清空 _lastFrame，下一帧会用新角度重新填充
@@ -2179,6 +2326,52 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 保存当前虚拟页的墨迹到 _boothStrokesByPage，并清空画布墨迹。
+        /// 在切换虚拟页（直播页↔照片页、照片页↔照片页）之前调用。
+        /// 不接入 timeMachine：booth 墨迹仅在特殊模式内有效，退出即丢弃。
+        /// </summary>
+        private void SaveBoothStrokes()
+        {
+            if (inkCanvas == null) return;
+            try
+            {
+                var snapshot = new StrokeCollection();
+                foreach (var s in inkCanvas.Strokes)
+                    snapshot.Add(s);
+                _boothStrokesByPage[_boothCurrentPhotoIndex] = snapshot;
+                inkCanvas.Strokes.Clear();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"SaveBoothStrokes 异常: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 从 _boothStrokesByPage 恢复目标虚拟页的墨迹到画布。
+        /// 在切换虚拟页并更新 _boothCurrentPhotoIndex 之后调用。
+        /// </summary>
+        private void RestoreBoothStrokes()
+        {
+            if (inkCanvas == null) return;
+            try
+            {
+                inkCanvas.Strokes.Clear();
+                if (_boothStrokesByPage.TryGetValue(_boothCurrentPhotoIndex, out var snapshot) && snapshot != null)
+                {
+                    var restored = new StrokeCollection();
+                    foreach (var s in snapshot)
+                        restored.Add(s);
+                    inkCanvas.Strokes = restored;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"RestoreBoothStrokes 异常: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
         /// 从直播页切换到照片预览页。
         /// 显示指定照片、停止实时预览、页码 (photoIndex+1)/N、拍照按钮变灰。
         /// </summary>
@@ -2198,7 +2391,10 @@ namespace Ink_Canvas
                 return;
             }
 
+            // 保存当前虚拟页墨迹，再切换到目标照片页（更新 _boothCurrentPhotoIndex 后恢复）
+            SaveBoothStrokes();
             _boothCurrentPhotoIndex = photoIndex;
+            RestoreBoothStrokes();
 
             // 按需计算照片在冻结画面上的布局参数（每张照片尺寸可能不同）
             if (VideoPresenterFrozenFrameImage != null)
@@ -2284,7 +2480,10 @@ namespace Ink_Canvas
         /// </summary>
         private void SwitchBoothToLivePage()
         {
+            // 保存当前虚拟页墨迹，再切换到直播页（更新 _boothCurrentPhotoIndex 后恢复）
+            SaveBoothStrokes();
             _boothCurrentPhotoIndex = -1;
+            RestoreBoothStrokes();
 
             // 清除冻结照片
             if (VideoPresenterFrozenFrameImage != null)

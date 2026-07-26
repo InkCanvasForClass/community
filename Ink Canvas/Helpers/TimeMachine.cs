@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Input;
+using System.Windows.Media;
 
 // Added for UIElement
 
@@ -241,6 +242,29 @@ namespace Ink_Canvas.Helpers
             _currentStrokeHistory.Add(history);
             _currentIndex = _currentStrokeHistory.Count - 1;
             NotifyUndoRedoState();
+        }
+
+        /// <summary>
+        /// 把历史中保存的墨迹按 matrix 同步变换（撤销/重做时能回到正确几何），
+        /// 跳过仍在画布上的笔迹（它们由 inkCanvas.Strokes.Transform 直接处理）。
+        /// </summary>
+        public void TransformStrokesInHistory(Matrix matrix, StrokeCollection canvasStrokes)
+        {
+            if (canvasStrokes == null) return;
+            var transformed = new HashSet<Stroke>();
+            foreach (var item in _currentStrokeHistory)
+            {
+                TransformStrokesInCollection(item.ReplacedStroke, matrix, canvasStrokes, transformed);
+                TransformStrokesInCollection(item.CurrentStroke, matrix, canvasStrokes, transformed);
+            }
+        }
+
+        private static void TransformStrokesInCollection(StrokeCollection strokes, Matrix matrix, StrokeCollection canvasStrokes, HashSet<Stroke> transformed)
+        {
+            if (strokes == null) return;
+            foreach (Stroke stroke in strokes)
+                if (!canvasStrokes.Contains(stroke) && transformed.Add(stroke))
+                    stroke.Transform(matrix, false);
         }
     }
 }
