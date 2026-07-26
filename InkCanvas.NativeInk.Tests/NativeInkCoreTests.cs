@@ -60,6 +60,7 @@ namespace InkCanvas.NativeInk.Tests
             Run(nameof(FirstPointLookAheadMatchesSegmentSpeed), FirstPointLookAheadMatchesSegmentSpeed);
             Run(nameof(PredictionHorizonStaysWithinAdaptiveBounds), PredictionHorizonStaysWithinAdaptiveBounds);
             Run(nameof(PredictionHorizonGrowsWithSpeed), PredictionHorizonGrowsWithSpeed);
+            Run(nameof(LowSpeedPredictionStaysShortInPixels), LowSpeedPredictionStaysShortInPixels);
             Run(nameof(PredictionHorizonIsCappedByReach), PredictionHorizonIsCappedByReach);
             Run(nameof(PredictionHorizonShrinksOnSharpTurn), PredictionHorizonShrinksOnSharpTurn);
             Run(nameof(PredictionHorizonShrinksOnStaleSamples), PredictionHorizonShrinksOnStaleSamples);
@@ -1051,27 +1052,44 @@ namespace InkCanvas.NativeInk.Tests
         }
 
         /// <summary>
-        /// 视界随速度单调变长；慢写不再贴死下限，但仍明显短于快写。
+        /// 视界随速度单调变长；超低速也要拿到可感知的预测量，而不是贴死下限。
         /// </summary>
         private static void PredictionHorizonGrowsWithSpeed()
         {
-            // 约 250px/s：慢写，应高于下限但仍属短视界。
+            // 约 62px/s：刚过 40px/s 门限的超低速。
+            var crawl = StraightStroke(8, 0.5, 8);
+            // 约 250px/s：慢写。
             var slow = StraightStroke(8, 2, 8);
             // 约 1250px/s：中速。
             var medium = StraightStroke(8, 10, 8);
             // 约 2500px/s：速度映射到满视界，且未被 140px 距离上限截断。
             var fast = StraightStroke(8, 20, 8);
 
+            var crawlHorizon = HorizonMs(crawl, InkTailPredictor.Build(crawl));
             var slowHorizon = HorizonMs(slow, InkTailPredictor.Build(slow));
             var mediumHorizon = HorizonMs(medium, InkTailPredictor.Build(medium));
             var fastHorizon = HorizonMs(fast, InkTailPredictor.Build(fast));
 
+            True(slowHorizon > crawlHorizon);
             True(mediumHorizon > slowHorizon);
             True(fastHorizon > mediumHorizon);
-            // 慢写要比下限有可感知的余量，否则等同于关掉低速预测。
-            True(slowHorizon >= InkTailPredictor.MinHorizonMilliseconds + 4.0);
-            True(slowHorizon <= 22.0);
+
+            // 超低速与慢写都要比下限有可感知的余量，否则等同于关掉低速预测。
+            True(crawlHorizon >= InkTailPredictor.MinHorizonMilliseconds + 3.0);
+            True(slowHorizon >= InkTailPredictor.MinHorizonMilliseconds + 12.0);
             True(fastHorizon >= 45.0);
+        }
+
+        /// <summary>
+        /// 低速视界变长不得把笔尾甩出笔尖太远——超低速的外推距离应始终是像素级。
+        /// </summary>
+        private static void LowSpeedPredictionStaysShortInPixels()
+        {
+            var crawl = StraightStroke(8, 0.5, 8);
+            var slow = StraightStroke(8, 2, 8);
+
+            True(Reach(crawl, InkTailPredictor.Build(crawl)) <= 3.0);
+            True(Reach(slow, InkTailPredictor.Build(slow)) <= 12.0);
         }
 
         /// <summary>

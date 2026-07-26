@@ -27,8 +27,8 @@ namespace Ink_Canvas.Ink.Native
         private const double MinPredictionSpeedPxPerSecond = 40.0;
         private const double MaxPredictionDistancePx = 140.0;
 
-        // 速度→视界映射：起点贴近最低预测速度，慢写也能拿到可感知的预测量。
-        private const double SlowSpeedPxPerSecond = 60.0;
+        // 速度→视界映射的两端。起点取最低预测速度，让超低速一离开门限就开始增长。
+        private const double SlowSpeedPxPerSecond = 40.0;
         private const double FastSpeedPxPerSecond = 2_500.0;
 
         // 拐弯抑制：夹角在自由角内不抑制，超过满抑制角按最小比例保留。
@@ -136,12 +136,9 @@ namespace Ink_Canvas.Ink.Native
             IReadOnlyList<RealInkPoint> realPoints,
             InkTailMotion motion)
         {
-            var speedT = Clamp01(
-                (motion.Speed - SlowSpeedPxPerSecond)
-                / (FastSpeedPxPerSecond - SlowSpeedPxPerSecond));
-            // 缓出曲线：低速段上升快，慢写也能拿到中段视界；高速段自然收敛到上限。
-            // smoothstep 在起点过于平坦，会把慢写压在下限上。
-            speedT = EaseOut(speedT);
+            // 按速度的对数归一化：线性归一化会把 40~250px/s 整段压进 t<0.1，
+            // 超低速因而贴死下限；人对笔速的感知本身也接近对数。
+            var speedT = NormalizeSpeed(motion.Speed);
 
             var horizon = MinHorizonMilliseconds
                 + (MaxHorizonMilliseconds - MinHorizonMilliseconds) * speedT;
@@ -369,15 +366,17 @@ namespace Ink_Canvas.Ink.Native
         private static double SmoothStep(double t) => t * t * (3.0 - 2.0 * t);
 
         /// <summary>
-        /// 缓出曲线（1-(1-t)^2）：起点斜率最大，终点平滑收敛。
+        /// 把笔速对数映射到 [0,1]：慢速端分辨率高，快速端自然饱和。
         /// </summary>
-        private static double EaseOut(double t)
+        private static double NormalizeSpeed(double speed)
         {
-            var inverse = 1.0 - t;
-            return 1.0 - inverse * inverse;
+            if (speed <= SlowSpeedPxPerSecond)
+                return 0.0;
+            if (speed >= FastSpeedPxPerSecond)
+                return 1.0;
+            return Math.Log(speed / SlowSpeedPxPerSecond)
+                / Math.Log(FastSpeedPxPerSecond / SlowSpeedPxPerSecond);
         }
-
-        private static double Clamp01(double value) => Math.Clamp(value, 0.0, 1.0);
 
         private static bool IsFinite(double value) =>
             !double.IsNaN(value) && !double.IsInfinity(value);
