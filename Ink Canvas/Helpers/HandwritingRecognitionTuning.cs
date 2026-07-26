@@ -52,6 +52,41 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        /// <summary>当前意图 LCID（0=跟随系统）。供消费端判断 CJK 等语言相关行为。</summary>
+        public static int CurrentIntendedLcid => _intendedLcid;
+
+        /// <summary>
+        /// 当前是否为 CJK（中/日/韩）识别意图。CJK 一字多笔、间距分词易拆字，消费端据此启用合并与跳过 Y 归一化。
+        /// LCID=0（跟随系统）时按系统 UI/Current 文化推断。
+        /// </summary>
+        public static bool IsCjkRecognizerActive
+        {
+            get
+            {
+                var lcid = _intendedLcid;
+                if (lcid == LcidFollowSystem)
+                    return IsCjkCulture(PrimaryHandwritingCulture());
+
+                // 常见 CJK LCID：zh-* (0x0804/0x0404/0x0C04/0x3404/0x0404…), ja (0x0411), ko (0x0412)
+                try
+                {
+                    var ci = new CultureInfo(lcid);
+                    return IsCjkCulture(ci);
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
+
+        private static bool IsCjkCulture(CultureInfo culture)
+        {
+            if (culture == null) return false;
+            var lang = culture.TwoLetterISOLanguageName?.ToLowerInvariant() ?? string.Empty;
+            return lang == "zh" || lang == "ja" || lang == "ko";
+        }
+
         /// <summary>语言切换或 FOD 安装变化后调用，清空所有缓存强制重解析。</summary>
         public static void InvalidateCache()
         {

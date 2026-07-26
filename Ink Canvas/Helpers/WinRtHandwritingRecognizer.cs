@@ -102,62 +102,26 @@ namespace Ink_Canvas.Helpers
                     return HandwritingRecognitionResult.Empty;
                 }
 
+                // C1：CJK 防拆字回检合并。InkAnalyzer 按水平间距切 InkWord，CJK 一字多笔常被误拆。
+                // 把「相邻 InkWord 水平间距 < 0.3×字高 且 垂直重叠 > 0.5×字高」的节点合并为一组，
+                // 整体重新 RecognizeAsync 取候选，避免部件级误识别。西文不合并（词间距本就大）。
+                var cjkMergeActive = HandwritingRecognitionTuning.IsCjkRecognizerActive;
+                var wordGroups = BuildCjkMergedWordGroups(wordNodes, idToWpf, cjkMergeActive, traceRecognition);
+
                 var segments = new List<HandwritingWordSegment>();
 
-                foreach (var node in wordNodes)
+                foreach (var wg in wordGroups)
                 {
-                    if (!(node is WinAnalysis.InkAnalysisInkWord word))
+                    if (wg.Strokes.Count == 0)
                         continue;
 
-                    var ids = word.GetStrokeIds();
-                    if (ids == null || ids.Count == 0)
-                        continue;
-
-                    var group = new List<Stroke>();
-                    foreach (var sid in ids)
-                    {
-                        if (idToWpf.TryGetValue(sid, out var st))
-                            group.Add(st);
-                    }
-
-                    if (group.Count == 0)
-                        continue;
-
-                    var wpfRect = GetOriginalStrokeBounds(group);
-                    var analysisText = word.RecognizedText ?? string.Empty;
+                    var wpfRect = GetOriginalStrokeBounds(wg.Strokes);
+                    var analysisText = wg.CombinedRecognizedText;
 
                     IReadOnlyList<string> candList = Array.Empty<string>();
                     try
                     {
-                        if (recognizer != null)
-                        {
-                            var mini = new WinRtInk.InkStrokeContainer();
-                            foreach (var st in group)
-                            {
-                                var ink = WinRtInkShapeRecognizer.CreateInkStrokeFromWpf(st);
-                                if (ink != null)
-                                    mini.AddStroke(ink);
-                            }
-
-                            var miniStrokes = mini.GetStrokes();
-                            if (miniStrokes != null && miniStrokes.Count > 0)
-                            {
-                                var rr = await recognizer
-                                    .RecognizeAsync(mini, WinRtInk.InkRecognitionTarget.All)
-                                    .AsTask()
-                                    .ConfigureAwait(true);
-                                if (rr != null && rr.Count > 0 && rr[0] != null)
-                                {
-                                    var cands = rr[0].GetTextCandidates();
-                                    if (cands != null && cands.Count > 0)
-                                    {
-                                        candList = cands
-                                            .Where(c => !string.IsNullOrWhiteSpace(c))
-                                            .ToList();
-                                    }
-                                }
-                            }
-                        }
+                        candList = await RecognizeStrokeGroupAsync(recognizer, wg.Strokes).ConfigureAwait(true);
                     }
                     catch (Exception ex)
                     {
@@ -187,7 +151,7 @@ namespace Ink_Canvas.Helpers
                         primary,
                         mergedCandidates,
                         wpfRect,
-                        group));
+                        wg.Strokes));
                 }
 
                 if (segments.Count == 0)
@@ -242,10 +206,159 @@ namespace Ink_Canvas.Helpers
             HandwritingRecognitionTuning.TryApplyPreferredRecognizer(container, logDetail);
         }
 
+        /// <summary>对一个笔画组单独跑 RecognizeAsync 取文本候选（供 C1 合并组与原 per-word 路径复用）。</summary>
+        private static async Task<IReadOnlyList<string>> RecognizeStrokeGroupAsync(
+            WinRtInk.InkRecognizerContainer recognizer,
+            IReadOnlyList<Stroke> group)
+        {
+            if (recognizer == null || group == null || group.Count == 0)
+                return Array.Empty<string>();
+
+            var mini = new WinRtInk.InkStrokeContainer();
+            foreach (var st in group)
+            {
+                var ink = WinRtInkShapeRecognizer.CreateInkStrokeFromWpf(st);
+                if (ink != null)
+                    mini.AddStroke(ink);
+            }
+
+            var miniStrokes = mini.GetStrokes();
+            if (miniStrokes == null || miniStrokes.Count == 0)
+                return Array.Empty<string>();
+
+            var rr = await recognizer
+                .RecognizeAsync(mini, WinRtInk.InkRecognitionTarget.All)
+                .AsTask()
+                .ConfigureAwait(true);
+
+            if (rr == null || rr.Count == 0 || rr[0] == null)
+                return Array.Empty<string>();
+
+            var cands = rr[0].GetTextCandidates();
+            if (cands == null || cands.Count == 0)
+                return Array.Empty<string>();
+
+            return cands.Where(c => !string.IsNullOrWhiteSpace(c)).ToList();
+        }
+
+        /// <summary>
+        /// C1：CJK 防拆字合并。InkAnalyzer 按水平间距切 InkWord，CJK 一字多笔常被误拆成相邻 InkWord。
+        /// 把「相邻 InkWord 水平间距 &lt; 0.3×字高 且 垂直重叠 &gt; 0.5×字高」的节点合并为一组，
+        /// 整组重新识别取候选。西文（cjkMergeActive=false）每个 InkWord 独立成组，行为与旧 per-word 路径一致。
+        /// </summary>
+        private static List<WordGroup> BuildCjkMergedWordGroups(
+            IReadOnlyList<WinAnalysis.IInkAnalysisNode> wordNodes,
+            Dictionary<uint, Stroke> idToWpf,
+            bool cjkMergeActive,
+            bool traceRecognition)
+        {
+            // 1) 把每个 InkWord 解析为 (笔画组, 原始包围框, RecognizedText)。
+            var units = new List<(List<Stroke> Strokes, Rect Bounds, string Text)>();
+            foreach (var node in wordNodes)
+            {
+                if (!(node is WinAnalysis.InkAnalysisInkWord word))
+                    continue;
+
+                var ids = word.GetStrokeIds();
+                if (ids == null || ids.Count == 0)
+                    continue;
+
+                var group = new List<Stroke>();
+                foreach (var sid in ids)
+                {
+                    if (idToWpf.TryGetValue(sid, out var st))
+                        group.Add(st);
+                }
+
+                if (group.Count == 0)
+                    continue;
+
+                units.Add((group, GetOriginalStrokeBounds(group), word.RecognizedText ?? string.Empty));
+            }
+
+            // 西文或不合并：每个 InkWord 独立成组，行为等价于原 per-word 循环。
+            if (!cjkMergeActive || units.Count <= 1)
+            {
+                return units.Select(u =>
+                {
+                    var g = new WordGroup();
+                    g.Strokes.AddRange(u.Strokes);
+                    g.CombinedRecognizedText = u.Text;
+                    return g;
+                }).ToList();
+            }
+
+            // CJK：按水平位置排序，相邻「水平间距 < 0.3×字高 且 垂直重叠 > 0.5×字高」合并为一组。
+            var ordered = units.OrderBy(u => u.Bounds.IsEmpty ? 0 : u.Bounds.Left).ToList();
+            var groups = new List<WordGroup>();
+            var current = new WordGroup();
+            current.Strokes.AddRange(ordered[0].Strokes);
+            current.CombinedRecognizedText = ordered[0].Text ?? string.Empty;
+            var currentBounds = ordered[0].Bounds;
+
+            for (var i = 1; i < ordered.Count; i++)
+            {
+                var u = ordered[i];
+                var charHeight = Math.Max(currentBounds.Height, u.Bounds.Height);
+                if (charHeight <= 0) charHeight = 1;
+
+                var horizontalGap = currentBounds.IsEmpty || u.Bounds.IsEmpty
+                    ? 0.0
+                    : Math.Max(0.0, u.Bounds.Left - currentBounds.Right);
+                var verticalOverlap = VerticalOverlapRatio(currentBounds, u.Bounds);
+
+                if (horizontalGap < 0.3 * charHeight && verticalOverlap > 0.5)
+                {
+                    // 合并到当前组：笔画累加、文本拼接（仅作候选兜底，主识别以整组重新 RecognizeAsync 为准）。
+                    current.Strokes.AddRange(u.Strokes);
+                    current.CombinedRecognizedText =
+                        (current.CombinedRecognizedText ?? string.Empty) + (u.Text ?? string.Empty);
+                    currentBounds = currentBounds.IsEmpty ? u.Bounds : Rect.Union(currentBounds, u.Bounds);
+                }
+                else
+                {
+                    groups.Add(current);
+                    current = new WordGroup();
+                    current.Strokes.AddRange(u.Strokes);
+                    current.CombinedRecognizedText = u.Text ?? string.Empty;
+                    currentBounds = u.Bounds;
+                }
+            }
+
+            groups.Add(current);
+
+            if (traceRecognition)
+                LogHandwriting("CJK 防拆字合并：InkWord 数=" + units.Count + " → 合并后组数=" + groups.Count);
+
+            return groups;
+        }
+
+        /// <summary>两框垂直相交高度占较小框高度的比例（0~1），用于判定是否同一行同一字。</summary>
+        private static double VerticalOverlapRatio(Rect a, Rect b)
+        {
+            if (a.IsEmpty || b.IsEmpty) return 0;
+            var top = Math.Max(a.Top, b.Top);
+            var bottom = Math.Min(a.Bottom, b.Bottom);
+            var overlap = Math.Max(0.0, bottom - top);
+            var minH = Math.Min(a.Height, b.Height);
+            if (minH <= 0) return 0;
+            return overlap / minH;
+        }
+
         private sealed class NormalizedHandwritingInput
         {
             public Stroke Original { get; set; }
             public Stroke Analysis { get; set; }
+        }
+
+        /// <summary>
+        /// C1 合并产物：一个或多个 InkWord 的笔画合集 + 拼接的 RecognizedText（仅作候选兜底，
+        /// 主识别以整组重新 RecognizeAsync 取 GetTextCandidates 为准）。
+        /// </summary>
+        private sealed class WordGroup
+        {
+            public List<Stroke> Strokes { get; } = new List<Stroke>();
+            public string CombinedRecognizedText { get; set; } = string.Empty;
         }
 
         private static List<NormalizedHandwritingInput> CreateNormalizedHandwritingInputs(StrokeCollection strokes)
@@ -253,6 +366,11 @@ namespace Ink_Canvas.Helpers
             var inputs = new List<NormalizedHandwritingInput>();
             if (strokes == null || strokes.Count == 0)
                 return inputs;
+
+            // CJK：一字多笔、部件间距本就大于拉丁字母间距。行内 Y 缩放会改变部件相对位置、
+            // 进一步误导 InkAnalyzer 的水平间距分词（把一字拆成多个 InkWord）。CJK 下跳过 Y 归一化，
+            // 保留原始几何比例；拉丁/西文仍做行高归一化（其分词本就按词间距，归一化有益）。
+            var cjkActive = HandwritingRecognitionTuning.IsCjkRecognizerActive;
 
             var valid = strokes.Cast<Stroke>()
                 .Where(s => s?.StylusPoints != null && s.StylusPoints.Count > 0)
@@ -302,10 +420,12 @@ namespace Ink_Canvas.Helpers
                     rowBounds = rowBounds.IsEmpty ? stroke.GetBounds() : Rect.Union(rowBounds, stroke.GetBounds());
 
                 var rowHeight = Math.Max(1.0, rowBounds.Height);
-                var scaleY = Math.Max(0.5, Math.Min(2.0, referenceHeight / rowHeight));
+                // CJK 不做行内 Y 缩放（scaleY=1.0）；西文保持原归一化逻辑。
+                var scaleY = cjkActive ? 1.0 : Math.Max(0.5, Math.Min(2.0, referenceHeight / rowHeight));
                 var rowCenter = rowBounds.Top + rowBounds.Height / 2.0;
                 var angle = GetRowAngle(row);
-                var rotate = Math.Abs(angle) > 20.0 * Math.PI / 180.0;
+                // CJK 下也不做倾斜矫正（旋转同样改变部件相对位置，且 CJK 通常横平竖直书写）。
+                var rotate = !cjkActive && Math.Abs(angle) > 20.0 * Math.PI / 180.0;
                 var transform = new Matrix();
                 transform.Translate(-rowBounds.Left, -rowCenter);
                 if (rotate)
