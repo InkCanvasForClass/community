@@ -273,6 +273,7 @@
     <Resource Include="Resources\DeveloperAvatars\PrefacedCorg.jpg" />
     <Resource Include="Resources\DeveloperAvatars\PANDA-JSR.jpg" />
     <Resource Include="Resources\DeveloperAvatars\Super-Yyt.png" />
+    <Resource Include="Resources\DeveloperAvatars\AstrZero.png" />
   </ItemGroup>
 <ItemGroup>
     <Resource Include="Resources\Icons-png\EasiCamera.png" />
