@@ -1,3 +1,4 @@
+using DirectShowLib.BDA;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Newtonsoft.Json;
 using System;
@@ -9,6 +10,7 @@ using System.Management;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Win32;
 
 namespace Ink_Canvas.Helpers
 {

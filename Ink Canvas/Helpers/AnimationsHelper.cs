@@ -4,6 +4,9 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Ink_Canvas.Helpers
 {
@@ -31,19 +34,19 @@ namespace Ink_Canvas.Helpers
                         var hwnd = source.Handle;
 
                         // 获取当前窗口位置
-                        if (NativeWindowHelper.GetWindowRect(hwnd, out NativeWindowHelper.RECT rect))
+                        if (PInvoke.GetWindowRect(new HWND(hwnd), out RECT rect))
                         {
                             // 使用相同的参数调用 SetWindowPos，但加上 SWP_SHOWWINDOW
                             // 这会强制窗口管理器重新评估并更新窗口位置
-                            NativeWindowHelper.SetWindowPos(
-                                hwnd,
-                                HWND_TOP,
-                                rect.Left, rect.Top,
-                                rect.Right - rect.Left,
-                                rect.Bottom - rect.Top,
-                                NativeWindowHelper.SWP_NOACTIVATE | NativeWindowHelper.SWP_SHOWWINDOW);
+                            PInvoke.SetWindowPos(
+                                new HWND(hwnd),
+                                new HWND(HWND_TOP),
+                                rect.left, rect.top,
+                                rect.right - rect.left,
+                                rect.bottom - rect.top,
+                                SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE | SET_WINDOW_POS_FLAGS.SWP_SHOWWINDOW);
 
-                            System.Diagnostics.Debug.WriteLine($"[PopupZOrder] Force refreshed position: ({rect.Left}, {rect.Top})");
+                            System.Diagnostics.Debug.WriteLine($"[PopupZOrder] Force refreshed position: ({rect.left}, {rect.top})");
                         }
                     }
                     catch (Exception ex)
@@ -78,9 +81,9 @@ namespace Ink_Canvas.Helpers
                         var hwnd = source.Handle;
 
                         // 策略1：直接设置为 TOPMOST（最高优先级）
-                        NativeWindowHelper.SetWindowPos(hwnd, NativeWindowHelper.HWND_TOPMOST,
+                        PInvoke.SetWindowPos(new HWND(hwnd), new HWND(NativeWindowHelper.HWND_TOPMOST),
                             0, 0, 0, 0,
-                            NativeWindowHelper.SWP_NOMOVE | NativeWindowHelper.SWP_NOSIZE | NativeWindowHelper.SWP_NOACTIVATE | NativeWindowHelper.SWP_SHOWWINDOW);
+                            SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE | SET_WINDOW_POS_FLAGS.SWP_SHOWWINDOW);
 
                         System.Diagnostics.Debug.WriteLine($"[PopupZOrder] Set TOPMOST for popup");
                     }
@@ -127,9 +130,9 @@ namespace Ink_Canvas.Helpers
 
                         var hwnd = source.Handle;
 
-                        NativeWindowHelper.SetWindowPos(hwnd, NativeWindowHelper.HWND_TOPMOST,
+                        PInvoke.SetWindowPos(new HWND(hwnd), new HWND(NativeWindowHelper.HWND_TOPMOST),
                             0, 0, 0, 0,
-                            NativeWindowHelper.SWP_NOMOVE | NativeWindowHelper.SWP_NOSIZE | NativeWindowHelper.SWP_NOACTIVATE | NativeWindowHelper.SWP_SHOWWINDOW);
+                            SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE | SET_WINDOW_POS_FLAGS.SWP_SHOWWINDOW);
                     }
                     catch (Exception ex)
                     {

@@ -5,6 +5,9 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Ink_Canvas.Helpers
 {
@@ -410,7 +413,7 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         private static bool IsTopmostApplied(IntPtr handle)
         {
-            int exStyle = NativeWindowHelper.GetWindowLong(handle, NativeWindowHelper.GWL_EXSTYLE);
+            int exStyle = PInvoke.GetWindowLong(new HWND(handle), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
             return (exStyle & NativeWindowHelper.WS_EX_TOPMOST) != 0;
         }
 
@@ -421,10 +424,10 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                var currentThreadId = NativeWindowHelper.GetCurrentThreadId();
+                var currentThreadId = PInvoke.GetCurrentThreadId();
                 var popupHandles = new List<IntPtr>();
 
-                NativeWindowHelper.EnumThreadWindows(currentThreadId, (hWnd, _) =>
+                PInvoke.EnumThreadWindows(currentThreadId, (hWnd, _) =>
                 {
                     if (!NativeWindowHelper.IsWindowReady(hWnd)) return true;
 
@@ -439,8 +442,8 @@ namespace Ink_Canvas.Helpers
 
                 foreach (var hwnd in popupHandles)
                 {
-                    NativeWindowHelper.SetWindowPos(hwnd, NativeWindowHelper.HWND_TOPMOST, 0, 0, 0, 0,
-                        NativeWindowHelper.SWP_NOMOVE | NativeWindowHelper.SWP_NOSIZE | NativeWindowHelper.SWP_NOACTIVATE | NativeWindowHelper.SWP_SHOWWINDOW | NativeWindowHelper.SWP_NOOWNERZORDER);
+                    PInvoke.SetWindowPos(new HWND(hwnd), new HWND(NativeWindowHelper.HWND_TOPMOST), 0, 0, 0, 0,
+                        SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE | SET_WINDOW_POS_FLAGS.SWP_SHOWWINDOW | SET_WINDOW_POS_FLAGS.SWP_NOOWNERZORDER);
                 }
             }
             catch (Exception ex)
@@ -465,7 +468,7 @@ namespace Ink_Canvas.Helpers
 
         private static void CleanupInvalidWindowsCore()
         {
-            foreach (var managedWindow in ManagedWindows.Where(w => w.Handle != IntPtr.Zero && !NativeWindowHelper.IsWindow(w.Handle)).ToList())
+            foreach (var managedWindow in ManagedWindows.Where(w => w.Handle != IntPtr.Zero && !PInvoke.IsWindow(new HWND(w.Handle))).ToList())
             {
                 DetachWindowEvents(managedWindow.Window);
                 ManagedWindows.Remove(managedWindow);

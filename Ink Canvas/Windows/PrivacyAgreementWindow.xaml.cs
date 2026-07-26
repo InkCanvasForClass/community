@@ -7,6 +7,8 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using Windows.Win32;
+using Windows.Win32.Foundation;
 
 namespace Ink_Canvas
 {
@@ -34,7 +36,7 @@ namespace Ink_Canvas
                     Activate();
                     Focus();
                     Topmost = true;
-                    SetForegroundWindow(new WindowInteropHelper(this).Handle);
+                    PInvoke.SetForegroundWindow(new HWND(new WindowInteropHelper(this).Handle));
                 }), DispatcherPriority.Loaded);
 
                 string privacyText = null;
@@ -73,8 +75,8 @@ namespace Ink_Canvas
             }
         }
 
-        [DllImport("user32.dll")]
-        private static extern bool SetForegroundWindow(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //private static extern bool SetForegroundWindow(IntPtr hWnd);
 
         private void Window_Closing(object sender, CancelEventArgs e) { }
 

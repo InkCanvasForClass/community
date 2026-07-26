@@ -18,6 +18,7 @@ using System.Windows.Ink;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Windows.Win32;
 using Application = System.Windows.Application;
 using File = System.IO.File;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
@@ -29,62 +30,62 @@ namespace Ink_Canvas
     public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
         #region Win32 API Declarations
-        [DllImport("user32.dll")]
-        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+        //[DllImport("user32.dll")]
+        //private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
-        [DllImport("user32.dll")]
-        private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+        //[DllImport("user32.dll")]
+        //private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 
-        [DllImport("user32.dll")]
-        private static extern uint GetDpiForWindow(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //private static extern uint GetDpiForWindow(IntPtr hWnd);
 
-        [StructLayout(LayoutKind.Sequential)]
-        private struct RECT
-        {
-            public int Left, Top, Right, Bottom;
-        }
+        //[StructLayout(LayoutKind.Sequential)]
+        //private struct RECT
+        //{
+        //    public int Left, Top, Right, Bottom;
+        //}
 
-        [DllImport("user32.dll")]
-        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+        //[DllImport("user32.dll")]
+        //private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
-        [DllImport("user32.dll")]
-        private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+        //[DllImport("user32.dll")]
+        //private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
 
-        [DllImport("user32.dll")]
-        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+        //[DllImport("user32.dll")]
+        //private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
 
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool IsWindowVisible(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //[return: MarshalAs(UnmanagedType.Bool)]
+        //private static extern bool IsWindowVisible(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        private static extern bool IsIconic(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //private static extern bool IsIconic(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        private static extern bool IsZoomed(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //private static extern bool IsZoomed(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetForegroundWindow();
+        //[DllImport("user32.dll")]
+        //private static extern IntPtr GetForegroundWindow();
 
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetWindow(IntPtr hWnd, uint uCmd);
+        //[DllImport("user32.dll")]
+        //private static extern IntPtr GetWindow(IntPtr hWnd, uint uCmd);
 
-        [DllImport("user32.dll")]
-        private static extern bool IsWindow(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //private static extern bool IsWindow(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        private static extern bool GetWindowRect(IntPtr hWnd, out ForegroundWindowInfo.RECT lpRect);
+        //[DllImport("user32.dll")]
+        //private static extern bool GetWindowRect(IntPtr hWnd, out ForegroundWindowInfo.RECT lpRect);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
+        //[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        //private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
 
-        private const int GWL_STYLE = -16;
-        private const int WS_VISIBLE = 0x10000000;
-        private const int WS_MINIMIZE = 0x20000000;
-        private const uint GW_HWNDNEXT = 2;
-        private const uint GW_HWNDPREV = 3;
+        //private const int GWL_STYLE = -16;
+        //private const int WS_VISIBLE = 0x10000000;
+        //private const int WS_MINIMIZE = 0x20000000;
+        //private const uint GW_HWNDNEXT = 2;
+        //private const uint GW_HWNDPREV = 3;
 
-        private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+        //private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
         #endregion
 
         #region PPT Application Variables
@@ -896,13 +897,13 @@ namespace Ink_Canvas
             try
             {
                 bool found = false;
-                EnumWindows((hWnd, _) =>
+                PInvoke.EnumWindows((hWnd, _) =>
                 {
-                    if (!IsWindow(hWnd) || !IsWindowVisible(hWnd))
+                    if (!PInvoke.IsWindow(hWnd) || !PInvoke.IsWindowVisible(hWnd))
                         return true;
 
                     var cls = new StringBuilder(256);
-                    if (GetClassName(hWnd, cls, cls.Capacity) == 0)
+                    if (PInvoke.GetClassName(hWnd, new Span<char>(cls.ToString().ToCharArray())) == 0)
                         return true;
 
                     if (!string.Equals(cls.ToString(), PowerPointSlideShowWindowClassName, StringComparison.OrdinalIgnoreCase))
@@ -910,7 +911,7 @@ namespace Ink_Canvas
 
                     try
                     {
-                        GetWindowThreadProcessId(hWnd, out uint pid);
+                        PInvoke.GetWindowThreadProcessId(hWnd, out uint pid);
                         using (var proc = Process.GetProcessById((int)pid))
                         {
                             var name = proc.ProcessName;
@@ -1707,14 +1708,14 @@ namespace Ink_Canvas
             IntPtr best = IntPtr.Zero;
             try
             {
-                EnumWindows((hWnd, lParam) =>
+                PInvoke.EnumWindows((hWnd, lParam) =>
                 {
                     if (hWnd == IntPtr.Zero) return true;
-                    if (!IsWindowVisible(hWnd)) return true;
-                    if (IsIconic(hWnd)) return true;
+                    if (!PInvoke.IsWindowVisible(hWnd)) return true;
+                    if (PInvoke.IsIconic(hWnd)) return true;
 
                     var sb = new StringBuilder(64);
-                    if (GetClassName(hWnd, sb, sb.Capacity) == 0) return true;
+                    if (PInvoke.GetClassName(hWnd, new Span<char>(sb.ToString().ToCharArray())) == 0) return true;
                     if (!string.Equals(sb.ToString(), PowerPointSlideShowWindowClassName, StringComparison.Ordinal)) return true;
 
                     best = hWnd;

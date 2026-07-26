@@ -14,6 +14,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Navigation;
 using System.Windows.Threading;
+using Windows.Win32;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using Screen = System.Windows.Forms.Screen;
 
@@ -196,9 +197,9 @@ namespace Ink_Canvas.Windows.SettingsViews
                 _pageTypes.Clear();
             };
 
-            this.TouchUp += (s, e) => ShowCursor(true);
-            this.MouseEnter += (s, e) => ShowCursor(true);
-            this.Activated += (s, e) => ShowCursor(true);
+            this.TouchUp += (s, e) => PInvoke.ShowCursor(true);
+            this.MouseEnter += (s, e) => PInvoke.ShowCursor(true);
+            this.Activated += (s, e) => PInvoke.ShowCursor(true);
 
             this.StateChanged += (sender, e) =>
             {
@@ -280,8 +281,8 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         #region 修复触摸屏鼠标指针消失问题
 
-        [System.Runtime.InteropServices.DllImport("user32.dll")]
-        private static extern int ShowCursor(bool bShow);
+        //[System.Runtime.InteropServices.DllImport("user32.dll")]
+        //private static extern int ShowCursor(bool bShow);
         #endregion
 
         #region 高DPI/多屏自适应窗口控制

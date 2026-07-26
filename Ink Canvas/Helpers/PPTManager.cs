@@ -11,6 +11,8 @@ using System.Text;
 using System.Threading;
 using System.Timers;
 using System.Windows.Threading;
+using Windows.Win32;
+using Windows.Win32.Foundation;
 using Application = System.Windows.Application;
 using Timer = System.Timers.Timer;
 
@@ -776,7 +778,7 @@ namespace Ink_Canvas.Helpers
             AppendObjectProbe(sb, "CurrentSlides", CurrentSlides);
             AppendObjectProbe(sb, "CurrentSlide", CurrentSlide);
             AppendProcessProbe(sb);
-            AppendWindowProbe(sb, "ForegroundWindow", GetForegroundWindow());
+            AppendWindowProbe(sb, "ForegroundWindow", PInvoke.GetForegroundWindow());
 
             if (application != null && SafeIsComObject(application))
             {
@@ -852,7 +854,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 var info = GetWindowInfo(hWnd);
-                sb.AppendLine($"{name}: HWND=0x{hWnd.ToInt64():X}, PID={info.ProcessId}, Process={info.ProcessName}, Visible={info.IsVisible}, Minimized={info.IsMinimized}, Maximized={info.IsMaximized}, Rect={info.Rect.Left},{info.Rect.Top},{info.Rect.Right},{info.Rect.Bottom}, Class='{info.ClassName}', Title='{info.Title}'");
+                sb.AppendLine($"{name}: HWND=0x{hWnd.ToInt64():X}, PID={info.ProcessId}, Process={info.ProcessName}, Visible={info.IsVisible}, Minimized={info.IsMinimized}, Maximized={info.IsMaximized}, Rect={info.Rect.left},{info.Rect.top},{info.Rect.right},{info.Rect.bottom}, Class='{info.ClassName}', Title='{info.Title}'");
             }
             catch (Exception ex)
             {
@@ -1607,7 +1609,7 @@ namespace Ink_Canvas.Helpers
                     PPTApplication.Path.Contains("WPS Office\\"))
                 {
                     uint processId;
-                    GetWindowThreadProcessId((IntPtr)PPTApplication.HWND, out processId);
+                    PInvoke.GetWindowThreadProcessId(new HWND(new IntPtr(PPTApplication.HWND)), out processId);
                     wpsProcess = Process.GetProcessById((int)processId);
                 }
 
@@ -1727,12 +1729,12 @@ namespace Ink_Canvas.Helpers
             try
             {
                 // 快速检查：直接检查前台窗口
-                var foregroundWindow = GetForegroundWindow();
+                var foregroundWindow = PInvoke.GetForegroundWindow();
                 if (foregroundWindow == IntPtr.Zero) return false;
 
                 // 获取前台窗口的进程ID
                 uint processId;
-                GetWindowThreadProcessId(foregroundWindow, out processId);
+                PInvoke.GetWindowThreadProcessId(foregroundWindow, out processId);
 
                 // 如果前台窗口就是我们监控的WPS进程，则认为仍然活跃
                 if (processId == _wpsProcess?.Id)
@@ -1806,11 +1808,11 @@ namespace Ink_Canvas.Helpers
             {
                 var allWindows = new List<WpsWindowInfo>();
 
-                EnumWindows((hWnd, lParam) =>
+                PInvoke.EnumWindows((hWnd, lParam) =>
                 {
                     try
                     {
-                        if (IsWindow(hWnd) && IsWindowVisible(hWnd))
+                        if (PInvoke.IsWindow(hWnd) && PInvoke.IsWindowVisible(hWnd))
                         {
                             var windowInfo = GetWindowInfo(hWnd);
                             if (IsWpsWindow(windowInfo) && !string.IsNullOrEmpty(windowInfo.Title))
@@ -2003,50 +2005,50 @@ namespace Ink_Canvas.Helpers
         #endregion
 
         #region WPS Window Detection
-        [DllImport("user32.dll")]
-        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+        //[DllImport("user32.dll")]
+        //private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
-        [DllImport("user32.dll")]
-        private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+        //[DllImport("user32.dll")]
+        //private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
 
-        [DllImport("user32.dll")]
-        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+        //[DllImport("user32.dll")]
+        //private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
 
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool IsWindowVisible(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //[return: MarshalAs(UnmanagedType.Bool)]
+        //private static extern bool IsWindowVisible(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        private static extern bool IsIconic(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //private static extern bool IsIconic(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        private static extern bool IsZoomed(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //private static extern bool IsZoomed(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetForegroundWindow();
+        //[DllImport("user32.dll")]
+        //private static extern IntPtr GetForegroundWindow();
 
-        [DllImport("user32.dll")]
-        private static extern bool IsWindow(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //private static extern bool IsWindow(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+        //[DllImport("user32.dll")]
+        //private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 
-        [StructLayout(LayoutKind.Sequential)]
-        public struct RECT
-        {
-            public int Left;
-            public int Top;
-            public int Right;
-            public int Bottom;
+        //[StructLayout(LayoutKind.Sequential)]
+        //public struct RECT
+        //{
+        //    public int Left;
+        //    public int Top;
+        //    public int Right;
+        //    public int Bottom;
 
-            public int Width => Right - Left;
-            public int Height => Bottom - Top;
-        }
+        //    public int Width => Right - Left;
+        //    public int Height => Bottom - Top;
+        //}
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
+        //[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        //private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
 
-        private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+        //private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 
         private class WpsWindowInfo
         {
@@ -2065,8 +2067,8 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                var foregroundHwnd = GetForegroundWindow();
-                if (foregroundHwnd != IntPtr.Zero && IsWindow(foregroundHwnd))
+                var foregroundHwnd = PInvoke.GetForegroundWindow();
+                if (foregroundHwnd != IntPtr.Zero && PInvoke.IsWindow(foregroundHwnd))
                 {
                     var windowInfo = GetWindowInfo(foregroundHwnd);
                     if (IsWpsWindow(windowInfo))
@@ -2084,31 +2086,32 @@ namespace Ink_Canvas.Helpers
 
         private WpsWindowInfo GetWindowInfo(IntPtr hWnd)
         {
+            HWND hwnd = new HWND(hWnd);
             var windowInfo = new WpsWindowInfo
             {
                 Handle = hWnd,
-                IsVisible = IsWindowVisible(hWnd),
-                IsMinimized = IsIconic(hWnd),
-                IsMaximized = IsZoomed(hWnd)
+                IsVisible = PInvoke.IsWindowVisible(hwnd),
+                IsMinimized = PInvoke.IsIconic(hwnd),
+                IsMaximized = PInvoke.IsZoomed(hwnd)
             };
 
             // 获取窗口标题
             var windowTitle = new StringBuilder(256);
-            GetWindowText(hWnd, windowTitle, 256);
+            PInvoke.GetWindowText(hwnd, new Span<char>(windowTitle.ToString().ToCharArray()));
             windowInfo.Title = windowTitle.ToString().Trim();
 
             // 获取窗口类名
             var className = new StringBuilder(256);
-            GetClassName(hWnd, className, 256);
+            PInvoke.GetClassName(hwnd, new Span<char>(className.ToString().ToCharArray()));
             windowInfo.ClassName = className.ToString().Trim();
 
             // 获取窗口位置
-            GetWindowRect(hWnd, out RECT rect);
+            PInvoke.GetWindowRect(hwnd, out RECT rect);
             windowInfo.Rect = rect;
 
             // 获取进程ID
             uint processId;
-            GetWindowThreadProcessId(hWnd, out processId);
+            PInvoke.GetWindowThreadProcessId(hwnd, out processId);
             windowInfo.ProcessId = processId;
 
             // 获取进程名
@@ -2149,7 +2152,7 @@ namespace Ink_Canvas.Helpers
             bool hasWpsTitle = wpsKeywords.Any(keyword => title.Contains(keyword));
             bool hasWpsClass = wpsKeywords.Any(keyword => className.Contains(keyword));
             bool isWpsClass = className.Contains("wps") || className.Contains("kingsoft") || className.Contains("wpp");
-            bool hasValidSize = (windowInfo.Rect.Right - windowInfo.Rect.Left) > 0 && (windowInfo.Rect.Bottom - windowInfo.Rect.Top) > 0;
+            bool hasValidSize = (windowInfo.Rect.right - windowInfo.Rect.left) > 0 && (windowInfo.Rect.bottom - windowInfo.Rect.top) > 0;
 
             return (hasWpsTitle || hasWpsClass || isWpsClass) && hasValidSize;
         }
@@ -2248,7 +2251,7 @@ namespace Ink_Canvas.Helpers
 
                 if (currentForegroundWindow != null)
                 {
-                    if (IsWindow(currentForegroundWindow.Handle) && IsWindowVisible(currentForegroundWindow.Handle))
+                    if (PInvoke.IsWindow(new HWND(currentForegroundWindow.Handle)) && PInvoke.IsWindowVisible(new HWND(currentForegroundWindow.Handle)))
                     {
                         return true;
                     }
@@ -2259,7 +2262,7 @@ namespace Ink_Canvas.Helpers
                 foreach (var process in wpsProcesses)
                 {
                     var windows = GetWpsWindowsByProcess(process.Id);
-                    if (windows.Any(w => w.IsVisible && !w.IsMinimized && w.Handle == GetForegroundWindow()))
+                    if (windows.Any(w => w.IsVisible && !w.IsMinimized && w.Handle == PInvoke.GetForegroundWindow()))
                     {
                         return true;
                     }
@@ -2280,14 +2283,14 @@ namespace Ink_Canvas.Helpers
 
             try
             {
-                EnumWindows((hWnd, lParam) =>
+                PInvoke.EnumWindows((hWnd, lParam) =>
                 {
                     try
                     {
-                        if (!IsWindow(hWnd)) return true;
+                        if (!PInvoke.IsWindow(hWnd)) return true;
 
                         uint windowProcessId;
-                        GetWindowThreadProcessId(hWnd, out windowProcessId);
+                        PInvoke.GetWindowThreadProcessId(hWnd, out windowProcessId);
 
                         if ((int)windowProcessId == processId)
                         {

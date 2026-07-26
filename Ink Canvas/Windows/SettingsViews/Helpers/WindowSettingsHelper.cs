@@ -4,6 +4,9 @@ using System.Diagnostics;
 using System.Security.Principal;
 using System.Windows;
 using System.Windows.Threading;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Ink_Canvas.Windows.SettingsViews.Helpers
 {
@@ -103,17 +106,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         public static void ApplyNoFocusMode(Window window)
         {
             var hwnd = new System.Windows.Interop.WindowInteropHelper(window).Handle;
-            int exStyle = NativeWindowHelper.GetWindowLong(hwnd, NativeWindowHelper.GWL_EXSTYLE);
+            int exStyle = PInvoke.GetWindowLong(new HWND(hwnd), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
 
             bool shouldBeNoFocus = !IsTemporarilyDisablingNoFocusMode && SettingsManager.Settings.Advanced.IsNoFocusMode;
 
             if (shouldBeNoFocus)
             {
-                NativeWindowHelper.SetWindowLong(hwnd, NativeWindowHelper.GWL_EXSTYLE, exStyle | NativeWindowHelper.WS_EX_NOACTIVATE);
+                PInvoke.SetWindowLong(new HWND(hwnd), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, exStyle | NativeWindowHelper.WS_EX_NOACTIVATE);
             }
             else
             {
-                NativeWindowHelper.SetWindowLong(hwnd, NativeWindowHelper.GWL_EXSTYLE, exStyle & ~NativeWindowHelper.WS_EX_NOACTIVATE);
+                PInvoke.SetWindowLong(new HWND(hwnd), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, exStyle & ~NativeWindowHelper.WS_EX_NOACTIVATE);
             }
         }
 

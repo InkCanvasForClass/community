@@ -5,6 +5,9 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Ink_Canvas.Helpers
 {
@@ -252,13 +255,13 @@ namespace Ink_Canvas.Helpers
 
         private IntPtr GetPopupHwnd(Popup popup)
         {
-            if (_hwndCache.TryGetValue(popup, out IntPtr cached) && NativeWindowHelper.IsWindow(cached))
+            if (_hwndCache.TryGetValue(popup, out IntPtr cached) && PInvoke.IsWindow(new HWND(cached)))
             {
                 return cached;
             }
 
             var source = PresentationSource.FromVisual(popup.Child) as HwndSource;
-            if (source?.Handle == IntPtr.Zero || !NativeWindowHelper.IsWindow(source.Handle))
+            if (source?.Handle == IntPtr.Zero || !PInvoke.IsWindow(new HWND(source.Handle)))
             {
                 _hwndCache.Remove(popup);
                 return IntPtr.Zero;
@@ -282,25 +285,25 @@ namespace Ink_Canvas.Helpers
 
                 if (shouldBeTopmost)
                 {
-                    NativeWindowHelper.SetWindowPos(popupHwnd, NativeWindowHelper.HWND_TOPMOST, 0, 0, 0, 0,
-                        NativeWindowHelper.SWP_NOMOVE | NativeWindowHelper.SWP_NOSIZE | NativeWindowHelper.SWP_NOACTIVATE | NativeWindowHelper.SWP_NOOWNERZORDER);
+                    PInvoke.SetWindowPos(new HWND(popupHwnd), new HWND(NativeWindowHelper.HWND_TOPMOST), 0, 0, 0, 0,
+                        SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE | SET_WINDOW_POS_FLAGS.SWP_NOOWNERZORDER);
 
                     if (_ownerHwnd != IntPtr.Zero)
                     {
-                        NativeWindowHelper.SetWindowPos(_ownerHwnd, popupHwnd, 0, 0, 0, 0,
-                            NativeWindowHelper.SWP_NOMOVE | NativeWindowHelper.SWP_NOSIZE | NativeWindowHelper.SWP_NOACTIVATE);
+                        PInvoke.SetWindowPos(new HWND(_ownerHwnd), new HWND(popupHwnd), 0, 0, 0, 0,
+                            SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE);
                     }
                 }
                 else
                 {
-                    int exStyle = NativeWindowHelper.GetWindowLong(popupHwnd, NativeWindowHelper.GWL_EXSTYLE);
+                    int exStyle = PInvoke.GetWindowLong(new HWND(popupHwnd), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
                     if ((exStyle & NativeWindowHelper.WS_EX_TOPMOST) != 0)
                     {
-                        NativeWindowHelper.SetWindowLong(popupHwnd, NativeWindowHelper.GWL_EXSTYLE, exStyle & ~NativeWindowHelper.WS_EX_TOPMOST);
+                        PInvoke.SetWindowLong(new HWND(popupHwnd), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, exStyle & ~NativeWindowHelper.WS_EX_TOPMOST);
                     }
 
-                    NativeWindowHelper.SetWindowPos(popupHwnd, NativeWindowHelper.HWND_NOTOPMOST, 0, 0, 0, 0,
-                        NativeWindowHelper.SWP_NOMOVE | NativeWindowHelper.SWP_NOSIZE | NativeWindowHelper.SWP_NOACTIVATE);
+                    PInvoke.SetWindowPos(new HWND(popupHwnd), new HWND(NativeWindowHelper.HWND_NOTOPMOST), 0, 0, 0, 0,
+                        SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE);
                 }
             }
             catch (Exception ex)
@@ -322,8 +325,8 @@ namespace Ink_Canvas.Helpers
                         var source = PresentationSource.FromVisual(childPopup.Child) as HwndSource;
                         if (source?.Handle != IntPtr.Zero)
                         {
-                            NativeWindowHelper.SetWindowPos(source.Handle, NativeWindowHelper.HWND_TOPMOST, 0, 0, 0, 0,
-                                NativeWindowHelper.SWP_NOMOVE | NativeWindowHelper.SWP_NOSIZE | NativeWindowHelper.SWP_NOACTIVATE | NativeWindowHelper.SWP_NOOWNERZORDER);
+                            PInvoke.SetWindowPos(new HWND(source.Handle), new HWND(NativeWindowHelper.HWND_TOPMOST), 0, 0, 0, 0,
+                                SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE | SET_WINDOW_POS_FLAGS.SWP_NOOWNERZORDER);
                         }
                     }
                 }
