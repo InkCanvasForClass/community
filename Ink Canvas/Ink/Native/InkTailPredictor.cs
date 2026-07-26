@@ -33,7 +33,7 @@ namespace Ink_Canvas.Ink.Native
 
         // 拐弯抑制：夹角在自由角内不抑制，超过满抑制角按最小比例保留。
         private const double TurnFreeAngleDegrees = 12.0;
-        private const double TurnFullAngleDegrees = 75.0;
+        private const double TurnFullAngleDegrees = 60.0;
         private const double MinTurnScale = 0.2;
 
         // 报点停滞抑制：间隔越大速度越陈旧，外推越不可信。
@@ -130,7 +130,7 @@ namespace Ink_Canvas.Ink.Native
         }
 
         /// <summary>
-        /// 视界 = 速度映射基线 × 拐弯抑制 × 停滞抑制，最终夹在 10~50ms。
+        /// 视界 = 速度映射基线 × 拐弯抑制 × 停滞抑制，再受最大外推距离约束，最终夹在 10~50ms。
         /// </summary>
         private static double ComputeAdaptiveHorizonMicroseconds(
             IReadOnlyList<RealInkPoint> realPoints,
@@ -145,6 +145,13 @@ namespace Ink_Canvas.Ink.Native
                 + (MaxHorizonMilliseconds - MinHorizonMilliseconds) * speedT;
             horizon *= motion.TurnScale;
             horizon *= ComputeStaleScale(realPoints);
+
+            // 距离上限换算成时长一并纳入，避免积分循环中途截断导致实际视界短于预期。
+            if (motion.Speed > 0)
+            {
+                var distanceLimitedMs = MaxPredictionDistancePx / motion.Speed * 1000.0;
+                horizon = Math.Min(horizon, distanceLimitedMs);
+            }
 
             horizon = Math.Clamp(horizon, MinHorizonMilliseconds, MaxHorizonMilliseconds);
             return horizon * 1000.0;

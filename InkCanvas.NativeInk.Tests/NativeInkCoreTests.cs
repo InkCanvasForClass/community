@@ -60,6 +60,7 @@ namespace InkCanvas.NativeInk.Tests
             Run(nameof(FirstPointLookAheadMatchesSegmentSpeed), FirstPointLookAheadMatchesSegmentSpeed);
             Run(nameof(PredictionHorizonStaysWithinAdaptiveBounds), PredictionHorizonStaysWithinAdaptiveBounds);
             Run(nameof(PredictionHorizonGrowsWithSpeed), PredictionHorizonGrowsWithSpeed);
+            Run(nameof(PredictionHorizonIsCappedByReach), PredictionHorizonIsCappedByReach);
             Run(nameof(PredictionHorizonShrinksOnSharpTurn), PredictionHorizonShrinksOnSharpTurn);
             Run(nameof(PredictionHorizonShrinksOnStaleSamples), PredictionHorizonShrinksOnStaleSamples);
             Run(nameof(PredictionIsEmptyBelowMinimumSpeed), PredictionIsEmptyBelowMinimumSpeed);
@@ -905,6 +906,85 @@ namespace InkCanvas.NativeInk.Tests
             return points;
         }
 
+        /// <summary>
+        /// 沿 X 轴匀速直线：每段间隔 intervalMs，步进 stepPx，速度 = stepPx / intervalMs。
+        /// </summary>
+        private static RealInkPoint[] StraightStroke(
+            int count,
+            double stepPx,
+            double intervalMs)
+        {
+            var points = new RealInkPoint[count];
+            for (var i = 0; i < count; i++)
+            {
+                points[i] = new RealInkPoint(
+                    i * stepPx,
+                    0,
+                    0.5f,
+                    (long)(i * intervalMs * 1000.0));
+            }
+
+            return points;
+        }
+
+        /// <summary>
+        /// 最后一段才转向 +Y 的折线：模拟“笔尖此刻正在拐弯”。
+        /// </summary>
+        private static RealInkPoint[] CornerAtTipStroke(
+            int count,
+            double stepPx,
+            double intervalMs)
+        {
+            var points = new RealInkPoint[count];
+            double x = 0, y = 0;
+            for (var i = 0; i < count; i++)
+            {
+                points[i] = new RealInkPoint(x, y, 0.5f, (long)(i * intervalMs * 1000.0));
+                if (i < count - 2)
+                    x += stepPx;
+                else
+                    y += stepPx;
+            }
+
+            return points;
+        }
+
+        /// <summary>
+        /// 匀速圆弧：整笔总共转过 totalDegrees，用于连续曲率场景。
+        /// </summary>
+        private static RealInkPoint[] ArcStroke(
+            int count,
+            double stepPx,
+            double intervalMs,
+            double totalDegrees)
+        {
+            var points = new RealInkPoint[count];
+            var perSegment = totalDegrees / (count - 1) * Math.PI / 180.0;
+            double x = 0, y = 0, angle = 0;
+            for (var i = 0; i < count; i++)
+            {
+                points[i] = new RealInkPoint(x, y, 0.5f, (long)(i * intervalMs * 1000.0));
+                x += stepPx * Math.Cos(angle);
+                y += stepPx * Math.Sin(angle);
+                angle += perSegment;
+            }
+
+            return points;
+        }
+
+        /// <summary>
+        /// 预测笔尾覆盖的时长（毫秒）：最后一个预测点相对最后一个真实点的时间跨度。
+        /// </summary>
+        private static double HorizonMs(
+            IReadOnlyList<RealInkPoint> real,
+            IReadOnlyList<PredictedInkPoint> predicted)
+        {
+            if (predicted.Count == 0)
+                return 0;
+            var last = real[real.Count - 1].TimestampMicroseconds;
+            return (predicted[predicted.Count - 1].TimestampMicroseconds - last) / 1000.0;
+        }
+
         private static NativeInkController Controller(
             out NativeInkSessionManager manager,
             out WetInkCommandMailbox mailbox)
@@ -936,6 +1016,180 @@ namespace InkCanvas.NativeInk.Tests
         private static InkStrokeStyleSnapshot Style()
         {
             return new InkStrokeStyleSnapshot(0xFF112233, 5, 5, false, false, false, 0, 0.5f, 1, 1);
+        }
+
+        /// <summary>
+        /// 任何速度/曲率组合下，预测视界都必须落在 10~50ms 内。
+        /// </summary>
+        private static void PredictionHorizonStaysWithinAdaptiveBounds()
+        {
+            var intervals = new[] { 4.0, 8.0, 16.0, 33.0, 60.0 };
+            var steps = new[] { 1.0, 5.0, 20.0, 60.0, 200.0 };
+            var checkedCases = 0;
+            foreach (var intervalMs in intervals)
+            {
+                foreach (var stepPx in steps)
+                {
+                    foreach (var straight in new[] { true, false })
+                    {
+                        var real = straight
+                            ? StraightStroke(8, stepPx, intervalMs)
+                            : CornerAtTipStroke(8, stepPx, intervalMs);
+                        var predicted = InkTailPredictor.Build(real);
+                        if (predicted.Count == 0)
+                            continue;
+
+                        var horizon = HorizonMs(real, predicted);
+                        True(horizon >= InkTailPredictor.MinHorizonMilliseconds - 0.001);
+                        True(horizon <= InkTailPredictor.MaxHorizonMilliseconds + 0.001);
+                        checkedCases++;
+                    }
+                }
+            }
+
+            True(checkedCases >= 10);
+        }
+
+        /// <summary>
+        /// 慢写贴近下限、快写显著变长（快写时另受最大外推距离约束）。
+        /// </summary>
+        private static void PredictionHorizonGrowsWithSpeed()
+        {
+            // 约 250px/s：刚过最低预测速度，应贴近下限。
+            var slow = StraightStroke(8, 2, 8);
+            // 约 1250px/s：中速。
+            var medium = StraightStroke(8, 10, 8);
+            // 约 2500px/s：速度映射到满视界，且未被 140px 距离上限截断。
+            var fast = StraightStroke(8, 20, 8);
+
+            var slowHorizon = HorizonMs(slow, InkTailPredictor.Build(slow));
+            var mediumHorizon = HorizonMs(medium, InkTailPredictor.Build(medium));
+            var fastHorizon = HorizonMs(fast, InkTailPredictor.Build(fast));
+
+            True(slowHorizon > 0);
+            True(mediumHorizon > slowHorizon);
+            True(fastHorizon > mediumHorizon);
+            True(slowHorizon <= 15.0);
+            True(fastHorizon >= 45.0);
+        }
+
+        /// <summary>
+        /// 极快书写时距离上限收敛视界，避免甩出过长的笔尾。
+        /// </summary>
+        private static void PredictionHorizonIsCappedByReach()
+        {
+            // 约 10000px/s：若取满 50ms 视界，笔尾将达 500px。
+            var veryFast = StraightStroke(8, 80, 8);
+            var predicted = InkTailPredictor.Build(veryFast);
+
+            True(predicted.Count > 0);
+            True(HorizonMs(veryFast, predicted) < InkTailPredictor.MaxHorizonMilliseconds);
+            // 允许一个步长的越界余量。
+            True(Reach(veryFast, predicted) <= 200.0);
+        }
+
+        /// <summary>
+        /// 相同速率下，笔尖正在转弯时的视界与外推距离都必须明显小于直线；
+        /// 连续弧线也应有一定收敛。
+        /// </summary>
+        private static void PredictionHorizonShrinksOnSharpTurn()
+        {
+            var straight = StraightStroke(8, 20, 8);
+            var turning = CornerAtTipStroke(8, 20, 8);
+
+            var straightPredicted = InkTailPredictor.Build(straight);
+            var turningPredicted = InkTailPredictor.Build(turning);
+
+            True(HorizonMs(turning, turningPredicted) < HorizonMs(straight, straightPredicted) * 0.75);
+            True(Reach(turning, turningPredicted) < Reach(straight, straightPredicted) * 0.75);
+
+            // 连续 180° 弧线：每段夹角较小，抑制更温和但仍应收敛。
+            var arc = ArcStroke(8, 20, 8, 180);
+            var arcPredicted = InkTailPredictor.Build(arc);
+            True(HorizonMs(arc, arcPredicted) < HorizonMs(straight, straightPredicted));
+        }
+
+        /// <summary>
+        /// 报点停滞（间隔远大于正常帧）时速度已陈旧，视界应收敛。
+        /// </summary>
+        private static void PredictionHorizonShrinksOnStaleSamples()
+        {
+            var fresh = StraightStroke(8, 20, 8);
+            // 同一速率（2500px/s）但报点间隔 48ms，属于停滞样本。
+            var stale = StraightStroke(8, 120, 48);
+
+            var freshHorizon = HorizonMs(fresh, InkTailPredictor.Build(fresh));
+            var staleHorizon = HorizonMs(stale, InkTailPredictor.Build(stale));
+
+            True(freshHorizon > 0);
+            True(staleHorizon < freshHorizon);
+        }
+
+        /// <summary>
+        /// 低于最低预测速度（含笔尖停驻）时不产生任何预测点。
+        /// </summary>
+        private static void PredictionIsEmptyBelowMinimumSpeed()
+        {
+            // 约 12px/s，远低于 40px/s 门限。
+            var crawling = StraightStroke(6, 0.1, 8);
+            Equal(0, InkTailPredictor.Build(crawling).Count);
+
+            var stationary = new[]
+            {
+                new RealInkPoint(10, 10, 0.5f, 0),
+                new RealInkPoint(10, 10, 0.5f, 8_000),
+                new RealInkPoint(10, 10, 0.5f, 16_000),
+            };
+            Equal(0, InkTailPredictor.Build(stationary).Count);
+
+            Equal(0, InkTailPredictor.Build(new RealInkPoint[0]).Count);
+            Equal(0, InkTailPredictor.Build(new[] { new RealInkPoint(0, 0, 0.5f, 0) }).Count);
+        }
+
+        /// <summary>
+        /// 预测点必须有限、时间戳严格递增，才能通过会话与几何层的校验。
+        /// </summary>
+        private static void PredictionStaysChronologicalAndFinite()
+        {
+            var real = StraightStroke(8, 40, 8);
+            var predicted = InkTailPredictor.Build(real);
+            True(predicted.Count > 0);
+
+            var previous = real[real.Length - 1].TimestampMicroseconds;
+            for (var i = 0; i < predicted.Count; i++)
+            {
+                var point = predicted[i];
+                True(!double.IsNaN(point.X) && !double.IsInfinity(point.X));
+                True(!double.IsNaN(point.Y) && !double.IsInfinity(point.Y));
+                True(point.Pressure > 0f && point.Pressure <= 1f);
+                True(point.TimestampMicroseconds > previous);
+                previous = point.TimestampMicroseconds;
+            }
+
+            // 会话层用同一套不变量校验，应当接受。
+            var manager = new NativeInkSessionManager();
+            var session = manager.Begin(9, NativeInkInputKind.Pen, Style(), new InkSampleProcessorSettings(), 0);
+            session.AppendReverseChronologicalHistory(new[] { Sample(20, 2, 2, 9), Sample(10, 1, 1, 9) });
+            session.ReplacePrediction(InkTailPredictor.Build(session.RealPoints));
+        }
+
+        /// <summary>
+        /// 预测笔尾相对最后一个真实点的最远直线距离。
+        /// </summary>
+        private static double Reach(
+            IReadOnlyList<RealInkPoint> real,
+            IReadOnlyList<PredictedInkPoint> predicted)
+        {
+            var last = real[real.Count - 1];
+            var maxReach = 0.0;
+            for (var i = 0; i < predicted.Count; i++)
+            {
+                var dx = predicted[i].X - last.X;
+                var dy = predicted[i].Y - last.Y;
+                maxReach = Math.Max(maxReach, Math.Sqrt(dx * dx + dy * dy));
+            }
+
+            return maxReach;
         }
 
         private static void Run(string name, Action test)
