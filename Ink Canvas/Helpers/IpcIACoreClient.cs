@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.MemoryMappedFiles;
@@ -85,6 +86,34 @@ namespace Ink_Canvas.Helpers
                 {
                     KillHelper();
                     return InkShapeRecognitionResult.Empty;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 通过 IPC 辅助进程执行 IACore 文字识别（IAWinFX InkAnalyzer + AnalysisHintNode）。
+        /// 返回分词文本/候选/包围框/笔画索引；辅助进程不可用或失败时返回空结果（调用方据此回落 WinRT）。
+        /// </summary>
+        /// <param name="hint">上下文提示（Factoid/WordList/WordMode/CoerceToFactoid/Hint 区域）；传 null 表示无提示。</param>
+        public HandwritingRecognitionResult RecognizeText(StrokeCollection strokes, IacoreTextHint hint = null)
+        {
+            if (strokes == null || strokes.Count == 0)
+                return HandwritingRecognitionResult.Empty;
+
+            EnsureHelperAlive();
+            if (!IsAvailable)
+                return HandwritingRecognitionResult.Empty;
+
+            lock (_pipeLock)
+            {
+                try
+                {
+                    return SendRecognizeTextRequest(strokes, hint);
+                }
+                catch
+                {
+                    KillHelper();
+                    return HandwritingRecognitionResult.Empty;
                 }
             }
         }
@@ -184,6 +213,38 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        private HandwritingRecognitionResult SendRecognizeTextRequest(StrokeCollection strokes, IacoreTextHint hint)
+        {
+            int requestLength = WriteTextRequestToSharedMemory(strokes, hint);
+
+            using (var client = new NamedPipeClientStream(".", PipeName, PipeDirection.InOut))
+            {
+                client.Connect(IpcTimeoutMs);
+
+                using (var writer = new BinaryWriter(client, System.Text.Encoding.UTF8, leaveOpen: true))
+                using (var reader = new BinaryReader(client, System.Text.Encoding.UTF8, leaveOpen: true))
+                {
+                    writer.Write(CmdRecognizeTextSharedMemory);
+                    writer.Write(requestLength);
+                    writer.Write(_sharedMemoryCapacity);
+                    writer.Write(_sharedMemoryGeneration);
+                    writer.Flush();
+
+                    int status = reader.ReadInt32();
+                    int responseLength = reader.ReadInt32();
+                    if (status == StatusResponseTooLarge)
+                    {
+                        GrowSharedMemory(_sharedMemoryCapacity * 2);
+                        return SendRecognizeTextRequest(strokes, hint);
+                    }
+                    if (status != StatusOk || responseLength <= 0)
+                        return HandwritingRecognitionResult.Empty;
+
+                    return ReadTextResponseFromSharedMemory(strokes, responseLength);
+                }
+            }
+        }
+
         private int WriteRequestToSharedMemory(StrokeCollection strokes)
         {
             int requestLength = GetRequestLength(strokes);
@@ -222,6 +283,87 @@ namespace Ink_Canvas.Helpers
             }
 
             return requestLength;
+        }
+
+        private int WriteTextRequestToSharedMemory(StrokeCollection strokes, IacoreTextHint hint)
+        {
+            int requestLength = GetTextRequestLength(strokes, hint);
+            int requiredCapacity = SharedMemoryHeaderSize + requestLength + MinResponseCapacity;
+            EnsureSharedMemory(requiredCapacity);
+
+            using (var accessor = _sharedMemory.CreateViewAccessor(0, SharedMemoryHeaderSize))
+            {
+                accessor.Write(HeaderMagicOffset, SharedMemoryMagic);
+                accessor.Write(HeaderVersionOffset, ProtocolVersion);
+                accessor.Write(HeaderRequestLengthOffset, requestLength);
+                accessor.Write(HeaderResponseOffsetOffset, 0);
+                accessor.Write(HeaderResponseLengthOffset, 0);
+                accessor.Write(HeaderStatusOffset, StatusOk);
+            }
+
+            using (var stream = _sharedMemory.CreateViewStream(
+                SharedMemoryHeaderSize,
+                requestLength,
+                MemoryMappedFileAccess.Write))
+            using (var writer = new BinaryWriter(stream, System.Text.Encoding.UTF8))
+            {
+                // 提示头：HintLeft/Top/Width/Height + Factoid + WordList[] + WordMode + CoerceToFactoid
+                writer.Write(hint?.HintLeft ?? 0f);
+                writer.Write(hint?.HintTop ?? 0f);
+                writer.Write(hint?.HintWidth ?? 0f);
+                writer.Write(hint?.HintHeight ?? 0f);
+                writer.Write(hint?.Factoid ?? string.Empty);
+
+                var wl = hint?.WordList;
+                int wlLen = wl != null ? wl.Length : 0;
+                writer.Write(wlLen);
+                for (int i = 0; i < wlLen; i++)
+                    writer.Write(wl[i] ?? string.Empty);
+
+                writer.Write(hint?.WordMode ?? false);
+                writer.Write(hint?.CoerceToFactoid ?? false);
+
+                // 笔画载荷：与形状请求同编码（strokeCount, 每 stroke 点数 + X/Y/Pressure）。
+                writer.Write(strokes.Count);
+                foreach (var stroke in strokes)
+                {
+                    var pts = stroke.StylusPoints;
+                    writer.Write(pts.Count);
+                    foreach (var pt in pts)
+                    {
+                        writer.Write((float)pt.X);
+                        writer.Write((float)pt.Y);
+                        writer.Write(pt.PressureFactor);
+                    }
+                }
+                writer.Flush();
+            }
+
+            return requestLength;
+        }
+
+        private static int GetTextRequestLength(StrokeCollection strokes, IacoreTextHint hint)
+        {
+            checked
+            {
+                // 4×float(Hint rect) + string(Factoid: 4+len) + int(wlLen) + Σ string(4+len) + bool×2 + int(strokeCount) + per stroke
+                int length = sizeof(float) * 4;
+                var factoid = hint?.Factoid ?? string.Empty;
+                length += sizeof(int) + System.Text.Encoding.UTF8.GetByteCount(factoid);
+
+                var wl = hint?.WordList;
+                int wlLen = wl != null ? wl.Length : 0;
+                length += sizeof(int);
+                for (int i = 0; i < wlLen; i++)
+                    length += sizeof(int) + System.Text.Encoding.UTF8.GetByteCount(wl[i] ?? string.Empty);
+
+                length += 2; // bool WordMode + bool CoerceToFactoid
+
+                length += sizeof(int);
+                foreach (var stroke in strokes)
+                    length += sizeof(int) + stroke.StylusPoints.Count * sizeof(float) * 3;
+                return length;
+            }
         }
 
         private InkShapeRecognitionResult ReadResponseFromSharedMemory(StrokeCollection strokes, int responseLength)
@@ -278,6 +420,70 @@ namespace Ink_Canvas.Helpers
                     width,
                     height,
                     recognized);
+            }
+        }
+
+        private HandwritingRecognitionResult ReadTextResponseFromSharedMemory(StrokeCollection strokes, int responseLength)
+        {
+            int responseOffset;
+            using (var accessor = _sharedMemory.CreateViewAccessor(0, SharedMemoryHeaderSize))
+            {
+                if (accessor.ReadInt32(HeaderMagicOffset) != SharedMemoryMagic ||
+                    accessor.ReadInt32(HeaderVersionOffset) != ProtocolVersion ||
+                    accessor.ReadInt32(HeaderStatusOffset) != StatusOk)
+                    return HandwritingRecognitionResult.Empty;
+
+                responseOffset = accessor.ReadInt32(HeaderResponseOffsetOffset);
+                int headerResponseLength = accessor.ReadInt32(HeaderResponseLengthOffset);
+                if (headerResponseLength > 0)
+                    responseLength = headerResponseLength;
+            }
+
+            if (responseOffset < SharedMemoryHeaderSize || responseLength <= 0 || responseOffset + responseLength > _sharedMemoryCapacity)
+                return HandwritingRecognitionResult.Empty;
+
+            using (var stream = _sharedMemory.CreateViewStream(responseOffset, responseLength, MemoryMappedFileAccess.Read))
+            using (var reader = new BinaryReader(stream, System.Text.Encoding.UTF8))
+            {
+                bool success = reader.ReadBoolean();
+                string combined = reader.ReadString();
+
+                int wLen = reader.ReadInt32();
+                var segments = new List<HandwritingWordSegment>(wLen);
+                for (int i = 0; i < wLen; i++)
+                {
+                    string text = reader.ReadString();
+
+                    int cLen = reader.ReadInt32();
+                    var candidates = new List<string>(cLen);
+                    for (int j = 0; j < cLen; j++)
+                        candidates.Add(reader.ReadString());
+
+                    float left = reader.ReadSingle();
+                    float top = reader.ReadSingle();
+                    float width = reader.ReadSingle();
+                    float height = reader.ReadSingle();
+
+                    int sLen = reader.ReadInt32();
+                    var segStrokes = new List<Stroke>(sLen);
+                    for (int j = 0; j < sLen; j++)
+                    {
+                        int idx = reader.ReadInt32();
+                        if (idx >= 0 && idx < strokes.Count)
+                            segStrokes.Add(strokes[idx]);
+                    }
+
+                    segments.Add(new HandwritingWordSegment(
+                        text,
+                        candidates,
+                        new Rect(left, top, width, height),
+                        segStrokes));
+                }
+
+                if (!success && segments.Count == 0)
+                    return HandwritingRecognitionResult.Empty;
+
+                return new HandwritingRecognitionResult(segments);
             }
         }
 
@@ -404,6 +610,24 @@ namespace Ink_Canvas.Helpers
         private const int StatusOk = 0;
         private const int StatusResponseTooLarge = 2;
         private const byte CmdRecognizeSharedMemory = 0x02;
+        private const byte CmdRecognizeTextSharedMemory = 0x03;
         private const byte CmdShutdown = 0xFF;
+    }
+
+    /// <summary>
+    /// IACore 文字识别的上下文提示（对应 IAWinFX AnalysisHintNode 的属性层）。
+    /// UWP WinRT InkAnalyzer 无法访问这些层；只有走 IPC 辅助进程才能注入 Factoid/WordList/WordMode/Coerce。
+    /// HintLeft/Top/Width/Height 全 0 表示无限区域（属性作用于全部笔画）。
+    /// </summary>
+    public sealed class IacoreTextHint
+    {
+        public float HintLeft;
+        public float HintTop;
+        public float HintWidth;
+        public float HintHeight;
+        public string Factoid;
+        public string[] WordList;
+        public bool WordMode;
+        public bool CoerceToFactoid;
     }
 }

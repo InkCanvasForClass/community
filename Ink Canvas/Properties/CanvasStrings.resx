@@ -280,10 +280,10 @@
     <value>矫正手绘三角形</value>
   </data>
   <data name="InkRecog_HandwritingBeautify" xml:space="preserve">
-    <value>WinRT识别转手写体字形</value>
+    <value>手写体纠正</value>
   </data>
   <data name="InkRecog_HandwritingBeautifyHint" xml:space="preserve">
-    <value>开启后，调用墨迹纠正 API 时：先使用 WinRT 识别手写文字，再将识别成功的文字用手写风格字体转成字形轮廓墨迹替换原笔画。需 WinRT。</value>
+    <value>开启后，调用墨迹纠正时：先识别手写文字，再将识别成功的文字用手写风格字体转成字形轮廓墨迹替换原笔画。识别引擎跟随上方「识别引擎」设置（IACore 走 IPC 辅助进程，可注入 Factoid/词表等上下文；WinRT 在本进程识别）。</value>
   </data>
   <data name="InkRecog_HandwritingFont" xml:space="preserve">
     <value>手写体字形字体</value>

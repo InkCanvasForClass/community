@@ -280,10 +280,10 @@
     <value>Correct freehand triangles</value>
   </data>
   <data name="InkRecog_HandwritingBeautify" xml:space="preserve">
-    <value>WinRT recognition to handwriting glyphs</value>
+    <value>Handwriting correction</value>
   </data>
   <data name="InkRecog_HandwritingBeautifyHint" xml:space="preserve">
-    <value>When enabled, the ink correction API uses WinRT to recognize handwritten words and replaces original strokes with handwriting-style glyph outlines. (Requires 64-bit Windows and WinRT)</value>
+    <value>When enabled, ink correction first recognizes handwritten words, then replaces the original strokes with handwriting-style glyph outlines. The recognition engine follows the "Recognition engine" setting above (IACore runs via the IPC helper and can inject factoid/word-list context; WinRT recognizes in-process).</value>
   </data>
   <data name="InkRecog_HandwritingFont" xml:space="preserve">
     <value>Handwriting glyph font</value>

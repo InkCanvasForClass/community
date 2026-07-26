@@ -498,6 +498,7 @@ namespace Ink_Canvas.Helpers
 
         /// <summary>
         /// 识别手写词后，将「有识别文本」的分词替换为指定手写风格字体的字形轮廓墨迹；未识别或空文本的词保留原笔画。
+        /// 识别走本类 WinRT <see cref="RecognizeHandwritingAsync"/>；字形渲染与引擎无关。
         /// </summary>
         public static async Task<StrokeCollection> ConvertRecognizedTextToHandwritingInkAsync(
             StrokeCollection strokes,
@@ -507,6 +508,29 @@ namespace Ink_Canvas.Helpers
             {
                 if (strokes != null && strokes.Count > 0 && !IsApiAvailable)
                     LogHandwriting("字形替换：跳过，IsApiAvailable=false。");
+                return strokes;
+            }
+
+            var reco = await RecognizeHandwritingAsync(strokes).ConfigureAwait(true);
+            return RenderHandwritingGlyphsFromResult(strokes, reco, handwritingFontFamilyList);
+        }
+
+        /// <summary>
+        /// 用已识别的分词结果，把「有识别文本」的分词替换为手写风格字体的字形轮廓墨迹；未识别或空文本的词保留原笔画。
+        /// 仅做字形渲染（WPF 字体轮廓），不依赖任何识别引擎——识别结果可来自 WinRT 或 IACore IPC。
+        /// </summary>
+        public static StrokeCollection RenderHandwritingGlyphsFromResult(
+            StrokeCollection strokes,
+            HandwritingRecognitionResult reco,
+            string handwritingFontFamilyList)
+        {
+            if (strokes == null || strokes.Count == 0)
+                return strokes;
+            if (reco == null || !reco.IsSuccess || reco.Words == null || reco.Words.Count == 0)
+            {
+                LogHandwriting(
+                    "字形替换中止：识别未成功（IsSuccess=" + (reco?.IsSuccess ?? false) +
+                    "，词数=" + (reco?.Words?.Count ?? 0) + "），原样返回笔画。");
                 return strokes;
             }
 
@@ -520,15 +544,6 @@ namespace Ink_Canvas.Helpers
 
             try
             {
-                var reco = await RecognizeHandwritingAsync(strokes).ConfigureAwait(true);
-                if (!reco.IsSuccess || reco.Words == null || reco.Words.Count == 0)
-                {
-                    LogHandwriting(
-                        "字形替换中止：识别未成功（IsSuccess=" + reco.IsSuccess +
-                        "，词数=" + (reco.Words?.Count ?? 0) + "），原样返回笔画。");
-                    return strokes;
-                }
-
                 var firstStrokeToSegment = new Dictionary<Stroke, HandwritingWordSegment>();
                 foreach (var w in reco.Words)
                 {
@@ -631,7 +646,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile("WinRT 手写体字形替换失败: " + ex.Message, LogHelper.LogType.Warning);
+                LogHelper.WriteLogToFile("手写体字形替换失败: " + ex.Message, LogHelper.LogType.Warning);
                 LogHandwriting("字形替换异常：" + ex, LogHelper.LogType.Warning);
                 return strokes;
             }
