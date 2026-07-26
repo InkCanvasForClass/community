@@ -691,10 +691,14 @@ namespace Ink_Canvas
                             if (!result.IsSuccess)
                                 return;
 
+                            // 拟合度门禁：吻合度过低保留原笔画，不强行纠正（涂鸦误判为形状的主修复点）
+                            if (!PassesShapeFitGate(result))
+                                return;
+
                             if (result.ShapeName == "Circle" &&
                                 Settings.InkToShape.IsInkToShapeRounded)
                             {
-                                if (result.ShapeWidth > 75)
+                                if (result.ShapeWidth > 75 * GetResolutionScale())
                                 {
                                     foreach (var circle in circles)
                                         //判断是否画同心圆
@@ -766,7 +770,7 @@ namespace Ink_Canvas
                                 result.Centroid = new Point((p[0].X + p[2].X) / 2, (p[0].Y + p[2].Y) / 2);
                                 var needRotation = true;
 
-                                if (result.ShapeWidth > 75 || (result.ShapeHeight > 75 && p.Count == 4))
+                                if (result.ShapeWidth > 75 * GetResolutionScale() || (result.ShapeHeight > 75 * GetResolutionScale() && p.Count == 4))
                                 {
                                     var iniP = new Point(result.Centroid.X - result.ShapeWidth / 2,
                                         result.Centroid.Y - result.ShapeHeight / 2);
@@ -908,9 +912,9 @@ namespace Ink_Canvas
                             {
                                 var p = result.HotPoints;
                                 if ((Math.Max(Math.Max(p[0].X, p[1].X), p[2].X) -
-                                     Math.Min(Math.Min(p[0].X, p[1].X), p[2].X) >= 100 ||
+                                     Math.Min(Math.Min(p[0].X, p[1].X), p[2].X) >= 100 * GetResolutionScale() ||
                                      Math.Max(Math.Max(p[0].Y, p[1].Y), p[2].Y) -
-                                     Math.Min(Math.Min(p[0].Y, p[1].Y), p[2].Y) >= 100) &&
+                                     Math.Min(Math.Min(p[0].Y, p[1].Y), p[2].Y) >= 100 * GetResolutionScale()) &&
                                     result.HotPoints.Count == 3)
                                 {
                                     //纠正垂直与水平关系
@@ -947,9 +951,9 @@ namespace Ink_Canvas
                             {
                                 var p = result.HotPoints;
                                 if ((Math.Max(Math.Max(Math.Max(p[0].X, p[1].X), p[2].X), p[3].X) -
-                                     Math.Min(Math.Min(Math.Min(p[0].X, p[1].X), p[2].X), p[3].X) >= 100 ||
+                                     Math.Min(Math.Min(Math.Min(p[0].X, p[1].X), p[2].X), p[3].X) >= 100 * GetResolutionScale() ||
                                      Math.Max(Math.Max(Math.Max(p[0].Y, p[1].Y), p[2].Y), p[3].Y) -
-                                     Math.Min(Math.Min(Math.Min(p[0].Y, p[1].Y), p[2].Y), p[3].Y) >= 100) &&
+                                     Math.Min(Math.Min(Math.Min(p[0].Y, p[1].Y), p[2].Y), p[3].Y) >= 100 * GetResolutionScale()) &&
                                     result.HotPoints.Count == 4)
                                 {
                                     //纠正垂直与水平关系
@@ -2500,6 +2504,167 @@ namespace Ink_Canvas
             minor1 = new Point(mx - b * sin, my + b * cos);
 
             return a > 1e-2 && b > 1e-2;
+        }
+
+        /// <summary>
+        /// 形状纠正拟合度门禁：把 WinRT/IACore 识别出的理想形状与原始笔画对比，
+        /// 吻合度过低则返回 false（消费端 return，保留原笔画而不强行纠正）。
+        /// 任一度量异常或数据不足时 fail-open 返回 true，避免度量 bug 静默关掉整个形状纠正。
+        /// 阈值固定为默认严格度（等价 strictness=0.5）：多边形归一化残差 ≤0.20，
+        /// 椭圆代数残差 mean|q| ≤0.25 且闭合度 ≤0.25。
+        /// </summary>
+        private bool PassesShapeFitGate(InkShapeRecognitionResult result)
+        {
+            if (result == null || !result.IsSuccess || result.StrokesToRemove == null || result.StrokesToRemove.Count == 0)
+                return true; // 上游已 IsSuccess 判过；到这里说明可放行
+
+            try
+            {
+                var name = result.ShapeName ?? string.Empty;
+
+                // 椭圆/圆：用 PCA 主轴系算代数残差 + 闭合度
+                if (name == "Circle" || name == "Ellipse")
+                {
+                    if (!TryEstimateEllipseParamsFromStrokes(
+                            result.StrokesToRemove,
+                            out var centroid, out var a, out var b, out var thetaRad,
+                            out _, out _, out _, out _))
+                        return true; // 反推失败→不拦，交给既有逻辑
+
+                    var residual = MeasureEllipseAlgebraicResidual(result.StrokesToRemove, centroid, a, b, thetaRad);
+                    var openness = MeasureOpennessRatio(result.StrokesToRemove);
+                    return residual <= 0.25 && openness <= 0.25;
+                }
+
+                // 三角形/矩形族：多边形边距残差（闭合边残差过大时 isClosed=false，自然被拒）
+                if (name == "Triangle" || name.Contains("Rectangle") || name.Contains("Diamond") ||
+                    name.Contains("Parallelogram") || name.Contains("Square") ||
+                    name.Contains("Trapezoid") || name.Contains("Quadrilateral"))
+                {
+                    if (result.HotPoints == null || result.HotPoints.Count < 3)
+                        return true;
+                    var residual = MeasurePolygonFitResidual(result.StrokesToRemove, result.HotPoints, out _);
+                    return residual <= 0.20;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"形状拟合度门禁异常(fail-open): {ex.Message}");
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// 多边形拟合残差：采样原始笔画点，取到理想多边形各边(含闭合边)的最近距离均值，
+        /// 用对角线 sqrt(w²+h²) 归一化。0=完美。闭合边残差过大时 isClosed=false。
+        /// </summary>
+        private double MeasurePolygonFitResidual(StrokeCollection originalStrokes, PointCollection hotPoints, out bool isClosed)
+        {
+            isClosed = true;
+            if (originalStrokes == null || originalStrokes.Count == 0 || hotPoints == null || hotPoints.Count < 3)
+                return 0.0;
+
+            // 收集并采样原始笔画点
+            var raw = new List<Point>(256);
+            foreach (var s in originalStrokes)
+            {
+                if (s?.StylusPoints == null) continue;
+                foreach (var sp in s.StylusPoints) raw.Add(sp.ToPoint());
+            }
+            if (raw.Count < 2) return 0.0;
+            var pts = SamplePointsByDistance(raw, 10.0);
+            if (pts.Count == 0) return 0.0;
+
+            // 归一化用对角线（用热点包围盒，比 ShapeWidth/Height 更贴合理想多边形）
+            double minX = double.MaxValue, maxX = double.MinValue, minY = double.MaxValue, maxY = double.MinValue;
+            for (int i = 0; i < hotPoints.Count; i++)
+            {
+                minX = Math.Min(minX, hotPoints[i].X); maxX = Math.Max(maxX, hotPoints[i].X);
+                minY = Math.Min(minY, hotPoints[i].Y); maxY = Math.Max(maxY, hotPoints[i].Y);
+            }
+            double diag = Math.Sqrt((maxX - minX) * (maxX - minX) + (maxY - minY) * (maxY - minY));
+            if (diag < 1e-3) return 1.0;
+
+            int n = hotPoints.Count;
+            double sum = 0, closingSum = 0;
+            for (int pi = 0; pi < pts.Count; pi++)
+            {
+                double best = double.MaxValue;
+                for (int i = 0; i < n; i++)
+                {
+                    var a = hotPoints[i];
+                    var b2 = hotPoints[(i + 1) % n];
+                    double d = DistanceFromLineToPoint(a, b2, pts[pi]);
+                    if (d < best) best = d;
+                    if (i == n - 1) closingSum += d; // 闭合边 (last→0)
+                }
+                sum += best;
+            }
+
+            double residual = (sum / pts.Count) / diag;
+            // 闭合边平均残差若超过对角线一截，视为开放折线被误判为闭合多边形
+            double closingAvg = (closingSum / pts.Count) / diag;
+            if (closingAvg > 0.5) isClosed = false;
+            return residual;
+        }
+
+        /// <summary>
+        /// 椭圆代数残差：在 PCA 主轴系 (u,v) 下 q=(u/a)²+(v/b)²−1，返回 mean|q|。0=完美椭圆。
+        /// </summary>
+        private double MeasureEllipseAlgebraicResidual(StrokeCollection originalStrokes, Point centroid, double a, double b, double thetaRad)
+        {
+            if (originalStrokes == null || originalStrokes.Count == 0 || a < 1e-3 || b < 1e-3)
+                return 0.0;
+
+            var raw = new List<Point>(256);
+            foreach (var s in originalStrokes)
+            {
+                if (s?.StylusPoints == null) continue;
+                foreach (var sp in s.StylusPoints) raw.Add(sp.ToPoint());
+            }
+            if (raw.Count < 2) return 0.0;
+            var pts = SamplePointsByDistance(raw, 10.0);
+            if (pts.Count == 0) return 0.0;
+
+            var cos = Math.Cos(-thetaRad);
+            var sin = Math.Sin(-thetaRad);
+            double sum = 0;
+            for (int i = 0; i < pts.Count; i++)
+            {
+                double dx = pts[i].X - centroid.X;
+                double dy = pts[i].Y - centroid.Y;
+                double u = dx * cos - dy * sin;
+                double v = dx * sin + dy * cos;
+                double q = (u / a) * (u / a) + (v / b) * (v / b) - 1.0;
+                sum += Math.Abs(q);
+            }
+            return sum / pts.Count;
+        }
+
+        /// <summary>
+        /// 闭合度：原始笔画(按收集顺序)首→末距离 / 路径周长。越大越开放。
+        /// </summary>
+        private double MeasureOpennessRatio(StrokeCollection originalStrokes)
+        {
+            if (originalStrokes == null || originalStrokes.Count == 0)
+                return 0.0;
+
+            var raw = new List<Point>(256);
+            foreach (var s in originalStrokes)
+            {
+                if (s?.StylusPoints == null) continue;
+                foreach (var sp in s.StylusPoints) raw.Add(sp.ToPoint());
+            }
+            if (raw.Count < 2) return 0.0;
+
+            double perimeter = 0;
+            for (int i = 1; i < raw.Count; i++)
+                perimeter += GetDistance(raw[i - 1], raw[i]);
+            if (perimeter < 1e-3) return 0.0;
+
+            return GetDistance(raw[0], raw[raw.Count - 1]) / perimeter;
         }
 
         public StylusPointCollection GenerateFakePressureTriangle(StylusPointCollection points)
