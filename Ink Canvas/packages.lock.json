@@ -225,6 +225,8 @@
           "System.Reflection.Primitives": "4.3.0",
           "System.Runtime": "4.3.0",
           "System.Runtime.Handles": "4.3.0"
+        }
+      },
       "Vortice.Direct2D1": {
         "type": "Direct",
         "requested": "[3.2.0, )",
