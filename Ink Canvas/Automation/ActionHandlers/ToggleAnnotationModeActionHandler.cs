@@ -20,7 +20,7 @@ namespace Ink_Canvas.WorkflowAutomation.ActionHandlers
                     if (mw?.inkCanvas == null) return;
 
                     if (s.EnterAnnotation)
-                        mw.inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                        mw.inkCanvas.EditingMode = InkCanvasEditingMode.None;
                     else
                         mw.inkCanvas.EditingMode = InkCanvasEditingMode.None;
                 });
@@ -41,7 +41,7 @@ namespace Ink_Canvas.WorkflowAutomation.ActionHandlers
                     if (s.EnterAnnotation)
                         mw.inkCanvas.EditingMode = InkCanvasEditingMode.None;
                     else
-                        mw.inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                        mw.inkCanvas.EditingMode = InkCanvasEditingMode.None;
                 });
 
                 AutomationBootstrap.Monitor?.NotifyInternalStateChanged();

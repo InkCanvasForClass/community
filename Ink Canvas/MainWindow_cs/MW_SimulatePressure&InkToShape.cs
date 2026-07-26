@@ -180,8 +180,12 @@ namespace Ink_Canvas
                 }
                 catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
-                // 「屏蔽压感」已在收笔主路径将点集归一成 0.5；此处若再跑 InkStyle 0/1 会重写 PressureFactor，造成假压感。
-                if (!Settings.Canvas.DisablePressure)
+                // 原生湿墨提交：湿预览压感已是最终值。此处再跑 InkStyle 0/1 会重写
+                // PressureFactor（尤其是 InkStyle 0 的收笔变细），抬笔瞬间干墨变样 → 烘干闪变。
+                // 「屏蔽压感」已在收笔主路径将点集归一成 0.5；此处若再跑 InkStyle 0/1 同样造成假压感。
+                var isNativeWetInkCommitted =
+                    e.Stroke.ContainsPropertyData(NativeWetInkCommittedGuid);
+                if (!Settings.Canvas.DisablePressure && !isNativeWetInkCommitted)
                 {
                     switch (Settings.Canvas.InkStyle)
                     {
@@ -350,6 +354,20 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_StrokeCollected(object sender, InkCanvasStrokeCollectedEventArgs e)
         {
+            if (e?.Stroke != null)
+                ProcessCommittedStroke(e.Stroke);
+        }
+
+        /// <summary>
+        /// Shared dry-ink post-process entry for WPF StrokeCollected and native wet-ink commit.
+        /// Keeps fade / pressure / velocity tip / straighten / shape / handwriting / edge expand order.
+        /// </summary>
+        private void ProcessCommittedStroke(Stroke stroke)
+        {
+            if (stroke == null)
+                return;
+
+            var e = new InkCanvasStrokeCollectedEventArgs(stroke);
             var strokeDrawingAttributes = e.Stroke?.DrawingAttributes;
 
             // 手写识别输入在收笔尾部从最终画布 Stroke 复制，避免使用压感/平滑前快照。
@@ -375,10 +393,8 @@ namespace Ink_Canvas
                 var startPoint = e.Stroke.StylusPoints.Count > 0 ? e.Stroke.StylusPoints[0].ToPoint() : new Point();
                 var endPoint = e.Stroke.StylusPoints.Count > 0 ? e.Stroke.StylusPoints[e.Stroke.StylusPoints.Count - 1].ToPoint() : new Point();
 
-                if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink)
-                {
-                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                }
+                // Native freehand keeps physical EditingMode at None; do not re-enable WPF wet ink.
+                EnsureNativePenPhysicalEditingMode();
 
                 // 添加到墨迹渐隐管理器
                 if (_inkFadeManager != null)
@@ -400,10 +416,7 @@ namespace Ink_Canvas
                 {
                     try
                     {
-                        if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink)
-                        {
-                            inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                        }
+                        EnsureNativePenPhysicalEditingMode();
 
                         if (inkCanvas.Strokes.Contains(e.Stroke))
                         {
@@ -430,7 +443,19 @@ namespace Ink_Canvas
                 inkCanvas.Opacity = 1;
                 var touchPressureSimulationApplied = false;
 
-                if (Settings.Canvas.DisablePressure)
+                // 原生湿墨管线提交的 Stroke：其 StylusPoint 压感已与实时预览一致。
+                // 跳过所有会重写 PressureFactor 的干墨后处理（屏蔽压感归一化、触摸压感
+                // 模拟、速度笔锋），否则抬笔瞬间线条粗细会跳变，产生“烘干闪变”。
+                var isNativeWetInkCommitted =
+                    e.Stroke != null
+                    && e.Stroke.ContainsPropertyData(NativeWetInkCommittedGuid);
+
+                if (isNativeWetInkCommitted)
+                {
+                    // 原生提交：保持 PressureFactor 不变。仍允许后续拉直/形状识别等不依赖
+                    // 压感粗细的处理。
+                }
+                else if (Settings.Canvas.DisablePressure)
                 {
                     var uniformPoints = new StylusPointCollection();
                     foreach (StylusPoint point in e.Stroke.StylusPoints)

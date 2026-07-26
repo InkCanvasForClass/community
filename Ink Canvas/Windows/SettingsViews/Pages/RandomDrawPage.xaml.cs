@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+// ManageNameRostersWindow lives in Ink_Canvas namespace
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -82,6 +83,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ToggleSwitchEnableProgressiveReminder.IsOn = settings.RandSettings.EnableProgressiveReminder;
             ProgressiveReminderVolumeSlider.Value = settings.RandSettings.ProgressiveReminderVolume;
 
+            UpdateNameRostersInComboBox();
             UpdatePickNameBackgroundsInComboBox();
             if (settings.RandSettings.SelectedBackgroundIndex >= ComboBoxPickNameBackground.Items.Count)
             {
@@ -149,6 +151,118 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             SettingsManager.Settings.RandSettings.ExternalCallerType = ComboBoxExternalCallerType.SelectedIndex;
             SettingsManager.SaveSettingsToFile();
+        }
+
+        #endregion
+
+        #region Name Roster Schemes
+
+        private void UpdateNameRostersInComboBox()
+        {
+            if (ComboBoxNameRoster == null) return;
+
+            bool wasLoaded = _isLoaded;
+            _isLoaded = false;
+            try
+            {
+                ComboBoxNameRoster.Items.Clear();
+
+                var noneItem = new ComboBoxItem
+                {
+                    Content = RandomStrings.Random_Roster_None,
+                    Tag = "",
+                    FontFamily = new FontFamily("Microsoft YaHei UI")
+                };
+                ComboBoxNameRoster.Items.Add(noneItem);
+
+                string selectedGuid = SettingsManager.Settings?.RandSettings?.SelectedNameRosterGuid ?? "";
+                int selectedIndex = 0;
+                var rosters = SettingsManager.Settings?.RandSettings?.NameRosters;
+                if (rosters != null)
+                {
+                    for (int i = 0; i < rosters.Count; i++)
+                    {
+                        var roster = rosters[i];
+                        var item = new ComboBoxItem
+                        {
+                            Content = roster.Name,
+                            Tag = roster.Guid ?? "",
+                            FontFamily = new FontFamily("Microsoft YaHei UI")
+                        };
+                        ComboBoxNameRoster.Items.Add(item);
+                        if (!string.IsNullOrEmpty(selectedGuid) &&
+                            string.Equals(roster.Guid, selectedGuid, StringComparison.OrdinalIgnoreCase))
+                        {
+                            selectedIndex = i + 1;
+                        }
+                    }
+                }
+
+                ComboBoxNameRoster.SelectedIndex = selectedIndex;
+            }
+            finally
+            {
+                _isLoaded = wasLoaded;
+            }
+        }
+
+        private void ComboBoxNameRoster_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            if (!(ComboBoxNameRoster.SelectedItem is ComboBoxItem selectedItem)) return;
+
+            string guid = selectedItem.Tag as string ?? "";
+            if (string.IsNullOrEmpty(guid))
+            {
+                // 选“未选择方案”：只清空选中状态，不改 Names.txt
+                if (SettingsManager.Settings?.RandSettings != null)
+                {
+                    SettingsManager.Settings.RandSettings.SelectedNameRosterGuid = "";
+                    SettingsManager.SaveSettingsToFile();
+                }
+                return;
+            }
+
+            NameRosterManager.SelectAndApply(guid);
+        }
+
+        private async void ButtonAddNameRoster_Click(object sender, RoutedEventArgs e)
+        {
+            var owner = Window.GetWindow(this) ?? Application.Current.MainWindow;
+            string guid = await ManageNameRostersWindow.AddNewRosterDialogAsync(owner);
+            if (string.IsNullOrEmpty(guid)) return;
+
+            // 新建后自动设为当前方案
+            NameRosterManager.SelectAndApply(guid);
+            UpdateNameRostersInComboBox();
+        }
+
+        private async void ButtonManageNameRosters_Click(object sender, RoutedEventArgs e)
+        {
+            var mw = Application.Current.MainWindow as MainWindow;
+            if (mw == null) return;
+
+            // 增设/重命名在控件内部用 ContentDialog 完成（同一时刻只能开一个，
+            // 已打开时会就地切换内容）；此处只负责展示管理列表。
+            // 覆盖默认 ContentDialogMaxWidth(548)：内容 UserControl 固定 640×360，
+            // 列表在控件内部纵向滚动，避免横向裁切操作按钮。
+            var content = new ManageNameRostersWindow();
+            var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+            {
+                Title = RandomStrings.Random_Roster_ManageWindowTitle,
+                Content = content,
+                CloseButtonText = NotificationStrings.AnimationOff,
+                Owner = Window.GetWindow(this) ?? mw,
+                DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Close,
+                Resources =
+                {
+                    ["ContentDialogMaxWidth"] = 720d,
+                    ["ContentDialogMaxHeight"] = 560d
+                }
+            };
+
+            await dialog.ShowAsync();
+            UpdateNameRostersInComboBox();
         }
 
         #endregion

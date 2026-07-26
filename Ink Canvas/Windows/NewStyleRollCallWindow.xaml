@@ -299,6 +299,23 @@
                                                FontSize="14"
                                                FontWeight="Medium"
                                                Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" />
+                                    <Grid Margin="0,0,0,8">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{x:Static props:RandomStrings.Random_Roster_SwitchLabel}"
+                                                   VerticalAlignment="Center"
+                                                   FontSize="13"
+                                                   Foreground="{DynamicResource NewRollCallWindowSecondaryTextForeground}"
+                                                   Margin="0,0,8,0" />
+                                        <ComboBox x:Name="NameRosterComboBox"
+                                                  Grid.Column="1"
+                                                  Height="32"
+                                                  HorizontalAlignment="Stretch"
+                                                  ToolTipService.ToolTip="{x:Static props:RandomStrings.Random_Roster_SwitchTooltip}"
+                                                  SelectionChanged="NameRosterComboBox_SelectionChanged" />
+                                    </Grid>
                                     <UniformGrid Columns="3">
                                         <Button x:Name="ImportListBtn" Style="{StaticResource ModernRollCallSmallButtonStyle}" Margin="0,0,8,0" Click="ImportList_Click">
                                             <StackPanel Orientation="Horizontal">

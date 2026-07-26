@@ -245,6 +245,66 @@ namespace Ink_Canvas.Properties
 
         public static string Random_AddBg_SaveFailedFormat => ResourceManager.GetString(nameof(Random_AddBg_SaveFailedFormat), _resourceCulture);
 
+        public static string Random_Roster_Title => ResourceManager.GetString(nameof(Random_Roster_Title), _resourceCulture);
+
+        public static string Random_Roster_SectionHeader => ResourceManager.GetString(nameof(Random_Roster_SectionHeader), _resourceCulture);
+
+        public static string Random_Roster_SelectLabel => ResourceManager.GetString(nameof(Random_Roster_SelectLabel), _resourceCulture);
+
+        public static string Random_Roster_None => ResourceManager.GetString(nameof(Random_Roster_None), _resourceCulture);
+
+        public static string Random_Roster_Manage => ResourceManager.GetString(nameof(Random_Roster_Manage), _resourceCulture);
+
+        public static string Random_Roster_ManageWindowTitle => ResourceManager.GetString(nameof(Random_Roster_ManageWindowTitle), _resourceCulture);
+
+        public static string Random_Roster_ManageTitle => ResourceManager.GetString(nameof(Random_Roster_ManageTitle), _resourceCulture);
+
+        public static string Random_Roster_SetAsCurrent => ResourceManager.GetString(nameof(Random_Roster_SetAsCurrent), _resourceCulture);
+
+        public static string Random_Roster_SaveCurrent => ResourceManager.GetString(nameof(Random_Roster_SaveCurrent), _resourceCulture);
+
+        public static string Random_Roster_Edit => ResourceManager.GetString(nameof(Random_Roster_Edit), _resourceCulture);
+
+        public static string Random_Roster_Rename => ResourceManager.GetString(nameof(Random_Roster_Rename), _resourceCulture);
+
+        public static string Random_Roster_Delete => ResourceManager.GetString(nameof(Random_Roster_Delete), _resourceCulture);
+
+        public static string Random_Roster_Add => ResourceManager.GetString(nameof(Random_Roster_Add), _resourceCulture);
+
+        public static string Random_Roster_AddPrompt => ResourceManager.GetString(nameof(Random_Roster_AddPrompt), _resourceCulture);
+
+        public static string Random_Roster_AddTitle => ResourceManager.GetString(nameof(Random_Roster_AddTitle), _resourceCulture);
+
+        public static string Random_Roster_RenamePrompt => ResourceManager.GetString(nameof(Random_Roster_RenamePrompt), _resourceCulture);
+
+        public static string Random_Roster_RenameTitle => ResourceManager.GetString(nameof(Random_Roster_RenameTitle), _resourceCulture);
+
+        public static string Random_Roster_SetSuccessFormat => ResourceManager.GetString(nameof(Random_Roster_SetSuccessFormat), _resourceCulture);
+
+        public static string Random_Roster_SetSuccessTitle => ResourceManager.GetString(nameof(Random_Roster_SetSuccessTitle), _resourceCulture);
+
+        public static string Random_Roster_SaveSuccessFormat => ResourceManager.GetString(nameof(Random_Roster_SaveSuccessFormat), _resourceCulture);
+
+        public static string Random_Roster_SaveSuccessTitle => ResourceManager.GetString(nameof(Random_Roster_SaveSuccessTitle), _resourceCulture);
+
+        public static string Random_Roster_DeleteConfirmFormat => ResourceManager.GetString(nameof(Random_Roster_DeleteConfirmFormat), _resourceCulture);
+
+        public static string Random_Roster_DeleteConfirmTitle => ResourceManager.GetString(nameof(Random_Roster_DeleteConfirmTitle), _resourceCulture);
+
+        public static string Random_Roster_DeleteFailedFormat => ResourceManager.GetString(nameof(Random_Roster_DeleteFailedFormat), _resourceCulture);
+
+        public static string Random_Roster_EmptyName => ResourceManager.GetString(nameof(Random_Roster_EmptyName), _resourceCulture);
+
+        public static string Random_Roster_DuplicateNameFormat => ResourceManager.GetString(nameof(Random_Roster_DuplicateNameFormat), _resourceCulture);
+
+        public static string Random_Roster_Hint => ResourceManager.GetString(nameof(Random_Roster_Hint), _resourceCulture);
+
+        public static string Random_Roster_SwitchLabel => ResourceManager.GetString(nameof(Random_Roster_SwitchLabel), _resourceCulture);
+
+        public static string Random_Roster_SwitchTooltip => ResourceManager.GetString(nameof(Random_Roster_SwitchTooltip), _resourceCulture);
+
+        public static string Random_Roster_OperationFailedFormat => ResourceManager.GetString(nameof(Random_Roster_OperationFailedFormat), _resourceCulture);
+
         public static string Random_CustomIcon_Title => ResourceManager.GetString(nameof(Random_CustomIcon_Title), _resourceCulture);
 
         public static string Random_AddIcon_WindowTitle => ResourceManager.GetString(nameof(Random_AddIcon_WindowTitle), _resourceCulture);
