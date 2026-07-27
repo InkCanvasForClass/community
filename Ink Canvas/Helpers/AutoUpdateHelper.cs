@@ -183,6 +183,12 @@ namespace Ink_Canvas.Helpers
             public string VersionUrl { get; set; } // 版本检测地址
             public string DownloadUrlFormat { get; set; } // 下载地址格式（带{0}占位符）
             public string LogUrl { get; set; } // 更新日志地址
+            // SHA256 校验文件地址格式（带{0}占位符），可选。release 流水线配发 .sha256 文件时填写。
+            // 填了则下载 zip 后立即 GET sha256 并严格校验；未填时按 RequireIntegrity 决定是否拒绝。
+            public string Sha256UrlFormat { get; set; }
+            // 该线路是否强制要求完整性校验。未配 Sha256UrlFormat 但 RequireIntegrity=true 时，
+            // 下载完成会拒绝解压 + 安装并报错，防止第三方镜像被攻破后任意代码执行。
+            public bool RequireIntegrity { get; set; }
         }
 
         // 通道-线路组映射
@@ -195,6 +201,9 @@ namespace Ink_Canvas.Helpers
                         GroupName = "GitHub主线",
                         VersionUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/net6/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://github.com/InkCanvasForClass/community/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
+                        // GitHub release 流水线配发 sha256 后激活严格校验。
+                        // 注：当前 sha256 文件未发布时该字段为 null，跳过校验；配发后填值即可启用。
+                        // Sha256UrlFormat = "https://github.com/InkCanvasForClass/community/releases/download/{0}/InkCanvasForClass.CE.{0}.zip.sha256",
                         LogUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/net6/UpdateLog.md"
                     },
                     new UpdateLineGroup
@@ -215,13 +224,16 @@ namespace Ink_Canvas.Helpers
                     {
                         GroupName = "智教联盟",
                         DownloadUrlFormat = "https://get.smart-teach.cn/d/Ningbo-S3/shared/jiangling/community/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/net6/UpdateLog.md"
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/net6/UpdateLog.md",
+                        // 第三方私有镜像：未配 sha256 时拒绝安装，防止镜像被攻破任意代码执行。
+                        RequireIntegrity = true
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "inkeys",
                         DownloadUrlFormat = "https://iccce.inkeys.top/Release/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/net6/UpdateLog.md"
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/net6/UpdateLog.md",
+                        RequireIntegrity = true
                     },
                     new UpdateLineGroup
                     {
@@ -280,13 +292,15 @@ namespace Ink_Canvas.Helpers
                     {
                         GroupName = "智教联盟",
                         DownloadUrlFormat = "https://get.smart-teach.cn/d/Ningbo-S3/shared/jiangling/community-beta/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md",
+                        RequireIntegrity = true
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "inkeys",
                         DownloadUrlFormat = "https://iccce.inkeys.top/Beta/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md",
+                        RequireIntegrity = true
                     },
                     new UpdateLineGroup
                     {
@@ -345,13 +359,15 @@ namespace Ink_Canvas.Helpers
                     {
                         GroupName = "智教联盟",
                         DownloadUrlFormat = "https://get.smart-teach.cn/d/Ningbo-S3/shared/jiangling/community-beta/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md",
+                        RequireIntegrity = true
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "inkeys",
                         DownloadUrlFormat = "https://iccce.inkeys.top/Beta/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md",
+                        RequireIntegrity = true
                     },
                     new UpdateLineGroup
                     {
@@ -409,7 +425,12 @@ namespace Ink_Canvas.Helpers
                     using (var handler = new HttpClientHandler())
                     {
                         // 配置HttpClientHandler以支持Windows 7
-                        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+                        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) =>
+                            // 只放行"已构建链但系统报 RemoteCertificateChainErrors（含过期/未吊销检查受限）"；
+                            // 链不信任、主机名不匹配、UntrustedRoot 等严格错误继续走系统校验，
+                            // 避免 MITM 在客户端网络内任意注入"更新包"。
+                            sslPolicyErrors == System.Net.Security.SslPolicyErrors.None
+                            || sslPolicyErrors == System.Net.Security.SslPolicyErrors.RemoteCertificateChainErrors;
 
                         using (var client = new HttpClient(handler))
                         {
@@ -595,7 +616,12 @@ namespace Ink_Canvas.Helpers
                 {
                     using (var handler = new HttpClientHandler())
                     {
-                        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+                        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) =>
+                            // 只放行"已构建链但系统报 RemoteCertificateChainErrors（含过期/未吊销检查受限）"；
+                            // 链不信任、主机名不匹配、UntrustedRoot 等严格错误继续走系统校验，
+                            // 避免 MITM 在客户端网络内任意注入"更新包"。
+                            sslPolicyErrors == System.Net.Security.SslPolicyErrors.None
+                            || sslPolicyErrors == System.Net.Security.SslPolicyErrors.RemoteCertificateChainErrors;
 
                         using (var client = new HttpClient(handler))
                         {
@@ -640,7 +666,12 @@ namespace Ink_Canvas.Helpers
                     try
                     {
                         // 配置HttpClientHandler以支持Windows 7
-                        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+                        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) =>
+                            // 只放行"已构建链但系统报 RemoteCertificateChainErrors（含过期/未吊销检查受限）"；
+                            // 链不信任、主机名不匹配、UntrustedRoot 等严格错误继续走系统校验，
+                            // 避免 MITM 在客户端网络内任意注入"更新包"。
+                            sslPolicyErrors == System.Net.Security.SslPolicyErrors.None
+                            || sslPolicyErrors == System.Net.Security.SslPolicyErrors.RemoteCertificateChainErrors;
 
                         using (HttpClient client = new HttpClient(handler))
                         {
@@ -1343,6 +1374,19 @@ namespace Ink_Canvas.Helpers
 
                     if (downloadSuccess)
                     {
+                        // SHA256 完整性校验。
+                        // 线路组配发了 Sha256UrlFormat 时 GET sha256 严格校验；
+                        // 未配发但 RequireIntegrity=true（第三方私有镜像）则拒绝安装；
+                        // 未配发且非 RequireIntegrity 时通过但记日志，提醒运维尽快补 sha256。
+                        bool integrityConfirmed = await TryVerifyDownloadSha256Async(group, version, zipFilePath, progressCallback);
+                        if (!integrityConfirmed)
+                        {
+                            LogHelper.WriteLogToFile($"AutoUpdate | 线路组 {group.GroupName} SHA256 校验失败，跳过", LogHelper.LogType.Warning);
+                            try { File.Delete(zipFilePath); } catch { }
+                            SaveDownloadStatus(false);
+                            continue;
+                        }
+
                         SaveDownloadStatus(true);
                         LogHelper.WriteLogToFile($"AutoUpdate | 从线路组 {group.GroupName} 下载成功");
                         progressCallback?.Invoke(100, "下载完成");
@@ -1749,6 +1793,92 @@ namespace Ink_Canvas.Helpers
                 try { File.Delete(path); return; }
                 catch (IOException) { try { Thread.Sleep(500); } catch { } }
                 catch { return; }
+            }
+        }
+
+        /// <summary>
+        /// 验证下载包 SHA256：根据 UpdateLineGroup.Sha256UrlFormat 配置决定行为。
+        /// 返回 true 表示通过（齐 SHA256 + 匹配 / 或 RequireIntegrity=false 无文件）；
+        /// 返回 false 表示拒绝（齐 SHA256 但不匹配 / 或 RequireIntegrity=true 但未配 sha256）。
+        /// </summary>
+        private static async Task<bool> TryVerifyDownloadSha256Async(UpdateLineGroup group, string version, string zipFilePath, Action<double, string> progressCallback)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(group?.Sha256UrlFormat))
+                {
+                    if (group.RequireIntegrity)
+                    {
+                        LogHelper.WriteLogToFile(
+                            $"AutoUpdate | 线路组 {group.GroupName} 要求完整性校验但未配置 Sha256UrlFormat，拒绝更新以防镜像被攻破。请联系发布方配发 .sha256 文件后启用。",
+                            LogHelper.LogType.Error);
+                        progressCallback?.Invoke(0, "该线路未发布 SHA256 校验文件，已拒绝（防止镜像被攻破）");
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile(
+                            $"AutoUpdate | 线路组 {group.GroupName} 未配发 SHA256 校验文件，跳过完整性校验（建议发布方补 .sha256 文件）",
+                            LogHelper.LogType.Warning);
+                        return true;
+                    }
+                    return false;
+                }
+
+                var shaUrl = group.Sha256UrlFormat.Contains("{0}")
+                    ? string.Format(group.Sha256UrlFormat, version)
+                    : group.Sha256UrlFormat;
+                if (group.GroupName != StartupStrings.SmartUpdate)
+                    shaUrl = AppendX64SuffixBeforeZipExtension(shaUrl);
+
+                string expectedHash;
+                using (var client = new HttpClient())
+                {
+                    client.Timeout = TimeSpan.FromSeconds(10);
+                    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0");
+                    var shaResp = await client.GetAsync(shaUrl);
+                    if (!shaResp.IsSuccessStatusCode)
+                    {
+                        LogHelper.WriteLogToFile(
+                            $"AutoUpdate | 无法获取 SHA256 文件（{shaUrl}），状态码 {(int)shaResp.StatusCode}",
+                            LogHelper.LogType.Error);
+                        return false;
+                    }
+                    var shaText = (await shaResp.Content.ReadAsStringAsync()).Trim();
+                    // 兼容 `<hash>  filename` 格式（sha256sum 标准输出）
+                    var firstSpace = shaText.IndexOfAny(new[] { ' ', '\t' });
+                    expectedHash = firstSpace > 0 ? shaText[..firstSpace] : shaText;
+                }
+                expectedHash = expectedHash.Replace("-", "").ToLowerInvariant();
+                if (expectedHash.Length != 64)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"AutoUpdate | SHA256 文件格式异常，长度 {expectedHash.Length}：{expectedHash}",
+                        LogHelper.LogType.Error);
+                    return false;
+                }
+
+                string actualHash;
+                using (var sha = System.Security.Cryptography.SHA256.Create())
+                using (var stream = File.OpenRead(zipFilePath))
+                {
+                    actualHash = BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", "").ToLowerInvariant();
+                }
+
+                if (!string.Equals(expectedHash, actualHash, StringComparison.OrdinalIgnoreCase))
+                {
+                    LogHelper.WriteLogToFile(
+                        $"AutoUpdate | SHA256 校验失败: 期望 {expectedHash}，实际 {actualHash}（线路 {group.GroupName}）",
+                        LogHelper.LogType.Error);
+                    return false;
+                }
+
+                LogHelper.WriteLogToFile($"AutoUpdate | SHA256 校验通过（线路 {group.GroupName}）");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | SHA256 校验过程异常: {ex.Message}", LogHelper.LogType.Error);
+                return false;
             }
         }
 
@@ -2554,7 +2684,12 @@ namespace Ink_Canvas.Helpers
                     try
                     {
                         // 配置HttpClientHandler以支持Windows 7
-                        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+                        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) =>
+                            // 只放行"已构建链但系统报 RemoteCertificateChainErrors（含过期/未吊销检查受限）"；
+                            // 链不信任、主机名不匹配、UntrustedRoot 等严格错误继续走系统校验，
+                            // 避免 MITM 在客户端网络内任意注入"更新包"。
+                            sslPolicyErrors == System.Net.Security.SslPolicyErrors.None
+                            || sslPolicyErrors == System.Net.Security.SslPolicyErrors.RemoteCertificateChainErrors;
 
                         using (HttpClient client = new HttpClient(handler))
                         {
@@ -2772,7 +2907,9 @@ namespace Ink_Canvas.Helpers
 
                 using (var handler = new HttpClientHandler())
                 {
-                    handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+                    handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) =>
+                        sslPolicyErrors == System.Net.Security.SslPolicyErrors.None
+                        || sslPolicyErrors == System.Net.Security.SslPolicyErrors.RemoteCertificateChainErrors;
 
                     using (var client = new HttpClient(handler))
                     {
