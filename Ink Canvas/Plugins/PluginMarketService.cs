@@ -669,6 +669,19 @@ namespace Ink_Canvas.Plugins
         private static string ResolveUrl(string url, string mirrorRoot)
         {
             if (string.IsNullOrEmpty(url)) return "";
+            // 防止恶意 mirrorRoot 通过在 URL 中注入 @ 或 / 改变路径解析：
+            //   https://github.com/{root}/file  + mirrorRoot="@evil.com/x"
+            //   → https://github.com/@evil.com/x/file（@ 前是 userinfo，真实 host 变成 evil.com）
+            // 白名单字符限定为 host/path 部分：字母、数字、点、冒号、斜杠、横线、下划线。
+            // 不允许 @ ? # 等 URL 元字符；URI 必须保持模板的可信结构。
+            if (!string.IsNullOrEmpty(mirrorRoot))
+            {
+                foreach (var ch in mirrorRoot)
+                {
+                    if (!(char.IsLetterOrDigit(ch) || ch == '.' || ch == ':' || ch == '/' || ch == '-' || ch == '_'))
+                        return url; // 含非法字符，保留原模板（不替换）
+                }
+            }
             return url.Replace("{root}", mirrorRoot ?? "");
         }
 
