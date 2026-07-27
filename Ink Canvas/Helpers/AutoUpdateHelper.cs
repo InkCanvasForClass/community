@@ -1253,11 +1253,20 @@ namespace Ink_Canvas.Helpers
                 version = NormalizeVersionForUpdate(version);
                 statusFilePath = GetUpdateDownloadStatusFilePath(version);
 
+                // 状态文件说"已下载"但 zip 不存在（用户/杀软清理过 Updates 目录），
+                // 不能短路返回成功——必须重新下载，否则 InstallNewVersionApp 找不到文件。
                 if (File.Exists(statusFilePath) && File.ReadAllText(statusFilePath).Trim().ToLower() == "true")
                 {
-                    LogHelper.WriteLogToFile("AutoUpdate | 安装包已下载");
-                    progressCallback?.Invoke(100, "已下载完成");
-                    return true;
+                    var zipPath = GetLocalUpdateZipFilePath(version);
+                    if (File.Exists(zipPath))
+                    {
+                        LogHelper.WriteLogToFile("AutoUpdate | 安装包已下载");
+                        progressCallback?.Invoke(100, "已下载完成");
+                        return true;
+                    }
+                    // zip 不存在则回退下载，并清理状态文件以避免下次再误判。
+                    try { File.Delete(statusFilePath); } catch { }
+                    LogHelper.WriteLogToFile("AutoUpdate | 状态文件存在但 zip 缺失，重新下载", LogHelper.LogType.Warning);
                 }
 
                 // 确保更新目录存在

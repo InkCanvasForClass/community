@@ -405,47 +405,37 @@ namespace Ink_Canvas.Helpers
                     }
                     else if (Marshal.IsComObject(PPTApplication))
                     {
+                        // 同步执行 -= 而非 Dispatcher.BeginInvoke 排队：
+                        // BeginInvoke 让 FinalReleaseComObject+置 null 先发生，lambda 内部 PPTApplication 已为 null
+                        // 整段 -= 被跳过，下次 ConnectToPPT += 同一处理器翻倍触发。
                         try
                         {
-                            Application.Current?.Dispatcher?.BeginInvoke(new Action(() =>
-                            {
-                                try
-                                {
-                                    if (PPTApplication != null && Marshal.IsComObject(PPTApplication))
-                                    {
-                                        PPTApplication.PresentationOpen -= OnPresentationOpen;
-                                        PPTApplication.PresentationClose -= OnPresentationClose;
-                                        PPTApplication.SlideShowBegin -= OnSlideShowBegin;
-                                        PPTApplication.SlideShowNextSlide -= OnSlideShowNextSlide;
-                                        PPTApplication.SlideShowEnd -= OnSlideShowEnd;
-                                    }
-                                }
-                                catch (COMException comEx)
-                                {
-                                    var hr = (uint)comEx.HResult;
-                                    LogHelper.WriteLogToFile($"取消PPT事件注册时COM异常: {comEx.Message} (HR: 0x{hr:X8})", LogHelper.LogType.Warning);
-                                }
-                                catch (InvalidCastException)
-                                {
-                                    LogHelper.WriteLogToFile("PPT COM对象已被释放，跳过事件注册取消", LogHelper.LogType.Trace);
-                                }
-                                catch (System.Reflection.TargetInvocationException tie) when (tie.InnerException is InvalidComObjectException)
-                                {
-                                    LogHelper.WriteLogToFile("PPT COM对象RCW已分离，跳过事件注册取消", LogHelper.LogType.Trace);
-                                }
-                                catch (InvalidComObjectException)
-                                {
-                                    LogHelper.WriteLogToFile("PPT COM对象RCW已分离，跳过事件注册取消", LogHelper.LogType.Trace);
-                                }
-                                catch (Exception ex)
-                                {
-                                    LogHelper.WriteLogToFile($"取消PPT事件注册时发生异常: {ex}", LogHelper.LogType.Warning);
-                                }
-                            }), DispatcherPriority.Normal);
+                            PPTApplication.PresentationOpen -= OnPresentationOpen;
+                            PPTApplication.PresentationClose -= OnPresentationClose;
+                            PPTApplication.SlideShowBegin -= OnSlideShowBegin;
+                            PPTApplication.SlideShowNextSlide -= OnSlideShowNextSlide;
+                            PPTApplication.SlideShowEnd -= OnSlideShowEnd;
+                        }
+                        catch (COMException comEx)
+                        {
+                            var hr = (uint)comEx.HResult;
+                            LogHelper.WriteLogToFile($"取消PPT事件注册时COM异常: {comEx.Message} (HR: 0x{hr:X8})", LogHelper.LogType.Warning);
+                        }
+                        catch (InvalidCastException)
+                        {
+                            LogHelper.WriteLogToFile("PPT COM对象已被释放，跳过事件注册取消", LogHelper.LogType.Trace);
+                        }
+                        catch (System.Reflection.TargetInvocationException tie) when (tie.InnerException is InvalidComObjectException)
+                        {
+                            LogHelper.WriteLogToFile("PPT COM对象RCW已分离，跳过事件注册取消", LogHelper.LogType.Trace);
+                        }
+                        catch (InvalidComObjectException)
+                        {
+                            LogHelper.WriteLogToFile("PPT COM对象RCW已分离，跳过事件注册取消", LogHelper.LogType.Trace);
                         }
                         catch (Exception ex)
                         {
-                            LogHelper.WriteLogToFile($"取消PPT事件注册失败: {ex}", LogHelper.LogType.Warning);
+                            LogHelper.WriteLogToFile($"取消PPT事件注册时发生异常: {ex}", LogHelper.LogType.Warning);
                         }
                     }
 

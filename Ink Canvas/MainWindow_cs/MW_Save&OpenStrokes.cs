@@ -535,10 +535,25 @@ namespace Ink_Canvas
                         }
                         else
                         {
-                            // 保存为二进制格式
-                            using (var fs = new FileStream(savePathWithName, FileMode.Create))
+                            // 保存为二进制格式：先写临时文件后 Replace 原子替换，
+                            // 避免 FileMode.Create 直接截断 → 写入中途失败 → 文件停在 0 字节。
+                            // 同目录下移动替换是原子操作，Windows 同卷 NTFS 保证。
+                            var tmpPath = savePathWithName + ".tmp";
+                            try
                             {
-                                inkCanvas.Strokes.Save(fs);
+                                using (var fs = new FileStream(tmpPath, FileMode.Create))
+                                {
+                                    inkCanvas.Strokes.Save(fs);
+                                }
+                                if (File.Exists(savePathWithName))
+                                    File.Replace(tmpPath, savePathWithName, null);
+                                else
+                                    File.Move(tmpPath, savePathWithName);
+                            }
+                            catch
+                            {
+                                try { if (File.Exists(tmpPath)) File.Delete(tmpPath); } catch { }
+                                throw;
                             }
                             if (newNotice)
                             {

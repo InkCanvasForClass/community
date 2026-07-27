@@ -1392,11 +1392,11 @@ namespace Ink_Canvas
                     // 仅PPT模式：放映开始立即同步主窗口可见性（勿仅依赖 SlideShowStateChanged 定时器）
                     CheckMainWindowVisibility();
 
-                    // 刷新智慧模式区域
+                    // 刷新智慧模式区域（改为异步版本，避免 GetSmartRegions 同步阻塞 UI）。
                     if (Settings.PowerPointSettings.EnableSmartMode)
                     {
                         System.Diagnostics.Debug.WriteLine("[SmartMode] SlideShowBegin, refreshing regions...");
-                        RefreshSmartModeRegions();
+                        _ = RefreshSmartModeRegionsAsync();
                     }
                 });
 
@@ -1537,9 +1537,12 @@ namespace Ink_Canvas
                 _previousSlideID = currentSlide;
                 NotifyPluginSlideChanged(currentSlide);
 
-                // 刷新智慧模式区域（翻页时视频控件可能变化）
+                // 刷新智慧模式区域（翻页时视频控件可能变化）。
+                // 翻页本身已是 UI 线程路径，这里改走异步版本避免每次翻页同步阻塞
+                // GetSmartRegions() 最长 4s。缓存仍由 UpdateTaskAwaiter/BuildSmartModeRects 提供，
+                // 首次异步结果到达前的若干页鼠标悬停判定退化为"按上一次缓存 + 缺省矩形"。
                 if (Settings.PowerPointSettings.EnableSmartMode)
-                    Application.Current.Dispatcher.InvokeAsync(() => RefreshSmartModeRegions());
+                    Application.Current.Dispatcher.InvokeAsync(() => _ = RefreshSmartModeRegionsAsync());
 
                 // 转发PPT翻页事件到小白板（如果已打开且启用了联动）
                 _miniWhiteboardWindow?.OnPPTSlideChangedExternal(currentSlide - 1);
@@ -1616,6 +1619,71 @@ namespace Ink_Canvas
             else
             {
                 Application.Current.Dispatcher.InvokeAsync(() => BuildSmartModeRects());
+            }
+        }
+
+        /// <summary>
+        /// 异步刷新智能模式视频控件区域：核心网络/共享内存访问放到线程池，避免 UI 线程被
+        /// GetSmartRegions 同步阻塞最多 4s。缓存命中仍由旧数据负责动画判定，
+        /// 此方法只负责后台拉取 + UI 线程应用结果。
+        /// </summary>
+        private async Task RefreshSmartModeRegionsAsync()
+        {
+            try
+            {
+                if (!Settings.PowerPointSettings.EnableSmartMode)
+                {
+                    _smartModeRegions = null;
+                    _smartModeSlideIndex = -1;
+                    return;
+                }
+
+                List<SmartRegion> regions = null;
+                int slideIndex = -1;
+                float slideWidth = 0f, slideHeight = 0f;
+                IntPtr slideShowHwnd = IntPtr.Zero;
+
+                await Task.Run(() =>
+                {
+                    try
+                    {
+                        if (_pptManager is PPTAgentLinkManager agentManager)
+                        {
+                            var response = agentManager.GetSmartRegions();
+                            if (response?.Regions != null && response.Regions.Count > 0)
+                            {
+                                regions = response.Regions;
+                                slideIndex = response.SlideIndex;
+                                slideWidth = response.SlideWidth;
+                                slideHeight = response.SlideHeight;
+                                slideShowHwnd = new IntPtr(response.SlideShowWindowHandle);
+                                return;
+                            }
+                        }
+                        regions = GetVideoRegionsViaCom();
+                        slideIndex = _currentSlideShowPosition;
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[SmartMode] 后台刷新异常: {ex}", LogHelper.LogType.Warning);
+                    }
+                });
+
+                if (regions == null) return;
+
+                _smartModeRegions = regions;
+                _smartModeSlideIndex = slideIndex;
+                _smartModeSlideWidth = slideWidth;
+                _smartModeSlideHeight = slideHeight;
+                _smartModeSlideShowHwnd = slideShowHwnd;
+
+                // BuildSmartModeRects 必须在 UI 线程执行。
+                if (Dispatcher.CheckAccess()) BuildSmartModeRects();
+                else await Dispatcher.InvokeAsync(() => BuildSmartModeRects());
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[SmartMode] 异步刷新失败: {ex}", LogHelper.LogType.Warning);
             }
         }
 
