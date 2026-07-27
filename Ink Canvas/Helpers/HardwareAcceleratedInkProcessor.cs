@@ -12,7 +12,7 @@ namespace Ink_Canvas.Helpers
     /// <summary>
     /// 硬件加速的墨迹处理器，利用WPF的GPU渲染能力
     /// </summary>
-    public class HardwareAcceleratedInkProcessor
+    public class HardwareAcceleratedInkProcessor : IDisposable
     {
         private readonly RenderTargetBitmap _renderTarget;
         private readonly DrawingVisual _drawingVisual;
@@ -34,31 +34,36 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 使用GPU加速的贝塞尔曲线平滑
         /// </summary>
-        public async Task<Stroke> SmoothStrokeWithGPU(Stroke originalStroke)
+        /// <summary>
+        /// 使用GPU加速的贝塞尔曲线平滑。
+        /// 注意：本方法在 UI 线程调用（来自 StrokeCollected 路径），WPF Stroke / StylusPointCollection
+        /// 是 DispatcherObject 但不是 Freezable——为安全起见不再用 Task.Run，避免跨线程访问
+        /// 触发 "必须在创建线程使用" 异常。仅 DrawingAttributes (Freezable) 被克隆并冻结。
+        /// </summary>
+        public Task<Stroke> SmoothStrokeWithGPU(Stroke originalStroke)
         {
             if (!_isInitialized || originalStroke == null || originalStroke.StylusPoints.Count < 2)
-                return originalStroke;
+                return Task.FromResult(originalStroke);
 
-            return await Task.Run(() =>
+            try
             {
-                try
-                {
-                    // 使用PathGeometry进行硬件加速的曲线拟合
-                    var pathGeometry = CreateSmoothPathGeometry(originalStroke.StylusPoints);
+                // 使用PathGeometry进行硬件加速的曲线拟合
+                var pathGeometry = CreateSmoothPathGeometry(originalStroke.StylusPoints);
 
-                    // 将PathGeometry转换回StylusPoint集合
-                    var smoothedPoints = ConvertPathGeometryToStylusPoints(pathGeometry, originalStroke.StylusPoints);
+                // 将PathGeometry转换回StylusPoint集合
+                var smoothedPoints = ConvertPathGeometryToStylusPoints(pathGeometry, originalStroke.StylusPoints);
 
-                    return new Stroke(new StylusPointCollection(smoothedPoints))
-                    {
-                        DrawingAttributes = originalStroke.DrawingAttributes.Clone()
-                    };
-                }
-                catch
+                var da = originalStroke.DrawingAttributes.Clone();
+                var result = new Stroke(new StylusPointCollection(smoothedPoints))
                 {
-                    return originalStroke;
-                }
-            });
+                    DrawingAttributes = da
+                };
+                return Task.FromResult(result);
+            }
+            catch
+            {
+                return Task.FromResult(originalStroke);
+            }
         }
 
         /// <summary>
@@ -186,12 +191,22 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 释放GPU相关资源标记
+        /// 释放GPU相关资源。
+        /// 先冻结 RenderTargetBitmap 让 WPF 停止依赖 GPU surface，再主动 Dispose 释放底层 GPU 句柄。
+        /// DrawingVisual 仅在 WeakReference 由 GC 回收，无显式释放 API，依靠 GC。
         /// </summary>
         public void Dispose()
         {
-
             _isInitialized = false;
+            try
+            {
+                if (_renderTarget != null)
+                {
+                    if (_renderTarget.CanFreeze) _renderTarget.Freeze();
+                    _renderTarget.Clear();
+                }
+            }
+            catch { }
         }
     }
 
