@@ -2005,50 +2005,15 @@ namespace Ink_Canvas.Helpers
         #endregion
 
         #region WPS Window Detection
-        //[DllImport("user32.dll")]
-        //private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+        // 这些 P/Invoke 之前被切换到 CsWin32 的 PInvoke.GetWindowText/GetClassName Span 重载，
+        // 但调用点写成了 `new Span<char>(emptyBuffer)`，容量为 0，永远读到空串，
+        // 导致 WPS 窗口三重验证全误判为"窗口已消失"，最终关闭/强杀仍在运行的 WPS 进程。
+        // 改为经典 StringBuilder 重载。GetWindowRect/IsWindowVisible 等仍走 CsWin32。
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
 
-        //[DllImport("user32.dll")]
-        //private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
-
-        //[DllImport("user32.dll")]
-        //private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
-
-        //[DllImport("user32.dll")]
-        //[return: MarshalAs(UnmanagedType.Bool)]
-        //private static extern bool IsWindowVisible(IntPtr hWnd);
-
-        //[DllImport("user32.dll")]
-        //private static extern bool IsIconic(IntPtr hWnd);
-
-        //[DllImport("user32.dll")]
-        //private static extern bool IsZoomed(IntPtr hWnd);
-
-        //[DllImport("user32.dll")]
-        //private static extern IntPtr GetForegroundWindow();
-
-        //[DllImport("user32.dll")]
-        //private static extern bool IsWindow(IntPtr hWnd);
-
-        //[DllImport("user32.dll")]
-        //private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
-
-        //[StructLayout(LayoutKind.Sequential)]
-        //public struct RECT
-        //{
-        //    public int Left;
-        //    public int Top;
-        //    public int Right;
-        //    public int Bottom;
-
-        //    public int Width => Right - Left;
-        //    public int Height => Bottom - Top;
-        //}
-
-        //[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        //private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
-
-        //private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
 
         private class WpsWindowInfo
         {
@@ -2097,12 +2062,12 @@ namespace Ink_Canvas.Helpers
 
             // 获取窗口标题
             var windowTitle = new StringBuilder(256);
-            PInvoke.GetWindowText(hwnd, new Span<char>(windowTitle.ToString().ToCharArray()));
+            GetWindowText(hwnd, windowTitle, windowTitle.Capacity);
             windowInfo.Title = windowTitle.ToString().Trim();
 
             // 获取窗口类名
             var className = new StringBuilder(256);
-            PInvoke.GetClassName(hwnd, new Span<char>(className.ToString().ToCharArray()));
+            GetClassName(hwnd, className, className.Capacity);
             windowInfo.ClassName = className.ToString().Trim();
 
             // 获取窗口位置

@@ -198,6 +198,33 @@ namespace Ink_Canvas
             _hasStoredInkCanvasManipulationStateForTouchInk = false;
         }
 
+        /// <summary>
+        /// 强制清空触摸活动集合，作为异常失活路径（TouchLeave / PointerCaptureLost /
+        /// LostFocus / Deactivated 等没有对应 TouchUp 的场景）的兜底。
+        /// 不修改其他触摸状态，避免与既有 dec.Clear / dec.Remove 兜底产生不一致。
+        /// </summary>
+        internal void AbortAllActiveTouchInputs()
+        {
+            if (_activeRealtimeTouchStrokeIds.Count > 0)
+            {
+                foreach (var strokeId in _activeRealtimeTouchStrokeIds)
+                    RealtimeInkFrameScheduler.Cancel(StrokeVisualList.TryGetValue(strokeId, out var sv) ? sv : null);
+                _activeRealtimeTouchStrokeIds.Clear();
+            }
+            if (_activeRealtimeStylusStrokeIds.Count > 0)
+                _activeRealtimeStylusStrokeIds.Clear();
+            if (_activeTouchStrokeIds.Count > 0)
+                _activeTouchStrokeIds.Clear();
+            if (_realtimeBrushTipStates.Count > 0)
+                _realtimeBrushTipStates.Clear();
+            foreach (var timerEntry in _pauseStraightenTimers)
+            {
+                timerEntry.Value.Stop();
+            }
+            _pauseStraightenTimers.Clear();
+            EndTouchInkInputIfIdle();
+        }
+
         internal void EnsureRealtimeStylusPipelineBinding()
         {
             if (inkCanvas == null) return;

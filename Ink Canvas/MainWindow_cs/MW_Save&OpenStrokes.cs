@@ -1191,14 +1191,10 @@ namespace Ink_Canvas
                     }
                 }
 
-                // 清空当前墨迹
-                ClearStrokes(true);
-                timeMachine.ClearStrokeHistory();
-
-                // 重置PPT墨迹存储
-                _singlePPTInkManager?.ClearAllStrokes();
-
-                // 读取所有页面的墨迹文件（支持.icstk和.xml格式）
+                // 先把所有页面的墨迹全部解析进内存，再清空原画布。
+                // 一旦循环中任意一页解析失败抛出，原画布墨迹不会被销毁、撤销历史可恢复。
+                // TimeMachineHistories 容量固定为 101（MW_BoardControls.cs:47），对超出范围或负数页码直接跳过。
+                var parsedStrokesByPage = new Dictionary<int, StrokeCollection>();
                 var icstkFiles = Directory.GetFiles(tempDir, "page_*.icstk");
                 var xmlFiles = Directory.GetFiles(tempDir, "page_*.xml");
                 var allFiles = new List<string>();
@@ -1208,31 +1204,42 @@ namespace Ink_Canvas
                 foreach (var file in allFiles)
                 {
                     var fileName = Path.GetFileNameWithoutExtension(file);
-                    if (fileName.StartsWith("page_") && int.TryParse(fileName.Substring(5), out int pageNumber))
+                    if (!fileName.StartsWith("page_") || !int.TryParse(fileName.Substring(5), out int pageNumber))
+                        continue;
+                    if (pageNumber < 1 || pageNumber >= TimeMachineHistories.Length)
                     {
-                        StrokeCollection strokes = null;
-                        string extension = Path.GetExtension(file).ToLower();
+                        LogHelper.WriteLogToFile($"跳过非法页码 {pageNumber}（文件 {file}）", LogHelper.LogType.Warning);
+                        continue;
+                    }
 
-                        if (extension == ".xml")
-                        {
-                            // 从XML文件加载
-                            strokes = LoadStrokesFromXML(file);
-                        }
-                        else
-                        {
-                            // 从二进制文件加载
-                            using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read))
-                            {
-                                strokes = new StrokeCollection(fs);
-                            }
-                        }
+                    StrokeCollection strokes;
+                    string extension = Path.GetExtension(file).ToLower();
 
-                        if (strokes != null && strokes.Count > 0)
+                    if (extension == ".xml")
+                    {
+                        strokes = LoadStrokesFromXML(file);
+                    }
+                    else
+                    {
+                        using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read))
                         {
-                            _singlePPTInkManager?.ForceSaveSlideStrokes(pageNumber, strokes);
+                            strokes = new StrokeCollection(fs);
                         }
                     }
+
+                    if (strokes != null && strokes.Count > 0)
+                        parsedStrokesByPage[pageNumber] = strokes;
                 }
+
+                // 清空当前墨迹
+                ClearStrokes(true);
+                timeMachine.ClearStrokeHistory();
+
+                // 重置PPT墨迹存储
+                _singlePPTInkManager?.ClearAllStrokes();
+
+                foreach (var pair in parsedStrokesByPage)
+                    _singlePPTInkManager?.ForceSaveSlideStrokes(pair.Key, pair.Value);
 
                 // 恢复当前页面的墨迹
                 if (_pptManager?.IsInSlideShow == true)
@@ -1268,6 +1275,32 @@ namespace Ink_Canvas
                     throw new InvalidOperationException("当前不在白板模式，无法恢复白板墨迹");
                 }
 
+                // 先把全部墨迹解析进内存，循环结束后才清空原画布——解析失败时原墨迹仍存在。
+                // 同时把 pageNumber 限定在 TimeMachineHistories 容量（101）内，避免 IndexOutOfRangeException。
+                var parsedHistoriesByPage = new Dictionary<int, TimeMachineHistory[]>();
+                var files = Directory.GetFiles(tempDir, "page_*.icstk");
+                foreach (var file in files)
+                {
+                    var fileName = Path.GetFileNameWithoutExtension(file);
+                    if (!fileName.StartsWith("page_") || !int.TryParse(fileName.Substring(5), out int pageNumber))
+                        continue;
+                    if (pageNumber < 1 || pageNumber >= TimeMachineHistories.Length)
+                    {
+                        LogHelper.WriteLogToFile($"跳过非法页码 {pageNumber}（文件 {file}）", LogHelper.LogType.Warning);
+                        continue;
+                    }
+
+                    using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read))
+                    {
+                        var strokes = new StrokeCollection(fs);
+                        if (strokes.Count > 0)
+                        {
+                            var history = new TimeMachineHistory(strokes, TimeMachineHistoryType.UserInput, false);
+                            parsedHistoriesByPage[pageNumber] = new[] { history };
+                        }
+                    }
+                }
+
                 // 清空当前墨迹
                 ClearStrokes(true);
                 timeMachine.ClearStrokeHistory();
@@ -1290,25 +1323,8 @@ namespace Ink_Canvas
                     TimeMachineHistories[i] = null;
                 }
 
-                // 读取所有页面的墨迹文件
-                var files = Directory.GetFiles(tempDir, "page_*.icstk");
-                foreach (var file in files)
-                {
-                    var fileName = Path.GetFileNameWithoutExtension(file);
-                    if (fileName.StartsWith("page_") && int.TryParse(fileName.Substring(5), out int pageNumber))
-                    {
-                        using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read))
-                        {
-                            var strokes = new StrokeCollection(fs);
-                            if (strokes.Count > 0)
-                            {
-                                // 创建历史记录
-                                var history = new TimeMachineHistory(strokes, TimeMachineHistoryType.UserInput, false);
-                                TimeMachineHistories[pageNumber] = new[] { history };
-                            }
-                        }
-                    }
-                }
+                foreach (var pair in parsedHistoriesByPage)
+                    TimeMachineHistories[pair.Key] = pair.Value;
 
                 // 恢复第一页的墨迹
                 if (TimeMachineHistories[1] != null)

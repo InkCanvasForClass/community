@@ -3365,9 +3365,12 @@ namespace Ink_Canvas
                             var ms = new MemoryStream();
                             inkCanvas.Strokes.Save(ms);
                             ms.Position = 0;
-                            if (_memoryStreams.ContainsKey(currentSlide))
-                                _memoryStreams[currentSlide]?.Dispose();
-                            _memoryStreams[currentSlide] = ms;
+                            lock (_memoryStreams)
+                            {
+                                if (_memoryStreams.ContainsKey(currentSlide))
+                                    _memoryStreams[currentSlide]?.Dispose();
+                                _memoryStreams[currentSlide] = ms;
+                            }
                         }
                         timeMachine.ClearStrokeHistory();
                     }
@@ -3380,9 +3383,12 @@ namespace Ink_Canvas
                                 var ms = new MemoryStream();
                                 inkCanvas.Strokes.Save(ms);
                                 ms.Position = 0;
-                                if (_memoryStreams.ContainsKey(currentSlide))
-                                    _memoryStreams[currentSlide]?.Dispose();
-                                _memoryStreams[currentSlide] = ms;
+                                lock (_memoryStreams)
+                                {
+                                    if (_memoryStreams.ContainsKey(currentSlide))
+                                        _memoryStreams[currentSlide]?.Dispose();
+                                    _memoryStreams[currentSlide] = ms;
+                                }
                             }
                             timeMachine.ClearStrokeHistory();
                         });
