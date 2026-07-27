@@ -1951,26 +1951,33 @@ namespace Ink_Canvas
                             if (!Directory.Exists(folderPathForSave))
                                 Directory.CreateDirectory(folderPathForSave);
 
+                            // 先在锁内快照出 (页码, 字节) 列表，再在锁外做磁盘 IO。
+                            // 之前在 lock 内直接 File.WriteAllBytes 把磁盘 IO 与字典保护混在一起，
+                            // 磁盘繁忙/AV 扫描锁定文件时 _memoryStreams 被独占数十秒，
+                            // 期间 OnPPTSlideShowNextSlide/ExitPPTPresentation 任何持锁访问全卡死。
+                            var snapshot = new List<(int page, byte[] bytes)>();
                             lock (_memoryStreams)
                             {
                                 for (int i = 1; i <= totalSlidesForSave; i++)
                                 {
                                     if (_memoryStreams.TryGetValue(i, out MemoryStream value) && value != null)
-                                    {
-                                        try
-                                        {
-                                            byte[] allBytes = value.ToArray();
-                                            string filePath = Path.Combine(folderPathForSave, i.ToString("0000") + ".icstk");
-                                            if (allBytes.Length > 8)
-                                                File.WriteAllBytes(filePath, allBytes);
-                                            else if (File.Exists(filePath))
-                                                File.Delete(filePath);
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            LogHelper.WriteLogToFile($"为第 {i} 页保存墨迹文件失败: {ex}", LogHelper.LogType.Warning);
-                                        }
-                                    }
+                                        snapshot.Add((i, value.ToArray()));
+                                }
+                            }
+
+                            foreach (var (page, bytes) in snapshot)
+                            {
+                                try
+                                {
+                                    string filePath = Path.Combine(folderPathForSave, page.ToString("0000") + ".icstk");
+                                    if (bytes.Length > 8)
+                                        File.WriteAllBytes(filePath, bytes);
+                                    else if (File.Exists(filePath))
+                                        File.Delete(filePath);
+                                }
+                                catch (Exception ex)
+                                {
+                                    LogHelper.WriteLogToFile($"为第 {page} 页保存墨迹文件失败: {ex}", LogHelper.LogType.Warning);
                                 }
                             }
                         }
