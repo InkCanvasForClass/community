@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.IO.Pipes;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Input;
@@ -26,7 +28,54 @@ namespace InkCanvas.IACoreHelper
 
             try
             {
-                RunPipeServer(pipeName, sharedMemoryNamePrefix);
+                // 提前解析父进程句柄并启动守护线程：父进程消失时立即清理并退出，
+                // 避免 helper 永远阻塞在 WaitForConnection 上变成孤儿。
+                Process parent;
+                try
+                {
+                    parent = Process.GetProcessById(parentPid);
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine("IACoreHelper fatal: parent process not found: " + ex.Message);
+                    return;
+                }
+
+                using (var parentExited = new ManualResetEventSlim(false))
+                {
+                    var parentWatcher = new Thread(() =>
+                    {
+                        try
+                        {
+                            parent.WaitForExit();
+                        }
+                        catch { }
+                        finally
+                        {
+                            parentExited.Set();
+                        }
+                    }) { IsBackground = true, Name = "IACoreHelper.ParentWatcher" };
+                    parentWatcher.Start();
+
+                    // 把 WaitForConnection 与守护等待放到一起：任一信号先到就退出。
+                    var serverThread = new Thread(() =>
+                    {
+                        try
+                        {
+                            RunPipeServer(pipeName, sharedMemoryNamePrefix, () => parentExited.IsSet);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.Error.WriteLine("IACoreHelper fatal: " + ex.Message);
+                        }
+                    }) { IsBackground = true, Name = "IACoreHelper.PipeServer" };
+                    serverThread.Start();
+
+                    // 主线程阻塞直到父进程消失。守护线程一旦 Set，主线程退出，进程随之终止。
+                    parentExited.Wait();
+                }
+                try { parent.Dispose(); } catch { }
+                Environment.Exit(0);
             }
             catch (Exception ex)
             {
@@ -34,95 +83,154 @@ namespace InkCanvas.IACoreHelper
             }
         }
 
-        private static void RunPipeServer(string pipeName, string sharedMemoryNamePrefix)
+        private static void RunPipeServer(string pipeName, string sharedMemoryNamePrefix, Func<bool> shouldExit)
         {
             MemoryMappedFile sharedMemory = null;
             string openedSharedMemoryName = null;
+            NamedPipeServerStream currentServer = null;
+            var shouldRun = true;
             try
             {
-                while (true)
+                // 用一个后台线程在父进程消失时把当前 server 强制 Dispose，
+                // WaitForConnection 因此抛 IOException 而非永远阻塞 — 避免 helper 变成孤儿。
+                var serverCanceller = new Thread(() =>
                 {
-                    using (var server = new NamedPipeServerStream(
+                    while (Volatile.Read(ref shouldRun))
+                    {
+                        Thread.Sleep(500);
+                        if (shouldExit == null) continue;
+                        if (!shouldExit())
+                            continue;
+                        var server = currentServer;
+                        try { server?.Dispose(); } catch { }
+                        return;
+                    }
+                }) { IsBackground = true, Name = "IACoreHelper.CancelOnParentExit" };
+                serverCanceller.Start();
+
+                while (!shouldExit())
+                {
+                    var server = new NamedPipeServerStream(
                         pipeName,
                         PipeDirection.InOut,
                         1,
                         PipeTransmissionMode.Byte,
-                        PipeOptions.WriteThrough))
+                        PipeOptions.WriteThrough);
+                    currentServer = server;
+                    try
                     {
                         server.WaitForConnection();
+                    }
+                    catch
+                    {
+                        // 父进程消失触发 server.Dispose()，抛出 ObjectDisposedException/IOException，跳出循环。
+                        server.Dispose();
+                        currentServer = null;
+                        return;
+                    }
 
-                        try
+                    try
+                    {
+                        using (var reader = new BinaryReader(server, System.Text.Encoding.UTF8, leaveOpen: true))
+                        using (var writer = new BinaryWriter(server, System.Text.Encoding.UTF8, leaveOpen: true))
                         {
-                            using (var reader = new BinaryReader(server, System.Text.Encoding.UTF8, leaveOpen: true))
-                            using (var writer = new BinaryWriter(server, System.Text.Encoding.UTF8, leaveOpen: true))
+                            byte cmd = reader.ReadByte();
+
+                            if (cmd == IpcConstants.CmdShutdown)
+                                return;
+
+                            if (cmd == IpcConstants.CmdPingSharedMemoryGeneration)
                             {
-                                byte cmd = reader.ReadByte();
-
-                                if (cmd == IpcConstants.CmdShutdown)
-                                    return;
-
-                                if (cmd == IpcConstants.CmdRecognize)
+                                // 客户端通过 GrowSharedMemory 切到新 generation 后立即下达：
+                                // 立即按当前 generation 打开新共享内存句柄，关闭"客户端已 Dispose、
+                                // helper 仍持旧句柄"中间窗口的 race。
+                                int pingGen = reader.ReadInt32();
+                                string targetName = sharedMemoryNamePrefix + pingGen;
+                                try
                                 {
-                                    var request = RecognizeRequest.ReadFrom(reader);
-                                    var response = HandleRecognize(request);
-                                    response.WriteTo(writer);
-                                    writer.Flush();
-                                }
-                                else if (cmd == IpcConstants.CmdRecognizeSharedMemory)
-                                {
-                                    int requestLength = reader.ReadInt32();
-                                    int capacity = reader.ReadInt32();
-                                    int generation = reader.ReadInt32();
-                                    string currentSharedMemoryName = sharedMemoryNamePrefix + generation;
-
-                                    if (sharedMemory == null || currentSharedMemoryName != openedSharedMemoryName)
+                                    if (sharedMemory == null || targetName != openedSharedMemoryName)
                                     {
                                         sharedMemory?.Dispose();
-                                        sharedMemory = MemoryMappedFile.OpenExisting(currentSharedMemoryName);
-                                        openedSharedMemoryName = currentSharedMemoryName;
+                                        sharedMemory = MemoryMappedFile.OpenExisting(targetName);
+                                        openedSharedMemoryName = targetName;
                                     }
-
-                                    int status = HandleSharedMemoryRecognize(sharedMemory, requestLength, capacity, out int responseLength);
-                                    writer.Write(status);
-                                    writer.Write(responseLength);
-                                    writer.Flush();
+                                    writer.Write(IpcConstants.StatusOk);
                                 }
-                                else if (cmd == IpcConstants.CmdRecognizeTextSharedMemory)
+                                catch (FileNotFoundException)
                                 {
-                                    int requestLength = reader.ReadInt32();
-                                    int capacity = reader.ReadInt32();
-                                    int generation = reader.ReadInt32();
-                                    string currentSharedMemoryName = sharedMemoryNamePrefix + generation;
-
-                                    if (sharedMemory == null || currentSharedMemoryName != openedSharedMemoryName)
-                                    {
-                                        sharedMemory?.Dispose();
-                                        sharedMemory = MemoryMappedFile.OpenExisting(currentSharedMemoryName);
-                                        openedSharedMemoryName = currentSharedMemoryName;
-                                    }
-
-                                    int status = HandleSharedMemoryRecognizeText(sharedMemory, requestLength, capacity, out int responseLength);
-                                    writer.Write(status);
-                                    writer.Write(responseLength);
-                                    writer.Flush();
+                                    writer.Write(IpcConstants.StatusError);
                                 }
+                                writer.Flush();
+                                continue;
+                            }
+
+                            if (cmd == IpcConstants.CmdRecognize)
+                            {
+                                var request = RecognizeRequest.ReadFrom(reader);
+                                var response = HandleRecognize(request);
+                                response.WriteTo(writer);
+                                writer.Flush();
+                            }
+                            else if (cmd == IpcConstants.CmdRecognizeSharedMemory)
+                            {
+                                int requestLength = reader.ReadInt32();
+                                int capacity = reader.ReadInt32();
+                                int generation = reader.ReadInt32();
+                                string currentSharedMemoryName = sharedMemoryNamePrefix + generation;
+
+                                if (sharedMemory == null || currentSharedMemoryName != openedSharedMemoryName)
+                                {
+                                    sharedMemory?.Dispose();
+                                    sharedMemory = MemoryMappedFile.OpenExisting(currentSharedMemoryName);
+                                    openedSharedMemoryName = currentSharedMemoryName;
+                                }
+
+                                int status = HandleSharedMemoryRecognize(sharedMemory, requestLength, capacity, out int responseLength);
+                                writer.Write(status);
+                                writer.Write(responseLength);
+                                writer.Flush();
+                            }
+                            else if (cmd == IpcConstants.CmdRecognizeTextSharedMemory)
+                            {
+                                int requestLength = reader.ReadInt32();
+                                int capacity = reader.ReadInt32();
+                                int generation = reader.ReadInt32();
+                                string currentSharedMemoryName = sharedMemoryNamePrefix + generation;
+
+                                if (sharedMemory == null || currentSharedMemoryName != openedSharedMemoryName)
+                                {
+                                    sharedMemory?.Dispose();
+                                    sharedMemory = MemoryMappedFile.OpenExisting(currentSharedMemoryName);
+                                    openedSharedMemoryName = currentSharedMemoryName;
+                                }
+
+                                int status = HandleSharedMemoryRecognizeText(sharedMemory, requestLength, capacity, out int responseLength);
+                                writer.Write(status);
+                                writer.Write(responseLength);
+                                writer.Flush();
                             }
                         }
-                        catch (FileNotFoundException)
-                        {
-                            sharedMemory?.Dispose();
-                            sharedMemory = null;
-                            Console.Error.WriteLine("IACoreHelper shared memory missing");
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.Error.WriteLine("IACoreHelper pipe error: " + ex.Message);
-                        }
+                    }
+                    catch (FileNotFoundException)
+                    {
+                        sharedMemory?.Dispose();
+                        sharedMemory = null;
+                        Console.Error.WriteLine("IACoreHelper shared memory missing");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Error.WriteLine("IACoreHelper pipe error: " + ex.Message);
+                    }
+                    finally
+                    {
+                        try { server.Dispose(); } catch { }
+                        currentServer = null;
                     }
                 }
             }
             finally
             {
+                Volatile.Write(ref shouldRun, false);
                 sharedMemory?.Dispose();
             }
         }

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.IO.Pipes;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
 using System.Windows.Ink;
@@ -29,10 +30,15 @@ namespace Ink_Canvas.Helpers
         }
 
         private Process _helperProcess;
+        private KillOnCloseJob _helperJob;
         private MemoryMappedFile _sharedMemory;
         private int _sharedMemoryCapacity = DefaultSharedMemoryCapacity;
         private int _sharedMemoryGeneration;
         private readonly object _pipeLock = new object();
+        // 仅守护"判断 IsAvailable → 启动 helper"这一段，避免与识别请求的 _pipeLock 互锁，
+        // 同时根除 App.xaml.cs:1415 + MainWindow.xaml.cs:1522/2588 + InkRecognitionManager:177
+        // 并发调 Start() 时起出两条 helper 的竞态（保留旧 PID 被覆盖变孤儿）。
+        private readonly object _startGate = new object();
         private bool _disposed;
         private bool _available;
 
@@ -54,15 +60,18 @@ namespace Ink_Canvas.Helpers
         public bool Start()
         {
             if (_disposed) return false;
-            if (IsAvailable) return true;
-
-            if (!File.Exists(HelperExePath))
+            lock (_startGate)
             {
-                _available = false;
-                return false;
-            }
+                if (IsAvailable) return true;
 
-            return LaunchHelper();
+                if (!File.Exists(HelperExePath))
+                {
+                    _available = false;
+                    return false;
+                }
+
+                return LaunchHelper();
+            }
         }
 
         public bool IsAvailable => _available && _helperProcess != null && !_helperProcess.HasExited;
@@ -142,6 +151,11 @@ namespace Ink_Canvas.Helpers
                 }
                 _helperProcess.EnableRaisingEvents = true;
                 _helperProcess.Exited += OnHelperExited;
+                // 把 helper 关联进 Job Object：父进程任何原因消失（崩溃/TaskKill/Environment.Exit）
+                // 关闭 job handle 时，Windows 内核会强制结束 helper，防止变成孤儿锁住主程序 exe。
+                // 与 helper 内部的父进程守护线程形成双保险。
+                _helperJob?.Dispose();
+                _helperJob = KillOnCloseJob.TryCreateAssociated(_helperProcess);
 
                 bool pipeReady = WaitForPipe(3000);
                 _available = pipeReady;
@@ -200,9 +214,12 @@ namespace Ink_Canvas.Helpers
 
                     int status = reader.ReadInt32();
                     int responseLength = reader.ReadInt32();
+                    // 共享内存容量不足时，仅放大一次并重发请求；helper 仍返回 TooLarge 则放弃，
+                    // 而不是让 GrowSharedMemory 在更大尺寸上抛 InvalidOperationException 被吞掉。
                     if (status == StatusResponseTooLarge)
                     {
-                        GrowSharedMemory(_sharedMemoryCapacity * 2);
+                        try { GrowSharedMemory(_sharedMemoryCapacity * 2); }
+                        catch { return InkShapeRecognitionResult.Empty; }
                         return SendRecognizeRequest(strokes);
                     }
                     if (status != StatusOk || responseLength <= 0)
@@ -234,7 +251,8 @@ namespace Ink_Canvas.Helpers
                     int responseLength = reader.ReadInt32();
                     if (status == StatusResponseTooLarge)
                     {
-                        GrowSharedMemory(_sharedMemoryCapacity * 2);
+                        try { GrowSharedMemory(_sharedMemoryCapacity * 2); }
+                        catch { return HandwritingRecognitionResult.Empty; }
                         return SendRecognizeTextRequest(strokes, hint);
                     }
                     if (status != StatusOk || responseLength <= 0)
@@ -515,6 +533,36 @@ namespace Ink_Canvas.Helpers
             _sharedMemoryGeneration++;
             _sharedMemory = MemoryMappedFile.CreateOrOpen(SharedMemoryName, capacity, MemoryMappedFileAccess.ReadWrite);
             _sharedMemoryCapacity = capacity;
+            // 让 helper 立即按新 generation 重开共享内存，避免下次共享内存命令仍走老句柄抛 FileNotFoundException。
+            try { PingSharedMemoryGeneration(); }
+            catch (Exception ex) { Debug.WriteLine("PingSharedMemoryGeneration failed: " + ex.Message); }
+        }
+
+        private void PingSharedMemoryGeneration()
+        {
+            if (!IsAvailable) return;
+            lock (_pipeLock)
+            {
+                try
+                {
+                    using (var client = new NamedPipeClientStream(".", PipeName, PipeDirection.InOut))
+                    {
+                        client.Connect(IpcTimeoutMs);
+                        using (var w = new BinaryWriter(client, System.Text.Encoding.UTF8, leaveOpen: true))
+                        using (var r = new BinaryReader(client, System.Text.Encoding.UTF8, leaveOpen: true))
+                        {
+                            w.Write(CmdPingSharedMemoryGeneration);
+                            w.Write(_sharedMemoryGeneration);
+                            w.Flush();
+                            r.ReadInt32(); // status：失败也只意味着下次再 OpenExisting 重试
+                        }
+                    }
+                }
+                catch
+                {
+                    // 同步唤起失败无影响，下次真实请求时 helper 仍会按 generation 不匹配重开。
+                }
+            }
         }
 
         private static int GetRequestLength(StrokeCollection strokes)
@@ -537,8 +585,8 @@ namespace Ink_Canvas.Helpers
 
         private void EnsureHelperAlive()
         {
-            if (!IsAvailable)
-                LaunchHelper();
+            // Start() 自带 _startGate 互斥，这里直接复用同一个 gate。
+            Start();
         }
 
         private void OnHelperExited(object sender, EventArgs e)
@@ -581,6 +629,8 @@ namespace Ink_Canvas.Helpers
                 _helperProcess?.Dispose();
                 _helperProcess = null;
                 _available = false;
+                _helperJob?.Dispose();
+                _helperJob = null;
                 ReleaseSharedMemory();
             }
         }
@@ -611,6 +661,7 @@ namespace Ink_Canvas.Helpers
         private const int StatusResponseTooLarge = 2;
         private const byte CmdRecognizeSharedMemory = 0x02;
         private const byte CmdRecognizeTextSharedMemory = 0x03;
+        private const byte CmdPingSharedMemoryGeneration = 0x04;
         private const byte CmdShutdown = 0xFF;
     }
 

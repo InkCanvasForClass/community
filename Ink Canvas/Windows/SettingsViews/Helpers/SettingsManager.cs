@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using ProcessProtectionManager = Ink_Canvas.Helpers.ProcessProtectionManager;
-
 namespace Ink_Canvas.Windows.SettingsViews.Helpers
 {
     public static class SettingsManager

@@ -15,6 +15,10 @@ namespace InkCanvas.IACoreHelper
         public const byte CmdRecognize = 0x01;
         public const byte CmdRecognizeSharedMemory = 0x02;
         public const byte CmdRecognizeTextSharedMemory = 0x03;
+        // 由客户端在 GrowSharedMemory 后立即发送：helper 立即换成新 generation 共享内存名打开，
+        // 关闭 GrowSharedMemory → 下次共享内存请求之间 helper 仍持有旧句柄的 race window，
+        // 否则该次 OpenExisting 抛 FileNotFoundException 被吞，返回 StatusError。
+        public const byte CmdPingSharedMemoryGeneration = 0x04;
         public const byte CmdShutdown = 0xFF;
         public const int StatusOk = 0;
         public const int StatusError = 1;
