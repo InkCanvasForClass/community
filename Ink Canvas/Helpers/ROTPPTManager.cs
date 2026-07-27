@@ -1505,8 +1505,10 @@ namespace Ink_Canvas.Helpers
                 if (!IsConnected || !IsInSlideShow || PPTApplication == null) return false;
                 if (!Marshal.IsComObject(PPTApplication)) return false;
 
-                // 在新线程中执行翻页操作，避免等待动画完成
-                new Thread(() =>
+                // 在新 STA 线程中执行翻页操作，避免等待动画完成。
+                // Office interop 要求 STA：默认 new Thread 是 MTA，触发 0x8001010E (RPC_E_WRONG_THREAD)
+                // 会让 DisconnectFromPPT 掉线。下面显式 SetApartmentState。
+                var navThread = new Thread(() =>
                 {
                     try
                     {
@@ -1551,7 +1553,10 @@ namespace Ink_Canvas.Helpers
                     {
                         LogHelper.WriteLogToFile($"切换到下一页失败: {ex}", LogHelper.LogType.Error);
                     }
-                }).Start();
+                });
+                navThread.IsBackground = true;
+                navThread.SetApartmentState(ApartmentState.STA);
+                navThread.Start();
                 return true;
             }
             catch (Exception ex)
@@ -1568,8 +1573,8 @@ namespace Ink_Canvas.Helpers
                 if (!IsConnected || !IsInSlideShow || PPTApplication == null) return false;
                 if (!Marshal.IsComObject(PPTApplication)) return false;
 
-                // 在新线程中执行翻页操作，避免等待动画完成
-                new Thread(() =>
+                // 在新 STA 线程中执行翻页操作（同 TryNavigateNext，必须 STA 避免 RPC_E_WRONG_THREAD）
+                var navThread = new Thread(() =>
                 {
                     try
                     {
@@ -1614,7 +1619,10 @@ namespace Ink_Canvas.Helpers
                     {
                         LogHelper.WriteLogToFile($"切换到上一页失败: {ex}", LogHelper.LogType.Error);
                     }
-                }).Start();
+                });
+                navThread.IsBackground = true;
+                navThread.SetApartmentState(ApartmentState.STA);
+                navThread.Start();
                 return true;
             }
             catch (Exception ex)

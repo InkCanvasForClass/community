@@ -3408,7 +3408,10 @@ namespace Ink_Canvas
         /// </remarks>
         private void BtnPPTSlideShow_Click(object sender, RoutedEventArgs e)
         {
-            new Thread(() =>
+            // TryStartSlideShow 在 COM/ROT 模式下会调用 PPT COM 对象，必须在 STA 线程跑，
+            // 否则会偶发 0x8001010E (RPC_E_WRONG_THREAD) 导致联动掉线。
+            // 默认 new Thread 是 MTA，需显式 SetApartmentState。
+            var t = new Thread(() =>
             {
                 try
                 {
@@ -3421,7 +3424,9 @@ namespace Ink_Canvas
                 {
                     LogHelper.WriteLogToFile($"启动幻灯片放映异常: {ex}", LogHelper.LogType.Error);
                 }
-            }).Start();
+            });
+            t.SetApartmentState(ApartmentState.STA);
+            t.Start();
         }
 
         public async Task ExitPPTPresentation()
