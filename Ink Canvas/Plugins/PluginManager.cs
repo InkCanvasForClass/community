@@ -401,10 +401,22 @@ namespace Ink_Canvas.Plugins
                 catch (Exception ex)
                 {
                     LogError(string.Format("Error installing package {0}", Path.GetFileName(pkgPath)), ex);
-                }
-                finally
-                {
-                    try { File.Delete(pkgPath); } catch { }
+                    // 解压失败：保留 pkg 改名隔离，**不**删除。File.Delete 解压失败的包会让用户
+                    // 永久丢失已下载好的 .icpx，必须重新走 GitHub 下载。
+                    // 改名 .failed_install_<ts> 标记为失败态，避免下次启动再触发同样的失败循环。
+                    // 30 天启动清理同 PluginMarketService.CleanupStalePartialFiles。
+                    try
+                    {
+                        var failedPath = pkgPath + ".failed_install_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                        if (File.Exists(failedPath)) File.Delete(failedPath); // 同秒重试情况
+                        File.Move(pkgPath, failedPath);
+                        LogError(string.Format("Package {0} preserved as failed install: {1}",
+                            Path.GetFileName(pkgPath), Path.GetFileName(failedPath)), null);
+                    }
+                    catch (Exception moveEx)
+                    {
+                        LogError(string.Format("Failed to preserve failed package {0}", Path.GetFileName(pkgPath)), moveEx);
+                    }
                 }
             }
         }

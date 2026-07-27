@@ -270,7 +270,8 @@ namespace Ink_Canvas.Plugins
                 foreach (var path in Directory.GetFiles(packagesDir))
                 {
                     var name = Path.GetFileName(path);
-                    if (!name.Contains(".partial_") && !name.Contains(".rolledaside_") && !name.EndsWith(".tmp"))
+                    if (!name.Contains(".partial_") && !name.Contains(".rolledaside_") && !name.EndsWith(".tmp")
+                        && !name.Contains(".failed_install_"))
                         continue;
                     try
                     {
