@@ -26,10 +26,11 @@ namespace Ink_Canvas.Helpers
             ///<summary>
             ///在一定时间内和前条标题相同，内容相同，来源相同的消息返回true
             ///</summary>
-            if (string.IsNullOrEmpty(_lastMessage.Title) || string.IsNullOrEmpty(message.Title)) return false;
-            
+            if (string.IsNullOrWhiteSpace(_lastMessage.Title) || string.IsNullOrWhiteSpace(message.Title)) return false;
+
             TimeSpan interval = message.CreatedAt - _lastMessage.Time;
-            double totalSeconds = interval.TotalSeconds;
+            if (interval.TotalSeconds < 0) LogHelper.WriteLogToFile("消息队列为乱序",LogHelper.LogType.Info);
+            double totalSeconds = Math.Abs(interval.TotalSeconds);
             if (_lastMessage.Title == message.Title && totalSeconds <= _deduplicationWindowSeconds && message.Source == _lastMessage.Source && message.Summary == _lastMessage.Summary)
             {
                 _lastMessage.Time = message.CreatedAt;
@@ -69,7 +70,7 @@ namespace Ink_Canvas.Helpers
             lock (SyncRoot)
             {
                 if (IsDuplicate(message)) return;
-                if (!string.IsNullOrEmpty(message.Title))
+                if (!string.IsNullOrWhiteSpace(message.Title))
                 {
                     //只有非空消息才做去重
                     _isFirstDuplicateInCurrentSequence = true;
