@@ -2687,7 +2687,10 @@ namespace Ink_Canvas
                 }
             }
 
-            Task.Run(() =>
+            // 改用 STA worker 跑 COM 翻页：Task.Run 跑到 MTA 线程池会触发 RPC_E_WRONG_THREAD，
+            // COM 模式 PPTManager.TryNavigatePrevious 直接调 SlideShowWindows.View.Next()，
+            // 跨单元封送在 PPT 忙于播放动画时超时或掉线。RunOnStaAsync 在文件内已定义。
+            RunOnStaAsync(() =>
             {
                 try
                 {
@@ -2738,7 +2741,8 @@ namespace Ink_Canvas
                 }
             }
 
-            Task.Run(() =>
+            // 同 BtnPPTSlidesUp_Click：用 STA worker 跑 COM 翻页，避免 MTA RPC_E_WRONG_THREAD。
+            RunOnStaAsync(() =>
             {
                 try
                 {
