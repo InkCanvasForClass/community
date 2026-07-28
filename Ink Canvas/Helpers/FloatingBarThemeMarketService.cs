@@ -26,6 +26,11 @@ namespace Ink_Canvas.Helpers
                 var json = await _httpClient.GetStringAsync(OfficialIndexUrl);
                 var index = JsonConvert.DeserializeObject<ThemeMarketIndex>(json);
                 Entries = index?.Themes ?? new List<ThemeMarketEntry>();
+                // mark installed state for each entry based on local files
+                foreach (var entry in Entries)
+                {
+                    entry.IsInstalled = IsInstalled(entry);
+                }
                 return true;
             }
             catch (Exception ex)
@@ -106,6 +111,9 @@ namespace Ink_Canvas.Helpers
         public string DownloadUrl { get; set; }
         public string DownloadSha256 { get; set; }
         public string BannerUrl { get; set; }
+        // whether this theme is already installed locally (computed by RefreshAsync)
+        [JsonIgnore]
+        public bool IsInstalled { get; set; }
     }
 
     public sealed class ThemeMarketManifest

@@ -26,10 +26,18 @@
                                          Margin="0,0,0,8">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="{Binding Manifest.Author}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                                <Button Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemeMarketInstall}"
+                                <Button x:Name="InstallButton"
+                                        Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemeMarketInstall}"
                                         Tag="{Binding}" Click="InstallButton_Click" />
                             </StackPanel>
                         </ui:SettingsCard>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsInstalled}" Value="True">
+                                <Setter TargetName="InstallButton" Property="Content" Value="已安装" />
+                                <Setter TargetName="InstallButton" Property="IsEnabled" Value="False" />
+                                <Setter TargetName="InstallButton" Property="Foreground" Value="Gray" />
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

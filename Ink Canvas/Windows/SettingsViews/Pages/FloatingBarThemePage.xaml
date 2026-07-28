@@ -25,11 +25,28 @@
                             <ui:SettingsCard Header="{Binding DisplayName}"
                                              Description="{Binding Description}"
                                              Margin="0,0,0,8">
-                                <Button Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemesApply}"
-                                        Tag="{Binding Id}"
-                                        Click="ButtonApplyTheme_Click"
-                                        HorizontalAlignment="Right" />
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button x:Name="ApplyButton"
+                                            Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemesApply}"
+                                            Tag="{Binding Id}"
+                                            Click="ButtonApplyTheme_Click" />
+                                    <Button x:Name="DeleteButton"
+                                            Content="删除"
+                                            Tag="{Binding Id}"
+                                            Click="ButtonDeleteTheme_Click"
+                                            Margin="8,0,0,0" />
+                                </StackPanel>
                             </ui:SettingsCard>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding IsApplied}" Value="True">
+                                    <Setter TargetName="ApplyButton" Property="Content" Value="已应用" />
+                                    <Setter TargetName="ApplyButton" Property="IsEnabled" Value="False" />
+                                    <Setter TargetName="ApplyButton" Property="Foreground" Value="Gray" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsBuiltIn}" Value="True">
+                                    <Setter TargetName="DeleteButton" Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

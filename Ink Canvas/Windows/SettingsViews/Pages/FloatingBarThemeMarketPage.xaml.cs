@@ -1,6 +1,7 @@
 using Ink_Canvas.Helpers;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
@@ -48,6 +49,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 {
                     var mainWindow = Application.Current.MainWindow as MainWindow;
                     mainWindow?.FloatingBarThemeService?.LoadThemes();
+                    // refresh market list to update installed state
+                    await RefreshAsync();
+                    // 如果设置窗口中的主题管理页存在，则让它也刷新（使安装的主题立刻在管理页可见）
+                    var settingsWindow = System.Windows.Application.Current.Windows.Cast<Window>().OfType<Windows.SettingsViews.SettingsWindow>().FirstOrDefault();
+                    settingsWindow?.RefreshFloatingBarThemePage();
                 }
             }
             catch (System.Exception ex)

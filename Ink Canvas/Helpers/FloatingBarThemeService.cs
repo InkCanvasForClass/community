@@ -3,6 +3,7 @@ using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -16,7 +17,7 @@ namespace Ink_Canvas.Helpers
     /// </summary>
     public sealed class FloatingBarThemeService
     {
-        public sealed class ThemeInfo
+        public sealed class ThemeInfo : System.ComponentModel.INotifyPropertyChanged
         {
             public string Id { get; set; }
             public string Name { get; set; }
@@ -26,13 +27,54 @@ namespace Ink_Canvas.Helpers
 
             [JsonIgnore]
             public string DisplayName => string.IsNullOrWhiteSpace(Name) ? Id : Name;
+
+            private bool _isApplied;
+            [JsonIgnore]
+            public bool IsApplied
+            {
+                get => _isApplied;
+                set
+                {
+                    if (_isApplied == value) return;
+                    _isApplied = value;
+                    PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(IsApplied)));
+                }
+            }
+
+            public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
         }
 
         private const string DefaultThemeId = "default";
         private readonly MainWindow _mainWindow;
         private ResourceDictionary _themeDictionary;
 
-        public List<ThemeInfo> Themes { get; } = new List<ThemeInfo>();
+        public ObservableCollection<ThemeInfo> Themes { get; } = new ObservableCollection<ThemeInfo>();
+
+        public bool DeleteTheme(string themeId)
+        {
+            var theme = Themes.FirstOrDefault(x => string.Equals(x.Id, themeId, StringComparison.OrdinalIgnoreCase));
+            if (theme == null || theme.IsBuiltIn) return false;
+            try
+            {
+                var dir = Path.Combine(App.RootPath, "FloatingBarThemes", themeId);
+                if (Directory.Exists(dir))
+                {
+                    Directory.Delete(dir, true);
+                }
+                // if deleted theme was applied, revert to default
+                if (string.Equals(MainWindow.Settings?.Appearance?.FloatingBarThemeId, themeId, StringComparison.OrdinalIgnoreCase))
+                {
+                    ApplyTheme(DefaultThemeId);
+                }
+                LoadThemes();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"删除浮动栏主题失败: {themeId}, {ex.Message}", LogHelper.LogType.Warning);
+                return false;
+            }
+        }
 
         public FloatingBarThemeService(MainWindow mainWindow)
         {
@@ -47,7 +89,8 @@ namespace Ink_Canvas.Helpers
                 Id = DefaultThemeId,
                 Name = ThemeStrings.Theme_FloatingBarBorderColor_Default,
                 Description = ThemeStrings.Theme_FloatingBarBorderColorHint,
-                IsBuiltIn = true
+                IsBuiltIn = true,
+                IsApplied = string.Equals(MainWindow.Settings?.Appearance?.FloatingBarThemeId ?? DefaultThemeId, DefaultThemeId, StringComparison.OrdinalIgnoreCase)
             });
 
             var root = Path.Combine(App.RootPath, "FloatingBarThemes");
@@ -65,6 +108,7 @@ namespace Ink_Canvas.Helpers
                     if (manifest == null || string.IsNullOrWhiteSpace(manifest.Id)) continue;
                     manifest.Path = directory;
                     manifest.IsBuiltIn = false;
+                    manifest.IsApplied = string.Equals(MainWindow.Settings?.Appearance?.FloatingBarThemeId ?? DefaultThemeId, manifest.Id, StringComparison.OrdinalIgnoreCase);
                     if (Themes.Any(x => string.Equals(x.Id, manifest.Id, StringComparison.OrdinalIgnoreCase)))
                         continue;
                     Themes.Add(manifest);
@@ -122,6 +166,11 @@ namespace Ink_Canvas.Helpers
                 MainWindow.Settings.Appearance.FloatingBarThemeId = theme.Id;
                 SettingsManager.SaveSettingsToFile();
                 _mainWindow.ApplyFloatingBarBorderColor();
+                // update IsApplied flags so UI updates without needing full reload
+                foreach (var t in Themes)
+                {
+                    t.IsApplied = string.Equals(t.Id, theme.Id, StringComparison.OrdinalIgnoreCase);
+                }
                 return true;
             }
             catch (Exception ex)
