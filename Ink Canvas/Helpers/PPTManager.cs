@@ -443,25 +443,8 @@ namespace Ink_Canvas.Helpers
                     SafeReleaseComObject(CurrentSlides, "CurrentSlides");
                     SafeReleaseComObject(CurrentPresentation, "CurrentPresentation");
 
-                    if (PPTApplication != null && Marshal.IsComObject(PPTApplication))
-                    {
-                        try
-                        {
-                            Marshal.FinalReleaseComObject(PPTApplication);
-                        }
-                        catch
-                        {
-                            try
-                            {
-                                int refCount = Marshal.ReleaseComObject(PPTApplication);
-                                while (refCount > 0)
-                                {
-                                    refCount = Marshal.ReleaseComObject(PPTApplication);
-                                }
-                            }
-                            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
-                        }
-                    }
+                    // PPTApplication 的 COM 生命周期由 MW_PPT.ClosePowerPointApplication 管理，
+                    // 此处仅清空引用，避免双重释放共享 RCW。
                 }
 
                 _cachedIsConnected = false;

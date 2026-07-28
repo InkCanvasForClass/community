@@ -460,7 +460,7 @@ namespace Ink_Canvas
                 // 直接设置PPTManager的PPTApplication属性，绕过COM注册问题
                 Task.Delay(1000).ContinueWith(_ =>
                 {
-                    Dispatcher.Invoke(() =>
+                    Dispatcher.BeginInvoke(() =>
                     {
                         try
                         {
@@ -1405,7 +1405,7 @@ namespace Ink_Canvas
                     new Thread(() =>
                     {
                         Thread.Sleep(100);
-                        Application.Current.Dispatcher.Invoke(() =>
+                        Application.Current.Dispatcher.BeginInvoke(() =>
                         {
                             ViewboxFloatingBarMarginAnimation(60);
                         });
@@ -2078,7 +2078,7 @@ namespace Ink_Canvas
                         {
                             Task.Delay(350).ContinueWith(_ =>
                             {
-                                Application.Current.Dispatcher.Invoke(() =>
+                                Application.Current.Dispatcher.BeginInvoke(() =>
                                 {
                                     if (!isFloatingBarFolded)
                                     {

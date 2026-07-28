@@ -67,7 +67,7 @@ namespace Ink_Canvas.IPC
             return TrySendMessage(message);
         }
 
-        public T SendRequest<T>(string command, object data = null, int timeoutMilliseconds = PipeConstants.RequestTimeoutMilliseconds)
+        public async Task<T> SendRequestAsync<T>(string command, object data = null, int timeoutMilliseconds = PipeConstants.RequestTimeoutMilliseconds)
         {
             var requestId = Guid.NewGuid().ToString("N");
             var tcs = new TaskCompletionSource<JToken>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -89,14 +89,17 @@ namespace Ink_Canvas.IPC
 
             try
             {
-                if (!tcs.Task.Wait(timeoutMilliseconds))
+                var completed = await Task.WhenAny(tcs.Task, Task.Delay(timeoutMilliseconds))
+                    .ConfigureAwait(false);
+
+                if (completed != tcs.Task)
                 {
                     _pendingRequests.TryRemove(requestId, out _);
                     LogHelper.WriteLogToFile($"PPT Agent 命令超时: {command}", LogHelper.LogType.Warning);
                     return default;
                 }
 
-                var token = tcs.Task.Result;
+                var token = await tcs.Task.ConfigureAwait(false);
                 if (token == null || token.Type == JTokenType.Null)
                     return default;
 
@@ -104,12 +107,29 @@ namespace Ink_Canvas.IPC
             }
             catch (Exception ex)
             {
+                _pendingRequests.TryRemove(requestId, out _);
                 LogHelper.WriteLogToFile($"PPT Agent 请求失败 [{command}]: {ex}", LogHelper.LogType.Warning);
                 return default;
             }
             finally
             {
                 _pendingRequests.TryRemove(requestId, out _);
+            }
+        }
+
+        /// <summary>
+        /// Synchronous request. Prefer <see cref="SendRequestAsync{T}"/> to avoid sync-over-async deadlocks.
+        /// </summary>
+        public T SendRequest<T>(string command, object data = null, int timeoutMilliseconds = PipeConstants.RequestTimeoutMilliseconds)
+        {
+            try
+            {
+                return SendRequestAsync<T>(command, data, timeoutMilliseconds).ConfigureAwait(false).GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"PPT Agent 请求失败 [{command}]: {ex}", LogHelper.LogType.Warning);
+                return default;
             }
         }
 

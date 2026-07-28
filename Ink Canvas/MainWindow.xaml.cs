@@ -1647,7 +1647,7 @@ namespace Ink_Canvas
                     {
                         isFloatingBarOutsideScreen = IsOutsideOfScreenHelper.IsOutsideOfScreen(ViewboxFloatingBar);
                         isInPPTPresentationMode = IsInPPTPresentationMode;
-                    });
+                    }, DispatcherPriority.Normal, TimeSpan.FromSeconds(5));
                     if (isFloatingBarOutsideScreen) dpiChangedDelayAction.DebounceAction(3000, null, () =>
                     {
                         if (!isFloatingBarFolded)
