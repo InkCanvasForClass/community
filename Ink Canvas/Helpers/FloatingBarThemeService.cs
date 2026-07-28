@@ -56,10 +56,35 @@ namespace Ink_Canvas.Helpers
             if (theme == null || theme.IsBuiltIn) return false;
             try
             {
-                var dir = Path.Combine(App.RootPath, "FloatingBarThemes", themeId);
-                if (Directory.Exists(dir))
+                // Resolve the actual theme folder to delete using the loaded ThemeInfo.Path when available.
+                var themesRoot = Path.Combine(App.RootPath, "FloatingBarThemes");
+                var themesRootFull = Path.GetFullPath(themesRoot).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+
+                string targetDir;
+                if (!string.IsNullOrWhiteSpace(theme.Path))
                 {
-                    Directory.Delete(dir, true);
+                    // theme.Path is expected to be the folder path where the manifest was read from
+                    targetDir = Path.GetFullPath(theme.Path);
+                }
+                else
+                {
+                    // fallback to folder named by id under themes root
+                    targetDir = Path.GetFullPath(Path.Combine(themesRoot, themeId));
+                }
+
+                // Safety check: ensure targetDir is inside themesRoot to prevent deleting outside the themes folder
+                var targetDirNormalized = targetDir.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+                if (!targetDirNormalized.StartsWith(themesRootFull, StringComparison.OrdinalIgnoreCase))
+                {
+                    // refuse to delete if path escapes the themes root
+                    LogHelper.WriteLogToFile($"拒绝删除浮动栏主题（路径不在 FloatingBarThemes 下）: {targetDir}", LogHelper.LogType.Warning);
+                }
+                else
+                {
+                    if (Directory.Exists(targetDir))
+                    {
+                        Directory.Delete(targetDir, true);
+                    }
                 }
                 // if deleted theme was applied, revert to default
                 if (string.Equals(MainWindow.Settings?.Appearance?.FloatingBarThemeId, themeId, StringComparison.OrdinalIgnoreCase))

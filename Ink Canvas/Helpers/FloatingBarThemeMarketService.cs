@@ -27,9 +27,14 @@ namespace Ink_Canvas.Helpers
                 var index = JsonConvert.DeserializeObject<ThemeMarketIndex>(json);
                 Entries = index?.Themes ?? new List<ThemeMarketEntry>();
                 // mark installed state for each entry based on local files
-                foreach (var entry in Entries)
+                if (Entries != null)
                 {
-                    entry.IsInstalled = IsInstalled(entry);
+                    for (int i = 0; i < Entries.Count; i++)
+                    {
+                        var entry = Entries[i];
+                        if (entry == null) continue; // tolerant to malformed index containing null entries
+                        entry.IsInstalled = IsInstalled(entry);
+                    }
                 }
                 return true;
             }

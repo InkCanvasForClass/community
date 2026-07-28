@@ -42,9 +42,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (sender is not Button button || button.Tag is not ThemeMarketEntry entry) return;
             button.IsEnabled = false;
+            var installed = false;
             try
             {
-                var installed = await _market.InstallAsync(entry);
+                installed = await _market.InstallAsync(entry);
                 if (installed)
                 {
                     var mainWindow = Application.Current.MainWindow as MainWindow;
@@ -62,7 +63,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
             finally
             {
-                button.IsEnabled = true;
+                // 只有在未成功安装时才恢复按钮本地可用性；若安装成功，RefreshAsync / DataTrigger 会设置按钮为已安装并禁用
+                if (!installed)
+                    button.IsEnabled = true;
             }
         }
 
