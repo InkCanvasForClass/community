@@ -2705,8 +2705,10 @@ namespace Ink_Canvas
             {
                 Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
+                    // IsFaulted 由前面的 if 单独处理；剩余两种终态中 RanToCompletion 才允许读 Result，
+                    // Canceled 直接走"切换失败"分支，避免 t.Result 再次抛 OperationCanceledException。
                     if (t.IsFaulted) { _pptUIManager?.UpdateConnectionStatus(false); return; }
-                    if (t.Result)
+                    if (t.IsCompletedSuccessfully && t.Result)
                     {
                         if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) ExceptionHandler.TryExecute(() => this.Activate(), "激活主窗口失败（PPT 上一页时）");
                     }
@@ -2757,8 +2759,10 @@ namespace Ink_Canvas
             {
                 Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
+                    // IsFaulted 由前面的 if 单独处理；Canceled 走"切换失败"分支，
+                    // 只有 RanToCompletion 才允许读 t.Result。
                     if (t.IsFaulted) { _pptUIManager?.UpdateConnectionStatus(false); return; }
-                    if (t.Result)
+                    if (t.IsCompletedSuccessfully && t.Result)
                     {
                         if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) ExceptionHandler.TryExecute(() => this.Activate(), "激活主窗口失败（PPT 下一页时）");
                     }
@@ -3261,7 +3265,9 @@ namespace Ink_Canvas
                 if (ReferenceEquals(_pptEnhancedPreviewBuildTask, task))
                     _pptEnhancedPreviewBuildTask = null;
 
-                if (task.Status == TaskStatus.RanToCompletion)
+                // 用 IsCompletedSuccessfully 而非 Status == RanToCompletion：前者排除 Canceled，
+                // 后者会读取 task.Result，对 Canceled 任务会再次抛 OperationCanceledException。
+                if (task.IsCompletedSuccessfully)
                 {
                     var result = task.Result;
                     if (generation == _pptEnhancedPreviewCacheGeneration && result != null && result.Count > 0)
