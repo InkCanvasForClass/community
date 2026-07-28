@@ -389,7 +389,7 @@ namespace Ink_Canvas
         [JsonProperty("enableNativeInkPrediction")]
         public bool EnableNativeInkPrediction { get; set; } = true; // 原生湿墨预测笔尾（仅实时预览，不进入提交/撤销/保存）
         [JsonProperty("useLegacyWetInk")]
-        public bool UseLegacyWetInk { get; set; } = false; // 使用旧版 WPF 湿墨迹输入系统（下次启动生效）
+        public bool UseLegacyWetInk { get; set; } = true; // 使用旧版 WPF 湿墨迹输入系统（下次启动生效）
         [JsonProperty("autoStraightenLine")]
         public bool AutoStraightenLine { get; set; } = true; // 是否启用直线自动拉直
         [JsonProperty("autoStraightenLineThreshold")]
