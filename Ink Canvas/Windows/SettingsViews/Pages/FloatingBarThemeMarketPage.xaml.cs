@@ -48,10 +48,24 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 installed = await _market.InstallAsync(entry);
                 if (installed)
                 {
+                    // mark this entry as installed immediately so UI reflects state even if subsequent refresh fails
+                    try { entry.IsInstalled = true; } catch { }
+
                     var mainWindow = Application.Current.MainWindow as MainWindow;
                     mainWindow?.FloatingBarThemeService?.LoadThemes();
                     // refresh market list to update installed state
-                    await RefreshAsync();
+                    try
+                    {
+                        await RefreshAsync();
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Debug.WriteLine($"FloatingBarThemeMarketPage | Refresh after install failed: {ex}");
+                        // refresh failed: revert temporary installed flag and re-enable button so user can retry
+                        try { entry.IsInstalled = false; } catch { }
+                        try { button.IsEnabled = true; } catch { }
+                    }
+
                     // 如果设置窗口中的主题管理页存在，则让它也刷新（使安装的主题立刻在管理页可见）
                     var settingsWindow = System.Windows.Application.Current.Windows.Cast<Window>().OfType<Windows.SettingsViews.SettingsWindow>().FirstOrDefault();
                     settingsWindow?.RefreshFloatingBarThemePage();

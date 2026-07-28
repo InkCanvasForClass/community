@@ -30,8 +30,8 @@
                                             Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemesApply}"
                                             Tag="{Binding Id}"
                                             Click="ButtonApplyTheme_Click" />
-                                    <Button x:Name="DeleteButton"
-                                            Content="删除"
+                                <Button x:Name="DeleteButton"
+                                        Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemesDelete}"
                                             Tag="{Binding Id}"
                                             Click="ButtonDeleteTheme_Click"
                                             Margin="8,0,0,0" />

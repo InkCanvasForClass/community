@@ -518,6 +518,12 @@
   <data name="Theme_IdleMiniBarHint" xml:space="preserve">
     <value>闲置（光标）状态下将浮动栏替换为可自动吸边的紧凑圆角批注栏，尽量减少对内容的遮挡</value>
   </data>
+  <data name="Theme_FloatingBarThemeMarketInstalled" xml:space="preserve">
+    <value>已安装</value>
+  </data>
+  <data name="Theme_FloatingBarThemesDelete" xml:space="preserve">
+    <value>删除</value>
+  </data>
   <data name="Theme_IdleMiniBarOpacity" xml:space="preserve">
     <value>更小批注栏不透明度</value>
   </data>

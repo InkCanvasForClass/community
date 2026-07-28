@@ -118,7 +118,20 @@ namespace Ink_Canvas.Helpers
         public string BannerUrl { get; set; }
         // whether this theme is already installed locally (computed by RefreshAsync)
         [JsonIgnore]
-        public bool IsInstalled { get; set; }
+        private bool _isInstalled;
+        [JsonIgnore]
+        public bool IsInstalled
+        {
+            get => _isInstalled;
+            set
+            {
+                if (_isInstalled == value) return;
+                _isInstalled = value;
+                PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(IsInstalled)));
+            }
+        }
+
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
     }
 
     public sealed class ThemeMarketManifest

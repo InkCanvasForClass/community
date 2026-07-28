@@ -33,7 +33,7 @@
                         </ui:SettingsCard>
                         <DataTemplate.Triggers>
                             <DataTrigger Binding="{Binding IsInstalled}" Value="True">
-                                <Setter TargetName="InstallButton" Property="Content" Value="已安装" />
+                                <Setter TargetName="InstallButton" Property="Content" Value="{x:Static props:ThemeStrings.Theme_FloatingBarThemeMarketInstalled}" />
                                 <Setter TargetName="InstallButton" Property="IsEnabled" Value="False" />
                                 <Setter TargetName="InstallButton" Property="Foreground" Value="Gray" />
                             </DataTrigger>
