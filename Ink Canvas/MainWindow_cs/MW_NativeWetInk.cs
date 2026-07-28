@@ -1023,7 +1023,12 @@ namespace Ink_Canvas
                 || IsUnderNamed(hit, "EdgeExpandHint")
                 || IsUnderNamed(hit, "PPTControlsGrid")
                 || IsUnderNamed(hit, "GridPPTControlLeft")
-                || IsUnderNamed(hit, "GridPPTControlRight"))
+                || IsUnderNamed(hit, "GridPPTControlRight")
+                || IsUnderNamed(hit, "LeftBottomPanelForPPTNavigation")
+                || IsUnderNamed(hit, "RightBottomPanelForPPTNavigation")
+                || IsUnderNamed(hit, "LeftSidePanelForPPTNavigation")
+                || IsUnderNamed(hit, "RightSidePanelForPPTNavigation")
+                || IsUnderNamed(hit, "PPTQuickPanelContainer"))
             {
                 return true;
             }
@@ -1144,6 +1149,10 @@ namespace Ink_Canvas
             TryAddElementExclusion(list, FindName("BlackboardLeftSide") as FrameworkElement, dpi, windowTopLeftScreen);
             TryAddElementExclusion(list, FindName("BlackboardCenterSide") as FrameworkElement, dpi, windowTopLeftScreen);
             TryAddElementExclusion(list, FindName("BlackboardRightSide") as FrameworkElement, dpi, windowTopLeftScreen);
+            TryAddElementExclusion(list, FindName("LeftBottomPanelForPPTNavigation") as FrameworkElement, dpi, windowTopLeftScreen);
+            TryAddElementExclusion(list, FindName("RightBottomPanelForPPTNavigation") as FrameworkElement, dpi, windowTopLeftScreen);
+            TryAddElementExclusion(list, FindName("LeftSidePanelForPPTNavigation") as FrameworkElement, dpi, windowTopLeftScreen);
+            TryAddElementExclusion(list, FindName("RightSidePanelForPPTNavigation") as FrameworkElement, dpi, windowTopLeftScreen);
             TryAddElementExclusion(list, EraserOverlayCanvas, dpi, windowTopLeftScreen);
             return list;
         }
