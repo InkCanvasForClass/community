@@ -3,6 +3,7 @@ using InkCanvasPPTAgent.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Ink_Canvas.Helpers
 {
@@ -91,9 +92,18 @@ namespace Ink_Canvas.Helpers
 
         public List<PPTSlideThumbnail> ExportSlideThumbnails(int width, int height, IProgress<double> progress = null)
         {
-            var response = _client?.SendRequest<ExportSlideThumbnailsResponse>(
+            return ExportSlideThumbnailsAsync(width, height, progress).GetAwaiter().GetResult();
+        }
+
+        public async Task<List<PPTSlideThumbnail>> ExportSlideThumbnailsAsync(int width, int height, IProgress<double> progress = null)
+        {
+            var client = _client;
+            if (client == null)
+                return new List<PPTSlideThumbnail>();
+
+            var response = await client.SendRequestAsync<ExportSlideThumbnailsResponse>(
                 PPTCommands.ExportSlideThumbnails,
-                new ExportSlideThumbnailsRequest { Width = width, Height = height });
+                new ExportSlideThumbnailsRequest { Width = width, Height = height }).ConfigureAwait(false);
 
             if (response?.Slides == null)
                 return new List<PPTSlideThumbnail>();
@@ -109,7 +119,16 @@ namespace Ink_Canvas.Helpers
 
         public SmartRegionsResponse GetSmartRegions()
         {
-            return _client?.SendRequest<SmartRegionsResponse>(PPTCommands.GetSmartRegions)
+            return GetSmartRegionsAsync().GetAwaiter().GetResult();
+        }
+
+        public async Task<SmartRegionsResponse> GetSmartRegionsAsync()
+        {
+            var client = _client;
+            if (client == null)
+                return new SmartRegionsResponse();
+
+            return await client.SendRequestAsync<SmartRegionsResponse>(PPTCommands.GetSmartRegions).ConfigureAwait(false)
                    ?? new SmartRegionsResponse();
         }
 

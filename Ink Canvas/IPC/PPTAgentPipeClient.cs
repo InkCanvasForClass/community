@@ -69,6 +69,11 @@ namespace Ink_Canvas.IPC
 
         public T SendRequest<T>(string command, object data = null, int timeoutMilliseconds = PipeConstants.RequestTimeoutMilliseconds)
         {
+            return SendRequestAsync<T>(command, data, timeoutMilliseconds).GetAwaiter().GetResult();
+        }
+
+        public async Task<T> SendRequestAsync<T>(string command, object data = null, int timeoutMilliseconds = PipeConstants.RequestTimeoutMilliseconds)
+        {
             var requestId = Guid.NewGuid().ToString("N");
             var tcs = new TaskCompletionSource<JToken>(TaskCreationOptions.RunContinuationsAsynchronously);
             _pendingRequests[requestId] = tcs;
@@ -89,18 +94,19 @@ namespace Ink_Canvas.IPC
 
             try
             {
-                if (!tcs.Task.Wait(timeoutMilliseconds))
-                {
-                    _pendingRequests.TryRemove(requestId, out _);
-                    LogHelper.WriteLogToFile($"PPT Agent 命令超时: {command}", LogHelper.LogType.Warning);
-                    return default;
-                }
-
-                var token = tcs.Task.Result;
+                var token = await tcs.Task
+                    .WaitAsync(TimeSpan.FromMilliseconds(timeoutMilliseconds))
+                    .ConfigureAwait(false);
                 if (token == null || token.Type == JTokenType.Null)
                     return default;
 
                 return token.ToObject<T>();
+            }
+            catch (TimeoutException)
+            {
+                _pendingRequests.TryRemove(requestId, out _);
+                LogHelper.WriteLogToFile($"PPT Agent 命令超时: {command}", LogHelper.LogType.Warning);
+                return default;
             }
             catch (Exception ex)
             {

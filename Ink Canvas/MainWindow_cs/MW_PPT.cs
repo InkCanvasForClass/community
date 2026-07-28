@@ -1524,11 +1524,13 @@ namespace Ink_Canvas
                                 }
                             }).ContinueWith(t =>
                             {
-                                if (t.IsFaulted || t.Result == null) return;
+                                if (!t.IsCompletedSuccessfully) return;
+                                var strokes = t.GetAwaiter().GetResult();
+                                if (strokes == null) return;
                                 Application.Current.Dispatcher.InvokeAsync(() =>
                                 {
                                     if (_currentSlideShowPosition != loadingPage) return;
-                                    inkCanvas.Strokes.Add(t.Result);
+                                    inkCanvas.Strokes.Add(strokes);
                                 });
                             });
                         }
@@ -1562,6 +1564,12 @@ namespace Ink_Canvas
         {
             try
             {
+                if (Dispatcher.CheckAccess() && _pptManager is PPTAgentLinkManager)
+                {
+                    _ = RefreshSmartModeRegionsAsync();
+                    return;
+                }
+
                 if (!Settings.PowerPointSettings.EnableSmartMode)
                 {
                     _smartModeRegions = null;
@@ -1643,31 +1651,48 @@ namespace Ink_Canvas
                 float slideWidth = 0f, slideHeight = 0f;
                 IntPtr slideShowHwnd = IntPtr.Zero;
 
-                await Task.Run(() =>
+                if (_pptManager is PPTAgentLinkManager agentManager)
                 {
                     try
                     {
-                        if (_pptManager is PPTAgentLinkManager agentManager)
+                        var response = await agentManager.GetSmartRegionsAsync();
+                        if (response?.Regions != null && response.Regions.Count > 0)
                         {
-                            var response = agentManager.GetSmartRegions();
-                            if (response?.Regions != null && response.Regions.Count > 0)
-                            {
-                                regions = response.Regions;
-                                slideIndex = response.SlideIndex;
-                                slideWidth = response.SlideWidth;
-                                slideHeight = response.SlideHeight;
-                                slideShowHwnd = new IntPtr(response.SlideShowWindowHandle);
-                                return;
-                            }
+                            regions = response.Regions;
+                            slideIndex = response.SlideIndex;
+                            slideWidth = response.SlideWidth;
+                            slideHeight = response.SlideHeight;
+                            slideShowHwnd = new IntPtr(response.SlideShowWindowHandle);
                         }
-                        regions = GetVideoRegionsViaCom();
-                        slideIndex = _currentSlideShowPosition;
+                        else
+                        {
+                            await Task.Run(() =>
+                            {
+                                regions = GetVideoRegionsViaCom();
+                                slideIndex = _currentSlideShowPosition;
+                            });
+                        }
                     }
                     catch (Exception ex)
                     {
                         LogHelper.WriteLogToFile($"[SmartMode] 后台刷新异常: {ex}", LogHelper.LogType.Warning);
                     }
-                });
+                }
+                else
+                {
+                    await Task.Run(() =>
+                    {
+                        try
+                        {
+                            regions = GetVideoRegionsViaCom();
+                            slideIndex = _currentSlideShowPosition;
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"[SmartMode] 后台刷新异常: {ex}", LogHelper.LogType.Warning);
+                        }
+                    });
+                }
 
                 if (regions == null) return;
 
@@ -2706,7 +2731,7 @@ namespace Ink_Canvas
                 Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     if (t.IsFaulted) { _pptUIManager?.UpdateConnectionStatus(false); return; }
-                    if (t.Result)
+                    if (t.IsCompletedSuccessfully && t.GetAwaiter().GetResult())
                     {
                         if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) ExceptionHandler.TryExecute(() => this.Activate(), "激活主窗口失败（PPT 上一页时）");
                     }
@@ -2758,7 +2783,7 @@ namespace Ink_Canvas
                 Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     if (t.IsFaulted) { _pptUIManager?.UpdateConnectionStatus(false); return; }
-                    if (t.Result)
+                    if (t.IsCompletedSuccessfully && t.GetAwaiter().GetResult())
                     {
                         if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) ExceptionHandler.TryExecute(() => this.Activate(), "激活主窗口失败（PPT 下一页时）");
                     }
@@ -3261,7 +3286,7 @@ namespace Ink_Canvas
                 if (ReferenceEquals(_pptEnhancedPreviewBuildTask, task))
                     _pptEnhancedPreviewBuildTask = null;
 
-                if (task.Status == TaskStatus.RanToCompletion)
+                if (task.IsCompletedSuccessfully)
                 {
                     var result = task.Result;
                     if (generation == _pptEnhancedPreviewCacheGeneration && result != null && result.Count > 0)
