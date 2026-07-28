@@ -6,7 +6,7 @@
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
         mc:Ignorable="d"
-        Title="Ink Canvas Annotation 使用指南"
+        Title="InkCanvasForClass Community 使用指南"
         Height="600"
         Width="520"
         MinHeight="400"
