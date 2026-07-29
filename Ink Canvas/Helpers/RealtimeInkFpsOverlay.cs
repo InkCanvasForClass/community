@@ -1,10 +1,15 @@
 using System;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Ink_Canvas.Properties;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Ink_Canvas.Helpers
 {
@@ -39,6 +44,8 @@ namespace Ink_Canvas.Helpers
             AllowsTransparency = true;
             Background = Brushes.Transparent;
             IsHitTestVisible = false;
+
+            SourceInitialized += OnSourceInitialized;
 
             var root = new Border
             {
@@ -148,6 +155,50 @@ namespace Ink_Canvas.Helpers
                 Left = 100;
                 Top = 100;
             }
+        }
+
+        private void OnSourceInitialized(object sender, EventArgs e)
+        {
+            try
+            {
+                var hwnd = new WindowInteropHelper(this).Handle;
+                if (hwnd == IntPtr.Zero)
+                    return;
+
+                // 关键:禁用激活 + 任务栏隐藏窗口风格,防止点击/显示时抢主窗口焦点。
+                var exStyle = PInvoke.GetWindowLong(new HWND(hwnd), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
+                exStyle |= (int)(WINDOW_EX_STYLE.WS_EX_NOACTIVATE | WINDOW_EX_STYLE.WS_EX_TOOLWINDOW | WINDOW_EX_STYLE.WS_EX_LAYERED);
+                PInvoke.SetWindowLong(new HWND(hwnd), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, exStyle);
+
+                if (HwndSource.FromHwnd(hwnd) is HwndSource source)
+                    source.AddHook(WndProcNoActivate);
+            }
+            catch
+            {
+                // best-effort: no-activate 风格设置失败时仍允许 HUD 显示。
+            }
+        }
+
+        private IntPtr WndProcNoActivate(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            const int WM_MOUSEACTIVATE = 0x0021;
+            const int MA_NOACTIVATE = 3;
+            const int WM_NCHITTEST = 0x0084;
+            const int HTTRANSPARENT = -1;
+
+            if (msg == WM_MOUSEACTIVATE)
+            {
+                handled = true;
+                return new IntPtr(MA_NOACTIVATE);
+            }
+
+            if (msg == WM_NCHITTEST)
+            {
+                handled = true;
+                return new IntPtr(HTTRANSPARENT);
+            }
+
+            return IntPtr.Zero;
         }
     }
 }
