@@ -4464,6 +4464,7 @@ namespace Ink_Canvas
 
             Process.Start(System.Windows.Forms.Application.ExecutablePath, "-m");
             _forceCloseFromExitOrRestartButton = true;
+            _exitApplicationRequested = true;
             App.IsAppExitByUser = true;
             CloseIsFromButton = true;
             Close();
