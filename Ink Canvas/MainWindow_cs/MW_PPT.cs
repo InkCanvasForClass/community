@@ -2295,14 +2295,20 @@ namespace Ink_Canvas
             try
             {
                 bool hasHiddenSlides = agentState?.HasHiddenSlides == true;
-                if (!hasHiddenSlides && pres?.Slides != null)
+
+                // PPT 刚打开时 COM RCW 可能尚未稳定，延迟一小段时间再访问 Slides
+                if (!hasHiddenSlides)
                 {
-                    foreach (Slide slide in pres.Slides)
+                    await Task.Delay(500);
+                    if (pres?.Slides != null)
                     {
-                        if (slide.SlideShowTransition.Hidden == MsoTriState.msoTrue)
+                        foreach (Slide slide in pres.Slides)
                         {
-                            hasHiddenSlides = true;
-                            break;
+                            if (slide.SlideShowTransition.Hidden == MsoTriState.msoTrue)
+                            {
+                                hasHiddenSlides = true;
+                                break;
+                            }
                         }
                     }
                 }
@@ -2371,15 +2377,21 @@ namespace Ink_Canvas
                 if (IsInPPTPresentationMode) return;
 
                 bool hasSlideTimings = agentState?.HasAutoPlayTimings == true;
-                if (!hasSlideTimings && pres?.Slides != null)
+
+                // PPT 刚打开时 COM RCW 可能尚未稳定，延迟一小段时间再访问 Slides
+                if (!hasSlideTimings)
                 {
-                    foreach (Slide slide in pres.Slides)
+                    await Task.Delay(500);
+                    if (pres?.Slides != null)
                     {
-                        if (slide.SlideShowTransition.AdvanceOnTime == MsoTriState.msoTrue &&
-                            slide.SlideShowTransition.AdvanceTime > 0)
+                        foreach (Slide slide in pres.Slides)
                         {
-                            hasSlideTimings = true;
-                            break;
+                            if (slide.SlideShowTransition.AdvanceOnTime == MsoTriState.msoTrue &&
+                                slide.SlideShowTransition.AdvanceTime > 0)
+                            {
+                                hasSlideTimings = true;
+                                break;
+                            }
                         }
                     }
                 }
