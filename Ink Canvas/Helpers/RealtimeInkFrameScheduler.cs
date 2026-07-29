@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using System.Windows.Media;
 using System.Windows.Threading;
 
@@ -39,6 +40,52 @@ namespace Ink_Canvas.Helpers
         private static int ActiveStrokeSessions;
         private static int IdleEmptyFrameCount;
         private static bool FrameKickPending;
+
+        // 实时墨迹脏标记入队计数器:每次 RequestRedraw/RequestForceRedraw/Flush 都 +1。
+        // HUD 每帧读取此值,然后清零,得到该帧时间窗内的入帧数(即墨迹帧率)。
+        // 用 Interlocked 保证跨线程安全;UI 线程 + 触屏线程均会写。
+        private static int _inkTickCount;
+
+        /// <summary>
+        /// 上报一次墨迹入帧(供 StrokeVisual.Redraw/ForceRedraw 等任何路径调用)。
+        /// 与 inkeys 的 StrokeImageList.emplace_back 每次入队 +1 的语义一致,
+        /// 区别是不绑定特定渲染管线:无论新旧墨迹系统,只要 StrokeVisual 重绘就 +1。
+        /// </summary>
+        internal static void RecordInkTick()
+        {
+            Interlocked.Increment(ref _inkTickCount);
+        }
+
+        /// <summary>
+        /// 取走并清零自上次读取以来的入帧计数。
+        /// HUD 周期调用,得到该周期内的墨迹入帧数。
+        /// </summary>
+        internal static int TakeInkTickCount()
+        {
+            return Interlocked.Exchange(ref _inkTickCount, 0);
+        }
+
+        /// <summary>
+        /// 读取当前累计入帧计数(不清零),用于诊断。
+        /// </summary>
+        internal static int PeekInkTickCount()
+        {
+            return Volatile.Read(ref _inkTickCount);
+        }
+
+        /// <summary>
+        /// 每次 CompositionTarget.Rendering 真正出帧时触发。
+        /// 第一个参数为渲染时刻的 Stopwatch 时间戳；第二个参数为该次渲染对应的 FrameWait 延迟（毫秒），无脏墨迹时为 0。
+        /// 用于实时 FPS / 延迟 HUD；订阅开销极小。
+        /// </summary>
+        internal static event Action<long, double> RenderingSampleAvailable;
+
+        /// <summary>
+        /// 每次 <see cref="RequestRedraw"/>/<see cref="RequestForceRedraw"/>/<see cref="Flush"/> 被调用时触发(参数为 Stopwatch 时间戳)。
+        /// HUD 用 1s 滑窗统计 tick 数,得到"墨迹入帧率":每秒钟有多少个墨迹脏标记入队。
+        /// 而不是 WPF 进程整体 CompositionTarget.Rendering 频率(屏幕刷新率)。
+        /// </summary>
+        internal static event Action<long> InkTickAvailable;
 
         // Input-side coalesce window: multiple TouchMove requests within this window
         // share one render pass without forcing another kick.
@@ -107,6 +154,8 @@ namespace Ink_Canvas.Helpers
 
             UnsubscribeIfIdle();
             ExecuteRedraw(strokeVisual, requestKind);
+            // Flush 也是一次墨迹入帧:笔尖起跳/收尾即应计 1 帧。
+            RaiseInkTick(Stopwatch.GetTimestamp());
         }
 
         public static void Cancel(StrokeVisual strokeVisual)
@@ -147,6 +196,13 @@ namespace Ink_Canvas.Helpers
             var now = Stopwatch.GetTimestamp();
             var isMonitoring = RealtimeInkPerformanceMonitor.IsDebugLoggingEnabled;
 
+            // 每次 RequestRedraw 调用都计 1 帧"墨迹入帧"。
+            // 即便 Coalesce 窗口内重复调用命中已 dirty 路径,这里也照样入帧:
+            // inkeys 的 StrokeImageList.emplace_back 也是每次入队 +1,保持一致的语义。
+            // 注意:真正的"墨迹帧率"计数已转移到 StrokeVisual.Redraw 入口,
+            // 这里仅保留事件 raise 以便其他订阅者使用。
+            RaiseInkTick(now);
+
             if (PendingRedraws.TryGetValue(strokeVisual, out var pending))
             {
                 if (requestKind == RedrawRequestKind.Force)
@@ -164,7 +220,9 @@ namespace Ink_Canvas.Helpers
             PendingRedraws[strokeVisual] = new PendingRedraw
             {
                 Kind = requestKind,
-                RequestedAt = isMonitoring ? now : 0L,
+                // 始终记录 RequestedAt,用于 FPS/延迟 HUD 的端到端延迟计算;
+                // 调试日志采样走 isMonitoring 路径独立判断,这里不再依赖调试开关。
+                RequestedAt = now,
                 Gen0CollectionCountStart = isMonitoring ? GC.CollectionCount(0) : -1,
                 Gen1CollectionCountStart = isMonitoring ? GC.CollectionCount(1) : -1,
                 Gen2CollectionCountStart = isMonitoring ? GC.CollectionCount(2) : -1
@@ -271,6 +329,8 @@ namespace Ink_Canvas.Helpers
                     }
                     IdleEmptyFrameCount = 0;
                 }
+                // 空闲帧也广播：让 HUD 知道当前是否有真实渲染在进行。
+                RaiseRenderingSample(renderedAt, 0);
                 return;
             }
 
@@ -299,10 +359,12 @@ namespace Ink_Canvas.Helpers
             }
             PendingRedraws.Clear();
 
+            double frameWaitSampleMs = 0;
             // One FrameWait sample per render pass (earliest dirty).
             if (earliest.HasValue)
             {
                 var earliestPair = earliest.Value;
+                frameWaitSampleMs = ToMilliseconds(renderedAt - earliestPair.Value.RequestedAt);
                 RealtimeInkPerformanceMonitor.RecordFrameWait(
                     earliestPair.Key,
                     renderedAt - earliestPair.Value.RequestedAt,
@@ -315,6 +377,9 @@ namespace Ink_Canvas.Helpers
 
             foreach (var pair in PendingSnapshot)
                 ExecuteRedraw(pair.Key, pair.Value.Kind);
+
+            // 保留原有事件广播供其他模块使用
+            RaiseRenderingSample(renderedAt, frameWaitSampleMs);
 
             PendingSnapshot.Clear();
 
@@ -358,6 +423,34 @@ namespace Ink_Canvas.Helpers
             catch (Exception ex)
             {
                 Debug.WriteLine(ex);
+            }
+        }
+
+        private static void RaiseRenderingSample(long renderedAtTicks, double frameWaitMs)
+        {
+            var handler = RenderingSampleAvailable;
+            if (handler == null) return;
+            try
+            {
+                handler.Invoke(renderedAtTicks, frameWaitMs);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"RealtimeInkFrameScheduler.RenderingSampleAvailable subscriber threw: {ex.Message}");
+            }
+        }
+
+        private static void RaiseInkTick(long renderedAtTicks)
+        {
+            var handler = InkTickAvailable;
+            if (handler == null) return;
+            try
+            {
+                handler.Invoke(renderedAtTicks);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"RealtimeInkFrameScheduler.InkTickAvailable subscriber threw: {ex.Message}");
             }
         }
     }

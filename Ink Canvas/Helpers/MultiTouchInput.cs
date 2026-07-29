@@ -259,6 +259,11 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public void Redraw(bool forceRedraw = false)
         {
+            // 任何路径(旧 WPF 墨迹/新湿墨提交)走到这里都算一帧"墨迹入帧",
+            // HUD 用此计数得到墨迹帧率。放在最前面,即使 Stroke/_visualCanvas 为 null
+            // 也能保证每次进入 Redraw 入口就 +1(笔迹开始建立时 _visualCanvas 可能尚未挂载)。
+            RealtimeInkFrameScheduler.RecordInkTick();
+
             if (Stroke == null || _visualCanvas == null) return;
 
             var currentPointCount = Stroke.StylusPoints.Count;
@@ -309,6 +314,7 @@ namespace Ink_Canvas.Helpers
         {
             if (Stroke == null || _visualCanvas == null) return;
 
+            RealtimeInkFrameScheduler.RecordInkTick();
             RealtimeInkPerformanceMonitor.RecordForceRedraw(this);
             var currentPointCount = Stroke.StylusPoints.Count;
 

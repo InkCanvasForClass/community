@@ -1,6 +1,7 @@
 using Ink_Canvas.Helpers;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Windows.Win32;
@@ -318,6 +319,30 @@ namespace Ink_Canvas.Ink.Native
             try
             {
                 result = _renderer.Apply(batch);
+                // 新湿墨实时渲染完成一帧：沿用 NativePointerInputSource 提供的微秒时间戳，
+                // 用最新点的时间作为本帧输入起点，转成 Stopwatch ticks 后交给统一监控器。
+                long dirtyStartedAtTicks = 0L;
+                if (batch != null && batch.RenderSnapshots.Count > 0)
+                {
+                    long latestMicroseconds = 0;
+                    for (var i = 0; i < batch.RenderSnapshots.Count; i++)
+                    {
+                        var snapshot = batch.RenderSnapshots[i];
+                        var realPoints = snapshot.RealPoints;
+                        if (realPoints == null || realPoints.Count == 0)
+                            continue;
+                        var candidate = realPoints[realPoints.Count - 1].TimestampMicroseconds;
+                        if (candidate > latestMicroseconds)
+                            latestMicroseconds = candidate;
+                    }
+                    if (latestMicroseconds > 0)
+                        dirtyStartedAtTicks = latestMicroseconds * Stopwatch.Frequency / 1_000_000L;
+                }
+                InkPerformanceMonitor.RecordFrame(new InkFrameSample
+                {
+                    DirtyStartedAtTicks = dirtyStartedAtTicks,
+                    PresentedAtTicks = Stopwatch.GetTimestamp()
+                });
             }
             catch (Exception ex)
             {
