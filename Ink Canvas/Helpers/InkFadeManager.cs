@@ -494,10 +494,11 @@ namespace Ink_Canvas.Helpers
                 {
                     var currentOpacity = visual.Opacity;
                     var isHighlighter = stroke.DrawingAttributes.IsHighlighter;
+                    var isLaser = IsLaserStroke(stroke);
 
                     int animDuration = GetStrokeAnimationDuration(stroke);
 
-                    if (isHighlighter)
+                    if (isHighlighter || isLaser)
                     {
                         StartUnifiedFadeAnimation(visual, stroke, currentOpacity, animDuration);
                     }
@@ -526,14 +527,14 @@ namespace Ink_Canvas.Helpers
                     EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
                 };
 
-                // 如果是高亮笔，添加轻微的缩放效果，使渐隐更加自然
-                if (stroke.DrawingAttributes.IsHighlighter)
+                // 如果是高亮笔或激光笔，添加轻微的缩放效果，使渐隐更加自然
+                if (stroke.DrawingAttributes.IsHighlighter || IsLaserStroke(stroke))
                 {
                     // 创建轻微的缩放动画，模拟墨迹"蒸发"的效果
                     var scaleAnimation = new DoubleAnimation
                     {
                         From = 1.0,
-                        To = 0.95, // 轻微缩小，增加自然感
+                        To = IsLaserStroke(stroke) ? 0.985 : 0.95,
                         Duration = TimeSpan.FromMilliseconds(duration),
                         EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
                     };
