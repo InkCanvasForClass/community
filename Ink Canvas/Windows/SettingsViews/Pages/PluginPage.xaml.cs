@@ -357,8 +357,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 await _market.RequestDownloadPluginAsync(dep);
 
             await _market.RequestDownloadPluginAsync(marketInfo.Id);
-
-            AskRestart();
+            LoadPlugins();
         }
 
         private void DeletePlugin_Click(object sender, RoutedEventArgs e)

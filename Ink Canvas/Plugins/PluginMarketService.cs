@@ -302,6 +302,9 @@ namespace Ink_Canvas.Plugins
         private void MergePlugins()
         {
             var merged = new Dictionary<string, MergedPluginInfo>();
+            var restartRequiredPluginIds = new HashSet<string>(
+                MergedPlugins?.Where(p => p.RestartRequired).Select(p => p.Id) ?? Enumerable.Empty<string>(),
+                StringComparer.OrdinalIgnoreCase);
             // 决定镜像：根据当前源自定义选择；若为空则用第一个可用镜像；都没有则用空串。
             string selectedMirror = "";
             string activeSourceId = Sources.GetActiveSource()?.Id ?? PluginMarketSourcesService.OfficialSource.Id;
@@ -333,7 +336,8 @@ namespace Ink_Canvas.Plugins
                     LoadStatus = local.LoadStatus,
                     PluginFolderPath = local.PluginFolderPath,
                     PluginConfigFolder = local.PluginConfigFolder,
-                    LocalInfo = local
+                    LocalInfo = local,
+                    RestartRequired = restartRequiredPluginIds.Contains(local.Id)
                 };
                 merged[local.Id] = info;
             }
@@ -384,7 +388,8 @@ namespace Ink_Canvas.Plugins
                             IconUrl = resolvedIconUrl,
                             ReadmeUrl = ResolveUrl(entry.ReadmeUrl, selectedMirror),
                             DownloadCount = entry.DownloadCount,
-                            StarsCount = entry.StarsCount
+                            StarsCount = entry.StarsCount,
+                            RestartRequired = restartRequiredPluginIds.Contains(id)
                         };
                         merged[id] = info;
                     }
@@ -392,6 +397,12 @@ namespace Ink_Canvas.Plugins
             }
 
             MergedPlugins = merged.Values.OrderBy(p => p.IsLocal ? 0 : 1).ThenBy(p => p.Name).ToList();
+        }
+
+        public void RefreshMergedPlugins()
+        {
+            _marketIndex ??= new PluginMarketIndex();
+            MergePlugins();
         }
 
         #endregion

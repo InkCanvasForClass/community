@@ -213,8 +213,19 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 if (e.PropertyName == nameof(PluginMarketService.MergedPlugins))
                 {
+                    var selectedPluginId = _selectedPlugin?.Id;
                     _allPlugins = _market.MergedPlugins ?? new List<MergedPluginInfo>();
                     RefreshList();
+
+                    if (!string.IsNullOrEmpty(selectedPluginId))
+                    {
+                        var updated = _allPlugins.FirstOrDefault(p => p.Id == selectedPluginId);
+                        if (updated != null)
+                        {
+                            _selectedPlugin = updated;
+                            ShowDetail(updated);
+                        }
+                    }
                 }
             });
         }
@@ -573,10 +584,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             await _market.RequestDownloadPluginAsync(id);
             _allPlugins = _market.MergedPlugins ?? new List<MergedPluginInfo>();
             RefreshList();
-
-            var updated = _allPlugins.FirstOrDefault(p => p.Id == id);
-            if (updated != null && updated.RestartRequired)
-                AskRestart();
         }
 
         private async void RefreshButton_Click(object sender, RoutedEventArgs e)
@@ -607,6 +614,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (!Directory.Exists(packagesDir)) Directory.CreateDirectory(packagesDir);
                 File.Copy(dialog.FileName, Path.Combine(packagesDir, Path.GetFileName(dialog.FileName)), true);
                 PluginManager.Instance.InstallPendingPackages();
+                _market.RefreshMergedPlugins();
                 _allPlugins = _market.MergedPlugins ?? new List<MergedPluginInfo>();
                 RefreshList();
             }
