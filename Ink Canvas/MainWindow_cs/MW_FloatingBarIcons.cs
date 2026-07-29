@@ -3668,17 +3668,7 @@ namespace Ink_Canvas
                 // 如果之前是激光笔模式，则保持激光笔属性
                 else if (penType == 2)
                 {
-                    drawingAttributes.IsHighlighter = false;
-                    drawingAttributes.StylusTip = StylusTip.Ellipse;
-                    drawingAttributes.Width = Settings.Canvas.LaserPenWidth;
-                    drawingAttributes.Height = Settings.Canvas.LaserPenWidth;
-                    Settings.Canvas.EnableInkFade = true;
-                    if (_inkFadeManager != null)
-                    {
-                        _inkFadeManager.IsEnabled = true;
-                        _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
-                        _inkFadeManager.UpdateFadeSpeedMultiplier(Settings.Canvas.InkFadeSpeedMultiplier);
-                    }
+                    ApplyLaserPenModeCore(refreshUi: false, updateIndicators: false);
                 }
 
                 ColorSwitchCheck();
@@ -3718,17 +3708,7 @@ namespace Ink_Canvas
                         // 如果之前是激光笔模式，则保持激光笔属性
                         else if (penType == 2)
                         {
-                            drawingAttributes.IsHighlighter = false;
-                            drawingAttributes.StylusTip = StylusTip.Ellipse;
-                            drawingAttributes.Width = Settings.Canvas.LaserPenWidth;
-                            drawingAttributes.Height = Settings.Canvas.LaserPenWidth;
-                            Settings.Canvas.EnableInkFade = true;
-                            if (_inkFadeManager != null)
-                            {
-                                _inkFadeManager.IsEnabled = true;
-                                _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
-                                _inkFadeManager.UpdateFadeSpeedMultiplier(Settings.Canvas.InkFadeSpeedMultiplier);
-                            }
+                            ApplyLaserPenModeCore(refreshUi: false, updateIndicators: false);
                         }
 
                         // 在非白板模式下，从线擦切换到批注时不直接弹出子面板

@@ -9,6 +9,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using Ink_Canvas.Ink.Native;
 
 namespace Ink_Canvas.Helpers
 {
@@ -314,64 +315,50 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                // 创建路径几何，使用墨迹的实际位置
                 var geometry = stroke.GetGeometry();
                 if (geometry == null)
                 {
                     return null;
                 }
 
-                // 获取绘画属性
                 var drawingAttribs = stroke.DrawingAttributes;
+                if (IsLaserStroke(stroke))
+                {
+                    return CreateLaserStrokeVisual(stroke);
+                }
 
-                // 创建路径元素，确保使用正确的绘画属性
                 var path = new Path
                 {
                     Data = geometry,
                     Stroke = new SolidColorBrush(drawingAttribs.Color),
-                    StrokeThickness = drawingAttribs.Width, // 使用原始墨迹的粗细
+                    StrokeThickness = drawingAttribs.Width,
                     StrokeStartLineCap = PenLineCap.Round,
                     StrokeEndLineCap = PenLineCap.Round,
                     StrokeLineJoin = PenLineJoin.Round,
-                    Fill = drawingAttribs.IsHighlighter ? new SolidColorBrush(drawingAttribs.Color) : null, // 高亮笔需要填充
-                    Opacity = 0.95, // 初始透明度更高，显得更自然
-
-                    // 优化渲染质量
+                    Fill = drawingAttribs.IsHighlighter ? new SolidColorBrush(drawingAttribs.Color) : null,
+                    Opacity = 0.95,
                     UseLayoutRounding = false,
                     SnapsToDevicePixels = false
                 };
 
-                // 如果是高亮笔，调整透明度和混合模式
                 if (drawingAttribs.IsHighlighter)
                 {
-                    path.Opacity = 0.4; // 高亮笔初始透明度更低，更符合荧光笔特性
-
-                    // 为高亮笔添加特殊的混合效果
-                    // 使用更柔和的笔触样式
+                    path.Opacity = 0.4;
                     path.StrokeStartLineCap = PenLineCap.Flat;
                     path.StrokeEndLineCap = PenLineCap.Flat;
                     path.StrokeLineJoin = PenLineJoin.Miter;
 
-                    // 高亮笔通常需要更宽的笔触来覆盖下面的内容
                     if (drawingAttribs.Width < 20)
                     {
                         path.StrokeThickness = Math.Max(drawingAttribs.Width * 1.5, 20);
                     }
 
-                    // 为高亮笔添加轻微的模糊效果，使渐隐更加自然
                     path.Effect = new BlurEffect
                     {
-                        Radius = 0.5, // 轻微的模糊效果
+                        Radius = 0.5,
                         KernelType = KernelType.Gaussian
                     };
                 }
-
-                // 不设置任何变换，保持墨迹原有粗细
-                var bounds = geometry.Bounds;
-
-                // 设置墨迹的初始位置
-                System.Windows.Controls.Canvas.SetLeft(path, bounds.Left);
-                System.Windows.Controls.Canvas.SetTop(path, bounds.Top);
 
                 return path;
             }
@@ -379,6 +366,118 @@ namespace Ink_Canvas.Helpers
             {
                 return null;
             }
+        }
+
+        private bool IsLaserStroke(Stroke stroke)
+        {
+            return stroke != null
+                && stroke.ContainsPropertyData(WpfStrokeCommitter.LaserRenderModeGuid);
+        }
+
+        private UIElement CreateLaserStrokeVisual(Stroke stroke)
+        {
+            if (stroke?.StylusPoints == null || stroke.StylusPoints.Count == 0)
+                return null;
+
+            var centerlineGeometry = CreateLaserCenterlineGeometry(stroke.StylusPoints);
+            if (centerlineGeometry == null)
+                return null;
+
+            return CreateLaserStrokeVisual(centerlineGeometry, stroke.DrawingAttributes);
+        }
+
+        private UIElement CreateLaserStrokeVisual(Geometry centerlineGeometry, DrawingAttributes drawingAttribs)
+        {
+            var container = new System.Windows.Controls.Canvas
+            {
+                Opacity = 1.0,
+                IsHitTestVisible = false,
+                UseLayoutRounding = false,
+                SnapsToDevicePixels = false
+            };
+
+            var baseThickness = Math.Max(0.8, drawingAttribs.Width);
+            var glowThickness = Math.Max(baseThickness * 2.2, baseThickness + 4);
+            var bodyThickness = Math.Max(1.0, baseThickness * 1.02);
+            var coreThickness = Math.Max(0.85, baseThickness * 0.38);
+            var bodyColor = BlendTowardWhite(drawingAttribs.Color, 0.08);
+            var coreColor = BlendTowardWhite(drawingAttribs.Color, 0.94);
+
+            var glowPath = CreateLaserLayerPath(centerlineGeometry, glowThickness, drawingAttribs.Color, 0.22, blurRadius: Math.Max(6.0, glowThickness * 0.55));
+            var bodyPath = CreateLaserLayerPath(centerlineGeometry, bodyThickness, bodyColor, 0.92, blurRadius: 0.0);
+            var corePath = CreateLaserLayerPath(centerlineGeometry, coreThickness, coreColor, 0.98, blurRadius: Math.Max(0.3, coreThickness * 0.12));
+
+            container.Children.Add(glowPath);
+            container.Children.Add(bodyPath);
+            container.Children.Add(corePath);
+            return container;
+        }
+
+        private Geometry CreateLaserCenterlineGeometry(StylusPointCollection stylusPoints)
+        {
+            if (stylusPoints == null || stylusPoints.Count == 0)
+                return null;
+
+            if (stylusPoints.Count == 1)
+            {
+                var point = stylusPoints[0].ToPoint();
+                return new LineGeometry(point, point);
+            }
+
+            var figure = new PathFigure
+            {
+                StartPoint = stylusPoints[0].ToPoint(),
+                IsClosed = false,
+                IsFilled = false
+            };
+
+            var points = new PointCollection();
+            for (int i = 1; i < stylusPoints.Count; i++)
+            {
+                points.Add(stylusPoints[i].ToPoint());
+            }
+
+            figure.Segments.Add(new PolyLineSegment(points, true));
+            return new PathGeometry(new[] { figure });
+        }
+
+        private Path CreateLaserLayerPath(Geometry centerlineGeometry, double thickness, Color color, double opacity, double blurRadius)
+        {
+            var path = new Path
+            {
+                Data = centerlineGeometry.Clone(),
+                Stroke = new SolidColorBrush(Color.FromArgb(255, color.R, color.G, color.B)),
+                StrokeThickness = thickness,
+                StrokeStartLineCap = PenLineCap.Round,
+                StrokeEndLineCap = PenLineCap.Round,
+                StrokeLineJoin = PenLineJoin.Round,
+                Fill = null,
+                Opacity = opacity,
+                UseLayoutRounding = false,
+                SnapsToDevicePixels = false,
+                IsHitTestVisible = false
+            };
+
+            if (blurRadius > 0.01)
+            {
+                path.Effect = new BlurEffect
+                {
+                    Radius = blurRadius,
+                    KernelType = KernelType.Gaussian
+                };
+            }
+
+            return path;
+        }
+
+        private static Color BlendTowardWhite(Color color, double amount)
+        {
+            amount = Math.Max(0.0, Math.Min(1.0, amount));
+            return Color.FromArgb(
+                color.A,
+                (byte)Math.Round(color.R + ((255 - color.R) * amount)),
+                (byte)Math.Round(color.G + ((255 - color.G) * amount)),
+                (byte)Math.Round(color.B + ((255 - color.B) * amount)));
         }
 
         /// <summary>
@@ -579,6 +678,11 @@ namespace Ink_Canvas.Helpers
                 var drawingAttribs = segmentStroke.DrawingAttributes;
                 var isHighlighter = drawingAttribs.IsHighlighter;
                 var opaqueColor = Color.FromArgb(255, drawingAttribs.Color.R, drawingAttribs.Color.G, drawingAttribs.Color.B);
+
+                if (IsLaserStroke(originalStroke))
+                {
+                    return CreateLaserStrokeVisual(segmentStroke);
+                }
 
                 var path = new Path
                 {

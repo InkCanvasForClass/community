@@ -20,6 +20,14 @@ namespace Ink_Canvas.Ink.Native
         public static readonly Guid NativeWetInkCommittedGuid =
             new Guid("B1F0A3C7-2D64-49B0-9E1A-7A4F8C2D5E60");
 
+        /// <summary>
+        /// Marks a dry Stroke that should be rendered by the laser neon fade path.
+        /// WPF-collected laser strokes and native wet-ink committed laser strokes
+        /// must stay visually aligned during wet→dry handoff and fade.
+        /// </summary>
+        public static readonly Guid LaserRenderModeGuid =
+            new Guid("A69B0C9D-9A3A-4F91-8BE3-8E2DBB9AD4F7");
+
         public static Stroke CreateStroke(NativeStrokeCommitPayload payload)
         {
             if (payload == null)
@@ -56,6 +64,11 @@ namespace Ink_Canvas.Ink.Native
             var stroke = new Stroke(points, attributes);
             if (!stroke.ContainsPropertyData(NativeWetInkCommittedGuid))
                 stroke.AddPropertyData(NativeWetInkCommittedGuid, true);
+            if (style.RenderMode == InkRenderMode.Laser
+                && !stroke.ContainsPropertyData(LaserRenderModeGuid))
+            {
+                stroke.AddPropertyData(LaserRenderModeGuid, true);
+            }
             if (payload.VelocityBrushTipApplied
                 && !stroke.ContainsPropertyData(RealtimeVelocityBrushTipAppliedGuid))
             {

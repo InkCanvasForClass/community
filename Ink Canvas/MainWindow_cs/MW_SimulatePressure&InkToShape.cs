@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Ink.Native;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -415,6 +416,12 @@ namespace Ink_Canvas
                 // 添加到墨迹渐隐管理器
                 if (_inkFadeManager != null)
                 {
+                    if (penType == 2
+                        && !e.Stroke.ContainsPropertyData(WpfStrokeCommitter.LaserRenderModeGuid))
+                    {
+                        e.Stroke.AddPropertyData(WpfStrokeCommitter.LaserRenderModeGuid, true);
+                    }
+
                     long strokeDurationMs = 0;
                     if (_stylusDownTimestamp > 0)
                     {

@@ -1085,7 +1085,8 @@ namespace Ink_Canvas
                 minimumDistanceScale: (float)Settings.Canvas.RealtimeBrushTipMinDistanceScale,
                 coordinateGeneration: _nativeCoordinateGeneration,
                 pageGeneration: CurrentWhiteboardIndex,
-                stylusTipShape: tipShape);
+                stylusTipShape: tipShape,
+                renderMode: penType == 2 ? InkRenderMode.Laser : InkRenderMode.Standard);
         }
 
         private InkSampleProcessorSettings CaptureProcessorSettings(InkStrokeStyleSnapshot style)

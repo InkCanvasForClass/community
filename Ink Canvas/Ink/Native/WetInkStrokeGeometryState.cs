@@ -250,7 +250,8 @@ namespace Ink_Canvas.Ink.Native
             && left.MinimumDistanceScale == right.MinimumDistanceScale
             && left.CoordinateGeneration == right.CoordinateGeneration
             && left.PageGeneration == right.PageGeneration
-            && left.StylusTipShape == right.StylusTipShape;
+            && left.StylusTipShape == right.StylusTipShape
+            && left.RenderMode == right.RenderMode;
 
         private static bool SamePoint(
             RealInkPoint left,

@@ -637,7 +637,8 @@ namespace InkCanvas.NativeInk.Tests
                 0.5f,
                 1,
                 1,
-                InkStylusTipShape.Rectangle);
+                InkStylusTipShape.Rectangle,
+                InkRenderMode.Standard);
             var geometry = new WetInkGeometryBuilder().Build(
                 new[] { new RealInkPoint(0, 0, 0.5f, 1) },
                 null,
@@ -1018,7 +1019,19 @@ namespace InkCanvas.NativeInk.Tests
 
         private static InkStrokeStyleSnapshot Style()
         {
-            return new InkStrokeStyleSnapshot(0xFF112233, 5, 5, false, false, false, 0, 0.5f, 1, 1);
+            return new InkStrokeStyleSnapshot(
+                0xFF112233,
+                5,
+                5,
+                false,
+                false,
+                false,
+                0,
+                0.5f,
+                1,
+                1,
+                InkStylusTipShape.Ellipse,
+                InkRenderMode.Standard);
         }
 
         /// <summary>

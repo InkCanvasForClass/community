@@ -16,6 +16,12 @@ namespace Ink_Canvas.Ink.Native
         Rectangle
     }
 
+    internal enum InkRenderMode
+    {
+        Standard,
+        Laser
+    }
+
     [Flags]
     internal enum NativeInkSampleFlags
     {
@@ -113,7 +119,8 @@ namespace Ink_Canvas.Ink.Native
             float minimumDistanceScale,
             long coordinateGeneration,
             long pageGeneration,
-            InkStylusTipShape stylusTipShape = InkStylusTipShape.Ellipse)
+            InkStylusTipShape stylusTipShape = InkStylusTipShape.Ellipse,
+            InkRenderMode renderMode = InkRenderMode.Standard)
         {
             ColorArgb = colorArgb;
             Width = width;
@@ -126,6 +133,7 @@ namespace Ink_Canvas.Ink.Native
             CoordinateGeneration = coordinateGeneration;
             PageGeneration = pageGeneration;
             StylusTipShape = stylusTipShape;
+            RenderMode = renderMode;
         }
 
         public uint ColorArgb { get; }
@@ -139,6 +147,7 @@ namespace Ink_Canvas.Ink.Native
         public long CoordinateGeneration { get; }
         public long PageGeneration { get; }
         public InkStylusTipShape StylusTipShape { get; }
+        public InkRenderMode RenderMode { get; }
     }
 
     internal sealed class NativeStrokeCommitPayload

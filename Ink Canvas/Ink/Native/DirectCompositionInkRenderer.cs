@@ -44,6 +44,7 @@ namespace Ink_Canvas.Ink.Native
         private IDXGISwapChain1 _swapChain;
         private ID2D1Bitmap1 _targetBitmap;
         private ID2D1SolidColorBrush _brush;
+        private ID2D1StrokeStyle _laserStrokeStyle;
         private IntPtr _hwnd;
         private WetInkTargetSnapshot _target;
         private bool _deviceReady;
@@ -226,7 +227,7 @@ namespace Ink_Canvas.Ink.Native
             {
                 ApplyExclusionClips();
                 foreach (var pair in _sessions)
-                    pair.Value.Draw(_d2dContext, _brush);
+                    pair.Value.Draw(_d2dContext, _brush, _laserStrokeStyle);
             }
 
             _d2dContext.EndDraw().CheckError();
@@ -266,6 +267,16 @@ namespace Ink_Canvas.Ink.Native
             _d2dContext = _d2dDevice.CreateDeviceContext(DeviceContextOptions.None);
             _d2dContext.UnitMode = UnitMode.Dips;
             _brush = _d2dContext.CreateSolidColorBrush(new Color4(1f, 1f, 1f, 1f), null);
+            _laserStrokeStyle = _d2dFactory.CreateStrokeStyle(new StrokeStyleProperties
+            {
+                StartCap = CapStyle.Flat,
+                EndCap = CapStyle.Flat,
+                DashCap = CapStyle.Flat,
+                LineJoin = LineJoin.Round,
+                DashStyle = DashStyle.Solid,
+                MiterLimit = 1f,
+                DashOffset = 0f
+            });
             _compositionDevice =
                 DComp.DCompositionCreateDevice<IDCompositionDevice>(_dxgiDevice);
         }
@@ -402,6 +413,7 @@ namespace Ink_Canvas.Ink.Native
 
         private void ReleaseDeviceResources()
         {
+            DisposeAndNull(ref _laserStrokeStyle);
             DisposeAndNull(ref _brush);
             DisposeAndNull(ref _d2dContext);
             DisposeAndNull(ref _d2dDevice);
@@ -442,14 +454,19 @@ namespace Ink_Canvas.Ink.Native
         {
             private readonly WetInkStrokeGeometryState _geometryState;
             private readonly List<ID2D1PathGeometry> _fixedPaths = new List<ID2D1PathGeometry>();
+            private readonly List<ID2D1PathGeometry> _fixedLaserCenterPaths = new List<ID2D1PathGeometry>();
             private readonly List<WetInkTip> _fixedStartTips = new List<WetInkTip>();
             private readonly List<WetInkTip> _fixedEndTips = new List<WetInkTip>();
             private ID2D1PathGeometry _dynamicPath;
+            private ID2D1PathGeometry _dynamicLaserCenterPath;
             private WetInkTip _dynamicStartTip;
             private WetInkTip _dynamicEndTip;
             private bool _dynamicIsSinglePoint;
             private bool _hasDynamic;
             private uint _colorArgb;
+            private InkRenderMode _renderMode;
+            private float _strokeWidth;
+            private float _strokeHeight;
             private int _publishedFixedCount;
 
             public SessionResources(WetInkGeometryBuilder builder)
@@ -461,18 +478,14 @@ namespace Ink_Canvas.Ink.Native
             {
                 var update = _geometryState.Update(snapshot);
                 _colorArgb = snapshot.Style.ColorArgb;
+                _renderMode = snapshot.Style.RenderMode;
+                _strokeWidth = (float)Math.Max(0.1, snapshot.Style.Width);
+                _strokeHeight = (float)Math.Max(0.1, snapshot.Style.Height);
 
                 if (update.Reset)
                 {
-                    // Baseline was replaced mid-stroke (e.g. pause straightening):
-                    // discard accumulated fixed geometry and rebuild from scratch.
-                    for (var i = 0; i < _fixedPaths.Count; i++)
-                    {
-                        var path = _fixedPaths[i];
-                        if (path != null)
-                            path.Dispose();
-                    }
-                    _fixedPaths.Clear();
+                    DisposePaths(_fixedPaths);
+                    DisposePaths(_fixedLaserCenterPaths);
                     _fixedStartTips.Clear();
                     _fixedEndTips.Clear();
                     _publishedFixedCount = 0;
@@ -482,12 +495,14 @@ namespace Ink_Canvas.Ink.Native
                 {
                     var segment = update.FixedSegments[_publishedFixedCount];
                     _fixedPaths.Add(CreatePath(factory, segment));
+                    _fixedLaserCenterPaths.Add(CreateLaserCenterPath(factory, segment));
                     _fixedStartTips.Add(segment.StartTip);
                     _fixedEndTips.Add(segment.EndTip);
                     _publishedFixedCount++;
                 }
 
                 DisposePath(ref _dynamicPath);
+                DisposePath(ref _dynamicLaserCenterPath);
                 _hasDynamic = false;
                 _dynamicIsSinglePoint = false;
                 if (update.DynamicTail != null)
@@ -498,7 +513,10 @@ namespace Ink_Canvas.Ink.Native
                             && update.DynamicTail.Outline.Count >= 3))
                     {
                         if (!_dynamicIsSinglePoint)
+                        {
                             _dynamicPath = CreatePath(factory, update.DynamicTail);
+                            _dynamicLaserCenterPath = CreateLaserCenterPath(factory, update.DynamicTail);
+                        }
                         _dynamicStartTip = update.DynamicTail.StartTip;
                         _dynamicEndTip = update.DynamicTail.EndTip;
                         _hasDynamic = true;
@@ -506,7 +524,18 @@ namespace Ink_Canvas.Ink.Native
                 }
             }
 
-            public void Draw(ID2D1DeviceContext context, ID2D1SolidColorBrush brush)
+            public void Draw(ID2D1DeviceContext context, ID2D1SolidColorBrush brush, ID2D1StrokeStyle laserStrokeStyle)
+            {
+                if (_renderMode == InkRenderMode.Laser)
+                {
+                    DrawLaser(context, brush, laserStrokeStyle);
+                    return;
+                }
+
+                DrawStandard(context, brush);
+            }
+
+            private void DrawStandard(ID2D1DeviceContext context, ID2D1SolidColorBrush brush)
             {
                 brush.Color = ToPremultipliedColor(_colorArgb);
 
@@ -516,9 +545,6 @@ namespace Ink_Canvas.Ink.Native
                     if (path != null)
                         context.FillGeometry(path, brush);
 
-                    // Avoid translucent overblend at fixed-segment junctions:
-                    // only the first segment draws its start tip; intermediate
-                    // end tips are omitted because the next segment continues.
                     if (i == 0)
                         DrawTip(context, brush, _fixedStartTips[i]);
                     if (i == _fixedPaths.Count - 1 && !_hasDynamic)
@@ -541,19 +567,50 @@ namespace Ink_Canvas.Ink.Native
                 DrawTip(context, brush, _dynamicEndTip);
             }
 
-            public void Dispose()
+            private void DrawLaser(ID2D1DeviceContext context, ID2D1SolidColorBrush brush, ID2D1StrokeStyle laserStrokeStyle)
             {
-                for (var i = 0; i < _fixedPaths.Count; i++)
+                var bodyThickness = Math.Max(0.8f, Math.Max(_strokeWidth, _strokeHeight));
+                var glowThickness = Math.Max(bodyThickness * 2.2f, bodyThickness + 4f);
+                var coreThickness = Math.Max(0.75f, bodyThickness * 0.38f);
+
+                for (var i = 0; i < _fixedLaserCenterPaths.Count; i++)
                 {
-                    var path = _fixedPaths[i];
+                    var path = _fixedLaserCenterPaths[i];
                     if (path != null)
-                        path.Dispose();
+                    {
+                        DrawLaserGeometry(context, brush, laserStrokeStyle, path, _colorArgb, glowThickness, bodyThickness, coreThickness);
+                    }
+
+                    if (i == 0)
+                        DrawLaserTip(context, brush, _fixedStartTips[i], glowThickness, bodyThickness, coreThickness);
+                    if (i == _fixedLaserCenterPaths.Count - 1 && !_hasDynamic)
+                        DrawLaserTip(context, brush, _fixedEndTips[i], glowThickness, bodyThickness, coreThickness);
                 }
 
-                _fixedPaths.Clear();
+                if (!_hasDynamic)
+                    return;
+
+                if (_dynamicIsSinglePoint)
+                {
+                    DrawLaserTip(context, brush, _dynamicStartTip, glowThickness, bodyThickness, coreThickness);
+                    return;
+                }
+
+                if (_dynamicLaserCenterPath != null)
+                    DrawLaserGeometry(context, brush, laserStrokeStyle, _dynamicLaserCenterPath, _colorArgb, glowThickness, bodyThickness, coreThickness);
+                if (_fixedLaserCenterPaths.Count == 0)
+                    DrawLaserTip(context, brush, _dynamicStartTip, glowThickness, bodyThickness, coreThickness);
+                DrawLaserTip(context, brush, _dynamicEndTip, glowThickness, bodyThickness, coreThickness);
+            }
+
+            public void Dispose()
+            {
+                DisposePaths(_fixedPaths);
+                DisposePaths(_fixedLaserCenterPaths);
                 _fixedStartTips.Clear();
                 _fixedEndTips.Clear();
                 DisposePath(ref _dynamicPath);
+                DisposePath(ref _dynamicLaserCenterPath);
             }
 
             private static ID2D1PathGeometry CreatePath(
@@ -570,9 +627,6 @@ namespace Ink_Canvas.Ink.Native
                 var path = factory.CreatePathGeometry();
                 using (var sink = path.Open())
                 {
-                    // Ribbon outlines self-intersect on sharp turns / segment overlaps.
-                    // Alternate (even-odd) fill punches transparent holes there; winding
-                    // keeps the union of the stroke solid like WPF ink.
                     sink.SetFillMode(Vortice.Direct2D1.FillMode.Winding);
                     var first = geometry.Outline[0];
                     sink.BeginFigure(new Vector2(first.X, first.Y), FigureBegin.Filled);
@@ -587,6 +641,125 @@ namespace Ink_Canvas.Ink.Native
                 }
 
                 return path;
+            }
+
+            private static ID2D1PathGeometry CreateLaserCenterPath(
+                ID2D1Factory1 factory,
+                WetInkRibbonGeometry geometry)
+            {
+                if (geometry == null
+                    || geometry.Outline == null
+                    || geometry.Outline.Count < 4
+                    || geometry.Outline.Count % 2 != 0)
+                {
+                    return null;
+                }
+
+                var centerCount = geometry.Outline.Count / 2;
+                if (centerCount < 2)
+                    return null;
+
+                var path = factory.CreatePathGeometry();
+                using (var sink = path.Open())
+                {
+                    var first = CenterPoint(geometry.Outline, 0);
+                    sink.BeginFigure(new Vector2(first.X, first.Y), FigureBegin.Hollow);
+                    for (var i = 1; i < centerCount; i++)
+                    {
+                        var point = CenterPoint(geometry.Outline, i);
+                        sink.AddLine(new Vector2(point.X, point.Y));
+                    }
+
+                    sink.EndFigure(FigureEnd.Open);
+                    sink.Close();
+                }
+
+                return path;
+            }
+
+            private static WetInkVertex CenterPoint(IReadOnlyList<WetInkVertex> outline, int index)
+            {
+                var mirrored = outline.Count - 1 - index;
+                var left = outline[index];
+                var right = outline[mirrored];
+                return new WetInkVertex(
+                    (left.X + right.X) * 0.5f,
+                    (left.Y + right.Y) * 0.5f);
+            }
+
+            private static void DrawLaserGeometry(
+                ID2D1DeviceContext context,
+                ID2D1SolidColorBrush brush,
+                ID2D1StrokeStyle laserStrokeStyle,
+                ID2D1PathGeometry path,
+                uint colorArgb,
+                float glowThickness,
+                float bodyThickness,
+                float coreThickness)
+            {
+                if (path == null)
+                    return;
+
+                brush.Color = ResolveLaserGlowColor(colorArgb);
+                context.DrawGeometry(path, brush, glowThickness, laserStrokeStyle);
+                brush.Color = ResolveLaserBodyColor(colorArgb);
+                context.DrawGeometry(path, brush, bodyThickness, laserStrokeStyle);
+                brush.Color = ResolveLaserCoreColor(colorArgb);
+                context.DrawGeometry(path, brush, coreThickness, laserStrokeStyle);
+            }
+
+            private void DrawLaserTip(
+                ID2D1DeviceContext context,
+                ID2D1SolidColorBrush brush,
+                WetInkTip tip,
+                float glowThickness,
+                float bodyThickness,
+                float coreThickness)
+            {
+                var bodyRadius = Math.Max(tip.RadiusX, tip.RadiusY);
+                if (bodyRadius <= 0f)
+                    return;
+
+                var bodyScale = Math.Max(1f, bodyThickness / Math.Max(0.01f, Math.Max(_strokeWidth, _strokeHeight)));
+                var glowScale = Math.Max(bodyScale * 1.6f, glowThickness / Math.Max(0.01f, bodyThickness));
+                var coreScale = Math.Min(1f, coreThickness / Math.Max(0.01f, bodyThickness));
+
+                brush.Color = ResolveLaserGlowColor(_colorArgb);
+                DrawScaledTip(context, brush, tip, glowScale);
+                brush.Color = ResolveLaserBodyColor(_colorArgb);
+                DrawScaledTip(context, brush, tip, bodyScale);
+                brush.Color = ResolveLaserCoreColor(_colorArgb);
+                DrawScaledTip(context, brush, tip, coreScale);
+            }
+
+            private static void DrawScaledTip(
+                ID2D1DeviceContext context,
+                ID2D1SolidColorBrush brush,
+                WetInkTip tip,
+                float scale)
+            {
+                if (scale <= 0f)
+                    return;
+
+                var radiusX = Math.Max(0.35f, tip.RadiusX * scale);
+                var radiusY = Math.Max(0.35f, tip.RadiusY * scale);
+                if (tip.Shape == InkStylusTipShape.Rectangle)
+                {
+                    var rect = new System.Drawing.RectangleF(
+                        tip.Center.X - radiusX,
+                        tip.Center.Y - radiusY,
+                        radiusX * 2f,
+                        radiusY * 2f);
+                    context.FillRectangle(rect, brush);
+                    return;
+                }
+
+                context.FillEllipse(
+                    new Ellipse(
+                        new Vector2(tip.Center.X, tip.Center.Y),
+                        radiusX,
+                        radiusY),
+                    brush);
             }
 
             private static void DrawTip(
@@ -616,6 +789,41 @@ namespace Ink_Canvas.Ink.Native
                     brush);
             }
 
+            private static Color4 ResolveLaserGlowColor(uint colorArgb) =>
+                ToPremultipliedColor(colorArgb, 0.22f);
+
+            private static Color4 ResolveLaserBodyColor(uint colorArgb) =>
+                ToPremultipliedColor(BlendTowardWhite(colorArgb, 0.08f), 0.88f);
+
+            private static Color4 ResolveLaserCoreColor(uint colorArgb) =>
+                ToPremultipliedColor(BlendTowardWhite(colorArgb, 0.94f), 0.98f);
+
+            private static uint BlendTowardWhite(uint colorArgb, float amount)
+            {
+                amount = Math.Max(0f, Math.Min(1f, amount));
+                var a = (byte)((colorArgb >> 24) & 0xFF);
+                var r = (byte)((colorArgb >> 16) & 0xFF);
+                var g = (byte)((colorArgb >> 8) & 0xFF);
+                var b = (byte)(colorArgb & 0xFF);
+                var mixedR = (byte)Math.Round(r + ((255 - r) * amount));
+                var mixedG = (byte)Math.Round(g + ((255 - g) * amount));
+                var mixedB = (byte)Math.Round(b + ((255 - b) * amount));
+                return ((uint)a << 24)
+                       | ((uint)mixedR << 16)
+                       | ((uint)mixedG << 8)
+                       | mixedB;
+            }
+
+            private static Color4 ToPremultipliedColor(uint colorArgb, float alphaMultiplier)
+            {
+                var a = ((colorArgb >> 24) & 0xFF) / 255f;
+                var r = ((colorArgb >> 16) & 0xFF) / 255f;
+                var g = ((colorArgb >> 8) & 0xFF) / 255f;
+                var b = (colorArgb & 0xFF) / 255f;
+                var effectiveAlpha = Math.Max(0f, Math.Min(1f, a * alphaMultiplier));
+                return new Color4(r * effectiveAlpha, g * effectiveAlpha, b * effectiveAlpha, effectiveAlpha);
+            }
+
             private static Color4 ToPremultipliedColor(uint colorArgb)
             {
                 var a = ((colorArgb >> 24) & 0xFF) / 255f;
@@ -623,6 +831,18 @@ namespace Ink_Canvas.Ink.Native
                 var g = ((colorArgb >> 8) & 0xFF) / 255f;
                 var b = (colorArgb & 0xFF) / 255f;
                 return new Color4(r * a, g * a, b * a, a);
+            }
+
+            private static void DisposePaths(List<ID2D1PathGeometry> paths)
+            {
+                for (var i = 0; i < paths.Count; i++)
+                {
+                    var path = paths[i];
+                    if (path != null)
+                        path.Dispose();
+                }
+
+                paths.Clear();
             }
 
             private static void DisposePath(ref ID2D1PathGeometry path)
