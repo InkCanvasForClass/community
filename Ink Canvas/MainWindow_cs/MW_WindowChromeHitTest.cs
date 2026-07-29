@@ -42,7 +42,6 @@ namespace Ink_Canvas
 
             if (_smartModeRegions == null || _smartModeRegions.Count == 0)
             {
-                LogHelper.WriteLogToFile("[SmartMode] BuildRects: 无区域数据", LogHelper.LogType.Info);
                 return;
             }
 

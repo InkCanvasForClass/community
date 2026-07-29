@@ -1570,8 +1570,6 @@ namespace Ink_Canvas
                     return;
                 }
 
-                LogHelper.WriteLogToFile($"[SmartMode] 开始刷新, PPTLinkMode={Settings.PowerPointSettings.PPTLinkMode}, Manager={_pptManager?.GetType().Name}", LogHelper.LogType.Info);
-
                 if (_pptManager is PPTAgentLinkManager agentManager)
                 {
                     var response = agentManager.GetSmartRegions();
@@ -1595,11 +1593,10 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    // COM/ROT 模式：尝试直接通过 COM interop 获取视频区域
-                    LogHelper.WriteLogToFile("[SmartMode] 非 Agent 模式，尝试 COM 直接获取", LogHelper.LogType.Info);
+                    // COM/ROT 模式：直接获取视频区域
                     _smartModeRegions = GetVideoRegionsViaCom();
                     _smartModeSlideIndex = _currentSlideShowPosition;
-                    if (_smartModeRegions != null)
+                    if (_smartModeRegions != null && _smartModeRegions.Count > 0)
                         LogHelper.WriteLogToFile($"[SmartMode] COM 获取到 {_smartModeRegions.Count} 个区域", LogHelper.LogType.Info);
                 }
             }
