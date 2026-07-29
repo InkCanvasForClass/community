@@ -30,7 +30,7 @@
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <Configurations>Debug;Release</Configurations>
     <Platforms>AnyCPU;x86;x64</Platforms>
-    <LangVersion>10</LangVersion>
+    <LangVersion>12</LangVersion>
     <NoWarn>$(NoWarn);CA1416;NU1701;MSB3270;CS8012;NETSDK1138;CS9269</NoWarn>
     <!-- PolySharp (传递依赖，经 Vortice→SharpGen.Runtime 引入) 在 .NET 10 SDK 下与既有的
          UnscopedRefAttribute 定义冲突 (CS0101/CS0579)。该 polyfill 类型已由其他来源提供，

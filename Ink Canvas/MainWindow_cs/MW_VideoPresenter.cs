@@ -71,18 +71,15 @@ namespace Ink_Canvas
 
 private System.Windows.Ink.StrokeCollection _liveStrokesSnapshot = new System.Windows.Ink.StrokeCollection();
 
-        // 旋转基准墨迹快照：用户在某个角度画墨迹时，保存一份"该角度下的原始墨迹"。
-        // 旋转时不再累积 delta（累积会导致 0->90 缩小后 90->180 在缩小基础上再变换，越来越小），
-        // 而是每次旋转都从基准墨迹重新变换到目标角度，避免累积误差。
-        // _rotationBaselineAngle 记录基准墨迹对应的角度（0/90/180/270）。
-        private System.Windows.Ink.StrokeCollection _rotationBaselineStrokes = null;
-        private int _rotationBaselineAngle = 0;
+        // 视频展台虚拟分页的 per-page 墨迹存储：key = _boothCurrentPhotoIndex（-1=直播页，0..N-1=照片页）。
+        // 切换虚拟页时保存当前墨迹、恢复目标页墨迹；退出特殊模式时整体清空（booth 墨迹不持久化到白板）。
+        // 不接入 timeMachine：booth 墨迹退出即丢弃，不需要撤销/重做。
+        private readonly Dictionary<int, StrokeCollection> _boothStrokesByPage = new Dictionary<int, StrokeCollection>();
+
         // 照片预览页：把 FillImage 的 LayoutTransform/RenderTransform 替换为 VideoCaptureElement 的同名实例，
         // 让照片预览完全复用实时画面的变换管线（旋转/缩放/移动走同一条代码路径）。
         // _frozenFrameOriginalRenderTransform 保存照片 Image 原始的 RenderTransform，返回直播页时恢复。
         private System.Windows.Media.TransformGroup _frozenFrameOriginalRenderTransform = null;
-        // 程序正在替换墨迹时设为 true，避免 StrokesChanged 重置基准
-        private bool _isApplyingRotationToStrokes = false;
 
         // 按页绑定：每一页对应一个“实时画面”元素与布局/设备信息
         private readonly Dictionary<int, System.Windows.Controls.Image> _liveFrameImageByPage = new Dictionary<int, System.Windows.Controls.Image>();
@@ -2470,7 +2467,6 @@ private System.Windows.Ink.StrokeCollection _liveStrokesSnapshot = new System.Wi
                 _lastFrame?.Dispose();
                 _lastFrame = null;
             }
-        }
         }
 
         /// <summary>
