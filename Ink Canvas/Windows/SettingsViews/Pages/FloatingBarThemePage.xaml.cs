@@ -19,7 +19,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             Loaded += (_, __) => RefreshThemes();
         }
 
-        private void RefreshThemes()
+        // 对外公开以便在导航或外部操作后强制刷新
+        public void RefreshThemes()
         {
             var service = ThemeService;
             if (service == null) return;
@@ -37,6 +38,20 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     ThemeStrings.Theme_FloatingBarThemesApplyFailed,
                     ThemeStrings.Theme_FloatingBarThemeMarketTitle);
             }
+            RefreshThemes();
+        }
+
+        private void ButtonDeleteTheme_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button button || button.Tag is not string themeId) return;
+            var service = ThemeService;
+            if (service == null) return;
+            var result = service.DeleteTheme(themeId);
+            if (!result)
+            {
+                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show("删除失败", ThemeStrings.Theme_FloatingBarThemeMarketTitle);
+            }
+            RefreshThemes();
         }
 
         private void ButtonOpenThemeFolder_Click(object sender, RoutedEventArgs e)

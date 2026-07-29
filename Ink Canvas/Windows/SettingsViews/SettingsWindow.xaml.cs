@@ -515,6 +515,28 @@ namespace Ink_Canvas.Windows.SettingsViews
 
             // 应用 URI 处理器留下的待处理高亮 key（等待页面 Loaded 完成，确保可视树已构建）
             TryApplyPendingHighlight();
+
+            // 如果导航到了浮动栏主题管理页，确保刷新主题列表（比如从主题市场安装后返回能立即看到）
+            try
+            {
+                if (currentPageType == typeof(FloatingBarThemePage))
+                {
+                    (rootFrame.Content as FloatingBarThemePage)?.RefreshThemes();
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// 允许外部调用以刷新设置窗口中的浮动栏主题管理页（如果当前正在显示）
+        /// </summary>
+        public void RefreshFloatingBarThemePage()
+        {
+            try
+            {
+                (rootFrame.Content as FloatingBarThemePage)?.RefreshThemes();
+            }
+            catch { }
         }
 
         /// <summary>
