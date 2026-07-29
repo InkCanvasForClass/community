@@ -45,6 +45,7 @@ namespace Ink_Canvas.Plugins
         private readonly PluginDependencyResolver _dependencyResolver = new PluginDependencyResolver();
         private readonly PluginConfigIo _configIo;
         private PluginSecurityCheck _securityCheck;
+        private PluginMarketService _market;
         private PluginLogger _logger;
         private PluginIpcService _ipc;
         // 当前正在 Initialize 的插件，用于 RegisterToolbarItem 等回调识别调用方
@@ -93,6 +94,7 @@ namespace Ink_Canvas.Plugins
         /// </summary>
         public void InitializeAdvancedServices(PluginMarketService market)
         {
+            _market = market;
             _securityCheck = new PluginSecurityCheck(market);
         }
 
@@ -246,6 +248,7 @@ namespace Ink_Canvas.Plugins
 
                 _plugins.Sort((a, b) => a.Order.CompareTo(b.Order));
                 BuildServiceProvider();
+                _market?.RefreshMergedPlugins();
                 Log(string.Format("Plugin loading complete. Loaded {0} plugins", _plugins.Count(p => p.LoadStatus == PluginLoadStatus.Loaded)));
             }
             catch (Exception ex)
@@ -277,6 +280,7 @@ namespace Ink_Canvas.Plugins
                 }
             }
             _plugins.Sort((a, b) => a.Order.CompareTo(b.Order));
+            _market?.RefreshMergedPlugins();
         }
 
         /// <summary>
@@ -395,6 +399,7 @@ namespace Ink_Canvas.Plugins
                     }
                     Directory.CreateDirectory(targetPath);
                     ZipFile.ExtractToDirectory(pkgPath, targetPath);
+                    File.Delete(pkgPath);
 
                     Log(string.Format("Installed plugin package: {0} v{1}", manifest.Name, manifest.Version));
                 }
@@ -850,6 +855,7 @@ namespace Ink_Canvas.Plugins
 
                 Log(string.Format("Plugin unloaded: {0}", plugin.Name));
                 OnPluginUnloaded(plugin);
+                _market?.RefreshMergedPlugins();
             }
             catch (Exception ex)
             {
