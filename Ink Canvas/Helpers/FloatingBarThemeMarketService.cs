@@ -26,6 +26,16 @@ namespace Ink_Canvas.Helpers
                 var json = await _httpClient.GetStringAsync(OfficialIndexUrl);
                 var index = JsonConvert.DeserializeObject<ThemeMarketIndex>(json);
                 Entries = index?.Themes ?? new List<ThemeMarketEntry>();
+                // mark installed state for each entry based on local files
+                if (Entries != null)
+                {
+                    for (int i = 0; i < Entries.Count; i++)
+                    {
+                        var entry = Entries[i];
+                        if (entry == null) continue; // tolerant to malformed index containing null entries
+                        entry.IsInstalled = IsInstalled(entry);
+                    }
+                }
                 return true;
             }
             catch (Exception ex)
@@ -106,6 +116,22 @@ namespace Ink_Canvas.Helpers
         public string DownloadUrl { get; set; }
         public string DownloadSha256 { get; set; }
         public string BannerUrl { get; set; }
+        // whether this theme is already installed locally (computed by RefreshAsync)
+        [JsonIgnore]
+        private bool _isInstalled;
+        [JsonIgnore]
+        public bool IsInstalled
+        {
+            get => _isInstalled;
+            set
+            {
+                if (_isInstalled == value) return;
+                _isInstalled = value;
+                PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof(IsInstalled)));
+            }
+        }
+
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
     }
 
     public sealed class ThemeMarketManifest
