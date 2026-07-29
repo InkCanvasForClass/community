@@ -1,7 +1,9 @@
 using System;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Ink_Canvas.Windows.SettingsViews
 {
@@ -17,14 +19,14 @@ namespace Ink_Canvas.Windows.SettingsViews
         private const int WS_EX_TRANSPARENT = 0x00000020;
         private const int WS_EX_NOACTIVATE = 0x08000000;
 
-        [DllImport("user32.dll")]
-        private static extern int GetWindowLong(IntPtr hwnd, int index);
+        //[DllImport("user32.dll")]
+        //private static extern int GetWindowLong(IntPtr hwnd, int index);
 
-        [DllImport("user32.dll")]
-        private static extern int SetWindowLong(IntPtr hwnd, int index, int newStyle);
+        //[DllImport("user32.dll")]
+        //private static extern int SetWindowLong(IntPtr hwnd, int index, int newStyle);
 
-        [DllImport("user32.dll")]
-        private static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+        //[DllImport("user32.dll")]
+        //private static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
 
         public PPTPageFlipPreviewWindow()
         {
@@ -41,8 +43,8 @@ namespace Ink_Canvas.Windows.SettingsViews
             try
             {
                 var hwnd = new WindowInteropHelper(this).Handle;
-                int extendedStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-                SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle | WS_EX_TRANSPARENT | WS_EX_NOACTIVATE);
+                int extendedStyle = PInvoke.GetWindowLong(new HWND(hwnd), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
+                PInvoke.SetWindowLong(new HWND(hwnd), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, extendedStyle | WS_EX_TRANSPARENT | WS_EX_NOACTIVATE);
 
                 // 精确定位到主屏幕整个边界（与 MainWindow 一致，避免 Maximized 导致的几像素溢出）
                 var screen = System.Windows.Forms.Screen.PrimaryScreen;
@@ -50,7 +52,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 Top = screen.Bounds.Y;
                 Width = screen.Bounds.Width;
                 Height = screen.Bounds.Height;
-                MoveWindow(hwnd, screen.Bounds.X, screen.Bounds.Y, screen.Bounds.Width, screen.Bounds.Height, true);
+                PInvoke.MoveWindow(new HWND(hwnd), screen.Bounds.X, screen.Bounds.Y, screen.Bounds.Width, screen.Bounds.Height, true);
             }
             catch (Exception ex)
             {

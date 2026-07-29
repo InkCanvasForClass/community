@@ -115,21 +115,31 @@ namespace Ink_Canvas.Helpers
             {
                 if (_config.UseHardwareAcceleration)
                 {
-                    // 使用硬件加速的同步版本（异步等待，超时则放弃硬件路径，使用原始笔画）
+                    // GPU 平滑为异步任务，此处是同步 API 的向后兼容入口；
+                    // 用带超时的 GetAwaiter().GetResult() 有界等待，超时/失败/取消回退原始笔画。
+                    // 注意：调用方在 UI 线程上时仍会发生 sync-over-async 阻塞，调用方应优先走 SmoothStrokeAsync。
                     var task = _hardwareProcessor.SmoothStrokeWithGPU(originalStroke);
-                    if (task.Wait(5000)) // 5秒超时
+                    using (var cts = new CancellationTokenSource(5000))
                     {
-                        try { result = task.GetAwaiter().GetResult(); }
+                        try
+                        {
+                            result = task.WaitAsync(cts.Token).GetAwaiter().GetResult();
+                        }
+                        catch (TimeoutException)
+                        {
+                            LogHelper.WriteLogToFile("墨迹平滑超时，返回原始笔画", LogHelper.LogType.Warning);
+                            result = originalStroke;
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            Debug.WriteLine("同步墨迹平滑被取消，返回原始笔画");
+                            result = originalStroke;
+                        }
                         catch (Exception hwEx)
                         {
                             Debug.WriteLine($"硬件加速平滑失败，回退原始笔画: {hwEx.Message}");
                             result = originalStroke;
                         }
-                    }
-                    else
-                    {
-                        LogHelper.WriteLogToFile("墨迹平滑超时，返回原始笔画", LogHelper.LogType.Warning);
-                        result = originalStroke;
                     }
                 }
                 else

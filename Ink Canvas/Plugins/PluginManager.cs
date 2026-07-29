@@ -47,6 +47,8 @@ namespace Ink_Canvas.Plugins
         private PluginSecurityCheck _securityCheck;
         private PluginLogger _logger;
         private PluginIpcService _ipc;
+        // 当前正在 Initialize 的插件，用于 RegisterToolbarItem 等回调识别调用方
+        private PluginInfo _currentLoadingPlugin;
 
         public static readonly string ManifestFileName = "manifest.json";
         public static readonly string PluginPackageExtension = ".icpx";
@@ -399,10 +401,22 @@ namespace Ink_Canvas.Plugins
                 catch (Exception ex)
                 {
                     LogError(string.Format("Error installing package {0}", Path.GetFileName(pkgPath)), ex);
-                }
-                finally
-                {
-                    try { File.Delete(pkgPath); } catch { }
+                    // 解压失败：保留 pkg 改名隔离，**不**删除。File.Delete 解压失败的包会让用户
+                    // 永久丢失已下载好的 .icpx，必须重新走 GitHub 下载。
+                    // 改名 .failed_install_<ts> 标记为失败态，避免下次启动再触发同样的失败循环。
+                    // 30 天启动清理同 PluginMarketService.CleanupStalePartialFiles。
+                    try
+                    {
+                        var failedPath = pkgPath + ".failed_install_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                        if (File.Exists(failedPath)) File.Delete(failedPath); // 同秒重试情况
+                        File.Move(pkgPath, failedPath);
+                        LogError(string.Format("Package {0} preserved as failed install: {1}",
+                            Path.GetFileName(pkgPath), Path.GetFileName(failedPath)), null);
+                    }
+                    catch (Exception moveEx)
+                    {
+                        LogError(string.Format("Failed to preserve failed package {0}", Path.GetFileName(pkgPath)), moveEx);
+                    }
                 }
             }
         }
@@ -720,7 +734,15 @@ namespace Ink_Canvas.Plugins
                 info.LoadStatus = PluginLoadStatus.Loaded;
                 _assemblyContexts[info.Id] = loadContext;
 
-                pluginInstance.Initialize(this);
+                _currentLoadingPlugin = info;
+                try
+                {
+                    pluginInstance.Initialize(this);
+                }
+                finally
+                {
+                    _currentLoadingPlugin = null;
+                }
                 Log(string.Format("Plugin loaded: {0} v{1} by {2}", info.Name, info.Version, info.Author));
                 OnPluginLoaded(info);
             }
@@ -916,12 +938,51 @@ namespace Ink_Canvas.Plugins
 
             try
             {
-                Controls.Toolbar.FloatingToolbar.ToolbarRegistry.RegisterPluginItem(itemInfo);
-                Log(string.Format("Plugin registered toolbar item: {0}", itemInfo.Id));
+                // 仅在插件首次注册时自动追加到浮动工具栏；后续启动只加入组件库，
+                // 避免用户删除组件后重启又被自动加回。
+                bool isFirstRegistration = IsFirstToolbarRegistration();
+                Controls.Toolbar.FloatingToolbar.ToolbarRegistry.RegisterPluginItem(itemInfo, autoAddToActiveConfig: isFirstRegistration);
+                if (isFirstRegistration)
+                {
+                    MarkToolbarRegistered();
+                }
+                Log(string.Format("Plugin registered toolbar item: {0} (autoAdd={1})", itemInfo.Id, isFirstRegistration));
             }
             catch (Exception ex)
             {
                 LogError(string.Format("Failed to register toolbar item {0}", itemInfo.Id), ex);
+            }
+        }
+
+        /// <summary>
+        /// 判断当前正在加载的插件是否首次注册工具栏项。
+        /// 通过插件目录下的 .toolbar_registered 标记文件判断；插件被删除时，
+        /// 其目录会被 CleanupUninstalledPlugins 清理，标记随之消失，重装后会再次自动追加。
+        /// </summary>
+        private bool IsFirstToolbarRegistration()
+        {
+            var pluginFolder = _currentLoadingPlugin?.PluginFolderPath;
+            if (string.IsNullOrEmpty(pluginFolder) || !Directory.Exists(pluginFolder))
+                return true; // 无法确定时默认按首次注册处理，保持向后兼容
+            var markerPath = Path.Combine(pluginFolder, ".toolbar_registered");
+            return !File.Exists(markerPath);
+        }
+
+        /// <summary>
+        /// 在当前加载插件的目录下写入 .toolbar_registered 标记，记录已发生过首次注册。
+        /// </summary>
+        private void MarkToolbarRegistered()
+        {
+            var pluginFolder = _currentLoadingPlugin?.PluginFolderPath;
+            if (string.IsNullOrEmpty(pluginFolder)) return;
+            try
+            {
+                var markerPath = Path.Combine(pluginFolder, ".toolbar_registered");
+                File.WriteAllText(markerPath, DateTimeOffset.UtcNow.ToString("O"));
+            }
+            catch (Exception ex)
+            {
+                LogError(string.Format("Failed to mark toolbar registration for {0}", _currentLoadingPlugin?.Id), ex);
             }
         }
 

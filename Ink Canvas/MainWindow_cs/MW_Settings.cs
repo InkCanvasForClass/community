@@ -645,7 +645,6 @@ namespace Ink_Canvas
                 SaveSettingsToFile();
                 CheckEraserTypeTab();
                 ApplyAdvancedEraserShape();
-                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                 inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
             }
         }
@@ -828,9 +827,12 @@ namespace Ink_Canvas
                     int currentDrawingShapeMode = drawingShapeMode;
                     bool currentForceEraser = forceEraser;
 
-                    inkCanvas.StylusDown += MainWindow_StylusDown;
-                    inkCanvas.StylusMove += MainWindow_StylusMove;
-                    inkCanvas.StylusUp += MainWindow_StylusUp;
+                    if (Settings.Canvas.UseLegacyWetInk)
+                    {
+                        inkCanvas.StylusDown += MainWindow_StylusDown;
+                        inkCanvas.StylusMove += MainWindow_StylusMove;
+                        inkCanvas.StylusUp += MainWindow_StylusUp;
+                    }
                     inkCanvas.TouchDown += MainWindow_TouchDown;
                     inkCanvas.TouchDown -= Main_Grid_TouchDown;
 
@@ -848,7 +850,18 @@ namespace Ink_Canvas
                     SaveSettingsToFile();
 
                     // 恢复到之前的编辑状态
-                    inkCanvas.EditingMode = currentEditingMode;
+                    if (Settings.Canvas.UseLegacyWetInk)
+                    {
+                        inkCanvas.EditingMode = currentEditingMode;
+                    }
+                    else
+                    {
+                        // 原生自由书写时 Ink 映射为 None
+                        inkCanvas.EditingMode = currentEditingMode == InkCanvasEditingMode.Ink
+                            ? InkCanvasEditingMode.None
+                            : currentEditingMode;
+                        EnsureNativePenPhysicalEditingMode();
+                    }
                     drawingShapeMode = currentDrawingShapeMode;
                     forceEraser = currentForceEraser;
                 }
@@ -1122,6 +1135,8 @@ namespace Ink_Canvas
             Settings.InkToShape.IsInkToShapeRounded = true;
             Settings.InkToShape.EnableWinRtHandwritingStrokeBeautify = false;
             Settings.InkToShape.HandwritingCorrectionFontFamily = "Ink Free,KaiTi,Segoe Script";
+            Settings.InkToShape.HandwritingLanguageOverrideLcid = 0;
+            Settings.InkToShape.HandwritingBeautifyDebounceMs = 2000;
 
             Settings.Startup.IsEnableNibMode = false;
             Settings.Startup.IsAutoUpdate = true;

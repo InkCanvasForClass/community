@@ -1,10 +1,12 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Ink_Canvas.Windows.SettingsViews
 {
@@ -25,14 +27,14 @@ namespace Ink_Canvas.Windows.SettingsViews
         private readonly Window _settingsWindow;
         private DispatcherTimer _zOrderTimer;
 
-        [DllImport("user32.dll")]
-        private static extern int GetWindowLong(IntPtr hwnd, int index);
+        //[DllImport("user32.dll")]
+        //private static extern int GetWindowLong(IntPtr hwnd, int index);
 
-        [DllImport("user32.dll")]
-        private static extern int SetWindowLong(IntPtr hwnd, int index, int newStyle);
+        //[DllImport("user32.dll")]
+        //private static extern int SetWindowLong(IntPtr hwnd, int index, int newStyle);
 
-        [DllImport("user32.dll")]
-        private static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+        //[DllImport("user32.dll")]
+        //private static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
 
         public PPTPageFlipPreviewOverlayWindow(Window settingsWindow)
         {
@@ -60,8 +62,8 @@ namespace Ink_Canvas.Windows.SettingsViews
             try
             {
                 var hwnd = new WindowInteropHelper(this).Handle;
-                int extendedStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-                SetWindowLong(hwnd, GWL_EXSTYLE, extendedStyle | WS_EX_TRANSPARENT | WS_EX_NOACTIVATE);
+                int extendedStyle = PInvoke.GetWindowLong(new HWND(hwnd), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
+                PInvoke.SetWindowLong(new HWND(hwnd), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, extendedStyle | WS_EX_TRANSPARENT | WS_EX_NOACTIVATE);
 
                 // 精确定位到主屏幕整个边界（与 MainWindow / PreviewWindow 一致）
                 var screen = System.Windows.Forms.Screen.PrimaryScreen;
@@ -69,7 +71,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 Top = screen.Bounds.Y;
                 Width = screen.Bounds.Width;
                 Height = screen.Bounds.Height;
-                MoveWindow(hwnd, screen.Bounds.X, screen.Bounds.Y, screen.Bounds.Width, screen.Bounds.Height, true);
+                PInvoke.MoveWindow(new HWND(hwnd), screen.Bounds.X, screen.Bounds.Y, screen.Bounds.Width, screen.Bounds.Height, true);
 
                 // 启动 Z 序维持定时器：周期性将 Overlay 置于 SettingsWindow 之上。
                 // WindowTopmostManager 重排 SettingsWindow（SetTopmost）会把它提到 TOPMOST 顶，
@@ -107,8 +109,8 @@ namespace Ink_Canvas.Windows.SettingsViews
             // 改用 HWND_TOPMOST 绝对置顶 + 100ms 高频刷新，确保 Overlay 始终压在 SettingsWindow 之上。
             // Overlay 为 WS_EX_TRANSPARENT 点击穿透，不会阻挡 SettingsWindow 的鼠标操作，
             // 且 4 个按钮位于屏幕边缘，对设置区中央的 Popup 影响极小。
-            NativeWindowHelper.SetWindowPos(overlayHandle, NativeWindowHelper.HWND_TOPMOST, 0, 0, 0, 0,
-                NativeWindowHelper.SWP_NOMOVE | NativeWindowHelper.SWP_NOSIZE | NativeWindowHelper.SWP_NOACTIVATE | NativeWindowHelper.SWP_NOOWNERZORDER);
+            PInvoke.SetWindowPos(new HWND(overlayHandle), new HWND(NativeWindowHelper.HWND_TOPMOST), 0, 0, 0, 0,
+                SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE | SET_WINDOW_POS_FLAGS.SWP_NOOWNERZORDER);
         }
 
         private void PPTPageFlipPreviewOverlayWindow_Closed(object sender, EventArgs e)

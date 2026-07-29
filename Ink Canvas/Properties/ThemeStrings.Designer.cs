@@ -222,6 +222,10 @@ namespace Ink_Canvas.Properties
 
         public static string Theme_IdleMiniBarHint => ResourceManager.GetString(nameof(Theme_IdleMiniBarHint), _resourceCulture);
 
+        public static string Theme_FloatingBarThemeMarketInstalled => ResourceManager.GetString(nameof(Theme_FloatingBarThemeMarketInstalled), _resourceCulture);
+
+        public static string Theme_FloatingBarThemesDelete => ResourceManager.GetString(nameof(Theme_FloatingBarThemesDelete), _resourceCulture);
+
         public static string Theme_IdleMiniBarOpacity => ResourceManager.GetString(nameof(Theme_IdleMiniBarOpacity), _resourceCulture);
 
         public static string Theme_IdleMiniBarAutoRestore => ResourceManager.GetString(nameof(Theme_IdleMiniBarAutoRestore), _resourceCulture);

@@ -2,6 +2,11 @@
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.Graphics.Dwm;
+using Windows.Win32.Graphics.Gdi;
+using Windows.Win32.UI.WindowsAndMessaging;
 
 // 由衷感謝 lindexi 提供的 《WPF 稳定的全屏化窗口方法》
 // 文章鏈接：https://blog.lindexi.com/post/WPF-%E7%A8%B3%E5%AE%9A%E7%9A%84%E5%85%A8%E5%B1%8F%E5%8C%96%E7%AA%97%E5%8F%A3%E6%96%B9%E6%B3%95.html
@@ -65,13 +70,13 @@ namespace Ink_Canvas.Helpers
                 var hwndSource = HwndSource.FromHwnd(hwnd);
 
                 //获取当前窗口的位置大小状态并保存
-                var placement = new WINDOWPLACEMENT();
-                placement.Size = (uint)Marshal.SizeOf(placement);
-                Win32.User32.GetWindowPlacement(hwnd, ref placement);
+                WINDOWPLACEMENT placement = new WINDOWPLACEMENT();
+                placement.length = (uint)Marshal.SizeOf(placement);
+                PInvoke.GetWindowPlacement(new HWND(hwnd), ref placement);
                 window.SetValue(BeforeFullScreenWindowPlacementProperty, placement);
 
                 //修改窗口样式
-                var style = (WindowStyles)Win32.User32.GetWindowLongPtr(hwnd, GetWindowLongFields.GWL_STYLE);
+                var style = (WindowStyles)PInvoke.GetWindowLong(new HWND(hwnd), WINDOW_LONG_PTR_INDEX.GWL_STYLE);
                 window.SetValue(BeforeFullScreenWindowStyleProperty, style);
                 //将窗口恢复到还原模式，在有标题栏的情况下最大化模式下无法全屏,
                 //这里采用还原，不修改标题栏的方式
@@ -80,22 +85,24 @@ namespace Ink_Canvas.Helpers
                 //去掉WS_MAXIMIZEBOX，禁用最大化，如果最大化会退出全屏
                 //去掉WS_MAXIMIZE，使窗口变成还原状态，不使用ShowWindow(hwnd, ShowWindowCommands.SW_RESTORE)，避免看到窗口变成还原状态这一过程（也避免影响窗口的Visible状态）
                 style &= (~(WindowStyles.WS_THICKFRAME | WindowStyles.WS_MAXIMIZEBOX | WindowStyles.WS_MAXIMIZE));
-                Win32.User32.SetWindowLongPtr(hwnd, GetWindowLongFields.GWL_STYLE, (IntPtr)style);
+                PInvoke.SetWindowLong(new HWND(hwnd), WINDOW_LONG_PTR_INDEX.GWL_STYLE, (int)style);
 
                 //禁用 DWM 过渡动画 忽略返回值，若DWM关闭不做处理
-                Win32.Dwmapi.DwmSetWindowAttribute(hwnd, DWMWINDOWATTRIBUTE.DWMWA_TRANSITIONS_FORCEDISABLED, 1,
-                    sizeof(int));
+                unsafe
+                {
+                    PInvoke.DwmSetWindowAttribute(new HWND(hwnd), DWMWINDOWATTRIBUTE.DWMWA_TRANSITIONS_FORCEDISABLED, (void*)1, sizeof(int));
+                }
 
                 //添加Hook，在窗口尺寸位置等要发生变化时，确保全屏
                 hwndSource.AddHook(KeepFullScreenHook);
 
-                if (Win32.User32.GetWindowRect(hwnd, out var rect))
+                if (PInvoke.GetWindowRect(new HWND(hwnd), out var rect))
                 {
                     //不能用 placement 的坐标，placement是工作区坐标，不是屏幕坐标。
 
                     //使用窗口当前的矩形调用下设置窗口位置和尺寸的方法，让Hook来进行调整窗口位置和尺寸到全屏模式
-                    Win32.User32.SetWindowPos(hwnd, (IntPtr)HwndZOrder.HWND_TOPMOST, rect.Left, rect.Top, rect.Width,
-                        rect.Height, (int)WindowPositionFlags.SWP_NOZORDER);
+                    PInvoke.SetWindowPos(new HWND(hwnd), new HWND((IntPtr)HwndZOrder.HWND_TOPMOST), rect.left, rect.top, rect.Width,
+                        rect.Height, SET_WINDOW_POS_FLAGS.SWP_NOZORDER);
                 }
             }
         }
@@ -137,35 +144,35 @@ namespace Ink_Canvas.Helpers
                 //恢复保存的状态
                 //不要改变Style里的WS_MAXIMIZE，否则会使窗口变成最大化状态，但是尺寸不对
                 //也不要设置回Style里的WS_MINIMIZE,否则会导致窗口最小化按钮显示成还原按钮
-                Win32.User32.SetWindowLongPtr(hwnd, GetWindowLongFields.GWL_STYLE,
-                    (IntPtr)(style & (~(WindowStyles.WS_MAXIMIZE | WindowStyles.WS_MINIMIZE))));
+                PInvoke.SetWindowLong(new HWND(hwnd), WINDOW_LONG_PTR_INDEX.GWL_STYLE,
+                    (int)(style & (~(WindowStyles.WS_MAXIMIZE | WindowStyles.WS_MINIMIZE))));
 
                 if ((style & WindowStyles.WS_MINIMIZE) != 0)
                 {
                     //如果窗口进入全屏前是最小化的，这里不让窗口恢复到之前的最小化状态，而是到还原的状态。
                     //大多数情况下，都不期望在退出全屏的时候，恢复到最小化。
-                    placement.ShowCmd = Win32.ShowWindowCommands.SW_RESTORE;
+                    placement.showCmd = SHOW_WINDOW_CMD.SW_RESTORE;
                 }
 
                 if ((style & WindowStyles.WS_MAXIMIZE) != 0)
                 {
                     //提前调用 ShowWindow 使窗口恢复最大化，若通过 SetWindowPlacement 最大化会导致闪烁，只靠其恢复 RestoreBounds.
-                    Win32.User32.ShowWindow(hwnd, Win32.ShowWindowCommands.SW_MAXIMIZE);
+                    PInvoke.ShowWindow(new HWND(hwnd), SHOW_WINDOW_CMD.SW_MAXIMIZE);
                 }
 
-                Win32.User32.SetWindowPlacement(hwnd, ref placement);
+                PInvoke.SetWindowPlacement(new HWND(hwnd), placement);
 
                 if ((style & WindowStyles.WS_MAXIMIZE) ==
                     0) //如果窗口是最大化就不要修改WPF属性，否则会破坏RestoreBounds，且WPF窗口自身在最大化时，不会修改 Left Top Width Height 属性
                 {
-                    if (Win32.User32.GetWindowRect(hwnd, out var rect))
+                    if (PInvoke.GetWindowRect(new HWND(hwnd), out var rect))
                     {
                         //不能用 placement 的坐标，placement是工作区坐标，不是屏幕坐标。
 
                         //确保窗口的 WPF 属性与 Win32 位置一致
                         var logicalPos =
                             hwndSource.CompositionTarget.TransformFromDevice.Transform(
-                                new System.Windows.Point(rect.Left, rect.Top));
+                                new System.Windows.Point(rect.left, rect.top));
                         var logicalSize =
                             hwndSource.CompositionTarget.TransformFromDevice.Transform(
                                 new System.Windows.Point(rect.Width, rect.Height));
@@ -177,8 +184,11 @@ namespace Ink_Canvas.Helpers
                 }
 
                 //重新启用 DWM 过渡动画 忽略返回值，若DWM关闭不做处理
-                Win32.Dwmapi.DwmSetWindowAttribute(hwnd, DWMWINDOWATTRIBUTE.DWMWA_TRANSITIONS_FORCEDISABLED, 0,
+                unsafe
+                {
+                    PInvoke.DwmSetWindowAttribute(new HWND(hwnd), DWMWINDOWATTRIBUTE.DWMWA_TRANSITIONS_FORCEDISABLED, (void*)0,
                     sizeof(int));
+                }
 
                 //删除保存的状态
                 window.ClearValue(BeforeFullScreenWindowPlacementProperty);
@@ -207,7 +217,7 @@ namespace Ink_Canvas.Helpers
                         return IntPtr.Zero;
                     }
 
-                    if (Win32.User32.IsIconic(hwnd))
+                    if (PInvoke.IsIconic(new HWND(hwnd)))
                     {
                         // 如果在全屏期间最小化了窗口，那么忽略后续的位置调整。
                         // 否则按后续逻辑，会根据窗口在 -32000 的位置，计算出错误的目标位置，然后就跳到主屏了。
@@ -215,46 +225,46 @@ namespace Ink_Canvas.Helpers
                     }
 
                     //获取窗口现在的矩形，下面用来参考计算目标矩形
-                    if (Win32.User32.GetWindowRect(hwnd, out var rect))
+                    if (PInvoke.GetWindowRect(new HWND(hwnd), out RECT rect))
                     {
                         var targetRect = rect; //窗口想要变化的目标矩形
 
                         if ((pos.Flags & WindowPositionFlags.SWP_NOMOVE) == 0)
                         {
                             //需要移动
-                            targetRect.Left = pos.X;
-                            targetRect.Top = pos.Y;
+                            targetRect.left = pos.X;
+                            targetRect.top = pos.Y;
                         }
 
                         if ((pos.Flags & WindowPositionFlags.SWP_NOSIZE) == 0)
                         {
                             //要改变尺寸
-                            targetRect.Right = targetRect.Left + pos.Width;
-                            targetRect.Bottom = targetRect.Top + pos.Height;
+                            targetRect.right = targetRect.left + pos.Width;
+                            targetRect.bottom = targetRect.top + pos.Height;
                         }
                         else
                         {
                             //不改变尺寸
-                            targetRect.Right = targetRect.Left + rect.Width;
-                            targetRect.Bottom = targetRect.Top + rect.Height;
+                            targetRect.right = targetRect.left + rect.Width;
+                            targetRect.bottom = targetRect.top + rect.Height;
                         }
 
                         //使用目标矩形获取显示器信息
-                        var monitor = Win32.User32.MonitorFromRect(targetRect, MonitorFlag.MONITOR_DEFAULTTOPRIMARY);
-                        var info = new MonitorInfo();
-                        info.Size = (uint)Marshal.SizeOf(info);
-                        if (Win32.User32.GetMonitorInfo(monitor, ref info))
+                        var monitor = PInvoke.MonitorFromRect(targetRect, MONITOR_FROM_FLAGS.MONITOR_DEFAULTTOPRIMARY);
+                        var info = new MONITORINFO();
+                        info.cbSize = (uint)Marshal.SizeOf(info);
+                        if (PInvoke.GetMonitorInfo(monitor, ref info))
                         {
                             //基于显示器信息设置窗口尺寸位置
-                            pos.X = info.MonitorRect.Left;
-                            pos.Y = info.MonitorRect.Top;
-                            pos.Width = info.MonitorRect.Right - info.MonitorRect.Left;
-                            pos.Height = info.MonitorRect.Bottom - info.MonitorRect.Top;
+                            pos.X = info.rcMonitor.left;
+                            pos.Y = info.rcMonitor.top;
+                            pos.Width = info.rcMonitor.right - info.rcMonitor.left;
+                            pos.Height = info.rcMonitor.bottom - info.rcMonitor.top;
                             pos.Flags &= ~(WindowPositionFlags.SWP_NOSIZE | WindowPositionFlags.SWP_NOMOVE |
                                            WindowPositionFlags.SWP_NOREDRAW);
                             pos.Flags |= WindowPositionFlags.SWP_NOCOPYBITS;
 
-                            if (rect == info.MonitorRect)
+                            if (rect.Equals(info.rcMonitor))
                             {
                                 var hwndSource = HwndSource.FromHwnd(hwnd);
                                 if (hwndSource?.RootVisual is Window window)

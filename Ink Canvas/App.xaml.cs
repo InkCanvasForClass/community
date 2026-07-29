@@ -12,7 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -20,6 +20,10 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Console;
+using Windows.Win32.UI.Accessibility;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
 using SplashScreen = Ink_Canvas.Windows.SplashScreen;
@@ -92,10 +96,10 @@ namespace Ink_Canvas
         private static DateTime previousCpuSampleTime = DateTime.MinValue;
         private static double? lastSystemCpuUsagePercent;
         private static double? lastProcessCpuUsagePercent;
-        private IntPtr processDestroyHook = IntPtr.Zero;
+        private UnhookWinEventSafeHandle processDestroyHook = new UnhookWinEventSafeHandle();
         private IntPtr monitoredMainWindowHandle = IntPtr.Zero;
         private bool mainWindowDestroyedLogged;
-        private WinEventDelegate processDestroyHookCallback;
+        private WINEVENTPROC processDestroyHookCallback;
         // 新增：启动画面相关
         private static SplashScreen _splashScreen;
         private static bool _isSplashScreenShown = false;
@@ -103,8 +107,8 @@ namespace Ink_Canvas
         private static readonly Stopwatch startupStopwatch = new Stopwatch();
         private static readonly Stopwatch splashStopwatch = new Stopwatch();
 
-        [DllImport("shell32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern int SetCurrentProcessExplicitAppUserModelID(string appId);
+        //[DllImport("shell32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        //private static extern int SetCurrentProcessExplicitAppUserModelID(string appId);
 
         public App()
         {
@@ -115,12 +119,11 @@ namespace Ink_Canvas
             // （gong-wpf-dragdrop 库内部使用）的模态消息循环无法接收触摸释放消息。
             // 在模拟触摸屏（UU 远程、spacedesk 等远程控制软件注入的虚拟触摸）下，
             // 拖动操作会进入假死状态，直到呼出鼠标或点击其他窗口生成真实鼠标消息才解除。
-            // ClassIsland 项目同样注释掉了该开关，参考其做法保持一致。
             // AppContext.SetSwitch("Switch.System.Windows.Input.Stylus.EnablePointerSupport", true);
 
             try
             {
-                SetCurrentProcessExplicitAppUserModelID("InkCanvasForClass.CE");
+                PInvoke.SetCurrentProcessExplicitAppUserModelID("InkCanvasForClass.CE");
             }
             catch
             {
@@ -272,8 +275,9 @@ namespace Ink_Canvas
                 // 注册进程退出处理程序
                 AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 
+                PHANDLER_ROUTINE handlerRoutine = new PHANDLER_ROUTINE(ConsoleCtrlHandler);
                 // 尝试注册Windows关闭消息监听
-                SetConsoleCtrlHandler(ConsoleCtrlHandler, true);
+                PInvoke.SetConsoleCtrlHandler(handlerRoutine, true);
 
                 try
                 {
@@ -349,27 +353,27 @@ namespace Ink_Canvas
 
         private void RegisterMainWindowDestroyHook()
         {
-            if (processDestroyHook != IntPtr.Zero || monitoredMainWindowHandle == IntPtr.Zero)
+            if (!processDestroyHook.IsInvalid || monitoredMainWindowHandle == IntPtr.Zero)
             {
                 return;
             }
 
-            processDestroyHook = SetWinEventHook(
+            processDestroyHook = PInvoke.SetWinEventHook(
                 EVENT_OBJECT_DESTROY,
                 EVENT_OBJECT_DESTROY,
-                IntPtr.Zero,
+                null,
                 processDestroyHookCallback,
                 (uint)currentProcessId,
                 0,
                 WINEVENT_OUTOFCONTEXT);
 
-            if (processDestroyHook == IntPtr.Zero)
+            if (!processDestroyHook.IsInvalid)
             {
                 return;
             }
         }
 
-        private void OnWinEventMainWindowDestroyed(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)
+        private void OnWinEventMainWindowDestroyed(HWINEVENTHOOK hWinEventHook, uint eventType, HWND hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)
         {
             if (eventType != EVENT_OBJECT_DESTROY || mainWindowDestroyedLogged)
             {
@@ -393,10 +397,10 @@ namespace Ink_Canvas
         {
             try
             {
-                if (processDestroyHook != IntPtr.Zero)
+                if (!processDestroyHook.IsInvalid)
                 {
-                    UnhookWinEvent(processDestroyHook);
-                    processDestroyHook = IntPtr.Zero;
+                    PInvoke.UnhookWinEvent(new HWINEVENTHOOK(processDestroyHook.DangerousGetHandle()));
+                    processDestroyHook = new UnhookWinEventSafeHandle();
                 }
             }
             catch
@@ -405,35 +409,35 @@ namespace Ink_Canvas
         }
 
         // Windows控制台控制处理程序
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool SetConsoleCtrlHandler(ConsoleCtrlDelegate handler, bool add);
+        //[DllImport("kernel32.dll", SetLastError = true)]
+        //private static extern bool SetConsoleCtrlHandler(ConsoleCtrlDelegate handler, bool add);
 
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool GetSystemTimes(out FILETIME lpIdleTime, out FILETIME lpKernelTime, out FILETIME lpUserTime);
+        //[DllImport("kernel32.dll", SetLastError = true)]
+        //private static extern bool GetSystemTimes(out FILETIME lpIdleTime, out FILETIME lpKernelTime, out FILETIME lpUserTime);
 
-        [StructLayout(LayoutKind.Sequential)]
-        private struct FILETIME
-        {
-            public uint dwLowDateTime;
-            public uint dwHighDateTime;
-        }
+        //[StructLayout(LayoutKind.Sequential)]
+        //private struct FILETIME
+        //{
+        //    public uint dwLowDateTime;
+        //    public uint dwHighDateTime;
+        //}
 
-        private delegate bool ConsoleCtrlDelegate(int ctrlType);
-        private delegate void WinEventDelegate(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime);
+        //private delegate bool ConsoleCtrlDelegate(int ctrlType);
+        //private delegate void WinEventDelegate(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime);
 
         private const uint EVENT_OBJECT_DESTROY = 0x8001;
         private const uint WINEVENT_OUTOFCONTEXT = 0x0000;
         private const int OBJID_WINDOW = 0;
         private const int CHILDID_SELF = 0;
 
-        [DllImport("user32.dll")]
-        private static extern IntPtr SetWinEventHook(uint eventMin, uint eventMax, IntPtr hmodWinEventProc, WinEventDelegate lpfnWinEventProc, uint idProcess, uint idThread, uint dwFlags);
+        //[DllImport("user32.dll")]
+        //private static extern IntPtr SetWinEventHook(uint eventMin, uint eventMax, IntPtr hmodWinEventProc, WinEventDelegate lpfnWinEventProc, uint idProcess, uint idThread, uint dwFlags);
 
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool UnhookWinEvent(IntPtr hWinEventHook);
+        //[DllImport("user32.dll")]
+        //[return: MarshalAs(UnmanagedType.Bool)]
+        //private static extern bool UnhookWinEvent(IntPtr hWinEventHook);
 
-        private static bool ConsoleCtrlHandler(int ctrlType)
+        private static BOOL ConsoleCtrlHandler(uint ctrlType)
         {
             string eventType = "未知控制类型";
 
@@ -627,7 +631,7 @@ namespace Ink_Canvas
         {
             try
             {
-                if (!GetSystemTimes(out FILETIME idleTime, out FILETIME kernelTime, out FILETIME userTime))
+                if (!PInvoke.GetSystemTimes(out FILETIME idleTime, out FILETIME kernelTime, out FILETIME userTime))
                 {
                     return;
                 }
@@ -674,7 +678,7 @@ namespace Ink_Canvas
 
         private static ulong ToUInt64(FILETIME fileTime)
         {
-            return ((ulong)fileTime.dwHighDateTime << 32) | fileTime.dwLowDateTime;
+            return ((ulong)(uint)fileTime.dwHighDateTime << 32) | (uint)fileTime.dwLowDateTime;
         }
 
         private static string FormatCpuUsagePercent(double? cpuUsagePercent)

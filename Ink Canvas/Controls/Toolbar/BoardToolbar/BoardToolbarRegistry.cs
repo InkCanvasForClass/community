@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -215,7 +216,21 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"BoardToolbarRegistry: 加载配置 [{name}] 失败: {ex.Message}", LogHelper.LogType.Error);
+                // 把损坏文件改名隔离：避免下次启动再尝试读同样的坏数据把 fallback 也覆盖；
+                // 给运维或用户一次"翻人工"恢复机会。
+                try
+                {
+                    var brokenPath = path + ".broken_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                    File.Move(path, brokenPath);
+                    LogHelper.WriteLogToFile(
+                        $"BoardToolbarRegistry: 加载配置 [{name}] 失败且被隔离为 [{brokenPath}]: {ex.Message}",
+                        LogHelper.LogType.Error);
+                }
+                catch (Exception moveEx)
+                {
+                    LogHelper.WriteLogToFile($"BoardToolbarRegistry: 加载配置 [{name}] 失败: {ex.Message}", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile($"BoardToolbarRegistry: 隔离损坏配置 [{name}] 失败: {moveEx.Message}", LogHelper.LogType.Warning);
+                }
                 return null;
             }
         }
@@ -230,7 +245,23 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
 
                 var path = GetConfigFilePath(name);
                 var json = JsonConvert.SerializeObject(layout, Formatting.Indented);
-                File.WriteAllText(path, json);
+                // 临时文件 + File.Replace/Move 原子替换，避免断电/进程被杀导致 default.json
+                // 停在 0 字节或半截，下次启动 LoadConfigFile 反序列化失败→fallback CreateDefault，
+                // 用户整套自定义布局静默丢失。
+                var tmpPath = path + ".tmp";
+                try
+                {
+                    File.WriteAllText(tmpPath, json);
+                    if (File.Exists(path))
+                        File.Replace(tmpPath, path, null);
+                    else
+                        File.Move(tmpPath, path);
+                }
+                catch (Exception innerEx)
+                {
+                    try { if (File.Exists(tmpPath)) File.Delete(tmpPath); } catch { }
+                    throw new Exception($"原子写入失败: {innerEx.Message}", innerEx);
+                }
                 LogHelper.WriteLogToFile($"BoardToolbarRegistry: 保存配置 [{name}] 成功", LogHelper.LogType.Info);
             }
             catch (Exception ex)
@@ -309,9 +340,22 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
 
         public static BoardToolbarLayoutSettings LoadActiveConfig()
         {
-            var layout = LoadConfigFile("default");
+            // 优先读 SettingsManager.Settings.BoardToolbarConfigName，让用户在 BoardToolbarPage
+            // 切换配置时 MainWindow 工具栏跟随切换；缺失/损坏/未设置时回退到 "default"，
+            // 再损坏则使用内置 CreateDefault——保证启动永远能加载出可用布局。
+            var configName = (SettingsManager.Settings?.BoardToolbarConfigName as string);
+            if (string.IsNullOrWhiteSpace(configName)) configName = "default";
+
+            var layout = LoadConfigFile(configName);
             if (layout != null && layout.Areas != null && layout.Areas.Count > 0)
                 return layout;
+
+            if (!string.Equals(configName, "default", StringComparison.OrdinalIgnoreCase))
+            {
+                layout = LoadConfigFile("default");
+                if (layout != null && layout.Areas != null && layout.Areas.Count > 0)
+                    return layout;
+            }
 
             return BoardToolbarLayoutSettings.CreateDefault();
         }

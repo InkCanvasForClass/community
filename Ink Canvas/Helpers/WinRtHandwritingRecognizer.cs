@@ -18,9 +18,6 @@ namespace Ink_Canvas.Helpers
     /// </summary>
     internal static class WinRtHandwritingRecognizer
     {
-        private static WinRtInk.InkRecognizer _preferredHandwritingRecognizer;
-        private static bool _preferredHandwritingRecognizerResolved;
-
         private static void LogHandwriting(string message, LogHelper.LogType logType = LogHelper.LogType.Info)
         {
             LogHelper.WriteLogToFile("[手写体] " + message, logType);
@@ -56,6 +53,10 @@ namespace Ink_Canvas.Helpers
             try
             {
                 var recognizer = new WinRtInk.InkRecognizerContainer();
+                // 把 settings 中的 LCID 覆盖推到 Tuning（LCID 变化时自动失效缓存重解析）。
+                HandwritingRecognitionTuning.ApplyFromSettings(
+                    MainWindow.Settings?.InkToShape?.HandwritingLanguageOverrideLcid ??
+                    HandwritingRecognitionTuning.LcidFollowSystem);
                 TryApplyPreferredHandwritingRecognizer(recognizer, traceRecognition);
 
                 var analyzer = new WinAnalysis.InkAnalyzer();
@@ -101,62 +102,26 @@ namespace Ink_Canvas.Helpers
                     return HandwritingRecognitionResult.Empty;
                 }
 
+                // C1：CJK 防拆字回检合并。InkAnalyzer 按水平间距切 InkWord，CJK 一字多笔常被误拆。
+                // 把「相邻 InkWord 水平间距 < 0.3×字高 且 垂直重叠 > 0.5×字高」的节点合并为一组，
+                // 整体重新 RecognizeAsync 取候选，避免部件级误识别。西文不合并（词间距本就大）。
+                var cjkMergeActive = HandwritingRecognitionTuning.IsCjkRecognizerActive;
+                var wordGroups = BuildCjkMergedWordGroups(wordNodes, idToWpf, cjkMergeActive, traceRecognition);
+
                 var segments = new List<HandwritingWordSegment>();
 
-                foreach (var node in wordNodes)
+                foreach (var wg in wordGroups)
                 {
-                    if (!(node is WinAnalysis.InkAnalysisInkWord word))
+                    if (wg.Strokes.Count == 0)
                         continue;
 
-                    var ids = word.GetStrokeIds();
-                    if (ids == null || ids.Count == 0)
-                        continue;
-
-                    var group = new List<Stroke>();
-                    foreach (var sid in ids)
-                    {
-                        if (idToWpf.TryGetValue(sid, out var st))
-                            group.Add(st);
-                    }
-
-                    if (group.Count == 0)
-                        continue;
-
-                    var wpfRect = GetOriginalStrokeBounds(group);
-                    var analysisText = word.RecognizedText ?? string.Empty;
+                    var wpfRect = GetOriginalStrokeBounds(wg.Strokes);
+                    var analysisText = wg.CombinedRecognizedText;
 
                     IReadOnlyList<string> candList = Array.Empty<string>();
                     try
                     {
-                        if (recognizer != null)
-                        {
-                            var mini = new WinRtInk.InkStrokeContainer();
-                            foreach (var st in group)
-                            {
-                                var ink = WinRtInkShapeRecognizer.CreateInkStrokeFromWpf(st);
-                                if (ink != null)
-                                    mini.AddStroke(ink);
-                            }
-
-                            var miniStrokes = mini.GetStrokes();
-                            if (miniStrokes != null && miniStrokes.Count > 0)
-                            {
-                                var rr = await recognizer
-                                    .RecognizeAsync(mini, WinRtInk.InkRecognitionTarget.All)
-                                    .AsTask()
-                                    .ConfigureAwait(true);
-                                if (rr != null && rr.Count > 0 && rr[0] != null)
-                                {
-                                    var cands = rr[0].GetTextCandidates();
-                            if (cands != null && cands.Count > 0)
-                            {
-                                candList = cands
-                                    .Where(c => !string.IsNullOrWhiteSpace(c))
-                                    .ToList();
-                            }
-                                }
-                            }
-                        }
+                        candList = await RecognizeStrokeGroupAsync(recognizer, wg.Strokes).ConfigureAwait(true);
                     }
                     catch (Exception ex)
                     {
@@ -186,7 +151,7 @@ namespace Ink_Canvas.Helpers
                         primary,
                         mergedCandidates,
                         wpfRect,
-                        group));
+                        wg.Strokes));
                 }
 
                 if (segments.Count == 0)
@@ -237,150 +202,147 @@ namespace Ink_Canvas.Helpers
             WinRtInk.InkRecognizerContainer container,
             bool logDetail)
         {
-            if (container == null)
-                return;
-            try
-            {
-                if (!_preferredHandwritingRecognizerResolved)
-                {
-                    _preferredHandwritingRecognizerResolved = true;
-                    var all = container.GetRecognizers();
-                    _preferredHandwritingRecognizer = SelectBestInkRecognizer(all);
-                    if (logDetail)
-                    {
-                        if (_preferredHandwritingRecognizer != null)
-                            LogHandwriting("识别器：已选用 \"" + _preferredHandwritingRecognizer.Name + "\"。");
-                        else if (all != null && all.Count > 0)
-                            LogHandwriting("识别器：未匹配到与 UI/区域语言对应的引擎，使用系统默认（共 " + all.Count + " 个）。");
-                    }
-                }
-
-                if (_preferredHandwritingRecognizer != null)
-                    container.SetDefaultRecognizer(_preferredHandwritingRecognizer);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile("[手写体] 设置默认手写识别器失败: " + ex.Message, LogHelper.LogType.Warning);
-            }
+            // 识别器选择/LCID/FOD/缓存统一在 HandwritingRecognitionTuning 内；本方法仅做日志门面。
+            HandwritingRecognitionTuning.TryApplyPreferredRecognizer(container, logDetail);
         }
 
-        private static WinRtInk.InkRecognizer SelectBestInkRecognizer(
-            IReadOnlyList<WinRtInk.InkRecognizer> list)
+        /// <summary>对一个笔画组单独跑 RecognizeAsync 取文本候选（供 C1 合并组与原 per-word 路径复用）。</summary>
+        private static async Task<IReadOnlyList<string>> RecognizeStrokeGroupAsync(
+            WinRtInk.InkRecognizerContainer recognizer,
+            IReadOnlyList<Stroke> group)
         {
-            if (list == null || list.Count == 0)
-                return null;
+            if (recognizer == null || group == null || group.Count == 0)
+                return Array.Empty<string>();
 
-            var culture = PrimaryHandwritingCulture();
-            var lang = (culture?.TwoLetterISOLanguageName ?? string.Empty).ToLowerInvariant();
-            var name = culture?.Name ?? string.Empty;
-
-            bool wantZhHans = lang == "zh" &&
-                              (name.IndexOf("hans", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                               name.Equals("zh-cn", StringComparison.OrdinalIgnoreCase) ||
-                               name.Equals("zh-sg", StringComparison.OrdinalIgnoreCase) ||
-                               (name.IndexOf("hant", StringComparison.OrdinalIgnoreCase) < 0 &&
-                                !name.Equals("zh-tw", StringComparison.OrdinalIgnoreCase) &&
-                                !name.Equals("zh-hk", StringComparison.OrdinalIgnoreCase) &&
-                                !name.Equals("zh-mo", StringComparison.OrdinalIgnoreCase)));
-
-            bool wantZhHant = lang == "zh" &&
-                              (name.IndexOf("hant", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                               name.Equals("zh-tw", StringComparison.OrdinalIgnoreCase) ||
-                               name.Equals("zh-hk", StringComparison.OrdinalIgnoreCase) ||
-                               name.Equals("zh-mo", StringComparison.OrdinalIgnoreCase));
-
-            WinRtInk.InkRecognizer Pick(Func<string, bool> match)
+            var mini = new WinRtInk.InkStrokeContainer();
+            foreach (var st in group)
             {
-                foreach (var r in list)
-                {
-                    var n = r?.Name;
-                    if (string.IsNullOrEmpty(n))
-                        continue;
-                    if (match(n))
-                        return r;
-                }
-
-                return null;
+                var ink = WinRtInkShapeRecognizer.CreateInkStrokeFromWpf(st);
+                if (ink != null)
+                    mini.AddStroke(ink);
             }
 
-            if (wantZhHans)
-            {
-                var r = Pick(n =>
-                    n.IndexOf("简体", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    n.IndexOf("簡體", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    (n.IndexOf("中文", StringComparison.OrdinalIgnoreCase) >= 0 &&
-                     (n.IndexOf("简体", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                      n.IndexOf("簡體", StringComparison.OrdinalIgnoreCase) >= 0)) ||
-                    (n.IndexOf("Chinese", StringComparison.OrdinalIgnoreCase) >= 0 &&
-                     (n.IndexOf("Simplified", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                      n.IndexOf("Hans", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                      n.IndexOf("PRC", StringComparison.OrdinalIgnoreCase) >= 0)));
-                if (r != null)
-                    return r;
-                r = Pick(n =>
-                    n.IndexOf("中文", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    n.IndexOf("Chinese", StringComparison.OrdinalIgnoreCase) >= 0);
-                if (r != null)
-                    return r;
-            }
-            else if (wantZhHant)
-            {
-                var r = Pick(n =>
-                    n.IndexOf("繁体", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    n.IndexOf("繁體", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    (n.IndexOf("中文", StringComparison.OrdinalIgnoreCase) >= 0 &&
-                     (n.IndexOf("繁体", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                      n.IndexOf("繁體", StringComparison.OrdinalIgnoreCase) >= 0)) ||
-                    (n.IndexOf("Chinese", StringComparison.OrdinalIgnoreCase) >= 0 &&
-                     (n.IndexOf("Traditional", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                      n.IndexOf("Hant", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                      n.IndexOf("Taiwan", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                      n.IndexOf("Hong Kong", StringComparison.OrdinalIgnoreCase) >= 0)));
-                if (r != null)
-                    return r;
-                r = Pick(n =>
-                    n.IndexOf("中文", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    n.IndexOf("Chinese", StringComparison.OrdinalIgnoreCase) >= 0);
-                if (r != null)
-                    return r;
-            }
-            else if (lang == "ja")
-            {
-                var r = Pick(n =>
-                    n.IndexOf("Japanese", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    n.IndexOf("日本語", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    n.IndexOf("日语", StringComparison.OrdinalIgnoreCase) >= 0);
-                if (r != null)
-                    return r;
-            }
-            else if (lang == "en")
-            {
-                var r = Pick(n => n.IndexOf("English", StringComparison.OrdinalIgnoreCase) >= 0);
-                if (r != null)
-                    return r;
-            }
+            var miniStrokes = mini.GetStrokes();
+            if (miniStrokes == null || miniStrokes.Count == 0)
+                return Array.Empty<string>();
 
-            if (lang == "zh")
-            {
-                var r = Pick(n =>
-                    n.IndexOf("中文", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                    n.IndexOf("Chinese", StringComparison.OrdinalIgnoreCase) >= 0);
-                if (r != null)
-                    return r;
-            }
+            var rr = await recognizer
+                .RecognizeAsync(mini, WinRtInk.InkRecognitionTarget.All)
+                .AsTask()
+                .ConfigureAwait(true);
 
-            return null;
+            if (rr == null || rr.Count == 0 || rr[0] == null)
+                return Array.Empty<string>();
+
+            var cands = rr[0].GetTextCandidates();
+            if (cands == null || cands.Count == 0)
+                return Array.Empty<string>();
+
+            return cands.Where(c => !string.IsNullOrWhiteSpace(c)).ToList();
         }
 
-        private static CultureInfo PrimaryHandwritingCulture()
+        /// <summary>
+        /// C1：CJK 防拆字合并。InkAnalyzer 按水平间距切 InkWord，CJK 一字多笔常被误拆成相邻 InkWord。
+        /// 把「相邻 InkWord 水平间距 &lt; 0.3×字高 且 垂直重叠 &gt; 0.5×字高」的节点合并为一组，
+        /// 整组重新识别取候选。西文（cjkMergeActive=false）每个 InkWord 独立成组，行为与旧 per-word 路径一致。
+        /// </summary>
+        private static List<WordGroup> BuildCjkMergedWordGroups(
+            IReadOnlyList<WinAnalysis.IInkAnalysisNode> wordNodes,
+            Dictionary<uint, Stroke> idToWpf,
+            bool cjkMergeActive,
+            bool traceRecognition)
         {
-            var ui = CultureInfo.CurrentUICulture;
-            var ct = CultureInfo.CurrentCulture;
-            if (string.Equals(ui.TwoLetterISOLanguageName, "zh", StringComparison.OrdinalIgnoreCase))
-                return ui;
-            if (string.Equals(ct.TwoLetterISOLanguageName, "zh", StringComparison.OrdinalIgnoreCase))
-                return ct;
-            return ui;
+            // 1) 把每个 InkWord 解析为 (笔画组, 原始包围框, RecognizedText)。
+            var units = new List<(List<Stroke> Strokes, Rect Bounds, string Text)>();
+            foreach (var node in wordNodes)
+            {
+                if (!(node is WinAnalysis.InkAnalysisInkWord word))
+                    continue;
+
+                var ids = word.GetStrokeIds();
+                if (ids == null || ids.Count == 0)
+                    continue;
+
+                var group = new List<Stroke>();
+                foreach (var sid in ids)
+                {
+                    if (idToWpf.TryGetValue(sid, out var st))
+                        group.Add(st);
+                }
+
+                if (group.Count == 0)
+                    continue;
+
+                units.Add((group, GetOriginalStrokeBounds(group), word.RecognizedText ?? string.Empty));
+            }
+
+            // 西文或不合并：每个 InkWord 独立成组，行为等价于原 per-word 循环。
+            if (!cjkMergeActive || units.Count <= 1)
+            {
+                return units.Select(u =>
+                {
+                    var g = new WordGroup();
+                    g.Strokes.AddRange(u.Strokes);
+                    g.CombinedRecognizedText = u.Text;
+                    return g;
+                }).ToList();
+            }
+
+            // CJK：按水平位置排序，相邻「水平间距 < 0.3×字高 且 垂直重叠 > 0.5×字高」合并为一组。
+            var ordered = units.OrderBy(u => u.Bounds.IsEmpty ? 0 : u.Bounds.Left).ToList();
+            var groups = new List<WordGroup>();
+            var current = new WordGroup();
+            current.Strokes.AddRange(ordered[0].Strokes);
+            current.CombinedRecognizedText = ordered[0].Text ?? string.Empty;
+            var currentBounds = ordered[0].Bounds;
+
+            for (var i = 1; i < ordered.Count; i++)
+            {
+                var u = ordered[i];
+                var charHeight = Math.Max(currentBounds.Height, u.Bounds.Height);
+                if (charHeight <= 0) charHeight = 1;
+
+                var horizontalGap = currentBounds.IsEmpty || u.Bounds.IsEmpty
+                    ? 0.0
+                    : Math.Max(0.0, u.Bounds.Left - currentBounds.Right);
+                var verticalOverlap = VerticalOverlapRatio(currentBounds, u.Bounds);
+
+                if (horizontalGap < 0.3 * charHeight && verticalOverlap > 0.5)
+                {
+                    // 合并到当前组：笔画累加、文本拼接（仅作候选兜底，主识别以整组重新 RecognizeAsync 为准）。
+                    current.Strokes.AddRange(u.Strokes);
+                    current.CombinedRecognizedText =
+                        (current.CombinedRecognizedText ?? string.Empty) + (u.Text ?? string.Empty);
+                    currentBounds = currentBounds.IsEmpty ? u.Bounds : Rect.Union(currentBounds, u.Bounds);
+                }
+                else
+                {
+                    groups.Add(current);
+                    current = new WordGroup();
+                    current.Strokes.AddRange(u.Strokes);
+                    current.CombinedRecognizedText = u.Text ?? string.Empty;
+                    currentBounds = u.Bounds;
+                }
+            }
+
+            groups.Add(current);
+
+            if (traceRecognition)
+                LogHandwriting("CJK 防拆字合并：InkWord 数=" + units.Count + " → 合并后组数=" + groups.Count);
+
+            return groups;
+        }
+
+        /// <summary>两框垂直相交高度占较小框高度的比例（0~1），用于判定是否同一行同一字。</summary>
+        private static double VerticalOverlapRatio(Rect a, Rect b)
+        {
+            if (a.IsEmpty || b.IsEmpty) return 0;
+            var top = Math.Max(a.Top, b.Top);
+            var bottom = Math.Min(a.Bottom, b.Bottom);
+            var overlap = Math.Max(0.0, bottom - top);
+            var minH = Math.Min(a.Height, b.Height);
+            if (minH <= 0) return 0;
+            return overlap / minH;
         }
 
         private sealed class NormalizedHandwritingInput
@@ -389,11 +351,26 @@ namespace Ink_Canvas.Helpers
             public Stroke Analysis { get; set; }
         }
 
+        /// <summary>
+        /// C1 合并产物：一个或多个 InkWord 的笔画合集 + 拼接的 RecognizedText（仅作候选兜底，
+        /// 主识别以整组重新 RecognizeAsync 取 GetTextCandidates 为准）。
+        /// </summary>
+        private sealed class WordGroup
+        {
+            public List<Stroke> Strokes { get; } = new List<Stroke>();
+            public string CombinedRecognizedText { get; set; } = string.Empty;
+        }
+
         private static List<NormalizedHandwritingInput> CreateNormalizedHandwritingInputs(StrokeCollection strokes)
         {
             var inputs = new List<NormalizedHandwritingInput>();
             if (strokes == null || strokes.Count == 0)
                 return inputs;
+
+            // CJK：一字多笔、部件间距本就大于拉丁字母间距。行内 Y 缩放会改变部件相对位置、
+            // 进一步误导 InkAnalyzer 的水平间距分词（把一字拆成多个 InkWord）。CJK 下跳过 Y 归一化，
+            // 保留原始几何比例；拉丁/西文仍做行高归一化（其分词本就按词间距，归一化有益）。
+            var cjkActive = HandwritingRecognitionTuning.IsCjkRecognizerActive;
 
             var valid = strokes.Cast<Stroke>()
                 .Where(s => s?.StylusPoints != null && s.StylusPoints.Count > 0)
@@ -443,10 +420,12 @@ namespace Ink_Canvas.Helpers
                     rowBounds = rowBounds.IsEmpty ? stroke.GetBounds() : Rect.Union(rowBounds, stroke.GetBounds());
 
                 var rowHeight = Math.Max(1.0, rowBounds.Height);
-                var scaleY = Math.Max(0.5, Math.Min(2.0, referenceHeight / rowHeight));
+                // CJK 不做行内 Y 缩放（scaleY=1.0）；西文保持原归一化逻辑。
+                var scaleY = cjkActive ? 1.0 : Math.Max(0.5, Math.Min(2.0, referenceHeight / rowHeight));
                 var rowCenter = rowBounds.Top + rowBounds.Height / 2.0;
                 var angle = GetRowAngle(row);
-                var rotate = Math.Abs(angle) > 20.0 * Math.PI / 180.0;
+                // CJK 下也不做倾斜矫正（旋转同样改变部件相对位置，且 CJK 通常横平竖直书写）。
+                var rotate = !cjkActive && Math.Abs(angle) > 20.0 * Math.PI / 180.0;
                 var transform = new Matrix();
                 transform.Translate(-rowBounds.Left, -rowCenter);
                 if (rotate)
@@ -519,6 +498,7 @@ namespace Ink_Canvas.Helpers
 
         /// <summary>
         /// 识别手写词后，将「有识别文本」的分词替换为指定手写风格字体的字形轮廓墨迹；未识别或空文本的词保留原笔画。
+        /// 识别走本类 WinRT <see cref="RecognizeHandwritingAsync"/>；字形渲染与引擎无关。
         /// </summary>
         public static async Task<StrokeCollection> ConvertRecognizedTextToHandwritingInkAsync(
             StrokeCollection strokes,
@@ -528,6 +508,29 @@ namespace Ink_Canvas.Helpers
             {
                 if (strokes != null && strokes.Count > 0 && !IsApiAvailable)
                     LogHandwriting("字形替换：跳过，IsApiAvailable=false。");
+                return strokes;
+            }
+
+            var reco = await RecognizeHandwritingAsync(strokes).ConfigureAwait(true);
+            return RenderHandwritingGlyphsFromResult(strokes, reco, handwritingFontFamilyList);
+        }
+
+        /// <summary>
+        /// 用已识别的分词结果，把「有识别文本」的分词替换为手写风格字体的字形轮廓墨迹；未识别或空文本的词保留原笔画。
+        /// 仅做字形渲染（WPF 字体轮廓），不依赖任何识别引擎——识别结果可来自 WinRT 或 IACore IPC。
+        /// </summary>
+        public static StrokeCollection RenderHandwritingGlyphsFromResult(
+            StrokeCollection strokes,
+            HandwritingRecognitionResult reco,
+            string handwritingFontFamilyList)
+        {
+            if (strokes == null || strokes.Count == 0)
+                return strokes;
+            if (reco == null || !reco.IsSuccess || reco.Words == null || reco.Words.Count == 0)
+            {
+                LogHandwriting(
+                    "字形替换中止：识别未成功（IsSuccess=" + (reco?.IsSuccess ?? false) +
+                    "，词数=" + (reco?.Words?.Count ?? 0) + "），原样返回笔画。");
                 return strokes;
             }
 
@@ -541,15 +544,6 @@ namespace Ink_Canvas.Helpers
 
             try
             {
-                var reco = await RecognizeHandwritingAsync(strokes).ConfigureAwait(true);
-                if (!reco.IsSuccess || reco.Words == null || reco.Words.Count == 0)
-                {
-                    LogHandwriting(
-                        "字形替换中止：识别未成功（IsSuccess=" + reco.IsSuccess +
-                        "，词数=" + (reco.Words?.Count ?? 0) + "），原样返回笔画。");
-                    return strokes;
-                }
-
                 var firstStrokeToSegment = new Dictionary<Stroke, HandwritingWordSegment>();
                 foreach (var w in reco.Words)
                 {
@@ -652,7 +646,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile("WinRT 手写体字形替换失败: " + ex.Message, LogHelper.LogType.Warning);
+                LogHelper.WriteLogToFile("手写体字形替换失败: " + ex.Message, LogHelper.LogType.Warning);
                 LogHandwriting("字形替换异常：" + ex, LogHelper.LogType.Warning);
                 return strokes;
             }
@@ -726,7 +720,10 @@ namespace Ink_Canvas.Helpers
 
             var typeface = ResolveHandwritingTypeface(fontFamilyList);
             var culture = CultureInfo.CurrentCulture;
-            var em = Math.Max(6.0, placeRect.Height * 0.72);
+            // 先按高度给 em（CJK 方块字、单字场景应填满高度），再仅在宽度溢出时按比例缩 em，
+            // 避免「多字词被原 14 次 0.9 缩放过度缩小」的问题。最小 em 取 box 高度 40%（相对下限，替代原绝对 4.5px）。
+            var minEm = Math.Max(4.5, placeRect.Height * 0.40);
+            var em = Math.Max(minEm, placeRect.Height * 0.92);
             FormattedText ft = null;
 
             for (var i = 0; i < 14; i++)
@@ -742,20 +739,23 @@ namespace Ink_Canvas.Helpers
                     TextFormattingMode.Display,
                     pixelsPerDip);
 
-                if (ft.Width <= placeRect.Width * 0.96 && ft.Height <= placeRect.Height * 0.96)
+                // 高度必然 ≤ box（em 由 height 派生）；只需保证宽度不超过 box 的 1.05 倍（允许轻微外溢，
+                // 因为识别词的实际包围框可能比理想字形略窄）。
+                if (ft.Width <= placeRect.Width * 1.05)
                     break;
 
                 em *= 0.9;
-                if (em < 4.5)
+                if (em < minEm)
                     break;
             }
 
             if (ft == null || ft.Width < 0.5 || ft.Height < 0.5)
                 return list;
 
-            var scale = Math.Min(
-                placeRect.Width * 0.94 / Math.Max(1e-6, ft.Width),
-                placeRect.Height * 0.94 / Math.Max(1e-6, ft.Height));
+            // 最终等比缩放：以高度为主轴填满 box，宽度超 box 时按宽度收紧；二者取小。
+            var scaleByHeight = placeRect.Height * 0.94 / Math.Max(1e-6, ft.Height);
+            var scaleByWidth = placeRect.Width * 0.94 / Math.Max(1e-6, ft.Width);
+            var scale = Math.Min(scaleByHeight, scaleByWidth);
             var tx = placeRect.Left + (placeRect.Width - ft.Width * scale) / 2.0;
             var ty = placeRect.Top + (placeRect.Height - ft.Height * scale) / 2.0;
 

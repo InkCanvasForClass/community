@@ -1131,6 +1131,23 @@ namespace Ink_Canvas
 
             SwitchToDefaultPen(null, null);
             CheckColorTheme(true);
+
+            // 进入白板模式后刷新页码按钮状态：启动时硬编码的禁用色不随主题切换，
+            // 需要在此用当前主题的 IconForeground 重新计算上一页按钮的灰色画刷，否则深色主题下图标不可见
+            if (currentMode != 0)
+            {
+                UpdateIndexInfoDisplay();
+
+                // 进入白板模式时显式切换到笔模式：SwitchBackground 不会更新 _currentToolMode，
+                // 导致原生湿墨迹管线 ResolveLogicalInkTool() 返回 Cursor 而非 Pen，
+                // 笔输入被当光标处理（route=PassThrough），UI 显示笔但无法绘制。
+                // PenIcon_Click 会正确设置 _currentToolMode="pen" 并触发管线路由到 Ink 路径。
+                if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink
+                    && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
+                {
+                    PenIcon_Click(null, null);
+                }
+            }
         }
 
         #endregion
@@ -1704,7 +1721,7 @@ namespace Ink_Canvas
 
                     if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
                     {
-                        inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                        EnsureNativePenPhysicalEditingMode();
                     }
 
                     ResetTouchStates();
@@ -1752,7 +1769,7 @@ namespace Ink_Canvas
 
                 if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
                 {
-                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                    EnsureNativePenPhysicalEditingMode();
                 }
 
                 ResetTouchStates();
@@ -3654,17 +3671,7 @@ namespace Ink_Canvas
                 // 如果之前是激光笔模式，则保持激光笔属性
                 else if (penType == 2)
                 {
-                    drawingAttributes.IsHighlighter = false;
-                    drawingAttributes.StylusTip = StylusTip.Ellipse;
-                    drawingAttributes.Width = Settings.Canvas.LaserPenWidth;
-                    drawingAttributes.Height = Settings.Canvas.LaserPenWidth;
-                    Settings.Canvas.EnableInkFade = true;
-                    if (_inkFadeManager != null)
-                    {
-                        _inkFadeManager.IsEnabled = true;
-                        _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
-                        _inkFadeManager.UpdateFadeSpeedMultiplier(Settings.Canvas.InkFadeSpeedMultiplier);
-                    }
+                    ApplyLaserPenModeCore(refreshUi: false, updateIndicators: false);
                 }
 
                 ColorSwitchCheck();
@@ -3704,17 +3711,7 @@ namespace Ink_Canvas
                         // 如果之前是激光笔模式，则保持激光笔属性
                         else if (penType == 2)
                         {
-                            drawingAttributes.IsHighlighter = false;
-                            drawingAttributes.StylusTip = StylusTip.Ellipse;
-                            drawingAttributes.Width = Settings.Canvas.LaserPenWidth;
-                            drawingAttributes.Height = Settings.Canvas.LaserPenWidth;
-                            Settings.Canvas.EnableInkFade = true;
-                            if (_inkFadeManager != null)
-                            {
-                                _inkFadeManager.IsEnabled = true;
-                                _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
-                                _inkFadeManager.UpdateFadeSpeedMultiplier(Settings.Canvas.InkFadeSpeedMultiplier);
-                            }
+                            ApplyLaserPenModeCore(refreshUi: false, updateIndicators: false);
                         }
 
                         // 在非白板模式下，从线擦切换到批注时不直接弹出子面板
@@ -4451,6 +4448,7 @@ namespace Ink_Canvas
 
             Process.Start(System.Windows.Forms.Application.ExecutablePath, "-m");
             _forceCloseFromExitOrRestartButton = true;
+            _exitApplicationRequested = true;
             App.IsAppExitByUser = true;
             CloseIsFromButton = true;
             Close();
@@ -6068,6 +6066,11 @@ namespace Ink_Canvas
                 }
                 else if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
                 {
+                    // Native freehand keeps physical EditingMode at None while logical
+                    // tool remains pen/color. Prefer cached mode; fall back to cursor.
+                    if (!string.IsNullOrEmpty(_currentToolMode)
+                        && !string.Equals(_currentToolMode, "cursor", StringComparison.OrdinalIgnoreCase))
+                        return _currentToolMode;
                     return "cursor";
                 }
                 else if (drawingShapeMode != 0)

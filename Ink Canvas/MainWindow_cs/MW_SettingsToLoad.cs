@@ -780,8 +780,18 @@ namespace Ink_Canvas
         private static void EnsureDefaultConfigSchemaIncludesIgnoredNullKeys(JObject defaultConfigObj)
         {
             if (defaultConfigObj == null) return;
-            if (defaultConfigObj["appearance"] is JObject appearance && !appearance.ContainsKey("hitokotoCategories"))
-                appearance["hitokotoCategories"] = JValue.CreateNull();
+            if (defaultConfigObj["appearance"] is JObject appearance)
+            {
+                // 这些属性同时具备 NullValueHandling.Ignore 且默认值为 null，
+                // 不会出现在默认 JObject 中。CleanupObsoleteSettings 会把它们
+                // 误判为"过期"并立即 SaveSettingsToFile 删除，于是用户自建语录
+                // 被静默清空。补成 null 占位让 RemoveObsoleteProperties 放行。
+                foreach (var ignoredKey in new[] { "hitokotoCategories", "customTipsSchemes", "enabledPresetTipsSources" })
+                {
+                    if (!appearance.ContainsKey(ignoredKey))
+                        appearance[ignoredKey] = JValue.CreateNull();
+                }
+            }
         }
 
         private void RemoveObsoleteProperties(JObject userObj, JObject defaultObj, ref bool hasChanges)

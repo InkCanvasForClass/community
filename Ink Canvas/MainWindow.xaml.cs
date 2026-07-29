@@ -1340,6 +1340,7 @@ namespace Ink_Canvas
         {
             var inkCanvas1 = sender as InkCanvas;
             if (inkCanvas1 == null) return;
+
             NotifyPluginPenModeChanged(inkCanvas1.EditingMode);
 
             if (IsCurrentPageFrozen && IsFreezeMutatingMode(inkCanvas1.EditingMode))
@@ -1505,6 +1506,15 @@ namespace Ink_Canvas
 
             isLoaded = true;
 
+            // 启动实时墨迹 FPS / 延迟 HUD（若用户在 Debug 页开启了开关）。
+            if (Settings?.Advanced != null && Settings.Advanced.IsRealtimeInkFpsOverlayEnabled)
+            {
+                ShowRealtimeInkFpsOverlay();
+            }
+
+            // Start native wet-ink (WM_POINTER + DirectComposition) after HWND is ready.
+            TryStartNativeWetInkPipeline();
+
             // 应用颜色主题，这将考虑自定义背景色
             CheckColorTheme(true);
             ApplyFloatingBarTheme();
@@ -1620,6 +1630,7 @@ namespace Ink_Canvas
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e)
         {
+            UpdateNativeWetInkTarget();
             if (!Settings.Advanced.IsEnableResolutionChangeDetection) return;
             ShowNotification(string.Format(Properties.MainWindowStrings.Main_DisplayChanged, Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height));
             HandleFloatingBarRecovery();
@@ -1627,6 +1638,8 @@ namespace Ink_Canvas
 
         private void MainWindow_OnDpiChanged(object sender, DpiChangedEventArgs e)
         {
+            UpdateNativeWetInkDpi();
+
             if (e.OldDpi.DpiScaleX != e.NewDpi.DpiScaleX && e.OldDpi.DpiScaleY != e.NewDpi.DpiScaleY && Settings.Advanced.IsEnableDPIChangeDetection)
             {
                 ShowNotification(string.Format(Properties.MainWindowStrings.Main_DPIChanged, e.OldDpi.DpiScaleX, e.OldDpi.DpiScaleY, e.NewDpi.DpiScaleX, e.NewDpi.DpiScaleY));
@@ -1647,7 +1660,7 @@ namespace Ink_Canvas
                     {
                         isFloatingBarOutsideScreen = IsOutsideOfScreenHelper.IsOutsideOfScreen(ViewboxFloatingBar);
                         isInPPTPresentationMode = IsInPPTPresentationMode;
-                    });
+                    }, DispatcherPriority.Normal, TimeSpan.FromSeconds(5));
                     if (isFloatingBarOutsideScreen) dpiChangedDelayAction.DebounceAction(3000, null, () =>
                     {
                         if (!isFloatingBarFolded)
@@ -1829,6 +1842,8 @@ namespace Ink_Canvas
 
         private void MainWindow_OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
+            UpdateNativeWetInkTarget();
+
             if (Settings.Advanced.IsEnableForceFullScreen)
             {
                 if (isLoaded) ShowNotification(
@@ -1848,7 +1863,7 @@ namespace Ink_Canvas
         /// <param name="e">关闭事件的参数（未使用）。</param>
         private void Window_Closed(object sender, EventArgs e)
         {
-            RealtimeInkFrameScheduler.Clear();
+            ShutdownNativeWetInkPipeline();
             SystemEvents.DisplaySettingsChanged -= SystemEventsOnDisplaySettingsChanged;
 
             try
@@ -2552,6 +2567,10 @@ namespace Ink_Canvas
                     InitializePopupManager();
                     PerformanceMonitorHelper.StartIfEnabled();
                     RealtimeInkPerformanceMonitor.StartIfEnabled();
+                    if (isLoaded && Settings?.Advanced?.IsRealtimeInkFpsOverlayEnabled == true)
+                    {
+                        ShowRealtimeInkFpsOverlay();
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -2746,6 +2765,11 @@ namespace Ink_Canvas
         private void Window_Deactivated(object sender, EventArgs e)
         {
             // 500ms 维护计时器会在下一个 tick 重新强制置顶，无需在此重复调用
+
+            // 窗口失活时，触点若走 TouchLeave 而非 TouchUp，触摸活动集合会残留，
+            // 导致 EndTouchInkInputIfIdle 永远不退出、IsManipulationEnabled 永远不恢复。
+            // 调用 AbortAllActiveTouchInputs 兜底。
+            try { AbortAllActiveTouchInputs(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
 
@@ -3255,10 +3279,19 @@ namespace Ink_Canvas
                     DisableEraserOverlay();
                 }
 
-                // 执行模式切换
-                inkCanvas.EditingMode = newMode;
+                // Logical Pen freehand is owned by the native wet-ink pipeline.
+                // Keep physical EditingMode at None so WPF never auto-collects wet strokes.
+                // 但仅当原生湿墨迹管线可用时才映射 Ink→None；管线不可用时回退到 WPF 内置 Ink 收集，
+                // 否则 EditingMode=None 会导致既无原生笔输入也无 WPF 墨迹，UI 显示笔但无法绘制。
+                var physicalMode = newMode;
+                if (physicalMode == InkCanvasEditingMode.Ink && IsNativeWetInkPipelineAvailable)
+                    physicalMode = InkCanvasEditingMode.None;
 
-                // 根据模式确定是否为鼠标模式（无工具模式）
+                // 执行模式切换
+                inkCanvas.EditingMode = physicalMode;
+                EnsureNativePenPhysicalEditingMode();
+
+                // Hotkeys key off the requested logical mode. Physical None is used for native Pen freehand.
                 bool isMouseMode = newMode == InkCanvasEditingMode.None;
 
                 // 更新快捷键状态

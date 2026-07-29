@@ -841,11 +841,15 @@ namespace Ink_Canvas
             ColorSwitchCheck(false);
         }
 
-        private void SwitchToLaserPen(object sender, MouseButtonEventArgs e)
+        private void ApplyLaserPenModeCore(bool refreshUi, bool updateIndicators)
         {
             penType = 2;
-            CheckPenTypeUIState();
-            CheckColorTheme();
+            if (refreshUi)
+            {
+                CheckPenTypeUIState();
+                CheckColorTheme();
+            }
+
             drawingAttributes.Width = Settings.Canvas.LaserPenWidth;
             drawingAttributes.Height = Settings.Canvas.LaserPenWidth;
             drawingAttributes.StylusTip = StylusTip.Ellipse;
@@ -859,7 +863,13 @@ namespace Ink_Canvas
                 _inkFadeManager.UpdateFadeSpeedMultiplier(Settings.Canvas.InkFadeSpeedMultiplier);
             }
 
-            ColorSwitchCheck(false);
+            if (updateIndicators)
+                ColorSwitchCheck(false);
+        }
+
+        private void SwitchToLaserPen(object sender, MouseButtonEventArgs e)
+        {
+            ApplyLaserPenModeCore(refreshUi: true, updateIndicators: true);
         }
 
         /// <summary>

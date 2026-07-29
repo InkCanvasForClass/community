@@ -780,6 +780,19 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             }
         }
 
+        /// <summary>手写识别语言覆盖（LCID）变化时清空识别器缓存，下一次识别按新语言重解析。</summary>
+        public static void OnHandwritingRecognizerLanguageChanged()
+        {
+            try
+            {
+                HandwritingRecognitionTuning.InvalidateCache();
+            }
+            catch
+            {
+                // 调优缓存失效失败不影响主流程；下次识别仍可继续。
+            }
+        }
+
         #endregion
 
         #region Update

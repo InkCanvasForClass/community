@@ -1,34 +1,35 @@
 using System;
-using System.Runtime.InteropServices;
 using System.Text;
+using Windows.Win32;
+using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Ink_Canvas.Helpers
 {
     public static class DebugConsoleManager
     {
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool AllocConsole();
+        //[DllImport("kernel32.dll", SetLastError = true)]
+        //private static extern bool AllocConsole();
 
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool FreeConsole();
+        //[DllImport("kernel32.dll", SetLastError = true)]
+        //private static extern bool FreeConsole();
 
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern IntPtr GetConsoleWindow();
+        //[DllImport("kernel32.dll", SetLastError = true)]
+        //private static extern IntPtr GetConsoleWindow();
 
-        [DllImport("user32.dll")]
-        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        //[DllImport("user32.dll")]
+        //private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetSystemMenu(IntPtr hWnd, bool bRevert);
+        //[DllImport("user32.dll")]
+        //private static extern IntPtr GetSystemMenu(IntPtr hWnd, bool bRevert);
 
-        [DllImport("user32.dll")]
-        private static extern bool DeleteMenu(IntPtr hMenu, uint uPosition, uint uFlags);
+        //[DllImport("user32.dll")]
+        //private static extern bool DeleteMenu(IntPtr hMenu, uint uPosition, uint uFlags);
 
-        [DllImport("kernel32.dll")]
-        private static extern bool SetConsoleTitle(string lpConsoleTitle);
+        //[DllImport("kernel32.dll")]
+        //private static extern bool SetConsoleTitle(string lpConsoleTitle);
 
-        private const int SW_HIDE = 0;
-        private const int SW_SHOW = 5;
+        //private const int SW_HIDE = 0;
+        //private const int SW_SHOW = 5;
         private const uint SC_CLOSE = 0xF060;
         private const uint MF_BYCOMMAND = 0x00000000;
 
@@ -42,27 +43,27 @@ namespace Ink_Canvas.Helpers
             {
                 if (!_allocated)
                 {
-                    if (GetConsoleWindow() == IntPtr.Zero)
+                    if (PInvoke.GetConsoleWindow() == IntPtr.Zero)
                     {
-                        if (!AllocConsole()) return;
+                        if (!PInvoke.AllocConsole()) return;
                     }
                     _allocated = true;
 
                     Console.OutputEncoding = Encoding.UTF8;
-                    SetConsoleTitle("InkCanvasForClass - Debug Console");
+                    PInvoke.SetConsoleTitle("InkCanvasForClass - Debug Console");
 
                     // 移除关闭菜单，避免用户点 X 时直接结束进程
-                    var hWnd = GetConsoleWindow();
+                    var hWnd = PInvoke.GetConsoleWindow();
                     if (hWnd != IntPtr.Zero)
                     {
-                        var hMenu = GetSystemMenu(hWnd, false);
-                        if (hMenu != IntPtr.Zero) DeleteMenu(hMenu, SC_CLOSE, MF_BYCOMMAND);
+                        var hMenu = PInvoke.GetSystemMenu(hWnd, false);
+                        if (hMenu != IntPtr.Zero) PInvoke.DeleteMenu(hMenu, SC_CLOSE, MF_BYCOMMAND);
                     }
                 }
                 else
                 {
-                    var hWnd = GetConsoleWindow();
-                    if (hWnd != IntPtr.Zero) ShowWindow(hWnd, SW_SHOW);
+                    var hWnd = PInvoke.GetConsoleWindow();
+                    if (hWnd != IntPtr.Zero) PInvoke.ShowWindow(hWnd, SHOW_WINDOW_CMD.SW_SHOW);
                 }
                 IsVisible = true;
             }
@@ -76,8 +77,8 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                var hWnd = GetConsoleWindow();
-                if (hWnd != IntPtr.Zero) ShowWindow(hWnd, SW_HIDE);
+                var hWnd = PInvoke.GetConsoleWindow();
+                if (hWnd != IntPtr.Zero) PInvoke.ShowWindow(hWnd, SHOW_WINDOW_CMD.SW_HIDE);
                 IsVisible = false;
             }
             catch (Exception ex)

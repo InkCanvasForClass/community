@@ -255,7 +255,8 @@ namespace Ink_Canvas
             if (TryBlockFrozenPageMutation("切换到画笔")) return;
             forceEraser = false;
             drawingShapeMode = 0;
-            inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+            inkCanvas.EditingMode = InkCanvasEditingMode.None;
+            EnsureNativePenPhysicalEditingMode();
             inkCanvas.IsManipulationEnabled = true;
             CancelSingleFingerDragMode();
             isLongPressSelected = false;
@@ -2330,6 +2331,11 @@ namespace Ink_Canvas
         private List<Point> GenerateEllipseGeometry(Point st, Point ed, bool isDrawTop = true,
             bool isDrawBottom = true)
         {
+            // 防御：画布被极端缩放/平移时识别出的椭圆中心/半轴可能非有限，直接返回空避免生成 NaN 点。
+            if (!double.IsFinite(st.X) || !double.IsFinite(st.Y) ||
+                !double.IsFinite(ed.X) || !double.IsFinite(ed.Y))
+                return new List<Point>();
+
             var a = 0.5 * (ed.X - st.X);
             var b = 0.5 * (ed.Y - st.Y);
             var pointList = new List<Point>();
@@ -2372,13 +2378,18 @@ namespace Ink_Canvas
         private StrokeCollection GenerateDashedLineEllipseStrokeCollection(Point st, Point ed, bool isDrawTop = true,
             bool isDrawBottom = true)
         {
+            var strokes = new StrokeCollection();
+            // 防御：非有限坐标直接返回空集，避免生成 NaN 笔画。
+            if (!double.IsFinite(st.X) || !double.IsFinite(st.Y) ||
+                !double.IsFinite(ed.X) || !double.IsFinite(ed.Y))
+                return strokes;
+
             var a = 0.5 * (ed.X - st.X);
             var b = 0.5 * (ed.Y - st.Y);
             var step = 0.05;
             var pointList = new List<Point>();
             StylusPointCollection point;
             Stroke stroke;
-            var strokes = new StrokeCollection();
             if (isDrawBottom)
                 for (var i = 0.0; i < 1.0; i += step * 1.66)
                 {
@@ -2646,7 +2657,8 @@ namespace Ink_Canvas
                 return;
             }
 
-            if (e.ChangedButton == MouseButton.Left && ShouldUseRealtimeVelocityBrushTipForMouse() && drawingShapeMode == 0)
+            // Mouse freehand is owned by the native wet-ink pipeline.
+            if (false && e.ChangedButton == MouseButton.Left && ShouldUseRealtimeVelocityBrushTipForMouse() && drawingShapeMode == 0)
             {
                 _isMouseRealtimeInking = true;
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;

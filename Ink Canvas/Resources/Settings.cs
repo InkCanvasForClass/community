@@ -386,6 +386,10 @@ namespace Ink_Canvas
         public bool EnablePressureTouchMode { get; set; } // 是否启用压感触屏模式
         [JsonProperty("disablePressure")]
         public bool DisablePressure { get; set; } // 是否屏蔽压感
+        [JsonProperty("enableNativeInkPrediction")]
+        public bool EnableNativeInkPrediction { get; set; } = true; // 原生湿墨预测笔尾（仅实时预览，不进入提交/撤销/保存）
+        [JsonProperty("useLegacyWetInk")]
+        public bool UseLegacyWetInk { get; set; } = true; // 使用旧版 WPF 湿墨迹输入系统（下次启动生效）
         [JsonProperty("autoStraightenLine")]
         public bool AutoStraightenLine { get; set; } = true; // 是否启用直线自动拉直
         [JsonProperty("autoStraightenLineThreshold")]
@@ -1403,6 +1407,12 @@ namespace Ink_Canvas
         [JsonProperty("isRealtimeInkDebugLogEnabled")]
         public bool IsRealtimeInkDebugLogEnabled { get; set; } = false;
 
+        /// <summary>
+        /// 在屏幕角落显示实时墨迹 FPS 与端到端延迟 HUD（毫秒）。默认关闭，独立于详细日志开关。
+        /// </summary>
+        [JsonProperty("isRealtimeInkFpsOverlayEnabled")]
+        public bool IsRealtimeInkFpsOverlayEnabled { get; set; } = false;
+
         [JsonProperty("isEnableFullScreenHelper")]
         public bool IsEnableFullScreenHelper { get; set; }
 
@@ -1488,6 +1498,12 @@ namespace Ink_Canvas
         public bool EnableWinRtHandwritingStrokeBeautify { get; set; }
         [JsonProperty("handwritingCorrectionFontFamily")]
         public string HandwritingCorrectionFontFamily { get; set; } = "Ink Free,KaiTi,Segoe Script";
+        /// <summary>手写识别器语言覆盖 LCID。0=跟随系统；其余值见 HandwritingRecognitionTuning 支持。</summary>
+        [JsonProperty("handwritingLanguageOverrideLcid")]
+        public int HandwritingLanguageOverrideLcid { get; set; }
+        /// <summary>收笔后延迟识别的毫秒数（300-5000，默认 2000），多笔一字时等用户写完再识别。</summary>
+        [JsonProperty("handwritingBeautifyDebounceMs")]
+        public int HandwritingBeautifyDebounceMs { get; set; } = 2000;
     }
 
     public class RandSettings
@@ -1536,6 +1552,36 @@ namespace Ink_Canvas
         public double MLAvoidanceWeight { get; set; } = 1.0;
         [JsonProperty("enableQuickDraw")]
         public bool EnableQuickDraw { get; set; } = true;
+        [JsonProperty("nameRosters")]
+        public List<NameRoster> NameRosters { get; set; } = new List<NameRoster>();
+        [JsonProperty("selectedNameRosterGuid")]
+        public string SelectedNameRosterGuid { get; set; } = "";
+    }
+
+    public class NameRoster
+    {
+        [JsonProperty("guid")]
+        public string Guid { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        // 名单内容（每行一人），与 Names.txt 的格式保持一致
+        [JsonProperty("namesContent")]
+        public string NamesContent { get; set; } = "";
+
+        // 替换规则内容（每行一条），与 Replace.txt 的格式保持一致
+        [JsonProperty("replaceContent")]
+        public string ReplaceContent { get; set; } = "";
+
+        public NameRoster(string guid, string name)
+        {
+            Guid = guid;
+            Name = name;
+        }
+
+        // 用于JSON序列化
+        public NameRoster() { }
     }
 
     public class CustomPickNameBackground

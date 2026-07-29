@@ -11,6 +11,8 @@ using System.Text;
 using System.Threading;
 using System.Timers;
 using System.Windows.Threading;
+using Windows.Win32;
+using Windows.Win32.Foundation;
 using Application = System.Windows.Application;
 using Timer = System.Timers.Timer;
 
@@ -403,47 +405,37 @@ namespace Ink_Canvas.Helpers
                     }
                     else if (Marshal.IsComObject(PPTApplication))
                     {
+                        // 同步执行 -= 而非 Dispatcher.BeginInvoke 排队：
+                        // BeginInvoke 让 FinalReleaseComObject+置 null 先发生，lambda 内部 PPTApplication 已为 null
+                        // 整段 -= 被跳过，下次 ConnectToPPT += 同一处理器翻倍触发。
                         try
                         {
-                            Application.Current?.Dispatcher?.BeginInvoke(new Action(() =>
-                            {
-                                try
-                                {
-                                    if (PPTApplication != null && Marshal.IsComObject(PPTApplication))
-                                    {
-                                        PPTApplication.PresentationOpen -= OnPresentationOpen;
-                                        PPTApplication.PresentationClose -= OnPresentationClose;
-                                        PPTApplication.SlideShowBegin -= OnSlideShowBegin;
-                                        PPTApplication.SlideShowNextSlide -= OnSlideShowNextSlide;
-                                        PPTApplication.SlideShowEnd -= OnSlideShowEnd;
-                                    }
-                                }
-                                catch (COMException comEx)
-                                {
-                                    var hr = (uint)comEx.HResult;
-                                    LogHelper.WriteLogToFile($"取消PPT事件注册时COM异常: {comEx.Message} (HR: 0x{hr:X8})", LogHelper.LogType.Warning);
-                                }
-                                catch (InvalidCastException)
-                                {
-                                    LogHelper.WriteLogToFile("PPT COM对象已被释放，跳过事件注册取消", LogHelper.LogType.Trace);
-                                }
-                                catch (System.Reflection.TargetInvocationException tie) when (tie.InnerException is InvalidComObjectException)
-                                {
-                                    LogHelper.WriteLogToFile("PPT COM对象RCW已分离，跳过事件注册取消", LogHelper.LogType.Trace);
-                                }
-                                catch (InvalidComObjectException)
-                                {
-                                    LogHelper.WriteLogToFile("PPT COM对象RCW已分离，跳过事件注册取消", LogHelper.LogType.Trace);
-                                }
-                                catch (Exception ex)
-                                {
-                                    LogHelper.WriteLogToFile($"取消PPT事件注册时发生异常: {ex}", LogHelper.LogType.Warning);
-                                }
-                            }), DispatcherPriority.Normal);
+                            PPTApplication.PresentationOpen -= OnPresentationOpen;
+                            PPTApplication.PresentationClose -= OnPresentationClose;
+                            PPTApplication.SlideShowBegin -= OnSlideShowBegin;
+                            PPTApplication.SlideShowNextSlide -= OnSlideShowNextSlide;
+                            PPTApplication.SlideShowEnd -= OnSlideShowEnd;
+                        }
+                        catch (COMException comEx)
+                        {
+                            var hr = (uint)comEx.HResult;
+                            LogHelper.WriteLogToFile($"取消PPT事件注册时COM异常: {comEx.Message} (HR: 0x{hr:X8})", LogHelper.LogType.Warning);
+                        }
+                        catch (InvalidCastException)
+                        {
+                            LogHelper.WriteLogToFile("PPT COM对象已被释放，跳过事件注册取消", LogHelper.LogType.Trace);
+                        }
+                        catch (System.Reflection.TargetInvocationException tie) when (tie.InnerException is InvalidComObjectException)
+                        {
+                            LogHelper.WriteLogToFile("PPT COM对象RCW已分离，跳过事件注册取消", LogHelper.LogType.Trace);
+                        }
+                        catch (InvalidComObjectException)
+                        {
+                            LogHelper.WriteLogToFile("PPT COM对象RCW已分离，跳过事件注册取消", LogHelper.LogType.Trace);
                         }
                         catch (Exception ex)
                         {
-                            LogHelper.WriteLogToFile($"取消PPT事件注册失败: {ex}", LogHelper.LogType.Warning);
+                            LogHelper.WriteLogToFile($"取消PPT事件注册时发生异常: {ex}", LogHelper.LogType.Warning);
                         }
                     }
 
@@ -451,25 +443,8 @@ namespace Ink_Canvas.Helpers
                     SafeReleaseComObject(CurrentSlides, "CurrentSlides");
                     SafeReleaseComObject(CurrentPresentation, "CurrentPresentation");
 
-                    if (PPTApplication != null && Marshal.IsComObject(PPTApplication))
-                    {
-                        try
-                        {
-                            Marshal.FinalReleaseComObject(PPTApplication);
-                        }
-                        catch
-                        {
-                            try
-                            {
-                                int refCount = Marshal.ReleaseComObject(PPTApplication);
-                                while (refCount > 0)
-                                {
-                                    refCount = Marshal.ReleaseComObject(PPTApplication);
-                                }
-                            }
-                            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
-                        }
-                    }
+                    // PPTApplication 的 COM 生命周期由 MW_PPT.ClosePowerPointApplication 管理，
+                    // 此处仅清空引用，避免双重释放共享 RCW。
                 }
 
                 _cachedIsConnected = false;
@@ -776,7 +751,7 @@ namespace Ink_Canvas.Helpers
             AppendObjectProbe(sb, "CurrentSlides", CurrentSlides);
             AppendObjectProbe(sb, "CurrentSlide", CurrentSlide);
             AppendProcessProbe(sb);
-            AppendWindowProbe(sb, "ForegroundWindow", GetForegroundWindow());
+            AppendWindowProbe(sb, "ForegroundWindow", PInvoke.GetForegroundWindow());
 
             if (application != null && SafeIsComObject(application))
             {
@@ -852,7 +827,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 var info = GetWindowInfo(hWnd);
-                sb.AppendLine($"{name}: HWND=0x{hWnd.ToInt64():X}, PID={info.ProcessId}, Process={info.ProcessName}, Visible={info.IsVisible}, Minimized={info.IsMinimized}, Maximized={info.IsMaximized}, Rect={info.Rect.Left},{info.Rect.Top},{info.Rect.Right},{info.Rect.Bottom}, Class='{info.ClassName}', Title='{info.Title}'");
+                sb.AppendLine($"{name}: HWND=0x{hWnd.ToInt64():X}, PID={info.ProcessId}, Process={info.ProcessName}, Visible={info.IsVisible}, Minimized={info.IsMinimized}, Maximized={info.IsMaximized}, Rect={info.Rect.left},{info.Rect.top},{info.Rect.right},{info.Rect.bottom}, Class='{info.ClassName}', Title='{info.Title}'");
             }
             catch (Exception ex)
             {
@@ -1607,7 +1582,7 @@ namespace Ink_Canvas.Helpers
                     PPTApplication.Path.Contains("WPS Office\\"))
                 {
                     uint processId;
-                    GetWindowThreadProcessId((IntPtr)PPTApplication.HWND, out processId);
+                    PInvoke.GetWindowThreadProcessId(new HWND(new IntPtr(PPTApplication.HWND)), out processId);
                     wpsProcess = Process.GetProcessById((int)processId);
                 }
 
@@ -1727,12 +1702,12 @@ namespace Ink_Canvas.Helpers
             try
             {
                 // 快速检查：直接检查前台窗口
-                var foregroundWindow = GetForegroundWindow();
+                var foregroundWindow = PInvoke.GetForegroundWindow();
                 if (foregroundWindow == IntPtr.Zero) return false;
 
                 // 获取前台窗口的进程ID
                 uint processId;
-                GetWindowThreadProcessId(foregroundWindow, out processId);
+                PInvoke.GetWindowThreadProcessId(foregroundWindow, out processId);
 
                 // 如果前台窗口就是我们监控的WPS进程，则认为仍然活跃
                 if (processId == _wpsProcess?.Id)
@@ -1806,11 +1781,11 @@ namespace Ink_Canvas.Helpers
             {
                 var allWindows = new List<WpsWindowInfo>();
 
-                EnumWindows((hWnd, lParam) =>
+                PInvoke.EnumWindows((hWnd, lParam) =>
                 {
                     try
                     {
-                        if (IsWindow(hWnd) && IsWindowVisible(hWnd))
+                        if (PInvoke.IsWindow(hWnd) && PInvoke.IsWindowVisible(hWnd))
                         {
                             var windowInfo = GetWindowInfo(hWnd);
                             if (IsWpsWindow(windowInfo) && !string.IsNullOrEmpty(windowInfo.Title))
@@ -2003,50 +1978,15 @@ namespace Ink_Canvas.Helpers
         #endregion
 
         #region WPS Window Detection
-        [DllImport("user32.dll")]
-        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
-
-        [DllImport("user32.dll")]
-        private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
-
-        [DllImport("user32.dll")]
+        // 这些 P/Invoke 之前被切换到 CsWin32 的 PInvoke.GetWindowText/GetClassName Span 重载，
+        // 但调用点写成了 `new Span<char>(emptyBuffer)`，容量为 0，永远读到空串，
+        // 导致 WPS 窗口三重验证全误判为"窗口已消失"，最终关闭/强杀仍在运行的 WPS 进程。
+        // 改为经典 StringBuilder 重载。GetWindowRect/IsWindowVisible 等仍走 CsWin32。
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
-
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool IsWindowVisible(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        private static extern bool IsIconic(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        private static extern bool IsZoomed(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetForegroundWindow();
-
-        [DllImport("user32.dll")]
-        private static extern bool IsWindow(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct RECT
-        {
-            public int Left;
-            public int Top;
-            public int Right;
-            public int Bottom;
-
-            public int Width => Right - Left;
-            public int Height => Bottom - Top;
-        }
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
-
-        private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 
         private class WpsWindowInfo
         {
@@ -2065,8 +2005,8 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                var foregroundHwnd = GetForegroundWindow();
-                if (foregroundHwnd != IntPtr.Zero && IsWindow(foregroundHwnd))
+                var foregroundHwnd = PInvoke.GetForegroundWindow();
+                if (foregroundHwnd != IntPtr.Zero && PInvoke.IsWindow(foregroundHwnd))
                 {
                     var windowInfo = GetWindowInfo(foregroundHwnd);
                     if (IsWpsWindow(windowInfo))
@@ -2084,31 +2024,32 @@ namespace Ink_Canvas.Helpers
 
         private WpsWindowInfo GetWindowInfo(IntPtr hWnd)
         {
+            HWND hwnd = new HWND(hWnd);
             var windowInfo = new WpsWindowInfo
             {
                 Handle = hWnd,
-                IsVisible = IsWindowVisible(hWnd),
-                IsMinimized = IsIconic(hWnd),
-                IsMaximized = IsZoomed(hWnd)
+                IsVisible = PInvoke.IsWindowVisible(hwnd),
+                IsMinimized = PInvoke.IsIconic(hwnd),
+                IsMaximized = PInvoke.IsZoomed(hwnd)
             };
 
             // 获取窗口标题
             var windowTitle = new StringBuilder(256);
-            GetWindowText(hWnd, windowTitle, 256);
+            GetWindowText(hwnd, windowTitle, windowTitle.Capacity);
             windowInfo.Title = windowTitle.ToString().Trim();
 
             // 获取窗口类名
             var className = new StringBuilder(256);
-            GetClassName(hWnd, className, 256);
+            GetClassName(hwnd, className, className.Capacity);
             windowInfo.ClassName = className.ToString().Trim();
 
             // 获取窗口位置
-            GetWindowRect(hWnd, out RECT rect);
+            PInvoke.GetWindowRect(hwnd, out RECT rect);
             windowInfo.Rect = rect;
 
             // 获取进程ID
             uint processId;
-            GetWindowThreadProcessId(hWnd, out processId);
+            PInvoke.GetWindowThreadProcessId(hwnd, out processId);
             windowInfo.ProcessId = processId;
 
             // 获取进程名
@@ -2149,7 +2090,7 @@ namespace Ink_Canvas.Helpers
             bool hasWpsTitle = wpsKeywords.Any(keyword => title.Contains(keyword));
             bool hasWpsClass = wpsKeywords.Any(keyword => className.Contains(keyword));
             bool isWpsClass = className.Contains("wps") || className.Contains("kingsoft") || className.Contains("wpp");
-            bool hasValidSize = (windowInfo.Rect.Right - windowInfo.Rect.Left) > 0 && (windowInfo.Rect.Bottom - windowInfo.Rect.Top) > 0;
+            bool hasValidSize = (windowInfo.Rect.right - windowInfo.Rect.left) > 0 && (windowInfo.Rect.bottom - windowInfo.Rect.top) > 0;
 
             return (hasWpsTitle || hasWpsClass || isWpsClass) && hasValidSize;
         }
@@ -2248,7 +2189,7 @@ namespace Ink_Canvas.Helpers
 
                 if (currentForegroundWindow != null)
                 {
-                    if (IsWindow(currentForegroundWindow.Handle) && IsWindowVisible(currentForegroundWindow.Handle))
+                    if (PInvoke.IsWindow(new HWND(currentForegroundWindow.Handle)) && PInvoke.IsWindowVisible(new HWND(currentForegroundWindow.Handle)))
                     {
                         return true;
                     }
@@ -2259,7 +2200,7 @@ namespace Ink_Canvas.Helpers
                 foreach (var process in wpsProcesses)
                 {
                     var windows = GetWpsWindowsByProcess(process.Id);
-                    if (windows.Any(w => w.IsVisible && !w.IsMinimized && w.Handle == GetForegroundWindow()))
+                    if (windows.Any(w => w.IsVisible && !w.IsMinimized && w.Handle == PInvoke.GetForegroundWindow()))
                     {
                         return true;
                     }
@@ -2280,14 +2221,14 @@ namespace Ink_Canvas.Helpers
 
             try
             {
-                EnumWindows((hWnd, lParam) =>
+                PInvoke.EnumWindows((hWnd, lParam) =>
                 {
                     try
                     {
-                        if (!IsWindow(hWnd)) return true;
+                        if (!PInvoke.IsWindow(hWnd)) return true;
 
                         uint windowProcessId;
-                        GetWindowThreadProcessId(hWnd, out windowProcessId);
+                        PInvoke.GetWindowThreadProcessId(hWnd, out windowProcessId);
 
                         if ((int)windowProcessId == processId)
                         {

@@ -3,99 +3,101 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.Graphics.Gdi;
 
 namespace Ink_Canvas.Helpers
 {
     internal class ForegroundWindowInfo
     {
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetForegroundWindow();
+        //[DllImport("user32.dll")]
+        //private static extern IntPtr GetForegroundWindow();
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+        //[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        //private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
 
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
+        //[DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        //private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
 
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+        //[DllImport("user32.dll")]
+        //[return: MarshalAs(UnmanagedType.Bool)]
+        //private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 
-        [DllImport("user32.dll")]
-        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+        //[DllImport("user32.dll")]
+        //private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
-        [StructLayout(LayoutKind.Sequential)]
-        public struct RECT
-        {
-            public int Left;
-            public int Top;
-            public int Right;
-            public int Bottom;
+        //[StructLayout(LayoutKind.Sequential)]
+        //public struct RECT
+        //{
+        //    public int Left;
+        //    public int Top;
+        //    public int Right;
+        //    public int Bottom;
 
-            public int Width => Right - Left;
-            public int Height => Bottom - Top;
-        }
+        //    public int Width => Right - Left;
+        //    public int Height => Bottom - Top;
+        //}
 
-        [StructLayout(LayoutKind.Sequential)]
-        private struct MONITORINFO
-        {
-            public uint cbSize;
-            public RECT rcMonitor;
-            public RECT rcWork;
-            public uint dwFlags;
-        }
+        //[StructLayout(LayoutKind.Sequential)]
+        //private struct MONITORINFO
+        //{
+        //    public uint cbSize;
+        //    public RECT rcMonitor;
+        //    public RECT rcWork;
+        //    public uint dwFlags;
+        //}
 
-        [DllImport("user32.dll")]
-        private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
+        //[DllImport("user32.dll")]
+        //private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
 
-        [DllImport("user32.dll")]
-        private static extern IntPtr MonitorFromWindow(IntPtr hwnd, uint dwFlags);
+        //[DllImport("user32.dll")]
+        //private static extern IntPtr MonitorFromWindow(IntPtr hwnd, uint dwFlags);
 
-        [DllImport("user32.dll")]
-        private static extern IntPtr MonitorFromRect(ref RECT lprc, uint dwFlags);
+        //[DllImport("user32.dll")]
+        //private static extern IntPtr MonitorFromRect(ref RECT lprc, uint dwFlags);
 
         public static IntPtr GetForegroundWindowHandle()
         {
-            return GetForegroundWindow();
+            return PInvoke.GetForegroundWindow();
         }
 
         public static string WindowTitle()
         {
-            IntPtr foregroundWindowHandle = GetForegroundWindow();
+            IntPtr foregroundWindowHandle = PInvoke.GetForegroundWindow();
 
             const int nChars = 256;
             StringBuilder windowTitle = new StringBuilder(nChars);
-            GetWindowText(foregroundWindowHandle, windowTitle, nChars);
+            PInvoke.GetWindowText(new HWND(foregroundWindowHandle), new Span<char>(windowTitle.ToString().ToCharArray()));
 
             return windowTitle.ToString();
         }
 
         public static string WindowClassName()
         {
-            IntPtr foregroundWindowHandle = GetForegroundWindow();
+            IntPtr foregroundWindowHandle = PInvoke.GetForegroundWindow();
 
             const int nChars = 256;
             StringBuilder className = new StringBuilder(nChars);
-            GetClassName(foregroundWindowHandle, className, nChars);
+            PInvoke.GetClassName(new HWND(foregroundWindowHandle), new Span<char>(className.ToString().ToCharArray()));
 
             return className.ToString();
         }
 
         public static RECT WindowRect()
         {
-            IntPtr foregroundWindowHandle = GetForegroundWindow();
+            IntPtr foregroundWindowHandle = PInvoke.GetForegroundWindow();
 
-            RECT windowRect;
-            GetWindowRect(foregroundWindowHandle, out windowRect);
+            PInvoke.GetWindowRect(new HWND(foregroundWindowHandle), out RECT windowRect);
 
             return windowRect;
         }
 
         public static string ProcessName()
         {
-            IntPtr foregroundWindowHandle = GetForegroundWindow();
+            IntPtr foregroundWindowHandle = PInvoke.GetForegroundWindow();
             uint processId;
-            GetWindowThreadProcessId(foregroundWindowHandle, out processId);
+            PInvoke.GetWindowThreadProcessId(new HWND(foregroundWindowHandle), out processId);
 
             try
             {
@@ -111,9 +113,9 @@ namespace Ink_Canvas.Helpers
 
         public static string ProcessPath()
         {
-            IntPtr foregroundWindowHandle = GetForegroundWindow();
+            IntPtr foregroundWindowHandle = PInvoke.GetForegroundWindow();
             uint processId;
-            GetWindowThreadProcessId(foregroundWindowHandle, out processId);
+            PInvoke.GetWindowThreadProcessId(new HWND(foregroundWindowHandle), out processId);
 
             try
             {
@@ -132,25 +134,24 @@ namespace Ink_Canvas.Helpers
             // 创建RECT结构体表示屏幕边界
             RECT screenRect = new RECT
             {
-                Left = screen.Bounds.Left,
-                Top = screen.Bounds.Top,
-                Right = screen.Bounds.Right,
-                Bottom = screen.Bounds.Bottom
+                left = screen.Bounds.Left,
+                top = screen.Bounds.Top,
+                right = screen.Bounds.Right,
+                bottom = screen.Bounds.Bottom
             };
 
             // 获取屏幕句柄
-            const uint MONITOR_DEFAULTTONEAREST = 0x00000002;
-            IntPtr hMonitor = MonitorFromRect(ref screenRect, MONITOR_DEFAULTTONEAREST);
+            HMONITOR hMonitor = PInvoke.MonitorFromRect(screenRect, MONITOR_FROM_FLAGS.MONITOR_DEFAULTTONEAREST);
 
             // 初始化MONITORINFO结构体
             MONITORINFO monitorInfo = new MONITORINFO();
             monitorInfo.cbSize = (uint)Marshal.SizeOf(typeof(MONITORINFO));
 
             // 获取监视器信息
-            GetMonitorInfo(hMonitor, ref monitorInfo);
+            PInvoke.GetMonitorInfo(hMonitor, ref monitorInfo);
 
             // 计算任务栏高度：monitorInfo.rcMonitor.bottom减去monitorInfo.rcWork.bottom的值
-            int taskbarHeight = monitorInfo.rcMonitor.Bottom - monitorInfo.rcWork.Bottom;
+            int taskbarHeight = monitorInfo.rcMonitor.bottom - monitorInfo.rcWork.bottom;
             // 考虑 DPI 缩放
             return taskbarHeight / dpiScaleY;
         }

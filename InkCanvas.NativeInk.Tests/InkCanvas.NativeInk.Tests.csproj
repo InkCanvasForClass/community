@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <LangVersion>10</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Ink Canvas\Ink\Native\NativeInkModels.cs" Link="Ink\Native\NativeInkModels.cs" />
+    <Compile Include="..\Ink Canvas\Ink\Native\InkSampleHistoryNormalizer.cs" Link="Ink\Native\InkSampleHistoryNormalizer.cs" />
+    <Compile Include="..\Ink Canvas\Ink\Native\InkSampleProcessor.cs" Link="Ink\Native\InkSampleProcessor.cs" />
+    <Compile Include="..\Ink Canvas\Ink\Native\InkTailPredictor.cs" Link="Ink\Native\InkTailPredictor.cs" />
+    <Compile Include="..\Ink Canvas\Ink\Native\NativeInkSession.cs" Link="Ink\Native\NativeInkSession.cs" />
+    <Compile Include="..\Ink Canvas\Ink\Native\NativeInkController.cs" Link="Ink\Native\NativeInkController.cs" />
+    <Compile Include="..\Ink Canvas\Ink\Native\NativeInkInputRouter.cs" Link="Ink\Native\NativeInkInputRouter.cs" />
+    <Compile Include="..\Ink Canvas\Ink\Native\NativePointerInputBatch.cs" Link="Ink\Native\NativePointerInputBatch.cs" />
+    <Compile Include="..\Ink Canvas\Ink\Native\NativePointerTimestampConverter.cs" Link="Ink\Native\NativePointerTimestampConverter.cs" />
+    <Compile Include="..\Ink Canvas\Ink\Native\WetInkCommandMailbox.cs" Link="Ink\Native\WetInkCommandMailbox.cs" />
+    <Compile Include="..\Ink Canvas\Ink\Native\WetInkGeometryBuilder.cs" Link="Ink\Native\WetInkGeometryBuilder.cs" />
+    <Compile Include="..\Ink Canvas\Ink\Native\WetInkStrokeGeometryState.cs" Link="Ink\Native\WetInkStrokeGeometryState.cs" />
+  </ItemGroup>
+</Project>

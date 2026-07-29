@@ -84,6 +84,17 @@
         "resolved": "7.1.3",
         "contentHash": "A1dglAzb24gjehmb7DwGd07mfyZ1gacAK7ObE0KwDlRc3mayH2QW7cSOy3TkkyELjLg19OQBuhPOj4SpXET9lg=="
       },
+      "Microsoft.Windows.CsWin32": {
+        "type": "Direct",
+        "requested": "[0.3.298, )",
+        "resolved": "0.3.298",
+        "contentHash": "moz/CojV5HSeJYV9pNVE6mWMKnJGvPgdD31EhBLyUJ8Ui06PBrH9oPFK1ljXbJJMM4EzKnkE1a0AtBbH1BHDGA==",
+        "dependencies": {
+          "Microsoft.Windows.SDK.Win32Docs": "0.1.42-alpha",
+          "Microsoft.Windows.SDK.Win32Metadata": "70.0.11-preview",
+          "Microsoft.Windows.WDK.Win32Metadata": "0.13.25-experimental"
+        }
+      },
       "MicrosoftOfficeCore": {
         "type": "Direct",
         "requested": "[15.0.0, )",
@@ -161,6 +172,56 @@
         "resolved": "6.0.2",
         "contentHash": "s6c9x2Kghd+ncEDnT6ApYVOacDXr/Y57oSUSx6wjegMOfKxhtrXn3PdASPNU59y3kB9OJ1yb3l5k6uKr3bhqew=="
       },
+      "Vortice.Direct2D1": {
+        "type": "Direct",
+        "requested": "[3.2.0, )",
+        "resolved": "3.2.0",
+        "contentHash": "WnB9X333LKA/HL0XMwn+VH91haU6KgR6JLX2RGGwb5JzSHiu5rwpDkEzbDR6JFwCzM4tT+hOCpch34ELWrXeYw==",
+        "dependencies": {
+          "SharpGen.Runtime": "2.0.0-beta.13",
+          "SharpGen.Runtime.COM": "2.0.0-beta.13",
+          "Vortice.DXGI": "3.2.0",
+          "Vortice.Mathematics": "1.5.2"
+        }
+      },
+      "Vortice.Direct3D11": {
+        "type": "Direct",
+        "requested": "[3.2.0, )",
+        "resolved": "3.2.0",
+        "contentHash": "BGeaLUXIty564H+QgynR5FH3su6UxKEY8RPVQtMxVVPj2f0PNryaFjVQ0JJJhaEkg6G2/7VF/8tizQZy/DkF9g==",
+        "dependencies": {
+          "SharpGen.Runtime": "2.0.0-beta.13",
+          "SharpGen.Runtime.COM": "2.0.0-beta.13",
+          "Vortice.DXGI": "3.2.0",
+          "Vortice.Mathematics": "1.5.2"
+        }
+      },
+      "Vortice.DirectComposition": {
+        "type": "Direct",
+        "requested": "[3.2.0, )",
+        "resolved": "3.2.0",
+        "contentHash": "9mba1b+jiyQyoHU1XCxxje2oHtarDQC5/LmZ74tn5oqSre5x7ZdALr96irZSx0RmzB75z+4DD3MXy5mbmFI4mw==",
+        "dependencies": {
+          "SharpGen.Runtime": "2.0.0-beta.13",
+          "SharpGen.Runtime.COM": "2.0.0-beta.13",
+          "Vortice.DXGI": "3.2.0",
+          "Vortice.Direct2D1": "3.2.0",
+          "Vortice.DirectX": "3.2.0",
+          "Vortice.Mathematics": "1.5.2"
+        }
+      },
+      "Vortice.DXGI": {
+        "type": "Direct",
+        "requested": "[3.2.0, )",
+        "resolved": "3.2.0",
+        "contentHash": "vx0z23UGxpLfYELK9P2HTalcoMd8etqmJzKfU2Ho88e+s4pAtQrUythotpYZ41zS/9cbOo25HhRAXljVmjPTuw==",
+        "dependencies": {
+          "SharpGen.Runtime": "2.0.0-beta.13",
+          "SharpGen.Runtime.COM": "2.0.0-beta.13",
+          "Vortice.DirectX": "3.2.0",
+          "Vortice.Mathematics": "1.5.2"
+        }
+      },
       "WebDav.Client": {
         "type": "Direct",
         "requested": "[2.9.0, )",
@@ -215,6 +276,24 @@
         "resolved": "6.0.0",
         "contentHash": "xlzi2IYREJH3/m6+lUrQlujzX8wDitm4QGnUu6kUXTQAWPuZY8i+ticFJbzfqaetLA6KR/rO6Ew/HuYD+bxifg=="
       },
+      "Microsoft.Windows.SDK.Win32Docs": {
+        "type": "Transitive",
+        "resolved": "0.1.42-alpha",
+        "contentHash": "Z/9po23gUA9aoukirh2ItMU2ZS9++Js9Gdds9fu5yuMojDrmArvY2y+tq9985tR3cxFxpZO1O35Wjfo0khj5HA=="
+      },
+      "Microsoft.Windows.SDK.Win32Metadata": {
+        "type": "Transitive",
+        "resolved": "70.0.11-preview",
+        "contentHash": "i8Dv2KCKzH8MQAsgLeUa5zFGyQOoz+TlvnbkFUkjsUtqhj4oguVj9rDpVACs5fLayZbwItOSllf+bhwr+z2yeg=="
+      },
+      "Microsoft.Windows.WDK.Win32Metadata": {
+        "type": "Transitive",
+        "resolved": "0.13.25-experimental",
+        "contentHash": "IM50tb/+UIwBr9FMr6ZKcZjCMW+Axo6NjGqKxgjUfyCY8dRnYUfrJEXxAaXoWtYP4X8EmASmC1Jtwh4XucseZg==",
+        "dependencies": {
+          "Microsoft.Windows.SDK.Win32Metadata": "63.0.31-preview"
+        }
+      },
       "NHotkey": {
         "type": "Transitive",
         "resolved": "4.0.0",
@@ -237,6 +316,43 @@
         "dependencies": {
           "OpenCvSharp4": "4.13.0.20260627"
         }
+      },
+      "PolySharp": {
+        "type": "Transitive",
+        "resolved": "1.10.0",
+        "contentHash": "+uNyVhhKOskjJLKOwIQ2qGaA0T507FaMbz5RwLAtmRaMaTAcUAZAiZvSk4Z8z6GkmqOyO1zryYNXmO0Vh7IrYQ=="
+      },
+      "SharpGen.Runtime": {
+        "type": "Transitive",
+        "resolved": "2.0.0-beta.13",
+        "contentHash": "H+Up2Er3ptWzcQ+CAO652fEsBLAmoXqKqtvc/6ycRV9XfLN2XJch0h8CwKQ3muD6eADPFf8Xp+nDQ8wDpcRDlg==",
+        "dependencies": {
+          "PolySharp": "1.10.0"
+        }
+      },
+      "SharpGen.Runtime.COM": {
+        "type": "Transitive",
+        "resolved": "2.0.0-beta.13",
+        "contentHash": "H22LsE3XTIOevf2TJgPgPnfYmjMlCtN+QYZVxzXlgTrgG2jHSTUTKZpIMPbKliLJGCEnDfX6yvBJvya0/xRTkA==",
+        "dependencies": {
+          "PolySharp": "1.10.0",
+          "SharpGen.Runtime": "2.0.0-beta.13"
+        }
+      },
+      "Vortice.DirectX": {
+        "type": "Transitive",
+        "resolved": "3.2.0",
+        "contentHash": "VvLoA3OMwy8XhsWtP5mO7LWS8mTysPaU9fvAzIJTdatW7TaC7GgA2kpanpbvHSysuJF/O5c9rB7IBukFP4v0aw==",
+        "dependencies": {
+          "SharpGen.Runtime": "2.0.0-beta.13",
+          "SharpGen.Runtime.COM": "2.0.0-beta.13",
+          "Vortice.Mathematics": "1.5.2"
+        }
+      },
+      "Vortice.Mathematics": {
+        "type": "Transitive",
+        "resolved": "1.5.2",
+        "contentHash": "kf/h6LTSCYB3Ii9mFOqQj8843nPkqGt/aYSRreIWB4BZzpXE2RNKLrJqh+7DaPRwr9qu1f28aRaxfOgeXxtKjw=="
       },
       "inkcanvas.controls": {
         "type": "Project",

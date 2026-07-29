@@ -222,6 +222,7 @@ namespace Ink_Canvas.Plugins
         {
             try
             {
+                CleanupStalePartialFiles();
                 if (!File.Exists(IndexCachePath))
                 {
                     _marketIndex = new PluginMarketIndex();
@@ -254,6 +255,42 @@ namespace Ink_Canvas.Plugins
                 MergePlugins();
             }
         }
+
+        /// <summary>
+        /// 清理早于 <see cref="PartialFileMaxAge"/> 天的失败下载残留（.partial_/rolledaside_/tmp），
+        /// 避免 PluginPackages 目录被早期失败的下载堆满。正常 .icpx 包不受影响。
+        /// </summary>
+        private static void CleanupStalePartialFiles()
+        {
+            try
+            {
+                var packagesDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PluginPackages");
+                if (!Directory.Exists(packagesDir)) return;
+                var cutoff = DateTime.Now.AddDays(-PartialFileMaxAgeDays);
+                foreach (var path in Directory.GetFiles(packagesDir))
+                {
+                    var name = Path.GetFileName(path);
+                    if (!name.Contains(".partial_") && !name.Contains(".rolledaside_") && !name.EndsWith(".tmp")
+                        && !name.Contains(".failed_install_"))
+                        continue;
+                    try
+                    {
+                        var ts = File.GetLastWriteTime(path);
+                        if (ts < cutoff) File.Delete(path);
+                    }
+                    catch
+                    {
+                        // 单文件清理失败不影响其他文件
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"PluginMarket | 清理过期残留包失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        private const int PartialFileMaxAgeDays = 30;
 
         #endregion
 
@@ -491,11 +528,37 @@ namespace Ink_Canvas.Plugins
                     Directory.CreateDirectory(packagesDir);
 
                 var targetPath = Path.Combine(packagesDir, id + ".icpx");
-                ProcessProtectionManager.WithWriteAccess(targetPath, () =>
+                try
                 {
-                    if (File.Exists(targetPath)) File.Delete(targetPath);
-                    File.Move(tempFile, targetPath);
-                });
+                    ProcessProtectionManager.WithWriteAccess(targetPath, () =>
+                    {
+                        // 先把可能存在的旧包改名备份（不直接删除），
+                        // 防止 File.Delete 后 File.Move 失败导致旧新全没。
+                        if (File.Exists(targetPath))
+                        {
+                            var rolledAside = targetPath + ".rolledaside_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                            File.Move(targetPath, rolledAside);
+                        }
+                        File.Move(tempFile, targetPath);
+                    });
+                }
+                catch
+                {
+                    // 移动失败：保留 tempFile 改名以便下次重试恢复，**不**删除新下载的包。
+                    try
+                    {
+                        if (File.Exists(tempFile))
+                        {
+                            var retained = Path.Combine(packagesDir, id + ".icpx.partial_" + DateTime.Now.ToString("yyyyMMdd_HHmmss"));
+                            File.Move(tempFile, retained);
+                        }
+                    }
+                    catch
+                    {
+                        // 两次移动都失败（极小概率）—— 至少保留 tempFile 留给下次启动扫描。
+                    }
+                    throw;
+                }
 
                 task.IsCompleted = true;
                 task.Progress = 100;
@@ -606,6 +669,19 @@ namespace Ink_Canvas.Plugins
         private static string ResolveUrl(string url, string mirrorRoot)
         {
             if (string.IsNullOrEmpty(url)) return "";
+            // 防止恶意 mirrorRoot 通过在 URL 中注入 @ 或 / 改变路径解析：
+            //   https://github.com/{root}/file  + mirrorRoot="@evil.com/x"
+            //   → https://github.com/@evil.com/x/file（@ 前是 userinfo，真实 host 变成 evil.com）
+            // 白名单字符限定为 host/path 部分：字母、数字、点、冒号、斜杠、横线、下划线。
+            // 不允许 @ ? # 等 URL 元字符；URI 必须保持模板的可信结构。
+            if (!string.IsNullOrEmpty(mirrorRoot))
+            {
+                foreach (var ch in mirrorRoot)
+                {
+                    if (!(char.IsLetterOrDigit(ch) || ch == '.' || ch == ':' || ch == '/' || ch == '-' || ch == '_'))
+                        return url; // 含非法字符，保留原模板（不替换）
+                }
+            }
             return url.Replace("{root}", mirrorRoot ?? "");
         }
 

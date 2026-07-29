@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Timers;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.Accessibility;
 
 namespace Ink_Canvas.WorkflowAutomation.Services
 {
@@ -15,16 +17,16 @@ namespace Ink_Canvas.WorkflowAutomation.Services
     {
         #region WinEvent Hook P/Invoke
 
-        private delegate void WinEventProc(IntPtr hWinEventHook, uint eventType,
-            IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime);
+        //private delegate void WinEventProc(IntPtr hWinEventHook, uint eventType,
+        //    IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime);
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern IntPtr SetWinEventHook(uint eventMin, uint eventMax,
-            IntPtr hmodWinEventProc, WinEventProc lpfnWinEventProc,
-            uint idProcess, uint idThread, uint dwFlags);
+        //[DllImport("user32.dll", SetLastError = true)]
+        //private static extern IntPtr SetWinEventHook(uint eventMin, uint eventMax,
+        //    IntPtr hmodWinEventProc, WinEventProc lpfnWinEventProc,
+        //    uint idProcess, uint idThread, uint dwFlags);
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool UnhookWinEvent(IntPtr hWinEventHook);
+        //[DllImport("user32.dll", SetLastError = true)]
+        //private static extern bool UnhookWinEvent(IntPtr hWinEventHook);
 
         private const uint EVENT_SYSTEM_FOREGROUND = 0x0003;
         private const uint WINEVENT_OUTOFCONTEXT = 0x0000;
@@ -47,8 +49,8 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         public event EventHandler InternalStateChanged;
 
         // WinEvent 钩子
-        private IntPtr _foregroundHook;
-        private WinEventProc _foregroundProc; // 防止 GC 回收委托
+        private HWINEVENTHOOK _foregroundHook;
+        private WINEVENTPROC _foregroundProc; // 防止 GC 回收委托
 
         // 前台窗口钩子失败时的降级轮询
         private Timer _foregroundFallbackTimer;
@@ -66,13 +68,13 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         {
             // 设置前台窗口变化钩子
             _foregroundProc = OnForegroundWindowEvent;
-            _foregroundHook = SetWinEventHook(
+            _foregroundHook = new HWINEVENTHOOK(PInvoke.SetWinEventHook(
                 EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND,
-                IntPtr.Zero, _foregroundProc,
-                0, 0, WINEVENT_OUTOFCONTEXT);
+                null, _foregroundProc,
+                0, 0, WINEVENT_OUTOFCONTEXT).DangerousGetHandle());
 
             // 如果钩子设置失败，降级为轮询
-            if (_foregroundHook == IntPtr.Zero)
+            if (_foregroundHook == HWINEVENTHOOK.Null)
             {
                 _foregroundFallbackTimer = new Timer(500);
                 _foregroundFallbackTimer.Elapsed += OnForegroundFallbackElapsed;
@@ -216,21 +218,21 @@ namespace Ink_Canvas.WorkflowAutomation.Services
 
         #region 前台窗口监控
 
-        private void OnForegroundWindowEvent(IntPtr hWinEventHook, uint eventType,
-            IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)
+        private void OnForegroundWindowEvent(HWINEVENTHOOK hWinEventHook, uint eventType,
+            HWND hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)
         {
             ForegroundWindowChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern IntPtr GetForegroundWindow();
+        //[DllImport("user32.dll", SetLastError = true)]
+        //private static extern IntPtr GetForegroundWindow();
 
         private void OnForegroundFallbackElapsed(object sender, ElapsedEventArgs e)
         {
             if (_disposed) return;
             try
             {
-                var current = GetForegroundWindow();
+                var current = PInvoke.GetForegroundWindow();
                 if (current != _lastForegroundWindow && current != IntPtr.Zero)
                 {
                     _lastForegroundWindow = current;
@@ -260,10 +262,10 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             if (_disposed) return;
             _disposed = true;
 
-            if (_foregroundHook != IntPtr.Zero)
+            if (_foregroundHook != HWINEVENTHOOK.Null)
             {
-                try { UnhookWinEvent(_foregroundHook); } catch { }
-                _foregroundHook = IntPtr.Zero;
+                try { PInvoke.UnhookWinEvent(_foregroundHook); } catch { }
+                _foregroundHook = HWINEVENTHOOK.Null;
             }
             _foregroundProc = null;
 

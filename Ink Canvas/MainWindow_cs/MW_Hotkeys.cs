@@ -45,8 +45,8 @@ namespace Ink_Canvas
                 return;
             }
 
-            // 鼠标模式 + PPT 放映：保留原 PPT 翻页逻辑
-            if (IsInPPTPresentationMode && !IsAnnotating)
+            // PPT 放映：滚轮始终翻页（与工具模式无关，恢复旧行为）
+            if (IsInPPTPresentationMode)
             {
                 if (e.Delta >= 120) BtnPPTSlidesUp_Click(null, null);
                 else if (e.Delta <= -120) BtnPPTSlidesDown_Click(null, null);

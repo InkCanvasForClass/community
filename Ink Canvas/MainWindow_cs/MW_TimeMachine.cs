@@ -473,6 +473,14 @@ namespace Ink_Canvas
                 HideSubPanels(); // 书写时自动隐藏二级菜单
             }
 
+            // 视频展台特殊模式下，用户新增墨迹意味着基准快照已过期，下次旋转重新保存。
+            // 程序自身在旋转墨迹（_isApplyingRotationToStrokes）时不重置。
+            if (_isVideoPresenterSpecialMode && e?.Added != null && e.Added.Count > 0
+                && !_isApplyingRotationToStrokes)
+            {
+                ResetRotationBaseline();
+            }
+
             foreach (var stroke in e?.Removed)
             {
                 stroke.StylusPointsChanged -= Stroke_StylusPointsChanged;

@@ -1,5 +1,7 @@
 using System;
-using System.Runtime.InteropServices;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Ink_Canvas.Helpers
 {
@@ -26,52 +28,52 @@ namespace Ink_Canvas.Helpers
 
         #region P/Invoke
 
-        [DllImport("user32.dll")]
-        public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+        //[DllImport("user32.dll")]
+        //public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
-        [DllImport("user32.dll")]
-        public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+        //[DllImport("user32.dll")]
+        //public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
 
-        [DllImport("user32.dll")]
-        public static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+        //[DllImport("user32.dll")]
+        //public static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
 
-        [DllImport("user32.dll")]
-        public static extern bool IsWindow(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //public static extern bool IsWindow(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        public static extern bool IsWindowVisible(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //public static extern bool IsWindowVisible(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        public static extern bool IsIconic(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //public static extern bool IsIconic(IntPtr hWnd);
 
-        public delegate bool EnumThreadWindowsProc(IntPtr hWnd, IntPtr lParam);
+        //public delegate bool EnumThreadWindowsProc(IntPtr hWnd, IntPtr lParam);
 
-        [DllImport("user32.dll")]
-        public static extern bool EnumThreadWindows(uint dwThreadId, EnumThreadWindowsProc lpfn, IntPtr lParam);
+        //[DllImport("user32.dll")]
+        //public static extern bool EnumThreadWindows(uint dwThreadId, EnumThreadWindowsProc lpfn, IntPtr lParam);
 
-        [DllImport("kernel32.dll")]
-        public static extern uint GetCurrentThreadId();
+        //[DllImport("kernel32.dll")]
+        //public static extern uint GetCurrentThreadId();
 
-        [DllImport("user32.dll")]
-        public static extern IntPtr GetForegroundWindow();
+        //[DllImport("user32.dll")]
+        //public static extern IntPtr GetForegroundWindow();
 
-        [DllImport("user32.dll")]
-        public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+        //[DllImport("user32.dll")]
+        //public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
-        [DllImport("kernel32.dll")]
-        public static extern uint GetCurrentProcessId();
+        //[DllImport("kernel32.dll")]
+        //public static extern uint GetCurrentProcessId();
 
-        [DllImport("user32.dll")]
-        public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+        //[DllImport("user32.dll")]
+        //public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 
-        [StructLayout(LayoutKind.Sequential)]
-        public struct RECT
-        {
-            public int Left;
-            public int Top;
-            public int Right;
-            public int Bottom;
-        }
+        //[StructLayout(LayoutKind.Sequential)]
+        //public struct RECT
+        //{
+        //    public int Left;
+        //    public int Top;
+        //    public int Right;
+        //    public int Bottom;
+        //}
 
         #endregion
 
@@ -82,13 +84,13 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public static void SetTopmost(IntPtr handle)
         {
-            SetWindowPos(handle, HWND_TOPMOST, 0, 0, 0, 0,
-                SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
+            PInvoke.SetWindowPos(new HWND(handle), new HWND(HWND_TOPMOST), 0, 0, 0, 0,
+                SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE | SET_WINDOW_POS_FLAGS.SWP_SHOWWINDOW | SET_WINDOW_POS_FLAGS.SWP_NOOWNERZORDER);
 
-            int exStyle = GetWindowLong(handle, GWL_EXSTYLE);
+            int exStyle = PInvoke.GetWindowLong(new HWND(handle), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
             if ((exStyle & WS_EX_TOPMOST) == 0)
             {
-                SetWindowLong(handle, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
+                PInvoke.SetWindowLong(new HWND(handle), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
             }
         }
 
@@ -97,13 +99,13 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public static void SetNotTopmost(IntPtr handle)
         {
-            SetWindowPos(handle, HWND_NOTOPMOST, 0, 0, 0, 0,
-                SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
+            PInvoke.SetWindowPos(new HWND(handle), new HWND(HWND_NOTOPMOST), 0, 0, 0, 0,
+                SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE | SET_WINDOW_POS_FLAGS.SWP_SHOWWINDOW | SET_WINDOW_POS_FLAGS.SWP_NOOWNERZORDER);
 
-            int exStyle = GetWindowLong(handle, GWL_EXSTYLE);
+            int exStyle = PInvoke.GetWindowLong(new HWND(handle), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
             if ((exStyle & WS_EX_TOPMOST) != 0)
             {
-                SetWindowLong(handle, GWL_EXSTYLE, exStyle & ~WS_EX_TOPMOST);
+                PInvoke.SetWindowLong(new HWND(handle), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, exStyle & ~WS_EX_TOPMOST);
             }
         }
 
@@ -112,7 +114,7 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public static bool IsWindowReady(IntPtr handle)
         {
-            return handle != IntPtr.Zero && IsWindow(handle) && IsWindowVisible(handle) && !IsIconic(handle);
+            return handle != IntPtr.Zero && PInvoke.IsWindow(new HWND(handle)) && PInvoke.IsWindowVisible(new HWND(handle)) && !PInvoke.IsIconic(new HWND(handle));
         }
 
         #endregion

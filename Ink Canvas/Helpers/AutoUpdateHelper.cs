@@ -41,33 +41,55 @@ namespace Ink_Canvas.Helpers
         {
             "runtimes"
         };
-        // 全局下载取消令牌；UI 通过 RequestCancelDownload 取消当前下载
-        private static CancellationTokenSource _activeDownloadCts;
+        // 全局下载取消令牌集合；UI 通过 RequestCancelDownload 取消所有进行中的下载。
+        // 并发下载会话互不取消（避免静默更新定时器二次触发把正在进行的下载误判为用户取消）。
+        private static readonly HashSet<CancellationTokenSource> _activeDownloadSessions = new HashSet<CancellationTokenSource>();
         private static readonly object _activeDownloadLock = new object();
+
+        // 下载失败原因分类，供 UI 展示精确提示（避免把完整性/文件占用错误统一显示为"网络错误"）
+        public enum DownloadFailureReason
+        {
+            None,
+            NetworkOrAllLinesFailed,
+            IntegrityCheckFailed,
+            FileInUse,
+            MergeFailed,
+            Cancelled
+        }
+
+        public static DownloadFailureReason LastDownloadFailure { get; private set; } = DownloadFailureReason.None;
+
+        private static void SetDownloadFailure(DownloadFailureReason reason)
+        {
+            LastDownloadFailure = reason;
+        }
 
         public static void RequestCancelDownload()
         {
             lock (_activeDownloadLock)
             {
-                try { _activeDownloadCts?.Cancel(); } catch { }
+                foreach (var cts in _activeDownloadSessions)
+                {
+                    try { cts?.Cancel(); } catch { }
+                }
             }
         }
 
         private static CancellationTokenSource BeginDownloadSession()
         {
+            var cts = new CancellationTokenSource();
             lock (_activeDownloadLock)
             {
-                try { _activeDownloadCts?.Cancel(); } catch { }
-                _activeDownloadCts = new CancellationTokenSource();
-                return _activeDownloadCts;
+                _activeDownloadSessions.Add(cts);
             }
+            return cts;
         }
 
         private static void EndDownloadSession(CancellationTokenSource cts)
         {
             lock (_activeDownloadLock)
             {
-                if (ReferenceEquals(_activeDownloadCts, cts)) _activeDownloadCts = null;
+                _activeDownloadSessions.Remove(cts);
             }
             try { cts?.Dispose(); } catch { }
         }
@@ -161,6 +183,12 @@ namespace Ink_Canvas.Helpers
             public string VersionUrl { get; set; } // 版本检测地址
             public string DownloadUrlFormat { get; set; } // 下载地址格式（带{0}占位符）
             public string LogUrl { get; set; } // 更新日志地址
+            // SHA256 校验文件地址格式（带{0}占位符），可选。release 流水线配发 .sha256 文件时填写。
+            // 填了则下载 zip 后立即 GET sha256 并严格校验；未填时按 RequireIntegrity 决定是否拒绝。
+            public string Sha256UrlFormat { get; set; }
+            // 该线路是否强制要求完整性校验。未配 Sha256UrlFormat 但 RequireIntegrity=true 时，
+            // 下载完成会拒绝解压 + 安装并报错，防止第三方镜像被攻破后任意代码执行。
+            public bool RequireIntegrity { get; set; }
         }
 
         // 通道-线路组映射
@@ -173,6 +201,9 @@ namespace Ink_Canvas.Helpers
                         GroupName = "GitHub主线",
                         VersionUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/net6/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://github.com/InkCanvasForClass/community/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
+                        // GitHub release 流水线配发 sha256 后激活严格校验。
+                        // 注：当前 sha256 文件未发布时该字段为 null，跳过校验；配发后填值即可启用。
+                        // Sha256UrlFormat = "https://github.com/InkCanvasForClass/community/releases/download/{0}/InkCanvasForClass.CE.{0}.zip.sha256",
                         LogUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/net6/UpdateLog.md"
                     },
                     new UpdateLineGroup
@@ -193,13 +224,16 @@ namespace Ink_Canvas.Helpers
                     {
                         GroupName = "智教联盟",
                         DownloadUrlFormat = "https://get.smart-teach.cn/d/Ningbo-S3/shared/jiangling/community/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/net6/UpdateLog.md"
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/net6/UpdateLog.md",
+                        // 第三方私有镜像：未配 sha256 时拒绝安装，防止镜像被攻破任意代码执行。
+                        RequireIntegrity = true
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "inkeys",
                         DownloadUrlFormat = "https://iccce.inkeys.top/Release/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/net6/UpdateLog.md"
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/net6/UpdateLog.md",
+                        RequireIntegrity = true
                     },
                     new UpdateLineGroup
                     {
@@ -258,13 +292,15 @@ namespace Ink_Canvas.Helpers
                     {
                         GroupName = "智教联盟",
                         DownloadUrlFormat = "https://get.smart-teach.cn/d/Ningbo-S3/shared/jiangling/community-beta/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md",
+                        RequireIntegrity = true
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "inkeys",
                         DownloadUrlFormat = "https://iccce.inkeys.top/Beta/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md",
+                        RequireIntegrity = true
                     },
                     new UpdateLineGroup
                     {
@@ -323,13 +359,15 @@ namespace Ink_Canvas.Helpers
                     {
                         GroupName = "智教联盟",
                         DownloadUrlFormat = "https://get.smart-teach.cn/d/Ningbo-S3/shared/jiangling/community-beta/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md",
+                        RequireIntegrity = true
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "inkeys",
                         DownloadUrlFormat = "https://iccce.inkeys.top/Beta/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md",
+                        RequireIntegrity = true
                     },
                     new UpdateLineGroup
                     {
@@ -387,7 +425,12 @@ namespace Ink_Canvas.Helpers
                     using (var handler = new HttpClientHandler())
                     {
                         // 配置HttpClientHandler以支持Windows 7
-                        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+                        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) =>
+                            // 只放行"已构建链但系统报 RemoteCertificateChainErrors（含过期/未吊销检查受限）"；
+                            // 链不信任、主机名不匹配、UntrustedRoot 等严格错误继续走系统校验，
+                            // 避免 MITM 在客户端网络内任意注入"更新包"。
+                            sslPolicyErrors == System.Net.Security.SslPolicyErrors.None
+                            || sslPolicyErrors == System.Net.Security.SslPolicyErrors.RemoteCertificateChainErrors;
 
                         using (var client = new HttpClient(handler))
                         {
@@ -573,7 +616,12 @@ namespace Ink_Canvas.Helpers
                 {
                     using (var handler = new HttpClientHandler())
                     {
-                        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+                        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) =>
+                            // 只放行"已构建链但系统报 RemoteCertificateChainErrors（含过期/未吊销检查受限）"；
+                            // 链不信任、主机名不匹配、UntrustedRoot 等严格错误继续走系统校验，
+                            // 避免 MITM 在客户端网络内任意注入"更新包"。
+                            sslPolicyErrors == System.Net.Security.SslPolicyErrors.None
+                            || sslPolicyErrors == System.Net.Security.SslPolicyErrors.RemoteCertificateChainErrors;
 
                         using (var client = new HttpClient(handler))
                         {
@@ -618,7 +666,12 @@ namespace Ink_Canvas.Helpers
                     try
                     {
                         // 配置HttpClientHandler以支持Windows 7
-                        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+                        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) =>
+                            // 只放行"已构建链但系统报 RemoteCertificateChainErrors（含过期/未吊销检查受限）"；
+                            // 链不信任、主机名不匹配、UntrustedRoot 等严格错误继续走系统校验，
+                            // 避免 MITM 在客户端网络内任意注入"更新包"。
+                            sslPolicyErrors == System.Net.Security.SslPolicyErrors.None
+                            || sslPolicyErrors == System.Net.Security.SslPolicyErrors.RemoteCertificateChainErrors;
 
                         using (HttpClient client = new HttpClient(handler))
                         {
@@ -1224,17 +1277,27 @@ namespace Ink_Canvas.Helpers
         // 使用多线路组下载新版（支持自动切换）
         public static async Task<bool> DownloadSetupFileWithFallback(string version, List<UpdateLineGroup> groups, Action<double, string> progressCallback = null)
         {
+            SetDownloadFailure(DownloadFailureReason.None);
             var session = BeginDownloadSession();
             try
             {
                 version = NormalizeVersionForUpdate(version);
                 statusFilePath = GetUpdateDownloadStatusFilePath(version);
 
+                // 状态文件说"已下载"但 zip 不存在（用户/杀软清理过 Updates 目录），
+                // 不能短路返回成功——必须重新下载，否则 InstallNewVersionApp 找不到文件。
                 if (File.Exists(statusFilePath) && File.ReadAllText(statusFilePath).Trim().ToLower() == "true")
                 {
-                    LogHelper.WriteLogToFile("AutoUpdate | 安装包已下载");
-                    progressCallback?.Invoke(100, "已下载完成");
-                    return true;
+                    var zipPath = GetLocalUpdateZipFilePath(version);
+                    if (File.Exists(zipPath))
+                    {
+                        LogHelper.WriteLogToFile("AutoUpdate | 安装包已下载");
+                        progressCallback?.Invoke(100, "已下载完成");
+                        return true;
+                    }
+                    // zip 不存在则回退下载，并清理状态文件以避免下次再误判。
+                    try { File.Delete(statusFilePath); } catch { }
+                    LogHelper.WriteLogToFile("AutoUpdate | 状态文件存在但 zip 缺失，重新下载", LogHelper.LogType.Warning);
                 }
 
                 // 确保更新目录存在
@@ -1259,11 +1322,7 @@ namespace Ink_Canvas.Helpers
                 }
 
                 // 依次尝试每个线路组
-                CancellationToken groupLoopToken;
-                lock (_activeDownloadLock)
-                {
-                    groupLoopToken = _activeDownloadCts?.Token ?? CancellationToken.None;
-                }
+                CancellationToken groupLoopToken = session.Token;
                 foreach (var group in groups)
                 {
                     if (groupLoopToken.IsCancellationRequested)
@@ -1305,7 +1364,7 @@ namespace Ink_Canvas.Helpers
                     }
                     LogHelper.WriteLogToFile($"AutoUpdate | 尝试从线路组 {group.GroupName} 下载: {url}");
 
-                    bool downloadSuccess = await DownloadFile(url, zipFilePath, progressCallback);
+                    bool downloadSuccess = await DownloadFile(url, zipFilePath, progressCallback, session.Token);
 
                     if (groupLoopToken.IsCancellationRequested)
                     {
@@ -1315,6 +1374,19 @@ namespace Ink_Canvas.Helpers
 
                     if (downloadSuccess)
                     {
+                        // SHA256 完整性校验。
+                        // 线路组配发了 Sha256UrlFormat 时 GET sha256 严格校验；
+                        // 未配发但 RequireIntegrity=true（第三方私有镜像）则拒绝安装；
+                        // 未配发且非 RequireIntegrity 时通过但记日志，提醒运维尽快补 sha256。
+                        bool integrityConfirmed = await TryVerifyDownloadSha256Async(group, version, zipFilePath, progressCallback);
+                        if (!integrityConfirmed)
+                        {
+                            LogHelper.WriteLogToFile($"AutoUpdate | 线路组 {group.GroupName} SHA256 校验失败，跳过", LogHelper.LogType.Warning);
+                            try { File.Delete(zipFilePath); } catch { }
+                            SaveDownloadStatus(false);
+                            continue;
+                        }
+
                         SaveDownloadStatus(true);
                         LogHelper.WriteLogToFile($"AutoUpdate | 从线路组 {group.GroupName} 下载成功");
                         progressCallback?.Invoke(100, "下载完成");
@@ -1326,6 +1398,8 @@ namespace Ink_Canvas.Helpers
 
                 LogHelper.WriteLogToFile("AutoUpdate | 所有线路组下载均失败", LogHelper.LogType.Error);
                 progressCallback?.Invoke(0, "所有线路组下载均失败");
+                if (LastDownloadFailure == DownloadFailureReason.None)
+                    SetDownloadFailure(DownloadFailureReason.NetworkOrAllLinesFailed);
                 return false;
             }
             catch (OperationCanceledException)
@@ -1333,6 +1407,7 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile("AutoUpdate | 下载已被用户取消", LogHelper.LogType.Warning);
                 SaveDownloadStatus(false);
                 progressCallback?.Invoke(0, "下载已取消");
+                SetDownloadFailure(DownloadFailureReason.Cancelled);
                 return false;
             }
             catch (Exception ex)
@@ -1345,6 +1420,8 @@ namespace Ink_Canvas.Helpers
 
                 SaveDownloadStatus(false);
                 progressCallback?.Invoke(0, $"下载异常: {ex.Message}");
+                if (LastDownloadFailure == DownloadFailureReason.None)
+                    SetDownloadFailure(DownloadFailureReason.NetworkOrAllLinesFailed);
                 return false;
             }
             finally
@@ -1354,17 +1431,20 @@ namespace Ink_Canvas.Helpers
         }
 
         // 下载文件的具体实现
-        public static async Task<bool> DownloadFile(string fileUrl, string destinationPath, Action<double, string> progressCallback = null)
+        public static async Task<bool> DownloadFile(string fileUrl, string destinationPath, Action<double, string> progressCallback = null, CancellationToken externalToken = default)
         {
             LogHelper.WriteLogToFile($"AutoUpdate | 正在尝试多线程下载: {fileUrl}");
             int maxRetry = 3;
             // 降低并发数，减少网络压力
             int[] threadOptions = { 32, 16, 8, 4, 1 };
 
-            CancellationToken externalToken;
-            lock (_activeDownloadLock)
+            if (externalToken == default)
             {
-                externalToken = _activeDownloadCts?.Token ?? CancellationToken.None;
+                lock (_activeDownloadLock)
+                {
+                    // 兼容无显式令牌的调用：取任一进行中的会话令牌；无会话则不可取消
+                    externalToken = _activeDownloadSessions.FirstOrDefault()?.Token ?? CancellationToken.None;
+                }
             }
 
             // 检查服务器是否支持Range分块下载
@@ -1409,7 +1489,7 @@ namespace Ink_Canvas.Helpers
             {
                 LogHelper.WriteLogToFile("AutoUpdate | 服务器不支持分块下载，自动降级为单线程下载");
                 progressCallback?.Invoke(0, "服务器不支持分块下载，自动降级为单线程下载");
-                return await DownloadSingleThread(fileUrl, destinationPath, totalSize, progressCallback);
+                return await DownloadSingleThread(fileUrl, destinationPath, totalSize, progressCallback, externalToken);
             }
 
             foreach (int threadCount in threadOptions)
@@ -1424,6 +1504,7 @@ namespace Ink_Canvas.Helpers
                 if (totalSize <= 0)
                 {
                     progressCallback?.Invoke(0, "无法获取文件大小，取消下载");
+                    SetDownloadFailure(DownloadFailureReason.NetworkOrAllLinesFailed);
                     return false;
                 }
 
@@ -1598,7 +1679,7 @@ namespace Ink_Canvas.Helpers
                         // 已经是最后一次尝试，降级为单线程
                         LogHelper.WriteLogToFile("AutoUpdate | 所有多线程尝试失败，降级为单线程下载");
                         progressCallback?.Invoke(0, "所有多线程尝试失败，降级为单线程下载");
-                        return await DownloadSingleThread(fileUrl, destinationPath, totalSize, progressCallback);
+                        return await DownloadSingleThread(fileUrl, destinationPath, totalSize, progressCallback, externalToken);
                     }
 
                     LogHelper.WriteLogToFile($"AutoUpdate | {threadCount}线程下载失败，尝试降级为{threadOptions[Array.IndexOf(threadOptions, threadCount) + 1]}线程");
@@ -1606,80 +1687,216 @@ namespace Ink_Canvas.Helpers
                     continue;
                 }
 
-                // 合并所有块
-                try
+                // 合并所有块（带文件锁重试，避免杀软扫描或残留句柄导致占用失败）
+                Exception mergeError = null;
+                for (int mergeAttempt = 0; mergeAttempt < 3; mergeAttempt++)
                 {
-                    using (var output = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                    try
                     {
-                        for (int i = 0; i < blockCount; i++)
+                        // 合并前清理可能残留的目标文件（上一轮失败可能留下被占用的半成品）
+                        if (mergeAttempt > 0)
                         {
-                            string tempPath = destinationPath + $".part{i}";
-                            if (!File.Exists(tempPath))
-                            {
-                                throw new FileNotFoundException($"分块文件不存在: {tempPath}");
-                            }
-
-                            using (var input = new FileStream(tempPath, FileMode.Open, FileAccess.Read))
-                            {
-                                await input.CopyToAsync(output);
-                            }
-                            File.Delete(tempPath);
+                            try { await Task.Delay(1000, externalToken); }
+                            catch (OperationCanceledException) { return false; }
+                            TryDeleteFileWithRetry(destinationPath);
                         }
-                    }
 
-                    progressCallback?.Invoke(100, $"多线程下载完成({threadCount}线程)");
-                    LogHelper.WriteLogToFile($"AutoUpdate | 多线程下载完成({threadCount}线程)");
-
-                    // 文件大小校验
-                    FileInfo fileInfo = new FileInfo(destinationPath);
-                    if (fileInfo.Length != totalSize)
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 文件大小校验失败，本地：{fileInfo.Length}，服务器：{totalSize}", LogHelper.LogType.Error);
-                        File.Delete(destinationPath);
-                        progressCallback?.Invoke(0, "文件大小校验失败，已删除损坏文件");
-                        return false;
-                    }
-
-                    // ZIP文件完整性校验
-                    if (destinationPath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
-                    {
-                        try
+                        using (var output = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None))
                         {
-                            ZipFile.OpenRead(destinationPath).Dispose();
+                            for (int i = 0; i < blockCount; i++)
+                            {
+                                string tempPath = destinationPath + $".part{i}";
+                                if (!File.Exists(tempPath))
+                                {
+                                    throw new FileNotFoundException($"分块文件不存在: {tempPath}");
+                                }
+
+                                using (var input = new FileStream(tempPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                                {
+                                    await input.CopyToAsync(output);
+                                }
+                                TryDeleteFileWithRetry(tempPath);
+                            }
                         }
-                        catch
+
+                        progressCallback?.Invoke(100, $"多线程下载完成({threadCount}线程)");
+                        LogHelper.WriteLogToFile($"AutoUpdate | 多线程下载完成({threadCount}线程)");
+
+                        // 文件大小校验
+                        FileInfo fileInfo = new FileInfo(destinationPath);
+                        if (fileInfo.Length != totalSize)
                         {
-                            LogHelper.WriteLogToFile("AutoUpdate | ZIP文件解压测试失败，文件可能已损坏", LogHelper.LogType.Error);
-                            File.Delete(destinationPath);
-                            progressCallback?.Invoke(0, "ZIP文件解压测试失败，已删除损坏文件");
+                            LogHelper.WriteLogToFile($"AutoUpdate | 文件大小校验失败，本地：{fileInfo.Length}，服务器：{totalSize}", LogHelper.LogType.Error);
+                            TryDeleteFileWithRetry(destinationPath);
+                            progressCallback?.Invoke(0, UpdateStrings.Msg_UpdateIntegrityFailed);
+                            SetDownloadFailure(DownloadFailureReason.IntegrityCheckFailed);
                             return false;
                         }
+
+                        // ZIP文件完整性校验
+                        if (destinationPath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+                        {
+                            try
+                            {
+                                ZipFile.OpenRead(destinationPath).Dispose();
+                            }
+                            catch (Exception zipEx)
+                            {
+                                LogHelper.WriteLogToFile($"AutoUpdate | ZIP文件解压测试失败，文件可能已损坏: {zipEx.Message}", LogHelper.LogType.Error);
+                                TryDeleteFileWithRetry(destinationPath);
+                                progressCallback?.Invoke(0, UpdateStrings.Msg_UpdateIntegrityFailed);
+                                SetDownloadFailure(DownloadFailureReason.IntegrityCheckFailed);
+                                return false;
+                            }
+                        }
+                        return true;
                     }
-                    return true;
+                    catch (Exception ex)
+                    {
+                        mergeError = ex;
+                        LogHelper.WriteLogToFile($"AutoUpdate | 合并分块文件时出错(第{mergeAttempt + 1}次): {ex.Message}", LogHelper.LogType.Warning);
+                        TryDeleteFileWithRetry(destinationPath);
+                        if (externalToken.IsCancellationRequested)
+                        {
+                            progressCallback?.Invoke(0, "下载已取消");
+                            SetDownloadFailure(DownloadFailureReason.Cancelled);
+                            return false;
+                        }
+                        // 仅对文件占用类异常重试；其它异常重试一次后放弃
+                        bool isFileLock = ex is IOException && ex.Message != null &&
+                            (ex.Message.Contains("being used by another process", StringComparison.OrdinalIgnoreCase) ||
+                             ex.Message.Contains("正由另一进程使用", StringComparison.OrdinalIgnoreCase));
+                        if (!isFileLock) break;
+                    }
                 }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"AutoUpdate | 合并分块文件时出错: {ex.Message}", LogHelper.LogType.Error);
-                    File.Delete(destinationPath);
-                    progressCallback?.Invoke(0, $"合并分块文件时出错: {ex.Message}");
-                    return false;
-                }
+                LogHelper.WriteLogToFile($"AutoUpdate | 合并分块文件最终失败: {mergeError?.Message}", LogHelper.LogType.Error);
+                bool finalFileLock = mergeError is IOException && mergeError.Message != null &&
+                    (mergeError.Message.Contains("being used by another process", StringComparison.OrdinalIgnoreCase) ||
+                     mergeError.Message.Contains("正由另一进程使用", StringComparison.OrdinalIgnoreCase));
+                progressCallback?.Invoke(0, finalFileLock
+                        ? UpdateStrings.Msg_UpdateFileInUse
+                        : string.Format(UpdateStrings.Msg_UpdateMergeFailed, mergeError?.Message ?? ""));
+                SetDownloadFailure(finalFileLock ? DownloadFailureReason.FileInUse : DownloadFailureReason.MergeFailed);
+                return false;
             }
             return false;
         }
 
+        /// <summary>
+        /// 删除文件并对文件占用异常做有限重试，避免杀软扫描或残留句柄导致删除失败。
+        /// </summary>
+        private static void TryDeleteFileWithRetry(string path, int maxRetry = 3)
+        {
+            if (string.IsNullOrEmpty(path) || !File.Exists(path)) return;
+            for (int i = 0; i < maxRetry; i++)
+            {
+                try { File.Delete(path); return; }
+                catch (IOException) { try { Thread.Sleep(500); } catch { } }
+                catch { return; }
+            }
+        }
+
+        /// <summary>
+        /// 验证下载包 SHA256：根据 UpdateLineGroup.Sha256UrlFormat 配置决定行为。
+        /// 返回 true 表示通过（齐 SHA256 + 匹配 / 或 RequireIntegrity=false 无文件）；
+        /// 返回 false 表示拒绝（齐 SHA256 但不匹配 / 或 RequireIntegrity=true 但未配 sha256）。
+        /// </summary>
+        private static async Task<bool> TryVerifyDownloadSha256Async(UpdateLineGroup group, string version, string zipFilePath, Action<double, string> progressCallback)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(group?.Sha256UrlFormat))
+                {
+                    if (group.RequireIntegrity)
+                    {
+                        LogHelper.WriteLogToFile(
+                            $"AutoUpdate | 线路组 {group.GroupName} 要求完整性校验但未配置 Sha256UrlFormat，拒绝更新以防镜像被攻破。请联系发布方配发 .sha256 文件后启用。",
+                            LogHelper.LogType.Error);
+                        progressCallback?.Invoke(0, "该线路未发布 SHA256 校验文件，已拒绝（防止镜像被攻破）");
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile(
+                            $"AutoUpdate | 线路组 {group.GroupName} 未配发 SHA256 校验文件，跳过完整性校验（建议发布方补 .sha256 文件）",
+                            LogHelper.LogType.Warning);
+                        return true;
+                    }
+                    return false;
+                }
+
+                var shaUrl = group.Sha256UrlFormat.Contains("{0}")
+                    ? string.Format(group.Sha256UrlFormat, version)
+                    : group.Sha256UrlFormat;
+                if (group.GroupName != StartupStrings.SmartUpdate)
+                    shaUrl = AppendX64SuffixBeforeZipExtension(shaUrl);
+
+                string expectedHash;
+                using (var client = new HttpClient())
+                {
+                    client.Timeout = TimeSpan.FromSeconds(10);
+                    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0");
+                    var shaResp = await client.GetAsync(shaUrl);
+                    if (!shaResp.IsSuccessStatusCode)
+                    {
+                        LogHelper.WriteLogToFile(
+                            $"AutoUpdate | 无法获取 SHA256 文件（{shaUrl}），状态码 {(int)shaResp.StatusCode}",
+                            LogHelper.LogType.Error);
+                        return false;
+                    }
+                    var shaText = (await shaResp.Content.ReadAsStringAsync()).Trim();
+                    // 兼容 `<hash>  filename` 格式（sha256sum 标准输出）
+                    var firstSpace = shaText.IndexOfAny(new[] { ' ', '\t' });
+                    expectedHash = firstSpace > 0 ? shaText[..firstSpace] : shaText;
+                }
+                expectedHash = expectedHash.Replace("-", "").ToLowerInvariant();
+                if (expectedHash.Length != 64)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"AutoUpdate | SHA256 文件格式异常，长度 {expectedHash.Length}：{expectedHash}",
+                        LogHelper.LogType.Error);
+                    return false;
+                }
+
+                string actualHash;
+                using (var sha = System.Security.Cryptography.SHA256.Create())
+                using (var stream = File.OpenRead(zipFilePath))
+                {
+                    actualHash = BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", "").ToLowerInvariant();
+                }
+
+                if (!string.Equals(expectedHash, actualHash, StringComparison.OrdinalIgnoreCase))
+                {
+                    LogHelper.WriteLogToFile(
+                        $"AutoUpdate | SHA256 校验失败: 期望 {expectedHash}，实际 {actualHash}（线路 {group.GroupName}）",
+                        LogHelper.LogType.Error);
+                    return false;
+                }
+
+                LogHelper.WriteLogToFile($"AutoUpdate | SHA256 校验通过（线路 {group.GroupName}）");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | SHA256 校验过程异常: {ex.Message}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
         // 单线程下载方法
-        private static async Task<bool> DownloadSingleThread(string fileUrl, string destinationPath, long totalSize, Action<double, string> progressCallback = null)
+        private static async Task<bool> DownloadSingleThread(string fileUrl, string destinationPath, long totalSize, Action<double, string> progressCallback = null, CancellationToken externalToken = default)
         {
             try
             {
                 LogHelper.WriteLogToFile($"AutoUpdate | 开始单线程下载: {fileUrl}");
                 progressCallback?.Invoke(0, "开始单线程下载");
 
-                CancellationToken token;
-                lock (_activeDownloadLock)
+                CancellationToken token = externalToken;
+                if (token == default)
                 {
-                    token = _activeDownloadCts?.Token ?? CancellationToken.None;
+                    lock (_activeDownloadLock)
+                    {
+                        token = _activeDownloadSessions.FirstOrDefault()?.Token ?? CancellationToken.None;
+                    }
                 }
 
                 using (var client = new HttpClient())
@@ -1727,12 +1944,19 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile("AutoUpdate | 单线程下载已被取消", LogHelper.LogType.Warning);
                 progressCallback?.Invoke(0, "下载已取消");
                 try { if (File.Exists(destinationPath)) File.Delete(destinationPath); } catch { }
+                SetDownloadFailure(DownloadFailureReason.Cancelled);
                 return false;
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"AutoUpdate | 单线程下载失败: {ex.Message}", LogHelper.LogType.Error);
-                progressCallback?.Invoke(0, $"单线程下载失败: {ex.Message}");
+                bool isFileLock = ex is IOException && ex.Message != null &&
+                    (ex.Message.Contains("being used by another process", StringComparison.OrdinalIgnoreCase) ||
+                     ex.Message.Contains("正由另一进程使用", StringComparison.OrdinalIgnoreCase));
+                progressCallback?.Invoke(0, isFileLock
+                    ? UpdateStrings.Msg_UpdateFileInUse
+                    : $"单线程下载失败: {ex.Message}");
+                SetDownloadFailure(isFileLock ? DownloadFailureReason.FileInUse : DownloadFailureReason.NetworkOrAllLinesFailed);
                 return false;
             }
         }
@@ -2460,7 +2684,12 @@ namespace Ink_Canvas.Helpers
                     try
                     {
                         // 配置HttpClientHandler以支持Windows 7
-                        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+                        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) =>
+                            // 只放行"已构建链但系统报 RemoteCertificateChainErrors（含过期/未吊销检查受限）"；
+                            // 链不信任、主机名不匹配、UntrustedRoot 等严格错误继续走系统校验，
+                            // 避免 MITM 在客户端网络内任意注入"更新包"。
+                            sslPolicyErrors == System.Net.Security.SslPolicyErrors.None
+                            || sslPolicyErrors == System.Net.Security.SslPolicyErrors.RemoteCertificateChainErrors;
 
                         using (HttpClient client = new HttpClient(handler))
                         {
@@ -2678,7 +2907,9 @@ namespace Ink_Canvas.Helpers
 
                 using (var handler = new HttpClientHandler())
                 {
-                    handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+                    handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) =>
+                        sslPolicyErrors == System.Net.Security.SslPolicyErrors.None
+                        || sslPolicyErrors == System.Net.Security.SslPolicyErrors.RemoteCertificateChainErrors;
 
                     using (var client = new HttpClient(handler))
                     {

@@ -348,25 +348,66 @@ namespace Ink_Canvas.Helpers
         internal static global::Windows.UI.Input.Inking.Analysis.InkAnalysisInkDrawing FindPrimaryDrawing(
             global::Windows.UI.Input.Inking.Analysis.InkAnalyzer analyzer)
         {
+            if (analyzer?.AnalysisRoot == null)
+                return null;
+
+            // 收集所有非 Drawing 的图形候选（含面积、笔画数）。
+            // 仅按最大包围盒面积选主图形会把"用很多笔画凑出的大包围盒"误判为形状，
+            // 因此在面积 ≥ 最大面积 60% 的候选里，优先选笔画数最少（最紧凑、最像单笔形状）的那个。
+            var candidates = new List<global::Windows.UI.Input.Inking.Analysis.InkAnalysisInkDrawing>();
+            var areaByCandidate = new Dictionary<global::Windows.UI.Input.Inking.Analysis.InkAnalysisInkDrawing, double>();
+            Collect(analyzer.AnalysisRoot);
+            if (candidates.Count == 0)
+                return null;
+
+            double maxArea = -1;
+            foreach (var c in candidates)
+            {
+                var area = areaByCandidate[c];
+                if (area > maxArea) maxArea = area;
+            }
+
             global::Windows.UI.Input.Inking.Analysis.InkAnalysisInkDrawing best = null;
-            double bestArea = -1;
-            if (analyzer?.AnalysisRoot != null)
-                Visit(analyzer.AnalysisRoot);
+            int bestStrokeCount = int.MaxValue;
+            double areaThreshold = maxArea * 0.6;
+            foreach (var c in candidates)
+            {
+                if (areaByCandidate[c] < areaThreshold) continue;
+                var ids = c.GetStrokeIds();
+                int sc = ids?.Count ?? 0;
+                if (sc == 0) sc = int.MaxValue; // 无笔画信息时不作为紧凑度优势
+                if (sc < bestStrokeCount)
+                {
+                    bestStrokeCount = sc;
+                    best = c;
+                }
+            }
+
+            // 退化兜底：没有候选达到 60% 阈值（不应发生），回退最大面积
+            if (best == null)
+            {
+                double bestArea = -1;
+                foreach (var c in candidates)
+                {
+                    if (areaByCandidate[c] > bestArea)
+                    {
+                        bestArea = areaByCandidate[c];
+                        best = c;
+                    }
+                }
+            }
+
             return best;
 
-            void Visit(global::Windows.UI.Input.Inking.Analysis.IInkAnalysisNode node)
+            void Collect(global::Windows.UI.Input.Inking.Analysis.IInkAnalysisNode node)
             {
                 if (node == null) return;
 
                 if (node is global::Windows.UI.Input.Inking.Analysis.InkAnalysisInkDrawing d &&
                     d.DrawingKind != global::Windows.UI.Input.Inking.Analysis.InkAnalysisDrawingKind.Drawing)
                 {
-                    double area = EstimateDrawingArea(d);
-                    if (area > bestArea)
-                    {
-                        bestArea = area;
-                        best = d;
-                    }
+                    candidates.Add(d);
+                    areaByCandidate[d] = EstimateDrawingArea(d);
                 }
 
                 // WinRT IInkAnalysisNode.Children 可能为 null，不可直接 foreach。
@@ -374,7 +415,7 @@ namespace Ink_Canvas.Helpers
                 if (children == null) return;
 
                 foreach (var child in children)
-                    Visit(child);
+                    Collect(child);
             }
         }
 

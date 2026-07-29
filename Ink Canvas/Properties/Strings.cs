@@ -269,6 +269,9 @@ namespace Ink_Canvas.Properties
             dict["Canvas_DisablePressureHint"] = ("CanvasStrings", "Canvas_DisablePressureHint");
             dict["Canvas_EnablePressureTouch"] = ("CanvasStrings", "Canvas_EnablePressureTouch");
             dict["Canvas_EnablePressureTouchHint"] = ("CanvasStrings", "Canvas_EnablePressureTouchHint");
+            dict["Canvas_EnableNativeInkPrediction"] = ("CanvasStrings", "Canvas_EnableNativeInkPrediction");
+            dict["Canvas_EnableNativeInkPredictionHint"] = ("CanvasStrings", "Canvas_EnableNativeInkPredictionHint");
+            dict["Canvas_WetInkRendererFailed"] = ("CanvasStrings", "Canvas_WetInkRendererFailed");
             dict["Canvas_EraserSize"] = ("CanvasStrings", "Canvas_EraserSize");
             dict["Canvas_EraserSize_Large"] = ("CanvasStrings", "Canvas_EraserSize_Large");
             dict["Canvas_EraserSize_Medium"] = ("CanvasStrings", "Canvas_EraserSize_Medium");

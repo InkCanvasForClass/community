@@ -9,6 +9,12 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.Magnification;
+using Windows.Win32.UI.WindowsAndMessaging;
+using Point = System.Windows.Point;
+using Rect = System.Windows.Rect;
 
 namespace Ink_Canvas.Windows
 {
@@ -23,31 +29,31 @@ namespace Ink_Canvas.Windows
         private const int WS_CHILD = 0x40000000;
         private const int WS_VISIBLE = 0x10000000;
 
-        [StructLayout(LayoutKind.Sequential)]
-        private struct RECT { public int left, top, right, bottom; public RECT(int l, int t, int r, int b) { left = l; top = t; right = r; bottom = b; } }
+        //[StructLayout(LayoutKind.Sequential)]
+        //private struct RECT { public int left, top, right, bottom; public RECT(int l, int t, int r, int b) { left = l; top = t; right = r; bottom = b; } }
 
-        [StructLayout(LayoutKind.Sequential)]
-        private struct MAGTRANSFORM
-        {
-            public float m00, m01, m02;
-            public float m10, m11, m12;
-            public float m20, m21, m22;
-        }
+        //[StructLayout(LayoutKind.Sequential)]
+        //private struct MAGTRANSFORM
+        //{
+        //    public float m00, m01, m02;
+        //    public float m10, m11, m12;
+        //    public float m20, m21, m22;
+        //}
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern IntPtr CreateWindowEx(int dwExStyle, string lpClassName, string lpWindowName, int dwStyle,
-            int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam);
+        //[DllImport("user32.dll", SetLastError = true)]
+        //private static extern IntPtr CreateWindowEx(int dwExStyle, string lpClassName, string lpWindowName, int dwStyle,
+        //    int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam);
 
-        [DllImport("user32.dll")] private static extern bool DestroyWindow(IntPtr hWnd);
-        [DllImport("user32.dll")] private static extern bool MoveWindow(IntPtr hWnd, int x, int y, int w, int h, bool repaint);
-        [DllImport("user32.dll")] private static extern bool InvalidateRect(IntPtr hWnd, IntPtr lpRect, bool bErase);
+        //[DllImport("user32.dll")] private static extern bool DestroyWindow(IntPtr hWnd);
+        //[DllImport("user32.dll")] private static extern bool MoveWindow(IntPtr hWnd, int x, int y, int w, int h, bool repaint);
+        //[DllImport("user32.dll")] private static extern bool InvalidateRect(IntPtr hWnd, IntPtr lpRect, bool bErase);
 
-        [DllImport("Magnification.dll")] private static extern bool MagInitialize();
-        [DllImport("Magnification.dll")] private static extern bool MagUninitialize();
-        [DllImport("Magnification.dll")] private static extern bool MagSetWindowSource(IntPtr hwnd, RECT rect);
-        [DllImport("Magnification.dll")] private static extern bool MagSetWindowTransform(IntPtr hwnd, ref MAGTRANSFORM pTransform);
-        [DllImport("Magnification.dll")] private static extern bool MagSetWindowFilterList(IntPtr hwnd, int dwFilterMode, int count, IntPtr[] pHWND);
-        private const int MW_FILTERMODE_EXCLUDE = 0;
+        //[DllImport("Magnification.dll")] private static extern bool MagInitialize();
+        //[DllImport("Magnification.dll")] private static extern bool MagUninitialize();
+        //[DllImport("Magnification.dll")] private static extern bool MagSetWindowSource(IntPtr hwnd, RECT rect);
+        //[DllImport("Magnification.dll")] private static extern bool MagSetWindowTransform(IntPtr hwnd, ref MAGTRANSFORM pTransform);
+        //[DllImport("Magnification.dll")] private static extern bool MagSetWindowFilterList(IntPtr hwnd, int dwFilterMode, int count, IntPtr[] pHWND);
+        //private const int MW_FILTERMODE_EXCLUDE = 0;
 
         #endregion
 
@@ -287,7 +293,7 @@ namespace Ink_Canvas.Windows
             PositionHandle(7, _boxLeft, _boxTop + _boxHeight / 2);             // W
 
             // 工具栏：选择框正下方居中；若超出则放上方
-            _toolbar.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            _toolbar.Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
             double tw = _toolbar.DesiredSize.Width, th = _toolbar.DesiredSize.Height;
             double tx = _boxLeft + _boxWidth / 2 - tw / 2;
             double ty = _boxTop + _boxHeight + 12;
@@ -432,23 +438,23 @@ namespace Ink_Canvas.Windows
             public IntPtr MagHwnd { get; private set; }
             public MagnifierHost(MagnifierWindow owner) { _owner = owner; }
 
-            protected override HandleRef BuildWindowCore(HandleRef hwndParent)
+            protected unsafe override HandleRef BuildWindowCore(HandleRef hwndParent)
             {
-                if (!MagInitialize()) throw new InvalidOperationException("MagInitialize 失败");
+                if (!PInvoke.MagInitialize()) throw new InvalidOperationException("MagInitialize 失败");
                 _owner._magInitialized = true;
 
-                MagHwnd = CreateWindowEx(
+                MagHwnd = PInvoke.CreateWindowEx(
                     0, MagnifierClassName, "ICCMagnifier",
-                    WS_CHILD | WS_VISIBLE,
+                    WINDOW_STYLE.WS_CHILD | WINDOW_STYLE.WS_VISIBLE,
                     0, 0, 100, 100,
-                    hwndParent.Handle, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+                    new HWND(hwndParent.Handle), null, null, null);
                 _owner._magHwnd = MagHwnd;
                 return new HandleRef(this, MagHwnd);
             }
 
             protected override void DestroyWindowCore(HandleRef hwnd)
             {
-                if (hwnd.Handle != IntPtr.Zero) DestroyWindow(hwnd.Handle);
+                if (hwnd.Handle != IntPtr.Zero) PInvoke.DestroyWindow(new HWND(hwnd.Handle));
                 MagHwnd = IntPtr.Zero;
             }
         }
@@ -459,29 +465,32 @@ namespace Ink_Canvas.Windows
             _hwndSource = (HwndSource)PresentationSource.FromVisual(this);
             ApplyTransform();
             if (_hwndSource != null && _magHwnd != IntPtr.Zero)
-                MagSetWindowFilterList(_magHwnd, MW_FILTERMODE_EXCLUDE, 1, new[] { _hwndSource.Handle });
+            {
+                HWND pHandle = new HWND(_hwndSource.Handle);
+                PInvoke.MagSetWindowFilterList(new HWND(_magHwnd), MW_FILTERMODE.MW_FILTERMODE_EXCLUDE, 1, ref pHandle);
+            }
+
 
             _timer = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(33) };
             _timer.Tick += OnTick;
             _timer.Start();
         }
 
-        private void ApplyTransform()
+        private unsafe void ApplyTransform()
         {
             if (_magHwnd == IntPtr.Zero) return;
-            var m = new MAGTRANSFORM
-            {
-                m00 = _zoom,
-                m01 = 0,
-                m02 = 0,
-                m10 = 0,
-                m11 = _zoom,
-                m12 = 0,
-                m20 = 0,
-                m21 = 0,
-                m22 = 1.0f
-            };
-            MagSetWindowTransform(_magHwnd, ref m);
+            var m = new MAGTRANSFORM();
+
+            m.v[0] = _zoom;
+            m.v[1] = 0f;
+            m.v[2] = 0f;
+            m.v[3] = 0f;
+            m.v[4] = _zoom;
+            m.v[5] = 0f;
+            m.v[6] = 0f;
+            m.v[7] = 0f;
+            m.v[8] = 1.0f;
+            PInvoke.MagSetWindowTransform(new HWND(_magHwnd), ref m);
         }
 
         private void OnTick(object sender, EventArgs e)
@@ -504,8 +513,8 @@ namespace Ink_Canvas.Windows
             int cy = (int)((tl.Y + br.Y) / 2);
             var src = new RECT(cx - srcW / 2, cy - srcH / 2,
                                cx - srcW / 2 + srcW, cy - srcH / 2 + srcH);
-            MagSetWindowSource(_magHwnd, src);
-            InvalidateRect(_magHwnd, IntPtr.Zero, false);
+            PInvoke.MagSetWindowSource(new HWND(_magHwnd), src);
+            unsafe { PInvoke.InvalidateRect(new HWND(_magHwnd), (RECT*)IntPtr.Zero.ToPointer(), false); }
         }
 
         #endregion
@@ -513,7 +522,7 @@ namespace Ink_Canvas.Windows
         protected override void OnClosed(EventArgs e)
         {
             if (_timer != null) { _timer.Stop(); _timer.Tick -= OnTick; _timer = null; }
-            if (_magInitialized) { MagUninitialize(); _magInitialized = false; }
+            if (_magInitialized) { PInvoke.MagUninitialize(); _magInitialized = false; }
             base.OnClosed(e);
         }
     }

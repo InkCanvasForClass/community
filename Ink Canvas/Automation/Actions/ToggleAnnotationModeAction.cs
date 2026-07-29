@@ -41,7 +41,7 @@ namespace Ink_Canvas.WorkflowAutomation.Actions
 
                     if (s.EnterAnnotation)
                     {
-                        mw.inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                        mw.inkCanvas.EditingMode = InkCanvasEditingMode.None;
                     }
                     else
                     {
@@ -69,7 +69,7 @@ namespace Ink_Canvas.WorkflowAutomation.Actions
                     }
                     else
                     {
-                        mw.inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                        mw.inkCanvas.EditingMode = InkCanvasEditingMode.None;
                     }
                 });
 

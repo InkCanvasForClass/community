@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using Windows.Win32;
 
 namespace Ink_Canvas.Helpers
 {
@@ -255,7 +255,7 @@ namespace Ink_Canvas.Helpers
                     return null;
                 }
 
-                if (GetVolumeInformation(rootPath, null, 0, out uint serialNumber, out _, out _, null, 0))
+                if (PInvoke.GetVolumeInformation(rootPath, null, out uint serialNumber, out _, out _, null))
                 {
                     return serialNumber.ToString("X8");
                 }
@@ -267,16 +267,16 @@ namespace Ink_Canvas.Helpers
             return null;
         }
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern bool GetVolumeInformation(
-            string rootPathName,
-            StringBuilder volumeNameBuffer,
-            uint volumeNameSize,
-            out uint volumeSerialNumber,
-            out uint maximumComponentLength,
-            out uint fileSystemFlags,
-            StringBuilder fileSystemNameBuffer,
-            uint nFileSystemNameSize);
+        //[DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        //private static extern bool GetVolumeInformation(
+        //    string rootPathName,
+        //    StringBuilder volumeNameBuffer,
+        //    uint volumeNameSize,
+        //    out uint volumeSerialNumber,
+        //    out uint maximumComponentLength,
+        //    out uint fileSystemFlags,
+        //    StringBuilder fileSystemNameBuffer,
+        //    uint nFileSystemNameSize);
 
         /// <summary>
         /// 基于硬件指纹生成25字符的设备ID

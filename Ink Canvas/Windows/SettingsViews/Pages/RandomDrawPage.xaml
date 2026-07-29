@@ -87,6 +87,24 @@
                     </ui:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="{x:Static props:RandomStrings.Random_Roster_SectionHeader}" />
+
+                    <ui:SettingsCard Header="{x:Static props:RandomStrings.Random_Roster_SelectLabel}">
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Button x:Name="ButtonAddNameRoster" Content="{x:Static props:RandomStrings.Random_Roster_Add}" Click="ButtonAddNameRoster_Click" />
+                            <Button x:Name="ButtonManageNameRosters" Content="{x:Static props:RandomStrings.Random_Roster_Manage}" Click="ButtonManageNameRosters_Click" />
+                            <ComboBox x:Name="ComboBoxNameRoster"
+                                      MinWidth="160"
+                                      SelectedIndex="0"
+                                      SelectionChanged="ComboBoxNameRoster_SelectionChanged" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <TextBlock Text="{x:Static props:RandomStrings.Random_Roster_Hint}"
+                               Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                               TextWrapping="Wrap" Margin="1,0,0,4" />
+
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:RandomStrings.Random_BackgroundSettingsTitle}" />
 
                     <ui:SettingsCard Header="{x:Static props:RandomStrings.Random_BackgroundSelectLabel}">

@@ -18,9 +18,9 @@ using System.Windows.Ink;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Windows.Win32;
 using Application = System.Windows.Application;
 using File = System.IO.File;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using MouseButtonEventArgs = System.Windows.Input.MouseButtonEventArgs;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 
@@ -29,62 +29,62 @@ namespace Ink_Canvas
     public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
         #region Win32 API Declarations
-        [DllImport("user32.dll")]
-        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+        //[DllImport("user32.dll")]
+        //private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
-        [DllImport("user32.dll")]
-        private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+        //[DllImport("user32.dll")]
+        //private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 
-        [DllImport("user32.dll")]
-        private static extern uint GetDpiForWindow(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //private static extern uint GetDpiForWindow(IntPtr hWnd);
 
-        [StructLayout(LayoutKind.Sequential)]
-        private struct RECT
-        {
-            public int Left, Top, Right, Bottom;
-        }
+        //[StructLayout(LayoutKind.Sequential)]
+        //private struct RECT
+        //{
+        //    public int Left, Top, Right, Bottom;
+        //}
 
-        [DllImport("user32.dll")]
-        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+        //[DllImport("user32.dll")]
+        //private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
-        [DllImport("user32.dll")]
-        private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+        //[DllImport("user32.dll")]
+        //private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
 
-        [DllImport("user32.dll")]
-        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+        //[DllImport("user32.dll")]
+        //private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
 
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool IsWindowVisible(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //[return: MarshalAs(UnmanagedType.Bool)]
+        //private static extern bool IsWindowVisible(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        private static extern bool IsIconic(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //private static extern bool IsIconic(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        private static extern bool IsZoomed(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //private static extern bool IsZoomed(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetForegroundWindow();
+        //[DllImport("user32.dll")]
+        //private static extern IntPtr GetForegroundWindow();
 
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetWindow(IntPtr hWnd, uint uCmd);
+        //[DllImport("user32.dll")]
+        //private static extern IntPtr GetWindow(IntPtr hWnd, uint uCmd);
 
-        [DllImport("user32.dll")]
-        private static extern bool IsWindow(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //private static extern bool IsWindow(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        private static extern bool GetWindowRect(IntPtr hWnd, out ForegroundWindowInfo.RECT lpRect);
+        //[DllImport("user32.dll")]
+        //private static extern bool GetWindowRect(IntPtr hWnd, out ForegroundWindowInfo.RECT lpRect);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
+        //[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        //private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
 
-        private const int GWL_STYLE = -16;
-        private const int WS_VISIBLE = 0x10000000;
-        private const int WS_MINIMIZE = 0x20000000;
-        private const uint GW_HWNDNEXT = 2;
-        private const uint GW_HWNDPREV = 3;
+        //private const int GWL_STYLE = -16;
+        //private const int WS_VISIBLE = 0x10000000;
+        //private const int WS_MINIMIZE = 0x20000000;
+        //private const uint GW_HWNDNEXT = 2;
+        //private const uint GW_HWNDPREV = 3;
 
-        private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+        //private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
         #endregion
 
         #region PPT Application Variables
@@ -460,7 +460,7 @@ namespace Ink_Canvas
                 // 直接设置PPTManager的PPTApplication属性，绕过COM注册问题
                 Task.Delay(1000).ContinueWith(_ =>
                 {
-                    Dispatcher.Invoke(() =>
+                    Dispatcher.BeginInvoke(() =>
                     {
                         try
                         {
@@ -896,13 +896,13 @@ namespace Ink_Canvas
             try
             {
                 bool found = false;
-                EnumWindows((hWnd, _) =>
+                PInvoke.EnumWindows((hWnd, _) =>
                 {
-                    if (!IsWindow(hWnd) || !IsWindowVisible(hWnd))
+                    if (!PInvoke.IsWindow(hWnd) || !PInvoke.IsWindowVisible(hWnd))
                         return true;
 
                     var cls = new StringBuilder(256);
-                    if (GetClassName(hWnd, cls, cls.Capacity) == 0)
+                    if (PInvoke.GetClassName(hWnd, new Span<char>(cls.ToString().ToCharArray())) == 0)
                         return true;
 
                     if (!string.Equals(cls.ToString(), PowerPointSlideShowWindowClassName, StringComparison.OrdinalIgnoreCase))
@@ -910,7 +910,7 @@ namespace Ink_Canvas
 
                     try
                     {
-                        GetWindowThreadProcessId(hWnd, out uint pid);
+                        PInvoke.GetWindowThreadProcessId(hWnd, out uint pid);
                         using (var proc = Process.GetProcessById((int)pid))
                         {
                             var name = proc.ProcessName;
@@ -1392,11 +1392,11 @@ namespace Ink_Canvas
                     // 仅PPT模式：放映开始立即同步主窗口可见性（勿仅依赖 SlideShowStateChanged 定时器）
                     CheckMainWindowVisibility();
 
-                    // 刷新智慧模式区域
+                    // 刷新智慧模式区域（改为异步版本，避免 GetSmartRegions 同步阻塞 UI）。
                     if (Settings.PowerPointSettings.EnableSmartMode)
                     {
                         System.Diagnostics.Debug.WriteLine("[SmartMode] SlideShowBegin, refreshing regions...");
-                        RefreshSmartModeRegions();
+                        _ = RefreshSmartModeRegionsAsync();
                     }
                 });
 
@@ -1405,7 +1405,7 @@ namespace Ink_Canvas
                     new Thread(() =>
                     {
                         Thread.Sleep(100);
-                        Application.Current.Dispatcher.Invoke(() =>
+                        Application.Current.Dispatcher.BeginInvoke(() =>
                         {
                             ViewboxFloatingBarMarginAnimation(60);
                         });
@@ -1537,9 +1537,12 @@ namespace Ink_Canvas
                 _previousSlideID = currentSlide;
                 NotifyPluginSlideChanged(currentSlide);
 
-                // 刷新智慧模式区域（翻页时视频控件可能变化）
+                // 刷新智慧模式区域（翻页时视频控件可能变化）。
+                // 翻页本身已是 UI 线程路径，这里改走异步版本避免每次翻页同步阻塞
+                // GetSmartRegions() 最长 4s。缓存仍由 UpdateTaskAwaiter/BuildSmartModeRects 提供，
+                // 首次异步结果到达前的若干页鼠标悬停判定退化为"按上一次缓存 + 缺省矩形"。
                 if (Settings.PowerPointSettings.EnableSmartMode)
-                    Application.Current.Dispatcher.InvokeAsync(() => RefreshSmartModeRegions());
+                    Application.Current.Dispatcher.InvokeAsync(() => _ = RefreshSmartModeRegionsAsync());
 
                 // 转发PPT翻页事件到小白板（如果已打开且启用了联动）
                 _miniWhiteboardWindow?.OnPPTSlideChangedExternal(currentSlide - 1);
@@ -1567,8 +1570,6 @@ namespace Ink_Canvas
                     return;
                 }
 
-                LogHelper.WriteLogToFile($"[SmartMode] 开始刷新, PPTLinkMode={Settings.PowerPointSettings.PPTLinkMode}, Manager={_pptManager?.GetType().Name}", LogHelper.LogType.Info);
-
                 if (_pptManager is PPTAgentLinkManager agentManager)
                 {
                     var response = agentManager.GetSmartRegions();
@@ -1592,11 +1593,10 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    // COM/ROT 模式：尝试直接通过 COM interop 获取视频区域
-                    LogHelper.WriteLogToFile("[SmartMode] 非 Agent 模式，尝试 COM 直接获取", LogHelper.LogType.Info);
+                    // COM/ROT 模式：直接获取视频区域
                     _smartModeRegions = GetVideoRegionsViaCom();
                     _smartModeSlideIndex = _currentSlideShowPosition;
-                    if (_smartModeRegions != null)
+                    if (_smartModeRegions != null && _smartModeRegions.Count > 0)
                         LogHelper.WriteLogToFile($"[SmartMode] COM 获取到 {_smartModeRegions.Count} 个区域", LogHelper.LogType.Info);
                 }
             }
@@ -1616,6 +1616,71 @@ namespace Ink_Canvas
             else
             {
                 Application.Current.Dispatcher.InvokeAsync(() => BuildSmartModeRects());
+            }
+        }
+
+        /// <summary>
+        /// 异步刷新智能模式视频控件区域：核心网络/共享内存访问放到线程池，避免 UI 线程被
+        /// GetSmartRegions 同步阻塞最多 4s。缓存命中仍由旧数据负责动画判定，
+        /// 此方法只负责后台拉取 + UI 线程应用结果。
+        /// </summary>
+        private async Task RefreshSmartModeRegionsAsync()
+        {
+            try
+            {
+                if (!Settings.PowerPointSettings.EnableSmartMode)
+                {
+                    _smartModeRegions = null;
+                    _smartModeSlideIndex = -1;
+                    return;
+                }
+
+                List<SmartRegion> regions = null;
+                int slideIndex = -1;
+                float slideWidth = 0f, slideHeight = 0f;
+                IntPtr slideShowHwnd = IntPtr.Zero;
+
+                await Task.Run(() =>
+                {
+                    try
+                    {
+                        if (_pptManager is PPTAgentLinkManager agentManager)
+                        {
+                            var response = agentManager.GetSmartRegions();
+                            if (response?.Regions != null && response.Regions.Count > 0)
+                            {
+                                regions = response.Regions;
+                                slideIndex = response.SlideIndex;
+                                slideWidth = response.SlideWidth;
+                                slideHeight = response.SlideHeight;
+                                slideShowHwnd = new IntPtr(response.SlideShowWindowHandle);
+                                return;
+                            }
+                        }
+                        regions = GetVideoRegionsViaCom();
+                        slideIndex = _currentSlideShowPosition;
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[SmartMode] 后台刷新异常: {ex}", LogHelper.LogType.Warning);
+                    }
+                });
+
+                if (regions == null) return;
+
+                _smartModeRegions = regions;
+                _smartModeSlideIndex = slideIndex;
+                _smartModeSlideWidth = slideWidth;
+                _smartModeSlideHeight = slideHeight;
+                _smartModeSlideShowHwnd = slideShowHwnd;
+
+                // BuildSmartModeRects 必须在 UI 线程执行。
+                if (Dispatcher.CheckAccess()) BuildSmartModeRects();
+                else await Dispatcher.InvokeAsync(() => BuildSmartModeRects());
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[SmartMode] 异步刷新失败: {ex}", LogHelper.LogType.Warning);
             }
         }
 
@@ -1707,14 +1772,14 @@ namespace Ink_Canvas
             IntPtr best = IntPtr.Zero;
             try
             {
-                EnumWindows((hWnd, lParam) =>
+                PInvoke.EnumWindows((hWnd, lParam) =>
                 {
                     if (hWnd == IntPtr.Zero) return true;
-                    if (!IsWindowVisible(hWnd)) return true;
-                    if (IsIconic(hWnd)) return true;
+                    if (!PInvoke.IsWindowVisible(hWnd)) return true;
+                    if (PInvoke.IsIconic(hWnd)) return true;
 
                     var sb = new StringBuilder(64);
-                    if (GetClassName(hWnd, sb, sb.Capacity) == 0) return true;
+                    if (PInvoke.GetClassName(hWnd, new Span<char>(sb.ToString().ToCharArray())) == 0) return true;
                     if (!string.Equals(sb.ToString(), PowerPointSlideShowWindowClassName, StringComparison.Ordinal)) return true;
 
                     best = hWnd;
@@ -1883,26 +1948,33 @@ namespace Ink_Canvas
                             if (!Directory.Exists(folderPathForSave))
                                 Directory.CreateDirectory(folderPathForSave);
 
+                            // 先在锁内快照出 (页码, 字节) 列表，再在锁外做磁盘 IO。
+                            // 之前在 lock 内直接 File.WriteAllBytes 把磁盘 IO 与字典保护混在一起，
+                            // 磁盘繁忙/AV 扫描锁定文件时 _memoryStreams 被独占数十秒，
+                            // 期间 OnPPTSlideShowNextSlide/ExitPPTPresentation 任何持锁访问全卡死。
+                            var snapshot = new List<(int page, byte[] bytes)>();
                             lock (_memoryStreams)
                             {
                                 for (int i = 1; i <= totalSlidesForSave; i++)
                                 {
                                     if (_memoryStreams.TryGetValue(i, out MemoryStream value) && value != null)
-                                    {
-                                        try
-                                        {
-                                            byte[] allBytes = value.ToArray();
-                                            string filePath = Path.Combine(folderPathForSave, i.ToString("0000") + ".icstk");
-                                            if (allBytes.Length > 8)
-                                                File.WriteAllBytes(filePath, allBytes);
-                                            else if (File.Exists(filePath))
-                                                File.Delete(filePath);
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            LogHelper.WriteLogToFile($"为第 {i} 页保存墨迹文件失败: {ex}", LogHelper.LogType.Warning);
-                                        }
-                                    }
+                                        snapshot.Add((i, value.ToArray()));
+                                }
+                            }
+
+                            foreach (var (page, bytes) in snapshot)
+                            {
+                                try
+                                {
+                                    string filePath = Path.Combine(folderPathForSave, page.ToString("0000") + ".icstk");
+                                    if (bytes.Length > 8)
+                                        File.WriteAllBytes(filePath, bytes);
+                                    else if (File.Exists(filePath))
+                                        File.Delete(filePath);
+                                }
+                                catch (Exception ex)
+                                {
+                                    LogHelper.WriteLogToFile($"为第 {page} 页保存墨迹文件失败: {ex}", LogHelper.LogType.Warning);
                                 }
                             }
                         }
@@ -2003,7 +2075,7 @@ namespace Ink_Canvas
                         {
                             Task.Delay(350).ContinueWith(_ =>
                             {
-                                Application.Current.Dispatcher.Invoke(() =>
+                                Application.Current.Dispatcher.BeginInvoke(() =>
                                 {
                                     if (!isFloatingBarFolded)
                                     {
@@ -2223,14 +2295,20 @@ namespace Ink_Canvas
             try
             {
                 bool hasHiddenSlides = agentState?.HasHiddenSlides == true;
-                if (!hasHiddenSlides && pres?.Slides != null)
+
+                // PPT 刚打开时 COM RCW 可能尚未稳定，延迟一小段时间再访问 Slides
+                if (!hasHiddenSlides)
                 {
-                    foreach (Slide slide in pres.Slides)
+                    await Task.Delay(500);
+                    if (pres?.Slides != null)
                     {
-                        if (slide.SlideShowTransition.Hidden == MsoTriState.msoTrue)
+                        foreach (Slide slide in pres.Slides)
                         {
-                            hasHiddenSlides = true;
-                            break;
+                            if (slide.SlideShowTransition.Hidden == MsoTriState.msoTrue)
+                            {
+                                hasHiddenSlides = true;
+                                break;
+                            }
                         }
                     }
                 }
@@ -2299,15 +2377,21 @@ namespace Ink_Canvas
                 if (IsInPPTPresentationMode) return;
 
                 bool hasSlideTimings = agentState?.HasAutoPlayTimings == true;
-                if (!hasSlideTimings && pres?.Slides != null)
+
+                // PPT 刚打开时 COM RCW 可能尚未稳定，延迟一小段时间再访问 Slides
+                if (!hasSlideTimings)
                 {
-                    foreach (Slide slide in pres.Slides)
+                    await Task.Delay(500);
+                    if (pres?.Slides != null)
                     {
-                        if (slide.SlideShowTransition.AdvanceOnTime == MsoTriState.msoTrue &&
-                            slide.SlideShowTransition.AdvanceTime > 0)
+                        foreach (Slide slide in pres.Slides)
                         {
-                            hasSlideTimings = true;
-                            break;
+                            if (slide.SlideShowTransition.AdvanceOnTime == MsoTriState.msoTrue &&
+                                slide.SlideShowTransition.AdvanceTime > 0)
+                            {
+                                hasSlideTimings = true;
+                                break;
+                            }
                         }
                     }
                 }
@@ -2612,7 +2696,10 @@ namespace Ink_Canvas
                 }
             }
 
-            Task.Run(() =>
+            // 改用 STA worker 跑 COM 翻页：Task.Run 跑到 MTA 线程池会触发 RPC_E_WRONG_THREAD，
+            // COM 模式 PPTManager.TryNavigatePrevious 直接调 SlideShowWindows.View.Next()，
+            // 跨单元封送在 PPT 忙于播放动画时超时或掉线。RunOnStaAsync 在文件内已定义。
+            RunOnStaAsync(() =>
             {
                 try
                 {
@@ -2627,8 +2714,10 @@ namespace Ink_Canvas
             {
                 Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
+                    // IsFaulted 由前面的 if 单独处理；剩余两种终态中 RanToCompletion 才允许读 Result，
+                    // Canceled 直接走"切换失败"分支，避免 t.Result 再次抛 OperationCanceledException。
                     if (t.IsFaulted) { _pptUIManager?.UpdateConnectionStatus(false); return; }
-                    if (t.Result)
+                    if (t.IsCompletedSuccessfully && t.Result)
                     {
                         if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) ExceptionHandler.TryExecute(() => this.Activate(), "激活主窗口失败（PPT 上一页时）");
                     }
@@ -2663,7 +2752,8 @@ namespace Ink_Canvas
                 }
             }
 
-            Task.Run(() =>
+            // 同 BtnPPTSlidesUp_Click：用 STA worker 跑 COM 翻页，避免 MTA RPC_E_WRONG_THREAD。
+            RunOnStaAsync(() =>
             {
                 try
                 {
@@ -2678,8 +2768,10 @@ namespace Ink_Canvas
             {
                 Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
+                    // IsFaulted 由前面的 if 单独处理；Canceled 走"切换失败"分支，
+                    // 只有 RanToCompletion 才允许读 t.Result。
                     if (t.IsFaulted) { _pptUIManager?.UpdateConnectionStatus(false); return; }
-                    if (t.Result)
+                    if (t.IsCompletedSuccessfully && t.Result)
                     {
                         if (Settings.PowerPointSettings.SkipAnimationsWhenGoNext) ExceptionHandler.TryExecute(() => this.Activate(), "激活主窗口失败（PPT 下一页时）");
                     }
@@ -3182,7 +3274,9 @@ namespace Ink_Canvas
                 if (ReferenceEquals(_pptEnhancedPreviewBuildTask, task))
                     _pptEnhancedPreviewBuildTask = null;
 
-                if (task.Status == TaskStatus.RanToCompletion)
+                // 用 IsCompletedSuccessfully 而非 Status == RanToCompletion：前者排除 Canceled，
+                // 后者会读取 task.Result，对 Canceled 任务会再次抛 OperationCanceledException。
+                if (task.IsCompletedSuccessfully)
                 {
                     var result = task.Result;
                     if (generation == _pptEnhancedPreviewCacheGeneration && result != null && result.Count > 0)
@@ -3333,7 +3427,10 @@ namespace Ink_Canvas
         /// </remarks>
         private void BtnPPTSlideShow_Click(object sender, RoutedEventArgs e)
         {
-            new Thread(() =>
+            // TryStartSlideShow 在 COM/ROT 模式下会调用 PPT COM 对象，必须在 STA 线程跑，
+            // 否则会偶发 0x8001010E (RPC_E_WRONG_THREAD) 导致联动掉线。
+            // 默认 new Thread 是 MTA，需显式 SetApartmentState。
+            var t = new Thread(() =>
             {
                 try
                 {
@@ -3346,7 +3443,9 @@ namespace Ink_Canvas
                 {
                     LogHelper.WriteLogToFile($"启动幻灯片放映异常: {ex}", LogHelper.LogType.Error);
                 }
-            }).Start();
+            });
+            t.SetApartmentState(ApartmentState.STA);
+            t.Start();
         }
 
         public async Task ExitPPTPresentation()
@@ -3365,9 +3464,12 @@ namespace Ink_Canvas
                             var ms = new MemoryStream();
                             inkCanvas.Strokes.Save(ms);
                             ms.Position = 0;
-                            if (_memoryStreams.ContainsKey(currentSlide))
-                                _memoryStreams[currentSlide]?.Dispose();
-                            _memoryStreams[currentSlide] = ms;
+                            lock (_memoryStreams)
+                            {
+                                if (_memoryStreams.ContainsKey(currentSlide))
+                                    _memoryStreams[currentSlide]?.Dispose();
+                                _memoryStreams[currentSlide] = ms;
+                            }
                         }
                         timeMachine.ClearStrokeHistory();
                     }
@@ -3380,9 +3482,12 @@ namespace Ink_Canvas
                                 var ms = new MemoryStream();
                                 inkCanvas.Strokes.Save(ms);
                                 ms.Position = 0;
-                                if (_memoryStreams.ContainsKey(currentSlide))
-                                    _memoryStreams[currentSlide]?.Dispose();
-                                _memoryStreams[currentSlide] = ms;
+                                lock (_memoryStreams)
+                                {
+                                    if (_memoryStreams.ContainsKey(currentSlide))
+                                        _memoryStreams[currentSlide]?.Dispose();
+                                    _memoryStreams[currentSlide] = ms;
+                                }
                             }
                             timeMachine.ClearStrokeHistory();
                         });

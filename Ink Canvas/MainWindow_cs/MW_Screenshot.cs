@@ -89,9 +89,24 @@ namespace Ink_Canvas
 
                     if (strokesToSave != null && !string.IsNullOrEmpty(strokeSavePath))
                     {
-                        using (var fs = new FileStream(strokeSavePath, FileMode.Create))
+                        // 原子写：tmp + File.Replace/Move，避免 FileMode.Create 直接截断后
+                        // 写入中途失败（磁盘满/进程被杀）让 .icstk 停在 0 字节。
+                        var tmpStrokePath = strokeSavePath + ".tmp";
+                        try
                         {
-                            strokesToSave.Save(fs);
+                            using (var fs = new FileStream(tmpStrokePath, FileMode.Create))
+                            {
+                                strokesToSave.Save(fs);
+                            }
+                            if (File.Exists(strokeSavePath))
+                                File.Replace(tmpStrokePath, strokeSavePath, null);
+                            else
+                                File.Move(tmpStrokePath, strokeSavePath);
+                        }
+                        catch
+                        {
+                            try { if (File.Exists(tmpStrokePath)) File.Delete(tmpStrokePath); } catch { }
+                            throw;
                         }
                     }
 

@@ -3,47 +3,49 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text;
+//using System.Runtime.InteropServices.ComTypes;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
 
 namespace Ink_Canvas.Helpers
 {
     public static class PPTROTConnectionHelper
     {
         #region Win32 API Declarations
-        [DllImport("ole32.dll")]
-        private static extern int GetRunningObjectTable(int reserved, out IRunningObjectTable prot);
+        //[DllImport("ole32.dll")]
+        //private static extern int GetRunningObjectTable(int reserved, out IRunningObjectTable prot);
 
-        [DllImport("ole32.dll")]
-        private static extern int CreateBindCtx(int reserved, out IBindCtx ppbc);
+        //[DllImport("ole32.dll")]
+        //private static extern int CreateBindCtx(int reserved, out IBindCtx ppbc);
 
-        [DllImport("ole32.dll", CharSet = CharSet.Unicode)]
-        private static extern int CLSIDFromProgID(string lpszProgID, out Guid pclsid);
+        //[DllImport("ole32.dll", CharSet = CharSet.Unicode)]
+        //private static extern int CLSIDFromProgID(string lpszProgID, out Guid pclsid);
 
-        [DllImport("user32.dll")]
-        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+        //[DllImport("user32.dll")]
+        //private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetForegroundWindow();
+        //[DllImport("user32.dll")]
+        //private static extern IntPtr GetForegroundWindow();
 
-        [DllImport("user32.dll")]
-        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+        //[DllImport("user32.dll")]
+        //private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
 
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool IsWindowVisible(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //[return: MarshalAs(UnmanagedType.Bool)]
+        //private static extern bool IsWindowVisible(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
-        private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+        //[DllImport("user32.dll")]
+        //private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 
-        [StructLayout(LayoutKind.Sequential)]
-        private struct RECT
-        {
-            public int Left;
-            public int Top;
-            public int Right;
-            public int Bottom;
-        }
+        //[StructLayout(LayoutKind.Sequential)]
+        //private struct RECT
+        //{
+        //    public int Left;
+        //    public int Top;
+        //    public int Right;
+        //    public int Bottom;
+        //}
         #endregion
 
         #region Constants
@@ -162,7 +164,7 @@ namespace Ink_Canvas.Helpers
         /// <param name="bestPriority">输出参数：返回找到的最佳实例的优先级（0 表示未找到或无活动演示）。</param>
         /// <param name="targetPriority">输出参数：返回与 <paramref name="targetApp"/> 对应实例的优先级（如果未提供或未命中则为 0）。</param>
         /// <returns>最合适的 PowerPoint 应用对象（通常为 COM Application 实例），若未找到则返回 null。</returns>
-        public static object GetAnyActivePowerPoint(object targetApp, out int bestPriority, out int targetPriority)
+        public unsafe static object GetAnyActivePowerPoint(object targetApp, out int bestPriority, out int targetPriority)
         {
             IRunningObjectTable rot = null;
             IEnumMoniker enumMoniker = null;
@@ -176,7 +178,7 @@ namespace Ink_Canvas.Helpers
 
             try
             {
-                int hr = GetRunningObjectTable(0, out rot);
+                int hr = PInvoke.GetRunningObjectTable(0, out rot);
                 if (hr != 0 || rot == null)
                 {
                     LogHelper.WriteLogToFile("无法获取 Running Object Table", LogHelper.LogType.Warning);
@@ -194,7 +196,7 @@ namespace Ink_Canvas.Helpers
                 IntPtr fetched = IntPtr.Zero;
                 string[] applicationMonikersFromProgIds = GetApplicationMonikersFromProgIds();
 
-                while (enumMoniker.Next(1, moniker, fetched) == 0)
+                while (enumMoniker.Next(1, moniker, (uint*)fetched.ToPointer()) == 0)
                 {
                     IBindCtx bindCtx = null;
                     object comObject = null;
@@ -206,9 +208,10 @@ namespace Ink_Canvas.Helpers
 
                     try
                     {
-                        CreateBindCtx(0, out bindCtx);
-                        moniker[0].GetDisplayName(bindCtx, null, out displayName);
-
+                        PInvoke.CreateBindCtx(0, out bindCtx);
+                        PWSTR* pDisplayName = null;
+                        moniker[0].GetDisplayName(bindCtx, null, pDisplayName);
+                        displayName = Marshal.PtrToStringUni((IntPtr)pDisplayName);
                         bool looksLikePresentationFile = LooksLikePresentationFile(displayName);
                         bool isApplicationMoniker = ContainsMoniker(applicationMonikersFromProgIds, displayName);
                         if (!isApplicationMoniker)
@@ -432,7 +435,7 @@ namespace Ink_Canvas.Helpers
             foreach (string progId in ApplicationProgIds)
             {
                 Guid clsid;
-                if (CLSIDFromProgID(progId, out clsid) == 0 && clsid != Guid.Empty)
+                if (PInvoke.CLSIDFromProgID(progId, out clsid) == 0 && clsid != Guid.Empty)
                 {
                     string moniker = "!" + clsid.ToString("B").ToUpperInvariant();
                     if (!ContainsMoniker(monikers, moniker))
@@ -476,11 +479,11 @@ namespace Ink_Canvas.Helpers
             {
                 dynamic ssw = sswObj;
 
-                IntPtr foregroundHwnd = GetForegroundWindow();
+                IntPtr foregroundHwnd = PInvoke.GetForegroundWindow();
                 if (foregroundHwnd == IntPtr.Zero) return false;
 
                 uint fgPid;
-                GetWindowThreadProcessId(foregroundHwnd, out fgPid);
+                PInvoke.GetWindowThreadProcessId(new HWND(foregroundHwnd), out fgPid);
 
                 IntPtr sswHwnd = IntPtr.Zero;
                 try
@@ -491,7 +494,7 @@ namespace Ink_Canvas.Helpers
                 if (sswHwnd == IntPtr.Zero) return false;
 
                 uint sswPid;
-                GetWindowThreadProcessId(sswHwnd, out sswPid);
+                PInvoke.GetWindowThreadProcessId(new HWND(sswHwnd), out sswPid);
 
                 if (fgPid == sswPid) return true;
 

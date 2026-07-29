@@ -1,10 +1,11 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using System;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using Windows.Win32;
+using Windows.Win32.Foundation;
 
 namespace Ink_Canvas
 {
@@ -41,7 +42,7 @@ namespace Ink_Canvas
                     var hwnd = new WindowInteropHelper(this).Handle;
                     if (hwnd != IntPtr.Zero)
                     {
-                        SetForegroundWindow(hwnd);
+                        PInvoke.SetForegroundWindow(new HWND(hwnd));
                     }
                 }
                 catch (Exception ex)
@@ -52,8 +53,8 @@ namespace Ink_Canvas
             }), DispatcherPriority.Background);
         }
 
-        [DllImport("user32.dll")]
-        private static extern bool SetForegroundWindow(IntPtr hWnd);
+        //[DllImport("user32.dll")]
+        //private static extern bool SetForegroundWindow(IntPtr hWnd);
 
         private void ButtonCopy_Click(object sender, RoutedEventArgs e)
         {

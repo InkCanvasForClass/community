@@ -16,10 +16,13 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Windows.Win32;
+using Windows.Win32.Graphics.Gdi;
 using WPFMediaKit.DirectShow.Controls;
 using WPFMediaKit.DirectShow.MediaPlayers;
 using WpfMediaKitMediaState = WPFMediaKit.DirectShow.MediaPlayers.MediaState;
@@ -66,10 +69,7 @@ namespace Ink_Canvas
         private readonly List<CapturedImage> _capturedPhotos = new List<CapturedImage>();
         private const int MaxCapturedPhotos = 50; // 容量上限：比 UI 显示的 30 项多一些，避免频繁清理
 
-        // 直播页墨迹快照：与每张照片的 CapturedImage.Strokes 对应，
-        // 切换页码时把当前 inkCanvas.Strokes 保存到当前槽位，再从目标槽位恢复。
-        // 直播页的墨迹槽位独立存放（不与任何照片绑定），用户在直播页画的批注不会因切到照片页而丢失。
-        private System.Windows.Ink.StrokeCollection _liveStrokesSnapshot = new System.Windows.Ink.StrokeCollection();
+private System.Windows.Ink.StrokeCollection _liveStrokesSnapshot = new System.Windows.Ink.StrokeCollection();
 
         // 旋转基准墨迹快照：用户在某个角度画墨迹时，保存一份"该角度下的原始墨迹"。
         // 旋转时不再累积 delta（累积会导致 0->90 缩小后 90->180 在缩小基础上再变换，越来越小），
@@ -90,6 +90,13 @@ namespace Ink_Canvas
         private readonly Dictionary<int, int> _cameraIndexByPage = new Dictionary<int, int>();
         private readonly Dictionary<int, (double left, double top, double width)> _liveFrameLayoutByPage =
             new Dictionary<int, (double left, double top, double width)>();
+
+        // 旋转基准：保存首次旋转前的画布快照，下次旋转用 M_baseline⁻¹ · M_target 直接重放，
+        // 避免每次旋转都叠加 fit 缩放导致墨迹持续缩小。
+        private System.Windows.Ink.StrokeCollection _rotationBaselineStrokes;
+        private int _rotationBaselineAngle;
+        // 旋转过程中（程序在变换墨迹）设为 true，避免 StrokesChanged 把基准当作用户编辑重置。
+        private bool _isApplyingRotationToStrokes;
 
         private DateTime _lastCaptureTime = DateTime.MinValue;
         private const int VideoPresenterCaptureCooldownMs = 1000;
@@ -427,6 +434,8 @@ namespace Ink_Canvas
             // 重置虚拟分页状态
             _boothCurrentPhotoIndex = -1;
             _capturedPhotos.Clear();
+            // 清空 booth per-page 墨迹存储（退出即丢弃，不持久化到白板）
+            _boothStrokesByPage.Clear();
 
             try
             {
@@ -1148,12 +1157,12 @@ namespace Ink_Canvas
             }
             finally
             {
-                if (hBmp != IntPtr.Zero) DeleteObject(hBmp);
+                if (hBmp != IntPtr.Zero) PInvoke.DeleteObject(new HGDIOBJ(hBmp));
             }
         }
 
-        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
-        private static extern bool DeleteObject(IntPtr hObject);
+        //[System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        //private static extern bool DeleteObject(IntPtr hObject);
 
         /// <summary>
         /// 获取当前白板页索引（确保返回值至少为 1）。
@@ -2363,7 +2372,7 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 把 WPF BitmapSource 转换为 System.Drawing.Bitmap（直接像素拷贝，无 PNG 编解码）。
+/// 把 WPF BitmapSource 转换为 System.Drawing.Bitmap（直接像素拷贝，无 PNG 编解码）。
         /// 用于 D3DImage 拍照路径需要做照片矫正时：OpenCvSharp 的 BitmapConverter.ToMat 只接受 System.Drawing.Bitmap。
         /// 性能：相比 PNG 编解码省 15-25ms（4K 帧从 ~30ms 降到 ~5ms），实时检测关键路径。
         /// 原理：BitmapSource.CopyPixels 直接拷贝 GPU→CPU 的像素数据，用 Stride 对齐构造 Bitmap。
@@ -2417,6 +2426,51 @@ namespace Ink_Canvas
                 return bmp;
             }
             catch { return null; }
+        }
+
+        /// <summary>
+        /// 旋转按钮入口：把预览 LayoutTransform 与画布墨迹一起转到目标角度，
+        /// 走基准重放管线避免持续缩小。冻结照片先回退到实时画面再旋转。
+        /// </summary>
+        private void HandleBoothRotation(double targetAngleDegrees)
+        {
+            if (!_isVideoPresenterSpecialMode || VideoPresenterFullCanvasRotation == null)
+                return;
+
+            // 冻结照片内容已被 RotateFlip 转正，再用 LayoutTransform 旋转会双重旋转；先回实时画面。
+            if (VideoPresenterFrozenFrameImage != null
+                && VideoPresenterFrozenFrameImage.Visibility == Visibility.Visible)
+            {
+                ClearFrozenFrame();
+                if (VideoPresenterFullCanvasImage != null)
+                {
+                    VideoPresenterFullCanvasImage.Visibility = Visibility.Visible;
+                    int page = GetCurrentPageIndex();
+                    int camIdx = -1;
+                    if (_cameraIndexByPage.TryGetValue(page, out int savedIdx)
+                        && savedIdx >= 0 && savedIdx < _cameraService.AvailableCameras.Count)
+                        camIdx = savedIdx;
+                    if (camIdx < 0 && _cameraService.AvailableCameras.Count > 0)
+                        camIdx = 0;
+                    if (camIdx >= 0)
+                        _ = StartVideoCaptureElementPreviewAsync(camIdx);
+                }
+            }
+
+            EnsureRotationBaseline();
+            CancelAllNativeWetInkSessions("video-presenter-rotate");
+            VideoPresenterFullCanvasRotation.Angle = targetAngleDegrees;
+            RotateBoothStrokesFromBaseline(targetAngleDegrees);
+
+            if (VideoPresenterFrozenFrameRotation != null)
+                VideoPresenterFrozenFrameRotation.Angle = 0;
+
+            lock (_videoPresenterFrameLock)
+            {
+                _lastFrame?.Dispose();
+                _lastFrame = null;
+            }
+        }
         }
 
         /// <summary>
@@ -2480,21 +2534,11 @@ namespace Ink_Canvas
                 EnsureCameraService();
                 _cameraService.RotationAngle = (_cameraService.RotationAngle + 1) % 4;
 
-                // 特殊模式下：同步旋转 VideoCaptureElement 的 LayoutTransform
-                // （旋转 90/270 时 LayoutTransform 会让 WPF 自动交换宽高，避免画面被裁剪）
-                if (_isVideoPresenterSpecialMode && VideoPresenterFullCanvasRotation != null)
+                if (_isVideoPresenterSpecialMode)
                 {
-                    // 直播页旋转：从基准重新变换到目标角度
-                    // 90°/270° 时视频视觉缩小（LayoutTransform 旋转后元素 fit 容器），墨迹跟着缩放
-                    EnsureRotationBaseline();
-                    VideoPresenterFullCanvasRotation.Angle = _cameraService.RotationAngle * 90.0;
-                    RotateBoothStrokesFromBaseline(VideoPresenterFullCanvasRotation.Angle);
-                    // 冻结画面 Image 的 LayoutTransform 始终保持 0（照片内容已正向），
-                    // 不跟随实时画面旋转，避免双重旋转。
-                    if (VideoPresenterFrozenFrameRotation != null)
-                    {
-                        VideoPresenterFrozenFrameRotation.Angle = 0;
-                    }
+                    // 基准重放管线：墨迹与预览一起旋转/缩小，不会每转一次都叠加缩放。
+                    HandleBoothRotation(_cameraService.RotationAngle * 90.0);
+                    return;
                 }
 
                 // 旋转后清空 _lastFrame，下一帧会用新角度重新填充
@@ -2947,6 +2991,52 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 保存当前虚拟页的墨迹到 _boothStrokesByPage，并清空画布墨迹。
+        /// 在切换虚拟页（直播页↔照片页、照片页↔照片页）之前调用。
+        /// 不接入 timeMachine：booth 墨迹仅在特殊模式内有效，退出即丢弃。
+        /// </summary>
+        private void SaveBoothStrokes()
+        {
+            if (inkCanvas == null) return;
+            try
+            {
+                var snapshot = new StrokeCollection();
+                foreach (var s in inkCanvas.Strokes)
+                    snapshot.Add(s);
+                _boothStrokesByPage[_boothCurrentPhotoIndex] = snapshot;
+                inkCanvas.Strokes.Clear();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"SaveBoothStrokes 异常: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 从 _boothStrokesByPage 恢复目标虚拟页的墨迹到画布。
+        /// 在切换虚拟页并更新 _boothCurrentPhotoIndex 之后调用。
+        /// </summary>
+        private void RestoreBoothStrokes()
+        {
+            if (inkCanvas == null) return;
+            try
+            {
+                inkCanvas.Strokes.Clear();
+                if (_boothStrokesByPage.TryGetValue(_boothCurrentPhotoIndex, out var snapshot) && snapshot != null)
+                {
+                    var restored = new StrokeCollection();
+                    foreach (var s in snapshot)
+                        restored.Add(s);
+                    inkCanvas.Strokes = restored;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"RestoreBoothStrokes 异常: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
         /// 从直播页切换到照片预览页。
         /// 显示指定照片、停止实时预览、页码 (photoIndex+1)/N、拍照按钮变灰。
         /// </summary>
@@ -2966,13 +3056,13 @@ namespace Ink_Canvas
                 return;
             }
 
-            // 切换前保存当前页墨迹到当前槽位（直播页快照或旧照片的 Strokes），
+// 切换前保存当前页墨迹到当前槽位（直播页快照或旧照片的 Strokes），
             // 避免新照片显示旧墨迹或当前墨迹丢失。
             SaveCurrentBoothStrokesToSlot();
             // 切换页面重置旋转基准（新页面的墨迹需要新的基准）
             ResetRotationBaseline();
-
             _boothCurrentPhotoIndex = photoIndex;
+            RestoreBoothStrokes();
 
             // 照片预览页直接复用实时画面的变换管线：把 FillImage 的 LayoutTransform/RenderTransform
             // 替换为 VideoCaptureElement 的同名实例（VideoPresenterFullCanvasRotation/Scale/Translate）。
@@ -3073,12 +3163,12 @@ namespace Ink_Canvas
         /// </summary>
         private void SwitchBoothToLivePage()
         {
-            // 返回直播前保存当前照片的墨迹到该照片槽位，避免丢失批注
+// 返回直播前保存当前照片的墨迹到该照片槽位，避免丢失批注
             SaveCurrentBoothStrokesToSlot();
             // 切换页面重置旋转基准
             ResetRotationBaseline();
-
             _boothCurrentPhotoIndex = -1;
+            RestoreBoothStrokes();
 
             // 清除冻结照片，并恢复照片 Image 原始的变换实例（解除与 VideoCaptureElement 的共享）
             if (VideoPresenterFrozenFrameImage != null)

@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using ProcessProtectionManager = Ink_Canvas.Helpers.ProcessProtectionManager;
-
 namespace Ink_Canvas.Windows.SettingsViews.Helpers
 {
     public static class SettingsManager
@@ -32,30 +31,58 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             }
         }
 
+        // 全局 SaveSettingsToFile 串行化：419 个调用点跨 UI 线程、公告轮询线程、插件线程，
+        // 互相 File.WriteAllText 同路径写时部分抛 IOException 被 catch 吞掉只记日志，用户感知不到
+        // 设置已丢失。先到先写、后到排队。
+        private static readonly object _saveGate = new object();
+
         public static void SaveSettingsToFile()
         {
             var text = JsonConvert.SerializeObject(Settings, Formatting.Indented);
-            try
+            lock (_saveGate)
             {
-                string configsDir = Path.Combine(App.RootPath, "Configs");
-                if (!Directory.Exists(configsDir))
-                {
-                    ProcessProtectionManager.WithWriteAccess(configsDir, () => Directory.CreateDirectory(configsDir));
-                }
-
-                var path = Path.Combine(App.RootPath, SettingsFileName);
-                ProcessProtectionManager.WithWriteAccess(path, () => File.WriteAllText(path, text));
-            }
-            catch (Exception ex)
-            {
-                // 设置保存失败不能静默：用户感知不到 = 下次启动设置丢失
                 try
                 {
-                    LogHelper.WriteLogToFile($"保存 Settings.json 失败: {ex.Message}", LogHelper.LogType.Error);
+                    string configsDir = Path.Combine(App.RootPath, "Configs");
+                    if (!Directory.Exists(configsDir))
+                    {
+                        ProcessProtectionManager.WithWriteAccess(configsDir, () => Directory.CreateDirectory(configsDir));
+                    }
+
+                    var path = Path.Combine(App.RootPath, SettingsFileName);
+                    // 临时文件 + File.Replace 原子替换，避免断电/进程被杀导致 Settings.json 半截。
+                    // 同目录移动替换是原子操作（Windows 同卷 NTFS 保证）。
+                    var tmpPath = path + ".tmp";
+                    try
+                    {
+                        ProcessProtectionManager.WithWriteAccess(tmpPath, () => File.WriteAllText(tmpPath, text));
+                        if (File.Exists(path))
+                        {
+                            ProcessProtectionManager.WithWriteAccess(path, () => File.Replace(tmpPath, path, null));
+                        }
+                        else
+                        {
+                            ProcessProtectionManager.WithWriteAccess(path, () => File.Move(tmpPath, path));
+                        }
+                    }
+                    catch
+                    {
+                        try { if (File.Exists(tmpPath)) File.Delete(tmpPath); } catch { }
+                        // 回退到直接覆盖，保持旧行为仍可用
+                        ProcessProtectionManager.WithWriteAccess(path, () => File.WriteAllText(path, text));
+                    }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine(ex);
+                    // 设置保存失败不能静默：用户感知不到 = 下次启动设置丢失
+                    try
+                    {
+                        LogHelper.WriteLogToFile($"保存 Settings.json 失败: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                    catch
+                    {
+                        System.Diagnostics.Debug.WriteLine(ex);
+                    }
                 }
             }
         }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Windows.Win32;
+using Windows.Win32.Foundation;
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
 namespace Ink_Canvas.Helpers
@@ -166,14 +168,20 @@ namespace Ink_Canvas.Helpers
 
         #region "Methods"
 
-        [DllImport("shell32.dll", SetLastError = true)]
-        private static extern int SHGetPropertyStoreForWindow(IntPtr handle, ref Guid riid, ref IPropertyStore propertyStore);
+        //[DllImport("shell32.dll", SetLastError = true)]
+        //private static extern int SHGetPropertyStoreForWindow(IntPtr handle, ref Guid riid, ref IPropertyStore propertyStore);
 
-        public static void DisableEdgeGestures(IntPtr hwnd, bool enable)
+        public unsafe static void DisableEdgeGestures(IntPtr hwnd, bool enable)
         {
             IPropertyStore pPropStore = null;
             int hr = 0;
-            hr = SHGetPropertyStoreForWindow(hwnd, ref IID_PROPERTY_STORE, ref pPropStore);
+            //hr = PInvoke.SHGetPropertyStoreForWindow(new HWND(hwnd), ref IID_PROPERTY_STORE, ref pPropStore);
+            fixed (Guid* ptr = &IID_PROPERTY_STORE)
+            {
+                hr = PInvoke.SHGetPropertyStoreForWindow(new HWND(hwnd), ptr, out object pPS);
+                pPropStore = (IPropertyStore)pPS;
+            }
+
             if (hr == 0)
             {
                 PropertyKey propKey = new PropertyKey();

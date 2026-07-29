@@ -3,8 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
+using Windows.Win32;
+using Windows.Win32.Storage.FileSystem;
 
 namespace Ink_Canvas.Helpers
 {
@@ -597,18 +598,15 @@ namespace Ink_Canvas.Helpers
         private static SafeFileHandle CreateDirectoryHandle(string dirPath)
         {
             const uint GENERIC_READ = 0x80000000;
-            const uint FILE_SHARE_READ = 0x00000001;
-            const uint OPEN_EXISTING = 3;
-            const uint FILE_FLAG_BACKUP_SEMANTICS = 0x02000000;
 
-            return CreateFile(
+            return PInvoke.CreateFile(
                 dirPath,
                 GENERIC_READ,
-                FILE_SHARE_READ,
-                IntPtr.Zero,
-                OPEN_EXISTING,
-                FILE_FLAG_BACKUP_SEMANTICS,
-                IntPtr.Zero);
+                FILE_SHARE_MODE.FILE_SHARE_READ,
+                null,
+                FILE_CREATION_DISPOSITION.OPEN_EXISTING,
+                FILE_FLAGS_AND_ATTRIBUTES.FILE_FLAG_BACKUP_SEMANTICS,
+                null);
         }
 
         /// <summary>
@@ -622,14 +620,14 @@ namespace Ink_Canvas.Helpers
         /// <param name="dwFlagsAndAttributes">文件属性和标志位，用于控制文件或目录的特殊行为（例如备份语义）。</param>
         /// <param name="hTemplateFile">用于创建新文件时的模板句柄，通常为 <see cref="IntPtr.Zero"/>。</param>
         /// <returns>表示文件或目录句柄的 <see cref="Microsoft.Win32.SafeHandles.SafeFileHandle"/>；调用失败时返回无效的句柄（可通过检查句柄或调用 <see cref="System.Runtime.InteropServices.Marshal.GetLastWin32Error"/> 获取错误码）。</returns>
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        private static extern SafeFileHandle CreateFile(
-            string lpFileName,
-            uint dwDesiredAccess,
-            uint dwShareMode,
-            IntPtr lpSecurityAttributes,
-            uint dwCreationDisposition,
-            uint dwFlagsAndAttributes,
-            IntPtr hTemplateFile);
+        //[DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        //private static extern SafeFileHandle CreateFile(
+        //    string lpFileName,
+        //    uint dwDesiredAccess,
+        //    uint dwShareMode,
+        //    IntPtr lpSecurityAttributes,
+        //    uint dwCreationDisposition,
+        //    uint dwFlagsAndAttributes,
+        //    IntPtr hTemplateFile);
     }
 }

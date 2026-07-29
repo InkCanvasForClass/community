@@ -1,21 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.UI.Input.KeyboardAndMouse;
 
 namespace Ink_Canvas
 {
     static class Hotkey
     {
         #region 系统api
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool RegisterHotKey(IntPtr hWnd, int id, HotkeyModifiers fsModifiers, uint vk);
+        //[DllImport("user32.dll")]
+        //[return: MarshalAs(UnmanagedType.Bool)]
+        //static extern bool RegisterHotKey(IntPtr hWnd, int id, HotkeyModifiers fsModifiers, uint vk);
 
-        [DllImport("user32.dll")]
-        static extern bool UnregisterHotKey(IntPtr hWnd, int id);
+        //[DllImport("user32.dll")]
+        //static extern bool UnregisterHotKey(IntPtr hWnd, int id);
         #endregion
 
         /// <summary>
@@ -25,7 +27,7 @@ namespace Ink_Canvas
         /// <param name="fsModifiers">组合键</param>
         /// <param name="key">快捷键</param>
         /// <param name="callBack">回调函数</param>
-        public static bool Regist(Window window, HotkeyModifiers fsModifiers, Key key, HotKeyCallBackHanlder callBack)
+        public static bool Regist(Window window, HOT_KEY_MODIFIERS fsModifiers, Key key, HotKeyCallBackHanlder callBack)
         {
             var hwnd = new WindowInteropHelper(window).Handle;
             var _hwndSource = HwndSource.FromHwnd(hwnd);
@@ -38,7 +40,7 @@ namespace Ink_Canvas
             int id = keyid++;
 
             var vk = KeyInterop.VirtualKeyFromKey(key);
-            if (!RegisterHotKey(hwnd, id, fsModifiers, (uint)vk))
+            if (!PInvoke.RegisterHotKey(new HWND(hwnd), id, fsModifiers, (uint)vk))
             {
                 //throw new Exception("regist hotkey fail.");
                 return false;
@@ -73,7 +75,7 @@ namespace Ink_Canvas
             foreach (KeyValuePair<int, HotKeyCallBackHanlder> var in keymap)
             {
                 if (var.Value == callBack)
-                    UnregisterHotKey(hWnd, var.Key);
+                    PInvoke.UnregisterHotKey(new HWND(hWnd), var.Key);
             }
         }
 
@@ -85,12 +87,12 @@ namespace Ink_Canvas
         public delegate void HotKeyCallBackHanlder();
     }
 
-    enum HotkeyModifiers
-    {
-        MOD_ALT = 0x1,
-        MOD_CONTROL = 0x2,
-        MOD_SHIFT = 0x4,
-        MOD_WIN = 0x8
-    }
+    //enum HotkeyModifiers
+    //{
+    //    MOD_ALT = 0x1,
+    //    MOD_CONTROL = 0x2,
+    //    MOD_SHIFT = 0x4,
+    //    MOD_WIN = 0x8
+    //}
 
 }

@@ -360,6 +360,96 @@
   <data name="Random_AddBg_SaveFailedFormat" xml:space="preserve">
     <value>保存背景时出错: {0}</value>
   </data>
+  <data name="Random_Roster_Title" xml:space="preserve">
+    <value>学生档案方案</value>
+  </data>
+  <data name="Random_Roster_SectionHeader" xml:space="preserve">
+    <value>学生档案</value>
+  </data>
+  <data name="Random_Roster_SelectLabel" xml:space="preserve">
+    <value>当前方案：</value>
+  </data>
+  <data name="Random_Roster_None" xml:space="preserve">
+    <value>未选择方案</value>
+  </data>
+  <data name="Random_Roster_Manage" xml:space="preserve">
+    <value>管理方案</value>
+  </data>
+  <data name="Random_Roster_ManageWindowTitle" xml:space="preserve">
+    <value>管理学生档案方案</value>
+  </data>
+  <data name="Random_Roster_ManageTitle" xml:space="preserve">
+    <value>管理学生档案方案（编辑名单 / 增设 / 删除 / 重命名）</value>
+  </data>
+  <data name="Random_Roster_SetAsCurrent" xml:space="preserve">
+    <value>设为当前</value>
+  </data>
+  <data name="Random_Roster_SaveCurrent" xml:space="preserve">
+    <value>保存当前名单</value>
+  </data>
+  <data name="Random_Roster_Edit" xml:space="preserve">
+    <value>编辑名单</value>
+  </data>
+  <data name="Random_Roster_Rename" xml:space="preserve">
+    <value>重命名</value>
+  </data>
+  <data name="Random_Roster_Delete" xml:space="preserve">
+    <value>删除</value>
+  </data>
+  <data name="Random_Roster_Add" xml:space="preserve">
+    <value>新建方案</value>
+  </data>
+  <data name="Random_Roster_AddPrompt" xml:space="preserve">
+    <value>请输入新方案名称：</value>
+  </data>
+  <data name="Random_Roster_AddTitle" xml:space="preserve">
+    <value>新建方案</value>
+  </data>
+  <data name="Random_Roster_RenamePrompt" xml:space="preserve">
+    <value>请输入新的方案名称：</value>
+  </data>
+  <data name="Random_Roster_RenameTitle" xml:space="preserve">
+    <value>重命名方案</value>
+  </data>
+  <data name="Random_Roster_SetSuccessFormat" xml:space="preserve">
+    <value>已切换到方案"{0}"，并更新当前名单</value>
+  </data>
+  <data name="Random_Roster_SetSuccessTitle" xml:space="preserve">
+    <value>已切换方案</value>
+  </data>
+  <data name="Random_Roster_SaveSuccessFormat" xml:space="preserve">
+    <value>已将当前名单保存到方案"{0}"</value>
+  </data>
+  <data name="Random_Roster_SaveSuccessTitle" xml:space="preserve">
+    <value>保存成功</value>
+  </data>
+  <data name="Random_Roster_DeleteConfirmFormat" xml:space="preserve">
+    <value>确定要删除方案"{0}"吗？</value>
+  </data>
+  <data name="Random_Roster_DeleteConfirmTitle" xml:space="preserve">
+    <value>确认删除</value>
+  </data>
+  <data name="Random_Roster_DeleteFailedFormat" xml:space="preserve">
+    <value>删除方案时出错: {0}</value>
+  </data>
+  <data name="Random_Roster_EmptyName" xml:space="preserve">
+    <value>方案名称不能为空</value>
+  </data>
+  <data name="Random_Roster_DuplicateNameFormat" xml:space="preserve">
+    <value>已存在同名方案：{0}</value>
+  </data>
+  <data name="Random_Roster_Hint" xml:space="preserve">
+    <value>不同班级可保存为不同方案，切换方案会替换当前名单文件（Names.txt / Replace.txt）。</value>
+  </data>
+  <data name="Random_Roster_SwitchLabel" xml:space="preserve">
+    <value>方案</value>
+  </data>
+  <data name="Random_Roster_SwitchTooltip" xml:space="preserve">
+    <value>切换学生档案方案</value>
+  </data>
+  <data name="Random_Roster_OperationFailedFormat" xml:space="preserve">
+    <value>操作失败: {0}</value>
+  </data>
   <data name="Random_CustomIcon_Title" xml:space="preserve">
     <value>自定义浮动栏图标管理</value>
   </data>

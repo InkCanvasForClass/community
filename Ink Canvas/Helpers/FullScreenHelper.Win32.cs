@@ -38,112 +38,112 @@ namespace Ink_Canvas.Helpers
 
             public static class Dwmapi
             {
-                public const string LibraryName = "Dwmapi.dll";
+                //public const string LibraryName = "Dwmapi.dll";
 
-                [DllImport(LibraryName, ExactSpelling = true, PreserveSig = false)]
-                [return: MarshalAs(UnmanagedType.Bool)]
-                public static extern bool DwmIsCompositionEnabled();
+                //[DllImport(LibraryName, ExactSpelling = true, PreserveSig = false)]
+                //[return: MarshalAs(UnmanagedType.Bool)]
+                //public static extern bool DwmIsCompositionEnabled();
 
-                [DllImport("Dwmapi.dll", ExactSpelling = true, SetLastError = true)]
-                public static extern int DwmSetWindowAttribute(IntPtr hwnd, DWMWINDOWATTRIBUTE dwAttribute,
-                    in int pvAttribute, uint cbAttribute);
+                //[DllImport("Dwmapi.dll", ExactSpelling = true, SetLastError = true)]
+                //public static extern int DwmSetWindowAttribute(IntPtr hwnd, DWMWINDOWATTRIBUTE dwAttribute,
+                //    in int pvAttribute, uint cbAttribute);
             }
 
             public static class User32
             {
-                public const string LibraryName = "user32";
+                //                public const string LibraryName = "user32";
 
-                [DllImport(LibraryName, CharSet = Properties.BuildCharSet)]
-                public static extern bool GetMonitorInfo(IntPtr hMonitor, ref MonitorInfo lpmi);
+                //                [DllImport(LibraryName, CharSet = Properties.BuildCharSet)]
+                //                public static extern bool GetMonitorInfo(IntPtr hMonitor, ref MonitorInfo lpmi);
 
-                [DllImport(LibraryName, ExactSpelling = true)]
-                public static extern IntPtr MonitorFromRect(in Rectangle lprc, MonitorFlag dwFlags);
+                //                [DllImport(LibraryName, ExactSpelling = true)]
+                //                public static extern IntPtr MonitorFromRect(in Rectangle lprc, MonitorFlag dwFlags);
 
-                [DllImport(LibraryName, ExactSpelling = true)]
-                public static extern bool IsIconic(IntPtr hwnd);
+                //                [DllImport(LibraryName, ExactSpelling = true)]
+                //                public static extern bool IsIconic(IntPtr hwnd);
 
-                [DllImport(LibraryName, ExactSpelling = true)]
-                public static extern bool ShowWindow(IntPtr hWnd, ShowWindowCommands nCmdShow);
+                //                [DllImport(LibraryName, ExactSpelling = true)]
+                //                public static extern bool ShowWindow(IntPtr hWnd, ShowWindowCommands nCmdShow);
 
-                [DllImport(LibraryName, ExactSpelling = true)]
-                public static extern bool SetWindowPlacement(IntPtr hWnd,
-                    [In] ref WINDOWPLACEMENT lpwndpl);
+                //                [DllImport(LibraryName, ExactSpelling = true)]
+                //                public static extern bool SetWindowPlacement(IntPtr hWnd,
+                //                    [In] ref WINDOWPLACEMENT lpwndpl);
 
-                [return: MarshalAs(UnmanagedType.Bool)]
-                [DllImport(LibraryName, ExactSpelling = true)]
-                public static extern bool GetWindowRect(IntPtr hWnd, out Rectangle lpRect);
+                //                [return: MarshalAs(UnmanagedType.Bool)]
+                //                [DllImport(LibraryName, ExactSpelling = true)]
+                //                public static extern bool GetWindowRect(IntPtr hWnd, out Rectangle lpRect);
 
-                [DllImport(LibraryName, ExactSpelling = true, SetLastError = true)]
-                public static extern Int32 SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, Int32 x, Int32 y, Int32 cx,
-                    Int32 cy, Int32 wFlagslong);
+                //                [DllImport(LibraryName, ExactSpelling = true, SetLastError = true)]
+                //                public static extern Int32 SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, Int32 x, Int32 y, Int32 cx,
+                //                    Int32 cy, Int32 wFlagslong);
 
-                [DllImport(LibraryName, ExactSpelling = true)]
-                public static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
+                //                [DllImport(LibraryName, ExactSpelling = true)]
+                //                public static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
 
-                public static IntPtr GetWindowLongPtr(IntPtr hWnd, GetWindowLongFields nIndex) =>
-                    GetWindowLongPtr(hWnd, (int)nIndex);
+                //                public static IntPtr GetWindowLongPtr(IntPtr hWnd, GetWindowLongFields nIndex) =>
+                //                    GetWindowLongPtr(hWnd, (int)nIndex);
 
-                public static IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex)
-                {
-                    return IntPtr.Size > 4
-#pragma warning disable CS0618 // 类型或成员已过时
-                        ? GetWindowLongPtr_x64(hWnd, nIndex)
-                        : new IntPtr(GetWindowLong(hWnd, nIndex));
-#pragma warning restore CS0618 // 类型或成员已过时
-                }
+                //                public static IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex)
+                //                {
+                //                    return IntPtr.Size > 4
+                //#pragma warning disable CS0618 // 类型或成员已过时
+                //                        ? GetWindowLongPtr_x64(hWnd, nIndex)
+                //                        : new IntPtr(GetWindowLong(hWnd, nIndex));
+                //#pragma warning restore CS0618 // 类型或成员已过时
+                //                }
 
-                [DllImport(LibraryName, CharSet = Properties.BuildCharSet)]
-                public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+                //                [DllImport(LibraryName, CharSet = Properties.BuildCharSet)]
+                //                public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
 
-                [DllImport(LibraryName, CharSet = Properties.BuildCharSet, EntryPoint = "GetWindowLongPtr")]
-                public static extern IntPtr GetWindowLongPtr_x64(IntPtr hWnd, int nIndex);
+                //                [DllImport(LibraryName, CharSet = Properties.BuildCharSet, EntryPoint = "GetWindowLongPtr")]
+                //                public static extern IntPtr GetWindowLongPtr_x64(IntPtr hWnd, int nIndex);
 
-                public static IntPtr SetWindowLongPtr(IntPtr hWnd, GetWindowLongFields nIndex, IntPtr dwNewLong) =>
-                    SetWindowLongPtr(hWnd, (int)nIndex, dwNewLong);
+                //                public static IntPtr SetWindowLongPtr(IntPtr hWnd, GetWindowLongFields nIndex, IntPtr dwNewLong) =>
+                //                    SetWindowLongPtr(hWnd, (int)nIndex, dwNewLong);
 
-                public static IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
-                {
-                    return IntPtr.Size > 4
-#pragma warning disable CS0618 // 类型或成员已过时
-                        ? SetWindowLongPtr_x64(hWnd, nIndex, dwNewLong)
-                        : new IntPtr(SetWindowLong(hWnd, nIndex, dwNewLong.ToInt32()));
-#pragma warning restore CS0618 // 类型或成员已过时
-                }
+                //                public static IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
+                //                {
+                //                    return IntPtr.Size > 4
+                //#pragma warning disable CS0618 // 类型或成员已过时
+                //                        ? SetWindowLongPtr_x64(hWnd, nIndex, dwNewLong)
+                //                        : new IntPtr(SetWindowLong(hWnd, nIndex, dwNewLong.ToInt32()));
+                //#pragma warning restore CS0618 // 类型或成员已过时
+                //                }
 
-                [DllImport(LibraryName, CharSet = Properties.BuildCharSet, EntryPoint = "SetWindowLongPtr")]
-                public static extern IntPtr SetWindowLongPtr_x64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+                //                [DllImport(LibraryName, CharSet = Properties.BuildCharSet, EntryPoint = "SetWindowLongPtr")]
+                //                public static extern IntPtr SetWindowLongPtr_x64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
-                [DllImport(LibraryName, CharSet = Properties.BuildCharSet)]
-                public static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+                //                [DllImport(LibraryName, CharSet = Properties.BuildCharSet)]
+                //                public static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
             }
         }
 
-        [StructLayout(LayoutKind.Sequential)]
-        struct MonitorInfo
-        {
-            /// <summary>
-            ///     The size of the structure, in bytes.
-            /// </summary>
-            public uint Size;
+        //[StructLayout(LayoutKind.Sequential)]
+        //struct MonitorInfo
+        //{
+        //    /// <summary>
+        //    ///     The size of the structure, in bytes.
+        //    /// </summary>
+        //    public uint Size;
 
-            /// <summary>
-            ///     A RECT structure that specifies the display monitor rectangle, expressed in virtual-screen coordinates. Note that
-            ///     if the monitor is not the primary display monitor, some of the rectangle's coordinates may be negative values.
-            /// </summary>
-            public Rectangle MonitorRect;
+        //    /// <summary>
+        //    ///     A RECT structure that specifies the display monitor rectangle, expressed in virtual-screen coordinates. Note that
+        //    ///     if the monitor is not the primary display monitor, some of the rectangle's coordinates may be negative values.
+        //    /// </summary>
+        //    public Rectangle MonitorRect;
 
-            /// <summary>
-            ///     A RECT structure that specifies the work area rectangle of the display monitor, expressed in virtual-screen
-            ///     coordinates. Note that if the monitor is not the primary display monitor, some of the rectangle's coordinates may
-            ///     be negative values.
-            /// </summary>
-            public Rectangle WorkRect;
+        //    /// <summary>
+        //    ///     A RECT structure that specifies the work area rectangle of the display monitor, expressed in virtual-screen
+        //    ///     coordinates. Note that if the monitor is not the primary display monitor, some of the rectangle's coordinates may
+        //    ///     be negative values.
+        //    /// </summary>
+        //    public Rectangle WorkRect;
 
-            /// <summary>
-            ///     A set of flags that represent attributes of the display monitor.
-            /// </summary>
-            public MonitorInfoFlag Flags;
-        }
+        //    /// <summary>
+        //    ///     A set of flags that represent attributes of the display monitor.
+        //    /// </summary>
+        //    public MonitorInfoFlag Flags;
+        //}
 
         enum MonitorInfoFlag
         {
@@ -178,10 +178,10 @@ namespace Ink_Canvas.Helpers
             HWND_TOPMOST = -1,
         }
 
-        enum DWMWINDOWATTRIBUTE : uint
-        {
-            DWMWA_TRANSITIONS_FORCEDISABLED = 3,
-        }
+        //enum DWMWINDOWATTRIBUTE : uint
+        //{
+        //    DWMWA_TRANSITIONS_FORCEDISABLED = 3,
+        //}
 
         enum GetWindowLongFields
         {
@@ -192,16 +192,16 @@ namespace Ink_Canvas.Helpers
             GWL_STYLE = -16,
         }
 
-        [StructLayout(LayoutKind.Sequential)]
-        struct WINDOWPLACEMENT // WindowPlacement
-        {
-            public uint Size;
-            public WindowPlacementFlags Flags;
-            public Win32.ShowWindowCommands ShowCmd;
-            public Point MinPosition;
-            public Point MaxPosition;
-            public Rectangle NormalPosition;
-        }
+        //[StructLayout(LayoutKind.Sequential)]
+        //struct WINDOWPLACEMENT // WindowPlacement
+        //{
+        //    public uint Size;
+        //    public WindowPlacementFlags Flags;
+        //    public Win32.ShowWindowCommands ShowCmd;
+        //    public Point MinPosition;
+        //    public Point MaxPosition;
+        //    public Rectangle NormalPosition;
+        //}
 
         [Flags]
         public enum WindowPositionFlags
