@@ -69,12 +69,10 @@ namespace Ink_Canvas
         private readonly List<CapturedImage> _capturedPhotos = new List<CapturedImage>();
         private const int MaxCapturedPhotos = 50; // 容量上限：比 UI 显示的 30 项多一些，避免频繁清理
 
-private System.Windows.Ink.StrokeCollection _liveStrokesSnapshot = new System.Windows.Ink.StrokeCollection();
-
-        // 视频展台虚拟分页的 per-page 墨迹存储：key = _boothCurrentPhotoIndex（-1=直播页，0..N-1=照片页）。
-        // 切换虚拟页时保存当前墨迹、恢复目标页墨迹；退出特殊模式时整体清空（booth 墨迹不持久化到白板）。
-        // 不接入 timeMachine：booth 墨迹退出即丢弃，不需要撤销/重做。
-        private readonly Dictionary<int, StrokeCollection> _boothStrokesByPage = new Dictionary<int, StrokeCollection>();
+        // 直播页墨迹快照：与每张照片的 CapturedImage.Strokes 对应，
+        // 切换页码时把当前 inkCanvas.Strokes 保存到当前槽位，再从目标槽位恢复。
+        // 直播页的墨迹槽位独立存放（不与任何照片绑定），用户在直播页画的批注不会因切到照片页而丢失。
+        private System.Windows.Ink.StrokeCollection _liveStrokesSnapshot = new System.Windows.Ink.StrokeCollection();
 
         // 照片预览页：把 FillImage 的 LayoutTransform/RenderTransform 替换为 VideoCaptureElement 的同名实例，
         // 让照片预览完全复用实时画面的变换管线（旋转/缩放/移动走同一条代码路径）。
@@ -431,8 +429,6 @@ private System.Windows.Ink.StrokeCollection _liveStrokesSnapshot = new System.Wi
             // 重置虚拟分页状态
             _boothCurrentPhotoIndex = -1;
             _capturedPhotos.Clear();
-            // 清空 booth per-page 墨迹存储（退出即丢弃，不持久化到白板）
-            _boothStrokesByPage.Clear();
 
             try
             {
@@ -2987,52 +2983,6 @@ private System.Windows.Ink.StrokeCollection _liveStrokesSnapshot = new System.Wi
         }
 
         /// <summary>
-        /// 保存当前虚拟页的墨迹到 _boothStrokesByPage，并清空画布墨迹。
-        /// 在切换虚拟页（直播页↔照片页、照片页↔照片页）之前调用。
-        /// 不接入 timeMachine：booth 墨迹仅在特殊模式内有效，退出即丢弃。
-        /// </summary>
-        private void SaveBoothStrokes()
-        {
-            if (inkCanvas == null) return;
-            try
-            {
-                var snapshot = new StrokeCollection();
-                foreach (var s in inkCanvas.Strokes)
-                    snapshot.Add(s);
-                _boothStrokesByPage[_boothCurrentPhotoIndex] = snapshot;
-                inkCanvas.Strokes.Clear();
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"SaveBoothStrokes 异常: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 从 _boothStrokesByPage 恢复目标虚拟页的墨迹到画布。
-        /// 在切换虚拟页并更新 _boothCurrentPhotoIndex 之后调用。
-        /// </summary>
-        private void RestoreBoothStrokes()
-        {
-            if (inkCanvas == null) return;
-            try
-            {
-                inkCanvas.Strokes.Clear();
-                if (_boothStrokesByPage.TryGetValue(_boothCurrentPhotoIndex, out var snapshot) && snapshot != null)
-                {
-                    var restored = new StrokeCollection();
-                    foreach (var s in snapshot)
-                        restored.Add(s);
-                    inkCanvas.Strokes = restored;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"RestoreBoothStrokes 异常: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
         /// 从直播页切换到照片预览页。
         /// 显示指定照片、停止实时预览、页码 (photoIndex+1)/N、拍照按钮变灰。
         /// </summary>
@@ -3052,13 +3002,12 @@ private System.Windows.Ink.StrokeCollection _liveStrokesSnapshot = new System.Wi
                 return;
             }
 
-// 切换前保存当前页墨迹到当前槽位（直播页快照或旧照片的 Strokes），
+            // 切换前保存当前页墨迹到当前槽位（直播页快照或旧照片的 Strokes），
             // 避免新照片显示旧墨迹或当前墨迹丢失。
             SaveCurrentBoothStrokesToSlot();
             // 切换页面重置旋转基准（新页面的墨迹需要新的基准）
             ResetRotationBaseline();
             _boothCurrentPhotoIndex = photoIndex;
-            RestoreBoothStrokes();
 
             // 照片预览页直接复用实时画面的变换管线：把 FillImage 的 LayoutTransform/RenderTransform
             // 替换为 VideoCaptureElement 的同名实例（VideoPresenterFullCanvasRotation/Scale/Translate）。
@@ -3159,12 +3108,11 @@ private System.Windows.Ink.StrokeCollection _liveStrokesSnapshot = new System.Wi
         /// </summary>
         private void SwitchBoothToLivePage()
         {
-// 返回直播前保存当前照片的墨迹到该照片槽位，避免丢失批注
+            // 返回直播前保存当前照片的墨迹到该照片槽位，避免丢失批注
             SaveCurrentBoothStrokesToSlot();
             // 切换页面重置旋转基准
             ResetRotationBaseline();
             _boothCurrentPhotoIndex = -1;
-            RestoreBoothStrokes();
 
             // 清除冻结照片，并恢复照片 Image 原始的变换实例（解除与 VideoCaptureElement 的共享）
             if (VideoPresenterFrozenFrameImage != null)

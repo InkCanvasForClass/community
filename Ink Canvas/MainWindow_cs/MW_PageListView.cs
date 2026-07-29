@@ -423,17 +423,8 @@ namespace Ink_Canvas
 
                 _capturedPhotos.RemoveAt(photoIndex);
 
-                // 同步移除被删照片的墨迹，并把后续照片页的墨迹 key 前移
-                _boothStrokesByPage.Remove(photoIndex);
-                var reindexed = new Dictionary<int, StrokeCollection>();
-                foreach (var kv in _boothStrokesByPage)
-                {
-                    int newKey = kv.Key > photoIndex ? kv.Key - 1 : kv.Key;
-                    reindexed[newKey] = kv.Value;
-                }
-                _boothStrokesByPage.Clear();
-                foreach (var kv in reindexed)
-                    _boothStrokesByPage[kv.Key] = kv.Value;
+                // 被删照片的墨迹已随 CapturedImage 一起从 _capturedPhotos 移除（GC 回收）。
+                // OLD 存储模型：照片墨迹直接挂在 CapturedImage.Strokes 上，不需要额外的字典索引重排。
 
                 // 如果当前正在看被删的照片，切回直播页
                 if (_boothCurrentPhotoIndex == photoIndex)
