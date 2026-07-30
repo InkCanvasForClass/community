@@ -178,6 +178,14 @@ namespace Ink_Canvas
             return stylusDevice?.TabletDevice?.Type == TabletDeviceType.Touch;
         }
 
+        private bool ShouldBypassLegacyStylusInkForSelection()
+        {
+            return Settings?.Canvas?.UseLegacyWetInk == true
+                   && GridInkCanvasSelectionCover?.Visibility == Visibility.Visible
+                   && inkCanvas != null
+                   && inkCanvas.GetSelectedStrokes().Count > 0;
+        }
+
         private void BeginTouchInkInput()
         {
             if (!_hasStoredInkCanvasManipulationStateForTouchInk)
@@ -1215,6 +1223,12 @@ namespace Ink_Canvas
             if (IsTouchStylusDevice(e.StylusDevice))
                 return;
 
+            if (ShouldBypassLegacyStylusInkForSelection())
+            {
+                e.Handled = true;
+                return;
+            }
+
             // 检查手写笔点击是否发生在浮动栏区域，如果是则允许事件传播到浮动栏按钮
             var stylusPoint = e.GetPosition(this);
             var floatingBarBounds = ViewboxFloatingBar.TransformToAncestor(this).TransformBounds(
@@ -1348,6 +1362,12 @@ namespace Ink_Canvas
         {
             if (IsTouchStylusDevice(e.StylusDevice))
                 return;
+
+            if (ShouldBypassLegacyStylusInkForSelection())
+            {
+                e.Handled = true;
+                return;
+            }
 
             var stylusId = e.StylusDevice.Id;
             if (_activeRealtimeStylusStrokeIds.Contains(stylusId))
@@ -1520,6 +1540,12 @@ namespace Ink_Canvas
             {
                 if (IsTouchStylusDevice(e.StylusDevice))
                     return;
+
+                if (ShouldBypassLegacyStylusInkForSelection())
+                {
+                    e.Handled = true;
+                    return;
+                }
 
                 if (drawingShapeMode != 0)
                 {
