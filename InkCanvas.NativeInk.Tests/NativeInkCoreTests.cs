@@ -1236,7 +1236,7 @@ namespace InkCanvas.NativeInk.Tests
         /// </summary>
         private static void PredictionDoesNotProduceSeewoStyleLongTail()
         {
-            // 希沃可见实现默认预测时长约 36ms；高速直线也不应产生一条接近整段 140 DIP 的长尾。
+            // 高速直线也不应产生一条接近整段距离上限的长尾。
             var fast = StraightStroke(8, 40, 8);
             var predicted = InkTailPredictor.Build(fast);
 

@@ -10,8 +10,8 @@ using GongDragDrop = GongSolutions.Wpf.DragDrop.DragDrop;
 namespace Ink_Canvas.Helpers
 {
     /// <summary>
-    /// 基于 ClassIsland 2.0 AVA 拖动思路的触屏感知拖拽辅助类。
-    /// <para>参考 ClassIsland 2.0 的 PointerStateAssist + TouchDragThumb + AdvancedItemDragBehavior 架构：</para>
+    /// 触屏感知拖拽辅助类。
+    /// <para>根据窗口与控件层级处理触屏拖拽：</para>
     /// <para>- 窗口/控件级检测输入设备类型（鼠标/触屏）</para>
     /// <para>- 触屏模式下显示拖动按钮（grip handle），鼠标模式下隐藏</para>
     /// <para>- 触屏模式下只有从 grip handle 发起的按下才能触发拖动，否则事件交给 ScrollViewer 处理滑动</para>
@@ -159,7 +159,6 @@ namespace Ink_Canvas.Helpers
 
         /// <summary>
         /// 是否强制始终显示 grip handle（不依赖触摸模式）。
-        /// 对应 ClassIsland 2.0 TouchDragThumb 的 IsExplicitVisible 属性。
         /// </summary>
         public static readonly DependencyProperty IsExplicitVisibleProperty =
             DependencyProperty.RegisterAttached(
@@ -277,8 +276,7 @@ namespace Ink_Canvas.Helpers
 
         /// <summary>
         /// 触屏按下时：切换到触屏模式，禁用 IsDragSource（阻止非 grip handle 区域触发拖动）。
-        /// 这对应 ClassIsland 2.0 AdvancedItemDragBehavior.PointerPressed 中的判定：
-        /// 触屏模式下如果不是从 TouchDragThumb 发起则 return。
+        /// 触屏模式下如果不是从 grip handle 发起则不触发拖动。
         /// 一旦激活触屏模式，不会因鼠标输入而恢复（重启软件可恢复）。
         /// </summary>
         private static void ItemsControl_PreviewStylusDown(object sender, StylusEventArgs e)
@@ -355,7 +353,7 @@ namespace Ink_Canvas.Helpers
 
         /// <summary>
         /// 触屏模式下显示 grip handle（Visibility=Visible），鼠标模式下隐藏（Visibility=Collapsed）。
-        /// 但 IsExplicitVisible=True 时始终显示（对应 ClassIsland 2.0 TouchDragThumb 的 IsExplicitVisible）。
+        /// 但 IsExplicitVisible=True 时始终显示。
         /// </summary>
         private static void UpdateGripHandleElementVisualState(UIElement element, bool isTouchMode)
         {

@@ -311,7 +311,7 @@ namespace Ink_Canvas.Helpers
 
         private void InitializeRules()
         {
-            // 希沃白板3 桌面悬浮窗
+            // 外部白板 3 桌面悬浮窗
             _interceptRules[InterceptType.SeewoWhiteboard3Floating] = new InterceptRule
             {
                 Type = InterceptType.SeewoWhiteboard3Floating,
@@ -330,7 +330,7 @@ namespace Ink_Canvas.Helpers
                 ExactClassNameMatch = false
             };
 
-            // 希沃白板5 桌面悬浮窗
+            // 外部白板 5 桌面悬浮窗
             _interceptRules[InterceptType.SeewoWhiteboard5Floating] = new InterceptRule
             {
                 Type = InterceptType.SeewoWhiteboard5Floating,
@@ -349,7 +349,7 @@ namespace Ink_Canvas.Helpers
                 ExactClassNameMatch = false
             };
 
-            // 希沃白板5C 桌面悬浮窗
+            // 外部白板 5C 桌面悬浮窗
             _interceptRules[InterceptType.SeewoWhiteboard5CFloating] = new InterceptRule
             {
                 Type = InterceptType.SeewoWhiteboard5CFloating,
@@ -368,7 +368,7 @@ namespace Ink_Canvas.Helpers
                 ExactClassNameMatch = false
             };
 
-            // 希沃品课教师端 桌面悬浮窗（父规则）
+            // 外部课堂软件桌面悬浮窗（父规则）
             _interceptRules[InterceptType.SeewoPincoSideBarFloating] = new InterceptRule
             {
                 Type = InterceptType.SeewoPincoSideBarFloating,
@@ -386,7 +386,7 @@ namespace Ink_Canvas.Helpers
                 ExactClassNameMatch = true
             };
 
-            // 希沃品课教师端 画笔悬浮窗（子规则）
+            // 外部课堂软件画笔悬浮窗（子规则）
             _interceptRules[InterceptType.SeewoPincoDrawingFloating] = new InterceptRule
             {
                 Type = InterceptType.SeewoPincoDrawingFloating,
@@ -404,7 +404,7 @@ namespace Ink_Canvas.Helpers
                 ExactClassNameMatch = true
             };
 
-            // 希沃品课教师端 桌面画板（子规则）
+            // 外部课堂软件桌面画板（子规则）
             _interceptRules[InterceptType.SeewoPincoBoardService] = new InterceptRule
             {
                 Type = InterceptType.SeewoPincoBoardService,
@@ -425,7 +425,7 @@ namespace Ink_Canvas.Helpers
                 ExactClassNameMatch = false
             };
 
-            // 希沃PPT小工具
+            // 外部课堂软件 PPT 小工具
             _interceptRules[InterceptType.SeewoPPTFloating] = new InterceptRule
             {
                 Type = InterceptType.SeewoPPTFloating,
@@ -681,7 +681,7 @@ namespace Ink_Canvas.Helpers
                 ChildTypes = new List<InterceptType>()
             };
 
-            // 希沃桌面 画笔悬浮窗
+            // 外部桌面画笔悬浮窗
             _interceptRules[InterceptType.SeewoDesktopAnnotationFloating] = new InterceptRule
             {
                 Type = InterceptType.SeewoDesktopAnnotationFloating,
@@ -693,7 +693,7 @@ namespace Ink_Canvas.Helpers
                 Description = "希沃桌面 画笔悬浮窗"
             };
 
-            // 希沃桌面 侧栏悬浮窗
+            // 外部桌面侧栏悬浮窗
             _interceptRules[InterceptType.SeewoDesktopSideBarFloating] = new InterceptRule
             {
                 Type = InterceptType.SeewoDesktopSideBarFloating,

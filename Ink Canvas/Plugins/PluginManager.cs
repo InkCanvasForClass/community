@@ -762,7 +762,7 @@ namespace Ink_Canvas.Plugins
         }
 
         /// <summary>
-        /// 上报一次失败，并按 ClassIsland 风格触发自动禁用（参考 ClassIsland 的插件错误恢复机制）。
+        /// 上报一次失败，并按错误恢复策略触发自动禁用。
         /// </summary>
         private void TrackFailure(PluginInfo info, Exception ex)
         {

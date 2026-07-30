@@ -1289,7 +1289,7 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 插入完整 PDF：嵌入控件内可翻页，右下角显示页码（类似希沃白板交互）。
+        /// 插入完整 PDF：嵌入控件内可翻页，右下角显示页码。
         /// </summary>
         private async Task<PdfEmbeddedView> CreateAndCompressImageFromPdfAsync(string filePath)
         {

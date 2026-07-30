@@ -10,7 +10,6 @@ namespace Ink_Canvas.WorkflowAutomation.Services
 {
     /// <summary>
     /// 行动服务，负责执行和恢复行动。
-    /// 对齐 ClassIsland 的 ActionService，实现 IActionService 接口。
     /// </summary>
     public class ActionService : IActionService
     {
@@ -25,14 +24,14 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             foreach (var action in actionSet.Actions)
                 action.Exception = null;
 
-            // 对齐 ClassIsland：仅在启用恢复时设置 IsOn 标志
+            // 启用恢复时设置 IsOn 标志
             // 未启用恢复时，IsOn 不应阻止重复触发
             if (actionSet.IsRevertEnabled)
             {
                 actionSet.IsOn = true;
             }
 
-            // 对齐 ClassIsland：异步执行行动，避免阻塞 UI 线程
+            // 异步执行行动，避免阻塞 UI 线程
             Task.Run(() =>
             {
                 foreach (var action in actionSet.Actions)
@@ -55,7 +54,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
 
             actionSet.IsOn = false;
 
-            // 对齐 ClassIsland：异步执行恢复，避免阻塞 UI 线程
+            // 异步执行恢复，避免阻塞 UI 线程
             Task.Run(() =>
             {
                 foreach (var action in actionSet.Actions)
@@ -67,7 +66,6 @@ namespace Ink_Canvas.WorkflowAutomation.Services
 
         /// <summary>
         /// 注册行动处理程序。
-        /// 对齐 ClassIsland 的 RegisterActionHandler。
         /// </summary>
         public void RegisterActionHandler(string id, ActionRegistryInfo.HandleDelegate handler)
         {
@@ -88,7 +86,6 @@ namespace Ink_Canvas.WorkflowAutomation.Services
 
         /// <summary>
         /// 注册行动恢复处理程序。
-        /// 对齐 ClassIsland 的 RegisterRevertHandler。
         /// </summary>
         public void RegisterRevertHandler(string id, ActionRegistryInfo.HandleDelegate handler)
         {
@@ -114,7 +111,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         {
             if (!IActionService.Actions.TryGetValue(action.Id, out var info)) return;
 
-            // 对齐 ClassIsland：反序列化 settings
+            // 反序列化 settings
             object settings = null;
             var settingsType = info.SettingsType;
             if (settingsType != null)
@@ -158,7 +155,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             if (!IActionService.Actions.TryGetValue(action.Id, out var info)) return;
             if (info.RevertHandle == null) return;
 
-            // 对齐 ClassIsland：反序列化 settings
+            // 反序列化 settings
             object settings = null;
             var settingsType = info.SettingsType;
             if (settingsType != null)

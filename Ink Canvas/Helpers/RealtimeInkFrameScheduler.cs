@@ -48,8 +48,7 @@ namespace Ink_Canvas.Helpers
 
         /// <summary>
         /// 上报一次墨迹入帧(供 StrokeVisual.Redraw/ForceRedraw 等任何路径调用)。
-        /// 与 inkeys 的 StrokeImageList.emplace_back 每次入队 +1 的语义一致,
-        /// 区别是不绑定特定渲染管线:无论新旧墨迹系统,只要 StrokeVisual 重绘就 +1。
+        /// 每次入队计数 +1，且不绑定特定渲染管线:无论新旧墨迹系统,只要 StrokeVisual 重绘就 +1。
         /// </summary>
         internal static void RecordInkTick()
         {
@@ -198,7 +197,7 @@ namespace Ink_Canvas.Helpers
 
             // 每次 RequestRedraw 调用都计 1 帧"墨迹入帧"。
             // 即便 Coalesce 窗口内重复调用命中已 dirty 路径,这里也照样入帧:
-            // inkeys 的 StrokeImageList.emplace_back 也是每次入队 +1,保持一致的语义。
+            // 每次入队都 +1，保持墨迹入帧计数语义一致。
             // 注意:真正的"墨迹帧率"计数已转移到 StrokeVisual.Redraw 入口,
             // 这里仅保留事件 raise 以便其他订阅者使用。
             RaiseInkTick(now);

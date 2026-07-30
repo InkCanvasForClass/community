@@ -4,7 +4,7 @@ using System;
 namespace Ink_Canvas.Plugins
 {
     /// <summary>
-    /// 插件抽象基类。参考 ClassIsland 的 PluginBase 设计。
+    /// 插件抽象基类。
     /// </summary>
     public abstract class PluginBase : IPlugin
     {

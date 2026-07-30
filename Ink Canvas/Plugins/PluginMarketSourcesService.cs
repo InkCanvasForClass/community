@@ -7,8 +7,7 @@ using System.Linq;
 namespace Ink_Canvas.Plugins
 {
     /// <summary>
-    /// 插件市场源（Source）配置管理。参考 ClassIsland ClassIsland/ClassIsland/Plugins/PluginMarketService.cs，
-    /// 用户可添加多个第三方插件源（指向不同的 index.json URL），并在每个源下选择具体的镜像。
+    /// 插件市场源配置管理，支持添加多个第三方插件源并选择镜像。
     /// </summary>
     public class PluginMarketSourcesService
     {
