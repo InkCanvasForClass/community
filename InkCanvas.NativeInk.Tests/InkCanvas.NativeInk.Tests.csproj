@@ -14,6 +14,7 @@
     <Compile Include="..\Ink Canvas\Ink\Native\InkTailPredictor.cs" Link="Ink\Native\InkTailPredictor.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\NativeInkSession.cs" Link="Ink\Native\NativeInkSession.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\NativeInkController.cs" Link="Ink\Native\NativeInkController.cs" />
+    <Compile Include="..\Ink Canvas\Ink\Native\NativePointerUpdatePump.cs" Link="Ink\Native\NativePointerUpdatePump.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\NativeInkInputRouter.cs" Link="Ink\Native\NativeInkInputRouter.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\NativePointerInputBatch.cs" Link="Ink\Native\NativePointerInputBatch.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\NativePointerTimestampConverter.cs" Link="Ink\Native\NativePointerTimestampConverter.cs" />

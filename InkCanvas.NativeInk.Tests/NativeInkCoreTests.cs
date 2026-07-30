@@ -39,6 +39,7 @@ namespace InkCanvas.NativeInk.Tests
             Run(nameof(RouterAllowsDelayedTwoFingerTakeover), RouterAllowsDelayedTwoFingerTakeover);
             Run(nameof(RouterKeepsCapturedInkAndSuppressesBarrelPoints), RouterKeepsCapturedInkAndSuppressesBarrelPoints);
             Run(nameof(PointerBatchCopiesSamples), PointerBatchCopiesSamples);
+            Run(nameof(PointerBatchOwnedSamplesSkipCopy), PointerBatchOwnedSamplesSkipCopy);
             Run(nameof(PointerTimestampConversionAvoidsOverflow), PointerTimestampConversionAvoidsOverflow);
             Run(nameof(PointerTickTimestampHandlesWraparound), PointerTickTimestampHandlesWraparound);
             Run(nameof(MailboxPreservesBoundariesAndCoalescesMoves), MailboxPreservesBoundariesAndCoalescesMoves);
@@ -68,6 +69,8 @@ namespace InkCanvas.NativeInk.Tests
             Run(nameof(PredictionCrawlingProducesShortTail), PredictionCrawlingProducesShortTail);
             Run(nameof(PredictionSurvivesSpeedDip), PredictionSurvivesSpeedDip);
             Run(nameof(PredictionStaysChronologicalAndFinite), PredictionStaysChronologicalAndFinite);
+            Run(nameof(UpdatePumpKeepsLatestPendingWork), UpdatePumpKeepsLatestPendingWork);
+            Run(nameof(UpdatePumpDropsStaleSessionWork), UpdatePumpDropsStaleSessionWork);
             Console.WriteLine($"Native ink contract tests passed: {_passed}.");
         }
 
@@ -485,6 +488,21 @@ namespace InkCanvas.NativeInk.Tests
                 true);
             samples[0] = Sample(20, 2, 2);
             Equal(10L, batch.SamplesNewestFirst[0].TimestampMicroseconds);
+        }
+
+        private static void PointerBatchOwnedSamplesSkipCopy()
+        {
+            var samples = new[] { Sample(10, 1, 1) };
+            var batch = NativePointerInputBatch.CreateFromOwnedSamples(
+                7,
+                NativeInkInputKind.Pen,
+                NativePointerMessageKind.Update,
+                samples,
+                false,
+                false,
+                true);
+            samples[0] = Sample(20, 2, 2);
+            Equal(20L, batch.SamplesNewestFirst[0].TimestampMicroseconds);
         }
 
         private static void PointerTimestampConversionAvoidsOverflow()
@@ -1236,6 +1254,68 @@ namespace InkCanvas.NativeInk.Tests
             var session = manager.Begin(9, NativeInkInputKind.Pen, Style(), new InkSampleProcessorSettings(), 0);
             session.AppendReverseChronologicalHistory(new[] { Sample(20, 2, 2, 9), Sample(10, 1, 1, 9) });
             session.ReplacePrediction(InkTailPredictor.Build(session.RealPoints));
+        }
+
+        private static void UpdatePumpKeepsLatestPendingWork()
+        {
+            var controller = Controller(out _, out var mailbox);
+            var session = controller.Begin(
+                7,
+                NativeInkInputKind.Pen,
+                Style(),
+                new InkSampleProcessorSettings(),
+                0,
+                new[] { Sample(10, 1, 10) });
+            mailbox.Drain();
+
+            var workSignals = 0;
+            using var pump = new NativePointerUpdatePump(controller, () => workSignals++);
+            pump.Enqueue(7, session.SessionId, new[] { Sample(20, 2, 20) }, predictionEnabled: false);
+            pump.Enqueue(7, session.SessionId, new[] { Sample(30, 3, 30) }, predictionEnabled: false);
+            pump.FlushPointer(7);
+
+            var batch = mailbox.Drain();
+            Equal(1, batch.RenderSnapshots.Count);
+            Equal(30L, batch.RenderSnapshots[0].RealPoints[batch.RenderSnapshots[0].RealPoints.Count - 1].TimestampMicroseconds);
+            True(workSignals >= 1);
+        }
+
+        private static void UpdatePumpDropsStaleSessionWork()
+        {
+            var controller = Controller(out var manager, out var mailbox);
+            var first = controller.Begin(
+                7,
+                NativeInkInputKind.Pen,
+                Style(),
+                new InkSampleProcessorSettings(),
+                0,
+                new[] { Sample(10, 1, 10) });
+            mailbox.Drain();
+
+            using var pump = new NativePointerUpdatePump(controller, () => { });
+
+            var payload = controller.End(7, 30, new[] { Sample(30, 3, 30) });
+            NotNull(payload);
+            var second = controller.Begin(
+                7,
+                NativeInkInputKind.Pen,
+                Style(),
+                new InkSampleProcessorSettings(),
+                40,
+                new[] { Sample(40, 4, 40) });
+            True(second.SessionId != first.SessionId);
+
+            pump.Enqueue(7, first.SessionId, new[] { Sample(20, 2, 20) }, predictionEnabled: false);
+            pump.FlushAll();
+
+            True(manager.TryGetSession(first.SessionId, out var retained));
+            Equal(NativeInkSessionState.Ending, retained.State);
+            var batch = mailbox.Drain();
+            Equal(2, batch.RenderSnapshots.Count);
+            Equal(first.SessionId, batch.RenderSnapshots[0].SessionId);
+            Equal(3L, batch.RenderSnapshots[0].Version);
+            Equal(second.SessionId, batch.RenderSnapshots[1].SessionId);
+            Equal(1L, batch.RenderSnapshots[1].Version);
         }
 
         /// <summary>
