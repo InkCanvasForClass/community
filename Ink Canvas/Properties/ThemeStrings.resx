@@ -534,6 +534,6 @@
     <value>主题更改</value>
   </data>
   <data name="Theme_RestartRequired" xml:space="preserve">
-    <value>更改应用主题后需要重启应用程序才能完全生效。是否立即重启？</value>
+    <value>更改主题后需要重启应用程序才能完全生效。是否立即重启？</value>
   </data>
 </root>

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
@@ -37,6 +38,20 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
                     ThemeStrings.Theme_FloatingBarThemesApplyFailed,
                     ThemeStrings.Theme_FloatingBarThemeMarketTitle);
+            }
+            else
+            {
+                var result = MessageBox.Show(
+                    ThemeStrings.GetString("Theme_RestartRequired"),
+                    ThemeStrings.GetString("Theme_RestartPromptTitle"),
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    AppRestartHelper.RestartWithCurrentPrivileges();
+                    return;
+                }
             }
             RefreshThemes();
         }

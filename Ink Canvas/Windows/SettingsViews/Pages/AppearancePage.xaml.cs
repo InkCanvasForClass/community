@@ -1,5 +1,4 @@
 using Ink_Canvas.Helpers;
-using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Diagnostics;
@@ -81,17 +80,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 SettingsManager.Settings.Appearance.Theme = ComboBoxTheme.SelectedIndex;
                 SettingsManager.SaveSettingsToFile();
                 SettingsActionHub.OnThemeChanged(ComboBoxTheme.SelectedIndex);
-
-                var result = MessageBox.Show(
-                    ThemeStrings.GetString("Theme_RestartRequired"),
-                    ThemeStrings.GetString("Theme_RestartPromptTitle"),
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question);
-
-                if (result == MessageBoxResult.Yes)
-                {
-                    AppRestartHelper.RestartWithCurrentPrivileges();
-                }
             }
             catch (Exception ex) { Debug.WriteLine($"切换主题时出错: {ex.Message}"); }
         }
