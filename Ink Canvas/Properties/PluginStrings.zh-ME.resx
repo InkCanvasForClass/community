@@ -94,10 +94,13 @@
     <value>有新版</value>
   </data>
   <data name="Market_RestartRequired" xml:space="preserve">
-    <value>得重启</value>
+    <value>待应用</value>
   </data>
   <data name="Market_RestartToApply" xml:space="preserve">
-    <value>重启一下就好</value>
+    <value>现在就应用</value>
+  </data>
+  <data name="Market_ApplyPendingUpdate" xml:space="preserve">
+    <value>现在就应用</value>
   </data>
   <data name="Market_SelectPluginHint" xml:space="preserve">
     <value>左边选一个插件看看详情呗</value>
@@ -129,13 +132,22 @@
     <value>召集依赖小伙伴</value>
   </data>
   <data name="Market_InstallLocalSuccess" xml:space="preserve">
-    <value>插件已加入装载队列，重启后生效~</value>
+    <value>插件装好了，已经热加载上线~</value>
   </data>
   <data name="Market_InstallLocalFailed" xml:space="preserve">
     <value>装载翻车了：{0}</value>
   </data>
+  <data name="Market_HotUpdateMessage" xml:space="preserve">
+    <value>会下载并立刻热更新这个插件，不用重启哦。继续吗？</value>
+  </data>
+  <data name="Market_HotInstallPending" xml:space="preserve">
+    <value>包已经下好了，但热加载没成功。可以点“现在就应用”再试，或者重启一下自动生效~</value>
+  </data>
+  <data name="Market_HotInstallFailedRestart" xml:space="preserve">
+    <value>热加载没搞定（可能文件还被占着）。现在重启应用完成安装吗？</value>
+  </data>
   <data name="Market_RestartMessage" xml:space="preserve">
-    <value>需要重启应用才能完成插件装载/升级，现在重启吗？</value>
+    <value>需要重启应用才能完成这次插件操作，现在重启吗？</value>
   </data>
   <data name="Market_RestartTitle" xml:space="preserve">
     <value>重启确认</value>
@@ -150,7 +162,7 @@
     <value>删库跑路</value>
   </data>
   <data name="Plugin_DeleteConfirm" xml:space="preserve">
-    <value>确定要删库「{0}」吗？删了得重启生效哦~</value>
+    <value>确定要删库「{0}」吗？删了会立刻卸载，不用重启~</value>
   </data>
   <data name="Plugin_DeleteTitle" xml:space="preserve">
     <value>删库跑路</value>
@@ -166,6 +178,9 @@
   </data>
   <data name="Plugin_ErrorReset" xml:space="preserve">
     <value>复位并重新召唤</value>
+  </data>
+  <data name="Plugin_ErrorResetConfirm" xml:space="preserve">
+    <value>会清掉错误记录并立刻尝试重新召唤这个插件，继续吗？</value>
   </data>
   <data name="Plugin_ExportConfig" xml:space="preserve">
     <value>导出配置</value>

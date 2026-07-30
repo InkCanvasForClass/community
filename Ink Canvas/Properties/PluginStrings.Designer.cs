@@ -78,6 +78,8 @@ namespace Ink_Canvas.Properties
 
         public static string Market_RestartToApply => ResourceManager.GetString(nameof(Market_RestartToApply), _resourceCulture);
 
+        public static string Market_ApplyPendingUpdate => ResourceManager.GetString(nameof(Market_ApplyPendingUpdate), _resourceCulture);
+
         public static string Market_SelectPluginHint => ResourceManager.GetString(nameof(Market_SelectPluginHint), _resourceCulture);
 
         public static string Market_ProjectHomepage => ResourceManager.GetString(nameof(Market_ProjectHomepage), _resourceCulture);
@@ -100,6 +102,12 @@ namespace Ink_Canvas.Properties
 
         public static string Market_InstallLocalFailed => ResourceManager.GetString(nameof(Market_InstallLocalFailed), _resourceCulture);
 
+        public static string Market_HotUpdateMessage => ResourceManager.GetString(nameof(Market_HotUpdateMessage), _resourceCulture);
+
+        public static string Market_HotInstallPending => ResourceManager.GetString(nameof(Market_HotInstallPending), _resourceCulture);
+
+        public static string Market_HotInstallFailedRestart => ResourceManager.GetString(nameof(Market_HotInstallFailedRestart), _resourceCulture);
+
         public static string Market_RestartMessage => ResourceManager.GetString(nameof(Market_RestartMessage), _resourceCulture);
 
         public static string Market_RestartTitle => ResourceManager.GetString(nameof(Market_RestartTitle), _resourceCulture);
@@ -121,6 +129,8 @@ namespace Ink_Canvas.Properties
         public static string Plugin_ErrorAutoDisabled => ResourceManager.GetString(nameof(Plugin_ErrorAutoDisabled), _resourceCulture);
 
         public static string Plugin_ErrorReset => ResourceManager.GetString(nameof(Plugin_ErrorReset), _resourceCulture);
+
+        public static string Plugin_ErrorResetConfirm => ResourceManager.GetString(nameof(Plugin_ErrorResetConfirm), _resourceCulture);
 
         public static string Plugin_ExportConfig => ResourceManager.GetString(nameof(Plugin_ExportConfig), _resourceCulture);
 

@@ -168,10 +168,10 @@
                                 <TextBlock Text="{x:Static props:PluginStrings.Market_Update}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
-                        <Button x:Name="DetailRestartBtn" Click="DetailRestart_Click" Padding="14,8" Margin="0,0,8,0">
+                        <Button x:Name="DetailRestartBtn" Click="DetailApplyPending_Click" Padding="14,8" Margin="0,0,8,0">
                             <StackPanel Orientation="Horizontal">
                                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" FontSize="14" Margin="0,0,6,0"/>
-                                <TextBlock Text="{x:Static props:PluginStrings.Market_RestartToApply}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{x:Static props:PluginStrings.Market_ApplyPendingUpdate}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
                         <ProgressBar x:Name="DetailProgress" Width="120" Height="4" VerticalAlignment="Center"/>

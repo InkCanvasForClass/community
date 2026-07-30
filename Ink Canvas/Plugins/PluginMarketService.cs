@@ -302,9 +302,10 @@ namespace Ink_Canvas.Plugins
         private void MergePlugins()
         {
             var merged = new Dictionary<string, MergedPluginInfo>();
-            var restartRequiredPluginIds = new HashSet<string>(
-                MergedPlugins?.Where(p => p.RestartRequired).Select(p => p.Id) ?? Enumerable.Empty<string>(),
-                StringComparer.OrdinalIgnoreCase);
+            // RestartRequired 仅表示“还有待安装包没被消费”，不再记忆上一轮 UI 状态。
+            // 旧逻辑会把 RestartRequired 从旧 MergedPlugins 拷回新列表，导致热安装成功后仍提示重启，
+            // 甚至重启后若包仍残留也会继续提示。
+            var restartRequiredPluginIds = PluginManager.Instance.GetPendingPackagePluginIds();
             // 决定镜像：根据当前源自定义选择；若为空则用第一个可用镜像；都没有则用空串。
             string selectedMirror = "";
             string activeSourceId = Sources.GetActiveSource()?.Id ?? PluginMarketSourcesService.OfficialSource.Id;
@@ -533,7 +534,7 @@ namespace Ink_Canvas.Plugins
                     }
                 }
 
-                // 移动到 PluginPackages 目录，下次启动时自动安装
+                // 移动到 PluginPackages 目录，随后热安装（新装/更新均尝试立即生效）
                 var packagesDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PluginPackages");
                 if (!Directory.Exists(packagesDir))
                     Directory.CreateDirectory(packagesDir);
@@ -573,26 +574,30 @@ namespace Ink_Canvas.Plugins
 
                 task.IsCompleted = true;
                 task.Progress = 100;
-                merged.RestartRequired = true;
 
-                // 检查是否为全新安装（当前未加载的插件）
-                var isAlreadyLoaded = PluginManager.Instance.Plugins.Any(p => p.Id == id);
-                if (!isAlreadyLoaded)
+                // 新装与更新统一走热安装：已加载插件会先卸载再覆盖。
+                // 仅当包仍残留在 PluginPackages/ 时才标记 RestartRequired。
+                try
                 {
-                    // 全新安装：尝试立即加载
-                    try
-                    {
-                        PluginManager.Instance.InstallPendingPackages();
-                        merged.RestartRequired = false;
-                    }
-                    catch
-                    {
-                        // 加载失败，保留 RestartRequired
-                    }
+                    PluginManager.Instance.InstallPendingPackages();
                 }
-                // 已加载插件的更新：仅下载到 PluginPackages/，下次启动时 ProcessPluginPackages 自动覆盖
+                catch (Exception installEx)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"PluginMarket | 热安装失败 {id}: {installEx.Message}",
+                        LogHelper.LogType.Warning);
+                }
 
-                LogHelper.WriteLogToFile($"PluginMarket | 插件下载完成: {id}");
+                // InstallPendingPackages 内部会 RefreshMergedPlugins；这里取最新对象更新状态。
+                var refreshed = MergedPlugins?.FirstOrDefault(p => p.Id == id) ?? merged;
+                refreshed.RestartRequired = PluginManager.Instance.GetPendingPackagePluginIds().Contains(id);
+                if (!ReferenceEquals(refreshed, merged))
+                    merged.RestartRequired = refreshed.RestartRequired;
+
+                LogHelper.WriteLogToFile(
+                    refreshed.RestartRequired
+                        ? $"PluginMarket | 插件下载完成但热安装未消费: {id}（仍需重启）"
+                        : $"PluginMarket | 插件下载并热安装完成: {id}");
 
                 return true;
             }

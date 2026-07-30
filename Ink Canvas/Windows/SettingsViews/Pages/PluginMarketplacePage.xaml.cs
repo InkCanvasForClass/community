@@ -549,6 +549,40 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             await InstallPluginAsync(_selectedPlugin.Id);
         }
 
+        private void DetailApplyPending_Click(object sender, RoutedEventArgs e)
+        {
+            if (_selectedPlugin == null) return;
+            try
+            {
+                PluginManager.Instance.InstallPendingPackages();
+                _allPlugins = _market.MergedPlugins ?? new List<MergedPluginInfo>();
+                RefreshList();
+
+                var stillPending = _market.MergedPlugins?.FirstOrDefault(p => p.Id == _selectedPlugin.Id);
+                if (stillPending?.RestartRequired == true)
+                {
+                    var restart = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                        PluginStrings.Market_HotInstallFailedRestart,
+                        PluginStrings.Market_RestartTitle,
+                        MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                    if (restart == MessageBoxResult.Yes)
+                        AskRestart();
+                }
+                else if (_selectedPlugin != null)
+                {
+                    var refreshed = _market.MergedPlugins?.FirstOrDefault(p => p.Id == _selectedPlugin.Id);
+                    if (refreshed != null) ShowDetail(refreshed);
+                }
+            }
+            catch (Exception ex)
+            {
+                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                    string.Format(PluginStrings.Market_InstallLocalFailed, ex.Message),
+                    PluginStrings.Market_Title,
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void DetailRestart_Click(object sender, RoutedEventArgs e)
         {
             AskRestart();
@@ -646,7 +680,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 var packagesDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PluginPackages");
                 if (!Directory.Exists(packagesDir)) Directory.CreateDirectory(packagesDir);
-                var packagePath = Path.Combine(packagesDir, Path.GetFileName(dialog.FileName));
+                // 优先用 manifest/安全检查得到的插件 ID 命名，保证热安装与 Pending 状态一致。
+                var packageFileName = !string.IsNullOrWhiteSpace(verdict.PluginId)
+                    ? verdict.PluginId + ".icpx"
+                    : Path.GetFileName(dialog.FileName);
+                var packagePath = Path.Combine(packagesDir, packageFileName);
                 File.Copy(dialog.FileName, packagePath, true);
                 PluginManager.Instance.InstallPendingPackages(
                     isUntrusted ? packagePath : null,
@@ -654,6 +692,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 _market.RefreshMergedPlugins();
                 _allPlugins = _market.MergedPlugins ?? new List<MergedPluginInfo>();
                 RefreshList();
+
+                var stillPending = !string.IsNullOrWhiteSpace(verdict.PluginId)
+                    && PluginManager.Instance.GetPendingPackagePluginIds().Contains(verdict.PluginId);
+                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                    stillPending ? PluginStrings.Market_HotInstallPending : PluginStrings.Market_InstallLocalSuccess,
+                    PluginStrings.Market_Title,
+                    MessageBoxButton.OK,
+                    stillPending ? MessageBoxImage.Warning : MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
