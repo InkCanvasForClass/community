@@ -29,7 +29,9 @@ namespace Ink_Canvas.Ink.Native
         private const uint TouchMaskPressure = 0x00000004;
         private const uint MiWpSignature = 0xFF515700;
         private const uint SignatureMask = 0xFFFFFF00;
+        private const ulong TouchPromotionBit = 0x00000080;
         private const uint MousePointerId = uint.MaxValue;
+        private const uint PromotedPenMousePointerId = uint.MaxValue - 1;
         private const int ErrorInsufficientBuffer = 122;
         private const int ErrorNoData = 232;
         private const int MaximumHistoryEntries = 4096;
@@ -179,7 +181,14 @@ namespace Ink_Canvas.Ink.Native
             NativePointerMessageKind messageKind,
             ref bool handled)
         {
-            var promoted = IsPromotedMouseMessage();
+            var promotion = GetPromotedPointerKind();
+            var promoted = promotion.HasValue;
+            var inputKind = promotion == NativeInkInputKind.Pen
+                ? NativeInkInputKind.Pen
+                : NativeInkInputKind.Mouse;
+            var pointerId = promotion == NativeInkInputKind.Pen
+                ? PromotedPenMousePointerId
+                : MousePointerId;
             if (messageKind == NativePointerMessageKind.Down)
                 _mouseInContact = true;
             else if (messageKind == NativePointerMessageKind.Up)
@@ -193,8 +202,8 @@ namespace Ink_Canvas.Ink.Native
                 ? NativeInkSampleFlags.Primary
                 : NativeInkSampleFlags.InContact | NativeInkSampleFlags.Primary;
             var sample = new RawInkSample(
-                MousePointerId,
-                NativeInkInputKind.Mouse,
+                pointerId,
+                inputKind,
                 (point.X - clientOrigin.X) / _dpiScaleX,
                 (point.Y - clientOrigin.Y) / _dpiScaleY,
                 0.5f,
@@ -203,8 +212,8 @@ namespace Ink_Canvas.Ink.Native
                 ++_mouseFrameId,
                 flags);
             handled = _handler(new NativePointerInputBatch(
-                MousePointerId,
-                NativeInkInputKind.Mouse,
+                pointerId,
+                inputKind,
                 messageKind,
                 new[] { sample },
                 (LowWord(wParam) & 0x0002) != 0,
@@ -535,10 +544,15 @@ namespace Ink_Canvas.Ink.Native
             return pressure / 1024f;
         }
 
-        private static bool IsPromotedMouseMessage()
+        private static NativeInkInputKind? GetPromotedPointerKind()
         {
             var extraInfo = unchecked((ulong)GetMessageExtraInfo().ToInt64());
-            return ((uint)extraInfo & SignatureMask) == MiWpSignature;
+            if (((uint)extraInfo & SignatureMask) != MiWpSignature)
+                return null;
+
+            return (extraInfo & TouchPromotionBit) != 0
+                ? NativeInkInputKind.Touch
+                : NativeInkInputKind.Pen;
         }
 
         private static uint LowWord(IntPtr value) => unchecked((uint)value.ToInt64()) & 0xFFFF;

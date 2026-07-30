@@ -29,6 +29,8 @@ namespace Ink_Canvas
             new Dictionary<uint, NativeInkInputKind>();
         private readonly Dictionary<uint, NativeInkInputKind> _wpfFallbackPointers =
             new Dictionary<uint, NativeInkInputKind>();
+        private readonly Dictionary<uint, NativeInkInputKind> _promotedMouseFallbackPointers =
+            new Dictionary<uint, NativeInkInputKind>();
         private long _lastNativePenInputTimestamp;
         private long _lastNativeTouchInputTimestamp;
 
@@ -162,6 +164,7 @@ namespace Ink_Canvas
             _nativeActiveTouchPointers.Clear();
             _nativeHardwarePointers.Clear();
             _wpfFallbackPointers.Clear();
+            _promotedMouseFallbackPointers.Clear();
             _nativeWetInkStarted = false;
         }
 
@@ -267,6 +270,9 @@ namespace Ink_Canvas
 
             _nativeCapturedRoutes.Clear();
             _nativeActiveTouchPointers.Clear();
+            _nativeHardwarePointers.Clear();
+            _wpfFallbackPointers.Clear();
+            _promotedMouseFallbackPointers.Clear();
         }
 
         private void SetOverlayVisible(bool visible)
@@ -382,11 +388,35 @@ namespace Ink_Canvas
                 ? ref _lastNativePenInputTimestamp
                 : ref _lastNativeTouchInputTimestamp;
 
+            if (batch.IsPromotedMouse && batch.InputKind == NativeInkInputKind.Pen)
+            {
+                if (ContainsInputKind(_nativeHardwarePointers, batch.InputKind)
+                    || ContainsInputKind(_wpfFallbackPointers, batch.InputKind))
+                {
+                    return false;
+                }
+
+                var promotedFallbackElapsedMilliseconds = lastNativeTimestamp == 0
+                    ? double.MaxValue
+                    : (now - lastNativeTimestamp) * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+                if (promotedFallbackElapsedMilliseconds <= 100)
+                    return false;
+
+                _promotedMouseFallbackPointers[batch.PointerId] = batch.InputKind;
+                if (batch.MessageKind == NativePointerMessageKind.Up
+                    || batch.MessageKind == NativePointerMessageKind.CaptureLost)
+                {
+                    _promotedMouseFallbackPointers.Remove(batch.PointerId);
+                }
+                return true;
+            }
+
             if (!batch.IsWpfFallback)
             {
                 // If WPF delivered Down first, keep that source for the whole stroke;
                 // switching sources mid-contact would create a duplicate / broken stroke.
-                if (ContainsInputKind(_wpfFallbackPointers, batch.InputKind))
+                if (ContainsInputKind(_wpfFallbackPointers, batch.InputKind)
+                    || ContainsInputKind(_promotedMouseFallbackPointers, batch.InputKind))
                     return false;
 
                 lastNativeTimestamp = now;

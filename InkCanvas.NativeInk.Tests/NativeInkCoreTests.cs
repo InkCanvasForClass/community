@@ -31,6 +31,7 @@ namespace InkCanvas.NativeInk.Tests
             Run(nameof(RouterBlocksFrozenMutationButAllowsRoam), RouterBlocksFrozenMutationButAllowsRoam);
             Run(nameof(RouterIgnoresPromotedMouse), RouterIgnoresPromotedMouse);
             Run(nameof(RouterLetsPromotedMouseReachUi), RouterLetsPromotedMouseReachUi);
+            Run(nameof(RouterAllowsPromotedPenMouseInk), RouterAllowsPromotedPenMouseInk);
             Run(nameof(RouterKeepsVideoGesturesAndPenAnnotationsSeparate), RouterKeepsVideoGesturesAndPenAnnotationsSeparate);
             Run(nameof(RouterRoutesInvertedPenToPointErase), RouterRoutesInvertedPenToPointErase);
             Run(nameof(RouterMapsLogicalTools), RouterMapsLogicalTools);
@@ -370,6 +371,16 @@ namespace InkCanvas.NativeInk.Tests
             Equal(NativeInputRoute.DeferToWpfUi, decision.Route);
             True(!decision.ConsumeNativeMessage);
             True(decision.AllowWpfPromotion);
+        }
+
+        private static void RouterAllowsPromotedPenMouseInk()
+        {
+            var decision = NativeInkInputRouter.DecideDown(
+                Pointer(NativeInkInputKind.Pen, isPromotedMouse: true),
+                Context(LogicalInkTool.Pen));
+            Equal(NativeInputRoute.Ink, decision.Route);
+            True(decision.ConsumeNativeMessage);
+            True(!decision.AllowWpfPromotion);
         }
 
         private static void RouterKeepsVideoGesturesAndPenAnnotationsSeparate()
