@@ -324,9 +324,8 @@ namespace Ink_Canvas
             if (_isVideoPresenterSpecialMode) return;
             _isVideoPresenterSpecialMode = true;
 
-            // 重置虚拟分页状态：进入特殊模式时在直播页，无照片
+            // 重置虚拟分页状态：进入特殊模式时默认回到直播页，但保留上次拍照列表
             _boothCurrentPhotoIndex = -1;
-            _capturedPhotos.Clear();
 
             try
             {
@@ -391,16 +390,15 @@ namespace Ink_Canvas
             }
         }
 
-        /// <summary>退出视频展台特殊模式：恢复白板背景、丢弃特殊模式下绘制的墨迹。</summary>
+        /// <summary>退出视频展台特殊模式：恢复白板背景，保留展台拍照供下次进入继续查看。</summary>
         private void ExitVideoPresenterSpecialMode()
         {
             if (!_isVideoPresenterSpecialMode) return;
             _isVideoPresenterSpecialMode = false;
 
-            // 重置虚拟分页状态
+            // 重置虚拟分页状态：退出后默认回到直播页，但保留照片列表
             _boothCurrentPhotoIndex = -1;
-            _capturedPhotos.Clear();
-            // 清空 booth per-page 墨迹存储（退出即丢弃，不持久化到白板）
+            // booth per-page 墨迹仍按原逻辑清空，不持久化到下次进入
             _boothStrokesByPage.Clear();
 
             try
