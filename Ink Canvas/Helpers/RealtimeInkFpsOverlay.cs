@@ -18,6 +18,7 @@ namespace Ink_Canvas.Helpers
     /// 数据源:
     /// - FPS：<see cref="InkPerformanceMonitor"/> 中活跃提交间隔滑窗；空闲 &gt; 1s 自动清空。
     /// - Submit latency：由 RecordFrame 上报 latest-sample → submitted 差值。
+    /// - Frame age：由 RecordFrame 上报 earliest-sample → submitted 差值。
     /// HUD 不订阅任何事件，而是周期调用 Snapshot() 读快照。
     /// </summary>
     internal sealed class RealtimeInkFpsOverlay : PerformanceTransparentWin
@@ -26,14 +27,16 @@ namespace Ink_Canvas.Helpers
 
         private readonly TextBlock _fpsText;
         private readonly TextBlock _latencyText;
+        private readonly TextBlock _frameAgeText;
         private readonly TextBlock _footerText;
         private readonly DispatcherTimer _refreshTimer;
         private bool _disposed;
 
         public RealtimeInkFpsOverlay()
         {
-            Width = 168;
-            Height = 76;
+            MinWidth = 168;
+            Width = 240;
+            Height = 92;
             ShowInTaskbar = false;
             Topmost = true;
             Focusable = false;
@@ -62,24 +65,40 @@ namespace Ink_Canvas.Helpers
                 Foreground = Brushes.LimeGreen,
                 FontSize = 14,
                 FontWeight = FontWeights.SemiBold,
-                Text = "FPS  --"
+                Text = "FPS  --",
+                TextTrimming = TextTrimming.CharacterEllipsis,
+                TextWrapping = TextWrapping.NoWrap
             };
             _latencyText = new TextBlock
             {
                 Foreground = Brushes.White,
                 FontSize = 12,
                 Margin = new Thickness(0, 2, 0, 0),
-                Text = "提交  -- ms"
+                Text = "提交  -- ms",
+                TextTrimming = TextTrimming.CharacterEllipsis,
+                TextWrapping = TextWrapping.NoWrap
+            };
+            _frameAgeText = new TextBlock
+            {
+                Foreground = Brushes.White,
+                FontSize = 11,
+                Margin = new Thickness(0, 1, 0, 0),
+                Text = "帧龄  -- ms",
+                TextTrimming = TextTrimming.CharacterEllipsis,
+                TextWrapping = TextWrapping.NoWrap
             };
             _footerText = new TextBlock
             {
                 Foreground = new SolidColorBrush(Color.FromRgb(170, 170, 170)),
                 FontSize = 10,
                 Margin = new Thickness(0, 2, 0, 0),
-                Text = "实时墨迹 (空闲)"
+                Text = "实时墨迹 (空闲)",
+                TextTrimming = TextTrimming.CharacterEllipsis,
+                TextWrapping = TextWrapping.NoWrap
             };
             ((StackPanel)root.Child).Children.Add(_fpsText);
             ((StackPanel)root.Child).Children.Add(_latencyText);
+            ((StackPanel)root.Child).Children.Add(_frameAgeText);
             ((StackPanel)root.Child).Children.Add(_footerText);
 
             Content = root;
@@ -93,6 +112,7 @@ namespace Ink_Canvas.Helpers
             InkPerformanceMonitor.SetEnabled(true);
             _refreshTimer.Start();
             Loaded += (_, _) => PositionInTopRight();
+            SizeChanged += (_, _) => PositionInTopRight();
 
             Closed += (_, _) =>
             {
@@ -116,6 +136,10 @@ namespace Ink_Canvas.Helpers
                 ? string.Format(CultureInfo.InvariantCulture,
                     "提交  {0:F1} ms / max {1:F1}", snap.AverageSubmitLatencyMs, snap.MaxSubmitLatencyMs)
                 : "提交  -- ms";
+            _frameAgeText.Text = snap.FrameAgeSampleCount > 0
+                ? string.Format(CultureInfo.InvariantCulture,
+                    "帧龄  {0:F1} ms / max {1:F1}", snap.AverageFrameAgeMs, snap.MaxFrameAgeMs)
+                : "帧龄  -- ms";
 
             var idleText = AdvancedStrings.RealtimeInkFpsOverlay_IdleText;
             if (string.IsNullOrEmpty(idleText)) idleText = "Realtime ink (idle)";
@@ -146,7 +170,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 var workArea = SystemParameters.WorkArea;
-                Left = workArea.Right - Width - 16;
+                Left = workArea.Right - ActualWidth - 16;
                 Top = workArea.Top + 16;
             }
             catch

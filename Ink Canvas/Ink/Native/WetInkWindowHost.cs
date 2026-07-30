@@ -320,10 +320,13 @@ namespace Ink_Canvas.Ink.Native
             {
                 result = _renderer.Apply(batch);
                 // 新湿墨实时渲染完成一帧：沿用 NativePointerInputSource 提供的微秒时间戳，
-                // 用最新点的时间作为本帧输入起点，转成 Stopwatch ticks 后交给统一监控器。
-                long dirtyStartedAtTicks = 0L;
+                // earliest/latest 分别表示参与本帧提交的最早/最新新增输入样本，
+                // 转成 Stopwatch ticks 后交给统一监控器。
+                long earliestSampleAtTicks = 0L;
+                long latestSampleAtTicks = 0L;
                 if (batch != null && batch.RenderSnapshots.Count > 0)
                 {
+                    long earliestMicroseconds = long.MaxValue;
                     long latestMicroseconds = 0;
                     for (var i = 0; i < batch.RenderSnapshots.Count; i++)
                     {
@@ -331,16 +334,22 @@ namespace Ink_Canvas.Ink.Native
                         var realPoints = snapshot.RealPoints;
                         if (realPoints == null || realPoints.Count == 0)
                             continue;
-                        var candidate = realPoints[realPoints.Count - 1].TimestampMicroseconds;
-                        if (candidate > latestMicroseconds)
-                            latestMicroseconds = candidate;
+                        var first = realPoints[0].TimestampMicroseconds;
+                        var last = realPoints[realPoints.Count - 1].TimestampMicroseconds;
+                        if (first < earliestMicroseconds)
+                            earliestMicroseconds = first;
+                        if (last > latestMicroseconds)
+                            latestMicroseconds = last;
                     }
+                    if (earliestMicroseconds != long.MaxValue)
+                        earliestSampleAtTicks = earliestMicroseconds * Stopwatch.Frequency / 1_000_000L;
                     if (latestMicroseconds > 0)
-                        dirtyStartedAtTicks = latestMicroseconds * Stopwatch.Frequency / 1_000_000L;
+                        latestSampleAtTicks = latestMicroseconds * Stopwatch.Frequency / 1_000_000L;
                 }
                 InkPerformanceMonitor.RecordFrame(new InkFrameSample
                 {
-                    LatestSampleAtTicks = dirtyStartedAtTicks,
+                    EarliestSampleAtTicks = earliestSampleAtTicks,
+                    LatestSampleAtTicks = latestSampleAtTicks,
                     SubmittedAtTicks = Stopwatch.GetTimestamp()
                 });
             }

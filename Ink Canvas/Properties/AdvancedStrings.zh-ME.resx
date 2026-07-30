@@ -154,7 +154,7 @@
     <value>右上角挂个实时笔迹帧率 / 提交延迟小监视器</value>
   </data>
   <data name="Debug_RealtimeInkFpsOverlay_Desc" xml:space="preserve">
-    <value>打开后会在屏幕右上角冒出一块小窗，实时刷新墨迹渲染帧率（FPS）和提交延迟（毫秒）。这个提交延迟指的是参与本帧提交的最新输入样本，到渲染线程把这帧提交记账完所花的时间，不是真正的端到端上屏延迟。只统计实时笔迹（TouchVelocity / 实时笔锋）路径，普通自带 Ink 笔迹不掺和。默认关着。</value>
+    <value>打开后会在屏幕右上角冒出一块小窗，实时刷新墨迹渲染帧率（FPS）、提交延迟和帧龄（毫秒）。提交延迟指的是参与本帧提交的最新输入样本，到渲染线程把这帧提交记账完所花的时间；帧龄指的是参与本帧提交的最早新增输入样本，到同一提交记账点的耗时。两者都不是真正的端到端上屏延迟。只统计实时笔迹（TouchVelocity / 实时笔锋）路径，普通自带 Ink 笔迹不掺和。默认关着。</value>
   </data>
   <data name="RealtimeInkFpsOverlay_IdleText" xml:space="preserve">
     <value>实时墨迹（发呆中）</value>

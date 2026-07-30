@@ -155,7 +155,7 @@
     <value>屏幕角落实时显示实时墨迹帧率与提交延迟</value>
   </data>
   <data name="Debug_RealtimeInkFpsOverlay_Desc" xml:space="preserve">
-    <value>开启后在屏幕右上角悬浮显示实时墨迹的实际渲染帧率（FPS）和提交延迟（毫秒）。提交延迟表示参与本帧提交的最新输入样本到渲染线程完成本次提交记账的耗时，不等同于真实端到端显示延迟。仅在实时笔迹（TouchVelocity / 实时笔锋）路径下统计；普通 InkCanvas 自带笔迹不影响。默认关闭。</value>
+    <value>开启后在屏幕右上角悬浮显示实时墨迹的实际渲染帧率（FPS）、提交延迟和帧龄（毫秒）。提交延迟表示参与本帧提交的最新输入样本到渲染线程完成本次提交记账的耗时；帧龄表示参与本帧提交的最早新增输入样本到提交记账的耗时。两者都不等同于真实端到端显示延迟。仅在实时笔迹（TouchVelocity / 实时笔锋）路径下统计；普通 InkCanvas 自带笔迹不影响。默认关闭。</value>
   </data>
   <data name="RealtimeInkFpsOverlay_IdleText" xml:space="preserve">
     <value>实时墨迹 (空闲)</value>
