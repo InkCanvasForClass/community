@@ -45,6 +45,9 @@
   <data name="Home_ExitApp" xml:space="preserve">
     <value>Exit application</value>
   </data>
+  <data name="Home_Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
   <data name="Home_ResetSettings" xml:space="preserve">
     <value>Reset to recommended settings</value>
   </data>
