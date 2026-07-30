@@ -16,7 +16,7 @@ namespace Ink_Canvas.Helpers
     }
 
     /// <summary>
-    /// 实时墨迹 FPS / 延迟聚合器(Steady-Ink 风格)。
+    /// 实时墨迹 FPS / 延迟聚合器。
     ///
     /// 设计要点:
     /// - 单一权威:由 FrameScheduler.OnRendering(旧墨迹) 和 WetInkWindowHost._renderer.Apply(新墨迹) 主动 record_frame。
