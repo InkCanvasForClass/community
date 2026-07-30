@@ -14,7 +14,6 @@ namespace Ink_Canvas.WorkflowAutomation.Services
 {
     /// <summary>
     /// 自动化服务，负责管理工作流的生命周期、触发和恢复。
-    /// 对齐 ClassIsland 的 AutomationService，通过 DI 容器解析触发器实例。
     /// </summary>
     public class AutomationService : ObservableObject
     {
@@ -240,7 +239,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         {
             if (trigger.TriggerInstance != null) return;
 
-            // 对齐 ClassIsland：通过 DI 容器解析触发器实例
+            // 通过 DI 容器解析触发器实例
             TriggerBase triggerInstance = null;
             if (_serviceProvider != null)
             {
@@ -357,7 +356,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             var workflow = trigger.AssociatedWorkflow;
             if (workflow == null) return;
 
-            // 对齐 ClassIsland：未启用恢复时，忽略触发器的恢复事件
+            // 未启用恢复时，忽略触发器的恢复事件
             if (!workflow.ActionSet.IsRevertEnabled) return;
             if (!workflow.ActionSet.IsOn) return;
 

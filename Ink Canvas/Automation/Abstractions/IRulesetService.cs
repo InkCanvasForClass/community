@@ -6,7 +6,6 @@ namespace Ink_Canvas.WorkflowAutomation.Abstractions
 {
     /// <summary>
     /// 规则集服务接口。
-    /// 对齐 ClassIsland 的 IRulesetService。
     /// </summary>
     public interface IRulesetService
     {

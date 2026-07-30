@@ -13,8 +13,7 @@ using System.Linq;
 namespace Ink_Canvas.WorkflowAutomation
 {
     /// <summary>
-    /// 自动化系统启动引导。
-    /// 对齐 ClassIsland 的 App.xaml.cs 注册模式，使用 DI 容器注册所有组件。
+    /// 自动化系统启动引导，使用 DI 容器注册所有组件。
     /// </summary>
     public static class AutomationBootstrap
     {
@@ -55,8 +54,7 @@ namespace Ink_Canvas.WorkflowAutomation
 
         /// <summary>
         /// 初始化自动化系统。
-        /// 对齐 ClassIsland：通过 IServiceCollection 注册所有触发器、行动和规则，
-        /// 然后通过 DI 容器解析。
+        /// 通过 IServiceCollection 注册所有触发器、行动和规则，然后通过 DI 容器解析。
         /// </summary>
         public static void Initialize()
         {
@@ -77,7 +75,7 @@ namespace Ink_Canvas.WorkflowAutomation
                 services.AddSingleton<IActionService, ActionService>();
                 services.AddSingleton<IRulesetService, RulesetService>();
 
-                // 3. 注册触发器（对齐 ClassIsland 的 AddTrigger<T>()）
+                // 3. 注册触发器
                 services.AddTrigger<ProcessDetectedTrigger>();
                 services.AddTrigger<PPTSlideShowTrigger>();
                 services.AddTrigger<TimerTrigger>();
@@ -90,7 +88,7 @@ namespace Ink_Canvas.WorkflowAutomation
                 services.AddTrigger<WhiteboardExitTrigger>();
                 services.AddTrigger<RulesetChangedTrigger>();
 
-                // 4. 注册行动（对齐 ClassIsland 的 AddAction<TSettings>()）
+                // 4. 注册行动
                 services.AddAction<FoldActionSettings>("inkcanvas.fold", "折叠/展开工具栏", "DockBottom");
                 services.AddAction<KillProcessActionSettings>("inkcanvas.killprocess", "结束进程", "CloseOutline");
                 services.AddAction<SaveStrokesActionSettings>("inkcanvas.savestrokes", "保存笔画", "ContentSaveOutline");
@@ -101,7 +99,7 @@ namespace Ink_Canvas.WorkflowAutomation
                 services.AddAction<ResetDesktopPositionActionSettings>("inkcanvas.resetdesktopposition", "重置桌面模式位置", "DockBottom");
                 services.AddAction<ResetPPTPositionActionSettings>("inkcanvas.resetpptposition", "重置PPT模式位置", "Presentation");
 
-                // 5. 注册规则（对齐 ClassIsland 的 AddRule<TSettings>()）
+                // 5. 注册规则
                 services.AddRule<ProcessRunningRuleSettings>("inkcanvas.processrunning", "进程正在运行", "ApplicationCogOutline");
                 services.AddRule<WindowTitleContainsRuleSettings>("inkcanvas.windowtitlecontains", "窗口标题包含", "FormatTitle");
                 services.AddRule<IsAnnotationModeRuleSettings>("inkcanvas.isannotationmode", "批注模式", "PenTool");
@@ -110,7 +108,7 @@ namespace Ink_Canvas.WorkflowAutomation
                 services.AddRule<IsFloatingBarFoldedRuleSettings>("inkcanvas.isfloatingbarfolded", "工具栏已折叠", "DockBottom");
                 services.AddRule<IsForegroundWhiteboardRuleSettings>("inkcanvas.isforegroundwhiteboard", "前台窗口是 ICC-CE 白板", "Whiteboard");
 
-                // 6. 注册行动处理器（对齐 ClassIsland 的 IHostedService 模式）
+                // 6. 注册行动处理器
                 services.AddTransient<FoldActionHandler>();
                 services.AddTransient<KillProcessActionHandler>();
                 services.AddTransient<SaveStrokesActionHandler>();
@@ -132,7 +130,6 @@ namespace Ink_Canvas.WorkflowAutomation
                 _rulesetService = (RulesetService)_serviceProvider.GetRequiredService<IRulesetService>();
 
                 // 9. 初始化行动处理器（注册 Handle/RevertHandle 委托）
-                // 对齐 ClassIsland：ActionHandler 在构造时通过 IActionService 注册处理程序
                 _serviceProvider.GetRequiredService<FoldActionHandler>();
                 _serviceProvider.GetRequiredService<KillProcessActionHandler>();
                 _serviceProvider.GetRequiredService<SaveStrokesActionHandler>();
@@ -143,7 +140,7 @@ namespace Ink_Canvas.WorkflowAutomation
                 _serviceProvider.GetRequiredService<ResetDesktopPositionActionHandler>();
                 _serviceProvider.GetRequiredService<ResetPPTPositionActionHandler>();
 
-                // 10. 注册规则处理程序（对齐 ClassIsland 的 RegisterRuleHandler）
+                // 10. 注册规则处理程序
                 RegisterRuleHandlers();
 
                 // 11. 加载配置
@@ -162,7 +159,6 @@ namespace Ink_Canvas.WorkflowAutomation
 
         /// <summary>
         /// 注册规则处理程序。
-        /// 对齐 ClassIsland：规则处理程序通过 IRulesetService.RegisterRuleHandler 注册。
         /// </summary>
         private static void RegisterRuleHandlers()
         {

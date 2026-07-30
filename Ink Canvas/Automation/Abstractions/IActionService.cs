@@ -5,7 +5,6 @@ namespace Ink_Canvas.WorkflowAutomation.Abstractions
 {
     /// <summary>
     /// 行动服务接口。
-    /// 对齐 ClassIsland 的 IActionService。
     /// </summary>
     public interface IActionService
     {

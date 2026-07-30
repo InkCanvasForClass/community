@@ -4,7 +4,7 @@ namespace Ink_Canvas.WorkflowAutomation.Models
 {
     /// <summary>
     /// 代表一个行动的注册信息。
-    /// 对齐 ClassIsland 的 ActionRegistryInfo，Handle 和 RevertHandle 分离注册。
+    /// Handle 和 RevertHandle 分离注册。
     /// </summary>
     public class ActionRegistryInfo
     {

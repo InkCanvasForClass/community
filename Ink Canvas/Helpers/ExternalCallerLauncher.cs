@@ -11,7 +11,7 @@ namespace Ink_Canvas.Helpers
         //   • "IslandCaller/Simple"        → ShowRandomStudent(1)（快抽 1 人）
         //   • "IslandCaller/Advanced/GUI"  → 打开 PersonalCall 高级点名窗口
         // 旧版仍使用 "IslandCaller/Run"，因此保留作为兼容回退。
-        // 插件按 `classisland://plugins/<route>` 的形式分发。
+        // 插件按约定的协议形式分发。
         private static readonly string[] ClassIslandProtocols =
         {
             // 新版（IslandCaller 2.0.0+）：单次抽取 1 人

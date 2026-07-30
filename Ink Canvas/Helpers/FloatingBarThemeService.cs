@@ -12,7 +12,7 @@ using System.Windows.Media;
 namespace Ink_Canvas.Helpers
 {
     /// <summary>
-    /// Loads ClassIsland-style local XAML themes for the floating toolbar.
+    /// 加载浮动工具栏的本地 XAML 主题。
     /// Each theme is a folder containing manifest.json and Theme.xaml.
     /// </summary>
     public sealed class FloatingBarThemeService

@@ -671,7 +671,7 @@ namespace Ink_Canvas.Helpers
                         return false;
                     }
 
-                    // 启用 SeAssignPrimaryTokenPrivilege（Inkeys 行为）
+                    // 启用 SeAssignPrimaryTokenPrivilege。
                     var tkp = new TOKEN_PRIVILEGES
                     {
                         PrivilegeCount = 1,

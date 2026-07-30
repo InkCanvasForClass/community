@@ -4,7 +4,6 @@ namespace Ink_Canvas.WorkflowAutomation.Abstractions
 {
     /// <summary>
     /// 自动化触发器信息特性。
-    /// 对齐 ClassIsland 的 TriggerInfo Attribute，标注在触发器类上。
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class TriggerInfoAttribute : Attribute
