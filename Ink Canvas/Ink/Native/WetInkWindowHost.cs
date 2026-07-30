@@ -1,5 +1,6 @@
 using Ink_Canvas.Helpers;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -39,6 +40,7 @@ namespace Ink_Canvas.Ink.Native
         private readonly AutoResetEvent _workEvent = new AutoResetEvent(false);
         private readonly ManualResetEventSlim _threadReady = new ManualResetEventSlim(false);
         private readonly object _targetSync = new object();
+        private readonly Dictionary<long, long> _telemetryLastRealTimestampBySession = new Dictionary<long, long>();
 
         private IntPtr _ownerHwnd;
         private IntPtr _overlayHwnd;
@@ -320,27 +322,64 @@ namespace Ink_Canvas.Ink.Native
             {
                 result = _renderer.Apply(batch);
                 // 新湿墨实时渲染完成一帧：沿用 NativePointerInputSource 提供的微秒时间戳，
-                // earliest/latest 分别表示参与本帧提交的最早/最新新增输入样本，
-                // 转成 Stopwatch ticks 后交给统一监控器。
+                // 仅按本次提交相对上次已提交快照真正新增的 delta 样本计算 earliest/latest，
+                // 避免把整笔首点误当作当前帧的最早样本。
                 long earliestSampleAtTicks = 0L;
                 long latestSampleAtTicks = 0L;
-                if (batch != null && batch.RenderSnapshots.Count > 0)
+                if (batch != null && batch.OrderedItems.Count > 0)
                 {
                     long earliestMicroseconds = long.MaxValue;
                     long latestMicroseconds = 0;
-                    for (var i = 0; i < batch.RenderSnapshots.Count; i++)
+                    for (var i = 0; i < batch.OrderedItems.Count; i++)
                     {
-                        var snapshot = batch.RenderSnapshots[i];
-                        var realPoints = snapshot.RealPoints;
+                        var item = batch.OrderedItems[i];
+                        if (item.Kind == WetInkMailboxItemKind.Boundary)
+                        {
+                            var command = item.BoundaryCommand;
+                            if (command.Kind == WetInkBoundaryCommandKind.BeginStroke)
+                            {
+                                _telemetryLastRealTimestampBySession.Remove(command.SessionId);
+                            }
+                            else if (command.Kind == WetInkBoundaryCommandKind.CancelStroke
+                                || command.Kind == WetInkBoundaryCommandKind.RetireStroke
+                                || command.Kind == WetInkBoundaryCommandKind.Reset
+                                || command.Kind == WetInkBoundaryCommandKind.Shutdown)
+                            {
+                                _telemetryLastRealTimestampBySession.Remove(command.SessionId);
+                            }
+                            continue;
+                        }
+
+                        var snapshot = item.RenderSnapshot;
+                        var realPoints = snapshot?.RealPoints;
                         if (realPoints == null || realPoints.Count == 0)
                             continue;
-                        var first = realPoints[0].TimestampMicroseconds;
-                        var last = realPoints[realPoints.Count - 1].TimestampMicroseconds;
-                        if (first < earliestMicroseconds)
-                            earliestMicroseconds = first;
-                        if (last > latestMicroseconds)
-                            latestMicroseconds = last;
+
+                        _telemetryLastRealTimestampBySession.TryGetValue(snapshot.SessionId, out var lastCommittedMicroseconds);
+                        long sessionEarliestDelta = long.MaxValue;
+                        long sessionLatestDelta = 0;
+                        for (var j = 0; j < realPoints.Count; j++)
+                        {
+                            var timestampMicroseconds = realPoints[j].TimestampMicroseconds;
+                            if (timestampMicroseconds <= lastCommittedMicroseconds)
+                                continue;
+                            if (timestampMicroseconds < sessionEarliestDelta)
+                                sessionEarliestDelta = timestampMicroseconds;
+                            if (timestampMicroseconds > sessionLatestDelta)
+                                sessionLatestDelta = timestampMicroseconds;
+                        }
+
+                        var currentLastMicroseconds = realPoints[realPoints.Count - 1].TimestampMicroseconds;
+                        _telemetryLastRealTimestampBySession[snapshot.SessionId] = currentLastMicroseconds;
+
+                        if (sessionEarliestDelta == long.MaxValue)
+                            continue;
+                        if (sessionEarliestDelta < earliestMicroseconds)
+                            earliestMicroseconds = sessionEarliestDelta;
+                        if (sessionLatestDelta > latestMicroseconds)
+                            latestMicroseconds = sessionLatestDelta;
                     }
+
                     if (earliestMicroseconds != long.MaxValue)
                         earliestSampleAtTicks = earliestMicroseconds * Stopwatch.Frequency / 1_000_000L;
                     if (latestMicroseconds > 0)
