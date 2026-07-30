@@ -262,9 +262,9 @@ namespace Ink_Canvas.Plugins
         /// <summary>
         /// 安装 PluginPackages 中待安装的插件包并立即加载。可在运行时调用。
         /// </summary>
-        public void InstallPendingPackages()
+        public void InstallPendingPackages(string approvedPackagePath = null, string approvedPackageSha256 = null)
         {
-            ProcessPluginPackages();
+            ProcessPluginPackages(approvedPackagePath, approvedPackageSha256);
             DiscoverPlugins();
             var loadOrder = ResolveLoadOrder();
             foreach (var pluginId in loadOrder)
@@ -338,7 +338,7 @@ namespace Ink_Canvas.Plugins
         /// <summary>
         /// 处理 PluginPackages 目录中的 .icpx 插件包，将其解压安装到 Plugins 目录。
         /// </summary>
-        private void ProcessPluginPackages()
+        private void ProcessPluginPackages(string approvedPackagePath = null, string approvedPackageSha256 = null)
         {
             if (!Directory.Exists(_pluginPackagesDirectory)) return;
 
@@ -375,7 +375,9 @@ namespace Ink_Canvas.Plugins
                     }
 
                     var verdict = _securityCheck.EvaluatePackage(pkgPath, null, manifest.Id);
-                    if (_securityCheck.RequiresUserConfirmation(verdict))
+                    var isExplicitlyApproved = string.Equals(pkgPath, approvedPackagePath, StringComparison.OrdinalIgnoreCase)
+                        && string.Equals(verdict.PackageSha256, approvedPackageSha256, StringComparison.OrdinalIgnoreCase);
+                    if (_securityCheck.RequiresUserConfirmation(verdict) && !isExplicitlyApproved)
                     {
                         Log(string.Format("Package {0} is not trusted, skipping automatic installation: {1}",
                             Path.GetFileName(pkgPath), string.Join(" ", verdict.Reasons)));

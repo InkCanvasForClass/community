@@ -620,10 +620,37 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (dialog.ShowDialog() != true) return;
             try
             {
+                var verdict = PluginManager.Instance.EvaluateTrust(dialog.FileName, null, null);
+                var isUntrusted = verdict.TrustLevel == PluginTrustLevel.Unknown;
+                if (isUntrusted)
+                {
+                    var reasons = verdict.Reasons != null && verdict.Reasons.Count > 0
+                        ? string.Join(Environment.NewLine, verdict.Reasons.Select(reason => "• " + reason))
+                        : PluginStrings.Market_SecurityUnknownReason;
+                    var permissions = verdict.Permissions != null && verdict.Permissions.Count > 0
+                        ? string.Join(", ", verdict.Permissions)
+                        : PluginStrings.Market_SecurityNone;
+                    var warning = string.Format(
+                        PluginStrings.Market_UntrustedInstallConfirmation,
+                        verdict.PluginId,
+                        verdict.PackageSha256,
+                        permissions,
+                        reasons);
+                    var result = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                        warning,
+                        PluginStrings.Market_SecurityTitle,
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Warning);
+                    if (result != MessageBoxResult.Yes) return;
+                }
+
                 var packagesDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PluginPackages");
                 if (!Directory.Exists(packagesDir)) Directory.CreateDirectory(packagesDir);
-                File.Copy(dialog.FileName, Path.Combine(packagesDir, Path.GetFileName(dialog.FileName)), true);
-                PluginManager.Instance.InstallPendingPackages();
+                var packagePath = Path.Combine(packagesDir, Path.GetFileName(dialog.FileName));
+                File.Copy(dialog.FileName, packagePath, true);
+                PluginManager.Instance.InstallPendingPackages(
+                    isUntrusted ? packagePath : null,
+                    isUntrusted ? verdict.PackageSha256 : null);
                 _market.RefreshMergedPlugins();
                 _allPlugins = _market.MergedPlugins ?? new List<MergedPluginInfo>();
                 RefreshList();
