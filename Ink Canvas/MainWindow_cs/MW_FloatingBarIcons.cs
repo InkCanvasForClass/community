@@ -3329,7 +3329,8 @@ namespace Ink_Canvas
                     return;
                 }
 
-                if (currentMode == 1 || isDragDropInEffect || ViewboxFloatingBar.Visibility != Visibility.Visible)
+                if (currentMode == 1 || isFloatingBarFolded || isFloatingBarChangingHideMode ||
+                    isDragDropInEffect || ViewboxFloatingBar.Visibility != Visibility.Visible)
                 {
                     return;
                 }
