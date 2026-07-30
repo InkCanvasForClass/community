@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
@@ -511,6 +512,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ShowDetail(plugin);
             else
                 ShowEmptyState();
+        }
+
+        private void DetailReadmeContainer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (e.Handled || DetailScrollViewer == null) return;
+
+            DetailScrollViewer.ScrollToVerticalOffset(Math.Max(0,
+                Math.Min(DetailScrollViewer.ScrollableHeight, DetailScrollViewer.VerticalOffset - e.Delta)));
+            e.Handled = true;
         }
 
         private static bool TryGetWebUri(string value, out Uri uri)

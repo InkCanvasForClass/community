@@ -45,11 +45,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             try
             {
                 var lang = settings.Appearance.Language ?? string.Empty;
-                int langIndex = string.IsNullOrWhiteSpace(lang) ? 0 :
-                    string.Equals(lang, "zh-CN", StringComparison.OrdinalIgnoreCase) ? 1 :
-                    string.Equals(lang, "en-US", StringComparison.OrdinalIgnoreCase) ? 2 :
-                    string.Equals(lang, "zh-ME", StringComparison.OrdinalIgnoreCase) ? 3 : 0;
-                ComboBoxLanguage.SelectedIndex = langIndex;
+                SelectComboBoxItemByTag(ComboBoxLanguage, lang);
             }
             finally
             {
@@ -93,14 +89,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded || _isApplyingLanguageFromSettings) return;
             try
             {
-                var index = ComboBoxLanguage.SelectedIndex;
-                string language = index switch
-                {
-                    1 => "zh-CN",
-                    2 => "en-US",
-                    3 => "zh-ME",
-                    _ => string.Empty
-                };
+                string language = GetSelectedComboBoxTag(ComboBoxLanguage, string.Empty);
                 SettingsManager.Settings.Appearance.Language = language;
                 SettingsManager.SaveSettingsToFile();
                 SettingsActionHub.OnLanguageChanged(language);

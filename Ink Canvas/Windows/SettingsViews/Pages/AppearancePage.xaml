@@ -67,10 +67,10 @@
                         <ComboBox x:Name="ComboBoxLanguage"
                                   SelectedIndex="0"
                                   SelectionChanged="ComboBoxLanguage_SelectionChanged">
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_System}" />
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Language_ChineseSimplified}" />
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Language_English}" />
-                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Language_MemeChinese}" />
+                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_System}" Tag="" />
+                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Language_ChineseSimplified}" Tag="zh-CN" />
+                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Language_English}" Tag="en-US" />
+                            <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Language_MemeChinese}" Tag="zh-ME" />
                         </ComboBox>
                     </ui:SettingsCard>
 

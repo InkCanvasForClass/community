@@ -71,6 +71,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                         // 回退到直接覆盖，保持旧行为仍可用
                         ProcessProtectionManager.WithWriteAccess(path, () => File.WriteAllText(path, text));
                     }
+
+                    App.UpdateCachedSettingsJson(text);
                 }
                 catch (Exception ex)
                 {

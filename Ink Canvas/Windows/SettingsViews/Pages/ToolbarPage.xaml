@@ -58,10 +58,18 @@
                                VerticalAlignment="Center" FontSize="13"/>
                     <Button Tag="RemoveItem"
                             x:Name="BtnRemoveItem"
-                            Style="{StaticResource BorderlessIconButtonStyle}"
                             VerticalAlignment="Center"
-                            Cursor="Hand"
-                            Visibility="Collapsed">
+                            Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource BorderlessIconButtonStyle}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListViewItem}}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
                         <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Delete_16_Regular}" FontSize="16" Foreground="IndianRed"/>
                     </Button>
                 </StackPanel>

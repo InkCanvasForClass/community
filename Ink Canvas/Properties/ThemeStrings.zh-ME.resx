@@ -524,4 +524,10 @@
   <data name="Theme_IdleMiniBarAutoRestore" xml:space="preserve">
     <value>贴太深后过几秒自己弹回来（秒）</value>
   </data>
+  <data name="Theme_RestartPromptTitle" xml:space="preserve">
+    <value>主题皮肤到账</value>
+  </data>
+  <data name="Theme_RestartRequired" xml:space="preserve">
+    <value>主题切了，但全套皮肤得重开应用才完全到账。现在立刻重启？</value>
+  </data>
 </root>

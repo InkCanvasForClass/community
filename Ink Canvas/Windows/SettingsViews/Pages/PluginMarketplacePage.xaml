@@ -112,7 +112,7 @@
             Fill="{DynamicResource DividerStrokeColorDefaultBrush}" Margin="0,16,0,16"/>
 
         <!-- 右侧：插件详情 -->
-        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" Margin="16,8,16,8">
+        <ScrollViewer x:Name="DetailScrollViewer" Grid.Column="2" VerticalScrollBarVisibility="Auto" Margin="16,8,16,8">
             <StackPanel>
                 <!-- 空状态 -->
                 <StackPanel x:Name="EmptyStatePanel"
@@ -214,7 +214,8 @@
                     <TextBlock x:Name="DetailReadmeHeader" Text="{x:Static props:PluginStrings.Market_TabOverview}"
                         FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
                     <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
-                        CornerRadius="8" Padding="0">
+                        CornerRadius="8" Padding="0"
+                        PreviewMouseWheel="DetailReadmeContainer_PreviewMouseWheel">
                         <Grid>
                             <FlowDocumentScrollViewer x:Name="DetailReadmeViewer"
                                 Background="Transparent"
