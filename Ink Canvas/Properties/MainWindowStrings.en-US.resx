@@ -152,6 +152,129 @@
   <data name="Main_Freeze_FrozenNoAction" xml:space="preserve">
     <value>This page is frozen, cannot {0}</value>
   </data>
+  <data name="Main_Freeze_Action_EditPage" xml:space="preserve">
+    <value>edit this page</value>
+  </data>
+  <data name="Main_Freeze_Action_SwitchToEditTool" xml:space="preserve">
+    <value>switch to the edit tool</value>
+  </data>
+  <data name="Main_Freeze_Action_SwitchToSelectionTool" xml:space="preserve">
+    <value>switch to the selection tool</value>
+  </data>
+  <data name="Main_Freeze_Action_ClearPageContent" xml:space="preserve">
+    <value>clear page content</value>
+  </data>
+  <data name="Main_Freeze_Action_PasteImage" xml:space="preserve">
+    <value>paste images</value>
+  </data>
+  <data name="Main_Freeze_Action_ExpandCanvas" xml:space="preserve">
+    <value>expand the canvas</value>
+  </data>
+  <data name="Main_Freeze_Action_ErasePageContent" xml:space="preserve">
+    <value>erase page content</value>
+  </data>
+  <data name="Main_Freeze_Action_MoveImage" xml:space="preserve">
+    <value>move images</value>
+  </data>
+  <data name="Main_Freeze_Action_ResizeImage" xml:space="preserve">
+    <value>resize images</value>
+  </data>
+  <data name="Main_Freeze_Action_MoveOrResizeImage" xml:space="preserve">
+    <value>move or resize images</value>
+  </data>
+  <data name="Main_Freeze_Action_CloneImage" xml:space="preserve">
+    <value>clone images</value>
+  </data>
+  <data name="Main_Freeze_Action_CloneImageToNewPage" xml:space="preserve">
+    <value>clone images to a new page</value>
+  </data>
+  <data name="Main_Freeze_Action_RotateImage" xml:space="preserve">
+    <value>rotate images</value>
+  </data>
+  <data name="Main_Freeze_Action_SwitchPdfPage" xml:space="preserve">
+    <value>switch PDF pages</value>
+  </data>
+  <data name="Main_Freeze_Action_DeleteImage" xml:space="preserve">
+    <value>delete images</value>
+  </data>
+  <data name="Main_Freeze_Action_UndoPageChanges" xml:space="preserve">
+    <value>undo page changes</value>
+  </data>
+  <data name="Main_Freeze_Action_RedoPageChanges" xml:space="preserve">
+    <value>redo page changes</value>
+  </data>
+  <data name="Main_Freeze_Action_ReplayPageChanges" xml:space="preserve">
+    <value>replay page changes</value>
+  </data>
+  <data name="Main_Freeze_Action_SwitchToPen" xml:space="preserve">
+    <value>switch to the pen tool</value>
+  </data>
+  <data name="Main_Freeze_Action_SwitchToEraser" xml:space="preserve">
+    <value>switch to the eraser tool</value>
+  </data>
+  <data name="Main_Freeze_Action_SwitchToStrokeEraser" xml:space="preserve">
+    <value>switch to the stroke eraser</value>
+  </data>
+  <data name="Main_Freeze_Action_ClearPage" xml:space="preserve">
+    <value>clear the page</value>
+  </data>
+  <data name="Main_Freeze_Action_InsertScreenshot" xml:space="preserve">
+    <value>insert screenshots</value>
+  </data>
+  <data name="Main_Freeze_Action_InsertImage" xml:space="preserve">
+    <value>insert images</value>
+  </data>
+  <data name="Main_Freeze_Action_Write" xml:space="preserve">
+    <value>write</value>
+  </data>
+  <data name="Main_Freeze_Action_OpenInkFile" xml:space="preserve">
+    <value>open ink files</value>
+  </data>
+  <data name="Main_Freeze_Action_RestoreInkFile" xml:space="preserve">
+    <value>restore ink files</value>
+  </data>
+  <data name="Main_Freeze_Action_CloneInk" xml:space="preserve">
+    <value>clone ink</value>
+  </data>
+  <data name="Main_Freeze_Action_CloneInkToNewPage" xml:space="preserve">
+    <value>clone ink to a new page</value>
+  </data>
+  <data name="Main_Freeze_Action_InsertInkToWhiteboard" xml:space="preserve">
+    <value>insert ink into the whiteboard</value>
+  </data>
+  <data name="Main_Freeze_Action_ChangeInkThickness" xml:space="preserve">
+    <value>change ink thickness</value>
+  </data>
+  <data name="Main_Freeze_Action_FlipInk" xml:space="preserve">
+    <value>flip ink</value>
+  </data>
+  <data name="Main_Freeze_Action_RotateInk" xml:space="preserve">
+    <value>rotate ink</value>
+  </data>
+  <data name="Main_Freeze_Action_MoveInk" xml:space="preserve">
+    <value>move ink</value>
+  </data>
+  <data name="Main_Freeze_Action_MoveOrResizeInk" xml:space="preserve">
+    <value>move or resize ink</value>
+  </data>
+  <data name="Main_Freeze_Action_ResizeInk" xml:space="preserve">
+    <value>resize ink</value>
+  </data>
+  <data name="Main_Freeze_Action_OpenShapeTool" xml:space="preserve">
+    <value>open the shape tool</value>
+  </data>
+  <data name="Main_Freeze_Action_DrawShape" xml:space="preserve">
+    <value>draw shapes</value>
+  </data>
+  <data name="Main_Freeze_Action_WriteOrErase" xml:space="preserve">
+    <value>write or erase</value>
+  </data>
+  <data name="Main_Freeze_Action_MoveOrResizeContent" xml:space="preserve">
+    <value>move or resize content</value>
+  </data>
+  <data name="Main_Freeze_Action_InsertFile" xml:space="preserve">
+    <value>insert files</value>
+  </data>
   <data name="Main_Freeze_Recorded" xml:space="preserve">
     <value>Annotation page recorded, will freeze after class ends</value>
   </data>

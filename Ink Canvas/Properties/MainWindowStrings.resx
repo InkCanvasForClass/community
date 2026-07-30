@@ -152,6 +152,129 @@
   <data name="Main_Freeze_FrozenNoAction" xml:space="preserve">
     <value>当前页面已冻结，不能{0}</value>
   </data>
+  <data name="Main_Freeze_Action_EditPage" xml:space="preserve">
+    <value>修改冻结页面</value>
+  </data>
+  <data name="Main_Freeze_Action_SwitchToEditTool" xml:space="preserve">
+    <value>切换到编辑工具</value>
+  </data>
+  <data name="Main_Freeze_Action_SwitchToSelectionTool" xml:space="preserve">
+    <value>切换到选择工具</value>
+  </data>
+  <data name="Main_Freeze_Action_ClearPageContent" xml:space="preserve">
+    <value>清除冻结页面内容</value>
+  </data>
+  <data name="Main_Freeze_Action_PasteImage" xml:space="preserve">
+    <value>粘贴图片</value>
+  </data>
+  <data name="Main_Freeze_Action_ExpandCanvas" xml:space="preserve">
+    <value>扩展画布</value>
+  </data>
+  <data name="Main_Freeze_Action_ErasePageContent" xml:space="preserve">
+    <value>擦除冻结页面</value>
+  </data>
+  <data name="Main_Freeze_Action_MoveImage" xml:space="preserve">
+    <value>移动图片</value>
+  </data>
+  <data name="Main_Freeze_Action_ResizeImage" xml:space="preserve">
+    <value>缩放图片</value>
+  </data>
+  <data name="Main_Freeze_Action_MoveOrResizeImage" xml:space="preserve">
+    <value>移动或缩放图片</value>
+  </data>
+  <data name="Main_Freeze_Action_CloneImage" xml:space="preserve">
+    <value>克隆图片</value>
+  </data>
+  <data name="Main_Freeze_Action_CloneImageToNewPage" xml:space="preserve">
+    <value>克隆图片到新页面</value>
+  </data>
+  <data name="Main_Freeze_Action_RotateImage" xml:space="preserve">
+    <value>旋转图片</value>
+  </data>
+  <data name="Main_Freeze_Action_SwitchPdfPage" xml:space="preserve">
+    <value>切换 PDF 页</value>
+  </data>
+  <data name="Main_Freeze_Action_DeleteImage" xml:space="preserve">
+    <value>删除图片</value>
+  </data>
+  <data name="Main_Freeze_Action_UndoPageChanges" xml:space="preserve">
+    <value>撤销冻结页面内容</value>
+  </data>
+  <data name="Main_Freeze_Action_RedoPageChanges" xml:space="preserve">
+    <value>重做冻结页面内容</value>
+  </data>
+  <data name="Main_Freeze_Action_ReplayPageChanges" xml:space="preserve">
+    <value>重播冻结页面内容</value>
+  </data>
+  <data name="Main_Freeze_Action_SwitchToPen" xml:space="preserve">
+    <value>切换到画笔</value>
+  </data>
+  <data name="Main_Freeze_Action_SwitchToEraser" xml:space="preserve">
+    <value>切换到橡皮擦</value>
+  </data>
+  <data name="Main_Freeze_Action_SwitchToStrokeEraser" xml:space="preserve">
+    <value>切换到线擦</value>
+  </data>
+  <data name="Main_Freeze_Action_ClearPage" xml:space="preserve">
+    <value>清空冻结页面内容</value>
+  </data>
+  <data name="Main_Freeze_Action_InsertScreenshot" xml:space="preserve">
+    <value>插入截图</value>
+  </data>
+  <data name="Main_Freeze_Action_InsertImage" xml:space="preserve">
+    <value>插入图片</value>
+  </data>
+  <data name="Main_Freeze_Action_Write" xml:space="preserve">
+    <value>书写</value>
+  </data>
+  <data name="Main_Freeze_Action_OpenInkFile" xml:space="preserve">
+    <value>打开墨迹文件</value>
+  </data>
+  <data name="Main_Freeze_Action_RestoreInkFile" xml:space="preserve">
+    <value>恢复墨迹文件</value>
+  </data>
+  <data name="Main_Freeze_Action_CloneInk" xml:space="preserve">
+    <value>克隆墨迹</value>
+  </data>
+  <data name="Main_Freeze_Action_CloneInkToNewPage" xml:space="preserve">
+    <value>克隆墨迹到新页面</value>
+  </data>
+  <data name="Main_Freeze_Action_InsertInkToWhiteboard" xml:space="preserve">
+    <value>插入墨迹到白板</value>
+  </data>
+  <data name="Main_Freeze_Action_ChangeInkThickness" xml:space="preserve">
+    <value>修改墨迹粗细</value>
+  </data>
+  <data name="Main_Freeze_Action_FlipInk" xml:space="preserve">
+    <value>翻转墨迹</value>
+  </data>
+  <data name="Main_Freeze_Action_RotateInk" xml:space="preserve">
+    <value>旋转墨迹</value>
+  </data>
+  <data name="Main_Freeze_Action_MoveInk" xml:space="preserve">
+    <value>移动墨迹</value>
+  </data>
+  <data name="Main_Freeze_Action_MoveOrResizeInk" xml:space="preserve">
+    <value>移动或缩放墨迹</value>
+  </data>
+  <data name="Main_Freeze_Action_ResizeInk" xml:space="preserve">
+    <value>调整墨迹大小</value>
+  </data>
+  <data name="Main_Freeze_Action_OpenShapeTool" xml:space="preserve">
+    <value>打开几何工具</value>
+  </data>
+  <data name="Main_Freeze_Action_DrawShape" xml:space="preserve">
+    <value>绘制几何图形</value>
+  </data>
+  <data name="Main_Freeze_Action_WriteOrErase" xml:space="preserve">
+    <value>书写或擦除</value>
+  </data>
+  <data name="Main_Freeze_Action_MoveOrResizeContent" xml:space="preserve">
+    <value>移动或缩放内容</value>
+  </data>
+  <data name="Main_Freeze_Action_InsertFile" xml:space="preserve">
+    <value>插入文件</value>
+  </data>
   <data name="Main_Freeze_Recorded" xml:space="preserve">
     <value>已记录当前批注页，等待课程结束后冻结</value>
   </data>
