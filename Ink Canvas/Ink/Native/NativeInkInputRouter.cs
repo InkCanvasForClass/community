@@ -185,7 +185,7 @@ namespace Ink_Canvas.Ink.Native
                 return Decision(NativeInputRoute.DeferToWpfUi, false, true);
             if (context.HitZone == CanvasHitZone.CanvasContent && context.Tool == LogicalInkTool.Select)
                 return Decision(NativeInputRoute.DeferToWpfUi, false, true);
-            if (pointer.IsPromotedMouse)
+            if (pointer.IsPromotedMouse && pointer.Kind == NativeInkInputKind.Mouse)
                 return Decision(NativeInputRoute.IgnorePromotedInput, true, false);
 
             if (context.VideoPresenter && context.Tool != LogicalInkTool.Pen)
