@@ -5,11 +5,7 @@ namespace Ink_Canvas.Helpers
 {
     /// <summary>
     /// 实时墨迹渲染线程主动上报的帧样本。
-    /// 对应 Steady-Ink 的 PerformanceFrameSample:
-    /// https://github.com/Enigfrank/Steady-Ink/blob/main/src/performance/monitor.rs
-    ///
-    /// 与 Steady-Ink 不同,我们不强制要求每帧都填全字段;只在有"脏→出帧"对应关系时填 InputLatency。
-    /// </summary>
+    ///     /// </summary>
     internal struct InkFrameSample
     {
         /// <summary>该帧对应的最早 RequestRedraw 时间戳(Stopwatch ticks)。0 表示无脏墨迹。</summary>
@@ -20,15 +16,13 @@ namespace Ink_Canvas.Helpers
     }
 
     /// <summary>
-    /// 实时墨迹 FPS / 延迟聚合器(Steady-Ink 风格)。
+    /// 实时墨迹 FPS / 延迟聚合器。
     ///
     /// 设计要点:
     /// - 单一权威:由 FrameScheduler.OnRendering(旧墨迹) 和 WetInkWindowHost._renderer.Apply(新墨迹) 主动 record_frame。
     /// - HUD 不订阅事件,而是周期调用 Snapshot() 拿到已发布快照。
     /// - FPS = 活跃呈现间隔的倒数;空闲 &gt; IdleGapLimit 自动清空窗口,避免长时间静止拉低 FPS。
     /// - 延迟 = 脏墨迹请求到本次出帧的端到端耗时。
-    ///
-    /// 这里使用 static 实现:整个进程一份,与项目其他实时性能监控器一致。
     /// </summary>
     internal static class InkPerformanceMonitor
     {
