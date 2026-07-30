@@ -5,14 +5,15 @@ namespace Ink_Canvas.Ink.Native
 {
     /// <summary>
     /// 湿墨预览笔尾预测：用最近 2~4 个真实点估速度/加速度/曲率，外推一段未来轨迹。
-    /// 外推时长动态自适应（10~50ms）：快写直线取上限，慢写、急转弯、报点停滞时收敛到下限。
-    /// 预测点仅进入实时预览，不进入提交/撤销/保存。
+    /// 外推时长动态自适应（10~36ms）：快写直线取上限，慢写、急转弯、报点停滞时收敛到下限。
+    /// 预测点默认仅进入实时预览；是否在抬笔时烘焙进干墨由调用方显式决定。
     /// </summary>
     internal static class InkTailPredictor
     {
-        // 动态视界上下限（毫秒）。上限受“预测越长越容易在拐弯处甩飞”约束。
+        // 动态视界上下限（毫秒）。参考常见硬笔预测器的约 36ms 预测时长，
+        // 上限受“预测越长越容易在拐弯处甩飞”约束。
         public const double MinHorizonMilliseconds = 10.0;
-        public const double MaxHorizonMilliseconds = 50.0;
+        public const double MaxHorizonMilliseconds = 36.0;
 
         // 时间戳异常回退时用的名义报点间隔。
         private const long DefaultStepMicroseconds = 10_000L;
@@ -27,7 +28,7 @@ namespace Ink_Canvas.Ink.Native
         // 真实速度低于此值时不再强制返回空，而是按一档极小速度继续外推，
         // 避免加速度/减速阶段的帧间笔尾闪烁消失。`Build` 仍会在点数不足、停驻、完全 NaN 时返回空。
         private const double MinEffectiveSpeedPxPerSecond = 5.0;
-        private const double MaxPredictionDistancePx = 140.0;
+        private const double MaxPredictionDistancePx = 80.0;
 
         // 速度→视界映射的两端。起点取最低预测速度，让超低速一离开门限就开始增长。
         private const double SlowSpeedPxPerSecond = 40.0;
@@ -45,8 +46,8 @@ namespace Ink_Canvas.Ink.Native
 
         // 每 10ms 的速度衰减，按实际步长换算，避免笔尾发散。
         private const double DecayPer10Milliseconds = 0.97;
-        // 末端压感相对笔尖的比例，形成可见的锥形尾。
-        private const double TailPressureTaper = 0.69;
+        // 预测尾压力约减半，避免预测几何即使较短仍显示成明显粗条。
+        private const double TailPressureTaper = 0.5;
 
         /// <summary>
         /// 按当前笔速与曲率自适应决定外推时长后构建预测笔尾。

@@ -539,7 +539,8 @@ namespace Ink_Canvas
                 style,
                 processorSettings,
                 startedAt,
-                canvasSamples);
+                canvasSamples,
+                predictionEnabled: Settings?.Canvas?.EnableNativeInkPrediction == true);
 
             if (session != null)
             {
@@ -630,8 +631,7 @@ namespace Ink_Canvas
 
             _nativePointerUpdatePump?.FlushPointer(batch.PointerId);
 
-            // 开启实时书写预测时，抬笔把当前预测笔尾烘焙进真实干墨（进入保存/撤销）。
-            var bakePrediction = Settings?.Canvas?.EnableNativeInkPrediction == true;
+            var bakePrediction = false;
             var payload = _nativeInkController.End(
                 batch.PointerId,
                 endedAt,

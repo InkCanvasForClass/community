@@ -25,7 +25,8 @@ namespace Ink_Canvas.Ink.Native
             InkStrokeStyleSnapshot style,
             InkSampleProcessorSettings processorSettings,
             long startedAtMicroseconds,
-            IReadOnlyList<RawInkSample> newestFirstHistory)
+            IReadOnlyList<RawInkSample> newestFirstHistory,
+            bool predictionEnabled = false)
         {
             lock (_syncRoot)
             {
@@ -47,8 +48,8 @@ namespace Ink_Canvas.Ink.Native
                 {
                     _snapshotVersions.Add(session.SessionId, 0);
                     AppendWithoutPublishing(session, newestFirstHistory);
-                    // 落笔时如果已有足够点且开启预测，立即附上笔尾，避免首帧无预测。
-                    if (session.RealPoints.Count >= 2)
+                    // 预测开关在落笔首帧就生效，避免关闭预测时短暂出现预测尾。
+                    if (predictionEnabled && session.RealPoints.Count >= 2)
                     {
                         try
                         {
@@ -107,18 +108,24 @@ namespace Ink_Canvas.Ink.Native
                     return false;
 
                 var appended = AppendWithoutPublishing(session, newestFirstHistory);
-                if (predictionEnabled && session.State == NativeInkSessionState.Active)
+                if (predictionEnabled && appended > 0 && session.State == NativeInkSessionState.Active)
                 {
                     var predicted = InkTailPredictor.Build(session.RealPoints);
                     session.ReplacePrediction(predicted);
-                    // 只要预测启用，即使本帧没有新真实点，也要发布一次，保持笔尾连续。
                     PublishSnapshot(session);
                     return true;
                 }
 
-                if (appended != 0)
+                if (!predictionEnabled && session.PredictedPoints.Count > 0)
+                {
+                    session.ReplacePrediction(Array.Empty<PredictedInkPoint>());
                     PublishSnapshot(session);
-                return appended != 0;
+                    return true;
+                }
+
+                if (appended > 0)
+                    PublishSnapshot(session);
+                return appended > 0;
             }
         }
 
@@ -138,7 +145,7 @@ namespace Ink_Canvas.Ink.Native
                 }
 
                 var appended = AppendWithoutPublishing(session, newestFirstHistory);
-                if (predictionEnabled)
+                if (predictionEnabled && appended > 0)
                 {
                     var predicted = InkTailPredictor.Build(session.RealPoints);
                     session.ReplacePrediction(predicted);
@@ -146,9 +153,16 @@ namespace Ink_Canvas.Ink.Native
                     return true;
                 }
 
-                if (appended != 0)
+                if (!predictionEnabled && session.PredictedPoints.Count > 0)
+                {
+                    session.ReplacePrediction(Array.Empty<PredictedInkPoint>());
                     PublishSnapshot(session);
-                return appended != 0;
+                    return true;
+                }
+
+                if (appended > 0)
+                    PublishSnapshot(session);
+                return appended > 0;
             }
         }
 

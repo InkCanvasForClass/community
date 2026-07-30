@@ -19,6 +19,9 @@ namespace InkCanvas.NativeInk.Tests
             Run(nameof(ControllerRetiresOnlyAfterDryAndWpfFences), ControllerRetiresOnlyAfterDryAndWpfFences);
             Run(nameof(PredictionNeverEntersCommitPayload), PredictionNeverEntersCommitPayload);
             Run(nameof(PredictionBakedIntoCommitPayload), PredictionBakedIntoCommitPayload);
+            Run(nameof(ControllerHonorsPredictionSettingOnBegin), ControllerHonorsPredictionSettingOnBegin);
+            Run(nameof(ControllerSkipsPredictionForDuplicateHistory), ControllerSkipsPredictionForDuplicateHistory);
+            Run(nameof(ControllerClearsPredictionWhenDisabled), ControllerClearsPredictionWhenDisabled);
             Run(nameof(CommitFenceTransitionsAreOrdered), CommitFenceTransitionsAreOrdered);
             Run(nameof(InvalidCommitFenceTransitionIsRejected), InvalidCommitFenceTransitionIsRejected);
             Run(nameof(CancelAllDropsConcurrentSessions), CancelAllDropsConcurrentSessions);
@@ -64,6 +67,7 @@ namespace InkCanvas.NativeInk.Tests
             Run(nameof(PredictionHorizonGrowsWithSpeed), PredictionHorizonGrowsWithSpeed);
             Run(nameof(LowSpeedPredictionStaysShortInPixels), LowSpeedPredictionStaysShortInPixels);
             Run(nameof(PredictionHorizonIsCappedByReach), PredictionHorizonIsCappedByReach);
+            Run(nameof(PredictionDoesNotProduceSeewoStyleLongTail), PredictionDoesNotProduceSeewoStyleLongTail);
             Run(nameof(PredictionHorizonShrinksOnSharpTurn), PredictionHorizonShrinksOnSharpTurn);
             Run(nameof(PredictionHorizonShrinksOnStaleSamples), PredictionHorizonShrinksOnStaleSamples);
             Run(nameof(PredictionIsEmptyBelowMinimumSpeed), PredictionIsEmptyBelowMinimumSpeed);
@@ -166,6 +170,81 @@ namespace InkCanvas.NativeInk.Tests
             True(!controller.TryMarkWetVisualRetired(
                 session.SessionId,
                 retireBatch.BoundaryCommands[0].Version));
+        }
+
+        private static void ControllerHonorsPredictionSettingOnBegin()
+        {
+            var disabledController = Controller(out _, out var disabledMailbox);
+            var disabled = disabledController.Begin(
+                4,
+                NativeInkInputKind.Pen,
+                Style(),
+                new InkSampleProcessorSettings(),
+                10,
+                new[] { Sample(20, 2, 2, 4), Sample(10, 1, 1, 4) },
+                predictionEnabled: false);
+            var disabledSnapshot = disabledMailbox.Drain().RenderSnapshots[0];
+            Equal(0, disabled.PredictedPoints.Count);
+            Equal(0, disabledSnapshot.PredictedPoints.Count);
+
+            var enabledController = Controller(out _, out var enabledMailbox);
+            var enabled = enabledController.Begin(
+                4,
+                NativeInkInputKind.Pen,
+                Style(),
+                new InkSampleProcessorSettings(),
+                10,
+                new[] { Sample(20, 2, 2, 4), Sample(10, 1, 1, 4) },
+                predictionEnabled: true);
+            var enabledSnapshot = enabledMailbox.Drain().RenderSnapshots[0];
+            True(enabled.PredictedPoints.Count > 0);
+            True(enabledSnapshot.PredictedPoints.Count > 0);
+        }
+
+        private static void ControllerSkipsPredictionForDuplicateHistory()
+        {
+            var controller = Controller(out _, out var mailbox);
+            var session = controller.Begin(
+                4,
+                NativeInkInputKind.Pen,
+                Style(),
+                new InkSampleProcessorSettings(),
+                10,
+                new[] { Sample(20, 2, 2, 4), Sample(10, 1, 1, 4) },
+                predictionEnabled: true);
+            mailbox.Drain();
+
+            True(!controller.TryUpdateSessionWithPrediction(
+                4,
+                session.SessionId,
+                new[] { Sample(20, 2, 2, 4), Sample(10, 1, 1, 4) },
+                predictionEnabled: true));
+            Equal(0, mailbox.Drain().RenderSnapshots.Count);
+            True(session.PredictedPoints.Count > 0);
+        }
+
+        private static void ControllerClearsPredictionWhenDisabled()
+        {
+            var controller = Controller(out _, out var mailbox);
+            var session = controller.Begin(
+                4,
+                NativeInkInputKind.Pen,
+                Style(),
+                new InkSampleProcessorSettings(),
+                10,
+                new[] { Sample(20, 2, 2, 4), Sample(10, 1, 1, 4) },
+                predictionEnabled: true);
+            mailbox.Drain();
+            True(session.PredictedPoints.Count > 0);
+
+            True(controller.TryUpdateSessionWithPrediction(
+                4,
+                session.SessionId,
+                Array.Empty<RawInkSample>(),
+                predictionEnabled: false));
+            var snapshot = mailbox.Drain().RenderSnapshots[0];
+            Equal(0, snapshot.PredictedPoints.Count);
+            Equal(0, session.PredictedPoints.Count);
         }
 
         private static void PredictionNeverEntersCommitPayload()
@@ -1106,7 +1185,7 @@ namespace InkCanvas.NativeInk.Tests
             var slow = StraightStroke(8, 2, 8);
             // 约 1250px/s：中速。
             var medium = StraightStroke(8, 10, 8);
-            // 约 2500px/s：速度映射到满视界，且未被 140px 距离上限截断。
+            // 约 2500px/s：速度映射到接近满视界，且未被 80 DIP 距离上限完全截断。
             var fast = StraightStroke(8, 20, 8);
 
             var crawlHorizon = HorizonMs(crawl, InkTailPredictor.Build(crawl));
@@ -1119,9 +1198,9 @@ namespace InkCanvas.NativeInk.Tests
             True(fastHorizon > mediumHorizon);
 
             // 超低速与慢写都要比下限有可感知的余量，否则等同于关掉低速预测。
-            True(crawlHorizon >= InkTailPredictor.MinHorizonMilliseconds + 3.0);
-            True(slowHorizon >= InkTailPredictor.MinHorizonMilliseconds + 12.0);
-            True(fastHorizon >= 45.0);
+            True(crawlHorizon >= InkTailPredictor.MinHorizonMilliseconds + 2.0);
+            True(slowHorizon >= InkTailPredictor.MinHorizonMilliseconds + 10.0);
+            True(fastHorizon >= 30.0);
         }
 
         /// <summary>
@@ -1141,7 +1220,7 @@ namespace InkCanvas.NativeInk.Tests
         /// </summary>
         private static void PredictionHorizonIsCappedByReach()
         {
-            // 约 10000px/s：若取满 50ms 视界，笔尾将达 500px。
+            // 约 10000px/s：若取满 36ms 视界，笔尾仍必须受距离上限约束。
             var veryFast = StraightStroke(8, 80, 8);
             var predicted = InkTailPredictor.Build(veryFast);
 
@@ -1155,6 +1234,17 @@ namespace InkCanvas.NativeInk.Tests
         /// 相同速率下，笔尖正在转弯时的视界与外推距离都必须明显小于直线；
         /// 连续弧线也应有一定收敛。
         /// </summary>
+        private static void PredictionDoesNotProduceSeewoStyleLongTail()
+        {
+            // 希沃可见实现默认预测时长约 36ms；高速直线也不应产生一条接近整段 140 DIP 的长尾。
+            var fast = StraightStroke(8, 40, 8);
+            var predicted = InkTailPredictor.Build(fast);
+
+            True(predicted.Count > 0);
+            True(HorizonMs(fast, predicted) <= 36.0 + 4.0);
+            True(Reach(fast, predicted) <= 80.0);
+        }
+
         private static void PredictionHorizonShrinksOnSharpTurn()
         {
             var straight = StraightStroke(8, 20, 8);

@@ -118,7 +118,7 @@
     <value>启用实时书写预测</value>
   </data>
   <data name="Canvas_EnableNativeInkPredictionHint" xml:space="preserve">
-    <value>开启后，实时书写会在笔尖前方延伸一段动态预测笔尾；抬笔时预测段会写入真实墨迹（进入保存/撤销）。建议在快速书写时观察笔尾是否“跟手”。</value>
+    <value>开启后，实时书写会在笔尖前方显示一段短暂的动态预测笔尾；抬笔时预测段不会写入保存/撤销的真实墨迹。</value>
   </data>
   <data name="Canvas_UseLegacyWetInk" xml:space="preserve">
     <value>切回旧版湿墨迹系统</value>

@@ -64,12 +64,14 @@ namespace Ink_Canvas.Ink.Native
             if (normalized.Count == 0)
                 return 0;
 
+            var previousRealPointCount = _realPoints.Count;
             Processor.Append(normalized, _realPoints);
             var last = normalized[normalized.Count - 1];
             LastAcceptedTimestampMicroseconds = last.TimestampMicroseconds;
             LastAcceptedFrameId = last.FrameId;
-            _predictedPoints = Array.Empty<PredictedInkPoint>();
-            return normalized.Count;
+            if (_realPoints.Count != previousRealPointCount)
+                _predictedPoints = Array.Empty<PredictedInkPoint>();
+            return _realPoints.Count - previousRealPointCount;
         }
 
         /// <summary>
