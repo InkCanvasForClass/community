@@ -41,7 +41,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         public ObservableCollection<ToolbarComponentEntry> GroupChildren { get; } = new();
         public GroupChildrenDropHandler GroupDropHandler { get; }
 
-        public IReadOnlyList<IToolbarItem> AvailableItems => ToolbarRegistry.Discover();
+        public IReadOnlyList<IToolbarItem> AvailableItems => ToolbarRegistry.Discover()
+            .Where(i => i.Id != "builtin.videoBooth")
+            .ToList();
 
         public static readonly DependencyProperty SelectedEntryProperty =
             DependencyProperty.Register(nameof(SelectedEntry), typeof(ToolbarComponentEntry), typeof(ToolbarPage),
