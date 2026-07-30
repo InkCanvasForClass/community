@@ -340,8 +340,8 @@ namespace Ink_Canvas.Ink.Native
                 }
                 InkPerformanceMonitor.RecordFrame(new InkFrameSample
                 {
-                    DirtyStartedAtTicks = dirtyStartedAtTicks,
-                    PresentedAtTicks = Stopwatch.GetTimestamp()
+                    LatestSampleAtTicks = dirtyStartedAtTicks,
+                    SubmittedAtTicks = Stopwatch.GetTimestamp()
                 });
             }
             catch (Exception ex)

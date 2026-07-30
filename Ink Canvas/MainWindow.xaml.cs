@@ -1499,7 +1499,7 @@ namespace Ink_Canvas
 
             isLoaded = true;
 
-            // 启动实时墨迹 FPS / 延迟 HUD（若用户在 Debug 页开启了开关）。
+            // 启动实时墨迹 FPS / 提交延迟 HUD（若用户在 Debug 页开启了开关）。
             if (Settings?.Advanced != null && Settings.Advanced.IsRealtimeInkFpsOverlayEnabled)
             {
                 ShowRealtimeInkFpsOverlay();

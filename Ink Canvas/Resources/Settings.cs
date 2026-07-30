@@ -1389,7 +1389,7 @@ namespace Ink_Canvas
         public bool IsRealtimeInkDebugLogEnabled { get; set; } = false;
 
         /// <summary>
-        /// 在屏幕角落显示实时墨迹 FPS 与端到端延迟 HUD（毫秒）。默认关闭，独立于详细日志开关。
+        /// 在屏幕角落显示实时墨迹 FPS 与提交延迟 HUD（毫秒）。默认关闭，独立于详细日志开关。
         /// </summary>
         [JsonProperty("isRealtimeInkFpsOverlayEnabled")]
         public bool IsRealtimeInkFpsOverlayEnabled { get; set; } = false;

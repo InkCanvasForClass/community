@@ -14,12 +14,11 @@ using Windows.Win32.UI.WindowsAndMessaging;
 namespace Ink_Canvas.Helpers
 {
     /// <summary>
-    /// 实时墨迹 FPS / 端到端延迟悬浮窗。
-    /// 数据源(Steady-Ink 风格):
-    /// - FPS:<see cref="InkPerformanceMonitor"/> 中活跃呈现间隔滑窗,空闲&gt;1s 自动清空。
-    ///   旧墨迹由 FrameScheduler.OnRendering record_frame,新墨迹由 WetInkWindowHost.Apply record_frame。
-    /// - Latency:同样由 record_frame 上报 dirty_started → presented 差值。
-    /// HUD 不订阅任何事件,周期调 Snapshot() 读快照。
+    /// 实时墨迹 FPS / 提交延迟悬浮窗。
+    /// 数据源:
+    /// - FPS：<see cref="InkPerformanceMonitor"/> 中活跃提交间隔滑窗；空闲 &gt; 1s 自动清空。
+    /// - Submit latency：由 RecordFrame 上报 latest-sample → submitted 差值。
+    /// HUD 不订阅任何事件，而是周期调用 Snapshot() 读快照。
     /// </summary>
     internal sealed class RealtimeInkFpsOverlay : PerformanceTransparentWin
     {
@@ -70,7 +69,7 @@ namespace Ink_Canvas.Helpers
                 Foreground = Brushes.White,
                 FontSize = 12,
                 Margin = new Thickness(0, 2, 0, 0),
-                Text = "延迟  -- ms"
+                Text = "提交  -- ms"
             };
             _footerText = new TextBlock
             {
@@ -113,10 +112,10 @@ namespace Ink_Canvas.Helpers
             _fpsText.Text = snap.Fps > 0
                 ? string.Format(CultureInfo.InvariantCulture, "FPS  {0:F1}", snap.Fps)
                 : "FPS  --";
-            _latencyText.Text = snap.InputSampleCount > 0
+            _latencyText.Text = snap.SubmitLatencySampleCount > 0
                 ? string.Format(CultureInfo.InvariantCulture,
-                    "延迟  {0:F1} ms / max {1:F1}", snap.AverageInputLatencyMs, snap.MaxInputLatencyMs)
-                : "延迟  -- ms";
+                    "提交  {0:F1} ms / max {1:F1}", snap.AverageSubmitLatencyMs, snap.MaxSubmitLatencyMs)
+                : "提交  -- ms";
 
             var idleText = AdvancedStrings.RealtimeInkFpsOverlay_IdleText;
             if (string.IsNullOrEmpty(idleText)) idleText = "Realtime ink (idle)";

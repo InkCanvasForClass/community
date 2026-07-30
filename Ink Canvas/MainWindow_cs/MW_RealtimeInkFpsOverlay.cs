@@ -4,7 +4,7 @@ using Ink_Canvas.Helpers;
 namespace Ink_Canvas
 {
     /// <summary>
-    /// 实时墨迹 FPS / 延迟 HUD 控制器。
+    /// 实时墨迹 FPS / 提交延迟 HUD 控制器。
     /// </summary>
     public partial class MainWindow
     {
@@ -19,7 +19,7 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 启动实时墨迹 FPS / 延迟 HUD。
+        /// 启动实时墨迹 FPS / 提交延迟 HUD。
         /// 若已存在则先关闭再重建，避免和旧实例的 CompositionTarget 订阅叠加。
         /// </summary>
         public void ShowRealtimeInkFpsOverlay()
@@ -41,7 +41,7 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 关闭实时墨迹 FPS / 延迟 HUD（无实例时静默 no-op）。
+        /// 关闭实时墨迹 FPS / 提交延迟 HUD（无实例时静默 no-op）。
         /// </summary>
         public void HideRealtimeInkFpsOverlay()
         {
