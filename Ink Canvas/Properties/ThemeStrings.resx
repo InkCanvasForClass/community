@@ -530,4 +530,10 @@
   <data name="Theme_IdleMiniBarAutoRestore" xml:space="preserve">
     <value>贴边收起后自动恢复时间（秒）</value>
   </data>
+  <data name="Theme_RestartPromptTitle" xml:space="preserve">
+    <value>主题更改</value>
+  </data>
+  <data name="Theme_RestartRequired" xml:space="preserve">
+    <value>更改应用主题后需要重启应用程序才能完全生效。是否立即重启？</value>
+  </data>
 </root>

@@ -524,4 +524,10 @@
   <data name="Theme_IdleMiniBarAutoRestore" xml:space="preserve">
     <value>Auto-restore delay after edge collapse (s)</value>
   </data>
+  <data name="Theme_RestartPromptTitle" xml:space="preserve">
+    <value>Theme Change</value>
+  </data>
+  <data name="Theme_RestartRequired" xml:space="preserve">
+    <value>You need to restart the app for theme changes to fully take effect. Restart now?</value>
+  </data>
 </root>

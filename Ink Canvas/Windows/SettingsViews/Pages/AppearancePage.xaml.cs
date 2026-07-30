@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Diagnostics;
@@ -45,11 +46,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             try
             {
                 var lang = settings.Appearance.Language ?? string.Empty;
-                int langIndex = string.IsNullOrWhiteSpace(lang) ? 0 :
-                    string.Equals(lang, "zh-CN", StringComparison.OrdinalIgnoreCase) ? 1 :
-                    string.Equals(lang, "en-US", StringComparison.OrdinalIgnoreCase) ? 2 :
-                    string.Equals(lang, "zh-ME", StringComparison.OrdinalIgnoreCase) ? 3 : 0;
-                ComboBoxLanguage.SelectedIndex = langIndex;
+                SelectComboBoxItemByTag(ComboBoxLanguage, lang);
             }
             finally
             {
@@ -84,6 +81,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 SettingsManager.Settings.Appearance.Theme = ComboBoxTheme.SelectedIndex;
                 SettingsManager.SaveSettingsToFile();
                 SettingsActionHub.OnThemeChanged(ComboBoxTheme.SelectedIndex);
+
+                var result = MessageBox.Show(
+                    ThemeStrings.GetString("Theme_RestartRequired"),
+                    ThemeStrings.GetString("Theme_RestartPromptTitle"),
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    AppRestartHelper.RestartWithCurrentPrivileges();
+                }
             }
             catch (Exception ex) { Debug.WriteLine($"切换主题时出错: {ex.Message}"); }
         }
@@ -93,14 +101,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded || _isApplyingLanguageFromSettings) return;
             try
             {
-                var index = ComboBoxLanguage.SelectedIndex;
-                string language = index switch
-                {
-                    1 => "zh-CN",
-                    2 => "en-US",
-                    3 => "zh-ME",
-                    _ => string.Empty
-                };
+                string language = GetSelectedComboBoxTag(ComboBoxLanguage, string.Empty);
                 SettingsManager.Settings.Appearance.Language = language;
                 SettingsManager.SaveSettingsToFile();
                 SettingsActionHub.OnLanguageChanged(language);
