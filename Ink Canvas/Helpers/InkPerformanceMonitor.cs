@@ -1,28 +1,39 @@
-using System;
-using System.Threading;
-
 namespace Ink_Canvas.Helpers
 {
     /// <summary>
     /// 实时墨迹渲染线程主动上报的帧样本。
-    ///     /// </summary>
+    /// </summary>
     internal struct InkFrameSample
     {
-        /// <summary>该帧对应的最早 RequestRedraw 时间戳(Stopwatch ticks)。0 表示无脏墨迹。</summary>
-        public long DirtyStartedAtTicks;
+        /// <summary>
+        /// 参与本帧提交的最早新增输入样本时间戳（Stopwatch ticks）。
+        /// 0 表示该帧没有可用于帧龄统计的输入样本。
+        /// </summary>
+        public long EarliestSampleAtTicks;
 
-        /// <summary>该帧实际呈现的时刻(Stopwatch ticks)。</summary>
-        public long PresentedAtTicks;
+        /// <summary>
+        /// 参与本帧提交的最新输入样本时间戳（Stopwatch ticks）。
+        /// 0 表示该帧没有可用于提交延迟统计的输入样本。
+        /// </summary>
+        public long LatestSampleAtTicks;
+
+        /// <summary>
+        /// 渲染线程完成本次提交记账的时刻（Stopwatch ticks）。
+        /// 这不是像素真正出现在屏幕上的时刻。
+        /// </summary>
+        public long SubmittedAtTicks;
     }
 
     /// <summary>
-    /// 实时墨迹 FPS / 延迟聚合器。
+    /// 实时墨迹 FPS / 时序聚合器。
     ///
     /// 设计要点:
-    /// - 单一权威:由 FrameScheduler.OnRendering(旧墨迹) 和 WetInkWindowHost._renderer.Apply(新墨迹) 主动 record_frame。
-    /// - HUD 不订阅事件,而是周期调用 Snapshot() 拿到已发布快照。
-    /// - FPS = 活跃呈现间隔的倒数;空闲 &gt; IdleGapLimit 自动清空窗口,避免长时间静止拉低 FPS。
-    /// - 延迟 = 脏墨迹请求到本次出帧的端到端耗时。
+    /// - 单一权威：由渲染路径主动调用 RecordFrame 上报样本。
+    /// - HUD 不订阅事件，而是周期调用 Snapshot() 读取已发布快照。
+    /// - FPS = 活跃提交间隔的倒数；空闲 > IdleGapLimit 自动清空窗口，避免长时间静止拉低 FPS。
+    /// - 提交延迟 = 本帧最新输入样本到渲染线程完成本次提交记账的耗时。
+    /// - 帧龄 = 本帧最早新增输入样本到渲染线程完成本次提交记账的耗时。
+    ///   两者都不是 pen-to-photon 端到端显示延迟，也不是湿墨到干墨交接延迟。
     /// </summary>
     internal static class InkPerformanceMonitor
     {
@@ -30,17 +41,22 @@ namespace Ink_Canvas.Helpers
         public const double IdleGapLimitMs = 1000.0;
 
         private static readonly object _sync = new object();
-        private static readonly double[] _presentIntervals = new double[SampleCapacity];
-        private static int _presentIntervalCount;
-        private static int _presentIntervalNext;
-        private static long _lastPresentedAt;
+        private static readonly double[] _submitIntervals = new double[SampleCapacity];
+        private static int _submitIntervalCount;
+        private static int _submitIntervalNext;
+        private static long _lastSubmittedAt;
 
-        private static readonly double[] _inputLatencies = new double[SampleCapacity];
-        private static int _inputLatencyCount;
-        private static int _inputLatencyNext;
+        private static readonly double[] _submitLatencies = new double[SampleCapacity];
+        private static int _submitLatencyCount;
+        private static int _submitLatencyNext;
+
+        private static readonly double[] _frameAges = new double[SampleCapacity];
+        private static int _frameAgeCount;
+        private static int _frameAgeNext;
 
         private static long _frameCount;
-        private static long _inputSampleCount;
+        private static long _submitLatencySampleCount;
+        private static long _frameAgeSampleCount;
 
         private static bool _enabled;
 
@@ -52,41 +68,55 @@ namespace Ink_Canvas.Helpers
             {
                 if (!_enabled)
                 {
-                    _lastPresentedAt = 0L;
+                    _lastSubmittedAt = 0L;
                     return;
                 }
 
-                var presentedAt = sample.PresentedAtTicks;
+                var submittedAt = sample.SubmittedAtTicks;
 
-                if (_lastPresentedAt != 0L)
+                if (_lastSubmittedAt != 0L)
                 {
-                    var intervalMs = (presentedAt - _lastPresentedAt) * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
-                    if (intervalMs < 0) intervalMs = 0;
+                    var intervalMs = (submittedAt - _lastSubmittedAt) * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+                    if (intervalMs < 0)
+                        intervalMs = 0;
                     if (intervalMs > IdleGapLimitMs)
                     {
-                        _presentIntervalCount = 0;
-                        _presentIntervalNext = 0;
+                        _submitIntervalCount = 0;
+                        _submitIntervalNext = 0;
                     }
                     else if (intervalMs > 0)
                     {
-                        _presentIntervals[_presentIntervalNext] = intervalMs;
-                        _presentIntervalNext = (_presentIntervalNext + 1) % SampleCapacity;
-                        if (_presentIntervalCount < SampleCapacity)
-                            _presentIntervalCount++;
+                        _submitIntervals[_submitIntervalNext] = intervalMs;
+                        _submitIntervalNext = (_submitIntervalNext + 1) % SampleCapacity;
+                        if (_submitIntervalCount < SampleCapacity)
+                            _submitIntervalCount++;
                     }
                 }
-                _lastPresentedAt = presentedAt;
+                _lastSubmittedAt = submittedAt;
 
-                if (sample.DirtyStartedAtTicks != 0L)
+                if (sample.LatestSampleAtTicks != 0L)
                 {
-                    var latencyMs = (presentedAt - sample.DirtyStartedAtTicks) * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+                    var latencyMs = (submittedAt - sample.LatestSampleAtTicks) * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
                     if (latencyMs >= 0)
                     {
-                        _inputLatencies[_inputLatencyNext] = latencyMs;
-                        _inputLatencyNext = (_inputLatencyNext + 1) % SampleCapacity;
-                        if (_inputLatencyCount < SampleCapacity)
-                            _inputLatencyCount++;
-                        _inputSampleCount++;
+                        _submitLatencies[_submitLatencyNext] = latencyMs;
+                        _submitLatencyNext = (_submitLatencyNext + 1) % SampleCapacity;
+                        if (_submitLatencyCount < SampleCapacity)
+                            _submitLatencyCount++;
+                        _submitLatencySampleCount++;
+                    }
+                }
+
+                if (sample.EarliestSampleAtTicks != 0L)
+                {
+                    var frameAgeMs = (submittedAt - sample.EarliestSampleAtTicks) * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+                    if (frameAgeMs >= 0)
+                    {
+                        _frameAges[_frameAgeNext] = frameAgeMs;
+                        _frameAgeNext = (_frameAgeNext + 1) % SampleCapacity;
+                        if (_frameAgeCount < SampleCapacity)
+                            _frameAgeCount++;
+                        _frameAgeSampleCount++;
                     }
                 }
 
@@ -98,7 +128,8 @@ namespace Ink_Canvas.Helpers
         {
             lock (_sync)
             {
-                if (_enabled == enabled) return;
+                if (_enabled == enabled)
+                    return;
                 _enabled = enabled;
                 ResetUnsafe();
             }
@@ -108,66 +139,89 @@ namespace Ink_Canvas.Helpers
         {
             lock (_sync)
             {
-                var s = new InkPerformanceSnapshot
+                var snapshot = new InkPerformanceSnapshot
                 {
                     Enabled = _enabled,
                     FrameCount = _frameCount,
-                    InputSampleCount = _inputSampleCount,
-                    LastIntervalMs = _presentIntervalCount > 0
-                        ? _presentIntervals[(_presentIntervalNext + SampleCapacity - 1) % SampleCapacity]
+                    SubmitLatencySampleCount = _submitLatencySampleCount,
+                    FrameAgeSampleCount = _frameAgeSampleCount,
+                    LastIntervalMs = _submitIntervalCount > 0
+                        ? _submitIntervals[(_submitIntervalNext + SampleCapacity - 1) % SampleCapacity]
                         : 0
                 };
 
-                if (_presentIntervalCount > 0)
+                if (_submitIntervalCount > 0)
                 {
                     double sum = 0;
-                    for (int i = 0; i < _presentIntervalCount; i++) sum += _presentIntervals[i];
-                    var avg = sum / _presentIntervalCount;
-                    s.Fps = avg > 0 ? (float)(1000.0 / avg) : 0f;
+                    for (int i = 0; i < _submitIntervalCount; i++)
+                        sum += _submitIntervals[i];
+                    var avg = sum / _submitIntervalCount;
+                    snapshot.Fps = avg > 0 ? (float)(1000.0 / avg) : 0f;
                 }
 
-                if (_inputLatencyCount > 0)
+                if (_submitLatencyCount > 0)
                 {
                     double sumLatency = 0;
                     double maxLatency = 0;
-                    for (int i = 0; i < _inputLatencyCount; i++)
+                    for (int i = 0; i < _submitLatencyCount; i++)
                     {
-                        var latency = _inputLatencies[i];
+                        var latency = _submitLatencies[i];
                         sumLatency += latency;
                         if (latency > maxLatency)
                             maxLatency = latency;
                     }
-                    s.AverageInputLatencyMs = (float)(sumLatency / _inputLatencyCount);
-                    s.MaxInputLatencyMs = (float)maxLatency;
+                    snapshot.AverageSubmitLatencyMs = (float)(sumLatency / _submitLatencyCount);
+                    snapshot.MaxSubmitLatencyMs = (float)maxLatency;
                 }
 
-                return s;
+                if (_frameAgeCount > 0)
+                {
+                    double sumFrameAge = 0;
+                    double maxFrameAge = 0;
+                    for (int i = 0; i < _frameAgeCount; i++)
+                    {
+                        var frameAge = _frameAges[i];
+                        sumFrameAge += frameAge;
+                        if (frameAge > maxFrameAge)
+                            maxFrameAge = frameAge;
+                    }
+                    snapshot.AverageFrameAgeMs = (float)(sumFrameAge / _frameAgeCount);
+                    snapshot.MaxFrameAgeMs = (float)maxFrameAge;
+                }
+
+                return snapshot;
             }
         }
 
         private static void ResetUnsafe()
         {
             _frameCount = 0;
-            _inputSampleCount = 0;
-            _lastPresentedAt = 0L;
-            _presentIntervalCount = 0;
-            _presentIntervalNext = 0;
-            _inputLatencyCount = 0;
-            _inputLatencyNext = 0;
+            _submitLatencySampleCount = 0;
+            _frameAgeSampleCount = 0;
+            _lastSubmittedAt = 0L;
+            _submitIntervalCount = 0;
+            _submitIntervalNext = 0;
+            _submitLatencyCount = 0;
+            _submitLatencyNext = 0;
+            _frameAgeCount = 0;
+            _frameAgeNext = 0;
         }
     }
 
     /// <summary>
-    /// 已发布的墨迹性能快照(Steady-Ink:PerformanceSnapshot)。
+    /// 已发布的墨迹性能快照。
     /// </summary>
     internal struct InkPerformanceSnapshot
     {
         public bool Enabled;
         public long FrameCount;
-        public long InputSampleCount;
+        public long SubmitLatencySampleCount;
+        public long FrameAgeSampleCount;
         public float Fps;
-        public float AverageInputLatencyMs;
-        public float MaxInputLatencyMs;
+        public float AverageSubmitLatencyMs;
+        public float MaxSubmitLatencyMs;
+        public float AverageFrameAgeMs;
+        public float MaxFrameAgeMs;
         public double LastIntervalMs;
     }
 }

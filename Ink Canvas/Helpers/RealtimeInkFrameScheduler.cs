@@ -76,7 +76,7 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 每次 CompositionTarget.Rendering 真正出帧时触发。
         /// 第一个参数为渲染时刻的 Stopwatch 时间戳；第二个参数为该次渲染对应的 FrameWait 延迟（毫秒），无脏墨迹时为 0。
-        /// 用于实时 FPS / 延迟 HUD；订阅开销极小。
+        /// 用于实时 FPS / 提交延迟 HUD；订阅开销极小。
         /// </summary>
         internal static event Action<long, double> RenderingSampleAvailable;
 
@@ -220,7 +220,7 @@ namespace Ink_Canvas.Helpers
             PendingRedraws[strokeVisual] = new PendingRedraw
             {
                 Kind = requestKind,
-                // 始终记录 RequestedAt,用于 FPS/延迟 HUD 的端到端延迟计算;
+                // 始终记录 RequestedAt，用于 FPS/提交延迟 HUD 的提交延迟计算;
                 // 调试日志采样走 isMonitoring 路径独立判断,这里不再依赖调试开关。
                 RequestedAt = now,
                 Gen0CollectionCountStart = isMonitoring ? GC.CollectionCount(0) : -1,

@@ -86,8 +86,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             LogHelper.WriteLogToFile(
                 isOn
-                    ? "[Debug] 实时笔迹 FPS / 延迟 HUD 已开启"
-                    : "[Debug] 实时笔迹 FPS / 延迟 HUD 已关闭",
+                    ? "[Debug] 实时笔迹 FPS / 提交延迟 HUD 已开启"
+                    : "[Debug] 实时笔迹 FPS / 提交延迟 HUD 已关闭",
                 LogHelper.LogType.Info);
         }
 
