@@ -203,6 +203,23 @@
   <data name="Market_SecurityTitle" xml:space="preserve">
     <value>安全警告</value>
   </data>
+  <data name="Market_UntrustedInstallConfirmation" xml:space="preserve">
+    <value>這個插件沒通過信任檢查。
+插件 ID：{0}
+SHA256：{1}
+宣告權限：{2}
+判定原因：
+{3}
+
+插件 DLL 可以執行任意程式碼。只有在你確認來源可信時才繼續安裝。
+要繼續安裝嗎？</value>
+  </data>
+  <data name="Market_SecurityUnknownReason" xml:space="preserve">
+    <value>沒有提供具體原因。</value>
+  </data>
+  <data name="Market_SecurityNone" xml:space="preserve">
+    <value>無</value>
+  </data>
   <data name="Market_OpenLogsFolder" xml:space="preserve">
     <value>打开案发现场</value>
   </data>

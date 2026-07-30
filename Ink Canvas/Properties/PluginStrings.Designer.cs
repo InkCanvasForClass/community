@@ -146,6 +146,12 @@ namespace Ink_Canvas.Properties
 
         public static string Market_SecurityTitle => ResourceManager.GetString(nameof(Market_SecurityTitle), _resourceCulture);
 
+        public static string Market_UntrustedInstallConfirmation => ResourceManager.GetString(nameof(Market_UntrustedInstallConfirmation), _resourceCulture);
+
+        public static string Market_SecurityUnknownReason => ResourceManager.GetString(nameof(Market_SecurityUnknownReason), _resourceCulture);
+
+        public static string Market_SecurityNone => ResourceManager.GetString(nameof(Market_SecurityNone), _resourceCulture);
+
         public static string Market_OpenLogsFolder => ResourceManager.GetString(nameof(Market_OpenLogsFolder), _resourceCulture);
 
         public static string Market_LoadErrorOnInstall => ResourceManager.GetString(nameof(Market_LoadErrorOnInstall), _resourceCulture);

@@ -203,6 +203,23 @@ Continue?</value>
   <data name="Market_SecurityTitle" xml:space="preserve">
     <value>Security Notice</value>
   </data>
+  <data name="Market_UntrustedInstallConfirmation" xml:space="preserve">
+    <value>This plugin has not passed the trust check.
+Plugin ID: {0}
+SHA256: {1}
+Declared permissions: {2}
+Reasons:
+{3}
+
+Plugin DLLs can execute arbitrary code. Continue only if you trust the source.
+Continue installation?</value>
+  </data>
+  <data name="Market_SecurityUnknownReason" xml:space="preserve">
+    <value>No specific reason was provided.</value>
+  </data>
+  <data name="Market_SecurityNone" xml:space="preserve">
+    <value>None</value>
+  </data>
   <data name="Market_OpenLogsFolder" xml:space="preserve">
     <value>Open plugin logs folder</value>
   </data>
