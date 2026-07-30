@@ -94,10 +94,13 @@
     <value>可更新</value>
   </data>
   <data name="Market_RestartRequired" xml:space="preserve">
-    <value>需重启</value>
+    <value>待应用</value>
   </data>
   <data name="Market_RestartToApply" xml:space="preserve">
-    <value>重启以应用</value>
+    <value>立即应用</value>
+  </data>
+  <data name="Market_ApplyPendingUpdate" xml:space="preserve">
+    <value>立即应用</value>
   </data>
   <data name="Market_SelectPluginHint" xml:space="preserve">
     <value>在左侧选择一个插件以查看详情</value>
@@ -129,13 +132,22 @@
     <value>安装依赖</value>
   </data>
   <data name="Market_InstallLocalSuccess" xml:space="preserve">
-    <value>插件已添加到安装队列，重启后生效。</value>
+    <value>插件已安装并热加载完成。</value>
   </data>
   <data name="Market_InstallLocalFailed" xml:space="preserve">
     <value>安装失败：{0}</value>
   </data>
+  <data name="Market_HotUpdateMessage" xml:space="preserve">
+    <value>将下载并立即热更新该插件，无需重启。是否继续？</value>
+  </data>
+  <data name="Market_HotInstallPending" xml:space="preserve">
+    <value>插件包已下载，但未能立即热加载。可点击“立即应用”重试，或重启应用后自动生效。</value>
+  </data>
+  <data name="Market_HotInstallFailedRestart" xml:space="preserve">
+    <value>热加载未能完成（可能因文件仍被占用）。是否立即重启应用以完成安装？</value>
+  </data>
   <data name="Market_RestartMessage" xml:space="preserve">
-    <value>需要重启应用以完成插件安装/更新。是否立即重启？</value>
+    <value>需要重启应用以完成插件操作。是否立即重启？</value>
   </data>
   <data name="Market_RestartTitle" xml:space="preserve">
     <value>重启确认</value>
@@ -150,7 +162,7 @@
     <value>删除</value>
   </data>
   <data name="Plugin_DeleteConfirm" xml:space="preserve">
-    <value>确定要删除插件「{0}」吗？删除后需要重启应用生效。</value>
+    <value>确定要删除插件「{0}」吗？删除后将立即卸载，无需重启。</value>
   </data>
   <data name="Plugin_DeleteTitle" xml:space="preserve">
     <value>删除插件</value>
@@ -166,6 +178,9 @@
   </data>
   <data name="Plugin_ErrorReset" xml:space="preserve">
     <value>重置错误并重新加载</value>
+  </data>
+  <data name="Plugin_ErrorResetConfirm" xml:space="preserve">
+    <value>将清除错误记录并立即尝试重新加载该插件。是否继续？</value>
   </data>
   <data name="Plugin_ExportConfig" xml:space="preserve">
     <value>导出配置</value>

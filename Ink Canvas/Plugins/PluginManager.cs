@@ -261,10 +261,12 @@ namespace Ink_Canvas.Plugins
 
         /// <summary>
         /// 安装 PluginPackages 中待安装的插件包并立即加载。可在运行时调用。
+        /// 已加载插件若有待安装包，会先卸载再覆盖安装，实现热更新。
         /// </summary>
-        public void InstallPendingPackages(string approvedPackagePath = null, string approvedPackageSha256 = null)
+        /// <returns>本次成功安装（解压）的插件 ID 列表。</returns>
+        public IReadOnlyList<string> InstallPendingPackages(string approvedPackagePath = null, string approvedPackageSha256 = null)
         {
-            ProcessPluginPackages(approvedPackagePath, approvedPackageSha256);
+            var installedIds = ProcessPluginPackages(approvedPackagePath, approvedPackageSha256);
             DiscoverPlugins();
             var loadOrder = ResolveLoadOrder();
             foreach (var pluginId in loadOrder)
@@ -281,6 +283,43 @@ namespace Ink_Canvas.Plugins
             }
             _plugins.Sort((a, b) => a.Order.CompareTo(b.Order));
             _market?.RefreshMergedPlugins();
+
+            if (installedIds.Count > 0)
+            {
+                try
+                {
+                    if (System.Windows.Application.Current?.MainWindow is Ink_Canvas.MainWindow mainWindow)
+                    {
+                        mainWindow.Dispatcher.InvokeAsync(() => mainWindow.RebuildToolbar(),
+                            System.Windows.Threading.DispatcherPriority.Loaded);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogError("Failed to rebuild toolbar after hot-installing plugins", ex);
+                }
+            }
+
+            return installedIds;
+        }
+
+        /// <summary>
+        /// 返回 PluginPackages 目录中仍待安装的插件 ID（按 .icpx 文件名）。
+        /// </summary>
+        public HashSet<string> GetPendingPackagePluginIds()
+        {
+            var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (!Directory.Exists(_pluginPackagesDirectory)) return ids;
+
+            foreach (var pkgPath in Directory.GetFiles(_pluginPackagesDirectory)
+                .Where(x => Path.GetExtension(x).Equals(PluginPackageExtension, StringComparison.OrdinalIgnoreCase)))
+            {
+                var id = Path.GetFileNameWithoutExtension(pkgPath);
+                if (!string.IsNullOrWhiteSpace(id))
+                    ids.Add(id);
+            }
+
+            return ids;
         }
 
         /// <summary>
@@ -337,72 +376,82 @@ namespace Ink_Canvas.Plugins
 
         /// <summary>
         /// 处理 PluginPackages 目录中的 .icpx 插件包，将其解压安装到 Plugins 目录。
+        /// 若目标插件已加载，会先卸载并释放 ALC，再覆盖安装，以支持热更新。
         /// </summary>
-        private void ProcessPluginPackages(string approvedPackagePath = null, string approvedPackageSha256 = null)
+        /// <returns>成功解压安装的插件 ID 列表。</returns>
+        private List<string> ProcessPluginPackages(string approvedPackagePath = null, string approvedPackageSha256 = null)
         {
-            if (!Directory.Exists(_pluginPackagesDirectory)) return;
+            var installedIds = new List<string>();
+            if (!Directory.Exists(_pluginPackagesDirectory)) return installedIds;
 
             foreach (var pkgPath in Directory.GetFiles(_pluginPackagesDirectory)
                 .Where(x => Path.GetExtension(x).Equals(PluginPackageExtension, StringComparison.OrdinalIgnoreCase)))
             {
                 try
                 {
-                    using var pkg = ZipFile.OpenRead(pkgPath);
-                    var manifestEntry = pkg.GetEntry(ManifestFileName);
-                    if (manifestEntry == null)
+                    PluginManifest manifest;
+                    using (var pkg = ZipFile.OpenRead(pkgPath))
                     {
-                        Log(string.Format("Package {0} missing manifest.json, skipping", Path.GetFileName(pkgPath)));
-                        continue;
+                        var manifestEntry = pkg.GetEntry(ManifestFileName);
+                        if (manifestEntry == null)
+                        {
+                            Log(string.Format("Package {0} missing manifest.json, skipping", Path.GetFileName(pkgPath)));
+                            continue;
+                        }
+
+                        string manifestText;
+                        using (var reader = new StreamReader(manifestEntry.Open()))
+                        {
+                            manifestText = reader.ReadToEnd();
+                        }
+
+                        manifest = JsonSerializer.Deserialize<PluginManifest>(manifestText);
+                        if (manifest == null || string.IsNullOrEmpty(manifest.Id) || !IsValidPluginId(manifest.Id))
+                        {
+                            Log(string.Format("Package {0} has invalid manifest or plugin id, skipping", Path.GetFileName(pkgPath)));
+                            continue;
+                        }
+
+                        if (_securityCheck == null)
+                        {
+                            Log(string.Format("Package {0} cannot be installed automatically before security services are initialized", Path.GetFileName(pkgPath)));
+                            continue;
+                        }
+
+                        var verdict = _securityCheck.EvaluatePackage(pkgPath, null, manifest.Id);
+                        var isExplicitlyApproved = string.Equals(pkgPath, approvedPackagePath, StringComparison.OrdinalIgnoreCase)
+                            && string.Equals(verdict.PackageSha256, approvedPackageSha256, StringComparison.OrdinalIgnoreCase);
+                        if (_securityCheck.RequiresUserConfirmation(verdict) && !isExplicitlyApproved)
+                        {
+                            Log(string.Format("Package {0} is not trusted, skipping automatic installation: {1}",
+                                Path.GetFileName(pkgPath), string.Join(" ", verdict.Reasons)));
+                            continue;
+                        }
+
+                        var targetPath = GetPluginPath(manifest.Id);
+                        var targetRoot = targetPath.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+                        foreach (var entry in pkg.Entries)
+                        {
+                            var entryPath = Path.GetFullPath(Path.Combine(targetPath, entry.FullName));
+                            if (!entryPath.StartsWith(targetRoot, StringComparison.OrdinalIgnoreCase))
+                                throw new InvalidDataException("Plugin package contains an entry outside the plugin directory.");
+                        }
                     }
 
-                    string manifestText;
-                    using (var reader = new StreamReader(manifestEntry.Open()))
-                    {
-                        manifestText = reader.ReadToEnd();
-                    }
+                    // 热更新：先卸载已加载实例并释放 ALC，否则 DLL 文件锁会阻止覆盖。
+                    UnloadPluginForReplacement(manifest.Id);
 
-                    var manifest = JsonSerializer.Deserialize<PluginManifest>(manifestText);
-                    if (manifest == null || string.IsNullOrEmpty(manifest.Id) || !IsValidPluginId(manifest.Id))
+                    var installTargetPath = GetPluginPath(manifest.Id);
+                    if (Directory.Exists(installTargetPath))
                     {
-                        Log(string.Format("Package {0} has invalid manifest or plugin id, skipping", Path.GetFileName(pkgPath)));
-                        continue;
+                        ProcessProtectionManager.ReleaseLocksForPath(installTargetPath);
+                        TryDeleteDirectory(installTargetPath);
                     }
-
-                    if (_securityCheck == null)
-                    {
-                        Log(string.Format("Package {0} cannot be installed automatically before security services are initialized", Path.GetFileName(pkgPath)));
-                        continue;
-                    }
-
-                    var verdict = _securityCheck.EvaluatePackage(pkgPath, null, manifest.Id);
-                    var isExplicitlyApproved = string.Equals(pkgPath, approvedPackagePath, StringComparison.OrdinalIgnoreCase)
-                        && string.Equals(verdict.PackageSha256, approvedPackageSha256, StringComparison.OrdinalIgnoreCase);
-                    if (_securityCheck.RequiresUserConfirmation(verdict) && !isExplicitlyApproved)
-                    {
-                        Log(string.Format("Package {0} is not trusted, skipping automatic installation: {1}",
-                            Path.GetFileName(pkgPath), string.Join(" ", verdict.Reasons)));
-                        continue;
-                    }
-
-                    var targetPath = GetPluginPath(manifest.Id);
-                    var targetRoot = targetPath.TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
-                    foreach (var entry in pkg.Entries)
-                    {
-                        var entryPath = Path.GetFullPath(Path.Combine(targetPath, entry.FullName));
-                        if (!entryPath.StartsWith(targetRoot, StringComparison.OrdinalIgnoreCase))
-                            throw new InvalidDataException("Plugin package contains an entry outside the plugin directory.");
-                    }
-
-                    if (Directory.Exists(targetPath))
-                    {
-                        // 释放门控锁后删除旧版本
-                        ProcessProtectionManager.ReleaseLocksForPath(targetPath);
-                        Directory.Delete(targetPath, true);
-                    }
-                    Directory.CreateDirectory(targetPath);
-                    ZipFile.ExtractToDirectory(pkgPath, targetPath);
+                    Directory.CreateDirectory(installTargetPath);
+                    ZipFile.ExtractToDirectory(pkgPath, installTargetPath);
                     File.Delete(pkgPath);
 
+                    installedIds.Add(manifest.Id);
                     Log(string.Format("Installed plugin package: {0} v{1}", manifest.Name, manifest.Version));
                 }
                 catch (Exception ex)
@@ -426,6 +475,71 @@ namespace Ink_Canvas.Plugins
                     }
                 }
             }
+
+            return installedIds;
+        }
+
+        /// <summary>
+        /// 卸载指定插件以便覆盖安装。若插件未在列表中则忽略。
+        /// </summary>
+        private void UnloadPluginForReplacement(string pluginId)
+        {
+            var existing = _plugins.FirstOrDefault(p => string.Equals(p.Id, pluginId, StringComparison.OrdinalIgnoreCase));
+            if (existing == null) return;
+
+            try
+            {
+                if (existing.Instance != null || existing.LoadStatus == PluginLoadStatus.Loaded
+                    || _assemblyContexts.ContainsKey(existing.Id))
+                {
+                    UnloadPlugin(existing);
+                }
+                else
+                {
+                    _plugins.Remove(existing);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError(string.Format("Failed to unload plugin {0} before replacement", pluginId), ex);
+                _plugins.Remove(existing);
+            }
+
+            // ALC.Unload 是异步完成的；强制两轮 GC 尽量释放 DLL 文件锁。
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
+            GC.WaitForPendingFinalizers();
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
+            GC.WaitForPendingFinalizers();
+        }
+
+        private void TryDeleteDirectory(string path)
+        {
+            const int maxAttempts = 5;
+            for (var attempt = 1; attempt <= maxAttempts; attempt++)
+            {
+                try
+                {
+                    if (!Directory.Exists(path)) return;
+                    ProcessProtectionManager.ReleaseLocksForPath(path);
+                    Directory.Delete(path, true);
+                    return;
+                }
+                catch (IOException) when (attempt < maxAttempts)
+                {
+                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
+                    GC.WaitForPendingFinalizers();
+                    System.Threading.Thread.Sleep(50 * attempt);
+                }
+                catch (UnauthorizedAccessException) when (attempt < maxAttempts)
+                {
+                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
+                    GC.WaitForPendingFinalizers();
+                    System.Threading.Thread.Sleep(50 * attempt);
+                }
+            }
+
+            // 最后一次失败抛出，由调用方记入 failed_install。
+            Directory.Delete(path, true);
         }
 
         #endregion
@@ -787,7 +901,7 @@ namespace Ink_Canvas.Plugins
         }
 
         /// <summary>
-        /// 显式重置插件的错误记录并清除禁用状态，下次重新加载。
+        /// 显式重置插件的错误记录并清除禁用状态，然后尝试热加载。
         /// </summary>
         public bool ResetPluginFailure(string pluginId)
         {
@@ -798,7 +912,45 @@ namespace Ink_Canvas.Plugins
                 _disabledPlugins.Remove(pluginId);
                 SaveDisabledPlugins();
             }
-            return true;
+
+            // 把列表中处于 Disabled/Error 的条目重置为 NotLoaded，再走加载路径
+            var existing = _plugins.FirstOrDefault(p => string.Equals(p.Id, pluginId, StringComparison.OrdinalIgnoreCase));
+            if (existing != null)
+            {
+                if (existing.LoadStatus == PluginLoadStatus.Loaded || existing.Instance != null
+                    || _assemblyContexts.ContainsKey(existing.Id))
+                {
+                    UnloadPlugin(existing);
+                    existing = null;
+                }
+                else
+                {
+                    existing.Exception = null;
+                    existing.LoadStatus = PluginLoadStatus.NotLoaded;
+                    existing.IsLoaded = false;
+                }
+            }
+
+            DiscoverPlugins();
+            existing = _plugins.FirstOrDefault(p => string.Equals(p.Id, pluginId, StringComparison.OrdinalIgnoreCase)
+                && p.LoadStatus == PluginLoadStatus.NotLoaded);
+            if (existing != null)
+            {
+                try
+                {
+                    LoadPlugin(existing);
+                }
+                catch (Exception ex)
+                {
+                    existing.LoadStatus = PluginLoadStatus.Error;
+                    existing.Exception = ex;
+                    LogError(string.Format("Failed to reload plugin {0} after error reset", pluginId), ex);
+                    return false;
+                }
+            }
+
+            _market?.RefreshMergedPlugins();
+            return existing != null && existing.LoadStatus == PluginLoadStatus.Loaded;
         }
 
         /// <summary>
@@ -842,12 +994,23 @@ namespace Ink_Canvas.Plugins
 
         public void UnloadPlugin(PluginInfo plugin)
         {
+            if (plugin == null) return;
+
             try
             {
-                plugin.Instance.Shutdown();
+                try
+                {
+                    plugin.Instance?.Shutdown();
+                }
+                catch (Exception shutdownEx)
+                {
+                    LogError(string.Format("Plugin {0} raised an error during Shutdown", plugin.Name), shutdownEx);
+                }
+
                 _plugins.Remove(plugin);
                 plugin.IsLoaded = false;
                 plugin.LoadStatus = PluginLoadStatus.NotLoaded;
+                plugin.Instance = null;
 
                 if (_assemblyContexts.TryGetValue(plugin.Id, out var alc))
                 {

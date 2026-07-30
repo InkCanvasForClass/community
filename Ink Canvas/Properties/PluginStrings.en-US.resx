@@ -94,10 +94,13 @@
     <value>Update available</value>
   </data>
   <data name="Market_RestartRequired" xml:space="preserve">
-    <value>Restart needed</value>
+    <value>Pending</value>
   </data>
   <data name="Market_RestartToApply" xml:space="preserve">
-    <value>Restart to apply</value>
+    <value>Apply now</value>
+  </data>
+  <data name="Market_ApplyPendingUpdate" xml:space="preserve">
+    <value>Apply now</value>
   </data>
   <data name="Market_SelectPluginHint" xml:space="preserve">
     <value>Select a plugin on the left to view details</value>
@@ -129,13 +132,22 @@ Continue?</value>
     <value>Install Dependencies</value>
   </data>
   <data name="Market_InstallLocalSuccess" xml:space="preserve">
-    <value>Plugin has been added to the install queue. Restart to take effect.</value>
+    <value>Plugin installed and hot-loaded successfully.</value>
   </data>
   <data name="Market_InstallLocalFailed" xml:space="preserve">
     <value>Installation failed: {0}</value>
   </data>
+  <data name="Market_HotUpdateMessage" xml:space="preserve">
+    <value>The plugin will be downloaded and hot-updated immediately without restarting. Continue?</value>
+  </data>
+  <data name="Market_HotInstallPending" xml:space="preserve">
+    <value>The package was downloaded but could not be hot-loaded. Click "Apply now" to retry, or restart the app to apply automatically.</value>
+  </data>
+  <data name="Market_HotInstallFailedRestart" xml:space="preserve">
+    <value>Hot-loading did not complete (the files may still be locked). Restart the app now to finish installation?</value>
+  </data>
   <data name="Market_RestartMessage" xml:space="preserve">
-    <value>The app needs to restart to complete plugin installation/update. Restart now?</value>
+    <value>The app needs to restart to complete the plugin operation. Restart now?</value>
   </data>
   <data name="Market_RestartTitle" xml:space="preserve">
     <value>Restart Confirmation</value>
@@ -150,7 +162,7 @@ Continue?</value>
     <value>Delete</value>
   </data>
   <data name="Plugin_DeleteConfirm" xml:space="preserve">
-    <value>Are you sure you want to delete plugin "{0}"? A restart is required to take effect.</value>
+    <value>Are you sure you want to delete plugin "{0}"? It will be unloaded immediately without restarting.</value>
   </data>
   <data name="Plugin_DeleteTitle" xml:space="preserve">
     <value>Delete Plugin</value>
@@ -166,6 +178,9 @@ Continue?</value>
   </data>
   <data name="Plugin_ErrorReset" xml:space="preserve">
     <value>Reset &#38; reload</value>
+  </data>
+  <data name="Plugin_ErrorResetConfirm" xml:space="preserve">
+    <value>Clear the error record and try reloading the plugin immediately. Continue?</value>
   </data>
   <data name="Plugin_ExportConfig" xml:space="preserve">
     <value>Export Config</value>

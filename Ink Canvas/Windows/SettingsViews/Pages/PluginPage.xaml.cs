@@ -209,23 +209,23 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             };
             actionPanel.Children.Add(folderBtn);
 
-            // 更新/重启按钮
+            // 待应用更新：尝试热安装；失败时才提供重启
             if (hasPendingUpdate)
             {
-                // 已下载，需要重启
-                var restartBtn = new Button
+                var applyBtn = new Button
                 {
                     Padding = new Thickness(6),
                     Margin = new Thickness(0, 0, 4, 0),
-                    ToolTip = PluginStrings.Market_RestartToApply
+                    ToolTip = PluginStrings.Market_ApplyPendingUpdate,
+                    Tag = pluginInfo.Id
                 };
-                restartBtn.Click += (s, ev) => AskRestart();
-                restartBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+                applyBtn.Click += ApplyPendingUpdate_Click;
+                applyBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
                 {
                     Icon = SegoeFluentIcons.Refresh,
                     FontSize = 14
                 };
-                actionPanel.Children.Add(restartBtn);
+                actionPanel.Children.Add(applyBtn);
             }
             else if (marketInfo != null)
             {
@@ -345,7 +345,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (marketInfo == null) return;
 
             var result = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
-                string.Format(PluginStrings.Plugin_UpdateAvailable, marketInfo.MarketVersion) + "\n\n" + PluginStrings.Market_RestartMessage,
+                string.Format(PluginStrings.Plugin_UpdateAvailable, marketInfo.MarketVersion) + "\n\n" + PluginStrings.Market_HotUpdateMessage,
                 PluginStrings.Plugin_Update,
                 MessageBoxButton.YesNo, MessageBoxImage.Question);
 
@@ -358,6 +358,48 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             await _market.RequestDownloadPluginAsync(marketInfo.Id);
             LoadPlugins();
+
+            // 下载后热安装通常已消费包；若仍有残留包再提示可手动应用/重启
+            var pending = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PluginPackages", marketInfo.Id + ".icpx");
+            if (File.Exists(pending))
+            {
+                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                    PluginStrings.Market_HotInstallPending,
+                    PluginStrings.Plugin_Update,
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void ApplyPendingUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = sender as FrameworkElement;
+            var pluginId = btn?.Tag as string;
+            if (string.IsNullOrEmpty(pluginId)) return;
+
+            try
+            {
+                PluginManager.Instance.InstallPendingPackages();
+                LoadPlugins();
+
+                var pending = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PluginPackages", pluginId + ".icpx");
+                if (File.Exists(pending))
+                {
+                    var restart = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                        PluginStrings.Market_HotInstallFailedRestart,
+                        PluginStrings.Market_RestartTitle,
+                        MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                    if (restart == MessageBoxResult.Yes)
+                        AskRestart();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"Plugin | 热安装失败: {pluginId} - {ex.Message}", LogHelper.LogType.Error);
+                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                    string.Format(PluginStrings.Market_InstallLocalFailed, ex.Message),
+                    PluginStrings.Plugin_Update,
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void DeletePlugin_Click(object sender, RoutedEventArgs e)
@@ -387,8 +429,25 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 // 3. 标记为待卸载状态
                 info.LoadStatus = PluginLoadStatus.Disabled;
 
+                // 4. 尽量立即删除目录（热卸载成功后一般可删）；失败则保留 .uninstall 待下次启动清理
+                try
+                {
+                    if (Directory.Exists(info.PluginFolderPath))
+                    {
+                        ProcessProtectionManager.ReleaseLocksForPath(info.PluginFolderPath);
+                        GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
+                        GC.WaitForPendingFinalizers();
+                        Directory.Delete(info.PluginFolderPath, true);
+                    }
+                }
+                catch (Exception deleteEx)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"Plugin | 热删除目录失败，将在下次启动清理: {info.Id} - {deleteEx.Message}",
+                        LogHelper.LogType.Warning);
+                }
+
                 LoadPlugins();
-                AskRestart();
             }
             catch (Exception ex)
             {
@@ -496,15 +555,24 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ? string.Format(PluginStrings.Plugin_ErrorAutoDisabled,
                     PluginErrorRecoveryService.FailureWindowMinutes,
                     PluginErrorRecoveryService.FailureThreshold)
-                : PluginStrings.Market_RestartMessage;
+                : PluginStrings.Plugin_ErrorResetConfirm;
 
             var result = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
                 msg, PluginStrings.Plugin_ErrorTitle,
                 MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result != MessageBoxResult.Yes) return;
 
-            PluginManager.Instance.ResetPluginFailure(info.Id);
-            AskRestart();
+            var reloaded = PluginManager.Instance.ResetPluginFailure(info.Id);
+            LoadPlugins();
+            if (!reloaded)
+            {
+                var restart = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                    PluginStrings.Market_HotInstallFailedRestart,
+                    PluginStrings.Market_RestartTitle,
+                    MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                if (restart == MessageBoxResult.Yes)
+                    AskRestart();
+            }
         }
 
         private static string SanitizeId(string id)
