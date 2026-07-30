@@ -92,6 +92,9 @@ namespace Ink_Canvas
 
         private static readonly Lazy<object> HitokotoHttpClient = new Lazy<object>(CreateHitokotoClient, System.Threading.LazyThreadSafetyMode.ExecutionAndPublication);
 
+        private readonly object _hitokotoPrefetchSyncRoot = new object();
+        private Task<string> _hitokotoPrefetchTask;
+        private string _hitokotoPrefetchRequestUrl;
         private DispatcherTimer _chickenSoupAutoRotationTimer;
 
         /// <summary>
@@ -132,6 +135,125 @@ namespace Ink_Canvas
                 }
                 return null;
             }
+        }
+
+        private HttpClient GetHitokotoHttpClientOrNull(bool writeLog = true)
+        {
+            try
+            {
+                return HitokotoHttpClient.Value as HttpClient;
+            }
+            catch (Exception initEx)
+            {
+                if (writeLog)
+                {
+                    LogHelper.WriteLogToFile($"一言 HTTP 客户端初始化失败: {initEx.Message}", LogHelper.LogType.Warning);
+                }
+                return null;
+            }
+        }
+
+        private string BuildHitokotoRequestUrl()
+        {
+            var cats = Settings.Appearance.HitokotoCategories;
+            if (cats == null || cats.Count == 0)
+                cats = new List<string> { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l" };
+
+            var urlBuilder = new StringBuilder("https://v1.hitokoto.cn/?encode=text");
+            foreach (var category in cats)
+            {
+                urlBuilder.Append($"&c={category}");
+            }
+
+            return urlBuilder.ToString();
+        }
+
+        private async Task<string> FetchHitokotoTextCoreAsync(HttpClient client, string requestUrl)
+        {
+            var response = await client.GetAsync(requestUrl).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+
+            var text = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            return string.IsNullOrWhiteSpace(text) ? string.Empty : text.Trim();
+        }
+
+        private Task<string> EnsureHitokotoPrefetchTask(HttpClient client, string requestUrl)
+        {
+            Task<string> task;
+            var created = false;
+
+            lock (_hitokotoPrefetchSyncRoot)
+            {
+                if (_hitokotoPrefetchTask == null
+                    || _hitokotoPrefetchTask.IsCanceled
+                    || _hitokotoPrefetchTask.IsFaulted
+                    || !string.Equals(_hitokotoPrefetchRequestUrl, requestUrl, StringComparison.Ordinal))
+                {
+                    _hitokotoPrefetchRequestUrl = requestUrl;
+                    _hitokotoPrefetchTask = FetchHitokotoTextCoreAsync(client, requestUrl);
+                    created = true;
+                }
+
+                task = _hitokotoPrefetchTask;
+            }
+
+            if (created)
+            {
+                task.ContinueWith(t =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        LogHelper.WriteLogToFile($"一言预取失败: {t.Exception?.GetBaseException().Message}", LogHelper.LogType.Warning);
+                    }
+                }, TaskScheduler.Default);
+            }
+
+            return task;
+        }
+
+        private bool HasUsableHitokotoPrefetchTask(string requestUrl)
+        {
+            lock (_hitokotoPrefetchSyncRoot)
+            {
+                return _hitokotoPrefetchTask != null
+                    && !_hitokotoPrefetchTask.IsFaulted
+                    && !_hitokotoPrefetchTask.IsCanceled
+                    && string.Equals(_hitokotoPrefetchRequestUrl, requestUrl, StringComparison.Ordinal);
+            }
+        }
+
+        private void StartHitokotoPrefetch(string requestUrl)
+        {
+            var client = GetHitokotoHttpClientOrNull(false);
+            if (client == null)
+            {
+                return;
+            }
+
+            _ = EnsureHitokotoPrefetchTask(client, requestUrl);
+        }
+
+        private async Task<string> ConsumePrefetchedHitokotoTextAsync(HttpClient client, string requestUrl)
+        {
+            var task = EnsureHitokotoPrefetchTask(client, requestUrl);
+            string text;
+            try
+            {
+                text = await task.ConfigureAwait(true);
+            }
+            finally
+            {
+                lock (_hitokotoPrefetchSyncRoot)
+                {
+                    if (ReferenceEquals(_hitokotoPrefetchTask, task))
+                    {
+                        _hitokotoPrefetchTask = null;
+                    }
+                }
+            }
+
+            StartHitokotoPrefetch(requestUrl);
+            return text;
         }
 
         /// <summary>
@@ -184,49 +306,39 @@ namespace Ink_Canvas
 
                 var rnd = new Random();
                 var selected = enabledSchemes[rnd.Next(enabledSchemes.Count)];
+                var hasHitokotoEnabled = enabledSchemes.Any(i => i.IsPreset && i.PresetId == "hitokoto");
+                string hitokotoRequestUrl = null;
+                var hadExistingHitokotoPrefetch = false;
+
+                if (hasHitokotoEnabled)
+                {
+                    hitokotoRequestUrl = BuildHitokotoRequestUrl();
+                    hadExistingHitokotoPrefetch = HasUsableHitokotoPrefetchTask(hitokotoRequestUrl);
+                    StartHitokotoPrefetch(hitokotoRequestUrl);
+                }
 
                 // Hitokoto 预设走 HTTP API
                 if (selected.IsPreset && selected.PresetId == "hitokoto")
                 {
-                    BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_Loading;
+                    var client = GetHitokotoHttpClientOrNull();
+                    if (client == null)
+                    {
+                        BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_HttpUnavailable;
+                        return;
+                    }
+
+                    var requestUrl = hitokotoRequestUrl ?? BuildHitokotoRequestUrl();
+                    if (!hadExistingHitokotoPrefetch)
+                    {
+                        BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_Loading;
+                    }
 
                     try
                     {
-                        object clientObj = null;
-                        try
-                        {
-                            clientObj = HitokotoHttpClient.Value;
-                        }
-                        catch (Exception initEx)
-                        {
-                            LogHelper.WriteLogToFile($"一言 HTTP 客户端初始化失败: {initEx.Message}", LogHelper.LogType.Warning);
-                            BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_HttpUnavailable;
-                            return;
-                        }
-
-                        if (clientObj == null || !(clientObj is HttpClient client))
-                        {
-                            BlackBoardWaterMark.Text = Properties.MainWindowStrings.Main_Hitokoto_HttpUnavailable;
-                            return;
-                        }
-
-                        var cats = Settings.Appearance.HitokotoCategories;
-                        if (cats == null || cats.Count == 0)
-                            cats = new List<string> { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l" };
-
-                        var urlBuilder = new StringBuilder("https://v1.hitokoto.cn/?encode=text");
-                        foreach (var category in cats)
-                        {
-                            urlBuilder.Append($"&c={category}");
-                        }
-
-                        var response = await client.GetAsync(urlBuilder.ToString()).ConfigureAwait(true);
-                        response.EnsureSuccessStatusCode();
-
-                        var text = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+                        var text = await ConsumePrefetchedHitokotoTextAsync(client, requestUrl).ConfigureAwait(true);
                         if (!string.IsNullOrWhiteSpace(text))
                         {
-                            BlackBoardWaterMark.Text = text.Trim();
+                            BlackBoardWaterMark.Text = text;
                         }
                         else
                         {

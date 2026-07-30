@@ -18,6 +18,7 @@ namespace Ink_Canvas
         private NativeInkController _nativeInkController;
         private NativePointerInputSource _nativePointerInputSource;
         private WpfPointerInputSource _wpfPointerInputSource;
+        private NativePointerUpdatePump _nativePointerUpdatePump;
         private WetInkWindowHost _wetInkWindowHost;
         private WpfRenderFrameFence _wpfRenderFrameFence;
 
@@ -67,6 +68,9 @@ namespace Ink_Canvas
                 _nativeWetInkMailbox = new WetInkCommandMailbox();
                 _nativeInkSessions = new NativeInkSessionManager();
                 _nativeInkController = new NativeInkController(_nativeInkSessions, _nativeWetInkMailbox);
+                _nativePointerUpdatePump = new NativePointerUpdatePump(
+                    _nativeInkController,
+                    () => _wetInkWindowHost?.SignalWork());
                 _wpfRenderFrameFence = new WpfRenderFrameFence(Dispatcher);
 
                 _wetInkWindowHost = new WetInkWindowHost(
@@ -132,6 +136,12 @@ namespace Ink_Canvas
             try { _wpfPointerInputSource?.Dispose(); }
             catch { /* best-effort */ }
             _wpfPointerInputSource = null;
+
+            try { _nativePointerUpdatePump?.FlushAll(); }
+            catch { /* best-effort */ }
+            try { _nativePointerUpdatePump?.Dispose(); }
+            catch { /* best-effort */ }
+            _nativePointerUpdatePump = null;
 
             try { _nativePointerInputSource?.Dispose(); }
             catch { /* best-effort */ }
@@ -241,6 +251,8 @@ namespace Ink_Canvas
             try
             {
                 _wpfRenderFrameFence?.CancelAll();
+                _nativePointerUpdatePump?.DiscardAll();
+                _nativePointerUpdatePump?.FlushAll();
                 _nativeInkController.CancelAll();
                 StopAllPauseStraightenTimers();
                 RefreshOverlayVisibility();
@@ -323,10 +335,13 @@ namespace Ink_Canvas
             StopPauseStraightenTimer(sessionId);
             try
             {
-                if (_nativeInkController != null
-                    && _nativeInkController.TryStraightenSession(sessionId))
+                if (_nativeInkController != null)
                 {
-                    _wetInkWindowHost?.SignalWork();
+                    FlushNativePointerUpdateForSession(sessionId);
+                    if (_nativeInkController.TryStraightenSession(sessionId))
+                    {
+                        _wetInkWindowHost?.SignalWork();
+                    }
                 }
             }
             catch (Exception ex)
@@ -441,6 +456,10 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile(
                     $"[WetInk] Pointer handler failed ({batch.MessageKind}): {ex}",
                     LogHelper.LogType.Error);
+                try { _nativePointerUpdatePump?.DiscardPointer(batch.PointerId); }
+                catch { /* best-effort */ }
+                try { _nativePointerUpdatePump?.FlushPointer(batch.PointerId); }
+                catch { /* best-effort */ }
                 try { _nativeInkController.Cancel(batch.PointerId); }
                 catch { /* best-effort */ }
                 _nativeCapturedRoutes.Remove(batch.PointerId);
@@ -512,13 +531,14 @@ namespace Ink_Canvas
                 return false;
 
             var facts = CreatePointerFacts(batch);
-            var context = BuildRouteContext(facts);
+            var context = BuildCapturedRouteContext(captured, batch.InputKind);
             var decision = NativeInkInputRouter.DecideCaptured(facts, context, captured);
 
             if (decision.Route == NativeInputRoute.BlockedFrozen
                 || decision.Route == NativeInputRoute.CanvasGesture
                 || HasCanceledFlag(facts))
             {
+                _nativePointerUpdatePump?.DiscardPointer(batch.PointerId);
                 if (_nativeInkController.Cancel(batch.PointerId))
                 {
                     RefreshOverlayVisibility();
@@ -535,15 +555,16 @@ namespace Ink_Canvas
 
             if (decision.Route == NativeInputRoute.Ink && !decision.SuppressPointEmission)
             {
-                // 真实点 + 预测笔尾同一快照发布，避免“Update 清空预测”造成的空窗。
                 var predictionEnabled = Settings?.Canvas?.EnableNativeInkPrediction == true;
-                if (_nativeInkController.UpdateWithPrediction(
-                        batch.PointerId,
-                        ToInkCanvasSamples(batch.SamplesNewestFirst),
-                        predictionEnabled))
+                if (_nativeInkController.TryGetSessionInfo(batch.PointerId, out var sessionId, out var state)
+                    && state == NativeInkSessionState.Active)
                 {
+                    _nativePointerUpdatePump?.Enqueue(
+                        batch.PointerId,
+                        sessionId,
+                        ToInkCanvasSampleArray(batch.SamplesNewestFirstArray),
+                        predictionEnabled);
                     ResetPauseStraightenTimerForPointer(batch.PointerId);
-                    _wetInkWindowHost?.SignalWork();
                 }
             }
 
@@ -566,6 +587,8 @@ namespace Ink_Canvas
             var facts = CreatePointerFacts(batch);
             if (HasCanceledFlag(facts))
             {
+                _nativePointerUpdatePump?.DiscardPointer(batch.PointerId);
+                _nativePointerUpdatePump?.FlushPointer(batch.PointerId);
                 if (_nativeInkController.Cancel(batch.PointerId))
                     _wetInkWindowHost?.SignalWork();
                 return true;
@@ -574,6 +597,8 @@ namespace Ink_Canvas
             var endedAt = batch.SamplesNewestFirst.Count > 0
                 ? batch.SamplesNewestFirst[0].TimestampMicroseconds
                 : DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() * 1000L;
+
+            _nativePointerUpdatePump?.FlushPointer(batch.PointerId);
 
             // 开启实时书写预测时，抬笔把当前预测笔尾烘焙进真实干墨（进入保存/撤销）。
             var bakePrediction = Settings?.Canvas?.EnableNativeInkPrediction == true;
@@ -598,6 +623,9 @@ namespace Ink_Canvas
             if (batch.InputKind == NativeInkInputKind.Touch)
                 _nativeActiveTouchPointers.Remove(batch.PointerId);
 
+            _nativePointerUpdatePump?.DiscardPointer(batch.PointerId);
+            _nativePointerUpdatePump?.FlushPointer(batch.PointerId);
+
             if (_nativeInkController.Cancel(batch.PointerId))
             {
                 RefreshOverlayVisibility();
@@ -618,6 +646,8 @@ namespace Ink_Canvas
             if (IsCurrentPageFrozen)
             {
                 TryBlockFrozenPageMutation("书写");
+                _nativePointerUpdatePump?.DiscardPointer(payload.PointerId);
+                _nativePointerUpdatePump?.FlushPointer(payload.PointerId);
                 _nativeInkController.Cancel(payload.PointerId);
                 RefreshOverlayVisibility();
                 _wetInkWindowHost?.SignalWork();
@@ -634,6 +664,8 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile(
                     $"[WetInk] CreateStroke failed: {ex}",
                     LogHelper.LogType.Error);
+                _nativePointerUpdatePump?.DiscardPointer(payload.PointerId);
+                _nativePointerUpdatePump?.FlushPointer(payload.PointerId);
                 _nativeInkController.Cancel(payload.PointerId);
                 _wetInkWindowHost?.SignalWork();
                 return;
@@ -693,6 +725,8 @@ namespace Ink_Canvas
                 try
                 {
                     _wpfRenderFrameFence?.Cancel(payload.SessionId);
+                    _nativePointerUpdatePump?.DiscardPointer(payload.PointerId);
+                    _nativePointerUpdatePump?.FlushPointer(payload.PointerId);
                     _nativeInkController?.Cancel(payload.PointerId);
                     _wetInkWindowHost?.SignalWork();
                 }
@@ -816,7 +850,18 @@ namespace Ink_Canvas
         /// </summary>
         private IReadOnlyList<RawInkSample> ToInkCanvasSamples(IReadOnlyList<RawInkSample> windowSamples)
         {
-            if (windowSamples == null || windowSamples.Count == 0 || inkCanvas == null)
+            if (windowSamples == null || windowSamples.Count == 0)
+                return windowSamples ?? Array.Empty<RawInkSample>();
+
+            var array = new RawInkSample[windowSamples.Count];
+            for (var i = 0; i < windowSamples.Count; i++)
+                array[i] = windowSamples[i];
+            return ToInkCanvasSampleArray(array);
+        }
+
+        private RawInkSample[] ToInkCanvasSampleArray(RawInkSample[] windowSamples)
+        {
+            if (windowSamples == null || windowSamples.Length == 0 || inkCanvas == null)
                 return windowSamples ?? Array.Empty<RawInkSample>();
 
             Point inkOriginInWindow;
@@ -827,14 +872,19 @@ namespace Ink_Canvas
             }
             catch
             {
-                return windowSamples;
+                var fallback = new RawInkSample[windowSamples.Length];
+                Array.Copy(windowSamples, fallback, fallback.Length);
+                return fallback;
             }
 
+            var converted = new RawInkSample[windowSamples.Length];
             if (Math.Abs(inkOriginInWindow.X) < 0.01 && Math.Abs(inkOriginInWindow.Y) < 0.01)
-                return windowSamples;
+            {
+                Array.Copy(windowSamples, converted, converted.Length);
+                return converted;
+            }
 
-            var converted = new RawInkSample[windowSamples.Count];
-            for (var i = 0; i < windowSamples.Count; i++)
+            for (var i = 0; i < windowSamples.Length; i++)
             {
                 var s = windowSamples[i];
                 converted[i] = new RawInkSample(
@@ -881,6 +931,49 @@ namespace Ink_Canvas
                 twoFingerGestureAllowed: twoFingerAllowed,
                 activeTouchCount: activeTouchCount,
                 palm: palm);
+        }
+
+        private NativeInkRouteContext BuildCapturedRouteContext(
+            NativeInkRouteDecision captured,
+            NativeInkInputKind inputKind)
+        {
+            var tool = ResolveLogicalInkTool();
+            var multiTouchWriting = currentMode == 0
+                ? Settings.Gesture.IsEnableMultiTouchMode || isInMultiTouchMode
+                : Settings.Gesture.IsEnableMultiTouchModeBoard || isInMultiTouchMode;
+            var twoFingerAllowed = ResolveTwoFingerGestureAllowed();
+            var activeTouchCount = Math.Max(dec.Count, _nativeActiveTouchPointers.Count);
+            var palm = inputKind == NativeInkInputKind.Touch ? BuildPalmRoutePolicy() : default;
+
+            return new NativeInkRouteContext(
+                hitZone: captured.Route == NativeInputRoute.Ink
+                    ? CanvasHitZone.CanvasSurface
+                    : CanvasHitZone.Outside,
+                tool,
+                canvasInputEnabled: IsEnabled && IsVisible && inkCanvas != null,
+                pageFrozen: IsCurrentPageFrozen,
+                videoPresenter: _isVideoPresenterSpecialMode,
+                multiTouchWriting: multiTouchWriting,
+                twoFingerGestureAllowed: twoFingerAllowed,
+                activeTouchCount: activeTouchCount,
+                palm: palm);
+        }
+
+        private void FlushNativePointerUpdateForSession(long sessionId)
+        {
+            if (_nativePointerUpdatePump == null || _nativeInkController == null)
+                return;
+
+            foreach (var route in _nativeCapturedRoutes)
+            {
+                if (_nativeInkController.TryGetSessionInfo(route.Key, out var activeSessionId, out var state)
+                    && activeSessionId == sessionId
+                    && state == NativeInkSessionState.Active)
+                {
+                    _nativePointerUpdatePump.FlushPointer(route.Key);
+                    return;
+                }
+            }
         }
 
         private LogicalInkTool ResolveLogicalInkTool()

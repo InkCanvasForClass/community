@@ -201,6 +201,18 @@
   <data name="Nav_BoardAppearance_Tooltip" xml:space="preserve">
     <value>Board toolbar appearance settings</value>
   </data>
+  <data name="Nav_ToolbarMenu" xml:space="preserve">
+    <value>Menu</value>
+  </data>
+  <data name="Nav_ToolbarMenu_Tooltip" xml:space="preserve">
+    <value>Toolbar menu order and visibility</value>
+  </data>
+  <data name="Nav_BoardMenu" xml:space="preserve">
+    <value>Menu</value>
+  </data>
+  <data name="Nav_BoardMenu_Tooltip" xml:space="preserve">
+    <value>Board menu order and visibility</value>
+  </data>
   <data name="Nav_CanvasAndInk_Tooltip" xml:space="preserve">
     <value>Canvas &amp; ink settings</value>
   </data>

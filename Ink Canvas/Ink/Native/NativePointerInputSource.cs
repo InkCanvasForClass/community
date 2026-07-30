@@ -33,6 +33,7 @@ namespace Ink_Canvas.Ink.Native
         private const int ErrorInsufficientBuffer = 122;
         private const int ErrorNoData = 232;
         private const int MaximumHistoryEntries = 4096;
+        private const int MaximumUpdateHistoryEntries = 128;
 
         private readonly HwndSource _source;
         private readonly NativePointerInputHandler _handler;
@@ -301,7 +302,7 @@ namespace Ink_Canvas.Ink.Native
             uint pointerId,
             NativePointerMessageKind messageKind)
         {
-            var history = ReadPenHistory(pointerId, out var historyComplete, out var error);
+            var history = ReadPenHistory(pointerId, messageKind, out var historyComplete, out var error);
             var clientOrigin = GetClientOrigin(hwnd);
             var samples = new RawInkSample[history.Length];
             var secondaryButtonDown = false;
@@ -325,7 +326,7 @@ namespace Ink_Canvas.Ink.Native
                     flags);
             }
 
-            return new NativePointerInputBatch(
+            return NativePointerInputBatch.CreateFromOwnedSamples(
                 pointerId,
                 NativeInkInputKind.Pen,
                 messageKind,
@@ -341,7 +342,7 @@ namespace Ink_Canvas.Ink.Native
             uint pointerId,
             NativePointerMessageKind messageKind)
         {
-            var history = ReadTouchHistory(pointerId, out var historyComplete, out var error);
+            var history = ReadTouchHistory(pointerId, messageKind, out var historyComplete, out var error);
             var clientOrigin = GetClientOrigin(hwnd);
             var samples = new RawInkSample[history.Length];
             for (var i = 0; i < history.Length; i++)
@@ -364,7 +365,7 @@ namespace Ink_Canvas.Ink.Native
                     hasContactArea ? Math.Abs(item.ContactRaw.Bottom - item.ContactRaw.Top) : 0);
             }
 
-            return new NativePointerInputBatch(
+            return NativePointerInputBatch.CreateFromOwnedSamples(
                 pointerId,
                 NativeInkInputKind.Touch,
                 messageKind,
@@ -377,6 +378,7 @@ namespace Ink_Canvas.Ink.Native
 
         private static NativePointerPenInfo[] ReadPenHistory(
             uint pointerId,
+            NativePointerMessageKind messageKind,
             out bool historyComplete,
             out int error)
         {
@@ -388,11 +390,12 @@ namespace Ink_Canvas.Ink.Native
                 error = Marshal.GetLastWin32Error();
                 if (error == ErrorInsufficientBuffer && count > 0 && count <= MaximumHistoryEntries)
                 {
-                    var history = new NativePointerPenInfo[count];
-                    var capacity = count;
+                    var requested = LimitHistoryEntries(messageKind, count);
+                    var history = new NativePointerPenInfo[requested];
+                    var capacity = requested;
                     if (GetPointerPenInfoHistory(pointerId, ref capacity, history))
                     {
-                        historyComplete = true;
+                        historyComplete = capacity >= count;
                         error = 0;
                         return Trim(history, capacity);
                     }
@@ -418,6 +421,7 @@ namespace Ink_Canvas.Ink.Native
 
         private static NativePointerTouchInfo[] ReadTouchHistory(
             uint pointerId,
+            NativePointerMessageKind messageKind,
             out bool historyComplete,
             out int error)
         {
@@ -427,11 +431,12 @@ namespace Ink_Canvas.Ink.Native
                 error = Marshal.GetLastWin32Error();
                 if (error == ErrorInsufficientBuffer && count > 0 && count <= MaximumHistoryEntries)
                 {
-                    var history = new NativePointerTouchInfo[count];
-                    var capacity = count;
+                    var requested = LimitHistoryEntries(messageKind, count);
+                    var history = new NativePointerTouchInfo[requested];
+                    var capacity = requested;
                     if (GetPointerTouchInfoHistory(pointerId, ref capacity, history))
                     {
-                        historyComplete = true;
+                        historyComplete = capacity >= count;
                         error = 0;
                         return Trim(history, capacity);
                     }
@@ -453,6 +458,15 @@ namespace Ink_Canvas.Ink.Native
             if (error == 0)
                 error = Marshal.GetLastWin32Error();
             throw new Win32Exception(error, $"Unable to copy pointer touch data for pointer {pointerId}.");
+        }
+
+        private static uint LimitHistoryEntries(
+            NativePointerMessageKind messageKind,
+            uint availableCount)
+        {
+            if (messageKind != NativePointerMessageKind.Update)
+                return availableCount;
+            return Math.Min(availableCount, (uint)MaximumUpdateHistoryEntries);
         }
 
         private static NativePointerPenInfo[] Trim(NativePointerPenInfo[] source, uint count)

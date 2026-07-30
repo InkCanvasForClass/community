@@ -502,6 +502,8 @@ namespace Ink_Canvas
         /// 墨迹选择克隆集合
         /// </summary>
         private StrokeCollection StrokesSelectionClone = new StrokeCollection();
+        private bool _isSelectionCoverStylusDragging;
+        private int _selectionCoverStylusDeviceId = -1;
 
         // 选择框和选择点相关变量
         /// <summary>
@@ -639,6 +641,116 @@ namespace Ink_Canvas
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
             }
+        }
+
+        private bool TryStartSelectionCoverDrag(Point pointInCanvas)
+        {
+            if (inkCanvas.GetSelectedStrokes().Count == 0)
+                return false;
+
+            var selectionBounds = inkCanvas.GetSelectionBounds();
+            if (pointInCanvas.X >= selectionBounds.Left &&
+                pointInCanvas.X <= selectionBounds.Right &&
+                pointInCanvas.Y >= selectionBounds.Top &&
+                pointInCanvas.Y <= selectionBounds.Bottom)
+            {
+                isStrokeDragging = true;
+                strokeDragStartPoint = pointInCanvas;
+                return true;
+            }
+
+            inkCanvas.Select(new StrokeCollection());
+            GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+            return false;
+        }
+
+        private void DragSelectedStrokesTo(Point currentPoint)
+        {
+            var delta = currentPoint - strokeDragStartPoint;
+            if (Math.Abs(delta.X) < double.Epsilon && Math.Abs(delta.Y) < double.Epsilon)
+                return;
+
+            var matrix = new Matrix();
+            matrix.Translate(delta.X, delta.Y);
+
+            foreach (var stroke in inkCanvas.GetSelectedStrokes())
+            {
+                stroke.Transform(matrix, false);
+            }
+
+            updateBorderStrokeSelectionControlLocation();
+            strokeDragStartPoint = currentPoint;
+        }
+
+        private void EndSelectionCoverStylusDrag()
+        {
+            _isSelectionCoverStylusDragging = false;
+            _selectionCoverStylusDeviceId = -1;
+            isStrokeDragging = false;
+            strokeDragStartPoint = new Point(0, 0);
+        }
+
+        private void GridInkCanvasSelectionCover_StylusDown(object sender, StylusDownEventArgs e)
+        {
+            if (IsTouchStylusDevice(e.StylusDevice))
+                return;
+
+            if (TryBlockFrozenPageMutation("移动墨迹"))
+            {
+                e.Handled = true;
+                return;
+            }
+
+            var pointInCanvas = e.GetPosition(inkCanvas);
+            if (!TryStartSelectionCoverDrag(pointInCanvas))
+            {
+                e.Handled = true;
+                return;
+            }
+
+            _isSelectionCoverStylusDragging = true;
+            _selectionCoverStylusDeviceId = e.StylusDevice.Id;
+            GridInkCanvasSelectionCover.CaptureStylus();
+            GridInkCanvasSelectionCover.Cursor = Cursors.SizeAll;
+            e.Handled = true;
+        }
+
+        private void GridInkCanvasSelectionCover_StylusMove(object sender, StylusEventArgs e)
+        {
+            if (IsTouchStylusDevice(e.StylusDevice))
+                return;
+
+            if (!_isSelectionCoverStylusDragging || _selectionCoverStylusDeviceId != e.StylusDevice.Id)
+                return;
+
+            if (TryBlockFrozenPageMutation("移动墨迹"))
+            {
+                e.Handled = true;
+                return;
+            }
+
+            DragSelectedStrokesTo(e.GetPosition(inkCanvas));
+            e.Handled = true;
+        }
+
+        private void GridInkCanvasSelectionCover_StylusUp(object sender, StylusEventArgs e)
+        {
+            if (IsTouchStylusDevice(e.StylusDevice))
+                return;
+
+            if (_selectionCoverStylusDeviceId != e.StylusDevice.Id)
+                return;
+
+            GridInkCanvasSelectionCover.ReleaseStylusCapture();
+            GridInkCanvasSelectionCover.Cursor = Cursors.Arrow;
+            EndSelectionCoverStylusDrag();
+
+            if (inkCanvas.GetSelectedStrokes().Count == 0)
+            {
+                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+            }
+
+            e.Handled = true;
         }
 
         /// <summary>
