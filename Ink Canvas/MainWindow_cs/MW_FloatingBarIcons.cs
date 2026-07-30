@@ -886,6 +886,11 @@ namespace Ink_Canvas
         private bool isDisplayingOrHidingBlackboard;
 
         /// <summary>
+        /// 进入白板后的程序性切笔是否需要抑制一次笔设置弹窗。
+        /// </summary>
+        private bool suppressNextPenPaletteOpen;
+
+        /// <summary>
         /// 白板按钮点击事件处理
         /// </summary>
         /// <param name="sender">发送者</param>
@@ -1072,7 +1077,12 @@ namespace Ink_Canvas
                         Application.Current.Dispatcher.Invoke(() => { ViewboxFloatingBarMarginAnimation(60); });
                     }).Start();
 
-                if (GetSelectionBGLeft() != 28) PenIcon_Click(null, null);
+                if (GetSelectionBGLeft() != 28)
+                {
+                    // 退出白板是程序内部的状态同步，不应触发笔设置弹窗。
+                    suppressNextPenPaletteOpen = true;
+                    PenIcon_Click(null, null);
+                }
 
                 StopChickenSoupAutoRotation();
                 WaterMarkTime.Visibility = Visibility.Collapsed;
@@ -1141,10 +1151,11 @@ namespace Ink_Canvas
                 // 进入白板模式时显式切换到笔模式：SwitchBackground 不会更新 _currentToolMode，
                 // 导致原生湿墨迹管线 ResolveLogicalInkTool() 返回 Cursor 而非 Pen，
                 // 笔输入被当光标处理（route=PassThrough），UI 显示笔但无法绘制。
-                // PenIcon_Click 会正确设置 _currentToolMode="pen" 并触发管线路由到 Ink 路径。
+                // 这里需要复用 PenIcon_Click 的完整切笔逻辑，但应避免被误判为"再次点击笔"而弹出笔设置面板。
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink
                     && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
                 {
+                    suppressNextPenPaletteOpen = true;
                     PenIcon_Click(null, null);
                 }
             }
@@ -3723,6 +3734,11 @@ namespace Ink_Canvas
                     {
                         AnimationsHelper.HidePopupWithSlideAndFade(PenPalette);
                         AnimationsHelper.HidePopupWithSlideAndFade(BoardPenPalette);
+                    }
+                    else if (suppressNextPenPaletteOpen)
+                    {
+                        suppressNextPenPaletteOpen = false;
+                        HideSubPanels("pen", true);
                     }
                     else
                     {
