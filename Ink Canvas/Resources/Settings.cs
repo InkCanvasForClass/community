@@ -363,7 +363,7 @@ namespace Ink_Canvas
         [JsonProperty("eraserType")]
         public int EraserType { get; set; } // 0 - 图标切换模式      1 - 面积擦     2 - 线条擦
         [JsonProperty("eraserShapeType")]
-        public int EraserShapeType { get; set; } // 0 - 圆形擦  1 - 黑板擦
+        public int EraserShapeType { get; set; } = 1; // 0 - 圆形擦  1 - 黑板擦（默认）
         [JsonProperty("hideStrokeWhenSelecting")]
         public bool HideStrokeWhenSelecting { get; set; } = true;
         [JsonProperty("fitToCurve")]
