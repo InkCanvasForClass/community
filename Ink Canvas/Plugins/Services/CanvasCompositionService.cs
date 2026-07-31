@@ -66,30 +66,61 @@ namespace Ink_Canvas.Plugins
             var pages = await _mainWindow.GetPluginExportPagesAsync(pageIndex, cancellationToken)
                 .ConfigureAwait(false);
 
+            // 逐页「合成 + 编码」彼此独立，可并行；PdfSharp 组装必须串行且按页序，
+            // 因此先并行产出各页字节，再按序写入文档。
+            // 并行度取 CPU-1（至少 2、最多 4）：合成会短暂回到 UI 线程取状态，
+            // 放太开反而加剧 UI 线程争用，且每页位图占内存不小。
+            var parallelism = Math.Max(2, Math.Min(4, Environment.ProcessorCount - 1));
+            var encoded = new byte[pages.Count][];
+            var sizes = new (double Width, double Height)[pages.Count];
+
+            using (var throttle = new SemaphoreSlim(parallelism, parallelism))
+            {
+                var tasks = new Task[pages.Count];
+                for (var i = 0; i < pages.Count; i++)
+                {
+                    var index = i;
+                    var page = pages[index];
+                    tasks[index] = Task.Run(async () =>
+                    {
+                        await throttle.WaitAsync(cancellationToken).ConfigureAwait(false);
+                        try
+                        {
+                            var render = await _mainWindow.RenderPluginPageAsync(page, cancellationToken)
+                                .ConfigureAwait(false);
+                            if (render?.Bitmap == null)
+                            {
+                                LogHelper.WriteLogToFile($"导出时第 {page} 页合成失败，已跳过。", LogHelper.LogType.Warning);
+                                return;
+                            }
+
+                            encoded[index] = EncodePage(render.Bitmap);
+                            sizes[index] = (render.WidthDip, render.HeightDip);
+                        }
+                        finally
+                        {
+                            throttle.Release();
+                        }
+                    }, cancellationToken);
+                }
+
+                await Task.WhenAll(tasks).ConfigureAwait(false);
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
             using (var document = new PdfDocument())
             {
-                foreach (var page in pages)
+                for (var i = 0; i < pages.Count; i++)
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    var render = await _mainWindow.RenderPluginPageAsync(page, cancellationToken)
-                        .ConfigureAwait(false);
-                    if (render?.Bitmap == null)
-                    {
-                        LogHelper.WriteLogToFile($"导出时第 {page} 页合成失败，已跳过。", LogHelper.LogType.Warning);
-                        continue;
-                    }
-
-                    // 编码是 CPU 密集的（PNG deflate 尤其慢），放到线程池，别占着 UI 线程。
-                    var bytes = await Task.Run(() => EncodePage(render.Bitmap), cancellationToken)
-                        .ConfigureAwait(false);
+                    var bytes = encoded[i];
                     if (bytes == null || bytes.Length == 0)
                     {
-                        LogHelper.WriteLogToFile($"导出时第 {page} 页编码失败，已跳过。", LogHelper.LogType.Warning);
+                        LogHelper.WriteLogToFile($"导出时第 {pages[i]} 页编码失败，已跳过。", LogHelper.LogType.Warning);
                         continue;
                     }
 
-                    AppendPage(document, bytes, render.WidthDip, render.HeightDip);
+                    AppendPage(document, bytes, sizes[i].Width, sizes[i].Height);
                 }
 
                 if (document.PageCount == 0)
