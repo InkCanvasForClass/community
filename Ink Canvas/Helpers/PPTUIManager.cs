@@ -240,8 +240,13 @@ namespace Ink_Canvas.Helpers
                 {
                     // 检查是否应该显示PPT按钮
                     // 不仅要检查按钮设置，还要确保确实在PPT放映模式下且页数有效
-                    bool isInSlideShow = _mainWindow.PPTManager?.IsInSlideShow == true;
-                    int slidesCount = _mainWindow.PPTManager?.SlidesCount ?? 0;
+                    // 放映来源有两种：真实 PowerPoint，或插件注册的外部演示源（PDF 等）。
+                    // 外部演示源没有 PPTManager 会话，页数由它自己声明，不能用 PPTManager 判断。
+                    bool isExternal = _mainWindow.IsExternalPresentationActive;
+                    bool isInSlideShow = isExternal || _mainWindow.PPTManager?.IsInSlideShow == true;
+                    int slidesCount = isExternal
+                        ? _mainWindow.ExternalPresentationPageCount
+                        : (_mainWindow.PPTManager?.SlidesCount ?? 0);
                     bool hasValidPageCount = slidesCount > 0;
 
                     bool shouldShowButtons = ShowPPTButton &&
