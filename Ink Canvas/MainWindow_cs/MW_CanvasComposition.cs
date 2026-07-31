@@ -48,6 +48,15 @@ namespace Ink_Canvas
         private Func<uint, CancellationToken, Task<BitmapSource>> _pluginPageRenderer;
 
         /// <summary>
+        /// 连续滚动模式下的滚动偏移（DIP，长条内容向上滚为正）。
+        /// 墨迹以「长条坐标」存取（含页偏移），滚动时宿主实时平移画布墨迹保持对齐。
+        /// </summary>
+        private double _pluginScrollOffsetY;
+
+        /// <summary>累计的墨迹平移量，用于消除增量平移的浮点累积误差。</summary>
+        private double _pluginInkTranslateY;
+
+        /// <summary>
         /// 当前可见页列表（页索引 + 内容矩形）。空 = 单页模式（用 <see cref="SetPluginCurrentPageAsync"/>）。
         /// 双页模式一次显示两页，墨迹按矩形切分到各物理页。
         /// </summary>
@@ -114,6 +123,8 @@ namespace Ink_Canvas
                 _pluginPageRenderer = null;
                 _pluginPageContentRect = null;
                 _pluginVisiblePages.Clear();
+                _pluginScrollOffsetY = 0;
+                _pluginInkTranslateY = 0;
 
                 // 背景层被移除（外部演示源关闭）后，画布上残留的墨迹也随之清空：
                 // 那些笔迹是画在 PDF 页面上的，桌面模式下继续显示会造成"墨迹飘在空画布上"。
@@ -260,6 +271,44 @@ namespace Ink_Canvas
                     " 各页条数=[" + string.Join(",", _pluginVisiblePages.Select(p =>
                         (p.PageIndex) + ":" + (_pluginPageInk.TryGetValue(p.PageIndex, out var ink) ? ink.Count : -1))) + "]",
                     LogHelper.LogType.Info);
+            });
+        }
+
+        /// <summary>
+        /// 连续滚动：把当前画布墨迹整体平移 <paramref name="deltaY"/>（DIP），与背景长条滚动保持一致。
+        /// 用绝对偏移消除增量平移的浮点累积误差。
+        /// </summary>
+        internal Task ScrollPluginOffsetAsync(double deltaY, CancellationToken cancellationToken)
+        {
+            return RunOnUiThreadAsync(() =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (inkCanvas == null || deltaY == 0) return;
+
+                // 更新绝对偏移。
+                _pluginScrollOffsetY += deltaY;
+
+                // 墨迹当前在「绝对长条坐标」下的偏移，减去新滚动偏移得到需平移量。
+                double targetInkOffset = -_pluginScrollOffsetY;
+                double shift = targetInkOffset - _pluginInkTranslateY;
+                if (shift == 0) return;
+
+                var matrix = new Matrix(1, 0, 0, 1, 0, shift);
+
+                var previousCommitType = _currentCommitType;
+                _currentCommitType = CommitReason.CodeInput;
+                try
+                {
+                    foreach (Stroke stroke in inkCanvas.Strokes)
+                        stroke.Transform(matrix, false);
+                }
+                finally
+                {
+                    _currentCommitType = previousCommitType;
+                }
+
+                _pluginInkTranslateY = targetInkOffset;
             });
         }
 

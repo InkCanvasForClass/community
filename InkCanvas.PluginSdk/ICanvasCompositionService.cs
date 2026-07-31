@@ -83,6 +83,12 @@ namespace Ink_Canvas.Plugins
             CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// 连续滚动：把当前画布墨迹整体平移 <paramref name="deltaY"/>（DIP），
+        /// 与插件背景长条的滚动保持一致。插件应在滚动背景层后立即调用，使墨迹实时跟随。
+        /// </summary>
+        Task ScrollOffsetAsync(double deltaY, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// 读取指定页的墨迹副本，坐标已绑定到背景层页面坐标系
         /// （原点为背景元素左上角，单位为设备无关像素，与 <see cref="FrameworkElement.ActualWidth"/> 同尺度）。
         /// 该页没有墨迹时返回空集合。
