@@ -76,6 +76,9 @@ namespace Ink_Canvas.Plugins.Services
                 _mainWindow.ArePPTControlsVisible = true;
                 _mainWindow.UpdateToolbarComponentVisibility();
 
+                // 浮动栏像真实 PPT 放映一样重新定位（居中、缩进）。
+                _mainWindow.UpdateToolbarPosition();
+
                 _mainWindow.PPTUIManager?.UpdateSlideShowStatus(
                     isInSlideShow: true,
                     currentSlide: CurrentPage,
@@ -136,6 +139,9 @@ namespace Ink_Canvas.Plugins.Services
             _mainWindow.PPTUIManager?.HideAllNavigationPanels();
             _mainWindow.UpdatePPTTimeCapsuleVisibility();
             _mainWindow.UpdatePPTQuickPanelVisibility();
+
+            // 浮动栏恢复到桌面模式的定位。
+            _mainWindow.UpdateToolbarPosition();
 
             LogHelper.WriteLogToFile(
                 $"外部演示源 [{activeId}] 已结束。",

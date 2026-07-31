@@ -98,6 +98,20 @@ namespace Ink_Canvas
                 _pluginCurrentPageIndex = 0;
                 _pluginPageRenderer = null;
                 _pluginPageContentRect = null;
+
+                // 背景层被移除（外部演示源关闭）后，画布上残留的墨迹也随之清空：
+                // 那些笔迹是画在 PDF 页面上的，桌面模式下继续显示会造成"墨迹飘在空画布上"。
+                // 用 CodeInput 提交类型，避免污染时间机器历史。
+                var previousCommitType = _currentCommitType;
+                _currentCommitType = CommitReason.CodeInput;
+                try
+                {
+                    inkCanvas?.Strokes.Clear();
+                }
+                finally
+                {
+                    _currentCommitType = previousCommitType;
+                }
             });
         }
 
