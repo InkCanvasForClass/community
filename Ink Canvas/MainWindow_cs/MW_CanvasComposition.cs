@@ -322,11 +322,6 @@ namespace Ink_Canvas
             });
         }
 
-        /// <summary>把指定页的「背景 + 墨迹」合成为一张 PNG。</summary>
-        internal async Task<PluginPageRender> RenderPluginPageAsync(uint pageIndex, CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
         /// <summary>把指定页的「背景 + 墨迹」合成为一张位图。</summary>
         internal async Task<PluginPageRender> RenderPluginPageAsync(uint pageIndex, CancellationToken cancellationToken)
         {
