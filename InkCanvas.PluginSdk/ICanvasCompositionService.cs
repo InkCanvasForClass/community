@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -69,6 +70,19 @@ namespace Ink_Canvas.Plugins
         Task SetCurrentPageAsync(uint pageIndex, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// 以「多可见页」方式切换背景层内容（双页等）。宿主会：
+        /// <list type="number">
+        /// <item>把画布墨迹按 <c>ContentRect</c> 逐个裁剪，存入对应 <c>PageIndex</c>；</item>
+        /// <item>清空画布；</item>
+        /// <item>把新可见页各自的墨迹恢复到画布。</item>
+        /// </list>
+        /// 与 <see cref="SetCurrentPageAsync"/> 的区别：一次显示多页时，墨迹必须按矩形切分到各物理页，
+        /// 否则左右页笔迹会混进同一个页索引。列表里的页索引需按从 0 开始、升序给出。
+        /// </summary>
+        Task SetVisiblePagesAsync(IReadOnlyList<PluginVisiblePage> visiblePages,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// 读取指定页的墨迹副本，坐标已绑定到背景层页面坐标系
         /// （原点为背景元素左上角，单位为设备无关像素，与 <see cref="FrameworkElement.ActualWidth"/> 同尺度）。
         /// 该页没有墨迹时返回空集合。
@@ -82,5 +96,18 @@ namespace Ink_Canvas.Plugins
         /// <param name="outputPath">输出 PDF 路径；所在目录不存在时会被创建。</param>
         /// <param name="pageIndex">起始页索引（从 0 开始）。</param>
         Task<string> ExportWithInkAsync(string outputPath, uint pageIndex, CancellationToken cancellationToken = default);
+    }
+
+    /// <summary>
+    /// 一个可见页：页索引 + 该页在背景层内占据的矩形（背景元素坐标系，DIP）。
+    /// 供 <see cref="ICanvasCompositionService.SetVisiblePagesAsync"/> 使用。
+    /// </summary>
+    public struct PluginVisiblePage
+    {
+        /// <summary>物理页索引（从 0 开始）。</summary>
+        public uint PageIndex { get; set; }
+
+        /// <summary>该页在背景层内占据的矩形；用于墨迹按矩形切分。</summary>
+        public Rect ContentRect { get; set; }
     }
 }

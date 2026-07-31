@@ -2,6 +2,7 @@ using Ink_Canvas.Helpers;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -48,6 +49,10 @@ namespace Ink_Canvas.Plugins
 
         public Task SetCurrentPageAsync(uint pageIndex, CancellationToken cancellationToken = default)
             => _mainWindow.SetPluginCurrentPageAsync(pageIndex, cancellationToken);
+
+        public Task SetVisiblePagesAsync(IReadOnlyList<PluginVisiblePage> visiblePages,
+            CancellationToken cancellationToken = default)
+            => _mainWindow.SetPluginVisiblePagesAsync(visiblePages, cancellationToken);
 
         public Task<StrokeCollection> GetStrokesForPageAsync(uint pageIndex,
             CancellationToken cancellationToken = default)
