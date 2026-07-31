@@ -51,7 +51,7 @@ namespace Ink_Canvas
             {
                 foreach (int index in Enumerable.Range(1, WhiteboardTotalCount))
                 {
-                    var st = ApplyHistoriesToNewStrokeCollection(TimeMachineHistories[index]);
+                    var st = ApplyHistoriesToNewStrokeCollection(TimeMachineHistories[index], true);
                     st.Clip(new Rect(0, 0, (int)inkCanvas.ActualWidth, (int)inkCanvas.ActualHeight));
                     var pitem = new PageListViewItem
                     {
@@ -66,7 +66,7 @@ namespace Ink_Canvas
                 blackBoardSidePageListViewObservableCollection.Clear();
                 foreach (int index in Enumerable.Range(1, WhiteboardTotalCount))
                 {
-                    var st = ApplyHistoriesToNewStrokeCollection(TimeMachineHistories[index]);
+                    var st = ApplyHistoriesToNewStrokeCollection(TimeMachineHistories[index], true);
                     st.Clip(new Rect(0, 0, (int)inkCanvas.ActualWidth, (int)inkCanvas.ActualHeight));
                     var pitem = new PageListViewItem
                     {
@@ -78,6 +78,9 @@ namespace Ink_Canvas
             }
 
             var _st = inkCanvas.Strokes.Clone();
+            _st.Add(_mathStrokeRenderer.Render(
+                MathCanvas.Scene,
+                Settings.Canvas.MathShowMeasurements));
             _st.Clip(new Rect(0, 0, (int)inkCanvas.ActualWidth, (int)inkCanvas.ActualHeight));
             var _pitem = new PageListViewItem
             {

@@ -384,4 +384,68 @@
   <data name="Shape_RemoveAsymptote" xml:space="preserve">
     <value>是否移除渐近线？</value>
   </data>
+  <data name="Canvas_EnableMathCanvas" xml:space="preserve">
+    <value>启用数学画布</value>
+  </data>
+  <data name="Canvas_EnableMathCanvasHint" xml:space="preserve">
+    <value>允许插入和编辑结构化几何、函数与立体对象；关闭后不影响原有笔迹功能。</value>
+  </data>
+  <data name="Canvas_MathDefaultStrokeWidth" xml:space="preserve">
+    <value>数学对象默认线宽</value>
+  </data>
+  <data name="Canvas_MathSnapEnabled" xml:space="preserve">
+    <value>启用数学对象吸附</value>
+  </data>
+  <data name="Canvas_MathSnapEnabledHint" xml:space="preserve">
+    <value>插入时吸附到端点、中点、圆心和交点。</value>
+  </data>
+  <data name="Canvas_MathSnapTolerance" xml:space="preserve">
+    <value>数学吸附距离</value>
+  </data>
+  <data name="Canvas_MathShowMeasurements" xml:space="preserve">
+    <value>显示数学测量标注</value>
+  </data>
+  <data name="Canvas_MathShowMeasurementsHint" xml:space="preserve">
+    <value>显示点坐标、线段长度、圆半径和角度。</value>
+  </data>
+  <data name="Canvas_MathShowGrid" xml:space="preserve">
+    <value>新坐标系显示网格</value>
+  </data>
+  <data name="Canvas_MathShowGridHint" xml:space="preserve">
+    <value>插入新坐标系时，默认在其范围内显示等距网格。</value>
+  </data>
+  <data name="Canvas_MathShowAxes" xml:space="preserve">
+    <value>新坐标系显示坐标轴</value>
+  </data>
+  <data name="Canvas_MathShowAxesHint" xml:space="preserve">
+    <value>插入新坐标系时，默认显示经过对象中心的横轴和纵轴。</value>
+  </data>
+  <data name="Canvas_MathGridSpacing" xml:space="preserve">
+    <value>新坐标系网格间距</value>
+  </data>
+  <data name="Canvas_MathConstraintsEnabled" xml:space="preserve">
+    <value>启用数学约束</value>
+  </data>
+  <data name="Canvas_MathConstraintsEnabledHint" xml:space="preserve">
+    <value>允许创建并在编辑时维护共线、水平、垂直、等长和点归属约束。</value>
+  </data>
+  <data name="Canvas_MathFunctionScale" xml:space="preserve"><value>函数图像默认缩放</value></data>
+  <data name="Canvas_MathFunctionSampleQuality" xml:space="preserve"><value>函数采样质量</value></data>
+  <data name="Canvas_MathFunctionShowMarkers" xml:space="preserve"><value>显示函数特征点</value></data>
+  <data name="Canvas_MathFunctionShowMarkersHint" xml:space="preserve"><value>为新函数显示零点与基础极值标记。</value></data>
+  <data name="Canvas_MathSolidDefaultView" xml:space="preserve"><value>新立体默认视图</value></data>
+  <data name="Canvas_MathSolidDefaultViewHint" xml:space="preserve"><value>仅影响之后插入的立体，不会改动已有数学场景。</value></data>
+  <data name="Canvas_MathSolidViewProjection" xml:space="preserve"><value>投影视图</value></data>
+  <data name="Canvas_MathSolidViewFront" xml:space="preserve"><value>正视图</value></data>
+  <data name="Canvas_MathSolidPerspective" xml:space="preserve"><value>立体使用透视投影</value></data>
+  <data name="Canvas_MathSolidPerspectiveHint" xml:space="preserve"><value>关闭后，新立体使用正交投影。</value></data>
+  <data name="Canvas_MathSolidShowHiddenEdges" xml:space="preserve"><value>显示立体隐藏棱</value></data>
+  <data name="Canvas_MathSolidShowHiddenEdgesHint" xml:space="preserve"><value>用虚线显示位于背面的棱。</value></data>
+  <data name="Canvas_MathSolidShowLabels" xml:space="preserve"><value>显示立体测量标注</value></data>
+  <data name="Canvas_MathSolidShowLabelsHint" xml:space="preserve"><value>显示体积与可计算的表面积。</value></data>
+  <data name="Canvas_MathSolidShowAxes" xml:space="preserve"><value>新立体显示三维坐标轴</value></data>
+  <data name="Canvas_MathSolidShowAxesHint" xml:space="preserve"><value>为新立体显示带正方向的 X、Y、Z 轴。</value></data>
+  <data name="Canvas_MathSolidRenderQuality" xml:space="preserve"><value>立体渲染质量</value></data>
+  <data name="Canvas_MathSolidScale" xml:space="preserve"><value>立体默认缩放</value></data>
+  <data name="Canvas_MathGroupTitle" xml:space="preserve"><value>数学画布</value></data>
 </root>

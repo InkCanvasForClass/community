@@ -414,6 +414,7 @@ namespace Ink_Canvas
                 _popupManager.RegisterPopup(BoardBorderToolsPopup);
                 _popupManager.RegisterPopup(BorderDrawShape);
                 _popupManager.RegisterPopup(BoardBorderDrawShape);
+                _popupManager.RegisterPopup(BoardMathInsertPopup);
                 _popupManager.RegisterPopup(PenPalette);
                 _popupManager.RegisterPopup(BoardPenPalette);
                 _popupManager.RegisterPopup(EraserSizePanel);
@@ -509,6 +510,7 @@ namespace Ink_Canvas
         /// </summary>
         private void HideSubPanelsImmediately()
         {
+            CancelMathInsertMode();
             BorderTools.IsOpen = false;
             BoardBorderToolsPopup.IsOpen = false;
             PenPalette.IsOpen = false;
@@ -526,6 +528,8 @@ namespace Ink_Canvas
             // 添加隐藏图形工具的二级菜单面板
             BorderDrawShape.IsOpen = false;
             BoardBorderDrawShape.IsOpen = false;
+            BoardMathInsertPopup.IsOpen = false;
+            CloseMathObjectActionsPopup();
 
             BackgroundPalette.IsOpen = false;
             BoothPopup.IsOpen = false;
@@ -592,6 +596,7 @@ namespace Ink_Canvas
         /// </param>
         internal async void HideSubPanels(string mode = null, bool autoAlignCenter = false)
         {
+            CancelMathInsertMode();
             mode = NormalizeToolModeForFreeze(mode);
 
             var boardPen = FindView("board.pen") as BoardToolbarButton;
@@ -616,6 +621,10 @@ namespace Ink_Canvas
             AnimationsHelper.HidePopupWithSlideAndFade(EraserSizePanel);
             AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderDrawShape);
+            // Math popup can be reopened immediately for text input. Closing it
+            // synchronously avoids an older animation completion closing the new popup.
+            BoardMathInsertPopup.IsOpen = false;
+            CloseMathObjectActionsPopup();
             var leftBorderAnim = FindView("board.pageList.leftBorder") as Border;
             var rightBorderAnim = FindView("board.pageList.rightBorder") as Border;
             if (leftBorderAnim != null) AnimationsHelper.HideWithSlideAndFade(leftBorderAnim);
@@ -1204,6 +1213,10 @@ namespace Ink_Canvas
                         CaptureAndEnqueueScreenshotSave(true);
                 }
 
+                BtnClear_Click(null, null);
+            }
+            else if (HasMathObjectsOnCurrentPage())
+            {
                 BtnClear_Click(null, null);
             }
         }
@@ -4537,6 +4550,7 @@ namespace Ink_Canvas
             }
 
             ClearStrokes(false);
+            ClearMathSceneForUserClear();
             // 保存非笔画元素（如图片）
             var preservedElements = PreserveNonStrokeElements();
             inkCanvas.Children.Clear();
@@ -4977,6 +4991,8 @@ namespace Ink_Canvas
                     ViewboxFloatingBar.Visibility = Visibility.Visible;
                 }
             }
+
+            ApplyMathSettings();
         }
 
         private void BtnSwitchSide_Click(object sender, RoutedEventArgs e)

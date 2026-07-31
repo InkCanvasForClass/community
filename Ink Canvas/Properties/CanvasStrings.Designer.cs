@@ -92,6 +92,74 @@ namespace Ink_Canvas.Properties
 
         public static string Canvas_EnableNativeInkPredictionHint => ResourceManager.GetString(nameof(Canvas_EnableNativeInkPredictionHint), _resourceCulture);
 
+        public static string Canvas_EnableMathCanvas => ResourceManager.GetString(nameof(Canvas_EnableMathCanvas), _resourceCulture);
+
+        public static string Canvas_EnableMathCanvasHint => ResourceManager.GetString(nameof(Canvas_EnableMathCanvasHint), _resourceCulture);
+
+        public static string Canvas_MathDefaultStrokeWidth => ResourceManager.GetString(nameof(Canvas_MathDefaultStrokeWidth), _resourceCulture);
+
+        public static string Canvas_MathSnapEnabled => ResourceManager.GetString(nameof(Canvas_MathSnapEnabled), _resourceCulture);
+
+        public static string Canvas_MathSnapEnabledHint => ResourceManager.GetString(nameof(Canvas_MathSnapEnabledHint), _resourceCulture);
+
+        public static string Canvas_MathSnapTolerance => ResourceManager.GetString(nameof(Canvas_MathSnapTolerance), _resourceCulture);
+
+        public static string Canvas_MathShowMeasurements => ResourceManager.GetString(nameof(Canvas_MathShowMeasurements), _resourceCulture);
+
+        public static string Canvas_MathShowMeasurementsHint => ResourceManager.GetString(nameof(Canvas_MathShowMeasurementsHint), _resourceCulture);
+
+        public static string Canvas_MathShowGrid => ResourceManager.GetString(nameof(Canvas_MathShowGrid), _resourceCulture);
+
+        public static string Canvas_MathShowGridHint => ResourceManager.GetString(nameof(Canvas_MathShowGridHint), _resourceCulture);
+
+        public static string Canvas_MathShowAxes => ResourceManager.GetString(nameof(Canvas_MathShowAxes), _resourceCulture);
+
+        public static string Canvas_MathShowAxesHint => ResourceManager.GetString(nameof(Canvas_MathShowAxesHint), _resourceCulture);
+
+        public static string Canvas_MathGridSpacing => ResourceManager.GetString(nameof(Canvas_MathGridSpacing), _resourceCulture);
+
+        public static string Canvas_MathConstraintsEnabled => ResourceManager.GetString(nameof(Canvas_MathConstraintsEnabled), _resourceCulture);
+
+        public static string Canvas_MathConstraintsEnabledHint => ResourceManager.GetString(nameof(Canvas_MathConstraintsEnabledHint), _resourceCulture);
+
+        public static string Canvas_MathFunctionScale => ResourceManager.GetString(nameof(Canvas_MathFunctionScale), _resourceCulture);
+
+        public static string Canvas_MathFunctionSampleQuality => ResourceManager.GetString(nameof(Canvas_MathFunctionSampleQuality), _resourceCulture);
+
+        public static string Canvas_MathFunctionShowMarkers => ResourceManager.GetString(nameof(Canvas_MathFunctionShowMarkers), _resourceCulture);
+
+        public static string Canvas_MathFunctionShowMarkersHint => ResourceManager.GetString(nameof(Canvas_MathFunctionShowMarkersHint), _resourceCulture);
+
+        public static string Canvas_MathSolidDefaultView => ResourceManager.GetString(nameof(Canvas_MathSolidDefaultView), _resourceCulture);
+
+        public static string Canvas_MathSolidDefaultViewHint => ResourceManager.GetString(nameof(Canvas_MathSolidDefaultViewHint), _resourceCulture);
+
+        public static string Canvas_MathSolidViewProjection => ResourceManager.GetString(nameof(Canvas_MathSolidViewProjection), _resourceCulture);
+
+        public static string Canvas_MathSolidViewFront => ResourceManager.GetString(nameof(Canvas_MathSolidViewFront), _resourceCulture);
+
+        public static string Canvas_MathSolidPerspective => ResourceManager.GetString(nameof(Canvas_MathSolidPerspective), _resourceCulture);
+
+        public static string Canvas_MathSolidPerspectiveHint => ResourceManager.GetString(nameof(Canvas_MathSolidPerspectiveHint), _resourceCulture);
+
+        public static string Canvas_MathSolidShowHiddenEdges => ResourceManager.GetString(nameof(Canvas_MathSolidShowHiddenEdges), _resourceCulture);
+
+        public static string Canvas_MathSolidShowHiddenEdgesHint => ResourceManager.GetString(nameof(Canvas_MathSolidShowHiddenEdgesHint), _resourceCulture);
+
+        public static string Canvas_MathSolidShowLabels => ResourceManager.GetString(nameof(Canvas_MathSolidShowLabels), _resourceCulture);
+
+        public static string Canvas_MathSolidShowLabelsHint => ResourceManager.GetString(nameof(Canvas_MathSolidShowLabelsHint), _resourceCulture);
+
+        public static string Canvas_MathSolidShowAxes => ResourceManager.GetString(nameof(Canvas_MathSolidShowAxes), _resourceCulture);
+
+        public static string Canvas_MathSolidShowAxesHint => ResourceManager.GetString(nameof(Canvas_MathSolidShowAxesHint), _resourceCulture);
+
+        public static string Canvas_MathGroupTitle => ResourceManager.GetString(nameof(Canvas_MathGroupTitle), _resourceCulture);
+
+        public static string Canvas_MathSolidRenderQuality => ResourceManager.GetString(nameof(Canvas_MathSolidRenderQuality), _resourceCulture);
+
+        public static string Canvas_MathSolidScale => ResourceManager.GetString(nameof(Canvas_MathSolidScale), _resourceCulture);
+
         public static string Canvas_UseLegacyWetInk => ResourceManager.GetString(nameof(Canvas_UseLegacyWetInk), _resourceCulture);
 
         public static string Canvas_UseLegacyWetInkHint => ResourceManager.GetString(nameof(Canvas_UseLegacyWetInkHint), _resourceCulture);

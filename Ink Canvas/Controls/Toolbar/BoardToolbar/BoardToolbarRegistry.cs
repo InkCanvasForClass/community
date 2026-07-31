@@ -212,6 +212,8 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                     LogHelper.WriteLogToFile($"BoardToolbarRegistry: 配置 [{name}] 内容为空或无效", LogHelper.LogType.Warning);
                     return null;
                 }
+                if (layout.EnsureCurrentVersion())
+                    SaveConfigFile(name, layout);
                 return layout;
             }
             catch (Exception ex)

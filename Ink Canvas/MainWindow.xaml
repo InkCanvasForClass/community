@@ -11,6 +11,7 @@
         xmlns:localControls="clr-namespace:Ink_Canvas.Controls"
         xmlns:Windows="clr-namespace:Ink_Canvas.Windows"
         xmlns:helpers="clr-namespace:Ink_Canvas.Helpers"
+        xmlns:mathRendering="clr-namespace:Ink_Canvas.Mathematics.Rendering"
         xmlns:wmk="clr-namespace:WPFMediaKit.DirectShow.Controls;assembly=WPFMediaKit"
         xmlns:icons="clr-namespace:Ink_Canvas"
         mc:Ignorable="d"
@@ -214,7 +215,20 @@
         <Grid Name="GridTransparencyFakeBackground" Opacity="0" />
         <Label Name="Label" Visibility="Collapsed" Foreground="Gray" Content="0" />
         <Grid Name="InkCanvasGridForInkReplay" d:Visibility="Collapsed">
+            <InkPresenter x:Name="MathInkPresenter"
+                       IsHitTestVisible="False"
+                       ClipToBounds="False"
+                       Panel.ZIndex="5" />
+            <InkPresenter x:Name="MathPreviewPresenter"
+                       IsHitTestVisible="False"
+                       ClipToBounds="False"
+                       Opacity="0.72"
+                       Panel.ZIndex="15" />
+            <Canvas x:Name="MathAnnotationOverlay"
+                    IsHitTestVisible="False"
+                    Panel.ZIndex="16" />
             <InkCanvas x:Name="inkCanvas" ForceCursor="True" UseCustomCursor="True"
+                       Panel.ZIndex="10"
                        TouchDown="Main_Grid_TouchDown"
                        TouchMove="inkCanvas_TouchMove"
                        ManipulationDelta="Main_Grid_ManipulationDelta"
@@ -233,6 +247,93 @@
                        StrokeCollected="inkCanvas_StrokeCollected" 
                        ClipToBounds="False" 
                        Background="Transparent" />
+
+            <mathRendering:MathCanvasControl x:Name="MathCanvas"
+                                             Visibility="Collapsed"
+                                             IsHitTestVisible="False"
+                                             Panel.ZIndex="10" />
+
+            <Canvas x:Name="MathInteractionOverlay"
+                    IsHitTestVisible="False"
+                    Panel.ZIndex="20">
+                <Rectangle x:Name="MathSelectionBounds"
+                           Visibility="Collapsed"
+                           Stroke="{DynamicResource FloatingBarAccentBrush}"
+                           StrokeThickness="2"
+                           StrokeDashArray="4,2"
+                           RadiusX="4"
+                           RadiusY="4" />
+                <Ellipse x:Name="MathSelectionRotateHandle"
+                         Visibility="Collapsed"
+                         Width="16"
+                         Height="16"
+                         Fill="{DynamicResource FloatingBarAccentBrush}"
+                         Stroke="White"
+                         StrokeThickness="2" />
+                <Rectangle x:Name="MathSelectionScaleHandle"
+                           Visibility="Collapsed"
+                           Width="14"
+                           Height="14"
+                           Fill="{DynamicResource FloatingBarAccentBrush}"
+                           Stroke="White"
+                           StrokeThickness="2" />
+                <Rectangle x:Name="MathSelectionVerticalScaleHandle"
+                           Visibility="Collapsed"
+                           Width="14"
+                           Height="14"
+                           Fill="{DynamicResource FloatingBarAccentBrush}"
+                           Stroke="White"
+                           StrokeThickness="2" />
+                <Ellipse x:Name="MathSnapIndicator"
+                         Visibility="Collapsed"
+                         Width="18"
+                         Height="18"
+                         Fill="#332563EB"
+                         Stroke="{DynamicResource FloatingBarAccentBrush}"
+                         StrokeThickness="2" />
+                <TextBlock x:Name="MathSnapIndicatorText"
+                           Visibility="Collapsed"
+                           Padding="5,2"
+                           Foreground="White"
+                           Background="#CC202020"
+                           FontSize="13" />
+                <Border x:Name="MathToolStatusBorder"
+                        Visibility="Collapsed"
+                        Canvas.Left="18"
+                        Canvas.Top="18"
+                        Padding="12,7"
+                        CornerRadius="6"
+                        Background="#D9202020"
+                        BorderBrush="{DynamicResource FloatingBarAccentBrush}"
+                        BorderThickness="1">
+                    <TextBlock x:Name="MathToolStatusText"
+                               Foreground="White"
+                               FontSize="15"
+                               FontWeight="SemiBold" />
+                </Border>
+            </Canvas>
+
+            <Canvas x:Name="MathObjectActionsLayer"
+                    Panel.ZIndex="30">
+                <Border x:Name="MathObjectActionsPopup"
+                        Visibility="Collapsed"
+                        Padding="6"
+                        CornerRadius="8"
+                        Background="{DynamicResource FloatingBarPopupBackgroundBrush}"
+                        BorderBrush="{DynamicResource FloatingBarAccentBrush}"
+                        BorderThickness="1">
+                    <StackPanel Orientation="Horizontal">
+                        <Button x:Name="MathObjectEditButton" Margin="2" Padding="9,5" />
+                        <Button x:Name="MathObjectMeasureButton" Margin="2" Padding="9,5" />
+                        <Button x:Name="MathObjectCircumsphereButton" Margin="2" Padding="9,5" />
+                        <Button x:Name="MathObjectInsphereButton" Margin="2" Padding="9,5" />
+                        <Button x:Name="MathObjectCircumcircleButton" Margin="2" Padding="9,5" />
+                        <Button x:Name="MathObjectIncircleButton" Margin="2" Padding="9,5" />
+                        <Button x:Name="MathObjectResetViewButton" Margin="2" Padding="9,5" />
+                        <Button x:Name="MathObjectDeleteButton" Margin="2" Padding="9,5" />
+                    </StackPanel>
+                </Border>
+            </Canvas>
 
             <Canvas x:Name="EraserOverlayCanvas" d:Visibility="Collapsed"
                     Background="Transparent"
@@ -789,6 +890,9 @@
                     <!--图形菜单-->
                     <Popup x:Name="BoardBorderDrawShape" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
                         <localControls:ShapeDrawPopupContent x:Name="BoardShapeDrawPopupContent" />
+                    </Popup>
+                    <Popup x:Name="BoardMathInsertPopup" Placement="Top" AllowsTransparency="True" StaysOpen="True" IsOpen="False">
+                        <localControls:MathInsertPopupContent x:Name="BoardMathInsertPopupContent" />
                     </Popup>
                     <!--插入图片菜单-->
                     <Popup x:Name="BoardImageOptionsPanel" Placement="Custom" AllowsTransparency="True" StaysOpen="True" IsOpen="False">

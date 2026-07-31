@@ -1,5 +1,7 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Mathematics.Persistence;
+using Ink_Canvas.Mathematics.Services;
 using Ink_Canvas.Properties;
 using System;
 using System.Collections.Generic;
@@ -17,6 +19,7 @@ namespace Ink_Canvas
         private bool _isBoardRoamingPointerDown;
         private Point _boardRoamingLastPoint;
         private Dictionary<Stroke, StylusPointCollection> _boardRoamingStrokeHistory;
+        private string _boardRoamingMathBeforeJson;
         private Rect _boardRoamingWorldBounds;
         private Point _boardRoamingViewportWorldPosition;
         private Rect _boardRoamingViewportInPreview;
@@ -81,6 +84,7 @@ namespace Ink_Canvas
             _boardRoamingStrokeHistory = new Dictionary<Stroke, StylusPointCollection>();
             foreach (var stroke in inkCanvas.Strokes)
                 _boardRoamingStrokeHistory[stroke] = stroke.StylusPoints.Clone();
+            _boardRoamingMathBeforeJson = MathSceneSerializer.Serialize(MathCanvas.Scene);
 
             inkCanvas.Cursor = Cursors.Hand;
         }
@@ -131,10 +135,16 @@ namespace Ink_Canvas
                     StrokeInitialHistory[item.Key] = item.Value.Item2;
             }
 
-            if (history.Count > 0 || inkCanvas.Children.Count > 0)
+            var mathChanged = !string.IsNullOrWhiteSpace(_boardRoamingMathBeforeJson) &&
+                              _boardRoamingMathBeforeJson != MathSceneSerializer.Serialize(MathCanvas.Scene);
+            if (mathChanged)
+                CommitMathSceneChange(_boardRoamingMathBeforeJson);
+
+            if (history.Count > 0 || mathChanged || inkCanvas.Children.Count > 0)
                 MarkCurrentPageInkChanged();
 
             _boardRoamingStrokeHistory = null;
+            _boardRoamingMathBeforeJson = null;
             _boardRoamingViewportWorldPosition = new Point();
         }
 
@@ -311,6 +321,7 @@ namespace Ink_Canvas
             _boardRoamingStrokeHistory = new Dictionary<Stroke, StylusPointCollection>();
             foreach (var stroke in inkCanvas.Strokes)
                 _boardRoamingStrokeHistory[stroke] = stroke.StylusPoints.Clone();
+            _boardRoamingMathBeforeJson = MathSceneSerializer.Serialize(MathCanvas.Scene);
         }
 
         private void EndBoardRoamingPopupDrag()
@@ -332,6 +343,10 @@ namespace Ink_Canvas
             {
                 foreach (var stroke in inkCanvas.Strokes)
                     stroke.Transform(matrix, false);
+                foreach (var mathObject in MathCanvas.Scene.Objects)
+                    MathGeometryService.Translate(mathObject, deltaX, deltaY);
+                MathReferenceService.Synchronize(MathCanvas.Scene);
+                RefreshMathScene();
                 TransformCanvasImages(matrix);
             }
             finally

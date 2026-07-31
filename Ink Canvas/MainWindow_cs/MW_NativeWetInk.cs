@@ -887,6 +887,10 @@ namespace Ink_Canvas
         {
             if (IsBoardRoamingMode)
                 return LogicalInkTool.BoardRoam;
+            if (_mathInsertMode != MathInsertMode.None ||
+                BoardMathInsertPopup?.IsOpen == true ||
+                MathObjectActionsPopup?.Visibility == Visibility.Visible)
+                return LogicalInkTool.Math;
             if (drawingShapeMode != 0
                 || string.Equals(_currentToolMode, "shape", StringComparison.OrdinalIgnoreCase))
                 return LogicalInkTool.Shape;

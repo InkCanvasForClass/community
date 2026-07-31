@@ -422,6 +422,44 @@ namespace Ink_Canvas
         public bool ShowCircleCenter { get; set; }
         [JsonProperty("showCoordinateUnitMarks")]
         public bool ShowCoordinateUnitMarks { get; set; }
+        [JsonProperty("enableMathCanvas")]
+        public bool EnableMathCanvas { get; set; } = true;
+        [JsonProperty("mathDefaultStrokeWidth")]
+        public double MathDefaultStrokeWidth { get; set; } = 2;
+        [JsonProperty("mathSnapEnabled")]
+        public bool MathSnapEnabled { get; set; } = true;
+        [JsonProperty("mathSnapTolerance")]
+        public double MathSnapTolerance { get; set; } = 12;
+        [JsonProperty("mathShowMeasurements")]
+        public bool MathShowMeasurements { get; set; } = true;
+        [JsonProperty("mathShowGrid")]
+        public bool MathShowGrid { get; set; } = true;
+        [JsonProperty("mathShowAxes")]
+        public bool MathShowAxes { get; set; } = true;
+        [JsonProperty("mathGridSpacing")]
+        public double MathGridSpacing { get; set; } = 40;
+        [JsonProperty("mathConstraintsEnabled")]
+        public bool MathConstraintsEnabled { get; set; } = true;
+        [JsonProperty("mathFunctionPixelsPerUnit")]
+        public double MathFunctionPixelsPerUnit { get; set; } = 40;
+        [JsonProperty("mathFunctionSampleQuality")]
+        public int MathFunctionSampleQuality { get; set; } = 2;
+        [JsonProperty("mathFunctionShowMarkers")]
+        public bool MathFunctionShowMarkers { get; set; } = true;
+        [JsonProperty("mathSolidViewMode")]
+        public int MathSolidViewMode { get; set; } = 0;
+        [JsonProperty("mathSolidPerspective")]
+        public bool MathSolidPerspective { get; set; } = false;
+        [JsonProperty("mathSolidShowHiddenEdges")]
+        public bool MathSolidShowHiddenEdges { get; set; } = true;
+        [JsonProperty("mathSolidShowLabels")]
+        public bool MathSolidShowLabels { get; set; } = true;
+        [JsonProperty("mathSolidShowAxes")]
+        public bool MathSolidShowAxes { get; set; } = false;
+        [JsonProperty("mathSolidRenderQuality")]
+        public int MathSolidRenderQuality { get; set; } = 2;
+        [JsonProperty("mathSolidScale")]
+        public double MathSolidScale { get; set; } = 55;
         [JsonProperty("enableInkFade")]
         public bool EnableInkFade { get; set; } = false;
         [JsonProperty("inkFadeTime")]

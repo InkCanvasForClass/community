@@ -1,0 +1,224 @@
+<UserControl x:Class="Ink_Canvas.Controls.MathInsertPopupContent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls">
+    <UserControl.Resources>
+        <Style x:Key="MathToolButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Width" Value="64" />
+            <Setter Property="Height" Value="70" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{DynamicResource FloatingBarForegroundBrush}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="ToolTip"
+                    Value="{Binding Content, RelativeSource={RelativeSource Self}}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Margin="1">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="42" />
+                                    <RowDefinition Height="18" />
+                                </Grid.RowDefinitions>
+                                <Image Source="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}"
+                                       RenderOptions.BitmapScalingMode="HighQuality"
+                                       Width="36"
+                                       Height="36"
+                                       Margin="0,4,0,2"
+                                       IsHitTestVisible="False" />
+                                <TextBlock Grid.Row="1"
+                                           Text="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}"
+                                           FontSize="11"
+                                           Foreground="{TemplateBinding Foreground}"
+                                           HorizontalAlignment="Stretch"
+                                           TextAlignment="Center"
+                                           TextTrimming="CharacterEllipsis"
+                                           ToolTip="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}"
+                                           IsHitTestVisible="False" />
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder"
+                                        Property="Background"
+                                        Value="{DynamicResource FloatingBarPopupInnerBorderBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.65" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="ButtonBorder"
+                                        Property="BorderBrush"
+                                        Value="{DynamicResource FloatingBarAccentBrush}" />
+                                <Setter TargetName="ButtonBorder" Property="BorderThickness" Value="1" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.4" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <controls:PopupShellContent x:Name="Shell" />
+        <ContentControl x:Name="InnerContentHost" Visibility="Collapsed">
+            <StackPanel Margin="2">
+                <StackPanel Orientation="Horizontal" Margin="3">
+                    <TextBlock x:Name="FunctionExpressionLabel"
+                               VerticalAlignment="Center"
+                               Margin="0,0,6,0" />
+                    <TextBox x:Name="FunctionExpressionTextBox"
+                             Width="190"
+                             Text="x^2-4"
+                             ToolTip="y=f(x)" />
+                    <TextBlock Text="x∈[" VerticalAlignment="Center" Margin="8,0,2,0" />
+                    <TextBox x:Name="FunctionDomainMinTextBox" Width="52" Text="-10" />
+                    <TextBlock Text="," VerticalAlignment="Center" Margin="3,0" />
+                    <TextBox x:Name="FunctionDomainMaxTextBox" Width="52" Text="10" />
+                    <TextBlock Text="]" VerticalAlignment="Center" Margin="2,0,6,0" />
+                    <Button x:Name="FunctionButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource DrawShapeImageSource.Parabola}" />
+                    <Button x:Name="EditFunctionButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource DrawShapeImageSource.Coordinate1}" />
+                </StackPanel>
+                <TextBlock x:Name="GeometrySectionLabel"
+                           Margin="6,4,6,0"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource FloatingBarAccentBrush}" />
+                <WrapPanel Width="640">
+                    <Button x:Name="CoordinatePlaneButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource DrawShapeImageSource.Coordinate1}" />
+                    <Button x:Name="PointButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource GeoIconEllipseCenter}" />
+                    <Button x:Name="SegmentButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource GeoIconDotLine}" />
+                    <Button x:Name="TriangleButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource DrawShapeImageSource.Triangle}" />
+                    <Button x:Name="LineButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource DrawShapeImageSource.Line}" />
+                    <Button x:Name="RayButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource GeoIconArrow}" />
+                    <Button x:Name="CircleButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource GeoIconCircle}" />
+                    <Button x:Name="LabelButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource DrawShapeImageSource.Coordinate3}" />
+                    <Button x:Name="AngleButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource DrawShapeImageSource.Coordinate4}" />
+                    <Button x:Name="SelectButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource DrawShapeImageSource.Coordinate5}" />
+                    <Button x:Name="DeleteButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource GeoIconDashedCircle}" />
+                </WrapPanel>
+                <TextBlock x:Name="ConstraintSectionLabel"
+                           Margin="6,6,6,0"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource FloatingBarAccentBrush}" />
+                <WrapPanel Width="640">
+                    <Button x:Name="HorizontalButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource GeoIconDashedLine}" />
+                    <Button x:Name="VerticalButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource GeoIconDotLine}" />
+                    <Button x:Name="ParallelButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource DrawShapeImageSource.ParallelLine}" />
+                    <Button x:Name="PerpendicularButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource DrawShapeImageSource.Coordinate4}" />
+                    <Button x:Name="EqualLengthButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource GeoIconRectangleCenter}" />
+                    <Button x:Name="CollinearButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource DrawShapeImageSource.ParallelLine}" />
+                    <Button x:Name="PointOnLineButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource GeoIconDashedLine}" />
+                    <Button x:Name="PointOnCircleButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource GeoIconDashedCircle}" />
+                </WrapPanel>
+                <TextBlock x:Name="SolidSectionLabel"
+                           Margin="6,6,6,0"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource FloatingBarAccentBrush}" />
+                <WrapPanel Width="640">
+                    <Button x:Name="CubeButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource GeoIconCuboid}" />
+                    <Button x:Name="CuboidButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource GeoIconCuboid}" />
+                    <Button x:Name="PrismButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource DrawShapeImageSource.Tetrahedron}" />
+                    <Button x:Name="PyramidButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource DrawShapeImageSource.Cone}" />
+                    <Button x:Name="CylinderButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource GeoIconCylinder}" />
+                    <Button x:Name="ConeButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource GeoIconCone}" />
+                    <Button x:Name="SphereButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource DrawShapeImageSource.Circle}" />
+                    <Button x:Name="RotateSolidButton"
+                            Style="{StaticResource MathToolButtonStyle}"
+                            Tag="{DynamicResource DrawShapeImageSource.Coordinate2}" />
+                </WrapPanel>
+                <Border x:Name="SolidDimensionsPanel"
+                        Visibility="Collapsed"
+                        Margin="6,6,6,2"
+                        Padding="10"
+                        CornerRadius="6"
+                        Background="{DynamicResource FloatingBarPopupInnerBorderBrush}">
+                    <StackPanel>
+                        <TextBlock x:Name="SolidDimensionsTitle"
+                                   Margin="0,0,0,8"
+                                   FontWeight="SemiBold" />
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel x:Name="SolidLengthField" Orientation="Horizontal">
+                                <TextBlock x:Name="SolidLengthLabel" VerticalAlignment="Center" />
+                                <TextBox x:Name="SolidLengthTextBox" Width="64" Margin="5,0,12,0" Text="3" />
+                            </StackPanel>
+                            <StackPanel x:Name="SolidWidthField" Orientation="Horizontal">
+                                <TextBlock x:Name="SolidWidthLabel" VerticalAlignment="Center" />
+                                <TextBox x:Name="SolidWidthTextBox" Width="64" Margin="5,0,12,0" Text="3" />
+                            </StackPanel>
+                            <StackPanel x:Name="SolidHeightField" Orientation="Horizontal">
+                                <TextBlock x:Name="SolidHeightLabel" VerticalAlignment="Center" />
+                                <TextBox x:Name="SolidHeightTextBox" Width="64" Margin="5,0,12,0" Text="3" />
+                            </StackPanel>
+                            <Button x:Name="SolidInsertConfirmButton" Margin="4,0" Padding="12,5" />
+                            <Button x:Name="SolidInsertCancelButton" Margin="4,0" Padding="12,5" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ContentControl>
+    </Grid>
+</UserControl>

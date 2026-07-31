@@ -10,6 +10,7 @@ namespace Ink_Canvas.Ink.Native
         StrokeEraser,
         Select,
         Shape,
+        Math,
         BoardRoam
     }
 
@@ -213,6 +214,8 @@ namespace Ink_Canvas.Ink.Native
                     return Decision(NativeInputRoute.Select, false, true);
                 case LogicalInkTool.Shape:
                     return Decision(NativeInputRoute.Shape, false, true);
+                case LogicalInkTool.Math:
+                    return Decision(NativeInputRoute.DeferToWpfUi, false, true);
                 case LogicalInkTool.BoardRoam:
                     return Decision(NativeInputRoute.BoardRoam, false, true);
                 case LogicalInkTool.Pen:

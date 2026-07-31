@@ -225,6 +225,8 @@ namespace Ink_Canvas
 
                 // 先清空当前画布的墨迹
                 inkCanvas.Strokes.Clear();
+                MathCanvas.Scene = new Ink_Canvas.Mathematics.Models.MathScene();
+                RefreshMathScene();
 
                 // 关闭所有媒体控件的播放器并释放文件句柄，再清空子元素
                 ShutdownAllCanvasMediaElements();

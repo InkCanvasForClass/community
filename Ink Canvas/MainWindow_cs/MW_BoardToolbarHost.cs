@@ -114,6 +114,11 @@ namespace Ink_Canvas
             ImageDrawShape_MouseUp(null, null);
         }
 
+        public void OpenMathInsert()
+        {
+            OpenMathInsertPopup();
+        }
+
         public void InsertImage()
         {
             InsertImageOptions_MouseUp(null, null);
@@ -247,6 +252,7 @@ namespace Ink_Canvas
             SetPopupPlacementTarget(BoardPenPalette, "board.pen");
             SetPopupPlacementTarget(BoardEraserSizePanel, "board.eraser");
             SetPopupPlacementTarget(BoardBorderDrawShape, "board.shape");
+            SetPopupPlacementTarget(BoardMathInsertPopup, "board.math");
             SetPopupPlacementTarget(BoardImageOptionsPanel, "board.insertImage");
             SetPopupPlacementTarget(BoardBorderToolsPopup, "board.tools");
         }
@@ -314,6 +320,9 @@ namespace Ink_Canvas
                 {
                     redoBtn.IsEnabled = CanRedo;
                 }
+
+                if (FindView("board.math") is BoardToolbarButton mathButton)
+                    mathButton.IsEnabled = Settings.Canvas.EnableMathCanvas;
             }), System.Windows.Threading.DispatcherPriority.Loaded);
         }
 

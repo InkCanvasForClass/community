@@ -120,6 +120,98 @@
   <data name="Board_Shape" xml:space="preserve">
     <value>Shapes</value>
   </data>
+  <data name="Board_Math" xml:space="preserve">
+    <value>Math</value>
+  </data>
+  <data name="Math_CoordinatePlane" xml:space="preserve"><value>Coordinate plane</value></data>
+  <data name="Math_Point" xml:space="preserve">
+    <value>Point</value>
+  </data>
+  <data name="Math_Segment" xml:space="preserve">
+    <value>Segment</value>
+  </data>
+  <data name="Math_Line" xml:space="preserve">
+    <value>Line</value>
+  </data>
+  <data name="Math_Ray" xml:space="preserve">
+    <value>Ray</value>
+  </data>
+  <data name="Math_Circle" xml:space="preserve">
+    <value>Circle</value>
+  </data>
+  <data name="Math_Label" xml:space="preserve">
+    <value>Label</value>
+  </data>
+  <data name="Math_Angle" xml:space="preserve">
+    <value>Angle</value>
+  </data>
+  <data name="Math_Select" xml:space="preserve">
+    <value>Select</value>
+  </data>
+  <data name="Math_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Math_Horizontal" xml:space="preserve"><value>Horizontal</value></data>
+  <data name="Math_Vertical" xml:space="preserve"><value>Vertical</value></data>
+  <data name="Math_Parallel" xml:space="preserve"><value>Parallel</value></data>
+  <data name="Math_Perpendicular" xml:space="preserve"><value>Perpendicular</value></data>
+  <data name="Math_EqualLength" xml:space="preserve"><value>Equal length</value></data>
+  <data name="Math_Collinear" xml:space="preserve"><value>Collinear</value></data>
+  <data name="Math_PointOnLine" xml:space="preserve"><value>Point on line</value></data>
+  <data name="Math_PointOnCircle" xml:space="preserve"><value>Point on circle</value></data>
+  <data name="Math_ConstraintAdded" xml:space="preserve"><value>Geometry constraint added</value></data>
+  <data name="Math_ConstraintInvalid" xml:space="preserve"><value>Select math objects supported by this constraint</value></data>
+  <data name="Math_ConstraintConflict" xml:space="preserve"><value>Constraints conflict; the scene was restored</value></data>
+  <data name="Math_ConstraintsDisabled" xml:space="preserve"><value>Enable math constraints in settings first</value></data>
+  <data name="Math_Function" xml:space="preserve"><value>Insert function</value></data>
+  <data name="Math_EditFunction" xml:space="preserve"><value>Edit function</value></data>
+  <data name="Math_Expression" xml:space="preserve"><value>Expression</value></data>
+  <data name="Math_FunctionInvalid" xml:space="preserve"><value>The function expression or domain is invalid; the scene was not changed</value></data>
+  <data name="Math_FunctionUpdated" xml:space="preserve"><value>Function updated</value></data>
+  <data name="Math_FunctionAnalysis" xml:space="preserve"><value>y={0}; zeros: {1}; extrema: {2}; y-intercept: {3}; monotonic: {4}</value></data>
+  <data name="Math_None" xml:space="preserve"><value>none</value></data>
+  <data name="Math_Increasing" xml:space="preserve"><value>increasing</value></data>
+  <data name="Math_Decreasing" xml:space="preserve"><value>decreasing</value></data>
+  <data name="Math_FunctionInterval" xml:space="preserve"><value>{0}[{1:0.##}, {2:0.##}]</value></data>
+  <data name="Math_SelectFunction" xml:space="preserve"><value>Select a function curve</value></data>
+  <data name="Math_Cube" xml:space="preserve"><value>Cube</value></data>
+  <data name="Math_Cuboid" xml:space="preserve"><value>Cuboid</value></data>
+  <data name="Math_Prism" xml:space="preserve"><value>Prism</value></data>
+  <data name="Math_Pyramid" xml:space="preserve"><value>Pyramid</value></data>
+  <data name="Math_Cylinder" xml:space="preserve"><value>Cylinder</value></data>
+  <data name="Math_Cone" xml:space="preserve"><value>Cone</value></data>
+  <data name="Math_Sphere" xml:space="preserve"><value>Sphere</value></data>
+  <data name="Math_Triangle" xml:space="preserve"><value>Triangle</value></data>
+  <data name="Math_RotateSolid" xml:space="preserve"><value>Rotate solid</value></data>
+  <data name="Math_SelectSolid" xml:space="preserve"><value>Select a solid object</value></data>
+  <data name="Math_EditObject" xml:space="preserve"><value>Edit</value></data>
+  <data name="Math_MeasureObject" xml:space="preserve"><value>Measure</value></data>
+  <data name="Math_ResetView" xml:space="preserve"><value>Reset view</value></data>
+  <data name="Math_Disabled" xml:space="preserve"><value>Enable the math canvas in Settings first</value></data>
+  <data name="Math_BoardModeOnly" xml:space="preserve"><value>Math tools are available in whiteboard mode only</value></data>
+  <data name="Math_SnapPoint" xml:space="preserve"><value>Snapped to point</value></data>
+  <data name="Math_SnapGeometry" xml:space="preserve"><value>Snapped to midpoint or intersection</value></data>
+  <data name="Math_StatusSelect" xml:space="preserve"><value>Select: click an object; drag to move; use handles to scale or rotate</value></data>
+  <data name="Math_StatusPoint" xml:space="preserve"><value>Point: click the canvas to place</value></data>
+  <data name="Math_StatusSegment" xml:space="preserve"><value>Segment: press at the start and drag to the end</value></data>
+  <data name="Math_StatusLine" xml:space="preserve"><value>Line: press at the first point and drag through the second</value></data>
+  <data name="Math_StatusRay" xml:space="preserve"><value>Ray: press at the endpoint and drag in its direction</value></data>
+  <data name="Math_StatusCircle" xml:space="preserve"><value>Circle: press at the center and drag out the radius</value></data>
+  <data name="Math_StatusAngle" xml:space="preserve"><value>Angle: select the vertex, first arm, then second arm</value></data>
+  <data name="Math_StatusTriangle" xml:space="preserve"><value>Triangle: select its three vertices</value></data>
+  <data name="Math_StatusRotate" xml:space="preserve"><value>Rotate solid: press the solid and drag</value></data>
+  <data name="Math_StatusConstraint" xml:space="preserve"><value>Constraint: select the requested objects in order; right-click to cancel</value></data>
+  <data name="Math_StatusPlace" xml:space="preserve"><value>Click the canvas to place; right-click to cancel</value></data>
+  <data name="Math_GroupGeometry" xml:space="preserve"><value>Plane geometry and object actions</value></data>
+  <data name="Math_GroupConstraints" xml:space="preserve"><value>Measurements and constraints</value></data>
+  <data name="Math_GroupSolids" xml:space="preserve"><value>Solid geometry</value></data>
+  <data name="Math_FunctionZero" xml:space="preserve"><value>Zero</value></data>
+  <data name="Math_FunctionExtremum" xml:space="preserve"><value>Extremum</value></data>
+  <data name="Math_FunctionIntersection" xml:space="preserve"><value>Intersection</value></data>
+  <data name="Math_MeasurementResult" xml:space="preserve"><value>Measurement: {0}</value></data>
+  <data name="Math_MeasurementUnavailable" xml:space="preserve"><value>No measurement is available for this object</value></data>
+  <data name="Math_ConstructionTooSmall" xml:space="preserve"><value>The construction is too small; drag farther</value></data>
+  <data name="Math_SnapHint" xml:space="preserve"><value>Move near an endpoint, midpoint, or intersection to snap</value></data>
   <data name="Board_Size" xml:space="preserve">
     <value>Size</value>
   </data>
@@ -696,4 +788,21 @@
   <data name="IdleMiniBar_Expand" xml:space="preserve">
     <value>Expand</value>
   </data>
+  <data name="Math_SolidDimensions" xml:space="preserve"><value>Set solid dimensions</value></data>
+  <data name="Math_SolidDimensionsInvalid" xml:space="preserve"><value>Enter valid dimensions between 0 and 1000</value></data>
+  <data name="Math_Length" xml:space="preserve"><value>Length</value></data>
+  <data name="Math_Width" xml:space="preserve"><value>Width</value></data>
+  <data name="Math_Height" xml:space="preserve"><value>Height</value></data>
+  <data name="Math_EdgeLength" xml:space="preserve"><value>Edge length</value></data>
+  <data name="Math_BaseLength" xml:space="preserve"><value>Base length</value></data>
+  <data name="Math_BaseHeight" xml:space="preserve"><value>Base height</value></data>
+  <data name="Math_PrismLength" xml:space="preserve"><value>Prism length</value></data>
+  <data name="Math_Radius" xml:space="preserve"><value>Radius</value></data>
+  <data name="Math_Circumsphere" xml:space="preserve"><value>Circumsphere</value></data>
+  <data name="Math_Insphere" xml:space="preserve"><value>Insphere</value></data>
+  <data name="Math_Circumcircle" xml:space="preserve"><value>Circumcircle</value></data>
+  <data name="Math_Incircle" xml:space="preserve"><value>Incircle</value></data>
+  <data name="Math_ConstructionUnavailable" xml:space="preserve"><value>This solid does not satisfy the exact construction condition</value></data>
+  <data name="Math_Insert" xml:space="preserve"><value>Insert</value></data>
+  <data name="Math_Cancel" xml:space="preserve"><value>Cancel</value></data>
 </root>

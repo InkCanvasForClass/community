@@ -120,6 +120,98 @@
   <data name="Board_Shape" xml:space="preserve">
     <value>图形</value>
   </data>
+  <data name="Board_Math" xml:space="preserve">
+    <value>数学</value>
+  </data>
+  <data name="Math_CoordinatePlane" xml:space="preserve"><value>坐标系</value></data>
+  <data name="Math_Point" xml:space="preserve">
+    <value>点</value>
+  </data>
+  <data name="Math_Segment" xml:space="preserve">
+    <value>线段</value>
+  </data>
+  <data name="Math_Line" xml:space="preserve">
+    <value>直线</value>
+  </data>
+  <data name="Math_Ray" xml:space="preserve">
+    <value>射线</value>
+  </data>
+  <data name="Math_Circle" xml:space="preserve">
+    <value>圆</value>
+  </data>
+  <data name="Math_Label" xml:space="preserve">
+    <value>标签</value>
+  </data>
+  <data name="Math_Angle" xml:space="preserve">
+    <value>角度</value>
+  </data>
+  <data name="Math_Select" xml:space="preserve">
+    <value>选择</value>
+  </data>
+  <data name="Math_Delete" xml:space="preserve">
+    <value>删除</value>
+  </data>
+  <data name="Math_Horizontal" xml:space="preserve"><value>水平约束</value></data>
+  <data name="Math_Vertical" xml:space="preserve"><value>垂直约束</value></data>
+  <data name="Math_Parallel" xml:space="preserve"><value>平行约束</value></data>
+  <data name="Math_Perpendicular" xml:space="preserve"><value>垂直于约束</value></data>
+  <data name="Math_EqualLength" xml:space="preserve"><value>等长约束</value></data>
+  <data name="Math_Collinear" xml:space="preserve"><value>共线约束</value></data>
+  <data name="Math_PointOnLine" xml:space="preserve"><value>点在直线上</value></data>
+  <data name="Math_PointOnCircle" xml:space="preserve"><value>点在圆上</value></data>
+  <data name="Math_ConstraintAdded" xml:space="preserve"><value>已添加几何约束</value></data>
+  <data name="Math_ConstraintInvalid" xml:space="preserve"><value>请选择符合该约束要求的数学对象</value></data>
+  <data name="Math_ConstraintConflict" xml:space="preserve"><value>约束发生冲突，场景已恢复</value></data>
+  <data name="Math_ConstraintsDisabled" xml:space="preserve"><value>请先在设置中启用数学约束</value></data>
+  <data name="Math_Function" xml:space="preserve"><value>插入函数</value></data>
+  <data name="Math_EditFunction" xml:space="preserve"><value>编辑函数</value></data>
+  <data name="Math_Expression" xml:space="preserve"><value>表达式</value></data>
+  <data name="Math_FunctionInvalid" xml:space="preserve"><value>函数表达式或定义域无效，场景未修改</value></data>
+  <data name="Math_FunctionUpdated" xml:space="preserve"><value>函数已更新</value></data>
+  <data name="Math_FunctionAnalysis" xml:space="preserve"><value>y={0}；零点：{1}；极值：{2}；y 轴截距：{3}；单调：{4}</value></data>
+  <data name="Math_None" xml:space="preserve"><value>无</value></data>
+  <data name="Math_Increasing" xml:space="preserve"><value>递增</value></data>
+  <data name="Math_Decreasing" xml:space="preserve"><value>递减</value></data>
+  <data name="Math_FunctionInterval" xml:space="preserve"><value>{0}[{1:0.##}, {2:0.##}]</value></data>
+  <data name="Math_SelectFunction" xml:space="preserve"><value>请选择一条函数曲线</value></data>
+  <data name="Math_Cube" xml:space="preserve"><value>正方体</value></data>
+  <data name="Math_Cuboid" xml:space="preserve"><value>长方体</value></data>
+  <data name="Math_Prism" xml:space="preserve"><value>棱柱</value></data>
+  <data name="Math_Pyramid" xml:space="preserve"><value>棱锥</value></data>
+  <data name="Math_Cylinder" xml:space="preserve"><value>圆柱</value></data>
+  <data name="Math_Cone" xml:space="preserve"><value>圆锥</value></data>
+  <data name="Math_Sphere" xml:space="preserve"><value>球</value></data>
+  <data name="Math_Triangle" xml:space="preserve"><value>三角形</value></data>
+  <data name="Math_RotateSolid" xml:space="preserve"><value>旋转立体</value></data>
+  <data name="Math_SelectSolid" xml:space="preserve"><value>请选择一个立体对象</value></data>
+  <data name="Math_EditObject" xml:space="preserve"><value>编辑</value></data>
+  <data name="Math_MeasureObject" xml:space="preserve"><value>测量</value></data>
+  <data name="Math_ResetView" xml:space="preserve"><value>重置视图</value></data>
+  <data name="Math_Disabled" xml:space="preserve"><value>请先在设置中启用数学画布</value></data>
+  <data name="Math_BoardModeOnly" xml:space="preserve"><value>数学工具仅在白板模式可用</value></data>
+  <data name="Math_SnapPoint" xml:space="preserve"><value>吸附到点</value></data>
+  <data name="Math_SnapGeometry" xml:space="preserve"><value>吸附到中点或交点</value></data>
+  <data name="Math_StatusSelect" xml:space="preserve"><value>选择：点击对象；拖动移动；使用控制柄缩放或旋转</value></data>
+  <data name="Math_StatusPoint" xml:space="preserve"><value>点：点击画布放置</value></data>
+  <data name="Math_StatusSegment" xml:space="preserve"><value>线段：从起点按住并拖到终点</value></data>
+  <data name="Math_StatusLine" xml:space="preserve"><value>直线：从第一点按住并拖过第二点</value></data>
+  <data name="Math_StatusRay" xml:space="preserve"><value>射线：从端点按住并拖向正方向</value></data>
+  <data name="Math_StatusCircle" xml:space="preserve"><value>圆：从圆心按住并拖出半径</value></data>
+  <data name="Math_StatusAngle" xml:space="preserve"><value>角度：依次选择顶点、第一边点、第二边点</value></data>
+  <data name="Math_StatusTriangle" xml:space="preserve"><value>三角形：依次选择三个顶点</value></data>
+  <data name="Math_StatusRotate" xml:space="preserve"><value>旋转立体：按住立体并拖动</value></data>
+  <data name="Math_StatusConstraint" xml:space="preserve"><value>约束：按提示依次选择对象；右键取消</value></data>
+  <data name="Math_StatusPlace" xml:space="preserve"><value>点击画布放置；右键取消</value></data>
+  <data name="Math_GroupGeometry" xml:space="preserve"><value>平面几何与对象操作</value></data>
+  <data name="Math_GroupConstraints" xml:space="preserve"><value>测量与约束</value></data>
+  <data name="Math_GroupSolids" xml:space="preserve"><value>立体几何</value></data>
+  <data name="Math_FunctionZero" xml:space="preserve"><value>零点</value></data>
+  <data name="Math_FunctionExtremum" xml:space="preserve"><value>极值</value></data>
+  <data name="Math_FunctionIntersection" xml:space="preserve"><value>交点</value></data>
+  <data name="Math_MeasurementResult" xml:space="preserve"><value>测量结果：{0}</value></data>
+  <data name="Math_MeasurementUnavailable" xml:space="preserve"><value>该对象暂无可用测量值</value></data>
+  <data name="Math_ConstructionTooSmall" xml:space="preserve"><value>构造尺寸过小，请拖动更长距离</value></data>
+  <data name="Math_SnapHint" xml:space="preserve"><value>靠近端点、中点或交点时自动吸附</value></data>
   <data name="Board_Size" xml:space="preserve">
     <value>大小</value>
   </data>
@@ -696,4 +788,21 @@
   <data name="IdleMiniBar_Expand" xml:space="preserve">
     <value>展开</value>
   </data>
+  <data name="Math_SolidDimensions" xml:space="preserve"><value>设置立体尺寸</value></data>
+  <data name="Math_SolidDimensionsInvalid" xml:space="preserve"><value>请输入 0 到 1000 之间的有效尺寸</value></data>
+  <data name="Math_Length" xml:space="preserve"><value>长</value></data>
+  <data name="Math_Width" xml:space="preserve"><value>宽</value></data>
+  <data name="Math_Height" xml:space="preserve"><value>高</value></data>
+  <data name="Math_EdgeLength" xml:space="preserve"><value>棱长</value></data>
+  <data name="Math_BaseLength" xml:space="preserve"><value>底边长</value></data>
+  <data name="Math_BaseHeight" xml:space="preserve"><value>底边高</value></data>
+  <data name="Math_PrismLength" xml:space="preserve"><value>棱柱长</value></data>
+  <data name="Math_Radius" xml:space="preserve"><value>半径</value></data>
+  <data name="Math_Circumsphere" xml:space="preserve"><value>外接球</value></data>
+  <data name="Math_Insphere" xml:space="preserve"><value>内切球</value></data>
+  <data name="Math_Circumcircle" xml:space="preserve"><value>外接圆</value></data>
+  <data name="Math_Incircle" xml:space="preserve"><value>内切圆</value></data>
+  <data name="Math_ConstructionUnavailable" xml:space="preserve"><value>当前几何体不满足此构造的严格条件</value></data>
+  <data name="Math_Insert" xml:space="preserve"><value>插入</value></data>
+  <data name="Math_Cancel" xml:space="preserve"><value>取消</value></data>
 </root>

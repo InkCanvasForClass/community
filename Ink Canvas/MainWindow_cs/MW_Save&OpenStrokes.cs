@@ -348,6 +348,7 @@ namespace Ink_Canvas
                         // 单页面XML保存
                         string xmlPath = Path.ChangeExtension(savePathWithName, ".xml");
                         SaveStrokesAsXML(inkCanvas.Strokes, xmlPath);
+                        SaveMathSceneSidecar(xmlPath, CurrentWhiteboardIndex);
                         if (newNotice)
                         {
                             Task.Delay(100).ContinueWith(t =>
@@ -481,13 +482,14 @@ namespace Ink_Canvas
                         for (int i = 0; i < allPageStrokes.Count; i++)
                         {
                             var strokes = allPageStrokes[i];
-                            if (strokes.Count > 0)
+                            if (strokes.Count > 0 || HasMathSceneForPage(i + 1))
                             {
                                 string pageFileName = Path.Combine(basePath, $"{baseFileName}_Page-{i + 1}.icstk");
                                 using (var fs = new FileStream(pageFileName, FileMode.Create))
                                 {
                                     strokes.Save(fs);
                                 }
+                                SaveMathSceneSidecar(pageFileName, i + 1);
 
                                 // 异步上传每个icstk文件
                                 _ = Task.Run(async () =>
@@ -522,6 +524,7 @@ namespace Ink_Canvas
                             // 保存为XML格式
                             string xmlPath = Path.ChangeExtension(savePathWithName, ".xml");
                             SaveStrokesAsXML(inkCanvas.Strokes, xmlPath);
+                            SaveMathSceneSidecar(xmlPath, CurrentWhiteboardIndex);
                             if (newNotice)
                             {
                                 Task.Delay(100).ContinueWith(t =>
@@ -549,6 +552,7 @@ namespace Ink_Canvas
                                     File.Replace(tmpPath, savePathWithName, null);
                                 else
                                     File.Move(tmpPath, savePathWithName);
+                                SaveMathSceneSidecar(savePathWithName, CurrentWhiteboardIndex);
                             }
                             catch
                             {
@@ -697,6 +701,9 @@ namespace Ink_Canvas
                             string xmlFileName = Path.Combine(tempDir, $"page_{i + 1:D4}.xml");
                             SaveStrokesAsXML(strokes, xmlFileName, false);
                         }
+                        SaveMathSceneFile(
+                            Path.Combine(tempDir, $"page_{i + 1:D4}.math.json"),
+                            i + 1);
                     }
 
                     // 保存元数据信息
@@ -808,6 +815,9 @@ namespace Ink_Canvas
                                 SavePageAsImage(strokes, fs);
                             }
                         }
+                        SaveMathSceneFile(
+                            Path.Combine(tempDir, $"page_{i + 1:D4}.math.json"),
+                            i + 1);
                     }
 
                     // 保存元数据信息
@@ -948,6 +958,7 @@ namespace Ink_Canvas
                             {
                                 inkCanvas.Strokes.Save(fs);
                             }
+                            SaveMathSceneSidecar(savePathWithName, CurrentWhiteboardIndex);
 
                             _ = Task.Run(async () =>
                             {
@@ -1292,8 +1303,10 @@ namespace Ink_Canvas
 
                 // 先把全部墨迹解析进内存，循环结束后才清空原画布——解析失败时原墨迹仍存在。
                 // 同时把 pageNumber 限定在 TimeMachineHistories 容量（101）内，避免 IndexOutOfRangeException。
-                var parsedHistoriesByPage = new Dictionary<int, TimeMachineHistory[]>();
-                var files = Directory.GetFiles(tempDir, "page_*.icstk");
+                var parsedHistoriesByPage = new Dictionary<int, List<TimeMachineHistory>>();
+                var files = new List<string>();
+                files.AddRange(Directory.GetFiles(tempDir, "page_*.icstk"));
+                files.AddRange(Directory.GetFiles(tempDir, "page_*.xml"));
                 foreach (var file in files)
                 {
                     var fileName = Path.GetFileNameWithoutExtension(file);
@@ -1305,19 +1318,57 @@ namespace Ink_Canvas
                         continue;
                     }
 
-                    using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read))
+                    StrokeCollection strokes;
+                    if (string.Equals(Path.GetExtension(file), ".xml", StringComparison.OrdinalIgnoreCase))
                     {
-                        var strokes = new StrokeCollection(fs);
-                        if (strokes.Count > 0)
+                        strokes = LoadStrokesFromXML(file);
+                    }
+                    else
+                    {
+                        using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read))
                         {
-                            var history = new TimeMachineHistory(strokes, TimeMachineHistoryType.UserInput, false);
-                            parsedHistoriesByPage[pageNumber] = new[] { history };
+                            strokes = new StrokeCollection(fs);
                         }
                     }
+
+                    if (strokes.Count > 0)
+                    {
+                        if (!parsedHistoriesByPage.TryGetValue(pageNumber, out var pageHistory))
+                        {
+                            pageHistory = new List<TimeMachineHistory>();
+                            parsedHistoriesByPage[pageNumber] = pageHistory;
+                        }
+                        pageHistory.Add(new TimeMachineHistory(strokes, TimeMachineHistoryType.UserInput, false));
+                    }
+                }
+
+                var mathFiles = Directory.GetFiles(tempDir, "page_*.math.json");
+                foreach (var mathFile in mathFiles)
+                {
+                    var pageFileName = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(mathFile));
+                    if (!pageFileName.StartsWith("page_") ||
+                        !int.TryParse(pageFileName.Substring(5), out var pageNumber) ||
+                        pageNumber < 1 ||
+                        pageNumber >= TimeMachineHistories.Length)
+                    {
+                        LogHelper.WriteLogToFile($"跳过非法数学场景文件 {mathFile}", LogHelper.LogType.Warning);
+                        continue;
+                    }
+
+                    var mathHistory = CreateMathSceneHistoryFromFile(mathFile);
+                    if (mathHistory == null) continue;
+                    if (!parsedHistoriesByPage.TryGetValue(pageNumber, out var pageHistory))
+                    {
+                        pageHistory = new List<TimeMachineHistory>();
+                        parsedHistoriesByPage[pageNumber] = pageHistory;
+                    }
+                    pageHistory.Add(mathHistory);
                 }
 
                 // 清空当前墨迹
                 ClearStrokes(true);
+                MathCanvas.Scene = new Ink_Canvas.Mathematics.Models.MathScene();
+                RefreshMathScene();
                 timeMachine.ClearStrokeHistory();
 
                 // 读取总页数
@@ -1339,7 +1390,7 @@ namespace Ink_Canvas
                 }
 
                 foreach (var pair in parsedHistoriesByPage)
-                    TimeMachineHistories[pair.Key] = pair.Value;
+                    TimeMachineHistories[pair.Key] = pair.Value.ToArray();
 
                 // 恢复第一页的墨迹
                 if (TimeMachineHistories[1] != null)
@@ -1441,6 +1492,7 @@ namespace Ink_Canvas
                         }
                     }
                 }
+                LoadMathSceneSidecar(filePath);
             }
             catch (Exception ex)
             {
@@ -1617,7 +1669,7 @@ namespace Ink_Canvas
                     inkCanvas.Strokes.Add(strokes);
                     LogHelper.NewLog($"Strokes Insert (2): Strokes Count: {strokes.Count.ToString()}");
                 }
+            LoadMathSceneSidecar(filePath);
         }
     }
 }
-

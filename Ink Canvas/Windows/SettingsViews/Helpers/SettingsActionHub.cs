@@ -81,6 +81,24 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             }
         }
 
+        public static void OnMathCanvasEnabledChanged(bool value)
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.ApplyMathSettings();
+        }
+
+        public static void OnMathMeasurementsChanged(bool value)
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.ApplyMathSettings();
+        }
+
+        public static void OnMathDisplayChanged()
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.ApplyMathSettings();
+        }
+
         #endregion
 
         #region Appearance

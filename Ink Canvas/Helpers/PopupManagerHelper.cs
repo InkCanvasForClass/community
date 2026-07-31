@@ -281,6 +281,17 @@ namespace Ink_Canvas.Helpers
                 var popupHwnd = GetPopupHwnd(popup);
                 if (popupHwnd == IntPtr.Zero) return;
 
+                // Registered popups are interactive UI. A stale WS_EX_TRANSPARENT
+                // flag makes their visible content click through to the canvas.
+                int exStyle = PInvoke.GetWindowLong(new HWND(popupHwnd), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
+                if ((exStyle & NativeWindowHelper.WS_EX_TRANSPARENT) != 0)
+                {
+                    PInvoke.SetWindowLong(
+                        new HWND(popupHwnd),
+                        WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE,
+                        exStyle & ~NativeWindowHelper.WS_EX_TRANSPARENT);
+                }
+
                 var shouldBeTopmost = CheckShouldBeTopmost();
 
                 if (shouldBeTopmost)
@@ -296,7 +307,7 @@ namespace Ink_Canvas.Helpers
                 }
                 else
                 {
-                    int exStyle = PInvoke.GetWindowLong(new HWND(popupHwnd), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
+                    exStyle = PInvoke.GetWindowLong(new HWND(popupHwnd), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
                     if ((exStyle & NativeWindowHelper.WS_EX_TOPMOST) != 0)
                     {
                         PInvoke.SetWindowLong(new HWND(popupHwnd), WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, exStyle & ~NativeWindowHelper.WS_EX_TOPMOST);

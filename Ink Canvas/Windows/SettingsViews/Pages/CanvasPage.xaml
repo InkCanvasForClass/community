@@ -30,6 +30,222 @@
                     Spacing="{StaticResource SettingsCardSpacing}">
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="{x:Static props:CanvasStrings.Canvas_MathGroupTitle}" />
+
+                    <controls:LabeledSettingsCard
+                            Header="{x:Static props:CanvasStrings.Canvas_EnableMathCanvas}"
+                            Description="{x:Static props:CanvasStrings.Canvas_EnableMathCanvasHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Calculator}"
+                            SwitchName="ToggleSwitchEnableMathCanvas"
+                            helpers:SettingsBinder.PropertyPath="Canvas.EnableMathCanvas"
+                            helpers:SettingsBinder.SettingsChanged="OnMathCanvasEnabledChanged" />
+
+                    <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_MathDefaultStrokeWidth}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock x:Name="MathDefaultStrokeWidthText"
+                                       VerticalAlignment="Center"
+                                       FontFamily="Consolas"
+                                       TextAlignment="Right" />
+                            <Slider Width="200"
+                                    Minimum="1"
+                                    Maximum="10"
+                                    TickFrequency="0.5"
+                                    IsSnapToTickEnabled="True"
+                                    helpers:SettingsBinder.PropertyPath="Canvas.MathDefaultStrokeWidth"
+                                    helpers:SettingsBinder.ValueRounding="1"
+                                    helpers:SettingsBinder.FormatString="{}{0:F1}"
+                                    helpers:SettingsBinder.TargetTextBlock="{Binding ElementName=MathDefaultStrokeWidthText}" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <controls:LabeledSettingsCard
+                            Header="{x:Static props:CanvasStrings.Canvas_MathSnapEnabled}"
+                            Description="{x:Static props:CanvasStrings.Canvas_MathSnapEnabledHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.MapPin}"
+                            SwitchName="ToggleSwitchMathSnapEnabled"
+                            helpers:SettingsBinder.PropertyPath="Canvas.MathSnapEnabled" />
+
+                    <controls:LabeledSettingsCard
+                            Header="{x:Static props:CanvasStrings.Canvas_MathShowMeasurements}"
+                            Description="{x:Static props:CanvasStrings.Canvas_MathShowMeasurementsHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Calculator}"
+                            SwitchName="ToggleSwitchMathShowMeasurements"
+                            helpers:SettingsBinder.PropertyPath="Canvas.MathShowMeasurements"
+                            helpers:SettingsBinder.SettingsChanged="OnMathMeasurementsChanged" />
+
+                    <controls:LabeledSettingsCard
+                            Header="{x:Static props:CanvasStrings.Canvas_MathShowGrid}"
+                            Description="{x:Static props:CanvasStrings.Canvas_MathShowGridHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.ViewAll}"
+                            SwitchName="ToggleSwitchMathShowGrid"
+                            helpers:SettingsBinder.PropertyPath="Canvas.MathShowGrid"
+                            helpers:SettingsBinder.SettingsChanged="OnMathDisplayChanged" />
+
+                    <controls:LabeledSettingsCard
+                            Header="{x:Static props:CanvasStrings.Canvas_MathShowAxes}"
+                            Description="{x:Static props:CanvasStrings.Canvas_MathShowAxesHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"
+                            SwitchName="ToggleSwitchMathShowAxes"
+                            helpers:SettingsBinder.PropertyPath="Canvas.MathShowAxes"
+                            helpers:SettingsBinder.SettingsChanged="OnMathDisplayChanged" />
+
+                    <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_MathGridSpacing}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ViewAll}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock x:Name="MathGridSpacingText"
+                                       VerticalAlignment="Center"
+                                       FontFamily="Consolas"
+                                       TextAlignment="Right" />
+                            <Slider Width="200"
+                                    Minimum="16"
+                                    Maximum="100"
+                                    TickFrequency="4"
+                                    IsSnapToTickEnabled="True"
+                                    helpers:SettingsBinder.PropertyPath="Canvas.MathGridSpacing"
+                                    helpers:SettingsBinder.ValueRounding="0"
+                                    helpers:SettingsBinder.FormatString="{}{0:F0}"
+                                    helpers:SettingsBinder.TargetTextBlock="{Binding ElementName=MathGridSpacingText}"
+                                    helpers:SettingsBinder.SettingsChanged="OnMathDisplayChanged" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <controls:LabeledSettingsCard
+                            Header="{x:Static props:CanvasStrings.Canvas_MathConstraintsEnabled}"
+                            Description="{x:Static props:CanvasStrings.Canvas_MathConstraintsEnabledHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Pin}"
+                            SwitchName="ToggleSwitchMathConstraintsEnabled"
+                            helpers:SettingsBinder.PropertyPath="Canvas.MathConstraintsEnabled" />
+
+                    <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_MathFunctionScale}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FullScreen}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock x:Name="MathFunctionScaleText"
+                                       VerticalAlignment="Center"
+                                       FontFamily="Consolas"
+                                       TextAlignment="Right" />
+                            <Slider Width="200"
+                                    Minimum="10"
+                                    Maximum="100"
+                                    TickFrequency="5"
+                                    IsSnapToTickEnabled="True"
+                                    helpers:SettingsBinder.PropertyPath="Canvas.MathFunctionPixelsPerUnit"
+                                    helpers:SettingsBinder.ValueRounding="0"
+                                    helpers:SettingsBinder.FormatString="{}{0:F0}"
+                                    helpers:SettingsBinder.TargetTextBlock="{Binding ElementName=MathFunctionScaleText}" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_MathFunctionSampleQuality}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.SpeedHigh}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <Slider Width="200"
+                                Minimum="1"
+                                Maximum="4"
+                                TickFrequency="1"
+                                IsSnapToTickEnabled="True"
+                                helpers:SettingsBinder.PropertyPath="Canvas.MathFunctionSampleQuality"
+                                helpers:SettingsBinder.ValueRounding="0" />
+                    </ui:SettingsCard>
+
+                    <controls:LabeledSettingsCard
+                            Header="{x:Static props:CanvasStrings.Canvas_MathFunctionShowMarkers}"
+                            Description="{x:Static props:CanvasStrings.Canvas_MathFunctionShowMarkersHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.MapPin}"
+                            SwitchName="ToggleSwitchMathFunctionShowMarkers"
+                            helpers:SettingsBinder.PropertyPath="Canvas.MathFunctionShowMarkers"
+                            helpers:SettingsBinder.SettingsChanged="OnMathDisplayChanged" />
+
+                    <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_MathSolidDefaultView}"
+                            Description="{x:Static props:CanvasStrings.Canvas_MathSolidDefaultViewHint}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ViewAll}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ComboBox x:Name="ComboBoxMathSolidDefaultView"
+                                  SelectedIndex="0"
+                                  helpers:SettingsBinder.PropertyPath="Canvas.MathSolidViewMode">
+                            <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_MathSolidViewProjection}" />
+                            <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_MathSolidViewFront}" />
+                        </ComboBox>
+                    </ui:SettingsCard>
+
+                    <controls:LabeledSettingsCard
+                            Header="{x:Static props:CanvasStrings.Canvas_MathSolidShowHiddenEdges}"
+                            Description="{x:Static props:CanvasStrings.Canvas_MathSolidShowHiddenEdgesHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Hide}"
+                            SwitchName="ToggleSwitchMathSolidShowHiddenEdges"
+                            helpers:SettingsBinder.PropertyPath="Canvas.MathSolidShowHiddenEdges" />
+
+                    <controls:LabeledSettingsCard
+                            Header="{x:Static props:CanvasStrings.Canvas_MathSolidShowLabels}"
+                            Description="{x:Static props:CanvasStrings.Canvas_MathSolidShowLabelsHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Calculator}"
+                            SwitchName="ToggleSwitchMathSolidShowLabels"
+                            helpers:SettingsBinder.PropertyPath="Canvas.MathSolidShowLabels" />
+
+                    <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_MathSolidRenderQuality}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.SpeedHigh}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <Slider Width="200"
+                                Minimum="1"
+                                Maximum="3"
+                                TickFrequency="1"
+                                IsSnapToTickEnabled="True"
+                                helpers:SettingsBinder.PropertyPath="Canvas.MathSolidRenderQuality"
+                                helpers:SettingsBinder.ValueRounding="0" />
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_MathSolidScale}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FullScreen}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock x:Name="MathSolidScaleText"
+                                       VerticalAlignment="Center"
+                                       FontFamily="Consolas"
+                                       TextAlignment="Right" />
+                            <Slider Width="200"
+                                    Minimum="10"
+                                    Maximum="100"
+                                    TickFrequency="5"
+                                    IsSnapToTickEnabled="True"
+                                    helpers:SettingsBinder.PropertyPath="Canvas.MathSolidScale"
+                                    helpers:SettingsBinder.ValueRounding="0"
+                                    helpers:SettingsBinder.FormatString="{}{0:F0}"
+                                    helpers:SettingsBinder.TargetTextBlock="{Binding ElementName=MathSolidScaleText}" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_MathSnapTolerance}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Ruler}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock x:Name="MathSnapToleranceText"
+                                       VerticalAlignment="Center"
+                                       FontFamily="Consolas"
+                                       TextAlignment="Right" />
+                            <Slider Width="200"
+                                    Minimum="4"
+                                    Maximum="30"
+                                    TickFrequency="1"
+                                    IsSnapToTickEnabled="True"
+                                    helpers:SettingsBinder.PropertyPath="Canvas.MathSnapTolerance"
+                                    helpers:SettingsBinder.ValueRounding="0"
+                                    helpers:SettingsBinder.FormatString="{}{0:F0}"
+                                    helpers:SettingsBinder.TargetTextBlock="{Binding ElementName=MathSnapToleranceText}" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:CanvasStrings.Canvas_GroupTitle}" />
 
                     <!-- 画笔光标：开关 + 展开后选择系统/内置/自定义光标 -->

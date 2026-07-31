@@ -1,5 +1,7 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Mathematics.Models;
+using Ink_Canvas.Mathematics.Persistence;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -291,6 +293,22 @@ namespace Ink_Canvas
                     }
                 }
             }
+            else if (item.CommitType == TimeMachineHistoryType.MathSceneChange && applyCanvas == null)
+            {
+                var json = item.StrokeHasBeenCleared
+                    ? item.MathSceneBeforeJson
+                    : item.MathSceneAfterJson;
+                var result = MathSceneSerializer.Deserialize(json);
+                MathCanvas.Scene = result.Scene;
+                RefreshMathScene();
+
+                for (var i = 0; i < result.Issues.Count; i++)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"数学场景历史恢复时已隔离异常数据: {result.Issues[i]}",
+                        LogHelper.LogType.Warning);
+                }
+            }
 
             _currentCommitType = CommitReason.UserInput;
         }
@@ -304,7 +322,9 @@ namespace Ink_Canvas
         /// 创建一个临时画布，应用历史记录，然后返回画布中的笔画集合
         /// 只处理笔画历史，不处理图片元素历史
         /// </remarks>
-        private StrokeCollection ApplyHistoriesToNewStrokeCollection(TimeMachineHistory[] items)
+        private StrokeCollection ApplyHistoriesToNewStrokeCollection(
+            TimeMachineHistory[] items,
+            bool includeMathStrokes = false)
         {
             InkCanvas fakeInkCanv = new InkCanvas
             {
@@ -315,14 +335,31 @@ namespace Ink_Canvas
 
             if (items != null && items.Length > 0)
             {
+                string mathSceneJson = null;
                 foreach (var timeMachineHistory in items)
                 {
                     // 只处理笔画历史，不处理图片元素历史
                     // 因为页面预览只需要显示笔画，图片元素会影响主画布
-                    if (timeMachineHistory.CommitType != TimeMachineHistoryType.ElementInsert)
+                    if (timeMachineHistory.CommitType != TimeMachineHistoryType.ElementInsert &&
+                        timeMachineHistory.CommitType != TimeMachineHistoryType.MathSceneChange)
                     {
                         ApplyHistoryToCanvas(timeMachineHistory, fakeInkCanv);
                     }
+
+                    if (timeMachineHistory.CommitType == TimeMachineHistoryType.MathSceneChange)
+                    {
+                        mathSceneJson = timeMachineHistory.StrokeHasBeenCleared
+                            ? timeMachineHistory.MathSceneBeforeJson
+                            : timeMachineHistory.MathSceneAfterJson;
+                    }
+                }
+
+                if (includeMathStrokes && !string.IsNullOrWhiteSpace(mathSceneJson))
+                {
+                    var result = MathSceneSerializer.Deserialize(mathSceneJson);
+                    fakeInkCanv.Strokes.Add(_mathStrokeRenderer.Render(
+                        result.Scene,
+                        Settings.Canvas.MathShowMeasurements));
                 }
             }
 
@@ -347,8 +384,17 @@ namespace Ink_Canvas
                 EditingMode = InkCanvasEditingMode.None,
             };
 
+            TimeMachineHistory latestMathHistory = null;
             foreach (var item in history)
+            {
+                if (item.CommitType == TimeMachineHistoryType.MathSceneChange)
+                {
+                    latestMathHistory = item;
+                    continue;
+                }
+
                 ApplyHistoryToCanvas(item, fakeInkCanv, removed);
+            }
 
             var list = new List<TimeMachineHistory>();
             if (fakeInkCanv.Strokes.Count > 0)
@@ -363,6 +409,14 @@ namespace Ink_Canvas
                     list.Add(new TimeMachineHistory(child, TimeMachineHistoryType.ElementInsert));
                     fakeInkCanv.Children.Remove(child);
                 }
+            }
+            if (latestMathHistory != null)
+            {
+                var emptySceneJson = MathSceneSerializer.Serialize(new MathScene());
+                var finalSceneJson = latestMathHistory.StrokeHasBeenCleared
+                    ? latestMathHistory.MathSceneBeforeJson
+                    : latestMathHistory.MathSceneAfterJson;
+                list.Add(new TimeMachineHistory(emptySceneJson, finalSceneJson));
             }
             return list.Count == 0 ? null : list.ToArray();
         }

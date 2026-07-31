@@ -511,6 +511,7 @@ namespace Ink_Canvas
             WireUpGesturePopupContentEvents();
             WireUpImageOptionsPopupContentEvents();
             WireUpWhiteboardModeSelectionEvents();
+            InitializeMathCanvas();
             BoardBorderToolsPopup.CustomPopupPlacementCallback =
                 (popupSize, targetSize, offset) => new[]
                 {
@@ -655,6 +656,7 @@ namespace Ink_Canvas
             BoardRoamingPopup.IsOpen = false;
             BorderDrawShape.IsOpen = false;
             BoardBorderDrawShape.IsOpen = false;
+            BoardMathInsertPopup.IsOpen = false;
             GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
 
             var workingArea = Screen.PrimaryScreen.WorkingArea;

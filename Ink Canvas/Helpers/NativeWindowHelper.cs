@@ -15,6 +15,7 @@ namespace Ink_Canvas.Helpers
 
         public const int GWL_EXSTYLE = -20;
         public const int WS_EX_TOPMOST = 0x00000008;
+        public const int WS_EX_TRANSPARENT = 0x00000020;
         public const int WS_EX_NOACTIVATE = 0x08000000;
         public static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
         public static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);

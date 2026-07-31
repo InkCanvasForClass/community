@@ -384,4 +384,68 @@
   <data name="Shape_RemoveAsymptote" xml:space="preserve">
     <value>Remove asymptote lines?</value>
   </data>
+  <data name="Canvas_EnableMathCanvas" xml:space="preserve">
+    <value>Enable math canvas</value>
+  </data>
+  <data name="Canvas_EnableMathCanvasHint" xml:space="preserve">
+    <value>Allow structured geometry, function, and solid objects without changing existing ink tools.</value>
+  </data>
+  <data name="Canvas_MathDefaultStrokeWidth" xml:space="preserve">
+    <value>Default math object stroke width</value>
+  </data>
+  <data name="Canvas_MathSnapEnabled" xml:space="preserve">
+    <value>Enable math object snapping</value>
+  </data>
+  <data name="Canvas_MathSnapEnabledHint" xml:space="preserve">
+    <value>Snap insertion points to endpoints, midpoints, centers, and intersections.</value>
+  </data>
+  <data name="Canvas_MathSnapTolerance" xml:space="preserve">
+    <value>Math snapping distance</value>
+  </data>
+  <data name="Canvas_MathShowMeasurements" xml:space="preserve">
+    <value>Show math measurements</value>
+  </data>
+  <data name="Canvas_MathShowMeasurementsHint" xml:space="preserve">
+    <value>Show point coordinates, segment lengths, circle radii, and angles.</value>
+  </data>
+  <data name="Canvas_MathShowGrid" xml:space="preserve">
+    <value>Grid on new coordinate planes</value>
+  </data>
+  <data name="Canvas_MathShowGridHint" xml:space="preserve">
+    <value>Show an evenly spaced grid inside newly inserted coordinate planes.</value>
+  </data>
+  <data name="Canvas_MathShowAxes" xml:space="preserve">
+    <value>Axes on new coordinate planes</value>
+  </data>
+  <data name="Canvas_MathShowAxesHint" xml:space="preserve">
+    <value>Show horizontal and vertical axes through the center of newly inserted coordinate planes.</value>
+  </data>
+  <data name="Canvas_MathGridSpacing" xml:space="preserve">
+    <value>New coordinate plane grid spacing</value>
+  </data>
+  <data name="Canvas_MathConstraintsEnabled" xml:space="preserve">
+    <value>Enable math constraints</value>
+  </data>
+  <data name="Canvas_MathConstraintsEnabledHint" xml:space="preserve">
+    <value>Create and maintain collinear, horizontal, vertical, equal-length, and point-placement constraints while editing.</value>
+  </data>
+  <data name="Canvas_MathFunctionScale" xml:space="preserve"><value>Default function scale</value></data>
+  <data name="Canvas_MathFunctionSampleQuality" xml:space="preserve"><value>Function sampling quality</value></data>
+  <data name="Canvas_MathFunctionShowMarkers" xml:space="preserve"><value>Show function feature points</value></data>
+  <data name="Canvas_MathFunctionShowMarkersHint" xml:space="preserve"><value>Show zeros and basic extrema on newly inserted functions.</value></data>
+  <data name="Canvas_MathSolidDefaultView" xml:space="preserve"><value>Default view for new solids</value></data>
+  <data name="Canvas_MathSolidDefaultViewHint" xml:space="preserve"><value>Only affects solids inserted after this change; existing math scenes are unchanged.</value></data>
+  <data name="Canvas_MathSolidViewProjection" xml:space="preserve"><value>Projection view</value></data>
+  <data name="Canvas_MathSolidViewFront" xml:space="preserve"><value>Front view</value></data>
+  <data name="Canvas_MathSolidPerspective" xml:space="preserve"><value>Use perspective projection for solids</value></data>
+  <data name="Canvas_MathSolidPerspectiveHint" xml:space="preserve"><value>When off, newly inserted solids use orthographic projection.</value></data>
+  <data name="Canvas_MathSolidShowHiddenEdges" xml:space="preserve"><value>Show hidden solid edges</value></data>
+  <data name="Canvas_MathSolidShowHiddenEdgesHint" xml:space="preserve"><value>Render rear-facing edges with dashed lines.</value></data>
+  <data name="Canvas_MathSolidShowLabels" xml:space="preserve"><value>Show solid measurements</value></data>
+  <data name="Canvas_MathSolidShowLabelsHint" xml:space="preserve"><value>Show volume and surface area when available.</value></data>
+  <data name="Canvas_MathSolidShowAxes" xml:space="preserve"><value>Show 3D axes on new solids</value></data>
+  <data name="Canvas_MathSolidShowAxesHint" xml:space="preserve"><value>Show positive X, Y, and Z axes on newly inserted solids.</value></data>
+  <data name="Canvas_MathSolidRenderQuality" xml:space="preserve"><value>Solid rendering quality</value></data>
+  <data name="Canvas_MathSolidScale" xml:space="preserve"><value>Default solid scale</value></data>
+  <data name="Canvas_MathGroupTitle" xml:space="preserve"><value>Math canvas</value></data>
 </root>

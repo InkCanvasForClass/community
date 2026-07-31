@@ -402,6 +402,7 @@ namespace InkCanvas.NativeInk.Tests
             Equal(NativeInputRoute.StrokeErase, Route(LogicalInkTool.StrokeEraser));
             Equal(NativeInputRoute.Select, Route(LogicalInkTool.Select));
             Equal(NativeInputRoute.Shape, Route(LogicalInkTool.Shape));
+            Equal(NativeInputRoute.DeferToWpfUi, Route(LogicalInkTool.Math));
             Equal(NativeInputRoute.BoardRoam, Route(LogicalInkTool.BoardRoam));
             Equal(NativeInputRoute.Ink, Route(LogicalInkTool.Pen));
         }

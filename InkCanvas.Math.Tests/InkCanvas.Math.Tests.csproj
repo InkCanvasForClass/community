@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <UseWPF>true</UseWPF>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <LangVersion>10</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Ink Canvas\Math\Models\*.cs" Link="Math\Models\%(Filename)%(Extension)" />
+    <Compile Include="..\Ink Canvas\Math\Persistence\*.cs" Link="Math\Persistence\%(Filename)%(Extension)" />
+    <Compile Include="..\Ink Canvas\Math\Services\*.cs" Link="Math\Services\%(Filename)%(Extension)" />
+    <Compile Include="..\Ink Canvas\Helpers\TimeMachine.cs" Link="Helpers\TimeMachine.cs" />
+  </ItemGroup>
+</Project>

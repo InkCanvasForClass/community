@@ -73,13 +73,49 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
 
     public class BoardToolbarLayoutSettings
     {
+        public const int CurrentSchemaVersion = 2;
+
+        [JsonProperty("schemaVersion")]
+        public int SchemaVersion { get; set; } = CurrentSchemaVersion;
+
         [JsonProperty("areas")]
         public List<BoardToolbarAreaEntry> Areas { get; set; } = new List<BoardToolbarAreaEntry>();
+
+        public bool EnsureCurrentVersion()
+        {
+            if (SchemaVersion >= CurrentSchemaVersion) return false;
+
+            for (var areaIndex = 0; areaIndex < Areas.Count; areaIndex++)
+            {
+                var groups = Areas[areaIndex].Groups;
+                for (var groupIndex = 0; groupIndex < groups.Count; groupIndex++)
+                {
+                    var group = groups[groupIndex];
+                    if (group.Id != "tools") continue;
+
+                    var hasMath = false;
+                    var insertIndex = group.Components.Count;
+                    for (var componentIndex = 0; componentIndex < group.Components.Count; componentIndex++)
+                    {
+                        var id = group.Components[componentIndex].Id;
+                        if (id == "board.math") hasMath = true;
+                        if (id == "board.shape") insertIndex = componentIndex + 1;
+                    }
+
+                    if (!hasMath)
+                        group.Components.Insert(insertIndex, new BoardToolbarComponentEntry { Id = "board.math" });
+                }
+            }
+
+            SchemaVersion = CurrentSchemaVersion;
+            return true;
+        }
 
         public static BoardToolbarLayoutSettings CreateDefault()
         {
             return new BoardToolbarLayoutSettings
             {
+                SchemaVersion = CurrentSchemaVersion,
                 Areas = new List<BoardToolbarAreaEntry>
                 {
                     new BoardToolbarAreaEntry
@@ -133,6 +169,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                                     new BoardToolbarComponentEntry { Id = "board.eraser" },
                                     new BoardToolbarComponentEntry { Id = "board.strokeEraser" },
                                     new BoardToolbarComponentEntry { Id = "board.shape" },
+                                    new BoardToolbarComponentEntry { Id = "board.math" },
                                     new BoardToolbarComponentEntry { Id = "board.insertImage" },
                                     new BoardToolbarComponentEntry { Id = "board.undo" },
                                     new BoardToolbarComponentEntry { Id = "board.redo" }

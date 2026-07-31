@@ -34,6 +34,8 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
 
         void SelectShape();
 
+        void OpenMathInsert();
+
         void InsertImage();
 
         void Undo();
