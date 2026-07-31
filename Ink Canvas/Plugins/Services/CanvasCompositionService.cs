@@ -93,7 +93,14 @@ namespace Ink_Canvas.Plugins
         private static void AppendPage(PdfDocument document, PluginPageRender render)
         {
             // XImage.FromStream 不复制流，必须活到 document.Save 之后，因此不在此处 Dispose。
-            var stream = new MemoryStream(render.PngBytes);
+            // 注意：不能用 new MemoryStream(bytes) —— 该构造函数产生的流 publiclyVisible=false，
+            // PDFsharp 内部调用 GetBuffer() 读取原始字节时会抛
+            // "MemoryStream's internal buffer cannot be accessed."。
+            // 无参构造 + Write 得到的流才允许 GetBuffer()。
+            var stream = new MemoryStream(render.PngBytes.Length);
+            stream.Write(render.PngBytes, 0, render.PngBytes.Length);
+            stream.Position = 0;
+
             var image = XImage.FromStream(stream);
 
             var page = document.AddPage();
