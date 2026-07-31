@@ -60,18 +60,7 @@ namespace Ink_Canvas
                 if (inkCanvas == null || !IsLoaded || inkCanvas.ActualWidth <= 0 || inkCanvas.ActualHeight <= 0) return;
                 if (EdgeExpandHintPopup == null || EdgeExpandHintButton == null) return;
 
-                // 详细诊断日志：每次 stroke 收尾都写一行，方便排查"没效果"
-                var eligible = IsEdgeExpandHintEligible();
-                LogHelper.WriteLogToFile(
-                    $"EdgeExpandHint[trace] eligible={eligible}, points={strokePoints.Count}, " +
-                    $"firstPt=({strokePoints[0].X:F0},{strokePoints[0].Y:F0}), " +
-                    $"canvas={inkCanvas.ActualWidth:F0}x{inkCanvas.ActualHeight:F0}, " +
-                    $"editMode={inkCanvas.EditingMode}, currentMode={currentMode}, shape={drawingShapeMode}, " +
-                    $"roam={IsBoardRoamingMode}, frozen={IsCurrentPageFrozen}, ppt={ArePPTControlsVisible}, " +
-                    $"enabled={Settings.Canvas.IsEnableEdgeExpandHint}, threshold={Settings.Canvas.EdgeExpandThreshold:F0}",
-                    LogHelper.LogType.Info);
-
-                if (!eligible) return;
+                if (!IsEdgeExpandHintEligible()) return;
 
                 var width = inkCanvas.ActualWidth;
                 var height = inkCanvas.ActualHeight;

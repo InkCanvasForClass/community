@@ -510,13 +510,6 @@ namespace Ink_Canvas
             var decision = NativeInkInputRouter.DecideDown(facts, context);
             _nativeCapturedRoutes[batch.PointerId] = decision;
 
-            LogHelper.WriteLogToFile(
-                $"[WetInk] Down id={batch.PointerId} kind={batch.InputKind} tool={context.Tool} " +
-                $"hit={context.HitZone} route={decision.Route} consume={decision.ConsumeNativeMessage} " +
-                $"xy=({facts.XDip:F1},{facts.YDip:F1}) samples={batch.SamplesNewestFirst.Count} " +
-                $"promoted={batch.IsPromotedMouse} mode={_currentToolMode}",
-                LogHelper.LogType.Event);
-
             if (decision.Route == NativeInputRoute.BlockedFrozen)
             {
                 TryBlockFrozenPageMutation("书写");
@@ -547,10 +540,6 @@ namespace Ink_Canvas
                 _stylusDownTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 RefreshOverlayVisibility();
                 _wetInkWindowHost?.SignalWork();
-                LogHelper.WriteLogToFile(
-                    $"[WetInk] Begin session={session.SessionId} pointsInHistory={batch.SamplesNewestFirst.Count} " +
-                    $"color=0x{style.ColorArgb:X8} w={style.Width:F2}",
-                    LogHelper.LogType.Event);
             }
 
             return decision.ConsumeNativeMessage;
@@ -703,12 +692,6 @@ namespace Ink_Canvas
 
             try
             {
-                LogHelper.WriteLogToFile(
-                    $"[WetInk] Commit session={payload.SessionId} points={payload.Points.Count} " +
-                    $"first=({payload.Points[0].X:F1},{payload.Points[0].Y:F1}) " +
-                    $"last=({payload.Points[payload.Points.Count - 1].X:F1},{payload.Points[payload.Points.Count - 1].Y:F1})",
-                    LogHelper.LogType.Event);
-
                 // Dry ink is the single source of truth. Add first so StrokesChanged /
                 // TimeMachine / dirty-page hooks fire before post-processing.
                 inkCanvas.Strokes.Add(stroke);
