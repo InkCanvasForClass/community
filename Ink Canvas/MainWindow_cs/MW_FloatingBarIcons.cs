@@ -505,6 +505,30 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 返回 <see cref="HideSubPanels"/> 中已由 <see cref="AnimationsHelper"/> 播放关闭动画的宿主自带弹窗。
+        /// 供 <c>CloseAllRegisteredPopups</c> 跳过，避免直接置 IsOpen=false 截断动画。
+        /// </summary>
+        private HashSet<Popup> GetAnimatedSubPanelPopups()
+        {
+            return new HashSet<Popup>
+            {
+                BorderTools,
+                BoardBorderToolsPopup,
+                PenPalette,
+                BoardPenPalette,
+                BoardEraserSizePanel,
+                EraserSizePanel,
+                BorderDrawShape,
+                BoardBorderDrawShape,
+                BoardImageOptionsPanel,
+                TwoFingerGestureBorder,
+                BoardTwoFingerGestureBorder,
+                BackgroundPalette,
+                BoothPopup
+            };
+        }
+
+        /// <summary>
         /// HideSubPanels的简化版，立即隐藏所有子面板，无动画效果
         /// </summary>
         private void HideSubPanelsImmediately()
@@ -529,6 +553,10 @@ namespace Ink_Canvas
 
             BackgroundPalette.IsOpen = false;
             BoothPopup.IsOpen = false;
+
+            // 上面是按名字硬编码的宿主自带面板；插件注册的弹窗不在其中，
+            // 统一交给 PopupManagerHelper 兜底关闭，保证点击空白处时行为一致。
+            _popupManager?.CloseAllRegisteredPopups();
         }
 
         /// <summary>
@@ -630,6 +658,11 @@ namespace Ink_Canvas
 
             // 视频展台弹窗也属于"子面板"，HideSubPanels 时一并隐藏
             AnimationsHelper.HidePopupWithSlideAndFade(BoothPopup);
+
+            // 上面是按名字硬编码的宿主自带面板；插件注册的弹窗不在其中，
+            // 统一交给 PopupManagerHelper 兜底关闭，保证点击空白处时行为一致。
+            // 已启动关闭动画的要跳过，否则直接置 IsOpen=false 会截断动画。
+            _popupManager?.CloseAllRegisteredPopups(GetAnimatedSubPanelPopups());
 
             if (mode != null)
             {

@@ -138,6 +138,38 @@ namespace Ink_Canvas.Helpers
             _needsUpdate = true;
         }
 
+        /// <summary>
+        /// 关闭所有已注册的 Popup。
+        /// <para>
+        /// 供 <c>HideSubPanels</c> / <c>HideSubPanelsImmediately</c> 兜底调用：宿主自带面板是按名字逐个关闭的，
+        /// 插件通过 <see cref="RegisterPopup"/> 注册的弹窗不在那份硬编码列表里，
+        /// 需要在此统一关闭，否则点击画布空白处时插件弹窗不会收起。
+        /// </para>
+        /// </summary>
+        /// <param name="skip">
+        /// 需要跳过的 Popup（调用方已自行处理，例如正在播放关闭动画）。
+        /// 传 <c>null</c> 表示不跳过任何一个。
+        /// </param>
+        public void CloseAllRegisteredPopups(ICollection<Popup> skip = null)
+        {
+            // 关闭过程会触发 Closed 事件并修改 _openPopups，遍历注册表的副本避免集合被修改。
+            var snapshot = _registeredPopups.ToArray();
+            foreach (var popup in snapshot)
+            {
+                if (popup == null || !popup.IsOpen) continue;
+                if (skip != null && skip.Contains(popup)) continue;
+
+                try
+                {
+                    popup.IsOpen = false;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[PopupManager] CloseAllRegisteredPopups error: {ex.Message}");
+                }
+            }
+        }
+
         public void BringToFront(Popup popup)
         {
             if (popup?.Child == null) return;
