@@ -3048,8 +3048,11 @@ namespace Ink_Canvas
             {
                 if (PPTTimeCapsuleContainer == null || PPTTimeCapsule == null) return;
 
+                // 外部演示源（插件把自己的文档接入放映模式，如 PDF）不显示时间胶囊：
+                // 它没有 PPT 会话，时间胶囊内部依赖 PPTManager 的演示信息，且对 PDF 阅读无意义。
                 if (Settings.PowerPointSettings.EnablePPTTimeCapsule &&
-                    IsInPPTPresentationMode)
+                    IsInPPTPresentationMode &&
+                    !IsExternalPresentationActive)
                 {
                     PPTTimeCapsuleContainer.Visibility = Visibility.Visible;
                     UpdatePPTTimeCapsulePosition();
@@ -3077,7 +3080,8 @@ namespace Ink_Canvas
                 if (PPTQuickPanelContainer == null || PPTQuickPanel == null) return;
 
                 // 仅在 PPT 模式下且用户开启“PPT 放映时显示快速面板”时显示
-                bool inSlideShow = IsInPPTPresentationMode;
+                // 外部演示源不显示 PPT 快捷面板，理由同时间胶囊。
+                bool inSlideShow = IsInPPTPresentationMode && !IsExternalPresentationActive;
                 bool showQuickPanel = Settings.PowerPointSettings.ShowPPTSidebarByDefault;
                 if (inSlideShow && showQuickPanel)
                 {

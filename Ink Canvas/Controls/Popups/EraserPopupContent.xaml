@@ -33,7 +33,7 @@
                 </ikw:SimpleStackPanel>
                 <TabControl x:Name="EraserTypeTabControl"
                             Style="{StaticResource {x:Static ui:ThemeKeys.TabControlPivotStyleKey}}"
-                            SelectedIndex="0">
+                            SelectedIndex="1">
                     <TabControl.Resources>
                         <sys:Double xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Key="PivotHeaderItemFontSize">16</sys:Double>
                         <Style x:Key="CompactPivotTabItem" TargetType="TabItem" BasedOn="{StaticResource TabItemPivotStyle}">

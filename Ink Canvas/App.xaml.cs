@@ -192,6 +192,11 @@ namespace Ink_Canvas
         private void RegisterPluginServices(MainWindow mainWindow)
         {
             var host = Plugins.PluginManager.Instance;
+
+            // 外部演示源服务需要回注到 MainWindow：翻页条事件要能路由到当前激活的演示源。
+            var presentationSourceService = new Plugins.Services.PresentationSourceService(mainWindow);
+            mainWindow.AttachPresentationSourceService(presentationSourceService);
+
             var services = new (Type iface, object impl)[]
             {
                 (typeof(Plugins.IAppRestartService),      new Plugins.AppRestartService()),
@@ -204,6 +209,7 @@ namespace Ink_Canvas
                 (typeof(Plugins.IFileAssociationService),      new Plugins.FileAssociationService()),
                 (typeof(Plugins.IWindowOverviewService),        new Plugins.WindowOverviewService(mainWindow.WindowOverviewModel)),
                 (typeof(Plugins.ICanvasCompositionService),      new Plugins.CanvasCompositionService(mainWindow)),
+                (typeof(Plugins.IPresentationSourceService),     presentationSourceService),
             };
 
             foreach (var (iface, impl) in services)
