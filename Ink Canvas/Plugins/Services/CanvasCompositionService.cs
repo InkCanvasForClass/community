@@ -39,6 +39,9 @@ namespace Ink_Canvas.Plugins
         public void RemoveBackgroundLayer()
             => _mainWindow.RemovePluginBackgroundLayer();
 
+        public void SetPageContentRect(Rect? contentRect)
+            => _mainWindow.SetPluginPageContentRect(contentRect);
+
         public void ConfigurePages(uint pageCount, uint currentPageIndex,
             Func<uint, CancellationToken, Task<BitmapSource>> pageRenderer)
             => _mainWindow.ConfigurePluginPages(pageCount, currentPageIndex, pageRenderer);
@@ -63,21 +66,61 @@ namespace Ink_Canvas.Plugins
             var pages = await _mainWindow.GetPluginExportPagesAsync(pageIndex, cancellationToken)
                 .ConfigureAwait(false);
 
+            // 逐页「合成 + 编码」彼此独立，可并行；PdfSharp 组装必须串行且按页序，
+            // 因此先并行产出各页字节，再按序写入文档。
+            // 并行度取 CPU-1（至少 2、最多 4）：合成会短暂回到 UI 线程取状态，
+            // 放太开反而加剧 UI 线程争用，且每页位图占内存不小。
+            var parallelism = Math.Max(2, Math.Min(4, Environment.ProcessorCount - 1));
+            var encoded = new byte[pages.Count][];
+            var sizes = new (double Width, double Height)[pages.Count];
+
+            using (var throttle = new SemaphoreSlim(parallelism, parallelism))
+            {
+                var tasks = new Task[pages.Count];
+                for (var i = 0; i < pages.Count; i++)
+                {
+                    var index = i;
+                    var page = pages[index];
+                    tasks[index] = Task.Run(async () =>
+                    {
+                        await throttle.WaitAsync(cancellationToken).ConfigureAwait(false);
+                        try
+                        {
+                            var render = await _mainWindow.RenderPluginPageAsync(page, cancellationToken)
+                                .ConfigureAwait(false);
+                            if (render?.Bitmap == null)
+                            {
+                                LogHelper.WriteLogToFile($"导出时第 {page} 页合成失败，已跳过。", LogHelper.LogType.Warning);
+                                return;
+                            }
+
+                            encoded[index] = EncodePage(render.Bitmap);
+                            sizes[index] = (render.WidthDip, render.HeightDip);
+                        }
+                        finally
+                        {
+                            throttle.Release();
+                        }
+                    }, cancellationToken);
+                }
+
+                await Task.WhenAll(tasks).ConfigureAwait(false);
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
             using (var document = new PdfDocument())
             {
-                foreach (var page in pages)
+                for (var i = 0; i < pages.Count; i++)
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    var render = await _mainWindow.RenderPluginPageAsync(page, cancellationToken)
-                        .ConfigureAwait(false);
-                    if (render?.PngBytes == null || render.PngBytes.Length == 0)
+                    var bytes = encoded[i];
+                    if (bytes == null || bytes.Length == 0)
                     {
-                        LogHelper.WriteLogToFile($"导出时第 {page} 页合成失败，已跳过。", LogHelper.LogType.Warning);
+                        LogHelper.WriteLogToFile($"导出时第 {pages[i]} 页编码失败，已跳过。", LogHelper.LogType.Warning);
                         continue;
                     }
 
-                    AppendPage(document, render);
+                    AppendPage(document, bytes, sizes[i].Width, sizes[i].Height);
                 }
 
                 if (document.PageCount == 0)
@@ -90,15 +133,38 @@ namespace Ink_Canvas.Plugins
             return fullPath;
         }
 
-        private static void AppendPage(PdfDocument document, PluginPageRender render)
+        /// <summary>
+        /// 把合成结果编码为 JPEG。相比 PNG 的 deflate，JPEG 编码快数倍、体积也小得多，
+        /// 而页面已是「PDF 栅格 + 墨迹」的照片型内容，JPEG 的画质损失在 92 质量下不可见。
+        /// </summary>
+        private static byte[] EncodePage(BitmapSource bitmap)
+        {
+            var encoder = new JpegBitmapEncoder { QualityLevel = 92 };
+            encoder.Frames.Add(BitmapFrame.Create(bitmap));
+            using (var stream = new MemoryStream())
+            {
+                encoder.Save(stream);
+                return stream.ToArray();
+            }
+        }
+
+        private static void AppendPage(PdfDocument document, byte[] imageBytes,
+            double widthDip, double heightDip)
         {
             // XImage.FromStream 不复制流，必须活到 document.Save 之后，因此不在此处 Dispose。
-            var stream = new MemoryStream(render.PngBytes);
+            // 注意：不能用 new MemoryStream(bytes) —— 该构造函数产生的流 publiclyVisible=false，
+            // PDFsharp 内部调用 GetBuffer() 读取原始字节时会抛
+            // "MemoryStream's internal buffer cannot be accessed."。
+            // 无参构造 + Write 得到的流才允许 GetBuffer()。
+            var stream = new MemoryStream(imageBytes.Length);
+            stream.Write(imageBytes, 0, imageBytes.Length);
+            stream.Position = 0;
+
             var image = XImage.FromStream(stream);
 
             var page = document.AddPage();
-            page.Width = XUnit.FromPoint(render.WidthDip * DipToPoint);
-            page.Height = XUnit.FromPoint(render.HeightDip * DipToPoint);
+            page.Width = XUnit.FromPoint(widthDip * DipToPoint);
+            page.Height = XUnit.FromPoint(heightDip * DipToPoint);
 
             using (var gfx = XGraphics.FromPdfPage(page))
             {
