@@ -333,13 +333,10 @@ namespace Ink_Canvas
                 ValidatePluginPageIndex(pageIndex);
                 GetPluginPageSize(out var widthDip, out var heightDip);
 
-                // 墨迹必须在 UI 线程读取并克隆；Stroke 不是线程安全的，
-                // 但 Freeze 后的克隆可以安全地在后台线程绘制。
+                // 墨迹必须在 UI 线程读取。GetPluginPageStrokesCore 返回的是克隆副本，
+                // 只归本次合成任务独占使用，因此可以安全地交给后台线程绘制。
+                // 注意 Stroke 不是 Freezable，无法冻结，线程安全完全依赖「不共享」这一点。
                 var strokes = GetPluginPageStrokesCore(pageIndex);
-                foreach (Stroke stroke in strokes)
-                {
-                    if (stroke.CanFreeze && !stroke.IsFrozen) stroke.Freeze();
-                }
 
                 return new PluginPagePlan
                 {
