@@ -133,6 +133,8 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="NHotkey.Wpf" Version="4.0.0" />
     <PackageReference Include="OSVersionExt" Version="4.1.0" />
+    <!-- PDFsharp 6.1.x 是最后一个以 net6.0 为目标框架的版本；用于插件「背景 + 墨迹」导出 PDF -->
+    <PackageReference Include="PDFsharp" Version="6.1.1" />
     <!-- AForge.Imaging / AForge.Math 仅用于照片校正（Grayscale/CannyEdgeDetector/BlobCounter/QuadrilateralTransformation）；摄像头采集已切换到 DirectShow（DirectShowLib） -->
     <PackageReference Include="AForge.Imaging" Version="2.2.5" />
     <PackageReference Include="AForge.Math" Version="2.2.5" />
