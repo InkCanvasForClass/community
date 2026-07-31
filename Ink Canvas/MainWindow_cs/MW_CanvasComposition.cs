@@ -17,7 +17,8 @@ namespace Ink_Canvas
     /// </summary>
     internal sealed class PluginPageRender
     {
-        public byte[] PngBytes { get; set; }
+        /// <summary>已 Freeze 的合成结果。编码放到后台线程做，避免 PNG 压缩阻塞 UI。</summary>
+        public BitmapSource Bitmap { get; set; }
 
         /// <summary>页面宽度（设备无关像素，即页面坐标系尺度）。</summary>
         public double WidthDip { get; set; }
@@ -39,6 +40,7 @@ namespace Ink_Canvas
         private const double PluginDefaultRenderScale = 2.0;
 
         private FrameworkElement _pluginBackgroundLayer;
+        private Rect? _pluginPageContentRect;
         private uint _pluginPageCount;
         private uint _pluginCurrentPageIndex;
         private Func<uint, CancellationToken, Task<BitmapSource>> _pluginPageRenderer;
@@ -95,6 +97,31 @@ namespace Ink_Canvas
                 _pluginPageCount = 0;
                 _pluginCurrentPageIndex = 0;
                 _pluginPageRenderer = null;
+                _pluginPageContentRect = null;
+            });
+        }
+
+        /// <summary>
+        /// 设置背景层内真正承载页面内容的矩形（背景元素坐标系，DIP）。
+        /// 背景以 Uniform 居中留边时，导出需要据此裁出页面区域，否则页面会被拉伸成画布比例。
+        /// </summary>
+        internal void SetPluginPageContentRect(Rect? contentRect)
+        {
+            RunOnUiThread(() =>
+            {
+                if (contentRect.HasValue)
+                {
+                    var rect = contentRect.Value;
+                    if (rect.Width <= 0 || rect.Height <= 0 ||
+                        double.IsNaN(rect.Width) || double.IsNaN(rect.Height) ||
+                        double.IsInfinity(rect.Width) || double.IsInfinity(rect.Height))
+                    {
+                        _pluginPageContentRect = null;
+                        return;
+                    }
+                }
+
+                _pluginPageContentRect = contentRect;
             });
         }
 
@@ -300,36 +327,87 @@ namespace Ink_Canvas
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var renderer = await RunOnUiThreadAsync(() =>
+        /// <summary>把指定页的「背景 + 墨迹」合成为一张位图。</summary>
+        internal async Task<PluginPageRender> RenderPluginPageAsync(uint pageIndex, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // 先在 UI 线程取齐所有需要的状态与数据，之后的重活全部离开 UI 线程。
+            var plan = await RunOnUiThreadAsync(() =>
             {
                 ValidatePluginPageIndex(pageIndex);
-                return _pluginPageRenderer;
+                GetPluginPageSize(out var widthDip, out var heightDip);
+
+                // 墨迹必须在 UI 线程读取并克隆；Stroke 不是线程安全的，
+                // 但 Freeze 后的克隆可以安全地在后台线程绘制。
+                var strokes = GetPluginPageStrokesCore(pageIndex);
+                foreach (Stroke stroke in strokes)
+                {
+                    if (stroke.CanFreeze && !stroke.IsFrozen) stroke.Freeze();
+                }
+
+                return new PluginPagePlan
+                {
+                    Renderer = _pluginPageRenderer,
+                    WidthDip = widthDip,
+                    HeightDip = heightDip,
+                    ContentRect = _pluginPageContentRect,
+                    Strokes = strokes,
+                    IsCurrentPage = pageIndex == _pluginCurrentPageIndex
+                };
             }).ConfigureAwait(false);
 
             BitmapSource background = null;
-            if (renderer != null)
+            if (plan.Renderer != null)
             {
-                background = await renderer(pageIndex, cancellationToken).ConfigureAwait(false);
+                background = await plan.Renderer(pageIndex, cancellationToken).ConfigureAwait(false);
                 if (background != null && background.CanFreeze && !background.IsFrozen) background.Freeze();
             }
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            return await RunOnUiThreadAsync(
-                () => ComposePluginPage(pageIndex, background, cancellationToken)).ConfigureAwait(false);
+            // 没有离屏位图时只能抓实时视觉树，那必须回到 UI 线程；
+            // 其余情况（导出的正常路径）在线程池上合成，不占用 UI。
+            if (background == null && plan.IsCurrentPage && _pluginBackgroundLayer != null)
+            {
+                return await RunOnUiThreadAsync(
+                    () => ComposePluginPage(plan, null, cancellationToken)).ConfigureAwait(false);
+            }
+
+            return await Task.Run(
+                () => ComposePluginPage(plan, background, cancellationToken), cancellationToken)
+                .ConfigureAwait(false);
         }
 
-        private PluginPageRender ComposePluginPage(uint pageIndex, BitmapSource background,
+        /// <summary>单页合成所需的全部输入，在 UI 线程一次性取齐后交给后台线程。</summary>
+        private sealed class PluginPagePlan
+        {
+            public Func<uint, CancellationToken, Task<BitmapSource>> Renderer;
+            public double WidthDip;
+            public double HeightDip;
+            public Rect? ContentRect;
+            public StrokeCollection Strokes;
+            public bool IsCurrentPage;
+        }
+
+        private PluginPageRender ComposePluginPage(PluginPagePlan plan, BitmapSource background,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            GetPluginPageSize(out var widthDip, out var heightDip);
+            // 页面区域：插件声明了内容矩形就用它（背景 Uniform 居中时的实际页面范围），
+            // 否则回落到整个背景层/画布。
+            var widthDip = plan.WidthDip;
+            var heightDip = plan.HeightDip;
+            var contentRect = plan.ContentRect;
+            var originX = contentRect?.X ?? 0;
+            var originY = contentRect?.Y ?? 0;
+
             var scale = GetPluginRenderScale(background, widthDip);
             var pixelWidth = Math.Max(1, (int)Math.Ceiling(widthDip * scale));
             var pixelHeight = Math.Max(1, (int)Math.Ceiling(heightDip * scale));
-            var strokes = GetPluginPageStrokesCore(pageIndex);
-            var useLiveVisual = background == null && pageIndex == _pluginCurrentPageIndex;
+            var strokes = plan.Strokes;
+            var useLiveVisual = background == null && plan.IsCurrentPage;
 
             var visual = new DrawingVisual();
             using (var context = visual.RenderOpen())
@@ -339,22 +417,36 @@ namespace Ink_Canvas
 
                 if (background != null)
                 {
+                    // 页面区域已按内容矩形裁定，此处铺满即为 1:1 还原，不会改变宽高比。
                     context.DrawImage(background, fullRect);
                 }
                 else if (useLiveVisual && _pluginBackgroundLayer != null)
                 {
-                    // 没有离屏回调时直接抓当前背景层的实时呈现。
-                    context.DrawRectangle(
-                        new VisualBrush(_pluginBackgroundLayer) { Stretch = Stretch.Fill }, null, fullRect);
+                    // 没有离屏回调时直接抓当前背景层的实时呈现；有内容矩形则只取该区域。
+                    var brush = new VisualBrush(_pluginBackgroundLayer) { Stretch = Stretch.None };
+                    if (contentRect.HasValue)
+                    {
+                        brush.ViewboxUnits = BrushMappingMode.Absolute;
+                        brush.Viewbox = contentRect.Value;
+                    }
+                    else
+                    {
+                        brush.Stretch = Stretch.Fill;
+                    }
+                    context.DrawRectangle(brush, null, fullRect);
                 }
 
+                // 墨迹在背景元素坐标系里，先平移掉内容矩形原点，再按渲染倍率缩放。
                 context.PushTransform(new ScaleTransform(scale, scale));
+                if (originX != 0 || originY != 0)
+                    context.PushTransform(new TranslateTransform(-originX, -originY));
                 try
                 {
                     foreach (Stroke stroke in strokes) stroke.Draw(context);
                 }
                 finally
                 {
+                    if (originX != 0 || originY != 0) context.Pop();
                     context.Pop();
                 }
             }
@@ -365,15 +457,26 @@ namespace Ink_Canvas
 
             return new PluginPageRender
             {
-                PngBytes = EncodePng(bitmap),
+                Bitmap = bitmap,
                 WidthDip = widthDip,
                 HeightDip = heightDip
             };
         }
 
-        /// <summary>页面尺寸即页面坐标系尺度：优先取背景层，其次取画布，最后回落到 1920x1080。</summary>
+        /// <summary>
+        /// 页面尺寸即页面坐标系尺度：插件声明的内容矩形优先（保持页面原始宽高比），
+        /// 其次背景层，再次画布，最后回落到 1920x1080。
+        /// </summary>
         private void GetPluginPageSize(out double widthDip, out double heightDip)
         {
+            var contentRect = _pluginPageContentRect;
+            if (contentRect.HasValue && contentRect.Value.Width > 0 && contentRect.Value.Height > 0)
+            {
+                widthDip = contentRect.Value.Width;
+                heightDip = contentRect.Value.Height;
+                return;
+            }
+
             widthDip = _pluginBackgroundLayer?.ActualWidth ?? 0;
             heightDip = _pluginBackgroundLayer?.ActualHeight ?? 0;
 
@@ -396,17 +499,6 @@ namespace Ink_Canvas
 
             // 跟随插件给出的位图分辨率，避免把高清页面渲染糊掉或把大图无谓放大。
             return Math.Max(1.0, Math.Min(4.0, background.PixelWidth / widthDip));
-        }
-
-        private static byte[] EncodePng(BitmapSource bitmap)
-        {
-            var encoder = new PngBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(bitmap));
-            using (var stream = new MemoryStream())
-            {
-                encoder.Save(stream);
-                return stream.ToArray();
-            }
         }
 
         #endregion

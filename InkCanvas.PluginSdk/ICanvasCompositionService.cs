@@ -38,6 +38,17 @@ namespace Ink_Canvas.Plugins
         bool HasBackgroundLayer { get; }
 
         /// <summary>
+        /// 声明背景层内真正承载页面内容的矩形（背景元素坐标系，DIP）。
+        /// <para>
+        /// 背景以 Uniform 等方式居中留边时必须调用：导出会只取该矩形作为 PDF 页面，
+        /// 从而保持页面原始宽高比，并把墨迹按同一矩形换算，避免被拉伸成画布比例。
+        /// 矩形外的墨迹（画在留边上的）导出时会被裁掉。
+        /// </para>
+        /// 传 <c>null</c> 表示整个背景层都是页面内容（默认行为）。
+        /// </summary>
+        void SetPageContentRect(Rect? contentRect);
+
+        /// <summary>
         /// 配置分页信息。<paramref name="pageRenderer"/> 用于导出非当前页时离屏渲染背景，
         /// 参数为从 0 开始的页索引，返回已 Freeze 的位图；为 <c>null</c> 时只能导出当前页。
         /// </summary>
