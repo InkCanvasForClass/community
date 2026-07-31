@@ -1271,7 +1271,10 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     }
                 };
 
-                // 弹窗关闭按钮支持
+                // 弹窗关闭按钮支持。
+                // 直接返回 PopupShellContent（或 PopupTabShellContent）时按原样接线；
+                // 插件常返回外层 UserControl、内含 Shell（如 PdfReader 的 ReaderPopupContent），
+                // 此时在视觉树里递归查找 Shell 再接线，否则标题栏关闭按钮点了没反应。
                 if (popupContent is PopupShellContent shell)
                 {
                     shell.CloseButtonControl.Click += (s, e) => popup.IsOpen = false;
@@ -1280,9 +1283,47 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 {
                     tabShell.CloseButtonControl.Click += (s, e) => popup.IsOpen = false;
                 }
+                else if (popupContent is FrameworkElement contentElement)
+                {
+                    // 立即尝试一次；Popup 未打开时子元素的视觉树可能尚未完全展开，
+                    // 因此再在 Opened 后重试一次（视觉树此时一定完整）。
+                    WireNestedShellCloseButton(contentElement, popup);
+                    popup.Opened += (s, e) => WireNestedShellCloseButton(contentElement, popup);
+                }
             }
 
             return view;
+        }
+
+        /// <summary>在弹窗内容里递归查找 PopupShellContent，把它的标题栏关闭按钮接到 popup 收起。</summary>
+        private static void WireNestedShellCloseButton(FrameworkElement content, Popup popup)
+        {
+            if (content == null || popup == null) return;
+
+            foreach (var nestedShell in FindVisualChildren<PopupShellContent>(content))
+            {
+                var closeButton = nestedShell.CloseButtonControl;
+                if (closeButton == null) continue;
+
+                // 用 Tag 记录已接线的 popup，避免 Opened 重试时重复订阅导致连关两次。
+                if (ReferenceEquals(closeButton.Tag, popup)) return;
+                closeButton.Tag = popup;
+                closeButton.Click += (s, e) => popup.IsOpen = false;
+                return; // 只需接最外层那个 Shell
+            }
+        }
+
+        private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) yield break;
+            int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childrenCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T result) yield return result;
+                foreach (var descendant in FindVisualChildren<T>(child))
+                    yield return descendant;
+            }
         }
 
         public void ApplyOrientation(FrameworkElement view, Orientation orientation)
