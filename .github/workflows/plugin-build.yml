@@ -118,34 +118,16 @@ jobs:
           $manifest = Get-Content (Join-Path $outputDir "manifest.json") | ConvertFrom-Json
           $pluginId = $manifest.Id
 
-          # 不应分发的程序集（宿主 Costura 已内嵌/提供），与 Validate 步骤的黑名单一致。
-          $forbidden = @(
-            'WinRT.Runtime.dll',
-            'Microsoft.Windows.SDK.NET.dll',
-            'InkCanvas.PluginSdk.dll',
-            'InkCanvas.Controls.dll'
-          )
-
           $staging = Join-Path $env:RUNNER_TEMP "icpx_$pluginId"
           if (Test-Path $staging) { Remove-Item $staging -Recurse -Force }
           New-Item -ItemType Directory -Path $staging | Out-Null
 
-          # 打包：manifest + 入口 DLL + deps.json + 插件自带的运行时依赖 DLL（如 iNKORE）。
-          $expected = @('manifest.json',
-                        $manifest.EntranceAssembly,
-                        "$($manifest.EntranceAssembly -replace '\.dll$','.deps.json')")
-          foreach ($f in $expected) {
+          foreach ($f in @("manifest.json", $manifest.EntranceAssembly,
+                           "$($manifest.EntranceAssembly -replace '\.dll$','.deps.json')")) {
             $src = Join-Path $outputDir $f
             if (-not (Test-Path $src)) { throw "缺少打包文件：$src" }
             Copy-Item $src $staging
           }
-          Get-ChildItem $outputDir -Filter *.dll |
-            Where-Object { $_.Name -notin $forbidden -and $_.Name -ne $manifest.EntranceAssembly } |
-            ForEach-Object {
-              Copy-Item $_.FullName $staging
-              $expected += $_.Name
-            }
-          $expected = $expected | Sort-Object
 
           $icpxName = "$pluginId.icpx"
           $icpxPath = Join-Path $env:GITHUB_WORKSPACE $icpxName
@@ -154,11 +136,14 @@ jobs:
           Add-Type -AssemblyName System.IO.Compression.FileSystem
           [System.IO.Compression.ZipFile]::CreateFromDirectory($staging, $icpxPath)
 
-          # .icpx 只能含 manifest、入口、deps.json 及插件自带的依赖 DLL，多一个都可能被宿主插件校验拒绝。
+          # .icpx 必须只含这几个文件，多一个都可能被宿主插件校验拒绝。
           $zip = [System.IO.Compression.ZipFile]::OpenRead($icpxPath)
           try { $entries = $zip.Entries | ForEach-Object { $_.FullName } }
           finally { $zip.Dispose() }
 
+          $expected = @('manifest.json',
+                        $manifest.EntranceAssembly,
+                        "$($manifest.EntranceAssembly -replace '\.dll$','.deps.json')")
           $unexpected = $entries | Where-Object { $_ -notin $expected }
           if ($unexpected) { throw "包内出现意外条目：$($unexpected -join ', ')" }
           $missing = $expected | Where-Object { $_ -notin $entries }
