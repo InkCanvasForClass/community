@@ -1,4 +1,3 @@
-using System.Windows;
 using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas

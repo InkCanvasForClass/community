@@ -475,7 +475,7 @@ namespace Ink_Canvas.Ink.Native
         {
             if (messageKind != NativePointerMessageKind.Update)
                 return availableCount;
-            return Math.Min(availableCount, (uint)MaximumUpdateHistoryEntries);
+            return Math.Min(availableCount, MaximumUpdateHistoryEntries);
         }
 
         private static NativePointerPenInfo[] Trim(NativePointerPenInfo[] source, uint count)

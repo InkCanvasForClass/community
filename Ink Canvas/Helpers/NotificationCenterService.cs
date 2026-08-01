@@ -29,16 +29,16 @@ namespace Ink_Canvas.Helpers
             if (string.IsNullOrWhiteSpace(_lastMessage.Title) || string.IsNullOrWhiteSpace(message.Title)) return false;
 
             TimeSpan interval = message.CreatedAt - _lastMessage.Time;
-            if (interval.TotalSeconds < 0) LogHelper.WriteLogToFile("消息队列为乱序",LogHelper.LogType.Info);
+            if (interval.TotalSeconds < 0) LogHelper.WriteLogToFile("消息队列为乱序", LogHelper.LogType.Info);
             double totalSeconds = Math.Abs(interval.TotalSeconds);
             if (_lastMessage.Title == message.Title && totalSeconds <= _deduplicationWindowSeconds && message.Source == _lastMessage.Source && message.Summary == _lastMessage.Summary)
             {
                 _lastMessage.Time = message.CreatedAt;
-                if (_isFirstDuplicateInCurrentSequence == true) LogHelper.WriteLogToFile($"{message.Source}发送的标题为{message.Title}的消息已被消息去重拦截",LogHelper.LogType.Info);
+                if (_isFirstDuplicateInCurrentSequence == true) LogHelper.WriteLogToFile($"{message.Source}发送的标题为{message.Title}的消息已被消息去重拦截", LogHelper.LogType.Info);
                 _isFirstDuplicateInCurrentSequence = false;
                 return true;
             }
-            
+
             return false;
         }
 

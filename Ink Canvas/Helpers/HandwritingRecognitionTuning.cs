@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using WinRtInk = global::Windows.UI.Input.Inking;
 
 namespace Ink_Canvas.Helpers

@@ -2,7 +2,6 @@ using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
