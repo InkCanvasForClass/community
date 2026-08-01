@@ -54,6 +54,9 @@ namespace Ink_Canvas.Plugins
             CancellationToken cancellationToken = default)
             => _mainWindow.SetPluginVisiblePagesAsync(visiblePages, cancellationToken);
 
+        public Task ScrollOffsetAsync(double deltaY, CancellationToken cancellationToken = default)
+            => _mainWindow.ScrollPluginOffsetAsync(deltaY, cancellationToken);
+
         public Task<StrokeCollection> GetStrokesForPageAsync(uint pageIndex,
             CancellationToken cancellationToken = default)
             => _mainWindow.GetPluginPageStrokesAsync(pageIndex, cancellationToken);
