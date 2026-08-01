@@ -1,5 +1,6 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Plugins;
+using Ink_Canvas.Properties;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -196,5 +197,33 @@ namespace Ink_Canvas
             }
             return result;
         }
+
+        /// <summary>
+        /// 触发「从文件插入图片」流程（文件对话框 + 插入画布）。冻结页拒绝返回 false。
+        /// </summary>
+        internal bool InsertPluginImage()
+        {
+            if (IsCurrentPageFrozen)
+            {
+                TryBlockFrozenPageMutation(FloatingBarStrings.Board_InsertImage);
+                return false;
+            }
+            if (inkCanvas == null) return false;
+
+            ImageOptionSelectFile_MouseUp(null, null);
+            return true;
+        }
+
+        /// <summary>更换当前画布背景色（打开颜色选择）。</summary>
+        internal void ChangePluginBackgroundColor()
+            => BoardChangeBackgroundColorBtn_MouseUp(null, null);
+
+        /// <summary>切换双指手势（画布平移/缩放）开关。</summary>
+        internal void TogglePluginGesture()
+            => TwoFingerGestureBorder_MouseUp(null, null);
+
+        /// <summary>退出白板模式（回到浮动栏）。</summary>
+        internal void ExitPluginWhiteboard()
+            => ImageBlackboard_MouseUp(null, null);
     }
 }

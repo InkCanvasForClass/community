@@ -108,6 +108,21 @@ namespace Ink_Canvas.Plugins
         /// <summary>删除当前白板页（仅剩一页时无效）。</summary>
         void DeleteWhiteboardPage();
 
+        /// <summary>
+        /// 打开「从文件插入图片」流程（文件对话框 + 插入画布）。
+        /// 返回是否成功触发流程；当前页冻结或不可插入时返回 false。
+        /// </summary>
+        bool InsertImage();
+
+        /// <summary>更换当前画布背景色（打开颜色选择）。</summary>
+        void ChangeBackgroundColor();
+
+        /// <summary>切换双指手势（画布平移/缩放）开关。</summary>
+        void ToggleGesture();
+
+        /// <summary>退出白板模式（回到浮动栏）。</summary>
+        void ExitWhiteboard();
+
         /// <summary>切换当前页的墨迹冻结状态。</summary>
         void ToggleInkFreeze();
     }

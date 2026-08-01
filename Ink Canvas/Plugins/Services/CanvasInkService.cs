@@ -78,6 +78,18 @@ namespace Ink_Canvas.Plugins
         public void DeleteWhiteboardPage()
             => RunOnUi(() => _mainWindow.DeleteWhiteboardPage());
 
+        public bool InsertImage()
+            => RunOnUi(() => _mainWindow.InsertPluginImage());
+
+        public void ChangeBackgroundColor()
+            => RunOnUi(() => _mainWindow.ChangePluginBackgroundColor());
+
+        public void ToggleGesture()
+            => RunOnUi(() => _mainWindow.TogglePluginGesture());
+
+        public void ExitWhiteboard()
+            => RunOnUi(() => _mainWindow.ExitPluginWhiteboard());
+
         public void ToggleInkFreeze()
             => RunOnUi(() => _mainWindow.ToggleInkFreeze());
     }
