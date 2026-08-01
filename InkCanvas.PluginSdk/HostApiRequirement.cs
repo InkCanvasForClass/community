@@ -16,8 +16,9 @@ namespace Ink_Canvas.Plugins
         public static readonly string MinSupportedHostVersion = "1.7.18";
 
         /// <summary>
-        /// 当前宿主编译版本号，与 <c>version.json</c> 一致。
+        /// 当前宿主编译版本号，由 Nerdbank.GitVersioning 依据 <c>version.json</c> 与 git 状态自动生成，
+        /// 随构建自动更新，不再手动维护。
         /// </summary>
-        public const string HostVersion = "1.7.18.7";
+        public const string HostVersion = ThisAssembly.AssemblyFileVersion;
     }
 }
