@@ -206,8 +206,13 @@ jobs:
             if ("${{ inputs.auto_release }}" -eq "true" -and $isMainPush) {
               $manifest = Get-Content (Join-Path "${{ steps.outdir.outputs.out_dir }}" "manifest.json") | ConvertFrom-Json
               $candidate = "v$($manifest.Version)"
+              # release 不存在时 gh release view 返回非零退出码——这是存在性探测的预期行为。
+              # GitHub Actions 的 pwsh 包装器会把最后的 $LASTEXITCODE 当作步骤退出码，
+              # 若不复位，探测"不存在"会让本步骤误报失败。这里显式捕获并复位。
               gh release view $candidate --repo "${{ github.repository }}" 2>$null | Out-Null
-              if ($LASTEXITCODE -eq 0) {
+              $probeCode = $LASTEXITCODE
+              $LASTEXITCODE = 0
+              if ($probeCode -eq 0) {
                 Write-Host "Release $candidate 已存在，跳过自动发版"
               } else {
                 Write-Host "版本更新到 $candidate，自动发版"
@@ -216,6 +221,8 @@ jobs:
             }
           }
           "tag=$tag" >> $env:GITHUB_OUTPUT
+          # 无论是否自动发版，本步骤都成功结束。
+          exit 0
 
       - name: Create GitHub Release
         if: steps.tag.outputs.tag != ''
