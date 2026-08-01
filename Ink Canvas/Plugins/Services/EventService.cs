@@ -1,4 +1,5 @@
 using System;
+using System.Windows.Ink;
 
 namespace Ink_Canvas.Plugins
 {
@@ -11,6 +12,9 @@ namespace Ink_Canvas.Plugins
         public event Action SlideShowEnded;
         public event Action<bool> TopMostChanged;
         public event Action AppExiting;
+        public event Action<StrokeCollection, StrokeCollection> StrokesChanged;
+        public event Action<int, int> WhiteboardPageChanged;
+        public event Action<bool, bool> UndoRedoStateChanged;
 
         private readonly MainWindow _mainWindow;
 
@@ -23,6 +27,10 @@ namespace Ink_Canvas.Plugins
                 _mainWindow.PluginPenModeChanged += OnPenModeChanged;
                 _mainWindow.PluginSlideChanged += OnSlideChanged;
                 _mainWindow.PluginSlideShowStateChanged += OnSlideShowStateChanged;
+                _mainWindow.PluginStrokesChanged += OnStrokesChanged;
+                _mainWindow.PluginWhiteboardPageChanged += OnWhiteboardPageChanged;
+                _mainWindow.PluginUndoRedoStateChanged += OnUndoRedoStateChanged;
+                _mainWindow.PluginTopMostChanged += OnTopMostChanged;
             }
         }
 
@@ -39,5 +47,14 @@ namespace Ink_Canvas.Plugins
         internal void OnSlideShowEnded() => SlideShowEnded?.Invoke();
         internal void OnTopMostChanged(bool topMost) => TopMostChanged?.Invoke(topMost);
         internal void OnAppExiting() => AppExiting?.Invoke();
+
+        internal void OnStrokesChanged(StrokeCollection added, StrokeCollection removed)
+            => StrokesChanged?.Invoke(added, removed);
+
+        internal void OnWhiteboardPageChanged(int pageIndex, int pageCount)
+            => WhiteboardPageChanged?.Invoke(pageIndex, pageCount);
+
+        internal void OnUndoRedoStateChanged(bool canUndo, bool canRedo)
+            => UndoRedoStateChanged?.Invoke(canUndo, canRedo);
     }
 }

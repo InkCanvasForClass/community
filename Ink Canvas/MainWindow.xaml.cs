@@ -2513,6 +2513,9 @@ namespace Ink_Canvas
         {
             WindowSettingsHelper.ApplyAlwaysOnTop(this);
             _popupManager?.OnTopmostSettingChanged();
+
+            // 通知插件窗口置顶状态变化（以实际应用后的 Topmost 为准）。
+            NotifyPluginTopMostChanged(Topmost);
         }
 
         private void StartTopmostMaintenance()

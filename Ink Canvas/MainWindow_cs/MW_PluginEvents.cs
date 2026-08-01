@@ -1,6 +1,7 @@
 using Ink_Canvas.Helpers;
 using System;
 using System.Windows.Controls;
+using System.Windows.Ink;
 
 namespace Ink_Canvas
 {
@@ -10,6 +11,10 @@ namespace Ink_Canvas
         internal event Action<bool> PluginPenModeChanged;
         internal event Action<int> PluginSlideChanged;
         internal event Action<bool> PluginSlideShowStateChanged;
+        internal event Action<StrokeCollection, StrokeCollection> PluginStrokesChanged;
+        internal event Action<int, int> PluginWhiteboardPageChanged;
+        internal event Action<bool, bool> PluginUndoRedoStateChanged;
+        internal event Action<bool> PluginTopMostChanged;
 
         private int _currentMode;
         private bool? _lastPluginPenMode;
@@ -80,5 +85,26 @@ namespace Ink_Canvas
                 }
             }
         }
+
+        private static void RaisePluginEvent<T1, T2>(Action<T1, T2> handlers, T1 value1, T2 value2, string eventName)
+        {
+            if (handlers == null) return;
+
+            foreach (Action<T1, T2> handler in handlers.GetInvocationList())
+            {
+                try
+                {
+                    handler(value1, value2);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"转发插件事件 {eventName} 失败: {ex.Message}", LogHelper.LogType.Warning);
+                }
+            }
+        }
+
+        /// <summary>向插件通知窗口置顶状态变化。</summary>
+        internal void NotifyPluginTopMostChanged(bool topMost)
+            => RaisePluginEvent(PluginTopMostChanged, topMost, nameof(PluginTopMostChanged));
     }
 }
