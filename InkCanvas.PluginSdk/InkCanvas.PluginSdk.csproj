@@ -33,6 +33,13 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+    <!-- 自包含引用 Nerdbank.GitVersioning：HostApiRequirement 使用 ThisAssembly.AssemblyFileVersion（NBGV 源生成）。
+         独立构建本 SDK（如 InkCanvas.PluginSdk 仓库的 sync-and-build 工作流）时不会带上仓库根 Directory.Build.props，
+         必须在此显式引用才能生成 ThisAssembly。
+         社区仓库内构建时 Directory.Build.props 已统一注入 NBGV（标记 NBGVProvidedByDirectoryBuildProps=true），
+         跳过此处引用以避免 NU1504 重复包引用。 -->
+    <PackageReference Include="Nerdbank.GitVersioning" Version="3.9.50" PrivateAssets="All"
+                      Condition="'$(NBGVProvidedByDirectoryBuildProps)' != 'true'" />
   </ItemGroup>
 
   <ItemGroup>

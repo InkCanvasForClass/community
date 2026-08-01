@@ -2,6 +2,9 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <NBGV_CacheMode>None</NBGV_CacheMode>
+    <!-- 标记：仓库树内已由本文件统一注入 Nerdbank.GitVersioning。
+         需要自包含引用 NBGV 的项目（如 InkCanvas.PluginSdk，供独立构建场景使用）用此属性避免重复引用产生 NU1504。 -->
+    <NBGVProvidedByDirectoryBuildProps>true</NBGVProvidedByDirectoryBuildProps>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Nerdbank.GitVersioning" Condition="!Exists('packages.config')">
