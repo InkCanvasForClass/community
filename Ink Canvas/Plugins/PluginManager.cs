@@ -97,7 +97,9 @@ namespace Ink_Canvas.Plugins
             _authorization = new PluginAuthorizationService(basePath);
         }
 
-        private readonly AssemblyLoadContext.ResolvingEventHandler _defaultResolvingHandler;
+        // net6 的 AssemblyLoadContext.Resolving 事件委托类型是 Func<AssemblyLoadContext, AssemblyName, Assembly>，
+        // 不能用更高版本 .NET 才存在的嵌套委托 ResolvingEventHandler 声明。
+        private readonly Func<AssemblyLoadContext, AssemblyName, Assembly> _defaultResolvingHandler;
 
         private Assembly OnDefaultContextResolving(AssemblyLoadContext context, AssemblyName name)
         {
