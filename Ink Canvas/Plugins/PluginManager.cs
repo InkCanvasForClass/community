@@ -855,10 +855,15 @@ namespace Ink_Canvas.Plugins
                 info.LoadStatus = PluginLoadStatus.Loaded;
                 _assemblyContexts[info.Id] = loadContext;
 
+                // 每个插件使用独立的宿主包装：Log/LogError 写入 PluginLogs/<plugin-id>/ 自己的文件夹，
+                // 不再混入宿主日志 PluginLogs/host/，也不进入主程序日志。
+                var pluginLogger = GetLogger(info.Id);
+                var pluginHost = new PluginHostProxy(this, pluginLogger, info.Id);
+
                 _currentLoadingPlugin = info;
                 try
                 {
-                    pluginInstance.Initialize(this);
+                    pluginInstance.Initialize(pluginHost);
                 }
                 finally
                 {
