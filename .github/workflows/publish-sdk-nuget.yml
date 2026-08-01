@@ -1,0 +1,94 @@
+name: Publish SDK to NuGet
+
+# 将 InkCanvas.PluginSdk / InkCanvas.Controls 打包并发布到 nuget.org。
+#
+# 触发方式：
+#   - push tag `sdk-v<version>`（如 sdk-v1.7.19.9）：以 tag 内版本号强制发包（等价于 -p:NBGV_OverrideVersion）。
+#   - workflow_dispatch：可手动输入版本号（留空则使用 NBGV 依据 git 状态计算的版本）。
+#
+# 依赖仓库 Secrets：NUGET_API_KEY（nuget.org 发布 API Key）。
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: '打包来源分支（默认 net6）'
+        required: false
+        default: 'net6'
+        type: string
+      version:
+        description: 'NuGet 包版本号（如 1.7.19.9）。留空则使用 NBGV 依据 git 状态计算的版本。'
+        required: false
+        default: ''
+        type: string
+  push:
+    tags:
+      - 'sdk-v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-sdk-nuget
+  cancel-in-progress: false
+
+jobs:
+  pack-and-push:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+        with:
+          # tag 触发时（push）ref 留空，自动检出被推送的 tag；手动触发时默认检出 net6。
+          ref: ${{ github.event_name == 'push' && '' || github.event.inputs.branch || 'net6' }}
+
+      - name: Setup .NET 6
+        uses: actions/setup-dotnet@v5.2.0
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Resolve package version
+        shell: pwsh
+        run: |
+          $version = ""
+          if ($env:GITHUB_EVENT_NAME -eq "push") {
+            # sdk-v1.7.19.9 -> 1.7.19.9
+            $version = $env:GITHUB_REF_NAME -replace "^sdk-v", ""
+          } elseif ($env:INPUT_VERSION) {
+            $version = $env:INPUT_VERSION
+          }
+          if ($version) {
+            "SDK_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+            Write-Host "Publishing with version: $version"
+          } else {
+            Write-Host "Publishing with NBGV-computed version."
+          }
+
+      - name: Pack InkCanvas.PluginSdk
+        shell: pwsh
+        run: |
+          $args = @("pack", "InkCanvas.PluginSdk/InkCanvas.PluginSdk.csproj", "-c", "Release", "-o", "dist")
+          if ($env:SDK_VERSION) { $args += "-p:NBGV_OverrideVersion=$env:SDK_VERSION" }
+          dotnet @args
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Pack InkCanvas.Controls
+        shell: pwsh
+        run: |
+          $args = @("pack", "InkCanvas.Controls/InkCanvas.Controls.csproj", "-c", "Release", "-o", "dist")
+          if ($env:SDK_VERSION) { $args += "-p:NBGV_OverrideVersion=$env:SDK_VERSION" }
+          dotnet @args
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Push to NuGet
+        shell: pwsh
+        run: |
+          $files = Get-ChildItem "$env:GITHUB_WORKSPACE/dist" -Filter *.nupkg
+          if (-not $files) { throw "No .nupkg files found in dist" }
+          foreach ($file in $files) {
+            Write-Host "Pushing $($file.Name)"
+            dotnet nuget push $file.FullName --source https://api.nuget.org/v3/index.json --api-key $env:NUGET_API_KEY --skip-duplicate
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}

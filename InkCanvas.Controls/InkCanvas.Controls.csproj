@@ -9,13 +9,33 @@
     <UseWPF>true</UseWPF>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <LangVersion>10</LangVersion>
-    <NoWarn>CA1416</NoWarn>
+    <NoWarn>CA1416;CS1591</NoWarn>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <!-- NuGet 打包元数据。包版本号由 Nerdbank.GitVersioning 依据 version.json 自动生成，无需手动维护。
+       手动发版时可用 -p:NBGV_OverrideVersion=x.y.z 强制指定。 -->
+  <PropertyGroup>
+    <PackageId>InkCanvas.Controls</PackageId>
+    <Authors>InkCanvasForClass</Authors>
+    <Description>InkCanvas 墨迹白板（ICC-CE）插件共用 WPF 控件库：工具栏按钮、颜色选择、设置卡片等，供插件 UI 与宿主视觉风格保持一致。</Description>
+    <PackageTags>wpf;controls;whiteboard;plugin;inkcanvas</PackageTags>
+    <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/InkCanvasForClass/community</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/InkCanvasForClass/community</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="iNKORE.UI.WPF.Modern" Version="0.10.2.1" />
     <PackageReference Include="iNKORE.UI.WPF" Version="1.2.8" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>
