@@ -312,15 +312,19 @@ namespace Ink_Canvas
             });
         }
 
-        /// <summary>把画布墨迹按当前可见页矩形逐个裁剪存回各物理页。</summary>
+        /// <summary>
+        /// 把画布墨迹按当前可见页矩形切分，转成「页面局部坐标」（减去页矩形原点）存入各物理页。
+        /// 页面局部坐标与展示模式无关：单页、双页、连续滚动下，同页墨迹始终在同一局部位置，
+        /// 恢复时按该页当前显示矩形原点映射回画布，从而保证模式切换不错位。
+        /// </summary>
         private void SaveVisiblePagesInk()
         {
             if (inkCanvas == null) return;
 
-            // 当前画布上的全部墨迹（页面坐标系）。
+            // 当前画布上的全部墨迹（画布坐标）。
             var canvasInk = CaptureCanvasStrokesInPageSpace();
 
-            // 没有可见页列表（单页模式）时，整块画布墨迹归属当前页。
+            // 没有可见页列表（单页模式）时，整块画布墨迹归属当前页，原点为画布原点（页面局部 = 画布坐标）。
             if (_pluginVisiblePages.Count == 0)
             {
                 _pluginPageInk[_pluginCurrentPageIndex] = canvasInk;
@@ -329,11 +333,15 @@ namespace Ink_Canvas
 
             foreach (var (pageIndex, rect) in _pluginVisiblePages)
             {
-                _pluginPageInk[pageIndex] = CropStrokesToRect(canvasInk, rect);
+                var cropped = CropStrokesToRect(canvasInk, rect);
+                // 转页面局部坐标：墨迹减去页矩形原点。
+                _pluginPageInk[pageIndex] = TranslateStrokes(cropped, -rect.X, -rect.Y);
             }
         }
 
-        /// <summary>清空画布并恢复各可见页的墨迹（页面坐标系 → 画布坐标系）。</summary>
+        /// <summary>
+        /// 清空画布并恢复各可见页墨迹：从页面局部坐标（加页矩形原点）映射回画布坐标。
+        /// </summary>
         private void ReplaceVisiblePagesInk()
         {
             if (inkCanvas == null) return;
@@ -347,10 +355,13 @@ namespace Ink_Canvas
             try
             {
                 inkCanvas.Strokes.Clear();
-                foreach (var (pageIndex, _) in _pluginVisiblePages)
+                foreach (var (pageIndex, rect) in _pluginVisiblePages)
                 {
                     if (!_pluginPageInk.TryGetValue(pageIndex, out var pageInk)) continue;
-                    var restored = CloneStrokes(pageInk, matrix);
+
+                    // 页面局部坐标 → 画布坐标：加页矩形原点，再应用画布矩阵。
+                    var inCanvas = TranslateStrokes(pageInk, rect.X, rect.Y);
+                    var restored = CloneStrokes(inCanvas, matrix);
                     if (restored.Count > 0) inkCanvas.Strokes.Add(restored);
                 }
                 HideEdgeExpandHint();
@@ -359,6 +370,27 @@ namespace Ink_Canvas
             {
                 _currentCommitType = previousCommitType;
             }
+        }
+
+        /// <summary>克隆墨迹并整体平移。</summary>
+        private static StrokeCollection TranslateStrokes(StrokeCollection source, double dx, double dy)
+        {
+            var result = new StrokeCollection();
+            if (source == null || (dx == 0 && dy == 0))
+            {
+                if (source != null) result.Add(source);
+                return result;
+            }
+
+            var matrix = new Matrix(1, 0, 0, 1, dx, dy);
+            foreach (Stroke stroke in source)
+            {
+                var clone = stroke.Clone();
+                clone.Transform(matrix, false);
+                result.Add(clone);
+            }
+
+            return result;
         }
 
         /// <summary>把墨迹裁剪到矩形内：保留落在矩形内的点，形成连续段笔画。</summary>
@@ -500,18 +532,21 @@ namespace Ink_Canvas
 
         private StrokeCollection GetPluginPageStrokesCore(uint pageIndex)
         {
-            // 多可见页模式：当前画布同时显示多页，按矩形实时裁剪该页的墨迹，
-            // 保证导出包含刚画下的内容（尚未翻页保存）。
+            // 多可见页模式：当前画布同时显示多页，按矩形实时裁剪该页的墨迹并转页面局部坐标，
+            // 保证导出包含刚画下的内容（尚未翻页保存），且与缓存坐标一致。
             if (_pluginVisiblePages.Count > 0)
             {
                 foreach (var (page, rect) in _pluginVisiblePages)
                 {
                     if (page == pageIndex)
-                        return CropStrokesToRect(CaptureCanvasStrokesInPageSpace(), rect);
+                    {
+                        var cropped = CropStrokesToRect(CaptureCanvasStrokesInPageSpace(), rect);
+                        return TranslateStrokes(cropped, -rect.X, -rect.Y);
+                    }
                 }
             }
 
-            // 单页模式：当前页以画布上的实时墨迹为准，其余页读缓存。
+            // 单页模式：当前页以画布上的实时墨迹为准（画布坐标 = 页面局部坐标），其余页读缓存。
             if (pageIndex == _pluginCurrentPageIndex) return CaptureCanvasStrokesInPageSpace();
 
             return _pluginPageInk.TryGetValue(pageIndex, out var cached)
@@ -656,9 +691,8 @@ namespace Ink_Canvas
                     var bgRect = UniformRect(background, fullRect);
                     context.DrawImage(background, bgRect);
 
-                    // 墨迹是页面坐标系（DIP），背景是像素。统一缩放系数：
-                    // 页面 DIP 宽 → 导出位图像素宽（背景实际占用的像素宽）。
-                    // 平移 originX/originY 把绝对画布坐标转到页面局部坐标后缩放。
+                    // 墨迹已是「页面局部坐标」（页矩形原点为 0，与展示模式无关），
+                    // 只需按 DIP→像素 缩放，不再平移。
                     double bgScale = bgRect.Width / widthDip;
 
                     // 诊断：记录墨迹变换前的原始边界，区分「墨迹本身宽」与「变换后宽」。
@@ -671,7 +705,7 @@ namespace Ink_Canvas
                         else rawBounds.Union(b);
                     }
 
-                    strokes = CloneStrokesScaled(strokes, bgScale, -originX, -originY);
+                    strokes = CloneStrokesScaled(strokes, bgScale, 0, 0);
 
                     Rect inkBounds = new Rect();
                     foreach (Stroke s in strokes)
