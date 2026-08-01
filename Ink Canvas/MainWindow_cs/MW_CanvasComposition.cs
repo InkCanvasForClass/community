@@ -71,6 +71,19 @@ namespace Ink_Canvas
         /// </summary>
         private readonly Dictionary<uint, Rect> _pluginPageRects = new Dictionary<uint, Rect>();
 
+        /// <summary>
+        /// 插件注册的画布双指手势处理器（如 PDF 阅读器）。非 null 时，宿主把画布上的
+        /// 双指操作转发给它；它返回 true 表示接管，宿主跳过默认的墨迹/画布变换。
+        /// </summary>
+        private Plugins.IPluginCanvasGestureHandler _pluginCanvasGestureHandler;
+
+        /// <summary>
+        /// 插件背景层内的「内容锚点」：墨迹换算（TransformToVisual）的目标元素。
+        /// 插件把页面内容放在会缩放/平移的容器、容器外还有固定背景时，必须指向该容器，
+        /// 宿主才能把缩放正确纳入墨迹的按页存取换算。null = 使用背景层根节点。
+        /// </summary>
+        private FrameworkElement _pluginContentAnchor;
+
         internal bool HasPluginBackgroundLayer => _pluginBackgroundLayer != null;
 
         internal uint PluginPageCount => _pluginPageCount;
@@ -116,6 +129,8 @@ namespace Ink_Canvas
             RunOnUiThread(() =>
             {
                 DetachPluginBackgroundLayer();
+                _pluginCanvasGestureHandler = null;
+                _pluginContentAnchor = null;
                 _pluginPageInk.Clear();
                 _pluginPageRects.Clear();
                 _pluginPageCount = 0;
@@ -249,6 +264,13 @@ namespace Ink_Canvas
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
+                // 双指手势/缩放在两次同步之间可能通过 TransformPluginInkAsync 移动过墨迹，
+                // 导致 _pluginScrollOffsetY/_pluginInkTranslateY 与墨迹实际位置失步。
+                // 这里归零：SaveVisiblePagesInk 会用当前的 TransformToVisual 矩阵换算墨迹，
+                // 之后的 ScrollPluginOffsetAsync 以同步后的墨迹为基准算增量，位移不受污染。
+                _pluginScrollOffsetY = 0;
+                _pluginInkTranslateY = 0;
+
                 // 先把当前画布墨迹按旧的可见页矩形切分存回各页，再切换。
                 SaveVisiblePagesInk();
 
@@ -319,10 +341,64 @@ namespace Ink_Canvas
                 // 与已平移的墨迹错位，把墨迹误存到相邻页。
                 if (shift != 0)
                 {
+                    // 墨迹在画布坐标平移 shift；ContentRect 在内容锚点坐标（内容层带缩放时，
+                    // 内容坐标 ↔ 画布坐标差 scale 倍），因此矩形平移量 = shift / scale。
+                    // scale 取「画布 → 内容」矩阵的 M11（锚点缩放 s 时该矩阵含 1/s）。
+                    double toContent = 1.0;
+                    var canvasToContent = GetCanvasToPageMatrix();
+                    if (canvasToContent.M11 > 0
+                        && !double.IsNaN(canvasToContent.M11)
+                        && !double.IsInfinity(canvasToContent.M11))
+                    {
+                        toContent = canvasToContent.M11;
+                    }
+
+                    double rectShift = shift * toContent;
                     var updated = new List<(uint PageIndex, Rect ContentRect)>(_pluginVisiblePages.Count);
                     foreach (var (pageIndex, rect) in _pluginVisiblePages)
-                        updated.Add((pageIndex, new Rect(rect.X, rect.Y + shift, rect.Width, rect.Height)));
+                        updated.Add((pageIndex, new Rect(rect.X, rect.Y + rectShift, rect.Width, rect.Height)));
                     _pluginVisiblePages = updated;
+                }
+            });
+        }
+
+        /// <summary>注册/注销插件画布双指手势处理器（线程安全，任意线程可调用）。</summary>
+        internal void SetPluginCanvasGestureHandler(Plugins.IPluginCanvasGestureHandler handler)
+        {
+            RunOnUiThread(() => { _pluginCanvasGestureHandler = handler; });
+        }
+
+        /// <summary>设置插件背景层内的内容锚点（墨迹换算目标，见 <see cref="_pluginContentAnchor"/>）。</summary>
+        internal void SetPluginCanvasContentAnchor(FrameworkElement contentLayer)
+        {
+            RunOnUiThread(() => { _pluginContentAnchor = contentLayer; });
+        }
+
+        /// <summary>
+        /// 按矩阵变换当前画布上的全部墨迹（仅笔画坐标，保留笔尖宽度）。
+        /// 供插件双指缩放/平移时让墨迹与背景层 RenderTransform 实时同步。
+        /// 与 <see cref="ScrollPluginOffsetAsync"/> 的区别：这是通用矩阵（缩放+平移），
+        /// 且不改动可见页矩形——背景层 RenderTransform 的缩放已包含在
+        /// <see cref="GetCanvasToPageMatrix"/> 的 <c>TransformToVisual</c> 里，
+        /// 墨迹的保存/恢复按该矩阵自动对齐，无需在矩形上同步。
+        /// </summary>
+        internal Task TransformPluginInkAsync(Matrix matrix, CancellationToken cancellationToken)
+        {
+            return RunOnUiThreadAsync(() =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (inkCanvas == null || matrix.IsIdentity) return;
+
+                var previousCommitType = _currentCommitType;
+                _currentCommitType = CommitReason.CodeInput;
+                try
+                {
+                    foreach (Stroke stroke in inkCanvas.Strokes)
+                        stroke.Transform(matrix, false);
+                }
+                finally
+                {
+                    _currentCommitType = previousCommitType;
                 }
             });
         }
@@ -476,14 +552,17 @@ namespace Ink_Canvas
 
         /// <summary>
         /// 画布坐标 → 页面坐标的变换。背景层铺满画布时两者原点重合，此处仍显式计算以兼容带边距的背景元素。
+        /// 目标优先用插件声明的内容锚点（<see cref="_pluginContentAnchor"/>）：内容锚点带缩放/平移变换时，
+        /// TransformToVisual 会把该变换正确纳入墨迹换算；未声明时回退到背景层根节点。
         /// </summary>
         private Matrix GetCanvasToPageMatrix()
         {
-            if (_pluginBackgroundLayer == null || inkCanvas == null) return Matrix.Identity;
+            FrameworkElement anchor = _pluginContentAnchor ?? _pluginBackgroundLayer;
+            if (anchor == null || inkCanvas == null) return Matrix.Identity;
 
             try
             {
-                var transform = inkCanvas.TransformToVisual(_pluginBackgroundLayer);
+                var transform = inkCanvas.TransformToVisual(anchor);
                 if (transform is MatrixTransform matrixTransform) return matrixTransform.Matrix;
 
                 var origin = transform.Transform(new Point(0, 0));
@@ -493,7 +572,7 @@ namespace Ink_Canvas
             }
             catch (InvalidOperationException)
             {
-                // 背景层尚未接入可视化树时按重合处理。
+                // 锚点尚未接入可视化树时按重合处理。
                 return Matrix.Identity;
             }
         }
