@@ -1,5 +1,7 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Plugins;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -15,6 +17,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
     public static class BoardToolbarRegistry
     {
         private static List<IBoardToolbarItem> _items;
+        private static readonly List<PluginToolbarItemInfo> _pluginItems = new List<PluginToolbarItemInfo>();
         private static readonly string ConfigSubDir = Path.Combine("Configs", "BoardToolbarConfigs");
 
         public static IReadOnlyList<IBoardToolbarItem> Discover()
@@ -36,6 +39,13 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                 })
                 .Where(i => i != null)
                 .ToList();
+
+            // 追加插件注册的白板工具栏组件。
+            foreach (var pluginItem in _pluginItems)
+            {
+                _items.Add(new PluginBoardToolbarItemWrapper(pluginItem));
+            }
+
             return _items;
         }
 
@@ -44,6 +54,71 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             var items = Discover();
             return items.FirstOrDefault(i => i.Id == id);
         }
+
+        #region 插件组件注册
+
+        /// <summary>
+        /// 注册一个插件白板工具栏组件。首个注册的插件启动时把组件追加进 active 配置（默认 center→tools），
+        /// 后续启动只加入组件库，避免用户删除组件后重启又被自动加回。
+        /// </summary>
+        public static void RegisterPluginItem(PluginToolbarItemInfo itemInfo, bool autoAddToActiveConfig = true)
+        {
+            if (itemInfo == null || string.IsNullOrEmpty(itemInfo.Id)) return;
+            if (_pluginItems.Any(item => string.Equals(item.Id, itemInfo.Id, StringComparison.OrdinalIgnoreCase))) return;
+
+            _pluginItems.Add(itemInfo);
+            LogHelper.WriteLogToFile($"BoardToolbarRegistry: 插件注册白板工具栏组件 [{itemInfo.Id}] (autoAddToActiveConfig={autoAddToActiveConfig})", LogHelper.LogType.Info);
+
+            if (autoAddToActiveConfig)
+            {
+                EnsurePluginItemInActiveConfig(itemInfo.Id);
+            }
+
+            if (_items != null)
+            {
+                _items.Add(new PluginBoardToolbarItemWrapper(itemInfo));
+            }
+        }
+
+        private static void EnsurePluginItemInActiveConfig(string itemId)
+        {
+            EnsureDefaultConfigExists();
+
+            var configName = SettingsManager.Settings?.BoardToolbarConfigName;
+            if (string.IsNullOrWhiteSpace(configName)) configName = "default";
+
+            var layout = LoadActiveConfig() ?? BoardToolbarLayoutSettings.CreateDefault();
+            layout.Areas ??= new List<BoardToolbarAreaEntry>();
+
+            // 定位 center 区；没有则新建。
+            var centerArea = layout.Areas.FirstOrDefault(a => string.Equals(a.Id, "center", StringComparison.OrdinalIgnoreCase));
+            if (centerArea == null)
+            {
+                centerArea = new BoardToolbarAreaEntry { Id = "center", Groups = new List<BoardToolbarGroupEntry>() };
+                layout.Areas.Add(centerArea);
+            }
+            centerArea.Groups ??= new List<BoardToolbarGroupEntry>();
+
+            // 定位 center 的 tools 组；没有则用第一个组，再没有则新建 "plugin" 组。
+            var group = centerArea.Groups.FirstOrDefault(g => string.Equals(g.Id, "tools", StringComparison.OrdinalIgnoreCase))
+                        ?? centerArea.Groups.FirstOrDefault();
+            if (group == null)
+            {
+                group = new BoardToolbarGroupEntry { Id = "plugin", Components = new List<BoardToolbarComponentEntry>() };
+                centerArea.Groups.Add(group);
+            }
+            group.Components ??= new List<BoardToolbarComponentEntry>();
+
+            if (group.Components.Any(c => string.Equals(c.Id, itemId, StringComparison.OrdinalIgnoreCase))) return;
+
+            group.Components.Add(new BoardToolbarComponentEntry { Id = itemId });
+            SaveConfigFile(configName, layout);
+            LogHelper.WriteLogToFile(
+                $"BoardToolbarRegistry: 已将插件组件 [{itemId}] 加入当前配置 [{configName}] 的 {group.Id} 组",
+                LogHelper.LogType.Info);
+        }
+
+        #endregion
 
         public static FrameworkElement BuildView(string id, IBoardToolbarHost host)
         {
@@ -155,6 +230,13 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             var opacity = entry.GetSettingDouble("opacity");
             if (opacity.HasValue)
                 view.Opacity = Math.Clamp(opacity.Value, 0, 1);
+
+            // 插件自定义设置：通过 PluginToolbarItemInfo.ApplySettings 回调应用。
+            var pluginItem = _pluginItems.FirstOrDefault(p => p.Id == entry.Id);
+            if (pluginItem != null)
+            {
+                pluginItem.ApplySettings?.Invoke(view, entry.Settings);
+            }
         }
 
         public static Border CreateGroupBorder(List<FrameworkElement> views, Orientation orientation = Orientation.Horizontal)
@@ -422,5 +504,44 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
         public static void RebuildRightToolbar(IBoardToolbarHost host, Panel container) { }
 
         #endregion
+    }
+
+    /// <summary>
+    /// 将 <see cref="PluginToolbarItemInfo"/> 包装为 <see cref="IBoardToolbarItem"/>，
+    /// 供 <see cref="BoardToolbarRegistry"/> 在构建白板工具栏时使用（与浮动栏 PluginToolbarItemWrapper 同构）。
+    /// </summary>
+    internal sealed class PluginBoardToolbarItemWrapper : IBoardToolbarItem
+    {
+        private readonly PluginToolbarItemInfo _info;
+
+        public string Id => _info.Id;
+        public string DisplayName => _info.DisplayName;
+        public string Description => _info.Description;
+        public string IconGeometry => _info.IconGeometry;
+        public FontIconData? IconKey => null;
+        public ButtonPosition DefaultPosition => ButtonPosition.Middle;
+
+        public PluginBoardToolbarItemWrapper(PluginToolbarItemInfo info)
+        {
+            _info = info;
+        }
+
+        public FrameworkElement BuildView(IBoardToolbarHost host)
+        {
+            var view = _info.ViewFactory?.Invoke();
+            if (view != null)
+            {
+                _info.ApplyOrientation?.Invoke(view, Orientation.Horizontal);
+            }
+            return view;
+        }
+
+        public void ApplyPosition(FrameworkElement view, ButtonPosition position)
+        {
+            if (view is BoardToolbarButton btn)
+            {
+                btn.Position = position;
+            }
+        }
     }
 }

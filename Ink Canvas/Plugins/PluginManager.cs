@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace Ink_Canvas.Plugins
 {
@@ -1163,6 +1164,40 @@ namespace Ink_Canvas.Plugins
             catch (Exception ex)
             {
                 LogError(string.Format("Failed to register toolbar item {0}", itemInfo.Id), ex);
+            }
+        }
+
+        /// <summary>
+        /// 向白板工具栏注册插件组件。行为与 <see cref="RegisterToolbarItem"/> 相同，仅目标工具栏不同。
+        /// </summary>
+        public void RegisterBoardToolbarItem(PluginToolbarItemInfo itemInfo)
+        {
+            if (itemInfo == null || string.IsNullOrEmpty(itemInfo.Id)) return;
+
+            try
+            {
+                // 复用 .toolbar_registered 标记：首次注册时把组件追加进 active 白板配置，
+                // 后续启动只加入组件库，避免用户删除组件后重启又被自动加回。
+                bool isFirstRegistration = IsFirstToolbarRegistration();
+                Controls.Toolbar.BoardToolbar.BoardToolbarRegistry.RegisterPluginItem(itemInfo, autoAddToActiveConfig: isFirstRegistration);
+                if (isFirstRegistration)
+                {
+                    MarkToolbarRegistered();
+                }
+
+                // 白板工具栏已构建时延迟重建以显示插件组件（在 Initialize 完成后执行，
+                // 避免 ViewFactory 依赖尚未初始化完成的插件状态）。
+                if (Application.Current?.MainWindow is MainWindow mw)
+                {
+                    mw.Dispatcher.BeginInvoke(new Action(mw.RebuildBoardToolbar),
+                        System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                }
+
+                Log(string.Format("Plugin registered board toolbar item: {0} (autoAdd={1})", itemInfo.Id, isFirstRegistration));
+            }
+            catch (Exception ex)
+            {
+                LogError(string.Format("Failed to register board toolbar item {0}", itemInfo.Id), ex);
             }
         }
 

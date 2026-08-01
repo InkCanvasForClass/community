@@ -37,6 +37,11 @@ namespace Ink_Canvas.Plugins
         void RegisterToolbarItem(PluginToolbarItemInfo itemInfo);
 
         /// <summary>
+        /// 向白板工具栏注册插件组件。行为与 <see cref="RegisterToolbarItem"/> 相同，仅目标工具栏不同。
+        /// </summary>
+        void RegisterBoardToolbarItem(PluginToolbarItemInfo itemInfo);
+
+        /// <summary>
         /// 注册一个 IPC 方法，由插件调用。返回前请确保未注册相同 <paramref name="method"/>。
         /// </summary>
         void RegisterIpcHandler(string method, Func<System.Text.Json.JsonElement?, object> handler);
