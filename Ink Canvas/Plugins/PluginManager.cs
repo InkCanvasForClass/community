@@ -1312,6 +1312,20 @@ namespace Ink_Canvas.Plugins
                     return LoadFromAssemblyPath(assemblyPath);
                 }
 
+                // 4. 扁平回退：直接探测 <插件目录>/<SimpleName>.dll。
+                //    插件 .deps.json 若记录了 lib/net6.0-.../ 相对路径而 DLL 实际平铺在插件目录根，
+                //    AssemblyDependencyResolver 解析不到；此回退与 .NET 默认 ALC 探测 App 目录的行为一致。
+                if (_info?.PluginFolderPath != null)
+                {
+                    var flatPath = Path.Combine(_info.PluginFolderPath, assemblyName.Name + ".dll");
+                    if (File.Exists(flatPath))
+                    {
+                        if (_authorization != null && !_authorization.RequestExternalAuthorization(_info, flatPath))
+                            return null;
+                        return LoadFromAssemblyPath(flatPath);
+                    }
+                }
+
                 return null;
             }
 

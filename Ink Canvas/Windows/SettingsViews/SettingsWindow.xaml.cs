@@ -907,13 +907,17 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         private void LoadPluginSettingsPages()
         {
-            try
-            {
-                var pluginManager = Ink_Canvas.Plugins.PluginManager.Instance;
-                var plugins = pluginManager.Plugins;
+            var pluginManager = Ink_Canvas.Plugins.PluginManager.Instance;
+            var plugins = pluginManager.Plugins;
 
-                foreach (var plugin in plugins)
+            foreach (var plugin in plugins)
+            {
+                // \u5355\u4E2A\u63D2\u4EF6\u7684\u8BBE\u7F6E\u9875\u5931\u8D25\uFF08\u7F3A\u4F9D\u8D56\u3001XAML \u89E3\u6790\u5F02\u5E38\u7B49\uFF09\u4E0D\u5E94\u4E2D\u6B62\u5176\u5B83\u63D2\u4EF6\u7684\u8BBE\u7F6E\u9875\u52A0\u8F7D\u3002
+                // \u4E4B\u524D\u7684\u6574\u4F53 try/catch \u4F1A\u8BA9\u6392\u5728\u5931\u8D25\u63D2\u4EF6\u4E4B\u540E\u7684\u6240\u6709\u63D2\u4EF6\u8BBE\u7F6E\u9875\u90FD\u51FA\u4E0D\u6765\u3002
+                try
                 {
+                    if (plugin.Instance == null) continue;
+
                     var settingsView = plugin.Instance.GetSettingsView();
                     if (settingsView != null)
                     {
@@ -936,10 +940,11 @@ namespace Ink_Canvas.Windows.SettingsViews
                         NavigationViewControl.MenuItems.Add(navItem);
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(string.Format(NavStrings.Nav_LoadPluginSettingsFailed, ex.Message));
+                catch (Exception ex)
+                {
+                    pluginManager.LogError(string.Format(
+                        NavStrings.Nav_LoadPluginSettingsFailed, plugin.Name + ": " + ex.Message), ex);
+                }
             }
         }
         #endregion
