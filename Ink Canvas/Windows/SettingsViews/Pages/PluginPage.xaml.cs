@@ -429,25 +429,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 // 3. 标记为待卸载状态
                 info.LoadStatus = PluginLoadStatus.Disabled;
 
-                // 4. 尽量立即删除目录（热卸载成功后一般可删）；失败则保留 .uninstall 待下次启动清理
-                try
-                {
-                    if (Directory.Exists(info.PluginFolderPath))
-                    {
-                        ProcessProtectionManager.ReleaseLocksForPath(info.PluginFolderPath);
-                        GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
-                        GC.WaitForPendingFinalizers();
-                        Directory.Delete(info.PluginFolderPath, true);
-                    }
-                }
-                catch (Exception deleteEx)
-                {
-                    LogHelper.WriteLogToFile(
-                        $"Plugin | 热删除目录失败，将在下次启动清理: {info.Id} - {deleteEx.Message}",
-                        LogHelper.LogType.Warning);
-                }
-
                 LoadPlugins();
+                AskRestart();
             }
             catch (Exception ex)
             {
