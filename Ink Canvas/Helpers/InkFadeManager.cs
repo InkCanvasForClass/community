@@ -1,3 +1,4 @@
+using Ink_Canvas.Ink.Native;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -9,7 +10,6 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-using Ink_Canvas.Ink.Native;
 
 namespace Ink_Canvas.Helpers
 {

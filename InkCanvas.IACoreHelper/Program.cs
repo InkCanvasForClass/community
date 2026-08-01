@@ -54,7 +54,8 @@ namespace InkCanvas.IACoreHelper
                         {
                             parentExited.Set();
                         }
-                    }) { IsBackground = true, Name = "IACoreHelper.ParentWatcher" };
+                    })
+                    { IsBackground = true, Name = "IACoreHelper.ParentWatcher" };
                     parentWatcher.Start();
 
                     // 把 WaitForConnection 与守护等待放到一起：任一信号先到就退出。
@@ -68,7 +69,8 @@ namespace InkCanvas.IACoreHelper
                         {
                             Console.Error.WriteLine("IACoreHelper fatal: " + ex.Message);
                         }
-                    }) { IsBackground = true, Name = "IACoreHelper.PipeServer" };
+                    })
+                    { IsBackground = true, Name = "IACoreHelper.PipeServer" };
                     serverThread.Start();
 
                     // 主线程阻塞直到父进程消失。守护线程一旦 Set，主线程退出，进程随之终止。
@@ -105,7 +107,8 @@ namespace InkCanvas.IACoreHelper
                         try { server?.Dispose(); } catch { }
                         return;
                     }
-                }) { IsBackground = true, Name = "IACoreHelper.CancelOnParentExit" };
+                })
+                { IsBackground = true, Name = "IACoreHelper.CancelOnParentExit" };
                 serverCanceller.Start();
 
                 while (!shouldExit())

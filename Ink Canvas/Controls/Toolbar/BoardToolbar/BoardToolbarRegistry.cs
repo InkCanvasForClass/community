@@ -343,7 +343,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             // 优先读 SettingsManager.Settings.BoardToolbarConfigName，让用户在 BoardToolbarPage
             // 切换配置时 MainWindow 工具栏跟随切换；缺失/损坏/未设置时回退到 "default"，
             // 再损坏则使用内置 CreateDefault——保证启动永远能加载出可用布局。
-            var configName = (SettingsManager.Settings?.BoardToolbarConfigName as string);
+            var configName = SettingsManager.Settings?.BoardToolbarConfigName;
             if (string.IsNullOrWhiteSpace(configName)) configName = "default";
 
             var layout = LoadConfigFile(configName);
