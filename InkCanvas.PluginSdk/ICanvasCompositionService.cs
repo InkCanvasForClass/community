@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Ink;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace Ink_Canvas.Plugins
@@ -87,6 +88,29 @@ namespace Ink_Canvas.Plugins
         /// 与插件背景长条的滚动保持一致。插件应在滚动背景层后立即调用，使墨迹实时跟随。
         /// </summary>
         Task ScrollOffsetAsync(double deltaY, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 注册/注销画布双指手势处理器。宿主在检测到画布上的双指操作
+        /// （捏合/平移，见 <see cref="IPluginCanvasGestureHandler"/>）时，会优先转发给该处理器；
+        /// 处理器返回 <c>true</c> 表示插件接管该事件，宿主跳过默认的墨迹/画布变换。
+        /// 传 <c>null</c> 表示注销。同一时刻只允许一个处理器。
+        /// </summary>
+        void SetCanvasGestureHandler(IPluginCanvasGestureHandler handler);
+
+        /// <summary>
+        /// 声明背景层内的「内容锚点」：墨迹换算（<see cref="TransformToVisual"/>）的目标元素。
+        /// 当插件把页面内容放在一个会缩放/平移的容器里、而容器之外还有固定背景时，
+        /// 必须把锚点指向该内容容器，宿主才能把缩放正确纳入墨迹的按页存取换算。
+        /// 传 <c>null</c> 表示使用注入的背景层根节点（默认）。
+        /// </summary>
+        void SetCanvasContentAnchor(FrameworkElement contentLayer);
+
+        /// <summary>
+        /// 按 <paramref name="matrix"/> 变换当前画布上的全部墨迹（仅变换笔画坐标，
+        /// 保留笔尖宽度），用于双指缩放/平移时让墨迹与插件背景层实时同步。
+        /// 变换作用于画布坐标（与背景层 RenderTransform 同一坐标系）。
+        /// </summary>
+        Task TransformInkAsync(Matrix matrix, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// 读取指定页的墨迹副本，坐标已绑定到背景层页面坐标系

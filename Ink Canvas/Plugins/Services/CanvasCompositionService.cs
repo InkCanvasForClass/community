@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Ink;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace Ink_Canvas.Plugins
@@ -56,6 +57,15 @@ namespace Ink_Canvas.Plugins
 
         public Task ScrollOffsetAsync(double deltaY, CancellationToken cancellationToken = default)
             => _mainWindow.ScrollPluginOffsetAsync(deltaY, cancellationToken);
+
+        public void SetCanvasGestureHandler(IPluginCanvasGestureHandler handler)
+            => _mainWindow.SetPluginCanvasGestureHandler(handler);
+
+        public void SetCanvasContentAnchor(FrameworkElement contentLayer)
+            => _mainWindow.SetPluginCanvasContentAnchor(contentLayer);
+
+        public Task TransformInkAsync(Matrix matrix, CancellationToken cancellationToken = default)
+            => _mainWindow.TransformPluginInkAsync(matrix, cancellationToken);
 
         public Task<StrokeCollection> GetStrokesForPageAsync(uint pageIndex,
             CancellationToken cancellationToken = default)

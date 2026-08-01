@@ -1018,6 +1018,12 @@ namespace Ink_Canvas
 
         private bool ResolveTwoFingerGestureAllowed()
         {
+            // 插件画布手势（如 PDF 阅读器双指缩放/平移）：只要注册了就强制放行双指手势，
+            // 让原生湿墨路由把双指判为手势（CanvasGesture）而非墨迹——否则第二指会在
+            // 宿主双指手势设置关闭时被当成墨迹画出来。单指书写时 ActiveTouchCount=1，
+            // 不受影响（DecidePen 要求 >=2 才进 CanvasGesture）。
+            if (_pluginCanvasGestureHandler != null) return true;
+
             if (IsInPPTPresentationMode)
                 return Settings.PowerPointSettings.IsEnableTwoFingerGestureInPresentationMode
                        && Settings.Gesture.IsEnableTwoFingerGesture;
