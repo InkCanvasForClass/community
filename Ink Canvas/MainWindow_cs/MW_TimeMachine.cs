@@ -405,6 +405,7 @@ namespace Ink_Canvas
         private void TimeMachine_OnUndoStateChanged(bool status)
         {
             IsUndoEnabled = status;
+            RaisePluginEvent(PluginUndoRedoStateChanged, IsUndoEnabled, IsRedoEnabled, nameof(PluginUndoRedoStateChanged));
         }
 
         /// <summary>
@@ -417,6 +418,7 @@ namespace Ink_Canvas
         private void TimeMachine_OnRedoStateChanged(bool status)
         {
             IsRedoEnabled = status;
+            RaisePluginEvent(PluginUndoRedoStateChanged, IsUndoEnabled, IsRedoEnabled, nameof(PluginUndoRedoStateChanged));
         }
 
         /// <summary>
@@ -459,6 +461,11 @@ namespace Ink_Canvas
                 TryBlockFrozenPageMutation("修改冻结页面");
                 return;
             }
+
+            // 通知插件墨迹集合变化。冻结页回滚已在上面 return，不会误报；
+            // 程序性 CodeInput 变化（含插件自身经 ICanvasInkService 的插入/清除）也会触发，
+            // 插件需避免在处理器内再次写入造成循环。
+            RaisePluginEvent(PluginStrokesChanged, e?.Added, e?.Removed, nameof(PluginStrokesChanged));
 
             if (!isHidingSubPanelsWhenInking)
             {

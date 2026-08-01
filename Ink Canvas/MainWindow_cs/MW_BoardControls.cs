@@ -31,15 +31,37 @@ namespace Ink_Canvas
         /// </summary>
         private StrokeCollection lastTouchDownStrokeCollection = new StrokeCollection();
 
+        private int _currentWhiteboardIndex = 1;
+
         /// <summary>
-        /// 当前白板页面索引
+        /// 当前白板页面索引（从 1 开始）
         /// </summary>
-        private int CurrentWhiteboardIndex = 1;
+        internal int CurrentWhiteboardIndex
+        {
+            get => _currentWhiteboardIndex;
+            set
+            {
+                if (_currentWhiteboardIndex == value) return;
+                _currentWhiteboardIndex = value;
+                RaisePluginEvent(PluginWhiteboardPageChanged, _currentWhiteboardIndex, WhiteboardTotalCount, nameof(PluginWhiteboardPageChanged));
+            }
+        }
+
+        private int _whiteboardTotalCount = 1;
 
         /// <summary>
         /// 白板页面总数
         /// </summary>
-        private int WhiteboardTotalCount = 1;
+        internal int WhiteboardTotalCount
+        {
+            get => _whiteboardTotalCount;
+            set
+            {
+                if (_whiteboardTotalCount == value) return;
+                _whiteboardTotalCount = value;
+                RaisePluginEvent(PluginWhiteboardPageChanged, CurrentWhiteboardIndex, _whiteboardTotalCount, nameof(PluginWhiteboardPageChanged));
+            }
+        }
 
         /// <summary>
         /// 存储每个白板页面的时间机器历史记录

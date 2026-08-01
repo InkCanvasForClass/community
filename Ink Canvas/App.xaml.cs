@@ -68,6 +68,8 @@ namespace Ink_Canvas
         public static Process watchdogProcess;
         // 新增：标记是否为软件内主动退出
         public static bool IsAppExitByUser;
+        // 新增：插件事件服务引用，App_Exit 时向插件广播 AppExiting
+        private static Plugins.EventService _pluginEventService;
         // 新增：标记是否正在触发安装更新（用于跳过某些交互确认）
         public static bool IsUpdateInstalling;
         // 新增：标记是否启用了UIA置顶功能
@@ -197,6 +199,9 @@ namespace Ink_Canvas
             var presentationSourceService = new Plugins.Services.PresentationSourceService(mainWindow);
             mainWindow.AttachPresentationSourceService(presentationSourceService);
 
+            // 保存事件服务引用，App_Exit 时向插件广播 AppExiting。
+            _pluginEventService = new Plugins.EventService(mainWindow);
+
             var services = new (Type iface, object impl)[]
             {
                 (typeof(Plugins.IAppRestartService),      new Plugins.AppRestartService()),
@@ -210,6 +215,8 @@ namespace Ink_Canvas
                 (typeof(Plugins.IWindowOverviewService),        new Plugins.WindowOverviewService(mainWindow.WindowOverviewModel)),
                 (typeof(Plugins.ICanvasCompositionService),      new Plugins.CanvasCompositionService(mainWindow)),
                 (typeof(Plugins.IPresentationSourceService),     presentationSourceService),
+                (typeof(Plugins.ICanvasInkService),        new Plugins.CanvasInkService(mainWindow)),
+                (typeof(Plugins.IRecognitionService),      new Plugins.RecognitionService()),
             };
 
             foreach (var (iface, impl) in services)
@@ -1854,6 +1861,16 @@ namespace Ink_Canvas
         private void App_Exit(object sender, ExitEventArgs e)
         {
             isAppExiting = true;
+
+            // 在卸载插件前广播 AppExiting，让插件有机会清理自身资源。
+            try
+            {
+                _pluginEventService?.OnAppExiting();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"广播插件 AppExiting 失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
 
             try { heartbeatTimer?.Stop(); } catch { }
             try { watchdogTimer?.Change(Timeout.Infinite, Timeout.Infinite); watchdogTimer?.Dispose(); } catch { }
