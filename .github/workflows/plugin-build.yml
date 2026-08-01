@@ -63,38 +63,10 @@ jobs:
         with:
           path: plugin
 
-      - name: Checkout ICC-CE main repo (net6)
-        uses: actions/checkout@v6.0.2
-        with:
-          repository: InkCanvasForClass/community
-          ref: net6
-          path: community
-
       - name: Setup .NET 6
         uses: actions/setup-dotnet@v5.2.0
         with:
           dotnet-version: '6.0.x'
-
-      - name: Build host SDK assemblies
-        shell: pwsh
-        run: |
-          dotnet build community/InkCanvas.PluginSdk/InkCanvas.PluginSdk.csproj --configuration Release
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          dotnet build community/InkCanvas.Controls/InkCanvas.Controls.csproj --configuration Release
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-      - name: Sync SDK DLLs to plugin lib/
-        shell: pwsh
-        run: |
-          $framework = "net6.0-windows10.0.19041.0"
-          $libDir = "plugin/lib"
-          New-Item -ItemType Directory -Path $libDir -Force | Out-Null
-          Copy-Item "community/InkCanvas.PluginSdk/bin/Release/$framework/InkCanvas.PluginSdk.dll" $libDir -Force
-          if (Test-Path "community/InkCanvas.Controls/bin/Release/$framework/InkCanvas.Controls.dll") {
-            Copy-Item "community/InkCanvas.Controls/bin/Release/$framework/InkCanvas.Controls.dll" $libDir -Force
-          }
-          Write-Host "lib synced:"
-          Get-ChildItem $libDir | Select-Object Name, Length
 
       - name: Restore
         run: dotnet restore "plugin/${{ inputs.project }}"
