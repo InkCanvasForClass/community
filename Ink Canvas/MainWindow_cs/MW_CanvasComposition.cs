@@ -223,10 +223,14 @@ namespace Ink_Canvas
                 ValidatePluginPageIndex(pageIndex);
                 if (pageIndex == _pluginCurrentPageIndex) return;
 
-                // 先把画布上的墨迹按页面坐标存回原页，再换成目标页的墨迹。
-                _pluginPageInk[_pluginCurrentPageIndex] = CaptureCanvasStrokesInPageSpace();
-                if (_pluginPageContentRect.HasValue)
-                    _pluginPageRects[_pluginCurrentPageIndex] = _pluginPageContentRect.Value;
+                // 先把画布上的墨迹存回原页（转页面局部坐标），再换成目标页的墨迹。
+                var canvasInk = CaptureCanvasStrokesInPageSpace();
+                var rect = _pluginPageContentRect;
+                _pluginPageInk[_pluginCurrentPageIndex] = rect.HasValue
+                    ? TranslateStrokes(canvasInk, -rect.Value.X, -rect.Value.Y)
+                    : canvasInk;
+                if (rect.HasValue)
+                    _pluginPageRects[_pluginCurrentPageIndex] = rect.Value;
                 _pluginCurrentPageIndex = pageIndex;
 
                 _pluginPageInk.TryGetValue(pageIndex, out var target);
@@ -276,7 +280,8 @@ namespace Ink_Canvas
 
         /// <summary>
         /// 连续滚动：把当前画布墨迹整体平移 <paramref name="deltaY"/>（DIP），与背景长条滚动保持一致。
-        /// 用绝对偏移消除增量平移的浮点累积误差。
+        /// 用绝对偏移消除增量平移的浮点累积误差。可见页矩形同步平移，保证任意时刻
+        /// 墨迹与矩形在同一坐标下（settle 同步按矩形裁剪墨迹才不会错位到别的页）。
         /// </summary>
         internal Task ScrollPluginOffsetAsync(double deltaY, CancellationToken cancellationToken)
         {
@@ -309,6 +314,16 @@ namespace Ink_Canvas
                 }
 
                 _pluginInkTranslateY = targetInkOffset;
+
+                // 可见页矩形与墨迹同平移：否则矩形停在旧坐标，settle 同步裁剪时
+                // 与已平移的墨迹错位，把墨迹误存到相邻页。
+                if (shift != 0)
+                {
+                    var updated = new List<(uint PageIndex, Rect ContentRect)>(_pluginVisiblePages.Count);
+                    foreach (var (pageIndex, rect) in _pluginVisiblePages)
+                        updated.Add((pageIndex, new Rect(rect.X, rect.Y + shift, rect.Width, rect.Height)));
+                    _pluginVisiblePages = updated;
+                }
             });
         }
 
@@ -324,10 +339,16 @@ namespace Ink_Canvas
             // 当前画布上的全部墨迹（画布坐标）。
             var canvasInk = CaptureCanvasStrokesInPageSpace();
 
-            // 没有可见页列表（单页模式）时，整块画布墨迹归属当前页，原点为画布原点（页面局部 = 画布坐标）。
+            // 没有可见页列表（单页模式）时，整块画布墨迹归属当前页。
+            // 也要转页面局部坐标（减内容矩形原点），与双页/长条模式一致，
+            // 否则单页墨迹是画布坐标，切到其它模式时坐标系不匹配而错位。
             if (_pluginVisiblePages.Count == 0)
             {
-                _pluginPageInk[_pluginCurrentPageIndex] = canvasInk;
+                var rect = _pluginPageContentRect;
+                if (rect.HasValue)
+                    _pluginPageInk[_pluginCurrentPageIndex] = TranslateStrokes(canvasInk, -rect.Value.X, -rect.Value.Y);
+                else
+                    _pluginPageInk[_pluginCurrentPageIndex] = canvasInk;
                 return;
             }
 
@@ -496,7 +517,7 @@ namespace Ink_Canvas
         private StrokeCollection CaptureCanvasStrokesInPageSpace()
             => CloneStrokes(inkCanvas?.Strokes, GetCanvasToPageMatrix());
 
-        /// <summary>用页面坐标系的墨迹替换画布内容，不写入时间机器历史。</summary>
+        /// <summary>用页面局部坐标的墨迹替换画布内容（加内容矩形原点映射回画布），不写入时间机器历史。</summary>
         private void ReplaceCanvasStrokesFromPageSpace(StrokeCollection pageStrokes)
         {
             if (inkCanvas == null) return;
@@ -510,7 +531,13 @@ namespace Ink_Canvas
             try
             {
                 inkCanvas.Strokes.Clear();
-                var restored = CloneStrokes(pageStrokes, matrix);
+
+                // 页面局部坐标 → 画布坐标：加内容矩形原点，再应用画布矩阵。
+                var rect = _pluginPageContentRect;
+                var inCanvas = rect.HasValue
+                    ? TranslateStrokes(pageStrokes, rect.Value.X, rect.Value.Y)
+                    : pageStrokes;
+                var restored = CloneStrokes(inCanvas, matrix);
                 if (restored.Count > 0) inkCanvas.Strokes.Add(restored);
                 HideEdgeExpandHint();
             }
@@ -546,8 +573,14 @@ namespace Ink_Canvas
                 }
             }
 
-            // 单页模式：当前页以画布上的实时墨迹为准（画布坐标 = 页面局部坐标），其余页读缓存。
-            if (pageIndex == _pluginCurrentPageIndex) return CaptureCanvasStrokesInPageSpace();
+            // 单页模式：当前页以画布上的实时墨迹为准，转页面局部坐标（减内容矩形原点）。
+            if (pageIndex == _pluginCurrentPageIndex)
+            {
+                var rect = _pluginPageContentRect;
+                if (rect.HasValue)
+                    return TranslateStrokes(CaptureCanvasStrokesInPageSpace(), -rect.Value.X, -rect.Value.Y);
+                return CaptureCanvasStrokesInPageSpace();
+            }
 
             return _pluginPageInk.TryGetValue(pageIndex, out var cached)
                 ? CloneStrokes(cached, Matrix.Identity)
