@@ -50,6 +50,8 @@ namespace Ink_Canvas.Plugins
 
         public void RegisterToolbarItem(PluginToolbarItemInfo itemInfo) => _manager.RegisterToolbarItem(itemInfo);
 
+        public void RegisterBoardToolbarItem(PluginToolbarItemInfo itemInfo) => _manager.RegisterBoardToolbarItem(itemInfo);
+
         public void RegisterIpcHandler(string method, Func<JsonElement?, object> handler) => _manager.RegisterIpcHandler(method, handler);
 
         public IPluginIpcBus Ipc => _manager.Ipc;
