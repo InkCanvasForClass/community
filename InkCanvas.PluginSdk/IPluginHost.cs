@@ -121,6 +121,22 @@ namespace Ink_Canvas.Plugins
         /// </summary>
         public List<string> OptionValues { get; set; } = new List<string>();
         public string DefaultValue { get; set; }
+
+        /// <summary>
+        /// Slider 类型的最小值。默认 0。仅对 <see cref="PluginToolbarSettingType.Slider"/> 生效。
+        /// </summary>
+        public double? MinValue { get; set; }
+
+        /// <summary>
+        /// Slider 类型的最大值。默认 100。仅对 <see cref="PluginToolbarSettingType.Slider"/> 生效。
+        /// </summary>
+        public double? MaxValue { get; set; }
+
+        /// <summary>
+        /// Slider 类型的步长。设置后滑块吸附到该步长（含鼠标拖动/键盘/点击）。默认 1。
+        /// 仅对 <see cref="PluginToolbarSettingType.Slider"/> 生效。
+        /// </summary>
+        public double? StepSize { get; set; }
     }
 
     public enum PluginToolbarSettingType
