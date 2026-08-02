@@ -140,16 +140,12 @@ float4 main(float2 uv : TEXCOORD0) : COLOR0
 
     if (ChromaticAberration > 0.0)
     {
-        // 边缘色散：只在靠近玻璃边界处出现，不在中心。
-        // 判据：SDF 法线在直边是纯水平/垂直（|gx|*|gy|≈0）、在圆角是斜向（≈0.5），
-        // 乘以贴边遮罩（depth 越小越贴边）让色散沿边缘一圈、圆角处最强。
-        float cornerMask = abs(grad.x) * abs(grad.y);
+        // 边缘色散：只沿玻璃边缘出现（edgeMask 贴边才非零），中心无色散。
+        // 用固定像素偏移（不乘任何衰减因子）做 R/B 色差，确保肉眼可见：
+        //   ChromaticAberration 控制偏移量，颜色分道沿折射法线方向。
         float edgeMask = saturate(1.0 - depth / max(RefractionHeight, 1e-3));
-        float dispersionIntensity = ChromaticAberration * (0.15 + 0.85 * cornerMask) * edgeMask *
-            ((centeredCoord.x * centeredCoord.y) / (halfSize.x * halfSize.y) * 0.5 + 0.5);
-        // 色散偏移只沿折射法线方向、强度由上面的贴边遮罩决定（贴边才非零），
-        // 不乘 d（避免在中心也产生位移）。
-        float2 dispersedCoord = refractedGrad * dispersionIntensity * 0.35;
+        float amount = ChromaticAberration * BlurRadius * edgeMask;
+        float2 dispersedCoord = refractedGrad * amount;
 
         // R/B 也走模糊采样，与 G 清晰度一致，不放大色偏
         float2 uv2 = refractedCoord / TextureSize;

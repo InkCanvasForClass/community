@@ -184,9 +184,10 @@ namespace Ink_Canvas
             _effect.RefractionHeight = 8f;
             _effect.RefractionAmount = -14f;
             _effect.DepthEffect = 0f;
-            // 边缘色散：开启。着色器内 R/G/B 三通道全模糊一致，只在圆角处出现，
-            // 不会像之前「只有 G 模糊、R/B 单点」那样把色差放大成花边。
-            _effect.ChromaticAberration = 0.5f;
+            // 边缘色散：固定像素偏移色差（着色器内 edgeMask 贴边才非零），
+            // ChromaticAberration 直接控制偏移量。0.4 × BlurRadius(4) ≈ 1.6px，
+            // 边缘一圈淡彩、不刺眼。
+            _effect.ChromaticAberration = 0.4f;
             // 高光上下对称。之前 -PI/2「光从上方来」+ 着色器里的 facing 迎光加权，
             // 让顶部明显比底部白，深色桌面上很扎眼。这里配合着色器去掉方向偏置。
             _effect.HighlightAngle = (float)(Math.PI / 2.0);
