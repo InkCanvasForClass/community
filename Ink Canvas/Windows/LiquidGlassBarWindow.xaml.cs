@@ -3,6 +3,7 @@ using Ink_Canvas.Shaders;
 using System;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -32,8 +33,8 @@ namespace Ink_Canvas
         private bool _isCapturing;
         private bool _isClosing;
 
-        /// <summary>胶囊圆角半径。与 XAML 中各层的 CornerRadius 保持一致。</summary>
-        private const double GlassCornerRadius = 26;
+        /// <summary>胶囊圆角半径上限。与 XAML 中各层的 CornerRadius 保持一致。</summary>
+        private const double GlassCornerRadius = 20;
 
         // 拖动状态
         private bool _dragging;
@@ -126,9 +127,10 @@ namespace Ink_Canvas
             _effect ??= new LiquidGlassEffect();
             if (!LiquidGlassEffect.IsShaderAvailable)
             {
-                // 着色器不可用时退回无折射：背景层照常显示裁剪截图，只是不弯曲
+                // 着色器不可用时退回无折射：背景层照常显示裁剪截图，只是不弯曲。
+                // 折射层的画刷要留着——SetupBackdrop 已把同一张画刷挂到两层，
+                // 若这里连 Background 一起清掉，而下面又会把 BackdropLayer 置空，就会两层全空、背景消失。
                 RefractionLayer.Effect = null;
-                RefractionLayer.Background = null;
                 return;
             }
 
@@ -146,9 +148,19 @@ namespace Ink_Canvas
             double h = Math.Max(1.0, RefractionLayer.ActualHeight);
 
             _effect.TextureSize = new Point(w, h);
-            _effect.GlassCenter = new Point(w * 0.5, h * 0.5);
-            _effect.GlassSize = new Point(w, h);
-            _effect.BlurIntensity = 0.28f;
+            // 边缘折射参数参考 AndroidLiquidGlass 的 lens()：只在边缘带内折射，中心清晰。
+            // 胶囊高 40 → RefractionHeight 取 10（带约占 1/4 高度），RefractionAmount 传负值
+            // 向内侧采样（透镜放大）。色散与高光保持克制，避免在小尺寸上显脏。
+            _effect.CornerRadius = (float)Math.Min(GlassCornerRadius, h / 2);
+            _effect.RefractionHeight = 12f;
+            _effect.RefractionAmount = -10f;
+            _effect.DepthEffect = 0f;
+            _effect.ChromaticAberration = 0.35f;
+            // 屏幕坐标 y 向下，-PI/2 = 光从上方来（顶部边缘最亮），与 TintLayer 的渐变方向一致
+            _effect.HighlightAngle = (float)(-Math.PI / 2.0);
+            _effect.HighlightFalloff = 1.4f;
+            _effect.HighlightStrength = 0.22f;
+            _effect.HighlightWidth = 5f;
         }
 
         /// <summary>图标颜色跟随系统主题：亮色桌面用深字，暗色用白字。</summary>
@@ -435,6 +447,44 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"液态玻璃浮动栏位置校正失败: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
+
+        // —— 选中态同步 ——
+
+        /// <summary>
+        /// 按主窗当前状态点亮对应按钮。选中用 Tag="on" 驱动样式里的填充胶囊，
+        /// 参考 GitHub 移动端底栏：玻璃背景下只换图标颜色区分度不够。
+        /// </summary>
+        /// <param name="toolMode">主窗的 _currentToolMode。</param>
+        /// <param name="penType">0 = 普通笔，1 = 荧光笔。</param>
+        /// <param name="color">当前画笔颜色，用于点亮颜色圆点。</param>
+        internal void SyncActiveState(string toolMode, int penType, Color? color)
+        {
+            bool isPen = string.Equals(toolMode, "pen", StringComparison.Ordinal);
+
+            SetActive(BtnPen, isPen && penType != 1);
+            SetActive(BtnHighlighter, isPen && penType == 1);
+            SetActive(BtnEraser, string.Equals(toolMode, "eraser", StringComparison.Ordinal)
+                                 || string.Equals(toolMode, "eraserByStrokes", StringComparison.Ordinal));
+            SetActive(BtnSelect, string.Equals(toolMode, "select", StringComparison.Ordinal));
+
+            // 颜色圆点：只在画笔类工具下点亮，橡皮/选择时全部熄灭
+            bool colorMeaningful = isPen && color.HasValue;
+            SetActive(DotBlack, colorMeaningful && IsSameColor(color.Value, Colors.Black));
+            SetActive(DotRed, colorMeaningful && IsSameColor(color.Value, Colors.Red));
+            SetActive(DotBlue, colorMeaningful && IsSameColor(color.Value, Color.FromRgb(37, 99, 235)));
+            SetActive(DotYellow, colorMeaningful && IsSameColor(color.Value, Colors.Yellow));
+        }
+
+        private static void SetActive(Border button, bool active)
+        {
+            if (button == null) return;
+            // 样式里用 Tag 触发；置 null 而非 "off"，避免多余的触发器分支
+            button.Tag = active ? "on" : null;
+        }
+
+        /// <summary>比较 RGB，忽略 alpha——荧光笔会改 alpha 但仍是同一支颜色。</summary>
+        private static bool IsSameColor(Color a, Color b)
+            => a.R == b.R && a.G == b.G && a.B == b.B;
 
         // —— 悬停时提亮，便于操作 ——
 

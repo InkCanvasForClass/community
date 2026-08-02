@@ -4174,6 +4174,7 @@ namespace Ink_Canvas
             };
             SetQuickColor(color);
             ScheduleBrushAutoRestore();
+            RefreshLiquidGlassBarActiveState();
         }
 
         /// <summary>
@@ -6127,6 +6128,9 @@ namespace Ink_Canvas
 
             // Issue #285 更小批注栏：根据当前工具模式刷新迷你栏显示状态
             RefreshIdleMiniBarState();
+
+            // 液态玻璃浮动栏：同步选中态高亮
+            RefreshLiquidGlassBarActiveState();
         }
 
         #endregion

@@ -47,6 +47,7 @@ namespace Ink_Canvas
 
                 _liquidGlassBar.GlassOpacity = Settings.Appearance.LiquidGlassBarOpacity;
                 StartLiquidGlassRefreshTimer();
+                RefreshLiquidGlassBarActiveState();
             }
             catch (Exception ex)
             {
@@ -163,6 +164,24 @@ namespace Ink_Canvas
         internal void ApplyLiquidGlassBarOpacity(double opacity)
         {
             if (_liquidGlassBar != null) _liquidGlassBar.GlassOpacity = opacity;
+        }
+
+        /// <summary>
+        /// 把当前工具模式与画笔颜色同步到玻璃栏的选中态。
+        /// 由 <c>UpdateCurrentToolMode</c> 与颜色切换后调用。
+        /// </summary>
+        internal void RefreshLiquidGlassBarActiveState()
+        {
+            if (_liquidGlassBar == null || !_liquidGlassBar.IsVisible) return;
+
+            try
+            {
+                _liquidGlassBar.SyncActiveState(_currentToolMode, penType, drawingAttributes?.Color);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"液态玻璃浮动栏状态同步失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
         }
 
         // —— 工具转发：玻璃栏调用这些方法，业务逻辑仍在原处理器里 ——

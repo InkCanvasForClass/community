@@ -20,23 +20,31 @@
         Closed="Window_Closed">
 
     <Window.Resources>
-        <!-- 玻璃面上的图标按钮：悬停用半透明白提亮，不用实色以免破坏玻璃质感 -->
+        <!-- 玻璃面上的图标按钮。选中态参考 GitHub 移动端底栏：一个带描边的浅色填充胶囊，
+             而不是只换图标颜色——玻璃背景下单靠颜色区分度不够。
+             Tag="on" 表示选中，由 code-behind 设置。 -->
         <Style x:Key="GlassToolButton" TargetType="Border">
             <Setter Property="Width" Value="40" />
             <Setter Property="Height" Value="40" />
             <Setter Property="CornerRadius" Value="20" />
             <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Margin" Value="2,0" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#40FFFFFF" />
+                    <Setter Property="Background" Value="#2EFFFFFF" />
+                </Trigger>
+                <Trigger Property="Tag" Value="on">
+                    <Setter Property="Background" Value="#4DFFFFFF" />
+                    <Setter Property="BorderBrush" Value="#73FFFFFF" />
                 </Trigger>
             </Style.Triggers>
         </Style>
 
-        <!-- 颜色圆点 -->
+        <!-- 颜色圆点。选中时套一圈更亮更厚的环 -->
         <Style x:Key="GlassColorDot" TargetType="Border">
             <Setter Property="Width" Value="22" />
             <Setter Property="Height" Value="22" />
@@ -44,8 +52,14 @@
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Margin" Value="3,0" />
             <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="BorderThickness" Value="2" />
-            <Setter Property="BorderBrush" Value="#66FFFFFF" />
+            <Setter Property="BorderThickness" Value="1.5" />
+            <Setter Property="BorderBrush" Value="#59FFFFFF" />
+            <Style.Triggers>
+                <Trigger Property="Tag" Value="on">
+                    <Setter Property="BorderThickness" Value="2.5" />
+                    <Setter Property="BorderBrush" Value="#F2FFFFFF" />
+                </Trigger>
+            </Style.Triggers>
         </Style>
     </Window.Resources>
 
@@ -78,13 +92,29 @@
                 <!-- 第 2 层：折射。着色器由 code-behind 挂到这一层 -->
                 <Border x:Name="RefractionLayer" CornerRadius="20" />
 
-                <!-- 第 3 层：玻璃体染色 + 顶部高光，做出厚度感 -->
+                <!-- 第 3 层：玻璃体染色。参考 Apple 的做法——中心几乎不加白，
+                     只在上下极窄的一段提亮，这样透过去的桌面仍然清楚，厚度感靠边缘而非整面磨砂 -->
                 <Border x:Name="TintLayer" CornerRadius="20" IsHitTestVisible="False">
                     <Border.Background>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <GradientStop Color="#38FFFFFF" Offset="0" />
-                            <GradientStop Color="#14FFFFFF" Offset="0.45" />
-                            <GradientStop Color="#22FFFFFF" Offset="1" />
+                            <GradientStop Color="#24FFFFFF" Offset="0" />
+                            <GradientStop Color="#07FFFFFF" Offset="0.22" />
+                            <GradientStop Color="#00FFFFFF" Offset="0.5" />
+                            <GradientStop Color="#06FFFFFF" Offset="0.8" />
+                            <GradientStop Color="#18FFFFFF" Offset="1" />
+                        </LinearGradientBrush>
+                    </Border.Background>
+                </Border>
+
+                <!-- 第 3.5 层：上缘镜面高光。一条贴着顶部的细亮弧，是玻璃体最直观的体积线索。
+                     着色器已在边缘带内画了法线高光，这里只补一点点顶部反光，不能再厚，
+                     否则和着色器高光、TintLayer、描边四层白摞起来整条栏会发雾 -->
+                <Border CornerRadius="20" IsHitTestVisible="False" Margin="1,1,1,0"
+                        VerticalAlignment="Top" Height="10">
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Color="#2BFFFFFF" Offset="0" />
+                            <GradientStop Color="#00FFFFFF" Offset="1" />
                         </LinearGradientBrush>
                     </Border.Background>
                 </Border>
@@ -179,13 +209,13 @@
                 </StackPanel>
 
                 <!-- 第 5 层：玻璃边缘。彩色渐变内描边模拟色散 -->
-                <Border CornerRadius="20" IsHitTestVisible="False" BorderThickness="1.4">
+                <Border CornerRadius="20" IsHitTestVisible="False" BorderThickness="1">
                     <Border.BorderBrush>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#A6FFFFFF" Offset="0" />
-                            <GradientStop Color="#4DA6E1FF" Offset="0.34" />
-                            <GradientStop Color="#4DFFB3E1" Offset="0.66" />
-                            <GradientStop Color="#8CFFFFFF" Offset="1" />
+                            <GradientStop Color="#73FFFFFF" Offset="0" />
+                            <GradientStop Color="#38A6E1FF" Offset="0.34" />
+                            <GradientStop Color="#38FFB3E1" Offset="0.66" />
+                            <GradientStop Color="#5EFFFFFF" Offset="1" />
                         </LinearGradientBrush>
                     </Border.BorderBrush>
                 </Border>
