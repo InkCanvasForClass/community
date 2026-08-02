@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="{x:Static props:ThemeStrings.Theme_LiquidGlassBar}"
         WindowStyle="None"
-        AllowsTransparency="False"
+        AllowsTransparency="True"
         Background="Transparent"
         ShowInTaskbar="False"
         ResizeMode="NoResize"

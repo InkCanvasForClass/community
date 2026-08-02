@@ -28,6 +28,9 @@ namespace Ink_Canvas
         /// <summary>SetWindowDisplayAffinity：窗口照常显示，但不被截屏 API 采集（Win10 2004+）。</summary>
         private const uint WdaExcludeFromCapture = 0x00000011;
 
+        /// <summary>背景模糊半径。WPF BlurEffect 的 GPU 高斯，玻璃的磨砂感。</summary>
+        private const double GlassBlurRadius = 14.0;
+
         private readonly MainWindow _owner;
         private ImageBrush _backdropBrush;
         private LiquidGlassEffect _effect;
@@ -91,43 +94,13 @@ namespace Ink_Canvas
                     // 失败（旧系统/远程会话）时回落到隐藏式截图，见 CaptureBehindSelf。
                     _excludedFromCapture = SetWindowDisplayAffinity(hwnd, WdaExcludeFromCapture);
 
-                    // DWM 原生模糊（参考 wpf-liquid-glass-window 同款）：窗口背后真实桌面
-                    // 由 DWM 合成器做连续高斯模糊，无重影、无截图、不闪烁。
-                    // 需要 AllowsTransparency=False（分层窗口对 DWM blur-behind 无效）。
-                    SetBlurBehind(hwnd, true);
+                    // 模糊由 BlurEffect 层完成（见 SetupBackdrop），不走 DWM blur-behind——
+                    // 分层窗口（AllowsTransparency=True）对 DWM blur-behind 无效。
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"液态玻璃浮动栏设置窗口样式失败: {ex.Message}", LogHelper.LogType.Warning);
-            }
-        }
-
-        /// <summary>
-        /// 开启/关闭 DWM blur-behind：窗口的透明背景区域显示为背后桌面的模糊。
-        /// BlurRegion = 整窗（-1,-1 表示全窗）。对应参考项目的 SetBlurBehind。
-        /// </summary>
-        private static void SetBlurBehind(IntPtr hwnd, bool enabled)
-        {
-            try
-            {
-                var blurBehind = new DwmBlurBehind
-                {
-                    Flags = DwmBlurBehindFlags.Enable | DwmBlurBehindFlags.BlurRegion,
-                    Enabled = enabled,
-                    BlurRegion = CreateRectRgn(0, 0, -1, -1)
-                };
-
-                _ = DwmEnableBlurBehindWindow(hwnd, ref blurBehind);
-
-                if (blurBehind.BlurRegion != IntPtr.Zero)
-                {
-                    _ = DeleteObject(blurBehind.BlurRegion);
-                }
-            }
-            catch
-            {
-                // DWM 在远程/受限会话可能不可用，忽略。
             }
         }
 
@@ -163,10 +136,15 @@ namespace Ink_Canvas
                 ViewboxUnits = BrushMappingMode.Absolute
             };
 
-            // 模糊由 DWM blur-behind 完成（窗口背景 = 背后桌面连续高斯，无重影）。
-            // BackdropLayer 保持透明：折射层输出中心 alpha=0，露出 DWM 模糊背景。
-            BackdropLayer.Background = null;
-            BackdropLayer.Effect = null;
+            // 第 1 层：截图 + WPF BlurEffect（GPU 高斯，无重影）。用户架构的 Blur 层。
+            // 截图画刷进 BackdropLayer，BlurEffect 整面模糊 = 磨砂背景。
+            BackdropLayer.Background = _backdropBrush;
+            BackdropLayer.Effect = new BlurEffect
+            {
+                Radius = GlassBlurRadius,
+                KernelType = KernelType.Gaussian,
+                RenderingBias = RenderingBias.Performance
+            };
         }
 
         private void SetupEffect()
@@ -176,15 +154,24 @@ namespace Ink_Canvas
             _effect ??= new LiquidGlassEffect();
             if (!LiquidGlassEffect.IsShaderAvailable)
             {
-                // 着色器不可用时退回纯 DWM 模糊背景，无折射
+                // 着色器不可用时退回无折射：模糊层照常显示柔化后的截图，只是不弯曲。
+                // 折射层的画刷要留着——SetupBackdrop 已把同一张画刷挂到两层，
+                // 若这里连 Background 一起清掉，而下面又会把 BackdropLayer 置空，就会两层全空、背景消失。
                 RefractionLayer.Effect = null;
-                RefractionLayer.Background = null;
                 return;
             }
 
-            // 折射层采样清晰截图做边缘折射，着色器中心输出透明（alpha=0）→
-            // 露出 DWM 模糊背景；边缘带折射清晰截图 + 高光 + 色散（透镜感）。
-            RefractionLayer.Background = _backdropBrush;
+            // 折射层的输入是模糊层的渲染结果——WPF 单元素只能挂一个 Effect，
+            // 用 VisualBrush 引用上一层，串成 blur → refraction 两级管线。
+            // 着色器对模糊结果做 SDF 折射 + 色散，中心原样透出模糊背景。
+            // 注意：BackdropLayer 不能设 Opacity=0（VisualBrush 会采到全透明=黑），
+            // 折射层着色器输出不透明（alpha=1）已完全盖住下层，无需隐藏。
+            RefractionLayer.Background = new VisualBrush(BackdropLayer)
+            {
+                Stretch = Stretch.None,
+                ViewboxUnits = BrushMappingMode.Absolute,
+                ViewportUnits = BrushMappingMode.Absolute
+            };
             RefractionLayer.Effect = _effect;
 
             UpdateEffectParameters();
@@ -680,28 +667,5 @@ namespace Ink_Canvas
 
         [DllImport("gdi32.dll")]
         private static extern bool DeleteObject(IntPtr hObject);
-
-        [DllImport("dwmapi.dll")]
-        private static extern int DwmEnableBlurBehindWindow(IntPtr hwnd, ref DwmBlurBehind blurBehind);
-
-        [DllImport("gdi32.dll")]
-        private static extern IntPtr CreateRectRgn(int left, int top, int right, int bottom);
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct DwmBlurBehind
-        {
-            public DwmBlurBehindFlags Flags;
-            public bool Enabled;
-            public IntPtr BlurRegion;
-            public bool TransitionOnMaximized;
-        }
-
-        [Flags]
-        private enum DwmBlurBehindFlags
-        {
-            Enable = 0x00000001,
-            BlurRegion = 0x00000002,
-            TransitionOnMaximized = 0x00000004
-        }
     }
 }
