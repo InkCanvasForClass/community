@@ -270,6 +270,12 @@ namespace Ink_Canvas
                     return;
                 }
 
+                if (pathLower.StartsWith("plugin/"))
+                {
+                    HandlePluginUriNavigation(uri, pathLower);
+                    return;
+                }
+
                 LogHelper.WriteLogToFile($"未知的 URI 命令: {command}", LogHelper.LogType.Warning);
             }
             catch (Exception ex)
@@ -500,6 +506,31 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"URI 设置导航失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 把 <c>icc://plugin/&lt;pluginId&gt;/&lt;subPath&gt;?&lt;query&gt;</c> 派发给注册的插件 URI 处理器。
+        /// 未处理（插件未注册/未加载/处理器返回 false）时仅写日志，不弹通知。
+        /// </summary>
+        private void HandlePluginUriNavigation(string uri, string pathLower)
+        {
+            try
+            {
+                string rest = pathLower.Substring("plugin/".Length); // <pluginId>/<subPath> 或 <pluginId>
+                string[] segs = rest.Split(new[] { '/' }, 2, StringSplitOptions.None);
+                string pluginId = segs[0];
+                string subPath = segs.Length > 1 ? segs[1] : "";
+
+                bool handled = Plugins.PluginManager.Instance.TryDispatchUri(pluginId, subPath, uri);
+                if (!handled)
+                {
+                    LogHelper.WriteLogToFile($"插件 URI 未被处理: {uri}（插件 {pluginId} 未注册处理器或处理器返回 false）", LogHelper.LogType.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"派发插件 URI 失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
     }

@@ -218,6 +218,7 @@ namespace Ink_Canvas
                 (typeof(Plugins.ICanvasInkService),        new Plugins.CanvasInkService(mainWindow)),
                 (typeof(Plugins.IRecognitionService),      new Plugins.RecognitionService()),
                 (typeof(Plugins.ITrayService),            new Plugins.TrayService(this)),
+                (typeof(Plugins.IPluginUriService),       new Plugins.UriService(host)),
             };
 
             foreach (var (iface, impl) in services)

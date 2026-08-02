@@ -49,8 +49,12 @@ namespace Ink_Canvas.Plugins
         private PluginMarketService _market;
         private PluginLogger _logger;
         private PluginIpcService _ipc;
-        // 当前正在 Initialize 的插件，用于 RegisterToolbarItem 等回调识别调用方
+        // 当前正在 Initialize 的插件，用于 RegisterToolbarItem / RegisterUriHandler 等回调识别调用方
         private PluginInfo _currentLoadingPlugin;
+
+        // 插件 URI 处理器注册表：pluginId -> (subPath -> handler)
+        private readonly Dictionary<string, Dictionary<string, Func<PluginUriRequest, bool>>> _uriHandlers =
+            new Dictionary<string, Dictionary<string, Func<PluginUriRequest, bool>>>(StringComparer.OrdinalIgnoreCase);
 
         public static readonly string ManifestFileName = "manifest.json";
         public static readonly string PluginPackageExtension = ".icpx";
@@ -1060,6 +1064,12 @@ namespace Ink_Canvas.Plugins
                     alc.Unload();
                 }
 
+                // 清理插件注册的 URI 处理器，避免卸载后残留
+                if (_uriHandlers.Remove(plugin.Id))
+                {
+                    Log(string.Format("Plugin unregistered URI handlers: {0}", plugin.Name));
+                }
+
                 Log(string.Format("Plugin unloaded: {0}", plugin.Name));
                 OnPluginUnloaded(plugin);
                 _market?.RefreshMergedPlugins();
@@ -1289,6 +1299,139 @@ namespace Ink_Canvas.Plugins
         /// 暴露给 UI 的配置导入导出器。
         /// </summary>
         public PluginConfigIo ConfigIo => _configIo;
+
+        #region 插件 URI 处理
+
+        /// <summary>
+        /// 注册 URI 处理程序。须在插件 Initialize 阶段调用，通过 <see cref="_currentLoadingPlugin"/> 识别调用方插件。
+        /// </summary>
+        public void RegisterUriHandler(string subPath, Func<PluginUriRequest, bool> handler)
+        {
+            var pluginId = _currentLoadingPlugin?.Id;
+            if (string.IsNullOrEmpty(pluginId))
+            {
+                LogError("RegisterUriHandler 必须在插件 Initialize 阶段调用（无法确定调用方插件 ID）");
+                return;
+            }
+            RegisterUriHandler(pluginId, subPath, handler);
+        }
+
+        internal void RegisterUriHandler(string pluginId, string subPath, Func<PluginUriRequest, bool> handler)
+        {
+            if (string.IsNullOrEmpty(pluginId) || handler == null) return;
+
+            var key = (subPath ?? "").Trim('/');
+            if (!_uriHandlers.TryGetValue(pluginId, out var map))
+            {
+                map = new Dictionary<string, Func<PluginUriRequest, bool>>(StringComparer.OrdinalIgnoreCase);
+                _uriHandlers[pluginId] = map;
+            }
+            map[key] = handler;
+            Log(string.Format("Plugin registered URI handler: {0}/{1}", pluginId, string.IsNullOrEmpty(key) ? "(catch-all)" : key));
+        }
+
+        /// <summary>
+        /// 派发插件 URI（由 MainWindow 的路由器调用，UI 线程）。
+        /// 子路径按「/」分段做最长前缀匹配（忽略大小写）；插件未注册/处理器返回 false/处理器异常均返回 false。
+        /// </summary>
+        public bool TryDispatchUri(string pluginId, string subPath, string rawUri)
+        {
+            if (string.IsNullOrEmpty(pluginId)) return false;
+            if (!_uriHandlers.TryGetValue(pluginId, out var map) || map.Count == 0) return false;
+
+            string reqPath = (subPath ?? "").Trim('/');
+            string bestKey = null;
+            foreach (var key in map.Keys)
+            {
+                if (key.Length == 0)
+                {
+                    if (bestKey == null) bestKey = key;
+                    continue;
+                }
+                if (string.Equals(reqPath, key, StringComparison.OrdinalIgnoreCase)
+                    || reqPath.StartsWith(key + "/", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (bestKey == null || key.Length > bestKey.Length) bestKey = key;
+                }
+            }
+            if (bestKey == null) return false;
+
+            var request = new PluginUriRequest
+            {
+                PluginId = pluginId,
+                Path = reqPath,
+                Query = ParseUriQuery(rawUri),
+                RawUri = rawUri,
+            };
+
+            try
+            {
+                return map[bestKey](request);
+            }
+            catch (Exception ex)
+            {
+                LogError(string.Format("插件 URI 处理器异常 ({0}/{1}): {2}", pluginId, reqPath, ex.Message), ex);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 主动打开一个 <c>icc://</c> 深链接。非 UI 线程时切到 UI 线程执行；
+        /// 复用 <see cref="MainWindow.HandleUriCommand"/> 的路由与「启用 URI 协议」守卫。
+        /// </summary>
+        public bool OpenUri(string uri)
+        {
+            if (string.IsNullOrWhiteSpace(uri) || !uri.Trim().StartsWith("icc:", StringComparison.OrdinalIgnoreCase))
+            {
+                LogError(string.Format("OpenUri 仅支持 icc: 协议: {0}", uri));
+                return false;
+            }
+
+            var app = Application.Current;
+            if (app?.Dispatcher == null) return false;
+
+            if (app.Dispatcher.CheckAccess())
+            {
+                (app.MainWindow as MainWindow)?.HandleUriCommand(uri);
+                return true;
+            }
+
+            bool dispatched = false;
+            app.Dispatcher.Invoke(() =>
+            {
+                (app.MainWindow as MainWindow)?.HandleUriCommand(uri);
+                dispatched = true;
+            });
+            return dispatched;
+        }
+
+        private IReadOnlyDictionary<string, string> ParseUriQuery(string uri)
+        {
+            var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (string.IsNullOrEmpty(uri)) return dict;
+            try
+            {
+                if (Uri.TryCreate(uri, UriKind.Absolute, out var u) && !string.IsNullOrEmpty(u.Query))
+                {
+                    string q = u.Query.TrimStart('?');
+                    foreach (var pair in q.Split(new[] { '&' }, StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        var kv = pair.Split(new[] { '=' }, 2, StringSplitOptions.None);
+                        if (kv.Length == 2 && !string.IsNullOrEmpty(kv[0]))
+                        {
+                            dict[Uri.UnescapeDataString(kv[0].Trim())] = Uri.UnescapeDataString(kv[1].Trim());
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError(string.Format("解析 URI 查询参数失败: {0}", ex.Message), ex);
+            }
+            return dict;
+        }
+
+        #endregion
 
         #endregion
 
