@@ -663,15 +663,41 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                                 {
                                     Tag = setting.Key,
                                     Width = 150,
-                                    Minimum = 0,
-                                    Maximum = 100,
+                                    Minimum = setting.MinValue ?? 0,
+                                    Maximum = setting.MaxValue ?? 100,
                                     VerticalAlignment = VerticalAlignment.Center
                                 };
+                                // 插件声明了步长时，滑块吸附到步长（含鼠标拖动/键盘/点击）
+                                if (setting.StepSize.HasValue && setting.StepSize.Value > 0)
+                                {
+                                    slider.SmallChange = setting.StepSize.Value;
+                                    slider.TickFrequency = setting.StepSize.Value;
+                                    slider.IsSnapToTickEnabled = true;
+                                }
+
                                 var numValue = entry.GetSettingDouble(setting.Key);
                                 if (numValue.HasValue) slider.Value = numValue.Value;
                                 else if (double.TryParse(setting.DefaultValue, out var dv)) slider.Value = dv;
-                                slider.ValueChanged += PluginCustomSetting_Slider_ValueChanged;
-                                card.Content = slider;
+
+                                // 当前值显示，跟随滑动实时更新；保存逻辑复用现有 handler
+                                var sliderValueText = new TextBlock
+                                {
+                                    Text = FormatSliderValue(slider, slider.Value),
+                                    MinWidth = 40,
+                                    Margin = new Thickness(10, 0, 0, 0),
+                                    VerticalAlignment = VerticalAlignment.Center,
+                                    TextAlignment = TextAlignment.Center
+                                };
+                                slider.ValueChanged += (s, e) =>
+                                {
+                                    sliderValueText.Text = FormatSliderValue(slider, slider.Value);
+                                    PluginCustomSetting_Slider_ValueChanged(s, e);
+                                };
+                                card.Content = new StackPanel
+                                {
+                                    Orientation = Orientation.Horizontal,
+                                    Children = { slider, sliderValueText }
+                                };
                                 break;
                         }
 
@@ -723,6 +749,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ActiveEntry.SetSetting(key, slider.Value);
             }
             SaveSettings();
+        }
+
+        /// <summary>
+        /// 格式化滑动条当前值：整数范围（Min/Max/Step 均为整数）显示整数，否则保留到 2 位小数。
+        /// </summary>
+        private static string FormatSliderValue(Slider slider, double value)
+        {
+            bool allIntegral = slider.Minimum % 1 == 0 && slider.Maximum % 1 == 0
+                && (slider.SmallChange <= 0 || slider.SmallChange % 1 == 0);
+            return allIntegral
+                ? ((int)Math.Round(value)).ToString(CultureInfo.InvariantCulture)
+                : value.ToString("0.##", CultureInfo.InvariantCulture);
         }
 
         private void ButtonReset_Click(object sender, RoutedEventArgs e)
