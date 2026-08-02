@@ -658,6 +658,12 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 供插件插入图片到画布的入口（复用完整插入流程：居中缩放、进撤销历史、切选择模式）。
+        /// </summary>
+        internal Task InsertBitmapSourceToCanvasForPlugin(BitmapSource bitmapSource)
+            => InsertBitmapSourceToCanvas(bitmapSource, null, null);
+
+        /// <summary>
         /// 初始化截图的TransformGroup
         /// </summary>
         /// <param name="image">要初始化的Image控件</param>

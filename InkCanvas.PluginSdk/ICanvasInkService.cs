@@ -124,5 +124,34 @@ namespace Ink_Canvas.Plugins
 
         /// <summary>切换当前页的墨迹冻结状态。</summary>
         void ToggleInkFreeze();
+
+        /// <summary>
+        /// 把当前画布页（墨迹 + 背景色）导出为 PNG 文件。
+        /// </summary>
+        /// <param name="filePath">输出 PNG 路径（目录需已存在）。</param>
+        /// <returns>是否导出成功。</returns>
+        bool ExportCurrentPageAsPng(string filePath);
+
+        /// <summary>
+        /// 把指定墨迹集合渲染为 PNG 文件。
+        /// </summary>
+        /// <param name="strokes">要导出的墨迹。</param>
+        /// <param name="filePath">输出 PNG 路径（目录需已存在）。</param>
+        /// <returns>是否导出成功。</returns>
+        bool ExportStrokesAsPng(System.Windows.Ink.StrokeCollection strokes, string filePath);
+
+        /// <summary>
+        /// 把图片插入当前画布（居中缩放、进入撤销历史、切换到选择模式）。
+        /// </summary>
+        /// <param name="bitmapSource">要插入的图片。</param>
+        /// <returns>是否已触发插入流程。</returns>
+        bool InsertBitmap(System.Windows.Media.Imaging.BitmapSource bitmapSource);
+
+        /// <summary>
+        /// 把剪贴板图片粘贴到画布（可选指定坐标）。
+        /// </summary>
+        /// <param name="position">插入位置（画布坐标）；null 表示居中。</param>
+        /// <returns>是否已触发粘贴流程。</returns>
+        System.Threading.Tasks.Task<bool> PasteClipboardImageAsync(System.Windows.Point? position = null);
     }
 }

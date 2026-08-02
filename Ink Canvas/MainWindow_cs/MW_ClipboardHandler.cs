@@ -387,6 +387,12 @@ namespace Ink_Canvas
             return Task.CompletedTask;
         }
 
+        /// <summary>
+        /// 供插件粘贴剪贴板图片到画布的入口（可选指定坐标）。
+        /// </summary>
+        internal Task PasteClipboardImageForPlugin(Point? position = null)
+            => PasteImageFromClipboard(position);
+
 
 
         /// <summary>

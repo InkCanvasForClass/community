@@ -1,6 +1,8 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Models;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Ink_Canvas.Plugins
 {
@@ -78,5 +80,56 @@ namespace Ink_Canvas.Plugins
             NotificationLevel.Success => NotificationMessageType.Reminder,
             _ => NotificationMessageType.Other,
         };
+
+        public IReadOnlyList<PluginNotification> GetHistory(string source = null)
+        {
+            try
+            {
+                return NotificationCenterService.GetHistory(source)
+                    .Select(m => new PluginNotification
+                    {
+                        Title = m.Title ?? "",
+                        Summary = m.Summary ?? "",
+                        Source = m.Source ?? "",
+                        Icon = m.Icon ?? "",
+                        Level = m.Level.ToString(),
+                        CreatedAt = m.CreatedAt,
+                    })
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"NotificationService.GetHistory failed: {ex.Message}", LogHelper.LogType.Warning);
+                return new List<PluginNotification>();
+            }
+        }
+
+        public void ClearHistory(string source = null)
+        {
+            try { NotificationCenterService.ClearHistory(source); }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"NotificationService.ClearHistory failed: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        public void ShowWindowsToast(string title, string message)
+        {
+            try
+            {
+                WindowsNotificationHelper.ShowToast(new NotificationMessage
+                {
+                    Type = NotificationMessageType.Other,
+                    Level = NotificationMessageLevel.Normal,
+                    Title = title ?? "",
+                    Summary = message ?? "",
+                    DisplaySeconds = 5,
+                });
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"NotificationService.ShowWindowsToast failed: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
     }
 }

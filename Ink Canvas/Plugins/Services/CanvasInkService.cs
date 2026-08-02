@@ -92,5 +92,47 @@ namespace Ink_Canvas.Plugins
 
         public void ToggleInkFreeze()
             => RunOnUi(() => _mainWindow.ToggleInkFreeze());
+
+        public bool ExportCurrentPageAsPng(string filePath)
+            => RunOnUi(() => _mainWindow.ExportCurrentPageAsPngForPlugin(filePath));
+
+        public bool ExportStrokesAsPng(StrokeCollection strokes, string filePath)
+            => RunOnUi(() => _mainWindow.ExportStrokesAsPngForPlugin(strokes, filePath));
+
+        public bool InsertBitmap(System.Windows.Media.Imaging.BitmapSource bitmapSource)
+        {
+            if (bitmapSource == null) return false;
+            return RunOnUi(() =>
+            {
+                try
+                {
+                    _mainWindow.InsertBitmapSourceToCanvasForPlugin(bitmapSource);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Helpers.LogHelper.WriteLogToFile($"CanvasInkService.InsertBitmap failed: {ex.Message}", Helpers.LogHelper.LogType.Warning);
+                    return false;
+                }
+            });
+        }
+
+        public System.Threading.Tasks.Task<bool> PasteClipboardImageAsync(Point? position = null)
+        {
+            bool result = RunOnUi(() =>
+            {
+                try
+                {
+                    _mainWindow.PasteClipboardImageForPlugin(position);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Helpers.LogHelper.WriteLogToFile($"CanvasInkService.PasteClipboardImageAsync failed: {ex.Message}", Helpers.LogHelper.LogType.Warning);
+                    return false;
+                }
+            });
+            return System.Threading.Tasks.Task.FromResult(result);
+        }
     }
 }
