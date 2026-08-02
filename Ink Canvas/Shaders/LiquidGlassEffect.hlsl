@@ -146,13 +146,13 @@ float4 main(float2 uv : TEXCOORD0) : COLOR0
     float edge = saturate(1.0 - depth / max(HighlightWidth, 1e-3));
     edge *= edge;
 
+    // 用 |ndl| 做上下对称的边缘光：之前额外乘 facing（saturate(ndl*0.5+0.5)）会让迎光侧
+    // 比背光侧亮一倍多，深色桌面上顶边明显比底边白。玻璃两侧受光本就该接近，去掉偏置。
+    // lerp 下限保证圆头（法线垂直于光向）也有一圈微光，不会突然断掉。
     float ndl = dot(grad, normalize(float2(cos(HighlightAngle), sin(HighlightAngle))));
-    // 迎光面（ndl>0）最亮，背光面留一档做环境反光；两端法线接近垂直于光向，
-    // lerp 下限保证圆头也有一圈微光，不会突然断掉。
     float spec = lerp(0.25, 1.0, pow(abs(ndl), HighlightFalloff));
-    float facing = lerp(0.4, 1.0, saturate(ndl * 0.5 + 0.5));
 
-    color.rgb += spec * facing * edge * HighlightStrength;
+    color.rgb += spec * edge * HighlightStrength;
 
     color.a = 1.0;
     return color;

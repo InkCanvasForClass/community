@@ -24,6 +24,9 @@ namespace Ink_Canvas
         private const int SwHide = 0;
         private const int SwShowNoActivate = 4;
 
+        /// <summary>SetWindowDisplayAffinity：窗口照常显示，但不被截屏 API 采集（Win10 2004+）。</summary>
+        private const uint WdaExcludeFromCapture = 0x00000011;
+
         private readonly MainWindow _owner;
         private ImageBrush _backdropBrush;
         private LiquidGlassEffect _effect;
@@ -32,6 +35,12 @@ namespace Ink_Canvas
         private RectangleGeometry _glassLayersClip;
         private bool _isCapturing;
         private bool _isClosing;
+
+        /// <summary>
+        /// 本窗是否已被系统排除在截屏之外。为 true 时重抓背景无需隐藏自己，
+        /// 也就没有隐藏/显示造成的闪烁。
+        /// </summary>
+        private bool _excludedFromCapture;
 
         /// <summary>胶囊圆角半径上限。与 XAML 中各层的 CornerRadius 保持一致。</summary>
         private const double GlassCornerRadius = 20;
@@ -75,6 +84,11 @@ namespace Ink_Canvas
                     var ex = GetWindowLong(hwnd, GwlExStyle).ToInt64();
                     SetWindowLong(hwnd, GwlExStyle,
                         new IntPtr(ex | WsExNoActivate | WsExToolWindow));
+
+                    // 让本窗不被截屏 API 采集（Win10 2004+）。这样重抓玻璃背景时
+                    // 不必先隐藏自己再显示回来，也就没有那一下闪烁。
+                    // 失败（旧系统/远程会话）时回落到隐藏式截图，见 CaptureBehindSelf。
+                    _excludedFromCapture = SetWindowDisplayAffinity(hwnd, WdaExcludeFromCapture);
                 }
             }
             catch (Exception ex)
@@ -158,10 +172,11 @@ namespace Ink_Canvas
             _effect.RefractionAmount = -14f;
             _effect.DepthEffect = 0f;
             _effect.ChromaticAberration = 0.45f;
-            // 屏幕坐标 y 向下，-PI/2 = 光从上方来（顶部边缘最亮），与 TintLayer 的渐变方向一致
-            _effect.HighlightAngle = (float)(-Math.PI / 2.0);
-            _effect.HighlightFalloff = 1.8f;
-            _effect.HighlightStrength = 0.13f;
+            // 高光上下对称。之前 -PI/2「光从上方来」+ 着色器里的 facing 迎光加权，
+            // 让顶部明显比底部白，深色桌面上很扎眼。这里配合着色器去掉方向偏置。
+            _effect.HighlightAngle = (float)(Math.PI / 2.0);
+            _effect.HighlightFalloff = 1.6f;
+            _effect.HighlightStrength = 0.11f;
             _effect.HighlightWidth = 3.5f;
         }
 
@@ -218,6 +233,25 @@ namespace Ink_Canvas
             if (_isCapturing) return;
             _isCapturing = true;
 
+            // 已被系统排除在截屏之外时，直接抓即可——不隐藏自己，也就不会闪。
+            if (_excludedFromCapture)
+            {
+                try
+                {
+                    LiquidGlassCapture.Capture();
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"液态玻璃浮动栏截图失败: {ex.Message}", LogHelper.LogType.Warning);
+                }
+                finally
+                {
+                    _isCapturing = false;
+                }
+                return;
+            }
+
+            // 回落路径（旧系统/远程会话）：先藏起自己，否则会把玻璃自己拍进背景里。
             var hwnd = new WindowInteropHelper(this).Handle;
             try
             {
@@ -550,5 +584,8 @@ namespace Ink_Canvas
 
         [DllImport("user32.dll")]
         private static extern bool ShowWindow(IntPtr hwnd, int cmd);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool SetWindowDisplayAffinity(IntPtr hwnd, uint affinity);
     }
 }

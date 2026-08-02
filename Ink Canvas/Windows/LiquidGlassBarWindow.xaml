@@ -97,27 +97,17 @@
                 <Border x:Name="TintLayer" CornerRadius="20" IsHitTestVisible="False">
                     <Border.Background>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <GradientStop Color="#18FFFFFF" Offset="0" />
-                            <GradientStop Color="#05FFFFFF" Offset="0.22" />
+                            <GradientStop Color="#0CFFFFFF" Offset="0" />
+                            <GradientStop Color="#03FFFFFF" Offset="0.25" />
                             <GradientStop Color="#00FFFFFF" Offset="0.5" />
-                            <GradientStop Color="#04FFFFFF" Offset="0.8" />
-                            <GradientStop Color="#10FFFFFF" Offset="1" />
+                            <GradientStop Color="#03FFFFFF" Offset="0.75" />
+                            <GradientStop Color="#0CFFFFFF" Offset="1" />
                         </LinearGradientBrush>
                     </Border.Background>
                 </Border>
 
-                <!-- 第 3.5 层：上缘镜面高光。一条贴着顶部的细亮弧，是玻璃体最直观的体积线索。
-                     着色器已在边缘带内画了法线高光，这里只补一点点顶部反光，不能再厚，
-                     否则和着色器高光、TintLayer、描边四层白摞起来整条栏会发雾 -->
-                <Border CornerRadius="20" IsHitTestVisible="False" Margin="1,1,1,0"
-                        VerticalAlignment="Top" Height="8">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <GradientStop Color="#1AFFFFFF" Offset="0" />
-                            <GradientStop Color="#00FFFFFF" Offset="1" />
-                        </LinearGradientBrush>
-                    </Border.Background>
-                </Border>
+                <!-- 原先这里还有一条只画在顶部的镜面高光弧。着色器的法线高光已经覆盖整圈边缘，
+                     再单独给顶部加一层就成了「上面比下面白」的直接来源，故移除。 -->
 
                 <!-- 第 4 层：内容 -->
                 <StackPanel x:Name="ContentPanel"
@@ -212,8 +202,10 @@
                      这里的描边只是勾一条极淡的轮廓线，太亮会盖过折射本身 -->
                 <Border CornerRadius="20" IsHitTestVisible="False" BorderThickness="1">
                     <Border.BorderBrush>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#4DFFFFFF" Offset="0" />
+                        <!-- 水平渐变而非斜向：斜向（0,0→1,1）在扁长胶囊上会让左上比右下亮，
+                             和「上面偏白」叠在一起更明显。水平方向上下均匀。 -->
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#3DFFFFFF" Offset="0" />
                             <GradientStop Color="#26A6E1FF" Offset="0.34" />
                             <GradientStop Color="#26FFB3E1" Offset="0.66" />
                             <GradientStop Color="#3DFFFFFF" Offset="1" />
