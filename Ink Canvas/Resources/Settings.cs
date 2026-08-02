@@ -816,6 +816,19 @@ namespace Ink_Canvas
 
         [JsonProperty("idleMiniBarAutoRestoreSeconds")]
         public double IdleMiniBarAutoRestoreSeconds { get; set; } = 60.0;
+
+        // 液态玻璃浮动栏（独立置顶胶囊窗口，桌面截图 + 折射着色器）
+        [JsonProperty("enableLiquidGlassBar")]
+        public bool EnableLiquidGlassBar { get; set; } = false;
+
+        [JsonProperty("liquidGlassBarOpacity")]
+        public double LiquidGlassBarOpacity { get; set; } = 0.95;
+
+        [JsonProperty("liquidGlassBarPositionX")]
+        public double LiquidGlassBarPositionX { get; set; } = -1;
+
+        [JsonProperty("liquidGlassBarPositionY")]
+        public double LiquidGlassBarPositionY { get; set; } = -1;
     }
 
     public enum PPTLinkMode

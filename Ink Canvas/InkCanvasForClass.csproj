@@ -254,6 +254,8 @@
     <Resource Include="Resources\new-icons\hand-move_white.png" />
     <Resource Include="Resources\new-icons\zoom_white.png" />
     <Resource Include="Resources\new-icons\rotate_white.png" />
+    <!-- 液态玻璃浮动栏折射着色器（必须是 Resource，否则 pack URI 找不到而退回无折射） -->
+    <Resource Include="Shaders\LiquidGlassEffect.ps" />
   </ItemGroup>
 <ItemGroup>
     <Resource Include="Resources\DeveloperAvatars\ChangSakura.png" />
