@@ -298,4 +298,13 @@ SHA256：{1}
   <data name="Market_RemoveSourceConfirmation" xml:space="preserve">
     <value>确定要删除货源“{0}”吗？</value>
   </data>
+  <data name="Compat_HostVersionTooLow" xml:space="preserve">
+    <value>这插件要 {0} 以上的本体，你这个才 {1}，带不动</value>
+  </data>
+  <data name="Compat_ApiVersionMismatch" xml:space="preserve">
+    <value>这插件要 {0} 版接口，本体只有 {1} 版，对不上</value>
+  </data>
+  <data name="Compat_HostVersionOutOfRange" xml:space="preserve">
+    <value>本体版本 {0} 不在这插件认的范围 {1} 里头</value>
+  </data>
 </root>

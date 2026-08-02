@@ -298,4 +298,13 @@ Continue installation?</value>
   <data name="Market_RemoveSourceConfirmation" xml:space="preserve">
     <value>Remove source “{0}”?</value>
   </data>
+  <data name="Compat_HostVersionTooLow" xml:space="preserve">
+    <value>This plugin requires host version ≥ {0}, but the current host is {1}</value>
+  </data>
+  <data name="Compat_ApiVersionMismatch" xml:space="preserve">
+    <value>This plugin requires API version {0}, but the current host API is {1}</value>
+  </data>
+  <data name="Compat_HostVersionOutOfRange" xml:space="preserve">
+    <value>The current host version {0} is outside the range supported by this plugin ({1})</value>
+  </data>
 </root>
