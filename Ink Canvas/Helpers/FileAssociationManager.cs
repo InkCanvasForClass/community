@@ -165,6 +165,193 @@ namespace Ink_Canvas.Helpers
             LogHelper.WriteLogToFile($"{FileExtension}文件关联状态: {(isRegistered ? "已注册" : "未注册")}", LogHelper.LogType.Event);
         }
 
+        #region 插件自定义扩展名关联
+
+        // 禁止插件覆盖的系统关键/可执行类型，避免插件注册恶意或危险的文件关联
+        private static readonly string[] ProtectedExtensions =
+        {
+            ".exe", ".dll", ".bat", ".cmd", ".com", ".msi", ".msp", ".ps1", ".vbs", ".vbe",
+            ".js", ".jse", ".wsf", ".wsh", ".scr", ".reg", ".sys", ".inf", ".jar", ".lnk",
+            ".url", ".pif", ".hta", ".cpl", ".sh", ".bash", ".ico", ".ocx", ".drv",
+            ".docm", ".xlsm", ".pptm",
+            ".icstk" // 宿主自身的文件类型，不允许插件覆盖
+        };
+
+        private static bool IsProtectedExtension(string extension)
+        {
+            return Array.IndexOf(ProtectedExtensions, extension) >= 0;
+        }
+
+        private static string NormalizeExtension(string extension)
+        {
+            string ext = extension.Trim().ToLowerInvariant();
+            if (!ext.StartsWith(".")) ext = "." + ext;
+            return ext;
+        }
+
+        /// <summary>
+        /// 注册自定义文件扩展名关联（供插件使用）。
+        /// 写入 <c>HKCU\Software\Classes</c>（无需管理员权限），把该扩展名的打开命令指向宿主 exe。
+        /// </summary>
+        /// <returns>是否注册成功；扩展名/ProgId 无效或扩展名受保护时返回 false。</returns>
+        public static bool RegisterFileAssociation(string extension, string progId, string description, string iconPath = null)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(extension) || string.IsNullOrWhiteSpace(progId)) return false;
+
+                string normalizedExtension = NormalizeExtension(extension);
+                if (IsProtectedExtension(normalizedExtension)) return false;
+
+                string normalizedProgId = progId.Trim();
+                string exePath = Process.GetCurrentProcess().MainModule.FileName;
+                string normalizedDescription = description ?? "";
+
+                // 注册文件类型
+                using (RegistryKey fileTypeKey = Registry.CurrentUser.CreateSubKey(@"Software\Classes\" + normalizedProgId))
+                {
+                    fileTypeKey.SetValue("", normalizedDescription);
+                    fileTypeKey.SetValue("FriendlyTypeName", normalizedDescription);
+
+                    // 设置默认图标
+                    using (RegistryKey defaultIconKey = fileTypeKey.CreateSubKey("DefaultIcon"))
+                    {
+                        string iconValue = string.IsNullOrEmpty(iconPath)
+                            ? $"\"{exePath}\",0"
+                            : $"\"{iconPath}\",0";
+                        defaultIconKey.SetValue("", iconValue);
+                    }
+
+                    // 设置打开命令：打开该扩展名文件时启动宿主 exe 并传入文件路径
+                    using (RegistryKey shellKey = fileTypeKey.CreateSubKey("shell"))
+                    using (RegistryKey openKey = shellKey.CreateSubKey("open"))
+                    using (RegistryKey commandKey = openKey.CreateSubKey("command"))
+                    {
+                        commandKey.SetValue("", $"\"{exePath}\" \"%1\"");
+                    }
+                }
+
+                // 注册文件扩展名
+                using (RegistryKey extensionKey = Registry.CurrentUser.CreateSubKey(@"Software\Classes\" + normalizedExtension))
+                {
+                    extensionKey.SetValue("", normalizedProgId);
+                }
+
+                // 刷新系统文件关联缓存
+                RefreshSystemFileAssociations();
+
+                LogHelper.WriteLogToFile($"成功注册{normalizedExtension}文件关联（ProgId: {normalizedProgId}）", LogHelper.LogType.Event);
+                return true;
+            }
+            catch (SecurityException ex)
+            {
+                LogHelper.WriteLogToFile($"注册文件关联时权限不足: {ex.Message}", LogHelper.LogType.Error);
+                return false;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                LogHelper.WriteLogToFile($"注册文件关联时访问被拒绝: {ex.Message}", LogHelper.LogType.Error);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"注册文件关联时出错: {ex.Message}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 注销自定义文件扩展名关联（供插件使用）。
+        /// 自动读取扩展名当前指向的 ProgId 并一并清理，无需调用方提供。
+        /// </summary>
+        /// <returns>是否注销成功。</returns>
+        public static bool UnregisterFileAssociation(string extension)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(extension)) return false;
+
+                string normalizedExtension = NormalizeExtension(extension);
+                if (IsProtectedExtension(normalizedExtension)) return false;
+
+                // 先读取扩展名当前指向的 ProgId，用于清理文件类型定义
+                string linkedProgId = null;
+                using (RegistryKey extensionKey = Registry.CurrentUser.OpenSubKey(@"Software\Classes\" + normalizedExtension))
+                {
+                    linkedProgId = extensionKey?.GetValue("") as string;
+                }
+
+                // 删除文件扩展名关联
+                Registry.CurrentUser.DeleteSubKeyTree(@"Software\Classes\" + normalizedExtension, false);
+
+                // 删除文件类型定义（排除宿主自身的 InkCanvasStrokesFile）
+                if (!string.IsNullOrWhiteSpace(linkedProgId)
+                    && !string.Equals(linkedProgId, FileTypeName, StringComparison.OrdinalIgnoreCase))
+                {
+                    Registry.CurrentUser.DeleteSubKeyTree(@"Software\Classes\" + linkedProgId, false);
+                }
+
+                // 刷新系统文件关联缓存
+                RefreshSystemFileAssociations();
+
+                LogHelper.WriteLogToFile($"成功注销{normalizedExtension}文件关联", LogHelper.LogType.Event);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"注销文件关联时出错: {ex.Message}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 检查自定义文件扩展名关联是否已注册且指向宿主 exe（供插件使用）。
+        /// </summary>
+        /// <param name="progId">可选的 ProgId；非空时校验扩展名指向的 ProgId 是否与之匹配。</param>
+        /// <returns>已注册且命令指向宿主 exe 时返回 true。</returns>
+        public static bool IsFileAssociationRegistered(string extension, string progId = null)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(extension)) return false;
+
+                string normalizedExtension = NormalizeExtension(extension);
+
+                using (RegistryKey extensionKey = Registry.CurrentUser.OpenSubKey(@"Software\Classes\" + normalizedExtension))
+                {
+                    if (extensionKey == null) return false;
+
+                    string fileType = extensionKey.GetValue("") as string;
+                    if (string.IsNullOrEmpty(fileType)) return false;
+
+                    // 指定了 ProgId 时校验是否一致
+                    if (!string.IsNullOrWhiteSpace(progId)
+                        && !string.Equals(fileType, progId.Trim(), StringComparison.OrdinalIgnoreCase))
+                        return false;
+
+                    using (RegistryKey shellKey = Registry.CurrentUser.OpenSubKey(@"Software\Classes\" + fileType + @"\shell\open\command"))
+                    {
+                        if (shellKey == null) return false;
+
+                        string command = shellKey.GetValue("") as string;
+                        if (string.IsNullOrEmpty(command)) return false;
+
+                        // 检查命令是否指向当前应用程序
+                        string currentExePath = Process.GetCurrentProcess().MainModule.FileName;
+                        return command.Contains(currentExePath);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"检查文件关联状态时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            return false;
+        }
+
+        #endregion
+
         /// <summary>
         /// 刷新系统文件关联缓存
         /// </summary>

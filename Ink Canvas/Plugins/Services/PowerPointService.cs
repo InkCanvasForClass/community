@@ -1,5 +1,7 @@
 using Ink_Canvas.Helpers;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Ink_Canvas.Plugins
 {
@@ -56,6 +58,54 @@ namespace Ink_Canvas.Plugins
             {
                 try { return _mainWindow?.PPTManager?.GetPresentationName(); }
                 catch { return null; }
+            }
+        }
+
+        public bool IsConnected
+        {
+            get
+            {
+                try { return _mainWindow?.PPTManager?.IsConnected ?? false; }
+                catch { return false; }
+            }
+        }
+
+        public string GetPresentationPath()
+        {
+            try { return _mainWindow?.PPTManager?.GetPresentationPath(); }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"PowerPointService.GetPresentationPath failed: {ex.Message}", LogHelper.LogType.Warning);
+                return null;
+            }
+        }
+
+        public IReadOnlyList<PluginSlideThumbnail> ExportSlideThumbnails(int width, int height)
+        {
+            try
+            {
+                var list = _mainWindow?.PPTManager?.ExportSlideThumbnails(width, height);
+                if (list == null || list.Count == 0) return Array.Empty<PluginSlideThumbnail>();
+                return list.Select(t => new PluginSlideThumbnail
+                {
+                    SlideNumber = t.SlideNumber,
+                    PngBytes = t.PngBytes,
+                }).ToList();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"PowerPointService.ExportSlideThumbnails failed: {ex.Message}", LogHelper.LogType.Warning);
+                return Array.Empty<PluginSlideThumbnail>();
+            }
+        }
+
+        public bool TryShowSlideNavigation()
+        {
+            try { return _mainWindow?.PPTManager?.TryShowSlideNavigation() ?? false; }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"PowerPointService.TryShowSlideNavigation failed: {ex.Message}", LogHelper.LogType.Warning);
+                return false;
             }
         }
 

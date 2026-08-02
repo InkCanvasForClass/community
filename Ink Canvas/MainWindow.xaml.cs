@@ -55,6 +55,8 @@ namespace Ink_Canvas
 
         // 墨迹渐隐管理器
         private InkFadeManager _inkFadeManager;
+        // 暴露给插件墨迹特效服务的入口（未初始化时为 null）
+        internal InkFadeManager InkFadeManagerInstance => _inkFadeManager;
         private readonly CancellationTokenSource _notificationProviderCancellation = new CancellationTokenSource();
         private AnnouncementService _announcementService;
 
@@ -1422,6 +1424,24 @@ namespace Ink_Canvas
                 _inkFadeManager.IsEnabled = isEnabled;
                 if (fadeTime > 0)
                     _inkFadeManager.UpdateFadeTime(fadeTime);
+            }
+        }
+
+        /// <summary>
+        /// 供插件全屏服务调用的入口：进入/退出全屏（包装 FullScreenHelper，保存/恢复窗口状态）。
+        /// </summary>
+        internal void SetPluginFullScreen(bool isFullScreen)
+        {
+            try
+            {
+                if (isFullScreen == isFullScreenApplied) return;
+                if (isFullScreen) Helpers.FullScreenHelper.StartFullScreen(this);
+                else Helpers.FullScreenHelper.EndFullScreen(this);
+                isFullScreenApplied = isFullScreen;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"插件切换全屏失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 

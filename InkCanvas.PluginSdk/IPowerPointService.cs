@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Ink_Canvas.Plugins
 {
@@ -28,6 +29,16 @@ namespace Ink_Canvas.Plugins
         string CurrentFileName { get; }
 
         /// <summary>
+        /// 是否已连接到 PowerPoint/WPS。
+        /// </summary>
+        bool IsConnected { get; }
+
+        /// <summary>
+        /// 当前演示文件的完整路径；未打开时返回 null。
+        /// </summary>
+        string GetPresentationPath();
+
+        /// <summary>
         /// 跳转到指定页。
         /// </summary>
         void GoToSlide(int slideNumber);
@@ -53,6 +64,19 @@ namespace Ink_Canvas.Plugins
         void StopSlideshow();
 
         /// <summary>
+        /// 导出全部幻灯片缩略图（PNG）。
+        /// </summary>
+        /// <param name="width">缩略图宽度。</param>
+        /// <param name="height">缩略图高度。</param>
+        /// <returns>缩略图列表；未连接时返回空列表。</returns>
+        IReadOnlyList<PluginSlideThumbnail> ExportSlideThumbnails(int width, int height);
+
+        /// <summary>
+        /// 尝试打开 PPT 翻页导航界面。返回是否成功打开。
+        /// </summary>
+        bool TryShowSlideNavigation();
+
+        /// <summary>
         /// 翻页事件（页码）。
         /// </summary>
         event Action<int> SlideChanged;
@@ -66,5 +90,17 @@ namespace Ink_Canvas.Plugins
         /// 放映结束事件。
         /// </summary>
         event Action SlideshowEnded;
+    }
+
+    /// <summary>
+    /// 单张幻灯片的缩略图（PNG 字节）。
+    /// </summary>
+    public sealed class PluginSlideThumbnail
+    {
+        /// <summary>幻灯片页码（从 1 开始）。</summary>
+        public int SlideNumber { get; set; }
+
+        /// <summary>缩略图 PNG 字节。</summary>
+        public byte[] PngBytes { get; set; }
     }
 }

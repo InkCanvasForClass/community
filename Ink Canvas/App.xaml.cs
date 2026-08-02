@@ -57,6 +57,8 @@ namespace Ink_Canvas
 
         public static string[] StartArgs;
         public static string RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
+        // 新增：版本字符串（在 App_Startup 中计算赋值，形如 "1.7.18.0 (sha)"）
+        public static string AppVersion = "";
 
         // 新增：标记是否通过--board参数启动
         public static bool StartWithBoardMode = false;
@@ -207,7 +209,8 @@ namespace Ink_Canvas
                 (typeof(Plugins.IAppRestartService),      new Plugins.AppRestartService()),
                 (typeof(Plugins.IWindowService),          new Plugins.WindowService(mainWindow)),
                 (typeof(Plugins.IPowerPointService),      new Plugins.PowerPointService(mainWindow)),
-                (typeof(Plugins.IEventService),           new Plugins.EventService(mainWindow)),
+                // 复用 _pluginEventService 实例：App_Exit 广播 AppExiting 时，插件经 DI 拿到的就是同一实例
+                (typeof(Plugins.IEventService),           _pluginEventService),
                 (typeof(Plugins.ISettingsService),        new Plugins.SettingsService()),
                 (typeof(Plugins.IHotkeyService),          new Plugins.HotkeyService(mainWindow.GlobalHotkeyManagerInstance)),
                 (typeof(Plugins.INotificationService),    new Plugins.NotificationService(mainWindow)),
@@ -219,6 +222,21 @@ namespace Ink_Canvas
                 (typeof(Plugins.IRecognitionService),      new Plugins.RecognitionService()),
                 (typeof(Plugins.ITrayService),            new Plugins.TrayService(this)),
                 (typeof(Plugins.IPluginUriService),       new Plugins.UriService(host)),
+                (typeof(Plugins.IScreenshotService),      new Plugins.ScreenshotService(mainWindow)),
+                (typeof(Plugins.IClipboardService),       new Plugins.ClipboardService()),
+                (typeof(Plugins.IAppInfoService),         new Plugins.AppInfoService()),
+                (typeof(Plugins.IScreenInfoService),      new Plugins.ScreenInfoService()),
+                (typeof(Plugins.IUpdateService),          new Plugins.UpdateService()),
+                (typeof(Plugins.IConfigProfileService),   new Plugins.ConfigProfileService()),
+                (typeof(Plugins.IQuoteService),           new Plugins.QuoteService(mainWindow)),
+                (typeof(Plugins.INameRosterService),      new Plugins.NameRosterService()),
+                (typeof(Plugins.IInkEffectService),       new Plugins.InkEffectService(mainWindow)),
+                (typeof(Plugins.ICameraService),          new Plugins.CameraService()),
+                (typeof(Plugins.ISystemInfoService),      new Plugins.SystemInfoService()),
+                (typeof(Plugins.IBackupService),          new Plugins.BackupService()),
+                (typeof(Plugins.IFileDialogService),      new Plugins.FileDialogService(mainWindow)),
+                (typeof(Plugins.IThemeService),           new Plugins.ThemeService()),
+                (typeof(Plugins.IAnnouncementService),    new Plugins.AnnouncementService()),
             };
 
             foreach (var (iface, impl) in services)
@@ -1003,6 +1021,7 @@ namespace Ink_Canvas
                     versionString += " (" + infoVersion.Substring(lastDotIndex + 1) + ")";
                 }
             }
+            AppVersion = versionString;
             LogHelper.NewLog(string.Format("Ink Canvas Starting (Version: {0})", versionString));
 
             // 检查是否为最终应用启动（更新后的应用）

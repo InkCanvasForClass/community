@@ -8,9 +8,8 @@ namespace Ink_Canvas.Plugins
         {
             try
             {
-                // 复用主程序的 FileAssociationManager 逻辑
-                // 当前仅支持 .icstk 格式，插件可扩展其他格式
-                return FileAssociationManager.RegisterFileAssociation();
+                // 插件自定义扩展名关联：写入 HKCU\Software\Classes，打开命令指向宿主 exe
+                return FileAssociationManager.RegisterFileAssociation(extension, progId, description, iconPath);
             }
             catch
             {
@@ -22,7 +21,8 @@ namespace Ink_Canvas.Plugins
         {
             try
             {
-                return FileAssociationManager.UnregisterFileAssociation();
+                // 注销插件自定义扩展名关联（宿主自动读取并清理其 ProgId）
+                return FileAssociationManager.UnregisterFileAssociation(extension);
             }
             catch
             {
@@ -34,7 +34,7 @@ namespace Ink_Canvas.Plugins
         {
             try
             {
-                return FileAssociationManager.IsFileAssociationRegistered();
+                return FileAssociationManager.IsFileAssociationRegistered(extension);
             }
             catch
             {

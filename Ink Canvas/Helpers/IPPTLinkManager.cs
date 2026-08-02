@@ -60,6 +60,7 @@ namespace Ink_Canvas.Helpers
         // 查询
         int GetCurrentSlideNumber();
         string GetPresentationName();
+        string GetPresentationPath();
         bool TryShowSlideNavigation();
         object GetCurrentActivePresentation();
         List<PPTSlideThumbnail> ExportSlideThumbnails(int width, int height, IProgress<double> progress = null);

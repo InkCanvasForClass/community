@@ -119,5 +119,22 @@ namespace Ink_Canvas.Plugins
             }
             catch (Exception ex) { LogHelper.WriteLogToFile($"WindowService.ExitWhiteboard failed: {ex.Message}", LogHelper.LogType.Warning); }
         }
+
+        public void SetFullscreen(bool fullscreen)
+        {
+            try
+            {
+                _mainWindow?.Dispatcher.Invoke(() =>
+                {
+                    _mainWindow.SetPluginFullScreen(fullscreen);
+                });
+            }
+            catch (Exception ex) { LogHelper.WriteLogToFile($"WindowService.SetFullscreen failed: {ex.Message}", LogHelper.LogType.Warning); }
+        }
+
+        public void ToggleFullscreen()
+        {
+            SetFullscreen(!IsFullscreen);
+        }
     }
 }

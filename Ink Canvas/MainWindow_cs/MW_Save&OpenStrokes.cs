@@ -1010,6 +1010,45 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 供插件导出的当前画布页 PNG 入口（墨迹 + 背景色）。
+        /// </summary>
+        internal bool ExportCurrentPageAsPngForPlugin(string filePath)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(filePath)) return false;
+                SaveSinglePageStrokesAsImage(filePath, false);
+                return File.Exists(filePath);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"插件导出当前页 PNG 失败: {ex.Message}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 供插件导出的任意墨迹 PNG 入口。
+        /// </summary>
+        internal bool ExportStrokesAsPngForPlugin(StrokeCollection strokes, string filePath)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(filePath) || strokes == null) return false;
+                using (var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+                {
+                    SavePageAsImage(strokes, stream);
+                }
+                return File.Exists(filePath);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"插件导出墨迹 PNG 失败: {ex.Message}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
+        /// <summary>
         /// 打开墨迹文件的鼠标释放事件处理
         /// </summary>
         /// <param name="sender">发送者</param>

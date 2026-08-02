@@ -55,6 +55,16 @@ namespace Ink_Canvas.Plugins
         void ExitWhiteboard();
 
         /// <summary>
+        /// 设置窗口全屏状态（进入/退出全屏）。
+        /// </summary>
+        void SetFullscreen(bool fullscreen);
+
+        /// <summary>
+        /// 切换窗口全屏状态。
+        /// </summary>
+        void ToggleFullscreen();
+
+        /// <summary>
         /// 窗口置顶状态变化事件。
         /// </summary>
         event Action<bool> TopMostChanged;
