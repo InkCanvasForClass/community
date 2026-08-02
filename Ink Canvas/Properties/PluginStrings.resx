@@ -298,4 +298,13 @@ SHA256：{1}
   <data name="Market_RemoveSourceConfirmation" xml:space="preserve">
     <value>确定要删除源“{0}”吗？</value>
   </data>
+  <data name="Compat_HostVersionTooLow" xml:space="preserve">
+    <value>插件要求宿主版本 ≥ {0}，当前宿主为 {1}</value>
+  </data>
+  <data name="Compat_ApiVersionMismatch" xml:space="preserve">
+    <value>插件要求 API 版本 {0}，当前宿主 API 为 {1}</value>
+  </data>
+  <data name="Compat_HostVersionOutOfRange" xml:space="preserve">
+    <value>当前宿主版本 {0} 不在插件支持的版本范围 {1} 内</value>
+  </data>
 </root>

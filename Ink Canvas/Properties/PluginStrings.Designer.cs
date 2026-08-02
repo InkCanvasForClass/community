@@ -203,5 +203,11 @@ namespace Ink_Canvas.Properties
         public static string Market_SourceNameRequired => ResourceManager.GetString(nameof(Market_SourceNameRequired), _resourceCulture);
 
         public static string Market_RemoveSourceConfirmation => ResourceManager.GetString(nameof(Market_RemoveSourceConfirmation), _resourceCulture);
+
+        public static string Compat_HostVersionTooLow => ResourceManager.GetString(nameof(Compat_HostVersionTooLow), _resourceCulture);
+
+        public static string Compat_ApiVersionMismatch => ResourceManager.GetString(nameof(Compat_ApiVersionMismatch), _resourceCulture);
+
+        public static string Compat_HostVersionOutOfRange => ResourceManager.GetString(nameof(Compat_HostVersionOutOfRange), _resourceCulture);
     }
 }

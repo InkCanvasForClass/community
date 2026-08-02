@@ -1,9 +1,18 @@
 using System;
+using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 
 namespace Ink_Canvas.Plugins
 {
     /// <summary>
-    /// 插件版本兼容性检查。支持以下格式：
+    /// 插件版本兼容性检查。三项检查各自独立，任一不通过即拒绝加载：
+    /// <list type="number">
+    /// <item><c>MinHostVersion</c>：宿主编译版本不得低于该值</item>
+    /// <item><c>ApiVersion</c>：与宿主 API 主版本相同且不高于宿主</item>
+    /// <item><c>VersionRange</c>：宿主编译版本须落在该范围内（可表达上界）</item>
+    /// </list>
+    /// 版本号无法解析时一律放行以免阻塞启动，但会记录警告，见 <c>LogUnparsable</c>。
+    /// <para>范围（<c>VersionRange</c>）支持以下格式：</para>
     /// <list type="bullet">
     /// <item>精确版本：<c>1.2.3</c></item>
     /// <item><c>^1.2.3</c>：同一主版本且大于等于给定版本</item>
@@ -21,13 +30,14 @@ namespace Ink_Canvas.Plugins
         {
             if (manifest == null) return CompatibilityResult.Ok();
 
-            // 1. 最低宿主版本
+            // 1. 最低宿主版本：与宿主实际编译版本比较
             if (!string.IsNullOrWhiteSpace(manifest.MinHostVersion))
             {
-                if (!IsVersionAtLeast(HostApiRequirement.MinSupportedHostVersion, manifest.MinHostVersion))
+                if (!IsVersionAtLeast(HostApiRequirement.HostVersion, manifest.MinHostVersion))
                 {
                     return CompatibilityResult.Fail(
-                        $"插件要求宿主版本 ≥ {manifest.MinHostVersion}，当前宿主为 {HostApiRequirement.MinSupportedHostVersion}");
+                        string.Format(PluginStrings.Compat_HostVersionTooLow,
+                            manifest.MinHostVersion, HostApiRequirement.HostVersion));
                 }
             }
 
@@ -37,17 +47,19 @@ namespace Ink_Canvas.Plugins
                 if (!IsApiVersionCompatible(manifest.ApiVersion))
                 {
                     return CompatibilityResult.Fail(
-                        $"插件要求 API 版本 {manifest.ApiVersion}，当前宿主 API 为 {HostApiRequirement.CurrentApiVersion}");
+                        string.Format(PluginStrings.Compat_ApiVersionMismatch,
+                            manifest.ApiVersion, HostApiRequirement.CurrentApiVersion));
                 }
             }
 
-            // 3. 版本范围（可选，仅当插件同时使用旧依赖检查时启用）
+            // 3. 宿主版本范围（可选）：插件声明自己能工作的宿主区间，可同时表达上界
             if (!string.IsNullOrWhiteSpace(manifest.VersionRange))
             {
-                if (!IsVersionInRange(manifest.Version, manifest.VersionRange))
+                if (!IsVersionInRange(HostApiRequirement.HostVersion, manifest.VersionRange))
                 {
                     return CompatibilityResult.Fail(
-                        $"插件版本 {manifest.Version} 不在宿主允许的版本范围 {manifest.VersionRange} 内");
+                        string.Format(PluginStrings.Compat_HostVersionOutOfRange,
+                            HostApiRequirement.HostVersion, manifest.VersionRange));
                 }
             }
 
@@ -64,7 +76,10 @@ namespace Ink_Canvas.Plugins
             {
                 return req.Major == cur.Major && req <= cur;
             }
-            return true; // 无法解析时放行，避免阻塞启动
+
+            // 无法解析时放行，避免阻塞启动；但必须留痕，否则插件会在不兼容的宿主上静默加载后崩溃
+            LogUnparsable("ApiVersion", required);
+            return true;
         }
 
         /// <summary>
@@ -77,6 +92,8 @@ namespace Ink_Canvas.Plugins
             {
                 return cur >= req;
             }
+
+            LogUnparsable("MinHostVersion", requiredMinVersion);
             return true;
         }
 
@@ -86,7 +103,11 @@ namespace Ink_Canvas.Plugins
         public static bool IsVersionInRange(string version, string range)
         {
             if (string.IsNullOrWhiteSpace(range)) return true;
-            if (Version.TryParse(NormalizeVersion(version), out var ver) != true) return true;
+            if (Version.TryParse(NormalizeVersion(version), out var ver) != true)
+            {
+                LogUnparsable("VersionRange.version", version);
+                return true;
+            }
 
             foreach (var raw in range.Split(new[] { ',', ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries))
             {
@@ -138,7 +159,23 @@ namespace Ink_Canvas.Plugins
 
         private static bool TryParse(string raw, out Version target)
         {
-            return Version.TryParse(NormalizeVersion(raw), out target);
+            if (Version.TryParse(NormalizeVersion(raw), out target)) return true;
+
+            // 调用方会 continue 跳过该比较项，等于放宽了范围限制，同样需要留痕
+            LogUnparsable("VersionRange.comparator", raw);
+            return false;
+        }
+
+        /// <summary>
+        /// 版本号无法被 <see cref="Version.TryParse"/> 解析时记一条警告。
+        /// 解析失败一律按放行处理以免阻塞启动，因此这条日志是排查
+        /// “插件本该被拒却仍加载”的唯一线索。带预发布后缀（如 <c>1.7.19-beta</c>）是常见成因。
+        /// </summary>
+        private static void LogUnparsable(string field, string value)
+        {
+            LogHelper.WriteLogToFile(
+                $"[PluginCompatibility] 无法解析 {field} \"{value}\"，已跳过该项兼容性检查并放行",
+                LogHelper.LogType.Warning);
         }
 
         /// <summary>
