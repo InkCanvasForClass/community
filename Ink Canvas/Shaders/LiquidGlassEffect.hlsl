@@ -43,7 +43,6 @@ float HighlightAngle : register(c6);
 float HighlightFalloff : register(c7);
 float HighlightStrength : register(c8);
 float HighlightWidth : register(c9);
-float BlurRadius : register(c10);
 
 // 零向量归一化会得到 NaN，而 0 * NaN 仍是 NaN，会污染采样坐标。
 // 胶囊水平中心线上 cornerCoord 恰好是零向量，必须走这个安全版本。
@@ -83,24 +82,6 @@ float circleMap(float x)
     return 1.0 - sqrt(1.0 - x * x);
 }
 
-// 十字形 5 点高斯模糊（中心 + 水平/垂直各 ±1、±2 阶）。权重总和 = 1，峰值收敛：
-// 平坦权重 + 大半径会让采样点彼此相距很远，得到「两张错开的清晰副本」而不是柔和的
-// 磨砂——那就是用户看到的重影。这里中心重、两侧软，半径内平滑过渡不重影。
-float4 SampleBlur(float2 uv, float2 texel, float radius)
-{
-    float2 step = texel * max(radius, 0.0) * 0.5;
-    float4 c = tex2D(implicitInputSampler, uv) * 0.4;
-    c += (tex2D(implicitInputSampler, uv + float2(step.x, 0.0)) +
-          tex2D(implicitInputSampler, uv - float2(step.x, 0.0))) * 0.12;
-    c += (tex2D(implicitInputSampler, uv + float2(0.0, step.y)) +
-          tex2D(implicitInputSampler, uv - float2(0.0, step.y))) * 0.12;
-    c += (tex2D(implicitInputSampler, uv + float2(2.0 * step.x, 0.0)) +
-          tex2D(implicitInputSampler, uv - float2(2.0 * step.x, 0.0))) * 0.03;
-    c += (tex2D(implicitInputSampler, uv + float2(0.0, 2.0 * step.y)) +
-          tex2D(implicitInputSampler, uv - float2(0.0, 2.0 * step.y))) * 0.03;
-    return c;
-}
-
 float4 main(float2 uv : TEXCOORD0) : COLOR0
 {
     float2 coord = uv * TextureSize;
@@ -121,26 +102,22 @@ float4 main(float2 uv : TEXCOORD0) : COLOR0
     float2 refractedGrad = SafeNormalize(grad + DepthEffect * SafeNormalize(centeredCoord));
     float2 refractedCoord = coord + d * refractedGrad;
 
-    float4 color;
+    // 输入纹理已经是 WPF BlurEffect 连续模糊过的背景——像素着色器只能离散采样，
+    // 手写模糊在大半径下必然稀疏、导致高频内容重影。这里直接取模糊层的结果。
+    float4 color = tex2D(implicitInputSampler, refractedCoord / TextureSize);
 
     if (ChromaticAberration > 0.0)
     {
-        // 色散：R/G/B 三通道各用一次模糊采样，清晰度一致，不会把色差放大成花边。
-        // 偏移量沿折射法线方向，dispersionIntensity 在角部（cx*cy 乘积）最强、中心为 0，
-        // 所以色散只出现在圆角处（边缘色散）。
+        // 色散：R/G/B 三通道清晰度一致（都取自同一模糊层），只在圆角处出现。
+        // 偏移量沿折射法线方向，dispersionIntensity 在角部（cx*cy 乘积）最强、中心为 0。
         float dispersionIntensity = ChromaticAberration *
             ((centeredCoord.x * centeredCoord.y) / (halfSize.x * halfSize.y));
         float2 dispersedCoord = d * refractedGrad * dispersionIntensity;
 
-        float2 uv = refractedCoord / TextureSize;
-        float4 r = SampleBlur(uv + dispersedCoord / TextureSize, texel, BlurRadius);
-        float4 c = SampleBlur(uv, texel, BlurRadius);
-        float4 b = SampleBlur(uv - dispersedCoord / TextureSize, texel, BlurRadius);
-        color = float4(r.r, c.g, b.b, c.a);
-    }
-    else
-    {
-        color = SampleBlur(refractedCoord / TextureSize, texel, BlurRadius);
+        float2 uv2 = refractedCoord / TextureSize;
+        float4 r = tex2D(implicitInputSampler, uv2 + dispersedCoord / TextureSize);
+        float4 b = tex2D(implicitInputSampler, uv2 - dispersedCoord / TextureSize);
+        color = float4(r.r, color.g, b.b, color.a);
     }
 
     // 边缘镜面高光：只在 HighlightWidth 带内，平方收紧使其更贴边，中心完全不加白。

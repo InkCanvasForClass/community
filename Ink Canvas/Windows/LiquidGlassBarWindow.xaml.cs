@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 using System.Windows.Threading;
 
 namespace Ink_Canvas
@@ -35,6 +36,9 @@ namespace Ink_Canvas
         private RectangleGeometry _glassLayersClip;
         private bool _isCapturing;
         private bool _isClosing;
+
+        /// <summary>背景模糊半径。WPF 原生 BlurEffect 的连续高斯，玻璃的磨砂感。</summary>
+        private const double GlassBlurRadius = 14.0;
 
         /// <summary>
         /// 本窗是否已被系统排除在截屏之外。为 true 时重抓背景无需隐藏自己，
@@ -129,9 +133,16 @@ namespace Ink_Canvas
                 ViewboxUnits = BrushMappingMode.Absolute
             };
 
+            // 第 1 层：截图 + WPF 原生 BlurEffect。像素着色器只能离散采样，手写模糊
+            // 在大半径下必然稀疏 → 高频内容（图标/文字）在采样空隙处重影。BlurEffect
+            // 是 WPF 内置的连续高斯，对整张图平滑模糊，无重影。
             BackdropLayer.Background = _backdropBrush;
-            // 折射层复用同一张画刷：着色器对它采样并做边缘位移
-            if (RefractionLayer != null) RefractionLayer.Background = _backdropBrush;
+            BackdropLayer.Effect = new BlurEffect
+            {
+                Radius = GlassBlurRadius,
+                KernelType = KernelType.Gaussian,
+                RenderingBias = RenderingBias.Performance
+            };
         }
 
         private void SetupEffect()
@@ -141,16 +152,27 @@ namespace Ink_Canvas
             _effect ??= new LiquidGlassEffect();
             if (!LiquidGlassEffect.IsShaderAvailable)
             {
-                // 着色器不可用时退回无折射：背景层照常显示裁剪截图，只是不弯曲。
-                // 折射层的画刷要留着——SetupBackdrop 已把同一张画刷挂到两层，
-                // 若这里连 Background 一起清掉，而下面又会把 BackdropLayer 置空，就会两层全空、背景消失。
+                // 着色器不可用时退回无折射：模糊层照常显示柔化后的截图，只是不弯曲
                 RefractionLayer.Effect = null;
+                RefractionLayer.Background = null;
+                BackdropLayer.Opacity = 1.0;
                 return;
             }
 
-            // 背景层交给折射层去画，避免同一张图叠两遍导致对比度过高
-            if (BackdropLayer != null) BackdropLayer.Background = null;
+            // 折射层的输入是模糊层的渲染结果——WPF 单元素只能挂一个 Effect，
+            // 用 VisualBrush 引用上一层，就串成了 blur → refraction 两级管线。
+            // 着色器只做 SDF 折射 + 色散，不再在内部模糊（那是重影的来源）。
+            RefractionLayer.Background = new VisualBrush(BackdropLayer)
+            {
+                Stretch = Stretch.None,
+                ViewboxUnits = BrushMappingMode.Absolute,
+                ViewportUnits = BrushMappingMode.Absolute
+            };
             RefractionLayer.Effect = _effect;
+
+            // 模糊层已被折射层引用并重绘，自己不再直接可见，否则同一张图会叠两遍
+            BackdropLayer.Opacity = 0;
+
             UpdateEffectParameters();
         }
 
@@ -180,8 +202,7 @@ namespace Ink_Canvas
             _effect.HighlightFalloff = 1.6f;
             _effect.HighlightStrength = 0.11f;
             _effect.HighlightWidth = 3.5f;
-            // 中间模糊：5 点高斯，磨砂感。只加这一项，不碰其他参数。
-            _effect.BlurRadius = 14f;
+            // 背景模糊由 BackdropLayer 的 WPF BlurEffect（GlassBlurRadius）完成，着色器不负责模糊。
         }
 
         /// <summary>图标颜色跟随系统主题：亮色桌面用深字，暗色用白字。</summary>

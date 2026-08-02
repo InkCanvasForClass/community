@@ -59,10 +59,6 @@ namespace Ink_Canvas.Shaders
             DependencyProperty.Register(nameof(HighlightWidth), typeof(float), typeof(LiquidGlassEffect),
                 new UIPropertyMetadata(6f, PixelShaderConstantCallback(9)));
 
-        public static readonly DependencyProperty BlurRadiusProperty =
-            DependencyProperty.Register(nameof(BlurRadius), typeof(float), typeof(LiquidGlassEffect),
-                new UIPropertyMetadata(14f, PixelShaderConstantCallback(10)));
-
         /// <summary>着色器二进制是否成功加载。失败时调用方应退回纯色/亚克力背景。</summary>
         public static bool IsShaderAvailable { get; private set; }
 
@@ -81,7 +77,6 @@ namespace Ink_Canvas.Shaders
             UpdateShaderValue(HighlightFalloffProperty);
             UpdateShaderValue(HighlightStrengthProperty);
             UpdateShaderValue(HighlightWidthProperty);
-            UpdateShaderValue(BlurRadiusProperty);
         }
 
         private static PixelShader EnsureShader()
@@ -187,13 +182,6 @@ namespace Ink_Canvas.Shaders
         {
             get => (float)GetValue(HighlightWidthProperty);
             set => SetValue(HighlightWidthProperty, value);
-        }
-
-        /// <summary>中间模糊半径（px）。5 点高斯近似，玻璃的磨砂感。</summary>
-        public float BlurRadius
-        {
-            get => (float)GetValue(BlurRadiusProperty);
-            set => SetValue(BlurRadiusProperty, value);
         }
     }
 }
