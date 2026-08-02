@@ -13,7 +13,6 @@ namespace Ink_Canvas.Helpers
     internal static class LiquidGlassCapture
     {
         private const int SrcCopy = 0x00CC0020;
-        private const int CaptureBlt = 0x40000000;
         private const int SmXVirtualScreen = 76;
         private const int SmYVirtualScreen = 77;
         private const int SmCxVirtualScreen = 78;
@@ -73,9 +72,10 @@ namespace Ink_Canvas.Helpers
                 if (hBitmap == IntPtr.Zero) return null;
 
                 oldBitmap = SelectObject(memDc, hBitmap);
-                // CAPTUREBLT 让分层窗口也进入截图，避免玻璃背景缺块
-                if (!BitBlt(memDc, 0, 0, width, height, screenDc, x, y, SrcCopy | CaptureBlt))
-                    BitBlt(memDc, 0, 0, width, height, screenDc, x, y, SrcCopy);
+                // 必须用纯 SRCCOPY，不能用 CAPTUREBLT：CAPTUREBLT 会把分层窗口也抓进截图，
+                // 而浮动栏自己就是 AllowsTransparency=True 的分层窗口 → 玻璃背景里出现本体重影。
+                // 纯 SRCCOPY 天然排除分层窗口，浮动栏不入镜，无需隐藏也不依赖 WDA 排除的可靠性。
+                BitBlt(memDc, 0, 0, width, height, screenDc, x, y, SrcCopy);
 
                 var bitmap = Imaging.CreateBitmapSourceFromHBitmap(
                     hBitmap,

@@ -171,13 +171,17 @@ namespace Ink_Canvas
             _effect.RefractionHeight = 8f;
             _effect.RefractionAmount = -14f;
             _effect.DepthEffect = 0f;
-            _effect.ChromaticAberration = 0.45f;
+            // 边缘色散：开启。着色器内 R/G/B 三通道全模糊一致，只在圆角处出现，
+            // 不会像之前「只有 G 模糊、R/B 单点」那样把色差放大成花边。
+            _effect.ChromaticAberration = 0.5f;
             // 高光上下对称。之前 -PI/2「光从上方来」+ 着色器里的 facing 迎光加权，
             // 让顶部明显比底部白，深色桌面上很扎眼。这里配合着色器去掉方向偏置。
             _effect.HighlightAngle = (float)(Math.PI / 2.0);
             _effect.HighlightFalloff = 1.6f;
             _effect.HighlightStrength = 0.11f;
             _effect.HighlightWidth = 3.5f;
+            // 中间模糊：5 点高斯，磨砂感。只加这一项，不碰其他参数。
+            _effect.BlurRadius = 14f;
         }
 
         /// <summary>图标颜色跟随系统主题：亮色桌面用深字，暗色用白字。</summary>
