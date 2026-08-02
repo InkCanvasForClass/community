@@ -1420,6 +1420,24 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 供插件全屏服务调用的入口：进入/退出全屏（包装 FullScreenHelper，保存/恢复窗口状态）。
+        /// </summary>
+        internal void SetPluginFullScreen(bool isFullScreen)
+        {
+            try
+            {
+                if (isFullScreen == isFullScreenApplied) return;
+                if (isFullScreen) Helpers.FullScreenHelper.StartFullScreen(this);
+                else Helpers.FullScreenHelper.EndFullScreen(this);
+                isFullScreenApplied = isFullScreen;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"插件切换全屏失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
         public string _lastAppliedProfileName;
         private bool isLoaded;
         private bool forcePointEraser;

@@ -234,6 +234,9 @@ namespace Ink_Canvas
                 (typeof(Plugins.ICameraService),          new Plugins.CameraService()),
                 (typeof(Plugins.ISystemInfoService),      new Plugins.SystemInfoService()),
                 (typeof(Plugins.IBackupService),          new Plugins.BackupService()),
+                (typeof(Plugins.IFileDialogService),      new Plugins.FileDialogService(mainWindow)),
+                (typeof(Plugins.IThemeService),           new Plugins.ThemeService()),
+                (typeof(Plugins.IAnnouncementService),    new Plugins.AnnouncementService()),
             };
 
             foreach (var (iface, impl) in services)
