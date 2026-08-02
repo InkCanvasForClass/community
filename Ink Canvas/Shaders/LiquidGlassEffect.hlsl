@@ -87,7 +87,6 @@ float4 main(float2 uv : TEXCOORD0) : COLOR0
     float2 coord = uv * TextureSize;
     float2 halfSize = TextureSize * 0.5;
     float2 centeredCoord = coord - halfSize;
-    float2 texel = 1.0 / TextureSize;
 
     float sd = sdRoundedRect(centeredCoord, halfSize, CornerRadius);
     float gradRadius = min(CornerRadius * 1.5, min(halfSize.x, halfSize.y));
@@ -102,13 +101,14 @@ float4 main(float2 uv : TEXCOORD0) : COLOR0
     float2 refractedGrad = SafeNormalize(grad + DepthEffect * SafeNormalize(centeredCoord));
     float2 refractedCoord = coord + d * refractedGrad;
 
-    // 输入纹理已经是 WPF BlurEffect 连续模糊过的背景——像素着色器只能离散采样，
-    // 手写模糊在大半径下必然稀疏、导致高频内容重影。这里直接取模糊层的结果。
+    // 输入纹理是截图（清晰）。DWM blur-behind 已在窗口背景做磨砂，中心区域这里输出
+    // 全透明（alpha=0）露出 DWM 模糊；只在边缘带（RefractionHeight 内）显示折射的截图，
+    // 制造「边缘透镜放大、中心磨砂」的 Apple 液态玻璃感。
     float4 color = tex2D(implicitInputSampler, refractedCoord / TextureSize);
 
     if (ChromaticAberration > 0.0)
     {
-        // 色散：R/G/B 三通道清晰度一致（都取自同一模糊层），只在圆角处出现。
+        // 色散：R/G/B 三通道清晰度一致（都取自同一截图），只在圆角处出现。
         // 偏移量沿折射法线方向，dispersionIntensity 在角部（cx*cy 乘积）最强、中心为 0。
         float dispersionIntensity = ChromaticAberration *
             ((centeredCoord.x * centeredCoord.y) / (halfSize.x * halfSize.y));
@@ -132,6 +132,7 @@ float4 main(float2 uv : TEXCOORD0) : COLOR0
 
     color.rgb += spec * edge * HighlightStrength;
 
-    color.a = 1.0;
+    // alpha 在边缘带渐隐：贴边 1（显示折射截图），往中心平滑过渡到 0（露出 DWM 模糊）。
+    color.a = 1.0 - smoothstep(0.0, RefractionHeight, depth);
     return color;
 }

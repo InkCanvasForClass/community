@@ -37,9 +37,6 @@ namespace Ink_Canvas
         private bool _isCapturing;
         private bool _isClosing;
 
-        /// <summary>背景模糊半径。WPF 原生 BlurEffect 的连续高斯，玻璃的磨砂感。</summary>
-        private const double GlassBlurRadius = 14.0;
-
         /// <summary>
         /// 本窗是否已被系统排除在截屏之外。为 true 时重抓背景无需隐藏自己，
         /// 也就没有隐藏/显示造成的闪烁。
@@ -93,11 +90,44 @@ namespace Ink_Canvas
                     // 不必先隐藏自己再显示回来，也就没有那一下闪烁。
                     // 失败（旧系统/远程会话）时回落到隐藏式截图，见 CaptureBehindSelf。
                     _excludedFromCapture = SetWindowDisplayAffinity(hwnd, WdaExcludeFromCapture);
+
+                    // DWM 原生模糊（参考 wpf-liquid-glass-window 同款）：窗口背后真实桌面
+                    // 由 DWM 合成器做连续高斯模糊，无重影、无截图、不闪烁。
+                    // 需要 AllowsTransparency=False（分层窗口对 DWM blur-behind 无效）。
+                    SetBlurBehind(hwnd, true);
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"液态玻璃浮动栏设置窗口样式失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        /// <summary>
+        /// 开启/关闭 DWM blur-behind：窗口的透明背景区域显示为背后桌面的模糊。
+        /// BlurRegion = 整窗（-1,-1 表示全窗）。对应参考项目的 SetBlurBehind。
+        /// </summary>
+        private static void SetBlurBehind(IntPtr hwnd, bool enabled)
+        {
+            try
+            {
+                var blurBehind = new DwmBlurBehind
+                {
+                    Flags = DwmBlurBehindFlags.Enable | DwmBlurBehindFlags.BlurRegion,
+                    Enabled = enabled,
+                    BlurRegion = CreateRectRgn(0, 0, -1, -1)
+                };
+
+                _ = DwmEnableBlurBehindWindow(hwnd, ref blurBehind);
+
+                if (blurBehind.BlurRegion != IntPtr.Zero)
+                {
+                    _ = DeleteObject(blurBehind.BlurRegion);
+                }
+            }
+            catch
+            {
+                // DWM 在远程/受限会话可能不可用，忽略。
             }
         }
 
@@ -133,16 +163,10 @@ namespace Ink_Canvas
                 ViewboxUnits = BrushMappingMode.Absolute
             };
 
-            // 第 1 层：截图 + WPF 原生 BlurEffect。像素着色器只能离散采样，手写模糊
-            // 在大半径下必然稀疏 → 高频内容（图标/文字）在采样空隙处重影。BlurEffect
-            // 是 WPF 内置的连续高斯，对整张图平滑模糊，无重影。
-            BackdropLayer.Background = _backdropBrush;
-            BackdropLayer.Effect = new BlurEffect
-            {
-                Radius = GlassBlurRadius,
-                KernelType = KernelType.Gaussian,
-                RenderingBias = RenderingBias.Performance
-            };
+            // 模糊由 DWM blur-behind 完成（窗口背景 = 背后桌面连续高斯，无重影）。
+            // BackdropLayer 保持透明：折射层输出中心 alpha=0，露出 DWM 模糊背景。
+            BackdropLayer.Background = null;
+            BackdropLayer.Effect = null;
         }
 
         private void SetupEffect()
@@ -152,26 +176,16 @@ namespace Ink_Canvas
             _effect ??= new LiquidGlassEffect();
             if (!LiquidGlassEffect.IsShaderAvailable)
             {
-                // 着色器不可用时退回无折射：模糊层照常显示柔化后的截图，只是不弯曲
+                // 着色器不可用时退回纯 DWM 模糊背景，无折射
                 RefractionLayer.Effect = null;
                 RefractionLayer.Background = null;
-                BackdropLayer.Opacity = 1.0;
                 return;
             }
 
-            // 折射层的输入是模糊层的渲染结果——WPF 单元素只能挂一个 Effect，
-            // 用 VisualBrush 引用上一层，就串成了 blur → refraction 两级管线。
-            // 着色器只做 SDF 折射 + 色散，不再在内部模糊（那是重影的来源）。
-            RefractionLayer.Background = new VisualBrush(BackdropLayer)
-            {
-                Stretch = Stretch.None,
-                ViewboxUnits = BrushMappingMode.Absolute,
-                ViewportUnits = BrushMappingMode.Absolute
-            };
+            // 折射层采样清晰截图做边缘折射，着色器中心输出透明（alpha=0）→
+            // 露出 DWM 模糊背景；边缘带折射清晰截图 + 高光 + 色散（透镜感）。
+            RefractionLayer.Background = _backdropBrush;
             RefractionLayer.Effect = _effect;
-
-            // 模糊层已被折射层引用并重绘，自己不再直接可见，否则同一张图会叠两遍
-            BackdropLayer.Opacity = 0;
 
             UpdateEffectParameters();
         }
@@ -202,7 +216,8 @@ namespace Ink_Canvas
             _effect.HighlightFalloff = 1.6f;
             _effect.HighlightStrength = 0.11f;
             _effect.HighlightWidth = 3.5f;
-            // 背景模糊由 BackdropLayer 的 WPF BlurEffect（GlassBlurRadius）完成，着色器不负责模糊。
+            // 背景磨砂由 DWM blur-behind 完成（窗口背景 = 背后桌面连续高斯，无重影），
+            // 着色器只负责边缘折射 + 高光 + 色散，中心 alpha=0 露出 DWM 模糊。
         }
 
         /// <summary>图标颜色跟随系统主题：亮色桌面用深字，暗色用白字。</summary>
@@ -371,6 +386,50 @@ namespace Ink_Canvas
         {
             ApplyRoundedClip(GlassRoot, ref _glassRootClip);
             ApplyRoundedClip(GlassLayers, ref _glassLayersClip);
+
+            // DWM blur-behind 只支持矩形窗口，四角会露出模糊背景（方形角）。
+            // 用 SetWindowRgn 把窗口真正裁成胶囊圆角，裁掉的部分透出清晰桌面。
+            // 注意坐标用物理像素（DPI 缩放），且相对窗口客户区，不是相对 GlassRoot。
+            ApplyRoundedWindowRegion();
+        }
+
+        /// <summary>
+        /// 把窗口裁剪成 GlassRoot 的胶囊圆角形状（物理像素）。SetWindowRgn 是真正的
+        /// 窗口级裁剪，能让 DWM 模糊背景也被裁成圆角。裁剪区外的部分完全透明（露出桌面）。
+        /// 失败时静默（保留矩形窗口，视觉上有方角但功能正常）。
+        /// </summary>
+        private void ApplyRoundedWindowRegion()
+        {
+            if (GlassRoot == null) return;
+
+            var hwnd = new WindowInteropHelper(this).Handle;
+            if (hwnd == IntPtr.Zero) return;
+
+            // DPI 缩放：窗口尺寸是 DIP，region 坐标必须乘缩放系数才是物理像素
+            double scale = 1.0;
+            var source = PresentationSource.FromVisual(this);
+            if (source?.CompositionTarget != null)
+                scale = source.CompositionTarget.TransformToDevice.M11;
+            if (scale <= 0) scale = 1.0;
+
+            // GlassRoot 相对窗口的位置（外层有 14px 投影边距）
+            var origin = GlassRoot.TranslatePoint(new Point(0, 0), this);
+            double w = GlassRoot.ActualWidth;
+            double h = GlassRoot.ActualHeight;
+            if (w <= 0 || h <= 0) return;
+
+            int left = (int)Math.Round(origin.X * scale);
+            int top = (int)Math.Round(origin.Y * scale);
+            int right = (int)Math.Round((origin.X + w) * scale);
+            int bottom = (int)Math.Round((origin.Y + h) * scale);
+            int rx = (int)Math.Round(GlassCornerRadius * scale * 2);
+            int ry = (int)Math.Round(Math.Min(GlassCornerRadius, h / 2) * scale * 2);
+
+            IntPtr region = CreateRoundRectRgn(left, top, right, bottom, rx, ry);
+            if (region == IntPtr.Zero) return;
+
+            _ = SetWindowRgn(hwnd, region, true);
+            // SetWindowRgn 接管 region，系统负责释放，不要 DeleteObject
         }
 
         private static void ApplyRoundedClip(FrameworkElement element, ref RectangleGeometry clip)
@@ -612,5 +671,37 @@ namespace Ink_Canvas
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool SetWindowDisplayAffinity(IntPtr hwnd, uint affinity);
+
+        [DllImport("gdi32.dll")]
+        private static extern IntPtr CreateRoundRectRgn(int nLeftRect, int nTopRect, int nRightRect, int nBottomRect, int nWidthEllipse, int nHeightEllipse);
+
+        [DllImport("user32.dll")]
+        private static extern int SetWindowRgn(IntPtr hWnd, IntPtr hRgn, bool bRedraw);
+
+        [DllImport("gdi32.dll")]
+        private static extern bool DeleteObject(IntPtr hObject);
+
+        [DllImport("dwmapi.dll")]
+        private static extern int DwmEnableBlurBehindWindow(IntPtr hwnd, ref DwmBlurBehind blurBehind);
+
+        [DllImport("gdi32.dll")]
+        private static extern IntPtr CreateRectRgn(int left, int top, int right, int bottom);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct DwmBlurBehind
+        {
+            public DwmBlurBehindFlags Flags;
+            public bool Enabled;
+            public IntPtr BlurRegion;
+            public bool TransitionOnMaximized;
+        }
+
+        [Flags]
+        private enum DwmBlurBehindFlags
+        {
+            Enable = 0x00000001,
+            BlurRegion = 0x00000002,
+            TransitionOnMaximized = 0x00000004
+        }
     }
 }
