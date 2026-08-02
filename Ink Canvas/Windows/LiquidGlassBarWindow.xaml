@@ -97,11 +97,11 @@
                 <Border x:Name="TintLayer" CornerRadius="20" IsHitTestVisible="False">
                     <Border.Background>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <GradientStop Color="#24FFFFFF" Offset="0" />
-                            <GradientStop Color="#07FFFFFF" Offset="0.22" />
+                            <GradientStop Color="#18FFFFFF" Offset="0" />
+                            <GradientStop Color="#05FFFFFF" Offset="0.22" />
                             <GradientStop Color="#00FFFFFF" Offset="0.5" />
-                            <GradientStop Color="#06FFFFFF" Offset="0.8" />
-                            <GradientStop Color="#18FFFFFF" Offset="1" />
+                            <GradientStop Color="#04FFFFFF" Offset="0.8" />
+                            <GradientStop Color="#10FFFFFF" Offset="1" />
                         </LinearGradientBrush>
                     </Border.Background>
                 </Border>
@@ -110,10 +110,10 @@
                      着色器已在边缘带内画了法线高光，这里只补一点点顶部反光，不能再厚，
                      否则和着色器高光、TintLayer、描边四层白摞起来整条栏会发雾 -->
                 <Border CornerRadius="20" IsHitTestVisible="False" Margin="1,1,1,0"
-                        VerticalAlignment="Top" Height="10">
+                        VerticalAlignment="Top" Height="8">
                     <Border.Background>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <GradientStop Color="#2BFFFFFF" Offset="0" />
+                            <GradientStop Color="#1AFFFFFF" Offset="0" />
                             <GradientStop Color="#00FFFFFF" Offset="1" />
                         </LinearGradientBrush>
                     </Border.Background>
@@ -208,14 +208,15 @@
                     </Border>
                 </StackPanel>
 
-                <!-- 第 5 层：玻璃边缘。彩色渐变内描边模拟色散 -->
+                <!-- 第 5 层：玻璃边缘。边框的立体感主要来自着色器在贴边一圈的折射，
+                     这里的描边只是勾一条极淡的轮廓线，太亮会盖过折射本身 -->
                 <Border CornerRadius="20" IsHitTestVisible="False" BorderThickness="1">
                     <Border.BorderBrush>
                         <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#73FFFFFF" Offset="0" />
-                            <GradientStop Color="#38A6E1FF" Offset="0.34" />
-                            <GradientStop Color="#38FFB3E1" Offset="0.66" />
-                            <GradientStop Color="#5EFFFFFF" Offset="1" />
+                            <GradientStop Color="#4DFFFFFF" Offset="0" />
+                            <GradientStop Color="#26A6E1FF" Offset="0.34" />
+                            <GradientStop Color="#26FFB3E1" Offset="0.66" />
+                            <GradientStop Color="#3DFFFFFF" Offset="1" />
                         </LinearGradientBrush>
                     </Border.BorderBrush>
                 </Border>

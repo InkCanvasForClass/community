@@ -152,15 +152,17 @@ namespace Ink_Canvas
             // 胶囊高 40 → RefractionHeight 取 10（带约占 1/4 高度），RefractionAmount 传负值
             // 向内侧采样（透镜放大）。色散与高光保持克制，避免在小尺寸上显脏。
             _effect.CornerRadius = (float)Math.Min(GlassCornerRadius, h / 2);
-            _effect.RefractionHeight = 12f;
-            _effect.RefractionAmount = -10f;
+            // 折射带做窄、位移做强：折射集中在贴边一圈，边框本身看起来就是一道透镜环，
+            // 中心区域完全不动。折射只重定向采样坐标，不改 alpha、不加白，所以透明度不变。
+            _effect.RefractionHeight = 8f;
+            _effect.RefractionAmount = -14f;
             _effect.DepthEffect = 0f;
-            _effect.ChromaticAberration = 0.35f;
+            _effect.ChromaticAberration = 0.45f;
             // 屏幕坐标 y 向下，-PI/2 = 光从上方来（顶部边缘最亮），与 TintLayer 的渐变方向一致
             _effect.HighlightAngle = (float)(-Math.PI / 2.0);
-            _effect.HighlightFalloff = 1.4f;
-            _effect.HighlightStrength = 0.22f;
-            _effect.HighlightWidth = 5f;
+            _effect.HighlightFalloff = 1.8f;
+            _effect.HighlightStrength = 0.13f;
+            _effect.HighlightWidth = 3.5f;
         }
 
         /// <summary>图标颜色跟随系统主题：亮色桌面用深字，暗色用白字。</summary>
