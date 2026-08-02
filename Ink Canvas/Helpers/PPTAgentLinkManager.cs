@@ -81,6 +81,9 @@ namespace Ink_Canvas.Helpers
 
         public string GetPresentationName() => GetStateSnapshot().PresentationName ?? string.Empty;
 
+        // Agent 模式只同步演示名称，不跟踪完整文件路径，返回 null
+        public string GetPresentationPath() => null;
+
         public bool TryShowSlideNavigation() => Send(PPTCommands.ShowSlideNavigation);
 
         public bool TryUnhideHiddenSlides() => Send(PPTCommands.UnhideHiddenSlides);

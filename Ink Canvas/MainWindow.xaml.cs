@@ -55,6 +55,8 @@ namespace Ink_Canvas
 
         // 墨迹渐隐管理器
         private InkFadeManager _inkFadeManager;
+        // 暴露给插件墨迹特效服务的入口（未初始化时为 null）
+        internal InkFadeManager InkFadeManagerInstance => _inkFadeManager;
         private readonly CancellationTokenSource _notificationProviderCancellation = new CancellationTokenSource();
         private AnnouncementService _announcementService;
 

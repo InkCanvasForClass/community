@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Windows.Input;
+
 namespace Ink_Canvas.Plugins
 {
     /// <summary>
@@ -24,5 +27,37 @@ namespace Ink_Canvas.Plugins
         /// 检查热键是否已注册。
         /// </summary>
         bool IsRegistered(string id);
+
+        /// <summary>
+        /// 获取宿主当前已注册的全部热键（含内置热键）的只读描述。
+        /// </summary>
+        IReadOnlyList<PluginHotkeyInfo> GetRegisteredHotkeys();
+
+        /// <summary>
+        /// 更新宿主内置热键的按键组合（按热键名称，如 "Undo"、"Redo"）。
+        /// </summary>
+        /// <returns>是否更新成功。</returns>
+        bool UpdateHotkey(string hotkeyName, Key key, ModifierKeys modifiers);
+
+        /// <summary>启用宿主热键注册（恢复响应）。</summary>
+        void EnableRegistration();
+
+        /// <summary>停用宿主热键注册（所有热键暂停响应）。</summary>
+        void DisableRegistration();
+    }
+
+    /// <summary>
+    /// 热键信息（只读描述，不含回调）。
+    /// </summary>
+    public sealed class PluginHotkeyInfo
+    {
+        /// <summary>热键名称（如 "Undo"）。</summary>
+        public string Name { get; set; } = "";
+
+        /// <summary>主键。</summary>
+        public Key Key { get; set; }
+
+        /// <summary>修饰键组合。</summary>
+        public ModifierKeys Modifiers { get; set; }
     }
 }

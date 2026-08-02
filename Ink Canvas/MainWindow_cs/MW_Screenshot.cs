@@ -145,6 +145,16 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 供插件截图服务调用的全屏捕获入口（调用方负责 Dispose 返回值）。
+        /// </summary>
+        internal System.Drawing.Bitmap CapturePluginFullScreen() => CaptureScreenshotToBitmap();
+
+        /// <summary>
+        /// 供插件截图服务调用的区域捕获入口（调用方负责 Dispose 返回值）。
+        /// </summary>
+        internal System.Drawing.Bitmap CapturePluginScreenArea(Rectangle area) => CaptureScreenArea(area);
+
+        /// <summary>
         /// 保存截图
         /// </summary>
         /// <param name="isHideNotification">是否隐藏通知</param>

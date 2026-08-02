@@ -95,6 +95,8 @@ namespace Ink_Canvas.Helpers
 
         public string GetPresentationName() => _inner.GetPresentationName();
 
+        public string GetPresentationPath() => _inner.GetPresentationPath();
+
         public bool TryShowSlideNavigation() => _inner.TryShowSlideNavigation();
 
         public object GetCurrentActivePresentation() => _inner.GetCurrentActivePresentation();

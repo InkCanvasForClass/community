@@ -1,6 +1,7 @@
 using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Input;
 
 namespace Ink_Canvas.Plugins
@@ -58,6 +59,57 @@ namespace Ink_Canvas.Plugins
         public bool IsRegistered(string id)
         {
             return _pluginHotkeys.ContainsKey(id);
+        }
+
+        public System.Collections.Generic.IReadOnlyList<PluginHotkeyInfo> GetRegisteredHotkeys()
+        {
+            try
+            {
+                var list = _manager?.GetRegisteredHotkeys();
+                if (list == null || list.Count == 0) return System.Array.Empty<PluginHotkeyInfo>();
+                return list.Select(h => new PluginHotkeyInfo
+                {
+                    Name = h.Name ?? "",
+                    Key = h.Key,
+                    Modifiers = h.Modifiers,
+                }).ToList();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"HotkeyService.GetRegisteredHotkeys failed: {ex.Message}", LogHelper.LogType.Warning);
+                return System.Array.Empty<PluginHotkeyInfo>();
+            }
+        }
+
+        public bool UpdateHotkey(string hotkeyName, Key key, ModifierKeys modifiers)
+        {
+            try
+            {
+                return _manager?.UpdateHotkey(hotkeyName, key, modifiers) ?? false;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"HotkeyService.UpdateHotkey failed: {ex.Message}", LogHelper.LogType.Warning);
+                return false;
+            }
+        }
+
+        public void EnableRegistration()
+        {
+            try { _manager?.EnableHotkeyRegistration(); }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"HotkeyService.EnableRegistration failed: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        public void DisableRegistration()
+        {
+            try { _manager?.DisableHotkeyRegistration(); }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"HotkeyService.DisableRegistration failed: {ex.Message}", LogHelper.LogType.Warning);
+            }
         }
     }
 }
