@@ -136,15 +136,10 @@ namespace Ink_Canvas
                 ViewboxUnits = BrushMappingMode.Absolute
             };
 
-            // 第 1 层：截图 + WPF BlurEffect（GPU 高斯，无重影）。用户架构的 Blur 层。
-            // 截图画刷进 BackdropLayer，BlurEffect 整面模糊 = 磨砂背景。
+            // 截图画刷作底。折射层直采同一张画刷（清晰截图），着色器在内部做轻量模糊
+            // + SDF 折射 + 色散，单元素单 Effect 完成 blur → refraction 管线。
             BackdropLayer.Background = _backdropBrush;
-            BackdropLayer.Effect = new BlurEffect
-            {
-                Radius = GlassBlurRadius,
-                KernelType = KernelType.Gaussian,
-                RenderingBias = RenderingBias.Performance
-            };
+            BackdropLayer.Effect = null;
         }
 
         private void SetupEffect()
@@ -154,25 +149,20 @@ namespace Ink_Canvas
             _effect ??= new LiquidGlassEffect();
             if (!LiquidGlassEffect.IsShaderAvailable)
             {
-                // 着色器不可用时退回无折射：模糊层照常显示柔化后的截图，只是不弯曲。
-                // 折射层的画刷要留着——SetupBackdrop 已把同一张画刷挂到两层，
-                // 若这里连 Background 一起清掉，而下面又会把 BackdropLayer 置空，就会两层全空、背景消失。
+                // 着色器不可用时退回：背景层显示清晰截图，无玻璃效果
                 RefractionLayer.Effect = null;
+                RefractionLayer.Background = null;
+                BackdropLayer.Opacity = 1.0;
                 return;
             }
 
-            // 折射层的输入是模糊层的渲染结果——WPF 单元素只能挂一个 Effect，
-            // 用 VisualBrush 引用上一层，串成 blur → refraction 两级管线。
-            // 着色器对模糊结果做 SDF 折射 + 色散，中心原样透出模糊背景。
-            // 注意：BackdropLayer 不能设 Opacity=0（VisualBrush 会采到全透明=黑），
-            // 折射层着色器输出不透明（alpha=1）已完全盖住下层，无需隐藏。
-            RefractionLayer.Background = new VisualBrush(BackdropLayer)
-            {
-                Stretch = Stretch.None,
-                ViewboxUnits = BrushMappingMode.Absolute,
-                ViewportUnits = BrushMappingMode.Absolute
-            };
+            // 折射层直采同一张清晰截图画刷（不是 VisualBrush——引用可视树元素容易采到
+            // 空/黑）。着色器在内部做轻量模糊 + SDF 折射 + 色散，单元素单 Effect 完成
+            // blur → refraction 管线，无黑屏。
+            RefractionLayer.Background = _backdropBrush;
             RefractionLayer.Effect = _effect;
+            // 背景层被折射层盖住（alpha=1），隐藏避免叠两遍
+            BackdropLayer.Opacity = 0;
 
             UpdateEffectParameters();
         }
@@ -203,8 +193,8 @@ namespace Ink_Canvas
             _effect.HighlightFalloff = 1.6f;
             _effect.HighlightStrength = 0.11f;
             _effect.HighlightWidth = 3.5f;
-            // 背景磨砂由 DWM blur-behind 完成（窗口背景 = 背后桌面连续高斯，无重影），
-            // 着色器只负责边缘折射 + 高光 + 色散，中心 alpha=0 露出 DWM 模糊。
+            // 内部模糊：轻量磨砂（半径 4），中间不至于太糊。着色器内 SampleBlur 连续高斯。
+            _effect.BlurRadius = 4f;
         }
 
         /// <summary>图标颜色跟随系统主题：亮色桌面用深字，暗色用白字。</summary>

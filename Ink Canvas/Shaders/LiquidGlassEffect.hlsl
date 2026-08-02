@@ -43,6 +43,7 @@ float HighlightAngle : register(c6);
 float HighlightFalloff : register(c7);
 float HighlightStrength : register(c8);
 float HighlightWidth : register(c9);
+float BlurRadius : register(c10);
 
 // 零向量归一化会得到 NaN，而 0 * NaN 仍是 NaN，会污染采样坐标。
 // 胶囊水平中心线上 cornerCoord 恰好是零向量，必须走这个安全版本。
@@ -82,6 +83,37 @@ float circleMap(float x)
     return 1.0 - sqrt(1.0 - x * x);
 }
 
+// 连续高斯模糊：沿 x、y 方向各 4 级采样，步长 = radius/4（覆盖 ±radius），
+// 权重按 exp(-t²) 连续衰减，权重总和归一到 1。采样点铺满整个半径范围，
+// 无空隙 → 不会产生「多张错开的清晰副本」那种重影。
+float4 SampleBlur(float2 uv, float2 texel, float radius)
+{
+    float sigma = max(radius / 4.0, 0.5);
+    float inv2s2 = 1.0 / (2.0 * sigma * sigma);
+    float2 h = float2(texel.x, 0.0);
+    float2 v = float2(0.0, texel.y);
+
+    float4 acc = tex2D(implicitInputSampler, uv);
+    float sum = 1.0;
+
+    float w1 = exp(-1.0 * inv2s2);
+    float w2 = exp(-4.0 * inv2s2);
+    float w3 = exp(-9.0 * inv2s2);
+    float w4 = exp(-16.0 * inv2s2);
+
+    acc += (tex2D(implicitInputSampler, uv + h) + tex2D(implicitInputSampler, uv - h)) * w1;
+    acc += (tex2D(implicitInputSampler, uv + 2.0 * h) + tex2D(implicitInputSampler, uv - 2.0 * h)) * w2;
+    acc += (tex2D(implicitInputSampler, uv + 3.0 * h) + tex2D(implicitInputSampler, uv - 3.0 * h)) * w3;
+    acc += (tex2D(implicitInputSampler, uv + 4.0 * h) + tex2D(implicitInputSampler, uv - 4.0 * h)) * w4;
+    acc += (tex2D(implicitInputSampler, uv + v) + tex2D(implicitInputSampler, uv - v)) * w1;
+    acc += (tex2D(implicitInputSampler, uv + 2.0 * v) + tex2D(implicitInputSampler, uv - 2.0 * v)) * w2;
+    acc += (tex2D(implicitInputSampler, uv + 3.0 * v) + tex2D(implicitInputSampler, uv - 3.0 * v)) * w3;
+    acc += (tex2D(implicitInputSampler, uv + 4.0 * v) + tex2D(implicitInputSampler, uv - 4.0 * v)) * w4;
+
+    sum += 4.0 * (w1 + w2 + w3 + w4);
+    return acc / sum;
+}
+
 float4 main(float2 uv : TEXCOORD0) : COLOR0
 {
     float2 coord = uv * TextureSize;
@@ -101,22 +133,28 @@ float4 main(float2 uv : TEXCOORD0) : COLOR0
     float2 refractedGrad = SafeNormalize(grad + DepthEffect * SafeNormalize(centeredCoord));
     float2 refractedCoord = coord + d * refractedGrad;
 
-    // 输入纹理是截图（清晰）。DWM blur-behind 已在窗口背景做磨砂，中心区域这里输出
-    // 全透明（alpha=0）露出 DWM 模糊；只在边缘带（RefractionHeight 内）显示折射的截图，
-    // 制造「边缘透镜放大、中心磨砂」的 Apple 液态玻璃感。
-    float4 color = tex2D(implicitInputSampler, refractedCoord / TextureSize);
+    // 输入纹理是清晰截图。对着色器内部做连续高斯模糊（Blur 层）+ SDF 折射采样：
+    // 边缘带内位移（透镜感），中心模糊背景原样透出。单元素单 Effect 完成 blur→refraction。
+    float2 texel = 1.0 / TextureSize;
+    float4 color = SampleBlur(refractedCoord / TextureSize, texel, BlurRadius);
 
     if (ChromaticAberration > 0.0)
     {
-        // 色散：R/G/B 三通道清晰度一致（都取自同一截图），只在圆角处出现。
-        // 偏移量沿折射法线方向，dispersionIntensity 在角部（cx*cy 乘积）最强、中心为 0。
-        float dispersionIntensity = ChromaticAberration *
-            ((centeredCoord.x * centeredCoord.y) / (halfSize.x * halfSize.y));
-        float2 dispersedCoord = d * refractedGrad * dispersionIntensity;
+        // 边缘色散：只在靠近玻璃边界处出现，不在中心。
+        // 判据：SDF 法线在直边是纯水平/垂直（|gx|*|gy|≈0）、在圆角是斜向（≈0.5），
+        // 乘以贴边遮罩（depth 越小越贴边）让色散沿边缘一圈、圆角处最强。
+        float cornerMask = abs(grad.x) * abs(grad.y);
+        float edgeMask = saturate(1.0 - depth / max(RefractionHeight, 1e-3));
+        float dispersionIntensity = ChromaticAberration * (0.15 + 0.85 * cornerMask) * edgeMask *
+            ((centeredCoord.x * centeredCoord.y) / (halfSize.x * halfSize.y) * 0.5 + 0.5);
+        // 色散偏移只沿折射法线方向、强度由上面的贴边遮罩决定（贴边才非零），
+        // 不乘 d（避免在中心也产生位移）。
+        float2 dispersedCoord = refractedGrad * dispersionIntensity * 0.35;
 
+        // R/B 也走模糊采样，与 G 清晰度一致，不放大色偏
         float2 uv2 = refractedCoord / TextureSize;
-        float4 r = tex2D(implicitInputSampler, uv2 + dispersedCoord / TextureSize);
-        float4 b = tex2D(implicitInputSampler, uv2 - dispersedCoord / TextureSize);
+        float4 r = SampleBlur(uv2 + dispersedCoord / TextureSize, texel, BlurRadius);
+        float4 b = SampleBlur(uv2 - dispersedCoord / TextureSize, texel, BlurRadius);
         color = float4(r.r, color.g, b.b, color.a);
     }
 
@@ -132,7 +170,7 @@ float4 main(float2 uv : TEXCOORD0) : COLOR0
 
     color.rgb += spec * edge * HighlightStrength;
 
-    // alpha 在边缘带渐隐：贴边 1（显示折射截图），往中心平滑过渡到 0（露出 DWM 模糊）。
-    color.a = 1.0 - smoothstep(0.0, RefractionHeight, depth);
+    // 整面显示模糊背景 + 边缘折射，alpha 恒为 1（不露任何下层，无黑屏）
+    color.a = 1.0;
     return color;
 }
