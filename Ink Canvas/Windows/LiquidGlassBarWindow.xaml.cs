@@ -194,8 +194,8 @@ namespace Ink_Canvas
             _effect.HighlightFalloff = 1.6f;
             _effect.HighlightStrength = 0.11f;
             _effect.HighlightWidth = 3.5f;
-            // 内部模糊：轻量磨砂（半径 4），中间不至于太糊。着色器内 SampleBlur 连续高斯。
-            _effect.BlurRadius = 4f;
+            // 内部模糊：轻量磨砂（半径 6），中间不至于太糊。着色器内 SampleBlur 连续高斯。
+            _effect.BlurRadius = 6f;
         }
 
         /// <summary>图标颜色跟随系统主题：亮色桌面用深字，暗色用白字。</summary>
@@ -365,49 +365,9 @@ namespace Ink_Canvas
             ApplyRoundedClip(GlassRoot, ref _glassRootClip);
             ApplyRoundedClip(GlassLayers, ref _glassLayersClip);
 
-            // DWM blur-behind 只支持矩形窗口，四角会露出模糊背景（方形角）。
-            // 用 SetWindowRgn 把窗口真正裁成胶囊圆角，裁掉的部分透出清晰桌面。
-            // 注意坐标用物理像素（DPI 缩放），且相对窗口客户区，不是相对 GlassRoot。
-            ApplyRoundedWindowRegion();
-        }
-
-        /// <summary>
-        /// 把窗口裁剪成 GlassRoot 的胶囊圆角形状（物理像素）。SetWindowRgn 是真正的
-        /// 窗口级裁剪，能让 DWM 模糊背景也被裁成圆角。裁剪区外的部分完全透明（露出桌面）。
-        /// 失败时静默（保留矩形窗口，视觉上有方角但功能正常）。
-        /// </summary>
-        private void ApplyRoundedWindowRegion()
-        {
-            if (GlassRoot == null) return;
-
-            var hwnd = new WindowInteropHelper(this).Handle;
-            if (hwnd == IntPtr.Zero) return;
-
-            // DPI 缩放：窗口尺寸是 DIP，region 坐标必须乘缩放系数才是物理像素
-            double scale = 1.0;
-            var source = PresentationSource.FromVisual(this);
-            if (source?.CompositionTarget != null)
-                scale = source.CompositionTarget.TransformToDevice.M11;
-            if (scale <= 0) scale = 1.0;
-
-            // GlassRoot 相对窗口的位置（外层有 14px 投影边距）
-            var origin = GlassRoot.TranslatePoint(new Point(0, 0), this);
-            double w = GlassRoot.ActualWidth;
-            double h = GlassRoot.ActualHeight;
-            if (w <= 0 || h <= 0) return;
-
-            int left = (int)Math.Round(origin.X * scale);
-            int top = (int)Math.Round(origin.Y * scale);
-            int right = (int)Math.Round((origin.X + w) * scale);
-            int bottom = (int)Math.Round((origin.Y + h) * scale);
-            int rx = (int)Math.Round(GlassCornerRadius * scale * 2);
-            int ry = (int)Math.Round(Math.Min(GlassCornerRadius, h / 2) * scale * 2);
-
-            IntPtr region = CreateRoundRectRgn(left, top, right, bottom, rx, ry);
-            if (region == IntPtr.Zero) return;
-
-            _ = SetWindowRgn(hwnd, region, true);
-            // SetWindowRgn 接管 region，系统负责释放，不要 DeleteObject
+            // 注意：这里不能用 SetWindowRgn 裁圆角——它会连外层 Grid 的 DropShadowEffect
+            // 一起裁掉，阴影消失。AllowsTransparency=True 的分层窗口原生支持圆角
+            // （GlassRoot.CornerRadius），无需窗口级 region。
         }
 
         private static void ApplyRoundedClip(FrameworkElement element, ref RectangleGeometry clip)
@@ -649,14 +609,5 @@ namespace Ink_Canvas
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool SetWindowDisplayAffinity(IntPtr hwnd, uint affinity);
-
-        [DllImport("gdi32.dll")]
-        private static extern IntPtr CreateRoundRectRgn(int nLeftRect, int nTopRect, int nRightRect, int nBottomRect, int nWidthEllipse, int nHeightEllipse);
-
-        [DllImport("user32.dll")]
-        private static extern int SetWindowRgn(IntPtr hWnd, IntPtr hRgn, bool bRedraw);
-
-        [DllImport("gdi32.dll")]
-        private static extern bool DeleteObject(IntPtr hObject);
     }
 }
