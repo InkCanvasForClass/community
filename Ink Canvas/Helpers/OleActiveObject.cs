@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using Windows.Win32;
+using Windows.Win32.Foundation;
 
 namespace Ink_Canvas.Helpers
 {
@@ -15,12 +16,31 @@ namespace Ink_Canvas.Helpers
         //[DllImport("oleaut32.dll", PreserveSig = true)]
         //private static extern int GetActiveObject(ref Guid rclsid, IntPtr pvReserved, [MarshalAs(UnmanagedType.IUnknown)] out object ppunk);
 
-        public unsafe static object GetActiveObject(string progId)
+        public static unsafe object GetActiveObject(string progID)
         {
-            int hr = PInvoke.CLSIDFromProgID(progId, out Guid clsid);
-            Marshal.ThrowExceptionForHR(hr);
-            hr = PInvoke.GetActiveObject(clsid, null, out object obj);
-            Marshal.ThrowExceptionForHR(hr);
+            if (string.IsNullOrEmpty(progID))
+                throw new ArgumentNullException(nameof(progID));
+
+            HRESULT hr;
+
+            hr = PInvoke.CLSIDFromProgIDEx(progID, out Guid clsid);
+
+            if (hr.Failed)
+            {
+                hr = PInvoke.CLSIDFromProgID(progID, out clsid);
+            }
+
+            if (hr.Failed)
+            {
+                Marshal.ThrowExceptionForHR(hr);
+            }
+            hr = PInvoke.GetActiveObject(in clsid, null, out object obj);
+
+            if (hr.Failed)
+            {
+                Marshal.ThrowExceptionForHR(hr);
+            }
+
             return obj;
         }
     }

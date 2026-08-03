@@ -174,22 +174,27 @@ namespace Ink_Canvas.Helpers
         public unsafe static void DisableEdgeGestures(IntPtr hwnd, bool enable)
         {
             IPropertyStore pPropStore = null;
-            int hr = 0;
+            HRESULT hr = default;
             //hr = PInvoke.SHGetPropertyStoreForWindow(new HWND(hwnd), ref IID_PROPERTY_STORE, ref pPropStore);
             fixed (Guid* ptr = &IID_PROPERTY_STORE)
             {
-                hr = PInvoke.SHGetPropertyStoreForWindow(new HWND(hwnd), ptr, out object pPS);
-                pPropStore = (IPropertyStore)pPS;
+                hr = PInvoke.SHGetPropertyStoreForWindow(new HWND(hwnd), ptr, out object? pPS);
+                if (hr.Succeeded && pPS is IPropertyStore store) pPropStore = store;
+                //pPropStore = (IPropertyStore)pPS;
             }
 
-            if (hr == 0)
+            if (hr.Succeeded && pPropStore is not null)
             {
-                PropertyKey propKey = new PropertyKey();
-                propKey.fmtid = DISABLE_TOUCH_SCREEN;
-                propKey.pid = 2;
-                PropVariant var = new PropVariant();
-                var.vt = VT_BOOL;
-                var.boolVal = enable;
+                PropertyKey propKey = new()
+                {
+                    fmtid = DISABLE_TOUCH_SCREEN,
+                    pid = 2
+                };
+                PropVariant var = new()
+                {
+                    vt = VT_BOOL,
+                    boolVal = enable
+                };
                 pPropStore.SetValue(ref propKey, ref var);
                 Marshal.FinalReleaseComObject(pPropStore);
             }
