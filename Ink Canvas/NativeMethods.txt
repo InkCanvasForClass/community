@@ -91,3 +91,4 @@ MagSetWindowSource
 MagSetWindowTransform
 MagSetWindowFilterList
 ShowCursor
+CLSIDFromProgIDEx
