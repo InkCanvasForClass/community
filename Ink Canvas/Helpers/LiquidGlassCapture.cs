@@ -48,11 +48,7 @@ namespace Ink_Canvas.Helpers
                 if (bitmap == null) return false;
 
                 // 把位图与坐标包进同一帧，一起交换：读侧不会拿到"新截图 + 旧原点"的错配。
-                var frame = new ScreenSnapshot(bitmap, vx, vy);
-                lock (SyncLock)
-                {
-                    Snapshot = frame;
-                }
+                PublishSnapshot(new ScreenSnapshot(bitmap, vx, vy));
                 return true;
             }
             catch (Exception ex)
@@ -66,6 +62,19 @@ namespace Ink_Canvas.Helpers
                 {
                     _capturing = false;
                 }
+            }
+        }
+
+        /// <summary>
+        /// 把外部抓到的帧（例如 Magnification API 路径）原子交换到 <see cref="Snapshot"/>。
+        /// 与 <see cref="Capture"/> 共用同一把锁，保证读侧永远看到完整帧。
+        /// </summary>
+        internal static void PublishSnapshot(ScreenSnapshot frame)
+        {
+            if (frame == null) return;
+            lock (SyncLock)
+            {
+                Snapshot = frame;
             }
         }
 

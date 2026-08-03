@@ -94,6 +94,9 @@ namespace Ink_Canvas
                     // 不必先隐藏自己再显示回来，也就没有那一下闪烁。
                     // 失败（旧系统/远程会话）时回落到隐藏式截图，见 CaptureBehindSelfAsync。
                     _excludedFromCapture = SetWindowDisplayAffinity(hwnd, WdaExcludeFromCapture);
+                    LogHelper.WriteLogToFile(
+                        $"液态玻璃浮动栏 SetWindowDisplayAffinity 返回={_excludedFromCapture} err={Marshal.GetLastWin32Error()}",
+                        LogHelper.LogType.Warning);
 
                     // 模糊由 BlurEffect 层完成（见 SetupBackdrop），不走 DWM blur-behind——
                     // 分层窗口（AllowsTransparency=True）对 DWM blur-behind 无效。
@@ -119,6 +122,8 @@ namespace Ink_Canvas
         {
             _isClosing = true;
             StopRefreshTimer();
+            // 放大镜宿主与本窗同生共死：关栏时释放，避免残留离屏窗口
+            LiquidGlassMagnifier.Shutdown();
             _backdropBrush = null;
             _effect = null;
         }
@@ -254,40 +259,31 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 后台抓屏一帧：UI 线程隐藏自己 → BitBlt 放到后台线程执行（不阻塞 UI）→
-        /// 恢复并应用新帧。隐藏/显示是窗口操作，必须在 UI 线程；BitBlt 只操作屏幕 DC，
-        /// 放后台线程。await 之后经 DispatcherSynchronizationContext 自动回到 UI 线程。
+        /// 抓屏一帧。优先走 Magnification API：排除本窗 HWND 后直接读"栏正下方"，
+        /// 全程不动窗口状态，因此不闪。失败（缺 DLL / 合成全黑 / 驱动不支持）时
+        /// 回退到 Hide → BitBlt → Show 老路径。
         /// </summary>
         private async Task CaptureBehindSelfAsync()
         {
             if (_isCapturing) return;
             _isCapturing = true;
 
-            var hwnd = IntPtr.Zero;
             try
             {
-                // 已被系统排除在截屏之外时直接抓，无需隐藏自己（Win10 2004+）。
-                // 否则先藏起自己，否则会把玻璃自己拍进背景里。
-                if (!_excludedFromCapture)
+                // —— 路径 1：Magnifier（首选，零闪烁）——
+                if (TryCaptureViaMagnifier())
                 {
-                    hwnd = new WindowInteropHelper(this).Handle;
-                    if (hwnd != IntPtr.Zero)
-                    {
-                        ShowWindow(hwnd, SwHide);
-                        Dispatcher.Invoke(DispatcherPriority.Render, new Action(() => { }));
-                    }
+                    UpdateEffectParameters();
+                    return;
                 }
 
-                // BitBlt 抓整个虚拟桌面耗时数毫秒到数十毫秒，放后台线程避免阻塞 UI。
-                // LiquidGlassCapture.Capture 内部加锁防重入，失败时保留旧帧。
-                await Task.Run(() => LiquidGlassCapture.Capture());
+                LogHelper.WriteLogToFile(
+                    $"液态玻璃放大镜失败，回退抓屏。_excludedFromCapture={_excludedFromCapture}",
+                    LogHelper.LogType.Warning);
 
-                if (!_excludedFromCapture && hwnd != IntPtr.Zero)
-                {
-                    ShowWindow(hwnd, SwShowNoActivate);
-                    Dispatcher.Invoke(DispatcherPriority.Render, new Action(() => { }));
-                }
-
+                // —— 路径 2：WDA 已排除自身时直接整屏 BitBlt（分层窗口上通常走不到）——
+                // —— 路径 3：Hide/Show 回退（会闪，仅作兜底）——
+                await CaptureViaHideShowAsync();
                 CropBackdropToWindow();
                 UpdateEffectParameters();
             }
@@ -298,6 +294,102 @@ namespace Ink_Canvas
             finally
             {
                 _isCapturing = false;
+            }
+        }
+
+        /// <summary>
+        /// 用放大镜抓取 GlassRoot 当前屏幕矩形下、排除本窗后的画面。
+        /// 成功时直接把小图挂到画刷上（Viewbox 置满），返回 true；失败返回 false。
+        /// 必须在 UI 线程调用（Magnification API 非线程安全）。
+        /// </summary>
+        private bool TryCaptureViaMagnifier()
+        {
+            if (_backdropBrush == null || GlassRoot == null) return false;
+            if (WindowState == WindowState.Minimized) return false;
+            if (GlassRoot.ActualWidth <= 0 || GlassRoot.ActualHeight <= 0) return false;
+
+            var hwnd = new WindowInteropHelper(this).Handle;
+            if (hwnd == IntPtr.Zero) return false;
+
+            Point topLeft, bottomRight;
+            try
+            {
+                topLeft = GlassRoot.PointToScreen(new Point(0, 0));
+                bottomRight = GlassRoot.PointToScreen(
+                    new Point(GlassRoot.ActualWidth, GlassRoot.ActualHeight));
+            }
+            catch
+            {
+                return false; // 窗口尚未连上 PresentationSource
+            }
+
+            int left = (int)Math.Round(topLeft.X);
+            int top = (int)Math.Round(topLeft.Y);
+            int width = Math.Max(1, (int)Math.Round(bottomRight.X - topLeft.X));
+            int height = Math.Max(1, (int)Math.Round(bottomRight.Y - topLeft.Y));
+
+            // 诊断 DPI/坐标：先无条件打一条"已到达"，再打详情
+            LogHelper.WriteLogToFile(
+                $"液态玻璃放大镜已到达 CaptureRegion: 源=({left},{top},{width}x{height})",
+                LogHelper.LogType.Warning);
+            try
+            {
+                var src = PresentationSource.FromVisual(this);
+                double scaleX = src?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+                double scaleY = src?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
+                int phCx = GetSystemMetrics(0), phCy = GetSystemMetrics(1);
+                LogHelper.WriteLogToFile(
+                    $"液态玻璃放大镜坐标详情: Actual=({GlassRoot.ActualWidth}x{GlassRoot.ActualHeight}) " +
+                    $"PointToScreen=({topLeft.X},{topLeft.Y})-({bottomRight.X},{bottomRight.Y}) " +
+                    $"DPI缩放=({scaleX},{scaleY}) 主屏物理={phCx}x{phCy}",
+                    LogHelper.LogType.Warning);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"液态玻璃放大镜坐标诊断异常: {ex.Message}", LogHelper.LogType.Warning);
+            }
+
+            var bitmap = LiquidGlassMagnifier.CaptureRegion(hwnd, left, top, width, height);
+            if (bitmap == null) return false;
+
+            // 小图本身就是栏区域：Viewbox 置满整张图，不再依赖虚拟屏原点裁剪。
+            // 不 Publish 到 LiquidGlassCapture.Snapshot——那是整屏帧的槽位；
+            // 拖动中 ScheduleCrop 若拿到这张小图会按虚拟屏裁出空矩形。
+            // 拖动期间就冻住这一帧，松手后 recapture 再换新位置的画面。
+            _backdropBrush.ImageSource = bitmap;
+            _backdropBrush.Viewbox = new Rect(0, 0, bitmap.PixelWidth, bitmap.PixelHeight);
+            return true;
+        }
+
+        /// <summary>
+        /// Hide/Show 回退：UI 线程隐藏自己 → BitBlt 放到后台线程 → 恢复。
+        /// 会闪，仅在放大镜不可用时使用。
+        /// </summary>
+        private async Task CaptureViaHideShowAsync()
+        {
+            var hwnd = IntPtr.Zero;
+            if (!_excludedFromCapture)
+            {
+                hwnd = new WindowInteropHelper(this).Handle;
+                if (hwnd != IntPtr.Zero)
+                {
+                    ShowWindow(hwnd, SwHide);
+                    Dispatcher.Invoke(DispatcherPriority.Render, new Action(() => { }));
+                }
+            }
+
+            try
+            {
+                // BitBlt 抓整个虚拟桌面耗时数毫秒到数十毫秒，放后台线程避免阻塞 UI。
+                await Task.Run(() => LiquidGlassCapture.Capture());
+            }
+            finally
+            {
+                if (!_excludedFromCapture && hwnd != IntPtr.Zero)
+                {
+                    ShowWindow(hwnd, SwShowNoActivate);
+                    Dispatcher.Invoke(DispatcherPriority.Render, new Action(() => { }));
+                }
             }
         }
 
@@ -616,5 +708,8 @@ namespace Ink_Canvas
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool SetWindowDisplayAffinity(IntPtr hwnd, uint affinity);
+
+        [DllImport("user32.dll")]
+        private static extern int GetSystemMetrics(int nIndex);
     }
 }

@@ -158,6 +158,10 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <Private>false</Private>
     </ProjectReference>
+    <ProjectReference Include="..\InkCanvas.LiquidGlassMagHost\InkCanvas.LiquidGlassMagHost.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
     <UpToDateCheckInput Include="..\InkCanvas.Controls\**\*.xaml" />
   </ItemGroup>
   <Target Name="CopyVstoAgent" AfterTargets="Build">
@@ -583,6 +587,8 @@
     </ItemGroup>
     <Copy SourceFiles="@(IACoreHelperFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" Condition="'@(IACoreHelperFiles)' != ''" />
   </Target>
+
+  <!-- InkCanvas.LiquidGlassMagHost 的 csproj 已将 OutputPath 直达此处，无需 Copy target。 -->
 
   <Target Name="CopyIACoreHelperToPublishDirectory" AfterTargets="Publish" Condition="'$(PublishSingleFile)' == 'true'">
     <ItemGroup>
