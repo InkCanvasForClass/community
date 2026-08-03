@@ -85,6 +85,16 @@ namespace Ink_Canvas
                     System.Threading.Thread.Sleep(100);
                     Application.Current.Dispatcher.Invoke(() =>
                     {
+                        // 若启用了快抽外部点名，则优先调用所选的外部点名器
+                        if (MainWindow.Settings?.RandSettings?.QuickDrawExternalCaller == true)
+                        {
+                            if (TryLaunchExternalCaller())
+                            {
+                                Close();
+                                return;
+                            }
+                        }
+
                         StartQuickDrawAnimation();
                     });
                 }).Start();
@@ -92,6 +102,30 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"开始快抽失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 调用所选外部点名器，成功返回 true
+        /// </summary>
+        private bool TryLaunchExternalCaller()
+        {
+            try
+            {
+                var protocols = ExternalCallerLauncher.GetProtocolsByType(MainWindow.Settings.RandSettings.ExternalCallerType);
+
+                if (!ExternalCallerLauncher.TryLaunch(protocols, out Exception lastException))
+                {
+                    throw lastException ?? new InvalidOperationException("external caller protocols are unavailable");
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format(Properties.RandomStrings.Random_RollCall_ExternalCallerFailedFormat, ex.Message), Properties.RandomStrings.Random_Error, MessageBoxButton.OK, MessageBoxImage.Error);
+                LogHelper.WriteLogToFile($"快抽外部点名调用失败: {ex.Message}", LogHelper.LogType.Error);
+                return false;
             }
         }
 

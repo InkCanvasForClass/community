@@ -47,6 +47,11 @@
                         IsOn="True"
                         Toggled="ToggleSwitchEnableQuickDraw_Toggled"/>
 
+                    <controls:LabeledSettingsCard x:Name="ToggleSwitchQuickDrawExternalCaller"
+                        Header="{x:Static props:RandomStrings.Random_QuickDraw_UseExternal}"
+                        IsOn="False"
+                        Toggled="ToggleSwitchQuickDrawExternalCaller_Toggled"/>
+
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchExternalCaller"
                         Header="{x:Static props:RandomStrings.Random_UseExternal}"
                         IsOn="False"

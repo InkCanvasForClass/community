@@ -480,6 +480,9 @@
   <data name="Random_AddIcon_SaveFailedFormat" xml:space="preserve">
     <value>保存图标翻车了: {0}</value>
   </data>
+  <data name="Random_QuickDraw_UseExternal" xml:space="preserve">
+    <value>快抽调用所选外部点名</value>
+  </data>
   <data name="Random_QuickDraw_WindowTitle" xml:space="preserve">
     <value>快抽窗口</value>
   </data>
