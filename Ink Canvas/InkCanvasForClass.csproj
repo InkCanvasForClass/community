@@ -588,7 +588,30 @@
     <Copy SourceFiles="@(IACoreHelperFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" Condition="'@(IACoreHelperFiles)' != ''" />
   </Target>
 
-  <!-- InkCanvas.LiquidGlassMagHost 的 csproj 已将 OutputPath 直达此处，无需 Copy target。 -->
+  <!-- InkCanvas.LiquidGlassMagHost：独立放大镜抓屏辅助进程。
+       MagHost 是 SDK 项目，SDK 会按平台给输出目录加前缀：x86/x64 平台输出到
+       bin\$(Platform)\$(Configuration)\$(TargetFramework)\，AnyCPU 输出到 bin\$(Configuration)\$(TargetFramework)\。
+       这里在 Build / Publish 后把 exe 复制到主程序输出目录，与 IACoreHelper 的 Copy target 模式一致，
+       CI 的 AnyCPU(=x64 产物)/x86 构建都能带上辅助 exe；单文件发布走 Publish 分支。 -->
+  <Target Name="CopyLiquidGlassMagHost" AfterTargets="Build" Condition="'$(PublishSingleFile)' != 'true'">
+    <ItemGroup>
+      <LiquidGlassMagHostFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.LiquidGlassMagHost\bin\$(Platform)\$(Configuration)\$(TargetFramework)\InkCanvas.LiquidGlassMagHost.*"
+                                Condition="'$(Platform)' != 'AnyCPU'" />
+      <LiquidGlassMagHostFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.LiquidGlassMagHost\bin\$(Configuration)\$(TargetFramework)\InkCanvas.LiquidGlassMagHost.*"
+                                Condition="'$(Platform)' == 'AnyCPU'" />
+    </ItemGroup>
+    <Copy SourceFiles="@(LiquidGlassMagHostFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" Condition="'@(LiquidGlassMagHostFiles)' != ''" />
+  </Target>
+
+  <Target Name="CopyLiquidGlassMagHostToPublishDirectory" AfterTargets="Publish" Condition="'$(PublishSingleFile)' == 'true'">
+    <ItemGroup>
+      <LiquidGlassMagHostPublishFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.LiquidGlassMagHost\bin\$(Platform)\$(Configuration)\$(TargetFramework)\InkCanvas.LiquidGlassMagHost.*"
+                                      Condition="'$(Platform)' != 'AnyCPU'" />
+      <LiquidGlassMagHostPublishFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.LiquidGlassMagHost\bin\$(Configuration)\$(TargetFramework)\InkCanvas.LiquidGlassMagHost.*"
+                                      Condition="'$(Platform)' == 'AnyCPU'" />
+    </ItemGroup>
+    <Copy SourceFiles="@(LiquidGlassMagHostPublishFiles)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" Condition="'@(LiquidGlassMagHostPublishFiles)' != ''" />
+  </Target>
 
   <Target Name="CopyIACoreHelperToPublishDirectory" AfterTargets="Publish" Condition="'$(PublishSingleFile)' == 'true'">
     <ItemGroup>
