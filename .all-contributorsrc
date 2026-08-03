@@ -15,119 +15,181 @@
       "name": "CJK_mkp",
       "avatar_url": "https://avatars.githubusercontent.com/u/113243675?v=4",
       "profile": "https://github.com/CJKmkp",
-      "contributions": ["maintenance", "doc", "code", "design"]
+      "contributions": [
+        "maintenance",
+        "doc",
+        "code",
+        "design"
+      ]
     },
     {
       "login": "CreeperAWA",
       "name": "CreeperAWA",
       "avatar_url": "https://avatars.githubusercontent.com/u/134939494?v=4",
       "profile": "https://github.com/CreeperAWA",
-      "contributions": ["code"]
+      "contributions": [
+        "code"
+      ]
     },
     {
       "login": "2-2-3-trimethylpentane",
       "name": "2,2,3-三甲基戊烷",
       "avatar_url": "https://avatars.githubusercontent.com/u/141403762?v=4",
       "profile": "https://github.com/2-2-3-trimethylpentane",
-      "contributions": ["blog", "doc", "design", "test", "tutorial", "video"]
+      "contributions": [
+        "blog",
+        "doc",
+        "design",
+        "test",
+        "tutorial",
+        "video"
+      ]
     },
     {
       "login": "Alan-CRL",
       "name": "Alan-CRL",
       "avatar_url": "https://avatars.githubusercontent.com/u/92425617?v=4",
       "profile": "https://github.com/Alan-CRL",
-      "contributions": ["code", "infra", "doc", "financial"]
+      "contributions": [
+        "code",
+        "infra",
+        "doc",
+        "financial"
+      ]
     },
     {
       "login": "MKStoler1024",
       "name": "MKStoler1024",
       "avatar_url": "https://avatars.githubusercontent.com/u/158786854?v=4",
       "profile": "https://github.com/MKStoler1024",
-      "contributions": ["doc", "code", "design"]
+      "contributions": [
+        "doc",
+        "code",
+        "design"
+      ]
     },
     {
       "login": "awesome-iwb",
       "name": "Awesome Iwb",
       "avatar_url": "https://avatars.githubusercontent.com/u/184760810?v=4",
       "profile": "https://github.com/awesome-iwb",
-      "contributions": ["doc"]
+      "contributions": [
+        "doc"
+      ]
     },
     {
       "login": "PrefacedCorg",
       "name": "PrefacedCorg",
       "avatar_url": "https://avatars.githubusercontent.com/u/129855423?v=4",
       "profile": "https://github.com/PrefacedCorg",
-      "contributions": ["code", "design"]
+      "contributions": [
+        "code",
+        "design"
+      ]
     },
     {
       "login": "Jursin",
       "name": "Jursin",
       "avatar_url": "https://avatars.githubusercontent.com/u/127487914?v=4",
       "profile": "http://blog.jursin.top",
-      "contributions": ["design"]
+      "contributions": [
+        "design"
+      ]
     },
     {
       "login": "Tayasui-rainnya",
       "name": "tayasui rainnya!",
       "avatar_url": "https://avatars.githubusercontent.com/u/156585442?v=4",
       "profile": "https://github.com/Tayasui-rainnya",
-      "contributions": ["design", "code"]
+      "contributions": [
+        "design",
+        "code"
+      ]
     },
     {
       "login": "doudou0720",
       "name": "doudou0720",
       "avatar_url": "https://avatars.githubusercontent.com/u/98651603?v=4",
       "profile": "https://github.com/doudou0720",
-      "contributions": ["code", "blog", "infra"]
+      "contributions": [
+        "code",
+        "blog",
+        "infra"
+      ]
     },
     {
       "login": "PANDAJSR",
       "name": "PANDAJSR",
       "avatar_url": "https://avatars.githubusercontent.com/u/170189561?v=4",
       "profile": "https://github.com/PANDAJSR",
-      "contributions": ["code"]
+      "contributions": [
+        "code"
+      ]
     },
     {
       "login": "LiuYan-xwx",
       "name": "流焰xwx",
       "avatar_url": "https://avatars.githubusercontent.com/u/66517348?v=4",
       "profile": "http://lyxwx.top",
-      "contributions": ["code"]
+      "contributions": [
+        "code"
+      ]
     },
     {
       "login": "Super-Yyt",
       "name": "Super-Yyt",
       "avatar_url": "https://avatars.githubusercontent.com/u/206630707?v=4",
       "profile": "https://github.com/Super-Yyt",
-      "contributions": ["infra", "blog"]
+      "contributions": [
+        "infra",
+        "blog"
+      ]
     },
     {
       "login": "Hao3288",
       "name": "NoobHao",
       "avatar_url": "https://avatars.githubusercontent.com/u/119276078?v=4",
       "profile": "https://github.com/Hao3288",
-      "contributions": ["code"]
+      "contributions": [
+        "code"
+      ]
     },
     {
       "login": "AstrZero",
       "name": "AstrZero",
       "avatar_url": "https://avatars.githubusercontent.com/u/135413163?v=4",
       "profile": "https://github.com/AstrZero",
-      "contributions": ["ideas", "code"]
+      "contributions": [
+        "ideas",
+        "code"
+      ]
     },
     {
       "login": "lrsgzs",
       "name": "lrs2187",
       "avatar_url": "https://avatars.githubusercontent.com/u/99574908?v=4",
       "profile": "http://lrsgzs.top",
-      "contributions": ["code"]
+      "contributions": [
+        "code"
+      ]
     },
     {
       "login": "Braydenccc",
       "name": "Jbyccc",
       "avatar_url": "https://avatars.githubusercontent.com/u/177214309?v=4",
       "profile": "http://jbyc.cc",
-      "contributions": ["code"]
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Makitoid",
+      "name": "Makitoid Wang",
+      "avatar_url": "https://avatars.githubusercontent.com/u/123004192?v=4",
+      "profile": "https://github.com/Makitoid",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "repoType": "github"
