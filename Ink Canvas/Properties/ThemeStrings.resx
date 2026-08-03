@@ -530,6 +530,57 @@
   <data name="Theme_IdleMiniBarAutoRestore" xml:space="preserve">
     <value>贴边收起后自动恢复时间（秒）</value>
   </data>
+  <data name="Theme_LiquidGlassBar" xml:space="preserve">
+    <value>液态玻璃浮动栏</value>
+  </data>
+  <data name="Theme_LiquidGlassBarHint" xml:space="preserve">
+    <value>启用一个独立置顶的胶囊形玻璃工具栏，通过折射桌面画面呈现厚玻璃质感。需要显卡支持像素着色器</value>
+  </data>
+  <data name="Theme_LiquidGlassBarOpacity" xml:space="preserve">
+    <value>玻璃不透明度</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_Drag" xml:space="preserve">
+    <value>拖动移动位置</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_Pen" xml:space="preserve">
+    <value>批注</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_Highlighter" xml:space="preserve">
+    <value>荧光笔</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_Eraser" xml:space="preserve">
+    <value>橡皮</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_Select" xml:space="preserve">
+    <value>选择</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_ColorBlack" xml:space="preserve">
+    <value>黑色</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_ColorRed" xml:space="preserve">
+    <value>红色</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_ColorBlue" xml:space="preserve">
+    <value>蓝色</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_ColorYellow" xml:space="preserve">
+    <value>黄色</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_Undo" xml:space="preserve">
+    <value>撤销</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_Redo" xml:space="preserve">
+    <value>重做</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_Clear" xml:space="preserve">
+    <value>清屏</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_Whiteboard" xml:space="preserve">
+    <value>白板</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_More" xml:space="preserve">
+    <value>更多工具</value>
+  </data>
   <data name="Theme_RestartPromptTitle" xml:space="preserve">
     <value>主题更改</value>
   </data>

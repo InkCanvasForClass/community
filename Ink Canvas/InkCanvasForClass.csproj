@@ -161,6 +161,10 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <Private>false</Private>
     </ProjectReference>
+    <ProjectReference Include="..\InkCanvas.LiquidGlassMagHost\InkCanvas.LiquidGlassMagHost.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <Private>false</Private>
+    </ProjectReference>
     <UpToDateCheckInput Include="..\InkCanvas.Controls\**\*.xaml" />
   </ItemGroup>
   <Target Name="CopyVstoAgent" AfterTargets="Build">
@@ -257,6 +261,8 @@
     <Resource Include="Resources\new-icons\hand-move_white.png" />
     <Resource Include="Resources\new-icons\zoom_white.png" />
     <Resource Include="Resources\new-icons\rotate_white.png" />
+    <!-- 液态玻璃浮动栏折射着色器（必须是 Resource，否则 pack URI 找不到而退回无折射） -->
+    <Resource Include="Shaders\LiquidGlassEffect.ps" />
   </ItemGroup>
 <ItemGroup>
     <Resource Include="Resources\DeveloperAvatars\ChangSakura.png" />
@@ -584,6 +590,8 @@
     </ItemGroup>
     <Copy SourceFiles="@(IACoreHelperFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" Condition="'@(IACoreHelperFiles)' != ''" />
   </Target>
+
+  <!-- InkCanvas.LiquidGlassMagHost 的 csproj 已将 OutputPath 直达此处，无需 Copy target。 -->
 
   <Target Name="CopyIACoreHelperToPublishDirectory" AfterTargets="Publish" Condition="'$(PublishSingleFile)' == 'true'">
     <ItemGroup>

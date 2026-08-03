@@ -60,6 +60,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (IdleMiniBarAutoRestoreSlider != null)
                 IdleMiniBarAutoRestoreSlider.Value = settings.Appearance.IdleMiniBarAutoRestoreSeconds;
 
+            // 加载液态玻璃浮动栏设置
+            if (ToggleSwitchEnableLiquidGlassBar != null)
+                ToggleSwitchEnableLiquidGlassBar.IsOn = settings.Appearance.EnableLiquidGlassBar;
+            if (LiquidGlassBarOpacitySlider != null)
+                LiquidGlassBarOpacitySlider.Value = settings.Appearance.LiquidGlassBarOpacity;
+
             // 加载工具栏位置
             string positionTag = settings.Appearance.ToolbarPosition.ToString();
             foreach (ComboBoxItem item in ToolbarPositionComboBox.Items)
@@ -127,6 +133,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdateSliderText(FloatingBarMenuOpacityInPPTSlider, FloatingBarMenuOpacityInPPTText, "{0:F2}");
             UpdateSliderText(IdleMiniBarOpacitySlider, IdleMiniBarOpacityText, "{0:F2}");
             UpdateSliderText(IdleMiniBarAutoRestoreSlider, IdleMiniBarAutoRestoreText, "{0:F0}s");
+            UpdateSliderText(LiquidGlassBarOpacitySlider, LiquidGlassBarOpacityText, "{0:F2}");
             UpdateFloatingBarActualScaleText();
         }
 
@@ -446,6 +453,33 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
             SettingsManager.Settings.Appearance.IdleMiniBarAutoRestoreSeconds = val;
             SettingsManager.SaveSettingsToFile();
+        }
+
+        // —— 液态玻璃浮动栏 ——
+
+        private void ToggleSwitchEnableLiquidGlassBar_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            if (ToggleSwitchEnableLiquidGlassBar == null) return;
+            SettingsManager.Settings.Appearance.EnableLiquidGlassBar = ToggleSwitchEnableLiquidGlassBar.IsOn;
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnEnableLiquidGlassBarChanged(ToggleSwitchEnableLiquidGlassBar.IsOn);
+        }
+
+        private void LiquidGlassBarOpacitySlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            UpdateSliderText(LiquidGlassBarOpacitySlider, LiquidGlassBarOpacityText, "{0:F2}");
+            if (!_isLoaded) return;
+            var slider = LiquidGlassBarOpacitySlider;
+            var val = Math.Round(slider.Value, 2);
+            if (slider.Value != val)
+            {
+                slider.Value = val;
+                return;
+            }
+            SettingsManager.Settings.Appearance.LiquidGlassBarOpacity = val;
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnLiquidGlassBarOpacityChanged(val);
         }
 
         #region Floating Bar Icon

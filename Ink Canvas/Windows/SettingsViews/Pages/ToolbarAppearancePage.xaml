@@ -96,6 +96,30 @@
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
+                    <ui:SettingsExpander x:Name="ExpanderLiquidGlassBar"
+                            Header="{x:Static props:ThemeStrings.Theme_LiquidGlassBar}"
+                            Description="{x:Static props:ThemeStrings.Theme_LiquidGlassBarHint}"
+                            IsExpanded="False">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Drop}" />
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchEnableLiquidGlassBar"
+                                Toggled="ToggleSwitchEnableLiquidGlassBar_Toggled" />
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_LiquidGlassBarOpacity}">
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock x:Name="LiquidGlassBarOpacityText"
+                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                    <Slider x:Name="LiquidGlassBarOpacitySlider" Minimum="0.2"
+                                            Maximum="1" Width="200"
+                                            IsSnapToTickEnabled="True" Value="0.95" TickFrequency="0.05"
+                                            TickPlacement="None" AutoToolTipPlacement="None"
+                                            ValueChanged="LiquidGlassBarOpacitySlider_ValueChanged" />
+                                </ikw:SimpleStackPanel>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
+
                     <ui:SettingsCard x:Name="CardFloatingBarBorderColor"
                             Header="{x:Static props:ThemeStrings.Theme_FloatingBarBorderColor}"
                             Description="{x:Static props:ThemeStrings.Theme_FloatingBarBorderColorHint}">

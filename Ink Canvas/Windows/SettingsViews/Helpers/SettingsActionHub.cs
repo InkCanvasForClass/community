@@ -382,6 +382,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             if (mw != null) mw.ApplyIdleMiniBarOpacity(value);
         }
 
+        public static void OnEnableLiquidGlassBarChanged(bool isOn)
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.ApplyLiquidGlassBarEnabled(isOn);
+        }
+
+        public static void OnLiquidGlassBarOpacityChanged(double value)
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.ApplyLiquidGlassBarOpacity(value);
+        }
+
         #endregion
 
         #region Advanced

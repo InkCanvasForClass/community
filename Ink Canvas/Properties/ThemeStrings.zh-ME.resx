@@ -524,6 +524,57 @@
   <data name="Theme_IdleMiniBarAutoRestore" xml:space="preserve">
     <value>贴太深后过几秒自己弹回来（秒）</value>
   </data>
+  <data name="Theme_LiquidGlassBar" xml:space="preserve">
+    <value>液态玻璃小条</value>
+  </data>
+  <data name="Theme_LiquidGlassBarHint" xml:space="preserve">
+    <value>单独飘一根玻璃胶囊工具条，会把下面的桌面折射出来，看着像块真玻璃。显卡得支持像素着色器</value>
+  </data>
+  <data name="Theme_LiquidGlassBarOpacity" xml:space="preserve">
+    <value>玻璃透不透</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_Drag" xml:space="preserve">
+    <value>拽着换地方</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_Pen" xml:space="preserve">
+    <value>写字</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_Highlighter" xml:space="preserve">
+    <value>荧光笔</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_Eraser" xml:space="preserve">
+    <value>擦</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_Select" xml:space="preserve">
+    <value>圈选</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_ColorBlack" xml:space="preserve">
+    <value>黑</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_ColorRed" xml:space="preserve">
+    <value>红</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_ColorBlue" xml:space="preserve">
+    <value>蓝</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_ColorYellow" xml:space="preserve">
+    <value>黄</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_Undo" xml:space="preserve">
+    <value>撤回</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_Redo" xml:space="preserve">
+    <value>再来</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_Clear" xml:space="preserve">
+    <value>全清</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_Whiteboard" xml:space="preserve">
+    <value>白板</value>
+  </data>
+  <data name="Theme_LiquidGlassBar_More" xml:space="preserve">
+    <value>更多家伙</value>
+  </data>
   <data name="Theme_RestartPromptTitle" xml:space="preserve">
     <value>主题皮肤到账</value>
   </data>
