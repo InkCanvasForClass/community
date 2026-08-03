@@ -9,6 +9,9 @@ namespace Ink_Canvas.Helpers
     /// <summary>
     /// 液态玻璃浮动栏的背景来源：用 GDI BitBlt 抓取整个虚拟桌面，缓存为冻结的 <see cref="BitmapSource"/>。
     /// 浮动栏只需按自身屏幕区域裁剪这张缓存图，移动时无需重新截屏。
+    /// 抓屏在后台线程执行（见 LiquidGlassBarWindow.CaptureBehindSelfAsync），完成时把整个
+    /// <see cref="ScreenSnapshot"/> 帧原子交换到 <see cref="Snapshot"/>——UI 线程总是读到
+    /// "位图 + 虚拟屏原点"一致的完整一帧（BackBuffer 语义），旧帧在抓屏期间仍可继续使用。
     /// </summary>
     internal static class LiquidGlassCapture
     {
@@ -18,27 +21,38 @@ namespace Ink_Canvas.Helpers
         private const int SmCxVirtualScreen = 78;
         private const int SmCyVirtualScreen = 79;
 
-        /// <summary>最近一次抓取到的整屏快照（已 Freeze，可跨线程读取）。</summary>
-        internal static BitmapSource Snapshot { get; private set; }
+        private static readonly object SyncLock = new object();
+        private static bool _capturing;
 
-        internal static int VirtualScreenX { get; private set; }
-        internal static int VirtualScreenY { get; private set; }
+        /// <summary>最近一次抓取到的完整帧（冻结位图 + 该帧的虚拟屏原点）。原子引用交换，可跨线程读。</summary>
+        internal static ScreenSnapshot Snapshot { get; private set; }
 
         /// <summary>抓取整个虚拟桌面。失败时保留上一帧，不会把 <see cref="Snapshot"/> 置空。</summary>
         internal static bool Capture()
         {
+            lock (SyncLock)
+            {
+                if (_capturing) return false;   // 防重入：上一次抓屏仍在进行时跳过本次
+                _capturing = true;
+            }
+
             try
             {
-                VirtualScreenX = GetSystemMetrics(SmXVirtualScreen);
-                VirtualScreenY = GetSystemMetrics(SmYVirtualScreen);
+                int vx = GetSystemMetrics(SmXVirtualScreen);
+                int vy = GetSystemMetrics(SmYVirtualScreen);
                 int width = GetSystemMetrics(SmCxVirtualScreen);
                 int height = GetSystemMetrics(SmCyVirtualScreen);
                 if (width <= 0 || height <= 0) return false;
 
-                var bitmap = CaptureRegion(VirtualScreenX, VirtualScreenY, width, height);
+                var bitmap = CaptureRegion(vx, vy, width, height);
                 if (bitmap == null) return false;
 
-                Snapshot = bitmap;
+                // 把位图与坐标包进同一帧，一起交换：读侧不会拿到"新截图 + 旧原点"的错配。
+                var frame = new ScreenSnapshot(bitmap, vx, vy);
+                lock (SyncLock)
+                {
+                    Snapshot = frame;
+                }
                 return true;
             }
             catch (Exception ex)
@@ -46,11 +60,21 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"液态玻璃背景抓取失败: {ex.Message}", LogHelper.LogType.Warning);
                 return false;
             }
+            finally
+            {
+                lock (SyncLock)
+                {
+                    _capturing = false;
+                }
+            }
         }
 
         internal static void Reset()
         {
-            Snapshot = null;
+            lock (SyncLock)
+            {
+                Snapshot = null;
+            }
         }
 
         private static BitmapSource CaptureRegion(int x, int y, int width, int height)
@@ -121,5 +145,23 @@ namespace Ink_Canvas.Helpers
 
         [DllImport("user32.dll")]
         private static extern int GetSystemMetrics(int nIndex);
+    }
+
+    /// <summary>
+    /// 一帧完整的桌面快照：冻结位图 + 该帧抓取时的虚拟屏原点。整个对象原子交换，
+    /// 保证读侧拿到的位图与坐标来自同一次抓取（BackBuffer 语义下的完整帧）。
+    /// </summary>
+    internal sealed class ScreenSnapshot
+    {
+        internal BitmapSource Bitmap { get; }
+        internal int VirtualScreenX { get; }
+        internal int VirtualScreenY { get; }
+
+        internal ScreenSnapshot(BitmapSource bitmap, int virtualScreenX, int virtualScreenY)
+        {
+            Bitmap = bitmap;
+            VirtualScreenX = virtualScreenX;
+            VirtualScreenY = virtualScreenY;
+        }
     }
 }

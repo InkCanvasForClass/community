@@ -9,6 +9,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
+using System.Threading.Tasks;
 
 namespace Ink_Canvas
 {
@@ -91,7 +92,7 @@ namespace Ink_Canvas
 
                     // 让本窗不被截屏 API 采集（Win10 2004+）。这样重抓玻璃背景时
                     // 不必先隐藏自己再显示回来，也就没有那一下闪烁。
-                    // 失败（旧系统/远程会话）时回落到隐藏式截图，见 CaptureBehindSelf。
+                    // 失败（旧系统/远程会话）时回落到隐藏式截图，见 CaptureBehindSelfAsync。
                     _excludedFromCapture = SetWindowDisplayAffinity(hwnd, WdaExcludeFromCapture);
 
                     // 模糊由 BlurEffect 层完成（见 SetupBackdrop），不走 DWM blur-behind——
@@ -236,50 +237,59 @@ namespace Ink_Canvas
         /// <summary>
         /// 刷新玻璃背后的桌面内容。<paramref name="recapture"/> 为 true 时重新整屏截图
         /// （需要先把本窗隐藏，否则会把玻璃自己拍进去）；否则只重新裁剪缓存图。
+        /// 抓屏在后台线程执行，方法立即返回，完成后自动裁剪并应用新帧，调用方无需等待。
         /// </summary>
         internal void RefreshBackdrop(bool recapture)
         {
             if (_isClosing) return;
 
-            if (recapture) CaptureBehindSelf();
+            if (recapture)
+            {
+                _ = CaptureBehindSelfAsync();
+                return;
+            }
+
             CropBackdropToWindow();
             UpdateEffectParameters();
         }
 
-        private void CaptureBehindSelf()
+        /// <summary>
+        /// 后台抓屏一帧：UI 线程隐藏自己 → BitBlt 放到后台线程执行（不阻塞 UI）→
+        /// 恢复并应用新帧。隐藏/显示是窗口操作，必须在 UI 线程；BitBlt 只操作屏幕 DC，
+        /// 放后台线程。await 之后经 DispatcherSynchronizationContext 自动回到 UI 线程。
+        /// </summary>
+        private async Task CaptureBehindSelfAsync()
         {
             if (_isCapturing) return;
             _isCapturing = true;
 
-            // 已被系统排除在截屏之外时，直接抓即可——不隐藏自己，也就不会闪。
-            if (_excludedFromCapture)
-            {
-                try
-                {
-                    LiquidGlassCapture.Capture();
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"液态玻璃浮动栏截图失败: {ex.Message}", LogHelper.LogType.Warning);
-                }
-                finally
-                {
-                    _isCapturing = false;
-                }
-                return;
-            }
-
-            // 回落路径（旧系统/远程会话）：先藏起自己，否则会把玻璃自己拍进背景里。
-            var hwnd = new WindowInteropHelper(this).Handle;
+            var hwnd = IntPtr.Zero;
             try
             {
-                if (hwnd != IntPtr.Zero)
+                // 已被系统排除在截屏之外时直接抓，无需隐藏自己（Win10 2004+）。
+                // 否则先藏起自己，否则会把玻璃自己拍进背景里。
+                if (!_excludedFromCapture)
                 {
-                    ShowWindow(hwnd, SwHide);
+                    hwnd = new WindowInteropHelper(this).Handle;
+                    if (hwnd != IntPtr.Zero)
+                    {
+                        ShowWindow(hwnd, SwHide);
+                        Dispatcher.Invoke(DispatcherPriority.Render, new Action(() => { }));
+                    }
+                }
+
+                // BitBlt 抓整个虚拟桌面耗时数毫秒到数十毫秒，放后台线程避免阻塞 UI。
+                // LiquidGlassCapture.Capture 内部加锁防重入，失败时保留旧帧。
+                await Task.Run(() => LiquidGlassCapture.Capture());
+
+                if (!_excludedFromCapture && hwnd != IntPtr.Zero)
+                {
+                    ShowWindow(hwnd, SwShowNoActivate);
                     Dispatcher.Invoke(DispatcherPriority.Render, new Action(() => { }));
                 }
 
-                LiquidGlassCapture.Capture();
+                CropBackdropToWindow();
+                UpdateEffectParameters();
             }
             catch (Exception ex)
             {
@@ -287,11 +297,6 @@ namespace Ink_Canvas
             }
             finally
             {
-                if (hwnd != IntPtr.Zero)
-                {
-                    ShowWindow(hwnd, SwShowNoActivate);
-                    Dispatcher.Invoke(DispatcherPriority.Render, new Action(() => { }));
-                }
                 _isCapturing = false;
             }
         }
@@ -306,6 +311,8 @@ namespace Ink_Canvas
             if (snapshot == null) return;
             if (GlassRoot.ActualWidth <= 0 || GlassRoot.ActualHeight <= 0) return;
 
+            var image = snapshot.Bitmap;
+
             Point topLeft, bottomRight;
             try
             {
@@ -318,19 +325,19 @@ namespace Ink_Canvas
                 return; // 窗口尚未连上 PresentationSource
             }
 
-            int x = (int)Math.Round(topLeft.X - LiquidGlassCapture.VirtualScreenX);
-            int y = (int)Math.Round(topLeft.Y - LiquidGlassCapture.VirtualScreenY);
+            int x = (int)Math.Round(topLeft.X - snapshot.VirtualScreenX);
+            int y = (int)Math.Round(topLeft.Y - snapshot.VirtualScreenY);
             int w = Math.Max(1, (int)Math.Round(bottomRight.X - topLeft.X));
             int h = Math.Max(1, (int)Math.Round(bottomRight.Y - topLeft.Y));
 
             if (x < 0) { w += x; x = 0; }
             if (y < 0) { h += y; y = 0; }
-            if (x + w > snapshot.PixelWidth) w = snapshot.PixelWidth - x;
-            if (y + h > snapshot.PixelHeight) h = snapshot.PixelHeight - y;
+            if (x + w > image.PixelWidth) w = image.PixelWidth - x;
+            if (y + h > image.PixelHeight) h = image.PixelHeight - y;
             if (w <= 0 || h <= 0) return;
 
-            if (!ReferenceEquals(_backdropBrush.ImageSource, snapshot))
-                _backdropBrush.ImageSource = snapshot;
+            if (!ReferenceEquals(_backdropBrush.ImageSource, image))
+                _backdropBrush.ImageSource = image;
 
             _backdropBrush.Viewbox = new Rect(x, y, w, h);
         }
