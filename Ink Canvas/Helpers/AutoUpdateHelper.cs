@@ -31,6 +31,10 @@ namespace Ink_Canvas.Helpers
         {
             "InkCanvas.IACoreHelper.exe",
             "InkCanvas.IACoreHelper.exe.config",
+            "InkCanvas.LiquidGlassMagHost.deps.json",
+            "InkCanvas.LiquidGlassMagHost.dll",
+            "InkCanvas.LiquidGlassMagHost.exe",
+            "InkCanvas.LiquidGlassMagHost.runtimeconfig.json",
             "InkCanvasForClass.deps.json",
             "InkCanvasForClass.dll",
             "InkCanvasForClass.dll.config",
