@@ -111,6 +111,10 @@
       <td align="center" valign="top" width="20%"><a href="http://jbyc.cc"><img src="https://avatars.githubusercontent.com/u/177214309?v=4?s=100" width="100px;" alt="Jbyccc"/><br /><sub><b>Jbyccc</b></sub></a><br /><a href="https://github.com/InkCanvasForClass/community/commits?author=Braydenccc" title="Code">💻</a></td>
       <td align="center" valign="top" width="20%"><a href="http://diann.top"><img src="https://avatars.githubusercontent.com/u/95152427?v=4?s=100" width="100px;" alt="Nikoa"/><br /><sub><b>Nikoa</b></sub></a><br /><a href="https://github.com/InkCanvasForClass/community/commits?author=diann34" title="Code">💻</a></td>
       <td align="center" valign="top" width="20%"><a href="https://github.com/chenjei2011"><img src="https://avatars.githubusercontent.com/u/194592960?v=4?s=100" width="100px;" alt="NullptrVoid"/><br /><sub><b>NullptrVoid</b></sub></a><br /><a href="https://github.com/InkCanvasForClass/community/commits?author=chenjei2011" title="Code">💻</a></td>
+      <td align="center" valign="top" width="20%"><a href="https://github.com/wwiinnddyy"><img src="https://avatars.githubusercontent.com/u/170236045?v=4?s=100" width="100px;" alt="lincube"/><br /><sub><b>lincube</b></sub></a><br /><a href="https://github.com/InkCanvasForClass/community/commits?author=wwiinnddyy" title="Code">💻</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="20%"><a href="https://github.com/Makitoid"><img src="https://avatars.githubusercontent.com/u/123004192?v=4?s=100" width="100px;" alt="Makitoid Wang"/><br /><sub><b>Makitoid Wang</b></sub></a><br /><a href="https://github.com/InkCanvasForClass/community/commits?author=Makitoid" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>

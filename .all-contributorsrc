@@ -199,6 +199,24 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "wwiinnddyy",
+      "name": "lincube",
+      "avatar_url": "https://avatars.githubusercontent.com/u/170236045?v=4",
+      "profile": "https://github.com/wwiinnddyy",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Makitoid",
+      "name": "Makitoid Wang",
+      "avatar_url": "https://avatars.githubusercontent.com/u/123004192?v=4",
+      "profile": "https://github.com/Makitoid",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "repoType": "github"
