@@ -109,6 +109,7 @@ If it still doesn't run, please [install `Microsoft Office`](https://www.coolhub
     <tr>
       <td align="center" valign="top" width="20%"><a href="http://lrsgzs.top"><img src="https://avatars.githubusercontent.com/u/99574908?v=4?s=100" width="100px;" alt="lrs2187"/><br /><sub><b>lrs2187</b></sub></a><br /><a href="https://github.com/InkCanvasForClass/community/commits?author=lrsgzs" title="Code">💻</a></td>
       <td align="center" valign="top" width="20%"><a href="http://jbyc.cc"><img src="https://avatars.githubusercontent.com/u/177214309?v=4?s=100" width="100px;" alt="Jbyccc"/><br /><sub><b>Jbyccc</b></sub></a><br /><a href="https://github.com/InkCanvasForClass/community/commits?author=Braydenccc" title="Code">💻</a></td>
+      <td align="center" valign="top" width="20%"><a href="http://diann.top"><img src="https://avatars.githubusercontent.com/u/95152427?v=4?s=100" width="100px;" alt="Nikoa"/><br /><sub><b>Nikoa</b></sub></a><br /><a href="https://github.com/InkCanvasForClass/community/commits?author=diann34" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
