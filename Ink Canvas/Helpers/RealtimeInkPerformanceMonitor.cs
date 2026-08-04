@@ -475,6 +475,10 @@ namespace Ink_Canvas.Helpers
                 // 新墨迹管线（WetInkWindowHost）独立计时：
                 nativeWetInk = new
                 {
+                    rawMouseActive = Ink_Canvas.Ink.Native.NativeInkPerfProbe.RawMouseActive ? "true" : "false",
+                    rawMouseRegisterError = Ink_Canvas.Ink.Native.NativeInkPerfProbe.RawMouseRegisterError,
+                    rawMouseSampleCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.RawMouseSampleCount,
+                    legacyMouseSampleCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.LegacyMouseSampleCount,
                     lastApplyMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.LastApplyMs, 3),
                     avgApplyMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.AverageApplyMs, 3),
                     lastApplySampleCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.LastApplySampleCount,
