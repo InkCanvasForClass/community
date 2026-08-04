@@ -32,6 +32,9 @@ namespace Ink_Canvas.Ink.Native
         // 高速状态下的距离上限时间预算：speed * 本常量 = 单帧外推距离上限。
         // 12ms ≈ 视界 24ms 的一半，让高速时笔尾稳步缩一半，防止 50px 死值顶到极长。
         private const double MaxPredictionDistanceCapMs = 12.0;
+        // 曲率外推单步最大转角（弧度，≈28°）。防止小半径+高速下笔尾单步旋转过大
+        // 出现"瞬时甩飞"，让预测尾沿弯道渐进。
+        private const double MaxStepAngleRadians = 0.5;
 
         // 速度→视界映射的两端。起点取最低预测速度，让超低速一离开门限就开始增长。
         private const double SlowSpeedPxPerSecond = 40.0;
@@ -177,13 +180,17 @@ namespace Ink_Canvas.Ink.Native
                 if (circleValid && circleRadius > 0.01)
                 {
                     var stepDist = stepSeconds * Math.Sqrt(vx * vx + vy * vy);
-                    var deltaAngle = angleSign * stepDist / circleRadius;
+                    // deltaAngle 是旋转幅值（正），方向由 sin 项里的 angleSign 单独控。
+                    // 之前 deltaAngle 也乘 angleSign，等于符号相消，导致方向反。
+                    // 截到 MaxStepAngleRadians 防止小半径+大步长导致单步大幅旋转
+                    // （高速过急弯时笔尾瞬时甩飞）。
+                    var deltaAngle = Math.Min(stepDist / circleRadius, MaxStepAngleRadians);
                     var rx = currX - circleX;
                     var ry = currY - circleY;
                     var cosA = Math.Cos(deltaAngle);
                     var sinA = Math.Sin(deltaAngle);
-                    // 2D 旋转（右手系）：rx' = rx*cos - ry*sin；ry' = rx*sin + ry*cos
-                    // angleSign 统一乘到 sin 上保证方向正确。
+                    // 2D 旋转：rx' = rx*cos - ry*sin；ry' = rx*sin + ry*cos
+                    // angleSign 仅乘 sin 项以翻转方向（CW 时 sin 取负）。
                     var nx = circleX + rx * cosA - ry * sinA * angleSign;
                     var ny = circleY + rx * sinA * angleSign + ry * cosA;
                     // 沿切线方向平滑混合：曲率有效时优先圆弧，微小平移避免原地打转。
