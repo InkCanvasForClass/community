@@ -53,7 +53,7 @@ namespace Ink_Canvas.Ink.Native
                     {
                         try
                         {
-                            var predicted = InkTailPredictor.Build(session.RealPoints);
+                            var predicted = InkTailPredictor.Build(session.RealPoints, session.TailSmoother);
                             if (predicted.Count > 0)
                                 session.ReplacePrediction(predicted);
                         }
@@ -110,7 +110,7 @@ namespace Ink_Canvas.Ink.Native
                 var appended = AppendWithoutPublishing(session, newestFirstHistory);
                 if (predictionEnabled && appended > 0 && session.State == NativeInkSessionState.Active)
                 {
-                    var predicted = InkTailPredictor.Build(session.RealPoints);
+                    var predicted = InkTailPredictor.Build(session.RealPoints, session.TailSmoother);
                     session.ReplacePrediction(predicted);
                     PublishSnapshot(session);
                     return true;
@@ -147,7 +147,7 @@ namespace Ink_Canvas.Ink.Native
                 var appended = AppendWithoutPublishing(session, newestFirstHistory);
                 if (predictionEnabled && appended > 0)
                 {
-                    var predicted = InkTailPredictor.Build(session.RealPoints);
+                    var predicted = InkTailPredictor.Build(session.RealPoints, session.TailSmoother);
                     session.ReplacePrediction(predicted);
                     PublishSnapshot(session);
                     return true;
