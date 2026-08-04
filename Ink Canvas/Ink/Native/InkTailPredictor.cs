@@ -106,7 +106,11 @@ namespace Ink_Canvas.Ink.Native
             motion = RescaleToSpeed(
                 motion,
                 smoother.SmoothSpeed(motion.Speed, realPoints));
-            var horizonMicroseconds = ComputeAdaptiveHorizonMicroseconds(realPoints, motion);
+            // 视界再做一次跨帧平滑：吸收 turnScale / staleScale / 距离截断 /
+            // 曲率有效性切换等每帧突变，让笔尾长度只能渐变（不"卡"）。
+            var horizonMicroseconds = smoother.SmoothHorizon(
+                ComputeAdaptiveHorizonMicroseconds(realPoints, motion),
+                realPoints);
             ResolveSampling(horizonMicroseconds, out var pointCount, out var stepMicroseconds);
             return Extrapolate(realPoints, motion, pointCount, stepMicroseconds);
         }
@@ -176,6 +180,12 @@ namespace Ink_Canvas.Ink.Native
             }
             var prevX = last.X;
             var prevY = last.Y;
+            // 距离上限循环外算一次（用平滑后的初速度）：放在循环内会随
+            // decayPerStep 每步变化，导致截断点抖动 → 笔尾长度突变。
+            var initialSpeed = Math.Sqrt(vx * vx + vy * vy);
+            var distanceCap = Math.Min(
+                MaxPredictionDistancePx,
+                Math.Max(MinPredictionDistancePx, initialSpeed * (MinHorizonMilliseconds * 0.001)));
 
             for (var i = 0; i < pointCount; i++)
             {
@@ -237,13 +247,6 @@ namespace Ink_Canvas.Ink.Native
                 var stepDistance = Math.Sqrt(
                     (currX - prevX) * (currX - prevX)
                     + (currY - prevY) * (currY - prevY));
-                // 距离上限 = min(50px, max(speed*minHorizon, MinPredictionDistancePx))。
-                // 低速时 speed*minHorizon 可能极小，用 MinPredictionDistancePx 兜底
-                // 保证低速也有可感知预测尾（不跟手）。
-                var speed = Math.Sqrt(vx * vx + vy * vy);
-                var distanceCap = Math.Min(
-                    MaxPredictionDistancePx,
-                    Math.Max(MinPredictionDistancePx, speed * (MinHorizonMilliseconds * 0.001)));
                 traveled += stepDistance;
                 if (traveled > distanceCap)
                     break;
@@ -675,12 +678,61 @@ namespace Ink_Canvas.Ink.Native
         private double _previousSpeed;
         private long _previousTimestampMicroseconds;
 
+        // 视界平滑状态：速度平滑只覆盖速度一条路径，但视界还受 turnScale /
+        // staleScale / 距离截断 / 曲率有效性切换影响，这些每帧都可能突变，
+        // 表现为笔尾"卡、突变式伸缩"。这里对最终视界再做一次跨帧平滑，
+        // 把所有上游突变都吸收成渐变。
+        private bool _hasPreviousHorizon;
+        private double _previousHorizonMicroseconds;
+        private long _previousHorizonTimestampMicroseconds;
+
+        /// <summary>
+        /// 对最终视界做跨帧指数平滑。伸长用 AccelerationTau，收缩用 SlowdownTau，
+        /// 与速度平滑同源，保证笔尾长度只能渐变。
+        /// </summary>
+        public double SmoothHorizon(
+            double targetHorizonMicroseconds,
+            IReadOnlyList<RealInkPoint> realPoints)
+        {
+            var timestamp = realPoints[realPoints.Count - 1].TimestampMicroseconds;
+            if (!_hasPreviousHorizon)
+            {
+                _hasPreviousHorizon = true;
+                _previousHorizonTimestampMicroseconds = timestamp;
+                if (_previousHorizonMicroseconds <= 0)
+                {
+                    _previousHorizonMicroseconds = targetHorizonMicroseconds;
+                    return targetHorizonMicroseconds;
+                }
+                // 中断恢复：从上次视界渐进，不瞬间跳到目标。
+                _previousHorizonMicroseconds +=
+                    (targetHorizonMicroseconds - _previousHorizonMicroseconds) * 0.15;
+                return _previousHorizonMicroseconds;
+            }
+
+            var deltaMilliseconds =
+                (timestamp - _previousHorizonTimestampMicroseconds) / 1000.0;
+            _previousHorizonTimestampMicroseconds = timestamp;
+            if (deltaMilliseconds <= 0)
+                return _previousHorizonMicroseconds;
+
+            var tau = targetHorizonMicroseconds < _previousHorizonMicroseconds
+                ? InkTailPredictor.SlowdownTauMilliseconds
+                : InkTailPredictor.AccelerationTauMilliseconds;
+            var alpha = 1.0 - Math.Exp(-deltaMilliseconds / tau);
+            _previousHorizonMicroseconds +=
+                (targetHorizonMicroseconds - _previousHorizonMicroseconds) * alpha;
+            return _previousHorizonMicroseconds;
+        }
+
         public void Reset()
         {
-            // 不归零速度，只重置时间戳与首帧标记：避免预测中断后重新开始
+            // 不归零速度/视界，只重置时间戳与首帧标记：避免预测中断后重新开始
             // 时首帧直接返回全速（瞬间拉满），保留渐进伸长。
             _hasPrevious = false;
             _previousTimestampMicroseconds = 0;
+            _hasPreviousHorizon = false;
+            _previousHorizonTimestampMicroseconds = 0;
         }
 
         public double SmoothSpeed(
