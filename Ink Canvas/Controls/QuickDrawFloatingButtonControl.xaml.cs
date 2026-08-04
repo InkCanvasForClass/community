@@ -33,6 +33,10 @@ namespace Ink_Canvas.Controls
                 // 如果正在拖动，不触发点击事件
                 if (_isDragging) return;
 
+                if (MainWindow.Settings?.RandSettings?.QuickDrawExternalCaller == true &&
+                    QuickDrawWindow.TryLaunchExternalCaller())
+                    return;
+
                 // 打开快抽窗口
                 var quickDrawWindow = new QuickDrawWindow();
                 quickDrawWindow.ShowDialog();
@@ -145,4 +149,3 @@ namespace Ink_Canvas.Controls
         }
     }
 }
-

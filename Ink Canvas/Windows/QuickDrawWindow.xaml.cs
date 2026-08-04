@@ -85,16 +85,6 @@ namespace Ink_Canvas
                     System.Threading.Thread.Sleep(100);
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        // 若启用了快抽外部点名，则优先调用所选的外部点名器
-                        if (MainWindow.Settings?.RandSettings?.QuickDrawExternalCaller == true)
-                        {
-                            if (TryLaunchExternalCaller())
-                            {
-                                Close();
-                                return;
-                            }
-                        }
-
                         StartQuickDrawAnimation();
                     });
                 }).Start();
@@ -108,7 +98,7 @@ namespace Ink_Canvas
         /// <summary>
         /// 调用所选外部点名器，成功返回 true
         /// </summary>
-        private bool TryLaunchExternalCaller()
+        internal static bool TryLaunchExternalCaller()
         {
             try
             {
