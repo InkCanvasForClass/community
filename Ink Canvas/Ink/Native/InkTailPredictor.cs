@@ -29,6 +29,9 @@ namespace Ink_Canvas.Ink.Native
         // 避免加速度/减速阶段的帧间笔尾闪烁消失。`Build` 仍会在点数不足、停驻、完全 NaN 时返回空。
         private const double MinEffectiveSpeedPxPerSecond = 5.0;
         private const double MaxPredictionDistancePx = 50.0;
+        // 高速状态下的距离上限时间预算：speed * 本常量 = 单帧外推距离上限。
+        // 12ms ≈ 视界 24ms 的一半，让高速时笔尾稳步缩一半，防止 50px 死值顶到极长。
+        private const double MaxPredictionDistanceCapMs = 12.0;
 
         // 速度→视界映射的两端。起点取最低预测速度，让超低速一离开门限就开始增长。
         private const double SlowSpeedPxPerSecond = 40.0;
@@ -219,8 +222,14 @@ namespace Ink_Canvas.Ink.Native
                 var stepDistance = Math.Sqrt(
                     (currX - prevX) * (currX - prevX)
                     + (currY - prevY) * (currY - prevY));
+                // 高速时距离上限按速度收敛：单帧外推距不超过 speed*SpeedDistanceCapMs，
+                // 防止高速下笔尾被 50px 死值顶到极长。
+                var speed = Math.Sqrt(vx * vx + vy * vy);
+                var distanceCap = Math.Min(
+                    MaxPredictionDistancePx,
+                    speed * MaxPredictionDistanceCapMs);
                 traveled += stepDistance;
-                if (traveled > MaxPredictionDistancePx)
+                if (traveled > distanceCap)
                     break;
 
                 stamp += stepMicroseconds;
