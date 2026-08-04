@@ -663,7 +663,8 @@ namespace Ink_Canvas
 
             _nativePointerUpdatePump?.FlushPointer(batch.PointerId);
 
-            var bakePrediction = false;
+            // 预测尾烘焙进干墨：预测开启时抬笔把预测点并入真实点，落到画布。
+            var bakePrediction = Settings?.Canvas?.EnableNativeInkPrediction == true;
             var payload = _nativeInkController.End(
                 batch.PointerId,
                 endedAt,
