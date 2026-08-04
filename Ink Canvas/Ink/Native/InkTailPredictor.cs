@@ -10,9 +10,10 @@ namespace Ink_Canvas.Ink.Native
     /// </summary>
     internal static class InkTailPredictor
     {
-        // 动态视界上下限（毫秒）。Max 24ms，比上一档略收，保留明显但不过分的预测尾。
-        public const double MinHorizonMilliseconds = 8.0;
-        public const double MaxHorizonMilliseconds = 24.0;
+        // 动态视界上下限（毫秒）。低速时取 MinHorizon（保证低速也有可感知的预测尾，
+        // 避免"低速不跟手"）；高速时取 MaxHorizon。
+        public const double MinHorizonMilliseconds = 14.0;
+        public const double MaxHorizonMilliseconds = 30.0;
 
         // 时间戳异常回退时用的名义报点间隔。
         private const long DefaultStepMicroseconds = 10_000L;
@@ -30,6 +31,8 @@ namespace Ink_Canvas.Ink.Native
         // 避免加速度/减速阶段的帧间笔尾闪烁消失。`Build` 仍会在点数不足、停驻、完全 NaN 时返回空。
         private const double MinEffectiveSpeedPxPerSecond = 5.0;
         private const double MaxPredictionDistancePx = 50.0;
+        // 低速下限：速度极慢时预测尾也不小于此值，保证低速跟手（可感知的预测尾）。
+        private const double MinPredictionDistancePx = 12.0;
         // 曲率外推单步最大转角（弧度，≈7°）。配合 18 个预测点，最大总转角 ≈126°，
         // 加上距离 cap 截断，笔尾呈自然弧线，避免小半径+高速下"瞬时甩飞"。
         private const double MaxStepAngleRadians = 0.12;
@@ -231,13 +234,13 @@ namespace Ink_Canvas.Ink.Native
                 var stepDistance = Math.Sqrt(
                     (currX - prevX) * (currX - prevX)
                     + (currY - prevY) * (currY - prevY));
-                // 距离上限按当前视界（minHorizon）收敛：speed * minHorizon。
-                // 避免 50px 死值在高速下顶到极限（让笔尾"看起来固定长度"，
-                // 没有视界感），按视界缩放使笔尾长度与视界变化一致。
+                // 距离上限 = min(50px, max(speed*minHorizon, MinPredictionDistancePx))。
+                // 低速时 speed*minHorizon 可能极小，用 MinPredictionDistancePx 兜底
+                // 保证低速也有可感知预测尾（不跟手）。
                 var speed = Math.Sqrt(vx * vx + vy * vy);
                 var distanceCap = Math.Min(
                     MaxPredictionDistancePx,
-                    speed * (MinHorizonMilliseconds * 0.001));
+                    Math.Max(MinPredictionDistancePx, speed * (MinHorizonMilliseconds * 0.001)));
                 traveled += stepDistance;
                 if (traveled > distanceCap)
                     break;
