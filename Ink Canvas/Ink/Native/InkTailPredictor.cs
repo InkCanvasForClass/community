@@ -10,16 +10,15 @@ namespace Ink_Canvas.Ink.Native
     /// </summary>
     internal static class InkTailPredictor
     {
-        // 动态视界上下限（毫秒）。介于原始 36ms 与最短之间，保留适度预测手感。
-        // 14ms 上限在 136Hz 采样下 ≈ 2 个采样周期，拖尾可见但克制。
-        public const double MinHorizonMilliseconds = 6.0;
-        public const double MaxHorizonMilliseconds = 14.0;
+        // 动态视界上下限（毫秒）。Max 24ms，比上一档略收，保留明显但不过分的预测尾。
+        public const double MinHorizonMilliseconds = 8.0;
+        public const double MaxHorizonMilliseconds = 24.0;
 
         // 时间戳异常回退时用的名义报点间隔。
         private const long DefaultStepMicroseconds = 10_000L;
 
-        // 预测点数固定，只让步长随视界变。视界 6-14ms，5 点覆盖足够。
-        private const int PredictionPointCount = 5;
+        // 预测点数固定，只让步长随视界变。视界 10-28ms，8 点覆盖足够。
+        private const int PredictionPointCount = 8;
 
         // 速度估计窗口：单段差分对报点间隔抖动过于敏感，用指数加权的最近若干段取代。
         private const int VelocityWindowSegments = 5;
@@ -29,7 +28,7 @@ namespace Ink_Canvas.Ink.Native
         // 真实速度低于此值时不再强制返回空，而是按一档极小速度继续外推，
         // 避免加速度/减速阶段的帧间笔尾闪烁消失。`Build` 仍会在点数不足、停驻、完全 NaN 时返回空。
         private const double MinEffectiveSpeedPxPerSecond = 5.0;
-        private const double MaxPredictionDistancePx = 30.0;
+        private const double MaxPredictionDistancePx = 50.0;
 
         // 速度→视界映射的两端。起点取最低预测速度，让超低速一离开门限就开始增长。
         private const double SlowSpeedPxPerSecond = 40.0;
@@ -43,12 +42,18 @@ namespace Ink_Canvas.Ink.Native
         // 笔速时间平滑常数（毫秒）。速度估计即使做了多段加权仍有残余抖动，
         // 逐帧重算会让笔尾长度反复伸缩（“一抽一抽”）。在源头平滑速度可一次性
         // 覆盖视界基线、距离约束与外推积分全部下游路径。按真实报点间隔推进。
+        // 注意：实际平滑现在对称使用 SlowdownTauMilliseconds（见 InkTailPredictionSmoother），
+        // 本常量保留仅为历史/外部引用兼容。
         internal const double SpeedTauMilliseconds = 32.0;
 
         // 报点停滞抑制：间隔越大速度越陈旧，外推越不可信。
         private const double FreshSampleIntervalMilliseconds = 12.0;
         private const double StaleSampleIntervalMilliseconds = 40.0;
         private const double MinStaleScale = 0.35;
+
+        // 速度平滑时间常数（毫秒）：预测视界伸长/收缩的渐变速度。
+        // 400ms 让长短变化非常缓慢——起笔/收笔时预测尾平滑伸缩，不突然拉长或缩没。
+        internal const double SlowdownTauMilliseconds = 400.0;
 
         // 每 10ms 的速度衰减，按实际步长换算，避免笔尾发散。
         private const double DecayPer10Milliseconds = 0.97;
@@ -133,25 +138,86 @@ namespace Ink_Canvas.Ink.Native
             var pressure = last.Pressure;
             var traveled = 0.0;
 
+            // 曲率外推：用最近三点拟合曲率圆心/半径。拐弯明显（turnScale 低）时，
+            // 预测点沿曲率圆圆弧前进（跟随弯道），而不是直线冲出。
+            // 曲率弱（近似直线）时退化为线性外推。
+            TryFitCurvatureCircle(
+                realPoints,
+                out var circleX,
+                out var circleY,
+                out var circleRadius,
+                out var circleValid);
+            var angleSign = 1.0;
+            if (circleValid && realPoints.Count >= 3)
+            {
+                // 判断旋转方向：当前速度相对半径向量的叉积符号。
+                var rx = last.X - circleX;
+                var ry = last.Y - circleY;
+                var cross = vx * ry - vy * rx;
+                angleSign = cross >= 0 ? 1.0 : -1.0;
+            }
+            var prevX = last.X;
+            var prevY = last.Y;
+
             for (var i = 0; i < pointCount; i++)
             {
                 // 半隐式欧拉：先更新速度再积分位置，并逐步衰减，避免笔尾发散。
-                vx = (vx + motion.AccelerationX * stepSeconds) * decayPerStep;
-                vy = (vy + motion.AccelerationY * stepSeconds) * decayPerStep;
-                var nextX = currX + vx * stepSeconds;
-                var nextY = currY + vy * stepSeconds;
-                if (!IsFinite(nextX) || !IsFinite(nextY))
+                // 若曲率有效且当前点在圆弧附近，改为沿圆弧旋转前进。
+                if (circleValid && circleRadius > 0.01)
+                {
+                    var stepDist = stepSeconds * Math.Sqrt(vx * vx + vy * vy);
+                    var deltaAngle = angleSign * stepDist / circleRadius;
+                    var rx = currX - circleX;
+                    var ry = currY - circleY;
+                    var cosA = Math.Cos(deltaAngle);
+                    var sinA = Math.Sin(deltaAngle);
+                    // 2D 旋转（右手系）：rx' = rx*cos - ry*sin；ry' = rx*sin + ry*cos
+                    // angleSign 统一乘到 sin 上保证方向正确。
+                    var nx = circleX + rx * cosA - ry * sinA * angleSign;
+                    var ny = circleY + rx * sinA * angleSign + ry * cosA;
+                    // 沿切线方向平滑混合：曲率有效时优先圆弧，微小平移避免原地打转。
+                    // （当步长极小时，纯旋转会导致半径不变但位置几乎不动，这里保留速度衰减）
+                    if (stepDist > 0.001)
+                    {
+                        currX = nx;
+                        currY = ny;
+                        // 速度方向旋转同 deltaAngle，保持后续外推跟随弯道。
+                        var c = Math.Cos(deltaAngle);
+                        var s = Math.Sin(deltaAngle) * angleSign;
+                        var nvx = vx * c - vy * s;
+                        var nvy = vx * s + vy * c;
+                        vx = nvx * decayPerStep;
+                        vy = nvy * decayPerStep;
+                    }
+                    else
+                    {
+                        vx *= decayPerStep;
+                        vy *= decayPerStep;
+                        currX += vx * stepSeconds;
+                        currY += vy * stepSeconds;
+                    }
+                }
+                else
+                {
+                    vx = (vx + motion.AccelerationX * stepSeconds) * decayPerStep;
+                    vy = (vy + motion.AccelerationY * stepSeconds) * decayPerStep;
+                    currX += vx * stepSeconds;
+                    currY += vy * stepSeconds;
+                }
+
+                if (!IsFinite(currX) || !IsFinite(currY))
                     break;
 
                 var stepDistance = Math.Sqrt(
-                    (nextX - currX) * (nextX - currX) + (nextY - currY) * (nextY - currY));
+                    (currX - prevX) * (currX - prevX)
+                    + (currY - prevY) * (currY - prevY));
                 traveled += stepDistance;
                 if (traveled > MaxPredictionDistancePx)
                     break;
 
                 stamp += stepMicroseconds;
-                currX = nextX;
-                currY = nextY;
+                prevX = currX;
+                prevY = currY;
 
                 // 越靠后压感越细，且与点数无关，保证视界变化时笔尾观感一致。
                 var progress = (i + 1) / (double)pointCount;
@@ -469,6 +535,55 @@ namespace Ink_Canvas.Ink.Native
             return true;
         }
 
+        /// <summary>
+        /// 用最近三个真实点拟合经过三点的曲率圆（圆心 + 半径）。
+        /// 三点近似共线时返回 false（视为直线，退化为线性外推）。
+        /// </summary>
+        private static bool TryFitCurvatureCircle(
+            IReadOnlyList<RealInkPoint> realPoints,
+            out double circleX,
+            out double circleY,
+            out double circleRadius,
+            out bool valid)
+        {
+            circleX = 0;
+            circleY = 0;
+            circleRadius = 0;
+            valid = false;
+            if (realPoints == null || realPoints.Count < 3)
+                return false;
+
+            var p1 = realPoints[realPoints.Count - 3];
+            var p2 = realPoints[realPoints.Count - 2];
+            var p3 = realPoints[realPoints.Count - 1];
+
+            // 三点外接圆圆心：两弦中垂线交点。
+            var ax = p2.X - p1.X;
+            var ay = p2.Y - p1.Y;
+            var bx = p3.X - p2.X;
+            var by = p3.Y - p2.Y;
+            var denom = ax * by - ay * bx;
+            // denom 接近 0 → 三点共线，无曲率。
+            if (Math.Abs(denom) < 1e-6)
+                return false;
+
+            // 中垂线方程：ax*ox + ay*oy = c1；bx*ox + by*oy = c2
+            var c1 = (p2.X * p2.X + p2.Y * p2.Y - p1.X * p1.X - p1.Y * p1.Y) * 0.5;
+            var c2 = (p3.X * p3.X + p3.Y * p3.Y - p2.X * p2.X - p2.Y * p2.Y) * 0.5;
+            var invDenom = 1.0 / denom;
+            var ox = (c1 * by - c2 * ay) * invDenom;
+            var oy = (ax * c2 - bx * c1) * invDenom;
+            var r = Math.Sqrt((p1.X - ox) * (p1.X - ox) + (p1.Y - oy) * (p1.Y - oy));
+            if (!IsFinite(r) || r < 0.5)
+                return false;
+
+            circleX = ox;
+            circleY = oy;
+            circleRadius = r;
+            valid = true;
+            return true;
+        }
+
         private static double SmoothStep(double t) => t * t * (3.0 - 2.0 * t);
 
         /// <summary>
@@ -552,8 +667,11 @@ namespace Ink_Canvas.Ink.Native
             if (deltaMilliseconds <= 0)
                 return _previousSpeed;
 
+            // 对称平滑：升、降都用一个较长的 tau，让预测视界伸长/收缩都平滑渐变，
+            // 避免速度突变时笔尾突然拉长或突然缩没。tau 取减速档（120ms），
+            // 覆盖升和降两个方向。
             var alpha = 1.0 - Math.Exp(
-                -deltaMilliseconds / InkTailPredictor.SpeedTauMilliseconds);
+                -deltaMilliseconds / InkTailPredictor.SlowdownTauMilliseconds);
             _previousSpeed += (targetSpeed - _previousSpeed) * alpha;
             return _previousSpeed;
         }
