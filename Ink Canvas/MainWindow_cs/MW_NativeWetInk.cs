@@ -482,7 +482,7 @@ namespace Ink_Canvas
                         _nativePointerInputSource.LegacyMouseSampleCount,
                         _nativePointerInputSource.RawMouseRegisterError);
 
-                // Dispatcher 延迟探针：测 UI 线程从「提交探针」到「执行」的排队延迟。
+                // Dispatcher 延迟探针：用 Send 优先级（立即执行不排队）测 UI 线程真实可用性。
                 // 高频下只每 500ms 测一次，避免探针本身干扰。
                 var nowMs = Environment.TickCount64;
                 if (nowMs - _lastDispatcherProbeMs >= 500)
@@ -494,7 +494,7 @@ namespace Ink_Canvas
                         sw.Stop();
                         Ink_Canvas.Ink.Native.NativeInkPerfProbe.RecordDispatcherDelay(
                             sw.Elapsed.TotalMilliseconds);
-                    }), System.Windows.Threading.DispatcherPriority.Background);
+                    }), System.Windows.Threading.DispatcherPriority.Send);
                 }
 
                 if (!ShouldAcceptPointerBatch(batch))

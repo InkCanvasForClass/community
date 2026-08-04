@@ -57,6 +57,32 @@ namespace Ink_Canvas
 
         public static string[] StartArgs;
         public static string RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
+
+        /// <summary>
+        /// 从 DispatcherOperation 提取回调委托的可读方法名。
+        /// WPF 内部把委托存在私有字段里，反射枚举拿；失败退回 Priority 类别。
+        /// </summary>
+        private static string ExtractDispatcherOpName(System.Windows.Threading.DispatcherOperation op)
+        {
+            try
+            {
+                if (op == null)
+                    return "<null>";
+                // 反射枚举私有字段找 Delegate 类型字段（_callback / _method 等）。
+                foreach (var field in op.GetType().GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic))
+                {
+                    var value = field.GetValue(op);
+                    if (value is Delegate del && del.Method != null)
+                        return $"{del.Method.Name} ({op.Priority})";
+                }
+                return $"{op.Priority}";
+            }
+            catch
+            {
+                try { return $"{op.Priority}"; }
+                catch { return "<error>"; }
+            }
+        }
         // 新增：版本字符串（在 App_Startup 中计算赋值，形如 "1.7.18.0 (sha)"）
         public static string AppVersion = "";
 
@@ -135,6 +161,39 @@ namespace Ink_Canvas
 
             // 配置TLS协议以支持Windows 7
             ConfigureTlsForWindows7();
+
+            // Dispatcher 长任务监控（诊断用）：
+            // OperationStarted = 操作真正开始执行，记录执行时长（Completed-Started），
+            // 排除 Background 优先级排队等待的虚高（posted→completed 含排队）。
+            try
+            {
+                Dispatcher.Hooks.OperationStarted += (s, e) =>
+                {
+                    var sw = Stopwatch.StartNew();
+                    e.Operation.Completed += (_, __) =>
+                    {
+                        sw.Stop();
+                        if (sw.ElapsedMilliseconds > 20)
+                        {
+                            var name = ExtractDispatcherOpName(e.Operation);
+                            var elapsed = sw.Elapsed.TotalMilliseconds;
+                            Debug.WriteLine($"Dispatcher Exec:{elapsed:F1}ms {name}");
+                            try
+                            {
+                                Ink_Canvas.Ink.Native.NativeInkPerfProbe.RecordSlowDispatcherOp(name, elapsed);
+                            }
+                            catch
+                            {
+                                // probe failure never breaks the dispatcher
+                            }
+                        }
+                    };
+                };
+            }
+            catch
+            {
+                // 监控失败不影响启动
+            }
 
             // 如果是看门狗子进程，直接进入看门狗主循环并终止主流程
             var args = Environment.GetCommandLineArgs();

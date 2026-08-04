@@ -176,6 +176,41 @@ namespace Ink_Canvas.Ink.Native
         public static long PresentWasStillDrawingCount => Interlocked.Read(ref _presentWasStillDrawingCount);
         public static double LastPresentWasStillDrawingMs => Interlocked.Read(ref _lastPresentWasStillDrawingTicks1000) / 1000.0;
 
+        // ---- Dispatcher 慢操作来源统计 ----
+        private static long _slowOpCount;
+        private static long _slowOpOver20Ms;
+        private static long _slowOpOver50Ms;
+        private static long _slowOpOver100Ms;
+        private static long _slowOpOver200Ms;
+        private static long _slowOpTotalMs;
+        private static string _lastSlowOpName = string.Empty;
+        private static double _lastSlowOpMs;
+
+        /// <summary>记录一个 Dispatcher 慢操作（排队+执行总时长）。</summary>
+        public static void RecordSlowDispatcherOp(string name, double elapsedMs)
+        {
+            Interlocked.Increment(ref _slowOpCount);
+            Interlocked.Add(ref _slowOpTotalMs, (long)(elapsedMs * 1000));
+            if (elapsedMs > 20) Interlocked.Increment(ref _slowOpOver20Ms);
+            if (elapsedMs > 50) Interlocked.Increment(ref _slowOpOver50Ms);
+            if (elapsedMs > 100) Interlocked.Increment(ref _slowOpOver100Ms);
+            if (elapsedMs > 200) Interlocked.Increment(ref _slowOpOver200Ms);
+            lock (_perKindLock)
+            {
+                _lastSlowOpName = name ?? "<unknown>";
+                _lastSlowOpMs = elapsedMs;
+            }
+        }
+
+        public static long SlowOpCount => Interlocked.Read(ref _slowOpCount);
+        public static long SlowOpOver20Ms => Interlocked.Read(ref _slowOpOver20Ms);
+        public static long SlowOpOver50Ms => Interlocked.Read(ref _slowOpOver50Ms);
+        public static long SlowOpOver100Ms => Interlocked.Read(ref _slowOpOver100Ms);
+        public static long SlowOpOver200Ms => Interlocked.Read(ref _slowOpOver200Ms);
+        public static double SlowOpTotalMs => Interlocked.Read(ref _slowOpTotalMs) / 1000.0;
+        public static string LastSlowOpName { get { lock (_perKindLock) return _lastSlowOpName; } }
+        public static double LastSlowOpMs { get { lock (_perKindLock) return _lastSlowOpMs; } }
+
         /// <summary>UI 线程 controller/marshal 入口记录一次 input 处理。</summary>
         public static void RecordInputEvent(int inputKindIndex, int rawInputPointCount, int addedPointCount, double elapsedMs)
         {
