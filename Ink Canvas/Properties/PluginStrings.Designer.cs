@@ -116,6 +116,14 @@ namespace Ink_Canvas.Properties
 
         public static string Plugin_Update => ResourceManager.GetString(nameof(Plugin_Update), _resourceCulture);
 
+        public static string Plugin_Reload => ResourceManager.GetString(nameof(Plugin_Reload), _resourceCulture);
+
+        public static string Plugin_ReloadSuccess => ResourceManager.GetString(nameof(Plugin_ReloadSuccess), _resourceCulture);
+
+        public static string Plugin_ReloadPartial => ResourceManager.GetString(nameof(Plugin_ReloadPartial), _resourceCulture);
+
+        public static string Plugin_ReloadFailed => ResourceManager.GetString(nameof(Plugin_ReloadFailed), _resourceCulture);
+
         public static string Plugin_Delete => ResourceManager.GetString(nameof(Plugin_Delete), _resourceCulture);
 
         public static string Plugin_DeleteConfirm => ResourceManager.GetString(nameof(Plugin_DeleteConfirm), _resourceCulture);

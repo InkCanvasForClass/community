@@ -158,6 +158,18 @@
   <data name="Plugin_Update" xml:space="preserve">
     <value>升级</value>
   </data>
+  <data name="Plugin_Reload" xml:space="preserve">
+    <value>热重载插件</value>
+  </data>
+  <data name="Plugin_ReloadSuccess" xml:space="preserve">
+    <value>插件已热重载完成，不用重启啦~</value>
+  </data>
+  <data name="Plugin_ReloadPartial" xml:space="preserve">
+    <value>插件重新装载好了，但旧程序集还赖在内存里。建议重启一下彻底清理旧版本~</value>
+  </data>
+  <data name="Plugin_ReloadFailed" xml:space="preserve">
+    <value>插件热重载翻车了：{0}</value>
+  </data>
   <data name="Plugin_Delete" xml:space="preserve">
     <value>删库跑路</value>
   </data>

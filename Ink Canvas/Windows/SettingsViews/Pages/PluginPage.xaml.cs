@@ -209,6 +209,22 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             };
             actionPanel.Children.Add(folderBtn);
 
+            // 热重载按钮：卸载插件注册并重新从磁盘加载，无需重启应用。
+            var reloadBtn = new Button
+            {
+                Padding = new Thickness(6),
+                Margin = new Thickness(0, 0, 4, 0),
+                ToolTip = PluginStrings.Plugin_Reload,
+                Tag = pluginInfo
+            };
+            reloadBtn.Click += ReloadPlugin_Click;
+            reloadBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+            {
+                Icon = SegoeFluentIcons.Refresh,
+                FontSize = 14
+            };
+            actionPanel.Children.Add(reloadBtn);
+
             // 待应用更新：尝试热安装；失败时才提供重启
             if (hasPendingUpdate)
             {
@@ -336,6 +352,50 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     Process.Start(new ProcessStartInfo { FileName = info.PluginFolderPath, UseShellExecute = true });
             }
             catch { }
+        }
+
+        private void ReloadPlugin_Click(object sender, RoutedEventArgs e)
+        {
+            var btn = sender as FrameworkElement;
+            var info = btn?.Tag as PluginInfo;
+            if (info == null) return;
+
+            try
+            {
+                var result = PluginManager.Instance.ReloadPlugin(info.Id);
+                LoadPlugins();
+
+                if (!result.Success)
+                {
+                    iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                        string.Format(PluginStrings.Plugin_ReloadFailed, result.ErrorMessage ?? "Unknown error"),
+                        PluginStrings.Plugin_Reload,
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                if (!result.FullyUnloaded)
+                {
+                    iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                        PluginStrings.Plugin_ReloadPartial,
+                        PluginStrings.Plugin_Reload,
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                    PluginStrings.Plugin_ReloadSuccess,
+                    PluginStrings.Plugin_Reload,
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"Plugin | 热重载失败: {info.Id} - {ex.Message}", LogHelper.LogType.Error);
+                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                    string.Format(PluginStrings.Plugin_ReloadFailed, ex.Message),
+                    PluginStrings.Plugin_Reload,
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private async void UpdatePlugin_Click(object sender, RoutedEventArgs e)

@@ -1147,7 +1147,8 @@ namespace Ink_Canvas.Plugins
             try
             {
                 // _services 里是宿主服务实例（EventService/HotkeyService/TrayService…），
-                // 插件的事件订阅与回调就挂在它们身上。
+                // 插件的事件订阅与回调就挂在它们身上。服务常把回调再转交给内部管理器
+                // （HotkeyService → GlobalHotkeyManager），故 Sweep 会向内递归若干层。
                 foreach (var service in _services.Values)
                 {
                     removed += PluginDelegateCleaner.Sweep(service, alc);
@@ -1158,6 +1159,14 @@ namespace Ink_Canvas.Plugins
                     removed += PluginDelegateCleaner.Sweep(_ipc, alc);
                 }
 
+                // 宿主的静态事件：插件经服务包装订阅后同样钉住 ALC，实例扫描覆盖不到。
+                removed += PluginDelegateCleaner.SweepStaticEvents(typeof(NotificationCenterService), alc);
+                removed += PluginDelegateCleaner.SweepStaticEvents(typeof(ClipboardNotification), alc);
+
+                // 托盘菜单项的 Click 处理器与画布背景层的插件控件都挂在 WPF 可视化树上，
+                // 不在任何服务对象的字段里，需要按插件 ID 显式拆除。
+                RemovePluginUiArtifacts(plugin);
+
                 if (removed > 0)
                 {
                     Log(string.Format("Detached {0} host delegate(s) owned by plugin {1}", removed, plugin.Name));
@@ -1166,6 +1175,49 @@ namespace Ink_Canvas.Plugins
             catch (Exception ex)
             {
                 LogError(string.Format("Failed to detach host delegates for plugin {0}", plugin.Name), ex);
+            }
+        }
+
+        /// <summary>
+        /// 拆除插件留在 WPF 可视化树上的痕迹：托盘菜单项与画布背景层。
+        /// 这些控件不在任何服务对象的字段里，反射扫描覆盖不到，但它们的事件处理器
+        /// 指向插件程序集，同样会阻止 ALC 卸载。
+        /// </summary>
+        private void RemovePluginUiArtifacts(PluginInfo plugin)
+        {
+            try
+            {
+                var app = Application.Current as App;
+                if (app == null) return;
+
+                void Cleanup()
+                {
+                    try
+                    {
+                        // 托盘菜单项按 "PluginTray.<id>" 命名，插件注册时用的就是自己的组件 Id；
+                        // 这里按插件 Id 前缀匹配，覆盖插件注册多个菜单项的情况。
+                        app.RemovePluginTrayMenuItemsByPrefix(plugin.Id);
+
+                        // 背景层是插件工厂产出的控件，卸载后必须摘掉，否则画布一直持有它。
+                        if (app.MainWindow is MainWindow mainWindow && mainWindow.HasPluginBackgroundLayer)
+                        {
+                            mainWindow.RemovePluginBackgroundLayer();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogError(string.Format("Failed to remove UI artifacts for plugin {0}", plugin.Name), ex);
+                    }
+                }
+
+                // 必须同步执行：卸载流程紧接着就要 GC 校验 ALC 是否释放，
+                // 异步排队会让这些引用在校验时仍然存在，导致误报"未完全卸载"。
+                if (app.Dispatcher.CheckAccess()) Cleanup();
+                else app.Dispatcher.Invoke(Cleanup);
+            }
+            catch (Exception ex)
+            {
+                LogError(string.Format("Failed to clean plugin UI artifacts for {0}", plugin.Name), ex);
             }
         }
 
