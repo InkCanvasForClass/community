@@ -483,7 +483,14 @@ namespace Ink_Canvas.Helpers
                     applyFrameCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.ApplyFrameCount,
                     beginStrokeCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.BeginStrokeCount,
                     endStrokeCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.EndStrokeCount,
-                    cancelStrokeCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.CancelStrokeCount
+                    cancelStrokeCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.CancelStrokeCount,
+                    // controller Update 分段（最大单帧，毫秒）
+                    maxUpdateAppendMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.MaxUpdateAppendMs, 3),
+                    maxUpdatePredictMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.MaxUpdatePredictMs, 3),
+                    maxUpdatePublishMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.MaxUpdatePublishMs, 3),
+                    maxUpdateTotalMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.MaxUpdateTotalMs, 3),
+                    lastUpdateTotalMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.LastUpdateTotalMs, 3),
+                    updateCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.UpdateCount
                 },
                 historyPath = GetHistoryPath()
             };
