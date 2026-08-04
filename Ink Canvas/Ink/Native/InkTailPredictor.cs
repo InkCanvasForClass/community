@@ -10,17 +10,16 @@ namespace Ink_Canvas.Ink.Native
     /// </summary>
     internal static class InkTailPredictor
     {
-        // 动态视界上下限（毫秒）。参考常见硬笔预测器的约 36ms 预测时长，
-        // 上限受“预测越长越容易在拐弯处甩飞”约束。
-        public const double MinHorizonMilliseconds = 10.0;
-        public const double MaxHorizonMilliseconds = 36.0;
+        // 动态视界上下限（毫秒）。介于原始 36ms 与最短之间，保留适度预测手感。
+        // 14ms 上限在 136Hz 采样下 ≈ 2 个采样周期，拖尾可见但克制。
+        public const double MinHorizonMilliseconds = 6.0;
+        public const double MaxHorizonMilliseconds = 14.0;
 
         // 时间戳异常回退时用的名义报点间隔。
         private const long DefaultStepMicroseconds = 10_000L;
 
-        // 预测点数固定，只让步长随视界变。点数一旦随视界量化（ceil(视界/步长) 再夹上下限），
-        // 视界在量化边界附近抖动就会让笔尾整段地长出来又缩回去，观感就是“一抽一抽”。
-        private const int PredictionPointCount = 8;
+        // 预测点数固定，只让步长随视界变。视界 6-14ms，5 点覆盖足够。
+        private const int PredictionPointCount = 5;
 
         // 速度估计窗口：单段差分对报点间隔抖动过于敏感，用指数加权的最近若干段取代。
         private const int VelocityWindowSegments = 5;
@@ -30,7 +29,7 @@ namespace Ink_Canvas.Ink.Native
         // 真实速度低于此值时不再强制返回空，而是按一档极小速度继续外推，
         // 避免加速度/减速阶段的帧间笔尾闪烁消失。`Build` 仍会在点数不足、停驻、完全 NaN 时返回空。
         private const double MinEffectiveSpeedPxPerSecond = 5.0;
-        private const double MaxPredictionDistancePx = 80.0;
+        private const double MaxPredictionDistancePx = 30.0;
 
         // 速度→视界映射的两端。起点取最低预测速度，让超低速一离开门限就开始增长。
         private const double SlowSpeedPxPerSecond = 40.0;
