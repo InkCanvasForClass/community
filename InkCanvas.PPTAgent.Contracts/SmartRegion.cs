@@ -17,7 +17,7 @@ namespace InkCanvasPPTAgent.Contracts
         public double Height { get; set; }
         /// <summary>Shape 名称（调试用）</summary>
         public string ShapeName { get; set; }
-        /// <summary>媒体类型（ppMediaTypeVideo = 13）</summary>
+        /// <summary>媒体类型（PpMediaType，视频为 ppMediaTypeMovie = 3；仅作调试信息，不影响行为）</summary>
         public int MediaType { get; set; }
     }
 

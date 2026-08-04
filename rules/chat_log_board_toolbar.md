@@ -1,5 +1,15 @@
 # 聊天记录 - 白板工具栏设置页面开发
 
+> **历史存档说明**：本文是按会话整理的开发聊天记录，仅反映当时代码状态，**不是现行规范**。
+> 后续代码已演进，当前状态请以这些文件为准：
+>
+> - 白板/浮动工具栏组件开发 → [toolbar.md](./toolbar.md)
+> - 设置页面导航与页面注册 → [settings_pages.md](./settings_pages.md)
+> - WPF 常见陷阱 → [general.md](./general.md)
+>
+> 尤其注意：**会话 3 描述的 `_staticPageTypes` 双字典结构已删除**。现在 `SettingsWindow.xaml.cs` 只有
+> 一个页面字典 `_pageTypes`（构造函数初始化），注册页面只往它里面加 Tag→Type 即可，详见 settings_pages.md。
+
 ## 会话 1：Bug 修复（视频展台图标 + 解冻自动切笔）
 
 ### 用户：修复 bug 1 2 3 4

@@ -74,6 +74,9 @@ namespace InkCanvas.NativeInk.Tests
             Run(nameof(PredictionCrawlingProducesShortTail), PredictionCrawlingProducesShortTail);
             Run(nameof(PredictionSurvivesSpeedDip), PredictionSurvivesSpeedDip);
             Run(nameof(PredictionStaysChronologicalAndFinite), PredictionStaysChronologicalAndFinite);
+            Run(nameof(SmoothedHorizonSuppressesJitter), SmoothedHorizonSuppressesJitter);
+            Run(nameof(SmoothedHorizonConvergesToSteadyState), SmoothedHorizonConvergesToSteadyState);
+            Run(nameof(SmoothedHorizonShrinksQuicklyOnTurn), SmoothedHorizonShrinksQuicklyOnTurn);
             Run(nameof(UpdatePumpKeepsLatestPendingWork), UpdatePumpKeepsLatestPendingWork);
             Run(nameof(UpdatePumpDropsStaleSessionWork), UpdatePumpDropsStaleSessionWork);
             Console.WriteLine($"Native ink contract tests passed: {_passed}.");
@@ -1331,11 +1334,65 @@ namespace InkCanvas.NativeInk.Tests
         }
 
         /// <summary>
+        /// 报点间隔抖动下，平滑器必须显著压低视界的帧间跳变（“一抽一抽”的直接成因）。
+        /// </summary>
+        private static void SmoothedHorizonSuppressesJitter()
+        {
+            // 名义 8ms 报点、±1ms 间隔抖动、每点 12px：真实触摸屏的常见量级。
+            var stroke = JitteryIntervalStroke(24, 12, 8, 1.0);
+
+            var rawJump = MaxFrameToFrameJump(HorizonSeries(stroke, null));
+            var smoothedJump = MaxFrameToFrameJump(
+                HorizonSeries(stroke, new InkTailPredictionSmoother()));
+
+            True(rawJump > 0.5);
+            // 平滑后帧间跳变至少降到无平滑的一半。
+            True(smoothedJump < rawJump * 0.5);
+        }
+
+        /// <summary>
+        /// 平滑不能改变稳态视界：匀速书写足够多帧后，平滑视界应收敛到无平滑视界附近。
+        /// 否则平滑会系统性地把笔尾变短或变长。
+        /// </summary>
+        private static void SmoothedHorizonConvergesToSteadyState()
+        {
+            var stroke = StraightStroke(40, 20, 8);
+            var smoothed = HorizonSeries(stroke, new InkTailPredictionSmoother());
+            var raw = HorizonSeries(stroke, null);
+
+            True(smoothed.Count > 0 && raw.Count > 0);
+            var steadySmoothed = smoothed[smoothed.Count - 1];
+            var steadyRaw = raw[raw.Count - 1];
+            True(Math.Abs(steadySmoothed - steadyRaw) < steadyRaw * 0.1);
+        }
+
+        /// <summary>
+        /// 拐弯时笔尾必须快速收回（收缩用小时间常数），否则会甩到弯道外侧。
+        /// 平滑不得把这个收缩拖慢成多帧才生效。
+        /// </summary>
+        private static void SmoothedHorizonShrinksQuicklyOnTurn()
+        {
+            // 先直行建立较长视界的平滑状态。
+            var smoother = new InkTailPredictionSmoother();
+            var straight = StraightStroke(12, 20, 8);
+            var straightSeries = HorizonSeries(straight, smoother);
+            var beforeTurn = straightSeries[straightSeries.Count - 1];
+
+            // 接着在笔尖处急转，喂入同一个 smoother。
+            var corner = CornerAtTipStroke(13, 20, 8);
+            var turned = InkTailPredictor.Build(corner, smoother);
+            True(turned.Count > 0);
+            var afterTurn = HorizonMs(corner, turned);
+
+            // 一帧内就要出现明显收缩，而不是缓慢回落。
+            True(afterTurn < beforeTurn * 0.85);
+        }
+
+        /// <summary>
         /// 预测点必须有限、时间戳严格递增，才能通过会话与几何层的校验。
         /// </summary>
         private static void PredictionStaysChronologicalAndFinite()
-        {
-            var real = StraightStroke(8, 40, 8);
+        {            var real = StraightStroke(8, 40, 8);
             var predicted = InkTailPredictor.Build(real);
             True(predicted.Count > 0);
 
@@ -1436,6 +1493,65 @@ namespace InkCanvas.NativeInk.Tests
             }
 
             return maxReach;
+        }
+
+        /// <summary>
+        /// 匀速直线，但报点间隔按 ±jitterMs 交替抖动：真实触摸屏的常见形态。
+        /// 位置按名义匀速推进，只有时间戳抖，因此单段差分算出的速度会被放大抖动。
+        /// </summary>
+        private static RealInkPoint[] JitteryIntervalStroke(
+            int count,
+            double stepPx,
+            double intervalMs,
+            double jitterMs)
+        {
+            var points = new RealInkPoint[count];
+            var timestampMs = 0.0;
+            for (var i = 0; i < count; i++)
+            {
+                points[i] = new RealInkPoint(
+                    i * stepPx,
+                    0,
+                    0.5f,
+                    (long)(timestampMs * 1000.0));
+                timestampMs += intervalMs + (i % 2 == 0 ? jitterMs : -jitterMs);
+            }
+
+            return points;
+        }
+
+        /// <summary>
+        /// 逐帧喂入笔画前缀（模拟实时书写），返回每帧的视界序列。
+        /// smoother 为 null 时走无状态路径。
+        /// </summary>
+        private static List<double> HorizonSeries(
+            RealInkPoint[] stroke,
+            InkTailPredictionSmoother smoother)
+        {
+            var series = new List<double>();
+            for (var n = 2; n <= stroke.Length; n++)
+            {
+                var prefix = new RealInkPoint[n];
+                Array.Copy(stroke, prefix, n);
+                var predicted = smoother == null
+                    ? InkTailPredictor.Build(prefix)
+                    : InkTailPredictor.Build(prefix, smoother);
+                if (predicted.Count > 0)
+                    series.Add(HorizonMs(prefix, predicted));
+            }
+
+            return series;
+        }
+
+        /// <summary>
+        /// 相邻帧视界变化的最大绝对值：抖动的直接度量。
+        /// </summary>
+        private static double MaxFrameToFrameJump(List<double> series)
+        {
+            var maxJump = 0.0;
+            for (var i = 1; i < series.Count; i++)
+                maxJump = Math.Max(maxJump, Math.Abs(series[i] - series[i - 1]));
+            return maxJump;
         }
 
         private static void Run(string name, Action test)
