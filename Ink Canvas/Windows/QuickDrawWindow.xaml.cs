@@ -96,6 +96,30 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 调用所选外部点名器，成功返回 true
+        /// </summary>
+        internal static bool TryLaunchExternalCaller()
+        {
+            try
+            {
+                var protocols = ExternalCallerLauncher.GetProtocolsByType(MainWindow.Settings.RandSettings.ExternalCallerType);
+
+                if (!ExternalCallerLauncher.TryLaunch(protocols, out Exception lastException))
+                {
+                    throw lastException ?? new InvalidOperationException("external caller protocols are unavailable");
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format(Properties.RandomStrings.Random_RollCall_ExternalCallerFailedFormat, ex.Message), Properties.RandomStrings.Random_Error, MessageBoxButton.OK, MessageBoxImage.Error);
+                LogHelper.WriteLogToFile($"快抽外部点名调用失败: {ex.Message}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
+        /// <summary>
         /// 快抽动画
         /// </summary>
         private void StartQuickDrawAnimation()

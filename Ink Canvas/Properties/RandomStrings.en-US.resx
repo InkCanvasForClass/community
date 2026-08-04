@@ -480,6 +480,9 @@ If not installed, please download and install it from the official website. If a
   <data name="Random_AddIcon_SaveFailedFormat" xml:space="preserve">
     <value>Error saving icon: {0}</value>
   </data>
+  <data name="Random_QuickDraw_UseExternal" xml:space="preserve">
+    <value>Use selected external caller for quick draw</value>
+  </data>
   <data name="Random_QuickDraw_WindowTitle" xml:space="preserve">
     <value>Quick Draw</value>
   </data>

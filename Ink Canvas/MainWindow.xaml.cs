@@ -3554,6 +3554,10 @@ namespace Ink_Canvas
                 if (Settings?.RandSettings?.EnableQuickDraw != true)
                     return;
 
+                if (Settings.RandSettings.QuickDrawExternalCaller &&
+                    QuickDrawWindow.TryLaunchExternalCaller())
+                    return;
+
                 var quickDrawWindow = new QuickDrawWindow();
                 quickDrawWindow.Owner = this;
                 quickDrawWindow.ShowDialog();
