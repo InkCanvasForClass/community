@@ -17,8 +17,9 @@ namespace Ink_Canvas.Ink.Native
         // 时间戳异常回退时用的名义报点间隔。
         private const long DefaultStepMicroseconds = 10_000L;
 
-        // 预测点数固定，只让步长随视界变。视界 10-28ms，8 点覆盖足够。
-        private const int PredictionPointCount = 8;
+        // 预测点数：拉满 18 个让点距变小（24ms 视界 / 18 = 1.33ms/步 ≈ 1-2px 步长，
+        // D2D 折线接近视觉连续曲线，避免"拉长的几条线"观感）。
+        private const int PredictionPointCount = 18;
 
         // 速度估计窗口：单段差分对报点间隔抖动过于敏感，用指数加权的最近若干段取代。
         private const int VelocityWindowSegments = 5;
@@ -32,9 +33,9 @@ namespace Ink_Canvas.Ink.Native
         // 高速状态下的距离上限时间预算：speed * 本常量 = 单帧外推距离上限。
         // 12ms ≈ 视界 24ms 的一半，让高速时笔尾稳步缩一半，防止 50px 死值顶到极长。
         private const double MaxPredictionDistanceCapMs = 12.0;
-        // 曲率外推单步最大转角（弧度，≈28°）。防止小半径+高速下笔尾单步旋转过大
-        // 出现"瞬时甩飞"，让预测尾沿弯道渐进。
-        private const double MaxStepAngleRadians = 0.5;
+        // 曲率外推单步最大转角（弧度，≈7°）。配合 18 个预测点，最大总转角 ≈126°，
+        // 加上距离 cap 截断，笔尾呈自然弧线，避免小半径+高速下"瞬时甩飞"。
+        private const double MaxStepAngleRadians = 0.12;
 
         // 速度→视界映射的两端。起点取最低预测速度，让超低速一离开门限就开始增长。
         private const double SlowSpeedPxPerSecond = 40.0;
