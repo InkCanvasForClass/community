@@ -1565,6 +1565,8 @@ namespace Ink_Canvas
         public double MLAvoidanceWeight { get; set; } = 1.0;
         [JsonProperty("enableQuickDraw")]
         public bool EnableQuickDraw { get; set; } = true;
+        [JsonProperty("quickDrawExternalCaller")]
+        public bool QuickDrawExternalCaller { get; set; }
         [JsonProperty("nameRosters")]
         public List<NameRoster> NameRosters { get; set; } = new List<NameRoster>();
         [JsonProperty("selectedNameRosterGuid")]

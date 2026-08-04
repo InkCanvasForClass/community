@@ -327,6 +327,8 @@ namespace Ink_Canvas.Properties
 
         public static string Random_QuickDraw_WindowTitle => ResourceManager.GetString(nameof(Random_QuickDraw_WindowTitle), _resourceCulture);
 
+        public static string Random_QuickDraw_UseExternal => ResourceManager.GetString(nameof(Random_QuickDraw_UseExternal), _resourceCulture);
+
         public static string Random_QuickDraw_Title => ResourceManager.GetString(nameof(Random_QuickDraw_Title), _resourceCulture);
 
         public static string Random_Rand_ClickToImport => ResourceManager.GetString(nameof(Random_Rand_ClickToImport), _resourceCulture);

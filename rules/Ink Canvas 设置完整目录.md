@@ -499,6 +499,7 @@
 │   │   ├── LabeledSettingsCard: 显示编辑名单按钮 → ToggleSwitch
 │   │   ├── LabeledSettingsCard: 启用随机和单人抽取 → ToggleSwitch
 │   │   ├── LabeledSettingsCard: 启用快速抽取 → ToggleSwitch
+│   │   ├── LabeledSettingsCard: 快抽调用所选外部点名 → ToggleSwitch
 │   │   ├── LabeledSettingsCard: 使用外部调用 → ToggleSwitch
 │   │   ├── SettingsCard: 外部调用类型 → ComboBox
 │   │   ├── SettingsCard: 单次关闭延迟 → Slider

@@ -61,6 +61,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             RandWindowOnceMaxStudentsSlider.Value = settings.RandSettings.RandWindowOnceMaxStudents;
             ToggleSwitchShowRandomAndSingleDraw.IsOn = settings.RandSettings.ShowRandomAndSingleDraw;
             ToggleSwitchEnableQuickDraw.IsOn = settings.RandSettings.EnableQuickDraw;
+            ToggleSwitchQuickDrawExternalCaller.IsOn = settings.RandSettings.QuickDrawExternalCaller;
             ToggleSwitchExternalCaller.IsOn = settings.RandSettings.DirectCallCiRand;
             ComboBoxExternalCallerType.SelectedIndex = settings.RandSettings.ExternalCallerType;
 
@@ -137,6 +138,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.SaveSettingsToFile();
 
             SettingsActionHub.OnEnableQuickDrawChanged();
+        }
+
+        private void ToggleSwitchQuickDrawExternalCaller_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.RandSettings.QuickDrawExternalCaller = ToggleSwitchQuickDrawExternalCaller.IsOn;
+            SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchExternalCaller_Toggled(object sender, RoutedEventArgs e)
