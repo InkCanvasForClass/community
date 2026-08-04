@@ -62,6 +62,9 @@ namespace Ink_Canvas.Ink.Native
         // 让速度变慢时预测视界缓慢收缩而非瞬间消失（避免笔尾"突然缩短"）。
         // 1500ms 让减速时预测尾花约 3-4 秒才收敛大半段，平滑感极强。
         internal const double SlowdownTauMilliseconds = 1500.0;
+        // 速度加速时的伸长时间常数（毫秒）。600ms 让预测尾随加速渐进伸长，
+        // 而非瞬间拉到全长（自然书写感）。比旧 SpeedTau(32ms) 慢得多。
+        internal const double AccelerationTauMilliseconds = 600.0;
 
         // 每 10ms 的速度衰减，按实际步长换算，避免笔尾发散。
         private const double DecayPer10Milliseconds = 0.97;
@@ -698,12 +701,13 @@ namespace Ink_Canvas.Ink.Native
                 return _previousSpeed;
 
             // 不对称平滑：
-            //  - 速度上升（或持平）：用 AccelerationTau，快跟手；
+            //  - 速度上升（或持平）：用 AccelerationTau（较长），让预测尾"伸长渐进"，
+            //    不瞬间拉到全长（自然书写感）。
             //  - 速度下降：用 SlowdownTau（更长），让预测视界在减速时缓慢收缩，
             //    笔尾不会"突然缩短"。
             var tau = targetSpeed < _previousSpeed
                 ? InkTailPredictor.SlowdownTauMilliseconds
-                : InkTailPredictor.SpeedTauMilliseconds;
+                : InkTailPredictor.AccelerationTauMilliseconds;
             var alpha = 1.0 - Math.Exp(-deltaMilliseconds / tau);
             _previousSpeed += (targetSpeed - _previousSpeed) * alpha;
             return _previousSpeed;
