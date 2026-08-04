@@ -39,6 +39,9 @@ namespace Ink_Canvas.Ink.Native
 
     internal sealed class WetInkRenderSnapshot
     {
+        private readonly RealInkPoint[] _realPointsArray;
+        private readonly PredictedInkPoint[] _predictedPointsArray;
+
         public WetInkRenderSnapshot(
             long sessionId,
             long version,
@@ -51,8 +54,10 @@ namespace Ink_Canvas.Ink.Native
             SessionId = sessionId;
             Version = version;
             Style = style;
-            RealPoints = Copy(realPoints);
-            PredictedPoints = Copy(predictedPoints);
+            _realPointsArray = Copy(realPoints);
+            _predictedPointsArray = Copy(predictedPoints);
+            RealPoints = _realPointsArray;
+            PredictedPoints = _predictedPointsArray;
             Sequence = sequence;
             GeometryGeneration = geometryGeneration;
         }
@@ -64,6 +69,11 @@ namespace Ink_Canvas.Ink.Native
         public IReadOnlyList<PredictedInkPoint> PredictedPoints { get; }
         public long Sequence { get; }
         public long GeometryGeneration { get; }
+
+        /// <summary>底层 RealInkPoint 数组（供零分配 Span 切片，只读）。</summary>
+        internal RealInkPoint[] RealPointsArray => _realPointsArray;
+        /// <summary>底层 PredictedInkPoint 数组（供零分配 Span 切片，只读）。</summary>
+        internal PredictedInkPoint[] PredictedPointsArray => _predictedPointsArray;
 
         internal WetInkRenderSnapshot WithSequence(long sequence) =>
             new WetInkRenderSnapshot(

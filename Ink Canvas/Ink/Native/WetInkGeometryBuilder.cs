@@ -70,6 +70,48 @@ namespace Ink_Canvas.Ink.Native
             InkStrokeStyleSnapshot style) =>
             Build(realPoints, predictedPoints, style, int.MaxValue);
 
+        /// <summary>Span 版本：零分配入口（渲染线程只读 snapshot 数组）。</summary>
+        internal WetInkRibbonGeometry Build(
+            ReadOnlySpan<RealInkPoint> realPoints,
+            ReadOnlySpan<PredictedInkPoint> predictedPoints,
+            InkStrokeStyleSnapshot style) =>
+            Build(realPoints, predictedPoints, style, int.MaxValue);
+
+        /// <summary>Span 版本 + outputPointCount 限制。</summary>
+        internal WetInkRibbonGeometry Build(
+            ReadOnlySpan<RealInkPoint> realPoints,
+            ReadOnlySpan<PredictedInkPoint> predictedPoints,
+            InkStrokeStyleSnapshot style,
+            int outputPointCount)
+        {
+            var pointCount = realPoints.Length + predictedPoints.Length;
+            if (pointCount == 0 || outputPointCount <= 0)
+                return Empty();
+
+            var centers = new List<WetInkVertex>(pointCount);
+            var radiiX = new List<float>(pointCount);
+            var radiiY = new List<float>(pointCount);
+            AppendRealPoints(
+                realPoints,
+                style,
+                centers,
+                radiiX,
+                radiiY);
+            AppendPredictedPoints(
+                predictedPoints,
+                style,
+                centers,
+                radiiX,
+                radiiY);
+
+            return BuildFromCenters(
+                style,
+                centers,
+                radiiX,
+                radiiY,
+                outputPointCount);
+        }
+
         internal WetInkRibbonGeometry Build(
             IReadOnlyList<RealInkPoint> realPoints,
             IReadOnlyList<PredictedInkPoint> predictedPoints,
@@ -98,6 +140,21 @@ namespace Ink_Canvas.Ink.Native
                 radiiX,
                 radiiY);
 
+            return BuildFromCenters(
+                style,
+                centers,
+                radiiX,
+                radiiY,
+                outputPointCount);
+        }
+
+        private static WetInkRibbonGeometry BuildFromCenters(
+            InkStrokeStyleSnapshot style,
+            List<WetInkVertex> centers,
+            List<float> radiiX,
+            List<float> radiiY,
+            int outputPointCount)
+        {
             var outputCount = Math.Min(outputPointCount, centers.Count);
             if (outputCount == 0)
                 return Empty();
@@ -205,6 +262,46 @@ namespace Ink_Canvas.Ink.Native
             if (points == null)
                 return;
             for (var i = 0; i < points.Count; i++)
+            {
+                AppendPoint(
+                    points[i].X,
+                    points[i].Y,
+                    points[i].Pressure,
+                    style,
+                    centers,
+                    radiiX,
+                    radiiY);
+            }
+        }
+
+        private static void AppendRealPoints(
+            ReadOnlySpan<RealInkPoint> points,
+            InkStrokeStyleSnapshot style,
+            List<WetInkVertex> centers,
+            List<float> radiiX,
+            List<float> radiiY)
+        {
+            for (var i = 0; i < points.Length; i++)
+            {
+                AppendPoint(
+                    points[i].X,
+                    points[i].Y,
+                    points[i].Pressure,
+                    style,
+                    centers,
+                    radiiX,
+                    radiiY);
+            }
+        }
+
+        private static void AppendPredictedPoints(
+            ReadOnlySpan<PredictedInkPoint> points,
+            InkStrokeStyleSnapshot style,
+            List<WetInkVertex> centers,
+            List<float> radiiX,
+            List<float> radiiY)
+        {
+            for (var i = 0; i < points.Length; i++)
             {
                 AppendPoint(
                     points[i].X,

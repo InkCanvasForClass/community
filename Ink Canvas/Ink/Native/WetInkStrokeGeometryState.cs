@@ -91,7 +91,10 @@ namespace Ink_Canvas.Ink.Native
                 _style = snapshot.Style;
                 _sessionId = snapshot.SessionId;
                 _initialized = true;
-                var tail = _builder.Build(snapshot.RealPoints, snapshot.PredictedPoints, snapshot.Style);
+                var tail = _builder.Build(
+                    snapshot.RealPointsArray.AsSpan(0, snapshot.RealPoints.Count),
+                    snapshot.PredictedPointsArray.AsSpan(0, snapshot.PredictedPoints.Count),
+                    snapshot.Style);
                 return new WetInkGeometryUpdate(
                     Array.Empty<WetInkRibbonGeometry>(),
                     tail,
@@ -106,6 +109,8 @@ namespace Ink_Canvas.Ink.Native
             var stablePointCount = Math.Max(
                 0,
                 snapshot.RealPoints.Count - DynamicTailPointCount);
+            // 取 snapshot 内部数组的 Span，零分配切片（snapshot 在渲染线程只读）。
+            var realSpan = snapshot.RealPointsArray.AsSpan(0, snapshot.RealPoints.Count);
             while (stablePointCount - _fixedRealPointCount
                 >= FixedSegmentPointCount)
             {
@@ -118,14 +123,10 @@ namespace Ink_Canvas.Ink.Native
                 var contextEndIndex = Math.Min(
                     snapshot.RealPoints.Count,
                     endIndex + 1);
-                var segmentPoints = CopyRange(
-                    snapshot.RealPoints,
-                    startIndex,
-                    contextEndIndex - startIndex);
                 var outputPointCount = endIndex - startIndex;
                 _fixedSegments.Add(_builder.Build(
-                    segmentPoints,
-                    null,
+                    realSpan.Slice(startIndex, contextEndIndex - startIndex),
+                    default,
                     snapshot.Style,
                     outputPointCount));
                 _fixedRealPointCount = endIndex;
@@ -134,13 +135,9 @@ namespace Ink_Canvas.Ink.Native
             var tailStart = _fixedRealPointCount == 0
                 ? 0
                 : _fixedRealPointCount - 1;
-            var tailPoints = CopyRange(
-                snapshot.RealPoints,
-                tailStart,
-                snapshot.RealPoints.Count - tailStart);
             var dynamicTail = _builder.Build(
-                tailPoints,
-                snapshot.PredictedPoints,
+                realSpan.Slice(tailStart),
+                snapshot.PredictedPointsArray.AsSpan(0, snapshot.PredictedPoints.Count),
                 snapshot.Style);
 
             _lastRealPoints = CopyRange(
