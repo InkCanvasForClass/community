@@ -25,6 +25,14 @@ namespace Ink_Canvas.Ink.Native
         private static long _totalApplyTicks100;
         private static long _totalSampleCount;
 
+        // 单帧 controller Update 路径分段计时（毫秒，*1000 ticks）
+        private static long _maxUpdateAppendTicks1000;
+        private static long _maxUpdatePredictTicks1000;
+        private static long _maxUpdatePublishTicks1000;
+        private static long _maxUpdateTotalTicks1000;
+        private static long _lastUpdateTotalMs;
+        private static long _updateCount;
+
         // ---- per-input-kind 累计（与 RealtimeInkPerformanceMonitor.byInputKind 对齐）----
         private static readonly PerKindStats[] _perKind = new[]
         {
@@ -103,6 +111,39 @@ namespace Ink_Canvas.Ink.Native
         {
             Interlocked.Increment(ref _beginStrokeCount);
         }
+
+        /// <summary>
+        /// 记录一次 controller Update 的分段耗时（毫秒）。
+        /// appendMs = normalizer + Processor；predictMs = predictor.Build + ReplacePrediction；
+        /// publishMs = CreateNextSnapshot + mailbox.PublishSnapshot。
+        /// </summary>
+        public static void RecordUpdateSegments(
+            double appendMs, double predictMs, double publishMs, double totalMs)
+        {
+            Interlocked.Increment(ref _updateCount);
+            Interlocked.Exchange(ref _lastUpdateTotalMs, (long)(totalMs * 100));
+            UpdateMax(ref _maxUpdateAppendTicks1000, (long)(appendMs * 1000));
+            UpdateMax(ref _maxUpdatePredictTicks1000, (long)(predictMs * 1000));
+            UpdateMax(ref _maxUpdatePublishTicks1000, (long)(publishMs * 1000));
+            UpdateMax(ref _maxUpdateTotalTicks1000, (long)(totalMs * 1000));
+        }
+
+        private static void UpdateMax(ref long field, long value)
+        {
+            while (true)
+            {
+                var current = System.Threading.Volatile.Read(ref field);
+                if (value <= current || System.Threading.Interlocked.CompareExchange(ref field, value, current) == current)
+                    return;
+            }
+        }
+
+        public static double MaxUpdateAppendMs => _maxUpdateAppendTicks1000 / 1000.0;
+        public static double MaxUpdatePredictMs => _maxUpdatePredictTicks1000 / 1000.0;
+        public static double MaxUpdatePublishMs => _maxUpdatePublishTicks1000 / 1000.0;
+        public static double MaxUpdateTotalMs => _maxUpdateTotalTicks1000 / 1000.0;
+        public static double LastUpdateTotalMs => _lastUpdateTotalMs / 100.0;
+        public static long UpdateCount => _updateCount;
 
         public static void RecordEndStroke()
         {

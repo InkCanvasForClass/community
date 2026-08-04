@@ -152,7 +152,13 @@ namespace Ink_Canvas.Ink.Native
                     return false;
                 }
 
+                var updateStart = System.Diagnostics.Stopwatch.GetTimestamp();
+                var appendStart = updateStart;
                 var appended = AppendWithoutPublishing(session, newestFirstHistory);
+                var appendMs = System.Diagnostics.Stopwatch.GetTimestamp() - appendStart;
+                var predictStart = System.Diagnostics.Stopwatch.GetTimestamp();
+                var predictMs = 0L;
+                var publishMs = 0L;
                 if (predictionEnabled && appended > 0)
                 {
                     // 预测是 best-effort：任何异常都静默跳过本帧预测（保留真实点），
@@ -166,21 +172,44 @@ namespace Ink_Canvas.Ink.Native
                     {
                         // best-effort prediction; real points are still appended and published below.
                     }
+                    predictMs = System.Diagnostics.Stopwatch.GetTimestamp() - predictStart;
+                    var publishStart = System.Diagnostics.Stopwatch.GetTimestamp();
                     PublishSnapshot(session);
+                    publishMs = System.Diagnostics.Stopwatch.GetTimestamp() - publishStart;
+                    RecordUpdateSegments(appendMs, predictMs, publishMs, System.Diagnostics.Stopwatch.GetTimestamp() - updateStart);
                     return true;
                 }
 
                 if (!predictionEnabled && session.PredictedPoints.Count > 0)
                 {
                     session.ReplacePrediction(Array.Empty<PredictedInkPoint>());
+                    predictMs = System.Diagnostics.Stopwatch.GetTimestamp() - predictStart;
+                    var publishStart = System.Diagnostics.Stopwatch.GetTimestamp();
                     PublishSnapshot(session);
+                    publishMs = System.Diagnostics.Stopwatch.GetTimestamp() - publishStart;
+                    RecordUpdateSegments(appendMs, predictMs, publishMs, System.Diagnostics.Stopwatch.GetTimestamp() - updateStart);
                     return true;
                 }
 
                 if (appended > 0)
+                {
+                    var publishStart = System.Diagnostics.Stopwatch.GetTimestamp();
                     PublishSnapshot(session);
+                    publishMs = System.Diagnostics.Stopwatch.GetTimestamp() - publishStart;
+                    RecordUpdateSegments(appendMs, 0, publishMs, System.Diagnostics.Stopwatch.GetTimestamp() - updateStart);
+                }
                 return appended > 0;
             }
+        }
+
+        private static void RecordUpdateSegments(long appendTicks, long predictTicks, long publishTicks, long totalTicks)
+        {
+            var freq = System.Diagnostics.Stopwatch.Frequency;
+            NativeInkPerfProbe.RecordUpdateSegments(
+                appendTicks * 1000.0 / freq,
+                predictTicks * 1000.0 / freq,
+                publishTicks * 1000.0 / freq,
+                totalTicks * 1000.0 / freq);
         }
 
         public bool ReplacePrediction(
