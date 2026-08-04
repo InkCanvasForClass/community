@@ -16,6 +16,7 @@ namespace Ink_Canvas.Ink.Native
         private const int WmMouseMove = 0x0200;
         private const int WmLeftButtonDown = 0x0201;
         private const int WmLeftButtonUp = 0x0202;
+        private const int WmInput = 0x00FF;
         private const uint MouseKeyLeftButton = 0x0001;
         private const uint PointerFlagInContact = 0x00000004;
         private const uint PointerFlagSecondButton = 0x00000020;
@@ -37,6 +38,15 @@ namespace Ink_Canvas.Ink.Native
         private const int MaximumHistoryEntries = 4096;
         private const int MaximumUpdateHistoryEntries = 128;
 
+        // ---- RawInput (WM_INPUT) 鼠标高频采样 ----
+        private const uint RidInput = 0x10000003;
+        private const uint RimTypeMouse = 0;
+        private const ushort RiMouseLeftButtonDown = 0x0001;
+        private const ushort RiMouseLeftButtonUp = 0x0002;
+        private const uint RidDeviceInputSink = 0x00000100; // RIDEV_INPUTSINK
+        private const ushort HIDUsagePageGenericDesktop = 0x01;
+        private const ushort HIDUsageMouse = 0x02;
+
         private readonly HwndSource _source;
         private readonly NativePointerInputHandler _handler;
         private readonly Dictionary<uint, NativeInkInputKind> _activePointerKinds = new Dictionary<uint, NativeInkInputKind>();
@@ -45,6 +55,20 @@ namespace Ink_Canvas.Ink.Native
         private bool _mouseInContact;
         private uint _mouseFrameId;
         private bool _disposed;
+        // RawInput 鼠标：注册成功时 ink 走 WM_INPUT（设备原生采样率），
+        // legacy WM_MOUSEMOVE 只负责"是否阻止 WPF 处理"，避免双墨迹/双擦除。
+        private bool _rawMouseActive;
+        // WM_INPUT Down 判定为"被 ink 消耗"（路由 Ink/Erase）时置位，
+        // 让紧随其后的 WM_LBUTTONDOWN 阻止 WPF 处理该按下。
+        private bool _rawMouseDownConsumed;
+        // 诊断：raw vs legacy 鼠标 sample 计数（供 RealtimeInkDebugLive.json）。
+        private long _rawMouseSampleCount;
+        private long _legacyMouseSampleCount;
+        private int _rawMouseRegisterError;
+        public long RawMouseSampleCount => System.Threading.Volatile.Read(ref _rawMouseSampleCount);
+        public long LegacyMouseSampleCount => System.Threading.Volatile.Read(ref _legacyMouseSampleCount);
+        public bool RawMouseActive => _rawMouseActive;
+        public int RawMouseRegisterError => System.Threading.Volatile.Read(ref _rawMouseRegisterError);
 
         public NativePointerInputSource(
             HwndSource source,
@@ -59,6 +83,43 @@ namespace Ink_Canvas.Ink.Native
             _dpiScaleX = dpiScaleX;
             _dpiScaleY = dpiScaleY;
             _source.AddHook(WndProc);
+            TryRegisterRawMouse(source.Handle);
+        }
+
+        /// <summary>
+        /// 注册 RawInput 鼠标（RIDEV_INPUTSINK，不抑制 legacy 鼠标消息以保留 WPF UI 交互）。
+        /// 注册失败静默回退到 WM_MOUSEMOVE 路径。
+        /// </summary>
+        private void TryRegisterRawMouse(IntPtr hwnd)
+        {
+            try
+            {
+                var device = new RawInputDevice
+                {
+                    UsagePage = HIDUsagePageGenericDesktop,
+                    Usage = HIDUsageMouse,
+                    Flags = RidDeviceInputSink,
+                    Target = hwnd
+                };
+                var cbSize = (uint)Marshal.SizeOf<RawInputDevice>();
+                var result = RegisterRawInputDevices(new[] { device }, 1, cbSize);
+                if (result)
+                {
+                    _rawMouseActive = true;
+                    System.Diagnostics.Debug.WriteLine($"[WetInk] RawInput mouse registered (cbSize={cbSize}, hwnd=0x{hwnd.ToInt64():X})");
+                }
+                else
+                {
+                    var error = Marshal.GetLastWin32Error();
+                    _rawMouseRegisterError = error;
+                    System.Diagnostics.Debug.WriteLine($"[WetInk] RegisterRawInputDevices failed: Win32 {error}, cbSize={cbSize}, hwnd=0x{hwnd.ToInt64():X}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _rawMouseActive = false;
+                System.Diagnostics.Debug.WriteLine($"[WetInk] RegisterRawInputDevices threw: {ex.Message}");
+            }
         }
 
         public void UpdateDpi(double dpiScaleX, double dpiScaleY)
@@ -102,14 +163,41 @@ namespace Ink_Canvas.Ink.Native
                     DispatchCaptureLost(wParam, ref handled);
                     break;
                 case WmLeftButtonDown:
+                    if (_rawMouseActive && !IsPromotedPenOrTouchMouse())
+                    {
+                        // ink 由 WM_INPUT Down 处理；这里按该 down 是否被 ink 消耗决定是否阻止 WPF。
+                        handled = _rawMouseDownConsumed;
+                        _mouseInContact = true;
+                        break;
+                    }
                     DispatchMouse(hwnd, wParam, lParam, NativePointerMessageKind.Down, ref handled);
                     break;
                 case WmMouseMove:
                     if (_mouseInContact || (LowWord(wParam) & MouseKeyLeftButton) != 0)
+                    {
+                        if (_rawMouseActive && !IsPromotedPenOrTouchMouse())
+                        {
+                            // 绘制期间阻止 WPF 处理 legacy move（防双墨迹/双擦除）；
+                            // ink 本身由 WM_INPUT Update 产生。
+                            handled = _mouseInContact;
+                            break;
+                        }
                         DispatchMouse(hwnd, wParam, lParam, NativePointerMessageKind.Update, ref handled);
+                    }
                     break;
                 case WmLeftButtonUp:
+                    if (_rawMouseActive && !IsPromotedPenOrTouchMouse())
+                    {
+                        handled = _rawMouseDownConsumed;
+                        _rawMouseDownConsumed = false;
+                        _mouseInContact = false;
+                        break;
+                    }
                     DispatchMouse(hwnd, wParam, lParam, NativePointerMessageKind.Up, ref handled);
+                    break;
+                case WmInput:
+                    if (_rawMouseActive && !IsPromotedPenOrTouchMouse())
+                        DispatchRawMouse(hwnd, lParam, ref handled);
                     break;
             }
 
@@ -174,6 +262,107 @@ namespace Ink_Canvas.Ink.Native
                 true));
         }
 
+        /// <summary>
+        /// 当前鼠标消息是否实为「笔/触摸提升」的伪鼠标消息（GetMessageExtraInfo 签名位）。
+        /// 这类消息继续走 WM_MOUSEMOVE（raw mouse 只服务真实鼠标，避免笔/触摸双处理）。
+        /// </summary>
+        private static bool IsPromotedPenOrTouchMouse()
+        {
+            return GetPromotedPointerKind().HasValue;
+        }
+
+        /// <summary>
+        /// 处理 WM_INPUT（RawInput 鼠标）：从设备原生采样率取按钮状态与光标位置，
+        /// 生成与 WM_MOUSEMOVE 相同的 batch 交给 handler。
+        /// </summary>
+        private void DispatchRawMouse(IntPtr hwnd, IntPtr lParam, ref bool handled)
+        {
+            try
+            {
+                uint size = 0;
+                if (GetRawInputData(lParam, RidInput, IntPtr.Zero, ref size, (uint)Marshal.SizeOf<RawInputHeader>()) != 0
+                    || size == 0 || size > 1024)
+                {
+                    return;
+                }
+
+                var buffer = Marshal.AllocHGlobal((int)size);
+                try
+                {
+                    var read = GetRawInputData(lParam, RidInput, buffer, ref size, (uint)Marshal.SizeOf<RawInputHeader>());
+                    if (read != size)
+                        return;
+
+                    var raw = Marshal.PtrToStructure<RawInput>(buffer);
+                    if (raw.Header.Type != RimTypeMouse)
+                        return;
+
+                    var buttonFlags = (ushort)(raw.Mouse.Buttons & 0xFFFF);
+                    var leftDown = (buttonFlags & RiMouseLeftButtonDown) != 0;
+                    var leftUp = (buttonFlags & RiMouseLeftButtonUp) != 0;
+
+                    NativePointerMessageKind messageKind;
+                    if (leftDown)
+                        messageKind = NativePointerMessageKind.Down;
+                    else if (leftUp)
+                        messageKind = NativePointerMessageKind.Up;
+                    else if (_mouseInContact)
+                        messageKind = NativePointerMessageKind.Update;
+                    else
+                        return; // 无接触的移动不产生 ink
+
+                    // 绝对坐标：GetCursorPos（屏幕）→ ScreenToClient（客户区）。
+                    var point = new NativePoint(0, 0);
+                    if (!GetCursorPos(ref point) || !ScreenToClient(hwnd, ref point))
+                        return;
+
+                    if (messageKind == NativePointerMessageKind.Down)
+                        _mouseInContact = true;
+                    else if (messageKind == NativePointerMessageKind.Up)
+                        _mouseInContact = false;
+
+                    var flags = messageKind == NativePointerMessageKind.Up
+                        ? NativeInkSampleFlags.Primary
+                        : NativeInkSampleFlags.InContact | NativeInkSampleFlags.Primary;
+                    var sample = new RawInkSample(
+                        MousePointerId,
+                        NativeInkInputKind.Mouse,
+                        point.X / _dpiScaleX,
+                        point.Y / _dpiScaleY,
+                        0.5f,
+                        false,
+                        NativePointerTimestampConverter.FromCurrentStopwatch(),
+                        ++_mouseFrameId,
+                        flags);
+
+                    var consumed = _handler(new NativePointerInputBatch(
+                        MousePointerId,
+                        NativeInkInputKind.Mouse,
+                        messageKind,
+                        new[] { sample },
+                        false,
+                        false,
+                        true));
+
+                    System.Threading.Interlocked.Increment(ref _rawMouseSampleCount);
+                    handled = consumed;
+                    if (messageKind == NativePointerMessageKind.Down)
+                        _rawMouseDownConsumed = consumed;
+                    else if (messageKind == NativePointerMessageKind.Up)
+                        _rawMouseDownConsumed = false;
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(buffer);
+                }
+            }
+            catch (Exception)
+            {
+                // 不因 raw mouse 处理失败破坏 WPF message loop。
+                handled = false;
+            }
+        }
+
         private void DispatchMouse(
             IntPtr hwnd,
             IntPtr wParam,
@@ -219,6 +408,7 @@ namespace Ink_Canvas.Ink.Native
                 (LowWord(wParam) & 0x0002) != 0,
                 promoted,
                 true));
+            System.Threading.Interlocked.Increment(ref _legacyMouseSampleCount);
         }
 
         private bool TryReadPenBatch(
@@ -597,6 +787,29 @@ namespace Ink_Canvas.Ink.Native
         [DllImport("user32.dll")]
         private static extern int GetMessageTime();
 
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool RegisterRawInputDevices(
+            [In, MarshalAs(UnmanagedType.LPArray)] RawInputDevice[] pRawInputDevices,
+            uint uiNumDevices,
+            uint cbSize);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern uint GetRawInputData(
+            IntPtr hRawInput,
+            uint uiCommand,
+            IntPtr pData,
+            ref uint pcbSize,
+            uint cbSizeHeader);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool GetCursorPos(ref NativePoint point);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool ScreenToClient(IntPtr hWnd, ref NativePoint point);
+
         private enum PointerInputType : uint
         {
             Touch = 2,
@@ -668,6 +881,42 @@ namespace Ink_Canvas.Ink.Native
             public NativeRect ContactRaw;
             public uint Orientation;
             public uint Pressure;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RawInputDevice
+        {
+            public ushort UsagePage;
+            public ushort Usage;
+            public uint Flags;
+            public IntPtr Target;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RawInputHeader
+        {
+            public uint Type;
+            public uint Size;
+            public IntPtr Device;
+            public IntPtr WParam;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RawMouse
+        {
+            public ushort Flags;
+            public uint Buttons;
+            public uint RawButtons;
+            public int LastX;
+            public int LastY;
+            public uint ExtraInformation;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct RawInput
+        {
+            public RawInputHeader Header;
+            public RawMouse Mouse;
         }
     }
 }

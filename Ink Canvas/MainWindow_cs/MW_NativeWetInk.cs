@@ -472,6 +472,14 @@ namespace Ink_Canvas
         {
             try
             {
+                // 同步 raw-mouse 诊断（供 Live JSON 判断 WM_INPUT 是否生效）。
+                if (_nativePointerInputSource != null)
+                    Ink_Canvas.Ink.Native.NativeInkPerfProbe.UpdateRawMouseDiagnostics(
+                        _nativePointerInputSource.RawMouseActive,
+                        _nativePointerInputSource.RawMouseSampleCount,
+                        _nativePointerInputSource.LegacyMouseSampleCount,
+                        _nativePointerInputSource.RawMouseRegisterError);
+
                 if (!ShouldAcceptPointerBatch(batch))
                     return false;
 

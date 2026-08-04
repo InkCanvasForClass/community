@@ -43,6 +43,26 @@ namespace Ink_Canvas.Ink.Native
 
         private static readonly object _perKindLock = new object();
 
+        // 鼠标 raw/legacy 采样诊断（由 MW_NativeWetInk 定期同步自 NativePointerInputSource）
+        private static long _rawMouseSampleCount;
+        private static long _legacyMouseSampleCount;
+        private static int _rawMouseActive;
+        private static int _rawMouseRegisterError;
+
+        /// <summary>由装配层把 NativePointerInputSource 的 raw-mouse 诊断同步进来。</summary>
+        public static void UpdateRawMouseDiagnostics(bool rawActive, long rawCount, long legacyCount, int registerError)
+        {
+            Volatile.Write(ref _rawMouseActive, rawActive ? 1 : 0);
+            Interlocked.Exchange(ref _rawMouseSampleCount, rawCount);
+            Interlocked.Exchange(ref _legacyMouseSampleCount, legacyCount);
+            Interlocked.Exchange(ref _rawMouseRegisterError, registerError);
+        }
+
+        public static bool RawMouseActive => Volatile.Read(ref _rawMouseActive) != 0;
+        public static long RawMouseSampleCount => Volatile.Read(ref _rawMouseSampleCount);
+        public static long LegacyMouseSampleCount => Volatile.Read(ref _legacyMouseSampleCount);
+        public static int RawMouseRegisterError => Volatile.Read(ref _rawMouseRegisterError);
+
         internal sealed class PerKindStats
         {
             public long InputEventCount;
