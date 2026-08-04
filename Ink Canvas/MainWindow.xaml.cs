@@ -765,6 +765,8 @@ namespace Ink_Canvas
             inkCanvas.MouseRightButtonUp += InkCanvas_MouseRightButtonUp;
             // 注册橡皮擦操作结束事件
             inkCanvas.StylusUp += inkCanvas_StylusUp;
+            // 原生湿墨迹管线仅在 Ink 模式下挂载；以编辑模式为触发锚点。
+            inkCanvas.EditingModeChanged += inkCanvas_EditingModeChanged;
 
             // 初始化第一页Canvas
             var firstCanvas = new System.Windows.Controls.Canvas();
@@ -1342,6 +1344,11 @@ namespace Ink_Canvas
         {
             var inkCanvas1 = sender as InkCanvas;
             if (inkCanvas1 == null) return;
+
+            // 原生湿墨迹管线仅在 Ink 批注工具下挂载。
+            // 请求 Ink 时物理模式被映射为 None，所以靠物理 EditingMode 区分不出；
+            // 必须按逻辑工具（_currentToolMode 解析）判断。
+            SyncNativeWetInkPipelineWithLogicalTool();
 
             NotifyPluginPenModeChanged(inkCanvas1.EditingMode);
 
@@ -3322,6 +3329,12 @@ namespace Ink_Canvas
                 // 执行模式切换
                 inkCanvas.EditingMode = physicalMode;
                 EnsureNativePenPhysicalEditingMode();
+
+                // 不在此手动启停原生湿墨迹管线：请求 Ink 时物理模式被映射为 None，
+                // 此刻读物理 EditingMode 无法区分 Ink 笔与非 Ink 工具。
+                // 真正的启停由 inkCanvas_EditingModeChanged（同步逻辑工具）驱动，
+                // 而 UpdateCurrentToolMode 被 PenIcon_Click 等路径在之后调用，
+                // 那里会通过同样的 SyncNativeWetInkPipelineWithLogicalTool 兜底。
 
                 // Hotkeys key off the requested logical mode. Physical None is used for native Pen freehand.
                 bool isMouseMode = newMode == InkCanvasEditingMode.None;

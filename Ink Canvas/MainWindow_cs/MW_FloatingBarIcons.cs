@@ -6144,6 +6144,9 @@ namespace Ink_Canvas
         private void UpdateCurrentToolMode(string mode)
         {
             _currentToolMode = NormalizeToolModeForFreeze(mode);
+            // 兜底：改变 _currentToolMode 之后若 EditingMode 之前恰好切到 None
+            // 不会触发 EditingModeChanged，这里手动同步一次原生湿墨迹管线状态。
+            SyncNativeWetInkPipelineWithLogicalTool();
             UpdateBoardRoamingButtonState();
 
             // Issue #285 更小批注栏：根据当前工具模式刷新迷你栏显示状态

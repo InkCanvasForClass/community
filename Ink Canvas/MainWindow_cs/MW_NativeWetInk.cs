@@ -49,7 +49,7 @@ namespace Ink_Canvas
         // Dispatcher 延迟探针节流。
         private long _lastDispatcherProbeMs;
 
-        private void TryStartNativeWetInkPipeline()
+        internal void TryStartNativeWetInkPipeline()
         {
             if (Settings?.Canvas?.UseLegacyWetInk == true)
             {
@@ -58,6 +58,12 @@ namespace Ink_Canvas
                     LogHelper.LogType.Event);
                 return;
             }
+
+            // 启动入口由上层（SetCurrentToolMode）按请求的逻辑模式请求 Ink 时调用；
+            // 此处只做幂等/失败守卫，不要再读取物理 EditingMode，
+            // 因为 Ink 请求已经被映射成 None 再调进来。
+            if (inkCanvas == null)
+                return;
 
             if (_nativeWetInkStarted || _nativeWetInkDisabled)
                 return;
@@ -130,6 +136,9 @@ namespace Ink_Canvas
 
         private void ShutdownNativeWetInkPipeline()
         {
+            if (!_nativeWetInkStarted && _wetInkWindowHost == null && _nativePointerInputSource == null)
+                return;
+
             UnwireNativeWetInkGeometryListeners();
 
             try { _wpfRenderFrameFence?.CancelAll(); }
@@ -1371,6 +1380,22 @@ namespace Ink_Canvas
 
             var scale = GetDpiScale();
             return (scale > 0 ? scale : 1.0, scale > 0 ? scale : 1.0);
+        }
+
+        /// <summary>
+        /// 让原生湿墨迹管线与当前逻辑工具保持一致。
+        /// 仅在 Ink 批注工具（即 ResolveLogicalInkTool 为 Pen）下挂载；其他工具
+        /// （光标、橡皮擦、选择、形状、白板漫游、PPT 模式等）均卸载，使 WPF
+        /// 控件（浮动栏、白板边栏、PPT 控件、设置弹窗）恢复原生输入。
+        /// </summary>
+        internal void SyncNativeWetInkPipelineWithLogicalTool()
+        {
+            if (inkCanvas == null) return;
+            var tool = ResolveLogicalInkTool();
+            if (tool == LogicalInkTool.Pen)
+                TryStartNativeWetInkPipeline();
+            else
+                ShutdownNativeWetInkPipeline();
         }
 
         /// <summary>
