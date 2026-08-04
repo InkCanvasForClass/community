@@ -110,8 +110,16 @@ namespace Ink_Canvas.Ink.Native
                 var appended = AppendWithoutPublishing(session, newestFirstHistory);
                 if (predictionEnabled && appended > 0 && session.State == NativeInkSessionState.Active)
                 {
-                    var predicted = InkTailPredictor.Build(session.RealPoints, session.TailSmoother);
-                    session.ReplacePrediction(predicted);
+                    // best-effort prediction：异常不取消整笔。
+                    try
+                    {
+                        var predicted = InkTailPredictor.Build(session.RealPoints, session.TailSmoother);
+                        session.ReplacePrediction(predicted);
+                    }
+                    catch
+                    {
+                        // best-effort; real points are still appended and published below.
+                    }
                     PublishSnapshot(session);
                     return true;
                 }
@@ -147,8 +155,17 @@ namespace Ink_Canvas.Ink.Native
                 var appended = AppendWithoutPublishing(session, newestFirstHistory);
                 if (predictionEnabled && appended > 0)
                 {
-                    var predicted = InkTailPredictor.Build(session.RealPoints, session.TailSmoother);
-                    session.ReplacePrediction(predicted);
+                    // 预测是 best-effort：任何异常都静默跳过本帧预测（保留真实点），
+                    // 不让预测失败冒泡到输入处理层把整笔取消（与 Begin 路径一致）。
+                    try
+                    {
+                        var predicted = InkTailPredictor.Build(session.RealPoints, session.TailSmoother);
+                        session.ReplacePrediction(predicted);
+                    }
+                    catch
+                    {
+                        // best-effort prediction; real points are still appended and published below.
+                    }
                     PublishSnapshot(session);
                     return true;
                 }

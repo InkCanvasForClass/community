@@ -273,6 +273,9 @@ namespace Ink_Canvas.Ink.Native
 
     internal sealed class NativeInkSessionManager
     {
+        // 双字典：pointerId → session（pointing sessions）+ sessionId → session（含 retired 状态）。
+        // 拆分是必要的：End 后 _activeSessions 已 detach（同一 pointerId 可立即复笔），
+        // 但 retirement 回调仍要按 sessionId 找到该 session 标记退休+清理。
         private readonly Dictionary<uint, NativeInkSession> _activeSessions = new Dictionary<uint, NativeInkSession>();
         private readonly Dictionary<long, NativeInkSession> _sessionsById = new Dictionary<long, NativeInkSession>();
         private long _nextSessionId;

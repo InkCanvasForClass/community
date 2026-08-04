@@ -4,51 +4,25 @@ using System.Threading;
 
 namespace Ink_Canvas.Ink.Native
 {
+    /// <summary>
+    /// 把 NativeInkController 的 Update+Prediction 调用统一收口。
+    ///
+    /// 早期版本用独立 worker 线程做异步 Update；但 NativePointerInputSource.WndProc
+    /// 本身就在 UI 线程同步回调，worker 只是把同一线程的调用再搬去后台线程，
+    /// 额外引入 1 次线程切换 + 2 次锁 + 跨线程 mailbox 隔离，对端到端延迟是净负。
+    /// 现在改为同步执行：Enqueue 直接在调用线程跑 TryUpdateSessionWithPrediction，
+    /// FlushPointer/DiscardPointer/DiscardAll 退化为 no-op（没有在途异步更新可冲刷）。
+    /// </summary>
     internal sealed class NativePointerUpdatePump : IDisposable
     {
-        private sealed class PendingUpdate
-        {
-            public PendingUpdate(
-                uint pointerId,
-                long sessionId,
-                RawInkSample[] samplesNewestFirst,
-                bool predictionEnabled)
-            {
-                PointerId = pointerId;
-                SessionId = sessionId;
-                SamplesNewestFirst = samplesNewestFirst ?? throw new ArgumentNullException(nameof(samplesNewestFirst));
-                PredictionEnabled = predictionEnabled;
-            }
-
-            public uint PointerId { get; }
-            public long SessionId { get; }
-            public RawInkSample[] SamplesNewestFirst { get; }
-            public bool PredictionEnabled { get; }
-        }
-
         private readonly NativeInkController _controller;
         private readonly Action _signalWork;
-        private readonly AutoResetEvent _workEvent = new AutoResetEvent(false);
-        private readonly ManualResetEventSlim _idleEvent = new ManualResetEventSlim(true);
-        private readonly Dictionary<uint, PendingUpdate> _pendingUpdates = new Dictionary<uint, PendingUpdate>();
-        private readonly Thread _workerThread;
-        private readonly object _syncRoot = new object();
-
-        private bool _shutdownRequested;
         private bool _disposed;
-        private bool _hasActiveUpdate;
-        private uint _activePointerId;
 
         public NativePointerUpdatePump(NativeInkController controller, Action signalWork)
         {
             _controller = controller ?? throw new ArgumentNullException(nameof(controller));
             _signalWork = signalWork ?? throw new ArgumentNullException(nameof(signalWork));
-            _workerThread = new Thread(WorkerMain)
-            {
-                IsBackground = true,
-                Name = "ICC-NativePointerUpdatePump"
-            };
-            _workerThread.Start();
         }
 
         public void Enqueue(
@@ -62,169 +36,58 @@ namespace Ink_Canvas.Ink.Native
             if (samplesNewestFirst.Length == 0)
                 return;
 
-            lock (_syncRoot)
-            {
-                ThrowIfDisposed();
-                _pendingUpdates[pointerId] = new PendingUpdate(
+            ThrowIfDisposed();
+            // 同步执行：预测 + snapshot 构造 + mailbox publish 全在当前（UI）线程完成，
+            // 省去 worker 线程切换与跨线程 mailbox 隔离。
+            if (_controller.TryUpdateSessionWithPrediction(
                     pointerId,
                     sessionId,
                     samplesNewestFirst,
-                    predictionEnabled);
-                _idleEvent.Reset();
+                    predictionEnabled))
+            {
+                _signalWork();
             }
-
-            _workEvent.Set();
         }
 
+        /// <summary>
+        /// 同步路径下没有在途异步更新，保留该方法只为兼容既有调用方（抬笔/取消前冲刷）。
+        /// </summary>
         public void FlushPointer(uint pointerId)
         {
-            SpinWaitUntil(() =>
-            {
-                lock (_syncRoot)
-                {
-                    return !_pendingUpdates.ContainsKey(pointerId)
-                           && !(_hasActiveUpdate && _activePointerId == pointerId);
-                }
-            });
+            ThrowIfDisposed();
+            // no-op：无在途异步更新可冲刷。
         }
 
+        /// <summary>
+        /// 同步路径下没有在途异步更新，保留该方法只为兼容既有调用方。
+        /// </summary>
         public void DiscardPointer(uint pointerId)
         {
-            lock (_syncRoot)
-            {
-                if (_disposed)
-                    return;
-                _pendingUpdates.Remove(pointerId);
-                if (_pendingUpdates.Count == 0 && !_hasActiveUpdate)
-                    _idleEvent.Set();
-            }
+            ThrowIfDisposed();
+            // no-op：无在途异步更新可丢弃。
         }
 
+        /// <summary>
+        /// 同步路径下没有在途异步更新，保留该方法只为兼容既有调用方。
+        /// </summary>
         public void DiscardAll()
         {
-            lock (_syncRoot)
-            {
-                if (_disposed)
-                    return;
-                _pendingUpdates.Clear();
-                if (!_hasActiveUpdate)
-                    _idleEvent.Set();
-            }
+            ThrowIfDisposed();
+            // no-op：无在途异步更新可丢弃。
         }
 
+        /// <summary>
+        /// 同步路径下没有在途异步更新，保留该方法只为兼容既有调用方。
+        /// </summary>
         public void FlushAll()
         {
-            SpinWaitUntil(() =>
-            {
-                lock (_syncRoot)
-                {
-                    return _pendingUpdates.Count == 0 && !_hasActiveUpdate;
-                }
-            });
+            ThrowIfDisposed();
+            // no-op：无在途异步更新可冲刷。
         }
 
         public void Dispose()
         {
-            if (_disposed)
-                return;
             _disposed = true;
-
-            lock (_syncRoot)
-            {
-                _shutdownRequested = true;
-                _pendingUpdates.Clear();
-            }
-
-            _workEvent.Set();
-            if (_workerThread.IsAlive)
-                _workerThread.Join(TimeSpan.FromSeconds(3));
-            _workEvent.Dispose();
-            _idleEvent.Dispose();
-        }
-
-        private void WorkerMain()
-        {
-            while (true)
-            {
-                _workEvent.WaitOne();
-
-                while (true)
-                {
-                    PendingUpdate pending;
-                    lock (_syncRoot)
-                    {
-                        if (_shutdownRequested)
-                            return;
-                        if (!TryTakeOnePendingUpdate(out pending))
-                        {
-                            if (_pendingUpdates.Count == 0 && !_hasActiveUpdate)
-                                _idleEvent.Set();
-                            break;
-                        }
-                        _hasActiveUpdate = true;
-                        _activePointerId = pending.PointerId;
-                    }
-
-                    try
-                    {
-                        if (_controller.TryUpdateSessionWithPrediction(
-                                pending.PointerId,
-                                pending.SessionId,
-                                pending.SamplesNewestFirst,
-                                pending.PredictionEnabled))
-                        {
-                            _signalWork();
-                        }
-                    }
-                    catch
-                    {
-                        // UI thread owns user-visible failure handling around pointer input.
-                        // Background update failures are best-effort suppressed here; the
-                        // next foreground boundary (cancel/end/device reset) will reconcile.
-                    }
-                    finally
-                    {
-                        lock (_syncRoot)
-                        {
-                            _hasActiveUpdate = false;
-                            _activePointerId = 0;
-                            if (_pendingUpdates.Count == 0)
-                                _idleEvent.Set();
-                        }
-                    }
-                }
-            }
-        }
-
-        private bool TryTakeOnePendingUpdate(out PendingUpdate pending)
-        {
-            uint key;
-            using (var enumerator = _pendingUpdates.GetEnumerator())
-            {
-                if (!enumerator.MoveNext())
-                {
-                    pending = null;
-                    return false;
-                }
-
-                var pair = enumerator.Current;
-                key = pair.Key;
-                pending = pair.Value;
-            }
-
-            _pendingUpdates.Remove(key);
-            return true;
-        }
-
-        private void SpinWaitUntil(Func<bool> predicate)
-        {
-            ThrowIfDisposed();
-            while (!predicate())
-            {
-                if (_shutdownRequested)
-                    return;
-                _idleEvent.Wait(5);
-            }
         }
 
         private void ThrowIfDisposed()

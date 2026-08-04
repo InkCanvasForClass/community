@@ -42,6 +42,10 @@ namespace Ink_Canvas
         private DependencyPropertyChangedEventHandler _nativeWetInkIsVisibleChangedHandler;
         private readonly Dictionary<long, DispatcherTimer> _nativePauseStraightenTimers =
             new Dictionary<long, DispatcherTimer>();
+        // B15: inkCanvas 在窗口坐标系下的原点缓存。全屏布局下通常恒为 (0,0)，
+        // 缓存后高频率 Update 直接返回原始 samples 数组，避免每帧 new RawInkSample[]。
+        private Point _inkCanvasOriginInWindow = new Point(double.NaN, double.NaN);
+        private bool _inkCanvasOriginCached;
 
         private void TryStartNativeWetInkPipeline()
         {
@@ -227,6 +231,8 @@ namespace Ink_Canvas
 
             _nativeCoordinateGeneration++;
             UpdateNativeWetInkTarget();
+            // B15: 原点可能随 DPI 缩放变化，失效缓存。
+            _inkCanvasOriginCached = false;
         }
 
         private void UpdateNativeWetInkTarget()
@@ -237,6 +243,8 @@ namespace Ink_Canvas
             try
             {
                 _wetInkWindowHost.UpdateTarget(BuildWetInkTargetSnapshot());
+                // B15: 窗口位置/尺寸变化会影响 inkCanvas 在窗口内的原点，失效缓存。
+                _inkCanvasOriginCached = false;
             }
             catch (Exception ex)
             {
@@ -550,6 +558,9 @@ namespace Ink_Canvas
             if (!_nativeCapturedRoutes.TryGetValue(batch.PointerId, out var captured))
                 return false;
 
+            var inputStartTicks = System.Diagnostics.Stopwatch.GetTimestamp();
+            var nativeKindIndex = (int)batch.InputKind; // Pen=0, Touch=1, Mouse=2
+
             var facts = CreatePointerFacts(batch);
             var context = BuildCapturedRouteContext(captured, batch.InputKind);
             var decision = NativeInkInputRouter.DecideCaptured(facts, context, captured);
@@ -585,6 +596,13 @@ namespace Ink_Canvas
                         ToInkCanvasSampleArray(batch.SamplesNewestFirstArray),
                         predictionEnabled);
                     ResetPauseStraightenTimerForPointer(batch.PointerId);
+
+                    // 记录新墨迹 input 事件（按 batch.InputKind 分桶）。
+                    var inputElapsedMs = (System.Diagnostics.Stopwatch.GetTimestamp() - inputStartTicks) * 1000.0
+                        / System.Diagnostics.Stopwatch.Frequency;
+                    var rawCount = batch.SamplesNewestFirst?.Count ?? 0;
+                    Ink_Canvas.Ink.Native.NativeInkPerfProbe.RecordInputEvent(
+                        nativeKindIndex, rawCount, rawCount, inputElapsedMs);
                 }
             }
 
@@ -866,6 +884,7 @@ namespace Ink_Canvas
             if (windowSamples == null || windowSamples.Count == 0)
                 return windowSamples ?? Array.Empty<RawInkSample>();
 
+            // 低频路径（Begin/End）：拷贝一份数组再走公共转换，保持不可变语义。
             var array = new RawInkSample[windowSamples.Count];
             for (var i = 0; i < windowSamples.Count; i++)
                 array[i] = windowSamples[i];
@@ -877,34 +896,44 @@ namespace Ink_Canvas
             if (windowSamples == null || windowSamples.Length == 0 || inkCanvas == null)
                 return windowSamples ?? Array.Empty<RawInkSample>();
 
-            Point inkOriginInWindow;
-            try
+            // B15: 缓存 inkCanvas 原点，避免每帧 TransformToAncestor。
+            if (!_inkCanvasOriginCached)
             {
-                inkOriginInWindow = inkCanvas.TransformToAncestor(this)
-                    .Transform(new Point(0, 0));
+                try
+                {
+                    _inkCanvasOriginInWindow = inkCanvas.TransformToAncestor(this)
+                        .Transform(new Point(0, 0));
+                    _inkCanvasOriginCached = true;
+                }
+                catch
+                {
+                    // 布局未就绪时退回逐帧转换。
+                    _inkCanvasOriginInWindow = new Point(double.NaN, double.NaN);
+                    _inkCanvasOriginCached = false;
+                }
             }
-            catch
+
+            // 全屏布局下 inkCanvas 通常就是窗口原点：零分配直接返回原数组引用。
+            // 调用方（controller）同步执行、只读消费，不会异步持有导致悬挂。
+            if (!double.IsNaN(_inkCanvasOriginInWindow.X)
+                && Math.Abs(_inkCanvasOriginInWindow.X) < 0.01
+                && Math.Abs(_inkCanvasOriginInWindow.Y) < 0.01)
             {
-                var fallback = new RawInkSample[windowSamples.Length];
-                Array.Copy(windowSamples, fallback, fallback.Length);
-                return fallback;
+                return windowSamples;
             }
+
+            if (double.IsNaN(_inkCanvasOriginInWindow.X))
+                return windowSamples;
 
             var converted = new RawInkSample[windowSamples.Length];
-            if (Math.Abs(inkOriginInWindow.X) < 0.01 && Math.Abs(inkOriginInWindow.Y) < 0.01)
-            {
-                Array.Copy(windowSamples, converted, converted.Length);
-                return converted;
-            }
-
             for (var i = 0; i < windowSamples.Length; i++)
             {
                 var s = windowSamples[i];
                 converted[i] = new RawInkSample(
                     s.PointerId,
                     s.InputKind,
-                    s.X - inkOriginInWindow.X,
-                    s.Y - inkOriginInWindow.Y,
+                    s.X - _inkCanvasOriginInWindow.X,
+                    s.Y - _inkCanvasOriginInWindow.Y,
                     s.Pressure,
                     s.HasPressure,
                     s.TimestampMicroseconds,

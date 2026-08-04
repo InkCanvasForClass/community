@@ -318,6 +318,7 @@ namespace Ink_Canvas.Ink.Native
             }
 
             WetInkApplyResult result;
+            var applyStartTicks = System.Diagnostics.Stopwatch.GetTimestamp();
             try
             {
                 result = _renderer.Apply(batch);
@@ -396,6 +397,27 @@ namespace Ink_Canvas.Ink.Native
             {
                 result = WetInkApplyResult.Failed(ex);
             }
+
+            // 记录 Apply 耗时（毫秒）+ 本批样本数/session 数，供 RealtimeInkDebugLive.json 输出。
+            try
+            {
+                var applyElapsedMs = (System.Diagnostics.Stopwatch.GetTimestamp() - applyStartTicks) * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+                var sampleCount = batch?.OrderedItems?.Count ?? 0;
+                var sessionCount = batch?.RenderSnapshots?.Count ?? 0;
+                NativeInkPerfProbe.RecordApply(applyElapsedMs, sampleCount, sessionCount);
+
+                // Render 端按 inputKind 累计 redraw：Snapshot 不携带 InputKind，
+                // 兜底按 Mouse 桶（多数场景都是 Mouse/Touch Ink）。inputKind 精确分桶
+                // 靠 UI 线程 RecordInputEvent 拿到 batch.InputKind。
+                NativeInkPerfProbe.RecordRedraw(2, applyElapsedMs, forceRedraw: false, committed: false);
+            }
+            catch
+            {
+                // never throw from the probe path
+            }
+
+            // 实时刷新 Live JSON（Debug log 开启时），让用户能看到 new 帧的 nativeWetInk 指标。
+            Helpers.RealtimeInkPerformanceMonitor.TickLiveStatus();
 
             HandleApplyResult(result);
         }
