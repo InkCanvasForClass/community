@@ -273,11 +273,13 @@ namespace Ink_Canvas.Ink.Native
 
     internal sealed class NativeInkSessionManager
     {
+        // 单字典：pointerId → session。Begin/Update/End/Cancel 全走 pointerId，
+        // 不再维护 sessionId 二级索引，避免每次 Begin/Cancel 两次 hash 写。
+        // 低频的按 sessionId 查询（退休栅栏/拉直）改为遍历，语义不变。
         private readonly Dictionary<uint, NativeInkSession> _activeSessions = new Dictionary<uint, NativeInkSession>();
-        private readonly Dictionary<long, NativeInkSession> _sessionsById = new Dictionary<long, NativeInkSession>();
         private long _nextSessionId;
 
-        public IReadOnlyCollection<NativeInkSession> Sessions => _sessionsById.Values;
+        public IReadOnlyCollection<NativeInkSession> Sessions => _activeSessions.Values;
 
         public NativeInkSession Begin(
             uint pointerId,
@@ -289,7 +291,6 @@ namespace Ink_Canvas.Ink.Native
             if (_activeSessions.TryGetValue(pointerId, out var previous))
             {
                 previous.Cancel();
-                _sessionsById.Remove(previous.SessionId);
             }
 
             var session = new NativeInkSession(
@@ -300,15 +301,26 @@ namespace Ink_Canvas.Ink.Native
                 new InkSampleProcessor(processorSettings),
                 startedAtMicroseconds);
             _activeSessions[pointerId] = session;
-            _sessionsById[session.SessionId] = session;
             return session;
         }
 
         public bool TryGet(uint pointerId, out NativeInkSession session) =>
             _activeSessions.TryGetValue(pointerId, out session);
 
-        public bool TryGetSession(long sessionId, out NativeInkSession session) =>
-            _sessionsById.TryGetValue(sessionId, out session);
+        public bool TryGetSession(long sessionId, out NativeInkSession session)
+        {
+            foreach (var pair in _activeSessions)
+            {
+                if (pair.Value.SessionId == sessionId)
+                {
+                    session = pair.Value;
+                    return true;
+                }
+            }
+
+            session = null;
+            return false;
+        }
 
         public bool DetachActivePointer(uint pointerId, NativeInkSession expectedSession)
         {
@@ -328,32 +340,33 @@ namespace Ink_Canvas.Ink.Native
                 return false;
             session.Cancel();
             _activeSessions.Remove(pointerId);
-            _sessionsById.Remove(session.SessionId);
             return true;
         }
 
         public void RemoveCompleted(long sessionId)
         {
-            if (!_sessionsById.TryGetValue(sessionId, out var session)
-                || (session.State != NativeInkSessionState.Completed && session.State != NativeInkSessionState.Canceled))
+            // 遍历中不能直接 Remove（会抛 InvalidOperationException），先找到 key 再删。
+            uint? keyToRemove = null;
+            foreach (var pair in _activeSessions)
             {
-                return;
+                if (pair.Value.SessionId == sessionId
+                    && (pair.Value.State == NativeInkSessionState.Completed
+                        || pair.Value.State == NativeInkSessionState.Canceled))
+                {
+                    keyToRemove = pair.Key;
+                    break;
+                }
             }
 
-            _sessionsById.Remove(sessionId);
-            if (_activeSessions.TryGetValue(session.PointerId, out var active)
-                && ReferenceEquals(active, session))
-            {
-                _activeSessions.Remove(session.PointerId);
-            }
+            if (keyToRemove.HasValue)
+                _activeSessions.Remove(keyToRemove.Value);
         }
 
         public void CancelAll()
         {
-            foreach (var session in _sessionsById.Values)
+            foreach (var session in _activeSessions.Values)
                 session.Cancel();
             _activeSessions.Clear();
-            _sessionsById.Clear();
         }
     }
 }
