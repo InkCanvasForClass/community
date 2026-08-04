@@ -558,6 +558,9 @@ namespace Ink_Canvas
             if (!_nativeCapturedRoutes.TryGetValue(batch.PointerId, out var captured))
                 return false;
 
+            var inputStartTicks = System.Diagnostics.Stopwatch.GetTimestamp();
+            var nativeKindIndex = (int)batch.InputKind; // Pen=0, Touch=1, Mouse=2
+
             var facts = CreatePointerFacts(batch);
             var context = BuildCapturedRouteContext(captured, batch.InputKind);
             var decision = NativeInkInputRouter.DecideCaptured(facts, context, captured);
@@ -593,6 +596,13 @@ namespace Ink_Canvas
                         ToInkCanvasSampleArray(batch.SamplesNewestFirstArray),
                         predictionEnabled);
                     ResetPauseStraightenTimerForPointer(batch.PointerId);
+
+                    // 记录新墨迹 input 事件（按 batch.InputKind 分桶）。
+                    var inputElapsedMs = (System.Diagnostics.Stopwatch.GetTimestamp() - inputStartTicks) * 1000.0
+                        / System.Diagnostics.Stopwatch.Frequency;
+                    var rawCount = batch.SamplesNewestFirst?.Count ?? 0;
+                    Ink_Canvas.Ink.Native.NativeInkPerfProbe.RecordInputEvent(
+                        nativeKindIndex, rawCount, rawCount, inputElapsedMs);
                 }
             }
 

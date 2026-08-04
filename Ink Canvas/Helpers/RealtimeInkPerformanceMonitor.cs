@@ -270,6 +270,24 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
+        /// 实时（非抬笔）刷新 Live JSON，供 WetInkWindowHost 渲染线程每帧调用。
+        /// 不写 PerformanceHistory。Debug log 关闭时 no-op。
+        /// </summary>
+        public static void TickLiveStatus()
+        {
+            if (!_isDebugLoggingEnabled)
+                return;
+            try
+            {
+                WriteLiveStatus(GetSnapshot(), isActive: true);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"RealtimeInkPerformanceMonitor.TickLiveStatus: {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// Stop detailed logging and append/update one PerformanceHistory record (ink fields only).
         /// No-op when the debug log was never enabled and has no session.
         /// </summary>
@@ -434,6 +452,8 @@ namespace Ink_Canvas.Helpers
         {
             var path = GetLiveStatusPath();
             EnsureParentDirectory(path);
+            // 读 NativeInkPerfProbe 的 per-kind 计数，序列化为 byInputKind 字符串字典。
+            var nativeByInputKind = BuildNativeByInputKind();
             var payload = new
             {
                 active = isActive,
@@ -451,10 +471,55 @@ namespace Ink_Canvas.Helpers
                 maxFrameWaitMs = Math.Round(snapshot?.MaxFrameWaitMs ?? 0, 3),
                 frameWaitSampleCount = snapshot?.FrameWaitSampleCount ?? 0,
                 slowRedrawOver5MsCount = snapshot?.SlowRedrawOver5MsCount ?? 0,
-                byInputKind = snapshot?.ByInputKind,
+                byInputKind = nativeByInputKind,
+                // 新墨迹管线（WetInkWindowHost）独立计时：
+                nativeWetInk = new
+                {
+                    lastApplyMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.LastApplyMs, 3),
+                    avgApplyMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.AverageApplyMs, 3),
+                    lastApplySampleCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.LastApplySampleCount,
+                    lastApplySessionCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.LastApplySessionCount,
+                    averageSamplePerFrame = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.AverageSamplePerFrame, 3),
+                    applyFrameCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.ApplyFrameCount,
+                    beginStrokeCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.BeginStrokeCount,
+                    endStrokeCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.EndStrokeCount,
+                    cancelStrokeCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.CancelStrokeCount
+                },
                 historyPath = GetHistoryPath()
             };
             File.WriteAllText(path, JsonConvert.SerializeObject(payload, CompactJsonSettings));
+        }
+
+        // NativeInkInputKind: Pen=0, Touch=1, Mouse=2
+        private static readonly string[] NativeKindKeys = { "Pen", "Touch", "Mouse" };
+
+        private static Dictionary<string, RealtimeInkInputPerformanceSnapshot> BuildNativeByInputKind()
+        {
+            var snapshot = Ink_Canvas.Ink.Native.NativeInkPerfProbe.PerKindSnapshot();
+            var result = new Dictionary<string, RealtimeInkInputPerformanceSnapshot>(snapshot.Length);
+            for (var i = 0; i < snapshot.Length; i++)
+            {
+                var k = i < NativeKindKeys.Length ? NativeKindKeys[i] : "Unknown";
+                var src = snapshot[i];
+                result[k] = new RealtimeInkInputPerformanceSnapshot
+                {
+                    InputEventCount = src.InputEventCount,
+                    RawInputPointCount = src.RawInputPointCount,
+                    AddedPointCount = src.AddedPointCount,
+                    RedrawCount = src.RedrawCount,
+                    ForceRedrawCount = src.ForceRedrawCount,
+                    CommitCount = src.CommitCount,
+                    TotalInputProcessingMs = Math.Round(src.TotalInputProcessingMs, 3),
+                    MaxInputProcessingMs = Math.Round(src.MaxInputProcessingMs, 3),
+                    TotalRedrawMs = Math.Round(src.TotalRedrawMs, 3),
+                    MaxRedrawMs = Math.Round(src.MaxRedrawMs, 3),
+                    SlowInputOver1MsCount = src.SlowInputOver1MsCount,
+                    SlowRedrawOver1MsCount = src.SlowRedrawOver1MsCount,
+                    SlowRedrawOver3MsCount = src.SlowRedrawOver3MsCount,
+                    SlowRedrawOver5MsCount = src.SlowRedrawOver5MsCount
+                };
+            }
+            return result;
         }
 
         private static string GetHistoryPath() => Path.Combine(App.RootPath ?? string.Empty, HistoryFileName);
