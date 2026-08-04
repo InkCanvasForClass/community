@@ -33,6 +33,7 @@ namespace Ink_Canvas.Ink.Native
         private ID3D11Device _d3dDevice;
         private ID3D11DeviceContext _d3dContext;
         private IDXGIDevice _dxgiDevice;
+        private IDXGIDevice1 _dxgiDevice1;
         private IDXGIAdapter _adapter;
         private IDXGIFactory2 _dxgiFactory;
         private ID2D1Factory1 _d2dFactory;
@@ -221,7 +222,10 @@ namespace Ink_Canvas.Ink.Native
                 return;
 
             _d2dContext.BeginDraw();
-            _d2dContext.Clear(new Color4(0f, 0f, 0f, 0f));
+            // FlipDiscard 后缓冲内容是上次 present 的残留，仅 forceClear 时清一次；
+            // 正常帧画满即可，省掉每次全屏 Clear 的开销。
+            if (forceClear)
+                _d2dContext.Clear(new Color4(0f, 0f, 0f, 0f));
 
             if (!forceClear && _target.IsVisible)
             {
@@ -230,10 +234,75 @@ namespace Ink_Canvas.Ink.Native
                     pair.Value.Draw(_d2dContext, _brush, _laserStrokeStyle);
             }
 
-            _d2dContext.EndDraw().CheckError();
-            _swapChain.Present(0, PresentFlags.None).CheckError();
-            _compositionDevice?.Commit().CheckError();
+            var endDrawResult = _d2dContext.EndDraw();
+            if (endDrawResult.Failure)
+            {
+                var code = (uint)endDrawResult.Code;
+                if (IsDeviceLostResult(code))
+                {
+                    _deviceReady = false;
+                    return;
+                }
+                try
+                {
+                    System.Diagnostics.Debug.WriteLine($"[WetInk] D2D EndDraw failed: 0x{code:X8}");
+                }
+                catch
+                {
+                    // never throw from the render hot path
+                }
+            }
+            PresentWithoutThrow();
+            try { _compositionDevice?.Commit(); }
+            catch (Exception ex) { LogWithoutThrow("DComp Commit", ex); }
             _needsPresent = false;
+        }
+
+        private void LogWithoutThrow(string context, Exception ex)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"[WetInk] {context} failed: {ex.Message}");
+            }
+            catch
+            {
+                // never throw from the render hot path
+            }
+        }
+
+        private void PresentWithoutThrow()
+        {
+            // DO_NOT_WAIT：GPU 无可用帧时直接返回 DXGI_ERROR_WAS_STILL_DRAWING，
+            // 避免把渲染线程卡在 vsync 上阻塞下一帧输入。
+            var hr = _swapChain.Present(0, PresentFlags.DoNotWait);
+            if (hr.Failure)
+            {
+                var code = (uint)hr.Code;
+                if (code == (uint)Vortice.DXGI.ResultCode.WasStillDrawing)
+                {
+                    // 上一帧 GPU 还在画，静默丢弃本帧；下次输入自然补上。
+                    return;
+                }
+                if (IsDeviceLostResult(code))
+                {
+                    _deviceReady = false;
+                    return;
+                }
+                try
+                {
+                    System.Diagnostics.Debug.WriteLine($"[WetInk] Present failed: 0x{code:X8}");
+                }
+                catch
+                {
+                    // never throw from the render hot path
+                }
+            }
+        }
+
+        private static bool IsDeviceLostResult(uint code)
+        {
+            return code == (uint)Vortice.DXGI.ResultCode.DeviceRemoved
+                   || code == (uint)Vortice.DXGI.ResultCode.DeviceReset;
         }
 
         private void ApplyExclusionClips()
@@ -258,6 +327,17 @@ namespace Ink_Canvas.Ink.Native
                 out _d3dContext).CheckError();
 
             _dxgiDevice = _d3dDevice.QueryInterface<IDXGIDevice>();
+            try
+            {
+                _dxgiDevice1 = _dxgiDevice.QueryInterface<IDXGIDevice1>();
+                // 驱动预渲染队列只留 1 帧，避免 Present 排队缓冲进一步增大输入到光子延迟。
+                _dxgiDevice1.SetMaximumFrameLatency(1);
+            }
+            catch
+            {
+                _dxgiDevice1 = null;
+                // 部分老驱动不支持；回退到默认帧延迟。
+            }
             _adapter = _dxgiDevice.GetAdapter();
             _dxgiFactory = _adapter.GetParent<IDXGIFactory2>();
             _d2dFactory = Vortice.Direct2D1.D2D1.D2D1CreateFactory<ID2D1Factory1>(
@@ -304,7 +384,9 @@ namespace Ink_Canvas.Ink.Native
                 BufferUsage = Usage.RenderTargetOutput,
                 BufferCount = 2,
                 Scaling = Scaling.Stretch,
-                SwapEffect = SwapEffect.FlipSequential,
+                // FlipDiscard：与 FlipSequential 相同的低延迟 flip 语义，
+                // 但缓冲内容在下一次 present 后即失效，允许 D2D 不再先 Clear 再画。
+                SwapEffect = SwapEffect.FlipDiscard,
                 AlphaMode = DXGIAlphaMode.Premultiplied,
                 Flags = SwapChainFlags.None
             };
@@ -420,6 +502,7 @@ namespace Ink_Canvas.Ink.Native
             DisposeAndNull(ref _d2dFactory);
             DisposeAndNull(ref _dxgiFactory);
             DisposeAndNull(ref _adapter);
+            DisposeAndNull(ref _dxgiDevice1);
             DisposeAndNull(ref _dxgiDevice);
             DisposeAndNull(ref _d3dContext);
             DisposeAndNull(ref _d3dDevice);
@@ -468,6 +551,11 @@ namespace Ink_Canvas.Ink.Native
             private float _strokeWidth;
             private float _strokeHeight;
             private int _publishedFixedCount;
+            // B11: 颜色每帧只算一次，Draw 时直接复用，避免每帧 3 次 Color4 构造 + GPU 状态同步。
+            private Color4 _premultipliedColor;
+            private Color4 _premultipliedLaserGlow;
+            private Color4 _premultipliedLaserBody;
+            private Color4 _premultipliedLaserCore;
 
             public SessionResources(WetInkGeometryBuilder builder)
             {
@@ -477,7 +565,15 @@ namespace Ink_Canvas.Ink.Native
             public void Update(WetInkRenderSnapshot snapshot, ID2D1Factory1 factory)
             {
                 var update = _geometryState.Update(snapshot);
-                _colorArgb = snapshot.Style.ColorArgb;
+                if (_colorArgb != snapshot.Style.ColorArgb)
+                {
+                    _colorArgb = snapshot.Style.ColorArgb;
+                    // B11: 颜色变了才重算，颜色不变直接复用上次缓存。
+                    _premultipliedColor = ToPremultipliedColor(_colorArgb);
+                    _premultipliedLaserGlow = ResolveLaserGlowColor(_colorArgb);
+                    _premultipliedLaserBody = ResolveLaserBodyColor(_colorArgb);
+                    _premultipliedLaserCore = ResolveLaserCoreColor(_colorArgb);
+                }
                 _renderMode = snapshot.Style.RenderMode;
                 _strokeWidth = (float)Math.Max(0.1, snapshot.Style.Width);
                 _strokeHeight = (float)Math.Max(0.1, snapshot.Style.Height);
@@ -514,8 +610,8 @@ namespace Ink_Canvas.Ink.Native
                     {
                         if (!_dynamicIsSinglePoint)
                         {
-                            _dynamicPath = CreatePath(factory, update.DynamicTail);
-                            _dynamicLaserCenterPath = CreateLaserCenterPath(factory, update.DynamicTail);
+                            _dynamicPath = RewritePath(factory, _dynamicPath, update.DynamicTail);
+                            _dynamicLaserCenterPath = RewriteLaserCenterPath(factory, _dynamicLaserCenterPath, update.DynamicTail);
                         }
                         _dynamicStartTip = update.DynamicTail.StartTip;
                         _dynamicEndTip = update.DynamicTail.EndTip;
@@ -537,7 +633,7 @@ namespace Ink_Canvas.Ink.Native
 
             private void DrawStandard(ID2D1DeviceContext context, ID2D1SolidColorBrush brush)
             {
-                brush.Color = ToPremultipliedColor(_colorArgb);
+                brush.Color = _premultipliedColor;
 
                 for (var i = 0; i < _fixedPaths.Count; i++)
                 {
@@ -578,7 +674,7 @@ namespace Ink_Canvas.Ink.Native
                     var path = _fixedLaserCenterPaths[i];
                     if (path != null)
                     {
-                        DrawLaserGeometry(context, brush, laserStrokeStyle, path, _colorArgb, glowThickness, bodyThickness, coreThickness);
+                        DrawLaserGeometry(context, brush, laserStrokeStyle, path, _premultipliedLaserGlow, _premultipliedLaserBody, _premultipliedLaserCore, glowThickness, bodyThickness, coreThickness);
                     }
 
                     if (i == 0)
@@ -597,7 +693,7 @@ namespace Ink_Canvas.Ink.Native
                 }
 
                 if (_dynamicLaserCenterPath != null)
-                    DrawLaserGeometry(context, brush, laserStrokeStyle, _dynamicLaserCenterPath, _colorArgb, glowThickness, bodyThickness, coreThickness);
+                    DrawLaserGeometry(context, brush, laserStrokeStyle, _dynamicLaserCenterPath, _premultipliedLaserGlow, _premultipliedLaserBody, _premultipliedLaserCore, glowThickness, bodyThickness, coreThickness);
                 if (_fixedLaserCenterPaths.Count == 0)
                     DrawLaserTip(context, brush, _dynamicStartTip, glowThickness, bodyThickness, coreThickness);
                 DrawLaserTip(context, brush, _dynamicEndTip, glowThickness, bodyThickness, coreThickness);
@@ -617,14 +713,55 @@ namespace Ink_Canvas.Ink.Native
                 ID2D1Factory1 factory,
                 WetInkRibbonGeometry geometry)
             {
+                var path = factory.CreatePathGeometry();
+                WritePathGeometry(path, geometry);
+                return path;
+            }
+
+            /// <summary>
+            /// 复用已有 path 的 geometry sink 重画，避免每帧 Dispose+Create 一个
+            /// ID2D1PathGeometry 资源。path 为 null 时新建。
+            /// </summary>
+            private static ID2D1PathGeometry RewritePath(
+                ID2D1Factory1 factory,
+                ID2D1PathGeometry existing,
+                WetInkRibbonGeometry geometry)
+            {
+                var path = existing ?? factory.CreatePathGeometry();
+                try
+                {
+                    WritePathGeometry(path, geometry);
+                    return path;
+                }
+                catch
+                {
+                    // geometry 写入失败时重建（如设备状态异常）。
+                    try { path.Dispose(); }
+                    catch { /* best-effort */ }
+                    path = factory.CreatePathGeometry();
+                    WritePathGeometry(path, geometry);
+                    return path;
+                }
+            }
+
+            private static void WritePathGeometry(
+                ID2D1PathGeometry path,
+                WetInkRibbonGeometry geometry)
+            {
                 if (geometry == null
                     || geometry.Outline == null
                     || geometry.Outline.Count < 3)
                 {
-                    return null;
+                    // 无有效轮廓：画空图元（清空 path 后仍持有资源）。
+                    using (var clear = path.Open())
+                    {
+                        clear.SetFillMode(Vortice.Direct2D1.FillMode.Winding);
+                        clear.EndFigure(FigureEnd.Closed);
+                        clear.Close();
+                    }
+                    return;
                 }
 
-                var path = factory.CreatePathGeometry();
                 using (var sink = path.Open())
                 {
                     sink.SetFillMode(Vortice.Direct2D1.FillMode.Winding);
@@ -639,12 +776,40 @@ namespace Ink_Canvas.Ink.Native
                     sink.EndFigure(FigureEnd.Closed);
                     sink.Close();
                 }
-
-                return path;
             }
 
             private static ID2D1PathGeometry CreateLaserCenterPath(
                 ID2D1Factory1 factory,
+                WetInkRibbonGeometry geometry)
+            {
+                var path = factory.CreatePathGeometry();
+                WriteLaserCenterPathGeometry(path, geometry);
+                return path;
+            }
+
+            private static ID2D1PathGeometry RewriteLaserCenterPath(
+                ID2D1Factory1 factory,
+                ID2D1PathGeometry existing,
+                WetInkRibbonGeometry geometry)
+            {
+                var path = existing ?? factory.CreatePathGeometry();
+                try
+                {
+                    WriteLaserCenterPathGeometry(path, geometry);
+                    return path;
+                }
+                catch
+                {
+                    try { path.Dispose(); }
+                    catch { /* best-effort */ }
+                    path = factory.CreatePathGeometry();
+                    WriteLaserCenterPathGeometry(path, geometry);
+                    return path;
+                }
+            }
+
+            private static void WriteLaserCenterPathGeometry(
+                ID2D1PathGeometry path,
                 WetInkRibbonGeometry geometry)
             {
                 if (geometry == null
@@ -652,14 +817,25 @@ namespace Ink_Canvas.Ink.Native
                     || geometry.Outline.Count < 4
                     || geometry.Outline.Count % 2 != 0)
                 {
-                    return null;
+                    using (var clear = path.Open())
+                    {
+                        clear.EndFigure(FigureEnd.Open);
+                        clear.Close();
+                    }
+                    return;
                 }
 
                 var centerCount = geometry.Outline.Count / 2;
                 if (centerCount < 2)
-                    return null;
+                {
+                    using (var clear = path.Open())
+                    {
+                        clear.EndFigure(FigureEnd.Open);
+                        clear.Close();
+                    }
+                    return;
+                }
 
-                var path = factory.CreatePathGeometry();
                 using (var sink = path.Open())
                 {
                     var first = CenterPoint(geometry.Outline, 0);
@@ -673,8 +849,6 @@ namespace Ink_Canvas.Ink.Native
                     sink.EndFigure(FigureEnd.Open);
                     sink.Close();
                 }
-
-                return path;
             }
 
             private static WetInkVertex CenterPoint(IReadOnlyList<WetInkVertex> outline, int index)
@@ -692,7 +866,9 @@ namespace Ink_Canvas.Ink.Native
                 ID2D1SolidColorBrush brush,
                 ID2D1StrokeStyle laserStrokeStyle,
                 ID2D1PathGeometry path,
-                uint colorArgb,
+                Color4 glowColor,
+                Color4 bodyColor,
+                Color4 coreColor,
                 float glowThickness,
                 float bodyThickness,
                 float coreThickness)
@@ -700,11 +876,11 @@ namespace Ink_Canvas.Ink.Native
                 if (path == null)
                     return;
 
-                brush.Color = ResolveLaserGlowColor(colorArgb);
+                brush.Color = glowColor;
                 context.DrawGeometry(path, brush, glowThickness, laserStrokeStyle);
-                brush.Color = ResolveLaserBodyColor(colorArgb);
+                brush.Color = bodyColor;
                 context.DrawGeometry(path, brush, bodyThickness, laserStrokeStyle);
-                brush.Color = ResolveLaserCoreColor(colorArgb);
+                brush.Color = coreColor;
                 context.DrawGeometry(path, brush, coreThickness, laserStrokeStyle);
             }
 
@@ -724,11 +900,11 @@ namespace Ink_Canvas.Ink.Native
                 var glowScale = Math.Max(bodyScale * 1.6f, glowThickness / Math.Max(0.01f, bodyThickness));
                 var coreScale = Math.Min(1f, coreThickness / Math.Max(0.01f, bodyThickness));
 
-                brush.Color = ResolveLaserGlowColor(_colorArgb);
+                brush.Color = _premultipliedLaserGlow;
                 DrawScaledTip(context, brush, tip, glowScale);
-                brush.Color = ResolveLaserBodyColor(_colorArgb);
+                brush.Color = _premultipliedLaserBody;
                 DrawScaledTip(context, brush, tip, bodyScale);
-                brush.Color = ResolveLaserCoreColor(_colorArgb);
+                brush.Color = _premultipliedLaserCore;
                 DrawScaledTip(context, brush, tip, coreScale);
             }
 
