@@ -1,6 +1,6 @@
 # ICC CE 设置完整目录
 
-```
+```text
 应用设置
 ├── 首页
 ├── ── ICC CE 设置 ──
@@ -102,12 +102,17 @@
 │   │   │   ├── LabeledSettingsCard: 使用24小时制 → ToggleSwitch
 │   │   │   ├── LabeledSettingsCard: 画板模式显示鸡汤 → ToggleSwitch
 │   │   │   ├── SettingsCard: 鸡汤来源 → ComboBox + Button
-│   │   │   ├── LabeledSettingsCard: 启用快捷面板 → ToggleSwitch
-│   │   │   ├── SettingsCard: 快捷面板底部偏移 → Slider
-│   │   │   └── SettingsCard: 展开按钮图标 → ComboBox
 │   │   └── TextBlock "浮动栏按钮"
 │   │       ├── LabeledSettingsCard: 使用旧版浮动栏 UI → ToggleSwitch
 │   │       └── SettingsCard: 浮动栏按钮 → Clickable
+│   ├── 侧边栏 (SidebarPage)
+│   │   ├── SettingsExpander: 启用快捷面板 → ToggleSwitch（开则展开）
+│   │   │   ├── SettingsCard: 快捷面板底部偏移 → Slider
+│   │   │   ├── LabeledSettingsCard: 允许拖动侧栏 → ToggleSwitch
+│   │   │   ├── SettingsCard: 展开按钮图标 → ComboBox
+│   │   │   └── SettingsCard: 快捷面板透明度 → Slider
+│   │   └── SettingsExpander: 自动折叠快捷面板 → ToggleSwitch（开则展开）
+│   │       └── SettingsCard: 自动折叠延迟 → Slider
 │   └── 快捷键
 │       ├── InfoBar: 快捷键说明
 │       ├── TextBlock "鼠标模式"
@@ -489,7 +494,7 @@
 │   └── (工作流编辑器 - 选择工作流时显示)
 │       └── TextBlock "自定义自动化规则"
 │           └── SettingsCard: 创建自定义的触发器→条件→行动规则 → Clickable
-├── 随机点名
+├── 点名与计时器
 │   ├── TextBlock "随机点名"
 │   │   ├── LabeledSettingsCard: 显示编辑名单按钮 → ToggleSwitch
 │   │   ├── LabeledSettingsCard: 启用随机和单人抽取 → ToggleSwitch
@@ -521,12 +526,22 @@
 │       └── SettingsExpander: SettingsExpander 示例（默认展开）
 │           ├── CopyButton
 │           └── SettingsCard: Customization
+├── ── 浮动栏主题 ──
+│   ├── 浮动栏主题 (FloatingBarThemePage)
+│   │   ├── SettingsCard: 打开主题文件夹 → Button
+│   │   └── ItemsControl: 主题列表（动态，含 应用/删除 按钮，内置主题不显示删除）
+│   └── 浮动栏主题市场 (FloatingBarThemeMarketPage)
+│       ├── Button: 刷新 + Button: 打开主题文件夹 + ProgressBar（加载条）
+│       └── ItemsControl: 市场主题列表（动态，含 安装 按钮）
 ├── ── 插件设置 ──
 ├── 插件
 │   ├── TextBlock "无"
 │   │   ├── Border: 插件数量状态
 │   │   └── StackPanel: 插件容器（动态加载）
 │   └── （插件设置页面动态加载 → PluginSettingsPage）
+├── 插件市场 (PluginMarketplacePage)
+│   ├── 左栏：搜索框 + 按钮（刷新/打开插件文件夹/管理源/本地安装）+ 源/镜像 ComboBox + 插件 ListView
+│   └── 右栏：插件详情（图标/名称/版本/作者/下载量/星标、安装/更新/应用重启按钮、依赖列表、说明文档）
 ├── ── 底部 ──
 ├── 友情链接
 │   └── TextBlock "无"

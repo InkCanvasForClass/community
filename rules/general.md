@@ -26,7 +26,7 @@ private void inkCanvas_StylusDown(object sender, StylusDownEventArgs e)
 }
 ```
 
-在 `MW_SimulatePressureAndInkToShape.cs` 的 `inkCanvas_StrokeCollected` 中计算并传递：
+在 `MW_SimulatePressure&InkToShape.cs`（文件名带 `&`）的 `inkCanvas_StrokeCollected` 中计算并传递：
 
 ```csharp
 long strokeDurationMs = 0;
