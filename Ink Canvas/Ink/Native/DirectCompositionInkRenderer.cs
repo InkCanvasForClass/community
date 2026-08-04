@@ -108,6 +108,7 @@ namespace Ink_Canvas.Ink.Native
 
             _pendingRetirementAcks.Clear();
             var hadWork = false;
+            var snapshotUpdateTicks = 0L;
             try
             {
                 if (batch != null)
@@ -120,7 +121,7 @@ namespace Ink_Canvas.Ink.Native
                             if (ApplyBoundary(item.BoundaryCommand))
                                 hadWork = true;
                         }
-                        else if (ApplySnapshot(item.RenderSnapshot))
+                        else if (ApplySnapshotTimed(item.RenderSnapshot, ref snapshotUpdateTicks))
                         {
                             hadWork = true;
                         }
@@ -130,7 +131,14 @@ namespace Ink_Canvas.Ink.Native
                 if (!hadWork && !_needsPresent)
                     return WetInkApplyResult.NoWork();
 
-                PresentFrame(forceClear: false);
+                var drawStart = System.Diagnostics.Stopwatch.GetTimestamp();
+                var drawMs = PresentFrameTimed(forceClear: false, out var presentMs);
+                var freq = System.Diagnostics.Stopwatch.Frequency;
+                NativeInkPerfProbe.RecordApplySegments(
+                    snapshotUpdateTicks * 1000.0 / freq,
+                    drawMs,
+                    presentMs);
+
                 var acks = _pendingRetirementAcks.Count == 0
                     ? Array.Empty<WetInkRetirementAck>()
                     : _pendingRetirementAcks.ToArray();
@@ -146,6 +154,14 @@ namespace Ink_Canvas.Ink.Native
             {
                 return WetInkApplyResult.Failed(ex);
             }
+        }
+
+        private bool ApplySnapshotTimed(WetInkRenderSnapshot snapshot, ref long snapshotUpdateTicks)
+        {
+            var start = System.Diagnostics.Stopwatch.GetTimestamp();
+            var result = ApplySnapshot(snapshot);
+            snapshotUpdateTicks += System.Diagnostics.Stopwatch.GetTimestamp() - start;
+            return result;
         }
 
         public void PresentIdleClear()
@@ -218,8 +234,22 @@ namespace Ink_Canvas.Ink.Native
 
         private void PresentFrame(bool forceClear)
         {
+            PresentFrameTimed(forceClear, out _);
+        }
+
+        /// <summary>
+        /// 与 PresentFrame 相同，但把「绘制几何」与「Present+Commit」耗时分开返回。
+        /// drawMs = BeginDraw..EndDraw（D2D 绘制）；presentMs = Present + DComp Commit（同步等待主导）。
+        /// </summary>
+        private double PresentFrameTimed(bool forceClear, out double presentMs)
+        {
+            var drawMs = 0.0;
+            presentMs = 0.0;
             if (_d2dContext == null || _swapChain == null || _target == null)
-                return;
+                return drawMs;
+
+            var freq = System.Diagnostics.Stopwatch.Frequency;
+            var drawStart = System.Diagnostics.Stopwatch.GetTimestamp();
 
             _d2dContext.BeginDraw();
             // FlipDiscard 下 back buffer 内容在下一次 Present 后即失效（未定义），
@@ -233,6 +263,9 @@ namespace Ink_Canvas.Ink.Native
                     pair.Value.Draw(_d2dContext, _brush, _laserStrokeStyle);
             }
 
+            drawMs = (System.Diagnostics.Stopwatch.GetTimestamp() - drawStart) * 1000.0 / freq;
+
+            var presentStart = System.Diagnostics.Stopwatch.GetTimestamp();
             var endDrawResult = _d2dContext.EndDraw();
             if (endDrawResult.Failure)
             {
@@ -240,7 +273,7 @@ namespace Ink_Canvas.Ink.Native
                 if (IsDeviceLostResult(code))
                 {
                     _deviceReady = false;
-                    return;
+                    return drawMs;
                 }
                 try
                 {
@@ -255,6 +288,8 @@ namespace Ink_Canvas.Ink.Native
             try { _compositionDevice?.Commit(); }
             catch (Exception ex) { LogWithoutThrow("DComp Commit", ex); }
             _needsPresent = false;
+            presentMs = (System.Diagnostics.Stopwatch.GetTimestamp() - presentStart) * 1000.0 / freq;
+            return drawMs;
         }
 
         private void LogWithoutThrow(string context, Exception ex)
@@ -273,13 +308,17 @@ namespace Ink_Canvas.Ink.Native
         {
             // DO_NOT_WAIT：GPU 无可用帧时直接返回 DXGI_ERROR_WAS_STILL_DRAWING，
             // 避免把渲染线程卡在 vsync 上阻塞下一帧输入。
+            var presentStart = System.Diagnostics.Stopwatch.GetTimestamp();
             var hr = _swapChain.Present(0, PresentFlags.DoNotWait);
+            var presentElapsedTicks = System.Diagnostics.Stopwatch.GetTimestamp() - presentStart;
             if (hr.Failure)
             {
                 var code = (uint)hr.Code;
                 if (code == (uint)Vortice.DXGI.ResultCode.WasStillDrawing)
                 {
-                    // 上一帧 GPU 还在画，静默丢弃本帧；下次输入自然补上。
+                    // 上一帧 GPU 还在画，静默丢弃本帧；记录频次与耗时供诊断。
+                    NativeInkPerfProbe.RecordPresentWasStillDrawing(
+                        presentElapsedTicks * 1000.0 / System.Diagnostics.Stopwatch.Frequency);
                     return;
                 }
                 if (IsDeviceLostResult(code))

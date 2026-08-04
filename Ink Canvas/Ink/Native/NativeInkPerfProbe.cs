@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 
 namespace Ink_Canvas.Ink.Native
@@ -112,6 +113,103 @@ namespace Ink_Canvas.Ink.Native
             Interlocked.Exchange(ref _lastApplySampleCount, sampleCount);
             Interlocked.Exchange(ref _lastApplySessionCount, sessionCount);
         }
+
+        // Apply 内部分段（渲染线程）：snapshot 几何/path 更新 vs Draw 绘制 vs Present
+        private static long _lastApplySnapshotUpdateMs100;
+        private static long _lastApplyDrawMs100;
+        private static long _lastApplyPresentMs100;
+        private static long _maxApplySnapshotUpdateMs1000;
+        private static long _maxApplyDrawMs1000;
+        private static long _maxApplyPresentMs1000;
+
+        public static void RecordApplySegments(double snapshotUpdateMs, double drawMs, double presentMs)
+        {
+            Interlocked.Exchange(ref _lastApplySnapshotUpdateMs100, (long)(snapshotUpdateMs * 100));
+            Interlocked.Exchange(ref _lastApplyDrawMs100, (long)(drawMs * 100));
+            Interlocked.Exchange(ref _lastApplyPresentMs100, (long)(presentMs * 100));
+            UpdateMax(ref _maxApplySnapshotUpdateMs1000, (long)(snapshotUpdateMs * 1000));
+            UpdateMax(ref _maxApplyDrawMs1000, (long)(drawMs * 1000));
+            UpdateMax(ref _maxApplyPresentMs1000, (long)(presentMs * 1000));
+        }
+
+        public static double LastApplySnapshotUpdateMs => _lastApplySnapshotUpdateMs100 / 100.0;
+        public static double LastApplyDrawMs => _lastApplyDrawMs100 / 100.0;
+        public static double LastApplyPresentMs => _lastApplyPresentMs100 / 100.0;
+        public static double MaxApplySnapshotUpdateMs => _maxApplySnapshotUpdateMs1000 / 1000.0;
+        public static double MaxApplyDrawMs => _maxApplyDrawMs1000 / 1000.0;
+        public static double MaxApplyPresentMs => _maxApplyPresentMs1000 / 1000.0;
+
+        // ---- 系统级指标：Dispatcher 延迟 / GC 分配 / Present 阻塞 ----
+        private static double _lastDispatcherDelayMs;
+        private static double _maxDispatcherDelayMs;
+        private static long _gcAllocatedBytesAtLastFlush;
+        private static double _gcAllocatedSinceLastFlushBytes;
+        private static long _presentWasStillDrawingCount;
+        private static long _lastPresentWasStillDrawingTicks1000;
+
+        /// <summary>由装配层在 UI 线程 BeginInvoke 一次，测 UI 线程阻塞延迟。</summary>
+        public static void RecordDispatcherDelay(double elapsedMs)
+        {
+            _lastDispatcherDelayMs = elapsedMs;
+            if (elapsedMs > _maxDispatcherDelayMs) _maxDispatcherDelayMs = elapsedMs;
+        }
+
+        /// <summary>由 Live JSON 刷新时快照累计分配字节（测 GC 压力）。</summary>
+        public static void UpdateGcAllocatedBytes()
+        {
+            var now = GC.GetTotalAllocatedBytes();
+            if (_gcAllocatedBytesAtLastFlush != 0)
+                _gcAllocatedSinceLastFlushBytes = (now - _gcAllocatedBytesAtLastFlush) / (1024.0 * 1024.0);
+            _gcAllocatedBytesAtLastFlush = now;
+        }
+
+        /// <summary>Present 返回 DXGI_ERROR_WAS_STILL_DRAWING 的次数（GPU 忙→丢帧）。</summary>
+        public static void RecordPresentWasStillDrawing(double elapsedMs)
+        {
+            Interlocked.Increment(ref _presentWasStillDrawingCount);
+            Interlocked.Exchange(ref _lastPresentWasStillDrawingTicks1000, (long)(elapsedMs * 1000));
+        }
+
+        public static double LastDispatcherDelayMs => _lastDispatcherDelayMs;
+        public static double MaxDispatcherDelayMs => _maxDispatcherDelayMs;
+        public static double GcAllocatedSinceLastFlushBytes => _gcAllocatedSinceLastFlushBytes;
+        public static long PresentWasStillDrawingCount => Interlocked.Read(ref _presentWasStillDrawingCount);
+        public static double LastPresentWasStillDrawingMs => Interlocked.Read(ref _lastPresentWasStillDrawingTicks1000) / 1000.0;
+
+        // ---- Dispatcher 慢操作来源统计 ----
+        private static long _slowOpCount;
+        private static long _slowOpOver20Ms;
+        private static long _slowOpOver50Ms;
+        private static long _slowOpOver100Ms;
+        private static long _slowOpOver200Ms;
+        private static long _slowOpTotalMs;
+        private static string _lastSlowOpName = string.Empty;
+        private static double _lastSlowOpMs;
+
+        /// <summary>记录一个 Dispatcher 慢操作（排队+执行总时长）。</summary>
+        public static void RecordSlowDispatcherOp(string name, double elapsedMs)
+        {
+            Interlocked.Increment(ref _slowOpCount);
+            Interlocked.Add(ref _slowOpTotalMs, (long)(elapsedMs * 1000));
+            if (elapsedMs > 20) Interlocked.Increment(ref _slowOpOver20Ms);
+            if (elapsedMs > 50) Interlocked.Increment(ref _slowOpOver50Ms);
+            if (elapsedMs > 100) Interlocked.Increment(ref _slowOpOver100Ms);
+            if (elapsedMs > 200) Interlocked.Increment(ref _slowOpOver200Ms);
+            lock (_perKindLock)
+            {
+                _lastSlowOpName = name ?? "<unknown>";
+                _lastSlowOpMs = elapsedMs;
+            }
+        }
+
+        public static long SlowOpCount => Interlocked.Read(ref _slowOpCount);
+        public static long SlowOpOver20Ms => Interlocked.Read(ref _slowOpOver20Ms);
+        public static long SlowOpOver50Ms => Interlocked.Read(ref _slowOpOver50Ms);
+        public static long SlowOpOver100Ms => Interlocked.Read(ref _slowOpOver100Ms);
+        public static long SlowOpOver200Ms => Interlocked.Read(ref _slowOpOver200Ms);
+        public static double SlowOpTotalMs => Interlocked.Read(ref _slowOpTotalMs) / 1000.0;
+        public static string LastSlowOpName { get { lock (_perKindLock) return _lastSlowOpName; } }
+        public static double LastSlowOpMs { get { lock (_perKindLock) return _lastSlowOpMs; } }
 
         /// <summary>UI 线程 controller/marshal 入口记录一次 input 处理。</summary>
         public static void RecordInputEvent(int inputKindIndex, int rawInputPointCount, int addedPointCount, double elapsedMs)
