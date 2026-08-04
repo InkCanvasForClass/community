@@ -10,12 +10,12 @@ namespace Ink_Canvas.Plugins
         /// 主版本相同且不高于此值即为兼容。
         /// <para>
         /// 维护规则：<b>每次向 SDK 新增对外接口或在既有接口上追加成员，都必须抬升次版本号</b>
-        /// （1.1.0 → 1.2.0），插件才有办法声明自己需要的能力下限。
+        /// （1.9.0 → 1.10.0），插件才有办法声明自己需要的能力下限。
         /// 发生破坏性变更（删除/改签名）时抬主版本号，这会使所有声明旧主版本的插件停止加载。
         /// 仅修复实现、不动接口时不需要改动。
         /// </para>
         /// </summary>
-        public static readonly string CurrentApiVersion = "1.1.0";
+        public static readonly string CurrentApiVersion = "1.9.0";
 
         /// <summary>
         /// 当前宿主编译版本号，由 Nerdbank.GitVersioning 依据 <c>version.json</c> 与 git 状态自动生成，
