@@ -36,6 +36,14 @@ namespace Ink_Canvas.Plugins
         private readonly string _pluginConfigsDirectory;
         private readonly List<PluginInfo> _plugins = new List<PluginInfo>();
         private readonly Dictionary<string, PluginLoadContext> _assemblyContexts = new Dictionary<string, PluginLoadContext>();
+        // 每个插件在宿主中留下的注册痕迹。卸载时逐一撤销，断开宿主对插件程序集的引用，
+        // 否则可回收 ALC 不会真正释放，热重载失效。
+        private readonly Dictionary<string, PluginRegistrationScope> _registrationScopes
+            = new Dictionary<string, PluginRegistrationScope>(StringComparer.OrdinalIgnoreCase);
+        // 卸载后仍在等待 GC 完成回收的 ALC 弱引用，用于校验是否真正卸载成功。
+        private readonly Dictionary<string, WeakReference> _unloadingContexts
+            = new Dictionary<string, WeakReference>(StringComparer.OrdinalIgnoreCase);
+
         private readonly HashSet<string> _disabledPlugins = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private readonly string _disabledPluginsFile;
         private readonly string _pluginLogsDirectory;
@@ -109,6 +117,12 @@ namespace Ink_Canvas.Plugins
         private Assembly OnDefaultContextResolving(AssemblyLoadContext context, AssemblyName name)
         {
             if (name == null || string.IsNullOrEmpty(name.Name)) return null;
+
+            // 只服务于确实需要走默认 ALC 的 XAML 解析场景，且仅限已知的 UI 依赖。
+            // 默认 ALC 不可回收：一旦在这里把插件目录的 DLL 加载进来，该文件就被锁到进程退出，
+            // 插件热重载会永久失败。因此白名单外的请求一律交回给插件自己的 ALC 处理。
+            if (!IsSharedUiDependency(name.Name)) return null;
+
             foreach (var plugin in _plugins)
             {
                 if (plugin.LoadStatus != PluginLoadStatus.Loaded
@@ -120,7 +134,9 @@ namespace Ink_Canvas.Plugins
 
                 try
                 {
-                    return context.LoadFromAssemblyPath(path);
+                    // 从字节数组加载：不持有文件句柄，插件目录可被覆盖/删除。
+                    // 代价是该程序集无法卸载，所以上面的白名单必须保持最小。
+                    return context.LoadFromStream(new MemoryStream(File.ReadAllBytes(path)));
                 }
                 catch (Exception)
                 {
@@ -128,6 +144,18 @@ namespace Ink_Canvas.Plugins
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// 判断某程序集是否属于「WPF XAML 解析器会经默认 ALC 请求」的共享 UI 依赖。
+        /// 这类请求不进入插件 ALC 的 Load 重载，必须由默认 ALC 兜底，否则插件设置页
+        /// 的 XAML 解析会抛 XamlParseException。
+        /// </summary>
+        private static bool IsSharedUiDependency(string simpleName)
+        {
+            return simpleName.StartsWith("iNKORE.UI.WPF", StringComparison.OrdinalIgnoreCase)
+                || simpleName.StartsWith("InkCanvas.Controls", StringComparison.OrdinalIgnoreCase)
+                || simpleName.StartsWith("InkCanvas.PluginSdk", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -646,7 +674,7 @@ namespace Ink_Canvas.Plugins
                 {
                     // 尝试从 DLL 中获取插件信息
                     var tempContext = new PluginLoadContext(dllFile, null);
-                    var assembly = tempContext.LoadFromAssemblyPath(dllFile);
+                    var assembly = tempContext.LoadWithoutLockingFile(dllFile);
                     var pluginType = FindPluginEntrance(assembly);
                     if (pluginType == null)
                     {
@@ -851,7 +879,8 @@ namespace Ink_Canvas.Plugins
 
             try
             {
-                var assembly = loadContext.LoadFromAssemblyPath(assemblyPath);
+                // 从字节加载，插件 DLL 不被文件锁占用，运行期可直接覆盖实现热重载。
+                var assembly = loadContext.LoadWithoutLockingFile(assemblyPath);
                 var pluginType = FindPluginEntrance(assembly);
                 if (pluginType == null)
                 {
@@ -900,6 +929,10 @@ namespace Ink_Canvas.Plugins
                 // 不再混入宿主日志 PluginLogs/host/，也不进入主程序日志。
                 var pluginLogger = GetLogger(info.Id);
                 var pluginHost = new PluginHostProxy(this, pluginLogger, info.Id);
+
+                // 建立本次加载的注册撤销范围，Initialize 期间所有向宿主的注册都记入其中。
+                var scope = new PluginRegistrationScope(info.Id);
+                _registrationScopes[info.Id] = scope;
 
                 _currentLoadingPlugin = info;
                 try
@@ -1053,6 +1086,22 @@ namespace Ink_Canvas.Plugins
                     LogError(string.Format("Plugin {0} raised an error during Shutdown", plugin.Name), shutdownEx);
                 }
 
+                // 撤销该插件在宿主留下的所有注册（工具栏组件、IPC 处理器、DI 服务、URI 处理器等）。
+                // 这一步是 ALC 能否真正卸载的关键：漏掉任何一条，宿主就还握着插件程序集里的委托，
+                // 可回收 ALC 便不会释放，DLL 也就仍被占用。
+                if (_registrationScopes.TryGetValue(plugin.Id, out var scope))
+                {
+                    _registrationScopes.Remove(plugin.Id);
+                    scope.UndoAll((description, ex) =>
+                        LogError(string.Format("Plugin {0} failed to undo registration [{1}]", plugin.Name, description), ex));
+
+                    // DI 容器缓存了已解析的单例，必须重建，否则插件实现的服务实例仍被 Provider 持有。
+                    if (scope.RegisteredServiceTypes.Count > 0)
+                    {
+                        BuildServiceProvider();
+                    }
+                }
+
                 _plugins.Remove(plugin);
                 plugin.IsLoaded = false;
                 plugin.LoadStatus = PluginLoadStatus.NotLoaded;
@@ -1061,6 +1110,13 @@ namespace Ink_Canvas.Plugins
                 if (_assemblyContexts.TryGetValue(plugin.Id, out var alc))
                 {
                     _assemblyContexts.Remove(plugin.Id);
+
+                    // 摘除插件用 += 订阅到宿主服务上的事件处理器与塞进宿主回调表的委托。
+                    // 这类订阅不带插件身份，无法靠 scope 精确撤销，只能按委托所属 ALC 反查。
+                    SweepPluginDelegates(alc, plugin);
+
+                    // 留一个弱引用，稍后用来判断 ALC 是否真的被回收了。
+                    _unloadingContexts[plugin.Id] = new WeakReference(alc);
                     alc.Unload();
                 }
 
@@ -1077,6 +1133,209 @@ namespace Ink_Canvas.Plugins
             catch (Exception ex)
             {
                 LogError(string.Format("Failed to unload plugin {0}", plugin.Name), ex);
+            }
+        }
+
+        /// <summary>
+        /// 摘除插件订阅到宿主服务上的委托。范围覆盖所有已注册的宿主服务实例
+        /// （事件订阅、热键回调表、托盘回调等），以及 IPC 处理器表。
+        /// </summary>
+        private void SweepPluginDelegates(AssemblyLoadContext alc, PluginInfo plugin)
+        {
+            var removed = 0;
+
+            try
+            {
+                // _services 里是宿主服务实例（EventService/HotkeyService/TrayService…），
+                // 插件的事件订阅与回调就挂在它们身上。服务常把回调再转交给内部管理器
+                // （HotkeyService → GlobalHotkeyManager），故 Sweep 会向内递归若干层。
+                foreach (var service in _services.Values)
+                {
+                    removed += PluginDelegateCleaner.Sweep(service, alc);
+                }
+
+                if (_ipc != null)
+                {
+                    removed += PluginDelegateCleaner.Sweep(_ipc, alc);
+                }
+
+                // 宿主的静态事件：插件经服务包装订阅后同样钉住 ALC，实例扫描覆盖不到。
+                removed += PluginDelegateCleaner.SweepStaticEvents(typeof(NotificationCenterService), alc);
+                removed += PluginDelegateCleaner.SweepStaticEvents(typeof(ClipboardNotification), alc);
+
+                // 托盘菜单项的 Click 处理器与画布背景层的插件控件都挂在 WPF 可视化树上，
+                // 不在任何服务对象的字段里，需要按插件 ID 显式拆除。
+                RemovePluginUiArtifacts(plugin);
+
+                if (removed > 0)
+                {
+                    Log(string.Format("Detached {0} host delegate(s) owned by plugin {1}", removed, plugin.Name));
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError(string.Format("Failed to detach host delegates for plugin {0}", plugin.Name), ex);
+            }
+        }
+
+        /// <summary>
+        /// 拆除插件留在 WPF 可视化树上的痕迹：托盘菜单项与画布背景层。
+        /// 这些控件不在任何服务对象的字段里，反射扫描覆盖不到，但它们的事件处理器
+        /// 指向插件程序集，同样会阻止 ALC 卸载。
+        /// </summary>
+        private void RemovePluginUiArtifacts(PluginInfo plugin)
+        {
+            try
+            {
+                var app = Application.Current as App;
+                if (app == null) return;
+
+                void Cleanup()
+                {
+                    try
+                    {
+                        // 托盘菜单项按 "PluginTray.<id>" 命名，插件注册时用的就是自己的组件 Id；
+                        // 这里按插件 Id 前缀匹配，覆盖插件注册多个菜单项的情况。
+                        app.RemovePluginTrayMenuItemsByPrefix(plugin.Id);
+
+                        // 背景层是插件工厂产出的控件，卸载后必须摘掉，否则画布一直持有它。
+                        if (app.MainWindow is MainWindow mainWindow && mainWindow.HasPluginBackgroundLayer)
+                        {
+                            mainWindow.RemovePluginBackgroundLayer();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogError(string.Format("Failed to remove UI artifacts for plugin {0}", plugin.Name), ex);
+                    }
+                }
+
+                // 必须同步执行：卸载流程紧接着就要 GC 校验 ALC 是否释放，
+                // 异步排队会让这些引用在校验时仍然存在，导致误报"未完全卸载"。
+                if (app.Dispatcher.CheckAccess()) Cleanup();
+                else app.Dispatcher.Invoke(Cleanup);
+            }
+            catch (Exception ex)
+            {
+                LogError(string.Format("Failed to clean plugin UI artifacts for {0}", plugin.Name), ex);
+            }
+        }
+
+        /// <summary>
+        /// 等待指定插件的 ALC 被 GC 真正回收，返回是否卸载成功。
+        /// <para>
+        /// <see cref="AssemblyLoadContext.Unload"/> 只是发起卸载请求，实际释放要等 GC 确认
+        /// 无人引用。这里做有限次 GC 后检查弱引用；仍存活说明宿主某处还留着插件对象，
+        /// 属于注册撤销不完整，调用方据此决定是否回退到重启。
+        /// </para>
+        /// </summary>
+        public bool WaitForUnload(string pluginId, int maxAttempts = 10)
+        {
+            if (string.IsNullOrEmpty(pluginId)) return true;
+            if (!_unloadingContexts.TryGetValue(pluginId, out var weakRef)) return true;
+
+            for (var attempt = 0; attempt < maxAttempts; attempt++)
+            {
+                GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true);
+                GC.WaitForPendingFinalizers();
+
+                if (!weakRef.IsAlive)
+                {
+                    _unloadingContexts.Remove(pluginId);
+                    Log(string.Format("Plugin ALC unloaded after {0} GC pass(es): {1}", attempt + 1, pluginId));
+                    return true;
+                }
+            }
+
+            LogError(string.Format(
+                "Plugin ALC for {0} is still alive after {1} GC passes; some host reference is pinning it (hot reload will fall back to restart).",
+                pluginId, maxAttempts));
+            return false;
+        }
+
+        /// <summary>
+        /// 热重载单个插件：卸载 → 校验 ALC 已释放 → 从磁盘重新发现并加载。
+        /// 用于插件开发时直接覆盖 DLL 后免重启生效，也用于市场更新的热更新路径。
+        /// </summary>
+        /// <returns>重载结果，<see cref="PluginReloadResult.Success"/> 为 false 时调用方应提示重启。</returns>
+        public PluginReloadResult ReloadPlugin(string pluginId)
+        {
+            if (string.IsNullOrEmpty(pluginId))
+                return PluginReloadResult.Failed("Plugin id is empty.");
+
+            var existing = _plugins.FirstOrDefault(p => string.Equals(p.Id, pluginId, StringComparison.OrdinalIgnoreCase));
+            var folderPath = existing?.PluginFolderPath;
+
+            if (existing != null)
+            {
+                UnloadPlugin(existing);
+            }
+
+            var unloaded = WaitForUnload(pluginId);
+
+            // 即便 ALC 未完全释放也继续尝试加载：程序集是从字节加载的，文件没有被锁，
+            // 新版本仍能读入；只是旧版本的类型会滞留在内存中，故需要如实告知调用方。
+            DiscoverPlugins();
+
+            var reloaded = _plugins.FirstOrDefault(p => string.Equals(p.Id, pluginId, StringComparison.OrdinalIgnoreCase)
+                                                        && p.LoadStatus == PluginLoadStatus.NotLoaded);
+            if (reloaded == null)
+            {
+                // 插件目录已被删除属于正常卸载，不算失败。
+                if (!string.IsNullOrEmpty(folderPath) && !Directory.Exists(folderPath))
+                    return new PluginReloadResult { Success = true, FullyUnloaded = unloaded, WasRemoved = true };
+
+                return PluginReloadResult.Failed(string.Format("Plugin {0} was not rediscovered after unload.", pluginId));
+            }
+
+            try
+            {
+                LoadPlugin(reloaded);
+            }
+            catch (Exception ex)
+            {
+                reloaded.LoadStatus = PluginLoadStatus.Error;
+                reloaded.Exception = ex;
+                LogError(string.Format("Failed to reload plugin {0}", pluginId), ex);
+                return PluginReloadResult.Failed(ex.Message);
+            }
+
+            _plugins.Sort((a, b) => a.Order.CompareTo(b.Order));
+            BuildServiceProvider();
+            _market?.RefreshMergedPlugins();
+            RefreshToolbars();
+
+            if (reloaded.LoadStatus != PluginLoadStatus.Loaded)
+            {
+                return PluginReloadResult.Failed(
+                    reloaded.Exception?.Message ?? string.Format("Plugin {0} did not reach Loaded state.", pluginId));
+            }
+
+            Log(string.Format("Plugin hot-reloaded: {0} v{1} (ALC fully unloaded: {2})",
+                reloaded.Name, reloaded.Version, unloaded));
+
+            return new PluginReloadResult { Success = true, FullyUnloaded = unloaded };
+        }
+
+        /// <summary>
+        /// 重建浮动工具栏与白板工具栏，让插件组件的增删立即反映到 UI。
+        /// </summary>
+        private void RefreshToolbars()
+        {
+            try
+            {
+                if (Application.Current?.MainWindow is MainWindow mainWindow)
+                {
+                    mainWindow.Dispatcher.InvokeAsync(() =>
+                    {
+                        mainWindow.RebuildToolbar();
+                        mainWindow.RebuildBoardToolbar();
+                    }, System.Windows.Threading.DispatcherPriority.Loaded);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError("Failed to rebuild toolbars after plugin reload", ex);
             }
         }
 
@@ -1135,6 +1394,7 @@ namespace Ink_Canvas.Plugins
         {
             _services[typeof(T)] = service;
             _serviceCollection.AddSingleton(typeof(T), service);
+            TrackServiceRegistration(typeof(T));
         }
 
         /// <summary>
@@ -1144,6 +1404,47 @@ namespace Ink_Canvas.Plugins
         {
             _services[serviceType] = service;
             _serviceCollection.AddSingleton(serviceType, service);
+            TrackServiceRegistration(serviceType);
+        }
+
+        /// <summary>
+        /// 若当前处于某插件的 Initialize 阶段，记录它注册的服务类型，卸载时一并撤销。
+        /// 宿主自身在启动时注册的服务不属于任何插件范围，不会被记录。
+        /// </summary>
+        private void TrackServiceRegistration(Type serviceType)
+        {
+            var scope = GetCurrentScope();
+            if (scope == null || serviceType == null) return;
+
+            scope.RegisteredServiceTypes.Add(serviceType);
+            TrackUndo("service:" + serviceType.Name, () =>
+            {
+                _services.Remove(serviceType);
+                for (var i = _serviceCollection.Count - 1; i >= 0; i--)
+                {
+                    if (_serviceCollection[i].ServiceType == serviceType)
+                        _serviceCollection.RemoveAt(i);
+                }
+            });
+        }
+
+        /// <summary>
+        /// 当前正在 Initialize 的插件对应的撤销范围；不在插件加载期间时返回 null。
+        /// </summary>
+        private PluginRegistrationScope GetCurrentScope()
+        {
+            var pluginId = _currentLoadingPlugin?.Id;
+            if (string.IsNullOrEmpty(pluginId)) return null;
+            return _registrationScopes.TryGetValue(pluginId, out var scope) ? scope : null;
+        }
+
+        /// <summary>
+        /// 把一个撤销动作记入当前插件的范围。不在插件加载期间调用时静默忽略
+        /// （宿主自身的注册不需要撤销）。
+        /// </summary>
+        private void TrackUndo(string description, Action undo)
+        {
+            GetCurrentScope()?.Track(description, undo);
         }
 
         /// <summary>
@@ -1169,6 +1470,11 @@ namespace Ink_Canvas.Plugins
                 {
                     MarkToolbarRegistered();
                 }
+
+                var itemId = itemInfo.Id;
+                TrackUndo("toolbar:" + itemId,
+                    () => Controls.Toolbar.FloatingToolbar.ToolbarRegistry.UnregisterPluginItem(itemId));
+
                 Log(string.Format("Plugin registered toolbar item: {0} (autoAdd={1})", itemInfo.Id, isFirstRegistration));
             }
             catch (Exception ex)
@@ -1176,6 +1482,7 @@ namespace Ink_Canvas.Plugins
                 LogError(string.Format("Failed to register toolbar item {0}", itemInfo.Id), ex);
             }
         }
+
 
         /// <summary>
         /// 向白板工具栏注册插件组件。行为与 <see cref="RegisterToolbarItem"/> 相同，仅目标工具栏不同。
@@ -1194,6 +1501,10 @@ namespace Ink_Canvas.Plugins
                 {
                     MarkToolbarRegistered();
                 }
+
+                var itemId = itemInfo.Id;
+                TrackUndo("boardToolbar:" + itemId,
+                    () => Controls.Toolbar.BoardToolbar.BoardToolbarRegistry.UnregisterPluginItem(itemId));
 
                 // 白板工具栏已构建时延迟重建以显示插件组件（在 Initialize 完成后执行，
                 // 避免 ViewFactory 依赖尚未初始化完成的插件状态）。
@@ -1254,6 +1565,9 @@ namespace Ink_Canvas.Plugins
                 _ipc.Start();
             }
             _ipc.RegisterHandler(method, handler);
+
+            var ipc = _ipc;
+            TrackUndo("ipc:" + method, () => ipc.UnregisterHandler(method, handler));
         }
 
         /// <summary>
@@ -1327,7 +1641,16 @@ namespace Ink_Canvas.Plugins
                 _uriHandlers[pluginId] = map;
             }
             map[key] = handler;
+            TrackUndo("uri:" + pluginId + "/" + key, () =>
+            {
+                if (_uriHandlers.TryGetValue(pluginId, out var m))
+                {
+                    m.Remove(key);
+                    if (m.Count == 0) _uriHandlers.Remove(pluginId);
+                }
+            });
             Log(string.Format("Plugin registered URI handler: {0}/{1}", pluginId, string.IsNullOrEmpty(key) ? "(catch-all)" : key));
+
         }
 
         /// <summary>
@@ -1523,7 +1846,7 @@ namespace Ink_Canvas.Plugins
                 {
                     if (_info != null && _authorization != null && !_authorization.RequestExternalAuthorization(_info, assemblyPath))
                         return null;
-                    return LoadFromAssemblyPath(assemblyPath);
+                    return LoadWithoutLockingFile(assemblyPath);
                 }
 
                 // 4. 扁平回退：直接探测 <插件目录>/<SimpleName>.dll。
@@ -1536,11 +1859,39 @@ namespace Ink_Canvas.Plugins
                     {
                         if (_authorization != null && !_authorization.RequestExternalAuthorization(_info, flatPath))
                             return null;
-                        return LoadFromAssemblyPath(flatPath);
+                        return LoadWithoutLockingFile(flatPath);
                     }
                 }
 
                 return null;
+            }
+
+            /// <summary>
+            /// 从字节数组加载程序集，避免 <see cref="AssemblyLoadContext.LoadFromAssemblyPath"/>
+            /// 对文件加内存映射锁。热重载依赖这一点：DLL 不被占用，才能在运行期直接覆盖。
+            /// 若旁边存在 .pdb 则一并载入，保证热重载后异常堆栈仍有行号。
+            /// </summary>
+            internal Assembly LoadWithoutLockingFile(string path)
+            {
+                var assemblyBytes = File.ReadAllBytes(path);
+                var pdbPath = Path.ChangeExtension(path, ".pdb");
+
+                if (File.Exists(pdbPath))
+                {
+                    try
+                    {
+                        using var pdbStream = new MemoryStream(File.ReadAllBytes(pdbPath));
+                        using var peStream = new MemoryStream(assemblyBytes);
+                        return LoadFromStream(peStream, pdbStream);
+                    }
+                    catch (Exception)
+                    {
+                        // pdb 损坏或版本不匹配时退回无符号加载，不因调试信息问题阻断插件加载。
+                    }
+                }
+
+                using var stream = new MemoryStream(assemblyBytes);
+                return LoadFromStream(stream);
             }
 
             protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)

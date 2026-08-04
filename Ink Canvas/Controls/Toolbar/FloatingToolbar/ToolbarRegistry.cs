@@ -287,6 +287,30 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
         public static IReadOnlyList<PluginToolbarItemInfo> GetPluginItems() => _pluginItems.AsReadOnly();
 
+        /// <summary>
+        /// 注销插件注册的工具栏组件，断开对插件程序集中委托（ViewFactory 等）的引用。
+        /// 热重载必需：这些委托只要还留在静态表里，插件 ALC 就永远卸载不掉。
+        /// 只清注册表与已构建的 <see cref="_items"/> 缓存，不动用户的布局配置文件——
+        /// 重载后同 Id 组件会重新注册，用户摆好的位置得以保留。
+        /// </summary>
+        public static bool UnregisterPluginItem(string itemId)
+        {
+            if (string.IsNullOrEmpty(itemId)) return false;
+
+            var removed = _pluginItems.RemoveAll(
+                item => string.Equals(item.Id, itemId, StringComparison.OrdinalIgnoreCase)) > 0;
+
+            // _items 里存的是包着 PluginToolbarItemInfo 的 wrapper，同样持有插件委托，必须一并移除。
+            _items?.RemoveAll(item => item is PluginToolbarItemWrapper
+                                      && string.Equals(item.Id, itemId, StringComparison.OrdinalIgnoreCase));
+
+            if (removed)
+                LogHelper.WriteLogToFile($"ToolbarRegistry: 已注销插件工具栏项 [{itemId}]", LogHelper.LogType.Info);
+
+            return removed;
+        }
+
+
         #region Config file system
 
         public static string GetConfigDirectory()

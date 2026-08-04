@@ -118,6 +118,27 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                 LogHelper.LogType.Info);
         }
 
+        /// <summary>
+        /// 注销插件注册的白板工具栏组件，断开对插件程序集中委托的引用。语义同
+        /// <see cref="FloatingToolbar.ToolbarRegistry.UnregisterPluginItem"/>：热重载必需，
+        /// 且不动用户布局配置。
+        /// </summary>
+        public static bool UnregisterPluginItem(string itemId)
+        {
+            if (string.IsNullOrEmpty(itemId)) return false;
+
+            var removed = _pluginItems.RemoveAll(
+                item => string.Equals(item.Id, itemId, StringComparison.OrdinalIgnoreCase)) > 0;
+
+            _items?.RemoveAll(item => item is PluginBoardToolbarItemWrapper
+                                      && string.Equals(item.Id, itemId, StringComparison.OrdinalIgnoreCase));
+
+            if (removed)
+                LogHelper.WriteLogToFile($"BoardToolbarRegistry: 已注销插件白板工具栏组件 [{itemId}]", LogHelper.LogType.Info);
+
+            return removed;
+        }
+
         #endregion
 
         public static FrameworkElement BuildView(string id, IBoardToolbarHost host)

@@ -750,6 +750,35 @@ namespace Ink_Canvas
             catch { return false; }
         }
 
+        /// <summary>
+        /// 移除某个插件注册的所有托盘菜单项。插件热重载时调用：菜单项的 Click 处理器
+        /// 闭包持有插件程序集中的回调，留着会阻止插件 AssemblyLoadContext 卸载。
+        /// 按 "PluginTray.&lt;pluginId&gt;" 前缀匹配，覆盖插件注册多个菜单项的情况。
+        /// </summary>
+        internal int RemovePluginTrayMenuItemsByPrefix(string pluginId)
+        {
+            if (string.IsNullOrWhiteSpace(pluginId)) return 0;
+            try
+            {
+                var trayMenu = GetPluginTaskbarIcon()?.ContextMenu;
+                if (trayMenu == null) return 0;
+
+                var prefix = "PluginTray." + pluginId;
+                var doomed = trayMenu.Items.OfType<MenuItem>()
+                    .Where(mi => mi.Name != null
+                                 && (mi.Name == prefix || mi.Name.StartsWith(prefix + ".", StringComparison.Ordinal)))
+                    .ToList();
+
+                foreach (var item in doomed) trayMenu.Items.Remove(item);
+                return doomed.Count;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"按插件移除托盘菜单项失败: {ex.Message}", LogHelper.LogType.Warning);
+                return 0;
+            }
+        }
+
         internal void ShowPluginMainWindow()
         {
             var mainWin = Current.MainWindow as MainWindow;

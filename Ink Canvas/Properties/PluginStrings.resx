@@ -158,6 +158,18 @@
   <data name="Plugin_Update" xml:space="preserve">
     <value>更新</value>
   </data>
+  <data name="Plugin_Reload" xml:space="preserve">
+    <value>热重载插件</value>
+  </data>
+  <data name="Plugin_ReloadSuccess" xml:space="preserve">
+    <value>插件已热重载完成，无需重启。</value>
+  </data>
+  <data name="Plugin_ReloadPartial" xml:space="preserve">
+    <value>插件已重新加载，但旧程序集仍在内存中。建议重启应用以彻底释放旧版本。</value>
+  </data>
+  <data name="Plugin_ReloadFailed" xml:space="preserve">
+    <value>插件热重载失败：{0}</value>
+  </data>
   <data name="Plugin_Delete" xml:space="preserve">
     <value>删除</value>
   </data>

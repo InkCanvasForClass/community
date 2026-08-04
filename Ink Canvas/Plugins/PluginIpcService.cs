@@ -80,6 +80,22 @@ namespace Ink_Canvas.Plugins
         }
 
         /// <summary>
+        /// 注销之前注册的处理函数（按引用匹配）。插件卸载时必须调用，
+        /// 否则委托留在 <see cref="_handlers"/> 中会钉住插件 ALC，导致热重载失效。
+        /// </summary>
+        public bool UnregisterHandler(string method, Func<System.Text.Json.JsonElement?, object> handler)
+        {
+            if (string.IsNullOrEmpty(method) || handler == null) return false;
+            lock (_lock)
+            {
+                if (!_handlers.TryGetValue(method, out var list)) return false;
+                var removed = list.Remove(handler);
+                if (list.Count == 0) _handlers.Remove(method);
+                return removed;
+            }
+        }
+
+        /// <summary>
         /// 主动调用对端，<paramref name="args"/> 是任意 JSON 结构。
         /// 失败时抛出 <see cref="InvalidOperationException"/>。
         /// </summary>
