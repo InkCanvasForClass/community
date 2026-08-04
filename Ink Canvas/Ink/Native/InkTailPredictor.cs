@@ -677,8 +677,9 @@ namespace Ink_Canvas.Ink.Native
 
         public void Reset()
         {
+            // 不归零速度，只重置时间戳与首帧标记：避免预测中断后重新开始
+            // 时首帧直接返回全速（瞬间拉满），保留渐进伸长。
             _hasPrevious = false;
-            _previousSpeed = 0;
             _previousTimestampMicroseconds = 0;
         }
 
@@ -689,10 +690,15 @@ namespace Ink_Canvas.Ink.Native
             var timestamp = realPoints[realPoints.Count - 1].TimestampMicroseconds;
             if (!_hasPrevious)
             {
+                // 首帧：从上次保留的速度向 target 渐进（不直接跳到全速），
+                // 避免预测中断后重新开始瞬间拉满。用固定小 alpha 渐进，
+                // 不依赖时间差（Reset 后时间戳被归零）。
                 _hasPrevious = true;
-                _previousSpeed = targetSpeed;
                 _previousTimestampMicroseconds = timestamp;
-                return targetSpeed;
+                if (_previousSpeed <= 0)
+                    return targetSpeed;
+                _previousSpeed += (targetSpeed - _previousSpeed) * 0.15;
+                return _previousSpeed;
             }
 
             var deltaMilliseconds = (timestamp - _previousTimestampMicroseconds) / 1000.0;
