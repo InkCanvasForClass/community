@@ -17,12 +17,14 @@ namespace Ink_Canvas.Ink.Native
 
         // 时间戳异常回退时用的名义报点间隔。
         private const long DefaultStepMicroseconds = 10_000L;
-        private const long MinStepMicroseconds = 2_000L;
 
-        // 视界内的采样粒度：约 4ms 一个预测点，再按上下限收敛点数。
-        private const double TargetStepMilliseconds = 4.0;
-        private const int MinPointCount = 3;
-        private const int MaxPointCount = 12;
+        // 预测点数固定，只让步长随视界变。点数一旦随视界量化（ceil(视界/步长) 再夹上下限），
+        // 视界在量化边界附近抖动就会让笔尾整段地长出来又缩回去，观感就是“一抽一抽”。
+        private const int PredictionPointCount = 8;
+
+        // 速度估计窗口：单段差分对报点间隔抖动过于敏感，用指数加权的最近若干段取代。
+        private const int VelocityWindowSegments = 5;
+        private const double VelocityWindowDecay = 0.6;
 
         private const double MaxPredictionSpeedPxPerSecond = 8_000.0;
         // 真实速度低于此值时不再强制返回空，而是按一档极小速度继续外推，
@@ -39,6 +41,11 @@ namespace Ink_Canvas.Ink.Native
         private const double TurnFullAngleDegrees = 60.0;
         private const double MinTurnScale = 0.2;
 
+        // 笔速时间平滑常数（毫秒）。速度估计即使做了多段加权仍有残余抖动，
+        // 逐帧重算会让笔尾长度反复伸缩（“一抽一抽”）。在源头平滑速度可一次性
+        // 覆盖视界基线、距离约束与外推积分全部下游路径。按真实报点间隔推进。
+        internal const double SpeedTauMilliseconds = 32.0;
+
         // 报点停滞抑制：间隔越大速度越陈旧，外推越不可信。
         private const double FreshSampleIntervalMilliseconds = 12.0;
         private const double StaleSampleIntervalMilliseconds = 40.0;
@@ -51,6 +58,8 @@ namespace Ink_Canvas.Ink.Native
 
         /// <summary>
         /// 按当前笔速与曲率自适应决定外推时长后构建预测笔尾。
+        /// 无跨帧状态：视界完全由当前点集决定，逐帧重算会有抖动。
+        /// 实时书写路径应改用 <see cref="InkTailPredictionSmoother"/>。
         /// </summary>
         public static IReadOnlyList<PredictedInkPoint> Build(IReadOnlyList<RealInkPoint> realPoints)
         {
@@ -60,6 +69,49 @@ namespace Ink_Canvas.Ink.Native
             var horizonMicroseconds = ComputeAdaptiveHorizonMicroseconds(realPoints, motion);
             ResolveSampling(horizonMicroseconds, out var pointCount, out var stepMicroseconds);
             return Extrapolate(realPoints, motion, pointCount, stepMicroseconds);
+        }
+
+        /// <summary>
+        /// 与 <see cref="Build"/> 相同，但笔速先经过调用方持有的时间平滑器。
+        /// 平滑速度而非平滑视界：视界基线、最大外推距离约束、外推积分本身全都由速度派生，
+        /// 只平滑其中一项会被其余未平滑项重新引入抖动。方向与拐弯/停滞抑制不受影响。
+        /// </summary>
+        internal static IReadOnlyList<PredictedInkPoint> Build(
+            IReadOnlyList<RealInkPoint> realPoints,
+            InkTailPredictionSmoother smoother)
+        {
+            if (smoother == null)
+                return Build(realPoints);
+            if (!TryEstimateMotion(realPoints, out var motion))
+            {
+                smoother.Reset();
+                return Array.Empty<PredictedInkPoint>();
+            }
+
+            motion = RescaleToSpeed(
+                motion,
+                smoother.SmoothSpeed(motion.Speed, realPoints));
+            var horizonMicroseconds = ComputeAdaptiveHorizonMicroseconds(realPoints, motion);
+            ResolveSampling(horizonMicroseconds, out var pointCount, out var stepMicroseconds);
+            return Extrapolate(realPoints, motion, pointCount, stepMicroseconds);
+        }
+
+        /// <summary>
+        /// 把运动量整体缩放到目标速率，保持方向、加速度比例与拐弯抑制系数不变。
+        /// </summary>
+        private static InkTailMotion RescaleToSpeed(InkTailMotion motion, double targetSpeed)
+        {
+            if (motion.Speed <= 0.0001 || targetSpeed <= 0)
+                return motion;
+
+            var scale = targetSpeed / motion.Speed;
+            return new InkTailMotion(
+                motion.VelocityX * scale,
+                motion.VelocityY * scale,
+                motion.AccelerationX * scale,
+                motion.AccelerationY * scale,
+                targetSpeed,
+                motion.TurnScale);
         }
 
         private static IReadOnlyList<PredictedInkPoint> Extrapolate(
@@ -133,18 +185,40 @@ namespace Ink_Canvas.Ink.Native
         }
 
         /// <summary>
-        /// 视界 = 速度映射基线 × 拐弯抑制 × 停滞抑制，再受最大外推距离约束，最终夹在 10~50ms。
+        /// 视界 = 速度映射基线 × 拐弯抑制 × 停滞抑制，再受最大外推距离约束，最终夹在 10~36ms。
         /// </summary>
         private static double ComputeAdaptiveHorizonMicroseconds(
             IReadOnlyList<RealInkPoint> realPoints,
             InkTailMotion motion)
         {
+            return ApplyHorizonSuppression(
+                ComputeSpeedBaselineMilliseconds(motion),
+                realPoints,
+                motion);
+        }
+
+        /// <summary>
+        /// 仅由笔速决定的视界基线（毫秒）。这一项含速度估计的残余抖动，是需要跨帧平滑的部分。
+        /// </summary>
+        private static double ComputeSpeedBaselineMilliseconds(InkTailMotion motion)
+        {
             // 按速度的对数归一化：线性归一化会把 40~250px/s 整段压进 t<0.1，
             // 超低速因而贴死下限；人对笔速的感知本身也接近对数。
             var speedT = NormalizeSpeed(motion.Speed);
-
-            var horizon = MinHorizonMilliseconds
+            return MinHorizonMilliseconds
                 + (MaxHorizonMilliseconds - MinHorizonMilliseconds) * speedT;
+        }
+
+        /// <summary>
+        /// 在（可能已平滑的）速度基线上施加拐弯/停滞抑制与距离约束。
+        /// 这些抑制必须当帧全量生效，不能被平滑拖慢，否则拐弯时笔尾会甩到弯道外侧。
+        /// </summary>
+        private static double ApplyHorizonSuppression(
+            double baselineMilliseconds,
+            IReadOnlyList<RealInkPoint> realPoints,
+            InkTailMotion motion)
+        {
+            var horizon = baselineMilliseconds;
             horizon *= motion.TurnScale;
             horizon *= ComputeStaleScale(realPoints);
 
@@ -164,17 +238,10 @@ namespace Ink_Canvas.Ink.Native
             out int pointCount,
             out long stepMicroseconds)
         {
-            var desired = (int)Math.Ceiling(horizonMicroseconds / (TargetStepMilliseconds * 1000.0));
-            pointCount = Math.Clamp(desired, MinPointCount, MaxPointCount);
-            // 向下取整，保证 点数 × 步长 不越过视界上限。
-            stepMicroseconds = Math.Max(
-                MinStepMicroseconds,
-                (long)(horizonMicroseconds / pointCount));
-            // 步长被下限抬高时相应收敛点数。
-            pointCount = Math.Clamp(
-                (int)(horizonMicroseconds / stepMicroseconds),
-                1,
-                pointCount);
+            // 点数恒定，步长连续随视界变化：视界平滑变化时笔尾长度也连续变化，
+            // 不会因为点数量化而整段跳变。
+            pointCount = PredictionPointCount;
+            stepMicroseconds = (long)(horizonMicroseconds / pointCount);
         }
 
         /// <summary>
@@ -306,9 +373,31 @@ namespace Ink_Canvas.Ink.Native
 
             var last = realPoints[realPoints.Count - 1];
             var secondLast = realPoints[realPoints.Count - 2];
-            if (!TrySegmentVelocity(secondLast, last, out velocityX, out velocityY))
+
+            // 指数加权最近若干段速度：单段差分会把 ±2ms 的报点间隔抖动放大成 20% 以上的
+            // 速度抖动，进而让视界逐帧跳变，笔尾观感发抽。越靠笔尖的段权重越高。
+            var sumX = 0.0;
+            var sumY = 0.0;
+            var weightSum = 0.0;
+            var weight = 1.0;
+            var oldest = Math.Max(1, realPoints.Count - VelocityWindowSegments);
+            for (var i = realPoints.Count - 1; i >= oldest; i--, weight *= VelocityWindowDecay)
             {
-                // 时间戳异常时，按默认步长把弦长当作速度。
+                if (!TrySegmentVelocity(realPoints[i - 1], realPoints[i], out var vx, out var vy))
+                    continue;
+                sumX += weight * vx;
+                sumY += weight * vy;
+                weightSum += weight;
+            }
+
+            if (weightSum > 0)
+            {
+                velocityX = sumX / weightSum;
+                velocityY = sumY / weightSum;
+            }
+            else
+            {
+                // 整个窗口的时间戳都异常时，按默认步长把弦长当作速度。
                 var chordX = last.X - secondLast.X;
                 var chordY = last.Y - secondLast.Y;
                 var chordLen = Math.Sqrt(chordX * chordX + chordY * chordY);
@@ -328,13 +417,15 @@ namespace Ink_Canvas.Ink.Native
             var thirdLast = realPoints[realPoints.Count - 3];
             if (!TrySegmentVelocity(thirdLast, secondLast, out var prevVx, out var prevVy))
                 return;
+            if (!TrySegmentVelocity(secondLast, last, out var latestVx, out var latestVy))
+                return;
 
             // 用最近两段速度差估计加速度，使转弯时的预测更跟手。
             var dt = (last.TimestampMicroseconds - secondLast.TimestampMicroseconds) / 1_000_000.0;
             if (dt <= 0.000001)
                 dt = DefaultStepMicroseconds / 1_000_000.0;
-            accelerationX = (velocityX - prevVx) / dt;
-            accelerationY = (velocityY - prevVy) / dt;
+            accelerationX = (latestVx - prevVx) / dt;
+            accelerationY = (latestVy - prevVy) / dt;
 
             // 限制加速度，避免噪声把笔尾甩飞。
             var accel = Math.Sqrt(accelerationX * accelerationX + accelerationY * accelerationY);
@@ -421,6 +512,51 @@ namespace Ink_Canvas.Ink.Native
             public double AccelerationY { get; }
             public double Speed { get; }
             public double TurnScale { get; }
+        }
+    }
+
+    /// <summary>
+    /// 单笔生命周期内的笔速平滑器。
+    /// 视界基线、最大外推距离约束、外推积分全部由笔速派生，因此速度估计的残余抖动会
+    /// 同时从多条路径把抖动带进笔尾长度（观感即“一抽一抽”）。在源头平滑速度可一次性
+    /// 覆盖全部下游路径。按真实报点间隔做指数平滑，报点率变化时平滑强度保持一致。
+    /// 方向、拐弯抑制、停滞抑制均不经过这里，急转时笔尾仍能当帧收回。
+    /// </summary>
+    internal sealed class InkTailPredictionSmoother
+    {
+        private bool _hasPrevious;
+        private double _previousSpeed;
+        private long _previousTimestampMicroseconds;
+
+        public void Reset()
+        {
+            _hasPrevious = false;
+            _previousSpeed = 0;
+            _previousTimestampMicroseconds = 0;
+        }
+
+        public double SmoothSpeed(
+            double targetSpeed,
+            IReadOnlyList<RealInkPoint> realPoints)
+        {
+            var timestamp = realPoints[realPoints.Count - 1].TimestampMicroseconds;
+            if (!_hasPrevious)
+            {
+                _hasPrevious = true;
+                _previousSpeed = targetSpeed;
+                _previousTimestampMicroseconds = timestamp;
+                return targetSpeed;
+            }
+
+            var deltaMilliseconds = (timestamp - _previousTimestampMicroseconds) / 1000.0;
+            _previousTimestampMicroseconds = timestamp;
+            if (deltaMilliseconds <= 0)
+                return _previousSpeed;
+
+            var alpha = 1.0 - Math.Exp(
+                -deltaMilliseconds / InkTailPredictor.SpeedTauMilliseconds);
+            _previousSpeed += (targetSpeed - _previousSpeed) * alpha;
+            return _previousSpeed;
         }
     }
 }

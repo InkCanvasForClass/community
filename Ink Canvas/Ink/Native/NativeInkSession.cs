@@ -48,6 +48,10 @@ namespace Ink_Canvas.Ink.Native
         public IReadOnlyList<RealInkPoint> RealPoints => _realPoints;
         public IReadOnlyList<PredictedInkPoint> PredictedPoints => _predictedPoints;
         /// <summary>
+        /// 本笔专属的预测视界时间平滑器，跨帧保持状态以压住笔尾长度的帧间抖动。
+        /// </summary>
+        internal InkTailPredictionSmoother TailSmoother { get; } = new InkTailPredictionSmoother();
+        /// <summary>
         // Increases whenever the point baseline is replaced mid-stroke (e.g.
         // straightening). Carried on snapshots so the wet renderer can discard
         // accumulated fixed geometry and rebuild.
@@ -92,6 +96,8 @@ namespace Ink_Canvas.Ink.Native
             _realPoints.Add(first);
             _realPoints.Add(last);
             _predictedPoints = Array.Empty<PredictedInkPoint>();
+            // 基线被整体替换，之前累积的视界平滑状态不再对应当前轨迹。
+            TailSmoother.Reset();
             _geometryGeneration++;
         }
 
