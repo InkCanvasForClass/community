@@ -46,6 +46,8 @@ namespace Ink_Canvas
         // 缓存后高频率 Update 直接返回原始 samples 数组，避免每帧 new RawInkSample[]。
         private Point _inkCanvasOriginInWindow = new Point(double.NaN, double.NaN);
         private bool _inkCanvasOriginCached;
+        // Dispatcher 延迟探针节流。
+        private long _lastDispatcherProbeMs;
 
         private void TryStartNativeWetInkPipeline()
         {
@@ -479,6 +481,21 @@ namespace Ink_Canvas
                         _nativePointerInputSource.RawMouseSampleCount,
                         _nativePointerInputSource.LegacyMouseSampleCount,
                         _nativePointerInputSource.RawMouseRegisterError);
+
+                // Dispatcher 延迟探针：测 UI 线程从「提交探针」到「执行」的排队延迟。
+                // 高频下只每 500ms 测一次，避免探针本身干扰。
+                var nowMs = Environment.TickCount64;
+                if (nowMs - _lastDispatcherProbeMs >= 500)
+                {
+                    _lastDispatcherProbeMs = nowMs;
+                    var sw = System.Diagnostics.Stopwatch.StartNew();
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        sw.Stop();
+                        Ink_Canvas.Ink.Native.NativeInkPerfProbe.RecordDispatcherDelay(
+                            sw.Elapsed.TotalMilliseconds);
+                    }), System.Windows.Threading.DispatcherPriority.Background);
+                }
 
                 if (!ShouldAcceptPointerBatch(batch))
                     return false;

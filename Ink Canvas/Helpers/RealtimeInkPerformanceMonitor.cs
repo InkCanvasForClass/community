@@ -279,6 +279,7 @@ namespace Ink_Canvas.Helpers
                 return;
             try
             {
+                Ink_Canvas.Ink.Native.NativeInkPerfProbe.UpdateGcAllocatedBytes();
                 WriteLiveStatus(GetSnapshot(), isActive: true);
             }
             catch (Exception ex)
@@ -481,6 +482,18 @@ namespace Ink_Canvas.Helpers
                     legacyMouseSampleCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.LegacyMouseSampleCount,
                     lastApplyMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.LastApplyMs, 3),
                     avgApplyMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.AverageApplyMs, 3),
+                    lastApplySnapshotUpdateMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.LastApplySnapshotUpdateMs, 3),
+                    lastApplyDrawMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.LastApplyDrawMs, 3),
+                    lastApplyPresentMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.LastApplyPresentMs, 3),
+                    maxApplySnapshotUpdateMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.MaxApplySnapshotUpdateMs, 3),
+                    maxApplyDrawMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.MaxApplyDrawMs, 3),
+                    maxApplyPresentMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.MaxApplyPresentMs, 3),
+                    // 系统级指标：GPU Present 阻塞 / Dispatcher 延迟 / GC 分配
+                    presentWasStillDrawingCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.PresentWasStillDrawingCount,
+                    lastPresentWasStillDrawingMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.LastPresentWasStillDrawingMs, 3),
+                    dispatcherDelayMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.LastDispatcherDelayMs, 3),
+                    maxDispatcherDelayMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.MaxDispatcherDelayMs, 3),
+                    gcAllocatedSinceLastFlushMB = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.GcAllocatedSinceLastFlushBytes, 3),
                     lastApplySampleCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.LastApplySampleCount,
                     lastApplySessionCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.LastApplySessionCount,
                     averageSamplePerFrame = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.AverageSamplePerFrame, 3),
