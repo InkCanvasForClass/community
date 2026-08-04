@@ -222,10 +222,9 @@ namespace Ink_Canvas.Ink.Native
                 return;
 
             _d2dContext.BeginDraw();
-            // FlipDiscard 后缓冲内容是上次 present 的残留，仅 forceClear 时清一次；
-            // 正常帧画满即可，省掉每次全屏 Clear 的开销。
-            if (forceClear)
-                _d2dContext.Clear(new Color4(0f, 0f, 0f, 0f));
+            // FlipDiscard 下 back buffer 内容在下一次 Present 后即失效（未定义），
+            // 必须每次 Clear，否则新帧会叠加上上帧的残留像素导致"重复+抖动"。
+            _d2dContext.Clear(new Color4(0f, 0f, 0f, 0f));
 
             if (!forceClear && _target.IsVisible)
             {
@@ -604,19 +603,24 @@ namespace Ink_Canvas.Ink.Native
                 if (update.DynamicTail != null)
                 {
                     _dynamicIsSinglePoint = update.DynamicTail.IsSinglePoint;
-                    if (_dynamicIsSinglePoint
-                        || (update.DynamicTail.Outline != null
-                            && update.DynamicTail.Outline.Count >= 3))
+                    if (_dynamicIsSinglePoint)
                     {
-                        if (!_dynamicIsSinglePoint)
-                        {
-                            _dynamicPath = RewritePath(factory, _dynamicPath, update.DynamicTail);
-                            _dynamicLaserCenterPath = RewriteLaserCenterPath(factory, _dynamicLaserCenterPath, update.DynamicTail);
-                        }
+                        // 单点笔尾不创建 path，Draw 走 DrawTip 分支。
                         _dynamicStartTip = update.DynamicTail.StartTip;
                         _dynamicEndTip = update.DynamicTail.EndTip;
                         _hasDynamic = true;
                     }
+                    else if (update.DynamicTail.Outline != null
+                        && update.DynamicTail.Outline.Count >= 3)
+                    {
+                        // 几何有效时才复用/新建 path；无效几何保持 null 让 Draw 跳过。
+                        _dynamicPath = RewritePath(factory, _dynamicPath, update.DynamicTail);
+                        _dynamicLaserCenterPath = RewriteLaserCenterPath(factory, _dynamicLaserCenterPath, update.DynamicTail);
+                        _dynamicStartTip = update.DynamicTail.StartTip;
+                        _dynamicEndTip = update.DynamicTail.EndTip;
+                        _hasDynamic = true;
+                    }
+                    // 几何无效：_hasDynamic 保持 false，Draw 跳过动态笔尾。
                 }
             }
 
@@ -752,11 +756,13 @@ namespace Ink_Canvas.Ink.Native
                     || geometry.Outline == null
                     || geometry.Outline.Count < 3)
                 {
-                    // 无有效轮廓：画空图元（清空 path 后仍持有资源）。
+                    // 无有效轮廓：清空 path 的可见几何（不调用 EndFigure，
+                    // 避免在未 BeginFigure 时进入 D2D sink 错误状态——
+                    // 历史上这里会让 FillGeometry 抛错导致 EndDraw 失败、
+                    // 后续帧不 Present，画面"重复+抖动"）。
                     using (var clear = path.Open())
                     {
                         clear.SetFillMode(Vortice.Direct2D1.FillMode.Winding);
-                        clear.EndFigure(FigureEnd.Closed);
                         clear.Close();
                     }
                     return;
