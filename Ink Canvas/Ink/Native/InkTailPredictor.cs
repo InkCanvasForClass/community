@@ -30,9 +30,6 @@ namespace Ink_Canvas.Ink.Native
         // 避免加速度/减速阶段的帧间笔尾闪烁消失。`Build` 仍会在点数不足、停驻、完全 NaN 时返回空。
         private const double MinEffectiveSpeedPxPerSecond = 5.0;
         private const double MaxPredictionDistancePx = 50.0;
-        // 高速状态下的距离上限时间预算：speed * 本常量 = 单帧外推距离上限。
-        // 12ms ≈ 视界 24ms 的一半，让高速时笔尾稳步缩一半，防止 50px 死值顶到极长。
-        private const double MaxPredictionDistanceCapMs = 12.0;
         // 曲率外推单步最大转角（弧度，≈7°）。配合 18 个预测点，最大总转角 ≈126°，
         // 加上距离 cap 截断，笔尾呈自然弧线，避免小半径+高速下"瞬时甩飞"。
         private const double MaxStepAngleRadians = 0.12;
@@ -185,7 +182,11 @@ namespace Ink_Canvas.Ink.Native
                     // 之前 deltaAngle 也乘 angleSign，等于符号相消，导致方向反。
                     // 截到 MaxStepAngleRadians 防止小半径+大步长导致单步大幅旋转
                     // （高速过急弯时笔尾瞬时甩飞）。
-                    var deltaAngle = Math.Min(stepDist / circleRadius, MaxStepAngleRadians);
+                    // 拟合半径钳到 [80, 600]：画圆 R=100-300 走真实值；接近直线时
+                    // 拟合半径异常大（>600），钳到 600 让 deltaAngle 极小退化
+                    // 为线性外推，避免轻微偏差时笔尾"上下乱甩"。R<80 视为噪声。
+                    var effectiveRadius = Math.Clamp(circleRadius, 80.0, 600.0);
+                    var deltaAngle = Math.Min(stepDist / effectiveRadius, MaxStepAngleRadians);
                     var rx = currX - circleX;
                     var ry = currY - circleY;
                     var cosA = Math.Cos(deltaAngle);
@@ -230,12 +231,13 @@ namespace Ink_Canvas.Ink.Native
                 var stepDistance = Math.Sqrt(
                     (currX - prevX) * (currX - prevX)
                     + (currY - prevY) * (currY - prevY));
-                // 高速时距离上限按速度收敛：单帧外推距不超过 speed*SpeedDistanceCapMs，
-                // 防止高速下笔尾被 50px 死值顶到极长。
+                // 距离上限按当前视界（minHorizon）收敛：speed * minHorizon。
+                // 避免 50px 死值在高速下顶到极限（让笔尾"看起来固定长度"，
+                // 没有视界感），按视界缩放使笔尾长度与视界变化一致。
                 var speed = Math.Sqrt(vx * vx + vy * vy);
                 var distanceCap = Math.Min(
                     MaxPredictionDistancePx,
-                    speed * MaxPredictionDistanceCapMs);
+                    speed * (MinHorizonMilliseconds * 0.001));
                 traveled += stepDistance;
                 if (traveled > distanceCap)
                     break;
