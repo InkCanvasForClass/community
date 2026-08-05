@@ -246,6 +246,9 @@
   <data name="Storage_SaveAsXml" xml:space="preserve">
     <value>Save as XML format</value>
   </data>
+  <data name="Storage_SaveAsUInk" xml:space="preserve">
+    <value>Save as UInk format (cross-app interoperability)</value>
+  </data>
   <data name="Storage_SaveFullPageStrokes" xml:space="preserve">
     <value>Save full-page strokes</value>
   </data>

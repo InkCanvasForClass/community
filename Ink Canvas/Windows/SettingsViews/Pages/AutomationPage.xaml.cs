@@ -77,6 +77,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardAutoSaveStrokesAtScreenshot.IsOn = auto.IsAutoSaveStrokesAtScreenshot;
             CardAutoSaveStrokesAtClear.IsOn = auto.IsAutoSaveScreenshotAtClear;
             CardSaveStrokesAsXML.IsOn = auto.IsSaveStrokesAsXML;
+            CardSaveStrokesAsUInk.IsOn = auto.IsSaveStrokesAsUInK;
             CardEnableAutoSaveStrokes.IsOn = auto.IsEnableAutoSaveStrokes;
 
             var interval = auto.AutoSaveStrokesIntervalMinutes;
@@ -422,6 +423,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.Automation.IsSaveStrokesAsXML = CardSaveStrokesAsXML.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchSaveStrokesAsUInK_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Automation.IsSaveStrokesAsUInK = CardSaveStrokesAsUInk.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 

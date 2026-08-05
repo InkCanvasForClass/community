@@ -1286,6 +1286,9 @@ namespace Ink_Canvas
         [JsonProperty("isSaveStrokesAsXML")]
         public bool IsSaveStrokesAsXML { get; set; } = false;
 
+        [JsonProperty("isSaveStrokesAsUInK")]
+        public bool IsSaveStrokesAsUInK { get; set; } = false;
+
         [JsonProperty("isAutoEnterAnnotationAfterKillHite")]
         public bool IsAutoEnterAnnotationAfterKillHite { get; set; }
 

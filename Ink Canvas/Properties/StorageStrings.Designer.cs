@@ -168,6 +168,8 @@ namespace Ink_Canvas.Properties
 
         public static string Storage_SaveAsXml => ResourceManager.GetString(nameof(Storage_SaveAsXml), _resourceCulture);
 
+        public static string Storage_SaveAsUInk => ResourceManager.GetString(nameof(Storage_SaveAsUInk), _resourceCulture);
+
         public static string Storage_SaveFullPageStrokes => ResourceManager.GetString(nameof(Storage_SaveFullPageStrokes), _resourceCulture);
 
         public static string Storage_ScreenshotsByDateFolder => ResourceManager.GetString(nameof(Storage_ScreenshotsByDateFolder), _resourceCulture);
