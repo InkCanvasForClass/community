@@ -1163,6 +1163,22 @@ namespace Ink_Canvas.Plugins
                 removed += PluginDelegateCleaner.SweepStaticEvents(typeof(NotificationCenterService), alc);
                 removed += PluginDelegateCleaner.SweepStaticEvents(typeof(ClipboardNotification), alc);
 
+                // 通知消息的 Action 回调不挂在事件上，而是作为字段嵌在 NotificationMessage 里。
+                // 队列/历史中残留的插件消息会把插件 ALC 一直钉住，必须主动清掉。
+                try
+                {
+                    var cleared = NotificationCenterService.ClearPluginCallbacks(plugin.Id);
+                    if (cleared > 0)
+                    {
+                        removed += cleared;
+                        Log(string.Format("Cleared {0} notification callback(s) for plugin {1}", cleared, plugin.Name));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogError(string.Format("Failed to clear notification callbacks for plugin {0}", plugin.Name), ex);
+                }
+
                 // 托盘菜单项的 Click 处理器与画布背景层的插件控件都挂在 WPF 可视化树上，
                 // 不在任何服务对象的字段里，需要按插件 ID 显式拆除。
                 RemovePluginUiArtifacts(plugin);
@@ -1179,7 +1195,8 @@ namespace Ink_Canvas.Plugins
         }
 
         /// <summary>
-        /// 拆除插件留在 WPF 可视化树上的痕迹：托盘菜单项与画布背景层。
+        /// 拆除插件留在 WPF 可视化树上的痕迹：托盘菜单项、画布背景层、
+        /// 通知回调控件上挂着的 Action。
         /// 这些控件不在任何服务对象的字段里，反射扫描覆盖不到，但它们的事件处理器
         /// 指向插件程序集，同样会阻止 ALC 卸载。
         /// </summary>
@@ -1199,9 +1216,16 @@ namespace Ink_Canvas.Plugins
                         app.RemovePluginTrayMenuItemsByPrefix(plugin.Id);
 
                         // 背景层是插件工厂产出的控件，卸载后必须摘掉，否则画布一直持有它。
-                        if (app.MainWindow is MainWindow mainWindow && mainWindow.HasPluginBackgroundLayer)
+                        if (app.MainWindow is MainWindow mainWindow)
                         {
-                            mainWindow.RemovePluginBackgroundLayer();
+                            if (mainWindow.HasPluginBackgroundLayer)
+                            {
+                                mainWindow.RemovePluginBackgroundLayer();
+                            }
+
+                            // 通知控件:当前正在显示的插件通知.Action 指向插件 ALC，
+                            // 关闭它即可释放引用。
+                            mainWindow.DetachPluginNotificationAction(plugin.Id);
                         }
                     }
                     catch (Exception ex)

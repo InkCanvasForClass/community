@@ -81,6 +81,24 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 拆除通知控件上挂的插件 Action 回调。插件热重载时由 <see cref="Ink_Canvas.Plugins.PluginManager"/>
+        /// 调用：当前显示的通知若来自该插件，<c>currentMessage.Action</c> 直接指向插件 ALC，
+        /// 留着会阻止热重载时被回收。
+        /// </summary>
+        internal void DetachPluginNotificationAction(string pluginId)
+        {
+            if (string.IsNullOrEmpty(pluginId)) return;
+            try
+            {
+                DynamicNotification?.DetachPluginActionIfMatches(pluginId);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"摘除插件通知 Action 失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
         private void NotificationCenterService_NotificationRequested(NotificationMessage message)
         {
             Dispatcher.BeginInvoke(new Action(() =>
