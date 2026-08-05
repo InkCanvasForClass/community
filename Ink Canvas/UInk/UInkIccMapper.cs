@@ -134,31 +134,90 @@ namespace Ink_Canvas.UInk
 
         // ==================== 加载方向 ====================
 
-        /// <summary>把文档映射为页面列表：逐 Canvas 拆 Ink/Shape/Media，调用撤回适配，应用 viewport 逆变换。</summary>
+        /// <summary>
+        /// 把文档映射为逻辑页面列表：按 (workspaceGuid, deviceGuid, pageGuid) 合并同页所有 layer，
+        /// layerIndex 越大越靠前；layer 1+ 继承 layer 0 的 viewport。各 layer 的撤回 delta 链按层顺序拼接。
+        /// </summary>
         public static List<UInkPageData> ToPages(UInkDocument doc, Func<IUInkContentBlock, Stroke> toStroke)
         {
             var pages = new List<UInkPageData>();
             if (doc?.Canvases == null) return pages;
 
-            foreach (var record in doc.Canvases)
-            {
-                var page = new UInkPageData { Canvas = record.Canvas };
-                foreach (var b in record.Blocks)
+            var groups = doc.Canvases
+                .Where(x => x?.Canvas != null)
+                .GroupBy(x => new
                 {
-                    switch (b)
+                    Workspace = x.Canvas.WorkspaceGuid ?? "",
+                    Device = x.Canvas.DeviceGuid ?? "",
+                    Page = x.Canvas.PageGuid ?? "",
+                });
+
+            foreach (var group in groups)
+            {
+                var layers = group.OrderBy(x => x.Canvas.LayerIndex).ToList();
+                var baseLayer = layers.FirstOrDefault(x => x.Canvas.LayerIndex == 0) ?? layers[0];
+                var viewport = baseLayer.Canvas.Viewport;
+                var page = new UInkPageData { Canvas = baseLayer.Canvas };
+                var history = new List<TimeMachineHistory>();
+
+                foreach (var record in layers)
+                {
+                    foreach (var b in record.Blocks)
                     {
-                        case UInkMedia m: page.Media.Add(m); break;
-                        case UInkShape s: page.Shapes.Add(s); break;
+                        switch (b)
+                        {
+                            case UInkMedia m: page.Media.Add(m); break;
+                            case UInkShape s: page.Shapes.Add(s); break;
+                        }
                     }
+
+                    var adapt = UInkUndoAdapter.Adapt(record, toStroke);
+                    ApplyViewportToAdaptation(adapt, viewport);
+                    foreach (Stroke stroke in adapt.FinalStrokes)
+                        if (!page.FinalStrokes.Contains(stroke))
+                            page.FinalStrokes.Add(stroke);
+                    if (adapt.History != null)
+                        history.AddRange(adapt.History);
                 }
 
-                var adapt = UInkUndoAdapter.Adapt(record, toStroke);
-                page.FinalStrokes = adapt.FinalStrokes;
-                page.History = adapt.History;
-                ApplyViewportToStrokes(page.FinalStrokes, record.Canvas?.Viewport);
+                page.History = history.Count == 0 ? null : history.ToArray();
                 pages.Add(page);
             }
             return pages;
+        }
+
+        /// <summary>
+        /// viewport 必须应用到撤回适配中的所有 Stroke，而不只是最终可见集合；否则 Undo 后重新显露的
+        /// renderOnlyWhenLatest 原稿仍停留在 Canvas 世界坐标。用引用去重确保每条 Stroke 只变换一次。
+        /// </summary>
+        private static void ApplyViewportToAdaptation(UInkUndoAdaptation adaptation, UInkViewport viewport)
+        {
+            if (adaptation == null || viewport == null) return;
+            if (viewport.Scale <= 0 || !float.IsFinite(viewport.Scale)) return;
+            if (Math.Abs(viewport.Scale - 1f) < 1e-6 && Math.Abs(viewport.X) < 1e-6 && Math.Abs(viewport.Y) < 1e-6) return;
+
+            var matrix = new Matrix(viewport.Scale, 0, 0, viewport.Scale,
+                -viewport.X * viewport.Scale, -viewport.Y * viewport.Scale);
+            var transformed = new HashSet<Stroke>();
+
+            if (adaptation.FinalStrokes != null)
+                foreach (Stroke stroke in adaptation.FinalStrokes)
+                    if (transformed.Add(stroke)) stroke.Transform(matrix, false);
+
+            if (adaptation.History == null) return;
+            foreach (var item in adaptation.History)
+            {
+                TransformHistoryCollection(item?.CurrentStroke, matrix, transformed);
+                TransformHistoryCollection(item?.ReplacedStroke, matrix, transformed);
+            }
+        }
+
+        private static void TransformHistoryCollection(StrokeCollection strokes, Matrix matrix, HashSet<Stroke> transformed)
+        {
+            if (strokes == null) return;
+            foreach (Stroke stroke in strokes)
+                if (transformed.Add(stroke))
+                    stroke.Transform(matrix, false);
         }
 
         /// <summary>

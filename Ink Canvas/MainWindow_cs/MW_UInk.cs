@@ -224,8 +224,21 @@ namespace Ink_Canvas
                         return;
                     }
 
-                    var wsType = doc.HeaderExtension?.Workspaces?.FirstOrDefault()?.WorkspaceType
-                        ?? (int)UInkWorkspaceType.ScreenAnnotation;
+                    // UInk 可注册父子 Workspace（如主白板 + 板中板）。ICC 当前一次只能承载一个 Workspace，
+                    // 因此优先加载根 Workspace（无 parentWorkspaceGuid）；否则同 pageIndex 的空子 Workspace
+                    // 会覆盖主 Workspace 的墨迹（explicit-multilayer fixture 即为此情形）。
+                    var rootWorkspace = doc.HeaderExtension?.Workspaces?
+                        .FirstOrDefault(x => string.IsNullOrEmpty(x.ParentWorkspaceGuid))
+                        ?? doc.HeaderExtension?.Workspaces?.FirstOrDefault();
+                    if (rootWorkspace != null)
+                    {
+                        var rootPages = pages
+                            .Where(p => string.Equals(p.Canvas?.WorkspaceGuid, rootWorkspace.Guid, StringComparison.Ordinal))
+                            .ToList();
+                        if (rootPages.Count > 0) pages = rootPages;
+                    }
+
+                    var wsType = rootWorkspace?.WorkspaceType ?? (int)UInkWorkspaceType.ScreenAnnotation;
                     bool isPPT = IsInPPTPresentationMode && _pptManager?.IsConnected == true;
                     bool isWhiteboard = currentMode != 0;
 
@@ -263,7 +276,8 @@ namespace Ink_Canvas
                 timeMachine.ImportTimeMachineHistory(page.History);
             inkCanvas.Strokes.Add(page.FinalStrokes);
             RestoreUInkMediaForPage(page.Media, extraMap, extractDir);
-            LogHelper.WriteLogToFile($"UInk 屏幕批注恢复: {page.FinalStrokes.Count} 条墨迹", LogHelper.LogType.Event);
+            var bounds = page.FinalStrokes.Count > 0 ? page.FinalStrokes.GetBounds() : Rect.Empty;
+            LogHelper.WriteLogToFile($"UInk 屏幕批注恢复: {page.FinalStrokes.Count} 条墨迹, bounds={bounds}", LogHelper.LogType.Event);
         }
 
         /// <summary>白板恢复：按 pageIndex 填充 TimeMachineHistories，切到第 1 页。</summary>
