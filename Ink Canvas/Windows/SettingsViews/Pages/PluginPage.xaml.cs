@@ -477,39 +477,23 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                // 1. 卸载插件实例：释放 AssemblyLoadContext、清理配置文件中残留的组件条目，
-                //    并在 ProcessProtectionManager.WithWriteAccess 内删除整个插件目录。
+                // 卸载插件：释放 AssemblyLoadContext、清理配置文件中残留的组件条目，
+                // 删除插件目录，并清理 PluginConfigs / PluginLogs / 错误记录 / 禁用标记。
                 var loaded = PluginManager.Instance.Plugins.FirstOrDefault(p => p.Id == info.Id);
                 if (loaded != null)
                 {
                     PluginManager.Instance.UnloadPlugin(loaded, deleteFolder: true);
                 }
-                else if (!string.IsNullOrEmpty(info.PluginFolderPath) && Directory.Exists(info.PluginFolderPath))
+                else
                 {
-                    // 未加载的插件走不到 UnloadPlugin，这里直接删目录。
-                    var folder = info.PluginFolderPath;
-                    Ink_Canvas.Helpers.ProcessProtectionManager.WithWriteAccess(folder, () =>
-                    {
-                        try
-                        {
-                            // WithWriteAccess 传目录时不会释放目录内各文件的 FileStream 锁，
-                            // 必须显式按前缀释放，否则 Directory.Delete 会失败。
-                            Ink_Canvas.Helpers.ProcessProtectionManager.ReleaseLocksForPath(folder);
-                            if (Directory.Exists(folder)) Directory.Delete(folder, true);
-                        }
-                        catch (Exception deleteEx)
-                        {
-                            LogHelper.WriteLogToFile($"Plugin | 删除插件目录失败: {folder} - {deleteEx.Message}", LogHelper.LogType.Warning);
-                            // 删不掉时退回 .uninstall 标记，下次启动由 CleanupUninstalledPlugins 兜底。
-                            try { File.WriteAllText(Path.Combine(folder, ".uninstall"), ""); } catch { }
-                        }
-                    });
+                    // 未加载的插件走不到 UnloadPlugin，直接做同样的磁盘清理。
+                    PluginManager.Instance.PurgeUnloadedPlugin(info);
                 }
 
-                // 2. 重建工具栏：插件组件条目已经从配置文件里移除，必须刷新 UI 才对用户可见。
+                // 重建工具栏：插件组件条目已经从配置文件里移除，必须刷新 UI 才对用户可见。
                 RebuildToolbarsAfterPluginChange();
 
-                // 3. 重新加载插件列表（已不在加载集合中）
+                // 重新加载插件列表（已不在加载集合中）
                 LoadPlugins();
             }
             catch (Exception ex)
