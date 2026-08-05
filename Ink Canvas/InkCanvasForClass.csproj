@@ -100,24 +100,6 @@
     <PublishReadyToRun>true</PublishReadyToRun>
     <PublishReadyToRunComposite>true</PublishReadyToRunComposite>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM64EC'">
-    <OutputPath>bin\$(Configuration)\$(Platform)\</OutputPath>
-    <DebugType>full</DebugType>
-    <PlatformTarget>ARM64EC</PlatformTarget>
-    <Prefer32Bit>false</Prefer32Bit>
-    <TieredCompilation>true</TieredCompilation>
-    <TieredPGO>true</TieredPGO>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM64EC'">
-    <OutputPath>bin\$(Configuration)\$(Platform)\</OutputPath>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>ARM64EC</PlatformTarget>
-    <Prefer32Bit>false</Prefer32Bit>
-    <TieredCompilation>true</TieredCompilation>
-    <TieredPGO>true</TieredPGO>
-    <PublishReadyToRun>true</PublishReadyToRun>
-    <PublishReadyToRunComposite>true</PublishReadyToRunComposite>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <OutputPath>bin\$(Configuration)\$(Platform)\</OutputPath>
     <DebugType>none</DebugType>

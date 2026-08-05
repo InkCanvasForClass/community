@@ -19,9 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # AnyCPU = 默认 x64；x64 = 显式 x64；ARM64 = 纯 ARM64 ABI（Surface Pro X 等）；
-        # ARM64EC = Windows 11 ARM64EC ABI（x64 兼容 + ARM64 加速，仅 ARM64 设备运行）。
-        architecture: [AnyCPU, x86, x64, ARM64, ARM64EC]
+        architecture: [AnyCPU, x86, x64, ARM64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
