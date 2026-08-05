@@ -82,14 +82,11 @@ jobs:
           DLASS_TELEMETRY_TOKEN: ${{ secrets.DLASS_TELEMETRY_TOKEN }}
         run: msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Debug" /p:GitFlow="$GITFLOW" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
 
-      # VSTO AddIn 是 MSIL 通用，但 Office 加载插件时仍按主程序的位宽宿主匹配，
-      # 因此每个主程序架构都各自 msbuild VSTO 一次（x86 ↔ Office x86、
-      # x64/AnyCPU ↔ Office x64、ARM64 ↔ Office ARM64 通过 emulation 加载 AnyCPU 产物），
-      # 把产物复制到对应 bin 目录下的 ppt-agent 子目录。
-      #
-      # ARM64 矩阵用 msbuild AnyCPU 跑 VSTO，因为 InkCanvas.PowerPointAddIn.csproj
-      # 当前未声明 ARM64 平台条件块，AnyCPU 即可；Office ARM64 通过 emulation 加载
-      # MSIL VSTO，与 AnyCPU/x64 通用。
+      # VSTO AddIn 是 MSIL 通用，且 InkCanvas.PowerPointAddIn.csproj 当前只声明了
+      # AnyCPU 平台条件块（Debug|AnyCPU / Release|AnyCPU），传 /p:Platform=x86/x64
+      # 会触发 MSBuild 错误 "The BaseOutputPath/OutputPath property is not set"。
+      # 因此 4 个主程序矩阵（AnyCPU / x86 / x64 / ARM64）都用 msbuild AnyCPU 跑 VSTO，
+      # 各自把产物复制到本矩阵 bin 下的 ppt-agent 子目录，互不依赖、彻底并行。
       - name: Build VSTO Add-in
         if: matrix.architecture == 'AnyCPU'
         shell: pwsh
@@ -120,13 +117,13 @@ jobs:
             exit 1
           }
 
-      - name: Build VSTO Add-in (x86)
+      - name: Build VSTO Add-in (x86 via AnyCPU)
         if: matrix.architecture == 'x86'
         shell: pwsh
         run: |
           msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" `
             /p:Configuration=Debug `
-            /p:Platform=x86 `
+            /p:Platform=AnyCPU `
             /p:SignManifests=true `
             /p:ManifestCertificateThumbprint=$env:SIGN_THUMBPRINT `
             /verbosity:minimal -maxcpucount
@@ -150,13 +147,13 @@ jobs:
             exit 1
           }
 
-      - name: Build VSTO Add-in (x64)
+      - name: Build VSTO Add-in (x64 via AnyCPU)
         if: matrix.architecture == 'x64'
         shell: pwsh
         run: |
           msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" `
             /p:Configuration=Debug `
-            /p:Platform=x64 `
+            /p:Platform=AnyCPU `
             /p:SignManifests=true `
             /p:ManifestCertificateThumbprint=$env:SIGN_THUMBPRINT `
             /verbosity:minimal -maxcpucount
@@ -180,8 +177,8 @@ jobs:
             exit 1
           }
 
-      # ARM64 矩阵：用 msbuild AnyCPU 构建 VSTO（csproj 当前不支持 ARM64 平台条件块），
-      # 产物归到 ARM64 bin 下的 ppt-agent，让 ARM64 主程序的安装包自带插件目录。
+      # ARM64 矩阵：VSTO csproj 不支持 ARM64 平台，且 InkCanvas.PowerPointAddIn 是 MSIL 通用，
+      # Office ARM64 通过 emulation 加载。统一用 msbuild AnyCPU 跑一份，产物归到 ARM64 bin 下。
       - name: Build VSTO Add-in (ARM64 via AnyCPU)
         if: matrix.architecture == 'ARM64'
         shell: pwsh
