@@ -82,6 +82,10 @@ namespace Ink_Canvas.Ink.Native
         private const double DecayPer10Milliseconds = 0.97;
         // 预测尾压力约减半，避免预测几何即使较短仍显示成明显粗条。
         private const double TailPressureTaper = 0.5;
+        // ARM64 上 MathF.Pow(float, float) 走单精度库，循环热路径避免
+        // Math.Pow(double, double) 的 libm 标量调用。float 精度对压感衰减
+        // （TailPressureTaper = 0.5 的幂函数）完全足够。
+        private const float TailPressureTaperF = 0.5f;
 
         /// <summary>
         /// 按当前笔速与曲率自适应决定外推时长后构建预测笔尾。
@@ -192,18 +196,26 @@ namespace Ink_Canvas.Ink.Native
             var prevY = last.Y;
             // 距离上限循环外算一次（用平滑后的初速度）：放在循环内会随
             // decayPerStep 每步变化，导致截断点抖动 → 笔尾长度突变。
-            var initialSpeed = Math.Sqrt(vx * vx + vy * vy);
+            // ARM64 上 Math.Sqrt(double) 没有 NEON 单指令通路（走 libm 标量），
+            // 循环内每步调用是主要热路径。改用「缓存平方」：循环里直接读 speedSq，
+            // 只在速度矢量旋转后做一次 sqrt 更新。
+            var initialSpeedSq = (float)(vx * vx + vy * vy);
+            var initialSpeed = MathF.Sqrt(initialSpeedSq);
             var distanceCap = Math.Min(
                 MaxPredictionDistancePx,
                 Math.Max(MinPredictionDistancePx, initialSpeed * (MinHorizonMilliseconds * 0.001)));
+
+            // 当前步的速度平方缓存（useCurvature 分支里每步更新）。
+            var speedSq = initialSpeedSq;
 
             for (var i = 0; i < pointCount; i++)
             {
                 // 半隐式欧拉：先更新速度再积分位置，并逐步衰减，避免笔尾发散。
                 if (useCurvature)
                 {
-                    var speed = Math.Sqrt(vx * vx + vy * vy);
-                    var stepDist = stepSeconds * speed;
+                    // 直接读缓存的平方，避免 Math.Sqrt；速度变化只是方向旋转，
+                    // magnitude^2 = vx^2 + vy^2 在 (c,s) 旋转下守恒。
+                    var stepDist = stepSeconds * MathF.Sqrt(speedSq);
                     // Δθ = κ · Δs（弧长 × 曲率）。截到 MaxStepAngleRadians 防止
                     // 小半径 + 大步长导致单步大幅旋转（高速过急弯时笔尾瞬时甩飞）。
                     var deltaAngle = Math.Clamp(
@@ -216,11 +228,15 @@ namespace Ink_Canvas.Ink.Native
                     var nvy = vx * s + vy * c;
                     vx = nvx * decayPerStep;
                     vy = nvy * decayPerStep;
+                    // 旋转 + 衰减后的速度平方（直接乘平方，避免 sqrt）：
+                    // |new| = |rotated| = sqrt(speedSq)，* decayPerStep 后平方 = speedSq * decayPerStep^2
+                    speedSq = (float)(vx * vx + vy * vy);
                 }
                 else
                 {
                     vx = (vx + motion.AccelerationX * stepSeconds) * decayPerStep;
                     vy = (vy + motion.AccelerationY * stepSeconds) * decayPerStep;
+                    speedSq = (float)(vx * vx + vy * vy);
                 }
 
                 currX += vx * stepSeconds;
@@ -246,9 +262,9 @@ namespace Ink_Canvas.Ink.Native
                         if (IsFinite(endX) && IsFinite(endY) && t > 0.001)
                         {
                             stamp += (long)(stepMicroseconds * t);
-                            var endTaper = (float)Math.Pow(
-                                TailPressureTaper,
-                                (i + t) / pointCount);
+                            var endTaper = MathF.Pow(
+                                TailPressureTaperF,
+                                (float)((i + t) / pointCount));
                             result.Add(new PredictedInkPoint(
                                 endX,
                                 endY,
@@ -266,8 +282,10 @@ namespace Ink_Canvas.Ink.Native
                 prevY = currY;
 
                 // 越靠后压感越细，且与点数无关，保证视界变化时笔尾观感一致。
-                var progress = (i + 1) / (double)pointCount;
-                var taper = (float)Math.Pow(TailPressureTaper, progress);
+                // ARM64 上 Math.Pow 走 libm 标量，MathF.Pow 至少走单精度库；
+                // 18 步 × ~120Hz = ~2k calls/s，主热路径之一。
+                var progress = (i + 1) / (float)pointCount;
+                var taper = MathF.Pow(TailPressureTaperF, progress);
                 var predictedPressure = Math.Clamp(pressure * taper, 0.08f, 1.0f);
                 result.Add(new PredictedInkPoint(currX, currY, predictedPressure, stamp));
             }
