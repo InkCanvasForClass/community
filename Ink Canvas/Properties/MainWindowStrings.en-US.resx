@@ -224,6 +224,12 @@
   <data name="Main_Freeze_Action_InsertImage" xml:space="preserve">
     <value>insert images</value>
   </data>
+  <data name="Main_Freeze_Action_InsertElement" xml:space="preserve">
+    <value>insert elements</value>
+  </data>
+  <data name="Main_Freeze_Action_DeleteElement" xml:space="preserve">
+    <value>delete elements</value>
+  </data>
   <data name="Main_Freeze_Action_Write" xml:space="preserve">
     <value>write</value>
   </data>

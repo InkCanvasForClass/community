@@ -195,6 +195,21 @@ namespace Ink_Canvas.Helpers
             // Never enlarge: auto-fit should only reduce font size when needed.
             if (max > current) max = current;
 
+            // 非英文界面下，若文字在默认字号下已经放得下，就不要被 MaxFontSize 上限硬缩成小字号。
+            // 典型场景：中文界面的浮动栏按钮文字为中文时保持默认字号，而插件注册的纯拉丁按钮
+            // （如 PDF 阅读器的 "PDF"）会被下方 ShouldAutoScaleForCurrentCulture 的拉丁回退逻辑
+            // 误触发缩放，导致同一条浮动栏里它的字号明显小于其它按钮。放得下就保持原字号。
+            // 英文界面仍走 MaxFontSize 上限，维持英文按钮文字的统一小字号风格。
+            if (!IsEnglishUi)
+            {
+                var desiredOriginal = MeasureTextWidth(fe, text, current);
+                if (desiredOriginal > 0 && desiredOriginal <= availableWidth + 0.5)
+                {
+                    RestoreOriginalFontSize(fe);
+                    return;
+                }
+            }
+
             var startFont = Math.Min(current, max);
             if (startFont < min) startFont = min;
 
@@ -244,6 +259,15 @@ namespace Ink_Canvas.Helpers
             if (fe is TextBlock tb) return tb.Text;
             if (fe is Label label) return label.Content as string ?? label.Content?.ToString();
             return null;
+        }
+
+        private static bool IsEnglishUi
+        {
+            get
+            {
+                var name = CultureInfo.CurrentUICulture?.Name ?? string.Empty;
+                return name.StartsWith("en", StringComparison.OrdinalIgnoreCase);
+            }
         }
 
         private static bool ShouldAutoScaleForCurrentCulture(string text)

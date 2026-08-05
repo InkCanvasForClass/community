@@ -15,7 +15,7 @@ namespace Ink_Canvas.Plugins
         /// 仅修复实现、不动接口时不需要改动。
         /// </para>
         /// </summary>
-        public static readonly string CurrentApiVersion = "1.9.0";
+        public static readonly string CurrentApiVersion = "1.10.0";
 
         /// <summary>
         /// 当前宿主编译版本号，由 Nerdbank.GitVersioning 依据 <c>version.json</c> 与 git 状态自动生成，

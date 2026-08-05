@@ -141,6 +141,7 @@ SecurityVerdict verdict = host.EvaluateTrust(packagePath, expectedSha256, declar
 | 接口 | 能力 |
 |------|------|
 | `ICanvasInkService` | 画布墨迹：切笔/写墨迹/清空（`PluginInkTool`：Pen/Highlighter/Eraser/Select 等） |
+| `ICanvasElementService` | 画布元素：插入/移除任意 WPF 控件（拖动/缩放/旋转/撤销历史/冻结页保护） |
 | `IRecognitionService` | 墨迹识别（`PluginRecognitionEngine`，中文/英文/数学 等） |
 | `IInkEffectService` | 墨迹特效（笔迹发光等） |
 | `ICanvasCompositionService` | 画布合成：导出 PNG / 插入图片 / 粘贴剪贴板图 |

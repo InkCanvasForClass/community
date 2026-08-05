@@ -278,6 +278,7 @@ namespace Ink_Canvas
                 (typeof(Plugins.ICanvasCompositionService),      new Plugins.CanvasCompositionService(mainWindow)),
                 (typeof(Plugins.IPresentationSourceService),     presentationSourceService),
                 (typeof(Plugins.ICanvasInkService),        new Plugins.CanvasInkService(mainWindow)),
+                (typeof(Plugins.ICanvasElementService),    new Plugins.CanvasElementService(mainWindow)),
                 (typeof(Plugins.IRecognitionService),      new Plugins.RecognitionService()),
                 (typeof(Plugins.ITrayService),            new Plugins.TrayService(this)),
                 (typeof(Plugins.IPluginUriService),       new Plugins.UriService(host)),

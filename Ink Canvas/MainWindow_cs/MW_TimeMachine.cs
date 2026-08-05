@@ -287,6 +287,24 @@ namespace Ink_Canvas
                                     CenterAndScaleElement(mediaControl);
                                 }
                             }
+                            else if (item.InsertedElement is FrameworkElement genericElement
+                                     && !(genericElement is Image)
+                                     && !(genericElement is MediaElement))
+                            {
+                                // 插件插入的自定义控件（见 ICanvasElementService）：
+                                // 撤销重做重插后若位置缺失则居中，并补齐 TransformGroup。
+                                double left = InkCanvas.GetLeft(genericElement);
+                                double top = InkCanvas.GetTop(genericElement);
+                                if (double.IsNaN(left) || double.IsNaN(top))
+                                {
+                                    CenterAndScaleElement(genericElement);
+                                }
+                                if (genericElement.RenderTransform == null
+                                    || genericElement.RenderTransform == Transform.Identity)
+                                {
+                                    InitializeElementTransform(genericElement);
+                                }
+                            }
                         }
                     }
                 }

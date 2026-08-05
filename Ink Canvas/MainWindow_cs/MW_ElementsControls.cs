@@ -207,7 +207,7 @@ namespace Ink_Canvas
             }
             if (sender is FrameworkElement element)
             {
-                if (element is CanvasMediaControl && CanvasMediaControl.IsInteractiveChildTarget(e.OriginalSource as DependencyObject))
+                if (IsInteractiveWidgetChild(e.OriginalSource as DependencyObject, element))
                 {
                     e.Handled = false;
                     return;
@@ -386,7 +386,7 @@ namespace Ink_Canvas
             }
             if (sender is FrameworkElement element)
             {
-                if (element is CanvasMediaControl && CanvasMediaControl.IsInteractiveChildTarget(e.OriginalSource as DependencyObject))
+                if (IsInteractiveWidgetChild(e.OriginalSource as DependencyObject, element))
                 {
                     e.Handled = false;
                     return;
@@ -1149,6 +1149,32 @@ namespace Ink_Canvas
         private static bool IsBitmapLikeCanvasElement(FrameworkElement fe)
         {
             return fe is Image || fe is PdfEmbeddedView || fe is CanvasMediaControl;
+        }
+
+        /// <summary>
+        /// 判断点击源是否落在元素内部的交互子控件上（按钮/滑块/下拉/缩放手柄/滚动条等）。
+        /// 用于插件插入的自定义控件：选中模式下内部按钮等应正常响应点击，而不是被整体选中拖动。
+        /// 从点击源沿可视树向上走到 <paramref name="element"/> 为止，途中遇到交互控件即视为交互子元素；
+        /// 与 <see cref="CanvasMediaControl.IsInteractiveChildTarget"/> 语义一致，但推广到任意元素。
+        /// </summary>
+        private static bool IsInteractiveWidgetChild(DependencyObject current, FrameworkElement element)
+        {
+            while (current != null && !ReferenceEquals(current, element))
+            {
+                if (current is System.Windows.Controls.Primitives.ButtonBase
+                    || current is Slider
+                    || current is ComboBox
+                    || current is ComboBoxItem
+                    || current is System.Windows.Controls.Primitives.Thumb
+                    || current is System.Windows.Controls.Primitives.ScrollBar)
+                {
+                    return true;
+                }
+
+                current = VisualTreeHelper.GetParent(current);
+            }
+
+            return false;
         }
 
         private static bool IsCanvasMediaElement(FrameworkElement fe)

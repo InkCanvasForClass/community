@@ -376,6 +376,16 @@ namespace Ink_Canvas
                         }
                         BindElementEvents(pdf);
                     }
+                    else if (element is FrameworkElement fe && !(element is Image) && !(element is MediaElement))
+                    {
+                        // 插件插入的自定义控件（见 ICanvasElementService）：翻页后重建变换与事件绑定，
+                        // 使拖动/缩放/旋转与内部子控件交互在恢复后依然可用。
+                        if (fe.RenderTransform == null || fe.RenderTransform == Transform.Identity)
+                        {
+                            InitializeElementTransform(fe);
+                        }
+                        BindElementEvents(fe);
+                    }
                 }
 
                 SyncPdfPageSidebarWithCanvas();
