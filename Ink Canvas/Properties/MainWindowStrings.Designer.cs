@@ -87,6 +87,14 @@ namespace Ink_Canvas.Properties
 
         public static string Main_Strokes_ModeMismatch => ResourceManager.GetString(nameof(Main_Strokes_ModeMismatch), _resourceCulture);
 
+        public static string Main_Strokes_SaveUInkSuccess => ResourceManager.GetString(nameof(Main_Strokes_SaveUInkSuccess), _resourceCulture);
+
+        public static string Main_Strokes_SaveUInkFailed => ResourceManager.GetString(nameof(Main_Strokes_SaveUInkFailed), _resourceCulture);
+
+        public static string Main_Strokes_OpenUInkSuccess => ResourceManager.GetString(nameof(Main_Strokes_OpenUInkSuccess), _resourceCulture);
+
+        public static string Main_Strokes_UInkInvalid => ResourceManager.GetString(nameof(Main_Strokes_UInkInvalid), _resourceCulture);
+
         public static string Main_Freeze_PageFrozen => ResourceManager.GetString(nameof(Main_Freeze_PageFrozen), _resourceCulture);
 
         public static string Main_Freeze_AnnotationPageFrozen => ResourceManager.GetString(nameof(Main_Freeze_AnnotationPageFrozen), _resourceCulture);

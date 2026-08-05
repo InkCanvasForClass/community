@@ -358,6 +358,11 @@
                                 Icon="{x:Static ui:SegoeFluentIcons.Save}"
                                 Toggled="ToggleSwitchSaveStrokesAsXML_Toggled"/>
 
+                            <controls:LabeledSettingsCard x:Name="CardSaveStrokesAsUInk"
+                                Header="{x:Static props:StorageStrings.Storage_SaveAsUInk}"
+                                Icon="{x:Static ui:SegoeFluentIcons.Save}"
+                                Toggled="ToggleSwitchSaveStrokesAsUInK_Toggled"/>
+
                             <controls:LabeledSettingsCard x:Name="CardEnableAutoSaveStrokes"
                                 Header="{x:Static props:StorageStrings.Storage_AutoSaveInk}"
                                 Description="{x:Static props:CanvasStrings.CanvasAndInkPanel_Hint_9}"

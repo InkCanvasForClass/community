@@ -99,7 +99,7 @@
     <value>打开墨迹文件</value>
   </data>
   <data name="Main_Strokes_OpenFileDialogFilter" xml:space="preserve">
-    <value>Ink Canvas Strokes File (*.icstk)|*.icstk|XML墨迹文件 (*.xml)|*.xml|ICC压缩包 (*.zip)|*.zip|所有支持的文件 (*.icstk;*.xml;*.zip)|*.icstk;*.xml;*.zip</value>
+    <value>Ink Canvas Strokes File (*.icstk)|*.icstk|XML墨迹文件 (*.xml)|*.xml|ICC压缩包 (*.zip)|*.zip|UInk墨迹文件 (*.uink)|*.uink|所有支持的文件 (*.icstk;*.xml;*.zip;*.uink)|*.icstk;*.xml;*.zip;*.uink</value>
   </data>
   <data name="Main_Strokes_SaveMultiPageXmlSuccess" xml:space="preserve">
     <value>多页面XML墨迹成功保存为 {0} 个XML文件</value>
@@ -121,6 +121,18 @@
   </data>
   <data name="Main_Strokes_ModeMismatch" xml:space="preserve">
     <value>墨迹保存模式({0})与当前模式({1})不匹配，无法恢复墨迹</value>
+  </data>
+  <data name="Main_Strokes_SaveUInkSuccess" xml:space="preserve">
+    <value>墨迹已保存为 UInk 文件 {0}</value>
+  </data>
+  <data name="Main_Strokes_SaveUInkFailed" xml:space="preserve">
+    <value>UInk 保存失败</value>
+  </data>
+  <data name="Main_Strokes_OpenUInkSuccess" xml:space="preserve">
+    <value>UInk 文件打开成功，共 {0} 页</value>
+  </data>
+  <data name="Main_Strokes_UInkInvalid" xml:space="preserve">
+    <value>无效的 UInk 文件</value>
   </data>
   <data name="Main_Freeze_PageFrozen" xml:space="preserve">
     <value>该页面已冻结</value>

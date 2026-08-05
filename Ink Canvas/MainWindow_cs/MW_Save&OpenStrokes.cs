@@ -1,6 +1,7 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
+using Ink_Canvas.UInk;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -241,6 +242,13 @@ namespace Ink_Canvas
                 else
                     //savePathWithName = savePath + @"\" + DateTime.Now.ToString("u").Replace(':', '-') + ".icstk";
                     savePathWithName = savePath + @"\" + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss-fff") + ".icstk";
+
+                if (Settings.Automation.IsSaveStrokesAsUInK)
+                {
+                    // UInk 1.0 格式保存（跨软件互操作），走两阶段提交
+                    SaveCurrentStateToUInk(Path.ChangeExtension(savePathWithName, ".uink"), newNotice);
+                    return;
+                }
 
                 if (Settings.Automation.IsSaveStrokesAsXML)
                 {
@@ -1083,7 +1091,12 @@ namespace Ink_Canvas
             {
                 string fileExtension = Path.GetExtension(openFileDialog.FileName).ToLower();
 
-                if (fileExtension == ".zip")
+                if (fileExtension == ".uink")
+                {
+                    // UInk 1.0 墨迹文件（MessagePack 对象流 + .uink.extra 资源包）
+                    OpenUInkFile(openFileDialog.FileName);
+                }
+                else if (fileExtension == ".zip")
                 {
                     // 处理ICC压缩包（可能包含XML格式）
                     OpenICCZipFile(openFileDialog.FileName);

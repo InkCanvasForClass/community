@@ -99,7 +99,7 @@
     <value>Open Strokes File</value>
   </data>
   <data name="Main_Strokes_OpenFileDialogFilter" xml:space="preserve">
-    <value>Ink Canvas Strokes File (*.icstk)|*.icstk|XML Strokes File (*.xml)|*.xml|ICC Archive (*.zip)|*.zip|All Supported Files (*.icstk;*.xml;*.zip)|*.icstk;*.xml;*.zip</value>
+    <value>Ink Canvas Strokes File (*.icstk)|*.icstk|XML Strokes File (*.xml)|*.xml|ICC Archive (*.zip)|*.zip|UInk Strokes File (*.uink)|*.uink|All Supported Files (*.icstk;*.xml;*.zip;*.uink)|*.icstk;*.xml;*.zip;*.uink</value>
   </data>
   <data name="Main_Strokes_SaveMultiPageXmlSuccess" xml:space="preserve">
     <value>Multi-page XML strokes saved as {0} XML files</value>
@@ -121,6 +121,18 @@
   </data>
   <data name="Main_Strokes_ModeMismatch" xml:space="preserve">
     <value>Stroke save mode ({0}) does not match current mode ({1}), cannot restore strokes</value>
+  </data>
+  <data name="Main_Strokes_SaveUInkSuccess" xml:space="preserve">
+    <value>Strokes saved as UInk file {0}</value>
+  </data>
+  <data name="Main_Strokes_SaveUInkFailed" xml:space="preserve">
+    <value>Failed to save UInk file</value>
+  </data>
+  <data name="Main_Strokes_OpenUInkSuccess" xml:space="preserve">
+    <value>UInk file opened, {0} pages</value>
+  </data>
+  <data name="Main_Strokes_UInkInvalid" xml:space="preserve">
+    <value>Invalid UInk file</value>
   </data>
   <data name="Main_Freeze_PageFrozen" xml:space="preserve">
     <value>This page is already frozen</value>

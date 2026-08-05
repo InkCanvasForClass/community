@@ -96,7 +96,7 @@
     <value>开箱墨迹盲盒</value>
   </data>
   <data name="Main_Strokes_OpenFileDialogFilter" xml:space="preserve">
-    <value>Ink Canvas 墨迹文件 (*.icstk)|*.icstk|XML墨迹文件 (*.xml)|*.xml|ICC压缩包 (*.zip)|*.zip|啥都能开 (*.icstk;*.xml;*.zip)|*.icstk;*.xml;*.zip</value>
+    <value>Ink Canvas 墨迹文件 (*.icstk)|*.icstk|XML墨迹文件 (*.xml)|*.xml|ICC压缩包 (*.zip)|*.zip|UInk墨迹文件 (*.uink)|*.uink|啥都能开 (*.icstk;*.xml;*.zip;*.uink)|*.icstk;*.xml;*.zip;*.uink</value>
   </data>
   <data name="Main_Strokes_SaveMultiPageXmlSuccess" xml:space="preserve">
     <value>{0} 个 XML 文件批发出货，文档狂魔达成！</value>
@@ -118,6 +118,18 @@
   </data>
   <data name="Main_Strokes_ModeMismatch" xml:space="preserve">
     <value>保存模式({0})和当前模式({1})八字不合，墨迹复活失败</value>
+  </data>
+  <data name="Main_Strokes_SaveUInkSuccess" xml:space="preserve">
+    <value>墨迹已化身 UInk 文件 {0}，跨端走起！</value>
+  </data>
+  <data name="Main_Strokes_SaveUInkFailed" xml:space="preserve">
+    <value>UInk 保存翻车了，隔壁老王都看不下去了</value>
+  </data>
+  <data name="Main_Strokes_OpenUInkSuccess" xml:space="preserve">
+    <value>UInk 文件开箱成功，共 {0} 页，连狗都惊呆了</value>
+  </data>
+  <data name="Main_Strokes_UInkInvalid" xml:space="preserve">
+    <value>这 UInk 文件是冒牌货，验明正身失败</value>
   </data>
   <data name="Main_Freeze_PageFrozen" xml:space="preserve">
     <value>这页已被被窝封印，再冻就多喝热水了</value>
