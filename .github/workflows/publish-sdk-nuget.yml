@@ -98,14 +98,15 @@ jobs:
       - name: Push to GitHub Packages
         # 同步推一份到 GitHub Packages NuGet 源，让仓库侧栏 Packages 区块亮起。
         # 默认私有；首次发布后到仓库 Packages 页 → Make public。
-        # OWNER = InkCanvasForClass 组织，仓库 = community。
+        # GitHub Packages NuGet 源 URL 只用 OWNER（组织或用户），不带仓库名；包归属由 nuspec 的 RepositoryUrl 决定。
+        # https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-nuget-registry
         shell: pwsh
         run: |
           $files = Get-ChildItem "$env:GITHUB_WORKSPACE/dist" -Filter *.nupkg
           if (-not $files) { throw "No .nupkg files found in dist" }
           foreach ($file in $files) {
             Write-Host "Pushing $($file.Name) to GitHub Packages"
-            dotnet nuget push $file.FullName --source https://nuget.pkg.github.com/InkCanvasForClass/community/index.json --api-key $env:GITHUB_TOKEN --skip-duplicate
+            dotnet nuget push $file.FullName --source https://nuget.pkg.github.com/InkCanvasForClass/index.json --api-key $env:GITHUB_TOKEN --skip-duplicate
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
         env:
