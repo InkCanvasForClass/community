@@ -477,20 +477,22 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                // 1. 卸载插件实例，释放 AssemblyLoadContext
+                // 1. 卸载插件实例，释放 AssemblyLoadContext，并清理配置文件中残留的组件条目
                 var loaded = PluginManager.Instance.Plugins.FirstOrDefault(p => p.Id == info.Id);
                 if (loaded != null)
+                {
                     PluginManager.Instance.UnloadPlugin(loaded);
+                }
 
-                // 2. 写入 .uninstall 标记
+                // 2. 写入 .uninstall 标记，让下次启动彻底清理插件目录
                 var uninstallMarker = Path.Combine(info.PluginFolderPath, ".uninstall");
                 File.WriteAllText(uninstallMarker, "");
 
-                // 3. 标记为待卸载状态
-                info.LoadStatus = PluginLoadStatus.Disabled;
+                // 3. 重建工具栏：插件组件条目已经从配置文件里移除，必须刷新 UI 才对用户可见。
+                RebuildToolbarsAfterPluginChange();
 
+                // 4. 重新加载插件列表（已不在加载集合中）
                 LoadPlugins();
-                AskRestart();
             }
             catch (Exception ex)
             {
@@ -499,6 +501,26 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     string.Format(PluginStrings.Market_InstallLocalFailed, ex.Message),
                     PluginStrings.Plugin_DeleteTitle,
                     MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// 通知 MainWindow 重建浮动工具栏与白板工具栏。卸载插件后，配置文件里残留的
+        /// 插件组件条目被清理，但工具栏的渲染缓存仍引用旧 ViewFactory，必须刷新一次。
+        /// </summary>
+        private void RebuildToolbarsAfterPluginChange()
+        {
+            try
+            {
+                if (System.Windows.Application.Current?.MainWindow is Ink_Canvas.MainWindow mainWindow)
+                {
+                    mainWindow.RebuildToolbar();
+                    mainWindow.RebuildBoardToolbar();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"Plugin | 重建工具栏失败: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
 

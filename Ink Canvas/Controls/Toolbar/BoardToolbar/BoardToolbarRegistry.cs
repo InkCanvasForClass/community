@@ -139,6 +139,76 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             return removed;
         }
 
+        /// <summary>
+        /// 当前注册到白板工具栏的插件组件列表的只读快照。
+        /// PluginManager 卸载前会读取此列表以便从 *.json 配置文件里一并清除残留条目。
+        /// </summary>
+        public static IReadOnlyList<PluginToolbarItemInfo> GetPluginItems() => _pluginItems.AsReadOnly();
+
+        /// <summary>
+        /// 从所有白板工具栏配置文件里移除指定 Id 的组件条目。Area → Group → Components
+        /// 三层结构下逐层递归剔除，避免 Populate 时刷 "组件 X 构建失败" 警告。
+        /// </summary>
+        /// <returns>被修改的配置文件数量。</returns>
+        public static int RemovePluginEntryFromAllConfigs(string itemId)
+        {
+            if (string.IsNullOrEmpty(itemId)) return 0;
+
+            var modified = 0;
+            foreach (var configName in ListConfigFiles())
+            {
+                try
+                {
+                    var layout = LoadConfigFile(configName);
+                    if (layout?.Areas == null) continue;
+
+                    if (StripPluginEntry(layout.Areas, itemId) > 0)
+                    {
+                        SaveConfigFile(configName, layout);
+                        modified++;
+                        LogHelper.WriteLogToFile(
+                            $"BoardToolbarRegistry: 已从配置 [{configName}] 移除插件组件条目 [{itemId}]",
+                            LogHelper.LogType.Info);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"BoardToolbarRegistry: 清理配置 [{configName}] 中的插件组件失败: {ex.Message}",
+                        LogHelper.LogType.Warning);
+                }
+            }
+
+            return modified;
+        }
+
+        private static int StripPluginEntry(List<BoardToolbarAreaEntry> areas, string itemId)
+        {
+            if (areas == null) return 0;
+
+            var removed = 0;
+            foreach (var area in areas)
+            {
+                if (area?.Groups == null) continue;
+
+                foreach (var group in area.Groups)
+                {
+                    if (group?.Components == null) continue;
+
+                    for (var i = group.Components.Count - 1; i >= 0; i--)
+                    {
+                        if (string.Equals(group.Components[i]?.Id, itemId, StringComparison.OrdinalIgnoreCase))
+                        {
+                            group.Components.RemoveAt(i);
+                            removed++;
+                        }
+                    }
+                }
+            }
+
+            return removed;
+        }
+
         #endregion
 
         public static FrameworkElement BuildView(string id, IBoardToolbarHost host)

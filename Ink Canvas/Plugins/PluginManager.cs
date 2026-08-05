@@ -77,6 +77,13 @@ namespace Ink_Canvas.Plugins
             get { return _plugins.AsReadOnly(); }
         }
 
+        /// <summary>
+        /// 当前正在 Initialize 的插件。供宿主服务（如 <see cref="Ink_Canvas.Plugins.Services.NotificationService"/>）
+        /// 在插件调用时识别来源，确保热重载时能按插件 ID 辨认通知回调归属。
+        /// 不暴露 IPlugin 字段以免插件引用影响到 GC 回收。
+        /// </summary>
+        public string CurrentLoadingPluginId => _currentLoadingPlugin?.Id;
+
         public event EventHandler<PluginInfo> PluginLoaded;
         public event EventHandler<PluginInfo> PluginUnloaded;
         public event EventHandler<string> LogMessage;
@@ -1089,6 +1096,16 @@ namespace Ink_Canvas.Plugins
                 // 撤销该插件在宿主留下的所有注册（工具栏组件、IPC 处理器、DI 服务、URI 处理器等）。
                 // 这一步是 ALC 能否真正卸载的关键：漏掉任何一条，宿主就还握着插件程序集里的委托，
                 // 可回收 ALC 便不会释放，DLL 也就仍被占用。
+                //
+                // 同时收集注册过的工具栏组件 Id，用于从 *.json 配置文件里清除残留条目。
+                // 必须在 UndoAll 之前抓快照：撤销后内部列表已被清空。
+                var itemIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var item in Controls.Toolbar.FloatingToolbar.ToolbarRegistry.GetPluginItems())
+                    itemIds.Add(item.Id);
+                foreach (var item in Controls.Toolbar.BoardToolbar.BoardToolbarRegistry.GetPluginItems())
+                    itemIds.Add(item.Id);
+                itemIds.Add(plugin.Id);
+
                 if (_registrationScopes.TryGetValue(plugin.Id, out var scope))
                 {
                     _registrationScopes.Remove(plugin.Id);
@@ -1106,6 +1123,27 @@ namespace Ink_Canvas.Plugins
                 plugin.IsLoaded = false;
                 plugin.LoadStatus = PluginLoadStatus.NotLoaded;
                 plugin.Instance = null;
+
+                // 从所有配置文件里移除插件组件条目（运行内清理代替重启）。
+                foreach (var itemId in itemIds)
+                {
+                    try
+                    {
+                        var modified = Controls.Toolbar.FloatingToolbar.ToolbarRegistry.RemovePluginEntryFromAllConfigs(itemId);
+                        modified += Controls.Toolbar.BoardToolbar.BoardToolbarRegistry.RemovePluginEntryFromAllConfigs(itemId);
+                        if (modified > 0)
+                        {
+                            Log(string.Format("Removed plugin item [{0}] from {1} config file(s)", itemId, modified));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogError(string.Format("Failed to clean plugin item [{0}] from configs", itemId), ex);
+                    }
+                }
+
+                // 删除插件目录下的首注册标记，确保重装或重载会再次自动追加组件到工具栏。
+                TryDeleteToolbarRegisteredMarker(plugin);
 
                 if (_assemblyContexts.TryGetValue(plugin.Id, out var alc))
                 {
@@ -1339,6 +1377,31 @@ namespace Ink_Canvas.Plugins
                 reloaded.Name, reloaded.Version, unloaded));
 
             return new PluginReloadResult { Success = true, FullyUnloaded = unloaded };
+        }
+
+        /// <summary>
+        /// 移除插件目录下的 .toolbar_registered 标记。这一标记的作用是「插件首次
+        /// 注册工具栏项时自动加入激活配置」——卸载后它会残留在插件目录里，
+        /// 下次重装/重载时便不再自动追加，违背用户预期。这里在卸载时主动清理。
+        /// </summary>
+        private void TryDeleteToolbarRegisteredMarker(PluginInfo plugin)
+        {
+            if (plugin == null || string.IsNullOrEmpty(plugin.PluginFolderPath)) return;
+            if (!Directory.Exists(plugin.PluginFolderPath)) return;
+
+            var markerPath = Path.Combine(plugin.PluginFolderPath, ".toolbar_registered");
+            try
+            {
+                if (File.Exists(markerPath))
+                {
+                    File.Delete(markerPath);
+                    Log(string.Format("Removed .toolbar_registered marker for plugin {0}", plugin.Name));
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError(string.Format("Failed to remove .toolbar_registered marker for plugin {0}", plugin.Name), ex);
+            }
         }
 
         /// <summary>
