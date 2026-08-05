@@ -30,12 +30,22 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <!-- NuGet 包元数据：图标与 README 让 nuget.org 详情页更好看。 -->
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="iNKORE.UI.WPF.Modern" Version="0.10.2.1" />
     <PackageReference Include="iNKORE.UI.WPF" Version="1.2.8" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- NuGet 包图标（128x128 PNG，复用仓库 icc.png）。 -->
+    <None Include="icon.png" Pack="True" PackagePath="" />
+    <!-- NuGet 包详情页显示的 README。 -->
+    <None Include="README.md" Pack="True" PackagePath="" />
   </ItemGroup>
 
 </Project>
