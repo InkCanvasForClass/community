@@ -27,7 +27,12 @@
   <PropertyGroup Condition="'$(Platform)' == 'ARM64'">
     <PlatformTarget>ARM64</PlatformTarget>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Platform)' != 'x86' And '$(Platform)' != 'ARM64'">
+  <PropertyGroup Condition="'$(Platform)' == 'ARM64EC'">
+    <!-- ARM64EC 宿主：与 Windows 11 ARM64EC 主程序 ABI 一致，
+         在 ARM64 设备上以原生速度运行（避免 x64 emulation 损失）。 -->
+    <PlatformTarget>ARM64EC</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)' != 'x86' And '$(Platform)' != 'ARM64' And '$(Platform)' != 'ARM64EC'">
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
