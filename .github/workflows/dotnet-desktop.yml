@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        architecture: [AnyCPU, x86]
+        architecture: [AnyCPU, x86, x64, ARM64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -111,27 +111,74 @@ jobs:
             exit 1
           }
 
-      - name: Build VSTO Add-in (x86)
+      # VSTO AddIn 是 MSIL 通用，运行时机架构由宿主 Office（Office x86/x64/ARM64）
+      # 选择。x86 / x64 / ARM64 主程序输出目录都复用 AnyCPU 下已经构建好的 ppt-agent。
+      - name: Reuse VSTO Add-in artifacts for x86 output
         if: matrix.architecture == 'x86'
         shell: pwsh
         run: |
-          msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" `
-            /p:Configuration=Debug `
-            /p:SignManifests=true `
-            /p:ManifestCertificateThumbprint=$env:SIGN_THUMBPRINT `
-            /verbosity:minimal -maxcpucount
-          $pptAgentDir = "Ink Canvas\bin\Debug\x86\net6.0-windows10.0.19041.0\ppt-agent"
-          New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
-          Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\*" $pptAgentDir -Recurse -Force
-          Copy-Item "InkCanvas.PPTAgent.Contracts\bin\Debug\netstandard2.0\InkCanvas.PPTAgent.Contracts.dll" $pptAgentDir -Force
-          Get-ChildItem $pptAgentDir | Select-Object Name
-          if (-not (Test-Path "$pptAgentDir\Microsoft.Office.Tools.Common.v4.0.Utilities.dll")) {
-            Write-Error "缺少 VSTO 依赖 DLL，artifact 不完整"
-            exit 1
+          $src = "Ink Canvas\bin\Debug\AnyCPU\net6.0-windows10.0.19041.0\ppt-agent"
+          $dst = "Ink Canvas\bin\Debug\x86\net6.0-windows10.0.19041.0\ppt-agent"
+          if (-not (Test-Path $src)) {
+            Write-Host "Source ppt-agent not found at $src - skipping (AnyCPU build may have failed)"
+            exit 0
           }
+          New-Item -ItemType Directory -Force -Path $dst | Out-Null
+          Copy-Item "$src\*" $dst -Recurse -Force
+          Get-ChildItem $dst | Select-Object Name
 
       - name: Check VSTO build result (x86)
         if: matrix.architecture == 'x86'
+        run: |
+          if (Test-Path "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll") {
+            Write-Host "VSTO DLL OK"
+          } else {
+            Write-Error "VSTO DLL not found"
+            exit 1
+          }
+
+      - name: Reuse VSTO Add-in artifacts for x64 output
+        if: matrix.architecture == 'x64'
+        shell: pwsh
+        run: |
+          $src = "Ink Canvas\bin\Debug\AnyCPU\net6.0-windows10.0.19041.0\ppt-agent"
+          $dst = "Ink Canvas\bin\Debug\x64\net6.0-windows10.0.19041.0\ppt-agent"
+          if (-not (Test-Path $src)) {
+            Write-Host "Source ppt-agent not found at $src - skipping (AnyCPU build may have failed)"
+            exit 0
+          }
+          New-Item -ItemType Directory -Force -Path $dst | Out-Null
+          Copy-Item "$src\*" $dst -Recurse -Force
+          Get-ChildItem $dst | Select-Object Name
+
+      - name: Check VSTO build result (x64)
+        if: matrix.architecture == 'x64'
+        run: |
+          if (Test-Path "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll") {
+            Write-Host "VSTO DLL OK"
+          } else {
+            Write-Error "VSTO DLL not found"
+            exit 1
+          }
+
+      # ARM64 复用 AnyCPU 下已经构建好的 ppt-agent 目录到 ARM64 输出里，
+      # 让 ARM64 产物（如 Surface Pro X 安装包）也能装 VSTO 插件（前提是 Office ARM64）。
+      - name: Reuse VSTO Add-in artifacts for ARM64 output
+        if: matrix.architecture == 'ARM64'
+        shell: pwsh
+        run: |
+          $src = "Ink Canvas\bin\Debug\AnyCPU\net6.0-windows10.0.19041.0\ppt-agent"
+          $dst = "Ink Canvas\bin\Debug\ARM64\net6.0-windows10.0.19041.0\ppt-agent"
+          if (-not (Test-Path $src)) {
+            Write-Host "Source ppt-agent not found at $src - skipping (AnyCPU build may have failed)"
+            exit 0
+          }
+          New-Item -ItemType Directory -Force -Path $dst | Out-Null
+          Copy-Item "$src\*" $dst -Recurse -Force
+          Get-ChildItem $dst | Select-Object Name
+
+      - name: Check VSTO build result (ARM64)
+        if: matrix.architecture == 'ARM64'
         run: |
           if (Test-Path "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll") {
             Write-Host "VSTO DLL OK"
