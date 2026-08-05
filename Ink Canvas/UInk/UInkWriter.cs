@@ -46,6 +46,13 @@ namespace Ink_Canvas.UInk
             }
         }
 
+        /// <summary>纯写入（无原子替换），供两阶段提交写临时文件使用。</summary>
+        public static void WriteDocument(UInkDocument doc, string path)
+        {
+            using var fs = new FileStream(path, FileMode.Create, FileAccess.Write);
+            Save(doc, fs);
+        }
+
         /// <summary>
         /// 增量追加：把已完成的 Ink/Shape/Media 块追加到文件末尾最后一个 Canvas 之后。
         /// 不更新 Header（增量语义：Header 统计可暂时落后，读取端按对象流重算）。
