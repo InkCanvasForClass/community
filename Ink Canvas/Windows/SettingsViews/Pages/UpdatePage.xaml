@@ -149,7 +149,7 @@
                                 Padding="16"
                                 CornerRadius="8"
                                 MinHeight="200"
-                                Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+                                Background="{DynamicResource LayerFillColorDefaultBrush}">
                             <ScrollViewer VerticalScrollBarVisibility="Auto"
                                           HorizontalScrollBarVisibility="Disabled"
                                           PanningMode="VerticalOnly"
@@ -280,7 +280,7 @@
                             <Border Padding="16"
                                     CornerRadius="8"
                                     MinHeight="200"
-                                    Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+                                    Background="{DynamicResource LayerFillColorDefaultBrush}">
                                 <ScrollViewer x:Name="ReleaseNotesScrollViewer"
                                               VerticalScrollBarVisibility="Auto"
                                               HorizontalScrollBarVisibility="Disabled"
@@ -307,7 +307,7 @@
                                     Visibility="Collapsed"
                                     Padding="12"
                                     CornerRadius="8"
-                                    Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+                                    Background="{DynamicResource LayerFillColorDefaultBrush}"
                                     BorderBrush="{DynamicResource SettingsPageBorderBrush}"
                                     BorderThickness="1">
                                 <ikw:SimpleStackPanel Spacing="6">

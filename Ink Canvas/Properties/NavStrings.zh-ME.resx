@@ -255,4 +255,31 @@
   <data name="Nav_Performance_Tooltip" xml:space="preserve">
     <value>给电脑体检，看看它 pp 行不行</value>
   </data>
+  <data name="Menu_AddedItems" xml:space="preserve">
+    <value>已加的菜单项</value>
+  </data>
+  <data name="Menu_AvailableItems" xml:space="preserve">
+    <value>还能加的菜单项</value>
+  </data>
+  <data name="Menu_ResetLayout" xml:space="preserve">
+    <value>恢复成默认布局</value>
+  </data>
+  <data name="Menu_LimitReached" xml:space="preserve">
+    <value>最多就 9 个，已经塞满啦，先拿掉几个</value>
+  </data>
+  <data name="Menu_ResetConfirmTitle" xml:space="preserve">
+    <value>恢复成默认布局</value>
+  </data>
+  <data name="Menu_ResetConfirmMsg" xml:space="preserve">
+    <value>现在的菜单和顺序会被扔掉，回到默认。要继续吗？</value>
+  </data>
+  <data name="Menu_ResetDone" xml:space="preserve">
+    <value>默认菜单布局已恢复</value>
+  </data>
+  <data name="Menu_ToolbarDesc" xml:space="preserve">
+    <value>挑挑浮动栏工具菜单里要显示啥、排啥顺序，最多 9 个（3×3 排）。</value>
+  </data>
+  <data name="Menu_BoardDesc" xml:space="preserve">
+    <value>挑挑白板工具菜单里要显示啥、排啥顺序，最多 9 个（3×3 排）。</value>
+  </data>
 </root>

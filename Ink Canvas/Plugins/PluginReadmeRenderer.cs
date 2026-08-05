@@ -201,7 +201,7 @@ namespace Ink_Canvas.Plugins
         {
             var border = new System.Windows.Controls.Border
             {
-                Background = new SolidColorBrush(Color.FromRgb(0xF3, 0xF3, 0xF3)),
+                Background = GetBrush("ControlFillColorDefaultBrush"),
                 CornerRadius = new CornerRadius(6),
                 Padding = new Thickness(10, 8, 10, 8),
                 Margin = new Thickness(0, 4, 0, 8)
@@ -211,6 +211,7 @@ namespace Ink_Canvas.Plugins
             {
                 FontFamily = new FontFamily("Consolas, Cascadia Mono, Courier New"),
                 FontSize = 12,
+                Foreground = GetBrush("TextFillColorPrimaryBrush"),
                 Text = string.Join(Environment.NewLine, codeLines),
                 TextWrapping = TextWrapping.NoWrap
             };
@@ -244,7 +245,7 @@ namespace Ink_Canvas.Plugins
             var table = new System.Windows.Documents.Table { CellSpacing = 0, Margin = new Thickness(0, 6, 0, 6) };
 
             var headerRowGroup = new System.Windows.Documents.TableRowGroup();
-            var headerRow = new System.Windows.Documents.TableRow { Background = new SolidColorBrush(Color.FromRgb(0xEC, 0xEC, 0xEC)) };
+            var headerRow = new System.Windows.Documents.TableRow { Background = GetBrush("SubtleFillColorSecondaryBrush") };
             foreach (var h in headerCells)
             {
                 var cellP = new Paragraph(new Run(h.Trim())) { FontWeight = FontWeights.SemiBold };
@@ -351,7 +352,8 @@ namespace Ink_Canvas.Plugins
                         var run = new Run(inner)
                         {
                             FontFamily = new FontFamily("Consolas, Cascadia Mono"),
-                            Background = new SolidColorBrush(Color.FromRgb(0xF3, 0xF3, 0xF3))
+                            Background = GetBrush("ControlFillColorDefaultBrush"),
+                            Foreground = GetBrush("TextFillColorPrimaryBrush")
                         };
                         paragraph.Inlines.Add(run);
                         pos = end + 1;

@@ -267,4 +267,31 @@
   <data name="Nav_Performance_Tooltip" xml:space="preserve">
     <value>Performance monitoring and device evaluation</value>
   </data>
+  <data name="Menu_AddedItems" xml:space="preserve">
+    <value>Added menu items</value>
+  </data>
+  <data name="Menu_AvailableItems" xml:space="preserve">
+    <value>Available menu items</value>
+  </data>
+  <data name="Menu_ResetLayout" xml:space="preserve">
+    <value>Reset to default layout</value>
+  </data>
+  <data name="Menu_LimitReached" xml:space="preserve">
+    <value>Limit reached (9 items). Please remove some items first.</value>
+  </data>
+  <data name="Menu_ResetConfirmTitle" xml:space="preserve">
+    <value>Reset to default layout</value>
+  </data>
+  <data name="Menu_ResetConfirmMsg" xml:space="preserve">
+    <value>This will discard the current menu items and order, and restore the default layout. Continue?</value>
+  </data>
+  <data name="Menu_ResetDone" xml:space="preserve">
+    <value>Default menu layout restored</value>
+  </data>
+  <data name="Menu_ToolbarDesc" xml:space="preserve">
+    <value>Configure the items and order shown in the floating bar tool menu, up to 9 items (3×3 layout).</value>
+  </data>
+  <data name="Menu_BoardDesc" xml:space="preserve">
+    <value>Configure the items and order shown in the whiteboard tool menu, up to 9 items (3×3 layout).</value>
+  </data>
 </root>

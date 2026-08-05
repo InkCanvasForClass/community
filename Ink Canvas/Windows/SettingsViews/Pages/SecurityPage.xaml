@@ -146,7 +146,7 @@
                         </ui:SettingsCard.HeaderIcon>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <ComboBox x:Name="ComboBoxUsbDrives"
-                                      Width="240" />
+                                      MinWidth="240" />
                             <Button x:Name="BtnRefreshUsbDrives"
                                     Content="{x:Static props:SecurityStrings.Security_UsbRefreshDrives}"
                                     MinWidth="80"

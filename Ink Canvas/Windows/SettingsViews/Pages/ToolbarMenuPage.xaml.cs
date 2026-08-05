@@ -1,5 +1,6 @@
 using GongSolutions.Wpf.DragDrop;
 using Ink_Canvas.Controls.Toolbar;
+using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Collections.Generic;
@@ -58,6 +59,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ToolsMenuRegistry.SaveFloatingBarConfig(layout);
         }
 
+        private const int MaxMenuItems = 9;
+
         private void RefreshLibraryList()
         {
             var addedSet = new HashSet<string>(AddedItems);
@@ -65,15 +68,19 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 .Where(i => !addedSet.Contains(i.Id))
                 .ToList();
             LibraryList.ItemsSource = available;
+            var atLimit = AddedItems.Count >= MaxMenuItems;
+            LibraryList.IsEnabled = !atLimit;
+            if (LibraryLimitHint != null)
+            {
+                LibraryLimitHint.Visibility = atLimit ? Visibility.Visible : Visibility.Collapsed;
+            }
         }
 
         private void AddLibraryItem_Click(object sender, RoutedEventArgs e)
         {
-            if (AddedItems.Count >= 9)
-            {
-                System.Windows.MessageBox.Show("最多只能添加 9 个菜单项。", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
+            // 防御性守卫：库列表在达到上限时已被禁用，正常路径不会触发；
+            // 此处保留是为了在禁用 UI 失效（拖拽等）时静默拒绝，避免打断用户。
+            if (AddedItems.Count >= MaxMenuItems) return;
             if (sender is FrameworkElement fe && fe.DataContext is ToolsMenuItemInfo item)
             {
                 AddedItems.Add(item.Id);
@@ -104,6 +111,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void ButtonReset_Click(object sender, RoutedEventArgs e)
         {
+            var msg = NavStrings.Menu_ResetConfirmMsg;
+            var title = NavStrings.Menu_ResetConfirmTitle;
+            if (System.Windows.MessageBox.Show(msg, title, MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+                return;
+
             var layout = ToolsMenuRegistry.CreateDefaultFloatingBarLayout();
             _suppressSave = true;
             AddedItems.Clear();
@@ -112,6 +124,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _suppressSave = false;
             RefreshLibraryList();
             SaveSettings();
+
+            var mw = Application.Current?.Windows.OfType<MainWindow>().FirstOrDefault();
+            mw?.ShowNotification(NavStrings.Menu_ResetDone);
         }
 
         #region Drag-drop
