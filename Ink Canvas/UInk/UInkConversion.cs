@@ -119,6 +119,134 @@ namespace Ink_Canvas.UInk
             return new Stroke(sps) { DrawingAttributes = da };
         }
 
+        // ---------- UInkShape → Stroke（读侧渲染） ----------
+
+        /// <summary>
+        /// 把 UInkShape 渲染为一条 Stroke：按几何生成轮廓点列（闭合图形回绕首点），
+        /// 用 stroke 样式（color/opacity/width）着色；仅 fill 时用 fill 颜色描轮廓近似。
+        /// dashArray/markers 目前按实线近似（规范允许渲染差异）。
+        /// </summary>
+        public static Stroke ShapeToStroke(UInkShape shape)
+        {
+            if (shape?.Geometry == null) return null;
+            var points = ComputeShapeOutlinePoints(shape.ShapeType, shape.Geometry);
+            if (points.Count < 2) return null;
+
+            var color = shape.Stroke?.Color ?? shape.Fill?.Color ?? new UInkColor();
+            float opacity = shape.Stroke?.Opacity ?? shape.Fill?.Opacity ?? 1f;
+            float width = shape.Stroke != null && shape.Stroke.Width > 0
+                ? shape.Stroke.Width
+                : (shape.Fill != null ? 8f : 4f); // 仅填充时用较粗描边近似
+
+            uint fb = color.Fallback & 0xFFFFFF;
+            var da = new DrawingAttributes
+            {
+                Color = Color.FromArgb(
+                    (byte)Math.Max(0, Math.Min(255, Math.Round(opacity * 255f))),
+                    (byte)(fb >> 16), (byte)(fb >> 8), (byte)fb),
+                Width = width,
+                Height = width,
+                FitToCurve = false,
+            };
+            var sps = new StylusPointCollection();
+            foreach (var (x, y) in points)
+                sps.Add(new StylusPoint(x, y, 0.5f));
+            return new Stroke(sps) { DrawingAttributes = da };
+        }
+
+        /// <summary>内容块 → Stroke 分发（Ink→InkToStroke，Shape→ShapeToStroke，Media→null）。供撤回适配/映射器使用。</summary>
+        public static Stroke BlockToStroke(IUInkContentBlock block) => block switch
+        {
+            UInkInk ink => InkToStroke(ink),
+            UInkShape shape => ShapeToStroke(shape),
+            _ => null,
+        };
+
+        private static List<(double x, double y)> ComputeShapeOutlinePoints(int shapeType, UInkShapeGeometry geometry)
+        {
+            var list = new List<(double, double)>();
+            switch (shapeType)
+            {
+                case (int)UInkShapeType.Line:
+                case (int)UInkShapeType.Polyline:
+                case (int)UInkShapeType.Polygon:
+                {
+                    if (geometry is UInkLineGeometry line && line.Points.Count >= 2)
+                    {
+                        foreach (var p in line.Points)
+                            list.Add((p.X, p.Y));
+                        if (shapeType == (int)UInkShapeType.Polygon && line.Points.Count >= 3)
+                            list.Add((line.Points[0].X, line.Points[0].Y)); // 闭合
+                    }
+                    break;
+                }
+                case (int)UInkShapeType.Rectangle:
+                case (int)UInkShapeType.Ellipse:
+                {
+                    if (geometry is UInkRectGeometry r)
+                    {
+                        var rx = r.Width / 2f;
+                        var ry = r.Height / 2f;
+                        if (shapeType == (int)UInkShapeType.Rectangle)
+                        {
+                            AddCorner(list, r.CenterX, r.CenterY, rx, ry, r.Rotation ?? 0f, -1, -1);
+                            AddCorner(list, r.CenterX, r.CenterY, rx, ry, r.Rotation ?? 0f, +1, -1);
+                            AddCorner(list, r.CenterX, r.CenterY, rx, ry, r.Rotation ?? 0f, +1, +1);
+                            AddCorner(list, r.CenterX, r.CenterY, rx, ry, r.Rotation ?? 0f, -1, +1);
+                            AddCorner(list, r.CenterX, r.CenterY, rx, ry, r.Rotation ?? 0f, -1, -1); // 闭合
+                        }
+                        else
+                        {
+                            AddEllipsePoints(list, r.CenterX, r.CenterY, rx, ry, r.Rotation ?? 0f);
+                        }
+                    }
+                    break;
+                }
+                case (int)UInkShapeType.Square:
+                {
+                    if (geometry is UInkSquareGeometry s)
+                    {
+                        var half = s.Size / 2f;
+                        AddCorner(list, s.CenterX, s.CenterY, half, half, s.Rotation ?? 0f, -1, -1);
+                        AddCorner(list, s.CenterX, s.CenterY, half, half, s.Rotation ?? 0f, +1, -1);
+                        AddCorner(list, s.CenterX, s.CenterY, half, half, s.Rotation ?? 0f, +1, +1);
+                        AddCorner(list, s.CenterX, s.CenterY, half, half, s.Rotation ?? 0f, -1, +1);
+                        AddCorner(list, s.CenterX, s.CenterY, half, half, s.Rotation ?? 0f, -1, -1);
+                    }
+                    break;
+                }
+                case (int)UInkShapeType.Circle:
+                {
+                    if (geometry is UInkCircleGeometry c)
+                        AddEllipsePoints(list, c.CenterX, c.CenterY, c.Radius, c.Radius, 0f);
+                    break;
+                }
+            }
+            return list;
+        }
+
+        private static void AddCorner(List<(double, double)> list, float cx, float cy,
+            float rx, float ry, float rot, int sx, int sy)
+        {
+            double dx = rx * sx, dy = ry * sy;
+            double cos = Math.Cos(rot), sin = Math.Sin(rot);
+            list.Add((cx + dx * cos - dy * sin, cy + dx * sin + dy * cos));
+        }
+
+        private static void AddEllipsePoints(List<(double, double)> list, float cx, float cy,
+            float rx, float ry, float rot)
+        {
+            const int n = 64;
+            double cos = Math.Cos(rot), sin = Math.Sin(rot);
+            for (int i = 0; i < n; i++)
+            {
+                double t = 2.0 * Math.PI * i / n;
+                double ex = rx * Math.Cos(t), ey = ry * Math.Sin(t);
+                list.Add((cx + ex * cos - ey * sin, cy + ex * sin + ey * cos));
+            }
+            if (list.Count > 0) list.Add(list[0]); // 闭合
+        }
+
         // ---------- DrawingAttributes 私有序列化（extra["icc:da"]） ----------
 
         private static string SerializeDrawingAttributes(DrawingAttributes da)
