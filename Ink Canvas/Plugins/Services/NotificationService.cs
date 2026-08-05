@@ -40,6 +40,10 @@ namespace Ink_Canvas.Plugins
 
             try
             {
+                // 用当前正在 Initialize 的插件 ID 作为 Source/ProviderId，
+                // 插件卸载时 NotificationCenterService.ClearPluginCallbacks 才能按 ID 摘掉 Action。
+                var pluginId = PluginManager.Instance.CurrentLoadingPluginId ?? "plugin";
+
                 _mainWindow?.Dispatcher.Invoke(() =>
                 {
                     // 带点击回调的通知走完整的 NotificationMessage 队列：
@@ -53,8 +57,8 @@ namespace Ink_Canvas.Plugins
                         Icon = level >= NotificationLevel.Warning ? "Warning" : "Info",
                         DisplaySeconds = 4,
                         Priority = 100,
-                        Source = "plugin",
-                        ProviderId = "plugin",
+                        Source = pluginId,
+                        ProviderId = pluginId,
                         Action = onClicked,
                     });
                 });

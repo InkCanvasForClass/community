@@ -310,6 +310,71 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             return removed;
         }
 
+        /// <summary>
+        /// 从所有浮动工具栏配置文件里移除指定 Id 的组件条目（递归处理组合子项）。
+        /// 插件卸载时调用：用户把插件组件拖进了工具栏，卸载后该组件已不存在，
+        /// 不清理会导致 Populate 反复刷 "未找到条目" 警告，且工具栏持续保留空白位。
+        /// </summary>
+        /// <returns>被修改的配置文件数量。</returns>
+        public static int RemovePluginEntryFromAllConfigs(string itemId)
+        {
+            if (string.IsNullOrEmpty(itemId)) return 0;
+
+            var modified = 0;
+            foreach (var configName in ListConfigFiles())
+            {
+                try
+                {
+                    var layout = LoadConfigFile(configName);
+                    if (layout?.Components == null) continue;
+
+                    if (StripPluginEntry(layout.Components, itemId) > 0)
+                    {
+                        SaveConfigFile(configName, layout);
+                        modified++;
+                        LogHelper.WriteLogToFile(
+                            $"ToolbarRegistry: 已从配置 [{configName}] 移除插件组件条目 [{itemId}]",
+                            LogHelper.LogType.Info);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"ToolbarRegistry: 清理配置 [{configName}] 中的插件组件失败: {ex.Message}",
+                        LogHelper.LogType.Warning);
+                }
+            }
+
+            return modified;
+        }
+
+        /// <summary>
+        /// 递归剔除 <see cref="ToolbarComponentEntry"/> 集合中 Id 等于 <paramref name="itemId"/> 的条目。
+        /// </summary>
+        private static int StripPluginEntry(List<ToolbarComponentEntry> entries, string itemId)
+        {
+            if (entries == null || entries.Count == 0) return 0;
+
+            var removed = 0;
+            for (var i = entries.Count - 1; i >= 0; i--)
+            {
+                var entry = entries[i];
+                if (entry == null) continue;
+
+                if (string.Equals(entry.Id, itemId, StringComparison.OrdinalIgnoreCase))
+                {
+                    entries.RemoveAt(i);
+                    removed++;
+                    continue;
+                }
+
+                if (entry.Children != null && entry.Children.Count > 0)
+                    removed += StripPluginEntry(entry.Children, itemId);
+            }
+
+            return removed;
+        }
+
 
         #region Config file system
 
