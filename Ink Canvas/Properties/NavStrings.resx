@@ -267,4 +267,31 @@
   <data name="Nav_Performance_Tooltip" xml:space="preserve">
     <value>性能监测与设备评估</value>
   </data>
+  <data name="Menu_AddedItems" xml:space="preserve">
+    <value>已添加的菜单项</value>
+  </data>
+  <data name="Menu_AvailableItems" xml:space="preserve">
+    <value>可添加的菜单项</value>
+  </data>
+  <data name="Menu_ResetLayout" xml:space="preserve">
+    <value>恢复默认布局</value>
+  </data>
+  <data name="Menu_LimitReached" xml:space="preserve">
+    <value>已达上限（9 个），请先移除部分菜单项</value>
+  </data>
+  <data name="Menu_ResetConfirmTitle" xml:space="preserve">
+    <value>恢复默认布局</value>
+  </data>
+  <data name="Menu_ResetConfirmMsg" xml:space="preserve">
+    <value>将丢弃当前的菜单项与排序，恢复为默认布局。是否继续？</value>
+  </data>
+  <data name="Menu_ResetDone" xml:space="preserve">
+    <value>已恢复默认菜单布局</value>
+  </data>
+  <data name="Menu_ToolbarDesc" xml:space="preserve">
+    <value>配置浮动栏工具菜单中显示的项目和顺序，最多 9 个（3×3 布局）。</value>
+  </data>
+  <data name="Menu_BoardDesc" xml:space="preserve">
+    <value>配置白板工具菜单中显示的项目和顺序，最多 9 个（3×3 布局）。</value>
+  </data>
 </root>

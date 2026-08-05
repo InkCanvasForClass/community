@@ -96,13 +96,13 @@
         <!-- ===== Section 1: 标题 + 提示 ===== -->
         <StackPanel Grid.Row="0" Margin="0,36,0,6">
             <TextBlock Text="{x:Static props:NavStrings.Nav_ToolbarMenu}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,6"/>
-            <TextBlock Text="配置浮动栏工具菜单中显示的项目和顺序，最多 9 个（3×3 布局）。"
+            <TextBlock Text="{x:Static props:NavStrings.Menu_ToolbarDesc}"
                        Opacity="0.65" FontSize="13" TextWrapping="Wrap"/>
         </StackPanel>
 
         <!-- ===== Section 2: 已添加的菜单项 ===== -->
         <DockPanel Grid.Row="1" LastChildFill="True" ClipToBounds="True">
-            <TextBlock Text="已添加的菜单项" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,6"
+            <TextBlock Text="{x:Static props:NavStrings.Menu_AddedItems}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,6"
                        DockPanel.Dock="Top"/>
             <Border CornerRadius="8" Padding="6" MinHeight="58">
                 <Border.Style>
@@ -141,8 +141,16 @@
 
         <!-- ===== Section 3: 可添加的菜单项 ===== -->
         <DockPanel Grid.Row="3" LastChildFill="True">
-            <TextBlock Text="可添加的菜单项" FontSize="14" FontWeight="SemiBold" Margin="0,4,0,6"
-                       DockPanel.Dock="Top"/>
+            <DockPanel DockPanel.Dock="Top" LastChildFill="False" Margin="0,4,0,6">
+                <TextBlock Text="{x:Static props:NavStrings.Menu_AvailableItems}" FontSize="14" FontWeight="SemiBold"
+                           DockPanel.Dock="Left"/>
+                <TextBlock x:Name="LibraryLimitHint"
+                           Text="{x:Static props:NavStrings.Menu_LimitReached}"
+                           FontSize="13" Opacity="0.65"
+                           VerticalAlignment="Center" Margin="12,0,0,0"
+                           Visibility="Collapsed"
+                           DockPanel.Dock="Left"/>
+            </DockPanel>
             <ui:ListView x:Name="LibraryList"
                      ItemTemplate="{StaticResource LibraryItemTemplate}"
                      dd:DragDrop.IsDragSource="True"
@@ -168,7 +176,7 @@
         </DockPanel>
 
         <!-- ===== Section 4: 恢复默认布局 ===== -->
-        <Button Grid.Row="4" Content="恢复默认布局" Click="ButtonReset_Click"
+        <Button Grid.Row="4" Content="{x:Static props:NavStrings.Menu_ResetLayout}" Click="ButtonReset_Click"
                 Padding="20,10" HorizontalAlignment="Left" Margin="0,12,0,16"/>
     </Grid>
 </ui:Page>
