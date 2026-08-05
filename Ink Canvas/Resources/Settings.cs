@@ -387,9 +387,9 @@ namespace Ink_Canvas
         [JsonProperty("disablePressure")]
         public bool DisablePressure { get; set; } // 是否屏蔽压感
         [JsonProperty("enableNativeInkPrediction")]
-        public bool EnableNativeInkPrediction { get; set; } = true; // 原生湿墨预测笔尾，仅用于实时预览，不烘焙进最终干墨
+        public bool EnableNativeInkPrediction { get; set; } = OSVersion.GetOperatingSystem() >= OSVersionExtension.OperatingSystem.Windows10; // 原生湿墨预测笔尾，用于实时预览，并烘干进最终干墨（Win10 及以上默认开启，依赖 WinRT 手写栈）
         [JsonProperty("useLegacyWetInk")]
-        public bool UseLegacyWetInk { get; set; } = true; // 使用旧版 WPF 湿墨迹输入系统（下次启动生效）
+        public bool UseLegacyWetInk { get; set; } = OSVersion.GetOperatingSystem() < OSVersionExtension.OperatingSystem.Windows10; // 使用旧版 WPF 湿墨迹输入系统（下次启动生效，Win10 及以上默认关闭以启用新的湿墨管线）
         [JsonProperty("autoStraightenLine")]
         public bool AutoStraightenLine { get; set; } = true; // 是否启用直线自动拉直
         [JsonProperty("autoStraightenLineThreshold")]
