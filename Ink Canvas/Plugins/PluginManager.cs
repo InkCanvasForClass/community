@@ -421,6 +421,14 @@ namespace Ink_Canvas.Plugins
                     Directory.Delete(subDir, true);
 
                     Log(string.Format("Cleaned up uninstalled plugin: {0}", Path.GetFileName(subDir)));
+
+                    // 目录名即 pluginId，顺带清掉配置 / 日志 / 错误记录 / 禁用标记，
+                    // 与运行期卸载路径保持一致。
+                    PurgePluginResidue(new PluginInfo
+                    {
+                        Id = Path.GetFileName(subDir),
+                        Name = Path.GetFileName(subDir),
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -1224,6 +1232,10 @@ namespace Ink_Canvas.Plugins
                     {
                         LogError(string.Format("Failed to delete plugin folder for plugin {0}", plugin.Name), ex);
                     }
+
+                    // 插件目录之外的残留：配置目录、日志目录、错误恢复记录、禁用标记。
+                    // 不清理的话，卸载后重装会读到上一次的配置与自动禁用状态。
+                    PurgePluginResidue(plugin);
                 }
                 else if (!string.IsNullOrEmpty(plugin.PluginFolderPath))
                 {
@@ -1253,6 +1265,108 @@ namespace Ink_Canvas.Plugins
             catch (Exception ex)
             {
                 LogError(string.Format("Failed to unload plugin {0}", plugin.Name), ex);
+            }
+        }
+
+        /// <summary>
+        /// 删除一个未加载插件的全部磁盘残留：插件目录、配置目录、日志目录、
+        /// 错误恢复记录与禁用标记。已加载的插件请走 <see cref="UnloadPlugin"/>
+        /// 并传 <c>deleteFolder: true</c>。
+        /// </summary>
+        public void PurgeUnloadedPlugin(PluginInfo plugin)
+        {
+            if (plugin == null || string.IsNullOrEmpty(plugin.Id)) return;
+
+            if (!string.IsNullOrEmpty(plugin.PluginFolderPath))
+            {
+                TryDeletePluginDirectory(plugin.PluginFolderPath, "folder", plugin.Name);
+                // 目录删不掉时留 .uninstall 标记，下次启动兜底清理。
+                if (Directory.Exists(plugin.PluginFolderPath))
+                {
+                    try { File.WriteAllText(Path.Combine(plugin.PluginFolderPath, ".uninstall"), ""); } catch { }
+                }
+            }
+
+            PurgePluginResidue(plugin);
+        }
+
+        /// <summary>
+        /// 清理插件目录之外的残留：<c>PluginConfigs/&lt;id&gt;/</c>、<c>PluginLogs/&lt;id&gt;/</c>、
+        /// 错误恢复记录与禁用列表条目。仅在真正卸载（而非热重载）时调用。
+        /// <para>
+        /// 不清理会导致：重装后读到上一次的插件配置；被自动禁用过的插件重装后仍处于禁用态；
+        /// 日志目录随卸载次数无限累积。
+        /// </para>
+        /// </summary>
+        private void PurgePluginResidue(PluginInfo plugin)
+        {
+            if (plugin == null || string.IsNullOrEmpty(plugin.Id)) return;
+
+            // 配置目录
+            var configFolder = !string.IsNullOrEmpty(plugin.PluginConfigFolder)
+                ? plugin.PluginConfigFolder
+                : Path.Combine(_pluginConfigsDirectory, plugin.Id);
+            TryDeletePluginDirectory(configFolder, "config", plugin.Name);
+
+            // 日志目录：PluginLogger 用短开短关的方式写文件，卸载时没有常驻句柄，可直接删。
+            TryDeletePluginDirectory(Path.Combine(_pluginLogsDirectory, plugin.Id), "log", plugin.Name);
+
+            // 错误恢复记录：留着会让重装后的插件仍被判为"最近频繁失败"甚至保持自动禁用。
+            try
+            {
+                if (_errorRecovery.Reset(plugin.Id))
+                    Log(string.Format("Cleared error recovery record for plugin {0}", plugin.Name));
+            }
+            catch (Exception ex)
+            {
+                LogError(string.Format("Failed to clear error recovery record for plugin {0}", plugin.Name), ex);
+            }
+
+            // 禁用列表：卸载即视为用户不再需要该插件，重装时应从"启用"开始。
+            try
+            {
+                if (_disabledPlugins.Remove(plugin.Id))
+                {
+                    SaveDisabledPlugins();
+                    Log(string.Format("Removed plugin {0} from disabled list", plugin.Name));
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError(string.Format("Failed to update disabled list for plugin {0}", plugin.Name), ex);
+            }
+        }
+
+        /// <summary>
+        /// 删除插件的附属目录（配置 / 日志）。走 <see cref="ProcessProtectionManager.WithWriteAccess"/>
+        /// 并显式释放目录内文件锁，避免进程保护开启时删除失败。
+        /// </summary>
+        private void TryDeletePluginDirectory(string folder, string kind, string pluginName)
+        {
+            if (string.IsNullOrEmpty(folder) || !Directory.Exists(folder)) return;
+
+            try
+            {
+                ProcessProtectionManager.WithWriteAccess(folder, () =>
+                {
+                    try
+                    {
+                        ProcessProtectionManager.ReleaseLocksForPath(folder);
+                        if (Directory.Exists(folder))
+                        {
+                            Directory.Delete(folder, true);
+                            Log(string.Format("Deleted plugin {0} directory [{1}]", kind, folder));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogError(string.Format("Failed to delete plugin {0} directory [{1}]", kind, folder), ex);
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                LogError(string.Format("Failed to purge {0} directory for plugin {1}", kind, pluginName), ex);
             }
         }
 
