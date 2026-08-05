@@ -114,6 +114,52 @@ namespace Ink_Canvas.Helpers
             TryShowNext();
         }
 
+        /// <summary>
+        /// 摘除属于指定插件的通知回调。通知消息的 <see cref="NotificationMessage.Action"/>
+        /// 字段直接指向插件 ALC 里的 Action，留在队列或历史中都会阻止插件 AssemblyLoadContext 卸载。
+        /// 该方法同时清空队列中指定来源的项，并把历史项的 <c>Action</c> 字段置空，
+        /// 避免插件用户的通知历史因热重载而被清空。
+        /// </summary>
+        public static int ClearPluginCallbacks(string pluginId, string providerId = "plugin")
+        {
+            if (string.IsNullOrEmpty(pluginId)) return 0;
+
+            var removed = 0;
+            lock (SyncRoot)
+            {
+                // 队列中待显示的：直接整条移除，避免用户点击触发旧回调。
+                for (var i = Queue.Count - 1; i >= 0; i--)
+                {
+                    var msg = Queue[i];
+                    if (msg == null) continue;
+                    if (msg.Action == null) continue;
+                    if (!pluginId.Equals(msg.Source, StringComparison.OrdinalIgnoreCase)
+                        && !pluginId.Equals(msg.ProviderId, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    Queue.RemoveAt(i);
+                    removed++;
+                }
+
+                // 历史中已显示的：保留文案给用户看，但清掉 Action 回调本身。
+                foreach (var msg in History)
+                {
+                    if (msg == null || msg.Action == null) continue;
+                    if (!pluginId.Equals(msg.Source, StringComparison.OrdinalIgnoreCase)
+                        && !pluginId.Equals(msg.ProviderId, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    msg.Action = null;
+                    removed++;
+                }
+
+                // 当前正在显示的那条走 NotificationRequested 事件的订阅；事件订阅由
+                // PluginDelegateCleaner.SweepStaticEvents 单独清理，这里不再处理。
+            }
+
+            return removed;
+        }
+
         private static void TryShowNext()
         {
             NotificationMessage next = null;

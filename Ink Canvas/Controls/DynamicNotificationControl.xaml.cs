@@ -185,6 +185,23 @@ namespace Ink_Canvas.Controls
             Close();
         }
 
+        /// <summary>
+        /// 摘除当前显示的插件回调。插件热重载时由 <see cref="Ink_Canvas.Plugins.PluginManager"/>
+        /// 调用：<c>currentMessage.Action</c> 直接指向插件 ALC 里的 Action，
+        /// 留着会阻止热重载时被回收。
+        /// </summary>
+        internal void DetachPluginActionIfMatches(string pluginId)
+        {
+            if (string.IsNullOrEmpty(pluginId)) return;
+            if (currentMessage == null || currentMessage.Action == null) return;
+
+            if (pluginId.Equals(currentMessage.Source, StringComparison.OrdinalIgnoreCase)
+                || pluginId.Equals(currentMessage.ProviderId, StringComparison.OrdinalIgnoreCase))
+            {
+                currentMessage.Action = null;
+            }
+        }
+
         private void UserControl_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {
             PauseCountdown();
