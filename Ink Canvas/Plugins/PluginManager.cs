@@ -67,6 +67,8 @@ namespace Ink_Canvas.Plugins
 
         public static readonly string ManifestFileName = "manifest.json";
         public static readonly string PluginPackageExtension = ".icpx";
+        /// <summary>待卸载标记文件名。目录删除失败时写入，下次启动由 CleanupUninstalledPlugins 兜底。</summary>
+        private const string UninstallMarkerFileName = ".uninstall";
 
         /// <summary>
         /// 已禁用的插件 ID 列表。
@@ -408,15 +410,14 @@ namespace Ink_Canvas.Plugins
 
             foreach (var subDir in Directory.GetDirectories(_pluginsDirectory))
             {
-                var marker = Path.Combine(subDir, ".uninstall");
+                var marker = Path.Combine(subDir, UninstallMarkerFileName);
                 if (!File.Exists(marker)) continue;
 
                 try
                 {
                     // 释放门控锁后删除
                     ProcessProtectionManager.ReleaseLocksForPath(subDir);
-                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
-                    GC.WaitForPendingFinalizers();
+                    ForceGarbageCollection();
 
                     Directory.Delete(subDir, true);
 
@@ -591,10 +592,8 @@ namespace Ink_Canvas.Plugins
             }
 
             // ALC.Unload 是异步完成的；强制两轮 GC 尽量释放 DLL 文件锁。
-            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
-            GC.WaitForPendingFinalizers();
-            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
-            GC.WaitForPendingFinalizers();
+            ForceGarbageCollection();
+            ForceGarbageCollection();
         }
 
         private void TryDeleteDirectory(string path)
@@ -609,16 +608,10 @@ namespace Ink_Canvas.Plugins
                     Directory.Delete(path, true);
                     return;
                 }
-                catch (IOException) when (attempt < maxAttempts)
+                catch (Exception ex) when ((ex is IOException || ex is UnauthorizedAccessException)
+                                           && attempt < maxAttempts)
                 {
-                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
-                    GC.WaitForPendingFinalizers();
-                    System.Threading.Thread.Sleep(50 * attempt);
-                }
-                catch (UnauthorizedAccessException) when (attempt < maxAttempts)
-                {
-                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
-                    GC.WaitForPendingFinalizers();
+                    ForceGarbageCollection();
                     System.Threading.Thread.Sleep(50 * attempt);
                 }
             }
@@ -1195,43 +1188,11 @@ namespace Ink_Canvas.Plugins
                 }
 
                 // 删除整个插件目录（仅在真正卸载时；热重载要留着目录重新加载）。
-                // 放进 WithWriteAccess：该 API 临时释放路径锁 → 执行 action → 重新锁，
-                // 期间删除不会被 "InkCanvasForClass 正在使用" 拒绝。
                 if (deleteFolder && !string.IsNullOrEmpty(plugin.PluginFolderPath))
                 {
-                    var folder = plugin.PluginFolderPath;
-                    try
-                    {
-                        ProcessProtectionManager.WithWriteAccess(folder, () =>
-                        {
-                            try
-                            {
-                                // WithWriteAccess 只释放「目录链句柄」与「targetPath 本身是文件时的那一个锁」，
-                                // 传目录时 File.Exists 恒 false，目录内部各 .dll 的 FileStream 不会被释放。
-                                // 必须显式按前缀释放，否则 Directory.Delete 会因文件被占用而失败。
-                                ProcessProtectionManager.ReleaseLocksForPath(folder);
-
-                                if (Directory.Exists(folder))
-                                {
-                                    Directory.Delete(folder, true);
-                                    Log(string.Format("UnloadPlugin: deleted plugin folder [{0}]", folder));
-                                }
-                            }
-                            catch (Exception deleteEx)
-                            {
-                                LogError(string.Format("UnloadPlugin: failed to delete plugin folder [{0}]", folder), deleteEx);
-                                // 删不掉时退回 .uninstall 标记，下次启动由 CleanupUninstalledPlugins 兜底。
-                                try { File.WriteAllText(Path.Combine(folder, ".uninstall"), ""); } catch { }
-                            }
-                        });
-                        // 强制回收，让 FileStream 句柄立即归还给 OS。
-                        GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true);
-                        GC.WaitForPendingFinalizers();
-                    }
-                    catch (Exception ex)
-                    {
-                        LogError(string.Format("Failed to delete plugin folder for plugin {0}", plugin.Name), ex);
-                    }
+                    TryDeletePluginDirectory(plugin.PluginFolderPath, "folder", plugin.Name,
+                        writeUninstallMarkerOnFailure: true);
+                    ForceGarbageCollection();
 
                     // 插件目录之外的残留：配置目录、日志目录、错误恢复记录、禁用标记。
                     // 不清理的话，卸载后重装会读到上一次的配置与自动禁用状态。
@@ -1243,8 +1204,7 @@ namespace Ink_Canvas.Plugins
                     try
                     {
                         ProcessProtectionManager.ReleaseLocksForPath(plugin.PluginFolderPath);
-                        GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true);
-                        GC.WaitForPendingFinalizers();
+                        ForceGarbageCollection();
                     }
                     catch (Exception ex)
                     {
@@ -1277,16 +1237,8 @@ namespace Ink_Canvas.Plugins
         {
             if (plugin == null || string.IsNullOrEmpty(plugin.Id)) return;
 
-            if (!string.IsNullOrEmpty(plugin.PluginFolderPath))
-            {
-                TryDeletePluginDirectory(plugin.PluginFolderPath, "folder", plugin.Name);
-                // 目录删不掉时留 .uninstall 标记，下次启动兜底清理。
-                if (Directory.Exists(plugin.PluginFolderPath))
-                {
-                    try { File.WriteAllText(Path.Combine(plugin.PluginFolderPath, ".uninstall"), ""); } catch { }
-                }
-            }
-
+            TryDeletePluginDirectory(plugin.PluginFolderPath, "folder", plugin.Name,
+                writeUninstallMarkerOnFailure: true);
             PurgePluginResidue(plugin);
         }
 
@@ -1338,15 +1290,23 @@ namespace Ink_Canvas.Plugins
         }
 
         /// <summary>
-        /// 删除插件的附属目录（配置 / 日志）。走 <see cref="ProcessProtectionManager.WithWriteAccess"/>
+        /// 删除插件的附属目录（配置 / 日志 / 插件主目录）。走 <see cref="ProcessProtectionManager.WithWriteAccess"/>
         /// 并显式释放目录内文件锁，避免进程保护开启时删除失败。
         /// </summary>
-        private void TryDeletePluginDirectory(string folder, string kind, string pluginName)
+        /// <param name="folder">要删除的目录路径。</param>
+        /// <param name="kind">目录类型描述（用于日志），如 "config" / "log" / "folder"。</param>
+        /// <param name="pluginName">插件名称（用于日志）。</param>
+        /// <param name="writeUninstallMarkerOnFailure">
+        /// true = 删除失败时写入 .uninstall 标记，让下次启动兜底清理；false = 仅记录日志。
+        /// </param>
+        /// <returns>删除是否成功。</returns>
+        private bool TryDeletePluginDirectory(string folder, string kind, string pluginName, bool writeUninstallMarkerOnFailure = false)
         {
-            if (string.IsNullOrEmpty(folder) || !Directory.Exists(folder)) return;
+            if (string.IsNullOrEmpty(folder) || !Directory.Exists(folder)) return true;
 
             try
             {
+                var deleted = false;
                 ProcessProtectionManager.WithWriteAccess(folder, () =>
                 {
                     try
@@ -1356,18 +1316,54 @@ namespace Ink_Canvas.Plugins
                         {
                             Directory.Delete(folder, true);
                             Log(string.Format("Deleted plugin {0} directory [{1}]", kind, folder));
+                            deleted = true;
                         }
                     }
                     catch (Exception ex)
                     {
                         LogError(string.Format("Failed to delete plugin {0} directory [{1}]", kind, folder), ex);
+                        if (writeUninstallMarkerOnFailure)
+                        {
+                            TryWriteUninstallMarker(folder);
+                        }
                     }
                 });
+                return deleted;
             }
             catch (Exception ex)
             {
                 LogError(string.Format("Failed to purge {0} directory for plugin {1}", kind, pluginName), ex);
+                if (writeUninstallMarkerOnFailure)
+                {
+                    TryWriteUninstallMarker(folder);
+                }
+                return false;
             }
+        }
+
+        /// <summary>
+        /// 在指定目录写入 .uninstall 标记文件，供下次启动时兜底清理。
+        /// </summary>
+        private void TryWriteUninstallMarker(string folder)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(folder) && Directory.Exists(folder))
+                {
+                    File.WriteAllText(Path.Combine(folder, ".uninstall"), "");
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// 强制执行垃圾回收，释放 FileStream / SafeFileHandle 等非托管句柄，
+        /// 并等待终结器队列清空。用于插件卸载后立即归还 OS 资源。
+        /// </summary>
+        private void ForceGarbageCollection()
+        {
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true);
+            GC.WaitForPendingFinalizers();
         }
 
         /// <summary>
