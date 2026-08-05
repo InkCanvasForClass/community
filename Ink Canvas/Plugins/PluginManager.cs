@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Diagnostics;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
@@ -1078,7 +1079,15 @@ namespace Ink_Canvas.Plugins
 
         #region Plugin Unloading
 
-        public void UnloadPlugin(PluginInfo plugin)
+        /// <summary>
+        /// 卸载插件：撤销所有宿主注册、释放 AssemblyLoadContext，并按需删除插件目录。
+        /// </summary>
+        /// <param name="plugin">要卸载的插件。</param>
+        /// <param name="deleteFolder">
+        /// true = 真正卸载，连同插件目录一并删除（用户点"删除"）；
+        /// false = 仅卸载实例并释放目录锁，保留文件（热重载 / 覆盖安装）。
+        /// </param>
+        public void UnloadPlugin(PluginInfo plugin, bool deleteFolder = false)
         {
             if (plugin == null) return;
 
@@ -1156,6 +1165,79 @@ namespace Ink_Canvas.Plugins
                     // 留一个弱引用，稍后用来判断 ALC 是否真的被回收了。
                     _unloadingContexts[plugin.Id] = new WeakReference(alc);
                     alc.Unload();
+
+                    // 立即跑一次 GC 帮 loader 释放 native handle，并打印诊断。
+                    // 之前只有 ReloadPlugin 才会校验，DeletePlugin / UnloadPlugin 路径下
+                    // 即便 ALC 仍存活也无任何日志，导致看上去"卸载成功但 dll 还在"。
+                    try
+                    {
+                        var fullyUnloaded = WaitForUnload(plugin.Id);
+                        if (!fullyUnloaded)
+                        {
+                            Log(string.Format(
+                                "Plugin {0} ALC did not fully unload (host code may still hold references); " +
+                                "consider restarting before manually overwriting the DLL.",
+                                plugin.Name));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogError(string.Format("WaitForUnload failed for plugin {0}", plugin.Name), ex);
+                    }
+                }
+
+                // 删除整个插件目录（仅在真正卸载时；热重载要留着目录重新加载）。
+                // 放进 WithWriteAccess：该 API 临时释放路径锁 → 执行 action → 重新锁，
+                // 期间删除不会被 "InkCanvasForClass 正在使用" 拒绝。
+                if (deleteFolder && !string.IsNullOrEmpty(plugin.PluginFolderPath))
+                {
+                    var folder = plugin.PluginFolderPath;
+                    try
+                    {
+                        ProcessProtectionManager.WithWriteAccess(folder, () =>
+                        {
+                            try
+                            {
+                                // WithWriteAccess 只释放「目录链句柄」与「targetPath 本身是文件时的那一个锁」，
+                                // 传目录时 File.Exists 恒 false，目录内部各 .dll 的 FileStream 不会被释放。
+                                // 必须显式按前缀释放，否则 Directory.Delete 会因文件被占用而失败。
+                                ProcessProtectionManager.ReleaseLocksForPath(folder);
+
+                                if (Directory.Exists(folder))
+                                {
+                                    Directory.Delete(folder, true);
+                                    Log(string.Format("UnloadPlugin: deleted plugin folder [{0}]", folder));
+                                }
+                            }
+                            catch (Exception deleteEx)
+                            {
+                                LogError(string.Format("UnloadPlugin: failed to delete plugin folder [{0}]", folder), deleteEx);
+                                // 删不掉时退回 .uninstall 标记，下次启动由 CleanupUninstalledPlugins 兜底。
+                                try { File.WriteAllText(Path.Combine(folder, ".uninstall"), ""); } catch { }
+                            }
+                        });
+                        // 强制回收，让 FileStream 句柄立即归还给 OS。
+                        GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true);
+                        GC.WaitForPendingFinalizers();
+                    }
+                    catch (Exception ex)
+                    {
+                        LogError(string.Format("Failed to delete plugin folder for plugin {0}", plugin.Name), ex);
+                    }
+                }
+                else if (!string.IsNullOrEmpty(plugin.PluginFolderPath))
+                {
+                    // 热重载/替换安装场景：保留目录，但必须释放锁，否则新版 DLL 覆盖不进去。
+                    try
+                    {
+                        ProcessProtectionManager.ReleaseLocksForPath(plugin.PluginFolderPath);
+                        GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true);
+                        GC.WaitForPendingFinalizers();
+                    }
+                    catch (Exception ex)
+                    {
+                        LogError(string.Format("Failed to release process protection locks for plugin {0}", plugin.Name), ex);
+                    }
                 }
 
                 // 清理插件注册的 URI 处理器，避免卸载后残留
@@ -1307,12 +1389,165 @@ namespace Ink_Canvas.Plugins
                     Log(string.Format("Plugin ALC unloaded after {0} GC pass(es): {1}", attempt + 1, pluginId));
                     return true;
                 }
+
+                // loader 与 native DLL 缓存未必在第一轮 GC 内释放，多给几轮机会。
+                // 间隔递增到 50ms 便于应付 loader latch。
+                System.Threading.Thread.Sleep(Math.Min(50 * (attempt + 1), 200));
             }
 
+            // 仍存活：emit 诊断信息，后端可以照此定位是哪个宿主对象还握有引用。
             LogError(string.Format(
                 "Plugin ALC for {0} is still alive after {1} GC passes; some host reference is pinning it (hot reload will fall back to restart).",
                 pluginId, maxAttempts));
+            DiagnoseLivePluginReferences(pluginId);
             return false;
+        }
+
+        /// <summary>
+        /// 诊断：列出该插件目录下仍被进程持有的 DLL（system32 忽略）。便于确认
+        /// 是插件主 DLL 还在被 mmap，还是某个 native 依赖尚未被卸载。
+        /// </summary>
+        private void DiagnoseLivePluginReferences(string pluginId)
+        {
+            try
+            {
+                // 优先从 _plugins 查；其次按约定路径 Plugins/<pluginId> 推导；
+                // 两者都为空时仍打印所有非系统 DLL 路径，便于开发者对照。
+                var info = _plugins.FirstOrDefault(p => string.Equals(p.Id, pluginId, StringComparison.OrdinalIgnoreCase));
+                var folder = info?.PluginFolderPath;
+                if (string.IsNullOrEmpty(folder))
+                {
+                    var fallback = Path.Combine(_pluginsDirectory, pluginId);
+                    if (Directory.Exists(fallback)) folder = fallback;
+                }
+
+                var loaded = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                try
+                {
+                    foreach (ProcessModule module in Process.GetCurrentProcess().Modules)
+                    {
+                        try
+                        {
+                            if (string.IsNullOrEmpty(module.FileName)) continue;
+                            loaded.Add(module.FileName);
+                        }
+                        catch { }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogError("DiagnoseLivePluginReferences: failed to enumerate modules", ex);
+                }
+
+                if (string.IsNullOrEmpty(folder) || !Directory.Exists(folder))
+                {
+                    Log("DiagnoseLivePluginReferences: plugin folder unknown. Falling back to listing all non-system modules.");
+                    foreach (var path in loaded)
+                    {
+                        if (path.StartsWith(Environment.SystemDirectory, StringComparison.OrdinalIgnoreCase)) continue;
+                        if (path.StartsWith(Path.GetTempPath(), StringComparison.OrdinalIgnoreCase)) continue;
+                        Log(string.Format("Process module still mapped: {0}", path));
+                    }
+                }
+                else
+                {
+                    Log(string.Format("DiagnoseLivePluginReferences: scanning modules for plugin folder [{0}]", folder));
+                    foreach (var dll in Directory.GetFiles(folder, "*.dll", SearchOption.AllDirectories))
+                    {
+                        if (!loaded.Contains(dll)) continue;
+                        Log(string.Format("Process still maps [{0}] (path: {1})", Path.GetFileName(dll), dll));
+                    }
+                }
+
+                // 解 ALC 仍存活的根因：扫描所有宿主服务实例（含 MainWindow 内的 _services），
+                // 找出哪个对象的字段/字典/事件还握着属于该插件 ALC 的委托或 Type。
+                TryPinpointPinningReference(pluginId);
+            }
+            catch (Exception ex)
+            {
+                LogError("DiagnoseLivePluginReferences failed", ex);
+            }
+        }
+
+        /// <summary>
+        /// 通过反射扫描所有已注册的宿主服务，找出仍持有该插件 ALC 之对象的源头。
+        /// 输出每个嫌疑字段的所属类型 + 字段名，便于开发者对照宿主代码补一刀。
+        /// </summary>
+        private void TryPinpointPinningReference(string pluginId)
+        {
+            try
+            {
+                var weakRef = _unloadingContexts.TryGetValue(pluginId, out var wr) ? wr : null;
+                var alc = weakRef?.Target as AssemblyLoadContext;
+                if (alc == null)
+                {
+                    Log("TryPinpointPinningReference: ALC weak reference unavailable, skipping.");
+                    return;
+                }
+
+                var roots = new List<object>();
+                foreach (var service in _services.Values)
+                {
+                    if (service != null) roots.Add(service);
+                }
+                if (_ipc != null) roots.Add(_ipc);
+                if (Application.Current?.MainWindow != null) roots.Add(Application.Current.MainWindow);
+
+                var visited = new HashSet<object>(ReferenceEqualityComparer.Instance);
+                var flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+                foreach (var root in roots)
+                {
+                    if (root == null) continue;
+                    WalkAndReportPinning(root, alc, 0, visited, new HashSet<string>(StringComparer.Ordinal), flags);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError("TryPinpointPinningReference failed", ex);
+            }
+        }
+
+        private void WalkAndReportPinning(object obj, AssemblyLoadContext target,
+            int depth, HashSet<object> visited, HashSet<string> seenPath, BindingFlags flags)
+        {
+            if (obj == null || target == null || depth < 0) return;
+            if (!visited.Add(obj)) return;
+
+            var type = obj.GetType();
+            while (type != null && type != typeof(object))
+            {
+                foreach (var field in type.GetFields(flags))
+                {
+                    if (field.IsStatic) continue;
+                    object value;
+                    try { value = field.GetValue(obj); }
+                    catch { continue; }
+
+                    if (value == null) continue;
+                    var path = type.Name + "." + field.Name;
+
+                    if (value is Delegate del)
+                    {
+                        if (PluginDelegateCleaner.IsOwnedBy(del, target) && seenPath.Add(path))
+                            Log(string.Format("Pinning reference: {0} (delegate)", path));
+                    }
+                    else if (value is Type t)
+                    {
+                        try
+                        {
+                            if (AssemblyLoadContext.GetLoadContext(t.Assembly) == target && seenPath.Add(path))
+                                Log(string.Format("Pinning reference: {0} (Type={1})", path, t.FullName));
+                        }
+                        catch { }
+                    }
+                    else if (depth > 0)
+                    {
+                        WalkAndReportPinning(value, target, depth - 1, visited, seenPath, flags);
+                    }
+                }
+                type = type.BaseType;
+            }
         }
 
         /// <summary>
@@ -1988,9 +2223,63 @@ namespace Ink_Canvas.Plugins
                 {
                     if (_info != null && _authorization != null && !_authorization.RequestExternalAuthorization(_info, libraryPath))
                         return IntPtr.Zero;
-                    return LoadUnmanagedDllFromPath(libraryPath);
+                    return LoadUnmanagedDllWithoutLockingFile(libraryPath);
                 }
                 return IntPtr.Zero;
+            }
+
+            /// <summary>
+            /// 加载 native DLL 但不锁住原文件。
+            /// <para>
+            /// <see cref="AssemblyLoadContext.LoadUnmanagedDllFromPath"/> 走 Win32 LoadLibrary，
+            /// 加载期间文件一直被 loader 持有，普通覆盖/删除会失败。
+            /// 解决思路：把原 DLL 拷贝到 <c>%TEMP%/ICC-CE-NativeCache/{pluginId}/</c>，
+            /// 从副本加载；这样插件目录里的 DLL 永远不会被锁，注册表/市场更新可以随时
+            /// 删除或覆盖。ALC 卸载时副本随 %TEMP% 清理流程一起回收（不必立即删除---
+            /// 删了反而会导致正在运行的 native 代码访问已释放内存）。
+            /// </para>
+            /// </summary>
+            internal IntPtr LoadUnmanagedDllWithoutLockingFile(string originalPath)
+            {
+                if (string.IsNullOrEmpty(originalPath) || !File.Exists(originalPath))
+                    return IntPtr.Zero;
+
+                try
+                {
+                    var cacheDir = Path.Combine(Path.GetTempPath(), "ICC-CE-NativeCache",
+                        _info?.Id ?? Path.GetFileNameWithoutExtension(originalPath));
+                    Directory.CreateDirectory(cacheDir);
+
+                    var fileName = Path.GetFileName(originalPath);
+                    var cachedPath = Path.Combine(cacheDir, fileName);
+
+                    // 复制并加载：拷贝用自己的 FileStream，读完即关，主进程不再持有原文件。
+                    // 副本路径固定后，重复加载同名 DLL 会拿到同一副本，不会内存增长。
+                    try
+                    {
+                        using (var src = new FileStream(originalPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                        using (var dst = new FileStream(cachedPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                        {
+                            src.CopyTo(dst);
+                        }
+                    }
+                    catch (Exception copyEx)
+                    {
+                        LogHelper.WriteLogToFile(
+                            $"PluginManager: 缓存 native DLL 失败，回退直接加载: {originalPath} -> {copyEx.Message}",
+                            LogHelper.LogType.Warning);
+                        return LoadUnmanagedDllFromPath(originalPath);
+                    }
+
+                    return LoadUnmanagedDllFromPath(cachedPath);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"PluginManager: 加载 native DLL 失败: {originalPath} -> {ex.Message}",
+                        LogHelper.LogType.Error);
+                    return IntPtr.Zero;
+                }
             }
         }
 
