@@ -29,7 +29,7 @@
     <EmbeddedOnlyCultures>en-US;zh-ME</EmbeddedOnlyCultures>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <Configurations>Debug;Release</Configurations>
-    <Platforms>AnyCPU;x86;x64</Platforms>
+    <Platforms>AnyCPU;x86;x64;ARM64;ARM64EC</Platforms>
     <LangVersion>12</LangVersion>
     <NoWarn>$(NoWarn);CA1416;NU1701;MSB3270;CS8012;NETSDK1138;CS9269</NoWarn>
     <!-- PolySharp (传递依赖，经 Vortice→SharpGen.Runtime 引入) 在 .NET 10 SDK 下与既有的
@@ -94,6 +94,24 @@
     <OutputPath>bin\$(Configuration)\$(Platform)\</OutputPath>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>ARM64</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+    <TieredCompilation>true</TieredCompilation>
+    <TieredPGO>true</TieredPGO>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishReadyToRunComposite>true</PublishReadyToRunComposite>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM64EC'">
+    <OutputPath>bin\$(Configuration)\$(Platform)\</OutputPath>
+    <DebugType>full</DebugType>
+    <PlatformTarget>ARM64EC</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+    <TieredCompilation>true</TieredCompilation>
+    <TieredPGO>true</TieredPGO>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM64EC'">
+    <OutputPath>bin\$(Configuration)\$(Platform)\</OutputPath>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>ARM64EC</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
     <TieredCompilation>true</TieredCompilation>
     <TieredPGO>true</TieredPGO>

@@ -19,7 +19,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        architecture: [AnyCPU, x86]
+        # AnyCPU = 默认 x64；x64 = 显式 x64；ARM64 = 纯 ARM64 ABI（Surface Pro X 等）；
+        # ARM64EC = Windows 11 ARM64EC ABI（x64 兼容 + ARM64 加速，仅 ARM64 设备运行）。
+        architecture: [AnyCPU, x86, x64, ARM64, ARM64EC]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -141,6 +143,100 @@ jobs:
             exit 1
           }
 
+      - name: Build VSTO Add-in (x64 via AnyCPU)
+        if: matrix.architecture == 'x64'
+        shell: pwsh
+        run: |
+          msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" `
+            /p:Configuration=Debug `
+            /p:Platform=AnyCPU `
+            /p:SignManifests=true `
+            /p:ManifestCertificateThumbprint=$env:SIGN_THUMBPRINT `
+            /verbosity:minimal -maxcpucount
+          $pptAgentDir = "Ink Canvas\bin\Debug\x64\net6.0-windows10.0.19041.0\ppt-agent"
+          New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
+          Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\*" $pptAgentDir -Recurse -Force
+          Copy-Item "InkCanvas.PPTAgent.Contracts\bin\Debug\netstandard2.0\InkCanvas.PPTAgent.Contracts.dll" $pptAgentDir -Force
+          Get-ChildItem $pptAgentDir | Select-Object Name
+          if (-not (Test-Path "$pptAgentDir\Microsoft.Office.Tools.Common.v4.0.Utilities.dll")) {
+            Write-Error "缺少 VSTO 依赖 DLL，artifact 不完整"
+            exit 1
+          }
+
+      - name: Check VSTO build result (x64)
+        if: matrix.architecture == 'x64'
+        run: |
+          if (Test-Path "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll") {
+            Write-Host "VSTO DLL OK"
+          } else {
+            Write-Error "VSTO DLL not found"
+            exit 1
+          }
+
+      # ARM64 矩阵：VSTO csproj 不支持 ARM64 平台，且 InkCanvas.PowerPointAddIn 是 MSIL 通用，
+      # Office ARM64 通过 emulation 加载。统一用 msbuild AnyCPU 跑一份，产物归到 ARM64 bin 下。
+      - name: Build VSTO Add-in (ARM64 via AnyCPU)
+        if: matrix.architecture == 'ARM64'
+        shell: pwsh
+        run: |
+          msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" `
+            /p:Configuration=Debug `
+            /p:Platform=AnyCPU `
+            /p:SignManifests=true `
+            /p:ManifestCertificateThumbprint=$env:SIGN_THUMBPRINT `
+            /verbosity:minimal -maxcpucount
+          $pptAgentDir = "Ink Canvas\bin\Debug\ARM64\net6.0-windows10.0.19041.0\ppt-agent"
+          New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
+          Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\*" $pptAgentDir -Recurse -Force
+          Copy-Item "InkCanvas.PPTAgent.Contracts\bin\Debug\netstandard2.0\InkCanvas.PPTAgent.Contracts.dll" $pptAgentDir -Force
+          Get-ChildItem $pptAgentDir | Select-Object Name
+          if (-not (Test-Path "$pptAgentDir\Microsoft.Office.Tools.Common.v4.0.Utilities.dll")) {
+            Write-Error "缺少 VSTO 依赖 DLL，artifact 不完整"
+            exit 1
+          }
+
+      - name: Check VSTO build result (ARM64)
+        if: matrix.architecture == 'ARM64'
+        run: |
+          if (Test-Path "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll") {
+            Write-Host "VSTO DLL OK"
+          } else {
+            Write-Error "VSTO DLL not found"
+            exit 1
+          }
+
+      # ARM64EC 矩阵：VSTO csproj 不支持 ARM64EC 平台，PowerPointAddIn 是 MSIL 通用，
+      # Office ARM64EC 通过 emulation 加载 AnyCPU 产物。统一用 msbuild AnyCPU 跑一份，
+      # 产物归到 ARM64EC bin 下的 ppt-agent（与 ARM64 矩阵对称，互不依赖）。
+      - name: Build VSTO Add-in (ARM64EC via AnyCPU)
+        if: matrix.architecture == 'ARM64EC'
+        shell: pwsh
+        run: |
+          msbuild "InkCanvas.PowerPointAddIn/InkCanvas.PowerPointAddIn.csproj" `
+            /p:Configuration=Debug `
+            /p:Platform=AnyCPU `
+            /p:SignManifests=true `
+            /p:ManifestCertificateThumbprint=$env:SIGN_THUMBPRINT `
+            /verbosity:minimal -maxcpucount
+          $pptAgentDir = "Ink Canvas\bin\Debug\ARM64EC\net6.0-windows10.0.19041.0\ppt-agent"
+          New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
+          Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\*" $pptAgentDir -Recurse -Force
+          Copy-Item "InkCanvas.PPTAgent.Contracts\bin\Debug\netstandard2.0\InkCanvas.PPTAgent.Contracts.dll" $pptAgentDir -Force
+          Get-ChildItem $pptAgentDir | Select-Object Name
+          if (-not (Test-Path "$pptAgentDir\Microsoft.Office.Tools.Common.v4.0.Utilities.dll")) {
+            Write-Error "缺少 VSTO 依赖 DLL，artifact 不完整"
+            exit 1
+          }
+
+      - name: Check VSTO build result (ARM64EC)
+        if: matrix.architecture == 'ARM64EC'
+        run: |
+          if (Test-Path "InkCanvas.PowerPointAddIn\bin\Debug\InkCanvas.PowerPointAddIn.dll") {
+            Write-Host "VSTO DLL OK"
+          } else {
+            Write-Error "VSTO DLL not found"
+            exit 1
+          }
       - name: Check if exe file is generated
         id: check-exe
         shell: pwsh
