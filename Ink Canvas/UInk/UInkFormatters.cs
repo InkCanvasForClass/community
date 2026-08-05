@@ -16,6 +16,8 @@ namespace Ink_Canvas.UInk
         // ---------- MessagePack 类型探测（3.x 无 NextMessageType，用 NextCode 解码） ----------
         public static bool IsNil(ref MessagePackReader r) => r.NextCode == MessagePackCode.Nil;
 
+        public static bool IsInteger(ref MessagePackReader r) => IsIntegerCode(r.NextCode);
+
         private static bool IsIntegerCode(byte code) =>
             code <= 0x7F || code >= 0xE0 || (code >= 0xCC && code <= 0xCF) || (code >= 0xD0 && code <= 0xD3);
 
