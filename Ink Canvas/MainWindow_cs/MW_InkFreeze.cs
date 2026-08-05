@@ -354,6 +354,8 @@ namespace Ink_Canvas
                 "清空冻结页面内容" => "Main_Freeze_Action_ClearPage",
                 "插入截图" => "Main_Freeze_Action_InsertScreenshot",
                 "插入图片" => "Main_Freeze_Action_InsertImage",
+                "插入控件" => "Main_Freeze_Action_InsertElement",
+                "删除控件" => "Main_Freeze_Action_DeleteElement",
                 "书写" => "Main_Freeze_Action_Write",
                 "打开墨迹文件" => "Main_Freeze_Action_OpenInkFile",
                 "恢复墨迹文件" => "Main_Freeze_Action_RestoreInkFile",
