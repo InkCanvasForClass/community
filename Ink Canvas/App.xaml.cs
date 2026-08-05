@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,6 +20,7 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
 using System.Windows.Threading;
 using Windows.Win32;
 using Windows.Win32.Foundation;
@@ -1033,6 +1035,20 @@ namespace Ink_Canvas
         async void App_Startup(object sender, StartupEventArgs e)
         {
             appStartTime = DateTime.Now;
+
+            // ARM64 渲染模式自适应：Surface Pro X 等 ARM64 设备走 WARP 软件光栅，
+            // WPF 默认按 GPU 路径会触发无效 GPU 句柄的探测耗时与偶发 fallback。
+            // 提前显式声明 SoftwareOnly，让 InkCanvas/浮动栏/墨迹预览的渲染直接走软件，
+            // 减少启动抖动与首帧延迟。x86/x64 不动。
+            // 注意：RenderOptions 位于 System.Windows.Media，RenderMode enum 位于
+            // System.Windows.Interop；本文件已 using System.Windows.Interop，
+            // 引用 RenderMode 直接走短名即可。
+            if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
+            {
+                RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
+                LogHelper.WriteLogToFile("App | ARM64 detected, RenderMode=SoftwareOnly");
+            }
+
             appStartupStartTime = DateTime.Now;
             startupStopwatch.Restart();
 
