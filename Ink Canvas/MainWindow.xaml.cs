@@ -1532,8 +1532,10 @@ namespace Ink_Canvas
                 ShowRealtimeInkFpsOverlay();
             }
 
-            // Start native wet-ink (WM_POINTER + DirectComposition) after HWND is ready.
-            TryStartNativeWetInkPipeline();
+            // 启动时按当前逻辑工具同步原生湿墨迹管线；
+            // 默认 _currentToolMode = "cursor"，不会启动管线，
+            // 仅当用户实际选了 Ink 笔时才会挂载。
+            SyncNativeWetInkPipelineWithLogicalTool();
 
             // 应用颜色主题，这将考虑自定义背景色
             CheckColorTheme(true);

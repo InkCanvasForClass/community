@@ -59,10 +59,12 @@ namespace Ink_Canvas
                 return;
             }
 
-            // 启动入口由上层（SetCurrentToolMode）按请求的逻辑模式请求 Ink 时调用；
-            // 此处只做幂等/失败守卫，不要再读取物理 EditingMode，
-            // 因为 Ink 请求已经被映射成 None 再调进来。
+            // 启动入口由上层（SetCurrentToolMode / SyncNativeWetInkPipelineWithLogicalTool）
+            // 在请求 Ink 时调用；此处只做幂等/失败守卫，并兜底防止光标/橡皮擦等模式下误启。
             if (inkCanvas == null)
+                return;
+
+            if (ResolveLogicalInkTool() != LogicalInkTool.Pen)
                 return;
 
             if (_nativeWetInkStarted || _nativeWetInkDisabled)
