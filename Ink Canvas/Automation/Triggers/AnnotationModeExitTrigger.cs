@@ -104,14 +104,14 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
                 {
                     var mw = System.Windows.Application.Current.MainWindow as MainWindow;
                     if (mw == null) return false;
-                    return mw.inkCanvas?.EditingMode == System.Windows.Controls.InkCanvasEditingMode.Ink;
+                    return mw.IsAnnotationModeActive();
                 }
 
                 return dispatcher?.Invoke(() =>
                 {
                     var mw = System.Windows.Application.Current.MainWindow as MainWindow;
                     if (mw == null) return false;
-                    return mw.inkCanvas?.EditingMode == System.Windows.Controls.InkCanvasEditingMode.Ink;
+                    return mw.IsAnnotationModeActive();
                 }) ?? false;
             }
             catch

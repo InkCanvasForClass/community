@@ -6154,6 +6154,29 @@ namespace Ink_Canvas
 
             // 液态玻璃浮动栏：同步选中态高亮
             RefreshLiquidGlassBarActiveState();
+
+            // 通知自动化系统：逻辑工具模式已变化。原生笔路径下物理 EditingMode 不变，
+            // 触发器无法靠 EditingModeChanged 感知进/出批注，必须在此显式通知。
+            AutomationBootstrap.Monitor?.NotifyInternalStateChanged();
+        }
+
+        /// <summary>
+        /// 自动化「切换批注模式」动作入口：进入/退出批注模式。
+        /// 与画笔/光标按钮保持一致的 SetCurrentToolMode + UpdateCurrentToolMode 序列，
+        /// 保证 _currentToolMode（逻辑工具）与原生湿墨迹管线同步。
+        /// </summary>
+        internal void SetAnnotationModeFromAutomation(bool enterAnnotation)
+        {
+            if (enterAnnotation)
+            {
+                if (SetCurrentToolMode(InkCanvasEditingMode.Ink))
+                    UpdateCurrentToolMode("pen");
+            }
+            else
+            {
+                if (SetCurrentToolMode(InkCanvasEditingMode.None))
+                    UpdateCurrentToolMode("cursor");
+            }
         }
 
         #endregion

@@ -1,7 +1,6 @@
 using Ink_Canvas.WorkflowAutomation.Abstractions;
 using Ink_Canvas.WorkflowAutomation.Actions;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace Ink_Canvas.WorkflowAutomation.ActionHandlers
 {
@@ -17,12 +16,10 @@ namespace Ink_Canvas.WorkflowAutomation.ActionHandlers
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     var mw = Application.Current.MainWindow as MainWindow;
-                    if (mw?.inkCanvas == null) return;
+                    if (mw == null) return;
 
-                    if (s.EnterAnnotation)
-                        mw.inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                    else
-                        mw.inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    // 统一走主程序工具切换序列，保证逻辑工具与原生湿墨迹管线同步
+                    mw.SetAnnotationModeFromAutomation(s.EnterAnnotation);
                 });
 
                 AutomationBootstrap.Monitor?.NotifyInternalStateChanged();
@@ -36,12 +33,9 @@ namespace Ink_Canvas.WorkflowAutomation.ActionHandlers
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     var mw = Application.Current.MainWindow as MainWindow;
-                    if (mw?.inkCanvas == null) return;
+                    if (mw == null) return;
 
-                    if (s.EnterAnnotation)
-                        mw.inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                    else
-                        mw.inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    mw.SetAnnotationModeFromAutomation(s.EnterAnnotation);
                 });
 
                 AutomationBootstrap.Monitor?.NotifyInternalStateChanged();
