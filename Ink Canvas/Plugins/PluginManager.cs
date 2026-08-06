@@ -1551,13 +1551,19 @@ namespace Ink_Canvas.Plugins
 
                 if (string.IsNullOrEmpty(folder) || !Directory.Exists(folder))
                 {
-                    Log("DiagnoseLivePluginReferences: plugin folder unknown. Falling back to listing all non-system modules.");
+                    // 无法定位插件目录时，逐条列出所有非系统模块会让日志被 dotnet runtime
+                    // / WinSxS 等无关 DLL 刷屏，对定位根因毫无帮助。这里只汇总一条，
+                    // 真正有信息量的字段级诊断交给下面的 TryPinpointPinningReference。
+                    int fallbackCount = 0;
                     foreach (var path in loaded)
                     {
                         if (path.StartsWith(Environment.SystemDirectory, StringComparison.OrdinalIgnoreCase)) continue;
                         if (path.StartsWith(Path.GetTempPath(), StringComparison.OrdinalIgnoreCase)) continue;
-                        Log(string.Format("Process module still mapped: {0}", path));
+                        fallbackCount++;
                     }
+                    Log(string.Format(
+                        "DiagnoseLivePluginReferences: plugin folder unknown, {0} non-system modules still mapped (suppressed; see TryPinpointPinningReference below).",
+                        fallbackCount));
                 }
                 else
                 {
