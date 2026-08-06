@@ -177,10 +177,17 @@ namespace Ink_Canvas
 
             try
             {
-                foreach (var stylusPoint in e.Stroke.StylusPoints)
-                    if ((stylusPoint.PressureFactor > 0.501 || stylusPoint.PressureFactor < 0.5) &&
-                        stylusPoint.PressureFactor != 0)
-                        return e.Stroke;
+                // 原生湿墨提交的笔画压感是湿墨预览最终值（必含非 0.5 点），压感守卫不能挡它，
+                // 否则新墨迹系统的干墨永远进不了墨迹平滑（性能面板平滑计时全 0）。
+                // 平滑器沿几何方向线性插值压感、不重写压感值；InkStyle 0/1/3 重写也已在
+                // 下方对 isNativeWetInkCommitted 跳过，放行不会造成二次烘焙或烘干闪变。
+                if (!e.Stroke.ContainsPropertyData(NativeWetInkCommittedGuid))
+                {
+                    foreach (var stylusPoint in e.Stroke.StylusPoints)
+                        if ((stylusPoint.PressureFactor > 0.501 || stylusPoint.PressureFactor < 0.5) &&
+                            stylusPoint.PressureFactor != 0)
+                            return e.Stroke;
+                }
 
                 try
                 {
@@ -310,6 +317,8 @@ namespace Ink_Canvas
 
                             if (smoothedStroke != e.Stroke)
                             {
+                                // 补回平滑器未复制的 property data（激光/原生湿墨标记）。
+                                InkSmoothingManager.CopyPropertyData(e.Stroke, smoothedStroke);
                                 SetNewBackupOfStroke();
                                 if (Settings.Canvas.MergeInkSmoothingWithUndo)
                                 {
@@ -1086,6 +1095,9 @@ namespace Ink_Canvas
                     if (inkCanvas.Strokes.Contains(original) && smoothed != original)
                     {
                         Debug.WriteLine("异步替换原始笔画为平滑后的笔画");
+                        // 平滑器创建的新 Stroke 只克隆 DrawingAttributes，需补回 property data
+                        //（LaserRenderModeGuid / NativeWetInkCommittedGuid 等，否则激光笔迹失效）。
+                        InkSmoothingManager.CopyPropertyData(original, smoothed);
                         SetNewBackupOfStroke();
                         if (Settings.Canvas.MergeInkSmoothingWithUndo)
                         {
