@@ -2,6 +2,7 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Ink.Native;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
@@ -1165,8 +1166,16 @@ namespace Ink_Canvas
                     return CanvasHitZone.Outside;
                 }
 
-                // Conservative model: for Pen freehand, default to the writing
-                // surface and only override when a known UI element is explicitly hit.
+                // 鼠标若悬浮在"非主窗口/非湿墨 overlay"的顶层窗口上（如打开的宿主 Popup 面板、
+                // 面板内的 ComboBox 下拉列表，或其他应用窗口），该点击属于面板交互。
+                // 主窗口因 RIDEV_INPUTSINK 全局注册，点击 Popup 时也会收到 WM_INPUT；若不在此
+                // 拦截，每次点击面板内控件都会在面板下方的画布上画出幽灵墨迹（"点击穿透到下方"），
+                // 且被当作画布输入后还可能干扰面板的收起/选择行为。
+                if (IsPointerOverForeignTopWindow(windowPoint))
+                    return CanvasHitZone.Outside;
+
+                // For Pen freehand, default to the writing surface and only override
+                // when the hit element is known UI chrome or is not on the InkCanvas.
                 var hit = InputHitTest(windowPoint) as DependencyObject;
 
                 // Eraser overlay sits above the canvas and owns its input.
@@ -1194,6 +1203,14 @@ namespace Ink_Canvas
                 if (hit != null && IsUiChromeHit(hit))
                     return CanvasHitZone.UiChrome;
 
+                // The InkCanvas is the writing surface. Any element rendered above it
+                // — side/quick panels, selection chrome, floating bars, dialogs, and
+                // any future panel not on the name whitelist — is UI chrome. Without
+                // this, the native WM_POINTER router swallows clicks over those panels
+                // as ink, so every child panel appears unclickable.
+                if (hit != null && !IsUnderElement(hit, inkCanvas))
+                    return CanvasHitZone.UiChrome;
+
                 // Everything else over the window is the writing surface for Pen.
                 return CanvasHitZone.CanvasSurface;
             }
@@ -1202,6 +1219,55 @@ namespace Ink_Canvas
                 return CanvasHitZone.CanvasSurface;
             }
         }
+
+        /// <summary>
+        /// 鼠标是否悬浮在"非主窗口/非湿墨 overlay"的顶层窗口上（如打开的宿主 Popup 面板、
+        /// 面板内的 ComboBox 下拉列表，或其他应用窗口）。
+        /// 主窗口因 RIDEV_INPUTSINK 全局注册 RawInput 鼠标（NativePointerInputSource），
+        /// 点击 Popup 时也会收到 WM_INPUT；若把面板上的点击判定为画布输入，
+        /// 每次点击面板内控件都会在面板下方的画布上画出幽灵墨迹（"点击穿透到下方"）。
+        /// 湿墨 overlay 覆盖主窗口但点击穿透（HTTRANSPARENT），绘制时鼠标 z 序落在 overlay 上，
+        /// 应继续视为主窗口内容；其余顶层窗口一律跳过墨迹。
+        /// </summary>
+        private bool IsPointerOverForeignTopWindow(Point windowPoint)
+        {
+            try
+            {
+                var screen = PointToScreen(windowPoint);
+                var topWindow = WindowFromPoint(new NativeWin32Point(
+                    (int)Math.Round(screen.X),
+                    (int)Math.Round(screen.Y)));
+                if (topWindow == IntPtr.Zero)
+                    return false;
+
+                var mainHwnd = new WindowInteropHelper(this).Handle;
+                if (topWindow == mainHwnd)
+                    return false;
+
+                var overlayHwnd = _wetInkWindowHost?.OverlayHandle ?? IntPtr.Zero;
+                return topWindow != overlayHwnd;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct NativeWin32Point
+        {
+            public NativeWin32Point(int x, int y)
+            {
+                X = x;
+                Y = y;
+            }
+
+            public int X;
+            public int Y;
+        }
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr WindowFromPoint(NativeWin32Point point);
 
         private bool IsUiChromeHit(DependencyObject hit)
         {
@@ -1351,6 +1417,16 @@ namespace Ink_Canvas
             TryAddElementExclusion(list, FindName("RightBottomPanelForPPTNavigation") as FrameworkElement, dpi, windowTopLeftScreen);
             TryAddElementExclusion(list, FindName("LeftSidePanelForPPTNavigation") as FrameworkElement, dpi, windowTopLeftScreen);
             TryAddElementExclusion(list, FindName("RightSidePanelForPPTNavigation") as FrameworkElement, dpi, windowTopLeftScreen);
+            TryAddElementExclusion(list, FindName("LeftSidePanel") as FrameworkElement, dpi, windowTopLeftScreen);
+            TryAddElementExclusion(list, FindName("RightSidePanel") as FrameworkElement, dpi, windowTopLeftScreen);
+            TryAddElementExclusion(list, FindName("LeftUnFoldButtonQuickPanel") as FrameworkElement, dpi, windowTopLeftScreen);
+            TryAddElementExclusion(list, FindName("RightUnFoldButtonQuickPanel") as FrameworkElement, dpi, windowTopLeftScreen);
+            TryAddElementExclusion(list, FindName("BorderStrokeSelectionControl") as FrameworkElement, dpi, windowTopLeftScreen);
+            TryAddElementExclusion(list, FindName("BorderImageSelectionControl") as FrameworkElement, dpi, windowTopLeftScreen);
+            TryAddElementExclusion(list, FindName("BorderPdfPageSidebar") as FrameworkElement, dpi, windowTopLeftScreen);
+            TryAddElementExclusion(list, FindName("ImageSelectionOverlay") as FrameworkElement, dpi, windowTopLeftScreen);
+            TryAddElementExclusion(list, FindName("QuickDrawFloatingButton") as FrameworkElement, dpi, windowTopLeftScreen);
+            TryAddElementExclusion(list, FindName("PPTTimeCapsuleContainer") as FrameworkElement, dpi, windowTopLeftScreen);
             TryAddElementExclusion(list, EraserOverlayCanvas, dpi, windowTopLeftScreen);
             return list;
         }

@@ -1975,9 +1975,12 @@ namespace Ink_Canvas
                 }
                 else if (inkCanvas != null
                     && inkCanvas.EditingMode != InkCanvasEditingMode.Ink
-                    && inkCanvas.EditingMode != InkCanvasEditingMode.None)
+                    && inkCanvas.EditingMode != InkCanvasEditingMode.None
+                    && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
+                    && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
                 {
-                    // 第一指 + 选择/橡皮擦模式：临时切 None 抑制 InkCanvas 内部框选/橡皮擦逻辑
+                    // 第一指 + 选择模式：临时切 None 抑制 InkCanvas 内部框选。
+                    // 橡皮擦模式除外——让 InkCanvas 正常执行擦除（否则线擦/点擦在展台会被当作拖动预览）
                     if (!_boothTouchSavedInkEditingMode.HasValue)
                     {
                         _boothTouchSavedInkEditingMode = inkCanvas.EditingMode;
@@ -2581,7 +2584,12 @@ namespace Ink_Canvas
             {
                 int manipulatorCount = e.Manipulators?.Count() ?? 0;
                 bool logicalPenSingleFinger = ResolveLogicalInkTool() == LogicalInkTool.Pen && manipulatorCount < 2;
-                if (!logicalPenSingleFinger)
+                bool penInkSingleFinger = inkCanvas.EditingMode == InkCanvasEditingMode.Ink && manipulatorCount < 2;
+                // 橡皮擦单指：让 InkCanvas 正常执行擦除，不转发到预览拖动/缩放
+                bool eraserSingleFinger = (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
+                    || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
+                    && manipulatorCount < 2;
+                if (!(logicalPenSingleFinger || penInkSingleFinger || eraserSingleFinger))
                 {
                     VideoPresenterSpecialMode_ManipulationDelta(sender, e);
                     return;
