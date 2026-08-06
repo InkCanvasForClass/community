@@ -1082,6 +1082,25 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 逻辑批注模式是否激活。
+        /// 原生湿墨迹管线会把 Ink 请求映射为物理 EditingMode=None（见 SetCurrentToolMode），
+        /// 因此不能只读物理 EditingMode；逻辑笔工具（pen/color）也算批注模式。
+        /// 供自动化触发器/规则（进入/退出批注、批注模式条件）判定使用。
+        /// </summary>
+        internal bool IsAnnotationModeActive()
+        {
+            try
+            {
+                if (inkCanvas?.EditingMode == InkCanvasEditingMode.Ink) return true; // 形状/传统/非原生路径
+                return ResolveLogicalInkTool() == LogicalInkTool.Pen;                // 原生笔：物理 None + 逻辑 pen/color
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private bool ResolveTwoFingerGestureAllowed()
         {
             // 插件画布手势（如 PDF 阅读器双指缩放/平移）：只要注册了就强制放行双指手势，
