@@ -50,6 +50,15 @@ namespace Ink_Canvas.Ink.Native
         private static int _rawMouseActive;
         private static int _rawMouseRegisterError;
 
+        // 单条 WM_POINTERUPDATE 合并历史（GetPointerPenInfoHistory / GetPointerTouchInfoHistory
+        // 返回的整批样本）采样统计：用于诊断「UI 卡顿→消息合并→历史超容量→丢段→笔迹跨段直跳」。
+        // 单一全局累计（不按输入类型分桶）：丢段是系统级问题，Pen/Touch 合并时同样可疑。
+        private static long _pointerHistoryEventCount;
+        private static long _pointerHistoryTruncatedCount;
+        private static long _maxPointerHistoryTotalCount;
+        private static long _maxPointerHistoryAcceptedCount;
+        private static long _maxPointerHistoryDroppedCount;
+
         /// <summary>由装配层把 NativePointerInputSource 的 raw-mouse 诊断同步进来。</summary>
         public static void UpdateRawMouseDiagnostics(bool rawActive, long rawCount, long legacyCount, int registerError)
         {
@@ -63,6 +72,32 @@ namespace Ink_Canvas.Ink.Native
         public static long RawMouseSampleCount => Volatile.Read(ref _rawMouseSampleCount);
         public static long LegacyMouseSampleCount => Volatile.Read(ref _legacyMouseSampleCount);
         public static int RawMouseRegisterError => Volatile.Read(ref _rawMouseRegisterError);
+
+        /// <summary>
+        /// 记录一次指针合并历史读取。<paramref name="totalCount"/> 是系统报告的可用条数，
+        /// <paramref name="acceptedCount"/> 是实际读入的条数；两者不等即发生永久丢段
+        /// （该 API 不支持翻页，未读到的更早条目在下一条消息取走后即不可恢复）。
+        /// 由 NativePointerInputSource 在 WndProc 同步调用，只做原子累加。
+        /// </summary>
+        public static void RecordPointerHistory(
+            int totalCount,
+            int acceptedCount,
+            bool historyComplete)
+        {
+            Interlocked.Increment(ref _pointerHistoryEventCount);
+            UpdateMax(ref _maxPointerHistoryTotalCount, totalCount);
+            UpdateMax(ref _maxPointerHistoryAcceptedCount, acceptedCount);
+            if (historyComplete)
+                return;
+            Interlocked.Increment(ref _pointerHistoryTruncatedCount);
+            UpdateMax(ref _maxPointerHistoryDroppedCount, Math.Max(0, totalCount - acceptedCount));
+        }
+
+        public static long PointerHistoryEventCount => Interlocked.Read(ref _pointerHistoryEventCount);
+        public static long PointerHistoryTruncatedCount => Interlocked.Read(ref _pointerHistoryTruncatedCount);
+        public static long MaxPointerHistoryTotalCount => Interlocked.Read(ref _maxPointerHistoryTotalCount);
+        public static long MaxPointerHistoryAcceptedCount => Interlocked.Read(ref _maxPointerHistoryAcceptedCount);
+        public static long MaxPointerHistoryDroppedCount => Interlocked.Read(ref _maxPointerHistoryDroppedCount);
 
         internal sealed class PerKindStats
         {

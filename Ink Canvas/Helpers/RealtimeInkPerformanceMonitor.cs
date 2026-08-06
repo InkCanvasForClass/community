@@ -480,6 +480,14 @@ namespace Ink_Canvas.Helpers
                     rawMouseRegisterError = Ink_Canvas.Ink.Native.NativeInkPerfProbe.RawMouseRegisterError,
                     rawMouseSampleCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.RawMouseSampleCount,
                     legacyMouseSampleCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.LegacyMouseSampleCount,
+                    // 指针合并历史丢段诊断：truncated > 0 表示单条 WM_POINTERUPDATE 的合并历史
+                    // 超出读取容量、中间采样被系统永久丢弃（笔迹会出现跨段直跳/拐角变直线）。
+                    // 与 maxDispatcherDelayMs 对照可确认是否由 UI 线程卡顿引发。
+                    pointerHistoryEventCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.PointerHistoryEventCount,
+                    pointerHistoryTruncatedCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.PointerHistoryTruncatedCount,
+                    maxPointerHistoryTotalCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.MaxPointerHistoryTotalCount,
+                    maxPointerHistoryAcceptedCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.MaxPointerHistoryAcceptedCount,
+                    maxPointerHistoryDroppedCount = Ink_Canvas.Ink.Native.NativeInkPerfProbe.MaxPointerHistoryDroppedCount,
                     lastApplyMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.LastApplyMs, 3),
                     avgApplyMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.AverageApplyMs, 3),
                     lastApplySnapshotUpdateMs = Math.Round(Ink_Canvas.Ink.Native.NativeInkPerfProbe.LastApplySnapshotUpdateMs, 3),
