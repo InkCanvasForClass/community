@@ -36,7 +36,6 @@ namespace Ink_Canvas.Ink.Native
         private const int ErrorInsufficientBuffer = 122;
         private const int ErrorNoData = 232;
         private const int MaximumHistoryEntries = 4096;
-        private const int MaximumUpdateHistoryEntries = 128;
 
         // ---- RawInput (WM_INPUT) 鼠标高频采样 ----
         private const uint RidInput = 0x10000003;
@@ -501,7 +500,7 @@ namespace Ink_Canvas.Ink.Native
             uint pointerId,
             NativePointerMessageKind messageKind)
         {
-            var history = ReadPenHistory(pointerId, messageKind, out var historyComplete, out var error);
+            var history = ReadPenHistory(pointerId, out var historyComplete, out var error);
             var clientOrigin = GetClientOrigin(hwnd);
             var samples = new RawInkSample[history.Length];
             var secondaryButtonDown = false;
@@ -541,7 +540,7 @@ namespace Ink_Canvas.Ink.Native
             uint pointerId,
             NativePointerMessageKind messageKind)
         {
-            var history = ReadTouchHistory(pointerId, messageKind, out var historyComplete, out var error);
+            var history = ReadTouchHistory(pointerId, out var historyComplete, out var error);
             var clientOrigin = GetClientOrigin(hwnd);
             var samples = new RawInkSample[history.Length];
             for (var i = 0; i < history.Length; i++)
@@ -577,7 +576,6 @@ namespace Ink_Canvas.Ink.Native
 
         private static NativePointerPenInfo[] ReadPenHistory(
             uint pointerId,
-            NativePointerMessageKind messageKind,
             out bool historyComplete,
             out int error)
         {
@@ -587,15 +585,21 @@ namespace Ink_Canvas.Ink.Native
             if (!GetPointerPenInfoHistory(pointerId, ref count, null))
             {
                 error = Marshal.GetLastWin32Error();
-                if (error == ErrorInsufficientBuffer && count > 0 && count <= MaximumHistoryEntries)
+                // count 超过防御上限时也要按上限读取，而不是放弃整批历史退回单点：
+                // 后者恰好在「卡顿→合并历史最多」时丢弃最多采样。
+                if (error == ErrorInsufficientBuffer && count > 0)
                 {
-                    var requested = LimitHistoryEntries(messageKind, count);
+                    var requested = LimitHistoryEntries(count);
                     var history = new NativePointerPenInfo[requested];
                     var capacity = requested;
                     if (GetPointerPenInfoHistory(pointerId, ref capacity, history))
                     {
                         historyComplete = capacity >= count;
                         error = 0;
+                        NativeInkPerfProbe.RecordPointerHistory(
+                            (int)count,
+                            (int)capacity,
+                            historyComplete);
                         return Trim(history, capacity);
                     }
                     error = Marshal.GetLastWin32Error();
@@ -620,7 +624,6 @@ namespace Ink_Canvas.Ink.Native
 
         private static NativePointerTouchInfo[] ReadTouchHistory(
             uint pointerId,
-            NativePointerMessageKind messageKind,
             out bool historyComplete,
             out int error)
         {
@@ -628,15 +631,20 @@ namespace Ink_Canvas.Ink.Native
             if (!GetPointerTouchInfoHistory(pointerId, ref count, null))
             {
                 error = Marshal.GetLastWin32Error();
-                if (error == ErrorInsufficientBuffer && count > 0 && count <= MaximumHistoryEntries)
+                // 同 ReadPenHistory：超上限时按上限读取，不放弃整批历史。
+                if (error == ErrorInsufficientBuffer && count > 0)
                 {
-                    var requested = LimitHistoryEntries(messageKind, count);
+                    var requested = LimitHistoryEntries(count);
                     var history = new NativePointerTouchInfo[requested];
                     var capacity = requested;
                     if (GetPointerTouchInfoHistory(pointerId, ref capacity, history))
                     {
                         historyComplete = capacity >= count;
                         error = 0;
+                        NativeInkPerfProbe.RecordPointerHistory(
+                            (int)count,
+                            (int)capacity,
+                            historyComplete);
                         return Trim(history, capacity);
                     }
                     error = Marshal.GetLastWin32Error();
@@ -659,13 +667,16 @@ namespace Ink_Canvas.Ink.Native
             throw new Win32Exception(error, $"Unable to copy pointer touch data for pointer {pointerId}.");
         }
 
-        private static uint LimitHistoryEntries(
-            NativePointerMessageKind messageKind,
-            uint availableCount)
+        private static uint LimitHistoryEntries(uint availableCount)
         {
-            if (messageKind != NativePointerMessageKind.Update)
-                return availableCount;
-            return Math.Min(availableCount, MaximumUpdateHistoryEntries);
+            // 读全量合并历史。GetPointerPenInfoHistory/GetPointerTouchInfoHistory 不支持翻页：
+            // 缓冲不足时系统只返回「最新 N 条」，更早的条目在下一条消息取走后即永久丢失
+            // （见 MSDN remarks：insufficient buffer → most recent entries；retrieving the
+            // next message → previous message info may no longer be available）。
+            // UI 线程一卡（GC / 大重绘 / PPT 联动），单条 WM_POINTERUPDATE 的合并历史可达数百条，
+            // 若在此截断，中间段会被静默丢弃 → ribbon 折线跨段直跳（拐角变直线）。
+            // 因此只保留 MaximumHistoryEntries 这一个防御性上限。
+            return Math.Min(availableCount, (uint)MaximumHistoryEntries);
         }
 
         private static NativePointerPenInfo[] Trim(NativePointerPenInfo[] source, uint count)

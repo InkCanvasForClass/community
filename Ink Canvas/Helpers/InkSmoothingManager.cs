@@ -44,6 +44,33 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
+        /// 把 <paramref name="source"/> 的全部 property data 复制到 <paramref name="target"/>。
+        /// 平滑器（AsyncAdvancedBezierSmoothing / HardwareAcceleratedInkProcessor / AdvancedBezierSmoothing）
+        /// 创建的新 Stroke 只克隆 DrawingAttributes，会丢失 NativeWetInkCommittedGuid、
+        /// LaserRenderModeGuid、RealtimeVelocityBrushTipAppliedGuid 等标记——激光笔迹会因此失去
+        /// 激光渲染效果，原生湿墨笔迹会失去「压感已烘焙」识别（后续可能被当普通笔画二次重写压感）。
+        /// 必须在 UI 线程调用（property data 值可能是 DispatcherObject）。
+        /// </summary>
+        public static void CopyPropertyData(Stroke source, Stroke target)
+        {
+            if (source == null || target == null || ReferenceEquals(source, target))
+                return;
+
+            foreach (var id in source.GetPropertyDataIds())
+            {
+                try
+                {
+                    if (!target.ContainsPropertyData(id))
+                        target.AddPropertyData(id, source.GetPropertyData(id));
+                }
+                catch
+                {
+                    // 个别 property data 值无法复制（如 DispatcherObject），跳过不阻断替换。
+                }
+            }
+        }
+
+        /// <summary>
         /// 平滑笔画（自动选择最佳方法）
         /// </summary>
         public async Task<Stroke> SmoothStrokeAsync(Stroke originalStroke,
