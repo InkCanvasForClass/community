@@ -1350,10 +1350,15 @@ namespace Ink_Canvas
             if (!_isVideoPresenterSpecialMode) return false;
             if (e.ChangedButton != MouseButton.Left) return false;
             if (inkCanvas == null) return false;
+            // 橡皮擦模式让 InkCanvas 正常擦除，不启动预览拖动
+            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
+                || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke) return false;
+            // 漫游模式交给漫游路径处理（会同步移动预览画面与墨迹）
+            if (IsBoardRoamingMode) return false;
             // Ink 模式下让 InkCanvas 正常绘制墨迹
             if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink) return false;
 
-            // 非 Ink 模式（Select/None 等）：阻止 InkCanvas 框选，启动鼠标拖动
+            // 非 Ink/擦除/漫游模式（Select/Cursor 等）：阻止 InkCanvas 框选，启动鼠标拖动
             _isBoothMouseDragging = true;
             _boothMouseDragStartOrigin = e.GetPosition(VideoPresenterSpecialModeContainer);
             _boothMouseDragStartTranslateX = _boothPreviewTranslateX;
