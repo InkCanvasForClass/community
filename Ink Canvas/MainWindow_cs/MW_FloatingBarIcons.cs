@@ -4718,6 +4718,12 @@ namespace Ink_Canvas
                     case 0: //屏幕模式
                         VideoPresenter_OnExitWhiteboardMode();
                         currentMode = 0;
+
+                        // 退出白板的公共兜底：所有入口（浮动栏按钮、白板工具栏、热键、自动收纳、IPC）
+                        // 都汇聚到这里，统一按当前放映状态重新评估翻页条可见性。
+                        // 真实 PPT 与外部演示源（插件注册的 PDF 等）都能恢复，非放映场景维持隐藏。
+                        _pptUIManager?.UpdateNavigationPanelsVisibility();
+
                         AutomationBootstrap.Monitor?.NotifyInternalStateChanged();
                         GridBackgroundCover.Visibility = Visibility.Collapsed;
                         AnimationsHelper.HideWithSlideAndFade(BlackboardLeftSide);
@@ -6158,6 +6164,10 @@ namespace Ink_Canvas
             // 通知自动化系统：逻辑工具模式已变化。原生笔路径下物理 EditingMode 不变，
             // 触发器无法靠 EditingModeChanged 感知进/出批注，必须在此显式通知。
             AutomationBootstrap.Monitor?.NotifyInternalStateChanged();
+
+            // 工具模式变化后同步刷新工具栏形态（批注/鼠标布局按 IsAnnotating 决定），
+            // 否则会出现指示器已切到鼠标、形态仍停在批注的失步（退出白板时的两步走流程即如此）。
+            UpdateToolbarComponentVisibility();
         }
 
         /// <summary>
