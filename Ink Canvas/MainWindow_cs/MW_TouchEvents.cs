@@ -1623,8 +1623,23 @@ namespace Ink_Canvas
         /// </remarks>
         private StrokeVisual GetStrokeVisual(int id)
         {
-            // Legacy DrawingVisual wet-ink path is retired.
-            return StrokeVisualList.TryGetValue(id, out var visual) ? visual : null;
+            if (StrokeVisualList.TryGetValue(id, out var visual)) return visual;
+
+            // Legacy DrawingVisual wet-ink preview is retired for the native pipeline
+            // (native WM_POINTER + DirectComposition renders wet ink itself).
+            // 旧墨迹系统（UseLegacyWetInk）的多指书写/触摸速度笔锋仍依赖 StrokeVisual
+            // 预览绘制，必须恢复创建逻辑，否则这些触摸路径完全无法出墨。
+            if (Settings?.Canvas?.UseLegacyWetInk != true)
+                return null;
+
+            var strokeVisual = new StrokeVisual(inkCanvas.DefaultDrawingAttributes.Clone());
+            StrokeVisualList[id] = strokeVisual;
+            var visualCanvas = new VisualCanvas();
+            strokeVisual.SetVisualCanvas(visualCanvas);
+            VisualCanvasList[id] = visualCanvas;
+            inkCanvas.Children.Add(visualCanvas);
+
+            return strokeVisual;
         }
 
         /// <summary>
@@ -2531,8 +2546,20 @@ namespace Ink_Canvas
                         && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
                         && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
                     {
-                        inkCanvas.EditingMode = InkCanvasEditingMode.None; EnsureNativePenPhysicalEditingMode();
-                        lastInkCanvasEditingMode = InkCanvasEditingMode.None;
+                        if (Settings?.Canvas?.UseLegacyWetInk == true)
+                        {
+                            // 旧墨迹系统：触摸/手写由 WPF 内置 Ink 收集，操作结束后必须恢复
+                            // EditingMode.Ink。否则下一笔落下时 EditingMode 仍为 None，
+                            // InkPresenter 在落笔时刻不会启动笔画（第一笔正常、后续均无法书写）。
+                            // 恢复 b9b5d38 之前的既有行为。
+                            inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                            lastInkCanvasEditingMode = InkCanvasEditingMode.Ink;
+                        }
+                        else
+                        {
+                            inkCanvas.EditingMode = InkCanvasEditingMode.None; EnsureNativePenPhysicalEditingMode();
+                            lastInkCanvasEditingMode = InkCanvasEditingMode.None;
+                        }
                     }
                 }
             }
