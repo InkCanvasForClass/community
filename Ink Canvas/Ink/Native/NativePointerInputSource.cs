@@ -57,9 +57,10 @@ namespace Ink_Canvas.Ink.Native
         // RawInput 鼠标：注册成功时 ink 走 WM_INPUT（设备原生采样率），
         // legacy WM_MOUSEMOVE 只负责"是否阻止 WPF 处理"，避免双墨迹/双擦除。
         private bool _rawMouseActive;
-        // WM_INPUT Down 判定为"被 ink 消耗"（路由 Ink/Erase）时置位，
-        // 让紧随其后的 WM_LBUTTONDOWN 阻止 WPF 处理该按下。
-        private bool _rawMouseDownConsumed;
+        // 本笔接触期间 WM_INPUT 是否已提供过 Update 样本。为 true 时 legacy
+        // WM_MOUSEMOVE 被拦截（样本由 raw 高频提供）；为 false 时回退用 legacy
+        // move 喂样本，覆盖「触摸框以注入鼠标上报、不走 RawInput」的设备。
+        private bool _rawMouseUpdateDeliveredInContact;
         // 诊断：raw vs legacy 鼠标 sample 计数（供 RealtimeInkDebugLive.json）。
         private long _rawMouseSampleCount;
         private long _legacyMouseSampleCount;
@@ -162,13 +163,10 @@ namespace Ink_Canvas.Ink.Native
                     DispatchCaptureLost(wParam, ref handled);
                     break;
                 case WmLeftButtonDown:
+                    // ink 会话生命周期统一由 legacy WM_LBUTTONDOWN/UP 建立/结束（可靠、成对到达），
+                    // WM_INPUT 只负责接触期间的高频取位。直接走 DispatchMouse 建会话并按路由结果阻止 WPF。
                     if (_rawMouseActive && !IsPromotedPenOrTouchMouse())
-                    {
-                        // ink 由 WM_INPUT Down 处理；这里按该 down 是否被 ink 消耗决定是否阻止 WPF。
-                        handled = _rawMouseDownConsumed;
-                        _mouseInContact = true;
-                        break;
-                    }
+                        _rawMouseUpdateDeliveredInContact = false;
                     DispatchMouse(hwnd, wParam, lParam, NativePointerMessageKind.Down, ref handled);
                     break;
                 case WmMouseMove:
@@ -176,26 +174,26 @@ namespace Ink_Canvas.Ink.Native
                     {
                         if (_rawMouseActive && !IsPromotedPenOrTouchMouse())
                         {
-                            // 绘制期间阻止 WPF 处理 legacy move（防双墨迹/双擦除）；
-                            // ink 本身由 WM_INPUT Update 产生。
-                            handled = _mouseInContact;
+                            // 绘制期间阻止 WPF 处理 legacy move（防双墨迹/双擦除），
+                            // 高频样本由 WM_INPUT Update 提供。若本笔 raw 还没提供过
+                            // Update（注入鼠标触摸框不产生 WM_INPUT），回退到 legacy move，
+                            // 避免整笔只剩落笔/抬笔两点。
+                            if (_rawMouseUpdateDeliveredInContact)
+                                handled = true;
+                            else
+                                DispatchMouse(hwnd, wParam, lParam, NativePointerMessageKind.Update, ref handled);
                             break;
                         }
                         DispatchMouse(hwnd, wParam, lParam, NativePointerMessageKind.Update, ref handled);
                     }
                     break;
                 case WmLeftButtonUp:
-                    if (_rawMouseActive && !IsPromotedPenOrTouchMouse())
-                    {
-                        handled = _rawMouseDownConsumed;
-                        _rawMouseDownConsumed = false;
-                        _mouseInContact = false;
-                        break;
-                    }
+                    // 抬笔必须经 DispatchMouse 结束会话并提交干墨：WM_INPUT Up 可能缺失/乱序，
+                    // 若只复位标志而不结束会话，下一笔 Begin 会 Cancel 上一笔 → 触摸只能写一笔。
                     DispatchMouse(hwnd, wParam, lParam, NativePointerMessageKind.Up, ref handled);
                     break;
                 case WmInput:
-                    if (_rawMouseActive && !IsPromotedPenOrTouchMouse())
+                    if (_rawMouseActive)
                         DispatchRawMouse(hwnd, lParam, ref handled);
                     break;
             }
@@ -296,18 +294,35 @@ namespace Ink_Canvas.Ink.Native
                     if (raw.Header.Type != RimTypeMouse)
                         return;
 
+                    // 触摸/笔提升的伪鼠标 raw input 会携带 WI_SIGNATURE（0xFF515700），
+                    // 这类输入由 WM_POINTER / promoted legacy 消息处理，不得进入 raw 鼠标路径。
+                    // 对 legacy 消息 GetMessageExtraInfo 可靠，但对 WM_INPUT 并不可靠，
+                    // 这里直接用 raw 自带的 ExtraInformation 判定。
+                    if (((uint)raw.Mouse.ExtraInformation & SignatureMask) == MiWpSignature)
+                        return;
+
                     var buttonFlags = (ushort)(raw.Mouse.Buttons & 0xFFFF);
                     var leftDown = (buttonFlags & RiMouseLeftButtonDown) != 0;
                     var leftUp = (buttonFlags & RiMouseLeftButtonUp) != 0;
 
-                    NativePointerMessageKind messageKind;
+                    // 落笔/抬笔的会话生命周期交给 legacy WM_LBUTTONDOWN/UP（可靠、成对到达），
+                    // WM_INPUT 只负责接触期间的高频取位：Down/Up 仅翻转接触标志、不建立/结束会话，
+                    // 避免「WM_INPUT Up 缺失/乱序」导致会话永不结束、下一笔 Begin 把上一笔干墨取消
+                    // （表现为触摸只能写一笔）。
                     if (leftDown)
-                        messageKind = NativePointerMessageKind.Down;
-                    else if (leftUp)
-                        messageKind = NativePointerMessageKind.Up;
-                    else if (_mouseInContact)
-                        messageKind = NativePointerMessageKind.Update;
-                    else
+                    {
+                        _mouseInContact = true;
+                        _rawMouseUpdateDeliveredInContact = false;
+                        handled = false;
+                        return;
+                    }
+                    if (leftUp)
+                    {
+                        _mouseInContact = false;
+                        handled = false;
+                        return;
+                    }
+                    if (!_mouseInContact)
                         return; // 无接触的移动不产生 ink
 
                     // 绝对坐标：GetCursorPos（屏幕）→ ScreenToClient（客户区）。
@@ -315,14 +330,7 @@ namespace Ink_Canvas.Ink.Native
                     if (!GetCursorPos(ref point) || !ScreenToClient(hwnd, ref point))
                         return;
 
-                    if (messageKind == NativePointerMessageKind.Down)
-                        _mouseInContact = true;
-                    else if (messageKind == NativePointerMessageKind.Up)
-                        _mouseInContact = false;
-
-                    var flags = messageKind == NativePointerMessageKind.Up
-                        ? NativeInkSampleFlags.Primary
-                        : NativeInkSampleFlags.InContact | NativeInkSampleFlags.Primary;
+                    var flags = NativeInkSampleFlags.InContact | NativeInkSampleFlags.Primary;
                     var sample = new RawInkSample(
                         MousePointerId,
                         NativeInkInputKind.Mouse,
@@ -337,18 +345,15 @@ namespace Ink_Canvas.Ink.Native
                     var consumed = _handler(new NativePointerInputBatch(
                         MousePointerId,
                         NativeInkInputKind.Mouse,
-                        messageKind,
+                        NativePointerMessageKind.Update,
                         new[] { sample },
                         false,
                         false,
                         true));
 
+                    _rawMouseUpdateDeliveredInContact = true;
                     System.Threading.Interlocked.Increment(ref _rawMouseSampleCount);
                     handled = consumed;
-                    if (messageKind == NativePointerMessageKind.Down)
-                        _rawMouseDownConsumed = consumed;
-                    else if (messageKind == NativePointerMessageKind.Up)
-                        _rawMouseDownConsumed = false;
                 }
                 finally
                 {
