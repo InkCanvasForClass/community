@@ -235,28 +235,64 @@ namespace Ink_Canvas.Ink.Native
             {
                 var pointerId = TouchPointerNamespace | (unchecked((uint)e.TouchDevice.Id) & 0x3FFFFFFF);
                 var touchPoint = e.GetTouchPoint(_relativeTo);
-                var timestamp = NextTimestamp(pointerId, 1)[0];
+
+                // 中间点补足采样密度：WISP 触摸事件频率低且抖动，只取当前点会让曲线
+                // 靠插值撑、看起来不平滑。GetIntermediateTouchPoints 返回上次与当前位置
+                // 之间的采样，一并喂给控制器（同一 frameId，时间戳严格递增）。
+                var intermediates = e.GetIntermediateTouchPoints(_relativeTo);
+                var intermediateCount = intermediates?.Count ?? 0;
+                var count = intermediateCount + 1;
+                var timestamps = NextTimestamp(pointerId, count);
                 var frameId = NextFrameId(pointerId);
-                var flags = messageKind == NativePointerMessageKind.Up
+                var currentFlags = messageKind == NativePointerMessageKind.Up
                     ? NativeInkSampleFlags.Primary
                     : NativeInkSampleFlags.InContact | NativeInkSampleFlags.Primary;
-                var sample = new RawInkSample(
+                var contactFlags = NativeInkSampleFlags.InContact | NativeInkSampleFlags.Primary;
+
+                // 时间正序：中间点在前，当前点最后。
+                var chronological = new RawInkSample[count];
+                if (intermediates != null)
+                {
+                    for (var i = 0; i < intermediateCount; i++)
+                    {
+                        var p = intermediates[i];
+                        chronological[i] = new RawInkSample(
+                            pointerId,
+                            NativeInkInputKind.Touch,
+                            p.Position.X,
+                            p.Position.Y,
+                            0.5f,
+                            false,
+                            timestamps[i],
+                            frameId,
+                            contactFlags,
+                            (float)Math.Max(0, p.Bounds.Width),
+                            (float)Math.Max(0, p.Bounds.Height));
+                    }
+                }
+                chronological[intermediateCount] = new RawInkSample(
                     pointerId,
                     NativeInkInputKind.Touch,
                     touchPoint.Position.X,
                     touchPoint.Position.Y,
                     0.5f,
                     false,
-                    timestamp,
+                    timestamps[intermediateCount],
                     frameId,
-                    flags,
+                    currentFlags,
                     (float)Math.Max(0, touchPoint.Bounds.Width),
                     (float)Math.Max(0, touchPoint.Bounds.Height));
+
+                // NativePointerInputBatch 契约是 newest-first。
+                var samples = new RawInkSample[count];
+                for (var i = 0; i < count; i++)
+                    samples[i] = chronological[count - 1 - i];
+
                 var handled = _handler(new NativePointerInputBatch(
                     pointerId,
                     NativeInkInputKind.Touch,
                     messageKind,
-                    new[] { sample },
+                    samples,
                     false,
                     false,
                     false,

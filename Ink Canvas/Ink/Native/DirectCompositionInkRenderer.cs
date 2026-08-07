@@ -133,6 +133,16 @@ namespace Ink_Canvas.Ink.Native
 
                 var drawStart = System.Diagnostics.Stopwatch.GetTimestamp();
                 var drawMs = PresentFrameTimed(forceClear: false, out var presentMs);
+                // PresentFrameTimed/PresentWithoutThrow 内部对设备丢失只置 _deviceReady=false
+                // 静默返回（不抛异常）。这里必须把状态上报为 DeviceLost，宿主才会
+                // DisableNativeWetInkAfterFailure → 回落 WPF 墨迹，否则输入被消费但湿墨永久停画。
+                if (!_deviceReady)
+                {
+                    return WetInkApplyResult.DeviceLost(
+                        new InvalidOperationException(
+                            "Direct3D/DirectComposition device lost during present."));
+                }
+
                 var freq = System.Diagnostics.Stopwatch.Frequency;
                 NativeInkPerfProbe.RecordApplySegments(
                     snapshotUpdateTicks * 1000.0 / freq,

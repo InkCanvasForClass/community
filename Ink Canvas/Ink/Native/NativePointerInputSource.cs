@@ -170,6 +170,11 @@ namespace Ink_Canvas.Ink.Native
                     DispatchMouse(hwnd, wParam, lParam, NativePointerMessageKind.Down, ref handled);
                     break;
                 case WmMouseMove:
+                    // 自愈：接触状态从实际按钮状态派生。若提升触摸/raw 抬笔消息缺失，
+                    // _mouseInContact 会滞留 true，把之后的真实鼠标 move 都当墨迹消费掉。
+                    // 非提升消息时每次按 wParam 按钮位刷新，真实按钮松开即自动复位。
+                    if (!IsPromotedPenOrTouchMouse())
+                        _mouseInContact = (LowWord(wParam) & MouseKeyLeftButton) != 0;
                     if (_mouseInContact || (LowWord(wParam) & MouseKeyLeftButton) != 0)
                     {
                         if (_rawMouseActive && !IsPromotedPenOrTouchMouse())
