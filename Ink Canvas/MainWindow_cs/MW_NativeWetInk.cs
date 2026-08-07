@@ -32,6 +32,12 @@ namespace Ink_Canvas
             new Dictionary<uint, NativeInkInputKind>();
         private readonly Dictionary<uint, NativeInkInputKind> _promotedMouseFallbackPointers =
             new Dictionary<uint, NativeInkInputKind>();
+        // 每个指针最后活动时间（Down/Update 刷新，Up/CaptureLost 移除），供滞留回收与活动触点计数。
+        private readonly Dictionary<uint, long> _nativePointerActivityTicks = new Dictionary<uint, long>();
+        private DispatcherTimer _nativePointerReaperTimer;
+        // 指针长时间无输入视为滞留（真实红外框/数字化仪可能缺 Up）：超时回收会话并清空集合。
+        // 调大可降低「书写中停顿被切断」的风险；调小可更快清掉幽灵墨迹。
+        private const long NativePointerIdleTimeoutMs = 500;
         private long _lastNativePenInputTimestamp;
         private long _lastNativeTouchInputTimestamp;
 
@@ -114,6 +120,9 @@ namespace Ink_Canvas
                 WireNativeWetInkGeometryListeners();
                 EnsureNativePenPhysicalEditingMode();
                 _nativeWetInkStarted = true;
+                // 滞留指针回收：真实红外框/数字化仪可能只发捕获丢失不发 Up，
+                // 长时间无输入即取消会话并清空集合，防止下一笔被 Cancel（只能写一笔/只可手势）。
+                StartNativePointerReaper();
                 // The overlay window is created visible; hide it until there is
                 // actually wet ink to render so it never blocks input in cursor mode.
                 RefreshOverlayVisibility();
@@ -178,11 +187,13 @@ namespace Ink_Canvas
             _nativeInkController = null;
             _nativeInkSessions = null;
             _nativeWetInkMailbox = null;
+            StopNativePointerReaper();
             _nativeCapturedRoutes.Clear();
             _nativeActiveTouchPointers.Clear();
             _nativeHardwarePointers.Clear();
             _wpfFallbackPointers.Clear();
             _promotedMouseFallbackPointers.Clear();
+            _nativePointerActivityTicks.Clear();
             _nativeWetInkStarted = false;
         }
 
@@ -295,7 +306,97 @@ namespace Ink_Canvas
             _nativeHardwarePointers.Clear();
             _wpfFallbackPointers.Clear();
             _promotedMouseFallbackPointers.Clear();
+            _nativePointerActivityTicks.Clear();
         }
+
+        #region 滞留指针回收
+
+        private void StartNativePointerReaper()
+        {
+            if (_nativePointerReaperTimer != null)
+                return;
+            _nativePointerReaperTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(250)
+            };
+            _nativePointerReaperTimer.Tick += (_, __) => ReapStaleNativePointers();
+            _nativePointerReaperTimer.Start();
+        }
+
+        private void StopNativePointerReaper()
+        {
+            if (_nativePointerReaperTimer == null)
+                return;
+            _nativePointerReaperTimer.Stop();
+            _nativePointerReaperTimer = null;
+        }
+
+        private void TrackNativePointerActivity(uint pointerId, NativeInkInputKind inputKind)
+        {
+            if (inputKind == NativeInkInputKind.Mouse)
+                return;
+            _nativePointerActivityTicks[pointerId] = System.Diagnostics.Stopwatch.GetTimestamp();
+        }
+
+        /// <summary>
+        /// 活动触点计数：只统计「最近有输入」的触摸指针。滞留指针（真实红外框缺 Up）
+        /// 即使还没被回收也不参与双指判定，否则下一根手指会被误判成双指手势
+        /// → consumeNativeMessage=false + WPF 画不出墨 → 「只可手势」。
+        /// </summary>
+        private int CountRecentlyActiveTouchPointers()
+        {
+            var now = System.Diagnostics.Stopwatch.GetTimestamp();
+            var windowTicks = NativePointerIdleTimeoutMs * System.Diagnostics.Stopwatch.Frequency / 1000L;
+            var count = 0;
+            foreach (var pointerId in _nativeActiveTouchPointers)
+            {
+                if (_nativePointerActivityTicks.TryGetValue(pointerId, out var last)
+                    && now - last <= windowTicks)
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        /// <summary>
+        /// 定期回收滞留指针：长时间无输入（Up 缺失/捕获丢失被去重挡掉）的会话强制 Cancel，
+        /// 并把所有相关集合里的残留清掉，保证下一笔不误判、幽灵墨迹不常驻。
+        /// </summary>
+        private void ReapStaleNativePointers()
+        {
+            if (_nativeInkController == null)
+                return;
+
+            var now = System.Diagnostics.Stopwatch.GetTimestamp();
+            var timeoutTicks = NativePointerIdleTimeoutMs * System.Diagnostics.Stopwatch.Frequency / 1000L;
+            var stale = new List<uint>(_nativePointerActivityTicks.Count);
+            foreach (var pair in _nativePointerActivityTicks)
+            {
+                if (now - pair.Value > timeoutTicks)
+                    stale.Add(pair.Key);
+            }
+
+            if (stale.Count == 0)
+                return;
+
+            foreach (var pointerId in stale)
+            {
+                if (_nativeInkController.Cancel(pointerId))
+                    _wetInkWindowHost?.SignalWork();
+                _nativeCapturedRoutes.Remove(pointerId);
+                _nativeActiveTouchPointers.Remove(pointerId);
+                _nativeHardwarePointers.Remove(pointerId);
+                _wpfFallbackPointers.Remove(pointerId);
+                _promotedMouseFallbackPointers.Remove(pointerId);
+                _nativePointerActivityTicks.Remove(pointerId);
+            }
+
+            RefreshOverlayVisibility();
+        }
+
+        #endregion
 
         private void SetOverlayVisible(bool visible)
         {
@@ -409,9 +510,20 @@ namespace Ink_Canvas
             ref var lastNativeTimestamp = ref batch.InputKind == NativeInkInputKind.Pen
                 ? ref _lastNativePenInputTimestamp
                 : ref _lastNativeTouchInputTimestamp;
+            // 终结消息（Up/CaptureLost）携带清理动作（End/Cancel、集合移除）。只要 pointerId
+            // 由某一侧持有就无条件放行，不能被跨源去重 / 100ms 窗口拦掉：否则滞留的终结核对
+            // 会让会话永不结束，下一笔 Begin 把它 Cancel → 只能写一笔 / 只可手势。
+            var isTerminal = batch.MessageKind == NativePointerMessageKind.Up
+                             || batch.MessageKind == NativePointerMessageKind.CaptureLost;
 
             if (batch.IsPromotedMouse && batch.InputKind == NativeInkInputKind.Pen)
             {
+                if (isTerminal && _promotedMouseFallbackPointers.ContainsKey(batch.PointerId))
+                {
+                    _promotedMouseFallbackPointers.Remove(batch.PointerId);
+                    return true;
+                }
+
                 if (ContainsInputKind(_nativeHardwarePointers, batch.InputKind)
                     || ContainsInputKind(_wpfFallbackPointers, batch.InputKind))
                 {
@@ -425,34 +537,44 @@ namespace Ink_Canvas
                     return false;
 
                 _promotedMouseFallbackPointers[batch.PointerId] = batch.InputKind;
-                if (batch.MessageKind == NativePointerMessageKind.Up
-                    || batch.MessageKind == NativePointerMessageKind.CaptureLost)
-                {
+                if (isTerminal)
                     _promotedMouseFallbackPointers.Remove(batch.PointerId);
-                }
                 return true;
             }
 
             if (!batch.IsWpfFallback)
             {
+                // 本侧（原生）持有的终结消息必须放行，清理动作在 HandleNativePointerUp/CaptureLost 里执行。
+                if (isTerminal && _nativeHardwarePointers.ContainsKey(batch.PointerId))
+                {
+                    _nativeHardwarePointers.Remove(batch.PointerId);
+                    return true;
+                }
+
                 // If WPF delivered Down first, keep that source for the whole stroke;
                 // switching sources mid-contact would create a duplicate / broken stroke.
                 if (ContainsInputKind(_wpfFallbackPointers, batch.InputKind)
                     || ContainsInputKind(_promotedMouseFallbackPointers, batch.InputKind))
                     return false;
 
+                // 终结消息即使不在本侧集合里，只要有捕获路由（即本侧持有会话）也放行。
+                if (isTerminal)
+                    return _nativeCapturedRoutes.ContainsKey(batch.PointerId);
+
                 lastNativeTimestamp = now;
                 _nativeHardwarePointers[batch.PointerId] = batch.InputKind;
-                if (batch.MessageKind == NativePointerMessageKind.Up
-                    || batch.MessageKind == NativePointerMessageKind.CaptureLost)
-                {
-                    _nativeHardwarePointers.Remove(batch.PointerId);
-                }
                 return true;
             }
 
-            // WPF legacy input is a fallback only. If the HWND is actively receiving or
-            // recently received the same physical input kind, this routed event is its mirror.
+            // WPF legacy input is a fallback only.
+            if (isTerminal && _wpfFallbackPointers.ContainsKey(batch.PointerId))
+            {
+                _wpfFallbackPointers.Remove(batch.PointerId);
+                return true;
+            }
+
+            // If the HWND is actively receiving the same physical input kind, this routed
+            // event is its mirror. Down/Update 需要去重；终结消息有捕获路由即可放行。
             if (ContainsInputKind(_nativeHardwarePointers, batch.InputKind))
                 return false;
             var elapsedMilliseconds = lastNativeTimestamp == 0
@@ -461,12 +583,10 @@ namespace Ink_Canvas
             if (elapsedMilliseconds <= 100)
                 return false;
 
+            if (isTerminal)
+                return _nativeCapturedRoutes.ContainsKey(batch.PointerId);
+
             _wpfFallbackPointers[batch.PointerId] = batch.InputKind;
-            if (batch.MessageKind == NativePointerMessageKind.Up
-                || batch.MessageKind == NativePointerMessageKind.CaptureLost)
-            {
-                _wpfFallbackPointers.Remove(batch.PointerId);
-            }
             return true;
         }
 
@@ -540,6 +660,7 @@ namespace Ink_Canvas
                 _nativeCapturedRoutes.Remove(batch.PointerId);
                 if (batch.InputKind == NativeInkInputKind.Touch)
                     _nativeActiveTouchPointers.Remove(batch.PointerId);
+                _nativePointerActivityTicks.Remove(batch.PointerId);
                 _wetInkWindowHost?.SignalWork();
                 return false;
             }
@@ -549,6 +670,7 @@ namespace Ink_Canvas
         {
             if (batch.InputKind == NativeInkInputKind.Touch)
                 _nativeActiveTouchPointers.Add(batch.PointerId);
+            TrackNativePointerActivity(batch.PointerId, batch.InputKind);
 
             var facts = CreatePointerFacts(batch);
             var context = BuildRouteContext(facts);
@@ -594,6 +716,7 @@ namespace Ink_Canvas
         {
             if (!_nativeCapturedRoutes.TryGetValue(batch.PointerId, out var captured))
                 return false;
+            TrackNativePointerActivity(batch.PointerId, batch.InputKind);
 
             var inputStartTicks = System.Diagnostics.Stopwatch.GetTimestamp();
             var nativeKindIndex = (int)batch.InputKind; // Pen=0, Touch=1, Mouse=2
@@ -652,6 +775,7 @@ namespace Ink_Canvas
             _nativeCapturedRoutes.Remove(batch.PointerId);
             if (batch.InputKind == NativeInkInputKind.Touch)
                 _nativeActiveTouchPointers.Remove(batch.PointerId);
+            _nativePointerActivityTicks.Remove(batch.PointerId);
 
             if (captured.Route != NativeInputRoute.Ink)
                 return captured.Route != default && captured.ConsumeNativeMessage;
@@ -697,6 +821,7 @@ namespace Ink_Canvas
             _nativeCapturedRoutes.Remove(batch.PointerId);
             if (batch.InputKind == NativeInkInputKind.Touch)
                 _nativeActiveTouchPointers.Remove(batch.PointerId);
+            _nativePointerActivityTicks.Remove(batch.PointerId);
 
             _nativePointerUpdatePump?.DiscardPointer(batch.PointerId);
             _nativePointerUpdatePump?.FlushPointer(batch.PointerId);
@@ -998,7 +1123,7 @@ namespace Ink_Canvas
                 ? Settings.Gesture.IsEnableMultiTouchMode || isInMultiTouchMode
                 : Settings.Gesture.IsEnableMultiTouchModeBoard || isInMultiTouchMode;
             var twoFingerAllowed = ResolveTwoFingerGestureAllowed();
-            var activeTouchCount = Math.Max(dec.Count, _nativeActiveTouchPointers.Count);
+            var activeTouchCount = Math.Max(dec.Count, CountRecentlyActiveTouchPointers());
             var palm = BuildPalmRoutePolicy();
 
             return new NativeInkRouteContext(
@@ -1022,7 +1147,7 @@ namespace Ink_Canvas
                 ? Settings.Gesture.IsEnableMultiTouchMode || isInMultiTouchMode
                 : Settings.Gesture.IsEnableMultiTouchModeBoard || isInMultiTouchMode;
             var twoFingerAllowed = ResolveTwoFingerGestureAllowed();
-            var activeTouchCount = Math.Max(dec.Count, _nativeActiveTouchPointers.Count);
+            var activeTouchCount = Math.Max(dec.Count, CountRecentlyActiveTouchPointers());
             var palm = inputKind == NativeInkInputKind.Touch ? BuildPalmRoutePolicy() : default;
 
             return new NativeInkRouteContext(

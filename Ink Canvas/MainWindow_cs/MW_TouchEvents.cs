@@ -1948,6 +1948,21 @@ namespace Ink_Canvas
         ///    - 记录当前的编辑模式
         ///    - 设置编辑模式为None，关闭画笔功能
         /// </remarks>
+        /// <summary>
+        /// 触摸捕获丢失兜底：真实红外框/数字化仪的触摸可能不发 PreviewTouchUp 而只发捕获丢失，
+        /// 若 dec 残留会让 dec.Count 虚高，把下一根手指误判为双指手势（只可手势）。
+        /// 注意：正常抬起时 ReleaseAllTouchCaptures 也会触发本事件，但只对「已不活跃」的
+        /// 触点移除（IsActive=false），仍按在屏上的手指（双指手势）不受影响。
+        /// </summary>
+        private void InkCanvas_LostTouchCapture(object sender, TouchEventArgs e)
+        {
+            if (e?.TouchDevice == null)
+                return;
+            if (e.TouchDevice.IsActive)
+                return;
+            dec.Remove(e.TouchDevice.Id);
+        }
+
         private void InkCanvas_PreviewTouchDown(object sender, TouchEventArgs e)
         {
             var touchPointForBar = e.GetTouchPoint(this);
@@ -2313,6 +2328,11 @@ namespace Ink_Canvas
                 return;
             }
 
+            // 提前维护 dec：后续所有提前 return（如 EraseByPoint 分支）都不能让触点残留，
+            // 否则 dec.Count 虚高会把下一根手指误判为双指手势（只可手势）。
+            // 视频展台分支已在上面自行 dec.Remove 并 return。
+            dec.Remove(e.TouchDevice.Id);
+
             var touchId = e.TouchDevice.Id;
             if (_activeRealtimeTouchStrokeIds.Contains(touchId))
             {
@@ -2390,8 +2410,6 @@ namespace Ink_Canvas
             inkCanvas.ReleaseAllTouchCaptures();
             ViewboxFloatingBar.IsHitTestVisible = true;
             BlackboardUIGridForInkReplay.IsHitTestVisible = true;
-
-            dec.Remove(e.TouchDevice.Id);
 
             if (dec.Count <= 1)
                 isMultiTouchTimerActive = false;

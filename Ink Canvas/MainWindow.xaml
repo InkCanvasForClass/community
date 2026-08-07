@@ -225,6 +225,7 @@
                        PreviewTouchDown="InkCanvas_PreviewTouchDown"
                        PreviewTouchMove="InkCanvas_PreviewTouchMove"
                        PreviewTouchUp="InkCanvas_PreviewTouchUp"
+                       LostTouchCapture="InkCanvas_LostTouchCapture"
                        MouseDown="inkCanvas_MouseDown"
                        MouseMove="inkCanvas_MouseMove"
                        MouseUp="inkCanvas_MouseUp"
