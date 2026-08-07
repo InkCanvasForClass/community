@@ -35,9 +35,11 @@ namespace Ink_Canvas.Ink.Native
             _source.AddHandler(Stylus.StylusDownEvent, new StylusDownEventHandler(OnStylusDown), true);
             _source.AddHandler(Stylus.StylusMoveEvent, new StylusEventHandler(OnStylusMove), true);
             _source.AddHandler(Stylus.StylusUpEvent, new StylusEventHandler(OnStylusUp), true);
+            _source.AddHandler(Stylus.LostStylusCaptureEvent, new StylusEventHandler(OnStylusCaptureLost), true);
             _source.AddHandler(UIElement.TouchDownEvent, new EventHandler<TouchEventArgs>(OnTouchDown), true);
             _source.AddHandler(UIElement.TouchMoveEvent, new EventHandler<TouchEventArgs>(OnTouchMove), true);
             _source.AddHandler(UIElement.TouchUpEvent, new EventHandler<TouchEventArgs>(OnTouchUp), true);
+            _source.AddHandler(UIElement.LostTouchCaptureEvent, new EventHandler<TouchEventArgs>(OnTouchCaptureLost), true);
         }
 
         public void Dispose()
@@ -49,9 +51,11 @@ namespace Ink_Canvas.Ink.Native
             _source.RemoveHandler(Stylus.StylusDownEvent, new StylusDownEventHandler(OnStylusDown));
             _source.RemoveHandler(Stylus.StylusMoveEvent, new StylusEventHandler(OnStylusMove));
             _source.RemoveHandler(Stylus.StylusUpEvent, new StylusEventHandler(OnStylusUp));
+            _source.RemoveHandler(Stylus.LostStylusCaptureEvent, new StylusEventHandler(OnStylusCaptureLost));
             _source.RemoveHandler(UIElement.TouchDownEvent, new EventHandler<TouchEventArgs>(OnTouchDown));
             _source.RemoveHandler(UIElement.TouchMoveEvent, new EventHandler<TouchEventArgs>(OnTouchMove));
             _source.RemoveHandler(UIElement.TouchUpEvent, new EventHandler<TouchEventArgs>(OnTouchUp));
+            _source.RemoveHandler(UIElement.LostTouchCaptureEvent, new EventHandler<TouchEventArgs>(OnTouchCaptureLost));
             _lastTimestamps.Clear();
             _frameIds.Clear();
             _lastStylusPoints.Clear();
@@ -86,6 +90,54 @@ namespace Ink_Canvas.Ink.Native
 
         private void OnTouchUp(object sender, TouchEventArgs e) =>
             DispatchTouch(e, NativePointerMessageKind.Up);
+
+        private void OnTouchCaptureLost(object sender, TouchEventArgs e)
+        {
+            // 真实红外框/数字化仪的触摸可能不发 TouchUp 而发触摸捕获丢失
+            // （第二指落下、系统手势接管、捕获被抢占、窗口失活等）。
+            // 若不在此结束会话，NativeInkController 会残留一个 Active 会话，
+            // 下一笔落笔时 Begin 先 Cancel 上一笔 → 只能写一笔 + 湿墨 overlay 卡死。
+            // 正常 TouchUp 后 legacy 层 ReleaseAllTouchCaptures 也会触发本事件，
+            // 此时会话已结束，Cancel 幂等无害。
+            if (_disposed || e?.TouchDevice == null)
+                return;
+
+            var pointerId = TouchPointerNamespace | (unchecked((uint)e.TouchDevice.Id) & 0x3FFFFFFF);
+            DispatchCanceled(pointerId, NativeInkInputKind.Touch);
+        }
+
+        private void OnStylusCaptureLost(object sender, StylusEventArgs e)
+        {
+            if (_disposed || e?.StylusDevice == null)
+                return;
+            // 触摸型笔的捕获丢失走 LostTouchCapture，这里只处理真实笔。
+            if (IsTouchStylus(e.StylusDevice))
+                return;
+
+            var pointerId = StylusPointerNamespace | (unchecked((uint)e.StylusDevice.Id) & 0x3FFFFFFF);
+            DispatchCanceled(pointerId, NativeInkInputKind.Pen);
+        }
+
+        private void DispatchCanceled(uint pointerId, NativeInkInputKind inputKind)
+        {
+            try
+            {
+                _handler(new NativePointerInputBatch(
+                    pointerId,
+                    inputKind,
+                    NativePointerMessageKind.CaptureLost,
+                    Array.Empty<RawInkSample>(),
+                    false,
+                    false,
+                    true,
+                    isWpfFallback: true));
+                Forget(pointerId);
+            }
+            catch
+            {
+                // WPF input must continue even if fallback sample conversion fails.
+            }
+        }
 
         private void DispatchStylus(StylusEventArgs e, NativePointerMessageKind messageKind)
         {
