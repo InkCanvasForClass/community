@@ -96,14 +96,32 @@ namespace Ink_Canvas
         private DateTime _lastCaptureTime = DateTime.MinValue;
         private const int VideoPresenterCaptureCooldownMs = 1000;
 
-        // A4 纸实时识别框：60fps 定时检测（16.6ms），在直播画面上叠加红色四边形框
-        // 实际刷新率受检测耗时限制（~30-50ms），由 Interlocked 防重入保证不会堆积
+        // A4 纸实时识别框：定时检测间隔与矫正框动画时长对齐到 200ms，
+        // 动画能完整跑完不被打断，避免拖影感。检测仍由 Interlocked 防重入保证不会堆积。
         private DispatcherTimer _paperDetectTimer;
-        private const int PaperDetectIntervalMs = 16;
+        private const int PaperDetectIntervalMs = 200;
         // 上一次实时检测到的角点（已映射到 overlay 坐标），null 表示未检测到
         private System.Windows.Point[] _lastOverlayCorners;
         // 实时检测任务防重入标志（上一次后台检测未完成时不启动新的）
         private int _paperDetectRunning;
+
+        // 矫正框移动动画：检测到新角点时，从上一帧位置平滑过渡到新位置，避免跳变。
+        // 动画期间 _lastOverlayCorners 实时记录"当前显示的中间位置"，新目标到来时以此为新起点，自然衔接。
+        private DispatcherTimer _overlayAnimTimer;
+        private System.Windows.Point[] _animFromCorners;
+        private System.Windows.Point[] _animToCorners;
+        private DateTime _animStartTime;
+        // 动画时长与抓帧间隔对齐到 200ms：每次新角点到来时上一次动画已刚好跑完，
+        // 不会被频繁打断，框平滑过渡且能跟上纸张移动。
+        private const int OverlayAnimDurationMs = 200;
+        // 复用元素：动画过程中不 Clear+重建，直接更新 Points/位置，避免闪烁
+        private System.Windows.Shapes.Polygon _overlayPolygon;
+        private System.Windows.Shapes.Ellipse[] _overlayEllipses;
+        // 诊断日志：记录新角点到来间隔，用于验证实际帧间隔与定时器间隔是否吻合
+        private DateTime? _lastOverlayDrawTime;
+        // 诊断日志：动画完成(正常结束)与被打断重启的计数，便于观察动画是否总在被截断
+        private int _overlayAnimCompletedCount;
+        private int _overlayAnimInterruptedCount;
 
         /// <summary>
         /// 切换视频呈现侧边栏的显示状态（显示或隐藏）。
@@ -2671,12 +2689,18 @@ namespace Ink_Canvas
         {
             if (_paperDetectTimer != null && _paperDetectTimer.IsEnabled)
                 _paperDetectTimer.Stop();
+            StopOverlayAnim();
             if (PaperDetectOverlayCanvas != null)
             {
                 PaperDetectOverlayCanvas.Children.Clear();
                 PaperDetectOverlayCanvas.Visibility = Visibility.Collapsed;
             }
+            _overlayPolygon = null;
+            _overlayEllipses = null;
             _lastOverlayCorners = null;
+            _lastOverlayDrawTime = null;
+            _overlayAnimCompletedCount = 0;
+            _overlayAnimInterruptedCount = 0;
         }
 
         /// <summary>
@@ -2694,7 +2718,13 @@ namespace Ink_Canvas
                 && VideoPresenterFrozenFrameImage.Visibility == Visibility.Visible)
             {
                 if (PaperDetectOverlayCanvas != null && PaperDetectOverlayCanvas.Children.Count > 0)
+                {
+                    StopOverlayAnim();
                     PaperDetectOverlayCanvas.Children.Clear();
+                    _overlayPolygon = null;
+                    _overlayEllipses = null;
+                    _lastOverlayCorners = null;
+                }
                 return;
             }
 
@@ -2855,44 +2885,183 @@ namespace Ink_Canvas
         /// <summary>
         /// 在覆盖 Canvas 上绘制 A4 纸检测框（红色四边形 + 4 个角点圆）。
         /// overlayPts 为 null 时清空覆盖层。
+        /// 有上一帧角点时，启动移动动画从上一帧位置平滑过渡到当前帧，避免框跳变；
+        /// 动画进行中又来新目标时，以当前中间位置为新起点继续追赶，自然衔接。
         /// </summary>
         private void DrawPaperDetectOverlay(System.Windows.Point[] overlayPts)
         {
             if (PaperDetectOverlayCanvas == null) return;
-            PaperDetectOverlayCanvas.Children.Clear();
 
             if (overlayPts == null || overlayPts.Length != 4)
             {
+                // 丢失检测：停止动画，清空覆盖层与复用元素引用
+                StopOverlayAnim();
+                PaperDetectOverlayCanvas.Children.Clear();
+                _overlayPolygon = null;
+                _overlayEllipses = null;
                 _lastOverlayCorners = null;
+                _lastOverlayDrawTime = null;
+                // 若有动画统计，输出汇总后重置
+                if (_overlayAnimCompletedCount > 0 || _overlayAnimInterruptedCount > 0)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"矫正框: 丢失检测 本次统计 完成={_overlayAnimCompletedCount} 打断={_overlayAnimInterruptedCount}",
+                        LogHelper.LogType.Trace);
+                    _overlayAnimCompletedCount = 0;
+                    _overlayAnimInterruptedCount = 0;
+                }
                 return;
             }
-            _lastOverlayCorners = overlayPts;
 
-            // 红色半透明四边形
-            var polygon = new System.Windows.Shapes.Polygon
+            // 诊断：记录新角点到来间隔（验证实际间隔 ≠ 16ms 定时器间隔，受检测耗时限制约 30-50ms）
+            var now = DateTime.UtcNow;
+            if (_lastOverlayDrawTime.HasValue)
             {
-                Stroke = System.Windows.Media.Brushes.Red,
-                StrokeThickness = 3,
-                Fill = new System.Windows.Media.SolidColorBrush(
-                    System.Windows.Media.Color.FromArgb(40, 255, 0, 0)) // 半透明红色填充
-            };
-            foreach (var p in overlayPts) polygon.Points.Add(p);
-            PaperDetectOverlayCanvas.Children.Add(polygon);
+                double intervalMs = (now - _lastOverlayDrawTime.Value).TotalMilliseconds;
+                bool animRunning = _overlayAnimTimer != null && _overlayAnimTimer.IsEnabled;
+                LogHelper.WriteLogToFile(
+                    $"矫正框: 新角点到来 间隔={intervalMs:F1}ms 动画运行中={animRunning} (完成={_overlayAnimCompletedCount},打断={_overlayAnimInterruptedCount})",
+                    LogHelper.LogType.Trace);
+            }
+            _lastOverlayDrawTime = now;
 
-            // 4 个角点圆（更醒目）
-            for (int i = 0; i < overlayPts.Length; i++)
+            if (_lastOverlayCorners == null)
             {
-                var ellipse = new System.Windows.Shapes.Ellipse
+                // 首次检测到（或丢失后重新检测到）：直接绘制，无动画
+                StopOverlayAnim();
+                EnsureOverlayElements();
+                ApplyOverlayPoints(overlayPts);
+                _lastOverlayCorners = (System.Windows.Point[])overlayPts.Clone();
+            }
+            else
+            {
+                // 有上一帧：启动动画从 _lastOverlayCorners（当前显示位置）过渡到 overlayPts
+                StartOverlayAnim(_lastOverlayCorners, overlayPts);
+            }
+        }
+
+        /// <summary>确保复用的 Polygon 与 4 个 Ellipse 已创建并加入覆盖层（动画中只更新属性，不重建）。</summary>
+        private void EnsureOverlayElements()
+        {
+            if (_overlayPolygon == null)
+            {
+                _overlayPolygon = new System.Windows.Shapes.Polygon
                 {
-                    Width = 12,
-                    Height = 12,
-                    Fill = System.Windows.Media.Brushes.Red,
-                    Stroke = System.Windows.Media.Brushes.White,
-                    StrokeThickness = 1
+                    Stroke = System.Windows.Media.Brushes.Red,
+                    StrokeThickness = 3,
+                    Fill = new System.Windows.Media.SolidColorBrush(
+                        System.Windows.Media.Color.FromArgb(40, 255, 0, 0)) // 半透明红色填充
                 };
-                System.Windows.Controls.Canvas.SetLeft(ellipse, overlayPts[i].X - 6);
-                System.Windows.Controls.Canvas.SetTop(ellipse, overlayPts[i].Y - 6);
-                PaperDetectOverlayCanvas.Children.Add(ellipse);
+                PaperDetectOverlayCanvas.Children.Add(_overlayPolygon);
+            }
+            if (_overlayEllipses == null)
+            {
+                _overlayEllipses = new System.Windows.Shapes.Ellipse[4];
+                for (int i = 0; i < 4; i++)
+                {
+                    _overlayEllipses[i] = new System.Windows.Shapes.Ellipse
+                    {
+                        Width = 12,
+                        Height = 12,
+                        Fill = System.Windows.Media.Brushes.Red,
+                        Stroke = System.Windows.Media.Brushes.White,
+                        StrokeThickness = 1
+                    };
+                    PaperDetectOverlayCanvas.Children.Add(_overlayEllipses[i]);
+                }
+            }
+        }
+
+        /// <summary>把给定 4 点应用到复用的 Polygon.Points 与 4 个 Ellipse 的位置。</summary>
+        private void ApplyOverlayPoints(System.Windows.Point[] pts)
+        {
+            if (_overlayPolygon == null || _overlayEllipses == null) return;
+            _overlayPolygon.Points = new System.Windows.Media.PointCollection(pts);
+            for (int i = 0; i < 4; i++)
+            {
+                System.Windows.Controls.Canvas.SetLeft(_overlayEllipses[i], pts[i].X - 6);
+                System.Windows.Controls.Canvas.SetTop(_overlayEllipses[i], pts[i].Y - 6);
+            }
+        }
+
+        /// <summary>启动矫正框移动动画：from→to，时长 OverlayAnimDurationMs，ease-out 缓动。</summary>
+        private void StartOverlayAnim(System.Windows.Point[] from, System.Windows.Point[] to)
+        {
+            EnsureOverlayElements();
+
+            // 诊断：若动画正在运行，说明上一次还没跑完就被新目标打断，记录打断进度
+            if (_overlayAnimTimer != null && _overlayAnimTimer.IsEnabled
+                && _animFromCorners != null && _animToCorners != null)
+            {
+                double prevT = (DateTime.UtcNow - _animStartTime).TotalMilliseconds / OverlayAnimDurationMs;
+                if (prevT > 1.0) prevT = 1.0;
+                double prevEased = 1.0 - (1.0 - prevT) * (1.0 - prevT);
+                _overlayAnimInterruptedCount++;
+                LogHelper.WriteLogToFile(
+                    $"矫正框: 动画被打断重启 上次进度={prevT:F2}(eased={prevEased:F2}) 时长={OverlayAnimDurationMs}ms",
+                    LogHelper.LogType.Trace);
+            }
+
+            _animFromCorners = (System.Windows.Point[])from.Clone();
+            _animToCorners = (System.Windows.Point[])to.Clone();
+            _animStartTime = DateTime.UtcNow;
+            // _lastOverlayCorners 由 OverlayAnimTimer_Tick 实时更新为当前插值位置，
+            // 动画未结束又来新目标时，新一轮 from 即此中间位置，自然衔接。
+
+            if (_overlayAnimTimer == null)
+            {
+                _overlayAnimTimer = new DispatcherTimer(DispatcherPriority.Render)
+                {
+                    Interval = TimeSpan.FromMilliseconds(16)
+                };
+                _overlayAnimTimer.Tick += OverlayAnimTimer_Tick;
+            }
+            if (!_overlayAnimTimer.IsEnabled)
+                _overlayAnimTimer.Start();
+            // 立即触发一次，避免起点停顿
+            OverlayAnimTimer_Tick(null, EventArgs.Empty);
+        }
+
+        /// <summary>停止矫正框移动动画并清空起止角点。</summary>
+        private void StopOverlayAnim()
+        {
+            if (_overlayAnimTimer != null && _overlayAnimTimer.IsEnabled)
+                _overlayAnimTimer.Stop();
+            _animFromCorners = null;
+            _animToCorners = null;
+        }
+
+        /// <summary>动画定时器 Tick：按 progress 插值 4 个角点并更新覆盖层，progress≥1 时停止。</summary>
+        private void OverlayAnimTimer_Tick(object sender, EventArgs e)
+        {
+            if (_animFromCorners == null || _animToCorners == null)
+            {
+                StopOverlayAnim();
+                return;
+            }
+            double t = (DateTime.UtcNow - _animStartTime).TotalMilliseconds / OverlayAnimDurationMs;
+            if (t > 1.0) t = 1.0;
+            // ease-out：起步快、末段慢，贴合检测框"追上纸张"的直觉
+            double eased = 1.0 - (1.0 - t) * (1.0 - t);
+
+            var pts = new System.Windows.Point[4];
+            for (int i = 0; i < 4; i++)
+            {
+                pts[i] = new System.Windows.Point(
+                    _animFromCorners[i].X + (_animToCorners[i].X - _animFromCorners[i].X) * eased,
+                    _animFromCorners[i].Y + (_animToCorners[i].Y - _animFromCorners[i].Y) * eased);
+            }
+            ApplyOverlayPoints(pts);
+            // 实时记录当前显示位置：动画未结束时新目标到来，以此为新起点
+            _lastOverlayCorners = (System.Windows.Point[])pts.Clone();
+
+            if (t >= 1.0)
+            {
+                _overlayAnimCompletedCount++;
+                LogHelper.WriteLogToFile(
+                    $"矫正框: 动画正常完成 实际耗时={(DateTime.UtcNow - _animStartTime).TotalMilliseconds:F1}ms (累计完成={_overlayAnimCompletedCount},打断={_overlayAnimInterruptedCount})",
+                    LogHelper.LogType.Trace);
+                StopOverlayAnim();
             }
         }
 
