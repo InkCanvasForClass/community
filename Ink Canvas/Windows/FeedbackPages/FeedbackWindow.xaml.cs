@@ -388,22 +388,22 @@ namespace Ink_Canvas.Windows.FeedbackPages
             string baseUrl = "https://inkcanvasforclass.feishu.cn/share/base/form/shrcnTufO72M20lU1sjQWcpv29e";
             var queryParams = new List<string>
             {
-                $"prefill_{Uri.EscapeDataString("反馈类型")}={Uri.EscapeDataString("Bug 报告 (反馈软件缺陷或异常) | Bug Report (Report a bug to help us improve)")}"
+                $"prefill_{Uri.EscapeDataString("反馈类型 | Feedback type")}={Uri.EscapeDataString("Bug 报告 (反馈软件缺陷或异常) | Bug Report (Report a bug to help us improve)")}"
             };
 
             if (!string.IsNullOrEmpty(versionInfo))
             {
-                queryParams.Add($"prefill_{Uri.EscapeDataString("软件版本")}={Uri.EscapeDataString(versionInfo)}");
+                queryParams.Add($"prefill_{Uri.EscapeDataString("软件版本 | App Version")}={Uri.EscapeDataString(versionInfo)}");
             }
 
             if (!string.IsNullOrEmpty(systemInfo))
             {
-                queryParams.Add($"prefill_{Uri.EscapeDataString("操作系统版本")}={Uri.EscapeDataString(systemInfo)}");
+                queryParams.Add($"prefill_{Uri.EscapeDataString("操作系统版本 | OS Version")}={Uri.EscapeDataString(systemInfo)}");
             }
 
             if (!string.IsNullOrEmpty(extraInfo))
             {
-                queryParams.Add($"prefill_{Uri.EscapeDataString("其他补充信息")}={Uri.EscapeDataString(extraInfo)}");
+                queryParams.Add($"prefill_{Uri.EscapeDataString("其他补充信息 | Additional Info")}={Uri.EscapeDataString(extraInfo)}");
             }
 
             return $"{baseUrl}?{string.Join("&", queryParams)}";
