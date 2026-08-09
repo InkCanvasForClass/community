@@ -41,6 +41,11 @@ namespace Ink_Canvas.Plugins
         // 否则可回收 ALC 不会真正释放，热重载失效。
         private readonly Dictionary<string, PluginRegistrationScope> _registrationScopes
             = new Dictionary<string, PluginRegistrationScope>(StringComparer.OrdinalIgnoreCase);
+        // 批量加载标志：为 true 时插件注册工具栏项不会逐项排队重建，
+        // 而是设置 _boardToolbarRebuildPending，由加载完成后统一重建一次。
+        private bool _isLoadingBatch;
+        private bool _boardToolbarRebuildPending;
+
         // 卸载后仍在等待 GC 完成回收的 ALC 弱引用，用于校验是否真正卸载成功。
         private readonly Dictionary<string, WeakReference> _unloadingContexts
             = new Dictionary<string, WeakReference>(StringComparer.OrdinalIgnoreCase);
@@ -300,35 +305,49 @@ namespace Ink_Canvas.Plugins
                 var loadOrder = ResolveLoadOrder();
 
                 // 4. 按顺序加载插件
-                foreach (var pluginId in loadOrder)
+                // 包裹授权会话：同一插件的外部 DLL 只弹一次确认，避免逐个弹窗导致 UI 错乱。
+                _authorization?.BeginSession();
+                _isLoadingBatch = true;
+                try
                 {
-                    var info = _plugins.FirstOrDefault(p => p.Id == pluginId);
-                    if (info == null || info.LoadStatus != PluginLoadStatus.NotLoaded) continue;
+                    foreach (var pluginId in loadOrder)
+                    {
+                        var info = _plugins.FirstOrDefault(p => p.Id == pluginId);
+                        if (info == null || info.LoadStatus != PluginLoadStatus.NotLoaded) continue;
 
-                    // 跳过已禁用的插件
-                    if (IsPluginDisabled(pluginId))
-                    {
-                        info.LoadStatus = PluginLoadStatus.Disabled;
-                        Log(string.Format("Plugin {0} is disabled, skipping", info.Name));
-                        continue;
-                    }
+                        // 跳过已禁用的插件
+                        if (IsPluginDisabled(pluginId))
+                        {
+                            info.LoadStatus = PluginLoadStatus.Disabled;
+                            Log(string.Format("Plugin {0} is disabled, skipping", info.Name));
+                            continue;
+                        }
 
-                    try
-                    {
-                        LoadPlugin(info);
+                        try
+                        {
+                            LoadPlugin(info);
+                        }
+                        catch (Exception ex)
+                        {
+                            info.LoadStatus = PluginLoadStatus.Error;
+                            info.Exception = ex;
+                            LogError(string.Format("Failed to load plugin {0}", info.Name), ex);
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        info.LoadStatus = PluginLoadStatus.Error;
-                        info.Exception = ex;
-                        LogError(string.Format("Failed to load plugin {0}", info.Name), ex);
-                    }
+                }
+                finally
+                {
+                    _isLoadingBatch = false;
+                    _authorization?.EndSession();
                 }
 
                 _plugins.Sort((a, b) => a.Order.CompareTo(b.Order));
                 BuildServiceProvider();
                 _market?.RefreshMergedPlugins();
                 Log(string.Format("Plugin loading complete. Loaded {0} plugins", _plugins.Count(p => p.LoadStatus == PluginLoadStatus.Loaded)));
+
+                // 批量加载期间累积的白板工具栏重建请求，在此统一排队一次。
+                FlushPendingBoardToolbarRebuild();
             }
             catch (Exception ex)
             {
@@ -348,23 +367,36 @@ namespace Ink_Canvas.Plugins
             var installedIds = ProcessPluginPackages(approvedPackagePath, approvedPackageSha256);
             DiscoverPlugins();
             var loadOrder = ResolveLoadOrder();
-            foreach (var pluginId in loadOrder)
+            _authorization?.BeginSession();
+            _isLoadingBatch = true;
+            try
             {
-                var info = _plugins.FirstOrDefault(p => p.Id == pluginId && p.LoadStatus == PluginLoadStatus.NotLoaded);
-                if (info == null) continue;
-                try { LoadPlugin(info); }
-                catch (Exception ex)
+                foreach (var pluginId in loadOrder)
                 {
-                    info.LoadStatus = PluginLoadStatus.Error;
-                    info.Exception = ex;
-                    LogError(string.Format("Failed to load plugin {0}", info.Name), ex);
+                    var info = _plugins.FirstOrDefault(p => p.Id == pluginId && p.LoadStatus == PluginLoadStatus.NotLoaded);
+                    if (info == null) continue;
+                    try { LoadPlugin(info); }
+                    catch (Exception ex)
+                    {
+                        info.LoadStatus = PluginLoadStatus.Error;
+                        info.Exception = ex;
+                        LogError(string.Format("Failed to load plugin {0}", info.Name), ex);
+                    }
                 }
+            }
+            finally
+            {
+                _isLoadingBatch = false;
+                _authorization?.EndSession();
             }
             _plugins.Sort((a, b) => a.Order.CompareTo(b.Order));
             _market?.RefreshMergedPlugins();
 
             if (installedIds.Count > 0)
             {
+                // 批量加载期间累积的白板工具栏重建请求，在此统一排队一次。
+                FlushPendingBoardToolbarRebuild();
+
                 try
                 {
                     if (System.Windows.Application.Current?.MainWindow is Ink_Canvas.MainWindow mainWindow)
@@ -1894,6 +1926,29 @@ namespace Ink_Canvas.Plugins
             _serviceProvider = _serviceCollection.BuildServiceProvider();
         }
 
+        /// <summary>
+        /// 批量加载结束后，若有插件注册了白板工具栏项，排队一次 <see cref="MainWindow.RebuildBoardToolbar"/>。
+        /// 避免每个插件组件都单独排队重建，与授权弹窗嵌套消息循环交错时引发 UI 渲染错乱。
+        /// </summary>
+        private void FlushPendingBoardToolbarRebuild()
+        {
+            if (!_boardToolbarRebuildPending) return;
+            _boardToolbarRebuildPending = false;
+
+            try
+            {
+                if (Application.Current?.MainWindow is MainWindow mw)
+                {
+                    mw.Dispatcher.BeginInvoke(new Action(mw.RebuildBoardToolbar),
+                        System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError("Failed to flush pending board toolbar rebuild", ex);
+            }
+        }
+
         public void RegisterToolbarItem(PluginToolbarItemInfo itemInfo)
         {
             if (itemInfo == null || string.IsNullOrEmpty(itemInfo.Id)) return;
@@ -1946,7 +2001,13 @@ namespace Ink_Canvas.Plugins
 
                 // 白板工具栏已构建时延迟重建以显示插件组件（在 Initialize 完成后执行，
                 // 避免 ViewFactory 依赖尚未初始化完成的插件状态）。
-                if (Application.Current?.MainWindow is MainWindow mw)
+                // 批量加载期间只标记，由加载完成后统一重建一次，避免每个组件都排队导致
+                // 重复销毁/创建控件与授权弹窗嵌套消息循环时交错引发 UI 渲染错乱。
+                if (_isLoadingBatch)
+                {
+                    _boardToolbarRebuildPending = true;
+                }
+                else if (Application.Current?.MainWindow is MainWindow mw)
                 {
                     mw.Dispatcher.BeginInvoke(new Action(mw.RebuildBoardToolbar),
                         System.Windows.Threading.DispatcherPriority.ApplicationIdle);
