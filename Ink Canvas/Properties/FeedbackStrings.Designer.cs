@@ -147,5 +147,13 @@ namespace Ink_Canvas.Properties
         public static string Page3_Uploading => ResourceManager.GetString(nameof(Page3_Uploading), _resourceCulture);
 
         public static string Page3_PastebinNotConfigured => ResourceManager.GetString(nameof(Page3_PastebinNotConfigured), _resourceCulture);
+
+        public static string Page3_Feishu => ResourceManager.GetString(nameof(Page3_Feishu), _resourceCulture);
+
+        public static string Page3_FeishuDesc => ResourceManager.GetString(nameof(Page3_FeishuDesc), _resourceCulture);
+
+        public static string Page3_OpenFeishu => ResourceManager.GetString(nameof(Page3_OpenFeishu), _resourceCulture);
+
+        public static string Page3_CopyFeishuUrl => ResourceManager.GetString(nameof(Page3_CopyFeishuUrl), _resourceCulture);
     }
 }

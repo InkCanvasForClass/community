@@ -204,4 +204,16 @@
   <data name="Page3_PastebinNotConfigured" xml:space="preserve">
     <value>Pastebin server not configured</value>
   </data>
+  <data name="Page3_Feishu" xml:space="preserve">
+    <value>Feishu Feedback</value>
+  </data>
+  <data name="Page3_FeishuDesc" xml:space="preserve">
+    <value>Submit feedback via Feishu form</value>
+  </data>
+  <data name="Page3_OpenFeishu" xml:space="preserve">
+    <value>Go to Feishu Feedback</value>
+  </data>
+  <data name="Page3_CopyFeishuUrl" xml:space="preserve">
+    <value>Copy feedback link</value>
+  </data>
 </root>

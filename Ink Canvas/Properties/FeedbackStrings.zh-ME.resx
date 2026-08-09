@@ -204,4 +204,16 @@
   <data name="Page3_PastebinNotConfigured" xml:space="preserve">
     <value>没配 Pastebin 服务器</value>
   </data>
+  <data name="Page3_Feishu" xml:space="preserve">
+    <value>用飞书整活反馈</value>
+  </data>
+  <data name="Page3_FeishuDesc" xml:space="preserve">
+    <value>用飞书表单发反馈</value>
+  </data>
+  <data name="Page3_OpenFeishu" xml:space="preserve">
+    <value>跳到飞书表单</value>
+  </data>
+  <data name="Page3_CopyFeishuUrl" xml:space="preserve">
+    <value>复制表单链接</value>
+  </data>
 </root>
