@@ -1,4 +1,3 @@
-using Ink_Canvas.Ink.Native;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -18,6 +17,11 @@ namespace Ink_Canvas.Helpers
     /// </summary>
     public class InkFadeManager
     {
+        /// <summary>
+        /// 激光笔迹标记 GUID（原由新墨迹系统 WpfStrokeCommitter 写入，撤回后本地持有以保证激光渐隐生效）。
+        /// </summary>
+        internal static readonly Guid LaserRenderModeGuid = new Guid("A69B0C9D-9A3A-4F91-8BE3-8E2DBB9AD4F7");
+
         #region Properties
         /// <summary>
         /// 是否启用墨迹渐隐功能
@@ -73,7 +77,10 @@ namespace Ink_Canvas.Helpers
 
             try
             {
-                // Native freehand keeps physical EditingMode at None; do not force WPF Ink.
+                if (_mainWindow.inkCanvas.EditingMode != InkCanvasEditingMode.Ink)
+                {
+                    _mainWindow.inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                }
 
                 _strokeStartPoints[stroke] = startPoint;
                 _strokeEndPoints[stroke] = endPoint;
@@ -371,7 +378,7 @@ namespace Ink_Canvas.Helpers
         private bool IsLaserStroke(Stroke stroke)
         {
             return stroke != null
-                && stroke.ContainsPropertyData(WpfStrokeCommitter.LaserRenderModeGuid);
+                && stroke.ContainsPropertyData(LaserRenderModeGuid);
         }
 
         private UIElement CreateLaserStrokeVisual(Stroke stroke)

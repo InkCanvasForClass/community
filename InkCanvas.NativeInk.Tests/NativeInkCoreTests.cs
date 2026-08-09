@@ -722,12 +722,12 @@ namespace InkCanvas.NativeInk.Tests
         {
             var builder = new WetInkGeometryBuilder();
             var geometry = builder.Build(
-                new[]
+                (IReadOnlyList<RealInkPoint>)new RealInkPoint[]
                 {
                     new RealInkPoint(0, 0, 0, 1),
                     new RealInkPoint(10, 0, 1, 2)
                 },
-                null,
+                (IReadOnlyList<PredictedInkPoint>)null,
                 Style());
             Equal(4, geometry.Outline.Count);
             True(geometry.StartRadius < geometry.EndRadius);
@@ -751,8 +751,8 @@ namespace InkCanvas.NativeInk.Tests
                 InkStylusTipShape.Rectangle,
                 InkRenderMode.Standard);
             var geometry = new WetInkGeometryBuilder().Build(
-                new[] { new RealInkPoint(0, 0, 0.5f, 1) },
-                null,
+                (IReadOnlyList<RealInkPoint>)new[] { new RealInkPoint(0, 0, 0.5f, 1) },
+                (IReadOnlyList<PredictedInkPoint>)null,
                 style);
             True(geometry.IsSinglePoint);
             Equal(2f, geometry.StartTip.RadiusX);
@@ -764,12 +764,12 @@ namespace InkCanvas.NativeInk.Tests
         {
             var builder = new WetInkGeometryBuilder();
             var geometry = builder.Build(
-                new[]
+                (IReadOnlyList<RealInkPoint>)new[]
                 {
                     new RealInkPoint(1, 2, 0.25f, 1),
                     new RealInkPoint(1, 2, 0.75f, 2)
                 },
-                null,
+                (IReadOnlyList<PredictedInkPoint>)null,
                 Style());
             Equal(0, geometry.Outline.Count);
             Equal(1f, geometry.StartCenter.X);
@@ -782,7 +782,10 @@ namespace InkCanvas.NativeInk.Tests
             var builder = new WetInkGeometryBuilder();
             var real = new[] { new RealInkPoint(0, 0, 0.5f, 1) };
             var predicted = new[] { new PredictedInkPoint(5, 0, 0.5f, 2) };
-            var geometry = builder.Build(real, predicted, Style());
+            var geometry = builder.Build(
+                (IReadOnlyList<RealInkPoint>)real,
+                (IReadOnlyList<PredictedInkPoint>)predicted,
+                Style());
             Equal(4, geometry.Outline.Count);
             Equal(5f, geometry.EndCenter.X);
 

@@ -20,7 +20,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ToggleSwitchPPTComDebugProbe.IsOn = SettingsManager.Settings.Advanced.IsPPTComDebugProbeEnabled;
                 ToggleSwitchPPTPageFlipPreview.IsOn = SettingsManager.Settings.Advanced.IsPPTPageFlipPreviewVisible;
                 ToggleSwitchRealtimeInkDebugLog.IsOn = SettingsManager.Settings.Advanced.IsRealtimeInkDebugLogEnabled;
-                ToggleSwitchRealtimeInkFpsOverlay.IsOn = SettingsManager.Settings.Advanced.IsRealtimeInkFpsOverlayEnabled;
                 _isLoaded = true;
             };
             Unloaded += (s, e) => _isLoaded = false;
@@ -65,29 +64,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 isOn
                     ? "[Debug] 实时笔迹详细调试日志已开启（落笔后查看 Configs/RealtimeInkDebugLive.json / PerformanceHistory.json）"
                     : "[Debug] 实时笔迹详细调试日志已关闭并尝试保存历史",
-                LogHelper.LogType.Info);
-        }
-
-        private void ToggleSwitchRealtimeInkFpsOverlay_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            bool isOn = ToggleSwitchRealtimeInkFpsOverlay.IsOn;
-            SettingsManager.Settings.Advanced.IsRealtimeInkFpsOverlayEnabled = isOn;
-            if (MainWindow.Settings?.Advanced != null)
-                MainWindow.Settings.Advanced.IsRealtimeInkFpsOverlayEnabled = isOn;
-            SettingsManager.SaveSettingsToFile();
-
-            var mainWindow = System.Windows.Application.Current?.MainWindow as MainWindow;
-            if (mainWindow != null)
-            {
-                if (isOn) mainWindow.ShowRealtimeInkFpsOverlay();
-                else mainWindow.HideRealtimeInkFpsOverlay();
-            }
-
-            LogHelper.WriteLogToFile(
-                isOn
-                    ? "[Debug] 实时笔迹 FPS / 提交延迟 HUD 已开启"
-                    : "[Debug] 实时笔迹 FPS / 提交延迟 HUD 已关闭",
                 LogHelper.LogType.Info);
         }
 

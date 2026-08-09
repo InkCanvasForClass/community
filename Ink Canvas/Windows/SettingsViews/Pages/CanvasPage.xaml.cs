@@ -31,7 +31,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 {
                     CardEnablePressureTouchMode.IsOn = settings.Canvas.EnablePressureTouchMode;
                     CardDisablePressure.IsOn = settings.Canvas.DisablePressure;
-                    CardUseLegacyWetInk.IsOn = settings.Canvas.UseLegacyWetInk;
 
                     int curveMode = 0;
                     if (settings.Canvas.UseAdvancedBezierSmoothing) curveMode = 2;
@@ -95,17 +94,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!CardDisablePressure.IsOn || !SettingsManager.Settings.Canvas.EnablePressureTouchMode)
                 CardEnablePressureTouchMode.IsOn = SettingsManager.Settings.Canvas.EnablePressureTouchMode;
             SettingsManager.SaveSettingsToFile();
-        }
-
-        private void ToggleSwitchUseLegacyWetInk_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.UseLegacyWetInk = CardUseLegacyWetInk.IsOn;
-            SettingsManager.SaveSettingsToFile();
-            if (Application.Current.MainWindow is MainWindow mainWindow)
-                mainWindow.ShowNotification(CanvasStrings.Canvas_UseLegacyWetInkRestartNotice);
-            else
-                MainWindow.ShowNewMessage(CanvasStrings.Canvas_UseLegacyWetInkRestartNotice);
         }
 
         private void ComboBoxCurveSmoothingMode_SelectionChanged(object sender, SelectionChangedEventArgs e)

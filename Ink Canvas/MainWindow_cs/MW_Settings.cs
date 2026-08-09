@@ -939,12 +939,9 @@ namespace Ink_Canvas
                     int currentDrawingShapeMode = drawingShapeMode;
                     bool currentForceEraser = forceEraser;
 
-                    if (Settings.Canvas.UseLegacyWetInk)
-                    {
-                        inkCanvas.StylusDown += MainWindow_StylusDown;
-                        inkCanvas.StylusMove += MainWindow_StylusMove;
-                        inkCanvas.StylusUp += MainWindow_StylusUp;
-                    }
+                    inkCanvas.StylusDown += MainWindow_StylusDown;
+                    inkCanvas.StylusMove += MainWindow_StylusMove;
+                    inkCanvas.StylusUp += MainWindow_StylusUp;
                     inkCanvas.TouchDown += MainWindow_TouchDown;
                     inkCanvas.TouchDown -= Main_Grid_TouchDown;
 
@@ -962,18 +959,7 @@ namespace Ink_Canvas
                     SaveSettingsToFile();
 
                     // 恢复到之前的编辑状态
-                    if (Settings.Canvas.UseLegacyWetInk)
-                    {
-                        inkCanvas.EditingMode = currentEditingMode;
-                    }
-                    else
-                    {
-                        // 原生自由书写时 Ink 映射为 None
-                        inkCanvas.EditingMode = currentEditingMode == InkCanvasEditingMode.Ink
-                            ? InkCanvasEditingMode.None
-                            : currentEditingMode;
-                        EnsureNativePenPhysicalEditingMode();
-                    }
+                    inkCanvas.EditingMode = currentEditingMode;
                     drawingShapeMode = currentDrawingShapeMode;
                     forceEraser = currentForceEraser;
                 }

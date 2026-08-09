@@ -112,14 +112,6 @@ namespace Ink_Canvas.Properties
 
         public static string Debug_RealtimeInkLog_Desc => ResourceManager.GetString(nameof(Debug_RealtimeInkLog_Desc), _resourceCulture);
 
-        public static string Debug_RealtimeInkFpsOverlay_Header => ResourceManager.GetString(nameof(Debug_RealtimeInkFpsOverlay_Header), _resourceCulture);
-
-        public static string Debug_RealtimeInkFpsOverlay_Desc => ResourceManager.GetString(nameof(Debug_RealtimeInkFpsOverlay_Desc), _resourceCulture);
-
-        public static string RealtimeInkFpsOverlay_IdleText => ResourceManager.GetString(nameof(RealtimeInkFpsOverlay_IdleText), _resourceCulture);
-
-        public static string RealtimeInkFpsOverlay_ActiveText => ResourceManager.GetString(nameof(RealtimeInkFpsOverlay_ActiveText), _resourceCulture);
-
         public static string Debug_IconSettings => ResourceManager.GetString(nameof(Debug_IconSettings), _resourceCulture);
 
         public static string Debug_SettingsExpanderExample => ResourceManager.GetString(nameof(Debug_SettingsExpanderExample), _resourceCulture);
