@@ -233,14 +233,17 @@ namespace Ink_Canvas
             inkCanvas.StylusMove += MainWindow_StylusMove;
             inkCanvas.StylusUp += MainWindow_StylusUp;
 
-            if (ShouldUseRealtimeVelocityBrushTip()
+            // 手动 StrokeVisual 采集（实时笔锋 / 多指书写）要求 InkCanvas 自身不收集笔画；
+            // 其余情况保持 Ink，由 InkCanvas 内建采集，两者不可同时生效。
+            var isManualStylusCollection = ShouldUseRealtimeVelocityBrushTip() || isInMultiTouchMode;
+            if (isManualStylusCollection
                 && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
                 && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
                 && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
             }
-            else if (!ShouldUseRealtimeVelocityBrushTip()
+            else if (!isManualStylusCollection
                      && inkCanvas.EditingMode == InkCanvasEditingMode.None)
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
@@ -1229,6 +1232,8 @@ namespace Ink_Canvas
                 }
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
                 {
+                    // Ink 模式下 InkCanvas 内建采集笔画（TouchDownPointsList[stylusId]=None 标记归属 InkCanvas），
+                    // 实时笔锋模式走手动采集，两者必须同步。
                     inkCanvas.EditingMode = ShouldUseRealtimeVelocityBrushTip()
                         ? InkCanvasEditingMode.None
                         : InkCanvasEditingMode.Ink;
