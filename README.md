@@ -151,8 +151,8 @@ GPLv3
 
 <a href="https://www.star-history.com/?repos=InkCanvasForClass%2Fcommunity&type=timeline&logscale=&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=InkCanvasForClass/community&type=timeline&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=InkCanvasForClass/community&type=timeline&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=InkCanvasForClass/community&type=timeline&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=InkCanvasForClass/community&type=timeline&theme=dark&logscale&legend=top-left&sealed_token=SnZc9WAG-aq5QD6TOSMy6YaCsT1iHHoBEcYjsrbRDjfsVwry1b_A8gwl8LcW8ykN4B5_mjq8snr-_x63pDQ1UzGGXkOdJATbwyoisUdWODvzjrIrfvqEBA" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=InkCanvasForClass/community&type=timeline&logscale&legend=top-left&sealed_token=SnZc9WAG-aq5QD6TOSMy6YaCsT1iHHoBEcYjsrbRDjfsVwry1b_A8gwl8LcW8ykN4B5_mjq8snr-_x63pDQ1UzGGXkOdJATbwyoisUdWODvzjrIrfvqEBA" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=InkCanvasForClass/community&type=timeline&logscale&legend=top-left&sealed_token=SnZc9WAG-aq5QD6TOSMy6YaCsT1iHHoBEcYjsrbRDjfsVwry1b_A8gwl8LcW8ykN4B5_mjq8snr-_x63pDQ1UzGGXkOdJATbwyoisUdWODvzjrIrfvqEBA" />
  </picture>
 </a>
