@@ -83,7 +83,7 @@
 
                 <!-- 颜色选择 -->
                 <Border x:Name="ColorBtn" Style="{StaticResource MiniToolBtn}" Width="28"
-                        MouseLeftButtonUp="ColorBtn_Click"
+                        MouseLeftButtonDown="ColorBtn_MouseLeftButtonDown"
                         ToolTip="Color">
                     <Ellipse x:Name="ColorIndicator" Width="14" Height="14"
                              Fill="White" Stroke="{DynamicResource IconForeground}" StrokeThickness="1"/>
@@ -115,6 +115,34 @@
                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" FontSize="14"
                                  Foreground="{DynamicResource IconForeground}"/>
                 </Border>
+
+                <!-- 分隔线 -->
+                <Border Width="1" Height="16" Background="{DynamicResource FloatingBarBorderBrush}" Margin="3,0" VerticalAlignment="Center"/>
+
+                <!-- 笔粗细预设：三个点（小/中/大），Tag 为实际 DrawingAttributes.Width -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="2,0">
+                    <Button x:Name="PenWidthBtnSmall" Tag="2.5"
+                            Click="PenWidthPreset_Click"
+                            Background="Transparent" BorderThickness="0"
+                            Padding="2" Margin="0,0,2,0" Cursor="Hand"
+                            ToolTip="细">
+                        <Ellipse Width="4" Height="4" Fill="{DynamicResource IconForeground}"/>
+                    </Button>
+                    <Button x:Name="PenWidthBtnMid" Tag="5"
+                            Click="PenWidthPreset_Click"
+                            Background="Transparent" BorderThickness="0"
+                            Padding="2" Margin="0,0,2,0" Cursor="Hand"
+                            ToolTip="中">
+                        <Ellipse Width="7" Height="7" Fill="{DynamicResource IconForeground}"/>
+                    </Button>
+                    <Button x:Name="PenWidthBtnLarge" Tag="10"
+                            Click="PenWidthPreset_Click"
+                            Background="Transparent" BorderThickness="0"
+                            Padding="2" Cursor="Hand"
+                            ToolTip="粗">
+                        <Ellipse Width="10" Height="10" Fill="{DynamicResource IconForeground}"/>
+                    </Button>
+                </StackPanel>
 
                 <!-- 分隔线 -->
                 <Border Width="1" Height="16" Background="{DynamicResource FloatingBarBorderBrush}" Margin="3,0" VerticalAlignment="Center"/>
@@ -163,10 +191,11 @@
             </StackPanel>
         </Border>
 
-        <!-- 调色盘 Popup -->
+        <!-- 调色盘 Popup：StaysOpen=True，由 code-behind 自己管理关闭（点 Swatch / 外部 / 其他工具栏按钮时显式关） -->
         <Popup x:Name="ColorPalettePopup" PlacementTarget="{Binding ElementName=ColorBtn}"
-               Placement="Top" StaysOpen="False" AllowsTransparency="True"
-               HorizontalOffset="-30" VerticalOffset="-4">
+               Placement="Top" StaysOpen="True" AllowsTransparency="True"
+               HorizontalOffset="-30" VerticalOffset="-4"
+               Closed="ColorPalettePopup_Closed">
             <Border Background="{DynamicResource FloatingBarBackgroundBrush}"
                     BorderBrush="{DynamicResource FloatingBarBorderBrush}"
                     BorderThickness="1" CornerRadius="6" Padding="6,4">

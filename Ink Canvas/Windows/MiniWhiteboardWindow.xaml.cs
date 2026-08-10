@@ -1,6 +1,7 @@
 using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
@@ -348,6 +349,9 @@ namespace Ink_Canvas
             MiniInkCanvas.DefaultDrawingAttributes.Width = settings.PenWidth;
             MiniInkCanvas.DefaultDrawingAttributes.Height = settings.PenWidth;
 
+            // 同步三个粗细预设按钮的选中高亮（不需重建按钮，只更新视觉）
+            UpdatePenWidthPresetHighlight(settings.PenWidth);
+
             UpdateColorIndicator();
         }
 
@@ -365,10 +369,18 @@ namespace Ink_Canvas
 
         #region Color Palette
 
-        private void ColorBtn_Click(object sender, MouseButtonEventArgs e)
+        private void ColorBtn_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            // 拦截 ColorBtn 自己的 MouseLeftButtonDown 事件：
+            // 1. e.Handled = true 避免 WPF Popup 的 Outside-MouseDown 自动关掉 Popup 导致的「关-再开」循环
+            // 2. StaysOpen=True 后我们自己管理关闭，第二次点 ColorBtn 也能干净地切换 IsOpen
             e.Handled = true;
             ColorPalettePopup.IsOpen = !ColorPalettePopup.IsOpen;
+        }
+
+        private void ColorPalettePopup_Closed(object sender, EventArgs e)
+        {
+            // Popup 关闭时清掉任何高亮态（目前没有视觉态，但留作未来扩展）
         }
 
         private void ColorSwatch_Click(object sender, MouseButtonEventArgs e)
@@ -390,6 +402,51 @@ namespace Ink_Canvas
 
                 ColorPalettePopup.IsOpen = false;
                 e.Handled = true;
+            }
+        }
+
+        #endregion
+
+        #region Pen Width Preset Buttons (in-window)
+
+        // Tag 值与 DrawingAttributes.Width 一致：2.5 / 5 / 10
+        private void PenWidthPreset_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button { Tag: string tag } &&
+                double.TryParse(tag, NumberStyles.Float, CultureInfo.InvariantCulture, out var width))
+            {
+                ApplyPenWidthPreset(width);
+            }
+        }
+
+        private void ApplyPenWidthPreset(double width)
+        {
+            MiniInkCanvas.DefaultDrawingAttributes.Width = width;
+            MiniInkCanvas.DefaultDrawingAttributes.Height = width;
+
+            var settings = MainWindow.Settings.MiniWhiteboard ??= new MiniWhiteboardSettings();
+            settings.PenWidth = width;
+
+            UpdatePenWidthPresetHighlight(width);
+        }
+
+        private void UpdatePenWidthPresetHighlight(double width)
+        {
+            // 让点高亮显示（背景变色），未点保持透明
+            var presets = new[] { PenWidthBtnSmall, PenWidthBtnMid, PenWidthBtnLarge };
+            foreach (var btn in presets)
+            {
+                if (btn == null) continue;
+                if (btn.Tag is string s &&
+                    double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out var v) &&
+                    Math.Abs(v - width) < 0.01)
+                {
+                    btn.Background = new SolidColorBrush(Color.FromArgb(0x55, 0x88, 0x88, 0x88));
+                }
+                else
+                {
+                    btn.Background = Brushes.Transparent;
+                }
             }
         }
 
