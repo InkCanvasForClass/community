@@ -2752,9 +2752,7 @@ namespace Ink_Canvas
         private void ViewboxFloatingBarMarginAnimationCore(int MarginFromEdge,
             bool PosXCaculatedWithTaskbarHeight = false, bool animate = false)
         {
-            if (!Topmost)
-                MarginFromEdge = -60;
-            else
+            if (Topmost)
             {
                 ViewboxFloatingBar.Visibility = Visibility.Visible;
                 ViewboxFloatingBar.UpdateLayout();
@@ -2786,6 +2784,10 @@ namespace Ink_Canvas
                 screenHeight = screen.Bounds.Height / dpiScaleY;
                 toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
             }
+
+            // 非置顶时使用 rcWork 获取的任务栏高度，确保浮动栏完全隐藏到屏幕底部以下
+            if (!Topmost)
+                MarginFromEdge = -60 - (int)Math.Round(toolbarHeight);
 
             double baseWidth = ViewboxFloatingBar.ActualWidth;
 
@@ -2872,7 +2874,7 @@ namespace Ink_Canvas
                 }
             }
 
-            if (MarginFromEdge != -60)
+            if (MarginFromEdge > -60)
             {
                 if (!IsVerticalToolbar && QuickColorPalette?.Visibility == Visibility.Visible)
                 {

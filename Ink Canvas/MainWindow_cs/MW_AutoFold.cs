@@ -144,7 +144,12 @@ namespace Ink_Canvas
                 LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
                 RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
                 GridForFloatingBarDraging.Visibility = Visibility.Collapsed;
-                ViewboxFloatingBarMarginAnimation(-60);
+                // 使用 rcWork 获取任务栏高度，确保浮动栏完全隐藏到屏幕底部以下
+                double dpiScaleYForFold = 1;
+                var srcForFold = PresentationSource.FromVisual(this);
+                if (srcForFold != null) dpiScaleYForFold = srcForFold.CompositionTarget.TransformToDevice.M22;
+                double taskbarHeightForFold = ForegroundWindowInfo.GetTaskbarHeight(GetFloatingBarTargetScreen(), dpiScaleYForFold);
+                ViewboxFloatingBarMarginAnimation(-60 - (int)Math.Round(taskbarHeightForFold));
                 HideSubPanels("cursor");
                 SidePannelMarginAnimation(-10);
             });
