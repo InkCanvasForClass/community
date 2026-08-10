@@ -10,6 +10,8 @@ namespace Ink_Canvas.Windows.FeedbackPages
     /// </summary>
     public partial class FeedbackPage3 : UserControl
     {
+        public event EventHandler<RoutedEventArgs> BtnOpenFeishuFormClick;
+        public event EventHandler<RoutedEventArgs> CardCopyFeishuUrlClick;
         public event EventHandler<RoutedEventArgs> BtnOpenGitHubIssueClick;
         public event EventHandler<RoutedEventArgs> CardCopyIssueUrlClick;
         public event EventHandler<RoutedEventArgs> BtnCopyMarkdownClick;
@@ -22,6 +24,8 @@ namespace Ink_Canvas.Windows.FeedbackPages
         public FeedbackPage3()
         {
             InitializeComponent();
+            BtnOpenFeishuForm.Click += (s, e) => BtnOpenFeishuFormClick?.Invoke(this, e);
+            CardCopyFeishuUrl.Click += (s, e) => CardCopyFeishuUrlClick?.Invoke(this, e);
             BtnOpenGitHubIssue.Click += (s, e) => BtnOpenGitHubIssueClick?.Invoke(this, e);
             CardCopyIssueUrl.Click += (s, e) => CardCopyIssueUrlClick?.Invoke(this, e);
             BtnCopyMarkdown.Click += (s, e) => BtnCopyMarkdownClick?.Invoke(this, e);

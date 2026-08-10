@@ -3,6 +3,7 @@ using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using OSVersionExtension;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -35,6 +36,8 @@ namespace Ink_Canvas.Windows.FeedbackPages
             _page2 = new FeedbackPage2();
             _page3 = new FeedbackPage3();
 
+            _page3.BtnOpenFeishuFormClick += BtnOpenFeishuForm_Click;
+            _page3.CardCopyFeishuUrlClick += CardCopyFeishuUrl_Click;
             _page3.BtnOpenGitHubIssueClick += BtnOpenGitHubIssue_Click;
             _page3.CardCopyIssueUrlClick += CardCopyIssueUrl_Click;
             _page3.BtnCopyMarkdownClick += BtnCopyMarkdown_Click;
@@ -373,6 +376,71 @@ namespace Ink_Canvas.Windows.FeedbackPages
             }
 
             return (versionInfo, systemInfo, extraInfo);
+        }
+
+        /// <summary>
+        /// 构建飞书表单反馈的 URL（包含预填充字段）。
+        /// </summary>
+        private string BuildFeishuFormUrl()
+        {
+            var (versionInfo, systemInfo, extraInfo) = BuildFeedbackInfo();
+
+            string baseUrl = "https://inkcanvasforclass.feishu.cn/share/base/form/shrcnTufO72M20lU1sjQWcpv29e";
+            var queryParams = new List<string>
+            {
+                $"prefill_{Uri.EscapeDataString("反馈类型 | Feedback type")}={Uri.EscapeDataString("Bug 报告 (反馈软件缺陷或异常) | Bug Report (Report a bug to help us improve)")}"
+            };
+
+            if (!string.IsNullOrEmpty(versionInfo))
+            {
+                queryParams.Add($"prefill_{Uri.EscapeDataString("软件版本 | App Version")}={Uri.EscapeDataString(versionInfo)}");
+            }
+
+            if (!string.IsNullOrEmpty(systemInfo))
+            {
+                queryParams.Add($"prefill_{Uri.EscapeDataString("操作系统版本 | OS Version")}={Uri.EscapeDataString(systemInfo)}");
+            }
+
+            if (!string.IsNullOrEmpty(extraInfo))
+            {
+                queryParams.Add($"prefill_{Uri.EscapeDataString("其他补充信息 | Additional Info")}={Uri.EscapeDataString(extraInfo)}");
+            }
+
+            return $"{baseUrl}?{string.Join("&", queryParams)}";
+        }
+
+        private void BtnOpenFeishuForm_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string url = BuildFeishuFormUrl();
+
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
+
+                Close();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"打开飞书反馈链接失败: {ex.Message}");
+            }
+        }
+
+        private void CardCopyFeishuUrl_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string url = BuildFeishuFormUrl();
+                Clipboard.SetText(url);
+                _page3.CardCopyFeishuUrl.Header = FeedbackStrings.Page3_Copied;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"复制飞书反馈链接失败: {ex.Message}");
+            }
         }
 
         /// <summary>

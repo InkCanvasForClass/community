@@ -15,6 +15,30 @@
             <TextBlock FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10"
                        Text="{x:Static props:FeedbackStrings.Page3Title}"/>
 
+            <!-- 飞书反馈 -->
+            <ui:SettingsExpander x:Name="ExpanderFeishuFeedback"
+                             Header="{x:Static props:FeedbackStrings.Page3_Feishu}"
+                             Description="{x:Static props:FeedbackStrings.Page3_FeishuDesc}">
+                <ui:SettingsExpander.HeaderIcon>
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Feedback}"/>
+                </ui:SettingsExpander.HeaderIcon>
+                <Button x:Name="BtnOpenFeishuForm"
+                        Content="{x:Static props:FeedbackStrings.Page3_OpenFeishu}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.AccentButtonStyleKey}}"/>
+                    </Button.Style>
+                </Button>
+                <ui:SettingsExpander.Items>
+                    <ui:SettingsCard x:Name="CardCopyFeishuUrl"
+                                     Header="{x:Static props:FeedbackStrings.Page3_CopyFeishuUrl}"
+                                     IsClickEnabled="True">
+                        <ui:SettingsCard.ActionIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Copy}"/>
+                        </ui:SettingsCard.ActionIcon>
+                    </ui:SettingsCard>
+                </ui:SettingsExpander.Items>
+            </ui:SettingsExpander>
+
             <!-- Pastebin 上传：POST 脱敏 JSON 到 pastebin 端 -->
             <ui:SettingsExpander x:Name="ExpanderPastebin"
                              Header="{x:Static props:FeedbackStrings.Page3_PastebinUpload}"
