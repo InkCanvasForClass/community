@@ -222,7 +222,11 @@ Continue?</value>
     <value>External DLL authorization</value>
   </data>
   <data name="Plugin_ExternalDllAuthorizationMessage" xml:space="preserve">
-    <value>Plugin "{0}" (author: {1}) requests loading external assembly "{2}". A DLL can execute arbitrary code; only allow it if you trust this plugin. Authorize loading?</value>
+    <value>Plugin "{0}" (author: {1}) requests loading external DLLs:
+{2}
+
+Once allowed, this plugin's other external DLLs will not be asked again. A DLL can execute arbitrary code; allow it only if you trust this plugin.
+Authorize?</value>
   </data>
   <data name="Market_SecurityWarning" xml:space="preserve">
     <value>This plugin comes from an unknown source. Continuing may be risky. Please confirm you trust the source.</value>
