@@ -222,7 +222,11 @@
     <value>外部 DLL 授权</value>
   </data>
   <data name="Plugin_ExternalDllAuthorizationMessage" xml:space="preserve">
-    <value>插件“{0}”（作者：{1}）请求加载外部程序集“{2}”。DLL 可执行任意代码，仅在你信任该插件时允许加载。是否授权？</value>
+    <value>插件「{0}」（作者：{1}）要求載入外部 DLL：
+{2}
+
+允許後，這個插件的其它外部 DLL 不會再逐個詢問。DLL 可以執行任意程式碼，只有在你信任這個插件時才允許。
+是否授權？</value>
   </data>
   <data name="Market_SecurityWarning" xml:space="preserve">
     <value>这个插件来历不明，装上去可能翻车。请确认你信任这个来源。</value>

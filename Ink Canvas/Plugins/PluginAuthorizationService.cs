@@ -10,19 +10,24 @@ using System.Windows;
 namespace Ink_Canvas.Plugins
 {
     /// <summary>
-    /// 管理插件加载外部程序集的用户授权。授权绑定插件 ID、程序集路径和 SHA-256。
+    /// 管理插件加载外部程序集的用户授权。
     /// <para>
+    /// 授权以「插件」为单位持久化：用户对某插件允许一次后，该插件的所有外部 DLL
+    /// （含后续新增）在后续加载中均不再询问，直到手动删除
+    /// <c>Configs/plugin_authorizations.json</c> 重置。
     /// 为避免同一插件的多个外部依赖在 ALC 递归解析期间连续弹出多个对话框
     /// （以及并发解析时重复弹窗导致 UI 渲染错乱），本实现：
     /// 1. 串行化所有授权请求（<see cref="_authorizationGate"/>）；
-    /// 2. 同一插件在一次加载会话内的首次决定（允许/拒绝）会被复用到该插件其余 DLL，
-    ///    仅当用户选择「允许」时才把每个 DLL 的路径 + SHA-256 持久化；
+    /// 2. 同一插件在一次加载会话内的首次决定（允许/拒绝）会被复用到该插件其余 DLL；
     /// 3. 所有 MessageBox 调用强制切换到 UI 线程，避免在后台线程创建窗口。
     /// </para>
     /// </summary>
     internal sealed class PluginAuthorizationService
     {
         private readonly string _filePath;
+        // 插件级授权集合：授权一次后，该插件的全部外部 DLL 后续加载不再询问。
+        private readonly HashSet<string> _authorizedPlugins = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        // 逐文件记录（旧格式/审计痕迹）：key = pluginId|fullPath，value = SHA-256。
         private readonly Dictionary<string, string> _authorizations = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         // 串行化授权请求，确保同一时刻只有一个对话框。
@@ -35,6 +40,16 @@ namespace Ink_Canvas.Plugins
         private readonly Dictionary<string, HashSet<string>> _sessionPendingFiles = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
         private int _sessionDepth;
 
+        /// <summary>
+        /// 持久化结构 v2：插件级授权集合 + 逐文件审计记录。
+        /// </summary>
+        private sealed class AuthorizationStore
+        {
+            public int Version { get; set; } = 2;
+            public HashSet<string> Plugins { get; set; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            public Dictionary<string, string> Files { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        }
+
         public PluginAuthorizationService(string basePath)
         {
             _filePath = Path.Combine(basePath, "Configs", "plugin_authorizations.json");
@@ -43,6 +58,14 @@ namespace Ink_Canvas.Plugins
 
         public bool IsAuthorized(PluginInfo plugin, string assemblyPath)
         {
+            if (plugin == null || string.IsNullOrWhiteSpace(plugin.Id)) return false;
+
+            // 插件级授权优先：信任该插件后，其全部外部 DLL 均视为已授权。
+            lock (_authorizations)
+            {
+                if (_authorizedPlugins.Contains(plugin.Id)) return true;
+            }
+
             var key = CreateKey(plugin, assemblyPath);
             if (key == null || !File.Exists(assemblyPath)) return false;
             var hash = ComputeHash(assemblyPath);
@@ -105,7 +128,7 @@ namespace Ink_Canvas.Plugins
                     {
                         if (!sessionAllowed) return false;
                         // 用户已对该插件本次会话授权，持久化当前 DLL 的授权记录。
-                        PersistAuthorization(plugin, assemblyPath);
+                        GrantAuthorization(plugin, assemblyPath);
                         return true;
                     }
 
@@ -131,7 +154,7 @@ namespace Ink_Canvas.Plugins
                         if (_sessionDecisions.TryGetValue(pluginId, out var sessionAllowed))
                         {
                             if (!sessionAllowed) return false;
-                            PersistAuthorization(plugin, assemblyPath);
+                            GrantAuthorization(plugin, assemblyPath);
                             return true;
                         }
                     }
@@ -151,7 +174,7 @@ namespace Ink_Canvas.Plugins
 
                 if (!allowed) return false;
 
-                PersistAuthorization(plugin, assemblyPath);
+                GrantAuthorization(plugin, assemblyPath);
                 return true;
             }
             finally
@@ -226,14 +249,18 @@ namespace Ink_Canvas.Plugins
             return result == MessageBoxResult.Yes;
         }
 
-        private void PersistAuthorization(PluginInfo plugin, string assemblyPath)
+        private void GrantAuthorization(PluginInfo plugin, string assemblyPath)
         {
-            var key = CreateKey(plugin, assemblyPath);
-            if (key == null) return;
-            var hash = ComputeHash(assemblyPath);
+            if (plugin == null || string.IsNullOrWhiteSpace(plugin.Id)) return;
             lock (_authorizations)
             {
-                _authorizations[key] = hash;
+                _authorizedPlugins.Add(plugin.Id);
+                // 保留逐文件记录作为审计痕迹，便于排查已授权范围。
+                var key = CreateKey(plugin, assemblyPath);
+                if (key != null && File.Exists(assemblyPath))
+                {
+                    _authorizations[key] = ComputeHash(assemblyPath);
+                }
             }
             Save();
         }
@@ -249,9 +276,45 @@ namespace Ink_Canvas.Plugins
             try
             {
                 if (!File.Exists(_filePath)) return;
-                var values = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(_filePath));
-                if (values == null) return;
-                foreach (var value in values) _authorizations[value.Key] = value.Value;
+                var raw = File.ReadAllText(_filePath);
+
+                // 新版版本化格式（v2）：插件级授权 + 逐文件审计。
+                try
+                {
+                    var store = JsonSerializer.Deserialize<AuthorizationStore>(raw);
+                    if (store != null && store.Version >= 2)
+                    {
+                        lock (_authorizations)
+                        {
+                            foreach (var pair in store.Files) _authorizations[pair.Key] = pair.Value;
+                            foreach (var id in store.Plugins)
+                            {
+                                if (!string.IsNullOrWhiteSpace(id)) _authorizedPlugins.Add(id);
+                            }
+                        }
+                        return;
+                    }
+                }
+                catch { }
+
+                // 旧平铺格式（key = pluginId|fullPath，value = SHA-256）。
+                // 迁移：插件只要曾授权过任意一个 DLL，即升级为插件级信任，
+                // 保证「授权一次」后不再逐 DLL 询问。
+                var legacy = JsonSerializer.Deserialize<Dictionary<string, string>>(raw);
+                if (legacy == null) return;
+                lock (_authorizations)
+                {
+                    foreach (var pair in legacy)
+                    {
+                        _authorizations[pair.Key] = pair.Value;
+                        var separator = pair.Key.IndexOf('|');
+                        if (separator > 0)
+                        {
+                            var pluginId = pair.Key.Substring(0, separator);
+                            if (!string.IsNullOrWhiteSpace(pluginId)) _authorizedPlugins.Add(pluginId);
+                        }
+                    }
+                }
             }
             catch { }
         }
@@ -262,7 +325,13 @@ namespace Ink_Canvas.Plugins
             {
                 var directory = Path.GetDirectoryName(_filePath);
                 if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);
-                File.WriteAllText(_filePath, JsonSerializer.Serialize(_authorizations,
+                var store = new AuthorizationStore();
+                lock (_authorizations)
+                {
+                    store.Plugins = new HashSet<string>(_authorizedPlugins, StringComparer.OrdinalIgnoreCase);
+                    store.Files = new Dictionary<string, string>(_authorizations, StringComparer.OrdinalIgnoreCase);
+                }
+                File.WriteAllText(_filePath, JsonSerializer.Serialize(store,
                     new JsonSerializerOptions { WriteIndented = true }));
             }
             catch { }
