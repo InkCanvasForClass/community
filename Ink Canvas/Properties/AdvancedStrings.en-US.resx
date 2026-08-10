@@ -150,18 +150,6 @@
   <data name="Debug_RealtimeInkLog_Desc" xml:space="preserve">
     <value>When enabled, records realtime-ink input/redraw/FrameWait/slow events. Updates Configs/RealtimeInkDebugLive.json after each stroke and writes realtimeInk* fields into Configs/PerformanceHistory.json; finalizes on toggle-off or exit. Off by default; enable only while diagnosing realtime ink (TouchVelocity / realtime brush tip). Independent of the Performance page toggle. Built-in InkCanvas ink is not counted.</value>
   </data>
-  <data name="Debug_RealtimeInkFpsOverlay_Header" xml:space="preserve">
-    <value>Show realtime ink FPS / submit-latency overlay</value>
-  </data>
-  <data name="Debug_RealtimeInkFpsOverlay_Desc" xml:space="preserve">
-    <value>When enabled, shows a small overlay in the top-right corner with live render FPS, submit latency, and frame age (ms). Submit latency measures the time from the latest input sample participating in a frame to the render thread finishing that frame's submission bookkeeping; frame age measures the time from the earliest newly-added input sample in that frame to the same submission point. Neither is true end-to-end display latency. Only the realtime ink path (TouchVelocity / realtime brush tip) is sampled; built-in InkCanvas ink is excluded. Off by default.</value>
-  </data>
-  <data name="RealtimeInkFpsOverlay_IdleText" xml:space="preserve">
-    <value>Realtime ink (idle)</value>
-  </data>
-  <data name="RealtimeInkFpsOverlay_ActiveText" xml:space="preserve">
-    <value>Realtime ink (n={0})</value>
-  </data>
   <data name="Debug_IconSettings" xml:space="preserve">
     <value>Icon Settings</value>
   </data>

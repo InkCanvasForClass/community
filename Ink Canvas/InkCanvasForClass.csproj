@@ -485,6 +485,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="AssemblyInfo.cs" />
+    <!-- 新墨迹系统（原生 WM_POINTER + DirectComposition 湿墨管线）已于 1.7.19.9 回退，
+         代码文件保留原地供后续复用/测试（InkCanvas.NativeInk.Tests 通过 Link 单独编译），
+         此处仅从主项目排除编译。 -->
+    <Compile Remove="Ink\Native\**" />
+    <Compile Remove="MainWindow_cs\MW_NativeWetInk.cs" />
+    <!-- 实时墨迹 FPS/延迟 HUD 与新墨迹渲染配套，数据源（WetInkWindowHost）已排除，一并保留文件、排除编译。 -->
+    <Compile Remove="Helpers\InkPerformanceMonitor.cs" />
+    <Compile Remove="Helpers\RealtimeInkFpsOverlay.cs" />
+    <Compile Remove="MainWindow_cs\MW_RealtimeInkFpsOverlay.cs" />
   </ItemGroup>
 
   <ItemGroup>

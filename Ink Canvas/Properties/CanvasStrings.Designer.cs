@@ -88,18 +88,6 @@ namespace Ink_Canvas.Properties
 
         public static string Canvas_EnablePressureTouchHint => ResourceManager.GetString(nameof(Canvas_EnablePressureTouchHint), _resourceCulture);
 
-        public static string Canvas_EnableNativeInkPrediction => ResourceManager.GetString(nameof(Canvas_EnableNativeInkPrediction), _resourceCulture);
-
-        public static string Canvas_EnableNativeInkPredictionHint => ResourceManager.GetString(nameof(Canvas_EnableNativeInkPredictionHint), _resourceCulture);
-
-        public static string Canvas_UseLegacyWetInk => ResourceManager.GetString(nameof(Canvas_UseLegacyWetInk), _resourceCulture);
-
-        public static string Canvas_UseLegacyWetInkHint => ResourceManager.GetString(nameof(Canvas_UseLegacyWetInkHint), _resourceCulture);
-
-        public static string Canvas_UseLegacyWetInkRestartNotice => ResourceManager.GetString(nameof(Canvas_UseLegacyWetInkRestartNotice), _resourceCulture);
-
-        public static string Canvas_WetInkRendererFailed => ResourceManager.GetString(nameof(Canvas_WetInkRendererFailed), _resourceCulture);
-
         public static string Canvas_EraserSize => ResourceManager.GetString(nameof(Canvas_EraserSize), _resourceCulture);
 
         public static string Canvas_EraserSize_Large => ResourceManager.GetString(nameof(Canvas_EraserSize_Large), _resourceCulture);

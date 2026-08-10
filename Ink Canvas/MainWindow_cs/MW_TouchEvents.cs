@@ -1,6 +1,5 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
-using Ink_Canvas.Ink.Native;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -39,7 +38,7 @@ namespace Ink_Canvas
         /// <summary>
         /// 上次的InkCanvas编辑模式
         /// </summary>
-        private InkCanvasEditingMode lastInkCanvasEditingMode = InkCanvasEditingMode.None;
+        private InkCanvasEditingMode lastInkCanvasEditingMode = InkCanvasEditingMode.Ink;
         /// <summary>
         /// 上次触摸按下的时间
         /// </summary>
@@ -51,12 +50,9 @@ namespace Ink_Canvas
         private bool isMultiTouchTimerActive;
         private bool isPalmEraserActive;
         private bool palmEraserWasEnabledBeforeMultiTouch;
-        private InkCanvasEditingMode palmEraserPreviousEditingMode = InkCanvasEditingMode.None;
+        private InkCanvasEditingMode palmEraserPreviousEditingMode = InkCanvasEditingMode.Ink;
         private readonly Dictionary<int, RealtimeBrushTipState> _realtimeBrushTipStates = new Dictionary<int, RealtimeBrushTipState>();
         private readonly Guid RealtimeVelocityBrushTipAppliedGuid = new Guid("74E57D95-945F-4A8C-B52A-7D3EF2D4FD5B");
-        // 原生湿墨管线提交的 Stroke 标记，与 WpfStrokeCommitter.NativeWetInkCommittedGuid 同值。
-        // 干墨后处理据此跳过触摸压感模拟/速度笔锋等会重写 PressureFactor 的步骤，避免抬笔闪变。
-        private readonly Guid NativeWetInkCommittedGuid = new Guid("B1F0A3C7-2D64-49B0-9E1A-7A4F8C2D5E60");
         internal const int MouseRealtimeStrokeId = -100001;
         private readonly HashSet<int> _activeRealtimeTouchStrokeIds = new HashSet<int>();
         private readonly HashSet<int> _activeRealtimeStylusStrokeIds = new HashSet<int>();
@@ -178,14 +174,6 @@ namespace Ink_Canvas
             return stylusDevice?.TabletDevice?.Type == TabletDeviceType.Touch;
         }
 
-        private bool ShouldBypassLegacyStylusInkForSelection()
-        {
-            return Settings?.Canvas?.UseLegacyWetInk == true
-                   && GridInkCanvasSelectionCover?.Visibility == Visibility.Visible
-                   && inkCanvas != null
-                   && inkCanvas.GetSelectedStrokes().Count > 0;
-        }
-
         private void BeginTouchInkInput()
         {
             if (!_hasStoredInkCanvasManipulationStateForTouchInk)
@@ -237,38 +225,29 @@ namespace Ink_Canvas
         {
             if (inkCanvas == null) return;
 
-            if (Settings?.Canvas?.UseLegacyWetInk == true)
-            {
-                if (isInMultiTouchMode)
-                {
-                    inkCanvas.StylusDown += MainWindow_StylusDown;
-                    inkCanvas.StylusMove += MainWindow_StylusMove;
-                    inkCanvas.StylusUp += MainWindow_StylusUp;
-                    inkCanvas.TouchDown += MainWindow_TouchDown;
-                    inkCanvas.TouchDown -= Main_Grid_TouchDown;
-                }
-                else
-                {
-                    inkCanvas.StylusDown -= MainWindow_StylusDown;
-                    inkCanvas.StylusMove -= MainWindow_StylusMove;
-                    inkCanvas.StylusUp -= MainWindow_StylusUp;
-                    inkCanvas.TouchDown -= MainWindow_TouchDown;
-                    inkCanvas.TouchDown += Main_Grid_TouchDown;
-                    if (ResolveLogicalInkTool() == LogicalInkTool.Pen
-                        && inkCanvas.EditingMode == InkCanvasEditingMode.None)
-                    {
-                        inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                    }
-                }
-                return;
-            }
-
-            // Freehand is owned by the native WM_POINTER + DirectComposition pipeline.
-            // Never re-subscribe WPF Stylus freehand handlers or re-enable EditingMode.Ink.
             inkCanvas.StylusDown -= MainWindow_StylusDown;
             inkCanvas.StylusMove -= MainWindow_StylusMove;
             inkCanvas.StylusUp -= MainWindow_StylusUp;
-            EnsureNativePenPhysicalEditingMode();
+
+            inkCanvas.StylusDown += MainWindow_StylusDown;
+            inkCanvas.StylusMove += MainWindow_StylusMove;
+            inkCanvas.StylusUp += MainWindow_StylusUp;
+
+            // 手动 StrokeVisual 采集（实时笔锋 / 多指书写）要求 InkCanvas 自身不收集笔画；
+            // 其余情况保持 Ink，由 InkCanvas 内建采集，两者不可同时生效。
+            var isManualStylusCollection = ShouldUseRealtimeVelocityBrushTip() || isInMultiTouchMode;
+            if (isManualStylusCollection
+                && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
+                && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
+                && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
+            {
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+            }
+            else if (!isManualStylusCollection
+                     && inkCanvas.EditingMode == InkCanvasEditingMode.None)
+            {
+                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+            }
         }
 
         private void InitializeRealtimeBrushTipState(int stylusId, StylusDownEventArgs e)
@@ -1088,13 +1067,7 @@ namespace Ink_Canvas
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
                     && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
                 {
-                    if (Settings?.Canvas?.UseLegacyWetInk == true)
-                        inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                    else
-                    {
-                        inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                        EnsureNativePenPhysicalEditingMode();
-                    }
+                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                 }
                 // 保存非笔画元素（如图片）
                 var preservedElements = PreserveNonStrokeElements();
@@ -1112,21 +1085,15 @@ namespace Ink_Canvas
             else
             {
 
-                if (Settings?.Canvas?.UseLegacyWetInk == true)
-                {
-                    inkCanvas.StylusDown += MainWindow_StylusDown;
-                    inkCanvas.StylusMove += MainWindow_StylusMove;
-                    inkCanvas.StylusUp += MainWindow_StylusUp;
-                }
+                inkCanvas.StylusDown += MainWindow_StylusDown;
+                inkCanvas.StylusMove += MainWindow_StylusMove;
+                inkCanvas.StylusUp += MainWindow_StylusUp;
                 inkCanvas.TouchDown += MainWindow_TouchDown;
                 inkCanvas.TouchDown -= Main_Grid_TouchDown;
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
                     && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
                 {
-                    if (Settings?.Canvas?.UseLegacyWetInk == true)
-                        inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                    else
-                        inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
                 }
                 // 保存非笔画元素（如图片）
                 var preservedElements = PreserveNonStrokeElements();
@@ -1224,12 +1191,6 @@ namespace Ink_Canvas
             if (IsTouchStylusDevice(e.StylusDevice))
                 return;
 
-            if (ShouldBypassLegacyStylusInkForSelection())
-            {
-                e.Handled = true;
-                return;
-            }
-
             // 检查手写笔点击是否发生在浮动栏区域，如果是则允许事件传播到浮动栏按钮
             var stylusPoint = e.GetPosition(this);
             var floatingBarBounds = ViewboxFloatingBar.TransformToAncestor(this).TransformBounds(
@@ -1272,6 +1233,8 @@ namespace Ink_Canvas
                 }
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
                 {
+                    // Ink 模式下 InkCanvas 内建采集笔画（TouchDownPointsList[stylusId]=None 标记归属 InkCanvas），
+                    // 实时笔锋模式走手动采集，两者必须同步。
                     inkCanvas.EditingMode = ShouldUseRealtimeVelocityBrushTip()
                         ? InkCanvasEditingMode.None
                         : InkCanvasEditingMode.Ink;
@@ -1363,12 +1326,6 @@ namespace Ink_Canvas
         {
             if (IsTouchStylusDevice(e.StylusDevice))
                 return;
-
-            if (ShouldBypassLegacyStylusInkForSelection())
-            {
-                e.Handled = true;
-                return;
-            }
 
             var stylusId = e.StylusDevice.Id;
             if (_activeRealtimeStylusStrokeIds.Contains(stylusId))
@@ -1542,12 +1499,6 @@ namespace Ink_Canvas
                 if (IsTouchStylusDevice(e.StylusDevice))
                     return;
 
-                if (ShouldBypassLegacyStylusInkForSelection())
-                {
-                    e.Handled = true;
-                    return;
-                }
-
                 if (drawingShapeMode != 0)
                 {
                     if (isTouchDown)
@@ -1625,13 +1576,6 @@ namespace Ink_Canvas
         private StrokeVisual GetStrokeVisual(int id)
         {
             if (StrokeVisualList.TryGetValue(id, out var visual)) return visual;
-
-            // Legacy DrawingVisual wet-ink preview is retired for the native pipeline
-            // (native WM_POINTER + DirectComposition renders wet ink itself).
-            // 旧墨迹系统（UseLegacyWetInk）的多指书写/触摸速度笔锋仍依赖 StrokeVisual
-            // 预览绘制，必须恢复创建逻辑，否则这些触摸路径完全无法出墨。
-            if (Settings?.Canvas?.UseLegacyWetInk != true)
-                return null;
 
             var strokeVisual = new StrokeVisual(inkCanvas.DefaultDrawingAttributes.Clone());
             StrokeVisualList[id] = strokeVisual;
@@ -1720,17 +1664,8 @@ namespace Ink_Canvas
             if (lineLength < 2) return;
 
             // Commit current stroke by briefly switching mode
-            if (Settings?.Canvas?.UseLegacyWetInk == true)
-            {
-                inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-            }
-            else
-            {
-                inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                EnsureNativePenPhysicalEditingMode();
-            }
+            inkCanvas.EditingMode = InkCanvasEditingMode.None;
+            inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
 
             // The just-committed stroke should now be last in inkCanvas.Strokes
             if (inkCanvas.Strokes.Count == 0) return;
@@ -1906,13 +1841,7 @@ namespace Ink_Canvas
             if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
                 && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
             {
-                if (Settings?.Canvas?.UseLegacyWetInk == true)
-                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                else
-                {
-                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                    EnsureNativePenPhysicalEditingMode();
-                }
+                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
             }
         }
 
@@ -1973,10 +1902,8 @@ namespace Ink_Canvas
 
                 if (isSecondFinger)
                 {
-                    // 第二指落下 = 双指手势开始：取消第一指正在画的墨迹，防止残留
-                    CancelAllNativeWetInkSessions("video-presenter-pinch");
-                    // 临时切 None，让 WPF 内置 Ink（legacy 湿墨 EditingMode==Ink）不再把第二指当新墨迹；
-                    // 仅在第一次进双指时保存用户模式，PreviewTouchUp 在所有手指抬起后恢复
+                    // 第二指落下 = 双指手势开始：临时切 None，让 WPF 内置 Ink（legacy 湿墨 EditingMode==Ink）
+                    // 不再把第二指当新墨迹；仅在第一次进双指时保存用户模式，PreviewTouchUp 在所有手指抬起后恢复
                     if (inkCanvas != null
                         && inkCanvas.EditingMode != InkCanvasEditingMode.None
                         && !_boothTouchSavedInkEditingMode.HasValue)
@@ -2062,7 +1989,6 @@ namespace Ink_Canvas
             // 插件手势（OnCanvasGestureStarting/Delta）收不到增量事件。
             if (_pluginCanvasGestureHandler != null && dec.Count > 1)
             {
-                CancelAllNativeWetInkSessions("plugin-canvas-gesture");
                 AbortAllActiveTouchInputs();
                 if (inkCanvas != null && inkCanvas.EditingMode != InkCanvasEditingMode.None)
                 {
@@ -2553,20 +2479,12 @@ namespace Ink_Canvas
                         && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
                         && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
                     {
-                        if (Settings?.Canvas?.UseLegacyWetInk == true)
-                        {
-                            // 旧墨迹系统：触摸/手写由 WPF 内置 Ink 收集，操作结束后必须恢复
-                            // EditingMode.Ink。否则下一笔落下时 EditingMode 仍为 None，
-                            // InkPresenter 在落笔时刻不会启动笔画（第一笔正常、后续均无法书写）。
-                            // 恢复 b9b5d38 之前的既有行为。
-                            inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                            lastInkCanvasEditingMode = InkCanvasEditingMode.Ink;
-                        }
-                        else
-                        {
-                            inkCanvas.EditingMode = InkCanvasEditingMode.None; EnsureNativePenPhysicalEditingMode();
-                            lastInkCanvasEditingMode = InkCanvasEditingMode.None;
-                        }
+                        // 旧墨迹系统：触摸/手写由 WPF 内置 Ink 收集，操作结束后必须恢复
+                        // EditingMode.Ink。否则下一笔落下时 EditingMode 仍为 None，
+                        // InkPresenter 在落笔时刻不会启动笔画（第一笔正常、后续均无法书写）。
+                        // 恢复 b9b5d38 之前的既有行为。
+                        inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                        lastInkCanvasEditingMode = InkCanvasEditingMode.Ink;
                     }
                 }
             }

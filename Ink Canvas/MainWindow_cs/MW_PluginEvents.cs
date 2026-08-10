@@ -31,10 +31,6 @@ namespace Ink_Canvas
                 _currentMode = value;
                 bool isWhiteboardMode = _currentMode == 1;
 
-                // 原生湿墨迹管线的启停由 inkCanvas_EditingModeChanged
-                // (InkCanvasEditingMode.Ink) 统一驱动；这里不再强制按 currentMode
-                // 卸载，避免白板模式下选了笔也被错误拆掉。
-
                 if (wasWhiteboardMode != isWhiteboardMode)
                 {
                     RaisePluginEvent(PluginWhiteboardModeChanged, isWhiteboardMode, nameof(PluginWhiteboardModeChanged));

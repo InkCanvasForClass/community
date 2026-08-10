@@ -1,5 +1,4 @@
 using Ink_Canvas.Helpers;
-using Ink_Canvas.Ink.Native;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -177,17 +176,10 @@ namespace Ink_Canvas
 
             try
             {
-                // 原生湿墨提交的笔画压感是湿墨预览最终值（必含非 0.5 点），压感守卫不能挡它，
-                // 否则新墨迹系统的干墨永远进不了墨迹平滑（性能面板平滑计时全 0）。
-                // 平滑器沿几何方向线性插值压感、不重写压感值；InkStyle 0/1/3 重写也已在
-                // 下方对 isNativeWetInkCommitted 跳过，放行不会造成二次烘焙或烘干闪变。
-                if (!e.Stroke.ContainsPropertyData(NativeWetInkCommittedGuid))
-                {
-                    foreach (var stylusPoint in e.Stroke.StylusPoints)
-                        if ((stylusPoint.PressureFactor > 0.501 || stylusPoint.PressureFactor < 0.5) &&
-                            stylusPoint.PressureFactor != 0)
-                            return e.Stroke;
-                }
+                foreach (var stylusPoint in e.Stroke.StylusPoints)
+                    if ((stylusPoint.PressureFactor > 0.501 || stylusPoint.PressureFactor < 0.5) &&
+                        stylusPoint.PressureFactor != 0)
+                        return e.Stroke;
 
                 try
                 {
@@ -204,12 +196,8 @@ namespace Ink_Canvas
                 }
                 catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
-                // 原生湿墨提交：湿预览压感已是最终值。此处再跑 InkStyle 0/1 会重写
-                // PressureFactor（尤其是 InkStyle 0 的收笔变细），抬笔瞬间干墨变样 → 烘干闪变。
-                // 「屏蔽压感」已在收笔主路径将点集归一成 0.5；此处若再跑 InkStyle 0/1 同样造成假压感。
-                var isNativeWetInkCommitted =
-                    e.Stroke.ContainsPropertyData(NativeWetInkCommittedGuid);
-                if (!Settings.Canvas.DisablePressure && !isNativeWetInkCommitted)
+                // 「屏蔽压感」已在收笔主路径将点集归一成 0.5；此处若再跑 InkStyle 0/1 会重写 PressureFactor，造成假压感。
+                if (!Settings.Canvas.DisablePressure)
                 {
                     switch (Settings.Canvas.InkStyle)
                     {
@@ -317,7 +305,7 @@ namespace Ink_Canvas
 
                             if (smoothedStroke != e.Stroke)
                             {
-                                // 补回平滑器未复制的 property data（激光/原生湿墨标记）。
+                                // 补回平滑器未复制的 property data（激光笔迹标记），否则激光笔迹失效。
                                 InkSmoothingManager.CopyPropertyData(e.Stroke, smoothedStroke);
                                 SetNewBackupOfStroke();
                                 // 平滑始终走 TryReplaceLastUserInputHistory（1步撤销），
@@ -411,16 +399,18 @@ namespace Ink_Canvas
                 var startPoint = e.Stroke.StylusPoints.Count > 0 ? e.Stroke.StylusPoints[0].ToPoint() : new Point();
                 var endPoint = e.Stroke.StylusPoints.Count > 0 ? e.Stroke.StylusPoints[e.Stroke.StylusPoints.Count - 1].ToPoint() : new Point();
 
-                // Native freehand keeps physical EditingMode at None; do not re-enable WPF wet ink.
-                EnsureNativePenPhysicalEditingMode();
+                if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink)
+                {
+                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                }
 
                 // 添加到墨迹渐隐管理器
                 if (_inkFadeManager != null)
                 {
                     if (penType == 2
-                        && !e.Stroke.ContainsPropertyData(WpfStrokeCommitter.LaserRenderModeGuid))
+                        && !e.Stroke.ContainsPropertyData(InkFadeManager.LaserRenderModeGuid))
                     {
-                        e.Stroke.AddPropertyData(WpfStrokeCommitter.LaserRenderModeGuid, true);
+                        e.Stroke.AddPropertyData(InkFadeManager.LaserRenderModeGuid, true);
                     }
 
                     long strokeDurationMs = 0;
@@ -440,7 +430,10 @@ namespace Ink_Canvas
                 {
                     try
                     {
-                        EnsureNativePenPhysicalEditingMode();
+                        if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink)
+                        {
+                            inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                        }
 
                         if (inkCanvas.Strokes.Contains(e.Stroke))
                         {
@@ -467,19 +460,7 @@ namespace Ink_Canvas
                 inkCanvas.Opacity = 1;
                 var touchPressureSimulationApplied = false;
 
-                // 原生湿墨管线提交的 Stroke：其 StylusPoint 压感已与实时预览一致。
-                // 跳过所有会重写 PressureFactor 的干墨后处理（屏蔽压感归一化、触摸压感
-                // 模拟、速度笔锋），否则抬笔瞬间线条粗细会跳变，产生“烘干闪变”。
-                var isNativeWetInkCommitted =
-                    e.Stroke != null
-                    && e.Stroke.ContainsPropertyData(NativeWetInkCommittedGuid);
-
-                if (isNativeWetInkCommitted)
-                {
-                    // 原生提交：保持 PressureFactor 不变。仍允许后续拉直/形状识别等不依赖
-                    // 压感粗细的处理。
-                }
-                else if (Settings.Canvas.DisablePressure)
+                if (Settings.Canvas.DisablePressure)
                 {
                     var uniformPoints = new StylusPointCollection();
                     foreach (StylusPoint point in e.Stroke.StylusPoints)
@@ -1088,7 +1069,7 @@ namespace Ink_Canvas
                     {
                         Debug.WriteLine("异步替换原始笔画为平滑后的笔画");
                         // 平滑器创建的新 Stroke 只克隆 DrawingAttributes，需补回 property data
-                        //（LaserRenderModeGuid / NativeWetInkCommittedGuid 等，否则激光笔迹失效）。
+                        //（LaserRenderModeGuid 等，否则激光笔迹失效）。
                         InkSmoothingManager.CopyPropertyData(original, smoothed);
                         SetNewBackupOfStroke();
                         if (Settings.Canvas.MergeInkSmoothingWithUndo)
