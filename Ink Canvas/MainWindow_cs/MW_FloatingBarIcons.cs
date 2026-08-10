@@ -1182,8 +1182,6 @@ namespace Ink_Canvas
                 UpdateIndexInfoDisplay();
 
                 // 进入白板模式时显式切换到笔模式：SwitchBackground 不会更新 _currentToolMode，
-                // 导致原生湿墨迹管线 ResolveLogicalInkTool() 返回 Cursor 而非 Pen，
-                // 笔输入被当光标处理（route=PassThrough），UI 显示笔但无法绘制。
                 // 这里需要复用 PenIcon_Click 的完整切笔逻辑，但应避免被误判为"再次点击笔"而弹出笔设置面板。
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink
                     && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
@@ -1765,7 +1763,7 @@ namespace Ink_Canvas
 
                     if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
                     {
-                        EnsureNativePenPhysicalEditingMode();
+                        inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                     }
 
                     ResetTouchStates();
@@ -1813,7 +1811,7 @@ namespace Ink_Canvas
 
                 if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
                 {
-                    EnsureNativePenPhysicalEditingMode();
+                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                 }
 
                 ResetTouchStates();
@@ -6130,9 +6128,6 @@ namespace Ink_Canvas
         private void UpdateCurrentToolMode(string mode)
         {
             _currentToolMode = NormalizeToolModeForFreeze(mode);
-            // 兜底：改变 _currentToolMode 之后若 EditingMode 之前恰好切到 None
-            // 不会触发 EditingModeChanged，这里手动同步一次原生湿墨迹管线状态。
-            SyncNativeWetInkPipelineWithLogicalTool();
             UpdateBoardRoamingButtonState();
 
             // Issue #285 更小批注栏：根据当前工具模式刷新迷你栏显示状态

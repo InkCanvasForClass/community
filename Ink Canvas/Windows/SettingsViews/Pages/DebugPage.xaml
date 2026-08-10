@@ -59,16 +59,6 @@ mc:Ignorable="d"
                     IsOn="False"
                     Toggled="ToggleSwitchRealtimeInkDebugLog_Toggled"/>
 
-                <controls:LabeledSettingsCard x:Name="ToggleSwitchRealtimeInkFpsOverlay"
-                    Header="{x:Static props:AdvancedStrings.Debug_RealtimeInkFpsOverlay_Header}"
-                    Description="{x:Static props:AdvancedStrings.Debug_RealtimeInkFpsOverlay_Desc}"
-                    IsOn="False"
-                    Toggled="ToggleSwitchRealtimeInkFpsOverlay_Toggled">
-                    <controls:LabeledSettingsCard.HeaderIcon>
-                        <ui:FontIcon Glyph="&#xE9D2;"/>
-                    </controls:LabeledSettingsCard.HeaderIcon>
-                </controls:LabeledSettingsCard>
-
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                     Text="{x:Static props:AdvancedStrings.Debug_CrashTest_Section}" />
 

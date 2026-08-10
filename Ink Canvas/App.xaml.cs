@@ -180,14 +180,6 @@ namespace Ink_Canvas
                             var name = ExtractDispatcherOpName(e.Operation);
                             var elapsed = sw.Elapsed.TotalMilliseconds;
                             Debug.WriteLine($"Dispatcher Exec:{elapsed:F1}ms {name}");
-                            try
-                            {
-                                Ink_Canvas.Ink.Native.NativeInkPerfProbe.RecordSlowDispatcherOp(name, elapsed);
-                            }
-                            catch
-                            {
-                                // probe failure never breaks the dispatcher
-                            }
                         }
                     };
                 };

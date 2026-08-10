@@ -761,8 +761,6 @@ namespace Ink_Canvas
             inkCanvas.MouseRightButtonUp += InkCanvas_MouseRightButtonUp;
             // 注册橡皮擦操作结束事件
             inkCanvas.StylusUp += inkCanvas_StylusUp;
-            // 原生湿墨迹管线仅在 Ink 模式下挂载；以编辑模式为触发锚点。
-            inkCanvas.EditingModeChanged += inkCanvas_EditingModeChanged;
 
             // 初始化第一页Canvas
             var firstCanvas = new System.Windows.Controls.Canvas();
@@ -1333,15 +1331,26 @@ namespace Ink_Canvas
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
+        /// <summary>
+        /// 是否处于批注模式（供 Automation 规则/触发器判断）。
+        /// 新墨迹系统撤回后，批注 = InkCanvas 物理编辑模式为 Ink。
+        /// </summary>
+        internal bool IsAnnotationModeActive()
+        {
+            try
+            {
+                return inkCanvas?.EditingMode == InkCanvasEditingMode.Ink;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private void inkCanvas_EditingModeChanged(object sender, RoutedEventArgs e)
         {
             var inkCanvas1 = sender as InkCanvas;
             if (inkCanvas1 == null) return;
-
-            // 原生湿墨迹管线仅在 Ink 批注工具下挂载。
-            // 请求 Ink 时物理模式被映射为 None，所以靠物理 EditingMode 区分不出；
-            // 必须按逻辑工具（_currentToolMode 解析）判断。
-            SyncNativeWetInkPipelineWithLogicalTool();
 
             NotifyPluginPenModeChanged(inkCanvas1.EditingMode);
 
@@ -1526,17 +1535,6 @@ namespace Ink_Canvas
 
             isLoaded = true;
 
-            // 启动实时墨迹 FPS / 提交延迟 HUD（若用户在 Debug 页开启了开关）。
-            if (Settings?.Advanced != null && Settings.Advanced.IsRealtimeInkFpsOverlayEnabled)
-            {
-                ShowRealtimeInkFpsOverlay();
-            }
-
-            // 启动时按当前逻辑工具同步原生湿墨迹管线；
-            // 默认 _currentToolMode = "cursor"，不会启动管线，
-            // 仅当用户实际选了 Ink 笔时才会挂载。
-            SyncNativeWetInkPipelineWithLogicalTool();
-
             // 应用颜色主题，这将考虑自定义背景色
             CheckColorTheme(true);
             ApplyFloatingBarTheme();
@@ -1655,7 +1653,6 @@ namespace Ink_Canvas
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e)
         {
-            UpdateNativeWetInkTarget();
             if (!Settings.Advanced.IsEnableResolutionChangeDetection) return;
             ShowNotification(string.Format(Properties.MainWindowStrings.Main_DisplayChanged, Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height));
             HandleFloatingBarRecovery();
@@ -1663,8 +1660,6 @@ namespace Ink_Canvas
 
         private void MainWindow_OnDpiChanged(object sender, DpiChangedEventArgs e)
         {
-            UpdateNativeWetInkDpi();
-
             if (e.OldDpi.DpiScaleX != e.NewDpi.DpiScaleX && e.OldDpi.DpiScaleY != e.NewDpi.DpiScaleY && Settings.Advanced.IsEnableDPIChangeDetection)
             {
                 ShowNotification(string.Format(Properties.MainWindowStrings.Main_DPIChanged, e.OldDpi.DpiScaleX, e.OldDpi.DpiScaleY, e.NewDpi.DpiScaleX, e.NewDpi.DpiScaleY));
@@ -1867,8 +1862,6 @@ namespace Ink_Canvas
 
         private void MainWindow_OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
-            UpdateNativeWetInkTarget();
-
             if (Settings.Advanced.IsEnableForceFullScreen)
             {
                 if (isLoaded) ShowNotification(
@@ -1888,7 +1881,7 @@ namespace Ink_Canvas
         /// <param name="e">关闭事件的参数（未使用）。</param>
         private void Window_Closed(object sender, EventArgs e)
         {
-            ShutdownNativeWetInkPipeline();
+            RealtimeInkFrameScheduler.Clear();
             SystemEvents.DisplaySettingsChanged -= SystemEventsOnDisplaySettingsChanged;
             // 玻璃浮动栏刻意不设 Owner，必须显式关闭，否则残留窗口会挡住进程退出
             HideLiquidGlassBar();
@@ -2597,10 +2590,6 @@ namespace Ink_Canvas
                     InitializePopupManager();
                     PerformanceMonitorHelper.StartIfEnabled();
                     RealtimeInkPerformanceMonitor.StartIfEnabled();
-                    if (isLoaded && Settings?.Advanced?.IsRealtimeInkFpsOverlayEnabled == true)
-                    {
-                        ShowRealtimeInkFpsOverlay();
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -3313,25 +3302,10 @@ namespace Ink_Canvas
                     DisableEraserOverlay();
                 }
 
-                // Logical Pen freehand is owned by the native wet-ink pipeline.
-                // Keep physical EditingMode at None so WPF never auto-collects wet strokes.
-                // 但仅当原生湿墨迹管线可用时才映射 Ink→None；管线不可用时回退到 WPF 内置 Ink 收集，
-                // 否则 EditingMode=None 会导致既无原生笔输入也无 WPF 墨迹，UI 显示笔但无法绘制。
-                var physicalMode = newMode;
-                if (physicalMode == InkCanvasEditingMode.Ink && IsNativeWetInkPipelineAvailable)
-                    physicalMode = InkCanvasEditingMode.None;
-
                 // 执行模式切换
-                inkCanvas.EditingMode = physicalMode;
-                EnsureNativePenPhysicalEditingMode();
+                inkCanvas.EditingMode = newMode;
 
-                // 不在此手动启停原生湿墨迹管线：请求 Ink 时物理模式被映射为 None，
-                // 此刻读物理 EditingMode 无法区分 Ink 笔与非 Ink 工具。
-                // 真正的启停由 inkCanvas_EditingModeChanged（同步逻辑工具）驱动，
-                // 而 UpdateCurrentToolMode 被 PenIcon_Click 等路径在之后调用，
-                // 那里会通过同样的 SyncNativeWetInkPipelineWithLogicalTool 兜底。
-
-                // Hotkeys key off the requested logical mode. Physical None is used for native Pen freehand.
+                // 根据模式确定是否为鼠标模式（无工具模式）
                 bool isMouseMode = newMode == InkCanvasEditingMode.None;
 
                 // 更新快捷键状态

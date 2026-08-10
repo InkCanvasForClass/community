@@ -386,10 +386,6 @@ namespace Ink_Canvas
         public bool EnablePressureTouchMode { get; set; } // 是否启用压感触屏模式
         [JsonProperty("disablePressure")]
         public bool DisablePressure { get; set; } // 是否屏蔽压感
-        [JsonProperty("enableNativeInkPrediction")]
-        public bool EnableNativeInkPrediction { get; set; } = OSVersion.GetOperatingSystem() >= OSVersionExtension.OperatingSystem.Windows10; // 原生湿墨预测笔尾，用于实时预览，并烘干进最终干墨（Win10 及以上默认开启，依赖 WinRT 手写栈）
-        [JsonProperty("useLegacyWetInk")]
-        public bool UseLegacyWetInk { get; set; } = OSVersion.GetOperatingSystem() < OSVersionExtension.OperatingSystem.Windows10; // 使用旧版 WPF 湿墨迹输入系统（下次启动生效，Win10 及以上默认关闭以启用新的湿墨管线）
         [JsonProperty("autoStraightenLine")]
         public bool AutoStraightenLine { get; set; } = true; // 是否启用直线自动拉直
         [JsonProperty("autoStraightenLineThreshold")]
@@ -1403,12 +1399,6 @@ namespace Ink_Canvas
         /// </summary>
         [JsonProperty("isRealtimeInkDebugLogEnabled")]
         public bool IsRealtimeInkDebugLogEnabled { get; set; } = false;
-
-        /// <summary>
-        /// 在屏幕角落显示实时墨迹 FPS 与提交延迟 HUD（毫秒）。默认关闭，独立于详细日志开关。
-        /// </summary>
-        [JsonProperty("isRealtimeInkFpsOverlayEnabled")]
-        public bool IsRealtimeInkFpsOverlayEnabled { get; set; } = false;
 
         [JsonProperty("isEnableFullScreenHelper")]
         public bool IsEnableFullScreenHelper { get; set; }

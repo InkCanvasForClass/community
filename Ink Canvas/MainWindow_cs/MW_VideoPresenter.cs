@@ -2174,7 +2174,6 @@ namespace Ink_Canvas
             }
 
             EnsureRotationBaseline();
-            CancelAllNativeWetInkSessions("video-presenter-rotate");
             VideoPresenterFullCanvasRotation.Angle = targetAngleDegrees;
             RotateBoothStrokesFromBaseline(targetAngleDegrees);
 
