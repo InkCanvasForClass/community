@@ -62,7 +62,9 @@ namespace Ink_Canvas.Windows.FeedbackPages
             try
             {
                 var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
-                _appVersion = $"v{assemblyVersion}";
+                _appVersion = string.IsNullOrEmpty(App.AppVersion)
+                    ? $"v{assemblyVersion}"
+                    : App.AppVersion;
             }
             catch (Exception ex)
             {
