@@ -2520,21 +2520,23 @@ namespace Ink_Canvas
         private void Main_Grid_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
         {
             // 视频展台特殊模式：
-            //   - 单指（逻辑笔模式）：在预览画面上绘制墨迹批注，走正常墨迹绘制路径，不拦截
+            //   - 单指（笔模式）：在预览画面上绘制墨迹批注，走正常墨迹绘制路径，不拦截
             //   - 双指（任意模式）：用于拖动/缩放预览画面（画面与墨迹同步变换）
-            //   - 单指（选择/橡皮擦等非笔模式）：用于拖动预览画面
-            // 新湿墨系统下，逻辑笔模式的物理 EditingMode 可能是 None，因此不能只靠 EditingMode==Ink 判断。
-            // 必须按逻辑工具类型区分，否则会把单指书写误转发为展台手势。
+            //   - 单指（选择/橡皮擦模式）：用于拖动预览画面
+            // 双指时必须拦截并转发到 VideoPresenterSpecialMode_ManipulationDelta，
+            // 否则笔模式（legacy WPF 湿墨 EditingMode==Ink）会落入下方通用双指路径，
+            // 只缩放墨迹不缩放预览画面（画面不同步），并留下第一指的残留墨迹。
+            // VideoPresenterSpecialModeContainer 在 Z 顺序最底层，触摸事件被 inkCanvas 拦截，
+            // 根本到不了 Container 上的处理器，必须在此转发。
             if (_isVideoPresenterSpecialMode && inkCanvas != null && drawingShapeMode == 0)
             {
                 int manipulatorCount = e.Manipulators?.Count() ?? 0;
-                bool logicalPenSingleFinger = ResolveLogicalInkTool() == LogicalInkTool.Pen && manipulatorCount < 2;
                 bool penInkSingleFinger = inkCanvas.EditingMode == InkCanvasEditingMode.Ink && manipulatorCount < 2;
                 // 橡皮擦单指：让 InkCanvas 正常执行擦除，不转发到预览拖动/缩放
                 bool eraserSingleFinger = (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
                     || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
                     && manipulatorCount < 2;
-                if (!(logicalPenSingleFinger || penInkSingleFinger || eraserSingleFinger))
+                if (!penInkSingleFinger && !eraserSingleFinger)
                 {
                     VideoPresenterSpecialMode_ManipulationDelta(sender, e);
                     return;
