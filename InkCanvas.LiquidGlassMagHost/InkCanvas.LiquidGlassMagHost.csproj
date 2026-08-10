@@ -3,6 +3,12 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
+    <!-- 声明支持的全部 RID：CI include_runtime 分支用 dotnet publish -r win-x64/win-x86
+         （带 no-restore）时，RID 会以全局属性传给 ProjectReference 的 MagHost。
+         不声明 RuntimeIdentifiers，restore 就不会为 MagHost 生成对应的 RID 目标，
+         构建时会报 NETSDK1047（assets 缺 net6.0-windows.../win-x64）。
+         与主项目 InkCanvasForClass.csproj 的声明保持一致；默认构建仍为 portable，无 RID 选中。 -->
+    <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <RootNamespace>InkCanvas.LiquidGlassMagHost</RootNamespace>
