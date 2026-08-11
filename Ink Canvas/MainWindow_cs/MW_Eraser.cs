@@ -610,6 +610,16 @@ namespace Ink_Canvas
         /// </summary>
         public void EnableEraserOverlay()
         {
+            // An inserted SVG is selected immediately after insertion. Its image-style
+            // selection overlay is a sibling above EraserOverlayCanvas and would otherwise
+            // consume the pointer before the area eraser can receive it.
+            if (currentSelectedElement != null)
+            {
+                currentSelectedElement.ReleaseMouseCapture();
+                UnselectElement(currentSelectedElement);
+                currentSelectedElement = null;
+            }
+
             if (eraserOverlayCanvas != null)
             {
                 eraserOverlayCanvas.IsHitTestVisible = true;
