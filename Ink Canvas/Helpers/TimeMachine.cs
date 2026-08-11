@@ -173,6 +173,9 @@ namespace Ink_Canvas.Helpers
         public bool StrokeHasBeenCleared;
         public StrokeCollection CurrentStroke;
         public StrokeCollection ReplacedStroke;
+        public UIElement EditedElement;
+        public string PreviousElementState;
+        public string CurrentElementState;
         //这里说一下 Tuple的 Value1 是初始值 ; Value 2 是改变值
         public Dictionary<Stroke, Tuple<StylusPointCollection, StylusPointCollection>> StylusPointDictionary;
         public Dictionary<Stroke, Tuple<DrawingAttributes, DrawingAttributes>> DrawingAttributes;
@@ -194,6 +197,15 @@ namespace Ink_Canvas.Helpers
             CommitType = commitType;
             DrawingAttributes = drawingAttributes;
         }
+        public TimeMachineHistory(UIElement element, string previousState, string currentState)
+        {
+            CommitType = TimeMachineHistoryType.ElementEdit;
+            EditedElement = element;
+            PreviousElementState = previousState;
+            CurrentElementState = currentState;
+            StrokeHasBeenCleared = false;
+        }
+
         public TimeMachineHistory(StrokeCollection currentStroke, TimeMachineHistoryType commitType, bool strokeHasBeenCleared, StrokeCollection replacedStroke)
         {
             CommitType = commitType;
@@ -210,6 +222,7 @@ namespace Ink_Canvas.Helpers
 
     public enum TimeMachineHistoryType
     {
+        ElementEdit,
         UserInput,
         ShapeRecognition,
         Clear,
@@ -248,6 +261,18 @@ namespace Ink_Canvas.Helpers
         /// 把历史中保存的墨迹按 matrix 同步变换（撤销/重做时能回到正确几何），
         /// 跳过仍在画布上的笔迹（它们由 inkCanvas.Strokes.Transform 直接处理）。
         /// </summary>
+        public void CommitElementEditHistory(UIElement element, string previousState, string currentState)
+        {
+            if (element == null || string.IsNullOrWhiteSpace(previousState) || string.IsNullOrWhiteSpace(currentState)
+                || string.Equals(previousState, currentState, StringComparison.Ordinal))
+                return;
+            if (_currentIndex + 1 < _currentStrokeHistory.Count)
+                _currentStrokeHistory.RemoveRange(_currentIndex + 1, (_currentStrokeHistory.Count - 1) - _currentIndex);
+            _currentStrokeHistory.Add(new TimeMachineHistory(element, previousState, currentState));
+            _currentIndex = _currentStrokeHistory.Count - 1;
+            NotifyUndoRedoState();
+        }
+
         public void TransformStrokesInHistory(Matrix matrix, StrokeCollection canvasStrokes)
         {
             if (canvasStrokes == null) return;

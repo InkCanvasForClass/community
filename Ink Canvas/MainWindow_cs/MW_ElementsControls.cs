@@ -212,7 +212,12 @@ namespace Ink_Canvas
                     e.Handled = false;
                     return;
                 }
-                if (inkCanvas.EditingMode != InkCanvasEditingMode.Select)
+                // Mouse mode normally lets the board receive clicks without entering the
+                // selection workflow. An already-selected inserted SVG is the exception: its
+                // group remains draggable without switching to the select tool first.
+                var canDragSelectedInMouseMode = inkCanvas.EditingMode == InkCanvasEditingMode.None
+                    && ReferenceEquals(currentSelectedElement, element);
+                if (inkCanvas.EditingMode != InkCanvasEditingMode.Select && !canDragSelectedInMouseMode)
                 {
                     e.Handled = false;
                     return;
@@ -300,7 +305,11 @@ namespace Ink_Canvas
         /// </remarks>
         private void Element_MouseMove(object sender, MouseEventArgs e)
         {
-            if (sender is FrameworkElement element && isDragging && element.IsMouseCaptured)
+            if (sender is FrameworkElement element
+                && (inkCanvas.EditingMode == InkCanvasEditingMode.Select
+                    || (inkCanvas.EditingMode == InkCanvasEditingMode.None
+                        && ReferenceEquals(currentSelectedElement, element)))
+                && isDragging && element.IsMouseCaptured)
             {
                 var currentPoint = e.GetPosition(inkCanvas);
 
@@ -346,6 +355,12 @@ namespace Ink_Canvas
 
 
                 // 使用滚轮缩放的核心机制
+                // 浣跨敤婊氳疆缂╂斁鐨勬牳蹇冩満鍒?
+                if (inkCanvas.EditingMode != InkCanvasEditingMode.Select)
+                {
+                    e.Handled = false;
+                    return;
+                }
                 ApplyWheelScaleTransform(element, e);
 
                 // 如果是图片元素，更新工具栏位置
@@ -1148,7 +1163,10 @@ namespace Ink_Canvas
         /// <summary>与图片选择工具栏、缩放控制点联动的画布位图类元素（普通图片、多页 PDF 嵌入或媒体控件）。</summary>
         private static bool IsBitmapLikeCanvasElement(FrameworkElement fe)
         {
-            return fe is Image || fe is PdfEmbeddedView || fe is CanvasMediaControl;
+            return fe is Image || fe is PdfEmbeddedView || fe is CanvasMediaControl
+                || string.Equals(fe?.GetType().FullName, "Ink_Canvas.SecAgent.Plugin.SvgCanvasElement", StringComparison.Ordinal)
+                || string.Equals(fe?.GetType().FullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneElement", StringComparison.Ordinal)
+                || string.Equals(fe?.GetType().FullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneGroup", StringComparison.Ordinal);
         }
 
         private static bool IsCanvasMediaElement(FrameworkElement fe)
@@ -2987,6 +3005,11 @@ namespace Ink_Canvas
             if (element is PdfEmbeddedView)
                 lockAspect = true;
 
+            // Editable SVG scenes are inserted as a fixed-aspect composition. Their text,
+            // paths and table geometry must scale uniformly when a corner handle is dragged.
+            if (IsSecAgentSceneCanvasElement(element))
+                lockAspect = true;
+
             if (!(element.RenderTransform is TransformGroup transformGroup)) return;
             var scaleTransform = transformGroup.Children.OfType<ScaleTransform>().FirstOrDefault();
             var translateTransform = transformGroup.Children.OfType<TranslateTransform>().FirstOrDefault();
@@ -3082,6 +3105,14 @@ namespace Ink_Canvas
             UpdateImageResizeHandlesPosition(default);
             if (BorderImageSelectionControl?.Visibility == Visibility.Visible)
                 UpdateImageSelectionToolbarPosition(element);
+        }
+
+        private static bool IsSecAgentSceneCanvasElement(FrameworkElement element)
+        {
+            var fullName = element?.GetType().FullName;
+            return string.Equals(fullName, "Ink_Canvas.SecAgent.Plugin.SvgCanvasElement", StringComparison.Ordinal)
+                || string.Equals(fullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneElement", StringComparison.Ordinal)
+                || string.Equals(fullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneGroup", StringComparison.Ordinal);
         }
 
         // Canvas position of element-local point (lx, ly) under the given transform.

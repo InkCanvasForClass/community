@@ -175,12 +175,25 @@ namespace Ink_Canvas
             _currentCommitType = CommitReason.ClearingCanvas;
             if (isErasedByCode) _currentCommitType = CommitReason.CodeInput;
 
+            // SecAgent editable scenes are WPF children, not InkCanvas.Strokes. Remove them
+            // here as well so page switches, loads and code/UI clears cannot leave them behind.
+            ClearSecAgentSceneElements();
             inkCanvas.Strokes.Clear();
             // 只隐藏 hint，不暂停（ClearStrokes 在切换页面、保存加载时都会被调用，
             // 设置 _edgeExpandHintSuspended 会导致后续书写永远无法触发提示）。
             HideEdgeExpandHint();
 
             _currentCommitType = CommitReason.UserInput;
+        }
+
+        /// <summary>
+        /// Clears ink strokes and SecAgent editable scene elements for automation and toolbar
+        /// integrations. The old automation action only cleared InkCanvas.Strokes, which left
+        /// SVG scene groups visible because they are WPF children.
+        /// </summary>
+        internal void ClearCanvasContentFromAutomation()
+        {
+            ClearStrokes(true);
         }
 
         private static HashSet<UIElement> CollectRemovedElementsFromHistory(TimeMachineHistory[] history)

@@ -13,7 +13,7 @@ namespace Ink_Canvas.WorkflowAutomation.ActionHandlers
                 {
                     var mw = Application.Current.MainWindow as MainWindow;
                     if (mw?.inkCanvas == null) return;
-                    mw.inkCanvas.Strokes.Clear();
+                    mw.ClearCanvasContentFromAutomation();
                 });
             });
         }

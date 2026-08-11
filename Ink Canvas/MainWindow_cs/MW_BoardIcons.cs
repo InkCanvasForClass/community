@@ -389,6 +389,10 @@ namespace Ink_Canvas
             PenIcon_Click(null, null);
             SymbolIconDelete_MouseUp(null, null);
 
+            // Editable SecAgent rows/lines are children rather than InkCanvas strokes.
+            // Remove them explicitly before the image-preservation branch.
+            ClearSecAgentSceneElements();
+
             // 根据设置决定是否清空图片
             if (Settings.Canvas.ClearCanvasAlsoClearImages)
             {
@@ -406,6 +410,7 @@ namespace Ink_Canvas
                 inkCanvas.Children.Clear();
                 // 恢复非笔画元素
                 RestoreNonStrokeElements(preservedElements);
+                ClearSecAgentSceneElements();
                 Debug.WriteLine($"BoardSymbolIconDelete: inkCanvas.Children.Count after restore: {inkCanvas.Children.Count}");
             }
         }
@@ -429,6 +434,9 @@ namespace Ink_Canvas
             SymbolIconDelete_MouseUp(null, null);
             if (!Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
 
+            // Editable SecAgent rows/lines are children rather than InkCanvas strokes.
+            ClearSecAgentSceneElements();
+
             // 根据设置决定是否清空图片
             if (Settings.Canvas.ClearCanvasAlsoClearImages)
             {
@@ -446,6 +454,7 @@ namespace Ink_Canvas
                 inkCanvas.Children.Clear();
                 // 恢复非笔画元素
                 RestoreNonStrokeElements(preservedElements);
+                ClearSecAgentSceneElements();
                 Debug.WriteLine($"BoardSymbolIconDeleteInkAndHistories: inkCanvas.Children.Count after restore: {inkCanvas.Children.Count}");
             }
         }

@@ -6,9 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -40,6 +42,10 @@ namespace Ink_Canvas
         public string Stretch { get; set; } = "Fill"; // 默认为Fill
         public string MediaKind { get; set; }
         public string MediaDisplayName { get; set; }
+        /// <summary>Type == SvgScene 时，保存一个可编辑 SVG 场景元素的 JSON 描述。</summary>
+        public string SceneElementJson { get; set; }
+        /// <summary>保存 SvgScene 的 WPF 变换矩阵，保留移动、缩放和旋转后的视觉位置。</summary>
+        public string TransformMatrix { get; set; }
         public double? MediaPositionSeconds { get; set; }
         public double? MediaSpeedRatio { get; set; }
         public double? MediaVolume { get; set; }
@@ -128,7 +134,91 @@ namespace Ink_Canvas
                         });
                     }
                 }
+                else if (child is FrameworkElement sceneGroup && string.Equals(sceneGroup.GetType().FullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneGroup", StringComparison.Ordinal))
+                {
+                    var serialized = sceneGroup.GetType().GetProperty("SerializedScene", BindingFlags.Public | BindingFlags.Instance)?.GetValue(sceneGroup) as string;
+                    if (!string.IsNullOrWhiteSpace(serialized))
+                    {
+                        elementInfos.Add(new CanvasElementInfo
+                        {
+                            Type = "SvgSceneGroup",
+                            SceneElementJson = serialized,
+                            Left = InkCanvas.GetLeft(sceneGroup),
+                            Top = InkCanvas.GetTop(sceneGroup),
+                            Width = sceneGroup.Width,
+                            Height = sceneGroup.Height,
+                            TransformMatrix = SerializeElementTransform(sceneGroup),
+                            Stretch = "None"
+                        });
+                    }
+                }
+                else if (child is FrameworkElement sceneElement && string.Equals(sceneElement.GetType().FullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneElement", StringComparison.Ordinal))
+                {
+                    var serialized = sceneElement.GetType().GetProperty("SerializedElement", BindingFlags.Public | BindingFlags.Instance)?.GetValue(sceneElement) as string;
+                    if (!string.IsNullOrWhiteSpace(serialized))
+                    {
+                        elementInfos.Add(new CanvasElementInfo
+                        {
+                            Type = "SvgScene",
+                            SceneElementJson = serialized,
+                            Left = InkCanvas.GetLeft(sceneElement),
+                            Top = InkCanvas.GetTop(sceneElement),
+                            Width = sceneElement.Width,
+                            Height = sceneElement.Height,
+                            TransformMatrix = SerializeElementTransform(sceneElement),
+                            Stretch = "None"
+                        });
+                    }
+                }
             }
+        }
+
+        private void RestoreSecAgentSceneElement(CanvasElementInfo info)
+        {
+            if (info == null || inkCanvas == null || string.IsNullOrWhiteSpace(info.SceneElementJson)) return;
+            try
+            {
+                var typeName = string.Equals(info.Type, "SvgSceneGroup", StringComparison.OrdinalIgnoreCase)
+                    ? "Ink_Canvas.SecAgent.Plugin.SvgSceneGroup"
+                    : "Ink_Canvas.SecAgent.Plugin.SvgSceneElement";
+                var type = AppDomain.CurrentDomain.GetAssemblies()
+                    .Select(assembly => assembly.GetType(typeName, false))
+                    .FirstOrDefault(candidate => candidate != null);
+                var factoryName = string.Equals(info.Type, "SvgSceneGroup", StringComparison.OrdinalIgnoreCase)
+                    ? "FromSerializedScene"
+                    : "FromSerializedElement";
+                var factory = type?.GetMethod(factoryName, BindingFlags.Public | BindingFlags.Static);
+                if (factory?.Invoke(null, new object[] { info.SceneElementJson, 1d }) is not FrameworkElement element) return;
+                element.Name = "svgscene_restore_" + DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
+                InkCanvas.SetLeft(element, double.IsNaN(info.Left) ? 0 : info.Left);
+                InkCanvas.SetTop(element, double.IsNaN(info.Top) ? 0 : info.Top);
+                InitializeElementTransform(element);
+                RestoreElementTransform(element, info.TransformMatrix);
+                inkCanvas.Children.Add(element);
+                BindElementEvents(element);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"恢复可编辑 SVG 场景元素失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        private static string SerializeElementTransform(FrameworkElement element)
+        {
+            var matrix = element?.RenderTransform?.Value ?? Matrix.Identity;
+            return string.Join(",", new[] { matrix.M11, matrix.M12, matrix.M21, matrix.M22, matrix.OffsetX, matrix.OffsetY }
+                .Select(value => value.ToString("R", CultureInfo.InvariantCulture)));
+        }
+
+        private static void RestoreElementTransform(FrameworkElement element, string serializedMatrix)
+        {
+            if (element?.RenderTransform is not TransformGroup group || string.IsNullOrWhiteSpace(serializedMatrix)) return;
+            var values = serializedMatrix.Split(',');
+            if (values.Length != 6) return;
+            var parsed = new double[6];
+            for (var index = 0; index < values.Length; index++)
+                if (!double.TryParse(values[index], NumberStyles.Float, CultureInfo.InvariantCulture, out parsed[index])) return;
+            group.Children.Add(new MatrixTransform(new Matrix(parsed[0], parsed[1], parsed[2], parsed[3], parsed[4], parsed[5])));
         }
 
         private void RestoreMediaFromElementInfo(CanvasElementInfo info)
@@ -1439,6 +1529,11 @@ namespace Ink_Canvas
                         {
                             RestoreMediaFromElementInfo(info);
                         }
+                        else if (string.Equals(info.Type, "SvgScene", StringComparison.OrdinalIgnoreCase)
+                            || string.Equals(info.Type, "SvgSceneGroup", StringComparison.OrdinalIgnoreCase))
+                        {
+                            RestoreSecAgentSceneElement(info);
+                        }
                     }
                 }
             }
@@ -1603,6 +1698,11 @@ namespace Ink_Canvas
                     else if (string.Equals(info.Type, "Media", StringComparison.OrdinalIgnoreCase) && File.Exists(info.SourcePath))
                     {
                         RestoreMediaFromElementInfo(info);
+                    }
+                    else if (string.Equals(info.Type, "SvgScene", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(info.Type, "SvgSceneGroup", StringComparison.OrdinalIgnoreCase))
+                    {
+                        RestoreSecAgentSceneElement(info);
                     }
                 }
             }

@@ -1233,7 +1233,7 @@ namespace Ink_Canvas
                 inkCanvas.Strokes.Remove(inkCanvas.GetSelectedStrokes());
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
             }
-            else if (inkCanvas.Strokes.Count > 0)
+            else if (inkCanvas.Strokes.Count > 0 || HasSecAgentSceneElementsOnCanvas())
             {
                 if (Settings.Automation.IsAutoSaveScreenshotAtClear &&
                     inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
@@ -4573,6 +4573,7 @@ namespace Ink_Canvas
             inkCanvas.Children.Clear();
             // 恢复非笔画元素
             RestoreNonStrokeElements(preservedElements);
+            ClearSecAgentSceneElements();
 
             if (Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
 
