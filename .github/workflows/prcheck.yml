@@ -3,7 +3,7 @@ name: PR Check
 on:
   pull_request:
     types: [opened, synchronize]
-    branches: [main, net8]
+    branches: [net6, net10]
     paths-ignore:
       - "**/*.md"
 
