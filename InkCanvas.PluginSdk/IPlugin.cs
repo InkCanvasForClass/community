@@ -1,8 +1,7 @@
 namespace Ink_Canvas.Plugins
 {
     /// <summary>
-    /// 插件接口。每个插件必须有一个实现此接口的类并用 <see cref="PluginEntranceAttribute"/> 标记；
-    /// 也可从 <see cref="PluginBase"/> 继承以获得默认实现。
+    /// 插件接口。每个插件须有一个实现此接口的类；建议用 <see cref="PluginEntranceAttribute"/> 标记（未标记时宿主自动回退查找 <see cref="PluginBase"/> 子类或任意实现）。
     /// </summary>
     public interface IPlugin
     {

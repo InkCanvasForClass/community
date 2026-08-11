@@ -17,9 +17,9 @@ namespace Ink_Canvas.Plugins
         public string Author { get; set; }
         /// <summary>插件列表排序（数值越小越靠前；实际加载顺序由依赖解析决定）。旧式 DLL 插件从插件实例读取，其余默认 0。</summary>
         public int Order { get; set; }
-        /// <summary>已加载的插件实例；未加载时为 null。</summary>
+        /// <summary>已创建的插件实例；初始化失败时也会保留，是否成功看 <see cref="LoadStatus"/>。</summary>
         public IPlugin Instance { get; set; }
-        /// <summary>插件是否已成功加载。</summary>
+        /// <summary>实例是否已创建（Initialize 前即置 true，不代表初始化成功）。</summary>
         public bool IsLoaded { get; set; }
 
         /// <summary>

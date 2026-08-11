@@ -85,7 +85,7 @@ namespace Ink_Canvas.Plugins
         /// <para>实现可参考 <see cref="PluginSecurityCheck"/>。</para>
         /// </summary>
         /// <param name="packagePath">安装包（.icpx）文件路径。</param>
-        /// <param name="expectedSha256">期望的 SHA256 校验值；包尚未提取时可传 null。</param>
+        /// <param name="expectedSha256">预留参数，当前不参与信任判定（保留兼容）；传 null 即可。</param>
         /// <param name="declaredPluginId">插件声明 ID，用于与官方市场索引比对。</param>
         /// <returns>包含信任级别、权限声明与提示原因的安全评估结果。</returns>
         SecurityVerdict EvaluateTrust(string packagePath, string expectedSha256, string declaredPluginId);
