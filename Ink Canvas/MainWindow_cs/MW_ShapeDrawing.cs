@@ -2646,6 +2646,15 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (e.ChangedButton == MouseButton.Left && inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
+            {
+                BeginSecAgentStrokeErase(e.GetPosition(inkCanvas));
+                if (MoveSecAgentStrokeErase(e.GetPosition(inkCanvas)))
+                {
+                    e.Handled = true;
+                    return;
+                }
+            }
             if (IsBoardRoamingMode && e.ChangedButton == MouseButton.Left)
             {
                 inkCanvas.CaptureMouse();
@@ -2690,6 +2699,13 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_MouseMove(object sender, MouseEventArgs e)
         {
+            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke
+                && e.LeftButton == MouseButtonState.Pressed
+                && MoveSecAgentStrokeErase(e.GetPosition(inkCanvas)))
+            {
+                e.Handled = true;
+                return;
+            }
             // 视频展台特殊模式：鼠标拖动摄像头预览画面
             if (_isBoothMouseDragging)
             {
@@ -2751,6 +2767,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            EndSecAgentStrokeErase();
             // 视频展台特殊模式：结束鼠标拖动
             if (_isBoothMouseDragging)
             {

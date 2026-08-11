@@ -2328,6 +2328,14 @@ namespace Ink_Canvas
         // 鼠标输入
         private void inkCanvas_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (e.ChangedButton == MouseButton.Left && inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
+            {
+                if (BeginSecAgentStrokeErase(e.GetPosition(inkCanvas)))
+                {
+                    e.Handled = true;
+                    return;
+                }
+            }
             // 视频展台特殊模式：非 Ink 模式下，鼠标左键拖动应该移动摄像头预览画面，
             // 而不是触发 InkCanvas 内部框选逻辑。这里拦截事件，启动鼠标拖动。
             if (VideoPresenterSpecialMode_HandleMouseDown(e))
@@ -2349,6 +2357,7 @@ namespace Ink_Canvas
             var hitTest = e.OriginalSource;
             var dependencyObject = hitTest as DependencyObject;
             bool clickedMediaControl = false;
+            bool clickedSecAgentSceneElement = false;
             while (dependencyObject != null)
             {
                 if (dependencyObject is CanvasMediaControl)
@@ -2356,9 +2365,16 @@ namespace Ink_Canvas
                     clickedMediaControl = true;
                     break;
                 }
+                if (string.Equals(dependencyObject.GetType().FullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneElement", StringComparison.Ordinal)
+                    || string.Equals(dependencyObject.GetType().FullName, "Ink_Canvas.SecAgent.Plugin.SvgCanvasElement", StringComparison.Ordinal)
+                    || string.Equals(dependencyObject.GetType().FullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneGroup", StringComparison.Ordinal))
+                {
+                    clickedSecAgentSceneElement = true;
+                    break;
+                }
                 dependencyObject = VisualTreeHelper.GetParent(dependencyObject);
             }
-            if (!(hitTest is Image) && !(hitTest is MediaElement) && !(hitTest is CanvasMediaControl) && !clickedMediaControl)
+            if (!(hitTest is Image) && !(hitTest is MediaElement) && !(hitTest is CanvasMediaControl) && !clickedMediaControl && !clickedSecAgentSceneElement)
             {
                 // 如果当前有选中的元素，取消选中状态
                 if (currentSelectedElement != null)
@@ -2381,6 +2397,14 @@ namespace Ink_Canvas
         // 手写笔输入
         private void inkCanvas_StylusDown(object sender, StylusDownEventArgs e)
         {
+            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
+            {
+                if (BeginSecAgentStrokeErase(e.GetPosition(inkCanvas)))
+                {
+                    e.Handled = true;
+                    return;
+                }
+            }
             _stylusDownTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             if (IsBoardRoamingMode)
@@ -2406,6 +2430,12 @@ namespace Ink_Canvas
 
         private void inkCanvas_StylusMove(object sender, StylusEventArgs e)
         {
+            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke
+                && MoveSecAgentStrokeErase(e.GetPosition(inkCanvas)))
+            {
+                e.Handled = true;
+                return;
+            }
             if (!_isBoardRoamingPointerDown) return;
 
             MoveBoardRoaming(e.GetPosition(inkCanvas));
@@ -2415,6 +2445,7 @@ namespace Ink_Canvas
         // 手写笔抬起事件（用于橡皮擦自动切换）
         private void inkCanvas_StylusUp(object sender, StylusEventArgs e)
         {
+            EndSecAgentStrokeErase();
             if (_isBoardRoamingPointerDown)
             {
                 EndBoardRoaming();
@@ -3297,6 +3328,11 @@ namespace Ink_Canvas
         {
             try
             {
+                if (newMode == InkCanvasEditingMode.EraseByPoint)
+                    isUsingStrokesEraser = false;
+                else if (newMode == InkCanvasEditingMode.EraseByStroke)
+                    isUsingStrokesEraser = true;
+
                 if (IsCurrentPageFrozen && IsFreezeMutatingMode(newMode))
                 {
                     TryBlockFrozenPageMutation("切换到编辑工具");

@@ -1231,7 +1231,7 @@ namespace Ink_Canvas
                 inkCanvas.Strokes.Remove(inkCanvas.GetSelectedStrokes());
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
             }
-            else if (inkCanvas.Strokes.Count > 0)
+            else if (inkCanvas.Strokes.Count > 0 || HasSecAgentSceneElementsOnCanvas())
             {
                 if (Settings.Automation.IsAutoSaveScreenshotAtClear &&
                     inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
@@ -3496,9 +3496,20 @@ namespace Ink_Canvas
                 else CaptureAndEnqueueScreenshotSave(true);
             }
 
+            // 鼠标工具下如果仍有已选中的图片/SVG，不能把整个 InkCanvas 设为不可命中。
+            // 这些元素位于 InkCanvas 的子树中；否则即使元素仍显示、选框仍显示，
+            // 元素本身及其透明外接矩形也都收不到拖动事件。
+            bool keepSelectedCanvasElementInteractive = currentSelectedElement != null
+                && IsBitmapLikeCanvasElement(currentSelectedElement);
+
             if (!IsInPPTPresentationMode)
             {
-                if (Settings.Canvas.HideStrokeWhenSelecting)
+                if (keepSelectedCanvasElementInteractive)
+                {
+                    inkCanvas.Visibility = Visibility.Visible;
+                    inkCanvas.IsHitTestVisible = true;
+                }
+                else if (Settings.Canvas.HideStrokeWhenSelecting)
                 {
                     inkCanvas.Visibility = Visibility.Collapsed;
                 }
@@ -3510,7 +3521,12 @@ namespace Ink_Canvas
             }
             else
             {
-                if (Settings.PowerPointSettings.IsShowStrokeOnSelectInPowerPoint)
+                if (keepSelectedCanvasElementInteractive)
+                {
+                    inkCanvas.Visibility = Visibility.Visible;
+                    inkCanvas.IsHitTestVisible = true;
+                }
+                else if (Settings.PowerPointSettings.IsShowStrokeOnSelectInPowerPoint)
                 {
                     inkCanvas.Visibility = Visibility.Visible;
                     inkCanvas.IsHitTestVisible = true;
@@ -4578,6 +4594,7 @@ namespace Ink_Canvas
             inkCanvas.Children.Clear();
             // 恢复非笔画元素
             RestoreNonStrokeElements(preservedElements);
+            ClearSecAgentSceneElements();
 
             if (Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
 
