@@ -386,6 +386,7 @@ namespace Ink_Canvas
         private void BoardSymbolIconDelete_MouseUp(object sender, RoutedEventArgs e)
         {
             if (TryBlockFrozenPageMutation("清除冻结页面内容")) return;
+            SecAgentDiag($"CLEAR_BEGIN kind=canvas sender={sender?.GetType().Name} {SecAgentDiagCanvasState()}");
             PenIcon_Click(null, null);
             SymbolIconDelete_MouseUp(null, null);
 
@@ -413,6 +414,7 @@ namespace Ink_Canvas
                 ClearSecAgentSceneElements();
                 Debug.WriteLine($"BoardSymbolIconDelete: inkCanvas.Children.Count after restore: {inkCanvas.Children.Count}");
             }
+            SecAgentDiag($"CLEAR_DONE kind=canvas {SecAgentDiagCanvasState()}");
         }
         /// <summary>
         /// 处理删除墨迹和历史记录图标点击事件，清空画布内容和时间机器历史
@@ -430,6 +432,7 @@ namespace Ink_Canvas
         private void BoardSymbolIconDeleteInkAndHistories_MouseUp(object sender, RoutedEventArgs e)
         {
             if (TryBlockFrozenPageMutation("清除冻结页面内容")) return;
+            SecAgentDiag($"CLEAR_BEGIN kind=canvas-and-history sender={sender?.GetType().Name} {SecAgentDiagCanvasState()}");
             PenIcon_Click(null, null);
             SymbolIconDelete_MouseUp(null, null);
             if (!Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
@@ -457,6 +460,7 @@ namespace Ink_Canvas
                 ClearSecAgentSceneElements();
                 Debug.WriteLine($"BoardSymbolIconDeleteInkAndHistories: inkCanvas.Children.Count after restore: {inkCanvas.Children.Count}");
             }
+            SecAgentDiag($"CLEAR_DONE kind=canvas-and-history {SecAgentDiagCanvasState()}");
         }
 
         /// <summary>

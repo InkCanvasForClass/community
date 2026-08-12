@@ -1359,6 +1359,10 @@ namespace Ink_Canvas
             var inkCanvas1 = sender as InkCanvas;
             if (inkCanvas1 == null) return;
 
+            SecAgentDiag($"MODE_CHANGED mode={inkCanvas1.EditingMode} overlay=" +
+                         $"{(FindName("EraserOverlayCanvas") as System.Windows.Controls.Canvas)?.IsHitTestVisible}/" +
+                         $"{(FindName("EraserOverlayCanvas") as System.Windows.Controls.Canvas)?.Visibility} {SecAgentDiagCanvasState()}");
+
             NotifyPluginPenModeChanged(inkCanvas1.EditingMode);
 
             if (IsCurrentPageFrozen && IsFreezeMutatingMode(inkCanvas1.EditingMode))
@@ -2328,6 +2332,9 @@ namespace Ink_Canvas
         // 鼠标输入
         private void inkCanvas_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
+            SecAgentDiag($"PREVIEW_MOUSE_DOWN button={e.ChangedButton} point={e.GetPosition(inkCanvas)} " +
+                         $"original={e.OriginalSource?.GetType().FullName ?? "null"} mode={inkCanvas?.EditingMode} " +
+                         $"selected={SecAgentDiagElement(currentSelectedElement)}");
             if (e.ChangedButton == MouseButton.Left && inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
             {
                 if (BeginSecAgentStrokeErase(e.GetPosition(inkCanvas)))
@@ -2374,8 +2381,11 @@ namespace Ink_Canvas
                 }
                 dependencyObject = VisualTreeHelper.GetParent(dependencyObject);
             }
+            SecAgentDiag($"PREVIEW_MOUSE_HIT media={clickedMediaControl} secagent={clickedSecAgentSceneElement} " +
+                         $"original={hitTest?.GetType().FullName ?? "null"}");
             if (!(hitTest is Image) && !(hitTest is MediaElement) && !(hitTest is CanvasMediaControl) && !clickedMediaControl && !clickedSecAgentSceneElement)
             {
+                SecAgentDiag("PREVIEW_MOUSE_BLANK clearing-selection");
                 // 如果当前有选中的元素，取消选中状态
                 if (currentSelectedElement != null)
                 {

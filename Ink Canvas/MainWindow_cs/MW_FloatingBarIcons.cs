@@ -891,9 +891,15 @@ namespace Ink_Canvas
         internal void SymbolIconUndo_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (TryBlockFrozenPageMutation("撤销冻结页面内容")) return;
-            if (!IsUndoEnabled) return;
+            SecAgentDiag($"UNDO_REQUEST enabled={IsUndoEnabled} sender={sender?.GetType().Name} {SecAgentDiagCanvasState()}");
+            if (!IsUndoEnabled)
+            {
+                SecAgentDiag("UNDO_SKIPPED disabled");
+                return;
+            }
             BtnUndo_Click(null, null);
             HideSubPanels();
+            SecAgentDiag($"UNDO_DONE {SecAgentDiagCanvasState()}");
         }
 
         /// <summary>
@@ -904,9 +910,15 @@ namespace Ink_Canvas
         internal void SymbolIconRedo_MouseUp(object sender, RoutedEventArgs e)
         {
             if (TryBlockFrozenPageMutation("重做冻结页面内容")) return;
-            if (!IsRedoEnabled) return;
+            SecAgentDiag($"REDO_REQUEST enabled={IsRedoEnabled} sender={sender?.GetType().Name} {SecAgentDiagCanvasState()}");
+            if (!IsRedoEnabled)
+            {
+                SecAgentDiag("REDO_SKIPPED disabled");
+                return;
+            }
             BtnRedo_Click(null, null);
             HideSubPanels();
+            SecAgentDiag($"REDO_DONE {SecAgentDiagCanvasState()}");
         }
 
         #endregion
@@ -4430,6 +4442,7 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void BtnUndo_Click(object sender, RoutedEventArgs e)
         {
+            SecAgentDiag($"UNDO_APPLY_BEGIN {SecAgentDiagCanvasState()}");
             if (inkCanvas.GetSelectedStrokes().Count != 0)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
@@ -4437,7 +4450,9 @@ namespace Ink_Canvas
             }
 
             var item = timeMachine.Undo();
+            SecAgentDiag($"UNDO_HISTORY_ITEM type={item?.GetType().FullName ?? "null"}");
             ApplyHistoryToCanvas(item);
+            SecAgentDiag($"UNDO_APPLY_DONE {SecAgentDiagCanvasState()}");
         }
 
         /// <summary>
@@ -4447,6 +4462,7 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void BtnRedo_Click(object sender, RoutedEventArgs e)
         {
+            SecAgentDiag($"REDO_APPLY_BEGIN {SecAgentDiagCanvasState()}");
             if (inkCanvas.GetSelectedStrokes().Count != 0)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
@@ -4454,7 +4470,9 @@ namespace Ink_Canvas
             }
 
             var item = timeMachine.Redo();
+            SecAgentDiag($"REDO_HISTORY_ITEM type={item?.GetType().FullName ?? "null"}");
             ApplyHistoryToCanvas(item);
+            SecAgentDiag($"REDO_APPLY_DONE {SecAgentDiagCanvasState()}");
         }
 
         /// <summary>
