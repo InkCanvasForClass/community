@@ -162,5 +162,25 @@ namespace Ink_Canvas.Properties
         public static string Debug_MemoryBreakdownForceGC_Desc => ResourceManager.GetString(nameof(Debug_MemoryBreakdownForceGC_Desc), _resourceCulture);
 
         public static string Debug_MemoryBreakdownForceGC_Button => ResourceManager.GetString(nameof(Debug_MemoryBreakdownForceGC_Button), _resourceCulture);
+
+        // Hand-added for RealtimeInk FPS overlay text. NativeInk recovery.
+        // Safe to remove once ResXFileCodeGenerator re-runs on AdvancedStrings.resx.
+        public static string RealtimeInkFpsOverlay_IdleText
+        {
+            get
+            {
+                var s = ResourceManager.GetString(nameof(RealtimeInkFpsOverlay_IdleText), _resourceCulture);
+                return string.IsNullOrEmpty(s) ? "Realtime ink (idle)" : s;
+            }
+        }
+
+        public static string RealtimeInkFpsOverlay_ActiveText
+        {
+            get
+            {
+                var s = ResourceManager.GetString(nameof(RealtimeInkFpsOverlay_ActiveText), _resourceCulture);
+                return string.IsNullOrEmpty(s) ? "Realtime ink (n={0})" : s;
+            }
+        }
     }
 }

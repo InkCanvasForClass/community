@@ -366,4 +366,7 @@
   <data name="Shape_RemoveAsymptote" xml:space="preserve">
     <value>物理超度渐近线？</value>
   </data>
+  <data name="Canvas_WetInkRendererFailed" xml:space="preserve">
+    <value>湿墨管线寄了，自动切回系统墨迹保命。想恢复请重启程序转生一下。</value>
+  </data>
 </root>

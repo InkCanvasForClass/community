@@ -12,6 +12,12 @@ using System.Windows.Threading;
 
 namespace Ink_Canvas
 {
+    internal enum InkPipelineKind
+    {
+        LegacyWpf,
+        NativeWinRt
+    }
+
     public partial class MainWindow
     {
         private WetInkCommandMailbox _nativeWetInkMailbox;
@@ -52,6 +58,14 @@ namespace Ink_Canvas
 
         internal void TryStartNativeWetInkPipeline()
         {
+            if (Settings?.Canvas?.UseLegacyInkSystem == true)
+            {
+                LogHelper.WriteLogToFile(
+                    "[WetInk] Legacy ink system master switch is on; native pipeline skipped.",
+                    LogHelper.LogType.Event);
+                return;
+            }
+
             if (Settings?.Canvas?.UseLegacyWetInk == true)
             {
                 LogHelper.WriteLogToFile(
@@ -1354,6 +1368,9 @@ namespace Ink_Canvas
 
         private InkSampleProcessorSettings CaptureProcessorSettings(InkStrokeStyleSnapshot style)
         {
+            // 湿墨侧当前仅通过 DisablePressure/EnablePressureForTouch/UseVelocityBrushTip/BaseWidth/InkStyle 接入；
+            // 平滑档位 FitToCurve/UseAdvancedBezierSmoothing/UseHardwareAcceleration/InkSmoothingQuality
+            // 在干墨阶段由 WPF 侧 InkSmoothingManager 继续生效，保证新旧系统结果一致。
             return new InkSampleProcessorSettings
             {
                 DisablePressure = Settings.Canvas.DisablePressure,
@@ -1493,6 +1510,53 @@ namespace Ink_Canvas
                 TryStartNativeWetInkPipeline();
             else
                 ShutdownNativeWetInkPipeline();
+        }
+
+        /// <summary>
+        /// 当前实际生效的墨迹管线类型。
+        /// 综合判断原生湿墨管线可用性与顶层 Legacy 开关，供设置页与后续 Task 复用。
+        /// </summary>
+        internal InkPipelineKind CurrentInkPipelineKind
+        {
+            get
+            {
+                if (IsNativeWetInkPipelineAvailable
+                    && Settings?.Canvas?.UseLegacyInkSystem != true)
+                {
+                    return InkPipelineKind.NativeWinRt;
+                }
+                return InkPipelineKind.LegacyWpf;
+            }
+        }
+
+        /// <summary>
+        /// 切换墨迹管线（顶层开关粒度）。
+        /// 封装 CancelAll → Shutdown/Start 流程与设置保存，供 SettingsActionHub 与后续 Task 调用。
+        /// </summary>
+        internal void SwitchInkPipeline(bool useLegacy)
+        {
+            try
+            {
+                CancelAllNativeWetInkSessions("Settings switch");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[WetInk] CancelAll before pipeline switch failed: {ex.Message}",
+                    LogHelper.LogType.Warning);
+            }
+
+            if (useLegacy)
+            {
+                ShutdownNativeWetInkPipeline();
+            }
+            else
+            {
+                SyncNativeWetInkPipelineWithLogicalTool();
+            }
+            // MergeInkSmoothingWithUndo 设置由 WPF 侧 InkSmoothingManager 的撤销合并逻辑使用；
+            // 新管线提交的干墨仍然经过它，无需在此处单独处理。
+            inkCanvas?.InvalidateVisual();
         }
 
         /// <summary>

@@ -70,6 +70,13 @@
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
+                    <controls:LabeledSettingsCard x:Name="CardUseLegacyInkSystem"
+                            Header="使用旧版墨迹系统"
+                            Description="关闭时使用基于 WinRT 的新一代墨迹渲染（低延迟湿墨），开启则回退到 WPF InkCanvas 普通墨迹，兼容旧设备。"
+                            Icon="{x:Static ui:SegoeFluentIcons.InkingTool}"
+                            SwitchName="ToggleSwitchUseLegacyInkSystem"
+                            Toggled="CardUseLegacyInkSystem_Toggled" />
+
                     <!-- 互斥开关：需要 code-behind 处理联动逻辑 -->
                     <controls:LabeledSettingsCard x:Name="CardEnablePressureTouchMode"
                             Header="{x:Static props:CanvasStrings.Canvas_EnablePressureTouch}"

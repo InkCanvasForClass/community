@@ -899,5 +899,28 @@ namespace Ink_Canvas.Helpers
         {
             return elapsedTicks * 1000.0 / Stopwatch.Frequency;
         }
+
+        /// <summary>
+        /// 由原生湿墨管线每帧重绘后调用：在 Debug 日志开启时刷新 RealtimeInkDebugLive.json，
+        /// 保证 nativeWetInk 指标（非 StrokeVisual 路径）也能被外部探针看到。
+        /// </summary>
+        public static void TickLiveStatus()
+        {
+            if (!_isDebugLoggingEnabled)
+                return;
+
+            try
+            {
+                var snapshot = GetSnapshot();
+                var isActive = snapshot.StrokeCount > 0
+                               || snapshot.InputEventCount > 0
+                               || snapshot.RedrawCount > 0;
+                WriteLiveStatus(snapshot, isActive);
+            }
+            catch
+            {
+                // never throw from the probe path
+            }
+        }
     }
 }

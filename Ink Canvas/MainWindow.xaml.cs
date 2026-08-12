@@ -1341,18 +1341,19 @@ namespace Ink_Canvas
         /// <summary>
         /// 是否处于批注模式（供 Automation 规则/触发器判断）。
         /// 新墨迹系统撤回后，批注 = InkCanvas 物理编辑模式为 Ink。
+        /// NativeInk 恢复后：由 MW_NativeWetInk.cs 提供超集实现，增加原生笔逻辑工具判定。
         /// </summary>
-        internal bool IsAnnotationModeActive()
-        {
-            try
-            {
-                return inkCanvas?.EditingMode == InkCanvasEditingMode.Ink;
-            }
-            catch
-            {
-                return false;
-            }
-        }
+        //internal bool IsAnnotationModeActive()
+        //{
+        //    try
+        //    {
+        //        return inkCanvas?.EditingMode == InkCanvasEditingMode.Ink;
+        //    }
+        //    catch
+        //    {
+        //        return false;
+        //    }
+        //}
 
         private void inkCanvas_EditingModeChanged(object sender, RoutedEventArgs e)
         {
@@ -1647,6 +1648,8 @@ namespace Ink_Canvas
                     }
                 }), DispatcherPriority.Loaded);
             }
+
+            TryStartNativeWetInkPipeline();
         }
 
 
@@ -1856,6 +1859,11 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile("Ink Canvas closing confirmed by user", LogHelper.LogType.Event);
                 }
 
+                if (!e.Cancel)
+                {
+                    ShutdownNativeWetInkPipeline();
+                }
+
                 if (e.Cancel) LogHelper.WriteLogToFile("Ink Canvas closing cancelled", LogHelper.LogType.Event);
             }
             catch (Exception ex)
@@ -1888,6 +1896,7 @@ namespace Ink_Canvas
         /// <param name="e">关闭事件的参数（未使用）。</param>
         private void Window_Closed(object sender, EventArgs e)
         {
+            ShutdownNativeWetInkPipeline();
             RealtimeInkFrameScheduler.Clear();
             SystemEvents.DisplaySettingsChanged -= SystemEventsOnDisplaySettingsChanged;
             // 玻璃浮动栏刻意不设 Owner，必须显式关闭，否则残留窗口会挡住进程退出

@@ -255,5 +255,18 @@ namespace Ink_Canvas.Properties
         public static string Canvas_DarkMode => ResourceManager.GetString(nameof(Canvas_DarkMode), _resourceCulture);
 
         public static string Shape_RemoveAsymptote => ResourceManager.GetString(nameof(Shape_RemoveAsymptote), _resourceCulture);
+
+        // Hand-added for NativeInk wet-ink renderer failure notification. NativeInk recovery.
+        // Safe to remove once ResXFileCodeGenerator re-runs on CanvasStrings.resx.
+        public static string Canvas_WetInkRendererFailed
+        {
+            get
+            {
+                var s = ResourceManager.GetString(nameof(Canvas_WetInkRendererFailed), _resourceCulture);
+                return string.IsNullOrEmpty(s)
+                    ? "原生湿墨渲染器异常，已自动回退到普通墨迹模式。可在设置→画布中关闭或重新打开「使用原生湿墨管线」后重试。"
+                    : s;
+            }
+        }
     }
 }

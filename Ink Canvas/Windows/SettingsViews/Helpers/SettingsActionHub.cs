@@ -81,6 +81,30 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             }
         }
 
+        public static void OnLegacyInkSystemToggled(bool useLegacy)
+        {
+            if (useLegacy)
+            {
+                SettingsManager.Settings.Canvas.UseLegacyWetInk = true;
+            }
+
+            SettingsManager.SaveSettingsToFile();
+
+            var mw = GetMainWindow();
+            if (mw == null) return;
+
+            Action doSwitch = () => mw.SwitchInkPipeline(useLegacy);
+            if (mw.inkCanvas != null
+                && mw.inkCanvas.EditingMode == System.Windows.Controls.InkCanvasEditingMode.Ink)
+            {
+                mw.Dispatcher.BeginInvoke(doSwitch, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+            }
+            else
+            {
+                mw.Dispatcher.Invoke(doSwitch);
+            }
+        }
+
         #endregion
 
         #region Appearance

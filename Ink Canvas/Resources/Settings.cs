@@ -497,6 +497,25 @@ namespace Ink_Canvas
         [JsonProperty("edgeExpandAutoHideMs")]
         public double EdgeExpandAutoHideMs { get; set; } = 5000;
 
+        [JsonProperty("useLegacyInkSystem")]
+        public bool UseLegacyInkSystem { get; set; } = false;
+
+        /// <summary>
+        /// 为 true 时强制跳过原生湿墨管线，回退到传统 WPF 墨迹输入系统（InkCanvas StrokesCollection）。
+        /// 默认 false = 启用 NativeInk 管线；如果用户遇到兼容性问题可切换到 true 走旧路径。
+        /// NativeInk 恢复后新增设置项。
+        /// </summary>
+        [JsonProperty("useLegacyWetInk")]
+        public bool UseLegacyWetInk { get; set; } = false;
+
+        /// <summary>
+        /// 是否启用原生墨迹尾部预测：落笔中基于当前速度/方向预测即将出现的点，
+        /// 先画到湿墨层，抬笔时根据真实位置修正，减少视觉滞后。默认开启。
+        /// NativeInk 恢复后新增设置项。
+        /// </summary>
+        [JsonProperty("enableNativeInkPrediction")]
+        public bool EnableNativeInkPrediction { get; set; } = true;
+
     }
 
     public enum OptionalOperation

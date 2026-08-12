@@ -366,4 +366,7 @@
   <data name="Shape_RemoveAsymptote" xml:space="preserve">
     <value>是否移除渐近线？</value>
   </data>
+  <data name="Canvas_WetInkRendererFailed" xml:space="preserve">
+    <value>湿墨渲染管线出现故障，已自动切换为系统内置墨迹模式。如需恢复，请重启程序。</value>
+  </data>
 </root>

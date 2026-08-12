@@ -2,6 +2,7 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Microsoft.Win32;
+using OSVersionExtension;
 using System;
 using System.Diagnostics;
 using System.Windows;
@@ -29,6 +30,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 if (settings.Canvas != null)
                 {
+                    CardUseLegacyInkSystem.IsOn = settings.Canvas.UseLegacyInkSystem;
+                    if (OSVersion.GetOperatingSystem() < OSVersionExtension.OperatingSystem.Windows10)
+                    {
+                        CardUseLegacyInkSystem.IsOn = true;
+                        CardUseLegacyInkSystem.IsEnabled = false;
+                        System.Windows.Controls.ToolTipService.SetToolTip(CardUseLegacyInkSystem, "当前系统版本低于 Windows 10，仅支持旧版墨迹系统。");
+                    }
+
                     CardEnablePressureTouchMode.IsOn = settings.Canvas.EnablePressureTouchMode;
                     CardDisablePressure.IsOn = settings.Canvas.DisablePressure;
 
@@ -94,6 +103,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!CardDisablePressure.IsOn || !SettingsManager.Settings.Canvas.EnablePressureTouchMode)
                 CardEnablePressureTouchMode.IsOn = SettingsManager.Settings.Canvas.EnablePressureTouchMode;
             SettingsManager.SaveSettingsToFile();
+        }
+
+        private void CardUseLegacyInkSystem_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.UseLegacyInkSystem = CardUseLegacyInkSystem.IsOn;
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnLegacyInkSystemToggled(CardUseLegacyInkSystem.IsOn);
         }
 
         private void ComboBoxCurveSmoothingMode_SelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -13,6 +13,10 @@ using System.Windows.Threading;
 namespace Ink_Canvas
 {
     /// <summary>
+    /// 插件墨迹服务兼容性说明：湿墨管线启用时，插件写入到 inkCanvas.Strokes 的干墨仍然是唯一真相源；
+    /// 工具切换通过 SetCurrentToolMode → SyncNativeWetInkPipelineWithLogicalTool 同步到湿墨管线。
+    /// </summary>
+    /// <summary>
     /// 插件画布墨迹服务核心：墨迹读取/插入/清除、工具切换、墨迹冻结。
     /// 对应 <see cref="ICanvasInkService"/>，由 <see cref="Plugins.CanvasInkService"/> 转发。
     /// 所有方法都必须由调用方保证在 UI 线程执行（转发层负责切换线程）。
