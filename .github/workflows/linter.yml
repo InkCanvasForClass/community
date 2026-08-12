@@ -3,9 +3,9 @@ name: Lint
 
 on:
   push:
-    branches: [net8]
+    branches: [net10]
   pull_request:
-    branches: [net8]
+    branches: [net10]
 
 permissions: {}
 
@@ -18,8 +18,9 @@ jobs:
       # contents permission to clone the repository
       contents: read
       packages: read
-      # Don't need issues and pull-requests permissions to write results as pull request comments in order not to make cjk unhappy.
-
+      # Need issues and pull-requests permissions to write results as pull request comments in order not to make cjk unhappy.
+      issues: write
+      pull-requests: write
       # To report GitHub Actions status checks. Omit if you don't need
       # to update commit status
       statuses: write
@@ -36,6 +37,7 @@ jobs:
       - name: Super-linter
         uses: super-linter/super-linter@v8.6.0 # x-release-please-version
         env:
+          VALIDATE_ALL_CODEBASE: false
           # Flag to have the linter complete with exit code 0 even if errors were detected, in order not to make cjk unhappy.
           DISABLE_ERRORS: true
           # Disable the BIOME_FORMAT rule
