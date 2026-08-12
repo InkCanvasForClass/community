@@ -134,6 +134,9 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile(
                     "[WetInk] Native WM_POINTER + DirectComposition wet-ink pipeline started.",
                     LogHelper.LogType.Event);
+                LogHelper.WriteLogToFile(
+                    "[NativeInk] 初始化成功（WinRT 湿墨管线已就绪）",
+                    LogHelper.LogType.Trace);
             }
             catch (Exception ex)
             {
@@ -599,6 +602,9 @@ namespace Ink_Canvas
                 _stylusDownTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
                 RefreshOverlayVisibility();
                 _wetInkWindowHost?.SignalWork();
+                LogHelper.WriteLogToFile(
+                    $"[NativeInk] 落笔 sessionId={session.SessionId} pointer={batch.PointerId} kind={batch.InputKind} tool={ResolveLogicalInkTool()}",
+                    LogHelper.LogType.Trace);
             }
 
             return decision.ConsumeNativeMessage;
@@ -766,8 +772,11 @@ namespace Ink_Canvas
                 // TimeMachine / dirty-page hooks fire before post-processing.
                 inkCanvas.Strokes.Add(stroke);
                 _nativeInkController.MarkDryCommitted(payload.SessionId);
+                LogHelper.WriteLogToFile(
+                    $"[NativeInk] 烘干 sessionId={payload.SessionId} pointer={payload.PointerId} points={payload.Points.Count} bounds={stroke.GetBounds().Width:F1}x{stroke.GetBounds().Height:F1}",
+                    LogHelper.LogType.Trace);
                 // 不要在此处移走湿墨 overlay：WPF 尚未把干墨绘制到下一帧，若此时移走
-                // 湿墨会出现“干墨未画、湿墨已消失”的空档，导致烘干闪变（整条墨迹闪一下）。
+                // 湿墨会出现"干墨未画、湿墨已消失"的空档，导致烘干闪变（整条墨迹闪一下）。
                 // 保持湿墨 overlay 在屏上，直到多帧 WPF 渲染栅栏确认干墨已合成，再退休湿墨
                 // （OnNativeWetInkRetired → RefreshOverlayVisibility → 移到屏外）。
                 ProcessCommittedStroke(stroke);
@@ -863,6 +872,9 @@ namespace Ink_Canvas
         private void DisableNativeWetInkAfterFailure(Exception ex, bool notify)
         {
             _nativeWetInkDisabled = true;
+            LogHelper.WriteLogToFile(
+                "[NativeInk] 回退：湿墨管线故障，自动降级到 WPF 旧版墨迹系统",
+                LogHelper.LogType.Trace);
             try
             {
                 CancelAllNativeWetInkSessions("device-failure");
@@ -1549,6 +1561,9 @@ namespace Ink_Canvas
             if (useLegacy)
             {
                 ShutdownNativeWetInkPipeline();
+                LogHelper.WriteLogToFile(
+                    "[NativeInk] 回退：已切换到旧版 WPF 墨迹系统（用户主动切换）",
+                    LogHelper.LogType.Trace);
             }
             else
             {
