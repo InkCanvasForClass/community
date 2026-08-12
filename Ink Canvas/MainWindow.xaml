@@ -241,7 +241,7 @@
                        Background="Transparent" />
 
             <Canvas x:Name="EraserOverlayCanvas" d:Visibility="Collapsed"
-                    Background="Transparent"
+                    Background="#01000000"
                     IsHitTestVisible="False"
                     Loaded="EraserOverlayCanvas_Loaded"
                     Panel.ZIndex="1000">

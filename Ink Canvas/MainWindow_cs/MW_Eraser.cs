@@ -80,6 +80,26 @@ namespace Ink_Canvas
                 args.Handled = true;
                 EraserOverlay_PointerMove(sender, args.GetPosition(inkCanvas));
             });
+            // Touch is not guaranteed to promote to the overlay's stylus events on
+            // every tablet driver. Handle it directly so the area eraser uses the same
+            // scene geometry and history path for finger/touch input as for mouse/pen.
+            canvas.TouchDown += ((o, args) =>
+            {
+                args.Handled = true;
+                canvas.CaptureTouch(args.TouchDevice);
+                EraserOverlay_PointerDown(sender);
+            });
+            canvas.TouchMove += ((o, args) =>
+            {
+                args.Handled = true;
+                EraserOverlay_PointerMove(sender, args.GetTouchPoint(inkCanvas).Position);
+            });
+            canvas.TouchUp += ((o, args) =>
+            {
+                args.Handled = true;
+                canvas.ReleaseTouchCapture(args.TouchDevice);
+                EraserOverlay_PointerUp(sender);
+            });
 
             // 设置橡皮擦样式
             UpdateEraserStyle();
