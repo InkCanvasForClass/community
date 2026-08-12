@@ -462,6 +462,14 @@ namespace Ink_Canvas.Properties
 
         public static string Canvas_EdgeExpandHint_Settings_TranslateStep => ResourceManager.GetString(nameof(Canvas_EdgeExpandHint_Settings_TranslateStep), _resourceCulture);
 
+        public static string Canvas_EdgeExpandHint_Settings_WhiteboardOnly => ResourceManager.GetString(nameof(Canvas_EdgeExpandHint_Settings_WhiteboardOnly), _resourceCulture);
+
+        public static string Canvas_EdgeExpandHint_Settings_WhiteboardOnlyHint => ResourceManager.GetString(nameof(Canvas_EdgeExpandHint_Settings_WhiteboardOnlyHint), _resourceCulture);
+
+        public static string Canvas_EdgeExpandHint_Settings_AutoHideDelay => ResourceManager.GetString(nameof(Canvas_EdgeExpandHint_Settings_AutoHideDelay), _resourceCulture);
+
+        public static string Canvas_EdgeExpandHint_Settings_AutoHideDelayHint => ResourceManager.GetString(nameof(Canvas_EdgeExpandHint_Settings_AutoHideDelayHint), _resourceCulture);
+
         public static string IdleMiniBar_StartAnnotate => ResourceManager.GetString(nameof(IdleMiniBar_StartAnnotate), _resourceCulture);
 
         public static string IdleMiniBar_Annotate => ResourceManager.GetString(nameof(IdleMiniBar_Annotate), _resourceCulture);

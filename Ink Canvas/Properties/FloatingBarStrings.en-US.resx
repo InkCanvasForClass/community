@@ -678,6 +678,18 @@
   <data name="Canvas_EdgeExpandHint_Settings_TranslateStep" xml:space="preserve">
     <value>Expand step (px)</value>
   </data>
+  <data name="Canvas_EdgeExpandHint_Settings_WhiteboardOnly" xml:space="preserve">
+    <value>Only in whiteboard mode</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_WhiteboardOnlyHint" xml:space="preserve">
+    <value>When on, the hint won't appear near edges while annotating the desktop, PowerPoint or other non-whiteboard scenarios; when off, it appears everywhere.</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_AutoHideDelay" xml:space="preserve">
+    <value>Auto-hide delay</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_AutoHideDelayHint" xml:space="preserve">
+    <value>How long the hint button stays visible after you stop writing. Writing again restarts the timer; hovering the button pauses it.</value>
+  </data>
   <data name="IdleMiniBar_StartAnnotate" xml:space="preserve">
     <value>Annotate</value>
   </data>

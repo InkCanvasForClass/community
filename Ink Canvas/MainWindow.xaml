@@ -262,32 +262,74 @@
             <!-- 边缘扩展画布提示按钮（书写贴近边缘时浮现）。
                  用 Popup 实现，确保永远在最顶层且不被 InkCanvasGridForInkReplay 的兄弟节点
                  （如 GridInkCanvasSelectionCover）遮挡命中测试。PlacementTarget 设为 inkCanvas，
-                 Placement=RelativePoint 让 HorizontalOffset/VerticalOffset 直接对应画布坐标。 -->
+                 Placement=RelativePoint 让 HorizontalOffset/VerticalOffset 直接对应画布坐标。
+                 按钮贴边停靠（Fluent 胶囊样式、Fade 入场动画），由 ShowEdgeExpandHint
+                 计算位置并避让白板工具栏 / 浮动工具栏等可见 UI。 -->
             <Popup x:Name="EdgeExpandHintPopup"
                    Placement="RelativePoint"
                    PlacementTarget="{Binding ElementName=inkCanvas}"
                    AllowsTransparency="True"
                    StaysOpen="True"
                    IsOpen="False"
-                   PopupAnimation="None"
+                   PopupAnimation="Fade"
                    HorizontalOffset="0"
                    VerticalOffset="0">
                 <Button x:Name="EdgeExpandHintButton"
                         Content="..."
-                        Width="64" Height="64"
-                        Padding="0"
-                        FontSize="14"
+                        MinWidth="56" Height="40"
+                        Padding="8,0"
+                        FontSize="13"
                         FontWeight="SemiBold"
-                        Foreground="White"
-                        Background="#CC2D2D30"
-                        BorderBrush="#992D2D30"
-                        BorderThickness="1"
+                        Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                        Background="{DynamicResource FloatingBarBackgroundBrush}"
+                        BorderBrush="{DynamicResource FloatingBarBorderBrush}"
+                        BorderThickness="1.5"
+                        SnapsToDevicePixels="True"
                         Visibility="Visible"
                         IsHitTestVisible="True"
                         Cursor="Hand"
                         Click="EdgeExpandHintButton_Click"
-                        Opacity="0.9"
-                        ToolTip="扩展画布" />
+                        MouseEnter="EdgeExpandHintButton_MouseEnter"
+                        MouseLeave="EdgeExpandHintButton_MouseLeave"
+                        ToolTip="{x:Static props:FloatingBarStrings.Canvas_EdgeExpandHint_Button}">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Opacity" Value="0.85" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="HintBorder"
+                                                CornerRadius="10"
+                                                Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                Padding="{TemplateBinding Padding}">
+                                            <Border.Effect>
+                                                <DropShadowEffect BlurRadius="14" ShadowDepth="2" Opacity="0.35" />
+                                            </Border.Effect>
+                                            <ContentPresenter HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="HintBorder" Property="BorderBrush"
+                                                        Value="{DynamicResource FloatingBarForegroundBrush}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Opacity" Value="1" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Opacity" Value="0.95" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
             </Popup>
 
             <!-- 快抽悬浮按钮 -->

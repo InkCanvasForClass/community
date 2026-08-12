@@ -479,6 +479,14 @@ namespace Ink_Canvas
         public bool IsEnableEdgeExpandHint { get; set; } = false;
 
         /// <summary>
+        /// "扩展画布"提示是否仅在白板模式下启用。
+        /// 为 true 时，桌面批注、PPT 演示等非白板场景即使书写贴近边缘也不会浮现提示按钮。
+        /// 默认开启，与功能初衷一致：扩展画布是白板场景的专用能力。
+        /// </summary>
+        [JsonProperty("isEnableEdgeExpandHintWhiteboardOnly")]
+        public bool IsEnableEdgeExpandHintWhiteboardOnly { get; set; } = true;
+
+        /// <summary>
         /// 触发"扩展画布"提示按钮的边缘阈值（像素）。当笔画的任意触点距画布四边的距离小于该值时，提示按钮会浮现。
         /// 默认 80 像素，便于教师日常书写时容易触发。
         /// </summary>

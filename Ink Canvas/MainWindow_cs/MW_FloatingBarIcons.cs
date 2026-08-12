@@ -6150,6 +6150,13 @@ namespace Ink_Canvas
         private void UpdateCurrentToolMode(string mode)
         {
             _currentToolMode = NormalizeToolModeForFreeze(mode);
+
+            // 工具切换为非笔模式（橡皮/框选/图形/漫游/鼠标）时，扩展画布提示立即消失
+            if (_currentToolMode != "pen" && _currentToolMode != "color")
+            {
+                HideEdgeExpandHint();
+            }
+
             UpdateBoardRoamingButtonState();
 
             // Issue #285 更小批注栏：根据当前工具模式刷新迷你栏显示状态

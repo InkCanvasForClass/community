@@ -651,6 +651,18 @@
   <data name="Canvas_EdgeExpandHint_Settings_TranslateStep" xml:space="preserve">
     <value>一下腾出多少地方（像素）</value>
   </data>
+  <data name="Canvas_EdgeExpandHint_Settings_WhiteboardOnly" xml:space="preserve">
+    <value>只在白板里才提示</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_WhiteboardOnlyHint" xml:space="preserve">
+    <value>关了的话，桌面批注、PPT 这些地方写嗨了也会弹出来。</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_AutoHideDelay" xml:space="preserve">
+    <value>多久之后自己藏起来</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_AutoHideDelayHint" xml:space="preserve">
+    <value>停笔之后提示按钮再待多久就消失；接着写会重新计时，鼠标放上去先不数。</value>
+  </data>
   <data name="IdleMiniBar_StartAnnotate" xml:space="preserve">
     <value>写点啥</value>
   </data>
