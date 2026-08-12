@@ -444,6 +444,4 @@ SKILL_FloatingToolbarRefactoring.md
 /.claude
 /.vscode
 /.workbuddy
-.trae/specs/ink-system-winrt-refactor/checklist.md
-.trae/specs/ink-system-winrt-refactor/spec.md
-.trae/specs/ink-system-winrt-refactor/tasks.md
+/.trae
