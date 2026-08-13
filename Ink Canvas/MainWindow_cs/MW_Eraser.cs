@@ -310,14 +310,20 @@ namespace Ink_Canvas
             try
             {
                 var owner = GetSecAgentHistoryOwner(element);
-                var before = ReadSecAgentState(owner);
-                if (owner != null && !string.IsNullOrWhiteSpace(before) && !_secAgentEraseInitialStates.ContainsKey(owner))
-                    _secAgentEraseInitialStates[owner] = before;
+                string before = null;
+                var firstOwnerEdit = owner != null && !_secAgentEraseInitialStates.TryGetValue(owner, out before);
+                if (firstOwnerEdit)
+                {
+                    before = ReadSecAgentState(owner);
+                    if (!string.IsNullOrWhiteSpace(before))
+                        _secAgentEraseInitialStates[owner] = before;
+                }
                 var inverse = element.TransformToAncestor(inkCanvas).Inverse;
                 if (inverse is null) return false;
                 var localRectangle = inverse.TransformBounds(canvasRectangle);
-                SecAgentDiag($"ERASER_AREA_BEGIN element={SecAgentDiagElement(element)} canvasRect={canvasRectangle} " +
-                             $"localRect={localRectangle} owner={SecAgentDiagElement(owner)} beforeLength={before?.Length ?? 0}");
+                if (firstOwnerEdit)
+                    SecAgentDiag($"ERASER_AREA_BEGIN element={SecAgentDiagElement(element)} canvasRect={canvasRectangle} " +
+                                 $"localRect={localRectangle} owner={SecAgentDiagElement(owner)} beforeLength={before?.Length ?? 0}");
                 var method = element.GetType().GetMethod("EraseLocalRect", new[] { typeof(Rect), typeof(double) });
                 if (method is null)
                 {
@@ -326,8 +332,14 @@ namespace Ink_Canvas
                 }
                 if (method.Invoke(element, new object[] { localRectangle, 4d }) is not bool changed || !changed)
                 {
-                    SecAgentDiag($"ERASER_AREA_METHOD_FALSE element={SecAgentDiagElement(element)}");
-                    return false;
+                    // Imported SVG geometry occasionally cannot be intersected by WPF
+                    // after the host has applied its selection transform. The element was
+                    // already selected by its transformed layout bounds, so erase the
+                    // semantic unit (one Markdown row/line/shape) rather than silently
+                    // leaving an apparently unerasable item on the canvas.
+                    SecAgentDiag($"ERASER_AREA_METHOD_FALSE_REMOVE_UNIT element={SecAgentDiagElement(element)} localRect={localRectangle}");
+                    RemoveSecAgentSceneElements(new[] { element }, false);
+                    return true;
                 }
 
                 var hasContent = element.GetType().GetProperty("HasVisualContent")?.GetValue(element) is bool value && value;
@@ -335,7 +347,8 @@ namespace Ink_Canvas
                     RemoveSecAgentSceneElements(new[] { element }, false);
                 else
                     MarkCurrentPageInkChanged();
-                SecAgentDiag($"ERASER_AREA_DONE hasContent={hasContent} ownerAfter={SecAgentDiagElement(owner)} {SecAgentDiagCanvasState()}");
+                if (firstOwnerEdit || !hasContent)
+                    SecAgentDiag($"ERASER_AREA_DONE hasContent={hasContent} ownerAfter={SecAgentDiagElement(owner)} {SecAgentDiagCanvasState()}");
                 return true;
             }
             catch (Exception ex)
@@ -450,7 +463,17 @@ namespace Ink_Canvas
             {
                 var inverse = element.TransformToAncestor(inkCanvas).Inverse;
                 if (inverse is not null)
-                    return InvokeSceneHitTest(element, "HitTestLocalPoint", inverse.Transform(canvasPoint), 4d);
+                {
+                    var localPoint = inverse.Transform(canvasPoint);
+                    if (InvokeSceneHitTest(element, "HitTestLocalPoint", localPoint, 4d))
+                        return true;
+                    if (IsSecAgentSceneLocalBoundsHit(element, localPoint, 4d))
+                    {
+                        SecAgentDiag($"ERASER_POINT_BOUNDS_FALLBACK element={SecAgentDiagElement(element)} localPoint={localPoint}");
+                        return true;
+                    }
+                    return false;
+                }
             }
             catch
             {
@@ -462,9 +485,11 @@ namespace Ink_Canvas
         private static bool IsSecAgentEditableSceneElement(FrameworkElement element)
         {
             var type = element?.GetType();
+            var name = element?.Name;
             return string.Equals(type?.FullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneElement", StringComparison.Ordinal)
                 || string.Equals(type?.Name, "SvgSceneElement", StringComparison.Ordinal)
-                || element?.Name?.StartsWith("svgscene_", StringComparison.OrdinalIgnoreCase) == true;
+                || (name?.StartsWith("svgscene_", StringComparison.OrdinalIgnoreCase) == true
+                    && !name.StartsWith("svgscene_group_", StringComparison.OrdinalIgnoreCase));
         }
 
         private static bool IsSecAgentEditableSceneGroup(FrameworkElement element)
@@ -536,10 +561,26 @@ namespace Ink_Canvas
                 {
                     var localPoint = inverse.Transform(canvasPoint);
                     if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
-                        return InvokeSceneHitTest(element, "HitTestLocalPoint", localPoint, 4d);
+                    {
+                        if (InvokeSceneHitTest(element, "HitTestLocalPoint", localPoint, 4d))
+                            return true;
+                        if (IsSecAgentSceneLocalBoundsHit(element, localPoint, 4d))
+                        {
+                            SecAgentDiag($"ERASER_STROKE_BOUNDS_FALLBACK element={SecAgentDiagElement(element)} localPoint={localPoint}");
+                            return true;
+                        }
+                        return false;
+                    }
 
                     var localRect = inverse.TransformBounds(canvasRect);
-                    return InvokeSceneRectTest(element, "IntersectsLocalRect", localRect, 4d);
+                    if (InvokeSceneRectTest(element, "IntersectsLocalRect", localRect, 4d))
+                        return true;
+                    if (IsSecAgentSceneLocalBoundsHit(element, localRect, 4d))
+                    {
+                        SecAgentDiag($"ERASER_AREA_BOUNDS_FALLBACK element={SecAgentDiagElement(element)} localRect={localRect}");
+                        return true;
+                    }
+                    return false;
                 }
             }
             catch
@@ -560,6 +601,21 @@ namespace Ink_Canvas
         {
             var method = element.GetType().GetMethod(methodName, new[] { typeof(Rect), typeof(double) });
             return method?.Invoke(element, new object[] { rectangle, tolerance }) is bool result && result;
+        }
+
+        private static bool IsSecAgentSceneLocalBoundsHit(FrameworkElement element, Point localPoint, double tolerance)
+            => GetSecAgentSceneLocalBounds(element, tolerance).Contains(localPoint);
+
+        private static bool IsSecAgentSceneLocalBoundsHit(FrameworkElement element, Rect localRectangle, double tolerance)
+            => !localRectangle.IsEmpty && GetSecAgentSceneLocalBounds(element, tolerance).IntersectsWith(localRectangle);
+
+        private static Rect GetSecAgentSceneLocalBounds(FrameworkElement element, double tolerance)
+        {
+            var width = element?.ActualWidth > 0 ? element.ActualWidth : element?.Width ?? 0;
+            var height = element?.ActualHeight > 0 ? element.ActualHeight : element?.Height ?? 0;
+            var bounds = new Rect(0, 0, Math.Max(1, width), Math.Max(1, height));
+            bounds.Inflate(Math.Max(0, tolerance), Math.Max(0, tolerance));
+            return bounds;
         }
 
         private void RemoveSecAgentSceneElements(IEnumerable<FrameworkElement> elements, bool recordHistory)

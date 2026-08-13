@@ -3580,6 +3580,7 @@ namespace Ink_Canvas
             GridTransparencyFakeBackground.Opacity = 0;
             GridTransparencyFakeBackground.Background = Brushes.Transparent;
             SetTransparentHitThrough();
+            SecAgentDiag($"CURSOR_HIT_TEST_APPLIED {TransparentHitTestState}");
 
             GridBackgroundCoverHolder.Visibility = Visibility.Collapsed;
 
