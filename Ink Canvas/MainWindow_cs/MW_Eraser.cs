@@ -384,13 +384,18 @@ namespace Ink_Canvas
         {
             if (inkCanvas?.EditingMode != InkCanvasEditingMode.EraseByStroke) return false;
             _secAgentStrokeEraseActive = true;
-            return EraseSecAgentSceneElementAtPoint(point);
+            var erased = EraseSecAgentSceneElementAtPoint(point);
+            SecAgentDiag($"STROKE_ERASER_BEGIN point={point} erasedScene={erased} {SecAgentDiagCanvasState()}");
+            return erased;
         }
 
         internal bool MoveSecAgentStrokeErase(Point point)
         {
             if (!_secAgentStrokeEraseActive) return false;
-            return EraseSecAgentSceneElementAtPoint(point);
+            var erased = EraseSecAgentSceneElementAtPoint(point);
+            if (erased)
+                SecAgentDiag($"STROKE_ERASER_HIT point={point} {SecAgentDiagCanvasState()}");
+            return erased;
         }
 
         internal void EndSecAgentStrokeErase()

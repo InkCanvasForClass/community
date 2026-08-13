@@ -760,6 +760,8 @@ namespace Ink_Canvas
 
             // 注册输入事件
             inkCanvas.PreviewMouseDown += inkCanvas_PreviewMouseDown;
+            inkCanvas.PreviewMouseMove += inkCanvas_PreviewMouseMove;
+            inkCanvas.PreviewMouseUp += inkCanvas_PreviewMouseUp;
             inkCanvas.StylusDown += inkCanvas_StylusDown;
             inkCanvas.StylusMove += inkCanvas_StylusMove;
             inkCanvas.MouseRightButtonUp += InkCanvas_MouseRightButtonUp;
@@ -2412,6 +2414,25 @@ namespace Ink_Canvas
                 }
             }
 
+        }
+
+        private void inkCanvas_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (inkCanvas?.EditingMode != InkCanvasEditingMode.EraseByStroke || e.LeftButton != MouseButtonState.Pressed)
+                return;
+
+            if (MoveSecAgentStrokeErase(e.GetPosition(inkCanvas)))
+            {
+                SecAgentDiag($"STROKE_ERASER_MOUSE_MOVE point={e.GetPosition(inkCanvas)} erasedScene=true");
+                e.Handled = true;
+            }
+        }
+
+        private void inkCanvas_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton != MouseButton.Left) return;
+            if (inkCanvas?.EditingMode == InkCanvasEditingMode.EraseByStroke)
+                EndSecAgentStrokeErase();
         }
 
         // 手写笔输入

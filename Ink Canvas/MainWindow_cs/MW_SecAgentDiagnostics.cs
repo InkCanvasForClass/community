@@ -48,7 +48,9 @@ namespace Ink_Canvas
             if (inkCanvas == null) return "canvas=null";
             var children = inkCanvas.Children.OfType<FrameworkElement>().ToArray();
             var sceneChildren = children.Where(IsSecAgentDiagnosticElement).Select(SecAgentDiagElement).ToArray();
-            return $"mode={inkCanvas.EditingMode}; strokes={inkCanvas.Strokes.Count}; children={inkCanvas.Children.Count}; " +
+            return $"mode={inkCanvas.EditingMode}; canvas={inkCanvas.Visibility}/hit={inkCanvas.IsHitTestVisible}; " +
+                   $"fakeBackground={GridTransparencyFakeBackground?.Visibility}/{GridTransparencyFakeBackground?.Opacity:0.##}/" +
+                   $"{GridTransparencyFakeBackground?.Background}; strokes={inkCanvas.Strokes.Count}; children={inkCanvas.Children.Count}; " +
                    $"selected={SecAgentDiagElement(currentSelectedElement)}; scenes=[{string.Join(" | ", sceneChildren)}]";
         }
 

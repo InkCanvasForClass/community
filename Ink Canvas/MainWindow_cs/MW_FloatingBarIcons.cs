@@ -3513,6 +3513,12 @@ namespace Ink_Canvas
             // 元素本身及其透明外接矩形也都收不到拖动事件。
             bool keepSelectedCanvasElementInteractive = currentSelectedElement != null
                 && IsBitmapLikeCanvasElement(currentSelectedElement);
+            // SVG scenes are hosted inside InkCanvas alongside ordinary annotation strokes.
+            // Collapsing InkCanvas for the cursor tool used to hide both the inserted scene
+            // and all annotation immediately after the user left the pen tool.  Keep the
+            // canvas visually present while a scene exists; it remains click-through unless
+            // that scene is currently selected.
+            bool keepSecAgentSceneVisible = HasSecAgentSceneElementsOnCanvas();
 
             if (!IsInPPTPresentationMode)
             {
@@ -3520,6 +3526,11 @@ namespace Ink_Canvas
                 {
                     inkCanvas.Visibility = Visibility.Visible;
                     inkCanvas.IsHitTestVisible = true;
+                }
+                else if (keepSecAgentSceneVisible)
+                {
+                    inkCanvas.Visibility = Visibility.Visible;
+                    inkCanvas.IsHitTestVisible = false;
                 }
                 else if (Settings.Canvas.HideStrokeWhenSelecting)
                 {
@@ -3537,6 +3548,11 @@ namespace Ink_Canvas
                 {
                     inkCanvas.Visibility = Visibility.Visible;
                     inkCanvas.IsHitTestVisible = true;
+                }
+                else if (keepSecAgentSceneVisible)
+                {
+                    inkCanvas.Visibility = Visibility.Visible;
+                    inkCanvas.IsHitTestVisible = false;
                 }
                 else if (Settings.PowerPointSettings.IsShowStrokeOnSelectInPowerPoint)
                 {
@@ -3556,6 +3572,10 @@ namespace Ink_Canvas
                     }
                 }
             }
+
+            SecAgentDiag($"CURSOR_CANVAS_STATE selectedInteractive={keepSelectedCanvasElementInteractive} " +
+                         $"sceneVisible={keepSecAgentSceneVisible} hideStroke={Settings.Canvas.HideStrokeWhenSelecting} " +
+                         $"{SecAgentDiagCanvasState()}");
 
             GridTransparencyFakeBackground.Opacity = 0;
             GridTransparencyFakeBackground.Background = Brushes.Transparent;
