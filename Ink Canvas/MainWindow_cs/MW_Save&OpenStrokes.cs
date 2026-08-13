@@ -197,10 +197,56 @@ namespace Ink_Canvas
                 RestoreElementTransform(element, info.TransformMatrix);
                 inkCanvas.Children.Add(element);
                 BindElementEvents(element);
+                RefreshRestoredSecAgentElementLayout(element);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"恢复可编辑 SVG 场景元素失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// Restored SVG scenes do not pass through the SecAgent insertion bridge. Force the
+        /// same immediate arrange/layout pass here so transparent hit rectangles, selection
+        /// dragging and eraser coordinate transforms are valid immediately after opening a
+        /// saved page, without requiring a tool switch.
+        /// </summary>
+        private void RefreshRestoredSecAgentElementLayout(FrameworkElement element)
+        {
+            if (element == null || inkCanvas == null) return;
+            try
+            {
+                element.Visibility = Visibility.Visible;
+                element.IsHitTestVisible = true;
+                inkCanvas.Visibility = Visibility.Visible;
+                inkCanvas.IsHitTestVisible = true;
+
+                var width = double.IsFinite(element.Width) && element.Width > 0 ? element.Width : 1;
+                var height = double.IsFinite(element.Height) && element.Height > 0 ? element.Height : 1;
+                var size = new System.Windows.Size(width, height);
+                element.Measure(size);
+                element.Arrange(new Rect(new System.Windows.Point(0, 0), size));
+
+                var forceLayout = element.GetType().GetMethod("ForceLayout", Type.EmptyTypes);
+                forceLayout?.Invoke(element, null);
+
+                inkCanvas.InvalidateMeasure();
+                inkCanvas.InvalidateArrange();
+                inkCanvas.UpdateLayout();
+                element.InvalidateMeasure();
+                element.InvalidateArrange();
+                element.Measure(size);
+                element.Arrange(new Rect(new System.Windows.Point(0, 0), size));
+                element.UpdateLayout();
+                element.InvalidateVisual();
+                LogHelper.WriteLogToFile($"[SecAgentDiag] RESTORE_LAYOUT type={element.GetType().Name} " +
+                    $"actual=({element.ActualWidth:0.##}x{element.ActualHeight:0.##}) " +
+                    $"size=({element.Width:0.##}x{element.Height:0.##}) " +
+                    $"visible={element.Visibility} hit={element.IsHitTestVisible}", LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[SecAgentDiag] RESTORE_LAYOUT_FAILED type={element.GetType().FullName} error={ex}", LogHelper.LogType.Error);
             }
         }
 
