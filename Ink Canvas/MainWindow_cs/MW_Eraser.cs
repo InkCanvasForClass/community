@@ -332,14 +332,11 @@ namespace Ink_Canvas
                 }
                 if (method.Invoke(element, new object[] { localRectangle, 4d }) is not bool changed || !changed)
                 {
-                    // Imported SVG geometry occasionally cannot be intersected by WPF
-                    // after the host has applied its selection transform. The element was
-                    // already selected by its transformed layout bounds, so erase the
-                    // semantic unit (one Markdown row/line/shape) rather than silently
-                    // leaving an apparently unerasable item on the canvas.
-                    SecAgentDiag($"ERASER_AREA_METHOD_FALSE_REMOVE_UNIT element={SecAgentDiagElement(element)} localRect={localRectangle}");
-                    RemoveSecAgentSceneElements(new[] { element }, false);
-                    return true;
+                    // Area erasing is allowed to make no change when the transformed
+                    // rectangle only overlaps the element's coarse bounds. Never turn this
+                    // into whole-row deletion; that semantic belongs to line erasing.
+                    SecAgentDiag($"ERASER_AREA_METHOD_FALSE_NO_CHANGE element={SecAgentDiagElement(element)} localRect={localRectangle}");
+                    return false;
                 }
 
                 var hasContent = element.GetType().GetProperty("HasVisualContent")?.GetValue(element) is bool value && value;
@@ -365,6 +362,11 @@ namespace Ink_Canvas
                 var after = ReadSecAgentState(pair.Key);
                 if (!string.IsNullOrWhiteSpace(after) && !string.Equals(pair.Value, after, StringComparison.Ordinal))
                     timeMachine.CommitElementEditHistory(pair.Key, pair.Value, after);
+
+                // Group serialization materializes deferred partial erases. Remove an empty
+                // group only after its final serialized state has been captured for undo.
+                if (IsSecAgentEditableSceneGroup(pair.Key) && !HasSecAgentSceneElements(pair.Key))
+                    RemoveSecAgentSceneElements(new[] { pair.Key }, false);
             }
             _secAgentEraseInitialStates.Clear();
         }
@@ -384,6 +386,8 @@ namespace Ink_Canvas
         private static string ReadSecAgentState(FrameworkElement element)
         {
             if (element == null) return null;
+            var materialize = element.GetType().GetMethod("CommitPendingAreaErase", Type.EmptyTypes);
+            materialize?.Invoke(element, null);
             var property = element.GetType().GetProperty("SerializedScene")
                 ?? element.GetType().GetProperty("SerializedElement");
             return property?.GetValue(element) as string;
