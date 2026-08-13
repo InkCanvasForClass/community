@@ -9,10 +9,7 @@
     xmlns:props="clr-namespace:Ink_Canvas.Properties"
     Title="{x:Static props:PluginStrings.Plugin_Settings}"
     mc:Ignorable="d">
-    <ScrollViewer PanningMode="VerticalFirst">
-        <Grid>
-            <ContentControl x:Name="PluginSettingsContent" Margin="24" />
-            <Rectangle Height="48" />
-        </Grid>
-    </ScrollViewer>
+    <Grid>
+        <ContentControl x:Name="PluginSettingsContent" />
+    </Grid>
 </ui:Page>

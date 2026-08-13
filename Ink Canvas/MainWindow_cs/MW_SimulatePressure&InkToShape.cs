@@ -1010,6 +1010,10 @@ namespace Ink_Canvas
                             {
                                 await InkToShapeProcessCoreAsync();
                                 var strokeAfterTail = RunStrokeCollectedPostShapeRecognitionTail(e, wsTail);
+                                if (wsTail && strokeHw != null && inkCanvas.Strokes.Contains(strokeHw))
+                                    PublishPluginCanvasLineCandidate(
+                                        strokeHw,
+                                        Plugins.CanvasLineSource.AutoStraightenedInk);
                                 if (Settings.InkToShape.EnableWinRtHandwritingStrokeBeautify)
                                 {
                                     var canvasStrokeForHw = wsTail ? strokeHw : strokeAfterTail;
@@ -1031,6 +1035,11 @@ namespace Ink_Canvas
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
             var strokeAfterTailSync = RunStrokeCollectedPostShapeRecognitionTail(e, wasStraightened);
+            if (wasStraightened && strokeForHandwritingBeautify != null &&
+                inkCanvas.Strokes.Contains(strokeForHandwritingBeautify))
+                PublishPluginCanvasLineCandidate(
+                    strokeForHandwritingBeautify,
+                    Plugins.CanvasLineSource.AutoStraightenedInk);
             if (Settings.InkToShape.EnableWinRtHandwritingStrokeBeautify
                 && !ShapeRecognitionRouter.ShouldRunShapeRecognition(
                     Settings.InkToShape.IsInkToShapeEnabled,

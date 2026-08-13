@@ -1004,7 +1004,7 @@ namespace Ink_Canvas
             return new NativeInkRouteContext(
                 hitZone,
                 tool,
-                canvasInputEnabled: IsEnabled && IsVisible && inkCanvas != null,
+                canvasInputEnabled: IsEnabled && IsVisible && inkCanvas != null && !IsPluginCanvasToolActive,
                 pageFrozen: IsCurrentPageFrozen,
                 videoPresenter: _isVideoPresenterSpecialMode,
                 multiTouchWriting: multiTouchWriting,
@@ -1030,7 +1030,7 @@ namespace Ink_Canvas
                     ? CanvasHitZone.CanvasSurface
                     : CanvasHitZone.Outside,
                 tool,
-                canvasInputEnabled: IsEnabled && IsVisible && inkCanvas != null,
+                canvasInputEnabled: IsEnabled && IsVisible && inkCanvas != null && !IsPluginCanvasToolActive,
                 pageFrozen: IsCurrentPageFrozen,
                 videoPresenter: _isVideoPresenterSpecialMode,
                 multiTouchWriting: multiTouchWriting,

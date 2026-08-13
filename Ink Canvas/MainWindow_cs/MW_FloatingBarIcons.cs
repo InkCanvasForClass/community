@@ -4584,6 +4584,7 @@ namespace Ink_Canvas
         private void PerformCanvasClear(bool preserveClearHistory = false)
         {
             if (TryBlockFrozenPageMutation("清空冻结页面内容")) return;
+            NotifyPluginWhiteboardPageClearing();
             forceEraser = false;
             //BorderClearInDelete.Visibility = Visibility.Collapsed;
 

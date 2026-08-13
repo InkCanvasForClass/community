@@ -2463,6 +2463,7 @@ namespace Ink_Canvas
                 return;
             }
 
+            CompletePluginCanvasViewportTransform();
             // 插件画布手势结束通知（插件内部用 _gestureActive 自保护，非手势时是无操作）。
             try { _pluginCanvasGestureHandler?.OnCanvasGestureCompleted(e); }
             catch (Exception ex) { LogHelper.WriteLogToFile($"插件画布手势结束通知失败: {ex.Message}", LogHelper.LogType.Warning); }
@@ -2679,6 +2680,8 @@ namespace Ink_Canvas
                              circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].Y) / 2
                         );
                     }
+
+                    PublishPluginCanvasViewportTransform(m);
                 }
             }
         }
