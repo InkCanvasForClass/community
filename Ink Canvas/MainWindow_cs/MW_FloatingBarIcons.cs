@@ -3579,7 +3579,13 @@ namespace Ink_Canvas
 
             GridTransparencyFakeBackground.Opacity = 0;
             GridTransparencyFakeBackground.Background = Brushes.Transparent;
-            SetTransparentHitThrough();
+            // Keep the window interactive while an SVG is selected so a click outside its
+            // full rectangular hit area can cancel the selection. Once it is cleared,
+            // HandleSelectedSecAgentSceneMouseDown restores click-through for the next click.
+            if (keepSelectedCanvasElementInteractive)
+                SetTransparentNotHitThrough();
+            else
+                SetTransparentHitThrough();
             SecAgentDiag($"CURSOR_HIT_TEST_APPLIED {TransparentHitTestState}");
 
             GridBackgroundCoverHolder.Visibility = Visibility.Collapsed;

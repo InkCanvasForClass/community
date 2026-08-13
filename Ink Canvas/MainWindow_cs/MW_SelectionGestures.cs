@@ -533,6 +533,23 @@ namespace Ink_Canvas
         /// </remarks>
         private void GridInkCanvasSelectionCover_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            // The lasso cover is above InkCanvas. Give editable SVG scenes priority so
+            // their own selection frame handles the click instead of stroke selection.
+            var scenePoint = e.GetPosition(inkCanvas);
+            var sceneElement = FindSecAgentSceneElementAtCanvasPoint(scenePoint);
+            if (sceneElement != null)
+            {
+                SecAgentDiag($"LASSO_SCENE_PRIORITY point={scenePoint} element={SecAgentDiagElement(sceneElement)} " +
+                             $"strokes={inkCanvas.GetSelectedStrokes().Count} overlay={GridInkCanvasSelectionCover.Visibility}");
+                isGridInkCanvasSelectionCoverMouseDown = false;
+                isStrokeDragging = false;
+                GridInkCanvasSelectionCover.ReleaseMouseCapture();
+                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+                Element_MouseLeftButtonDown(sceneElement, e);
+                e.Handled = true;
+                return;
+            }
+
             if (TryBlockFrozenPageMutation("移动墨迹"))
             {
                 e.Handled = true;
@@ -577,6 +594,26 @@ namespace Ink_Canvas
         /// 如果正在拖动墨迹，执行拖动操作
         /// 如果鼠标在选中区域移动，更新墨迹选中栏位置
         /// </remarks>
+        private FrameworkElement FindSecAgentSceneElementAtCanvasPoint(Point canvasPoint)
+        {
+            if (inkCanvas == null) return null;
+
+            foreach (var child in inkCanvas.Children.OfType<FrameworkElement>().Reverse())
+            {
+                if (!IsSecAgentEditableSceneElement(child) && !IsSecAgentEditableSceneGroup(child))
+                    continue;
+
+                var bounds = GetSceneElementBounds(child);
+                if (bounds.Contains(canvasPoint))
+                {
+                    SecAgentDiag($"LASSO_SCENE_HIT point={canvasPoint} bounds={bounds} element={SecAgentDiagElement(child)}");
+                    return child;
+                }
+            }
+
+            return null;
+        }
+
         private void GridInkCanvasSelectionCover_MouseMove(object sender, MouseEventArgs e)
         {
             if (!isGridInkCanvasSelectionCoverMouseDown) return;

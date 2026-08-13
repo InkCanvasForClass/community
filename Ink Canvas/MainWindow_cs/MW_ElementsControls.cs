@@ -239,6 +239,14 @@ namespace Ink_Canvas
 
                 // 选中当前元素
                 SelectElement(element);
+                if (canDragSelectedInMouseMode)
+                {
+                    // SelectElement normally enters InkCanvas's stroke-selection mode.
+                    // Preserve cursor mode for an already-selected SVG so the drag does
+                    // not re-enable the lasso selection frame after mouse-up.
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    SecAgentDiag($"MOUSE_MODE_PRESERVED element={SecAgentDiagElement(element)} mode={inkCanvas.EditingMode}");
+                }
 
                 // 开始拖动
                 isDragging = true;
