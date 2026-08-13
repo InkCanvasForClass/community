@@ -252,20 +252,158 @@ namespace Ink_Canvas
 
         private static string SerializeElementTransform(FrameworkElement element)
         {
-            var matrix = element?.RenderTransform?.Value ?? Matrix.Identity;
-            return string.Join(",", new[] { matrix.M11, matrix.M12, matrix.M21, matrix.M22, matrix.OffsetX, matrix.OffsetY }
-                .Select(value => value.ToString("R", CultureInfo.InvariantCulture)));
+            if (element?.RenderTransform is not Transform transform)
+                return string.Empty;
+
+            // Keep the transform tree instead of flattening it into one matrix. The
+            // selection/resize code intentionally addresses the Scale/Translate/Rotate
+            // nodes by type; restoring a flat matrix after the default nodes would make
+            // the visible object and its selection frame disagree after reopening.
+            var node = SerializeTransformNode(transform);
+            return "v2:" + JsonConvert.SerializeObject(node, Newtonsoft.Json.Formatting.None);
+        }
+
+        private sealed class PersistedTransformNode
+        {
+            public string Type { get; set; }
+            public double[] Values { get; set; }
+            public List<PersistedTransformNode> Children { get; set; }
+        }
+
+        private static PersistedTransformNode SerializeTransformNode(Transform transform)
+        {
+            if (transform is TransformGroup group)
+            {
+                return new PersistedTransformNode
+                {
+                    Type = "group",
+                    Children = group.Children.Cast<Transform>().Select(SerializeTransformNode).ToList()
+                };
+            }
+
+            if (transform is ScaleTransform scale)
+                return new PersistedTransformNode
+                {
+                    Type = "scale",
+                    Values = new[] { scale.ScaleX, scale.ScaleY, scale.CenterX, scale.CenterY }
+                };
+
+            if (transform is TranslateTransform translate)
+                return new PersistedTransformNode
+                {
+                    Type = "translate",
+                    Values = new[] { translate.X, translate.Y }
+                };
+
+            if (transform is RotateTransform rotate)
+                return new PersistedTransformNode
+                {
+                    Type = "rotate",
+                    Values = new[] { rotate.Angle, rotate.CenterX, rotate.CenterY }
+                };
+
+            if (transform is SkewTransform skew)
+                return new PersistedTransformNode
+                {
+                    Type = "skew",
+                    Values = new[] { skew.AngleX, skew.AngleY, skew.CenterX, skew.CenterY }
+                };
+
+            var matrix = transform.Value;
+            return new PersistedTransformNode
+            {
+                Type = "matrix",
+                Values = new[] { matrix.M11, matrix.M12, matrix.M21, matrix.M22, matrix.OffsetX, matrix.OffsetY }
+            };
+        }
+
+        private static Transform DeserializeTransformNode(PersistedTransformNode node)
+        {
+            if (node == null || string.IsNullOrWhiteSpace(node.Type)) return null;
+            var values = node.Values ?? Array.Empty<double>();
+            switch (node.Type.ToLowerInvariant())
+            {
+                case "group":
+                {
+                    var group = new TransformGroup();
+                    foreach (var child in node.Children ?? new List<PersistedTransformNode>())
+                    {
+                        var transform = DeserializeTransformNode(child);
+                        if (transform != null) group.Children.Add(transform);
+                    }
+                    return group;
+                }
+                case "scale" when values.Length >= 4:
+                    return new ScaleTransform(values[0], values[1], values[2], values[3]);
+                case "translate" when values.Length >= 2:
+                    return new TranslateTransform(values[0], values[1]);
+                case "rotate" when values.Length >= 3:
+                    return new RotateTransform(values[0], values[1], values[2]);
+                case "skew" when values.Length >= 4:
+                    return new SkewTransform(values[0], values[1], values[2], values[3]);
+                case "matrix" when values.Length >= 6:
+                    return new MatrixTransform(new Matrix(values[0], values[1], values[2], values[3], values[4], values[5]));
+                default:
+                    return null;
+            }
         }
 
         private static void RestoreElementTransform(FrameworkElement element, string serializedMatrix)
         {
-            if (element?.RenderTransform is not TransformGroup group || string.IsNullOrWhiteSpace(serializedMatrix)) return;
+            if (element == null || string.IsNullOrWhiteSpace(serializedMatrix)) return;
+
+            if (serializedMatrix.StartsWith("v2:", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    var node = JsonConvert.DeserializeObject<PersistedTransformNode>(serializedMatrix[3..]);
+                    var transform = DeserializeTransformNode(node);
+                    if (transform != null)
+                    {
+                        element.RenderTransform = transform;
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"鎭㈠ SVG TransformGroup v2 澶辫触: {ex.Message}", LogHelper.LogType.Warning);
+                }
+            }
+
+            // Backward compatibility for boards written before v2. Migrate the old flat
+            // matrix into the same Scale/Translate/Rotate shape expected by selection and
+            // resize code instead of appending a MatrixTransform after identity nodes.
+            if (element.RenderTransform is not TransformGroup group) return;
             var values = serializedMatrix.Split(',');
             if (values.Length != 6) return;
             var parsed = new double[6];
             for (var index = 0; index < values.Length; index++)
                 if (!double.TryParse(values[index], NumberStyles.Float, CultureInfo.InvariantCulture, out parsed[index])) return;
-            group.Children.Add(new MatrixTransform(new Matrix(parsed[0], parsed[1], parsed[2], parsed[3], parsed[4], parsed[5])));
+
+            var matrix = new Matrix(parsed[0], parsed[1], parsed[2], parsed[3], parsed[4], parsed[5]);
+            var scaleX = Math.Sqrt(matrix.M11 * matrix.M11 + matrix.M12 * matrix.M12);
+            if (scaleX < 1e-9 || double.IsNaN(scaleX) || double.IsInfinity(scaleX))
+            {
+                group.Children.Clear();
+                group.Children.Add(new MatrixTransform(matrix));
+                return;
+            }
+
+            var determinant = matrix.M11 * matrix.M22 - matrix.M12 * matrix.M21;
+            var scaleY = determinant / scaleX;
+            var angle = Math.Atan2(matrix.M12, matrix.M11) * 180d / Math.PI;
+            var width = element.Width > 0 ? element.Width : element.ActualWidth;
+            var height = element.Height > 0 ? element.Height : element.ActualHeight;
+            var center = new System.Windows.Point(Math.Max(0, width) / 2d, Math.Max(0, height) / 2d);
+            var transformedCenter = matrix.Transform(center);
+            var translation = new Vector(
+                transformedCenter.X - center.X * scaleX,
+                transformedCenter.Y - center.Y * scaleY);
+
+            group.Children.Clear();
+            group.Children.Add(new ScaleTransform(scaleX, scaleY));
+            group.Children.Add(new TranslateTransform(translation.X, translation.Y));
+            group.Children.Add(new RotateTransform(angle, transformedCenter.X, transformedCenter.Y));
         }
 
         private void RestoreMediaFromElementInfo(CanvasElementInfo info)

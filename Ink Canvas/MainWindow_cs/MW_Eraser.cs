@@ -786,6 +786,16 @@ namespace Ink_Canvas
                 eraserFeedback.Visibility = Visibility.Collapsed;
             }
 
+            // A tool switch can disable the overlay before PointerUp is delivered. Commit
+            // pending SVG scene snapshots here as well, otherwise the visual erase remains
+            // but its initial state never enters the undo/redo history.
+            var pendingSceneHistoryCount = _secAgentEraseInitialStates.Count;
+            if (pendingSceneHistoryCount > 0)
+            {
+                CommitPendingSecAgentEraseHistory();
+                SecAgentDiag($"ERASER_OVERLAY_DISABLE_COMMIT_SCENE_HISTORY pendingStates={pendingSceneHistoryCount} committed=true");
+            }
+
             CommitPendingGeometryEraseHistory();
             SecAgentDiag($"ERASER_OVERLAY_DISABLED after={eraserOverlayCanvas?.IsHitTestVisible}/{eraserOverlayCanvas?.Visibility} " +
                          $"active={isUsingGeometryEraser} pendingStates={_secAgentEraseInitialStates.Count} {SecAgentDiagCanvasState()}");
