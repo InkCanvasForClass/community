@@ -44,6 +44,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     ComboBoxPenCursorType.SelectedIndex = settings.Canvas.PenCursorType;
                     CustomPenCursorPathText.Text = settings.Canvas.CustomPenCursorPath ?? string.Empty;
                     UpdateCustomPenCursorPathVisibility();
+
+                    // 加载扩展画布提示自动隐藏延时（设置存储为毫秒，界面以秒为单位）
+                    if (settings.Canvas.EdgeExpandAutoHideMs < 1000 || settings.Canvas.EdgeExpandAutoHideMs > 30000)
+                    {
+                        settings.Canvas.EdgeExpandAutoHideMs = 5000;
+                        SettingsManager.SaveSettingsToFile();
+                    }
+                    EdgeExpandHintAutoHideDelaySlider.Value = settings.Canvas.EdgeExpandAutoHideMs / 1000.0;
+                    EdgeExpandHintAutoHideDelayText.Text =
+                        string.Format(CanvasStrings.Canvas_SecondsFormat, EdgeExpandHintAutoHideDelaySlider.Value);
                 }
             }
             catch (Exception ex)
@@ -145,6 +155,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             UpdateCustomPenCursorPathVisibility();
+        }
+
+        private void EdgeExpandHintAutoHideDelaySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!_isLoaded) return;
+            double seconds = Math.Round(e.NewValue);
+            EdgeExpandHintAutoHideDelayText.Text = string.Format(CanvasStrings.Canvas_SecondsFormat, seconds);
+            SettingsManager.Settings.Canvas.EdgeExpandAutoHideMs = seconds * 1000;
+            SettingsManager.SaveSettingsToFile();
         }
 
         private void UpdateCustomPenCursorPathVisibility()

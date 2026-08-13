@@ -31,6 +31,7 @@ namespace Ink_Canvas
         public void ReloadSettingsFromFile()
         {
             LoadSettings(false, skipAutoUpdateCheck: true);
+            SyncWhiteboardTipsAutoHide();
         }
 
         /// <summary>

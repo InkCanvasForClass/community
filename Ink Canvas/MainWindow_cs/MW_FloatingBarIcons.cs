@@ -1049,6 +1049,7 @@ namespace Ink_Canvas
                     }
                 }, TaskScheduler.FromCurrentSynchronizationContext());
                 StartChickenSoupAutoRotation();
+                StartWhiteboardTipsAutoHide();
 
                 if (Settings.Canvas.UsingWhiteboard)
                 {
@@ -1118,6 +1119,7 @@ namespace Ink_Canvas
                 }
 
                 StopChickenSoupAutoRotation();
+                StopWhiteboardTipsAutoHide();
                 WaterMarkTime.Visibility = Visibility.Collapsed;
                 WaterMarkDate.Visibility = Visibility.Collapsed;
                 BlackBoardWaterMark.Visibility = Visibility.Collapsed;
@@ -2970,6 +2972,23 @@ namespace Ink_Canvas
                             pointDesktop = pos;
                     }
                 }
+
+                // 自动翻转启用且主按钮位于右侧时，以右侧（主按钮）为固定点重新计算水平位置。
+                // 批注状态变更时工具栏组件显隐会使宽度变化，若沿用居中或保存的左侧位置，
+                // 主按钮会被推出屏幕边缘造成意外遮挡；此处与拖动时的实时翻转逻辑保持一致。
+                if (MarginFromEdge >= 0
+                    && Settings.Appearance.AutoFlipWhenSpaceInsufficient
+                    && !IsVerticalToolbar
+                    && isFloatingBarHeadOnRight)
+                {
+                    RefreshFloatingBarSizeCache(true);
+                    var headLeft = ViewboxFloatingBar.Margin.Left
+                                   + Math.Max(0, _cachedFloatingBarWidth - _cachedFloatingBarHeadWidth);
+                    pos.X = ClampFloatingBarLeft(
+                        headLeft - Math.Max(0, floatingBarWidth - _cachedFloatingBarHeadWidth),
+                        floatingBarWidth,
+                        screenWidth);
+                }
             }
             else if (IsVerticalToolbar)
             {
@@ -4550,6 +4569,20 @@ namespace Ink_Canvas
 
         private void BtnClear_Click(object sender, RoutedEventArgs e)
         {
+            PerformCanvasClear();
+        }
+
+        /// <summary>
+        /// 清空画布内容（清屏按钮与长按撤销清屏共用）。
+        /// 清屏历史默认由 StrokesChanged 事件路径按 <see cref="TimeMachineHistoryType.Clear"/> 提交；
+        /// 长按撤销清屏在调用前已显式提交并置 <see cref="_suppressClearHistoryCommit"/> 抑制重复提交。
+        /// </summary>
+        /// <param name="preserveClearHistory">
+        /// true 时即使「清空墨迹时删除墨迹历史记录」开启也保留本次清屏的撤销记录
+        /// （长按撤销清屏使用，保证清屏后仍可通过撤销恢复墨迹）。
+        /// </param>
+        private void PerformCanvasClear(bool preserveClearHistory = false)
+        {
             if (TryBlockFrozenPageMutation("清空冻结页面内容")) return;
             forceEraser = false;
             //BorderClearInDelete.Visibility = Visibility.Collapsed;
@@ -4565,13 +4598,6 @@ namespace Ink_Canvas
                 if (Pen_Icon.Background == null) PenIcon_Click(null, null);
             }
 
-            if (inkCanvas.Strokes.Count != 0)
-            {
-                // 注入历史记录以便支持撤销
-                var whiteboardIndex = CurrentWhiteboardIndex;
-                if (currentMode == 0) whiteboardIndex = 0;
-            }
-
             ClearStrokes(false);
             // 保存非笔画元素（如图片）
             var preservedElements = PreserveNonStrokeElements();
@@ -4579,10 +4605,10 @@ namespace Ink_Canvas
             // 恢复非笔画元素
             RestoreNonStrokeElements(preservedElements);
 
-            if (Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
+            if (Settings.Canvas.ClearCanvasAndClearTimeMachine && !preserveClearHistory)
+                timeMachine.ClearStrokeHistory();
 
             CancelSingleFingerDragMode();
-
         }
 
         private bool lastIsInMultiTouchMode;
@@ -6150,6 +6176,13 @@ namespace Ink_Canvas
         private void UpdateCurrentToolMode(string mode)
         {
             _currentToolMode = NormalizeToolModeForFreeze(mode);
+
+            // 工具切换为非笔模式（橡皮/框选/图形/漫游/鼠标）时，扩展画布提示立即消失
+            if (_currentToolMode != "pen" && _currentToolMode != "color")
+            {
+                HideEdgeExpandHint();
+            }
+
             UpdateBoardRoamingButtonState();
 
             // Issue #285 更小批注栏：根据当前工具模式刷新迷你栏显示状态

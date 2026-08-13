@@ -61,7 +61,11 @@ namespace Ink_Canvas
             ShapeDrawFloatingBarBtn = btn;
             BorderDrawShape.PlacementTarget = btn;
         }
-        internal void AttachSymbolIconUndo(ToolbarImageButton btn) => SymbolIconUndo = btn;
+        internal void AttachSymbolIconUndo(ToolbarImageButton btn)
+        {
+            SymbolIconUndo = btn;
+            AttachUndoLongPressHandlers(btn);
+        }
         internal void AttachSymbolIconRedo(ToolbarImageButton btn) => SymbolIconRedo = btn;
         internal void AttachCursorWithDelBtn(ToolbarImageButton btn) => CursorWithDelFloatingBarBtn = btn;
         internal void AttachWhiteboardBtn(ToolbarImageButton btn) => WhiteboardFloatingBarBtn = btn;

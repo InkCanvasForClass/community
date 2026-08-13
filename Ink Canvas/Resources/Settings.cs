@@ -382,6 +382,12 @@ namespace Ink_Canvas
         public int MaxConcurrentSmoothingTasks { get; set; } // 0表示自动检测CPU核心数
         [JsonProperty("clearCanvasAndClearTimeMachine")]
         public bool ClearCanvasAndClearTimeMachine { get; set; }
+        /// <summary>长按撤销按钮约 0.8 秒清空画布（默认关闭，快速点击仍是普通撤销）。</summary>
+        [JsonProperty("enableLongPressUndoClear")]
+        public bool EnableLongPressUndoClear { get; set; } = false;
+        /// <summary>长按撤销清屏后是否在通知中心发送提示（默认开启）。</summary>
+        [JsonProperty("notifyAfterLongPressUndoClear")]
+        public bool NotifyAfterLongPressUndoClear { get; set; } = true;
         [JsonProperty("enablePressureTouchMode")]
         public bool EnablePressureTouchMode { get; set; } // 是否启用压感触屏模式
         [JsonProperty("disablePressure")]
@@ -477,6 +483,14 @@ namespace Ink_Canvas
         /// </summary>
         [JsonProperty("isEnableEdgeExpandHint")]
         public bool IsEnableEdgeExpandHint { get; set; } = false;
+
+        /// <summary>
+        /// "扩展画布"提示是否仅在白板模式下启用。
+        /// 为 true 时，桌面批注、PPT 演示等非白板场景即使书写贴近边缘也不会浮现提示按钮。
+        /// 默认开启，与功能初衷一致：扩展画布是白板场景的专用能力。
+        /// </summary>
+        [JsonProperty("isEnableEdgeExpandHintWhiteboardOnly")]
+        public bool IsEnableEdgeExpandHintWhiteboardOnly { get; set; } = true;
 
         /// <summary>
         /// 触发"扩展画布"提示按钮的边缘阈值（像素）。当笔画的任意触点距画布四边的距离小于该值时，提示按钮会浮现。
@@ -708,6 +722,12 @@ namespace Ink_Canvas
         public bool EnableChickenSoupAutoRotation { get; set; } = false;
         [JsonProperty("chickenSoupAutoRotationInterval")]
         public int ChickenSoupAutoRotationInterval { get; set; } = 60;
+        [JsonProperty("enableWhiteboardTipsAutoHideOnInteraction")]
+        public bool EnableWhiteboardTipsAutoHideOnInteraction { get; set; } = false;
+        [JsonProperty("enableWhiteboardTipsInstantRestore")]
+        public bool EnableWhiteboardTipsInstantRestore { get; set; } = false;
+        [JsonProperty("whiteboardTipsAutoHideRestoreDelay")]
+        public int WhiteboardTipsAutoHideRestoreDelay { get; set; } = 5;
         [JsonProperty("customTipsSchemes", NullValueHandling = NullValueHandling.Ignore)]
         public List<TipsScheme> CustomTipsSchemes { get; set; }
         [JsonProperty("enabledPresetTipsSources", NullValueHandling = NullValueHandling.Ignore)]

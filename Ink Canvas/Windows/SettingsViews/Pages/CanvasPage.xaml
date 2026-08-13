@@ -123,6 +123,27 @@
                             SwitchName="ToggleSwitchClearCanvasAlsoClearImages"
                             helpers:SettingsBinder.PropertyPath="Canvas.ClearCanvasAlsoClearImages" />
 
+                    <!-- 长按撤销清屏：主开关 + 通知子开关。
+                         主开关开启时自动展开显示子选项；子开关在总功能关闭时禁用（不可调节）。 -->
+                    <ui:SettingsExpander x:Name="ExpanderLongPressUndoClear"
+                            Header="{x:Static props:CanvasStrings.Canvas_LongPressUndoClear}"
+                            Description="{x:Static props:CanvasStrings.Canvas_LongPressUndoClearHint}"
+                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchLongPressUndoClear, Mode=OneWay}"
+                            d:Visibility="Visible" d:IsExpanded="True">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Undo}" />
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchLongPressUndoClear"
+                                helpers:SettingsBinder.PropertyPath="Canvas.EnableLongPressUndoClear" />
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_LongPressUndoClearNotify}"
+                                    Description="{x:Static props:CanvasStrings.Canvas_LongPressUndoClearNotifyHint}"
+                                    IsEnabled="{Binding IsOn, ElementName=ToggleSwitchLongPressUndoClear}">
+                                <ui:ToggleSwitch helpers:SettingsBinder.PropertyPath="Canvas.NotifyAfterLongPressUndoClear" />
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
+
                     <controls:LabeledSettingsCard
                             Header="{x:Static props:CanvasStrings.Canvas_CompressPicturesUploaded}"
                             Icon="{x:Static ui:SegoeFluentIcons.Clear}"
@@ -136,11 +157,37 @@
                             SwitchName="ToggleSwitchLaunchSeewoVideoShowcaseForWhiteboardBooth"
                             helpers:SettingsBinder.PropertyPath="Canvas.LaunchSeewoVideoShowcaseForWhiteboardBooth" />
 
-                    <controls:LabeledSettingsCard
+                    <!-- 边缘扩展画布提示：主开关 + 白板限定子开关。
+                         主开关开启时自动展开显示子选项；子开关在总功能关闭时禁用（不可调节）。 -->
+                    <ui:SettingsExpander x:Name="ExpanderEdgeExpandHint"
                             Header="{x:Static props:FloatingBarStrings.Canvas_EdgeExpandHint_Settings_Enable}"
-                            Icon="{x:Static ui:SegoeFluentIcons.FullScreen}"
-                            SwitchName="ToggleSwitchEdgeExpandHint"
-                            helpers:SettingsBinder.PropertyPath="Canvas.IsEnableEdgeExpandHint" />
+                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchEdgeExpandHint, Mode=OneWay}"
+                            d:Visibility="Visible" d:IsExpanded="True">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FullScreen}" />
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchEdgeExpandHint"
+                                helpers:SettingsBinder.PropertyPath="Canvas.IsEnableEdgeExpandHint" />
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="{x:Static props:FloatingBarStrings.Canvas_EdgeExpandHint_Settings_WhiteboardOnly}"
+                                    Description="{x:Static props:FloatingBarStrings.Canvas_EdgeExpandHint_Settings_WhiteboardOnlyHint}"
+                                    IsEnabled="{Binding IsOn, ElementName=ToggleSwitchEdgeExpandHint}">
+                                <ui:ToggleSwitch helpers:SettingsBinder.PropertyPath="Canvas.IsEnableEdgeExpandHintWhiteboardOnly" />
+                            </ui:SettingsCard>
+                            <ui:SettingsCard Header="{x:Static props:FloatingBarStrings.Canvas_EdgeExpandHint_Settings_AutoHideDelay}"
+                                    Description="{x:Static props:FloatingBarStrings.Canvas_EdgeExpandHint_Settings_AutoHideDelayHint}"
+                                    IsEnabled="{Binding IsOn, ElementName=ToggleSwitchEdgeExpandHint}">
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock x:Name="EdgeExpandHintAutoHideDelayText"
+                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                    <Slider x:Name="EdgeExpandHintAutoHideDelaySlider" Width="200"
+                                            Minimum="1" Maximum="30" Value="5"
+                                            TickFrequency="1" IsSnapToTickEnabled="True"
+                                            ValueChanged="EdgeExpandHintAutoHideDelaySlider_ValueChanged" />
+                                </ikw:SimpleStackPanel>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
 
                     <!-- 简单下拉：声明式绑定 -->
                     <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_KeepAsymptote}"

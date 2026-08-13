@@ -446,6 +446,24 @@
   <data name="Theme_Tips_GlobalSettingsHint" xml:space="preserve">
     <value>管理信仰の源的显示、来源与自动轮换</value>
   </data>
+  <data name="Theme_Tips_AutoHideInstantRestore" xml:space="preserve">
+    <value>操作结束立即恢复</value>
+  </data>
+  <data name="Theme_Tips_AutoHideInstantRestoreHint" xml:space="preserve">
+    <value>开启后，手指或笔抬起、松开鼠标，或指针移出时间/鸡汤区域时立即恢复显示；关闭时在操作停止后按下方延迟恢复</value>
+  </data>
+  <data name="Theme_Tips_AutoHideOnInteraction" xml:space="preserve">
+    <value>在时间与鸡汤区域操作时自动隐藏</value>
+  </data>
+  <data name="Theme_Tips_AutoHideOnInteractionHint" xml:space="preserve">
+    <value>在白板模式中，当触控、手写笔或鼠标操作（含悬停）落在时间或鸡汤显示区域上时自动隐藏，停止操作后自动恢复显示</value>
+  </data>
+  <data name="Theme_Tips_AutoHideRestoreDelay" xml:space="preserve">
+    <value>恢复显示延迟（秒）</value>
+  </data>
+  <data name="Theme_Tips_AutoHideRestoreDelayHint" xml:space="preserve">
+    <value>停止操作后经过该时长自动恢复显示，可输入不小于 1 的整数</value>
+  </data>
   <data name="Theme_Tips_AutoRotation" xml:space="preserve">
     <value>自动轮换 Tips</value>
   </data>

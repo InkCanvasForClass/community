@@ -10,6 +10,7 @@
             Width="60" Height="50"
             MouseDown="ButtonBorder_MouseDown"
             MouseUp="ButtonBorder_MouseUp"
+            MouseLeave="ButtonBorder_MouseLeave"
             Background="Transparent"
             Opacity="1"
             BorderThickness="0"
