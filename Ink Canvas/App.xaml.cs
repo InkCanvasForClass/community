@@ -291,6 +291,14 @@ namespace Ink_Canvas
                 (typeof(Plugins.IFileDialogService),      new Plugins.FileDialogService(mainWindow)),
                 (typeof(Plugins.IThemeService),           new Plugins.ThemeService()),
                 (typeof(Plugins.IAnnouncementService),    new Plugins.AnnouncementService()),
+                (typeof(Plugins.ICanvasAppearanceService),       new Plugins.CanvasAppearanceService(mainWindow)),
+                (typeof(Plugins.IFocusInteractionService),       new Plugins.FocusInteractionService(mainWindow)),
+                (typeof(Plugins.ICanvasLayerService),            new Plugins.CanvasLayerService(mainWindow)),
+                (typeof(Plugins.ICanvasToolService),             new Plugins.CanvasToolService(mainWindow)),
+                (typeof(Plugins.ICanvasLineConversionService),   new Plugins.CanvasLineConversionService(mainWindow)),
+                (typeof(Plugins.ICanvasViewportService),         new Plugins.CanvasViewportService(mainWindow)),
+                (typeof(Plugins.IUndoService),                   new Plugins.UndoService(mainWindow)),
+                (typeof(Plugins.IWhiteboardDocumentService),     new Plugins.WhiteboardDocumentService(mainWindow)),
             };
 
             foreach (var (iface, impl) in services)

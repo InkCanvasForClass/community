@@ -1,6 +1,7 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
+using Ink_Canvas.Plugins;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -548,12 +549,15 @@ namespace Ink_Canvas
 
             VideoPresenter_BeforePageLeave();
             PauseAllCanvasMediaPlayback();
+            var previousPluginPageIndex = CurrentWhiteboardIndex;
+            BeginPluginWhiteboardPageChange(CurrentWhiteboardIndex - 1);
             SaveStrokes();
 
             ClearStrokes(true);
             CurrentWhiteboardIndex--;
 
             RestoreStrokes();
+            CompletePluginWhiteboardPageChange(previousPluginPageIndex);
             VideoPresenter_OnPageChanged();
 
             UpdateIndexInfoDisplay();
@@ -603,12 +607,15 @@ namespace Ink_Canvas
 
             VideoPresenter_BeforePageLeave();
             PauseAllCanvasMediaPlayback();
+            var previousPluginPageIndex = CurrentWhiteboardIndex;
+            BeginPluginWhiteboardPageChange(CurrentWhiteboardIndex + 1);
             SaveStrokes();
 
             ClearStrokes(true);
             CurrentWhiteboardIndex++;
 
             RestoreStrokes();
+            CompletePluginWhiteboardPageChange(previousPluginPageIndex);
             VideoPresenter_OnPageChanged();
 
             UpdateIndexInfoDisplay();
@@ -650,11 +657,15 @@ namespace Ink_Canvas
 
             VideoPresenter_BeforePageLeave();
             PauseAllCanvasMediaPlayback();
+            var previousPluginPageIndex = CurrentWhiteboardIndex;
+            var newPluginPageId = CreatePluginWhiteboardPageId();
+            BeginPluginWhiteboardPageChange(CurrentWhiteboardIndex + 1, newPluginPageId);
             SaveStrokes();
             ClearStrokes(true);
 
             WhiteboardTotalCount++;
             CurrentWhiteboardIndex++;
+            InsertPluginWhiteboardPageId(CurrentWhiteboardIndex, newPluginPageId);
 
             if (CurrentWhiteboardIndex != WhiteboardTotalCount)
             {
@@ -674,6 +685,7 @@ namespace Ink_Canvas
 
             // 恢复新页面（这会清空画布，因为历史记录为null）
             RestoreStrokes();
+            CompletePluginWhiteboardPageChange(previousPluginPageIndex);
             VideoPresenter_OnPageChanged();
 
             UpdateIndexInfoDisplay();
@@ -720,6 +732,11 @@ namespace Ink_Canvas
                 currentSelectedElement = null;
             }
 
+            var oldPluginPageCount = WhiteboardTotalCount;
+            var deletingCurrentPluginPage = pageIndex == CurrentWhiteboardIndex;
+            if (deletingCurrentPluginPage) CaptureCurrentPluginPageStates();
+            var removedPluginPage = RemovePluginWhiteboardPageId(pageIndex, oldPluginPageCount);
+
             if (pageIndex == CurrentWhiteboardIndex)
             {
                 PauseAllCanvasMediaPlayback();
@@ -744,6 +761,7 @@ namespace Ink_Canvas
                 TimeMachineHistories[oldTotal] = null;
                 WhiteboardTotalCount--;
                 RestoreStrokes();
+                RestoreCurrentPluginPageStates();
             }
             else if (pageIndex < CurrentWhiteboardIndex)
             {
@@ -773,6 +791,16 @@ namespace Ink_Canvas
 
             frozenPages[WhiteboardTotalCount + 1] = false;
             pageLastUserInkMutationUtc[WhiteboardTotalCount + 1] = DateTime.MinValue;
+
+            if (deletingCurrentPluginPage)
+            {
+                PluginWhiteboardDocumentChanged?.Invoke(this, new WhiteboardPageChangedEventArgs
+                {
+                    PreviousPage = removedPluginPage,
+                    CurrentPage = CreatePluginWhiteboardPageInfo(CurrentWhiteboardIndex)
+                });
+            }
+            NotifyPluginWhiteboardPageRemoved(removedPluginPage);
 
             UpdateIndexInfoDisplay();
             if (WhiteboardTotalCount < 99) BtnWhiteBoardAdd.IsEnabled = true;

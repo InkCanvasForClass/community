@@ -309,6 +309,34 @@ namespace Ink_Canvas
                     }
                 }
             }
+            else if (item.CommitType == TimeMachineHistoryType.PluginStateChange && applyCanvas == null)
+            {
+                ApplyPluginUndoState(
+                    item.PluginId,
+                    item.StrokeHasBeenCleared ? item.PluginStateBefore : item.PluginStateAfter);
+            }
+            else if (item.CommitType == TimeMachineHistoryType.PluginInkConversion)
+            {
+                if (item.StrokeHasBeenCleared)
+                {
+                    if (item.CurrentStroke != null)
+                        foreach (var stroke in item.CurrentStroke)
+                            if (canvas.Strokes.Contains(stroke))
+                                canvas.Strokes.Remove(stroke);
+                }
+                else
+                {
+                    if (item.CurrentStroke != null)
+                        foreach (var stroke in item.CurrentStroke)
+                            if (!canvas.Strokes.Contains(stroke))
+                                canvas.Strokes.Add(stroke);
+                }
+
+                if (applyCanvas == null)
+                    ApplyPluginUndoState(
+                        item.PluginId,
+                        item.StrokeHasBeenCleared ? item.PluginStateAfter : item.PluginStateBefore);
+            }
 
             _currentCommitType = CommitReason.UserInput;
         }
@@ -337,7 +365,8 @@ namespace Ink_Canvas
                 {
                     // 只处理笔画历史，不处理图片元素历史
                     // 因为页面预览只需要显示笔画，图片元素会影响主画布
-                    if (timeMachineHistory.CommitType != TimeMachineHistoryType.ElementInsert)
+                    if (timeMachineHistory.CommitType != TimeMachineHistoryType.ElementInsert &&
+                        timeMachineHistory.CommitType != TimeMachineHistoryType.PluginStateChange)
                     {
                         ApplyHistoryToCanvas(timeMachineHistory, fakeInkCanv);
                     }
@@ -365,8 +394,18 @@ namespace Ink_Canvas
                 EditingMode = InkCanvasEditingMode.None,
             };
 
+            var latestPluginStates = new Dictionary<string, TimeMachineHistory>(StringComparer.OrdinalIgnoreCase);
             foreach (var item in history)
+            {
+                if (item.CommitType == TimeMachineHistoryType.PluginStateChange ||
+                    item.CommitType == TimeMachineHistoryType.PluginInkConversion)
+                {
+                    if (!string.IsNullOrWhiteSpace(item.PluginId)) latestPluginStates[item.PluginId] = item;
+                    if (item.CommitType == TimeMachineHistoryType.PluginStateChange) continue;
+                }
+
                 ApplyHistoryToCanvas(item, fakeInkCanv, removed);
+            }
 
             var list = new List<TimeMachineHistory>();
             if (fakeInkCanv.Strokes.Count > 0)
@@ -381,6 +420,13 @@ namespace Ink_Canvas
                     list.Add(new TimeMachineHistory(child, TimeMachineHistoryType.ElementInsert));
                     fakeInkCanv.Children.Remove(child);
                 }
+            }
+            foreach (var item in latestPluginStates.Values)
+            {
+                var finalState = item.StrokeHasBeenCleared
+                    ? item.PluginStateBefore
+                    : item.PluginStateAfter;
+                list.Add(new TimeMachineHistory(item.PluginId, string.Empty, finalState));
             }
             return list.Count == 0 ? null : list.ToArray();
         }

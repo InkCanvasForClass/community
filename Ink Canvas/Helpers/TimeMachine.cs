@@ -208,6 +208,9 @@ namespace Ink_Canvas.Helpers
         public Dictionary<Stroke, Tuple<StylusPointCollection, StylusPointCollection>> StylusPointDictionary;
         public Dictionary<Stroke, Tuple<DrawingAttributes, DrawingAttributes>> DrawingAttributes;
         public UIElement InsertedElement; // 新增
+        public string PluginId;
+        public string PluginStateBefore;
+        public string PluginStateAfter;
         public TimeMachineHistory(StrokeCollection currentStroke, TimeMachineHistoryType commitType, bool strokeHasBeenCleared)
         {
             CommitType = commitType;
@@ -237,6 +240,26 @@ namespace Ink_Canvas.Helpers
             CommitType = commitType;
             InsertedElement = element;
         }
+        public TimeMachineHistory(string pluginId, string beforeState, string afterState)
+        {
+            CommitType = TimeMachineHistoryType.PluginStateChange;
+            PluginId = pluginId;
+            PluginStateBefore = beforeState;
+            PluginStateAfter = afterState;
+        }
+        public TimeMachineHistory(
+            string pluginId,
+            string beforeState,
+            string afterState,
+            StrokeCollection consumedStrokes)
+        {
+            CommitType = TimeMachineHistoryType.PluginInkConversion;
+            PluginId = pluginId;
+            PluginStateBefore = beforeState;
+            PluginStateAfter = afterState;
+            CurrentStroke = consumedStrokes;
+            StrokeHasBeenCleared = true;
+        }
     }
 
     public enum TimeMachineHistoryType
@@ -246,7 +269,9 @@ namespace Ink_Canvas.Helpers
         Clear,
         Manipulation,
         DrawingAttributes,
-        ElementInsert // 新增
+        ElementInsert, // 新增
+        PluginStateChange,
+        PluginInkConversion
     }
 
     public partial class TimeMachine // 新增partial，便于扩展
@@ -271,6 +296,53 @@ namespace Ink_Canvas.Helpers
             var history = new TimeMachineHistory(element, TimeMachineHistoryType.ElementInsert);
             history.StrokeHasBeenCleared = true; // 标记为已清除
             _currentStrokeHistory.Add(history);
+            _currentIndex = _currentStrokeHistory.Count - 1;
+            NotifyUndoRedoState();
+        }
+
+        public void CommitPluginStateHistory(string pluginId, string beforeState, string afterState)
+        {
+            if (string.IsNullOrWhiteSpace(pluginId))
+                throw new ArgumentException("Plugin ID is required.", nameof(pluginId));
+            if (beforeState == null) throw new ArgumentNullException(nameof(beforeState));
+            if (afterState == null) throw new ArgumentNullException(nameof(afterState));
+
+            if (_currentIndex + 1 < _currentStrokeHistory.Count)
+            {
+                _currentStrokeHistory.RemoveRange(_currentIndex + 1, (_currentStrokeHistory.Count - 1) - _currentIndex);
+            }
+
+            _currentStrokeHistory.Add(new TimeMachineHistory(pluginId, beforeState, afterState));
+            _currentIndex = _currentStrokeHistory.Count - 1;
+            NotifyUndoRedoState();
+        }
+
+        public void CommitPluginInkConversionHistory(
+            string pluginId,
+            string beforeState,
+            string afterState,
+            StrokeCollection consumedStrokes)
+        {
+            if (string.IsNullOrWhiteSpace(pluginId))
+                throw new ArgumentException("Plugin ID is required.", nameof(pluginId));
+            if (beforeState == null) throw new ArgumentNullException(nameof(beforeState));
+            if (afterState == null) throw new ArgumentNullException(nameof(afterState));
+            if (consumedStrokes == null) throw new ArgumentNullException(nameof(consumedStrokes));
+            if (consumedStrokes.Count == 0)
+                throw new ArgumentException("At least one consumed stroke is required.", nameof(consumedStrokes));
+
+            if (_currentIndex + 1 < _currentStrokeHistory.Count)
+            {
+                _currentStrokeHistory.RemoveRange(
+                    _currentIndex + 1,
+                    (_currentStrokeHistory.Count - 1) - _currentIndex);
+            }
+
+            _currentStrokeHistory.Add(new TimeMachineHistory(
+                pluginId,
+                beforeState,
+                afterState,
+                consumedStrokes));
             _currentIndex = _currentStrokeHistory.Count - 1;
             NotifyUndoRedoState();
         }
