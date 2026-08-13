@@ -38,6 +38,13 @@ namespace Ink_Canvas
         {
             var canvas = (System.Windows.Controls.Canvas)sender;
             eraserOverlayCanvas = canvas;
+
+            // d:Visibility is design-time only.  Before this was set explicitly, the
+            // overlay was Visible from the first frame even though the eraser was not
+            // active; that full-window visual layer made startup hit testing dependent on
+            // the first tool/settings action.  Keep it completely inert until enabled.
+            canvas.IsHitTestVisible = false;
+            canvas.Visibility = Visibility.Collapsed;
             SecAgentDiag($"ERASER_OVERLAY_LOADED canvas={canvas.Name} size=({canvas.ActualWidth:0.##}x{canvas.ActualHeight:0.##}) " +
                          $"hit={canvas.IsHitTestVisible} visibility={canvas.Visibility} {SecAgentDiagCanvasState()}");
 

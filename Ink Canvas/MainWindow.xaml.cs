@@ -1651,6 +1651,16 @@ namespace Ink_Canvas
                     }
                 }), DispatcherPriority.Loaded);
             }
+
+            // WindowChrome hit testing is initialized only after the HWND exists.  The
+            // startup path previously set no-focus mode but never initialized the matching
+            // transparent hit-through state, so the transparent window could consume input
+            // until a tool/settings action called SetTransparentHitThrough().  Re-apply it
+            // once all Loaded callbacks and startup mode changes have completed.
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                ApplyTransparentHitTestForCurrentMode("startup-idle");
+            }), DispatcherPriority.ApplicationIdle);
         }
 
 
