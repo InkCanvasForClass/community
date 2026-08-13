@@ -118,6 +118,16 @@ namespace Ink_Canvas.Properties
 
         public static string Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint => ResourceManager.GetString(nameof(Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint), _resourceCulture);
 
+        public static string Canvas_LongPressUndoClear => ResourceManager.GetString(nameof(Canvas_LongPressUndoClear), _resourceCulture);
+
+        public static string Canvas_LongPressUndoClearHint => ResourceManager.GetString(nameof(Canvas_LongPressUndoClearHint), _resourceCulture);
+
+        public static string Canvas_LongPressUndoClearNotification => ResourceManager.GetString(nameof(Canvas_LongPressUndoClearNotification), _resourceCulture);
+
+        public static string Canvas_LongPressUndoClearNotify => ResourceManager.GetString(nameof(Canvas_LongPressUndoClearNotify), _resourceCulture);
+
+        public static string Canvas_LongPressUndoClearNotifyHint => ResourceManager.GetString(nameof(Canvas_LongPressUndoClearNotifyHint), _resourceCulture);
+
         public static string Canvas_MergeInkSmoothingWithUndo => ResourceManager.GetString(nameof(Canvas_MergeInkSmoothingWithUndo), _resourceCulture);
 
         public static string Canvas_MergeInkSmoothingWithUndoHint => ResourceManager.GetString(nameof(Canvas_MergeInkSmoothingWithUndoHint), _resourceCulture);

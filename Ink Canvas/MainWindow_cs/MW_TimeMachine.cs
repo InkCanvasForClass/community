@@ -534,6 +534,11 @@ namespace Ink_Canvas
             if (e.Added.Count != 0 || e.Removed.Count != 0)
                 MarkCurrentPageInkChanged();
 
+            // 长按撤销清屏：清空前已显式提交可撤销历史，这里吞掉事件路径的自动重复提交
+            // （含点擦分支的批量收集），避免产生重复历史或污染橡皮擦批处理。
+            if (_suppressClearHistoryCommit && _currentCommitType == CommitReason.ClearingCanvas)
+                return;
+
             if ((e.Added.Count != 0 || e.Removed.Count != 0) && IsEraseByPoint)
             {
                 if (AddedStroke == null) AddedStroke = new StrokeCollection();

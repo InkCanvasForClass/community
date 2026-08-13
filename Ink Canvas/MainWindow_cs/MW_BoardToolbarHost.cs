@@ -25,6 +25,8 @@ namespace Ink_Canvas
             _boardToolbarViews[id] = view;
             if (id == "board.pen")
                 UpdateBoardPenIconColor();
+            if (id == "board.undo" && view is BoardToolbarButton undoBtn)
+                AttachUndoLongPressHandlers(undoBtn);
         }
 
         public FrameworkElement FindView(string id)

@@ -382,6 +382,12 @@ namespace Ink_Canvas
         public int MaxConcurrentSmoothingTasks { get; set; } // 0表示自动检测CPU核心数
         [JsonProperty("clearCanvasAndClearTimeMachine")]
         public bool ClearCanvasAndClearTimeMachine { get; set; }
+        /// <summary>长按撤销按钮约 0.8 秒清空画布（默认关闭，快速点击仍是普通撤销）。</summary>
+        [JsonProperty("enableLongPressUndoClear")]
+        public bool EnableLongPressUndoClear { get; set; } = false;
+        /// <summary>长按撤销清屏后是否在通知中心发送提示（默认开启）。</summary>
+        [JsonProperty("notifyAfterLongPressUndoClear")]
+        public bool NotifyAfterLongPressUndoClear { get; set; } = true;
         [JsonProperty("enablePressureTouchMode")]
         public bool EnablePressureTouchMode { get; set; } // 是否启用压感触屏模式
         [JsonProperty("disablePressure")]

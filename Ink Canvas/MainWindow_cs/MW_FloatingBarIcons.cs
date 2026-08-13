@@ -4569,6 +4569,20 @@ namespace Ink_Canvas
 
         private void BtnClear_Click(object sender, RoutedEventArgs e)
         {
+            PerformCanvasClear();
+        }
+
+        /// <summary>
+        /// 清空画布内容（清屏按钮与长按撤销清屏共用）。
+        /// 清屏历史默认由 StrokesChanged 事件路径按 <see cref="TimeMachineHistoryType.Clear"/> 提交；
+        /// 长按撤销清屏在调用前已显式提交并置 <see cref="_suppressClearHistoryCommit"/> 抑制重复提交。
+        /// </summary>
+        /// <param name="preserveClearHistory">
+        /// true 时即使「清空墨迹时删除墨迹历史记录」开启也保留本次清屏的撤销记录
+        /// （长按撤销清屏使用，保证清屏后仍可通过撤销恢复墨迹）。
+        /// </param>
+        private void PerformCanvasClear(bool preserveClearHistory = false)
+        {
             if (TryBlockFrozenPageMutation("清空冻结页面内容")) return;
             forceEraser = false;
             //BorderClearInDelete.Visibility = Visibility.Collapsed;
@@ -4584,13 +4598,6 @@ namespace Ink_Canvas
                 if (Pen_Icon.Background == null) PenIcon_Click(null, null);
             }
 
-            if (inkCanvas.Strokes.Count != 0)
-            {
-                // 注入历史记录以便支持撤销
-                var whiteboardIndex = CurrentWhiteboardIndex;
-                if (currentMode == 0) whiteboardIndex = 0;
-            }
-
             ClearStrokes(false);
             // 保存非笔画元素（如图片）
             var preservedElements = PreserveNonStrokeElements();
@@ -4598,10 +4605,10 @@ namespace Ink_Canvas
             // 恢复非笔画元素
             RestoreNonStrokeElements(preservedElements);
 
-            if (Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
+            if (Settings.Canvas.ClearCanvasAndClearTimeMachine && !preserveClearHistory)
+                timeMachine.ClearStrokeHistory();
 
             CancelSingleFingerDragMode();
-
         }
 
         private bool lastIsInMultiTouchMode;

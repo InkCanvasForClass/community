@@ -123,6 +123,27 @@
                             SwitchName="ToggleSwitchClearCanvasAlsoClearImages"
                             helpers:SettingsBinder.PropertyPath="Canvas.ClearCanvasAlsoClearImages" />
 
+                    <!-- 长按撤销清屏：主开关 + 通知子开关。
+                         主开关开启时自动展开显示子选项；子开关在总功能关闭时禁用（不可调节）。 -->
+                    <ui:SettingsExpander x:Name="ExpanderLongPressUndoClear"
+                            Header="{x:Static props:CanvasStrings.Canvas_LongPressUndoClear}"
+                            Description="{x:Static props:CanvasStrings.Canvas_LongPressUndoClearHint}"
+                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchLongPressUndoClear, Mode=OneWay}"
+                            d:Visibility="Visible" d:IsExpanded="True">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Undo}" />
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchLongPressUndoClear"
+                                helpers:SettingsBinder.PropertyPath="Canvas.EnableLongPressUndoClear" />
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_LongPressUndoClearNotify}"
+                                    Description="{x:Static props:CanvasStrings.Canvas_LongPressUndoClearNotifyHint}"
+                                    IsEnabled="{Binding IsOn, ElementName=ToggleSwitchLongPressUndoClear}">
+                                <ui:ToggleSwitch helpers:SettingsBinder.PropertyPath="Canvas.NotifyAfterLongPressUndoClear" />
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
+
                     <controls:LabeledSettingsCard
                             Header="{x:Static props:CanvasStrings.Canvas_CompressPicturesUploaded}"
                             Icon="{x:Static ui:SegoeFluentIcons.Clear}"

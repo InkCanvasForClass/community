@@ -159,6 +159,21 @@
   <data name="Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint" xml:space="preserve">
     <value>开启后，点击白板工具栏「展台」将打开希沃视频展台（需已安装）；关闭则使用内置展台。</value>
   </data>
+  <data name="Canvas_LongPressUndoClear" xml:space="preserve">
+    <value>长按撤销按钮清屏</value>
+  </data>
+  <data name="Canvas_LongPressUndoClearHint" xml:space="preserve">
+    <value>在撤销按钮上按住约 0.8 秒即可清空画布，清屏后仍可撤销恢复；快速点击仍是普通撤销</value>
+  </data>
+  <data name="Canvas_LongPressUndoClearNotification" xml:space="preserve">
+    <value>已通过长按撤销按钮清屏，可点击撤销恢复</value>
+  </data>
+  <data name="Canvas_LongPressUndoClearNotify" xml:space="preserve">
+    <value>清屏后发送通知</value>
+  </data>
+  <data name="Canvas_LongPressUndoClearNotifyHint" xml:space="preserve">
+    <value>长按撤销清屏后，在通知中心显示一条提示</value>
+  </data>
   <data name="Canvas_MergeInkSmoothingWithUndo" xml:space="preserve">
     <value>将墨迹平滑与原墨迹合并撤销</value>
   </data>
