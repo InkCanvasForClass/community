@@ -43,6 +43,13 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             // 追加插件注册的白板工具栏组件。
             foreach (var pluginItem in _pluginItems)
             {
+                if (_items.Any(item => string.Equals(item.Id, pluginItem.Id, StringComparison.OrdinalIgnoreCase)))
+                {
+                    LogHelper.WriteLogToFile(
+                        $"BoardToolbarRegistry: 插件白板工具栏项 ID 冲突 [{pluginItem.Id}]",
+                        LogHelper.LogType.Warning);
+                    continue;
+                }
                 _items.Add(new PluginBoardToolbarItemWrapper(pluginItem));
             }
 
@@ -61,23 +68,28 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
         /// 注册一个插件白板工具栏组件。首个注册的插件启动时把组件追加进 active 配置（默认 center→tools），
         /// 后续启动只加入组件库，避免用户删除组件后重启又被自动加回。
         /// </summary>
-        public static void RegisterPluginItem(PluginToolbarItemInfo itemInfo, bool autoAddToActiveConfig = true)
+        public static bool RegisterPluginItem(
+            PluginToolbarItemInfo itemInfo,
+            bool autoAddToActiveConfig = true)
         {
-            if (itemInfo == null || string.IsNullOrEmpty(itemInfo.Id)) return;
-            if (_pluginItems.Any(item => string.Equals(item.Id, itemInfo.Id, StringComparison.OrdinalIgnoreCase))) return;
+            if (itemInfo == null || string.IsNullOrWhiteSpace(itemInfo.Id)) return false;
+            if (_pluginItems.Any(item =>
+                    string.Equals(item.Id, itemInfo.Id, StringComparison.OrdinalIgnoreCase))) return false;
 
             _pluginItems.Add(itemInfo);
             LogHelper.WriteLogToFile($"BoardToolbarRegistry: 插件注册白板工具栏组件 [{itemInfo.Id}] (autoAddToActiveConfig={autoAddToActiveConfig})", LogHelper.LogType.Info);
-
-            if (autoAddToActiveConfig)
+            if (autoAddToActiveConfig) EnsurePluginItemInActiveConfig(itemInfo.Id);
+            if (_items == null) return true;
+            if (_items.Any(item => string.Equals(item.Id, itemInfo.Id, StringComparison.OrdinalIgnoreCase)))
             {
-                EnsurePluginItemInActiveConfig(itemInfo.Id);
+                LogHelper.WriteLogToFile(
+                    $"BoardToolbarRegistry: 插件白板工具栏项 ID 冲突 [{itemInfo.Id}]",
+                    LogHelper.LogType.Warning);
+                _pluginItems.Remove(itemInfo);
+                return false;
             }
-
-            if (_items != null)
-            {
-                _items.Add(new PluginBoardToolbarItemWrapper(itemInfo));
-            }
+            _items.Add(new PluginBoardToolbarItemWrapper(itemInfo));
+            return true;
         }
 
         private static void EnsurePluginItemInActiveConfig(string itemId)

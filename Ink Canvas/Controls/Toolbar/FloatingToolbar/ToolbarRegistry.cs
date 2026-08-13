@@ -231,10 +231,10 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             return _items;
         }
 
-        public static void RegisterPluginItem(PluginToolbarItemInfo itemInfo, bool autoAddToActiveConfig = true)
+        public static bool RegisterPluginItem(PluginToolbarItemInfo itemInfo, bool autoAddToActiveConfig = true)
         {
-            if (itemInfo == null || string.IsNullOrEmpty(itemInfo.Id)) return;
-            if (_pluginItems.Any(item => string.Equals(item.Id, itemInfo.Id, StringComparison.OrdinalIgnoreCase))) return;
+            if (itemInfo == null || string.IsNullOrEmpty(itemInfo.Id)) return false;
+            if (_pluginItems.Any(item => string.Equals(item.Id, itemInfo.Id, StringComparison.OrdinalIgnoreCase))) return false;
 
             _pluginItems.Add(itemInfo);
             LogHelper.WriteLogToFile($"ToolbarRegistry: 插件注册工具栏项 [{itemInfo.Id}] (autoAddToActiveConfig={autoAddToActiveConfig})", LogHelper.LogType.Info);
@@ -248,6 +248,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             {
                 _items.Add(new PluginToolbarItemWrapper(itemInfo));
             }
+            return true;
         }
 
         private static void EnsurePluginItemInActiveConfig(string itemId)
@@ -301,8 +302,11 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 item => string.Equals(item.Id, itemId, StringComparison.OrdinalIgnoreCase)) > 0;
 
             // _items 里存的是包着 PluginToolbarItemInfo 的 wrapper，同样持有插件委托，必须一并移除。
-            _items?.RemoveAll(item => item is PluginToolbarItemWrapper
-                                      && string.Equals(item.Id, itemId, StringComparison.OrdinalIgnoreCase));
+            if (_items != null)
+            {
+                removed |= _items.RemoveAll(item => item is PluginToolbarItemWrapper
+                                                    && string.Equals(item.Id, itemId, StringComparison.OrdinalIgnoreCase)) > 0;
+            }
 
             if (removed)
                 LogHelper.WriteLogToFile($"ToolbarRegistry: 已注销插件工具栏项 [{itemId}]", LogHelper.LogType.Info);
