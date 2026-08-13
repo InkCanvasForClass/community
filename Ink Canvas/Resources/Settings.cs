@@ -516,6 +516,21 @@ namespace Ink_Canvas
         [JsonProperty("enableNativeInkPrediction")]
         public bool EnableNativeInkPrediction { get; set; } = true;
 
+        /// <summary>
+        /// 是否启用 WPF Stylus/Touch 回退输入源。
+        /// 
+        /// 主流现代触摸屏/笔会通过 WM_POINTER 被 NativePointerInputSource 采集，
+        /// 低延迟且不会重复。开启回退会同时挂载 WPF Stylus/Touch RoutedEvent
+        /// 到同一 NativeInkController → 对同一块手势段重复 Append 两次，导致：
+        ///   - 笔画抖动/双线/烘干时坐标不重合
+        ///   - 撤销栈翻倍
+        /// 
+        /// 仅当设备是老式 USB 数字化仪/单片电阻屏（完全收不到 WM_POINTER）时才需要打开。
+        /// 默认 false：关闭 WPF 桥，彻底避免双源抖动。
+        /// </summary>
+        [JsonProperty("useWpfStylusFallback")]
+        public bool UseWpfStylusFallback { get; set; } = false;
+
     }
 
     public enum OptionalOperation
@@ -530,6 +545,12 @@ namespace Ink_Canvas
         [JsonIgnore]
         public bool IsEnableTwoFingerGesture => IsEnableTwoFingerZoom || IsEnableTwoFingerTranslate || IsEnableTwoFingerRotation
             || IsEnableTwoFingerZoomBoard || IsEnableTwoFingerTranslateBoard || IsEnableTwoFingerRotationBoard;
+        /// <summary>桌面/屏幕批注模式（currentMode==0）是否启用了任意双指手势。</summary>
+        [JsonIgnore]
+        public bool IsEnableTwoFingerGestureForDesktop => IsEnableTwoFingerZoom || IsEnableTwoFingerTranslate || IsEnableTwoFingerRotation;
+        /// <summary>白板模式（currentMode==1）是否启用了任意双指手势。</summary>
+        [JsonIgnore]
+        public bool IsEnableTwoFingerGestureForBoard => IsEnableTwoFingerZoomBoard || IsEnableTwoFingerTranslateBoard || IsEnableTwoFingerRotationBoard;
         [JsonIgnore]
         public bool IsEnableTwoFingerGestureTranslateOrRotation => IsEnableTwoFingerTranslate || IsEnableTwoFingerRotation
             || IsEnableTwoFingerTranslateBoard || IsEnableTwoFingerRotationBoard;

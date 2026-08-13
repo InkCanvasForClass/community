@@ -18,9 +18,10 @@ namespace Ink_Canvas.Ink.Native
         // 时间戳异常回退时用的名义报点间隔。
         private const long DefaultStepMicroseconds = 10_000L;
 
-        // 预测点数：拉满 18 个让点距变小（24ms 视界 / 18 = 1.33ms/步 ≈ 1-2px 步长，
-        // D2D 折线接近视觉连续曲线，避免"拉长的几条线"观感）。
-        private const int PredictionPointCount = 18;
+        // 方案E：预测点数从 18 收紧到 8 个。减少外推步数能直接压缩曲率/加速度
+        // 的累积误差，尾端与真实指针位置的最大偏差显著降低；配合 MaxPredictionDistancePx=30
+        // 仍能提供可感知的低延迟笔尾，同时不会让烘干重影被肉眼察觉。
+        private const int PredictionPointCount = 8;
 
         // 速度估计窗口：单段差分对报点间隔抖动过于敏感，用指数加权的最近若干段取代。
         private const int VelocityWindowSegments = 5;
@@ -30,9 +31,14 @@ namespace Ink_Canvas.Ink.Native
         // 真实速度低于此值时不再强制返回空，而是按一档极小速度继续外推，
         // 避免加速度/减速阶段的帧间笔尾闪烁消失。`Build` 仍会在点数不足、停驻、完全 NaN 时返回空。
         private const double MinEffectiveSpeedPxPerSecond = 5.0;
-        private const double MaxPredictionDistancePx = 50.0;
+        // 方案E：把预测上限从 50px 收紧到 30px，避免高速/抖动触摸屏上
+        // 预测尾外推过远，导致尾端与真实墨迹偏差过大，烘干时肉眼可见双线。
+        private const double MaxPredictionDistancePx = 30.0;
         // 低速下限：速度极慢时预测尾也不小于此值，保证低速跟手（可感知的预测尾）。
         private const double MinPredictionDistancePx = 12.0;
+        // 方案E：每帧预测点上限。点数越少几何/采样越保守，尾端偏离真实轨迹
+        // 的概率越低；同时减少外推步数让曲率累积误差被压缩。
+        private const int MaxPredictionPointCount = 8;
         // 曲率外推单步最大转角（弧度，≈7°）。配合 18 个预测点，最大总转角 ≈126°，
         // 加上距离 cap 截断，笔尾呈自然弧线，避免小半径+高速下"瞬时甩飞"。
         private const double MaxStepAngleRadians = 0.12;
@@ -369,7 +375,15 @@ namespace Ink_Canvas.Ink.Native
         {
             // 点数恒定，步长连续随视界变化：视界平滑变化时笔尾长度也连续变化，
             // 不会因为点数量化而整段跳变。
-            pointCount = PredictionPointCount;
+            // 方案E：再被 MaxPredictionPointCount 上限夹一次（当前 PredictionPointCount=8，
+            // 已是最小；作为防御性裁剪，防止未来调整常量时意外超出）。
+            pointCount = Math.Min(PredictionPointCount, Math.Max(1, MaxPredictionPointCount));
+            if (horizonMicroseconds <= 0 || pointCount <= 0)
+            {
+                pointCount = 0;
+                stepMicroseconds = 0;
+                return;
+            }
             stepMicroseconds = (long)(horizonMicroseconds / pointCount);
         }
 

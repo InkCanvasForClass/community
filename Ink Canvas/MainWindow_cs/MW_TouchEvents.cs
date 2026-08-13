@@ -2110,9 +2110,17 @@ namespace Ink_Canvas
                 lastTouchDownStrokeCollection = inkCanvas.Strokes.Clone();
             }
 
-            if (dec.Count > 1 || isSingleFingerDragMode || !Settings.Gesture.IsEnableTwoFingerGesture)
+            // 手势配置与实际处理不符的根因：IsEnableTwoFingerGesture 把桌面+白板设置全 OR 在一起，
+            // 导致白板开了手势但桌面没开时，桌面模式第二指落下也会触发 EditingMode=None 中断书写。
+            // 修复：根据 currentMode 选择对应模式的设置。
+            bool isBoardModeForGesture = currentMode == 1;
+            bool isTwoFingerGestureEnabledForCurrentMode = isBoardModeForGesture
+                ? Settings.Gesture.IsEnableTwoFingerGestureForBoard
+                : Settings.Gesture.IsEnableTwoFingerGestureForDesktop;
+
+            if (dec.Count > 1 || isSingleFingerDragMode || !isTwoFingerGestureEnabledForCurrentMode)
             {
-                if (isInMultiTouchMode || !Settings.Gesture.IsEnableTwoFingerGesture) return;
+                if (isInMultiTouchMode || !isTwoFingerGestureEnabledForCurrentMode) return;
                 if (inkCanvas.EditingMode == InkCanvasEditingMode.None ||
                     inkCanvas.EditingMode == InkCanvasEditingMode.Select) return;
                 var timeSinceLastTouch = (DateTime.Now - lastTouchDownTime).TotalMilliseconds;
@@ -2564,7 +2572,13 @@ namespace Ink_Canvas
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
                 return;
 
-            if (isInMultiTouchMode || (!Settings.Gesture.IsEnableTwoFingerGesture && !IsBoardRoamingMode)) return;
+            if (isInMultiTouchMode) return;
+
+            bool isBoardMode = currentMode == 1;
+            bool isTwoFingerGestureEnabled = isBoardMode
+                ? Settings.Gesture.IsEnableTwoFingerGestureForBoard
+                : Settings.Gesture.IsEnableTwoFingerGestureForDesktop;
+            if (!isTwoFingerGestureEnabled && !IsBoardRoamingMode) return;
 
             bool hasMultipleManipulators = e.Manipulators.Count() >= 2;
             bool shouldUseTwoFingerGesture = (dec.Count >= 2 && hasMultipleManipulators &&
@@ -2580,7 +2594,6 @@ namespace Ink_Canvas
 
                 var m = new Matrix();
 
-                bool isBoardMode = currentMode == 1;
                 bool enableTranslate = IsBoardRoamingMode || (isBoardMode ? Settings.Gesture.IsEnableTwoFingerTranslateBoard : Settings.Gesture.IsEnableTwoFingerTranslate);
                 bool enableRotate = !IsBoardRoamingMode && (isBoardMode ? Settings.Gesture.IsEnableTwoFingerRotationBoard : Settings.Gesture.IsEnableTwoFingerRotation);
                 bool enableZoom = !IsBoardRoamingMode && (isBoardMode ? Settings.Gesture.IsEnableTwoFingerZoomBoard : Settings.Gesture.IsEnableTwoFingerZoom);

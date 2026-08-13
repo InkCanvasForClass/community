@@ -188,6 +188,45 @@ namespace Ink_Canvas.Ink.Native
             _workEvent.Set();
         }
 
+        /// <summary>修复P1/P2加强：强制把湿墨 SwapChain 清成全透明。
+        /// 用于「清空墨迹 / 切页 / 关闭湿墨层 / 烘干后清预测层」之后，确保 DirectComposition
+        /// overlay 的最后一帧不是旧像素残留（否则新操作触发 Present 前会闪一下）。
+        /// 线程安全：只设 flag（volatile bool），不直接调 D2D。渲染线程在下次 Apply 时执行 clear。
+        /// 调用后会 SignalWork 唤醒渲染线程立即处理。</summary>
+        public void ForceClearIdle()
+        {
+            if (_disposed || _shutdownRequested)
+                return;
+            try
+            {
+                if (_renderer is DirectCompositionInkRenderer dcomp)
+                    dcomp.PresentIdleClear();
+                else
+                    _renderer?.PresentIdleClear();
+                // 唤醒渲染线程处理 pendingIdleClear flag。
+                _workEvent.Set();
+            }
+            catch
+            {
+                // best-effort：清屏失败绝不抛到业务层
+            }
+        }
+
+        /// <summary>烘干统一清预测层：是否存在任何「还在写」的活跃 session（没 End 也没待退休）。
+        /// UI 线程只读，返回渲染线程最近一次 Apply 的快照。
+        /// 用于判断「烘干后能不能把湿墨 SwapChain 整体清透明」，避免误擦多指同时写时另一笔正在绘制的湿墨。</summary>
+        public bool HasActiveWetInkSessions
+        {
+            get
+            {
+                if (_disposed || _shutdownRequested) return false;
+                if (_renderer is DirectCompositionInkRenderer dcomp)
+                    return dcomp.HasActiveWetInkSessions;
+                var r = _renderer;
+                return r != null && r.HasActiveWetInkSessions;
+            }
+        }
+
         public void Dispose()
         {
             if (_disposed)
@@ -308,11 +347,25 @@ namespace Ink_Canvas.Ink.Native
                 return;
             }
 
-            if ((batch == null
-                    || (batch.OrderedItems.Count == 0
-                        && batch.BoundaryCommands.Count == 0
-                        && batch.RenderSnapshots.Count == 0))
-                && !targetDirty)
+            var batchEmpty = batch == null
+                             || (batch.OrderedItems.Count == 0
+                                 && batch.BoundaryCommands.Count == 0
+                                 && batch.RenderSnapshots.Count == 0);
+            // 方案G(2/2)：即使没有新命令（空 batch），只要 renderer 内部还有
+            // 活动 session / 待退休 session / 需要 Present 的标记，就仍然
+            // 触发一次 Apply 做 Present（传空 batch），避免抬笔尾帧/退休帧
+            // 因没有后续事件驱动而"卡在 SwapChain 前一帧"，形成烘干残像。
+            var rendererHasPendingWork = false;
+            try
+            {
+                if (_renderer is DirectCompositionInkRenderer dcomp)
+                    rendererHasPendingWork = dcomp.HasPendingVisualWork;
+            }
+            catch
+            {
+                // type probe failure treated as false
+            }
+            if (batchEmpty && !targetDirty && !rendererHasPendingWork)
             {
                 return;
             }

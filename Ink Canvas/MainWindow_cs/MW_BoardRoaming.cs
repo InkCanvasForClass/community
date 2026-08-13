@@ -181,6 +181,22 @@ namespace Ink_Canvas
 
                 _boardRoamingWorldBounds = Rect.Union(viewport, contentBounds);
                 _boardRoamingWorldBounds.Inflate(horizontalPadding, verticalPadding);
+
+                // 修复P3：最终 worldBounds 单边尺寸再次 clamp（8192 安全上限）。
+                // 如果用户墨迹非常分散，Inflate 之后边界会远超 RenderTargetBitmap 上限，
+                // 这里把 Width/Height 等比缩到上限内，保证后续 VisualBrush / RTB 不炸。
+                const double maxSide = 8192.0;
+                if (_boardRoamingWorldBounds.Width > maxSide || _boardRoamingWorldBounds.Height > maxSide)
+                {
+                    var sx = maxSide / _boardRoamingWorldBounds.Width;
+                    var sy = maxSide / _boardRoamingWorldBounds.Height;
+                    var s = Math.Min(sx, sy);
+                    var newW = _boardRoamingWorldBounds.Width * s;
+                    var newH = _boardRoamingWorldBounds.Height * s;
+                    var cx = _boardRoamingWorldBounds.X + _boardRoamingWorldBounds.Width * 0.5;
+                    var cy = _boardRoamingWorldBounds.Y + _boardRoamingWorldBounds.Height * 0.5;
+                    _boardRoamingWorldBounds = new Rect(cx - newW * 0.5, cy - newH * 0.5, newW, newH);
+                }
             }
 
             const double previewWidth = 352;
@@ -220,18 +236,48 @@ namespace Ink_Canvas
 
         private Rect GetBoardRoamingContentBounds()
         {
+            // 修复P3：单边安全上限。WPF RenderTargetBitmap 在软件渲染/部分集成显卡下
+            // 单维度超过 8192 会直接抛异常或返回空图；个别超大坐标来自 NaN/异常保存文件
+            // 也会直接拉爆 Rect。先在源头把每个边界都夹到合理区间。
+            const double maxSingleSide = 8192.0;
             var result = Rect.Empty;
+
             foreach (var stroke in inkCanvas.Strokes)
-                result.Union(stroke.GetBounds());
+            {
+                Rect b;
+                try { b = stroke.GetBounds(); }
+                catch
+                {
+                    continue;
+                }
+                if (!b.IsEmpty && double.IsFinite(b.X) && double.IsFinite(b.Y)
+                    && double.IsFinite(b.Width) && double.IsFinite(b.Height)
+                    && b.Width <= maxSingleSide && b.Height <= maxSingleSide)
+                {
+                    result.Union(b);
+                }
+            }
 
             foreach (UIElement child in inkCanvas.Children)
             {
                 if (child is not FrameworkElement element) continue;
                 try
                 {
+                    var aw = element.ActualWidth;
+                    var ah = element.ActualHeight;
+                    if (!double.IsFinite(aw) || !double.IsFinite(ah)
+                        || aw <= 0 || ah <= 0 || aw > maxSingleSide || ah > maxSingleSide)
+                    {
+                        continue;
+                    }
                     var bounds = element.TransformToAncestor(inkCanvas)
-                        .TransformBounds(new Rect(0, 0, element.ActualWidth, element.ActualHeight));
-                    result.Union(bounds);
+                        .TransformBounds(new Rect(0, 0, aw, ah));
+                    if (!bounds.IsEmpty && double.IsFinite(bounds.X) && double.IsFinite(bounds.Y)
+                        && double.IsFinite(bounds.Width) && double.IsFinite(bounds.Height)
+                        && bounds.Width <= maxSingleSide && bounds.Height <= maxSingleSide)
+                    {
+                        result.Union(bounds);
+                    }
                 }
                 catch (InvalidOperationException)
                 {
@@ -250,8 +296,14 @@ namespace Ink_Canvas
         {
             try
             {
+                // 修复P3：RTB 单边尺寸硬上限 2048（预览实际仅 352x198，再大浪费显存，
+                // 且在部分老驱动/集成显卡上 >2048 直接渲染失败）。
+                const int maxBitmapSide = 2048;
                 var bitmapWidth = Math.Max(1, (int)Math.Ceiling(previewWidth));
                 var bitmapHeight = Math.Max(1, (int)Math.Ceiling(previewHeight));
+                if (bitmapWidth > maxBitmapSide) bitmapWidth = maxBitmapSide;
+                if (bitmapHeight > maxBitmapSide) bitmapHeight = maxBitmapSide;
+
                 var drawingVisual = new DrawingVisual();
                 using (var context = drawingVisual.RenderOpen())
                 {
@@ -259,15 +311,37 @@ namespace Ink_Canvas
                     var background = GridBackgroundCover.Background ?? Brushes.White;
                     context.DrawRectangle(background, null, _boardRoamingPreviewMovementBounds);
 
-                    var visualBrush = new VisualBrush(inkCanvas)
+                    // 修复P3：优先尝试 VisualBrush 快速路径；失败时降级为「手动画每一笔 stroke
+                    // + 每个子元素缩略图」，绕开 inkCanvas 视觉树过大导致的 RTB/VisualBrush
+                    // 内部异常（墨迹过多 / 子元素过多 / 布局脏都可能触发）。
+                    bool fallbackNeeded;
+                    try
                     {
-                        Stretch = Stretch.Fill,
-                        ViewboxUnits = BrushMappingMode.Absolute,
-                        Viewbox = worldBounds,
-                        ViewportUnits = BrushMappingMode.Absolute,
-                        Viewport = _boardRoamingPreviewMovementBounds
-                    };
-                    context.DrawRectangle(visualBrush, null, _boardRoamingPreviewMovementBounds);
+                        var visualBrush = new VisualBrush(inkCanvas)
+                        {
+                            Stretch = Stretch.Fill,
+                            ViewboxUnits = BrushMappingMode.Absolute,
+                            Viewbox = worldBounds,
+                            ViewportUnits = BrushMappingMode.Absolute,
+                            Viewport = _boardRoamingPreviewMovementBounds
+                        };
+                        // 冻结失败不影响使用，但能减少内存占用——能冻就冻。
+                        try { if (visualBrush.CanFreeze) visualBrush.Freeze(); } catch { /* best-effort */ }
+                        context.DrawRectangle(visualBrush, null, _boardRoamingPreviewMovementBounds);
+                        fallbackNeeded = false;
+                    }
+                    catch
+                    {
+                        fallbackNeeded = true;
+                    }
+
+                    if (fallbackNeeded)
+                    {
+                        DrawBoardRoamingStrokesFallback(
+                            context,
+                            worldBounds,
+                            _boardRoamingPreviewMovementBounds);
+                    }
                 }
 
                 var bitmap = new RenderTargetBitmap(
@@ -282,8 +356,104 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"生成漫游预览失败: {ex.Message}", LogHelper.LogType.Warning);
+                // 修复P3：记录完整堆栈，便于定位到底是 VisualBrush 还是 RTB 还是 stroke.Transform
+                // 导致的异常；之前只记 Message 丢失了 90% 诊断信息。
+                LogHelper.WriteLogToFile(
+                    $"生成漫游预览失败: {ex}",
+                    LogHelper.LogType.Warning);
                 return null;
+            }
+        }
+
+        /// <summary>修复P3：VisualBrush(inkCanvas) 失败时的降级渲染路径。
+        /// 直接用 DrawingContext 迭代每一笔 Stroke + 每个 FrameworkElement，
+        /// 自己做 world→preview 的坐标映射，不走完整 WPF 布局/渲染管线，
+        /// 在墨迹极多/子元素极多的白板上稳定度显著更高。</summary>
+        private void DrawBoardRoamingStrokesFallback(
+            DrawingContext context,
+            Rect worldBounds,
+            Rect previewBounds)
+        {
+            if (worldBounds.Width <= 0 || worldBounds.Height <= 0
+                || previewBounds.Width <= 0 || previewBounds.Height <= 0)
+            {
+                return;
+            }
+
+            var sx = previewBounds.Width / worldBounds.Width;
+            var sy = previewBounds.Height / worldBounds.Height;
+            var scale = Math.Min(sx, sy);
+            if (scale <= 0) return;
+
+            var offsetX = previewBounds.X + (previewBounds.Width - worldBounds.Width * scale) * 0.5;
+            var offsetY = previewBounds.Y + (previewBounds.Height - worldBounds.Height * scale) * 0.5;
+
+            var worldToPreview = Matrix.Identity;
+            worldToPreview.Translate(-worldBounds.X, -worldBounds.Y);
+            worldToPreview.Scale(scale, scale);
+            worldToPreview.Translate(offsetX, offsetY);
+
+            // 安全上限：超过 10 万笔时只画前 5 万笔（预览本来就是缩小的，
+            // 大量重叠笔迹肉眼看和全画无异，避免卡死线程）。
+            const int maxStrokes = 50000;
+            var drawn = 0;
+            var previewTransform = new MatrixTransform(worldToPreview);
+            try { if (previewTransform.CanFreeze) previewTransform.Freeze(); } catch { /* best-effort */ }
+            foreach (var stroke in inkCanvas.Strokes)
+            {
+                if (drawn++ >= maxStrokes) break;
+                try
+                {
+                    // 用 Stroke 的 DrawingAttributes 取原始线宽，然后乘以预览缩放比，
+                    // 最后对 Geometry 统一应用 world→preview 矩阵。
+                    var da = stroke.DrawingAttributes;
+                    var penWidth = Math.Max(0.1, da.Width * scale);
+                    var pen = new Pen(new SolidColorBrush(da.Color), penWidth);
+                    try { if (pen.CanFreeze) pen.Freeze(); } catch { /* best-effort */ }
+                    var geo = stroke.GetGeometry(da);
+                    if (geo == null) continue;
+                    geo.Transform = previewTransform;
+                    context.DrawGeometry(null, pen, geo);
+                }
+                catch
+                {
+                    // 单笔画失败就跳过（可能是 StylusPoints 异常），继续其余笔画。
+                }
+            }
+
+            // 子元素：只画截图作为缩略（避免再递归渲染复杂布局）。
+            // 数量做上限控制，和 strokes 一起共享 maxStrokes 的"节流精神"。
+            const int maxChildren = 2000;
+            var childDrawn = 0;
+            foreach (UIElement child in inkCanvas.Children)
+            {
+                if (childDrawn++ >= maxChildren) break;
+                if (child is not FrameworkElement element) continue;
+                try
+                {
+                    var aw = element.ActualWidth;
+                    var ah = element.ActualHeight;
+                    if (!double.IsFinite(aw) || !double.IsFinite(ah) || aw <= 0 || ah <= 0)
+                        continue;
+                    var elementInCanvasBounds = element.TransformToAncestor(inkCanvas)
+                        .TransformBounds(new Rect(0, 0, aw, ah));
+                    // Matrix 没有 TransformBounds：用 Rect.Transform(matrix) 替代。
+                    var elementInPreview = elementInCanvasBounds;
+                    elementInPreview.Transform(worldToPreview);
+                    if (elementInPreview.Width <= 0 || elementInPreview.Height <= 0) continue;
+
+                    // 子元素简化画一个半透明色块 + 边框（代表位置）；
+                    // 如果是图片/媒体再尝试抓缩略，不做重的 RTB 递归渲染。
+                    var fillBrush = new SolidColorBrush(Color.FromArgb(0x60, 0x80, 0x80, 0x80));
+                    try { if (fillBrush.CanFreeze) fillBrush.Freeze(); } catch { /* best-effort */ }
+                    var pen = new Pen(Brushes.DimGray, 0.5);
+                    try { if (pen.CanFreeze) pen.Freeze(); } catch { /* best-effort */ }
+                    context.DrawRectangle(fillBrush, pen, elementInPreview);
+                }
+                catch
+                {
+                    // 单个子元素失败跳过
+                }
             }
         }
 

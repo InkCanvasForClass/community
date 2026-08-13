@@ -58,6 +58,17 @@ namespace Ink_Canvas
 
         internal void TryStartNativeWetInkPipeline()
         {
+            var diagTool = ResolveLogicalInkTool();
+            LogHelper.WriteLogToFile(
+                $"[NativeInk] 请求启动 WinRT 湿墨管线：" +
+                $"UseLegacyInkSystem={Settings?.Canvas?.UseLegacyInkSystem}  " +
+                $"UseLegacyWetInk={Settings?.Canvas?.UseLegacyWetInk}  " +
+                $"Tool={diagTool}  " +
+                $"Started={_nativeWetInkStarted}  " +
+                $"Disabled={_nativeWetInkDisabled}  " +
+                $"inkCanvasNull={inkCanvas == null}",
+                LogHelper.LogType.Trace);
+
             if (Settings?.Canvas?.UseLegacyInkSystem == true)
             {
                 LogHelper.WriteLogToFile(
@@ -77,25 +88,49 @@ namespace Ink_Canvas
             // 启动入口由上层（SetCurrentToolMode / SyncNativeWetInkPipelineWithLogicalTool）
             // 在请求 Ink 时调用；此处只做幂等/失败守卫，并兜底防止光标/橡皮擦等模式下误启。
             if (inkCanvas == null)
+            {
+                LogHelper.WriteLogToFile("[NativeInk] 跳过：inkCanvas == null", LogHelper.LogType.Trace);
                 return;
+            }
 
-            if (ResolveLogicalInkTool() != LogicalInkTool.Pen)
+            if (diagTool != LogicalInkTool.Pen)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[NativeInk] 跳过：当前工具不是 Pen（ResolveLogicalInkTool={diagTool}），" +
+                    $"_currentToolMode={_currentToolMode}  inkCanvas.EditingMode={inkCanvas.EditingMode}",
+                    LogHelper.LogType.Trace);
                 return;
+            }
 
             if (_nativeWetInkStarted || _nativeWetInkDisabled)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[NativeInk] 跳过：管线状态 Started={_nativeWetInkStarted} Disabled={_nativeWetInkDisabled}",
+                    LogHelper.LogType.Trace);
                 return;
+            }
 
             try
             {
                 var hwnd = new WindowInteropHelper(this).Handle;
                 if (hwnd == IntPtr.Zero)
+                {
+                    LogHelper.WriteLogToFile("[NativeInk] 跳过：HWND 尚未就绪", LogHelper.LogType.Trace);
                     return;
+                }
 
                 var hwndSource = HwndSource.FromHwnd(hwnd);
                 if (hwndSource == null)
+                {
+                    LogHelper.WriteLogToFile("[NativeInk] 跳过：HwndSource 为空", LogHelper.LogType.Trace);
                     return;
+                }
 
                 var dpi = GetNativeDpiScales();
+                LogHelper.WriteLogToFile(
+                    $"[NativeInk] ① 创建内部对象：Dpi=({dpi.X:F2},{dpi.Y:F2})  " +
+                    $"Mailbox/Controller/Pump/Fence…",
+                    LogHelper.LogType.Trace);
                 _nativeWetInkMailbox = new WetInkCommandMailbox();
                 _nativeInkSessions = new NativeInkSessionManager();
                 _nativeInkController = new NativeInkController(_nativeInkSessions, _nativeWetInkMailbox);
@@ -104,6 +139,7 @@ namespace Ink_Canvas
                     () => _wetInkWindowHost?.SignalWork());
                 _wpfRenderFrameFence = new WpfRenderFrameFence(Dispatcher);
 
+                LogHelper.WriteLogToFile("[NativeInk] ② 创建 WetInkWindowHost 并 Start（DComp/D2D/D3D 激活）", LogHelper.LogType.Trace);
                 _wetInkWindowHost = new WetInkWindowHost(
                     hwnd,
                     _nativeWetInkMailbox,
@@ -112,18 +148,28 @@ namespace Ink_Canvas
                     OnNativeWetInkFatalError);
                 _wetInkWindowHost.Start(BuildWetInkTargetSnapshot());
 
+                LogHelper.WriteLogToFile("[NativeInk] ③ 挂载 NativePointerInputSource", LogHelper.LogType.Trace);
                 _nativePointerInputSource = new NativePointerInputSource(
                     hwndSource,
                     OnNativePointerInput,
                     dpi.X,
                     dpi.Y);
-                // Legacy WPF stylus stack can consume pen/touch before WM_POINTER reaches
-                // the HWND (common on touch films). Bridge those samples into the same
-                // native controller; no legacy wet renderer is re-enabled.
-                _wpfPointerInputSource = new WpfPointerInputSource(
-                    this,
-                    inkCanvas,
-                    OnNativePointerInput);
+
+                // WPF Stylus/Touch 回退桥：默认不挂（Settings.Canvas.UseWpfStylusFallback=false），
+                // 从根源消除「WM_POINTER + WPF Stylus」双源同时打同一块段的抖动/双线/烘干重影。
+                // 仅当设备是老式 USB 数字化仪/单片电阻屏（完全收不到 WM_POINTER）时，
+                // 用户在设置页打开后才启用。
+                var useWpfFallback = Settings?.Canvas?.UseWpfStylusFallback == true;
+                LogHelper.WriteLogToFile(
+                    $"[NativeInk] ③-2 WPF Stylus/Touch 回退桥：{(useWpfFallback ? "启用（兼容老设备）" : "禁用（避免双源抖动）")}",
+                    LogHelper.LogType.Trace);
+                if (useWpfFallback)
+                {
+                    _wpfPointerInputSource = new WpfPointerInputSource(
+                        this,
+                        inkCanvas,
+                        OnNativePointerInput);
+                }
 
                 WireNativeWetInkGeometryListeners();
                 EnsureNativePenPhysicalEditingMode();
@@ -143,6 +189,9 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile(
                     $"[WetInk] Failed to start native wet-ink pipeline: {ex}",
                     LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile(
+                    $"[NativeInk] 激活失败：{ex.GetType().Name} {ex.Message}",
+                    LogHelper.LogType.Trace);
                 DisableNativeWetInkAfterFailure(ex, notify: true);
             }
         }
@@ -299,6 +348,21 @@ namespace Ink_Canvas
                 StopAllPauseStraightenTimers();
                 RefreshOverlayVisibility();
                 _wetInkWindowHost?.SignalWork();
+
+                // 修复P1/P2加强：CancelAll/Reset 命令入邮箱后，延迟一次后台调 ForceClearIdle。
+                // 渲染线程 Drain 到 Reset 会 ClearSessions → Present 清空 SwapChain 主体；
+                // 这里再补一次 PresentIdleClear 作为兜底，彻底抹掉 FlipDiscard 表面上
+                // 任何仍可能残留的旧帧像素（含预测尾），避免"清空后再落笔旧预测重现"。
+                // DispatcherPriority.Background 确保 UI 线程先处理完清空操作的后续
+                // （Strokes.Clear、InvalidateVisual 等）再走。
+                if (_wetInkWindowHost != null)
+                {
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        try { _wetInkWindowHost.ForceClearIdle(); }
+                        catch { /* best-effort */ }
+                    }), DispatcherPriority.Background);
+                }
             }
             catch (Exception ex)
             {
@@ -693,15 +757,22 @@ namespace Ink_Canvas
                 ? batch.SamplesNewestFirst[0].TimestampMicroseconds
                 : DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() * 1000L;
 
+            // 方案2：预测开启期间，写的过程仍然显示预测尾（低延迟手感保留）；
+            // 但抬笔后：
+            //   (1) bakePredictionIntoRealInk = false  →  WPF 干墨只包含真实样本，不写预测外推点
+            //   (2) session.End(bake=false) 把 _predictedPoints 清空（NativeInkSession.End L199）
+            //   (3) NativeInkController.End 在 session.End 之后 CreateNextSnapshot
+            //       → PublishEnd 发出的最后一帧天然不带预测尾
+            //       → 湿墨 overlay 退休前显示的尾巴与干墨 100% 重合，不会出现两条线。
+            // 注意：FlushPointer 放在 End 之前把实时点送完；End 内部会再发裁剪后最终帧。
             _nativePointerUpdatePump?.FlushPointer(batch.PointerId);
-
-            // 预测尾烘焙进干墨：预测开启时抬笔把预测点并入真实点，落到画布。
-            var bakePrediction = Settings?.Canvas?.EnableNativeInkPrediction == true;
             var payload = _nativeInkController.End(
                 batch.PointerId,
                 endedAt,
                 ToInkCanvasSamples(batch.SamplesNewestFirst),
-                bakePredictionIntoRealInk: bakePrediction);
+                bakePredictionIntoRealInk: false);
+            // End 之后再 Flush 一次做兜底，确保残留预测尾帧被最新裁剪帧覆盖。
+            _nativePointerUpdatePump?.FlushPointer(batch.PointerId);
             RefreshOverlayVisibility();
             _wetInkWindowHost?.SignalWork();
 
@@ -843,6 +914,28 @@ namespace Ink_Canvas
                 // A retired session may be the last live wet visual; hide the
                 // overlay so it stops covering the main window's own content.
                 RefreshOverlayVisibility();
+
+                // 烘干统一清预测层（白板+批注模式通用，不影响撤回）：
+                // 现在刚刚烘干 Ack 完（真实墨迹已经进 inkCanvas.Strokes，撤回栈由 WPF 管理，
+                // 和湿墨 SwapChain 表面完全无关），如果此刻没有任何正在写的其他笔，
+                // 就把湿墨 overlay 的 SwapChain 表面整体清透明——之前残留的「预测残影」
+                // 会被彻底抹掉，不会再出现「新落笔时旧预测尾重现」或「清空后旧预测批量重现」。
+                // 为什么走 Dispatcher Background？
+                //   1) WPF 干墨可能还没合成到屏幕上，让它先在 Send 优先级把湿墨 Retire
+                //      视觉上处理完（RefreshOverlayVisibility），再 Background 清表面，
+                //      保证时序上用户看不到"湿墨突然消失"的空档。
+                //   2) 如果 HasActiveWetInkSessions 因为渲染线程还没更新最新快照返回 true
+                //      也没关系：下一笔烘干 Ack 时还会再检查；清 SwapChain 是幂等的，
+                //      漏一两次下次补上即可，用户无感。
+                if (_wetInkWindowHost != null
+                    && !_wetInkWindowHost.HasActiveWetInkSessions)
+                {
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        try { _wetInkWindowHost?.ForceClearIdle(); }
+                        catch { /* best-effort */ }
+                    }), DispatcherPriority.Background);
+                }
             }
 
             if (Dispatcher.CheckAccess())
@@ -1136,10 +1229,16 @@ namespace Ink_Canvas
             // 不受影响（DecidePen 要求 >=2 才进 CanvasGesture）。
             if (_pluginCanvasGestureHandler != null) return true;
 
+            // 修复：根据 currentMode 选择对应模式的双指手势设置，不再用合并属性。
+            bool isBoardMode = currentMode == 1;
+            bool isTwoFingerGestureEnabled = isBoardMode
+                ? Settings.Gesture.IsEnableTwoFingerGestureForBoard
+                : Settings.Gesture.IsEnableTwoFingerGestureForDesktop;
+
             if (IsInPPTPresentationMode)
                 return Settings.PowerPointSettings.IsEnableTwoFingerGestureInPresentationMode
-                       && Settings.Gesture.IsEnableTwoFingerGesture;
-            return Settings.Gesture.IsEnableTwoFingerGesture;
+                       && isTwoFingerGestureEnabled;
+            return isTwoFingerGestureEnabled;
         }
 
         private PalmRoutePolicy BuildPalmRoutePolicy()
@@ -1516,12 +1615,31 @@ namespace Ink_Canvas
         /// </summary>
         internal void SyncNativeWetInkPipelineWithLogicalTool()
         {
-            if (inkCanvas == null) return;
-            var tool = ResolveLogicalInkTool();
+            // 第一行就打日志：这是启动唯一入口，保证即便后续任何分支 return 都能在
+            // Debug Console 里看到 "[NativeInk]"，帮定位"管线看起来没激活"的根因。
+            var tool = inkCanvas == null ? LogicalInkTool.Cursor : ResolveLogicalInkTool();
+            LogHelper.WriteLogToFile(
+                $"[NativeInk] Sync 管线：inkCanvasNull={inkCanvas == null}  " +
+                $"Tool={tool}  _currentToolMode={_currentToolMode}  " +
+                $"EditingMode={inkCanvas?.EditingMode}  " +
+                $"PipelineStarted={_nativeWetInkStarted}  Disabled={_nativeWetInkDisabled}",
+                LogHelper.LogType.Trace);
+
+            if (inkCanvas == null)
+            {
+                LogHelper.WriteLogToFile("[NativeInk] Sync 跳过：inkCanvas == null", LogHelper.LogType.Trace);
+                return;
+            }
+
             if (tool == LogicalInkTool.Pen)
                 TryStartNativeWetInkPipeline();
             else
+            {
+                LogHelper.WriteLogToFile(
+                    $"[NativeInk] Sync：当前不是书写工具（Tool={tool}），卸载湿墨管线",
+                    LogHelper.LogType.Trace);
                 ShutdownNativeWetInkPipeline();
+            }
         }
 
         /// <summary>

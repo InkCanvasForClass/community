@@ -197,6 +197,14 @@ namespace Ink_Canvas
             _currentCommitType = CommitReason.ClearingCanvas;
             if (isErasedByCode) _currentCommitType = CommitReason.CodeInput;
 
+            // 修复P1/P2：清空干墨前必须先清掉原生湿墨管线中所有残留 session。
+            // 之前缺这一步时：
+            //   1. 用户写了一笔 → 停顿拉直（session仍Active未End/未Retire）
+            //   2. 点清空 → 只清 inkCanvas.Strokes，湿墨层 _sessions 仍保留旧session
+            //   3. 用户再落笔 → 新session触发Present → 湿墨层把所有_session重画一遍
+            //      → "之前的直线/预测尾"跟着新笔一起重新显示，且永远不烘干
+            CancelAllNativeWetInkSessions("clear-strokes");
+
             inkCanvas.Strokes.Clear();
             // 只隐藏 hint，不暂停（ClearStrokes 在切换页面、保存加载时都会被调用，
             // 设置 _edgeExpandHintSuspended 会导致后续书写永远无法触发提示）。

@@ -124,6 +124,15 @@ namespace Ink_Canvas.Ink.Native
 
         WetInkApplyResult Apply(WetInkMailboxBatch batch);
 
+        /// <summary>方案G：batch 为空时是否仍需要强制 Present 一次（避免尾帧丢包/残留）。
+        /// 渲染线程空转查询用。</summary>
+        bool HasPendingVisualWork { get; }
+
+        /// <summary>烘干统一清预测层：是否存在任何「还在写」的活跃 session（没 End 也没待退休）。
+        /// UI 线程只读，返回渲染线程最近一次 Apply 的快照。
+        /// 业务层在烘干 Ack 后判断：若 idle 则调用 PresentIdleClear 把 SwapChain 表面残留预测像素整体抹掉。</summary>
+        bool HasActiveWetInkSessions { get; }
+
         void PresentIdleClear();
     }
 }

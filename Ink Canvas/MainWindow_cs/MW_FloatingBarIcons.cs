@@ -4718,6 +4718,7 @@ namespace Ink_Canvas
                     case 0: //屏幕模式
                         VideoPresenter_OnExitWhiteboardMode();
                         currentMode = 0;
+                        SyncMultiTouchModeOnModeSwitch();
 
                         // 退出白板的公共兜底：所有入口（浮动栏按钮、白板工具栏、热键、自动收纳、IPC）
                         // 都汇聚到这里，统一按当前放映状态重新评估翻页条可见性。
@@ -4803,6 +4804,7 @@ namespace Ink_Canvas
                         break;
                     case 1: //黑板或白板模式
                         currentMode = 1;
+                        SyncMultiTouchModeOnModeSwitch();
                         AutomationBootstrap.Monitor?.NotifyInternalStateChanged();
                         GridBackgroundCover.Visibility = Visibility.Visible;
                         AnimationsHelper.ShowWithSlideFromBottomAndFade(BlackboardLeftSide);
@@ -6085,13 +6087,17 @@ namespace Ink_Canvas
         {
             try
             {
-                // 优先使用缓存的模式，避免在浮动栏刷新时返回过时的模式信息
-                if (!string.IsNullOrEmpty(_currentToolMode))
+                // 优先使用缓存的模式，避免在浮动栏刷新时返回过时的模式信息。
+                // 但启动早期缓存默认值是 "cursor"，而 inkCanvas.EditingMode 可能已经是 Ink。
+                // 因此只有当缓存 != cursor 时直接信任缓存；否则回落到 inkCanvas 推断，
+                // 避免 Window_Loaded 管线初始化阶段误判为光标模式 → 新管线永远不启动。
+                if (!string.IsNullOrEmpty(_currentToolMode)
+                    && !string.Equals(_currentToolMode, "cursor", StringComparison.OrdinalIgnoreCase))
                 {
                     return _currentToolMode;
                 }
 
-                // 如果缓存为空，则从inkCanvas状态推断模式
+                // 从 inkCanvas 状态推断模式（缓存为空或 cursor 默认值时使用）
                 if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
                 {
                     return "select";
@@ -6165,6 +6171,24 @@ namespace Ink_Canvas
             // 工具模式变化后同步刷新工具栏形态（批注/鼠标布局按 IsAnnotating 决定），
             // 否则会出现指示器已切到鼠标、形态仍停在批注的失步（退出白板时的两步走流程即如此）。
             UpdateToolbarComponentVisibility();
+
+            // 逻辑工具切换后，同步原生湿墨迹管线的启动/关闭：
+            // - Pen/Color → Try 启动 WinRT WM_POINTER + DComp 湿墨层
+            // - 其它工具 → 卸载湿墨层，把输入还给 WPF（浮动栏/边栏/设置弹窗/PPT 控件）
+            // 注意：不能靠 EditingModeChanged 驱动这步，因为 EnsureNativePenPhysicalEditingMode
+            // 会让逻辑 Pen 模式下物理 EditingMode 保持 None。
+            // 独立 try-catch：前序 UI 代码（RefreshLiquidGlassBarActiveState 等）在启动早期
+            // 可能抛异常，若不隔离会导致 WPF 静默吞异常 → 管线永远不启动。
+            try
+            {
+                SyncNativeWetInkPipelineWithLogicalTool();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[NativeInk] UpdateCurrentToolMode 内 Sync 管线失败: {ex.Message}",
+                    LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>

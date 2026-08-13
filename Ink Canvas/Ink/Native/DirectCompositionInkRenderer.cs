@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using Vortice.DCommon;
 using Vortice.Direct2D1;
@@ -29,6 +30,11 @@ namespace Ink_Canvas.Ink.Native
             new Dictionary<long, SessionResources>();
         private readonly List<WetInkRetirementAck> _pendingRetirementAcks =
             new List<WetInkRetirementAck>();
+        // 方案B：两阶段退休的阶段1缓存（RetireStroke→标记PendingRetire）。
+        // Present 完成后把里面的 acks 搬到 _pendingRetirementAcks，这样 "OnNativeWetInkRetired"
+        // 收到 ack 时，湿墨层实际上已经把最后一帧画出来了，不会出现空帧闪烘。
+        private readonly List<WetInkRetirementAck> _pendingRetirementCommands =
+            new List<WetInkRetirementAck>();
 
         private ID3D11Device _d3dDevice;
         private ID3D11DeviceContext _d3dContext;
@@ -51,6 +57,39 @@ namespace Ink_Canvas.Ink.Native
         private bool _deviceReady;
         private bool _needsPresent;
         private bool _disposed;
+        // 烘干统一清预测层：渲染线程每 Apply 一次就重算一次快照，UI 线程只读这个 volatile bool。
+        // 不用 lock：volatile 读写本身原子；最多延迟一帧读到旧值，清 SwapChain 是幂等的完全安全。
+        private volatile bool _hasActiveWetInkSnapshot;
+        // 烘干统一清预测层：UI 线程设 flag，渲染线程在下次 Apply 时执行 D2D Clear+Present。
+        // 避免从 UI 线程直接调 D2D/SwapChain 和渲染线程竞争。
+        private volatile bool _pendingIdleClear;
+
+        /// <summary>方案G：渲染线程判断是否仍存在需要上屏的湿墨视觉（活 session/待退休/强制 Present）。
+        /// batch 为空时若返回 true，仍触发一次 Apply+Present 避免尾帧丢帧/残留。</summary>
+        public bool HasPendingVisualWork
+        {
+            get
+            {
+                if (_disposed || !_deviceReady) return false;
+                if (_needsPresent) return true;
+                if (_pendingIdleClear) return true;
+                if (_pendingRetirementCommands.Count > 0) return true;
+                if (_sessions.Count > 0) return true;
+                return false;
+            }
+        }
+
+        /// <summary>烘干统一清预测层：是否存在任何「还在写」的活跃 session。
+        /// 返回的是渲染线程最近一次 Apply 时的快照（可能最多延迟一帧），
+        /// 但清 SwapChain 透明是幂等操作，完全安全。</summary>
+        public bool HasActiveWetInkSessions
+        {
+            get
+            {
+                if (_disposed || !_deviceReady) return false;
+                return _hasActiveWetInkSnapshot;
+            }
+        }
 
         public void BindTarget(IntPtr hwnd, WetInkTargetSnapshot target)
         {
@@ -106,6 +145,17 @@ namespace Ink_Canvas.Ink.Native
             if (!_deviceReady || _target == null || _target.ScreenBounds.IsEmpty)
                 return WetInkApplyResult.NoWork();
 
+            // 方案B：把上一轮 Present 后真正要删除的 PendingRetire session 在这里处理掉，
+            // 再执行本轮命令。这样 session 的生命周期是：
+            //   RetireStroke 指令到 → MarkPendingRetire → 本轮 Present 仍然画最后一帧
+            //   → 下次 Apply 开头才真正 Dispose/Remove，湿墨几何至少保留 1 帧 → 无空帧闪烘。
+            CollectPendingRetirements();
+
+            // 烘干统一清预测层：在本轮 session 状态稳定后，重算一次「是否存在正在写的笔」快照。
+            // 注意在 ApplyBoundary（可能 AddSession/MarkEnded/MarkPendingRetire）之后再算一次，
+            // 保证 UI 线程读到的值尽量新。
+            UpdateActiveWetInkSnapshot();
+
             _pendingRetirementAcks.Clear();
             var hadWork = false;
             var snapshotUpdateTicks = 0L;
@@ -128,7 +178,10 @@ namespace Ink_Canvas.Ink.Native
                     }
                 }
 
-                if (!hadWork && !_needsPresent)
+                // 边界命令可能新增/结束 session 或标记退休，再刷一次。
+                UpdateActiveWetInkSnapshot();
+
+                if (!hadWork && !_needsPresent && !_pendingIdleClear)
                     return WetInkApplyResult.NoWork();
 
                 var drawStart = System.Diagnostics.Stopwatch.GetTimestamp();
@@ -139,10 +192,51 @@ namespace Ink_Canvas.Ink.Native
                     drawMs,
                     presentMs);
 
+                // 方案D：烘干前额外补偿帧。
+                // 只要本轮有 RetireStroke 标记（_pendingRetirementCommands 非空）
+                // 或任何 session 还处于 PendingRetire/Ended 状态，就再画一次并同步 Present(1)，
+                // 用「完全不带预测的最终裁剪帧」强制覆盖 SwapChain，消除部分触摸屏上
+                // 「前一帧预测尾没被完全刷新掉 → 湿墨与干墨之间残留一条预测残影」的双线/烘干现象。
+                var needsCompensationFrame = _pendingRetirementCommands.Count > 0
+                                              || _sessions.Values.Any(s => s.NeedsReliablePresent);
+                if (needsCompensationFrame)
+                {
+                    try
+                    {
+                        // reliable=true：StillDrawing 时同步等 vsync；
+                        // 用完全相同的几何再 Present 一次，确保最终帧稳定落在屏幕上。
+                        PresentFrameTimed(forceClear: false, out _);
+                    }
+                    catch
+                    {
+                        // best-effort：补偿帧失败不影响主流程成功
+                    }
+                }
+
+                // 烘干统一清预测层：如果有 pending 的 idle clear 请求（来自 ForceClearIdle），
+                // 在正常绘制 + 补偿帧之后执行一次 forceClear Present，把 SwapChain 表面整体清透明。
+                // 必须放在最后，确保 clear 帧是最终帧，覆盖一切残留预测像素。
+                if (_pendingIdleClear)
+                {
+                    _pendingIdleClear = false;
+                    PresentFrameTimed(forceClear: true, out _);
+                }
+
+                // 方案B：Present 结束之后，把本轮标记的待退休 acks 搬给调用者。
+                // 此刻几何已上 SwapChain 合成到屏幕，再触发 OnNativeWetInkRetired
+                // → RemoveSession（真正删） 就不会"提前清空"了。
+                for (var i = 0; i < _pendingRetirementCommands.Count; i++)
+                    _pendingRetirementAcks.Add(_pendingRetirementCommands[i]);
+                _pendingRetirementCommands.Clear();
+
+                // 修复：不能在这里 Clear _pendingRetirementAcks！
+                // CollectPendingRetirements 在下一次 Apply 开头需要用它来真正 Dispose+Remove session。
+                // 之前在这里 Clear 导致 session 永远不从 _sessions 移除 → 每帧都在画已退休的
+                // session 几何（含预测残影）→ ForceClearIdle 清了表面后下一帧又画回来。
+                // 只复制返回，保留原始 list 给下一帧 CollectPendingRetirements 消费。
                 var acks = _pendingRetirementAcks.Count == 0
                     ? Array.Empty<WetInkRetirementAck>()
                     : _pendingRetirementAcks.ToArray();
-                _pendingRetirementAcks.Clear();
                 return WetInkApplyResult.Success(acks);
             }
             catch (Exception ex) when (IsDeviceLost(ex))
@@ -154,6 +248,49 @@ namespace Ink_Canvas.Ink.Native
             {
                 return WetInkApplyResult.Failed(ex);
             }
+        }
+
+        private void CollectPendingRetirements()
+        {
+            if (_pendingRetirementAcks.Count == 0 && _pendingRetirementCommands.Count == 0)
+                return;
+            // 这里只把"上一轮已经 Present 过、并回了 acks"的 session 真正移除。
+            // _pendingRetirementAcks 里存的是「上一次 Apply 已经给调用方 ack 过」的 session，
+            // 此时湿墨层早已带着该 session 的最后一帧显示完了，安全删除。
+            if (_pendingRetirementAcks.Count > 0)
+            {
+                for (var i = 0; i < _pendingRetirementAcks.Count; i++)
+                {
+                    var ack = _pendingRetirementAcks[i];
+                    if (_sessions.TryGetValue(ack.SessionId, out var s))
+                    {
+                        try { s.Dispose(); } catch { /* best-effort */ }
+                        _sessions.Remove(ack.SessionId);
+                    }
+                }
+                _pendingRetirementAcks.Clear();
+            }
+        }
+
+        /// <summary>烘干统一清预测层：基于渲染线程当前最新的 _sessions 状态重算
+        /// 「是否存在任何正在写（Active）的笔」快照，UI 线程只读这个 volatile 结果。</summary>
+        private void UpdateActiveWetInkSnapshot()
+        {
+            if (_disposed || !_deviceReady)
+            {
+                _hasActiveWetInkSnapshot = false;
+                return;
+            }
+            // _sessions 只在渲染线程增删改，这里遍历没有竞争。
+            foreach (var s in _sessions.Values)
+            {
+                if (s != null && s.IsActive)
+                {
+                    _hasActiveWetInkSnapshot = true;
+                    return;
+                }
+            }
+            _hasActiveWetInkSnapshot = false;
         }
 
         private bool ApplySnapshotTimed(WetInkRenderSnapshot snapshot, ref long snapshotUpdateTicks)
@@ -169,7 +306,9 @@ namespace Ink_Canvas.Ink.Native
             EnsureNotDisposed();
             if (!_deviceReady)
                 return;
-            PresentFrame(forceClear: true);
+            // 烘干统一清预测层：不直接调 D2D（会和渲染线程竞争），只设 flag。
+            // 渲染线程在下次 Apply 时检查此 flag 并执行 forceClear Present。
+            _pendingIdleClear = true;
         }
 
         public void Dispose()
@@ -196,14 +335,50 @@ namespace Ink_Canvas.Ink.Native
                     }
                     return false;
                 case WetInkBoundaryCommandKind.EndStroke:
+                    // 方案C：标记该 session 已抬笔（后续的 StillDrawing 要同步等待 Present，
+                    // 否则裁剪尾帧被 GPU 丢弃 → 屏幕残留预测尾 → 烘干重影。
+                    if (_sessions.TryGetValue(command.SessionId, out var endRes))
+                    {
+                        endRes.MarkEnded();
+                        _needsPresent = true;
+                    }
                     return false;
                 case WetInkBoundaryCommandKind.CancelStroke:
                     return RemoveSession(command.SessionId);
                 case WetInkBoundaryCommandKind.RetireStroke:
-                    if (RemoveSession(command.SessionId))
+                    // 方案B：两阶段退休，避免湿墨空帧闪烘：
+                    //   阶段1（本次）：标记 PendingRetire，几何仍然保留在 _sessions 里继续参与绘制
+                    //                 → Present 结束后再真正 Dispose/Remove
+                    //   阶段2（下次 ProcessCommands 之前）：CollectPendingRetirements 真正删除，
+                    //                 并写回 RetirementAck（延迟一帧 ack，保证渲染线程已带着湿墨
+                    //                 画过了最后一帧）。
+                    if (_sessions.TryGetValue(command.SessionId, out var res)
+                        && !res.IsPendingRetire)
                     {
-                        _pendingRetirementAcks.Add(
+                        res.MarkPendingRetire();
+                        _pendingRetirementCommands.Add(
                             new WetInkRetirementAck(command.SessionId, command.Version));
+                        _needsPresent = true;
+
+                        // 烘干统一清预测层（借鉴 WinRT InkSynchronizer 自动清湿墨的思路）：
+                        // RetireStroke 到达时，干墨已经通过 WPF 渲染栅栏确认上屏，
+                        // 此时如果没有其他正在写的笔，直接在同一帧设置 _pendingIdleClear。
+                        // Apply 末尾会 forceClear 把 SwapChain 表面整体清透明，
+                        // 不再依赖 ack→UI线程→ForceClearIdle 的长链条（7-8帧延迟，易断）。
+                        var hasOtherActive = false;
+                        foreach (var pair in _sessions)
+                        {
+                            if (pair.Key != command.SessionId
+                                && pair.Value != null
+                                && pair.Value.IsActive)
+                            {
+                                hasOtherActive = true;
+                                break;
+                            }
+                        }
+                        if (!hasOtherActive)
+                            _pendingIdleClear = true;
+
                         return true;
                     }
                     return false;
@@ -284,7 +459,12 @@ namespace Ink_Canvas.Ink.Native
                     // never throw from the render hot path
                 }
             }
-            PresentWithoutThrow();
+            // 方案C：抬笔/待退休/裁剪尾帧必须保证上屏，不能被 StillDrawing 静默丢弃；
+            // 仍在书写中的帧可以丢（DoNotWait 追求低延迟）。
+            // 烘干统一清预测层：forceClear=true 时必须 reliable——这是清 SwapChain 残留
+            // 预测像素的帧，丢了旧像素就留着了（识别图形后湿墨不清的根因）。
+            var needsReliablePresent = forceClear || _sessions.Values.Any(s => s.NeedsReliablePresent);
+            PresentWithoutThrow(needsReliablePresent);
             try { _compositionDevice?.Commit(); }
             catch (Exception ex) { LogWithoutThrow("DComp Commit", ex); }
             _needsPresent = false;
@@ -304,7 +484,7 @@ namespace Ink_Canvas.Ink.Native
             }
         }
 
-        private void PresentWithoutThrow()
+        private void PresentWithoutThrow(bool reliable = false)
         {
             // DO_NOT_WAIT：GPU 无可用帧时直接返回 DXGI_ERROR_WAS_STILL_DRAWING，
             // 避免把渲染线程卡在 vsync 上阻塞下一帧输入。
@@ -316,7 +496,28 @@ namespace Ink_Canvas.Ink.Native
                 var code = (uint)hr.Code;
                 if (code == (uint)Vortice.DXGI.ResultCode.WasStillDrawing)
                 {
-                    // 上一帧 GPU 还在画，静默丢弃本帧；记录频次与耗时供诊断。
+                    // 方案C：抬笔裁剪尾帧 / 退休帧 / 任何已标记 End/PendingRetire 的帧
+                    // 不能丢——丢了就会出现"预测尾残留在 SwapChain 上"的现象，看起来像烘干重影。
+                    // 回退为 Present(1, None)：同步等 1 个 vsync，GPU 保证上屏。
+                    // 落笔过程中仍然直接跳过（保持 DoNotWait 的低延迟）。
+                    if (reliable)
+                    {
+                        try
+                        {
+                            var waitHr = _swapChain.Present(1, PresentFlags.None);
+                            if (waitHr.Failure)
+                            {
+                                var waitCode = (uint)waitHr.Code;
+                                if (IsDeviceLostResult(waitCode))
+                                    _deviceReady = false;
+                            }
+                        }
+                        catch
+                        {
+                            // best-effort：vsync 同步失败也不抛异常
+                        }
+                    }
+                    // 记录频次与耗时供诊断。
                     NativeInkPerfProbe.RecordPresentWasStillDrawing(
                         presentElapsedTicks * 1000.0 / System.Diagnostics.Stopwatch.Frequency);
                     return;
@@ -594,11 +795,31 @@ namespace Ink_Canvas.Ink.Native
             private Color4 _premultipliedLaserGlow;
             private Color4 _premultipliedLaserBody;
             private Color4 _premultipliedLaserCore;
+            // 方案B：待退休标记。RetireStroke 收到指令时先 true（保留几何多画一帧），
+            // 下一帧再真正 Dispose + Remove，避免"湿墨空帧 + WPF 干墨还没合成"造成的烘干闪白。
+            private bool _pendingRetire;
+            // 方案C：抬笔标记（EndStroke 发生过）→ StillDrawing 时不能丢裁剪尾帧
+            private bool _ended;
 
             public SessionResources(WetInkGeometryBuilder builder)
             {
                 _geometryState = new WetInkStrokeGeometryState(builder);
             }
+
+        /// <summary>方案C：是否已经 EndStroke → Present 必须保底成功</summary>
+            public bool NeedsReliablePresent => _ended || _pendingRetire;
+
+            /// <summary>方案B：是否已标记待退休，下一帧结束真正删除</summary>
+            public bool IsPendingRetire => _pendingRetire;
+
+            /// <summary>烘干统一清预测层：是否仍处于"正在写"的活跃状态（没 End 也没待退休）。
+            /// 如果所有 session 都 Ended/PendingRetire，说明用户已经抬笔/正在烘干，
+            /// 此时 SwapChain 表面残留的预测像素都可以被清零，而不会误擦正在写的真实湿墨。</summary>
+            public bool IsActive => !_ended && !_pendingRetire;
+
+            public void MarkEnded() => _ended = true;
+
+            public void MarkPendingRetire() => _pendingRetire = true;
 
             public void Update(WetInkRenderSnapshot snapshot, ID2D1Factory1 factory)
             {

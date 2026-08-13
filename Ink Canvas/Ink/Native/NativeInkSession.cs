@@ -15,6 +15,10 @@ namespace Ink_Canvas.Ink.Native
 
     internal sealed class NativeInkSession
     {
+        // 方案E：ReplacePrediction 安全网上限。与 InkTailPredictor.MaxPredictionPointCount
+        // 保持一致（冗余常量，避免跨类引用影响热路径）。
+        private const int MaxSafePredictionPointCount = 8;
+
         private readonly List<RealInkPoint> _realPoints = new List<RealInkPoint>();
         private PredictedInkPoint[] _predictedPoints = Array.Empty<PredictedInkPoint>();
 
@@ -112,11 +116,16 @@ namespace Ink_Canvas.Ink.Native
                 return;
             }
 
+            // 方案E：先按安全上限裁剪。即使上游外推意外输出大量点，也只取前
+            // MaxSafePredictionPointCount 个（尾部离真实点最远、偏差最大的先被裁掉），
+            // 避免预测尾过度外推导致烘干残像。
+            var takeCount = Math.Min(points.Count, MaxSafePredictionPointCount);
+
             var previousTimestamp = _realPoints.Count == 0
                 ? long.MinValue
                 : _realPoints[_realPoints.Count - 1].TimestampMicroseconds;
-            _predictedPoints = new PredictedInkPoint[points.Count];
-            for (var i = 0; i < points.Count; i++)
+            var valid = new List<PredictedInkPoint>(takeCount);
+            for (var i = 0; i < takeCount; i++)
             {
                 var point = points[i];
                 if (!IsFinite(point.X)
@@ -124,14 +133,18 @@ namespace Ink_Canvas.Ink.Native
                     || !IsFinite(point.Pressure)
                     || point.TimestampMicroseconds <= previousTimestamp)
                 {
-                    throw new ArgumentException(
-                        "Predicted points must be finite and strictly chronological after real points.",
-                        nameof(points));
+                    // 方案E：单个点非法就停止继续接受后续点（后续时间戳更靠后，
+                    // 更可能已偏离真实位置），直接以已接受的合法子集作为预测尾。
+                    break;
                 }
 
-                _predictedPoints[i] = point;
+                valid.Add(point);
                 previousTimestamp = point.TimestampMicroseconds;
             }
+
+            _predictedPoints = valid.Count == 0
+                ? Array.Empty<PredictedInkPoint>()
+                : valid.ToArray();
         }
 
         /// <summary>
@@ -178,6 +191,7 @@ namespace Ink_Canvas.Ink.Native
         public NativeStrokeCommitPayload End(long endedAtMicroseconds, bool bakePredictionIntoRealInk = false)
         {
             EnsureState(NativeInkSessionState.Active);
+            var hadPredictionBefore = _predictedPoints != null && _predictedPoints.Length > 0;
             if (bakePredictionIntoRealInk)
             {
                 // 抬笔前若预测缓冲为空，按最终真实点再算一次，保证预览与干墨一致。
@@ -209,6 +223,16 @@ namespace Ink_Canvas.Ink.Native
             // 实时笔锋已在 Append 过程中写入。
             Processor.ApplyFinalBrushTip(_realPoints);
             if (Processor.FinalBrushTipApplied)
+                _geometryGeneration++;
+
+            // 方案F：抬笔尾点吸附。
+            // 如果 End 之前存在预测缓冲（hadPredictionBefore=true），说明湿墨层
+            // 的最终几何仍可能带有"预测尾巴"。无论 bake 是否写入干墨，这里都自增
+            // 一次 GeometryGeneration，强制湿墨渲染器在 PublishEnd 发出的最后一帧
+            // 完全从真实 _realPoints 重建几何（丢弃之前累积的含预测的固定/动态段）。
+            // 这样湿墨 overlay 的最后一帧与干墨是用同一套点绘制的，100% 重合，
+            // 不会出现"尾端翘出一段与干墨不重合"的烘干双线。
+            if (hadPredictionBefore)
                 _geometryGeneration++;
 
             State = NativeInkSessionState.Ending;

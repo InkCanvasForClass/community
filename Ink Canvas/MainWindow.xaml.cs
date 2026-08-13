@@ -1,6 +1,7 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Ink.Native;
 using Ink_Canvas.Models;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows;
@@ -1649,7 +1650,37 @@ namespace Ink_Canvas
                 }), DispatcherPriority.Loaded);
             }
 
-            TryStartNativeWetInkPipeline();
+            // Window_Loaded 期间工具栏 / LoadSettings 可能没走 UpdateCurrentToolMode，
+            // _currentToolMode 仍停在默认 "cursor"，会让 ResolveLogicalInkTool() 返回 Cursor，
+            // 进而让 Sync/TryStart 直接 return → 新管线永远不启动。
+            // 解决：按 inkCanvas.EditingMode / drawingAttributes 回推一次真实模式，
+            // 写回缓存后再 Sync，保证启动阶段 "默认就是 Pen" 的程序也能立即进新管线。
+            // 独立 try-catch：UpdateCurrentToolMode 内的 UI 代码在启动早期可能抛异常，
+            // WPF 会静默吞掉 → Sync 永远不执行 → 新管线永远不启动。
+            try
+            {
+                var initialMode = GetCurrentSelectedMode();
+                if (!string.Equals(initialMode, _currentToolMode, StringComparison.OrdinalIgnoreCase))
+                {
+                    UpdateCurrentToolMode(initialMode);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[NativeInk] Window_Loaded 初始化工具模式失败: {ex.Message}",
+                    LogHelper.LogType.Error);
+            }
+            try
+            {
+                SyncNativeWetInkPipelineWithLogicalTool();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[NativeInk] Window_Loaded 同步管线失败: {ex.Message}",
+                    LogHelper.LogType.Error);
+            }
         }
 
 
@@ -3321,8 +3352,17 @@ namespace Ink_Canvas
                 // 执行模式切换
                 inkCanvas.EditingMode = newMode;
 
+                // 如果逻辑工具是 Pen/Color（手写）且原生湿墨管线已就绪，
+                // 物理 InkCanvas.EditingMode 必须改为 None，阻止 WPF 内置
+                // StylusInputManager 重复收集同一笔笔画 → 避免"新旧双重采集"
+                // 导致延迟、笔迹抖动、撤销栈翻倍等"看起来没区别"的症状。
+                EnsureNativePenPhysicalEditingMode();
+
                 // 根据模式确定是否为鼠标模式（无工具模式）
-                bool isMouseMode = newMode == InkCanvasEditingMode.None;
+                // 注意：此处判断应该基于"最终物理 EditingMode"而不是入参 newMode，
+                // 因为上面 EnsureNativePenPhysicalEditingMode 可能把 Ink → None。
+                bool isMouseMode = inkCanvas.EditingMode == InkCanvasEditingMode.None
+                    && ResolveLogicalInkTool() == LogicalInkTool.Cursor;
 
                 // 更新快捷键状态
                 if (_globalHotkeyManager != null)

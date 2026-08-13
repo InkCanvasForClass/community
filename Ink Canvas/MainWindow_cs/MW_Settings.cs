@@ -1084,7 +1084,38 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        /// <summary>修复 Bug6：切换桌面/白板模式时，如果目标模式未启用多点触控但 isInMultiTouchMode 仍为 true，
+        /// 通过关闭来源模式的 toggle 触发正常的清理流程（移除事件、恢复手掌擦除等）。</summary>
+        private void SyncMultiTouchModeOnModeSwitch()
+        {
+            if (!isInMultiTouchMode) return;
+            bool isBoardMode = currentMode == 1;
+            bool isMultiTouchEnabledForCurrentMode = isBoardMode
+                ? Settings.Gesture.IsEnableMultiTouchModeBoard
+                : Settings.Gesture.IsEnableMultiTouchMode;
+            if (isMultiTouchEnabledForCurrentMode) return;
 
+            // 目标模式未启用多点触控，需要关闭。
+            // 关闭来源模式的 toggle 以触发 ToggleSwitchEnableMultiTouchMode_Toggled 的正常清理流程。
+            // currentMode 已经切换，所以非 Board 属性返回的是目标模式的 toggle，
+            // 需要显式用来源模式的 toggle。
+            if (isBoardMode)
+            {
+                // 从桌面切到白板：关闭浮动栏 toggle
+                if (FloatingBarGesturePopupContent?.MultiTouchToggle is { } floatingToggle && floatingToggle.IsOn)
+                    floatingToggle.IsOn = false;
+                else
+                    isInMultiTouchMode = false; // fallback：toggle 不可用时直接重置
+            }
+            else
+            {
+                // 从白板切到桌面：关闭白板 toggle
+                if (BoardToggleSwitchEnableMultiTouchMode is { } boardToggle && boardToggle.IsOn)
+                    boardToggle.IsOn = false;
+                else
+                    isInMultiTouchMode = false; // fallback
+            }
+        }
 
         #endregion
 
