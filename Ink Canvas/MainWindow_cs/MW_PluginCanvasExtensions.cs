@@ -166,7 +166,9 @@ namespace Ink_Canvas
 
                 _pluginToolPreviousLogicalMode = _currentToolMode;
                 _pluginCanvasToolActive = true;
-                CancelAllNativeWetInkSessions("plugin canvas tool activated");
+                // 原生湿墨管线已被 csproj 排除编译（MW_NativeWetInk.cs 未参与编译），
+                // 插件画布工具接管输入前以 WPF 实时墨迹的等价取消兜底，避免残留半截笔迹。
+                AbortAllActiveTouchInputs();
                 SetCurrentToolMode(InkCanvasEditingMode.None);
 
                 created = new PluginCanvasToolSession(
