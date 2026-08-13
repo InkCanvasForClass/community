@@ -446,6 +446,24 @@
   <data name="Theme_Tips_GlobalSettingsHint" xml:space="preserve">
     <value>投喂机制</value>
   </data>
+  <data name="Theme_Tips_AutoHideInstantRestore" xml:space="preserve">
+    <value>松手就复活</value>
+  </data>
+  <data name="Theme_Tips_AutoHideInstantRestoreHint" xml:space="preserve">
+    <value>开了它，手指或笔一抬、鼠标一松，或者指针一挪走，立马复活；不开就按下面的倒计时复活</value>
+  </data>
+  <data name="Theme_Tips_AutoHideOnInteraction" xml:space="preserve">
+    <value>戳到时间鸡汤区域就隐身</value>
+  </data>
+  <data name="Theme_Tips_AutoHideOnInteractionHint" xml:space="preserve">
+    <value>白板里触控、手写笔或鼠标（悬停也算）戳到时间或鸡汤的位置，它们马上让位；停手后自动复活</value>
+  </data>
+  <data name="Theme_Tips_AutoHideRestoreDelay" xml:space="preserve">
+    <value>隐身复活倒计时（秒）</value>
+  </data>
+  <data name="Theme_Tips_AutoHideRestoreDelayHint" xml:space="preserve">
+    <value>停手后等这么久才复活，最少 1 秒</value>
+  </data>
   <data name="Theme_Tips_AutoRotation" xml:space="preserve">
     <value>Gacha 抽卡体验</value>
   </data>

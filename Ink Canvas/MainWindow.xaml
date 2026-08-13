@@ -340,7 +340,7 @@
                     Visibility="Collapsed"  d:Visibility="Visible"
                     Panel.ZIndex="1001"/>
         </Grid>
-        <Canvas IsHitTestVisible="False">
+        <Canvas x:Name="WhiteboardTipsOverlayCanvas" IsHitTestVisible="False">
             <ikw:SimpleStackPanel Canvas.Left="25" Canvas.Top="15" Orientation="Vertical">
                 <TextBlock Text="{Binding nowTime}" Name="WaterMarkTime" Visibility="Collapsed"  d:Visibility="Visible" FontSize="30"
                            FontWeight="Bold" Foreground="White" Opacity="0.6" />

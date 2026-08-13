@@ -446,6 +446,24 @@
   <data name="Theme_Tips_GlobalSettingsHint" xml:space="preserve">
     <value>Manage faith source display, sources and auto-rotation</value>
   </data>
+  <data name="Theme_Tips_AutoHideInstantRestore" xml:space="preserve">
+    <value>Restore instantly when the interaction ends</value>
+  </data>
+  <data name="Theme_Tips_AutoHideInstantRestoreHint" xml:space="preserve">
+    <value>When enabled, time &amp; tips fade back in as soon as the finger or pen lifts, the mouse button is released, or the pointer leaves the area; when disabled, they restore after the delay below</value>
+  </data>
+  <data name="Theme_Tips_AutoHideOnInteraction" xml:space="preserve">
+    <value>Auto-hide when interacting with the time &amp; tips area</value>
+  </data>
+  <data name="Theme_Tips_AutoHideOnInteractionHint" xml:space="preserve">
+    <value>While in whiteboard mode, the time and chicken-soup tips fade out when touch, pen or mouse interactions (hovering included) land on them, and fade back in after you stop</value>
+  </data>
+  <data name="Theme_Tips_AutoHideRestoreDelay" xml:space="preserve">
+    <value>Restore delay (seconds)</value>
+  </data>
+  <data name="Theme_Tips_AutoHideRestoreDelayHint" xml:space="preserve">
+    <value>How long to wait after interaction stops before showing time &amp; tips again; must be an integer no less than 1</value>
+  </data>
   <data name="Theme_Tips_AutoRotation" xml:space="preserve">
     <value>Auto-rotate Tips</value>
   </data>

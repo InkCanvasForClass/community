@@ -716,6 +716,12 @@ namespace Ink_Canvas
         public bool EnableChickenSoupAutoRotation { get; set; } = false;
         [JsonProperty("chickenSoupAutoRotationInterval")]
         public int ChickenSoupAutoRotationInterval { get; set; } = 60;
+        [JsonProperty("enableWhiteboardTipsAutoHideOnInteraction")]
+        public bool EnableWhiteboardTipsAutoHideOnInteraction { get; set; } = false;
+        [JsonProperty("enableWhiteboardTipsInstantRestore")]
+        public bool EnableWhiteboardTipsInstantRestore { get; set; } = false;
+        [JsonProperty("whiteboardTipsAutoHideRestoreDelay")]
+        public int WhiteboardTipsAutoHideRestoreDelay { get; set; } = 5;
         [JsonProperty("customTipsSchemes", NullValueHandling = NullValueHandling.Ignore)]
         public List<TipsScheme> CustomTipsSchemes { get; set; }
         [JsonProperty("enabledPresetTipsSources", NullValueHandling = NullValueHandling.Ignore)]
