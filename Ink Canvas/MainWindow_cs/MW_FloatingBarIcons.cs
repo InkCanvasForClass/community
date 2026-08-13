@@ -2972,6 +2972,23 @@ namespace Ink_Canvas
                             pointDesktop = pos;
                     }
                 }
+
+                // 自动翻转启用且主按钮位于右侧时，以右侧（主按钮）为固定点重新计算水平位置。
+                // 批注状态变更时工具栏组件显隐会使宽度变化，若沿用居中或保存的左侧位置，
+                // 主按钮会被推出屏幕边缘造成意外遮挡；此处与拖动时的实时翻转逻辑保持一致。
+                if (MarginFromEdge >= 0
+                    && Settings.Appearance.AutoFlipWhenSpaceInsufficient
+                    && !IsVerticalToolbar
+                    && isFloatingBarHeadOnRight)
+                {
+                    RefreshFloatingBarSizeCache(true);
+                    var headLeft = ViewboxFloatingBar.Margin.Left
+                                   + Math.Max(0, _cachedFloatingBarWidth - _cachedFloatingBarHeadWidth);
+                    pos.X = ClampFloatingBarLeft(
+                        headLeft - Math.Max(0, floatingBarWidth - _cachedFloatingBarHeadWidth),
+                        floatingBarWidth,
+                        screenWidth);
+                }
             }
             else if (IsVerticalToolbar)
             {
