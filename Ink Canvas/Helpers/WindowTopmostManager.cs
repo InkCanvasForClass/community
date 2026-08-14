@@ -266,6 +266,13 @@ namespace Ink_Canvas.Helpers
                     managedWindow.ZOrder = ++_zOrderSeed;
                     // 用户点击激活的窗口需要强制重新设置 Z 序（即使已处于 TOPMOST 状态）
                     managedWindow.AppliedTopmost = false;
+
+                    // 若该窗口存在 Owned 子属窗口（如弹窗/对话框），一并提升其 ZOrder 保证永远在 Parent 之上
+                    foreach (var owned in ManagedWindows.Where(w => w.Window != null && w.Window.Owner == window))
+                    {
+                        owned.ZOrder = ++_zOrderSeed;
+                        owned.AppliedTopmost = false;
+                    }
                 }
 
                 if (!_isPaused && (_mainWindowTopmostEnabled || _topmostMaintenanceEnabled))
@@ -359,9 +366,30 @@ namespace Ink_Canvas.Helpers
             CleanupInvalidWindowsCore();
 
             var mainWindow = ManagedWindows.FirstOrDefault(w => w.IsMainWindow);
+
+            long GetEffectiveZOrder(ManagedWindow mw)
+            {
+                long z = mw.ZOrder;
+                var curr = mw.Window?.Owner;
+                while (curr != null)
+                {
+                    var parentMw = ManagedWindows.FirstOrDefault(m => m.Window == curr);
+                    if (parentMw != null)
+                    {
+                        z = Math.Max(z, parentMw.ZOrder + 1000000);
+                        curr = parentMw.Window?.Owner;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                return z;
+            }
+
             var childWindows = ManagedWindows
                 .Where(w => !w.IsMainWindow && NativeWindowHelper.IsWindowReady(w.Handle))
-                .OrderBy(w => w.ZOrder)
+                .OrderBy(GetEffectiveZOrder)
                 .ToList();
 
             // Z序规范：主窗口先置顶，子窗口按打开顺序逐级覆盖（后打开的高于先打开的）

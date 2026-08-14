@@ -227,14 +227,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private async void CleanWithConfirm(string displayName, string[] subDirs, bool keepRoot)
         {
-            var result = MessageBox.Show(
+            var result = MessageBoxHelper.Show(
+                this,
                 string.Format(LocalizationHelper.GetString("Storage_Confirm_Body"), displayName).Replace("\\n", "\n"),
                 LocalizationHelper.GetString("Storage_Confirm_Title"),
                 MessageBoxButton.OKCancel,
                 MessageBoxImage.Warning);
             if (result != MessageBoxResult.OK) return;
 
-            var second = MessageBox.Show(
+            var second = MessageBoxHelper.Show(
+                this,
                 string.Format(LocalizationHelper.GetString("Storage_Confirm_Second_Body"), displayName),
                 LocalizationHelper.GetString("Storage_Confirm_Second_Title"),
                 MessageBoxButton.OKCancel,
@@ -268,7 +270,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"清理「{displayName}」失败: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show(
+                MessageBoxHelper.Show(
+                    this,
                     string.Format(LocalizationHelper.GetString("Storage_CleanFailed"), ex.Message),
                     LocalizationHelper.GetString("Storage_Confirm_Title"),
                     MessageBoxButton.OK, MessageBoxImage.Error);

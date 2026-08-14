@@ -1855,7 +1855,7 @@ namespace Ink_Canvas
 
                 if (!CloseIsFromButton && Settings.Advanced.IsSecondConfirmWhenShutdownApp)
                 {
-                    var result1 = MessageBox.Show(Properties.MainWindowStrings.Main_CloseConfirm_Level1, "InkCanvasForClass",
+                    var result1 = MessageBoxHelper.Show(this, Properties.MainWindowStrings.Main_CloseConfirm_Level1, "InkCanvasForClass",
                         MessageBoxButton.OKCancel, MessageBoxImage.Warning);
 
                     if (result1 == MessageBoxResult.Cancel)
@@ -1866,7 +1866,7 @@ namespace Ink_Canvas
                         return;
                     }
 
-                    var result2 = MessageBox.Show(Properties.MainWindowStrings.Main_CloseConfirm_Level2, "InkCanvasForClass",
+                    var result2 = MessageBoxHelper.Show(this, Properties.MainWindowStrings.Main_CloseConfirm_Level2, "InkCanvasForClass",
                         MessageBoxButton.OKCancel, MessageBoxImage.Error);
 
                     if (result2 == MessageBoxResult.Cancel)
@@ -1877,7 +1877,7 @@ namespace Ink_Canvas
                         return;
                     }
 
-                    var result3 = MessageBox.Show(Properties.MainWindowStrings.Main_CloseConfirm_Level3, "InkCanvasForClass",
+                    var result3 = MessageBoxHelper.Show(this, Properties.MainWindowStrings.Main_CloseConfirm_Level3, "InkCanvasForClass",
                         MessageBoxButton.OKCancel, MessageBoxImage.Question);
 
                     if (result3 == MessageBoxResult.Cancel)
