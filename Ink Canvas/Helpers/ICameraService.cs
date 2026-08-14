@@ -96,6 +96,103 @@ namespace Ink_Canvas.Helpers
 
         /// <summary>获取当前帧的 GDI+ Bitmap（用于拍照后的图像处理，调用方负责 Dispose）。</summary>
         Bitmap GetCurrentFrameAsBitmap();
+
+        // === 摄像头属性控制（手机专业模式）===
+        // 通过 DirectShow IAMVideoProcAmp / IAMCameraControl 写入摄像头硬件。
+        // 视频展台特殊模式下 VideoCaptureElement 占用设备流式预览，这里用一个
+        // "不抢占设备"的常驻 FilterGraphNoThread + source filter 同时持有两个接口，
+        // 属性写入驱动 KSPROPERTY 后全局生效，VideoCaptureElement 的画面随之改变。
+
+        /// <summary>
+        /// 亮度（曝光度）归一化值，范围 -100..100，0 表示摄像头默认值。
+        /// 等价于 <see cref="GetCameraPropertyValue"/>(<see cref="BoothCameraProperty.Brightness"/>)，
+        /// 保留是为了与早期代码兼容。setter 会异步把值应用到硬件。
+        /// 摄像头不支持时 setter 静默忽略。
+        /// </summary>
+        int Brightness { get; set; }
+
+        /// <summary>当前摄像头是否支持亮度（曝光度）调节。等价于 IsCameraPropertySupported(Brightness)。</summary>
+        bool BrightnessSupported { get; }
+
+        /// <summary>
+        /// 探测当前摄像头支持的全部属性（亮度/对比度/饱和度/色温/增益/焦距/快门），
+        /// 并构建常驻"不抢占设备"的图同时持有 IAMVideoProcAmp 与 IAMCameraControl。
+        /// 探测后 <see cref="CameraProperties"/> 已就绪，并会立即把当前所有值应用一次。
+        /// 等价于 <see cref="ProbeCameraPropertiesAsync"/>，保留是为了兼容。
+        /// </summary>
+        Task ProbeBrightnessSupportAsync();
+
+        /// <summary>立即把当前 Brightness 应用到摄像头硬件。等价于 ApplyCameraPropertyAsync(Brightness)。</summary>
+        Task<bool> ApplyBrightnessAsync();
+
+        /// <summary>释放属性控制占用的常驻 FilterGraphNoThread 资源。等价于 ReleaseCameraPropertyControl()。</summary>
+        void ReleaseBrightnessControl();
+
+        // --- 统一属性 API（推荐新代码使用）---
+
+        /// <summary>当前摄像头所有属性的支持状态与归一化值（-100..100，0=默认）。需先 ProbeCameraPropertiesAsync。</summary>
+        IReadOnlyDictionary<BoothCameraProperty, CameraPropState> CameraProperties { get; }
+
+        /// <summary>读取指定属性的归一化值（-100..100，0=默认）。未支持/未探测时返回 0。</summary>
+        int GetCameraPropertyValue(BoothCameraProperty prop);
+
+        /// <summary>
+        /// 设置指定属性的归一化值（-100..100，自动 clamp）。setter 会异步应用到硬件，不阻塞 UI。
+        /// 摄像头不支持时静默忽略。
+        /// </summary>
+        void SetCameraPropertyValue(BoothCameraProperty prop, int value);
+
+        /// <summary>当前摄像头是否支持指定属性。需先 ProbeCameraPropertiesAsync。</summary>
+        bool IsCameraPropertySupported(BoothCameraProperty prop);
+
+        /// <summary>
+        /// 探测当前摄像头支持的全部属性，构建常驻"不抢占设备"的图同时持有 IAMVideoProcAmp 与 IAMCameraControl。
+        /// 内部用 FilterGraphNoThread + AddSourceFilterForMoniker，不调用 Run()，可与 VideoCaptureElement 流式预览共存。
+        /// 探测后 <see cref="CameraProperties"/> 已就绪，并会立即把当前所有属性值应用一次。
+        /// </summary>
+        Task ProbeCameraPropertiesAsync();
+
+        /// <summary>立即把指定属性的当前值应用到摄像头硬件。通常由 SetCameraPropertyValue 自动触发。</summary>
+        Task<bool> ApplyCameraPropertyAsync(BoothCameraProperty prop);
+
+        /// <summary>释放属性控制占用的常驻 FilterGraphNoThread 资源（切换摄像头/停止预览/退出展台时调用）。</summary>
+        void ReleaseCameraPropertyControl();
+    }
+
+    /// <summary>
+    /// 视频展台可调摄像头属性枚举。映射到 DirectShow IAMVideoProcAmp / IAMCameraControl 的对应 property。
+    /// </summary>
+    public enum BoothCameraProperty
+    {
+        /// <summary>亮度（曝光度）- IAMVideoProcAmp.Brightness。绝大多数摄像头支持。</summary>
+        Brightness,
+        /// <summary>对比度 - IAMVideoProcAmp.Contrast。</summary>
+        Contrast,
+        /// <summary>饱和度 - IAMVideoProcAmp.Saturation。</summary>
+        Saturation,
+        /// <summary>色温（白平衡）- IAMVideoProcAmp.WhiteBalance。需摄像头支持 Manual，否则只能 Auto。</summary>
+        WhiteBalance,
+        /// <summary>增益（最接近手机 ISO 的概念）- IAMVideoProcAmp.Gain。DirectShow 无 ISO 概念。</summary>
+        Gain,
+        /// <summary>焦距（手动对焦）- IAMCameraControl.Focus。需有马达的镜头；定焦摄像头不支持。</summary>
+        Focus,
+        /// <summary>快门（曝光时间）- IAMCameraControl.Exposure。多数 USB 摄像头仅 Auto；非手机绝对快门速度。</summary>
+        Exposure,
+    }
+
+    /// <summary>单个摄像头属性的支持状态与归一化值。</summary>
+    public class CameraPropState
+    {
+        /// <summary>摄像头是否支持手动调节该属性。</summary>
+        public bool Supported;
+        /// <summary>硬件范围最小值（IAMVideoProcAmp/IAMCameraControl.GetRange 返回）。</summary>
+        public int HwMin;
+        /// <summary>硬件范围最大值。</summary>
+        public int HwMax;
+        /// <summary>硬件默认值。</summary>
+        public int HwDefault;
+        /// <summary>归一化值 -100..100，0=默认。+100=max，-100=min。</summary>
+        public int NormalizedValue;
     }
 
     public class FrameEventArgs : EventArgs

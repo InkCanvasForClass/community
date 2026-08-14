@@ -478,6 +478,37 @@ namespace Ink_Canvas
         public string VideoPresenterLastResolutionKey { get; set; } = null;
 
         /// <summary>
+        /// 视频展台亮度（曝光度）归一化值，范围 -100..100，0 为摄像头默认。
+        /// 通过 DirectShow IAMVideoProcAmp.Brightness 写入摄像头硬件；摄像头不支持时 UI 自动禁用滑块。
+        /// </summary>
+        [JsonProperty("videoPresenterBrightness")]
+        public int VideoPresenterBrightness { get; set; } = 0;
+
+        /// <summary>对比度，-100..100，0=默认。IAMVideoProcAmp.Contrast。</summary>
+        [JsonProperty("videoPresenterContrast")]
+        public int VideoPresenterContrast { get; set; } = 0;
+
+        /// <summary>饱和度，-100..100，0=默认。IAMVideoProcAmp.Saturation。</summary>
+        [JsonProperty("videoPresenterSaturation")]
+        public int VideoPresenterSaturation { get; set; } = 0;
+
+        /// <summary>色温（白平衡），-100..100，0=默认。IAMVideoProcAmp.WhiteBalance，写入时切到 Manual。</summary>
+        [JsonProperty("videoPresenterWhiteBalance")]
+        public int VideoPresenterWhiteBalance { get; set; } = 0;
+
+        /// <summary>增益（最接近手机 ISO），-100..100，0=默认。IAMVideoProcAmp.Gain。DirectShow 无 ISO 概念。</summary>
+        [JsonProperty("videoPresenterGain")]
+        public int VideoPresenterGain { get; set; } = 0;
+
+        /// <summary>焦距（手动对焦），-100..100，0=默认。IAMCameraControl.Focus，需有马达的镜头。</summary>
+        [JsonProperty("videoPresenterFocus")]
+        public int VideoPresenterFocus { get; set; } = 0;
+
+        /// <summary>快门（曝光时间），-100..100，0=默认。IAMCameraControl.Exposure，多数 USB 摄像头仅 Auto。</summary>
+        [JsonProperty("videoPresenterExposure")]
+        public int VideoPresenterExposure { get; set; } = 0;
+
+        /// <summary>
         /// 是否在书写位置贴近画布边缘时显示"扩展画布"提示按钮。
         /// 默认关闭，避免在 PPT 演示、桌面批注等场景干扰；开启后在白板书写时贴近边缘会自动浮现提示。
         /// </summary>

@@ -67,5 +67,37 @@ namespace Ink_Canvas.Properties
         public static string Rotate => ResourceManager.GetString(nameof(Rotate), _resourceCulture);
 
         public static string Title => ResourceManager.GetString(nameof(Title), _resourceCulture);
+
+        public static string Brightness => ResourceManager.GetString(nameof(Brightness), _resourceCulture);
+
+        public static string Brightness_Tooltip => ResourceManager.GetString(nameof(Brightness_Tooltip), _resourceCulture);
+
+        public static string BrightnessNotSupported => ResourceManager.GetString(nameof(BrightnessNotSupported), _resourceCulture);
+
+        public static string ProMode => ResourceManager.GetString(nameof(ProMode), _resourceCulture);
+
+        public static string ProMode_Tooltip => ResourceManager.GetString(nameof(ProMode_Tooltip), _resourceCulture);
+
+        public static string Contrast => ResourceManager.GetString(nameof(Contrast), _resourceCulture);
+
+        public static string Saturation => ResourceManager.GetString(nameof(Saturation), _resourceCulture);
+
+        public static string WhiteBalance => ResourceManager.GetString(nameof(WhiteBalance), _resourceCulture);
+
+        public static string WhiteBalance_Tooltip => ResourceManager.GetString(nameof(WhiteBalance_Tooltip), _resourceCulture);
+
+        public static string Gain => ResourceManager.GetString(nameof(Gain), _resourceCulture);
+
+        public static string Gain_Tooltip => ResourceManager.GetString(nameof(Gain_Tooltip), _resourceCulture);
+
+        public static string Focus => ResourceManager.GetString(nameof(Focus), _resourceCulture);
+
+        public static string Focus_Tooltip => ResourceManager.GetString(nameof(Focus_Tooltip), _resourceCulture);
+
+        public static string Exposure => ResourceManager.GetString(nameof(Exposure), _resourceCulture);
+
+        public static string Exposure_Tooltip => ResourceManager.GetString(nameof(Exposure_Tooltip), _resourceCulture);
+
+        public static string PropNotSupported => ResourceManager.GetString(nameof(PropNotSupported), _resourceCulture);
     }
 }
