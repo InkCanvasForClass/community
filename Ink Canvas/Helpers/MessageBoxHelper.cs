@@ -134,7 +134,8 @@ namespace Ink_Canvas.Helpers
 
             if (dispatcher != null && !dispatcher.CheckAccess())
             {
-                return await dispatcher.InvokeAsync(() => Show(context, messageBoxText, caption, button, icon, defaultResult));
+                var task = await dispatcher.InvokeAsync(() => ShowAsync(context, messageBoxText, caption, button, icon, defaultResult));
+                return await task;
             }
 
             var owner = GetDefaultOwner(context);
