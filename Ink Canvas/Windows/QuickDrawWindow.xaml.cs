@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
 
 namespace Ink_Canvas
 {
@@ -15,7 +17,12 @@ namespace Ink_Canvas
     {
         private Random random = new Random();
         private int autoCloseWaitTime = 2500; // 自动关闭等待时间（毫秒）
-        private List<string> nameList = new List<string>(); // 名单列表 
+        private List<string> nameList = new List<string>(); // 名单列表
+
+        private bool _finalJumpEnabled;               // "最后一跳"开关
+        private double _finalJumpProbability = 0.3;   // 最后一跳触发概率（0-1）
+        private double _finalJumpSettleDelaySeconds = 0.5; // "假最终"跳变间隔（秒）：定格多久后变成下一个
+        private bool _finalJumpPulse = true;          // 落点轻跳脉冲动画开关
 
         public QuickDrawWindow()
         {
@@ -42,6 +49,10 @@ namespace Ink_Canvas
                 if (MainWindow.Settings?.RandSettings != null)
                 {
                     autoCloseWaitTime = (int)MainWindow.Settings.RandSettings.RandWindowOnceCloseLatency * 1000;
+                    _finalJumpEnabled = MainWindow.Settings.RandSettings.EnableQuickDrawFinalJump;
+                    _finalJumpProbability = Math.Max(0, Math.Min(1, MainWindow.Settings.RandSettings.QuickDrawFinalJumpProbability));
+                    _finalJumpSettleDelaySeconds = Math.Max(0, MainWindow.Settings.RandSettings.QuickDrawFinalJumpSettleDelaySeconds);
+                    _finalJumpPulse = MainWindow.Settings.RandSettings.EnableQuickDrawFinalJumpPulse;
                 }
             }
             catch (Exception ex)
@@ -168,15 +179,20 @@ namespace Ink_Canvas
                 System.Threading.Thread.Sleep(sleepTime);
             }
 
-            // 动画结束，显示最终结果
-            Application.Current.Dispatcher.Invoke(() =>
+            // 动画结束：真最终走正常路径（降重抽选）
+            string finalName = Application.Current.Dispatcher.Invoke(() =>
             {
                 // 使用降重抽选方法选择最终名字
                 var selectedNames = NewStyleRollCallWindow.SelectNamesWithML(nameList, 1, random);
-                string finalName = selectedNames.Count > 0 ? selectedNames[0] : nameList[random.Next(0, nameList.Count)];
-                MainResultDisplay.Text = finalName;
+                return selectedNames.Count > 0 ? selectedNames[0] : nameList[random.Next(0, nameList.Count)];
+            });
 
-                // 更新历史记录
+            // "快抽结果滑动"（若命中）：先快速随机亮一个假最终，停顿后滑到真最终
+            FinishWithOptionalFinalJump(finalName, nameList);
+
+            // 更新历史记录（仅记录真实最终结果，与历史数据线程一致）
+            Application.Current.Dispatcher.Invoke(() =>
+            {
                 NewStyleRollCallWindow.UpdateRollCallHistory(new List<string> { finalName });
             });
 
@@ -217,16 +233,21 @@ namespace Ink_Canvas
                 System.Threading.Thread.Sleep(sleepTime);
             }
 
-            // 动画结束，显示最终结果
-            Application.Current.Dispatcher.Invoke(() =>
+            // 动画结束：真最终走正常路径（降重抽选）
+            var numberList = Enumerable.Range(1, 60).Select(n => n.ToString()).ToList();
+            string finalNumber = Application.Current.Dispatcher.Invoke(() =>
             {
                 // 使用降重抽选方法选择最终数字
-                var numberList = Enumerable.Range(1, 60).Select(n => n.ToString()).ToList();
                 var selectedNumbers = NewStyleRollCallWindow.SelectNamesWithML(numberList, 1, random);
-                string finalNumber = selectedNumbers.Count > 0 ? selectedNumbers[0] : random.Next(1, 61).ToString();
-                MainResultDisplay.Text = finalNumber;
+                return selectedNumbers.Count > 0 ? selectedNumbers[0] : random.Next(1, 61).ToString();
+            });
 
-                // 更新历史记录
+            // "快抽结果滑动"（若命中）：先快速随机亮一个假最终，停顿后滑到真最终
+            FinishWithOptionalFinalJump(finalNumber, numberList);
+
+            // 更新历史记录（仅记录真实最终结果，与历史数据线程一致）
+            Application.Current.Dispatcher.Invoke(() =>
+            {
                 NewStyleRollCallWindow.UpdateRollCallHistory(new List<string> { finalNumber });
             });
 
@@ -239,6 +260,76 @@ namespace Ink_Canvas
                     Close();
                 });
             }).Start();
+        }
+
+        /// <summary>
+        /// "快抽结果滑动"整蛊表演：真最终已由正常路径（降重抽选）确定。
+        /// 按概率先快速随机亮一个与真最终不同的"假最终"，停顿后滑到真最终，
+        /// 落点按设置播放轻跳脉冲动画。在动画线程上调用。
+        /// </summary>
+        private void FinishWithOptionalFinalJump(string trueResult, List<string> allCandidates)
+        {
+            // 不跳：直接显示真最终
+            if (!_finalJumpEnabled || allCandidates.Count <= 1 || random.NextDouble() >= _finalJumpProbability)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    MainResultDisplay.Text = trueResult;
+                });
+                return;
+            }
+
+            // 假最终：从名单里快速随机挑一位（与真最终不同即可，纯展示用）
+            var fakePool = allCandidates.Where(c => c != trueResult).ToList();
+            if (fakePool.Count == 0)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    MainResultDisplay.Text = trueResult;
+                });
+                return;
+            }
+            string fakeResult = fakePool[random.Next(fakePool.Count)];
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                MainResultDisplay.Text = fakeResult;
+            });
+
+            // 按设置的跳变间隔停顿：让学生以为抽中了
+            System.Threading.Thread.Sleep((int)(_finalJumpSettleDelaySeconds * 1000));
+
+            // 滑到真最终，落点按设置播放轻跳脉冲
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                MainResultDisplay.Text = trueResult;
+                if (_finalJumpPulse)
+                {
+                    PlayFinalHopPulse();
+                }
+            });
+        }
+
+        /// <summary>
+        /// 最后一跳的落点脉冲：结果整体轻轻向上一跳再回位，让这次跳格显得刻意而俏皮
+        /// </summary>
+        private void PlayFinalHopPulse()
+        {
+            var translate = new TranslateTransform(0, 0);
+            ResultGrid.RenderTransform = translate;
+
+            var hop = new DoubleAnimationUsingKeyFrames();
+            hop.KeyFrames.Add(new EasingDoubleKeyFrame(0, KeyTime.FromTimeSpan(TimeSpan.Zero)));
+            hop.KeyFrames.Add(new EasingDoubleKeyFrame(-10, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(110)))
+            {
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            });
+            hop.KeyFrames.Add(new EasingDoubleKeyFrame(0, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(250)))
+            {
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
+            });
+
+            translate.BeginAnimation(TranslateTransform.YProperty, hop);
         }
 
 
