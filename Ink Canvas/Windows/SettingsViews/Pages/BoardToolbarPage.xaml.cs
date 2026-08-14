@@ -174,11 +174,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var files = BoardToolbarRegistry.ListConfigFiles();
             if (files.Count <= 1)
             {
-                MessageBox.Show(FloatingBarStrings.ToolbarPage_AtLeastOneConfig, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBoxHelper.Show(this, FloatingBarStrings.ToolbarPage_AtLeastOneConfig, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (MessageBox.Show($"{FloatingBarStrings.ToolbarPage_ConfirmDeleteConfig} \"{name}\"?", FloatingBarStrings.ToolbarPage_ConfirmDelete,
+            if (MessageBoxHelper.Show(this, $"{FloatingBarStrings.ToolbarPage_ConfirmDeleteConfig} \"{name}\"?", FloatingBarStrings.ToolbarPage_ConfirmDelete,
                 MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
                 return;
 

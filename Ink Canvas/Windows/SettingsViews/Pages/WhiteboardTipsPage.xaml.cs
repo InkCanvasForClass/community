@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using iNKORE.UI.WPF.Modern.Controls;
@@ -10,7 +11,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using ContentDialog = iNKORE.UI.WPF.Modern.Controls.ContentDialog;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
@@ -509,7 +509,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (string.IsNullOrEmpty(name))
                 {
                     args.Cancel = true;
-                    MessageBox.Show(ThemeStrings.Theme_Tips_NameRequired, title, MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBoxHelper.Show(this, ThemeStrings.Theme_Tips_NameRequired, title, MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
                 var content = contentBox.Text ?? string.Empty;

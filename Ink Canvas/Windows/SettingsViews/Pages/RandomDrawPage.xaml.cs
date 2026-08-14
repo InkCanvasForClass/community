@@ -468,7 +468,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 SettingsManager.Settings.RandSettings.CustomTimerSoundPath = openFileDialog.FileName;
                 SettingsManager.SaveSettingsToFile();
-                MessageBox.Show(RandomStrings.Random_CustomAlarmSuccess, RandomStrings.Random_AlarmSetupSuccess, MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBoxHelper.Show(this, RandomStrings.Random_CustomAlarmSuccess, RandomStrings.Random_AlarmSetupSuccess, MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -476,7 +476,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             SettingsManager.Settings.RandSettings.CustomTimerSoundPath = "";
             SettingsManager.SaveSettingsToFile();
-            MessageBox.Show(RandomStrings.Random_ResetAlarmSuccess, RandomStrings.Random_ResetSuccess, MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBoxHelper.Show(this, RandomStrings.Random_ResetAlarmSuccess, RandomStrings.Random_ResetSuccess, MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void ToggleSwitchEnableProgressiveReminder_Toggled(object sender, RoutedEventArgs e)

@@ -291,7 +291,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             if (isTestChannel && !SettingsManager.Settings.Startup.HasAcceptedTelemetryPrivacy)
             {
-                MessageBox.Show(
+                MessageBoxHelper.Show(this,
                     UpdateStrings.Channel_PrivacyRequired,
                     UpdateStrings.Channel_PrivacyRequiredTitle,
                     MessageBoxButton.OK,
@@ -306,7 +306,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             if (isTestChannel && SettingsManager.Settings.Startup.TelemetryUploadLevel == TelemetryUploadLevel.None)
             {
-                var result = MessageBox.Show(
+                var result = MessageBoxHelper.Show(this,
                     UpdateStrings.Channel_TelemetryRequired,
                     UpdateStrings.Channel_TelemetryRequiredTitle,
                     MessageBoxButton.YesNo,
@@ -651,7 +651,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     return;
                 }
 
-                MessageBoxResult result = MessageBox.Show(
+                MessageBoxResult result = MessageBoxHelper.Show(
+                    this,
                     UpdateStrings.InstallUpdate_Msg,
                     UpdateStrings.InstallUpdate_Title,
                     MessageBoxButton.OKCancel,
@@ -933,7 +934,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private async void FixVersionButton_Click(object sender, RoutedEventArgs e)
         {
-            var confirm = MessageBox.Show(
+            var confirm = MessageBoxHelper.Show(
+                this,
                 UpdateStrings.FixVersion_ConfirmBody,
                 UpdateStrings.FixVersion_ConfirmTitle,
                 MessageBoxButton.YesNo,
@@ -949,7 +951,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 bool result = await AutoUpdateHelper.FixVersion(SettingsManager.Settings.Startup.UpdateChannel);
                 if (!result)
                 {
-                    MessageBox.Show(
+                    MessageBoxHelper.Show(
+                        this,
                         UpdateStrings.FixVersion_FailedBody,
                         UpdateStrings.FixVersion_FailedTitle,
                         MessageBoxButton.OK,
@@ -959,7 +962,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"Error in FixVersionButton_Click: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show(
+                MessageBoxHelper.Show(
+                    this,
                     string.Format(UpdateStrings.FixVersion_ErrorBody, ex.Message),
                     UpdateStrings.FixVersion_ErrorTitle,
                     MessageBoxButton.OK,

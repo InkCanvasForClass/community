@@ -35,13 +35,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var service = ThemeService;
             if (service == null || !service.ApplyTheme(themeId))
             {
-                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                MessageBoxHelper.Show(this,
                     ThemeStrings.Theme_FloatingBarThemesApplyFailed,
                     ThemeStrings.Theme_FloatingBarThemeMarketTitle);
             }
             else
             {
-                var result = MessageBox.Show(
+                var result = MessageBoxHelper.Show(this,
                     ThemeStrings.GetString("Theme_RestartRequired"),
                     ThemeStrings.GetString("Theme_RestartPromptTitle"),
                     MessageBoxButton.YesNo,
@@ -64,7 +64,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var result = service.DeleteTheme(themeId);
             if (!result)
             {
-                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show("删除失败", ThemeStrings.Theme_FloatingBarThemeMarketTitle);
+                MessageBoxHelper.Show(this, "删除失败", ThemeStrings.Theme_FloatingBarThemeMarketTitle);
             }
             RefreshThemes();
         }

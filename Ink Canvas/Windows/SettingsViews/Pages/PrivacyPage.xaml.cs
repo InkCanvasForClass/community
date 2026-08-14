@@ -92,7 +92,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 oldLevel != TelemetryUploadLevel.None &&
                 SettingsManager.Settings.Startup.UpdateChannel != UpdateChannel.Release)
             {
-                var result = MessageBox.Show(
+                var result = MessageBoxHelper.Show(this,
                     AboutStrings.Privacy_ConfirmDisableTelemetry_Message,
                     AboutStrings.Privacy_ConfirmDisableTelemetry_Title,
                     MessageBoxButton.YesNo,
@@ -131,7 +131,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             if (newLevel != TelemetryUploadLevel.None && !SettingsManager.Settings.Startup.HasAcceptedTelemetryPrivacy)
             {
-                MessageBox.Show(
+                MessageBoxHelper.Show(this,
                     AboutStrings.Privacy_PrivacyAgreementRequired_Message,
                     AboutStrings.Privacy_PrivacyAgreementRequired_Title,
                     MessageBoxButton.OK,
@@ -169,7 +169,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 if (!PrivacyFileExists())
                 {
-                    MessageBox.Show(
+                    MessageBoxHelper.Show(this,
                         AboutStrings.Privacy_PrivacyFileNotFound_Message,
                         AboutStrings.Privacy_PrivacyFileNotFound_Title,
                         MessageBoxButton.OK,
@@ -191,6 +191,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 }
 
                 var privacyWindow = new PrivacyAgreementWindow();
+                privacyWindow.Owner = Window.GetWindow(this) ?? MessageBoxHelper.GetDefaultOwner(this);
                 bool? dialogResult = privacyWindow.ShowDialog();
 
                 if (dialogResult == true && privacyWindow.UserAccepted)
@@ -216,7 +217,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
             else
             {
-                var result = MessageBox.Show(
+                var result = MessageBoxHelper.Show(this,
                     AboutStrings.Privacy_ConfirmRevokePrivacy_Message,
                     AboutStrings.Privacy_ConfirmRevokePrivacy_Title,
                     MessageBoxButton.YesNo,

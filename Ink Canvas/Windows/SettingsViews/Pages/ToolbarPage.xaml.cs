@@ -232,7 +232,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var existing = ToolbarRegistry.ListConfigFiles();
             if (existing.Contains(name, StringComparer.OrdinalIgnoreCase))
             {
-                MessageBox.Show(FloatingBarStrings.ToolbarPage_DuplicateConfigExists, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBoxHelper.Show(this, FloatingBarStrings.ToolbarPage_DuplicateConfigExists, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -263,7 +263,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var existing = ToolbarRegistry.ListConfigFiles();
             if (existing.Contains(name, StringComparer.OrdinalIgnoreCase))
             {
-                MessageBox.Show(FloatingBarStrings.ToolbarPage_DuplicateConfigExists, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBoxHelper.Show(this, FloatingBarStrings.ToolbarPage_DuplicateConfigExists, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -284,11 +284,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var files = ToolbarRegistry.ListConfigFiles();
             if (files.Count <= 1)
             {
-                MessageBox.Show(FloatingBarStrings.ToolbarPage_AtLeastOneConfig, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBoxHelper.Show(this, FloatingBarStrings.ToolbarPage_AtLeastOneConfig, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (MessageBox.Show($"{FloatingBarStrings.ToolbarPage_ConfirmDeleteConfig} \"{name}\"?", FloatingBarStrings.ToolbarPage_ConfirmDelete,
+            if (MessageBoxHelper.Show(this, $"{FloatingBarStrings.ToolbarPage_ConfirmDeleteConfig} \"{name}\"?", FloatingBarStrings.ToolbarPage_ConfirmDelete,
                 MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
                 return;
 

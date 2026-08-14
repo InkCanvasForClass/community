@@ -1,5 +1,6 @@
 using GongSolutions.Wpf.DragDrop;
 using Ink_Canvas.Controls.Toolbar;
+using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
@@ -113,7 +114,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             var msg = NavStrings.Menu_ResetConfirmMsg;
             var title = NavStrings.Menu_ResetConfirmTitle;
-            if (System.Windows.MessageBox.Show(msg, title, MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+            if (MessageBoxHelper.Show(this, msg, title, MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
                 return;
 
             var layout = ToolsMenuRegistry.CreateDefaultBoardLayout();
