@@ -99,5 +99,13 @@ namespace Ink_Canvas.Properties
         public static string Exposure_Tooltip => ResourceManager.GetString(nameof(Exposure_Tooltip), _resourceCulture);
 
         public static string PropNotSupported => ResourceManager.GetString(nameof(PropNotSupported), _resourceCulture);
+
+        public static string ResetDefault => ResourceManager.GetString(nameof(ResetDefault), _resourceCulture);
+
+        public static string Mirror => ResourceManager.GetString(nameof(Mirror), _resourceCulture);
+
+        public static string MirrorHorizontal => ResourceManager.GetString(nameof(MirrorHorizontal), _resourceCulture);
+
+        public static string MirrorVertical => ResourceManager.GetString(nameof(MirrorVertical), _resourceCulture);
     }
 }

@@ -34,6 +34,15 @@ namespace Ink_Canvas.Controls
         public TextBlock FocusValueText => FocusValueTextCtrl;
         public Slider ExposureSlider => ExposureSliderCtrl;
         public TextBlock ExposureValueText => ExposureValueTextCtrl;
+        public Button BrightnessResetButton => BrightnessResetButtonCtrl;
+        public Button ContrastResetButton => ContrastResetButtonCtrl;
+        public Button SaturationResetButton => SaturationResetButtonCtrl;
+        public Button WhiteBalanceResetButton => WhiteBalanceResetButtonCtrl;
+        public Button GainResetButton => GainResetButtonCtrl;
+        public Button FocusResetButton => FocusResetButtonCtrl;
+        public Button ExposureResetButton => ExposureResetButtonCtrl;
+        public ToggleButton MirrorHorizontalToggle => MirrorHorizontalToggleCtrl;
+        public ToggleButton MirrorVerticalToggle => MirrorVerticalToggleCtrl;
 
         public Button CloseButtonControl => Shell?.CloseButtonControl;
 

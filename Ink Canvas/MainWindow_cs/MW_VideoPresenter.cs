@@ -49,6 +49,9 @@ namespace Ink_Canvas
         // SaveSettingsToFile 是同步序列化+写盘的阻塞操作，每次都写会卡 UI。
         // 用 DispatcherTimer debounce：拖动停止后 400ms 才写一次。
         private DispatcherTimer _boothPropsSaveDebounceTimer;
+        // 镜像状态（水平/垂直），影响实时预览和拍照
+        private bool _boothMirrorHorizontal;
+        private bool _boothMirrorVertical;
         // 进入特殊模式前 inkCanvas 的 EditingMode，退出时恢复
         private InkCanvasEditingMode _inkEditingModeBeforeSpecialMode = InkCanvasEditingMode.Ink;
         // 特殊模式 + 非笔模式下，触摸期间临时切到 None 避免 InkCanvas 内部框选；手指抬起后恢复
@@ -177,6 +180,8 @@ namespace Ink_Canvas
             SyncPhotoCorrectionAccelerationComboBox();
             // 同步亮度滑块：从 Settings 读值 + 按摄像头支持情况启用/禁用
             SyncBoothBrightnessSlider();
+            // 同步镜像状态（从 Settings 恢复 + 应用到 LayoutTransform）
+            SyncBoothMirrorToggles();
 
             if (BoothPopup.IsOpen)
             {
@@ -501,8 +506,27 @@ namespace Ink_Canvas
 
                 // 停止 VideoCaptureElement 预览，释放 DirectShow 图
                 try { VideoPresenterFullCanvasImage?.Stop(); } catch { }
-                // 释放亮度控制占用的常驻 FilterGraphNoThread 资源（下次进入会重新探测）
-                try { _cameraService?.ReleaseBrightnessControl(); } catch { }
+                // 释放摄像头属性控制占用的常驻 FilterGraphNoThread 资源。
+                // 必须延迟到后台线程执行：VideoCaptureElement.Stop() 是异步的（WPFMediaKit 内部异步清理 FilterGraph），
+                // 立即同步释放 source filter 的 COM 对象会与 VideoCaptureElement 的 DirectShow 图清理竞争设备锁，
+                // 导致 UI 线程死锁（打开设置窗口时 ExitVideoPresenterSpecialMode 卡死）。
+                // 延迟 500ms 让 VideoCaptureElement 先完全释放设备，再在后台线程释放 COM 对象。
+                var svcForRelease = _cameraService;
+                if (svcForRelease != null)
+                {
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await Task.Delay(500);
+                            svcForRelease.ReleaseCameraPropertyControl();
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"延迟释放摄像头属性控制资源失败: {ex.Message}", LogHelper.LogType.Warning);
+                        }
+                    });
+                }
             }
             catch (Exception ex)
             {
@@ -1136,6 +1160,14 @@ namespace Ink_Canvas
                                 };
                                 photoCache.RotateFlip(rotationType);
                             }
+                        }
+                        // 应用镜像：与 LayoutTransform 显示顺序一致（旋转→镜像）
+                        if (photoCache != null)
+                        {
+                            if (_boothMirrorHorizontal)
+                                photoCache.RotateFlip(System.Drawing.RotateFlipType.RotateNoneFlipX);
+                            if (_boothMirrorVertical)
+                                photoCache.RotateFlip(System.Drawing.RotateFlipType.RotateNoneFlipY);
                         }
                     }
                     catch { photoCache = null; }
@@ -2274,6 +2306,11 @@ namespace Ink_Canvas
                             {
                                 directBitmapSource = ApplyRotationToBitmapSource(directBitmapSource, rotationAngle);
                             }
+                            // 应用镜像（D3DImage 也未经过 LayoutTransform 镜像）
+                            if (directBitmapSource != null && (_boothMirrorHorizontal || _boothMirrorVertical))
+                            {
+                                directBitmapSource = ApplyMirrorToBitmapSource(directBitmapSource, _boothMirrorHorizontal, _boothMirrorVertical);
+                            }
                             if (directBitmapSource == null)
                             {
                                 LogHelper.WriteLogToFile("视频展台拍照: 路径2 旋转后 BitmapSource 为 null", LogHelper.LogType.Warning);
@@ -2372,6 +2409,24 @@ namespace Ink_Canvas
                 var rotated = new TransformedBitmap(src, new RotateTransform(rotationAngle * 90.0));
                 rotated.Freeze();
                 return rotated;
+            }
+            catch { return src; }
+        }
+
+        /// <summary>
+        /// 对 BitmapSource 应用镜像（水平/垂直）。
+        /// 用于 D3DImage 拍照路径（绕过 LayoutTransform，需手动应用镜像）。
+        /// </summary>
+        private static BitmapSource ApplyMirrorToBitmapSource(BitmapSource src, bool mirrorHorizontal, bool mirrorVertical)
+        {
+            if (src == null) return null;
+            try
+            {
+                double scaleX = mirrorHorizontal ? -1 : 1;
+                double scaleY = mirrorVertical ? -1 : 1;
+                var mirrored = new TransformedBitmap(src, new ScaleTransform(scaleX, scaleY));
+                mirrored.Freeze();
+                return mirrored;
             }
             catch { return src; }
         }
@@ -2861,6 +2916,103 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"保存 {prop} 设置失败: {ex.Message}", LogHelper.LogType.Warning);
             }
+        }
+
+        /// <summary>
+        /// 重置按钮点击：把指定属性的滑块设回 0（默认值）。
+        /// 设 Value=0 会触发 ValueChanged，自动更新数值文本、写硬件、保存设置。
+        /// 若滑块已在 0，WPF 不触发 ValueChanged——此时强制写一次硬件确保回到默认。
+        /// </summary>
+        private void ResetBoothCameraPropSlider(BoothCameraProperty prop)
+        {
+            var slider = GetBoothPropSlider(prop);
+            if (slider == null) return;
+
+            if (slider.Value != 0)
+            {
+                // 值非 0：设回 0，ValueChanged 会自动处理一切
+                slider.Value = 0;
+            }
+            else
+            {
+                // 已在 0：ValueChanged 不触发，手动写一次硬件确保回到默认
+                if (_cameraService != null && _cameraService.IsCameraPropertySupported(prop))
+                {
+                    _cameraService.SetCameraPropertyValue(prop, 0);
+                    _ = _cameraService.ApplyCameraPropertyAsync(prop);
+                }
+            }
+        }
+
+        // ====================================================================
+        // 镜像控制（水平/垂直）
+        // ====================================================================
+
+        /// <summary>
+        /// 设置镜像状态并应用到显示层。
+        /// null 表示不改变该方向的状态。
+        /// </summary>
+        private void SetBoothMirror(bool? horizontal, bool? vertical)
+        {
+            if (horizontal.HasValue) _boothMirrorHorizontal = horizontal.Value;
+            if (vertical.HasValue) _boothMirrorVertical = vertical.Value;
+            ApplyBoothMirror();
+
+            // 持久化
+            try
+            {
+                if (Settings?.Canvas != null)
+                {
+                    bool changed = false;
+                    if (Settings.Canvas.VideoPresenterMirrorHorizontal != _boothMirrorHorizontal)
+                    {
+                        Settings.Canvas.VideoPresenterMirrorHorizontal = _boothMirrorHorizontal;
+                        changed = true;
+                    }
+                    if (Settings.Canvas.VideoPresenterMirrorVertical != _boothMirrorVertical)
+                    {
+                        Settings.Canvas.VideoPresenterMirrorVertical = _boothMirrorVertical;
+                        changed = true;
+                    }
+                    if (changed) ScheduleBoothPropsSaveDebounced();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"保存镜像设置失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        /// <summary>把镜像状态应用到 VideoCaptureElement 和 FillImage 的 LayoutTransform。</summary>
+        private void ApplyBoothMirror()
+        {
+            double scaleX = _boothMirrorHorizontal ? -1 : 1;
+            double scaleY = _boothMirrorVertical ? -1 : 1;
+            if (VideoPresenterFullCanvasMirror != null)
+            {
+                VideoPresenterFullCanvasMirror.ScaleX = scaleX;
+                VideoPresenterFullCanvasMirror.ScaleY = scaleY;
+            }
+            if (VideoPresenterFrozenFrameMirror != null)
+            {
+                VideoPresenterFrozenFrameMirror.ScaleX = scaleX;
+                VideoPresenterFrozenFrameMirror.ScaleY = scaleY;
+            }
+        }
+
+        /// <summary>从 Settings 恢复镜像状态并同步 ToggleButton。在 BoothPopup 打开时调用。</summary>
+        private void SyncBoothMirrorToggles()
+        {
+            _boothMirrorHorizontal = Settings?.Canvas?.VideoPresenterMirrorHorizontal ?? false;
+            _boothMirrorVertical = Settings?.Canvas?.VideoPresenterMirrorVertical ?? false;
+            ApplyBoothMirror();
+
+            var hToggle = BoothPopupContent?.MirrorHorizontalToggle;
+            var vToggle = BoothPopupContent?.MirrorVerticalToggle;
+            if (hToggle != null && hToggle.IsChecked != _boothMirrorHorizontal)
+                hToggle.IsChecked = _boothMirrorHorizontal;
+            if (vToggle != null && vToggle.IsChecked != _boothMirrorVertical)
+                vToggle.IsChecked = _boothMirrorVertical;
         }
 
         /// <summary>

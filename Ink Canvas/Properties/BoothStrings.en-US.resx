@@ -132,4 +132,16 @@
   <data name="PropNotSupported" xml:space="preserve">
     <value>The current camera does not support this item</value>
   </data>
+  <data name="ResetDefault" xml:space="preserve">
+    <value>Reset to default</value>
+  </data>
+  <data name="Mirror" xml:space="preserve">
+    <value>Mirror</value>
+  </data>
+  <data name="MirrorHorizontal" xml:space="preserve">
+    <value>Horizontal</value>
+  </data>
+  <data name="MirrorVertical" xml:space="preserve">
+    <value>Vertical</value>
+  </data>
 </root>

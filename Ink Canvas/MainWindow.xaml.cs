@@ -483,6 +483,18 @@ namespace Ink_Canvas
             content.GainSlider.ValueChanged += (s, e) => BoothCameraPropSlider_ValueChanged(BoothCameraProperty.Gain, e.NewValue, content.GainValueText);
             content.FocusSlider.ValueChanged += (s, e) => BoothCameraPropSlider_ValueChanged(BoothCameraProperty.Focus, e.NewValue, content.FocusValueText);
             content.ExposureSlider.ValueChanged += (s, e) => BoothCameraPropSlider_ValueChanged(BoothCameraProperty.Exposure, e.NewValue, content.ExposureValueText);
+            // 重置按钮：点击后把对应滑块设回 0（默认值），ValueChanged 会自动写硬件 + 保存设置
+            content.BrightnessResetButton.Click += (s, e) => ResetBoothCameraPropSlider(BoothCameraProperty.Brightness);
+            content.ContrastResetButton.Click += (s, e) => ResetBoothCameraPropSlider(BoothCameraProperty.Contrast);
+            content.SaturationResetButton.Click += (s, e) => ResetBoothCameraPropSlider(BoothCameraProperty.Saturation);
+            content.WhiteBalanceResetButton.Click += (s, e) => ResetBoothCameraPropSlider(BoothCameraProperty.WhiteBalance);
+            content.GainResetButton.Click += (s, e) => ResetBoothCameraPropSlider(BoothCameraProperty.Gain);
+            content.FocusResetButton.Click += (s, e) => ResetBoothCameraPropSlider(BoothCameraProperty.Focus);
+            content.ExposureResetButton.Click += (s, e) => ResetBoothCameraPropSlider(BoothCameraProperty.Exposure);
+            content.MirrorHorizontalToggle.Checked += (s, e) => SetBoothMirror(true, null);
+            content.MirrorHorizontalToggle.Unchecked += (s, e) => SetBoothMirror(false, null);
+            content.MirrorVerticalToggle.Checked += (s, e) => SetBoothMirror(null, true);
+            content.MirrorVerticalToggle.Unchecked += (s, e) => SetBoothMirror(null, false);
             // X 关闭按钮：只关闭菜单（隐藏 Popup），不退出视频展台模式。
             // 完全退出由菜单内"关闭"按钮（BtnExitVideoPresenter_Click）负责。
             content.CloseButtonControl.Click += (s, e) =>
