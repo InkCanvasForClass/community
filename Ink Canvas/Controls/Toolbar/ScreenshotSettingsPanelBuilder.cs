@@ -23,14 +23,8 @@ namespace Ink_Canvas.Controls.Toolbar
 
             var auto = SettingsManager.Settings.Automation;
 
-            // 1. 截图保存位置（浏览）
-            var locationCard = new SettingsCard
-            {
-                Header = StorageStrings.Storage_ScreenshotSaveLocation,
-                Description = StorageStrings.Storage_ScreenshotSaveLocationDesc,
-                HeaderIcon = new FontIcon(SegoeFluentIcons.Folder)
-            };
-
+            // 1. 截图保存位置（开关 + 浏览）
+            // 开关关闭时不使用自定义位置（退回桌面默认），并禁用路径与浏览按钮使其变灰。
             var locationTextBox = new TextBox
             {
                 IsReadOnly = true,
@@ -65,10 +59,49 @@ namespace Ink_Canvas.Controls.Toolbar
                 }
             };
 
-            locationCard.Content = new StackPanel
+            var locationToggle = new iNKORE.UI.WPF.Modern.Controls.ToggleSwitch
+            {
+                IsOn = auto.IsSaveScreenshotToCustomLocation,
+                MinWidth = 0,
+                OnContent = "",
+                OffContent = "",
+                Margin = new Thickness(8, 0, 0, 0),
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+            var pathRow = new StackPanel
             {
                 Orientation = Orientation.Horizontal,
                 Children = { locationTextBox, browseButton }
+            };
+
+            var locationCard = new SettingsCard
+            {
+                Header = StorageStrings.Storage_ScreenshotSaveLocation,
+                Description = StorageStrings.Storage_ScreenshotSaveLocationDesc,
+                HeaderIcon = new FontIcon(SegoeFluentIcons.Folder),
+                Content = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    Children = { pathRow, locationToggle }
+                }
+            };
+
+            // 同步启用状态：开关关时路径与浏览按钮变灰
+            void UpdateLocationRowEnabled()
+            {
+                var enabled = locationToggle.IsOn;
+                locationTextBox.IsEnabled = enabled;
+                browseButton.IsEnabled = enabled;
+                pathRow.Opacity = enabled ? 1.0 : 0.4;
+            }
+            UpdateLocationRowEnabled();
+
+            locationToggle.Toggled += (s, e) =>
+            {
+                SettingsManager.Settings.Automation.IsSaveScreenshotToCustomLocation = locationToggle.IsOn;
+                SettingsManager.SaveSettingsToFile();
+                UpdateLocationRowEnabled();
             };
 
             // 2. 截图后复制到剪贴板

@@ -176,7 +176,10 @@
                         <!-- LayoutTransform 用于旋转：旋转 90/270 时 WPF 自动重新布局（宽高交换），
                              避免画面被裁剪；缩放/位移仍走 RenderTransform -->
                         <helpers:CapturableVideoCaptureElement.LayoutTransform>
-                            <RotateTransform x:Name="VideoPresenterFullCanvasRotation" Angle="0" />
+                            <TransformGroup>
+                                <ScaleTransform x:Name="VideoPresenterFullCanvasMirror" ScaleX="1" ScaleY="1" />
+                                <RotateTransform x:Name="VideoPresenterFullCanvasRotation" Angle="0" />
+                            </TransformGroup>
                         </helpers:CapturableVideoCaptureElement.LayoutTransform>
                         <helpers:CapturableVideoCaptureElement.RenderTransform>
                             <TransformGroup>
@@ -194,7 +197,10 @@
                            RenderTransformOrigin="0,0"
                            Visibility="Collapsed">
                         <helpers:FillImage.LayoutTransform>
-                            <RotateTransform x:Name="VideoPresenterFrozenFrameRotation" Angle="0" />
+                            <TransformGroup>
+                                <ScaleTransform x:Name="VideoPresenterFrozenFrameMirror" ScaleX="1" ScaleY="1" />
+                                <RotateTransform x:Name="VideoPresenterFrozenFrameRotation" Angle="0" />
+                            </TransformGroup>
                         </helpers:FillImage.LayoutTransform>
                         <helpers:FillImage.RenderTransform>
                             <TransformGroup>

@@ -132,4 +132,16 @@
   <data name="PropNotSupported" xml:space="preserve">
     <value>當前攝像頭不支援此項</value>
   </data>
+  <data name="ResetDefault" xml:space="preserve">
+    <value>重置術</value>
+  </data>
+  <data name="Mirror" xml:space="preserve">
+    <value>鏡像</value>
+  </data>
+  <data name="MirrorHorizontal" xml:space="preserve">
+    <value>水平鏡像</value>
+  </data>
+  <data name="MirrorVertical" xml:space="preserve">
+    <value>垂直鏡像</value>
+  </data>
 </root>

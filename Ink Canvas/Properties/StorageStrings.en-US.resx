@@ -256,10 +256,10 @@
     <value>Save screenshots in date folders</value>
   </data>
   <data name="Storage_ScreenshotSaveLocation" xml:space="preserve">
-    <value>Screenshot save location</value>
+    <value>Save screenshots to a custom location</value>
   </data>
   <data name="Storage_ScreenshotSaveLocationDesc" xml:space="preserve">
-    <value>Directory where screenshot files are saved</value>
+    <value>When off, screenshots are saved to the desktop</value>
   </data>
   <data name="Storage_CopyScreenshotToClipboard" xml:space="preserve">
     <value>Copy screenshot to clipboard after capture</value>

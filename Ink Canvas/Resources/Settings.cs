@@ -508,6 +508,14 @@ namespace Ink_Canvas
         [JsonProperty("videoPresenterExposure")]
         public int VideoPresenterExposure { get; set; } = 0;
 
+        /// <summary>水平镜像（左右翻转）。</summary>
+        [JsonProperty("videoPresenterMirrorHorizontal")]
+        public bool VideoPresenterMirrorHorizontal { get; set; } = false;
+
+        /// <summary>垂直镜像（上下翻转）。</summary>
+        [JsonProperty("videoPresenterMirrorVertical")]
+        public bool VideoPresenterMirrorVertical { get; set; } = false;
+
         /// <summary>
         /// 是否在书写位置贴近画布边缘时显示"扩展画布"提示按钮。
         /// 默认关闭，避免在 PPT 演示、桌面批注等场景干扰；开启后在白板书写时贴近边缘会自动浮现提示。
@@ -1311,6 +1319,9 @@ namespace Ink_Canvas
 
         [JsonProperty("screenshotSaveLocation")]
         public string ScreenshotSaveLocation = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+
+        [JsonProperty("isSaveScreenshotToCustomLocation")]
+        public bool IsSaveScreenshotToCustomLocation { get; set; }
 
         [JsonProperty("isCopyScreenshotToClipboard")]
         public bool IsCopyScreenshotToClipboard { get; set; }
