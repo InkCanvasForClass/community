@@ -257,10 +257,10 @@
     <value>截图按日期分箱子装</value>
   </data>
   <data name="Storage_ScreenshotSaveLocation" xml:space="preserve">
-    <value>截图存哪儿</value>
+    <value>截图存到自选地方</value>
   </data>
   <data name="Storage_ScreenshotSaveLocationDesc" xml:space="preserve">
-    <value>截的图都丢这个文件夹</value>
+    <value>关掉的话截图就扔桌面</value>
   </data>
   <data name="Storage_CopyScreenshotToClipboard" xml:space="preserve">
     <value>截完图塞剪贴板</value>

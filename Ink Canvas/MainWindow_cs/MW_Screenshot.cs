@@ -178,14 +178,47 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 获取截图保存目录（来源于截图组件设置，默认为桌面）。
+        /// 获取截图保存目录。
+        /// 仅当"截图保存到指定位置"开关开启时使用自定义位置，否则回退到桌面。
         /// </summary>
         private string GetScreenshotSaveDirectory()
         {
-            var location = Settings.Automation.ScreenshotSaveLocation;
-            if (string.IsNullOrWhiteSpace(location))
-                location = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-            return location;
+            if (Settings.Automation.IsSaveScreenshotToCustomLocation)
+            {
+                var location = Settings.Automation.ScreenshotSaveLocation;
+                if (!string.IsNullOrWhiteSpace(location))
+                    return location;
+            }
+            return Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+        }
+
+        /// <summary>
+        /// 将截图写入剪贴板，同时提供 PNG 流、Bitmap、FileDrop 三种格式。
+        /// 仅写入 Bitmap 格式时 Win+V 剪贴板历史不收录、资源管理器右键也不能粘贴为文件，
+        /// 故用 DataObject 多格式写入：
+        /// - PNG 流：Win+V 历史 / 现代应用可识别
+        /// - Bitmap：老式应用兼容
+        /// - FileDrop：资源管理器右键可粘贴为 .png 文件（需传入已保存的文件路径）
+        /// 注意：带上 FileDrop 后，部分聊天软件可能优先把贴图当作发送文件处理。
+        /// </summary>
+        private static void CopyImageToClipboard(BitmapSource image, string filePath = null)
+        {
+            if (image == null) return;
+
+            var pngStream = new MemoryStream();
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(image));
+            encoder.Save(pngStream);
+            pngStream.Position = 0;
+
+            var data = new System.Windows.DataObject();
+            data.SetData("PNG", pngStream);                              // Win+V 历史 / 现代应用
+            data.SetData(System.Windows.DataFormats.Bitmap, image);    // 老式 Bitmap 兼容
+            if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
+            {
+                data.SetData(System.Windows.DataFormats.FileDrop, new[] { filePath }); // 资源管理器右键粘贴为文件
+            }
+            System.Windows.Clipboard.SetDataObject(data, true);
         }
 
         /// <summary>
@@ -295,7 +328,7 @@ namespace Ink_Canvas
                         // 截图后复制到剪贴板
                         if (Settings.Automation.IsCopyScreenshotToClipboard)
                         {
-                            try { System.Windows.Clipboard.SetImage(ConvertBitmapToBitmapSource(finalBitmap)); }
+                            try { CopyImageToClipboard(ConvertBitmapToBitmapSource(finalBitmap), savePath); }
                             catch (Exception ex) { LogHelper.WriteLogToFile($"截图复制到剪贴板失败: {ex}", LogHelper.LogType.Warning); }
                         }
 
@@ -464,7 +497,7 @@ namespace Ink_Canvas
                 // 截图后复制到剪贴板
                 if (copyToClipboard)
                 {
-                    try { System.Windows.Clipboard.SetImage(ConvertBitmapToBitmapSource(bitmap)); }
+                    try { CopyImageToClipboard(ConvertBitmapToBitmapSource(bitmap), savePath); }
                     catch (Exception ex) { LogHelper.WriteLogToFile($"截图复制到剪贴板失败: {ex}", LogHelper.LogType.Warning); }
                 }
             }

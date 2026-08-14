@@ -257,10 +257,10 @@
     <value>截图分日期文件夹保存</value>
   </data>
   <data name="Storage_ScreenshotSaveLocation" xml:space="preserve">
-    <value>截图保存位置</value>
+    <value>截图保存到指定位置</value>
   </data>
   <data name="Storage_ScreenshotSaveLocationDesc" xml:space="preserve">
-    <value>截图文件的保存目录</value>
+    <value>关闭后截图将保存到桌面</value>
   </data>
   <data name="Storage_CopyScreenshotToClipboard" xml:space="preserve">
     <value>截图后复制到剪贴板</value>
