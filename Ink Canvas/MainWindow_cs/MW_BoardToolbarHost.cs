@@ -8,8 +8,10 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 using SegoeFluentIcons = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons;
 
 namespace Ink_Canvas
@@ -383,12 +385,20 @@ namespace Ink_Canvas
                     leftTouchStartY = pt.Y;
                     leftScrollStartOffset = leftScrollViewer.VerticalOffset;
                     leftScrollViewer.CaptureTouch(e.TouchDevice);
+                    // 长按缩略图进入拖拽排序候选（命中项才生效）
+                    TryBeginPageListDragCandidate(leftPageListView, e.GetTouchPoint(leftPageListView).Position, e.OriginalSource, requireHold: true);
                     e.Handled = true;
                 };
                 leftScrollViewer.TouchMove += (s, e) =>
                 {
                     if (leftIsTouching)
                     {
+                        // 拖拽排序（长按后拖动）优先：等待确认或拖拽中时吞掉事件，不滚动
+                        if (UpdatePageListDrag(leftPageListView, e.GetTouchPoint(leftPageListView).Position))
+                        {
+                            e.Handled = true;
+                            return;
+                        }
                         var pt = e.GetTouchPoint(leftScrollViewer).Position;
                         double deltaY = leftTouchStartY - pt.Y;
                         double deltaX = pt.X - leftTouchStartX;
@@ -401,7 +411,17 @@ namespace Ink_Canvas
                 };
                 leftScrollViewer.TouchUp += (s, e) =>
                 {
-                    if (leftIsTouching && !leftTouchDidScroll)
+                    var wasDragging = _pageListDragActive && _pageListDragListView == leftPageListView;
+                    if (wasDragging)
+                    {
+                        EndPageListDrag();
+                    }
+                    else if (_pageListDragCandidate && _pageListDragListView == leftPageListView)
+                    {
+                        CancelPageListDragCandidate();
+                    }
+
+                    if (leftIsTouching && !leftTouchDidScroll && !wasDragging)
                     {
                         var pt = e.GetTouchPoint(leftScrollViewer).Position;
                         double dx = pt.X - leftTouchStartX, dy = pt.Y - leftTouchStartY;
@@ -432,12 +452,20 @@ namespace Ink_Canvas
                     rightTouchStartY = pt.Y;
                     rightScrollStartOffset = rightScrollViewer.VerticalOffset;
                     rightScrollViewer.CaptureTouch(e.TouchDevice);
+                    // 长按缩略图进入拖拽排序候选（命中项才生效）
+                    TryBeginPageListDragCandidate(rightPageListView, e.GetTouchPoint(rightPageListView).Position, e.OriginalSource, requireHold: true);
                     e.Handled = true;
                 };
                 rightScrollViewer.TouchMove += (s, e) =>
                 {
                     if (rightIsTouching)
                     {
+                        // 拖拽排序（长按后拖动）优先：等待确认或拖拽中时吞掉事件，不滚动
+                        if (UpdatePageListDrag(rightPageListView, e.GetTouchPoint(rightPageListView).Position))
+                        {
+                            e.Handled = true;
+                            return;
+                        }
                         var pt = e.GetTouchPoint(rightScrollViewer).Position;
                         double deltaY = rightTouchStartY - pt.Y;
                         double deltaX = pt.X - rightTouchStartX;
@@ -450,7 +478,17 @@ namespace Ink_Canvas
                 };
                 rightScrollViewer.TouchUp += (s, e) =>
                 {
-                    if (rightIsTouching && !rightTouchDidScroll)
+                    var wasDragging = _pageListDragActive && _pageListDragListView == rightPageListView;
+                    if (wasDragging)
+                    {
+                        EndPageListDrag();
+                    }
+                    else if (_pageListDragCandidate && _pageListDragListView == rightPageListView)
+                    {
+                        CancelPageListDragCandidate();
+                    }
+
+                    if (rightIsTouching && !rightTouchDidScroll && !wasDragging)
                     {
                         var pt = e.GetTouchPoint(rightScrollViewer).Position;
                         double dx = pt.X - rightTouchStartX, dy = pt.Y - rightTouchStartY;
@@ -473,7 +511,8 @@ namespace Ink_Canvas
             double marginLeft, double marginTop, double marginRight, double marginBottom,
             string btnId)
         {
-            var itemTemplate = CreatePageListItemTemplate(mouseUpHandler);
+            // 选中条朝向屏幕中央：左侧列表的条在右，右侧列表的条在左
+            var itemTemplate = CreatePageListItemTemplate(mouseUpHandler, selectionBarOnLeft: listViewId != "board.pageList.left");
 
             var listView = new System.Windows.Controls.ListView
             {
@@ -488,6 +527,59 @@ namespace Ink_Canvas
             ScrollViewer.SetHorizontalScrollBarVisibility(listView, ScrollBarVisibility.Disabled);
             ScrollViewer.SetVerticalScrollBarVisibility(listView, ScrollBarVisibility.Disabled);
 
+            // 页面缩略图拖拽排序（鼠标/笔；触摸长按入口见 AttachPagePreviewTouchHandlers）
+            listView.PreviewMouseLeftButtonDown += PageList_PreviewMouseLeftButtonDown;
+            listView.PreviewMouseMove += PageList_PreviewMouseMove;
+            listView.PreviewMouseUp += PageList_PreviewMouseUp;
+            listView.LostMouseCapture += PageList_LostMouseCapture;
+            listView.SelectionChanged += PageList_SelectionChanged;
+
+            // 被拖项以半透明+阴影呈现"抬起"效果。
+            // 样式绑定到数据项的 IsDragging，集合移动/容器重建后跟随实例迁移，不会丢失。
+            // 注意：必须基于主题隐式样式继承（保留主题的选中/悬停视觉），
+            // 否则会回退到 WPF 默认容器白色 chrome。
+            var dragShadow = new DropShadowEffect
+            {
+                Color = Colors.Black,
+                BlurRadius = 10,
+                ShadowDepth = 2,
+                Direction = 270,
+                Opacity = 0.35
+            };
+            dragShadow.Freeze();
+            var dragTrigger = new DataTrigger { Binding = new Binding(nameof(PageListViewItem.IsDragging)), Value = true };
+            dragTrigger.Setters.Add(new Setter(UIElement.OpacityProperty, 0.7));
+            dragTrigger.Setters.Add(new Setter(UIElement.EffectProperty, dragShadow));
+            var containerStyle = new Style(typeof(ListViewItem));
+            if (listView.TryFindResource(typeof(ListViewItem)) is Style implicitItemStyle)
+                containerStyle.BasedOn = implicitItemStyle;
+            containerStyle.Setters.Add(new Setter(UIElement.OpacityProperty, 1.0));
+            // 兜底：即使主题隐式样式缺失，也保持容器无背景无边框（避免默认白色 chrome）
+            containerStyle.Setters.Add(new Setter(Control.BackgroundProperty, Brushes.Transparent));
+            containerStyle.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
+
+            // 自定义容器模板：剥离主题 ListViewItem 模板（其左侧选中指示条无法通过
+            // ListViewItemSelectionIndicatorVisualEnabled 资源可靠关闭，导致双蓝条），
+            // 选中态完全由缩略图卡片内的镜像小蓝条呈现；悬停反馈由下面的触发器补充。
+            var containerBorderFactory = new FrameworkElementFactory(typeof(Border));
+            containerBorderFactory.SetValue(Border.BackgroundProperty,
+                new TemplateBindingExtension(Control.BackgroundProperty));
+            var containerPresenterFactory = new FrameworkElementFactory(typeof(ContentPresenter));
+            containerPresenterFactory.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Stretch);
+            containerPresenterFactory.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Stretch);
+            containerBorderFactory.AppendChild(containerPresenterFactory);
+            containerStyle.Setters.Add(new Setter(Control.TemplateProperty, new ControlTemplate(typeof(ListViewItem))
+            {
+                VisualTree = containerBorderFactory
+            }));
+
+            containerStyle.Triggers.Add(dragTrigger);
+            var hoverTrigger = new Trigger { Property = UIElement.IsMouseOverProperty, Value = true };
+            hoverTrigger.Setters.Add(new Setter(Control.BackgroundProperty,
+                new SolidColorBrush(Color.FromArgb(0x14, 0, 0, 0))));
+            containerStyle.Triggers.Add(hoverTrigger);
+            listView.ItemContainerStyle = containerStyle;
+
             var scrollViewer = new ScrollViewer
             {
                 Name = scrollViewerId.Replace(".", "_"),
@@ -498,6 +590,25 @@ namespace Ink_Canvas
                 PanningMode = PanningMode.VerticalOnly,
                 IsManipulationEnabled = true
             };
+
+            // 拖拽排序的插入位置指示线：覆盖在列表上方，拖拽时实时定位到落点
+            var dragIndicator = new Border
+            {
+                Name = (listViewId + ".dragIndicator").Replace(".", "_"),
+                Height = 3,
+                CornerRadius = new CornerRadius(1.5),
+                Background = Application.Current.TryFindResource("AccentFillColorDefaultBrush") as Brush
+                             ?? SystemColors.HighlightBrush,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Top,
+                Margin = new Thickness(8, 0, 8, 0),
+                Visibility = Visibility.Collapsed,
+                IsHitTestVisible = false
+            };
+
+            var overlayGrid = new Grid();
+            overlayGrid.Children.Add(scrollViewer);
+            overlayGrid.Children.Add(dragIndicator);
 
             var border = new Border
             {
@@ -510,13 +621,16 @@ namespace Ink_Canvas
                 Opacity = 1,
                 BorderBrush = (Brush)Application.Current.TryFindResource("FloatingBarBorderBrush"),
                 BorderThickness = new Thickness(1),
-                Child = scrollViewer,
+                Child = overlayGrid,
                 Visibility = Visibility.Collapsed
             };
+            // 保存原始边距，供打开面板时按目标高度换算位置（见 EnsurePageListPanelHeight）
+            border.Tag = new Thickness(marginLeft, marginTop, marginRight, marginBottom);
 
             RegisterView(borderId, border);
             RegisterView(listViewId, listView);
             RegisterView(scrollViewerId, scrollViewer);
+            RegisterView(listViewId + ".dragIndicator", dragIndicator);
 
             var btn = FindView(btnId) as Border;
             if (btn != null)
@@ -532,7 +646,7 @@ namespace Ink_Canvas
             }
         }
 
-        private DataTemplate CreatePageListItemTemplate(MouseButtonEventHandler mouseUpHandler)
+        private DataTemplate CreatePageListItemTemplate(MouseButtonEventHandler mouseUpHandler, bool selectionBarOnLeft)
         {
             var template = new DataTemplate();
 
@@ -543,6 +657,7 @@ namespace Ink_Canvas
             var itemBorderFactory = new FrameworkElementFactory(typeof(Border));
             itemBorderFactory.SetValue(Border.MarginProperty, new Thickness(0, 4, 0, 0));
             itemBorderFactory.SetValue(Border.WidthProperty, 160.0);
+            itemBorderFactory.SetValue(Border.CornerRadiusProperty, new CornerRadius(4));
             itemBorderFactory.SetResourceReference(Border.BackgroundProperty, "FloatingBarBackgroundBrush");
             itemBorderFactory.SetResourceReference(Border.BorderBrushProperty, "FloatingBarBorderBrush");
             itemBorderFactory.SetValue(Border.BorderThicknessProperty, new Thickness(1));
@@ -551,8 +666,27 @@ namespace Ink_Canvas
 
             var viewboxFactory = new FrameworkElementFactory(typeof(Viewbox));
             viewboxFactory.SetValue(Viewbox.WidthProperty, 160.0);
-            viewboxFactory.SetValue(Viewbox.HeightProperty, 120.0);
             viewboxFactory.SetValue(Viewbox.StretchProperty, Stretch.Uniform);
+
+            // 高度与圆角裁剪都实时跟随画布实际宽高比（MultiBinding + 转换器）：
+            // 预览始终精确填满卡片，任何比例下都不存在留白边条
+            var heightBinding = new MultiBinding
+            {
+                Converter = new WhiteboardThumbnailAspectConverter(),
+                ConverterParameter = "Height"
+            };
+            heightBinding.Bindings.Add(new Binding("ActualWidth") { Source = inkCanvas });
+            heightBinding.Bindings.Add(new Binding("ActualHeight") { Source = inkCanvas });
+            viewboxFactory.SetBinding(Viewbox.HeightProperty, heightBinding);
+
+            var clipBinding = new MultiBinding
+            {
+                Converter = new WhiteboardThumbnailAspectConverter(),
+                ConverterParameter = "Clip"
+            };
+            clipBinding.Bindings.Add(new Binding("ActualWidth") { Source = inkCanvas });
+            clipBinding.Bindings.Add(new Binding("ActualHeight") { Source = inkCanvas });
+            viewboxFactory.SetBinding(UIElement.ClipProperty, clipBinding);
 
             // Viewbox 是 Decorator，只能有一个子级。用 Grid 作为容器，叠加 InkCanvas/Image/TextBlock
             // 三个元素，通过 Visibility 绑定互斥显示：
@@ -651,15 +785,58 @@ namespace Ink_Canvas
                 SegoeFluentIcons.Delete);
             deleteBtnFactory.AppendChild(fontIconFactory);
 
+            // 选中小蓝条：朝向屏幕中央——左侧控件弹出的列表条在右，右侧控件弹出的条在左
+            var selectionBarFactory = new FrameworkElementFactory(typeof(Border));
+            selectionBarFactory.SetValue(Border.WidthProperty, 3.0);
+            selectionBarFactory.SetValue(Border.CornerRadiusProperty, new CornerRadius(1.5));
+            selectionBarFactory.SetValue(Border.VerticalAlignmentProperty, VerticalAlignment.Stretch);
+            selectionBarFactory.SetValue(Border.HorizontalAlignmentProperty,
+                selectionBarOnLeft ? HorizontalAlignment.Left : HorizontalAlignment.Right);
+            selectionBarFactory.SetValue(Border.MarginProperty,
+                selectionBarOnLeft ? new Thickness(3, 8, 0, 8) : new Thickness(0, 8, 3, 8));
+            selectionBarFactory.SetValue(Border.BackgroundProperty,
+                Application.Current.TryFindResource("AccentFillColorDefaultBrush") as Brush
+                ?? SystemColors.HighlightBrush);
+            selectionBarFactory.SetValue(Border.IsHitTestVisibleProperty, false);
+            selectionBarFactory.SetBinding(UIElement.VisibilityProperty, new Binding("IsSelected") { Converter = boolToVis });
+
             gridFactory.AppendChild(viewboxFactory);
             gridFactory.AppendChild(indexBorderFactory);
             gridFactory.AppendChild(deleteBtnFactory);
+            gridFactory.AppendChild(selectionBarFactory);
 
             itemBorderFactory.AppendChild(gridFactory);
             outerStackFactory.AppendChild(itemBorderFactory);
             template.VisualTree = outerStackFactory;
 
             return template;
+        }
+
+        /// <summary>
+        /// 按画布实际宽高比计算缩略图尺寸（160 宽，高 80~120 夹紧）或同尺寸圆角裁剪。
+        /// 绑定到画布 ActualWidth/ActualHeight，页面预览实时精确填满卡片，
+        /// 任何比例下都不留白边；画布尺寸未就绪时回退 120（4:3）。
+        /// </summary>
+        private sealed class WhiteboardThumbnailAspectConverter : IMultiValueConverter
+        {
+            public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+            {
+                var width = values != null && values.Length > 0 && values[0] is double w ? w : 0;
+                var height = values != null && values.Length > 1 && values[1] is double h ? h : 0;
+
+                double thumbnailHeight = 120;
+                if (width > 1 && height > 1)
+                    thumbnailHeight = Math.Max(80, Math.Min(120, 160.0 * height / width));
+
+                if (parameter is string p && p == "Clip")
+                    return new RectangleGeometry(new Rect(0, 0, 160, thumbnailHeight), 4, 4);
+                return thumbnailHeight;
+            }
+
+            public object[] ConvertBack(object value, Type[] targetTypes, object parameter, System.Globalization.CultureInfo culture)
+            {
+                throw new NotSupportedException();
+            }
         }
     }
 }

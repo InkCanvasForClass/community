@@ -1628,6 +1628,14 @@ namespace Ink_Canvas
         public bool EnableQuickDraw { get; set; } = true;
         [JsonProperty("quickDrawExternalCaller")]
         public bool QuickDrawExternalCaller { get; set; }
+        [JsonProperty("enableQuickDrawFinalJump")]
+        public bool EnableQuickDrawFinalJump { get; set; }
+        [JsonProperty("quickDrawFinalJumpProbability")]
+        public double QuickDrawFinalJumpProbability { get; set; } = 0.3;
+        [JsonProperty("quickDrawFinalJumpSettleDelaySeconds")]
+        public double QuickDrawFinalJumpSettleDelaySeconds { get; set; } = 0.5;
+        [JsonProperty("enableQuickDrawFinalJumpPulse")]
+        public bool EnableQuickDrawFinalJumpPulse { get; set; } = true;
         [JsonProperty("nameRosters")]
         public List<NameRoster> NameRosters { get; set; } = new List<NameRoster>();
         [JsonProperty("selectedNameRosterGuid")]

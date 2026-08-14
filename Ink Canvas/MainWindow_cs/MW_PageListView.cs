@@ -1,6 +1,8 @@
 using Ink_Canvas.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,8 +14,41 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
-        private class PageListViewItem
+        private class PageListViewItem : INotifyPropertyChanged
         {
+            public event PropertyChangedEventHandler PropertyChanged;
+
+            private bool _isDragging;
+            private bool _isSelected;
+
+            /// <summary>该项是否正被拖拽（用于缩略图列表的"抬起"样式）。</summary>
+            public bool IsDragging
+            {
+                get => _isDragging;
+                set
+                {
+                    if (_isDragging == value) return;
+                    _isDragging = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDragging)));
+                }
+            }
+
+            /// <summary>
+            /// 该项是否为当前页。选中态由模板中的小蓝条呈现；
+            /// 左侧列表的蓝条在条目右侧、右侧列表的蓝条在条目左侧（均朝向屏幕中央），
+            /// 左右列表共用同一数据集合，标记天然同步。
+            /// </summary>
+            public bool IsSelected
+            {
+                get => _isSelected;
+                set
+                {
+                    if (_isSelected == value) return;
+                    _isSelected = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsSelected)));
+                }
+            }
+
             public int Index { get; set; }
             public StrokeCollection Strokes { get; set; }
 
@@ -448,5 +483,423 @@ namespace Ink_Canvas
 
             DeleteWhiteBoardPageByIndex(item.Index);
         }
+
+        #region 页面缩略图拖拽排序
+
+        /// <summary>拖拽排序是否已越过阈值真正开始。</summary>
+        private bool _pageListDragActive;
+
+        /// <summary>是否处于拖拽候选（已按下，等待越过阈值/长按确认）。</summary>
+        private bool _pageListDragCandidate;
+
+        private ListView _pageListDragListView;
+        private ScrollViewer _pageListDragScrollViewer;
+
+        /// <summary>拖拽起始项在集合中的索引（0-based，拖拽过程中保持不变）。</summary>
+        private int _pageListDragFromIndex = -1;
+
+        /// <summary>被拖项当前的集合索引（随实时移动更新）。</summary>
+        private int _pageListDragCurrentIndex = -1;
+
+        /// <summary>被拖项的实例（高亮状态跟随实例迁移，容器重建不丢失）。</summary>
+        private PageListViewItem _pageListDragItem;
+
+        /// <summary>被拖项的容器与其内容（拖拽期间跟随指针平移的是内容，容器布局保持不动）。</summary>
+        private ListViewItem _pageListDragContainer;
+        private UIElement _pageListDragContainerContent;
+        private TranslateTransform _pageListDragTranslate;
+
+        /// <summary>被拖项在列表坐标系中的布局中心 Y（拖拽期间集合不动，此值稳定）。</summary>
+        private double _pageListDragContainerCenterY;
+
+        /// <summary>插入位置指示线（仅活动列表显示）。</summary>
+        private Border _pageListDragIndicator;
+
+        private Point _pageListDragStartPosition;
+        private long _pageListDragCandidateStartTicks;
+        private bool _pageListDragRequiresHold;
+
+        /// <summary>鼠标/笔按下后移动超过该距离即开始拖拽。</summary>
+        private const double PageListDragThresholdPx = 8;
+
+        /// <summary>触摸需按住该时长确认拖拽（避免与列表滚动冲突）。</summary>
+        private const long PageListDragTouchHoldTicks = 450 * TimeSpan.TicksPerMillisecond;
+
+        /// <summary>
+        /// 在页面缩略图项上按下时记录拖拽候选。
+        /// 命中删除按钮、视频展台虚拟分页或仅一页时不进入候选。
+        /// </summary>
+        private bool TryBeginPageListDragCandidate(ListView listView, Point positionInList, object originalSource, bool requireHold)
+        {
+            if (_pageListDragActive || _isVideoPresenterSpecialMode || WhiteboardTotalCount < 2)
+                return false;
+
+            // 删除按钮上的按下不进入拖拽，保留按钮点击语义
+            if (FindAncestorOfType<Button>(originalSource as DependencyObject) != null)
+                return false;
+
+            var container = HitTestPageListViewItem(listView, positionInList);
+            if (container == null) return false;
+            var index = listView.ItemContainerGenerator.IndexFromContainer(container);
+            if (index < 0) return false;
+            if (!(listView.ItemContainerGenerator.ItemFromContainer(container) is PageListViewItem item)) return false;
+
+            _pageListDragCandidate = true;
+            _pageListDragListView = listView;
+            _pageListDragScrollViewer = FindAncestorOfType<ScrollViewer>(listView);
+            _pageListDragFromIndex = index;
+            _pageListDragCurrentIndex = index;
+            _pageListDragItem = item;
+            _pageListDragStartPosition = positionInList;
+            _pageListDragCandidateStartTicks = Environment.TickCount64;
+            _pageListDragRequiresHold = requireHold;
+            return true;
+        }
+
+        private static ListViewItem HitTestPageListViewItem(ListView listView, Point positionInList)
+        {
+            var hit = VisualTreeHelper.HitTest(listView, positionInList);
+            if (hit?.VisualHit == null) return null;
+            return FindAncestorOfType<ListViewItem>(hit.VisualHit);
+        }
+
+        /// <summary>
+        /// 移动事件驱动：等待越过阈值/长按确认后进入拖拽；拖拽中被拖项跟随指针、
+        /// 插入指示线标记落点（集合保持不动，松手时一次性移动）。
+        /// 返回 true 表示本次事件已被拖拽流程消费（触摸调用方应跳过滚动逻辑）。
+        /// </summary>
+        private bool UpdatePageListDrag(ListView listView, Point positionInList)
+        {
+            if (!_pageListDragCandidate || _pageListDragListView != listView) return false;
+
+            if (!_pageListDragActive)
+            {
+                var withinThreshold = Math.Abs(positionInList.Y - _pageListDragStartPosition.Y) <= PageListDragThresholdPx;
+
+                if (_pageListDragRequiresHold)
+                {
+                    // 长按确认前移动过大：取消候选，交还滚动
+                    if (!withinThreshold)
+                    {
+                        CancelPageListDragCandidate();
+                        return false;
+                    }
+                    if (Environment.TickCount64 - _pageListDragCandidateStartTicks < PageListDragTouchHoldTicks)
+                        return true;
+                }
+                else if (withinThreshold)
+                {
+                    return true;
+                }
+
+                _pageListDragActive = true;
+                BeginPageListDragVisual(listView);
+            }
+
+            AutoScrollPageListDuringDrag(positionInList);
+            UpdatePageListDragVisual(listView, positionInList);
+            return true;
+        }
+
+        /// <summary>进入拖拽：点亮被拖项"抬起"样式并让它从此刻起跟随指针。</summary>
+        private void BeginPageListDragVisual(ListView listView)
+        {
+            SetPageListDragItemHighlight(true);
+
+            _pageListDragContainer = listView.ItemContainerGenerator.ContainerFromIndex(_pageListDragFromIndex) as ListViewItem;
+            if (_pageListDragContainer != null)
+            {
+                _pageListDragContainerCenterY = _pageListDragContainer.TransformToVisual(listView)
+                    .Transform(new Point(0, _pageListDragContainer.ActualHeight / 2.0)).Y;
+
+                // 平移施加在容器的内容上（容器自身布局不动），滚动/坐标换算保持稳定
+                _pageListDragContainerContent = VisualTreeHelper.GetChildrenCount(_pageListDragContainer) > 0
+                    ? VisualTreeHelper.GetChild(_pageListDragContainer, 0) as UIElement
+                    : null;
+                if (_pageListDragContainerContent != null)
+                {
+                    _pageListDragTranslate = new TranslateTransform();
+                    var group = new TransformGroup();
+                    group.Children.Add(new ScaleTransform(1.03, 1.03));
+                    group.Children.Add(_pageListDragTranslate);
+                    _pageListDragContainerContent.RenderTransformOrigin = new Point(0.5, 0.5);
+                    _pageListDragContainerContent.RenderTransform = group;
+                }
+
+                Panel.SetZIndex(_pageListDragContainer, 10);
+            }
+
+            // 指示线只在用户拖拽的这一侧列表显示
+            _pageListDragIndicator = FindView("board.pageList.left") == listView
+                ? FindView("board.pageList.left.dragIndicator") as Border
+                : FindView("board.pageList.right.dragIndicator") as Border;
+        }
+
+        /// <summary>拖拽移动：被拖项跟随指针；指示线标记落点（k&lt;起点在其上方，k&gt;起点在其下方）。</summary>
+        private void UpdatePageListDragVisual(ListView listView, Point positionInList)
+        {
+            if (_pageListDragTranslate != null)
+                _pageListDragTranslate.Y = positionInList.Y - _pageListDragContainerCenterY;
+
+            _pageListDragCurrentIndex = ComputePageListDragTargetIndex(listView, positionInList);
+
+            if (_pageListDragIndicator == null) return;
+
+            // 落点未变时隐藏指示线
+            if (_pageListDragCurrentIndex == _pageListDragFromIndex)
+            {
+                _pageListDragIndicator.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            var anchorContainer = listView.ItemContainerGenerator.ContainerFromIndex(_pageListDragCurrentIndex) as ListViewItem;
+            if (anchorContainer == null)
+            {
+                _pageListDragIndicator.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            // 向上拖：线画在目标项上边缘；向下拖：画在目标项下边缘（含"放最后一位"）
+            var anchorPoint = new Point(0, _pageListDragCurrentIndex < _pageListDragFromIndex
+                ? 0
+                : anchorContainer.ActualHeight);
+            var y = anchorContainer.TransformToVisual(_pageListDragIndicator.Parent as Visual)
+                .Transform(anchorPoint).Y;
+
+            _pageListDragIndicator.Margin = new Thickness(8, y - 1.5, 8, 0);
+            _pageListDragIndicator.Visibility = Visibility.Visible;
+        }
+
+        /// <summary>拖拽接近列表上下边缘时自动滚动。</summary>
+        private void AutoScrollPageListDuringDrag(Point positionInList)
+        {
+            var scrollViewer = _pageListDragScrollViewer;
+            if (scrollViewer == null) return;
+
+            var posInScroll = _pageListDragListView.TransformToVisual(scrollViewer).Transform(positionInList);
+            const double edge = 24;
+            if (posInScroll.Y < edge) scrollViewer.LineUp();
+            else if (posInScroll.Y > scrollViewer.ActualHeight - edge) scrollViewer.LineDown();
+        }
+
+        /// <summary>
+        /// 根据指针位置计算被拖项的插入位置（0-based）。
+        /// 统计中点位于指针上方的其余项数量即为最终落点：被拖项自身被排除在计数外，
+        /// 无需再作偏移修正（额外减一会导致任何页都无法落到最后一位）。
+        /// </summary>
+        private int ComputePageListDragTargetIndex(ListView listView, Point positionInList)
+        {
+            var count = blackBoardSidePageListViewObservableCollection.Count;
+            var target = 0;
+            for (var i = 0; i < count; i++)
+            {
+                if (i == _pageListDragCurrentIndex) continue;
+                var container = listView.ItemContainerGenerator.ContainerFromIndex(i) as ListViewItem;
+                if (container == null) continue;
+                var midY = container.TransformToVisual(listView)
+                    .Transform(new Point(0, container.ActualHeight / 2.0)).Y;
+                if (positionInList.Y > midY) target++;
+            }
+            return Math.Max(0, Math.Min(count - 1, target));
+        }
+
+        /// <summary>
+        /// 结束拖拽：按落点一次性移动集合，把第 fromPage 页的数据搬移到第 toPage 页，
+        /// 页号重排并刷新列表。被拖页是当前页时先保存未提交墨迹，恢复后页号跟随；
+        /// 否则仅搬移快照数组、画布不动。
+        /// </summary>
+        private void EndPageListDrag()
+        {
+            if (!_pageListDragActive)
+            {
+                CancelPageListDragCandidate();
+                return;
+            }
+
+            _pageListDragActive = false;
+            _pageListDragCandidate = false;
+
+            var fromPage = _pageListDragFromIndex + 1;
+            var toPage = _pageListDragCurrentIndex + 1;
+
+            try
+            {
+                if (fromPage != toPage
+                    && fromPage >= 1 && fromPage <= WhiteboardTotalCount
+                    && toPage >= 1 && toPage <= WhiteboardTotalCount)
+                {
+                    // 集合按最终落点一次性移动（拖拽期间集合未动）
+                    blackBoardSidePageListViewObservableCollection.Move(_pageListDragFromIndex, _pageListDragCurrentIndex);
+
+                    if (CurrentWhiteboardIndex == fromPage)
+                    {
+                        // 当前页参与搬移：先落盘未保存的墨迹，页号跟随被拖页
+                        VideoPresenter_BeforePageLeave();
+                        PauseAllCanvasMediaPlayback();
+                        SaveStrokes();
+                        ClearStrokes(true);
+
+                        MoveWhiteboardPageData(fromPage, toPage);
+
+                        CurrentWhiteboardIndex = toPage;
+
+                        RestoreStrokes();
+                        VideoPresenter_OnPageChanged();
+                    }
+                    else
+                    {
+                        // 其他页搬移：当前画布不动，仅重排快照与页号
+                        MoveWhiteboardPageData(fromPage, toPage);
+
+                        if (fromPage < toPage && CurrentWhiteboardIndex > fromPage && CurrentWhiteboardIndex <= toPage)
+                            CurrentWhiteboardIndex--;
+                        else if (toPage < fromPage && CurrentWhiteboardIndex >= toPage && CurrentWhiteboardIndex < fromPage)
+                            CurrentWhiteboardIndex++;
+                    }
+
+                    UpdateIndexInfoDisplay();
+                    RefreshBlackBoardSidePageListView();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"页面拖拽排序失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+            finally
+            {
+                CancelPageListDragCandidate();
+            }
+        }
+
+        /// <summary>取消拖拽候选并清空状态（含被拖项视觉与插入指示线的还原）。</summary>
+        private void CancelPageListDragCandidate()
+        {
+            SetPageListDragItemHighlight(false);
+
+            if (_pageListDragContainerContent != null)
+            {
+                _pageListDragContainerContent.RenderTransform = null;
+                _pageListDragContainerContent.RenderTransformOrigin = new Point(0, 0);
+            }
+            if (_pageListDragContainer != null)
+                _pageListDragContainer.ClearValue(Panel.ZIndexProperty);
+            if (_pageListDragIndicator != null)
+                _pageListDragIndicator.Visibility = Visibility.Collapsed;
+
+            _pageListDragCandidate = false;
+            _pageListDragActive = false;
+            _pageListDragListView = null;
+            _pageListDragScrollViewer = null;
+            _pageListDragFromIndex = -1;
+            _pageListDragCurrentIndex = -1;
+            _pageListDragItem = null;
+            _pageListDragContainer = null;
+            _pageListDragContainerContent = null;
+            _pageListDragTranslate = null;
+            _pageListDragIndicator = null;
+        }
+
+        /// <summary>开启/关闭被拖项的"抬起"视觉（半透明+阴影）。</summary>
+        private void SetPageListDragItemHighlight(bool isDragging)
+        {
+            if (_pageListDragItem != null)
+                _pageListDragItem.IsDragging = isDragging;
+        }
+
+        /// <summary>
+        /// 将第 fromPage 页的快照数据移动到第 toPage 页（1-based），区间内其余页顺移。
+        /// 搬移字段与新增/删除页保持一致：历史、多指状态、冻结状态、最后变更时间。
+        /// </summary>
+        private void MoveWhiteboardPageData(int fromPage, int toPage)
+        {
+            if (fromPage == toPage) return;
+
+            var history = TimeMachineHistories[fromPage];
+            var multiState = savedMultiTouchModeStates[fromPage];
+            var frozen = frozenPages[fromPage];
+            var lastUtc = pageLastUserInkMutationUtc[fromPage];
+
+            if (fromPage < toPage)
+            {
+                for (var i = fromPage; i < toPage; i++)
+                {
+                    TimeMachineHistories[i] = TimeMachineHistories[i + 1];
+                    savedMultiTouchModeStates[i] = savedMultiTouchModeStates[i + 1];
+                    frozenPages[i] = frozenPages[i + 1];
+                    pageLastUserInkMutationUtc[i] = pageLastUserInkMutationUtc[i + 1];
+                }
+            }
+            else
+            {
+                for (var i = fromPage; i > toPage; i--)
+                {
+                    TimeMachineHistories[i] = TimeMachineHistories[i - 1];
+                    savedMultiTouchModeStates[i] = savedMultiTouchModeStates[i - 1];
+                    frozenPages[i] = frozenPages[i - 1];
+                    pageLastUserInkMutationUtc[i] = pageLastUserInkMutationUtc[i - 1];
+                }
+            }
+
+            TimeMachineHistories[toPage] = history;
+            savedMultiTouchModeStates[toPage] = multiState;
+            frozenPages[toPage] = frozen;
+            pageLastUserInkMutationUtc[toPage] = lastUtc;
+        }
+
+        #region 鼠标/笔拖拽入口
+
+        /// <summary>
+        /// 列表选中变化时同步各数据项的 IsSelected 标记。
+        /// 选中样式由数据驱动（卡片描边），左右两个列表共享同一集合，天然对称。
+        /// </summary>
+        private void PageList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!(sender is ListView listView)) return;
+            for (var i = 0; i < blackBoardSidePageListViewObservableCollection.Count; i++)
+            {
+                blackBoardSidePageListViewObservableCollection[i].IsSelected = i == listView.SelectedIndex;
+            }
+        }
+
+        private void PageList_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (!(sender is ListView listView)) return;
+            // 仅记录候选，不在此捕获鼠标——否则普通点击的 MouseUp 会改道到列表，
+            // 缩略图切页将失效；捕获推迟到真正越过阈值开始拖拽时
+            TryBeginPageListDragCandidate(listView, e.GetPosition(listView), e.OriginalSource, requireHold: false);
+        }
+
+        private void PageList_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (!(sender is ListView listView)) return;
+            if (!_pageListDragCandidate || _pageListDragListView != listView) return;
+
+            var wasActive = _pageListDragActive;
+            UpdatePageListDrag(listView, e.GetPosition(listView));
+            // 刚进入拖拽时捕获鼠标，保证拖动期间（含越出列表边缘）事件连续
+            if (!wasActive && _pageListDragActive)
+                listView.CaptureMouse();
+            e.Handled = true;
+        }
+
+        private void PageList_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (!(_pageListDragListView == sender)) return;
+            var wasDragging = _pageListDragActive;
+            EndPageListDrag();
+            // 拖拽结束时吞掉本次点击，避免触发缩略图切页
+            if (wasDragging) e.Handled = true;
+        }
+
+        private void PageList_LostMouseCapture(object sender, MouseEventArgs e)
+        {
+            // 捕获意外丢失（如窗口失活）时收尾，避免集合已移动而页数据未同步
+            if (_pageListDragListView == sender && _pageListDragActive)
+                EndPageListDrag();
+        }
+
+        #endregion
+
+        #endregion
     }
 }

@@ -483,6 +483,24 @@
   <data name="Random_QuickDraw_UseExternal" xml:space="preserve">
     <value>快抽调用所选外部点名</value>
   </data>
+  <data name="Random_QuickDraw_FinalJump" xml:space="preserve">
+    <value>快抽结果滑动</value>
+  </data>
+  <data name="Random_QuickDraw_FinalJumpProbability" xml:space="preserve">
+    <value>触发概率</value>
+  </data>
+  <data name="Random_QuickDraw_FinalJumpDelay" xml:space="preserve">
+    <value>跳变间隔（秒）</value>
+  </data>
+  <data name="Random_QuickDraw_FinalJumpPulse" xml:space="preserve">
+    <value>跳动动画</value>
+  </data>
+  <data name="Random_QuickDraw_FinalJumpPulseHint" xml:space="preserve">
+    <value>结果滑动时向上轻跳一下的落点动画，关闭后仅更换文字不再跳动</value>
+  </data>
+  <data name="Random_QuickDraw_FinalJumpHint" xml:space="preserve">
+    <value>开启后，快抽结果看似定格时，还有一定概率停顿片刻再滑动到另一个结果，增加抽选悬念</value>
+  </data>
   <data name="Random_QuickDraw_WindowTitle" xml:space="preserve">
     <value>快抽窗口</value>
   </data>

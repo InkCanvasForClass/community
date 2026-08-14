@@ -483,6 +483,24 @@ If not installed, please download and install it from the official website. If a
   <data name="Random_QuickDraw_UseExternal" xml:space="preserve">
     <value>Use selected external caller for quick draw</value>
   </data>
+  <data name="Random_QuickDraw_FinalJump" xml:space="preserve">
+    <value>Quick draw result slides</value>
+  </data>
+  <data name="Random_QuickDraw_FinalJumpProbability" xml:space="preserve">
+    <value>Trigger probability</value>
+  </data>
+  <data name="Random_QuickDraw_FinalJumpDelay" xml:space="preserve">
+    <value>Slide delay (seconds)</value>
+  </data>
+  <data name="Random_QuickDraw_FinalJumpPulse" xml:space="preserve">
+    <value>Hop animation</value>
+  </data>
+  <data name="Random_QuickDraw_FinalJumpPulseHint" xml:space="preserve">
+    <value>The result briefly hops upward when it slides; when off, only the text changes without the hop</value>
+  </data>
+  <data name="Random_QuickDraw_FinalJumpHint" xml:space="preserve">
+    <value>When enabled, the quick draw result may appear to settle and then, with some chance, pause briefly and slide to another result, adding suspense to the draw</value>
+  </data>
   <data name="Random_QuickDraw_WindowTitle" xml:space="preserve">
     <value>Quick Draw</value>
   </data>
