@@ -1581,7 +1581,7 @@ namespace Ink_Canvas
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(string.Format(Properties.MainWindowStrings.Main_RollCall_CannotCallExternal, ex.Message));
+                    MessageBoxHelper.Show(this, string.Format(Properties.MainWindowStrings.Main_RollCall_CannotCallExternal, ex.Message));
 
                     // 调用失败时回退到相应的点名窗口
                     if (Settings.RandSettings.UseNewRollCallUI)
@@ -4508,11 +4508,11 @@ namespace Ink_Canvas
         {
             if (Settings.Advanced.IsSecondConfirmWhenShutdownApp)
             {
-                if (MessageBox.Show(Properties.MainWindowStrings.Main_CloseConfirm_Level1, "InkCanvasForClass",
+                if (MessageBoxHelper.Show(this, Properties.MainWindowStrings.Main_CloseConfirm_Level1, "InkCanvasForClass",
                         MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.Cancel) return;
-                if (MessageBox.Show(Properties.MainWindowStrings.Main_CloseConfirm_Level2, "InkCanvasForClass",
+                if (MessageBoxHelper.Show(this, Properties.MainWindowStrings.Main_CloseConfirm_Level2, "InkCanvasForClass",
                         MessageBoxButton.OKCancel, MessageBoxImage.Error) == MessageBoxResult.Cancel) return;
-                if (MessageBox.Show(Properties.MainWindowStrings.Main_CloseConfirm_Level3, "InkCanvasForClass",
+                if (MessageBoxHelper.Show(this, Properties.MainWindowStrings.Main_CloseConfirm_Level3, "InkCanvasForClass",
                         MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.Cancel) return;
             }
 

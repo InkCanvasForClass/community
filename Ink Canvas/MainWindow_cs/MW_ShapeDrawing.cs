@@ -2915,7 +2915,7 @@ namespace Ink_Canvas
                                 opFlag = false;
                                 break;
                             case OptionalOperation.Ask:
-                                opFlag = MessageBox.Show(Properties.CanvasStrings.Shape_RemoveAsymptote, "Ink Canvas", MessageBoxButton.YesNo) !=
+                                opFlag = MessageBoxHelper.Show(this, Properties.CanvasStrings.Shape_RemoveAsymptote, "Ink Canvas", MessageBoxButton.YesNo) !=
                                          MessageBoxResult.Yes;
                                 break;
                         }
