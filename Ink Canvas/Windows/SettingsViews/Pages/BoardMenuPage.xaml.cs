@@ -47,6 +47,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             foreach (var id in layout.BoardItems)
                 AddedItems.Add(id);
             RefreshLibraryList();
+            UpdateComponentSettingsPanel();
         }
 
         private void SaveSettings()
@@ -102,6 +103,28 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void AddedList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             SettingsListItemHelper.UpdateRemoveButtonVisibility(AddedList, "BtnRemoveItem");
+            UpdateComponentSettingsPanel();
+        }
+
+        /// <summary>
+        /// 根据当前选中的已添加菜单项，更新"组件设置"面板。
+        /// 仅当该项提供了 CustomSettingsPanelFactory（如截图）时显示组件设置 Tab。
+        /// </summary>
+        private void UpdateComponentSettingsPanel()
+        {
+            PanelPluginCustomSettings.Children.Clear();
+            PanelPluginCustomSettings.Visibility = Visibility.Collapsed;
+            ComponentSettingsTab.Visibility = Visibility.Collapsed;
+
+            var selectedId = AddedList.SelectedItem as string;
+            if (string.IsNullOrEmpty(selectedId)) return;
+
+            var item = ToolsMenuRegistry.FindItem(selectedId);
+            if (item?.CustomSettingsPanelFactory == null) return;
+
+            PanelPluginCustomSettings.Visibility = Visibility.Visible;
+            PanelPluginCustomSettings.Children.Add(item.CustomSettingsPanelFactory());
+            ComponentSettingsTab.Visibility = Visibility.Visible;
         }
 
         private void LibraryList_SelectionChanged(object sender, SelectionChangedEventArgs e)

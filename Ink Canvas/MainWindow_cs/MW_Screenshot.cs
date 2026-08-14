@@ -178,21 +178,33 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 保存截图到桌面
+        /// 获取截图保存目录（来源于截图组件设置，默认为桌面）。
+        /// </summary>
+        private string GetScreenshotSaveDirectory()
+        {
+            var location = Settings.Automation.ScreenshotSaveLocation;
+            if (string.IsNullOrWhiteSpace(location))
+                location = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            return location;
+        }
+
+        /// <summary>
+        /// 保存截图到配置的保存目录
         /// </summary>
         /// <remarks>
         /// 该方法会：
-        /// 1. 生成桌面路径和文件名
-        /// 2. 调用CaptureAndSaveScreenshot方法捕获并保存截图到桌面
-        /// 3. 如果设置了自动保存墨迹，调用SaveInkCanvasStrokes方法保存墨迹
+        /// 1. 根据截图组件设置生成保存路径和文件名
+        /// 2. 调用CaptureAndSaveScreenshot方法捕获并保存截图
+        /// 3. 如果设置了截图后复制到剪贴板，将截图复制到剪贴板
+        /// 4. 如果设置了自动保存墨迹，调用SaveInkCanvasStrokes方法保存墨迹
         /// </remarks>
         internal void SaveScreenShotToDesktop()
         {
-            var desktopPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
+            var savePath = Path.Combine(
+                GetScreenshotSaveDirectory(),
                 $"{GetScreenshotFileNameStem()}.png");
 
-            CaptureAndSaveScreenshot(desktopPath, false);
+            CaptureAndSaveScreenshot(savePath, false, Settings.Automation.IsCopyScreenshotToClipboard);
 
             if (Settings.Automation.IsAutoSaveStrokesAtScreenshot)
                 SaveInkCanvasStrokes(false);
@@ -227,8 +239,8 @@ namespace Ink_Canvas
                     return;
                 }
 
-                var desktopPath = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
+                var savePath = Path.Combine(
+                    GetScreenshotSaveDirectory(),
                     $"{GetScreenshotFileNameStem()}.png");
 
                 using (var originalBitmap = CaptureScreenArea(screenshotResult.Value.Area))
@@ -272,14 +284,22 @@ namespace Ink_Canvas
                             }
                         }
 
-                        var directory = Path.GetDirectoryName(desktopPath);
+                        var directory = Path.GetDirectoryName(savePath);
                         if (!Directory.Exists(directory))
                         {
                             Directory.CreateDirectory(directory);
                         }
 
-                        finalBitmap.Save(desktopPath, ImageFormat.Png);
-                        ShowNotification(string.Format(Properties.MainWindowStrings.Main_Screenshot_SaveSuccess, desktopPath));
+                        finalBitmap.Save(savePath, ImageFormat.Png);
+
+                        // 截图后复制到剪贴板
+                        if (Settings.Automation.IsCopyScreenshotToClipboard)
+                        {
+                            try { System.Windows.Clipboard.SetImage(ConvertBitmapToBitmapSource(finalBitmap)); }
+                            catch (Exception ex) { LogHelper.WriteLogToFile($"截图复制到剪贴板失败: {ex}", LogHelper.LogType.Warning); }
+                        }
+
+                        ShowNotification(string.Format(Properties.MainWindowStrings.Main_Screenshot_SaveSuccess, savePath));
                     }
                     finally
                     {
@@ -404,6 +424,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="savePath">保存路径</param>
         /// <param name="isHideNotification">是否隐藏通知</param>
+        /// <param name="copyToClipboard">是否在保存后复制到剪贴板</param>
         /// <remarks>
         /// 该方法会：
         /// 1. 获取虚拟屏幕边界
@@ -411,10 +432,11 @@ namespace Ink_Canvas
         /// 3. 从屏幕复制内容到位图
         /// 4. 确保保存目录存在
         /// 5. 保存为PNG格式
-        /// 6. 如果不隐藏通知，显示保存成功通知
-        /// 7. 异步上传截图到Dlass
+        /// 6. 若 copyToClipboard 为真，将截图复制到剪贴板
+        /// 7. 如果不隐藏通知，显示保存成功通知
+        /// 8. 异步上传截图到Dlass
         /// </remarks>
-        private void CaptureAndSaveScreenshot(string savePath, bool isHideNotification)
+        private void CaptureAndSaveScreenshot(string savePath, bool isHideNotification, bool copyToClipboard = false)
         {
             var rc = SystemInformation.VirtualScreen;
 
@@ -438,6 +460,13 @@ namespace Ink_Canvas
 
                 // 使用PNG格式保存，确保透明度信息不丢失
                 bitmap.Save(savePath, ImageFormat.Png);
+
+                // 截图后复制到剪贴板
+                if (copyToClipboard)
+                {
+                    try { System.Windows.Clipboard.SetImage(ConvertBitmapToBitmapSource(bitmap)); }
+                    catch (Exception ex) { LogHelper.WriteLogToFile($"截图复制到剪贴板失败: {ex}", LogHelper.LogType.Warning); }
+                }
             }
 
             if (!isHideNotification)

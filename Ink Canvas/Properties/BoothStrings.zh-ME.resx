@@ -84,4 +84,52 @@
   <data name="Title" xml:space="preserve">
     <value>现场直播</value>
   </data>
+  <data name="Brightness" xml:space="preserve">
+    <value>补光术</value>
+  </data>
+  <data name="Brightness_Tooltip" xml:space="preserve">
+    <value>施展亮度魔法。居中为原始状态，摄像头不会这招时技能封印</value>
+  </data>
+  <data name="BrightnessNotSupported" xml:space="preserve">
+    <value>当前摄像头未学会此技能</value>
+  </data>
+  <data name="ProMode" xml:space="preserve">
+    <value>高手模式</value>
+  </data>
+  <data name="ProMode_Tooltip" xml:space="preserve">
+    <value>展开後可像手機專業模式一樣調節對比度/飽和度/色溫/增益/焦距/快門。各項目僅當攝像頭硬體支援時才能調節</value>
+  </data>
+  <data name="Contrast" xml:space="preserve">
+    <value>對比度</value>
+  </data>
+  <data name="Saturation" xml:space="preserve">
+    <value>飽和度</value>
+  </data>
+  <data name="WhiteBalance" xml:space="preserve">
+    <value>色溫</value>
+  </data>
+  <data name="Gain" xml:space="preserve">
+    <value>增益</value>
+  </data>
+  <data name="Gain_Tooltip" xml:space="preserve">
+    <value>類比增益，最接近手機 ISO 的概念（DirectShow 無 ISO）。0=攝像頭預設</value>
+  </data>
+  <data name="Focus" xml:space="preserve">
+    <value>焦距</value>
+  </data>
+  <data name="Focus_Tooltip" xml:space="preserve">
+    <value>手動對焦。需攝像頭有對焦馬達；定焦攝像頭不支援。0=預設，調整時自動切到手動模式</value>
+  </data>
+  <data name="Exposure" xml:space="preserve">
+    <value>快門</value>
+  </data>
+  <data name="Exposure_Tooltip" xml:space="preserve">
+    <value>曝光時間（相對值，非手機絕對快門速度）。多數 USB 攝像頭僅 Auto，不支援手動調節</value>
+  </data>
+  <data name="WhiteBalance_Tooltip" xml:space="preserve">
+    <value>白平衡（色溫）。寫入時自動切到手動模式。數值近似 Kelvin 但未經校準</value>
+  </data>
+  <data name="PropNotSupported" xml:space="preserve">
+    <value>當前攝像頭不支援此項</value>
+  </data>
 </root>

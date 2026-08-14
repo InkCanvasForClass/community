@@ -476,6 +476,13 @@ namespace Ink_Canvas
             content.ExitVideoPresenterButton.Click += BtnExitVideoPresenter_Click;
             content.PhotoCorrectionToggle.Checked += ToggleBtnPhotoCorrection_Checked;
             content.PhotoCorrectionToggle.Unchecked += ToggleBtnPhotoCorrection_Unchecked;
+            content.BrightnessSlider.ValueChanged += BoothBrightnessSlider_ValueChanged;
+            content.ContrastSlider.ValueChanged += (s, e) => BoothCameraPropSlider_ValueChanged(BoothCameraProperty.Contrast, e.NewValue, content.ContrastValueText);
+            content.SaturationSlider.ValueChanged += (s, e) => BoothCameraPropSlider_ValueChanged(BoothCameraProperty.Saturation, e.NewValue, content.SaturationValueText);
+            content.WhiteBalanceSlider.ValueChanged += (s, e) => BoothCameraPropSlider_ValueChanged(BoothCameraProperty.WhiteBalance, e.NewValue, content.WhiteBalanceValueText);
+            content.GainSlider.ValueChanged += (s, e) => BoothCameraPropSlider_ValueChanged(BoothCameraProperty.Gain, e.NewValue, content.GainValueText);
+            content.FocusSlider.ValueChanged += (s, e) => BoothCameraPropSlider_ValueChanged(BoothCameraProperty.Focus, e.NewValue, content.FocusValueText);
+            content.ExposureSlider.ValueChanged += (s, e) => BoothCameraPropSlider_ValueChanged(BoothCameraProperty.Exposure, e.NewValue, content.ExposureValueText);
             // X 关闭按钮：只关闭菜单（隐藏 Popup），不退出视频展台模式。
             // 完全退出由菜单内"关闭"按钮（BtnExitVideoPresenter_Click）负责。
             content.CloseButtonControl.Click += (s, e) =>

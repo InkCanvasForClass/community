@@ -256,6 +256,15 @@
   <data name="Storage_ScreenshotsByDateFolder" xml:space="preserve">
     <value>截图分日期文件夹保存</value>
   </data>
+  <data name="Storage_ScreenshotSaveLocation" xml:space="preserve">
+    <value>截图保存位置</value>
+  </data>
+  <data name="Storage_ScreenshotSaveLocationDesc" xml:space="preserve">
+    <value>截图文件的保存目录</value>
+  </data>
+  <data name="Storage_CopyScreenshotToClipboard" xml:space="preserve">
+    <value>截图后复制到剪贴板</value>
+  </data>
   <data name="Storage_Title" xml:space="preserve">
     <value>存储管理</value>
   </data>
