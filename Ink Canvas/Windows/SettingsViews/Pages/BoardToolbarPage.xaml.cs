@@ -453,6 +453,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (entry == null) return;
             _suppressSave = true;
 
+            // 组件自定义设置面板（动态生成，如截图组件的全局设置）
+            PanelPluginCustomSettings.Children.Clear();
+            PanelPluginCustomSettings.Visibility = Visibility.Collapsed;
+            var builtinItem = BoardToolbarRegistry.FindItem(entry.Id);
+            if (builtinItem?.CustomSettingsPanelFactory != null)
+            {
+                PanelPluginCustomSettings.Visibility = Visibility.Visible;
+                PanelPluginCustomSettings.Children.Add(builtinItem.CustomSettingsPanelFactory());
+            }
+
             TextBoxFixedWidth.Text = entry.GetSettingDouble("fixedWidth")?.ToString() ?? "";
             TextBoxFixedHeight.Text = entry.GetSettingDouble("fixedHeight")?.ToString() ?? "";
             TextBoxMinWidth.Text = entry.GetSettingDouble("minWidth")?.ToString() ?? "";

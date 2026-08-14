@@ -1309,6 +1309,12 @@ namespace Ink_Canvas
         [JsonProperty("isAutoSaveStrokesAtScreenshot")]
         public bool IsAutoSaveStrokesAtScreenshot { get; set; }
 
+        [JsonProperty("screenshotSaveLocation")]
+        public string ScreenshotSaveLocation = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+
+        [JsonProperty("isCopyScreenshotToClipboard")]
+        public bool IsCopyScreenshotToClipboard { get; set; }
+
         [JsonProperty("isAutoSaveStrokesAtClear")]
         public bool IsAutoSaveScreenshotAtClear { get; set; }
 
