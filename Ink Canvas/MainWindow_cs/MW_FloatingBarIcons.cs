@@ -891,9 +891,15 @@ namespace Ink_Canvas
         internal void SymbolIconUndo_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (TryBlockFrozenPageMutation("撤销冻结页面内容")) return;
-            if (!IsUndoEnabled) return;
+            SecAgentDiag($"UNDO_REQUEST enabled={IsUndoEnabled} sender={sender?.GetType().Name} {SecAgentDiagCanvasState()}");
+            if (!IsUndoEnabled)
+            {
+                SecAgentDiag("UNDO_SKIPPED disabled");
+                return;
+            }
             BtnUndo_Click(null, null);
             HideSubPanels();
+            SecAgentDiag($"UNDO_DONE {SecAgentDiagCanvasState()}");
         }
 
         /// <summary>
@@ -904,9 +910,15 @@ namespace Ink_Canvas
         internal void SymbolIconRedo_MouseUp(object sender, RoutedEventArgs e)
         {
             if (TryBlockFrozenPageMutation("重做冻结页面内容")) return;
-            if (!IsRedoEnabled) return;
+            SecAgentDiag($"REDO_REQUEST enabled={IsRedoEnabled} sender={sender?.GetType().Name} {SecAgentDiagCanvasState()}");
+            if (!IsRedoEnabled)
+            {
+                SecAgentDiag("REDO_SKIPPED disabled");
+                return;
+            }
             BtnRedo_Click(null, null);
             HideSubPanels();
+            SecAgentDiag($"REDO_DONE {SecAgentDiagCanvasState()}");
         }
 
         #endregion
@@ -1233,7 +1245,7 @@ namespace Ink_Canvas
                 inkCanvas.Strokes.Remove(inkCanvas.GetSelectedStrokes());
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
             }
-            else if (inkCanvas.Strokes.Count > 0)
+            else if (inkCanvas.Strokes.Count > 0 || HasSecAgentSceneElementsOnCanvas())
             {
                 if (Settings.Automation.IsAutoSaveScreenshotAtClear &&
                     inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
@@ -3515,9 +3527,31 @@ namespace Ink_Canvas
                 else CaptureAndEnqueueScreenshotSave(true);
             }
 
+            // 鼠标工具下如果仍有已选中的图片/SVG，不能把整个 InkCanvas 设为不可命中。
+            // 这些元素位于 InkCanvas 的子树中；否则即使元素仍显示、选框仍显示，
+            // 元素本身及其透明外接矩形也都收不到拖动事件。
+            bool keepSelectedCanvasElementInteractive = currentSelectedElement != null
+                && IsBitmapLikeCanvasElement(currentSelectedElement);
+            // SVG scenes are hosted inside InkCanvas alongside ordinary annotation strokes.
+            // Collapsing InkCanvas for the cursor tool used to hide both the inserted scene
+            // and all annotation immediately after the user left the pen tool.  Keep the
+            // canvas visually present while a scene exists; it remains click-through unless
+            // that scene is currently selected.
+            bool keepSecAgentSceneVisible = HasSecAgentSceneElementsOnCanvas();
+
             if (!IsInPPTPresentationMode)
             {
-                if (Settings.Canvas.HideStrokeWhenSelecting)
+                if (keepSelectedCanvasElementInteractive)
+                {
+                    inkCanvas.Visibility = Visibility.Visible;
+                    inkCanvas.IsHitTestVisible = true;
+                }
+                else if (keepSecAgentSceneVisible)
+                {
+                    inkCanvas.Visibility = Visibility.Visible;
+                    inkCanvas.IsHitTestVisible = false;
+                }
+                else if (Settings.Canvas.HideStrokeWhenSelecting)
                 {
                     inkCanvas.Visibility = Visibility.Collapsed;
                 }
@@ -3529,7 +3563,17 @@ namespace Ink_Canvas
             }
             else
             {
-                if (Settings.PowerPointSettings.IsShowStrokeOnSelectInPowerPoint)
+                if (keepSelectedCanvasElementInteractive)
+                {
+                    inkCanvas.Visibility = Visibility.Visible;
+                    inkCanvas.IsHitTestVisible = true;
+                }
+                else if (keepSecAgentSceneVisible)
+                {
+                    inkCanvas.Visibility = Visibility.Visible;
+                    inkCanvas.IsHitTestVisible = false;
+                }
+                else if (Settings.PowerPointSettings.IsShowStrokeOnSelectInPowerPoint)
                 {
                     inkCanvas.Visibility = Visibility.Visible;
                     inkCanvas.IsHitTestVisible = true;
@@ -3548,9 +3592,20 @@ namespace Ink_Canvas
                 }
             }
 
+            SecAgentDiag($"CURSOR_CANVAS_STATE selectedInteractive={keepSelectedCanvasElementInteractive} " +
+                         $"sceneVisible={keepSecAgentSceneVisible} hideStroke={Settings.Canvas.HideStrokeWhenSelecting} " +
+                         $"{SecAgentDiagCanvasState()}");
+
             GridTransparencyFakeBackground.Opacity = 0;
             GridTransparencyFakeBackground.Background = Brushes.Transparent;
-            SetTransparentHitThrough();
+            // Keep the window interactive while an SVG is selected so a click outside its
+            // full rectangular hit area can cancel the selection. Once it is cleared,
+            // HandleSelectedSecAgentSceneMouseDown restores click-through for the next click.
+            if (keepSelectedCanvasElementInteractive)
+                SetTransparentNotHitThrough();
+            else
+                SetTransparentHitThrough();
+            SecAgentDiag($"CURSOR_HIT_TEST_APPLIED {TransparentHitTestState}");
 
             GridBackgroundCoverHolder.Visibility = Visibility.Collapsed;
 
@@ -4433,6 +4488,7 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void BtnUndo_Click(object sender, RoutedEventArgs e)
         {
+            SecAgentDiag($"UNDO_APPLY_BEGIN {SecAgentDiagCanvasState()}");
             if (inkCanvas.GetSelectedStrokes().Count != 0)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
@@ -4440,7 +4496,9 @@ namespace Ink_Canvas
             }
 
             var item = timeMachine.Undo();
+            SecAgentDiag($"UNDO_HISTORY_ITEM type={item?.GetType().FullName ?? "null"}");
             ApplyHistoryToCanvas(item);
+            SecAgentDiag($"UNDO_APPLY_DONE {SecAgentDiagCanvasState()}");
         }
 
         /// <summary>
@@ -4450,6 +4508,7 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void BtnRedo_Click(object sender, RoutedEventArgs e)
         {
+            SecAgentDiag($"REDO_APPLY_BEGIN {SecAgentDiagCanvasState()}");
             if (inkCanvas.GetSelectedStrokes().Count != 0)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
@@ -4457,7 +4516,9 @@ namespace Ink_Canvas
             }
 
             var item = timeMachine.Redo();
+            SecAgentDiag($"REDO_HISTORY_ITEM type={item?.GetType().FullName ?? "null"}");
             ApplyHistoryToCanvas(item);
+            SecAgentDiag($"REDO_APPLY_DONE {SecAgentDiagCanvasState()}");
         }
 
         /// <summary>
@@ -4604,6 +4665,7 @@ namespace Ink_Canvas
             inkCanvas.Children.Clear();
             // 恢复非笔画元素
             RestoreNonStrokeElements(preservedElements);
+            ClearSecAgentSceneElements();
 
             if (Settings.Canvas.ClearCanvasAndClearTimeMachine && !preserveClearHistory)
                 timeMachine.ClearStrokeHistory();

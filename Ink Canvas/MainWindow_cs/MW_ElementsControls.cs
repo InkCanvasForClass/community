@@ -156,6 +156,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void BindElementEvents(FrameworkElement element)
         {
+            SecAgentDiag($"BIND_ELEMENT {SecAgentDiagElement(element)} mode={inkCanvas?.EditingMode}");
             if (element is CanvasMediaControl mediaControl)
             {
                 mediaControl.RegisterSelectHandler(Element_MouseLeftButtonDown);
@@ -207,12 +208,20 @@ namespace Ink_Canvas
             }
             if (sender is FrameworkElement element)
             {
+                SecAgentDiag($"MOUSE_DOWN original={e.OriginalSource?.GetType().FullName ?? "null"} " +
+                             $"source={SecAgentDiagElement(element)} mode={inkCanvas?.EditingMode} " +
+                             $"current={SecAgentDiagElement(currentSelectedElement)} handled={e.Handled}");
                 if (IsInteractiveWidgetChild(e.OriginalSource as DependencyObject, element))
                 {
                     e.Handled = false;
                     return;
                 }
-                if (inkCanvas.EditingMode != InkCanvasEditingMode.Select)
+                // Mouse mode normally lets the board receive clicks without entering the
+                // selection workflow. An already-selected inserted SVG is the exception: its
+                // group remains draggable without switching to the select tool first.
+                var canDragSelectedInMouseMode = inkCanvas.EditingMode == InkCanvasEditingMode.None
+                    && ReferenceEquals(currentSelectedElement, element);
+                if (inkCanvas.EditingMode != InkCanvasEditingMode.Select && !canDragSelectedInMouseMode)
                 {
                     e.Handled = false;
                     return;
@@ -230,12 +239,23 @@ namespace Ink_Canvas
 
                 // 选中当前元素
                 SelectElement(element);
+                if (canDragSelectedInMouseMode)
+                {
+                    // SelectElement normally enters InkCanvas's stroke-selection mode.
+                    // Preserve cursor mode for an already-selected SVG so the drag does
+                    // not re-enable the lasso selection frame after mouse-up.
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    SecAgentDiag($"MOUSE_MODE_PRESERVED element={SecAgentDiagElement(element)} mode={inkCanvas.EditingMode}");
+                }
 
                 // 开始拖动
                 isDragging = true;
                 dragStartPoint = e.GetPosition(inkCanvas);
                 element.CaptureMouse();
                 element.Cursor = Cursors.SizeAll;
+                SecAgentDiagResetDragCounter();
+                SecAgentDiag($"MOUSE_DRAG_STARTED element={SecAgentDiagElement(element)} point={dragStartPoint} " +
+                             $"mode={inkCanvas?.EditingMode} captured={element.IsMouseCaptured}");
 
                 e.Handled = true;
             }
@@ -255,6 +275,8 @@ namespace Ink_Canvas
         {
             if (sender is FrameworkElement element)
             {
+                SecAgentDiag($"MOUSE_UP element={SecAgentDiagElement(element)} dragging={isDragging} " +
+                             $"captured={element.IsMouseCaptured} point={e.GetPosition(inkCanvas)}");
                 isDragging = false;
                 element.ReleaseMouseCapture();
                 element.Cursor = Cursors.Hand;
@@ -300,12 +322,17 @@ namespace Ink_Canvas
         /// </remarks>
         private void Element_MouseMove(object sender, MouseEventArgs e)
         {
-            if (sender is FrameworkElement element && isDragging && element.IsMouseCaptured)
+            if (sender is FrameworkElement element
+                && (inkCanvas.EditingMode == InkCanvasEditingMode.Select
+                    || (inkCanvas.EditingMode == InkCanvasEditingMode.None
+                        && ReferenceEquals(currentSelectedElement, element)))
+                && isDragging && element.IsMouseCaptured)
             {
                 var currentPoint = e.GetPosition(inkCanvas);
 
                 // 使用鼠标拖动的完整实现机制
                 ApplyMouseDragTransform(element, currentPoint, dragStartPoint);
+                SecAgentDiagDragMove(element, currentPoint);
 
                 // 如果是图片元素，更新工具栏位置
                 if (IsBitmapLikeCanvasElement(element) && BorderImageSelectionControl?.Visibility == Visibility.Visible)
@@ -346,6 +373,12 @@ namespace Ink_Canvas
 
 
                 // 使用滚轮缩放的核心机制
+                // 浣跨敤婊氳疆缂╂斁鐨勬牳蹇冩満鍒?
+                if (inkCanvas.EditingMode != InkCanvasEditingMode.Select)
+                {
+                    e.Handled = false;
+                    return;
+                }
                 ApplyWheelScaleTransform(element, e);
 
                 // 如果是图片元素，更新工具栏位置
@@ -743,6 +776,8 @@ namespace Ink_Canvas
         /// </remarks>
         private void SelectElement(FrameworkElement element)
         {
+            SecAgentDiag($"SELECT_BEGIN element={SecAgentDiagElement(element)} before={SecAgentDiagElement(currentSelectedElement)} " +
+                         $"mode={inkCanvas?.EditingMode} {SecAgentDiagCanvasState()}");
             currentSelectedElement = element;
 
             // 根据元素类型显示不同的选择工具栏
@@ -793,6 +828,8 @@ namespace Ink_Canvas
             }
 
             SyncPdfPageSidebarWithCanvas();
+            SecAgentDiag($"SELECT_DONE element={SecAgentDiagElement(element)} mode={inkCanvas?.EditingMode} " +
+                         $"overlay={ImageSelectionOverlay?.Visibility} toolbar={BorderImageSelectionControl?.Visibility} {SecAgentDiagCanvasState()}");
         }
 
         /// <summary>
@@ -807,6 +844,8 @@ namespace Ink_Canvas
         /// </remarks>
         private void UnselectElement(FrameworkElement element)
         {
+            SecAgentDiag($"UNSELECT_BEGIN element={SecAgentDiagElement(element)} current={SecAgentDiagElement(currentSelectedElement)} " +
+                         $"mode={inkCanvas?.EditingMode} overlay={ImageSelectionOverlay?.Visibility}");
             // 去除选中效果
 
             // 隐藏图片选择工具栏
@@ -834,6 +873,8 @@ namespace Ink_Canvas
             }
 
             SyncPdfPageSidebarWithCanvas();
+            SecAgentDiag($"UNSELECT_DONE element={SecAgentDiagElement(element)} mode={inkCanvas?.EditingMode} " +
+                         $"overlay={ImageSelectionOverlay?.Visibility} current={SecAgentDiagElement(currentSelectedElement)}");
         }
 
         /// <summary>
@@ -1148,7 +1189,10 @@ namespace Ink_Canvas
         /// <summary>与图片选择工具栏、缩放控制点联动的画布位图类元素（普通图片、多页 PDF 嵌入或媒体控件）。</summary>
         private static bool IsBitmapLikeCanvasElement(FrameworkElement fe)
         {
-            return fe is Image || fe is PdfEmbeddedView || fe is CanvasMediaControl;
+            return fe is Image || fe is PdfEmbeddedView || fe is CanvasMediaControl
+                || string.Equals(fe?.GetType().FullName, "Ink_Canvas.SecAgent.Plugin.SvgCanvasElement", StringComparison.Ordinal)
+                || string.Equals(fe?.GetType().FullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneElement", StringComparison.Ordinal)
+                || string.Equals(fe?.GetType().FullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneGroup", StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -3016,6 +3060,11 @@ namespace Ink_Canvas
             if (element is PdfEmbeddedView)
                 lockAspect = true;
 
+            // Editable SVG scenes are inserted as a fixed-aspect composition. Their text,
+            // paths and table geometry must scale uniformly when a corner handle is dragged.
+            if (IsSecAgentSceneCanvasElement(element))
+                lockAspect = true;
+
             if (!(element.RenderTransform is TransformGroup transformGroup)) return;
             var scaleTransform = transformGroup.Children.OfType<ScaleTransform>().FirstOrDefault();
             var translateTransform = transformGroup.Children.OfType<TranslateTransform>().FirstOrDefault();
@@ -3111,6 +3160,14 @@ namespace Ink_Canvas
             UpdateImageResizeHandlesPosition(default);
             if (BorderImageSelectionControl?.Visibility == Visibility.Visible)
                 UpdateImageSelectionToolbarPosition(element);
+        }
+
+        private static bool IsSecAgentSceneCanvasElement(FrameworkElement element)
+        {
+            var fullName = element?.GetType().FullName;
+            return string.Equals(fullName, "Ink_Canvas.SecAgent.Plugin.SvgCanvasElement", StringComparison.Ordinal)
+                || string.Equals(fullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneElement", StringComparison.Ordinal)
+                || string.Equals(fullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneGroup", StringComparison.Ordinal);
         }
 
         // Canvas position of element-local point (lx, ly) under the given transform.

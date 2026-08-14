@@ -7,9 +7,11 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -41,6 +43,10 @@ namespace Ink_Canvas
         public string Stretch { get; set; } = "Fill"; // 默认为Fill
         public string MediaKind { get; set; }
         public string MediaDisplayName { get; set; }
+        /// <summary>Type == SvgScene 时，保存一个可编辑 SVG 场景元素的 JSON 描述。</summary>
+        public string SceneElementJson { get; set; }
+        /// <summary>保存 SvgScene 的 WPF 变换矩阵，保留移动、缩放和旋转后的视觉位置。</summary>
+        public string TransformMatrix { get; set; }
         public double? MediaPositionSeconds { get; set; }
         public double? MediaSpeedRatio { get; set; }
         public double? MediaVolume { get; set; }
@@ -129,7 +135,275 @@ namespace Ink_Canvas
                         });
                     }
                 }
+                else if (child is FrameworkElement sceneGroup && string.Equals(sceneGroup.GetType().FullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneGroup", StringComparison.Ordinal))
+                {
+                    var serialized = sceneGroup.GetType().GetProperty("SerializedScene", BindingFlags.Public | BindingFlags.Instance)?.GetValue(sceneGroup) as string;
+                    if (!string.IsNullOrWhiteSpace(serialized))
+                    {
+                        elementInfos.Add(new CanvasElementInfo
+                        {
+                            Type = "SvgSceneGroup",
+                            SceneElementJson = serialized,
+                            Left = InkCanvas.GetLeft(sceneGroup),
+                            Top = InkCanvas.GetTop(sceneGroup),
+                            Width = sceneGroup.Width,
+                            Height = sceneGroup.Height,
+                            TransformMatrix = SerializeElementTransform(sceneGroup),
+                            Stretch = "None"
+                        });
+                    }
+                }
+                else if (child is FrameworkElement sceneElement && string.Equals(sceneElement.GetType().FullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneElement", StringComparison.Ordinal))
+                {
+                    var serialized = sceneElement.GetType().GetProperty("SerializedElement", BindingFlags.Public | BindingFlags.Instance)?.GetValue(sceneElement) as string;
+                    if (!string.IsNullOrWhiteSpace(serialized))
+                    {
+                        elementInfos.Add(new CanvasElementInfo
+                        {
+                            Type = "SvgScene",
+                            SceneElementJson = serialized,
+                            Left = InkCanvas.GetLeft(sceneElement),
+                            Top = InkCanvas.GetTop(sceneElement),
+                            Width = sceneElement.Width,
+                            Height = sceneElement.Height,
+                            TransformMatrix = SerializeElementTransform(sceneElement),
+                            Stretch = "None"
+                        });
+                    }
+                }
             }
+        }
+
+        private void RestoreSecAgentSceneElement(CanvasElementInfo info)
+        {
+            if (info == null || inkCanvas == null || string.IsNullOrWhiteSpace(info.SceneElementJson)) return;
+            try
+            {
+                var typeName = string.Equals(info.Type, "SvgSceneGroup", StringComparison.OrdinalIgnoreCase)
+                    ? "Ink_Canvas.SecAgent.Plugin.SvgSceneGroup"
+                    : "Ink_Canvas.SecAgent.Plugin.SvgSceneElement";
+                var type = AppDomain.CurrentDomain.GetAssemblies()
+                    .Select(assembly => assembly.GetType(typeName, false))
+                    .FirstOrDefault(candidate => candidate != null);
+                var factoryName = string.Equals(info.Type, "SvgSceneGroup", StringComparison.OrdinalIgnoreCase)
+                    ? "FromSerializedScene"
+                    : "FromSerializedElement";
+                var factory = type?.GetMethod(factoryName, BindingFlags.Public | BindingFlags.Static);
+                if (factory?.Invoke(null, new object[] { info.SceneElementJson, 1d }) is not FrameworkElement element) return;
+                element.Name = "svgscene_restore_" + DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
+                InkCanvas.SetLeft(element, double.IsNaN(info.Left) ? 0 : info.Left);
+                InkCanvas.SetTop(element, double.IsNaN(info.Top) ? 0 : info.Top);
+                InitializeElementTransform(element);
+                RestoreElementTransform(element, info.TransformMatrix);
+                inkCanvas.Children.Add(element);
+                BindElementEvents(element);
+                RefreshRestoredSecAgentElementLayout(element);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"恢复可编辑 SVG 场景元素失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// Restored SVG scenes do not pass through the SecAgent insertion bridge. Force the
+        /// same immediate arrange/layout pass here so transparent hit rectangles, selection
+        /// dragging and eraser coordinate transforms are valid immediately after opening a
+        /// saved page, without requiring a tool switch.
+        /// </summary>
+        private void RefreshRestoredSecAgentElementLayout(FrameworkElement element)
+        {
+            if (element == null || inkCanvas == null) return;
+            try
+            {
+                element.Visibility = Visibility.Visible;
+                element.IsHitTestVisible = true;
+                inkCanvas.Visibility = Visibility.Visible;
+                inkCanvas.IsHitTestVisible = true;
+
+                var width = double.IsFinite(element.Width) && element.Width > 0 ? element.Width : 1;
+                var height = double.IsFinite(element.Height) && element.Height > 0 ? element.Height : 1;
+                var size = new System.Windows.Size(width, height);
+                element.Measure(size);
+                element.Arrange(new Rect(new System.Windows.Point(0, 0), size));
+
+                var forceLayout = element.GetType().GetMethod("ForceLayout", Type.EmptyTypes);
+                forceLayout?.Invoke(element, null);
+
+                inkCanvas.InvalidateMeasure();
+                inkCanvas.InvalidateArrange();
+                inkCanvas.UpdateLayout();
+                element.InvalidateMeasure();
+                element.InvalidateArrange();
+                element.Measure(size);
+                element.Arrange(new Rect(new System.Windows.Point(0, 0), size));
+                element.UpdateLayout();
+                element.InvalidateVisual();
+                LogHelper.WriteLogToFile($"[SecAgentDiag] RESTORE_LAYOUT type={element.GetType().Name} " +
+                    $"actual=({element.ActualWidth:0.##}x{element.ActualHeight:0.##}) " +
+                    $"size=({element.Width:0.##}x{element.Height:0.##}) " +
+                    $"visible={element.Visibility} hit={element.IsHitTestVisible}", LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[SecAgentDiag] RESTORE_LAYOUT_FAILED type={element.GetType().FullName} error={ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        private static string SerializeElementTransform(FrameworkElement element)
+        {
+            if (element?.RenderTransform is not Transform transform)
+                return string.Empty;
+
+            // Keep the transform tree instead of flattening it into one matrix. The
+            // selection/resize code intentionally addresses the Scale/Translate/Rotate
+            // nodes by type; restoring a flat matrix after the default nodes would make
+            // the visible object and its selection frame disagree after reopening.
+            var node = SerializeTransformNode(transform);
+            return "v2:" + JsonConvert.SerializeObject(node, Newtonsoft.Json.Formatting.None);
+        }
+
+        private sealed class PersistedTransformNode
+        {
+            public string Type { get; set; }
+            public double[] Values { get; set; }
+            public List<PersistedTransformNode> Children { get; set; }
+        }
+
+        private static PersistedTransformNode SerializeTransformNode(Transform transform)
+        {
+            if (transform is TransformGroup group)
+            {
+                return new PersistedTransformNode
+                {
+                    Type = "group",
+                    Children = group.Children.Cast<Transform>().Select(SerializeTransformNode).ToList()
+                };
+            }
+
+            if (transform is ScaleTransform scale)
+                return new PersistedTransformNode
+                {
+                    Type = "scale",
+                    Values = new[] { scale.ScaleX, scale.ScaleY, scale.CenterX, scale.CenterY }
+                };
+
+            if (transform is TranslateTransform translate)
+                return new PersistedTransformNode
+                {
+                    Type = "translate",
+                    Values = new[] { translate.X, translate.Y }
+                };
+
+            if (transform is RotateTransform rotate)
+                return new PersistedTransformNode
+                {
+                    Type = "rotate",
+                    Values = new[] { rotate.Angle, rotate.CenterX, rotate.CenterY }
+                };
+
+            if (transform is SkewTransform skew)
+                return new PersistedTransformNode
+                {
+                    Type = "skew",
+                    Values = new[] { skew.AngleX, skew.AngleY, skew.CenterX, skew.CenterY }
+                };
+
+            var matrix = transform.Value;
+            return new PersistedTransformNode
+            {
+                Type = "matrix",
+                Values = new[] { matrix.M11, matrix.M12, matrix.M21, matrix.M22, matrix.OffsetX, matrix.OffsetY }
+            };
+        }
+
+        private static Transform DeserializeTransformNode(PersistedTransformNode node)
+        {
+            if (node == null || string.IsNullOrWhiteSpace(node.Type)) return null;
+            var values = node.Values ?? Array.Empty<double>();
+            switch (node.Type.ToLowerInvariant())
+            {
+                case "group":
+                {
+                    var group = new TransformGroup();
+                    foreach (var child in node.Children ?? new List<PersistedTransformNode>())
+                    {
+                        var transform = DeserializeTransformNode(child);
+                        if (transform != null) group.Children.Add(transform);
+                    }
+                    return group;
+                }
+                case "scale" when values.Length >= 4:
+                    return new ScaleTransform(values[0], values[1], values[2], values[3]);
+                case "translate" when values.Length >= 2:
+                    return new TranslateTransform(values[0], values[1]);
+                case "rotate" when values.Length >= 3:
+                    return new RotateTransform(values[0], values[1], values[2]);
+                case "skew" when values.Length >= 4:
+                    return new SkewTransform(values[0], values[1], values[2], values[3]);
+                case "matrix" when values.Length >= 6:
+                    return new MatrixTransform(new Matrix(values[0], values[1], values[2], values[3], values[4], values[5]));
+                default:
+                    return null;
+            }
+        }
+
+        private static void RestoreElementTransform(FrameworkElement element, string serializedMatrix)
+        {
+            if (element == null || string.IsNullOrWhiteSpace(serializedMatrix)) return;
+
+            if (serializedMatrix.StartsWith("v2:", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    var node = JsonConvert.DeserializeObject<PersistedTransformNode>(serializedMatrix[3..]);
+                    var transform = DeserializeTransformNode(node);
+                    if (transform != null)
+                    {
+                        element.RenderTransform = transform;
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"鎭㈠ SVG TransformGroup v2 澶辫触: {ex.Message}", LogHelper.LogType.Warning);
+                }
+            }
+
+            // Backward compatibility for boards written before v2. Migrate the old flat
+            // matrix into the same Scale/Translate/Rotate shape expected by selection and
+            // resize code instead of appending a MatrixTransform after identity nodes.
+            if (element.RenderTransform is not TransformGroup group) return;
+            var values = serializedMatrix.Split(',');
+            if (values.Length != 6) return;
+            var parsed = new double[6];
+            for (var index = 0; index < values.Length; index++)
+                if (!double.TryParse(values[index], NumberStyles.Float, CultureInfo.InvariantCulture, out parsed[index])) return;
+
+            var matrix = new Matrix(parsed[0], parsed[1], parsed[2], parsed[3], parsed[4], parsed[5]);
+            var scaleX = Math.Sqrt(matrix.M11 * matrix.M11 + matrix.M12 * matrix.M12);
+            if (scaleX < 1e-9 || double.IsNaN(scaleX) || double.IsInfinity(scaleX))
+            {
+                group.Children.Clear();
+                group.Children.Add(new MatrixTransform(matrix));
+                return;
+            }
+
+            var determinant = matrix.M11 * matrix.M22 - matrix.M12 * matrix.M21;
+            var scaleY = determinant / scaleX;
+            var angle = Math.Atan2(matrix.M12, matrix.M11) * 180d / Math.PI;
+            var width = element.Width > 0 ? element.Width : element.ActualWidth;
+            var height = element.Height > 0 ? element.Height : element.ActualHeight;
+            var center = new System.Windows.Point(Math.Max(0, width) / 2d, Math.Max(0, height) / 2d);
+            var transformedCenter = matrix.Transform(center);
+            var translation = new Vector(
+                transformedCenter.X - center.X * scaleX,
+                transformedCenter.Y - center.Y * scaleY);
+
+            group.Children.Clear();
+            group.Children.Add(new ScaleTransform(scaleX, scaleY));
+            group.Children.Add(new TranslateTransform(translation.X, translation.Y));
+            group.Children.Add(new RotateTransform(angle, transformedCenter.X, transformedCenter.Y));
         }
 
         private void RestoreMediaFromElementInfo(CanvasElementInfo info)
@@ -1491,6 +1765,11 @@ namespace Ink_Canvas
                         {
                             RestoreMediaFromElementInfo(info);
                         }
+                        else if (string.Equals(info.Type, "SvgScene", StringComparison.OrdinalIgnoreCase)
+                            || string.Equals(info.Type, "SvgSceneGroup", StringComparison.OrdinalIgnoreCase))
+                        {
+                            RestoreSecAgentSceneElement(info);
+                        }
                     }
                 }
             }
@@ -1655,6 +1934,11 @@ namespace Ink_Canvas
                     else if (string.Equals(info.Type, "Media", StringComparison.OrdinalIgnoreCase) && File.Exists(info.SourcePath))
                     {
                         RestoreMediaFromElementInfo(info);
+                    }
+                    else if (string.Equals(info.Type, "SvgScene", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(info.Type, "SvgSceneGroup", StringComparison.OrdinalIgnoreCase))
+                    {
+                        RestoreSecAgentSceneElement(info);
                     }
                 }
             }

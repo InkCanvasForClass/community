@@ -3,6 +3,8 @@ using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
@@ -239,6 +241,13 @@ namespace Ink_Canvas
                                 canvas.Strokes.Remove(currentStroke);
                 }
             }
+            else if (item.CommitType == TimeMachineHistoryType.ElementEdit)
+            {
+                var state = item.StrokeHasBeenCleared ? item.PreviousElementState : item.CurrentElementState;
+                var replacement = RestoreEditedElement(item.EditedElement, state, canvas);
+                if (replacement != null)
+                    item.EditedElement = replacement;
+            }
             else if (item.CommitType == TimeMachineHistoryType.ElementInsert)
             {
                 var targetCanvas = canvas ?? inkCanvas;
@@ -322,6 +331,98 @@ namespace Ink_Canvas
         /// 创建一个临时画布，应用历史记录，然后返回画布中的笔画集合
         /// 只处理笔画历史，不处理图片元素历史
         /// </remarks>
+        private FrameworkElement RestoreEditedElement(UIElement current, string serializedState, InkCanvas canvas)
+        {
+            if (current is not FrameworkElement currentElement || string.IsNullOrWhiteSpace(serializedState) || canvas == null)
+                return current as FrameworkElement;
+
+            var parent = currentElement.Parent as Panel;
+            var directCanvas = currentElement.Parent as InkCanvas;
+            var index = parent?.Children.IndexOf(currentElement)
+                ?? directCanvas?.Children.IndexOf(currentElement)
+                ?? canvas.Children.Count;
+            var left = InkCanvas.GetLeft(currentElement);
+            var top = InkCanvas.GetTop(currentElement);
+            var transform = currentElement.RenderTransform?.Clone();
+
+            if (IsEmptyEditableState(serializedState))
+            {
+                if (ReferenceEquals(currentSelectedElement, currentElement))
+                {
+                    UnselectElement(currentElement);
+                    currentSelectedElement = null;
+                }
+                if (parent != null && parent.Children.Contains(currentElement))
+                    parent.Children.Remove(currentElement);
+                else if (directCanvas != null && directCanvas.Children.Contains(currentElement))
+                    directCanvas.Children.Remove(currentElement);
+                return currentElement;
+            }
+
+            try
+            {
+                var type = currentElement.GetType();
+                var method = type.GetMethod("FromSerializedScene", BindingFlags.Public | BindingFlags.Static)
+                    ?? type.GetMethod("FromSerializedElement", BindingFlags.Public | BindingFlags.Static);
+                if (method == null) return currentElement;
+                var parameters = method.GetParameters().Length == 1
+                    ? new object[] { serializedState }
+                    : new object[] { serializedState, 1d };
+                if (method.Invoke(null, parameters) is not FrameworkElement replacement)
+                    return currentElement;
+
+                if (ReferenceEquals(currentSelectedElement, currentElement))
+                {
+                    UnselectElement(currentElement);
+                    currentSelectedElement = null;
+                }
+                if (parent != null && parent.Children.Contains(currentElement))
+                    parent.Children.Remove(currentElement);
+                else if (directCanvas != null && directCanvas.Children.Contains(currentElement))
+                    directCanvas.Children.Remove(currentElement);
+                if (!double.IsNaN(left)) InkCanvas.SetLeft(replacement, left);
+                if (!double.IsNaN(top)) InkCanvas.SetTop(replacement, top);
+                replacement.Name = currentElement.Name;
+                replacement.RenderTransform = transform;
+                if (parent != null)
+                    parent.Children.Insert(Math.Min(index, parent.Children.Count), replacement);
+                else if (directCanvas != null)
+                    directCanvas.Children.Insert(Math.Min(index, directCanvas.Children.Count), replacement);
+                else
+                    canvas.Children.Insert(Math.Min(index, canvas.Children.Count), replacement);
+                InitializeElementTransformIfMissing(replacement);
+                BindElementEvents(replacement);
+                return replacement;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"RestoreEditableElement failed: {ex.Message}");
+                return currentElement;
+            }
+        }
+
+        private static bool IsEmptyEditableState(string serializedState)
+        {
+            try
+            {
+                using var document = JsonDocument.Parse(serializedState);
+                var root = document.RootElement;
+                return root.TryGetProperty("elements", out var elements)
+                    && elements.ValueKind == JsonValueKind.Array
+                    && elements.GetArrayLength() == 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void InitializeElementTransformIfMissing(FrameworkElement element)
+        {
+            if (element.RenderTransform == null || element.RenderTransform.Value.IsIdentity)
+                InitializeElementTransform(element);
+        }
+
         private StrokeCollection ApplyHistoriesToNewStrokeCollection(TimeMachineHistory[] items)
         {
             InkCanvas fakeInkCanv = new InkCanvas

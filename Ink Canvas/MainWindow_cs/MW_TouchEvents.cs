@@ -873,10 +873,15 @@ namespace Ink_Canvas
             for (int i = inkCanvas.Children.Count - 1; i >= 0; i--)
             {
                 var child = inkCanvas.Children[i];
+                if (child is FrameworkElement sceneChild
+                    && (IsSecAgentEditableSceneElement(sceneChild) || IsSecAgentEditableSceneGroup(sceneChild)))
+                    continue;
 
                 // 保存图片、媒体元素等非笔画相关的UI元素
                 if (child is Image || child is MediaElement || child is CanvasMediaControl ||
-                    (child is Border border && border.Name != "EraserOverlayCanvas"))
+                    (child is Border border && border.Name != "EraserOverlayCanvas" &&
+                     !string.Equals(child.GetType().FullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneElement", StringComparison.Ordinal) &&
+                     !string.Equals(child.GetType().FullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneGroup", StringComparison.Ordinal)))
                 {
                     // CanvasMediaControl 直接保留原始引用，避免克隆导致播放状态丢失
                     if (child is CanvasMediaControl)

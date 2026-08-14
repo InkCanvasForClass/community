@@ -24,6 +24,9 @@ namespace Ink_Canvas.Helpers
 
         public bool IsUsingWindowChromeRendering => _useWindowChromeRendering && _dwmEnabled;
 
+        public string TransparentHitTestState
+            => $"chrome={IsUsingWindowChromeRendering} hwnd={_hwnd != IntPtr.Zero} passThrough={_transparentHitThrough}";
+
         public PerformanceTransparentWin()
         {
             WindowStyle = WindowStyle.None;
@@ -31,6 +34,9 @@ namespace Ink_Canvas.Helpers
 
             _useWindowChromeRendering = SettingsManager.ReadEnableWindowChromeRendering();
             _dwmEnabled = DwmCompositionHelper.IsCompositionEnabled();
+            // Both rendering modes need WM_NCHITTEST. The AllowsTransparency fallback is
+            // also a layered transparent window and must pass through clicks in cursor mode.
+            SourceInitialized += PerformanceTransparentWin_SourceInitialized;
 
             if (IsUsingWindowChromeRendering)
             {
@@ -67,13 +73,10 @@ namespace Ink_Canvas.Helpers
             };
 
             Background = Brushes.Transparent;
-            SourceInitialized += PerformanceTransparentWin_SourceInitialized;
         }
 
         private void PerformanceTransparentWin_SourceInitialized(object sender, EventArgs e)
         {
-            if (!IsUsingWindowChromeRendering) return;
-
             _hwnd = new WindowInteropHelper(this).Handle;
             EnsureLayeredWindowStyle();
             if (HwndSource.FromHwnd(_hwnd) is HwndSource source)
@@ -106,14 +109,12 @@ namespace Ink_Canvas.Helpers
 
         public void SetTransparentHitThrough()
         {
-            if (!IsUsingWindowChromeRendering) return;
             _transparentHitThrough = true;
             EnsureLayeredWindowStyle();
         }
 
         public void SetTransparentNotHitThrough()
         {
-            if (!IsUsingWindowChromeRendering) return;
             _transparentHitThrough = false;
             EnsureLayeredWindowStyle();
         }
@@ -143,7 +144,7 @@ namespace Ink_Canvas.Helpers
 
         private void EnsureLayeredWindowStyle()
         {
-            if (!IsUsingWindowChromeRendering || _hwnd == IntPtr.Zero) return;
+            if (_hwnd == IntPtr.Zero) return;
 
             var exStyle = GetWindowLongPtr(_hwnd, GwlExStyle).ToInt64();
             if ((exStyle & WsExLayered) == 0)
