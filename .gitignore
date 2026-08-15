@@ -47,6 +47,10 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
+# Local build verification output
+**/build-check*/
+**/obj-check*/
+
 # Build results on 'Bin' directories
 **/[Bb]in/*
 # Uncomment if you have tasks that rely on *.refresh files to move binaries
