@@ -777,13 +777,31 @@ namespace Ink_Canvas
 
             // 检查是否有图片元素被选中（通过InkCanvas的选中元素）
             var selectedElements = inkCanvas.GetSelectedElements();
-            bool hasImageElement = selectedElements.Any(element => element is Image || element is PdfEmbeddedView);
+            var selectedImageElement = selectedElements
+                .FirstOrDefault(element => element is Image || element is PdfEmbeddedView) as FrameworkElement;
 
-            // 如果有图片元素被选中，不显示选择框
-            if (hasImageElement)
+            // InkCanvas 首次点击可能直接接管图片选择，这里把选中结果立即交给新版图片选中框，
+            // 避免先显示旧版选择锚点，等第二次点击/拖拽时才进入自定义流程。
+            if (selectedImageElement != null)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                 HideSelectionDisplay();
+
+                isProgramChangeStrokeSelection = true;
+                try
+                {
+                    if (currentSelectedElement != null && !ReferenceEquals(currentSelectedElement, selectedImageElement))
+                    {
+                        var previousEditingMode = inkCanvas.EditingMode;
+                        UnselectElement(currentSelectedElement);
+                        inkCanvas.EditingMode = previousEditingMode;
+                    }
+                    SelectElement(selectedImageElement);
+                }
+                finally
+                {
+                    isProgramChangeStrokeSelection = false;
+                }
                 return;
             }
 
