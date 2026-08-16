@@ -220,6 +220,7 @@ jobs:
       - name: Setup dotnet
         uses: actions/setup-dotnet@v5
         with:
+          dotnet-version: "*"
           cache: true
           cache-dependency-path: "**/packages.lock.json"
 
@@ -258,7 +259,7 @@ jobs:
               -p:EnforceProcessCountAcrossBuilds=true `
               -p:RunAnalyzers=false
           } else {
-            msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
+            dotnet msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
 
             New-Item -ItemType Directory -Path $publishDir -Force
             Copy-Item "Ink Canvas\bin\Release\${{ matrix.architecture }}\net10.0-windows10.0.19041.0\*" $publishDir -Recurse -Force
