@@ -460,7 +460,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 var token = TxtNewToken.Text?.Trim() ?? string.Empty;
                 if (string.IsNullOrEmpty(token))
                 {
-                    MessageBox.Show(CloudStorageStrings.CloudStorage_PleaseEnterNewToken, CloudStorageStrings.CloudStorage_Tip, MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBoxHelper.Show(this, CloudStorageStrings.CloudStorage_PleaseEnterNewToken, CloudStorageStrings.CloudStorage_Tip, MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -468,13 +468,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 SaveUserToken(token);
                 InitializeApiClient();
                 RunWithoutUiEvents(LoadUserToken);
-                MessageBox.Show(CloudStorageStrings.CloudStorage_TokenSavedAndSelected, CloudStorageStrings.CloudStorage_Success, MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBoxHelper.Show(this, CloudStorageStrings.CloudStorage_TokenSavedAndSelected, CloudStorageStrings.CloudStorage_Success, MessageBoxButton.OK, MessageBoxImage.Information);
                 _ = TestConnectionAsync();
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"保存Token时出错: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show($"{CloudStorageStrings.CloudStorage_SaveTokenError}{ex.Message}", CloudStorageStrings.CloudStorage_Error, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBoxHelper.Show(this, $"{CloudStorageStrings.CloudStorage_SaveTokenError}{ex.Message}", CloudStorageStrings.CloudStorage_Error, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -485,12 +485,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (CmbSavedTokens.SelectedItem == null ||
                     CmbSavedTokens.SelectedItem.ToString() == NoSavedTokenText)
                 {
-                    MessageBox.Show(CloudStorageStrings.CloudStorage_PleaseSelectToken, CloudStorageStrings.CloudStorage_Tip, MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBoxHelper.Show(this, CloudStorageStrings.CloudStorage_PleaseSelectToken, CloudStorageStrings.CloudStorage_Tip, MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
                 var selectedToken = CmbSavedTokens.SelectedItem.ToString();
-                var result = MessageBox.Show(CloudStorageStrings.CloudStorage_ConfirmDeleteToken, CloudStorageStrings.CloudStorage_Confirm, MessageBoxButton.YesNo, MessageBoxImage.Question);
+                var result = MessageBoxHelper.Show(this, CloudStorageStrings.CloudStorage_ConfirmDeleteToken, CloudStorageStrings.CloudStorage_Confirm, MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result != MessageBoxResult.Yes)
                 {
                     return;
@@ -511,7 +511,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"删除Token时出错: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show($"{CloudStorageStrings.CloudStorage_DeleteTokenError}{ex.Message}", CloudStorageStrings.CloudStorage_Error, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBoxHelper.Show(this, $"{CloudStorageStrings.CloudStorage_DeleteTokenError}{ex.Message}", CloudStorageStrings.CloudStorage_Error, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -536,12 +536,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 MainWindow.Settings.Dlass.WebDavRootDirectory = TxtWebDavRootDirectory.Text;
                 MainWindow.SaveSettingsToFile();
 
-                MessageBox.Show(CloudStorageStrings.CloudStorage_WebDavSettingsSaved, CloudStorageStrings.CloudStorage_Success, MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBoxHelper.Show(this, CloudStorageStrings.CloudStorage_WebDavSettingsSaved, CloudStorageStrings.CloudStorage_Success, MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"保存WebDav设置时出错: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show($"{CloudStorageStrings.CloudStorage_SaveWebDavError}{ex.Message}", CloudStorageStrings.CloudStorage_Error, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBoxHelper.Show(this, $"{CloudStorageStrings.CloudStorage_SaveWebDavError}{ex.Message}", CloudStorageStrings.CloudStorage_Error, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -558,7 +558,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
 
             _hasPromptedDlassRegistration = true;
-            var result = MessageBox.Show(
+            var result = MessageBoxHelper.Show(this,
                 CloudStorageStrings.CloudStorage_DlassRegistrationPrompt,
                 CloudStorageStrings.CloudStorage_DlassRegistrationTitle,
                 MessageBoxButton.YesNo,
@@ -570,7 +570,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
         }
 
-        private static void OpenDlassDashboard()
+        private void OpenDlassDashboard()
         {
             try
             {
@@ -584,7 +584,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"打开浏览器时出错: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show(CloudStorageStrings.CloudStorage_CannotOpenBrowser,
+                MessageBoxHelper.Show(this, CloudStorageStrings.CloudStorage_CannotOpenBrowser,
                     CloudStorageStrings.CloudStorage_Tip, MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }

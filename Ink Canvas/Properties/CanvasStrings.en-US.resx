@@ -159,6 +159,21 @@
   <data name="Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint" xml:space="preserve">
     <value>When enabled, the whiteboard toolbar Booth button launches Seewo Video Showcase (must be installed). When disabled, the built-in booth is used.</value>
   </data>
+  <data name="Canvas_LongPressUndoClear" xml:space="preserve">
+    <value>Long-press undo to clear canvas</value>
+  </data>
+  <data name="Canvas_LongPressUndoClearHint" xml:space="preserve">
+    <value>Press and hold the undo button for about 0.8 seconds to clear the canvas — you can still undo it afterwards; a quick click performs a normal undo</value>
+  </data>
+  <data name="Canvas_LongPressUndoClearNotification" xml:space="preserve">
+    <value>Canvas cleared by long-pressing the undo button — click undo to restore</value>
+  </data>
+  <data name="Canvas_LongPressUndoClearNotify" xml:space="preserve">
+    <value>Notify after clearing</value>
+  </data>
+  <data name="Canvas_LongPressUndoClearNotifyHint" xml:space="preserve">
+    <value>Show a message in the notification center after clearing via long-press undo</value>
+  </data>
   <data name="Canvas_MergeInkSmoothingWithUndo" xml:space="preserve">
     <value>Merge ink smoothing into undo</value>
   </data>

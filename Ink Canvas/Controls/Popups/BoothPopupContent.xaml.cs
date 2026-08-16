@@ -19,6 +19,30 @@ namespace Ink_Canvas.Controls
         public Button RotateImageButton => RotateImageButtonCtrl;
         public Button ExitVideoPresenterButton => ExitVideoPresenterButtonCtrl;
         public ToggleButton PhotoCorrectionToggle => PhotoCorrectionToggleCtrl;
+        public Slider BrightnessSlider => BrightnessSliderCtrl;
+        public TextBlock BrightnessValueText => BrightnessValueTextCtrl;
+        public Expander ProModeExpander => ProModeExpanderCtrl;
+        public Slider ContrastSlider => ContrastSliderCtrl;
+        public TextBlock ContrastValueText => ContrastValueTextCtrl;
+        public Slider SaturationSlider => SaturationSliderCtrl;
+        public TextBlock SaturationValueText => SaturationValueTextCtrl;
+        public Slider WhiteBalanceSlider => WhiteBalanceSliderCtrl;
+        public TextBlock WhiteBalanceValueText => WhiteBalanceValueTextCtrl;
+        public Slider GainSlider => GainSliderCtrl;
+        public TextBlock GainValueText => GainValueTextCtrl;
+        public Slider FocusSlider => FocusSliderCtrl;
+        public TextBlock FocusValueText => FocusValueTextCtrl;
+        public Slider ExposureSlider => ExposureSliderCtrl;
+        public TextBlock ExposureValueText => ExposureValueTextCtrl;
+        public Button BrightnessResetButton => BrightnessResetButtonCtrl;
+        public Button ContrastResetButton => ContrastResetButtonCtrl;
+        public Button SaturationResetButton => SaturationResetButtonCtrl;
+        public Button WhiteBalanceResetButton => WhiteBalanceResetButtonCtrl;
+        public Button GainResetButton => GainResetButtonCtrl;
+        public Button FocusResetButton => FocusResetButtonCtrl;
+        public Button ExposureResetButton => ExposureResetButtonCtrl;
+        public ToggleButton MirrorHorizontalToggle => MirrorHorizontalToggleCtrl;
+        public ToggleButton MirrorVerticalToggle => MirrorVerticalToggleCtrl;
 
         public Button CloseButtonControl => Shell?.CloseButtonControl;
 

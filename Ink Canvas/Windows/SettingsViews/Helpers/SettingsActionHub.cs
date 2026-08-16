@@ -253,6 +253,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             if (mw != null) mw.ApplyChickenSoupPosition();
         }
 
+        public static void OnWhiteboardTipsAutoHideChanged()
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.SyncWhiteboardTipsAutoHide();
+        }
+
         public static void OnQuickPanelBottomOffsetChanged(double value)
         {
             var mw = GetMainWindow();

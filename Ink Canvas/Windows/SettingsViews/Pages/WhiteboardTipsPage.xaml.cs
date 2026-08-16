@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using iNKORE.UI.WPF.Modern.Controls;
@@ -10,7 +11,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using ContentDialog = iNKORE.UI.WPF.Modern.Controls.ContentDialog;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
@@ -20,11 +20,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private bool _isLoaded = false;
         private List<TipsScheme> _allSchemes = new List<TipsScheme>();
         private int _lastValidInterval = 60;
+        private int _lastValidAutoHideRestoreDelay = 5;
 
         public WhiteboardTipsPage()
         {
             InitializeComponent();
             ComboBoxRotationInterval.LostFocus += ComboBoxRotationInterval_LostFocus;
+            ComboBoxAutoHideRestoreDelay.LostFocus += ComboBoxAutoHideRestoreDelay_LostFocus;
             LoadSettings();
             _isLoaded = true;
         }
@@ -53,6 +55,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ComboBoxRotationInterval.Text = _lastValidInterval.ToString();
 
             CardRotationInterval.Visibility = CardEnableAutoRotation.IsOn ? Visibility.Visible : Visibility.Collapsed;
+
+            CardEnableAutoHideOnInteraction.IsOn = settings.Appearance.EnableWhiteboardTipsAutoHideOnInteraction;
+            CardEnableInstantRestore.IsOn = settings.Appearance.EnableWhiteboardTipsInstantRestore;
+            _lastValidAutoHideRestoreDelay = Math.Max(1, settings.Appearance.WhiteboardTipsAutoHideRestoreDelay);
+            ComboBoxAutoHideRestoreDelay.Text = _lastValidAutoHideRestoreDelay.ToString();
+
+            UpdateAutoHideChildCardsVisibility();
             BtnCustomizeHitokoto.IsEnabled = CardEnableChickenSoupInWhiteboardMode.IsOn;
 
             UpdateChildControlsEnabled();
@@ -153,6 +162,62 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.Settings.Appearance.ChickenSoupAutoRotationInterval = val;
             SettingsManager.SaveSettingsToFile();
             SettingsActionHub.OnChickenSoupAutoRotationChanged();
+        }
+
+        private void ToggleSwitchEnableAutoHideOnInteraction_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.EnableWhiteboardTipsAutoHideOnInteraction = CardEnableAutoHideOnInteraction.IsOn;
+            SettingsManager.SaveSettingsToFile();
+            UpdateAutoHideChildCardsVisibility();
+            SettingsActionHub.OnWhiteboardTipsAutoHideChanged();
+        }
+
+        private void ToggleSwitchEnableInstantRestore_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.EnableWhiteboardTipsInstantRestore = CardEnableInstantRestore.IsOn;
+            SettingsManager.SaveSettingsToFile();
+            UpdateAutoHideChildCardsVisibility();
+            SettingsActionHub.OnWhiteboardTipsAutoHideChanged();
+        }
+
+        /// <summary>
+        /// 主开关控制两个子项可见性；开启"操作结束立即恢复"时隐藏延迟设置（延迟仅作兜底）。
+        /// </summary>
+        private void UpdateAutoHideChildCardsVisibility()
+        {
+            bool master = CardEnableAutoHideOnInteraction.IsOn;
+            bool instant = CardEnableInstantRestore.IsOn;
+
+            CardEnableInstantRestore.Visibility = master ? Visibility.Visible : Visibility.Collapsed;
+            CardAutoHideRestoreDelay.Visibility = (master && !instant) ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void ComboBoxAutoHideRestoreDelay_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            ValidateAndSaveAutoHideRestoreDelay();
+        }
+
+        private void ComboBoxAutoHideRestoreDelay_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            ValidateAndSaveAutoHideRestoreDelay();
+        }
+
+        private void ValidateAndSaveAutoHideRestoreDelay()
+        {
+            if (!int.TryParse(ComboBoxAutoHideRestoreDelay.Text, out int val) || val < 1)
+            {
+                ComboBoxAutoHideRestoreDelay.Text = _lastValidAutoHideRestoreDelay.ToString();
+                return;
+            }
+            if (val == _lastValidAutoHideRestoreDelay) return;
+            _lastValidAutoHideRestoreDelay = val;
+            SettingsManager.Settings.Appearance.WhiteboardTipsAutoHideRestoreDelay = val;
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnWhiteboardTipsAutoHideChanged();
         }
 
         private async void BtnCustomizeHitokoto_Click(object sender, RoutedEventArgs e)
@@ -444,7 +509,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (string.IsNullOrEmpty(name))
                 {
                     args.Cancel = true;
-                    MessageBox.Show(ThemeStrings.Theme_Tips_NameRequired, title, MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBoxHelper.Show(this, ThemeStrings.Theme_Tips_NameRequired, title, MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
                 var content = contentBox.Text ?? string.Empty;

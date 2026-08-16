@@ -89,6 +89,7 @@ namespace Ink_Canvas.Controls
 
 
         public event MouseButtonEventHandler ButtonMouseDown;
+        public event MouseEventHandler ButtonMouseLeave;
         public event MouseButtonEventHandler ButtonMouseUp;
 
         public GeometryDrawing IconGeometryDrawing => IconGeometryInternal;
@@ -193,6 +194,11 @@ namespace Ink_Canvas.Controls
         private void ButtonBorder_MouseUp(object sender, MouseButtonEventArgs e)
         {
             ButtonMouseUp?.Invoke(this, e);
+        }
+
+        private void ButtonBorder_MouseLeave(object sender, MouseEventArgs e)
+        {
+            ButtonMouseLeave?.Invoke(this, e);
         }
     }
 }

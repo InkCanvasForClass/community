@@ -476,6 +476,25 @@ namespace Ink_Canvas
             content.ExitVideoPresenterButton.Click += BtnExitVideoPresenter_Click;
             content.PhotoCorrectionToggle.Checked += ToggleBtnPhotoCorrection_Checked;
             content.PhotoCorrectionToggle.Unchecked += ToggleBtnPhotoCorrection_Unchecked;
+            content.BrightnessSlider.ValueChanged += BoothBrightnessSlider_ValueChanged;
+            content.ContrastSlider.ValueChanged += (s, e) => BoothCameraPropSlider_ValueChanged(BoothCameraProperty.Contrast, e.NewValue, content.ContrastValueText);
+            content.SaturationSlider.ValueChanged += (s, e) => BoothCameraPropSlider_ValueChanged(BoothCameraProperty.Saturation, e.NewValue, content.SaturationValueText);
+            content.WhiteBalanceSlider.ValueChanged += (s, e) => BoothCameraPropSlider_ValueChanged(BoothCameraProperty.WhiteBalance, e.NewValue, content.WhiteBalanceValueText);
+            content.GainSlider.ValueChanged += (s, e) => BoothCameraPropSlider_ValueChanged(BoothCameraProperty.Gain, e.NewValue, content.GainValueText);
+            content.FocusSlider.ValueChanged += (s, e) => BoothCameraPropSlider_ValueChanged(BoothCameraProperty.Focus, e.NewValue, content.FocusValueText);
+            content.ExposureSlider.ValueChanged += (s, e) => BoothCameraPropSlider_ValueChanged(BoothCameraProperty.Exposure, e.NewValue, content.ExposureValueText);
+            // 重置按钮：点击后把对应滑块设回 0（默认值），ValueChanged 会自动写硬件 + 保存设置
+            content.BrightnessResetButton.Click += (s, e) => ResetBoothCameraPropSlider(BoothCameraProperty.Brightness);
+            content.ContrastResetButton.Click += (s, e) => ResetBoothCameraPropSlider(BoothCameraProperty.Contrast);
+            content.SaturationResetButton.Click += (s, e) => ResetBoothCameraPropSlider(BoothCameraProperty.Saturation);
+            content.WhiteBalanceResetButton.Click += (s, e) => ResetBoothCameraPropSlider(BoothCameraProperty.WhiteBalance);
+            content.GainResetButton.Click += (s, e) => ResetBoothCameraPropSlider(BoothCameraProperty.Gain);
+            content.FocusResetButton.Click += (s, e) => ResetBoothCameraPropSlider(BoothCameraProperty.Focus);
+            content.ExposureResetButton.Click += (s, e) => ResetBoothCameraPropSlider(BoothCameraProperty.Exposure);
+            content.MirrorHorizontalToggle.Checked += (s, e) => SetBoothMirror(true, null);
+            content.MirrorHorizontalToggle.Unchecked += (s, e) => SetBoothMirror(false, null);
+            content.MirrorVerticalToggle.Checked += (s, e) => SetBoothMirror(null, true);
+            content.MirrorVerticalToggle.Unchecked += (s, e) => SetBoothMirror(null, false);
             // X 关闭按钮：只关闭菜单（隐藏 Popup），不退出视频展台模式。
             // 完全退出由菜单内"关闭"按钮（BtnExitVideoPresenter_Click）负责。
             content.CloseButtonControl.Click += (s, e) =>
@@ -517,6 +536,7 @@ namespace Ink_Canvas
             WireUpGesturePopupContentEvents();
             WireUpImageOptionsPopupContentEvents();
             WireUpWhiteboardModeSelectionEvents();
+            InitializeWhiteboardTipsAutoHide();
             BoardBorderToolsPopup.CustomPopupPlacementCallback =
                 (popupSize, targetSize, offset) => new[]
                 {
@@ -1835,7 +1855,7 @@ namespace Ink_Canvas
 
                 if (!CloseIsFromButton && Settings.Advanced.IsSecondConfirmWhenShutdownApp)
                 {
-                    var result1 = MessageBox.Show(Properties.MainWindowStrings.Main_CloseConfirm_Level1, "InkCanvasForClass",
+                    var result1 = MessageBoxHelper.Show(this, Properties.MainWindowStrings.Main_CloseConfirm_Level1, "InkCanvasForClass",
                         MessageBoxButton.OKCancel, MessageBoxImage.Warning);
 
                     if (result1 == MessageBoxResult.Cancel)
@@ -1846,7 +1866,7 @@ namespace Ink_Canvas
                         return;
                     }
 
-                    var result2 = MessageBox.Show(Properties.MainWindowStrings.Main_CloseConfirm_Level2, "InkCanvasForClass",
+                    var result2 = MessageBoxHelper.Show(this, Properties.MainWindowStrings.Main_CloseConfirm_Level2, "InkCanvasForClass",
                         MessageBoxButton.OKCancel, MessageBoxImage.Error);
 
                     if (result2 == MessageBoxResult.Cancel)
@@ -1857,7 +1877,7 @@ namespace Ink_Canvas
                         return;
                     }
 
-                    var result3 = MessageBox.Show(Properties.MainWindowStrings.Main_CloseConfirm_Level3, "InkCanvasForClass",
+                    var result3 = MessageBoxHelper.Show(this, Properties.MainWindowStrings.Main_CloseConfirm_Level3, "InkCanvasForClass",
                         MessageBoxButton.OKCancel, MessageBoxImage.Question);
 
                     if (result3 == MessageBoxResult.Cancel)

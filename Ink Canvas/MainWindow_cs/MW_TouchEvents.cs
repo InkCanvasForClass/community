@@ -213,6 +213,9 @@ namespace Ink_Canvas
                 _activeTouchStrokeIds.Clear();
             if (_realtimeBrushTipStates.Count > 0)
                 _realtimeBrushTipStates.Clear();
+            // 同步清理水印自动隐藏的触摸跟踪，避免丢失 TouchUp 时陈旧状态阻塞恢复
+            if (_whiteboardTipsAreaTouchIds.Count > 0)
+                _whiteboardTipsAreaTouchIds.Clear();
             foreach (var timerEntry in _pauseStraightenTimers)
             {
                 timerEntry.Value.Stop();

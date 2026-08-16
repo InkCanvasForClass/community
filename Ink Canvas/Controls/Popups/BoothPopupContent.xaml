@@ -7,7 +7,7 @@
              xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
              xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
              mc:Ignorable="d"
-             d:DesignWidth="320" d:DesignHeight="200">
+             d:DesignWidth="320" d:DesignHeight="240">
     <Grid>
         <controls:PopupShellContent x:Name="Shell" Title="{x:Static props:BoothStrings.Title}" d:Visibility="Collapsed" />
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
@@ -45,6 +45,240 @@
                         <ComboBoxItem Content="{x:Static props:BoothStrings.AccelerationCUDA}" />
                     </ComboBox>
                 </ikw:SimpleStackPanel>
+
+                <!-- 亮度（曝光度） -->
+                <ikw:SimpleStackPanel Orientation="Vertical" Spacing="3">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   Text="{x:Static props:BoothStrings.Brightness}"
+                                   Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                                   FontSize="13" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" />
+                        <Slider Grid.Column="1"
+                                x:Name="BrightnessSliderCtrl"
+                                Minimum="-100" Maximum="100" Value="0"
+                                TickFrequency="10" TickPlacement="BottomRight"
+                                SmallChange="1" LargeChange="10"
+                                Margin="8,0"
+                                MinWidth="180"
+                                VerticalAlignment="Center"
+                                ToolTip="{x:Static props:BoothStrings.Brightness_Tooltip}" />
+                        <TextBlock Grid.Column="2"
+                                   x:Name="BrightnessValueTextCtrl"
+                                   Text="0" MinWidth="36" TextAlignment="Right"
+                                   Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                                   FontSize="12"
+                                   VerticalAlignment="Center" />
+                        <Button Grid.Column="3" x:Name="BrightnessResetButtonCtrl"
+                                Padding="4,2" Margin="4,0,0,0"
+                                VerticalAlignment="Center"
+                                ToolTip="{x:Static props:BoothStrings.ResetDefault}">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" FontSize="12" />
+                        </Button>
+                    </Grid>
+                </ikw:SimpleStackPanel>
+
+                <!-- 镜像 -->
+                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBlock Text="{x:Static props:BoothStrings.Mirror}"
+                               Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                               FontSize="13" FontWeight="SemiBold"
+                               VerticalAlignment="Center" />
+                    <ToggleButton x:Name="MirrorHorizontalToggleCtrl"
+                                  Padding="8,4" MinWidth="64">
+                        <TextBlock Text="{x:Static props:BoothStrings.MirrorHorizontal}" />
+                    </ToggleButton>
+                    <ToggleButton x:Name="MirrorVerticalToggleCtrl"
+                                  Padding="8,4" MinWidth="64">
+                        <TextBlock Text="{x:Static props:BoothStrings.MirrorVertical}" />
+                    </ToggleButton>
+                </ikw:SimpleStackPanel>
+
+                <!-- 专业模式：对比度 / 饱和度 / 色温 / 增益 / 焦距 / 快门 -->
+                <Expander x:Name="ProModeExpanderCtrl"
+                          Header="{x:Static props:BoothStrings.ProMode}"
+                          ToolTip="{x:Static props:BoothStrings.ProMode_Tooltip}"
+                          IsExpanded="False"
+                          Padding="0,2">
+                    <ikw:SimpleStackPanel Orientation="Vertical" Spacing="6" Margin="0,4,0,0">
+                        <!-- 对比度 -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="64" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="36" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{x:Static props:BoothStrings.Contrast}"
+                                       Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                                       FontSize="12" VerticalAlignment="Center" />
+                            <Slider Grid.Column="1" x:Name="ContrastSliderCtrl"
+                                    Minimum="-100" Maximum="100" Value="0"
+                                    TickFrequency="10" TickPlacement="BottomRight"
+                                    SmallChange="1" LargeChange="10"
+                                    Margin="8,0" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" x:Name="ContrastValueTextCtrl"
+                                       Text="0" TextAlignment="Right"
+                                       Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                                       FontSize="12" VerticalAlignment="Center" />
+                            <Button Grid.Column="3" x:Name="ContrastResetButtonCtrl"
+                                    Padding="4,2" Margin="4,0,0,0"
+                                    VerticalAlignment="Center"
+                                    ToolTip="{x:Static props:BoothStrings.ResetDefault}">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" FontSize="12" />
+                            </Button>
+                        </Grid>
+                        <!-- 饱和度 -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="64" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="36" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{x:Static props:BoothStrings.Saturation}"
+                                       Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                                       FontSize="12" VerticalAlignment="Center" />
+                            <Slider Grid.Column="1" x:Name="SaturationSliderCtrl"
+                                    Minimum="-100" Maximum="100" Value="0"
+                                    TickFrequency="10" TickPlacement="BottomRight"
+                                    SmallChange="1" LargeChange="10"
+                                    Margin="8,0" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" x:Name="SaturationValueTextCtrl"
+                                       Text="0" TextAlignment="Right"
+                                       Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                                       FontSize="12" VerticalAlignment="Center" />
+                            <Button Grid.Column="3" x:Name="SaturationResetButtonCtrl"
+                                    Padding="4,2" Margin="4,0,0,0"
+                                    VerticalAlignment="Center"
+                                    ToolTip="{x:Static props:BoothStrings.ResetDefault}">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" FontSize="12" />
+                            </Button>
+                        </Grid>
+                        <!-- 色温（白平衡） -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="64" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="36" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{x:Static props:BoothStrings.WhiteBalance}"
+                                       Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                                       FontSize="12" VerticalAlignment="Center"
+                                       ToolTip="{x:Static props:BoothStrings.WhiteBalance_Tooltip}" />
+                            <Slider Grid.Column="1" x:Name="WhiteBalanceSliderCtrl"
+                                    Minimum="-100" Maximum="100" Value="0"
+                                    TickFrequency="10" TickPlacement="BottomRight"
+                                    SmallChange="1" LargeChange="10"
+                                    Margin="8,0" VerticalAlignment="Center"
+                                    ToolTip="{x:Static props:BoothStrings.WhiteBalance_Tooltip}" />
+                            <TextBlock Grid.Column="2" x:Name="WhiteBalanceValueTextCtrl"
+                                       Text="0" TextAlignment="Right"
+                                       Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                                       FontSize="12" VerticalAlignment="Center" />
+                            <Button Grid.Column="3" x:Name="WhiteBalanceResetButtonCtrl"
+                                    Padding="4,2" Margin="4,0,0,0"
+                                    VerticalAlignment="Center"
+                                    ToolTip="{x:Static props:BoothStrings.ResetDefault}">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" FontSize="12" />
+                            </Button>
+                        </Grid>
+                        <!-- 增益（ISO 替代） -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="64" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="36" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{x:Static props:BoothStrings.Gain}"
+                                       Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                                       FontSize="12" VerticalAlignment="Center"
+                                       ToolTip="{x:Static props:BoothStrings.Gain_Tooltip}" />
+                            <Slider Grid.Column="1" x:Name="GainSliderCtrl"
+                                    Minimum="-100" Maximum="100" Value="0"
+                                    TickFrequency="10" TickPlacement="BottomRight"
+                                    SmallChange="1" LargeChange="10"
+                                    Margin="8,0" VerticalAlignment="Center"
+                                    ToolTip="{x:Static props:BoothStrings.Gain_Tooltip}" />
+                            <TextBlock Grid.Column="2" x:Name="GainValueTextCtrl"
+                                       Text="0" TextAlignment="Right"
+                                       Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                                       FontSize="12" VerticalAlignment="Center" />
+                            <Button Grid.Column="3" x:Name="GainResetButtonCtrl"
+                                    Padding="4,2" Margin="4,0,0,0"
+                                    VerticalAlignment="Center"
+                                    ToolTip="{x:Static props:BoothStrings.ResetDefault}">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" FontSize="12" />
+                            </Button>
+                        </Grid>
+                        <!-- 焦距 -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="64" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="36" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{x:Static props:BoothStrings.Focus}"
+                                       Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                                       FontSize="12" VerticalAlignment="Center"
+                                       ToolTip="{x:Static props:BoothStrings.Focus_Tooltip}" />
+                            <Slider Grid.Column="1" x:Name="FocusSliderCtrl"
+                                    Minimum="-100" Maximum="100" Value="0"
+                                    TickFrequency="10" TickPlacement="BottomRight"
+                                    SmallChange="1" LargeChange="10"
+                                    Margin="8,0" VerticalAlignment="Center"
+                                    ToolTip="{x:Static props:BoothStrings.Focus_Tooltip}" />
+                            <TextBlock Grid.Column="2" x:Name="FocusValueTextCtrl"
+                                       Text="0" TextAlignment="Right"
+                                       Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                                       FontSize="12" VerticalAlignment="Center" />
+                            <Button Grid.Column="3" x:Name="FocusResetButtonCtrl"
+                                    Padding="4,2" Margin="4,0,0,0"
+                                    VerticalAlignment="Center"
+                                    ToolTip="{x:Static props:BoothStrings.ResetDefault}">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" FontSize="12" />
+                            </Button>
+                        </Grid>
+                        <!-- 快门（曝光） -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="64" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="36" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{x:Static props:BoothStrings.Exposure}"
+                                       Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                                       FontSize="12" VerticalAlignment="Center"
+                                       ToolTip="{x:Static props:BoothStrings.Exposure_Tooltip}" />
+                            <Slider Grid.Column="1" x:Name="ExposureSliderCtrl"
+                                    Minimum="-100" Maximum="100" Value="0"
+                                    TickFrequency="10" TickPlacement="BottomRight"
+                                    SmallChange="1" LargeChange="10"
+                                    Margin="8,0" VerticalAlignment="Center"
+                                    ToolTip="{x:Static props:BoothStrings.Exposure_Tooltip}" />
+                            <TextBlock Grid.Column="2" x:Name="ExposureValueTextCtrl"
+                                       Text="0" TextAlignment="Right"
+                                       Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                                       FontSize="12" VerticalAlignment="Center" />
+                            <Button Grid.Column="3" x:Name="ExposureResetButtonCtrl"
+                                    Padding="4,2" Margin="4,0,0,0"
+                                    VerticalAlignment="Center"
+                                    ToolTip="{x:Static props:BoothStrings.ResetDefault}">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" FontSize="12" />
+                            </Button>
+                        </Grid>
+                    </ikw:SimpleStackPanel>
+                </Expander>
 
                 <!-- 4 个操作按钮：矫正 / 拍照 / 旋转 / 关闭 -->
                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">

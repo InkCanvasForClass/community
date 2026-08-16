@@ -1061,6 +1061,9 @@ namespace Ink_Canvas
 
             TryApplyPreferredLanguageFromParsedSettings(parsedSettings);
 
+            // 应用 Windows 系统个性化强调色到全局主题管理器，使强调按钮与弹窗确认按钮自动匹配系统强调色
+            ThemeHelper.ApplySystemAccentColor();
+
             // 根据设置决定是否显示启动画面（复用已解析的设置对象）
             if (ShouldShowSplashScreenFromParsed(parsedSettings) && !IsLaunchByFileOrUri(e.Args))
             {

@@ -41,9 +41,13 @@ namespace Ink_Canvas.Plugins
     /// </summary>
     public enum NotificationLevel
     {
+        /// <summary>信息。</summary>
         Info,
+        /// <summary>警告。</summary>
         Warning,
+        /// <summary>错误。</summary>
         Error,
+        /// <summary>成功。</summary>
         Success
     }
 

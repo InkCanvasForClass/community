@@ -678,6 +678,18 @@
   <data name="Canvas_EdgeExpandHint_Settings_TranslateStep" xml:space="preserve">
     <value>单次扩展像素</value>
   </data>
+  <data name="Canvas_EdgeExpandHint_Settings_WhiteboardOnly" xml:space="preserve">
+    <value>仅在白板模式启用</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_WhiteboardOnlyHint" xml:space="preserve">
+    <value>开启后，桌面批注、PPT 演示等非白板场景书写贴近边缘时不会提示；关闭后所有场景都会提示。</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_AutoHideDelay" xml:space="preserve">
+    <value>自动隐藏延时</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_AutoHideDelayHint" xml:space="preserve">
+    <value>停止书写后，提示按钮保持显示的时间；再次书写会重新计时，悬停按钮时暂停计时。</value>
+  </data>
   <data name="IdleMiniBar_StartAnnotate" xml:space="preserve">
     <value>开始批注</value>
   </data>

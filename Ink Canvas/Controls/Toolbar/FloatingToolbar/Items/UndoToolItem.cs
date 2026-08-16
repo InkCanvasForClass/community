@@ -12,7 +12,11 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public override string IconGeometry => XamlGraphicsIconGeometries.UndoIcon;
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
-            => host.Window.SymbolIconUndo_MouseUp(sender, e);
+        {
+            // 本次按住若已通过长按触发清屏，则吞掉普通撤销
+            if (!host.Window.ConsumeUndoLongPressClick()) return;
+            host.Window.SymbolIconUndo_MouseUp(sender, e);
+        }
 
         protected override void AfterBuild(IToolbarHost host, ToolbarImageButton view)
         {

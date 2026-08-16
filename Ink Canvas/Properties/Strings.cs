@@ -438,6 +438,10 @@ namespace Ink_Canvas.Properties
             dict["Canvas_EdgeExpandHint_Settings_Enable"] = ("FloatingBarStrings", "Canvas_EdgeExpandHint_Settings_Enable");
             dict["Canvas_EdgeExpandHint_Settings_Threshold"] = ("FloatingBarStrings", "Canvas_EdgeExpandHint_Settings_Threshold");
             dict["Canvas_EdgeExpandHint_Settings_TranslateStep"] = ("FloatingBarStrings", "Canvas_EdgeExpandHint_Settings_TranslateStep");
+            dict["Canvas_EdgeExpandHint_Settings_WhiteboardOnly"] = ("FloatingBarStrings", "Canvas_EdgeExpandHint_Settings_WhiteboardOnly");
+            dict["Canvas_EdgeExpandHint_Settings_WhiteboardOnlyHint"] = ("FloatingBarStrings", "Canvas_EdgeExpandHint_Settings_WhiteboardOnlyHint");
+            dict["Canvas_EdgeExpandHint_Settings_AutoHideDelay"] = ("FloatingBarStrings", "Canvas_EdgeExpandHint_Settings_AutoHideDelay");
+            dict["Canvas_EdgeExpandHint_Settings_AutoHideDelayHint"] = ("FloatingBarStrings", "Canvas_EdgeExpandHint_Settings_AutoHideDelayHint");
             dict["IdleMiniBar_StartAnnotate"] = ("FloatingBarStrings", "IdleMiniBar_StartAnnotate");
             dict["IdleMiniBar_Annotate"] = ("FloatingBarStrings", "IdleMiniBar_Annotate");
             dict["IdleMiniBar_ClearPage"] = ("FloatingBarStrings", "IdleMiniBar_ClearPage");

@@ -73,8 +73,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardAutoFoldAfterPPTSlideShow.IsOn = auto.IsAutoFoldAfterPPTSlideShow;
             CardKeepFoldAfterSoftwareExit.IsOn = auto.KeepFoldAfterSoftwareExit;
 
-            CardSaveScreenshotsInDateFolders.IsOn = auto.IsSaveScreenshotsInDateFolders;
-            CardAutoSaveStrokesAtScreenshot.IsOn = auto.IsAutoSaveStrokesAtScreenshot;
             CardAutoSaveStrokesAtClear.IsOn = auto.IsAutoSaveScreenshotAtClear;
             CardSaveStrokesAsXML.IsOn = auto.IsSaveStrokesAsXML;
             CardSaveStrokesAsUInk.IsOn = auto.IsSaveStrokesAsUInK;
@@ -397,20 +395,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         #endregion
 
         #region Storage & Save
-
-        private void ToggleSwitchSaveScreenshotsInDateFolders_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Automation.IsSaveScreenshotsInDateFolders = CardSaveScreenshotsInDateFolders.IsOn;
-            SettingsManager.SaveSettingsToFile();
-        }
-
-        private void ToggleSwitchAutoSaveStrokesAtScreenshot_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.Automation.IsAutoSaveStrokesAtScreenshot = CardAutoSaveStrokesAtScreenshot.IsOn;
-            SettingsManager.SaveSettingsToFile();
-        }
 
         private void ToggleSwitchAutoSaveStrokesAtClear_Toggled(object sender, RoutedEventArgs e)
         {
