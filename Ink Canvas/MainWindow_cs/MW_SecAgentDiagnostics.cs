@@ -8,11 +8,13 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Plugins;
 
 namespace Ink_Canvas
 {
     public partial class MainWindow
     {
+        private const string SecAgentIntegrationPluginId = "inkcanvas.iccce.secagent";
         private int _secAgentDiagEraserMoveCount;
         private int _secAgentDiagDragMoveCount;
         private DateTime _secAgentDiagLastEraserMoveLogUtc;
@@ -20,6 +22,8 @@ namespace Ink_Canvas
 
         private void SecAgentDiag(string message, LogHelper.LogType type = LogHelper.LogType.Info)
         {
+            if (!IsSecAgentIntegrationPluginInstalled()) return;
+
             var line = $"[SecAgentDiag] {message}";
             try { LogHelper.WriteLogToFile(line, type); }
             catch { Debug.WriteLine(line); }
@@ -40,6 +44,19 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 Debug.WriteLine($"[SecAgentDiag] dedicated-log-failed {ex.GetType().Name}: {ex.Message}");
+            }
+        }
+
+        private static bool IsSecAgentIntegrationPluginInstalled()
+        {
+            try
+            {
+                return PluginManager.Instance.Plugins.Any(plugin =>
+                    string.Equals(plugin.Id, SecAgentIntegrationPluginId, StringComparison.OrdinalIgnoreCase));
+            }
+            catch
+            {
+                return false;
             }
         }
 
