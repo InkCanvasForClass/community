@@ -241,6 +241,12 @@ namespace Ink_Canvas.Helpers
                     },
                     new UpdateLineGroup
                     {
+                        GroupName = "cnb",
+                        DownloadUrlFormat = "https://cnb.cool/InkCanvasForClass/downloads/-/git/raw/main/Release/InkCanvasForClass.CE.{0}.zip",
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/net10/UpdateLog.md"
+                    },
+                    new UpdateLineGroup
+                    {
                         GroupName = "gh-proxy",
                         VersionUrl = "https://gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community/refs/heads/net10/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://gh-proxy.org/https://github.com/InkCanvasForClass/community/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
@@ -308,6 +314,12 @@ namespace Ink_Canvas.Helpers
                     },
                     new UpdateLineGroup
                     {
+                        GroupName = "cnb",
+                        DownloadUrlFormat = "https://cnb.cool/InkCanvasForClass/downloads/-/git/raw/main/Beta/InkCanvasForClass.CE.{0}.zip",
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
+                    },
+                    new UpdateLineGroup
+                    {
                         GroupName = "gh-proxy",
                         VersionUrl = "https://gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/main/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://gh-proxy.org/https://github.com/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
@@ -372,6 +384,12 @@ namespace Ink_Canvas.Helpers
                         DownloadUrlFormat = "https://iccce.inkeys.top/Beta/InkCanvasForClass.CE.{0}.zip",
                         LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md",
                         RequireIntegrity = true
+                    },
+                    new UpdateLineGroup
+                    {
+                        GroupName = "cnb",
+                        DownloadUrlFormat = "https://cnb.cool/InkCanvasForClass/downloads/-/git/raw/main/Beta/InkCanvasForClass.CE.{0}.zip",
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
@@ -546,7 +564,7 @@ namespace Ink_Canvas.Helpers
 
         private static string GetLineGroupTestUrl(UpdateLineGroup group)
         {
-            if (group.GroupName == "智教联盟" || group.GroupName == "inkeys")
+            if (group.GroupName == "智教联盟" || group.GroupName == "inkeys" || group.GroupName == "cnb")
             {
                 try
                 {
@@ -567,7 +585,7 @@ namespace Ink_Canvas.Helpers
 
         private static async Task<(UpdateLineGroup group, long delay)> MeasureLineGroupDelayAsync(UpdateLineGroup group, string testUrl)
         {
-            var delay = group.GroupName == "智教联盟" || group.GroupName == "inkeys"
+            var delay = group.GroupName == "智教联盟" || group.GroupName == "inkeys" || group.GroupName == "cnb"
                 ? await GetDownloadUrlDelay(testUrl)
                 : await GetUrlDelay(testUrl);
             return (group, delay);
