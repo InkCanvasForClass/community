@@ -10,24 +10,24 @@ body:
         在反馈之前，请确认你已仔细阅读并同意以下内容。
         Before providing feedback, please ensure you have carefully read and agree to the following.
         [https://inkcanvasforclass.feishu.cn/wiki/GjMqwMNuIiTOIqkpkiOciRVCnbc#share-GWfjdZgwNoR7ElxaZxKcO6QZneR](https://inkcanvasforclass.feishu.cn/wiki/GjMqwMNuIiTOIqkpkiOciRVCnbc#share-GWfjdZgwNoR7ElxaZxKcO6QZneR)
-        1.您在生产环境中发现了此问题，并稳定反现
-        2.您尝试了自行解决(包括但不限于重置配置文件，全新安装)但始终无法解决
-        3.您可以在其它设备上稳定复现此问题
-        4.您确认此问题并非由实验性功能引起
-        5.您确认此问题严重影响了使用并且可明确定义为漏洞或缺陷
-        6.您了解开发者无法及时回复和及时修复
-        7.您确认、知晓无意义提交Bug类反馈的后果，并同意以下条款:
-          (1).被认定为无意义的反馈将会被直接关闭
-          (2).多次提交无意义的Bug类反馈将会被处以7天内不再接受您反馈的处罚措施的处罚措施
-        1.You discovered this issue in the production environment and can reliably reproduce it.
-        2.You have tried to resolve it yourself (including but not limited to resetting configuration files and performing a clean install) but have been unable to do so.
-        3.You can reliably reproduce this issue on other devices.
-        4.You confirm that this issue is not caused by experimental features.
-        5.You confirm that this issue seriously affects usability and can be clearly defined as a vulnerability or defect.
-        6.You understand that the developers cannot respond and fix it in a timely manner.
-        7.You acknowledge and understand the consequences of submitting meaningless bug reports and agree to the following terms:
-          (1).Feedback deemed meaningless will be closed directly.
-          (2).Submitting multiple meaningless bug reports will result in a 7-day ban on accepting your feedback.
+        1. 您在生产环境中发现了此问题，并稳定反现
+        2. 您尝试了自行解决(包括但不限于重置配置文件，全新安装)但始终无法解决
+        3. 您可以在其它设备上稳定复现此问题
+        4. 您确认此问题并非由实验性功能引起
+        5. 您确认此问题严重影响了使用并且可明确定义为漏洞或缺陷
+        6. 您了解开发者无法及时回复和及时修复
+        7. 您确认、知晓无意义提交Bug类反馈的后果，并同意以下条款:
+          1. 被认定为无意义的反馈将会被直接关闭
+          2. 多次提交无意义的Bug类反馈将会被处以7天内不再接受您反馈的处罚措施的处罚措施
+        1. You discovered this issue in the production environment and can reliably reproduce it.
+        2. You have tried to resolve it yourself (including but not limited to resetting configuration files and performing a clean install) but have been unable to do so.
+        3. You can reliably reproduce this issue on other devices.
+        4. You confirm that this issue is not caused by experimental features.
+        5. You confirm that this issue seriously affects usability and can be clearly defined as a vulnerability or defect.
+        6. You understand that the developers cannot respond and fix it in a timely manner.
+        7. You acknowledge and understand the consequences of submitting meaningless bug reports and agree to the following terms:
+          1. Feedback deemed meaningless will be closed directly.
+          2. Submitting multiple meaningless bug reports will result in a 7-day ban on accepting your feedback.
         
   - type: input
     id: version
