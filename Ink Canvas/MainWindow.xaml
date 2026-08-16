@@ -338,6 +338,85 @@
                 </Button>
             </Popup>
 
+            <!-- 批注状态点提示：当用户在批注模式下反复点击同一区域时浮现，
+                 提醒用户当前处于批注模式而非鼠标模式。 -->
+            <Popup x:Name="AnnotationDotHintPopup"
+                   Placement="Absolute"
+                   AllowsTransparency="True"
+                   StaysOpen="True"
+                   IsOpen="False"
+                   PopupAnimation="Fade"
+                   HorizontalOffset="0"
+                   VerticalOffset="0">
+                <Border x:Name="AnnotationDotHintBorder"
+                        Width="295"
+                        CornerRadius="10"
+                        Padding="14,10"
+                        Background="#E8303030"
+                        BorderBrush="#50FFFFFF"
+                        BorderThickness="1"
+                        SnapsToDevicePixels="True"
+                        Opacity="0">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.4" Color="Black" />
+                    </Border.Effect>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock x:Name="AnnotationDotHintText"
+                                   Text="{x:Static props:FloatingBarStrings.Canvas_AnnotationDotHint_Text}"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
+                                   Foreground="White"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,10,0" />
+                        <Button x:Name="AnnotationDotHintKeepBtn"
+                                Content="{x:Static props:FloatingBarStrings.Canvas_AnnotationDotHint_Keep}"
+                                Width="52" Height="30"
+                                FontSize="12"
+                                FontWeight="SemiBold"
+                                Foreground="White"
+                                Background="#40FFFFFF"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                Click="AnnotationDotHintKeep_Click"
+                                Margin="0,0,6,0">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}"
+                                            CornerRadius="6"
+                                            BorderThickness="1"
+                                            BorderBrush="#60FFFFFF">
+                                        <ContentPresenter HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center" />
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                        <Button x:Name="AnnotationDotHintExitBtn"
+                                Content="{x:Static props:FloatingBarStrings.Canvas_AnnotationDotHint_Exit}"
+                                Width="72" Height="30"
+                                FontSize="12"
+                                FontWeight="SemiBold"
+                                Foreground="White"
+                                Background="#CC2563EB"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                Click="AnnotationDotHintExit_Click">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}"
+                                            CornerRadius="6"
+                                            BorderThickness="1"
+                                            BorderBrush="#40FFFFFF">
+                                        <ContentPresenter HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center" />
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Popup>
+
             <!-- 快抽悬浮按钮 -->
             <localControls:QuickDrawFloatingButtonControl x:Name="QuickDrawFloatingButton"
                     HorizontalAlignment="Right"

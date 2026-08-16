@@ -393,6 +393,16 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"边缘扩展提示判定失败: {ex.Message}", LogHelper.LogType.Warning);
             }
 
+            // 批注状态点提示：检测短墨迹（点击）并在连续点击时提醒用户
+            try
+            {
+                HandleAnnotationDotAfterStroke(e.Stroke);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"批注点提示判定失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+
             if (Settings.Canvas.EnableInkFade)
             {
                 // 获取墨迹的起点和终点

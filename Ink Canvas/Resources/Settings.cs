@@ -550,6 +550,37 @@ namespace Ink_Canvas
         [JsonProperty("edgeExpandAutoHideMs")]
         public double EdgeExpandAutoHideMs { get; set; } = 5000;
 
+        /// <summary>
+        /// 是否启用批注状态点提示：在批注模式下连续点击画布时，显示提示提醒用户当前处于批注模式。
+        /// 默认开启，帮助教师避免忘记关闭批注。
+        /// </summary>
+        [JsonProperty("isEnableAnnotationDotHint")]
+        public bool IsEnableAnnotationDotHint { get; set; } = true;
+
+        /// <summary>
+        /// 批注点提示的连续点击范围阈值（像素）。当连续点击的位置都在此半径范围内时触发提示。
+        /// </summary>
+        [JsonProperty("annotationDotHintClusterRadius")]
+        public double AnnotationDotHintClusterRadius { get; set; } = 50;
+
+        /// <summary>
+        /// 单次触发笔迹长度阈值（像素）。笔迹包围盒最大边长小于此值视为"点击"而非"书写"。
+        /// </summary>
+        [JsonProperty("annotationDotHintStrokeLengthThreshold")]
+        public double AnnotationDotHintStrokeLengthThreshold { get; set; } = 10;
+
+        /// <summary>
+        /// 触发提示的最小连续点击次数。
+        /// </summary>
+        [JsonProperty("annotationDotHintClickCount")]
+        public int AnnotationDotHintClickCount { get; set; } = 3;
+
+        /// <summary>
+        /// 提示显示时长（秒）。超过后自动隐藏。
+        /// </summary>
+        [JsonProperty("annotationDotHintDisplayDurationSeconds")]
+        public double AnnotationDotHintDisplayDurationSeconds { get; set; } = 3;
+
     }
 
     public enum OptionalOperation

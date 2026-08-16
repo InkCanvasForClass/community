@@ -690,6 +690,48 @@
   <data name="Canvas_EdgeExpandHint_Settings_AutoHideDelayHint" xml:space="preserve">
     <value>How long the hint button stays visible after you stop writing. Writing again restarts the timer; hovering the button pauses it.</value>
   </data>
+  <data name="Canvas_AnnotationDotHint_Text" xml:space="preserve">
+    <value>Currently in annotation mode</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Keep" xml:space="preserve">
+    <value>Keep</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Exit" xml:space="preserve">
+    <value>Exit annotation</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_Enable" xml:space="preserve">
+    <value>Annotation status dot hint</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_EnableHint" xml:space="preserve">
+    <value>Show a hint when clicking repeatedly in annotation mode to remind you're in annotation mode</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_ClusterRadius" xml:space="preserve">
+    <value>Cluster radius</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_StrokeLength" xml:space="preserve">
+    <value>Stroke length threshold</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_ClickCount" xml:space="preserve">
+    <value>Click count threshold</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_DisplayDuration" xml:space="preserve">
+    <value>Display duration</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_Preview" xml:space="preserve">
+    <value>Trigger area preview &amp; test</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_PreviewHint" xml:space="preserve">
+    <value>Click in the area below to leave dots. The central circle represents the trigger range. Clicking within the circle enough times triggers the hint.</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_PreviewPlaceholder" xml:space="preserve">
+    <value>Click here to draw dots</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_PreviewLabel" xml:space="preserve">
+    <value>Click {0} times inside the circle to trigger</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_PreviewTriggered" xml:space="preserve">
+    <value>✓ Hint triggered</value>
+  </data>
   <data name="IdleMiniBar_StartAnnotate" xml:space="preserve">
     <value>Annotate</value>
   </data>
