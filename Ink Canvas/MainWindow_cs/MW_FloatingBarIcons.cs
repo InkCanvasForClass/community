@@ -390,6 +390,7 @@ namespace Ink_Canvas
                 _userHasDraggedFloatingBar = true;
 
                 _popupManager?.MarkNeedsUpdate();
+                RefreshWetInkTargetSoon();
 
                 if (BorderTools.IsOpen) _popupManager?.BringToFront(BorderTools);
                 if (BoardBorderToolsPopup.IsOpen) _popupManager?.BringToFront(BoardBorderToolsPopup);
@@ -406,9 +407,13 @@ namespace Ink_Canvas
         {
             try
             {
+                if (_popupManager != null)
+                    _popupManager.OpenPopupsChanged -= OnWetInkPopupCollectionChanged;
+
                 _popupManager = new PopupManagerHelper();
 
                 _popupManager.ShouldBeTopmost = () => Settings.Advanced.IsAlwaysOnTop;
+                _popupManager.OpenPopupsChanged += OnWetInkPopupCollectionChanged;
 
                 _popupManager.RegisterPopup(BorderTools);
                 _popupManager.RegisterPopup(BoardBorderToolsPopup);
@@ -446,6 +451,7 @@ namespace Ink_Canvas
             pos = e.GetPosition(null);
             downPos = e.GetPosition(null);
             GridForFloatingBarDraging.Visibility = Visibility.Visible;
+            RefreshWetInkTargetSoon();
         }
 
         /// <summary>
@@ -489,6 +495,7 @@ namespace Ink_Canvas
             SetFloatingBarHighlightPosition(_currentToolMode);
 
             GridForFloatingBarDraging.Visibility = Visibility.Collapsed;
+            RefreshWetInkTargetSoon();
         }
 
         #endregion 浮動工具欄的拖動實現
@@ -6260,6 +6267,9 @@ namespace Ink_Canvas
             // 工具模式变化后同步刷新工具栏形态（批注/鼠标布局按 IsAnnotating 决定），
             // 否则会出现指示器已切到鼠标、形态仍停在批注的失步（退出白板时的两步走流程即如此）。
             UpdateToolbarComponentVisibility();
+
+            // 新墨迹引擎按逻辑工具决定接管/释放输入，必须在模式缓存更新后同步。
+            SyncWetInkEngineWithLogicalTool();
         }
 
         /// <summary>

@@ -34,6 +34,7 @@ namespace Ink_Canvas
                 if (wasWhiteboardMode != isWhiteboardMode)
                 {
                     RaisePluginEvent(PluginWhiteboardModeChanged, isWhiteboardMode, nameof(PluginWhiteboardModeChanged));
+                    RefreshWetInkTargetSoon();
                 }
             }
         }

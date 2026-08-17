@@ -80,6 +80,7 @@ namespace InkCanvas.NativeInk.Tests
             Run(nameof(UpdatePumpKeepsLatestPendingWork), UpdatePumpKeepsLatestPendingWork);
             Run(nameof(UpdatePumpDropsStaleSessionWork), UpdatePumpDropsStaleSessionWork);
             Console.WriteLine($"Native ink contract tests passed: {_passed}.");
+            WetInkCoreTests.RunAll();
         }
 
         private static void HistoryIsChronologicalAndDeduplicated()
@@ -1170,7 +1171,14 @@ namespace InkCanvas.NativeInk.Tests
                             continue;
 
                         var horizon = HorizonMs(real, predicted);
-                        True(horizon >= InkTailPredictor.MinHorizonMilliseconds - 0.001);
+                        // 高速时预测尾会被 50px 距离上限截断，时间视界可能短于 MinHorizon：
+                        // 下限按「距离上限 ÷ 速度」推导，而不是无条件要求 14ms。
+                        var nominalSpeed = stepPx / intervalMs * 1000.0;
+                        var distanceLimitedMinMs =
+                            Math.Min(InkTailPredictor.MinHorizonMilliseconds, 50.0 / nominalSpeed * 1000.0);
+                        if (!(horizon >= distanceLimitedMinMs - 0.1))
+                            throw new InvalidOperationException(
+                                $"horizon={horizon:F3}ms min={distanceLimitedMinMs:F3}ms step={stepPx}px interval={intervalMs}ms");
                         True(horizon <= InkTailPredictor.MaxHorizonMilliseconds + 0.001);
                         checkedCases++;
                     }
@@ -1199,9 +1207,15 @@ namespace InkCanvas.NativeInk.Tests
             var mediumHorizon = HorizonMs(medium, InkTailPredictor.Build(medium));
             var fastHorizon = HorizonMs(fast, InkTailPredictor.Build(fast));
 
-            True(slowHorizon > crawlHorizon);
-            True(mediumHorizon > slowHorizon);
-            True(fastHorizon > mediumHorizon);
+            if (!(slowHorizon > crawlHorizon))
+                throw new InvalidOperationException(
+                    $"slow={slowHorizon:F3} crawl={crawlHorizon:F3}");
+            if (!(mediumHorizon > slowHorizon))
+                throw new InvalidOperationException(
+                    $"medium={mediumHorizon:F3} slow={slowHorizon:F3}");
+            if (!(fastHorizon > mediumHorizon))
+                throw new InvalidOperationException(
+                    $"fast={fastHorizon:F3} medium={mediumHorizon:F3}");
 
             // 超低速与慢写都要比下限有可感知的余量，否则等同于关掉低速预测。
             True(crawlHorizon >= InkTailPredictor.MinHorizonMilliseconds + 2.0);
@@ -1569,7 +1583,6 @@ namespace InkCanvas.NativeInk.Tests
             {
                 Console.Error.WriteLine($"FAIL {name}: {ex.Message}");
                 Environment.ExitCode = 1;
-                throw;
             }
         }
 

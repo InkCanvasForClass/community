@@ -91,6 +91,7 @@ namespace Ink_Canvas
             }
 
             isLongPressSelected = false;
+            RefreshWetInkStyleSoon();
         }
 
         /// <summary>
@@ -639,6 +640,8 @@ namespace Ink_Canvas
             UpdatePenIconColor();
             // 更新白板工具栏画笔图标颜色
             UpdateBoardPenIconColor();
+
+            RefreshWetInkStyleSoon();
         }
 
         /// <summary>
@@ -810,6 +813,8 @@ namespace Ink_Canvas
             Settings.Canvas.EnableInkFade = false;
             if (_inkFadeManager != null)
                 _inkFadeManager.IsEnabled = false;
+
+            RefreshWetInkStyleSoon();
         }
 
         /// <summary>
@@ -839,6 +844,7 @@ namespace Ink_Canvas
                 _inkFadeManager.IsEnabled = false;
 
             ColorSwitchCheck(false);
+            RefreshWetInkStyleSoon();
         }
 
         private void ApplyLaserPenModeCore(bool refreshUi, bool updateIndicators)
@@ -865,11 +871,14 @@ namespace Ink_Canvas
 
             if (updateIndicators)
                 ColorSwitchCheck(false);
+
+            RefreshWetInkStyleSoon();
         }
 
         private void SwitchToLaserPen(object sender, MouseButtonEventArgs e)
         {
             ApplyLaserPenModeCore(refreshUi: true, updateIndicators: true);
+            RefreshWetInkStyleSoon();
         }
 
         /// <summary>

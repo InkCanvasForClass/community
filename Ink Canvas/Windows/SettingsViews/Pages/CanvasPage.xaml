@@ -70,6 +70,15 @@
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
 
+                    <!-- WinRT 湿墨新墨迹系统开关：仅保存，重启后生效 -->
+                    <controls:LabeledSettingsCard
+                            Header="{x:Static props:CanvasStrings.Canvas_UseLegacyInkSystem}"
+                            Description="{x:Static props:CanvasStrings.Canvas_UseLegacyInkSystemHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.InkingTool}"
+                            SwitchName="ToggleSwitchUseLegacyInkSystem"
+                            helpers:SettingsBinder.PropertyPath="Canvas.UseLegacyInkSystem"
+                            helpers:SettingsBinder.SettingsChanged="OnUseLegacyInkSystemChanged" />
+
                     <!-- 互斥开关：需要 code-behind 处理联动逻辑 -->
                     <controls:LabeledSettingsCard x:Name="CardEnablePressureTouchMode"
                             Header="{x:Static props:CanvasStrings.Canvas_EnablePressureTouch}"

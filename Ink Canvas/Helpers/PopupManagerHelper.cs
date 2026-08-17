@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Interop;
@@ -16,6 +17,9 @@ namespace Ink_Canvas.Helpers
         #region 状态管理
 
         private static readonly List<PopupManagerHelper> _activeInstances = new List<PopupManagerHelper>();
+
+        /// <summary>打开/关闭 Popup 时触发，供墨迹覆盖层重建排除区。</summary>
+        public event Action OpenPopupsChanged;
 
         private readonly List<Popup> _registeredPopups = new List<Popup>();
         private readonly Dictionary<Popup, IntPtr> _hwndCache = new Dictionary<Popup, IntPtr>();
@@ -105,6 +109,8 @@ namespace Ink_Canvas.Helpers
             _openPopups.Add(popup);
             _hwndCache.Remove(popup);
 
+            OpenPopupsChanged?.Invoke();
+
             FixPopupZOrder(popup);
 
             Application.Current.Dispatcher.BeginInvoke(new Action(() =>
@@ -127,6 +133,8 @@ namespace Ink_Canvas.Helpers
 
             _openPopups.Remove(popup);
             _hwndCache.Remove(popup);
+
+            OpenPopupsChanged?.Invoke();
         }
 
         #endregion
@@ -136,6 +144,12 @@ namespace Ink_Canvas.Helpers
         public void MarkNeedsUpdate()
         {
             _needsUpdate = true;
+        }
+
+        /// <summary>返回当前打开 Popup 的快照，供覆盖层排除区遍历。</summary>
+        public IReadOnlyCollection<Popup> GetOpenPopupsSnapshot()
+        {
+            return _openPopups.ToArray();
         }
 
         /// <summary>

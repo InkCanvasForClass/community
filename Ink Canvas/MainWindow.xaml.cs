@@ -1683,6 +1683,10 @@ namespace Ink_Canvas
             {
                 ApplyTransparentHitTestForCurrentMode("startup-idle");
             }), DispatcherPriority.ApplicationIdle);
+
+            // 新墨迹引擎（WinRT InkPresenter）在窗口模式、工具栏与主题全部就绪后启动；
+            // 任何初始化失败都会自动回退传统 WPF InkCanvas 路径。
+            Dispatcher.BeginInvoke(StartWetInkEngine, DispatcherPriority.ApplicationIdle);
         }
 
 
@@ -1696,6 +1700,7 @@ namespace Ink_Canvas
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e)
         {
+            RefreshWetInkTargetSoon();
             if (!Settings.Advanced.IsEnableResolutionChangeDetection) return;
             ShowNotification(string.Format(Properties.MainWindowStrings.Main_DisplayChanged, Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height));
             HandleFloatingBarRecovery();
@@ -1703,6 +1708,7 @@ namespace Ink_Canvas
 
         private void MainWindow_OnDpiChanged(object sender, DpiChangedEventArgs e)
         {
+            RefreshWetInkTargetSoon();
             if (e.OldDpi.DpiScaleX != e.NewDpi.DpiScaleX && e.OldDpi.DpiScaleY != e.NewDpi.DpiScaleY && Settings.Advanced.IsEnableDPIChangeDetection)
             {
                 ShowNotification(string.Format(Properties.MainWindowStrings.Main_DPIChanged, e.OldDpi.DpiScaleX, e.OldDpi.DpiScaleY, e.NewDpi.DpiScaleX, e.NewDpi.DpiScaleY));
@@ -1914,6 +1920,8 @@ namespace Ink_Canvas
                     Screen.PrimaryScreen.Bounds.Width,
                     Screen.PrimaryScreen.Bounds.Height, true);
             }
+
+            RefreshWetInkTargetSoon();
         }
 
 
@@ -1924,6 +1932,7 @@ namespace Ink_Canvas
         /// <param name="e">关闭事件的参数（未使用）。</param>
         private void Window_Closed(object sender, EventArgs e)
         {
+            ShutdownWetInkEngine();
             RealtimeInkFrameScheduler.Clear();
             SystemEvents.DisplaySettingsChanged -= SystemEventsOnDisplaySettingsChanged;
             // 玻璃浮动栏刻意不设 Owner，必须显式关闭，否则残留窗口会挡住进程退出

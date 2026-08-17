@@ -442,6 +442,7 @@ namespace Ink_Canvas
                     UpdateQuickColorPaletteIndicator(inkCanvas.DefaultDrawingAttributes.Color);
                 }), System.Windows.Threading.DispatcherPriority.Loaded);
                 LogHelper.WriteLogToFile("MW_Toolbar: RebuildToolbar 完成", LogHelper.LogType.Info);
+                RefreshWetInkTargetSoon();
             }
             catch (Exception ex)
             {

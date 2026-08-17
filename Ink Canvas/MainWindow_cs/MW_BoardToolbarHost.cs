@@ -215,6 +215,7 @@ namespace Ink_Canvas
                 UpdateBoardToolbarState();
                 UpdateBoardRoamingButtonState();
                 CheckEnableTwoFingerGestureBtnColorPrompt();
+                RefreshWetInkTargetSoon();
             }
             catch (Exception ex)
             {
@@ -236,6 +237,7 @@ namespace Ink_Canvas
                 UpdateBoardToolbarState();
                 UpdateBoardRoamingButtonState();
                 CheckEnableTwoFingerGestureBtnColorPrompt();
+                RefreshWetInkTargetSoon();
             }
             catch (Exception ex)
             {

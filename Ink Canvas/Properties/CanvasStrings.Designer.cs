@@ -164,6 +164,12 @@ namespace Ink_Canvas.Properties
 
         public static string Canvas_SelectCustomPenCursor => ResourceManager.GetString(nameof(Canvas_SelectCustomPenCursor), _resourceCulture);
 
+        public static string Canvas_UseLegacyInkSystem => ResourceManager.GetString(nameof(Canvas_UseLegacyInkSystem), _resourceCulture);
+
+        public static string Canvas_UseLegacyInkSystemHint => ResourceManager.GetString(nameof(Canvas_UseLegacyInkSystemHint), _resourceCulture);
+
+        public static string Canvas_UseLegacyInkSystemRestartNotice => ResourceManager.GetString(nameof(Canvas_UseLegacyInkSystemRestartNotice), _resourceCulture);
+
         public static string Canvas_CustomPenCursorFilter => ResourceManager.GetString(nameof(Canvas_CustomPenCursorFilter), _resourceCulture);
 
         public static string Canvas_SwitchBackAfterEraser => ResourceManager.GetString(nameof(Canvas_SwitchBackAfterEraser), _resourceCulture);

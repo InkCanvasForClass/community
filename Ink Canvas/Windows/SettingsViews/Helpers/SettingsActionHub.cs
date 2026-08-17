@@ -20,6 +20,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             }
         }
 
+        public static void OnUseLegacyInkSystemChanged(bool value)
+        {
+            LogHelper.WriteLogToFile(
+                $"旧版墨迹系统开关已切换: UseLegacyInkSystem={value}（重启后生效）",
+                LogHelper.LogType.Event);
+            MessageBoxHelper.Show(
+                Properties.CanvasStrings.Canvas_UseLegacyInkSystemRestartNotice,
+                Properties.CanvasStrings.Canvas_UseLegacyInkSystem);
+        }
+
         public static void OnPenCursorTypeChanged(int selectedIndex)
         {
             var mw = GetMainWindow();

@@ -292,6 +292,9 @@ namespace Ink_Canvas.Properties
             dict["Canvas_ShowCoordinateUnitMarks"] = ("CanvasStrings", "Canvas_ShowCoordinateUnitMarks");
             dict["Canvas_ShowCoordinateUnitMarksHint"] = ("CanvasStrings", "Canvas_ShowCoordinateUnitMarksHint");
             dict["Canvas_ShowPenCursor"] = ("CanvasStrings", "Canvas_ShowPenCursor");
+            dict["Canvas_UseLegacyInkSystem"] = ("CanvasStrings", "Canvas_UseLegacyInkSystem");
+            dict["Canvas_UseLegacyInkSystemHint"] = ("CanvasStrings", "Canvas_UseLegacyInkSystemHint");
+            dict["Canvas_UseLegacyInkSystemRestartNotice"] = ("CanvasStrings", "Canvas_UseLegacyInkSystemRestartNotice");
             dict["Canvas_SwitchBackAfterEraser"] = ("CanvasStrings", "Canvas_SwitchBackAfterEraser");
             dict["Canvas_SwitchBackAfterEraserHint"] = ("CanvasStrings", "Canvas_SwitchBackAfterEraserHint");
             dict["Canvas_SwitchBackDelay"] = ("CanvasStrings", "Canvas_SwitchBackDelay");

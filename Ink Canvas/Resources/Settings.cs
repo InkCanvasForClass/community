@@ -335,6 +335,10 @@ namespace Ink_Canvas
         [JsonProperty("inkWidth")]
         public double InkWidth { get; set; } = 2.5;
 
+        /// <summary>为 true 时使用旧版 WPF InkCanvas 墨迹系统；为 false 时使用 WinRT 湿墨新墨迹系统。仅重启后生效。</summary>
+        [JsonProperty("useLegacyInkSystem")]
+        public bool UseLegacyInkSystem { get; set; } = false;
+
         [JsonProperty("highlighterWidth")]
         public double HighlighterWidth { get; set; } = 20;
 

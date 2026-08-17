@@ -378,6 +378,15 @@
   <data name="Canvas_DarkMode" xml:space="preserve">
     <value>Dark</value>
   </data>
+  <data name="Canvas_UseLegacyInkSystem" xml:space="preserve">
+    <value>Switch back to the legacy ink system</value>
+  </data>
+  <data name="Canvas_UseLegacyInkSystemHint" xml:space="preserve">
+    <value>Disable the WinRT wet-ink system. Takes effect after restart.</value>
+  </data>
+  <data name="Canvas_UseLegacyInkSystemRestartNotice" xml:space="preserve">
+    <value>Ink system change saved. It will take effect after restart.</value>
+  </data>
   <data name="Shape_RemoveAsymptote" xml:space="preserve">
     <value>Remove asymptote lines?</value>
   </data>

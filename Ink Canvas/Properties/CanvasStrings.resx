@@ -378,6 +378,15 @@
   <data name="Canvas_DarkMode" xml:space="preserve">
     <value>黑底</value>
   </data>
+  <data name="Canvas_UseLegacyInkSystem" xml:space="preserve">
+    <value>切换回旧版墨迹系统</value>
+  </data>
+  <data name="Canvas_UseLegacyInkSystemHint" xml:space="preserve">
+    <value>关闭 WinRT 湿墨新墨迹系统，重启软件后生效。</value>
+  </data>
+  <data name="Canvas_UseLegacyInkSystemRestartNotice" xml:space="preserve">
+    <value>墨迹系统切换已保存，重启软件后生效。</value>
+  </data>
   <data name="Shape_RemoveAsymptote" xml:space="preserve">
     <value>是否移除渐近线？</value>
   </data>

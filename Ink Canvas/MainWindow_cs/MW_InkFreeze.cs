@@ -122,6 +122,7 @@ namespace Ink_Canvas
             {
                 ApplyFreezeStateToCurrentStrokes();
                 EnsureCurrentFrozenEditingState();
+                SyncWetInkEngineWithLogicalTool();
             }
 
             UpdateInkFreezeButtonState();
@@ -153,7 +154,10 @@ namespace Ink_Canvas
 
             frozenPages[pageIndex] = false;
             if (pageIndex == GetCurrentFreezePageIndex())
+            {
                 ApplyFreezeStateToCurrentStrokes();
+                SyncWetInkEngineWithLogicalTool();
+            }
 
             UpdateInkFreezeButtonState();
             if (notify) ShowNotification(pageIndex == 0 ? MainWindowStrings.Main_Freeze_PageUnfrozen : string.Format(MainWindowStrings.Main_Freeze_WhiteboardPageUnfrozen, pageIndex));

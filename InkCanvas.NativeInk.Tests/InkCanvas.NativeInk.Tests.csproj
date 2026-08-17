@@ -5,6 +5,7 @@
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <UseWPF>true</UseWPF>
     <LangVersion>10</LangVersion>
   </PropertyGroup>
   <ItemGroup>
@@ -22,5 +23,12 @@
     <Compile Include="..\Ink Canvas\Ink\Native\WetInkCommandMailbox.cs" Link="Ink\Native\WetInkCommandMailbox.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\WetInkGeometryBuilder.cs" Link="Ink\Native\WetInkGeometryBuilder.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\WetInkStrokeGeometryState.cs" Link="Ink\Native\WetInkStrokeGeometryState.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Ink Canvas\Ink\WetInk\WetInkModels.cs" Link="Ink\WetInk\WetInkModels.cs" />
+    <Compile Include="..\Ink Canvas\Ink\WetInk\WetInkTailPredictor.cs" Link="Ink\WetInk\WetInkTailPredictor.cs" />
+    <Compile Include="..\Ink Canvas\Ink\WetInk\WetInkPredictionSession.cs" Link="Ink\WetInk\WetInkPredictionSession.cs" />
+    <Compile Include="..\Ink Canvas\Ink\WetInk\WetInkTouchClassifier.cs" Link="Ink\WetInk\WetInkTouchClassifier.cs" />
+    <Compile Include="..\Ink Canvas\Ink\WetInk\WetInkRouter.cs" Link="Ink\WetInk\WetInkRouter.cs" />
   </ItemGroup>
 </Project>

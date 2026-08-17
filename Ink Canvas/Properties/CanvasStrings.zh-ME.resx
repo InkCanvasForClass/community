@@ -378,6 +378,15 @@
   <data name="Canvas_DarkMode" xml:space="preserve">
     <value>暗黑系</value>
   </data>
+  <data name="Canvas_UseLegacyInkSystem" xml:space="preserve">
+    <value>切回旧版墨迹系统</value>
+  </data>
+  <data name="Canvas_UseLegacyInkSystemHint" xml:space="preserve">
+    <value>关掉 WinRT 湿墨，重启后生效。</value>
+  </data>
+  <data name="Canvas_UseLegacyInkSystemRestartNotice" xml:space="preserve">
+    <value>墨迹系统已切换，重启后生效。</value>
+  </data>
   <data name="Shape_RemoveAsymptote" xml:space="preserve">
     <value>物理超度渐近线？</value>
   </data>

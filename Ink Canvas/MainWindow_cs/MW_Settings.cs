@@ -801,6 +801,7 @@ namespace Ink_Canvas
                 Settings.Canvas.LaserPenWidth = value;
             }
             SaveSettingsToFile();
+            RefreshWetInkStyleSoon();
         }
 
         /// <summary>
@@ -841,6 +842,7 @@ namespace Ink_Canvas
                 Settings.Canvas.LaserPenAlpha = (int)value;
             }
             SaveSettingsToFile();
+            RefreshWetInkStyleSoon();
         }
 
         private void LaserPenFadeTimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)

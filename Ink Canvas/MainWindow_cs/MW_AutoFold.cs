@@ -154,6 +154,7 @@ namespace Ink_Canvas
                 HideSubPanels("cursor");
                 SidePannelMarginAnimation(-10);
             });
+            RefreshWetInkTargetSoon();
 
             // 新增：如果开启了彻底隐藏，则隐藏主窗口
             if (Settings.Automation.ThoroughlyHideWhenFolded)
@@ -473,6 +474,7 @@ namespace Ink_Canvas
                     {
                         SetFloatingBarHighlightPosition(selectedToolMode);
                     }
+                    RefreshWetInkTargetSoon();
                 }
                 catch (Exception ex)
                 {
