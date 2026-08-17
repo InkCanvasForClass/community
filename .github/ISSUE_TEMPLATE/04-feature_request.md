@@ -12,7 +12,7 @@ type: Feature
 
 **上 GitHub 很慢？可以使用飞书文档提交反馈哦~** | **GitHub is slow? You can submit your feedback via Feishu form.**
 
-[进入飞书表单](https://inkcanvasforclass.feishu.cn/share/base/form/shrcnTufO72M20l1UsjQWcpv29e) | [Feishu Form](https://inkcanvasforclass.feishu.cn/share/base/form/shrcnTufO72M20l1UsjQWcpv29e)
+[进入飞书表单](https://inkcanvasforclass.feishu.cn/share/base/form/shrcnTufO72M20lU1sjQWcpv29e) | [Feishu Form](https://inkcanvasforclass.feishu.cn/share/base/form/shrcnTufO72M20lU1sjQWcpv29e)
 
 > [!important]
 > 重要：如果您想要提出 **多项功能**，请为每一个功能开一个单独的 issue。
