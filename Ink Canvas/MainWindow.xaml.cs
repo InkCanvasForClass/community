@@ -3409,6 +3409,15 @@ namespace Ink_Canvas
                 // 执行模式切换
                 inkCanvas.EditingMode = newMode;
 
+                // 进入选择模式且当前没有墨迹选中时，恢复 InkCanvas 内置套索框。
+                // 新墨迹选中框会在选中后隐藏内置框，避免新旧选中框叠加；
+                // 若一直保持隐藏，下一次拖拽套索时会看不到指示框。
+                if (newMode == InkCanvasEditingMode.Select &&
+                    inkCanvas.GetSelectedStrokes().Count == 0)
+                {
+                    ShowInkCanvasBuiltInSelectionAdorner();
+                }
+
                 // 根据模式确定是否为鼠标模式（无工具模式）
                 bool isMouseMode = newMode == InkCanvasEditingMode.None;
 

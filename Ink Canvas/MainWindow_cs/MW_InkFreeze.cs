@@ -289,9 +289,7 @@ namespace Ink_Canvas
             try
             {
                 drawingShapeMode = 0;
-                inkCanvas?.Select(new StrokeCollection());
-                if (GridInkCanvasSelectionCover != null)
-                    GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+                HideAllSelectionOverlays();
                 if (currentSelectedElement != null)
                 {
                     UnselectElement(currentSelectedElement);

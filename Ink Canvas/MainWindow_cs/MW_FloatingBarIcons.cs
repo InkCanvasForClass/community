@@ -948,6 +948,8 @@ namespace Ink_Canvas
             if (isDisplayingOrHidingBlackboard) return;
             isDisplayingOrHidingBlackboard = true;
 
+            HideAllSelectionOverlays();
+
             UnFoldFloatingBar_MouseUp(null, null);
 
             if (inkCanvas.EditingMode == InkCanvasEditingMode.Select) PenIcon_Click(null, null);
@@ -1243,7 +1245,7 @@ namespace Ink_Canvas
             if (inkCanvas.GetSelectedStrokes().Count > 0)
             {
                 inkCanvas.Strokes.Remove(inkCanvas.GetSelectedStrokes());
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+                HideAllSelectionOverlays();
             }
             else if (inkCanvas.Strokes.Count > 0 || HasSecAgentSceneElementsOnCanvas())
             {
@@ -3612,8 +3614,7 @@ namespace Ink_Canvas
             // 点击鼠标按钮退出批注模式时的全屏还原
             RestoreFullScreenOnExitAnnotationMode();
 
-            inkCanvas.Select(new StrokeCollection());
-            GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+            HideAllSelectionOverlays();
 
             // 视频展台特殊模式下不执行 SaveStrokes/RestoreStrokes，
             // 否则会清空 timeMachine 历史并 Children.Clear() 移除直播帧，
@@ -3714,7 +3715,7 @@ namespace Ink_Canvas
                 inkCanvas.Visibility = Visibility.Visible;
 
                 GridBackgroundCoverHolder.Visibility = Visibility.Visible;
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+                HideAllSelectionOverlays();
 
                 /*if (forceEraser && currentMode == 0)
                     BtnColorRed_Click(sender, null);*/
@@ -4491,8 +4492,7 @@ namespace Ink_Canvas
             SecAgentDiag($"UNDO_APPLY_BEGIN {SecAgentDiagCanvasState()}");
             if (inkCanvas.GetSelectedStrokes().Count != 0)
             {
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-                inkCanvas.Select(new StrokeCollection());
+                HideAllSelectionOverlays();
             }
 
             var item = timeMachine.Undo();
@@ -4511,8 +4511,7 @@ namespace Ink_Canvas
             SecAgentDiag($"REDO_APPLY_BEGIN {SecAgentDiagCanvasState()}");
             if (inkCanvas.GetSelectedStrokes().Count != 0)
             {
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-                inkCanvas.Select(new StrokeCollection());
+                HideAllSelectionOverlays();
             }
 
             var item = timeMachine.Redo();
@@ -4679,7 +4678,7 @@ namespace Ink_Canvas
         {
             if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
 
-            GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+            HideAllSelectionOverlays();
 
             if (isSingleFingerDragMode) ToggleFingerDragMode(null, null);
             isLongPressSelected = false;
@@ -4987,7 +4986,7 @@ namespace Ink_Canvas
 
                 GridBackgroundCoverHolder.Visibility = Visibility.Visible;
 
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+                HideAllSelectionOverlays();
 
                 if (GridBackgroundCover.Visibility == Visibility.Collapsed)
                 {

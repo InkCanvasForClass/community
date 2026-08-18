@@ -2815,6 +2815,15 @@ namespace Ink_Canvas
 
         private bool _imageOverlayHooked;
         private FrameworkElement _overlayTrackedElement;
+        private bool _strokeOverlayResizeActive;
+        private Rect _strokeOverlayResizeOriginalBounds;
+        private Vector _strokeOverlayResizeAccumulated;
+        private double _strokeSelectionRotationAngle;
+        private Rect _strokeSelectionFrameBounds;
+        private static bool _inkCanvasAdornerHideFailed;
+        private static readonly System.Reflection.PropertyInfo InkCanvasSelectionAdornerProperty =
+            typeof(InkCanvas).GetProperty("SelectionAdorner",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
         private void EnsureImageOverlayHooks()
         {
@@ -2823,6 +2832,8 @@ namespace Ink_Canvas
             ImageSelectionOverlay.ResizeDelta += ImageSelectionOverlay_ResizeDelta;
             ImageSelectionOverlay.MoveDelta += ImageSelectionOverlay_MoveDelta;
             ImageSelectionOverlay.RotateDelta += ImageSelectionOverlay_RotateDelta;
+            ImageSelectionOverlay.InteractionStarted += ImageSelectionOverlay_InteractionStarted;
+            ImageSelectionOverlay.InteractionEnded += ImageSelectionOverlay_InteractionEnded;
             _imageOverlayHooked = true;
         }
 
@@ -2871,14 +2882,184 @@ namespace Ink_Canvas
         {
             try
             {
+                _strokeOverlayResizeActive = false;
+                ResetStrokeSelectionFrame();
                 DetachOverlayTracking();
                 if (ImageSelectionOverlay != null)
                     ImageSelectionOverlay.Visibility = Visibility.Collapsed;
+                if (inkCanvas == null || inkCanvas.GetSelectedStrokes().Count == 0)
+                {
+                    ShowInkCanvasBuiltInSelectionAdorner();
+                }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"隐藏图片选中框失败: {ex.Message}", LogHelper.LogType.Error);
             }
+        }
+
+        private void ResetStrokeSelectionFrame()
+        {
+            _strokeSelectionRotationAngle = 0;
+            _strokeSelectionFrameBounds = new Rect();
+        }
+
+        private static double NormalizeRotationAngle(double angle)
+        {
+            angle %= 360.0;
+            if (angle < 0) angle += 360.0;
+            return angle;
+        }
+
+        private void HideInkCanvasBuiltInSelectionAdorner()
+        {
+            try
+            {
+                if (inkCanvas == null) return;
+                var adorner = InkCanvasSelectionAdornerProperty?.GetValue(inkCanvas) as UIElement;
+                if (adorner != null && adorner.Visibility != Visibility.Collapsed)
+                    adorner.Visibility = Visibility.Collapsed;
+            }
+            catch (Exception ex)
+            {
+                if (!_inkCanvasAdornerHideFailed)
+                {
+                    _inkCanvasAdornerHideFailed = true;
+                    LogHelper.WriteLogToFile($"隐藏墨迹内置选中框失败: {ex.Message}", LogHelper.LogType.Error);
+                }
+            }
+        }
+
+        private void ShowInkCanvasBuiltInSelectionAdorner()
+        {
+            try
+            {
+                if (inkCanvas == null) return;
+                var adorner = InkCanvasSelectionAdornerProperty?.GetValue(inkCanvas) as UIElement;
+                if (adorner != null && adorner.Visibility != Visibility.Visible)
+                    adorner.Visibility = Visibility.Visible;
+            }
+            catch (Exception ex)
+            {
+                if (!_inkCanvasAdornerHideFailed)
+                {
+                    _inkCanvasAdornerHideFailed = true;
+                    LogHelper.WriteLogToFile($"显示墨迹内置选中框失败: {ex.Message}", LogHelper.LogType.Error);
+                }
+            }
+        }
+
+        private void ShowStrokeSelectionHandles()
+        {
+            try
+            {
+                if (ImageSelectionOverlay == null || inkCanvas == null) return;
+                EnsureImageOverlayHooks();
+                ResetStrokeSelectionFrame();
+                var selectionBounds = inkCanvas.GetSelectionBounds();
+                _strokeSelectionFrameBounds = selectionBounds.Width > 0 && selectionBounds.Height > 0
+                    ? selectionBounds
+                    : new Rect();
+                UpdateStrokeSelectionHandlesPosition();
+                ImageSelectionOverlay.Visibility = Visibility.Visible;
+                HideInkCanvasBuiltInSelectionAdorner();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"显示墨迹选中框失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void UpdateStrokeSelectionHandlesPosition()
+        {
+            if (ImageSelectionOverlay == null || inkCanvas == null) return;
+            if (inkCanvas.GetSelectedStrokes().Count == 0) return;
+
+            var bounds = _strokeSelectionFrameBounds;
+            if (bounds.Width <= 0 || bounds.Height <= 0) return;
+
+            var center = new Point(bounds.Left + bounds.Width / 2, bounds.Top + bounds.Height / 2);
+            ImageSelectionOverlay.UpdateFrame(center, bounds.Width, bounds.Height,
+                                              NormalizeRotationAngle(_strokeSelectionRotationAngle));
+            HideInkCanvasBuiltInSelectionAdorner();
+        }
+
+        private void TranslateStrokeSelectionFrame(Vector delta)
+        {
+            if (_strokeSelectionFrameBounds.Width <= 0 || _strokeSelectionFrameBounds.Height <= 0) return;
+            _strokeSelectionFrameBounds = new Rect(
+                _strokeSelectionFrameBounds.X + delta.X,
+                _strokeSelectionFrameBounds.Y + delta.Y,
+                _strokeSelectionFrameBounds.Width,
+                _strokeSelectionFrameBounds.Height);
+        }
+
+        private void UpdateStrokeSelectionFrameForManipulation(Vector translation, Vector scale,
+                                                               double rotationDelta, bool applyScale,
+                                                               bool applyRotation)
+        {
+            if (_strokeSelectionFrameBounds.Width <= 0 || _strokeSelectionFrameBounds.Height <= 0) return;
+
+            var bounds = _strokeSelectionFrameBounds;
+            if (translation.X != 0 || translation.Y != 0)
+            {
+                bounds = new Rect(bounds.X + translation.X, bounds.Y + translation.Y,
+                                  bounds.Width, bounds.Height);
+            }
+
+            if (applyScale && (Math.Abs(scale.X - 1) > 0.0001 || Math.Abs(scale.Y - 1) > 0.0001))
+            {
+                var center = new Point(bounds.X + bounds.Width / 2, bounds.Y + bounds.Height / 2);
+                double newWidth = Math.Max(10, bounds.Width * scale.X);
+                double newHeight = Math.Max(10, bounds.Height * scale.Y);
+                bounds = new Rect(center.X - newWidth / 2, center.Y - newHeight / 2, newWidth, newHeight);
+            }
+
+            if (applyRotation && rotationDelta != 0)
+            {
+                _strokeSelectionRotationAngle = NormalizeRotationAngle(_strokeSelectionRotationAngle + rotationDelta);
+            }
+
+            _strokeSelectionFrameBounds = bounds;
+        }
+
+        private Rect GetActiveStrokeSelectionFrameBounds()
+        {
+            if (_strokeSelectionFrameBounds.Width > 0 && _strokeSelectionFrameBounds.Height > 0)
+                return _strokeSelectionFrameBounds;
+
+            var bounds = inkCanvas?.GetSelectionBounds() ?? new Rect();
+            if (bounds.Width > 0 && bounds.Height > 0)
+                _strokeSelectionFrameBounds = bounds;
+            return bounds;
+        }
+
+        private bool IsStrokeSelectionOverlayActive()
+        {
+            return currentSelectedElement == null
+                   && inkCanvas?.GetSelectedStrokes().Count > 0
+                   && ImageSelectionOverlay?.Visibility == Visibility.Visible;
+        }
+
+        private void ImageSelectionOverlay_InteractionStarted(object sender, EventArgs e)
+        {
+            if (!IsStrokeSelectionOverlayActive()) return;
+
+            _strokeOverlayResizeActive = false;
+            _strokeOverlayResizeOriginalBounds = _strokeSelectionFrameBounds;
+            _strokeOverlayResizeAccumulated = new Vector();
+        }
+
+        private void ImageSelectionOverlay_InteractionEnded(object sender, EventArgs e)
+        {
+            if (!IsStrokeSelectionOverlayActive())
+            {
+                _strokeOverlayResizeActive = false;
+                return;
+            }
+
+            _strokeOverlayResizeActive = false;
+            CommitPendingStrokeManipulationHistory();
         }
 
         // elementBounds parameter is ignored — overlay needs the UNROTATED bounds of the element,
@@ -2989,6 +3170,12 @@ namespace Ink_Canvas
             if (TryBlockFrozenPageMutation("缩放图片")) return;
             try
             {
+                if (IsStrokeSelectionOverlayActive())
+                {
+                    HandleStrokeOverlayResizeDelta(e);
+                    return;
+                }
+
                 if (!IsBitmapLikeCanvasElement(currentSelectedElement)) return;
                 ResizeImageByCorner(currentSelectedElement, e.CanvasDelta, e.Corner, e.LockAspectRatio);
             }
@@ -2998,11 +3185,74 @@ namespace Ink_Canvas
             }
         }
 
+        private void HandleStrokeOverlayResizeDelta(ImageResizeDeltaEventArgs e)
+        {
+            if (inkCanvas == null || inkCanvas.GetSelectedStrokes().Count == 0) return;
+
+            if (!_strokeOverlayResizeActive)
+            {
+                _strokeOverlayResizeActive = true;
+                _strokeOverlayResizeOriginalBounds = _strokeSelectionFrameBounds;
+                _strokeOverlayResizeAccumulated = new Vector();
+            }
+
+            if (_strokeOverlayResizeOriginalBounds.Width <= 0 || _strokeOverlayResizeOriginalBounds.Height <= 0)
+                return;
+
+            _strokeOverlayResizeAccumulated += e.CanvasDelta;
+            var localDelta = CanvasVectorToLocal(_strokeOverlayResizeAccumulated, _strokeSelectionRotationAngle);
+            var delta = new Point(localDelta.X, localDelta.Y);
+            var newBounds = CalculateNewBounds(_strokeOverlayResizeOriginalBounds, delta, GetResizeHandleName(e.Corner));
+
+            if (e.LockAspectRatio && _strokeOverlayResizeOriginalBounds.Width > 0 && _strokeOverlayResizeOriginalBounds.Height > 0)
+            {
+                double uniform = Math.Min(newBounds.Width / _strokeOverlayResizeOriginalBounds.Width,
+                                          newBounds.Height / _strokeOverlayResizeOriginalBounds.Height);
+                newBounds = new Rect(newBounds.X, newBounds.Y,
+                                     _strokeOverlayResizeOriginalBounds.Width * uniform,
+                                     _strokeOverlayResizeOriginalBounds.Height * uniform);
+            }
+
+            ApplyBoundsToStrokes(newBounds, _strokeOverlayResizeOriginalBounds, _strokeSelectionRotationAngle);
+            _strokeSelectionFrameBounds = newBounds;
+            UpdateStrokeSelectionHandlesPosition();
+            updateBorderStrokeSelectionControlLocation();
+        }
+
+        private static string GetResizeHandleName(ImageResizeCorner corner)
+        {
+            switch (corner)
+            {
+                case ImageResizeCorner.TopLeft: return "TopLeftHandle";
+                case ImageResizeCorner.TopRight: return "TopRightHandle";
+                case ImageResizeCorner.BottomLeft: return "BottomLeftHandle";
+                default: return "BottomRightHandle";
+            }
+        }
+
         private void ImageSelectionOverlay_MoveDelta(object sender, ImageMoveDeltaEventArgs e)
         {
             if (TryBlockFrozenPageMutation("移动图片")) return;
             try
             {
+                if (IsStrokeSelectionOverlayActive())
+                {
+                    var selectedStrokes = inkCanvas.GetSelectedStrokes();
+                    if (selectedStrokes.Count == 0) return;
+
+                    var matrix = new Matrix();
+                    matrix.Translate(e.CanvasDelta.X, e.CanvasDelta.Y);
+                    foreach (var stroke in selectedStrokes)
+                    {
+                        stroke.Transform(matrix, false);
+                    }
+
+                    TranslateStrokeSelectionFrame(e.CanvasDelta);
+                    UpdateStrokeSelectionHandlesPosition();
+                    updateBorderStrokeSelectionControlLocation();
+                    return;
+                }
+
                 if (currentSelectedElement == null) return;
                 if (currentSelectedElement.RenderTransform is TransformGroup tg)
                 {
@@ -3036,6 +3286,27 @@ namespace Ink_Canvas
             if (TryBlockFrozenPageMutation("旋转图片")) return;
             try
             {
+                if (IsStrokeSelectionOverlayActive())
+                {
+                    var selectedStrokes = inkCanvas.GetSelectedStrokes();
+                    if (selectedStrokes.Count == 0) return;
+
+                    var bounds = _strokeSelectionFrameBounds;
+                    if (bounds.Width <= 0 || bounds.Height <= 0) return;
+                    var center = new Point(bounds.Left + bounds.Width / 2, bounds.Top + bounds.Height / 2);
+                    var matrix = new Matrix();
+                    matrix.RotateAt(e.AngleDelta, center.X, center.Y);
+                    foreach (var stroke in selectedStrokes)
+                    {
+                        stroke.Transform(matrix, false);
+                    }
+
+                    _strokeSelectionRotationAngle = NormalizeRotationAngle(_strokeSelectionRotationAngle + e.AngleDelta);
+                    UpdateStrokeSelectionHandlesPosition();
+                    updateBorderStrokeSelectionControlLocation();
+                    return;
+                }
+
                 if (currentSelectedElement == null) return;
                 ApplyRotateTransform(currentSelectedElement, e.AngleDelta);
                 UpdateImageResizeHandlesPosition(default);

@@ -194,6 +194,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void ClearStrokes(bool isErasedByCode)
         {
+            HideAllSelectionOverlays();
             _currentCommitType = CommitReason.ClearingCanvas;
             if (isErasedByCode) _currentCommitType = CommitReason.CodeInput;
 
@@ -245,6 +246,8 @@ namespace Ink_Canvas
         {
             try
             {
+                HideAllSelectionOverlays();
+
                 // 隐藏图片选择工具栏
                 if (currentSelectedElement != null)
                 {
