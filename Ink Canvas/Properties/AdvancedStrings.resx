@@ -97,7 +97,7 @@
     <value>日志输出等级</value>
   </data>
   <data name="LogLevelHint" xml:space="preserve">
-    <value>低于所选等级的日志将被过滤，默认 Trace（输出全部）。控制台颜色：Info 无色、Trace 绿色、Warning 黄色、Error 红色。</value>
+    <value>低于所选等级的日志将被过滤。Info 输出全部（不过滤任何日志）；默认 Trace 会额外过滤掉最低级的 Info/Event 日志。控制台颜色：Info 无色、Trace 绿色、Warning 黄色、Error 红色。</value>
   </data>
   <data name="LogRotateHint" xml:space="preserve">
     <value>日志文件超过 512 KB 时会自动删除。开启日期保存后，日志将保存在 Logs 文件夹中，当文件夹大小超过 5MB 时自动清空。</value>
