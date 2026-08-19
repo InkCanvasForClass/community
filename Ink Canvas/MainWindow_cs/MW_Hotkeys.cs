@@ -30,13 +30,7 @@ namespace Ink_Canvas
             bool passthrough = IsAnnotating
                                && Settings.Appearance.PassThroughMouseWheelInDrawingMode;
 
-            try
-            {
-                LogHelper.WriteLogToFile(
-                    $"[MouseWheel] enter delta={e.Delta} isPPT={IsInPPTPresentationMode} currentMode={currentMode} isAnnotating={IsAnnotating} passSetting={Settings?.Appearance?.PassThroughMouseWheelInDrawingMode} -> passthrough={passthrough}",
-                    LogHelper.LogType.Trace);
-            }
-            catch { }
+
 
             if (passthrough)
             {
