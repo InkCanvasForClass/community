@@ -93,6 +93,12 @@
   <data name="Logging" xml:space="preserve">
     <value>记小本本留证据</value>
   </data>
+  <data name="LogLevel" xml:space="preserve">
+    <value>日志输出等级</value>
+  </data>
+  <data name="LogLevelHint" xml:space="preserve">
+    <value>等级以下的日志直接丢进垃圾桶。默认 Trace 全都要；控制台里 Info 素颜无色、Trace 绿油油、Warning 黄澄澄、Error 红艳艳。</value>
+  </data>
   <data name="LogRotateHint" xml:space="preserve">
     <value>日志文件超过 512 KB 自动清理。开启日期保存后日志放 Logs 文件夹，文件夹超过 5MB 就全部删库跑路，绝不留痕！</value>
   </data>

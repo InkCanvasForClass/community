@@ -74,6 +74,10 @@ namespace Ink_Canvas.Properties
 
         public static string Logging => ResourceManager.GetString(nameof(Logging), _resourceCulture);
 
+        public static string LogLevel => ResourceManager.GetString(nameof(LogLevel), _resourceCulture);
+
+        public static string LogLevelHint => ResourceManager.GetString(nameof(LogLevelHint), _resourceCulture);
+
         public static string LogRotateHint => ResourceManager.GetString(nameof(LogRotateHint), _resourceCulture);
 
         public static string NibModeBoundsWidthHeader => ResourceManager.GetString(nameof(NibModeBoundsWidthHeader), _resourceCulture);

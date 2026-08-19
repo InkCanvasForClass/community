@@ -58,6 +58,7 @@ namespace Ink_Canvas
 
                         if (Settings != null)
                         {
+                            LogHelper.SetLogLevel(Settings?.Advanced?.LogLevel);
                             CleanupObsoleteSettings(text);
                         }
 

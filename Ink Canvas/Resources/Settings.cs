@@ -1506,6 +1506,9 @@ namespace Ink_Canvas
         [JsonProperty("isDebugConsoleEnabled")]
         public bool IsDebugConsoleEnabled { get; set; } = false;
 
+        [JsonProperty("logLevel")]
+        public string LogLevel { get; set; } = "Trace";
+
         [JsonProperty("isPPTComDebugProbeEnabled")]
         public bool IsPPTComDebugProbeEnabled { get; set; } = false;
 
