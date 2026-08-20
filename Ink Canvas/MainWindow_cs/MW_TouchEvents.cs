@@ -1864,8 +1864,10 @@ namespace Ink_Canvas
         public double GetTouchBoundWidth(TouchEventArgs e)
         {
             var args = e.GetTouchPoint(null).Bounds;
-            if (!Settings.Advanced.IsQuadIR) return args.Width;
-            return Math.Sqrt(args.Width * args.Height);
+            return Ink_Canvas.Ink.PalmEraserGeometry.GetEffectiveContactWidthDip(
+                args.Width,
+                args.Height,
+                Settings.Advanced.IsQuadIR);
         }
 
         /// <summary>
@@ -2086,18 +2088,21 @@ namespace Ink_Canvas
 
                     if (boundWidth > BoundsWidth * EraserThresholdValue * thresholdMultiplier)
                     {
-                        boundWidth *= Settings.Startup.IsEnableNibMode
+                        var eraserSizeFactor = Settings.Startup.IsEnableNibMode
                             ? Settings.Advanced.NibModeBoundsWidthEraserSize
                             : Settings.Advanced.FingerModeBoundsWidthEraserSize;
+                        var palmEraserWidth = Ink_Canvas.Ink.PalmEraserGeometry.ApplyPalmEraserSize(
+                            boundWidth,
+                            eraserSizeFactor,
+                            Settings.Advanced.IsSpecialScreen,
+                            Settings.Advanced.TouchMultiplier);
 
-                        if (Settings.Advanced.IsSpecialScreen)
-                            boundWidth *= Settings.Advanced.TouchMultiplier;
                         palmEraserPreviousEditingMode = inkCanvas.EditingMode;
                         inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
                         isPalmEraserActive = true;
 
                         EnableEraserOverlay();
-                        eraserWidth = boundWidth;
+                        eraserWidth = palmEraserWidth;
                         UpdateEraserStyle();
                         touchPoint = e.GetTouchPoint(inkCanvas);
                         EraserOverlay_PointerDown(sender);

@@ -17,6 +17,7 @@
     <Compile Include="..\Ink Canvas\Ink\Native\NativeInkPerfProbe.cs" Link="Ink\Native\NativeInkPerfProbe.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\NativePointerUpdatePump.cs" Link="Ink\Native\NativePointerUpdatePump.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\NativeInkInputRouter.cs" Link="Ink\Native\NativeInkInputRouter.cs" />
+    <Compile Include="..\Ink Canvas\Ink\PalmEraserGeometry.cs" Link="Ink\PalmEraserGeometry.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\NativePointerInputBatch.cs" Link="Ink\Native\NativePointerInputBatch.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\NativePointerTimestampConverter.cs" Link="Ink\Native\NativePointerTimestampConverter.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\WetInkCommandMailbox.cs" Link="Ink\Native\WetInkCommandMailbox.cs" />

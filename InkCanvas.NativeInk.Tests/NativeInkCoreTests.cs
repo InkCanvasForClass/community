@@ -40,6 +40,9 @@ namespace InkCanvas.NativeInk.Tests
             Run(nameof(RouterMapsLogicalTools), RouterMapsLogicalTools);
             Run(nameof(RouterPrefersMultiTouchWritingOverPalmErase), RouterPrefersMultiTouchWritingOverPalmErase);
             Run(nameof(RouterAppliesQuadIrPalmThresholdAndSpecialMultiplier), RouterAppliesQuadIrPalmThresholdAndSpecialMultiplier);
+            Run(nameof(RouterUsesGeometricMeanForElongatedTopBottomIrPalm), RouterUsesGeometricMeanForElongatedTopBottomIrPalm);
+            Run(nameof(RouterKeepsWidthForNormalPalmContact), RouterKeepsWidthForNormalPalmContact);
+            Run(nameof(RouterCapsPalmEraserWidth), RouterCapsPalmEraserWidth);
             Run(nameof(RouterAllowsDelayedTwoFingerTakeover), RouterAllowsDelayedTwoFingerTakeover);
             Run(nameof(RouterKeepsCapturedInkAndSuppressesBarrelPoints), RouterKeepsCapturedInkAndSuppressesBarrelPoints);
             Run(nameof(PointerBatchCopiesSamples), PointerBatchCopiesSamples);
@@ -538,6 +541,67 @@ namespace InkCanvas.NativeInk.Tests
                     LogicalInkTool.Pen,
                     palm: Palm(enabled: true, isSpecialScreen: true, touchMultiplier: 0)));
             Equal(NativeInputRoute.Ink, disabledOnSpecialScreen.Route);
+        }
+
+        private static void RouterUsesGeometricMeanForElongatedTopBottomIrPalm()
+        {
+            // 上下红外框常见异常：接触矩形接近全宽长条（width 异常大、height 接近真实手掌）。
+            // 非四边红外模式下也应使用几何平均，避免橡皮被放大到远超手掌。
+            var decision = NativeInkInputRouter.DecideDown(
+                Pointer(NativeInkInputKind.Touch, contactWidthDip: 1920, contactHeightDip: 120),
+                Context(
+                    LogicalInkTool.Pen,
+                    palm: Palm(
+                        enabled: true,
+                        isQuadIr: false,
+                        isSpecialScreen: true,
+                        boundsWidthDip: 10,
+                        thresholdFactor: 2,
+                        sensitivityMultiplier: 2,
+                        eraserSizeFactor: 0.8,
+                        touchMultiplier: 0.3)));
+            Equal(NativeInputRoute.PointErase, decision.Route);
+            True(Math.Abs(decision.PalmEraserWidthDip - 115.2d) < 0.001);
+        }
+
+        private static void RouterKeepsWidthForNormalPalmContact()
+        {
+            // 普通触摸屏接触矩形不细长时，继续使用宽度，避免改变原有行为。
+            var decision = NativeInkInputRouter.DecideDown(
+                Pointer(NativeInkInputKind.Touch, contactWidthDip: 80, contactHeightDip: 100),
+                Context(
+                    LogicalInkTool.Pen,
+                    palm: Palm(
+                        enabled: true,
+                        isQuadIr: false,
+                        isSpecialScreen: false,
+                        boundsWidthDip: 10,
+                        thresholdFactor: 2,
+                        sensitivityMultiplier: 2,
+                        eraserSizeFactor: 0.8,
+                        touchMultiplier: 1)));
+            Equal(NativeInputRoute.PointErase, decision.Route);
+            Equal(64d, decision.PalmEraserWidthDip);
+        }
+
+        private static void RouterCapsPalmEraserWidth()
+        {
+            // 即使两个轴都异常大，最终手掌橡皮也不能超过保护上限。
+            var decision = NativeInkInputRouter.DecideDown(
+                Pointer(NativeInkInputKind.Touch, contactWidthDip: 500, contactHeightDip: 500),
+                Context(
+                    LogicalInkTool.Pen,
+                    palm: Palm(
+                        enabled: true,
+                        isQuadIr: false,
+                        isSpecialScreen: false,
+                        boundsWidthDip: 10,
+                        thresholdFactor: 2,
+                        sensitivityMultiplier: 2,
+                        eraserSizeFactor: 1,
+                        touchMultiplier: 1)));
+            Equal(NativeInputRoute.PointErase, decision.Route);
+            Equal(Ink_Canvas.Ink.PalmEraserGeometry.MaxPalmEraserWidthDip, decision.PalmEraserWidthDip);
         }
 
         private static void RouterAllowsDelayedTwoFingerTakeover()
