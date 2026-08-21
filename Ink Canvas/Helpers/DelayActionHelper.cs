@@ -25,7 +25,15 @@ namespace Ink_Canvas.Helpers
                         // 解除订阅，打破 timer.Elapsed → lambda → timer 循环引用
                         _timerDebounce.Elapsed -= elapsedHandler;
                         _timerDebounce.Stop(); _timerDebounce.Close(); _timerDebounce = null;
-                        InvokeAction(action, inv);
+                        try
+                        {
+                            InvokeAction(action, inv);
+                        }
+                        catch (Exception ex)
+                        {
+                            // 回调运行在 System.Timers.Timer 线程上，未捕获异常会直接终止进程。
+                            System.Diagnostics.Debug.WriteLine($"DelayAction 回调异常: {ex.Message}");
+                        }
                     };
                     _timerDebounce.Elapsed += elapsedHandler;
                 }

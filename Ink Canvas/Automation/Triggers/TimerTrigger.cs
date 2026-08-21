@@ -1,4 +1,5 @@
 using Ink_Canvas.WorkflowAutomation.Abstractions;
+using System;
 using System.Timers;
 
 namespace Ink_Canvas.WorkflowAutomation.Triggers
@@ -50,9 +51,16 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
 
         private void OnTimerElapsed(object sender, ElapsedEventArgs e)
         {
-            if (Settings.TriggerOnce && _hasTriggered) return;
-            _hasTriggered = true;
-            Trigger();
+            try
+            {
+                if (Settings.TriggerOnce && _hasTriggered) return;
+                _hasTriggered = true;
+                Trigger();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"TimerTrigger.OnTimerElapsed: {ex.Message}");
+            }
         }
     }
 }

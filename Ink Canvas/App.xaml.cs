@@ -979,7 +979,14 @@ namespace Ink_Canvas
                 }
             }
 
-            Ink_Canvas.MainWindow.ShowNewMessage(MainWindowStrings.Main_App_UnexpectedError);
+            try
+            {
+                Ink_Canvas.MainWindow.ShowNewMessage(MainWindowStrings.Main_App_UnexpectedError);
+            }
+            catch (Exception notifyEx)
+            {
+                System.Diagnostics.Debug.WriteLine(notifyEx);
+            }
             LogHelper.NewLog(e.Exception.ToString());
 
             // 记录到崩溃日志
@@ -1861,55 +1868,72 @@ namespace Ink_Canvas
 
             watchdogTimer = new Timer(_ =>
             {
-                if (isAppExiting)
-                    return;
-                if (IsOobeShowing)
-                    return;
-
-                if (!isStartupComplete && appStartupStartTime != DateTime.MinValue)
+                try
                 {
-                    DateTime startTime = _isSplashScreenShown && splashScreenStartTime != DateTime.MinValue
-                        ? splashScreenStartTime
-                        : appStartupStartTime;
-                    TimeSpan elapsedSinceStart = DateTime.Now - startTime;
-                    if (elapsedSinceStart.TotalMinutes >= 2)
-                    {
-                        string timeType = _isSplashScreenShown ? "启动画面已显示" : "应用启动开始";
-                        string restartReason = $"检测到启动假死：{timeType}{elapsedSinceStart.TotalMinutes:F2}分钟，但未收到启动完成心跳，自动重启。";
-                        LogHelper.WriteLogToFile(restartReason, LogHelper.LogType.Error);
-                        WriteCrashLog(restartReason);
-                        SyncCrashActionFromSettings();
-                        if (CrashAction == CrashActionType.SilentRestart)
-                        {
-                            TryRestartWithBreaker(restartReason);
-                        }
+                    if (isAppExiting)
                         return;
+                    if (IsOobeShowing)
+                        return;
+
+                    if (!isStartupComplete && appStartupStartTime != DateTime.MinValue)
+                    {
+                        DateTime startTime = _isSplashScreenShown && splashScreenStartTime != DateTime.MinValue
+                            ? splashScreenStartTime
+                            : appStartupStartTime;
+                        TimeSpan elapsedSinceStart = DateTime.Now - startTime;
+                        if (elapsedSinceStart.TotalMinutes >= 2)
+                        {
+                            string timeType = _isSplashScreenShown ? "启动画面已显示" : "应用启动开始";
+                            string restartReason = $"检测到启动假死：{timeType}{elapsedSinceStart.TotalMinutes:F2}分钟，但未收到启动完成心跳，自动重启。";
+                            LogHelper.WriteLogToFile(restartReason, LogHelper.LogType.Error);
+                            WriteCrashLog(restartReason);
+                            SyncCrashActionFromSettings();
+                            if (CrashAction == CrashActionType.SilentRestart)
+                            {
+                                TryRestartWithBreaker(restartReason);
+                            }
+                            return;
+                        }
+                    }
+
+                    if (isStartupComplete)
+                    {
+                        var now = DateTime.Now;
+                        var sinceHeartbeat = now - lastHeartbeat;
+                        var sinceStartupComplete = startupCompleteHeartbeat == DateTime.MinValue
+                            ? TimeSpan.Zero
+                            : now - startupCompleteHeartbeat;
+
+                        if (sinceStartupComplete.TotalSeconds < 30)
+                        {
+                            return;
+                        }
+
+                        if (sinceHeartbeat.TotalSeconds > 10)
+                        {
+                            string restartReason = $"检测到主线程无响应，自动重启。心跳超时 {sinceHeartbeat.TotalSeconds:F1} 秒。";
+                            LogHelper.NewLog(restartReason);
+                            WriteCrashLog(restartReason);
+                            SyncCrashActionFromSettings();
+                            if (CrashAction == CrashActionType.SilentRestart)
+                            {
+                                TryRestartWithBreaker(restartReason);
+                            }
+                        }
                     }
                 }
-
-                if (isStartupComplete)
+                catch (Exception ex)
                 {
-                    var now = DateTime.Now;
-                    var sinceHeartbeat = now - lastHeartbeat;
-                    var sinceStartupComplete = startupCompleteHeartbeat == DateTime.MinValue
-                        ? TimeSpan.Zero
-                        : now - startupCompleteHeartbeat;
-
-                    if (sinceStartupComplete.TotalSeconds < 30)
+                    // 看门狗回调运行在 ThreadPool 上，任何未捕获异常都会直接终止进程。
+                    // 这里兜底记录，避免看门狗自身成为闪退源。
+                    try
                     {
-                        return;
+                        LogHelper.WriteLogToFile($"心跳看门狗回调异常: {ex.Message}", LogHelper.LogType.Error);
+                        WriteCrashLog($"心跳看门狗回调异常: {ex}");
                     }
-
-                    if (sinceHeartbeat.TotalSeconds > 10)
+                    catch
                     {
-                        string restartReason = $"检测到主线程无响应，自动重启。心跳超时 {sinceHeartbeat.TotalSeconds:F1} 秒。";
-                        LogHelper.NewLog(restartReason);
-                        WriteCrashLog(restartReason);
-                        SyncCrashActionFromSettings();
-                        if (CrashAction == CrashActionType.SilentRestart)
-                        {
-                            TryRestartWithBreaker(restartReason);
-                        }
+                        System.Diagnostics.Debug.WriteLine(ex);
                     }
                 }
             }, null, 0, 3000);

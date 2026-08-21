@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -198,7 +199,14 @@ namespace Ink_Canvas.WorkflowAutomation.Services
 
             if (anyChanged)
             {
-                ProcessChanged?.Invoke(this, EventArgs.Empty);
+                try
+                {
+                    ProcessChanged?.Invoke(this, EventArgs.Empty);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"进程状态变化事件处理失败: {ex.Message}", LogHelper.LogType.Warning);
+                }
             }
         }
 
@@ -221,7 +229,14 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         private void OnForegroundWindowEvent(HWINEVENTHOOK hWinEventHook, uint eventType,
             HWND hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)
         {
-            ForegroundWindowChanged?.Invoke(this, EventArgs.Empty);
+            try
+            {
+                ForegroundWindowChanged?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"前台窗口变化事件处理失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
         }
 
         //[DllImport("user32.dll", SetLastError = true)]

@@ -432,8 +432,16 @@ namespace Ink_Canvas.Helpers
                 _windows = windows;
             }
 
-            // 触发更新事件
-            WindowsUpdated?.Invoke(this, windows);
+            // 触发更新事件。订阅方（插件等）可能抛异常，而本方法通常运行在
+            // System.Threading.Timer 的后台线程上，未捕获的异常会直接终止进程。
+            try
+            {
+                WindowsUpdated?.Invoke(this, windows);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"窗口概览更新事件处理失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
         }
 
         /// <summary>

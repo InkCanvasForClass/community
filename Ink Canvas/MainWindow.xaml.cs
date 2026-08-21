@@ -1696,9 +1696,31 @@ namespace Ink_Canvas
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e)
         {
-            if (!Settings.Advanced.IsEnableResolutionChangeDetection) return;
-            ShowNotification(string.Format(Properties.MainWindowStrings.Main_DisplayChanged, Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height));
-            HandleFloatingBarRecovery();
+            // SystemEvents 事件在系统事件专用线程上触发，不能直接访问 WPF UI 对象；
+            // 必须封送到主线程，否则会因跨线程访问 UI 抛出未处理异常导致进程闪退。
+            try
+            {
+                if (Dispatcher == null || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
+                    return;
+
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        if (Settings?.Advanced == null || !Settings.Advanced.IsEnableResolutionChangeDetection) return;
+                        ShowNotification(string.Format(Properties.MainWindowStrings.Main_DisplayChanged, Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height));
+                        HandleFloatingBarRecovery();
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"显示器配置变化处理失败: {ex.Message}", LogHelper.LogType.Warning);
+                    }
+                }), DispatcherPriority.Normal);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"调度显示器配置变化处理失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
         }
 
         private void MainWindow_OnDpiChanged(object sender, DpiChangedEventArgs e)
@@ -1724,14 +1746,39 @@ namespace Ink_Canvas
                         isFloatingBarOutsideScreen = IsOutsideOfScreenHelper.IsOutsideOfScreen(ViewboxFloatingBar);
                         isInPPTPresentationMode = IsInPPTPresentationMode;
                     }, DispatcherPriority.Normal, TimeSpan.FromSeconds(5));
-                    if (isFloatingBarOutsideScreen) dpiChangedDelayAction.DebounceAction(3000, null, () =>
+                    if (isFloatingBarOutsideScreen)
                     {
-                        if (!isFloatingBarFolded)
+                        // DelayAction 在 null 同步对象时会在 System.Timers.Timer 线程直接执行回调；
+                        // 该回调若直接访问 WPF 控件会因跨线程访问 UI 导致未处理异常。这里只负责封送。
+                        dpiChangedDelayAction.DebounceAction(3000, null, () =>
                         {
-                            if (isInPPTPresentationMode) ViewboxFloatingBarMarginAnimation(60);
-                            else ViewboxFloatingBarMarginAnimation(100, true);
-                        }
-                    });
+                            try
+                            {
+                                if (Dispatcher == null || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
+                                    return;
+
+                                Dispatcher.BeginInvoke(new Action(() =>
+                                {
+                                    try
+                                    {
+                                        if (!isFloatingBarFolded)
+                                        {
+                                            if (isInPPTPresentationMode) ViewboxFloatingBarMarginAnimation(60);
+                                            else ViewboxFloatingBarMarginAnimation(100, true);
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        LogHelper.WriteLogToFile($"浮动工具栏恢复动画失败: {ex.Message}", LogHelper.LogType.Warning);
+                                    }
+                                }), DispatcherPriority.Normal);
+                            }
+                            catch (Exception ex)
+                            {
+                                LogHelper.WriteLogToFile($"调度浮动工具栏恢复失败: {ex.Message}", LogHelper.LogType.Warning);
+                            }
+                        });
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -1926,6 +1973,7 @@ namespace Ink_Canvas
         {
             RealtimeInkFrameScheduler.Clear();
             SystemEvents.DisplaySettingsChanged -= SystemEventsOnDisplaySettingsChanged;
+            SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
             // 玻璃浮动栏刻意不设 Owner，必须显式关闭，否则残留窗口会挡住进程退出
             HideLiquidGlassBar();
 
