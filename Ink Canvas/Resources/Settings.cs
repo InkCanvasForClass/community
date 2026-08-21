@@ -552,10 +552,10 @@ namespace Ink_Canvas
 
         /// <summary>
         /// 是否启用批注状态点提示：在批注模式下连续点击画布时，显示提示提醒用户当前处于批注模式。
-        /// 默认开启，帮助教师避免忘记关闭批注。
+        /// 默认关闭，避免打扰
         /// </summary>
         [JsonProperty("isEnableAnnotationDotHint")]
-        public bool IsEnableAnnotationDotHint { get; set; } = true;
+        public bool IsEnableAnnotationDotHint { get; set; } = false;
 
         /// <summary>
         /// 批注点提示的连续点击范围阈值（像素）。当连续点击的位置都在此半径范围内时触发提示。
@@ -1505,6 +1505,9 @@ namespace Ink_Canvas
 
         [JsonProperty("isDebugConsoleEnabled")]
         public bool IsDebugConsoleEnabled { get; set; } = false;
+
+        [JsonProperty("logLevel")]
+        public string LogLevel { get; set; } = "Trace";
 
         [JsonProperty("isPPTComDebugProbeEnabled")]
         public bool IsPPTComDebugProbeEnabled { get; set; } = false;

@@ -75,6 +75,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ToggleSwitchIsQuadIR.IsOn = settings.Advanced.IsQuadIR;
             ToggleSwitchIsLogEnabled.IsOn = settings.Advanced.IsLogEnabled;
             ToggleSwitchIsSaveLogByDate.IsOn = settings.Advanced.IsSaveLogByDate;
+            ComboBoxLogLevel.SelectedIndex = LogHelper.LogLevel switch
+            {
+                LogHelper.LogType.Trace => 1,
+                LogHelper.LogType.Warning => 2,
+                LogHelper.LogType.Error => 3,
+                _ => 0 // Info / Event
+            };
             ToggleSwitchIsSecondConfimeWhenShutdownApp.IsOn = settings.Advanced.IsSecondConfirmWhenShutdownApp;
 
             CardTouchMultiplier.IsExpanded = settings.Advanced.IsSpecialScreen;
@@ -259,6 +266,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.Advanced.IsSaveLogByDate = ToggleSwitchIsSaveLogByDate.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ComboBoxLogLevel_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded || ComboBoxLogLevel.SelectedIndex < 0) return;
+            var level = ComboBoxLogLevel.SelectedIndex switch
+            {
+                1 => LogHelper.LogType.Trace,
+                2 => LogHelper.LogType.Warning,
+                3 => LogHelper.LogType.Error,
+                _ => LogHelper.LogType.Info
+            };
+            LogHelper.LogLevel = level;
+            SettingsManager.Settings.Advanced.LogLevel = level.ToString();
             SettingsManager.SaveSettingsToFile();
         }
 

@@ -171,6 +171,18 @@
                         IsOn="True"
                         Toggled="ToggleSwitchIsSaveLogByDate_Toggled"/>
 
+                    <ui:SettingsCard x:Name="CardLogLevel"
+                        Header="{x:Static props:AdvancedStrings.LogLevel}"
+                        Description="{x:Static props:AdvancedStrings.LogLevelHint}">
+                        <ui:SettingsCard.HeaderIcon><ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Info}"/></ui:SettingsCard.HeaderIcon>
+                        <ComboBox x:Name="ComboBoxLogLevel" SelectionChanged="ComboBoxLogLevel_SelectionChanged">
+                            <ComboBoxItem Content="Info"/>
+                            <ComboBoxItem Content="Trace"/>
+                            <ComboBoxItem Content="Warning"/>
+                            <ComboBoxItem Content="Error"/>
+                        </ComboBox>
+                    </ui:SettingsCard>
+
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchIsSecondConfimeWhenShutdownApp"
                         Header="{x:Static props:AdvancedStrings.ConfirmExit}"
                         Icon="{x:Static ui:SegoeFluentIcons.SignOut}"

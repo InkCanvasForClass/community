@@ -93,6 +93,12 @@
   <data name="Logging" xml:space="preserve">
     <value>Enable logging</value>
   </data>
+  <data name="LogLevel" xml:space="preserve">
+    <value>Log output level</value>
+  </data>
+  <data name="LogLevelHint" xml:space="preserve">
+    <value>Logs below the selected level are filtered out. Info outputs everything (no filtering); the default Trace additionally filters out the lowest-level Info/Event entries. Console colors: Info default, Trace green, Warning yellow, Error red.</value>
+  </data>
   <data name="LogRotateHint" xml:space="preserve">
     <value>When enabled, logs are saved to the Logs folder and the folder is automatically cleared when it exceeds 5 MB. Otherwise, log files exceeding 512 KB are automatically deleted.</value>
   </data>
