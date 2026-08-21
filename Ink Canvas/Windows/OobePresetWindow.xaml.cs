@@ -163,7 +163,7 @@ namespace Ink_Canvas.Windows
             settings.Canvas.DisablePressure = false;
             settings.Canvas.HideStrokeWhenSelecting = false;
             settings.Canvas.EnablePalmEraser = false;
-            settings.Canvas.IsEnableAnnotationDotHint = true;
+            settings.Canvas.IsEnableAnnotationDotHint = false;
 
             // 墨迹纠正
             settings.InkToShape.IsInkToShapeEnabled = true;
@@ -238,7 +238,7 @@ namespace Ink_Canvas.Windows
             settings.Canvas.DisablePressure = false;
             settings.Canvas.HideStrokeWhenSelecting = true;
             settings.Canvas.EnablePalmEraser = false;
-            settings.Canvas.IsEnableAnnotationDotHint = true;
+            settings.Canvas.IsEnableAnnotationDotHint = false;
 
             // 墨迹纠正
             settings.InkToShape.IsInkToShapeEnabled = false;
