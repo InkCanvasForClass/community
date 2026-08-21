@@ -97,7 +97,7 @@ namespace Ink_Canvas
             if (lastBorderMouseDownObject != sender) return;
 
             var strokes = inkCanvas.GetSelectedStrokes();
-            HideAllSelectionOverlays();
+            inkCanvas.Select(new StrokeCollection());
             CloneStrokesToNewBoard(strokes);
         }
 
@@ -116,7 +116,7 @@ namespace Ink_Canvas
             if (strokes.Count == 0) return;
 
             // 参考ICA模式：先取消选中，再克隆（确保克隆出的墨迹不携带选中态）
-            HideAllSelectionOverlays();
+            inkCanvas.Select(new StrokeCollection());
             _pendingInsertStrokes = strokes.Clone();
 
             // 在发送者附近弹出目标选择菜单
@@ -139,7 +139,9 @@ namespace Ink_Canvas
             try
             {
                 // 确保主画布上没有选中状态（防止选中态渲染污染克隆墨迹）
-                HideAllSelectionOverlays();
+                inkCanvas.Select(new StrokeCollection());
+                HideSelectionDisplay();
+                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
 
                 if (currentMode != 1)
                 {
@@ -173,7 +175,9 @@ namespace Ink_Canvas
             try
             {
                 // 确保主画布上没有选中状态
-                HideAllSelectionOverlays();
+                inkCanvas.Select(new StrokeCollection());
+                HideSelectionDisplay();
+                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
 
                 if (_miniWhiteboardWindow == null || !_miniWhiteboardWindow.IsLoaded)
                 {
@@ -380,8 +384,6 @@ namespace Ink_Canvas
             var targetStrokes = inkCanvas.GetSelectedStrokes();
             foreach (var stroke in targetStrokes) stroke.Transform(m, false);
 
-            UpdateStrokeSelectionHandlesPosition();
-
             if (DrawingAttributesHistory.Count > 0)
             {
                 timeMachine.CommitStrokeDrawingAttributesHistory(DrawingAttributesHistory);
@@ -411,17 +413,18 @@ namespace Ink_Canvas
 
             var m = new Matrix();
 
-            var bounds = GetActiveStrokeSelectionFrameBounds();
-            var center = new Point(bounds.Left + bounds.Width / 2,
-                bounds.Top + bounds.Height / 2);
+            // Find center of element and then transform to get current location of center
+            var fe = e.Source as FrameworkElement;
+            var center = new Point(fe.ActualWidth / 2, fe.ActualHeight / 2);
+            center = new Point(inkCanvas.GetSelectionBounds().Left + inkCanvas.GetSelectionBounds().Width / 2,
+                inkCanvas.GetSelectionBounds().Top + inkCanvas.GetSelectionBounds().Height / 2);
+            center = m.Transform(center); // 转换为矩阵缩放和旋转的中心点
 
             // Update matrix to reflect translation/rotation
             m.RotateAt(45, center.X, center.Y); // 顺时针旋转45度
 
             var targetStrokes = inkCanvas.GetSelectedStrokes();
             foreach (var stroke in targetStrokes) stroke.Transform(m, false);
-            _strokeSelectionRotationAngle = NormalizeRotationAngle(_strokeSelectionRotationAngle + 45);
-            UpdateStrokeSelectionHandlesPosition();
 
             if (DrawingAttributesHistory.Count > 0)
             {
@@ -451,18 +454,18 @@ namespace Ink_Canvas
 
             var m = new Matrix();
 
-            var bounds = GetActiveStrokeSelectionFrameBounds();
-            var center = new Point(bounds.Left + bounds.Width / 2,
-                bounds.Top + bounds.Height / 2);
+            // Find center of element and then transform to get current location of center
+            var fe = e.Source as FrameworkElement;
+            var center = new Point(fe.ActualWidth / 2, fe.ActualHeight / 2);
+            center = new Point(inkCanvas.GetSelectionBounds().Left + inkCanvas.GetSelectionBounds().Width / 2,
+                inkCanvas.GetSelectionBounds().Top + inkCanvas.GetSelectionBounds().Height / 2);
+            center = m.Transform(center); // 转换为矩阵缩放和旋转的中心点
 
             // Update matrix to reflect translation/rotation
             m.RotateAt(90, center.X, center.Y); // 旋转
 
             var targetStrokes = inkCanvas.GetSelectedStrokes();
             foreach (var stroke in targetStrokes) stroke.Transform(m, false);
-
-            _strokeSelectionRotationAngle = NormalizeRotationAngle(_strokeSelectionRotationAngle + 90);
-            UpdateStrokeSelectionHandlesPosition();
 
             if (DrawingAttributesHistory.Count > 0)
             {
@@ -633,9 +636,7 @@ namespace Ink_Canvas
                 }
 
                 // 更新选中栏位置
-                TranslateStrokeSelectionFrame(delta);
                 updateBorderStrokeSelectionControlLocation();
-                UpdateStrokeSelectionHandlesPosition();
 
                 // 更新起始点
                 strokeDragStartPoint = currentPoint;
@@ -766,13 +767,11 @@ namespace Ink_Canvas
                     }
                 }
 
-                // 显示墨迹选择栏，并用新版覆盖层锚点替换旧的虚线框和八点手柄
+                // 显示墨迹选择栏和选择框
                 GridInkCanvasSelectionCover.Visibility = Visibility.Visible;
                 BorderStrokeSelectionClone.Background = Brushes.Transparent;
-                HideImageResizeHandles();
-                HideSelectionDisplay();
                 updateBorderStrokeSelectionControlLocation();
-                ShowStrokeSelectionHandles();
+                UpdateSelectionDisplay();
                 return;
             }
 
@@ -816,13 +815,7 @@ namespace Ink_Canvas
 
             // 没有选中任何内容，隐藏选择框
             GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-            if (BorderStrokeSelectionControl != null)
-            {
-                BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
-            }
             HideSelectionDisplay();
-            HideImageResizeHandles();
-            ShowInkCanvasBuiltInSelectionAdorner();
         }
 
 
@@ -940,9 +933,12 @@ namespace Ink_Canvas
 
                     var m = new Matrix();
 
-                    var bounds = GetActiveStrokeSelectionFrameBounds();
-                    var center = new Point(bounds.Left + bounds.Width / 2,
-                        bounds.Top + bounds.Height / 2);
+                    // Find center of element and then transform to get current location of center
+                    var fe = e.Source as FrameworkElement;
+                    var center = new Point(fe.ActualWidth / 2, fe.ActualHeight / 2);
+                    center = new Point(inkCanvas.GetSelectionBounds().Left + inkCanvas.GetSelectionBounds().Width / 2,
+                        inkCanvas.GetSelectionBounds().Top + inkCanvas.GetSelectionBounds().Height / 2);
+                    center = m.Transform(center); // 转换为矩阵缩放和旋转的中心点
 
                     // Update matrix to reflect translation/rotation
                     m.Translate(trans.X, trans.Y); // 移动
@@ -961,10 +957,7 @@ namespace Ink_Canvas
                         stroke.Transform(m, false);
                     }
 
-                    UpdateStrokeSelectionFrameForManipulation(trans, scale, rotate, !disableScale,
-                        Settings.Gesture.IsEnableTwoFingerRotationOnSelection);
                     updateBorderStrokeSelectionControlLocation();
-                    UpdateStrokeSelectionHandlesPosition();
                 }
             }
             catch (Exception ex)
@@ -1026,13 +1019,13 @@ namespace Ink_Canvas
                 }
                 isProgramChangeStrokeSelection = true;
                 inkCanvas.Select(new StrokeCollection());
+                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                 isProgramChangeStrokeSelection = false;
-                HideAllSelectionOverlays();
                 StrokesSelectionClone = new StrokeCollection();
             }
             else if (inkCanvas.GetSelectedStrokes().Count == 0)
             {
-                HideAllSelectionOverlays();
+                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                 StrokesSelectionClone = new StrokeCollection();
             }
             else
@@ -1078,9 +1071,7 @@ namespace Ink_Canvas
                         }
 
                         // 更新选中栏位置
-                        TranslateStrokeSelectionFrame(delta);
                         updateBorderStrokeSelectionControlLocation();
-                        UpdateStrokeSelectionHandlesPosition();
 
                         // 更新最后触摸点
                         lastDragPointInCanvas = currentTouchPoint;
@@ -1437,50 +1428,6 @@ namespace Ink_Canvas
             newBounds = new Rect(newX, newY, newWidth, newHeight);
 
             return newBounds;
-        }
-
-        /// <summary>
-        /// 应用新的边界到选中的墨迹
-        /// </summary>
-        /// <param name="newBounds">新的边界矩形</param>
-        /// <remarks>
-        /// 计算缩放比例和平移量
-        /// 创建变换矩阵
-        /// 应用变换到选中的墨迹
-        /// </remarks>
-        private void ApplyBoundsToStrokes(Rect newBounds, Rect originalBounds, double rotationAngle)
-        {
-            var selectedStrokes = inkCanvas.GetSelectedStrokes();
-            if (selectedStrokes.Count == 0 || originalBounds.Width <= 0 || originalBounds.Height <= 0)
-                return;
-
-            var scaleX = newBounds.Width / originalBounds.Width;
-            var scaleY = newBounds.Height / originalBounds.Height;
-            var translateX = newBounds.X - originalBounds.X;
-            var translateY = newBounds.Y - originalBounds.Y;
-
-            var oldCenter = new Point(originalBounds.X + originalBounds.Width / 2,
-                                      originalBounds.Y + originalBounds.Height / 2);
-            var newCenter = new Point(newBounds.X + newBounds.Width / 2,
-                                      newBounds.Y + newBounds.Height / 2);
-
-            // 先把当前已旋转的墨迹转回未旋转坐标系，完成缩放/平移后，
-            // 再绕新中心旋转回原角度，这样缩放手柄始终以未旋转的框架为准。
-            var unrotate = new Matrix();
-            unrotate.RotateAt(-rotationAngle, oldCenter.X, oldCenter.Y);
-
-            var scaleTranslate = new Matrix();
-            scaleTranslate.Translate(translateX, translateY);
-            scaleTranslate.ScaleAt(scaleX, scaleY, oldCenter.X, oldCenter.Y);
-
-            var rotate = new Matrix();
-            rotate.RotateAt(rotationAngle, newCenter.X, newCenter.Y);
-
-            var matrix = Matrix.Multiply(Matrix.Multiply(unrotate, scaleTranslate), rotate);
-            foreach (var stroke in selectedStrokes)
-            {
-                stroke.Transform(matrix, false);
-            }
         }
 
         /// <summary>

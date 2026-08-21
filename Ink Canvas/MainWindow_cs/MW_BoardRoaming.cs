@@ -41,7 +41,8 @@ namespace Ink_Canvas
             drawingShapeMode = 0;
             forceEraser = false;
             forcePointEraser = false;
-            HideAllSelectionOverlays();
+            GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+            inkCanvas.Select(new StrokeCollection());
 
             if (!SetCurrentToolMode(InkCanvasEditingMode.None)) return;
 

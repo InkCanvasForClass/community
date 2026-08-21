@@ -918,7 +918,7 @@ namespace Ink_Canvas
                                     }
 
                                     ReplaceStrokesSafely(result.StrokesToRemove, stroke, e.Stroke);
-                                    HideAllSelectionOverlays();
+                                    GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                                     newStrokes = new StrokeCollection();
                                 }
                             }
@@ -952,7 +952,7 @@ namespace Ink_Canvas
                                     };
                                     stroke.AddPropertyData(Helpers.ModernInkAnalyzer.ShapeStrokePropertyGuid, true);
                                     ReplaceStrokesSafely(result.StrokesToRemove, stroke, e.Stroke);
-                                    HideAllSelectionOverlays();
+                                    GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                                     newStrokes = new StrokeCollection();
                                 }
                             }
@@ -994,7 +994,7 @@ namespace Ink_Canvas
                                     };
                                     stroke.AddPropertyData(Helpers.ModernInkAnalyzer.ShapeStrokePropertyGuid, true);
                                     ReplaceStrokesSafely(result.StrokesToRemove, stroke, e.Stroke);
-                                    HideAllSelectionOverlays();
+                                    GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                                     newStrokes = new StrokeCollection();
                                 }
                             }

@@ -562,36 +562,6 @@ namespace Ink_Canvas
             {
                 ImageSelectionOverlay.Visibility = Visibility.Collapsed;
             }
-            HideSelectionDisplay();
-            ClearInkCanvasSelectionPreservingMode();
-            if (inkCanvas != null && inkCanvas.GetSelectedStrokes().Count > 0)
-            {
-                HideInkCanvasBuiltInSelectionAdorner();
-            }
-            else
-            {
-                ShowInkCanvasBuiltInSelectionAdorner();
-            }
-            ResetStrokeSelectionFrame();
-        }
-
-        /// <summary>清空 InkCanvas 选区，同时保持当前编辑模式不变。</summary>
-        private void ClearInkCanvasSelectionPreservingMode()
-        {
-            if (inkCanvas == null) return;
-
-            var previousEditingMode = inkCanvas.EditingMode;
-            try
-            {
-                inkCanvas.Select(new StrokeCollection());
-            }
-            finally
-            {
-                if (inkCanvas.EditingMode != previousEditingMode)
-                {
-                    inkCanvas.EditingMode = previousEditingMode;
-                }
-            }
         }
 
         /// <summary>把当前 _boothPreviewScale / Translate 应用到全屏预览 Image 的 RenderTransform。</summary>
