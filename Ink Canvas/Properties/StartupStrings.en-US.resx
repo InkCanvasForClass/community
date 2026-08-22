@@ -87,6 +87,12 @@
   <data name="NoFocusModeHint" xml:space="preserve">
     <value>Keep responding to input when the window loses focus</value>
   </data>
+  <data name="PPTOnlyMode" xml:space="preserve">
+    <value>PPT-only mode</value>
+  </data>
+  <data name="PPTOnlyModeHint" xml:space="preserve">
+    <value>Choose the app's run mode. In PPT-only mode the app stays completely hidden and only appears during a PowerPoint slideshow. (Experimental, may be unstable.)</value>
+  </data>
   <data name="RunAtStartup" xml:space="preserve">
     <value>Run at startup</value>
   </data>
