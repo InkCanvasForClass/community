@@ -8,6 +8,7 @@
     <LangVersion>10</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\Ink Canvas\Ink\EraserContactSizing.cs" Link="Ink\EraserContactSizing.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\NativeInkModels.cs" Link="Ink\Native\NativeInkModels.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\InkSampleHistoryNormalizer.cs" Link="Ink\Native\InkSampleHistoryNormalizer.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\InkSampleProcessor.cs" Link="Ink\Native\InkSampleProcessor.cs" />

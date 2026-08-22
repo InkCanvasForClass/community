@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Ink;
 using Ink_Canvas.Ink.Native;
 using System;
 using System.Collections.Generic;
@@ -999,7 +1000,7 @@ namespace Ink_Canvas
                 : Settings.Gesture.IsEnableMultiTouchModeBoard || isInMultiTouchMode;
             var twoFingerAllowed = ResolveTwoFingerGestureAllowed();
             var activeTouchCount = Math.Max(dec.Count, _nativeActiveTouchPointers.Count);
-            var palm = BuildPalmRoutePolicy();
+            var palm = BuildPalmEraserPolicy();
 
             return new NativeInkRouteContext(
                 hitZone,
@@ -1023,7 +1024,7 @@ namespace Ink_Canvas
                 : Settings.Gesture.IsEnableMultiTouchModeBoard || isInMultiTouchMode;
             var twoFingerAllowed = ResolveTwoFingerGestureAllowed();
             var activeTouchCount = Math.Max(dec.Count, _nativeActiveTouchPointers.Count);
-            var palm = inputKind == NativeInkInputKind.Touch ? BuildPalmRoutePolicy() : default;
+            var palm = inputKind == NativeInkInputKind.Touch ? BuildPalmEraserPolicy() : default;
 
             return new NativeInkRouteContext(
                 hitZone: captured.Route == NativeInputRoute.Ink
@@ -1114,42 +1115,6 @@ namespace Ink_Canvas
                 return Settings.PowerPointSettings.IsEnableTwoFingerGestureInPresentationMode
                        && Settings.Gesture.IsEnableTwoFingerGesture;
             return Settings.Gesture.IsEnableTwoFingerGesture;
-        }
-
-        private PalmRoutePolicy BuildPalmRoutePolicy()
-        {
-            var canvas = Settings.Canvas;
-            var advanced = Settings.Advanced;
-            var isNib = Settings.Startup.IsEnableNibMode;
-
-            double sensitivityMultiplier;
-            switch (canvas.PalmEraserSensitivity)
-            {
-                case 0:
-                    sensitivityMultiplier = 3.0;
-                    break;
-                case 1:
-                    sensitivityMultiplier = 2.5;
-                    break;
-                default:
-                    sensitivityMultiplier = 2.0;
-                    break;
-            }
-
-            return new PalmRoutePolicy(
-                enabled: canvas.EnablePalmEraser,
-                isActive: isPalmEraserActive,
-                isQuadIr: advanced.IsQuadIR,
-                isSpecialScreen: advanced.IsSpecialScreen,
-                boundsWidthDip: BoundsWidth,
-                thresholdFactor: isNib
-                    ? advanced.NibModeBoundsWidthThresholdValue
-                    : advanced.FingerModeBoundsWidthThresholdValue,
-                sensitivityMultiplier: sensitivityMultiplier,
-                eraserSizeFactor: isNib
-                    ? advanced.NibModeBoundsWidthEraserSize
-                    : advanced.FingerModeBoundsWidthEraserSize,
-                touchMultiplier: advanced.TouchMultiplier);
         }
 
         private CanvasHitZone ResolveHitZone(double xDip, double yDip)

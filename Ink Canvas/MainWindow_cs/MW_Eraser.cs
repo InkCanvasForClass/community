@@ -1,5 +1,6 @@
 using Ink_Canvas.Properties;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Ink;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -806,29 +807,10 @@ namespace Ink_Canvas
         /// </summary>
         public void UpdateEraserSize()
         {
-            double k = 1.0;
-
-            switch (Settings.Canvas.EraserSize)
-            {
-                case 0: k = Settings.Canvas.EraserShapeType == 0 ? 0.5 : 0.7; break;
-                case 1: k = Settings.Canvas.EraserShapeType == 0 ? 0.8 : 0.9; break;
-                case 2: k = 1.0; break;
-                case 3: k = Settings.Canvas.EraserShapeType == 0 ? 1.25 : 1.2; break;
-                case 4: k = Settings.Canvas.EraserShapeType == 0 ? 1.5 : 1.3; break;
-            }
-
-            // 更新形状类型
-            isEraserCircleShape = (Settings.Canvas.EraserShapeType == 0);
-
-            // 根据形状类型设置尺寸
-            if (isEraserCircleShape)
-            {
-                eraserWidth = k * 90; // 圆形橡皮擦
-            }
-            else
-            {
-                eraserWidth = k * 90 * 0.6; // 矩形橡皮擦宽度
-            }
+            isEraserCircleShape = Settings.Canvas.EraserShapeType == 0;
+            eraserWidth = EraserSizeCalculator.GetPresetWidthDip(
+                Settings.Canvas.EraserSize,
+                isEraserCircleShape);
 
             // 更新橡皮擦样式
             UpdateEraserStyle();
