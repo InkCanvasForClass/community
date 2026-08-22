@@ -2427,9 +2427,8 @@ namespace Ink_Canvas
         /// </remarks>
         private void InkCanvas_ManipulationStarting(object sender, ManipulationStartingEventArgs e)
         {
-            // 插件画布手势（PDF 阅读器双指缩放/平移、光标模式单指翻页/滚动）：
-            // 优先让插件声明手势模式（≥1 指均先问插件，插件返回 false 才走宿主/墨迹）。
-            if (_pluginCanvasGestureHandler != null && (e.Manipulators?.Count() ?? 0) >= 1)
+            // 插件画布手势（如 PDF 阅读器双指缩放/平移）：优先让插件声明手势模式。
+            if (_pluginCanvasGestureHandler != null && (e.Manipulators?.Count() ?? 0) >= 2)
             {
                 if (_pluginCanvasGestureHandler.OnCanvasGestureStarting(e)) return;
             }
@@ -2561,7 +2560,7 @@ namespace Ink_Canvas
 
             // 插件画布手势（如 PDF 阅读器双指缩放/平移、光标模式单指翻页/滚动）：≥1 指优先转发。
             // 插件返回 true 表示已接管，宿主跳过默认的墨迹/画布变换。
-            if (_pluginCanvasGestureHandler != null && (e.Manipulators?.Count() ?? 0) >= 1)
+            if (_pluginCanvasGestureHandler != null && (e.Manipulators?.Count() ?? 0) >= 2)
             {
                 if (_pluginCanvasGestureHandler.OnCanvasGestureDelta(e))
                 {
