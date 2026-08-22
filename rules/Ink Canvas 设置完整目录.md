@@ -118,7 +118,9 @@
 │   └── 快捷键
 │       ├── InfoBar: 快捷键说明
 │       ├── TextBlock "鼠标模式"
-│       │   └── LabeledSettingsCard: 鼠标模式下启用快捷键 → ToggleSwitch
+│       │   ├── LabeledSettingsCard: 鼠标模式下启用快捷键 → ToggleSwitch
+│       │   ├── LabeledSettingsCard: 绘制模式下滚轮穿透 → ToggleSwitch
+│       │   └── LabeledSettingsCard: PPT 放映时接管 PageUp/PageDown → ToggleSwitch
 │       ├── TextBlock "基本操作"
 │       │   ├── HotkeyItem: 撤销
 │       │   ├── HotkeyItem: 重做

@@ -160,6 +160,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             CardEnableHotkeysInMouseMode.IsOn = SettingsManager.Settings.Appearance.EnableHotkeysInMouseMode;
             CardPassThroughMouseWheelInDrawingMode.IsOn = SettingsManager.Settings.Appearance.PassThroughMouseWheelInDrawingMode;
+            CardEnablePPTPageKeyHook.IsOn = SettingsManager.Settings.Appearance.EnablePPTPageKeyHook;
         }
 
         private void ToggleSwitchEnableHotkeysInMouseMode_Toggled(object sender, RoutedEventArgs e)
@@ -202,6 +203,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"更新绘制模式滚轮穿透设置时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void ToggleSwitchEnablePPTPageKeyHook_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            try
+            {
+                SettingsManager.Settings.Appearance.EnablePPTPageKeyHook = CardEnablePPTPageKeyHook.IsOn;
+                SettingsManager.SaveSettingsToFile();
+                _mainWindow?.RefreshPPTPageKeyHook();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新 PPT PageUp/PageDown 低级键盘钩子设置时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 

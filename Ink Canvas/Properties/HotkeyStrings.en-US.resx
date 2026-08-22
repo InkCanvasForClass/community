@@ -63,6 +63,12 @@
   <data name="Hotkey_PassThroughMouseWheelInDrawingModeHint" xml:space="preserve">
     <value>When on, scrolling the mouse wheel in annotation/drawing mode is forwarded to the window underneath (e.g. PowerPoint, Word), no need to switch to mouse mode</value>
   </data>
+  <data name="Hotkey_EnablePPTPageKeyHook" xml:space="preserve">
+    <value>Capture PageUp/PageDown during PowerPoint slide shows</value>
+  </data>
+  <data name="Hotkey_EnablePPTPageKeyHookHint" xml:space="preserve">
+    <value>When on, a low-level keyboard hook maps PageUp and PageDown to the previous and next slide during PowerPoint slide shows</value>
+  </data>
   <data name="Hotkey_BasicOperations" xml:space="preserve">
     <value>Basic Operations</value>
   </data>

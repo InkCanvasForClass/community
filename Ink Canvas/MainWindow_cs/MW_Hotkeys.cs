@@ -8,6 +8,24 @@ namespace Ink_Canvas
     public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
         /// <summary>
+        /// 根据设置和真实 PowerPoint 放映状态安装或卸载 PageUp/PageDown 低级键盘钩子。
+        /// </summary>
+        internal void RefreshPPTPageKeyHook()
+        {
+            if (_pptPageKeyHook == null) return;
+
+            bool shouldInstall = Settings.Appearance.EnablePPTPageKeyHook &&
+                                 IsInPPTPresentationMode &&
+                                 PPTManager?.IsInSlideShow == true &&
+                                 !IsExternalPresentationActive;
+
+            if (shouldInstall)
+                _pptPageKeyHook.Install();
+            else
+                _pptPageKeyHook.Uninstall();
+        }
+
+        /// <summary>
         /// 鼠标滚轮事件处理，用于PPT翻页
         /// 在批注/绘制模式下，若开启滚轮穿透，则把滚轮事件转发到下方窗口
         /// </summary>

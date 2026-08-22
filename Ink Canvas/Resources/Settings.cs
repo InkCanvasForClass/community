@@ -842,6 +842,9 @@ namespace Ink_Canvas
         [JsonProperty("passThroughMouseWheelInDrawingMode")]
         public bool PassThroughMouseWheelInDrawingMode { get; set; } = false;
 
+        [JsonProperty("enablePPTPageKeyHook")]
+        public bool EnablePPTPageKeyHook { get; set; } = false;
+
         [JsonProperty("language")]
         public string Language { get; set; } = "";
 

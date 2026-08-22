@@ -53,6 +53,9 @@ namespace Ink_Canvas
         private GlobalHotkeyManager _globalHotkeyManager;
         internal GlobalHotkeyManager GlobalHotkeyManagerInstance => _globalHotkeyManager;
 
+        // PPT PageUp/PageDown 低级键盘钩子
+        private PPTPageKeyHook _pptPageKeyHook;
+
         // 墨迹渐隐管理器
         private InkFadeManager _inkFadeManager;
         // 暴露给插件墨迹特效服务的入口（未初始化时为 null）
@@ -1956,6 +1959,13 @@ namespace Ink_Canvas
             CleanupClipboardMonitoring();
             ClipboardNotification.Stop();
 
+            // 清理 PPT PageUp/PageDown 低级键盘钩子
+            if (_pptPageKeyHook != null)
+            {
+                _pptPageKeyHook.Dispose();
+                _pptPageKeyHook = null;
+            }
+
             // 清理全局快捷键管理器
             if (_globalHotkeyManager != null)
             {
@@ -2930,6 +2940,13 @@ namespace Ink_Canvas
                 _globalHotkeyManager.EnableHotkeyRegistration();
                 // 启动时默认为鼠标模式，禁用快捷键
                 _globalHotkeyManager.UpdateHotkeyStateForToolMode(true);
+
+                _pptPageKeyHook = new PPTPageKeyHook(
+                    Dispatcher,
+                    () => BtnPPTSlidesUp_Click(null, null),
+                    () => BtnPPTSlidesDown_Click(null, null));
+                RefreshPPTPageKeyHook();
+
                 LogHelper.WriteLogToFile("全局快捷键管理器已初始化，启动时默认为鼠标模式并禁用快捷键", LogHelper.LogType.Event);
             }
             catch (Exception ex)

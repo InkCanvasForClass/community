@@ -66,6 +66,7 @@ namespace Ink_Canvas.Helpers
                         _mainWindow.ArePPTControlsVisible = false;
                         // Old UI removed:                         _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Collapsed;
                         _mainWindow.IsInPPTPresentationMode = false;
+                        _mainWindow.RefreshPPTPageKeyHook();
                         _mainWindow.UpdateToolbarComponentVisibility();
                         HideAllNavigationPanels();
                     }
@@ -92,6 +93,7 @@ namespace Ink_Canvas.Helpers
 
                         // Old UI removed:                         _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Collapsed;
                         _mainWindow.IsInPPTPresentationMode = true;
+                        _mainWindow.RefreshPPTPageKeyHook();
                         _mainWindow.UpdateToolbarComponentVisibility();
 
                         // 同步页码到所有翻页条 + 兼容旧绑定的隐藏 placeholder
@@ -132,6 +134,7 @@ namespace Ink_Canvas.Helpers
                     {
                         // Old UI removed:                         _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Visible;
                         _mainWindow.IsInPPTPresentationMode = false;
+                        _mainWindow.RefreshPPTPageKeyHook();
                         _mainWindow.UpdateToolbarComponentVisibility();
                         HideAllNavigationPanels();
                         _mainWindow.UpdatePPTTimeCapsuleVisibility();
