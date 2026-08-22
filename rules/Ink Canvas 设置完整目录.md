@@ -8,6 +8,8 @@
 │   ├── 基本
 │   │   └── TextBlock "行为"
 │   │       ├── SettingsCard: 开机自启 → ToggleSwitch
+│   │       ├── SettingsCard: 快速启动模式 → ToggleSwitch
+│   │       ├── LabeledSettingsCard: 仅PPT模式 → ToggleSwitch
 │   │       ├── SettingsCard: 注册 Url 协议 → ToggleSwitch
 │   │       ├── SettingsExpander: 托盘图标 → ToggleSwitch（开则展开）
 │   │       │   ├── SettingsCard: 鼠标左键/触屏单击时 → ComboBox

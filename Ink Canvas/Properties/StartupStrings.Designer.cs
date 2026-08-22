@@ -70,6 +70,10 @@ namespace Ink_Canvas.Properties
 
         public static string NoFocusModeHint => ResourceManager.GetString(nameof(NoFocusModeHint), _resourceCulture);
 
+        public static string PPTOnlyMode => ResourceManager.GetString(nameof(PPTOnlyMode), _resourceCulture);
+
+        public static string PPTOnlyModeHint => ResourceManager.GetString(nameof(PPTOnlyModeHint), _resourceCulture);
+
         public static string RunAtStartup => ResourceManager.GetString(nameof(RunAtStartup), _resourceCulture);
 
         public static string RunAtStartupHint => ResourceManager.GetString(nameof(RunAtStartupHint), _resourceCulture);
