@@ -24,15 +24,15 @@ type: Bug
 
 ### 检查清单 | Checklist (必填 | Required)
 
-- [x] 您在生产环境中发现了此问题，并稳定复现 | You have encountered this issue in a production environment and can reliably reproduce it.
-- [x] 您尝试了自行解决（包括但不限于重置配置文件，全新安装）但始终无法解决 | You have tried to resolve it yourself (including but not limited to resetting config files and doing a clean install), but could not fix it.
-- [x] 您可以在其它设备上稳定复现此问题 | You can reliably reproduce this issue on another device.
-- [x] 您确认此问题并非由实验性功能引起 | You confirm that this issue is not caused by an experimental feature.
-- [x] 您确认此问题严重影响了使用并且可明确定义为漏洞或缺陷 | You confirm that this issue seriously affects usage and can be clearly defined as a bug or defect.
-- [x] 您了解开发者无法及时回复和及时修复 | You understand that developers may not respond or fix issues promptly.
-- [x] 您确认、知晓无意义提交 Bug 类反馈的后果，并同意以下条款 | You confirm that you understand the consequences of submitting meaningless bug reports and agree to the following terms.
-- [x] 被认定为无意义的反馈将会被直接关闭 | Feedback deemed meaningless will be closed directly.
-- [x] 多次提交无意义的 Bug 类反馈将会被处以 7 天内不再接受您反馈的处罚 | Repeated meaningless bug reports will result in your feedback being suspended for 7 days.
+- [ ] 您在生产环境中发现了此问题，并稳定复现 | You have encountered this issue in a production environment and can reliably reproduce it.
+- [ ] 您尝试了自行解决（包括但不限于重置配置文件，全新安装）但始终无法解决 | You have tried to resolve it yourself (including but not limited to resetting config files and doing a clean install), but could not fix it.
+- [ ] 您可以在其它设备上稳定复现此问题 | You can reliably reproduce this issue on another device.
+- [ ] 您确认此问题并非由实验性功能引起 | You confirm that this issue is not caused by an experimental feature.
+- [ ] 您确认此问题严重影响了使用并且可明确定义为漏洞或缺陷 | You confirm that this issue seriously affects usage and can be clearly defined as a bug or defect.
+- [ ] 您了解开发者无法及时回复和及时修复 | You understand that developers may not respond or fix issues promptly.
+- [ ] 您确认、知晓无意义提交 Bug 类反馈的后果，并同意以下条款 | You confirm that you understand the consequences of submitting meaningless bug reports and agree to the following terms.
+- [ ] 被认定为无意义的反馈将会被直接关闭 | Feedback deemed meaningless will be closed directly.
+- [ ] 多次提交无意义的 Bug 类反馈将会被处以 7 天内不再接受您反馈的处罚 | Repeated meaningless bug reports will result in your feedback being suspended for 7 days.
 - [ ] 我已经仔细阅读过选项里的内容，并且知道这个选项不用勾选。 | I have carefully read the options and know that this option does not need to be checked.
 
 ### 软件版本 | App Version (必填 | Required)
