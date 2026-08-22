@@ -2191,20 +2191,14 @@ namespace Ink_Canvas
             try
             {
                 bool hasHiddenSlides = agentState?.HasHiddenSlides == true;
-
-                // PPT 刚打开时 COM RCW 可能尚未稳定，延迟一小段时间再访问 Slides
-                if (!hasHiddenSlides)
+                if (!hasHiddenSlides && pres?.Slides != null)
                 {
-                    await Task.Delay(500);
-                    if (pres?.Slides != null)
+                    foreach (Slide slide in pres.Slides)
                     {
-                        foreach (Slide slide in pres.Slides)
+                        if (slide.SlideShowTransition.Hidden == MsoTriState.msoTrue)
                         {
-                            if (slide.SlideShowTransition.Hidden == MsoTriState.msoTrue)
-                            {
-                                hasHiddenSlides = true;
-                                break;
-                            }
+                            hasHiddenSlides = true;
+                            break;
                         }
                     }
                 }
@@ -2273,21 +2267,15 @@ namespace Ink_Canvas
                 if (IsInPPTPresentationMode) return;
 
                 bool hasSlideTimings = agentState?.HasAutoPlayTimings == true;
-
-                // PPT 刚打开时 COM RCW 可能尚未稳定，延迟一小段时间再访问 Slides
-                if (!hasSlideTimings)
+                if (!hasSlideTimings && pres?.Slides != null)
                 {
-                    await Task.Delay(500);
-                    if (pres?.Slides != null)
+                    foreach (Slide slide in pres.Slides)
                     {
-                        foreach (Slide slide in pres.Slides)
+                        if (slide.SlideShowTransition.AdvanceOnTime == MsoTriState.msoTrue &&
+                            slide.SlideShowTransition.AdvanceTime > 0)
                         {
-                            if (slide.SlideShowTransition.AdvanceOnTime == MsoTriState.msoTrue &&
-                                slide.SlideShowTransition.AdvanceTime > 0)
-                            {
-                                hasSlideTimings = true;
-                                break;
-                            }
+                            hasSlideTimings = true;
+                            break;
                         }
                     }
                 }
