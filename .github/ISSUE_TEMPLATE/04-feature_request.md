@@ -24,11 +24,11 @@ type: Feature
 
 ### 检查清单 | Checklist (必填 | Required)
 
-- [x] 您确认此功能不存在于最新版本 | You confirm that this feature does not exist in the latest version.
-- [x] 您确认此功能有开发的必要 | You confirm that this feature is worth developing.
-- [x] 您确认此功能无法通过开发插件/自动化实现 | You confirm that this feature cannot be implemented through a plugin or automation.
-- [x] 您没有为软件提交 Pull Request 或开发插件的能力 | You are unable to submit a Pull Request or develop a plugin for this software.
-- [x] 您了解开发者无法及时回复和及时开发 | You understand that developers may not respond or implement features promptly.
+- [ ] 您确认此功能不存在于最新版本 | You confirm that this feature does not exist in the latest version.
+- [ ] 您确认此功能有开发的必要 | You confirm that this feature is worth developing.
+- [ ] 您确认此功能无法通过开发插件/自动化实现 | You confirm that this feature cannot be implemented through a plugin or automation.
+- [ ] 您没有为软件提交 Pull Request 或开发插件的能力 | You are unable to submit a Pull Request or develop a plugin for this software.
+- [ ] 您了解开发者无法及时回复和及时开发 | You understand that developers may not respond or implement features promptly.
 - [ ] 我已经仔细阅读过选项里的内容，并且知道这个选项不用勾选。 | I have carefully read the options and know that this option does not need to be checked.
 
 ### 功能描述 | Description (必填 | Required)
