@@ -802,7 +802,9 @@ namespace Ink_Canvas
             StrokeManipulationHistory[sender as Stroke] =
                 new Tuple<StylusPointCollection, StylusPointCollection>(StrokeInitialHistory[sender as Stroke],
                     (sender as Stroke).StylusPoints.Clone());
-            if ((StrokeManipulationHistory.Count == count || sender == null) && dec.Count == 0)
+            if ((StrokeManipulationHistory.Count == count || sender == null)
+                && dec.Count == 0
+                && !_isStrokeRotationOverlayActive)
             {
                 CommitPendingStrokeManipulationHistory();
             }

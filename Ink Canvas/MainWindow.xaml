@@ -438,6 +438,7 @@
         <!--墨迹/图片选择器-->
         <Grid Visibility="{Binding ElementName=inkCanvas, Path=Visibility}">
             <Grid Name="GridInkCanvasSelectionCover"
+                  IsVisibleChanged="GridInkCanvasSelectionCover_IsVisibleChanged"
                   MouseDown="GridInkCanvasSelectionCover_MouseDown"
                   MouseMove="GridInkCanvasSelectionCover_MouseMove"
                   MouseUp="GridInkCanvasSelectionCover_MouseUp"
@@ -493,6 +494,7 @@
                 </Canvas>
             </Grid>
             <Border Name="BorderStrokeSelectionControl"
+                    Panel.ZIndex="1001"
                     HorizontalAlignment="Left" VerticalAlignment="Top" Margin="800,400,0,0"
                     CornerRadius="5" Height="80"
                     Background="{DynamicResource FloatingBarBackgroundBrush}" d:BorderBrush="Red" d:Background="Green"
@@ -822,7 +824,7 @@
                 </Grid>
             </Border>
 
-            <!-- 图片选择覆盖层（缩放/移动/旋转） -->
+            <!-- 自定义选中覆盖层（元素缩放/移动/旋转，墨迹旋转锚点） -->
             <localControls:ImageSelectionOverlay x:Name="ImageSelectionOverlay"
                                             Visibility="Collapsed"  d:Visibility="Visible"
                                             Panel.ZIndex="1000" />

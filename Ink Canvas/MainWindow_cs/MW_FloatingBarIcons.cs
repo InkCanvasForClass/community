@@ -1242,8 +1242,11 @@ namespace Ink_Canvas
             if (TryBlockFrozenPageMutation("清除冻结页面内容")) return;
             if (inkCanvas.GetSelectedStrokes().Count > 0)
             {
-                inkCanvas.Strokes.Remove(inkCanvas.GetSelectedStrokes());
+                var selectedStrokes = inkCanvas.GetSelectedStrokes();
+                inkCanvas.Select(new StrokeCollection());
+                inkCanvas.Strokes.Remove(selectedStrokes);
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+                HideSelectionDisplay();
             }
             else if (inkCanvas.Strokes.Count > 0 || HasSecAgentSceneElementsOnCanvas())
             {

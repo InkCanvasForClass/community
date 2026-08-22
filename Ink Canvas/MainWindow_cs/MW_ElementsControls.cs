@@ -2815,6 +2815,9 @@ namespace Ink_Canvas
 
         private bool _imageOverlayHooked;
         private FrameworkElement _overlayTrackedElement;
+        private bool _isStrokeRotationOverlayActive;
+        private Point _strokeRotationCenter;
+        private double _strokeRotationAngle;
 
         private void EnsureImageOverlayHooks()
         {
@@ -2823,6 +2826,8 @@ namespace Ink_Canvas
             ImageSelectionOverlay.ResizeDelta += ImageSelectionOverlay_ResizeDelta;
             ImageSelectionOverlay.MoveDelta += ImageSelectionOverlay_MoveDelta;
             ImageSelectionOverlay.RotateDelta += ImageSelectionOverlay_RotateDelta;
+            ImageSelectionOverlay.InteractionStarted += ImageSelectionOverlay_InteractionStarted;
+            ImageSelectionOverlay.InteractionEnded += ImageSelectionOverlay_InteractionEnded;
             _imageOverlayHooked = true;
         }
 
@@ -2857,6 +2862,7 @@ namespace Ink_Canvas
             {
                 if (ImageSelectionOverlay == null || element == null) return;
                 EnsureImageOverlayHooks();
+                ImageSelectionOverlay.SetMode(SelectionOverlayMode.Element);
                 AttachOverlayTracking(element);
                 UpdateImageResizeHandlesPosition(default);
                 ImageSelectionOverlay.Visibility = Visibility.Visible;
@@ -2984,6 +2990,66 @@ namespace Ink_Canvas
                               canvasDelta.X * sin + canvasDelta.Y * cos);
         }
 
+        private void ShowStrokeRotationHandle(Rect selectionBounds)
+        {
+            if (ImageSelectionOverlay == null || selectionBounds.IsEmpty
+                || selectionBounds.Width <= 0 || selectionBounds.Height <= 0)
+            {
+                return;
+            }
+
+            EnsureImageOverlayHooks();
+            DetachOverlayTracking();
+            ImageSelectionOverlay.SetMode(SelectionOverlayMode.Stroke);
+
+            var center = _isStrokeRotationOverlayActive
+                ? _strokeRotationCenter
+                : new Point(selectionBounds.Left + selectionBounds.Width / 2,
+                            selectionBounds.Top + selectionBounds.Height / 2);
+            double width = _isStrokeRotationOverlayActive
+                ? ImageSelectionOverlay.Width
+                : selectionBounds.Width + 16;
+            double height = _isStrokeRotationOverlayActive
+                ? ImageSelectionOverlay.Height
+                : selectionBounds.Height + 16;
+            double angle = _isStrokeRotationOverlayActive ? _strokeRotationAngle : 0;
+
+            ImageSelectionOverlay.UpdateFrame(center, width, height, angle);
+            ImageSelectionOverlay.Visibility = Visibility.Visible;
+        }
+
+        private bool IsStrokeRotationOverlayTarget()
+        {
+            return currentSelectedElement == null
+                && inkCanvas?.GetSelectedStrokes().Count > 0
+                && GridInkCanvasSelectionCover?.Visibility == Visibility.Visible;
+        }
+
+        private void ImageSelectionOverlay_InteractionStarted(object sender, EventArgs e)
+        {
+            if (!IsStrokeRotationOverlayTarget()) return;
+
+            var bounds = inkCanvas.GetSelectionBounds();
+            _isStrokeRotationOverlayActive = true;
+            _strokeRotationCenter = new Point(bounds.Left + bounds.Width / 2,
+                                              bounds.Top + bounds.Height / 2);
+            _strokeRotationAngle = 0;
+            ImageSelectionOverlay.UpdateFrame(_strokeRotationCenter,
+                                              bounds.Width + 16,
+                                              bounds.Height + 16,
+                                              _strokeRotationAngle);
+        }
+
+        private void ImageSelectionOverlay_InteractionEnded(object sender, EventArgs e)
+        {
+            if (!_isStrokeRotationOverlayActive) return;
+
+            _isStrokeRotationOverlayActive = false;
+            _strokeRotationAngle = 0;
+            CommitPendingStrokeManipulationHistory();
+            RefreshStrokeSelectionChrome();
+        }
+
         private void ImageSelectionOverlay_ResizeDelta(object sender, ImageResizeDeltaEventArgs e)
         {
             if (TryBlockFrozenPageMutation("缩放图片")) return;
@@ -3033,9 +3099,31 @@ namespace Ink_Canvas
 
         private void ImageSelectionOverlay_RotateDelta(object sender, ImageRotateDeltaEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("旋转图片")) return;
+            string action = IsStrokeRotationOverlayTarget() || _isStrokeRotationOverlayActive
+                ? "旋转墨迹"
+                : "旋转图片";
+            if (TryBlockFrozenPageMutation(action)) return;
             try
             {
+                if (_isStrokeRotationOverlayActive)
+                {
+                    var strokes = inkCanvas.GetSelectedStrokes();
+                    if (strokes.Count == 0) return;
+
+                    var matrix = Matrix.Identity;
+                    matrix.RotateAt(e.AngleDelta, _strokeRotationCenter.X, _strokeRotationCenter.Y);
+                    foreach (var stroke in strokes)
+                        stroke.Transform(matrix, false);
+
+                    _strokeRotationAngle += e.AngleDelta;
+                    ImageSelectionOverlay.UpdateFrame(_strokeRotationCenter,
+                                                      ImageSelectionOverlay.Width,
+                                                      ImageSelectionOverlay.Height,
+                                                      _strokeRotationAngle);
+                    updateBorderStrokeSelectionControlLocation();
+                    return;
+                }
+
                 if (currentSelectedElement == null) return;
                 ApplyRotateTransform(currentSelectedElement, e.AngleDelta);
                 UpdateImageResizeHandlesPosition(default);
@@ -3044,7 +3132,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"图片旋转失败: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"{action}失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
