@@ -300,18 +300,21 @@ namespace Ink_Canvas.Ink.Native
             if (policy.IsSpecialScreen && policy.TouchMultiplier == 0)
                 return false;
 
-            var boundWidth = policy.IsQuadIr
-                ? Math.Sqrt(Math.Max(0, pointer.ContactWidthDip * pointer.ContactHeightDip))
-                : pointer.ContactWidthDip;
+            var boundWidth = PalmEraserGeometry.GetEffectiveContactWidthDip(
+                pointer.ContactWidthDip,
+                pointer.ContactHeightDip,
+                policy.IsQuadIr);
             var threshold = policy.BoundsWidthDip
                             * policy.ThresholdFactor
                             * policy.SensitivityMultiplier;
             if (boundWidth <= policy.BoundsWidthDip || boundWidth <= threshold)
                 return false;
 
-            eraserWidthDip = boundWidth
-                             * policy.EraserSizeFactor
-                             * (policy.IsSpecialScreen ? policy.TouchMultiplier : 1);
+            eraserWidthDip = PalmEraserGeometry.ApplyPalmEraserSize(
+                boundWidth,
+                policy.EraserSizeFactor,
+                policy.IsSpecialScreen,
+                policy.TouchMultiplier);
             return true;
         }
 
