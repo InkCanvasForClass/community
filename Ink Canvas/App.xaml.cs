@@ -58,6 +58,9 @@ namespace Ink_Canvas
         }
 
         public static string[] StartArgs;
+
+        /// <summary>从文件关联双击打开的插件关联文件路径；插件加载完成后派发给注册该扩展名的插件。</summary>
+        internal static string PendingPluginFilePath;
         public static string RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
         /// <summary>
@@ -1298,6 +1301,21 @@ namespace Ink_Canvas
                             LogHelper.WriteLogToFile("通过IPC发送文件路径失败", LogHelper.LogType.Warning);
                         }
                     }
+                    // 检查是否有插件关联文件参数（文件关联打开）
+                    else if (!string.IsNullOrEmpty(FileAssociationManager.GetPluginFileFromArgs(e.Args)))
+                    {
+                        string pluginFile = FileAssociationManager.GetPluginFileFromArgs(e.Args);
+                        LogHelper.WriteLogToFile($"检测到已运行实例，尝试通过IPC发送插件关联文件: {pluginFile}", LogHelper.LogType.Event);
+
+                        if (FileAssociationManager.TrySendPluginFileToExistingInstance(pluginFile))
+                        {
+                            LogHelper.WriteLogToFile("插件关联文件路径已通过IPC发送给已运行实例", LogHelper.LogType.Event);
+                        }
+                        else
+                        {
+                            LogHelper.WriteLogToFile("通过IPC发送插件关联文件路径失败", LogHelper.LogType.Warning);
+                        }
+                    }
                     // 检查是否有--board参数
                     else if (hasBoardArg)
                     {
@@ -1396,6 +1414,11 @@ namespace Ink_Canvas
             _taskbar = (TaskbarIcon)FindResource("TaskbarTrayIcon");
 
             StartArgs = e.Args;
+
+            // 文件关联双击打开插件关联文件：记录待打开路径，等插件加载完成后派发给注册该扩展名的插件。
+            PendingPluginFilePath = FileAssociationManager.GetPluginFileFromArgs(e.Args);
+            if (!string.IsNullOrEmpty(PendingPluginFilePath))
+                LogHelper.WriteLogToFile($"App | 检测到插件文件关联启动，待插件加载后打开: {PendingPluginFilePath}", LogHelper.LogType.Event);
 
             // 在非更新模式下创建主窗口
             if (_isSplashScreenShown)
@@ -1586,6 +1609,27 @@ namespace Ink_Canvas
                     {
                         LogHelper.WriteLogToFile($"启动插件 IPC 总线失败: {ipcEx.Message}", LogHelper.LogType.Warning);
                     }
+
+                    // 文件关联双击插件关联文件：插件已加载（相关插件在 Initialize 注册了 "open" URI 处理器），
+                    // 把路径派发给注册该扩展名的插件。不走 HandleUriCommand，避免受「启用 URI 协议」设置门禁。
+                    if (!string.IsNullOrEmpty(PendingPluginFilePath))
+                    {
+                        try
+                        {
+                            string pending = PendingPluginFilePath;
+                            PendingPluginFilePath = null;
+                            bool handled = Helpers.FileAssociationManager.DispatchPluginFileOpen(pending);
+                            if (handled)
+                                LogHelper.WriteLogToFile($"App | 已派发插件关联文件: {pending}", LogHelper.LogType.Event);
+                            else
+                                LogHelper.WriteLogToFile($"App | 派发插件关联文件失败（插件未加载或未注册处理器）: {pending}", LogHelper.LogType.Warning);
+                        }
+                        catch (Exception pluginFileEx)
+                        {
+                            LogHelper.WriteLogToFile($"App | 派发插件关联文件失败: {pluginFileEx.Message}", LogHelper.LogType.Error);
+                        }
+                    }
+
                     LogHelper.WriteLogToFile(string.Format("插件加载完成，共加载 {0} 个插件", PluginManager.Instance.Plugins.Count));
                 }
                 catch (Exception ex)
