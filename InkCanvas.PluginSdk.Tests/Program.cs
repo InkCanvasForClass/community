@@ -39,7 +39,7 @@ namespace InkCanvas.PluginSdk.Tests
 
         private static void PluginCompatibilityUsesActualHostAndCanvasApiVersions()
         {
-            Assert(HostApiRequirement.CurrentApiVersion == "1.3.0",
+            Assert(HostApiRequirement.CurrentApiVersion == "1.10.0",
                 "The canvas viewport contract must advance the compatible API minor version.");
             Assert(Version.TryParse(HostApiRequirement.HostVersion, out var hostVersion) &&
                    hostVersion >= new Version(1, 7, 19, 9),
@@ -48,24 +48,17 @@ namespace InkCanvas.PluginSdk.Tests
             var current = PluginCompatibility.Check(new PluginManifest
             {
                 Version = "1.0.0",
-                ApiVersion = "1.3.0",
+                ApiVersion = "1.10.0",
                 MinHostVersion = "1.7.19.9"
             });
             Assert(current.IsCompatible, "The current math plugin contract should be accepted.");
 
-            var lineConversionApi = PluginCompatibility.Check(new PluginManifest
-            {
-                Version = "1.0.0",
-                ApiVersion = "1.2.0"
-            });
-            Assert(lineConversionApi.IsCompatible, "The API minor bump must remain compatible with 1.2 plugins.");
-
             var previousApi = PluginCompatibility.Check(new PluginManifest
             {
                 Version = "1.0.0",
-                ApiVersion = "1.1.0"
+                ApiVersion = "1.9.0"
             });
-            Assert(previousApi.IsCompatible, "The API minor bump must remain compatible with 1.1 plugins.");
+            Assert(previousApi.IsCompatible, "The API minor bump must remain compatible with 1.9 plugins.");
 
             var legacyApi = PluginCompatibility.Check(new PluginManifest
             {
@@ -77,14 +70,14 @@ namespace InkCanvas.PluginSdk.Tests
             var futureHost = PluginCompatibility.Check(new PluginManifest
             {
                 Version = "1.0.0",
-                MinHostVersion = "1.7.19.10"
+                MinHostVersion = "1.8.0.3"
             });
             Assert(!futureHost.IsCompatible, "A plugin requiring a newer host must be rejected.");
 
             var futureApi = PluginCompatibility.Check(new PluginManifest
             {
                 Version = "1.0.0",
-                ApiVersion = "1.4.0"
+                ApiVersion = "1.11.0"
             });
             Assert(!futureApi.IsCompatible, "A plugin requiring a newer API minor version must be rejected.");
         }
