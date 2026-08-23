@@ -1993,11 +1993,12 @@ namespace Ink_Canvas.Plugins
 
             try
             {
-                // 仅在插件首次注册时自动追加到浮动工具栏；后续启动只加入组件库，
+                // 仅在插件首次注册时自动追加到目标工具栏；后续启动只加入组件库，
                 // 避免用户删除组件后重启又被自动加回。
                 bool isFirstRegistration = IsFirstToolbarRegistration();
+                bool isWhiteboard = itemInfo.Surface == PluginToolbarSurface.Whiteboard;
                 bool registered;
-                if (itemInfo.Surface == PluginToolbarSurface.Whiteboard)
+                if (isWhiteboard)
                     registered = Controls.Toolbar.BoardToolbar.BoardToolbarRegistry.RegisterPluginItem(
                         itemInfo,
                         autoAddToActiveConfig: isFirstRegistration);
@@ -2022,8 +2023,28 @@ namespace Ink_Canvas.Plugins
                 }
 
                 var itemId = itemInfo.Id;
-                TrackUndo("toolbar:" + itemId,
-                    () => Controls.Toolbar.FloatingToolbar.ToolbarRegistry.UnregisterPluginItem(itemId));
+                if (isWhiteboard)
+                {
+                    TrackUndo("boardToolbar:" + itemId,
+                        () => Controls.Toolbar.BoardToolbar.BoardToolbarRegistry.UnregisterPluginItem(itemId));
+
+                    // 与 RegisterBoardToolbarItem 保持一致：白板工具栏已构建时延迟重建，
+                    // 批量加载期间只标记，由加载完成后统一重建一次。
+                    if (_isLoadingBatch)
+                    {
+                        _boardToolbarRebuildPending = true;
+                    }
+                    else if (Application.Current?.MainWindow is MainWindow mw)
+                    {
+                        mw.Dispatcher.BeginInvoke(new Action(mw.RebuildBoardToolbar),
+                            System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                    }
+                }
+                else
+                {
+                    TrackUndo("toolbar:" + itemId,
+                        () => Controls.Toolbar.FloatingToolbar.ToolbarRegistry.UnregisterPluginItem(itemId));
+                }
 
                 Log(string.Format("Plugin registered toolbar item: {0} (autoAdd={1})", itemInfo.Id, isFirstRegistration));
             }
