@@ -8,8 +8,43 @@ body:
         感谢你的反馈！请详细填写以下内容，便于我们定位问题。
         Thank you for your feedback! Please fill out the following information to help us locate the issue.
 
-        在报告问题之前，请确保你的软件已经更新到最新Beta版本，否则我们可能会无条件直接关闭该Issue，感谢配合！
-        Before reporting the issue, please make sure your software has been updated to the latest Beta version. Otherwise, we may unconditionally close this Issue without any further notice. Thank you for your cooperation!
+        **上 GitHub 很慢？可以使用飞书文档提交反馈哦~** | **GitHub is slow? You can submit your feedback via Feishu form.**
+        [进入飞书表单](https://inkcanvasforclass.feishu.cn/share/base/form/shrcnTufO72M20lU1sjQWcpv29e) | [Feishu Form](https://inkcanvasforclass.feishu.cn/share/base/form/shrcnTufO72M20lU1sjQWcpv29e)
+  - type: markdown
+    attributes:
+      value: |
+        > [!important]
+        > 重要：如果要提出**多个 Bug**，请为每一个 Bug 开一个单独的 issue。
+        > Important: If you want to report **multiple bugs**, please open a separate issue for each bug.
+
+        > [!note]
+        > 上传附件时**请优先使用 GitHub 的附件系统上传附件**，将需要上传的附件粘贴或拖动到撰写区域即可上传。多个文件可打包为 zip 格式后上传。**尽量避免使用需要登陆或安装客户端才能接收附件的网盘（如\*度网盘、\*克网盘、1\*3网盘等）上传附件**，以避免开发者因不具有对应网盘客户端或账户而延误问题诊断。
+        > When uploading attachments, **please use GitHub's attachment system first**. Paste or drag files into the editor to upload. Multiple files can be packed as a zip. **Avoid cloud drives that require login or a client (e.g. Baidu Netdisk, Quark Netdisk, 123 Pan)** so maintainers can access them without extra accounts.
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 检查清单 | Checklist
+      description: 在提交 Bug 反馈前，请先确认以下内容 | Please confirm the following before submitting a bug report
+      options:
+        - label: 您在生产环境中发现了此问题，并稳定复现 | You have encountered this issue in a production environment and can reliably reproduce it.
+          required: true
+        - label: 您尝试了自行解决（包括但不限于重置配置文件，全新安装）但始终无法解决 | You have tried to resolve it yourself (including but not limited to resetting config files and doing a clean install), but could not fix it.
+          required: true
+        - label: 您可以在其它设备上稳定复现此问题 | You can reliably reproduce this issue on another device.
+          required: true
+        - label: 您确认此问题并非由实验性功能引起 | You confirm that this issue is not caused by an experimental feature.
+          required: true
+        - label: 您确认此问题严重影响了使用并且可明确定义为漏洞或缺陷 | You confirm that this issue seriously affects usage and can be clearly defined as a bug or defect.
+          required: true
+        - label: 您了解开发者无法及时回复和及时修复 | You understand that developers may not respond or fix issues promptly.
+          required: true
+        - label: 您确认、知晓无意义提交 Bug 类反馈的后果，并同意以下条款 | You confirm that you understand the consequences of submitting meaningless bug reports and agree to the following terms.
+          required: true
+        - label: 被认定为无意义的反馈将会被直接关闭 | Feedback deemed meaningless will be closed directly.
+          required: true
+        - label: 多次提交无意义的 Bug 类反馈将会被处以 7 天内不再接受您反馈的处罚 | Repeated meaningless bug reports will result in your feedback being suspended for 7 days.
+          required: true
+        - label: 我已经仔细阅读过选项里的内容，并且知道这个选项不用勾选。 | I have carefully read the options and know that this option does not need to be checked.
   - type: input
     id: version
     attributes:

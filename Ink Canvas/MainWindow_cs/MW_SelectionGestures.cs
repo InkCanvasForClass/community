@@ -533,6 +533,23 @@ namespace Ink_Canvas
         /// </remarks>
         private void GridInkCanvasSelectionCover_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            // The lasso cover is above InkCanvas. Give editable SVG scenes priority so
+            // their own selection frame handles the click instead of stroke selection.
+            var scenePoint = e.GetPosition(inkCanvas);
+            var sceneElement = FindSecAgentSceneElementAtCanvasPoint(scenePoint);
+            if (sceneElement != null)
+            {
+                SecAgentDiag($"LASSO_SCENE_PRIORITY point={scenePoint} element={SecAgentDiagElement(sceneElement)} " +
+                             $"strokes={inkCanvas.GetSelectedStrokes().Count} overlay={GridInkCanvasSelectionCover.Visibility}");
+                isGridInkCanvasSelectionCoverMouseDown = false;
+                isStrokeDragging = false;
+                GridInkCanvasSelectionCover.ReleaseMouseCapture();
+                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+                Element_MouseLeftButtonDown(sceneElement, e);
+                e.Handled = true;
+                return;
+            }
+
             if (TryBlockFrozenPageMutation("移动墨迹"))
             {
                 e.Handled = true;
@@ -577,6 +594,26 @@ namespace Ink_Canvas
         /// 如果正在拖动墨迹，执行拖动操作
         /// 如果鼠标在选中区域移动，更新墨迹选中栏位置
         /// </remarks>
+        private FrameworkElement FindSecAgentSceneElementAtCanvasPoint(Point canvasPoint)
+        {
+            if (inkCanvas == null) return null;
+
+            foreach (var child in inkCanvas.Children.OfType<FrameworkElement>().Reverse())
+            {
+                if (!IsSecAgentEditableSceneElement(child) && !IsSecAgentEditableSceneGroup(child))
+                    continue;
+
+                var bounds = GetSceneElementBounds(child);
+                if (bounds.Contains(canvasPoint))
+                {
+                    SecAgentDiag($"LASSO_SCENE_HIT point={canvasPoint} bounds={bounds} element={SecAgentDiagElement(child)}");
+                    return child;
+                }
+            }
+
+            return null;
+        }
+
         private void GridInkCanvasSelectionCover_MouseMove(object sender, MouseEventArgs e)
         {
             if (!isGridInkCanvasSelectionCoverMouseDown) return;
@@ -598,8 +635,9 @@ namespace Ink_Canvas
                     stroke.Transform(matrix, false);
                 }
 
-                // 更新选中栏位置
+                // 更新选中栏、选择框和旋转锚点位置
                 updateBorderStrokeSelectionControlLocation();
+                UpdateSelectionDisplay();
 
                 // 更新起始点
                 strokeDragStartPoint = currentPoint;
@@ -638,6 +676,12 @@ namespace Ink_Canvas
             if (inkCanvas.GetSelectedStrokes().Count == 0)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+                HideSelectionDisplay();
+            }
+            else
+            {
+                CommitPendingStrokeManipulationHistory();
+                RefreshStrokeSelectionChrome();
             }
         }
 
@@ -740,13 +784,31 @@ namespace Ink_Canvas
 
             // 检查是否有图片元素被选中（通过InkCanvas的选中元素）
             var selectedElements = inkCanvas.GetSelectedElements();
-            bool hasImageElement = selectedElements.Any(element => element is Image || element is PdfEmbeddedView);
+            var selectedImageElement = selectedElements
+                .FirstOrDefault(element => element is Image || element is PdfEmbeddedView) as FrameworkElement;
 
-            // 如果有图片元素被选中，不显示选择框
-            if (hasImageElement)
+            // InkCanvas 首次点击可能直接接管图片选择，这里把选中结果立即交给新版图片选中框，
+            // 避免先显示旧版选择锚点，等第二次点击/拖拽时才进入自定义流程。
+            if (selectedImageElement != null)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                 HideSelectionDisplay();
+
+                isProgramChangeStrokeSelection = true;
+                try
+                {
+                    if (currentSelectedElement != null && !ReferenceEquals(currentSelectedElement, selectedImageElement))
+                    {
+                        var previousEditingMode = inkCanvas.EditingMode;
+                        UnselectElement(currentSelectedElement);
+                        inkCanvas.EditingMode = previousEditingMode;
+                    }
+                    SelectElement(selectedImageElement);
+                }
+                finally
+                {
+                    isProgramChangeStrokeSelection = false;
+                }
                 return;
             }
 
@@ -820,16 +882,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void GridInkCanvasSelectionCover_ManipulationCompleted(object sender, ManipulationCompletedEventArgs e)
         {
-            if (StrokeManipulationHistory?.Count > 0)
-            {
-                timeMachine.CommitStrokeManipulationHistory(StrokeManipulationHistory);
-                foreach (var item in StrokeManipulationHistory)
-                {
-                    StrokeInitialHistory[item.Key] = item.Value.Item2;
-                }
-
-                StrokeManipulationHistory = null;
-            }
+            CommitPendingStrokeManipulationHistory();
 
             if (DrawingAttributesHistory.Count > 0)
             {
@@ -840,6 +893,8 @@ namespace Ink_Canvas
                     item.Value.Clear();
                 }
             }
+
+            RefreshStrokeSelectionChrome();
         }
 
         /// <summary>
@@ -903,6 +958,7 @@ namespace Ink_Canvas
                     }
 
                     updateBorderStrokeSelectionControlLocation();
+                    UpdateSelectionDisplay();
                 }
             }
             catch (Exception ex)
@@ -955,28 +1011,32 @@ namespace Ink_Canvas
                 var touchPointInCanvas = e.GetTouchPoint(inkCanvas).Position;
                 var selectionBounds = inkCanvas.GetSelectionBounds();
 
-                if (!(touchPointInCanvas.X < selectionBounds.Left) &&
-                    !(touchPointInCanvas.Y < selectionBounds.Top) &&
-                    !(touchPointInCanvas.X > selectionBounds.Right) &&
-                    !(touchPointInCanvas.Y > selectionBounds.Bottom))
+                if (selectionBounds.Contains(touchPointInCanvas))
                 {
+                    StrokesSelectionClone = new StrokeCollection();
+                    CommitPendingStrokeManipulationHistory();
+                    RefreshStrokeSelectionChrome();
                     return;
                 }
+
                 isProgramChangeStrokeSelection = true;
                 inkCanvas.Select(new StrokeCollection());
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                 isProgramChangeStrokeSelection = false;
                 StrokesSelectionClone = new StrokeCollection();
+                HideSelectionDisplay();
             }
             else if (inkCanvas.GetSelectedStrokes().Count == 0)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                 StrokesSelectionClone = new StrokeCollection();
+                HideSelectionDisplay();
             }
             else
             {
-                GridInkCanvasSelectionCover.Visibility = Visibility.Visible;
                 StrokesSelectionClone = new StrokeCollection();
+                CommitPendingStrokeManipulationHistory();
+                RefreshStrokeSelectionChrome();
             }
         }
 
@@ -1015,8 +1075,9 @@ namespace Ink_Canvas
                             stroke.Transform(matrix, false);
                         }
 
-                        // 更新选中栏位置
+                        // 更新选中栏、选择框和旋转锚点位置
                         updateBorderStrokeSelectionControlLocation();
+                        UpdateSelectionDisplay();
 
                         // 更新最后触摸点
                         lastDragPointInCanvas = currentTouchPoint;
@@ -1120,6 +1181,32 @@ namespace Ink_Canvas
 
         #region Selection Display and Resize Handles
 
+        private void GridInkCanvasSelectionCover_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (GridInkCanvasSelectionCover.IsVisible && inkCanvas.GetSelectedStrokes().Count > 0)
+            {
+                updateBorderStrokeSelectionControlLocation();
+                UpdateSelectionDisplay();
+            }
+            else if (currentSelectedElement == null)
+            {
+                HideSelectionDisplay();
+            }
+        }
+
+        private void RefreshStrokeSelectionChrome()
+        {
+            if (inkCanvas.GetSelectedStrokes().Count == 0)
+            {
+                HideSelectionDisplay();
+                return;
+            }
+
+            GridInkCanvasSelectionCover.Visibility = Visibility.Visible;
+            updateBorderStrokeSelectionControlLocation();
+            UpdateSelectionDisplay();
+        }
+
         /// <summary>
         /// 在画布上显示当前选中墨迹的可视选择框与调整控件（如有选中墨迹则显示，否则隐藏）。
         /// </summary>
@@ -1148,6 +1235,8 @@ namespace Ink_Canvas
             // 更新选择点位置
             UpdateSelectionHandles(selectionBounds);
             SelectionHandlesCanvas.Visibility = Visibility.Visible;
+
+            ShowStrokeRotationHandle(selectionBounds);
         }
 
         /// <summary>
@@ -1160,6 +1249,17 @@ namespace Ink_Canvas
         {
             SelectionRectangle.Visibility = Visibility.Collapsed;
             SelectionHandlesCanvas.Visibility = Visibility.Collapsed;
+            if (currentSelectedElement == null)
+            {
+                if (_isStrokeRotationOverlayActive)
+                {
+                    _isStrokeRotationOverlayActive = false;
+                    CommitPendingStrokeManipulationHistory();
+                }
+
+                _strokeRotationAngle = 0;
+                HideImageResizeHandles();
+            }
         }
 
         /// <summary>

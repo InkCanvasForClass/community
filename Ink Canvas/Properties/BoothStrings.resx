@@ -84,4 +84,64 @@
   <data name="Title" xml:space="preserve">
     <value>视频展台</value>
   </data>
+  <data name="Brightness" xml:space="preserve">
+    <value>亮度</value>
+  </data>
+  <data name="Brightness_Tooltip" xml:space="preserve">
+    <value>摄像头亮度（曝光度）。滑块置中为摄像头默认值。摄像头不支持时此滑块自动禁用</value>
+  </data>
+  <data name="BrightnessNotSupported" xml:space="preserve">
+    <value>当前摄像头不支持亮度调节</value>
+  </data>
+  <data name="ProMode" xml:space="preserve">
+    <value>专业模式</value>
+  </data>
+  <data name="ProMode_Tooltip" xml:space="preserve">
+    <value>展开后可像手机专业模式一样调节对比度/饱和度/色温/增益/焦距/快门。各项目仅当摄像头硬件支持时才能调节</value>
+  </data>
+  <data name="Contrast" xml:space="preserve">
+    <value>对比度</value>
+  </data>
+  <data name="Saturation" xml:space="preserve">
+    <value>饱和度</value>
+  </data>
+  <data name="WhiteBalance" xml:space="preserve">
+    <value>色温</value>
+  </data>
+  <data name="Gain" xml:space="preserve">
+    <value>增益</value>
+  </data>
+  <data name="Gain_Tooltip" xml:space="preserve">
+    <value>模拟增益，最接近手机 ISO 的概念（DirectShow 无 ISO）。0=摄像头默认</value>
+  </data>
+  <data name="Focus" xml:space="preserve">
+    <value>焦距</value>
+  </data>
+  <data name="Focus_Tooltip" xml:space="preserve">
+    <value>手动对焦。需摄像头有对焦马达；定焦摄像头不支持。0=默认，调整时自动切到手动模式</value>
+  </data>
+  <data name="Exposure" xml:space="preserve">
+    <value>快门</value>
+  </data>
+  <data name="Exposure_Tooltip" xml:space="preserve">
+    <value>曝光时间（相对值，非手机绝对快门速度）。多数 USB 摄像头仅 Auto，不支持手动调节</value>
+  </data>
+  <data name="WhiteBalance_Tooltip" xml:space="preserve">
+    <value>白平衡（色温）。写入时自动切到手动模式。数值近似 Kelvin 但未经校准</value>
+  </data>
+  <data name="PropNotSupported" xml:space="preserve">
+    <value>当前摄像头不支持此项</value>
+  </data>
+  <data name="ResetDefault" xml:space="preserve">
+    <value>恢复默认</value>
+  </data>
+  <data name="Mirror" xml:space="preserve">
+    <value>镜像</value>
+  </data>
+  <data name="MirrorHorizontal" xml:space="preserve">
+    <value>水平镜像</value>
+  </data>
+  <data name="MirrorVertical" xml:space="preserve">
+    <value>垂直镜像</value>
+  </data>
 </root>

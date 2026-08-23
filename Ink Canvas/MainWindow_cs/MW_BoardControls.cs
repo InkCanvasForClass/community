@@ -198,12 +198,25 @@ namespace Ink_Canvas
             _currentCommitType = CommitReason.ClearingCanvas;
             if (isErasedByCode) _currentCommitType = CommitReason.CodeInput;
 
+            // SecAgent editable scenes are WPF children, not InkCanvas.Strokes. Remove them
+            // here as well so page switches, loads and code/UI clears cannot leave them behind.
+            ClearSecAgentSceneElements();
             inkCanvas.Strokes.Clear();
             // 只隐藏 hint，不暂停（ClearStrokes 在切换页面、保存加载时都会被调用，
             // 设置 _edgeExpandHintSuspended 会导致后续书写永远无法触发提示）。
             HideEdgeExpandHint();
 
             _currentCommitType = CommitReason.UserInput;
+        }
+
+        /// <summary>
+        /// Clears ink strokes and SecAgent editable scene elements for automation and toolbar
+        /// integrations. The old automation action only cleared InkCanvas.Strokes, which left
+        /// SVG scene groups visible because they are WPF children.
+        /// </summary>
+        internal void ClearCanvasContentFromAutomation()
+        {
+            ClearStrokes(true);
         }
 
         private static HashSet<UIElement> CollectRemovedElementsFromHistory(TimeMachineHistory[] history)
@@ -436,6 +449,32 @@ namespace Ink_Canvas
         /// - 处理右侧页面列表按钮点击：显示或隐藏右侧页面列表
         /// - 显示页面列表时会刷新列表内容并滚动到当前页面
         /// </remarks>
+        /// <summary>
+        /// 打开页列表面板前，按屏幕高度与页码按钮位置调整面板尺寸：
+        /// 目标约为屏幕高度的 60%（上限 640），面板底部钉在按钮上方，
+        /// 增加的高度通过上移面板吸收，顶部至少保留约 24px。
+        /// </summary>
+        private void EnsurePageListPanelHeight(Border panel, ScrollViewer scrollViewer, FrameworkElement anchorButton)
+        {
+            if (panel == null || scrollViewer == null || anchorButton == null) return;
+
+            var screenHeight = SystemParameters.WorkArea.Height;
+            var desiredHeight = Math.Min(screenHeight * 0.6, 640);
+
+            // 按钮顶部位置限制可上移空间（原始布局：-465 顶部边距 + 460 高度，
+            // 面板底部正好在按钮上方 5px，高度增量全部向上扩展）
+            var buttonTop = anchorButton.TransformToAncestor(this).Transform(new Point(0, 0)).Y;
+            var height = Math.Min(desiredHeight, Math.Max(320, buttonTop + 20));
+
+            scrollViewer.Height = height;
+
+            var baseMargin = panel.Tag is Thickness tag ? tag : panel.Margin;
+            panel.Margin = new Thickness(baseMargin.Left,
+                baseMargin.Top - (height - 460),
+                baseMargin.Right,
+                baseMargin.Bottom);
+        }
+
         private async void BtnWhiteBoardPageIndex_Click(object sender, EventArgs e)
         {
             var BtnLeftPageListWB = FindView("board.pageList.leftBtn") as Border;
@@ -462,6 +501,7 @@ namespace Ink_Canvas
                         RefreshBoothPageListView();
                     else
                         RefreshBlackBoardSidePageListView();
+                    EnsurePageListPanelHeight(BoardBorderLeftPageListView, BlackBoardLeftSidePageListScrollViewer, BtnLeftPageListWB);
                     AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderLeftPageListView);
                     await Task.Delay(1);
                     if (BlackBoardLeftSidePageListView != null)
@@ -493,6 +533,7 @@ namespace Ink_Canvas
                         RefreshBoothPageListView();
                     else
                         RefreshBlackBoardSidePageListView();
+                    EnsurePageListPanelHeight(BoardBorderRightPageListView, BlackBoardRightSidePageListScrollViewer, BtnRightPageListWB);
                     AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderRightPageListView);
                     await Task.Delay(1);
                     if (BlackBoardRightSidePageListView != null)

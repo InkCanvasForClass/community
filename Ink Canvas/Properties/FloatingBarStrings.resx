@@ -690,6 +690,48 @@
   <data name="Canvas_EdgeExpandHint_Settings_AutoHideDelayHint" xml:space="preserve">
     <value>停止书写后，提示按钮保持显示的时间；再次书写会重新计时，悬停按钮时暂停计时。</value>
   </data>
+  <data name="Canvas_AnnotationDotHint_Text" xml:space="preserve">
+    <value>当前正处于批注状态</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Keep" xml:space="preserve">
+    <value>保持</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Exit" xml:space="preserve">
+    <value>退出批注</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_Enable" xml:space="preserve">
+    <value>批注状态点提示</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_EnableHint" xml:space="preserve">
+    <value>批注模式下连续点击画布时，显示提示提醒当前处于批注模式</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_ClusterRadius" xml:space="preserve">
+    <value>连续点击范围大小</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_StrokeLength" xml:space="preserve">
+    <value>单次触发笔迹长度</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_ClickCount" xml:space="preserve">
+    <value>点击次数阈值</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_DisplayDuration" xml:space="preserve">
+    <value>提示显示时长</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_Preview" xml:space="preserve">
+    <value>触发区域预览与测试</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_PreviewHint" xml:space="preserve">
+    <value>在下方区域点击可留下点，中央圆圈代表触发范围。圈内连点达到阈值时触发提示。</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_PreviewPlaceholder" xml:space="preserve">
+    <value>点击此区域画点</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_PreviewLabel" xml:space="preserve">
+    <value>圈内连点 {0} 次触發提示</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_PreviewTriggered" xml:space="preserve">
+    <value>✓ 已触发提示</value>
+  </data>
   <data name="IdleMiniBar_StartAnnotate" xml:space="preserve">
     <value>开始批注</value>
   </data>

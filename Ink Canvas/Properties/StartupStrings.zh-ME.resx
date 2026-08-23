@@ -87,6 +87,12 @@
   <data name="NoFocusModeHint" xml:space="preserve">
     <value>窗口失去焦点时照样能接收输入，不抛弃不放弃</value>
   </data>
+  <data name="PPTOnlyMode" xml:space="preserve">
+    <value>PPT专用隐身模式</value>
+  </data>
+  <data name="PPTOnlyModeHint" xml:space="preserve">
+    <value>选一个运行模式：仅PPT模式下软件彻底隐身，只在PPT放映的时候突然冒出来。（实验性功能，可能不太稳）</value>
+  </data>
   <data name="RunAtStartup" xml:space="preserve">
     <value>开机就起飞</value>
   </data>

@@ -75,6 +75,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ToggleSwitchIsQuadIR.IsOn = settings.Advanced.IsQuadIR;
             ToggleSwitchIsLogEnabled.IsOn = settings.Advanced.IsLogEnabled;
             ToggleSwitchIsSaveLogByDate.IsOn = settings.Advanced.IsSaveLogByDate;
+            ComboBoxLogLevel.SelectedIndex = LogHelper.LogLevel switch
+            {
+                LogHelper.LogType.Trace => 1,
+                LogHelper.LogType.Warning => 2,
+                LogHelper.LogType.Error => 3,
+                _ => 0 // Info / Event
+            };
             ToggleSwitchIsSecondConfimeWhenShutdownApp.IsOn = settings.Advanced.IsSecondConfirmWhenShutdownApp;
 
             CardTouchMultiplier.IsExpanded = settings.Advanced.IsSpecialScreen;
@@ -262,6 +269,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.SaveSettingsToFile();
         }
 
+        private void ComboBoxLogLevel_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded || ComboBoxLogLevel.SelectedIndex < 0) return;
+            var level = ComboBoxLogLevel.SelectedIndex switch
+            {
+                1 => LogHelper.LogType.Trace,
+                2 => LogHelper.LogType.Warning,
+                3 => LogHelper.LogType.Error,
+                _ => LogHelper.LogType.Info
+            };
+            LogHelper.LogLevel = level;
+            SettingsManager.Settings.Advanced.LogLevel = level.ToString();
+            SettingsManager.SaveSettingsToFile();
+        }
+
         private void ToggleSwitchIsSecondConfimeWhenShutdownApp_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
@@ -369,7 +391,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var name = input.Text?.Trim();
             if (string.IsNullOrEmpty(name))
             {
-                MessageBox.Show(ConfigStrings.SaveAs_EnterName, ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBoxHelper.Show(this, ConfigStrings.SaveAs_EnterName, ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
             try
@@ -383,12 +405,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     if (mw != null) mw.ShowNotification(string.Format(ConfigStrings.SavedAsProfile, name));
                 }
                 else
-                    MessageBox.Show(ConfigStrings.SaveAs_Failed, ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBoxHelper.Show(this, ConfigStrings.SaveAs_Failed, ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"另存为方案失败: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show(string.Format(ConfigStrings.SaveAs_FailedMsg, ex.Message), ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBoxHelper.Show(this, string.Format(ConfigStrings.SaveAs_FailedMsg, ex.Message), ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -398,12 +420,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var name = ComboBoxConfigProfile?.SelectedItem as string;
             if (string.IsNullOrEmpty(name))
             {
-                MessageBox.Show(ConfigStrings.Delete_SelectFirst, ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBoxHelper.Show(this, ConfigStrings.Delete_SelectFirst, ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
             try
             {
-                if (MessageBox.Show(string.Format(ConfigStrings.Delete_ConfirmMsg, name), ConfigStrings.Delete_ConfirmTitle, MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+                if (MessageBoxHelper.Show(this, string.Format(ConfigStrings.Delete_ConfirmMsg, name), ConfigStrings.Delete_ConfirmTitle, MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
                     return;
                 if (ConfigProfileManager.DeleteProfile(name))
                 {
@@ -425,12 +447,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     }
                 }
                 else
-                    MessageBox.Show(ConfigStrings.Delete_Failed, ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBoxHelper.Show(this, ConfigStrings.Delete_Failed, ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"删除配置文件失败: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show(string.Format(ConfigStrings.Delete_FailedMsg, ex.Message), ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBoxHelper.Show(this, string.Format(ConfigStrings.Delete_FailedMsg, ex.Message), ConfigStrings.SaveAsProfileTitle, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

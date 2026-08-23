@@ -478,6 +478,45 @@ namespace Ink_Canvas
         public string VideoPresenterLastResolutionKey { get; set; } = null;
 
         /// <summary>
+        /// 视频展台亮度（曝光度）归一化值，范围 -100..100，0 为摄像头默认。
+        /// 通过 DirectShow IAMVideoProcAmp.Brightness 写入摄像头硬件；摄像头不支持时 UI 自动禁用滑块。
+        /// </summary>
+        [JsonProperty("videoPresenterBrightness")]
+        public int VideoPresenterBrightness { get; set; } = 0;
+
+        /// <summary>对比度，-100..100，0=默认。IAMVideoProcAmp.Contrast。</summary>
+        [JsonProperty("videoPresenterContrast")]
+        public int VideoPresenterContrast { get; set; } = 0;
+
+        /// <summary>饱和度，-100..100，0=默认。IAMVideoProcAmp.Saturation。</summary>
+        [JsonProperty("videoPresenterSaturation")]
+        public int VideoPresenterSaturation { get; set; } = 0;
+
+        /// <summary>色温（白平衡），-100..100，0=默认。IAMVideoProcAmp.WhiteBalance，写入时切到 Manual。</summary>
+        [JsonProperty("videoPresenterWhiteBalance")]
+        public int VideoPresenterWhiteBalance { get; set; } = 0;
+
+        /// <summary>增益（最接近手机 ISO），-100..100，0=默认。IAMVideoProcAmp.Gain。DirectShow 无 ISO 概念。</summary>
+        [JsonProperty("videoPresenterGain")]
+        public int VideoPresenterGain { get; set; } = 0;
+
+        /// <summary>焦距（手动对焦），-100..100，0=默认。IAMCameraControl.Focus，需有马达的镜头。</summary>
+        [JsonProperty("videoPresenterFocus")]
+        public int VideoPresenterFocus { get; set; } = 0;
+
+        /// <summary>快门（曝光时间），-100..100，0=默认。IAMCameraControl.Exposure，多数 USB 摄像头仅 Auto。</summary>
+        [JsonProperty("videoPresenterExposure")]
+        public int VideoPresenterExposure { get; set; } = 0;
+
+        /// <summary>水平镜像（左右翻转）。</summary>
+        [JsonProperty("videoPresenterMirrorHorizontal")]
+        public bool VideoPresenterMirrorHorizontal { get; set; } = false;
+
+        /// <summary>垂直镜像（上下翻转）。</summary>
+        [JsonProperty("videoPresenterMirrorVertical")]
+        public bool VideoPresenterMirrorVertical { get; set; } = false;
+
+        /// <summary>
         /// 是否在书写位置贴近画布边缘时显示"扩展画布"提示按钮。
         /// 默认关闭，避免在 PPT 演示、桌面批注等场景干扰；开启后在白板书写时贴近边缘会自动浮现提示。
         /// </summary>
@@ -510,6 +549,37 @@ namespace Ink_Canvas
         /// </summary>
         [JsonProperty("edgeExpandAutoHideMs")]
         public double EdgeExpandAutoHideMs { get; set; } = 5000;
+
+        /// <summary>
+        /// 是否启用批注状态点提示：在批注模式下连续点击画布时，显示提示提醒用户当前处于批注模式。
+        /// 默认关闭，避免打扰
+        /// </summary>
+        [JsonProperty("isEnableAnnotationDotHint")]
+        public bool IsEnableAnnotationDotHint { get; set; } = false;
+
+        /// <summary>
+        /// 批注点提示的连续点击范围阈值（像素）。当连续点击的位置都在此半径范围内时触发提示。
+        /// </summary>
+        [JsonProperty("annotationDotHintClusterRadius")]
+        public double AnnotationDotHintClusterRadius { get; set; } = 50;
+
+        /// <summary>
+        /// 单次触发笔迹长度阈值（像素）。笔迹包围盒最大边长小于此值视为"点击"而非"书写"。
+        /// </summary>
+        [JsonProperty("annotationDotHintStrokeLengthThreshold")]
+        public double AnnotationDotHintStrokeLengthThreshold { get; set; } = 10;
+
+        /// <summary>
+        /// 触发提示的最小连续点击次数。
+        /// </summary>
+        [JsonProperty("annotationDotHintClickCount")]
+        public int AnnotationDotHintClickCount { get; set; } = 3;
+
+        /// <summary>
+        /// 提示显示时长（秒）。超过后自动隐藏。
+        /// </summary>
+        [JsonProperty("annotationDotHintDisplayDurationSeconds")]
+        public double AnnotationDotHintDisplayDurationSeconds { get; set; } = 3;
 
     }
 
@@ -771,6 +841,9 @@ namespace Ink_Canvas
 
         [JsonProperty("passThroughMouseWheelInDrawingMode")]
         public bool PassThroughMouseWheelInDrawingMode { get; set; } = false;
+
+        [JsonProperty("enablePPTPageKeyHook")]
+        public bool EnablePPTPageKeyHook { get; set; } = false;
 
         [JsonProperty("language")]
         public string Language { get; set; } = "";
@@ -1278,6 +1351,15 @@ namespace Ink_Canvas
         [JsonProperty("isAutoSaveStrokesAtScreenshot")]
         public bool IsAutoSaveStrokesAtScreenshot { get; set; }
 
+        [JsonProperty("screenshotSaveLocation")]
+        public string ScreenshotSaveLocation = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+
+        [JsonProperty("isSaveScreenshotToCustomLocation")]
+        public bool IsSaveScreenshotToCustomLocation { get; set; }
+
+        [JsonProperty("isCopyScreenshotToClipboard")]
+        public bool IsCopyScreenshotToClipboard { get; set; }
+
         [JsonProperty("isAutoSaveStrokesAtClear")]
         public bool IsAutoSaveScreenshotAtClear { get; set; }
 
@@ -1426,6 +1508,9 @@ namespace Ink_Canvas
 
         [JsonProperty("isDebugConsoleEnabled")]
         public bool IsDebugConsoleEnabled { get; set; } = false;
+
+        [JsonProperty("logLevel")]
+        public string LogLevel { get; set; } = "Trace";
 
         [JsonProperty("isPPTComDebugProbeEnabled")]
         public bool IsPPTComDebugProbeEnabled { get; set; } = false;
@@ -1580,6 +1665,14 @@ namespace Ink_Canvas
         public bool EnableQuickDraw { get; set; } = true;
         [JsonProperty("quickDrawExternalCaller")]
         public bool QuickDrawExternalCaller { get; set; }
+        [JsonProperty("enableQuickDrawFinalJump")]
+        public bool EnableQuickDrawFinalJump { get; set; }
+        [JsonProperty("quickDrawFinalJumpProbability")]
+        public double QuickDrawFinalJumpProbability { get; set; } = 0.3;
+        [JsonProperty("quickDrawFinalJumpSettleDelaySeconds")]
+        public double QuickDrawFinalJumpSettleDelaySeconds { get; set; } = 0.5;
+        [JsonProperty("enableQuickDrawFinalJumpPulse")]
+        public bool EnableQuickDrawFinalJumpPulse { get; set; } = true;
         [JsonProperty("nameRosters")]
         public List<NameRoster> NameRosters { get; set; } = new List<NameRoster>();
         [JsonProperty("selectedNameRosterGuid")]

@@ -15,6 +15,12 @@ namespace Ink_Canvas.Controls
         BottomRight
     }
 
+    public enum SelectionOverlayMode
+    {
+        Element,
+        Stroke
+    }
+
     public class ImageResizeDeltaEventArgs : EventArgs
     {
         public ImageResizeCorner Corner { get; }
@@ -44,7 +50,7 @@ namespace Ink_Canvas.Controls
     public partial class ImageSelectionOverlay : UserControl
     {
         private const double HandleSize = 12;
-        private const double RotationHandleSize = 14;
+        private const double RotationHandleHitSize = 28;
         private const double RotationHandleOffset = 28;
 
         public event EventHandler<ImageResizeDeltaEventArgs> ResizeDelta;
@@ -61,6 +67,8 @@ namespace Ink_Canvas.Controls
         private bool _isResizing;
         private bool _isRotating;
         private bool _isMoving;
+        private bool _rotationStartedByTouch;
+        private int? _rotationTouchDeviceId;
         private ImageResizeCorner _activeCorner;
         private Point _lastPoint;
         private double _lastRotationAngle;
@@ -88,10 +96,28 @@ namespace Ink_Canvas.Controls
             RotationHandle.MouseLeftButtonDown += BeginRotate;
             RotationHandle.MouseMove += RotateMove;
             RotationHandle.MouseLeftButtonUp += EndRotate;
+            RotationHandle.LostMouseCapture += RotationHandle_LostMouseCapture;
+            RotationHandle.TouchDown += BeginRotateTouch;
+            RotationHandle.TouchMove += RotateTouchMove;
+            RotationHandle.TouchUp += EndRotateTouch;
+            RotationHandle.LostTouchCapture += RotationHandle_LostTouchCapture;
 
             MoveSurface.MouseLeftButtonDown += BeginMove;
             MoveSurface.MouseMove += MoveMove;
             MoveSurface.MouseLeftButtonUp += EndMove;
+        }
+
+        public void SetMode(SelectionOverlayMode mode)
+        {
+            bool isElementMode = mode == SelectionOverlayMode.Element;
+
+            OverlayRoot.Background = isElementMode ? Brushes.Transparent : null;
+            MoveSurface.IsHitTestVisible = isElementMode;
+            FrameBorder.Visibility = isElementMode ? Visibility.Visible : Visibility.Collapsed;
+            TopLeftHandle.Visibility = isElementMode ? Visibility.Visible : Visibility.Collapsed;
+            TopRightHandle.Visibility = isElementMode ? Visibility.Visible : Visibility.Collapsed;
+            BottomLeftHandle.Visibility = isElementMode ? Visibility.Visible : Visibility.Collapsed;
+            BottomRightHandle.Visibility = isElementMode ? Visibility.Visible : Visibility.Collapsed;
         }
 
         /// <summary>
@@ -135,7 +161,7 @@ namespace Ink_Canvas.Controls
             System.Windows.Controls.Canvas.SetLeft(BottomRightHandle, width - h);
             System.Windows.Controls.Canvas.SetTop(BottomRightHandle, height - h);
 
-            double rh = RotationHandleSize / 2;
+            double rh = RotationHandleHitSize / 2;
             double midX = width / 2;
             System.Windows.Controls.Canvas.SetLeft(RotationHandle, midX - rh);
             System.Windows.Controls.Canvas.SetTop(RotationHandle, -RotationHandleOffset - rh);
@@ -184,6 +210,7 @@ namespace Ink_Canvas.Controls
 
         private void BeginRotate(object sender, MouseButtonEventArgs e)
         {
+            if (_rotationStartedByTouch) return;
             var source = GetSource();
             if (source == null) return;
             _isRotating = true;
@@ -196,26 +223,114 @@ namespace Ink_Canvas.Controls
 
         private void RotateMove(object sender, MouseEventArgs e)
         {
-            if (!_isRotating || !RotationHandle.IsMouseCaptured) return;
+            if (_rotationStartedByTouch || !_isRotating || !RotationHandle.IsMouseCaptured) return;
             var source = GetSource();
             if (source == null) return;
-            var p = e.GetPosition(source);
-            double angle = AngleFromCenter(p);
-            double delta = angle - _lastRotationAngle;
-            if (delta > 180) delta -= 360;
-            else if (delta < -180) delta += 360;
-            _lastRotationAngle = angle;
-            RotateDelta?.Invoke(this, new ImageRotateDeltaEventArgs(delta));
+            RaiseRotateDelta(e.GetPosition(source));
             e.Handled = true;
         }
 
         private void EndRotate(object sender, MouseButtonEventArgs e)
         {
-            if (!_isRotating) return;
-            RotationHandle.ReleaseMouseCapture();
-            _isRotating = false;
-            InteractionEnded?.Invoke(this, EventArgs.Empty);
+            if (_rotationStartedByTouch || !_isRotating) return;
+            FinishRotation();
             e.Handled = true;
+        }
+
+        private void RotationHandle_LostMouseCapture(object sender, MouseEventArgs e)
+        {
+            if (_isRotating && !_rotationStartedByTouch)
+                FinishRotation();
+        }
+
+        private void BeginRotateTouch(object sender, TouchEventArgs e)
+        {
+            if (_isRotating) return;
+            var source = GetSource();
+            if (source == null) return;
+
+            _isRotating = true;
+            _rotationStartedByTouch = true;
+            _rotationTouchDeviceId = e.TouchDevice.Id;
+            _lastRotationAngle = AngleFromCenter(e.GetTouchPoint(source).Position);
+            RotationHandle.CaptureTouch(e.TouchDevice);
+            InteractionStarted?.Invoke(this, EventArgs.Empty);
+            e.Handled = true;
+        }
+
+        private void RotateTouchMove(object sender, TouchEventArgs e)
+        {
+            if (!_isRotating || !_rotationStartedByTouch
+                || _rotationTouchDeviceId != e.TouchDevice.Id
+                || !RotationHandle.AreAnyTouchesCaptured)
+            {
+                return;
+            }
+
+            var source = GetSource();
+            if (source == null) return;
+            RaiseRotateDelta(e.GetTouchPoint(source).Position);
+            e.Handled = true;
+        }
+
+        private void EndRotateTouch(object sender, TouchEventArgs e)
+        {
+            if (!_isRotating || !_rotationStartedByTouch
+                || _rotationTouchDeviceId != e.TouchDevice.Id)
+            {
+                return;
+            }
+
+            FinishRotation();
+            e.Handled = true;
+        }
+
+        private void RotationHandle_LostTouchCapture(object sender, TouchEventArgs e)
+        {
+            if (_isRotating && _rotationStartedByTouch
+                && _rotationTouchDeviceId == e.TouchDevice.Id)
+            {
+                FinishRotation();
+            }
+        }
+
+        private void RaiseRotateDelta(Point point)
+        {
+            double angle = AngleFromCenter(point);
+            double delta = angle - _lastRotationAngle;
+            if (delta > 180) delta -= 360;
+            else if (delta < -180) delta += 360;
+            _lastRotationAngle = angle;
+            RotateDelta?.Invoke(this, new ImageRotateDeltaEventArgs(delta));
+        }
+
+        private void FinishRotation()
+        {
+            if (!_isRotating) return;
+
+            bool startedByTouch = _rotationStartedByTouch;
+            int? touchDeviceId = _rotationTouchDeviceId;
+            _isRotating = false;
+            _rotationStartedByTouch = false;
+            _rotationTouchDeviceId = null;
+
+            if (startedByTouch)
+            {
+                foreach (TouchDevice touch in RotationHandle.TouchesCaptured)
+                {
+                    if (touchDeviceId == touch.Id)
+                    {
+                        RotationHandle.ReleaseTouchCapture(touch);
+                        break;
+                    }
+                }
+            }
+            else if (RotationHandle.IsMouseCaptured)
+            {
+                RotationHandle.ReleaseMouseCapture();
+            }
+
+            InteractionEnded?.Invoke(this, EventArgs.Empty);
         }
 
         private void BeginMove(object sender, MouseButtonEventArgs e)

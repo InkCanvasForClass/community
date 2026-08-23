@@ -63,6 +63,12 @@
   <data name="Hotkey_PassThroughMouseWheelInDrawingModeHint" xml:space="preserve">
     <value>开了之后，在白板/批注形态下滚滚轮，下面的 PPT/Word 也会跟着滚，不用切到鼠标形态啦</value>
   </data>
+  <data name="Hotkey_EnablePPTPageKeyHook" xml:space="preserve">
+    <value>PPT 放映时接管 PageUp/PageDown</value>
+  </data>
+  <data name="Hotkey_EnablePPTPageKeyHookHint" xml:space="preserve">
+    <value>开启后用低级键盘钩子，让 PageUp 和 PageDown 在 PowerPoint 放映时负责上一页和下一页</value>
+  </data>
   <data name="Hotkey_BasicOperations" xml:space="preserve">
     <value>基础招式</value>
   </data>

@@ -160,6 +160,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             CardEnableHotkeysInMouseMode.IsOn = SettingsManager.Settings.Appearance.EnableHotkeysInMouseMode;
             CardPassThroughMouseWheelInDrawingMode.IsOn = SettingsManager.Settings.Appearance.PassThroughMouseWheelInDrawingMode;
+            CardEnablePPTPageKeyHook.IsOn = SettingsManager.Settings.Appearance.EnablePPTPageKeyHook;
         }
 
         private void ToggleSwitchEnableHotkeysInMouseMode_Toggled(object sender, RoutedEventArgs e)
@@ -205,20 +206,35 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
         }
 
+        private void ToggleSwitchEnablePPTPageKeyHook_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            try
+            {
+                SettingsManager.Settings.Appearance.EnablePPTPageKeyHook = CardEnablePPTPageKeyHook.IsOn;
+                SettingsManager.SaveSettingsToFile();
+                _mainWindow?.RefreshPPTPageKeyHook();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新 PPT PageUp/PageDown 低级键盘钩子设置时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
         private void OnHotkeyChanged(object sender, HotkeyChangedEventArgs e)
         {
             try
             {
                 if (_hotkeyManager == null)
                 {
-                    MessageBox.Show(HotkeyStrings.Hotkey_ManagerNotInit, HotkeyStrings.Hotkey_Error,
+                    MessageBoxHelper.Show(this, HotkeyStrings.Hotkey_ManagerNotInit, HotkeyStrings.Hotkey_Error,
                         MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
                 if (IsHotkeyConflict(e.Key, e.Modifiers, e.HotkeyName))
                 {
-                    MessageBox.Show(string.Format(HotkeyStrings.Hotkey_ConflictMessage, $"{e.Modifiers}+{e.Key}"),
+                    MessageBoxHelper.Show(this, string.Format(HotkeyStrings.Hotkey_ConflictMessage, $"{e.Modifiers}+{e.Key}"),
                         HotkeyStrings.Hotkey_ConflictTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
@@ -345,7 +361,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 if (_hotkeyManager == null) return;
 
-                var result = MessageBox.Show(HotkeyStrings.Hotkey_ConfirmResetMessage, HotkeyStrings.Hotkey_ConfirmResetTitle,
+                var result = MessageBoxHelper.Show(this, HotkeyStrings.Hotkey_ConfirmResetMessage, HotkeyStrings.Hotkey_ConfirmResetTitle,
                     MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result != MessageBoxResult.Yes) return;
 
@@ -354,13 +370,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 _hotkeyManager.SaveHotkeysToSettings();
                 LoadCurrentHotkeys();
 
-                MessageBox.Show(HotkeyStrings.Hotkey_ResetCompleteMessage, HotkeyStrings.Hotkey_ResetCompleteTitle,
+                MessageBoxHelper.Show(this, HotkeyStrings.Hotkey_ResetCompleteMessage, HotkeyStrings.Hotkey_ResetCompleteTitle,
                     MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"重置快捷键时出错: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show(string.Format(HotkeyStrings.Hotkey_ResetErrorMessage, ex.Message), HotkeyStrings.Hotkey_Error,
+                MessageBoxHelper.Show(this, string.Format(HotkeyStrings.Hotkey_ResetErrorMessage, ex.Message), HotkeyStrings.Hotkey_Error,
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -371,13 +387,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 if (_hotkeyManager == null) return;
                 _hotkeyManager.SaveHotkeysToSettings();
-                MessageBox.Show(HotkeyStrings.Hotkey_SaveSuccessMessage, HotkeyStrings.Hotkey_SaveSuccessTitle,
+                MessageBoxHelper.Show(this, HotkeyStrings.Hotkey_SaveSuccessMessage, HotkeyStrings.Hotkey_SaveSuccessTitle,
                     MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"保存快捷键设置时出错: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show(string.Format(HotkeyStrings.Hotkey_SaveErrorMessage, ex.Message), HotkeyStrings.Hotkey_Error,
+                MessageBoxHelper.Show(this, string.Format(HotkeyStrings.Hotkey_SaveErrorMessage, ex.Message), HotkeyStrings.Hotkey_Error,
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

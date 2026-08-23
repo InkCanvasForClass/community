@@ -1,5 +1,6 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Ink;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -873,10 +874,15 @@ namespace Ink_Canvas
             for (int i = inkCanvas.Children.Count - 1; i >= 0; i--)
             {
                 var child = inkCanvas.Children[i];
+                if (child is FrameworkElement sceneChild
+                    && (IsSecAgentEditableSceneElement(sceneChild) || IsSecAgentEditableSceneGroup(sceneChild)))
+                    continue;
 
                 // 保存图片、媒体元素等非笔画相关的UI元素
                 if (child is Image || child is MediaElement || child is CanvasMediaControl ||
-                    (child is Border border && border.Name != "EraserOverlayCanvas"))
+                    (child is Border border && border.Name != "EraserOverlayCanvas" &&
+                     !string.Equals(child.GetType().FullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneElement", StringComparison.Ordinal) &&
+                     !string.Equals(child.GetType().FullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneGroup", StringComparison.Ordinal)))
                 {
                     // CanvasMediaControl 直接保留原始引用，避免克隆导致播放状态丢失
                     if (child is CanvasMediaControl)
@@ -1848,19 +1854,29 @@ namespace Ink_Canvas
             }
         }
 
-        /// <summary>
-        /// 获取触摸边界宽度方法
-        /// </summary>
-        /// <param name="e">触摸事件参数</param>
-        /// <returns>返回触摸边界宽度</returns>
-        /// <remarks>
-        /// 手掌擦阈值与特殊屏 <c>TouchMultiplier</c> 在激活逻辑中单独参与计算，此处仅返回几何接触尺寸。
-        /// </remarks>
-        public double GetTouchBoundWidth(TouchEventArgs e)
+        private PalmEraserPolicy BuildPalmEraserPolicy()
         {
-            var args = e.GetTouchPoint(null).Bounds;
-            if (!Settings.Advanced.IsQuadIR) return args.Width;
-            return Math.Sqrt(args.Width * args.Height);
+            var canvas = Settings.Canvas;
+            var advanced = Settings.Advanced;
+            var isNib = Settings.Startup.IsEnableNibMode;
+
+            return new PalmEraserPolicy(
+                enabled: canvas.EnablePalmEraser,
+                isActive: isPalmEraserActive,
+                isQuadIr: advanced.IsQuadIR,
+                isSpecialScreen: advanced.IsSpecialScreen,
+                boundsWidthDip: BoundsWidth,
+                thresholdFactor: isNib
+                    ? advanced.NibModeBoundsWidthThresholdValue
+                    : advanced.FingerModeBoundsWidthThresholdValue,
+                sensitivityMultiplier: PalmEraserCalculator.GetSensitivityMultiplier(
+                    canvas.PalmEraserSensitivity),
+                eraserSizeFactor: isNib
+                    ? advanced.NibModeBoundsWidthEraserSize
+                    : advanced.FingerModeBoundsWidthEraserSize,
+                touchMultiplier: advanced.TouchMultiplier,
+                maximumEraserWidthDip: EraserSizeCalculator.GetMaximumPresetWidthDip(
+                    isEraserCircleShape));
         }
 
         /// <summary>
@@ -2055,53 +2071,27 @@ namespace Ink_Canvas
             if (Settings.Canvas.EnablePalmEraser && !isPalmEraserActive && drawingShapeMode == 0)
             {
                 var touchPoint = e.GetTouchPoint(inkCanvas);
-                double boundWidth = GetTouchBoundWidth(e);
+                var touchBounds = e.GetTouchPoint(null).Bounds;
+                var palmEvaluation = PalmEraserCalculator.Evaluate(
+                    touchBounds.Width,
+                    touchBounds.Height,
+                    BuildPalmEraserPolicy());
 
-                if ((Settings.Advanced.TouchMultiplier != 0 || !Settings.Advanced.IsSpecialScreen)
-                    && (boundWidth > BoundsWidth))
+                if (palmEvaluation.ActivatesEraser)
                 {
-                    double thresholdMultiplier;
-                    switch (Settings.Canvas.PalmEraserSensitivity)
+                    palmEraserPreviousEditingMode = inkCanvas.EditingMode;
+                    inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
+                    isPalmEraserActive = true;
+
+                    EnableEraserOverlay();
+                    eraserWidth = palmEvaluation.EraserWidthDip;
+                    UpdateEraserStyle();
+                    EraserOverlay_PointerDown(sender);
+                    EraserOverlay_PointerMove(sender, touchPoint.Position);
+                    if (Settings.Canvas.IsShowCursor)
                     {
-                        case 0:
-                            thresholdMultiplier = 3.0;
-                            break;
-                        case 1:
-                            thresholdMultiplier = 2.5;
-                            break;
-                        case 2:
-                        default:
-                            thresholdMultiplier = 2.0;
-                            break;
-                    }
-
-                    double EraserThresholdValue = Settings.Startup.IsEnableNibMode
-                        ? Settings.Advanced.NibModeBoundsWidthThresholdValue
-                        : Settings.Advanced.FingerModeBoundsWidthThresholdValue;
-
-                    if (boundWidth > BoundsWidth * EraserThresholdValue * thresholdMultiplier)
-                    {
-                        boundWidth *= Settings.Startup.IsEnableNibMode
-                            ? Settings.Advanced.NibModeBoundsWidthEraserSize
-                            : Settings.Advanced.FingerModeBoundsWidthEraserSize;
-
-                        if (Settings.Advanced.IsSpecialScreen)
-                            boundWidth *= Settings.Advanced.TouchMultiplier;
-                        palmEraserPreviousEditingMode = inkCanvas.EditingMode;
-                        inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
-                        isPalmEraserActive = true;
-
-                        EnableEraserOverlay();
-                        eraserWidth = boundWidth;
-                        UpdateEraserStyle();
-                        touchPoint = e.GetTouchPoint(inkCanvas);
-                        EraserOverlay_PointerDown(sender);
-                        EraserOverlay_PointerMove(sender, touchPoint.Position);
-                        if (Settings.Canvas.IsShowCursor)
-                        {
-                            inkCanvas.ForceCursor = false;
-                            inkCanvas.UseCustomCursor = false;
-                        }
+                        inkCanvas.ForceCursor = false;
+                        inkCanvas.UseCustomCursor = false;
                     }
                 }
             }

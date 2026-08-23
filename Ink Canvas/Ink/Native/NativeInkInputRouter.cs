@@ -1,4 +1,5 @@
 using System;
+using Ink_Canvas.Ink;
 
 namespace Ink_Canvas.Ink.Native
 {
@@ -75,41 +76,6 @@ namespace Ink_Canvas.Ink.Native
         public double ContactHeightDip { get; }
     }
 
-    internal readonly struct PalmRoutePolicy
-    {
-        public PalmRoutePolicy(
-            bool enabled,
-            bool isActive,
-            bool isQuadIr,
-            bool isSpecialScreen,
-            double boundsWidthDip,
-            double thresholdFactor,
-            double sensitivityMultiplier,
-            double eraserSizeFactor,
-            double touchMultiplier)
-        {
-            Enabled = enabled;
-            IsActive = isActive;
-            IsQuadIr = isQuadIr;
-            IsSpecialScreen = isSpecialScreen;
-            BoundsWidthDip = boundsWidthDip;
-            ThresholdFactor = thresholdFactor;
-            SensitivityMultiplier = sensitivityMultiplier;
-            EraserSizeFactor = eraserSizeFactor;
-            TouchMultiplier = touchMultiplier;
-        }
-
-        public bool Enabled { get; }
-        public bool IsActive { get; }
-        public bool IsQuadIr { get; }
-        public bool IsSpecialScreen { get; }
-        public double BoundsWidthDip { get; }
-        public double ThresholdFactor { get; }
-        public double SensitivityMultiplier { get; }
-        public double EraserSizeFactor { get; }
-        public double TouchMultiplier { get; }
-    }
-
     internal readonly struct NativeInkRouteContext
     {
         public NativeInkRouteContext(
@@ -121,7 +87,7 @@ namespace Ink_Canvas.Ink.Native
             bool multiTouchWriting,
             bool twoFingerGestureAllowed,
             int activeTouchCount,
-            PalmRoutePolicy palm)
+            PalmEraserPolicy palm)
         {
             HitZone = hitZone;
             Tool = tool;
@@ -142,7 +108,7 @@ namespace Ink_Canvas.Ink.Native
         public bool MultiTouchWriting { get; }
         public bool TwoFingerGestureAllowed { get; }
         public int ActiveTouchCount { get; }
-        public PalmRoutePolicy Palm { get; }
+        public PalmEraserPolicy Palm { get; }
     }
 
     internal readonly struct NativeInkRouteDecision
@@ -264,13 +230,17 @@ namespace Ink_Canvas.Ink.Native
             {
                 if (context.MultiTouchWriting)
                     return Decision(NativeInputRoute.Ink, true, false);
-                if (TryGetPalmEraserWidth(pointer, context.Palm, out var eraserWidth))
+                var palmEvaluation = PalmEraserCalculator.Evaluate(
+                    pointer.ContactWidthDip,
+                    pointer.ContactHeightDip,
+                    context.Palm);
+                if (palmEvaluation.RoutesToEraser)
                 {
                     return new NativeInkRouteDecision(
                         NativeInputRoute.PointErase,
                         false,
                         true,
-                        palmEraserWidthDip: eraserWidth);
+                        palmEraserWidthDip: palmEvaluation.EraserWidthDip);
                 }
                 if (context.TwoFingerGestureAllowed && context.ActiveTouchCount >= 2)
                 {
@@ -287,32 +257,6 @@ namespace Ink_Canvas.Ink.Native
                 true,
                 false,
                 suppressPointEmission: pointer.SecondaryBarrelButtonDown);
-        }
-
-        private static bool TryGetPalmEraserWidth(
-            NativePointerFacts pointer,
-            PalmRoutePolicy policy,
-            out double eraserWidthDip)
-        {
-            eraserWidthDip = 0;
-            if (!policy.Enabled || policy.IsActive)
-                return policy.IsActive;
-            if (policy.IsSpecialScreen && policy.TouchMultiplier == 0)
-                return false;
-
-            var boundWidth = policy.IsQuadIr
-                ? Math.Sqrt(Math.Max(0, pointer.ContactWidthDip * pointer.ContactHeightDip))
-                : pointer.ContactWidthDip;
-            var threshold = policy.BoundsWidthDip
-                            * policy.ThresholdFactor
-                            * policy.SensitivityMultiplier;
-            if (boundWidth <= policy.BoundsWidthDip || boundWidth <= threshold)
-                return false;
-
-            eraserWidthDip = boundWidth
-                             * policy.EraserSizeFactor
-                             * (policy.IsSpecialScreen ? policy.TouchMultiplier : 1);
-            return true;
         }
 
         private static bool IsUiZone(CanvasHitZone hitZone)

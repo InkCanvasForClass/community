@@ -84,4 +84,64 @@
   <data name="Title" xml:space="preserve">
     <value>Visual presenter</value>
   </data>
+  <data name="Brightness" xml:space="preserve">
+    <value>Brightness</value>
+  </data>
+  <data name="Brightness_Tooltip" xml:space="preserve">
+    <value>Camera brightness (exposure). Center = camera default. Disabled when the camera does not support it</value>
+  </data>
+  <data name="BrightnessNotSupported" xml:space="preserve">
+    <value>The current camera does not support brightness adjustment</value>
+  </data>
+  <data name="ProMode" xml:space="preserve">
+    <value>Pro mode</value>
+  </data>
+  <data name="ProMode_Tooltip" xml:space="preserve">
+    <value>Expand to adjust contrast / saturation / white balance / gain / focus / exposure like a phone pro mode. Each item is only adjustable when supported by the camera hardware</value>
+  </data>
+  <data name="Contrast" xml:space="preserve">
+    <value>Contrast</value>
+  </data>
+  <data name="Saturation" xml:space="preserve">
+    <value>Saturation</value>
+  </data>
+  <data name="WhiteBalance" xml:space="preserve">
+    <value>White balance</value>
+  </data>
+  <data name="Gain" xml:space="preserve">
+    <value>Gain</value>
+  </data>
+  <data name="Gain_Tooltip" xml:space="preserve">
+    <value>Analog gain, closest to phone ISO (DirectShow has no ISO). 0 = camera default</value>
+  </data>
+  <data name="Focus" xml:space="preserve">
+    <value>Focus</value>
+  </data>
+  <data name="Focus_Tooltip" xml:space="preserve">
+    <value>Manual focus. Requires a motorized lens; fixed-focus cameras do not support it. 0 = default, adjusting switches to manual</value>
+  </data>
+  <data name="Exposure" xml:space="preserve">
+    <value>Shutter</value>
+  </data>
+  <data name="Exposure_Tooltip" xml:space="preserve">
+    <value>Exposure time (relative, not absolute shutter speed like a phone). Most USB cameras only support Auto</value>
+  </data>
+  <data name="WhiteBalance_Tooltip" xml:space="preserve">
+    <value>White balance (color temperature). Switches to manual on write. Value is roughly Kelvin but uncalibrated</value>
+  </data>
+  <data name="PropNotSupported" xml:space="preserve">
+    <value>The current camera does not support this item</value>
+  </data>
+  <data name="ResetDefault" xml:space="preserve">
+    <value>Reset to default</value>
+  </data>
+  <data name="Mirror" xml:space="preserve">
+    <value>Mirror</value>
+  </data>
+  <data name="MirrorHorizontal" xml:space="preserve">
+    <value>Horizontal</value>
+  </data>
+  <data name="MirrorVertical" xml:space="preserve">
+    <value>Vertical</value>
+  </data>
 </root>

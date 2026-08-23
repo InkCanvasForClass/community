@@ -114,6 +114,8 @@ namespace Ink_Canvas.Properties
 
         public static string Storage_Confirm_Title => ResourceManager.GetString(nameof(Storage_Confirm_Title), _resourceCulture);
 
+        public static string Storage_CopyScreenshotToClipboard => ResourceManager.GetString(nameof(Storage_CopyScreenshotToClipboard), _resourceCulture);
+
         public static string Storage_Core_Desc => ResourceManager.GetString(nameof(Storage_Core_Desc), _resourceCulture);
 
         public static string Storage_Core_NotCleanable => ResourceManager.GetString(nameof(Storage_Core_NotCleanable), _resourceCulture);
@@ -171,6 +173,10 @@ namespace Ink_Canvas.Properties
         public static string Storage_SaveAsUInk => ResourceManager.GetString(nameof(Storage_SaveAsUInk), _resourceCulture);
 
         public static string Storage_SaveFullPageStrokes => ResourceManager.GetString(nameof(Storage_SaveFullPageStrokes), _resourceCulture);
+
+        public static string Storage_ScreenshotSaveLocation => ResourceManager.GetString(nameof(Storage_ScreenshotSaveLocation), _resourceCulture);
+
+        public static string Storage_ScreenshotSaveLocationDesc => ResourceManager.GetString(nameof(Storage_ScreenshotSaveLocationDesc), _resourceCulture);
 
         public static string Storage_ScreenshotsByDateFolder => ResourceManager.GetString(nameof(Storage_ScreenshotsByDateFolder), _resourceCulture);
 

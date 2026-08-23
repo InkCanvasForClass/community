@@ -8,6 +8,7 @@
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+      xmlns:helpers="clr-namespace:Ink_Canvas.Windows.SettingsViews.Helpers"
       xmlns:hk="clr-namespace:Ink_Canvas.Windows"
       mc:Ignorable="d"
       Title="{x:Static props:NavStrings.Nav_Shortcuts}">
@@ -53,6 +54,14 @@
                             Icon="{x:Static ui:SegoeFluentIcons.Mouse}"
                             SwitchName="ToggleSwitchPassThroughMouseWheelInDrawingMode"
                             Toggled="ToggleSwitchPassThroughMouseWheelInDrawingMode_Toggled" />
+
+                    <controls:LabeledSettingsCard x:Name="CardEnablePPTPageKeyHook"
+                            helpers:SettingsNavigator.SettingsKey="enablePPTPageKeyHook"
+                            Header="{x:Static props:HotkeyStrings.Hotkey_EnablePPTPageKeyHook}"
+                            Description="{x:Static props:HotkeyStrings.Hotkey_EnablePPTPageKeyHookHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.KeyboardStandard}"
+                            SwitchName="ToggleSwitchEnablePPTPageKeyHook"
+                            Toggled="ToggleSwitchEnablePPTPageKeyHook_Toggled" />
 
                     <!-- 基本操作 -->
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"

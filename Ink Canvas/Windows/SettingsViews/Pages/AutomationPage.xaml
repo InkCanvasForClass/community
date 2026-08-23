@@ -247,16 +247,6 @@
 
                     <TextBlock Text="{x:Static props:StorageStrings.AutoSave_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
-                    <controls:LabeledSettingsCard x:Name="CardSaveScreenshotsInDateFolders"
-                            Header="{x:Static props:StorageStrings.Storage_ScreenshotsByDateFolder}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Folder}"
-                            Toggled="ToggleSwitchSaveScreenshotsInDateFolders_Toggled"/>
-
-                    <controls:LabeledSettingsCard x:Name="CardAutoSaveStrokesAtScreenshot"
-                            Header="{x:Static props:StorageStrings.Storage_AutoSaveInkOnScreenshot}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Save}"
-                            Toggled="ToggleSwitchAutoSaveStrokesAtScreenshot_Toggled"/>
-
                     <controls:LabeledSettingsCard x:Name="CardAutoSaveStrokesAtClear"
                             Header="{x:Static props:StorageStrings.Storage_AutoScreenshotOnClear}"
                             Icon="{x:Static ui:SegoeFluentIcons.Save}"

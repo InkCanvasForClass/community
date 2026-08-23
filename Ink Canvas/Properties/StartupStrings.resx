@@ -87,6 +87,12 @@
   <data name="NoFocusModeHint" xml:space="preserve">
     <value>窗口失去焦点时仍可接收输入</value>
   </data>
+  <data name="PPTOnlyMode" xml:space="preserve">
+    <value>仅PPT模式</value>
+  </data>
+  <data name="PPTOnlyModeHint" xml:space="preserve">
+    <value>选择软件运行模式。仅PPT模式下，软件将完全隐藏，仅在PPT放映时显示。（实验性功能，可能不稳定。）</value>
+  </data>
   <data name="RunAtStartup" xml:space="preserve">
     <value>开机时运行</value>
   </data>

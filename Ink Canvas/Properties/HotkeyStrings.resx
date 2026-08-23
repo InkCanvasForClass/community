@@ -63,6 +63,12 @@
   <data name="Hotkey_PassThroughMouseWheelInDrawingModeHint" xml:space="preserve">
     <value>开启后，批注/绘制模式下滚动鼠标滚轮会直接传给下方窗口（例如 PPT/Word），不再需要切换到鼠标模式</value>
   </data>
+  <data name="Hotkey_EnablePPTPageKeyHook" xml:space="preserve">
+    <value>PPT 放映时接管 PageUp/PageDown</value>
+  </data>
+  <data name="Hotkey_EnablePPTPageKeyHookHint" xml:space="preserve">
+    <value>开启后，使用低级键盘钩子在 PowerPoint 放映时将 PageUp 和 PageDown 分别绑定为上一页和下一页</value>
+  </data>
   <data name="Hotkey_BasicOperations" xml:space="preserve">
     <value>基本操作</value>
   </data>

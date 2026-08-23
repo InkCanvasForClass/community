@@ -12,9 +12,9 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: '打包来源分支（默认 net6）'
+        description: '打包来源分支（默认 net10）'
         required: false
-        default: 'net6'
+        default: 'net10'
         type: string
       version:
         description: 'NuGet 包版本号（如 1.7.19.9）。留空则使用 NBGV 依据 git 状态计算的版本。'
@@ -41,13 +41,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6.0.2
         with:
-          # tag 触发时（push）ref 留空，自动检出被推送的 tag；手动触发时默认检出 net6。
-          ref: ${{ github.event_name == 'push' && '' || github.event.inputs.branch || 'net6' }}
+          # tag 触发时（push）ref 留空，自动检出被推送的 tag；手动触发时默认检出 net10。
+          ref: ${{ github.event_name == 'push' && '' || github.event.inputs.branch || 'net10' }}
 
-      - name: Setup .NET 6
+      - name: Setup .NET 10
         uses: actions/setup-dotnet@v5.2.0
         with:
-          dotnet-version: '6.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Resolve package version
         shell: pwsh

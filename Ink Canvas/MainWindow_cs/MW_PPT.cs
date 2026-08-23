@@ -2107,101 +2107,28 @@ namespace Ink_Canvas
         /// 5. 尝试解析位置文件中的页码
         /// 6. 如果解析成功且页码大于0，则保存上次播放页码并显示跳转提示窗口
         /// 异常会被捕获并记录为错误日志，确保方法执行不会中断。
-        /// </remarks>
-        private TaskCompletionSource<bool> _inlineDialogTcs;
-
         private async Task<bool> ShowInlineYesNoDialog(string title, string content)
         {
-            _inlineDialogTcs = new TaskCompletionSource<bool>();
-
-            InlineDialogTitle.Content = title;
-            InlineDialogContent.Text = content;
-
-            InlineDialogRoot.Opacity = 0;
-            InlineDialogRoot.Visibility = Visibility.Visible;
-            InlineDialogScaleTransform.ScaleX = 1.05;
-            InlineDialogScaleTransform.ScaleY = 1.05;
-
-            var showAnimation = new System.Windows.Media.Animation.Storyboard();
-
-            var opacityAnimation = new System.Windows.Media.Animation.DoubleAnimation(0, 1,
-                TimeSpan.FromMilliseconds(150));
-            opacityAnimation.FillBehavior = System.Windows.Media.Animation.FillBehavior.HoldEnd;
-            System.Windows.Media.Animation.Storyboard.SetTarget(opacityAnimation, InlineDialogRoot);
-            System.Windows.Media.Animation.Storyboard.SetTargetProperty(opacityAnimation,
-                new PropertyPath(Grid.OpacityProperty));
-            showAnimation.Children.Add(opacityAnimation);
-
-            var scaleXAnimation = new System.Windows.Media.Animation.DoubleAnimation(1.05, 1.0,
-                TimeSpan.FromMilliseconds(250));
-            scaleXAnimation.FillBehavior = System.Windows.Media.Animation.FillBehavior.HoldEnd;
-            var ease = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut };
-            scaleXAnimation.EasingFunction = ease;
-            System.Windows.Media.Animation.Storyboard.SetTarget(scaleXAnimation, InlineDialogCard);
-            System.Windows.Media.Animation.Storyboard.SetTargetProperty(scaleXAnimation,
-                new PropertyPath("(UIElement.RenderTransform).(ScaleTransform.ScaleX)"));
-            showAnimation.Children.Add(scaleXAnimation);
-
-            var scaleYAnimation = new System.Windows.Media.Animation.DoubleAnimation(1.05, 1.0,
-                TimeSpan.FromMilliseconds(250));
-            scaleYAnimation.FillBehavior = System.Windows.Media.Animation.FillBehavior.HoldEnd;
-            scaleYAnimation.EasingFunction = ease;
-            System.Windows.Media.Animation.Storyboard.SetTarget(scaleYAnimation, InlineDialogCard);
-            System.Windows.Media.Animation.Storyboard.SetTargetProperty(scaleYAnimation,
-                new PropertyPath("(UIElement.RenderTransform).(ScaleTransform.ScaleY)"));
-            showAnimation.Children.Add(scaleYAnimation);
-
-            showAnimation.Begin(this);
-
-            return await _inlineDialogTcs.Task;
+            var result = await MessageBoxHelper.ShowAsync(this, content, title, MessageBoxButton.YesNo, MessageBoxImage.Question);
+            return result == MessageBoxResult.Yes;
         }
 
         private void HideInlineDialog()
         {
-            var hideAnimation = new System.Windows.Media.Animation.Storyboard();
-
-            var opacityAnimation = new System.Windows.Media.Animation.DoubleAnimation(1, 0,
-                TimeSpan.FromMilliseconds(150));
-            opacityAnimation.FillBehavior = System.Windows.Media.Animation.FillBehavior.HoldEnd;
-            System.Windows.Media.Animation.Storyboard.SetTarget(opacityAnimation, InlineDialogRoot);
-            System.Windows.Media.Animation.Storyboard.SetTargetProperty(opacityAnimation,
-                new PropertyPath(Grid.OpacityProperty));
-            hideAnimation.Children.Add(opacityAnimation);
-
-            var scaleXAnimation = new System.Windows.Media.Animation.DoubleAnimation(1.0, 1.05,
-                TimeSpan.FromMilliseconds(100));
-            scaleXAnimation.FillBehavior = System.Windows.Media.Animation.FillBehavior.HoldEnd;
-            System.Windows.Media.Animation.Storyboard.SetTarget(scaleXAnimation, InlineDialogCard);
-            System.Windows.Media.Animation.Storyboard.SetTargetProperty(scaleXAnimation,
-                new PropertyPath("(UIElement.RenderTransform).(ScaleTransform.ScaleX)"));
-            hideAnimation.Children.Add(scaleXAnimation);
-
-            var scaleYAnimation = new System.Windows.Media.Animation.DoubleAnimation(1.0, 1.05,
-                TimeSpan.FromMilliseconds(100));
-            scaleYAnimation.FillBehavior = System.Windows.Media.Animation.FillBehavior.HoldEnd;
-            System.Windows.Media.Animation.Storyboard.SetTarget(scaleYAnimation, InlineDialogCard);
-            System.Windows.Media.Animation.Storyboard.SetTargetProperty(scaleYAnimation,
-                new PropertyPath("(UIElement.RenderTransform).(ScaleTransform.ScaleY)"));
-            hideAnimation.Children.Add(scaleYAnimation);
-
-            hideAnimation.Completed += (s, e) =>
+            if (InlineDialogRoot != null)
             {
                 InlineDialogRoot.Visibility = Visibility.Collapsed;
-            };
-
-            hideAnimation.Begin(this);
+            }
         }
 
         private void InlineDialogPrimaryButton_Click(object sender, RoutedEventArgs e)
         {
             HideInlineDialog();
-            _inlineDialogTcs?.TrySetResult(true);
         }
 
         private void InlineDialogSecondaryButton_Click(object sender, RoutedEventArgs e)
         {
             HideInlineDialog();
-            _inlineDialogTcs?.TrySetResult(false);
         }
 
         private async void ShowPreviousPageNotification(Presentation pres, PPTState agentState = null)
@@ -2264,20 +2191,14 @@ namespace Ink_Canvas
             try
             {
                 bool hasHiddenSlides = agentState?.HasHiddenSlides == true;
-
-                // PPT 刚打开时 COM RCW 可能尚未稳定，延迟一小段时间再访问 Slides
-                if (!hasHiddenSlides)
+                if (!hasHiddenSlides && pres?.Slides != null)
                 {
-                    await Task.Delay(500);
-                    if (pres?.Slides != null)
+                    foreach (Slide slide in pres.Slides)
                     {
-                        foreach (Slide slide in pres.Slides)
+                        if (slide.SlideShowTransition.Hidden == MsoTriState.msoTrue)
                         {
-                            if (slide.SlideShowTransition.Hidden == MsoTriState.msoTrue)
-                            {
-                                hasHiddenSlides = true;
-                                break;
-                            }
+                            hasHiddenSlides = true;
+                            break;
                         }
                     }
                 }
@@ -2346,21 +2267,15 @@ namespace Ink_Canvas
                 if (IsInPPTPresentationMode) return;
 
                 bool hasSlideTimings = agentState?.HasAutoPlayTimings == true;
-
-                // PPT 刚打开时 COM RCW 可能尚未稳定，延迟一小段时间再访问 Slides
-                if (!hasSlideTimings)
+                if (!hasSlideTimings && pres?.Slides != null)
                 {
-                    await Task.Delay(500);
-                    if (pres?.Slides != null)
+                    foreach (Slide slide in pres.Slides)
                     {
-                        foreach (Slide slide in pres.Slides)
+                        if (slide.SlideShowTransition.AdvanceOnTime == MsoTriState.msoTrue &&
+                            slide.SlideShowTransition.AdvanceTime > 0)
                         {
-                            if (slide.SlideShowTransition.AdvanceOnTime == MsoTriState.msoTrue &&
-                                slide.SlideShowTransition.AdvanceTime > 0)
-                            {
-                                hasSlideTimings = true;
-                                break;
-                            }
+                            hasSlideTimings = true;
+                            break;
                         }
                     }
                 }

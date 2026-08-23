@@ -1,11 +1,9 @@
 name: ICC-CE Plugin Build (shared)
 
-# 共享插件构建工作流：供所有 net6 插件仓库（CountdownDays / FunctionInsert /
-# PdfReader / SamplePlugin / SeewoAutoLogin 等）通过 workflow_call 复用。
+# 共享插件构建工作流：供 net10 插件仓库通过 workflow_call 复用。
 #
 # 核心约定：插件编译依赖宿主 SDK（InkCanvas.PluginSdk.dll / InkCanvas.Controls.dll），
-# 这里统一从本仓库（community, net6 分支）构建后同步进插件的 lib/，保证插件
-# 始终基于最新宿主 SDK 编译，无需手动提交 DLL。随后构建插件、校验产物、
+# 插件直接引用 net10 SDK NuGet 包；本工作流负责还原、构建、校验产物、
 # 打包 .icpx，可选创建 GitHub Release。
 
 on:
@@ -63,10 +61,10 @@ jobs:
         with:
           path: plugin
 
-      - name: Setup .NET 6
+      - name: Setup .NET 10
         uses: actions/setup-dotnet@v5.2.0
         with:
-          dotnet-version: '6.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Restore
         run: dotnet restore "plugin/${{ inputs.project }}"
@@ -80,12 +78,29 @@ jobs:
         run: |
           $csproj = "plugin/${{ inputs.project }}"
           $pluginRoot = Split-Path -Parent $csproj
-          $outDir = Join-Path $pluginRoot "bin/Release/net6.0-windows10.0.19041.0"
-          if (-not (Test-Path $outDir)) {
-            $outDir = Join-Path $pluginRoot "bin/x64/Release/net6.0-windows10.0.19041.0"
-          }
-          if (-not (Test-Path $outDir)) { throw "找不到构建输出目录：$csproj" }
+          if (-not $pluginRoot) { $pluginRoot = "plugin" }
+
+          # 不硬编码 TargetFramework 或 Platform 中间目录。构建完成后按入口项目的
+          # AssemblyName 定位 Release 产物，并要求同目录存在 manifest.json，排除 obj/ref。
+          [xml]$projectXml = Get-Content $csproj
+          $assemblyName = @($projectXml.Project.PropertyGroup.AssemblyName | Where-Object { $_ })[0]
+          if (-not $assemblyName) { $assemblyName = [IO.Path]::GetFileNameWithoutExtension($csproj) }
+
+          $assemblyFile = "$assemblyName.dll"
+          $binRoot = Join-Path $pluginRoot "bin"
+          if (-not (Test-Path $binRoot)) { throw "找不到构建输出根目录：$binRoot" }
+
+          $candidates = Get-ChildItem $binRoot -Recurse -File -Filter $assemblyFile |
+            Where-Object {
+              $_.FullName -match '[\\/]Release[\\/]' -and
+              (Test-Path (Join-Path $_.Directory.FullName "manifest.json"))
+            } |
+            Sort-Object LastWriteTimeUtc -Descending
+
+          if (-not $candidates) { throw "找不到构建输出目录：$csproj（入口程序集：$assemblyFile）" }
+          $outDir = $candidates[0].Directory.FullName
           "out_dir=$outDir" >> $env:GITHUB_OUTPUT
+          Write-Host "Resolved output directory: $outDir"
 
       - name: Validate build output
         shell: pwsh

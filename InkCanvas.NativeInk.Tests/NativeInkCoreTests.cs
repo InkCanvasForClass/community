@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Ink_Canvas.Ink;
 using Ink_Canvas.Ink.Native;
 
 namespace InkCanvas.NativeInk.Tests
@@ -40,6 +41,10 @@ namespace InkCanvas.NativeInk.Tests
             Run(nameof(RouterMapsLogicalTools), RouterMapsLogicalTools);
             Run(nameof(RouterPrefersMultiTouchWritingOverPalmErase), RouterPrefersMultiTouchWritingOverPalmErase);
             Run(nameof(RouterAppliesQuadIrPalmThresholdAndSpecialMultiplier), RouterAppliesQuadIrPalmThresholdAndSpecialMultiplier);
+            Run(nameof(PalmEraserCapsHugeDualSideContactByShape), PalmEraserCapsHugeDualSideContactByShape);
+            Run(nameof(PalmEraserPreservesStrictThresholds), PalmEraserPreservesStrictThresholds);
+            Run(nameof(PalmEraserRejectsInvalidMeasurementsAndFactors), PalmEraserRejectsInvalidMeasurementsAndFactors);
+            Run(nameof(PalmEraserKeepsAlreadyActiveRouteWithoutResizing), PalmEraserKeepsAlreadyActiveRouteWithoutResizing);
             Run(nameof(RouterAllowsDelayedTwoFingerTakeover), RouterAllowsDelayedTwoFingerTakeover);
             Run(nameof(RouterKeepsCapturedInkAndSuppressesBarrelPoints), RouterKeepsCapturedInkAndSuppressesBarrelPoints);
             Run(nameof(PointerBatchCopiesSamples), PointerBatchCopiesSamples);
@@ -540,6 +545,124 @@ namespace InkCanvas.NativeInk.Tests
             Equal(NativeInputRoute.Ink, disabledOnSpecialScreen.Route);
         }
 
+        private static void PalmEraserCapsHugeDualSideContactByShape()
+        {
+            var circleMaximum = EraserSizeCalculator.GetMaximumPresetWidthDip(true);
+            var rectangleMaximum = EraserSizeCalculator.GetMaximumPresetWidthDip(false);
+
+            var circle = PalmEraserCalculator.Evaluate(
+                4000,
+                1,
+                Palm(enabled: true, maximumEraserWidthDip: circleMaximum));
+            True(circle.RoutesToEraser);
+            True(circle.ActivatesEraser);
+            Equal(4000d, circle.RecognitionMetricDip);
+            Equal(circleMaximum, circle.EraserWidthDip);
+
+            var rectangle = PalmEraserCalculator.Evaluate(
+                4000,
+                1,
+                Palm(enabled: true, maximumEraserWidthDip: rectangleMaximum));
+            Equal(rectangleMaximum, rectangle.EraserWidthDip);
+            True(rectangleMaximum < circleMaximum);
+        }
+
+        private static void PalmEraserPreservesStrictThresholds()
+        {
+            var policy = Palm(
+                enabled: true,
+                boundsWidthDip: 10,
+                thresholdFactor: 2,
+                sensitivityMultiplier: 2,
+                eraserSizeFactor: 0.5,
+                maximumEraserWidthDip: 135);
+
+            True(!PalmEraserCalculator.Evaluate(10, 10, policy).RoutesToEraser);
+            True(!PalmEraserCalculator.Evaluate(40, 10, policy).RoutesToEraser);
+
+            var aboveThreshold = PalmEraserCalculator.Evaluate(40.001, 10, policy);
+            True(aboveThreshold.RoutesToEraser);
+            True(Math.Abs(aboveThreshold.EraserWidthDip - 20.0005) < 0.000001);
+
+            var quadPolicy = Palm(
+                enabled: true,
+                isQuadIr: true,
+                boundsWidthDip: 10,
+                thresholdFactor: 2,
+                sensitivityMultiplier: 2,
+                eraserSizeFactor: 0.5,
+                maximumEraserWidthDip: 135);
+            True(!PalmEraserCalculator.Evaluate(80, 20, quadPolicy).RoutesToEraser);
+            True(PalmEraserCalculator.Evaluate(81, 20, quadPolicy).RoutesToEraser);
+        }
+
+        private static void PalmEraserRejectsInvalidMeasurementsAndFactors()
+        {
+            var valid = Palm(enabled: true, maximumEraserWidthDip: 135);
+            var invalidMeasurements = new[]
+            {
+                0d,
+                -1d,
+                double.NaN,
+                double.PositiveInfinity,
+                double.NegativeInfinity
+            };
+            foreach (var measurement in invalidMeasurements)
+                True(!PalmEraserCalculator.Evaluate(measurement, 100, valid).RoutesToEraser);
+
+            True(!PalmEraserCalculator.Evaluate(
+                100,
+                double.NaN,
+                Palm(enabled: true, isQuadIr: true, maximumEraserWidthDip: 135)).RoutesToEraser);
+            True(!PalmEraserCalculator.Evaluate(
+                100,
+                100,
+                Palm(enabled: true, isSpecialScreen: true, touchMultiplier: 0, maximumEraserWidthDip: 135)).RoutesToEraser);
+            True(!PalmEraserCalculator.Evaluate(
+                100,
+                100,
+                Palm(enabled: true, isSpecialScreen: true, touchMultiplier: double.NaN, maximumEraserWidthDip: 135)).RoutesToEraser);
+            True(!PalmEraserCalculator.Evaluate(
+                100,
+                100,
+                Palm(enabled: true, eraserSizeFactor: -1, maximumEraserWidthDip: 135)).RoutesToEraser);
+            True(!PalmEraserCalculator.Evaluate(
+                100,
+                100,
+                Palm(enabled: true, maximumEraserWidthDip: double.PositiveInfinity)).RoutesToEraser);
+
+            var cappedOverflow = PalmEraserCalculator.Evaluate(
+                double.MaxValue,
+                1,
+                Palm(
+                    enabled: true,
+                    isSpecialScreen: true,
+                    eraserSizeFactor: double.MaxValue,
+                    touchMultiplier: double.MaxValue,
+                    maximumEraserWidthDip: 135));
+            True(cappedOverflow.RoutesToEraser);
+            Equal(135d, cappedOverflow.EraserWidthDip);
+        }
+
+        private static void PalmEraserKeepsAlreadyActiveRouteWithoutResizing()
+        {
+            var evaluation = PalmEraserCalculator.Evaluate(
+                double.NaN,
+                double.NaN,
+                Palm(enabled: true, isActive: true, maximumEraserWidthDip: 135));
+            True(evaluation.RoutesToEraser);
+            True(!evaluation.ActivatesEraser);
+            Equal(0d, evaluation.EraserWidthDip);
+
+            var decision = NativeInkInputRouter.DecideDown(
+                Pointer(NativeInkInputKind.Touch),
+                Context(
+                    LogicalInkTool.Pen,
+                    palm: Palm(enabled: true, isActive: true, maximumEraserWidthDip: 135)));
+            Equal(NativeInputRoute.PointErase, decision.Route);
+            Equal(0d, decision.PalmEraserWidthDip);
+        }
+
         private static void RouterAllowsDelayedTwoFingerTakeover()
         {
             var decision = NativeInkInputRouter.DecideDown(
@@ -884,7 +1007,7 @@ namespace InkCanvas.NativeInk.Tests
             bool multiTouchWriting = false,
             bool twoFingerGestureAllowed = false,
             int activeTouchCount = 1,
-            PalmRoutePolicy palm = default)
+            PalmEraserPolicy palm = default)
         {
             return new NativeInkRouteContext(
                 hitZone,
@@ -898,7 +1021,7 @@ namespace InkCanvas.NativeInk.Tests
                 palm);
         }
 
-        private static PalmRoutePolicy Palm(
+        private static PalmEraserPolicy Palm(
             bool enabled,
             bool isActive = false,
             bool isQuadIr = false,
@@ -907,9 +1030,10 @@ namespace InkCanvas.NativeInk.Tests
             double thresholdFactor = 2,
             double sensitivityMultiplier = 2,
             double eraserSizeFactor = 0.5,
-            double touchMultiplier = 1)
+            double touchMultiplier = 1,
+            double maximumEraserWidthDip = 135)
         {
-            return new PalmRoutePolicy(
+            return new PalmEraserPolicy(
                 enabled,
                 isActive,
                 isQuadIr,
@@ -918,7 +1042,8 @@ namespace InkCanvas.NativeInk.Tests
                 thresholdFactor,
                 sensitivityMultiplier,
                 eraserSizeFactor,
-                touchMultiplier);
+                touchMultiplier,
+                maximumEraserWidthDip);
         }
 
         private static void GeometryStateResetsOnGenerationChange()

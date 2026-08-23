@@ -174,11 +174,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var files = BoardToolbarRegistry.ListConfigFiles();
             if (files.Count <= 1)
             {
-                MessageBox.Show(FloatingBarStrings.ToolbarPage_AtLeastOneConfig, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBoxHelper.Show(this, FloatingBarStrings.ToolbarPage_AtLeastOneConfig, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (MessageBox.Show($"{FloatingBarStrings.ToolbarPage_ConfirmDeleteConfig} \"{name}\"?", FloatingBarStrings.ToolbarPage_ConfirmDelete,
+            if (MessageBoxHelper.Show(this, $"{FloatingBarStrings.ToolbarPage_ConfirmDeleteConfig} \"{name}\"?", FloatingBarStrings.ToolbarPage_ConfirmDelete,
                 MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
                 return;
 
@@ -452,6 +452,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var entry = SelectedEntry;
             if (entry == null) return;
             _suppressSave = true;
+
+            // 组件自定义设置面板（动态生成，如截图组件的全局设置）
+            PanelPluginCustomSettings.Children.Clear();
+            PanelPluginCustomSettings.Visibility = Visibility.Collapsed;
+            var builtinItem = BoardToolbarRegistry.FindItem(entry.Id);
+            if (builtinItem?.CustomSettingsPanelFactory != null)
+            {
+                PanelPluginCustomSettings.Visibility = Visibility.Visible;
+                PanelPluginCustomSettings.Children.Add(builtinItem.CustomSettingsPanelFactory());
+            }
 
             TextBoxFixedWidth.Text = entry.GetSettingDouble("fixedWidth")?.ToString() ?? "";
             TextBoxFixedHeight.Text = entry.GetSettingDouble("fixedHeight")?.ToString() ?? "";

@@ -49,6 +49,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     ToggleSwitchFastStartup.IsOn = settings.Startup.EnableFastStartup;
                 }
 
+                CardPPTOnlyMode.IsOn = settings.ModeSettings.IsPPTOnlyMode;
+
                 ToggleSwitchEnableTrayIcon.IsOn = settings.Appearance.EnableTrayIcon;
                 ComboBoxTrayLeftClickAction.SelectedIndex = (int)settings.Appearance.TrayLeftClickAction;
                 ComboBoxTrayRightClickAction.SelectedIndex = (int)settings.Appearance.TrayRightClickAction;
@@ -185,6 +187,23 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 Debug.WriteLine($"设置外部协议时出错: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 仅PPT模式开关：勾选后主窗口完全隐藏，仅在PPT放映时显示。
+        /// </summary>
+        private void ToggleSwitchPPTOnlyMode_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+
+            try
+            {
+                WindowSettingsHelper.ApplyPPTOnlyMode(Application.Current.MainWindow, CardPPTOnlyMode.IsOn);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"设置仅PPT模式时出错: {ex.Message}");
             }
         }
 
