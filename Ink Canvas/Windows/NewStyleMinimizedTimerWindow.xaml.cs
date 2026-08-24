@@ -63,6 +63,7 @@ namespace Ink_Canvas.Windows
                 if (!IsVisible) return;
                 if (_shouldHide != null && _shouldHide())
                 {
+                    _restoreCallback?.Invoke();
                     Close();
                     return;
                 }
