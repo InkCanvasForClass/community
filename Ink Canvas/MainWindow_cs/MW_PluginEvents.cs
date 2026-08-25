@@ -33,6 +33,7 @@ namespace Ink_Canvas
 
                 if (wasWhiteboardMode != isWhiteboardMode)
                 {
+                    if (!isWhiteboardMode) DeactivateActivePluginCanvasToolForModeChange();
                     RaisePluginEvent(PluginWhiteboardModeChanged, isWhiteboardMode, nameof(PluginWhiteboardModeChanged));
                 }
             }

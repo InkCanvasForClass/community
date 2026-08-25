@@ -1,3 +1,4 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.4.11626.88
@@ -15,6 +16,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InkCanvas.PptAgent.Contracts", "InkCanvas.PPTAgent.Contracts\InkCanvas.PptAgent.Contracts.csproj", "{81F4D8C2-2559-9FE9-90BD-D014CD0E9F3F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InkCanvas.LiquidGlassMagHost", "InkCanvas.LiquidGlassMagHost\InkCanvas.LiquidGlassMagHost.csproj", "{33EC1CA4-A135-4E70-B339-EAAC67E262A1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InkCanvas.PluginSdk.Tests", "InkCanvas.PluginSdk.Tests\InkCanvas.PluginSdk.Tests.csproj", "{1121CB0C-7759-44C5-A310-282D16E366D7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -170,6 +173,26 @@ Global
 		{33EC1CA4-A135-4E70-B339-EAAC67E262A1}.Release|x64.Build.0 = Release|x64
 		{33EC1CA4-A135-4E70-B339-EAAC67E262A1}.Release|x86.ActiveCfg = Release|x86
 		{33EC1CA4-A135-4E70-B339-EAAC67E262A1}.Release|x86.Build.0 = Release|x86
+		{1121CB0C-7759-44C5-A310-282D16E366D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1121CB0C-7759-44C5-A310-282D16E366D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1121CB0C-7759-44C5-A310-282D16E366D7}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{1121CB0C-7759-44C5-A310-282D16E366D7}.Debug|ARM.Build.0 = Debug|Any CPU
+		{1121CB0C-7759-44C5-A310-282D16E366D7}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{1121CB0C-7759-44C5-A310-282D16E366D7}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{1121CB0C-7759-44C5-A310-282D16E366D7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1121CB0C-7759-44C5-A310-282D16E366D7}.Debug|x64.Build.0 = Debug|Any CPU
+		{1121CB0C-7759-44C5-A310-282D16E366D7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1121CB0C-7759-44C5-A310-282D16E366D7}.Debug|x86.Build.0 = Debug|Any CPU
+		{1121CB0C-7759-44C5-A310-282D16E366D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1121CB0C-7759-44C5-A310-282D16E366D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1121CB0C-7759-44C5-A310-282D16E366D7}.Release|ARM.ActiveCfg = Release|Any CPU
+		{1121CB0C-7759-44C5-A310-282D16E366D7}.Release|ARM.Build.0 = Release|Any CPU
+		{1121CB0C-7759-44C5-A310-282D16E366D7}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{1121CB0C-7759-44C5-A310-282D16E366D7}.Release|ARM64.Build.0 = Release|Any CPU
+		{1121CB0C-7759-44C5-A310-282D16E366D7}.Release|x64.ActiveCfg = Release|Any CPU
+		{1121CB0C-7759-44C5-A310-282D16E366D7}.Release|x64.Build.0 = Release|Any CPU
+		{1121CB0C-7759-44C5-A310-282D16E366D7}.Release|x86.ActiveCfg = Release|Any CPU
+		{1121CB0C-7759-44C5-A310-282D16E366D7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -8,6 +8,9 @@ namespace Ink_Canvas.Plugins
     /// </summary>
     public interface IEventService
     {
+        /// <summary>当前是否处于普通白板模式。</summary>
+        bool IsWhiteboardMode { get; }
+
         /// <summary>白板模式切换时触发（true=进入白板，false=退出白板）</summary>
         event Action<bool> WhiteboardModeChanged;
 

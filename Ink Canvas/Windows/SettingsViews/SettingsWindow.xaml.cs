@@ -188,10 +188,14 @@ namespace Ink_Canvas.Windows.SettingsViews
             };
 
             AnnouncementService.UnreadCountChanged += UpdateAnnouncementUnreadBadge;
+            Ink_Canvas.Plugins.PluginManager.Instance.PluginLoaded += PluginManager_PluginsChanged;
+            Ink_Canvas.Plugins.PluginManager.Instance.PluginUnloaded += PluginManager_PluginsChanged;
 
             this.Closed += (sender, e) =>
             {
                 AnnouncementService.UnreadCountChanged -= UpdateAnnouncementUnreadBadge;
+                Ink_Canvas.Plugins.PluginManager.Instance.PluginLoaded -= PluginManager_PluginsChanged;
+                Ink_Canvas.Plugins.PluginManager.Instance.PluginUnloaded -= PluginManager_PluginsChanged;
                 UnregisterDpiChangedListener();
                 _pages.Clear();
                 _pageTypes.Clear();
@@ -907,45 +911,54 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         private void LoadPluginSettingsPages()
         {
-            var pluginManager = Ink_Canvas.Plugins.PluginManager.Instance;
-            var plugins = pluginManager.Plugins;
-
-            foreach (var plugin in plugins)
+            var staleTags = _pluginPages.Keys.ToList();
+            foreach (var tag in staleTags)
             {
-                // \u5355\u4E2A\u63D2\u4EF6\u7684\u8BBE\u7F6E\u9875\u5931\u8D25\uFF08\u7F3A\u4F9D\u8D56\u3001XAML \u89E3\u6790\u5F02\u5E38\u7B49\uFF09\u4E0D\u5E94\u4E2D\u6B62\u5176\u5B83\u63D2\u4EF6\u7684\u8BBE\u7F6E\u9875\u52A0\u8F7D\u3002
-                // \u4E4B\u524D\u7684\u6574\u4F53 try/catch \u4F1A\u8BA9\u6392\u5728\u5931\u8D25\u63D2\u4EF6\u4E4B\u540E\u7684\u6240\u6709\u63D2\u4EF6\u8BBE\u7F6E\u9875\u90FD\u51FA\u4E0D\u6765\u3002
-                try
-                {
-                    if (plugin.Instance == null) continue;
-
-                    var settingsView = plugin.Instance.GetSettingsView();
-                    if (settingsView != null)
-                    {
-                        var pageTag = string.Format("PluginSettings_{0}", plugin.Id);
-
-                        _pageTypes[pageTag] = typeof(PluginSettingsPage);
-                        _pluginPages[pageTag] = plugin;
-
-                        var navItem = new NavigationViewItem
-                        {
-                            Content = string.Format(NavStrings.Nav_PluginSettingsFormat, plugin.Name),
-                            Tag = pageTag
-                        };
-
-                        navItem.Icon = new FontIcon
-                        {
-                            Glyph = "\uE713"
-                        };
-
-                        NavigationViewControl.MenuItems.Add(navItem);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    pluginManager.LogError(string.Format(
-                        NavStrings.Nav_LoadPluginSettingsFailed, plugin.Name + ": " + ex.Message), ex);
-                }
+                _pluginPages.Remove(tag);
+                _pageTypes.Remove(tag);
+                if (_pages.TryGetValue(tag, out var page) && page is PluginSettingsPage settingsPage)
+                    settingsPage.CurrentPlugin = null;
+                _pages.Remove(tag);
             }
+
+            for (var i = NavigationViewControl.MenuItems.Count - 1; i >= 0; i--)
+            {
+                if (NavigationViewControl.MenuItems[i] is NavigationViewItem item &&
+                    item.Tag is string tag && tag.StartsWith("PluginSettings_", StringComparison.Ordinal))
+                    NavigationViewControl.MenuItems.RemoveAt(i);
+            }
+
+            var pluginManager = Ink_Canvas.Plugins.PluginManager.Instance;
+            var entries = Ink_Canvas.Plugins.PluginSettingsNavigationRegistry.Discover(
+                pluginManager.Plugins,
+                (plugin, ex) => pluginManager.LogError(string.Format(
+                    NavStrings.Nav_LoadPluginSettingsFailed,
+                    $"{plugin?.Id}: {ex.Message}"), ex));
+            foreach (var entry in entries)
+            {
+                var plugin = entry.Plugin;
+                var pageTag = entry.PageTag;
+                _pageTypes[pageTag] = typeof(PluginSettingsPage);
+                _pluginPages[pageTag] = plugin;
+
+                var navItem = new NavigationViewItem
+                {
+                    Content = string.Format(NavStrings.Nav_PluginSettingsFormat, plugin.Name),
+                    Tag = pageTag,
+                    Icon = new FontIcon
+                    {
+                        Glyph = "\uE713"
+                    }
+                };
+                NavigationViewControl.MenuItems.Add(navItem);
+            }
+        }
+
+        private void PluginManager_PluginsChanged(object sender, Ink_Canvas.Plugins.PluginInfo e)
+        {
+            Dispatcher.BeginInvoke(
+                new Action(LoadPluginSettingsPages),
+                System.Windows.Threading.DispatcherPriority.Background);
         }
         #endregion
 

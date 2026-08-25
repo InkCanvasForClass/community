@@ -107,6 +107,7 @@ namespace Ink_Canvas
 
             _isBoardRoamingPointerDown = false;
             CommitBoardRoamingHistory();
+            CompletePluginCanvasViewportTransform();
             inkCanvas.Cursor = IsBoardRoamingMode ? Cursors.Hand : Cursors.Arrow;
         }
 
@@ -319,6 +320,7 @@ namespace Ink_Canvas
 
             _isBoardRoamingPointerDown = false;
             CommitBoardRoamingHistory();
+            CompletePluginCanvasViewportTransform();
             RefreshBoardRoamingPopup();
         }
 
@@ -333,6 +335,7 @@ namespace Ink_Canvas
                 foreach (var stroke in inkCanvas.Strokes)
                     stroke.Transform(matrix, false);
                 TransformCanvasImages(matrix);
+                PublishPluginCanvasViewportTransform(matrix);
                 // 视频展台特殊模式：漫游时预览画面与墨迹同步平移
                 // （否则只有墨迹会动，展台背景不动）
                 if (_isVideoPresenterSpecialMode)

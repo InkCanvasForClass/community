@@ -10,7 +10,10 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
 {
@@ -27,7 +30,8 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             var itemType = typeof(IBoardToolbarItem);
             _items = Assembly.GetExecutingAssembly()
                 .GetTypes()
-                .Where(t => !t.IsAbstract && !t.IsInterface && itemType.IsAssignableFrom(t))
+                .Where(t => !t.IsAbstract && !t.IsInterface && itemType.IsAssignableFrom(t)
+                            && t.GetConstructor(Type.EmptyTypes) != null)
                 .Select(t =>
                 {
                     try { return (IBoardToolbarItem)Activator.CreateInstance(t); }
@@ -43,6 +47,13 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             // 追加插件注册的白板工具栏组件。
             foreach (var pluginItem in _pluginItems)
             {
+                if (_items.Any(item => string.Equals(item.Id, pluginItem.Id, StringComparison.OrdinalIgnoreCase)))
+                {
+                    LogHelper.WriteLogToFile(
+                        $"BoardToolbarRegistry: 插件白板工具栏项 ID 冲突 [{pluginItem.Id}]",
+                        LogHelper.LogType.Warning);
+                    continue;
+                }
                 _items.Add(new PluginBoardToolbarItemWrapper(pluginItem));
             }
 
@@ -61,23 +72,28 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
         /// 注册一个插件白板工具栏组件。首个注册的插件启动时把组件追加进 active 配置（默认 center→tools），
         /// 后续启动只加入组件库，避免用户删除组件后重启又被自动加回。
         /// </summary>
-        public static void RegisterPluginItem(PluginToolbarItemInfo itemInfo, bool autoAddToActiveConfig = true)
+        public static bool RegisterPluginItem(
+            PluginToolbarItemInfo itemInfo,
+            bool autoAddToActiveConfig = true)
         {
-            if (itemInfo == null || string.IsNullOrEmpty(itemInfo.Id)) return;
-            if (_pluginItems.Any(item => string.Equals(item.Id, itemInfo.Id, StringComparison.OrdinalIgnoreCase))) return;
+            if (itemInfo == null || string.IsNullOrWhiteSpace(itemInfo.Id)) return false;
+            if (_pluginItems.Any(item =>
+                    string.Equals(item.Id, itemInfo.Id, StringComparison.OrdinalIgnoreCase))) return false;
 
             _pluginItems.Add(itemInfo);
             LogHelper.WriteLogToFile($"BoardToolbarRegistry: 插件注册白板工具栏组件 [{itemInfo.Id}] (autoAddToActiveConfig={autoAddToActiveConfig})", LogHelper.LogType.Info);
-
-            if (autoAddToActiveConfig)
+            if (autoAddToActiveConfig) EnsurePluginItemInActiveConfig(itemInfo.Id);
+            if (_items == null) return true;
+            if (_items.Any(item => string.Equals(item.Id, itemInfo.Id, StringComparison.OrdinalIgnoreCase)))
             {
-                EnsurePluginItemInActiveConfig(itemInfo.Id);
+                LogHelper.WriteLogToFile(
+                    $"BoardToolbarRegistry: 插件白板工具栏项 ID 冲突 [{itemInfo.Id}]",
+                    LogHelper.LogType.Warning);
+                _pluginItems.Remove(itemInfo);
+                return false;
             }
-
-            if (_items != null)
-            {
-                _items.Add(new PluginBoardToolbarItemWrapper(itemInfo));
-            }
+            _items.Add(new PluginBoardToolbarItemWrapper(itemInfo));
+            return true;
         }
 
         private static void EnsurePluginItemInActiveConfig(string itemId)
@@ -624,7 +640,130 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             {
                 _info.ApplyOrientation?.Invoke(view, Orientation.Horizontal);
             }
+
+            // 与浮动工具栏 PluginToolbarItemWrapper 对齐：插件提供了弹窗内容工厂时，
+            // 宿主自动创建 Popup 并把 BoardToolbarButton 的点击接到弹窗开合上。
+            if (_info.PopupContentFactory != null && view is BoardToolbarButton btn)
+            {
+                var popup = new Popup
+                {
+                    Name = "BoardPluginPopup_" + _info.Id.Replace('.', '_'),
+                    AllowsTransparency = true,
+                    StaysOpen = true,
+                    Focusable = true,
+                    IsOpen = false,
+                    PlacementTarget = btn,
+                    Placement = PlacementMode.Custom
+                };
+
+                var popupContent = _info.PopupContentFactory();
+                if (popupContent != null)
+                    popup.Child = popupContent;
+
+                popup.CustomPopupPlacementCallback = (popupSize, targetSize, offset) =>
+                {
+                    return new[]
+                    {
+                        new CustomPopupPlacement(
+                            new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height - 8),
+                            PopupPrimaryAxis.Vertical)
+                    };
+                };
+
+                // 注册到 PopupManagerHelper，宿主点击画布/切换面板时统一收起。
+                btn.Loaded += (s, e) =>
+                {
+                    var window = Window.GetWindow(btn);
+                    if (window is MainWindow mw)
+                    {
+                        mw.GetPopupManager()?.RegisterPopup(popup);
+                    }
+                };
+
+                void SetPopupOpen(bool isOpen)
+                {
+                    if (popup.IsOpen == isOpen) return;
+
+                    if (isOpen)
+                    {
+                        var window = Window.GetWindow(btn);
+                        if (window is MainWindow mw)
+                        {
+                            mw.CloseAllPopups();
+                        }
+                        AnimationsHelper.ShowPopupWithSlideAndFade(popup);
+                        popup.Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            if (popup.Child is UIElement child)
+                            {
+                                child.Focus();
+                                Keyboard.Focus(child);
+                                child.MoveFocus(new TraversalRequest(FocusNavigationDirection.First));
+                            }
+                        }), DispatcherPriority.Input);
+                    }
+                    else
+                    {
+                        popup.IsOpen = false;
+                    }
+                }
+
+                btn.ButtonMouseUp += (s, e) => SetPopupOpen(!popup.IsOpen);
+
+                // 把弹窗开合回调交给插件，插件可程序化打开/收起（例如函数编辑请求、工具激活时）。
+                _info.BindPopupController?.Invoke(SetPopupOpen);
+
+                // 通知插件弹窗实际开合状态。
+                popup.Opened += (s, e) => _info.PopupStateChanged?.Invoke(true);
+                popup.Closed += (s, e) => _info.PopupStateChanged?.Invoke(false);
+
+                // 弹窗关闭按钮支持（PopupShellContent / PopupTabShellContent / 嵌套 UserControl）。
+                if (popupContent is PopupShellContent shell)
+                {
+                    shell.CloseButtonControl.Click += (s, e) => popup.IsOpen = false;
+                }
+                else if (popupContent is PopupTabShellContent tabShell)
+                {
+                    tabShell.CloseButtonControl.Click += (s, e) => popup.IsOpen = false;
+                }
+                else if (popupContent is FrameworkElement contentElement)
+                {
+                    WireNestedShellCloseButton(contentElement, popup);
+                    popup.Opened += (s, e) => WireNestedShellCloseButton(contentElement, popup);
+                }
+            }
+
             return view;
+        }
+
+        /// <summary>在弹窗内容里递归查找 PopupShellContent，把它的标题栏关闭按钮接到 popup 收起。</summary>
+        private static void WireNestedShellCloseButton(FrameworkElement content, Popup popup)
+        {
+            if (content == null || popup == null) return;
+
+            foreach (var nestedShell in FindVisualChildren<PopupShellContent>(content))
+            {
+                var closeButton = nestedShell.CloseButtonControl;
+                if (closeButton == null) continue;
+
+                if (ReferenceEquals(closeButton.Tag, popup)) return;
+                closeButton.Tag = popup;
+                closeButton.Click += (s, e) => popup.IsOpen = false;
+                return; // 只接最外层那个 Shell
+            }
+        }
+
+        private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) yield break;
+            int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childrenCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T result) yield return result;
+                foreach (var descendant in FindVisualChildren<T>(child))
+                    yield return descendant;
+            }
         }
 
         public void ApplyPosition(FrameworkElement view, ButtonPosition position)
