@@ -867,6 +867,36 @@ namespace Ink_Canvas.Plugins
 
         #region Plugin Loading
 
+        /// <summary>
+        /// 加载指定插件。插件必须已经被发现且当前未处于 Loaded 状态。
+        /// </summary>
+        public bool LoadPlugin(string pluginId)
+        {
+            if (string.IsNullOrEmpty(pluginId)) return false;
+
+            var info = _plugins.FirstOrDefault(p => string.Equals(p.Id, pluginId, StringComparison.OrdinalIgnoreCase));
+            if (info == null) return false;
+            if (info.LoadStatus == PluginLoadStatus.Loaded) return true;
+            if (IsPluginDisabled(pluginId)) return false;
+
+            try
+            {
+                LoadPlugin(info);
+            }
+            catch (Exception ex)
+            {
+                info.LoadStatus = PluginLoadStatus.Error;
+                info.Exception = ex;
+                LogError(string.Format("Failed to load plugin {0}", pluginId), ex);
+            }
+
+            _plugins.Sort((a, b) => a.Order.CompareTo(b.Order));
+            BuildServiceProvider();
+            _market?.RefreshMergedPlugins();
+            RefreshToolbars();
+            return info.LoadStatus == PluginLoadStatus.Loaded;
+        }
+
         private void LoadPlugin(PluginInfo info)
         {
             Log(string.Format("Loading plugin: {0}", info.Name));
@@ -1145,7 +1175,10 @@ namespace Ink_Canvas.Plugins
         /// true = 真正卸载，连同插件目录一并删除（用户点"删除"）；
         /// false = 仅卸载实例并释放目录锁，保留文件（热重载 / 覆盖安装）。
         /// </param>
-        public void UnloadPlugin(PluginInfo plugin, bool deleteFolder = false)
+        /// <param name="keepInList">
+        /// true = 保留插件信息以便稍后从页面再次加载；false = 从已安装列表移除（重载/删除流程）。
+        /// </param>
+        public void UnloadPlugin(PluginInfo plugin, bool deleteFolder = false, bool keepInList = false)
         {
             if (plugin == null) return;
 
@@ -1199,7 +1232,10 @@ namespace Ink_Canvas.Plugins
                     }
                 }
 
-                _plugins.Remove(plugin);
+                if (!keepInList || deleteFolder)
+                {
+                    _plugins.Remove(plugin);
+                }
                 plugin.IsLoaded = false;
                 plugin.LoadStatus = PluginLoadStatus.NotLoaded;
                 plugin.Instance = null;

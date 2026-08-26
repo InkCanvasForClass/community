@@ -209,21 +209,22 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             };
             actionPanel.Children.Add(folderBtn);
 
-            // 热重载按钮：卸载插件注册并重新从磁盘加载，无需重启应用。
-            var reloadBtn = new Button
+            // 卸载/加载按钮：根据插件当前状态切换动作与提示。
+            var isLoaded = pluginInfo.LoadStatus == PluginLoadStatus.Loaded;
+            var toggleBtn = new Button
             {
                 Padding = new Thickness(6),
                 Margin = new Thickness(0, 0, 4, 0),
-                ToolTip = PluginStrings.Plugin_Reload,
+                ToolTip = isLoaded ? PluginStrings.Plugin_Unload : PluginStrings.Plugin_Load,
                 Tag = pluginInfo
             };
-            reloadBtn.Click += ReloadPlugin_Click;
-            reloadBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+            toggleBtn.Click += TogglePluginLoad_Click;
+            toggleBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
             {
-                Icon = SegoeFluentIcons.Refresh,
+                Icon = isLoaded ? SegoeFluentIcons.Upload : SegoeFluentIcons.Download,
                 FontSize = 14
             };
-            actionPanel.Children.Add(reloadBtn);
+            actionPanel.Children.Add(toggleBtn);
 
             // 待应用更新：尝试热安装；失败时才提供重启
             if (hasPendingUpdate)
@@ -356,7 +357,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch { }
         }
 
-        private void ReloadPlugin_Click(object sender, RoutedEventArgs e)
+        private void TogglePluginLoad_Click(object sender, RoutedEventArgs e)
         {
             var btn = sender as FrameworkElement;
             var info = btn?.Tag as PluginInfo;
@@ -364,38 +365,42 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                var result = PluginManager.Instance.ReloadPlugin(info.Id);
-                LoadPlugins();
+                var pluginManager = PluginManager.Instance;
+                if (info.LoadStatus == PluginLoadStatus.Loaded)
+                {
+                    pluginManager.UnloadPlugin(info, keepInList: true);
+                    RebuildToolbarsAfterPluginChange();
+                    LoadPlugins();
+                    MessageBoxHelper.Show(this,
+                        PluginStrings.Plugin_UnloadSuccess,
+                        PluginStrings.Plugin_Unload,
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
 
-                if (!result.Success)
+                var loaded = pluginManager.LoadPlugin(info.Id);
+                LoadPlugins();
+                if (!loaded)
                 {
                     MessageBoxHelper.Show(this,
-                        string.Format(PluginStrings.Plugin_ReloadFailed, result.ErrorMessage ?? "Unknown error"),
-                        PluginStrings.Plugin_Reload,
+                        string.Format(PluginStrings.Plugin_LoadFailed,
+                            info.Exception?.Message ?? "Unknown error"),
+                        PluginStrings.Plugin_Load,
                         MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
-                if (!result.FullyUnloaded)
-                {
-                    MessageBoxHelper.Show(this,
-                        PluginStrings.Plugin_ReloadPartial,
-                        PluginStrings.Plugin_Reload,
-                        MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
                 MessageBoxHelper.Show(this,
-                    PluginStrings.Plugin_ReloadSuccess,
-                    PluginStrings.Plugin_Reload,
+                    PluginStrings.Plugin_LoadSuccess,
+                    PluginStrings.Plugin_Load,
                     MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"Plugin | 热重载失败: {info.Id} - {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"Plugin | 加载状态切换失败: {info.Id} - {ex.Message}", LogHelper.LogType.Error);
                 MessageBoxHelper.Show(this,
-                    string.Format(PluginStrings.Plugin_ReloadFailed, ex.Message),
-                    PluginStrings.Plugin_Reload,
+                    string.Format(PluginStrings.Plugin_LoadFailed, ex.Message),
+                    PluginStrings.Plugin_Load,
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
