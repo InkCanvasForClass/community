@@ -53,13 +53,16 @@ namespace Ink_Canvas.Plugins
         void RegisterService<T>(T service) where T : class;
 
         /// <summary>
-        /// 向浮动工具栏注册插件组件。
+        /// 向工具栏注册插件组件。目标工具栏由 <see cref="PluginToolbarItemInfo.Surface"/> 决定：
+        /// Whiteboard 注册到白板工具栏，其余注册到浮动工具栏。
         /// </summary>
         /// <param name="itemInfo">要注册的工具栏组件信息。</param>
         void RegisterToolbarItem(PluginToolbarItemInfo itemInfo);
 
         /// <summary>
-        /// 向白板工具栏注册插件组件。行为与 <see cref="RegisterToolbarItem"/> 相同，仅目标工具栏不同。
+        /// 旧版接口：固定向白板工具栏注册插件组件，与 <see cref="RegisterToolbarItem"/> 共用同一实现。
+        /// 新插件请改用 <see cref="RegisterToolbarItem"/> 并设置 <see cref="PluginToolbarItemInfo.Surface"/>
+        /// = <see cref="PluginToolbarSurface.Whiteboard"/>。
         /// </summary>
         /// <param name="itemInfo">要注册的工具栏组件信息。</param>
         void RegisterBoardToolbarItem(PluginToolbarItemInfo itemInfo);

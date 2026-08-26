@@ -2029,65 +2029,76 @@ namespace Ink_Canvas.Plugins
 
             try
             {
-                // 仅在插件首次注册时自动追加到目标工具栏；后续启动只加入组件库，
-                // 避免用户删除组件后重启又被自动加回。
-                bool isFirstRegistration = IsFirstToolbarRegistration();
-                bool isWhiteboard = itemInfo.Surface == PluginToolbarSurface.Whiteboard;
-                bool registered;
-                if (isWhiteboard)
-                    registered = Controls.Toolbar.BoardToolbar.BoardToolbarRegistry.RegisterPluginItem(
-                        itemInfo,
-                        autoAddToActiveConfig: isFirstRegistration);
-                else
-                    registered = Controls.Toolbar.FloatingToolbar.ToolbarRegistry.RegisterPluginItem(
-                        itemInfo,
-                        autoAddToActiveConfig: isFirstRegistration);
-                if (!registered) return;
-
-                if (_currentLoadingPlugin != null)
-                {
-                    if (!_pluginToolbarItems.TryGetValue(_currentLoadingPlugin.Id, out var registrations))
-                    {
-                        registrations = new List<KeyValuePair<PluginToolbarSurface, string>>();
-                        _pluginToolbarItems[_currentLoadingPlugin.Id] = registrations;
-                    }
-                    registrations.Add(new KeyValuePair<PluginToolbarSurface, string>(itemInfo.Surface, itemInfo.Id));
-                }
-                if (isFirstRegistration)
-                {
-                    MarkToolbarRegistered();
-                }
-
-                var itemId = itemInfo.Id;
-                if (isWhiteboard)
-                {
-                    TrackUndo("boardToolbar:" + itemId,
-                        () => Controls.Toolbar.BoardToolbar.BoardToolbarRegistry.UnregisterPluginItem(itemId));
-
-                    // 与 RegisterBoardToolbarItem 保持一致：白板工具栏已构建时延迟重建，
-                    // 批量加载期间只标记，由加载完成后统一重建一次。
-                    if (_isLoadingBatch)
-                    {
-                        _boardToolbarRebuildPending = true;
-                    }
-                    else if (Application.Current?.MainWindow is MainWindow mw)
-                    {
-                        mw.Dispatcher.BeginInvoke(new Action(mw.RebuildBoardToolbar),
-                            System.Windows.Threading.DispatcherPriority.ApplicationIdle);
-                    }
-                }
-                else
-                {
-                    TrackUndo("toolbar:" + itemId,
-                        () => Controls.Toolbar.FloatingToolbar.ToolbarRegistry.UnregisterPluginItem(itemId));
-                }
-
-                Log(string.Format("Plugin registered toolbar item: {0} (autoAdd={1})", itemInfo.Id, isFirstRegistration));
+                RegisterToolbarItemCore(itemInfo, itemInfo.Surface);
             }
             catch (Exception ex)
             {
                 LogError(string.Format("Failed to register toolbar item {0}", itemInfo.Id), ex);
             }
+        }
+
+        /// <summary>
+        /// 工具栏项注册的统一实现。目标工具栏由 <paramref name="targetSurface"/> 决定：
+        /// Whiteboard 注册到白板工具栏，其余注册到浮动工具栏。
+        /// <see cref="RegisterToolbarItem"/> 按 <see cref="PluginToolbarItemInfo.Surface"/> 路由，
+        /// <see cref="RegisterBoardToolbarItem"/> 固定传 Whiteboard，两条公开入口共用此实现。
+        /// </summary>
+        private void RegisterToolbarItemCore(PluginToolbarItemInfo itemInfo, PluginToolbarSurface targetSurface)
+        {
+            // 仅在插件首次注册时自动追加到目标工具栏；后续启动只加入组件库，
+            // 避免用户删除组件后重启又被自动加回。
+            bool isFirstRegistration = IsFirstToolbarRegistration();
+            bool isWhiteboard = targetSurface == PluginToolbarSurface.Whiteboard;
+            bool registered;
+            if (isWhiteboard)
+                registered = Controls.Toolbar.BoardToolbar.BoardToolbarRegistry.RegisterPluginItem(
+                    itemInfo,
+                    autoAddToActiveConfig: isFirstRegistration);
+            else
+                registered = Controls.Toolbar.FloatingToolbar.ToolbarRegistry.RegisterPluginItem(
+                    itemInfo,
+                    autoAddToActiveConfig: isFirstRegistration);
+            if (!registered) return;
+
+            if (_currentLoadingPlugin != null)
+            {
+                if (!_pluginToolbarItems.TryGetValue(_currentLoadingPlugin.Id, out var registrations))
+                {
+                    registrations = new List<KeyValuePair<PluginToolbarSurface, string>>();
+                    _pluginToolbarItems[_currentLoadingPlugin.Id] = registrations;
+                }
+                registrations.Add(new KeyValuePair<PluginToolbarSurface, string>(targetSurface, itemInfo.Id));
+            }
+            if (isFirstRegistration)
+            {
+                MarkToolbarRegistered();
+            }
+
+            var itemId = itemInfo.Id;
+            if (isWhiteboard)
+            {
+                TrackUndo("boardToolbar:" + itemId,
+                    () => Controls.Toolbar.BoardToolbar.BoardToolbarRegistry.UnregisterPluginItem(itemId));
+
+                // 白板工具栏已构建时延迟重建，批量加载期间只标记，由加载完成后统一重建一次。
+                if (_isLoadingBatch)
+                {
+                    _boardToolbarRebuildPending = true;
+                }
+                else if (Application.Current?.MainWindow is MainWindow mw)
+                {
+                    mw.Dispatcher.BeginInvoke(new Action(mw.RebuildBoardToolbar),
+                        System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                }
+            }
+            else
+            {
+                TrackUndo("toolbar:" + itemId,
+                    () => Controls.Toolbar.FloatingToolbar.ToolbarRegistry.UnregisterPluginItem(itemId));
+            }
+
+            Log(string.Format("Plugin registered toolbar item: {0} (surface={1}, autoAdd={2})",
+                itemInfo.Id, targetSurface, isFirstRegistration));
         }
 
         private void UnregisterToolbarItems(string pluginId)
@@ -2119,7 +2130,10 @@ namespace Ink_Canvas.Plugins
         }
 
         /// <summary>
-        /// 向白板工具栏注册插件组件。行为与 <see cref="RegisterToolbarItem"/> 相同，仅目标工具栏不同。
+        /// 旧版接口：固定向白板工具栏注册插件组件（无论 <see cref="PluginToolbarItemInfo.Surface"/> 取值）。
+        /// 与 <see cref="RegisterToolbarItem"/> 共用同一实现，同样按插件登记，
+        /// 卸载/初始化失败回滚时会由 <see cref="UnregisterToolbarItems"/> 统一撤销。
+        /// 新插件请改用 <see cref="RegisterToolbarItem"/> 并设置 Surface = Whiteboard。
         /// </summary>
         public void RegisterBoardToolbarItem(PluginToolbarItemInfo itemInfo)
         {
@@ -2127,34 +2141,7 @@ namespace Ink_Canvas.Plugins
 
             try
             {
-                // 复用 .toolbar_registered 标记：首次注册时把组件追加进 active 白板配置，
-                // 后续启动只加入组件库，避免用户删除组件后重启又被自动加回。
-                bool isFirstRegistration = IsFirstToolbarRegistration();
-                Controls.Toolbar.BoardToolbar.BoardToolbarRegistry.RegisterPluginItem(itemInfo, autoAddToActiveConfig: isFirstRegistration);
-                if (isFirstRegistration)
-                {
-                    MarkToolbarRegistered();
-                }
-
-                var itemId = itemInfo.Id;
-                TrackUndo("boardToolbar:" + itemId,
-                    () => Controls.Toolbar.BoardToolbar.BoardToolbarRegistry.UnregisterPluginItem(itemId));
-
-                // 白板工具栏已构建时延迟重建以显示插件组件（在 Initialize 完成后执行，
-                // 避免 ViewFactory 依赖尚未初始化完成的插件状态）。
-                // 批量加载期间只标记，由加载完成后统一重建一次，避免每个组件都排队导致
-                // 重复销毁/创建控件与授权弹窗嵌套消息循环时交错引发 UI 渲染错乱。
-                if (_isLoadingBatch)
-                {
-                    _boardToolbarRebuildPending = true;
-                }
-                else if (Application.Current?.MainWindow is MainWindow mw)
-                {
-                    mw.Dispatcher.BeginInvoke(new Action(mw.RebuildBoardToolbar),
-                        System.Windows.Threading.DispatcherPriority.ApplicationIdle);
-                }
-
-                Log(string.Format("Plugin registered board toolbar item: {0} (autoAdd={1})", itemInfo.Id, isFirstRegistration));
+                RegisterToolbarItemCore(itemInfo, PluginToolbarSurface.Whiteboard);
             }
             catch (Exception ex)
             {
