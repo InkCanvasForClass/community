@@ -685,16 +685,12 @@ namespace Ink_Canvas
                 || IsDescendantOf(source, ImageSelectionOverlay)
                 || IsDescendantOf(source, ViewboxFloatingBar))
             {
-                SecAgentDiag($"CURSOR_SELECTION_CHROME_CLICK source={source?.GetType().FullName ?? "null"} " +
-                             $"element={SecAgentDiagElement(currentSelectedElement)}");
                 return;
             }
 
             var point = e.GetPosition(inkCanvas);
             var bounds = GetSceneElementBounds(currentSelectedElement);
             var inside = bounds.Contains(point);
-            SecAgentDiag($"CURSOR_SELECTION_BOUNDARY point={point} bounds={bounds} inside={inside} " +
-                         $"element={SecAgentDiagElement(currentSelectedElement)} source={source?.GetType().FullName ?? "null"}");
             if (inside) return;
 
             var oldElement = currentSelectedElement;
@@ -707,7 +703,6 @@ namespace Ink_Canvas
             // window can receive the outside click. Restore pass-through immediately after
             // clearing the selection; the next click then reaches the underlying desktop.
             SetTransparentHitThrough();
-            SecAgentDiag($"CURSOR_SELECTION_CLEARED_OUTSIDE element={SecAgentDiagElement(oldElement)} point={point}");
         }
 
         private bool IsFloatingBarUiAbsentFromScreens()

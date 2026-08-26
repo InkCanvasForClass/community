@@ -22,10 +22,6 @@ namespace Ink_Canvas
                 SetTransparentNotHitThrough();
             else
                 SetTransparentHitThrough();
-
-            SecAgentDiag($"WINDOW_HIT_TEST_SYNC reason={reason} annotation={annotationVisible} " +
-                         $"mode={inkCanvas?.EditingMode} background={GridTransparencyFakeBackground?.Background} " +
-                         $"opacity={GridTransparencyFakeBackground?.Opacity:0.##}");
         }
     }
 }

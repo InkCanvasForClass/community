@@ -539,8 +539,6 @@ namespace Ink_Canvas
             var sceneElement = FindSecAgentSceneElementAtCanvasPoint(scenePoint);
             if (sceneElement != null)
             {
-                SecAgentDiag($"LASSO_SCENE_PRIORITY point={scenePoint} element={SecAgentDiagElement(sceneElement)} " +
-                             $"strokes={inkCanvas.GetSelectedStrokes().Count} overlay={GridInkCanvasSelectionCover.Visibility}");
                 isGridInkCanvasSelectionCoverMouseDown = false;
                 isStrokeDragging = false;
                 GridInkCanvasSelectionCover.ReleaseMouseCapture();
@@ -606,7 +604,6 @@ namespace Ink_Canvas
                 var bounds = GetSceneElementBounds(child);
                 if (bounds.Contains(canvasPoint))
                 {
-                    SecAgentDiag($"LASSO_SCENE_HIT point={canvasPoint} bounds={bounds} element={SecAgentDiagElement(child)}");
                     return child;
                 }
             }

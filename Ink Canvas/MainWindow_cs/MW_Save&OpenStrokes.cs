@@ -239,14 +239,10 @@ namespace Ink_Canvas
                 element.Arrange(new Rect(new System.Windows.Point(0, 0), size));
                 element.UpdateLayout();
                 element.InvalidateVisual();
-                LogHelper.WriteLogToFile($"[SecAgentDiag] RESTORE_LAYOUT type={element.GetType().Name} " +
-                    $"actual=({element.ActualWidth:0.##}x{element.ActualHeight:0.##}) " +
-                    $"size=({element.Width:0.##}x{element.Height:0.##}) " +
-                    $"visible={element.Visibility} hit={element.IsHitTestVisible}", LogHelper.LogType.Info);
             }
-            catch (Exception ex)
+            catch
             {
-                LogHelper.WriteLogToFile($"[SecAgentDiag] RESTORE_LAYOUT_FAILED type={element.GetType().FullName} error={ex}", LogHelper.LogType.Error);
+                // Layout refresh is best-effort while restoring plugin elements.
             }
         }
 

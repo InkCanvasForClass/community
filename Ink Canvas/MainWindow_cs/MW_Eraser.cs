@@ -46,8 +46,6 @@ namespace Ink_Canvas
             // the first tool/settings action.  Keep it completely inert until enabled.
             canvas.IsHitTestVisible = false;
             canvas.Visibility = Visibility.Collapsed;
-            SecAgentDiag($"ERASER_OVERLAY_LOADED canvas={canvas.Name} size=({canvas.ActualWidth:0.##}x{canvas.ActualHeight:0.##}) " +
-                         $"hit={canvas.IsHitTestVisible} visibility={canvas.Visibility} {SecAgentDiagCanvasState()}");
 
             // 获取橡皮擦反馈控件
             eraserFeedback = FindName("EraserFeedback") as Image;
@@ -138,8 +136,6 @@ namespace Ink_Canvas
         /// </summary>
         private void EraserOverlay_PointerDown(object sender)
         {
-            SecAgentDiag($"ERASER_DOWN sender={sender?.GetType().Name} selected={SecAgentDiagElement(currentSelectedElement)} " +
-                         $"overlay={eraserOverlayCanvas?.IsHitTestVisible}/{eraserOverlayCanvas?.Visibility} {SecAgentDiagCanvasState()}");
             _secAgentEraseInitialStates.Clear();
             if (currentSelectedElement != null)
             {
@@ -184,8 +180,6 @@ namespace Ink_Canvas
                 eraserFeedback.Measure(new Size(Double.PositiveInfinity, Double.PositiveInfinity));
                 eraserFeedback.Visibility = Visibility.Collapsed;
             }
-            SecAgentDiag($"ERASER_DOWN_READY width={eraserWidth:0.##} circle={isEraserCircleShape} " +
-                         $"geometryActive={isUsingGeometryEraser} hitTester={hitTester != null} mode={inkCanvas?.EditingMode}");
         }
 
         /// <summary>
@@ -194,9 +188,6 @@ namespace Ink_Canvas
         private void EraserOverlay_PointerUp(object sender)
         {
             if (!isUsingGeometryEraser) return;
-
-            SecAgentDiag($"ERASER_UP_BEGIN sender={sender?.GetType().Name} pendingStates={_secAgentEraseInitialStates.Count} " +
-                         $"hitTester={hitTester != null} {SecAgentDiagCanvasState()}");
 
             // 解锁
             isUsingGeometryEraser = false;
@@ -224,7 +215,6 @@ namespace Ink_Canvas
 
             // 橡皮擦自动切换回批注
             HandleEraserOperationEnded();
-            SecAgentDiag($"ERASER_UP_DONE pendingStates={_secAgentEraseInitialStates.Count} {SecAgentDiagCanvasState()}");
         }
 
         private void CommitPendingGeometryEraseHistory()
@@ -292,13 +282,11 @@ namespace Ink_Canvas
             var candidates = EnumerateSecAgentEditableSceneElements()
                 .Where(element => IsSecAgentSceneHit(element, point, eraserBounds))
                 .ToArray();
-            SecAgentDiagEraserMove(point, eraserBounds, candidates);
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
             {
                 foreach (var candidate in candidates)
                 {
-                    var changed = EraseSecAgentSceneArea(candidate, eraserBounds);
-                    SecAgentDiag($"ERASER_AREA_RESULT changed={changed} candidate={SecAgentDiagElement(candidate)}");
+                    EraseSecAgentSceneArea(candidate, eraserBounds);
                 }
                 return;
             }
@@ -322,13 +310,9 @@ namespace Ink_Canvas
                 var inverse = element.TransformToAncestor(inkCanvas).Inverse;
                 if (inverse is null) return false;
                 var localRectangle = inverse.TransformBounds(canvasRectangle);
-                if (firstOwnerEdit)
-                    SecAgentDiag($"ERASER_AREA_BEGIN element={SecAgentDiagElement(element)} canvasRect={canvasRectangle} " +
-                                 $"localRect={localRectangle} owner={SecAgentDiagElement(owner)} beforeLength={before?.Length ?? 0}");
                 var method = element.GetType().GetMethod("EraseLocalRect", new[] { typeof(Rect), typeof(double) });
                 if (method is null)
                 {
-                    SecAgentDiag($"ERASER_AREA_NO_METHOD type={element.GetType().FullName}", LogHelper.LogType.Error);
                     return false;
                 }
                 if (method.Invoke(element, new object[] { localRectangle, 4d }) is not bool changed || !changed)
@@ -336,7 +320,6 @@ namespace Ink_Canvas
                     // Area erasing is allowed to make no change when the transformed
                     // rectangle only overlaps the element's coarse bounds. Never turn this
                     // into whole-row deletion; that semantic belongs to line erasing.
-                    SecAgentDiag($"ERASER_AREA_METHOD_FALSE_NO_CHANGE element={SecAgentDiagElement(element)} localRect={localRectangle}");
                     return false;
                 }
 
@@ -345,13 +328,10 @@ namespace Ink_Canvas
                     RemoveSecAgentSceneElements(new[] { element }, false);
                 else
                     MarkCurrentPageInkChanged();
-                if (firstOwnerEdit || !hasContent)
-                    SecAgentDiag($"ERASER_AREA_DONE hasContent={hasContent} ownerAfter={SecAgentDiagElement(owner)} {SecAgentDiagCanvasState()}");
                 return true;
             }
-            catch (Exception ex)
+            catch
             {
-                SecAgentDiag($"ERASER_AREA_EXCEPTION type={element?.GetType().FullName} error={ex}", LogHelper.LogType.Error);
                 return false;
             }
         }
@@ -403,7 +383,6 @@ namespace Ink_Canvas
             if (inkCanvas?.EditingMode != InkCanvasEditingMode.EraseByStroke) return false;
             _secAgentStrokeEraseActive = true;
             var erased = EraseSecAgentSceneElementAtPoint(point);
-            SecAgentDiag($"STROKE_ERASER_BEGIN point={point} erasedScene={erased} {SecAgentDiagCanvasState()}");
             return erased;
         }
 
@@ -411,8 +390,6 @@ namespace Ink_Canvas
         {
             if (!_secAgentStrokeEraseActive) return false;
             var erased = EraseSecAgentSceneElementAtPoint(point);
-            if (erased)
-                SecAgentDiag($"STROKE_ERASER_HIT point={point} {SecAgentDiagCanvasState()}");
             return erased;
         }
 
@@ -474,7 +451,6 @@ namespace Ink_Canvas
                         return true;
                     if (IsSecAgentSceneLocalBoundsHit(element, localPoint, 4d))
                     {
-                        SecAgentDiag($"ERASER_POINT_BOUNDS_FALLBACK element={SecAgentDiagElement(element)} localPoint={localPoint}");
                         return true;
                     }
                     return false;
@@ -571,7 +547,6 @@ namespace Ink_Canvas
                             return true;
                         if (IsSecAgentSceneLocalBoundsHit(element, localPoint, 4d))
                         {
-                            SecAgentDiag($"ERASER_STROKE_BOUNDS_FALLBACK element={SecAgentDiagElement(element)} localPoint={localPoint}");
                             return true;
                         }
                         return false;
@@ -582,7 +557,6 @@ namespace Ink_Canvas
                         return true;
                     if (IsSecAgentSceneLocalBoundsHit(element, localRect, 4d))
                     {
-                        SecAgentDiag($"ERASER_AREA_BOUNDS_FALLBACK element={SecAgentDiagElement(element)} localRect={localRect}");
                         return true;
                     }
                     return false;
@@ -627,8 +601,6 @@ namespace Ink_Canvas
         {
             var targets = elements?.Where(element => element != null).Distinct().ToArray();
             if (targets is null || targets.Length == 0) return;
-            SecAgentDiag($"REMOVE_BEGIN recordHistory={recordHistory} targets={targets.Length} " +
-                         string.Join(" | ", targets.Select(SecAgentDiagElement)));
             foreach (var target in targets)
             {
                 var isDirectChild = inkCanvas.Children.Contains(target);
@@ -663,7 +635,6 @@ namespace Ink_Canvas
                 }
             }
             MarkCurrentPageInkChanged();
-            SecAgentDiag($"REMOVE_DONE recordHistory={recordHistory} {SecAgentDiagCanvasState()}");
         }
 
         /// <summary>
@@ -676,9 +647,6 @@ namespace Ink_Canvas
             var targets = inkCanvas.Children.OfType<FrameworkElement>()
                 .Where(element => IsSecAgentEditableSceneElement(element) || IsSecAgentEditableSceneGroup(element))
                 .ToArray();
-            SecAgentDiag($"CLEAR_SCENES_BEGIN directTargets={targets.Length} " +
-                         string.Join(" | ", targets.Select(SecAgentDiagElement)));
-            Debug.WriteLine($"ClearSecAgentSceneElements: found {targets.Length} direct scene element(s).");
             RemoveSecAgentSceneElements(targets, false);
             // A selection/host integration can temporarily reparent an inserted item. Remove
             // any remaining direct scene child as a final invariant for toolbar clear actions.
@@ -687,7 +655,6 @@ namespace Ink_Canvas
                 if (IsSecAgentEditableSceneElement(child) || IsSecAgentEditableSceneGroup(child))
                     inkCanvas.Children.Remove(child);
             }
-            SecAgentDiag($"CLEAR_SCENES_DONE {SecAgentDiagCanvasState()}");
         }
 
         private Rect GetSceneElementBounds(FrameworkElement element)
@@ -736,8 +703,6 @@ namespace Ink_Canvas
         /// </summary>
         public void EnableEraserOverlay()
         {
-            SecAgentDiag($"ERASER_OVERLAY_ENABLE before={eraserOverlayCanvas?.IsHitTestVisible}/{eraserOverlayCanvas?.Visibility} " +
-                         $"selected={SecAgentDiagElement(currentSelectedElement)} {SecAgentDiagCanvasState()}");
             // An inserted SVG is selected immediately after insertion. Its image-style
             // selection overlay is a sibling above EraserOverlayCanvas and would otherwise
             // consume the pointer before the area eraser can receive it.
@@ -753,8 +718,6 @@ namespace Ink_Canvas
                 eraserOverlayCanvas.IsHitTestVisible = true;
                 eraserOverlayCanvas.Visibility = Visibility.Visible;
             }
-            SecAgentDiag($"ERASER_OVERLAY_ENABLED after={eraserOverlayCanvas?.IsHitTestVisible}/{eraserOverlayCanvas?.Visibility} " +
-                         $"selected={SecAgentDiagElement(currentSelectedElement)} mode={inkCanvas?.EditingMode}");
         }
 
         /// <summary>
@@ -762,8 +725,6 @@ namespace Ink_Canvas
         /// </summary>
         public void DisableEraserOverlay()
         {
-            SecAgentDiag($"ERASER_OVERLAY_DISABLE before={eraserOverlayCanvas?.IsHitTestVisible}/{eraserOverlayCanvas?.Visibility} " +
-                         $"active={isUsingGeometryEraser} pendingStates={_secAgentEraseInitialStates.Count} mode={inkCanvas?.EditingMode}");
             if (eraserOverlayCanvas != null)
             {
                 eraserOverlayCanvas.IsHitTestVisible = false;
@@ -794,12 +755,9 @@ namespace Ink_Canvas
             if (pendingSceneHistoryCount > 0)
             {
                 CommitPendingSecAgentEraseHistory();
-                SecAgentDiag($"ERASER_OVERLAY_DISABLE_COMMIT_SCENE_HISTORY pendingStates={pendingSceneHistoryCount} committed=true");
             }
 
             CommitPendingGeometryEraseHistory();
-            SecAgentDiag($"ERASER_OVERLAY_DISABLED after={eraserOverlayCanvas?.IsHitTestVisible}/{eraserOverlayCanvas?.Visibility} " +
-                         $"active={isUsingGeometryEraser} pendingStates={_secAgentEraseInitialStates.Count} {SecAgentDiagCanvasState()}");
         }
 
         /// <summary>
