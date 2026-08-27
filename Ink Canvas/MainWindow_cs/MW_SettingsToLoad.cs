@@ -740,8 +740,9 @@ namespace Ink_Canvas
                 JObject defaultConfigObj = JObject.FromObject(defaultSettings); EnsureDefaultConfigSchemaIncludesIgnoredNullKeys(defaultConfigObj);
                 JObject userConfigObj = JObject.Parse(userConfigJson);
 
-                // 记录是否有清理操作
+                // 记录是否有清理或迁移操作
                 bool hasChanges = false;
+                MigrateLegacyStartupMode(userConfigObj, ref hasChanges);
 
                 // 递归比较并删除用户配置中多余的键
                 RemoveObsoleteProperties(userConfigObj, defaultConfigObj, ref hasChanges);
@@ -779,6 +780,24 @@ namespace Ink_Canvas
         /// 7. 删除标记的键
         /// 8. 设置变更标志
         /// </remarks>
+        private static void MigrateLegacyStartupMode(JObject userConfigObj, ref bool hasChanges)
+        {
+            if (!(userConfigObj?["startup"] is JObject startup)) return;
+
+            if (startup["startupMode"] == null && startup["enableFastStartup"]?.Type == JTokenType.Boolean)
+            {
+                startup["startupMode"] = startup["enableFastStartup"].Value<bool>()
+                    ? (int)StartupMode.Fastest
+                    : (int)StartupMode.Faster;
+                hasChanges = true;
+            }
+
+            if (startup.Remove("enableFastStartup"))
+            {
+                hasChanges = true;
+            }
+        }
+
         private static void EnsureDefaultConfigSchemaIncludesIgnoredNullKeys(JObject defaultConfigObj)
         {
             if (defaultConfigObj == null) return;

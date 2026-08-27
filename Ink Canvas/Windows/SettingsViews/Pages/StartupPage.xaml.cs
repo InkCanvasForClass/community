@@ -46,7 +46,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     ComboBoxCrashAction.SelectedIndex = crashAction;
 
                     ToggleSwitchFoldAtStartup.IsOn = settings.Startup.IsFoldAtStartup;
-                    ToggleSwitchFastStartup.IsOn = settings.Startup.EnableFastStartup;
+
+                    StartupMode startupMode = settings.Startup.StartupMode;
+                    if (!Enum.IsDefined(typeof(StartupMode), startupMode)) startupMode = StartupMode.Default;
+                    ComboBoxStartupMode.SelectedIndex = (int)startupMode;
                 }
 
                 CardPPTOnlyMode.IsOn = settings.ModeSettings.IsPPTOnlyMode;
@@ -123,18 +126,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
         }
 
-        private void ToggleSwitchFastStartup_Toggled(object sender, RoutedEventArgs e)
+        private void ComboBoxStartupMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!_isLoaded) return;
 
             try
             {
-                SettingsManager.Settings.Startup.EnableFastStartup = ToggleSwitchFastStartup.IsOn;
+                int selectedIndex = ComboBoxStartupMode.SelectedIndex;
+                if (!Enum.IsDefined(typeof(StartupMode), selectedIndex)) return;
+
+                SettingsManager.Settings.Startup.StartupMode = (StartupMode)selectedIndex;
                 SettingsManager.SaveSettingsToFile();
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"设置快速启动模式时出错: {ex.Message}");
+                Debug.WriteLine($"设置启动模式时出错: {ex.Message}");
             }
         }
 

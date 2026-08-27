@@ -50,13 +50,18 @@
                              Toggled="ToggleSwitchFoldAtStartup_Toggled" />
         </ui:SettingsCard>
 
-        <ui:SettingsCard Header="{x:Static props:StartupStrings.FastStartup}"
-                         Description="{x:Static props:StartupStrings.FastStartupHint}">
+        <ui:SettingsCard Header="{x:Static props:StartupStrings.StartupMode}"
+                         Description="{x:Static props:StartupStrings.StartupModeHint}">
             <ui:SettingsCard.HeaderIcon>
                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
             </ui:SettingsCard.HeaderIcon>
-            <ui:ToggleSwitch x:Name="ToggleSwitchFastStartup"
-                             Toggled="ToggleSwitchFastStartup_Toggled" />
+            <ComboBox x:Name="ComboBoxStartupMode"
+                      SelectedIndex="0"
+                      SelectionChanged="ComboBoxStartupMode_SelectionChanged">
+                <ComboBoxItem Content="{x:Static props:StartupStrings.StartupMode_Default}" />
+                <ComboBoxItem Content="{x:Static props:StartupStrings.StartupMode_Faster}" />
+                <ComboBoxItem Content="{x:Static props:StartupStrings.StartupMode_Fastest}" />
+            </ComboBox>
         </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardPPTOnlyMode"

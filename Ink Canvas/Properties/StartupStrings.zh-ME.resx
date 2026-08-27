@@ -60,11 +60,20 @@
   <data name="ExternalProtocolHint" xml:space="preserve">
     <value>通过 icc:// 协议从外部召唤控制软件</value>
   </data>
-  <data name="FastStartup" xml:space="preserve">
-    <value>快速启动先起飞再装货</value>
+  <data name="StartupMode" xml:space="preserve">
+    <value>启动姿势选一档</value>
   </data>
-  <data name="FastStartupHint" xml:space="preserve">
-    <value>先把主界面尽快端上来，插件、PPT、通知、自动化和监控等非首屏功能等启动后再慢慢加载。下次启动生效。</value>
+  <data name="StartupModeHint" xml:space="preserve">
+    <value>选择软件起飞时先装哪批货：默认档使用普通启动顺序，更快档使用当前优化顺序，最快档先把主界面端上来再慢慢加载非首屏功能。下次启动生效。</value>
+  </data>
+  <data name="StartupMode_Default" xml:space="preserve">
+    <value>稳扎稳打默认档</value>
+  </data>
+  <data name="StartupMode_Faster" xml:space="preserve">
+    <value>加速起飞更快档</value>
+  </data>
+  <data name="StartupMode_Fastest" xml:space="preserve">
+    <value>弹射起飞最快档</value>
   </data>
   <data name="FixVersionHint" xml:space="preserve">
     <value>版本修复会根据当前通道下载最新版本并安装，软件装坏了可以用这个抢救</value>
