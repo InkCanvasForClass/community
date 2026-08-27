@@ -52,9 +52,15 @@ namespace Ink_Canvas.Properties
 
         public static string ExternalProtocolHint => ResourceManager.GetString(nameof(ExternalProtocolHint), _resourceCulture);
 
-        public static string FastStartup => ResourceManager.GetString(nameof(FastStartup), _resourceCulture);
+        public static string StartupMode => ResourceManager.GetString(nameof(StartupMode), _resourceCulture);
 
-        public static string FastStartupHint => ResourceManager.GetString(nameof(FastStartupHint), _resourceCulture);
+        public static string StartupModeHint => ResourceManager.GetString(nameof(StartupModeHint), _resourceCulture);
+
+        public static string StartupMode_Default => ResourceManager.GetString(nameof(StartupMode_Default), _resourceCulture);
+
+        public static string StartupMode_Faster => ResourceManager.GetString(nameof(StartupMode_Faster), _resourceCulture);
+
+        public static string StartupMode_Fastest => ResourceManager.GetString(nameof(StartupMode_Fastest), _resourceCulture);
 
         public static string FixVersionHint => ResourceManager.GetString(nameof(FixVersionHint), _resourceCulture);
 

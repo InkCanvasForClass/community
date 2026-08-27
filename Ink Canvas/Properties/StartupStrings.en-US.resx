@@ -60,11 +60,20 @@
   <data name="ExternalProtocolHint" xml:space="preserve">
     <value>Control via icc:// protocol</value>
   </data>
-  <data name="FastStartup" xml:space="preserve">
-    <value>Fast startup mode</value>
+  <data name="StartupMode" xml:space="preserve">
+    <value>Startup mode</value>
   </data>
-  <data name="FastStartupHint" xml:space="preserve">
-    <value>Show the main interface sooner and load non-essential features such as plugins, PowerPoint integration, notifications, automation, and monitoring after startup. Takes effect on next launch.</value>
+  <data name="StartupModeHint" xml:space="preserve">
+    <value>Choose the order in which features load. Default uses the normal startup order; Faster uses the current optimized order; Fastest shows the main interface first and defers non-essential features. Takes effect on next launch.</value>
+  </data>
+  <data name="StartupMode_Default" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="StartupMode_Faster" xml:space="preserve">
+    <value>Faster</value>
+  </data>
+  <data name="StartupMode_Fastest" xml:space="preserve">
+    <value>Fastest</value>
   </data>
   <data name="FixVersionHint" xml:space="preserve">
     <value>Downloads and reinstalls the latest build from the selected channel to fix broken installations.</value>

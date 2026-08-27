@@ -92,8 +92,11 @@ namespace Ink_Canvas
         public static bool StartWithBoardMode = false;
         // 新增：标记是否通过--show参数启动
         public static bool StartWithShowMode = false;
-        // 新增：是否启用快速启动模式（默认关闭）
-        public static bool IsFastStartupEnabled { get; private set; }
+        // 当前启动模式由 Settings.json 在主窗口创建前确定。
+        public static StartupMode CurrentStartupMode { get; private set; } = StartupMode.Default;
+        public static bool IsDefaultStartupMode => CurrentStartupMode == StartupMode.Default;
+        public static bool IsFasterStartupMode => CurrentStartupMode == StartupMode.Faster;
+        public static bool IsFastestStartupMode => CurrentStartupMode == StartupMode.Fastest;
         // 新增：保存看门狗进程对象
         public static Process watchdogProcess;
         // 新增：标记是否为软件内主动退出
@@ -1051,8 +1054,8 @@ namespace Ink_Canvas
 
             // 从缓存设置同步 CrashAction（替代原构造函数中的 SyncCrashActionFromSettings）
             SyncCrashActionFromParsed(parsedSettings);
-            IsFastStartupEnabled = IsFastStartupEnabledFromParsed(parsedSettings);
-            LogHelper.WriteLogToFile($"App | 快速启动模式: {(IsFastStartupEnabled ? "启用" : "关闭")}");
+            CurrentStartupMode = GetStartupModeFromParsed(parsedSettings);
+            LogHelper.WriteLogToFile($"App | 启动模式: {CurrentStartupMode}");
 
             TryApplyPreferredLanguageFromParsedSettings(parsedSettings);
 
@@ -1070,6 +1073,12 @@ namespace Ink_Canvas
                 // 形成可见卡顿甚至死锁。此处直接返回，依靠 Splash 自身 Loaded 事件完成首帧渲染即可。
                 Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
             }
+
+            if (IsDefaultStartupMode)
+            {
+                await Task.Delay(100);
+            }
+
             RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
             var version = Assembly.GetExecutingAssembly().GetName().Version;
@@ -1118,6 +1127,10 @@ namespace Ink_Canvas
             {
                 SetSplashMessage("正在加载配置...");
                 SetSplashProgress(50);
+                if (IsDefaultStartupMode)
+                {
+                    await Task.Delay(100);
+                }
             }
 
             // 处理更新模式启动
@@ -1380,8 +1393,8 @@ namespace Ink_Canvas
                 string mutexName = isFinalApp ? "InkCanvasForClass CE Final" : "InkCanvasForClass CE Update";
                 mutex = new Mutex(true, mutexName, out bool tempRet);
 
-                // 额外等待一小段时间确保更新进程完全退出
-                await Task.Delay(100);
+                // 默认模式沿用 1.7.19.4 的等待时序；优化模式保留当前短等待。
+                await Task.Delay(IsDefaultStartupMode ? 1000 : 100);
                 LogHelper.WriteLogToFile("App | 特殊模式等待完成，继续启动");
             }
 
@@ -1398,8 +1411,8 @@ namespace Ink_Canvas
             var mainWindow = new MainWindow();
             MainWindow = mainWindow;
 
-            // 注册插件服务。快速启动模式下将服务注册延迟到首帧显示之后，避免插件相关对象阻塞主窗口创建。
-            if (!IsFastStartupEnabled)
+            // 最快模式将插件服务注册延迟到首帧显示之后，其他模式在显示主窗口前注册。
+            if (!IsFastestStartupMode)
             {
                 RegisterPluginServices(mainWindow);
             }
@@ -1447,10 +1460,19 @@ namespace Ink_Canvas
             mainWindow.Show();
             MemoryBreakdownHelper.StartAutomaticDumpMonitor();
 
-            if (IsFastStartupEnabled)
+            if (IsFastestStartupMode)
             {
-                _ = RunFastStartupPostRenderTasksAsync(mainWindow);
+                _ = RunFastestStartupPostRenderTasksAsync(mainWindow);
                 _ = Dispatcher.BeginInvoke(new Action(() => _taskbar?.ForceCreate()), DispatcherPriority.ContextIdle);
+            }
+            else if (IsDefaultStartupMode)
+            {
+                WindowTopmostManager.Initialize(mainWindow);
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(600);
+                    Dispatcher.Invoke(() => _taskbar?.ForceCreate());
+                });
             }
             else
             {
@@ -1476,7 +1498,7 @@ namespace Ink_Canvas
             _ = RunDeferredStartupTasksAsync();
         }
 
-        private async Task RunFastStartupPostRenderTasksAsync(MainWindow mainWindow)
+        private async Task RunFastestStartupPostRenderTasksAsync(MainWindow mainWindow)
         {
             try
             {
@@ -1485,11 +1507,11 @@ namespace Ink_Canvas
 
                 RegisterPluginServices(mainWindow);
                 WindowTopmostManager.Initialize(mainWindow, skipScan: true);
-                LogHelper.WriteLogToFile("App | 快速启动模式的应用级延迟任务已开始");
+                LogHelper.WriteLogToFile("App | 最快启动模式的应用级延迟任务已开始");
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"App | 快速启动模式延迟初始化失败: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"App | 最快启动模式延迟初始化失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -1497,7 +1519,7 @@ namespace Ink_Canvas
         {
             try
             {
-                await Task.Delay(IsFastStartupEnabled ? 1200 : 400);
+                await Task.Delay(IsFastestStartupMode ? 1200 : 400);
 
                 try
                 {
@@ -1643,18 +1665,36 @@ namespace Ink_Canvas
             return _cachedParsedSettings;
         }
 
-        private static bool IsFastStartupEnabledFromParsed(dynamic parsedSettings)
+        private static StartupMode GetStartupModeFromParsed(dynamic parsedSettings)
         {
             try
             {
-                return parsedSettings?["startup"]?["enableFastStartup"] != null &&
-                       (bool)parsedSettings["startup"]["enableFastStartup"];
+                string startupModeValue = parsedSettings?["startup"]?["startupMode"]?.ToString();
+                if (!string.IsNullOrWhiteSpace(startupModeValue))
+                {
+                    if (int.TryParse(startupModeValue, out int startupMode) &&
+                        Enum.IsDefined(typeof(StartupMode), startupMode))
+                    {
+                        return (StartupMode)startupMode;
+                    }
+
+                    return StartupMode.Default;
+                }
+
+                // 旧版二态设置迁移：关闭对应当前普通顺序（更快），开启对应当前快速顺序（最快）。
+                if (parsedSettings?["startup"]?["enableFastStartup"] != null)
+                {
+                    return (bool)parsedSettings["startup"]["enableFastStartup"]
+                        ? StartupMode.Fastest
+                        : StartupMode.Faster;
+                }
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"检查快速启动设置失败: {ex.Message}", LogHelper.LogType.Warning);
-                return false;
+                LogHelper.WriteLogToFile($"检查启动模式设置失败: {ex.Message}", LogHelper.LogType.Warning);
             }
+
+            return StartupMode.Default;
         }
 
         private void TryApplyPreferredLanguageFromParsedSettings(dynamic parsedSettings)

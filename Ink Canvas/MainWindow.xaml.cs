@@ -1473,16 +1473,16 @@ namespace Ink_Canvas
             // 工具栏插件化按钮先注入到容器，确保 LoadSettings 内部对 Cursor_Icon / Pen_Icon 等的访问非空。
             // Settings.Toolbar 此时尚为默认值（全部可见），与旧 XAML 行为一致。
             InitializeToolbarPlugins();
-            // 初始化 Popup 管理器（置顶 + 拖动跟随）。快速启动模式下延迟到首帧之后。
-            if (!App.IsFastStartupEnabled)
+            // 初始化 Popup 管理器（置顶 + 拖动跟随）。最快模式下延迟到首帧之后。
+            if (!App.IsFastestStartupMode)
             {
                 InitializePopupManager();
             }
             // 加载设置
             LoadSettings(true);
-            // 启动性能监测（如果已启用）。快速启动模式下延迟到首帧之后。
+            // 启动性能监测（如果已启用）。最快模式下延迟到首帧之后。
             // 实时笔迹详细调试日志独立于性能监测，由 Debug 页开关控制，默认关闭。
-            if (!App.IsFastStartupEnabled)
+            if (!App.IsFastestStartupMode)
             {
                 PerformanceMonitorHelper.StartIfEnabled();
                 RealtimeInkPerformanceMonitor.StartIfEnabled();
@@ -1494,6 +1494,12 @@ namespace Ink_Canvas
             {
                 if (IsInPPTPresentationMode) ViewboxFloatingBarMarginAnimation(60, skipAnimation: true);
                 else ViewboxFloatingBarMarginAnimation(100, true, skipAnimation: true);
+            }
+
+            // 默认模式沿用 1.7.19.4：通知与自动化在 Window_Loaded 中初始化。
+            if (App.IsDefaultStartupMode)
+            {
+                InitializeNotificationAndAutomationForStartup();
             }
 
             // 启动时根据设置恢复调试控制台显示状态
@@ -1535,6 +1541,12 @@ namespace Ink_Canvas
 
             isLoaded = true;
 
+            // 默认模式沿用 1.7.19.4：RealtimeStylus 与画板工具栏在首屏加载阶段完成。
+            if (App.IsDefaultStartupMode)
+            {
+                InitializeRealtimeAndBoardForStartup();
+            }
+
             // 应用颜色主题，这将考虑自定义背景色
             CheckColorTheme(true);
             ApplyFloatingBarTheme();
@@ -1543,8 +1555,8 @@ namespace Ink_Canvas
             BorderInkReplayToolBox.Visibility = Visibility.Collapsed;
 
             // 识别后端预热改为后台低优先级执行，避免启动主线程被 WinRT 初始化拖慢。
-            // 快速启动模式下由第二阶段统一延迟。
-            if (!App.IsFastStartupEnabled && ShapeRecognitionRouter.ShouldRunShapeRecognition(
+            // 最快模式下由第二阶段统一延迟。
+            if (!App.IsFastestStartupMode && ShapeRecognitionRouter.ShouldRunShapeRecognition(
                     Settings.InkToShape.IsInkToShapeEnabled,
                     ShapeRecognitionRouter.FromSettingsInt(Settings.InkToShape.ShapeRecognitionEngine)))
             {
@@ -2575,28 +2587,8 @@ namespace Ink_Canvas
             _popupManager?.OnOwnerActivated();
         }
 
-        private async Task RunDeferredStartupPhaseBAsync()
+        private void InitializeNotificationAndAutomationForStartup()
         {
-            if (_deferredPhaseBCompleted) return;
-            _deferredPhaseBCompleted = true;
-
-            await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ContextIdle);
-            await Task.Delay(App.IsFastStartupEnabled ? 1000 : 600);
-
-            if (App.IsFastStartupEnabled)
-            {
-                try
-                {
-                    InitializePopupManager();
-                    PerformanceMonitorHelper.StartIfEnabled();
-                    RealtimeInkPerformanceMonitor.StartIfEnabled();
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"[MainWindow] 快速启动延迟基础服务初始化出错: {ex.Message}", LogHelper.LogType.Error);
-                }
-            }
-
             try
             {
                 InitializeNotificationProviders();
@@ -2614,17 +2606,10 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"[MainWindow] 初始化自动化系统时出错: {ex.Message}", LogHelper.LogType.Error);
             }
+        }
 
-            // 后移的非首屏初始化
-            if (App.IsFastStartupEnabled &&
-                ShapeRecognitionRouter.ShouldRunShapeRecognition(
-                    Settings.InkToShape.IsInkToShapeEnabled,
-                    ShapeRecognitionRouter.FromSettingsInt(Settings.InkToShape.ShapeRecognitionEngine)))
-            {
-                _ = Task.Run(() => InkRecognizeHelper.WarmupShapeRecognition(
-                    ShapeRecognitionRouter.FromSettingsInt(Settings.InkToShape.ShapeRecognitionEngine)));
-            }
-
+        private void InitializeRealtimeAndBoardForStartup()
+        {
             try
             {
                 EnsureRealtimeStylusPipelineBinding();
@@ -2663,6 +2648,52 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"[MainWindow] 黑板工具栏初始化出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private async Task RunDeferredStartupPhaseBAsync()
+        {
+            if (_deferredPhaseBCompleted) return;
+            _deferredPhaseBCompleted = true;
+
+            if (!App.IsDefaultStartupMode)
+            {
+                await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ContextIdle);
+            }
+            await Task.Delay(App.IsFastestStartupMode ? 1000 : 600);
+
+            if (App.IsFastestStartupMode)
+            {
+                try
+                {
+                    InitializePopupManager();
+                    PerformanceMonitorHelper.StartIfEnabled();
+                    RealtimeInkPerformanceMonitor.StartIfEnabled();
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[MainWindow] 最快启动延迟基础服务初始化出错: {ex.Message}", LogHelper.LogType.Error);
+                }
+            }
+
+            if (!App.IsDefaultStartupMode)
+            {
+                InitializeNotificationAndAutomationForStartup();
+            }
+
+            // 后移的非首屏初始化
+            if (App.IsFastestStartupMode &&
+                ShapeRecognitionRouter.ShouldRunShapeRecognition(
+                    Settings.InkToShape.IsInkToShapeEnabled,
+                    ShapeRecognitionRouter.FromSettingsInt(Settings.InkToShape.ShapeRecognitionEngine)))
+            {
+                _ = Task.Run(() => InkRecognizeHelper.WarmupShapeRecognition(
+                    ShapeRecognitionRouter.FromSettingsInt(Settings.InkToShape.ShapeRecognitionEngine)));
+            }
+
+            if (!App.IsDefaultStartupMode)
+            {
+                InitializeRealtimeAndBoardForStartup();
             }
 
             try
