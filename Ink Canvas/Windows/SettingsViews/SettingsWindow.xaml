@@ -468,7 +468,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
 
                 <!-- 自动化 -->
                 <ui:NavigationViewItem
-                    x:Name="AutomationPageItem"
+                    x:Name="AutomationWorkflowPageItem"
                     Content="{x:Static props:AutomationStrings.Automation_Title}"
                     Tag="AutomationWorkflowPage"
                     ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Automation_Settings}">
