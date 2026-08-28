@@ -669,7 +669,7 @@ namespace Ink_Canvas
                 if (mode != "clear")
                 {
                     if (Cursor_Icon != null) { if (!ToolbarRegistry.GetUseRedStyle(Cursor_Icon)) Cursor_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); Cursor_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("cursor", false)); }
-                    if (Pen_Icon != null) { if (!ToolbarRegistry.GetUseRedStyle(Pen_Icon)) Pen_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); Pen_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("pen", false)); }
+                    if (Pen_Icon != null) { if (!ToolbarRegistry.GetUseRedStyle(Pen_Icon)) Pen_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); Pen_Icon.ClearIconInnerOutline(); Pen_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("pen", false)); }
                     if (EraserByStrokes_Icon != null) { if (!ToolbarRegistry.GetUseRedStyle(EraserByStrokes_Icon)) EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); EraserByStrokes_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("eraserStroke", false)); }
                     if (Eraser_Icon != null) { if (!ToolbarRegistry.GetUseRedStyle(Eraser_Icon)) Eraser_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); Eraser_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("eraserCircle", false)); }
                     if (SymbolIconSelect != null) { if (!ToolbarRegistry.GetUseRedStyle(SymbolIconSelect)) SymbolIconSelect.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); SymbolIconSelect.Icon.Geometry = Geometry.Parse(GetCorrectIcon("lassoSelect", false)); }
@@ -723,6 +723,11 @@ namespace Ink_Canvas
                                         Pen_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
                                 }
                                 Pen_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("pen", true));
+                                // 几何更新后再应用描边，确保描边跟随当前图标几何
+                                if (Settings.Appearance.ShowPenColorOnFloatingBarIcon)
+                                    ApplyPenIconOutlineForContrast();
+                                else
+                                    Pen_Icon.ClearIconInnerOutline();
                             }
                             if (boardPen != null)
                             {
@@ -5412,14 +5417,84 @@ namespace Ink_Canvas
         /// </summary>
         internal void UpdatePenIconColor()
         {
-            if (!Settings.Appearance.ShowPenColorOnFloatingBarIcon) return;
             if (Pen_Icon == null || Pen_Icon.Icon == null) return;
-            if (_currentToolMode != "pen" && _currentToolMode != "color") return;
+
+            if (!Settings.Appearance.ShowPenColorOnFloatingBarIcon
+                || (_currentToolMode != "pen" && _currentToolMode != "color"))
+            {
+                Pen_Icon.ClearIconInnerOutline();
+                return;
+            }
 
             try
             {
                 var inkColor = inkCanvas.DefaultDrawingAttributes.Color;
                 Pen_Icon.Icon.Brush = new SolidColorBrush(inkColor);
+                ApplyPenIconOutlineForContrast();
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// 计算两个颜色之间的 WCAG 相对对比度（范围约 1~21，值越大对比越强）。
+        /// </summary>
+        private static double GetColorContrastRatio(Color color1, Color color2)
+        {
+            static double Luminance(Color c)
+            {
+                double Channel(double v)
+                {
+                    v /= 255d;
+                    return v <= 0.03928 ? v / 12.92 : Math.Pow((v + 0.055) / 1.055, 2.4);
+                }
+
+                return 0.2126 * Channel(c.R) + 0.7152 * Channel(c.G) + 0.0722 * Channel(c.B);
+            }
+
+            double l1 = Luminance(color1);
+            double l2 = Luminance(color2);
+            return (Math.Max(l1, l2) + 0.05) / (Math.Min(l1, l2) + 0.05);
+        }
+
+        /// <summary>
+        /// 获取浮动栏当前背景色（跟随主题），用于判断批注图标是否清晰可见。
+        /// </summary>
+        private Color GetFloatingBarBackgroundColor()
+        {
+            try
+            {
+                if (Application.Current.TryFindResource("FloatBarBackground") is SolidColorBrush backgroundBrush)
+                    return backgroundBrush.Color;
+            }
+            catch { }
+
+            bool isDarkTheme = Settings.Appearance.Theme == 1 ||
+                                (Settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
+            return isDarkTheme ? Color.FromRgb(0x1A, 0x1C, 0x1E) : Colors.White;
+        }
+
+        /// <summary>
+        /// 当批注图标使用画笔颜色且与浮动栏背景对比度过低时，为图标添加向内描边，
+        /// 避免图标与背景融为一体导致“消失”；对比度足够时移除描边。
+        /// 注意：需在图标 Geometry 更新之后调用，描边才能跟随当前几何。
+        /// </summary>
+        private void ApplyPenIconOutlineForContrast()
+        {
+            if (Pen_Icon == null || Pen_Icon.Icon == null) return;
+
+            try
+            {
+                var inkColor = inkCanvas.DefaultDrawingAttributes.Color;
+                if (GetColorContrastRatio(inkColor, GetFloatingBarBackgroundColor()) < 2.5)
+                {
+                    // 描边使用浮动栏前景色（浅色主题为黑色、深色主题为白色），保证与背景形成足够反差；
+                    // 向内描边不会改变图标的视觉大小
+                    Pen_Icon.SetIconInnerOutline(new SolidColorBrush(FloatBarForegroundColor), 1.0);
+                }
+                else
+                {
+                    Pen_Icon.ClearIconInnerOutline();
+                }
             }
             catch { }
         }
@@ -5477,6 +5552,7 @@ namespace Ink_Canvas
                     if (button == null) return;
                     if (!ToolbarRegistry.GetUseRedStyle(button))
                         button.Icon.Brush = foregroundBrush;
+                    button.ClearIconInnerOutline();
                     button.Icon.Geometry = Geometry.Parse(GetCorrectIcon(iconType, false));
                 }
 
@@ -5527,6 +5603,11 @@ namespace Ink_Canvas
                             targetButton.Icon.Brush = new SolidColorBrush(highlightBarColor);
                     }
                     targetButton.Icon.Geometry = Geometry.Parse(GetCorrectIcon(targetIconType, true));
+                    // 几何更新后再应用描边，确保描边跟随当前图标几何
+                    if (Settings.Appearance.ShowPenColorOnFloatingBarIcon && targetButton == Pen_Icon)
+                        ApplyPenIconOutlineForContrast();
+                    else
+                        targetButton.ClearIconInnerOutline();
                 }
             }
             catch (Exception ex)

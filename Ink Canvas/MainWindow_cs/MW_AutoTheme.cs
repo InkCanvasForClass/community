@@ -93,6 +93,8 @@ namespace Ink_Canvas
             {
                 FloatBarForegroundColor = (Color)Application.Current.FindResource("FloatBarForegroundColor");
                 RefreshFloatingBarButtonColors();
+                // 主题切换后浮动栏背景变化，重新评估批注图标描边是否需要
+                UpdatePenIconColor();
             }
             catch (Exception)
             {
