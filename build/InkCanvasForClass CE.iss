@@ -12,22 +12,23 @@
 
 [Setup]
 ; 注意：AppId 的值唯一标识此应用程序。不要在其他应用程序的安装程序中使用相同的 AppId 值。
+; (若要生成新的 GUID，请在 IDE 中单击 "工具|生成 GUID"。)
 AppId={{CA801226-FD02-4C78-BCF8-753B38E70CB3}}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
+;AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-
-; ✅ 核心修改：使用自定义函数获取当前交互式用户的 LocalAppData，确保管理员/普通用户路径一致
-DefaultDirName={code:GetCurrentUserLocalAppData}\{#MyAppName}
-
+DefaultDirName={localappdata}\{#MyAppName}
 UninstallDisplayIcon={app}\{#MyAppExeName}
 ChangesAssociations=yes
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 LicenseFile=LICENSE
+; 取消注释以下行以在非管理员安装模式下运行 (仅为当前用户安装)。
+PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=.
 OutputBaseFilename=InkCanvasForClass CE Setup
@@ -44,6 +45,7 @@ Name: "dotnet6"; Description: "下载并安装 .NET Runtime 6 (运行本程序�
 
 [Files]
 Source: "release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; 注意：不要在任何共享系统文件上使用 "Flags: ignoreversion" 
 
 [Registry]
 Root: HKA; Subkey: "Software\Classes\{#MyAppAssocExt}\OpenWithProgids"; ValueType: string; ValueName: "{#MyAppAssocKey}"; ValueData: ""; Flags: uninsdeletevalue
@@ -61,35 +63,6 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 [Code]
-// ✅ 核心函数：始终返回当前交互式用户的 LocalAppData 路径
-// 无论是否以管理员权限运行，都绑定到启动安装程序的原始用户
-function GetCurrentUserLocalAppData(Param: String): String;
-var
-  UserAppData: String;
-begin
-  // 1. 优先读取 LOCALAPPDATA 环境变量
-  UserAppData := GetEnv('LOCALAPPDATA');
-  
-  // 2. UAC 提权后环境变量可能指向 systemprofile，需通过注册表修正
-  if (UserAppData = '') or (Pos('systemprofile', Lowercase(UserAppData)) > 0) then
-  begin
-    if RegQueryStringValue(HKEY_CURRENT_USER, 
-        'Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders', 
-        'Local AppData', UserAppData) then
-    begin
-      // ExpandConstantEx 展开 %USERPROFILE% 等未解析的环境变量
-      // 参数 False, False 确保在非安装上下文中正确解析
-      UserAppData := ExpandConstantEx(UserAppData, False, False);
-    end;
-  end;
-  
-  // 3. 最终兜底：通过 USERPROFILE 拼接
-  if (UserAppData = '') or (Pos('systemprofile', Lowercase(UserAppData)) > 0) then
-    UserAppData := GetEnv('USERPROFILE') + '\AppData\Local';
-    
-  Result := UserAppData;
-end;
-
 var
   DownloadPage: TDownloadWizardPage;
 
@@ -173,5 +146,5 @@ begin
         DeleteFile(DotNetInstallerPath);
       end;
     end;
-  end;
+  end
 end;
