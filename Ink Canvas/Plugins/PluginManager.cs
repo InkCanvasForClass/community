@@ -115,7 +115,7 @@ namespace Ink_Canvas.Plugins
             LoadDisabledPlugins();
 
             // 让默认 ALC 能看到插件目录里的依赖程序集。WPF XAML 解析器对部分程序集请求
-            // （如 "iNKORE.UI.WPF.Modern, Culture=neutral, PublicKeyToken=..."，通常不带版本号）
+            // （如 "WpfUiCompat, Culture=neutral, PublicKeyToken=..."，通常不带版本号）
             // 会走默认 ALC 的 Assembly.Load，不进入插件 ALC 的 Load 重载。若插件自带依赖 DLL
             // 但默认 ALC 解析不到（宿主 Costura 只内嵌宿主自身的副本），插件设置页的 XAML
             // 解析就会抛 XamlParseException。这里按插件目录逐个探测 <插件目录>/<名称>.dll 兜底。
@@ -171,7 +171,7 @@ namespace Ink_Canvas.Plugins
         /// </summary>
         private static bool IsSharedUiDependency(string simpleName)
         {
-            return simpleName.StartsWith("iNKORE.UI.WPF", StringComparison.OrdinalIgnoreCase)
+            return simpleName.StartsWith("WpfUiCompat", StringComparison.OrdinalIgnoreCase)
                 || simpleName.StartsWith("InkCanvas.Controls", StringComparison.OrdinalIgnoreCase)
                 || simpleName.StartsWith("InkCanvas.PluginSdk", StringComparison.OrdinalIgnoreCase);
         }

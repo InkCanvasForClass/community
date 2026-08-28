@@ -3,7 +3,7 @@ using Ink_Canvas.Models;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using MessageBox = WpfUiCompat.Controls.MessageBox;
 
 namespace Ink_Canvas.Windows
 {

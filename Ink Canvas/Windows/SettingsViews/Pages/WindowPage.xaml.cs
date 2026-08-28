@@ -6,11 +6,11 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using MessageBox = WpfUiCompat.Controls.MessageBox;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
-    public partial class WindowPage : iNKORE.UI.WPF.Modern.Controls.Page
+    public partial class WindowPage : WpfUiCompat.Controls.Page
     {
         private bool _isLoaded = false;
         private bool _isAdmin = false;

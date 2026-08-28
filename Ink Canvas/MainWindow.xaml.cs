@@ -7,8 +7,8 @@ using Ink_Canvas.Windows;
 using Ink_Canvas.Windows.SettingsViews;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Ink_Canvas.WorkflowAutomation;
-using iNKORE.UI.WPF.Modern;
-using iNKORE.UI.WPF.Modern.Controls;
+using WpfUiCompat;
+using WpfUiCompat.Controls;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -35,7 +35,7 @@ using Cursors = System.Windows.Input.Cursors;
 using DpiChangedEventArgs = System.Windows.DpiChangedEventArgs;
 using File = System.IO.File;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using MessageBox = WpfUiCompat.Controls.MessageBox;
 using Point = System.Windows.Point;
 using VerticalAlignment = System.Windows.VerticalAlignment;
 
@@ -1140,7 +1140,7 @@ namespace Ink_Canvas
         private void HighlighterOverlapToggle_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            var toggle = (iNKORE.UI.WPF.Modern.Controls.ToggleSwitch)sender;
+            var toggle = (WpfUiCompat.Controls.ToggleSwitch)sender;
             Settings.Canvas.HighlighterOverlapEnabled = toggle.IsOn;
             if (penType == 1)
             {
@@ -2244,7 +2244,7 @@ namespace Ink_Canvas
         }
 
         // 添加一个辅助方法，根据当前编辑模式设置光标
-        public void SetCursorBasedOnEditingMode(InkCanvas canvas)
+        public void SetCursorBasedOnEditingMode(System.Windows.Controls.InkCanvas canvas)
         {
             // 套索选择模式下光标始终显示，无论用户设置如何
             if (canvas.EditingMode == InkCanvasEditingMode.Select)

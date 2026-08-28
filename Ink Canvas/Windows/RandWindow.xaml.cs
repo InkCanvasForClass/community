@@ -1,5 +1,5 @@
 using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using WpfUiCompat.Common.IconKeys;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using MessageBox = WpfUiCompat.Controls.MessageBox;
 
 namespace Ink_Canvas
 {

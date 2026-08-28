@@ -162,20 +162,20 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         private static bool IsIsOnControl(FrameworkElement element)
         {
             return element is LabeledSettingsCard
-                || element is iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
+                || element is WpfUiCompat.Controls.ToggleSwitch;
         }
 
         private static bool GetIsOn(FrameworkElement element)
         {
             if (element is LabeledSettingsCard lsc) return lsc.IsOn;
-            if (element is iNKORE.UI.WPF.Modern.Controls.ToggleSwitch ts) return ts.IsOn;
+            if (element is WpfUiCompat.Controls.ToggleSwitch ts) return ts.IsOn;
             return false;
         }
 
         private static void SetIsOn(FrameworkElement element, bool value)
         {
             if (element is LabeledSettingsCard lsc) lsc.IsOn = value;
-            else if (element is iNKORE.UI.WPF.Modern.Controls.ToggleSwitch ts) ts.IsOn = value;
+            else if (element is WpfUiCompat.Controls.ToggleSwitch ts) ts.IsOn = value;
         }
 
         private static void ApplyValueToControl(FrameworkElement element, object value)
@@ -210,7 +210,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                         InvokeSettingsChanged(element, lsc.IsOn);
                     };
                 }
-                else if (element is iNKORE.UI.WPF.Modern.Controls.ToggleSwitch ts)
+                else if (element is WpfUiCompat.Controls.ToggleSwitch ts)
                 {
                     ts.Toggled += (s, e) =>
                     {

@@ -17,7 +17,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         public string Role { get; set; }
     }
 
-    public partial class AboutPage : iNKORE.UI.WPF.Modern.Controls.Page
+    public partial class AboutPage : WpfUiCompat.Controls.Page
     {
         private DispatcherTimer _usageRefreshTimer;
         private long _savedTotalSeconds;

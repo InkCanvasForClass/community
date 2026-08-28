@@ -3,7 +3,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using Page = WpfUiCompat.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {

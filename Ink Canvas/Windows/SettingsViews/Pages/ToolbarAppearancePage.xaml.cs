@@ -5,7 +5,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using Page = WpfUiCompat.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -498,14 +498,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (mw == null) return;
 
             var content = new AddCustomIconWindow(mw);
-            var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+            var dialog = new WpfUiCompat.Controls.ContentDialog
             {
                 Title = Properties.RandomStrings.Random_AddIcon_WindowTitle,
                 Content = content,
                 PrimaryButtonText = FloatingBarStrings.Tools_Save,
                 CloseButtonText = Properties.RandomStrings.Random_Cancel,
                 Owner = Window.GetWindow(this) ?? mw,
-                DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Primary
+                DefaultButton = WpfUiCompat.Controls.ContentDialogButton.Primary
             };
 
             content.OnInputChanged += () =>
@@ -534,13 +534,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (mw == null) return;
 
             var content = new CustomIconWindow(mw);
-            var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+            var dialog = new WpfUiCompat.Controls.ContentDialog
             {
                 Title = Properties.ThemeStrings.Theme_CustomFloatingIconLabel,
                 Content = content,
                 CloseButtonText = Properties.NotificationStrings.AnimationOff,
                 Owner = Window.GetWindow(this) ?? mw,
-                DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Close
+                DefaultButton = WpfUiCompat.Controls.ContentDialogButton.Close
             };
             await dialog.ShowAsync();
         }

@@ -18,7 +18,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using Page = WpfUiCompat.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {

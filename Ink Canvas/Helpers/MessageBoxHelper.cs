@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using MessageBox = WpfUiCompat.Controls.MessageBox;
 
 namespace Ink_Canvas.Helpers
 {

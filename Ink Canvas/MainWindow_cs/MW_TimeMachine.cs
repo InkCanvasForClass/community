@@ -109,11 +109,11 @@ namespace Ink_Canvas
         /// 6. ElementInsert: 处理元素插入操作
         /// </remarks>
         /// <param name="elementsRemovedInThisPage"></param>
-        private void ApplyHistoryToCanvas(TimeMachineHistory item, InkCanvas applyCanvas = null, HashSet<UIElement> elementsRemovedInThisPage = null)
+        private void ApplyHistoryToCanvas(TimeMachineHistory item, System.Windows.Controls.InkCanvas applyCanvas = null, HashSet<UIElement> elementsRemovedInThisPage = null)
         {
             _currentCommitType = CommitReason.CodeInput;
             var canvas = inkCanvas;
-            if (applyCanvas != null && applyCanvas is InkCanvas)
+            if (applyCanvas != null && applyCanvas is System.Windows.Controls.InkCanvas)
             {
                 canvas = applyCanvas;
             }
@@ -359,7 +359,7 @@ namespace Ink_Canvas
         /// 创建一个临时画布，应用历史记录，然后返回画布中的笔画集合
         /// 只处理笔画历史，不处理图片元素历史
         /// </remarks>
-        private FrameworkElement RestoreEditedElement(UIElement current, string serializedState, InkCanvas canvas)
+        private FrameworkElement RestoreEditedElement(UIElement current, string serializedState, System.Windows.Controls.InkCanvas canvas)
         {
             if (current is not FrameworkElement currentElement || string.IsNullOrWhiteSpace(serializedState) || canvas == null)
                 return current as FrameworkElement;

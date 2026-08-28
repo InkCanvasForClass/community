@@ -1,4 +1,4 @@
-using iNKORE.UI.WPF.Modern.Controls;
+using WpfUiCompat.Controls;
 using System.Windows.Controls;
 
 namespace Ink_Canvas.Controls

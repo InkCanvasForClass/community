@@ -1,5 +1,5 @@
 using Ink_Canvas.Plugins;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using WpfUiCompat.Common.IconKeys;
 using System;
 using System.Collections.Generic;
 using System.Windows;

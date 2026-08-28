@@ -607,7 +607,7 @@ namespace Ink_Canvas
         public void UpdateCustomIconsInComboBox()
         {
             var page = Application.Current.Windows.OfType<Window>()
-                .SelectMany(w => FindVisualChildren<iNKORE.UI.WPF.Modern.Controls.NavigationView>(w))
+                .SelectMany(w => FindVisualChildren<WpfUiCompat.Controls.NavigationView>(w))
                 .SelectMany(nv => FindVisualChildren<Windows.SettingsViews.Pages.ToolbarAppearancePage>(nv))
                 .FirstOrDefault();
             if (page == null) return;
@@ -898,7 +898,7 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            var toggle = (iNKORE.UI.WPF.Modern.Controls.ToggleSwitch)sender;
+            var toggle = (WpfUiCompat.Controls.ToggleSwitch)sender;
             bool isOn = toggle.IsOn;
 
             if (sender == BoardToggleSwitchEnableTwoFingerZoom)
@@ -921,7 +921,7 @@ namespace Ink_Canvas
         private void ToggleSwitchEnableMultiTouchMode_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            var toggle = (iNKORE.UI.WPF.Modern.Controls.ToggleSwitch)sender;
+            var toggle = (WpfUiCompat.Controls.ToggleSwitch)sender;
             bool isOn = toggle.IsOn;
             bool isBoardSender = sender == BoardToggleSwitchEnableMultiTouchMode;
 
@@ -1040,7 +1040,7 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            var toggle = (iNKORE.UI.WPF.Modern.Controls.ToggleSwitch)sender;
+            var toggle = (WpfUiCompat.Controls.ToggleSwitch)sender;
             bool isOn = toggle.IsOn;
 
             if (sender == BoardToggleSwitchEnableTwoFingerTranslate)
@@ -1064,7 +1064,7 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            var toggle = (iNKORE.UI.WPF.Modern.Controls.ToggleSwitch)sender;
+            var toggle = (WpfUiCompat.Controls.ToggleSwitch)sender;
             bool isOn = toggle.IsOn;
 
             if (sender == BoardToggleSwitchEnableTwoFingerRotation)

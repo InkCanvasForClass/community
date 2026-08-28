@@ -1,5 +1,5 @@
 using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using WpfUiCompat.Common.IconKeys;
 using System;
 using System.Media;
 using System.Timers;

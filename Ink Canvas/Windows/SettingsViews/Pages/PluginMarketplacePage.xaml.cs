@@ -16,7 +16,7 @@ using System.Windows.Media;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
-    public partial class PluginMarketplacePage : iNKORE.UI.WPF.Modern.Controls.Page
+    public partial class PluginMarketplacePage : WpfUiCompat.Controls.Page
     {
         private readonly PluginMarketService _market = PluginMarketService.Instance;
         private string _searchText = "";
@@ -174,13 +174,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             try
             {
                 var content = new PluginMarketSourcesWindow(_market.Sources);
-                var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+                var dialog = new WpfUiCompat.Controls.ContentDialog
                 {
                     Title = PluginStrings.Market_ManageSources,
                     Content = content,
                     CloseButtonText = Properties.NotificationStrings.AnimationOff,
                     Owner = Window.GetWindow(this) ?? Application.Current?.MainWindow,
-                    DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Close,
+                    DefaultButton = WpfUiCompat.Controls.ContentDialogButton.Close,
                     Resources =
                     {
                         ["ContentDialogMaxWidth"] = 860d,
@@ -263,9 +263,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
         }
 
-        private iNKORE.UI.WPF.Modern.Controls.ListViewItem CreatePluginListItem(MergedPluginInfo p)
+        private WpfUiCompat.Controls.ListViewItem CreatePluginListItem(MergedPluginInfo p)
         {
-            var item = new iNKORE.UI.WPF.Modern.Controls.ListViewItem
+            var item = new WpfUiCompat.Controls.ListViewItem
             {
                 Padding = new Thickness(10),
                 Margin = new Thickness(0),
@@ -286,9 +286,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 CornerRadius = new CornerRadius(6),
                 Margin = new Thickness(0, 0, 10, 0),
                 VerticalAlignment = VerticalAlignment.Center,
-                Child = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+                Child = new WpfUiCompat.Controls.FontIcon
                 {
-                    Icon = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons.Puzzle,
+                    Icon = WpfUiCompat.Common.IconKeys.SegoeFluentIcons.Puzzle,
                     FontSize = 18,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center
@@ -343,9 +343,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 var btn = new Button { Padding = new Thickness(4), Tag = p.Id, ToolTip = PluginStrings.Market_Install };
                 btn.Click += InstallButton_Click;
-                btn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+                btn.Content = new WpfUiCompat.Controls.FontIcon
                 {
-                    Icon = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons.Download,
+                    Icon = WpfUiCompat.Common.IconKeys.SegoeFluentIcons.Download,
                     FontSize = 14
                 };
                 actionPanel.Children.Add(btn);
@@ -354,18 +354,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 var btn = new Button { Padding = new Thickness(4), Tag = p.Id, ToolTip = PluginStrings.Market_Update, Margin = new Thickness(4, 0, 0, 0) };
                 btn.Click += InstallButton_Click;
-                btn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+                btn.Content = new WpfUiCompat.Controls.FontIcon
                 {
-                    Icon = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons.Upload,
+                    Icon = WpfUiCompat.Common.IconKeys.SegoeFluentIcons.Upload,
                     FontSize = 14
                 };
                 actionPanel.Children.Add(btn);
             }
             if (p.IsLocal)
             {
-                var checkIcon = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+                var checkIcon = new WpfUiCompat.Controls.FontIcon
                 {
-                    Icon = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons.Completed,
+                    Icon = WpfUiCompat.Common.IconKeys.SegoeFluentIcons.Completed,
                     FontSize = 14,
                     Margin = new Thickness(4, 0, 0, 0),
                     Foreground = new SolidColorBrush((Color)Application.Current.FindResource("SystemAccentColor"))
@@ -418,7 +418,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var projectUrl = p.MarketEntry?.Manifest?.Url;
             if (string.IsNullOrWhiteSpace(projectUrl))
                 projectUrl = p.LocalInfo?.Manifest?.Url;
-            DetailUrl.NavigateUri = TryGetWebUri(projectUrl, out var homepage) ? homepage : null;
+            DetailUrl.NavigateUri = TryGetWebUri(projectUrl, out var homepage) ? homepage?.ToString() : null;
             DetailUrl.Visibility = DetailUrl.NavigateUri != null ? Visibility.Visible : Visibility.Collapsed;
 
             // 按钮状态
@@ -507,7 +507,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void PluginListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var selectedItem = PluginListBox.SelectedItem as iNKORE.UI.WPF.Modern.Controls.ListViewItem;
+            var selectedItem = PluginListBox.SelectedItem as WpfUiCompat.Controls.ListViewItem;
             var plugin = selectedItem?.Tag as MergedPluginInfo;
             if (plugin != null)
                 ShowDetail(plugin);

@@ -2,7 +2,7 @@ using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar.BoardToolbar;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
-using iNKORE.UI.WPF.Controls;
+using WpfUiCompat.Controls;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -12,7 +12,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
-using SegoeFluentIcons = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons;
+using SegoeFluentIcons = WpfUiCompat.Common.IconKeys.SegoeFluentIcons;
 
 namespace Ink_Canvas
 {
@@ -550,15 +550,15 @@ namespace Ink_Canvas
             var dragTrigger = new DataTrigger { Binding = new Binding(nameof(PageListViewItem.IsDragging)), Value = true };
             dragTrigger.Setters.Add(new Setter(UIElement.OpacityProperty, 0.7));
             dragTrigger.Setters.Add(new Setter(UIElement.EffectProperty, dragShadow));
-            var containerStyle = new Style(typeof(ListViewItem));
-            if (listView.TryFindResource(typeof(ListViewItem)) is Style implicitItemStyle)
+            var containerStyle = new Style(typeof(System.Windows.Controls.ListViewItem));
+            if (listView.TryFindResource(typeof(System.Windows.Controls.ListViewItem)) is Style implicitItemStyle)
                 containerStyle.BasedOn = implicitItemStyle;
             containerStyle.Setters.Add(new Setter(UIElement.OpacityProperty, 1.0));
             // 兜底：即使主题隐式样式缺失，也保持容器无背景无边框（避免默认白色 chrome）
             containerStyle.Setters.Add(new Setter(Control.BackgroundProperty, Brushes.Transparent));
             containerStyle.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
 
-            // 自定义容器模板：剥离主题 ListViewItem 模板（其左侧选中指示条无法通过
+            // 自定义容器模板：剥离主题 System.Windows.Controls.ListViewItem 模板（其左侧选中指示条无法通过
             // ListViewItemSelectionIndicatorVisualEnabled 资源可靠关闭，导致双蓝条），
             // 选中态完全由缩略图卡片内的镜像小蓝条呈现；悬停反馈由下面的触发器补充。
             var containerBorderFactory = new FrameworkElementFactory(typeof(Border));
@@ -568,7 +568,7 @@ namespace Ink_Canvas
             containerPresenterFactory.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Stretch);
             containerPresenterFactory.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Stretch);
             containerBorderFactory.AppendChild(containerPresenterFactory);
-            containerStyle.Setters.Add(new Setter(Control.TemplateProperty, new ControlTemplate(typeof(ListViewItem))
+            containerStyle.Setters.Add(new Setter(Control.TemplateProperty, new ControlTemplate(typeof(System.Windows.Controls.ListViewItem))
             {
                 VisualTree = containerBorderFactory
             }));
@@ -780,8 +780,8 @@ namespace Ink_Canvas
             deleteBtnFactory.SetBinding(UIElement.VisibilityProperty,
                 new System.Windows.Data.Binding("ShowDeleteButton") { Converter = boolToVis });
 
-            var fontIconFactory = new FrameworkElementFactory(typeof(iNKORE.UI.WPF.Modern.Controls.FontIcon));
-            fontIconFactory.SetValue(iNKORE.UI.WPF.Modern.Controls.FontIcon.IconProperty,
+            var fontIconFactory = new FrameworkElementFactory(typeof(WpfUiCompat.Controls.FontIcon));
+            fontIconFactory.SetValue(WpfUiCompat.Controls.FontIcon.IconProperty,
                 SegoeFluentIcons.Delete);
             deleteBtnFactory.AppendChild(fontIconFactory);
 

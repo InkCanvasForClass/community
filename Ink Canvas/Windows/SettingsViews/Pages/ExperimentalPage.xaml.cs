@@ -7,7 +7,7 @@ using System.Windows;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
-    public partial class ExperimentalPage : iNKORE.UI.WPF.Modern.Controls.Page
+    public partial class ExperimentalPage : WpfUiCompat.Controls.Page
     {
         private bool _isLoaded = false;
 

@@ -1,6 +1,6 @@
 using Ink_Canvas.Models;
 using Ink_Canvas.Properties;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using WpfUiCompat.Common.IconKeys;
 using System;
 using System.Diagnostics;
 using System.Windows;

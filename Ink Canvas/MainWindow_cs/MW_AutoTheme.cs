@@ -1,7 +1,7 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern;
+using WpfUiCompat;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;

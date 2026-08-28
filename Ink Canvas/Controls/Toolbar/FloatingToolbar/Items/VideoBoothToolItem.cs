@@ -1,8 +1,8 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using WpfUiCompat.Common.IconKeys;
 using System.Windows.Input;
-using FluentSystemIcons = iNKORE.UI.WPF.Modern.Common.IconKeys.FluentSystemIcons;
+using FluentSystemIcons = WpfUiCompat.Common.IconKeys.FluentSystemIcons;
 
 namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
 {

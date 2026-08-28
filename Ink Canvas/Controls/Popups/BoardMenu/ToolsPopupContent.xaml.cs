@@ -68,7 +68,7 @@ namespace Ink_Canvas.Controls
             // Build rows of 3
             for (int i = 0; i < items.Count; i += 3)
             {
-                var row = new iNKORE.UI.WPF.Controls.SimpleStackPanel
+                var row = new WpfUiCompat.Controls.SimpleStackPanel
                 {
                     Orientation = Orientation.Horizontal,
                     Spacing = 3

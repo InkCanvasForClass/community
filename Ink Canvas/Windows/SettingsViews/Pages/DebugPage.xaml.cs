@@ -2,8 +2,8 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Windows;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using MessageBox = WpfUiCompat.Controls.MessageBox;
+using Page = WpfUiCompat.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {

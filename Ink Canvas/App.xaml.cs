@@ -2,7 +2,7 @@ using H.NotifyIcon;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Plugins;
 using Ink_Canvas.Properties;
-using iNKORE.UI.WPF.Modern.Controls;
+using WpfUiCompat.Controls;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using System;

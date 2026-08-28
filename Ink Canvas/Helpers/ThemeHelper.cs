@@ -1,4 +1,4 @@
-using iNKORE.UI.WPF.Modern;
+using WpfUiCompat;
 using Microsoft.Win32;
 using System;
 using System.Windows;

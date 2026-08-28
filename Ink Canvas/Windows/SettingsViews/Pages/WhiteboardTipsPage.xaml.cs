@@ -1,7 +1,7 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
+using WpfUiCompat.Controls;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -10,8 +10,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using ContentDialog = iNKORE.UI.WPF.Modern.Controls.ContentDialog;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using ContentDialog = WpfUiCompat.Controls.ContentDialog;
+using Page = WpfUiCompat.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {

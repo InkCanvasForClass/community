@@ -1,4 +1,4 @@
-using iNKORE.UI.WPF.Controls;
+using WpfUiCompat.Controls;
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;

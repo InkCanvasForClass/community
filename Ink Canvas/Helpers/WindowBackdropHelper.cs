@@ -1,4 +1,4 @@
-using iNKORE.UI.WPF.Modern.Helpers.Styles;
+using WpfUiCompat.Helpers;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -63,7 +63,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 var windowHelperType = AppDomain.CurrentDomain.GetAssemblies()
-                    .Select(assembly => assembly.GetType("iNKORE.UI.WPF.Modern.Controls.Helpers.WindowHelper", false))
+                    .Select(assembly => assembly.GetType("WpfUiCompat.Helpers.WindowHelper", false))
                     .FirstOrDefault(type => type != null);
 
                 if (windowHelperType == null)

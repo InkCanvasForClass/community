@@ -1,6 +1,6 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using WpfUiCompat.Common.IconKeys;
 using System;
 using System.Linq;
 using System.Windows;
@@ -8,16 +8,16 @@ using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using FontIcon = iNKORE.UI.WPF.Modern.Controls.FontIcon;
-using NavigationView = iNKORE.UI.WPF.Modern.Controls.NavigationView;
-using NavigationViewItem = iNKORE.UI.WPF.Modern.Controls.NavigationViewItem;
-using NavigationViewSelectionChangedEventArgs = iNKORE.UI.WPF.Modern.Controls.NavigationViewSelectionChangedEventArgs;
+using FontIcon = WpfUiCompat.Controls.FontIcon;
+using NavigationView = WpfUiCompat.Controls.NavigationView;
+using NavigationViewItem = WpfUiCompat.Controls.NavigationViewItem;
+using NavigationViewSelectionChangedEventArgs = WpfUiCompat.Controls.NavigationViewSelectionChangedEventArgs;
 using Screen = System.Windows.Forms.Screen;
 
 namespace Ink_Canvas.Windows
 {
     /// <summary>
-    /// 首次启动体验(OOBE)窗口。使用 iNKORE.UI.WPF.Modern 的 NavigationView 作为左侧导航,
+    /// 首次启动体验(OOBE)窗口。使用 WpfUiCompat 的 NavigationView 作为左侧导航,
     /// 引导用户依次完成欢迎页、8 个配置步骤与完成摘要页。
     /// </summary>
     public partial class OobeWindow : Window

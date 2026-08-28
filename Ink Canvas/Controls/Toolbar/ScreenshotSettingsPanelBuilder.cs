@@ -1,7 +1,7 @@
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
-using iNKORE.UI.WPF.Modern.Controls;
+using WpfUiCompat.Common.IconKeys;
+using WpfUiCompat.Controls;
 using System;
 using System.IO;
 using System.Windows;
@@ -59,7 +59,7 @@ namespace Ink_Canvas.Controls.Toolbar
                 }
             };
 
-            var locationToggle = new iNKORE.UI.WPF.Modern.Controls.ToggleSwitch
+            var locationToggle = new WpfUiCompat.Controls.ToggleSwitch
             {
                 IsOn = auto.IsSaveScreenshotToCustomLocation,
                 MinWidth = 0,

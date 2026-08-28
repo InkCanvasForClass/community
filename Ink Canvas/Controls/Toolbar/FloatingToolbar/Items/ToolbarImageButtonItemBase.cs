@@ -1,6 +1,6 @@
 using Ink_Canvas.Plugins;
 using Ink_Canvas.Properties;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using WpfUiCompat.Common.IconKeys;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -77,7 +77,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
             var oldIcon = buttonContent.Children.OfType<Image>().FirstOrDefault();
             if (oldIcon == null) return;
 
-            var fontIcon = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+            var fontIcon = new WpfUiCompat.Controls.FontIcon
             {
                 Icon = IconKey.Value,
                 Width = 24,

@@ -12,8 +12,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using MessageBox = WpfUiCompat.Controls.MessageBox;
+using Page = WpfUiCompat.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -384,7 +384,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                if (sender is iNKORE.UI.WPF.Modern.Controls.ToggleSwitch toggleSwitch &&
+                if (sender is WpfUiCompat.Controls.ToggleSwitch toggleSwitch &&
                     toggleSwitch.DataContext is IUploadProvider provider)
                 {
                     EnsureSettingsObjects();

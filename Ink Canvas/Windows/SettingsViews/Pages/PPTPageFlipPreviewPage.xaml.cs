@@ -7,8 +7,8 @@ using System.Windows.Interop;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.WindowsAndMessaging;
-using NavigationViewPaneDisplayMode = iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using NavigationViewPaneDisplayMode = WpfUiCompat.Controls.NavigationViewPaneDisplayMode;
+using Page = WpfUiCompat.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {

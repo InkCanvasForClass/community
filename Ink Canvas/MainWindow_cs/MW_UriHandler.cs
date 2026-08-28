@@ -457,10 +457,10 @@ namespace Ink_Canvas
 
                 // 选中对应导航项（菜单 + 子菜单 + 底部菜单）
                 var navView = window.GetNavigationView();
-                iNKORE.UI.WPF.Modern.Controls.NavigationViewItem navItem = null;
+                WpfUiCompat.Controls.NavigationViewItem navItem = null;
                 foreach (var item in navView.MenuItems)
                 {
-                    if (item is iNKORE.UI.WPF.Modern.Controls.NavigationViewItem ni)
+                    if (item is WpfUiCompat.Controls.NavigationViewItem ni)
                     {
                         if ((ni.Tag as string) == pageTag)
                         {
@@ -469,7 +469,7 @@ namespace Ink_Canvas
                         }
                         foreach (var child in ni.MenuItems)
                         {
-                            if (child is iNKORE.UI.WPF.Modern.Controls.NavigationViewItem cni
+                            if (child is WpfUiCompat.Controls.NavigationViewItem cni
                                 && (cni.Tag as string) == pageTag)
                             {
                                 ni.IsExpanded = true;
@@ -484,7 +484,7 @@ namespace Ink_Canvas
                 {
                     foreach (var item in navView.FooterMenuItems)
                     {
-                        if (item is iNKORE.UI.WPF.Modern.Controls.NavigationViewItem ni
+                        if (item is WpfUiCompat.Controls.NavigationViewItem ni
                             && (ni.Tag as string) == pageTag)
                         {
                             navItem = ni;

@@ -10,7 +10,7 @@ using System.Windows.Media.Animation;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
-    public partial class StartupPage : iNKORE.UI.WPF.Modern.Controls.Page
+    public partial class StartupPage : WpfUiCompat.Controls.Page
     {
         private bool _isLoaded = false;
 

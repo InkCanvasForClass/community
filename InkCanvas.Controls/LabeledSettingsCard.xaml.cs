@@ -1,4 +1,4 @@
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using WpfUiCompat.Common.IconKeys;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -7,7 +7,7 @@ namespace Ink_Canvas.Controls
 {
     public partial class LabeledSettingsCard : UserControl
     {
-        public iNKORE.UI.WPF.Modern.Controls.ToggleSwitch ToggleSwitchControl => ToggleSwitch;
+        public WpfUiCompat.Controls.ToggleSwitch ToggleSwitchControl => ToggleSwitch;
 
         public static readonly DependencyProperty HeaderProperty = DependencyProperty.Register(
             nameof(Header), typeof(string), typeof(LabeledSettingsCard), new PropertyMetadata(string.Empty));
@@ -87,7 +87,7 @@ namespace Ink_Canvas.Controls
             }
             else if (Icon.HasValue)
             {
-                SettingsCard.HeaderIcon = new iNKORE.UI.WPF.Modern.Controls.FontIcon(Icon.Value);
+                SettingsCard.HeaderIcon = new WpfUiCompat.Controls.FontIcon(Icon.Value);
             }
             else if (HeaderIcon != null)
             {

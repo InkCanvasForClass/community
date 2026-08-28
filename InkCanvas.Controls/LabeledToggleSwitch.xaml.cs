@@ -1,6 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
-using ModernControls = iNKORE.UI.WPF.Modern.Controls;
+using ModernControls = WpfUiCompat.Controls;
 
 namespace Ink_Canvas.Controls
 {

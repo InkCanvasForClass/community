@@ -77,7 +77,6 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
             PaneTitle=""
             IsTabStop="False"
             IsTitleBarAutoPaddingEnabled="False"
-            PaneDisplayMode="Auto"
             SelectionChanged="OnNavigationViewSelectionChanged"
             BackRequested="OnNavigationViewBackRequested"
             DisplayModeChanged="NavigationViewControl_DisplayModeChanged"
@@ -574,7 +573,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                     Content="{x:Static props:NavStrings.Nav_AboutInkCanvas}"
                     Tag="AboutPage">
                     <ui:NavigationViewItem.Icon>
-                        <ui:SymbolIcon Symbol="Help" />
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Help}" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
             </ui:NavigationView.FooterMenuItems>

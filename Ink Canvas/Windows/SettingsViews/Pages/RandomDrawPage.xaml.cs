@@ -5,8 +5,8 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using MessageBox = WpfUiCompat.Controls.MessageBox;
+using Page = WpfUiCompat.Controls.Page;
 // ManageNameRostersWindow lives in Ink_Canvas namespace
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
@@ -308,13 +308,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // 覆盖默认 ContentDialogMaxWidth(548)：内容 UserControl 固定 640×360，
             // 列表在控件内部纵向滚动，避免横向裁切操作按钮。
             var content = new ManageNameRostersWindow();
-            var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+            var dialog = new WpfUiCompat.Controls.ContentDialog
             {
                 Title = RandomStrings.Random_Roster_ManageWindowTitle,
                 Content = content,
                 CloseButtonText = NotificationStrings.AnimationOff,
                 Owner = Window.GetWindow(this) ?? mw,
-                DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Close,
+                DefaultButton = WpfUiCompat.Controls.ContentDialogButton.Close,
                 Resources =
                 {
                     ["ContentDialogMaxWidth"] = 720d,
@@ -361,14 +361,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (mw == null) return;
 
             var content = new AddPickNameBackgroundWindow(mw);
-            var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+            var dialog = new WpfUiCompat.Controls.ContentDialog
             {
                 Title = Properties.RandomStrings.Random_AddBg_WindowTitle,
                 Content = content,
                 PrimaryButtonText = FloatingBarStrings.Tools_Save,
                 CloseButtonText = Properties.RandomStrings.Random_Cancel,
                 Owner = Window.GetWindow(this) ?? mw,
-                DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Primary
+                DefaultButton = WpfUiCompat.Controls.ContentDialogButton.Primary
             };
 
             content.OnInputChanged += () =>
@@ -397,13 +397,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (mw == null) return;
 
             var content = new ManagePickNameBackgroundsWindow(mw);
-            var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+            var dialog = new WpfUiCompat.Controls.ContentDialog
             {
                 Title = Properties.RandomStrings.Random_ManageBg_WindowTitle,
                 Content = content,
                 CloseButtonText = Properties.NotificationStrings.AnimationOff,
                 Owner = Window.GetWindow(this) ?? mw,
-                DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Close
+                DefaultButton = WpfUiCompat.Controls.ContentDialogButton.Close
             };
             await dialog.ShowAsync();
         }

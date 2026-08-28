@@ -1,8 +1,8 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
-using iNKORE.UI.WPF.Modern.Controls;
+using WpfUiCompat.Common.IconKeys;
+using WpfUiCompat.Controls;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,11 +11,11 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using MessageBox = WpfUiCompat.Controls.MessageBox;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
-    public partial class UpdatePage : iNKORE.UI.WPF.Modern.Controls.Page
+    public partial class UpdatePage : WpfUiCompat.Controls.Page
     {
         private enum UpdateUiState
         {
@@ -891,7 +891,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 SecondaryButtonText = CommonStrings.Common_Cancel
             };
 
-            var panel = new iNKORE.UI.WPF.Controls.SimpleStackPanel
+            var panel = new WpfUiCompat.Controls.SimpleStackPanel
             {
                 Spacing = 16,
                 Margin = new Thickness(0, 10, 0, 0)

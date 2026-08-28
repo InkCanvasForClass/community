@@ -14,7 +14,7 @@ using System.Windows.Threading;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
-    public partial class CanvasPage : iNKORE.UI.WPF.Modern.Controls.Page
+    public partial class CanvasPage : WpfUiCompat.Controls.Page
     {
         private bool _isLoaded = false;
 

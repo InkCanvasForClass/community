@@ -1,15 +1,15 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
+using WpfUiCompat.Controls;
 using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using ContentDialog = iNKORE.UI.WPF.Modern.Controls.ContentDialog;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using ContentDialog = WpfUiCompat.Controls.ContentDialog;
+using MessageBox = WpfUiCompat.Controls.MessageBox;
+using Page = WpfUiCompat.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -375,7 +375,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 Text = ConfigStrings.ProfileNameLabel,
                 Margin = new Thickness(0, 0, 0, 8)
             };
-            var content = new iNKORE.UI.WPF.Controls.SimpleStackPanel { Spacing = 6 };
+            var content = new WpfUiCompat.Controls.SimpleStackPanel { Spacing = 6 };
             content.Children.Add(label);
             content.Children.Add(input);
             var dialog = new ContentDialog

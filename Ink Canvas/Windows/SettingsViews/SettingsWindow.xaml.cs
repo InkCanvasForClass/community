@@ -2,7 +2,11 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Pages;
-using iNKORE.UI.WPF.Modern.Controls;
+using WpfUiCompat.Controls;
+using AutoSuggestBoxQuerySubmittedEventArgs = Wpf.Ui.Controls.AutoSuggestBoxQuerySubmittedEventArgs;
+using AutoSuggestionBoxTextChangeReason = Wpf.Ui.Controls.AutoSuggestionBoxTextChangeReason;
+using AutoSuggestBoxTextChangedEventArgs = Wpf.Ui.Controls.AutoSuggestBoxTextChangedEventArgs;
+using WpfAutoSuggestBox = Wpf.Ui.Controls.AutoSuggestBox;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +19,7 @@ using System.Windows.Media;
 using System.Windows.Navigation;
 using System.Windows.Threading;
 using Windows.Win32;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using MessageBox = WpfUiCompat.Controls.MessageBox;
 using Screen = System.Windows.Forms.Screen;
 
 namespace Ink_Canvas.Windows.SettingsViews
@@ -260,11 +264,11 @@ namespace Ink_Canvas.Windows.SettingsViews
                 int themeIndex = Helpers.SettingsManager.Settings.Appearance.Theme;
                 var elementTheme = themeIndex switch
                 {
-                    0 => iNKORE.UI.WPF.Modern.ElementTheme.Light,
-                    1 => iNKORE.UI.WPF.Modern.ElementTheme.Dark,
-                    _ => IsSystemThemeLight() ? iNKORE.UI.WPF.Modern.ElementTheme.Light : iNKORE.UI.WPF.Modern.ElementTheme.Dark,
+                    0 => WpfUiCompat.ElementTheme.Light,
+                    1 => WpfUiCompat.ElementTheme.Dark,
+                    _ => IsSystemThemeLight() ? WpfUiCompat.ElementTheme.Light : WpfUiCompat.ElementTheme.Dark,
                 };
-                iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, elementTheme);
+                WpfUiCompat.ThemeManager.SetRequestedTheme(this, elementTheme);
             }
             catch { }
         }
@@ -477,11 +481,11 @@ namespace Ink_Canvas.Windows.SettingsViews
             Type currentPageType = rootFrame.SourcePageType;
             if (currentPageType == typeof(PPTPageFlipPreviewPage))
             {
-                NavigationViewControl.PaneDisplayMode = iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode.LeftMinimal;
+                NavigationViewControl.PaneDisplayMode = WpfUiCompat.Controls.NavigationViewPaneDisplayMode.LeftMinimal;
             }
             else
             {
-                NavigationViewControl.PaneDisplayMode = iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode.Auto;
+                NavigationViewControl.PaneDisplayMode = WpfUiCompat.Controls.NavigationViewPaneDisplayMode.Auto;
             }
 
             if (_isNavigating)
@@ -782,11 +786,11 @@ namespace Ink_Canvas.Windows.SettingsViews
                 {
                     header = lsc.Header;
                 }
-                else if (node is iNKORE.UI.WPF.Modern.Controls.SettingsCard sc)
+                else if (node is WpfUiCompat.Controls.SettingsCard sc)
                 {
                     header = sc.Header?.ToString();
                 }
-                else if (node is iNKORE.UI.WPF.Modern.Controls.SettingsExpander se)
+                else if (node is WpfUiCompat.Controls.SettingsExpander se)
                 {
                     header = se.Header?.ToString();
                 }
@@ -842,11 +846,11 @@ namespace Ink_Canvas.Windows.SettingsViews
             }
         }
 
-        private void OnControlsSearchBoxQuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        private void OnControlsSearchBoxQuerySubmitted(WpfAutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
             EnsureSearchIndexBuilt();
 
-            string raw = (args.ChosenSuggestion as string) ?? args.QueryText;
+            string raw = args.QueryText;
             if (string.IsNullOrWhiteSpace(raw)) return;
 
             string query = raw.Trim();
@@ -857,7 +861,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             NavigateToSearchEntry(entry);
         }
 
-        private void OnControlsSearchBoxTextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        private void OnControlsSearchBoxTextChanged(WpfAutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
             if (args.Reason != AutoSuggestionBoxTextChangeReason.UserInput) return;
 
@@ -1297,9 +1301,9 @@ namespace Ink_Canvas.Windows.SettingsViews
             {
                 if (current is Ink_Canvas.Controls.LabeledSettingsCard lsc)
                     return lsc;
-                if (current is iNKORE.UI.WPF.Modern.Controls.SettingsCard sc)
+                if (current is WpfUiCompat.Controls.SettingsCard sc)
                     return sc;
-                if (current is iNKORE.UI.WPF.Modern.Controls.SettingsExpander se)
+                if (current is WpfUiCompat.Controls.SettingsExpander se)
                     return se;
 
                 current = VisualTreeHelper.GetParent(current);
@@ -1339,9 +1343,9 @@ namespace Ink_Canvas.Windows.SettingsViews
             {
                 if (target is Ink_Canvas.Controls.LabeledSettingsCard lsc)
                     return lsc.Header?.Trim();
-                if (target is iNKORE.UI.WPF.Modern.Controls.SettingsCard sc)
+                if (target is WpfUiCompat.Controls.SettingsCard sc)
                     return (sc.Header as string)?.Trim() ?? sc.Header?.ToString()?.Trim();
-                if (target is iNKORE.UI.WPF.Modern.Controls.SettingsExpander se)
+                if (target is WpfUiCompat.Controls.SettingsExpander se)
                     return (se.Header as string)?.Trim() ?? se.Header?.ToString()?.Trim();
             }
             catch { }
@@ -1451,7 +1455,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                     var count = AnnouncementService.GetUnreadCount(Helpers.SettingsManager.Settings);
                     if (AnnouncementUnreadInfoBadge != null)
                     {
-                        AnnouncementUnreadInfoBadge.Value = count;
+                        AnnouncementUnreadInfoBadge.Value = count.ToString();
                         AnnouncementUnreadInfoBadge.Visibility = count > 0 ? Visibility.Visible : Visibility.Collapsed;
                     }
                 }

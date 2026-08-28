@@ -1,0 +1,38 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        兼容层控件样式字典：合并 WPF-UI 全量控件样式（隐式样式），
+        并补充项目 XAML 中以 StaticResource 引用的 iNKORE 遗留命名样式。
+        - DefaultTabControlStyle / DefaultTabItemStyle：ThemeKeys.TabControlPivotStyleKey / TabItemPivotStyleKey 的映射目标
+        - TabControlPivotStyle / TabItemPivotStyle / AccentButtonStyle：XAML 中的裸键引用
+        WPF-UI 的 TabControl / TabItem / Button 样式为无键隐式样式，此处以命名样式包装。
+    -->
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/Wpf.Ui;component/Resources/Wpf.Ui.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <!-- TabControl：iNKORE Pivot 样式键（ThemeKeys 映射 + 裸键） -->
+    <Style x:Key="DefaultTabControlStyle" TargetType="{x:Type TabControl}" BasedOn="{StaticResource {x:Type TabControl}}" />
+    <Style x:Key="TabControlPivotStyle" TargetType="{x:Type TabControl}" BasedOn="{StaticResource {x:Type TabControl}}" />
+
+    <!-- TabItem：iNKORE Pivot 样式键（ThemeKeys 映射 + 裸键） -->
+    <Style x:Key="DefaultTabItemStyle" TargetType="{x:Type TabItem}" BasedOn="{StaticResource {x:Type TabItem}}" />
+    <Style x:Key="TabItemPivotStyle" TargetType="{x:Type TabItem}" BasedOn="{StaticResource {x:Type TabItem}}" />
+
+    <!-- Button：iNKORE AccentButtonStyle（强调色按钮）。基于 WPF-UI 隐式样式。 -->
+    <Style x:Key="AccentButtonStyle" TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}" />
+
+
+    <!--
+        覆盖 WPF-UI 的隐式 Window 样式：WPF-UI 将 Window/Page 背景设为 Transparent
+        （为 DWM 系统背景让路），但未启用系统背景时透明窗口无任何绘制 → 纯黑。
+        这里改为不透明的主题背景画笔；启用 Mica 等背景时由 BackdropHelper 在
+        运行时将窗口背景改为 Transparent 并扩展玻璃帧。
+        本字典为 XamlControlsResources 的自有条目，优先于其合并的 Wpf.Ui.xaml。
+    -->
+    <Style TargetType="{x:Type Window}">
+        <Setter Property="Background" Value="{DynamicResource ApplicationBackgroundBrush}"/>
+    </Style>
+</ResourceDictionary>

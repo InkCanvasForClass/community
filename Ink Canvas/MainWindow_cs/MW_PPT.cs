@@ -1,7 +1,7 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.WorkflowAutomation;
 using InkCanvasPPTAgent.Contracts;
-using iNKORE.UI.WPF.Modern;
+using WpfUiCompat;
 using Microsoft.Office.Core;
 using Microsoft.Office.Interop.PowerPoint;
 using System;
@@ -2450,7 +2450,7 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
+            var toggle = sender as WpfUiCompat.Controls.ToggleSwitch;
             if (toggle != null)
                 Settings.PowerPointSettings.EnablePowerPointEnhancement = toggle.IsOn;
 
@@ -2494,7 +2494,7 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
+            var toggle = sender as WpfUiCompat.Controls.ToggleSwitch;
             if (toggle != null)
                 Settings.PowerPointSettings.IsSupportWPS = toggle.IsOn;
 
@@ -2531,7 +2531,7 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
+            var toggle = sender as WpfUiCompat.Controls.ToggleSwitch;
             if (toggle != null)
                 Settings.PowerPointSettings.SkipAnimationsWhenGoNext = toggle.IsOn;
 

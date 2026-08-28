@@ -1,16 +1,16 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
-using iNKORE.UI.WPF.Modern.Common;
-using iNKORE.UI.WPF.Modern.Controls;
+using WpfUiCompat.Common;
+using WpfUiCompat.Controls;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using ContentDialog = iNKORE.UI.WPF.Modern.Controls.ContentDialog;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using ContentDialog = WpfUiCompat.Controls.ContentDialog;
+using MessageBox = WpfUiCompat.Controls.MessageBox;
 
 namespace Ink_Canvas
 {

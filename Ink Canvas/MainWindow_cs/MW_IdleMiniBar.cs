@@ -341,10 +341,10 @@ namespace Ink_Canvas
         private void UpdateIdleMiniBarExpandArrow(bool left, bool right, bool top, bool bottom)
         {
             if (IdleMiniBarExpandIcon == null) return;
-            if (left) IdleMiniBarExpandIcon.Icon = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons.ChevronRight;
-            else if (right) IdleMiniBarExpandIcon.Icon = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons.ChevronLeft;
-            else if (top) IdleMiniBarExpandIcon.Icon = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons.ChevronDown;
-            else if (bottom) IdleMiniBarExpandIcon.Icon = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons.ChevronUp;
+            if (left) IdleMiniBarExpandIcon.Icon = WpfUiCompat.Common.IconKeys.SegoeFluentIcons.ChevronRight;
+            else if (right) IdleMiniBarExpandIcon.Icon = WpfUiCompat.Common.IconKeys.SegoeFluentIcons.ChevronLeft;
+            else if (top) IdleMiniBarExpandIcon.Icon = WpfUiCompat.Common.IconKeys.SegoeFluentIcons.ChevronDown;
+            else if (bottom) IdleMiniBarExpandIcon.Icon = WpfUiCompat.Common.IconKeys.SegoeFluentIcons.ChevronUp;
         }
 
         private void AnimateIdleMiniBarTo(double left, double top)

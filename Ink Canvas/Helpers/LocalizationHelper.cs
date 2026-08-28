@@ -1,5 +1,5 @@
 using Ink_Canvas.Properties;
-using iNKORE.UI.WPF.Modern.Controls;
+using WpfUiCompat.Controls;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -49,7 +49,7 @@ namespace Ink_Canvas.Helpers
                     System.Windows.Application.Current.Resources["Common_Off"] = offText;
                 }
 
-                // 替换 iNKORE.UI.WPF.Modern.Strings 的 ResourceManager，让 ToggleSwitch
+                // 替换 WpfUiCompat.Strings 的 ResourceManager，让 ToggleSwitch
                 // 构造函数中的 SetCurrentValue 直接拿到正确的本地化文本
                 PatchModernStrings(onText, offText);
 
@@ -63,15 +63,15 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 反射替换 iNKORE.UI.WPF.Modern.Strings 的 ResourceManager，
+        /// 反射替换 WpfUiCompat.Strings 的 ResourceManager，
         /// 注入 ToggleSwitchOn/ToggleSwitchOff 的本地化翻译。
         /// </summary>
         private static void PatchModernStrings(string onText, string offText)
         {
             try
             {
-                var stringsType = typeof(iNKORE.UI.WPF.Modern.ThemeManager).Assembly
-                    .GetType("iNKORE.UI.WPF.Modern.Strings");
+                var stringsType = typeof(WpfUiCompat.ThemeManager).Assembly
+                    .GetType("WpfUiCompat.Strings");
                 if (stringsType == null) return;
 
                 var resourceManField = stringsType.GetField("resourceMan",

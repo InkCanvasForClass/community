@@ -1,7 +1,7 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Plugins;
 using Ink_Canvas.Properties;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using WpfUiCompat.Common.IconKeys;
 using Microsoft.Win32;
 using System;
 using System.Diagnostics;
@@ -13,7 +13,7 @@ using System.Windows.Media;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
-    public partial class PluginPage : iNKORE.UI.WPF.Modern.Controls.Page
+    public partial class PluginPage : WpfUiCompat.Controls.Page
     {
         private readonly PluginMarketService _market = PluginMarketService.Instance;
 
@@ -50,7 +50,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                         HorizontalAlignment = HorizontalAlignment.Center,
                         Margin = new Thickness(0, 40, 0, 0)
                     };
-                    var icon = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+                    var icon = new WpfUiCompat.Controls.FontIcon
                     {
                         Icon = SegoeFluentIcons.Puzzle,
                         FontSize = 48,
@@ -110,7 +110,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 CornerRadius = new CornerRadius(6),
                 Margin = new Thickness(0, 0, 12, 0),
                 VerticalAlignment = VerticalAlignment.Center,
-                Child = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+                Child = new WpfUiCompat.Controls.FontIcon
                 {
                     Icon = SegoeFluentIcons.Puzzle,
                     FontSize = 20,
@@ -202,7 +202,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 Tag = pluginInfo
             };
             folderBtn.Click += OpenFolder_Click;
-            folderBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+            folderBtn.Content = new WpfUiCompat.Controls.FontIcon
             {
                 Icon = SegoeFluentIcons.FolderOpen,
                 FontSize = 14
@@ -219,7 +219,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 Tag = pluginInfo
             };
             toggleBtn.Click += TogglePluginLoad_Click;
-            toggleBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+            toggleBtn.Content = new WpfUiCompat.Controls.FontIcon
             {
                 Icon = isLoaded ? SegoeFluentIcons.Upload : SegoeFluentIcons.Download,
                 FontSize = 14
@@ -238,7 +238,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     Tag = pluginInfo.Id
                 };
                 applyBtn.Click += ApplyPendingUpdate_Click;
-                applyBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+                applyBtn.Content = new WpfUiCompat.Controls.FontIcon
                 {
                     Icon = SegoeFluentIcons.Refresh,
                     FontSize = 14
@@ -257,7 +257,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     Tag = marketInfo
                 };
                 updateBtn.Click += UpdatePlugin_Click;
-                updateBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+                updateBtn.Content = new WpfUiCompat.Controls.FontIcon
                 {
                     Icon = SegoeFluentIcons.Upload,
                     FontSize = 14
@@ -274,7 +274,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 Tag = pluginInfo
             };
             deleteBtn.Click += DeletePlugin_Click;
-            deleteBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+            deleteBtn.Content = new WpfUiCompat.Controls.FontIcon
             {
                 Icon = SegoeFluentIcons.Delete,
                 FontSize = 14
@@ -290,7 +290,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 Tag = pluginInfo
             };
             exportBtn.Click += ExportConfig_Click;
-            exportBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+            exportBtn.Content = new WpfUiCompat.Controls.FontIcon
             {
                 Icon = SegoeFluentIcons.Save,
                 FontSize = 14
@@ -306,7 +306,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 Tag = pluginInfo
             };
             importBtn.Click += ImportConfig_Click;
-            importBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+            importBtn.Content = new WpfUiCompat.Controls.FontIcon
             {
                 Icon = SegoeFluentIcons.OpenFile,
                 FontSize = 14
@@ -325,7 +325,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     Tag = pluginInfo
                 };
                 resetBtn.Click += ResetError_Click;
-                resetBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+                resetBtn.Content = new WpfUiCompat.Controls.FontIcon
                 {
                     Icon = SegoeFluentIcons.Refresh,
                     FontSize = 14,

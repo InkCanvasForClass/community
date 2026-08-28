@@ -1,5 +1,5 @@
 using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern;
+using WpfUiCompat;
 using System;
 using System.Threading;
 using System.Threading.Tasks;

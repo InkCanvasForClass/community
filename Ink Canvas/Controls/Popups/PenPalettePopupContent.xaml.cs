@@ -1,5 +1,5 @@
 using Ink_Canvas.Properties;
-using iNKORE.UI.WPF.Modern.Controls;
+using WpfUiCompat.Controls;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
