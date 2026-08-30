@@ -503,14 +503,13 @@ namespace Ink_Canvas
                 ClipToBounds = true,
                 Margin = new Thickness(marginLeft, marginTop, marginRight, marginBottom),
                 CornerRadius = new CornerRadius(8),
-                Background = (Brush)Application.Current.TryFindResource("FloatingBarBackgroundBrush")
-                    ?? (Brush)Application.Current.TryFindResource("FloatBarBackground"),
                 Opacity = 1,
-                BorderBrush = (Brush)Application.Current.TryFindResource("FloatingBarBorderBrush"),
                 BorderThickness = new Thickness(1),
                 Child = scrollViewer,
                 Visibility = Visibility.Collapsed
             };
+            border.SetResourceReference(Border.BackgroundProperty, "FloatingBarBackgroundBrush");
+            border.SetResourceReference(Border.BorderBrushProperty, "FloatingBarBorderBrush");
 
             RegisterView(borderId, border);
             RegisterView(listViewId, listView);

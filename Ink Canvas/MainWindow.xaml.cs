@@ -1541,15 +1541,15 @@ namespace Ink_Canvas
 
             isLoaded = true;
 
+            // 应用颜色主题，这将考虑自定义背景色
+            CheckColorTheme(true);
+            ApplyFloatingBarTheme();
+
             // 默认模式沿用 1.7.19.4：RealtimeStylus 与画板工具栏在首屏加载阶段完成。
             if (App.IsDefaultStartupMode)
             {
                 InitializeRealtimeAndBoardForStartup();
             }
-
-            // 应用颜色主题，这将考虑自定义背景色
-            CheckColorTheme(true);
-            ApplyFloatingBarTheme();
 
             BtnWhiteBoardSwitchPrevious.IsEnabled = CurrentWhiteboardIndex != 1;
             BorderInkReplayToolBox.Visibility = Visibility.Collapsed;
