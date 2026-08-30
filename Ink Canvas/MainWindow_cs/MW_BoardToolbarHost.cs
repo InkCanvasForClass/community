@@ -616,14 +616,13 @@ namespace Ink_Canvas
                 ClipToBounds = true,
                 Margin = new Thickness(marginLeft, marginTop, marginRight, marginBottom),
                 CornerRadius = new CornerRadius(8),
-                Background = (Brush)Application.Current.TryFindResource("FloatingBarBackgroundBrush")
-                    ?? (Brush)Application.Current.TryFindResource("FloatBarBackground"),
                 Opacity = 1,
-                BorderBrush = (Brush)Application.Current.TryFindResource("FloatingBarBorderBrush"),
                 BorderThickness = new Thickness(1),
                 Child = overlayGrid,
                 Visibility = Visibility.Collapsed
             };
+            border.SetResourceReference(Border.BackgroundProperty, "FloatingBarBackgroundBrush");
+            border.SetResourceReference(Border.BorderBrushProperty, "FloatingBarBorderBrush");
             // 保存原始边距，供打开面板时按目标高度换算位置（见 EnsurePageListPanelHeight）
             border.Tag = new Thickness(marginLeft, marginTop, marginRight, marginBottom);
 
