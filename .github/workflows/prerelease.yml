@@ -9,7 +9,7 @@ on:
       version_type:
         description: "Version bump type"
         required: true
-        default: "patch"
+        default: "build"
         type: choice
         options:
           - patch
@@ -28,8 +28,8 @@ on:
         type: boolean
       include_runtime:
         description: "Publish as self-contained single-file build with .NET runtime"
-        required: false
-        default: false
+        required: true
+        default: true
         type: boolean
 
 concurrency:
