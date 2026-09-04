@@ -11,6 +11,7 @@
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <LangVersion>10</LangVersion>
     <NoWarn>CA1416;NETSDK1138</NoWarn>
+    <CetCompat>false</CetCompat>
   </PropertyGroup>
 
   <ItemGroup>
