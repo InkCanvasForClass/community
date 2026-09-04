@@ -46,6 +46,7 @@ namespace Ink_Canvas.Helpers
         private const string DefaultThemeId = "default";
         private readonly MainWindow _mainWindow;
         private ResourceDictionary _themeDictionary;
+        private ResourceDictionary _colorfulOverlayDictionary;
 
         public ObservableCollection<ThemeInfo> Themes { get; } = new ObservableCollection<ThemeInfo>();
 
@@ -148,6 +149,7 @@ namespace Ink_Canvas.Helpers
         {
             var id = MainWindow.Settings?.Appearance?.FloatingBarThemeId;
             ApplyTheme(string.IsNullOrWhiteSpace(id) ? DefaultThemeId : id);
+            ApplyColorfulOverlay();
         }
 
         private ResourceDictionary CreateBuiltInThemeDictionary()
@@ -187,6 +189,9 @@ namespace Ink_Canvas.Helpers
                 _themeDictionary = dictionary;
                 resources.MergedDictionaries.Add(dictionary);
 
+                // 彩色浮动栏覆盖字典始终保持在主题字典之后，确保渐变背景优先于主题背景
+                ApplyColorfulOverlay();
+
                 MainWindow.Settings.Appearance.FloatingBarThemeId = theme.Id;
                 SettingsManager.SaveSettingsToFile();
                 _mainWindow.ApplyFloatingBarBorderColor();
@@ -202,6 +207,47 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"应用浮动栏主题失败: {theme.Id}, {ex.Message}", LogHelper.LogType.Warning);
                 return false;
             }
+        }
+
+        /// <summary>
+        /// 根据 IsColorfulViewboxFloatingBar 设置应用或移除彩色浮动栏背景覆盖。
+        /// 开启时在合并字典末尾追加只含 FloatingBarBackgroundBrush 的覆盖字典
+        /// （历史蓝→绿对角半透明渐变 #9580B0FF → #95C0FFC0），
+        /// 其余前景/边框/悬停色继续沿用当前浮动栏主题；关闭时移除，回落到主题背景。
+        /// 覆盖字典始终位于 _themeDictionary 之后，主题切换后需重新调用本方法保持优先级。
+        /// </summary>
+        public void ApplyColorfulOverlay()
+        {
+            var resources = Application.Current.Resources;
+            var enabled = MainWindow.Settings?.Appearance?.IsColorfulViewboxFloatingBar == true;
+
+            if (!enabled)
+            {
+                if (_colorfulOverlayDictionary != null)
+                {
+                    resources.MergedDictionaries.Remove(_colorfulOverlayDictionary);
+                    _colorfulOverlayDictionary = null;
+                }
+                return;
+            }
+
+            if (_colorfulOverlayDictionary != null)
+                resources.MergedDictionaries.Remove(_colorfulOverlayDictionary);
+
+            var gradientBrush = new LinearGradientBrush
+            {
+                StartPoint = new Point(0, 0),
+                EndPoint = new Point(1, 1)
+            };
+            gradientBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0x95, 0x80, 0xB0, 0xFF), 0));
+            gradientBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0x95, 0xC0, 0xFF, 0xC0), 1));
+
+            _colorfulOverlayDictionary = new ResourceDictionary
+            {
+                { "FloatingBarBackgroundBrush", gradientBrush }
+            };
+            // 追加到末尾，优先级高于 _themeDictionary 与亮/暗主题字典
+            resources.MergedDictionaries.Add(_colorfulOverlayDictionary);
         }
     }
 }
