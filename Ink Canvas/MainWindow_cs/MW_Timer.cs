@@ -431,51 +431,58 @@ namespace Ink_Canvas
         /// </remarks>
         private void TimerDisplayTime_Elapsed(object sender, ElapsedEventArgs e)
         {
-            DateTime localTime = DateTime.Now;
-            DateTime displayTime = localTime;
-
-            TimeSpan timeJump = localTime - lastLocalTime;
-            double timeJumpMinutes = Math.Abs(timeJump.TotalMinutes);
-
-            if (timeJumpMinutes > 3 && !isNtpSyncing)
+            try
             {
-                Task.Run(async () =>
+                DateTime localTime = DateTime.Now;
+                DateTime displayTime = localTime;
+
+                TimeSpan timeJump = localTime - lastLocalTime;
+                double timeJumpMinutes = Math.Abs(timeJump.TotalMinutes);
+
+                if (timeJumpMinutes > 3 && !isNtpSyncing)
                 {
-                    try
+                    Task.Run(async () =>
                     {
-                        await TimerNtpSync_ElapsedAsync();
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"时间跳跃触发的NTP同步失败: {ex.Message}", LogHelper.LogType.Error);
-                    }
-                });
-            }
-            lastLocalTime = localTime;
+                        try
+                        {
+                            await TimerNtpSync_ElapsedAsync();
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"时间跳跃触发的NTP同步失败: {ex.Message}", LogHelper.LogType.Error);
+                        }
+                    });
+                }
+                lastLocalTime = localTime;
 
-            if (useNetworkTime && networkTimeOffset != TimeSpan.Zero)
-            {
-                displayTime = localTime + networkTimeOffset;
-            }
-
-            string timeString;
-            if (Settings.Appearance.Use24HourTimeFormat)
-            {
-                timeString = displayTime.ToString("HH:mm:ss");
-            }
-            else
-            {
-                timeString = displayTime.ToString("tt hh'时'mm'分'ss'秒'");
-            }
-
-            if (timeString != lastDisplayedTime)
-            {
-                lastDisplayedTime = timeString;
-
-                Dispatcher.BeginInvoke(new Action(() =>
+                if (useNetworkTime && networkTimeOffset != TimeSpan.Zero)
                 {
-                    nowTimeVM.nowTime = timeString;
-                }));
+                    displayTime = localTime + networkTimeOffset;
+                }
+
+                string timeString;
+                if (Settings.Appearance.Use24HourTimeFormat)
+                {
+                    timeString = displayTime.ToString("HH:mm:ss");
+                }
+                else
+                {
+                    timeString = displayTime.ToString("tt hh'时'mm'分'ss'秒'");
+                }
+
+                if (timeString != lastDisplayedTime)
+                {
+                    lastDisplayedTime = timeString;
+
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        nowTimeVM.nowTime = timeString;
+                    }));
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"时间显示定时器回调异常: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
 
@@ -490,11 +497,18 @@ namespace Ink_Canvas
         /// </remarks>
         private void TimerDisplayDate_Elapsed(object sender, ElapsedEventArgs e)
         {
-            // 使用BeginInvoke异步更新UI，避免阻塞
-            Dispatcher.BeginInvoke(new Action(() =>
+            try
             {
-                nowTimeVM.nowDate = DateTime.Now.ToString("yyyy'年'MM'月'dd'日' dddd");
-            }));
+                // 使用BeginInvoke异步更新UI，避免阻塞
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    nowTimeVM.nowDate = DateTime.Now.ToString("yyyy'年'MM'月'dd'日' dddd");
+                }));
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"日期显示定时器回调异常: {ex.Message}", LogHelper.LogType.Warning);
+            }
         }
 
         private DispatcherTimer _dispatcherTimerForTime;

@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using Ink_Canvas.WorkflowAutomation.Abstractions;
 using Ink_Canvas.WorkflowAutomation.Enums;
 using Ink_Canvas.WorkflowAutomation.Models;
@@ -52,12 +53,26 @@ namespace Ink_Canvas.WorkflowAutomation.Services
 
         private void OnStatusMayHaveChanged(object sender, EventArgs e)
         {
-            NotifyStatusChanged();
+            try
+            {
+                NotifyStatusChanged();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"规则状态变化事件处理失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
         }
 
         private void OnFallbackTimerElapsed(object sender, ElapsedEventArgs e)
         {
-            NotifyStatusChanged();
+            try
+            {
+                NotifyStatusChanged();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"规则状态兜底轮询处理失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
         }
 
         /// <summary>
@@ -217,7 +232,14 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         /// </summary>
         public void NotifyStatusChanged()
         {
-            StatusUpdated?.Invoke(this, EventArgs.Empty);
+            try
+            {
+                StatusUpdated?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"规则状态更新通知处理失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
         }
 
         public void Dispose()

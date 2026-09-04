@@ -284,19 +284,43 @@ namespace Ink_Canvas
 
         private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
         {
-            switch (Settings.Appearance.Theme)
+            // SystemEvents 事件在系统事件专用线程上触发，不能直接访问 WPF UI 对象；
+            // 必须封送到主线程，否则会因跨线程访问 UI 抛出未处理异常导致进程闪退。
+            try
             {
-                case 0:
-                    SetTheme(ThemeLight);
-                    break;
-                case 1:
-                    SetTheme(ThemeDark);
-                    break;
-                case 2:
-                    // 与 IsCurrentThemeDark / GetEffectiveTheme / 浮动栏一致，统一读 AppsUseLightTheme，
-                    // 否则 SystemUsesLightTheme 与 AppsUseLightTheme 可独立取值时主题会混搭
-                    SetTheme(ThemeHelper.IsSystemThemeLight() ? ThemeLight : ThemeDark);
-                    break;
+                if (Dispatcher == null || Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished)
+                    return;
+
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        if (Settings?.Appearance == null) return;
+
+                        switch (Settings.Appearance.Theme)
+                        {
+                            case 0:
+                                SetTheme(ThemeLight);
+                                break;
+                            case 1:
+                                SetTheme(ThemeDark);
+                                break;
+                            case 2:
+                                // 与 IsCurrentThemeDark / GetEffectiveTheme / 浮动栏一致，统一读 AppsUseLightTheme，
+                                // 否则 SystemUsesLightTheme 与 AppsUseLightTheme 可独立取值时主题会混搭
+                                SetTheme(ThemeHelper.IsSystemThemeLight() ? ThemeLight : ThemeDark);
+                                break;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"用户偏好变化(主题)处理失败: {ex.Message}", LogHelper.LogType.Warning);
+                    }
+                }), DispatcherPriority.Normal);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"调度用户偏好变化(主题)失败: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
 
