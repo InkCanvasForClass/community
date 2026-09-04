@@ -1453,6 +1453,15 @@ namespace Ink_Canvas
             FloatingBarThemeService.ApplySavedTheme();
         }
 
+        /// <summary>
+        /// 应用或移除彩色浮动栏背景（蓝绿半透明渐变），供 SettingsActionHub 切换开关时实时调用。
+        /// </summary>
+        internal void ApplyColorfulFloatingBar()
+        {
+            FloatingBarThemeService ??= new FloatingBarThemeService(this);
+            FloatingBarThemeService.ApplyColorfulOverlay();
+        }
+
         public void UpdateInkSmoothingConfig()
         {
             _inkSmoothingManager?.UpdateConfig();

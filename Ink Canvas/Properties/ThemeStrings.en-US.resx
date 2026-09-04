@@ -306,6 +306,12 @@
   <data name="Theme_HideFloatingBarBorderHint" xml:space="preserve">
     <value>Sets the floating bar border thickness to 0 for a borderless look.</value>
   </data>
+  <data name="Theme_ColorfulFloatingBar" xml:space="preserve">
+    <value>Colorful floating toolbar</value>
+  </data>
+  <data name="Theme_ColorfulFloatingBarHint" xml:space="preserve">
+    <value>Tints the floating toolbar background with a translucent blue-green gradient, overriding the current floating bar theme background.</value>
+  </data>
   <data name="Theme_FloatingBarBorderColor" xml:space="preserve">
     <value>Floating bar border color</value>
   </data>
