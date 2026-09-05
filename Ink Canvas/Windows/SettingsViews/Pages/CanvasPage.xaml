@@ -85,6 +85,14 @@
                             SwitchName="ToggleSwitchDisablePressure"
                             Toggled="ToggleSwitchDisablePressure_Toggled" />
 
+                    <!-- 实验性 WinRT 墨迹引擎：默认关闭，开启后由 MainWindow 挂载系统湿墨管线 -->
+                    <controls:LabeledSettingsCard x:Name="CardUseWinRTInk"
+                            Header="{x:Static props:CanvasStrings.Canvas_UseWinRTInk}"
+                            Description="{x:Static props:CanvasStrings.Canvas_UseWinRTInkHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Edit}"
+                            SwitchName="ToggleSwitchUseWinRTInk"
+                            Toggled="ToggleSwitchUseWinRTInk_Toggled" />
+
                     <!-- 简单下拉：声明式绑定 -->
                     <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_EraserSize}"
                             Description="{x:Static props:CanvasStrings.Canvas_EraserSizeHint}">

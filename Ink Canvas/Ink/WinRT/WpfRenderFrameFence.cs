@@ -3,19 +3,16 @@ using System.Collections.Generic;
 using System.Windows.Media;
 using System.Windows.Threading;
 
-namespace Ink_Canvas.Ink.Native
+namespace Ink_Canvas.Ink.WinRT
 {
     /// <summary>
-    /// Multi-frame WPF CompositionTarget.Rendering fence used only for wet-to-dry handoff.
-    /// Does not drive the wet-ink frame loop.
-    ///
+    /// Multi-frame WPF CompositionTarget.Rendering fence used for the wet-to-dry handoff.
     /// A single Rendering callback is not enough: the first event often fires before the
-    /// newly-added dry Stroke is actually composited by DWM. Waiting a second frame
-    /// ensures dry ink is on screen before the wet overlay is retired / moved off-screen.
+    /// newly-added dry Stroke is actually composited by DWM. Waiting a few frames ensures
+    /// dry ink is on screen before EndDry tells the OS to remove the wet stroke.
     /// </summary>
     internal sealed class WpfRenderFrameFence : IDisposable
     {
-        // 5 帧：首帧常在干墨合成前触发；第二帧多数已就绪；第三帧覆盖高负载/多屏 DWM 延迟。
         private const int FramesToWait = 5;
 
         private readonly Dispatcher _dispatcher;
@@ -29,7 +26,7 @@ namespace Ink_Canvas.Ink.Native
             _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
         }
 
-        public void Arm(long sessionId, Action onNextFrame)
+        public void Arm(long key, Action onNextFrame)
         {
             if (onNextFrame == null)
                 throw new ArgumentNullException(nameof(onNextFrame));
@@ -37,19 +34,19 @@ namespace Ink_Canvas.Ink.Native
 
             lock (_sync)
             {
-                _pending[sessionId] = new PendingFence(onNextFrame, FramesToWait);
+                _pending[key] = new PendingFence(onNextFrame, FramesToWait);
                 EnsureSubscribed_NoLock();
             }
         }
 
-        public void Cancel(long sessionId)
+        public void Cancel(long key)
         {
             if (_disposed)
                 return;
 
             lock (_sync)
             {
-                _pending.Remove(sessionId);
+                _pending.Remove(key);
                 if (_pending.Count == 0)
                     Unsubscribe_NoLock();
             }

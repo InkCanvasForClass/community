@@ -378,6 +378,15 @@
   <data name="Canvas_DarkMode" xml:space="preserve">
     <value>Dark</value>
   </data>
+  <data name="Canvas_UseWinRTInk" xml:space="preserve">
+    <value>Use WinRT ink engine (experimental)</value>
+  </data>
+  <data name="Canvas_UseWinRTInkHint" xml:space="preserve">
+    <value>Uses the system Wet Ink rendering and a dedicated ink thread; takes effect in pen tool. When off, falls back to WPF native ink. Experimental: may be incompatible with some devices.</value>
+  </data>
+  <data name="Canvas_WetInkRendererFailed" xml:space="preserve">
+    <value>Ink rendering failed to initialize; reverted to default ink mode</value>
+  </data>
   <data name="Shape_RemoveAsymptote" xml:space="preserve">
     <value>Remove asymptote lines?</value>
   </data>

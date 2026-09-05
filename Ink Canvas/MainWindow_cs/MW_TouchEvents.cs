@@ -2569,6 +2569,9 @@ namespace Ink_Canvas
 
             if (shouldUseTwoFingerGesture)
             {
+                // 双指手势接管画布变换：取消 WinRT 墨迹管线的在途湿墨，避免留下残留墨迹。
+                CancelActiveWinRTInk();
+
                 var md = e.DeltaManipulation;
                 var trans = md.Translation; // 获得位移矢量
 
