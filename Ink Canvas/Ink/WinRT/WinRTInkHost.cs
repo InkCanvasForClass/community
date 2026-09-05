@@ -119,8 +119,7 @@ namespace Ink_Canvas.Ink.WinRT
             lock (_inkThreadIdSync) { _inkThreadId = Environment.CurrentManagedThreadId; }
 
             var riid = InkDesktopHostInterop.IidInkPresenterDesktop;
-            var hr = _host.CreateInkPresenter(ref riid, out var presenterDesktopObject);
-            hr.ThrowIfFailed();
+            CheckHr(_host.CreateInkPresenter(ref riid, out var presenterDesktopObject), "CreateInkPresenter");
             var presenterDesktop = (IInkPresenterDesktop)presenterDesktopObject;
             // Wrap the raw IUnknown into the projected InkPresenter (CsWinRT canonical path:
             // MarshalInspectable<T>.FromAbi creates a projected RCW from the ABI pointer;
@@ -139,9 +138,13 @@ namespace Ink_Canvas.Ink.WinRT
             _presenterDesktop = presenterDesktop;
             // Supply the IDCompositionDevice3 required for custom drying; the commit handler below
             // commits this same device when the presenter requests a wet-ink composition update.
-            presenterDesktop.SetRootVisual(
-                _overlay.RootVisual,
-                _overlay.CompositionDevice3).ThrowIfFailed();
+            // Vortice wrappers pass as raw pointers: marshaling the managed wrapper as IUnknown
+            // would create a CCW whose QI for the DComp interfaces fails with E_NOINTERFACE.
+            CheckHr(
+                presenterDesktop.SetRootVisual(
+                    _overlay.RootVisual?.NativePointer ?? IntPtr.Zero,
+                    _overlay.CompositionDevice3?.NativePointer ?? IntPtr.Zero),
+                "SetRootVisual");
 
             _presenter.InputDeviceTypes = CoreInputDeviceTypes.Mouse | CoreInputDeviceTypes.Pen | CoreInputDeviceTypes.Touch;
             _presenter.InputProcessingConfiguration.Mode = InkInputProcessingMode.Inking;
@@ -149,7 +152,9 @@ namespace Ink_Canvas.Ink.WinRT
             _presenter.UpdateDefaultDrawingAttributes(config.ToInkDrawingAttributes());
 
             _inkSynchronizer = _presenter.ActivateCustomDrying();
-            presenterDesktop.SetCommitRequestHandler(_commitHandler).ThrowIfFailed();
+            // The commit handler is our own ComImport object (a real CCW), so passing the
+            // managed instance as UnmanagedType.Interface marshals it correctly.
+            CheckHr(presenterDesktop.SetCommitRequestHandler(_commitHandler), "SetCommitRequestHandler");
 
             _independentInput = CoreInkIndependentInputSource.Create(_presenter);
             _onPointerPressing = (s, e) => _inputGate.OnPointerPressing(s, e);
@@ -191,9 +196,11 @@ namespace Ink_Canvas.Ink.WinRT
             };
             _presenter.StrokesCollected += _onStrokesCollected;
 
-            presenterDesktop.SetSize(
-                Math.Max(1, config.WidthPx),
-                Math.Max(1, config.HeightPx)).ThrowIfFailed();
+            CheckHr(
+                presenterDesktop.SetSize(
+                    Math.Max(1, config.WidthPx),
+                    Math.Max(1, config.HeightPx)),
+                "SetSize");
 
             // Commit the root visual + initial presenter size so the first wet stroke has a target.
             _overlay.CompositionDevice?.Commit();
@@ -331,6 +338,19 @@ namespace Ink_Canvas.Ink.WinRT
                 return 0;
             });
             _host.QueueWorkItem(item).ThrowIfFailed();
+        }
+
+        /// <summary>
+        /// Checks an HRESULT from the ink-thread presenter setup, tagging the failure with the
+        /// exact COM call so runtime logs pinpoint which handshake step failed on which machine.
+        /// </summary>
+        private static void CheckHr(int hr, string step)
+        {
+            if (hr < 0)
+                throw new InvalidOperationException(
+                    $"[WinRTInk] {step} failed with HRESULT 0x{hr:X8}.");
+            if (hr != 0)
+                Marshal.ThrowExceptionForHR(hr);
         }
 
         public void Dispose()

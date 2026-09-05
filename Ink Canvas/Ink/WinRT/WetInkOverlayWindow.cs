@@ -276,7 +276,7 @@ namespace Ink_Canvas.Ink.WinRT
                     var handle = GCHandle.FromIntPtr(createStruct.lpCreateParams);
                     WindowsByHwnd[hwnd] = handle.Target as WetInkOverlayWindow;
                 }
-                return IntPtr.Zero;
+                return new IntPtr(1);
             }
             if (msg == WmNcDestroy)
             {

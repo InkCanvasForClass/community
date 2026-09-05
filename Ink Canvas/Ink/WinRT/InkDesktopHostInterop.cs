@@ -19,7 +19,7 @@ namespace Ink_Canvas.Ink.WinRT
 
         [PreserveSig]
         int CreateAndInitializeInkPresenter(
-            [MarshalAs(UnmanagedType.IUnknown)] object rootVisual,
+            IntPtr rootVisual,
             float width,
             float height,
             [In] ref Guid riid,
@@ -31,10 +31,14 @@ namespace Ink_Canvas.Ink.WinRT
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     internal interface IInkPresenterDesktop
     {
+        // rootVisual/device take raw interface pointers (Vortice objects' NativePointer):
+        // Vortice/SharpGen wrappers are not System.__ComObject RCWs, so marshaling them as
+        // UnmanagedType.IUnknown would CCW the managed wrapper and the native QI for
+        // IDCompositionVisual / IDCompositionDevice3 on that CCW fails with E_NOINTERFACE.
         [PreserveSig]
         int SetRootVisual(
-            [MarshalAs(UnmanagedType.IUnknown)] object rootVisual,
-            [MarshalAs(UnmanagedType.IUnknown)] object device);
+            IntPtr rootVisual,
+            IntPtr device);
 
         [PreserveSig]
         int SetCommitRequestHandler(
