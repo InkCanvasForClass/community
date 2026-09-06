@@ -128,7 +128,7 @@
     <PackageReference Include="iNKORE.UI.WPF" Version="1.2.8" />
     <PackageReference Include="MdXaml" Version="1.27.0" />
     <PackageReference Include="Microsoft.Office.Interop.PowerPoint" Version="15.0.4420.1018" />
-    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.333">
+    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.298">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -648,10 +648,6 @@
     <EmbeddedResource Update="Properties\*.zh-ME.resx">
       <WithCulture>false</WithCulture>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Update="Nerdbank.GitVersioning" Version="3.10.94" />
   </ItemGroup>
   
   <Target Name="SetAssemblyInformationalVersion" DependsOnTargets="GetBuildVersion" AfterTargets="GetBuildVersion">
