@@ -83,7 +83,7 @@ namespace Ink_Canvas
                         var directory = Path.GetDirectoryName(path);
                         if (!Directory.Exists(directory))
                             Directory.CreateDirectory(directory);
-                        bitmapToSave.Save(path, ImageFormat.Png);
+                        Helpers.ScreenshotImageSaveHelper.Save(bitmapToSave, path);
                         bitmapToSave.Dispose();
                     }
 
@@ -492,7 +492,7 @@ namespace Ink_Canvas
                 basePath,
                 "Auto Saved - Screenshots",
                 dateFolder,
-                safeRelativePath + ".png");
+                safeRelativePath + Helpers.ScreenshotImageSaveHelper.GetExtension());
         }
 
         private static string SanitizeScreenshotRelativePath(string relativePath)
@@ -540,7 +540,7 @@ namespace Ink_Canvas
 
             return Path.Combine(
                 screenshotsFolder,
-                $"{GetScreenshotFileNameStem()}.png");
+                GetScreenshotFileNameStem() + Helpers.ScreenshotImageSaveHelper.GetExtension());
         }
 
         private string GetScreenshotFileNameStem()

@@ -174,6 +174,24 @@ namespace Ink_Canvas.Properties
 
         public static string Storage_ScreenshotsByDateFolder => ResourceManager.GetString(nameof(Storage_ScreenshotsByDateFolder), _resourceCulture);
 
+        public static string Storage_ScreenshotSettings => ResourceManager.GetString(nameof(Storage_ScreenshotSettings), _resourceCulture);
+
+        public static string Storage_ScreenshotSettingsDesc => ResourceManager.GetString(nameof(Storage_ScreenshotSettingsDesc), _resourceCulture);
+
+        public static string Storage_ScreenshotFormat => ResourceManager.GetString(nameof(Storage_ScreenshotFormat), _resourceCulture);
+
+        public static string Storage_ScreenshotJpegQuality => ResourceManager.GetString(nameof(Storage_ScreenshotJpegQuality), _resourceCulture);
+
+        public static string Storage_ScreenshotScale => ResourceManager.GetString(nameof(Storage_ScreenshotScale), _resourceCulture);
+
+        public static string Storage_ScreenshotScale_100 => ResourceManager.GetString(nameof(Storage_ScreenshotScale_100), _resourceCulture);
+
+        public static string Storage_ScreenshotScale_75 => ResourceManager.GetString(nameof(Storage_ScreenshotScale_75), _resourceCulture);
+
+        public static string Storage_ScreenshotScale_50 => ResourceManager.GetString(nameof(Storage_ScreenshotScale_50), _resourceCulture);
+
+        public static string Storage_ScreenshotScale_25 => ResourceManager.GetString(nameof(Storage_ScreenshotScale_25), _resourceCulture);
+
         public static string Storage_Title => ResourceManager.GetString(nameof(Storage_Title), _resourceCulture);
 
         public static string Storage_TotalUsage => ResourceManager.GetString(nameof(Storage_TotalUsage), _resourceCulture);

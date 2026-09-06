@@ -1275,6 +1275,15 @@ namespace Ink_Canvas
         [JsonProperty("isSaveScreenshotsInDateFolders")]
         public bool IsSaveScreenshotsInDateFolders { get; set; }
 
+        [JsonProperty("screenshotSaveFormat")]
+        public int ScreenshotSaveFormat { get; set; } = 0;
+
+        [JsonProperty("screenshotJpegQuality")]
+        public long ScreenshotJpegQuality { get; set; } = 90;
+
+        [JsonProperty("screenshotScaleMode")]
+        public int ScreenshotScaleMode { get; set; } = 0;
+
         [JsonProperty("isAutoSaveStrokesAtScreenshot")]
         public bool IsAutoSaveStrokesAtScreenshot { get; set; }
 
