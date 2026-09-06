@@ -1532,7 +1532,8 @@ namespace Ink_Canvas
                     SetTheme("Dark");
                     break;
                 case 2: // 跟随系统
-                    if (ThemeHelper.IsSystemThemeLight())
+                    _lastFollowedSystemThemeLight = ThemeHelper.IsSystemThemeLight();
+                    if (_lastFollowedSystemThemeLight.Value)
                     {
                         ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
                         SetTheme("Light");
@@ -1904,6 +1905,8 @@ namespace Ink_Canvas
         {
             RealtimeInkFrameScheduler.Clear();
             SystemEvents.DisplaySettingsChanged -= SystemEventsOnDisplaySettingsChanged;
+            SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
+            _systemThemeRetryTimer?.Stop();
             // 玻璃浮动栏刻意不设 Owner，必须显式关闭，否则残留窗口会挡住进程退出
             HideLiquidGlassBar();
 
@@ -3506,14 +3509,19 @@ namespace Ink_Canvas
         {
             try
             {
+                // 手动切换主题时基线失效，运行时系统深浅色切换需要重新建立
+                _lastFollowedSystemThemeLight = null;
+
                 switch (themeIndex)
                 {
                     case 0: // 浅色主题
+                        ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
                         SetTheme("Light", true);
                         // 浅色主题下设置浮动栏为完全不透明
                         ViewboxFloatingBar.Opacity = 1.0;
                         break;
                     case 1: // 深色主题
+                        ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
                         SetTheme("Dark", true);
                         // 深色主题下设置浮动栏为完全不透明
                         ViewboxFloatingBar.Opacity = 1.0;
@@ -3521,11 +3529,13 @@ namespace Ink_Canvas
                     case 2: // 跟随系统
                         if (ThemeHelper.IsSystemThemeLight())
                         {
+                            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
                             SetTheme("Light", true);
                             ViewboxFloatingBar.Opacity = 1.0;
                         }
                         else
                         {
+                            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
                             SetTheme("Dark", true);
                             ViewboxFloatingBar.Opacity = 1.0;
                         }
