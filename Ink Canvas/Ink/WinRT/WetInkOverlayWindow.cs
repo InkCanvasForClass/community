@@ -115,6 +115,16 @@ namespace Ink_Canvas.Ink.WinRT
                     Marshal.GetLastWin32Error(),
                     "CreateWindowEx failed for WinRT ink overlay.");
 
+            // Entering pen mode parks-in the fullscreen overlay with a z-order change; DWM
+            // would play its window transition for that, flashing the whole screen once.
+            // Disabling transitions for this window keeps the move invisible.
+            var disableTransitions = 1; // TRUE
+            DwmSetWindowAttribute(
+                _overlayHwnd,
+                3 /* DWMWA_TRANSITIONS_FORCEDISABLED */,
+                ref disableTransitions,
+                sizeof(int));
+
             CreateCompositionTree();
             PlaceOverlay();
         }
@@ -384,5 +394,12 @@ namespace Ink_Canvas.Ink.WinRT
             int cx,
             int cy,
             uint uFlags);
+
+        [DllImport("dwmapi.dll")]
+        private static extern int DwmSetWindowAttribute(
+            IntPtr hwnd,
+            int attribute,
+            ref int value,
+            int size);
     }
 }

@@ -49,6 +49,7 @@ namespace Ink_Canvas
 
         private EventHandler _winRTInkLocationChangedHandler;
         private DependencyPropertyChangedEventHandler _winRTInkIsVisibleChangedHandler;
+        private PropertyDataChangedEventHandler _winRTInkAttributesChangedHandler;
 
         internal bool IsWinRTInkPipelineAvailable =>
             _winRTInkStarted && !_winRTInkDisabled;
@@ -59,7 +60,18 @@ namespace Ink_Canvas
                 return;
             if (Settings?.Canvas?.UseWinRTInk == true
                 && ResolveLogicalInkTool() == LogicalInkTool.Pen)
-                TryStartWinRTInkPipeline();
+            {
+                if (_winRTInkStarted && !_winRTInkDisabled)
+                {
+                    // Already running: tool switches (color / pen type / width) must refresh
+                    // the presenter's drawing attributes, not just re-run the start guard.
+                    UpdateWinRTInkStyle();
+                }
+                else
+                {
+                    TryStartWinRTInkPipeline();
+                }
+            }
             else
                 ShutdownWinRTInkPipeline();
         }
@@ -103,6 +115,15 @@ namespace Ink_Canvas
 
                 WireWinRTInkGeometryListeners();
                 _winRTInkStarted = true;
+
+                // Color / width / highlighter changes mutate inkCanvas.DefaultDrawingAttributes
+                // in place; push each change to the presenter so wet ink stays in sync.
+                if (_winRTInkAttributesChangedHandler == null)
+                {
+                    _winRTInkAttributesChangedHandler = (_, __) => UpdateWinRTInkStyle();
+                    inkCanvas.DefaultDrawingAttributes.AttributeChanged += _winRTInkAttributesChangedHandler;
+                }
+
                 PushWinRTInkGateSnapshots();
                 EnsureWinRTInkPhysicalEditingMode();
 
@@ -127,6 +148,13 @@ namespace Ink_Canvas
                 return;
 
             UnwireWinRTInkGeometryListeners();
+
+            if (_winRTInkAttributesChangedHandler != null)
+            {
+                try { inkCanvas.DefaultDrawingAttributes.AttributeChanged -= _winRTInkAttributesChangedHandler; }
+                catch { /* best-effort */ }
+                _winRTInkAttributesChangedHandler = null;
+            }
 
             try { _winRTInkFrameFence?.CancelAll(); }
             catch { /* best-effort */ }
@@ -223,6 +251,32 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile(
                     $"[WinRTInk] UpdateTarget failed: {ex}",
+                    LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// Re-pushes the current drawing style (color / width / pen type / pressure) to the
+        /// presenter without touching geometry. Called on DefaultDrawingAttributes changes
+        /// and tool-mode switches; the dry-ink converter reads the same refreshed config,
+        /// so wet and dry ink stay consistent.
+        /// </summary>
+        private void UpdateWinRTInkStyle()
+        {
+            if (!_winRTInkStarted || _winRTInkHost == null || _winRTInkDisabled)
+                return;
+
+            try
+            {
+                var config = BuildWinRTInkConfig();
+                _winRTInkConfig = config;
+                _winRTInkHost.UpdateDrawingAttributes(config.ToInkDrawingAttributes());
+                PushWinRTInkGateSnapshots();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[WinRTInk] UpdateStyle failed: {ex}",
                     LogHelper.LogType.Error);
             }
         }
