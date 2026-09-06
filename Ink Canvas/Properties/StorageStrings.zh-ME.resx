@@ -256,14 +256,42 @@
   <data name="Storage_ScreenshotsByDateFolder" xml:space="preserve">
     <value>截图按日期分箱子装</value>
   </data>
-  <data name="Storage_ScreenshotSaveLocation" xml:space="preserve">
-    <value>截图存到自选地方</value>
-  </data>
-  <data name="Storage_ScreenshotSaveLocationDesc" xml:space="preserve">
-    <value>关掉的话截图就扔桌面</value>
-  </data>
-  <data name="Storage_CopyScreenshotToClipboard" xml:space="preserve">
-    <value>截完图塞剪贴板</value>
+<data name="Storage_ScreenshotSettings" xml:space="preserve">
+  <value>截图保存</value>
+</data>
+<data name="Storage_ScreenshotSettingsDesc" xml:space="preserve">
+  <value>自动截图的格式、质量、缩放都在这里，展开调一调</value>
+</data>
+<data name="Storage_ScreenshotFormat" xml:space="preserve">
+  <value>截图格式</value>
+</data>
+<data name="Storage_ScreenshotJpegQuality" xml:space="preserve">
+  <value>JPG 质量</value>
+</data>
+<data name="Storage_ScreenshotScale" xml:space="preserve">
+  <value>截图缩放（像素倍率）</value>
+</data>
+<data name="Storage_ScreenshotScale_100" xml:space="preserve">
+  <value>100%</value>
+</data>
+<data name="Storage_ScreenshotScale_75" xml:space="preserve">
+  <value>75%</value>
+</data>
+<data name="Storage_ScreenshotScale_50" xml:space="preserve">
+  <value>50%</value>
+</data>
+<data name="Storage_ScreenshotScale_25" xml:space="preserve">
+  <value>25%</value>
+</data>
+<data name="Storage_ScreenshotSaveLocation" xml:space="preserve">
+  <value>截图存到自选地方</value>
+</data>
+<data name="Storage_ScreenshotSaveLocationDesc" xml:space="preserve">
+  <value>关掉的话截图就扔桌面</value>
+</data>
+<data name="Storage_CopyScreenshotToClipboard" xml:space="preserve">
+  <value>截完图塞剪贴板</value>
+</data>
   </data>
   <data name="Storage_Title" xml:space="preserve">
     <value>硬盘管家</value>

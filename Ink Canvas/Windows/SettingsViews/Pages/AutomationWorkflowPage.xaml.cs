@@ -155,9 +155,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardAutoFoldAfterPPTSlideShow.IsOn = auto.IsAutoFoldAfterPPTSlideShow;
             CardKeepFoldAfterSoftwareExit.IsOn = auto.KeepFoldAfterSoftwareExit;
 
-            CardSaveScreenshotsInDateFolders.IsOn = auto.IsSaveScreenshotsInDateFolders;
-            CardAutoSaveStrokesAtScreenshot.IsOn = auto.IsAutoSaveStrokesAtScreenshot;
-            CardAutoSaveStrokesAtClear.IsOn = auto.IsAutoSaveScreenshotAtClear;
+            ToggleSwitchSaveScreenshotsInDateFolders.IsOn = auto.IsSaveScreenshotsInDateFolders;
+            ToggleSwitchAutoSaveStrokesAtScreenshot.IsOn = auto.IsAutoSaveStrokesAtScreenshot;
+            ToggleSwitchAutoSaveStrokesAtClear.IsOn = auto.IsAutoSaveScreenshotAtClear;
+
+            SyncScreenshotFormatSelection(auto.ScreenshotSaveFormat);
+            ScreenshotJpegQualitySlider.Value = Math.Max(50, Math.Min(100, auto.ScreenshotJpegQuality));
+            SyncScreenshotScaleSelection(auto.ScreenshotScaleMode);
             CardSaveStrokesAsXML.IsOn = auto.IsSaveStrokesAsXML;
             CardSaveStrokesAsUInk.IsOn = auto.IsSaveStrokesAsUInK;
             CardEnableAutoSaveStrokes.IsOn = auto.IsEnableAutoSaveStrokes;
@@ -303,11 +307,59 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         #region Storage & Save
 
         private void ToggleSwitchSaveScreenshotsInDateFolders_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsSaveScreenshotsInDateFolders = CardSaveScreenshotsInDateFolders.IsOn; SettingsManager.SaveSettingsToFile(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsSaveScreenshotsInDateFolders = ToggleSwitchSaveScreenshotsInDateFolders.IsOn; SettingsManager.SaveSettingsToFile(); }
         private void ToggleSwitchAutoSaveStrokesAtScreenshot_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoSaveStrokesAtScreenshot = CardAutoSaveStrokesAtScreenshot.IsOn; SettingsManager.SaveSettingsToFile(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoSaveStrokesAtScreenshot = ToggleSwitchAutoSaveStrokesAtScreenshot.IsOn; SettingsManager.SaveSettingsToFile(); }
+
+        private void SyncScreenshotFormatSelection(int format)
+        {
+            ComboBoxScreenshotFormat.SelectedIndex = format == ScreenshotImageSaveHelper.FormatJpeg ? 1 : 0;
+            CardScreenshotJpegQuality.Visibility = format == ScreenshotImageSaveHelper.FormatJpeg
+                ? Visibility.Visible
+                : Visibility.Collapsed;
+        }
+
+        private void ComboBoxScreenshotFormat_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded || ComboBoxScreenshotFormat.SelectedItem == null) return;
+            var format = ((ComboBoxItem)ComboBoxScreenshotFormat.SelectedItem).Tag.ToString() == "1"
+                ? ScreenshotImageSaveHelper.FormatJpeg
+                : ScreenshotImageSaveHelper.FormatPng;
+            SyncScreenshotFormatSelection(format);
+            SettingsManager.Settings.Automation.ScreenshotSaveFormat = format;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ScreenshotJpegQualitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            UpdateSliderText(ScreenshotJpegQualitySlider, ScreenshotJpegQualityText, "{0:0}");
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Automation.ScreenshotJpegQuality = (long)ScreenshotJpegQualitySlider.Value;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void SyncScreenshotScaleSelection(int scaleMode)
+        {
+            var index = scaleMode >= 0 && scaleMode < ComboBoxScreenshotScale.Items.Count ? scaleMode : 0;
+            ComboBoxScreenshotScale.SelectedIndex = index;
+        }
+
+        private void ComboBoxScreenshotScale_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded || ComboBoxScreenshotScale.SelectedItem == null) return;
+            var scaleMode = int.Parse(((ComboBoxItem)ComboBoxScreenshotScale.SelectedItem).Tag.ToString());
+            SettingsManager.Settings.Automation.ScreenshotScaleMode = scaleMode;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void UpdateSliderText(Slider slider, TextBlock textBlock, string format)
+        {
+            if (slider == null || textBlock == null) return;
+            textBlock.Text = string.Format(format, slider.Value);
+        }
+
         private void ToggleSwitchAutoSaveStrokesAtClear_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoSaveScreenshotAtClear = CardAutoSaveStrokesAtClear.IsOn; SettingsManager.SaveSettingsToFile(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoSaveScreenshotAtClear = ToggleSwitchAutoSaveStrokesAtClear.IsOn; SettingsManager.SaveSettingsToFile(); }
         private void ToggleSwitchSaveStrokesAsXML_Toggled(object sender, RoutedEventArgs e)
         { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsSaveStrokesAsXML = CardSaveStrokesAsXML.IsOn; SettingsManager.SaveSettingsToFile(); }
         private void ToggleSwitchSaveStrokesAsUInK_Toggled(object sender, RoutedEventArgs e)
