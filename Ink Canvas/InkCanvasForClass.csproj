@@ -119,16 +119,16 @@
     <None Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Costura.Fody" Version="6.2.0">
+    <PackageReference Include="Costura.Fody" Version="6.0.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="gong-wpf-dragdrop" Version="4.0.0" />
-    <PackageReference Include="H.NotifyIcon.Wpf" Version="2.4.1" />
+    <PackageReference Include="H.NotifyIcon.Wpf" Version="2.0.131" />
     <PackageReference Include="iNKORE.UI.WPF.Modern" Version="0.10.2.1" />
     <PackageReference Include="iNKORE.UI.WPF" Version="1.2.8" />
     <PackageReference Include="MdXaml" Version="1.27.0" />
     <PackageReference Include="Microsoft.Office.Interop.PowerPoint" Version="15.0.4420.1018" />
-    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.333">
+    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.298">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -137,18 +137,17 @@
     <PackageReference Include="Microsoft.International.Converters.PinYinConverter" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
-    <PackageReference Include="System.ComponentModel.Composition" Version="10.0.11" />
-    <PackageReference Include="System.Composition.AttributedModel" Version="10.0.11" />
+    <PackageReference Include="System.ComponentModel.Composition" Version="10.0.5" />
+    <PackageReference Include="System.Composition.AttributedModel" Version="10.0.5" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-    <PackageReference Include="System.Management" Version="10.0.11" />
+    <PackageReference Include="System.Management" Version="6.0.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <!-- UInk 1.0 规范：主文件为 MessagePack 对象流（Header/HeaderExtension/Canvas/Ink/Shape/Media），由 UInk/ 下的读写器使用 -->
     <PackageReference Include="MessagePack" Version="3.1.8" />
     <PackageReference Include="NHotkey.Wpf" Version="4.0.0" />
     <PackageReference Include="OSVersionExt" Version="4.1.0" />
     <!-- PDFsharp 6.1.x 是最后一个以 net6.0 为目标框架的版本；用于插件「背景 + 墨迹」导出 PDF -->
-    <PackageReference Include="PDFsharp" Version="6.2.4" />
+    <PackageReference Include="PDFsharp" Version="6.1.1" />
     <!-- AForge.Imaging / AForge.Math 仅用于照片校正（Grayscale/CannyEdgeDetector/BlobCounter/QuadrilateralTransformation）；摄像头采集已切换到 DirectShow（DirectShowLib） -->
     <PackageReference Include="AForge.Imaging" Version="2.2.5" />
     <PackageReference Include="AForge.Math" Version="2.2.5" />
@@ -157,14 +156,14 @@
     <PackageReference Include="OpenCvSharp4.Extensions" Version="4.13.0.20260627" />
 
     <PackageReference Include="WebDav.Client" Version="2.9.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.11" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <PackageReference Include="Vortice.Direct2D1" Version="3.8.3" />
-    <PackageReference Include="Vortice.Direct3D11" Version="3.8.3" />
-    <PackageReference Include="Vortice.DirectComposition" Version="3.8.3" />
-    <PackageReference Include="Vortice.DXGI" Version="3.8.3" />
-    <!-- 视频展台：DirectShow + VMR9 Renderless + D3DImage 零拷贝 GPU 渲染（兼容 Win7 SP1+ 和 Win10+） -->
-    <PackageReference Include="JerryShaw.WPFMediaKit" Version="1.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Vortice.Direct2D1" Version="3.2.0" />
+    <PackageReference Include="Vortice.Direct3D11" Version="3.2.0" />
+    <PackageReference Include="Vortice.DirectComposition" Version="3.2.0" />
+    <PackageReference Include="Vortice.DXGI" Version="3.2.0" />
+    <!-- 视频展台：DirectShow + VMR9 Renderless + D3DImage 零拷贝 GPU 渲染 -->
+    <PackageReference Include="WPFMediaKit" Version="3.0.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\InkCanvas.PluginSdk\InkCanvas.PluginSdk.csproj" />
@@ -620,16 +619,20 @@
        CI 的 AnyCPU(=x64 产物)/x86 构建都能带上辅助 exe；单文件发布走 Publish 分支。 -->
   <Target Name="CopyLiquidGlassMagHost" AfterTargets="Build" Condition="'$(PublishSingleFile)' != 'true'">
     <ItemGroup>
-      <LiquidGlassMagHostFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.LiquidGlassMagHost\bin\$(Platform)\$(Configuration)\$(TargetFramework)\InkCanvas.LiquidGlassMagHost.*" Condition="'$(Platform)' != 'AnyCPU'" />
-      <LiquidGlassMagHostFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.LiquidGlassMagHost\bin\$(Configuration)\$(TargetFramework)\InkCanvas.LiquidGlassMagHost.*" Condition="'$(Platform)' == 'AnyCPU'" />
+      <LiquidGlassMagHostFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.LiquidGlassMagHost\bin\$(Platform)\$(Configuration)\$(TargetFramework)\InkCanvas.LiquidGlassMagHost.*"
+                                Condition="'$(Platform)' != 'AnyCPU'" />
+      <LiquidGlassMagHostFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.LiquidGlassMagHost\bin\$(Configuration)\$(TargetFramework)\InkCanvas.LiquidGlassMagHost.*"
+                                Condition="'$(Platform)' == 'AnyCPU'" />
     </ItemGroup>
     <Copy SourceFiles="@(LiquidGlassMagHostFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" Condition="'@(LiquidGlassMagHostFiles)' != ''" />
   </Target>
 
   <Target Name="CopyLiquidGlassMagHostToPublishDirectory" AfterTargets="Publish" Condition="'$(PublishSingleFile)' == 'true'">
     <ItemGroup>
-      <LiquidGlassMagHostPublishFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.LiquidGlassMagHost\bin\$(Platform)\$(Configuration)\$(TargetFramework)\InkCanvas.LiquidGlassMagHost.*" Condition="'$(Platform)' != 'AnyCPU'" />
-      <LiquidGlassMagHostPublishFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.LiquidGlassMagHost\bin\$(Configuration)\$(TargetFramework)\InkCanvas.LiquidGlassMagHost.*" Condition="'$(Platform)' == 'AnyCPU'" />
+      <LiquidGlassMagHostPublishFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.LiquidGlassMagHost\bin\$(Platform)\$(Configuration)\$(TargetFramework)\InkCanvas.LiquidGlassMagHost.*"
+                                      Condition="'$(Platform)' != 'AnyCPU'" />
+      <LiquidGlassMagHostPublishFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.LiquidGlassMagHost\bin\$(Configuration)\$(TargetFramework)\InkCanvas.LiquidGlassMagHost.*"
+                                      Condition="'$(Platform)' == 'AnyCPU'" />
     </ItemGroup>
     <Copy SourceFiles="@(LiquidGlassMagHostPublishFiles)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" Condition="'@(LiquidGlassMagHostPublishFiles)' != ''" />
   </Target>
@@ -648,10 +651,6 @@
     <EmbeddedResource Update="Properties\*.zh-ME.resx">
       <WithCulture>false</WithCulture>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Update="Nerdbank.GitVersioning" Version="3.10.94" />
   </ItemGroup>
   
   <Target Name="SetAssemblyInformationalVersion" DependsOnTargets="GetBuildVersion" AfterTargets="GetBuildVersion">
