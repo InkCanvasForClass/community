@@ -48,6 +48,9 @@ namespace Ink_Canvas.Ink.WinRT
         private readonly Action<PointerEventArgs> _onChromePointerDown;
         private readonly Action<PointerEventArgs> _onChromePointerMove;
         private readonly Action<PointerEventArgs> _onChromePointerRelease;
+        private readonly Action<PointerEventArgs> _onInkPointerPress;
+        private readonly Action<PointerEventArgs> _onInkPointerMove;
+        private readonly Action<PointerEventArgs> _onInkPointerRelease;
         private readonly Action _onStrokeEnded;
         private readonly Action _onStrokeCanceled;
 
@@ -65,7 +68,9 @@ namespace Ink_Canvas.Ink.WinRT
         private readonly Dictionary<uint, bool> _touchGestureInProgress = new Dictionary<uint, bool>();
         private readonly HashSet<uint> _activeTouchPointers = new HashSet<uint>();
         private readonly HashSet<uint> _chromeForwardedPointers = new HashSet<uint>();
+        private readonly HashSet<uint> _inkingPointers = new HashSet<uint>();
         private uint _mouseForwardingPointerId;
+        private long _lastInkMoveForwardTicks;
         private volatile bool _isGestureInProgress;
 
         public WinRTInkInputGate(
@@ -73,6 +78,9 @@ namespace Ink_Canvas.Ink.WinRT
             Action<PointerEventArgs> onChromePointerDown,
             Action<PointerEventArgs> onChromePointerMove,
             Action<PointerEventArgs> onChromePointerRelease,
+            Action<PointerEventArgs> onInkPointerPress,
+            Action<PointerEventArgs> onInkPointerMove,
+            Action<PointerEventArgs> onInkPointerRelease,
             Action onStrokeEnded,
             Action onStrokeCanceled)
         {
@@ -80,6 +88,9 @@ namespace Ink_Canvas.Ink.WinRT
             _onChromePointerDown = onChromePointerDown;
             _onChromePointerMove = onChromePointerMove;
             _onChromePointerRelease = onChromePointerRelease;
+            _onInkPointerPress = onInkPointerPress;
+            _onInkPointerMove = onInkPointerMove;
+            _onInkPointerRelease = onInkPointerRelease;
             _onStrokeEnded = onStrokeEnded ?? throw new ArgumentNullException(nameof(onStrokeEnded));
             _onStrokeCanceled = onStrokeCanceled ?? throw new ArgumentNullException(nameof(onStrokeCanceled));
         }
@@ -168,6 +179,9 @@ namespace Ink_Canvas.Ink.WinRT
             switch (result)
             {
                 case PointerGateResult.AllowInk:
+                    _inkingPointers.Add(pointerId);
+                    try { _onInkPointerPress?.Invoke(e); }
+                    catch { /* tracking is best-effort */ }
                     return;
 
                 case PointerGateResult.BlockAndForward:
@@ -209,6 +223,22 @@ namespace Ink_Canvas.Ink.WinRT
                     try { _onChromePointerMove?.Invoke(e); }
                     catch { /* forwarding is best-effort */ }
                 }
+                return;
+            }
+            if (_inkingPointers.Contains(pointerId))
+            {
+                // Pause-straighten movement feed. Throttled to ~66 Hz: the UI thread only
+                // needs to know "movement happened" to reset its pause timer, and forwarding
+                // every pointer update would flood the dispatcher queue.
+                var now = System.Diagnostics.Stopwatch.GetTimestamp();
+                var elapsedMs = (now - _lastInkMoveForwardTicks) * 1000.0
+                                / System.Diagnostics.Stopwatch.Frequency;
+                if (elapsedMs >= 15)
+                {
+                    _lastInkMoveForwardTicks = now;
+                    try { _onInkPointerMove?.Invoke(e); }
+                    catch { /* tracking is best-effort */ }
+                }
             }
         }
 
@@ -216,6 +246,12 @@ namespace Ink_Canvas.Ink.WinRT
         {
             var pointerId = e.CurrentPoint.PointerId;
             _activeTouchPointers.Remove(pointerId);
+
+            if (_inkingPointers.Remove(pointerId))
+            {
+                try { _onInkPointerRelease?.Invoke(e); }
+                catch { /* tracking is best-effort */ }
+            }
 
             if (_touchGestureInProgress.Remove(pointerId))
             {

@@ -96,11 +96,27 @@ namespace Ink_Canvas
 
                 _winRTInkFrameFence = new Ink.WinRT.WpfRenderFrameFence(Dispatcher);
                 _chromeInputForwarder = new Ink.WinRT.ChromeInputForwarder();
+                var uiDispatcher = Dispatcher;
                 _winRTInkInputGate = new WinRTInkInputGate(
                     classifyPointer: ClassifyWinRTInkPointer,
                     onChromePointerDown: ForwardWinRTInkChromePointerDown,
                     onChromePointerMove: ForwardWinRTInkChromePointerMove,
                     onChromePointerRelease: ForwardWinRTInkChromePointerUp,
+                    onInkPointerPress: e =>
+                    {
+                        // Ink thread: extract the position struct before marshaling.
+                        var p = e.CurrentPoint.Position;
+                        uiDispatcher.BeginInvoke(new Action(() => OnWinRTInkPausePress(p.X, p.Y)));
+                    },
+                    onInkPointerMove: e =>
+                    {
+                        var p = e.CurrentPoint.Position;
+                        uiDispatcher.BeginInvoke(new Action(() => OnWinRTInkPauseMove(p.X, p.Y)));
+                    },
+                    onInkPointerRelease: e =>
+                    {
+                        uiDispatcher.BeginInvoke(new Action(OnWinRTInkPauseRelease));
+                    },
                     onStrokeEnded: OnWinRTInkStrokeCanceled,
                     onStrokeCanceled: OnWinRTInkStrokeCanceled);
 
@@ -162,6 +178,7 @@ namespace Ink_Canvas
                 return;
 
             UnwireWinRTInkGeometryListeners();
+            ShutdownWinRTInkPauseStraighten();
 
             if (_winRTInkAttributesChangedHandler != null)
             {
@@ -296,6 +313,177 @@ namespace Ink_Canvas
                     $"[WinRTInk] UpdateStyle failed: {ex}",
                     LogHelper.LogType.Error);
             }
+        }
+
+        // ---- Pause straightening (WinRT path) ---------------------------------------
+        //
+        // The legacy WPF path watched StylusMove and force-committed the in-progress stroke
+        // when the pen paused for PauseStraightenDelay ms (MW_TouchEvents.TryPauseStraightenInkMode):
+        // the segment start→pause became a straight line, and continued writing started a new
+        // stroke. The OS wet stroke cannot be edited mid-flight, so this path instead records
+        // the pause position from the input gate and applies the same transform when the
+        // stroke dries: points up to the pause become a straight line, the points after the
+        // pause are kept as a separate continuation stroke.
+
+        private const double WinRTInkPauseMatchToleranceDip = 20.0;
+        private const double WinRTInkPauseStraightenMinLengthDip = 100.0;
+        private const double WinRTInkPauseJitterThresholdPx = 1.5;
+
+        private DispatcherTimer _winRTInkPauseStraightenTimer;
+        private bool _winRTInkPauseTracking;
+        private bool _winRTInkPausePending;
+        private Point _winRTInkPauseLastPos;   // presenter physical px
+        private Point _winRTInkPauseAnchorPos; // presenter physical px at last timer reset
+        private Point _winRTInkPausePos;       // presenter physical px, where the pause happened
+
+        /// <summary>UI thread (marshaled from the ink input gate): an ink-allowed press began.</summary>
+        private void OnWinRTInkPausePress(double x, double y)
+        {
+            _winRTInkPausePending = false;
+            if (!Settings.Canvas.PauseStraightenLine || drawingShapeMode != 0)
+            {
+                _winRTInkPauseTracking = false;
+                return;
+            }
+
+            _winRTInkPauseTracking = true;
+            _winRTInkPauseLastPos = new Point(x, y);
+            _winRTInkPauseAnchorPos = _winRTInkPauseLastPos;
+            ResetWinRTInkPauseTimer();
+        }
+
+        /// <summary>UI thread (throttled feed from the ink input gate): the pen is moving.</summary>
+        private void OnWinRTInkPauseMove(double x, double y)
+        {
+            if (!_winRTInkPauseTracking)
+                return;
+
+            _winRTInkPauseLastPos = new Point(x, y);
+            var dx = x - _winRTInkPauseAnchorPos.X;
+            var dy = y - _winRTInkPauseAnchorPos.Y;
+            if (dx * dx + dy * dy < WinRTInkPauseJitterThresholdPx * WinRTInkPauseJitterThresholdPx)
+                return; // sub-pixel jitter while holding still does not count as movement
+
+            _winRTInkPauseAnchorPos = _winRTInkPauseLastPos;
+            ResetWinRTInkPauseTimer();
+        }
+
+        /// <summary>UI thread (marshaled from the ink input gate): the pointer lifted.</summary>
+        private void OnWinRTInkPauseRelease()
+        {
+            _winRTInkPauseTracking = false;
+            _winRTInkPauseStraightenTimer?.Stop();
+            // A pause already detected stays pending until the dry batch consumes it.
+        }
+
+        private void ResetWinRTInkPauseTimer()
+        {
+            var delay = Settings.Canvas.PauseStraightenDelay;
+            if (delay < 100)
+                delay = 100;
+
+            if (_winRTInkPauseStraightenTimer == null)
+            {
+                _winRTInkPauseStraightenTimer = new DispatcherTimer();
+                _winRTInkPauseStraightenTimer.Tick += (s, e) =>
+                {
+                    _winRTInkPauseStraightenTimer.Stop();
+                    if (!_winRTInkPauseTracking)
+                        return;
+                    // The pen has been still for the whole delay: record the pause point.
+                    _winRTInkPausePending = true;
+                    _winRTInkPausePos = _winRTInkPauseLastPos;
+                };
+            }
+
+            _winRTInkPauseStraightenTimer.Interval = TimeSpan.FromMilliseconds(delay);
+            _winRTInkPauseStraightenTimer.Stop();
+            _winRTInkPauseStraightenTimer.Start();
+        }
+
+        private void ShutdownWinRTInkPauseStraighten()
+        {
+            _winRTInkPauseStraightenTimer?.Stop();
+            _winRTInkPauseTracking = false;
+            _winRTInkPausePending = false;
+        }
+
+        /// <summary>
+        /// Splits one dry batch at the recorded pause point: the segment before the pause is
+        /// returned as a straightened point set (start, optional 1/3 and 2/3, pause point,
+        /// flat 0.5 pressure — same shape as the legacy TryPauseStraighten), the points from
+        /// the pause onward are returned as a continuation stroke. Returns false (and leaves
+        /// the batch untouched) when no pause was pending or the batch never passed the pause
+        /// position.
+        /// </summary>
+        private bool TrySplitBatchOnPauseStraighten(
+            IReadOnlyList<global::Windows.UI.Input.Inking.InkPoint> batch,
+            WinRTInkConfig config,
+            out IReadOnlyList<global::Windows.UI.Input.Inking.InkPoint> straightened,
+            out IReadOnlyList<global::Windows.UI.Input.Inking.InkPoint> continuation)
+        {
+            straightened = null;
+            continuation = null;
+            if (!_winRTInkPausePending || batch == null || batch.Count < 2)
+                return false;
+
+            var pause = _winRTInkPausePos;
+            var dpi = Math.Max(1.0, Math.Max(config.DpiScaleX, config.DpiScaleY));
+
+            var nearestIndex = -1;
+            double nearestDistSq = double.MaxValue;
+            for (var i = 0; i < batch.Count; i++)
+            {
+                var p = batch[i].Position;
+                var dx = p.X - pause.X;
+                var dy = p.Y - pause.Y;
+                var distSq = dx * dx + dy * dy;
+                if (distSq < nearestDistSq)
+                {
+                    nearestDistSq = distSq;
+                    nearestIndex = i;
+                }
+            }
+
+            var tolerancePx = WinRTInkPauseMatchToleranceDip * dpi;
+            if (nearestIndex < 1 || nearestDistSq > tolerancePx * tolerancePx)
+                return false;
+
+            var start = batch[0].Position;
+            var pausePoint = batch[nearestIndex].Position;
+            var dxLine = pausePoint.X - start.X;
+            var dyLine = pausePoint.Y - start.Y;
+            var lengthPx = Math.Sqrt(dxLine * dxLine + dyLine * dyLine);
+
+            var straight = new List<global::Windows.UI.Input.Inking.InkPoint>
+            {
+                new global::Windows.UI.Input.Inking.InkPoint(start, 0.5f)
+            };
+            if (lengthPx > WinRTInkPauseStraightenMinLengthDip * dpi)
+            {
+                straight.Add(new global::Windows.UI.Input.Inking.InkPoint(
+                    new global::Windows.Foundation.Point(
+                        start.X + dxLine / 3.0,
+                        start.Y + dyLine / 3.0),
+                    0.5f));
+                straight.Add(new global::Windows.UI.Input.Inking.InkPoint(
+                    new global::Windows.Foundation.Point(
+                        start.X + dxLine * 2.0 / 3.0,
+                        start.Y + dyLine * 2.0 / 3.0),
+                    0.5f));
+            }
+            straight.Add(new global::Windows.UI.Input.Inking.InkPoint(pausePoint, 0.5f));
+            straightened = straight;
+
+            if (nearestIndex < batch.Count - 1)
+            {
+                var rest = new List<global::Windows.UI.Input.Inking.InkPoint>(batch.Count - nearestIndex);
+                for (var i = nearestIndex; i < batch.Count; i++)
+                    rest.Add(batch[i]);
+                continuation = rest;
+            }
+
+            return true;
         }
 
         private (int X, int Y, int Width, int Height) ScreenBoundsFromConfig(WinRTInkConfig config)
@@ -1013,6 +1201,7 @@ namespace Ink_Canvas
             if (IsCurrentPageFrozen)
             {
                 TryBlockFrozenPageMutation("书写");
+                _winRTInkPausePending = false;
                 CompleteWinRTInkDry();
                 return;
             }
@@ -1023,14 +1212,29 @@ namespace Ink_Canvas
                 var strokes = new List<System.Windows.Ink.Stroke>(pointBatches.Count);
                 for (var i = 0; i < pointBatches.Count; i++)
                 {
-                    var stroke = WinRTStrokeConverter.CreateStroke(
-                        pointBatches[i],
-                        config.Style,
-                        config.DpiScaleX,
-                        config.DpiScaleY,
-                        config.CanvasOriginDip);
-                    strokes.Add(stroke);
+                    if (TrySplitBatchOnPauseStraighten(
+                            pointBatches[i],
+                            config,
+                            out var straightened,
+                            out var continuation))
+                    {
+                        strokes.Add(WinRTStrokeConverter.CreateStroke(
+                            straightened, config.Style, config.DpiScaleX, config.DpiScaleY, config.CanvasOriginDip));
+                        if (continuation != null)
+                        {
+                            strokes.Add(WinRTStrokeConverter.CreateStroke(
+                                continuation, config.Style, config.DpiScaleX, config.DpiScaleY, config.CanvasOriginDip));
+                        }
+                    }
+                    else
+                    {
+                        strokes.Add(WinRTStrokeConverter.CreateStroke(
+                            pointBatches[i], config.Style, config.DpiScaleX, config.DpiScaleY, config.CanvasOriginDip));
+                    }
                 }
+                // The pending pause has been matched against (or missed by) this batch —
+                // it must never apply to a later stroke.
+                _winRTInkPausePending = false;
 
                 // Dry ink is the single source of truth: add first so StrokesChanged / TimeMachine
                 // / dirty-page hooks fire before post-processing.
