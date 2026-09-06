@@ -48,12 +48,11 @@
       },
       "H.NotifyIcon.Wpf": {
         "type": "Direct",
-        "requested": "[2.4.1, )",
-        "resolved": "2.4.1",
-        "contentHash": "aDfDSHCCOWgQoIvAApiog/MhriXibacqANQm+b5GaRCgRg92u5J2QcoW2C+wIblgxhtGx3o32/DCKWRR5C/KLw==",
+        "requested": "[2.1.4, )",
+        "resolved": "2.1.4",
+        "contentHash": "JXwEhOXo8smlx6p4SjbxRQ8C0WDDgm2j/3nitA9yeksY3kTaMADL34zxaheQM0Qbf9efoaV2PTC7DXjNaBUHXA==",
         "dependencies": {
-          "H.NotifyIcon": "2.4.1",
-          "System.ValueTuple": "4.5.0"
+          "H.NotifyIcon": "2.1.4"
         }
       },
       "iNKORE.UI.WPF": {
@@ -296,20 +295,18 @@
       },
       "H.GeneratedIcons.System.Drawing": {
         "type": "Transitive",
-        "resolved": "2.4.1",
-        "contentHash": "gjYhuwHQzISqKhcNYaRdDhzKCoqLZii+6TTHP0MQf4Q9+H6z4f4A5Xu/j8B8XpFPQ1grCMlQYREvNyNJT9Q/Bg==",
+        "resolved": "2.1.4",
+        "contentHash": "MjW8AmrbVHnFl17WzTqVA0LvUcgKtV/1gL04fTQdYgHotrjkz9Q8mgDxtrxevPCYE8SGvQBrKTPttCwkS1zsMw==",
         "dependencies": {
-          "System.Drawing.Common": "10.0.0"
+          "System.Drawing.Common": "8.0.10"
         }
       },
       "H.NotifyIcon": {
         "type": "Transitive",
-        "resolved": "2.4.1",
-        "contentHash": "nNPgNzo5UHcWYpVLO3AsRlH8fKE9shBA7/WLpZrFZUFbzpKGcLnz15Kmg0pQ851aboAfm3YuHjYFsYQges/pyw==",
+        "resolved": "2.1.4",
+        "contentHash": "puxd5k0RQQilmIReQZjz+lyJWWmko/WWYkNbEUpqymPXZsCv9ILrhdz1j6YARR1OJCl9RWykV7WWvxYJRsVdMw==",
         "dependencies": {
-          "H.GeneratedIcons.System.Drawing": "2.4.1",
-          "System.Memory": "4.6.0",
-          "System.Runtime.CompilerServices.Unsafe": "6.1.0"
+          "H.GeneratedIcons.System.Drawing": "2.1.4"
         }
       },
       "JerryShaw.DirectShowLib": {
@@ -373,6 +370,11 @@
           "System.Security.Principal.Windows": "5.0.0"
         }
       },
+      "Microsoft.Win32.SystemEvents": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "9opKRyOKMCi2xJ7Bj7kxtZ1r9vbzosMvRrdEhVhDz8j8MoBGgB+WmC94yH839NPH+BclAjtQ/pyagvi/8gDLkw=="
+      },
       "Microsoft.Windows.SDK.Win32Docs": {
         "type": "Transitive",
         "resolved": "0.1.42-alpha",
@@ -416,8 +418,11 @@
       },
       "System.Drawing.Common": {
         "type": "Transitive",
-        "resolved": "10.0.0",
-        "contentHash": "kohT9ZZlkB5R5ifihCBnPJLdIUQGiTj1ZI6z4LKatr+F4MmIJJu7qQpBkqt9280ivtnSvlTx9qZEY+CpJ0zMkA=="
+        "resolved": "8.0.10",
+        "contentHash": "MdajRp3P+FOlThgY6FBjAqnmLiVl5t2yWEC/2AsDMqx1zYbJG3G5TnscFBQ4obqcaGqvN5UnhQHSFaJFG2HftQ==",
+        "dependencies": {
+          "Microsoft.Win32.SystemEvents": "8.0.0"
+        }
       },
       "System.Formats.Asn1": {
         "type": "Transitive",
@@ -438,8 +443,8 @@
       },
       "System.Memory": {
         "type": "Transitive",
-        "resolved": "4.6.0",
-        "contentHash": "OEkbBQoklHngJ8UD8ez2AERSk2g+/qpAaSWWCBFbpH727HxDq5ydVkuncBaKcKfwRqXGWx64dS6G1SUScMsitg=="
+        "resolved": "4.5.5",
+        "contentHash": "XIWiDvKPXaTveaB7HVganDlOCRoj03l+jrwNvcge/t8vhGYKvqV+dMv6G4SAX2NoNmN0wZfVPTAlFwZcZvVOUw=="
       },
       "System.Reflection": {
         "type": "Transitive",
@@ -580,6 +585,11 @@
           "System.Security.AccessControl": "5.0.0",
           "System.Security.Principal.Windows": "5.0.0"
         }
+      },
+      "Microsoft.Win32.SystemEvents": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "9opKRyOKMCi2xJ7Bj7kxtZ1r9vbzosMvRrdEhVhDz8j8MoBGgB+WmC94yH839NPH+BclAjtQ/pyagvi/8gDLkw=="
       },
       "runtime.any.System.IO": {
         "type": "Transitive",
@@ -752,6 +762,11 @@
           "System.Security.Principal.Windows": "5.0.0"
         }
       },
+      "Microsoft.Win32.SystemEvents": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "9opKRyOKMCi2xJ7Bj7kxtZ1r9vbzosMvRrdEhVhDz8j8MoBGgB+WmC94yH839NPH+BclAjtQ/pyagvi/8gDLkw=="
+      },
       "runtime.any.System.IO": {
         "type": "Transitive",
         "resolved": "4.3.0",
@@ -922,6 +937,11 @@
           "System.Security.AccessControl": "5.0.0",
           "System.Security.Principal.Windows": "5.0.0"
         }
+      },
+      "Microsoft.Win32.SystemEvents": {
+        "type": "Transitive",
+        "resolved": "8.0.0",
+        "contentHash": "9opKRyOKMCi2xJ7Bj7kxtZ1r9vbzosMvRrdEhVhDz8j8MoBGgB+WmC94yH839NPH+BclAjtQ/pyagvi/8gDLkw=="
       },
       "runtime.any.System.IO": {
         "type": "Transitive",
