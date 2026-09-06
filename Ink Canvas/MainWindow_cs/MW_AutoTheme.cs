@@ -280,22 +280,82 @@ namespace Ink_Canvas
             SetFloatingBarButtonBrush(Exit_Icon);
         }
 
+        // 跟随系统模式下最近一次应用的系统深浅色；null 表示尚未建立基线
+        private bool? _lastFollowedSystemThemeLight;
+        private DispatcherTimer _systemThemeRetryTimer;
+        private int _systemThemeRetryCount;
+        private const int SystemThemeRetryLimit = 10;
+        private static readonly TimeSpan SystemThemeRetryInterval = TimeSpan.FromMilliseconds(300);
+
         private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
         {
-            switch (Settings.Appearance.Theme)
+            // 只关心外观类偏好变化；键盘/鼠标/电源等类别与主题无关
+            if (e.Category != UserPreferenceCategory.General) return;
+            // SystemEvents 的事件不保证在 UI 线程触发，统一调度回 UI 线程
+            Dispatcher.BeginInvoke(new Action(CheckSystemThemeSwitch));
+        }
+
+        /// <summary>
+        /// 系统深浅色切换检测：AppsUseLightTheme 注册表的写入可能晚于系统广播，
+        /// 首次读到旧值时延迟重试，确认真正翻转后再走完整主题管线。
+        /// </summary>
+        private void CheckSystemThemeSwitch()
+        {
+            // 仅「跟随系统」需要响应；固定主题重复应用反而会打断黑板/PPT 模式的深色覆盖
+            if (Settings.Appearance.Theme != 2) return;
+
+            bool systemLight = ThemeHelper.IsSystemThemeLight();
+
+            if (_lastFollowedSystemThemeLight == null)
             {
-                case 0:
-                    SetTheme(ThemeLight);
-                    break;
-                case 1:
-                    SetTheme(ThemeDark);
-                    break;
-                case 2:
-                    // 与 IsCurrentThemeDark / GetEffectiveTheme / 浮动栏一致，统一读 AppsUseLightTheme，
-                    // 否则 SystemUsesLightTheme 与 AppsUseLightTheme 可独立取值时主题会混搭
-                    SetTheme(ThemeHelper.IsSystemThemeLight() ? ThemeLight : ThemeDark);
-                    break;
+                // 首次只建立基线，不重复应用当前主题
+                _lastFollowedSystemThemeLight = systemLight;
+                return;
             }
+
+            if (systemLight == _lastFollowedSystemThemeLight)
+            {
+                // 广播先于注册表写入的情况：延迟重读，确认值确实没变再放弃
+                StartSystemThemeRetry();
+                return;
+            }
+
+            StopSystemThemeRetry();
+            _lastFollowedSystemThemeLight = systemLight;
+            ApplyFollowedSystemTheme(systemLight);
+        }
+
+        private void StartSystemThemeRetry()
+        {
+            if (_systemThemeRetryCount >= SystemThemeRetryLimit) return;
+
+            _systemThemeRetryCount++;
+            if (_systemThemeRetryTimer == null)
+            {
+                _systemThemeRetryTimer = new DispatcherTimer { Interval = SystemThemeRetryInterval };
+                _systemThemeRetryTimer.Tick += (s, args) =>
+                {
+                    _systemThemeRetryTimer.Stop();
+                    CheckSystemThemeSwitch();
+                };
+            }
+            _systemThemeRetryTimer.Start();
+        }
+
+        private void StopSystemThemeRetry()
+        {
+            _systemThemeRetryTimer?.Stop();
+            _systemThemeRetryCount = 0;
+        }
+
+        private void ApplyFollowedSystemTheme(bool systemLight)
+        {
+            // 应用级主题（App 级 ThemeResources / Default 主题控件与 Popup）必须与
+            // 窗口级 RequestedTheme 同步翻转，否则切换后会出现深浅混搭
+            ThemeManager.Current.ApplicationTheme = systemLight ? ApplicationTheme.Light : ApplicationTheme.Dark;
+            SetTheme(systemLight ? ThemeLight : ThemeDark, autoSwitchIcon: true);
+            ViewboxFloatingBar.Opacity = 1.0;
+            RefreshNotificationColors();
         }
 
         private void AutoSwitchFloatingBarIconForTheme(string theme)
