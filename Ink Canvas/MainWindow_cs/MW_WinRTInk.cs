@@ -104,13 +104,23 @@ namespace Ink_Canvas
                     onStrokeEnded: OnWinRTInkStrokeCanceled,
                     onStrokeCanceled: OnWinRTInkStrokeCanceled);
 
-                _winRTInkOverlay = new WetInkOverlayWindow(hwnd, IsCanvasPoint);
+                if (_winRTInkOverlay == null)
+                    _winRTInkOverlay = new WetInkOverlayWindow(hwnd, IsCanvasPoint);
                 _winRTInkHost = new WinRTInkHost(_winRTInkOverlay, _winRTInkInputGate);
                 _winRTInkHost.OnDryAvailable = OnWinRTInkDryAvailable;
                 _winRTInkHost.OnDryFailed = ex => DisableWinRTInkAfterFailure(ex, notify: true);
 
                 var config = BuildWinRTInkConfig();
                 _winRTInkConfig = config;
+                // Real bounds before creation: the overlay is born at its final position,
+                // cloaked — entering pen mode later only uncloaks it, never moves a window
+                // across the screen (the source of the entry flash).
+                var initialBounds = ScreenBoundsFromConfig(config);
+                _winRTInkOverlay.SetBounds(
+                    initialBounds.X,
+                    initialBounds.Y,
+                    initialBounds.Width,
+                    initialBounds.Height);
                 _winRTInkHost.Start(hwnd, config);
 
                 WireWinRTInkGeometryListeners();
@@ -127,7 +137,11 @@ namespace Ink_Canvas
                 PushWinRTInkGateSnapshots();
                 EnsureWinRTInkPhysicalEditingMode();
 
-                RefreshWinRTInkOverlayVisibility();
+                // Explicit first refresh: size, attributes, bounds and uncloak in one pass.
+                // Relying on window events (LocationChanged/IsVisibleChanged/StateChanged)
+                // to deliver the initial bounds left the overlay parked at its birth size.
+                UpdateWinRTInkTarget();
+
                 LogHelper.WriteLogToFile(
                     "[WinRTInk] InkDesktopHost + system wet ink pipeline started.",
                     LogHelper.LogType.Event);
@@ -168,9 +182,12 @@ namespace Ink_Canvas
             catch { /* best-effort */ }
             _winRTInkHost = null;
 
-            try { _winRTInkOverlay?.Dispose(); }
+            // Keep the overlay HWND alive (cloaked) across tool switches: it is expensive to
+            // recreate (window + DComp device + cross-screen move = the entry flash) and a
+            // cloaked window is invisible to composition and hit-testing, so an idle overlay
+            // is completely inert. It is destroyed with its owner on app exit.
+            try { _winRTInkOverlay?.SetOnScreen(false); }
             catch { /* best-effort */ }
-            _winRTInkOverlay = null;
 
             _winRTInkInputGate = null;
             _chromeInputForwarder = null;
@@ -438,6 +455,11 @@ namespace Ink_Canvas
 
         private bool IsCanvasPoint(int screenX, int screenY)
         {
+            // Inert whenever the pipeline is down: the overlay stays cloaked then (invisible
+            // to hit-testing), but if a NCHITTEST ever leaks through, everything passes.
+            if (!IsWinRTInkPipelineAvailable)
+                return false;
+
             CanvasHitZone zone;
             string detail;
             try

@@ -7,12 +7,18 @@ namespace Ink_Canvas.Ink.WinRT
 {
     /// <summary>
     /// Transparent overlay HWND that hosts the WinRT InkPresenter's DirectComposition
-    /// visual. It is a child of the main window, stays WS_VISIBLE at all times, and is
-    /// either parked far off-screen (no live wet ink) or positioned exactly over the
-    /// main window. Unlike the retired custom renderer overlay, this window MUST receive
-    /// pointer input so the InkPresenter's ink-enabled area gets the pen/touch/mouse.
-    /// Hit-testing is dynamic: WM_NCHITTEST returns HTCLIENT over the canvas area and
-    /// HTTRANSPARENT over UI chrome / foreign windows, so the app UI stays clickable.
+    /// visual, positioned exactly over the main window. Unlike the retired custom
+    /// renderer overlay, this window MUST receive pointer input so the InkPresenter's
+    /// ink-enabled area gets the pen/touch/mouse. Hit-testing is dynamic: WM_NCHITTEST
+    /// returns HTCLIENT over the canvas area and HTTRANSPARENT over UI chrome / foreign
+    /// windows, so the app UI stays clickable.
+    ///
+    /// Visibility is managed with DWM cloaking instead of parking the window off-screen:
+    /// the window is created once at its final bounds, born cloaked, and the DComp
+    /// surface keeps rendering while cloaked — the first uncloak reveals already
+    /// composited transparent content, so entering pen mode never flashes. Cloaked
+    /// windows are also skipped by hit-testing, which keeps the idle overlay inert
+    /// without moving it.
     /// </summary>
     internal sealed class WetInkOverlayWindow : IDisposable
     {
@@ -32,7 +38,8 @@ namespace Ink_Canvas.Ink.WinRT
         private const int WsExToolWindow = 0x00000080;
         private const int WsExNoRedirectionBitmap = 0x00200000;
         private const int ErrorClassAlreadyExists = 1410;
-        private const int HiddenPosition = -100000;
+        private const int DwmwaTransitionsForcedDisabled = 3;
+        private const int DwmwaCloak = 13;
 
         private static readonly object ClassSync = new object();
         private static bool _classRegistered;
@@ -42,11 +49,16 @@ namespace Ink_Canvas.Ink.WinRT
         private readonly Func<int, int, bool> _hitTestCallback;
         private IntPtr _overlayHwnd;
         private GCHandle _gcHandle;
-        private bool _shouldShowOnScreen;
-        private int _boundsX = HiddenPosition;
-        private int _boundsY = HiddenPosition;
+        private bool _cloaked = true;
+        private int _boundsX;
+        private int _boundsY;
         private int _boundsWidth = 1;
         private int _boundsHeight = 1;
+        private bool _boundsApplied;
+        private int _lastAppliedX;
+        private int _lastAppliedY;
+        private int _lastAppliedW = 1;
+        private int _lastAppliedH = 1;
         private bool _disposed;
 
         private IDCompositionDevice _compositionDevice;
@@ -85,7 +97,8 @@ namespace Ink_Canvas.Ink.WinRT
 
         /// <summary>
         /// Creates the HWND and the DirectComposition tree rooted at it. Must run on the
-        /// UI thread (same thread that creates windows for this app).
+        /// UI thread (same thread that creates windows for this app). The window is born
+        /// cloaked at the bounds set via <see cref="SetBounds"/> before this call.
         /// </summary>
         public void EnsureCreated()
         {
@@ -101,8 +114,8 @@ namespace Ink_Canvas.Ink.WinRT
                 WindowClassName,
                 "ICC WinRT Ink Overlay",
                 WsPopup | WsVisible,
-                HiddenPosition,
-                HiddenPosition,
+                _boundsX,
+                _boundsY,
                 Math.Max(1, _boundsWidth),
                 Math.Max(1, _boundsHeight),
                 _ownerHwnd,
@@ -111,22 +124,41 @@ namespace Ink_Canvas.Ink.WinRT
                 GCHandle.ToIntPtr(gcHandle));
 
             if (_overlayHwnd == IntPtr.Zero)
+            {
+                _gcHandle.Free();
+                _gcHandle = default;
                 throw new System.ComponentModel.Win32Exception(
                     Marshal.GetLastWin32Error(),
                     "CreateWindowEx failed for WinRT ink overlay.");
+            }
 
-            // Entering pen mode parks-in the fullscreen overlay with a z-order change; DWM
-            // would play its window transition for that, flashing the whole screen once.
-            // Disabling transitions for this window keeps the move invisible.
+            // Born cloaked with DWM transitions disabled: both attribute calls happen before
+            // returning to the message loop, so no un-cloaked frame can ever be composited.
+            // The surface keeps rendering while cloaked — entering pen mode only uncloaks
+            // already-composited transparent content instead of moving a window across the
+            // screen (the source of the entry flash).
             var disableTransitions = 1; // TRUE
             DwmSetWindowAttribute(
                 _overlayHwnd,
-                3 /* DWMWA_TRANSITIONS_FORCEDISABLED */,
+                DwmwaTransitionsForcedDisabled,
                 ref disableTransitions,
                 sizeof(int));
+            SetCloaked(true);
 
             CreateCompositionTree();
-            PlaceOverlay();
+
+            // Bottom of the owned-window stack once, at creation: popup palettes stay above
+            // the overlay so WindowFromPoint resolves them for the chrome input forwarder.
+            SetWindowPos(
+                _overlayHwnd,
+                new IntPtr(1) /* HWND_BOTTOM */,
+                0,
+                0,
+                0,
+                0,
+                0x0001 /* SWP_NOSIZE */ | 0x0002 /* SWP_NOMOVE */ | 0x0010 /* SWP_NOACTIVATE */);
+
+            ApplyBounds(force: true);
         }
 
         public void SetBounds(int x, int y, int width, int height)
@@ -136,18 +168,67 @@ namespace Ink_Canvas.Ink.WinRT
             _boundsWidth = Math.Max(1, width);
             _boundsHeight = Math.Max(1, height);
             if (_overlayHwnd != IntPtr.Zero)
-                PlaceOverlay();
+                ApplyBounds(force: false);
         }
 
         /// <summary>
-        /// Parks the overlay off-screen when no wet ink is live. Avoids ShowWindow/HideWindow
-        /// (DWM composition re-layout flashes on wet→dry handoff).
+        /// Reveals (uncloaks) or hides (cloaks) the overlay. Cloaking keeps the DComp
+        /// surface rendering, avoids any window move, and makes the window invisible to
+        /// hit-testing so the idle overlay cannot intercept input.
         /// </summary>
         public void SetOnScreen(bool visible)
         {
-            _shouldShowOnScreen = visible;
-            if (_overlayHwnd != IntPtr.Zero)
-                PlaceOverlay();
+            if (_overlayHwnd == IntPtr.Zero)
+                return;
+            if (visible)
+            {
+                if (_cloaked)
+                    SetCloaked(false);
+                ApplyBounds(force: false);
+            }
+            else if (!_cloaked)
+            {
+                SetCloaked(true);
+            }
+        }
+
+        private void SetCloaked(bool cloaked)
+        {
+            if (_overlayHwnd == IntPtr.Zero)
+            {
+                _cloaked = cloaked;
+                return;
+            }
+            var value = cloaked ? 1 : 0;
+            DwmSetWindowAttribute(_overlayHwnd, DwmwaCloak, ref value, sizeof(int));
+            _cloaked = cloaked;
+        }
+
+        private void ApplyBounds(bool force)
+        {
+            if (_overlayHwnd == IntPtr.Zero)
+                return;
+
+            var w = Math.Max(1, _boundsWidth);
+            var h = Math.Max(1, _boundsHeight);
+            if (!force && _boundsApplied
+                && _lastAppliedX == _boundsX && _lastAppliedY == _boundsY
+                && _lastAppliedW == w && _lastAppliedH == h)
+                return;
+
+            SetWindowPos(
+                _overlayHwnd,
+                IntPtr.Zero,
+                _boundsX,
+                _boundsY,
+                w,
+                h,
+                0x0010 /* SWP_NOACTIVATE */ | 0x0004 /* SWP_NOZORDER */ | 0x0040 /* SWP_SHOWWINDOW */);
+            _lastAppliedX = _boundsX;
+            _lastAppliedY = _boundsY;
+            _lastAppliedW = w;
+            _lastAppliedH = h;
+            _boundsApplied = true;
         }
 
         private void CreateCompositionTree()
@@ -161,30 +242,6 @@ namespace Ink_Canvas.Ink.WinRT
             _compositionDevice.CreateVisual(out _compositionVisual).CheckError();
             _compositionTarget.SetRoot(_compositionVisual).CheckError();
             _compositionDevice.Commit().CheckError();
-        }
-
-        private void PlaceOverlay()
-        {
-            if (_overlayHwnd == IntPtr.Zero)
-                return;
-
-            var x = _shouldShowOnScreen ? _boundsX : HiddenPosition;
-            var y = _shouldShowOnScreen ? _boundsY : HiddenPosition;
-
-            // HWND_BOTTOM: the overlay stays below sibling popup HWNDs (WPF Popup palettes,
-            // combo dropdowns, ...) so already-open popups keep receiving pointer input —
-            // WindowFromPoint is purely geometric and would otherwise report the overlay on
-            // top of them, making the hit-test gate treat popup areas as canvas. A child
-            // window always paints above its parent's client area, so wet-ink rendering is
-            // unaffected by the sibling z-order.
-            SetWindowPos(
-                _overlayHwnd,
-                new IntPtr(1) /* HWND_BOTTOM */,
-                x,
-                y,
-                Math.Max(1, _boundsWidth),
-                Math.Max(1, _boundsHeight),
-                0x0010 /* SWP_NOACTIVATE */ | 0x0040 /* SWP_SHOWWINDOW */);
         }
 
         public void Dispose()
