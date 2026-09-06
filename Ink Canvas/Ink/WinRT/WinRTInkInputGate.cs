@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -11,14 +12,42 @@ using Windows.UI.Input.Inking.Core;
 namespace Ink_Canvas.Ink.WinRT
 {
     /// <summary>
+    /// Result of classifying one pointer press against the UI.
+    /// </summary>
+    internal enum PointerGateResult
+    {
+        /// <summary>Let the InkPresenter collect this pointer as ink.</summary>
+        AllowInk,
+
+        /// <summary>
+        /// Suppress inking and swallow the input (frozen page, two-finger gesture, palm
+        /// eraser, or classification failure). The press must not be re-dispatched.
+        /// </summary>
+        BlockSilently,
+
+        /// <summary>
+        /// Suppress inking and forward the pointer to the window under it as synthesized
+        /// mouse input. Pointer input delivered to the ink HWND bypasses the overlay
+        /// WM_NCHITTEST pass-through, so chrome hits (floating bar, side panels, popup
+        /// palettes) never reach their target window on their own — they have to be
+        /// re-dispatched explicitly for the controls to stay clickable.
+        /// </summary>
+        BlockAndForward
+    }
+
+    /// <summary>
     /// Runs on the ink background thread (CoreInkIndependentInputSource events) and decides,
-    /// per pointer, whether the InkPresenter may ink or the input must be suppressed.
-    /// Cheap, lock-free: reads volatile snapshots refreshed by the UI thread and only
-    /// toggles Handled / cancellation flags. No WPF calls here.
+    /// per pointer, whether the InkPresenter may ink, the input must be suppressed, or the
+    /// input must be re-dispatched to the window under the pointer. Cheap and lock-free apart
+    /// from the per-press classifier callback (which marshals to the UI thread). No WPF calls
+    /// happen directly here.
     /// </summary>
     internal sealed class WinRTInkInputGate
     {
-        private readonly Func<uint, bool> _allowPointerToInk;
+        private readonly Func<PointerEventArgs, PointerGateResult> _classifyPointer;
+        private readonly Action<PointerEventArgs> _onChromePointerDown;
+        private readonly Action<PointerEventArgs> _onChromePointerMove;
+        private readonly Action<PointerEventArgs> _onChromePointerRelease;
         private readonly Action _onStrokeEnded;
         private readonly Action _onStrokeCanceled;
 
@@ -35,14 +64,22 @@ namespace Ink_Canvas.Ink.WinRT
         // Ink-thread only.
         private readonly Dictionary<uint, bool> _touchGestureInProgress = new Dictionary<uint, bool>();
         private readonly HashSet<uint> _activeTouchPointers = new HashSet<uint>();
+        private readonly HashSet<uint> _chromeForwardedPointers = new HashSet<uint>();
+        private uint _mouseForwardingPointerId;
         private volatile bool _isGestureInProgress;
 
         public WinRTInkInputGate(
-            Func<uint, bool> allowPointerToInk,
+            Func<PointerEventArgs, PointerGateResult> classifyPointer,
+            Action<PointerEventArgs> onChromePointerDown,
+            Action<PointerEventArgs> onChromePointerMove,
+            Action<PointerEventArgs> onChromePointerRelease,
             Action onStrokeEnded,
             Action onStrokeCanceled)
         {
-            _allowPointerToInk = allowPointerToInk ?? throw new ArgumentNullException(nameof(allowPointerToInk));
+            _classifyPointer = classifyPointer ?? throw new ArgumentNullException(nameof(classifyPointer));
+            _onChromePointerDown = onChromePointerDown;
+            _onChromePointerMove = onChromePointerMove;
+            _onChromePointerRelease = onChromePointerRelease;
             _onStrokeEnded = onStrokeEnded ?? throw new ArgumentNullException(nameof(onStrokeEnded));
             _onStrokeCanceled = onStrokeCanceled ?? throw new ArgumentNullException(nameof(onStrokeCanceled));
         }
@@ -76,15 +113,14 @@ namespace Ink_Canvas.Ink.WinRT
             if (_cancelAll)
             {
                 e.Handled = true;
+                LogGatePress(device, e, "cancelAll");
                 return;
             }
 
-            // UI chrome / foreign windows are handled by the overlay WM_NCHITTEST, which
-            // turns the overlay HTTRANSPARENT there so no pointer reaches the presenter.
-            // Here we only gate the canvas-wide conditions.
             if (!_canvasInputEnabled || _pageFrozen)
             {
                 e.Handled = true;
+                LogGatePress(device, e, "canvas-disabled-or-frozen");
                 return;
             }
 
@@ -101,6 +137,7 @@ namespace Ink_Canvas.Ink.WinRT
                     foreach (var activePointerId in _activeTouchPointers)
                         _touchGestureInProgress[activePointerId] = true;
                     e.Handled = true;
+                    LogGatePress(device, e, "two-finger-gesture");
                     return;
                 }
 
@@ -116,14 +153,37 @@ namespace Ink_Canvas.Ink.WinRT
                     {
                         _touchGestureInProgress[pointerId] = true;
                         e.Handled = true;
+                        LogGatePress(device, e, "palm-eraser");
                         return;
                     }
                 }
             }
 
-            if (!_allowPointerToInk(pointerId))
+            // Chrome / foreign-window classification: pointer input that reaches the ink
+            // HWND bypasses the overlay WM_NCHITTEST pass-through, so the classifier below
+            // is the authoritative gate. It also decides whether a blocked press should be
+            // re-dispatched to the window under the pointer (BlockAndForward).
+            var result = _classifyPointer(e);
+            LogGatePress(device, e, result.ToString());
+            switch (result)
             {
-                e.Handled = true;
+                case PointerGateResult.AllowInk:
+                    return;
+
+                case PointerGateResult.BlockAndForward:
+                    e.Handled = true;
+                    _chromeForwardedPointers.Add(pointerId);
+                    if (_mouseForwardingPointerId == 0)
+                    {
+                        _mouseForwardingPointerId = pointerId;
+                        try { _onChromePointerDown?.Invoke(e); }
+                        catch { /* forwarding is best-effort */ }
+                    }
+                    return;
+
+                default:
+                    e.Handled = true;
+                    return;
             }
         }
 
@@ -139,6 +199,16 @@ namespace Ink_Canvas.Ink.WinRT
             if (_touchGestureInProgress.ContainsKey(pointerId))
             {
                 e.Handled = true;
+                return;
+            }
+            if (_chromeForwardedPointers.Contains(pointerId))
+            {
+                e.Handled = true;
+                if (_mouseForwardingPointerId == pointerId)
+                {
+                    try { _onChromePointerMove?.Invoke(e); }
+                    catch { /* forwarding is best-effort */ }
+                }
             }
         }
 
@@ -150,6 +220,17 @@ namespace Ink_Canvas.Ink.WinRT
             if (_touchGestureInProgress.Remove(pointerId))
             {
                 e.Handled = true;
+            }
+
+            if (_chromeForwardedPointers.Remove(pointerId))
+            {
+                e.Handled = true;
+                if (_mouseForwardingPointerId == pointerId)
+                {
+                    _mouseForwardingPointerId = 0;
+                    try { _onChromePointerRelease?.Invoke(e); }
+                    catch { /* forwarding is best-effort */ }
+                }
             }
             else if (_cancelAll)
             {
@@ -178,6 +259,21 @@ namespace Ink_Canvas.Ink.WinRT
             }
             _onStrokeEnded();
             return true;
+        }
+
+        private static void LogGatePress(
+            PointerDeviceType device,
+            PointerEventArgs e,
+            string decision)
+        {
+            try
+            {
+                var p = e.CurrentPoint.Position;
+                LogHelper.WriteLogToFile(
+                    $"[WinRTInk] gate press device={device} pos=({p.X:0.#},{p.Y:0.#}) -> {decision}",
+                    LogHelper.LogType.Event);
+            }
+            catch { /* never throw from the input gate */ }
         }
     }
 }

@@ -161,14 +161,20 @@ namespace Ink_Canvas.Ink.WinRT
             var x = _shouldShowOnScreen ? _boundsX : HiddenPosition;
             var y = _shouldShowOnScreen ? _boundsY : HiddenPosition;
 
+            // HWND_BOTTOM: the overlay stays below sibling popup HWNDs (WPF Popup palettes,
+            // combo dropdowns, ...) so already-open popups keep receiving pointer input —
+            // WindowFromPoint is purely geometric and would otherwise report the overlay on
+            // top of them, making the hit-test gate treat popup areas as canvas. A child
+            // window always paints above its parent's client area, so wet-ink rendering is
+            // unaffected by the sibling z-order.
             SetWindowPos(
                 _overlayHwnd,
-                IntPtr.Zero,
+                new IntPtr(1) /* HWND_BOTTOM */,
                 x,
                 y,
                 Math.Max(1, _boundsWidth),
                 Math.Max(1, _boundsHeight),
-                0x0010 /* SWP_NOACTIVATE */ | 0x0004 /* SWP_NOZORDER */ | 0x0040 /* SWP_SHOWWINDOW */);
+                0x0010 /* SWP_NOACTIVATE */ | 0x0040 /* SWP_SHOWWINDOW */);
         }
 
         public void Dispose()

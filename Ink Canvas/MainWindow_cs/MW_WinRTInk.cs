@@ -30,7 +30,12 @@ namespace Ink_Canvas
         private WetInkOverlayWindow _winRTInkOverlay;
         private WinRTInkHost _winRTInkHost;
         private WinRTInkInputGate _winRTInkInputGate;
+        private Ink.WinRT.ChromeInputForwarder _chromeInputForwarder;
         private Ink.WinRT.WpfRenderFrameFence _winRTInkFrameFence;
+
+        // Cached on the UI thread at pipeline start: the chrome-forwarding callbacks run on
+        // the ink input thread and must not touch WPF objects (WindowInteropHelper throws).
+        private IntPtr _winRTInkMainHwnd;
 
         private bool _winRTInkStarted;
         private bool _winRTInkDisabled;
@@ -75,10 +80,15 @@ namespace Ink_Canvas
                 var hwnd = new WindowInteropHelper(this).Handle;
                 if (hwnd == IntPtr.Zero)
                     return;
+                _winRTInkMainHwnd = hwnd;
 
                 _winRTInkFrameFence = new Ink.WinRT.WpfRenderFrameFence(Dispatcher);
+                _chromeInputForwarder = new Ink.WinRT.ChromeInputForwarder();
                 _winRTInkInputGate = new WinRTInkInputGate(
-                    allowPointerToInk: _ => true,
+                    classifyPointer: ClassifyWinRTInkPointer,
+                    onChromePointerDown: ForwardWinRTInkChromePointerDown,
+                    onChromePointerMove: ForwardWinRTInkChromePointerMove,
+                    onChromePointerRelease: ForwardWinRTInkChromePointerUp,
                     onStrokeEnded: OnWinRTInkStrokeCanceled,
                     onStrokeCanceled: OnWinRTInkStrokeCanceled);
 
@@ -135,6 +145,7 @@ namespace Ink_Canvas
             _winRTInkOverlay = null;
 
             _winRTInkInputGate = null;
+            _chromeInputForwarder = null;
             _winRTInkConfig = null;
             _winRTInkPendingDry.Clear();
             _winRTInkDryInProgress = false;
@@ -373,16 +384,44 @@ namespace Ink_Canvas
 
         private bool IsCanvasPoint(int screenX, int screenY)
         {
+            CanvasHitZone zone;
+            string detail;
             try
             {
                 var windowPoint = PointFromScreen(new Point(screenX, screenY));
-                var hitZone = ResolveHitZone(windowPoint.X, windowPoint.Y);
-                return hitZone == CanvasHitZone.CanvasSurface;
+                zone = ResolveHitZone(windowPoint.X, windowPoint.Y, out detail);
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                zone = CanvasHitZone.Outside;
+                detail = $"IsCanvasPoint exception: {ex.GetType().Name}: {ex.Message}";
             }
+
+            LogWinRTInkHitTestResult(zone, detail, screenX, screenY);
+            return zone == CanvasHitZone.CanvasSurface;
+        }
+
+        private CanvasHitZone _lastWinRTInkHitZone = (CanvasHitZone)(-1);
+        private string _lastWinRTInkHitDetail;
+
+        /// <summary>
+        /// Field diagnostics for the overlay hit-test gate: logs each transition (zone or
+        /// classification changed) so unclickable-chrome reports can be traced to the exact
+        /// decision — top-level window under the cursor and the WPF element hit.
+        /// </summary>
+        private void LogWinRTInkHitTestResult(CanvasHitZone zone, string detail, int screenX, int screenY)
+        {
+            if (zone == _lastWinRTInkHitZone && detail == _lastWinRTInkHitDetail)
+                return;
+            _lastWinRTInkHitZone = zone;
+            _lastWinRTInkHitDetail = detail;
+            try
+            {
+                LogHelper.WriteLogToFile(
+                    $"[WinRTInk] NCHITTEST screen=({screenX},{screenY}) zone={zone} {detail ?? ""}",
+                    LogHelper.LogType.Event);
+            }
+            catch { /* never throw from hit-test logging */ }
         }
 
         private enum CanvasHitZone
@@ -394,10 +433,21 @@ namespace Ink_Canvas
             CanvasSurface
         }
 
-        private CanvasHitZone ResolveHitZone(double xDip, double yDip)
+        private enum TopWindowClass
         {
+            Main,
+            Overlay,
+            Foreign
+        }
+
+        private CanvasHitZone ResolveHitZone(double xDip, double yDip, out string detail)
+        {
+            detail = null;
             if (inkCanvas == null)
+            {
+                detail = "inkCanvas==null";
                 return CanvasHitZone.Outside;
+            }
 
             try
             {
@@ -405,18 +455,25 @@ namespace Ink_Canvas
                 if (windowPoint.X < 0 || windowPoint.Y < 0
                     || windowPoint.X > ActualWidth || windowPoint.Y > ActualHeight)
                 {
+                    detail = "outside window bounds";
                     return CanvasHitZone.Outside;
                 }
 
-                if (IsPointerOverForeignTopWindow(windowPoint))
-                    return CanvasHitZone.Outside;
-
+                var topClass = ClassifyTopWindow(windowPoint);
                 var hit = InputHitTest(windowPoint) as DependencyObject;
+                detail = $"top={topClass} hit={DescribeHit(hit)}";
+
+                if (topClass == TopWindowClass.Foreign)
+                {
+                    detail += " [foreign-top-window]";
+                    return CanvasHitZone.Outside;
+                }
 
                 if (hit != null
                     && (IsUnderNamed(hit, "EraserOverlayCanvas")
                         || IsUnderElement(hit, EraserOverlayCanvas)))
                 {
+                    detail += " [eraser-overlay]";
                     return CanvasHitZone.EraserOverlay;
                 }
 
@@ -428,25 +485,50 @@ namespace Ink_Canvas
                         && (IsUnderNamed(hit, "GridInkCanvasSelectionCover")
                             || IsUnderElement(hit, selectionCover)))
                     {
+                        detail += " [selection-overlay]";
                         return CanvasHitZone.SelectionOverlay;
                     }
                 }
 
                 if (hit != null && IsUiChromeHit(hit))
+                {
+                    detail += " [chrome]";
                     return CanvasHitZone.UiChrome;
+                }
 
                 if (hit != null && !IsUnderElement(hit, inkCanvas))
+                {
+                    detail += " [non-canvas-structural]";
                     return CanvasHitZone.UiChrome;
+                }
 
+                detail += " [canvas]";
                 return CanvasHitZone.CanvasSurface;
             }
-            catch
+            catch (Exception ex)
             {
+                detail = $"ResolveHitZone exception: {ex.GetType().Name}: {ex.Message}";
                 return CanvasHitZone.CanvasSurface;
             }
         }
 
-        private bool IsPointerOverForeignTopWindow(Point windowPoint)
+        private static string DescribeHit(DependencyObject hit)
+        {
+            if (hit == null)
+                return "null";
+            var name = hit is FrameworkElement fe && !string.IsNullOrEmpty(fe.Name)
+                ? $"#{fe.Name}"
+                : "";
+            return $"{hit.GetType().Name}{name}";
+        }
+
+        /// <summary>
+        /// Classifies the top-level window under the cursor: the main window, our own wet-ink
+        /// overlay, or a foreign HWND (WPF Popup palettes, combo dropdowns, other apps).
+        /// WindowFromPoint is purely geometric — it walks sibling HWNDs top-down and reports
+        /// whichever covers the point, so the overlay's own HTTRANSPARENT does not hide it.
+        /// </summary>
+        private TopWindowClass ClassifyTopWindow(Point windowPoint)
         {
             try
             {
@@ -455,19 +537,183 @@ namespace Ink_Canvas
                     (int)Math.Round(screen.X),
                     (int)Math.Round(screen.Y)));
                 if (topWindow == IntPtr.Zero)
-                    return false;
+                    return TopWindowClass.Main;
 
                 var mainHwnd = new WindowInteropHelper(this).Handle;
                 if (topWindow == mainHwnd)
-                    return false;
+                    return TopWindowClass.Main;
 
                 var overlayHwnd = _winRTInkOverlay?.OverlayHandle ?? IntPtr.Zero;
-                return topWindow != overlayHwnd;
+                if (topWindow == overlayHwnd)
+                    return TopWindowClass.Overlay;
+
+                return TopWindowClass.Foreign;
             }
             catch
             {
-                return false;
+                return TopWindowClass.Main;
             }
+        }
+
+        // ---- Pointer classification & chrome re-dispatch ----------------------------
+        //
+        // Pointer input that reaches the ink HWND bypasses the overlay WM_NCHITTEST
+        // pass-through entirely (empirically confirmed: touch presses over the floating bar
+        // produce no WM_NCHITTEST at all), so the authoritative chrome gate runs here, in
+        // the CoreInkIndependentInputSource press handler. Every press is classified on the
+        // UI thread via a short synchronous marshal; chrome hits are then replayed to the
+        // window under the pointer as synthesized mouse messages (the same PostMessage
+        // technique the PPT media-control passthrough uses).
+
+        /// <summary>
+        /// Ink input thread: classifies one pointer press. Marshals the WPF hit-zone
+        /// resolution onto the UI thread (the ink thread must not touch WPF) with a short
+        /// timeout; on failure the press is suppressed so no ghost ink lands on chrome.
+        /// </summary>
+        private Ink.WinRT.PointerGateResult ClassifyWinRTInkPointer(
+            global::Windows.UI.Core.PointerEventArgs e)
+        {
+            try
+            {
+                var position = e.CurrentPoint.Position;
+                if (!TryGetWinRTInkScreenPoint(position, out var screenX, out var screenY))
+                {
+                    LogHelper.WriteLogToFile(
+                        "[WinRTInk] gate classify: overlay not on screen, suppressing press.",
+                        LogHelper.LogType.Event);
+                    return Ink.WinRT.PointerGateResult.BlockSilently;
+                }
+
+                var zone = CanvasHitZone.Outside;
+                var classified = false;
+                var dispatcher = _winRTInkOverlay?.UiDispatcher;
+                if (dispatcher != null)
+                {
+                    try
+                    {
+                        dispatcher.Invoke(
+                            new Action(() =>
+                            {
+                                try
+                                {
+                                    var windowPoint = PointFromScreen(new Point(screenX, screenY));
+                                    zone = ResolveHitZone(windowPoint.X, windowPoint.Y, out _);
+                                    classified = true;
+                                }
+                                catch { /* classification failure -> not classified */ }
+                            }),
+                            DispatcherPriority.Send,
+                            CancellationToken.None,
+                            TimeSpan.FromMilliseconds(300));
+                    }
+                    catch { /* dispatcher shutting down -> suppressed */ }
+                }
+
+                LogHelper.WriteLogToFile(
+                    $"[WinRTInk] gate classify raw=({position.X:0.#},{position.Y:0.#}) screen=({screenX:0},{screenY:0}) zone={zone} classified={classified}",
+                    LogHelper.LogType.Event);
+
+                if (!classified)
+                    return Ink.WinRT.PointerGateResult.BlockSilently;
+                if (zone == CanvasHitZone.CanvasSurface)
+                    return Ink.WinRT.PointerGateResult.AllowInk;
+                // UiChrome / SelectionOverlay / EraserOverlay / Outside (e.g. an open popup
+                // palette): suppress inking and let the forwarder re-dispatch the press.
+                return Ink.WinRT.PointerGateResult.BlockAndForward;
+            }
+            catch
+            {
+                return Ink.WinRT.PointerGateResult.BlockSilently;
+            }
+        }
+
+        /// <summary>
+        /// Maps an ink-presenter-space position (overlay client, physical px) to screen
+        /// coordinates using the overlay's current window rect.
+        /// </summary>
+        private bool TryGetWinRTInkScreenPoint(
+            global::Windows.Foundation.Point position,
+            out double screenX,
+            out double screenY)
+        {
+            screenX = 0;
+            screenY = 0;
+            var overlayHwnd = _winRTInkOverlay?.OverlayHandle ?? IntPtr.Zero;
+            if (overlayHwnd == IntPtr.Zero)
+                return false;
+            if (!GetWindowRect(overlayHwnd, out var rect))
+                return false;
+            // Parked far off-screen: no live wet ink, so the press cannot be mapped.
+            if (rect.Left <= -50000 || rect.Top <= -50000)
+                return false;
+            screenX = rect.Left + position.X;
+            screenY = rect.Top + position.Y;
+            return true;
+        }
+
+        private void ForwardWinRTInkChromePointerDown(global::Windows.UI.Core.PointerEventArgs e)
+        {
+            try
+            {
+                if (!TryGetWinRTInkScreenPoint(e.CurrentPoint.Position, out var screenX, out var screenY))
+                    return;
+                var target = _chromeInputForwarder?.ForwardDown(
+                    screenX,
+                    screenY,
+                    _winRTInkMainHwnd,
+                    _winRTInkOverlay?.OverlayHandle ?? IntPtr.Zero) ?? IntPtr.Zero;
+                LogHelper.WriteLogToFile(
+                    $"[WinRTInk] chrome forward down screen=({screenX:0},{screenY:0}) target=0x{target.ToString("X")}",
+                    LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[WinRTInk] chrome forward down failed: {ex.Message}",
+                    LogHelper.LogType.Error);
+            }
+        }
+
+        private void ForwardWinRTInkChromePointerMove(global::Windows.UI.Core.PointerEventArgs e)
+        {
+            try
+            {
+                if (!TryGetWinRTInkScreenPoint(e.CurrentPoint.Position, out var screenX, out var screenY))
+                    return;
+                _chromeInputForwarder?.ForwardMove(screenX, screenY);
+            }
+            catch { /* forwarding is best-effort */ }
+        }
+
+        private void ForwardWinRTInkChromePointerUp(global::Windows.UI.Core.PointerEventArgs e)
+        {
+            try
+            {
+                if (!TryGetWinRTInkScreenPoint(e.CurrentPoint.Position, out var screenX, out var screenY))
+                    return;
+                _chromeInputForwarder?.ForwardUp(screenX, screenY);
+                LogHelper.WriteLogToFile(
+                    $"[WinRTInk] chrome forward up screen=({screenX:0},{screenY:0})",
+                    LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[WinRTInk] chrome forward up failed: {ex.Message}",
+                    LogHelper.LogType.Error);
+            }
+        }
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool GetWindowRect(IntPtr hWnd, out NativeWin32Rect lpRect);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct NativeWin32Rect
+        {
+            public int Left;
+            public int Top;
+            public int Right;
+            public int Bottom;
         }
 
         [StructLayout(LayoutKind.Sequential)]
