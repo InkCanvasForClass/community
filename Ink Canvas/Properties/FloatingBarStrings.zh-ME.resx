@@ -676,7 +676,7 @@
     <value>批注状态点提示</value>
   </data>
   <data name="Canvas_AnnotationDotHint_Settings_EnableHint" xml:space="preserve">
-    <value>在批注中一直点画布，会弹出来提醒你现在是在批注中哦</value>
+    <value>批注中 30 秒没写字时，点画布会闪出状态小圆点；短时间内连点到次数，才会跳出「正在批注」的提示。写长一点的笔迹会重新计时。</value>
   </data>
   <data name="Canvas_AnnotationDotHint_Settings_ClusterRadius" xml:space="preserve">
     <value>连续点击范围大小</value>

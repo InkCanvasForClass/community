@@ -703,7 +703,7 @@
     <value>批注状态点提示</value>
   </data>
   <data name="Canvas_AnnotationDotHint_Settings_EnableHint" xml:space="preserve">
-    <value>批注模式下连续点击画布时，显示提示提醒当前处于批注模式</value>
+    <value>批注模式下 30 秒未书写后，点击画布会短暂闪现状态小圆点；短时内连续点击达到次数阈值时，才显示「批注中」提示。书写长笔迹会重新计时。</value>
   </data>
   <data name="Canvas_AnnotationDotHint_Settings_ClusterRadius" xml:space="preserve">
     <value>连续点击范围大小</value>

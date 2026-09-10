@@ -703,7 +703,7 @@
     <value>Annotation status dot hint</value>
   </data>
   <data name="Canvas_AnnotationDotHint_Settings_EnableHint" xml:space="preserve">
-    <value>Show a hint when clicking repeatedly in annotation mode to remind you're in annotation mode</value>
+    <value>In annotation mode, once nothing has been written for 30 seconds, each canvas click briefly flashes a status dot; reaching the click threshold within a short time also shows the "annotating" hint. Writing a long stroke restarts the timer.</value>
   </data>
   <data name="Canvas_AnnotationDotHint_Settings_ClusterRadius" xml:space="preserve">
     <value>Cluster radius</value>

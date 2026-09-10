@@ -339,9 +339,11 @@
             </Popup>
 
             <!-- 批注状态点提示：当用户在批注模式下反复点击同一区域时浮现，
-                 提醒用户当前处于批注模式而非鼠标模式。 -->
+                 提醒用户当前处于批注模式而非鼠标模式。
+                 Placement=RelativePoint 相对 inkCanvas，避免 DPI 缩放导致的位置偏差。 -->
             <Popup x:Name="AnnotationDotHintPopup"
-                   Placement="Absolute"
+                   Placement="RelativePoint"
+                   PlacementTarget="{Binding ElementName=inkCanvas}"
                    AllowsTransparency="True"
                    StaysOpen="True"
                    IsOpen="False"
@@ -414,6 +416,31 @@
                             </Button.Template>
                         </Button>
                     </StackPanel>
+                </Border>
+            </Popup>
+
+            <!-- 批注状态指示小圆点：带圆角容器的短促渐显/渐隐图标，指示当前处于批注状态。
+                 Placement=RelativePoint 相对 inkCanvas，避免 DPI 缩放导致的位置偏差。 -->
+            <Popup x:Name="AnnotationDotIndicatorPopup"
+                   Placement="RelativePoint"
+                   PlacementTarget="{Binding ElementName=inkCanvas}"
+                   AllowsTransparency="True"
+                   StaysOpen="True"
+                   IsOpen="False"
+                   HorizontalOffset="0"
+                   VerticalOffset="0">
+                <Border x:Name="AnnotationDotIndicatorBorder"
+                        Width="28" Height="28"
+                        CornerRadius="14"
+                        Background="#B0303030"
+                        BorderBrush="#40FFFFFF"
+                        BorderThickness="1"
+                        SnapsToDevicePixels="True"
+                        Opacity="0">
+                    <Ellipse Width="12" Height="12"
+                             Fill="#FF2563EB"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center" />
                 </Border>
             </Popup>
 
