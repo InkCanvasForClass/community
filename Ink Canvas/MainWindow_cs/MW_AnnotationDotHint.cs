@@ -28,6 +28,10 @@ namespace Ink_Canvas
         private readonly Queue<Point> _annotationDotPositions = new Queue<Point>();
         /// <summary>最近点击位置队列的最大容量。</summary>
         private const int AnnotationDotMaxQueueSize = 10;
+        /// <summary>最近一次「长笔迹」（真实书写）的提交时间；用于 30 秒未书写的空闲门控。</summary>
+        private DateTime? _lastLongStrokeTime;
+        /// <summary>距离上次真实书写多久后，功能按「空闲」状态触发（秒）。</summary>
+        private const double AnnotationDotIdleSeconds = 30;
         /// <summary>提示自动隐藏计时器。</summary>
         private DispatcherTimer _annotationDotHintTimer;
         /// <summary>提示是否正在显示。</summary>
@@ -50,16 +54,32 @@ namespace Ink_Canvas
                 double maxDim = Math.Max(bounds.Width, bounds.Height);
                 double strokeThreshold = Settings.Canvas.AnnotationDotHintStrokeLengthThreshold;
 
-                // 仅对极短墨迹（点击）进行追踪
-                if (maxDim > strokeThreshold) return;
+                // 长笔迹 = 真实书写：重置 30 秒空闲计时器，并清空点击轨迹。
+                if (maxDim > strokeThreshold)
+                {
+                    _lastLongStrokeTime = DateTime.Now;
+                    _annotationDotPositions.Clear();
+                    return;
+                }
 
                 var center = new Point(bounds.Left + bounds.Width / 2, bounds.Top + bounds.Height / 2);
                 if (double.IsNaN(center.X) || double.IsNaN(center.Y)) return;
 
-                // 对单点 / 极短墨迹补画可见圆点（不影响原始墨迹管线）
+                // 对单点 / 极短墨迹补画可见圆点（按笔的实际粗细，不做加粗）
                 EnsureDotVisible(stroke, center);
 
-                TrackAnnotationDotPosition(center);
+                if (IsAnnotationIdle())
+                {
+                    // 30 秒未书写：每次点击都显示指示小圆点
+                    ShowAnnotationDotIndicator(center);
+                    // 短时内连续点击达到阈值 → 显示「批注中」提示
+                    TrackAnnotationDotPosition(center, showHint: true);
+                }
+                else
+                {
+                    // 30 秒内有书写：仅连续点击达到阈值时，在末次点击显示一次指示小圆点（不显示批注提示）
+                    TrackAnnotationDotPosition(center, showHint: false);
+                }
             }
             catch (Exception ex)
             {
@@ -90,8 +110,7 @@ namespace Ink_Canvas
                     ?? (inkCanvas.DefaultDrawingAttributes?.Clone()
                         ?? new DrawingAttributes { Color = Colors.Black, Width = 2, Height = 2 });
 
-                drawingAttrs.Width = Math.Max(drawingAttrs.Width, 3);
-                drawingAttrs.Height = Math.Max(drawingAttrs.Height, 3);
+                // 按笔的实际粗细渲染，不做加粗处理。
 
                 // 构建一个由 8 个点组成的微小圆（半径 2px），确保视觉可见
                 var points = new StylusPointCollection();
@@ -122,11 +141,12 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 记录点击位置到追踪队列，并检查是否需要显示提示。
-        /// 仅检查最近 N 个点（N = 点击次数阈值），而非队列全部点，
-        /// 避免跨区域点击导致判定失败。
+        /// 记录点击位置到追踪队列，并在连续点击达到阈值时执行相应动作。
+        /// <paramref name="showHint"/> 为 true 时触发「批注中」提示（30 秒空闲后路径）；
+        /// 为 false 时仅显示一次指示小圆点（30 秒内路径，不显示批注提示）。
+        /// 仅检查最近 N 个点（N = 点击次数阈值），而非队列全部点，避免跨区域误判。
         /// </summary>
-        private void TrackAnnotationDotPosition(Point position)
+        private void TrackAnnotationDotPosition(Point position, bool showHint)
         {
             if (double.IsNaN(position.X) || double.IsNaN(position.Y)) return;
 
@@ -143,7 +163,16 @@ namespace Ink_Canvas
             // 而非队列中所有点，避免队列中混入旧区域点导致误判
             if (IsRecentClusterWithinRadius(clickCount, clusterRadius))
             {
-                ShowAnnotationDotHint(position);
+                if (showHint)
+                {
+                    ShowAnnotationDotHint(position);
+                }
+                else
+                {
+                    // 30 秒内连续点击达到阈值：末次点击显示一次指示小圆点，但不显示「批注中」提示
+                    ShowAnnotationDotIndicator(position);
+                }
+                _annotationDotPositions.Clear();
             }
         }
 
@@ -181,7 +210,9 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 显示批注状态提示。使用屏幕坐标绝对定位，边缘点击时对齐锚点而非居中。
+        /// 显示批注状态提示。Popup 使用 Placement=RelativePoint 且 PlacementTarget=inkCanvas，
+        /// 偏移量直接使用画布（逻辑）坐标，避免 DPI 缩放下的屏幕坐标换算偏差。
+        /// 靠近画布边缘时对齐锚点而非居中。
         /// </summary>
         private void ShowAnnotationDotHint(Point anchor)
         {
@@ -193,51 +224,47 @@ namespace Ink_Canvas
             var popup = AnnotationDotHintPopup;
             if (popup == null) return;
 
-            // 直接将画布坐标转为屏幕坐标（考虑 RenderTransform 等）
-            var clickScreen = inkCanvas.PointToScreen(anchor);
-
-            // 使用实际 Border 宽度，确保与 XAML 定义一致
-            double hintWidth = (AnnotationDotHintBorder?.ActualWidth > 0) ? AnnotationDotHintBorder.ActualWidth : 380;
-            double hintHeight = 60;
+            // 使用实际 Border 尺寸，与 XAML 定义一致；未布局时回退到 XAML 固定值
+            double hintWidth = (AnnotationDotHintBorder?.ActualWidth > 0) ? AnnotationDotHintBorder.ActualWidth : 295;
+            double hintHeight = (AnnotationDotHintBorder?.ActualHeight > 0) ? AnnotationDotHintBorder.ActualHeight : 60;
             const double margin = 20;
 
-            var workArea = SystemParameters.WorkArea;
-            double screenW = workArea.Width;
-            double screenH = workArea.Height;
+            double canvasW = inkCanvas.ActualWidth;
+            double canvasH = inkCanvas.ActualHeight;
 
             double hintLeft, hintTop;
 
-            // 水平：靠近左边缘时对齐左边缘，靠近右边缘时对齐右边缘
-            if (clickScreen.X < workArea.Left + screenW / 2)
+            // 水平：靠近左半边时对齐左边缘，靠近右半边时对齐右边缘
+            if (anchor.X < canvasW / 2)
             {
-                // 左半屏：提示左边缘对齐锚点
-                hintLeft = clickScreen.X;
+                // 左半边：提示左边缘对齐锚点
+                hintLeft = anchor.X;
             }
             else
             {
-                // 右半屏：提示右边缘对齐锚点
-                hintLeft = clickScreen.X - hintWidth;
+                // 右半边：提示右边缘对齐锚点
+                hintLeft = anchor.X - hintWidth;
             }
 
-            // 垂直：上半屏放锚点下方，下半屏放锚点上方
-            if (clickScreen.Y < workArea.Top + screenH / 2)
+            // 垂直：上半边放锚点下方，下半边放锚点上方
+            if (anchor.Y < canvasH / 2)
             {
-                hintTop = clickScreen.Y + 10;
+                hintTop = anchor.Y + 10;
             }
             else
             {
-                hintTop = clickScreen.Y - hintHeight - 10;
+                hintTop = anchor.Y - hintHeight - 10;
             }
 
-            // 钳制到屏幕工作区域内
-            if (hintLeft < workArea.Left + margin)
-                hintLeft = workArea.Left + margin;
-            if (hintLeft + hintWidth > workArea.Right - margin)
-                hintLeft = workArea.Right - hintWidth - margin;
-            if (hintTop < workArea.Top + margin)
-                hintTop = workArea.Top + margin;
-            if (hintTop + hintHeight > workArea.Bottom - margin)
-                hintTop = workArea.Bottom - hintHeight - margin;
+            // 钳制到画布可见区域内
+            if (hintLeft < margin)
+                hintLeft = margin;
+            if (hintLeft + hintWidth > canvasW - margin)
+                hintLeft = canvasW - hintWidth - margin;
+            if (hintTop < margin)
+                hintTop = margin;
+            if (hintTop + hintHeight > canvasH - margin)
+                hintTop = canvasH - hintHeight - margin;
 
             popup.HorizontalOffset = hintLeft;
             popup.VerticalOffset = hintTop;
@@ -261,6 +288,50 @@ namespace Ink_Canvas
             };
             _annotationDotHintTimer.Tick += AnnotationDotHintTimer_Tick;
             _annotationDotHintTimer.Start();
+        }
+
+        /// <summary>
+        /// 当前是否满足「30 秒未在白板内书写」的空闲条件。
+        /// 从未书写过（<see cref="_lastLongStrokeTime"/> 为空）时视为空闲。
+        /// </summary>
+        private bool IsAnnotationIdle()
+        {
+            return !_lastLongStrokeTime.HasValue
+                || (DateTime.Now - _lastLongStrokeTime.Value).TotalSeconds >= AnnotationDotIdleSeconds;
+        }
+
+        /// <summary>
+        /// 显示「处于批注状态」的指示小圆点：带圆角容器，渐显出现、短暂停留后渐隐消失。
+        /// Popup 使用 Placement=RelativePoint 且 PlacementTarget=inkCanvas，坐标直接使用画布（逻辑）坐标。
+        /// </summary>
+        private void ShowAnnotationDotIndicator(Point anchor)
+        {
+            var popup = AnnotationDotIndicatorPopup;
+            var border = AnnotationDotIndicatorBorder;
+            if (popup == null || border == null) return;
+
+            // 容器尺寸与 XAML 定义一致（28×28），居中对齐点击位置
+            const double size = 28;
+            popup.HorizontalOffset = anchor.X - size / 2;
+            popup.VerticalOffset = anchor.Y - size / 2;
+            popup.IsOpen = true;
+
+            // 渐显 → 短暂停留 → 渐隐
+            var anim = new DoubleAnimationUsingKeyFrames();
+            anim.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromTimeSpan(TimeSpan.Zero)));
+            anim.KeyFrames.Add(new LinearDoubleKeyFrame(1, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(150))));
+            anim.KeyFrames.Add(new LinearDoubleKeyFrame(1, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(550))));
+            anim.KeyFrames.Add(new LinearDoubleKeyFrame(0, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(750))));
+            anim.Completed += (s, e) =>
+            {
+                if (AnnotationDotIndicatorPopup != null)
+                    AnnotationDotIndicatorPopup.IsOpen = false;
+            };
+
+            // 结束上一次未完成的动画，避免快速连点时叠加
+            border.BeginAnimation(UIElement.OpacityProperty, null);
+            border.Opacity = 0;
+            border.BeginAnimation(UIElement.OpacityProperty, anim);
         }
 
         private void HideAnnotationDotHint()
