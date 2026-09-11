@@ -2576,11 +2576,13 @@ namespace Ink_Canvas
 
                 bool isBoardMode = currentMode == 1;
                 bool enableTranslate = IsBoardRoamingMode || (isBoardMode ? Settings.Gesture.IsEnableTwoFingerTranslateBoard : Settings.Gesture.IsEnableTwoFingerTranslate);
-                bool enableRotate = !IsBoardRoamingMode && (isBoardMode ? Settings.Gesture.IsEnableTwoFingerRotationBoard : Settings.Gesture.IsEnableTwoFingerRotation);
-                bool enableZoom = !IsBoardRoamingMode && (isBoardMode ? Settings.Gesture.IsEnableTwoFingerZoomBoard : Settings.Gesture.IsEnableTwoFingerZoom);
-                bool enableGestureTranslateOrRotate = IsBoardRoamingMode || (isBoardMode
-                    ? (Settings.Gesture.IsEnableTwoFingerTranslateBoard || Settings.Gesture.IsEnableTwoFingerRotationBoard)
-                    : (Settings.Gesture.IsEnableTwoFingerTranslate || Settings.Gesture.IsEnableTwoFingerRotation));
+                bool enableRotate = IsBoardRoamingMode
+                    ? Settings.Gesture.IsEnableTwoFingerRotationRoaming
+                    : (isBoardMode ? Settings.Gesture.IsEnableTwoFingerRotationBoard : Settings.Gesture.IsEnableTwoFingerRotation);
+                bool enableZoom = IsBoardRoamingMode
+                    ? Settings.Gesture.IsEnableTwoFingerZoomRoaming
+                    : (isBoardMode ? Settings.Gesture.IsEnableTwoFingerZoomBoard : Settings.Gesture.IsEnableTwoFingerZoom);
+                bool enableGestureTranslateOrRotate = enableTranslate || enableRotate;
 
                 if (enableTranslate)
                     m.Translate(trans.X, trans.Y); // 移动

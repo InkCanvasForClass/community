@@ -618,6 +618,11 @@ namespace Ink_Canvas
         public bool IsEnableTwoFingerTranslateBoard { get; set; } = true;
         [JsonProperty("isEnableTwoFingerRotationBoard")]
         public bool IsEnableTwoFingerRotationBoard { get; set; }
+
+        [JsonProperty("isEnableTwoFingerZoomRoaming")]
+        public bool IsEnableTwoFingerZoomRoaming { get; set; } = true;
+        [JsonProperty("isEnableTwoFingerRotationRoaming")]
+        public bool IsEnableTwoFingerRotationRoaming { get; set; }
     }
 
     // 更新通道枚举
