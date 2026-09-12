@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -7,7 +8,6 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Threading;
 using Point = System.Windows.Point;
 
 namespace Ink_Canvas
@@ -32,10 +32,12 @@ namespace Ink_Canvas
         private DateTime? _lastLongStrokeTime;
         /// <summary>距离上次真实书写多久后，功能按「空闲」状态触发（秒）。</summary>
         private const double AnnotationDotIdleSeconds = 30;
-        /// <summary>提示自动隐藏计时器。</summary>
-        private DispatcherTimer _annotationDotHintTimer;
+        /// <summary>上一次点击笔迹处理时的空闲状态；用于检测刚跨越 30 秒空闲边界的时刻。</summary>
+        private bool _lastClickWasIdle;
         /// <summary>提示是否正在显示。</summary>
         private bool _annotationDotHintVisible;
+        /// <summary>当前显示中的「批注中」提示弹窗（iNKORE MessageBox，非模态），用于重复触发时判断与外部关闭。</summary>
+        private iNKORE.UI.WPF.Modern.Controls.MessageBox _annotationDotHintBox;
 
         /// <summary>
         /// 在 <see cref="ProcessCommittedStroke"/> 后调用，检测短墨迹（点击）并判断是否需要显示提示。
@@ -50,8 +52,12 @@ namespace Ink_Canvas
                 if (currentMode == 1) return; // 白板模式不启用
                 if (!Settings?.Canvas?.IsEnableAnnotationDotHint ?? true) return;
 
-                var bounds = stroke.GetBounds();
-                double maxDim = Math.Max(bounds.Width, bounds.Height);
+                // 注意：Stroke.GetBounds() 会按笔宽向外扩展（单击 ≈ 笔宽 + 路径跨度），
+                // 笔较粗时单击也会超过阈值而被误判为书写，导致本功能整体失效。
+                // 因此这里改用笔迹路径本身的跨度（仅由采样点构成，不含笔宽）判断。
+                var pathExtent = GetStrokePathExtent(stroke);
+                if (pathExtent.IsEmpty) return;
+                double maxDim = Math.Max(pathExtent.Width, pathExtent.Height);
                 double strokeThreshold = Settings.Canvas.AnnotationDotHintStrokeLengthThreshold;
 
                 // 长笔迹 = 真实书写：重置 30 秒空闲计时器，并清空点击轨迹。
@@ -59,16 +65,25 @@ namespace Ink_Canvas
                 {
                     _lastLongStrokeTime = DateTime.Now;
                     _annotationDotPositions.Clear();
+                    _lastClickWasIdle = false;
                     return;
                 }
 
-                var center = new Point(bounds.Left + bounds.Width / 2, bounds.Top + bounds.Height / 2);
+                var center = new Point(pathExtent.Left + pathExtent.Width / 2, pathExtent.Top + pathExtent.Height / 2);
                 if (double.IsNaN(center.X) || double.IsNaN(center.Y)) return;
 
-                // 对单点 / 极短墨迹补画可见圆点（按笔的实际粗细，不做加粗）
+                // 对单点 / 极短墨迹补画可见圆点（视觉直径与笔的实际粗细一致，不加粗）
                 EnsureDotVisible(stroke, center);
 
-                if (IsAnnotationIdle())
+                bool isIdle = IsAnnotationIdle();
+
+                // 刚跨过 30 秒空闲边界时清空点击轨迹：边界前按「非空闲」规则记录的点击
+                // 不参与空闲期的「批注中」提示计数，否则空闲后的首次点击就可能误弹提示。
+                if (isIdle && !_lastClickWasIdle)
+                    _annotationDotPositions.Clear();
+                _lastClickWasIdle = isIdle;
+
+                if (isIdle)
                 {
                     // 30 秒未书写：每次点击都显示指示小圆点
                     ShowAnnotationDotIndicator(center);
@@ -88,6 +103,26 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 计算笔迹路径本身的包围盒（仅由采样点构成，不含笔宽外扩）。
+        /// <see cref="Stroke.GetBounds"/> 会按 DrawingAttributes 宽高向外各扩一圈，
+        /// 结果随笔粗增大，不能用于区分「点击」与「书写」。
+        /// </summary>
+        private static Rect GetStrokePathExtent(Stroke stroke)
+        {
+            double minX = double.MaxValue, minY = double.MaxValue;
+            double maxX = double.MinValue, maxY = double.MinValue;
+            foreach (StylusPoint sp in stroke.StylusPoints)
+            {
+                if (sp.X < minX) minX = sp.X;
+                if (sp.X > maxX) maxX = sp.X;
+                if (sp.Y < minY) minY = sp.Y;
+                if (sp.Y > maxY) maxY = sp.Y;
+            }
+            if (minX > maxX || minY > maxY) return Rect.Empty;
+            return new Rect(minX, minY, maxX - minX, maxY - minY);
+        }
+
+        /// <summary>
         /// 对点击产生的极短墨迹补充可见圆点。
         /// 使用 <see cref="CommitReason.CodeInput"/> 避免触发 <see cref="ProcessCommittedStroke"/> 递归。
         /// </summary>
@@ -100,9 +135,10 @@ namespace Ink_Canvas
             {
                 // 单点墨迹（StylusPoints.Count == 1）在视觉上不可见，需补点
                 // 多点但极短墨迹（如 2px 线段）可能也不明显，同样补点
+                var pathExtent = GetStrokePathExtent(originalStroke);
                 bool needsDot = originalStroke.StylusPoints.Count <= 1
-                    || originalStroke.GetBounds().Width < 3
-                    || originalStroke.GetBounds().Height < 3;
+                    || pathExtent.Width < 3
+                    || pathExtent.Height < 3;
 
                 if (!needsDot) return;
 
@@ -110,15 +146,18 @@ namespace Ink_Canvas
                     ?? (inkCanvas.DefaultDrawingAttributes?.Clone()
                         ?? new DrawingAttributes { Color = Colors.Black, Width = 2, Height = 2 });
 
-                // 按笔的实际粗细渲染，不做加粗处理。
+                // 墨迹的渲染直径 = 2×路径半径 + 笔画宽。取路径半径 = 原笔宽/4、笔画宽减半，
+                // 使圆点最终视觉直径恰好等于笔的实际粗细，与非点击墨迹粗细一致。
+                double radius = Math.Min(drawingAttrs.Width, drawingAttrs.Height) / 4;
+                drawingAttrs.Width /= 2;
+                drawingAttrs.Height /= 2;
 
-                // 构建一个由 8 个点组成的微小圆（半径 2px），确保视觉可见
+                // 构建一个由 8 个点组成的微小圆，确保视觉可见
                 var points = new StylusPointCollection();
-                double r = 2;
                 for (int i = 0; i < 8; i++)
                 {
                     double angle = Math.PI * 2 * i / 8;
-                    points.Add(new StylusPoint(center.X + r * Math.Cos(angle), center.Y + r * Math.Sin(angle)));
+                    points.Add(new StylusPoint(center.X + radius * Math.Cos(angle), center.Y + radius * Math.Sin(angle), 0.5f));
                 }
                 var dotStroke = new Stroke(points) { DrawingAttributes = drawingAttrs };
 
@@ -210,23 +249,20 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 显示批注状态提示。Popup 使用 Placement=RelativePoint 且 PlacementTarget=inkCanvas，
-        /// 偏移量直接使用画布（逻辑）坐标，避免 DPI 缩放下的屏幕坐标换算偏差。
-        /// 靠近画布边缘时对齐锚点而非居中。
+        /// 显示「批注中」提示弹框：使用 iNKORE MessageBox（非模态、不抢焦点、自动关闭）替代原 Popup。
+        /// 定位策略与原 Popup 版本一致：先在画布坐标系内按锚点所在半屏对齐并钳制到画布内，
+        /// 再通过 <see cref="MessageBoxHelper.TranslateToScreen"/> 换算为屏幕 DIP 坐标传给弹窗。
         /// </summary>
         private void ShowAnnotationDotHint(Point anchor)
         {
             _annotationDotPositions.Clear();
 
             if (_annotationDotHintVisible) return;
-            _annotationDotHintVisible = true;
+            if (inkCanvas == null) return;
 
-            var popup = AnnotationDotHintPopup;
-            if (popup == null) return;
-
-            // 使用实际 Border 尺寸，与 XAML 定义一致；未布局时回退到 XAML 固定值
-            double hintWidth = (AnnotationDotHintBorder?.ActualWidth > 0) ? AnnotationDotHintBorder.ActualWidth : 295;
-            double hintHeight = (AnnotationDotHintBorder?.ActualHeight > 0) ? AnnotationDotHintBorder.ActualHeight : 60;
+            // MessageBox 按内容自适应，此处为对齐与钳制用的估算尺寸
+            const double hintWidth = 360;
+            const double hintHeight = 170;
             const double margin = 20;
 
             double canvasW = inkCanvas.ActualWidth;
@@ -266,28 +302,39 @@ namespace Ink_Canvas
             if (hintTop + hintHeight > canvasH - margin)
                 hintTop = canvasH - hintHeight - margin;
 
-            popup.HorizontalOffset = hintLeft;
-            popup.VerticalOffset = hintTop;
-            popup.IsOpen = true;
+            // 画布坐标 → 屏幕 DIP 坐标（DPI 安全换算），失败则放弃本次提示
+            var screenPoint = MessageBoxHelper.TranslateToScreen(inkCanvas, new Point(hintLeft, hintTop));
+            if (double.IsNaN(screenPoint.X) || double.IsNaN(screenPoint.Y)) return;
 
-            if (AnnotationDotHintBorder != null)
-            {
-                AnnotationDotHintBorder.Opacity = 0;
-                var fadeIn = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(300))
-                {
-                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-                };
-                AnnotationDotHintBorder.BeginAnimation(UIElement.OpacityProperty, fadeIn);
-            }
-
-            StopAnnotationDotHintTimer();
             double displaySeconds = Settings?.Canvas?.AnnotationDotHintDisplayDurationSeconds ?? 3;
-            _annotationDotHintTimer = new DispatcherTimer(DispatcherPriority.Normal, Dispatcher)
-            {
-                Interval = TimeSpan.FromSeconds(displaySeconds)
-            };
-            _annotationDotHintTimer.Tick += AnnotationDotHintTimer_Tick;
-            _annotationDotHintTimer.Start();
+
+            var box = MessageBoxHelper.ShowAtNonBlocking(
+                this,
+                screenPoint.X, screenPoint.Y,
+                FloatingBarStrings.Canvas_AnnotationDotHint_Text,
+                string.Empty,
+                MessageBoxButton.YesNo,
+                MessageBoxImage.None,
+                onClosed: result =>
+                {
+                    _annotationDotHintVisible = false;
+                    _annotationDotHintBox = null;
+                    if (result == MessageBoxResult.No)
+                    {
+                        // 「退出批注」：退出批注模式
+                        CursorIcon_Click(null, null);
+                    }
+                },
+                autoCloseSeconds: displaySeconds > 0 ? displaySeconds : (double?)null,
+                configure: b =>
+                {
+                    b.YesButtonText = FloatingBarStrings.Canvas_AnnotationDotHint_Keep;
+                    b.NoButtonText = FloatingBarStrings.Canvas_AnnotationDotHint_Exit;
+                });
+
+            if (box == null) return;
+            _annotationDotHintVisible = true;
+            _annotationDotHintBox = box;
         }
 
         /// <summary>
@@ -334,55 +381,5 @@ namespace Ink_Canvas
             border.BeginAnimation(UIElement.OpacityProperty, anim);
         }
 
-        private void HideAnnotationDotHint()
-        {
-            _annotationDotHintVisible = false;
-            StopAnnotationDotHintTimer();
-
-            if (AnnotationDotHintBorder != null)
-            {
-                var fadeOut = new DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(200))
-                {
-                    EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
-                };
-                fadeOut.Completed += (s, e) =>
-                {
-                    if (AnnotationDotHintPopup != null)
-                        AnnotationDotHintPopup.IsOpen = false;
-                };
-                AnnotationDotHintBorder.BeginAnimation(UIElement.OpacityProperty, fadeOut);
-            }
-            else
-            {
-                if (AnnotationDotHintPopup != null)
-                    AnnotationDotHintPopup.IsOpen = false;
-            }
-        }
-
-        private void StopAnnotationDotHintTimer()
-        {
-            if (_annotationDotHintTimer != null)
-            {
-                _annotationDotHintTimer.Stop();
-                _annotationDotHintTimer.Tick -= AnnotationDotHintTimer_Tick;
-                _annotationDotHintTimer = null;
-            }
-        }
-
-        private void AnnotationDotHintTimer_Tick(object sender, EventArgs e)
-        {
-            HideAnnotationDotHint();
-        }
-
-        private void AnnotationDotHintKeep_Click(object sender, RoutedEventArgs e)
-        {
-            HideAnnotationDotHint();
-        }
-
-        private void AnnotationDotHintExit_Click(object sender, RoutedEventArgs e)
-        {
-            HideAnnotationDotHint();
-            CursorIcon_Click(null, null);
-        }
     }
 }
