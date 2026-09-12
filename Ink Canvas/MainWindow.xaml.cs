@@ -2496,7 +2496,7 @@ namespace Ink_Canvas
                 inkCanvas.CaptureStylus();
                 ViewboxFloatingBar.IsHitTestVisible = false;
                 BlackboardUIGridForInkReplay.IsHitTestVisible = false;
-                BeginBoardRoaming(e.GetPosition(inkCanvas));
+                BeginBoardRoamingContact(e.StylusDevice.Id, e.GetPosition(inkCanvas));
                 e.Handled = true;
                 return;
             }
@@ -2520,9 +2520,9 @@ namespace Ink_Canvas
                 e.Handled = true;
                 return;
             }
-            if (!_isBoardRoamingPointerDown) return;
+            if (!_isBoardRoamingPointerDown && !_isBoardRoamingTwoFingerGesture && _boardRoamingContacts.Count == 0) return;
 
-            MoveBoardRoaming(e.GetPosition(inkCanvas));
+            MoveBoardRoamingContact(e.StylusDevice.Id, e.GetPosition(inkCanvas));
             e.Handled = true;
         }
 
@@ -2530,12 +2530,15 @@ namespace Ink_Canvas
         private void inkCanvas_StylusUp(object sender, StylusEventArgs e)
         {
             EndSecAgentStrokeErase();
-            if (_isBoardRoamingPointerDown)
+            if (_isBoardRoamingPointerDown || _isBoardRoamingTwoFingerGesture || _boardRoamingContacts.Count > 0)
             {
-                EndBoardRoaming();
-                inkCanvas.ReleaseStylusCapture();
-                ViewboxFloatingBar.IsHitTestVisible = true;
-                BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+                EndBoardRoamingContact(e.StylusDevice.Id);
+                if (_boardRoamingContacts.Count == 0)
+                {
+                    inkCanvas.ReleaseStylusCapture();
+                    ViewboxFloatingBar.IsHitTestVisible = true;
+                    BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+                }
                 e.Handled = true;
                 return;
             }

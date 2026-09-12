@@ -3650,7 +3650,7 @@ namespace Ink_Canvas
         {
             if (TryBlockFrozenPageMutation("切换到画笔")) return;
 
-            EndBoardRoaming();
+            CancelBoardRoamingInteraction();
 
             if (lastBorderMouseDownObject is Panel panel)
                 panel.Background = new SolidColorBrush(Colors.Transparent);
