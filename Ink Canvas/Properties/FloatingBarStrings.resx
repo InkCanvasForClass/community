@@ -691,7 +691,7 @@
     <value>停止书写后，提示按钮保持显示的时间；再次书写会重新计时，悬停按钮时暂停计时。</value>
   </data>
   <data name="Canvas_AnnotationDotHint_Text" xml:space="preserve">
-    <value>当前正处于批注状态</value>
+    <value>当前正处于屏幕批注&#xA;如需与其它应用交互，需要先退出批注状态</value>
   </data>
   <data name="Canvas_AnnotationDotHint_Keep" xml:space="preserve">
     <value>保持</value>

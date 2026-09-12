@@ -664,7 +664,7 @@
     <value>停笔之后提示按钮再待多久就消失；接着写会重新计时，鼠标放上去先不数。</value>
   </data>
   <data name="Canvas_AnnotationDotHint_Text" xml:space="preserve">
-    <value>现在是在批注中哦</value>
+    <value>现在是在屏幕批注中哦&#xA;要与其它应用交互，需要先退出批注状态</value>
   </data>
   <data name="Canvas_AnnotationDotHint_Keep" xml:space="preserve">
     <value>保持</value>

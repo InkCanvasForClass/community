@@ -691,7 +691,7 @@
     <value>How long the hint button stays visible after you stop writing. Writing again restarts the timer; hovering the button pauses it.</value>
   </data>
   <data name="Canvas_AnnotationDotHint_Text" xml:space="preserve">
-    <value>Currently in annotation mode</value>
+    <value>Currently in screen annotation&#xA;To interact with other apps, exit annotation mode first.</value>
   </data>
   <data name="Canvas_AnnotationDotHint_Keep" xml:space="preserve">
     <value>Keep</value>
