@@ -3,6 +3,7 @@ using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -23,7 +24,40 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void StartupPage_Loaded(object sender, RoutedEventArgs e)
         {
             LoadSettings();
+            InitializeShortcutButtons();
             _isLoaded = true;
+        }
+
+        /// <summary>
+        /// 为「创建快捷方式」按钮填充程序内图标徽章内容与提示文字。
+        /// </summary>
+        private void InitializeShortcutButtons()
+        {
+            InitializeShortcutButton(BtnShortcutBoard, UriSchemeShortcutHelper.FeatureBoard);
+            InitializeShortcutButton(BtnShortcutBooth, UriSchemeShortcutHelper.FeatureBooth);
+            InitializeShortcutButton(BtnShortcutRandom, UriSchemeShortcutHelper.FeatureRandom);
+            InitializeShortcutButton(BtnShortcutSettings, UriSchemeShortcutHelper.FeatureSettings);
+            InitializeShortcutButton(BtnShortcutAnnotate, UriSchemeShortcutHelper.FeatureAnnotate);
+        }
+
+        private void InitializeShortcutButton(Button button, string feature)
+        {
+            button.Content = UriSchemeShortcutHelper.CreateBadgeElement(feature, 40);
+            button.ToolTip = UriSchemeShortcutHelper.GetFeatureLabel(feature);
+        }
+
+        private void BtnShortcut_Click(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            if (!(sender is Button button) || !(button.Tag is string feature)) return;
+
+            bool success = UriSchemeShortcutHelper.CreateDesktopShortcut(feature);
+            var mainWindow = Application.Current?.Windows.OfType<MainWindow>().FirstOrDefault();
+            if (mainWindow == null) return;
+
+            mainWindow.ShowNotification(success
+                ? string.Format(StartupStrings.ExternalProtocol_Shortcut_Created, UriSchemeShortcutHelper.GetFeatureLabel(feature))
+                : StartupStrings.ExternalProtocol_Shortcut_Failed);
         }
 
         private void LoadSettings()
