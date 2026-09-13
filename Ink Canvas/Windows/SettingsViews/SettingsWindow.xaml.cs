@@ -789,6 +789,18 @@ namespace Ink_Canvas.Windows.SettingsViews
                 else if (node is iNKORE.UI.WPF.Modern.Controls.SettingsExpander se)
                 {
                     header = se.Header?.ToString();
+
+                    // 展开器（SettingsExpander）内部的子设置卡片并不会总被 LogicalTreeHelper
+                    // 枚举到（需展开/加载后才生成容器），因此直接遍历其 Items 集合，
+                    // 确保嵌套的「创建快捷方式」「批注状态点提示」等子项也能被设置搜索检索到。
+                    if (se.Items is System.Collections.IEnumerable seItems)
+                    {
+                        foreach (var seItem in seItems)
+                        {
+                            if (seItem is DependencyObject seItemDep)
+                                CollectEntriesFromPage(seItemDep, pageTag);
+                        }
+                    }
                 }
 
                 if (!string.IsNullOrWhiteSpace(header) && target != null)
