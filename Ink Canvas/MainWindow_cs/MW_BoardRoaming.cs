@@ -127,8 +127,15 @@ namespace Ink_Canvas
         /// </summary>
         private void CancelBoardRoamingInteraction()
         {
+            // 双指手势进行中时 _isBoardRoamingPointerDown 已被清除
+            //（见 BeginBoardRoamingTwoFingerGesture），直接调 EndBoardRoaming 会
+            // 提前返回，导致手势历史不提交、CompletePluginCanvasViewportTransform 被跳过。
+            var wasTwoFingerGesture = _isBoardRoamingTwoFingerGesture;
             ResetBoardRoamingGestureState();
-            EndBoardRoaming();
+            if (wasTwoFingerGesture)
+                EndBoardRoamingTwoFingerGesture();
+            else
+                EndBoardRoaming();
         }
 
         private void ResetBoardRoamingGestureState()
@@ -386,6 +393,19 @@ namespace Ink_Canvas
                 timeMachine.CommitStrokeManipulationHistory(history);
                 foreach (var item in history)
                     StrokeInitialHistory[item.Key] = item.Value.Item2;
+            }
+
+            // 双指捏合缩放除变换几何外还会修改 DrawingAttributes.Width/Height
+            //（见 TransformBoardRoamingContent），事件驱动的 DrawingAttributesHistory
+            // 会挂起这些变化。若不在此提交：撤销只回退几何、保留缩放后的笔宽，
+            // 且过期条目会被后续无关操作一并提交。提交后重置，与 MW_Colors /
+            // MW_SelectionGestures 的提交模式一致。
+            if (DrawingAttributesHistory.Count > 0)
+            {
+                timeMachine.CommitStrokeDrawingAttributesHistory(DrawingAttributesHistory);
+                DrawingAttributesHistory = new Dictionary<Stroke, Tuple<DrawingAttributes, DrawingAttributes>>();
+                foreach (var item in DrawingAttributesHistoryFlag)
+                    item.Value.Clear();
             }
 
             if (history.Count > 0 || inkCanvas.Children.Count > 0)
