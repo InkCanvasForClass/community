@@ -3,6 +3,7 @@ using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -23,7 +24,76 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void StartupPage_Loaded(object sender, RoutedEventArgs e)
         {
             LoadSettings();
+            InitializeShortcutButtons();
             _isLoaded = true;
+        }
+
+        /// <summary>
+        /// 为「创建快捷方式」按钮填充程序内图标徽章内容与提示文字。
+        /// </summary>
+        private void InitializeShortcutButtons()
+        {
+            InitializeShortcutButton(BtnShortcutBoard, UriSchemeShortcutHelper.FeatureBoard);
+            InitializeShortcutButton(BtnShortcutBooth, UriSchemeShortcutHelper.FeatureBooth);
+            InitializeShortcutButton(BtnShortcutRandom, UriSchemeShortcutHelper.FeatureRandom);
+            InitializeShortcutButton(BtnShortcutSettings, UriSchemeShortcutHelper.FeatureSettings);
+            InitializeShortcutButton(BtnShortcutAnnotate, UriSchemeShortcutHelper.FeatureAnnotate);
+        }
+
+        private void InitializeShortcutButton(Button button, string feature)
+        {
+            button.Content = UriSchemeShortcutHelper.CreateBadgeElement(feature, 40);
+            button.ToolTip = UriSchemeShortcutHelper.GetFeatureLabel(feature);
+        }
+
+        private void BtnShortcut_Click(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            if (!(sender is Button button) || !(button.Tag is string feature)) return;
+
+            // 快捷方式以 icc:// 为目标，协议未启用时 HandleUriCommand 会拒绝全部请求，
+            // 因此先确保外部协议已注册并启用，再创建快捷方式。
+            bool success = EnsureUriSchemeEnabledForShortcut() &&
+                           UriSchemeShortcutHelper.CreateDesktopShortcut(feature);
+            var mainWindow = Application.Current?.Windows.OfType<MainWindow>().FirstOrDefault();
+            if (mainWindow == null) return;
+
+            mainWindow.ShowNotification(success
+                ? string.Format(StartupStrings.ExternalProtocol_Shortcut_Created, UriSchemeShortcutHelper.GetFeatureLabel(feature))
+                : StartupStrings.ExternalProtocol_Shortcut_Failed);
+        }
+
+        /// <summary>
+        /// 确保外部协议可用：协议未启用时自动注册并开启设置（与本页开关等效），
+        /// 使新建的 icc:// 快捷方式真正可用，避免“创建成功”但快捷方式无法工作。
+        /// </summary>
+        private bool EnsureUriSchemeEnabledForShortcut()
+        {
+            try
+            {
+                if (SettingsManager.Settings.Advanced.IsEnableUriScheme) return true;
+
+                bool registered = UriSchemeHelper.IsUriSchemeRegistered() || UriSchemeHelper.RegisterUriScheme();
+                if (!registered)
+                {
+                    LogHelper.WriteLogToFile("创建快捷方式时注册外部协议失败，请检查权限或日志", LogHelper.LogType.Error);
+                    return false;
+                }
+
+                SettingsManager.Settings.Advanced.IsEnableUriScheme = true;
+                SettingsManager.SaveSettingsToFile();
+
+                // 同步本页开关显示；用 _isLoaded 挡住 Toggled 事件避免重复注册
+                _isLoaded = false;
+                ToggleSwitchExternalProtocol.IsOn = true;
+                _isLoaded = true;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"启用外部协议时出错: {ex.Message}");
+                return false;
+            }
         }
 
         private void LoadSettings()

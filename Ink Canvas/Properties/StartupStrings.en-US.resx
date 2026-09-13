@@ -183,4 +183,31 @@
   <data name="UpdatePackageArchitectureHint" xml:space="preserve">
     <value>Select the architecture for the update package. By default, it matches the current software architecture.</value>
   </data>
+  <data name="ExternalProtocol_ShortcutCreate" xml:space="preserve">
+    <value>Create desktop shortcuts</value>
+  </data>
+  <data name="ExternalProtocol_ShortcutCreateHint" xml:space="preserve">
+    <value>Click an icon to create a desktop shortcut for that feature</value>
+  </data>
+  <data name="ExternalProtocol_Shortcut_Board" xml:space="preserve">
+    <value>Whiteboard</value>
+  </data>
+  <data name="ExternalProtocol_Shortcut_Booth" xml:space="preserve">
+    <value>Booth</value>
+  </data>
+  <data name="ExternalProtocol_Shortcut_Random" xml:space="preserve">
+    <value>Random pick</value>
+  </data>
+  <data name="ExternalProtocol_Shortcut_Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="ExternalProtocol_Shortcut_Annotate" xml:space="preserve">
+    <value>Annotate</value>
+  </data>
+  <data name="ExternalProtocol_Shortcut_Created" xml:space="preserve">
+    <value>Desktop shortcut created: {0}</value>
+  </data>
+  <data name="ExternalProtocol_Shortcut_Failed" xml:space="preserve">
+    <value>Failed to create shortcut, check logs for details</value>
+  </data>
 </root>
