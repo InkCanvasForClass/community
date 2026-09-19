@@ -1,4 +1,4 @@
-using OpenCvSharp;
+﻿using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using Point = OpenCvSharp.Point;
 using Size = OpenCvSharp.Size;
@@ -3991,5 +3991,94 @@ namespace Ink_Canvas
 
         private static double Dist(OpenCvSharp.Point a, OpenCvSharp.Point b)
             => Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
+        #region 视频展台插件服务包装（IVideoBoothService 后端入口）
+
+        /// <summary>
+        /// 当前是否处于视频展台特殊模式（全屏预览激活）。供 IVideoBoothService 读取。
+        /// </summary>
+        public bool IsVideoBoothActive => _isVideoPresenterSpecialMode;
+
+        /// <summary>当前展台预览缩放倍率（未激活时为 1.0）。供 IVideoBoothService 读取。</summary>
+        public double VideoBoothZoomScale => _isVideoPresenterSpecialMode ? _boothPreviewScale : 1.0;
+
+        /// <summary>
+        /// 开关视频展台：未激活时进入白板并打开展台；已激活时完全退出
+        /// （等同展台菜单「关闭」按钮）。供 IVideoBoothService 调用，须在 UI 线程。
+        /// </summary>
+        public void ToggleVideoBooth()
+        {
+            if (_isVideoPresenterSpecialMode)
+            {
+                BtnExitVideoPresenter_Click(null, null);
+                return;
+            }
+
+            // 未在白板模式时先进白板（ImageBlackboard_MouseUp 是切换语义，已在白板则不能再次调用）
+            if (currentMode != 1)
+            {
+                ImageBlackboard_MouseUp(null, null);
+            }
+
+            // 与白板工具栏「视频展台」按钮一致：直接走内置展台，
+            // 不检查 LaunchSeewoVideoShowcaseForWhiteboardBooth（插件入口的目标就是内置展台）
+            ToggleVideoPresenterSidebar();
+        }
+
+        /// <summary>展台拍照（复用菜单拍照按钮完整管线）。供 IVideoBoothService 调用，须在 UI 线程。</summary>
+        public void VideoBoothCapturePhoto()
+        {
+            if (!_isVideoPresenterSpecialMode) return;
+            BtnCapturePhoto_Click(null, null);
+        }
+
+        /// <summary>展台旋转 90°（复用菜单旋转按钮，直播页/照片页自适应）。供 IVideoBoothService 调用，须在 UI 线程。</summary>
+        public void VideoBoothRotate90()
+        {
+            if (!_isVideoPresenterSpecialMode) return;
+            BtnRotateImage_Click(null, null);
+        }
+
+        /// <summary>
+        /// 以画面中心为锚点按 <paramref name="scaleFactor"/> 缩放预览（与滚轮缩放同管线，含墨迹同步）。
+        /// 供 IVideoBoothService 调用，须在 UI 线程。
+        /// </summary>
+        public void VideoBoothZoom(double scaleFactor)
+        {
+            if (!_isVideoPresenterSpecialMode) return;
+            try
+            {
+                double newScale = Math.Max(0.1, Math.Min(10.0, _boothPreviewScale * scaleFactor));
+                if (Math.Abs(newScale - _boothPreviewScale) < 0.0001) return;
+
+                double containerW = VideoPresenterSpecialModeContainer?.ActualWidth ?? 0;
+                double containerH = VideoPresenterSpecialModeContainer?.ActualHeight ?? 0;
+                var origin = new System.Windows.Point(containerW / 2.0, containerH / 2.0);
+
+                double ratio = newScale / _boothPreviewScale;
+                _boothPreviewTranslateX = origin.X - (origin.X - _boothPreviewTranslateX) * ratio;
+                _boothPreviewTranslateY = origin.Y - (origin.Y - _boothPreviewTranslateY) * ratio;
+                _boothPreviewScale = newScale;
+                ApplyBoothPreviewTransform();
+
+                // 与滚轮缩放一致：同步缩放画布墨迹
+                ScaleInkCanvasStrokes(origin, ratio);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"VideoBoothZoom 异常: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>重置展台缩放/平移到默认状态。供 IVideoBoothService 调用，须在 UI 线程。</summary>
+        public void VideoBoothResetZoom()
+        {
+            if (!_isVideoPresenterSpecialMode) return;
+            _boothPreviewScale = 1.0;
+            _boothPreviewTranslateX = 0;
+            _boothPreviewTranslateY = 0;
+            ApplyBoothPreviewTransform();
+        }
+
+        #endregion
     }
 }
