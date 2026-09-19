@@ -34,9 +34,7 @@ namespace Ink_Canvas.Windows
             InitializeComponent();
             if (!SettingsManager.Settings.Timer.IsOpenTransparency)
             {
-                MainBorder.Background = new SolidColorBrush(
-                    Color.FromArgb(255, 249, 249, 249)
-                );
+                MainBorder.Background = (Brush)FindResource("NewTimerWindowBackground");
             }
             _getRemainingTime = remainingTime;
             _shouldHide = shouldHide;
@@ -165,9 +163,7 @@ namespace Ink_Canvas.Windows
         {
             if(SettingsManager.Settings.Timer.IsOpenTransparency)
             {
-                MainBorder.Background = new SolidColorBrush(
-                    Color.FromArgb(255, 249, 249, 249)//完全不透明
-                    );
+                MainBorder.Background = (Brush)FindResource("NewTimerWindowBackground");
                 SettingsManager.Settings.Timer.IsOpenTransparency = false;
                 SettingsManager.SaveSettingsToFile();
             }
