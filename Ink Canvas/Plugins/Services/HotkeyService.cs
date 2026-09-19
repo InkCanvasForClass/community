@@ -1,4 +1,4 @@
-using Ink_Canvas.Helpers;
+﻿using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +26,7 @@ namespace Ink_Canvas.Plugins
             {
                 var modKeys = (ModifierKeys)modifiers;
                 var wpfKey = KeyInterop.KeyFromVirtualKey((int)key);
-                var result = _manager.RegisterHotkey(id, wpfKey, modKeys, callback);
+                var result = _manager.RegisterPluginHotkey(id, wpfKey, modKeys, callback);
                 if (result)
                 {
                     _pluginHotkeys[id] = (modifiers, key, callback);

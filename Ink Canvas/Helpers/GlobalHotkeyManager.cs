@@ -1,4 +1,4 @@
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using NHotkey.Wpf;
 using System;
 using System.Collections.Generic;
@@ -18,6 +18,8 @@ namespace Ink_Canvas.Helpers
     {
         #region Private Fields
         private readonly Dictionary<string, HotkeyInfo> _registeredHotkeys;
+        // 插件注册的热键名集合：注册时跳过上下文门控，上下文刷新（模式/屏幕切换）时不会被批量注销
+        private readonly HashSet<string> _pluginHotkeyIds = new HashSet<string>(StringComparer.Ordinal);
         private readonly MainWindow _mainWindow;
         private bool _isDisposed;
         private bool _hotkeysShouldBeRegistered = true; // 启动时注册热键
@@ -129,6 +131,68 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
+        /// 注册插件热键（经 IHotkeyService 进来）。与内置热键的差异：
+        /// 1. 不做「鼠标模式/多屏焦点」上下文门控——插件热键多对应硬件按钮等常驻场景，
+        ///    若启动初始化时恰处鼠标模式，按旧逻辑会全部注册失败；
+        /// 2. 登记进 _pluginHotkeyIds，上下文刷新（UnregisterAllHotkeys() 默认路径）不会将其清除。
+        /// 显式停用（DisableHotkeyRegistration）与 Dispose 仍会一并清除。
+        /// </summary>
+        public bool RegisterPluginHotkey(string hotkeyName, Key key, ModifierKeys modifiers, Action action)
+        {
+            try
+            {
+                if (_isDisposed || string.IsNullOrEmpty(hotkeyName) || action == null)
+                    return false;
+
+                // 同名热键已存在时先移除，再注册
+                if (_registeredHotkeys.ContainsKey(hotkeyName))
+                {
+                    try
+                    {
+                        HotkeyManager.Current.Remove(hotkeyName);
+                    }
+                    catch
+                    {
+                    }
+
+                    _registeredHotkeys.Remove(hotkeyName);
+                    _pluginHotkeyIds.Remove(hotkeyName);
+                }
+
+                HotkeyManager.Current.AddOrReplace(hotkeyName, key, modifiers, (sender, e) =>
+                {
+                    try
+                    {
+                        // 确保在主线程中执行
+                        _mainWindow.Dispatcher.Invoke(() =>
+                        {
+                            action?.Invoke();
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"执行快捷键 {hotkeyName} 时出错: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                });
+
+                _registeredHotkeys[hotkeyName] = new HotkeyInfo
+                {
+                    Name = hotkeyName,
+                    Key = key,
+                    Modifiers = modifiers,
+                    Action = action
+                };
+                _pluginHotkeyIds.Add(hotkeyName);
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// 注销指定快捷键
         /// </summary>
         /// <param name="hotkeyName">快捷键名称</param>
@@ -142,6 +206,7 @@ namespace Ink_Canvas.Helpers
 
                 HotkeyManager.Current.Remove(hotkeyName);
                 _registeredHotkeys.Remove(hotkeyName);
+                _pluginHotkeyIds.Remove(hotkeyName);
                 // 成功注销全局快捷键
                 return true;
             }
@@ -157,12 +222,30 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public void UnregisterAllHotkeys()
         {
+            // 默认仅注销内置快捷键：上下文刷新（模式/屏幕切换）时保留插件热键，
+            // 否则插件热键会被静默清除且无人负责恢复
+            UnregisterAllHotkeys(false);
+        }
+
+        /// <summary>
+        /// 注销快捷键。includePluginHotkeys=false 时仅注销内置快捷键（上下文刷新路径）；
+        /// true 时连同插件热键一并注销（显式停用 DisableHotkeyRegistration / Dispose 路径）。
+        /// </summary>
+        public void UnregisterAllHotkeys(bool includePluginHotkeys)
+        {
             try
             {
                 if (_isDisposed)
                     return;
 
+                var namesToRemove = new List<string>();
                 foreach (var hotkeyName in _registeredHotkeys.Keys)
+                {
+                    if (includePluginHotkeys || !_pluginHotkeyIds.Contains(hotkeyName))
+                        namesToRemove.Add(hotkeyName);
+                }
+
+                foreach (var hotkeyName in namesToRemove)
                 {
                     try
                     {
@@ -172,10 +255,10 @@ namespace Ink_Canvas.Helpers
                     {
                         LogHelper.WriteLogToFile($"注销快捷键 {hotkeyName} 时出错: {ex.Message}", LogHelper.LogType.Warning);
                     }
-                }
 
-                _registeredHotkeys.Clear();
-                // 已注销所有全局快捷键，集合已清空
+                    _registeredHotkeys.Remove(hotkeyName);
+                    _pluginHotkeyIds.Remove(hotkeyName);
+                }
             }
             catch (Exception ex)
             {
@@ -427,7 +510,7 @@ namespace Ink_Canvas.Helpers
                     }
 
                     // 注销所有快捷键
-                    UnregisterAllHotkeys();
+                    UnregisterAllHotkeys(true);
                 }
                 else
                 {
@@ -1378,7 +1461,7 @@ namespace Ink_Canvas.Helpers
             if (!_isDisposed)
             {
                 // 注销所有快捷键
-                UnregisterAllHotkeys();
+                UnregisterAllHotkeys(true);
 
                 // 停止定时器
                 if (_mousePositionTimer != null)
