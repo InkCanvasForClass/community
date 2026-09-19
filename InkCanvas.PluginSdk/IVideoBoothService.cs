@@ -14,8 +14,20 @@
         /// <summary>当前是否处于视频展台特殊模式（全屏预览激活）。</summary>
         bool IsActive { get; }
 
+        /// <summary>
+        /// 当前是否处于照片预览页（展台特殊模式下正在查看某张已拍照片，
+        /// 而非摄像头直播画面）。拍照按钮在照片预览页会被宿主置灰，
+        /// 硬件拍照键可据此给出「返回摄像头画面」的引导提示。
+        /// </summary>
+        bool IsPhotoPreviewActive { get; }
+
         /// <summary>当前预览缩放倍率（未激活时恒为 1.0）。</summary>
         double ZoomScale { get; }
+
+        /// <summary>
+        /// 从照片预览页返回直播（摄像头）画面。未处于照片预览页时为空操作。
+        /// </summary>
+        void SwitchToLiveView();
 
         /// <summary>
         /// 开关视频展台：未激活时进入白板并打开展台；已激活时完全退出

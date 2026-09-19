@@ -31,6 +31,27 @@ namespace Ink_Canvas.Plugins
             }
         }
 
+        public bool IsPhotoPreviewActive
+        {
+            get
+            {
+                try
+                {
+                    return _mainWindow != null && Invoke(() => _mainWindow.IsVideoBoothPhotoPreviewActive);
+                }
+                catch (Exception ex)
+                {
+                    Helpers.LogHelper.WriteLogToFile($"VideoBoothService.IsPhotoPreviewActive 异常: {ex.Message}", Helpers.LogHelper.LogType.Error);
+                    return false;
+                }
+            }
+        }
+
+        public void SwitchToLiveView()
+        {
+            SafeInvoke(() => _mainWindow.VideoBoothSwitchToLiveView(), nameof(SwitchToLiveView));
+        }
+
         public double ZoomScale
         {
             get

@@ -271,7 +271,7 @@ namespace Ink_Canvas
                 // 复用 _pluginEventService 实例：App_Exit 广播 AppExiting 时，插件经 DI 拿到的就是同一实例
                 (typeof(Plugins.IEventService),           _pluginEventService),
                 (typeof(Plugins.ISettingsService),        new Plugins.SettingsService()),
-                (typeof(Plugins.IHotkeyService),          new Plugins.HotkeyService(mainWindow.GlobalHotkeyManagerInstance)),
+                (typeof(Plugins.IHotkeyService),          new Plugins.HotkeyService(mainWindow)),
                 (typeof(Plugins.INotificationService),    new Plugins.NotificationService(mainWindow)),
                 (typeof(Plugins.IFileAssociationService),      new Plugins.FileAssociationService()),
                 (typeof(Plugins.IWindowOverviewService),        new Plugins.WindowOverviewService(mainWindow.WindowOverviewModel)),

@@ -3543,6 +3543,10 @@ namespace Ink_Canvas
                     UpdateBoothPageInfoDisplay();
                     // 刷新页码列表：第 0 项（直播页文字）+ 第 1..N 项（各照片缩略图）
                     RefreshBoothPageListView();
+                    // 拍照后自动展开右侧页码面板并滚动到最新照片：
+                    // 无论通过展台菜单拍照按钮还是硬件按键热键（最后都走 BtnCapturePhoto_Click），
+                    // 用户都能立即看到新照片缩略图；面板已展开时该方法直接返回。
+                    ShowPageListRightPanel(scrollToLastPhoto: true);
                 }
                 catch (Exception ex)
                 {
@@ -3998,30 +4002,103 @@ namespace Ink_Canvas
         /// </summary>
         public bool IsVideoBoothActive => _isVideoPresenterSpecialMode;
 
+        /// <summary>
+        /// 当前是否处于展台照片预览页（特殊模式下正在查看已拍照片，而非直播画面）。
+        /// 供 IVideoBoothService 读取。
+        /// </summary>
+        public bool IsVideoBoothPhotoPreviewActive => _isVideoPresenterSpecialMode && _boothCurrentPhotoIndex >= 0;
+
+        /// <summary>
+        /// 从照片预览页返回直播（摄像头）画面。未处于照片预览页时为空操作。
+        /// 供 IVideoBoothService 调用，须在 UI 线程。
+        /// </summary>
+        public void VideoBoothSwitchToLiveView()
+        {
+            if (!_isVideoPresenterSpecialMode || _boothCurrentPhotoIndex < 0) return;
+            SwitchBoothToLivePage();
+        }
+
         /// <summary>当前展台预览缩放倍率（未激活时为 1.0）。供 IVideoBoothService 读取。</summary>
         public double VideoBoothZoomScale => _isVideoPresenterSpecialMode ? _boothPreviewScale : 1.0;
 
+        /// <summary>记录 P 打开展台前是否已处于白板模式：退出展台时据此决定是否连白板一起退出（从哪里来回哪去）。</summary>
+        private bool _boothToggleCameFromWhiteboard = true;
+
         /// <summary>
-        /// 开关视频展台：未激活时进入白板并打开展台；已激活时完全退出
-        /// （等同展台菜单「关闭」按钮）。供 IVideoBoothService 调用，须在 UI 线程。
+        /// 开关视频展台：未激活时进入白板并打开展台（不弹菜单，直接进全屏预览）；
+        /// 已激活时完全退出（等同展台菜单「关闭」按钮），
+        /// 且「从哪里来回哪去」——若进入展台前不在白板，退出展台后连白板一起退出回到桌面。
+        /// 供 IVideoBoothService 调用，须在 UI 线程。
         /// </summary>
         public void ToggleVideoBooth()
         {
             if (_isVideoPresenterSpecialMode)
             {
+                var cameFromWhiteboard = _boothToggleCameFromWhiteboard;
+                _boothToggleCameFromWhiteboard = true;
+
                 BtnExitVideoPresenter_Click(null, null);
+
+                // 从哪里来回哪去：进入展台前不在白板 → 退出展台后也退出白板
+                if (!cameFromWhiteboard && currentMode == 1)
+                {
+                    ImageBlackboard_MouseUp(null, null);
+                }
                 return;
             }
 
-            // 未在白板模式时先进白板（ImageBlackboard_MouseUp 是切换语义，已在白板则不能再次调用）
+            // 打开展台前记录当前是否已在白板
+            _boothToggleCameFromWhiteboard = currentMode == 1;
             if (currentMode != 1)
             {
+                // ImageBlackboard_MouseUp 是切换语义：只在非白板时调用一次进入白板
                 ImageBlackboard_MouseUp(null, null);
             }
 
-            // 与白板工具栏「视频展台」按钮一致：直接走内置展台，
-            // 不检查 LaunchSeewoVideoShowcaseForWhiteboardBooth（插件入口的目标就是内置展台）
-            ToggleVideoPresenterSidebar();
+            // 与白板工具栏「视频展台」按钮不同：插件入口直接进内置展台全屏预览，
+            // 不弹 BoothPopup 菜单，也不检查 LaunchSeewoVideoShowcaseForWhiteboardBooth
+            EnterVideoBoothDirect();
+        }
+
+        /// <summary>
+        /// 直接进入视频展台特殊模式并启动预览，不弹出展台菜单。
+        /// 与 ToggleVideoPresenterSidebar 的「首次打开」分支一致，仅省略 ShowPopup。
+        /// 进入前若存在残留状态（_isVideoPresenterSpecialMode 但预览已停，或 BoothPopup 还开着），
+        /// 先硬清理再进入，保证「手动退出后再次按 P」也能重新启动预览。
+        /// </summary>
+        private void EnterVideoBoothDirect()
+        {
+            if (BoothPopup == null) return;
+
+            // 清理残留：菜单可能处于淡出动画中（IsOpen 仍为 true）；模式标志可能残留导致
+            // EnterVideoPresenterSpecialMode 提前 return、预览不再启动（表现为再次按 P 后按键失效）
+            if (_isVideoPresenterSpecialMode)
+            {
+                ExitVideoPresenterSpecialMode();
+                CloseVideoPresenterSidebarAndReleaseResources();
+            }
+            else if (BoothPopup.IsOpen)
+            {
+                AnimationsHelper.HidePopupWithSlideAndFade(BoothPopup);
+            }
+
+            SyncPhotoCorrectionAccelerationComboBox();
+            SyncBoothBrightnessSlider();
+            SyncBoothMirrorToggles();
+
+            EnsureCameraService();
+            if (BtnCapturePhoto != null) BtnCapturePhoto.IsEnabled = false;
+
+            EnterVideoPresenterSpecialMode();
+
+            RefreshVideoPresenterDeviceList();
+            // ComboBox 会在 StartVideoPresenterPreview 完成后被填充
+            RefreshBoothResolutionComboBox();
+
+            if (ToggleBtnPhotoCorrection != null)
+            {
+                ToggleBtnPhotoCorrection.IsChecked = Settings?.Automation?.IsEnablePhotoCorrection ?? false;
+            }
         }
 
         /// <summary>展台拍照（复用菜单拍照按钮完整管线）。供 IVideoBoothService 调用，须在 UI 线程。</summary>

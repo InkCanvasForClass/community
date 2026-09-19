@@ -186,8 +186,19 @@ namespace Ink_Canvas.Helpers
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                // 诊断日志：之前静默吞掉异常，插件热键全部失败时无任何线索。
+                var inner = ex;
+                var chain = new StringBuilder();
+                while (inner != null)
+                {
+                    chain.Append($"[{inner.GetType().Name}] {inner.Message} ");
+                    inner = inner.InnerException;
+                }
+                LogHelper.WriteLogToFile(
+                    $"注册插件热键 {hotkeyName} ({modifiers}+{key}) 失败: {chain}",
+                    LogHelper.LogType.Error);
                 return false;
             }
         }
@@ -492,8 +503,8 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 禁用快捷键注册功能
-        /// 调用此方法后，快捷键将被注销
+        /// 禁用快捷键注册功能（显式停用：设置页开关、托盘开关、IHotkeyService.DisableRegistration）。
+        /// 调用此方法后，包括插件热键在内的所有快捷键将被注销。
         /// </summary>
         public void DisableHotkeyRegistration()
         {
@@ -509,7 +520,7 @@ namespace Ink_Canvas.Helpers
                         _mousePositionTimer.Stop();
                     }
 
-                    // 注销所有快捷键
+                    // 注销所有快捷键（含插件热键——这是用户/插件的显式停用）
                     UnregisterAllHotkeys(true);
                 }
                 else
@@ -519,6 +530,38 @@ namespace Ink_Canvas.Helpers
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"禁用快捷键注册功能时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 上下文驱动的停用（鼠标模式等模式切换路径专用）：仅注销内置快捷键。
+        /// 插件热键（经 RegisterPluginHotkey 注册）按设计不受「鼠标模式/多屏焦点」上下文门控约束，
+        /// 若像显式停用一样连它们一起清除，插件不会自动重新注册，
+        /// 模式一旦切到鼠标模式（进白板/退出展台都会触发）硬件按钮热键就永久失效。
+        /// </summary>
+        private void DisableHotkeyRegistrationForContext()
+        {
+            try
+            {
+                if (!_hotkeysShouldBeRegistered)
+                {
+                    return;
+                }
+
+                _hotkeysShouldBeRegistered = false;
+
+                // 停止鼠标位置监控定时器
+                if (_mousePositionTimer != null && _mousePositionTimer.IsEnabled)
+                {
+                    _mousePositionTimer.Stop();
+                }
+
+                // 仅注销内置快捷键，保留插件热键
+                UnregisterAllHotkeys(false);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"上下文停用快捷键时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -546,8 +589,10 @@ namespace Ink_Canvas.Helpers
                     }
                     else
                     {
-                        // 鼠标模式下禁用快捷键，让键盘操作放行
-                        DisableHotkeyRegistration();
+                        // 鼠标模式下禁用内置快捷键，让键盘操作放行。
+                        // 插件热键（硬件按钮等常驻场景）不参与上下文门控，必须保留注册，
+                        // 否则进白板/退出展台引发的一次模式切换就会让它们永久失效。
+                        DisableHotkeyRegistrationForContext();
                     }
                 }
                 else
