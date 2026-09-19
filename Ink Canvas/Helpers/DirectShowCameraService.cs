@@ -220,6 +220,7 @@ namespace Ink_Canvas.Helpers
                             }
                             state.Supported = false;
                             state.NormalizedValue = 0;
+                            state.SupportsAuto = false;
 
                             if (spec.isVideoProcAmp)
                             {
@@ -236,6 +237,7 @@ namespace Ink_Canvas.Helpers
                                 state.HwMin = min;
                                 state.HwMax = max;
                                 state.HwDefault = def;
+                                state.SupportsAuto = (flags & VideoProcAmpFlags.Auto) != 0;
                                 state.Supported = true;
                                 supportedCount++;
                             }
@@ -254,6 +256,7 @@ namespace Ink_Canvas.Helpers
                                 state.HwMin = min;
                                 state.HwMax = max;
                                 state.HwDefault = def;
+                                state.SupportsAuto = (flags & CameraControlFlags.Auto) != 0;
                                 state.Supported = true;
                                 supportedCount++;
                             }
@@ -315,8 +318,10 @@ namespace Ink_Canvas.Helpers
             if (!_cameraPropStates.TryGetValue(prop, out var state) || !state.Supported) return false;
             try
             {
-                // 归一化 -100..100 映射到硬件 [min,max]，0=def：
+                // 归一化 -100..100 映射到硬件 [min,max]：
+                //   0 = 默认（Auto）：写 Auto 标志让摄像头回到自动控制（驱动不支持 Auto 时退化为 Manual + 默认值）；
                 //   value>0: def → max 插值；value<0: min → def 插值
+                bool useAuto = state.NormalizedValue == 0 && state.SupportsAuto;
                 int hwValue;
                 if (state.NormalizedValue == 0)
                 {
@@ -352,13 +357,15 @@ namespace Ink_Canvas.Helpers
                 if (isVideoProcAmp)
                 {
                     if (_propVideoProcAmp == null) return false;
-                    // Manual flag：写入同时关闭 Auto（色温/焦距/快门等需要切到手动模式）
-                    hr = _propVideoProcAmp.Set((VideoProcAmpProperty)nativeProp, hwValue, VideoProcAmpFlags.Manual);
+                    // 0（默认）写 Auto 让摄像头回到自动控制；非 0 写 Manual（色温/焦距/快门等需切到手动模式）
+                    var flags = useAuto ? VideoProcAmpFlags.Auto : VideoProcAmpFlags.Manual;
+                    hr = _propVideoProcAmp.Set((VideoProcAmpProperty)nativeProp, hwValue, flags);
                 }
                 else
                 {
                     if (_propCameraControl == null) return false;
-                    hr = _propCameraControl.Set((CameraControlProperty)nativeProp, hwValue, CameraControlFlags.Manual);
+                    var flags = useAuto ? CameraControlFlags.Auto : CameraControlFlags.Manual;
+                    hr = _propCameraControl.Set((CameraControlProperty)nativeProp, hwValue, flags);
                 }
                 if (hr != 0)
                 {
