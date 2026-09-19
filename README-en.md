@@ -70,7 +70,7 @@ If it still doesn't run, please [install `Microsoft Office`](https://www.coolhub
 
 ## ✏️ Contribution Guidelines
 
-**Please note that when contributing code, you _must_ submit all changes to the _net6_ branch to ensure that the net6 version is always ahead of the main branch.**
+**Please note that when contributing code, you _must_ submit all changes to the _net10_ branch to ensure that the net10 version is always ahead of the main branch.**
 
 ## Todo LIST
 
