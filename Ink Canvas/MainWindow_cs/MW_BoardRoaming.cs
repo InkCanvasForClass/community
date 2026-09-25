@@ -25,9 +25,18 @@ namespace Ink_Canvas
         private Rect _boardRoamingPreviewMovementBounds;
         private bool _isUpdatingBoardRoamingPopup;
         private bool _boardRoamingPopupEventsAttached;
+        private readonly HashSet<int> _boardRoamingContactIds = new HashSet<int>();
+        private int _boardRoamingPrimaryContactId = -1;
+        private bool _isBoardRoamingMultiTouchSuppressed;
 
         internal void ActivateBoardRoamingMode()
         {
+            if (IsBoardRoamingMode)
+            {
+                ExitBoardRoamingMode();
+                return;
+            }
+
             if (currentMode != 1) return;
             if (IsCurrentPageFrozen)
             {
@@ -36,6 +45,7 @@ namespace Ink_Canvas
             }
 
             HideEdgeExpandHint();
+            ResetBoardRoamingContactState();
             ResetTouchStates();
             CancelSingleFingerDragMode();
             drawingShapeMode = 0;
@@ -110,6 +120,91 @@ namespace Ink_Canvas
             inkCanvas.Cursor = IsBoardRoamingMode ? Cursors.Hand : Cursors.Arrow;
         }
 
+        private void ResetBoardRoamingContactState()
+        {
+            _boardRoamingContactIds.Clear();
+            _boardRoamingPrimaryContactId = -1;
+            _isBoardRoamingMultiTouchSuppressed = false;
+        }
+
+        /// <summary>
+        /// 记录漫游触点。漫游只允许第一根手指拖动；第二根及以后触点会抑制本次多指操作。
+        /// </summary>
+        private void BeginBoardRoamingContact(int contactId, Point point)
+        {
+            if (!IsBoardRoamingMode || !_boardRoamingContactIds.Add(contactId)) return;
+
+            if (_boardRoamingContactIds.Count == 1 && !_isBoardRoamingMultiTouchSuppressed)
+            {
+                _boardRoamingPrimaryContactId = contactId;
+                BeginBoardRoaming(point);
+                return;
+            }
+
+            _isBoardRoamingMultiTouchSuppressed = true;
+            _boardRoamingPrimaryContactId = -1;
+            if (_isBoardRoamingPointerDown)
+                EndBoardRoaming();
+        }
+
+        private void MoveBoardRoamingContact(int contactId, Point point)
+        {
+            if (!IsBoardRoamingMode
+                || _isBoardRoamingMultiTouchSuppressed
+                || contactId != _boardRoamingPrimaryContactId)
+                return;
+
+            MoveBoardRoaming(point);
+        }
+
+        private void EndBoardRoamingContact(int contactId)
+        {
+            if (!_boardRoamingContactIds.Remove(contactId)) return;
+
+            if (_boardRoamingContactIds.Count == 0)
+            {
+                if (!_isBoardRoamingMultiTouchSuppressed)
+                    EndBoardRoaming();
+                ResetBoardRoamingContactState();
+            }
+            else if (contactId == _boardRoamingPrimaryContactId)
+            {
+                // 多指操作期间不恢复剩余手指，避免抬起第二指后重新跳动。
+                _boardRoamingPrimaryContactId = -1;
+            }
+        }
+
+        /// <summary>
+        /// 退出漫游并返回批注模式。
+        /// </summary>
+        internal void ExitBoardRoamingMode()
+        {
+            if (!IsBoardRoamingMode)
+            {
+                if (BoardRoamingPopup != null)
+                    BoardRoamingPopup.IsOpen = false;
+                ResetBoardRoamingContactState();
+                return;
+            }
+
+            var hadActiveBoardRoamingInput = _boardRoamingContactIds.Count > 0 || _isBoardRoamingPointerDown;
+            EndBoardRoaming();
+            ResetBoardRoamingContactState();
+            if (hadActiveBoardRoamingInput)
+            {
+                inkCanvas.ReleaseStylusCapture();
+                inkCanvas.ReleaseAllTouchCaptures();
+                ViewboxFloatingBar.IsHitTestVisible = true;
+                BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+            }
+            if (BoardRoamingPopup != null)
+                BoardRoamingPopup.IsOpen = false;
+
+            // 复用现有批注入口，确保编辑模式、工具栏高亮和原生墨迹状态同步。
+            PenIcon_Click(null, null);
+            SetCursorBasedOnEditingMode(inkCanvas);
+        }
+
         private void CommitBoardRoamingHistory()
         {
             if (_boardRoamingStrokeHistory == null) return;
@@ -157,7 +252,7 @@ namespace Ink_Canvas
             BoardRoamingPopupContent.ViewportDragStarted += BeginBoardRoamingPopupDrag;
             BoardRoamingPopupContent.ViewportDragCompleted += EndBoardRoamingPopupDrag;
             if (BoardRoamingPopupContent.CloseButtonControl != null)
-                BoardRoamingPopupContent.CloseButtonControl.Click += (s, e) => BoardRoamingPopup.IsOpen = false;
+                BoardRoamingPopupContent.CloseButtonControl.Click += (s, e) => ExitBoardRoamingMode();
             _boardRoamingPopupEventsAttached = true;
         }
 

@@ -2543,6 +2543,15 @@ namespace Ink_Canvas
                 return;
             }
 
+            if (IsBoardRoamingMode
+                && (_boardRoamingContactIds.Count > 0
+                    || _isBoardRoamingMultiTouchSuppressed
+                    || (e.Manipulators?.Count() ?? 0) != 1))
+            {
+                e.Handled = true;
+                return;
+            }
+
             // 插件画布手势（如 PDF 阅读器双指缩放/平移）：双指一律优先转发。
             // 插件返回 true 表示已接管，宿主跳过默认的墨迹/画布变换。
             if (_pluginCanvasGestureHandler != null && (e.Manipulators?.Count() ?? 0) >= 2)

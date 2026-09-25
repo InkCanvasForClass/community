@@ -2405,7 +2405,7 @@ namespace Ink_Canvas
                 inkCanvas.CaptureStylus();
                 ViewboxFloatingBar.IsHitTestVisible = false;
                 BlackboardUIGridForInkReplay.IsHitTestVisible = false;
-                BeginBoardRoaming(e.GetPosition(inkCanvas));
+                BeginBoardRoamingContact(e.StylusDevice.Id, e.GetPosition(inkCanvas));
                 e.Handled = true;
                 return;
             }
@@ -2423,21 +2423,28 @@ namespace Ink_Canvas
 
         private void inkCanvas_StylusMove(object sender, StylusEventArgs e)
         {
-            if (!_isBoardRoamingPointerDown) return;
+            if (!IsBoardRoamingMode || _boardRoamingContactIds.Count == 0) return;
 
-            MoveBoardRoaming(e.GetPosition(inkCanvas));
+            MoveBoardRoamingContact(e.StylusDevice.Id, e.GetPosition(inkCanvas));
             e.Handled = true;
         }
 
         // 手写笔抬起事件（用于橡皮擦自动切换）
         private void inkCanvas_StylusUp(object sender, StylusEventArgs e)
         {
-            if (_isBoardRoamingPointerDown)
+            if (_boardRoamingContactIds.Count > 0 || _isBoardRoamingPointerDown)
             {
-                EndBoardRoaming();
-                inkCanvas.ReleaseStylusCapture();
-                ViewboxFloatingBar.IsHitTestVisible = true;
-                BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+                if (_boardRoamingContactIds.Count > 0)
+                    EndBoardRoamingContact(e.StylusDevice.Id);
+                else
+                    EndBoardRoaming();
+
+                if (_boardRoamingContactIds.Count == 0)
+                {
+                    inkCanvas.ReleaseStylusCapture();
+                    ViewboxFloatingBar.IsHitTestVisible = true;
+                    BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+                }
                 e.Handled = true;
                 return;
             }
