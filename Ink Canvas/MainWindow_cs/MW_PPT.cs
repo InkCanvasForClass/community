@@ -901,11 +901,12 @@ namespace Ink_Canvas
                     if (!PInvoke.IsWindow(hWnd) || !PInvoke.IsWindowVisible(hWnd))
                         return true;
 
-                    var cls = new StringBuilder(256);
-                    if (PInvoke.GetClassName(hWnd, new Span<char>(cls.ToString().ToCharArray())) == 0)
+                    Span<char> classBuffer = stackalloc char[256];
+                    int classLength = PInvoke.GetClassName(hWnd, classBuffer);
+                    if (classLength == 0)
                         return true;
 
-                    if (!string.Equals(cls.ToString(), PowerPointSlideShowWindowClassName, StringComparison.OrdinalIgnoreCase))
+                    if (!string.Equals(classBuffer.Slice(0, classLength).ToString(), PowerPointSlideShowWindowClassName, StringComparison.OrdinalIgnoreCase))
                         return true;
 
                     try
@@ -1708,9 +1709,10 @@ namespace Ink_Canvas
                     if (!PInvoke.IsWindowVisible(hWnd)) return true;
                     if (PInvoke.IsIconic(hWnd)) return true;
 
-                    var sb = new StringBuilder(64);
-                    if (PInvoke.GetClassName(hWnd, new Span<char>(sb.ToString().ToCharArray())) == 0) return true;
-                    if (!string.Equals(sb.ToString(), PowerPointSlideShowWindowClassName, StringComparison.Ordinal)) return true;
+                    Span<char> classBuffer = stackalloc char[256];
+                    int classLength = PInvoke.GetClassName(hWnd, classBuffer);
+                    if (classLength == 0) return true;
+                    if (!string.Equals(classBuffer.Slice(0, classLength).ToString(), PowerPointSlideShowWindowClassName, StringComparison.Ordinal)) return true;
 
                     best = hWnd;
                     return false; // 停止枚举
