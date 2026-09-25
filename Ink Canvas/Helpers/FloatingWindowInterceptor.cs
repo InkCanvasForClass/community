@@ -1040,20 +1040,20 @@ namespace Ink_Canvas.Helpers
                 if (process == null) return null;
 
                 // 获取窗口标题
-                Span<char> titleBuffer = stackalloc char[256];
-                int titleLength = PInvoke.GetWindowText(hwnd, titleBuffer);
+                var titleBuilder = new StringBuilder(256);
+                PInvoke.GetWindowText(hwnd, new Span<char>(titleBuilder.ToString().ToCharArray()));
 
                 // 获取窗口类名
-                Span<char> classBuffer = stackalloc char[256];
-                int classLength = PInvoke.GetClassName(hwnd, classBuffer);
+                var classBuilder = new StringBuilder(256);
+                PInvoke.GetClassName(hwnd, new Span<char>(classBuilder.ToString().ToCharArray()));
 
                 return new WindowInfo
                 {
                     Handle = hWnd,
                     ProcessId = processId,
                     ProcessName = process.ProcessName,
-                    WindowTitle = titleBuffer.Slice(0, titleLength).ToString(),
-                    ClassName = classBuffer.Slice(0, classLength).ToString(),
+                    WindowTitle = titleBuilder.ToString(),
+                    ClassName = classBuilder.ToString(),
                     Process = process
                 };
             }
@@ -1074,9 +1074,9 @@ namespace Ink_Canvas.Helpers
                 // 检查类名
                 if (!string.IsNullOrEmpty(rule.ClassNamePattern))
                 {
-                    Span<char> classBuffer = stackalloc char[256];
-                    int classLength = PInvoke.GetClassName(hwnd, classBuffer);
-                    var classNameStr = classBuffer.Slice(0, classLength).ToString();
+                    var className = new StringBuilder(256);
+                    PInvoke.GetClassName(hwnd, new Span<char>(className.ToString().ToCharArray()));
+                    var classNameStr = className.ToString();
 
                     if (rule.ExactClassNameMatch)
                     {
@@ -1093,9 +1093,9 @@ namespace Ink_Canvas.Helpers
                 // 检查窗口标题
                 if (!string.IsNullOrEmpty(rule.WindowTitlePattern))
                 {
-                    Span<char> titleBuffer = stackalloc char[256];
-                    int titleLength = PInvoke.GetWindowText(hwnd, titleBuffer);
-                    var titleStr = titleBuffer.Slice(0, titleLength).ToString();
+                    var windowTitle = new StringBuilder(256);
+                    PInvoke.GetWindowText(hwnd, new Span<char>(windowTitle.ToString().ToCharArray()));
+                    var titleStr = windowTitle.ToString();
 
                     if (rule.ExactTitleMatch)
                     {
@@ -1120,11 +1120,9 @@ namespace Ink_Canvas.Helpers
                 // 检查窗口尺寸
                 if (rule.HasWindowSize)
                 {
-                    // DwmGetWindowAttribute 通过 Span<byte> 重载输出扩展边框，需回读该缓冲区
-                    Span<byte> rectBuffer = stackalloc byte[Marshal.SizeOf<RECT>()];
-                    if (PInvoke.DwmGetWindowAttribute(hwnd, DWMWINDOWATTRIBUTE.DWMWA_EXTENDED_FRAME_BOUNDS, rectBuffer) == 0)
+                    var rect = new RECT();
+                    if (PInvoke.DwmGetWindowAttribute(hwnd, DWMWINDOWATTRIBUTE.DWMWA_EXTENDED_FRAME_BOUNDS, new Span<byte>(new byte[Marshal.SizeOf(rect)])) == 0)
                     {
-                        var rect = MemoryMarshal.Read<RECT>(rectBuffer);
                         var width = rect.right - rect.left;
                         var height = rect.bottom - rect.top;
 
@@ -1203,9 +1201,9 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                Span<char> titleBuffer = stackalloc char[256];
-                int titleLength = PInvoke.GetWindowText(new HWND(hWnd), titleBuffer);
-                return titleBuffer.Slice(0, titleLength).ToString();
+                var titleBuilder = new StringBuilder(256);
+                PInvoke.GetWindowText(new HWND(hWnd), new Span<char>(titleBuilder.ToString().ToCharArray()));
+                return titleBuilder.ToString();
             }
             catch
             {
