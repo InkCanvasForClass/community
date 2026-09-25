@@ -1173,6 +1173,9 @@ namespace Ink_Canvas
             Settings.Automation.IsAutoKillIDT = false;
             Settings.Automation.IsAutoKillSeewoLauncher2DesktopAnnotation = false;
             Settings.Automation.IsSaveScreenshotsInDateFolders = false;
+            Settings.Automation.ScreenshotSaveFormat = 0;
+            Settings.Automation.ScreenshotJpegQuality = 90;
+            Settings.Automation.ScreenshotScaleMode = 0;
             Settings.Automation.IsAutoSaveStrokesAtScreenshot = true;
             Settings.Automation.IsAutoSaveScreenshotAtClear = true;
             Settings.Automation.IsAutoClearWhenExitingWritingMode = false;

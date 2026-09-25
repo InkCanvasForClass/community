@@ -161,10 +161,19 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
 
         public static void ApplyUIAccessTopMost(Window window)
         {
+            bool runtimePaused = false;
+
             try
             {
                 if (SettingsManager.Settings.Advanced.EnableUIAccessTopMost && SettingsManager.Settings.Advanced.IsAlwaysOnTop)
                 {
+                    // helper 失败后启动的普通用户实例只执行一次回退，不再重新申请 UIA。
+                    if (App.IsUIAccessFallbackLaunch)
+                    {
+                        FallbackToNormalTopMost(window, "UIA helper 已请求普通置顶回退");
+                        return;
+                    }
+
                     var identity = WindowsIdentity.GetCurrent();
                     var principal = new WindowsPrincipal(identity);
 
@@ -180,6 +189,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                                 return;
                             }
 
+                            runtimePaused = true;
                             OnStopKillProcessTimer?.Invoke();
 
                             if (App.watchdogProcess != null && !App.watchdogProcess.HasExited)
@@ -209,16 +219,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                             }
                             else
                             {
-                                LogHelper.WriteLogToFile("UIAccess | 启动失败，回退到普通管理员模式", LogHelper.LogType.Warning);
-                                App.IsUIAccessTopMostEnabled = false;
-                                App.IsAppExitByUser = false;
-                                App.StartWatchdogIfNeeded();
-                                OnStartKillProcessTimer?.Invoke();
+                                FallbackToNormalTopMost(window, "UIAccess 子进程在启动观察期内退出");
+                                RestoreAfterUIAccessFailure();
                             }
                         }
                         catch (Exception ex)
                         {
                             LogHelper.WriteLogToFile($"启用UIA置顶功能时出错: {ex.Message}", LogHelper.LogType.Error);
+                            FallbackToNormalTopMost(window, "启用 UIA 置顶时发生异常");
+                            if (runtimePaused)
+                            {
+                                RestoreAfterUIAccessFailure();
+                            }
                         }
                     }
                     else if (UIAccessHelper.HasUIAccess())
@@ -229,6 +241,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                     else
                     {
                         LogHelper.WriteLogToFile("UIA置顶功能需要管理员权限，正在申请管理员权限重启");
+                        runtimePaused = true;
                         OnStopKillProcessTimer?.Invoke();
 
                         if (App.watchdogProcess != null && !App.watchdogProcess.HasExited)
@@ -237,7 +250,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                             App.watchdogProcess = null;
                         }
 
-                        AppRestartHelper.SwitchToUIATopMostAndRestart();
+                        bool started = AppRestartHelper.TrySwitchToUIATopMostAndRestart();
+                        if (!started)
+                        {
+                            RestoreAfterUIAccessFailure();
+                        }
                     }
                 }
                 else
@@ -248,6 +265,66 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"应用UIA置顶功能时出错: {ex.Message}", LogHelper.LogType.Error);
+                FallbackToNormalTopMost(window, "应用 UIA 置顶时发生异常");
+                if (runtimePaused)
+                {
+                    RestoreAfterUIAccessFailure();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 关闭失败的 UIAccess 置顶方案并立即恢复普通置顶。
+        /// </summary>
+        public static void FallbackToNormalTopMost(Window window, string reason)
+        {
+            App.IsUIAccessTopMostEnabled = false;
+            App.IsAppExitByUser = false;
+
+            try
+            {
+                if (SettingsManager.Settings?.Advanced != null)
+                {
+                    bool wasEnabled = SettingsManager.Settings.Advanced.EnableUIAccessTopMost;
+                    SettingsManager.Settings.Advanced.EnableUIAccessTopMost = false;
+                    if (wasEnabled)
+                    {
+                        SettingsManager.SaveSettingsToFile();
+                    }
+                }
+
+                if (window != null)
+                {
+                    ApplyAlwaysOnTop(window);
+                }
+
+                string detail = string.IsNullOrWhiteSpace(reason) ? "UIA 启动失败" : reason;
+                LogHelper.WriteLogToFile($"UIAccess | {detail}，已回退到普通置顶", LogHelper.LogType.Warning);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"UIAccess | 回退到普通置顶失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private static void RestoreAfterUIAccessFailure()
+        {
+            try
+            {
+                App.StartWatchdogIfNeeded();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"UIAccess | 恢复看门狗失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+
+            try
+            {
+                OnStartKillProcessTimer?.Invoke();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"UIAccess | 恢复进程计时器失败: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
 

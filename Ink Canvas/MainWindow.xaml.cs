@@ -2502,7 +2502,7 @@ namespace Ink_Canvas
                 inkCanvas.CaptureStylus();
                 ViewboxFloatingBar.IsHitTestVisible = false;
                 BlackboardUIGridForInkReplay.IsHitTestVisible = false;
-                BeginBoardRoaming(e.GetPosition(inkCanvas));
+                BeginBoardRoamingContact(e.StylusDevice.Id, e.GetPosition(inkCanvas));
                 e.Handled = true;
                 return;
             }
@@ -2526,9 +2526,9 @@ namespace Ink_Canvas
                 e.Handled = true;
                 return;
             }
-            if (!_isBoardRoamingPointerDown) return;
+            if (!_isBoardRoamingPointerDown && !_isBoardRoamingTwoFingerGesture && _boardRoamingContacts.Count == 0) return;
 
-            MoveBoardRoaming(e.GetPosition(inkCanvas));
+            MoveBoardRoamingContact(e.StylusDevice.Id, e.GetPosition(inkCanvas));
             e.Handled = true;
         }
 
@@ -2536,12 +2536,15 @@ namespace Ink_Canvas
         private void inkCanvas_StylusUp(object sender, StylusEventArgs e)
         {
             EndSecAgentStrokeErase();
-            if (_isBoardRoamingPointerDown)
+            if (_isBoardRoamingPointerDown || _isBoardRoamingTwoFingerGesture || _boardRoamingContacts.Count > 0)
             {
-                EndBoardRoaming();
-                inkCanvas.ReleaseStylusCapture();
-                ViewboxFloatingBar.IsHitTestVisible = true;
-                BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+                EndBoardRoamingContact(e.StylusDevice.Id);
+                if (_boardRoamingContacts.Count == 0)
+                {
+                    inkCanvas.ReleaseStylusCapture();
+                    ViewboxFloatingBar.IsHitTestVisible = true;
+                    BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+                }
                 e.Handled = true;
                 return;
             }
@@ -2973,11 +2976,10 @@ namespace Ink_Canvas
         {
             try
             {
-                _globalHotkeyManager = new GlobalHotkeyManager(this);
-                // 启动时加载快捷键，但默认为鼠标模式，禁用快捷键以放行键盘操作
-                _globalHotkeyManager.EnableHotkeyRegistration();
-                // 启动时默认为鼠标模式，禁用快捷键
-                _globalHotkeyManager.UpdateHotkeyStateForToolMode(true);
+                // 幂等：插件服务（HotkeyService）可能在延迟任务之前按需创建过管理器，
+                // 这里只补齐 PPT 翻页钩子，避免重复创建导致热键重复注册。
+                _globalHotkeyManager = EnsureGlobalHotkeyManagerCreated();
+                if (_globalHotkeyManager == null) return;
 
                 _pptPageKeyHook = new PPTPageKeyHook(
                     Dispatcher,
@@ -2991,6 +2993,34 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"初始化全局快捷键管理器时出错: {ex.Message}", LogHelper.LogType.Error);
             }
+        }
+
+        /// <summary>
+        /// 确保全局快捷键管理器已创建（幂等）。供插件服务（IHotkeyService）在
+        /// 依赖注入注册后按需触发：RegisterPluginServices 在 MainWindow 构造后立即执行，
+        /// 早于 RunDeferredStartupPhaseBAsync 里的 InitializeGlobalHotkeyManager，
+        /// 若不按需创建，HotkeyService 拿到的 manager 就是 null，插件热键全部静默失败。
+        /// </summary>
+        internal GlobalHotkeyManager EnsureGlobalHotkeyManagerCreated()
+        {
+            try
+            {
+                if (_globalHotkeyManager == null)
+                {
+                    _globalHotkeyManager = new GlobalHotkeyManager(this);
+                    // 启动时加载快捷键，但默认为鼠标模式，禁用快捷键以放行键盘操作
+                    _globalHotkeyManager.EnableHotkeyRegistration();
+                    // 启动时默认为鼠标模式，禁用快捷键
+                    _globalHotkeyManager.UpdateHotkeyStateForToolMode(true);
+
+                    LogHelper.WriteLogToFile("全局快捷键管理器已按需初始化（插件服务触发）", LogHelper.LogType.Event);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"按需初始化全局快捷键管理器时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+            return _globalHotkeyManager;
         }
 
         /// <summary>

@@ -10,8 +10,9 @@ namespace Ink_Canvas
 {
     /// <summary>
     /// 处理 icc: URL 协议命令
-    /// 支持：收纳/展开/切换、彻底隐藏、点名/计时器/白板、工具状态切换与查询、配置方案列表与切换。
+    /// 支持：收纳/展开/切换、彻底隐藏、点名/计时器/白板/展台/批注、工具状态切换与查询、配置方案列表与切换。
     /// 支持：重启/退出、清空墨迹、撤销/重做、翻页/新建/删除白板页、截图、选择工具。
+    /// 展台：icc://booth 打开白板并弹出展台菜单；icc://videopresenter 直接进全屏预览（不弹菜单）。
     /// 配置方案：icc://config-profile/list 输出列表到 %TEMP%\InkCanvasConfigProfileList.json；
     ///          icc://config-profile/switch?name=方案名 切换方案，结果写入 %TEMP%\InkCanvasConfigProfileSwitchResult.txt。
     /// </summary>
@@ -118,6 +119,29 @@ namespace Ink_Canvas
                     case "whiteboard":
                     case "board":
                         ImageBlackboard_MouseUp(null, null);
+                        return;
+                    case "booth":
+                        // 与浮动栏「视频展台」按钮一致：希沃模式下直接启动希沃视频展台，
+                        // 否则先打开白板，再触发内置展台
+                        if (Settings.Canvas.LaunchSeewoVideoShowcaseForWhiteboardBooth == true)
+                        {
+                            SoftwareLauncher.LaunchEasiCamera("希沃视频展台");
+                        }
+                        else
+                        {
+                            ImageBlackboard_MouseUp(null, null);
+                            ToggleVideoPresenterSidebarPublic();
+                        }
+                        return;
+                    case "videopresenter":
+                        // 与 booth 的区别：走硬件按钮热键同款入口（插件 IVideoBoothService.Toggle）——
+                        // 直接进内置展台全屏预览，不弹出展台菜单，也不受「希沃视频展台」设置影响
+                        ToggleVideoBooth();
+                        return;
+                    case "annotate":
+                    case "annotation":
+                        // 批注：切换到画笔模式
+                        PenIcon_Click(null, null);
                         return;
                     case "restart":
                         ShowNotification(Properties.MainWindowStrings.Main_Uri_Restart);

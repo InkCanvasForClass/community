@@ -235,12 +235,45 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
+        /// 窗口样式匹配方式
+        /// </summary>
+        public enum WindowStyleMatchType
+        {
+            Exact,
+            Subset
+        }
+
+        /// <summary>
+        /// 窗口尺寸匹配方式
+        /// </summary>
+        public enum WindowSizeMatchType
+        {
+            Exact,
+            Scale,
+            DpiScale,
+            FullScreen,
+            FullHeight,
+            FullWidth
+        }
+
+        /// <summary>
+        /// 可复用的窗口尺寸匹配项
+        /// </summary>
+        public class WindowSizeMatch
+        {
+            public WindowSizeMatchType MatchType { get; set; } = WindowSizeMatchType.Exact;
+            public int Width { get; set; }
+            public int Height { get; set; }
+        }
+
+        /// <summary>
         /// 拦截规则
         /// </summary>
         public class InterceptRule
         {
             public InterceptType Type { get; set; }
             public string ProcessName { get; set; }
+            public List<string> ProcessNameAliases { get; set; } = new List<string>();
             public string WindowTitlePattern { get; set; }
             public string ClassNamePattern { get; set; }
             public bool IsEnabled { get; set; }
@@ -252,15 +285,18 @@ namespace Ink_Canvas.Helpers
             // 新增的精确匹配字段
             public bool HasWindowStyle { get; set; }
             public uint WindowStyle { get; set; }
+            public WindowStyleMatchType StyleMatchType { get; set; } = WindowStyleMatchType.Exact;
             public bool HasWindowSize { get; set; }
             public int WindowWidth { get; set; }
             public int WindowHeight { get; set; }
+            public List<WindowSizeMatch> WindowSizeMatches { get; set; } = new List<WindowSizeMatch>();
             public bool ExactTitleMatch { get; set; } = false;
             public bool ExactClassNameMatch { get; set; } = false;
 
             // 运行时状态字段
             public bool foundHwnd { get; set; } = false;
             public IntPtr outHwnd { get; set; } = IntPtr.Zero;
+            public HashSet<IntPtr> FoundWindows { get; } = new HashSet<IntPtr>();
         }
 
         #endregion
@@ -269,6 +305,7 @@ namespace Ink_Canvas.Helpers
 
         private readonly Dictionary<InterceptType, InterceptRule> _interceptRules;
         private readonly Dictionary<IntPtr, InterceptType> _interceptedWindows;
+        private readonly object _scanLock = new object();
         private readonly Timer _scanTimer;
         private readonly Dispatcher _dispatcher;
         private bool _isRunning;
@@ -341,10 +378,14 @@ namespace Ink_Canvas.Helpers
                 RequiresAdmin = false,
                 Description = "希沃白板5 桌面悬浮窗",
                 HasWindowStyle = true,
-                WindowStyle = 369623040,
-                HasWindowSize = true,
-                WindowWidth = 550,
-                WindowHeight = 200,
+                // WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_SYSMENU
+                WindowStyle = 0x06080000,
+                StyleMatchType = WindowStyleMatchType.Subset,
+                WindowSizeMatches = new List<WindowSizeMatch>
+                {
+                    new WindowSizeMatch { MatchType = WindowSizeMatchType.FullScreen },
+                    new WindowSizeMatch { MatchType = WindowSizeMatchType.Scale, Width = 550, Height = 200 }
+                },
                 ExactTitleMatch = false,
                 ExactClassNameMatch = false
             };
@@ -360,10 +401,14 @@ namespace Ink_Canvas.Helpers
                 RequiresAdmin = false,
                 Description = "希沃白板5C 桌面悬浮窗",
                 HasWindowStyle = true,
-                WindowStyle = 369623040,
-                HasWindowSize = true,
-                WindowWidth = 550,
-                WindowHeight = 200,
+                // WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_SYSMENU
+                WindowStyle = 0x06080000,
+                StyleMatchType = WindowStyleMatchType.Subset,
+                WindowSizeMatches = new List<WindowSizeMatch>
+                {
+                    new WindowSizeMatch { MatchType = WindowSizeMatchType.FullScreen },
+                    new WindowSizeMatch { MatchType = WindowSizeMatchType.Scale, Width = 550, Height = 200 }
+                },
                 ExactTitleMatch = false,
                 ExactClassNameMatch = false
             };
@@ -672,6 +717,7 @@ namespace Ink_Canvas.Helpers
             {
                 Type = InterceptType.IntelligentClassPPTFloating,
                 ProcessName = "IntelligentClass",
+                ProcessNameAliases = new List<string> { "POWERPNT" },
                 WindowTitlePattern = "",
                 ClassNamePattern = "HwndWrapper[IntelligentClass.Office.PowerPoint.vsto|vstolocal;VSTA_Main;",
                 IsEnabled = true,
@@ -732,8 +778,15 @@ namespace Ink_Canvas.Helpers
             _isRunning = false;
             _scanTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
-            // 恢复所有被拦截的窗口
-            RestoreAllWindows();
+            // 自动更新重启时由新进程接管拦截，避免旧进程退出瞬间把目标窗口恢复并抢到前台。
+            if (!App.IsUpdateInstalling)
+            {
+                RestoreAllWindows();
+            }
+            else
+            {
+                LogHelper.WriteLogToFile("自动更新期间跳过恢复悬浮窗", LogHelper.LogType.Trace);
+            }
         }
 
         /// <summary>
@@ -835,17 +888,19 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public void RestoreAllWindows()
         {
-            var windowsToRestore = new List<IntPtr>(_interceptedWindows.Keys);
-            var restoredCount = 0;
-
-            foreach (var hWnd in windowsToRestore)
+            lock (_scanLock)
             {
-                if (RestoreWindow(new HWND(hWnd)))
+                var windowsToRestore = new List<IntPtr>(_interceptedWindows.Keys);
+                var restoredCount = 0;
+
+                foreach (var hWnd in windowsToRestore)
                 {
-                    restoredCount++;
+                    if (RestoreWindow(new HWND(hWnd)))
+                    {
+                        restoredCount++;
+                    }
                 }
             }
-
         }
 
         /// <summary>
@@ -853,24 +908,26 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public void RestoreWindowsByType(InterceptType type)
         {
-            var windowsToRestore = new List<IntPtr>();
-            foreach (var kvp in _interceptedWindows)
+            lock (_scanLock)
             {
-                if (kvp.Value == type)
+                var windowsToRestore = new List<IntPtr>();
+                foreach (var kvp in _interceptedWindows)
                 {
-                    windowsToRestore.Add(kvp.Key);
+                    if (kvp.Value == type)
+                    {
+                        windowsToRestore.Add(kvp.Key);
+                    }
+                }
+
+                var restoredCount = 0;
+                foreach (var hWnd in windowsToRestore)
+                {
+                    if (RestoreWindow(new HWND(hWnd)))
+                    {
+                        restoredCount++;
+                    }
                 }
             }
-
-            var restoredCount = 0;
-            foreach (var hWnd in windowsToRestore)
-            {
-                if (RestoreWindow(new HWND(hWnd)))
-                {
-                    restoredCount++;
-                }
-            }
-
         }
 
         /// <summary>
@@ -885,18 +942,13 @@ namespace Ink_Canvas.Helpers
 
             if (PInvoke.IsWindow(hwnd))
             {
-                // 使用多种方法确保窗口恢复显示
+                // 恢复显示但不抢前台，也不改变窗口原有的 Z 序
                 PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_RESTORE);
-                PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_SHOW);
-                PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_SHOWNORMAL);
-
-                // 将窗口置于前台并显示
+                PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_SHOWNOACTIVATE);
                 PInvoke.SetWindowPos(hwnd, HWND.Null, 0, 0, 0, 0,
-                    SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOZORDER | SET_WINDOW_POS_FLAGS.SWP_SHOWWINDOW);
-
-                // 强制将窗口带到前台
-                PInvoke.BringWindowToTop(hwnd);
-                PInvoke.SetForegroundWindow(hwnd);
+                    SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE |
+                    SET_WINDOW_POS_FLAGS.SWP_NOZORDER | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE |
+                    SET_WINDOW_POS_FLAGS.SWP_SHOWWINDOW);
 
                 _interceptedWindows.Remove(hWnd);
 
@@ -942,7 +994,11 @@ namespace Ink_Canvas.Helpers
         {
             if (!_isRunning) return;
 
-            try
+            lock (_scanLock)
+            {
+                if (!_isRunning) return;
+
+                try
             {
                 // 简化的扫描逻辑
                 var interceptedCount = 0;
@@ -951,10 +1007,9 @@ namespace Ink_Canvas.Helpers
                 // 重置所有规则的发现状态
                 foreach (var rule in _interceptRules.Values)
                 {
-                    if (rule.IsEnabled)
-                    {
-                        rule.foundHwnd = false;
-                    }
+                    rule.FoundWindows.Clear();
+                    rule.foundHwnd = false;
+                    rule.outHwnd = IntPtr.Zero;
                 }
 
                 // 枚举所有窗口
@@ -963,14 +1018,16 @@ namespace Ink_Canvas.Helpers
                 // 处理找到的窗口
                 foreach (var rule in _interceptRules.Values)
                 {
-                    if (rule.IsEnabled && rule.foundHwnd && rule.outHwnd != IntPtr.Zero)
+                    if (!rule.IsEnabled || rule.FoundWindows.Count == 0) continue;
+
+                    foreach (var hWnd in rule.FoundWindows)
                     {
-                        bool shouldIntercept = !_interceptedWindows.ContainsKey(rule.outHwnd) ||
-                                             (_interceptedWindows.ContainsKey(rule.outHwnd) && PInvoke.IsWindowVisible(new HWND(rule.outHwnd)));
+                        bool shouldIntercept = !_interceptedWindows.ContainsKey(hWnd) ||
+                                             (_interceptedWindows.ContainsKey(hWnd) && PInvoke.IsWindowVisible(new HWND(hWnd)));
 
                         if (shouldIntercept)
                         {
-                            InterceptWindow(rule.outHwnd, rule);
+                            InterceptWindow(hWnd, rule);
                             interceptedCount++;
                         }
                     }
@@ -992,6 +1049,7 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"扫描窗口时发生错误: {ex.Message}", LogHelper.LogType.Error);
                 _consecutiveEmptyScans++;
             }
+            }
         }
 
 
@@ -1008,12 +1066,17 @@ namespace Ink_Canvas.Helpers
                 // 检查每个启用的规则
                 foreach (var rule in _interceptRules.Values)
                 {
-                    if (!rule.IsEnabled || rule.foundHwnd) continue;
+                    if (!rule.IsEnabled) continue;
 
                     if (MatchesRulePrecise(hWnd, rule))
                     {
-                        rule.outHwnd = hWnd;
-                        rule.foundHwnd = true;
+                        IntPtr windowHandle = hWnd;
+                        if (rule.FoundWindows.Add(windowHandle))
+                        {
+                            // 保留首个命中句柄供现有诊断/调用方使用，同时收集同一规则的全部窗口。
+                            rule.outHwnd = rule.outHwnd == IntPtr.Zero ? windowHandle : rule.outHwnd;
+                            rule.foundHwnd = true;
+                        }
                     }
                 }
 
@@ -1040,20 +1103,18 @@ namespace Ink_Canvas.Helpers
                 if (process == null) return null;
 
                 // 获取窗口标题
-                var titleBuilder = new StringBuilder(256);
-                PInvoke.GetWindowText(hwnd, new Span<char>(titleBuilder.ToString().ToCharArray()));
+                var windowTitle = ReadWindowText(hwnd);
 
                 // 获取窗口类名
-                var classBuilder = new StringBuilder(256);
-                PInvoke.GetClassName(hwnd, new Span<char>(classBuilder.ToString().ToCharArray()));
+                var className = ReadWindowClassName(hwnd);
 
                 return new WindowInfo
                 {
                     Handle = hWnd,
                     ProcessId = processId,
                     ProcessName = process.ProcessName,
-                    WindowTitle = titleBuilder.ToString(),
-                    ClassName = classBuilder.ToString(),
+                    WindowTitle = windowTitle,
+                    ClassName = className,
                     Process = process
                 };
             }
@@ -1071,12 +1132,23 @@ namespace Ink_Canvas.Helpers
             try
             {
                 HWND hwnd = new HWND(hWnd);
+                if (!PInvoke.IsWindow(hwnd)) return false;
+
+                // 检查进程名
+                if (!string.IsNullOrEmpty(rule.ProcessName))
+                {
+                    var processName = GetWindowProcessName(hwnd);
+                    bool processMatched = string.Equals(processName, rule.ProcessName, StringComparison.OrdinalIgnoreCase)
+                        || rule.ProcessNameAliases.Any(alias =>
+                            string.Equals(processName, alias, StringComparison.OrdinalIgnoreCase));
+                    if (!processMatched)
+                        return false;
+                }
+
                 // 检查类名
                 if (!string.IsNullOrEmpty(rule.ClassNamePattern))
                 {
-                    var className = new StringBuilder(256);
-                    PInvoke.GetClassName(hwnd, new Span<char>(className.ToString().ToCharArray()));
-                    var classNameStr = className.ToString();
+                    var classNameStr = ReadWindowClassName(hwnd);
 
                     if (rule.ExactClassNameMatch)
                     {
@@ -1085,7 +1157,7 @@ namespace Ink_Canvas.Helpers
                     }
                     else
                     {
-                        if (!classNameStr.Contains(rule.ClassNamePattern))
+                        if (!classNameStr.Contains(rule.ClassNamePattern, StringComparison.OrdinalIgnoreCase))
                             return false;
                     }
                 }
@@ -1093,9 +1165,7 @@ namespace Ink_Canvas.Helpers
                 // 检查窗口标题
                 if (!string.IsNullOrEmpty(rule.WindowTitlePattern))
                 {
-                    var windowTitle = new StringBuilder(256);
-                    PInvoke.GetWindowText(hwnd, new Span<char>(windowTitle.ToString().ToCharArray()));
-                    var titleStr = windowTitle.ToString();
+                    var titleStr = ReadWindowText(hwnd);
 
                     if (rule.ExactTitleMatch)
                     {
@@ -1104,7 +1174,7 @@ namespace Ink_Canvas.Helpers
                     }
                     else
                     {
-                        if (!titleStr.Contains(rule.WindowTitlePattern))
+                        if (!titleStr.Contains(rule.WindowTitlePattern, StringComparison.OrdinalIgnoreCase))
                             return false;
                     }
                 }
@@ -1112,39 +1182,40 @@ namespace Ink_Canvas.Helpers
                 // 检查窗口样式
                 if (rule.HasWindowStyle)
                 {
-                    var style = PInvoke.GetWindowLong(hwnd, WINDOW_LONG_PTR_INDEX.GWL_STYLE);
-                    if (style != rule.WindowStyle)
-                        return false;
-                }
-
-                // 检查窗口尺寸
-                if (rule.HasWindowSize)
-                {
-                    var rect = new RECT();
-                    if (PInvoke.DwmGetWindowAttribute(hwnd, DWMWINDOWATTRIBUTE.DWMWA_EXTENDED_FRAME_BOUNDS, new Span<byte>(new byte[Marshal.SizeOf(rect)])) == 0)
+                    var style = unchecked((uint)PInvoke.GetWindowLong(hwnd, WINDOW_LONG_PTR_INDEX.GWL_STYLE));
+                    if (rule.StyleMatchType == WindowStyleMatchType.Subset)
                     {
-                        var width = rect.right - rect.left;
-                        var height = rect.bottom - rect.top;
-
-                        // 检查精确匹配
-                        if (rule.WindowWidth == width && rule.WindowHeight == height)
-                            return true;
-
-                        // 检查缩放匹配
-                        var hdc = PInvoke.GetDC(HWND.Null);
-                        var horizontalDPI = PInvoke.GetDeviceCaps(hdc, GET_DEVICE_CAPS_INDEX.LOGPIXELSX);
-                        var verticalDPI = PInvoke.GetDeviceCaps(hdc, GET_DEVICE_CAPS_INDEX.LOGPIXELSY);
-                        PInvoke.ReleaseDC(HWND.Null, hdc);
-
-                        var scale = (horizontalDPI + verticalDPI) / 2.0f / 96.0f;
-                        var scaledWidth = (int)(rule.WindowWidth * scale);
-                        var scaledHeight = (int)(rule.WindowHeight * scale);
-
-                        if (Math.Abs(scaledWidth - width) <= 1 && Math.Abs(scaledHeight - height) <= 1)
-                            return true;
-
+                        if ((style & rule.WindowStyle) != rule.WindowStyle)
+                            return false;
+                    }
+                    else if (style != rule.WindowStyle)
+                    {
                         return false;
                     }
+                }
+
+                // 同一规则可配置多个尺寸变体，例如希沃白板 5/5C 的全屏画布和工具悬浮窗。
+                if (rule.WindowSizeMatches != null && rule.WindowSizeMatches.Count > 0)
+                {
+                    return rule.WindowSizeMatches.Any(windowSize => MatchesWindowSize(hwnd, windowSize));
+                }
+
+                // 兼容旧规则：先精确匹配，再按当前 DPI 尝试匹配。
+                if (rule.HasWindowSize)
+                {
+                    var exactSize = new WindowSizeMatch
+                    {
+                        MatchType = WindowSizeMatchType.Exact,
+                        Width = rule.WindowWidth,
+                        Height = rule.WindowHeight
+                    };
+                    var dpiSize = new WindowSizeMatch
+                    {
+                        MatchType = WindowSizeMatchType.DpiScale,
+                        Width = rule.WindowWidth,
+                        Height = rule.WindowHeight
+                    };
+                    return MatchesWindowSize(hwnd, exactSize) || MatchesWindowSize(hwnd, dpiSize);
                 }
 
                 return true;
@@ -1154,6 +1225,109 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"精确匹配规则时发生错误: {ex.Message}", LogHelper.LogType.Error);
                 return false;
             }
+        }
+
+        private bool MatchesWindowSize(HWND hwnd, WindowSizeMatch windowSize)
+        {
+            if (!TryGetWindowBounds(hwnd, out var rect)) return false;
+
+            int width = rect.right - rect.left;
+            int height = rect.bottom - rect.top;
+            if (width <= 0 || height <= 0) return false;
+
+            switch (windowSize.MatchType)
+            {
+                case WindowSizeMatchType.Exact:
+                    return width == windowSize.Width && height == windowSize.Height;
+
+                case WindowSizeMatchType.Scale:
+                    if (windowSize.Width <= 0 || windowSize.Height <= 0) return false;
+                    double widthRatio = (double)width / windowSize.Width;
+                    double heightRatio = (double)height / windowSize.Height;
+                    return Math.Abs(widthRatio - heightRatio) <= 0.03d;
+
+                case WindowSizeMatchType.DpiScale:
+                    if (windowSize.Width <= 0 || windowSize.Height <= 0) return false;
+
+                    var hdc = PInvoke.GetDC(hwnd);
+                    if (hdc == IntPtr.Zero) return false;
+                    try
+                    {
+                        var horizontalDpi = PInvoke.GetDeviceCaps(hdc, GET_DEVICE_CAPS_INDEX.LOGPIXELSX);
+                        var verticalDpi = PInvoke.GetDeviceCaps(hdc, GET_DEVICE_CAPS_INDEX.LOGPIXELSY);
+                        var scale = (horizontalDpi + verticalDpi) / 2.0f / 96.0f;
+                        var scaledWidth = (int)(windowSize.Width * scale);
+                        var scaledHeight = (int)(windowSize.Height * scale);
+                        return Math.Abs(scaledWidth - width) <= 1 && Math.Abs(scaledHeight - height) <= 1;
+                    }
+                    finally
+                    {
+                        PInvoke.ReleaseDC(hwnd, hdc);
+                    }
+
+                case WindowSizeMatchType.FullScreen:
+                    var screen = System.Windows.Forms.Screen.FromHandle((IntPtr)hwnd);
+                    return width == screen.Bounds.Width && height == screen.Bounds.Height;
+
+                case WindowSizeMatchType.FullHeight:
+                    var heightScreen = System.Windows.Forms.Screen.FromHandle((IntPtr)hwnd);
+                    return height == heightScreen.Bounds.Height;
+
+                case WindowSizeMatchType.FullWidth:
+                    var widthScreen = System.Windows.Forms.Screen.FromHandle((IntPtr)hwnd);
+                    return width == widthScreen.Bounds.Width;
+
+                default:
+                    return false;
+            }
+        }
+
+        private bool TryGetWindowBounds(HWND hwnd, out RECT rect)
+        {
+            var frameBounds = new byte[Marshal.SizeOf<RECT>()];
+            if (PInvoke.DwmGetWindowAttribute(
+                    hwnd,
+                    DWMWINDOWATTRIBUTE.DWMWA_EXTENDED_FRAME_BOUNDS,
+                    frameBounds.AsSpan()) == 0)
+            {
+                rect = MemoryMarshal.Read<RECT>(frameBounds.AsSpan());
+                if (rect.right > rect.left && rect.bottom > rect.top)
+                    return true;
+            }
+
+            return PInvoke.GetWindowRect(hwnd, out rect);
+        }
+
+        private string GetWindowProcessName(HWND hwnd)
+        {
+            PInvoke.GetWindowThreadProcessId(hwnd, out uint processId);
+            if (processId == 0) return string.Empty;
+
+            try
+            {
+                using var process = Process.GetProcessById((int)processId);
+                return process.ProcessName;
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        private string ReadWindowText(HWND hwnd)
+        {
+            var buffer = new char[256];
+            int length = PInvoke.GetWindowText(hwnd, new Span<char>(buffer));
+            if (length <= 0) return string.Empty;
+            return new string(buffer, 0, Math.Min(length, buffer.Length));
+        }
+
+        private string ReadWindowClassName(HWND hwnd)
+        {
+            var buffer = new char[256];
+            int length = PInvoke.GetClassName(hwnd, new Span<char>(buffer));
+            if (length <= 0) return string.Empty;
+            return new string(buffer, 0, Math.Min(length, buffer.Length));
         }
 
         private bool MatchesRule(WindowInfo windowInfo, InterceptRule rule)
@@ -1175,8 +1349,21 @@ namespace Ink_Canvas.Helpers
                     return;
                 }
 
-                // 直接隐藏窗口，不发送关闭消息
+                // 直接隐藏窗口，不发送关闭消息；如果窗口仍报告可见，再用 SetWindowPos 补一次隐藏。
                 PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_HIDE);
+                if (PInvoke.IsWindowVisible(hwnd))
+                {
+                    PInvoke.SetWindowPos(hwnd, HWND.Null, 0, 0, 0, 0,
+                        SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE |
+                        SET_WINDOW_POS_FLAGS.SWP_NOZORDER | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE |
+                        SET_WINDOW_POS_FLAGS.SWP_HIDEWINDOW);
+                }
+
+                if (PInvoke.IsWindowVisible(hwnd))
+                {
+                    LogHelper.WriteLogToFile($"隐藏悬浮窗失败: {hWnd} ({rule.Type})", LogHelper.LogType.Warning);
+                    return;
+                }
 
                 // 记录拦截的窗口
                 _interceptedWindows[hWnd] = rule.Type;
@@ -1201,9 +1388,7 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                var titleBuilder = new StringBuilder(256);
-                PInvoke.GetWindowText(new HWND(hWnd), new Span<char>(titleBuilder.ToString().ToCharArray()));
-                return titleBuilder.ToString();
+                return ReadWindowText(new HWND(hWnd));
             }
             catch
             {
@@ -1296,8 +1481,11 @@ namespace Ink_Canvas.Helpers
             Stop();
             _scanTimer?.Dispose();
 
-            // 恢复所有被拦截的窗口
-            RestoreAllWindows();
+            // 自动更新时保持隐藏状态交给新进程接管，正常退出才恢复窗口。
+            if (!App.IsUpdateInstalling)
+            {
+                RestoreAllWindows();
+            }
 
             _disposed = true;
         }

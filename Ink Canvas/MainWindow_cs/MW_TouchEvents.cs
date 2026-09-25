@@ -2544,6 +2544,15 @@ namespace Ink_Canvas
                 return;
             }
 
+            if (IsBoardRoamingMode
+                && (_boardRoamingContacts.Count > 0
+                    || _isBoardRoamingTwoFingerGesture
+                    || (e.Manipulators?.Count() ?? 0) != 1))
+            {
+                e.Handled = true;
+                return;
+            }
+
             // 插件画布手势（如 PDF 阅读器双指缩放/平移）：双指一律优先转发。
             // 插件返回 true 表示已接管，宿主跳过默认的墨迹/画布变换。
             if (_pluginCanvasGestureHandler != null && (e.Manipulators?.Count() ?? 0) >= 2)
@@ -2579,11 +2588,13 @@ namespace Ink_Canvas
 
                 bool isBoardMode = currentMode == 1;
                 bool enableTranslate = IsBoardRoamingMode || (isBoardMode ? Settings.Gesture.IsEnableTwoFingerTranslateBoard : Settings.Gesture.IsEnableTwoFingerTranslate);
-                bool enableRotate = !IsBoardRoamingMode && (isBoardMode ? Settings.Gesture.IsEnableTwoFingerRotationBoard : Settings.Gesture.IsEnableTwoFingerRotation);
-                bool enableZoom = !IsBoardRoamingMode && (isBoardMode ? Settings.Gesture.IsEnableTwoFingerZoomBoard : Settings.Gesture.IsEnableTwoFingerZoom);
-                bool enableGestureTranslateOrRotate = IsBoardRoamingMode || (isBoardMode
-                    ? (Settings.Gesture.IsEnableTwoFingerTranslateBoard || Settings.Gesture.IsEnableTwoFingerRotationBoard)
-                    : (Settings.Gesture.IsEnableTwoFingerTranslate || Settings.Gesture.IsEnableTwoFingerRotation));
+                bool enableRotate = IsBoardRoamingMode
+                    ? Settings.Gesture.IsEnableTwoFingerRotationRoaming
+                    : (isBoardMode ? Settings.Gesture.IsEnableTwoFingerRotationBoard : Settings.Gesture.IsEnableTwoFingerRotation);
+                bool enableZoom = IsBoardRoamingMode
+                    ? Settings.Gesture.IsEnableTwoFingerZoomRoaming
+                    : (isBoardMode ? Settings.Gesture.IsEnableTwoFingerZoomBoard : Settings.Gesture.IsEnableTwoFingerZoom);
+                bool enableGestureTranslateOrRotate = enableTranslate || enableRotate;
 
                 if (enableTranslate)
                     m.Translate(trans.X, trans.Y); // 移动

@@ -25,12 +25,6 @@ namespace Ink_Canvas
         private int _currentPageIndex = 0; // 0-based internal index
         private int _totalCount = 1;
 
-        // Multi-touch window drag
-        private readonly Dictionary<int, Point> _touchPoints = new Dictionary<int, Point>();
-        private bool _isMultiTouchDragging;
-        private Point _multiTouchLastCenter;
-        private InkCanvasEditingMode _lastMiniInkCanvasEditingMode = InkCanvasEditingMode.Ink;
-
         // Undo/redo per page
         private readonly List<bool> _pageLastModeIsRedo = new List<bool>();
 
@@ -74,81 +68,21 @@ namespace Ink_Canvas
             LogHelper.WriteLogToFile("小白板窗口已关闭", LogHelper.LogType.Event);
         }
 
-        #endregion
-
-        #region Multi-Touch Window Drag
-
-        private void RootGrid_PreviewTouchDown(object sender, TouchEventArgs e)
+        private void MiniTitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            _touchPoints[e.TouchDevice.Id] = GetTouchScreenPosition(e);
-            MiniInkCanvas.CaptureTouch(e.TouchDevice);
+            if (e.LeftButton != MouseButtonState.Pressed)
+                return;
 
-            if (_touchPoints.Count >= 2)
+            try
             {
-                if (!_isMultiTouchDragging)
-                {
-                    _lastMiniInkCanvasEditingMode = MiniInkCanvas.EditingMode;
-                    MiniInkCanvas.EditingMode = InkCanvasEditingMode.None;
-                    _isMultiTouchDragging = true;
-                }
-
-                _multiTouchLastCenter = GetTouchCenter();
-                e.Handled = true;
+                DragMove();
             }
-        }
+            catch (InvalidOperationException)
+            {
+                // The window can be closing or temporarily unavailable for dragging.
+            }
 
-        private void RootGrid_PreviewTouchMove(object sender, TouchEventArgs e)
-        {
-            if (!_touchPoints.ContainsKey(e.TouchDevice.Id)) return;
-
-            _touchPoints[e.TouchDevice.Id] = GetTouchScreenPosition(e);
-
-            // 单指移动：不拦截，交给 InkCanvas 绘制
-            if (_touchPoints.Count < 2 || !_isMultiTouchDragging) return;
-
-            var center = GetTouchCenter();
-            var deltaX = center.X - _multiTouchLastCenter.X;
-            var deltaY = center.Y - _multiTouchLastCenter.Y;
-
-            Left += deltaX;
-            Top += deltaY;
-
-            _multiTouchLastCenter = center;
             e.Handled = true;
-        }
-
-        private void RootGrid_PreviewTouchUp(object sender, TouchEventArgs e)
-        {
-            _touchPoints.Remove(e.TouchDevice.Id);
-            MiniInkCanvas.ReleaseTouchCapture(e.TouchDevice);
-
-            if (_touchPoints.Count < 2 && _isMultiTouchDragging)
-            {
-                _isMultiTouchDragging = false;
-                MiniInkCanvas.EditingMode = _lastMiniInkCanvasEditingMode;
-            }
-
-            if (_touchPoints.Count == 0)
-            {
-                MiniInkCanvas.ReleaseAllTouchCaptures();
-            }
-        }
-
-        private Point GetTouchCenter()
-        {
-            double x = 0, y = 0;
-            foreach (var pt in _touchPoints.Values)
-            {
-                x += pt.X;
-                y += pt.Y;
-            }
-            return new Point(x / _touchPoints.Count, y / _touchPoints.Count);
-        }
-
-        private Point GetTouchScreenPosition(TouchEventArgs e)
-        {
-            var point = e.GetTouchPoint(this).Position;
-            return PointToScreen(point);
         }
 
         #endregion

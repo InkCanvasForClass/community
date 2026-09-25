@@ -12,13 +12,15 @@ namespace Ink_Canvas
         /// </summary>
         private void ApplyTransparentHitTestForCurrentMode(string reason)
         {
+            if (!IsUsingWindowChromeRendering) return;
+
             var annotationVisible = GridTransparencyFakeBackground != null
                 && GridTransparencyFakeBackground.Visibility == Visibility.Visible
                 && GridTransparencyFakeBackground.Opacity > 0.01
                 && GridTransparencyFakeBackground.Background != null
                 && GridTransparencyFakeBackground.Background != Brushes.Transparent;
 
-            if (annotationVisible || inkCanvas?.EditingMode == System.Windows.Controls.InkCanvasEditingMode.Ink)
+            if (annotationVisible || IsAnnotating || inkCanvas?.EditingMode == System.Windows.Controls.InkCanvasEditingMode.Ink)
                 SetTransparentNotHitThrough();
             else
                 SetTransparentHitThrough();

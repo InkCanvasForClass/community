@@ -1,4 +1,4 @@
-using Ink_Canvas.Helpers;
+﻿using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,25 +8,34 @@ namespace Ink_Canvas.Plugins
 {
     internal class HotkeyService : IHotkeyService
     {
-        private readonly GlobalHotkeyManager _manager;
+        /// <summary>
+        /// 注意：不能直接注入 GlobalHotkeyManager。RegisterPluginServices 在 MainWindow
+        /// 构造后立即执行，而 GlobalHotkeyManager 原本在 RunDeferredStartupPhaseBAsync
+        /// （Loaded 后数百毫秒）才创建——注入会拿到 null，导致插件热键全部静默失败。
+        /// 因此这里持 MainWindow 引用，访问时按需 EnsureGlobalHotkeyManagerCreated()。
+        /// </summary>
+        private readonly MainWindow _mainWindow;
         private readonly Dictionary<string, (uint Modifiers, uint Key, Action Callback)> _pluginHotkeys
             = new Dictionary<string, (uint, uint, Action)>();
 
-        public HotkeyService(GlobalHotkeyManager manager)
+        public HotkeyService(MainWindow mainWindow)
         {
-            _manager = manager;
+            _mainWindow = mainWindow;
         }
+
+        private GlobalHotkeyManager Manager => _mainWindow?.EnsureGlobalHotkeyManagerCreated();
 
         public bool Register(string id, uint modifiers, uint key, Action callback)
         {
-            if (_manager == null || string.IsNullOrEmpty(id) || callback == null) return false;
+            var manager = Manager;
+            if (manager == null || string.IsNullOrEmpty(id) || callback == null) return false;
             if (_pluginHotkeys.ContainsKey(id)) return false;
 
             try
             {
                 var modKeys = (ModifierKeys)modifiers;
                 var wpfKey = KeyInterop.KeyFromVirtualKey((int)key);
-                var result = _manager.RegisterHotkey(id, wpfKey, modKeys, callback);
+                var result = manager.RegisterPluginHotkey(id, wpfKey, modKeys, callback);
                 if (result)
                 {
                     _pluginHotkeys[id] = (modifiers, key, callback);
@@ -41,12 +50,13 @@ namespace Ink_Canvas.Plugins
 
         public bool Unregister(string id)
         {
-            if (_manager == null || string.IsNullOrEmpty(id)) return false;
+            var manager = Manager;
+            if (manager == null || string.IsNullOrEmpty(id)) return false;
             if (!_pluginHotkeys.ContainsKey(id)) return false;
 
             try
             {
-                _manager.UnregisterHotkey(id);
+                manager.UnregisterHotkey(id);
                 _pluginHotkeys.Remove(id);
                 return true;
             }
@@ -65,7 +75,7 @@ namespace Ink_Canvas.Plugins
         {
             try
             {
-                var list = _manager?.GetRegisteredHotkeys();
+                var list = Manager?.GetRegisteredHotkeys();
                 if (list == null || list.Count == 0) return System.Array.Empty<PluginHotkeyInfo>();
                 return list.Select(h => new PluginHotkeyInfo
                 {
@@ -85,7 +95,7 @@ namespace Ink_Canvas.Plugins
         {
             try
             {
-                return _manager?.UpdateHotkey(hotkeyName, key, modifiers) ?? false;
+                return Manager?.UpdateHotkey(hotkeyName, key, modifiers) ?? false;
             }
             catch (Exception ex)
             {
@@ -96,7 +106,7 @@ namespace Ink_Canvas.Plugins
 
         public void EnableRegistration()
         {
-            try { _manager?.EnableHotkeyRegistration(); }
+            try { Manager?.EnableHotkeyRegistration(); }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"HotkeyService.EnableRegistration failed: {ex.Message}", LogHelper.LogType.Warning);
@@ -105,7 +115,7 @@ namespace Ink_Canvas.Plugins
 
         public void DisableRegistration()
         {
-            try { _manager?.DisableHotkeyRegistration(); }
+            try { Manager?.DisableHotkeyRegistration(); }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"HotkeyService.DisableRegistration failed: {ex.Message}", LogHelper.LogType.Warning);

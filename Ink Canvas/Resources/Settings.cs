@@ -56,6 +56,9 @@ namespace Ink_Canvas
         [JsonProperty("notification")]
         public NotificationSettings Notification { get; set; } = new NotificationSettings();
 
+        [JsonProperty("timer")]
+        public TimerSettings Timer { get; set; } = new TimerSettings();
+
         [JsonProperty("toolbar")]
         public ToolbarLayoutSettings Toolbar { get; set; } = new ToolbarLayoutSettings();
 
@@ -298,6 +301,12 @@ namespace Ink_Canvas
 
         [JsonProperty("isDictationDoNotDisturbInWhiteboardEnabled")]
         public bool IsDictationDoNotDisturbInWhiteboardEnabled { get; set; } = true;
+    }
+
+    public class TimerSettings
+    {
+        [JsonProperty("isOpenTransparency")]
+        public bool IsOpenTransparency { get; set; } = true;
     }
 
     public class Security
@@ -621,6 +630,11 @@ namespace Ink_Canvas
         public bool IsEnableTwoFingerTranslateBoard { get; set; } = true;
         [JsonProperty("isEnableTwoFingerRotationBoard")]
         public bool IsEnableTwoFingerRotationBoard { get; set; }
+
+        [JsonProperty("isEnableTwoFingerZoomRoaming")]
+        public bool IsEnableTwoFingerZoomRoaming { get; set; } = true;
+        [JsonProperty("isEnableTwoFingerRotationRoaming")]
+        public bool IsEnableTwoFingerRotationRoaming { get; set; }
     }
 
     // 更新通道枚举
@@ -1382,6 +1396,15 @@ namespace Ink_Canvas
 
         [JsonProperty("isSaveScreenshotsInDateFolders")]
         public bool IsSaveScreenshotsInDateFolders { get; set; }
+
+        [JsonProperty("screenshotSaveFormat")]
+        public int ScreenshotSaveFormat { get; set; } = 0;
+
+        [JsonProperty("screenshotJpegQuality")]
+        public long ScreenshotJpegQuality { get; set; } = 90;
+
+        [JsonProperty("screenshotScaleMode")]
+        public int ScreenshotScaleMode { get; set; } = 0;
 
         [JsonProperty("isAutoSaveStrokesAtScreenshot")]
         public bool IsAutoSaveStrokesAtScreenshot { get; set; }

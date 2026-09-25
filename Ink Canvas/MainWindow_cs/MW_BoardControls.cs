@@ -527,30 +527,64 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
-                    // 视频展台特殊模式：刷新虚拟分页项（直播页文字 + 照片缩略图），不刷新普通白板页
-                    if (_isVideoPresenterSpecialMode)
-                        RefreshBoothPageListView();
-                    else
-                        RefreshBlackBoardSidePageListView();
-                    EnsurePageListPanelHeight(BoardBorderRightPageListView, BlackBoardRightSidePageListScrollViewer, BtnRightPageListWB);
-                    AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderRightPageListView);
-                    await Task.Delay(1);
-                    if (BlackBoardRightSidePageListView != null)
-                    {
-                        int scrollIndex = _isVideoPresenterSpecialMode
-                            ? (_boothCurrentPhotoIndex + 1)
-                            : CurrentWhiteboardIndex - 1;
-                        var rightContainer = BlackBoardRightSidePageListView.ItemContainerGenerator.ContainerFromIndex(
-                            scrollIndex) as ListViewItem;
-                        if (rightContainer != null)
-                        {
-                            ScrollViewToVerticalTop(rightContainer, BlackBoardRightSidePageListScrollViewer);
-                        }
-                    }
+                    ShowPageListRightPanel();
                 }
             }
 
+        }
+
+        /// <summary>
+        /// 展开右侧页码面板（与点击右侧页码按钮的展开行为一致）。
+        /// <para>
+        /// 视频展台拍照完成后自动调用：刷新虚拟分页项（直播页文字 + 照片缩略图），
+        /// 并把面板滚动到最新一张照片（scrollToLastPhoto=true）或当前虚拟页。
+        /// 面板已展开时直接返回（内容由调用方负责刷新）。
+        /// </para>
+        /// </summary>
+        internal async void ShowPageListRightPanel(bool scrollToLastPhoto = false)
+        {
+            try
+            {
+                var BtnRightPageListWB = FindView("board.pageList.rightBtn") as Border;
+                var BoardBorderLeftPageListView = FindView("board.pageList.leftBorder") as Border;
+                var BoardBorderRightPageListView = FindView("board.pageList.rightBorder") as Border;
+                var BlackBoardRightSidePageListView = FindView("board.pageList.right") as System.Windows.Controls.ListView;
+                var BlackBoardRightSidePageListScrollViewer = FindView("board.pageList.rightScrollViewer") as ScrollViewer;
+
+                if (BoardBorderRightPageListView == null) return;
+                if (BoardBorderRightPageListView.Visibility == Visibility.Visible) return;
+
+                AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
+                // 视频展台特殊模式：刷新虚拟分页项（直播页文字 + 照片缩略图），不刷新普通白板页
+                // 否则 RefreshBlackBoardSidePageListView 会用普通白板页的墨迹预览覆盖虚拟分页项
+                if (_isVideoPresenterSpecialMode)
+                    RefreshBoothPageListView();
+                else
+                    RefreshBlackBoardSidePageListView();
+                EnsurePageListPanelHeight(BoardBorderRightPageListView, BlackBoardRightSidePageListScrollViewer, BtnRightPageListWB);
+                AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderRightPageListView);
+                await Task.Delay(1);
+                if (BlackBoardRightSidePageListView != null)
+                {
+                    int scrollIndex = scrollToLastPhoto
+                        // 展开最新一张照片（刚拍摄完追加到列表末尾）
+                        ? blackBoardSidePageListViewObservableCollection.Count - 1
+                        // 特殊模式下滚动到当前虚拟页（-1=直播页→0，0..N-1=照片页→index+1）
+                        : (_isVideoPresenterSpecialMode
+                            ? (_boothCurrentPhotoIndex + 1)
+                            : CurrentWhiteboardIndex - 1);
+                    var rightContainer = BlackBoardRightSidePageListView.ItemContainerGenerator.ContainerFromIndex(
+                        scrollIndex) as ListViewItem;
+                    if (rightContainer != null)
+                    {
+                        ScrollViewToVerticalTop(rightContainer, BlackBoardRightSidePageListScrollViewer);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"展开右侧页码面板失败: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>

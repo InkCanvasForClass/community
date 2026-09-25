@@ -43,10 +43,7 @@
     <!-- 无标题栏窗口：画布内嵌悬浮白板工具栏，工具栏不贴边 -->
     <Grid x:Name="RootGrid"
           Background="#01000000"
-          ClipToBounds="True"
-          PreviewTouchDown="RootGrid_PreviewTouchDown"
-          PreviewTouchMove="RootGrid_PreviewTouchMove"
-          PreviewTouchUp="RootGrid_PreviewTouchUp">
+          ClipToBounds="True">
         <InkCanvas x:Name="MiniInkCanvas"
                    Background="#10FFFFFF"
                    EditingMode="Ink"
@@ -60,6 +57,24 @@
                                    IgnorePressure="False" />
             </InkCanvas.DefaultDrawingAttributes>
         </InkCanvas>
+
+        <!-- 标题栏拖动区域：使用系统 DragMove，避免触摸坐标累加造成窗口抖动 -->
+        <Border x:Name="MiniTitleBar"
+                Height="30"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Top"
+                Panel.ZIndex="10"
+                Background="{DynamicResource FloatingBarBackgroundBrush}"
+                BorderBrush="{DynamicResource FloatingBarBorderBrush}"
+                BorderThickness="0,0,0,1"
+                MouseLeftButtonDown="MiniTitleBar_MouseLeftButtonDown">
+            <TextBlock Text="{x:Static fb:FloatingBarStrings.FloatingBar_MiniWhiteboard}"
+                       Foreground="{DynamicResource IconForeground}"
+                       FontSize="12"
+                       FontWeight="SemiBold"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center" />
+        </Border>
 
         <!-- 内嵌一体式图标工具栏：底部悬浮，不贴边 -->
         <Border x:Name="MiniToolbar"

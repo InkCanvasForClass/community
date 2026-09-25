@@ -57,57 +57,31 @@ namespace Ink_Canvas
             // 绑定事件处理
             canvas.StylusDown += ((o, args) =>
             {
-                args.Handled = true;
                 if (args.StylusDevice.TabletDevice.Type == TabletDeviceType.Stylus) canvas.CaptureStylus();
                 EraserOverlay_PointerDown(sender);
             });
             canvas.StylusUp += ((o, args) =>
             {
-                args.Handled = true;
                 if (args.StylusDevice.TabletDevice.Type == TabletDeviceType.Stylus) canvas.ReleaseStylusCapture();
                 EraserOverlay_PointerUp(sender);
             });
             canvas.StylusMove += ((o, args) =>
             {
-                args.Handled = true;
                 EraserOverlay_PointerMove(sender, args.GetPosition(inkCanvas));
             });
             canvas.MouseDown += ((o, args) =>
             {
-                args.Handled = true;
                 canvas.CaptureMouse();
                 EraserOverlay_PointerDown(sender);
             });
             canvas.MouseUp += ((o, args) =>
             {
-                args.Handled = true;
                 canvas.ReleaseMouseCapture();
                 EraserOverlay_PointerUp(sender);
             });
             canvas.MouseMove += ((o, args) =>
             {
-                args.Handled = true;
                 EraserOverlay_PointerMove(sender, args.GetPosition(inkCanvas));
-            });
-            // Touch is not guaranteed to promote to the overlay's stylus events on
-            // every tablet driver. Handle it directly so the area eraser uses the same
-            // scene geometry and history path for finger/touch input as for mouse/pen.
-            canvas.TouchDown += ((o, args) =>
-            {
-                args.Handled = true;
-                canvas.CaptureTouch(args.TouchDevice);
-                EraserOverlay_PointerDown(sender);
-            });
-            canvas.TouchMove += ((o, args) =>
-            {
-                args.Handled = true;
-                EraserOverlay_PointerMove(sender, args.GetTouchPoint(inkCanvas).Position);
-            });
-            canvas.TouchUp += ((o, args) =>
-            {
-                args.Handled = true;
-                canvas.ReleaseTouchCapture(args.TouchDevice);
-                EraserOverlay_PointerUp(sender);
             });
 
             // 设置橡皮擦样式
@@ -194,6 +168,8 @@ namespace Ink_Canvas
 
             // 释放捕获
             ((UIElement)sender).ReleaseMouseCapture();
+            ((UIElement)sender).ReleaseStylusCapture();
+            ((UIElement)sender).ReleaseAllTouchCaptures();
 
             // 隐藏橡皮擦反馈
             if (eraserFeedback != null)
@@ -727,6 +703,9 @@ namespace Ink_Canvas
         {
             if (eraserOverlayCanvas != null)
             {
+                eraserOverlayCanvas.ReleaseMouseCapture();
+                eraserOverlayCanvas.ReleaseStylusCapture();
+                eraserOverlayCanvas.ReleaseAllTouchCaptures();
                 eraserOverlayCanvas.IsHitTestVisible = false;
                 eraserOverlayCanvas.Visibility = Visibility.Collapsed;
             }

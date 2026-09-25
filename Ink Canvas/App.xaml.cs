@@ -1,4 +1,4 @@
-using H.NotifyIcon;
+﻿using H.NotifyIcon;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Plugins;
 using Ink_Canvas.Properties;
@@ -110,6 +110,8 @@ namespace Ink_Canvas
         public static bool IsUpdateInstalling;
         // 新增：标记是否启用了UIA置顶功能
         public static bool IsUIAccessTopMostEnabled;
+        // UIA helper 启动失败后，普通用户子进程使用此标记执行一次性回退。
+        public static bool IsUIAccessFallbackLaunch { get; private set; }
         // 新增：标记是否正在显示 OOBE（首次启动向导），看门狗在此期间不判定为卡死/假死
         public static bool IsOobeShowing;
         // 新增：退出信号文件路径
@@ -204,6 +206,8 @@ namespace Ink_Canvas
                 return;
             }
 
+            IsUIAccessFallbackLaunch = args.Contains("--uia-fallback");
+
             if (args.Contains("--enable-uia-topmost-helper"))
             {
                 // 检查是否为原进程令牌模式（通过 --uia-source-pid 参数判断）
@@ -218,14 +222,19 @@ namespace Ink_Canvas
                     }
                 }
 
-                if (sourcePid != 0)
+                bool started = sourcePid != 0
+                    ? UIAccessHelper.LaunchNormalUserWithUIAccessFromElevatedHelper_ProcessToken(sourcePid)
+                    : UIAccessHelper.LaunchNormalUserWithUIAccessFromElevatedHelper();
+
+                if (!started)
                 {
-                    Environment.Exit(UIAccessHelper.LaunchNormalUserWithUIAccessFromElevatedHelper_ProcessToken(sourcePid) ? 0 : 1);
+                    // UIA 子进程可能在 CreateProcessWithTokenW 成功后继续启动时崩溃。
+                    // helper 仍需启动普通用户实例，避免原进程退出后桌面上没有可用实例。
+                    LogHelper.WriteLogToFile("UIAccess | UIA 子进程启动失败，回退启动普通置顶实例", LogHelper.LogType.Warning);
+                    started = UIAccessHelper.RestartAsNormalUser("--uia-fallback");
                 }
-                else
-                {
-                    Environment.Exit(UIAccessHelper.LaunchNormalUserWithUIAccessFromElevatedHelper() ? 0 : 1);
-                }
+
+                Environment.Exit(started ? 0 : 1);
                 return;
             }
 
@@ -271,7 +280,7 @@ namespace Ink_Canvas
                 // 复用 _pluginEventService 实例：App_Exit 广播 AppExiting 时，插件经 DI 拿到的就是同一实例
                 (typeof(Plugins.IEventService),           _pluginEventService),
                 (typeof(Plugins.ISettingsService),        new Plugins.SettingsService()),
-                (typeof(Plugins.IHotkeyService),          new Plugins.HotkeyService(mainWindow.GlobalHotkeyManagerInstance)),
+                (typeof(Plugins.IHotkeyService),          new Plugins.HotkeyService(mainWindow)),
                 (typeof(Plugins.INotificationService),    new Plugins.NotificationService(mainWindow)),
                 (typeof(Plugins.IFileAssociationService),      new Plugins.FileAssociationService()),
                 (typeof(Plugins.IWindowOverviewService),        new Plugins.WindowOverviewService(mainWindow.WindowOverviewModel)),
@@ -292,6 +301,7 @@ namespace Ink_Canvas
                 (typeof(Plugins.INameRosterService),      new Plugins.NameRosterService()),
                 (typeof(Plugins.IInkEffectService),       new Plugins.InkEffectService(mainWindow)),
                 (typeof(Plugins.ICameraService),          new Plugins.CameraService()),
+                (typeof(Plugins.IVideoBoothService),      new Plugins.VideoBoothService(mainWindow)),
                 (typeof(Plugins.ISystemInfoService),      new Plugins.SystemInfoService()),
                 (typeof(Plugins.IBackupService),          new Plugins.BackupService()),
                 (typeof(Plugins.IFileDialogService),      new Plugins.FileDialogService(mainWindow)),
@@ -1465,8 +1475,7 @@ namespace Ink_Canvas
                 // 启动完成，恢复日志调用栈采集
                 LogHelper.SuppressCallerInfo = false;
 
-                // 启动成功，重置崩溃重启计数器
-                StartupCount.Reset();
+                // 这里只记录启动完成；重启计数会在应用稳定运行并保持心跳正常后清零，避免启动后立即崩溃绕过熔断。
 
                 if (_isSplashScreenShown && splashStopwatch.IsRunning)
                 {
@@ -1844,6 +1853,43 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 停止当前进程创建的看门狗，避免应用主动退出或熔断退出后被看门狗再次拉起。
+        /// </summary>
+        private static void StopWatchdog()
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(watchdogExitSignalFile))
+                {
+                    File.WriteAllText(watchdogExitSignalFile, "exit");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
+
+            try
+            {
+                if (watchdogProcess != null)
+                {
+                    if (!watchdogProcess.HasExited)
+                    {
+                        watchdogProcess.Kill();
+                        watchdogProcess.WaitForExit(1000);
+                    }
+
+                    watchdogProcess.Dispose();
+                    watchdogProcess = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
+        }
+
+        /// <summary>
         /// 尝试通过熔断机制静默重启应用：先检查是否达到重启上限，未达则启动新进程并退出当前进程。
         /// 重启上限（5次）内启动新进程；达到上限时弹出提示、重置计数并以非零码退出。
         /// 重启前会通知看门狗退出（写入退出信号文件），避免看门狗二次触发导致双进程启动。
@@ -1857,6 +1903,8 @@ namespace Ink_Canvas
 
             if (count >= 5)
             {
+                // 达到上限时也必须先停止看门狗，否则关闭提示后看门狗会把进程再次拉起。
+                StopWatchdog();
                 MessageBox.Show(
                     UpdateStrings.Msg_RestartLimit,
                     UpdateStrings.Msg_RestartLimitTitle,
@@ -1869,23 +1917,8 @@ namespace Ink_Canvas
 
             try
             {
-                // 通知看门狗退出，防止看门狗检测到进程退出后二次触发重启
-                if (!string.IsNullOrEmpty(watchdogExitSignalFile))
-                {
-                    try { File.WriteAllText(watchdogExitSignalFile, "restart"); }
-                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
-                }
-
-                // 杀掉看门狗进程，避免竞态
-                try
-                {
-                    if (watchdogProcess != null && !watchdogProcess.HasExited)
-                    {
-                        watchdogProcess.Kill();
-                        watchdogProcess = null;
-                    }
-                }
-                catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+                // 通知并停止看门狗，防止看门狗检测到进程退出后二次触发重启。
+                StopWatchdog();
 
                 string exePath = Process.GetCurrentProcess().MainModule.FileName;
                 Process.Start(exePath);
@@ -1992,16 +2025,26 @@ namespace Ink_Canvas
                         return;
                     }
 
-                    if (sinceHeartbeat.TotalSeconds > 10)
+                    // 只有主窗口完成启动且持续保持心跳正常，才认为本次启动稳定，清除连续重启计数。
+                    // 若此时已无响应，必须保留计数让熔断机制生效。
+                    if (sinceHeartbeat.TotalSeconds <= 10)
                     {
-                        string restartReason = $"检测到主线程无响应，自动重启。心跳超时 {sinceHeartbeat.TotalSeconds:F1} 秒。";
-                        LogHelper.NewLog(restartReason);
-                        WriteCrashLog(restartReason);
-                        SyncCrashActionFromSettings();
-                        if (CrashAction == CrashActionType.SilentRestart)
+                        if (StartupCount.GetCount() > 0)
                         {
-                            TryRestartWithBreaker(restartReason);
+                            StartupCount.Reset();
+                            LogHelper.WriteLogToFile("应用已稳定运行30秒，重置崩溃重启计数器");
                         }
+
+                        return;
+                    }
+
+                    string restartReason = $"检测到主线程无响应，自动重启。心跳超时 {sinceHeartbeat.TotalSeconds:F1} 秒。";
+                    LogHelper.NewLog(restartReason);
+                    WriteCrashLog(restartReason);
+                    SyncCrashActionFromSettings();
+                    if (CrashAction == CrashActionType.SilentRestart)
+                    {
+                        TryRestartWithBreaker(restartReason);
                     }
                 }
             }, null, 0, 3000);
@@ -2055,6 +2098,14 @@ namespace Ink_Canvas
                         }
                         Thread.Sleep(2000);
                     }
+
+                    // 主进程退出后再次检查退出信号，覆盖信号写入与进程退出之间的竞态。
+                    if (File.Exists(exitSignalFile))
+                    {
+                        try { File.Delete(exitSignalFile); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+                        Environment.Exit(0);
+                    }
+
                     // 主进程异常退出，自动重启前判断崩溃后操作
                     SyncCrashActionFromSettings(); // 同步设置
 

@@ -1,3 +1,4 @@
+using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,6 +27,8 @@ namespace Ink_Canvas.Controls
 
         public Image PreviewImageControl => PreviewImage;
         public Button CloseButtonControl => Shell?.CloseButtonControl;
+        public ToggleSwitch TwoFingerZoomToggle => ToggleSwitchEnableTwoFingerZoom;
+        public ToggleSwitch TwoFingerRotationToggle => ToggleSwitchEnableTwoFingerRotation;
 
         public BoardRoamingPopupContent()
         {
