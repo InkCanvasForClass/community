@@ -40,6 +40,12 @@ namespace Ink_Canvas
 
         internal void ActivateBoardRoamingMode()
         {
+            if (IsBoardRoamingMode)
+            {
+                ExitBoardRoamingMode();
+                return;
+            }
+
             if (currentMode != 1) return;
             if (IsCurrentPageFrozen)
             {
@@ -243,6 +249,47 @@ namespace Ink_Canvas
                 _isBoardRoamingSingleFingerPending = false;
                 EndBoardRoaming();
             }
+        }
+
+        /// <summary>
+        /// 退出漫游并返回批注模式。
+        /// </summary>
+        internal void ExitBoardRoamingMode()
+        {
+            if (!IsBoardRoamingMode)
+            {
+                if (BoardRoamingPopup != null)
+                    BoardRoamingPopup.IsOpen = false;
+                ResetBoardRoamingGestureState();
+                return;
+            }
+
+            var hadActiveBoardRoamingInput = _boardRoamingContacts.Count > 0
+                || _isBoardRoamingPointerDown
+                || _isBoardRoamingTwoFingerGesture
+                || _isBoardRoamingPopupDragActive;
+
+            if (_isBoardRoamingTwoFingerGesture)
+                EndBoardRoamingTwoFingerGesture();
+            else if (_isBoardRoamingPopupDragActive)
+                EndBoardRoamingPopupDrag();
+            else
+                EndBoardRoaming();
+
+            ResetBoardRoamingGestureState();
+            if (hadActiveBoardRoamingInput)
+            {
+                inkCanvas.ReleaseStylusCapture();
+                inkCanvas.ReleaseAllTouchCaptures();
+                ViewboxFloatingBar.IsHitTestVisible = true;
+                BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+            }
+            if (BoardRoamingPopup != null)
+                BoardRoamingPopup.IsOpen = false;
+
+            // 复用现有批注入口，确保编辑模式、工具栏高亮和原生墨迹状态同步。
+            PenIcon_Click(null, null);
+            SetCursorBasedOnEditingMode(inkCanvas);
         }
 
         private void BeginBoardRoamingTwoFingerGesture()
@@ -452,6 +499,7 @@ namespace Ink_Canvas
             BoardRoamingPopupContent.ViewportDragCompleted += EndBoardRoamingPopupDrag;
             if (BoardRoamingPopupContent.CloseButtonControl != null)
             {
+                BoardRoamingPopupContent.CloseButtonControl.Click += (s, e) => ExitBoardRoamingMode();
                 // 按下阶段立即关闭，避免首次点击被拖拽/捕获等逻辑吞掉导致需要点两次。
                 BoardRoamingPopupContent.CloseButtonControl.PreviewMouseLeftButtonDown +=
                     BoardRoamingCloseButton_PreviewInputDown;
@@ -467,13 +515,13 @@ namespace Ink_Canvas
 
         private void BoardRoamingCloseButton_PreviewInputDown(object sender, MouseButtonEventArgs e)
         {
-            BoardRoamingPopup.IsOpen = false;
+            ExitBoardRoamingMode();
             e.Handled = true;
         }
 
         private void BoardRoamingCloseButton_PreviewStylusDown(object sender, StylusDownEventArgs e)
         {
-            BoardRoamingPopup.IsOpen = false;
+            ExitBoardRoamingMode();
             e.Handled = true;
         }
 
