@@ -74,6 +74,14 @@ namespace Ink_Canvas.Helpers
 
         public static void SwitchToUIATopMostAndRestart()
         {
+            TrySwitchToUIATopMostAndRestart();
+        }
+
+        /// <summary>
+        /// 尝试切换到 UIAccess 置顶并重启。失败时保留当前进程，自动回退到普通置顶。
+        /// </summary>
+        public static bool TrySwitchToUIATopMostAndRestart()
+        {
             try
             {
                 SettingsManager.Settings.Advanced.EnableUIAccessTopMost = true;
@@ -136,19 +144,32 @@ namespace Ink_Canvas.Helpers
 
                 if (started)
                 {
-                    Application.Current.Shutdown();
+                    Application.Current?.Shutdown();
+                    return true;
                 }
-                else
-                {
-                    App.IsAppExitByUser = false;
-                    App.IsUIAccessTopMostEnabled = false;
-                }
+
+                FallbackToNormalTopMost("UIA 置顶启动失败");
+                return false;
             }
             catch (Exception ex)
             {
-                App.IsAppExitByUser = false;
-                App.IsUIAccessTopMostEnabled = false;
-                Debug.WriteLine($"切换到UIA置顶模式时出错: {ex.Message}");
+                FallbackToNormalTopMost($"切换到 UIA 置顶时出错: {ex.Message}");
+                return false;
+            }
+        }
+
+        private static void FallbackToNormalTopMost(string reason)
+        {
+            App.IsAppExitByUser = false;
+            App.IsUIAccessTopMostEnabled = false;
+
+            try
+            {
+                WindowSettingsHelper.FallbackToNormalTopMost(Application.Current?.MainWindow, reason);
+            }
+            catch (Exception fallbackEx)
+            {
+                Debug.WriteLine($"回退到普通置顶时出错: {fallbackEx.Message}");
             }
         }
 

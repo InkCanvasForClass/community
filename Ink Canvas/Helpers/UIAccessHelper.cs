@@ -368,7 +368,7 @@ namespace Ink_Canvas.Helpers
                         }
 
                         LogHelper.WriteLogToFile("UIAccess | 已为普通用户令牌设置 UIAccess");
-                        return LaunchWithToken(userToken, extraArgs);
+                        return LaunchWithToken(userToken, AppendExtraArg(extraArgs, "--uia-child"));
                     }
                     finally
                     {
