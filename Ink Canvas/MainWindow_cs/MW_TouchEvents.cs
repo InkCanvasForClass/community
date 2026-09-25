@@ -2545,8 +2545,8 @@ namespace Ink_Canvas
             }
 
             if (IsBoardRoamingMode
-                && (_boardRoamingContactIds.Count > 0
-                    || _isBoardRoamingMultiTouchSuppressed
+                && (_boardRoamingContacts.Count > 0
+                    || _isBoardRoamingTwoFingerGesture
                     || (e.Manipulators?.Count() ?? 0) != 1))
             {
                 e.Handled = true;
