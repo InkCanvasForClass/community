@@ -36,6 +36,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 {
                     CardEnablePressureTouchMode.IsOn = settings.Canvas.EnablePressureTouchMode;
                     CardDisablePressure.IsOn = settings.Canvas.DisablePressure;
+                    CardUseWinRTInk.IsOn = settings.Canvas.UseWinRTInk;
 
                     int curveMode = 0;
                     if (settings.Canvas.UseAdvancedBezierSmoothing) curveMode = 2;
@@ -122,6 +123,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!CardDisablePressure.IsOn || !SettingsManager.Settings.Canvas.EnablePressureTouchMode)
                 CardEnablePressureTouchMode.IsOn = SettingsManager.Settings.Canvas.EnablePressureTouchMode;
             SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchUseWinRTInk_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.UseWinRTInk = CardUseWinRTInk.IsOn;
+            SettingsManager.SaveSettingsToFile();
+            // 切换实验性墨迹管线：让 MainWindow 按当前逻辑工具挂载/卸载系统湿墨。
+            (Application.Current.MainWindow as MainWindow)?.SyncWinRTInkPipelineWithLogicalTool();
         }
 
         private void ComboBoxCurveSmoothingMode_SelectionChanged(object sender, SelectionChangedEventArgs e)

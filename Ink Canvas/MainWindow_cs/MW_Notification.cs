@@ -185,7 +185,10 @@ namespace Ink_Canvas
 
         private void ApplyDynamicNotificationFloatingBarPlacement()
         {
-            if (DynamicNotification == null || ViewboxFloatingBar == null || ViewboxFloatingBar.Visibility != Visibility.Visible)
+            // 收纳或收纳动画期间浮动栏已移出可用区域，保留默认的顶部居中位置，避免通知跟随到屏幕外。
+            if (DynamicNotification == null || ViewboxFloatingBar == null ||
+                ViewboxFloatingBar.Visibility != Visibility.Visible ||
+                isFloatingBarFolded || isFloatingBarChangingHideMode)
             {
                 return;
             }

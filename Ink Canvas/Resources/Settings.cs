@@ -56,6 +56,9 @@ namespace Ink_Canvas
         [JsonProperty("notification")]
         public NotificationSettings Notification { get; set; } = new NotificationSettings();
 
+        [JsonProperty("timer")]
+        public TimerSettings Timer { get; set; } = new TimerSettings();
+
         [JsonProperty("toolbar")]
         public ToolbarLayoutSettings Toolbar { get; set; } = new ToolbarLayoutSettings();
 
@@ -300,6 +303,12 @@ namespace Ink_Canvas
         public bool IsDictationDoNotDisturbInWhiteboardEnabled { get; set; } = true;
     }
 
+    public class TimerSettings
+    {
+        [JsonProperty("isOpenTransparency")]
+        public bool IsOpenTransparency { get; set; } = true;
+    }
+
     public class Security
     {
         [JsonProperty("passwordEnabled")]
@@ -417,6 +426,9 @@ namespace Ink_Canvas
         public bool IsCompressPicturesUploaded { get; set; }
         [JsonProperty("enablePalmEraser")]
         public bool EnablePalmEraser { get; set; } = true;
+        /// <summary>实验性：启用 WinRT 系统墨迹管线（CoreInkIndependentInputSource + 系统 Wet Ink），关闭时回退 WPF 原生墨迹。</summary>
+        [JsonProperty("useWinRTInk")]
+        public bool UseWinRTInk { get; set; } = false;
         [JsonProperty("palmEraserSensitivity")]
         public int PalmEraserSensitivity { get; set; } = 0; // 0-低敏感度, 1-中敏感度, 2-高敏感度
         [JsonProperty("clearCanvasAlsoClearImages")]

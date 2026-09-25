@@ -2544,6 +2544,15 @@ namespace Ink_Canvas
                 return;
             }
 
+            if (IsBoardRoamingMode
+                && (_boardRoamingContacts.Count > 0
+                    || _isBoardRoamingTwoFingerGesture
+                    || (e.Manipulators?.Count() ?? 0) != 1))
+            {
+                e.Handled = true;
+                return;
+            }
+
             // 插件画布手势（如 PDF 阅读器双指缩放/平移）：双指一律优先转发。
             // 插件返回 true 表示已接管，宿主跳过默认的墨迹/画布变换。
             if (_pluginCanvasGestureHandler != null && (e.Manipulators?.Count() ?? 0) >= 2)
@@ -2569,6 +2578,9 @@ namespace Ink_Canvas
 
             if (shouldUseTwoFingerGesture)
             {
+                // 双指手势接管画布变换：取消 WinRT 墨迹管线的在途湿墨，避免留下残留墨迹。
+                CancelActiveWinRTInk();
+
                 var md = e.DeltaManipulation;
                 var trans = md.Translation; // 获得位移矢量
 
@@ -2606,75 +2618,11 @@ namespace Ink_Canvas
                     m.ScaleAt(scale.X, scale.Y, center.X, center.Y); // 缩放
                 }
 
-                var strokes = inkCanvas.GetSelectedStrokes();
-                if (strokes.Count != 0)
-                {
-                    foreach (var stroke in strokes)
-                    {
-                        stroke.Transform(m, false);
-
-                        foreach (var circle in circles)
-                            if (stroke == circle.Stroke)
-                            {
-                                circle.R = GetDistance(circle.Stroke.StylusPoints[0].ToPoint(),
-                                    circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].ToPoint()) / 2;
-                                circle.Centroid = new Point(
-                                    (circle.Stroke.StylusPoints[0].X +
-                                     circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].X) / 2,
-                                    (circle.Stroke.StylusPoints[0].Y +
-                                     circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].Y) / 2);
-                                break;
-                            }
-
-                        if (!enableZoom) continue;
-                        try
-                        {
-                            stroke.DrawingAttributes.Width *= md.Scale.X;
-                            stroke.DrawingAttributes.Height *= md.Scale.Y;
-                        }
-                        catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
-                    }
-                }
-                else
-                {
-                    if (enableZoom)
-                    {
-                        foreach (var stroke in inkCanvas.Strokes)
-                        {
-                            stroke.Transform(m, false);
-                            try
-                            {
-                                stroke.DrawingAttributes.Width *= md.Scale.X;
-                                stroke.DrawingAttributes.Height *= md.Scale.Y;
-                            }
-                            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
-                        }
-
-                        // 同时变换画布上的图片元素
-                        TransformCanvasImages(m);
-                    }
-                    else
-                    {
-                        foreach (var stroke in inkCanvas.Strokes) stroke.Transform(m, false);
-
-                        // 同时变换画布上的图片元素
-                        TransformCanvasImages(m);
-                    }
-
-                    foreach (var circle in circles)
-                    {
-                        circle.R = GetDistance(circle.Stroke.StylusPoints[0].ToPoint(),
-                            circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].ToPoint()) / 2;
-                        circle.Centroid = new Point(
-                            (circle.Stroke.StylusPoints[0].X +
-                             circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].X) / 2,
-                            (circle.Stroke.StylusPoints[0].Y +
-                             circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].Y) / 2
-                        );
-                    }
-
-                    PublishPluginCanvasViewportTransform(m);
-                }
+                ApplyWinRTCanvasGestureMatrix(
+                    m,
+                    enableZoom,
+                    md.Scale.X,
+                    md.Scale.Y);
             }
         }
 

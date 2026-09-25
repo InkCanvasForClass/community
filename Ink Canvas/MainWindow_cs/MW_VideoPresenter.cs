@@ -1604,6 +1604,10 @@ namespace Ink_Canvas
         {
             if (!_isVideoPresenterSpecialMode) return;
 
+            // 展台双指捏合/拖动接管预览变换：取消 WinRT 墨迹在途湿墨。
+            if ((e.Manipulators?.Count() ?? 0) >= 2)
+                CancelActiveWinRTInk();
+
             try
             {
                 var delta = e.DeltaManipulation;
