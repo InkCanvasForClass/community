@@ -50,6 +50,7 @@ namespace Ink_Canvas
         private long _winRTInkDryId;
 
         private EventHandler _winRTInkLocationChangedHandler;
+        private SizeChangedEventHandler _winRTInkSizeChangedHandler;
         private DependencyPropertyChangedEventHandler _winRTInkIsVisibleChangedHandler;
         private PropertyDataChangedEventHandler _winRTInkAttributesChangedHandler;
 
@@ -262,6 +263,12 @@ namespace Ink_Canvas
                 LocationChanged += _winRTInkLocationChangedHandler;
             }
 
+            if (_winRTInkSizeChangedHandler == null)
+            {
+                _winRTInkSizeChangedHandler = (_, __) => UpdateWinRTInkTarget();
+                SizeChanged += _winRTInkSizeChangedHandler;
+            }
+
             if (_winRTInkIsVisibleChangedHandler == null)
             {
                 _winRTInkIsVisibleChangedHandler = (_, __) => UpdateWinRTInkTarget();
@@ -284,6 +291,12 @@ namespace Ink_Canvas
             {
                 IsVisibleChanged -= _winRTInkIsVisibleChangedHandler;
                 _winRTInkIsVisibleChangedHandler = null;
+            }
+
+            if (_winRTInkSizeChangedHandler != null)
+            {
+                SizeChanged -= _winRTInkSizeChangedHandler;
+                _winRTInkSizeChangedHandler = null;
             }
 
             StateChanged -= WinRTInk_StateChanged;

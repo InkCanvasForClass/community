@@ -195,6 +195,31 @@ namespace Ink_Canvas.Ink.WinRT
                 return;
             }
 
+            // Resolve chrome before touching the touch-contact/gesture state. If the first
+            // contact lands on a toolbar and the second contact lands on the canvas, the
+            // toolbar pointer must remain a forwarded mouse interaction, not become part of
+            // the two-finger gesture.
+            var result = _classifyPointer(e);
+            LogGatePress(device, e, result.ToString());
+            if (result == PointerGateResult.BlockAndForward)
+            {
+                e.Handled = true;
+                _chromeForwardedPointers.Add(pointerId);
+                if (_mouseForwardingPointerId == 0)
+                {
+                    _mouseForwardingPointerId = pointerId;
+                    try { _onChromePointerDown?.Invoke(e); }
+                    catch { /* forwarding is best-effort */ }
+                }
+                return;
+            }
+
+            if (result != PointerGateResult.AllowInk)
+            {
+                e.Handled = true;
+                return;
+            }
+
             if (device == PointerDeviceType.Touch)
             {
                 TrackTouchPress(pointerId, position);
@@ -224,52 +249,22 @@ namespace Ink_Canvas.Ink.WinRT
                         return;
                     }
                 }
-            }
 
-            // Chrome / foreign-window classification: pointer input that reaches the ink
-            // HWND bypasses the overlay WM_NCHITTEST pass-through, so the classifier below
-            // is the authoritative gate. It also decides whether a blocked press should be
-            // re-dispatched to the window under the pointer (BlockAndForward).
-            var result = _classifyPointer(e);
-            LogGatePress(device, e, result.ToString());
-            switch (result)
-            {
-                case PointerGateResult.AllowInk:
-                    if (device == PointerDeviceType.Touch && !_multiTouchWriting
-                        && _activeTouchPointers.Count >= 2)
-                    {
-                        // With both multi-touch writing and two-finger gestures disabled,
-                        // preserve the legacy single-contact behavior.
-                        e.Handled = true;
-                        return;
-                    }
-
-                    if (device == PointerDeviceType.Touch)
-                    {
-                        try { _onTouchPointerPress?.Invoke(pointerId, position); }
-                        catch { /* tracking is best-effort */ }
-                    }
-
-                    _inkingPointers.Add(pointerId);
-                    try { _onInkPointerPress?.Invoke(pointerId, device, position); }
-                    catch { /* tracking is best-effort */ }
-                    return;
-
-                case PointerGateResult.BlockAndForward:
-                    e.Handled = true;
-                    _chromeForwardedPointers.Add(pointerId);
-                    if (_mouseForwardingPointerId == 0)
-                    {
-                        _mouseForwardingPointerId = pointerId;
-                        try { _onChromePointerDown?.Invoke(e); }
-                        catch { /* forwarding is best-effort */ }
-                    }
-                    return;
-
-                default:
+                if (!_multiTouchWriting && _activeTouchPointers.Count >= 2)
+                {
+                    // With both multi-touch writing and two-finger gestures disabled,
+                    // preserve the legacy single-contact behavior.
                     e.Handled = true;
                     return;
+                }
+
+                try { _onTouchPointerPress?.Invoke(pointerId, position); }
+                catch { /* tracking is best-effort */ }
             }
+
+            _inkingPointers.Add(pointerId);
+            try { _onInkPointerPress?.Invoke(pointerId, device, position); }
+            catch { /* tracking is best-effort */ }
         }
 
         public void OnPointerMoving(CoreInkIndependentInputSource sender, PointerEventArgs e)

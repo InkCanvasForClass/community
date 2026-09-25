@@ -120,8 +120,7 @@ namespace Ink_Canvas.Ink.WinRT
         {
             try
             {
-                _callback();
-                return 0;
+                return _callback();
             }
             catch (Exception ex)
             {
