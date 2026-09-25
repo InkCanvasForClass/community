@@ -273,6 +273,7 @@ namespace Ink_Canvas.Helpers
         {
             public InterceptType Type { get; set; }
             public string ProcessName { get; set; }
+            public List<string> ProcessNameAliases { get; set; } = new List<string>();
             public string WindowTitlePattern { get; set; }
             public string ClassNamePattern { get; set; }
             public bool IsEnabled { get; set; }
@@ -304,6 +305,7 @@ namespace Ink_Canvas.Helpers
 
         private readonly Dictionary<InterceptType, InterceptRule> _interceptRules;
         private readonly Dictionary<IntPtr, InterceptType> _interceptedWindows;
+        private readonly object _scanLock = new object();
         private readonly Timer _scanTimer;
         private readonly Dispatcher _dispatcher;
         private bool _isRunning;
@@ -715,6 +717,7 @@ namespace Ink_Canvas.Helpers
             {
                 Type = InterceptType.IntelligentClassPPTFloating,
                 ProcessName = "IntelligentClass",
+                ProcessNameAliases = new List<string> { "POWERPNT" },
                 WindowTitlePattern = "",
                 ClassNamePattern = "HwndWrapper[IntelligentClass.Office.PowerPoint.vsto|vstolocal;VSTA_Main;",
                 IsEnabled = true,
@@ -775,8 +778,15 @@ namespace Ink_Canvas.Helpers
             _isRunning = false;
             _scanTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
-            // 恢复所有被拦截的窗口
-            RestoreAllWindows();
+            // 自动更新重启时由新进程接管拦截，避免旧进程退出瞬间把目标窗口恢复并抢到前台。
+            if (!App.IsUpdateInstalling)
+            {
+                RestoreAllWindows();
+            }
+            else
+            {
+                LogHelper.WriteLogToFile("自动更新期间跳过恢复悬浮窗", LogHelper.LogType.Trace);
+            }
         }
 
         /// <summary>
@@ -878,17 +888,19 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public void RestoreAllWindows()
         {
-            var windowsToRestore = new List<IntPtr>(_interceptedWindows.Keys);
-            var restoredCount = 0;
-
-            foreach (var hWnd in windowsToRestore)
+            lock (_scanLock)
             {
-                if (RestoreWindow(new HWND(hWnd)))
+                var windowsToRestore = new List<IntPtr>(_interceptedWindows.Keys);
+                var restoredCount = 0;
+
+                foreach (var hWnd in windowsToRestore)
                 {
-                    restoredCount++;
+                    if (RestoreWindow(new HWND(hWnd)))
+                    {
+                        restoredCount++;
+                    }
                 }
             }
-
         }
 
         /// <summary>
@@ -896,24 +908,26 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public void RestoreWindowsByType(InterceptType type)
         {
-            var windowsToRestore = new List<IntPtr>();
-            foreach (var kvp in _interceptedWindows)
+            lock (_scanLock)
             {
-                if (kvp.Value == type)
+                var windowsToRestore = new List<IntPtr>();
+                foreach (var kvp in _interceptedWindows)
                 {
-                    windowsToRestore.Add(kvp.Key);
+                    if (kvp.Value == type)
+                    {
+                        windowsToRestore.Add(kvp.Key);
+                    }
+                }
+
+                var restoredCount = 0;
+                foreach (var hWnd in windowsToRestore)
+                {
+                    if (RestoreWindow(new HWND(hWnd)))
+                    {
+                        restoredCount++;
+                    }
                 }
             }
-
-            var restoredCount = 0;
-            foreach (var hWnd in windowsToRestore)
-            {
-                if (RestoreWindow(new HWND(hWnd)))
-                {
-                    restoredCount++;
-                }
-            }
-
         }
 
         /// <summary>
@@ -928,18 +942,13 @@ namespace Ink_Canvas.Helpers
 
             if (PInvoke.IsWindow(hwnd))
             {
-                // 使用多种方法确保窗口恢复显示
+                // 恢复显示但不抢前台，也不改变窗口原有的 Z 序
                 PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_RESTORE);
-                PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_SHOW);
-                PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_SHOWNORMAL);
-
-                // 将窗口置于前台并显示
+                PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_SHOWNOACTIVATE);
                 PInvoke.SetWindowPos(hwnd, HWND.Null, 0, 0, 0, 0,
-                    SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOZORDER | SET_WINDOW_POS_FLAGS.SWP_SHOWWINDOW);
-
-                // 强制将窗口带到前台
-                PInvoke.BringWindowToTop(hwnd);
-                PInvoke.SetForegroundWindow(hwnd);
+                    SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE |
+                    SET_WINDOW_POS_FLAGS.SWP_NOZORDER | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE |
+                    SET_WINDOW_POS_FLAGS.SWP_SHOWWINDOW);
 
                 _interceptedWindows.Remove(hWnd);
 
@@ -985,7 +994,11 @@ namespace Ink_Canvas.Helpers
         {
             if (!_isRunning) return;
 
-            try
+            lock (_scanLock)
+            {
+                if (!_isRunning) return;
+
+                try
             {
                 // 简化的扫描逻辑
                 var interceptedCount = 0;
@@ -1035,6 +1048,7 @@ namespace Ink_Canvas.Helpers
             {
                 LogHelper.WriteLogToFile($"扫描窗口时发生错误: {ex.Message}", LogHelper.LogType.Error);
                 _consecutiveEmptyScans++;
+            }
             }
         }
 
@@ -1124,7 +1138,10 @@ namespace Ink_Canvas.Helpers
                 if (!string.IsNullOrEmpty(rule.ProcessName))
                 {
                     var processName = GetWindowProcessName(hwnd);
-                    if (!string.Equals(processName, rule.ProcessName, StringComparison.OrdinalIgnoreCase))
+                    bool processMatched = string.Equals(processName, rule.ProcessName, StringComparison.OrdinalIgnoreCase)
+                        || rule.ProcessNameAliases.Any(alias =>
+                            string.Equals(processName, alias, StringComparison.OrdinalIgnoreCase));
+                    if (!processMatched)
                         return false;
                 }
 
@@ -1332,8 +1349,21 @@ namespace Ink_Canvas.Helpers
                     return;
                 }
 
-                // 直接隐藏窗口，不发送关闭消息
+                // 直接隐藏窗口，不发送关闭消息；如果窗口仍报告可见，再用 SetWindowPos 补一次隐藏。
                 PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_HIDE);
+                if (PInvoke.IsWindowVisible(hwnd))
+                {
+                    PInvoke.SetWindowPos(hwnd, HWND.Null, 0, 0, 0, 0,
+                        SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE |
+                        SET_WINDOW_POS_FLAGS.SWP_NOZORDER | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE |
+                        SET_WINDOW_POS_FLAGS.SWP_HIDEWINDOW);
+                }
+
+                if (PInvoke.IsWindowVisible(hwnd))
+                {
+                    LogHelper.WriteLogToFile($"隐藏悬浮窗失败: {hWnd} ({rule.Type})", LogHelper.LogType.Warning);
+                    return;
+                }
 
                 // 记录拦截的窗口
                 _interceptedWindows[hWnd] = rule.Type;
@@ -1451,8 +1481,11 @@ namespace Ink_Canvas.Helpers
             Stop();
             _scanTimer?.Dispose();
 
-            // 恢复所有被拦截的窗口
-            RestoreAllWindows();
+            // 自动更新时保持隐藏状态交给新进程接管，正常退出才恢复窗口。
+            if (!App.IsUpdateInstalling)
+            {
+                RestoreAllWindows();
+            }
 
             _disposed = true;
         }
