@@ -250,6 +250,7 @@ namespace Ink_Canvas
             DispatcherUnhandledException += App_DispatcherUnhandledException;
             Exit += App_Exit;
             StartHeartbeatMonitor();
+            LogHelper.WriteLogToFile("[Crash] 已注册应用启动、退出和未处理异常事件", LogHelper.LogType.Info);
 
             // 初始化全局异常和进程结束处理
             InitializeCrashListeners();
@@ -367,6 +368,7 @@ namespace Ink_Canvas
         {
             if (crashListenersInitialized) return;
 
+            LogHelper.WriteLogToFile("[Crash] 开始初始化崩溃与进程退出监听器", LogHelper.LogType.Info);
             try
             {
                 // 确保崩溃日志目录存在
@@ -401,7 +403,7 @@ namespace Ink_Canvas
                 }
 
                 crashListenersInitialized = true;
-                LogHelper.WriteLogToFile("已初始化崩溃监听器");
+                LogHelper.WriteLogToFile("[Crash] 崩溃与进程退出监听器初始化完成", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
@@ -633,6 +635,10 @@ namespace Ink_Canvas
             try
             {
                 var exception = e.ExceptionObject as Exception;
+                var exceptionTypeName = exception == null ? "<unknown>" : exception.GetType().FullName;
+                LogHelper.WriteLogToFile(
+                    $"[Crash] 捕获非 UI 线程未处理异常: type={exceptionTypeName}, terminating={e.IsTerminating}",
+                    LogHelper.LogType.Info);
 
                 if (exception is System.Runtime.InteropServices.COMException comEx)
                 {
@@ -678,6 +684,7 @@ namespace Ink_Canvas
 
                 string errorMessage = exception?.ToString() ?? "未知异常";
                 lastErrorMessage = errorMessage;
+                LogHelper.WriteLogToFile("[Crash] 非 UI 异常未被安全分类，写入崩溃记录", LogHelper.LogType.Info);
 
                 WriteCrashLog($"捕获到未处理的异常: {errorMessage}");
 
@@ -709,6 +716,7 @@ namespace Ink_Canvas
             CleanupTerminationMonitoring();
             TimeSpan runDuration = DateTime.Now - appStartTime;
             string durationText = FormatTimeSpan(runDuration);
+            LogHelper.WriteLogToFile($"[Exit] 进程退出事件: duration={durationText}", LogHelper.LogType.Info);
             WriteCrashLog($"应用程序退出，运行时长: {durationText}");
 
             // 如果有最后错误消息，记录到日志
@@ -952,6 +960,10 @@ namespace Ink_Canvas
 
         private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
+            var uiExceptionTypeName = e.Exception == null ? "<unknown>" : e.Exception.GetType().FullName;
+            LogHelper.WriteLogToFile(
+                $"[Crash] 捕获 UI 线程未处理异常: type={uiExceptionTypeName}",
+                LogHelper.LogType.Info);
             if (e.Exception is System.Runtime.InteropServices.COMException comEx)
             {
                 var hr = (uint)comEx.HResult;
@@ -1013,6 +1025,7 @@ namespace Ink_Canvas
             e.Handled = true;
 
             SyncCrashActionFromSettings(); // 崩溃时同步最新设置
+            LogHelper.WriteLogToFile($"[Crash] UI 异常处理策略: {CrashAction}", LogHelper.LogType.Info);
 
             if (CrashAction == CrashActionType.ShowCrashWindow)
             {
@@ -1051,6 +1064,9 @@ namespace Ink_Canvas
         async void App_Startup(object sender, StartupEventArgs e)
         {
             appStartTime = DateTime.Now;
+            LogHelper.WriteLogToFile(
+                $"[Startup] App_Startup 开始，参数 {e.Args.Length} 个: {string.Join(" ", e.Args)}",
+                LogHelper.LogType.Info);
 
             // ARM64 渲染模式自适应：Surface Pro X 等 ARM64 设备走 WARP 软件光栅，
             // WPF 默认按 GPU 路径会触发无效 GPU 句柄的探测耗时与偶发 fallback。
@@ -1459,6 +1475,7 @@ namespace Ink_Canvas
             }
             var mainWindow = new MainWindow();
             MainWindow = mainWindow;
+            LogHelper.WriteLogToFile($"[Startup] 主窗口已创建，启动模式={CurrentStartupMode}", LogHelper.LogType.Info);
 
             // 最快模式将插件服务注册延迟到首帧显示之后，其他模式在显示主窗口前注册。
             if (!IsFastestStartupMode)
@@ -1507,6 +1524,7 @@ namespace Ink_Canvas
 
             mainWindow.Show();
             MemoryBreakdownHelper.StartAutomaticDumpMonitor();
+            LogHelper.WriteLogToFile("[Startup] 主窗口已显示，进入应用级延迟任务阶段", LogHelper.LogType.Info);
 
             if (IsFastestStartupMode)
             {
@@ -2127,6 +2145,9 @@ namespace Ink_Canvas
         private void App_Exit(object sender, ExitEventArgs e)
         {
             isAppExiting = true;
+            LogHelper.WriteLogToFile(
+                $"[Exit] 开始应用退出清理: user={IsAppExitByUser}, code={e.ApplicationExitCode}, crashAction={CrashAction}",
+                LogHelper.LogType.Info);
 
             // 在卸载插件前广播 AppExiting，让插件有机会清理自身资源。
             try
@@ -2146,7 +2167,9 @@ namespace Ink_Canvas
 
             try
             {
+                LogHelper.WriteLogToFile("[Exit] 开始释放 IACore IPC 客户端", LogHelper.LogType.Info);
                 IpcIACoreClient.Instance.Dispose();
+                LogHelper.WriteLogToFile("[Exit] IACore IPC 客户端已释放", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
@@ -2167,9 +2190,9 @@ namespace Ink_Canvas
             // 卸载所有插件
             try
             {
-                LogHelper.WriteLogToFile("正在卸载插件...");
+                LogHelper.WriteLogToFile("[Exit] 开始卸载插件", LogHelper.LogType.Info);
                 PluginManager.Instance.UnloadAll();
-                LogHelper.WriteLogToFile("插件卸载完成");
+                LogHelper.WriteLogToFile("[Exit] 插件卸载完成", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
@@ -2214,6 +2237,10 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile($"记录设备标识符退出信息失败: {deviceEx.Message}", LogHelper.LogType.Error);
                 }
 
+                LogHelper.WriteLogToFile(
+                    $"[Exit] 记录退出状态完成: user={IsAppExitByUser}, watchdog={(IsAppExitByUser ? "signal" : "preserved")}",
+                    LogHelper.LogType.Info);
+
                 if (IsAppExitByUser)
                 {
                     // 写入退出信号文件，通知看门狗正常退出
@@ -2234,6 +2261,8 @@ namespace Ink_Canvas
                 }
                 catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
             }
+
+            LogHelper.WriteLogToFile("[Exit] 应用退出清理流程结束", LogHelper.LogType.Info);
         }
     }
 }

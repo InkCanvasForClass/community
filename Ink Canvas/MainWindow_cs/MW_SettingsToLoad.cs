@@ -643,6 +643,9 @@ namespace Ink_Canvas
                 UpdateQuickColorPaletteIndicator(inkCanvas.DefaultDrawingAttributes.Color);
             }), System.Windows.Threading.DispatcherPriority.Loaded);
 
+            LogHelper.WriteLogToFile(
+                $"[Settings] 设置加载完成: isStartup={isStartup}, theme={Settings.Appearance?.Theme}, language={Settings.Appearance?.Language}, pptLink={Settings.PowerPointSettings?.PPTLinkMode}",
+                LogHelper.LogType.Info);
         }
 
         /// <summary>

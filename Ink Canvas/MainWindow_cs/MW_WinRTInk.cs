@@ -191,8 +191,8 @@ namespace Ink_Canvas
                 UpdateWinRTInkTarget();
 
                 LogHelper.WriteLogToFile(
-                    "[WinRTInk] InkDesktopHost + system wet ink pipeline started.",
-                    LogHelper.LogType.Event);
+                    $"[WinRTInk] 新墨迹管线已挂载: 覆盖层 {config.WidthPx}x{config.HeightPx}px, 已通知失败={_winRTInkDisabled}",
+                    LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
@@ -209,6 +209,7 @@ namespace Ink_Canvas
             if (!_winRTInkStarted && _winRTInkHost == null)
                 return;
 
+            LogHelper.WriteLogToFile("[WinRTInk] 开始卸载新墨迹管线", LogHelper.LogType.Info);
             UnwireWinRTInkGeometryListeners();
             ShutdownWinRTInkPauseStraighten();
             _winRTInkTwoFingerGestureActive = false;
@@ -253,6 +254,10 @@ namespace Ink_Canvas
                 try { inkCanvas.EditingMode = InkCanvasEditingMode.Ink; }
                 catch { /* best-effort fallback to WPF ink */ }
             }
+
+            LogHelper.WriteLogToFile(
+                $"[WinRTInk] 新墨迹管线已卸载，回退到旧墨迹 (editingMode={inkCanvas?.EditingMode})",
+                LogHelper.LogType.Info);
         }
 
         private void WireWinRTInkGeometryListeners()

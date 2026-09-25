@@ -118,11 +118,13 @@ namespace Ink_Canvas.Helpers
                 _isMonitoring = true;
 
                 _samplingTimer = new Timer(OnSample, null, SamplingIntervalMs, SamplingIntervalMs);
+                LogHelper.WriteLogToFile("[Perf] 性能监测已启动", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"PerformanceMonitorHelper.Start: {ex.Message}");
                 _isMonitoring = false;
+                LogHelper.WriteLogToFile($"[Perf] 性能监测启动失败: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
 

@@ -259,6 +259,9 @@ namespace Ink_Canvas
         {
             try
             {
+                LogHelper.WriteLogToFile(
+                    $"[PPT] 开始初始化管理器: linkMode={Settings.PowerPointSettings.PPTLinkMode}, supportWps={Settings.PowerPointSettings.IsSupportWPS}",
+                    LogHelper.LogType.Info);
                 // 初始化长按定时器
                 InitializeLongPressTimer();
                 WirePPTNavBars();
@@ -331,7 +334,9 @@ namespace Ink_Canvas
                 _pptUIManager.EnablePPTButtonPageClickable = Settings.PowerPointSettings.EnablePPTButtonPageClickable;
                 _pptUIManager.EnablePPTButtonLongPressPageTurn = Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn;
 
-                LogHelper.WriteLogToFile("PPT管理器初始化完成", LogHelper.LogType.Event);
+                LogHelper.WriteLogToFile(
+                    $"[PPT] 管理器初始化完成: manager={_pptManager?.GetType().Name}, autoSaveInk={_singlePPTInkManager?.IsAutoSaveEnabled}",
+                    LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
@@ -350,7 +355,7 @@ namespace Ink_Canvas
             if (Settings.PowerPointSettings.PowerPointSupport)
             {
                 _pptManager?.StartMonitoring();
-                LogHelper.WriteLogToFile("PPT监控已启动", LogHelper.LogType.Event);
+                LogHelper.WriteLogToFile("[PPT] 主窗口已启动 PPT 监控", LogHelper.LogType.Info);
             }
         }
 
@@ -370,7 +375,7 @@ namespace Ink_Canvas
             }
 
             _pptManager?.StopMonitoring();
-            LogHelper.WriteLogToFile("PPT监控已停止", LogHelper.LogType.Event);
+            LogHelper.WriteLogToFile("[PPT] 主窗口已停止 PPT 监控", LogHelper.LogType.Info);
         }
 
         #region PowerPoint Application Management
@@ -400,7 +405,7 @@ namespace Ink_Canvas
                 }
                 _powerPointProcessMonitorTimer.Start();
 
-                LogHelper.WriteLogToFile("PowerPoint应用程序守护已启动", LogHelper.LogType.Event);
+                LogHelper.WriteLogToFile("[PPT] PowerPoint 应用程序守护已启动", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
@@ -421,7 +426,7 @@ namespace Ink_Canvas
                 // 关闭PowerPoint应用程序（包括关机时）
                 ClosePowerPointApplication(isShutdown);
 
-                LogHelper.WriteLogToFile("PowerPoint应用程序守护已停止", LogHelper.LogType.Event);
+                LogHelper.WriteLogToFile("[PPT] PowerPoint 应用程序守护已停止", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
@@ -734,7 +739,7 @@ namespace Ink_Canvas
 
                 StopPPTOnlyVisibilityProbeTimer();
 
-                LogHelper.WriteLogToFile("PPT管理器已释放", LogHelper.LogType.Event);
+                LogHelper.WriteLogToFile("[PPT] PPT 管理器已释放", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
@@ -744,6 +749,7 @@ namespace Ink_Canvas
 
         internal void UnloadPPTModuleForShutdown()
         {
+            LogHelper.WriteLogToFile("[PPT] 开始执行关机清理", LogHelper.LogType.Info);
             try
             {
                 try
@@ -751,7 +757,7 @@ namespace Ink_Canvas
                     _longPressTimer?.Stop();
                     _powerPointProcessMonitorTimer?.Stop();
                     StopPPTOnlyVisibilityProbeTimer();
-                    LogHelper.WriteLogToFile("关机时已停止所有 PPT 相关定时器", LogHelper.LogType.Event);
+                    LogHelper.WriteLogToFile("[PPT] 关机时已停止所有相关定时器", LogHelper.LogType.Info);
                 }
                 catch (Exception ex)
                 {
@@ -762,6 +768,7 @@ namespace Ink_Canvas
                 if (Dispatcher == null || Dispatcher.CheckAccess())
                 {
                     DisposePPTManagers(isShutdown: true);
+                    LogHelper.WriteLogToFile("[PPT] 关机清理完成", LogHelper.LogType.Info);
                     return;
                 }
 
@@ -771,7 +778,11 @@ namespace Ink_Canvas
                     return;
                 }
 
-                Dispatcher.Invoke(() => DisposePPTManagers(isShutdown: true), DispatcherPriority.Send);
+                Dispatcher.Invoke(() =>
+                {
+                    DisposePPTManagers(isShutdown: true);
+                    LogHelper.WriteLogToFile("[PPT] 关机清理完成", LogHelper.LogType.Info);
+                }, DispatcherPriority.Send);
             }
             catch (TaskCanceledException ex)
             {
@@ -958,11 +969,11 @@ namespace Ink_Canvas
                         _exitPPTModeAfterDisconnectTimer?.Stop();
                         _exitPPTModeAfterDisconnectTimer = null;
                         SchedulePPTEnhancedPreviewPreload();
-                        LogHelper.WriteLogToFile("PPT连接已建立", LogHelper.LogType.Event);
+                        LogHelper.WriteLogToFile("[PPT] 连接已建立", LogHelper.LogType.Info);
                     }
                     else
                     {
-                        LogHelper.WriteLogToFile("PPT连接已断开", LogHelper.LogType.Event);
+                        LogHelper.WriteLogToFile("[PPT] 连接已断开，已安排模式清理", LogHelper.LogType.Info);
                         _singlePPTInkManager?.ClearAllStrokes();
                         CollapseAllPPTNavBarPreviews();
                         ResetPPTEnhancedPreviewCache();
@@ -1037,7 +1048,7 @@ namespace Ink_Canvas
 
                     SchedulePPTEnhancedPreviewPreload();
 
-                    LogHelper.WriteLogToFile($"已打开新演示文稿: {pres?.Name ?? agentState?.PresentationName ?? _pptManager?.GetPresentationName()}，墨迹状态已清理", LogHelper.LogType.Event);
+                    LogHelper.WriteLogToFile($"[PPT] 演示文稿已打开，已清理墨迹: {pres?.Name ?? agentState?.PresentationName ?? _pptManager?.GetPresentationName()}", LogHelper.LogType.Info);
                 });
             }
             catch (Exception ex)

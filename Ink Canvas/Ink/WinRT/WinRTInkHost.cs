@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -115,6 +116,10 @@ namespace Ink_Canvas.Ink.WinRT
                             "WinRT ink presenter failed to initialize.",
                             threadError);
                 }
+
+                LogHelper.WriteLogToFile(
+                    $"[WinRTInk] Presenter 已就绪: inkThread={_inkThreadId}, 尺寸={config.WidthPx}x{config.HeightPx}px",
+                    LogHelper.LogType.Info);
             }
         }
 

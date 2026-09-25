@@ -58,6 +58,7 @@ namespace Ink_Canvas.Plugins
             {
                 if (_listenTask != null) return;
                 _listenTask = Task.Run(ListenLoopAsync);
+                LogHelper.WriteLogToFile("[PluginIpc] 插件 IPC 总线服务端已启动", LogHelper.LogType.Info);
             }
         }
 

@@ -374,6 +374,9 @@ namespace Ink_Canvas
         {
             if (_isVideoPresenterSpecialMode) return;
             _isVideoPresenterSpecialMode = true;
+            LogHelper.WriteLogToFile(
+                $"[Booth] 进入视频展台拍摄模式: 页面={_boothCurrentPhotoIndex}, 编辑模式={inkCanvas?.EditingMode}",
+                LogHelper.LogType.Info);
 
             // 重置虚拟分页状态：进入特殊模式时默认回到直播页，但保留上次拍照列表
             _boothCurrentPhotoIndex = -1;
@@ -452,6 +455,7 @@ namespace Ink_Canvas
         {
             if (!_isVideoPresenterSpecialMode) return;
             _isVideoPresenterSpecialMode = false;
+            LogHelper.WriteLogToFile("[Booth] 退出视频展台拍摄模式，已丢弃拍摄态墨迹", LogHelper.LogType.Info);
 
             // 停止 A4 纸实时识别定时器并隐藏覆盖层
             StopPaperDetectTimer();

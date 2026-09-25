@@ -160,6 +160,9 @@ namespace Ink_Canvas.Helpers
                 _available = pipeReady;
                 if (!pipeReady)
                     ReleaseSharedMemory();
+                LogHelper.WriteLogToFile(
+                    $"[IACore] 辅助进程{(pipeReady ? "启动成功" : "启动失败（管道未就绪）")}: pid={_helperProcess?.Id}, 共享内存={_sharedMemoryCapacity / 1024 / 1024}MB",
+                    pipeReady ? LogHelper.LogType.Info : LogHelper.LogType.Warning);
                 return pipeReady;
             }
             catch
@@ -625,6 +628,10 @@ namespace Ink_Canvas.Helpers
             catch { }
             finally
             {
+                if (_helperProcess != null)
+                {
+                    LogHelper.WriteLogToFile("[IACore] 辅助进程已停止并释放共享内存", LogHelper.LogType.Info);
+                }
                 _helperProcess?.Dispose();
                 _helperProcess = null;
                 _available = false;

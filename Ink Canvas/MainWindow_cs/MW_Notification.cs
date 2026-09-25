@@ -79,6 +79,10 @@ namespace Ink_Canvas
                     }
                 }), DispatcherPriority.ContextIdle);
             }
+
+            LogHelper.WriteLogToFile(
+                $"[Notification] 通知提供商已初始化: 公告已启用={Settings?.Notification?.IsAnnouncementEnabled == true}, 公告服务实例={_announcementService != null}",
+                LogHelper.LogType.Info);
         }
 
         /// <summary>

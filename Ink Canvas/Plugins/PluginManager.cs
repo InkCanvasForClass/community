@@ -758,6 +758,10 @@ namespace Ink_Canvas.Plugins
                     LogError(string.Format("Error scanning DLL {0}", Path.GetFileName(dllFile)), ex);
                 }
             }
+
+            LogHelper.WriteLogToFile(
+                $"[Plugin] 插件扫描完成: 共发现 {_plugins.Count} 个 (其中已加载 {_plugins.Count(p => p.LoadStatus == PluginLoadStatus.Loaded)} 个)",
+                LogHelper.LogType.Info);
         }
 
         #endregion
@@ -777,11 +781,13 @@ namespace Ink_Canvas.Plugins
                 ResolveDependencyNode(nodes, node.Value, new List<DependencyNode>());
             }
 
-            return nodes
+            var order = nodes
                 .Where(x => x.Value.Plugin.LoadStatus == PluginLoadStatus.NotLoaded)
                 .OrderBy(x => x.Value.Depth)
                 .Select(x => x.Key)
                 .ToList();
+            LogHelper.WriteLogToFile($"[Plugin] 依赖解析完成，加载顺序: {string.Join(" -> ", order)}", LogHelper.LogType.Info);
+            return order;
         }
 
         private void ResolveDependencyNode(Dictionary<string, DependencyNode> allNodes, DependencyNode node, List<DependencyNode> walking)

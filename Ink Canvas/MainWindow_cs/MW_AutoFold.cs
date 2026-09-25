@@ -127,6 +127,7 @@ namespace Ink_Canvas
             {
                 isFloatingBarChangingHideMode = true;
                 isFloatingBarFolded = true;
+                LogHelper.WriteLogToFile($"[Toolbar] 浮动栏已折叠: 用户触发={foldFloatingBarByUser}, 自动折叠命令={isAutoFoldCommand}", LogHelper.LogType.Info);
                 HideEdgeExpandHint(); // 浮动栏收起后批注界面整体隐藏，扩展画布提示立即消失
                 if (currentMode != 0) CloseWhiteboardImmediately();
                 if (IsAnnotating)
@@ -401,6 +402,7 @@ namespace Ink_Canvas
             {
                 isFloatingBarChangingHideMode = true;
                 isFloatingBarFolded = false;
+                LogHelper.WriteLogToFile($"[Toolbar] 浮动栏已展开: 用户触发={unfoldFloatingBarByUser}", LogHelper.LogType.Info);
             });
 
             await Task.Delay(0);

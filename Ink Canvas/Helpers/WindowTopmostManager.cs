@@ -57,6 +57,9 @@ namespace Ink_Canvas.Helpers
                     ScanOpenWindows();
                 }
                 StartTimer();
+                LogHelper.WriteLogToFile(
+                    $"[Window] 置顶管理器已初始化: 主窗口置顶={_mainWindowTopmostEnabled}, 扫描现有窗口={!skipScan}",
+                    LogHelper.LogType.Info);
             });
         }
 
@@ -78,6 +81,7 @@ namespace Ink_Canvas.Helpers
 
                     ManagedWindows.Clear();
                     _mainWindow = null;
+                    LogHelper.WriteLogToFile("[Window] 置顶管理器已关闭，托管窗口已全部解绑", LogHelper.LogType.Info);
                 }
             });
         }

@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -48,9 +49,14 @@ namespace Ink_Canvas.UInk
                 if (File.Exists(tmpExtra))
                     AtomicReplace(tmpExtra, extraPath);
                 AtomicReplace(tmpMain, mainPath);
+
+                LogHelper.WriteLogToFile(
+                    $"[UInk] 两阶段提交完成: {mainPath}, 资源 {union.Count} 个, 主文件 {new FileInfo(mainPath).Length} 字节",
+                    LogHelper.LogType.Info);
             }
             catch
             {
+                LogHelper.WriteLogToFile($"[UInk] 两阶段提交失败，已回滚临时文件: {mainPath}", LogHelper.LogType.Error);
                 TryDelete(tmpMain);
                 TryDelete(tmpExtra);
                 throw;

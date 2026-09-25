@@ -35,6 +35,7 @@ namespace Ink_Canvas.IPC
 
             _cts = new CancellationTokenSource();
             _connectLoopTask = Task.Run(() => ConnectLoop(_cts.Token));
+            LogHelper.WriteLogToFile("[PPT-Agent] Pipe 客户端连接循环已启动", LogHelper.LogType.Info);
         }
 
         public void Stop()
@@ -47,6 +48,7 @@ namespace Ink_Canvas.IPC
                 ClosePipe();
                 FailPendingRequests(new IOException("PPT Agent pipe stopped."));
                 cts?.Dispose();
+                LogHelper.WriteLogToFile("[PPT-Agent] Pipe 客户端已停止", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
@@ -64,7 +66,11 @@ namespace Ink_Canvas.IPC
                 RequestId = Guid.NewGuid().ToString("N")
             };
 
-            return TrySendMessage(message);
+            var sent = TrySendMessage(message);
+            LogHelper.WriteLogToFile(
+                $"[PPT-Agent] 命令{(sent ? "已发送" : "发送失败")}: {command}",
+                sent ? LogHelper.LogType.Info : LogHelper.LogType.Warning);
+            return sent;
         }
 
         public async Task<T> SendRequestAsync<T>(string command, object data = null, int timeoutMilliseconds = PipeConstants.RequestTimeoutMilliseconds)
@@ -145,6 +151,7 @@ namespace Ink_Canvas.IPC
 
                     _pipe = pipe;
                     SetConnected(true);
+                    LogHelper.WriteLogToFile("[PPT-Agent] Pipe 已连接", LogHelper.LogType.Info);
                     SendCommand(PPTCommands.State);
 
                     Listen(pipe, token);
@@ -267,6 +274,7 @@ namespace Ink_Canvas.IPC
         {
             if (_isConnected == connected) return;
             _isConnected = connected;
+            LogHelper.WriteLogToFile($"[PPT-Agent] Pipe 状态变化: connected={connected}", LogHelper.LogType.Info);
             ConnectionChanged?.Invoke(connected);
         }
 
@@ -292,6 +300,7 @@ namespace Ink_Canvas.IPC
             _disposed = true;
             Stop();
             _cts?.Dispose();
+            LogHelper.WriteLogToFile("[PPT-Agent] Pipe 客户端已释放", LogHelper.LogType.Info);
         }
     }
 }

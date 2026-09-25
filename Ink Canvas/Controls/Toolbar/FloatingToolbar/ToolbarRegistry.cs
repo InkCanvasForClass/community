@@ -888,6 +888,10 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 }
                 isFirst = false;
             }
+
+            LogHelper.WriteLogToFile(
+                $"[Toolbar] 浮动栏已构建: 条目 {displayItems.Count} 个, 分段 {segments.Count} 个, 组件库 {discovered.Count} 个",
+                LogHelper.LogType.Info);
         }
 
         private static Border CreateContentBorder(List<DisplayItem> items, Orientation orientation = Orientation.Horizontal)

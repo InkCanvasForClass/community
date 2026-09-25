@@ -31,6 +31,7 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     File.WriteAllText(CountFilePath, count.ToString());
+                    LogHelper.WriteLogToFile($"[Crash] 熔断计数已递增: {count}", LogHelper.LogType.Info);
                 }
                 catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
             }
@@ -43,7 +44,10 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     if (File.Exists(CountFilePath))
+                    {
                         File.Delete(CountFilePath);
+                        LogHelper.WriteLogToFile("[Crash] 熔断计数已重置（已稳定运行）", LogHelper.LogType.Info);
+                    }
                 }
                 catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
             }

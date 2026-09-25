@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Ink_Canvas.Helpers;
 using Ink_Canvas.WorkflowAutomation.Abstractions;
 using Ink_Canvas.WorkflowAutomation.Models;
 using Newtonsoft.Json;
@@ -143,6 +144,9 @@ namespace Ink_Canvas.WorkflowAutomation.Services
                 LoadWorkflow(workflow);
             }
             Workflows.CollectionChanged += WorkflowsOnCollectionChanged;
+            LogHelper.WriteLogToFile(
+                $"[Automation] 配置已加载: {CurrentConfig}, 工作流 {Workflows.Count} 个",
+                LogHelper.LogType.Info);
         }
 
         /// <summary>
@@ -155,9 +159,10 @@ namespace Ink_Canvas.WorkflowAutomation.Services
                 var json = JsonConvert.SerializeObject(Workflows, Formatting.Indented);
                 File.WriteAllText(CurrentConfigPath, json);
             }
-            catch
+            catch (Exception ex)
             {
                 // 忽略保存失败
+                LogHelper.WriteLogToFile($"[Automation] 配置保存失败 [{note}]: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
 
@@ -345,6 +350,9 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             }
 
             ActionService.Invoke(workflow.ActionSet);
+            LogHelper.WriteLogToFile(
+                $"[Automation] 触发器已执行工作流: 触发器 {workflow.Triggers?.Count ?? 0} 个, 动作 {workflow.ActionSet?.Actions?.Count ?? 0} 个",
+                LogHelper.LogType.Info);
             SaveConfig("TriggerTriggered");
         }
 

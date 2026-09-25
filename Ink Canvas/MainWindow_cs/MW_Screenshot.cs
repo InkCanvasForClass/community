@@ -493,6 +493,9 @@ namespace Ink_Canvas
 
                 // 使用PNG格式保存，确保透明度信息不丢失
                 bitmap.Save(savePath, ImageFormat.Png);
+                LogHelper.WriteLogToFile(
+                    $"[Screenshot] 截图已保存: {savePath} ({rc.Width}x{rc.Height}), 复制到剪贴板={copyToClipboard}",
+                    LogHelper.LogType.Info);
 
                 // 截图后复制到剪贴板
                 if (copyToClipboard)

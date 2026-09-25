@@ -449,6 +449,9 @@ namespace Ink_Canvas.Windows.SettingsViews
                 rootFrame.RemoveBackEntry();
                 rootFrame.Navigate(cachedPage);
                 rootFrame.RemoveBackEntry();
+                LogHelper.WriteLogToFile(
+                    $"[Nav] 已导航到设置页面 {pageTag}{(pluginInfo != null ? " (插件: " + pluginInfo.Id + ")" : "")}",
+                    LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {

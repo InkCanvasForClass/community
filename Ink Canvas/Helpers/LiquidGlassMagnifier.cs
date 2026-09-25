@@ -173,6 +173,7 @@ namespace Ink_Canvas.Helpers
             }
             catch { /* 退出期 */ }
             try { host.Dispose(); } catch { }
+            LogHelper.WriteLogToFile("[LiquidGlass] 放大镜辅助进程已关闭", LogHelper.LogType.Info);
         }
 
         private static bool EnsureHost()
@@ -239,7 +240,7 @@ namespace Ink_Canvas.Helpers
                 _stdout = proc.StandardOutput.BaseStream;
                 _hostPid = proc.Id;
             }
-            LogHelper.WriteLogToFile($"液态玻璃放大镜子进程已启动: pid={proc.Id}", LogHelper.LogType.Warning);
+            LogHelper.WriteLogToFile($"[LiquidGlass] 放大镜辅助进程已启动: pid={proc.Id}", LogHelper.LogType.Info);
             return true;
         }
 
@@ -278,6 +279,8 @@ namespace Ink_Canvas.Helpers
         {
             lock (Sync)
             {
+                if (_host != null)
+                    LogHelper.WriteLogToFile("[LiquidGlass] 放大镜辅助进程已失效，标记为不可用", LogHelper.LogType.Warning);
                 try { _host?.Kill(); } catch { }
                 _host = null;
                 _stdin = null;

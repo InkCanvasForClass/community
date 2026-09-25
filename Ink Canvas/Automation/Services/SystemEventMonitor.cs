@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -94,6 +95,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         {
             _foregroundFallbackTimer?.Start();
             UpdateProcessTimerState();
+            LogHelper.WriteLogToFile("[Automation] 系统事件监控已启动", LogHelper.LogType.Info);
         }
 
         /// <summary>
@@ -103,6 +105,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         {
             _foregroundFallbackTimer?.Stop();
             _processTimer?.Stop();
+            LogHelper.WriteLogToFile("[Automation] 系统事件监控已停止", LogHelper.LogType.Info);
         }
 
         #region 进程监控

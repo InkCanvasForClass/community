@@ -20,10 +20,12 @@ namespace Ink_Canvas
             Topmost = true;
             AnimationsHelper.ShowWithSlideFromBottomAndFade(this, 0.25);
             ApplyTheme();
+            LogHelper.WriteLogToFile("[Crash] 崩溃详情窗口已创建", LogHelper.LogType.Info);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            LogHelper.WriteLogToFile("[Crash] 崩溃详情窗口已显示", LogHelper.LogType.Info);
             TextBoxCrashInfo.Text = string.IsNullOrWhiteSpace(CrashInfo)
                 ? CrashStrings.CrashWindowNoDetails
                 : CrashInfo;
@@ -61,6 +63,7 @@ namespace Ink_Canvas
             try
             {
                 Clipboard.SetText(TextBoxCrashInfo.Text ?? string.Empty);
+                LogHelper.WriteLogToFile("[Crash] 用户已复制崩溃详情", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
@@ -70,6 +73,7 @@ namespace Ink_Canvas
 
         private void ButtonClose_Click(object sender, RoutedEventArgs e)
         {
+            LogHelper.WriteLogToFile("[Crash] 用户关闭崩溃详情窗口", LogHelper.LogType.Info);
             Close();
         }
 

@@ -127,6 +127,7 @@ namespace Ink_Canvas
             }
 
             UpdateInkFreezeButtonState();
+            LogHelper.WriteLogToFile($"[Ink] 页面已冻结: page={pageIndex}", LogHelper.LogType.Info);
             if (notify) ShowNotification(pageIndex == 0 ? MainWindowStrings.Main_Freeze_AnnotationPageFrozen : string.Format(MainWindowStrings.Main_Freeze_WhiteboardPageFrozen, pageIndex));
         }
 

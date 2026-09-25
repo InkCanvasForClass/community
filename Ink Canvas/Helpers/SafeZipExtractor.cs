@@ -19,6 +19,8 @@ namespace Ink_Canvas.Helpers
             var fullExtractPath = Path.GetFullPath(extractPath);
             Directory.CreateDirectory(fullExtractPath);
 
+            int written = 0;
+            int skipped = 0;
             using (var zip = ZipFile.OpenRead(zipFilePath))
             {
                 foreach (var entry in zip.Entries)
@@ -29,7 +31,10 @@ namespace Ink_Canvas.Helpers
 
                     // 防止绝对路径和盘符前缀
                     if (Path.IsPathRooted(entry.FullName))
+                    {
+                        skipped++;
                         continue;
+                    }
 
                     // 统一路径分隔符
                     var normalized = entry.FullName.Replace('/', Path.DirectorySeparatorChar);
@@ -38,6 +43,7 @@ namespace Ink_Canvas.Helpers
                     if (normalized.Contains(".." + Path.DirectorySeparatorChar) ||
                         normalized.StartsWith(".." + Path.DirectorySeparatorChar, StringComparison.Ordinal))
                     {
+                        skipped++;
                         continue;
                     }
 
@@ -46,7 +52,10 @@ namespace Ink_Canvas.Helpers
 
                     // 再次确认仍然在目标目录下
                     if (!destinationPath.StartsWith(fullExtractPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        skipped++;
                         continue;
+                    }
 
                     // 目录条目
                     if (entry.FullName.EndsWith("/", StringComparison.Ordinal) ||
@@ -66,8 +75,19 @@ namespace Ink_Canvas.Helpers
                     {
                         input.CopyTo(output);
                     }
+                    written++;
                 }
             }
+
+            if (skipped > 0)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[Zip] 解压 {Path.GetFileName(zipFilePath)} 时跳过 {skipped} 个不安全条目（绝对路径/目录穿越/越界）",
+                    LogHelper.LogType.Warning);
+            }
+            LogHelper.WriteLogToFile(
+                $"[Zip] 解压完成: {Path.GetFileName(zipFilePath)} -> {fullExtractPath}, 写入 {written} 个条目",
+                LogHelper.LogType.Info);
         }
     }
 }

@@ -79,6 +79,7 @@ namespace Ink_Canvas
 
             InvalidateVisual();
             RefreshOtherWindowsTheme();
+            LogHelper.WriteLogToFile($"[Theme] 主题已应用: {theme} (自动切换图标={autoSwitchIcon})", LogHelper.LogType.Info);
         }
 
         void LoadImageResourceDictionary(string path)

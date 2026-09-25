@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using Ink_Canvas.WorkflowAutomation.Abstractions;
 using Ink_Canvas.WorkflowAutomation.ActionHandlers;
 using Ink_Canvas.WorkflowAutomation.Actions;
@@ -60,6 +61,7 @@ namespace Ink_Canvas.WorkflowAutomation
         {
             if (_isInitialized) return;
 
+            LogHelper.WriteLogToFile("[Automation] 开始初始化自动化系统", LogHelper.LogType.Info);
             try
             {
                 // 0. 清空全局 Registry 中残留的 Handler / Rule，避免重新初始化时累加
@@ -148,10 +150,14 @@ namespace Ink_Canvas.WorkflowAutomation
                 Service.LoadConfig();
 
                 _isInitialized = true;
+                LogHelper.WriteLogToFile(
+                    $"[Automation] 自动化系统初始化完成: 工作流 {Service?.Workflows?.Count ?? 0} 个, 配置 {Service?.CurrentConfig}",
+                    LogHelper.LogType.Info);
             }
-            catch
+            catch (Exception ex)
             {
                 // 任意步骤失败时整体回滚到未初始化状态，避免后续 AutomationBootstrap 调用走错误路径
+                LogHelper.WriteLogToFile($"[Automation] 初始化失败，已回滚: {ex.Message}", LogHelper.LogType.Error);
                 try { Shutdown(); } catch { }
                 throw;
             }
@@ -193,6 +199,7 @@ namespace Ink_Canvas.WorkflowAutomation
         /// </summary>
         public static void Shutdown()
         {
+            LogHelper.WriteLogToFile("[Automation] 开始关闭自动化系统", LogHelper.LogType.Info);
             // 卸载所有工作流
             if (Service?.Workflows != null)
             {
@@ -216,6 +223,7 @@ namespace Ink_Canvas.WorkflowAutomation
 
             // 重置单例状态，允许重新初始化
             _isInitialized = false;
+            LogHelper.WriteLogToFile("[Automation] 自动化系统已关闭", LogHelper.LogType.Info);
         }
     }
 }

@@ -103,6 +103,9 @@ namespace Ink_Canvas
                     resources.Add((m.Path, src));
 
                 UInkSaveService.SaveFull(doc, path, resources);
+                LogHelper.WriteLogToFile(
+                    $"[UInk] 保存完成: {path}, {pages.Count} 页, 资源 {resources.Count} 个, 媒体 {currentMedia.Count} 个",
+                    LogHelper.LogType.Info);
 
                 if (newNotice)
                 {
@@ -198,9 +201,13 @@ namespace Ink_Canvas
                 var doc = UInkReader.Load(path);
                 if (doc == null)
                 {
+                    LogHelper.WriteLogToFile($"[UInk] 打开失败：文件头校验不通过 {path}", LogHelper.LogType.Warning);
                     ShowNotification(MainWindowStrings.Main_Strokes_UInkInvalid);
                     return;
                 }
+                LogHelper.WriteLogToFile(
+                    $"[UInk] 开始打开: {path}, 画布 {doc.Canvases?.Count ?? 0} 个, 资源扩展={(doc.HeaderExtension != null)}",
+                    LogHelper.LogType.Info);
 
                 // 资源包：预算检查 + 安全解压到临时目录（媒体随后拷贝到持久缓存）
                 Dictionary<string, string> extraMap = null;
@@ -250,6 +257,9 @@ namespace Ink_Canvas
                         RestoreUInkToAnnotation(pages, extraMap, extractDir);
 
                     ShowNotification(string.Format(MainWindowStrings.Main_Strokes_OpenUInkSuccess, pages.Count));
+                    LogHelper.WriteLogToFile(
+                        $"[UInk] 打开完成: {path}, 载入 {pages.Count} 页, workspaceType={wsType}, ppt={isPPT}, whiteboard={isWhiteboard}",
+                        LogHelper.LogType.Info);
                 }
                 finally
                 {
