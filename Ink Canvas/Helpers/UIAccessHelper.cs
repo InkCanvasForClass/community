@@ -50,6 +50,13 @@ namespace Ink_Canvas.Helpers
         private const uint SE_PRIVILEGE_ENABLED = 0x00000002;
         private const string SE_ASSIGNPRIMARYTOKEN_NAME = "SeAssignPrimaryTokenPrivilege";
 
+        // CreateProcessWithTokenW 返回成功只代表进程已创建，UIA 子进程仍可能在启动阶段崩溃。
+        // 留出一段观察窗口，只有子进程在窗口内退出才判定为启动失败。
+        private const uint UIA_STARTUP_GRACE_PERIOD_MS = 10000;
+        private const uint WAIT_OBJECT_0 = 0x00000000;
+        private const uint WAIT_TIMEOUT = 0x00000102;
+        private const uint WAIT_FAILED = 0xFFFFFFFF;
+
         private static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
 
         #endregion
@@ -213,6 +220,9 @@ namespace Ink_Canvas.Helpers
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         private static extern void GetStartupInfoW(ref STARTUPINFOW lpStartupInfo);
 
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern uint WaitForSingleObject(IntPtr hHandle, uint dwMilliseconds);
+
         [DllImport("userenv.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool CreateEnvironmentBlock(out IntPtr lpEnvironment, IntPtr hToken, bool bInherit);
@@ -277,7 +287,7 @@ namespace Ink_Canvas.Helpers
 
                 try
                 {
-                    return LaunchWithToken(uiaToken, extraArgs);
+                    return LaunchWithToken(uiaToken, extraArgs, validateStartup: true);
                 }
                 finally
                 {
@@ -368,7 +378,7 @@ namespace Ink_Canvas.Helpers
                         }
 
                         LogHelper.WriteLogToFile("UIAccess | 已为普通用户令牌设置 UIAccess");
-                        return LaunchWithToken(userToken, extraArgs);
+                        return LaunchWithToken(userToken, extraArgs, validateStartup: true);
                     }
                     finally
                     {
@@ -452,7 +462,7 @@ namespace Ink_Canvas.Helpers
                         }
 
                         LogHelper.WriteLogToFile("UIAccess | 已为普通用户令牌设置 UIAccess（原进程令牌方案）");
-                        return LaunchWithToken_ProcessToken(userToken, AppendExtraArg(extraArgs, "--uia-child"));
+                        return LaunchWithToken_ProcessToken(userToken, AppendExtraArg(extraArgs, "--uia-child"), validateStartup: true);
                     }
                     finally
                     {
@@ -801,7 +811,7 @@ namespace Ink_Canvas.Helpers
 
         #region Process Launch
 
-        private static bool LaunchWithToken(IntPtr token, string extraArgs)
+        private static bool LaunchWithToken(IntPtr token, string extraArgs, bool validateStartup = false)
         {
             string exePath = GetExecutablePathForRelaunch();
             string workDir = System.IO.Path.GetDirectoryName(exePath);
@@ -870,8 +880,15 @@ namespace Ink_Canvas.Helpers
                     return false;
                 }
 
+                bool survivedStartup = !validateStartup || WaitForUIAChildStartup(pi.hProcess, pi.dwProcessId);
                 CloseHandle(pi.hProcess);
                 CloseHandle(pi.hThread);
+
+                if (!survivedStartup)
+                {
+                    return false;
+                }
+
                 LogHelper.WriteLogToFile($"UIAccess | 已使用 UIAccess 令牌启动新进程 (PID={pi.dwProcessId}, Exe={exePath})");
                 return true;
             }
@@ -887,7 +904,7 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 使用原进程令牌方案启动新进程（不使用 CreateEnvironmentBlock）
         /// </summary>
-        private static bool LaunchWithToken_ProcessToken(IntPtr token, string extraArgs)
+        private static bool LaunchWithToken_ProcessToken(IntPtr token, string extraArgs, bool validateStartup = false)
         {
             string exePath = GetExecutablePathForRelaunch();
 
@@ -950,10 +967,38 @@ namespace Ink_Canvas.Helpers
                 return false;
             }
 
+            bool survivedStartup = !validateStartup || WaitForUIAChildStartup(pi.hProcess, pi.dwProcessId);
             CloseHandle(pi.hProcess);
             CloseHandle(pi.hThread);
+
+            if (!survivedStartup)
+            {
+                return false;
+            }
+
             LogHelper.WriteLogToFile($"UIAccess | 已使用 UIAccess 令牌启动新进程（原进程令牌方案） (PID={pi.dwProcessId}, Exe={exePath})");
             return true;
+        }
+
+        private static bool WaitForUIAChildStartup(IntPtr processHandle, uint processId)
+        {
+            uint waitResult = WaitForSingleObject(processHandle, UIA_STARTUP_GRACE_PERIOD_MS);
+            if (waitResult == WAIT_TIMEOUT)
+            {
+                LogHelper.WriteLogToFile($"UIAccess | UIA 子进程已存活 {UIA_STARTUP_GRACE_PERIOD_MS}ms，认为启动阶段通过 (PID={processId})");
+                return true;
+            }
+
+            if (waitResult == WAIT_OBJECT_0)
+            {
+                LogHelper.WriteLogToFile($"UIAccess | UIA 子进程在启动观察期内退出 (PID={processId})", LogHelper.LogType.Error);
+                return false;
+            }
+
+            int error = Marshal.GetLastWin32Error();
+            string result = waitResult == WAIT_FAILED ? $"WAIT_FAILED/{error}" : waitResult.ToString();
+            LogHelper.WriteLogToFile($"UIAccess | 等待 UIA 子进程启动状态失败 (PID={processId}, Result={result})", LogHelper.LogType.Error);
+            return false;
         }
 
         private static string AppendExtraArg(string existing, string newArg)
