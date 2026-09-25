@@ -292,7 +292,9 @@ namespace Ink_Canvas
         private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
         {
             // 只关心外观类偏好变化；键盘/鼠标/电源等类别与主题无关
-            if (e.Category != UserPreferenceCategory.General) return;
+            // e 为空时表示程序加载设置后的内部初始化调用，此时直接建立主题基线。
+            if (e != null && e.Category != UserPreferenceCategory.General) return;
+            if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
             // SystemEvents 的事件不保证在 UI 线程触发，统一调度回 UI 线程
             Dispatcher.BeginInvoke(new Action(CheckSystemThemeSwitch));
         }
