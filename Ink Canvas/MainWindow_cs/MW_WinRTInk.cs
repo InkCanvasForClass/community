@@ -2,6 +2,7 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Ink;
 using Ink_Canvas.Ink.WinRT;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -43,6 +44,7 @@ namespace Ink_Canvas
 
         private WinRTInkConfig _winRTInkConfig;
         private readonly Queue<Action> _winRTInkPendingDry = new Queue<Action>();
+        private readonly ConcurrentQueue<uint> _winRTInkEndedPointerIds = new ConcurrentQueue<uint>();
         private bool _winRTInkDryInProgress;
         private bool _winRTInkDryEndQueued;
         private long _winRTInkDryId;
@@ -102,22 +104,51 @@ namespace Ink_Canvas
                     onChromePointerDown: ForwardWinRTInkChromePointerDown,
                     onChromePointerMove: ForwardWinRTInkChromePointerMove,
                     onChromePointerRelease: ForwardWinRTInkChromePointerUp,
-                    onInkPointerPress: e =>
+                    onTouchPointerPress: (pointerId, p) =>
                     {
-                        // Ink thread: extract the position struct before marshaling.
-                        var p = e.CurrentPoint.Position;
-                        uiDispatcher.BeginInvoke(new Action(() => OnWinRTInkPausePress(p.X, p.Y)));
+                        uiDispatcher.BeginInvoke(new Action(() =>
+                            OnWinRTInkTouchPointerPress(pointerId, p.X, p.Y)));
                     },
-                    onInkPointerMove: e =>
+                    onTouchPointerMove: (pointerId, p) =>
                     {
-                        var p = e.CurrentPoint.Position;
-                        uiDispatcher.BeginInvoke(new Action(() => OnWinRTInkPauseMove(p.X, p.Y)));
+                        uiDispatcher.BeginInvoke(new Action(() =>
+                            OnWinRTInkTouchPointerMove(pointerId, p.X, p.Y)));
                     },
-                    onInkPointerRelease: e =>
+                    onTouchPointerRelease: (pointerId, p) =>
                     {
-                        uiDispatcher.BeginInvoke(new Action(OnWinRTInkPauseRelease));
+                        uiDispatcher.BeginInvoke(new Action(() =>
+                            OnWinRTInkTouchPointerRelease(pointerId, p.X, p.Y)));
                     },
-                    onStrokeEnded: OnWinRTInkStrokeCanceled,
+                    onInkPointerPress: (pointerId, device, p) =>
+                    {
+                        uiDispatcher.BeginInvoke(new Action(() =>
+                            OnWinRTInkPausePress(pointerId, p.X, p.Y)));
+                    },
+                    onInkPointerMove: (pointerId, device, p) =>
+                    {
+                        uiDispatcher.BeginInvoke(new Action(() =>
+                            OnWinRTInkPauseMove(pointerId, p.X, p.Y)));
+                    },
+                    onInkPointerRelease: (pointerId, device, p) =>
+                    {
+                        uiDispatcher.BeginInvoke(new Action(() =>
+                            OnWinRTInkPauseRelease(pointerId)));
+                    },
+                    onTwoFingerGestureStarted: snapshot =>
+                    {
+                        uiDispatcher.BeginInvoke(new Action(() =>
+                            OnWinRTInkTwoFingerGestureStarted(snapshot)));
+                    },
+                    onTwoFingerGestureDelta: snapshot =>
+                    {
+                        uiDispatcher.BeginInvoke(new Action(() =>
+                            OnWinRTInkTwoFingerGestureDelta(snapshot)));
+                    },
+                    onTwoFingerGestureCompleted: () =>
+                    {
+                        uiDispatcher.BeginInvoke(new Action(OnWinRTInkTwoFingerGestureCompleted));
+                    },
+                    onStrokeEnded: OnWinRTInkStrokeEnded,
                     onStrokeCanceled: OnWinRTInkStrokeCanceled);
 
                 if (_winRTInkOverlay == null)
@@ -179,6 +210,7 @@ namespace Ink_Canvas
 
             UnwireWinRTInkGeometryListeners();
             ShutdownWinRTInkPauseStraighten();
+            _winRTInkTwoFingerGestureActive = false;
 
             if (_winRTInkAttributesChangedHandler != null)
             {
@@ -315,6 +347,306 @@ namespace Ink_Canvas
             }
         }
 
+        // ---- WinRT touch/gesture bridge ----------------------------------------------
+
+        private bool _winRTInkTwoFingerGestureActive;
+
+        private Point WinRTInkPointToCanvasDip(double xPhysical, double yPhysical)
+        {
+            var config = _winRTInkConfig;
+            if (config == null)
+                return new Point(xPhysical, yPhysical);
+
+            return new Point(
+                xPhysical / Math.Max(1.0, config.DpiScaleX) - config.CanvasOriginDip.X,
+                yPhysical / Math.Max(1.0, config.DpiScaleY) - config.CanvasOriginDip.Y);
+        }
+
+        private void OnWinRTInkTouchPointerPress(uint pointerId, double x, double y)
+        {
+            if (!IsBoardRoamingMode)
+                return;
+
+            BeginBoardRoamingContact(unchecked((int)pointerId), WinRTInkPointToCanvasDip(x, y));
+        }
+
+        private void OnWinRTInkTouchPointerMove(uint pointerId, double x, double y)
+        {
+            if (!IsBoardRoamingMode)
+                return;
+
+            MoveBoardRoamingContact(unchecked((int)pointerId), WinRTInkPointToCanvasDip(x, y));
+        }
+
+        private void OnWinRTInkTouchPointerRelease(uint pointerId, double x, double y)
+        {
+            if (!IsBoardRoamingMode)
+                return;
+
+            EndBoardRoamingContact(unchecked((int)pointerId));
+        }
+
+        private void OnWinRTInkTwoFingerGestureStarted(WinRTInkGestureSnapshot snapshot)
+        {
+            _winRTInkTwoFingerGestureActive = true;
+            // The input gate has already marked the old wet contacts handled. Stop every
+            // pause timer here; no dry batch should be created for the gesture.
+            ShutdownWinRTInkPauseStraighten();
+        }
+
+        private void OnWinRTInkTwoFingerGestureDelta(WinRTInkGestureSnapshot snapshot)
+        {
+            if (!_winRTInkTwoFingerGestureActive || inkCanvas == null)
+                return;
+
+            var previousFirst = WinRTInkPointToCanvasDip(
+                snapshot.PreviousFirst.X,
+                snapshot.PreviousFirst.Y);
+            var previousSecond = WinRTInkPointToCanvasDip(
+                snapshot.PreviousSecond.X,
+                snapshot.PreviousSecond.Y);
+            var currentFirst = WinRTInkPointToCanvasDip(
+                snapshot.CurrentFirst.X,
+                snapshot.CurrentFirst.Y);
+            var currentSecond = WinRTInkPointToCanvasDip(
+                snapshot.CurrentSecond.X,
+                snapshot.CurrentSecond.Y);
+
+            // Board roaming has a dedicated contact-point state machine. Normally WinRT ink
+            // is shut down before entering roaming, but keeping this route makes the bridge
+            // safe when a mode switch races with the overlay input thread.
+            if (IsBoardRoamingMode)
+            {
+                MoveBoardRoamingContact(
+                    unchecked((int)snapshot.FirstPointerId),
+                    currentFirst);
+                MoveBoardRoamingContact(
+                    unchecked((int)snapshot.SecondPointerId),
+                    currentSecond);
+                return;
+            }
+
+            if (_isVideoPresenterSpecialMode)
+            {
+                ApplyWinRTVideoPresenterGesture(previousFirst, previousSecond, currentFirst, currentSecond);
+                return;
+            }
+
+            ApplyWinRTCanvasTwoFingerGesture(
+                previousFirst,
+                previousSecond,
+                currentFirst,
+                currentSecond);
+        }
+
+        private void OnWinRTInkTwoFingerGestureCompleted()
+        {
+            _winRTInkTwoFingerGestureActive = false;
+            if (IsBoardRoamingMode)
+                CompletePluginCanvasViewportTransform();
+        }
+
+        private void ApplyWinRTVideoPresenterGesture(
+            Point previousFirst,
+            Point previousSecond,
+            Point currentFirst,
+            Point currentSecond)
+        {
+            var previousMidpoint = new Point(
+                (previousFirst.X + previousSecond.X) / 2,
+                (previousFirst.Y + previousSecond.Y) / 2);
+            var currentMidpoint = new Point(
+                (currentFirst.X + currentSecond.X) / 2,
+                (currentFirst.Y + currentSecond.Y) / 2);
+            var translation = currentMidpoint - previousMidpoint;
+
+            if (Math.Abs(translation.X) > 0.001 || Math.Abs(translation.Y) > 0.001)
+            {
+                _boothPreviewTranslateX += translation.X;
+                _boothPreviewTranslateY += translation.Y;
+                ApplyBoothPreviewTransform();
+
+                var translateMatrix = Matrix.Identity;
+                translateMatrix.Translate(translation.X, translation.Y);
+                try
+                {
+                    foreach (var stroke in inkCanvas.Strokes)
+                        stroke.Transform(translateMatrix, false);
+                    timeMachine?.TransformStrokesInHistory(translateMatrix, inkCanvas.Strokes);
+                    ResetRotationBaseline();
+                }
+                catch { /* best-effort synchronization */ }
+            }
+
+            var previousDistance = GetDistance(previousFirst, previousSecond);
+            var currentDistance = GetDistance(currentFirst, currentSecond);
+            if (previousDistance <= 0.001 || currentDistance <= 0.001)
+                return;
+
+            var scaleFactor = currentDistance / previousDistance;
+            if (Math.Abs(scaleFactor - 1.0) < 0.001)
+                return;
+
+            var newScale = Math.Max(0.1, Math.Min(10.0, _boothPreviewScale * scaleFactor));
+            var ratio = newScale / Math.Max(0.0001, _boothPreviewScale);
+            var newTranslateX = currentMidpoint.X
+                                - (currentMidpoint.X - _boothPreviewTranslateX) * ratio;
+            var newTranslateY = currentMidpoint.Y
+                                - (currentMidpoint.Y - _boothPreviewTranslateY) * ratio;
+
+            _boothPreviewScale = newScale;
+            _boothPreviewTranslateX = newTranslateX;
+            _boothPreviewTranslateY = newTranslateY;
+            ApplyBoothPreviewTransform();
+            ScaleInkCanvasStrokes(currentMidpoint, ratio);
+        }
+
+        private void ApplyWinRTCanvasTwoFingerGesture(
+            Point previousFirst,
+            Point previousSecond,
+            Point currentFirst,
+            Point currentSecond)
+        {
+            if (IsCurrentPageFrozen)
+            {
+                TryBlockFrozenPageMutation("移动或缩放内容");
+                return;
+            }
+
+            var previousMidpoint = new Point(
+                (previousFirst.X + previousSecond.X) / 2,
+                (previousFirst.Y + previousSecond.Y) / 2);
+            var currentMidpoint = new Point(
+                (currentFirst.X + currentSecond.X) / 2,
+                (currentFirst.Y + currentSecond.Y) / 2);
+            var translation = currentMidpoint - previousMidpoint;
+            var previousDistance = GetDistance(previousFirst, previousSecond);
+            var currentDistance = GetDistance(currentFirst, currentSecond);
+            var scale = previousDistance > 0.001 && currentDistance > 0.001
+                ? currentDistance / previousDistance
+                : 1.0;
+            var rotation = NormalizeWinRTGestureAngle(
+                Math.Atan2(currentSecond.Y - currentFirst.Y, currentSecond.X - currentFirst.X)
+                - Math.Atan2(previousSecond.Y - previousFirst.Y, previousSecond.X - previousFirst.X));
+
+            var isBoardMode = currentMode == 1;
+            var enableTranslate = isBoardMode
+                ? Settings.Gesture.IsEnableTwoFingerTranslateBoard
+                : Settings.Gesture.IsEnableTwoFingerTranslate;
+            var enableRotate = isBoardMode
+                ? Settings.Gesture.IsEnableTwoFingerRotationBoard
+                : Settings.Gesture.IsEnableTwoFingerRotation;
+            var enableZoom = isBoardMode
+                ? Settings.Gesture.IsEnableTwoFingerZoomBoard
+                : Settings.Gesture.IsEnableTwoFingerZoom;
+
+            var matrix = Matrix.Identity;
+            if (enableTranslate)
+                matrix.Translate(translation.X, translation.Y);
+            if (enableRotate)
+                matrix.RotateAt(rotation, currentMidpoint.X, currentMidpoint.Y);
+            if (enableZoom)
+                matrix.ScaleAt(scale, scale, currentMidpoint.X, currentMidpoint.Y);
+
+            if (matrix.IsIdentity)
+                return;
+
+            ApplyWinRTCanvasGestureMatrix(matrix, enableZoom, scale, scale);
+        }
+
+        private void ApplyWinRTCanvasGestureMatrix(
+            Matrix matrix,
+            bool scaleStrokeAttributes,
+            double scaleX,
+            double scaleY)
+        {
+            if (inkCanvas == null)
+                return;
+
+            var strokes = inkCanvas.GetSelectedStrokes();
+            if (strokes.Count != 0)
+            {
+                foreach (var stroke in strokes)
+                {
+                    stroke.Transform(matrix, false);
+                    UpdateWinRTGestureCircle(stroke);
+                    if (scaleStrokeAttributes)
+                        ScaleWinRTGestureStrokeAttributes(stroke, scaleX, scaleY);
+                }
+                return;
+            }
+
+            foreach (var stroke in inkCanvas.Strokes)
+            {
+                stroke.Transform(matrix, false);
+                if (scaleStrokeAttributes)
+                    ScaleWinRTGestureStrokeAttributes(stroke, scaleX, scaleY);
+            }
+
+            TransformCanvasImages(matrix);
+            foreach (var circle in circles)
+            {
+                circle.R = GetDistance(
+                    circle.Stroke.StylusPoints[0].ToPoint(),
+                    circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].ToPoint()) / 2;
+                circle.Centroid = new Point(
+                    (circle.Stroke.StylusPoints[0].X
+                        + circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].X) / 2,
+                    (circle.Stroke.StylusPoints[0].Y
+                        + circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].Y) / 2);
+            }
+
+            PublishPluginCanvasViewportTransform(matrix);
+        }
+
+        private void UpdateWinRTGestureCircle(Stroke stroke)
+        {
+            if (stroke == null || stroke.StylusPoints.Count < 2)
+                return;
+
+            foreach (var circle in circles)
+            {
+                if (circle.Stroke != stroke)
+                    continue;
+
+                var midpoint = circle.Stroke.StylusPoints.Count / 2;
+                circle.R = GetDistance(
+                    circle.Stroke.StylusPoints[0].ToPoint(),
+                    circle.Stroke.StylusPoints[midpoint].ToPoint()) / 2;
+                circle.Centroid = new Point(
+                    (circle.Stroke.StylusPoints[0].X + circle.Stroke.StylusPoints[midpoint].X) / 2,
+                    (circle.Stroke.StylusPoints[0].Y + circle.Stroke.StylusPoints[midpoint].Y) / 2);
+                break;
+            }
+        }
+
+        private static void ScaleWinRTGestureStrokeAttributes(Stroke stroke, double scaleX, double scaleY)
+        {
+            if (stroke == null
+                || double.IsNaN(scaleX) || double.IsInfinity(scaleX)
+                || double.IsNaN(scaleY) || double.IsInfinity(scaleY))
+                return;
+
+            try
+            {
+                stroke.DrawingAttributes.Width *= scaleX;
+                stroke.DrawingAttributes.Height *= scaleY;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
+        }
+
+        private static double NormalizeWinRTGestureAngle(double radians)
+        {
+            while (radians > Math.PI)
+                radians -= Math.PI * 2;
+            while (radians < -Math.PI)
+                radians += Math.PI * 2;
+            return radians * 180 / Math.PI;
+        }
+
         // ---- Pause straightening (WinRT path) ---------------------------------------
         //
         // The legacy WPF path watched StylusMove and force-committed the in-progress stroke
@@ -329,85 +661,164 @@ namespace Ink_Canvas
         private const double WinRTInkPauseStraightenMinLengthDip = 100.0;
         private const double WinRTInkPauseJitterThresholdPx = 1.5;
 
-        private DispatcherTimer _winRTInkPauseStraightenTimer;
-        private bool _winRTInkPauseTracking;
-        private bool _winRTInkPausePending;
-        private Point _winRTInkPauseLastPos;   // presenter physical px
-        private Point _winRTInkPauseAnchorPos; // presenter physical px at last timer reset
-        private Point _winRTInkPausePos;       // presenter physical px, where the pause happened
-
-        /// <summary>UI thread (marshaled from the ink input gate): an ink-allowed press began.</summary>
-        private void OnWinRTInkPausePress(double x, double y)
+        private sealed class WinRTInkPauseState
         {
-            _winRTInkPausePending = false;
+            public DispatcherTimer Timer { get; set; }
+            public bool Tracking { get; set; }
+            public bool Pending { get; set; }
+            public Point LastPos { get; set; }
+            public Point AnchorPos { get; set; }
+            public Point PausePos { get; set; }
+        }
+
+        private readonly struct WinRTInkPauseMetadata
+        {
+            public WinRTInkPauseMetadata(bool hasPause, Point pausePosition)
+            {
+                HasPause = hasPause;
+                PausePosition = pausePosition;
+            }
+
+            public bool HasPause { get; }
+            public Point PausePosition { get; }
+        }
+
+        private readonly Dictionary<uint, WinRTInkPauseState> _winRTInkPauseStates =
+            new Dictionary<uint, WinRTInkPauseState>();
+
+        /// <summary>UI thread (marshaled from the ink input gate): an ink-allowed pointer began.</summary>
+        private void OnWinRTInkPausePress(uint pointerId, double x, double y)
+        {
             if (!Settings.Canvas.PauseStraightenLine || drawingShapeMode != 0)
             {
-                _winRTInkPauseTracking = false;
+                RemoveWinRTInkPauseState(pointerId);
                 return;
             }
 
-            _winRTInkPauseTracking = true;
-            _winRTInkPauseLastPos = new Point(x, y);
-            _winRTInkPauseAnchorPos = _winRTInkPauseLastPos;
-            ResetWinRTInkPauseTimer();
+            var position = new Point(x, y);
+            var state = GetOrCreateWinRTInkPauseState(pointerId);
+            state.Pending = false;
+            state.Tracking = true;
+            state.LastPos = position;
+            state.AnchorPos = position;
+            ResetWinRTInkPauseTimer(pointerId, state);
         }
 
-        /// <summary>UI thread (throttled feed from the ink input gate): the pen is moving.</summary>
-        private void OnWinRTInkPauseMove(double x, double y)
+        /// <summary>UI thread (throttled feed from the ink input gate): a pointer moved.</summary>
+        private void OnWinRTInkPauseMove(uint pointerId, double x, double y)
         {
-            if (!_winRTInkPauseTracking)
+            if (!_winRTInkPauseStates.TryGetValue(pointerId, out var state)
+                || !state.Tracking)
                 return;
 
-            _winRTInkPauseLastPos = new Point(x, y);
-            var dx = x - _winRTInkPauseAnchorPos.X;
-            var dy = y - _winRTInkPauseAnchorPos.Y;
+            state.LastPos = new Point(x, y);
+            var dx = x - state.AnchorPos.X;
+            var dy = y - state.AnchorPos.Y;
             if (dx * dx + dy * dy < WinRTInkPauseJitterThresholdPx * WinRTInkPauseJitterThresholdPx)
                 return; // sub-pixel jitter while holding still does not count as movement
 
-            _winRTInkPauseAnchorPos = _winRTInkPauseLastPos;
-            ResetWinRTInkPauseTimer();
+            state.AnchorPos = state.LastPos;
+            ResetWinRTInkPauseTimer(pointerId, state);
         }
 
-        /// <summary>UI thread (marshaled from the ink input gate): the pointer lifted.</summary>
-        private void OnWinRTInkPauseRelease()
+        /// <summary>UI thread (marshaled from the ink input gate): a pointer lifted.</summary>
+        private void OnWinRTInkPauseRelease(uint pointerId)
         {
-            _winRTInkPauseTracking = false;
-            _winRTInkPauseStraightenTimer?.Stop();
-            // A pause already detected stays pending until the dry batch consumes it.
+            if (!_winRTInkPauseStates.TryGetValue(pointerId, out var state))
+                return;
+
+            state.Tracking = false;
+            state.Timer?.Stop();
+            // A pause already detected stays pending until the matching dry stroke consumes it.
+            if (!state.Pending)
+                RemoveWinRTInkPauseState(pointerId);
         }
 
-        private void ResetWinRTInkPauseTimer()
+        private WinRTInkPauseState GetOrCreateWinRTInkPauseState(uint pointerId)
+        {
+            if (_winRTInkPauseStates.TryGetValue(pointerId, out var state))
+                return state;
+
+            state = new WinRTInkPauseState();
+            _winRTInkPauseStates[pointerId] = state;
+            return state;
+        }
+
+        private void ResetWinRTInkPauseTimer(uint pointerId, WinRTInkPauseState state)
         {
             var delay = Settings.Canvas.PauseStraightenDelay;
             if (delay < 100)
                 delay = 100;
 
-            if (_winRTInkPauseStraightenTimer == null)
+            if (state.Timer == null)
             {
-                _winRTInkPauseStraightenTimer = new DispatcherTimer();
-                _winRTInkPauseStraightenTimer.Tick += (s, e) =>
+                state.Timer = new DispatcherTimer();
+                state.Timer.Tick += (s, e) =>
                 {
-                    _winRTInkPauseStraightenTimer.Stop();
-                    if (!_winRTInkPauseTracking)
+                    state.Timer.Stop();
+                    if (!_winRTInkPauseStates.TryGetValue(pointerId, out var current)
+                        || !ReferenceEquals(current, state)
+                        || !state.Tracking)
                         return;
-                    // The pen has been still for the whole delay: record the pause point.
-                    _winRTInkPausePending = true;
-                    _winRTInkPausePos = _winRTInkPauseLastPos;
+
+                    // The pointer has been still for the whole delay: record its pause point.
+                    state.Pending = true;
+                    state.PausePos = state.LastPos;
                 };
             }
 
-            _winRTInkPauseStraightenTimer.Interval = TimeSpan.FromMilliseconds(delay);
-            _winRTInkPauseStraightenTimer.Stop();
-            _winRTInkPauseStraightenTimer.Start();
+            state.Timer.Interval = TimeSpan.FromMilliseconds(delay);
+            state.Timer.Stop();
+            state.Timer.Start();
+        }
+
+        private void RemoveWinRTInkPauseState(uint pointerId)
+        {
+            if (!_winRTInkPauseStates.TryGetValue(pointerId, out var state))
+                return;
+            state.Timer?.Stop();
+            _winRTInkPauseStates.Remove(pointerId);
         }
 
         private void ShutdownWinRTInkPauseStraighten()
         {
-            _winRTInkPauseStraightenTimer?.Stop();
-            _winRTInkPauseTracking = false;
-            _winRTInkPausePending = false;
+            foreach (var state in _winRTInkPauseStates.Values)
+                state.Timer?.Stop();
+            _winRTInkPauseStates.Clear();
+            while (_winRTInkEndedPointerIds.TryDequeue(out _)) { }
         }
 
+        /// <summary>
+        /// Captures pause metadata for the strokes whose StrokeEnded events preceded this dry
+        /// batch. StrokeEnded carries the pointer ID while StrokesCollected only carries points,
+        /// so the queue preserves the OS event order without touching WPF from the ink thread.
+        /// </summary>
+        private IReadOnlyList<WinRTInkPauseMetadata> CaptureWinRTInkPauseMetadata(int strokeCount)
+        {
+            var metadata = new List<WinRTInkPauseMetadata>(Math.Max(0, strokeCount));
+            for (var i = 0; i < strokeCount; i++)
+            {
+                if (!_winRTInkEndedPointerIds.TryDequeue(out var pointerId))
+                {
+                    metadata.Add(default(WinRTInkPauseMetadata));
+                    continue;
+                }
+
+                if (_winRTInkPauseStates.TryGetValue(pointerId, out var state))
+                {
+                    metadata.Add(new WinRTInkPauseMetadata(state.Pending, state.PausePos));
+                    state.Pending = false;
+                    if (!state.Tracking)
+                        RemoveWinRTInkPauseState(pointerId);
+                }
+                else
+                {
+                    metadata.Add(default(WinRTInkPauseMetadata));
+                }
+            }
+
+            return metadata;
+        }
         /// <summary>
         /// Splits one dry batch at the recorded pause point: the segment before the pause is
         /// returned as a straightened point set (start, optional 1/3 and 2/3, pause point,
@@ -419,15 +830,16 @@ namespace Ink_Canvas
         private bool TrySplitBatchOnPauseStraighten(
             IReadOnlyList<global::Windows.UI.Input.Inking.InkPoint> batch,
             WinRTInkConfig config,
+            WinRTInkPauseMetadata pauseMetadata,
             out IReadOnlyList<global::Windows.UI.Input.Inking.InkPoint> straightened,
             out IReadOnlyList<global::Windows.UI.Input.Inking.InkPoint> continuation)
         {
             straightened = null;
             continuation = null;
-            if (!_winRTInkPausePending || batch == null || batch.Count < 2)
+            if (!pauseMetadata.HasPause || batch == null || batch.Count < 2)
                 return false;
 
-            var pause = _winRTInkPausePos;
+            var pause = pauseMetadata.PausePosition;
             var dpi = Math.Max(1.0, Math.Max(config.DpiScaleX, config.DpiScaleY));
 
             var nearestIndex = -1;
@@ -1106,10 +1518,15 @@ namespace Ink_Canvas
             catch { /* best-effort */ }
         }
 
+        /// <summary>Ink-thread StrokeEnded for a live stroke. Queue only the pointer ID;</summary>
+        private void OnWinRTInkStrokeEnded(uint pointerId)
+        {
+            _winRTInkEndedPointerIds.Enqueue(pointerId);
+        }
+
         /// <summary>
         /// Ink-thread StrokeEnded canceled by the gate (frozen page / palm eraser / two-finger
         /// gesture / CancelActiveStrokes). The presenter drops the wet stroke; nothing to dry.
-        /// Runs on the UI thread after the gate routed it back.
         /// </summary>
         private void OnWinRTInkStrokeCanceled()
         {
@@ -1154,7 +1571,9 @@ namespace Ink_Canvas
                 return;
             }
 
-            var pendingDry = new Action(() => MaterializeWinRTInkDry(pointBatches, config));
+            var pauseMetadata = CaptureWinRTInkPauseMetadata(pointBatches.Count);
+            var pendingDry = new Action(() =>
+                MaterializeWinRTInkDry(pointBatches, config, pauseMetadata));
             _winRTInkPendingDry.Enqueue(pendingDry);
             DrainWinRTInkPendingDry();
             }
@@ -1196,12 +1615,12 @@ namespace Ink_Canvas
         /// </summary>
         private void MaterializeWinRTInkDry(
             IReadOnlyList<IReadOnlyList<global::Windows.UI.Input.Inking.InkPoint>> pointBatches,
-            WinRTInkConfig config)
+            WinRTInkConfig config,
+            IReadOnlyList<WinRTInkPauseMetadata> pauseMetadata)
         {
             if (IsCurrentPageFrozen)
             {
                 TryBlockFrozenPageMutation("书写");
-                _winRTInkPausePending = false;
                 CompleteWinRTInkDry();
                 return;
             }
@@ -1212,29 +1631,43 @@ namespace Ink_Canvas
                 var strokes = new List<System.Windows.Ink.Stroke>(pointBatches.Count);
                 for (var i = 0; i < pointBatches.Count; i++)
                 {
+                    var pause = pauseMetadata != null && i < pauseMetadata.Count
+                        ? pauseMetadata[i]
+                        : default(WinRTInkPauseMetadata);
                     if (TrySplitBatchOnPauseStraighten(
                             pointBatches[i],
                             config,
+                            pause,
                             out var straightened,
                             out var continuation))
                     {
                         strokes.Add(WinRTStrokeConverter.CreateStroke(
-                            straightened, config.Style, config.DpiScaleX, config.DpiScaleY, config.CanvasOriginDip));
+                            straightened,
+                            config.Style,
+                            config.DpiScaleX,
+                            config.DpiScaleY,
+                            config.CanvasOriginDip,
+                            pauseStraightened: true));
                         if (continuation != null)
                         {
                             strokes.Add(WinRTStrokeConverter.CreateStroke(
-                                continuation, config.Style, config.DpiScaleX, config.DpiScaleY, config.CanvasOriginDip));
+                                continuation,
+                                config.Style,
+                                config.DpiScaleX,
+                                config.DpiScaleY,
+                                config.CanvasOriginDip));
                         }
                     }
                     else
                     {
                         strokes.Add(WinRTStrokeConverter.CreateStroke(
-                            pointBatches[i], config.Style, config.DpiScaleX, config.DpiScaleY, config.CanvasOriginDip));
+                            pointBatches[i],
+                            config.Style,
+                            config.DpiScaleX,
+                            config.DpiScaleY,
+                            config.CanvasOriginDip));
                     }
                 }
-                // The pending pause has been matched against (or missed by) this batch —
-                // it must never apply to a later stroke.
-                _winRTInkPausePending = false;
 
                 // Dry ink is the single source of truth: add first so StrokesChanged / TimeMachine
                 // / dirty-page hooks fire before post-processing.

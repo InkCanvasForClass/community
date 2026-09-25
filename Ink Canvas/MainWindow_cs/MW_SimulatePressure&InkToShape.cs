@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Ink.WinRT;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -197,7 +198,7 @@ namespace Ink_Canvas
                 catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
                 // 「屏蔽压感」已在收笔主路径将点集归一成 0.5；此处若再跑 InkStyle 0/1 会重写 PressureFactor，造成假压感。
-                if (!Settings.Canvas.DisablePressure)
+                if (!Settings.Canvas.DisablePressure && !wasStraightened)
                 {
                     switch (Settings.Canvas.InkStyle)
                     {
@@ -375,6 +376,7 @@ namespace Ink_Canvas
 
             var e = new InkCanvasStrokeCollectedEventArgs(stroke);
             var strokeDrawingAttributes = e.Stroke?.DrawingAttributes;
+            var isPauseStraightened = e.Stroke.ContainsPropertyData(WinRTStrokeConverter.PauseStraightenedGuid);
 
             // 手写识别输入在收笔尾部从最终画布 Stroke 复制，避免使用压感/平滑前快照。
             // Issue #286 — 边缘扩展画布提示：在笔画收集后立即判断位置。
@@ -460,7 +462,7 @@ namespace Ink_Canvas
             }
 
             // 标记是否进行了直线拉直
-            bool wasStraightened = false;
+            bool wasStraightened = isPauseStraightened;
             Stroke strokeForHandwritingBeautify = null;
 
             if (Settings.Canvas.FitToCurve) drawingAttributes.FitToCurve = false;
@@ -470,7 +472,7 @@ namespace Ink_Canvas
                 inkCanvas.Opacity = 1;
                 var touchPressureSimulationApplied = false;
 
-                if (Settings.Canvas.DisablePressure)
+                if (Settings.Canvas.DisablePressure || isPauseStraightened)
                 {
                     var uniformPoints = new StylusPointCollection();
                     foreach (StylusPoint point in e.Stroke.StylusPoints)
@@ -580,6 +582,7 @@ namespace Ink_Canvas
                 // 「屏蔽压感」时必须跳过：否则会重写 PressureFactor 并强制 IgnorePressure=false，与归一压感冲突。
                 // VelocityBrushTipMix <= 0 时 ApplyVelocityBrushTipFromSpeed 为空操作，无需调用。
                 if (Settings.Canvas.InkStyle == 3
+                    && !isPauseStraightened
                     && Settings.Canvas.VelocityBrushTipMix > 0
                     && !Settings.Canvas.DisablePressure
                     && !touchPressureSimulationApplied
@@ -630,6 +633,11 @@ namespace Ink_Canvas
                             {
                                 DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
                             };
+                            if (isPauseStraightened)
+                            {
+                                straightStroke.DrawingAttributes.IgnorePressure = true;
+                                straightStroke.AddPropertyData(WinRTStrokeConverter.PauseStraightenedGuid, true);
+                            }
                             straightStroke.AddPropertyData(Helpers.ModernInkAnalyzer.ShapeStrokePropertyGuid, true);
 
                             // Replace the original stroke with the straightened one

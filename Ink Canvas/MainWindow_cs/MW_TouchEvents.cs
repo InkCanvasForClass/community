@@ -2618,75 +2618,11 @@ namespace Ink_Canvas
                     m.ScaleAt(scale.X, scale.Y, center.X, center.Y); // 缩放
                 }
 
-                var strokes = inkCanvas.GetSelectedStrokes();
-                if (strokes.Count != 0)
-                {
-                    foreach (var stroke in strokes)
-                    {
-                        stroke.Transform(m, false);
-
-                        foreach (var circle in circles)
-                            if (stroke == circle.Stroke)
-                            {
-                                circle.R = GetDistance(circle.Stroke.StylusPoints[0].ToPoint(),
-                                    circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].ToPoint()) / 2;
-                                circle.Centroid = new Point(
-                                    (circle.Stroke.StylusPoints[0].X +
-                                     circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].X) / 2,
-                                    (circle.Stroke.StylusPoints[0].Y +
-                                     circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].Y) / 2);
-                                break;
-                            }
-
-                        if (!enableZoom) continue;
-                        try
-                        {
-                            stroke.DrawingAttributes.Width *= md.Scale.X;
-                            stroke.DrawingAttributes.Height *= md.Scale.Y;
-                        }
-                        catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
-                    }
-                }
-                else
-                {
-                    if (enableZoom)
-                    {
-                        foreach (var stroke in inkCanvas.Strokes)
-                        {
-                            stroke.Transform(m, false);
-                            try
-                            {
-                                stroke.DrawingAttributes.Width *= md.Scale.X;
-                                stroke.DrawingAttributes.Height *= md.Scale.Y;
-                            }
-                            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
-                        }
-
-                        // 同时变换画布上的图片元素
-                        TransformCanvasImages(m);
-                    }
-                    else
-                    {
-                        foreach (var stroke in inkCanvas.Strokes) stroke.Transform(m, false);
-
-                        // 同时变换画布上的图片元素
-                        TransformCanvasImages(m);
-                    }
-
-                    foreach (var circle in circles)
-                    {
-                        circle.R = GetDistance(circle.Stroke.StylusPoints[0].ToPoint(),
-                            circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].ToPoint()) / 2;
-                        circle.Centroid = new Point(
-                            (circle.Stroke.StylusPoints[0].X +
-                             circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].X) / 2,
-                            (circle.Stroke.StylusPoints[0].Y +
-                             circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].Y) / 2
-                        );
-                    }
-
-                    PublishPluginCanvasViewportTransform(m);
-                }
+                ApplyWinRTCanvasGestureMatrix(
+                    m,
+                    enableZoom,
+                    md.Scale.X,
+                    md.Scale.Y);
             }
         }
 

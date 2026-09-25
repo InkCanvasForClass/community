@@ -40,6 +40,10 @@ namespace Ink_Canvas.Ink.WinRT
         private TypedEventHandler<CoreInkIndependentInputSource, PointerEventArgs> _onPointerPressing;
         private TypedEventHandler<CoreInkIndependentInputSource, PointerEventArgs> _onPointerMoving;
         private TypedEventHandler<CoreInkIndependentInputSource, PointerEventArgs> _onPointerReleasing;
+        private TypedEventHandler<CoreInkIndependentInputSource, PointerEventArgs> _onPointerLost;
+        private TypedEventHandler<CoreInkIndependentInputSource, PointerEventArgs> _onPointerExiting;
+        private TypedEventHandler<InkStrokeInput, PointerEventArgs> _onStrokeEnded;
+        private TypedEventHandler<InkStrokeInput, PointerEventArgs> _onStrokeCanceled;
         private TypedEventHandler<InkPresenter, InkStrokesCollectedEventArgs> _onStrokesCollected;
 
         private bool _disposed;
@@ -152,6 +156,11 @@ namespace Ink_Canvas.Ink.WinRT
             _presenter.UpdateDefaultDrawingAttributes(config.ToInkDrawingAttributes());
 
             _inkSynchronizer = _presenter.ActivateCustomDrying();
+            // Custom drying is required before the WinRT multiple-pointer configuration.
+            // Without this call the presenter keeps its default SimpleSinglePointer policy,
+            // so only the primary touch contact can become an InkStroke.
+            _presenter.SetPredefinedConfiguration(
+                InkPresenterPredefinedConfiguration.SimpleMultiplePointer);
             // The commit handler is our own ComImport object (a real CCW), so passing the
             // managed instance as UnmanagedType.Interface marshals it correctly.
             CheckHr(presenterDesktop.SetCommitRequestHandler(_commitHandler), "SetCommitRequestHandler");
@@ -160,9 +169,18 @@ namespace Ink_Canvas.Ink.WinRT
             _onPointerPressing = (s, e) => _inputGate.OnPointerPressing(s, e);
             _onPointerMoving = (s, e) => _inputGate.OnPointerMoving(s, e);
             _onPointerReleasing = (s, e) => _inputGate.OnPointerReleasing(s, e);
+            _onPointerLost = (s, e) => _inputGate.OnPointerLost(s, e);
+            _onPointerExiting = (s, e) => _inputGate.OnPointerExiting(s, e);
             _independentInput.PointerPressing += _onPointerPressing;
             _independentInput.PointerMoving += _onPointerMoving;
             _independentInput.PointerReleasing += _onPointerReleasing;
+            _independentInput.PointerLost += _onPointerLost;
+            _independentInput.PointerExiting += _onPointerExiting;
+
+            _onStrokeEnded = (s, e) => { _inputGate.OnStrokeEnded(s, e); };
+            _onStrokeCanceled = (s, e) => { _inputGate.OnStrokeCanceled(s, e); };
+            _presenter.StrokeInput.StrokeEnded += _onStrokeEnded;
+            _presenter.StrokeInput.StrokeCanceled += _onStrokeCanceled;
 
             _onStrokesCollected = (s, e) =>
             {
@@ -368,6 +386,8 @@ namespace Ink_Canvas.Ink.WinRT
                         _independentInput.PointerPressing -= _onPointerPressing;
                         _independentInput.PointerMoving -= _onPointerMoving;
                         _independentInput.PointerReleasing -= _onPointerReleasing;
+                        _independentInput.PointerLost -= _onPointerLost;
+                        _independentInput.PointerExiting -= _onPointerExiting;
                     }
                     catch { }
                     _independentInput = null;
@@ -375,7 +395,12 @@ namespace Ink_Canvas.Ink.WinRT
 
                 if (_presenter != null)
                 {
-                    try { _presenter.StrokesCollected -= _onStrokesCollected; }
+                    try
+                    {
+                        _presenter.StrokeInput.StrokeEnded -= _onStrokeEnded;
+                        _presenter.StrokeInput.StrokeCanceled -= _onStrokeCanceled;
+                        _presenter.StrokesCollected -= _onStrokesCollected;
+                    }
                     catch { }
                     _presenter = null;
                 }
@@ -384,6 +409,10 @@ namespace Ink_Canvas.Ink.WinRT
                 _onPointerPressing = null;
                 _onPointerMoving = null;
                 _onPointerReleasing = null;
+                _onPointerLost = null;
+                _onPointerExiting = null;
+                _onStrokeEnded = null;
+                _onStrokeCanceled = null;
                 _onStrokesCollected = null;
                 _inkSynchronizer = null;
                 _commitHandler = null;

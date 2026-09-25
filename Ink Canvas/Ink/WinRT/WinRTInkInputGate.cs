@@ -12,6 +12,36 @@ using Windows.UI.Input.Inking.Core;
 namespace Ink_Canvas.Ink.WinRT
 {
     /// <summary>
+    /// A pair of physical-pixel touch positions captured on the ink thread. The UI thread uses
+    /// the previous/current pair to apply one atomic two-finger gesture increment.
+    /// </summary>
+    internal readonly struct WinRTInkGestureSnapshot
+    {
+        public WinRTInkGestureSnapshot(
+            uint firstPointerId,
+            uint secondPointerId,
+            Point previousFirst,
+            Point previousSecond,
+            Point currentFirst,
+            Point currentSecond)
+        {
+            FirstPointerId = firstPointerId;
+            SecondPointerId = secondPointerId;
+            PreviousFirst = previousFirst;
+            PreviousSecond = previousSecond;
+            CurrentFirst = currentFirst;
+            CurrentSecond = currentSecond;
+        }
+
+        public uint FirstPointerId { get; }
+        public uint SecondPointerId { get; }
+        public Point PreviousFirst { get; }
+        public Point PreviousSecond { get; }
+        public Point CurrentFirst { get; }
+        public Point CurrentSecond { get; }
+    }
+
+    /// <summary>
     /// Result of classifying one pointer press against the UI.
     /// </summary>
     internal enum PointerGateResult
@@ -48,10 +78,16 @@ namespace Ink_Canvas.Ink.WinRT
         private readonly Action<PointerEventArgs> _onChromePointerDown;
         private readonly Action<PointerEventArgs> _onChromePointerMove;
         private readonly Action<PointerEventArgs> _onChromePointerRelease;
-        private readonly Action<PointerEventArgs> _onInkPointerPress;
-        private readonly Action<PointerEventArgs> _onInkPointerMove;
-        private readonly Action<PointerEventArgs> _onInkPointerRelease;
-        private readonly Action _onStrokeEnded;
+        private readonly Action<uint, Point> _onTouchPointerPress;
+        private readonly Action<uint, Point> _onTouchPointerMove;
+        private readonly Action<uint, Point> _onTouchPointerRelease;
+        private readonly Action<uint, PointerDeviceType, Point> _onInkPointerPress;
+        private readonly Action<uint, PointerDeviceType, Point> _onInkPointerMove;
+        private readonly Action<uint, PointerDeviceType, Point> _onInkPointerRelease;
+        private readonly Action<WinRTInkGestureSnapshot> _onTwoFingerGestureStarted;
+        private readonly Action<WinRTInkGestureSnapshot> _onTwoFingerGestureDelta;
+        private readonly Action _onTwoFingerGestureCompleted;
+        private readonly Action<uint> _onStrokeEnded;
         private readonly Action _onStrokeCanceled;
 
         // UI-thread refreshed snapshots.
@@ -65,32 +101,49 @@ namespace Ink_Canvas.Ink.WinRT
         private volatile bool _cancelAll;
 
         // Ink-thread only.
-        private readonly Dictionary<uint, bool> _touchGestureInProgress = new Dictionary<uint, bool>();
+        private readonly Dictionary<uint, Point> _touchPoints = new Dictionary<uint, Point>();
+        private readonly List<uint> _touchPointerOrder = new List<uint>();
         private readonly HashSet<uint> _activeTouchPointers = new HashSet<uint>();
+        private readonly HashSet<uint> _gesturePointers = new HashSet<uint>();
+        private readonly HashSet<uint> _canceledStrokePointers = new HashSet<uint>();
         private readonly HashSet<uint> _chromeForwardedPointers = new HashSet<uint>();
         private readonly HashSet<uint> _inkingPointers = new HashSet<uint>();
+        private readonly Dictionary<uint, long> _lastInkMoveForwardTicks = new Dictionary<uint, long>();
         private uint _mouseForwardingPointerId;
-        private long _lastInkMoveForwardTicks;
-        private volatile bool _isGestureInProgress;
+        private uint _gestureFirstPointerId;
+        private uint _gestureSecondPointerId;
+        private bool _isGestureInProgress;
 
         public WinRTInkInputGate(
             Func<PointerEventArgs, PointerGateResult> classifyPointer,
             Action<PointerEventArgs> onChromePointerDown,
             Action<PointerEventArgs> onChromePointerMove,
             Action<PointerEventArgs> onChromePointerRelease,
-            Action<PointerEventArgs> onInkPointerPress,
-            Action<PointerEventArgs> onInkPointerMove,
-            Action<PointerEventArgs> onInkPointerRelease,
-            Action onStrokeEnded,
+            Action<uint, Point> onTouchPointerPress,
+            Action<uint, Point> onTouchPointerMove,
+            Action<uint, Point> onTouchPointerRelease,
+            Action<uint, PointerDeviceType, Point> onInkPointerPress,
+            Action<uint, PointerDeviceType, Point> onInkPointerMove,
+            Action<uint, PointerDeviceType, Point> onInkPointerRelease,
+            Action<WinRTInkGestureSnapshot> onTwoFingerGestureStarted,
+            Action<WinRTInkGestureSnapshot> onTwoFingerGestureDelta,
+            Action onTwoFingerGestureCompleted,
+            Action<uint> onStrokeEnded,
             Action onStrokeCanceled)
         {
             _classifyPointer = classifyPointer ?? throw new ArgumentNullException(nameof(classifyPointer));
             _onChromePointerDown = onChromePointerDown;
             _onChromePointerMove = onChromePointerMove;
             _onChromePointerRelease = onChromePointerRelease;
+            _onTouchPointerPress = onTouchPointerPress;
+            _onTouchPointerMove = onTouchPointerMove;
+            _onTouchPointerRelease = onTouchPointerRelease;
             _onInkPointerPress = onInkPointerPress;
             _onInkPointerMove = onInkPointerMove;
             _onInkPointerRelease = onInkPointerRelease;
+            _onTwoFingerGestureStarted = onTwoFingerGestureStarted;
+            _onTwoFingerGestureDelta = onTwoFingerGestureDelta;
+            _onTwoFingerGestureCompleted = onTwoFingerGestureCompleted;
             _onStrokeEnded = onStrokeEnded ?? throw new ArgumentNullException(nameof(onStrokeEnded));
             _onStrokeCanceled = onStrokeCanceled ?? throw new ArgumentNullException(nameof(onStrokeCanceled));
         }
@@ -111,15 +164,22 @@ namespace Ink_Canvas.Ink.WinRT
 
         public void CancelActiveStrokes()
         {
-            // The ink thread observes this on the next moving/releasing event and marks it
-            // Handled so the presenter drops the in-progress stroke.
+            // The ink thread observes this on the next moving/releasing/stroke-ended event and
+            // marks all currently active strokes handled so the presenter cancels them.
             _cancelAll = true;
+            foreach (var pointerId in _inkingPointers)
+                _canceledStrokePointers.Add(pointerId);
         }
 
         public void OnPointerPressing(CoreInkIndependentInputSource sender, PointerEventArgs e)
         {
             var pointerId = e.CurrentPoint.PointerId;
             var device = e.CurrentPoint.PointerDevice.PointerDeviceType;
+            var position = GetPosition(e);
+
+            // A pointer ID can be reused after a lost/canceled contact. Do not let a stale
+            // cancellation marker suppress the new stroke.
+            _canceledStrokePointers.Remove(pointerId);
 
             if (_cancelAll)
             {
@@ -137,16 +197,12 @@ namespace Ink_Canvas.Ink.WinRT
 
             if (device == PointerDeviceType.Touch)
             {
-                _activeTouchPointers.Add(pointerId);
+                TrackTouchPress(pointerId, position);
 
                 if (!_multiTouchWriting && _twoFingerGestureAllowed
                     && _activeTouchPointers.Count >= 2)
                 {
-                    // The second touch finger turns this into a two-finger gesture. Mark both
-                    // pointers handled so the presenter cancels the first wet stroke as well.
-                    _isGestureInProgress = true;
-                    foreach (var activePointerId in _activeTouchPointers)
-                        _touchGestureInProgress[activePointerId] = true;
+                    BeginTwoFingerGesture();
                     e.Handled = true;
                     LogGatePress(device, e, "two-finger-gesture");
                     return;
@@ -162,7 +218,7 @@ namespace Ink_Canvas.Ink.WinRT
                         : (heightDip <= 0 ? widthDip : Math.Sqrt(widthDip * heightDip));
                     if (metric >= PalmEraserThresholdDip)
                     {
-                        _touchGestureInProgress[pointerId] = true;
+                        _gesturePointers.Add(pointerId);
                         e.Handled = true;
                         LogGatePress(device, e, "palm-eraser");
                         return;
@@ -179,8 +235,23 @@ namespace Ink_Canvas.Ink.WinRT
             switch (result)
             {
                 case PointerGateResult.AllowInk:
+                    if (device == PointerDeviceType.Touch && !_multiTouchWriting
+                        && _activeTouchPointers.Count >= 2)
+                    {
+                        // With both multi-touch writing and two-finger gestures disabled,
+                        // preserve the legacy single-contact behavior.
+                        e.Handled = true;
+                        return;
+                    }
+
+                    if (device == PointerDeviceType.Touch)
+                    {
+                        try { _onTouchPointerPress?.Invoke(pointerId, position); }
+                        catch { /* tracking is best-effort */ }
+                    }
+
                     _inkingPointers.Add(pointerId);
-                    try { _onInkPointerPress?.Invoke(e); }
+                    try { _onInkPointerPress?.Invoke(pointerId, device, position); }
                     catch { /* tracking is best-effort */ }
                     return;
 
@@ -204,17 +275,30 @@ namespace Ink_Canvas.Ink.WinRT
         public void OnPointerMoving(CoreInkIndependentInputSource sender, PointerEventArgs e)
         {
             var pointerId = e.CurrentPoint.PointerId;
+            var position = GetPosition(e);
+
             if (_cancelAll)
             {
                 e.Handled = true;
-                _cancelAll = false;
                 return;
             }
-            if (_touchGestureInProgress.ContainsKey(pointerId))
+
+            if (_activeTouchPointers.Contains(pointerId))
             {
-                e.Handled = true;
-                return;
+                var previous = GetTouchPosition(pointerId, position);
+                _touchPoints[pointerId] = position;
+                try { _onTouchPointerMove?.Invoke(pointerId, position); }
+                catch { /* tracking is best-effort */ }
+
+                if (_gesturePointers.Contains(pointerId))
+                {
+                    e.Handled = true;
+                    _lastChangedPointerId = pointerId;
+                    EmitGestureDelta(previous);
+                    return;
+                }
             }
+
             if (_chromeForwardedPointers.Contains(pointerId))
             {
                 e.Handled = true;
@@ -225,18 +309,25 @@ namespace Ink_Canvas.Ink.WinRT
                 }
                 return;
             }
+
             if (_inkingPointers.Contains(pointerId))
             {
-                // Pause-straighten movement feed. Throttled to ~66 Hz: the UI thread only
-                // needs to know "movement happened" to reset its pause timer, and forwarding
-                // every pointer update would flood the dispatcher queue.
+                // Pause-straighten movement feed. Each pointer has its own throttle so
+                // simultaneous touch contacts cannot starve one another.
                 var now = System.Diagnostics.Stopwatch.GetTimestamp();
-                var elapsedMs = (now - _lastInkMoveForwardTicks) * 1000.0
-                                / System.Diagnostics.Stopwatch.Frequency;
+                if (!_lastInkMoveForwardTicks.TryGetValue(pointerId, out var last))
+                    last = 0;
+                var elapsedMs = (now - last) * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
                 if (elapsedMs >= 15)
                 {
-                    _lastInkMoveForwardTicks = now;
-                    try { _onInkPointerMove?.Invoke(e); }
+                    _lastInkMoveForwardTicks[pointerId] = now;
+                    try
+                    {
+                        _onInkPointerMove?.Invoke(
+                            pointerId,
+                            e.CurrentPoint.PointerDevice.PointerDeviceType,
+                            position);
+                    }
                     catch { /* tracking is best-effort */ }
                 }
             }
@@ -244,18 +335,75 @@ namespace Ink_Canvas.Ink.WinRT
 
         public void OnPointerReleasing(CoreInkIndependentInputSource sender, PointerEventArgs e)
         {
-            var pointerId = e.CurrentPoint.PointerId;
-            _activeTouchPointers.Remove(pointerId);
+            CompletePointer(e, "pointer-released");
+        }
 
-            if (_inkingPointers.Remove(pointerId))
+        public void OnPointerLost(CoreInkIndependentInputSource sender, PointerEventArgs e)
+        {
+            CompletePointer(e, "pointer-lost");
+        }
+
+        public void OnPointerExiting(CoreInkIndependentInputSource sender, PointerEventArgs e)
+        {
+            CompletePointer(e, "pointer-exiting");
+        }
+
+        /// <summary>
+        /// Called on the ink thread when the presenter finalizes a stroke. Returns true when
+        /// the stroke is a live candidate for custom drying (i.e. we let it through).
+        /// </summary>
+        public bool OnStrokeEnded(InkStrokeInput sender, PointerEventArgs e)
+        {
+            var pointerId = e.CurrentPoint.PointerId;
+            if (_cancelAll || _canceledStrokePointers.Remove(pointerId)
+                || _gesturePointers.Contains(pointerId))
             {
-                try { _onInkPointerRelease?.Invoke(e); }
+                e.Handled = true;
+                _onStrokeCanceled();
+                return false;
+            }
+
+            _onStrokeEnded(pointerId);
+            return true;
+        }
+
+        public void OnStrokeCanceled(InkStrokeInput sender, PointerEventArgs e)
+        {
+            _canceledStrokePointers.Remove(e.CurrentPoint.PointerId);
+            _onStrokeCanceled();
+        }
+
+        private void CompletePointer(PointerEventArgs e, string reason)
+        {
+            var pointerId = e.CurrentPoint.PointerId;
+            var position = GetPosition(e);
+            var device = e.CurrentPoint.PointerDevice.PointerDeviceType;
+
+            if (_activeTouchPointers.Contains(pointerId))
+            {
+                _touchPoints[pointerId] = position;
+                try { _onTouchPointerRelease?.Invoke(pointerId, position); }
                 catch { /* tracking is best-effort */ }
             }
 
-            if (_touchGestureInProgress.Remove(pointerId))
+            if (_gesturePointers.Remove(pointerId))
             {
+                _canceledStrokePointers.Add(pointerId);
                 e.Handled = true;
+                RemoveTouch(pointerId);
+                if (_activeTouchPointers.Count == 0)
+                    EndTwoFingerGesture();
+                LogGatePress(device, e, reason + ":gesture");
+                return;
+            }
+
+            if (_inkingPointers.Remove(pointerId))
+            {
+                if (!string.Equals(reason, "pointer-released", StringComparison.Ordinal))
+                    _canceledStrokePointers.Add(pointerId);
+                try { _onInkPointerRelease?.Invoke(pointerId, device, position); }
+                catch { /* tracking is best-effort */ }
+                _lastInkMoveForwardTicks.Remove(pointerId);
             }
 
             if (_chromeForwardedPointers.Remove(pointerId))
@@ -268,33 +416,151 @@ namespace Ink_Canvas.Ink.WinRT
                     catch { /* forwarding is best-effort */ }
                 }
             }
-            else if (_cancelAll)
+            else if (_cancelAll || _canceledStrokePointers.Contains(pointerId))
             {
                 e.Handled = true;
-                _cancelAll = false;
             }
 
-            if (_activeTouchPointers.Count == 0)
-            {
-                _touchGestureInProgress.Clear();
-                _isGestureInProgress = false;
-            }
+            RemoveTouch(pointerId);
+            if (_inkingPointers.Count == 0 && _activeTouchPointers.Count == 0)
+                _cancelAll = false;
+            LogGatePress(device, e, reason);
         }
 
-        /// <summary>
-        /// Called on the ink thread when the presenter finalizes a stroke. Returns true when
-        /// the stroke is a live candidate for custom drying (i.e. we let it through).
-        /// </summary>
-        public bool OnStrokeEnded(InkStrokeInput sender, PointerEventArgs e)
+        private void TrackTouchPress(uint pointerId, Point position)
         {
-            if (_cancelAll)
+            _activeTouchPointers.Add(pointerId);
+            _touchPoints[pointerId] = position;
+            _touchPointerOrder.Remove(pointerId);
+            _touchPointerOrder.Add(pointerId);
+        }
+
+        private void RemoveTouch(uint pointerId)
+        {
+            _activeTouchPointers.Remove(pointerId);
+            _touchPoints.Remove(pointerId);
+            _touchPointerOrder.Remove(pointerId);
+        }
+
+        private Point GetTouchPosition(uint pointerId, Point fallback)
+            => _touchPoints.TryGetValue(pointerId, out var position) ? position : fallback;
+
+        private void BeginTwoFingerGesture()
+        {
+            if (_isGestureInProgress)
             {
-                _cancelAll = false;
-                _onStrokeCanceled();
-                return false;
+                foreach (var pointerId in _activeTouchPointers)
+                    _gesturePointers.Add(pointerId);
+                return;
             }
-            _onStrokeEnded();
-            return true;
+
+            if (!TryGetGesturePointerIds(out var firstPointerId, out var secondPointerId))
+                return;
+
+            _isGestureInProgress = true;
+            _gestureFirstPointerId = firstPointerId;
+            _gestureSecondPointerId = secondPointerId;
+            foreach (var pointerId in _activeTouchPointers)
+            {
+                _gesturePointers.Add(pointerId);
+                if (_inkingPointers.Remove(pointerId))
+                {
+                    _canceledStrokePointers.Add(pointerId);
+                    _lastInkMoveForwardTicks.Remove(pointerId);
+                    try
+                    {
+                        _onInkPointerRelease?.Invoke(
+                            pointerId,
+                            PointerDeviceType.Touch,
+                            GetTouchPosition(pointerId, new Point()));
+                    }
+                    catch { /* tracking is best-effort */ }
+                }
+            }
+
+            var first = GetTouchPosition(firstPointerId, new Point());
+            var second = GetTouchPosition(secondPointerId, new Point());
+            var snapshot = new WinRTInkGestureSnapshot(
+                firstPointerId,
+                secondPointerId,
+                first,
+                second,
+                first,
+                second);
+            try { _onTwoFingerGestureStarted?.Invoke(snapshot); }
+            catch { /* gesture forwarding is best-effort */ }
+        }
+
+        private void EmitGestureDelta(Point changedPrevious)
+        {
+            if (!_isGestureInProgress
+                || !_touchPoints.TryGetValue(_gestureFirstPointerId, out var currentFirst)
+                || !_touchPoints.TryGetValue(_gestureSecondPointerId, out var currentSecond))
+                return;
+
+            var previousFirst = _touchPoints[_gestureFirstPointerId];
+            var previousSecond = _touchPoints[_gestureSecondPointerId];
+            if (_gestureFirstPointerId == _gestureSecondPointerId)
+                return;
+
+            // The changed pointer's previous position is passed in by the caller; the other
+            // pointer is unchanged for this event. Restore the current value only after the
+            // snapshot is built so the UI receives a true incremental transform.
+            if (_lastChangedPointerId == _gestureFirstPointerId)
+                previousFirst = changedPrevious;
+            else if (_lastChangedPointerId == _gestureSecondPointerId)
+                previousSecond = changedPrevious;
+
+            var snapshot = new WinRTInkGestureSnapshot(
+                _gestureFirstPointerId,
+                _gestureSecondPointerId,
+                previousFirst,
+                previousSecond,
+                currentFirst,
+                currentSecond);
+            try { _onTwoFingerGestureDelta?.Invoke(snapshot); }
+            catch { /* gesture forwarding is best-effort */ }
+        }
+
+        private uint _lastChangedPointerId;
+
+        private void EndTwoFingerGesture()
+        {
+            if (!_isGestureInProgress)
+                return;
+
+            _isGestureInProgress = false;
+            _gesturePointers.Clear();
+            _gestureFirstPointerId = 0;
+            _gestureSecondPointerId = 0;
+            try { _onTwoFingerGestureCompleted?.Invoke(); }
+            catch { /* gesture forwarding is best-effort */ }
+        }
+
+        private bool TryGetGesturePointerIds(out uint firstPointerId, out uint secondPointerId)
+        {
+            firstPointerId = 0;
+            secondPointerId = 0;
+            var found = 0;
+            foreach (var pointerId in _touchPointerOrder)
+            {
+                if (!_activeTouchPointers.Contains(pointerId))
+                    continue;
+                if (found++ == 0)
+                    firstPointerId = pointerId;
+                else
+                {
+                    secondPointerId = pointerId;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static Point GetPosition(PointerEventArgs e)
+        {
+            var position = e.CurrentPoint.Position;
+            return new Point(position.X, position.Y);
         }
 
         private static void LogGatePress(
