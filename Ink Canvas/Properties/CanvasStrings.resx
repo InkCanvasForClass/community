@@ -378,6 +378,15 @@
   <data name="Canvas_DarkMode" xml:space="preserve">
     <value>黑底</value>
   </data>
+  <data name="Canvas_UseWinRTInk" xml:space="preserve">
+    <value>使用 WinRT 墨迹引擎（实验性）</value>
+  </data>
+  <data name="Canvas_UseWinRTInkHint" xml:space="preserve">
+    <value>启用系统 Wet Ink 渲染与独立墨迹线程，需在笔工具下生效。关闭后回退 WPF 原生墨迹。实验性功能，可能与部分设备不兼容。</value>
+  </data>
+  <data name="Canvas_WetInkRendererFailed" xml:space="preserve">
+    <value>墨迹渲染初始化失败，已回退到默认墨迹模式</value>
+  </data>
   <data name="Shape_RemoveAsymptote" xml:space="preserve">
     <value>是否移除渐近线？</value>
   </data>

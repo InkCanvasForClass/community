@@ -915,6 +915,7 @@ namespace Ink_Canvas
             }
 
             CheckEnableTwoFingerGestureBtnColorPrompt();
+            PushWinRTInkGateSnapshots();
             SaveSettingsToFile();
         }
 
@@ -1033,6 +1034,7 @@ namespace Ink_Canvas
             }
 
             CheckEnableTwoFingerGestureBtnColorPrompt();
+            PushWinRTInkGateSnapshots();
             SaveSettingsToFile();
         }
 
@@ -1057,6 +1059,7 @@ namespace Ink_Canvas
             }
 
             CheckEnableTwoFingerGestureBtnColorPrompt();
+            PushWinRTInkGateSnapshots();
             SaveSettingsToFile();
         }
 
@@ -1081,6 +1084,7 @@ namespace Ink_Canvas
             }
 
             CheckEnableTwoFingerGestureBtnColorPrompt();
+            PushWinRTInkGateSnapshots();
             SaveSettingsToFile();
         }
 

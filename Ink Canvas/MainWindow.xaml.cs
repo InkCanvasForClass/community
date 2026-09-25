@@ -1371,7 +1371,8 @@ namespace Ink_Canvas
         {
             try
             {
-                return inkCanvas?.EditingMode == InkCanvasEditingMode.Ink;
+                return inkCanvas?.EditingMode == InkCanvasEditingMode.Ink
+                       || ResolveLogicalInkTool() == LogicalInkTool.Pen;
             }
             catch
             {
@@ -1653,6 +1654,9 @@ namespace Ink_Canvas
             // 应用无焦点模式设置
             ApplyNoFocusMode();
 
+            // 实验性 WinRT 墨迹管线：加载完成后按当前逻辑工具挂载（默认关闭）。
+            SyncWinRTInkPipelineWithLogicalTool();
+
             // 设置UIA置顶状态
             App.IsUIAccessTopMostEnabled = Settings.Advanced.EnableUIAccessTopMost;
             if (Settings.Advanced.EnableUIAccessTopMost && Settings.Advanced.IsAlwaysOnTop)
@@ -1730,6 +1734,8 @@ namespace Ink_Canvas
 
                 HandleFloatingBarRecovery();
             }
+
+            UpdateWinRTInkTarget();
         }
 
         private void HandleFloatingBarRecovery()
@@ -3487,6 +3493,7 @@ namespace Ink_Canvas
 
                 // 执行模式切换
                 inkCanvas.EditingMode = newMode;
+                SyncWinRTInkPipelineWithLogicalTool();
 
                 // 根据模式确定是否为鼠标模式（无工具模式）
                 bool isMouseMode = newMode == InkCanvasEditingMode.None;
