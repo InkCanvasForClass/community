@@ -107,6 +107,8 @@ namespace Ink_Canvas
         public static bool IsUpdateInstalling;
         // 新增：标记是否启用了UIA置顶功能
         public static bool IsUIAccessTopMostEnabled;
+        // UIA helper 启动失败后，普通用户子进程使用此标记执行一次性回退。
+        public static bool IsUIAccessFallbackLaunch { get; private set; }
         // 新增：标记是否正在显示 OOBE（首次启动向导），看门狗在此期间不判定为卡死/假死
         public static bool IsOobeShowing;
         // 新增：退出信号文件路径
@@ -201,6 +203,8 @@ namespace Ink_Canvas
                 return;
             }
 
+            IsUIAccessFallbackLaunch = args.Contains("--uia-fallback");
+
             if (args.Contains("--enable-uia-topmost-helper"))
             {
                 // 检查是否为原进程令牌模式（通过 --uia-source-pid 参数判断）
@@ -215,14 +219,19 @@ namespace Ink_Canvas
                     }
                 }
 
-                if (sourcePid != 0)
+                bool started = sourcePid != 0
+                    ? UIAccessHelper.LaunchNormalUserWithUIAccessFromElevatedHelper_ProcessToken(sourcePid)
+                    : UIAccessHelper.LaunchNormalUserWithUIAccessFromElevatedHelper();
+
+                if (!started)
                 {
-                    Environment.Exit(UIAccessHelper.LaunchNormalUserWithUIAccessFromElevatedHelper_ProcessToken(sourcePid) ? 0 : 1);
+                    // UIA 子进程可能在 CreateProcessWithTokenW 成功后继续启动时崩溃。
+                    // helper 仍需启动普通用户实例，避免原进程退出后桌面上没有可用实例。
+                    LogHelper.WriteLogToFile("UIAccess | UIA 子进程启动失败，回退启动普通置顶实例", LogHelper.LogType.Warning);
+                    started = UIAccessHelper.RestartAsNormalUser("--uia-fallback");
                 }
-                else
-                {
-                    Environment.Exit(UIAccessHelper.LaunchNormalUserWithUIAccessFromElevatedHelper() ? 0 : 1);
-                }
+
+                Environment.Exit(started ? 0 : 1);
                 return;
             }
 
