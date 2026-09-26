@@ -54,7 +54,7 @@ namespace Ink_Canvas.Plugins
             var fontSize = Clamp(options.FontSize, 4, 256);
             var strokeWidth = Clamp(options.StrokeWidth, 0.25, 32);
             var familyName = string.IsNullOrWhiteSpace(options.FontFamily)
-                ? "Microsoft YaHei UI" : options.FontFamily;
+                ? "SimSun" : options.FontFamily;
 
             FormattedText formatted;
             try

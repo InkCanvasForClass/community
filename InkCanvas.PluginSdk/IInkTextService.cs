@@ -10,10 +10,10 @@ namespace Ink_Canvas.Plugins
     public sealed class PluginInkTextOptions
     {
         /// <summary>优先使用的字体；为空时使用系统默认字体回退。</summary>
-        public string FontFamily { get; set; } = "Microsoft YaHei UI";
+        public string FontFamily { get; set; } = "SimSun";
 
         /// <summary>逗号分隔的字体回退列表。</summary>
-        public string FallbackFontFamilies { get; set; } = "Microsoft YaHei UI,Microsoft YaHei,Segoe UI Symbol";
+        public string FallbackFontFamilies { get; set; } = "SimSun,宋体,Microsoft YaHei,Segoe UI Symbol";
 
         /// <summary>字体字号（DIP）。</summary>
         public double FontSize { get; set; } = 32;
