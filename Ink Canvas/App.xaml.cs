@@ -314,6 +314,9 @@ namespace Ink_Canvas
                 (typeof(Plugins.ICanvasToolService),             new Plugins.CanvasToolService(mainWindow)),
                 (typeof(Plugins.ICanvasLineConversionService),   new Plugins.CanvasLineConversionService(mainWindow)),
                 (typeof(Plugins.ICanvasViewportService),         new Plugins.CanvasViewportService(mainWindow)),
+                (typeof(Plugins.ICanvasCoordinateService),       new Plugins.CanvasCoordinateService(mainWindow)),
+                (typeof(Plugins.IInkTextService),                new Plugins.InkTextService(mainWindow)),
+                (typeof(Plugins.IScreenElementService),          new Plugins.ScreenElementService()),
                 (typeof(Plugins.IUndoService),                   new Plugins.UndoService(mainWindow)),
                 (typeof(Plugins.IWhiteboardDocumentService),     new Plugins.WhiteboardDocumentService(mainWindow)),
             };
