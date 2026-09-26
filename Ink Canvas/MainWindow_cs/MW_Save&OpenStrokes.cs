@@ -188,8 +188,7 @@ namespace Ink_Canvas
                 var factoryName = string.Equals(info.Type, "SvgSceneGroup", StringComparison.OrdinalIgnoreCase)
                     ? "FromSerializedScene"
                     : "FromSerializedElement";
-                var factory = type?.GetMethod(factoryName, BindingFlags.Public | BindingFlags.Static);
-                if (factory?.Invoke(null, new object[] { info.SceneElementJson, 1d }) is not FrameworkElement element) return;
+                if (!TryInvokeSerializedElementFactory(type, factoryName, info.SceneElementJson, out var element)) return;
                 element.Name = "svgscene_restore_" + DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
                 InkCanvas.SetLeft(element, double.IsNaN(info.Left) ? 0 : info.Left);
                 InkCanvas.SetTop(element, double.IsNaN(info.Top) ? 0 : info.Top);

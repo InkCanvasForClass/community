@@ -533,10 +533,33 @@ namespace Ink_Canvas
         /// </remarks>
         private void GridInkCanvasSelectionCover_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            // The lasso cover is above InkCanvas. Give editable SVG scenes priority so
-            // their own selection frame handles the click instead of stroke selection.
-            var scenePoint = e.GetPosition(inkCanvas);
-            var sceneElement = FindSecAgentSceneElementAtCanvasPoint(scenePoint);
+            if (TryBlockFrozenPageMutation("移动墨迹"))
+            {
+                e.Handled = true;
+                return;
+            }
+
+            var clickPoint = e.GetPosition(inkCanvas);
+            var selectedStrokes = inkCanvas.GetSelectedStrokes();
+            if (selectedStrokes.Count > 0)
+            {
+                var selectionBounds = inkCanvas.GetSelectionBounds();
+                if (selectionBounds.Contains(clickPoint))
+                {
+                    // A click inside an existing stroke selection belongs to the stroke
+                    // drag gesture, even when an SVG scene occupies the same area.
+                    isGridInkCanvasSelectionCoverMouseDown = true;
+                    isStrokeDragging = true;
+                    strokeDragStartPoint = clickPoint;
+                    GridInkCanvasSelectionCover.CaptureMouse();
+                    GridInkCanvasSelectionCover.Cursor = Cursors.SizeAll;
+                    e.Handled = true;
+                    return;
+                }
+            }
+
+            // Only let an SVG scene handle clicks outside the active stroke selection.
+            var sceneElement = FindSecAgentSceneElementAtCanvasPoint(clickPoint);
             if (sceneElement != null)
             {
                 isGridInkCanvasSelectionCoverMouseDown = false;
@@ -548,39 +571,16 @@ namespace Ink_Canvas
                 return;
             }
 
-            if (TryBlockFrozenPageMutation("移动墨迹"))
+            isGridInkCanvasSelectionCoverMouseDown = selectedStrokes.Count > 0;
+            isStrokeDragging = false;
+            if (selectedStrokes.Count > 0)
             {
-                e.Handled = true;
-                return;
+                // Clicking outside the selection clears the stroke selection.
+                inkCanvas.Select(new StrokeCollection());
+                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
             }
-            isGridInkCanvasSelectionCoverMouseDown = true;
 
-            // 检查是否有选中的墨迹
-            if (inkCanvas.GetSelectedStrokes().Count > 0)
-            {
-                // 获取鼠标点击位置
-                var clickPoint = e.GetPosition(inkCanvas);
-                var selectionBounds = inkCanvas.GetSelectionBounds();
-
-                // 检查点击位置是否在选择框边界内
-                if (clickPoint.X >= selectionBounds.Left &&
-                    clickPoint.X <= selectionBounds.Right &&
-                    clickPoint.Y >= selectionBounds.Top &&
-                    clickPoint.Y <= selectionBounds.Bottom)
-                {
-                    // 只有在选择框边界内才允许拖动
-                    isStrokeDragging = true;
-                    strokeDragStartPoint = clickPoint;
-                    GridInkCanvasSelectionCover.CaptureMouse();
-                    GridInkCanvasSelectionCover.Cursor = Cursors.SizeAll;
-                }
-                else
-                {
-                    // 点击在选择框外，取消选择
-                    inkCanvas.Select(new StrokeCollection());
-                    GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-                }
-            }
+            e.Handled = true;
         }
 
         /// <summary>
