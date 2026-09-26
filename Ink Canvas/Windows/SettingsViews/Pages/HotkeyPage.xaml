@@ -48,6 +48,13 @@
                             SwitchName="ToggleSwitchEnableHotkeysInMouseMode"
                             Toggled="ToggleSwitchEnableHotkeysInMouseMode_Toggled" />
 
+                    <controls:LabeledSettingsCard x:Name="CardKeepDrawingHotkeysInMouseMode"
+                            Header="{x:Static props:HotkeyStrings.Hotkey_KeepDrawingHotkeysInMouseMode}"
+                            Description="{x:Static props:HotkeyStrings.Hotkey_KeepDrawingHotkeysInMouseModeHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.PenWorkspace}"
+                            SwitchName="ToggleSwitchKeepDrawingHotkeysInMouseMode"
+                            Toggled="ToggleSwitchKeepDrawingHotkeysInMouseMode_Toggled" />
+
                     <controls:LabeledSettingsCard x:Name="CardPassThroughMouseWheelInDrawingMode"
                             Header="{x:Static props:HotkeyStrings.Hotkey_PassThroughMouseWheelInDrawingMode}"
                             Description="{x:Static props:HotkeyStrings.Hotkey_PassThroughMouseWheelInDrawingModeHint}"
