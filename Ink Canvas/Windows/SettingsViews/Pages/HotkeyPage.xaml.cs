@@ -159,8 +159,28 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void LoadMouseModeSetting()
         {
             CardEnableHotkeysInMouseMode.IsOn = SettingsManager.Settings.Appearance.EnableHotkeysInMouseMode;
+            CardKeepDrawingHotkeysInMouseMode.IsOn = SettingsManager.Settings.Appearance.KeepDrawingHotkeysInMouseMode;
             CardPassThroughMouseWheelInDrawingMode.IsOn = SettingsManager.Settings.Appearance.PassThroughMouseWheelInDrawingMode;
             CardEnablePPTPageKeyHook.IsOn = SettingsManager.Settings.Appearance.EnablePPTPageKeyHook;
+        }
+
+        private void ToggleSwitchKeepDrawingHotkeysInMouseMode_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            try
+            {
+                SettingsManager.Settings.Appearance.KeepDrawingHotkeysInMouseMode = CardKeepDrawingHotkeysInMouseMode.IsOn;
+                SettingsManager.SaveSettingsToFile();
+                if (_hotkeyManager != null && _mainWindow != null)
+                {
+                    bool isMouseMode = _mainWindow.inkCanvas.EditingMode == InkCanvasEditingMode.None;
+                    _hotkeyManager.UpdateHotkeyStateForToolMode(isMouseMode);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新鼠标模式绘图快捷键设置时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private void ToggleSwitchEnableHotkeysInMouseMode_Toggled(object sender, RoutedEventArgs e)
@@ -175,14 +195,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (_hotkeyManager != null && _mainWindow != null)
                 {
                     bool isCurrentlyMouseMode = _mainWindow.inkCanvas.EditingMode == InkCanvasEditingMode.None;
-                    if (isCurrentlyMouseMode && !newState)
-                    {
-                        _hotkeyManager.DisableHotkeyRegistration();
-                    }
-                    else
-                    {
-                        _hotkeyManager.UpdateHotkeyStateForToolMode(isCurrentlyMouseMode);
-                    }
+                    _hotkeyManager.UpdateHotkeyStateForToolMode(isCurrentlyMouseMode);
                 }
             }
             catch (Exception ex)
@@ -396,6 +409,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 MessageBoxHelper.Show(this, string.Format(HotkeyStrings.Hotkey_SaveErrorMessage, ex.Message), HotkeyStrings.Hotkey_Error,
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void CardKeepDrawingHotkeysInMouseMode_Loaded(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

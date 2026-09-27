@@ -23,6 +23,14 @@ namespace Ink_Canvas.Helpers
         private readonly MainWindow _mainWindow;
         private bool _isDisposed;
         private bool _hotkeysShouldBeRegistered = true; // 启动时注册热键
+        private bool _isContextHotkeyDisabled;
+        private bool _allowContextExemptRegistration;
+
+        private static readonly HashSet<string> DrawingHotkeyNames = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "DrawTool", "EraserTool", "BlackboardTool", "QuitDrawTool",
+            "Pen1", "Pen2", "Pen3", "Pen4", "Pen5", "DrawLine"
+        };
 
         // 多屏幕支持相关字段
         private Screen _currentScreen;
@@ -70,7 +78,7 @@ namespace Ink_Canvas.Helpers
                     return false;
 
                 // 检查是否应该注册热键（基于屏幕和模式）
-                if (!ShouldRegisterHotkeys())
+                if (!ShouldRegisterHotkeys() && !_allowContextExemptRegistration)
                 {
                     return false;
                 }
@@ -469,6 +477,7 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
+                _isContextHotkeyDisabled = false;
                 if (!_hotkeysShouldBeRegistered)
                 {
                     _hotkeysShouldBeRegistered = true;
@@ -510,6 +519,7 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
+                _isContextHotkeyDisabled = false;
                 if (_hotkeysShouldBeRegistered)
                 {
                     _hotkeysShouldBeRegistered = false;
@@ -543,11 +553,12 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                if (!_hotkeysShouldBeRegistered)
+                if (!_hotkeysShouldBeRegistered && !_isContextHotkeyDisabled)
                 {
                     return;
                 }
 
+                _isContextHotkeyDisabled = true;
                 _hotkeysShouldBeRegistered = false;
 
                 // 停止鼠标位置监控定时器
@@ -558,10 +569,37 @@ namespace Ink_Canvas.Helpers
 
                 // 仅注销内置快捷键，保留插件热键
                 UnregisterAllHotkeys(false);
+
+                if (MainWindow.Settings.Appearance.KeepDrawingHotkeysInMouseMode)
+                {
+                    RegisterDrawingHotkeysForMouseMode();
+                }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"上下文停用快捷键时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void RegisterDrawingHotkeysForMouseMode()
+        {
+            try
+            {
+                var drawingHotkeys = GetHotkeysFromConfigFile();
+                _allowContextExemptRegistration = true;
+                foreach (var hotkey in drawingHotkeys)
+                {
+                    if (!DrawingHotkeyNames.Contains(hotkey.Name))
+                        continue;
+
+                    var action = GetActionByName(hotkey.Name);
+                    if (action != null)
+                        RegisterHotkey(hotkey.Name, hotkey.Key, hotkey.Modifiers, action);
+                }
+            }
+            finally
+            {
+                _allowContextExemptRegistration = false;
             }
         }
 
@@ -599,11 +637,8 @@ namespace Ink_Canvas.Helpers
                 {
                     // 非鼠标模式下启用快捷键
                     EnableHotkeyRegistration();
-
-                    if (_hotkeysShouldBeRegistered && _registeredHotkeys.Count == 0)
-                    {
-                        LoadHotkeysFromSettings();
-                    }
+                    _isContextHotkeyDisabled = false;
+                    LoadHotkeysFromSettings();
                 }
             }
             catch (Exception ex)
