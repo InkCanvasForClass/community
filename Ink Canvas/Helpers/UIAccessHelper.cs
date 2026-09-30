@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -49,6 +50,20 @@ namespace Ink_Canvas.Helpers
 
         private const uint SE_PRIVILEGE_ENABLED = 0x00000002;
         private const string SE_ASSIGNPRIMARYTOKEN_NAME = "SeAssignPrimaryTokenPrivilege";
+
+        /// <summary>
+        /// 提权 helper 模式开关：以管理员身份启动自身，只负责拉起 UIA 子进程，不进入正常启动流程。
+        /// </summary>
+        public const string UIA_HELPER_SWITCH = "--enable-uia-topmost-helper";
+
+        /// <summary>
+        /// 原始启动参数转发开关：helper 通过它接收「发起提权重启的进程」的命令行参数
+        /// （如 icc:// 深链接、.icstk 文件路径），值为 NUL 分隔参数的 Base64 编码。
+        /// </summary>
+        public const string FORWARD_ARGS_SWITCH = "--uia-forward-args";
+
+        private const string UIA_SOURCE_PID_SWITCH = "--uia-source-pid";
+        private const string SKIP_MUTEX_CHECK_SWITCH = "--skip-mutex-check";
 
         // CreateProcessWithTokenW 返回成功只代表进程已创建，UIA 子进程仍可能在启动阶段崩溃。
         // 留出一段观察窗口，只有子进程在窗口内退出才判定为启动失败。
@@ -817,33 +832,7 @@ namespace Ink_Canvas.Helpers
             string workDir = System.IO.Path.GetDirectoryName(exePath);
 
             // 重建命令行：保留原始参数，追加 --skip-mutex-check 防止单实例阻塞
-            var cmdBuilder = new StringBuilder(32768);
-            cmdBuilder.Append('"').Append(exePath).Append('"');
-
-            string[] args = Environment.GetCommandLineArgs();
-            for (int i = 1; i < args.Length; i++)
-            {
-                if (string.Equals(args[i], "--enable-uia-topmost-helper", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                // 单文件发布下，托管入口程序集位于 bundle 解压目录；重启时必须使用真实 exe，
-                // 不能把 EntryAssembly.Location / 解压路径带给新进程。
-                if (string.Equals(args[i], exePath, StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                cmdBuilder.Append(' ');
-                AppendQuoted(cmdBuilder, args[i]);
-            }
-
-            if (!string.IsNullOrEmpty(extraArgs))
-                cmdBuilder.Append(' ').Append(extraArgs);
-
-            // 防止单实例 Mutex 阻塞新进程
-            if (Array.IndexOf(args, "--skip-mutex-check") < 0
-                && (extraArgs == null || extraArgs.IndexOf("--skip-mutex-check", StringComparison.Ordinal) < 0))
-            {
-                cmdBuilder.Append(" --skip-mutex-check");
-            }
+            var cmdBuilder = BuildRelaunchCommandLine(exePath, extraArgs);
 
             var si = new STARTUPINFOW { cb = (uint)Marshal.SizeOf(typeof(STARTUPINFOW)) };
             GetStartupInfoW(ref si);
@@ -908,42 +897,7 @@ namespace Ink_Canvas.Helpers
         {
             string exePath = GetExecutablePathForRelaunch();
 
-            var cmdBuilder = new StringBuilder(32768);
-            cmdBuilder.Append('"').Append(exePath).Append('"');
-
-            string[] args = Environment.GetCommandLineArgs();
-            for (int i = 1; i < args.Length; i++)
-            {
-                if (string.Equals(args[i], "--enable-uia-topmost-helper", StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                if (string.Equals(args[i], "--uia-source-pid", StringComparison.OrdinalIgnoreCase))
-                {
-                    i++; // 跳过 PID 值
-                    continue;
-                }
-
-                if (string.Equals(args[i], exePath, StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                cmdBuilder.Append(' ');
-                AppendQuoted(cmdBuilder, args[i]);
-            }
-
-            if (!string.IsNullOrWhiteSpace(extraArgs))
-            {
-                cmdBuilder.Append(' ').Append(extraArgs);
-            }
-
-            if (Array.IndexOf(args, "--skip-mutex-check") < 0
-                && (extraArgs == null || extraArgs.IndexOf("--skip-mutex-check", StringComparison.OrdinalIgnoreCase) < 0))
-            {
-                cmdBuilder.Append(" --skip-mutex-check");
-            }
+            var cmdBuilder = BuildRelaunchCommandLine(exePath, extraArgs);
 
             var si = new STARTUPINFOW { cb = (uint)Marshal.SizeOf(typeof(STARTUPINFOW)) };
             GetStartupInfoW(ref si);
@@ -999,6 +953,164 @@ namespace Ink_Canvas.Helpers
             string result = waitResult == WAIT_FAILED ? $"WAIT_FAILED/{error}" : waitResult.ToString();
             LogHelper.WriteLogToFile($"UIAccess | 等待 UIA 子进程启动状态失败 (PID={processId}, Result={result})", LogHelper.LogType.Error);
             return false;
+        }
+
+        /// <summary>
+        /// 生成转发原始启动参数的命令行片段（形如 " --uia-forward-args &lt;base64&gt;"，含前导空格）。
+        /// 提权重启链会经过一个管理员 helper 进程，helper 自身不带用户参数，
+        /// 因此发起重启的进程必须用它把自己的命令行参数交给 helper；没有需要转发的参数时返回空串。
+        /// </summary>
+        public static string BuildForwardArgsArgument()
+        {
+            string payload = EncodeCurrentProcessArgs();
+            return string.IsNullOrEmpty(payload) ? string.Empty : $" {FORWARD_ARGS_SWITCH} {payload}";
+        }
+
+        /// <summary>
+        /// 把当前进程的启动参数（不含 exe 路径）打包成 Base64。
+        /// 参数之间用 NUL 分隔：Windows 命令行本身不允许 NUL，因此不会与参数内容冲突。
+        /// </summary>
+        private static string EncodeCurrentProcessArgs()
+        {
+            try
+            {
+                string[] args = Environment.GetCommandLineArgs();
+                var forwarded = new List<string>();
+                for (int i = 1; i < args.Length; i++)
+                {
+                    // 只转发用户启动意图，UIA 内部开关一律剥离
+                    if (string.Equals(args[i], UIA_HELPER_SWITCH, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    if (string.Equals(args[i], UIA_SOURCE_PID_SWITCH, StringComparison.OrdinalIgnoreCase))
+                    {
+                        i++; // 跳过 PID 值
+                        continue;
+                    }
+
+                    if (string.Equals(args[i], FORWARD_ARGS_SWITCH, StringComparison.OrdinalIgnoreCase))
+                    {
+                        i++; // 跳过上一级载荷，避免参数层层嵌套
+                        continue;
+                    }
+
+                    forwarded.Add(args[i]);
+                }
+
+                if (forwarded.Count == 0)
+                    return null;
+
+                return Convert.ToBase64String(Encoding.UTF8.GetBytes(string.Join("\0", forwarded)));
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"UIAccess | 打包转发参数失败: {ex.Message}", LogHelper.LogType.Warning);
+                return null;
+            }
+        }
+
+        private static bool TryDecodeForwardedArgs(string payload, out string[] args)
+        {
+            args = null;
+            if (string.IsNullOrWhiteSpace(payload))
+                return false;
+
+            try
+            {
+                string joined = Encoding.UTF8.GetString(Convert.FromBase64String(payload));
+                if (string.IsNullOrEmpty(joined))
+                    return false;
+
+                args = joined.Split('\0');
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"UIAccess | 解析转发参数失败: {ex.Message}", LogHelper.LogType.Warning);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 取出应当传递给 UIA 子进程的参数。
+        /// 提权 helper 优先使用 --uia-forward-args 携带的原始进程参数，
+        /// 否则回退到当前进程自身的参数（helper 内部开关一律剥离）。
+        /// </summary>
+        private static string[] BuildRelaunchArgs()
+        {
+            string[] ownArgs = Environment.GetCommandLineArgs();
+
+            for (int i = 1; i < ownArgs.Length; i++)
+            {
+                if (!string.Equals(ownArgs[i], FORWARD_ARGS_SWITCH, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                if (i + 1 < ownArgs.Length && TryDecodeForwardedArgs(ownArgs[i + 1], out string[] forwarded))
+                    return forwarded;
+
+                LogHelper.WriteLogToFile("UIAccess | 未取得可用的转发参数，回退使用 helper 自身参数", LogHelper.LogType.Warning);
+                break;
+            }
+
+            var result = new List<string>();
+            for (int i = 1; i < ownArgs.Length; i++)
+            {
+                if (string.Equals(ownArgs[i], UIA_HELPER_SWITCH, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                if (string.Equals(ownArgs[i], UIA_SOURCE_PID_SWITCH, StringComparison.OrdinalIgnoreCase))
+                {
+                    i++; // 跳过 PID 值
+                    continue;
+                }
+
+                if (string.Equals(ownArgs[i], FORWARD_ARGS_SWITCH, StringComparison.OrdinalIgnoreCase))
+                {
+                    i++; // 跳过转发载荷
+                    continue;
+                }
+
+                result.Add(ownArgs[i]);
+            }
+
+            return result.ToArray();
+        }
+
+        /// <summary>
+        /// 重建 UIA 子进程的命令行：保留原始启动参数（URI、文件路径等），追加 UIA 内部参数，
+        /// 并在原参数未包含 --skip-mutex-check 时补上，防止新进程被单实例 Mutex 阻塞。
+        /// </summary>
+        private static StringBuilder BuildRelaunchCommandLine(string exePath, string extraArgs)
+        {
+            var cmdBuilder = new StringBuilder(32768);
+            cmdBuilder.Append('"').Append(exePath).Append('"');
+
+            bool hasSkipMutexCheck = false;
+            foreach (string arg in BuildRelaunchArgs())
+            {
+                // 单文件发布下，托管入口程序集位于 bundle 解压目录；重启时必须使用真实 exe，
+                // 不能把 EntryAssembly.Location / 解压路径带给新进程。
+                if (string.Equals(arg, exePath, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                if (string.Equals(arg, SKIP_MUTEX_CHECK_SWITCH, StringComparison.OrdinalIgnoreCase))
+                    hasSkipMutexCheck = true;
+
+                cmdBuilder.Append(' ');
+                AppendQuoted(cmdBuilder, arg);
+            }
+
+            if (!string.IsNullOrWhiteSpace(extraArgs))
+            {
+                cmdBuilder.Append(' ').Append(extraArgs);
+                if (extraArgs.IndexOf(SKIP_MUTEX_CHECK_SWITCH, StringComparison.OrdinalIgnoreCase) >= 0)
+                    hasSkipMutexCheck = true;
+            }
+
+            if (!hasSkipMutexCheck)
+                cmdBuilder.Append(' ').Append(SKIP_MUTEX_CHECK_SWITCH);
+
+            return cmdBuilder;
         }
 
         private static string AppendExtraArg(string existing, string newArg)
