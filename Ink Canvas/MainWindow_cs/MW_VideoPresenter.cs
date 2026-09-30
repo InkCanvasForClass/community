@@ -1801,6 +1801,51 @@ namespace Ink_Canvas
             catch { }
         }
 
+        /// <summary>
+        /// 恢复进入视频展台特殊模式前保存的画布编辑模式。
+        /// </summary>
+        /// <remarks>
+        /// 进入特殊模式时 EditingMode 被临时压成 None（用于抑制 InkCanvas 内部框选），退出时靠这里恢复。
+        /// EditingMode 的 setter 会同步跑 <c>inkCanvas_EditingModeChanged</c>，其中包含插件回调
+        /// (<c>NotifyPluginPenModeChanged</c>)、光标加载与橡皮擦覆盖层初始化，任一处抛异常都会让赋值整体失败。
+        /// 若在此静默吞掉，画布会永久停在 None —— 表现为画不了、输入落到 manipulation 上变成拖动。
+        /// 因此：先消费保存值（避免重复恢复同一份状态），失败留 Warning 并尝试一次保底恢复，两次都留痕以便区分
+        /// 「插件回调抛异常（重试无意义）」与「瞬时状态导致（重试可救）」。
+        /// </remarks>
+        private void RestoreBoothInkEditingMode(string source)
+        {
+            if (!_boothTouchSavedInkEditingMode.HasValue || inkCanvas == null) return;
+
+            var savedMode = _boothTouchSavedInkEditingMode.Value;
+            _boothTouchSavedInkEditingMode = null;
+
+            try
+            {
+                inkCanvas.EditingMode = savedMode;
+                return;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[Booth] 恢复画布编辑模式失败，尝试保底恢复 (source={source}, saved={savedMode}, current={inkCanvas.EditingMode}): {ex}",
+                    LogHelper.LogType.Warning);
+            }
+
+            try
+            {
+                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                LogHelper.WriteLogToFile(
+                    $"[Booth] 已保底恢复到批注模式 (source={source})",
+                    LogHelper.LogType.Info);
+            }
+            catch (Exception fallbackEx)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[Booth] 保底恢复同样失败，画布停留在 {inkCanvas.EditingMode} (source={source}): {fallbackEx}",
+                    LogHelper.LogType.Error);
+            }
+        }
+
         /// <summary>鼠标松开处理：结束拖动，恢复 EditingMode。</summary>
         private void VideoPresenterSpecialMode_HandleMouseUp(MouseButtonEventArgs e)
         {
@@ -1809,16 +1854,8 @@ namespace Ink_Canvas
             _isBoothMouseDragging = false;
             inkCanvas?.ReleaseMouseCapture();
 
-            // 恢复用户选择的 EditingMode
-            if (_boothTouchSavedInkEditingMode.HasValue && inkCanvas != null)
-            {
-                try
-                {
-                    inkCanvas.EditingMode = _boothTouchSavedInkEditingMode.Value;
-                }
-                catch { }
-                _boothTouchSavedInkEditingMode = null;
-            }
+            // 恢复用户选择的 EditingMode（失败时保证不会把画布留在 None）
+            RestoreBoothInkEditingMode("mouse-up");
             e.Handled = true;
         }
 

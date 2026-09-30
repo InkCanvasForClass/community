@@ -2221,15 +2221,8 @@ namespace Ink_Canvas
                 dec.Remove(e.TouchDevice.Id);
                 if (dec.Count == 0)
                 {
-                    if (_boothTouchSavedInkEditingMode.HasValue && inkCanvas != null)
-                    {
-                        try
-                        {
-                            inkCanvas.EditingMode = _boothTouchSavedInkEditingMode.Value;
-                        }
-                        catch { }
-                        _boothTouchSavedInkEditingMode = null;
-                    }
+                    // 恢复触摸前保存的 EditingMode（失败时保证不会把画布留在 None）
+                    RestoreBoothInkEditingMode("touch-up");
                 }
                 // 仍然执行常规清理（释放触摸捕获、恢复浮动栏可见性等）
                 inkCanvas?.ReleaseAllTouchCaptures();
