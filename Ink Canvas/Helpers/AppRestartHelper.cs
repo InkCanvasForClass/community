@@ -119,12 +119,17 @@ namespace Ink_Canvas.Helpers
                     string exePath = Process.GetCurrentProcess().MainModule.FileName;
                     ProcessStartInfo psi;
 
+                    // 提权重启链会经过一个管理员 helper 进程，helper 自身只带 UIA 开关，
+                    // 必须把当前进程的启动参数（icc:// 深链接、文件路径等）显式转发给它，
+                    // 否则 UIA 子进程重建命令行时会丢掉这些参数，用户启动意图消失。
+                    string forwardArgs = UIAccessHelper.BuildForwardArgsArgument();
+
                     if (useProcessToken)
                     {
                         int currentPid = Process.GetCurrentProcess().Id;
                         psi = new ProcessStartInfo(exePath)
                         {
-                            Arguments = $"--enable-uia-topmost-helper --uia-source-pid {currentPid}",
+                            Arguments = $"{UIAccessHelper.UIA_HELPER_SWITCH} --uia-source-pid {currentPid}{forwardArgs}",
                             UseShellExecute = true,
                             Verb = "runas"
                         };
@@ -136,7 +141,7 @@ namespace Ink_Canvas.Helpers
                     {
                         psi = new ProcessStartInfo(exePath)
                         {
-                            Arguments = "--enable-uia-topmost-helper",
+                            Arguments = $"{UIAccessHelper.UIA_HELPER_SWITCH}{forwardArgs}",
                             UseShellExecute = true,
                             Verb = "runas"
                         };
