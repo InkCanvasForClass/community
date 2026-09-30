@@ -238,6 +238,10 @@ namespace Ink_Canvas.Helpers
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern uint WaitForSingleObject(IntPtr hHandle, uint dwMilliseconds);
 
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool GetExitCodeProcess(IntPtr hProcess, out uint lpExitCode);
+
         [DllImport("userenv.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool CreateEnvironmentBlock(out IntPtr lpEnvironment, IntPtr hToken, bool bInherit);
@@ -945,7 +949,15 @@ namespace Ink_Canvas.Helpers
 
             if (waitResult == WAIT_OBJECT_0)
             {
-                LogHelper.WriteLogToFile($"UIAccess | UIA 子进程在启动观察期内退出 (PID={processId})", LogHelper.LogType.Error);
+                if (GetExitCodeProcess(processHandle, out uint exitCode))
+                {
+                    LogHelper.WriteLogToFile($"UIAccess | UIA 子进程在启动观察期内退出 (PID={processId}, ExitCode={exitCode}, Hex=0x{exitCode:X8})", LogHelper.LogType.Error);
+                }
+                else
+                {
+                    int error = Marshal.GetLastWin32Error();
+                    LogHelper.WriteLogToFile($"UIAccess | UIA 子进程在启动观察期内退出，但读取退出码失败 (PID={processId}, LastError={error})", LogHelper.LogType.Error);
+                }
                 return false;
             }
 
