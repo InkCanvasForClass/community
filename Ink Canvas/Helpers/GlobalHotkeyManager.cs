@@ -1,8 +1,6 @@
-﻿using Newtonsoft.Json;
-using NHotkey.Wpf;
+﻿using NHotkey.Wpf;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Windows;
@@ -34,8 +32,19 @@ namespace Ink_Canvas.Helpers
         private bool _isMouseOverWindow = false;
         private System.Windows.Threading.DispatcherTimer _mousePositionTimer;
 
-        // 配置文件路径
-        private static readonly string HotkeyConfigFile = Path.Combine(App.RootPath, "Configs", "HotkeyConfig.json");
+        // M16：HotkeyConfig.json 读写与加载编排已提取至 Services.Shell.HotkeyService。
+        // 以下委托由 HotkeyService 构造时接线；原位 public 方法为转发壳，对外签名与语义不变。
+        internal Action LoadHotkeysHandler { get; set; }
+        internal Action SaveHotkeysHandler { get; set; }
+        internal Func<List<HotkeyInfo>> ConfigHotkeysProvider { get; set; }
+        internal Action RegisterDefaultsHandler { get; set; }
+
+        // M16：供 HotkeyService 读写（原私有字段，等价改写为 internal 访问器）
+        internal bool HotkeysShouldBeRegistered
+        {
+            get => _hotkeysShouldBeRegistered;
+            set => _hotkeysShouldBeRegistered = value;
+        }
         #endregion
 
         #region Constructor
@@ -48,8 +57,8 @@ namespace Ink_Canvas.Helpers
             // 初始化多屏幕支持
             InitializeMultiScreenSupport();
 
-            // 启动时确保配置文件存在
-            EnsureConfigFileExists();
+            // M16：启动时确保配置文件存在的职责随配置层搬入 HotkeyService 构造函数，
+            // 由主窗口在创建本管理器后立即创建服务（同一调用栈，时序不变）。
         }
         #endregion
 
@@ -300,167 +309,39 @@ namespace Ink_Canvas.Helpers
 
         /// <summary>
         /// 获取配置文件中的快捷键信息（不注册，仅用于显示）
+        /// M16：实现已提取至 Services.Shell.HotkeyService，本方法为转发壳。
         /// </summary>
         /// <returns>配置文件中的快捷键列表</returns>
         public List<HotkeyInfo> GetHotkeysFromConfigFile()
         {
-            try
-            {
-                if (!File.Exists(HotkeyConfigFile))
-                {
-                    return new List<HotkeyInfo>();
-                }
-
-                // 读取配置文件内容
-                string jsonContent = File.ReadAllText(HotkeyConfigFile, Encoding.UTF8);
-                if (string.IsNullOrEmpty(jsonContent))
-                {
-                    LogHelper.WriteLogToFile("快捷键配置文件为空", LogHelper.LogType.Warning);
-                    return new List<HotkeyInfo>();
-                }
-
-                // 反序列化配置
-                var config = JsonConvert.DeserializeObject<HotkeyConfig>(jsonContent);
-                if (config?.Hotkeys == null || config.Hotkeys.Count == 0)
-                {
-                    LogHelper.WriteLogToFile("快捷键配置为空或格式错误", LogHelper.LogType.Warning);
-                    return new List<HotkeyInfo>();
-                }
-
-                // 转换为HotkeyInfo列表（不注册，仅用于显示）
-                var hotkeyList = new List<HotkeyInfo>();
-                foreach (var hotkeyConfig in config.Hotkeys)
-                {
-                    hotkeyList.Add(new HotkeyInfo
-                    {
-                        Name = hotkeyConfig.Name,
-                        Key = hotkeyConfig.Key,
-                        Modifiers = hotkeyConfig.Modifiers,
-                        Action = null // 不设置动作，仅用于显示
-                    });
-                }
-
-                return hotkeyList;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"从配置文件读取快捷键信息时出错: {ex.Message}", LogHelper.LogType.Error);
-                return new List<HotkeyInfo>();
-            }
+            return ConfigHotkeysProvider?.Invoke() ?? new List<HotkeyInfo>();
         }
 
         /// <summary>
         /// 注册默认快捷键集合
+        /// M16：实现已提取至 Services.Shell.HotkeyService，本方法为转发壳。
         /// </summary>
         public void RegisterDefaultHotkeys()
         {
-            try
-            {
-                // 开始注册默认快捷键集合
-
-                // 基本操作快捷键
-                RegisterHotkey("Undo", Key.Z, ModifierKeys.Control, () => _mainWindow.SymbolIconUndo_MouseUp(null, null));
-                RegisterHotkey("Redo", Key.Y, ModifierKeys.Control, () => _mainWindow.SymbolIconRedo_MouseUp(null, null));
-                RegisterHotkey("Clear", Key.E, ModifierKeys.Control, () => _mainWindow.SymbolIconDelete_MouseUp(null, null));
-                RegisterHotkey("Paste", Key.V, ModifierKeys.Control, () => _mainWindow.HandleGlobalPaste(null, null));
-
-                // 工具切换快捷键
-                RegisterHotkey("SelectTool", Key.S, ModifierKeys.Alt, () => _mainWindow.SwitchToSelectFromHotkey());
-                RegisterHotkey("DrawTool", Key.D, ModifierKeys.Alt, () => _mainWindow.PenIcon_Click(null, null));
-                RegisterHotkey("EraserTool", Key.E, ModifierKeys.Alt, () => _mainWindow.SwitchToEraserFromHotkey());
-                RegisterHotkey("BlackboardTool", Key.B, ModifierKeys.Alt, () => _mainWindow.ImageBlackboard_MouseUp(null, null));
-                RegisterHotkey("QuitDrawTool", Key.Q, ModifierKeys.Alt, () => _mainWindow.KeyChangeToQuitDrawTool(null, null));
-
-                // 画笔快捷键 - 使用反射访问penType字段
-                RegisterHotkey("Pen1", Key.D1, ModifierKeys.Alt, () => SwitchToPenType(0));
-                RegisterHotkey("Pen2", Key.D2, ModifierKeys.Alt, () => SwitchToPenType(1));
-                RegisterHotkey("Pen3", Key.D3, ModifierKeys.Alt, () => SwitchToPenType(2));
-                RegisterHotkey("Pen4", Key.D4, ModifierKeys.Alt, () => SwitchToPenType(3));
-                RegisterHotkey("Pen5", Key.D5, ModifierKeys.Alt, () => SwitchToPenType(4));
-
-                // 功能快捷键
-                RegisterHotkey("DrawLine", Key.L, ModifierKeys.Alt, () => _mainWindow.DrawLineFromHotkey());
-                RegisterHotkey("Screenshot", Key.C, ModifierKeys.Alt, () => _mainWindow.SaveScreenShotToDesktop());
-                RegisterHotkey("QuickDraw", Key.K, ModifierKeys.Alt, () => _mainWindow.OpenQuickDrawFromHotkey());
-                RegisterHotkey("Hide", Key.V, ModifierKeys.Alt, () => _mainWindow.SymbolIconEmoji_MouseUp(null, null));
-
-                // 退出快捷键
-                RegisterHotkey("Exit", Key.Escape, ModifierKeys.None, () => _mainWindow.KeyExit(null, null));
-
-                // 已注册默认全局快捷键集合
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"注册默认快捷键时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
+            RegisterDefaultsHandler?.Invoke();
         }
 
         /// <summary>
         /// 从配置文件加载快捷键
+        /// M16：实现已提取至 Services.Shell.HotkeyService，本方法为转发壳。
         /// </summary>
         public void LoadHotkeysFromSettings()
         {
-            try
-            {
-                // 开始从配置文件加载快捷键设置
-
-                // 检查是否应该注册快捷键
-                if (!_hotkeysShouldBeRegistered)
-                {
-                    // 当前状态不允许注册快捷键，跳过加载
-                    return;
-                }
-
-                // 如果配置文件不存在，先创建默认配置文件
-                if (!File.Exists(HotkeyConfigFile))
-                {
-                    LogHelper.WriteLogToFile($"快捷键配置文件不存在: {HotkeyConfigFile}", LogHelper.LogType.Warning);
-                    CreateDefaultConfigFile();
-                    RegisterDefaultHotkeys();
-                    _hotkeysShouldBeRegistered = true;
-                    return;
-                }
-
-                // 尝试从配置文件加载
-                if (LoadHotkeysFromConfigFile())
-                {
-                    // 成功从配置文件加载快捷键设置
-                    _hotkeysShouldBeRegistered = true;
-                }
-                else
-                {
-                    LogHelper.WriteLogToFile("配置文件存在但加载失败，回退到默认快捷键", LogHelper.LogType.Warning);
-                    RegisterDefaultHotkeys();
-                    _hotkeysShouldBeRegistered = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"从设置加载快捷键时出错: {ex.Message}", LogHelper.LogType.Error);
-                // 出错时不自动使用默认快捷键，保持当前状态
-            }
+            LoadHotkeysHandler?.Invoke();
         }
 
         /// <summary>
         /// 保存快捷键配置到设置
+        /// M16：实现已提取至 Services.Shell.HotkeyService，本方法为转发壳。
         /// </summary>
         public void SaveHotkeysToSettings()
         {
-            try
-            {
-
-                if (SaveHotkeysToConfigFile())
-                {
-                }
-                else
-                {
-                    LogHelper.WriteLogToFile("保存快捷键配置失败", LogHelper.LogType.Error);
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"保存快捷键配置时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
+            SaveHotkeysHandler?.Invoke();
         }
 
         /// <summary>
@@ -1115,304 +996,6 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 切换到指定笔类型
-        /// </summary>
-        /// <param name="penTypeIndex">笔类型索引</param>
-        private void SwitchToPenType(int penTypeIndex)
-        {
-            try
-            {
-                var switchMethod = _mainWindow.GetType().GetMethod(
-                    penTypeIndex == 2 ? "SwitchToLaserPen" : (penTypeIndex == 1 ? "SwitchToHighlighterPen" : "SwitchToDefaultPen"),
-                    BindingFlags.NonPublic | BindingFlags.Instance);
-
-                if (switchMethod != null)
-                {
-                    switchMethod.Invoke(_mainWindow, new object[] { null, null });
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"切换到笔类型{penTypeIndex}时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 确保配置文件存在，如果不存在则创建
-        /// </summary>
-        private void EnsureConfigFileExists()
-        {
-            try
-            {
-                // 如果配置文件不存在，创建默认配置文件
-                if (!File.Exists(HotkeyConfigFile))
-                {
-                    CreateDefaultConfigFile();
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"确保快捷键配置文件存在时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 创建默认的快捷键配置文件
-        /// </summary>
-        private void CreateDefaultConfigFile()
-        {
-            try
-            {
-                // 确保配置目录存在
-                string configDir = Path.GetDirectoryName(HotkeyConfigFile);
-                if (!Directory.Exists(configDir))
-                {
-                    Directory.CreateDirectory(configDir);
-                }
-
-                // 创建默认配置对象
-                var config = new HotkeyConfig
-                {
-                    Version = "1.0",
-                    LastModified = DateTime.Now,
-                    Hotkeys = new List<HotkeyConfigItem>()
-                };
-
-                // 添加默认快捷键配置
-                config.Hotkeys.AddRange(new[]
-                {
-                    new HotkeyConfigItem { Name = "Undo", Key = Key.Z, Modifiers = ModifierKeys.Control },
-                    new HotkeyConfigItem { Name = "Redo", Key = Key.Y, Modifiers = ModifierKeys.Control },
-                    new HotkeyConfigItem { Name = "Clear", Key = Key.E, Modifiers = ModifierKeys.Control },
-                    new HotkeyConfigItem { Name = "Paste", Key = Key.V, Modifiers = ModifierKeys.Control },
-                    new HotkeyConfigItem { Name = "SelectTool", Key = Key.S, Modifiers = ModifierKeys.Alt },
-                    new HotkeyConfigItem { Name = "DrawTool", Key = Key.D, Modifiers = ModifierKeys.Alt },
-                    new HotkeyConfigItem { Name = "EraserTool", Key = Key.E, Modifiers = ModifierKeys.Alt },
-                    new HotkeyConfigItem { Name = "BlackboardTool", Key = Key.B, Modifiers = ModifierKeys.Alt },
-                    new HotkeyConfigItem { Name = "QuitDrawTool", Key = Key.Q, Modifiers = ModifierKeys.Alt },
-                    new HotkeyConfigItem { Name = "Pen1", Key = Key.D1, Modifiers = ModifierKeys.Alt },
-                    new HotkeyConfigItem { Name = "Pen2", Key = Key.D2, Modifiers = ModifierKeys.Alt },
-                    new HotkeyConfigItem { Name = "Pen3", Key = Key.D3, Modifiers = ModifierKeys.Alt },
-                    new HotkeyConfigItem { Name = "Pen4", Key = Key.D4, Modifiers = ModifierKeys.Alt },
-                    new HotkeyConfigItem { Name = "Pen5", Key = Key.D5, Modifiers = ModifierKeys.Alt },
-                    new HotkeyConfigItem { Name = "DrawLine", Key = Key.L, Modifiers = ModifierKeys.Alt },
-                    new HotkeyConfigItem { Name = "Screenshot", Key = Key.C, Modifiers = ModifierKeys.Alt },
-                    new HotkeyConfigItem { Name = "QuickDraw", Key = Key.K, Modifiers = ModifierKeys.Alt },
-                    new HotkeyConfigItem { Name = "Hide", Key = Key.V, Modifiers = ModifierKeys.Alt },
-                    new HotkeyConfigItem { Name = "Exit", Key = Key.Escape, Modifiers = ModifierKeys.None }
-                });
-
-                // 序列化为JSON
-                var settings = new JsonSerializerSettings
-                {
-                    Formatting = Formatting.Indented
-                };
-
-                string jsonContent = JsonConvert.SerializeObject(config, settings);
-
-                // 写入配置文件
-                File.WriteAllText(HotkeyConfigFile, jsonContent, Encoding.UTF8);
-
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"创建默认快捷键配置文件时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 从配置文件加载快捷键设置
-        /// </summary>
-        /// <returns>是否加载成功</returns>
-        private bool LoadHotkeysFromConfigFile()
-        {
-            try
-            {
-                if (!File.Exists(HotkeyConfigFile))
-                {
-                    LogHelper.WriteLogToFile($"快捷键配置文件不存在: {HotkeyConfigFile}", LogHelper.LogType.Warning);
-                    return false;
-                }
-
-                // 读取配置文件内容
-                string jsonContent = File.ReadAllText(HotkeyConfigFile, Encoding.UTF8);
-                if (string.IsNullOrEmpty(jsonContent))
-                {
-                    LogHelper.WriteLogToFile("快捷键配置文件为空", LogHelper.LogType.Warning);
-                    return false;
-                }
-
-                // 反序列化配置
-                var config = JsonConvert.DeserializeObject<HotkeyConfig>(jsonContent);
-                if (config?.Hotkeys == null || config.Hotkeys.Count == 0)
-                {
-                    LogHelper.WriteLogToFile("快捷键配置为空或格式错误", LogHelper.LogType.Warning);
-                    return false;
-                }
-
-                // 注册配置中的快捷键
-                int successCount = 0;
-                foreach (var hotkeyConfig in config.Hotkeys)
-                {
-                    try
-                    {
-                        // 根据快捷键名称获取对应的动作
-                        var action = GetActionByName(hotkeyConfig.Name);
-                        if (action != null)
-                        {
-                            if (RegisterHotkey(hotkeyConfig.Name, hotkeyConfig.Key, hotkeyConfig.Modifiers, action))
-                            {
-                                successCount++;
-                            }
-                        }
-                        else
-                        {
-                            LogHelper.WriteLogToFile($"未找到快捷键 {hotkeyConfig.Name} 对应的动作", LogHelper.LogType.Warning);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"注册快捷键 {hotkeyConfig.Name} 时出错: {ex.Message}", LogHelper.LogType.Error);
-                    }
-                }
-
-                // 旧版 HotkeyConfig.json 无「快抽」项时补注册默认组合，避免升级后无快捷键
-                if (successCount > 0 && !IsHotkeyRegistered("QuickDraw"))
-                {
-                    var quickDrawAction = GetActionByName("QuickDraw");
-                    if (quickDrawAction != null && RegisterHotkey("QuickDraw", Key.K, ModifierKeys.Alt, quickDrawAction))
-                        successCount++;
-                }
-
-                if (successCount > 0)
-                {
-                    _hotkeysShouldBeRegistered = true;
-                }
-                return successCount > 0;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"从配置文件加载快捷键时出错: {ex.Message}", LogHelper.LogType.Error);
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// 保存快捷键配置到配置文件
-        /// </summary>
-        /// <returns>是否保存成功</returns>
-        private bool SaveHotkeysToConfigFile()
-        {
-            try
-            {
-                // 确保配置目录存在
-                string configDir = Path.GetDirectoryName(HotkeyConfigFile);
-                if (!Directory.Exists(configDir))
-                {
-                    Directory.CreateDirectory(configDir);
-                }
-
-                // 创建配置对象
-                var config = new HotkeyConfig
-                {
-                    Version = "1.0",
-                    LastModified = DateTime.Now,
-                    Hotkeys = new List<HotkeyConfigItem>()
-                };
-
-                // 添加所有已注册的快捷键
-                foreach (var hotkey in _registeredHotkeys.Values)
-                {
-                    config.Hotkeys.Add(new HotkeyConfigItem
-                    {
-                        Name = hotkey.Name,
-                        Key = hotkey.Key,
-                        Modifiers = hotkey.Modifiers
-                    });
-                }
-
-                // 序列化为JSON
-                var settings = new JsonSerializerSettings
-                {
-                    Formatting = Formatting.Indented
-                };
-
-                string jsonContent = JsonConvert.SerializeObject(config, settings);
-
-                // 直接写入原文件，覆盖原有内容
-                File.WriteAllText(HotkeyConfigFile, jsonContent, Encoding.UTF8);
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"保存快捷键配置到配置文件时出错: {ex.Message}", LogHelper.LogType.Error);
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// 根据快捷键名称获取对应的动作
-        /// </summary>
-        /// <param name="hotkeyName">快捷键名称</param>
-        /// <returns>对应的动作，如果不存在则返回null</returns>
-        private Action GetActionByName(string hotkeyName)
-        {
-            try
-            {
-                switch (hotkeyName)
-                {
-                    case "Undo":
-                        return () => _mainWindow.SymbolIconUndo_MouseUp(null, null);
-                    case "Redo":
-                        return () => _mainWindow.SymbolIconRedo_MouseUp(null, null);
-                    case "Clear":
-                        return () => _mainWindow.SymbolIconDelete_MouseUp(null, null);
-                    case "Paste":
-                        return () => _mainWindow.HandleGlobalPaste(null, null);
-                    case "SelectTool":
-                        return () => _mainWindow.SwitchToSelectFromHotkey();
-                    case "DrawTool":
-                        return () => _mainWindow.PenIcon_Click(null, null);
-                    case "EraserTool":
-                        return () => _mainWindow.SwitchToEraserFromHotkey();
-                    case "BlackboardTool":
-                        return () => _mainWindow.ImageBlackboard_MouseUp(null, null);
-                    case "QuitDrawTool":
-                        return () => _mainWindow.KeyChangeToQuitDrawTool(null, null);
-                    case "Pen1":
-                        return () => SwitchToPenType(0);
-                    case "Pen2":
-                        return () => SwitchToPenType(1);
-                    case "Pen3":
-                        return () => SwitchToPenType(2);
-                    case "Pen4":
-                        return () => SwitchToPenType(3);
-                    case "Pen5":
-                        return () => SwitchToPenType(4);
-                    case "DrawLine":
-                        return () => _mainWindow.DrawLineFromHotkey();
-                    case "Screenshot":
-                        return () => _mainWindow.SaveScreenShotToDesktop();
-                    case "QuickDraw":
-                        return () => _mainWindow.OpenQuickDrawFromHotkey();
-                    case "Hide":
-                        return () => _mainWindow.SymbolIconEmoji_MouseUp(null, null);
-                    case "Exit":
-                        return () => _mainWindow.KeyExit(null, null);
-                    default:
-                        LogHelper.WriteLogToFile($"未知的快捷键名称: {hotkeyName}", LogHelper.LogType.Warning);
-                        return null;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"获取快捷键 {hotkeyName} 对应动作时出错: {ex.Message}", LogHelper.LogType.Error);
-                return null;
-            }
-        }
-
-        /// <summary>
         /// 检查当前是否处于鼠标模式（选择模式）
         /// </summary>
         /// <returns>如果处于鼠标模式则返回true（不应该注册快捷键），否则返回false（应该注册快捷键）</returns>
@@ -1552,26 +1135,6 @@ namespace Ink_Canvas.Helpers
                 var modifiersText = Modifiers == ModifierKeys.None ? "" : $"{Modifiers}+";
                 return $"{modifiersText}{Key}";
             }
-        }
-
-        /// <summary>
-        /// 快捷键配置类
-        /// </summary>
-        private class HotkeyConfig
-        {
-            public string Version { get; set; }
-            public DateTime LastModified { get; set; }
-            public List<HotkeyConfigItem> Hotkeys { get; set; }
-        }
-
-        /// <summary>
-        /// 快捷键配置项类
-        /// </summary>
-        private class HotkeyConfigItem
-        {
-            public string Name { get; set; }
-            public Key Key { get; set; }
-            public ModifierKeys Modifiers { get; set; }
         }
         #endregion
     }
