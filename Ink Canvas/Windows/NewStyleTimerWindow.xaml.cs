@@ -45,8 +45,16 @@ namespace Ink_Canvas.Windows
             hideTimer.Elapsed += HideTimer_Elapsed;
             lastActivityTime = DateTime.Now;
 
-            // 监听主题变化事件
-            SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+            // 监听主题变化事件。SystemEvents 在 UIAccess 降权子进程等特殊上下文下会抛
+            // PlatformNotSupportedException，订阅失败降级，不阻断窗口构造。
+            try
+            {
+                SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"NewStyleTimerWindow | 订阅系统主题变化失败，已降级: {ex.Message}", LogHelper.LogType.Warning);
+            }
 
             // 监听关闭事件，清理资源
             Closed += NewStyleTimerWindow_Closed;
@@ -103,7 +111,14 @@ namespace Ink_Canvas.Windows
         private void NewStyleTimerWindow_Closed(object sender, EventArgs e)
         {
             _minimizedWindow?.Close();
-            SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
+            try
+            {
+                SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"NewStyleTimerWindow | 取消系统事件订阅失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
             timer?.Stop();
             timer?.Dispose();
             hideTimer?.Stop();
