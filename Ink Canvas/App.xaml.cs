@@ -1493,6 +1493,22 @@ namespace Ink_Canvas
                 SetSplashMessage("正在初始化主界面...");
                 SetSplashProgress(75);
             }
+            else
+            {
+                // URL/文件启动会跳过 SplashScreen 分支，也就跳过了那段消息泵抽水，
+                // 导致 Microsoft.Win32.SystemEvents 的隐藏消息窗口尚未初始化，
+                // MainWindow 构造时订阅系统事件会抛 PlatformNotSupportedException。
+                // 这里无条件补一次轻量抽水，让 SystemEvents 在 MainWindow 构造前就绪，
+                // 使 URL 启动的实例也能正常随系统主题/显示设置实时切换。
+                try
+                {
+                    Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
+                }
+                catch (Exception pumpEx)
+                {
+                    LogHelper.WriteLogToFile($"App | 启动前消息泵抽水失败（不影响降级路径）: {pumpEx.Message}", LogHelper.LogType.Warning);
+                }
+            }
             var mainWindow = new MainWindow();
             MainWindow = mainWindow;
 
