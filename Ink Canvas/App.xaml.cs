@@ -57,6 +57,52 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 标准单实例互斥体名。所有启动路径最终都应占用此名，避免出现无人持有导致的无限多开。
+        /// </summary>
+        private const string StandardMutexName = "InkCanvasForClass CE";
+
+        /// <summary>
+        /// 在“跳过退出决策”的启动路径（skip-mutex-check / final-app / 更新交接）下，
+        /// 仍以标准名占用互斥体。旧实例可能正处于释放窗口期，故带短重试等待抢占；
+        /// 抢不到也返回互斥体对象并继续运行（交接场景旧实例即将退出），仅不做“已有实例则退出”的决策。
+        /// </summary>
+        private static Mutex AcquireStandardMutexWithRetry()
+        {
+            // 至多等待 ~2.5s（旧实例正常退出释放互斥体的时间窗口），超时仍继续。
+            const int maxAttempts = 25;
+            const int retryDelayMs = 100;
+
+            var standardMutex = new Mutex(true, StandardMutexName, out bool acquired);
+            if (acquired)
+            {
+                LogHelper.WriteLogToFile("App | 已占用标准单实例互斥体");
+                return standardMutex;
+            }
+
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
+            {
+                try
+                {
+                    // 旧实例释放后，WaitOne 会拿到所有权；true 表示已持有。
+                    if (standardMutex.WaitOne(retryDelayMs))
+                    {
+                        LogHelper.WriteLogToFile($"App | 等待 {attempt * retryDelayMs}ms 后占用标准单实例互斥体");
+                        return standardMutex;
+                    }
+                }
+                catch (AbandonedMutexException)
+                {
+                    // 旧实例异常退出未释放互斥体：AbandonedMutexException 抛出即代表本进程已取得所有权。
+                    LogHelper.WriteLogToFile("App | 检测到被遗弃的互斥体，已接管标准单实例互斥体", LogHelper.LogType.Warning);
+                    return standardMutex;
+                }
+            }
+
+            LogHelper.WriteLogToFile("App | 等待占用标准单实例互斥体超时，继续启动（交接场景）", LogHelper.LogType.Warning);
+            return standardMutex;
+        }
+
         public static string[] StartArgs;
         public static string RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
@@ -1286,11 +1332,17 @@ namespace Ink_Canvas
                 }
             }
 
-            // 如果是更新过程、更新模式、最终应用或跳过Mutex检查，跳过Mutex检查
-            if (!isUpdateInProgress && !isUpdateMode && !isFinalApp && !skipMutexCheck)
+            // 单实例互斥体：无论何种启动模式都占用「标准名」，避免出现无人持有标准名导致的无限多开。
+            // - skipMutexCheck / finalApp / 更新交接：这些路径的语义只是「即使已有实例也不退出」，
+            //   而不是「不占用标准名」。旧实例可能正处于释放窗口期，故先带短重试等待抢占标准名，
+            //   抢不到也继续运行（交接场景旧实例即将退出），只跳过“检测到已有实例则退出”的决策。
+            // - 正常路径：抢不到标准名 => 已有实例在运行 => 交接给已运行实例并退出（原有行为）。
+            bool skipExitDecision = isUpdateInProgress || isUpdateMode || isFinalApp || skipMutexCheck;
+
+            if (!skipExitDecision)
             {
                 bool ret;
-                mutex = new Mutex(true, "InkCanvasForClass CE", out ret);
+                mutex = new Mutex(true, StandardMutexName, out ret);
 
                 if (!ret && !e.Args.Contains("-m")) //-m multiple
                 {
@@ -1398,9 +1450,11 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile("App | 更新过程中，跳过重复运行检测");
                 }
 
-                // 在特殊模式下，创建一个临时的Mutex以避免其他检查出错
-                string mutexName = isFinalApp ? "InkCanvasForClass CE Final" : "InkCanvasForClass CE Update";
-                mutex = new Mutex(true, mutexName, out bool tempRet);
+                // 关键修复（Issue #684）：这些路径仍必须占用「标准名」互斥体，否则标准名长期无人持有，
+                // 后续任何正常启动都会误判“无实例运行”而不断多开（每个实例还会拉起一个看门狗）。
+                // 旧实例可能正处于释放窗口期，带短重试等待抢占；抢不到也继续运行（交接场景旧实例即将退出），
+                // 仅跳过“检测到已有实例则退出”的决策。
+                mutex = AcquireStandardMutexWithRetry();
 
                 // 默认模式沿用 1.7.19.4 的等待时序；优化模式保留当前短等待。
                 await Task.Delay(IsDefaultStartupMode ? 1000 : 100);
