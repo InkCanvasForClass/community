@@ -955,8 +955,8 @@ namespace Ink_Canvas.Helpers
                 }
                 else
                 {
-                    int error = Marshal.GetLastWin32Error();
-                    LogHelper.WriteLogToFile($"UIAccess | UIA 子进程在启动观察期内退出，但读取退出码失败 (PID={processId}, LastError={error})", LogHelper.LogType.Error);
+                    int exitCodeError = Marshal.GetLastWin32Error();
+                    LogHelper.WriteLogToFile($"UIAccess | UIA 子进程在启动观察期内退出，但读取退出码失败 (PID={processId}, LastError={exitCodeError})", LogHelper.LogType.Error);
                 }
                 return false;
             }
