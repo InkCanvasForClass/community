@@ -3,6 +3,7 @@ using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Models;
 using Ink_Canvas.Properties;
+using Ink_Canvas.Services;
 using Ink_Canvas.Windows;
 using Ink_Canvas.Windows.SettingsViews;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
@@ -53,6 +54,9 @@ namespace Ink_Canvas
         private GlobalHotkeyManager _globalHotkeyManager;
         internal GlobalHotkeyManager GlobalHotkeyManagerInstance => _globalHotkeyManager;
 
+        // 全局热键配置服务（M16）：HotkeyConfig.json 读写与加载编排，随管理器一并创建
+        private Services.Shell.HotkeyService _hotkeyService;
+
         // PPT PageUp/PageDown 低级键盘钩子
         private PPTPageKeyHook _pptPageKeyHook;
 
@@ -60,8 +64,8 @@ namespace Ink_Canvas
         private InkFadeManager _inkFadeManager;
         // 暴露给插件墨迹特效服务的入口（未初始化时为 null）
         internal InkFadeManager InkFadeManagerInstance => _inkFadeManager;
-        private readonly CancellationTokenSource _notificationProviderCancellation = new CancellationTokenSource();
-        private AnnouncementService _announcementService;
+        private readonly NotificationService _notificationService;
+        private readonly Services.Shell.ScreenshotService _screenshotService;
 
         // 悬浮窗拦截管理器
         public FloatingWindowInterceptorManager _floatingWindowInterceptorManager;
@@ -535,6 +539,9 @@ namespace Ink_Canvas
             */
             InitializeComponent();
 
+            _notificationService = CreateNotificationService();
+            _screenshotService = CreateScreenshotService();
+
             if (BorderTools.Child is FrameworkElement btChild) btChild.Visibility = Visibility.Collapsed;
             if (BorderDrawShape.Child is FrameworkElement bdsChild) bdsChild.Visibility = Visibility.Collapsed;
             if (BoardBorderToolsPopup.Child is FrameworkElement bbtpChild) bbtpChild.Visibility = Visibility.Collapsed;
@@ -830,6 +837,9 @@ namespace Ink_Canvas
             Deactivated += Window_Deactivated;
 
             Dispatcher.BeginInvoke(new Action(CheckAndShowOobe), DispatcherPriority.Loaded);
+
+            // M11：设置存储服务（寄生提取），供各 partial 中的转发壳使用
+            _settingsStore = new Services.SettingsStore();
         }
 
         /// <summary>
@@ -2756,6 +2766,52 @@ namespace Ink_Canvas
             _popupManager?.OnOwnerActivated();
         }
 
+        /// <summary>
+        /// 装配通知服务（M13）：注入 x:Name 控件强类型引用与访问主窗口私有状态的委托，
+        /// 服务本身不引用 MainWindow 类型、不直接引用 UI 线程调度器。
+        /// </summary>
+        private NotificationService CreateNotificationService()
+        {
+            return new NotificationService(
+                DynamicNotification,
+                TextBlockNotice,
+                GridNotifications,
+                ViewboxFloatingBar,
+                new NotificationService.Hooks
+                {
+                    GetSettings = () => Settings,
+                    IsCurrentThemeDark = IsCurrentThemeDark,
+                    IsInPptPresentationMode = () => IsInPPTPresentationMode,
+                    GetCurrentMode = () => currentMode,
+                    IsFloatingBarFolded = () => isFloatingBarFolded,
+                    IsFloatingBarChangingHideMode = () => isFloatingBarChangingHideMode,
+                    GetHostWindow = () => this,
+                    UiInvoke = a => Dispatcher.BeginInvoke(a),
+                    UiInvokeContextIdle = a => Dispatcher.BeginInvoke(a, DispatcherPriority.ContextIdle)
+                });
+        }
+
+        /// <summary>
+        /// 装配截图服务（M15）：注入设置读取、墨迹快照、白板页索引、DPI 缩放、通知与
+        /// UI 线程调度委托，服务本身不引用 MainWindow 类型、不直接引用 UI 线程调度器。
+        /// 通知文本（MainWindowStrings 资源）保留在主窗口侧格式化，服务只接收格式化入口。
+        /// </summary>
+        private Services.Shell.ScreenshotService CreateScreenshotService()
+        {
+            return new Services.Shell.ScreenshotService(
+                new Services.Shell.ScreenshotService.Hooks
+                {
+                    GetSettings = () => Settings,
+                    GetInkStrokeCount = () => inkCanvas?.Strokes?.Count,
+                    CloneInkStrokes = () => inkCanvas.Strokes.Clone(),
+                    GetCurrentWhiteboardIndex = () => CurrentWhiteboardIndex,
+                    GetDpiScale = GetDpiScale,
+                    ShowScreenshotSaveSuccess = path => ShowNotification(string.Format(Properties.MainWindowStrings.Main_Screenshot_SaveSuccess, path)),
+                    UiInvoke = a => Dispatcher.Invoke(a),
+                    SaveInkStrokesAtScreenshot = () => SaveInkCanvasStrokes(false)
+                });
+        }
+
         private void InitializeNotificationAndAutomationForStartup()
         {
             try
@@ -3058,6 +3114,8 @@ namespace Ink_Canvas
                 if (_globalHotkeyManager == null)
                 {
                     _globalHotkeyManager = new GlobalHotkeyManager(this);
+                    // M16：热键配置服务与管理器同栈创建，内置热键回调以字典注入（回调本体在 MW_Hotkeys.cs）
+                    _hotkeyService = new Services.Shell.HotkeyService(_globalHotkeyManager, BuildBuiltinHotkeyActions());
                     // 启动时加载快捷键，但默认为鼠标模式，禁用快捷键以放行键盘操作
                     _globalHotkeyManager.EnableHotkeyRegistration();
                     // 启动时默认为鼠标模式，禁用快捷键
