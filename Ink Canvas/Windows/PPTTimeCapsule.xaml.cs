@@ -58,8 +58,17 @@ namespace Ink_Canvas.Windows
             InitializeTimers();
             ApplyTheme();
 
-            // 监听主题变化
-            SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+            // 监听主题变化。SystemEvents 依赖消息泵/桌面窗口，在 UIAccess 降权子进程等
+            // 特殊启动上下文下会抛 PlatformNotSupportedException；订阅失败时降级（不随系统
+            // 主题实时切换），绝不能让异常冒泡炸掉整个 MainWindow 的 XAML 构造。
+            try
+            {
+                SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"PPTTimeCapsule | 订阅系统主题变化失败，已降级: {ex.Message}", LogHelper.LogType.Warning);
+            }
 
             Loaded += PPTTimeCapsule_Loaded;
             Unloaded += PPTTimeCapsule_Unloaded;

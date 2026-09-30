@@ -186,6 +186,9 @@ namespace Ink_Canvas
         private IntPtr monitoredMainWindowHandle = IntPtr.Zero;
         private bool mainWindowDestroyedLogged;
         private WINEVENTPROC processDestroyHookCallback;
+        // 控制台控制处理回调。SetConsoleCtrlHandler 会在整个进程生命周期内持有该函数指针，
+        // 必须用字段 root 住托管委托，否则 GC 回收委托后 native 侧指针悬空（CA1419）。
+        private static PHANDLER_ROUTINE _consoleCtrlHandler;
         // 新增：启动画面相关
         private static SplashScreen _splashScreen;
         private static bool _isSplashScreenShown = false;
@@ -198,6 +201,16 @@ namespace Ink_Canvas
 
         public App()
         {
+            // 最早期的启动日志：子进程若在构造函数阶段崩溃（如 0xC0000374 堆损坏），
+            // 这条日志能确认崩溃发生在构造函数入口之前还是之后，配合 PageHeap 定位。
+            try
+            {
+                LogHelper.WriteLogToFile($"App | 构造函数入口 pid={Environment.ProcessId} args=[{string.Join(" ", Environment.GetCommandLineArgs())}]", LogHelper.LogType.Trace);
+            }
+            catch
+            {
+            }
+
             System.Windows.Forms.Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
 
             // 注意：此处显式禁用 Switch.System.Windows.Input.Stylus.EnablePointerSupport。
@@ -434,15 +447,24 @@ namespace Ink_Canvas
                 // 注册控制台Ctrl+C等终止信号处理
                 Console.CancelKeyPress += Console_CancelKeyPress;
 
-                // 注册系统会话结束事件（关机、注销等）
-                SystemEvents.SessionEnding += SystemEvents_SessionEnding;
+                // 注册系统会话结束事件（关机、注销等）。SystemEvents 在 UIAccess 降权子进程等
+                // 特殊上下文下会抛 PlatformNotSupportedException，单独防护以免跳过后续注册。
+                try
+                {
+                    SystemEvents.SessionEnding += SystemEvents_SessionEnding;
+                }
+                catch (Exception sysEvtEx)
+                {
+                    LogHelper.WriteLogToFile($"App | 订阅系统会话结束事件失败，已降级: {sysEvtEx.Message}", LogHelper.LogType.Warning);
+                }
 
                 // 注册进程退出处理程序
                 AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
 
-                PHANDLER_ROUTINE handlerRoutine = new PHANDLER_ROUTINE(ConsoleCtrlHandler);
+                // 委托必须用字段 root 住，SetConsoleCtrlHandler 会长期持有其函数指针（CA1419）。
+                _consoleCtrlHandler = new PHANDLER_ROUTINE(ConsoleCtrlHandler);
                 // 尝试注册Windows关闭消息监听
-                PInvoke.SetConsoleCtrlHandler(handlerRoutine, true);
+                PInvoke.SetConsoleCtrlHandler(_consoleCtrlHandler, true);
 
                 try
                 {

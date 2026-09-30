@@ -68,6 +68,10 @@ namespace Ink_Canvas.Helpers
         // CreateProcessWithTokenW 返回成功只代表进程已创建，UIA 子进程仍可能在启动阶段崩溃。
         // 留出一段观察窗口，只有子进程在窗口内退出才判定为启动失败。
         private const uint UIA_STARTUP_GRACE_PERIOD_MS = 10000;
+        // 观察窗口内的轮询步长：分段等待而非一次性阻塞满 10s，子进程若崩溃可立即感知并返回失败。
+        private const uint UIA_STARTUP_POLL_STEP_MS = 500;
+        // 子进程崩溃时的重试次数：0xC0000374(堆损坏) 等启动早期崩溃具有偶发性，重试通常即可成功。
+        private const int UIA_STARTUP_MAX_RETRIES = 2;
         private const uint WAIT_OBJECT_0 = 0x00000000;
         private const uint WAIT_TIMEOUT = 0x00000102;
         private const uint WAIT_FAILED = 0xFFFFFFFF;
@@ -855,35 +859,48 @@ namespace Ink_Canvas.Helpers
 
             try
             {
-                bool ok = CreateProcessWithTokenW(
-                    token,
-                    LOGON_WITH_PROFILE,
-                    exePath,
-                    cmdBuilder,
-                    creationFlags,
-                    environment,
-                    workDir,
-                    ref si,
-                    out PROCESS_INFORMATION pi);
-
-                if (!ok)
+                for (int attempt = 1; ; attempt++)
                 {
-                    int err = Marshal.GetLastWin32Error();
-                    LogHelper.WriteLogToFile($"UIAccess | CreateProcessWithTokenW 失败: {err}; Exe={exePath}; WorkDir={workDir}; Cmd={cmdBuilder}", LogHelper.LogType.Error);
+                    bool ok = CreateProcessWithTokenW(
+                        token,
+                        LOGON_WITH_PROFILE,
+                        exePath,
+                        cmdBuilder,
+                        creationFlags,
+                        environment,
+                        workDir,
+                        ref si,
+                        out PROCESS_INFORMATION pi);
+
+                    if (!ok)
+                    {
+                        int err = Marshal.GetLastWin32Error();
+                        LogHelper.WriteLogToFile($"UIAccess | CreateProcessWithTokenW 失败: {err}; Exe={exePath}; WorkDir={workDir}; Cmd={cmdBuilder}", LogHelper.LogType.Error);
+                        return false;
+                    }
+
+                    UIAChildStartupResult startupResult = validateStartup
+                        ? WaitForUIAChildStartup(pi.hProcess, pi.dwProcessId)
+                        : UIAChildStartupResult.Survived;
+                    uint childPid = pi.dwProcessId;
+                    CloseHandle(pi.hProcess);
+                    CloseHandle(pi.hThread);
+
+                    if (startupResult == UIAChildStartupResult.Survived)
+                    {
+                        LogHelper.WriteLogToFile($"UIAccess | 已使用 UIAccess 令牌启动新进程 (PID={childPid}, Exe={exePath}, 尝试第{attempt}次)");
+                        return true;
+                    }
+
+                    // 仅对「进程在观察期内退出」这种偶发启动崩溃重试；等待失败无法判定，不重试。
+                    if (startupResult == UIAChildStartupResult.Exited && attempt <= UIA_STARTUP_MAX_RETRIES)
+                    {
+                        LogHelper.WriteLogToFile($"UIAccess | UIA 子进程启动失败，准备重试 (第{attempt}次失败，共允许{UIA_STARTUP_MAX_RETRIES}次重试)", LogHelper.LogType.Warning);
+                        continue;
+                    }
+
                     return false;
                 }
-
-                bool survivedStartup = !validateStartup || WaitForUIAChildStartup(pi.hProcess, pi.dwProcessId);
-                CloseHandle(pi.hProcess);
-                CloseHandle(pi.hThread);
-
-                if (!survivedStartup)
-                {
-                    return false;
-                }
-
-                LogHelper.WriteLogToFile($"UIAccess | 已使用 UIAccess 令牌启动新进程 (PID={pi.dwProcessId}, Exe={exePath})");
-                return true;
             }
             finally
             {
@@ -906,65 +923,104 @@ namespace Ink_Canvas.Helpers
             var si = new STARTUPINFOW { cb = (uint)Marshal.SizeOf(typeof(STARTUPINFOW)) };
             GetStartupInfoW(ref si);
 
-            LogHelper.WriteLogToFile($"UIAccess | CreateProcessWithTokenW 启动（原进程令牌方案）: Cmd={cmdBuilder}");
-            bool ok = CreateProcessWithTokenW(
-                token,
-                LOGON_WITH_PROFILE,
-                null,
-                cmdBuilder,
-                CREATE_NEW_CONSOLE,
-                IntPtr.Zero,
-                null,
-                ref si,
-                out PROCESS_INFORMATION pi);
-
-            if (!ok)
+            for (int attempt = 1; ; attempt++)
             {
-                int err = Marshal.GetLastWin32Error();
-                LogHelper.WriteLogToFile($"UIAccess | CreateProcessWithTokenW 失败（原进程令牌方案）: {err}; Exe={exePath}; Cmd={cmdBuilder}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"UIAccess | CreateProcessWithTokenW 启动（原进程令牌方案，第{attempt}次）: Cmd={cmdBuilder}");
+                bool ok = CreateProcessWithTokenW(
+                    token,
+                    LOGON_WITH_PROFILE,
+                    null,
+                    cmdBuilder,
+                    CREATE_NEW_CONSOLE,
+                    IntPtr.Zero,
+                    null,
+                    ref si,
+                    out PROCESS_INFORMATION pi);
+
+                if (!ok)
+                {
+                    int err = Marshal.GetLastWin32Error();
+                    LogHelper.WriteLogToFile($"UIAccess | CreateProcessWithTokenW 失败（原进程令牌方案）: {err}; Exe={exePath}; Cmd={cmdBuilder}", LogHelper.LogType.Error);
+                    return false;
+                }
+
+                UIAChildStartupResult startupResult = validateStartup
+                    ? WaitForUIAChildStartup(pi.hProcess, pi.dwProcessId)
+                    : UIAChildStartupResult.Survived;
+                uint childPid = pi.dwProcessId;
+                CloseHandle(pi.hProcess);
+                CloseHandle(pi.hThread);
+
+                if (startupResult == UIAChildStartupResult.Survived)
+                {
+                    LogHelper.WriteLogToFile($"UIAccess | 已使用 UIAccess 令牌启动新进程（原进程令牌方案） (PID={childPid}, Exe={exePath}, 尝试第{attempt}次)");
+                    return true;
+                }
+
+                if (startupResult == UIAChildStartupResult.Exited && attempt <= UIA_STARTUP_MAX_RETRIES)
+                {
+                    LogHelper.WriteLogToFile($"UIAccess | UIA 子进程启动失败（原进程令牌方案），准备重试 (第{attempt}次失败，共允许{UIA_STARTUP_MAX_RETRIES}次重试)", LogHelper.LogType.Warning);
+                    continue;
+                }
+
                 return false;
             }
-
-            bool survivedStartup = !validateStartup || WaitForUIAChildStartup(pi.hProcess, pi.dwProcessId);
-            CloseHandle(pi.hProcess);
-            CloseHandle(pi.hThread);
-
-            if (!survivedStartup)
-            {
-                return false;
-            }
-
-            LogHelper.WriteLogToFile($"UIAccess | 已使用 UIAccess 令牌启动新进程（原进程令牌方案） (PID={pi.dwProcessId}, Exe={exePath})");
-            return true;
         }
 
-        private static bool WaitForUIAChildStartup(IntPtr processHandle, uint processId)
+        /// <summary>
+        /// 观察 UIA 子进程的启动阶段结果。
+        /// </summary>
+        private enum UIAChildStartupResult
         {
-            uint waitResult = WaitForSingleObject(processHandle, UIA_STARTUP_GRACE_PERIOD_MS);
-            if (waitResult == WAIT_TIMEOUT)
+            /// <summary>存活满观察窗口，认为启动成功。</summary>
+            Survived,
+            /// <summary>在观察窗口内退出（崩溃或自行退出），可重试。</summary>
+            Exited,
+            /// <summary>等待句柄失败，无法判定，不重试。</summary>
+            WaitFailed,
+        }
+
+        /// <summary>
+        /// 分段轮询观察 UIA 子进程是否熬过启动阶段。
+        /// 不一次性阻塞满 <see cref="UIA_STARTUP_GRACE_PERIOD_MS"/>，而是按 <see cref="UIA_STARTUP_POLL_STEP_MS"/>
+        /// 逐段等待：子进程若在窗口内崩溃可立即感知并返回，避免白等满 10s；存活至窗口结束才判定成功。
+        /// </summary>
+        private static UIAChildStartupResult WaitForUIAChildStartup(IntPtr processHandle, uint processId)
+        {
+            uint elapsed = 0;
+            while (elapsed < UIA_STARTUP_GRACE_PERIOD_MS)
             {
-                LogHelper.WriteLogToFile($"UIAccess | UIA 子进程已存活 {UIA_STARTUP_GRACE_PERIOD_MS}ms，认为启动阶段通过 (PID={processId})");
-                return true;
+                uint step = Math.Min(UIA_STARTUP_POLL_STEP_MS, UIA_STARTUP_GRACE_PERIOD_MS - elapsed);
+                uint waitResult = WaitForSingleObject(processHandle, step);
+
+                if (waitResult == WAIT_TIMEOUT)
+                {
+                    elapsed += step;
+                    continue;
+                }
+
+                if (waitResult == WAIT_OBJECT_0)
+                {
+                    if (GetExitCodeProcess(processHandle, out uint exitCode))
+                    {
+                        LogHelper.WriteLogToFile($"UIAccess | UIA 子进程在启动观察期内退出 (PID={processId}, 存活约{elapsed}ms, ExitCode={exitCode}, Hex=0x{exitCode:X8})", LogHelper.LogType.Error);
+                    }
+                    else
+                    {
+                        int exitCodeError = Marshal.GetLastWin32Error();
+                        LogHelper.WriteLogToFile($"UIAccess | UIA 子进程在启动观察期内退出，但读取退出码失败 (PID={processId}, 存活约{elapsed}ms, LastError={exitCodeError})", LogHelper.LogType.Error);
+                    }
+                    return UIAChildStartupResult.Exited;
+                }
+
+                int error = Marshal.GetLastWin32Error();
+                string result = waitResult == WAIT_FAILED ? $"WAIT_FAILED/{error}" : waitResult.ToString();
+                LogHelper.WriteLogToFile($"UIAccess | 等待 UIA 子进程启动状态失败 (PID={processId}, Result={result})", LogHelper.LogType.Error);
+                return UIAChildStartupResult.WaitFailed;
             }
 
-            if (waitResult == WAIT_OBJECT_0)
-            {
-                if (GetExitCodeProcess(processHandle, out uint exitCode))
-                {
-                    LogHelper.WriteLogToFile($"UIAccess | UIA 子进程在启动观察期内退出 (PID={processId}, ExitCode={exitCode}, Hex=0x{exitCode:X8})", LogHelper.LogType.Error);
-                }
-                else
-                {
-                    int exitCodeError = Marshal.GetLastWin32Error();
-                    LogHelper.WriteLogToFile($"UIAccess | UIA 子进程在启动观察期内退出，但读取退出码失败 (PID={processId}, LastError={exitCodeError})", LogHelper.LogType.Error);
-                }
-                return false;
-            }
-
-            int error = Marshal.GetLastWin32Error();
-            string result = waitResult == WAIT_FAILED ? $"WAIT_FAILED/{error}" : waitResult.ToString();
-            LogHelper.WriteLogToFile($"UIAccess | 等待 UIA 子进程启动状态失败 (PID={processId}, Result={result})", LogHelper.LogType.Error);
-            return false;
+            LogHelper.WriteLogToFile($"UIAccess | UIA 子进程已存活 {UIA_STARTUP_GRACE_PERIOD_MS}ms，认为启动阶段通过 (PID={processId})");
+            return UIAChildStartupResult.Survived;
         }
 
         /// <summary>

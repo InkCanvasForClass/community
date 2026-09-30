@@ -772,7 +772,16 @@ namespace Ink_Canvas
             timeMachine.OnUndoStateChanged += TimeMachine_OnUndoStateChanged;
             inkCanvas.Strokes.StrokesChanged += StrokesOnStrokesChanged;
 
-            SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+            // SystemEvents 依赖消息泵/桌面窗口，在 UIAccess 降权子进程等特殊上下文下会抛
+            // PlatformNotSupportedException；订阅失败降级，不阻断后续初始化。
+            try
+            {
+                SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"MainWindow | 订阅系统主题变化失败，已降级: {ex.Message}", LogHelper.LogType.Warning);
+            }
             try
             {
                 if (File.Exists("SpecialVersion.ini")) SpecialVersionResetToSuggestion_Click();
@@ -1625,7 +1634,15 @@ namespace Ink_Canvas
                 }), DispatcherPriority.ContextIdle);
             }
 
-            SystemEvents.DisplaySettingsChanged += SystemEventsOnDisplaySettingsChanged;
+            // SystemEvents 在 UIAccess 降权子进程等特殊上下文下会抛 PlatformNotSupportedException，订阅失败降级。
+            try
+            {
+                SystemEvents.DisplaySettingsChanged += SystemEventsOnDisplaySettingsChanged;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"MainWindow | 订阅显示设置变化失败，已降级: {ex.Message}", LogHelper.LogType.Warning);
+            }
             // 自动收纳到侧边栏（若通过 --board 进入白板模式或 --show 参数则跳过收纳）
             if (Settings.Startup.IsFoldAtStartup && !App.StartWithBoardMode && !App.StartWithShowMode)
             {
@@ -1975,8 +1992,15 @@ namespace Ink_Canvas
         {
             LogHelper.WriteLogToFile("[Exit] 主窗口 Closed，开始释放资源", LogHelper.LogType.Info);
             RealtimeInkFrameScheduler.Clear();
-            SystemEvents.DisplaySettingsChanged -= SystemEventsOnDisplaySettingsChanged;
-            SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
+            try
+            {
+                SystemEvents.DisplaySettingsChanged -= SystemEventsOnDisplaySettingsChanged;
+                SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"MainWindow | 取消系统事件订阅失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
             _systemThemeRetryTimer?.Stop();
             // 玻璃浮动栏刻意不设 Owner，必须显式关闭，否则残留窗口会挡住进程退出
             HideLiquidGlassBar();
