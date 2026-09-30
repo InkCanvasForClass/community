@@ -16,6 +16,19 @@ namespace Ink_Canvas.Plugins
 {
     public class PluginManager : IPluginHost
     {
+        #region 诊断日志（程序集解析 / 插件日志写入等高频路径节流）
+
+        private static int _diagExceptionCount;
+
+        private static void LogCallbackException(string what, Exception ex)
+        {
+            var n = System.Threading.Interlocked.Increment(ref _diagExceptionCount);
+            if (n == 1 || n % 100 == 0)
+                LogHelper.WriteLogToFile($"[Plugin] {what} 异常（累计 {n} 次）: {ex.Message}", LogHelper.LogType.Info);
+        }
+
+        #endregion
+
         private static PluginManager _instance;
         public static PluginManager Instance
         {
@@ -156,9 +169,11 @@ namespace Ink_Canvas.Plugins
                     // 代价是该程序集无法卸载，所以上面的白名单必须保持最小。
                     return context.LoadFromStream(new MemoryStream(File.ReadAllBytes(path)));
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     // 同名程序集已加载（如宿主 Costura 内嵌副本）时忽略，交给其它解析路径。
+                    LogCallbackException(
+                        $"默认 ALC 兜底解析程序集 \"{name.Name}\"（已加载同名程序集等）", ex);
                 }
             }
             return null;
@@ -220,7 +235,10 @@ namespace Ink_Canvas.Plugins
                     foreach (var id in list) _disabledPlugins.Add(id);
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Plugin] 读取已禁用插件列表失败（禁用状态可能丢失）: {_disabledPluginsFile}, 原因: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         private void SaveDisabledPlugins()
@@ -233,7 +251,10 @@ namespace Ink_Canvas.Plugins
                     System.Text.Json.JsonSerializer.Serialize(_disabledPlugins.ToList(),
                     new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Plugin] 保存已禁用插件列表失败（禁用状态可能无法持久化）: {_disabledPluginsFile}, 原因: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         /// <summary>
@@ -278,7 +299,10 @@ namespace Ink_Canvas.Plugins
                     DateTime.Now, level, message, Environment.NewLine);
                 File.AppendAllText(logFile, line);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogCallbackException($"写入插件 \"{pluginId}\" 的独立日志文件", ex);
+            }
         }
 
         /// <summary>
@@ -1465,7 +1489,10 @@ namespace Ink_Canvas.Plugins
                     File.WriteAllText(Path.Combine(folder, ".uninstall"), "");
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Plugin] 写入 .uninstall 标记文件失败（该插件目录下次启动不会被兜底清理）: {folder}, 原因: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         /// <summary>
@@ -1653,7 +1680,10 @@ namespace Ink_Canvas.Plugins
                             if (string.IsNullOrEmpty(module.FileName)) continue;
                             loaded.Add(module.FileName);
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            LogCallbackException("诊断插件占用: 读取进程已加载模块信息失败（跳过该模块）", ex);
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -1767,7 +1797,10 @@ namespace Ink_Canvas.Plugins
                             if (AssemblyLoadContext.GetLoadContext(t.Assembly) == target && seenPath.Add(path))
                                 Log(string.Format("Pinning reference: {0} (Type={1})", path, t.FullName));
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            LogCallbackException("诊断插件占用: 检查类型是否归属目标 ALC", ex);
+                        }
                     }
                     else if (depth > 0)
                     {
@@ -2457,7 +2490,11 @@ namespace Ink_Canvas.Plugins
                                 var assembly = depContext.Load(assemblyName);
                                 if (assembly != null) return assembly;
                             }
-                            catch { }
+                            catch (Exception ex)
+                            {
+                                LogCallbackException(
+                                    $"插件 ALC 解析: 从依赖插件 \"{dep.Id}\" 的上下文加载程序集 \"{assemblyName.Name}\"", ex);
+                            }
                         }
                     }
                 }
@@ -2517,9 +2554,10 @@ namespace Ink_Canvas.Plugins
                         using var peStream = new MemoryStream(assemblyBytes);
                         return LoadFromStream(peStream, pdbStream);
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
                         // pdb 损坏或版本不匹配时退回无符号加载，不因调试信息问题阻断插件加载。
+                        LogHelper.WriteLogToFile($"[Plugin] 载入 pdb 调试符号失败，退回无符号加载: {pdbPath}, 原因: {ex.Message}", LogHelper.LogType.Info);
                     }
                 }
 

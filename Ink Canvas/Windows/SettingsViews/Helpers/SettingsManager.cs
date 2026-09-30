@@ -67,7 +67,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                     }
                     catch
                     {
-                        try { if (File.Exists(tmpPath)) File.Delete(tmpPath); } catch { }
+                        try { if (File.Exists(tmpPath)) File.Delete(tmpPath); }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile(
+                                $"[Settings] 保存设置失败后清理临时文件 {tmpPath} 失败: {ex.Message}",
+                                LogHelper.LogType.Info);
+                        }
                         // 回退到直接覆盖，保持旧行为仍可用
                         ProcessProtectionManager.WithWriteAccess(path, () => File.WriteAllText(path, text));
                     }

@@ -400,7 +400,10 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                try { File.WriteAllText(resultPath, "error: " + ex.Message, System.Text.Encoding.UTF8); } catch { }
+                try { File.WriteAllText(resultPath, "error: " + ex.Message, System.Text.Encoding.UTF8); } catch (Exception inner)
+                {
+                    LogHelper.WriteLogToFile($"[Nav] 写入 URI 结果文件失败: {inner.Message}", LogHelper.LogType.Info);
+                }
                 LogHelper.WriteLogToFile($"URI 切换配置方案失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }

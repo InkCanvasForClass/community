@@ -165,8 +165,9 @@ namespace Ink_Canvas
             {
                 PInvoke.SetCurrentProcessExplicitAppUserModelID("InkCanvasForClass.CE");
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[App] 设置 AppUserModelID 失败（任务栏分组可能异常）: {ex.Message}", LogHelper.LogType.Info);
             }
 
             // 配置TLS协议以支持Windows 7
@@ -361,8 +362,9 @@ namespace Ink_Canvas
                     // 对于更新的Windows版本，不进行任何TLS配置，使用系统默认设置
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[App] TLS 兼容配置失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -441,8 +443,9 @@ namespace Ink_Canvas
                 Current.MainWindow.SourceInitialized -= MainWindow_SourceInitialized;
                 Current.MainWindow.SourceInitialized += MainWindow_SourceInitialized;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Crash] 绑定主窗口 SourceInitialized 事件失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -463,8 +466,9 @@ namespace Ink_Canvas
 
                 RegisterMainWindowDestroyHook();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Crash] 注册主窗口销毁监听失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -520,8 +524,9 @@ namespace Ink_Canvas
                     processDestroyHook = new UnhookWinEventSafeHandle();
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Crash] 卸载窗口销毁 WinEvent 钩子失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -955,10 +960,17 @@ namespace Ink_Canvas
             try
             {
                 int crashAction = 2;
-                try { crashAction = (int)(parsedSettings?["startup"]?["crashAction"] ?? 2); } catch { }
+                try { crashAction = (int)(parsedSettings?["startup"]?["crashAction"] ?? 2); }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[App] 解析崩溃后动作设置失败，改用默认值 2: {ex.Message}", LogHelper.LogType.Info);
+                }
                 CrashAction = (CrashActionType)crashAction;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[App] 同步崩溃后动作失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
@@ -2162,8 +2174,14 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"广播插件 AppExiting 失败: {ex.Message}", LogHelper.LogType.Warning);
             }
 
-            try { heartbeatTimer?.Stop(); } catch { }
-            try { watchdogTimer?.Change(Timeout.Infinite, Timeout.Infinite); watchdogTimer?.Dispose(); } catch { }
+            try { heartbeatTimer?.Stop(); } catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Exit] 停止心跳计时器失败: {ex.Message}", LogHelper.LogType.Info);
+            }
+            try { watchdogTimer?.Change(Timeout.Infinite, Timeout.Infinite); watchdogTimer?.Dispose(); } catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Exit] 释放看门狗计时器失败: {ex.Message}", LogHelper.LogType.Info);
+            }
             MemoryBreakdownHelper.StopAutomaticDumpMonitor();
 
             CleanupTerminationMonitoring();
@@ -2188,7 +2206,10 @@ namespace Ink_Canvas
                     mutex = null;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Exit] 释放单实例互斥体失败: {ex.Message}", LogHelper.LogType.Info);
+            }
 
             // 卸载所有插件
             try

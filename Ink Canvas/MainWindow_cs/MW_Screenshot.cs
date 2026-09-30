@@ -105,7 +105,10 @@ namespace Ink_Canvas
                         }
                         catch
                         {
-                            try { if (File.Exists(tmpStrokePath)) File.Delete(tmpStrokePath); } catch { }
+                            try { if (File.Exists(tmpStrokePath)) File.Delete(tmpStrokePath); } catch (Exception ex)
+                            {
+                                LogHelper.WriteLogToFile($"[Screenshot] 清理临时笔画文件失败: {ex.Message}", LogHelper.LogType.Info);
+                            }
                             throw;
                         }
                     }
@@ -522,8 +525,9 @@ namespace Ink_Canvas
                     // 使用上传帮助类上传到所有启用的服务
                     await Helpers.UploadHelper.UploadFileAsync(savePath);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    LogHelper.WriteLogToFile($"[Screenshot] 截图上传失败（本地文件已保存）: {ex.Message}", LogHelper.LogType.Info);
                 }
             });
         }

@@ -1,4 +1,6 @@
+using Ink_Canvas.Helpers;
 using Ink_Canvas.WorkflowAutomation.Models;
+using System;
 using System.Diagnostics;
 
 namespace Ink_Canvas.WorkflowAutomation.Actions
@@ -41,10 +43,16 @@ namespace Ink_Canvas.WorkflowAutomation.Actions
                         {
                             process.Kill();
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"[Automation] 结束进程 行动: 结束进程 \"{s.ProcessName}\" 中的某个进程失败: {ex.Message}", LogHelper.LogType.Info);
+                        }
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Automation] 结束进程 行动: 枚举进程 \"{s.ProcessName}\" 失败: {ex.Message}", LogHelper.LogType.Info);
+                }
             };
 
             // 杀进程不支持恢复

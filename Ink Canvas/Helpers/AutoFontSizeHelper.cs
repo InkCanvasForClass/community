@@ -416,8 +416,9 @@ namespace Ink_Canvas.Helpers
                     {
                         culture = fe.Language.GetEquivalentCulture();
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        LogHelper.WriteLogToFile($"[UI] 取控件语言对应的 Culture 失败，回退到当前 UI Culture: {ex.Message}", LogHelper.LogType.Info);
                     }
                 }
 

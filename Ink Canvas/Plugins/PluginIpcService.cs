@@ -302,8 +302,11 @@ namespace Ink_Canvas.Plugins
             {
                 return System.Diagnostics.Process.GetCurrentProcess().SessionId.ToString();
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile(
+                    $"[Plugin] PluginIpc 获取当前进程 SessionId 失败，回退为 0: {ex.Message}",
+                    LogHelper.LogType.Info);
                 return "0";
             }
         }
@@ -313,9 +316,21 @@ namespace Ink_Canvas.Plugins
             if (_disposed) return;
             _disposed = true;
 
-            try { _cts.Cancel(); } catch { }
-            try { _listenTask?.Wait(TimeSpan.FromSeconds(1)); } catch { }
-            try { _cts.Dispose(); } catch { }
+            try { _cts.Cancel(); }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Plugin] PluginIpc 释放时取消 CancellationTokenSource 失败: {ex.Message}", LogHelper.LogType.Info);
+            }
+            try { _listenTask?.Wait(TimeSpan.FromSeconds(1)); }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Plugin] PluginIpc 释放时等待监听任务结束失败（监听循环可能仍在运行）: {ex.Message}", LogHelper.LogType.Info);
+            }
+            try { _cts.Dispose(); }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Plugin] PluginIpc 释放时释放 CancellationTokenSource 失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
     }
 }

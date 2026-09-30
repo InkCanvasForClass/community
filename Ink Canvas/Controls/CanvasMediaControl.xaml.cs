@@ -160,8 +160,9 @@ namespace Ink_Canvas.Controls
                 _isPlaying = false;
                 UpdatePlayPauseGlyph();
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Media] 暂停播放失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -178,8 +179,9 @@ namespace Ink_Canvas.Controls
                     SeekTo(TimeSpan.Zero);
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Media] 停止播放失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -191,8 +193,9 @@ namespace Ink_Canvas.Controls
                 Player.Stop();
                 Player.Source = null;
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Media] 关闭媒体控件（卸载渲染钩子/停止播放/释放源）失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -296,8 +299,9 @@ namespace Ink_Canvas.Controls
             {
                 Player.Stop();
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Media] 播放结束时停止播放器失败: {ex.Message}", LogHelper.LogType.Info);
             }
             SeekTo(TimeSpan.Zero);
             UpdatePlayPauseGlyph();
@@ -326,8 +330,9 @@ namespace Ink_Canvas.Controls
                 }
                 UpdatePlayPauseGlyph();
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Media] 切换播放/暂停状态失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -396,8 +401,9 @@ namespace Ink_Canvas.Controls
                 {
                     Player.Position = position;
                 }
-                catch
+                catch (Exception ex)
                 {
+                    LogHelper.WriteLogToFile($"[Media] 定位播放位置到 {position} 失败: {ex.Message}", LogHelper.LogType.Info);
                 }
             }
             UpdateTimeText(position);
@@ -459,8 +465,9 @@ namespace Ink_Canvas.Controls
             {
                 Player.SpeedRatio = ratio;
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Media] 应用播放倍速 {ratio} 失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 

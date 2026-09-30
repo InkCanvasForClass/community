@@ -213,8 +213,9 @@ namespace Ink_Canvas
                 DynamicNotification.VerticalAlignment = VerticalAlignment.Top;
                 DynamicNotification.Margin = new Thickness(left, top, 0, 0);
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Notification] 计算通知悬浮栏位置失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 

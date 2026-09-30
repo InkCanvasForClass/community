@@ -113,7 +113,11 @@ namespace Ink_Canvas
                     if (value is int i) return i == 1;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[Crash] 崩溃窗口读取系统主题注册表项失败: {ex.Message}", LogHelper.LogType.Info);
+            }
             return true;
         }
     }
