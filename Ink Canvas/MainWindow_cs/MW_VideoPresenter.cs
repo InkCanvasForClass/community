@@ -114,6 +114,17 @@ namespace Ink_Canvas
         // 实时检测任务防重入标志（上一次后台检测未完成时不启动新的）
         private int _paperDetectRunning;
 
+        // 预览兜底重启次数上限：
+        // StartVideoCaptureElementPreviewAsync 内的 1.5s 兜底定时器在 MediaOpened 未触发时会
+        // 再次调用 StartVideoCaptureElementPreviewAsync，而后者又会创建新的兜底定时器，
+        // 形成"每 1.75s 重启一次 DirectShow 图"的无限自循环 —— 设备能枚举到但打不开
+        // （虚拟摄像头、驱动异常、设备被占用）时既不 MediaOpened 也不 MediaFailed，
+        // 循环永不停止，反复重建 FilterGraph 与 D3DImage，最终 CPU 打满 / COM 资源耗尽卡死。
+        private int _boothPreviewRestartRetryCount;
+        private const int MaxBoothPreviewRestartRetries = 2;
+        // 预览是否真的起来过（MediaOpened 触发过）。用于判断展台是否处于"空壳"状态。
+        private bool _boothMediaOpened;
+
         // 矫正框移动动画：检测到新角点时，从上一帧位置平滑过渡到新位置，避免跳变。
         // 动画期间 _lastOverlayCorners 实时记录"当前显示的中间位置"，新目标到来时以此为新起点，自然衔接。
         private DispatcherTimer _overlayAnimTimer;
@@ -188,6 +199,12 @@ namespace Ink_Canvas
                 // 菜单可见时点击视频展台按钮 = 仅关闭菜单（与右上角 X 一致），
                 // 不退出视频展台模式。完全退出由菜单内"关闭"按钮（BtnExitVideoPresenter_Click）负责。
                 AnimationsHelper.HidePopupWithSlideAndFade(BoothPopup);
+                // 例外：预览从未成功启动（没摄像头 / 设备打不开）时，收起菜单会把特殊模式的
+                // 全屏遮罩留在原地，白板彻底无法操作。此时直接完整退出展台。
+                if (!_boothMediaOpened)
+                {
+                    BtnExitVideoPresenter_Click(null, null);
+                }
                 return;
             }
 
@@ -374,6 +391,9 @@ namespace Ink_Canvas
         {
             if (_isVideoPresenterSpecialMode) return;
             _isVideoPresenterSpecialMode = true;
+            // 每次进入展台都重置预览成功标记与兜底重试计数
+            _boothMediaOpened = false;
+            _boothPreviewRestartRetryCount = 0;
             LogHelper.WriteLogToFile(
                 $"[Booth] 进入视频展台拍摄模式: 页面={_boothCurrentPhotoIndex}, 编辑模式={inkCanvas?.EditingMode}",
                 LogHelper.LogType.Info);
@@ -455,6 +475,8 @@ namespace Ink_Canvas
         {
             if (!_isVideoPresenterSpecialMode) return;
             _isVideoPresenterSpecialMode = false;
+            _boothMediaOpened = false;
+            _boothPreviewRestartRetryCount = 0;
             LogHelper.WriteLogToFile("[Booth] 退出视频展台拍摄模式，已丢弃拍摄态墨迹", LogHelper.LogType.Info);
 
             // 停止 A4 纸实时识别定时器并隐藏覆盖层
@@ -537,13 +559,23 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"ExitVideoPresenterSpecialMode 异常: {ex.Message}", LogHelper.LogType.Error);
             }
 
-            // 退出特殊模式后恢复白板正常页码显示
-            UpdateIndexInfoDisplay();
-            // 恢复白板侧栏页码列表（覆盖视频展台虚拟分页项，重新填充实际白板页）
-            RefreshBlackBoardSidePageListView();
+            // 退出特殊模式后恢复白板正常页码显示。
+            // 这三个恢复动作都在 try 之外（上面 catch 只包住清理逻辑），
+            // 展台期间页码列表被换成虚拟分页项，CurrentWhiteboardIndex / 集合长度可能不一致，
+            // 任一步抛异常都会从 Click 处理器冒泡成 UI 线程未处理异常 —— 必须兜住。
+            try
+            {
+                UpdateIndexInfoDisplay();
+                // 恢复白板侧栏页码列表（覆盖视频展台虚拟分页项，重新填充实际白板页）
+                RefreshBlackBoardSidePageListView();
 
-            // 恢复翻页按钮（显示"新页面"按钮，全部启用）
-            RestoreBoothPagingButtons();
+                // 恢复翻页按钮（显示"新页面"按钮，全部启用）
+                RestoreBoothPagingButtons();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"ExitVideoPresenterSpecialMode 恢复白板状态异常: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>隐藏所有选择框（墨迹选择框、图片选择框、图片缩放手柄）。</summary>
@@ -1096,6 +1128,9 @@ namespace Ink_Canvas
                     VideoPresenterSearchingText.Visibility = Visibility.Collapsed;
                 }
                 if (BtnCapturePhoto != null) BtnCapturePhoto.IsEnabled = true;
+                // 预览真的起来了：标记成功并清零兜底重试计数
+                _boothMediaOpened = true;
+                _boothPreviewRestartRetryCount = 0;
                 LogHelper.WriteLogToFile(
                     "[VideoPresenter] MediaOpened: 摄像头已打开，隐藏占位文字",
                     LogHelper.LogType.Info);
@@ -1346,6 +1381,20 @@ namespace Ink_Canvas
         /// 若未检测到摄像头，会在面板中显示提示文本；若存在设备，则为每个设备创建一个用于选择的单选按钮，选择某项会启动对应的摄像头预览。函数在列表生成后会尝试恢复并启动当前页面在 _cameraIndexByPage 中存储的摄像头索引，仅当没有保存的索引时才会选择并启动第一个可用设备。保存的每页选择优先于默认选择第一个设备。
         /// </remarks>
         private async void RefreshVideoPresenterDeviceList()
+        {
+            // async void 里未捕获的异常会直接打到 UI Dispatcher（不会沿调用栈传播），
+            // 表现为"点一下展台程序就没了"。整体兜一层，异常只记日志不外抛。
+            try
+            {
+                await RefreshVideoPresenterDeviceListCoreAsync();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"RefreshVideoPresenterDeviceList 异常: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private async System.Threading.Tasks.Task RefreshVideoPresenterDeviceListCoreAsync()
         {
             if (_cameraService == null) return;
             if (CameraDevicesComboBox == null) return;
@@ -2087,14 +2136,30 @@ namespace Ink_Canvas
                                         if (VideoPresenterSearchingText != null
                                             && VideoPresenterSearchingText.Visibility != Visibility.Visible)
                                         {
+                                            _boothPreviewRestartRetryCount = 0;
                                             btnRef.IsEnabled = true;
                                             return;
                                         }
 
-                                        // MediaOpened 没触发（SearchingText 仍可见）：重试一次重启预览
-                                        // 首次 Stop→Play 可能因为设备占用/FILTER_GRAPH 状态不稳导致 MediaOpened 丢失
+                                        // MediaOpened 没触发（SearchingText 仍可见）：有限次重试重启预览
+                                        // 首次 Stop→Play 可能因为设备占用/FILTER_GRAPH 状态不稳导致 MediaOpened 丢失。
+                                        // 必须限制次数：重试会再次进入本方法并创建新的兜底定时器，
+                                        // 若无上限且设备始终打不开（既不 MediaOpened 也不 MediaFailed），
+                                        // 就会变成每 1.75s 重建一次 FilterGraph + D3DImage 的无限循环，最终卡死。
+                                        if (_boothPreviewRestartRetryCount >= MaxBoothPreviewRestartRetries)
+                                        {
+                                            LogHelper.WriteLogToFile(
+                                                $"[VideoPresenter] 兜底重试已达上限({MaxBoothPreviewRestartRetries})，停止重启预览；设备可能不可用",
+                                                LogHelper.LogType.Warning);
+                                            if (VideoPresenterSearchingText != null)
+                                            {
+                                                VideoPresenterSearchingText.Text = "摄像头启动失败，请检查设备后重试";
+                                            }
+                                            return;
+                                        }
+                                        _boothPreviewRestartRetryCount++;
                                         LogHelper.WriteLogToFile(
-                                            "[VideoPresenter] 兜底定时器：MediaOpened 1.5s 未触发，重试重启预览",
+                                            $"[VideoPresenter] 兜底定时器：MediaOpened 1.5s 未触发，重试重启预览（{_boothPreviewRestartRetryCount}/{MaxBoothPreviewRestartRetries}）",
                                             LogHelper.LogType.Warning);
                                         int camIdx = FindCurrentCameraIndex();
                                         if (camIdx >= 0)

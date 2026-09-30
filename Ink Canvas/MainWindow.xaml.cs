@@ -504,6 +504,16 @@ namespace Ink_Canvas
             {
                 if (BoothPopup != null)
                     AnimationsHelper.HidePopupWithSlideAndFade(BoothPopup);
+
+                // 预览从未真正启动过（没摄像头 / 设备打不开）时，只收起菜单会把展台的特殊模式
+                // 留在原地：#333333 全屏遮罩 + "未检测到摄像头设备" 占位文字仍在，翻页与常规白板
+                // 操作全部失效，用户看到的正是"卡死"，只能退出白板才能恢复。
+                // 这种情况下点 X 的意图就是退出展台，直接走完整退出；
+                // 预览正常时仍保持"X 只收起菜单"的原语义。
+                if (_isVideoPresenterSpecialMode && !_boothMediaOpened)
+                {
+                    BtnExitVideoPresenter_Click(null, null);
+                }
             };
             // 注意：此处不恢复 PhotoCorrectionAccelerationComboBox.SelectedIndex，
             // 因为 WireUpBoothPopupContentEvents 在 LoadSettings 之前调用，Settings 仍为默认值。
