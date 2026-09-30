@@ -26,6 +26,12 @@ namespace Ink_Canvas
         private static readonly Dictionary<string, DateTime> _uriCommandLastExecuted = new Dictionary<string, DateTime>();
         private static readonly TimeSpan _uriCommandDebounceWindow = TimeSpan.FromSeconds(3);
 
+        // URL 启动去抖：同一 URI 在 300ms 内重复到达（如双击快捷方式/链接触发两次启动）时忽略后一次
+        private static readonly object _uriRepeatLock = new object();
+        private static string _lastUriRaw;
+        private static DateTime _lastUriRawTime = DateTime.MinValue;
+        private static readonly TimeSpan _uriRepeatIgnoreWindow = TimeSpan.FromMilliseconds(300);
+
         public void HandleUriCommand(string uri)
         {
             try
@@ -36,6 +42,20 @@ namespace Ink_Canvas
                 {
                     LogHelper.WriteLogToFile($"URI 协议已禁用，忽略请求: {uri}", LogHelper.LogType.Warning);
                     return;
+                }
+
+                // 忽略 300ms 内到达的完全相同的 URI（防止双击/重复启动导致命令执行两次）
+                lock (_uriRepeatLock)
+                {
+                    DateTime now = DateTime.Now;
+                    if (string.Equals(_lastUriRaw, uri, StringComparison.OrdinalIgnoreCase)
+                        && now - _lastUriRawTime < _uriRepeatIgnoreWindow)
+                    {
+                        LogHelper.WriteLogToFile($"URI 命令在 {_uriRepeatIgnoreWindow.TotalMilliseconds:0}ms 内重复到达，已忽略: {uri}", LogHelper.LogType.Warning);
+                        return;
+                    }
+                    _lastUriRaw = uri;
+                    _lastUriRawTime = now;
                 }
 
                 LogHelper.WriteLogToFile($"正在处理 URI 命令: {uri}", LogHelper.LogType.Event);
