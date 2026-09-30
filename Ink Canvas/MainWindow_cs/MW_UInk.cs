@@ -265,7 +265,10 @@ namespace Ink_Canvas
                 {
                     if (extractDir != null)
                     {
-                        try { if (Directory.Exists(extractDir)) Directory.Delete(extractDir, true); } catch { }
+                        try { if (Directory.Exists(extractDir)) Directory.Delete(extractDir, true); } catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"[UInk] 清理临时解压目录失败: {ex.Message}", LogHelper.LogType.Info);
+                        }
                     }
                 }
             }
@@ -345,7 +348,10 @@ namespace Ink_Canvas
         {
             if (mediaList == null) return;
             var cacheDir = Path.Combine(Settings.Automation.AutoSavedStrokesLocation, "UInk Media");
-            try { Directory.CreateDirectory(cacheDir); } catch { }
+            try { Directory.CreateDirectory(cacheDir); } catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[UInk] 创建媒体缓存目录失败: {ex.Message}", LogHelper.LogType.Info);
+            }
 
             foreach (var m in mediaList)
             {

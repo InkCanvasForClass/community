@@ -280,7 +280,8 @@ namespace Ink_Canvas.IPC
 
         private void ClosePipe()
         {
-            try { _pipe?.Dispose(); } catch { }
+            try { _pipe?.Dispose(); }
+            catch (Exception ex) { LogHelper.WriteLogToFile($"[PPT-Agent] 关闭并释放命名管道失败: {ex.Message}", LogHelper.LogType.Info); }
             _pipe = null;
             SetConnected(false);
         }

@@ -16,6 +16,19 @@ namespace Ink_Canvas.WorkflowAutomation.Services
     /// </summary>
     public class SystemEventMonitor : IDisposable
     {
+        #region 诊断日志（计时器热路径节流）
+
+        private static int _diagExceptionCount;
+
+        private static void LogCallbackException(string what, Exception ex)
+        {
+            var n = System.Threading.Interlocked.Increment(ref _diagExceptionCount);
+            if (n == 1 || n % 100 == 0)
+                LogHelper.WriteLogToFile($"[Automation] {what} 异常（累计 {n} 次）: {ex.Message}", LogHelper.LogType.Info);
+        }
+
+        #endregion
+
         #region WinEvent Hook P/Invoke
 
         //private delegate void WinEventProc(IntPtr hWinEventHook, uint eventType,
@@ -211,8 +224,9 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             {
                 return Process.GetProcessesByName(processName).Length > 0;
             }
-            catch
+            catch (Exception ex)
             {
+                LogCallbackException($"进程轮询检测 \"{processName}\" 是否运行", ex);
                 return false;
             }
         }
@@ -242,7 +256,10 @@ namespace Ink_Canvas.WorkflowAutomation.Services
                     ForegroundWindowChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogCallbackException("前台窗口兜底轮询获取当前前台窗口", ex);
+            }
         }
 
         #endregion
@@ -267,7 +284,11 @@ namespace Ink_Canvas.WorkflowAutomation.Services
 
             if (_foregroundHook != HWINEVENTHOOK.Null)
             {
-                try { PInvoke.UnhookWinEvent(_foregroundHook); } catch { }
+                try { PInvoke.UnhookWinEvent(_foregroundHook); }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Automation] SystemEventMonitor 释放时卸载前台窗口 WinEvent 钩子失败: {ex.Message}", LogHelper.LogType.Info);
+                }
                 _foregroundHook = HWINEVENTHOOK.Null;
             }
             _foregroundProc = null;

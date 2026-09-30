@@ -370,8 +370,9 @@ namespace Ink_Canvas
                 _exitPPTModeAfterDisconnectTimer = null;
                 ResetPPTEnhancedPreviewCache();
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[PPT] 停止监控时清理延迟退出定时器/预览缓存失败: {ex.Message}", LogHelper.LogType.Info);
             }
 
             _pptManager?.StopMonitoring();
@@ -891,8 +892,9 @@ namespace Ink_Canvas
             {
                 _pptOnlyVisibilityProbeTimer?.Stop();
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[PPT] 停止「仅PPT模式」可见性探测定时器失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -933,8 +935,10 @@ namespace Ink_Canvas
                             }
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        // 枚举回调内：拿不到进程名就可能漏判放映窗口
+                        LogHelper.WriteLogToFile($"[PPT] 读取 POWERPNT 进程信息失败，放映窗口检测可能漏判: {ex.Message}", LogHelper.LogType.Info);
                     }
 
                     return true;
@@ -1114,8 +1118,9 @@ namespace Ink_Canvas
                 {
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[PPT] 处理演示文稿关闭事件时发生非 COM 异常: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -1319,8 +1324,9 @@ namespace Ink_Canvas
                         {
                             _singlePPTInkManager.InitializePresentation(activePresentation);
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
+                            LogHelper.WriteLogToFile($"[PPT] 放映开始时初始化演示文稿墨迹管理器失败: {ex.Message}", LogHelper.LogType.Info);
                         }
                     }
 
@@ -1691,7 +1697,10 @@ namespace Ink_Canvas
                             MediaType = (int)shape.MediaType
                         });
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[SmartMode] 读取形状视频区域信息失败，该形状会被跳过: {ex.Message}", LogHelper.LogType.Info);
+                    }
                 }
                 return regions;
             }
@@ -1785,7 +1794,10 @@ namespace Ink_Canvas
                                 return true;
                         }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[SmartMode] 读取 OLE 控件 ProgID 失败，将按非视频处理: {ex.Message}", LogHelper.LogType.Info);
+                    }
                     // 无法确认是否为媒体播放器时，不视为视频，避免把普通 ActiveX 控件误判为视频
                     return false;
                 }
@@ -1798,10 +1810,16 @@ namespace Ink_Canvas
                         if ((int)(object)shape.MediaType == 3)  // ppMediaTypeMovie
                             return true;
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[SmartMode] 读取嵌入式 OLE 形状 MediaType 失败: {ex.Message}", LogHelper.LogType.Info);
+                    }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[SmartMode] 判定形状是否为视频时发生异常: {ex.Message}", LogHelper.LogType.Info);
+            }
             return false;
         }
 
@@ -3100,16 +3118,18 @@ namespace Ink_Canvas
             {
                 ctsToCancel?.Cancel();
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[PPT] 取消增强预览构建任务失败: {ex.Message}", LogHelper.LogType.Info);
             }
 
             try
             {
                 ctsToCancel?.Dispose();
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[PPT] 释放增强预览取消令牌失败: {ex.Message}", LogHelper.LogType.Info);
             }
 
             DisposePPTEnhancedPreviewItems(cacheToDispose);

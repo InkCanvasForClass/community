@@ -225,7 +225,7 @@ namespace Ink_Canvas.Ink.WinRT
                 {
                     _mouseForwardingPointerId = pointerId;
                     try { _onChromePointerDown?.Invoke(e); }
-                    catch { /* forwarding is best-effort */ }
+                    catch (Exception ex) { LogCallbackException("转发指针按下到界面区域", ex); }
                 }
                 return;
             }
@@ -275,12 +275,12 @@ namespace Ink_Canvas.Ink.WinRT
                 }
 
                 try { _onTouchPointerPress?.Invoke(pointerId, position); }
-                catch { /* tracking is best-effort */ }
+                catch (Exception ex) { LogCallbackException("转发触摸按下", ex); }
             }
 
             _inkingPointers.Add(pointerId);
             try { _onInkPointerPress?.Invoke(pointerId, device, position); }
-            catch { /* tracking is best-effort */ }
+            catch (Exception ex) { LogCallbackException("转发墨迹按下", ex); }
         }
 
         public void OnPointerMoving(CoreInkIndependentInputSource sender, PointerEventArgs e)
@@ -309,7 +309,7 @@ namespace Ink_Canvas.Ink.WinRT
                 }
 
                 try { _onTouchPointerMove?.Invoke(pointerId, position); }
-                catch { /* tracking is best-effort */ }
+                catch (Exception ex) { LogCallbackException("转发触摸移动", ex); }
             }
 
             if (_chromeForwardedPointers.Contains(pointerId))
@@ -318,7 +318,7 @@ namespace Ink_Canvas.Ink.WinRT
                 if (_mouseForwardingPointerId == pointerId)
                 {
                     try { _onChromePointerMove?.Invoke(e); }
-                    catch { /* forwarding is best-effort */ }
+                    catch (Exception ex) { LogCallbackException("转发指针移动到界面区域", ex); }
                 }
                 return;
             }
@@ -341,7 +341,7 @@ namespace Ink_Canvas.Ink.WinRT
                             e.CurrentPoint.PointerDevice.PointerDeviceType,
                             position);
                     }
-                    catch { /* tracking is best-effort */ }
+                    catch (Exception ex) { LogCallbackException("转发墨迹移动", ex); }
                 }
             }
         }
@@ -402,7 +402,7 @@ namespace Ink_Canvas.Ink.WinRT
                 if (_gesturePointers.Contains(pointerId))
                     EmitGestureDelta(force: true);
                 try { _onTouchPointerRelease?.Invoke(pointerId, position); }
-                catch { /* tracking is best-effort */ }
+                catch (Exception ex) { LogCallbackException("转发触摸抬起", ex); }
             }
 
             if (_gesturePointers.Remove(pointerId))
@@ -421,7 +421,7 @@ namespace Ink_Canvas.Ink.WinRT
                 if (!string.Equals(reason, "pointer-released", StringComparison.Ordinal))
                     _canceledStrokePointers.Add(pointerId);
                 try { _onInkPointerRelease?.Invoke(pointerId, device, position); }
-                catch { /* tracking is best-effort */ }
+                catch (Exception ex) { LogCallbackException("转发墨迹抬起", ex); }
                 _lastInkMoveForwardTicks.Remove(pointerId);
             }
 
@@ -432,7 +432,7 @@ namespace Ink_Canvas.Ink.WinRT
                 {
                     _mouseForwardingPointerId = 0;
                     try { _onChromePointerRelease?.Invoke(e); }
-                    catch { /* forwarding is best-effort */ }
+                    catch (Exception ex) { LogCallbackException("转发指针抬起到界面区域", ex); }
                 }
             }
             else if (_cancelAll || _canceledStrokePointers.Contains(pointerId))
@@ -444,6 +444,22 @@ namespace Ink_Canvas.Ink.WinRT
             if (_inkingPointers.Count == 0 && _activeTouchPointers.Count == 0)
                 _cancelAll = false;
             LogGatePress(device, e, reason);
+        }
+
+        // 逐指针事件路径上的异常日志节流：这些 catch 都在 PointerPressing/Moving/Releasing
+        // 的热路径里（触摸可达 120Hz+），异常若每次都记会瞬间刷爆日志并触发 5MB 整目录清理，
+        // 反而把现场证据清掉。这里首次必记，之后每 100 次记一次并带累计次数。
+        private static int _diagExceptionCount;
+
+        private static void LogCallbackException(string what, Exception ex)
+        {
+            var n = Interlocked.Increment(ref _diagExceptionCount);
+            if (n == 1 || n % 100 == 0)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[WinRTInk] 输入门控回调异常（累计 {n} 次）: {what} - {ex.Message}",
+                    LogHelper.LogType.Info);
+            }
         }
 
         private void TrackTouchPress(uint pointerId, Point position)
@@ -493,7 +509,7 @@ namespace Ink_Canvas.Ink.WinRT
                             PointerDeviceType.Touch,
                             GetTouchPosition(pointerId, new Point()));
                     }
-                    catch { /* tracking is best-effort */ }
+                    catch (Exception ex) { LogCallbackException("手势开始时补发墨迹抬起", ex); }
                 }
             }
 
@@ -514,7 +530,7 @@ namespace Ink_Canvas.Ink.WinRT
                 first,
                 second);
             try { _onTwoFingerGestureStarted?.Invoke(snapshot); }
-            catch { /* gesture forwarding is best-effort */ }
+            catch (Exception ex) { LogCallbackException("转发双指手势开始", ex); }
         }
 
         /// <summary>
@@ -564,7 +580,7 @@ namespace Ink_Canvas.Ink.WinRT
             _gestureForwardedDeltas++;
 
             try { _onTwoFingerGestureDelta?.Invoke(snapshot); }
-            catch { /* gesture forwarding is best-effort */ }
+            catch (Exception ex) { LogCallbackException("转发双指手势增量", ex); }
         }
 
         private void EndTwoFingerGesture()
@@ -582,7 +598,7 @@ namespace Ink_Canvas.Ink.WinRT
             _gestureFirstPointerId = 0;
             _gestureSecondPointerId = 0;
             try { _onTwoFingerGestureCompleted?.Invoke(); }
-            catch { /* gesture forwarding is best-effort */ }
+            catch (Exception ex) { LogCallbackException("转发双指手势结束", ex); }
         }
 
         /// <summary>

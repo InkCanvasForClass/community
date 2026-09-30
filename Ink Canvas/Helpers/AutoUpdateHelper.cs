@@ -74,7 +74,11 @@ namespace Ink_Canvas.Helpers
             {
                 foreach (var cts in _activeDownloadSessions)
                 {
-                    try { cts?.Cancel(); } catch { }
+                    try { cts?.Cancel(); }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Update] 请求取消下载时取消 CancellationTokenSource 失败: {ex.Message}", LogHelper.LogType.Info);
+                    }
                 }
             }
         }
@@ -95,7 +99,11 @@ namespace Ink_Canvas.Helpers
             {
                 _activeDownloadSessions.Remove(cts);
             }
-            try { cts?.Dispose(); } catch { }
+            try { cts?.Dispose(); }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Update] 释放下载会话 CancellationTokenSource 失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         public static bool IsX64UpdatePackageSelected()
@@ -1302,7 +1310,11 @@ namespace Ink_Canvas.Helpers
                         return true;
                     }
                     // zip 不存在则回退下载，并清理状态文件以避免下次再误判。
-                    try { File.Delete(statusFilePath); } catch { }
+                    try { File.Delete(statusFilePath); }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Update] 删除失效的下载状态文件 {statusFilePath} 失败，下次检查可能仍误判为已下载: {ex.Message}", LogHelper.LogType.Info);
+                    }
                     LogHelper.WriteLogToFile("AutoUpdate | 状态文件存在但 zip 缺失，重新下载", LogHelper.LogType.Warning);
                 }
 
@@ -1612,7 +1624,11 @@ namespace Ink_Canvas.Helpers
                                         LogHelper.WriteLogToFile($"AutoUpdate | 分块{block.Index}下载已被用户取消", LogHelper.LogType.Warning);
                                         if (File.Exists(tempPath))
                                         {
-                                            try { File.Delete(tempPath); } catch { }
+                                            try { File.Delete(tempPath); }
+                                            catch (Exception deleteEx)
+                                            {
+                                                LogHelper.WriteLogToFile($"[Update] 取消分块{block.Index}下载后删除临时分块文件 {tempPath} 失败: {deleteEx.Message}", LogHelper.LogType.Info);
+                                            }
                                         }
                                         cts.Cancel();
                                         return;
@@ -1784,7 +1800,14 @@ namespace Ink_Canvas.Helpers
             for (int i = 0; i < maxRetry; i++)
             {
                 try { File.Delete(path); return; }
-                catch (IOException) { try { Thread.Sleep(500); } catch { } }
+                catch (IOException)
+                {
+                    try { Thread.Sleep(500); }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Update] 删除文件 {path} 占用重试时的等待被打断，放弃继续重试: {ex.Message}", LogHelper.LogType.Info);
+                    }
+                }
                 catch { return; }
             }
         }
@@ -1850,7 +1873,11 @@ namespace Ink_Canvas.Helpers
             {
                 LogHelper.WriteLogToFile("AutoUpdate | 单线程下载已被取消", LogHelper.LogType.Warning);
                 progressCallback?.Invoke(0, "下载已取消");
-                try { if (File.Exists(destinationPath)) File.Delete(destinationPath); } catch { }
+                try { if (File.Exists(destinationPath)) File.Delete(destinationPath); }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Update] 取消单线程下载后删除半成品文件 {destinationPath} 失败（下次更新会重新下载）: {ex.Message}", LogHelper.LogType.Info);
+                }
                 SetDownloadFailure(DownloadFailureReason.Cancelled);
                 return false;
             }
@@ -1926,8 +1953,9 @@ namespace Ink_Canvas.Helpers
             {
                 wasProcessProtectionEnabled = ProcessProtectionManager.Enabled;
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Update] 读取进程保护当前开关状态失败，将按“未开启”处理并继续安装: {ex.Message}", LogHelper.LogType.Info);
             }
 
             try
@@ -2110,8 +2138,9 @@ namespace Ink_Canvas.Helpers
                 {
                     ProcessProtectionManager.SetEnabled(wasProcessProtectionEnabled);
                 }
-                catch
+                catch (Exception ex)
                 {
+                    LogHelper.WriteLogToFile($"[Update] 安装结束后恢复进程保护开关状态失败（可能残留禁用状态）: {ex.Message}", LogHelper.LogType.Info);
                 }
             }
         }

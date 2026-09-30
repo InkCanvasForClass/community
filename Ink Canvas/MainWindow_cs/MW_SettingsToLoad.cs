@@ -174,8 +174,9 @@ namespace Ink_Canvas
             {
                 ProcessProtectionManager.ApplyFromSettings();
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[ProcGuard] 按设置应用进程保护失败: {ex.Message}", LogHelper.LogType.Info);
             }
 
             // Startup

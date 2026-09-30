@@ -1015,7 +1015,10 @@ namespace Ink_Canvas.Helpers
             {
                 mainModulePath = Process.GetCurrentProcess().MainModule?.FileName;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[ProcGuard] 以 UIAccess/普通用户身份重启前读取当前主模块路径失败，将回退到 Environment.ProcessPath: {ex.Message}", LogHelper.LogType.Info);
+            }
 
             if (!string.IsNullOrEmpty(mainModulePath) && System.IO.File.Exists(mainModulePath))
                 return mainModulePath;

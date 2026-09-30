@@ -1874,8 +1874,10 @@ namespace Ink_Canvas
                                 _allowCloseAfterExitVerification = true;
                                 Close();
                             }
-                            catch
+                            catch (Exception ex)
                             {
+                                // 走到这里说明验证流程中途失败且未置位放行标志，窗口会表现为"点关闭没反应"
+                                LogHelper.WriteLogToFile($"[Exit] 退出密码验证流程异常，本次关闭未放行: {ex.Message}", LogHelper.LogType.Info);
                             }
                             finally
                             {
@@ -1885,8 +1887,9 @@ namespace Ink_Canvas
                         return;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
+                    LogHelper.WriteLogToFile($"[Exit] 检查是否需要退出密码验证失败: {ex.Message}", LogHelper.LogType.Info);
                 }
 
                 if (!CloseIsFromButton && Settings.Advanced.IsSecondConfirmWhenShutdownApp)

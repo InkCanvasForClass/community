@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using Ink_Canvas.Models;
 using Ink_Canvas.Properties;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
@@ -178,8 +179,9 @@ namespace Ink_Canvas.Controls
                     Process.Start(new ProcessStartInfo(currentMessage.ActionUrl) { UseShellExecute = true });
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Notification] 执行动态通知的动作回调/打开动作链接失败: {ex.Message}", LogHelper.LogType.Info);
             }
 
             Close();

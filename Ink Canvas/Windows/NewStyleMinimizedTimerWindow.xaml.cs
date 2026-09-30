@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using iNKORE.UI.WPF.Modern;
 using System;
@@ -136,8 +137,10 @@ namespace Ink_Canvas.Windows
             {
                 DragMove();
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile(
+                    $"[Timer] 最小化计时器窗口拖动 DragMove 失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 

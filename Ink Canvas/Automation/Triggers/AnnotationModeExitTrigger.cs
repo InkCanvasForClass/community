@@ -1,4 +1,6 @@
+using Ink_Canvas.Helpers;
 using Ink_Canvas.WorkflowAutomation.Abstractions;
+using System;
 
 namespace Ink_Canvas.WorkflowAutomation.Triggers
 {
@@ -17,6 +19,15 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
     public class AnnotationModeExitTrigger : TriggerBase<AnnotationModeExitSettings>
     {
         private bool _wasInAnnotationMode = false;
+
+        private static int _diagExceptionCount;
+
+        private static void LogCallbackException(string what, Exception ex)
+        {
+            var n = System.Threading.Interlocked.Increment(ref _diagExceptionCount);
+            if (n == 1 || n % 100 == 0)
+                LogHelper.WriteLogToFile($"[Automation] {what} 异常（累计 {n} 次）: {ex.Message}", LogHelper.LogType.Info);
+        }
 
         public override void Loaded()
         {
@@ -54,7 +65,10 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
                     mw.inkCanvas.EditingModeChanged += OnEditingModeChanged;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Automation] 批注模式退出触发器订阅 inkCanvas.EditingModeChanged 失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         private void TryUnsubscribeInkCanvas()
@@ -67,7 +81,10 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
                     mw.inkCanvas.EditingModeChanged -= OnEditingModeChanged;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Automation] 批注模式退出触发器退订 inkCanvas.EditingModeChanged 失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         private void OnEditingModeChanged(object sender, System.EventArgs e)
@@ -114,8 +131,9 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
                     return mw.IsAnnotationModeActive();
                 }) ?? false;
             }
-            catch
+            catch (Exception ex)
             {
+                LogCallbackException("读取批注模式状态 IsInAnnotationMode", ex);
                 return false;
             }
         }

@@ -86,8 +86,9 @@ namespace Ink_Canvas.Helpers
                     {
                         HotkeyManager.Current.Remove(hotkeyName);
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        LogHelper.WriteLogToFile($"[Hotkey] 注册前清理全局热键 {hotkeyName} 的旧注册失败，将直接覆盖: {ex.Message}", LogHelper.LogType.Info);
                     }
                 }
 
@@ -151,8 +152,9 @@ namespace Ink_Canvas.Helpers
                     {
                         HotkeyManager.Current.Remove(hotkeyName);
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        LogHelper.WriteLogToFile($"[Hotkey] 注册插件热键前清理同名全局热键 {hotkeyName} 失败，将直接覆盖: {ex.Message}", LogHelper.LogType.Info);
                     }
 
                     _registeredHotkeys.Remove(hotkeyName);

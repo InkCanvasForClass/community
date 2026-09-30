@@ -547,8 +547,9 @@ namespace Ink_Canvas.Windows
                 device.Activate(ref IID_IAudioEndpointVolume, 0, IntPtr.Zero, out interfacePointer);
                 _audioEndpointVolume = interfacePointer as IAudioEndpointVolume;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[PPT] 初始化默认音频端点音量接口失败（音量控制将不可用）: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
