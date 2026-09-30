@@ -330,6 +330,7 @@ namespace Ink_Canvas
                     if (_taskbar is FrameworkElement fe)
                         fe.Visibility = Settings.Appearance.EnableTrayIcon ? Visibility.Visible : Visibility.Collapsed;
 
+                    // 设置加载完成后主动触发一次主题刷新检查；参数传 null 表示非系统广播，不做类别过滤
                     SystemEvents_UserPreferenceChanged(null, null);
                 }
                 else
