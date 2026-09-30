@@ -220,9 +220,20 @@ namespace Ink_Canvas
             // 拖动操作会进入假死状态，直到呼出鼠标或点击其他窗口生成真实鼠标消息才解除。
             // AppContext.SetSwitch("Switch.System.Windows.Input.Stylus.EnablePointerSupport", true);
 
+            // SetCurrentProcessExplicitAppUserModelID 内部会初始化 Shell/COM，在 UIAccess
+            // 降权子进程的特殊令牌环境下会触发 native 堆损坏(0xC0000374)，稳定崩在此 P/Invoke
+            // 且 try/catch 挡不住（进程级 fail-fast）。该调用仅用于任务栏图标分组，对 UIAccess
+            // 子进程非关键，故仅在非 UIAccess 进程执行。（管理员主进程无 UIAccess，正常执行。）
             try
             {
-                PInvoke.SetCurrentProcessExplicitAppUserModelID("InkCanvasForClass.CE");
+                if (!UIAccessHelper.HasUIAccess())
+                {
+                    PInvoke.SetCurrentProcessExplicitAppUserModelID("InkCanvasForClass.CE");
+                }
+                else
+                {
+                    LogHelper.WriteLogToFile("App | UIAccess 进程跳过 SetCurrentProcessExplicitAppUserModelID（规避 Shell/COM 堆损坏）", LogHelper.LogType.Trace);
+                }
             }
             catch (Exception ex)
             {
