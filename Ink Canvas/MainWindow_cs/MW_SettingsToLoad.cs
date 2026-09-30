@@ -734,39 +734,8 @@ namespace Ink_Canvas
         /// 4. 如果有清理操作，重新反序列化并保存
         /// 5. 记录清理结果到日志
         /// </remarks>
-        private void CleanupObsoleteSettings(string userConfigJson)
-        {
-            try
-            {
-                // 创建默认配置对象
-                Settings defaultSettings = new Settings();
-
-                // 将默认配置和用户配置都序列化为JObject
-                JObject defaultConfigObj = JObject.FromObject(defaultSettings); EnsureDefaultConfigSchemaIncludesIgnoredNullKeys(defaultConfigObj);
-                JObject userConfigObj = JObject.Parse(userConfigJson);
-
-                // 记录是否有清理或迁移操作
-                bool hasChanges = false;
-                MigrateLegacyStartupMode(userConfigObj, ref hasChanges);
-
-                // 递归比较并删除用户配置中多余的键
-                RemoveObsoleteProperties(userConfigObj, defaultConfigObj, ref hasChanges);
-
-                // 如果有清理操作，重新反序列化并保存
-                if (hasChanges)
-                {
-                    string cleanedJson = userConfigObj.ToString(Formatting.Indented);
-                    Settings = JsonConvert.DeserializeObject<Settings>(cleanedJson);
-                    SaveSettingsToFile();
-                    App.UpdateCachedSettingsJson(cleanedJson);
-                    LogHelper.WriteLogToFile("已清理过期配置项", LogHelper.LogType.Event);
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"清理过期配置时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
+        // M11 壳：实现已搬移至 Services/Settings/SettingsStore.cs
+        private void CleanupObsoleteSettings(string userConfigJson) => _settingsStore.CleanupObsoleteSettings(userConfigJson);
 
         /// <summary>
         /// 递归删除用户配置中多余的属性
@@ -785,101 +754,17 @@ namespace Ink_Canvas
         /// 7. 删除标记的键
         /// 8. 设置变更标志
         /// </remarks>
-        private static void MigrateLegacyStartupMode(JObject userConfigObj, ref bool hasChanges)
-        {
-            if (!(userConfigObj?["startup"] is JObject startup)) return;
+        // M11 壳：实现已搬移至 Services/Settings/SettingsStore.cs
+        private static void MigrateLegacyStartupMode(JObject userConfigObj, ref bool hasChanges) =>
+            Services.SettingsStore.MigrateLegacyStartupMode(userConfigObj, ref hasChanges);
 
-            if (startup["startupMode"] == null && startup["enableFastStartup"]?.Type == JTokenType.Boolean)
-            {
-                startup["startupMode"] = startup["enableFastStartup"].Value<bool>()
-                    ? (int)StartupMode.Fastest
-                    : (int)StartupMode.Faster;
-                hasChanges = true;
-            }
+        // M11 壳：实现已搬移至 Services/Settings/SettingsStore.cs
+        private static void EnsureDefaultConfigSchemaIncludesIgnoredNullKeys(JObject defaultConfigObj) =>
+            Services.SettingsStore.EnsureDefaultConfigSchemaIncludesIgnoredNullKeys(defaultConfigObj);
 
-            if (startup.Remove("enableFastStartup"))
-            {
-                hasChanges = true;
-            }
-        }
-
-        private static void EnsureDefaultConfigSchemaIncludesIgnoredNullKeys(JObject defaultConfigObj)
-        {
-            if (defaultConfigObj == null) return;
-            if (defaultConfigObj["appearance"] is JObject appearance)
-            {
-                // 这些属性同时具备 NullValueHandling.Ignore 且默认值为 null，
-                // 不会出现在默认 JObject 中。CleanupObsoleteSettings 会把它们
-                // 误判为"过期"并立即 SaveSettingsToFile 删除，于是用户自建语录
-                // 被静默清空。补成 null 占位让 RemoveObsoleteProperties 放行。
-                foreach (var ignoredKey in new[] { "hitokotoCategories", "customTipsSchemes", "enabledPresetTipsSources" })
-                {
-                    if (!appearance.ContainsKey(ignoredKey))
-                        appearance[ignoredKey] = JValue.CreateNull();
-                }
-            }
-        }
-
-        private void RemoveObsoleteProperties(JObject userObj, JObject defaultObj, ref bool hasChanges)
-        {
-            if (userObj == null || defaultObj == null)
-                return;
-
-            // 获取需要删除的键列表（避免在遍历时修改集合）
-            List<string> keysToRemove = new List<string>();
-
-            foreach (var property in userObj.Properties())
-            {
-                string propertyName = property.Name;
-
-                // 如果默认配置中不存在该属性，标记为删除
-                if (!defaultObj.ContainsKey(propertyName))
-                {
-                    keysToRemove.Add(propertyName);
-                    continue;
-                }
-
-                // 如果两个属性都是对象类型，递归比较
-                JToken userValue = property.Value;
-                JToken defaultValue = defaultObj[propertyName];
-
-                if (userValue != null && defaultValue != null)
-                {
-                    if (userValue.Type == JTokenType.Object && defaultValue.Type == JTokenType.Object)
-                    {
-                        RemoveObsoleteProperties(userValue as JObject, defaultValue as JObject, ref hasChanges);
-                    }
-                    // 处理数组中的对象（如自定义图标列表等）
-                    else if (userValue.Type == JTokenType.Array && defaultValue.Type == JTokenType.Array)
-                    {
-                        JArray userArray = userValue as JArray;
-                        JArray defaultArray = defaultValue as JArray;
-
-                        if (userArray != null && defaultArray != null && userArray.Count > 0 && defaultArray.Count > 0)
-                        {
-                            // 如果数组元素是对象，比较第一个元素的属性结构
-                            if (userArray[0].Type == JTokenType.Object && defaultArray[0].Type == JTokenType.Object)
-                            {
-                                for (int i = 0; i < userArray.Count; i++)
-                                {
-                                    if (userArray[i] is JObject userItemObj && defaultArray[0] is JObject defaultItemObj)
-                                    {
-                                        RemoveObsoleteProperties(userItemObj, defaultItemObj, ref hasChanges);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // 删除标记的键
-            foreach (string key in keysToRemove)
-            {
-                userObj.Remove(key);
-                hasChanges = true;
-            }
-        }
+        // M11 壳：实现已搬移至 Services/Settings/SettingsStore.cs
+        private void RemoveObsoleteProperties(JObject userObj, JObject defaultObj, ref bool hasChanges) =>
+            _settingsStore.RemoveObsoleteProperties(userObj, defaultObj, ref hasChanges);
 
         internal void ApplyQuickPanelBottomOffset(double offset)
         {
