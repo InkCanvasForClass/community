@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+
+    <!--  设置页「展开式设置卡」（ui:CardExpander）内部的整宽行样式。
+         配合 CardExpander 的 ContentPadding="0" 使用：把展开区里嵌套的 ui:CardControl 从
+         「一张张浮起的小卡片」变成同一张卡片内由 1px 分隔线连成的列表，
+         与 WPF-UI Gallery（Wpf.Ui.Gallery\Views\Pages\SettingsPage.xaml）的写法保持一致。  -->
+
+    <!--  普通行：去掉卡片底色与圆角，只保留 1px 上分隔线  -->
+    <Style
+        x:Key="SettingsExpanderRowStyle"
+        BasedOn="{StaticResource DefaultUiCardControlStyle}"
+        TargetType="{x:Type ui:CardControl}">
+        <Setter Property="Padding" Value="14,12,14,12" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{DynamicResource DividerStrokeColorDefaultBrush}" />
+        <Setter Property="BorderThickness" Value="0,1,0,0" />
+    </Style>
+
+    <!--  首行：标题区与内容区之间本来就有一条边线，故不再画分隔线  -->
+    <Style
+        x:Key="SettingsExpanderFirstRowStyle"
+        BasedOn="{StaticResource SettingsExpanderRowStyle}"
+        TargetType="{x:Type ui:CardControl}">
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+</ResourceDictionary>

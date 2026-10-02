@@ -8,6 +8,7 @@
         xmlns:props="clr-namespace:Ink_Canvas.Properties"
         mc:Ignorable="d"
         Topmost="True" WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource ApplicationBackgroundBrush}"
 
         ResizeMode="NoResize"
         Title="{x:Static props:FeedbackStrings.WindowTitle}"

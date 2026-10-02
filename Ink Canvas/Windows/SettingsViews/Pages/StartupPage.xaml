@@ -60,25 +60,27 @@
 
                     <controls:LabeledSettingsCard x:Name="CardPPTOnlyMode" Header="{x:Static props:StartupStrings.PPTOnlyMode}" Description="{x:Static props:StartupStrings.PPTOnlyModeHint}" Symbol="SlideTransition24" SwitchName="ToggleSwitchPPTOnlyMode" Toggled="ToggleSwitchPPTOnlyMode_Toggled" />
 
-                    <ui:CardExpander IsExpanded="True">
+                    <ui:CardExpander IsExpanded="True" ContentPadding="0">
                         <ui:CardExpander.Header>
                             <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="{x:Static props:StartupStrings.ExternalProtocol}" />
-                                    <TextBlock Text="{x:Static props:StartupStrings.ExternalProtocolHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                </StackPanel>
-                                <ui:ToggleSwitch x:Name="ToggleSwitchExternalProtocol" Checked="ToggleSwitchExternalProtocol_Toggled" Unchecked="ToggleSwitchExternalProtocol_Toggled" Grid.Column="1" />
+                                <ui:TextBlock Text="{x:Static props:StartupStrings.ExternalProtocol}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                <ui:TextBlock Text="{x:Static props:StartupStrings.ExternalProtocolHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />
+                                <ui:ToggleSwitch x:Name="ToggleSwitchExternalProtocol" Checked="ToggleSwitchExternalProtocol_Toggled" Unchecked="ToggleSwitchExternalProtocol_Toggled" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,16,0" />
                             </Grid>
                         </ui:CardExpander.Header>
                         <ui:CardExpander.Icon>
                             <ui:SymbolIcon Symbol="Link24" />
                         </ui:CardExpander.Icon>
                         <StackPanel>
-                            <ui:CardControl>
+                            <ui:CardControl Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                 <ui:CardControl.Header>
                                     <StackPanel>
                                         <TextBlock Text="{x:Static props:StartupStrings.ExternalProtocol_ShortcutCreate}" />
@@ -96,25 +98,27 @@
                         </StackPanel>
                     </ui:CardExpander>
 
-                    <ui:CardExpander IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchEnableTrayIcon, Mode=OneWay}">
+                    <ui:CardExpander IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchEnableTrayIcon, Mode=OneWay}" ContentPadding="0">
                         <ui:CardExpander.Header>
                             <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="{x:Static props:WindowStrings.Tray_GroupTitle}" />
-                                    <TextBlock Text="{x:Static props:WindowStrings.Tray_EnableTrayIcon}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                </StackPanel>
-                                <ui:ToggleSwitch x:Name="ToggleSwitchEnableTrayIcon" Checked="ToggleSwitchEnableTrayIcon_Toggled" Unchecked="ToggleSwitchEnableTrayIcon_Toggled" Grid.Column="1" />
+                                <ui:TextBlock Text="{x:Static props:WindowStrings.Tray_GroupTitle}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                <ui:TextBlock Text="{x:Static props:WindowStrings.Tray_EnableTrayIcon}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />
+                                <ui:ToggleSwitch x:Name="ToggleSwitchEnableTrayIcon" Checked="ToggleSwitchEnableTrayIcon_Toggled" Unchecked="ToggleSwitchEnableTrayIcon_Toggled" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,16,0" />
                             </Grid>
                         </ui:CardExpander.Header>
                         <ui:CardExpander.Icon>
                             <ui:SymbolIcon Symbol="Pin24" />
                         </ui:CardExpander.Icon>
                         <StackPanel>
-                            <ui:CardControl Header="{x:Static props:WindowStrings.Tray_LeftClickAction}">
+                            <ui:CardControl Header="{x:Static props:WindowStrings.Tray_LeftClickAction}" Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                 <ComboBox x:Name="ComboBoxTrayLeftClickAction" SelectedIndex="0" SelectionChanged="ComboBoxTrayLeftClickAction_SelectionChanged">
                                     <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_ShowMenu}" />
                                     <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_HideShowMainWindow}" />
@@ -129,7 +133,7 @@
                                     <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_NoAction}" />
                                 </ComboBox>
                             </ui:CardControl>
-                            <ui:CardControl Header="{x:Static props:WindowStrings.Tray_RightClickAction}">
+                            <ui:CardControl Header="{x:Static props:WindowStrings.Tray_RightClickAction}" Style="{StaticResource SettingsExpanderRowStyle}">
                                 <ComboBox x:Name="ComboBoxTrayRightClickAction" SelectedIndex="0" SelectionChanged="ComboBoxTrayRightClickAction_SelectionChanged">
                                     <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_ShowMenu}" />
                                     <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_HideShowMainWindow}" />
@@ -164,25 +168,27 @@
                         </ComboBox>
                     </ui:CardControl>
 
-                    <ui:CardExpander IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchEnableSplashScreen, Mode=OneWay}">
+                    <ui:CardExpander IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchEnableSplashScreen, Mode=OneWay}" ContentPadding="0">
                         <ui:CardExpander.Header>
                             <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="{x:Static props:ThemeStrings.Theme_EnableSplash}" />
-                                    <TextBlock Text="{x:Static props:ThemeStrings.Theme_EnableSplash}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                </StackPanel>
-                                <ui:ToggleSwitch x:Name="ToggleSwitchEnableSplashScreen" Checked="ToggleSwitchEnableSplashScreen_Toggled" Unchecked="ToggleSwitchEnableSplashScreen_Toggled" Grid.Column="1" />
+                                <ui:TextBlock Text="{x:Static props:ThemeStrings.Theme_EnableSplash}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                <ui:TextBlock Text="{x:Static props:ThemeStrings.Theme_EnableSplash}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />
+                                <ui:ToggleSwitch x:Name="ToggleSwitchEnableSplashScreen" Checked="ToggleSwitchEnableSplashScreen_Toggled" Unchecked="ToggleSwitchEnableSplashScreen_Toggled" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,16,0" />
                             </Grid>
                         </ui:CardExpander.Header>
                         <ui:CardExpander.Icon>
                             <ui:SymbolIcon Symbol="Image24" />
                         </ui:CardExpander.Icon>
                         <StackPanel>
-                            <ui:CardControl Header="{x:Static props:ThemeStrings.Theme_SplashStyle}">
+                            <ui:CardControl Header="{x:Static props:ThemeStrings.Theme_SplashStyle}" Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                 <ComboBox x:Name="ComboBoxSplashScreenStyle" SelectedIndex="1" SelectionChanged="ComboBoxSplashScreenStyle_SelectionChanged">
                                     <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Splash_Random}" />
                                     <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Splash_Seasonal}" />
@@ -194,7 +200,7 @@
                                     <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Splash_Custom}" />
                                 </ComboBox>
                             </ui:CardControl>
-                            <ui:CardControl x:Name="CardCustomSplashImage" Visibility="Collapsed">
+                            <ui:CardControl x:Name="CardCustomSplashImage" Visibility="Collapsed" Style="{StaticResource SettingsExpanderRowStyle}">
                                 <ui:CardControl.Header>
                                     <StackPanel>
                                         <TextBlock Text="{x:Static props:ThemeStrings.Theme_CustomSplashImage}" />
@@ -207,7 +213,7 @@
                                     <Button x:Name="ButtonClearCustomSplash" Content="{x:Static props:ThemeStrings.Theme_Clear}" Padding="10,3" Click="ButtonClearCustomSplash_Click" />
                                 </vio:SimpleStackPanel>
                             </ui:CardControl>
-                            <ui:CardControl x:Name="CardCustomSplashTextPosition" Visibility="Collapsed">
+                            <ui:CardControl x:Name="CardCustomSplashTextPosition" Visibility="Collapsed" Style="{StaticResource SettingsExpanderRowStyle}">
                                 <ui:CardControl.Header>
                                     <StackPanel>
                                         <TextBlock Text="{x:Static props:ThemeStrings.Theme_CustomSplashTextPosition}" />

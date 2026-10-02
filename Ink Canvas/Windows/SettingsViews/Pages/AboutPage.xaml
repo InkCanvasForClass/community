@@ -9,6 +9,7 @@
                         <Setter Property="Margin" Value="1,30,0,6" />
                     </Style.Setters>
                 </Style>
+                <!-- 展开卡内的「整宽行」样式已提升到 Resources/SettingsCardStyles.xaml -->
                 <DataTemplate x:Key="DeveloperAvatarTemplate">
                     <vio:SimpleStackPanel Orientation="Vertical" HorizontalAlignment="Center">
                         <Image Source="{Binding AvatarPath}" VerticalAlignment="Center" HorizontalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" Width="96" Height="96" Margin="0,0,0,6">
@@ -50,32 +51,40 @@
                         <Button x:Name="BtnReportIssue" Content="{x:Static props:FeedbackStrings.About_FeedbackButton}" Click="BtnReportIssue_Click" />
                     </ui:CardControl>
 
-                    <ui:CardExpander IsExpanded="True" d:Visibility="Visible" d:IsExpanded="True">
+                    <ui:CardExpander ContentPadding="0" IsExpanded="True" d:Visibility="Visible" d:IsExpanded="True">
                         <ui:CardExpander.Header>
-                            <StackPanel>
-                                <TextBlock Text="{x:Static props:AboutStrings.DeviceInfo}" />
-                            </StackPanel>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ui:TextBlock Grid.Row="0" Grid.Column="0" FontTypography="Body" Text="{x:Static props:AboutStrings.DeviceInfo}" />
+                            </Grid>
                         </ui:CardExpander.Header>
                         <ui:CardExpander.Icon>
                             <ui:SymbolIcon Symbol="DeviceEq24" />
                         </ui:CardExpander.Icon>
                         <StackPanel>
-                            <ui:CardControl Header="{x:Static props:AboutStrings.DeviceIdLabel}">
+                            <ui:CardControl Style="{StaticResource SettingsExpanderFirstRowStyle}" Header="{x:Static props:AboutStrings.DeviceIdLabel}">
                                 <TextBlock x:Name="DeviceIdTextBlock" Text="{x:Static props:AboutStrings.DeviceInfo_Loading}" />
                             </ui:CardControl>
-                            <ui:CardControl Header="{x:Static props:AboutStrings.UsageFrequencyLabel}">
+                            <ui:CardControl Style="{StaticResource SettingsExpanderRowStyle}" Header="{x:Static props:AboutStrings.UsageFrequencyLabel}">
                                 <TextBlock x:Name="UsageFrequencyTextBlock" Text="{x:Static props:AboutStrings.DeviceInfo_Loading}" />
                             </ui:CardControl>
-                            <ui:CardControl Header="{x:Static props:AboutStrings.UpdatePriorityLabel}">
+                            <ui:CardControl Style="{StaticResource SettingsExpanderRowStyle}" Header="{x:Static props:AboutStrings.UpdatePriorityLabel}">
                                 <TextBlock x:Name="UpdatePriorityTextBlock" Text="{x:Static props:AboutStrings.DeviceInfo_Loading}" />
                             </ui:CardControl>
-                            <ui:CardControl Header="{x:Static props:AboutStrings.LaunchCountLabel}">
+                            <ui:CardControl Style="{StaticResource SettingsExpanderRowStyle}" Header="{x:Static props:AboutStrings.LaunchCountLabel}">
                                 <TextBlock x:Name="LaunchCountTextBlock" Text="{x:Static props:AboutStrings.DeviceInfo_Loading}" />
                             </ui:CardControl>
-                            <ui:CardControl Header="{x:Static props:AboutStrings.TotalUsageLabel}">
+                            <ui:CardControl Style="{StaticResource SettingsExpanderRowStyle}" Header="{x:Static props:AboutStrings.TotalUsageLabel}">
                                 <TextBlock x:Name="TotalUsageTextBlock" Text="{x:Static props:AboutStrings.DeviceInfo_Loading}" />
                             </ui:CardControl>
-                            <ui:CardControl Header="">
+                            <ui:CardControl Style="{StaticResource SettingsExpanderRowStyle}" Header="">
                                 <Button x:Name="RefreshDeviceInfoButton" Content="{x:Static props:AboutStrings.RefreshDeviceInfo}" Click="RefreshDeviceInfo_Click" />
                             </ui:CardControl>
                         </StackPanel>

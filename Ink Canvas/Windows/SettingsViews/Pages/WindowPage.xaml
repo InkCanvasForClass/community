@@ -8,9 +8,7 @@
             <Style TargetType="ui:FontIcon">
                 <Setter Property="FontSize" Value="24" />
             </Style>
-            <Style x:Key="SettingsSectionHeaderTextBlockStyle"
-                BasedOn="{StaticResource BodyStrongTextBlockStyle}"
-                TargetType="TextBlock">
+            <Style x:Key="SettingsSectionHeaderTextBlockStyle" BasedOn="{StaticResource BodyStrongTextBlockStyle}" TargetType="TextBlock">
                 <Style.Setters>
                     <Setter Property="Margin" Value="1,30,0,6" />
                 </Style.Setters>
@@ -63,15 +61,17 @@
                     <ui:CardExpander x:Name="ExpanderAlwaysOnTop" IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchAlwaysOnTop, Mode=OneWay}" d:Visibility="Visible" d:IsExpanded="True">
                         <ui:CardExpander.Header>
                             <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="{x:Static props:StartupStrings.TopMost}" />
-                                    <TextBlock Text="{x:Static props:StartupStrings.TopMostHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                </StackPanel>
-                                <ui:ToggleSwitch x:Name="ToggleSwitchAlwaysOnTop" Checked="ToggleSwitchAlwaysOnTop_Toggled" Unchecked="ToggleSwitchAlwaysOnTop_Toggled" Grid.Column="1" />
+                                <ui:TextBlock Text="{x:Static props:StartupStrings.TopMost}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                <ui:TextBlock Text="{x:Static props:StartupStrings.TopMostHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />
+                                <ui:ToggleSwitch x:Name="ToggleSwitchAlwaysOnTop" Checked="ToggleSwitchAlwaysOnTop_Toggled" Unchecked="ToggleSwitchAlwaysOnTop_Toggled" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,16,0" />
                             </Grid>
                         </ui:CardExpander.Header>
                         <ui:CardExpander.Icon>

@@ -16,32 +16,34 @@
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="{x:Static props:CanvasStrings.Canvas_GroupTitle}" />
 
                     <!-- 画笔光标：开关 + 展开后选择系统/内置/自定义光标 -->
-                    <ui:CardExpander x:Name="ExpanderShowPenCursor" IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchShowCursor, Mode=OneWay}" d:Visibility="Visible" d:IsExpanded="True">
+                    <ui:CardExpander x:Name="ExpanderShowPenCursor" IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchShowCursor, Mode=OneWay}" d:Visibility="Visible" d:IsExpanded="True" ContentPadding="0">
                         <ui:CardExpander.Header>
                             <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="{x:Static props:CanvasStrings.Canvas_ShowPenCursor}" />
-                                    <TextBlock Text="{x:Static props:CanvasStrings.Canvas_PenCursorTypeHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                </StackPanel>
-                                <ui:ToggleSwitch x:Name="ToggleSwitchShowCursor" helpers:SettingsBinder.PropertyPath="Canvas.IsShowCursor" helpers:SettingsBinder.SettingsChanged="OnIsShowCursorChanged" Grid.Column="1" />
+                                <ui:TextBlock Text="{x:Static props:CanvasStrings.Canvas_ShowPenCursor}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                <ui:TextBlock Text="{x:Static props:CanvasStrings.Canvas_PenCursorTypeHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />
+                                <ui:ToggleSwitch x:Name="ToggleSwitchShowCursor" helpers:SettingsBinder.PropertyPath="Canvas.IsShowCursor" helpers:SettingsBinder.SettingsChanged="OnIsShowCursorChanged" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,16,0" />
                             </Grid>
                         </ui:CardExpander.Header>
                         <ui:CardExpander.Icon>
                             <ui:SymbolIcon Symbol="HandRight24" />
                         </ui:CardExpander.Icon>
                         <StackPanel>
-                            <ui:CardControl Header="{x:Static props:CanvasStrings.Canvas_PenCursorType}">
+                            <ui:CardControl Header="{x:Static props:CanvasStrings.Canvas_PenCursorType}" Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                 <ComboBox x:Name="ComboBoxPenCursorType" SelectedIndex="1" helpers:SettingsBinder.PropertyPath="Canvas.PenCursorType" helpers:SettingsBinder.SettingsChanged="OnPenCursorTypeChanged" SelectionChanged="ComboBoxPenCursorType_SelectionChanged">
                                     <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_PenCursorType_System}" />
                                     <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_PenCursorType_BuiltIn}" />
                                     <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_PenCursorType_Custom}" />
                                 </ComboBox>
                             </ui:CardControl>
-                            <ui:CardControl x:Name="CardCustomPenCursorPath" Visibility="Collapsed">
+                            <ui:CardControl x:Name="CardCustomPenCursorPath" Visibility="Collapsed" Style="{StaticResource SettingsExpanderRowStyle}">
                                 <ui:CardControl.Header>
                                     <StackPanel>
                                         <TextBlock Text="{x:Static props:CanvasStrings.Canvas_CustomPenCursorPath}" />
@@ -93,25 +95,27 @@
 
                     <!-- 长按撤销清屏：主开关 + 通知子开关。
                          主开关开启时自动展开显示子选项；子开关在总功能关闭时禁用（不可调节）。 -->
-                    <ui:CardExpander x:Name="ExpanderLongPressUndoClear" IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchLongPressUndoClear, Mode=OneWay}" d:Visibility="Visible" d:IsExpanded="True">
+                    <ui:CardExpander x:Name="ExpanderLongPressUndoClear" IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchLongPressUndoClear, Mode=OneWay}" d:Visibility="Visible" d:IsExpanded="True" ContentPadding="0">
                         <ui:CardExpander.Header>
                             <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="{x:Static props:CanvasStrings.Canvas_LongPressUndoClear}" />
-                                    <TextBlock Text="{x:Static props:CanvasStrings.Canvas_LongPressUndoClearHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                </StackPanel>
-                                <ui:ToggleSwitch x:Name="ToggleSwitchLongPressUndoClear" helpers:SettingsBinder.PropertyPath="Canvas.EnableLongPressUndoClear" Grid.Column="1" />
+                                <ui:TextBlock Text="{x:Static props:CanvasStrings.Canvas_LongPressUndoClear}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                <ui:TextBlock Text="{x:Static props:CanvasStrings.Canvas_LongPressUndoClearHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />
+                                <ui:ToggleSwitch x:Name="ToggleSwitchLongPressUndoClear" helpers:SettingsBinder.PropertyPath="Canvas.EnableLongPressUndoClear" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,16,0" />
                             </Grid>
                         </ui:CardExpander.Header>
                         <ui:CardExpander.Icon>
                             <ui:SymbolIcon Symbol="ArrowUndo24" />
                         </ui:CardExpander.Icon>
                         <StackPanel>
-                            <ui:CardControl IsEnabled="{Binding IsChecked, ElementName=ToggleSwitchLongPressUndoClear}">
+                            <ui:CardControl IsEnabled="{Binding IsChecked, ElementName=ToggleSwitchLongPressUndoClear}" Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                 <ui:CardControl.Header>
                                     <StackPanel>
                                         <TextBlock Text="{x:Static props:CanvasStrings.Canvas_LongPressUndoClearNotify}" />
@@ -129,24 +133,26 @@
 
                     <!-- 边缘扩展画布提示：主开关 + 白板限定子开关。
                          主开关开启时自动展开显示子选项；子开关在总功能关闭时禁用（不可调节）。 -->
-                    <ui:CardExpander x:Name="ExpanderEdgeExpandHint" IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchEdgeExpandHint, Mode=OneWay}" d:Visibility="Visible" d:IsExpanded="True">
+                    <ui:CardExpander x:Name="ExpanderEdgeExpandHint" IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchEdgeExpandHint, Mode=OneWay}" d:Visibility="Visible" d:IsExpanded="True" ContentPadding="0">
                         <ui:CardExpander.Header>
                             <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="{x:Static props:FloatingBarStrings.Canvas_EdgeExpandHint_Settings_Enable}" />
-                                </StackPanel>
-                                <ui:ToggleSwitch x:Name="ToggleSwitchEdgeExpandHint" helpers:SettingsBinder.PropertyPath="Canvas.IsEnableEdgeExpandHint" Grid.Column="1" />
+                                <ui:TextBlock Text="{x:Static props:FloatingBarStrings.Canvas_EdgeExpandHint_Settings_Enable}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                <ui:ToggleSwitch x:Name="ToggleSwitchEdgeExpandHint" helpers:SettingsBinder.PropertyPath="Canvas.IsEnableEdgeExpandHint" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,16,0" />
                             </Grid>
                         </ui:CardExpander.Header>
                         <ui:CardExpander.Icon>
                             <ui:SymbolIcon Symbol="FullScreenMaximize24" />
                         </ui:CardExpander.Icon>
                         <StackPanel>
-                            <ui:CardControl IsEnabled="{Binding IsChecked, ElementName=ToggleSwitchEdgeExpandHint}">
+                            <ui:CardControl IsEnabled="{Binding IsChecked, ElementName=ToggleSwitchEdgeExpandHint}" Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                 <ui:CardControl.Header>
                                     <StackPanel>
                                         <TextBlock Text="{x:Static props:FloatingBarStrings.Canvas_EdgeExpandHint_Settings_WhiteboardOnly}" />
@@ -155,7 +161,7 @@
                                 </ui:CardControl.Header>
                                 <ui:ToggleSwitch helpers:SettingsBinder.PropertyPath="Canvas.IsEnableEdgeExpandHintWhiteboardOnly" />
                             </ui:CardControl>
-                            <ui:CardControl IsEnabled="{Binding IsChecked, ElementName=ToggleSwitchEdgeExpandHint}">
+                            <ui:CardControl IsEnabled="{Binding IsChecked, ElementName=ToggleSwitchEdgeExpandHint}" Style="{StaticResource SettingsExpanderRowStyle}">
                                 <ui:CardControl.Header>
                                     <StackPanel>
                                         <TextBlock Text="{x:Static props:FloatingBarStrings.Canvas_EdgeExpandHint_Settings_AutoHideDelay}" />
@@ -172,25 +178,27 @@
 
                     <!-- 批注状态点提示：主开关 + 可展开详细配置。
                          主开关开启时自动展开显示子选项。 -->
-                    <ui:CardExpander x:Name="ExpanderAnnotationDotHint">
+                    <ui:CardExpander x:Name="ExpanderAnnotationDotHint" ContentPadding="0">
                         <ui:CardExpander.Header>
                             <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="{x:Static props:FloatingBarStrings.Canvas_AnnotationDotHint_Settings_Enable}" />
-                                    <TextBlock Text="{x:Static props:FloatingBarStrings.Canvas_AnnotationDotHint_Settings_EnableHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                </StackPanel>
-                                <ui:ToggleSwitch x:Name="ToggleSwitchAnnotationDotHint" helpers:SettingsBinder.PropertyPath="Canvas.IsEnableAnnotationDotHint" Grid.Column="1" />
+                                <ui:TextBlock Text="{x:Static props:FloatingBarStrings.Canvas_AnnotationDotHint_Settings_Enable}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                <ui:TextBlock Text="{x:Static props:FloatingBarStrings.Canvas_AnnotationDotHint_Settings_EnableHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />
+                                <ui:ToggleSwitch x:Name="ToggleSwitchAnnotationDotHint" helpers:SettingsBinder.PropertyPath="Canvas.IsEnableAnnotationDotHint" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,16,0" />
                             </Grid>
                         </ui:CardExpander.Header>
                         <ui:CardExpander.Icon>
                             <ui:SymbolIcon Symbol="Info24" />
                         </ui:CardExpander.Icon>
                         <StackPanel>
-                            <ui:CardControl IsEnabled="{Binding IsChecked, ElementName=ToggleSwitchAnnotationDotHint}">
+                            <ui:CardControl IsEnabled="{Binding IsChecked, ElementName=ToggleSwitchAnnotationDotHint}" Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                 <ui:CardControl.Header>
                                     <StackPanel>
                                         <TextBlock Text="{x:Static props:FloatingBarStrings.Canvas_AnnotationDotHint_Settings_ClusterRadius}" />
@@ -202,7 +210,7 @@
                                     <Slider x:Name="AnnotationDotHintClusterRadiusSlider" Width="200" Minimum="10" Maximum="200" Value="50" TickFrequency="10" IsSnapToTickEnabled="True" ValueChanged="AnnotationDotHintClusterRadiusSlider_ValueChanged" />
                                 </vio:SimpleStackPanel>
                             </ui:CardControl>
-                            <ui:CardControl IsEnabled="{Binding IsChecked, ElementName=ToggleSwitchAnnotationDotHint}">
+                            <ui:CardControl IsEnabled="{Binding IsChecked, ElementName=ToggleSwitchAnnotationDotHint}" Style="{StaticResource SettingsExpanderRowStyle}">
                                 <ui:CardControl.Header>
                                     <StackPanel>
                                         <TextBlock Text="{x:Static props:FloatingBarStrings.Canvas_AnnotationDotHint_Settings_StrokeLength}" />
@@ -214,7 +222,7 @@
                                     <Slider x:Name="AnnotationDotHintStrokeLengthSlider" Width="200" Minimum="3" Maximum="30" Value="10" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="AnnotationDotHintStrokeLengthSlider_ValueChanged" />
                                 </vio:SimpleStackPanel>
                             </ui:CardControl>
-                            <ui:CardControl IsEnabled="{Binding IsChecked, ElementName=ToggleSwitchAnnotationDotHint}">
+                            <ui:CardControl IsEnabled="{Binding IsChecked, ElementName=ToggleSwitchAnnotationDotHint}" Style="{StaticResource SettingsExpanderRowStyle}">
                                 <ui:CardControl.Header>
                                     <StackPanel>
                                         <TextBlock Text="{x:Static props:FloatingBarStrings.Canvas_AnnotationDotHint_Settings_ClickCount}" />
@@ -226,7 +234,7 @@
                                     <Slider x:Name="AnnotationDotHintClickCountSlider" Width="200" Minimum="2" Maximum="10" Value="3" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="AnnotationDotHintClickCountSlider_ValueChanged" />
                                 </vio:SimpleStackPanel>
                             </ui:CardControl>
-                            <ui:CardControl IsEnabled="{Binding IsChecked, ElementName=ToggleSwitchAnnotationDotHint}">
+                            <ui:CardControl IsEnabled="{Binding IsChecked, ElementName=ToggleSwitchAnnotationDotHint}" Style="{StaticResource SettingsExpanderRowStyle}">
                                 <ui:CardControl.Header>
                                     <StackPanel>
                                         <TextBlock Text="{x:Static props:FloatingBarStrings.Canvas_AnnotationDotHint_Settings_DisplayDuration}" />
@@ -238,7 +246,7 @@
                                     <Slider x:Name="AnnotationDotHintDisplayDurationSlider" Width="200" Minimum="1" Maximum="30" Value="3" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="AnnotationDotHintDisplayDurationSlider_ValueChanged" />
                                 </vio:SimpleStackPanel>
                             </ui:CardControl>
-                            <ui:CardControl IsEnabled="{Binding IsChecked, ElementName=ToggleSwitchAnnotationDotHint}">
+                            <ui:CardControl IsEnabled="{Binding IsChecked, ElementName=ToggleSwitchAnnotationDotHint}" Style="{StaticResource SettingsExpanderRowStyle}">
                                 <ui:CardControl.Header>
                                     <StackPanel>
                                         <TextBlock Text="{x:Static props:FloatingBarStrings.Canvas_AnnotationDotHint_Settings_Preview}" />
@@ -293,18 +301,20 @@
                     </ui:CardControl>
 
                     <!-- Expander + ToggleSwitch：ToggleSwitch 用声明式，Expander.IsExpanded 由 XAML Binding 驱动 -->
-                    <ui:CardExpander x:Name="ExpanderBrushAutoRestore" IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchBrushAutoRestore, Mode=OneWay}" d:Visibility="Visible" d:IsExpanded="True">
+                    <ui:CardExpander x:Name="ExpanderBrushAutoRestore" IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchBrushAutoRestore, Mode=OneWay}" d:Visibility="Visible" d:IsExpanded="True" ContentPadding="0">
                         <ui:CardExpander.Header>
                             <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="{x:Static props:CanvasStrings.Canvas_BrushAutoRestore}" />
-                                    <TextBlock Text="{x:Static props:CanvasStrings.Canvas_BrushAutoRestoreHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                </StackPanel>
-                                <ui:ToggleSwitch x:Name="ToggleSwitchBrushAutoRestore" helpers:SettingsBinder.PropertyPath="Canvas.EnableBrushAutoRestore" Grid.Column="1" />
+                                <ui:TextBlock Text="{x:Static props:CanvasStrings.Canvas_BrushAutoRestore}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                <ui:TextBlock Text="{x:Static props:CanvasStrings.Canvas_BrushAutoRestoreHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />
+                                <ui:ToggleSwitch x:Name="ToggleSwitchBrushAutoRestore" helpers:SettingsBinder.PropertyPath="Canvas.EnableBrushAutoRestore" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,16,0" />
                             </Grid>
                         </ui:CardExpander.Header>
                         <ui:CardExpander.Icon>
@@ -312,11 +322,11 @@
                         </ui:CardExpander.Icon>
                         <StackPanel>
                             <!-- TextBox：暂不支持声明式，保留 code-behind -->
-                            <ui:CardControl Header="{x:Static props:CanvasStrings.Canvas_AutoRestoreTimePoints}">
+                            <ui:CardControl Header="{x:Static props:CanvasStrings.Canvas_AutoRestoreTimePoints}" Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                 <TextBox x:Name="BrushAutoRestoreTimesTextBox" Width="260" TextChanged="BrushAutoRestoreTimesTextBox_TextChanged" />
                             </ui:CardControl>
                             <!-- ComboBox by Tag：暂不支持声明式，保留 code-behind -->
-                            <ui:CardControl Header="{x:Static props:CanvasStrings.Canvas_RestoreColor}">
+                            <ui:CardControl Header="{x:Static props:CanvasStrings.Canvas_RestoreColor}" Style="{StaticResource SettingsExpanderRowStyle}">
                                 <ComboBox x:Name="ComboBoxBrushAutoRestoreColor" SelectionChanged="ComboBoxBrushAutoRestoreColor_SelectionChanged">
                                     <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_Color_Default}" Tag="#FFFF0000" />
                                     <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_Color_Black}" Tag="#FF000000" />
@@ -330,13 +340,13 @@
                                 </ComboBox>
                             </ui:CardControl>
                             <!-- Slider：声明式绑定 -->
-                            <ui:CardControl Header="{x:Static props:CanvasStrings.Canvas_RestoreWidth}">
+                            <ui:CardControl Header="{x:Static props:CanvasStrings.Canvas_RestoreWidth}" Style="{StaticResource SettingsExpanderRowStyle}">
                                 <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="BrushAutoRestoreWidthText" VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" />
                                     <Slider x:Name="BrushAutoRestoreWidthSlider" Width="200" Minimum="1" Maximum="20" TickFrequency="1" IsSnapToTickEnabled="True" Value="5" helpers:SettingsBinder.PropertyPath="Canvas.BrushAutoRestoreWidth" helpers:SettingsBinder.ValueRounding="2" helpers:SettingsBinder.FormatString="{}{0:F2}" helpers:SettingsBinder.TargetTextBlock="{Binding ElementName=BrushAutoRestoreWidthText}" />
                                 </vio:SimpleStackPanel>
                             </ui:CardControl>
-                            <ui:CardControl Header="{x:Static props:CanvasStrings.Canvas_RestoreOpacity}">
+                            <ui:CardControl Header="{x:Static props:CanvasStrings.Canvas_RestoreOpacity}" Style="{StaticResource SettingsExpanderRowStyle}">
                                 <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="BrushAutoRestoreAlphaText" VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" />
                                     <Slider x:Name="BrushAutoRestoreAlphaSlider" Width="200" Minimum="0" Maximum="255" TickFrequency="5" IsSnapToTickEnabled="True" helpers:SettingsBinder.PropertyPath="Canvas.BrushAutoRestoreAlpha" helpers:SettingsBinder.ValueRounding="0" helpers:SettingsBinder.FormatString="{}{0:0}" helpers:SettingsBinder.TargetTextBlock="{Binding ElementName=BrushAutoRestoreAlphaText}" />
@@ -345,25 +355,27 @@
                         </StackPanel>
                     </ui:CardExpander>
 
-                    <ui:CardExpander x:Name="ExpanderEnableEraserAutoSwitchBack" IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchEnableEraserAutoSwitchBack, Mode=OneWay}" d:Visibility="Visible" d:IsExpanded="True">
+                    <ui:CardExpander x:Name="ExpanderEnableEraserAutoSwitchBack" IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchEnableEraserAutoSwitchBack, Mode=OneWay}" d:Visibility="Visible" d:IsExpanded="True" ContentPadding="0">
                         <ui:CardExpander.Header>
                             <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="{x:Static props:CanvasStrings.Canvas_SwitchBackAfterEraser}" />
-                                    <TextBlock Text="{x:Static props:CanvasStrings.Canvas_SwitchBackAfterEraserHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                </StackPanel>
-                                <ui:ToggleSwitch x:Name="ToggleSwitchEnableEraserAutoSwitchBack" helpers:SettingsBinder.PropertyPath="Canvas.EnableEraserAutoSwitchBack" Grid.Column="1" />
+                                <ui:TextBlock Text="{x:Static props:CanvasStrings.Canvas_SwitchBackAfterEraser}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                <ui:TextBlock Text="{x:Static props:CanvasStrings.Canvas_SwitchBackAfterEraserHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />
+                                <ui:ToggleSwitch x:Name="ToggleSwitchEnableEraserAutoSwitchBack" helpers:SettingsBinder.PropertyPath="Canvas.EnableEraserAutoSwitchBack" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,16,0" />
                             </Grid>
                         </ui:CardExpander.Header>
                         <ui:CardExpander.Icon>
                             <ui:SymbolIcon Symbol="ArrowSwap24" />
                         </ui:CardExpander.Icon>
                         <StackPanel>
-                            <ui:CardControl>
+                            <ui:CardControl Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                 <ui:CardControl.Header>
                                     <StackPanel>
                                         <TextBlock Text="{x:Static props:CanvasStrings.Canvas_SwitchBackDelay}" />
@@ -382,25 +394,27 @@
 
                     <controls:LabeledSettingsCard Header="{x:Static props:GestureStrings.Gesture_AllowRotateScale}" Description="{x:Static props:GestureStrings.Gesture_AllowRotateScaleHint}" Symbol="ArrowRotateClockwise24" SwitchName="ToggleSwitchEnableTwoFingerRotationOnSelection" helpers:SettingsBinder.PropertyPath="Gesture.IsEnableTwoFingerRotationOnSelection" />
 
-                    <ui:CardExpander x:Name="ExpanderEnablePalmEraser" IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchEnablePalmEraser, Mode=OneWay}" d:Visibility="Visible" d:IsExpanded="True">
+                    <ui:CardExpander x:Name="ExpanderEnablePalmEraser" IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchEnablePalmEraser, Mode=OneWay}" d:Visibility="Visible" d:IsExpanded="True" ContentPadding="0">
                         <ui:CardExpander.Header>
                             <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="{x:Static props:GestureStrings.Gesture_EnablePalmEraser}" />
-                                    <TextBlock Text="{x:Static props:GestureStrings.Gesture_PalmHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                </StackPanel>
-                                <ui:ToggleSwitch x:Name="ToggleSwitchEnablePalmEraser" helpers:SettingsBinder.PropertyPath="Canvas.EnablePalmEraser" Grid.Column="1" />
+                                <ui:TextBlock Text="{x:Static props:GestureStrings.Gesture_EnablePalmEraser}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                <ui:TextBlock Text="{x:Static props:GestureStrings.Gesture_PalmHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />
+                                <ui:ToggleSwitch x:Name="ToggleSwitchEnablePalmEraser" helpers:SettingsBinder.PropertyPath="Canvas.EnablePalmEraser" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,16,0" />
                             </Grid>
                         </ui:CardExpander.Header>
                         <ui:CardExpander.Icon>
                             <ui:SymbolIcon Symbol="Eraser24" />
                         </ui:CardExpander.Icon>
                         <StackPanel>
-                            <ui:CardControl Header="{x:Static props:GestureStrings.Gesture_PalmSensitivity}">
+                            <ui:CardControl Header="{x:Static props:GestureStrings.Gesture_PalmSensitivity}" Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                 <ComboBox helpers:SettingsBinder.PropertyPath="Canvas.PalmEraserSensitivity">
                                     <ComboBoxItem Content="{x:Static props:GestureStrings.Gesture_PalmSensitivityLow}" />
                                     <ComboBoxItem Content="{x:Static props:GestureStrings.Gesture_PalmSensitivityMedium}" />

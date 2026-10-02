@@ -19,18 +19,20 @@
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchDisableHardwareAcceleration" Header="{x:Static props:CanvasStrings.Canvas_DisableHardwareAcceleration}" Description="{x:Static props:CanvasStrings.Canvas_DisableHardwareAccelerationHint}" Symbol="Settings24" IsOn="False" Toggled="ToggleSwitchDisableHardwareAcceleration_Toggled" />
 
-                    <ui:CardExpander x:Name="CardTouchMultiplier" IsExpanded="True">
+                    <ui:CardExpander x:Name="CardTouchMultiplier" IsExpanded="True" ContentPadding="0">
                         <ui:CardExpander.Header>
                             <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="{x:Static props:AdvancedStrings.TouchMultiplier}" />
-                                    <TextBlock Text="{x:Static props:AdvancedStrings.TouchMultiplierHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                </StackPanel>
-                                <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8" Grid.Column="1">
+                                <ui:TextBlock Text="{x:Static props:AdvancedStrings.TouchMultiplier}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                <ui:TextBlock Text="{x:Static props:AdvancedStrings.TouchMultiplierHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />
+                                <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,16,0">
                             <TextBlock x:Name="TouchMultiplierText" VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" />
                             <Slider x:Name="TouchMultiplierSlider" Minimum="0" Maximum="2" Width="200" IsSnapToTickEnabled="True" TickFrequency="0.01" TickPlacement="None" ValueChanged="TouchMultiplierSlider_ValueChanged" />
                         </vio:SimpleStackPanel>
@@ -40,7 +42,7 @@
                             <ui:SymbolIcon Symbol="HandDraw24" />
                         </ui:CardExpander.Icon>
                         <StackPanel>
-                            <ui:CardControl Header="{x:Static props:AdvancedStrings.TouchMultiplierCalibrateHint}">
+                            <ui:CardControl Header="{x:Static props:AdvancedStrings.TouchMultiplierCalibrateHint}" Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                 <vio:SimpleStackPanel Spacing="8" Margin="0,4,0,4">
                                     <TextBlock Text="{x:Static props:AdvancedStrings.TouchMultiplierValueHint}" Foreground="{DynamicResource TextFillColorTertiaryBrush}" TextWrapping="Wrap" MaxWidth="420" />
                                     <Border Margin="0,0,20,0" CornerRadius="4" Height="48" Background="Transparent" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="2" TouchDown="BorderCalculateMultiplier_TouchDown" />
@@ -69,18 +71,26 @@
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchIsQuadIR" Header="{x:Static props:AdvancedStrings.QuadIRMode}" Symbol="FullScreenMaximize24" IsOn="True" Toggled="ToggleSwitchIsQuadIR_Toggled" />
 
-                    <ui:CardExpander x:Name="CardAutoCalibrate" IsExpanded="False">
+                    <ui:CardExpander x:Name="CardAutoCalibrate" IsExpanded="False" ContentPadding="0">
                         <ui:CardExpander.Header>
-                            <StackPanel>
-                                <TextBlock Text="自动校准触摸参数" />
-                                <TextBlock Text="通过三次触摸自动计算合适的笔尖/手指阈值和触摸倍率" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                            </StackPanel>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ui:TextBlock Text="自动校准触摸参数" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                <ui:TextBlock Text="通过三次触摸自动计算合适的笔尖/手指阈值和触摸倍率" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />
+                            </Grid>
                         </ui:CardExpander.Header>
                         <ui:CardExpander.Icon>
                             <ui:SymbolIcon Symbol="Accessibility24" />
                         </ui:CardExpander.Icon>
                         <StackPanel>
-                            <ui:CardControl Header="校准步骤">
+                            <ui:CardControl Header="校准步骤" Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                 <vio:SimpleStackPanel Spacing="8" Margin="0,4,0,4">
                                     <TextBlock Text="点击&quot;开始校准&quot;按钮，然后依次在下方区域用：" Foreground="{DynamicResource TextFillColorTertiaryBrush}" TextWrapping="Wrap" MaxWidth="420" />
                                     <vio:SimpleStackPanel Orientation="Vertical" Spacing="4" Margin="8,0,0,0">

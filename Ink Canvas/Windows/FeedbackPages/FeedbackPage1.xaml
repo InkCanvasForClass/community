@@ -3,78 +3,110 @@
         <vio:SimpleStackPanel Spacing="12">
             <TextBlock FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10" Text="{x:Static props:FeedbackStrings.Page1Title}" />
 
-            <ui:CardExpander x:Name="ExpanderSoftware">
+            <ui:CardExpander x:Name="ExpanderSoftware" ContentPadding="0">
                 <ui:CardExpander.Header>
-                    <StackPanel>
-                        <TextBlock Text="{x:Static props:FeedbackStrings.Page1_SoftwareInfo}" />
-                        <TextBlock Text="{x:Static props:FeedbackStrings.Page1_SoftwareInfoDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                    </StackPanel>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:TextBlock Text="{x:Static props:FeedbackStrings.Page1_SoftwareInfo}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                        <ui:TextBlock Text="{x:Static props:FeedbackStrings.Page1_SoftwareInfoDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />
+                    </Grid>
                 </ui:CardExpander.Header>
                 <ui:CardExpander.Icon>
                     <ui:SymbolIcon Symbol="Apps24" />
                 </ui:CardExpander.Icon>
                 <StackPanel>
-                    <ui:CardControl>
+                    <ui:CardControl Style="{StaticResource SettingsExpanderFirstRowStyle}">
                         <CheckBox x:Name="CheckAppVersion" IsChecked="True" Content="{x:Static props:FeedbackStrings.Page1_AppVersion}" />
                     </ui:CardControl>
-                    <ui:CardControl>
+                    <ui:CardControl Style="{StaticResource SettingsExpanderRowStyle}">
                         <CheckBox x:Name="CheckUpdateChannel" IsChecked="True" Content="{x:Static props:FeedbackStrings.Page1_UpdateChannel}" />
                     </ui:CardControl>
                 </StackPanel>
             </ui:CardExpander>
 
-            <ui:CardExpander x:Name="ExpanderSystem">
+            <ui:CardExpander x:Name="ExpanderSystem" ContentPadding="0">
                 <ui:CardExpander.Header>
-                    <StackPanel>
-                        <TextBlock Text="{x:Static props:FeedbackStrings.Page1_SystemInfo}" />
-                        <TextBlock Text="{x:Static props:FeedbackStrings.Page1_SystemInfoDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                    </StackPanel>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:TextBlock Text="{x:Static props:FeedbackStrings.Page1_SystemInfo}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                        <ui:TextBlock Text="{x:Static props:FeedbackStrings.Page1_SystemInfoDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />
+                    </Grid>
                 </ui:CardExpander.Header>
                 <ui:CardExpander.Icon>
                     <ui:SymbolIcon Symbol="Desktop24" />
                 </ui:CardExpander.Icon>
                 <StackPanel>
-                    <ui:CardControl>
+                    <ui:CardControl Style="{StaticResource SettingsExpanderFirstRowStyle}">
                         <CheckBox x:Name="CheckOSVersion" IsChecked="True" Content="{x:Static props:FeedbackStrings.Page1_OSVersion}" />
                     </ui:CardControl>
-                    <ui:CardControl>
+                    <ui:CardControl Style="{StaticResource SettingsExpanderRowStyle}">
                         <CheckBox x:Name="CheckNetVersion" IsChecked="True" Content="{x:Static props:FeedbackStrings.Page1_NetVersion}" />
                     </ui:CardControl>
                 </StackPanel>
             </ui:CardExpander>
 
-            <ui:CardExpander x:Name="ExpanderDevice">
+            <ui:CardExpander x:Name="ExpanderDevice" ContentPadding="0">
                 <ui:CardExpander.Header>
-                    <StackPanel>
-                        <TextBlock Text="{x:Static props:FeedbackStrings.Page1_DeviceInfo}" />
-                        <TextBlock Text="{x:Static props:FeedbackStrings.Page1_DeviceInfoDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                    </StackPanel>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:TextBlock Text="{x:Static props:FeedbackStrings.Page1_DeviceInfo}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                        <ui:TextBlock Text="{x:Static props:FeedbackStrings.Page1_DeviceInfoDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />
+                    </Grid>
                 </ui:CardExpander.Header>
                 <ui:CardExpander.Icon>
                     <ui:SymbolIcon Symbol="DeviceEq24" />
                 </ui:CardExpander.Icon>
                 <StackPanel>
-                    <ui:CardControl>
+                    <ui:CardControl Style="{StaticResource SettingsExpanderFirstRowStyle}">
                         <CheckBox x:Name="CheckDeviceId" IsChecked="False" Content="{x:Static props:FeedbackStrings.Page1_DeviceId}" />
                     </ui:CardControl>
                 </StackPanel>
             </ui:CardExpander>
 
-            <ui:CardExpander x:Name="ExpanderConfiguration">
+            <ui:CardExpander x:Name="ExpanderConfiguration" ContentPadding="0">
                 <ui:CardExpander.Header>
-                    <StackPanel>
-                        <TextBlock Text="{x:Static props:FeedbackStrings.Page1_Config}" />
-                        <TextBlock Text="{x:Static props:FeedbackStrings.Page1_ConfigDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                    </StackPanel>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:TextBlock Text="{x:Static props:FeedbackStrings.Page1_Config}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                        <ui:TextBlock Text="{x:Static props:FeedbackStrings.Page1_ConfigDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />
+                    </Grid>
                 </ui:CardExpander.Header>
                 <ui:CardExpander.Icon>
                     <ui:SymbolIcon Symbol="Settings24" />
                 </ui:CardExpander.Icon>
                 <StackPanel>
-                    <ui:CardControl>
+                    <ui:CardControl Style="{StaticResource SettingsExpanderFirstRowStyle}">
                         <CheckBox x:Name="CheckPPTLinkage" IsChecked="True" Content="{x:Static props:FeedbackStrings.Page1_PPTSettings}" />
                     </ui:CardControl>
-                    <ui:CardControl>
+                    <ui:CardControl Style="{StaticResource SettingsExpanderRowStyle}">
                         <CheckBox x:Name="CheckInkRecognition" IsChecked="True" Content="{x:Static props:FeedbackStrings.Page1_InkRecognition}" />
                     </ui:CardControl>
                 </StackPanel>

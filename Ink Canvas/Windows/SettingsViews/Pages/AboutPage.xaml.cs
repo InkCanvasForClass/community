@@ -141,7 +141,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
             catch (Exception ex)
             {
+                // 之前只写 Debug 输出，Release 下等于静默失败（点了「提交反馈」毫无反应）
                 Debug.WriteLine($"打开反馈窗口失败: {ex.Message}");
+                Ink_Canvas.Helpers.LogHelper.WriteLogToFile($"[Settings] 打开反馈窗口失败: {ex}", Ink_Canvas.Helpers.LogHelper.LogType.Error);
             }
         }
 

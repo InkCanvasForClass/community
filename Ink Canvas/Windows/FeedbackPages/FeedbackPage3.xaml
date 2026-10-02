@@ -4,18 +4,21 @@
             <TextBlock FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10" Text="{x:Static props:FeedbackStrings.Page3Title}" />
 
             <!-- 飞书反馈 -->
-            <ui:CardExpander x:Name="ExpanderFeishuFeedback">
+            <ui:CardExpander x:Name="ExpanderFeishuFeedback" ContentPadding="0">
                 <ui:CardExpander.Header>
                     <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="{x:Static props:FeedbackStrings.Page3_Feishu}" />
-                            <TextBlock Text="{x:Static props:FeedbackStrings.Page3_FeishuDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                        </StackPanel>
-                        <Button x:Name="BtnOpenFeishuForm" Content="{x:Static props:FeedbackStrings.Page3_OpenFeishu}" Grid.Column="1">
+                        
+                        <ui:TextBlock Text="{x:Static props:FeedbackStrings.Page3_Feishu}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                        <ui:TextBlock Text="{x:Static props:FeedbackStrings.Page3_FeishuDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />                        
+                        <Button x:Name="BtnOpenFeishuForm" Content="{x:Static props:FeedbackStrings.Page3_OpenFeishu}" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,16,0">
                     <Button.Style>
                         <Style TargetType="Button" />
                     </Button.Style>
@@ -26,7 +29,7 @@
                     <ui:SymbolIcon Symbol="ChatHelp24" />
                 </ui:CardExpander.Icon>
                 <StackPanel>
-                    <ui:CardControl x:Name="CardCopyFeishuUrl" Header="{x:Static props:FeedbackStrings.Page3_CopyFeishuUrl}">
+                    <ui:CardControl x:Name="CardCopyFeishuUrl" Header="{x:Static props:FeedbackStrings.Page3_CopyFeishuUrl}" Style="{StaticResource SettingsExpanderFirstRowStyle}">
                         <ui:CardControl.Content>
                             <ui:SymbolIcon Symbol="Copy24" />
                         </ui:CardControl.Content>
@@ -35,18 +38,21 @@
             </ui:CardExpander>
 
             <!-- Pastebin 上传：POST 脱敏 JSON 到 pastebin 端 -->
-            <ui:CardExpander x:Name="ExpanderPastebin">
+            <ui:CardExpander x:Name="ExpanderPastebin" ContentPadding="0">
                 <ui:CardExpander.Header>
                     <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="{x:Static props:FeedbackStrings.Page3_PastebinUpload}" />
-                            <TextBlock Text="{x:Static props:FeedbackStrings.Page3_PastebinUploadDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                        </StackPanel>
-                        <Button x:Name="BtnUploadPastebin" Content="{x:Static props:FeedbackStrings.Page3_UploadToPastebin}" Grid.Column="1">
+                        
+                        <ui:TextBlock Text="{x:Static props:FeedbackStrings.Page3_PastebinUpload}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                        <ui:TextBlock Text="{x:Static props:FeedbackStrings.Page3_PastebinUploadDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />                        
+                        <Button x:Name="BtnUploadPastebin" Content="{x:Static props:FeedbackStrings.Page3_UploadToPastebin}" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,16,0">
                     <Button.Style>
                         <Style TargetType="Button" />
                     </Button.Style>
@@ -57,13 +63,13 @@
                     <ui:SymbolIcon Symbol="Cloud24" />
                 </ui:CardExpander.Icon>
                 <StackPanel>
-                    <ui:CardControl>
+                    <ui:CardControl Style="{StaticResource SettingsExpanderFirstRowStyle}">
                         <vio:SimpleStackPanel Spacing="8" MinWidth="280">
                             <TextBlock Text="{x:Static props:FeedbackStrings.Page1_PastebinServer}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             <TextBox x:Name="TextBoxPastebinUrl" VerticalAlignment="Center" FontFamily="Consolas" FontSize="12" />
                         </vio:SimpleStackPanel>
                     </ui:CardControl>
-                    <ui:CardControl x:Name="CardPasteResult" Header="" Visibility="Collapsed">
+                    <ui:CardControl x:Name="CardPasteResult" Header="" Visibility="Collapsed" Style="{StaticResource SettingsExpanderRowStyle}">
                         <ui:CardControl.Icon>
                             <ui:SymbolIcon Symbol="Link24" />
                         </ui:CardControl.Icon>
@@ -77,18 +83,21 @@
             </ui:CardExpander>
 
             <!-- GitHub 反馈 -->
-            <ui:CardExpander x:Name="ExpanderGitHubFeedback">
+            <ui:CardExpander x:Name="ExpanderGitHubFeedback" ContentPadding="0">
                 <ui:CardExpander.Header>
                     <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="{x:Static props:FeedbackStrings.Page3_GitHub}" />
-                            <TextBlock Text="{x:Static props:FeedbackStrings.Page3_GitHubDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                        </StackPanel>
-                        <Button x:Name="BtnOpenGitHubIssue" Content="{x:Static props:FeedbackStrings.Page3_OpenGitHub}" Grid.Column="1">
+                        
+                        <ui:TextBlock Text="{x:Static props:FeedbackStrings.Page3_GitHub}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                        <ui:TextBlock Text="{x:Static props:FeedbackStrings.Page3_GitHubDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />                        
+                        <Button x:Name="BtnOpenGitHubIssue" Content="{x:Static props:FeedbackStrings.Page3_OpenGitHub}" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,16,0">
                     <Button.Style>
                         <Style TargetType="Button" />
                     </Button.Style>
@@ -99,7 +108,7 @@
                     <ui:SymbolIcon Symbol="Mail24" />
                 </ui:CardExpander.Icon>
                 <StackPanel>
-                    <ui:CardControl x:Name="CardCopyIssueUrl" Header="{x:Static props:FeedbackStrings.Page3_CopyIssueUrl}">
+                    <ui:CardControl x:Name="CardCopyIssueUrl" Header="{x:Static props:FeedbackStrings.Page3_CopyIssueUrl}" Style="{StaticResource SettingsExpanderFirstRowStyle}">
                         <ui:CardControl.Content>
                             <ui:SymbolIcon Symbol="Copy24" />
                         </ui:CardControl.Content>
@@ -108,18 +117,21 @@
             </ui:CardExpander>
 
             <!-- Markdown 模板 -->
-            <ui:CardExpander x:Name="ExpanderMarkdownTemplate">
+            <ui:CardExpander x:Name="ExpanderMarkdownTemplate" ContentPadding="0">
                 <ui:CardExpander.Header>
                     <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="{x:Static props:FeedbackStrings.Page3_Markdown}" />
-                            <TextBlock Text="{x:Static props:FeedbackStrings.Page3_MarkdownDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                        </StackPanel>
-                        <Button x:Name="BtnCopyMarkdown" Content="{x:Static props:FeedbackStrings.Page3_CopyMarkdown}" Grid.Column="1">
+                        
+                        <ui:TextBlock Text="{x:Static props:FeedbackStrings.Page3_Markdown}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                        <ui:TextBlock Text="{x:Static props:FeedbackStrings.Page3_MarkdownDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />                        
+                        <Button x:Name="BtnCopyMarkdown" Content="{x:Static props:FeedbackStrings.Page3_CopyMarkdown}" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,16,0">
                     <Button.Style>
                         <Style TargetType="Button" />
                     </Button.Style>
@@ -130,7 +142,7 @@
                     <ui:SymbolIcon Symbol="Code24" />
                 </ui:CardExpander.Icon>
                 <StackPanel>
-                    <ui:CardControl>
+                    <ui:CardControl Style="{StaticResource SettingsExpanderFirstRowStyle}">
                         <TextBox x:Name="TextBoxMarkdownTemplate" MinHeight="200" IsReadOnly="True" BorderThickness="0" Background="Transparent" FontFamily="Consolas" FontSize="12" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
                     </ui:CardControl>
                 </StackPanel>

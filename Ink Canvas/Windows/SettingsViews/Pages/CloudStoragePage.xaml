@@ -31,25 +31,27 @@
                     </vio:SimpleStackPanel>
                 </ui:CardControl>
 
-                <ui:CardExpander IsExpanded="True">
+                <ui:CardExpander IsExpanded="True" ContentPadding="0">
                     <ui:CardExpander.Header>
                         <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="{x:Static props:CloudStorageStrings.CloudStorage_UploadProviders}" />
-                                <TextBlock Text="{x:Static props:CloudStorageStrings.CloudStorage_UploadProvidersDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                            </StackPanel>
-                            <TextBlock Text="" Grid.Column="1" />
+                            <ui:TextBlock Text="{x:Static props:CloudStorageStrings.CloudStorage_UploadProviders}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                            <ui:TextBlock Text="{x:Static props:CloudStorageStrings.CloudStorage_UploadProvidersDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />
+                            <TextBlock Text="" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,16,0" />
                         </Grid>
                     </ui:CardExpander.Header>
                     <ui:CardExpander.Icon>
                         <ui:SymbolIcon Symbol="Cloud24" />
                     </ui:CardExpander.Icon>
                     <StackPanel>
-                        <ui:CardControl>
+                        <ui:CardControl Style="{StaticResource SettingsExpanderFirstRowStyle}">
                             <ui:CardControl.Header>
                                 <StackPanel>
                                     <TextBlock Text="{x:Static props:CloudStorageStrings.CloudStorage_ProviderList}" />
@@ -76,25 +78,27 @@
 
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="{x:Static props:CloudStorageStrings.CloudStorage_Dlass}" />
 
-                <ui:CardExpander IsExpanded="True">
+                <ui:CardExpander IsExpanded="True" ContentPadding="0">
                     <ui:CardExpander.Header>
                         <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="{x:Static props:CloudStorageStrings.CloudStorage_UserToken}" />
-                                <TextBlock Text="{x:Static props:CloudStorageStrings.CloudStorage_UserTokenDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                            </StackPanel>
-                            <TextBlock x:Name="TxtTokenStatus" Text="{x:Static props:CloudStorageStrings.CloudStorage_TokenNotSet}" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Column="1" />
+                            <ui:TextBlock Text="{x:Static props:CloudStorageStrings.CloudStorage_UserToken}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                            <ui:TextBlock Text="{x:Static props:CloudStorageStrings.CloudStorage_UserTokenDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />
+                            <TextBlock x:Name="TxtTokenStatus" Text="{x:Static props:CloudStorageStrings.CloudStorage_TokenNotSet}" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,16,0" />
                         </Grid>
                     </ui:CardExpander.Header>
                     <ui:CardExpander.Icon>
                         <ui:SymbolIcon Symbol="People24" />
                     </ui:CardExpander.Icon>
                     <StackPanel>
-                        <ui:CardControl>
+                        <ui:CardControl Style="{StaticResource SettingsExpanderFirstRowStyle}">
                             <ui:CardControl.Header>
                                 <StackPanel>
                                     <TextBlock Text="{x:Static props:CloudStorageStrings.CloudStorage_SavedTokens}" />
@@ -103,7 +107,7 @@
                             </ui:CardControl.Header>
                             <ComboBox x:Name="CmbSavedTokens" IsEditable="False" IsReadOnly="True" SelectionChanged="CmbSavedTokens_SelectionChanged" />
                         </ui:CardControl>
-                        <ui:CardControl>
+                        <ui:CardControl Style="{StaticResource SettingsExpanderRowStyle}">
                             <ui:CardControl.Header>
                                 <StackPanel>
                                     <TextBlock Text="{x:Static props:CloudStorageStrings.CloudStorage_NewToken}" />
@@ -112,7 +116,7 @@
                             </ui:CardControl.Header>
                             <TextBox x:Name="TxtNewToken" MinWidth="260" MaxLength="500" />
                         </ui:CardControl>
-                        <ui:CardControl Header="{x:Static props:CloudStorageStrings.CloudStorage_TokenActions}">
+                        <ui:CardControl Header="{x:Static props:CloudStorageStrings.CloudStorage_TokenActions}" Style="{StaticResource SettingsExpanderRowStyle}">
                             <WrapPanel Orientation="Horizontal">
                                 <Button x:Name="BtnSaveToken" Content="{x:Static props:CloudStorageStrings.CloudStorage_SaveToken}" Margin="0,0,8,0" Click="BtnSaveToken_Click" />
                                 <Button x:Name="BtnClearToken" Content="{x:Static props:CloudStorageStrings.CloudStorage_DeleteToken}" Margin="0,0,8,0" Click="BtnClearToken_Click" />
@@ -155,18 +159,20 @@
 
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="{x:Static props:CloudStorageStrings.CloudStorage_WebDav}" />
 
-                <ui:CardExpander IsExpanded="True">
+                <ui:CardExpander IsExpanded="True" ContentPadding="0">
                     <ui:CardExpander.Header>
                         <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="{x:Static props:CloudStorageStrings.CloudStorage_WebDavSettings}" />
-                                <TextBlock Text="{x:Static props:CloudStorageStrings.CloudStorage_WebDavSettingsDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                            </StackPanel>
-                            <Border Background="#07aef0dc" CornerRadius="4" Padding="6,2" VerticalAlignment="Center" Grid.Column="1">
+                            <ui:TextBlock Text="{x:Static props:CloudStorageStrings.CloudStorage_WebDavSettings}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                            <ui:TextBlock Text="{x:Static props:CloudStorageStrings.CloudStorage_WebDavSettingsDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />
+                            <Border Background="#07aef0dc" CornerRadius="4" Padding="6,2" VerticalAlignment="Center" Grid.Column="1" Grid.RowSpan="2" Margin="0,0,16,0">
                         <TextBlock Text="Beta" FontSize="10" FontWeight="SemiBold" Foreground="White" />
                     </Border>
                         </Grid>
@@ -175,7 +181,7 @@
                         <ui:SymbolIcon Symbol="Folder24" />
                     </ui:CardExpander.Icon>
                     <StackPanel>
-                        <ui:CardControl>
+                        <ui:CardControl Style="{StaticResource SettingsExpanderFirstRowStyle}">
                             <ui:CardControl.Header>
                                 <StackPanel>
                                     <TextBlock Text="{x:Static props:CloudStorageStrings.CloudStorage_WebDavUrl}" />
@@ -184,13 +190,13 @@
                             </ui:CardControl.Header>
                             <TextBox x:Name="TxtWebDavUrl" MinWidth="320" />
                         </ui:CardControl>
-                        <ui:CardControl Header="{x:Static props:CloudStorageStrings.CloudStorage_Username}">
+                        <ui:CardControl Header="{x:Static props:CloudStorageStrings.CloudStorage_Username}" Style="{StaticResource SettingsExpanderRowStyle}">
                             <TextBox x:Name="TxtWebDavUsername" MinWidth="320" />
                         </ui:CardControl>
-                        <ui:CardControl Header="{x:Static props:CloudStorageStrings.CloudStorage_Password}">
+                        <ui:CardControl Header="{x:Static props:CloudStorageStrings.CloudStorage_Password}" Style="{StaticResource SettingsExpanderRowStyle}">
                             <PasswordBox x:Name="TxtWebDavPassword" MinWidth="320" />
                         </ui:CardControl>
-                        <ui:CardControl>
+                        <ui:CardControl Style="{StaticResource SettingsExpanderRowStyle}">
                             <ui:CardControl.Header>
                                 <StackPanel>
                                     <TextBlock Text="{x:Static props:CloudStorageStrings.CloudStorage_RootDirectory}" />
@@ -199,7 +205,7 @@
                             </ui:CardControl.Header>
                             <TextBox x:Name="TxtWebDavRootDirectory" MinWidth="320" />
                         </ui:CardControl>
-                        <ui:CardControl Header="{x:Static props:CloudStorageStrings.CloudStorage_WebDavActions}">
+                        <ui:CardControl Header="{x:Static props:CloudStorageStrings.CloudStorage_WebDavActions}" Style="{StaticResource SettingsExpanderRowStyle}">
                             <WrapPanel Orientation="Horizontal">
                                 <Button Content="{x:Static props:CloudStorageStrings.CloudStorage_SaveWebDavSettings}" Margin="0,0,8,0" Click="BtnSaveWebDav_Click" />
                                 <Button Content="{x:Static props:CloudStorageStrings.CloudStorage_Restore}" Click="BtnCancelWebDav_Click" />

@@ -119,103 +119,127 @@
 
                             <TextBlock Text="{x:Static props:AutomationStrings.Automation_AutoFoldTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
 
-                            <ui:CardExpander IsExpanded="True">
+                            <ui:CardExpander IsExpanded="True" ContentPadding="0">
                                 <ui:CardExpander.Header>
-                                    <StackPanel>
-                                        <TextBlock Text="{x:Static props:AutomationStrings.AutoFold_Group_Seewo}" />
-                                    </StackPanel>
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ui:TextBlock Text="{x:Static props:AutomationStrings.AutoFold_Group_Seewo}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                    </Grid>
                                 </ui:CardExpander.Header>
                                 <ui:CardExpander.Icon>
                                     <ui:ImageIcon Source="/Resources/Icons-png/EasiNote.png" />
                                 </ui:CardExpander.Icon>
                                 <StackPanel>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoBoard5}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoBoard5}" Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="CardAutoFoldInEasiNote" Checked="ToggleSwitchAutoFoldInEasiNote_Toggled" Unchecked="ToggleSwitchAutoFoldInEasiNote_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoCamera}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoCamera}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/EasiCamera.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="CardAutoFoldInEasiCamera" Checked="ToggleSwitchAutoFoldInEasiCamera_Toggled" Unchecked="ToggleSwitchAutoFoldInEasiCamera_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoBoard3}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoBoard3}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote3.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="CardAutoFoldInEasiNote3" Checked="ToggleSwitchAutoFoldInEasiNote3_Toggled" Unchecked="ToggleSwitchAutoFoldInEasiNote3_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoLightBoard}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoLightBoard}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote3C.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="CardAutoFoldInEasiNote3C" Checked="ToggleSwitchAutoFoldInEasiNote3C_Toggled" Unchecked="ToggleSwitchAutoFoldInEasiNote3C_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoLightBoard5C}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoLightBoard5C}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote5C.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="CardAutoFoldInEasiNote5C" Checked="ToggleSwitchAutoFoldInEasiNote5C_Toggled" Unchecked="ToggleSwitchAutoFoldInEasiNote5C_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoPinco}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoPinco}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/SeewoPinco.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="CardAutoFoldInSeewoPincoTeacher" Checked="ToggleSwitchAutoFoldInSeewoPincoTeacher_Toggled" Unchecked="ToggleSwitchAutoFoldInSeewoPincoTeacher_Toggled" />
                                     </ui:CardControl>
                                 </StackPanel>
                             </ui:CardExpander>
 
-                            <ui:CardExpander IsExpanded="True">
+                            <ui:CardExpander IsExpanded="True" ContentPadding="0">
                                 <ui:CardExpander.Header>
-                                    <StackPanel>
-                                        <TextBlock Text="{x:Static props:AutomationStrings.AutoFold_Group_Hite}" />
-                                    </StackPanel>
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ui:TextBlock Text="{x:Static props:AutomationStrings.AutoFold_Group_Hite}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                    </Grid>
                                 </ui:CardExpander.Header>
                                 <ui:CardExpander.Icon><ui:SymbolIcon Symbol="Edit24" /></ui:CardExpander.Icon>
                                 <StackPanel>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_HiteBoard}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_HiteBoard}" Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/HiteBoard.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="CardAutoFoldInHiteTouchPro" Checked="ToggleSwitchAutoFoldInHiteTouchPro_Toggled" Unchecked="ToggleSwitchAutoFoldInHiteTouchPro_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_HiteCamera}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_HiteCamera}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/HiteCamera.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="CardAutoFoldInHiteCamera" Checked="ToggleSwitchAutoFoldInHiteCamera_Toggled" Unchecked="ToggleSwitchAutoFoldInHiteCamera_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_HiteLightBoard}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_HiteLightBoard}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/HiteLightBoard.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="CardAutoFoldInHiteLightBoard" Checked="ToggleSwitchAutoFoldInHiteLightBoard_Toggled" Unchecked="ToggleSwitchAutoFoldInHiteLightBoard_Toggled" />
                                     </ui:CardControl>
                                 </StackPanel>
                             </ui:CardExpander>
 
-                            <ui:CardExpander IsExpanded="True">
+                            <ui:CardExpander IsExpanded="True" ContentPadding="0">
                                 <ui:CardExpander.Header>
-                                    <StackPanel>
-                                        <TextBlock Text="{x:Static props:AutomationStrings.AutoFold_Group_Other}" />
-                                    </StackPanel>
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ui:TextBlock Text="{x:Static props:AutomationStrings.AutoFold_Group_Other}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                    </Grid>
                                 </ui:CardExpander.Header>
                                 <ui:CardExpander.Icon><ui:SymbolIcon Symbol="Edit24" /></ui:CardExpander.Icon>
                                 <StackPanel>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_WenXiangBoard}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_WenXiangBoard}" Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/WenXiang.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="CardAutoFoldInWxBoardMain" Checked="ToggleSwitchAutoFoldInWxBoardMain_Toggled" Unchecked="ToggleSwitchAutoFoldInWxBoardMain_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_MSWhiteboard}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_MSWhiteboard}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/Whiteboard.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="CardAutoFoldInMSWhiteboard" Checked="ToggleSwitchAutoFoldInMSWhiteboard_Toggled" Unchecked="ToggleSwitchAutoFoldInMSWhiteboard_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_AdmoxBoard}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_AdmoxBoard}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/AdmoxWhiteboard.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="CardAutoFoldInAdmoxWhiteboard" Checked="ToggleSwitchAutoFoldInAdmoxWhiteboard_Toggled" Unchecked="ToggleSwitchAutoFoldInAdmoxWhiteboard_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_AdmoxBooth}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_AdmoxBooth}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/AdmoxBooth.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="CardAutoFoldInAdmoxBooth" Checked="ToggleSwitchAutoFoldInAdmoxBooth_Toggled" Unchecked="ToggleSwitchAutoFoldInAdmoxBooth_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_YiYunBoard}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_YiYunBoard}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/YiYunWhiteboard.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="CardAutoFoldInQPoint" Checked="ToggleSwitchAutoFoldInQPoint_Toggled" Unchecked="ToggleSwitchAutoFoldInQPoint_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_YiYunBooth}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_YiYunBooth}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/YiYunVisualPresenter.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="CardAutoFoldInYiYunVisualPresenter" Checked="ToggleSwitchAutoFoldInYiYunVisualPresenter_Toggled" Unchecked="ToggleSwitchAutoFoldInYiYunVisualPresenter_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_MaxHubBoard}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_MaxHubBoard}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/MaxHubWhiteboard.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="CardAutoFoldInMaxHubWhiteboard" Checked="ToggleSwitchAutoFoldInMaxHubWhiteboard_Toggled" Unchecked="ToggleSwitchAutoFoldInMaxHubWhiteboard_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_OldZyBoard}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_OldZyBoard}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/Donview.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="CardAutoFoldInOldZyBoard" Checked="ToggleSwitchAutoFoldInOldZyBoard_Toggled" Unchecked="ToggleSwitchAutoFoldInOldZyBoard_Toggled" />
                                     </ui:CardControl>
@@ -260,25 +284,27 @@
 
                             <TextBlock Text="{x:Static props:StorageStrings.AutoSave_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
 
-                            <ui:CardExpander IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchSaveScreenshotsInDateFolders, Mode=OneWay}">
+                            <ui:CardExpander IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchSaveScreenshotsInDateFolders, Mode=OneWay}" ContentPadding="0">
                                 <ui:CardExpander.Header>
                                     <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0">
-                                            <TextBlock Text="{x:Static props:StorageStrings.Storage_ScreenshotSettings}" />
-                                            <TextBlock Text="{x:Static props:StorageStrings.Storage_ScreenshotSettingsDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                        </StackPanel>
-                                        <ui:ToggleSwitch x:Name="ToggleSwitchSaveScreenshotsInDateFolders" d:IsOn="True" Checked="ToggleSwitchSaveScreenshotsInDateFolders_Toggled" Unchecked="ToggleSwitchSaveScreenshotsInDateFolders_Toggled" Grid.Column="1" />
+                                        <ui:TextBlock Text="{x:Static props:StorageStrings.Storage_ScreenshotSettings}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                        <ui:TextBlock Text="{x:Static props:StorageStrings.Storage_ScreenshotSettingsDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />
+                                        <ui:ToggleSwitch x:Name="ToggleSwitchSaveScreenshotsInDateFolders" d:IsOn="True" Checked="ToggleSwitchSaveScreenshotsInDateFolders_Toggled" Unchecked="ToggleSwitchSaveScreenshotsInDateFolders_Toggled" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,16,0" />
                                     </Grid>
                                 </ui:CardExpander.Header>
                                 <ui:CardExpander.Icon>
                                     <ui:SymbolIcon Symbol="Camera24" />
                                 </ui:CardExpander.Icon>
                                 <StackPanel>
-                                    <ui:CardControl Header="{x:Static props:StorageStrings.Storage_ScreenshotFormat}">
+                                    <ui:CardControl Header="{x:Static props:StorageStrings.Storage_ScreenshotFormat}" Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                         <ui:CardControl.Icon>
                                             <ui:SymbolIcon Symbol="Image24" />
                                         </ui:CardControl.Icon>
@@ -287,7 +313,7 @@
                                             <ComboBoxItem Content="JPG" Tag="1" />
                                         </ComboBox>
                                     </ui:CardControl>
-                                    <ui:CardControl x:Name="CardScreenshotJpegQuality" Header="{x:Static props:StorageStrings.Storage_ScreenshotJpegQuality}" Visibility="Collapsed">
+                                    <ui:CardControl x:Name="CardScreenshotJpegQuality" Header="{x:Static props:StorageStrings.Storage_ScreenshotJpegQuality}" Visibility="Collapsed" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon>
                                             <ui:SymbolIcon Symbol="Crop24" />
                                         </ui:CardControl.Icon>
@@ -296,7 +322,7 @@
                                             <Slider x:Name="ScreenshotJpegQualitySlider" Width="200" Minimum="50" Maximum="100" IsSnapToTickEnabled="True" TickFrequency="1" TickPlacement="None" ValueChanged="ScreenshotJpegQualitySlider_ValueChanged" />
                                         </vio:SimpleStackPanel>
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:StorageStrings.Storage_ScreenshotScale}">
+                                    <ui:CardControl Header="{x:Static props:StorageStrings.Storage_ScreenshotScale}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon>
                                             <ui:SymbolIcon Symbol="ZoomIn24" />
                                         </ui:CardControl.Icon>
@@ -307,13 +333,13 @@
                                             <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_ScreenshotScale_25}" Tag="3" />
                                         </ComboBox>
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:StorageStrings.Storage_AutoSaveInkOnScreenshot}">
+                                    <ui:CardControl Header="{x:Static props:StorageStrings.Storage_AutoSaveInkOnScreenshot}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon>
                                             <ui:SymbolIcon Symbol="Save24" />
                                         </ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="ToggleSwitchAutoSaveStrokesAtScreenshot" Checked="ToggleSwitchAutoSaveStrokesAtScreenshot_Toggled" Unchecked="ToggleSwitchAutoSaveStrokesAtScreenshot_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:StorageStrings.Storage_AutoScreenshotOnClear}">
+                                    <ui:CardControl Header="{x:Static props:StorageStrings.Storage_AutoScreenshotOnClear}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon>
                                             <ui:SymbolIcon Symbol="Save24" />
                                         </ui:CardControl.Icon>
@@ -357,17 +383,19 @@
 
                             <controls:LabeledSettingsCard x:Name="CardUseCustomSaveFileName" Header="{x:Static props:AutomationStrings.Automation_UseCustomSaveFileName_Header}" Description="{x:Static props:AutomationStrings.Automation_UseCustomSaveFileName_Desc}" Symbol="Edit24" Toggled="ToggleSwitchUseCustomSaveFileName_Toggled" />
 
-                            <ui:CardExpander x:Name="CardSaveFileNamePreset" IsExpanded="True">
+                            <ui:CardExpander x:Name="CardSaveFileNamePreset" IsExpanded="True" ContentPadding="0">
                                 <ui:CardExpander.Header>
                                     <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0">
-                                            <TextBlock Text="{x:Static props:AutomationStrings.Automation_SaveFileNameFormat}" />
-                                        </StackPanel>
-                                        <ComboBox x:Name="ComboBoxSaveFileNamePreset" SelectionChanged="ComboBoxSaveFileNamePreset_SelectionChanged" Grid.Column="1">
+                                        <ui:TextBlock Text="{x:Static props:AutomationStrings.Automation_SaveFileNameFormat}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                        <ComboBox x:Name="ComboBoxSaveFileNamePreset" SelectionChanged="ComboBoxSaveFileNamePreset_SelectionChanged" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,16,0">
                                     <ComboBoxItem Content="{x:Static props:AutomationStrings.Automation_SaveFileName_Timestamp}" Tag="{}{datetime}" />
                                     <ComboBoxItem Content="{x:Static props:AutomationStrings.Automation_SaveFileName_Date}" Tag="{}{date}" />
                                     <ComboBoxItem Content="{x:Static props:AutomationStrings.Automation_SaveFileName_DateTime}" Tag="{}{date}_{time}" />
@@ -380,7 +408,7 @@
                                 </ui:CardExpander.Header>
                                 <ui:CardExpander.Icon><ui:SymbolIcon Symbol="Edit24" /></ui:CardExpander.Icon>
                                 <StackPanel>
-                                    <ui:CardControl x:Name="CardCustomSaveFileNameTemplate" Visibility="Collapsed">
+                                    <ui:CardControl x:Name="CardCustomSaveFileNameTemplate" Visibility="Collapsed" Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                         <ui:CardControl.Header>
                                             <StackPanel>
                                                 <TextBlock Text="{x:Static props:AutomationStrings.Automation_SaveFileName_CustomTemplate_Header}" />
@@ -394,74 +422,90 @@
 
                             <TextBlock Text="{x:Static props:AutomationStrings.FloatingInterceptor_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
 
-                            <ui:CardExpander IsExpanded="True">
+                            <ui:CardExpander IsExpanded="True" ContentPadding="0">
                                 <ui:CardExpander.Header>
-                                    <StackPanel>
-                                        <TextBlock Text="{x:Static props:AutomationStrings.FloatingInterceptor_Group_Seewo}" />
-                                    </StackPanel>
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ui:TextBlock Text="{x:Static props:AutomationStrings.FloatingInterceptor_Group_Seewo}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                    </Grid>
                                 </ui:CardExpander.Header>
                                 <ui:CardExpander.Icon><ui:SymbolIcon Symbol="Edit24" /></ui:CardExpander.Icon>
                                 <StackPanel>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoBoard3}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoBoard3}" Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote3.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="ToggleSwitchSeewoWhiteboard3Floating" Checked="ToggleSwitchSeewoWhiteboard3Floating_Toggled" Unchecked="ToggleSwitchSeewoWhiteboard3Floating_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoBoard5}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoBoard5}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="ToggleSwitchSeewoWhiteboard5Floating" Checked="ToggleSwitchSeewoWhiteboard5Floating_Toggled" Unchecked="ToggleSwitchSeewoWhiteboard5Floating_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoBoard5C}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoBoard5C}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote5C.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="ToggleSwitchSeewoWhiteboard5CFloating" Checked="ToggleSwitchSeewoWhiteboard5CFloating_Toggled" Unchecked="ToggleSwitchSeewoWhiteboard5CFloating_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoPinco}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoPinco}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/SeewoPinco.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="ToggleSwitchSeewoPincoSideBarFloating" Checked="ToggleSwitchSeewoPincoSideBarFloating_Toggled" Unchecked="ToggleSwitchSeewoPincoSideBarFloating_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoPincoDrawing}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoPincoDrawing}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/SeewoPinco.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="ToggleSwitchSeewoPincoDrawingFloating" Checked="ToggleSwitchSeewoPincoDrawingFloating_Toggled" Unchecked="ToggleSwitchSeewoPincoDrawingFloating_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoPPTTools}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoPPTTools}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/PPTTools.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="ToggleSwitchSeewoPPTFloating" Checked="ToggleSwitchSeewoPPTFloating_Toggled" Unchecked="ToggleSwitchSeewoPPTFloating_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoDesktopAnnotation}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoDesktopAnnotation}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/SeewoPinco.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="ToggleSwitchSeewoDesktopAnnotationFloating" Checked="ToggleSwitchSeewoDesktopAnnotationFloating_Toggled" Unchecked="ToggleSwitchSeewoDesktopAnnotationFloating_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoDesktopSideBar}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoDesktopSideBar}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/SeewoPinco.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="ToggleSwitchSeewoDesktopSideBarFloating" Checked="ToggleSwitchSeewoDesktopSideBarFloating_Toggled" Unchecked="ToggleSwitchSeewoDesktopSideBarFloating_Toggled" />
                                     </ui:CardControl>
                                 </StackPanel>
                             </ui:CardExpander>
 
-                            <ui:CardExpander IsExpanded="True">
+                            <ui:CardExpander IsExpanded="True" ContentPadding="0">
                                 <ui:CardExpander.Header>
-                                    <StackPanel>
-                                        <TextBlock Text="{x:Static props:NotificationStrings.Type_Other}" />
-                                    </StackPanel>
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <ui:TextBlock Text="{x:Static props:NotificationStrings.Type_Other}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                    </Grid>
                                 </ui:CardExpander.Header>
                                 <ui:CardExpander.Icon><ui:SymbolIcon Symbol="Edit24" /></ui:CardExpander.Icon>
                                 <StackPanel>
-                                    <ui:CardControl Header="AiClass">
+                                    <ui:CardControl Header="AiClass" Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/AiClass.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="ToggleSwitchAiClassFloating" Checked="ToggleSwitchAiClassFloating_Toggled" Unchecked="ToggleSwitchAiClassFloating_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_HiteAnnotation}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_HiteAnnotation}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/HiteAnnotation.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="ToggleSwitchHiteAnnotationFloating" Checked="ToggleSwitchHiteAnnotationFloating_Toggled" Unchecked="ToggleSwitchHiteAnnotationFloating_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_ChangYanClass}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_ChangYanClass}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/畅言智慧课堂.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="ToggleSwitchChangYanFloating" Checked="ToggleSwitchChangYanFloating_Toggled" Unchecked="ToggleSwitchChangYanFloating_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_ChangYanPPT}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_ChangYanPPT}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/畅言智慧课堂.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="ToggleSwitchChangYanPPTFloating" Checked="ToggleSwitchChangYanPPTFloating_Toggled" Unchecked="ToggleSwitchChangYanPPTFloating_Toggled" />
                                     </ui:CardControl>
-                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_IntelligentClass}">
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_IntelligentClass}" Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/天喻教育云.png" /></ui:CardControl.Icon>
                                         <ui:ToggleSwitch x:Name="ToggleSwitchIntelligentClassFloating" Checked="ToggleSwitchIntelligentClassFloating_Toggled" Unchecked="ToggleSwitchIntelligentClassFloating_Toggled" />
                                     </ui:CardControl>
@@ -470,18 +514,20 @@
 
                             <TextBlock Text="{x:Static props:SecurityStrings.FileAssoc_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
 
-                            <ui:CardExpander IsExpanded="True">
+                            <ui:CardExpander IsExpanded="True" ContentPadding="0">
                                 <ui:CardExpander.Header>
                                     <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <StackPanel Grid.Column="0">
-                                            <TextBlock Text="{x:Static props:SecurityStrings.FileAssoc_Check}" />
-                                            <TextBlock Text="{x:Static props:AutomationStrings.FileAssoc_CheckDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                        </StackPanel>
-                                        <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Grid.Column="1">
+                                        <ui:TextBlock Text="{x:Static props:SecurityStrings.FileAssoc_Check}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                        <ui:TextBlock Text="{x:Static props:AutomationStrings.FileAssoc_CheckDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Row="1" Grid.Column="0" />
+                                        <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Grid.Column="1" Grid.RowSpan="2" Margin="0,0,16,0">
                                         <TextBlock x:Name="TextBlockFileAssociationStatus" Text="{x:Static props:AutomationStrings.FileAssoc_NotChecked}" VerticalAlignment="Center" FontWeight="SemiBold" />
                                         <Button x:Name="BtnCheckFileAssociation" Content="{x:Static props:SecurityStrings.FileAssoc_Check}" Click="BtnCheckFileAssociation_Click" />
                                     </vio:SimpleStackPanel>
@@ -489,7 +535,7 @@
                                 </ui:CardExpander.Header>
                                 <ui:CardExpander.Icon><ui:SymbolIcon Symbol="Link24" /></ui:CardExpander.Icon>
                                 <StackPanel>
-                                    <ui:CardControl>
+                                    <ui:CardControl Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                         <ui:CardControl.Header>
                                             <StackPanel>
                                                 <TextBlock Text="{x:Static props:AutomationStrings.FileAssoc_RegisterHeader}" />
@@ -499,7 +545,7 @@
                                         <ui:CardControl.Icon><ui:SymbolIcon Symbol="Add24" /></ui:CardControl.Icon>
                                         <Button x:Name="BtnRegisterFileAssociation" Content="{x:Static props:AutomationStrings.FileAssoc_RegisterHeader}" Click="BtnRegisterFileAssociation_Click" />
                                     </ui:CardControl>
-                                    <ui:CardControl>
+                                    <ui:CardControl Style="{StaticResource SettingsExpanderRowStyle}">
                                         <ui:CardControl.Header>
                                             <StackPanel>
                                                 <TextBlock Text="{x:Static props:SecurityStrings.FileAssoc_Unregister}" />

@@ -15,20 +15,28 @@
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="{x:Static props:AboutStrings.PrivacyAndTelemetry}" />
 
-                    <ui:CardExpander IsExpanded="True" d:Visibility="Visible" d:IsExpanded="True">
+                    <ui:CardExpander IsExpanded="True" d:Visibility="Visible" d:IsExpanded="True" ContentPadding="0">
                         <ui:CardExpander.Header>
-                            <StackPanel>
-                                <TextBlock Text="{x:Static props:AboutStrings.PrivacyAndTelemetry}" />
-                            </StackPanel>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ui:TextBlock Text="{x:Static props:AboutStrings.PrivacyAndTelemetry}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                            </Grid>
                         </ui:CardExpander.Header>
                         <ui:CardExpander.Icon>
                             <ui:SymbolIcon Symbol="Shield24" />
                         </ui:CardExpander.Icon>
                         <StackPanel>
-                            <ui:CardControl>
+                            <ui:CardControl Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                 <CheckBox x:Name="CheckBoxTelemetryPrivacyAccepted" Content="{x:Static props:AboutStrings.PrivacyAgreement}" Checked="CheckBoxTelemetryPrivacyAccepted_Checked" Unchecked="CheckBoxTelemetryPrivacyAccepted_Checked" />
                             </ui:CardControl>
-                            <ui:CardControl Header="{x:Static props:AboutStrings.TelemetryLabel}">
+                            <ui:CardControl Header="{x:Static props:AboutStrings.TelemetryLabel}" Style="{StaticResource SettingsExpanderRowStyle}">
                                 <ComboBox x:Name="ComboBoxTelemetryUploadLevel" SelectionChanged="ComboBoxTelemetryUploadLevel_SelectionChanged">
                                     <ComboBoxItem Tag="0" Content="{x:Static props:AboutStrings.Telemetry_Off}" />
                                     <ComboBoxItem Tag="1" Content="{x:Static props:AboutStrings.Telemetry_Basic}" />

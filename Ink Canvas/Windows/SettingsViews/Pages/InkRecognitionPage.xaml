@@ -60,58 +60,68 @@
 
                     <controls:LabeledSettingsCard x:Name="CardEnableInkToShapeNoFakePressureTriangle" Header="{x:Static props:CanvasStrings.InkRecog_BlockTriFakePressure}" ShowWhen="{Binding IsOn, ElementName=CardEnableInkToShape}" d:Visibility="Visible" Symbol="Warning24" SwitchName="ToggleSwitchEnableInkToShapeNoFakePressureTriangle" Toggled="ToggleSwitchEnableInkToShapeNoFakePressureTriangle_Toggled" />
 
-                    <ui:CardExpander Visibility="{Binding IsOn, ElementName=CardEnableInkToShape, Converter={StaticResource BooleanToVisibilityConverter}}" IsExpanded="{Binding IsOn, ElementName=CardEnableInkToShape, Mode=OneWay}" d:Visibility="Visible" d:IsExpanded="True">
+                    <ui:CardExpander Visibility="{Binding IsOn, ElementName=CardEnableInkToShape, Converter={StaticResource BooleanToVisibilityConverter}}" IsExpanded="{Binding IsOn, ElementName=CardEnableInkToShape, Mode=OneWay}" d:Visibility="Visible" d:IsExpanded="True" ContentPadding="0">
                         <ui:CardExpander.Header>
-                            <StackPanel>
-                                <TextBlock Text="{x:Static props:CanvasStrings.InkRecog_ShapeCorrection}" />
-                            </StackPanel>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ui:TextBlock Text="{x:Static props:CanvasStrings.InkRecog_ShapeCorrection}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                            </Grid>
                         </ui:CardExpander.Header>
                         <ui:CardExpander.Icon>
                             <ui:SymbolIcon Symbol="Settings24" />
                         </ui:CardExpander.Icon>
                         <StackPanel>
-                            <ui:CardControl>
+                            <ui:CardControl Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                 <CheckBox x:Name="ToggleCheckboxEnableInkToShapeTriangle" IsChecked="True" Content="{x:Static props:CanvasStrings.InkRecog_FixTriangle}" Checked="ToggleCheckboxEnableInkToShapeTriangle_CheckedChanged" />
                             </ui:CardControl>
-                            <ui:CardControl>
+                            <ui:CardControl Style="{StaticResource SettingsExpanderRowStyle}">
                                 <CheckBox x:Name="ToggleCheckboxEnableInkToShapeRectangle" IsChecked="True" Content="{x:Static props:CanvasStrings.InkRecog_FixRectangle}" Checked="ToggleCheckboxEnableInkToShapeRectangle_CheckedChanged" />
                             </ui:CardControl>
-                            <ui:CardControl>
+                            <ui:CardControl Style="{StaticResource SettingsExpanderRowStyle}">
                                 <CheckBox x:Name="ToggleCheckboxEnableInkToShapeRounded" IsChecked="True" Content="{x:Static props:CanvasStrings.InkRecog_FixEllipse}" Checked="ToggleCheckboxEnableInkToShapeRounded_CheckedChanged" Unchecked="ToggleCheckboxEnableInkToShapeRounded_CheckedChanged" />
                             </ui:CardControl>
                         </StackPanel>
                     </ui:CardExpander>
 
-                    <ui:CardExpander x:Name="ExpanderAutoStraightenLine" IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchAutoStraightenLine, Mode=OneWay}" d:Visibility="Visible" d:IsExpanded="True">
+                    <ui:CardExpander x:Name="ExpanderAutoStraightenLine" IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchAutoStraightenLine, Mode=OneWay}" d:Visibility="Visible" d:IsExpanded="True" ContentPadding="0">
                         <ui:CardExpander.Header>
                             <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="{x:Static props:CanvasStrings.InkRecog_AutoStraightLine}" />
-                                </StackPanel>
-                                <ui:ToggleSwitch x:Name="ToggleSwitchAutoStraightenLine" Checked="ToggleSwitchAutoStraightenLine_Toggled" Unchecked="ToggleSwitchAutoStraightenLine_Toggled" Grid.Column="1" />
+                                <ui:TextBlock Text="{x:Static props:CanvasStrings.InkRecog_AutoStraightLine}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                <ui:ToggleSwitch x:Name="ToggleSwitchAutoStraightenLine" Checked="ToggleSwitchAutoStraightenLine_Toggled" Unchecked="ToggleSwitchAutoStraightenLine_Toggled" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,16,0" />
                             </Grid>
                         </ui:CardExpander.Header>
                         <ui:CardExpander.Icon>
                             <ui:SymbolIcon Symbol="TextBulletListLtr24" />
                         </ui:CardExpander.Icon>
                         <StackPanel>
-                            <ui:CardControl Header="{x:Static props:CanvasStrings.InkRecog_LengthThreshold}">
+                            <ui:CardControl Header="{x:Static props:CanvasStrings.InkRecog_LengthThreshold}" Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                 <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="AutoStraightenLineThresholdText" VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" />
                                     <Slider x:Name="AutoStraightenLineThresholdSlider" Width="200" Minimum="30" Maximum="300" Value="80" TickFrequency="30" IsSnapToTickEnabled="True" ValueChanged="AutoStraightenLineThresholdSlider_ValueChanged" />
                                 </vio:SimpleStackPanel>
                             </ui:CardControl>
-                            <ui:CardControl Header="{x:Static props:CanvasStrings.InkRecog_Sensitivity}">
+                            <ui:CardControl Header="{x:Static props:CanvasStrings.InkRecog_Sensitivity}" Style="{StaticResource SettingsExpanderRowStyle}">
                                 <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="LineStraightenSensitivityText" VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" />
                                     <Slider x:Name="LineStraightenSensitivitySlider" Width="200" Minimum="0.05" Maximum="2.0" Value="0.20" TickFrequency="0.05" IsSnapToTickEnabled="True" ValueChanged="LineStraightenSensitivitySlider_ValueChanged" />
                                 </vio:SimpleStackPanel>
                             </ui:CardControl>
-                            <ui:CardControl>
+                            <ui:CardControl Style="{StaticResource SettingsExpanderRowStyle}">
                                 <ui:CardControl.Header>
                                     <StackPanel>
                                         <TextBlock Text="{x:Static props:CanvasStrings.InkRecog_HighPrecisionStraighten}" />
@@ -120,7 +130,7 @@
                                 </ui:CardControl.Header>
                                 <ui:ToggleSwitch x:Name="ToggleSwitchHighPrecisionLineStraighten" Checked="ToggleSwitchHighPrecisionLineStraighten_Toggled" Unchecked="ToggleSwitchHighPrecisionLineStraighten_Toggled" />
                             </ui:CardControl>
-                            <ui:CardControl>
+                            <ui:CardControl Style="{StaticResource SettingsExpanderRowStyle}">
                                 <ui:CardControl.Header>
                                     <StackPanel>
                                         <TextBlock Text="{x:Static props:CanvasStrings.InkRecog_PauseStraightenLine}" />
@@ -129,7 +139,7 @@
                                 </ui:CardControl.Header>
                                 <ui:ToggleSwitch x:Name="ToggleSwitchPauseStraightenLine" Checked="ToggleSwitchPauseStraightenLine_Toggled" Unchecked="ToggleSwitchPauseStraightenLine_Toggled" />
                             </ui:CardControl>
-                            <ui:CardControl Header="{x:Static props:CanvasStrings.InkRecog_PauseStraightenDelay}">
+                            <ui:CardControl Header="{x:Static props:CanvasStrings.InkRecog_PauseStraightenDelay}" Style="{StaticResource SettingsExpanderRowStyle}">
                                 <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="PauseStraightenDelayText" VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" />
                                     <Slider x:Name="PauseStraightenDelaySlider" Width="200" Minimum="100" Maximum="1000" Value="300" TickFrequency="50" IsSnapToTickEnabled="True" ValueChanged="PauseStraightenDelaySlider_ValueChanged" />
@@ -138,24 +148,26 @@
                         </StackPanel>
                     </ui:CardExpander>
 
-                    <ui:CardExpander x:Name="ExpanderLineEndpointSnapping" IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchLineEndpointSnapping, Mode=OneWay}" d:Visibility="Visible" d:IsExpanded="True">
+                    <ui:CardExpander x:Name="ExpanderLineEndpointSnapping" IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchLineEndpointSnapping, Mode=OneWay}" d:Visibility="Visible" d:IsExpanded="True" ContentPadding="0">
                         <ui:CardExpander.Header>
                             <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="{x:Static props:CanvasStrings.InkRecog_LineEndpointSnapping}" />
-                                </StackPanel>
-                                <ui:ToggleSwitch x:Name="ToggleSwitchLineEndpointSnapping" Checked="ToggleSwitchLineEndpointSnapping_Toggled" Unchecked="ToggleSwitchLineEndpointSnapping_Toggled" Grid.Column="1" />
+                                <ui:TextBlock Text="{x:Static props:CanvasStrings.InkRecog_LineEndpointSnapping}" Grid.Row="0" Grid.Column="0" FontTypography="Body" />
+                                <ui:ToggleSwitch x:Name="ToggleSwitchLineEndpointSnapping" Checked="ToggleSwitchLineEndpointSnapping_Toggled" Unchecked="ToggleSwitchLineEndpointSnapping_Toggled" Grid.Column="1" Grid.RowSpan="2" VerticalAlignment="Center" Margin="0,0,16,0" />
                             </Grid>
                         </ui:CardExpander.Header>
                         <ui:CardExpander.Icon>
                             <ui:SymbolIcon Symbol="Link24" />
                         </ui:CardExpander.Icon>
                         <StackPanel>
-                            <ui:CardControl>
+                            <ui:CardControl Style="{StaticResource SettingsExpanderFirstRowStyle}">
                                 <ui:CardControl.Header>
                                     <StackPanel>
                                         <TextBlock Text="{x:Static props:CanvasStrings.InkRecog_SnappingDistance}" />

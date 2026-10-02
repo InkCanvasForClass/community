@@ -275,6 +275,9 @@
                 <ResourceDictionary Source="Resources/SeewoImageDictionary.xaml"/>
                 <ResourceDictionary Source="Resources/DrawShapeImageDictionary.xaml"/>
                 <ResourceDictionary Source="Resources/IconImageDictionary.xaml"/>
+                <!--  设置页展开卡内部的「整宽行」样式（被各设置页以 StaticResource 引用，
+                      必须排在 Wpf.Ui 的 ControlsDictionary 之后才能解析到 DefaultUiCardControlStyle）  -->
+                <ResourceDictionary Source="Resources/SettingsCardStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
