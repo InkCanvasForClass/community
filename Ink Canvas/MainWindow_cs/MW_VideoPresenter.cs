@@ -1,4 +1,4 @@
-﻿using OpenCvSharp;
+using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using Point = OpenCvSharp.Point;
 using Size = OpenCvSharp.Size;
@@ -1003,6 +1003,8 @@ namespace Ink_Canvas
             _cameraService = CameraServiceFactory.Create();
             _cameraService.FrameReceived += CameraService_FrameReceived;
             _cameraService.ErrorOccurred += CameraService_ErrorOccurred;
+            // 恢复上次退出时保存的展台旋转角度（0..3），使预览/拍照方向与应用保持一致
+            _cameraService.RotationAngle = NormalizeBoothRotationAngle(Settings?.Canvas?.VideoPresenterRotationAngle ?? 0);
             SyncBoothResolutionToCameraService();
         }
 
@@ -2691,6 +2693,29 @@ namespace Ink_Canvas
             catch { return null; }
         }
 
+        /// <summary>把任意旋转角度归一化到 0..3（对应 0°/90°/180°/270°）。</summary>
+        private static int NormalizeBoothRotationAngle(int angle)
+        {
+            return ((angle % 4) + 4) % 4;
+        }
+
+        /// <summary>把当前展台旋转角度（_cameraService.RotationAngle）持久化到设置文件。</summary>
+        private void PersistBoothRotation()
+        {
+            try
+            {
+                if (_cameraService == null || Settings?.Canvas == null) return;
+                int angle = NormalizeBoothRotationAngle(_cameraService.RotationAngle);
+                if (Settings.Canvas.VideoPresenterRotationAngle == angle) return;
+                Settings.Canvas.VideoPresenterRotationAngle = angle;
+                ScheduleBoothPropsSaveDebounced();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"保存展台旋转角度失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
         /// <summary>
         /// 旋转按钮入口：把预览 LayoutTransform 与画布墨迹一起转到目标角度，
         /// 走基准重放管线避免持续缩小。冻结照片先回退到实时画面再旋转。
@@ -2794,6 +2819,8 @@ namespace Ink_Canvas
 
                 EnsureCameraService();
                 _cameraService.RotationAngle = (_cameraService.RotationAngle + 1) % 4;
+                // 持久化旋转角度，下次启动展台时恢复同一方向
+                PersistBoothRotation();
 
                 if (_isVideoPresenterSpecialMode)
                 {
