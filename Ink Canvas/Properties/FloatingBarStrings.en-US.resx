@@ -150,6 +150,9 @@
   <data name="FloatingBar_ClearAndMouse" xml:space="preserve">
     <value>Clear &amp; cursor</value>
   </data>
+  <data name="FloatingBar_ClearAndMouseShort" xml:space="preserve">
+    <value>Clear &amp; cursor</value>
+  </data>
   <data name="FloatingBar_ExitButton" xml:space="preserve">
     <value>Exit</value>
   </data>

@@ -148,6 +148,9 @@
     <value>清空</value>
   </data>
   <data name="FloatingBar_ClearAndMouse" xml:space="preserve">
+    <value>鼠标(清空)</value>
+  </data>
+  <data name="FloatingBar_ClearAndMouseShort" xml:space="preserve">
     <value>清并鼠</value>
   </data>
   <data name="FloatingBar_ExitButton" xml:space="preserve">

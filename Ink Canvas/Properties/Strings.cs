@@ -408,6 +408,7 @@ namespace Ink_Canvas.Properties
             dict["FloatingBar_AreaEraser"] = ("FloatingBarStrings", "FloatingBar_AreaEraser");
             dict["FloatingBar_Clear"] = ("FloatingBarStrings", "FloatingBar_Clear");
             dict["FloatingBar_ClearAndMouse"] = ("FloatingBarStrings", "FloatingBar_ClearAndMouse");
+            dict["FloatingBar_ClearAndMouseShort"] = ("FloatingBarStrings", "FloatingBar_ClearAndMouseShort");
             dict["FloatingBar_ExitButton"] = ("FloatingBarStrings", "FloatingBar_ExitButton");
             dict["FloatingBar_Freeze"] = ("FloatingBarStrings", "FloatingBar_Freeze");
             dict["FloatingBar_Geometry"] = ("FloatingBarStrings", "FloatingBar_Geometry");

@@ -1179,6 +1179,10 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
             if (view is ToolbarImageButton btn)
             {
+                var labelKey = entry.GetSettingString(ComponentSettingKeys.Label);
+                if (!string.IsNullOrEmpty(labelKey))
+                    btn.Label = Strings.GetString(labelKey) ?? labelKey;
+
                 var fontSize = entry.GetSettingDouble(ComponentSettingKeys.FontSize);
                 if (fontSize.HasValue && fontSize.Value > 0)
                     btn.LabelFontSize = fontSize.Value;
