@@ -45,6 +45,9 @@ namespace Ink_Canvas.Windows
 
             _settings = settings;
             InitializeComponent();
+            // 记录 XAML 中的设计最小尺寸，实际生效值会按屏幕工作区收敛
+            _designMinWidth = MinWidth;
+            _designMinHeight = MinHeight;
             WindowBackdropHelper.Apply(this, _settings);
 
             Opacity = 0;
@@ -473,6 +476,17 @@ namespace Ink_Canvas.Windows
 
         private HwndSource _hwndSource;
 
+        // XAML 中声明的设计最小尺寸；工作区更小时允许窗口继续缩小，避免窗口被撑出屏幕
+        private double _designMinWidth;
+        private double _designMinHeight;
+
+        // 最大化前的窗口位置与尺寸，用于还原
+        private double _originalLeft;
+        private double _originalTop;
+        private double _originalWidth;
+        private double _originalHeight;
+        private bool _wasMaximized;
+
         private void GetWorkAreaSize(out double workAreaWidthDip, out double workAreaHeightDip, out double screenLeftDip, out double screenTopDip)
         {
             var windowHandle = new WindowInteropHelper(this).Handle;
@@ -496,17 +510,66 @@ namespace Ink_Canvas.Windows
             screenTopDip = screenBounds.Top / dpiScaleY;
         }
 
+        /// <summary>
+        /// 按当前屏幕工作区收敛窗口的最小/最大尺寸：最小尺寸不能大于工作区，
+        /// 否则窗口会被硬撑出屏幕，表现为底部或左右两侧显示不全。
+        /// </summary>
+        private void ApplyWorkAreaConstraints(double workAreaWidthDip, double workAreaHeightDip)
+        {
+            this.MinWidth = Math.Min(_designMinWidth, workAreaWidthDip);
+            this.MinHeight = Math.Min(_designMinHeight, workAreaHeightDip);
+            this.MaxWidth = workAreaWidthDip;
+            this.MaxHeight = workAreaHeightDip;
+        }
+
         private void SetMaxSizeAndCenter()
         {
             if (!this.IsLoaded) return;
 
             GetWorkAreaSize(out double workAreaWidthDip, out double workAreaHeightDip, out double screenLeftDip, out double screenTopDip);
 
-            this.MaxWidth = workAreaWidthDip;
-            this.MaxHeight = workAreaHeightDip;
+            ApplyWorkAreaConstraints(workAreaWidthDip, workAreaHeightDip);
 
             this.Left = screenLeftDip + (workAreaWidthDip - this.ActualWidth) / 2;
             this.Top = screenTopDip + (workAreaHeightDip - this.ActualHeight) / 2;
+        }
+
+        private void SetMaxSizeOnly()
+        {
+            if (!this.IsLoaded) return;
+
+            GetWorkAreaSize(out double workAreaWidthDip, out double workAreaHeightDip, out _, out _);
+
+            ApplyWorkAreaConstraints(workAreaWidthDip, workAreaHeightDip);
+        }
+
+        private void OobeWindow_OnStateChanged(object sender, EventArgs e)
+        {
+            if (this.WindowState == WindowState.Maximized)
+            {
+                // 记住最大化前的位置与尺寸；同时放开最大尺寸限制，否则最大化后窗口无法铺满屏幕，
+                // 还原时也会因为尺寸被截断而跑出屏幕
+                _originalLeft = this.Left;
+                _originalTop = this.Top;
+                _originalWidth = this.Width;
+                _originalHeight = this.Height;
+                _wasMaximized = true;
+                this.MaxWidth = double.PositiveInfinity;
+                this.MaxHeight = double.PositiveInfinity;
+            }
+            else if (this.WindowState == WindowState.Normal && _wasMaximized)
+            {
+                this.Left = _originalLeft;
+                this.Top = _originalTop;
+                this.Width = _originalWidth;
+                this.Height = _originalHeight;
+                _wasMaximized = false;
+                SetMaxSizeOnly();
+            }
+            else if (this.WindowState == WindowState.Normal)
+            {
+                SetMaxSizeOnly();
+            }
         }
 
         private void RegisterDpiChangedListener()
