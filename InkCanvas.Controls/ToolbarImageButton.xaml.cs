@@ -84,6 +84,8 @@ namespace Ink_Canvas.Controls
             set => LabelTextBlock.FontSize = value;
         }
 
+        public TextBlock LabelTextBlockControl => LabelTextBlock;
+
         public double IconHeight
         {
             get => ButtonImage.Height;
