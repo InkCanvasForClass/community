@@ -51,7 +51,7 @@
                     </Border.Style>
                     
                     <Image x:Name="ChevronImage"
-                           Source="{DynamicResource QuickPanelUnfoldChevronIcon}"
+                           Source="{DynamicResource QuickPanelChevronLeftIcon}"
                            RenderOptions.BitmapScalingMode="HighQuality"
                            Height="8" Width="8"
                            HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -70,7 +70,7 @@
                 <Border x:Name="ClassicPanelBorder" Background="#9918181b" Opacity="1"
                         CornerRadius="0,25,25,0" Height="50" Width="32">
                     <Image x:Name="ClassicChevronImage" Margin="10,0,0,0"
-                           Source="{DynamicResource QuickPanelUnfoldChevronIcon}"
+                           Source="{DynamicResource QuickPanelChevronLeftIcon}"
                            RenderOptions.BitmapScalingMode="HighQuality" Height="14" Width="14"
                            IsHitTestVisible="False"/>
                 </Border>

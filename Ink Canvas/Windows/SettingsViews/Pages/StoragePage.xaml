@@ -16,7 +16,7 @@
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="{x:Static props:StorageStrings.Storage_Title}" />
 
                 <!-- 概览卡片 -->
-                <Border Background="{DynamicResource {DynamicResource LayerFillColorDefaultBrush}}" BorderBrush="{DynamicResource {DynamicResource CardStrokeColorDefaultBrush}}" CornerRadius="4" BorderThickness="1" Padding="20,16">
+                <Border Background="{DynamicResource LayerFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" CornerRadius="4" BorderThickness="1" Padding="20,16">
                     <vio:SimpleStackPanel Spacing="12">
                         <Grid>
                             <Grid.ColumnDefinitions>

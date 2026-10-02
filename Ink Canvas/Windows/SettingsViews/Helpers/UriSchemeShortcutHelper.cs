@@ -43,7 +43,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         private static readonly Color BadgeFillColorOnCard = Color.FromArgb(0x2E, 0x80, 0x80, 0x80);
         private static readonly Color BadgeBorderColorOnCard = Color.FromArgb(0x47, 0x80, 0x80, 0x80);
 
-        private const string ThemeForegroundBrushKey = "SystemControlForegroundBaseHighBrush";
+        private const string ThemeForegroundBrushKey = "TextFillColorPrimaryBrush";
 
         /// <summary>获取功能对应的 icc:// 命令路径（不含协议头）。</summary>
         public static string GetFeatureUri(string feature)

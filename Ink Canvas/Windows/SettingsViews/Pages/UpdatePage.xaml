@@ -21,7 +21,7 @@
                         </Grid.ColumnDefinitions>
 
                         <Grid Grid.Column="0" Width="48" Height="48" VerticalAlignment="Top" Margin="0,0,16,0">
-                            <Ellipse Fill="{DynamicResource SystemControlHighlightAccentBrush}" />
+                            <Ellipse Fill="{DynamicResource AccentFillColorDefaultBrush}" />
                             <Grid x:Name="CompletedStatusGlyph" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <Ellipse Stroke="White" StrokeThickness="2" />
                                 <Path Data="M 5,11 L 9,15 L 17,7" Stroke="White" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />

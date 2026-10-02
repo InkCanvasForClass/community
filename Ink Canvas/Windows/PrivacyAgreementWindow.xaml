@@ -50,7 +50,7 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <Border Grid.Column="0" Grid.RowSpan="2" Width="48" Height="48" Margin="0,0,16,0" VerticalAlignment="Top" CornerRadius="10" Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
+                <Border Grid.Column="0" Grid.RowSpan="2" Width="48" Height="48" Margin="0,0,16,0" VerticalAlignment="Top" CornerRadius="10" Background="{DynamicResource SolidBackgroundFillColorSecondaryBrush}">
                     <ui:SymbolIcon Symbol="Shield24" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
 
@@ -61,8 +61,8 @@
 
         <!-- 内容区 -->
         <ScrollViewer Grid.Row="2" x:Name="ContentScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" PanningMode="VerticalFirst" Padding="40,16,40,16">
-            <Border Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" CornerRadius="8" Padding="20,16" BorderThickness="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
-                <TextBlock Name="TextBoxPrivacyContent" TextWrapping="Wrap" LineHeight="22" FontSize="13" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+            <Border Background="{DynamicResource SolidBackgroundFillColorBaseBrush}" CornerRadius="8" Padding="20,16" BorderThickness="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
+                <TextBlock Name="TextBoxPrivacyContent" TextWrapping="Wrap" LineHeight="22" FontSize="13" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
             </Border>
         </ScrollViewer>
 

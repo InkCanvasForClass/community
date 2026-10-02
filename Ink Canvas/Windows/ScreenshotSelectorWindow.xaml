@@ -142,7 +142,7 @@
 
         <!-- 底部工具栏 -->
         <Border Background="{StaticResource ScreenshotBarBackgroundBrush}"
-                BorderBrush="{DynamicResource {DynamicResource CardStrokeColorDefaultBrush}}"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
                 CornerRadius="12"
                 Padding="10"
@@ -175,7 +175,7 @@
 
                 <Rectangle Width="1"
                            Height="32"
-                           Fill="{DynamicResource {DynamicResource DividerStrokeColorDefaultBrush}}"
+                           Fill="{DynamicResource DividerStrokeColorDefaultBrush}"
                            Margin="4,0" />
 
                 <!-- 操作按钮 -->
@@ -191,7 +191,7 @@
                 <Rectangle Name="ToolbarDividerRectangle"
                            Width="1"
                            Height="32"
-                           Fill="{DynamicResource {DynamicResource DividerStrokeColorDefaultBrush}}"
+                           Fill="{DynamicResource DividerStrokeColorDefaultBrush}"
                            Margin="4,0" />
                 <Button Name="ConfirmButton"
                         Style="{StaticResource ScreenshotBarActionButtonStyle}"

@@ -29,7 +29,7 @@
 
         <TextBlock Text="{x:Static props:RandomStrings.Random_AddIcon_PreviewLabel}" Margin="0,0,0,8" FontSize="14"/>
 
-        <Border BorderBrush="{DynamicResource ComboBoxBorderBrush}" BorderThickness="1" Padding="8" HorizontalAlignment="Left">
+        <Border BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" Padding="8" HorizontalAlignment="Left">
             <Image Name="IconPreviewImage" Width="64" Height="64" Stretch="Uniform"/>
         </Border>
     </StackPanel>

@@ -17,7 +17,7 @@
                             </Image.Clip>
                         </Image>
                         <TextBlock Text="{Binding Name}" HorizontalAlignment="Center" FontSize="18" FontWeight="Bold" />
-                        <TextBlock Text="{Binding Role}" HorizontalAlignment="Center" FontSize="12" TextElement.Foreground="{DynamicResource {DynamicResource AccentTextFillColorPrimaryBrush}}" />
+                        <TextBlock Text="{Binding Role}" HorizontalAlignment="Center" FontSize="12" TextElement.Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
                     </vio:SimpleStackPanel>
                 </DataTemplate>
                 <DataTemplate x:Key="ContributorAvatarTemplate">
@@ -81,7 +81,7 @@
                         </StackPanel>
                     </ui:CardExpander>
 
-                    <Border Background="{DynamicResource {DynamicResource LayerFillColorDefaultBrush}}" BorderBrush="{DynamicResource {DynamicResource CardStrokeColorDefaultBrush}}" CornerRadius="4" BorderThickness="1" Padding="12,10" TextElement.FontSize="14">
+                    <Border Background="{DynamicResource LayerFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" CornerRadius="4" BorderThickness="1" Padding="12,10" TextElement.FontSize="14">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
@@ -89,7 +89,7 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
-                            <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8" TextElement.Foreground="{DynamicResource {DynamicResource AccentTextFillColorPrimaryBrush}}" Margin="0,3,0,0">
+                            <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8" TextElement.Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" Margin="0,3,0,0">
                                 <ui:SymbolIcon Symbol="Info24" FontSize="24" />
                                 <TextBlock FontSize="16" VerticalAlignment="Center" FontWeight="SemiBold" Text="{x:Static props:AboutStrings.LicenseTitle}" />
                             </vio:SimpleStackPanel>

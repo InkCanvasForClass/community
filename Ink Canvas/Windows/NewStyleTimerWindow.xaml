@@ -13,7 +13,7 @@
         MinHeight="420"
         Topmost="True"
         WindowStartupLocation="CenterScreen"
-        Background="{DynamicResource ApplicationPageBackgroundThemeBrush}"
+        Background="{DynamicResource ApplicationBackgroundBrush}"
 
 
 
@@ -34,10 +34,10 @@
                     <Grid Height="50" x:Name="TitleBar" VerticalAlignment="Top" Margin="0,0,450,0" Background="Transparent" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="22,0,0,0">
                             <Path Data="M5 13a7 7 0 1 0 14 0a7 7 0 0 0 -14 0z M14.5 10.5l-2.5 2.5 M17 8l1 -1 M14 3h-4"
-                                  Stroke="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"
+                                  Stroke="{DynamicResource TextFillColorPrimaryBrush}"
                                   StrokeThickness="2" StrokeLineJoin="Round" Fill="Transparent" Width="24" Height="24" Stretch="Uniform" Margin="0,0,8,0"/>
                             <TextBlock Text="{x:Static props:TimerStrings.Timer_Title}" FontSize="28" FontWeight="Bold"
-                                       Foreground="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                        x:Name="TitleText"/>
                         </StackPanel>
                     </Grid>
@@ -53,30 +53,30 @@
                                         <Grid Margin="0,0,15,0">
                                             <StackPanel HorizontalAlignment="Center">
                                                 <Button x:Name="Digit1PlusBtn" Width="40" Height="40" Cursor="Hand" Click="Digit1Plus_Click" Margin="0,0,0,15"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="15"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
-                                                    <Path Data="M12 5l0 14 M5 12l14 0" Stroke="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
+                                                    <Path Data="M12 5l0 14 M5 12l14 0" Stroke="{DynamicResource TextFillColorPrimaryBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
                                                 </Button>
                                                 <Path x:Name="Digit1Display" Data="{StaticResource Digit0}" Fill="{DynamicResource NewTimerWindowDigitForeground}" Width="48" Height="48" HorizontalAlignment="Center" Stretch="Uniform" Margin="0,0,0,15"/>
                                                 <Button x:Name="Digit1MinusBtn" Width="40" Height="40" Cursor="Hand" Click="Digit1Minus_Click"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="15"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
-                                                    <Path Data="M5 12l14 0" Stroke="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
+                                                    <Path Data="M5 12l14 0" Stroke="{DynamicResource TextFillColorPrimaryBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
                                                 </Button>
                                             </StackPanel>
                                         </Grid>
                                         <Grid>
                                             <StackPanel HorizontalAlignment="Center">
                                                 <Button x:Name="Digit2PlusBtn" Width="40" Height="40" Cursor="Hand" Click="Digit2Plus_Click" Margin="0,0,0,15"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="15"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
-                                                    <Path Data="M12 5l0 14 M5 12l14 0" Stroke="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
+                                                    <Path Data="M12 5l0 14 M5 12l14 0" Stroke="{DynamicResource TextFillColorPrimaryBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
                                                 </Button>
                                                 <Path x:Name="Digit2Display" Data="{StaticResource Digit0}" Fill="{DynamicResource NewTimerWindowDigitForeground}" Width="48" Height="48" HorizontalAlignment="Center" Stretch="Uniform" Margin="0,0,0,15"/>
                                                 <Button x:Name="Digit2MinusBtn" Width="40" Height="40" Cursor="Hand" Click="Digit2Minus_Click"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="15"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
-                                                    <Path Data="M5 12l14 0" Stroke="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
+                                                    <Path Data="M5 12l14 0" Stroke="{DynamicResource TextFillColorPrimaryBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
                                                 </Button>
                                             </StackPanel>
                                         </Grid>
@@ -90,30 +90,30 @@
                                         <Grid Margin="0,0,15,0">
                                             <StackPanel HorizontalAlignment="Center">
                                                 <Button x:Name="Digit3PlusBtn" Width="40" Height="40" Cursor="Hand" Click="Digit3Plus_Click" Margin="0,0,0,15"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="15"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
-                                                    <Path Data="M12 5l0 14 M5 12l14 0" Stroke="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
+                                                    <Path Data="M12 5l0 14 M5 12l14 0" Stroke="{DynamicResource TextFillColorPrimaryBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
                                                 </Button>
                                                 <Path x:Name="Digit3Display" Data="{StaticResource Digit0}" Fill="{DynamicResource NewTimerWindowDigitForeground}" Width="48" Height="48" HorizontalAlignment="Center" Stretch="Uniform" Margin="0,0,0,15"/>
                                                 <Button x:Name="Digit3MinusBtn" Width="40" Height="40" Cursor="Hand" Click="Digit3Minus_Click"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="15"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
-                                                    <Path Data="M5 12l14 0" Stroke="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
+                                                    <Path Data="M5 12l14 0" Stroke="{DynamicResource TextFillColorPrimaryBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
                                                 </Button>
                                             </StackPanel>
                                         </Grid>
                                         <Grid>
                                             <StackPanel HorizontalAlignment="Center">
                                                 <Button x:Name="Digit4PlusBtn" Width="40" Height="40" Cursor="Hand" Click="Digit4Plus_Click" Margin="0,0,0,15"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="15"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
-                                                    <Path Data="M12 5l0 14 M5 12l14 0" Stroke="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
+                                                    <Path Data="M12 5l0 14 M5 12l14 0" Stroke="{DynamicResource TextFillColorPrimaryBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
                                                 </Button>
                                                 <Path x:Name="Digit4Display" Data="{StaticResource Digit0}" Fill="{DynamicResource NewTimerWindowDigitForeground}" Width="48" Height="48" HorizontalAlignment="Center" Stretch="Uniform" Margin="0,0,0,15"/>
                                                 <Button x:Name="Digit4MinusBtn" Width="40" Height="40" Cursor="Hand" Click="Digit4Minus_Click"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="15"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
-                                                    <Path Data="M5 12l14 0" Stroke="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
+                                                    <Path Data="M5 12l14 0" Stroke="{DynamicResource TextFillColorPrimaryBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
                                                 </Button>
                                             </StackPanel>
                                         </Grid>
@@ -127,30 +127,30 @@
                                         <Grid Margin="0,0,15,0">
                                             <StackPanel HorizontalAlignment="Center">
                                                 <Button x:Name="Digit5PlusBtn" Width="40" Height="40" Cursor="Hand" Click="Digit5Plus_Click" Margin="0,0,0,15"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="15"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
-                                                    <Path Data="M12 5l0 14 M5 12l14 0" Stroke="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
+                                                    <Path Data="M12 5l0 14 M5 12l14 0" Stroke="{DynamicResource TextFillColorPrimaryBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
                                                 </Button>
                                                 <Path x:Name="Digit5Display" Data="{StaticResource Digit0}" Fill="{DynamicResource NewTimerWindowDigitForeground}" Width="48" Height="48" HorizontalAlignment="Center" Stretch="Uniform" Margin="0,0,0,15"/>
                                                 <Button x:Name="Digit5MinusBtn" Width="40" Height="40" Cursor="Hand" Click="Digit5Minus_Click"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="15"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
-                                                    <Path Data="M5 12l14 0" Stroke="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
+                                                    <Path Data="M5 12l14 0" Stroke="{DynamicResource TextFillColorPrimaryBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
                                                 </Button>
                                             </StackPanel>
                                         </Grid>
                                         <Grid>
                                             <StackPanel HorizontalAlignment="Center">
                                                 <Button x:Name="Digit6PlusBtn" Width="40" Height="40" Cursor="Hand" Click="Digit6Plus_Click" Margin="0,0,0,15"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="15"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
-                                                    <Path Data="M12 5l0 14 M5 12l14 0" Stroke="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
+                                                    <Path Data="M12 5l0 14 M5 12l14 0" Stroke="{DynamicResource TextFillColorPrimaryBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
                                                 </Button>
                                                 <Path x:Name="Digit6Display" Data="{StaticResource Digit0}" Fill="{DynamicResource NewTimerWindowDigitForeground}" Width="48" Height="48" HorizontalAlignment="Center" Stretch="Uniform" Margin="0,0,0,15"/>
                                                 <Button x:Name="Digit6MinusBtn" Width="40" Height="40" Cursor="Hand" Click="Digit6Minus_Click"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="15"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
-                                                    <Path Data="M5 12l14 0" Stroke="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
+                                                    <Path Data="M5 12l14 0" Stroke="{DynamicResource TextFillColorPrimaryBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform"/>
                                                 </Button>
                                             </StackPanel>
                                         </Grid>
@@ -160,7 +160,7 @@
                         </Grid>
 
                         <!-- Divider -->
-                        <Border Width="2" Background="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}" Opacity="0.3"
+                        <Border Width="2" Background="{DynamicResource TextFillColorPrimaryBrush}" Opacity="0.3"
                                 HorizontalAlignment="Left" VerticalAlignment="Stretch" Margin="465,0,0,0"/>
 
                         <!-- Right: quick options with TabControl -->
@@ -176,59 +176,59 @@
                                         <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
                                                 <Button x:Name="Common5MinBtn" Width="100" Height="55" Cursor="Hand" Click="Common5Min_Click" Margin="0,0,15,0"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="6"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                                         <Path Data="M10 15h2a1.5 1.5 0 0 0 0 -3h-2v-3h3.5 M3 12v.01 M21 12v.01 M12 21v.01 M7.5 4.2v.01 M16.5 19.8v.01 M7.5 19.8v.01 M4.2 16.5v.01 M19.8 16.5v.01 M19.8 7.5v.01 M4.2 7.5v.01 M16.5 4.206a9.042 9.042 0 0 0 -4.5 -1.206"
-                                                              Stroke="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform" Margin="0,0,8,0"/>
-                                                        <TextBlock Text="05:00" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"/>
+                                                              Stroke="{DynamicResource TextFillColorPrimaryBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform" Margin="0,0,8,0"/>
+                                                        <TextBlock Text="05:00" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                                                     </StackPanel>
                                                 </Button>
                                                 <Button x:Name="Common10MinBtn" Width="100" Height="55" Cursor="Hand" Click="Common10Min_Click" Margin="0,0,15,0"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="6"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                                         <Path Data="M9 9v6 M12 11v2a2 2 0 1 0 4 0v-2a2 2 0 1 0 -4 0z M3 12v.01 M21 12v.01 M12 21v.01 M7.5 4.2v.01 M16.5 19.8v.01 M7.5 19.8v.01 M4.2 16.5v.01 M19.8 16.5v.01 M4.2 7.5v.01 M19.81 7.527a8.994 8.994 0 0 0 -7.81 -4.527"
-                                                              Stroke="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform" Margin="0,0,8,0"/>
-                                                        <TextBlock Text="10:00" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"/>
+                                                              Stroke="{DynamicResource TextFillColorPrimaryBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform" Margin="0,0,8,0"/>
+                                                        <TextBlock Text="10:00" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                                                     </StackPanel>
                                                 </Button>
                                                 <Button x:Name="Common15MinBtn" Width="100" Height="55" Cursor="Hand" Click="Common15Min_Click"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="6"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                                         <Path Data="M12 15h2a1 1 0 0 0 1 -1v-1a1 1 0 0 0 -1 -1h-2v-3h3 M9 9v6 M3 12v.01 M12 21v.01 M7.5 4.2v.01 M16.5 19.8v.01 M7.5 19.8v.01 M4.2 16.5v.01 M19.8 16.5v.01 M4.2 7.5v.01 M21 12a9 9 0 0 0 -9 -9"
-                                                              Stroke="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform" Margin="0,0,8,0"/>
-                                                        <TextBlock Text="15:00" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"/>
+                                                              Stroke="{DynamicResource TextFillColorPrimaryBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform" Margin="0,0,8,0"/>
+                                                        <TextBlock Text="15:00" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                                                     </StackPanel>
                                                 </Button>
                                             </StackPanel>
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                                 <Button x:Name="Common30MinBtn" Width="100" Height="55" Cursor="Hand" Click="Common30Min_Click" Margin="0,0,15,0"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="6"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                                         <Path Data="M14 10.5v3a1.5 1.5 0 0 0 3 0v-3a1.5 1.5 0 0 0 -3 0z M8 9h1.5a1.5 1.5 0 0 1 0 3h-.5h.5a1.5 1.5 0 0 1 0 3h-1.5 M3 12v.01 M7.5 4.2v.01 M7.5 19.8v.01 M4.2 16.5v.01 M4.2 7.5v.01 M12 21a9 9 0 0 0 0 -18"
-                                                              Stroke="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform" Margin="0,0,8,0"/>
-                                                        <TextBlock Text="30:00" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"/>
+                                                              Stroke="{DynamicResource TextFillColorPrimaryBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform" Margin="0,0,8,0"/>
+                                                        <TextBlock Text="30:00" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                                                     </StackPanel>
                                                 </Button>
                                                 <Button x:Name="Common45MinBtn" Width="100" Height="55" Cursor="Hand" Click="Common45Min_Click" Margin="0,0,15,0"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="6"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                                         <Path Data="M13 15h2a1 1 0 0 0 1 -1v-1a1 1 0 0 0 -1 -1h-2v-3h3 M7 9v2a1 1 0 0 0 1 1h1 M10 9v6 M7.5 4.2v.01 M4.2 7.5v.01 M3 12a9 9 0 1 0 9 -9"
-                                                              Stroke="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform" Margin="0,0,8,0"/>
-                                                        <TextBlock Text="45:00" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"/>
+                                                              Stroke="{DynamicResource TextFillColorPrimaryBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform" Margin="0,0,8,0"/>
+                                                        <TextBlock Text="45:00" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                                                     </StackPanel>
                                                 </Button>
                                                 <Button x:Name="Common60MinBtn" Width="100" Height="55" Cursor="Hand" Click="Common60Min_Click"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="6"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                                         <Path Data="M14 10.5v3a1.5 1.5 0 0 0 3 0v-3a1.5 1.5 0 0 0 -3 0z M11 9h-2a1 1 0 0 0 -1 1v4a1 1 0 0 0 1 1h1a1 1 0 0 0 1 -1v-1a1 1 0 0 0 -1 -1h-2 M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"
-                                                              Stroke="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform" Margin="0,0,8,0"/>
-                                                        <TextBlock Text="60:00" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"/>
+                                                              Stroke="{DynamicResource TextFillColorPrimaryBrush}" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform" Margin="0,0,8,0"/>
+                                                        <TextBlock Text="60:00" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                                                     </StackPanel>
                                                 </Button>
                                             </StackPanel>
@@ -240,36 +240,36 @@
                                         <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
                                                 <Button x:Name="RecentTimer1Btn" Width="100" Height="55" Cursor="Hand" Click="RecentTimer1_Click" Margin="0,0,15,0"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="6"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
-                                                    <TextBlock x:Name="RecentTimer1Text" Text="--:--" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"/>
+                                                    <TextBlock x:Name="RecentTimer1Text" Text="--:--" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                                                 </Button>
                                                 <Button x:Name="RecentTimer2Btn" Width="100" Height="55" Cursor="Hand" Click="RecentTimer2_Click" Margin="0,0,15,0"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="6"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
-                                                    <TextBlock x:Name="RecentTimer2Text" Text="--:--" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"/>
+                                                    <TextBlock x:Name="RecentTimer2Text" Text="--:--" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                                                 </Button>
                                                 <Button x:Name="RecentTimer3Btn" Width="100" Height="55" Cursor="Hand" Click="RecentTimer3_Click"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="6"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
-                                                    <TextBlock x:Name="RecentTimer3Text" Text="--:--" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"/>
+                                                    <TextBlock x:Name="RecentTimer3Text" Text="--:--" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                                                 </Button>
                                             </StackPanel>
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                                 <Button x:Name="RecentTimer4Btn" Width="100" Height="55" Cursor="Hand" Click="RecentTimer4_Click" Margin="0,0,15,0"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="6"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
-                                                    <TextBlock x:Name="RecentTimer4Text" Text="--:--" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"/>
+                                                    <TextBlock x:Name="RecentTimer4Text" Text="--:--" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                                                 </Button>
                                                 <Button x:Name="RecentTimer5Btn" Width="100" Height="55" Cursor="Hand" Click="RecentTimer5_Click" Margin="0,0,15,0"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="6"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
-                                                    <TextBlock x:Name="RecentTimer5Text" Text="--:--" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"/>
+                                                    <TextBlock x:Name="RecentTimer5Text" Text="--:--" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                                                 </Button>
                                                 <Button x:Name="RecentTimer6Btn" Width="100" Height="55" Cursor="Hand" Click="RecentTimer6_Click"
-                                                        Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                                        Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                                     <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="6"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
-                                                    <TextBlock x:Name="RecentTimer6Text" Text="--:--" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"/>
+                                                    <TextBlock x:Name="RecentTimer6Text" Text="--:--" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                                                 </Button>
                                             </StackPanel>
                                         </StackPanel>
@@ -283,7 +283,7 @@
                     <Grid HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,20">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <Button x:Name="FullscreenBtn" Width="110" Height="40" Cursor="Hand" Click="Fullscreen_Click" Margin="0,0,30,0" IsEnabled="False"
-                                    Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                    Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8">
@@ -298,26 +298,26 @@
                                 </Button.Template>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <Path Data="M4 8v-2a2 2 0 0 1 2 -2h2 M4 16v2a2 2 0 0 0 2 2h2 M16 4h2a2 2 0 0 1 2 2v2 M16 20h2a2 2 0 0 0 2 -2v-2"
-                                          Stroke="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}" StrokeThickness="2" StrokeLineJoin="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform" Margin="0,0,5,0"/>
+                                          Stroke="{DynamicResource TextFillColorPrimaryBrush}" StrokeThickness="2" StrokeLineJoin="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform" Margin="0,0,5,0"/>
                                     <TextBlock Text="{x:Static props:TimerStrings.Timer_FullScreen}" FontSize="16"
-                                               Foreground="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"/>
+                                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                                 </StackPanel>
                             </Button>
                             <Button x:Name="StartPauseBtn" Width="80" Height="80" Cursor="Hand" Click="StartPause_Click" Margin="0,0,30,0"
-                                    Background="{DynamicResource {DynamicResource AccentFillColorDefaultBrush}}" BorderThickness="0">
+                                    Background="{DynamicResource AccentFillColorDefaultBrush}" BorderThickness="0">
                                 <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="40"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
                                 <Path x:Name="StartPauseIcon"
                                       Data="M6.5 4.00004V20C6.49995 20.178 6.54737 20.3527 6.63738 20.5062C6.72739 20.6597 6.85672 20.7864 7.01202 20.8732C7.16733 20.96 7.34299 21.0038 7.52088 21.0001C7.69878 20.9964 7.87245 20.9453 8.024 20.852L21.024 12.852C21.1696 12.7626 21.2898 12.6373 21.3733 12.4881C21.4567 12.339 21.5005 12.1709 21.5005 12C21.5005 11.8291 21.4567 11.6611 21.3733 11.512C21.2898 11.3628 21.1696 11.2375 21.024 11.148L8.024 3.14804C7.87245 3.0548 7.69878 3.00369 7.52088 2.99997C7.34299 2.99626 7.16733 3.04007 7.01202 3.1269C6.85672 3.21372 6.72739 3.34042 6.63738 3.4939C6.54737 3.64739 6.49995 3.82211 6.5 4.00004Z"
                                       Fill="White" Width="24" Height="24" Margin="2,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Fill"/>
                             </Button>
                             <Button x:Name="ResetBtn" Width="110" Height="40" Cursor="Hand" Click="Reset_Click"
-                                    Background="{DynamicResource {DynamicResource ControlFillColorDefaultBrush}}" BorderThickness="0">
+                                    Background="{DynamicResource ControlFillColorDefaultBrush}" BorderThickness="0">
                                 <Button.Template><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" CornerRadius="8"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Button.Template>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <Path Data="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4 M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"
-                                          Stroke="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}" StrokeThickness="2" StrokeLineJoin="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform" Margin="0,0,5,0"/>
+                                          Stroke="{DynamicResource TextFillColorPrimaryBrush}" StrokeThickness="2" StrokeLineJoin="Round" Fill="Transparent" Width="20" Height="20" Stretch="Uniform" Margin="0,0,5,0"/>
                                     <TextBlock Text="{x:Static props:TimerStrings.Timer_Reset}" FontSize="16"
-                                               Foreground="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"/>
+                                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                                 </StackPanel>
                             </Button>
                         </StackPanel>

@@ -39,7 +39,7 @@
                     Margin="0,8,0,12"
                     Padding="16"
                     CornerRadius="10"
-                    Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+                    Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -88,7 +88,7 @@
 
                 <Border Grid.Column="0"
                         CornerRadius="10"
-                        Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+                        Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
                     <ui:ListView x:Name="AnnouncementListBox"
                                  BorderThickness="0"
                                  Background="Transparent"
@@ -176,7 +176,7 @@
                 <Border Grid.Column="2"
                         Padding="20"
                         CornerRadius="10"
-                        Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+                        Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />

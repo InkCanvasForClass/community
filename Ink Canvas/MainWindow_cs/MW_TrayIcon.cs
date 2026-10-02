@@ -699,8 +699,8 @@ namespace Ink_Canvas
                     {
                         Text = text,
                         FontSize = 14,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Foreground = new SolidColorBrush(Color.FromRgb(0x18, 0x18, 0x1b))
+                        VerticalAlignment = VerticalAlignment.Center
+                        // 不写死 Foreground：跟随 ContextMenu 的主题前景色，深色主题下才可读
                     }
                 };
                 item.Click += (s, e) => onClicked();

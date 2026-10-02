@@ -56,7 +56,7 @@ Title="{x:Static props:AnnouncementStrings.CenterTitle}"
                     <Border Padding="12"
                             Margin="0,0,0,8"
                             CornerRadius="8"
-                            Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+                            Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
                         <StackPanel>
                             <DockPanel LastChildFill="True">
                                 <TextBlock Text="{Binding Type}"

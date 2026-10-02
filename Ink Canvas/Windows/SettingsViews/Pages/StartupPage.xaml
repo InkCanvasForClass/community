@@ -224,17 +224,17 @@
                                         <vio:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                             <Border x:Name="BorderTextAlignLeft" Width="36" Height="30" PreviewMouseLeftButtonDown="BorderTextAlign_Click" Tag="0" Cursor="Hand" Panel.ZIndex="2">
                                                 <Canvas>
-                                                    <ui:SymbolIcon Symbol="AlignLeft24" FontSize="14" Canvas.Left="11" Canvas.Top="8" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+                                                    <ui:SymbolIcon Symbol="AlignLeft24" FontSize="14" Canvas.Left="11" Canvas.Top="8" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                                                 </Canvas>
                                             </Border>
                                             <Border x:Name="BorderTextAlignCenter" Width="36" Height="30" PreviewMouseLeftButtonDown="BorderTextAlign_Click" Tag="1" Cursor="Hand" Panel.ZIndex="2">
                                                 <Canvas>
-                                                    <ui:SymbolIcon Symbol="AlignCenterHorizontal24" FontSize="14" Canvas.Left="11" Canvas.Top="8" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+                                                    <ui:SymbolIcon Symbol="AlignCenterHorizontal24" FontSize="14" Canvas.Left="11" Canvas.Top="8" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                                                 </Canvas>
                                             </Border>
                                             <Border x:Name="BorderTextAlignRight" Width="36" Height="30" PreviewMouseLeftButtonDown="BorderTextAlign_Click" Tag="2" Cursor="Hand" Panel.ZIndex="2">
                                                 <Canvas>
-                                                    <ui:SymbolIcon Symbol="AlignRight24" FontSize="14" Canvas.Left="11" Canvas.Top="8" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+                                                    <ui:SymbolIcon Symbol="AlignRight24" FontSize="14" Canvas.Left="11" Canvas.Top="8" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
                                                 </Canvas>
                                             </Border>
                                         </vio:SimpleStackPanel>

@@ -29,7 +29,7 @@
 
         <TextBlock Text="{x:Static props:RandomStrings.Random_AddBg_PreviewLabel}" Margin="0,0,0,8" FontSize="14"/>
 
-        <Border BorderBrush="{DynamicResource ComboBoxBorderBrush}" BorderThickness="1" Padding="8" MaxHeight="160">
+        <Border BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" Padding="8" MaxHeight="160">
             <Grid>
                 <Image Name="BackgroundPreviewImage" Stretch="Uniform" MaxHeight="140"/>
                 <TextBlock Text="{x:Static props:RandomStrings.Random_AddBg_NoImage}" HorizontalAlignment="Center" VerticalAlignment="Center"

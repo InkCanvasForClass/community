@@ -18,10 +18,10 @@
     </Window.Resources>
 
     <Border x:Name="MainBorder"
-            Background="{DynamicResource {DynamicResource CardBackgroundFillColorDefaultBrush}}"
+            Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
             CornerRadius="12"
             BorderThickness="1"
-            BorderBrush="{DynamicResource {DynamicResource CardStrokeColorDefaultBrush}}"
+            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
             MouseLeftButtonDown="MainBorder_MouseLeftButtonDown">
         <Grid>
             <!-- Close button -->
@@ -47,7 +47,7 @@
                     </ControlTemplate>
                 </Button.Template>
                 <TextBlock Text="✕" FontSize="12" FontWeight="Bold"
-                           Foreground="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"
+                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Button>
 
@@ -73,7 +73,7 @@
                     </ControlTemplate>
                 </Button.Template>
                 <TextBlock Text="💡" FontSize="14"
-                           Foreground="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"
+                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Button>
 

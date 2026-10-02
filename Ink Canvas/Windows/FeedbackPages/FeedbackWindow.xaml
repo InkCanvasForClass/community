@@ -28,7 +28,7 @@
                         Click="ButtonCancel_Click">
                     <Button.Style>
                         <Style TargetType="Button">
-                            <Setter Property="Foreground" Value="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}"/>
                         </Style>
                     </Button.Style>
                 </Button>
@@ -44,7 +44,7 @@
                         Click="ButtonBack_Click" Visibility="Collapsed">
                     <Button.Style>
                         <Style TargetType="Button">
-                            <Setter Property="Foreground" Value="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}"/>
                         </Style>
                     </Button.Style>
                 </Button>

@@ -12,7 +12,7 @@
                 <GridViewColumn Header="{x:Static props:RandomStrings.Random_Preview}" Width="130">
                     <GridViewColumn.CellTemplate>
                         <DataTemplate>
-                            <Border BorderThickness="1" BorderBrush="{DynamicResource ComboBoxBorderBrush}">
+                            <Border BorderThickness="1" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
                                 <Image Source="{Binding FilePath}" Width="120" Height="68" Stretch="Uniform"/>
                             </Border>
                         </DataTemplate>

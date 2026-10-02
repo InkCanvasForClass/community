@@ -106,7 +106,7 @@
                     <!-- 欢迎页 (居中布局, 不进 ScrollViewer 的滚动条) -->
                     <Grid x:Name="WelcomePanel" Visibility="Visible">
                         <vio:SimpleStackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="640" Spacing="16">
-                            <Border Width="96" Height="96" HorizontalAlignment="Center" CornerRadius="20" Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
+                            <Border Width="96" Height="96" HorizontalAlignment="Center" CornerRadius="20" Background="{DynamicResource SolidBackgroundFillColorSecondaryBrush}">
                                 <Image Source="\Resources\icc.ico" Width="64" RenderOptions.BitmapScalingMode="HighQuality" />
                             </Border>
 
@@ -342,7 +342,7 @@
                     <Grid x:Name="FinishPanel" Visibility="Collapsed">
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                             <vio:SimpleStackPanel HorizontalAlignment="Center" VerticalAlignment="Top" MaxWidth="640" Margin="40,32,40,16" Spacing="14">
-                                <Border Width="80" Height="80" HorizontalAlignment="Center" CornerRadius="20" Background="{DynamicResource SystemControlBackgroundAccentBrush}">
+                                <Border Width="80" Height="80" HorizontalAlignment="Center" CornerRadius="20" Background="{DynamicResource AccentFillColorDefaultBrush}">
                                     <ui:SymbolIcon FontSize="40" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Symbol="Checkmark24" />
                                 </Border>
 
@@ -350,7 +350,7 @@
 
                                 <TextBlock HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Opacity="0.85" Style="{DynamicResource BodyTextBlockStyle}" Text="{x:Static props:OobeStrings.Oobe_FinishDesc}" />
 
-                                <Border CornerRadius="8" Padding="16" Margin="0,8,0,0" BorderThickness="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}">
+                                <Border CornerRadius="8" Padding="16" Margin="0,8,0,0" BorderThickness="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
                                     <vio:SimpleStackPanel x:Name="FinishSummaryHost" Spacing="6" />
                                 </Border>
                             </vio:SimpleStackPanel>

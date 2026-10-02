@@ -35,7 +35,7 @@
                            Margin="0,0,8,0" VerticalAlignment="Center"/>
                     <TextBlock Text="{x:Static fb:FloatingBarStrings.FloatingBar_Whiteboard}"
                                FontSize="12"
-                               Foreground="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"
+                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                VerticalAlignment="Center"/>
                 </StackPanel>
             </Border>
@@ -59,7 +59,7 @@
                            Margin="0,0,8,0" VerticalAlignment="Center"/>
                     <TextBlock Text="{x:Static fb:FloatingBarStrings.FloatingBar_MiniWhiteboard}"
                                FontSize="12"
-                               Foreground="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"
+                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                VerticalAlignment="Center"/>
                 </StackPanel>
             </Border>
