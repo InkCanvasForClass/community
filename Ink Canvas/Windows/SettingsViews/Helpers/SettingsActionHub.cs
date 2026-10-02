@@ -798,9 +798,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             if (mw != null)
             {
                 if (mw.FloatingBarToggleSwitchEnableInkToShape != null)
-                    mw.FloatingBarToggleSwitchEnableInkToShape.IsOn = isOn;
+                    mw.FloatingBarToggleSwitchEnableInkToShape.IsChecked = isOn;
                 if (mw.BoardToggleSwitchEnableInkToShape != null)
-                    mw.BoardToggleSwitchEnableInkToShape.IsOn = isOn;
+                    mw.BoardToggleSwitchEnableInkToShape.IsChecked = isOn;
             }
         }
 

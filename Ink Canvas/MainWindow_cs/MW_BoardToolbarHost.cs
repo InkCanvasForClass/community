@@ -2,7 +2,7 @@ using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar.BoardToolbar;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
-using iNKORE.UI.WPF.Controls;
+using SimpleStackPanel = Wpf.Ui.Violeta.Controls.Compat.SimpleStackPanel;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -12,7 +12,8 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
-using SegoeFluentIcons = iNKORE.UI.WPF.Modern.Common.IconKeys.SegoeFluentIcons;
+using SymbolIcon = Wpf.Ui.Controls.SymbolIcon;
+using SymbolRegular = Wpf.Ui.Controls.SymbolRegular;
 
 namespace Ink_Canvas
 {
@@ -781,9 +782,9 @@ namespace Ink_Canvas
             deleteBtnFactory.SetBinding(UIElement.VisibilityProperty,
                 new System.Windows.Data.Binding("ShowDeleteButton") { Converter = boolToVis });
 
-            var fontIconFactory = new FrameworkElementFactory(typeof(iNKORE.UI.WPF.Modern.Controls.FontIcon));
-            fontIconFactory.SetValue(iNKORE.UI.WPF.Modern.Controls.FontIcon.IconProperty,
-                SegoeFluentIcons.Delete);
+            var fontIconFactory = new FrameworkElementFactory(typeof(Wpf.Ui.Controls.FontIcon));
+            fontIconFactory.SetValue(Wpf.Ui.Controls.FontIcon.IconProperty,
+                SymbolRegular.Delete);
             deleteBtnFactory.AppendChild(fontIconFactory);
 
             // 选中小蓝条：朝向屏幕中央——左侧控件弹出的列表条在右，右侧控件弹出的条在左

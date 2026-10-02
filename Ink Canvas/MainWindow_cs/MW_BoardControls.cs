@@ -419,7 +419,7 @@ namespace Ink_Canvas
                     // 更新UI状态
                     if (ToggleSwitchEnableMultiTouchMode != null)
                     {
-                        ToggleSwitchEnableMultiTouchMode.IsOn = true;
+                        ToggleSwitchEnableMultiTouchMode.IsChecked = true;
                     }
 
                     LogHelper.WriteLogToFile($"恢复多指书写模式状态 - 页面索引: {pageIndex}", LogHelper.LogType.Info);
@@ -429,7 +429,7 @@ namespace Ink_Canvas
                     // 更新UI状态
                     if (ToggleSwitchEnableMultiTouchMode != null)
                     {
-                        ToggleSwitchEnableMultiTouchMode.IsOn = false;
+                        ToggleSwitchEnableMultiTouchMode.IsChecked = false;
                     }
                 }
             }

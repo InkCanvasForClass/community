@@ -55,8 +55,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
             var opacitySlider = (Slider)panel.FindName("OpacitySlider");
 
             // 初始化控件状态
-            enableCard.IsOn = settings.IsEnabled;
-            syncPptCard.IsOn = settings.SyncWithPPTPages;
+            enableCard.IsChecked = settings.IsEnabled;
+            syncPptCard.IsChecked = settings.SyncWithPPTPages;
             widthSlider.Value = settings.DefaultWidth;
             heightSlider.Value = settings.DefaultHeight;
             opacitySlider.Value = settings.DefaultOpacity;
@@ -67,12 +67,12 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
             // 绑定事件
             enableCard.Toggled += (s, e) =>
             {
-                SettingsManager.Settings.MiniWhiteboard.IsEnabled = enableCard.IsOn;
+                SettingsManager.Settings.MiniWhiteboard.IsEnabled = ((enableCard.IsChecked) == true);
                 SettingsManager.SaveSettingsToFile();
             };
             syncPptCard.Toggled += (s, e) =>
             {
-                SettingsManager.Settings.MiniWhiteboard.SyncWithPPTPages = syncPptCard.IsOn;
+                SettingsManager.Settings.MiniWhiteboard.SyncWithPPTPages = ((syncPptCard.IsChecked) == true);
                 SettingsManager.SaveSettingsToFile();
             };
             widthSlider.ValueChanged += (s, e) =>

@@ -5,7 +5,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using Page = System.Windows.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -54,7 +54,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             // 加载更小批注栏（Issue #285）设置
             if (ToggleSwitchEnableIdleMiniBar != null)
-                ToggleSwitchEnableIdleMiniBar.IsOn = settings.Appearance.EnableIdleMiniBar;
+                ToggleSwitchEnableIdleMiniBar.IsChecked = settings.Appearance.EnableIdleMiniBar;
             if (IdleMiniBarOpacitySlider != null)
                 IdleMiniBarOpacitySlider.Value = settings.Appearance.IdleMiniBarOpacity;
             if (IdleMiniBarAutoRestoreSlider != null)
@@ -62,7 +62,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             // 加载液态玻璃浮动栏设置
             if (ToggleSwitchEnableLiquidGlassBar != null)
-                ToggleSwitchEnableLiquidGlassBar.IsOn = settings.Appearance.EnableLiquidGlassBar;
+                ToggleSwitchEnableLiquidGlassBar.IsChecked = settings.Appearance.EnableLiquidGlassBar;
             if (LiquidGlassBarOpacitySlider != null)
                 LiquidGlassBarOpacitySlider.Value = settings.Appearance.LiquidGlassBarOpacity;
 
@@ -80,46 +80,46 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // 加载翻转内容设置
             if (CardReverseToolbarContent != null)
             {
-                CardReverseToolbarContent.IsOn = settings.Appearance.ReverseToolbarContent;
+                CardReverseToolbarContent.IsChecked = settings.Appearance.ReverseToolbarContent;
             }
 
             // 加载自动翻转设置
             if (ToggleSwitchAutoFlipWhenSpaceInsufficient != null)
             {
-                ToggleSwitchAutoFlipWhenSpaceInsufficient.IsOn = settings.Appearance.AutoFlipWhenSpaceInsufficient;
+                ToggleSwitchAutoFlipWhenSpaceInsufficient.IsChecked = settings.Appearance.AutoFlipWhenSpaceInsufficient;
             }
 
             // 加载自动翻转后翻转组件内容设置
             if (ToggleSwitchFlipContentOnAutoFlip != null)
             {
-                ToggleSwitchFlipContentOnAutoFlip.IsOn = settings.Appearance.FlipContentOnAutoFlip;
+                ToggleSwitchFlipContentOnAutoFlip.IsChecked = settings.Appearance.FlipContentOnAutoFlip;
             }
 
             // 加载禁止工具栏动画设置
             if (CardDisableToolbarAnimation != null)
             {
-                CardDisableToolbarAnimation.IsOn = settings.Appearance.DisableToolbarAnimation;
+                CardDisableToolbarAnimation.IsChecked = settings.Appearance.DisableToolbarAnimation;
             }
 
             // 加载旧版浮动栏 UI 设置
             if (CardUseLegacyFloatingBarUI != null)
-                CardUseLegacyFloatingBarUI.IsOn = settings.Appearance.UseLegacyFloatingBarUI;
+                CardUseLegacyFloatingBarUI.IsChecked = settings.Appearance.UseLegacyFloatingBarUI;
 
             // 加载在浮动栏图标上显示笔色设置
             if (CardShowPenColorOnFloatingBarIcon != null)
-                CardShowPenColorOnFloatingBarIcon.IsOn = settings.Appearance.ShowPenColorOnFloatingBarIcon;
+                CardShowPenColorOnFloatingBarIcon.IsChecked = settings.Appearance.ShowPenColorOnFloatingBarIcon;
 
             // 加载彩色浮动工具栏设置
             if (CardColorfulFloatingBar != null)
-                CardColorfulFloatingBar.IsOn = settings.Appearance.IsColorfulViewboxFloatingBar;
+                CardColorfulFloatingBar.IsChecked = settings.Appearance.IsColorfulViewboxFloatingBar;
 
             // 加载紧凑浮动栏模式设置
             if (ToggleSwitchCompactFloatingBar != null)
-                ToggleSwitchCompactFloatingBar.IsOn = settings.Appearance.CompactFloatingBar;
+                ToggleSwitchCompactFloatingBar.IsChecked = settings.Appearance.CompactFloatingBar;
 
             // 加载隐藏浮动栏边框设置
             if (ToggleSwitchHideFloatingBarBorder != null)
-                ToggleSwitchHideFloatingBarBorder.IsOn = settings.Appearance.HideFloatingBarBorder;
+                ToggleSwitchHideFloatingBarBorder.IsChecked = settings.Appearance.HideFloatingBarBorder;
 
             // 加载浮动栏边框颜色设置
             int mode = settings.Appearance.FloatingBarBorderColorMode;
@@ -227,9 +227,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             if (CardReverseToolbarContent == null) return;
 
-            SettingsManager.Settings.Appearance.ReverseToolbarContent = CardReverseToolbarContent.IsOn;
+            SettingsManager.Settings.Appearance.ReverseToolbarContent = ((CardReverseToolbarContent.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
-            SettingsActionHub.OnReverseToolbarContentChanged(CardReverseToolbarContent.IsOn);
+            SettingsActionHub.OnReverseToolbarContentChanged(((CardReverseToolbarContent.IsChecked) == true));
         }
 
         private void AutoFlipWhenSpaceInsufficientToggleSwitch_Toggled(object sender, RoutedEventArgs e)
@@ -237,7 +237,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             if (ToggleSwitchAutoFlipWhenSpaceInsufficient == null) return;
 
-            SettingsManager.Settings.Appearance.AutoFlipWhenSpaceInsufficient = ToggleSwitchAutoFlipWhenSpaceInsufficient.IsOn;
+            SettingsManager.Settings.Appearance.AutoFlipWhenSpaceInsufficient = ((ToggleSwitchAutoFlipWhenSpaceInsufficient.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -246,7 +246,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             if (ToggleSwitchFlipContentOnAutoFlip == null) return;
 
-            SettingsManager.Settings.Appearance.FlipContentOnAutoFlip = ToggleSwitchFlipContentOnAutoFlip.IsOn;
+            SettingsManager.Settings.Appearance.FlipContentOnAutoFlip = ((ToggleSwitchFlipContentOnAutoFlip.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -255,14 +255,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             if (CardDisableToolbarAnimation == null) return;
 
-            SettingsManager.Settings.Appearance.DisableToolbarAnimation = CardDisableToolbarAnimation.IsOn;
+            SettingsManager.Settings.Appearance.DisableToolbarAnimation = ((CardDisableToolbarAnimation.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchUseLegacyFloatingBarUI_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.UseLegacyFloatingBarUI = CardUseLegacyFloatingBarUI.IsOn;
+            SettingsManager.Settings.Appearance.UseLegacyFloatingBarUI = ((CardUseLegacyFloatingBarUI.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
             SettingsActionHub.OnUseLegacyFloatingBarUIChanged();
         }
@@ -270,7 +270,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchShowPenColorOnFloatingBarIcon_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.ShowPenColorOnFloatingBarIcon = CardShowPenColorOnFloatingBarIcon.IsOn;
+            SettingsManager.Settings.Appearance.ShowPenColorOnFloatingBarIcon = ((CardShowPenColorOnFloatingBarIcon.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
             // Refresh the pen icon color on the floating bar
             if (Application.Current.MainWindow is MainWindow mainWindow)
@@ -281,7 +281,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             if (CardColorfulFloatingBar == null) return;
-            SettingsManager.Settings.Appearance.IsColorfulViewboxFloatingBar = CardColorfulFloatingBar.IsOn;
+            SettingsManager.Settings.Appearance.IsColorfulViewboxFloatingBar = ((CardColorfulFloatingBar.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
             SettingsActionHub.OnColorfulFloatingBarChanged();
         }
@@ -289,17 +289,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchCompactFloatingBar_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.CompactFloatingBar = ToggleSwitchCompactFloatingBar.IsOn;
+            SettingsManager.Settings.Appearance.CompactFloatingBar = ((ToggleSwitchCompactFloatingBar.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
-            SettingsActionHub.OnCompactFloatingBarChanged(ToggleSwitchCompactFloatingBar.IsOn);
+            SettingsActionHub.OnCompactFloatingBarChanged(ToggleSwitchCompactFloatingBar.IsChecked == true);
         }
 
         private void ToggleSwitchHideFloatingBarBorder_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.HideFloatingBarBorder = ToggleSwitchHideFloatingBarBorder.IsOn;
+            SettingsManager.Settings.Appearance.HideFloatingBarBorder = ((ToggleSwitchHideFloatingBarBorder.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
-            SettingsActionHub.OnHideFloatingBarBorderChanged(ToggleSwitchHideFloatingBarBorder.IsOn);
+            SettingsActionHub.OnHideFloatingBarBorderChanged(((ToggleSwitchHideFloatingBarBorder.IsChecked) == true));
         }
 
         /// <summary>
@@ -432,9 +432,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             if (ToggleSwitchEnableIdleMiniBar == null) return;
-            SettingsManager.Settings.Appearance.EnableIdleMiniBar = ToggleSwitchEnableIdleMiniBar.IsOn;
+            SettingsManager.Settings.Appearance.EnableIdleMiniBar = ((ToggleSwitchEnableIdleMiniBar.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
-            SettingsActionHub.OnEnableIdleMiniBarChanged(ToggleSwitchEnableIdleMiniBar.IsOn);
+            SettingsActionHub.OnEnableIdleMiniBarChanged(((ToggleSwitchEnableIdleMiniBar.IsChecked) == true));
         }
 
         private void IdleMiniBarOpacitySlider_ValueChanged(object sender, RoutedEventArgs e)
@@ -474,9 +474,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             if (ToggleSwitchEnableLiquidGlassBar == null) return;
-            SettingsManager.Settings.Appearance.EnableLiquidGlassBar = ToggleSwitchEnableLiquidGlassBar.IsOn;
+            SettingsManager.Settings.Appearance.EnableLiquidGlassBar = ((ToggleSwitchEnableLiquidGlassBar.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
-            SettingsActionHub.OnEnableLiquidGlassBarChanged(ToggleSwitchEnableLiquidGlassBar.IsOn);
+            SettingsActionHub.OnEnableLiquidGlassBarChanged(((ToggleSwitchEnableLiquidGlassBar.IsChecked) == true));
         }
 
         private void LiquidGlassBarOpacitySlider_ValueChanged(object sender, RoutedEventArgs e)
@@ -511,14 +511,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (mw == null) return;
 
             var content = new AddCustomIconWindow(mw);
-            var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+            var dialog = new Wpf.Ui.Controls.ContentDialog
             {
                 Title = Properties.RandomStrings.Random_AddIcon_WindowTitle,
                 Content = content,
                 PrimaryButtonText = FloatingBarStrings.Tools_Save,
                 CloseButtonText = Properties.RandomStrings.Random_Cancel,
                 Owner = Window.GetWindow(this) ?? mw,
-                DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Primary
+                DefaultButton = Wpf.Ui.Controls.ContentDialogButton.Primary
             };
 
             content.OnInputChanged += () =>
@@ -547,13 +547,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (mw == null) return;
 
             var content = new CustomIconWindow(mw);
-            var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+            var dialog = new Wpf.Ui.Controls.ContentDialog
             {
                 Title = Properties.ThemeStrings.Theme_CustomFloatingIconLabel,
                 Content = content,
                 CloseButtonText = Properties.NotificationStrings.AnimationOff,
                 Owner = Window.GetWindow(this) ?? mw,
-                DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Close
+                DefaultButton = Wpf.Ui.Controls.ContentDialogButton.Close
             };
             await dialog.ShowAsync();
         }

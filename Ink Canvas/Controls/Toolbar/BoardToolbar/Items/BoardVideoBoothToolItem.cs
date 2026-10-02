@@ -1,9 +1,9 @@
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
+// 只别名导入 WPF-UI 专属控件，避免与 System.Windows.Controls 同名类型冲突。
+using FontIcon = Wpf.Ui.Controls.FontIcon;
+using SymbolRegular = Wpf.Ui.Controls.SymbolRegular;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using FluentSystemIcons = iNKORE.UI.WPF.Modern.Common.IconKeys.FluentSystemIcons;
-using FontIcon = iNKORE.UI.WPF.Modern.Controls.FontIcon;
 
 namespace Ink_Canvas.Controls.Toolbar.BoardToolbar.Items
 {
@@ -13,7 +13,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar.Items
         public override string LocalizationKey => "Board_VideoBooth";
         public override string Description => "视频展台";
         public override string IconGeometry => null;
-        public override FontIconData? IconKey => FluentSystemIcons.Video_24_Regular;
+        public override SymbolRegular? IconKey => SymbolRegular.Video24;
         public override ButtonPosition DefaultPosition => ButtonPosition.Single;
 
         protected override void OnClick(IBoardToolbarHost host, object sender, MouseButtonEventArgs e)
@@ -51,7 +51,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar.Items
                 grid.Children.RemoveAt(0);
                 var fontIcon = new FontIcon
                 {
-                    Icon = FluentSystemIcons.Video_24_Regular,
+                    Icon = SymbolRegular.Video24,
                     Width = 24,
                     Height = 24,
                     VerticalAlignment = VerticalAlignment.Top,

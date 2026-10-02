@@ -100,17 +100,17 @@ namespace Ink_Canvas
                 var settings = MainWindow.Settings;
                 if (settings == null) return;
 
-                iNKORE.UI.WPF.Modern.ElementTheme target;
+                Wpf.Ui.Appearance.ApplicationTheme target;
                 switch (settings.Appearance.Theme)
                 {
-                    case 0: target = iNKORE.UI.WPF.Modern.ElementTheme.Light; break;
-                    case 1: target = iNKORE.UI.WPF.Modern.ElementTheme.Dark; break;
+                    case 0: target = Wpf.Ui.Appearance.ApplicationTheme.Light; break;
+                    case 1: target = Wpf.Ui.Appearance.ApplicationTheme.Dark; break;
                     default:
                         target = IsSystemThemeLight()
-                            ? iNKORE.UI.WPF.Modern.ElementTheme.Light
-                            : iNKORE.UI.WPF.Modern.ElementTheme.Dark; break;
+                            ? Wpf.Ui.Appearance.ApplicationTheme.Light
+                            : Wpf.Ui.Appearance.ApplicationTheme.Dark; break;
                 }
-                iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, target);
+                Wpf.Ui.Appearance.ApplicationThemeManager.SetRequestedTheme(this, target);
             }
             catch (Exception ex)
             {

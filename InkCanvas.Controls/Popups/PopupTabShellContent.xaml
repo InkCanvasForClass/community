@@ -1,14 +1,14 @@
 <UserControl x:Class="Ink_Canvas.Controls.PopupTabShellContent"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
              xmlns:controls="clr-namespace:Ink_Canvas.Controls"
              mc:Ignorable="d">
     <Border CornerRadius="8" Background="{DynamicResource FloatingBarBackgroundBrush}"
             BorderBrush="{DynamicResource FloatingBarAccentBrush}" BorderThickness="3">
-        <ikw:SimpleStackPanel Margin="-1">
+        <vio:SimpleStackPanel Margin="-1">
             <controls:PopupTabTitleBar x:Name="TabTitleBar" />
             <Border Margin="9,0,9,9" BorderBrush="{DynamicResource FloatingBarPopupInnerBorderBrush}"
                     Background="{DynamicResource FloatingBarPopupInnerBackgroundBrush}" BorderThickness="2"
@@ -17,6 +17,6 @@
                     <ContentPresenter x:Name="ContentArea" />
                 </Grid>
             </Border>
-        </ikw:SimpleStackPanel>
+        </vio:SimpleStackPanel>
     </Border>
 </UserControl>

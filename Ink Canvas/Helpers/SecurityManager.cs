@@ -1,7 +1,7 @@
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
-using iNKORE.UI.WPF.Controls;
-using iNKORE.UI.WPF.Modern.Controls;
+using SimpleStackPanel = Wpf.Ui.Violeta.Controls.Compat.SimpleStackPanel;
+using Wpf.Ui.Controls;
 using System;
 using System.Linq;
 using System.Security.Cryptography;
@@ -11,7 +11,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using MessageBox = System.Windows.MessageBox;
 
 namespace Ink_Canvas.Helpers
 {

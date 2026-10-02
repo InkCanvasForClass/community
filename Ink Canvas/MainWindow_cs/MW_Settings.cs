@@ -70,10 +70,10 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
             if (sender == ToggleSwitchEnableNibMode)
-                BoardToggleSwitchEnableNibMode.IsOn = ToggleSwitchEnableNibMode.IsOn;
+                BoardToggleSwitchEnableNibMode.IsChecked = ((ToggleSwitchEnableNibMode.IsChecked) == true);
             else
-                ToggleSwitchEnableNibMode.IsOn = BoardToggleSwitchEnableNibMode.IsOn;
-            Settings.Startup.IsEnableNibMode = ToggleSwitchEnableNibMode.IsOn;
+                ToggleSwitchEnableNibMode.IsChecked = ((BoardToggleSwitchEnableNibMode.IsChecked) == true);
+            Settings.Startup.IsEnableNibMode = ((ToggleSwitchEnableNibMode.IsChecked) == true);
 
             if (Settings.Startup.IsEnableNibMode)
                 BoundsWidth = Settings.Advanced.NibModeBoundsWidth;
@@ -608,7 +608,7 @@ namespace Ink_Canvas
         public void UpdateCustomIconsInComboBox()
         {
             var page = Application.Current.Windows.OfType<Window>()
-                .SelectMany(w => FindVisualChildren<iNKORE.UI.WPF.Modern.Controls.NavigationView>(w))
+                .SelectMany(w => FindVisualChildren<Wpf.Ui.Controls.NavigationView>(w))
                 .SelectMany(nv => FindVisualChildren<Windows.SettingsViews.Pages.ToolbarAppearancePage>(nv))
                 .FirstOrDefault();
             if (page == null) return;
@@ -899,8 +899,8 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            var toggle = (iNKORE.UI.WPF.Modern.Controls.ToggleSwitch)sender;
-            bool isOn = toggle.IsOn;
+            var toggle = (Wpf.Ui.Controls.ToggleSwitch)sender;
+            bool isOn = ((toggle.IsChecked) == true);
 
             if (sender == BoardToggleSwitchEnableTwoFingerZoom)
                 Settings.Gesture.IsEnableTwoFingerZoomBoard = isOn;
@@ -910,9 +910,9 @@ namespace Ink_Canvas
             if (isOn)
             {
                 if (sender == BoardToggleSwitchEnableTwoFingerZoom)
-                    BoardToggleSwitchEnableMultiTouchMode.IsOn = false;
+                    BoardToggleSwitchEnableMultiTouchMode.IsChecked = false;
                 else
-                    ToggleSwitchEnableMultiTouchMode.IsOn = false;
+                    ToggleSwitchEnableMultiTouchMode.IsChecked = false;
             }
 
             CheckEnableTwoFingerGestureBtnColorPrompt();
@@ -923,8 +923,8 @@ namespace Ink_Canvas
         private void ToggleSwitchEnableMultiTouchMode_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            var toggle = (iNKORE.UI.WPF.Modern.Controls.ToggleSwitch)sender;
-            bool isOn = toggle.IsOn;
+            var toggle = (Wpf.Ui.Controls.ToggleSwitch)sender;
+            bool isOn = ((toggle.IsChecked) == true);
             bool isBoardSender = sender == BoardToggleSwitchEnableMultiTouchMode;
 
             if (isBoardSender)
@@ -1014,11 +1014,11 @@ namespace Ink_Canvas
                     Settings.Gesture.IsEnableTwoFingerZoomBoard = false;
                     Settings.Gesture.IsEnableTwoFingerRotationBoard = false;
                     if (BoardToggleSwitchEnableTwoFingerTranslate != null)
-                        BoardToggleSwitchEnableTwoFingerTranslate.IsOn = false;
+                        BoardToggleSwitchEnableTwoFingerTranslate.IsChecked = false;
                     if (BoardToggleSwitchEnableTwoFingerZoom != null)
-                        BoardToggleSwitchEnableTwoFingerZoom.IsOn = false;
+                        BoardToggleSwitchEnableTwoFingerZoom.IsChecked = false;
                     if (BoardToggleSwitchEnableTwoFingerRotation != null)
-                        BoardToggleSwitchEnableTwoFingerRotation.IsOn = false;
+                        BoardToggleSwitchEnableTwoFingerRotation.IsChecked = false;
                 }
                 else
                 {
@@ -1026,11 +1026,11 @@ namespace Ink_Canvas
                     Settings.Gesture.IsEnableTwoFingerZoom = false;
                     Settings.Gesture.IsEnableTwoFingerRotation = false;
                     if (ToggleSwitchEnableTwoFingerTranslate != null)
-                        ToggleSwitchEnableTwoFingerTranslate.IsOn = false;
+                        ToggleSwitchEnableTwoFingerTranslate.IsChecked = false;
                     if (ToggleSwitchEnableTwoFingerZoom != null)
-                        ToggleSwitchEnableTwoFingerZoom.IsOn = false;
+                        ToggleSwitchEnableTwoFingerZoom.IsChecked = false;
                     if (ToggleSwitchEnableTwoFingerRotation != null)
-                        ToggleSwitchEnableTwoFingerRotation.IsOn = false;
+                        ToggleSwitchEnableTwoFingerRotation.IsChecked = false;
                 }
             }
 
@@ -1043,8 +1043,8 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            var toggle = (iNKORE.UI.WPF.Modern.Controls.ToggleSwitch)sender;
-            bool isOn = toggle.IsOn;
+            var toggle = (Wpf.Ui.Controls.ToggleSwitch)sender;
+            bool isOn = ((toggle.IsChecked) == true);
 
             if (sender == BoardToggleSwitchEnableTwoFingerTranslate)
                 Settings.Gesture.IsEnableTwoFingerTranslateBoard = isOn;
@@ -1054,9 +1054,9 @@ namespace Ink_Canvas
             if (isOn)
             {
                 if (sender == BoardToggleSwitchEnableTwoFingerTranslate)
-                    BoardToggleSwitchEnableMultiTouchMode.IsOn = false;
+                    BoardToggleSwitchEnableMultiTouchMode.IsChecked = false;
                 else
-                    ToggleSwitchEnableMultiTouchMode.IsOn = false;
+                    ToggleSwitchEnableMultiTouchMode.IsChecked = false;
             }
 
             CheckEnableTwoFingerGestureBtnColorPrompt();
@@ -1068,8 +1068,8 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            var toggle = (iNKORE.UI.WPF.Modern.Controls.ToggleSwitch)sender;
-            bool isOn = toggle.IsOn;
+            var toggle = (Wpf.Ui.Controls.ToggleSwitch)sender;
+            bool isOn = ((toggle.IsChecked) == true);
 
             if (sender == BoardToggleSwitchEnableTwoFingerRotation)
                 Settings.Gesture.IsEnableTwoFingerRotationBoard = isOn;
@@ -1079,9 +1079,9 @@ namespace Ink_Canvas
             if (isOn)
             {
                 if (sender == BoardToggleSwitchEnableTwoFingerRotation)
-                    BoardToggleSwitchEnableMultiTouchMode.IsOn = false;
+                    BoardToggleSwitchEnableMultiTouchMode.IsChecked = false;
                 else
-                    ToggleSwitchEnableMultiTouchMode.IsOn = false;
+                    ToggleSwitchEnableMultiTouchMode.IsChecked = false;
             }
 
             CheckEnableTwoFingerGestureBtnColorPrompt();

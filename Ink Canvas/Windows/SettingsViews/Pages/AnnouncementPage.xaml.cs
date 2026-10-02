@@ -3,7 +3,7 @@ using Ink_Canvas.Models;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System.Windows;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using Page = System.Windows.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -33,8 +33,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             _isLoaded = false;
             var notification = SettingsManager.Settings.Notification;
-            CardEnableAnnouncements.IsOn = notification.IsAnnouncementEnabled;
-            CardEnableForcePopup.IsOn = notification.IsForcePopupEnabled;
+            CardEnableAnnouncements.IsChecked = notification.IsAnnouncementEnabled;
+            CardEnableForcePopup.IsChecked = notification.IsForcePopupEnabled;
         }
 
         private void SaveSettings()
@@ -61,7 +61,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnableAnnouncements_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Notification.IsAnnouncementEnabled = CardEnableAnnouncements.IsOn;
+            SettingsManager.Settings.Notification.IsAnnouncementEnabled = ((CardEnableAnnouncements.IsChecked) == true);
             SaveSettings();
             UpdateAnnouncementProviderEnabledState();
         }
@@ -69,7 +69,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnableForcePopup_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Notification.IsForcePopupEnabled = CardEnableForcePopup.IsOn;
+            SettingsManager.Settings.Notification.IsForcePopupEnabled = ((CardEnableForcePopup.IsChecked) == true);
             SaveSettings();
         }
 

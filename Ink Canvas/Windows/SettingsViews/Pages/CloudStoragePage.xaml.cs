@@ -12,8 +12,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using MessageBox = System.Windows.MessageBox;
+using Page = System.Windows.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -198,7 +198,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void LoadAutoUploadSettings()
         {
-            ToggleSwitchAutoUploadNotes.IsOn = MainWindow.Settings?.Dlass?.IsAutoUploadNotes == true;
+            ToggleSwitchAutoUploadNotes.IsChecked = MainWindow.Settings?.Dlass?.IsAutoUploadNotes == true;
         }
 
         private void LoadUniversalUploadSettings()
@@ -324,7 +324,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             try
             {
                 EnsureSettingsObjects();
-                bool enabled = ToggleSwitchAutoUploadNotes.IsOn;
+                bool enabled = ((ToggleSwitchAutoUploadNotes.IsChecked) == true);
                 MainWindow.Settings.Dlass.IsAutoUploadNotes = enabled;
                 SetProviderEnabled("Dlass", enabled);
                 MainWindow.SaveSettingsToFile();
@@ -384,16 +384,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                if (sender is iNKORE.UI.WPF.Modern.Controls.ToggleSwitch toggleSwitch &&
+                if (sender is Wpf.Ui.Controls.ToggleSwitch toggleSwitch &&
                     toggleSwitch.DataContext is IUploadProvider provider)
                 {
                     EnsureSettingsObjects();
-                    SetProviderEnabled(provider.Name, toggleSwitch.IsOn);
+                    SetProviderEnabled(provider.Name, ((toggleSwitch.IsChecked) == true));
 
                     if (provider.Name == "Dlass")
                     {
-                        MainWindow.Settings.Dlass.IsAutoUploadNotes = toggleSwitch.IsOn;
-                        RunWithoutUiEvents(() => ToggleSwitchAutoUploadNotes.IsOn = toggleSwitch.IsOn);
+                        MainWindow.Settings.Dlass.IsAutoUploadNotes = ((toggleSwitch.IsChecked) == true);
+                        RunWithoutUiEvents(() => ToggleSwitchAutoUploadNotes.IsChecked = ((toggleSwitch.IsChecked) == true));
                     }
 
                     MainWindow.SaveSettingsToFile();

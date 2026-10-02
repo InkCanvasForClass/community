@@ -2,7 +2,15 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Pages;
-using iNKORE.UI.WPF.Modern.Controls;
+// 只别名导入 WPF-UI 专属控件，避免与 System.Windows.Controls 的同名类型（TextBlock/Image/Button/Border 等）产生 CS0104 歧义。
+using AutoSuggestBox = Wpf.Ui.Controls.AutoSuggestBox;
+using AutoSuggestBoxQuerySubmittedEventArgs = Wpf.Ui.Controls.AutoSuggestBoxQuerySubmittedEventArgs;
+using AutoSuggestBoxTextChangedEventArgs = Wpf.Ui.Controls.AutoSuggestBoxTextChangedEventArgs;
+using FontIcon = Wpf.Ui.Controls.FontIcon;
+using NavigationView = Wpf.Ui.Controls.NavigationView;
+using NavigationViewItem = Wpf.Ui.Controls.NavigationViewItem;
+using NavigationViewPaneDisplayMode = Wpf.Ui.Controls.NavigationViewPaneDisplayMode;
+using ToggleSwitch = Wpf.Ui.Controls.ToggleSwitch;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +23,7 @@ using System.Windows.Media;
 using System.Windows.Navigation;
 using System.Windows.Threading;
 using Windows.Win32;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using MessageBox = System.Windows.MessageBox;
 using Screen = System.Windows.Forms.Screen;
 
 namespace Ink_Canvas.Windows.SettingsViews
@@ -260,11 +268,11 @@ namespace Ink_Canvas.Windows.SettingsViews
                 int themeIndex = Helpers.SettingsManager.Settings.Appearance.Theme;
                 var elementTheme = themeIndex switch
                 {
-                    0 => iNKORE.UI.WPF.Modern.ElementTheme.Light,
-                    1 => iNKORE.UI.WPF.Modern.ElementTheme.Dark,
-                    _ => IsSystemThemeLight() ? iNKORE.UI.WPF.Modern.ElementTheme.Light : iNKORE.UI.WPF.Modern.ElementTheme.Dark,
+                    0 => Wpf.Ui.Appearance.ApplicationTheme.Light,
+                    1 => Wpf.Ui.Appearance.ApplicationTheme.Dark,
+                    _ => IsSystemThemeLight() ? Wpf.Ui.Appearance.ApplicationTheme.Light : Wpf.Ui.Appearance.ApplicationTheme.Dark,
                 };
-                iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, elementTheme);
+                Wpf.Ui.Appearance.ApplicationThemeManager.SetRequestedTheme(this, elementTheme);
             }
             catch (Exception ex)
             {
@@ -381,7 +389,7 @@ namespace Ink_Canvas.Windows.SettingsViews
         #endregion
 
         #region 导航逻辑优化（含页面缓存）
-        private void OnNavigationViewSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+        private void OnNavigationViewSelectionChanged(NavigationView sender, RoutedEventArgs args)
         {
             if (_isNavigating)
             {
@@ -477,7 +485,7 @@ namespace Ink_Canvas.Windows.SettingsViews
         }
 
 
-        private void OnNavigationViewBackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
+        private void OnNavigationViewBackRequested(NavigationView sender, RoutedEventArgs args)
         {
             if (rootFrame.CanGoBack) rootFrame.GoBack();
         }
@@ -486,11 +494,11 @@ namespace Ink_Canvas.Windows.SettingsViews
             Type currentPageType = rootFrame.SourcePageType;
             if (currentPageType == typeof(PPTPageFlipPreviewPage))
             {
-                NavigationViewControl.PaneDisplayMode = iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode.LeftMinimal;
+                NavigationViewControl.PaneDisplayMode = Wpf.Ui.Controls.NavigationViewPaneDisplayMode.LeftMinimal;
             }
             else
             {
-                NavigationViewControl.PaneDisplayMode = iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode.Auto;
+                NavigationViewControl.PaneDisplayMode = Wpf.Ui.Controls.NavigationViewPaneDisplayMode.Auto;
             }
 
             if (_isNavigating)
@@ -646,7 +654,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             }
         }
 
-        private void NavigationViewControl_DisplayModeChanged(NavigationView sender, NavigationViewDisplayModeChangedEventArgs args)
+        private void NavigationViewControl_DisplayModeChanged(NavigationView sender, RoutedEventArgs args)
         {
             UpdateAppTitleBarMargin(sender);
         }
@@ -800,11 +808,11 @@ namespace Ink_Canvas.Windows.SettingsViews
                 {
                     header = lsc.Header;
                 }
-                else if (node is iNKORE.UI.WPF.Modern.Controls.SettingsCard sc)
+                else if (node is Ink_Canvas.Controls.SettingsCard sc)
                 {
                     header = sc.Header?.ToString();
                 }
-                else if (node is iNKORE.UI.WPF.Modern.Controls.SettingsExpander se)
+                else if (node is Ink_Canvas.Controls.SettingsExpander se)
                 {
                     header = se.Header?.ToString();
 
@@ -1354,9 +1362,9 @@ namespace Ink_Canvas.Windows.SettingsViews
             {
                 if (current is Ink_Canvas.Controls.LabeledSettingsCard lsc)
                     return lsc;
-                if (current is iNKORE.UI.WPF.Modern.Controls.SettingsCard sc)
+                if (current is Ink_Canvas.Controls.SettingsCard sc)
                     return sc;
-                if (current is iNKORE.UI.WPF.Modern.Controls.SettingsExpander se)
+                if (current is Ink_Canvas.Controls.SettingsExpander se)
                     return se;
 
                 current = VisualTreeHelper.GetParent(current);
@@ -1399,9 +1407,9 @@ namespace Ink_Canvas.Windows.SettingsViews
             {
                 if (target is Ink_Canvas.Controls.LabeledSettingsCard lsc)
                     return lsc.Header?.Trim();
-                if (target is iNKORE.UI.WPF.Modern.Controls.SettingsCard sc)
+                if (target is Ink_Canvas.Controls.SettingsCard sc)
                     return (sc.Header as string)?.Trim() ?? sc.Header?.ToString()?.Trim();
-                if (target is iNKORE.UI.WPF.Modern.Controls.SettingsExpander se)
+                if (target is Ink_Canvas.Controls.SettingsExpander se)
                     return (se.Header as string)?.Trim() ?? se.Header?.ToString()?.Trim();
             }
             catch (Exception ex)

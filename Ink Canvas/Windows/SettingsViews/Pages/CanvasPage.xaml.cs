@@ -14,7 +14,7 @@ using System.Windows.Threading;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
-    public partial class CanvasPage : iNKORE.UI.WPF.Modern.Controls.Page
+    public partial class CanvasPage : System.Windows.Controls.Page
     {
         private bool _isLoaded = false;
 
@@ -34,9 +34,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 if (settings.Canvas != null)
                 {
-                    CardEnablePressureTouchMode.IsOn = settings.Canvas.EnablePressureTouchMode;
-                    CardDisablePressure.IsOn = settings.Canvas.DisablePressure;
-                    CardUseWinRTInk.IsOn = settings.Canvas.UseWinRTInk;
+                    CardEnablePressureTouchMode.IsChecked = settings.Canvas.EnablePressureTouchMode;
+                    CardDisablePressure.IsChecked = settings.Canvas.DisablePressure;
+                    CardUseWinRTInk.IsChecked = settings.Canvas.UseWinRTInk;
 
                     int curveMode = 0;
                     if (settings.Canvas.UseAdvancedBezierSmoothing) curveMode = 2;
@@ -108,27 +108,27 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnablePressureTouchMode_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.EnablePressureTouchMode = CardEnablePressureTouchMode.IsOn;
-            SettingsActionHub.OnEnablePressureTouchModeChanged(CardEnablePressureTouchMode.IsOn);
-            if (!CardEnablePressureTouchMode.IsOn || !SettingsManager.Settings.Canvas.DisablePressure)
-                CardDisablePressure.IsOn = SettingsManager.Settings.Canvas.DisablePressure;
+            SettingsManager.Settings.Canvas.EnablePressureTouchMode = ((CardEnablePressureTouchMode.IsChecked) == true);
+            SettingsActionHub.OnEnablePressureTouchModeChanged(((CardEnablePressureTouchMode.IsChecked) == true));
+            if (!((CardEnablePressureTouchMode.IsChecked) == true) || !SettingsManager.Settings.Canvas.DisablePressure)
+                CardDisablePressure.IsChecked = SettingsManager.Settings.Canvas.DisablePressure;
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchDisablePressure_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.DisablePressure = CardDisablePressure.IsOn;
-            SettingsActionHub.OnDisablePressureChanged(CardDisablePressure.IsOn);
-            if (!CardDisablePressure.IsOn || !SettingsManager.Settings.Canvas.EnablePressureTouchMode)
-                CardEnablePressureTouchMode.IsOn = SettingsManager.Settings.Canvas.EnablePressureTouchMode;
+            SettingsManager.Settings.Canvas.DisablePressure = ((CardDisablePressure.IsChecked) == true);
+            SettingsActionHub.OnDisablePressureChanged(((CardDisablePressure.IsChecked) == true));
+            if (!((CardDisablePressure.IsChecked) == true) || !SettingsManager.Settings.Canvas.EnablePressureTouchMode)
+                CardEnablePressureTouchMode.IsChecked = SettingsManager.Settings.Canvas.EnablePressureTouchMode;
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchUseWinRTInk_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.UseWinRTInk = CardUseWinRTInk.IsOn;
+            SettingsManager.Settings.Canvas.UseWinRTInk = ((CardUseWinRTInk.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
             // 切换实验性墨迹管线：让 MainWindow 按当前逻辑工具挂载/卸载系统湿墨。
             (Application.Current.MainWindow as MainWindow)?.SyncWinRTInkPipelineWithLogicalTool();

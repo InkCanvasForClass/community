@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+             xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
              xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
              xmlns:icons="clr-namespace:Ink_Canvas"
              xmlns:c="clr-namespace:Ink_Canvas.Converter"
@@ -14,7 +14,7 @@
     <Grid>
         <controls:PopupShellContent x:Name="Shell" Title="{x:Static props:FloatingBarStrings.Board_SelectImage}"/>
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
-            <ikw:SimpleStackPanel Margin="4" Spacing="2">
+            <vio:SimpleStackPanel Margin="4" Spacing="2">
                 <Border x:Name="_ScreenshotOption" Background="Transparent" CornerRadius="3" Padding="6,4">
                     <Border.Style>
                         <Style TargetType="Border">
@@ -26,7 +26,7 @@
                             </Style.Triggers>
                         </Style>
                     </Border.Style>
-                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                    <vio:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                         <Image Height="16" Width="16">
                             <Image.Source>
                                 <DrawingImage>
@@ -41,7 +41,7 @@
                         </Image>
                         <TextBlock Text="{x:Static props:FloatingBarStrings.Board_Screenshot}" FontSize="10"
                                    Foreground="{DynamicResource TextForeground}" VerticalAlignment="Center"/>
-                    </ikw:SimpleStackPanel>
+                    </vio:SimpleStackPanel>
                 </Border>
                 <Border x:Name="_SelectFileOption" Background="Transparent" CornerRadius="3" Padding="6,4">
                     <Border.Style>
@@ -54,7 +54,7 @@
                             </Style.Triggers>
                         </Style>
                     </Border.Style>
-                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                    <vio:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                         <Image Height="16" Width="16">
                             <Image.Source>
                                 <DrawingImage>
@@ -69,9 +69,9 @@
                         </Image>
                         <TextBlock Text="{x:Static props:FloatingBarStrings.Board_SelectImage}" FontSize="10"
                                    Foreground="{DynamicResource TextForeground}" VerticalAlignment="Center"/>
-                    </ikw:SimpleStackPanel>
+                    </vio:SimpleStackPanel>
                 </Border>
-            </ikw:SimpleStackPanel>
+            </vio:SimpleStackPanel>
         </ContentControl>
     </Grid>
 </UserControl>

@@ -4,57 +4,58 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-    xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+    xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
     xmlns:props="clr-namespace:Ink_Canvas.Properties"
     mc:Ignorable="d"
     d:DesignHeight="450" d:DesignWidth="600">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                   IsManipulationEnabled="True" PanningMode="VerticalOnly">
-        <ikw:SimpleStackPanel Spacing="12" Margin="0,0,0,20">
+        <vio:SimpleStackPanel Spacing="12" Margin="0,0,0,20">
             <TextBlock FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10"
                        Text="{x:Static props:FeedbackStrings.Page3Title}"/>
 
             <!-- 飞书反馈 -->
-            <ui:SettingsExpander x:Name="ExpanderFeishuFeedback"
+            <controls:SettingsExpander x:Name="ExpanderFeishuFeedback"
                              Header="{x:Static props:FeedbackStrings.Page3_Feishu}"
                              Description="{x:Static props:FeedbackStrings.Page3_FeishuDesc}">
-                <ui:SettingsExpander.HeaderIcon>
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Feedback}"/>
-                </ui:SettingsExpander.HeaderIcon>
+                <controls:SettingsExpander.Icon>
+                    <ui:SymbolIcon Symbol="ChatHelp24"/>
+                </controls:SettingsExpander.Icon>
                 <Button x:Name="BtnOpenFeishuForm"
                         Content="{x:Static props:FeedbackStrings.Page3_OpenFeishu}">
                     <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.AccentButtonStyleKey}}"/>
+                        <Style TargetType="Button"/>
                     </Button.Style>
                 </Button>
-                <ui:SettingsExpander.Items>
-                    <ui:SettingsCard x:Name="CardCopyFeishuUrl"
+                <StackPanel>
+                    <controls:SettingsCard x:Name="CardCopyFeishuUrl"
                                      Header="{x:Static props:FeedbackStrings.Page3_CopyFeishuUrl}"
                                      IsClickEnabled="True">
-                        <ui:SettingsCard.ActionIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Copy}"/>
-                        </ui:SettingsCard.ActionIcon>
-                    </ui:SettingsCard>
-                </ui:SettingsExpander.Items>
-            </ui:SettingsExpander>
+                        <controls:SettingsCard.ActionIcon>
+                            <ui:SymbolIcon Symbol="Copy24"/>
+                        </controls:SettingsCard.ActionIcon>
+                    </controls:SettingsCard>
+                </StackPanel>
+            </controls:SettingsExpander>
 
             <!-- Pastebin 上传：POST 脱敏 JSON 到 pastebin 端 -->
-            <ui:SettingsExpander x:Name="ExpanderPastebin"
+            <controls:SettingsExpander x:Name="ExpanderPastebin"
                              Header="{x:Static props:FeedbackStrings.Page3_PastebinUpload}"
                              Description="{x:Static props:FeedbackStrings.Page3_PastebinUploadDesc}">
-                <ui:SettingsExpander.HeaderIcon>
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}"/>
-                </ui:SettingsExpander.HeaderIcon>
+                <controls:SettingsExpander.Icon>
+                    <ui:SymbolIcon Symbol="Cloud24"/>
+                </controls:SettingsExpander.Icon>
                 <Button x:Name="BtnUploadPastebin"
                         Content="{x:Static props:FeedbackStrings.Page3_UploadToPastebin}">
                     <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.AccentButtonStyleKey}}"/>
+                        <Style TargetType="Button"/>
                     </Button.Style>
                 </Button>
-                <ui:SettingsExpander.Items>
-                    <ui:SettingsCard ContentAlignment="Left">
-                        <ikw:SimpleStackPanel Spacing="8" MinWidth="280">
+                <StackPanel>
+                    <controls:SettingsCard ContentAlignment="Left">
+                        <vio:SimpleStackPanel Spacing="8" MinWidth="280">
                             <TextBlock Text="{x:Static props:FeedbackStrings.Page1_PastebinServer}"
                                        FontSize="12"
                                        Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
@@ -62,63 +63,63 @@
                                      VerticalAlignment="Center"
                                      FontFamily="Consolas"
                                      FontSize="12"/>
-                        </ikw:SimpleStackPanel>
-                    </ui:SettingsCard>
-                    <ui:SettingsCard x:Name="CardPasteResult"
+                        </vio:SimpleStackPanel>
+                    </controls:SettingsCard>
+                    <controls:SettingsCard x:Name="CardPasteResult"
                                      Header=""
                                      Visibility="Collapsed">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}"/>
-                        </ui:SettingsCard.HeaderIcon>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="Link24"/>
+                        </controls:SettingsCard.Icon>
                         <Button x:Name="BtnCopyPasteUrl"
                                 Content="{x:Static props:FeedbackStrings.Page3_CopyPastebinUrl}">
                             <Button.Style>
-                                <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}"/>
+                                <Style TargetType="Button"/>
                             </Button.Style>
                         </Button>
-                    </ui:SettingsCard>
-                </ui:SettingsExpander.Items>
-            </ui:SettingsExpander>
+                    </controls:SettingsCard>
+                </StackPanel>
+            </controls:SettingsExpander>
 
             <!-- GitHub 反馈 -->
-            <ui:SettingsExpander x:Name="ExpanderGitHubFeedback"
+            <controls:SettingsExpander x:Name="ExpanderGitHubFeedback"
                              Header="{x:Static props:FeedbackStrings.Page3_GitHub}"
                              Description="{x:Static props:FeedbackStrings.Page3_GitHubDesc}">
-                <ui:SettingsExpander.HeaderIcon>
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Mail}"/>
-                </ui:SettingsExpander.HeaderIcon>
+                <controls:SettingsExpander.Icon>
+                    <ui:SymbolIcon Symbol="Mail24"/>
+                </controls:SettingsExpander.Icon>
                 <Button x:Name="BtnOpenGitHubIssue"
                         Content="{x:Static props:FeedbackStrings.Page3_OpenGitHub}">
                     <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.AccentButtonStyleKey}}"/>
+                        <Style TargetType="Button"/>
                     </Button.Style>
                 </Button>
-                <ui:SettingsExpander.Items>
-                    <ui:SettingsCard x:Name="CardCopyIssueUrl"
+                <StackPanel>
+                    <controls:SettingsCard x:Name="CardCopyIssueUrl"
                                      Header="{x:Static props:FeedbackStrings.Page3_CopyIssueUrl}"
                                      IsClickEnabled="True">
-                        <ui:SettingsCard.ActionIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Copy}"/>
-                        </ui:SettingsCard.ActionIcon>
-                    </ui:SettingsCard>
-                </ui:SettingsExpander.Items>
-            </ui:SettingsExpander>
+                        <controls:SettingsCard.ActionIcon>
+                            <ui:SymbolIcon Symbol="Copy24"/>
+                        </controls:SettingsCard.ActionIcon>
+                    </controls:SettingsCard>
+                </StackPanel>
+            </controls:SettingsExpander>
 
             <!-- Markdown 模板 -->
-            <ui:SettingsExpander x:Name="ExpanderMarkdownTemplate"
+            <controls:SettingsExpander x:Name="ExpanderMarkdownTemplate"
                              Header="{x:Static props:FeedbackStrings.Page3_Markdown}"
                              Description="{x:Static props:FeedbackStrings.Page3_MarkdownDesc}">
-                <ui:SettingsExpander.HeaderIcon>
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Code}"/>
-                </ui:SettingsExpander.HeaderIcon>
+                <controls:SettingsExpander.Icon>
+                    <ui:SymbolIcon Symbol="Code24"/>
+                </controls:SettingsExpander.Icon>
                 <Button x:Name="BtnCopyMarkdown"
                         Content="{x:Static props:FeedbackStrings.Page3_CopyMarkdown}">
                     <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}"/>
+                        <Style TargetType="Button"/>
                     </Button.Style>
                 </Button>
-                <ui:SettingsExpander.Items>
-                    <ui:SettingsCard ContentAlignment="Left">
+                <StackPanel>
+                    <controls:SettingsCard ContentAlignment="Left">
                         <TextBox x:Name="TextBoxMarkdownTemplate"
                                  MinHeight="200"
                                  IsReadOnly="True"
@@ -129,9 +130,9 @@
                                  TextWrapping="Wrap"
                                  AcceptsReturn="True"
                                  VerticalScrollBarVisibility="Auto"/>
-                    </ui:SettingsCard>
-                </ui:SettingsExpander.Items>
-            </ui:SettingsExpander>
-        </ikw:SimpleStackPanel>
+                    </controls:SettingsCard>
+                </StackPanel>
+            </controls:SettingsExpander>
+        </vio:SimpleStackPanel>
     </ScrollViewer>
 </UserControl>

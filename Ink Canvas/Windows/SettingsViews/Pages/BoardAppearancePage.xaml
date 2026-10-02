@@ -1,11 +1,11 @@
-<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.BoardAppearancePage"
+<Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.BoardAppearancePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
-      xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-      xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       mc:Ignorable="d"
@@ -24,7 +24,7 @@
                 </Style>
             </FrameworkElement.Resources>
             <Grid>
-                <ikw:SimpleStackPanel MaxWidth="1000"
+                <vio:SimpleStackPanel MaxWidth="1000"
                     HorizontalAlignment="Stretch"
                     Spacing="{StaticResource SettingsCardSpacing}">
 
@@ -33,38 +33,38 @@
 
                     <controls:LabeledSettingsCard x:Name="CardEnableTimeDisplayInWhiteboardMode"
                             Header="{x:Static props:ThemeStrings.Theme_ShowTimeInWhiteboard}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Pinned}"
+                            Symbol="Pin24"
                             SwitchName="ToggleSwitchEnableTimeDisplayInWhiteboardMode"
                             Toggled="ToggleSwitchEnableTimeDisplayInWhiteboardMode_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardShowPenColorOnBoardToolbarIcon"
                             Header="{x:Static props:ThemeStrings.Theme_ShowPenColorOnBoardToolbarIcon}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Draw}"
+                            Symbol="DrawImage24"
                             SwitchName="ToggleSwitchShowPenColorOnBoardToolbarIcon"
                             Toggled="ToggleSwitchShowPenColorOnBoardToolbarIcon_Toggled" />
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:ThemeStrings.Theme_Tips_Title}" />
 
-                    <ui:SettingsCard Click="QuickNavCard_Click" Tag="WhiteboardTipsPage" IsEnabled="True"
+                    <controls:SettingsCard Click="QuickNavCard_Click" Tag="WhiteboardTipsPage" IsEnabled="True"
                                      Header="{x:Static props:ThemeStrings.Theme_Tips_Title}" IsClickEnabled="True">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Message}" />
-                        </ui:SettingsCard.HeaderIcon>
+                        <controls:SettingsCard.HeaderIcon>
+                            <ui:SymbolIcon Symbol="ChatMultiple24" />
+                        </controls:SettingsCard.HeaderIcon>
 
-                    </ui:SettingsCard>
+                    </controls:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:ThemeStrings.Theme_BoardToolbarOpacity}" />
 
-                    <ui:SettingsExpander Header="{x:Static props:ThemeStrings.Theme_BoardToolbarOpacity}"
+                    <controls:SettingsExpander Header="{x:Static props:ThemeStrings.Theme_BoardToolbarOpacity}"
                                          IsExpanded="True">
-                        <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EaseOfAccess}" />
-                        </ui:SettingsExpander.HeaderIcon>
-                        <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_BoardToolbarOpacityLeft}">
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                        <controls:SettingsExpander.HeaderIcon>
+                            <ui:SymbolIcon Symbol="Accessibility24" />
+                        </controls:SettingsExpander.HeaderIcon>
+                        <StackPanel>
+                            <controls:SettingsCard Header="{x:Static props:ThemeStrings.Theme_BoardToolbarOpacityLeft}">
+                                <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="BoardToolbarLeftOpacityText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                                     <Slider x:Name="BoardToolbarLeftOpacitySlider" Minimum="0.3"
@@ -72,10 +72,10 @@
                                             IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
                                             TickPlacement="None" AutoToolTipPlacement="None"
                                             ValueChanged="BoardToolbarLeftOpacitySlider_ValueChanged" />
-                                </ikw:SimpleStackPanel>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_BoardToolbarOpacityCenter}">
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                </vio:SimpleStackPanel>
+                            </controls:SettingsCard>
+                            <controls:SettingsCard Header="{x:Static props:ThemeStrings.Theme_BoardToolbarOpacityCenter}">
+                                <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="BoardToolbarCenterOpacityText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                                     <Slider x:Name="BoardToolbarCenterOpacitySlider" Minimum="0.3"
@@ -83,10 +83,10 @@
                                             IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
                                             TickPlacement="None" AutoToolTipPlacement="None"
                                             ValueChanged="BoardToolbarCenterOpacitySlider_ValueChanged" />
-                                </ikw:SimpleStackPanel>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_BoardToolbarOpacityRight}">
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                </vio:SimpleStackPanel>
+                            </controls:SettingsCard>
+                            <controls:SettingsCard Header="{x:Static props:ThemeStrings.Theme_BoardToolbarOpacityRight}">
+                                <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="BoardToolbarRightOpacityText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                                     <Slider x:Name="BoardToolbarRightOpacitySlider" Minimum="0.3"
@@ -94,17 +94,17 @@
                                             IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
                                             TickPlacement="None" AutoToolTipPlacement="None"
                                             ValueChanged="BoardToolbarRightOpacitySlider_ValueChanged" />
-                                </ikw:SimpleStackPanel>
-                            </ui:SettingsCard>
-                        </ui:SettingsExpander.Items>
-                    </ui:SettingsExpander>
+                                </vio:SimpleStackPanel>
+                            </controls:SettingsCard>
+                        </StackPanel>
+                    </controls:SettingsExpander>
 
                     <Rectangle Height="16" />
-                    <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_BoardMenuOpacity}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.PreviewLink}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                    <controls:SettingsCard Header="{x:Static props:ThemeStrings.Theme_BoardMenuOpacity}">
+                        <controls:SettingsCard.HeaderIcon>
+                            <ui:SymbolIcon Symbol="Open24" />
+                        </controls:SettingsCard.HeaderIcon>
+                        <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="BoardMenuOpacityText"
                                        VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                             <Slider x:Name="BoardMenuOpacitySlider" Minimum="0.3"
@@ -112,20 +112,20 @@
                                     IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
                                     TickPlacement="None" AutoToolTipPlacement="None"
                                     ValueChanged="BoardMenuOpacitySlider_ValueChanged" />
-                        </ikw:SimpleStackPanel>
-                    </ui:SettingsCard>
+                        </vio:SimpleStackPanel>
+                    </controls:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:ThemeStrings.Theme_BlackboardScale80}" />
 
-                    <ui:SettingsExpander Header="{x:Static props:ThemeStrings.Theme_BlackboardScale80}"
+                    <controls:SettingsExpander Header="{x:Static props:ThemeStrings.Theme_BlackboardScale80}"
                                          IsExpanded="True">
-                        <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BackToWindow}" />
-                        </ui:SettingsExpander.HeaderIcon>
-                        <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_BoardScaleLeft}">
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                        <controls:SettingsExpander.HeaderIcon>
+                            <ui:SymbolIcon Symbol="ArrowMinimize24" />
+                        </controls:SettingsExpander.HeaderIcon>
+                        <StackPanel>
+                            <controls:SettingsCard Header="{x:Static props:ThemeStrings.Theme_BoardScaleLeft}">
+                                <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="ViewboxBlackBoardLeftScaleText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                                     <Slider x:Name="ViewboxBlackBoardLeftScaleTransformValueSlider" Minimum="0.5"
@@ -133,10 +133,10 @@
                                             IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
                                             TickPlacement="None" AutoToolTipPlacement="None"
                                             ValueChanged="ViewboxBlackBoardLeftScaleTransformValueSlider_ValueChanged" />
-                                </ikw:SimpleStackPanel>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_BoardScaleCenter}">
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                </vio:SimpleStackPanel>
+                            </controls:SettingsCard>
+                            <controls:SettingsCard Header="{x:Static props:ThemeStrings.Theme_BoardScaleCenter}">
+                                <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="ViewboxBlackBoardCenterScaleText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                                     <Slider x:Name="ViewboxBlackBoardCenterScaleTransformValueSlider" Minimum="0.5"
@@ -144,10 +144,10 @@
                                             IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
                                             TickPlacement="None" AutoToolTipPlacement="None"
                                             ValueChanged="ViewboxBlackBoardCenterScaleTransformValueSlider_ValueChanged" />
-                                </ikw:SimpleStackPanel>
-                            </ui:SettingsCard>
-                            <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_BoardScaleRight}">
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                </vio:SimpleStackPanel>
+                            </controls:SettingsCard>
+                            <controls:SettingsCard Header="{x:Static props:ThemeStrings.Theme_BoardScaleRight}">
+                                <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="ViewboxBlackBoardRightScaleText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                                     <Slider x:Name="ViewboxBlackBoardRightScaleTransformValueSlider" Minimum="0.5"
@@ -155,14 +155,14 @@
                                             IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
                                             TickPlacement="None" AutoToolTipPlacement="None"
                                             ValueChanged="ViewboxBlackBoardRightScaleTransformValueSlider_ValueChanged" />
-                                </ikw:SimpleStackPanel>
-                            </ui:SettingsCard>
-                        </ui:SettingsExpander.Items>
-                    </ui:SettingsExpander>
+                                </vio:SimpleStackPanel>
+                            </controls:SettingsCard>
+                        </StackPanel>
+                    </controls:SettingsExpander>
 
                     <Rectangle Height="48" />
-                </ikw:SimpleStackPanel>
+                </vio:SimpleStackPanel>
             </Grid>
         </Grid>
     </ScrollViewer>
-</ui:Page>
+</Page>

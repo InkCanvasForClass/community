@@ -1,10 +1,10 @@
-<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.AnnouncementCenterPage"
+<Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.AnnouncementCenterPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-      xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
       xmlns:converter="clr-namespace:Ink_Canvas.Converter"
       mc:Ignorable="d"
       Title="{x:Static props:AnnouncementStrings.CenterTitle}">
@@ -47,11 +47,11 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <ui:FontIcon Grid.Column="0"
+                    <ui:SymbolIcon Grid.Column="0"
                                  Width="36"
                                  Height="36"
                                  Margin="0,0,14,0"
-                                 Icon="{x:Static ui:SegoeFluentIcons.Message}"
+                                 Symbol="ChatMultiple24"
                                  FontSize="24"
                                  VerticalAlignment="Top" />
 
@@ -126,11 +126,11 @@
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <ui:FontIcon Grid.Column="0"
+                                        <ui:SymbolIcon Grid.Column="0"
                                                      Width="28"
                                                      Height="28"
                                                      Margin="0,2,10,0"
-                                                     Icon="{x:Static ui:SegoeFluentIcons.Message}"
+                                                     Symbol="ChatMultiple24"
                                                      Opacity="0.85" />
                                         <StackPanel Grid.Column="1">
                                             <DockPanel LastChildFill="True">
@@ -189,7 +189,7 @@
                                    FontWeight="SemiBold"
                                    TextWrapping="Wrap" />
 
-                        <ikw:SimpleStackPanel Grid.Row="1"
+                        <vio:SimpleStackPanel Grid.Row="1"
                                               Margin="0,10,0,16"
                                               Orientation="Horizontal"
                                               Spacing="12">
@@ -197,7 +197,7 @@
                                        Style="{StaticResource AnnouncementMetaTextBlockStyle}" />
                             <TextBlock x:Name="DetailTimeTextBlock"
                                        Style="{StaticResource AnnouncementMetaTextBlockStyle}" />
-                        </ikw:SimpleStackPanel>
+                        </vio:SimpleStackPanel>
 
                         <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
                             <StackPanel>
@@ -219,4 +219,4 @@
             </Grid>
         </Grid>
     </ScrollViewer>
-</ui:Page>
+</Page>

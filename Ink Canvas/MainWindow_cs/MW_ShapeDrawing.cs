@@ -1,6 +1,6 @@
 using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
-using iNKORE.UI.WPF.Modern.Controls;
+using Wpf.Ui.Controls;
+using Wpf.Ui.Controls;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,7 +11,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using MessageBox = System.Windows.MessageBox;
 using Point = System.Windows.Point;
 
 namespace Ink_Canvas
@@ -63,7 +63,7 @@ namespace Ink_Canvas
                     }
                     // 同步圆心显示开关状态
                     if (ShapeDrawPopupContent?.ShowCircleCenterToggle != null)
-                        ShapeDrawPopupContent.ShowCircleCenterToggle.IsOn = Settings.Canvas.ShowCircleCenter;
+                        ShapeDrawPopupContent.ShowCircleCenterToggle.IsChecked = Settings.Canvas.ShowCircleCenter;
                     AnimationsHelper.ShowPopupWithSlideAndFade(BorderDrawShape);
                     _popupManager?.BringToFront(BorderDrawShape);
                 }
@@ -79,7 +79,7 @@ namespace Ink_Canvas
                     }
                     // 同步圆心显示开关状态
                     if (BoardShapeDrawPopupContent?.ShowCircleCenterToggle != null)
-                        BoardShapeDrawPopupContent.ShowCircleCenterToggle.IsOn = Settings.Canvas.ShowCircleCenter;
+                        BoardShapeDrawPopupContent.ShowCircleCenterToggle.IsChecked = Settings.Canvas.ShowCircleCenter;
                     AnimationsHelper.ShowPopupWithSlideAndFade(BoardBorderDrawShape);
                     _popupManager?.BringToFront(BoardBorderDrawShape);
                 }
@@ -161,12 +161,15 @@ namespace Ink_Canvas
         {
             if (lastBorderMouseDownObject != sender) return;
 
-            ToggleSwitchDrawShapeBorderAutoHide.IsOn = !ToggleSwitchDrawShapeBorderAutoHide.IsOn;
+            ToggleSwitchDrawShapeBorderAutoHide.IsChecked = !((ToggleSwitchDrawShapeBorderAutoHide.IsChecked) == true);
 
-            if (ToggleSwitchDrawShapeBorderAutoHide.IsOn)
-                ((FontIcon)sender).Icon = SegoeFluentIcons.Pin;
-            else
-                ((FontIcon)sender).Icon = SegoeFluentIcons.Unpin;
+            // XAML 侧对应元素已迁移为 WPF-UI 的 SymbolIcon（图标通过 Symbol 设置，非 iNKORE 的 Icon）。
+            if (sender is Wpf.Ui.Controls.SymbolIcon symbolIcon)
+            {
+                symbolIcon.Symbol = ((ToggleSwitchDrawShapeBorderAutoHide.IsChecked) == true)
+                    ? SymbolRegular.Pin24
+                    : SymbolRegular.Unpin24;
+            }
         }
 
         /// <summary>
@@ -281,7 +284,7 @@ namespace Ink_Canvas
 
             if (isInMultiTouchMode)
             {
-                ToggleSwitchEnableMultiTouchMode.IsOn = false;
+                ToggleSwitchEnableMultiTouchMode.IsChecked = false;
                 lastIsInMultiTouchMode = true;
             }
 
@@ -319,7 +322,7 @@ namespace Ink_Canvas
             lastMouseDownSender = null;
             if (isLongPressSelected)
             {
-                if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
+                if (((ToggleSwitchDrawShapeBorderAutoHide.IsChecked) == true)) CollapseBorderDrawShape();
                 if (sender is UIElement ui)
                 {
                     var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
@@ -361,7 +364,7 @@ namespace Ink_Canvas
             lastMouseDownSender = null;
             if (isLongPressSelected)
             {
-                if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
+                if (((ToggleSwitchDrawShapeBorderAutoHide.IsChecked) == true)) CollapseBorderDrawShape();
                 if (sender is UIElement ui)
                 {
                     var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
@@ -403,7 +406,7 @@ namespace Ink_Canvas
             lastMouseDownSender = null;
             if (isLongPressSelected)
             {
-                if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
+                if (((ToggleSwitchDrawShapeBorderAutoHide.IsChecked) == true)) CollapseBorderDrawShape();
                 if (sender is UIElement ui)
                 {
                     var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
@@ -445,7 +448,7 @@ namespace Ink_Canvas
             lastMouseDownSender = null;
             if (isLongPressSelected)
             {
-                if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
+                if (((ToggleSwitchDrawShapeBorderAutoHide.IsChecked) == true)) CollapseBorderDrawShape();
                 if (sender is UIElement ui)
                 {
                     var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
@@ -487,7 +490,7 @@ namespace Ink_Canvas
             lastMouseDownSender = null;
             if (isLongPressSelected)
             {
-                if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
+                if (((ToggleSwitchDrawShapeBorderAutoHide.IsChecked) == true)) CollapseBorderDrawShape();
                 if (sender is UIElement ui)
                 {
                     var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
@@ -2848,7 +2851,7 @@ namespace Ink_Canvas
 
                 if (lastIsInMultiTouchMode)
                 {
-                    ToggleSwitchEnableMultiTouchMode.IsOn = true;
+                    ToggleSwitchEnableMultiTouchMode.IsChecked = true;
                     lastIsInMultiTouchMode = false;
                 }
             }
@@ -2861,7 +2864,7 @@ namespace Ink_Canvas
                     BtnPen_Click(null, null); //画完一次还原到笔模式
                     if (lastIsInMultiTouchMode)
                     {
-                        ToggleSwitchEnableMultiTouchMode.IsOn = true;
+                        ToggleSwitchEnableMultiTouchMode.IsChecked = true;
                         lastIsInMultiTouchMode = false;
                     }
                 }
@@ -2893,7 +2896,7 @@ namespace Ink_Canvas
                     BtnPen_Click(null, null); //画完还原到笔模式
                     if (lastIsInMultiTouchMode)
                     {
-                        ToggleSwitchEnableMultiTouchMode.IsOn = true;
+                        ToggleSwitchEnableMultiTouchMode.IsChecked = true;
                         lastIsInMultiTouchMode = false;
                     }
 
@@ -2948,7 +2951,7 @@ namespace Ink_Canvas
                     BtnPen_Click(null, null); //画完还原到笔模式
                     if (lastIsInMultiTouchMode)
                     {
-                        ToggleSwitchEnableMultiTouchMode.IsOn = true;
+                        ToggleSwitchEnableMultiTouchMode.IsChecked = true;
                         lastIsInMultiTouchMode = false;
                     }
                 }

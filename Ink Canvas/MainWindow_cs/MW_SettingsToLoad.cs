@@ -205,14 +205,14 @@ namespace Ink_Canvas
 
                 if (Settings.Startup.IsEnableNibMode)
                 {
-                    ToggleSwitchEnableNibMode.IsOn = true;
-                    BoardToggleSwitchEnableNibMode.IsOn = true;
+                    ToggleSwitchEnableNibMode.IsChecked = true;
+                    BoardToggleSwitchEnableNibMode.IsChecked = true;
                     BoundsWidth = Settings.Advanced.NibModeBoundsWidth;
                 }
                 else
                 {
-                    ToggleSwitchEnableNibMode.IsOn = false;
-                    BoardToggleSwitchEnableNibMode.IsOn = false;
+                    ToggleSwitchEnableNibMode.IsChecked = false;
+                    BoardToggleSwitchEnableNibMode.IsChecked = false;
                     BoundsWidth = Settings.Advanced.FingerModeBoundsWidth;
                 }
 
@@ -234,8 +234,8 @@ namespace Ink_Canvas
             {
                 Settings.Startup = new Startup();
                 Settings.Startup.IsEnableNibMode = false;
-                ToggleSwitchEnableNibMode.IsOn = false;
-                BoardToggleSwitchEnableNibMode.IsOn = false;
+                ToggleSwitchEnableNibMode.IsChecked = false;
+                BoardToggleSwitchEnableNibMode.IsChecked = false;
                 BoundsWidth = Settings.Advanced.FingerModeBoundsWidth;
             }
 
@@ -369,18 +369,18 @@ namespace Ink_Canvas
             {
                 if (FloatingBarGesturePopupContent != null)
                 {
-                    FloatingBarGesturePopupContent.MultiTouchToggle.IsOn = Settings.Gesture.IsEnableMultiTouchMode;
-                    FloatingBarGesturePopupContent.TwoFingerTranslateToggle.IsOn = Settings.Gesture.IsEnableTwoFingerTranslate;
-                    FloatingBarGesturePopupContent.TwoFingerZoomToggle.IsOn = Settings.Gesture.IsEnableTwoFingerZoom;
-                    FloatingBarGesturePopupContent.TwoFingerRotationToggle.IsOn = Settings.Gesture.IsEnableTwoFingerRotation;
+                    FloatingBarGesturePopupContent.MultiTouchToggle.IsChecked = Settings.Gesture.IsEnableMultiTouchMode;
+                    FloatingBarGesturePopupContent.TwoFingerTranslateToggle.IsChecked = Settings.Gesture.IsEnableTwoFingerTranslate;
+                    FloatingBarGesturePopupContent.TwoFingerZoomToggle.IsChecked = Settings.Gesture.IsEnableTwoFingerZoom;
+                    FloatingBarGesturePopupContent.TwoFingerRotationToggle.IsChecked = Settings.Gesture.IsEnableTwoFingerRotation;
                 }
 
                 if (BoardGesturePopupContent != null)
                 {
-                    BoardGesturePopupContent.MultiTouchToggle.IsOn = Settings.Gesture.IsEnableMultiTouchModeBoard;
-                    BoardGesturePopupContent.TwoFingerTranslateToggle.IsOn = Settings.Gesture.IsEnableTwoFingerTranslateBoard;
-                    BoardGesturePopupContent.TwoFingerZoomToggle.IsOn = Settings.Gesture.IsEnableTwoFingerZoomBoard;
-                    BoardGesturePopupContent.TwoFingerRotationToggle.IsOn = Settings.Gesture.IsEnableTwoFingerRotationBoard;
+                    BoardGesturePopupContent.MultiTouchToggle.IsChecked = Settings.Gesture.IsEnableMultiTouchModeBoard;
+                    BoardGesturePopupContent.TwoFingerTranslateToggle.IsChecked = Settings.Gesture.IsEnableTwoFingerTranslateBoard;
+                    BoardGesturePopupContent.TwoFingerZoomToggle.IsChecked = Settings.Gesture.IsEnableTwoFingerZoomBoard;
+                    BoardGesturePopupContent.TwoFingerRotationToggle.IsChecked = Settings.Gesture.IsEnableTwoFingerRotationBoard;
                 }
             }
             catch (Exception ex)
@@ -574,8 +574,8 @@ namespace Ink_Canvas
             // InkToShape
             if (Settings.InkToShape != null)
             {
-                FloatingBarToggleSwitchEnableInkToShape.IsOn = Settings.InkToShape.IsInkToShapeEnabled;
-                BoardToggleSwitchEnableInkToShape.IsOn = Settings.InkToShape.IsInkToShapeEnabled;
+                FloatingBarToggleSwitchEnableInkToShape.IsChecked = Settings.InkToShape.IsInkToShapeEnabled;
+                BoardToggleSwitchEnableInkToShape.IsChecked = Settings.InkToShape.IsInkToShapeEnabled;
             }
             else
             {
@@ -710,9 +710,9 @@ namespace Ink_Canvas
                 UpdateSliderText(LaserPenFadeSpeedSlider, LaserPenFadeSpeedText, "{0:0.0}x");
                 UpdateSliderText(BoardLaserPenFadeSpeedSlider, BoardLaserPenFadeSpeedText, "{0:0.0}x");
                 if (HighlighterOverlapToggle != null)
-                    HighlighterOverlapToggle.IsOn = Settings.Canvas.HighlighterOverlapEnabled;
+                    HighlighterOverlapToggle.IsChecked = Settings.Canvas.HighlighterOverlapEnabled;
                 if (BoardHighlighterOverlapToggle != null)
-                    BoardHighlighterOverlapToggle.IsOn = Settings.Canvas.HighlighterOverlapEnabled;
+                    BoardHighlighterOverlapToggle.IsChecked = Settings.Canvas.HighlighterOverlapEnabled;
 
                 LogHelper.WriteLogToFile("墨迹渐隐设置已加载", LogHelper.LogType.Trace);
             }

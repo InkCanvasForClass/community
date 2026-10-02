@@ -2,8 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:props="clr-namespace:Ink_Canvas.Properties"
-        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-        xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
         Title="{x:Static props:MainWindowStrings.Main_Screenshot_WindowTitle}"
         WindowStyle="None" 
         AllowsTransparency="True" 
@@ -36,7 +36,7 @@
                           Opacity="0.35"
                           Color="#000000" />
 
-        <Style x:Key="ScreenshotBarModeButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
+        <Style x:Key="ScreenshotBarModeButtonStyle" TargetType="Button">
             <Setter Property="Height" Value="36" />
             <Setter Property="MinWidth" Value="0" />
             <Setter Property="Padding" Value="14,0" />
@@ -45,7 +45,7 @@
             <Setter Property="Cursor" Value="Hand" />
         </Style>
 
-        <Style x:Key="ScreenshotBarActionButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
+        <Style x:Key="ScreenshotBarActionButtonStyle" TargetType="Button">
             <Setter Property="Height" Value="36" />
             <Setter Property="MinWidth" Value="0" />
             <Setter Property="Padding" Value="16,0" />
@@ -54,9 +54,9 @@
             <Setter Property="Foreground" Value="White" />
             <Setter Property="Cursor" Value="Hand" />
             <Style.Resources>
-                <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonForegroundKey}" Color="White" />
-                <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonForegroundPointerOverKey}" Color="White" />
-                <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonForegroundPressedKey}" Color="White" />
+                <SolidColorBrush x:Key="{DynamicResource TextFillColorPrimaryBrush}" Color="White" />
+                <SolidColorBrush x:Key="{DynamicResource TextFillColorPrimaryBrush}" Color="White" />
+                <SolidColorBrush x:Key="{DynamicResource TextFillColorPrimaryBrush}" Color="White" />
             </Style.Resources>
         </Style>
     </Window.Resources>
@@ -142,7 +142,7 @@
 
         <!-- 底部工具栏 -->
         <Border Background="{StaticResource ScreenshotBarBackgroundBrush}"
-                BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.CardStrokeColorDefaultBrushKey}}"
+                BorderBrush="{DynamicResource {DynamicResource CardStrokeColorDefaultBrush}}"
                 BorderThickness="1"
                 CornerRadius="12"
                 Padding="10"
@@ -151,10 +151,10 @@
                 Margin="0,0,0,80"
                 Effect="{StaticResource ScreenshotBarShadow}"
                 Panel.ZIndex="1000"
-                ui:ThemeManager.RequestedTheme="Dark">
-            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+>
+            <vio:SimpleStackPanel Orientation="Horizontal" Spacing="10">
                 <!-- 模式切换按钮 -->
-                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                     <Button Name="RectangleModeButton"
                             Style="{StaticResource ScreenshotBarModeButtonStyle}"
                             Content="{x:Static props:MainWindowStrings.Main_Screenshot_RectangleMode}"
@@ -171,11 +171,11 @@
                             Style="{StaticResource ScreenshotBarModeButtonStyle}"
                             Content="{x:Static props:MainWindowStrings.Main_Screenshot_CameraCaptureMode}"
                             Click="CameraModeButton_Click" />
-                </ikw:SimpleStackPanel>
+                </vio:SimpleStackPanel>
 
                 <Rectangle Width="1"
                            Height="32"
-                           Fill="{DynamicResource {x:Static ui:ThemeKeys.DividerStrokeColorDefaultBrushKey}}"
+                           Fill="{DynamicResource {DynamicResource DividerStrokeColorDefaultBrush}}"
                            Margin="4,0" />
 
                 <!-- 操作按钮 -->
@@ -191,7 +191,7 @@
                 <Rectangle Name="ToolbarDividerRectangle"
                            Width="1"
                            Height="32"
-                           Fill="{DynamicResource {x:Static ui:ThemeKeys.DividerStrokeColorDefaultBrushKey}}"
+                           Fill="{DynamicResource {DynamicResource DividerStrokeColorDefaultBrush}}"
                            Margin="4,0" />
                 <Button Name="ConfirmButton"
                         Style="{StaticResource ScreenshotBarActionButtonStyle}"
@@ -200,8 +200,8 @@
                         BorderBrush="{StaticResource ScreenshotBarPrimaryBrush}"
                         Click="ConfirmButton_Click">
                     <Button.Resources>
-                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPointerOverKey}" Color="#10B981" />
-                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPressedKey}" Color="#047857" />
+                        <SolidColorBrush x:Key="{DynamicResource ControlBackgroundPointerOver}" Color="#10B981" />
+                        <SolidColorBrush x:Key="{DynamicResource ControlBackgroundPressed}" Color="#047857" />
                     </Button.Resources>
                 </Button>
                 <Button Name="AddToWhiteboardButton"
@@ -211,8 +211,8 @@
                         BorderBrush="{StaticResource ScreenshotBarAccentBrush}"
                         Click="AddToWhiteboardButton_Click">
                     <Button.Resources>
-                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPointerOverKey}" Color="#3B82F6" />
-                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPressedKey}" Color="#1D4ED8" />
+                        <SolidColorBrush x:Key="{DynamicResource ControlBackgroundPointerOver}" Color="#3B82F6" />
+                        <SolidColorBrush x:Key="{DynamicResource ControlBackgroundPressed}" Color="#1D4ED8" />
                     </Button.Resources>
                 </Button>
                 <Button Name="CancelButton"
@@ -222,11 +222,11 @@
                         BorderBrush="{StaticResource ScreenshotBarDangerBrush}"
                         Click="CancelButton_Click">
                     <Button.Resources>
-                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPointerOverKey}" Color="#EF4444" />
-                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPressedKey}" Color="#B91C1C" />
+                        <SolidColorBrush x:Key="{DynamicResource ControlBackgroundPointerOver}" Color="#EF4444" />
+                        <SolidColorBrush x:Key="{DynamicResource ControlBackgroundPressed}" Color="#B91C1C" />
                     </Button.Resources>
                 </Button>
-            </ikw:SimpleStackPanel>
+            </vio:SimpleStackPanel>
         </Border>
 
         <!-- 摄像头预览区域 -->

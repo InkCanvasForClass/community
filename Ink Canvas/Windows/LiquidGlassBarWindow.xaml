@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:props="clr-namespace:Ink_Canvas.Properties"
         mc:Ignorable="d"
         Title="{x:Static props:ThemeStrings.Theme_LiquidGlassBar}"
@@ -128,22 +128,22 @@
                     <Border x:Name="BtnPen" Style="{StaticResource GlassToolButton}"
                             ToolTip="{x:Static props:ThemeStrings.Theme_LiquidGlassBar_Pen}"
                             MouseLeftButtonUp="BtnPen_MouseLeftButtonUp">
-                        <ui:FontIcon x:Name="IconPen" Icon="{x:Static ui:SegoeFluentIcons.Edit}" FontSize="17" />
+                        <ui:SymbolIcon x:Name="IconPen" Symbol="Edit24" FontSize="17" />
                     </Border>
                     <Border x:Name="BtnHighlighter" Style="{StaticResource GlassToolButton}"
                             ToolTip="{x:Static props:ThemeStrings.Theme_LiquidGlassBar_Highlighter}"
                             MouseLeftButtonUp="BtnHighlighter_MouseLeftButtonUp">
-                        <ui:FontIcon x:Name="IconHighlighter" Icon="{x:Static ui:SegoeFluentIcons.Highlight}" FontSize="17" />
+                        <ui:SymbolIcon x:Name="IconHighlighter" Symbol="Highlight24" FontSize="17" />
                     </Border>
                     <Border x:Name="BtnEraser" Style="{StaticResource GlassToolButton}"
                             ToolTip="{x:Static props:ThemeStrings.Theme_LiquidGlassBar_Eraser}"
                             MouseLeftButtonUp="BtnEraser_MouseLeftButtonUp">
-                        <ui:FontIcon x:Name="IconEraser" Icon="{x:Static ui:SegoeFluentIcons.EraseTool}" FontSize="17" />
+                        <ui:SymbolIcon x:Name="IconEraser" Symbol="Eraser24" FontSize="17" />
                     </Border>
                     <Border x:Name="BtnSelect" Style="{StaticResource GlassToolButton}"
                             ToolTip="{x:Static props:ThemeStrings.Theme_LiquidGlassBar_Select}"
                             MouseLeftButtonUp="BtnSelect_MouseLeftButtonUp">
-                        <ui:FontIcon x:Name="IconSelect" Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}" FontSize="17" />
+                        <ui:SymbolIcon x:Name="IconSelect" Symbol="HandDraw24" FontSize="17" />
                     </Border>
 
                     <Border Width="1" Height="24" Margin="7,0" VerticalAlignment="Center"
@@ -174,27 +174,27 @@
                     <Border x:Name="BtnUndo" Style="{StaticResource GlassToolButton}"
                             ToolTip="{x:Static props:ThemeStrings.Theme_LiquidGlassBar_Undo}"
                             MouseLeftButtonUp="BtnUndo_MouseLeftButtonUp">
-                        <ui:FontIcon x:Name="IconUndo" Icon="{x:Static ui:SegoeFluentIcons.Undo}" FontSize="17" />
+                        <ui:SymbolIcon x:Name="IconUndo" Symbol="ArrowUndo24" FontSize="17" />
                     </Border>
                     <Border x:Name="BtnRedo" Style="{StaticResource GlassToolButton}"
                             ToolTip="{x:Static props:ThemeStrings.Theme_LiquidGlassBar_Redo}"
                             MouseLeftButtonUp="BtnRedo_MouseLeftButtonUp">
-                        <ui:FontIcon x:Name="IconRedo" Icon="{x:Static ui:SegoeFluentIcons.Redo}" FontSize="17" />
+                        <ui:SymbolIcon x:Name="IconRedo" Symbol="ArrowRedo24" FontSize="17" />
                     </Border>
                     <Border x:Name="BtnClear" Style="{StaticResource GlassToolButton}"
                             ToolTip="{x:Static props:ThemeStrings.Theme_LiquidGlassBar_Clear}"
                             MouseLeftButtonUp="BtnClear_MouseLeftButtonUp">
-                        <ui:FontIcon x:Name="IconClear" Icon="{x:Static ui:SegoeFluentIcons.Delete}" FontSize="17" />
+                        <ui:SymbolIcon x:Name="IconClear" Symbol="Delete24" FontSize="17" />
                     </Border>
                     <Border x:Name="BtnWhiteboard" Style="{StaticResource GlassToolButton}"
                             ToolTip="{x:Static props:ThemeStrings.Theme_LiquidGlassBar_Whiteboard}"
                             MouseLeftButtonUp="BtnWhiteboard_MouseLeftButtonUp">
-                        <ui:FontIcon x:Name="IconWhiteboard" Icon="{x:Static ui:SegoeFluentIcons.Draw}" FontSize="17" />
+                        <ui:SymbolIcon x:Name="IconWhiteboard" Symbol="DrawImage24" FontSize="17" />
                     </Border>
                     <Border x:Name="BtnMore" Style="{StaticResource GlassToolButton}"
                             ToolTip="{x:Static props:ThemeStrings.Theme_LiquidGlassBar_More}"
                             MouseLeftButtonUp="BtnMore_MouseLeftButtonUp">
-                        <ui:FontIcon x:Name="IconMore" Icon="{x:Static ui:SegoeFluentIcons.More}" FontSize="17" />
+                        <ui:SymbolIcon x:Name="IconMore" Symbol="MoreHorizontal24" FontSize="17" />
                     </Border>
                 </StackPanel>
 

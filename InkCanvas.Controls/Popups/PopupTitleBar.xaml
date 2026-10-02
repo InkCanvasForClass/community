@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              mc:Ignorable="d" d:Width="300">
     <Grid Margin="12,8,10,5">
         <Grid.ColumnDefinitions>
@@ -17,7 +17,7 @@
                 Cursor="Hand" VerticalAlignment="Center"
                 Padding="4" MinWidth="28" MinHeight="28"
                 Background="Transparent" BorderThickness="0">
-            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChromeCloseContrast}"
+            <ui:SymbolIcon Symbol="Dismiss24"
                          Foreground="{DynamicResource FloatingBarPopupCloseBrush}" FontSize="16" />
             <Button.Template>
                 <ControlTemplate TargetType="Button">

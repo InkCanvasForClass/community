@@ -5,7 +5,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
         mc:Ignorable="d"
         Title="{x:Static fb:FloatingBarStrings.FloatingBar_MiniWhiteboard}"
@@ -17,11 +17,11 @@
         WindowStartupLocation="CenterScreen"
         Loaded="Window_Loaded"
         Closing="Window_Closing"
-        ui:ThemeManager.IsThemeAware="True"
-        ui:WindowHelper.UseModernWindowStyle="True"
-        ui:WindowHelper.CornerStyle="Round"
-        ui:TitleBar.ExtendViewIntoTitleBar="True"
-        ui:TitleBar.Height="0">
+
+
+
+
+>
 
     <Window.Resources>
         <Style x:Key="MiniToolBtn" TargetType="Border">
@@ -92,7 +92,7 @@
                 <Border x:Name="PenBtn" Style="{StaticResource MiniToolBtn}"
                         MouseLeftButtonUp="PenBtn_Click"
                         ToolTip="{x:Static fb:FloatingBarStrings.Board_Pen}">
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" FontSize="14"
+                    <ui:SymbolIcon Symbol="Edit24" FontSize="14"
                                  Foreground="{DynamicResource IconForeground}"/>
                 </Border>
 
@@ -108,7 +108,7 @@
                 <Border x:Name="EraserBtn" Style="{StaticResource MiniToolBtn}"
                         MouseLeftButtonUp="EraserBtn_Click"
                         ToolTip="{x:Static fb:FloatingBarStrings.Board_Eraser}">
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EraseTool}" FontSize="14"
+                    <ui:SymbolIcon Symbol="Eraser24" FontSize="14"
                                  Foreground="{DynamicResource IconForeground}"/>
                 </Border>
 
@@ -119,7 +119,7 @@
                 <Border x:Name="UndoBtn" Style="{StaticResource MiniToolBtn}"
                         MouseLeftButtonUp="UndoBtn_Click"
                         ToolTip="{x:Static fb:FloatingBarStrings.Board_Undo}">
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Undo}" FontSize="14"
+                    <ui:SymbolIcon Symbol="ArrowUndo24" FontSize="14"
                                  Foreground="{DynamicResource IconForeground}"/>
                 </Border>
 
@@ -127,7 +127,7 @@
                 <Border x:Name="ClearBtn" Style="{StaticResource MiniToolBtn}"
                         MouseLeftButtonUp="ClearBtn_Click"
                         ToolTip="{x:Static fb:FloatingBarStrings.MiniWhiteboard_Clear}">
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" FontSize="14"
+                    <ui:SymbolIcon Symbol="Delete24" FontSize="14"
                                  Foreground="{DynamicResource IconForeground}"/>
                 </Border>
 
@@ -166,7 +166,7 @@
                 <Border Style="{StaticResource MiniToolBtn}"
                         MouseLeftButtonUp="PrevPageBtn_Click"
                         ToolTip="{x:Static fb:FloatingBarStrings.Board_PreviousPage}">
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronLeft}" FontSize="14"
+                    <ui:SymbolIcon Symbol="ChevronLeft24" FontSize="14"
                                  Foreground="{DynamicResource IconForeground}"/>
                 </Border>
 
@@ -180,7 +180,7 @@
                 <Border Style="{StaticResource MiniToolBtn}"
                         MouseLeftButtonUp="NextPageBtn_Click"
                         ToolTip="{x:Static fb:FloatingBarStrings.Board_NextPage}">
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronRight}" FontSize="14"
+                    <ui:SymbolIcon Symbol="ChevronRight24" FontSize="14"
                                  Foreground="{DynamicResource IconForeground}"/>
                 </Border>
 
@@ -188,7 +188,7 @@
                 <Border Style="{StaticResource MiniToolBtn}"
                         MouseLeftButtonUp="AddPageBtn_Click"
                         ToolTip="{x:Static fb:FloatingBarStrings.Board_NewPage}">
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" FontSize="14"
+                    <ui:SymbolIcon Symbol="Add24" FontSize="14"
                                  Foreground="{DynamicResource IconForeground}"/>
                 </Border>
 
@@ -199,7 +199,7 @@
                 <Border Style="{StaticResource MiniToolBtn}"
                         MouseLeftButtonUp="FoldBtn_Click"
                         ToolTip="{x:Static fb:FloatingBarStrings.FloatingBar_Hide}">
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronDown}" FontSize="14"
+                    <ui:SymbolIcon Symbol="ChevronDown24" FontSize="14"
                                  Foreground="{DynamicResource IconForeground}"/>
                 </Border>
 

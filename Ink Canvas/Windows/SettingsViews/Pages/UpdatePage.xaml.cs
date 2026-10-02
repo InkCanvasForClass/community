@@ -1,8 +1,8 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
-using iNKORE.UI.WPF.Modern.Controls;
+using Wpf.Ui.Controls;
+using Wpf.Ui.Controls;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,11 +11,11 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using MessageBox = System.Windows.MessageBox;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
-    public partial class UpdatePage : iNKORE.UI.WPF.Modern.Controls.Page
+    public partial class UpdatePage : System.Windows.Controls.Page
     {
         private enum UpdateUiState
         {
@@ -108,9 +108,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 var settings = SettingsManager.Settings;
                 if (settings.Startup != null)
                 {
-                    CardAutoUpdate.IsOn = settings.Startup.IsAutoUpdate;
-                    CardSilentUpdate.IsOn = settings.Startup.IsAutoUpdateWithSilence;
-                    CardSmartUpdate.IsOn = settings.Startup.IsSmartUpdate;
+                    CardAutoUpdate.IsChecked = settings.Startup.IsAutoUpdate;
+                    CardSilentUpdate.IsChecked = settings.Startup.IsAutoUpdateWithSilence;
+                    CardSmartUpdate.IsChecked = settings.Startup.IsSmartUpdate;
 
                     AutoUpdateWithSilenceTimeComboBox.InitializeAutoUpdateWithSilenceTimeComboBoxOptions(
                         AutoUpdateWithSilenceStartTimeComboBox, AutoUpdateWithSilenceEndTimeComboBox);
@@ -165,13 +165,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                bool newState = CardAutoUpdate.IsOn;
+                bool newState = ((CardAutoUpdate.IsChecked) == true);
                 SettingsManager.Settings.Startup.IsAutoUpdate = newState;
 
                 if (!newState)
                 {
                     SettingsManager.Settings.Startup.IsAutoUpdateWithSilence = false;
-                    CardSilentUpdate.IsOn = false;
+                    CardSilentUpdate.IsChecked = false;
                 }
 
                 SettingsManager.SaveSettingsToFile();
@@ -188,7 +188,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                SettingsManager.Settings.Startup.IsAutoUpdateWithSilence = CardSilentUpdate.IsOn;
+                SettingsManager.Settings.Startup.IsAutoUpdateWithSilence = ((CardSilentUpdate.IsChecked) == true);
                 SettingsManager.SaveSettingsToFile();
             }
             catch (Exception ex)
@@ -203,9 +203,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                SettingsManager.Settings.Startup.IsSmartUpdate = CardSmartUpdate.IsOn;
+                SettingsManager.Settings.Startup.IsSmartUpdate = ((CardSmartUpdate.IsChecked) == true);
                 SettingsManager.SaveSettingsToFile();
-                LogHelper.WriteLogToFile($"Settings | Smart update: {CardSmartUpdate.IsOn}");
+                LogHelper.WriteLogToFile($"Settings | Smart update: {((CardSmartUpdate.IsChecked) == true)}");
 
                 if (SettingsManager.Settings.Startup.IsAutoUpdate)
                 {
@@ -396,14 +396,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             switch (state)
             {
                 case UpdateUiState.Idle:
-                    StatusIcon.Icon = SegoeFluentIcons.Completed;
+                    StatusIcon.Icon = SymbolRegular.Completed;
                     StatusTitle.Text = UpdateStrings.Status_UpToDate;
                     StatusSubtitle.Text = customSubtitle ?? BuildLastCheckSubtitle();
                     CheckUpdateButton.Visibility = Visibility.Visible;
                     break;
 
                 case UpdateUiState.Checking:
-                    StatusIcon.Icon = SegoeFluentIcons.Sync;
+                    StatusIcon.Icon = SymbolRegular.Sync;
                     StatusTitle.Text = UpdateStrings.Status_Checking;
                     StatusSubtitle.Text = "";
                     CheckUpdateButton.Visibility = Visibility.Visible;
@@ -414,7 +414,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     break;
 
                 case UpdateUiState.UpdateAvailable:
-                    StatusIcon.Icon = SegoeFluentIcons.Upload;
+                    StatusIcon.Icon = SymbolRegular.Upload;
                     StatusTitle.Text = string.Format(UpdateStrings.Status_NewVersionAvailable, _remoteVersion);
                     StatusSubtitle.Text = customSubtitle ?? string.Format(UpdateStrings.Status_VersionTransition, GetCurrentVersion(), _remoteVersion);
                     UpdateNowButton.Visibility = Visibility.Visible;
@@ -423,7 +423,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     break;
 
                 case UpdateUiState.Downloading:
-                    StatusIcon.Icon = SegoeFluentIcons.Download;
+                    StatusIcon.Icon = SymbolRegular.Download;
                     StatusTitle.Text = UpdateStrings.Status_Downloading;
                     StatusSubtitle.Text = customSubtitle ?? string.Format(UpdateStrings.Status_TargetVersion, _remoteVersion);
                     ProgressPanel.Visibility = Visibility.Visible;
@@ -431,14 +431,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     break;
 
                 case UpdateUiState.Downloaded:
-                    StatusIcon.Icon = SegoeFluentIcons.Download;
+                    StatusIcon.Icon = SymbolRegular.Download;
                     StatusTitle.Text = UpdateStrings.Status_Downloaded;
                     StatusSubtitle.Text = customSubtitle ?? string.Format(UpdateStrings.Status_WillInstallOnExit, _remoteVersion);
                     CheckUpdateButton.Visibility = Visibility.Visible;
                     break;
 
                 case UpdateUiState.NetworkError:
-                    StatusIcon.Icon = SegoeFluentIcons.Error;
+                    StatusIcon.Icon = SymbolRegular.Error;
                     StatusTitle.Text = UpdateStrings.Status_NetworkError;
                     StatusSubtitle.Text = customSubtitle ?? UpdateStrings.Status_NetworkErrorHint;
                     CheckUpdateButton.Visibility = Visibility.Visible;
@@ -719,8 +719,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 SettingsManager.Settings.Startup.IsAutoUpdate = true;
                 SettingsManager.Settings.Startup.IsAutoUpdateWithSilence = true;
                 SettingsManager.SaveSettingsToFile();
-                CardAutoUpdate.IsOn = true;
-                CardSilentUpdate.IsOn = true;
+                CardAutoUpdate.IsChecked = true;
+                CardSilentUpdate.IsChecked = true;
 
                 SettingsActionHub.OnStartSilentUpdateTimer();
                 ApplyState(UpdateUiState.Downloaded);
@@ -891,7 +891,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 SecondaryButtonText = CommonStrings.Common_Cancel
             };
 
-            var panel = new iNKORE.UI.WPF.Controls.SimpleStackPanel
+            var panel = new Wpf.Ui.Violeta.Controls.Compat.SimpleStackPanel
             {
                 Spacing = 16,
                 Margin = new Thickness(0, 10, 0, 0)

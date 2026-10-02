@@ -1,5 +1,5 @@
-using iNKORE.UI.WPF.Modern;
-using iNKORE.UI.WPF.Modern.Helpers.Styles;
+using Wpf.Ui.Appearance;
+using Wpf.Ui.Controls;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -18,7 +18,7 @@ namespace Ink_Canvas.Helpers
 
         private sealed class BackdropRequest
         {
-            public BackdropType Type;
+            public WindowBackdropType Type;
             public bool Hooked;
             public bool ReappliedAfterShow;
         }
@@ -41,9 +41,9 @@ namespace Ink_Canvas.Helpers
             try
             {
                 var normalizedName = string.IsNullOrWhiteSpace(backdropName) ? "None" : backdropName;
-                if (!Enum.TryParse(normalizedName, true, out BackdropType backdropType))
+                if (!Enum.TryParse(normalizedName, true, out WindowBackdropType backdropType))
                 {
-                    backdropType = BackdropType.None;
+                    backdropType = WindowBackdropType.None;
                 }
 
                 // 目标效果与窗口当前效果一致时必须走这条分支，不能再执行下面的“先移除再设置”：
@@ -51,7 +51,7 @@ namespace Ink_Canvas.Helpers
                 // SetSystemBackdropType 传入相同值不会触发库内部的属性变更回调，于是窗口会
                 // 停留在“背景已被移除”的状态。Windows 11 上系统背景生效时窗口自身背景是透明的，
                 // 此时整页会直接透出桌面与 DWM 回退色，表现为发白；Win10 没有系统背景所以不复现。
-                if (TryGetWindowHelperBackdropType(window, out BackdropType currentType) &&
+                if (TryGetWindowHelperBackdropType(window, out WindowBackdropType currentType) &&
                     currentType == backdropType)
                 {
                     ApplyNativeBackdrop(window, backdropType);
@@ -68,7 +68,7 @@ namespace Ink_Canvas.Helpers
                     return;
                 }
 
-                if (backdropType == BackdropType.None)
+                if (backdropType == WindowBackdropType.None)
                 {
                     SyncWindowDarkMode(window);
                     return;
@@ -94,7 +94,7 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 只刷新 DWM 侧的系统背景与深色模式，不重建窗口样式。
         /// </summary>
-        private static void ApplyNativeBackdrop(Window window, BackdropType backdropType)
+        private static void ApplyNativeBackdrop(Window window, WindowBackdropType backdropType)
         {
             try
             {
@@ -139,7 +139,7 @@ namespace Ink_Canvas.Helpers
         /// 窗口显示完成后再应用一次系统背景：构造阶段窗口尚未显示时设置的 DWM 系统背景
         /// 在部分系统上不会被采纳，首帧会退回纯色回退背景，需要窗口可见后重新应用。
         /// </summary>
-        private static void AttachReapplyAfterShow(Window window, BackdropType backdropType)
+        private static void AttachReapplyAfterShow(Window window, WindowBackdropType backdropType)
         {
             try
             {
@@ -166,13 +166,13 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        private static bool TrySetWindowHelperBackdrop(Window window, BackdropType backdropType)
+        private static bool TrySetWindowHelperBackdrop(Window window, WindowBackdropType backdropType)
         {
             try
             {
                 var method = FindWindowHelperMethod(
                     "SetSystemBackdropType",
-                    new[] { typeof(Window), typeof(BackdropType) });
+                    new[] { typeof(Window), typeof(WindowBackdropType) });
 
                 if (method == null)
                 {
@@ -188,9 +188,9 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        private static bool TryGetWindowHelperBackdropType(Window window, out BackdropType backdropType)
+        private static bool TryGetWindowHelperBackdropType(Window window, out WindowBackdropType backdropType)
         {
-            backdropType = BackdropType.None;
+            backdropType = WindowBackdropType.None;
 
             try
             {
@@ -200,7 +200,7 @@ namespace Ink_Canvas.Helpers
                     return false;
                 }
 
-                if (method.Invoke(null, new object[] { window }) is BackdropType value)
+                if (method.Invoke(null, new object[] { window }) is WindowBackdropType value)
                 {
                     backdropType = value;
                     return true;

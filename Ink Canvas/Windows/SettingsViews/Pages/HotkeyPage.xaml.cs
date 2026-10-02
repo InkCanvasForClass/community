@@ -7,8 +7,8 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using MessageBox = System.Windows.MessageBox;
+using Page = System.Windows.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -158,9 +158,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void LoadMouseModeSetting()
         {
-            CardEnableHotkeysInMouseMode.IsOn = SettingsManager.Settings.Appearance.EnableHotkeysInMouseMode;
-            CardPassThroughMouseWheelInDrawingMode.IsOn = SettingsManager.Settings.Appearance.PassThroughMouseWheelInDrawingMode;
-            CardEnablePPTPageKeyHook.IsOn = SettingsManager.Settings.Appearance.EnablePPTPageKeyHook;
+            CardEnableHotkeysInMouseMode.IsChecked = SettingsManager.Settings.Appearance.EnableHotkeysInMouseMode;
+            CardPassThroughMouseWheelInDrawingMode.IsChecked = SettingsManager.Settings.Appearance.PassThroughMouseWheelInDrawingMode;
+            CardEnablePPTPageKeyHook.IsChecked = SettingsManager.Settings.Appearance.EnablePPTPageKeyHook;
         }
 
         private void ToggleSwitchEnableHotkeysInMouseMode_Toggled(object sender, RoutedEventArgs e)
@@ -168,7 +168,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             try
             {
-                bool newState = CardEnableHotkeysInMouseMode.IsOn;
+                bool newState = ((CardEnableHotkeysInMouseMode.IsChecked) == true);
                 SettingsManager.Settings.Appearance.EnableHotkeysInMouseMode = newState;
                 SettingsManager.SaveSettingsToFile();
 
@@ -196,7 +196,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             try
             {
-                bool newState = CardPassThroughMouseWheelInDrawingMode.IsOn;
+                bool newState = ((CardPassThroughMouseWheelInDrawingMode.IsChecked) == true);
                 SettingsManager.Settings.Appearance.PassThroughMouseWheelInDrawingMode = newState;
                 SettingsManager.SaveSettingsToFile();
             }
@@ -211,7 +211,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             try
             {
-                SettingsManager.Settings.Appearance.EnablePPTPageKeyHook = CardEnablePPTPageKeyHook.IsOn;
+                SettingsManager.Settings.Appearance.EnablePPTPageKeyHook = ((CardEnablePPTPageKeyHook.IsChecked) == true);
                 SettingsManager.SaveSettingsToFile();
                 _mainWindow?.RefreshPPTPageKeyHook();
             }

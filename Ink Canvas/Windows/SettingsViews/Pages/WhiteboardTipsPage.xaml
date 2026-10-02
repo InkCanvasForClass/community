@@ -1,11 +1,11 @@
-<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.WhiteboardTipsPage"
+<Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.WhiteboardTipsPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
-      xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-      xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       xmlns:c="clr-namespace:Ink_Canvas.Converter"
@@ -34,7 +34,7 @@
                 </Style>
             </FrameworkElement.Resources>
             <Grid HorizontalAlignment="Stretch">
-                <ikw:SimpleStackPanel MaxWidth="1000"
+                <vio:SimpleStackPanel MaxWidth="1000"
                     HorizontalAlignment="Stretch"
                     Spacing="{StaticResource SettingsCardSpacing}">
 
@@ -44,14 +44,14 @@
 
                     <controls:LabeledSettingsCard x:Name="CardEnableChickenSoupInWhiteboardMode"
                             Header="{x:Static props:ThemeStrings.Theme_ShowQuoteInWhiteboard}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Message}"
+                            Symbol="ChatMultiple24"
                             SwitchName="ToggleSwitchEnableChickenSoupInWhiteboardMode"
                             Toggled="ToggleSwitchEnableChickenSoupInWhiteboardMode_Toggled" />
 
-                    <ui:SettingsCard x:Name="CardQuotePosition" Header="{x:Static props:ThemeStrings.Theme_QuotePosition}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.POI}" />
-                        </ui:SettingsCard.HeaderIcon>
+                    <controls:SettingsCard x:Name="CardQuotePosition" Header="{x:Static props:ThemeStrings.Theme_QuotePosition}">
+                        <controls:SettingsCard.HeaderIcon>
+                            <ui:SymbolIcon Symbol="Location24" />
+                        </controls:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxChickenSoupPosition"
                                   MinWidth="180"
                                   SelectionChanged="ComboBoxChickenSoupPosition_SelectionChanged">
@@ -60,21 +60,21 @@
                             <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuotePosition_BottomRight}" Tag="BottomRight" />
                             <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_QuotePosition_BottomLeft}" Tag="BottomLeft" />
                         </ComboBox>
-                    </ui:SettingsCard>
+                    </controls:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardEnableAutoRotation"
                             Header="{x:Static props:ThemeStrings.Theme_Tips_AutoRotation}"
                             Description="{x:Static props:ThemeStrings.Theme_Tips_AutoRotationHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Sync}"
+                            Symbol="ArrowSync24"
                             SwitchName="ToggleSwitchEnableAutoRotation"
                             Toggled="ToggleSwitchEnableAutoRotation_Toggled" />
 
-                    <ui:SettingsCard x:Name="CardRotationInterval"
+                    <controls:SettingsCard x:Name="CardRotationInterval"
                             Header="{x:Static props:ThemeStrings.Theme_Tips_RotationInterval}"
                             Description="{x:Static props:ThemeStrings.Theme_Tips_RotationIntervalHint}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" />
-                        </ui:SettingsCard.HeaderIcon>
+                        <controls:SettingsCard.HeaderIcon>
+                            <ui:SymbolIcon Symbol="ArrowSync24" />
+                        </controls:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxRotationInterval"
                                   IsEditable="True"
                                   MinWidth="120"
@@ -88,28 +88,28 @@
                             <ComboBoxItem Content="180" />
                             <ComboBoxItem Content="300" />
                         </ComboBox>
-                    </ui:SettingsCard>
+                    </controls:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardEnableAutoHideOnInteraction"
                             Header="{x:Static props:ThemeStrings.Theme_Tips_AutoHideOnInteraction}"
                             Description="{x:Static props:ThemeStrings.Theme_Tips_AutoHideOnInteractionHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Hide}"
+                            Symbol="EyeOff24"
                             SwitchName="ToggleSwitchEnableAutoHideOnInteraction"
                             Toggled="ToggleSwitchEnableAutoHideOnInteraction_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardEnableInstantRestore"
                             Header="{x:Static props:ThemeStrings.Theme_Tips_AutoHideInstantRestore}"
                             Description="{x:Static props:ThemeStrings.Theme_Tips_AutoHideInstantRestoreHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Play}"
+                            Symbol="Play24"
                             SwitchName="ToggleSwitchEnableInstantRestore"
                             Toggled="ToggleSwitchEnableInstantRestore_Toggled" />
 
-                    <ui:SettingsCard x:Name="CardAutoHideRestoreDelay"
+                    <controls:SettingsCard x:Name="CardAutoHideRestoreDelay"
                             Header="{x:Static props:ThemeStrings.Theme_Tips_AutoHideRestoreDelay}"
                             Description="{x:Static props:ThemeStrings.Theme_Tips_AutoHideRestoreDelayHint}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Stopwatch}" />
-                        </ui:SettingsCard.HeaderIcon>
+                        <controls:SettingsCard.HeaderIcon>
+                            <ui:SymbolIcon Symbol="Timer24" />
+                        </controls:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxAutoHideRestoreDelay"
                                   IsEditable="True"
                                   MinWidth="120"
@@ -122,7 +122,7 @@
                             <ComboBoxItem Content="30" />
                             <ComboBoxItem Content="60" />
                         </ComboBox>
-                    </ui:SettingsCard>
+                    </controls:SettingsCard>
 
                     <!-- Section 2: 信仰の源出自 Where? -->
                     <Grid Margin="1,30,0,6">
@@ -132,7 +132,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Style="{StaticResource BodyStrongTextBlockStyle}"
                                    Text="{x:Static props:ThemeStrings.Theme_QuoteSource}" />
-                            <ikw:SimpleStackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                            <vio:SimpleStackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
                             <Button x:Name="BtnCustomizeHitokoto" Content="{x:Static props:ThemeStrings.Theme_Hitokoto_CustomizeTitle}"
                                     Padding="14,4" Click="BtnCustomizeHitokoto_Click" />
                             <Button x:Name="BtnImport" Content="{x:Static props:ThemeStrings.Theme_Tips_Import}"
@@ -140,7 +140,7 @@
                             <Button x:Name="BtnCreate" Content="{x:Static props:ThemeStrings.Theme_Tips_Create}"
                                     Padding="14,4" Click="BtnCreate_Click"
                                     Style="{DynamicResource AccentButtonStyle}" />
-                        </ikw:SimpleStackPanel>
+                        </vio:SimpleStackPanel>
                     </Grid>
 
                     <Border BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
@@ -192,20 +192,20 @@
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <CheckBox Grid.Column="0" IsChecked="{Binding IsEnabled}"
-                                                  Checked="SchemeCheckBox_Changed" Unchecked="SchemeCheckBox_Changed"
+                                                  Checked="SchemeCheckBox_Changed"
                                                   VerticalAlignment="Center" Margin="0,0,8,0" />
                                         <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" HorizontalAlignment="Left" />
-                                        <ui:FontIcon Grid.Column="2" Glyph="&#xE72E;"
+                                        <ui:SymbolIcon Grid.Column="2" Glyph="&#xE72E;"
                                                      Visibility="{Binding IsPreset, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                      FontSize="14" VerticalAlignment="Center" Margin="0,0,8,0" />
                                         <Button Grid.Column="3" Click="BtnExport_Click"
                                                 Style="{StaticResource IconButtonStyle}" VerticalAlignment="Center"
                                                 ToolTip="{x:Static props:ThemeStrings.Theme_Tips_Export}">
-                                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Download}" FontSize="14" />
+                                            <ui:SymbolIcon Symbol="ArrowDownload24" FontSize="14" />
                                         </Button>
                                         <Button Grid.Column="4" Click="BtnEdit_Click" VerticalAlignment="Center"
                                                 ToolTip="{x:Static props:ThemeStrings.Theme_Tips_Edit}">
-                                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" FontSize="14" />
+                                            <ui:SymbolIcon Symbol="Edit24" FontSize="14" />
                                             <Button.Style>
                                                 <Style TargetType="Button" BasedOn="{StaticResource IconButtonStyle}">
                                                     <Style.Triggers>
@@ -218,7 +218,7 @@
                                         </Button>
                                         <Button Grid.Column="5" Click="BtnDeleteScheme_Click" VerticalAlignment="Center"
                                                 ToolTip="Delete">
-                                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" FontSize="14" />
+                                            <ui:SymbolIcon Symbol="Delete24" FontSize="14" />
                                             <Button.Style>
                                                 <Style TargetType="Button" BasedOn="{StaticResource IconButtonStyle}">
                                                     <Style.Triggers>
@@ -236,8 +236,8 @@
                     </Border>
 
                     <Rectangle Height="48" />
-                </ikw:SimpleStackPanel>
+                </vio:SimpleStackPanel>
             </Grid>
         </Grid>
     </ScrollViewer>
-</ui:Page>
+</Page>

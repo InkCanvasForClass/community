@@ -1,5 +1,5 @@
 using Ink_Canvas.Plugins;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using Wpf.Ui.Controls;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -17,7 +17,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
         string IconGeometry { get; }
 
-        FontIconData? IconKey { get; }
+        SymbolRegular? IconKey { get; }
 
         ToolbarRuleset DefaultHidingRuleset { get; }
 

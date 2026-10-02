@@ -1,12 +1,11 @@
 using System.Windows;
 using System.Windows.Controls;
-using ModernControls = iNKORE.UI.WPF.Modern.Controls;
 
 namespace Ink_Canvas.Controls
 {
     public partial class LabeledToggleSwitch : UserControl
     {
-        public ModernControls.ToggleSwitch ToggleSwitchControl => ToggleSwitch;
+        public Wpf.Ui.Controls.ToggleSwitch ToggleSwitchControl => ToggleSwitch;
 
         public static readonly DependencyProperty LabelProperty = DependencyProperty.Register(
             nameof(Label), typeof(string), typeof(LabeledToggleSwitch), new PropertyMetadata(string.Empty));
@@ -44,6 +43,16 @@ namespace Ink_Canvas.Controls
             set => SetValue(IsOnProperty, value);
         }
 
+        /// <summary>
+        /// <see cref="IsOn"/> 的别名，类型为 <see cref="bool"/>? 以与 WPF-UI 原生
+        /// <c>ToggleSwitch.IsChecked</c>（三态）保持一致。
+        /// </summary>
+        public bool? IsChecked
+        {
+            get => IsOn;
+            set => IsOn = value ?? false;
+        }
+
         public static readonly DependencyProperty ShowWhenProperty = DependencyProperty.Register(
             nameof(ShowWhen), typeof(bool), typeof(LabeledToggleSwitch), new PropertyMetadata(true, OnShowWhenChanged));
 
@@ -70,7 +79,12 @@ namespace Ink_Canvas.Controls
             HintTextBlock.Visibility = string.IsNullOrEmpty(Hint) ? Visibility.Collapsed : Visibility.Visible;
         }
 
-        private void ToggleSwitch_Toggled(object sender, RoutedEventArgs e)
+        private void ToggleSwitch_Checked(object sender, RoutedEventArgs e)
+        {
+            Toggled?.Invoke(this, e);
+        }
+
+        private void ToggleSwitch_Unchecked(object sender, RoutedEventArgs e)
         {
             Toggled?.Invoke(this, e);
         }

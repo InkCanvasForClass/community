@@ -4,83 +4,84 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-    xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+    xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
     xmlns:props="clr-namespace:Ink_Canvas.Properties"
     mc:Ignorable="d"
     d:DesignHeight="450" d:DesignWidth="600">
     <ScrollViewer VerticalScrollBarVisibility="Auto" IsManipulationEnabled="True" PanningMode="VerticalOnly">
-        <ikw:SimpleStackPanel Spacing="12">
+        <vio:SimpleStackPanel Spacing="12">
             <TextBlock FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10"
                        Text="{x:Static props:FeedbackStrings.Page1Title}"/>
 
-            <ui:SettingsExpander x:Name="ExpanderSoftware"
+            <controls:SettingsExpander x:Name="ExpanderSoftware"
                              Header="{x:Static props:FeedbackStrings.Page1_SoftwareInfo}"
                              Description="{x:Static props:FeedbackStrings.Page1_SoftwareInfoDesc}">
-                <ui:SettingsExpander.HeaderIcon>
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AppIconDefault}"/>
-                </ui:SettingsExpander.HeaderIcon>
-                <ui:SettingsExpander.Items>
-                    <ui:SettingsCard ContentAlignment="Left">
+                <controls:SettingsExpander.Icon>
+                    <ui:SymbolIcon Symbol="Apps24"/>
+                </controls:SettingsExpander.Icon>
+                <StackPanel>
+                    <controls:SettingsCard ContentAlignment="Left">
                         <CheckBox x:Name="CheckAppVersion" IsChecked="True"
                                   Content="{x:Static props:FeedbackStrings.Page1_AppVersion}"/>
-                    </ui:SettingsCard>
-                    <ui:SettingsCard ContentAlignment="Left">
+                    </controls:SettingsCard>
+                    <controls:SettingsCard ContentAlignment="Left">
                         <CheckBox x:Name="CheckUpdateChannel" IsChecked="True"
                                   Content="{x:Static props:FeedbackStrings.Page1_UpdateChannel}"/>
-                    </ui:SettingsCard>
-                </ui:SettingsExpander.Items>
-            </ui:SettingsExpander>
+                    </controls:SettingsCard>
+                </StackPanel>
+            </controls:SettingsExpander>
 
-            <ui:SettingsExpander x:Name="ExpanderSystem"
+            <controls:SettingsExpander x:Name="ExpanderSystem"
                              Header="{x:Static props:FeedbackStrings.Page1_SystemInfo}"
                              Description="{x:Static props:FeedbackStrings.Page1_SystemInfoDesc}">
-                <ui:SettingsExpander.HeaderIcon>
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.PC1}"/>
-                </ui:SettingsExpander.HeaderIcon>
-                <ui:SettingsExpander.Items>
-                    <ui:SettingsCard ContentAlignment="Left">
+                <controls:SettingsExpander.Icon>
+                    <ui:SymbolIcon Symbol="Desktop24"/>
+                </controls:SettingsExpander.Icon>
+                <StackPanel>
+                    <controls:SettingsCard ContentAlignment="Left">
                         <CheckBox x:Name="CheckOSVersion" IsChecked="True"
                                   Content="{x:Static props:FeedbackStrings.Page1_OSVersion}"/>
-                    </ui:SettingsCard>
-                    <ui:SettingsCard ContentAlignment="Left">
+                    </controls:SettingsCard>
+                    <controls:SettingsCard ContentAlignment="Left">
                         <CheckBox x:Name="CheckNetVersion" IsChecked="True"
                                   Content="{x:Static props:FeedbackStrings.Page1_NetVersion}"/>
-                    </ui:SettingsCard>
-                </ui:SettingsExpander.Items>
-            </ui:SettingsExpander>
+                    </controls:SettingsCard>
+                </StackPanel>
+            </controls:SettingsExpander>
 
-            <ui:SettingsExpander x:Name="ExpanderDevice"
+            <controls:SettingsExpander x:Name="ExpanderDevice"
                              Header="{x:Static props:FeedbackStrings.Page1_DeviceInfo}"
                              Description="{x:Static props:FeedbackStrings.Page1_DeviceInfoDesc}">
-                <ui:SettingsExpander.HeaderIcon>
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Devices2}"/>
-                </ui:SettingsExpander.HeaderIcon>
-                <ui:SettingsExpander.Items>
-                    <ui:SettingsCard ContentAlignment="Left">
+                <controls:SettingsExpander.Icon>
+                    <ui:SymbolIcon Symbol="DeviceEq24"/>
+                </controls:SettingsExpander.Icon>
+                <StackPanel>
+                    <controls:SettingsCard ContentAlignment="Left">
                         <CheckBox x:Name="CheckDeviceId" IsChecked="False"
                                   Content="{x:Static props:FeedbackStrings.Page1_DeviceId}"/>
-                    </ui:SettingsCard>
-                </ui:SettingsExpander.Items>
-            </ui:SettingsExpander>
+                    </controls:SettingsCard>
+                </StackPanel>
+            </controls:SettingsExpander>
 
-            <ui:SettingsExpander x:Name="ExpanderConfiguration"
+            <controls:SettingsExpander x:Name="ExpanderConfiguration"
                              Header="{x:Static props:FeedbackStrings.Page1_Config}"
                              Description="{x:Static props:FeedbackStrings.Page1_ConfigDesc}">
-                <ui:SettingsExpander.HeaderIcon>
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
-                </ui:SettingsExpander.HeaderIcon>
-                <ui:SettingsExpander.Items>
-                    <ui:SettingsCard ContentAlignment="Left">
+                <controls:SettingsExpander.Icon>
+                    <ui:SymbolIcon Symbol="Settings24"/>
+                </controls:SettingsExpander.Icon>
+                <StackPanel>
+                    <controls:SettingsCard ContentAlignment="Left">
                         <CheckBox x:Name="CheckPPTLinkage" IsChecked="True"
                                   Content="{x:Static props:FeedbackStrings.Page1_PPTSettings}"/>
-                    </ui:SettingsCard>
-                    <ui:SettingsCard ContentAlignment="Left">
+                    </controls:SettingsCard>
+                    <controls:SettingsCard ContentAlignment="Left">
                         <CheckBox x:Name="CheckInkRecognition" IsChecked="True"
                                   Content="{x:Static props:FeedbackStrings.Page1_InkRecognition}"/>
-                    </ui:SettingsCard>
-                </ui:SettingsExpander.Items>
-            </ui:SettingsExpander>
-        </ikw:SimpleStackPanel>
+                    </controls:SettingsCard>
+                </StackPanel>
+            </controls:SettingsExpander>
+        </vio:SimpleStackPanel>
     </ScrollViewer>
 </UserControl>

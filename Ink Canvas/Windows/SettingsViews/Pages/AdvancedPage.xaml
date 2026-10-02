@@ -1,11 +1,11 @@
-<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.AdvancedPage"
+<Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.AdvancedPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
-      xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-      xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       mc:Ignorable="d"
@@ -24,7 +24,7 @@
                 </Style>
             </FrameworkElement.Resources>
             <Grid>
-                <ikw:SimpleStackPanel MaxWidth="1000"
+                <vio:SimpleStackPanel MaxWidth="1000"
                     HorizontalAlignment="Stretch"
                     Spacing="{StaticResource SettingsCardSpacing}">
 
@@ -33,25 +33,25 @@
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchIsSpecialScreen"
                         Header="{x:Static props:AdvancedStrings.SpecialScreenMode}"
-                        Icon="{x:Static ui:SegoeFluentIcons.Settings}"
+                        Symbol="Settings24"
                         IsOn="True"
                         Toggled="ToggleSwitchIsSpecialScreen_OnToggled"/>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchDisableHardwareAcceleration"
                         Header="{x:Static props:CanvasStrings.Canvas_DisableHardwareAcceleration}"
                         Description="{x:Static props:CanvasStrings.Canvas_DisableHardwareAccelerationHint}"
-                        Icon="{x:Static ui:SegoeFluentIcons.Settings}"
+                        Symbol="Settings24"
                         IsOn="False"
                         Toggled="ToggleSwitchDisableHardwareAcceleration_Toggled"/>
 
-                    <ui:SettingsExpander x:Name="CardTouchMultiplier"
+                    <controls:SettingsExpander x:Name="CardTouchMultiplier"
                                          Header="{x:Static props:AdvancedStrings.TouchMultiplier}"
                                          Description="{x:Static props:AdvancedStrings.TouchMultiplierHint}"
                                          IsExpanded="True">
-                        <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Touch}" />
-                        </ui:SettingsExpander.HeaderIcon>
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                        <controls:SettingsExpander.HeaderIcon>
+                            <ui:SymbolIcon Symbol="HandDraw24" />
+                        </controls:SettingsExpander.HeaderIcon>
+                        <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="TouchMultiplierText"
                                        VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                             <Slider x:Name="TouchMultiplierSlider"
@@ -60,11 +60,11 @@
                                     IsSnapToTickEnabled="True"
                                     TickFrequency="0.01" TickPlacement="None"
                                     ValueChanged="TouchMultiplierSlider_ValueChanged" />
-                        </ikw:SimpleStackPanel>
-                        <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{x:Static props:AdvancedStrings.TouchMultiplierCalibrateHint}"
+                        </vio:SimpleStackPanel>
+                        <StackPanel>
+                            <controls:SettingsCard Header="{x:Static props:AdvancedStrings.TouchMultiplierCalibrateHint}"
                                              ContentAlignment="Left">
-                                <ikw:SimpleStackPanel Spacing="8" Margin="0,4,0,4">
+                                <vio:SimpleStackPanel Spacing="8" Margin="0,4,0,4">
                                     <TextBlock Text="{x:Static props:AdvancedStrings.TouchMultiplierValueHint}"
                                                Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                                                TextWrapping="Wrap" MaxWidth="420" />
@@ -74,20 +74,20 @@
                                     <TextBlock x:Name="TextBlockShowCalculatedMultiplier" FontSize="14" />
                                     <TextBlock x:Name="TextBlockShowRawValue" FontSize="14"
                                                Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
-                                </ikw:SimpleStackPanel>
-                            </ui:SettingsCard>
-                        </ui:SettingsExpander.Items>
-                    </ui:SettingsExpander>
+                                </vio:SimpleStackPanel>
+                            </controls:SettingsCard>
+                        </StackPanel>
+                    </controls:SettingsExpander>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchEraserBindTouchMultiplier"
                         Header="{x:Static props:AdvancedStrings.EraserBindTouchMultiplier}"
                         Description="{x:Static props:AdvancedStrings.EraserBindTouchHint}"
-                        Icon="{x:Static ui:SegoeFluentIcons.EraseTool}"
+                        Symbol="Eraser24"
                         IsOn="True"
                         Toggled="ToggleSwitchEraserBindTouchMultiplier_Toggled"/>
 
-                    <ui:SettingsCard Header="{x:Static props:AdvancedStrings.NibModeBoundsWidthHeader}">
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                    <controls:SettingsCard Header="{x:Static props:AdvancedStrings.NibModeBoundsWidthHeader}">
+                        <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="NibModeBoundsWidthText"
                                        VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                             <Slider x:Name="NibModeBoundsWidthSlider"
@@ -95,11 +95,11 @@
                                     IsSnapToTickEnabled="True" TickFrequency="1" Value="5"
                                     TickPlacement="None"
                                     ValueChanged="NibModeBoundsWidthSlider_ValueChanged" />
-                        </ikw:SimpleStackPanel>
-                    </ui:SettingsCard>
+                        </vio:SimpleStackPanel>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:AdvancedStrings.FingerModeBoundsWidthHeader}">
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                    <controls:SettingsCard Header="{x:Static props:AdvancedStrings.FingerModeBoundsWidthHeader}">
+                        <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="FingerModeBoundsWidthText"
                                        VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                             <Slider x:Name="FingerModeBoundsWidthSlider"
@@ -107,33 +107,33 @@
                                     IsSnapToTickEnabled="True" TickFrequency="1" Value="20"
                                     TickPlacement="None"
                                     ValueChanged="FingerModeBoundsWidthSlider_ValueChanged" />
-                        </ikw:SimpleStackPanel>
-                    </ui:SettingsCard>
+                        </vio:SimpleStackPanel>
+                    </controls:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchIsQuadIR"
                         Header="{x:Static props:AdvancedStrings.QuadIRMode}"
-                        Icon="{x:Static ui:SegoeFluentIcons.FullScreen}"
+                        Symbol="FullScreenMaximize24"
                         IsOn="True"
                         Toggled="ToggleSwitchIsQuadIR_Toggled"/>
 
-                    <ui:SettingsExpander x:Name="CardAutoCalibrate"
+                    <controls:SettingsExpander x:Name="CardAutoCalibrate"
                                          Header="自动校准触摸参数"
                                          Description="通过三次触摸自动计算合适的笔尖/手指阈值和触摸倍率"
                                          IsExpanded="False">
-                        <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EaseOfAccess}" />
-                        </ui:SettingsExpander.HeaderIcon>
-                        <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="校准步骤" ContentAlignment="Left">
-                                <ikw:SimpleStackPanel Spacing="8" Margin="0,4,0,4">
+                        <controls:SettingsExpander.HeaderIcon>
+                            <ui:SymbolIcon Symbol="Accessibility24" />
+                        </controls:SettingsExpander.HeaderIcon>
+                        <StackPanel>
+                            <controls:SettingsCard Header="校准步骤" ContentAlignment="Left">
+                                <vio:SimpleStackPanel Spacing="8" Margin="0,4,0,4">
                                     <TextBlock Text="点击&quot;开始校准&quot;按钮，然后依次在下方区域用："
                                                Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                                                TextWrapping="Wrap" MaxWidth="420" />
-                                    <ikw:SimpleStackPanel Orientation="Vertical" Spacing="4" Margin="8,0,0,0">
+                                    <vio:SimpleStackPanel Orientation="Vertical" Spacing="4" Margin="8,0,0,0">
                                         <TextBlock Text="1. 笔尖（触控笔）" />
                                         <TextBlock Text="2. 手指" />
                                         <TextBlock Text="3. 手掌（模拟误触）" />
-                                    </ikw:SimpleStackPanel>
+                                    </vio:SimpleStackPanel>
                                     <Button x:Name="BtnStartCalibrate" Content="开始校准" Click="BtnStartCalibrate_Click" MinWidth="120" />
                                     <Border x:Name="BorderCalibrate" Margin="0,0,20,0" CornerRadius="4" Height="64" 
                                             Background="Transparent"
@@ -145,23 +145,23 @@
                                                    VerticalAlignment="Center"
                                                    Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
                                     </Border>
-                                    <ikw:SimpleStackPanel Orientation="Vertical" Spacing="4" Margin="8,0,0,0">
+                                    <vio:SimpleStackPanel Orientation="Vertical" Spacing="4" Margin="8,0,0,0">
                                         <TextBlock x:Name="TextNibCalibrated" Text="笔尖值: 未校准" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
                                         <TextBlock x:Name="TextFingerCalibrated" Text="手指值: 未校准" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
                                         <TextBlock x:Name="TextPalmCalibrated" Text="手掌值: 未校准" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
                                         <TextBlock x:Name="TextCalibrateResult" Text="" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" FontWeight="SemiBold" />
-                                    </ikw:SimpleStackPanel>
-                                </ikw:SimpleStackPanel>
-                            </ui:SettingsCard>
-                        </ui:SettingsExpander.Items>
-                    </ui:SettingsExpander>
+                                    </vio:SimpleStackPanel>
+                                </vio:SimpleStackPanel>
+                            </controls:SettingsCard>
+                        </StackPanel>
+                    </controls:SettingsExpander>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:AdvancedStrings.Logging}" />
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchIsLogEnabled"
                         Header="{x:Static props:AdvancedStrings.Logging}"
-                        Icon="{x:Static ui:SegoeFluentIcons.OpenFile}"
+                        Symbol="FolderOpen24"
                         IsOn="True"
                         Toggled="ToggleSwitchIsLogEnabled_Toggled"/>
 
@@ -171,21 +171,21 @@
                         IsOn="True"
                         Toggled="ToggleSwitchIsSaveLogByDate_Toggled"/>
 
-                    <ui:SettingsCard x:Name="CardLogLevel"
+                    <controls:SettingsCard x:Name="CardLogLevel"
                         Header="{x:Static props:AdvancedStrings.LogLevel}"
                         Description="{x:Static props:AdvancedStrings.LogLevelHint}">
-                        <ui:SettingsCard.HeaderIcon><ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Info}"/></ui:SettingsCard.HeaderIcon>
+                        <controls:SettingsCard.HeaderIcon><ui:SymbolIcon Symbol="Info24"/></controls:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxLogLevel" SelectionChanged="ComboBoxLogLevel_SelectionChanged">
                             <ComboBoxItem Content="Info"/>
                             <ComboBoxItem Content="Trace"/>
                             <ComboBoxItem Content="Warning"/>
                             <ComboBoxItem Content="Error"/>
                         </ComboBox>
-                    </ui:SettingsCard>
+                    </controls:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="ToggleSwitchIsSecondConfimeWhenShutdownApp"
                         Header="{x:Static props:AdvancedStrings.ConfirmExit}"
-                        Icon="{x:Static ui:SegoeFluentIcons.SignOut}"
+                        Symbol="ArrowExit24"
                         IsOn="True"
                         Toggled="ToggleSwitchIsSecondConfimeWhenShutdownApp_Toggled"/>
 
@@ -196,22 +196,22 @@
                                Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                                TextWrapping="Wrap" Margin="1,0,0,4" />
 
-                    <ui:SettingsCard Header="{x:Static props:ConfigStrings.Label}">
+                    <controls:SettingsCard Header="{x:Static props:ConfigStrings.Label}">
                         <ComboBox x:Name="ComboBoxConfigProfile"
                                   SelectionChanged="ComboBoxConfigProfile_SelectionChanged" />
-                    </ui:SettingsCard>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard ContentAlignment="Left">
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                    <controls:SettingsCard ContentAlignment="Left">
+                        <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <Button x:Name="BtnDeleteConfigProfile" Content="{x:Static props:ConfigStrings.Delete}" Click="BtnDeleteConfigProfile_Click" />
                             <Button x:Name="BtnSaveAsConfigProfile" Content="{x:Static props:ConfigStrings.SaveAs}" Click="BtnSaveAsConfigProfile_Click" />
-                        </ikw:SimpleStackPanel>
-                    </ui:SettingsCard>
+                        </vio:SimpleStackPanel>
+                    </controls:SettingsCard>
 
                     <Rectangle Height="48" />
 
-                </ikw:SimpleStackPanel>
+                </vio:SimpleStackPanel>
             </Grid>
         </Grid>
     </ScrollViewer>
-</ui:Page>
+</Page>

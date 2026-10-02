@@ -1,7 +1,7 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Models;
 using Ink_Canvas.Properties;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using Wpf.Ui.Controls;
 using System;
 using System.Diagnostics;
 using System.Windows;
@@ -43,7 +43,7 @@ namespace Ink_Canvas.Controls
             ContentTextBlock.Text = string.IsNullOrWhiteSpace(message?.Summary) ? message?.Content ?? string.Empty : message.Summary;
             ActionButton.Content = string.IsNullOrWhiteSpace(message?.ActionText) ? NotificationStrings.ViewDetails : message.ActionText;
             ActionButton.Visibility = message?.Action != null || !string.IsNullOrWhiteSpace(message?.ActionUrl) ? Visibility.Visible : Visibility.Collapsed;
-            IconGlyph.Icon = GetIcon(message);
+            IconGlyph.Symbol = GetIcon(message);
             ExpandedPanel.Visibility = isExpanded ? Visibility.Visible : Visibility.Collapsed;
 
             Visibility = Visibility.Visible;
@@ -65,22 +65,22 @@ namespace Ink_Canvas.Controls
             }
         }
 
-        private FontIconData GetIcon(NotificationMessage message)
+        private SymbolRegular GetIcon(NotificationMessage message)
         {
-            if (message?.Level >= NotificationMessageLevel.High) return SegoeFluentIcons.Warning;
+            if (message?.Level >= NotificationMessageLevel.High) return SymbolRegular.Warning24;
 
             switch (message?.Type)
             {
                 case NotificationMessageType.Urgent:
-                    return SegoeFluentIcons.Warning;
+                    return SymbolRegular.Warning24;
                 case NotificationMessageType.Important:
-                    return SegoeFluentIcons.Important;
+                    return SymbolRegular.Important24;
                 case NotificationMessageType.Update:
-                    return SegoeFluentIcons.Sync;
+                    return SymbolRegular.Sync24;
                 case NotificationMessageType.Reminder:
-                    return SegoeFluentIcons.Stopwatch;
+                    return SymbolRegular.Stopwatch24;
                 default:
-                    return SegoeFluentIcons.Info;
+                    return SymbolRegular.Info24;
             }
         }
 

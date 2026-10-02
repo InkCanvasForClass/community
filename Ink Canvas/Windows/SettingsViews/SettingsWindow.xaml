@@ -4,27 +4,23 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-    xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
 Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
     Width="1138" Height="750"
     MinWidth="270" MinHeight="220"
     WindowStartupLocation="CenterScreen"
-    ui:ThemeManager.IsThemeAware="True"
-    ui:TitleBar.ExtendViewIntoTitleBar="True"
-    ui:WindowHelper.SystemBackdropType="None"
-    ui:WindowHelper.UseModernWindowStyle="True"
-    ui:WindowHelper.CornerStyle="Round"
-    ui:TitleBar.Height="48"
+
+
+
+
+
+
     mc:Ignorable="d">
 
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ui:ThemeResources CanBeAccessedAcrossThreads="True">
-                    <ui:ThemeResources.ThemeDictionaries>
-                    </ui:ThemeResources.ThemeDictionaries>
-                </ui:ThemeResources>
             </ResourceDictionary.MergedDictionaries>
             <!--  L-Pattern Overwriting resources  -->
             <Thickness x:Key="NavigationViewContentMargin">0,48,0,0</Thickness>
@@ -58,12 +54,12 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                     <ColumnDefinition/>
                     <ColumnDefinition Width="137"/>
                 </Grid.ColumnDefinitions>
-                <ikw:SimpleStackPanel x:Name="AppTitle" Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <vio:SimpleStackPanel x:Name="AppTitle" Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                     <Image Source="\Resources\icc.ico" Width="20" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <TextBlock x:Name="AppTitleText"
                         VerticalAlignment="Center"
                         Text="{x:Static props:NavStrings.Nav_AppSettings}" TextWrapping="NoWrap"/>
-                </ikw:SimpleStackPanel>
+                </vio:SimpleStackPanel>
             </Grid>
         </Border>
 
@@ -76,28 +72,19 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
             IsFooterSeparatorVisible="True"
             PaneTitle=""
             IsTabStop="False"
-            IsTitleBarAutoPaddingEnabled="False"
+
             PaneDisplayMode="Auto"
             SelectionChanged="OnNavigationViewSelectionChanged"
             BackRequested="OnNavigationViewBackRequested"
-            DisplayModeChanged="NavigationViewControl_DisplayModeChanged"
-            IsSettingsVisible="False"
+
             IsBackButtonVisible="Visible"
-            IsBackEnabled="True"
+
             OpenPaneLength="240"
             ScrollViewer.VerticalScrollBarVisibility="Auto"
             ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.RowSpan="2">
 
-            <ui:NavigationView.HeaderTemplate>
-                <DataTemplate>
-                    <Grid Margin="0,8,0,12">
-                        <TextBlock
-                            Text="{Binding}"
-                            FontSize="20"
-                            FontWeight="SemiBold"/>
-                    </Grid>
-                </DataTemplate>
-            </ui:NavigationView.HeaderTemplate>
+            <!-- Header 由 code-behind 在导航时动态设置为当前页面标题（见 OnRootFrameNavigated），
+                 XAML 侧只在上面用 Header=" " 占位，故此处不再声明 Header/HeaderTemplate。 -->
 
             <ui:NavigationView.AutoSuggestBox>
                 <ui:AutoSuggestBox
@@ -108,9 +95,9 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                     PlaceholderText="{x:Static props:NavStrings.Nav_SearchSettings}"
                     QuerySubmitted="OnControlsSearchBoxQuerySubmitted"
                     TextChanged="OnControlsSearchBoxTextChanged">
-                    <ui:AutoSuggestBox.QueryIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Search}" FontSize="12"/>
-                    </ui:AutoSuggestBox.QueryIcon>
+                    <ui:AutoSuggestBox.Icon>
+                        <ui:SymbolIcon Symbol="Search24" FontSize="12"/>
+                    </ui:AutoSuggestBox.Icon>
                 </ui:AutoSuggestBox>
             </ui:NavigationView.AutoSuggestBox>
 
@@ -121,18 +108,18 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                     Tag="HomePage"
                     ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Home_Tooltip}">
                     <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Home}"/>
+                        <ui:SymbolIcon Symbol="Home24"/>
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
-                <ui:NavigationViewItemHeader Content="{x:Static props:NavStrings.Nav_ICCSettings}"/>
+                <ui:NavigationViewItemHeader Text="{x:Static props:NavStrings.Nav_ICCSettings}"/>
                 <!-- 通用 -->
                 <ui:NavigationViewItem
                     x:Name="GeneralItem"
                     Content="{x:Static props:NavStrings.Nav_General}"
-                    SelectsOnInvoked="False"
+
                     ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_General_Tooltip}">
                     <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Home}"/>
+                        <ui:SymbolIcon Symbol="Home24"/>
                     </ui:NavigationViewItem.Icon>
                     <ui:NavigationViewItem.MenuItems>
                         <ui:NavigationViewItem
@@ -141,7 +128,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="StartupPage"
                             ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Startup_Tooltip}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Play}"/>
+                                <ui:SymbolIcon Symbol="Play24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
@@ -150,7 +137,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="ClockPage"
                             ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Clock_Tooltip}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Stopwatch}"/>
+                                <ui:SymbolIcon Symbol="Timer24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
@@ -159,7 +146,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="PrivacyPage"
                             ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Privacy_Tooltip}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Shield}"/>
+                                <ui:SymbolIcon Symbol="Shield24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
@@ -168,7 +155,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="SecurityPage"
                             ToolTipService.ToolTip="{x:Static props:NavStrings.Settings_Nav_Security_Tooltip}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Permissions}"/>
+                                <ui:SymbolIcon Symbol="ShieldTask24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
@@ -177,7 +164,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="AdvancedPage"
                             ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Advanced_Settings}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
+                                <ui:SymbolIcon Symbol="Settings24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
@@ -186,7 +173,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="PerformancePage"
                             ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Performance_Tooltip}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.SpeedHigh}"/>
+                                <ui:SymbolIcon Symbol="Gauge24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
@@ -196,10 +183,10 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                 <ui:NavigationViewItem
                     x:Name="MainInterfaceItem"
                     Content="{x:Static props:NavStrings.Nav_MainInterface}"
-                    SelectsOnInvoked="False"
+
                     ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_MainInterface_Tooltip}">
                     <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.TVMonitor}"/>
+                        <ui:SymbolIcon Symbol="Tv24"/>
                     </ui:NavigationViewItem.Icon>
                     <ui:NavigationViewItem.MenuItems>
                         <ui:NavigationViewItem
@@ -208,7 +195,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="WindowPage"
                             ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Window_Tooltip}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}"/>
+                                <ui:SymbolIcon Symbol="Pin24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
@@ -217,7 +204,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="AppearancePage"
                             ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Theme_Settings}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Personalize}"/>
+                                <ui:SymbolIcon Symbol="PaintBrush24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
@@ -226,7 +213,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="SidebarPage"
                             ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Sidebar_Tooltip}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronRight}"/>
+                                <ui:SymbolIcon Symbol="ChevronRight24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
@@ -235,7 +222,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="HotkeyPage"
                             ToolTipService.ToolTip="{x:Static props:NavStrings.Settings_Nav_Hotkey_Tooltip}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.KeyboardStandard}"/>
+                                <ui:SymbolIcon Symbol="Keyboard24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
@@ -245,10 +232,10 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                 <ui:NavigationViewItem
                     x:Name="CanvasPageItem"
                     Content="{x:Static props:CanvasStrings.Canvas_GroupTitle}"
-                    SelectsOnInvoked="False"
+
                     ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_CanvasAndInk_Tooltip}">
                     <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
+                        <ui:SymbolIcon Symbol="Edit24"/>
                     </ui:NavigationViewItem.Icon>
                     <ui:NavigationViewItem.MenuItems>
                         <ui:NavigationViewItem
@@ -257,7 +244,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="CanvasPage"
                             ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Canvas_Tooltip}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
+                                <ui:SymbolIcon Symbol="Edit24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
@@ -266,7 +253,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="InkRecognitionPage"
                             ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_InkRecognition_Tooltip}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Draw}"/>
+                                <ui:SymbolIcon Symbol="DrawImage24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
@@ -279,7 +266,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                     Tag="PowerPointPage"
                     ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_PPT_Tooltip}">
                     <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}"/>
+                        <ui:SymbolIcon Symbol="SlideTransition24"/>
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
@@ -290,7 +277,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                     Tag="UpdatePage"
                     ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Update_Tooltip}">
                     <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}"/>
+                        <ui:SymbolIcon Symbol="ArrowSync24"/>
                     </ui:NavigationViewItem.Icon>
                     <ui:NavigationViewItem.InfoBadge>
                         <ui:InfoBadge Style="{DynamicResource AttentionDotInfoBadgeStyle}"
@@ -303,10 +290,10 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                 <ui:NavigationViewItem
                     x:Name="NotificationPageItem"
                     Content="{x:Static props:NotificationStrings.DefaultTitle}"
-                    SelectsOnInvoked="False"
+
                     ToolTipService.ToolTip="{x:Static props:NotificationStrings.NavTooltip}">
                     <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Message}"/>
+                        <ui:SymbolIcon Symbol="ChatMultiple24"/>
                     </ui:NavigationViewItem.Icon>
                     <ui:NavigationViewItem.MenuItems>
                         <ui:NavigationViewItem
@@ -315,7 +302,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="NotificationPage"
                             ToolTipService.ToolTip="{x:Static props:NotificationStrings.NavTooltip}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Message}"/>
+                                <ui:SymbolIcon Symbol="ChatMultiple24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
@@ -324,7 +311,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="AnnouncementCenterPage"
                             ToolTipService.ToolTip="{x:Static props:AnnouncementStrings.CenterHint}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BulletedList}"/>
+                                <ui:SymbolIcon Symbol="TextBulletListLtr24"/>
                             </ui:NavigationViewItem.Icon>
                             <ui:NavigationViewItem.InfoBadge>
                                 <ui:InfoBadge x:Name="AnnouncementUnreadInfoBadge"
@@ -342,7 +329,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                     Tag="ExperimentalPage"
                     ToolTipService.ToolTip="{x:Static props:AdvancedStrings.Experimental}">
                     <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}"/>
+                        <ui:SymbolIcon Symbol="WindowDevTools24"/>
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
@@ -350,10 +337,10 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                 <ui:NavigationViewItem
                     x:Name="StorageItem"
                     Content="{x:Static props:StorageStrings.Storage_NavTitle}"
-                    SelectsOnInvoked="False"
+
                     ToolTipService.ToolTip="{x:Static props:StorageStrings.Storage_NavTooltip}">
                     <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.HardDrive}"/>
+                        <ui:SymbolIcon Symbol="HardDrive24"/>
                     </ui:NavigationViewItem.Icon>
                     <ui:NavigationViewItem.MenuItems>
                         <ui:NavigationViewItem
@@ -362,7 +349,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="StoragePage"
                             ToolTipService.ToolTip="{x:Static props:StorageStrings.Storage_NavTooltip}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.HardDrive}"/>
+                                <ui:SymbolIcon Symbol="HardDrive24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
@@ -371,7 +358,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="BackupPage"
                             ToolTipService.ToolTip="{x:Static props:StorageStrings.Backup_Title}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}"/>
+                                <ui:SymbolIcon Symbol="ArrowSync24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
@@ -380,7 +367,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="CloudStoragePage"
                             ToolTipService.ToolTip="{x:Static props:CloudStorageStrings.CloudStorage_Manage}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}"/>
+                                <ui:SymbolIcon Symbol="Cloud24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
@@ -390,10 +377,10 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                 <ui:NavigationViewItem
                     x:Name="ToolbarItem"
                     Content="{x:Static props:NavStrings.Nav_Toolbar}"
-                    SelectsOnInvoked="False"
+
                     ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Toolbar_Tooltip}">
                     <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Rename}"/>
+                        <ui:SymbolIcon Symbol="Rename24"/>
                     </ui:NavigationViewItem.Icon>
                     <ui:NavigationViewItem.MenuItems>
                         <ui:NavigationViewItem
@@ -402,7 +389,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="ToolbarPage"
                             ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_ToolbarComponents_Tooltip}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Rename}"/>
+                                <ui:SymbolIcon Symbol="Rename24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
@@ -411,7 +398,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="ToolbarAppearancePage"
                             ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_ToolbarAppearance_Tooltip}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Personalize}"/>
+                                <ui:SymbolIcon Symbol="PaintBrush24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
@@ -420,7 +407,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="ToolbarMenuPage"
                             ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_ToolbarMenu_Tooltip}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BulletedList}"/>
+                                <ui:SymbolIcon Symbol="TextBulletListLtr24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
@@ -430,10 +417,10 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                 <ui:NavigationViewItem
                     x:Name="BoardItem"
                     Content="{x:Static props:NavStrings.Nav_Board}"
-                    SelectsOnInvoked="False"
+
                     ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Board_Tooltip}">
                     <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}"/>
+                        <ui:SymbolIcon Symbol="Edit24"/>
                     </ui:NavigationViewItem.Icon>
                     <ui:NavigationViewItem.MenuItems>
                         <ui:NavigationViewItem
@@ -442,7 +429,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="BoardToolbarPage"
                             ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_BoardComponents_Tooltip}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Rename}"/>
+                                <ui:SymbolIcon Symbol="Rename24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
@@ -451,7 +438,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="BoardAppearancePage"
                             ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_BoardAppearance_Tooltip}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Personalize}"/>
+                                <ui:SymbolIcon Symbol="PaintBrush24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
@@ -460,7 +447,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="BoardMenuPage"
                             ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_BoardMenu_Tooltip}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BulletedList}"/>
+                                <ui:SymbolIcon Symbol="TextBulletListLtr24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
@@ -473,7 +460,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                     Tag="AutomationWorkflowPage"
                     ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_Automation_Settings}">
                     <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}"/>
+                        <ui:SymbolIcon Symbol="ArrowSync24"/>
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
@@ -484,7 +471,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                     Tag="RandomDrawPage"
                     ToolTipService.ToolTip="{x:Static props:NavStrings.Nav_RandomDraw_Tooltip}">
                     <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.People}"/>
+                        <ui:SymbolIcon Symbol="People24"/>
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
@@ -495,18 +482,18 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                     Tag="DebugPage"
                     ToolTipService.ToolTip="Debug">
                     <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}"/>
+                        <ui:SymbolIcon Symbol="WindowDevTools24"/>
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
-                <ui:NavigationViewItemHeader Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemesTitle}"/>
+                <ui:NavigationViewItemHeader Text="{x:Static props:ThemeStrings.Theme_FloatingBarThemesTitle}"/>
                 <ui:NavigationViewItem
                     x:Name="FloatingBarThemeItem"
                     Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemesTitle}"
-                    SelectsOnInvoked="False"
+
                     ToolTipService.ToolTip="{x:Static props:ThemeStrings.Theme_FloatingBarThemesDescription}">
                     <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Color}"/>
+                        <ui:SymbolIcon Symbol="Color24"/>
                     </ui:NavigationViewItem.Icon>
                     <ui:NavigationViewItem.MenuItems>
                         <ui:NavigationViewItem
@@ -514,7 +501,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemesTitle}"
                             Tag="FloatingBarThemePage">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Color}"/>
+                                <ui:SymbolIcon Symbol="Color24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
@@ -522,20 +509,20 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemeMarketTitle}"
                             Tag="FloatingBarThemeMarketPage">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Shop}"/>
+                                <ui:SymbolIcon Symbol="Cart24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
 
-                <ui:NavigationViewItemHeader Content="{x:Static props:NavStrings.Nav_PluginSettings}"/>
+                <ui:NavigationViewItemHeader Text="{x:Static props:NavStrings.Nav_PluginSettings}"/>
                 <ui:NavigationViewItem
                     x:Name="PluginItem"
                     Content="{x:Static props:NavStrings.Nav_Plugins}"
-                    SelectsOnInvoked="False"
+
                     ToolTipService.ToolTip="{x:Static props:NavStrings.Settings_Plugins}">
                     <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Puzzle}"/>
+                        <ui:SymbolIcon Symbol="PuzzlePiece24"/>
                     </ui:NavigationViewItem.Icon>
                     <ui:NavigationViewItem.MenuItems>
                         <ui:NavigationViewItem
@@ -544,7 +531,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="PluginPage"
                             ToolTipService.ToolTip="{x:Static props:NavStrings.Settings_Plugins}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.CheckMark}"/>
+                                <ui:SymbolIcon Symbol="Checkmark24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
@@ -553,7 +540,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             Tag="PluginMarketplacePage"
                             ToolTipService.ToolTip="{x:Static props:PluginStrings.Market_Title}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Globe}"/>
+                                <ui:SymbolIcon Symbol="Globe24"/>
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                     </ui:NavigationViewItem.MenuItems>
@@ -566,7 +553,7 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                     Content="{x:Static props:NavStrings.Nav_FriendlyLinks}"
                     Tag="FriendlyLinksPage">
                     <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />
+                        <ui:SymbolIcon Symbol="Link24" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
                 <ui:NavigationViewItem
@@ -579,8 +566,10 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                 </ui:NavigationViewItem>
             </ui:NavigationView.FooterMenuItems>
 
-            <ui:Frame x:Name="rootFrame" Navigated="OnRootFrameNavigated" NavigationUIVisibility="Hidden" />
-            <!--我要玩原神-->
+            <!-- WPF-UI 的 NavigationView 不接受直接子内容，内容区必须放在 ContentOverlay 里 -->
+            <ui:NavigationView.ContentOverlay>
+                <Frame x:Name="rootFrame" Navigated="OnRootFrameNavigated" NavigationUIVisibility="Hidden" />
+            </ui:NavigationView.ContentOverlay>
         </ui:NavigationView>
 
         <!-- 复制设置项 URL 后的瞬态通知 -->

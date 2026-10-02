@@ -1,4 +1,4 @@
-using iNKORE.UI.WPF.Modern;
+using Wpf.Ui.Appearance;
 using Microsoft.Win32;
 using System;
 using System.Windows;
@@ -114,7 +114,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 var accentColor = GetSystemAccentColor();
-                ThemeManager.Current.AccentColor = accentColor;
+                ApplicationAccentColorManager.Apply(accentColor, ApplicationThemeManager.GetAppTheme());
             }
             catch (Exception ex)
             {
@@ -167,22 +167,30 @@ namespace Ink_Canvas.Helpers
             return false;
         }
 
-        public static ElementTheme GetEffectiveTheme(Settings settings)
+        /// <summary>
+        /// 依据设置计算当前应生效的主题（0=浅色，1=深色，其它=跟随系统）。
+        /// WPF-UI 的主题是应用级的，返回 WPF-UI 的 ApplicationTheme。
+        /// </summary>
+        public static ApplicationTheme GetEffectiveTheme(Settings settings)
         {
             if (settings.Appearance.Theme == 0)
-                return ElementTheme.Light;
+                return ApplicationTheme.Light;
             if (settings.Appearance.Theme == 1)
-                return ElementTheme.Dark;
+                return ApplicationTheme.Dark;
 
-            return IsSystemThemeLight() ? ElementTheme.Light : ElementTheme.Dark;
+            return IsSystemThemeLight() ? ApplicationTheme.Light : ApplicationTheme.Dark;
         }
 
+        /// <summary>
+        /// 应用主题。注意：WPF-UI 没有 iNKORE 那样逐元素的 RequestedTheme，主题统一作用于
+        /// 整个应用；element 参数仅为保持既有调用签名而保留。
+        /// </summary>
         public static void ApplyTheme(FrameworkElement element, Settings settings)
         {
-            if (element == null || settings == null) return;
+            if (settings == null) return;
             try
             {
-                ThemeManager.SetRequestedTheme(element, GetEffectiveTheme(settings));
+                ApplicationThemeManager.Apply(GetEffectiveTheme(settings), updateAccent: false);
                 ApplySystemAccentColor();
             }
             catch (Exception ex)
@@ -193,13 +201,13 @@ namespace Ink_Canvas.Helpers
 
         public static void ApplyTheme(FrameworkElement element, Settings settings, Action<string> onThemeApplied)
         {
-            if (element == null || settings == null) return;
+            if (settings == null) return;
             try
             {
                 var theme = GetEffectiveTheme(settings);
-                ThemeManager.SetRequestedTheme(element, theme);
+                ApplicationThemeManager.Apply(theme, updateAccent: false);
                 ApplySystemAccentColor();
-                onThemeApplied?.Invoke(theme == ElementTheme.Dark ? "Dark" : "Light");
+                onThemeApplied?.Invoke(theme == ApplicationTheme.Dark ? "Dark" : "Light");
             }
             catch (Exception ex)
             {

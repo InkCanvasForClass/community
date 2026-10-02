@@ -5,8 +5,8 @@ using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using MessageBox = System.Windows.MessageBox;
+using Page = System.Windows.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -27,7 +27,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _isLoaded = true;
 
             // Load toggle state
-            ToggleSwitchEnableMonitoring.IsOn = SettingsManager.Settings.Performance.IsMonitoringEnabled;
+            ToggleSwitchEnableMonitoring.IsChecked = SettingsManager.Settings.Performance.IsMonitoringEnabled;
 
             // Update current session UI
             UpdateCurrentSessionUI();
@@ -65,7 +65,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
 
-            bool isOn = ToggleSwitchEnableMonitoring.IsOn;
+            bool isOn = ((ToggleSwitchEnableMonitoring.IsChecked) == true);
             SettingsManager.Settings.Performance.IsMonitoringEnabled = isOn;
             SettingsManager.SaveSettingsToFile();
 

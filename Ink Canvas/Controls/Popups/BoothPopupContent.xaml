@@ -3,36 +3,36 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-             xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+             xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
              mc:Ignorable="d"
              d:DesignWidth="320" d:DesignHeight="240">
     <Grid>
         <controls:PopupShellContent x:Name="Shell" Title="{x:Static props:BoothStrings.Title}" d:Visibility="Collapsed" />
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
-            <ikw:SimpleStackPanel Margin="10" Spacing="8" HorizontalAlignment="Stretch">
+            <vio:SimpleStackPanel Margin="10" Spacing="8" HorizontalAlignment="Stretch">
                 <!-- 摄像头设备 -->
-                <ikw:SimpleStackPanel Orientation="Vertical" Spacing="3">
+                <vio:SimpleStackPanel Orientation="Vertical" Spacing="3">
                     <TextBlock Text="{x:Static props:BoothStrings.CameraDevices}"
                                Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                FontSize="13" FontWeight="SemiBold" />
                     <ComboBox x:Name="CameraDevicesComboBoxCtrl"
                               MinWidth="260" />
-                </ikw:SimpleStackPanel>
+                </vio:SimpleStackPanel>
 
                 <!-- 分辨率 -->
-                <ikw:SimpleStackPanel Orientation="Vertical" Spacing="3">
+                <vio:SimpleStackPanel Orientation="Vertical" Spacing="3">
                     <TextBlock Text="{x:Static props:BoothStrings.Resolution_Tooltip}"
                                Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                FontSize="13" FontWeight="SemiBold" />
                     <ComboBox x:Name="BoothResolutionComboBoxCtrl"
                               MinWidth="260"
                               ToolTip="{x:Static props:BoothStrings.Resolution_Tooltip}" />
-                </ikw:SimpleStackPanel>
+                </vio:SimpleStackPanel>
 
                 <!-- 加速模式：CPU / OpenCL / CUDA -->
-                <ikw:SimpleStackPanel Orientation="Vertical" Spacing="3">
+                <vio:SimpleStackPanel Orientation="Vertical" Spacing="3">
                     <TextBlock Text="{x:Static props:BoothStrings.Acceleration}"
                                Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                FontSize="13" FontWeight="SemiBold" />
@@ -44,10 +44,10 @@
                         <ComboBoxItem Content="{x:Static props:BoothStrings.AccelerationOpenCL}" />
                         <ComboBoxItem Content="{x:Static props:BoothStrings.AccelerationCUDA}" />
                     </ComboBox>
-                </ikw:SimpleStackPanel>
+                </vio:SimpleStackPanel>
 
                 <!-- 亮度（曝光度） -->
-                <ikw:SimpleStackPanel Orientation="Vertical" Spacing="3">
+                <vio:SimpleStackPanel Orientation="Vertical" Spacing="3">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -79,13 +79,13 @@
                                 Padding="4,2" Margin="4,0,0,0"
                                 VerticalAlignment="Center"
                                 ToolTip="{x:Static props:BoothStrings.ResetDefault}">
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" FontSize="12" />
+                            <ui:SymbolIcon Symbol="ArrowSync24" FontSize="12" />
                         </Button>
                     </Grid>
-                </ikw:SimpleStackPanel>
+                </vio:SimpleStackPanel>
 
                 <!-- 镜像 -->
-                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                <vio:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                     <TextBlock Text="{x:Static props:BoothStrings.Mirror}"
                                Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                FontSize="13" FontWeight="SemiBold"
@@ -98,7 +98,7 @@
                                   Padding="8,4" MinWidth="64">
                         <TextBlock Text="{x:Static props:BoothStrings.MirrorVertical}" />
                     </ToggleButton>
-                </ikw:SimpleStackPanel>
+                </vio:SimpleStackPanel>
 
                 <!-- 专业模式：对比度 / 饱和度 / 色温 / 增益 / 焦距 / 快门 -->
                 <Expander x:Name="ProModeExpanderCtrl"
@@ -106,7 +106,7 @@
                           ToolTip="{x:Static props:BoothStrings.ProMode_Tooltip}"
                           IsExpanded="False"
                           Padding="0,2">
-                    <ikw:SimpleStackPanel Orientation="Vertical" Spacing="6" Margin="0,4,0,0">
+                    <vio:SimpleStackPanel Orientation="Vertical" Spacing="6" Margin="0,4,0,0">
                         <!-- 对比度 -->
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -131,7 +131,7 @@
                                     Padding="4,2" Margin="4,0,0,0"
                                     VerticalAlignment="Center"
                                     ToolTip="{x:Static props:BoothStrings.ResetDefault}">
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" FontSize="12" />
+                                <ui:SymbolIcon Symbol="ArrowSync24" FontSize="12" />
                             </Button>
                         </Grid>
                         <!-- 饱和度 -->
@@ -158,7 +158,7 @@
                                     Padding="4,2" Margin="4,0,0,0"
                                     VerticalAlignment="Center"
                                     ToolTip="{x:Static props:BoothStrings.ResetDefault}">
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" FontSize="12" />
+                                <ui:SymbolIcon Symbol="ArrowSync24" FontSize="12" />
                             </Button>
                         </Grid>
                         <!-- 色温（白平衡） -->
@@ -187,7 +187,7 @@
                                     Padding="4,2" Margin="4,0,0,0"
                                     VerticalAlignment="Center"
                                     ToolTip="{x:Static props:BoothStrings.ResetDefault}">
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" FontSize="12" />
+                                <ui:SymbolIcon Symbol="ArrowSync24" FontSize="12" />
                             </Button>
                         </Grid>
                         <!-- 增益（ISO 替代） -->
@@ -216,7 +216,7 @@
                                     Padding="4,2" Margin="4,0,0,0"
                                     VerticalAlignment="Center"
                                     ToolTip="{x:Static props:BoothStrings.ResetDefault}">
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" FontSize="12" />
+                                <ui:SymbolIcon Symbol="ArrowSync24" FontSize="12" />
                             </Button>
                         </Grid>
                         <!-- 焦距 -->
@@ -245,7 +245,7 @@
                                     Padding="4,2" Margin="4,0,0,0"
                                     VerticalAlignment="Center"
                                     ToolTip="{x:Static props:BoothStrings.ResetDefault}">
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" FontSize="12" />
+                                <ui:SymbolIcon Symbol="ArrowSync24" FontSize="12" />
                             </Button>
                         </Grid>
                         <!-- 快门（曝光） -->
@@ -274,14 +274,14 @@
                                     Padding="4,2" Margin="4,0,0,0"
                                     VerticalAlignment="Center"
                                     ToolTip="{x:Static props:BoothStrings.ResetDefault}">
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" FontSize="12" />
+                                <ui:SymbolIcon Symbol="ArrowSync24" FontSize="12" />
                             </Button>
                         </Grid>
-                    </ikw:SimpleStackPanel>
+                    </vio:SimpleStackPanel>
                 </Expander>
 
                 <!-- 4 个操作按钮：矫正 / 拍照 / 旋转 / 关闭 -->
-                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                <vio:SimpleStackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
                     <ToggleButton x:Name="PhotoCorrectionToggleCtrl"
                                   Padding="10,4"
                                   MinWidth="64">
@@ -302,8 +302,8 @@
                             MinWidth="64">
                         <TextBlock Text="{x:Static props:BoothStrings.Close}" />
                     </Button>
-                </ikw:SimpleStackPanel>
-            </ikw:SimpleStackPanel>
+                </vio:SimpleStackPanel>
+            </vio:SimpleStackPanel>
         </ContentControl>
     </Grid>
 </UserControl>

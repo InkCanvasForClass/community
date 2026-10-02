@@ -1,5 +1,5 @@
 using Ink_Canvas.Properties;
-using iNKORE.UI.WPF.Modern.Controls;
+using Wpf.Ui.Controls;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -73,7 +73,7 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                var stringsType = typeof(iNKORE.UI.WPF.Modern.ThemeManager).Assembly
+                var stringsType = typeof(Wpf.Ui.Appearance.ApplicationThemeManager).Assembly
                     .GetType("iNKORE.UI.WPF.Modern.Strings");
                 if (stringsType == null) return;
 

@@ -1,9 +1,11 @@
-using iNKORE.UI.WPF.Controls;
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
+// iuwm SimpleStackPanel（带 Spacing）→ Violeta 的 SimpleStackPanel。
+// 按需别名引入，避免 Wpf.Ui.Controls 与 System.Windows.Controls 的同名类型产生 CS0104 歧义。
+using SimpleStackPanel = Wpf.Ui.Violeta.Controls.Compat.SimpleStackPanel;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;

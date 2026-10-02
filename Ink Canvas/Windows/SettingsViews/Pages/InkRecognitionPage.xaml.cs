@@ -7,7 +7,7 @@ using System.Windows.Controls;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
-    public partial class InkRecognitionPage : iNKORE.UI.WPF.Modern.Controls.Page
+    public partial class InkRecognitionPage : System.Windows.Controls.Page
     {
         private bool _isLoaded = false;
 
@@ -49,15 +49,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 if (settings.InkToShape != null)
                 {
-                    CardEnableInkToShape.IsOn = settings.InkToShape.IsInkToShapeEnabled;
+                    CardEnableInkToShape.IsChecked = settings.InkToShape.IsInkToShapeEnabled;
                     int eng = settings.InkToShape.ShapeRecognitionEngine;
                     if (eng < 0) eng = 0;
                     if (eng > 2) eng = 2;
                     ComboBoxShapeRecognitionEngine.SelectedIndex = eng;
-                    CardEnableWinRtHandwritingStrokeBeautify.IsOn = settings.InkToShape.EnableWinRtHandwritingStrokeBeautify;
+                    CardEnableWinRtHandwritingStrokeBeautify.IsChecked = settings.InkToShape.EnableWinRtHandwritingStrokeBeautify;
                     SelectHandwritingFontByValue(settings.InkToShape.HandwritingCorrectionFontFamily);
-                    CardEnableInkToShapeNoFakePressureRectangle.IsOn = settings.InkToShape.IsInkToShapeNoFakePressureRectangle;
-                    CardEnableInkToShapeNoFakePressureTriangle.IsOn = settings.InkToShape.IsInkToShapeNoFakePressureTriangle;
+                    CardEnableInkToShapeNoFakePressureRectangle.IsChecked = settings.InkToShape.IsInkToShapeNoFakePressureRectangle;
+                    CardEnableInkToShapeNoFakePressureTriangle.IsChecked = settings.InkToShape.IsInkToShapeNoFakePressureTriangle;
                     ToggleCheckboxEnableInkToShapeTriangle.IsChecked = settings.InkToShape.IsInkToShapeTriangle;
                     ToggleCheckboxEnableInkToShapeRectangle.IsChecked = settings.InkToShape.IsInkToShapeRectangle;
                     ToggleCheckboxEnableInkToShapeRounded.IsChecked = settings.InkToShape.IsInkToShapeRounded;
@@ -66,12 +66,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 if (settings.Canvas != null)
                 {
-                    ToggleSwitchAutoStraightenLine.IsOn = settings.Canvas.AutoStraightenLine;
+                    ToggleSwitchAutoStraightenLine.IsChecked = settings.Canvas.AutoStraightenLine;
                     AutoStraightenLineThresholdSlider.Value = settings.Canvas.AutoStraightenLineThreshold;
-                    ToggleSwitchHighPrecisionLineStraighten.IsOn = settings.Canvas.HighPrecisionLineStraighten;
-                    ToggleSwitchPauseStraightenLine.IsOn = settings.Canvas.PauseStraightenLine;
+                    ToggleSwitchHighPrecisionLineStraighten.IsChecked = settings.Canvas.HighPrecisionLineStraighten;
+                    ToggleSwitchPauseStraightenLine.IsChecked = settings.Canvas.PauseStraightenLine;
                     PauseStraightenDelaySlider.Value = settings.Canvas.PauseStraightenDelay;
-                    ToggleSwitchLineEndpointSnapping.IsOn = settings.Canvas.LineEndpointSnapping;
+                    ToggleSwitchLineEndpointSnapping.IsChecked = settings.Canvas.LineEndpointSnapping;
                 }
             }
             catch (Exception ex)
@@ -81,16 +81,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             _isLoaded = true;
 
-            ExpanderAutoStraightenLine.IsExpanded = ToggleSwitchAutoStraightenLine.IsOn;
-            ExpanderLineEndpointSnapping.IsExpanded = ToggleSwitchLineEndpointSnapping.IsOn;
+            ExpanderAutoStraightenLine.IsExpanded = (ToggleSwitchAutoStraightenLine.IsChecked == true);
+            ExpanderLineEndpointSnapping.IsExpanded = (ToggleSwitchLineEndpointSnapping.IsChecked == true);
         }
 
         private void ToggleSwitchEnableInkToShape_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.InkToShape.IsInkToShapeEnabled = CardEnableInkToShape.IsOn;
+            SettingsManager.Settings.InkToShape.IsInkToShapeEnabled = ((CardEnableInkToShape.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
-            SettingsActionHub.OnInkToShapeEnabledChanged(CardEnableInkToShape.IsOn);
+            SettingsActionHub.OnInkToShapeEnabledChanged(((CardEnableInkToShape.IsChecked) == true));
         }
 
         private void ComboBoxShapeRecognitionEngine_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -106,7 +106,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnableWinRtHandwritingStrokeBeautify_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.InkToShape.EnableWinRtHandwritingStrokeBeautify = CardEnableWinRtHandwritingStrokeBeautify.IsOn;
+            SettingsManager.Settings.InkToShape.EnableWinRtHandwritingStrokeBeautify = ((CardEnableWinRtHandwritingStrokeBeautify.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -141,14 +141,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnableInkToShapeNoFakePressureRectangle_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.InkToShape.IsInkToShapeNoFakePressureRectangle = CardEnableInkToShapeNoFakePressureRectangle.IsOn;
+            SettingsManager.Settings.InkToShape.IsInkToShapeNoFakePressureRectangle = ((CardEnableInkToShapeNoFakePressureRectangle.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchEnableInkToShapeNoFakePressureTriangle_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.InkToShape.IsInkToShapeNoFakePressureTriangle = CardEnableInkToShapeNoFakePressureTriangle.IsOn;
+            SettingsManager.Settings.InkToShape.IsInkToShapeNoFakePressureTriangle = ((CardEnableInkToShapeNoFakePressureTriangle.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -176,8 +176,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchAutoStraightenLine_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.AutoStraightenLine = ToggleSwitchAutoStraightenLine.IsOn;
-            ExpanderAutoStraightenLine.IsExpanded = ToggleSwitchAutoStraightenLine.IsOn;
+            SettingsManager.Settings.Canvas.AutoStraightenLine = ((ToggleSwitchAutoStraightenLine.IsChecked) == true);
+            ExpanderAutoStraightenLine.IsExpanded = ((ToggleSwitchAutoStraightenLine.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -202,14 +202,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchHighPrecisionLineStraighten_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.HighPrecisionLineStraighten = ToggleSwitchHighPrecisionLineStraighten.IsOn;
+            SettingsManager.Settings.Canvas.HighPrecisionLineStraighten = ((ToggleSwitchHighPrecisionLineStraighten.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchPauseStraightenLine_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.PauseStraightenLine = ToggleSwitchPauseStraightenLine.IsOn;
+            SettingsManager.Settings.Canvas.PauseStraightenLine = ((ToggleSwitchPauseStraightenLine.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -224,8 +224,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchLineEndpointSnapping_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.LineEndpointSnapping = ToggleSwitchLineEndpointSnapping.IsOn;
-            ExpanderLineEndpointSnapping.IsExpanded = ToggleSwitchLineEndpointSnapping.IsOn;
+            SettingsManager.Settings.Canvas.LineEndpointSnapping = (ToggleSwitchLineEndpointSnapping.IsChecked == true);
+            ExpanderLineEndpointSnapping.IsExpanded = (ToggleSwitchLineEndpointSnapping.IsChecked == true);
             SettingsManager.SaveSettingsToFile();
         }
 

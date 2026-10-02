@@ -1,6 +1,6 @@
 using Ink_Canvas.Plugins;
 using Ink_Canvas.Properties;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using Wpf.Ui.Controls;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,7 +13,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public string DisplayName => FloatingBarStrings.FloatingBar_QuickPaletteMode;
         public string Description => FloatingBarStrings.ToolbarItem_Desc_QuickColorPalette;
         public string IconGeometry => XamlGraphicsIconGeometries.ColorPaletteIconGeometry;
-        public FontIconData? IconKey => null;
+        public SymbolRegular? IconKey => null;
         public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AnnotationOnly().WithHideOnCollapsed();
         public bool DefaultShowSeparateBorder => false;
         public bool DefaultPreventHideOnDragClick => false;

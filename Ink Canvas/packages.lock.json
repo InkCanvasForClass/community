@@ -51,21 +51,6 @@
           "H.NotifyIcon": "2.4.1"
         }
       },
-      "iNKORE.UI.WPF": {
-        "type": "Direct",
-        "requested": "[1.2.8, )",
-        "resolved": "1.2.8",
-        "contentHash": "7b+z25JFdhGAfyJqlVIF0vLbmgsRvqDZMvhGPTz20gzQigDPMqVUOoCCKB5824GtYsjFCYNilmaowb+4yWATkQ=="
-      },
-      "iNKORE.UI.WPF.Modern": {
-        "type": "Direct",
-        "requested": "[0.10.2.1, )",
-        "resolved": "0.10.2.1",
-        "contentHash": "nGwuuVul+TcLCTgPmaAZCc0fYFqUpCNZ8PiulVT3gZnsWt/AvxMZ0DSPpuyI/iRPc/NhFIg9lSIR7uaHWV0I/Q==",
-        "dependencies": {
-          "iNKORE.UI.WPF": "1.2.8"
-        }
-      },
       "MdXaml": {
         "type": "Direct",
         "requested": "[1.27.0, )",
@@ -259,6 +244,24 @@
         "resolved": "2.9.0",
         "contentHash": "GLhd1tQAJeuVO1sj3Wm/dkg0GEVWxk+XGl6rdegMSMHenZuOaWQw4PifWDsjNEC1dtV1/C8JJfK0qfdkM+VIgA=="
       },
+      "WPF-UI": {
+        "type": "Direct",
+        "requested": "[4.3.0, )",
+        "resolved": "4.3.0",
+        "contentHash": "SIHhc8lIrhEQ/1cLFZN6Dtf8cqsLm4myBULj9obnacd9TyDs2vizhKYzRzTlcPEcnzb3L4EstvPN3M6kcXbJCA==",
+        "dependencies": {
+          "WPF-UI.Abstractions": "4.3.0"
+        }
+      },
+      "WPF-UI.Violeta": {
+        "type": "Direct",
+        "requested": "[4.3.0.15, )",
+        "resolved": "4.3.0.15",
+        "contentHash": "bYYOVqO3y+SZ3vVzwntVJ3UIQlJsbKXif7B/Ij97ebpUsa9Kl613DLbBxcr2NSD83ln1k+Zl6ujkkvznjOE3Ew==",
+        "dependencies": {
+          "WPF-UI": "4.3.0"
+        }
+      },
       "WPFMediaKit": {
         "type": "Direct",
         "requested": "[3.0.1, )",
@@ -404,11 +407,16 @@
         "resolved": "2.1.0",
         "contentHash": "KK+SjNSuKdP+zbavekubi+vaeb1Jo4k87ZF6CMkVWjr6RjJwc8peVtmgzXXDIMy4ZC3ZISyk3llY3q65ISOkBQ=="
       },
+      "WPF-UI.Abstractions": {
+        "type": "Transitive",
+        "resolved": "4.3.0",
+        "contentHash": "7Kj9DmCCo4SOCd1jAiw4+EcMFP2nR8rLLvitAYzVtzbWToTsodkbie24+8x9C4LDLxkopWEUGX62szqqNy7oeg=="
+      },
       "inkcanvas.controls": {
         "type": "Project",
         "dependencies": {
-          "iNKORE.UI.WPF": "[1.2.8, )",
-          "iNKORE.UI.WPF.Modern": "[0.10.2.1, )"
+          "WPF-UI": "[4.3.0, )",
+          "WPF-UI.Violeta": "[4.3.0.15, )"
         }
       },
       "inkcanvas.pluginsdk": {

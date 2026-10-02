@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+             xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
              mc:Ignorable="d"
              d:DesignHeight="150" d:DesignWidth="80">
     <Grid Width="80" Height="150" VerticalAlignment="Center">
@@ -66,7 +66,7 @@
 
         <!-- Classic Capsule Handle -->
         <Viewbox x:Name="ClassicViewbox" Height="50" Width="32" VerticalAlignment="Center" Visibility="Collapsed">
-            <ikw:SimpleStackPanel>
+            <vio:SimpleStackPanel>
                 <Border x:Name="ClassicPanelBorder" Background="#9918181b" Opacity="1"
                         CornerRadius="0,25,25,0" Height="50" Width="32">
                     <Image x:Name="ClassicChevronImage" Margin="10,0,0,0"
@@ -74,7 +74,7 @@
                            RenderOptions.BitmapScalingMode="HighQuality" Height="14" Width="14"
                            IsHitTestVisible="False"/>
                 </Border>
-            </ikw:SimpleStackPanel>
+            </vio:SimpleStackPanel>
         </Viewbox>
     </Grid>
 </UserControl>

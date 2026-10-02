@@ -1,15 +1,15 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
+// 只别名导入 WPF-UI 专属控件，避免与 System.Windows.Controls 的同名类型（TextBlock/Image/Button/Border 等）产生 CS0104 歧义。
+using ContentDialog = Wpf.Ui.Controls.ContentDialog;
 using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using ContentDialog = iNKORE.UI.WPF.Modern.Controls.ContentDialog;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using MessageBox = System.Windows.MessageBox;
+using Page = System.Windows.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -66,15 +66,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var settings = SettingsManager.Settings;
             if (settings?.Advanced == null) return;
 
-            ToggleSwitchIsSpecialScreen.IsOn = settings.Advanced.IsSpecialScreen;
-            ToggleSwitchDisableHardwareAcceleration.IsOn = !settings.Canvas.UseHardwareAcceleration;
+            ToggleSwitchIsSpecialScreen.IsChecked = settings.Advanced.IsSpecialScreen;
+            ToggleSwitchDisableHardwareAcceleration.IsChecked = !settings.Canvas.UseHardwareAcceleration;
             TouchMultiplierSlider.Value = settings.Advanced.TouchMultiplier;
-            ToggleSwitchEraserBindTouchMultiplier.IsOn = settings.Advanced.EraserBindTouchMultiplier;
+            ToggleSwitchEraserBindTouchMultiplier.IsChecked = settings.Advanced.EraserBindTouchMultiplier;
             NibModeBoundsWidthSlider.Value = settings.Advanced.NibModeBoundsWidth;
             FingerModeBoundsWidthSlider.Value = settings.Advanced.FingerModeBoundsWidth;
-            ToggleSwitchIsQuadIR.IsOn = settings.Advanced.IsQuadIR;
-            ToggleSwitchIsLogEnabled.IsOn = settings.Advanced.IsLogEnabled;
-            ToggleSwitchIsSaveLogByDate.IsOn = settings.Advanced.IsSaveLogByDate;
+            ToggleSwitchIsQuadIR.IsChecked = settings.Advanced.IsQuadIR;
+            ToggleSwitchIsLogEnabled.IsChecked = settings.Advanced.IsLogEnabled;
+            ToggleSwitchIsSaveLogByDate.IsChecked = settings.Advanced.IsSaveLogByDate;
             ComboBoxLogLevel.SelectedIndex = LogHelper.LogLevel switch
             {
                 LogHelper.LogType.Trace => 1,
@@ -82,7 +82,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 LogHelper.LogType.Error => 3,
                 _ => 0 // Info / Event
             };
-            ToggleSwitchIsSecondConfimeWhenShutdownApp.IsOn = settings.Advanced.IsSecondConfirmWhenShutdownApp;
+            ToggleSwitchIsSecondConfimeWhenShutdownApp.IsChecked = settings.Advanced.IsSecondConfirmWhenShutdownApp;
 
             CardTouchMultiplier.IsExpanded = settings.Advanced.IsSpecialScreen;
         }
@@ -92,15 +92,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchIsSpecialScreen_OnToggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Advanced.IsSpecialScreen = ToggleSwitchIsSpecialScreen.IsOn;
-            CardTouchMultiplier.IsExpanded = ToggleSwitchIsSpecialScreen.IsOn;
+            SettingsManager.Settings.Advanced.IsSpecialScreen = ((ToggleSwitchIsSpecialScreen.IsChecked) == true);
+            CardTouchMultiplier.IsExpanded = ((ToggleSwitchIsSpecialScreen.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchDisableHardwareAcceleration_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.UseHardwareAcceleration = !ToggleSwitchDisableHardwareAcceleration.IsOn;
+            SettingsManager.Settings.Canvas.UseHardwareAcceleration = !((ToggleSwitchDisableHardwareAcceleration.IsChecked) == true);
             SettingsActionHub.OnHardwareAccelerationChanged();
             SettingsManager.SaveSettingsToFile();
         }
@@ -133,7 +133,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEraserBindTouchMultiplier_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Advanced.EraserBindTouchMultiplier = ToggleSwitchEraserBindTouchMultiplier.IsOn;
+            SettingsManager.Settings.Advanced.EraserBindTouchMultiplier = ((ToggleSwitchEraserBindTouchMultiplier.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -158,7 +158,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchIsQuadIR_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Advanced.IsQuadIR = ToggleSwitchIsQuadIR.IsOn;
+            SettingsManager.Settings.Advanced.IsQuadIR = ((ToggleSwitchIsQuadIR.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -258,14 +258,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchIsLogEnabled_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Advanced.IsLogEnabled = ToggleSwitchIsLogEnabled.IsOn;
+            SettingsManager.Settings.Advanced.IsLogEnabled = ((ToggleSwitchIsLogEnabled.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchIsSaveLogByDate_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Advanced.IsSaveLogByDate = ToggleSwitchIsSaveLogByDate.IsOn;
+            SettingsManager.Settings.Advanced.IsSaveLogByDate = ((ToggleSwitchIsSaveLogByDate.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -287,7 +287,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchIsSecondConfimeWhenShutdownApp_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Advanced.IsSecondConfirmWhenShutdownApp = ToggleSwitchIsSecondConfimeWhenShutdownApp.IsOn;
+            SettingsManager.Settings.Advanced.IsSecondConfirmWhenShutdownApp = ((ToggleSwitchIsSecondConfimeWhenShutdownApp.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -375,7 +375,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 Text = ConfigStrings.ProfileNameLabel,
                 Margin = new Thickness(0, 0, 0, 8)
             };
-            var content = new iNKORE.UI.WPF.Controls.SimpleStackPanel { Spacing = 6 };
+            var content = new Wpf.Ui.Violeta.Controls.Compat.SimpleStackPanel { Spacing = 6 };
             content.Children.Add(label);
             content.Children.Add(input);
             var dialog = new ContentDialog

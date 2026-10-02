@@ -7,7 +7,7 @@ using System.Windows;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
-    public partial class ExperimentalPage : iNKORE.UI.WPF.Modern.Controls.Page
+    public partial class ExperimentalPage : System.Windows.Controls.Page
     {
         private bool _isLoaded = false;
 
@@ -32,11 +32,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 var settings = SettingsManager.Settings;
                 if (settings.Advanced != null)
                 {
-                    CardFullScreenHelper.IsOn = settings.Advanced.IsEnableFullScreenHelper;
-                    CardEdgeGestureUtil.IsOn = settings.Advanced.IsEnableEdgeGestureUtil;
-                    CardForceFullScreen.IsOn = settings.Advanced.IsEnableForceFullScreen;
-                    CardDPIChangeDetection.IsOn = settings.Advanced.IsEnableDPIChangeDetection;
-                    CardResolutionChangeDetection.IsOn = settings.Advanced.IsEnableResolutionChangeDetection;
+                    CardFullScreenHelper.IsChecked = settings.Advanced.IsEnableFullScreenHelper;
+                    CardEdgeGestureUtil.IsChecked = settings.Advanced.IsEnableEdgeGestureUtil;
+                    CardForceFullScreen.IsChecked = settings.Advanced.IsEnableForceFullScreen;
+                    CardDPIChangeDetection.IsChecked = settings.Advanced.IsEnableDPIChangeDetection;
+                    CardResolutionChangeDetection.IsChecked = settings.Advanced.IsEnableResolutionChangeDetection;
                 }
             }
             catch (Exception ex)
@@ -53,7 +53,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                SettingsManager.Settings.Advanced.IsEnableFullScreenHelper = CardFullScreenHelper.IsOn;
+                SettingsManager.Settings.Advanced.IsEnableFullScreenHelper = ((CardFullScreenHelper.IsChecked) == true);
                 SettingsManager.SaveSettingsToFile();
             }
             catch (Exception ex)
@@ -68,7 +68,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                SettingsManager.Settings.Advanced.IsEnableEdgeGestureUtil = CardEdgeGestureUtil.IsOn;
+                SettingsManager.Settings.Advanced.IsEnableEdgeGestureUtil = ((CardEdgeGestureUtil.IsChecked) == true);
                 SettingsManager.SaveSettingsToFile();
 
                 if (OSVersion.GetOperatingSystem() >= OSVersionExtension.OperatingSystem.Windows10)
@@ -77,7 +77,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     if (window != null)
                     {
                         var handle = new System.Windows.Interop.WindowInteropHelper(window).Handle;
-                        EdgeGestureUtil.DisableEdgeGestures(handle, CardEdgeGestureUtil.IsOn);
+                        EdgeGestureUtil.DisableEdgeGestures(handle, ((CardEdgeGestureUtil.IsChecked) == true));
                     }
                 }
             }
@@ -93,7 +93,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                SettingsManager.Settings.Advanced.IsEnableForceFullScreen = CardForceFullScreen.IsOn;
+                SettingsManager.Settings.Advanced.IsEnableForceFullScreen = ((CardForceFullScreen.IsChecked) == true);
                 SettingsManager.SaveSettingsToFile();
             }
             catch (Exception ex)
@@ -108,7 +108,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                SettingsManager.Settings.Advanced.IsEnableDPIChangeDetection = CardDPIChangeDetection.IsOn;
+                SettingsManager.Settings.Advanced.IsEnableDPIChangeDetection = ((CardDPIChangeDetection.IsChecked) == true);
                 SettingsManager.SaveSettingsToFile();
             }
             catch (Exception ex)
@@ -123,7 +123,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                SettingsManager.Settings.Advanced.IsEnableResolutionChangeDetection = CardResolutionChangeDetection.IsOn;
+                SettingsManager.Settings.Advanced.IsEnableResolutionChangeDetection = ((CardResolutionChangeDetection.IsChecked) == true);
                 SettingsManager.SaveSettingsToFile();
             }
             catch (Exception ex)

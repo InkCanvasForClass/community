@@ -2,8 +2,8 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Windows;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using MessageBox = System.Windows.MessageBox;
+using Page = System.Windows.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -16,10 +16,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             InitializeComponent();
             Loaded += (s, e) =>
             {
-                ToggleSwitchDebugConsole.IsOn = SettingsManager.Settings.Advanced.IsDebugConsoleEnabled;
-                ToggleSwitchPPTComDebugProbe.IsOn = SettingsManager.Settings.Advanced.IsPPTComDebugProbeEnabled;
-                ToggleSwitchPPTPageFlipPreview.IsOn = SettingsManager.Settings.Advanced.IsPPTPageFlipPreviewVisible;
-                ToggleSwitchRealtimeInkDebugLog.IsOn = SettingsManager.Settings.Advanced.IsRealtimeInkDebugLogEnabled;
+                ToggleSwitchDebugConsole.IsChecked = SettingsManager.Settings.Advanced.IsDebugConsoleEnabled;
+                ToggleSwitchPPTComDebugProbe.IsChecked = SettingsManager.Settings.Advanced.IsPPTComDebugProbeEnabled;
+                ToggleSwitchPPTPageFlipPreview.IsChecked = SettingsManager.Settings.Advanced.IsPPTPageFlipPreviewVisible;
+                ToggleSwitchRealtimeInkDebugLog.IsChecked = SettingsManager.Settings.Advanced.IsRealtimeInkDebugLogEnabled;
                 _isLoaded = true;
             };
             Unloaded += (s, e) => _isLoaded = false;
@@ -28,7 +28,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchDebugConsole_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            bool isOn = ToggleSwitchDebugConsole.IsOn;
+            bool isOn = ((ToggleSwitchDebugConsole.IsChecked) == true);
             SettingsManager.Settings.Advanced.IsDebugConsoleEnabled = isOn;
             SettingsManager.SaveSettingsToFile();
 
@@ -39,21 +39,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchPPTComDebugProbe_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Advanced.IsPPTComDebugProbeEnabled = ToggleSwitchPPTComDebugProbe.IsOn;
+            SettingsManager.Settings.Advanced.IsPPTComDebugProbeEnabled = ((ToggleSwitchPPTComDebugProbe.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchPPTPageFlipPreview_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Advanced.IsPPTPageFlipPreviewVisible = ToggleSwitchPPTPageFlipPreview.IsOn;
+            SettingsManager.Settings.Advanced.IsPPTPageFlipPreviewVisible = ((ToggleSwitchPPTPageFlipPreview.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchRealtimeInkDebugLog_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            bool isOn = ToggleSwitchRealtimeInkDebugLog.IsOn;
+            bool isOn = ((ToggleSwitchRealtimeInkDebugLog.IsChecked) == true);
             SettingsManager.Settings.Advanced.IsRealtimeInkDebugLogEnabled = isOn;
             if (MainWindow.Settings?.Advanced != null)
                 MainWindow.Settings.Advanced.IsRealtimeInkDebugLogEnabled = isOn;

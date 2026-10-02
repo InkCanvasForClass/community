@@ -3,13 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-        xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
         xmlns:props="clr-namespace:Ink_Canvas.Properties"
         mc:Ignorable="d"
         Topmost="True" WindowStartupLocation="CenterScreen"
-        ui:WindowHelper.UseModernWindowStyle="True"
-        ResizeMode="NoResize" ui:ThemeManager.RequestedTheme="Light"
+
+        ResizeMode="NoResize"
         Title="{x:Static props:FeedbackStrings.WindowTitle}"
         Height="550" Width="650"
         FontFamily="Microsoft YaHei UI">
@@ -19,16 +19,16 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <ui:Frame x:Name="ContentFrame" Grid.Row="0" NavigationUIVisibility="Hidden" />
+        <Frame x:Name="ContentFrame" Grid.Row="0" NavigationUIVisibility="Hidden" />
 
         <Grid Grid.Row="1" VerticalAlignment="Bottom" Margin="0,20,0,0">
-            <ikw:SimpleStackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal" Spacing="12">
+            <vio:SimpleStackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal" Spacing="12">
                 <Button x:Name="ButtonCancel" Content="{x:Static props:FeedbackStrings.BtnCancel}"
                         Width="100" Height="36" FontFamily="Microsoft YaHei UI" FontSize="14"
                         Click="ButtonCancel_Click">
                     <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
-                            <Setter Property="Foreground" Value="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}"/>
+                        <Style TargetType="Button">
+                            <Setter Property="Foreground" Value="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"/>
                         </Style>
                     </Button.Style>
                 </Button>
@@ -36,15 +36,15 @@
                         Width="120" Height="36" FontFamily="Microsoft YaHei UI" FontSize="14" FontWeight="SemiBold"
                         Click="ButtonNext_Click">
                     <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.AccentButtonStyleKey}}"/>
+                        <Style TargetType="Button"/>
                     </Button.Style>
                 </Button>
                 <Button x:Name="ButtonBack" Content="{x:Static props:FeedbackStrings.BtnBack}"
                         Width="100" Height="36" FontFamily="Microsoft YaHei UI" FontSize="14"
                         Click="ButtonBack_Click" Visibility="Collapsed">
                     <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
-                            <Setter Property="Foreground" Value="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}"/>
+                        <Style TargetType="Button">
+                            <Setter Property="Foreground" Value="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"/>
                         </Style>
                     </Button.Style>
                 </Button>
@@ -52,10 +52,10 @@
                         Width="120" Height="36" FontFamily="Microsoft YaHei UI" FontSize="14" FontWeight="SemiBold"
                         Click="ButtonConfirm_Click" Visibility="Collapsed">
                     <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.AccentButtonStyleKey}}"/>
+                        <Style TargetType="Button"/>
                     </Button.Style>
                 </Button>
-            </ikw:SimpleStackPanel>
+            </vio:SimpleStackPanel>
         </Grid>
     </Grid>
 </Window>

@@ -3,8 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-        xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
         mc:Ignorable="d"
         Title="InkCanvasForClass Community 使用指南"
         Height="600"
@@ -15,11 +15,11 @@
         Topmost="True"
         ResizeMode="CanResize"
         FontFamily="Microsoft YaHei UI"
-        ui:ThemeManager.IsThemeAware="True"
-        ui:TitleBar.ExtendViewIntoTitleBar="True"
-        ui:WindowHelper.SystemBackdropType="None"
-        ui:WindowHelper.UseModernWindowStyle="True"
-        ui:TitleBar.Height="48">
+
+
+
+
+>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -28,7 +28,7 @@
 
         <!-- 自定义标题栏（与 OOBE / 隐私说明等 Fluent 窗口一致） -->
         <Border x:Name="Border_TitleBarRoot"
-                Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.Height)}">
+                Height="32">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
@@ -43,9 +43,9 @@
                            FontWeight="SemiBold" />
 
                 <Rectangle Grid.Column="2"
-                           Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.SystemOverlayRightInset)}" />
+                           Width="138" />
 
-                <ikw:SimpleStackPanel x:Name="StackPanel_RightButtons"
+                <vio:SimpleStackPanel x:Name="StackPanel_RightButtons"
                                       Grid.Column="1"
                                       Orientation="Horizontal"
                                       Spacing="5" />
@@ -57,8 +57,8 @@
                           VerticalScrollBarVisibility="Auto"
                           PanningMode="VerticalOnly"
                           ManipulationBoundaryFeedback="SCManipulationBoundaryFeedback">
-                <ikw:SimpleStackPanel Margin="24,20,24,28" Spacing="4">
-                    <ikw:SimpleStackPanel Margin="0,0,0,12"
+                <vio:SimpleStackPanel Margin="24,20,24,28" Spacing="4">
+                    <vio:SimpleStackPanel Margin="0,0,0,12"
                                           Orientation="Horizontal"
                                           HorizontalAlignment="Left"
                                           Spacing="12">
@@ -72,9 +72,9 @@
                                    TextWrapping="Wrap"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource SettingsPageForeground}" />
-                    </ikw:SimpleStackPanel>
+                    </vio:SimpleStackPanel>
 
-                    <ikw:SimpleStackPanel Margin="0,0,0,8"
+                    <vio:SimpleStackPanel Margin="0,0,0,8"
                                           MinHeight="28"
                                           Orientation="Horizontal"
                                           HorizontalAlignment="Left">
@@ -83,8 +83,8 @@
                                    TextWrapping="Wrap"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource SettingsPageForeground}" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel Margin="0,0,0,8"
+                    </vio:SimpleStackPanel>
+                    <vio:SimpleStackPanel Margin="0,0,0,8"
                                           MinHeight="28"
                                           Orientation="Horizontal"
                                           HorizontalAlignment="Left">
@@ -93,8 +93,8 @@
                                    TextWrapping="Wrap"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource SettingsPageForeground}" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel Margin="0,0,0,8"
+                    </vio:SimpleStackPanel>
+                    <vio:SimpleStackPanel Margin="0,0,0,8"
                                           MinHeight="28"
                                           Orientation="Horizontal"
                                           HorizontalAlignment="Left">
@@ -103,8 +103,8 @@
                                    TextWrapping="Wrap"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource SettingsPageForeground}" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel Margin="0,0,0,8"
+                    </vio:SimpleStackPanel>
+                    <vio:SimpleStackPanel Margin="0,0,0,8"
                                           MinHeight="28"
                                           Orientation="Horizontal"
                                           HorizontalAlignment="Left">
@@ -113,8 +113,8 @@
                                    TextWrapping="Wrap"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource SettingsPageForeground}" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel Margin="0,0,0,8"
+                    </vio:SimpleStackPanel>
+                    <vio:SimpleStackPanel Margin="0,0,0,8"
                                           MinHeight="28"
                                           Orientation="Horizontal"
                                           HorizontalAlignment="Left">
@@ -123,8 +123,8 @@
                                    TextWrapping="Wrap"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource SettingsPageForeground}" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel Margin="0,0,0,8"
+                    </vio:SimpleStackPanel>
+                    <vio:SimpleStackPanel Margin="0,0,0,8"
                                           MinHeight="28"
                                           Orientation="Horizontal"
                                           HorizontalAlignment="Left">
@@ -133,8 +133,8 @@
                                    TextWrapping="Wrap"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource SettingsPageForeground}" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel Margin="0,0,0,8"
+                    </vio:SimpleStackPanel>
+                    <vio:SimpleStackPanel Margin="0,0,0,8"
                                           MinHeight="28"
                                           Orientation="Horizontal"
                                           HorizontalAlignment="Left">
@@ -143,8 +143,8 @@
                                    TextWrapping="Wrap"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource SettingsPageForeground}" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel Margin="0,0,0,8"
+                    </vio:SimpleStackPanel>
+                    <vio:SimpleStackPanel Margin="0,0,0,8"
                                           MinHeight="28"
                                           Orientation="Horizontal"
                                           HorizontalAlignment="Left">
@@ -153,8 +153,8 @@
                                    TextWrapping="Wrap"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource SettingsPageForeground}" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel Margin="0,0,0,8"
+                    </vio:SimpleStackPanel>
+                    <vio:SimpleStackPanel Margin="0,0,0,8"
                                           MinHeight="28"
                                           Orientation="Horizontal"
                                           HorizontalAlignment="Left">
@@ -163,8 +163,8 @@
                                    TextWrapping="Wrap"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource SettingsPageForeground}" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel Margin="0,0,0,8"
+                    </vio:SimpleStackPanel>
+                    <vio:SimpleStackPanel Margin="0,0,0,8"
                                           MinHeight="28"
                                           Orientation="Horizontal"
                                           HorizontalAlignment="Left">
@@ -173,8 +173,8 @@
                                    TextWrapping="Wrap"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource SettingsPageForeground}" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel Margin="0,0,0,8"
+                    </vio:SimpleStackPanel>
+                    <vio:SimpleStackPanel Margin="0,0,0,8"
                                           MinHeight="28"
                                           Orientation="Horizontal"
                                           HorizontalAlignment="Left">
@@ -183,8 +183,8 @@
                                    TextWrapping="Wrap"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource SettingsPageForeground}" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel MinHeight="28"
+                    </vio:SimpleStackPanel>
+                    <vio:SimpleStackPanel MinHeight="28"
                                           Orientation="Horizontal"
                                           HorizontalAlignment="Left">
                         <TextBlock FontSize="14"
@@ -192,8 +192,8 @@
                                    TextWrapping="Wrap"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource SettingsPageForeground}" />
-                    </ikw:SimpleStackPanel>
-                </ikw:SimpleStackPanel>
+                    </vio:SimpleStackPanel>
+                </vio:SimpleStackPanel>
             </ScrollViewer>
         </Grid>
     </Grid>

@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
              mc:Ignorable="d">
     <Border x:Name="ButtonBorder" CornerRadius="4" Background="Transparent" Margin="0,2,0,7">
         <Grid Name="ButtonPanel" d:Background="Red"

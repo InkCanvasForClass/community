@@ -4,57 +4,58 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-    xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+    xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
     xmlns:props="clr-namespace:Ink_Canvas.Properties"
     mc:Ignorable="d"
     d:DesignHeight="450" d:DesignWidth="600">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                   IsManipulationEnabled="True" PanningMode="VerticalOnly">
-        <ikw:SimpleStackPanel Spacing="12" Margin="0,0,0,20">
+        <vio:SimpleStackPanel Spacing="12" Margin="0,0,0,20">
             <TextBlock FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10"
                        Text="{x:Static props:FeedbackStrings.Page2Title}"/>
 
-            <ui:SettingsCard Header="{x:Static props:FeedbackStrings.Page2_SoftwareInfo}"
+            <controls:SettingsCard Header="{x:Static props:FeedbackStrings.Page2_SoftwareInfo}"
                              Description="{x:Static props:FeedbackStrings.Page2_SoftwareInfoDesc}">
-                <ui:SettingsCard.HeaderIcon>
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AppIconDefault}"/>
-                </ui:SettingsCard.HeaderIcon>
-                <ikw:SimpleStackPanel Spacing="8">
+                <controls:SettingsCard.Icon>
+                    <ui:SymbolIcon Symbol="Apps24"/>
+                </controls:SettingsCard.Icon>
+                <vio:SimpleStackPanel Spacing="8">
                     <TextBlock x:Name="TextAppVersionInfo" Text="" FontSize="14" TextWrapping="Wrap"/>
-                </ikw:SimpleStackPanel>
-            </ui:SettingsCard>
+                </vio:SimpleStackPanel>
+            </controls:SettingsCard>
 
-            <ui:SettingsCard Header="{x:Static props:FeedbackStrings.Page2_SystemInfo}"
+            <controls:SettingsCard Header="{x:Static props:FeedbackStrings.Page2_SystemInfo}"
                              Description="{x:Static props:FeedbackStrings.Page2_SystemInfoDesc}">
-                <ui:SettingsCard.HeaderIcon>
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.PC1}"/>
-                </ui:SettingsCard.HeaderIcon>
-                <ikw:SimpleStackPanel Spacing="8">
+                <controls:SettingsCard.Icon>
+                    <ui:SymbolIcon Symbol="Desktop24"/>
+                </controls:SettingsCard.Icon>
+                <vio:SimpleStackPanel Spacing="8">
                     <TextBlock x:Name="TextSystemInfo" Text="" FontSize="14" TextWrapping="Wrap"/>
-                </ikw:SimpleStackPanel>
-            </ui:SettingsCard>
+                </vio:SimpleStackPanel>
+            </controls:SettingsCard>
 
-            <ui:SettingsCard Header="{x:Static props:FeedbackStrings.Page2_DeviceInfo}"
+            <controls:SettingsCard Header="{x:Static props:FeedbackStrings.Page2_DeviceInfo}"
                              Description="{x:Static props:FeedbackStrings.Page2_DeviceInfoDesc}">
-                <ui:SettingsCard.HeaderIcon>
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Devices2}"/>
-                </ui:SettingsCard.HeaderIcon>
-                <ikw:SimpleStackPanel Spacing="8">
+                <controls:SettingsCard.Icon>
+                    <ui:SymbolIcon Symbol="DeviceEq24"/>
+                </controls:SettingsCard.Icon>
+                <vio:SimpleStackPanel Spacing="8">
                     <TextBlock x:Name="TextDeviceInfo" Text="" FontSize="14" TextWrapping="Wrap"/>
-                </ikw:SimpleStackPanel>
-            </ui:SettingsCard>
+                </vio:SimpleStackPanel>
+            </controls:SettingsCard>
 
-            <ui:SettingsCard x:Name="CardConfiguration"
+            <controls:SettingsCard x:Name="CardConfiguration"
                              Header="{x:Static props:FeedbackStrings.Page2_Config}"
                              Description="{x:Static props:FeedbackStrings.Page2_ConfigDesc}">
-                <ui:SettingsCard.HeaderIcon>
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
-                </ui:SettingsCard.HeaderIcon>
-                <ikw:SimpleStackPanel Spacing="8">
+                <controls:SettingsCard.Icon>
+                    <ui:SymbolIcon Symbol="Settings24"/>
+                </controls:SettingsCard.Icon>
+                <vio:SimpleStackPanel Spacing="8">
                     <TextBlock x:Name="TextConfigurationInfo" Text="" FontSize="14" TextWrapping="Wrap"/>
-                </ikw:SimpleStackPanel>
-            </ui:SettingsCard>
-        </ikw:SimpleStackPanel>
+                </vio:SimpleStackPanel>
+            </controls:SettingsCard>
+        </vio:SimpleStackPanel>
     </ScrollViewer>
 </UserControl>

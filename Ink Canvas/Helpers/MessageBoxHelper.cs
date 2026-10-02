@@ -1,5 +1,9 @@
-using iNKORE.UI.WPF.Modern.Common;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
+// Wpf.Ui.Controls 与 System.Windows.Controls 有同名类型（MessageBoxButton/MessageBoxResult/
+// TextBlock/Image/Border 等），整命名空间 using 会产生 CS0104 歧义，故只按需别名导入。
+using IconSource = Wpf.Ui.Controls.IconSource;
+using FontIconSource = Wpf.Ui.Controls.FontIconSource;
+using SymbolIcon = Wpf.Ui.Controls.SymbolIcon;
+using SymbolRegular = Wpf.Ui.Controls.SymbolRegular;
 using System;
 using System.Linq;
 using System.Media;
@@ -8,7 +12,7 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using MessageBox = System.Windows.MessageBox;
 
 namespace Ink_Canvas.Helpers
 {
@@ -201,7 +205,7 @@ namespace Ink_Canvas.Helpers
             string caption = "",
             MessageBoxButton button = MessageBoxButton.OK,
             MessageBoxImage icon = MessageBoxImage.None,
-            Action<MessageBox> configure = null)
+            Action<PositionedMessageBox> configure = null)
         {
             var app = Application.Current;
             var dispatcher = app?.Dispatcher;
@@ -227,7 +231,7 @@ namespace Ink_Canvas.Helpers
             string caption = "",
             MessageBoxButton button = MessageBoxButton.OK,
             MessageBoxImage icon = MessageBoxImage.None,
-            Action<MessageBox> configure = null)
+            Action<PositionedMessageBox> configure = null)
         {
             var tcs = new TaskCompletionSource<MessageBoxResult>(TaskCreationOptions.RunContinuationsAsynchronously);
             ShowAtNonBlocking(context, screenX, screenY, messageBoxText, caption, button, icon,
@@ -245,7 +249,7 @@ namespace Ink_Canvas.Helpers
         /// 未点击按钮时结果为 <see cref="MessageBoxResult.None"/>。
         /// 返回弹窗实例，可通过其 <c>Close(MessageBoxResult)</c> 主动关闭。
         /// </summary>
-        public static MessageBox ShowAtNonBlocking(
+        public static PositionedMessageBox ShowAtNonBlocking(
             DependencyObject context,
             double screenX, double screenY,
             string messageBoxText,
@@ -255,7 +259,7 @@ namespace Ink_Canvas.Helpers
             Action<MessageBoxResult> onClosed = null,
             double? autoCloseSeconds = null,
             bool showActivated = false,
-            Action<MessageBox> configure = null)
+            Action<PositionedMessageBox> configure = null)
         {
             var app = Application.Current;
             var dispatcher = app?.Dispatcher;
@@ -320,7 +324,7 @@ namespace Ink_Canvas.Helpers
         /// 镜像 Owner 的置顶状态（置顶窗口的弹窗需同置顶才能保持可见），
         /// 并在显示后钳制到所在显示器工作区内，避免弹窗超出屏幕。
         /// </summary>
-        private static MessageBox CreatePositionedMessageBox(
+        private static PositionedMessageBox CreatePositionedMessageBox(
             Window owner,
             double screenX, double screenY,
             string messageBoxText, string caption,
@@ -329,13 +333,11 @@ namespace Ink_Canvas.Helpers
         {
             bool manualPosition = IsFinite(screenX) && IsFinite(screenY);
 
-            var box = new MessageBox
+            var box = new PositionedMessageBox
             {
                 Owner = owner,
-                Content = messageBoxText,
                 Caption = caption ?? string.Empty,
                 MessageBoxButtons = button,
-                IconSource = CreateIconSource(icon),
                 ShowInTaskbar = false,
                 ShowActivated = showActivated,
                 Topmost = owner != null && owner.Topmost,
@@ -346,28 +348,25 @@ namespace Ink_Canvas.Helpers
                 Top = manualPosition ? screenY : 0,
             };
 
-            if (MessageBox.MakeSound)
-            {
-                box.SystemSoundOnLoaded = CreateSystemSound(icon);
-            }
+            box.SetMessage(messageBoxText);
+            box.ApplyImage(icon);
+            box.SystemSoundOnLoaded = CreateSystemSound(icon);
 
             box.ContentRendered += (s, e) => ClampToWorkArea(box);
             return box;
         }
 
-        /// <summary>将 <see cref="MessageBoxImage"/> 映射为库内图标（与库静态 Show 的映射一致）。</summary>
-        private static IconSource CreateIconSource(MessageBoxImage icon)
+        /// <summary>将 <see cref="MessageBoxImage"/> 映射为 WPF-UI 图标符号。</summary>
+        private static SymbolRegular? CreateSymbol(MessageBoxImage icon)
         {
-            FontIconData symbol;
             switch (icon)
             {
-                case MessageBoxImage.Error: symbol = SegoeFluentIcons.ErrorBadge; break;
-                case MessageBoxImage.Information: symbol = SegoeFluentIcons.Info; break;
-                case MessageBoxImage.Warning: symbol = SegoeFluentIcons.Warning; break;
-                case MessageBoxImage.Question: symbol = SegoeFluentIcons.Unknown; break;
+                case MessageBoxImage.Error: return SymbolRegular.ErrorCircle24;
+                case MessageBoxImage.Information: return SymbolRegular.Info24;
+                case MessageBoxImage.Warning: return SymbolRegular.Warning24;
+                case MessageBoxImage.Question: return SymbolRegular.QuestionCircle24;
                 default: return null;
             }
-            return new FontIconSource { Icon = symbol, FontSize = 30 };
         }
 
         /// <summary>将 <see cref="MessageBoxImage"/> 映射为系统提示音（与库静态 Show 的映射一致）。</summary>
@@ -384,7 +383,7 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>显示后按实际渲染尺寸将弹窗钳制回其所在显示器的工作区，防止溢出屏幕。</summary>
-        private static void ClampToWorkArea(MessageBox box)
+        private static void ClampToWorkArea(PositionedMessageBox box)
         {
             try
             {

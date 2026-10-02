@@ -3,7 +3,7 @@ using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.WorkflowAutomation;
-using iNKORE.UI.WPF.Modern;
+using Wpf.Ui.Appearance;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,7 +22,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using Application = System.Windows.Application;
 using Button = System.Windows.Controls.Button;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using MessageBox = System.Windows.MessageBox;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using Panel = System.Windows.Controls.Panel;
@@ -4663,7 +4663,7 @@ namespace Ink_Canvas
 
         private void CancelSingleFingerDragMode()
         {
-            if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
+            if (((ToggleSwitchDrawShapeBorderAutoHide.IsChecked) == true)) CollapseBorderDrawShape();
 
             GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
 
@@ -6371,19 +6371,19 @@ namespace Ink_Canvas
 
             // 更新UI开关状态
             if (ToggleSwitchEnableTwoFingerTranslate != null)
-                ToggleSwitchEnableTwoFingerTranslate.IsOn = false;
+                ToggleSwitchEnableTwoFingerTranslate.IsChecked = false;
             if (ToggleSwitchEnableTwoFingerZoom != null)
-                ToggleSwitchEnableTwoFingerZoom.IsOn = false;
+                ToggleSwitchEnableTwoFingerZoom.IsChecked = false;
             if (ToggleSwitchEnableTwoFingerRotation != null)
-                ToggleSwitchEnableTwoFingerRotation.IsOn = false;
+                ToggleSwitchEnableTwoFingerRotation.IsChecked = false;
 
             // 更新设置窗口中的开关状态
             if (BoardToggleSwitchEnableTwoFingerTranslate != null)
-                BoardToggleSwitchEnableTwoFingerTranslate.IsOn = false;
+                BoardToggleSwitchEnableTwoFingerTranslate.IsChecked = false;
             if (BoardToggleSwitchEnableTwoFingerZoom != null)
-                BoardToggleSwitchEnableTwoFingerZoom.IsOn = false;
+                BoardToggleSwitchEnableTwoFingerZoom.IsChecked = false;
             if (BoardToggleSwitchEnableTwoFingerRotation != null)
-                BoardToggleSwitchEnableTwoFingerRotation.IsOn = false;
+                BoardToggleSwitchEnableTwoFingerRotation.IsChecked = false;
         }
 
     }

@@ -1,10 +1,10 @@
-<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.CloudStoragePage"
+<Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.CloudStoragePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-      xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       mc:Ignorable="d"
@@ -23,37 +23,37 @@
                 </Style>
             </FrameworkElement.Resources>
 
-            <ikw:SimpleStackPanel MaxWidth="1000"
+            <vio:SimpleStackPanel MaxWidth="1000"
                 HorizontalAlignment="Stretch"
                 Spacing="{StaticResource SettingsCardSpacing}">
 
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                            Text="{x:Static props:CloudStorageStrings.CloudStorage_Manage}" />
 
-                <ui:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_UploadDelay}"
+                <controls:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_UploadDelay}"
                                  Description="{x:Static props:CloudStorageStrings.CloudStorage_UploadDelayDesc}">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.QuietHours}" />
-                    </ui:SettingsCard.HeaderIcon>
-                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <controls:SettingsCard.Icon>
+                        <ui:SymbolIcon Symbol="WeatherMoon24" />
+                    </controls:SettingsCard.Icon>
+                    <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                         <TextBox x:Name="TxtUniversalUploadDelayMinutes"
                                  Width="88"
                                  HorizontalContentAlignment="Right"
                                  TextChanged="TxtUniversalUploadDelayMinutes_TextChanged"
                                  PreviewTextInput="TxtUniversalUploadDelayMinutes_PreviewTextInput" />
                         <TextBlock Text="{x:Static props:CloudStorageStrings.CloudStorage_Minutes}" VerticalAlignment="Center" />
-                    </ikw:SimpleStackPanel>
-                </ui:SettingsCard>
+                    </vio:SimpleStackPanel>
+                </controls:SettingsCard>
 
-                <ui:SettingsExpander Header="{x:Static props:CloudStorageStrings.CloudStorage_UploadProviders}"
+                <controls:SettingsExpander Header="{x:Static props:CloudStorageStrings.CloudStorage_UploadProviders}"
                                      Description="{x:Static props:CloudStorageStrings.CloudStorage_UploadProvidersDesc}"
                                      IsExpanded="True">
-                    <ui:SettingsExpander.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}" />
-                    </ui:SettingsExpander.HeaderIcon>
+                    <controls:SettingsExpander.Icon>
+                        <ui:SymbolIcon Symbol="Cloud24" />
+                    </controls:SettingsExpander.Icon>
                     <TextBlock Text="" />
-                    <ui:SettingsExpander.Items>
-                        <ui:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_ProviderList}"
+                    <StackPanel>
+                        <controls:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_ProviderList}"
                                          Description="{x:Static props:CloudStorageStrings.CloudStorage_ProviderListDesc}">
                             <ItemsControl x:Name="LstUploadProviders">
                                 <ItemsControl.ItemTemplate>
@@ -67,43 +67,43 @@
                                                        VerticalAlignment="Center" />
                                             <ui:ToggleSwitch x:Name="ToggleProviderEnabled"
                                                              Grid.Column="1"
-                                                             IsOn="{Binding IsEnabled, Mode=OneWay}"
-                                                             Toggled="ToggleProviderEnabled_Toggled" />
+                                                             IsChecked="{Binding IsEnabled, Mode=OneWay}"
+                                                             Checked="ToggleProviderEnabled_Toggled" Unchecked="ToggleProviderEnabled_Toggled" />
                                         </Grid>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-                        </ui:SettingsCard>
-                    </ui:SettingsExpander.Items>
-                </ui:SettingsExpander>
+                        </controls:SettingsCard>
+                    </StackPanel>
+                </controls:SettingsExpander>
 
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                            Text="{x:Static props:CloudStorageStrings.CloudStorage_Dlass}" />
 
-                <ui:SettingsExpander Header="{x:Static props:CloudStorageStrings.CloudStorage_UserToken}"
+                <controls:SettingsExpander Header="{x:Static props:CloudStorageStrings.CloudStorage_UserToken}"
                                      Description="{x:Static props:CloudStorageStrings.CloudStorage_UserTokenDesc}"
                                      IsExpanded="True">
-                    <ui:SettingsExpander.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.People}" />
-                    </ui:SettingsExpander.HeaderIcon>
+                    <controls:SettingsExpander.Icon>
+                        <ui:SymbolIcon Symbol="People24" />
+                    </controls:SettingsExpander.Icon>
                     <TextBlock x:Name="TxtTokenStatus"
                                Text="{x:Static props:CloudStorageStrings.CloudStorage_TokenNotSet}"
                                Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                    <ui:SettingsExpander.Items>
-                        <ui:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_SavedTokens}"
+                    <StackPanel>
+                        <controls:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_SavedTokens}"
                                          Description="{x:Static props:CloudStorageStrings.CloudStorage_SavedTokensDesc}">
                             <ComboBox x:Name="CmbSavedTokens"
                                       IsEditable="False"
                                       IsReadOnly="True"
                                       SelectionChanged="CmbSavedTokens_SelectionChanged" />
-                        </ui:SettingsCard>
-                        <ui:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_NewToken}"
+                        </controls:SettingsCard>
+                        <controls:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_NewToken}"
                                          Description="{x:Static props:CloudStorageStrings.CloudStorage_NewTokenDesc}">
                             <TextBox x:Name="TxtNewToken"
                                      MinWidth="260"
                                      MaxLength="500" />
-                        </ui:SettingsCard>
-                        <ui:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_TokenActions}">
+                        </controls:SettingsCard>
+                        <controls:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_TokenActions}">
                             <WrapPanel Orientation="Horizontal">
                                 <Button x:Name="BtnSaveToken"
                                         Content="{x:Static props:CloudStorageStrings.CloudStorage_SaveToken}"
@@ -117,16 +117,16 @@
                                         Content="{x:Static props:CloudStorageStrings.CloudStorage_OpenDlassDashboard}"
                                         Click="BtnOpenDlassDashboard_Click" />
                             </WrapPanel>
-                        </ui:SettingsCard>
-                    </ui:SettingsExpander.Items>
-                </ui:SettingsExpander>
+                        </controls:SettingsCard>
+                    </StackPanel>
+                </controls:SettingsExpander>
 
-                <ui:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_ConnectionStatus}"
+                <controls:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_ConnectionStatus}"
                                  Description="{x:Static props:CloudStorageStrings.CloudStorage_ConnectionStatusDesc}">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" />
-                    </ui:SettingsCard.HeaderIcon>
-                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                    <controls:SettingsCard.Icon>
+                        <ui:SymbolIcon Symbol="ArrowSync24" />
+                    </controls:SettingsCard.Icon>
+                    <vio:SimpleStackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
                         <TextBlock x:Name="TxtConnectionStatus"
                                    Text="{x:Static props:CloudStorageStrings.CloudStorage_NotConnected}"
                                    VerticalAlignment="Center"
@@ -134,54 +134,53 @@
                         <Button x:Name="BtnTestToken"
                                 Content="{x:Static props:CloudStorageStrings.CloudStorage_TestConnection}"
                                 Click="BtnTestToken_Click" />
-                    </ikw:SimpleStackPanel>
-                </ui:SettingsCard>
+                    </vio:SimpleStackPanel>
+                </controls:SettingsCard>
 
-                <ui:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_ClassSelection}"
+                <controls:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_ClassSelection}"
                                  Description="{x:Static props:CloudStorageStrings.CloudStorage_ClassSelectionDesc}">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.People}" />
-                    </ui:SettingsCard.HeaderIcon>
+                    <controls:SettingsCard.Icon>
+                        <ui:SymbolIcon Symbol="People24" />
+                    </controls:SettingsCard.Icon>
                     <ComboBox x:Name="CmbClassSelection"
                               IsEditable="False"
                               IsReadOnly="True"
                               SelectionChanged="CmbClassSelection_SelectionChanged" />
-                </ui:SettingsCard>
+                </controls:SettingsCard>
 
                 <controls:LabeledSettingsCard x:Name="ToggleSwitchAutoUploadNotes"
                         Header="{x:Static props:CloudStorageStrings.CloudStorage_AutoUploadNotes}"
                         Description="{x:Static props:CloudStorageStrings.CloudStorage_AutoUploadNotesDesc}"
-                        Icon="{x:Static ui:SegoeFluentIcons.Upload}"
-                        Toggled="ToggleSwitchAutoUploadNotes_Toggled" />
+                        Symbol="ArrowUpload24" Toggled="ToggleProviderEnabled_Toggled" />
 
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                            Text="{x:Static props:CloudStorageStrings.CloudStorage_WebDav}" />
 
-                <ui:SettingsExpander Header="{x:Static props:CloudStorageStrings.CloudStorage_WebDavSettings}"
+                <controls:SettingsExpander Header="{x:Static props:CloudStorageStrings.CloudStorage_WebDavSettings}"
                                      Description="{x:Static props:CloudStorageStrings.CloudStorage_WebDavSettingsDesc}"
                                      IsExpanded="True">
-                    <ui:SettingsExpander.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Folder}" />
-                    </ui:SettingsExpander.HeaderIcon>
+                    <controls:SettingsExpander.Icon>
+                        <ui:SymbolIcon Symbol="Folder24" />
+                    </controls:SettingsExpander.Icon>
                     <Border Background="#07aef0dc" CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
                         <TextBlock Text="Beta" FontSize="10" FontWeight="SemiBold" Foreground="White" />
                     </Border>
-                    <ui:SettingsExpander.Items>
-                        <ui:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_WebDavUrl}"
+                    <StackPanel>
+                        <controls:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_WebDavUrl}"
                                          Description="{x:Static props:CloudStorageStrings.CloudStorage_WebDavUrlDesc}">
                             <TextBox x:Name="TxtWebDavUrl" MinWidth="320" />
-                        </ui:SettingsCard>
-                        <ui:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_Username}">
+                        </controls:SettingsCard>
+                        <controls:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_Username}">
                             <TextBox x:Name="TxtWebDavUsername" MinWidth="320" />
-                        </ui:SettingsCard>
-                        <ui:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_Password}">
+                        </controls:SettingsCard>
+                        <controls:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_Password}">
                             <PasswordBox x:Name="TxtWebDavPassword" MinWidth="320" />
-                        </ui:SettingsCard>
-                        <ui:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_RootDirectory}"
+                        </controls:SettingsCard>
+                        <controls:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_RootDirectory}"
                                          Description="{x:Static props:CloudStorageStrings.CloudStorage_RootDirectoryDesc}">
                             <TextBox x:Name="TxtWebDavRootDirectory" MinWidth="320" />
-                        </ui:SettingsCard>
-                        <ui:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_WebDavActions}">
+                        </controls:SettingsCard>
+                        <controls:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_WebDavActions}">
                             <WrapPanel Orientation="Horizontal">
                                 <Button Content="{x:Static props:CloudStorageStrings.CloudStorage_SaveWebDavSettings}"
                                         Margin="0,0,8,0"
@@ -189,12 +188,12 @@
                                 <Button Content="{x:Static props:CloudStorageStrings.CloudStorage_Restore}"
                                         Click="BtnCancelWebDav_Click" />
                             </WrapPanel>
-                        </ui:SettingsCard>
-                    </ui:SettingsExpander.Items>
-                </ui:SettingsExpander>
+                        </controls:SettingsCard>
+                    </StackPanel>
+                </controls:SettingsExpander>
 
                 <Rectangle Height="48" />
-            </ikw:SimpleStackPanel>
+            </vio:SimpleStackPanel>
         </Grid>
     </ScrollViewer>
-</ui:Page>
+</Page>

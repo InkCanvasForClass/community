@@ -703,8 +703,8 @@ namespace Ink_Canvas
                 if (BoardPenWidthSlider != null) BoardPenWidthSlider.Value = Settings.Canvas.InkWidth * 2;
                 if (BoardPenAlphaSlider != null) BoardPenAlphaSlider.Value = Settings.Canvas.InkAlpha;
                 _isUpdatingSliders = false;
-                if (HighlighterOverlapToggle != null) HighlighterOverlapToggle.IsOn = Settings.Canvas.HighlighterOverlapEnabled;
-                if (BoardHighlighterOverlapToggle != null) BoardHighlighterOverlapToggle.IsOn = Settings.Canvas.HighlighterOverlapEnabled;
+                if (HighlighterOverlapToggle != null) HighlighterOverlapToggle.IsChecked = Settings.Canvas.HighlighterOverlapEnabled;
+                if (BoardHighlighterOverlapToggle != null) BoardHighlighterOverlapToggle.IsChecked = Settings.Canvas.HighlighterOverlapEnabled;
 
                 await Dispatcher.InvokeAsync(() =>
                 {
@@ -740,8 +740,8 @@ namespace Ink_Canvas
                 if (BoardPenWidthSlider != null) BoardPenWidthSlider.Value = Settings.Canvas.HighlighterWidth;
                 if (BoardPenAlphaSlider != null) BoardPenAlphaSlider.Value = Settings.Canvas.HighlighterAlpha;
                 _isUpdatingSliders = false;
-                if (HighlighterOverlapToggle != null) HighlighterOverlapToggle.IsOn = Settings.Canvas.HighlighterOverlapEnabled;
-                if (BoardHighlighterOverlapToggle != null) BoardHighlighterOverlapToggle.IsOn = Settings.Canvas.HighlighterOverlapEnabled;
+                if (HighlighterOverlapToggle != null) HighlighterOverlapToggle.IsChecked = Settings.Canvas.HighlighterOverlapEnabled;
+                if (BoardHighlighterOverlapToggle != null) BoardHighlighterOverlapToggle.IsChecked = Settings.Canvas.HighlighterOverlapEnabled;
 
                 await Dispatcher.InvokeAsync(() =>
                 {

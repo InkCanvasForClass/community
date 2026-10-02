@@ -3,8 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-             xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+             xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
              xmlns:helpers="clr-namespace:Ink_Canvas.Helpers"
              xmlns:local="clr-namespace:Ink_Canvas.Controls"
@@ -24,10 +24,10 @@
     <Grid>
         <controls:PopupShellContent x:Name="Shell" Title="{x:Static props:FloatingBarStrings.Tools_MoreFeaturesTitle}" d:Visibility="Collapsed" />
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
-            <ikw:SimpleStackPanel x:Name="MenuPanel" Margin="2" Spacing="3" HorizontalAlignment="Center">
-                <ikw:SimpleStackPanel.Resources>
+            <vio:SimpleStackPanel x:Name="MenuPanel" Margin="2" Spacing="3" HorizontalAlignment="Center">
+                <vio:SimpleStackPanel.Resources>
                     <Style TargetType="Label" BasedOn="{StaticResource AutoFitToolPopupLabel8}" />
-                </ikw:SimpleStackPanel.Resources>
+                </vio:SimpleStackPanel.Resources>
                 <!-- All buttons declared here; layout is applied dynamically via ApplyMenuLayout() -->
                 <controls:ToolMenuButton x:Name="TimerToolBtn" Label="{x:Static props:FloatingBarStrings.QuickPanel_Timer}" Visibility="Collapsed" />
                 <controls:ToolMenuButton x:Name="RandomDrawToolBtn" Label="{x:Static props:FloatingBarStrings.Tools_RandomDraw}" Visibility="Collapsed" />
@@ -40,7 +40,7 @@
                 <controls:ToolMenuButton x:Name="RedoToolBtn" Label="{x:Static props:FloatingBarStrings.Board_Redo}" Visibility="Collapsed" />
                 <controls:ToolMenuButton x:Name="ManualToolBtn" Label="{x:Static props:FloatingBarStrings.Tools_Manual}" Visibility="Collapsed" />
                 <controls:ToolMenuButton x:Name="SettingsToolBtn" Label="{x:Static props:NavStrings.Settings_Title}" Visibility="Collapsed" />
-            </ikw:SimpleStackPanel>
+            </vio:SimpleStackPanel>
         </ContentControl>
     </Grid>
 </local:ToolsPopupContent>

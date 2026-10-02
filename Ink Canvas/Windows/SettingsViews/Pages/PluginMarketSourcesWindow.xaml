@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     xmlns:props="clr-namespace:Ink_Canvas.Properties"
     mc:Ignorable="d"
     d:DesignWidth="760" d:DesignHeight="360"
@@ -35,7 +35,7 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal" Margin="4,6">
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Globe}"
+                            <ui:SymbolIcon Symbol="Globe24"
                                 FontSize="14" Margin="0,0,8,0"
                                 VerticalAlignment="Center"
                                 Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
@@ -50,7 +50,7 @@
             <Button Grid.Row="2" Click="AddButton_Click"
                 HorizontalAlignment="Left" Margin="0,12,0,0" Padding="10,6">
                 <StackPanel Orientation="Horizontal">
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Add}" FontSize="13" Margin="0,0,6,0"/>
+                    <ui:SymbolIcon Symbol="Add24" FontSize="13" Margin="0,0,6,0"/>
                     <TextBlock Text="{x:Static props:PluginStrings.Market_AddSource}" VerticalAlignment="Center"/>
                 </StackPanel>
             </Button>
@@ -94,13 +94,13 @@
                 <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Click="RemoveButton_Click" x:Name="RemoveBtn" Padding="12,7" Margin="0,0,8,0">
                         <StackPanel Orientation="Horizontal">
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" FontSize="13" Margin="0,0,6,0"/>
+                            <ui:SymbolIcon Symbol="Delete24" FontSize="13" Margin="0,0,6,0"/>
                             <TextBlock Text="{x:Static props:PluginStrings.Market_RemoveSource}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                     <Button x:Name="SaveBtn" Click="SaveButton_Click" Padding="14,7" IsDefault="True">
                         <StackPanel Orientation="Horizontal">
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Save}" FontSize="13" Margin="0,0,6,0"/>
+                            <ui:SymbolIcon Symbol="Save24" FontSize="13" Margin="0,0,6,0"/>
                             <TextBlock Text="{x:Static props:PluginStrings.Market_SaveSource}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>

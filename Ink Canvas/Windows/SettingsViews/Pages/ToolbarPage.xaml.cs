@@ -13,7 +13,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using Page = System.Windows.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -604,7 +604,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                     foreach (var setting in customSettings)
                     {
-                        var card = new iNKORE.UI.WPF.Modern.Controls.SettingsCard
+                        var card = new Ink_Canvas.Controls.SettingsCard
                         {
                             Header = setting.DisplayName,
                             Description = setting.Description
@@ -637,7 +637,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                                 break;
 
                             case PluginToolbarSettingType.Toggle:
-                                var toggle = new iNKORE.UI.WPF.Modern.Controls.ToggleSwitch
+                                var toggle = new Wpf.Ui.Controls.ToggleSwitch
                                 {
                                     Tag = setting.Key,
                                     MinWidth = 0,
@@ -645,8 +645,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                                     OffContent = ""
                                 };
                                 var boolValue = entry.GetSettingBool(setting.Key);
-                                if (setting.DefaultValue == "true") toggle.IsOn = boolValue || !entry.Settings.ContainsKey(setting.Key);
-                                else toggle.IsOn = boolValue;
+                                if (setting.DefaultValue == "true") toggle.IsChecked = boolValue || !entry.Settings.ContainsKey(setting.Key);
+                                else toggle.IsChecked = boolValue;
                                 toggle.Toggled += PluginCustomSetting_Toggle_Toggled;
                                 card.Content = toggle;
                                 break;
@@ -723,11 +723,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void PluginCustomSetting_Toggle_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded || ActiveEntry == null || _suppressSave) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
+            var toggle = sender as Wpf.Ui.Controls.ToggleSwitch;
             var key = toggle?.Tag as string;
             if (!string.IsNullOrEmpty(key))
             {
-                ActiveEntry.SetSetting(key, toggle.IsOn);
+                ActiveEntry.SetSetting(key, ((toggle.IsChecked) == true));
             }
             SaveSettings();
         }

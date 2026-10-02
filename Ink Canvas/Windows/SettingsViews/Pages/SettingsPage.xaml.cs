@@ -1,4 +1,5 @@
-using iNKORE.UI.WPF.Modern.Controls;
+
+using System.Windows.Controls;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {

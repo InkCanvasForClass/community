@@ -162,20 +162,20 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         private static bool IsIsOnControl(FrameworkElement element)
         {
             return element is LabeledSettingsCard
-                || element is iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
+                || element is Wpf.Ui.Controls.ToggleSwitch;
         }
 
         private static bool GetIsOn(FrameworkElement element)
         {
-            if (element is LabeledSettingsCard lsc) return lsc.IsOn;
-            if (element is iNKORE.UI.WPF.Modern.Controls.ToggleSwitch ts) return ts.IsOn;
+            if (element is LabeledSettingsCard lsc) return ((lsc.IsChecked) == true);
+            if (element is Wpf.Ui.Controls.ToggleSwitch ts) return ((ts.IsChecked) == true);
             return false;
         }
 
         private static void SetIsOn(FrameworkElement element, bool value)
         {
-            if (element is LabeledSettingsCard lsc) lsc.IsOn = value;
-            else if (element is iNKORE.UI.WPF.Modern.Controls.ToggleSwitch ts) ts.IsOn = value;
+            if (element is LabeledSettingsCard lsc) lsc.IsChecked = value;
+            else if (element is Wpf.Ui.Controls.ToggleSwitch ts) ts.IsChecked = value;
         }
 
         private static void ApplyValueToControl(FrameworkElement element, object value)
@@ -205,19 +205,19 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                     lsc.Toggled += (s, e) =>
                     {
                         if (_isInitializing) return;
-                        SetValueToSettings(propertyPath, lsc.IsOn);
+                        SetValueToSettings(propertyPath, ((lsc.IsChecked) == true));
                         SettingsManager.SaveSettingsToFile();
-                        InvokeSettingsChanged(element, lsc.IsOn);
+                        InvokeSettingsChanged(element, ((lsc.IsChecked) == true));
                     };
                 }
-                else if (element is iNKORE.UI.WPF.Modern.Controls.ToggleSwitch ts)
+                else if (element is Wpf.Ui.Controls.ToggleSwitch ts)
                 {
                     ts.Toggled += (s, e) =>
                     {
                         if (_isInitializing) return;
-                        SetValueToSettings(propertyPath, ts.IsOn);
+                        SetValueToSettings(propertyPath, ((ts.IsChecked) == true));
                         SettingsManager.SaveSettingsToFile();
-                        InvokeSettingsChanged(element, ts.IsOn);
+                        InvokeSettingsChanged(element, ((ts.IsChecked) == true));
                     };
                 }
             }

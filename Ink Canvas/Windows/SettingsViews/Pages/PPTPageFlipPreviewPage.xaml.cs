@@ -7,8 +7,8 @@ using System.Windows.Interop;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.WindowsAndMessaging;
-using NavigationViewPaneDisplayMode = iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using NavigationViewPaneDisplayMode = Wpf.Ui.Controls.NavigationViewPaneDisplayMode;
+using Page = System.Windows.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -257,7 +257,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!isGlobal)
             {
                 useGlobal = GetUseGlobalSettings(selectedIndex, ppt);
-                ToggleSwitchUseGlobalSettings.IsOn = useGlobal;
+                ToggleSwitchUseGlobalSettings.IsChecked = useGlobal;
             }
 
             // PositionSettingsPanel: enabled when global tab, or position tab with UseGlobalSettings off
@@ -270,20 +270,20 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // 1. Position enabled ToggleSwitch
             if (isGlobal)
             {
-                ToggleSwitchPositionEnabled.IsOn = ppt.PPTGlobalButtonEnabled;
+                ToggleSwitchPositionEnabled.IsChecked = ppt.PPTGlobalButtonEnabled;
             }
             else
             {
                 bool effectiveEnabled = useGlobal ? ppt.PPTGlobalButtonEnabled : IsPositionDisplayEnabled(selectedIndex, ppt);
-                ToggleSwitchPositionEnabled.IsOn = effectiveEnabled;
+                ToggleSwitchPositionEnabled.IsChecked = effectiveEnabled;
             }
 
             // 2. Show Page Number ToggleSwitch
-            ToggleSwitchShowPageNumber.IsOn = isGlobal ? ppt.PPTGlobalShowPageNumber
+            ToggleSwitchShowPageNumber.IsChecked = isGlobal ? ppt.PPTGlobalShowPageNumber
                 : (useGlobal ? ppt.PPTGlobalShowPageNumber : GetPositionShowPageNumber(selectedIndex, ppt));
 
             // 3. Black Background ToggleSwitch
-            ToggleSwitchBlackBackground.IsOn = isGlobal ? ppt.PPTGlobalBlackBackground
+            ToggleSwitchBlackBackground.IsChecked = isGlobal ? ppt.PPTGlobalBlackBackground
                 : (useGlobal ? ppt.PPTGlobalBlackBackground : GetPositionBlackBackground(selectedIndex, ppt));
 
             // 4. Offset Sliders (Side + Bottom)
@@ -601,7 +601,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             if (IsGlobalTabSelected)
             {
-                ppt.PPTGlobalButtonEnabled = ToggleSwitchPositionEnabled.IsOn;
+                ppt.PPTGlobalButtonEnabled = ((ToggleSwitchPositionEnabled.IsChecked) == true);
                 SettingsManager.SaveSettingsToFile();
                 SettingsActionHub.OnPPTGlobalSettingsChanged();
                 UpdatePreviews();
@@ -613,7 +613,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             string str = ppt.PPTButtonsDisplayOption.ToString("D4");
             char[] c = str.ToCharArray();
-            c[displayIndex] = ToggleSwitchPositionEnabled.IsOn ? '2' : '1';
+            c[displayIndex] = ((ToggleSwitchPositionEnabled.IsChecked) == true) ? '2' : '1';
 
             ppt.PPTButtonsDisplayOption = int.Parse(new string(c));
             SettingsManager.SaveSettingsToFile();
@@ -631,7 +631,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             if (IsGlobalTabSelected)
             {
-                ppt.PPTGlobalShowPageNumber = ToggleSwitchShowPageNumber.IsOn;
+                ppt.PPTGlobalShowPageNumber = ((ToggleSwitchShowPageNumber.IsChecked) == true);
                 SettingsManager.SaveSettingsToFile();
                 SettingsActionHub.OnPPTGlobalSettingsChanged();
                 UpdatePreviews();
@@ -639,7 +639,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
 
             int selectedIndex = GetSelectedPositionIndex();
-            bool isOn = ToggleSwitchShowPageNumber.IsOn;
+            bool isOn = ((ToggleSwitchPositionEnabled.IsChecked) == true);
 
             SetPositionShowPageNumber(selectedIndex, ppt, isOn);
             SettingsManager.SaveSettingsToFile();
@@ -657,7 +657,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             if (IsGlobalTabSelected)
             {
-                ppt.PPTGlobalBlackBackground = ToggleSwitchBlackBackground.IsOn;
+                ppt.PPTGlobalBlackBackground = ((ToggleSwitchBlackBackground.IsChecked) == true);
                 SettingsManager.SaveSettingsToFile();
                 SettingsActionHub.OnPPTGlobalSettingsChanged();
                 UpdatePreviews();
@@ -665,7 +665,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
 
             int selectedIndex = GetSelectedPositionIndex();
-            bool isOn = ToggleSwitchBlackBackground.IsOn;
+            bool isOn = ((ToggleSwitchBlackBackground.IsChecked) == true);
 
             SetPositionBlackBackground(selectedIndex, ppt, isOn);
             SettingsManager.SaveSettingsToFile();
@@ -682,7 +682,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var ppt = SettingsManager.Settings.PowerPointSettings;
             int selectedIndex = GetSelectedPositionIndex();
 
-            SetUseGlobalSettings(selectedIndex, ppt, ToggleSwitchUseGlobalSettings.IsOn);
+            SetUseGlobalSettings(selectedIndex, ppt, ((ToggleSwitchUseGlobalSettings.IsChecked) == true));
             SettingsManager.SaveSettingsToFile();
 
             // Reload UI to apply IsEnabled state and effective values

@@ -4,18 +4,18 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Ink_Canvas"
-        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-        xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
         mc:Ignorable="d" FontFamily="Microsoft YaHei UI"
         WindowStartupLocation="CenterScreen"
         Topmost="True"
         Title="{x:Static props:RandomStrings.Random_History_WindowTitle}" Height="500" Width="400"
         Loaded="Window_Loaded"
-        ui:ThemeManager.IsThemeAware="True"
-        ui:TitleBar.ExtendViewIntoTitleBar="True"
-        ui:WindowHelper.SystemBackdropType="None"
-        ui:WindowHelper.UseModernWindowStyle="True"
-        ui:TitleBar.Height="48">
+
+
+
+
+>
     <Window.Resources>
         <!-- 主题资源 -->
         <SolidColorBrush x:Key="RollCallHistoryWindowBackground" Color="White"/>
@@ -32,7 +32,7 @@
         
         <!-- 自定义标题栏 -->
         <Border x:Name="Border_TitleBarRoot"
-                Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.Height)}">
+                Height="32">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
@@ -44,13 +44,13 @@
                            VerticalAlignment="Center" Margin="12,0,0,0" FontSize="12" FontWeight="SemiBold"/>
 
                 <!--Right Inset-->
-                <Rectangle Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.SystemOverlayRightInset)}"
+                <Rectangle Width="138"
                     Grid.Column="2"/>
 
                 <!--Right Buttons-->
-                <ikw:SimpleStackPanel x:Name="StackPanel_RightButtons"
+                <vio:SimpleStackPanel x:Name="StackPanel_RightButtons"
                     Orientation="Horizontal" Grid.Column="1" Spacing="5">
-                </ikw:SimpleStackPanel>
+                </vio:SimpleStackPanel>
             </Grid>
         </Border>
         

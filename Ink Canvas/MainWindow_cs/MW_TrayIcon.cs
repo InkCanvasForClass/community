@@ -1,7 +1,7 @@
 using H.NotifyIcon;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
-using iNKORE.UI.WPF.Controls;
+using SimpleStackPanel = Wpf.Ui.Violeta.Controls.Compat.SimpleStackPanel;
 using System;
 using System.Diagnostics;
 using System.Linq;

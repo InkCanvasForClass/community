@@ -3,7 +3,7 @@ using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Windows;
 using System.Windows.Controls;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using Page = System.Windows.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -36,8 +36,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var settings = SettingsManager.Settings;
             if (settings?.Appearance == null) return;
 
-            CardEnableTimeDisplayInWhiteboardMode.IsOn = settings.Appearance.EnableTimeDisplayInWhiteboardMode;
-            CardShowPenColorOnBoardToolbarIcon.IsOn = settings.Appearance.ShowPenColorOnBoardToolbarIcon;
+            CardEnableTimeDisplayInWhiteboardMode.IsChecked = settings.Appearance.EnableTimeDisplayInWhiteboardMode;
+            CardShowPenColorOnBoardToolbarIcon.IsChecked = settings.Appearance.ShowPenColorOnBoardToolbarIcon;
 
             BoardToolbarLeftOpacitySlider.Value = settings.Appearance.BoardToolbarLeftOpacity;
             BoardToolbarCenterOpacitySlider.Value = settings.Appearance.BoardToolbarCenterOpacity;
@@ -71,15 +71,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnableTimeDisplayInWhiteboardMode_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.EnableTimeDisplayInWhiteboardMode = CardEnableTimeDisplayInWhiteboardMode.IsOn;
+            SettingsManager.Settings.Appearance.EnableTimeDisplayInWhiteboardMode = ((CardEnableTimeDisplayInWhiteboardMode.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
-            SettingsActionHub.OnTimeDisplayInWhiteboardChanged(CardEnableTimeDisplayInWhiteboardMode.IsOn);
+            SettingsActionHub.OnTimeDisplayInWhiteboardChanged(((CardEnableTimeDisplayInWhiteboardMode.IsChecked) == true));
         }
 
         private void ToggleSwitchShowPenColorOnBoardToolbarIcon_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.ShowPenColorOnBoardToolbarIcon = CardShowPenColorOnBoardToolbarIcon.IsOn;
+            SettingsManager.Settings.Appearance.ShowPenColorOnBoardToolbarIcon = ((CardShowPenColorOnBoardToolbarIcon.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
             if (Application.Current.MainWindow is MainWindow mainWindow)
                 mainWindow.UpdateBoardPenIconColor();

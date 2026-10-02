@@ -1,6 +1,6 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using Wpf.Ui.Controls;
 using System;
 using System.Linq;
 using System.Windows;
@@ -8,10 +8,10 @@ using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using FontIcon = iNKORE.UI.WPF.Modern.Controls.FontIcon;
-using NavigationView = iNKORE.UI.WPF.Modern.Controls.NavigationView;
-using NavigationViewItem = iNKORE.UI.WPF.Modern.Controls.NavigationViewItem;
-using NavigationViewSelectionChangedEventArgs = iNKORE.UI.WPF.Modern.Controls.NavigationViewSelectionChangedEventArgs;
+using FontIcon = Wpf.Ui.Controls.FontIcon;
+using NavigationView = Wpf.Ui.Controls.NavigationView;
+using NavigationViewItem = Wpf.Ui.Controls.NavigationViewItem;
+using NavigationViewSelectionChangedEventArgs = System.Windows.RoutedEventArgs;
 using Screen = System.Windows.Forms.Screen;
 
 namespace Ink_Canvas.Windows
@@ -90,8 +90,8 @@ namespace Ink_Canvas.Windows
                 if (_settings.Startup != null)
                 {
                     ComboBoxTelemetryUploadLevel.SelectedIndex = (int)_settings.Startup.TelemetryUploadLevel;
-                    CardFoldAtStartup.IsOn = _settings.Startup.IsFoldAtStartup;
-                    CardAutoUpdate.IsOn = _settings.Startup.IsAutoUpdate;
+                    CardFoldAtStartup.IsChecked = _settings.Startup.IsFoldAtStartup;
+                    CardAutoUpdate.IsChecked = _settings.Startup.IsAutoUpdate;
                     int crashAction = _settings.Startup.CrashAction;
                     if (crashAction < 0 || crashAction > 2) crashAction = 0;
                     ComboBoxCrashAction.SelectedIndex = crashAction;
@@ -104,10 +104,10 @@ namespace Ink_Canvas.Windows
             {
                 if (_settings.Canvas != null)
                 {
-                    CardShowCursor.IsOn = _settings.Canvas.IsShowCursor;
-                    CardDisablePressure.IsOn = _settings.Canvas.DisablePressure;
-                    CardHideStrokeWhenSelecting.IsOn = _settings.Canvas.HideStrokeWhenSelecting;
-                    CardEnablePalmEraser.IsOn = _settings.Canvas.EnablePalmEraser;
+                    CardShowCursor.IsChecked = _settings.Canvas.IsShowCursor;
+                    CardDisablePressure.IsChecked = _settings.Canvas.DisablePressure;
+                    CardHideStrokeWhenSelecting.IsChecked = _settings.Canvas.HideStrokeWhenSelecting;
+                    CardEnablePalmEraser.IsChecked = _settings.Canvas.EnablePalmEraser;
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -116,8 +116,8 @@ namespace Ink_Canvas.Windows
             {
                 if (_settings.Gesture != null)
                 {
-                    CardTwoFingerZoom.IsOn = _settings.Gesture.IsEnableTwoFingerZoom;
-                    CardTwoFingerTranslate.IsOn = _settings.Gesture.IsEnableTwoFingerTranslate;
+                    CardTwoFingerZoom.IsChecked = _settings.Gesture.IsEnableTwoFingerZoom;
+                    CardTwoFingerTranslate.IsChecked = _settings.Gesture.IsEnableTwoFingerTranslate;
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -126,7 +126,7 @@ namespace Ink_Canvas.Windows
             {
                 if (_settings.InkToShape != null)
                 {
-                    CardInkToShapeEnabled.IsOn = _settings.InkToShape.IsInkToShapeEnabled;
+                    CardInkToShapeEnabled.IsChecked = _settings.InkToShape.IsInkToShapeEnabled;
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -139,10 +139,10 @@ namespace Ink_Canvas.Windows
                     if (themeIndex < 0 || themeIndex > 2) themeIndex = 2;
                     ComboBoxTheme.SelectedIndex = themeIndex;
                     SelectComboBoxItemByTag(ComboBoxWindowBackdrop, _settings.Appearance.WindowBackdrop);
-                    CardEnableSplashScreen.IsOn = _settings.Appearance.EnableSplashScreen;
-                    CardEnableTrayIcon.IsOn = _settings.Appearance.EnableTrayIcon;
-                    CardShowQuickPanel.IsOn = _settings.Appearance.IsShowQuickPanel;
-                    CardEnableHotkeysInMouseMode.IsOn = _settings.Appearance.EnableHotkeysInMouseMode;
+                    CardEnableSplashScreen.IsChecked = _settings.Appearance.EnableSplashScreen;
+                    CardEnableTrayIcon.IsChecked = _settings.Appearance.EnableTrayIcon;
+                    CardShowQuickPanel.IsChecked = _settings.Appearance.IsShowQuickPanel;
+                    CardEnableHotkeysInMouseMode.IsChecked = _settings.Appearance.EnableHotkeysInMouseMode;
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -151,10 +151,10 @@ namespace Ink_Canvas.Windows
             {
                 if (_settings.PowerPointSettings != null)
                 {
-                    CardPPTSupport.IsOn = _settings.PowerPointSettings.PowerPointSupport;
-                    CardPPTAutoSaveStrokes.IsOn = _settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint;
-                    CardPPTAutoSaveScreenshots.IsOn = _settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint;
-                    CardPPTTimeCapsule.IsOn = _settings.PowerPointSettings.EnablePPTTimeCapsule;
+                    CardPPTSupport.IsChecked = _settings.PowerPointSettings.PowerPointSupport;
+                    CardPPTAutoSaveStrokes.IsChecked = _settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint;
+                    CardPPTAutoSaveScreenshots.IsChecked = _settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint;
+                    CardPPTTimeCapsule.IsChecked = _settings.PowerPointSettings.EnablePPTTimeCapsule;
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -163,14 +163,14 @@ namespace Ink_Canvas.Windows
             {
                 if (_settings.Automation != null)
                 {
-                    CardAutoFoldInPPTSlideShow.IsOn = _settings.Automation.IsAutoFoldInPPTSlideShow;
-                    CardEnableAutoSaveStrokes.IsOn = _settings.Automation.IsEnableAutoSaveStrokes;
+                    CardAutoFoldInPPTSlideShow.IsChecked = _settings.Automation.IsAutoFoldInPPTSlideShow;
+                    CardEnableAutoSaveStrokes.IsChecked = _settings.Automation.IsEnableAutoSaveStrokes;
                     if (_settings.Automation.FloatingWindowInterceptor != null)
                     {
-                        CardFloatingWindowInterceptor.IsOn = _settings.Automation.FloatingWindowInterceptor.IsEnabled;
+                        CardFloatingWindowInterceptor.IsChecked = _settings.Automation.FloatingWindowInterceptor.IsEnabled;
                     }
-                    CardAutoSaveStrokesAtClear.IsOn = _settings.Automation.IsAutoSaveScreenshotAtClear;
-                    CardSaveScreenshotsInDateFolders.IsOn = _settings.Automation.IsSaveScreenshotsInDateFolders;
+                    CardAutoSaveStrokesAtClear.IsChecked = _settings.Automation.IsAutoSaveScreenshotAtClear;
+                    CardSaveScreenshotsInDateFolders.IsChecked = _settings.Automation.IsSaveScreenshotsInDateFolders;
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -179,7 +179,7 @@ namespace Ink_Canvas.Windows
             {
                 if (_settings.RandSettings != null)
                 {
-                    CardShowRandomAndSingleDraw.IsOn = _settings.RandSettings.ShowRandomAndSingleDraw;
+                    CardShowRandomAndSingleDraw.IsChecked = _settings.RandSettings.ShowRandomAndSingleDraw;
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -188,7 +188,7 @@ namespace Ink_Canvas.Windows
             {
                 if (_settings.Advanced != null)
                 {
-                    CardIsLogEnabled.IsOn = _settings.Advanced.IsLogEnabled;
+                    CardIsLogEnabled.IsChecked = _settings.Advanced.IsLogEnabled;
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -203,8 +203,8 @@ namespace Ink_Canvas.Windows
                     int level = ComboBoxTelemetryUploadLevel.SelectedIndex;
                     if (level < 0) level = 0;
                     _settings.Startup.TelemetryUploadLevel = (TelemetryUploadLevel)level;
-                    _settings.Startup.IsFoldAtStartup = CardFoldAtStartup.IsOn;
-                    _settings.Startup.IsAutoUpdate = CardAutoUpdate.IsOn;
+                    _settings.Startup.IsFoldAtStartup = ((CardFoldAtStartup.IsChecked) == true);
+                    _settings.Startup.IsAutoUpdate = ((CardAutoUpdate.IsChecked) == true);
                     int crashAction = ComboBoxCrashAction.SelectedIndex;
                     if (crashAction < 0 || crashAction > 2) crashAction = 0;
                     _settings.Startup.CrashAction = crashAction;
@@ -217,10 +217,10 @@ namespace Ink_Canvas.Windows
             {
                 if (_settings.Canvas != null)
                 {
-                    _settings.Canvas.IsShowCursor = CardShowCursor.IsOn;
-                    _settings.Canvas.DisablePressure = CardDisablePressure.IsOn;
-                    _settings.Canvas.HideStrokeWhenSelecting = CardHideStrokeWhenSelecting.IsOn;
-                    _settings.Canvas.EnablePalmEraser = CardEnablePalmEraser.IsOn;
+                    _settings.Canvas.IsShowCursor = ((CardShowCursor.IsChecked) == true);
+                    _settings.Canvas.DisablePressure = ((CardDisablePressure.IsChecked) == true);
+                    _settings.Canvas.HideStrokeWhenSelecting = ((CardHideStrokeWhenSelecting.IsChecked) == true);
+                    _settings.Canvas.EnablePalmEraser = ((CardEnablePalmEraser.IsChecked) == true);
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -229,8 +229,8 @@ namespace Ink_Canvas.Windows
             {
                 if (_settings.Gesture != null)
                 {
-                    _settings.Gesture.IsEnableTwoFingerZoom = CardTwoFingerZoom.IsOn;
-                    _settings.Gesture.IsEnableTwoFingerTranslate = CardTwoFingerTranslate.IsOn;
+                    _settings.Gesture.IsEnableTwoFingerZoom = ((CardTwoFingerZoom.IsChecked) == true);
+                    _settings.Gesture.IsEnableTwoFingerTranslate = ((CardTwoFingerTranslate.IsChecked) == true);
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -239,7 +239,7 @@ namespace Ink_Canvas.Windows
             {
                 if (_settings.InkToShape != null)
                 {
-                    _settings.InkToShape.IsInkToShapeEnabled = CardInkToShapeEnabled.IsOn;
+                    _settings.InkToShape.IsInkToShapeEnabled = ((CardInkToShapeEnabled.IsChecked) == true);
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -252,10 +252,10 @@ namespace Ink_Canvas.Windows
                     if (themeIndex < 0) themeIndex = 2;
                     _settings.Appearance.Theme = themeIndex;
                     _settings.Appearance.WindowBackdrop = GetSelectedComboBoxTag(ComboBoxWindowBackdrop, "None");
-                    _settings.Appearance.EnableSplashScreen = CardEnableSplashScreen.IsOn;
-                    _settings.Appearance.EnableTrayIcon = CardEnableTrayIcon.IsOn;
-                    _settings.Appearance.IsShowQuickPanel = CardShowQuickPanel.IsOn;
-                    _settings.Appearance.EnableHotkeysInMouseMode = CardEnableHotkeysInMouseMode.IsOn;
+                    _settings.Appearance.EnableSplashScreen = ((CardEnableSplashScreen.IsChecked) == true);
+                    _settings.Appearance.EnableTrayIcon = ((CardEnableTrayIcon.IsChecked) == true);
+                    _settings.Appearance.IsShowQuickPanel = ((CardShowQuickPanel.IsChecked) == true);
+                    _settings.Appearance.EnableHotkeysInMouseMode = ((CardEnableHotkeysInMouseMode.IsChecked) == true);
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -264,10 +264,10 @@ namespace Ink_Canvas.Windows
             {
                 if (_settings.PowerPointSettings != null)
                 {
-                    _settings.PowerPointSettings.PowerPointSupport = CardPPTSupport.IsOn;
-                    _settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint = CardPPTAutoSaveStrokes.IsOn;
-                    _settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint = CardPPTAutoSaveScreenshots.IsOn;
-                    _settings.PowerPointSettings.EnablePPTTimeCapsule = CardPPTTimeCapsule.IsOn;
+                    _settings.PowerPointSettings.PowerPointSupport = ((CardPPTSupport.IsChecked) == true);
+                    _settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint = ((CardPPTAutoSaveStrokes.IsChecked) == true);
+                    _settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint = ((CardPPTAutoSaveScreenshots.IsChecked) == true);
+                    _settings.PowerPointSettings.EnablePPTTimeCapsule = ((CardPPTTimeCapsule.IsChecked) == true);
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -276,13 +276,13 @@ namespace Ink_Canvas.Windows
             {
                 if (_settings.Automation != null)
                 {
-                    _settings.Automation.IsAutoFoldInPPTSlideShow = CardAutoFoldInPPTSlideShow.IsOn;
-                    _settings.Automation.IsEnableAutoSaveStrokes = CardEnableAutoSaveStrokes.IsOn;
-                    _settings.Automation.IsAutoSaveScreenshotAtClear = CardAutoSaveStrokesAtClear.IsOn;
-                    _settings.Automation.IsSaveScreenshotsInDateFolders = CardSaveScreenshotsInDateFolders.IsOn;
+                    _settings.Automation.IsAutoFoldInPPTSlideShow = ((CardAutoFoldInPPTSlideShow.IsChecked) == true);
+                    _settings.Automation.IsEnableAutoSaveStrokes = ((CardEnableAutoSaveStrokes.IsChecked) == true);
+                    _settings.Automation.IsAutoSaveScreenshotAtClear = ((CardAutoSaveStrokesAtClear.IsChecked) == true);
+                    _settings.Automation.IsSaveScreenshotsInDateFolders = ((CardSaveScreenshotsInDateFolders.IsChecked) == true);
                     if (_settings.Automation.FloatingWindowInterceptor != null)
                     {
-                        _settings.Automation.FloatingWindowInterceptor.IsEnabled = CardFloatingWindowInterceptor.IsOn;
+                        _settings.Automation.FloatingWindowInterceptor.IsEnabled = ((CardFloatingWindowInterceptor.IsChecked) == true);
                     }
                 }
             }
@@ -292,7 +292,7 @@ namespace Ink_Canvas.Windows
             {
                 if (_settings.RandSettings != null)
                 {
-                    _settings.RandSettings.ShowRandomAndSingleDraw = CardShowRandomAndSingleDraw.IsOn;
+                    _settings.RandSettings.ShowRandomAndSingleDraw = ((CardShowRandomAndSingleDraw.IsChecked) == true);
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -301,7 +301,7 @@ namespace Ink_Canvas.Windows
             {
                 if (_settings.Advanced != null)
                 {
-                    _settings.Advanced.IsLogEnabled = CardIsLogEnabled.IsOn;
+                    _settings.Advanced.IsLogEnabled = ((CardIsLogEnabled.IsChecked) == true);
                 }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -675,12 +675,12 @@ namespace Ink_Canvas.Windows
                 if (isFinish)
                 {
                     BtnConfirmText.Text = Properties.OobeStrings.Oobe_SaveAndStart;
-                    BtnConfirmIcon.Icon = SegoeFluentIcons.Accept;
+                    BtnConfirmIcon.Symbol = SymbolRegular.Accept;
                 }
                 else
                 {
                     BtnConfirmText.Text = Properties.OobeStrings.Oobe_Next;
-                    BtnConfirmIcon.Icon = SegoeFluentIcons.ChevronRight;
+                    BtnConfirmIcon.Symbol = SymbolRegular.ChevronRight;
                 }
 
                 UpdateConfirmEnabled();
@@ -768,15 +768,15 @@ namespace Ink_Canvas.Windows
                 default: themeText = ThemeStrings.Theme_System; break;
             }
 
-            AddSummaryRow(SegoeFluentIcons.Shield, Properties.OobeStrings.Oobe_SummaryTelemetryLevel, telemetryText);
-            AddSummaryRow(SegoeFluentIcons.Sync, UpdateStrings.Header_AutoUpdate, BoolText(CardAutoUpdate.IsOn));
-            AddSummaryRow(SegoeFluentIcons.Personalize, Properties.OobeStrings.Oobe_SummaryAppTheme, themeText);
-            AddSummaryRow(SegoeFluentIcons.FullScreen, ThemeStrings.Theme_WindowBackdrop, backdropText);
-            AddSummaryRow(SegoeFluentIcons.Slideshow, Properties.OobeStrings.Oobe_SummaryPPTLink, BoolText(CardPPTSupport.IsOn));
-            AddSummaryRow(SegoeFluentIcons.TouchPointer, Properties.OobeStrings.Oobe_SummaryTwoFingerZoom,
-                $"{BoolText(CardTwoFingerZoom.IsOn)} / {BoolText(CardTwoFingerTranslate.IsOn)}");
-            AddSummaryRow(SegoeFluentIcons.Pin, Properties.OobeStrings.Oobe_SummaryTrayIcon, BoolText(CardEnableTrayIcon.IsOn));
-            AddSummaryRow(SegoeFluentIcons.Document, Properties.OobeStrings.Oobe_SummaryLogEnabled, BoolText(CardIsLogEnabled.IsOn));
+            AddSummaryRow(SymbolRegular.Shield, Properties.OobeStrings.Oobe_SummaryTelemetryLevel, telemetryText);
+            AddSummaryRow(SymbolRegular.Sync, UpdateStrings.Header_AutoUpdate, BoolText(((CardAutoUpdate.IsChecked) == true)));
+            AddSummaryRow(SymbolRegular.Personalize, Properties.OobeStrings.Oobe_SummaryAppTheme, themeText);
+            AddSummaryRow(SymbolRegular.FullScreen, ThemeStrings.Theme_WindowBackdrop, backdropText);
+            AddSummaryRow(SymbolRegular.Slideshow, Properties.OobeStrings.Oobe_SummaryPPTLink, BoolText(((CardPPTSupport.IsChecked) == true)));
+            AddSummaryRow(SymbolRegular.TouchPointer, Properties.OobeStrings.Oobe_SummaryTwoFingerZoom,
+                $"{BoolText(((CardTwoFingerZoom.IsChecked) == true))} / {BoolText(((CardTwoFingerTranslate.IsChecked) == true))}");
+            AddSummaryRow(SymbolRegular.Pin, Properties.OobeStrings.Oobe_SummaryTrayIcon, BoolText(((CardEnableTrayIcon.IsChecked) == true)));
+            AddSummaryRow(SymbolRegular.Document, Properties.OobeStrings.Oobe_SummaryLogEnabled, BoolText(((CardIsLogEnabled.IsChecked) == true)));
         }
 
         private static string BoolText(bool value) => value ? Properties.OobeStrings.Oobe_BoolEnabled : Properties.OobeStrings.Oobe_BoolDisabled;
@@ -786,7 +786,7 @@ namespace Ink_Canvas.Windows
             return (comboBox?.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? fallback;
         }
 
-        private void AddSummaryRow(FontIconData icon, string label, string value)
+        private void AddSummaryRow(SymbolRegular icon, string label, string value)
         {
             var grid = new Grid { Margin = new Thickness(0, 2, 0, 2) };
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(28) });

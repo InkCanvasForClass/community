@@ -6,11 +6,11 @@ using System.IO;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using MessageBox = System.Windows.MessageBox;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
-    public partial class PrivacyPage : iNKORE.UI.WPF.Modern.Controls.Page
+    public partial class PrivacyPage : System.Windows.Controls.Page
     {
         private bool _isLoaded = false;
         private bool _isChangingTelemetryInternally;

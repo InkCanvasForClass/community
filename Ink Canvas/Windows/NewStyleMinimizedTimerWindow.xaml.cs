@@ -1,6 +1,6 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
-using iNKORE.UI.WPF.Modern;
+using Wpf.Ui.Appearance;
 using System;
 using System.Timers;
 using System.Windows;

@@ -37,7 +37,7 @@ namespace Ink_Canvas
         /// <summary>提示是否正在显示。</summary>
         private bool _annotationDotHintVisible;
         /// <summary>当前显示中的「批注中」提示弹窗（iNKORE MessageBox，非模态），用于重复触发时判断与外部关闭。</summary>
-        private iNKORE.UI.WPF.Modern.Controls.MessageBox _annotationDotHintBox;
+        private Helpers.PositionedMessageBox _annotationDotHintBox;
 
         /// <summary>
         /// 在 <see cref="ProcessCommittedStroke"/> 后调用，检测短墨迹（点击）并判断是否需要显示提示。

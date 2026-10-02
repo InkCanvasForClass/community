@@ -6,11 +6,11 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using MessageBox = System.Windows.MessageBox;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
-    public partial class WindowPage : iNKORE.UI.WPF.Modern.Controls.Page
+    public partial class WindowPage : System.Windows.Controls.Page
     {
         private bool _isLoaded = false;
         private bool _isAdmin = false;
@@ -43,13 +43,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 var settings = SettingsManager.Settings;
                 if (settings.Advanced != null)
                 {
-                    CardNoFocusMode.IsOn = settings.Advanced.IsNoFocusMode;
-                    CardWindowMode.IsOn = settings.Advanced.WindowMode;
-                    CardWindowChromeRendering.IsOn = settings.Startup?.EnableWindowChromeRendering ?? false;
-                    CardAvoidFullScreen.IsOn = settings.Advanced.IsEnableAvoidFullScreenHelper;
-                    CardMultiScreenSupport.IsOn = settings.Advanced.EnableMultiScreenSupport;
-                    CardFollowMouseScreen.IsOn = settings.Advanced.FollowMouseForScreenSelection;
-                    ToggleSwitchAlwaysOnTop.IsOn = settings.Advanced.IsAlwaysOnTop;
+                    CardNoFocusMode.IsChecked = settings.Advanced.IsNoFocusMode;
+                    CardWindowMode.IsChecked = settings.Advanced.WindowMode;
+                    CardWindowChromeRendering.IsChecked = settings.Startup?.EnableWindowChromeRendering ?? false;
+                    CardAvoidFullScreen.IsChecked = settings.Advanced.IsEnableAvoidFullScreenHelper;
+                    CardMultiScreenSupport.IsChecked = settings.Advanced.EnableMultiScreenSupport;
+                    CardFollowMouseScreen.IsChecked = settings.Advanced.FollowMouseForScreenSelection;
+                    ToggleSwitchAlwaysOnTop.IsChecked = settings.Advanced.IsAlwaysOnTop;
 
                     _topMostModeItems.Clear();
                     _topMostModeItems.Add(new TopMostModeSelectionItem());
@@ -138,7 +138,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                bool newState = CardNoFocusMode.IsOn;
+                bool newState = ((CardNoFocusMode.IsChecked) == true);
 
                 SettingsManager.Settings.Advanced.IsNoFocusMode = newState;
                 SettingsManager.SaveSettingsToFile();
@@ -166,7 +166,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                bool newState = CardWindowMode.IsOn;
+                bool newState = ((CardWindowMode.IsChecked) == true);
 
                 SettingsManager.Settings.Advanced.WindowMode = newState;
                 SettingsManager.SaveSettingsToFile();
@@ -189,7 +189,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                bool newState = CardAvoidFullScreen.IsOn;
+                bool newState = ((CardAvoidFullScreen.IsChecked) == true);
                 SettingsManager.Settings.Advanced.IsEnableAvoidFullScreenHelper = newState;
                 SettingsManager.SaveSettingsToFile();
 
@@ -218,7 +218,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                bool newState = CardWindowChromeRendering.IsOn;
+                bool newState = ((CardWindowChromeRendering.IsChecked) == true);
                 if (SettingsManager.Settings.Startup == null)
                     SettingsManager.Settings.Startup = new Startup();
 
@@ -245,7 +245,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                bool newState = ToggleSwitchAlwaysOnTop.IsOn;
+                bool newState = ((ToggleSwitchAlwaysOnTop.IsChecked) == true);
 
                 SettingsManager.Settings.Advanced.IsAlwaysOnTop = newState;
                 SettingsManager.SaveSettingsToFile();
@@ -277,7 +277,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                bool newState = CardMultiScreenSupport.IsOn;
+                bool newState = ((CardMultiScreenSupport.IsChecked) == true);
                 SettingsManager.Settings.Advanced.EnableMultiScreenSupport = newState;
                 SettingsManager.SaveSettingsToFile();
 
@@ -298,7 +298,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                bool newState = CardFollowMouseScreen.IsOn;
+                bool newState = ((CardFollowMouseScreen.IsChecked) == true);
                 SettingsManager.Settings.Advanced.FollowMouseForScreenSelection = newState;
                 SettingsManager.SaveSettingsToFile();
 
@@ -351,7 +351,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (!SettingsManager.Settings.Advanced.IsAlwaysOnTop)
                 {
                     SettingsManager.Settings.Advanced.IsAlwaysOnTop = true;
-                    ToggleSwitchAlwaysOnTop.IsOn = true;
+                    ToggleSwitchAlwaysOnTop.IsChecked = true;
                 }
 
                 SettingsManager.SaveSettingsToFile();

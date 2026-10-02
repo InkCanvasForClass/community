@@ -1,14 +1,14 @@
 <UserControl x:Class="Ink_Canvas.Controls.ToolMenuButton"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
              mc:Ignorable="d">
     <Border x:Name="ButtonBorder"
             CornerRadius="4"
             Background="Transparent" d:Background="Red">
-        <ikw:SimpleStackPanel x:Name="ButtonPanel"
+        <vio:SimpleStackPanel x:Name="ButtonPanel"
                               MouseDown="ButtonPanel_MouseDown"
                               MouseLeave="ButtonPanel_MouseLeave"
                               MouseUp="ButtonPanel_MouseUp"
@@ -35,6 +35,6 @@
                    FontSize="14" d:Content="田田田"
                    HorizontalAlignment="Center"
                    Foreground="{DynamicResource FloatBarForeground}" />
-        </ikw:SimpleStackPanel>
+        </vio:SimpleStackPanel>
     </Border>
 </UserControl>

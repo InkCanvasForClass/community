@@ -1,5 +1,5 @@
 using Ink_Canvas.Properties;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using Wpf.Ui.Controls;
 using System;
 using System.Windows;
 using System.Windows.Input;
@@ -16,7 +16,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
         public string DisplayName => Strings.GetString(LocalizationKey) ?? LocalizationKey;
 
         public virtual string IconGeometry => null;
-        public virtual FontIconData? IconKey => null;
+        public virtual SymbolRegular? IconKey => null;
 
         public virtual Func<FrameworkElement> CustomSettingsPanelFactory => null;
 

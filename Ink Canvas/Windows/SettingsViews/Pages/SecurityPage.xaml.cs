@@ -4,7 +4,7 @@ using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Windows;
 using System.Windows.Controls;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using Page = System.Windows.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -40,17 +40,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (settings.Security == null) settings.Security = new Security();
 
                 var sec = settings.Security;
-                CardPasswordEnabled.IsOn = sec.PasswordEnabled;
-                CardRequirePasswordOnExit.IsOn = sec.RequirePasswordOnExit;
-                CardRequirePasswordOnEnterSettings.IsOn = sec.RequirePasswordOnEnterSettings;
-                CardRequirePasswordOnResetConfig.IsOn = sec.RequirePasswordOnResetConfig;
-                CardRequirePasswordOnModifyOrClearNameList.IsOn = sec.RequirePasswordOnModifyOrClearNameList;
-                CardTotpEnabled.IsOn = sec.TotpEnabled;
+                CardPasswordEnabled.IsChecked = sec.PasswordEnabled;
+                CardRequirePasswordOnExit.IsChecked = sec.RequirePasswordOnExit;
+                CardRequirePasswordOnEnterSettings.IsChecked = sec.RequirePasswordOnEnterSettings;
+                CardRequirePasswordOnResetConfig.IsChecked = sec.RequirePasswordOnResetConfig;
+                CardRequirePasswordOnModifyOrClearNameList.IsChecked = sec.RequirePasswordOnModifyOrClearNameList;
+                CardTotpEnabled.IsChecked = sec.TotpEnabled;
                 TextBoxTotpSecret.Text = sec.TotpSecret ?? "";
-                CardEnableProcessProtection.IsOn = sec.EnableProcessProtection;
+                CardEnableProcessProtection.IsChecked = sec.EnableProcessProtection;
 
                 // Load U-disk settings
-                CardUsbVerificationEnabled.IsOn = sec.UsbVerificationEnabled;
+                CardUsbVerificationEnabled.IsChecked = sec.UsbVerificationEnabled;
                 TextBoxUsbAuthorizedSns.Text = sec.UsbAuthorizedSns ?? "";
 
                 UpdatePasswordUiState();
@@ -92,7 +92,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             var prev = _isLoaded;
             _isLoaded = false;
-            try { card.IsOn = value; }
+            try { card.IsChecked = value; }
             finally { _isLoaded = prev; }
         }
 
@@ -104,7 +104,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (settings.Security == null) settings.Security = new Security();
             var sec = settings.Security;
 
-            bool newState = CardPasswordEnabled.IsOn;
+            bool newState = ((CardPasswordEnabled.IsChecked) == true);
             var owner = Window.GetWindow(this);
 
             if (newState)
@@ -167,35 +167,35 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchRequirePasswordOnExit_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Security.RequirePasswordOnExit = CardRequirePasswordOnExit.IsOn;
+            SettingsManager.Settings.Security.RequirePasswordOnExit = ((CardRequirePasswordOnExit.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchRequirePasswordOnEnterSettings_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Security.RequirePasswordOnEnterSettings = CardRequirePasswordOnEnterSettings.IsOn;
+            SettingsManager.Settings.Security.RequirePasswordOnEnterSettings = ((CardRequirePasswordOnEnterSettings.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchRequirePasswordOnResetConfig_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Security.RequirePasswordOnResetConfig = CardRequirePasswordOnResetConfig.IsOn;
+            SettingsManager.Settings.Security.RequirePasswordOnResetConfig = ((CardRequirePasswordOnResetConfig.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchRequirePasswordOnModifyOrClearNameList_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Security.RequirePasswordOnModifyOrClearNameList = CardRequirePasswordOnModifyOrClearNameList.IsOn;
+            SettingsManager.Settings.Security.RequirePasswordOnModifyOrClearNameList = ((CardRequirePasswordOnModifyOrClearNameList.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchEnableProcessProtection_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            bool newState = CardEnableProcessProtection.IsOn;
+            bool newState = ((CardEnableProcessProtection.IsChecked) == true);
             SettingsManager.Settings.Security.EnableProcessProtection = newState;
             SettingsManager.SaveSettingsToFile();
             ProcessProtectionManager.SetEnabled(newState);
@@ -209,7 +209,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (settings.Security == null) settings.Security = new Security();
 
             var sec = settings.Security;
-            sec.TotpEnabled = CardTotpEnabled.IsOn;
+            sec.TotpEnabled = ((CardTotpEnabled.IsChecked) == true);
             if (sec.TotpEnabled && string.IsNullOrWhiteSpace(sec.TotpSecret))
             {
                 sec.TotpSecret = SecurityManager.GenerateTotpSecret();
@@ -290,7 +290,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var settings = SettingsManager.Settings;
             if (settings?.Security == null) return;
 
-            settings.Security.UsbVerificationEnabled = CardUsbVerificationEnabled.IsOn;
+            settings.Security.UsbVerificationEnabled = ((CardUsbVerificationEnabled.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
             UpdatePasswordUiState();
 

@@ -1,4 +1,4 @@
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using Wpf.Ui.Controls;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using IWshRuntimeLibrary;
@@ -9,7 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using FontIcon = iNKORE.UI.WPF.Modern.Controls.FontIcon;
+using FontIcon = Wpf.Ui.Controls.FontIcon;
 
 namespace Ink_Canvas.Windows.SettingsViews.Helpers
 {
@@ -69,7 +69,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             }
         }
 
-        /// <summary>获取功能在程序内使用的图标：几何路径字符串或 FontIconData 字形。</summary>
+        /// <summary>获取功能在程序内使用的图标：几何路径字符串或 SymbolRegular 字形。</summary>
         private static object GetFeatureIcon(string feature)
         {
             switch (feature)
@@ -77,7 +77,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 case FeatureBoard: return XamlGraphicsIconGeometries.WhiteboardFloatingBarBtnIcon;
                 case FeatureBooth: return FluentSystemIcons.Video_24_Regular;
                 case FeatureRandom: return XamlGraphicsIconGeometries.RandomDrawIconGeometry;
-                case FeatureSettings: return SegoeFluentIcons.Settings;
+                case FeatureSettings: return SymbolRegular.Settings;
                 case FeatureAnnotate: return XamlGraphicsIconGeometries.SolidPenIcon;
                 default: return null;
             }
@@ -126,7 +126,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             object icon = GetFeatureIcon(feature);
             if (icon == null) return null;
 
-            if (icon is FontIconData fontIconData)
+            if (icon is SymbolRegular fontIconData)
             {
                 var fontIcon = new FontIcon
                 {
@@ -243,7 +243,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             var brush = new SolidColorBrush(BadgeIconColor);
             var center = new Point(size / 2, size / 2);
 
-            if (icon is FontIconData fontIconData)
+            if (icon is SymbolRegular fontIconData)
             {
                 var typeface = new Typeface(fontIconData.FontFamily, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
                 var text = new FormattedText(fontIconData.Glyph, CultureInfo.InvariantCulture,

@@ -5,8 +5,8 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using MessageBox = System.Windows.MessageBox;
+using Page = System.Windows.Controls.Page;
 // ManageNameRostersWindow lives in Ink_Canvas namespace
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
@@ -58,22 +58,22 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var settings = SettingsManager.Settings;
             if (settings?.RandSettings == null) return;
 
-            ToggleSwitchDisplayRandWindowNamesInputBtn.IsOn = settings.RandSettings.DisplayRandWindowNamesInputBtn;
+            ToggleSwitchDisplayRandWindowNamesInputBtn.IsChecked = settings.RandSettings.DisplayRandWindowNamesInputBtn;
             RandWindowOnceCloseLatencySlider.Value = settings.RandSettings.RandWindowOnceCloseLatency;
             RandWindowOnceMaxStudentsSlider.Value = settings.RandSettings.RandWindowOnceMaxStudents;
-            ToggleSwitchShowRandomAndSingleDraw.IsOn = settings.RandSettings.ShowRandomAndSingleDraw;
-            ToggleSwitchEnableQuickDraw.IsOn = settings.RandSettings.EnableQuickDraw;
-            ToggleSwitchQuickDrawExternalCaller.IsOn = settings.RandSettings.QuickDrawExternalCaller;
-            ToggleSwitchQuickDrawFinalJump.IsOn = settings.RandSettings.EnableQuickDrawFinalJump;
+            ToggleSwitchShowRandomAndSingleDraw.IsChecked = settings.RandSettings.ShowRandomAndSingleDraw;
+            ToggleSwitchEnableQuickDraw.IsChecked = settings.RandSettings.EnableQuickDraw;
+            ToggleSwitchQuickDrawExternalCaller.IsChecked = settings.RandSettings.QuickDrawExternalCaller;
+            ToggleSwitchQuickDrawFinalJump.IsChecked = settings.RandSettings.EnableQuickDrawFinalJump;
             QuickDrawFinalJumpProbabilitySlider.Value = settings.RandSettings.QuickDrawFinalJumpProbability * 100;
             QuickDrawFinalJumpDelaySlider.Value = settings.RandSettings.QuickDrawFinalJumpSettleDelaySeconds;
-            ToggleSwitchQuickDrawFinalJumpPulse.IsOn = settings.RandSettings.EnableQuickDrawFinalJumpPulse;
-            ToggleSwitchExternalCaller.IsOn = settings.RandSettings.DirectCallCiRand;
+            ToggleSwitchQuickDrawFinalJumpPulse.IsChecked = settings.RandSettings.EnableQuickDrawFinalJumpPulse;
+            ToggleSwitchExternalCaller.IsChecked = settings.RandSettings.DirectCallCiRand;
             ComboBoxExternalCallerType.SelectedIndex = settings.RandSettings.ExternalCallerType;
 
-            ToggleSwitchUseNewRollCallUI.IsOn = settings.RandSettings.UseNewRollCallUI;
+            ToggleSwitchUseNewRollCallUI.IsChecked = settings.RandSettings.UseNewRollCallUI;
             ToggleSwitchDisplayRandWindowNamesInputBtn.Visibility = settings.RandSettings.UseNewRollCallUI ? Visibility.Collapsed : Visibility.Visible;
-            ToggleSwitchEnableMLAvoidance.IsOn = settings.RandSettings.EnableMLAvoidance;
+            ToggleSwitchEnableMLAvoidance.IsChecked = settings.RandSettings.EnableMLAvoidance;
             MLAvoidanceHistorySlider.Value = settings.RandSettings.MLAvoidanceHistoryCount;
             MLAvoidanceWeightSlider.Value = settings.RandSettings.MLAvoidanceWeight;
 
@@ -81,13 +81,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ComboBoxTimerUIStyle.SelectedIndex = 0;
             else
                 ComboBoxTimerUIStyle.SelectedIndex = 1;
-            ToggleSwitchEnableOvertimeCountUp.IsOn = settings.RandSettings.EnableOvertimeCountUp;
+            ToggleSwitchEnableOvertimeCountUp.IsChecked = settings.RandSettings.EnableOvertimeCountUp;
 
             bool canEnableRedText = settings.RandSettings.EnableOvertimeCountUp && settings.RandSettings.EnableOvertimeRedText;
-            ToggleSwitchEnableOvertimeRedText.IsOn = canEnableRedText;
+            ToggleSwitchEnableOvertimeRedText.IsChecked = canEnableRedText;
 
             TimerVolumeSlider.Value = settings.RandSettings.TimerVolume;
-            ToggleSwitchEnableProgressiveReminder.IsOn = settings.RandSettings.EnableProgressiveReminder;
+            ToggleSwitchEnableProgressiveReminder.IsChecked = settings.RandSettings.EnableProgressiveReminder;
             ProgressiveReminderVolumeSlider.Value = settings.RandSettings.ProgressiveReminderVolume;
 
             UpdateNameRostersInComboBox();
@@ -104,7 +104,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchDisplayRandWindowNamesInputBtn_OnToggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.RandSettings.DisplayRandWindowNamesInputBtn = ToggleSwitchDisplayRandWindowNamesInputBtn.IsOn;
+            SettingsManager.Settings.RandSettings.DisplayRandWindowNamesInputBtn = ((ToggleSwitchDisplayRandWindowNamesInputBtn.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -129,7 +129,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchShowRandomAndSingleDraw_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            bool isToggled = ToggleSwitchShowRandomAndSingleDraw.IsOn;
+            bool isToggled = ((ToggleSwitchShowRandomAndSingleDraw.IsChecked) == true);
             SettingsManager.Settings.RandSettings.ShowRandomAndSingleDraw = isToggled;
 
             SettingsActionHub.OnShowRandomAndSingleDrawChanged(isToggled);
@@ -140,7 +140,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnableQuickDraw_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.RandSettings.EnableQuickDraw = ToggleSwitchEnableQuickDraw.IsOn;
+            SettingsManager.Settings.RandSettings.EnableQuickDraw = ((ToggleSwitchEnableQuickDraw.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
 
             SettingsActionHub.OnEnableQuickDrawChanged();
@@ -149,7 +149,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchQuickDrawExternalCaller_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.RandSettings.QuickDrawExternalCaller = ToggleSwitchQuickDrawExternalCaller.IsOn;
+            SettingsManager.Settings.RandSettings.QuickDrawExternalCaller = ((ToggleSwitchQuickDrawExternalCaller.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -157,7 +157,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             // 概率滑杆的展开/收起由 LabeledSettingsCard 的 ExpandableContent 按 IsOn 自动处理
-            SettingsManager.Settings.RandSettings.EnableQuickDrawFinalJump = ToggleSwitchQuickDrawFinalJump.IsOn;
+            SettingsManager.Settings.RandSettings.EnableQuickDrawFinalJump = ((ToggleSwitchQuickDrawFinalJump.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -185,8 +185,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void ToggleSwitchQuickDrawFinalJumpPulse_Toggled(object sender, RoutedEventArgs e)
         {
-            if (!_isLoaded) return;
-            SettingsManager.Settings.RandSettings.EnableQuickDrawFinalJumpPulse = ToggleSwitchQuickDrawFinalJumpPulse.IsOn;
+            SettingsManager.Settings.RandSettings.EnableQuickDrawFinalJumpPulse = ((ToggleSwitchQuickDrawFinalJumpPulse.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -203,7 +202,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchExternalCaller_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.RandSettings.DirectCallCiRand = ToggleSwitchExternalCaller.IsOn;
+            SettingsManager.Settings.RandSettings.DirectCallCiRand = ((ToggleSwitchExternalCaller.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -308,13 +307,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // 覆盖默认 ContentDialogMaxWidth(548)：内容 UserControl 固定 640×360，
             // 列表在控件内部纵向滚动，避免横向裁切操作按钮。
             var content = new ManageNameRostersWindow();
-            var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+            var dialog = new Wpf.Ui.Controls.ContentDialog
             {
                 Title = RandomStrings.Random_Roster_ManageWindowTitle,
                 Content = content,
                 CloseButtonText = NotificationStrings.AnimationOff,
                 Owner = Window.GetWindow(this) ?? mw,
-                DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Close,
+                DefaultButton = Wpf.Ui.Controls.ContentDialogButton.Close,
                 Resources =
                 {
                     ["ContentDialogMaxWidth"] = 720d,
@@ -361,14 +360,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (mw == null) return;
 
             var content = new AddPickNameBackgroundWindow(mw);
-            var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+            var dialog = new Wpf.Ui.Controls.ContentDialog
             {
                 Title = Properties.RandomStrings.Random_AddBg_WindowTitle,
                 Content = content,
                 PrimaryButtonText = FloatingBarStrings.Tools_Save,
                 CloseButtonText = Properties.RandomStrings.Random_Cancel,
                 Owner = Window.GetWindow(this) ?? mw,
-                DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Primary
+                DefaultButton = Wpf.Ui.Controls.ContentDialogButton.Primary
             };
 
             content.OnInputChanged += () =>
@@ -397,13 +396,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (mw == null) return;
 
             var content = new ManagePickNameBackgroundsWindow(mw);
-            var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+            var dialog = new Wpf.Ui.Controls.ContentDialog
             {
                 Title = Properties.RandomStrings.Random_ManageBg_WindowTitle,
                 Content = content,
                 CloseButtonText = Properties.NotificationStrings.AnimationOff,
                 Owner = Window.GetWindow(this) ?? mw,
-                DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Close
+                DefaultButton = Wpf.Ui.Controls.ContentDialogButton.Close
             };
             await dialog.ShowAsync();
         }
@@ -415,15 +414,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchUseNewRollCallUI_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.RandSettings.UseNewRollCallUI = ToggleSwitchUseNewRollCallUI.IsOn;
-            ToggleSwitchDisplayRandWindowNamesInputBtn.Visibility = ToggleSwitchUseNewRollCallUI.IsOn ? Visibility.Collapsed : Visibility.Visible;
+            SettingsManager.Settings.RandSettings.UseNewRollCallUI = ((ToggleSwitchUseNewRollCallUI.IsChecked) == true);
+            ToggleSwitchDisplayRandWindowNamesInputBtn.Visibility = ((ToggleSwitchUseNewRollCallUI.IsChecked) == true) ? Visibility.Collapsed : Visibility.Visible;
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchEnableMLAvoidance_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.RandSettings.EnableMLAvoidance = ToggleSwitchEnableMLAvoidance.IsOn;
+            SettingsManager.Settings.RandSettings.EnableMLAvoidance = ((ToggleSwitchEnableMLAvoidance.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -468,11 +467,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnableOvertimeCountUp_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.RandSettings.EnableOvertimeCountUp = ToggleSwitchEnableOvertimeCountUp.IsOn;
+            SettingsManager.Settings.RandSettings.EnableOvertimeCountUp = ((ToggleSwitchEnableOvertimeCountUp.IsChecked) == true);
 
-            if (!ToggleSwitchEnableOvertimeCountUp.IsOn)
+            if (!((ToggleSwitchEnableOvertimeCountUp.IsChecked) == true))
             {
-                ToggleSwitchEnableOvertimeRedText.IsOn = false;
+                ToggleSwitchEnableOvertimeRedText.IsChecked = false;
                 SettingsManager.Settings.RandSettings.EnableOvertimeRedText = false;
             }
 
@@ -483,13 +482,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
 
-            if (ToggleSwitchEnableOvertimeRedText.IsOn && !ToggleSwitchEnableOvertimeCountUp.IsOn)
+            if (((ToggleSwitchEnableOvertimeRedText.IsChecked) == true) && !((ToggleSwitchEnableOvertimeCountUp.IsChecked) == true))
             {
-                ToggleSwitchEnableOvertimeCountUp.IsOn = true;
+                ToggleSwitchEnableOvertimeCountUp.IsChecked = true;
                 SettingsManager.Settings.RandSettings.EnableOvertimeCountUp = true;
             }
 
-            SettingsManager.Settings.RandSettings.EnableOvertimeRedText = ToggleSwitchEnableOvertimeRedText.IsOn;
+            SettingsManager.Settings.RandSettings.EnableOvertimeRedText = ((ToggleSwitchEnableOvertimeRedText.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -535,7 +534,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnableProgressiveReminder_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.RandSettings.EnableProgressiveReminder = ToggleSwitchEnableProgressiveReminder.IsOn;
+            SettingsManager.Settings.RandSettings.EnableProgressiveReminder = ((ToggleSwitchEnableProgressiveReminder.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 

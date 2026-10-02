@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+             xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
              xmlns:local="clr-namespace:Ink_Canvas.Controls"
              mc:Ignorable="d"
              d:DesignHeight="50" d:DesignWidth="200">
@@ -73,7 +73,7 @@
                      ItemTemplate="{StaticResource PPTPreviewItemTemplate}"
                      ItemContainerStyle="{StaticResource PPTPreviewItemContainerStyle}"
                      MouseUp="PreviewList_MouseUp"/>
-            <ikw:SimpleStackPanel x:Name="ButtonRow" Orientation="Horizontal"
+            <vio:SimpleStackPanel x:Name="ButtonRow" Orientation="Horizontal"
                                   HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Border x:Name="PreviousButtonBorder" Width="50" Height="50"
                         MouseDown="PreviousButton_MouseDown"
@@ -104,13 +104,13 @@
                     <Grid>
                         <Border x:Name="PageButtonFeedbackBorder" Margin="0,3" CornerRadius="5"
                                 Background="#18181b" Opacity="0"/>
-                        <ikw:SimpleStackPanel VerticalAlignment="Center" Orientation="Vertical"
+                        <vio:SimpleStackPanel VerticalAlignment="Center" Orientation="Vertical"
                                              Spacing="0.5" Margin="12,0">
                             <TextBlock x:Name="PageNowText" HorizontalAlignment="Center" VerticalAlignment="Center"
                                        FontSize="17" FontWeight="Bold" Text="?"/>
                             <TextBlock x:Name="PageTotalText" HorizontalAlignment="Center" VerticalAlignment="Center"
                                        FontSize="10" Text="/ ?"/>
-                        </ikw:SimpleStackPanel>
+                        </vio:SimpleStackPanel>
                     </Grid>
                 </Border>
                 <Border x:Name="NextButtonBorder" Width="50" Height="50"
@@ -134,7 +134,7 @@
                         </Image>
                     </Grid>
                 </Border>
-            </ikw:SimpleStackPanel>
+            </vio:SimpleStackPanel>
         </DockPanel>
     </Border>
     </Viewbox>

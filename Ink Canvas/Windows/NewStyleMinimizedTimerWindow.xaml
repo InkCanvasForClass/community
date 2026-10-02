@@ -1,7 +1,7 @@
 <Window x:Class="Ink_Canvas.Windows.NewStyleMinimizedTimerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         Topmost="True"
         ShowInTaskbar="False"
         WindowStyle="None"
@@ -18,10 +18,10 @@
     </Window.Resources>
 
     <Border x:Name="MainBorder"
-            Background="{DynamicResource {x:Static ui:ThemeKeys.CardBackgroundFillColorDefaultBrushKey}}"
+            Background="{DynamicResource {DynamicResource CardBackgroundFillColorDefaultBrush}}"
             CornerRadius="12"
             BorderThickness="1"
-            BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.CardStrokeColorDefaultBrushKey}}"
+            BorderBrush="{DynamicResource {DynamicResource CardStrokeColorDefaultBrush}}"
             MouseLeftButtonDown="MainBorder_MouseLeftButtonDown">
         <Grid>
             <!-- Close button -->
@@ -47,7 +47,7 @@
                     </ControlTemplate>
                 </Button.Template>
                 <TextBlock Text="✕" FontSize="12" FontWeight="Bold"
-                           Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}"
+                           Foreground="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"
                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Button>
 
@@ -73,7 +73,7 @@
                     </ControlTemplate>
                 </Button.Template>
                 <TextBlock Text="💡" FontSize="14"
-                           Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}"
+                           Foreground="{DynamicResource {DynamicResource TextFillColorPrimaryBrush}}"
                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Button>
 

@@ -3,8 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-             xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+             xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
              xmlns:icons="clr-namespace:Ink_Canvas"
              xmlns:c="clr-namespace:Ink_Canvas.Converter"
@@ -15,8 +15,8 @@
     <Grid>
         <controls:PopupShellContent x:Name="Shell" Title="{x:Static props:FloatingBarStrings.Board_EraserOptions}" d:Visibility="Collapsed" />
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
-            <ikw:SimpleStackPanel Margin="10" Spacing="3">
-                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="2"
+            <vio:SimpleStackPanel Margin="10" Spacing="3">
+                <vio:SimpleStackPanel Orientation="Horizontal" Spacing="2"
                                      VerticalAlignment="Center"
                                      HorizontalAlignment="Center">
                     <Label Content="{x:Static props:FloatingBarStrings.Board_Size}" FontWeight="Bold"
@@ -30,9 +30,8 @@
                         <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_EraserSize_Large}" />
                         <ComboBoxItem Content="{x:Static props:CanvasStrings.Canvas_EraserSize_VeryLarge}" />
                     </ComboBox>
-                </ikw:SimpleStackPanel>
+                </vio:SimpleStackPanel>
                 <TabControl x:Name="EraserTypeTabControl"
-                            Style="{StaticResource {x:Static ui:ThemeKeys.TabControlPivotStyleKey}}"
                             SelectedIndex="1">
                     <TabControl.Resources>
                         <sys:Double xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Key="PivotHeaderItemFontSize">16</sys:Double>
@@ -49,12 +48,12 @@
                 <Button x:Name="ClearInkButton" Foreground="White"
                         HorizontalAlignment="Center">
                     <Button.Resources>
-                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundKey}" Color="#b91c1c" />
-                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPointerOverKey}" Color="#b91c1c" />
-                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPressedKey}" Color="#991b1b" />
+                        <SolidColorBrush x:Key="{DynamicResource ControlBackground}" Color="#b91c1c" />
+                        <SolidColorBrush x:Key="{DynamicResource ControlBackgroundPointerOver}" Color="#b91c1c" />
+                        <SolidColorBrush x:Key="{DynamicResource ControlBackgroundPressed}" Color="#991b1b" />
                     </Button.Resources>
                     <Button.Content>
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="2">
+                        <vio:SimpleStackPanel Orientation="Horizontal" Spacing="2">
                             <Image RenderOptions.BitmapScalingMode="HighQuality" Height="18">
                                 <Image.Source>
                                     <DrawingImage>
@@ -70,18 +69,18 @@
                             <TextBlock VerticalAlignment="Center"
                                        Foreground="White" FontWeight="Bold"
                                        Text="{x:Static props:FloatingBarStrings.Board_ClearInk}" />
-                        </ikw:SimpleStackPanel>
+                        </vio:SimpleStackPanel>
                     </Button.Content>
                 </Button>
                 <Button x:Name="ClearInkAndHistoryButton" Foreground="White"
                         HorizontalAlignment="Center">
                     <Button.Resources>
-                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundKey}" Color="#b91c1c" />
-                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPointerOverKey}" Color="#b91c1c" />
-                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPressedKey}" Color="#991b1b" />
+                        <SolidColorBrush x:Key="{DynamicResource ControlBackground}" Color="#b91c1c" />
+                        <SolidColorBrush x:Key="{DynamicResource ControlBackgroundPointerOver}" Color="#b91c1c" />
+                        <SolidColorBrush x:Key="{DynamicResource ControlBackgroundPressed}" Color="#991b1b" />
                     </Button.Resources>
                     <Button.Content>
-                        <ikw:SimpleStackPanel Orientation="Horizontal">
+                        <vio:SimpleStackPanel Orientation="Horizontal">
                             <Image RenderOptions.BitmapScalingMode="HighQuality" Height="18">
                                 <Image.Source>
                                     <DrawingImage>
@@ -97,10 +96,10 @@
                             <TextBlock VerticalAlignment="Center"
                                        Foreground="White" FontWeight="Bold"
                                        Text="{x:Static props:FloatingBarStrings.Board_ClearInkAndHistory}" />
-                        </ikw:SimpleStackPanel>
+                        </vio:SimpleStackPanel>
                     </Button.Content>
                 </Button>
-            </ikw:SimpleStackPanel>
+            </vio:SimpleStackPanel>
         </ContentControl>
     </Grid>
 </UserControl>

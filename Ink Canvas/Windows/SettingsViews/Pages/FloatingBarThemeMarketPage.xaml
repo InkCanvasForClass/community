@@ -1,8 +1,9 @@
-<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.FloatingBarThemeMarketPage"
+<Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.FloatingBarThemeMarketPage"
          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
          xmlns:props="clr-namespace:Ink_Canvas.Properties"
-         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
          Loaded="Page_Loaded">
     <Grid Margin="24">
         <Grid.RowDefinitions>
@@ -21,7 +22,7 @@
             <ItemsControl x:Name="ThemeList">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <ui:SettingsCard Header="{Binding Manifest.Name}"
+                        <controls:SettingsCard Header="{Binding Manifest.Name}"
                                          Description="{Binding Manifest.Description}"
                                          Margin="0,0,0,8">
                             <StackPanel Orientation="Horizontal">
@@ -30,7 +31,7 @@
                                         Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemeMarketInstall}"
                                         Tag="{Binding}" Click="InstallButton_Click" />
                             </StackPanel>
-                        </ui:SettingsCard>
+                        </controls:SettingsCard>
                         <DataTemplate.Triggers>
                             <DataTrigger Binding="{Binding IsInstalled}" Value="True">
                                 <Setter TargetName="InstallButton" Property="Content" Value="{x:Static props:ThemeStrings.Theme_FloatingBarThemeMarketInstalled}" />
@@ -43,4 +44,4 @@
             </ItemsControl>
         </ScrollViewer>
     </Grid>
-</ui:Page>
+</Page>

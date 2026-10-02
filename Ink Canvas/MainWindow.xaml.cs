@@ -7,8 +7,9 @@ using Ink_Canvas.Windows;
 using Ink_Canvas.Windows.SettingsViews;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Ink_Canvas.WorkflowAutomation;
-using iNKORE.UI.WPF.Modern;
-using iNKORE.UI.WPF.Modern.Controls;
+using Wpf.Ui.Appearance;
+// 只别名导入 WPF-UI 专属控件，避免与 System.Windows.Controls 的同名类型（TextBlock/Image/Button/Border 等）产生 CS0104 歧义。
+using ToggleSwitch = Wpf.Ui.Controls.ToggleSwitch;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -35,7 +36,7 @@ using Cursors = System.Windows.Input.Cursors;
 using DpiChangedEventArgs = System.Windows.DpiChangedEventArgs;
 using File = System.IO.File;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using MessageBox = System.Windows.MessageBox;
 using Point = System.Windows.Point;
 using VerticalAlignment = System.Windows.VerticalAlignment;
 
@@ -1159,12 +1160,12 @@ namespace Ink_Canvas
         private void HighlighterOverlapToggle_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            var toggle = (iNKORE.UI.WPF.Modern.Controls.ToggleSwitch)sender;
-            Settings.Canvas.HighlighterOverlapEnabled = toggle.IsOn;
+            var toggle = (Wpf.Ui.Controls.ToggleSwitch)sender;
+            Settings.Canvas.HighlighterOverlapEnabled = ((toggle.IsChecked) == true);
             if (penType == 1)
             {
-                drawingAttributes.IsHighlighter = !toggle.IsOn;
-                inkCanvas.DefaultDrawingAttributes.IsHighlighter = !toggle.IsOn;
+                drawingAttributes.IsHighlighter = !((toggle.IsChecked) == true);
+                inkCanvas.DefaultDrawingAttributes.IsHighlighter = !((toggle.IsChecked) == true);
             }
             SaveSettingsToFile();
         }
@@ -3196,11 +3197,11 @@ namespace Ink_Canvas
                 if (toggle == null) return;
 
                 if (sender == FloatingBarToggleSwitchEnableInkToShape)
-                    BoardToggleSwitchEnableInkToShape.IsOn = FloatingBarToggleSwitchEnableInkToShape.IsOn;
+                    BoardToggleSwitchEnableInkToShape.IsChecked = ((FloatingBarToggleSwitchEnableInkToShape.IsChecked) == true);
                 else
-                    FloatingBarToggleSwitchEnableInkToShape.IsOn = BoardToggleSwitchEnableInkToShape.IsOn;
+                    FloatingBarToggleSwitchEnableInkToShape.IsChecked = ((BoardToggleSwitchEnableInkToShape.IsChecked) == true);
 
-                Settings.InkToShape.IsInkToShapeEnabled = FloatingBarToggleSwitchEnableInkToShape.IsOn;
+                Settings.InkToShape.IsInkToShapeEnabled = ((FloatingBarToggleSwitchEnableInkToShape.IsChecked) == true);
                 SaveSettingsToFile();
             }
             catch (Exception ex)
@@ -3215,7 +3216,7 @@ namespace Ink_Canvas
             {
                 var toggle = sender as ToggleSwitch;
                 if (toggle == null) return;
-                Settings.Canvas.ShowCircleCenter = toggle.IsOn;
+                Settings.Canvas.ShowCircleCenter = ((toggle.IsChecked) == true);
                 SaveSettingsToFile();
             }
             catch (Exception ex)
@@ -3256,7 +3257,7 @@ namespace Ink_Canvas
             {
                 if (!isLoaded) return;
                 var toggle = sender as ToggleSwitch;
-                Settings.PowerPointSettings.EnablePPTTimeCapsule = toggle != null && toggle.IsOn;
+                Settings.PowerPointSettings.EnablePPTTimeCapsule = toggle != null && ((toggle.IsChecked) == true);
                 SaveSettingsToFile();
 
                 // 如果当前在PPT放映模式，需要立即更新时间胶囊和快捷面板的显示状态

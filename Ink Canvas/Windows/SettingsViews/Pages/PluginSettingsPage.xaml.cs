@@ -6,7 +6,7 @@ using System.Windows.Media;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
-    public partial class PluginSettingsPage : iNKORE.UI.WPF.Modern.Controls.Page
+    public partial class PluginSettingsPage : System.Windows.Controls.Page
     {
         private PluginInfo _currentPlugin;
 

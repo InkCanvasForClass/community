@@ -24,9 +24,9 @@ namespace Ink_Canvas.Plugins
             {
                 var settings = MainWindow.Settings;
                 var theme = settings == null
-                    ? Ink_Canvas.Helpers.ThemeHelper.IsSystemThemeLight() ? iNKORE.UI.WPF.Modern.ElementTheme.Light : iNKORE.UI.WPF.Modern.ElementTheme.Dark
+                    ? Ink_Canvas.Helpers.ThemeHelper.IsSystemThemeLight() ? Wpf.Ui.Appearance.ApplicationTheme.Light : Wpf.Ui.Appearance.ApplicationTheme.Dark
                     : Ink_Canvas.Helpers.ThemeHelper.GetEffectiveTheme(settings);
-                return theme == iNKORE.UI.WPF.Modern.ElementTheme.Dark ? PluginTheme.Dark : PluginTheme.Light;
+                return theme == Wpf.Ui.Appearance.ApplicationTheme.Dark ? PluginTheme.Dark : PluginTheme.Light;
             }
             catch (Exception ex)
             {

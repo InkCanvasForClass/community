@@ -1,11 +1,11 @@
-<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.SidebarPage"
+<Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.SidebarPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
-      xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-      xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       mc:Ignorable="d"
@@ -24,27 +24,27 @@
                 </Style>
             </FrameworkElement.Resources>
             <Grid>
-                <ikw:SimpleStackPanel MaxWidth="1000"
+                <vio:SimpleStackPanel MaxWidth="1000"
                     HorizontalAlignment="Stretch"
                     Spacing="{StaticResource SettingsCardSpacing}">
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:ThemeStrings.Theme_SidebarGroupTitle}" />
 
-                    <ui:SettingsExpander Header="{x:Static props:ThemeStrings.Theme_EnableQuickPanel}"
+                    <controls:SettingsExpander Header="{x:Static props:ThemeStrings.Theme_EnableQuickPanel}"
                             IsExpanded="{Binding IsOn, ElementName=ToggleSwitchEnableQuickPanel, Mode=OneWay}">
-                        <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}" />
-                        </ui:SettingsExpander.HeaderIcon>
+                        <controls:SettingsExpander.Icon>
+                            <ui:SymbolIcon Symbol="Pin24" />
+                        </controls:SettingsExpander.Icon>
                         <ui:ToggleSwitch x:Name="ToggleSwitchEnableQuickPanel" d:IsOn="True"
-                                        Toggled="ToggleSwitchEnableQuickPanel_Toggled" />
-                        <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_QuickPanelBottomOffset}"
+                                        Checked="ToggleSwitchEnableQuickPanel_Toggled" Unchecked="ToggleSwitchEnableQuickPanel_Toggled" />
+                        <StackPanel>
+                            <controls:SettingsCard Header="{x:Static props:ThemeStrings.Theme_QuickPanelBottomOffset}"
                                     Description="{x:Static props:ThemeStrings.Theme_QuickPanelBottomOffset_Description}">
-                                <ui:SettingsCard.HeaderIcon>
-                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronDown}" />
-                                </ui:SettingsCard.HeaderIcon>
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                <controls:SettingsCard.Icon>
+                                    <ui:SymbolIcon Symbol="ChevronDown24" />
+                                </controls:SettingsCard.Icon>
+                                <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="QuickPanelBottomOffsetText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                                     <Slider x:Name="QuickPanelBottomOffsetSlider" Minimum="-600"
@@ -52,21 +52,21 @@
                                             IsSnapToTickEnabled="True" Value="-150" TickFrequency="10"
                                             TickPlacement="None" AutoToolTipPlacement="None"
                                             ValueChanged="QuickPanelBottomOffsetSlider_ValueChanged" />
-                                </ikw:SimpleStackPanel>
-                            </ui:SettingsCard>
+                                </vio:SimpleStackPanel>
+                            </controls:SettingsCard>
 
-                            <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_AllowDragSidePanel}">
-                                <ui:SettingsCard.HeaderIcon>
-                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Touch}" />
-                                </ui:SettingsCard.HeaderIcon>
+                            <controls:SettingsCard Header="{x:Static props:ThemeStrings.Theme_AllowDragSidePanel}">
+                                <controls:SettingsCard.Icon>
+                                    <ui:SymbolIcon Symbol="HandDraw24" />
+                                </controls:SettingsCard.Icon>
                                 <ui:ToggleSwitch x:Name="ToggleSwitchAllowDragSidePanel"
-                                                Toggled="ToggleSwitchAllowDragSidePanel_Toggled" />
-                            </ui:SettingsCard>
+                                                Checked="ToggleSwitchAllowDragSidePanel_Toggled" Unchecked="ToggleSwitchAllowDragSidePanel_Toggled" />
+                            </controls:SettingsCard>
 
-                            <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_UnfoldButtonIcon}">
-                                <ui:SettingsCard.HeaderIcon>
-                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronRight}" />
-                                </ui:SettingsCard.HeaderIcon>
+                            <controls:SettingsCard Header="{x:Static props:ThemeStrings.Theme_UnfoldButtonIcon}">
+                                <controls:SettingsCard.Icon>
+                                    <ui:SymbolIcon Symbol="ChevronRight24" />
+                                </controls:SettingsCard.Icon>
                                 <ComboBox x:Name="ComboBoxUnFoldBtnImg"
                                           SelectedIndex="0"
                                           SelectionChanged="ComboBoxUnFoldBtnImg_SelectionChanged">
@@ -74,13 +74,13 @@
                                     <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_UnfoldIcon_ClassicPen}" />
                                     <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_UnfoldIcon_Stripe}" />
                                 </ComboBox>
-                            </ui:SettingsCard>
+                            </controls:SettingsCard>
 
-                            <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_QuickPanelOpacity}">
-                                <ui:SettingsCard.HeaderIcon>
-                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.View}" />
-                                </ui:SettingsCard.HeaderIcon>
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <controls:SettingsCard Header="{x:Static props:ThemeStrings.Theme_QuickPanelOpacity}">
+                                <controls:SettingsCard.Icon>
+                                    <ui:SymbolIcon Symbol="Eye24" />
+                                </controls:SettingsCard.Icon>
+                                <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="QuickPanelOpacityText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                                     <Slider x:Name="QuickPanelOpacitySlider" Minimum="0.1"
@@ -88,24 +88,24 @@
                                             IsSnapToTickEnabled="True" Value="1.0" TickFrequency="0.1"
                                             TickPlacement="None" AutoToolTipPlacement="None"
                                             ValueChanged="QuickPanelOpacitySlider_ValueChanged" />
-                                </ikw:SimpleStackPanel>
-                            </ui:SettingsCard>
-                        </ui:SettingsExpander.Items>
-                    </ui:SettingsExpander>
+                                </vio:SimpleStackPanel>
+                            </controls:SettingsCard>
+                        </StackPanel>
+                    </controls:SettingsExpander>
 
-                    <ui:SettingsExpander Header="{x:Static props:ThemeStrings.Theme_AutoCollapseQuickPanel}"
+                    <controls:SettingsExpander Header="{x:Static props:ThemeStrings.Theme_AutoCollapseQuickPanel}"
                             IsExpanded="{Binding IsOn, ElementName=ToggleSwitchAutoCollapseQuickPanel, Mode=OneWay}">
-                        <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronDown}" />
-                        </ui:SettingsExpander.HeaderIcon>
+                        <controls:SettingsExpander.Icon>
+                            <ui:SymbolIcon Symbol="ChevronDown24" />
+                        </controls:SettingsExpander.Icon>
                         <ui:ToggleSwitch x:Name="ToggleSwitchAutoCollapseQuickPanel" d:IsOn="True"
-                                        Toggled="ToggleSwitchAutoCollapseQuickPanel_Toggled" />
-                        <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_AutoCollapseQuickPanelDelay}">
-                                <ui:SettingsCard.HeaderIcon>
-                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.History}" />
-                                </ui:SettingsCard.HeaderIcon>
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                        Checked="ToggleSwitchAutoCollapseQuickPanel_Toggled" Unchecked="ToggleSwitchAutoCollapseQuickPanel_Toggled" />
+                        <StackPanel>
+                            <controls:SettingsCard Header="{x:Static props:ThemeStrings.Theme_AutoCollapseQuickPanelDelay}">
+                                <controls:SettingsCard.Icon>
+                                    <ui:SymbolIcon Symbol="History24" />
+                                </controls:SettingsCard.Icon>
+                                <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="AutoCollapseDelayText"
                                                VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
                                     <Slider x:Name="AutoCollapseDelaySlider" Minimum="1"
@@ -113,14 +113,14 @@
                                             IsSnapToTickEnabled="True" Value="3.0" TickFrequency="1"
                                             TickPlacement="None" AutoToolTipPlacement="None"
                                             ValueChanged="AutoCollapseDelaySlider_ValueChanged" />
-                                </ikw:SimpleStackPanel>
-                            </ui:SettingsCard>
-                        </ui:SettingsExpander.Items>
-                    </ui:SettingsExpander>
+                                </vio:SimpleStackPanel>
+                            </controls:SettingsCard>
+                        </StackPanel>
+                    </controls:SettingsExpander>
 
                     <Rectangle Height="48" />
-                </ikw:SimpleStackPanel>
+                </vio:SimpleStackPanel>
             </Grid>
         </Grid>
     </ScrollViewer>
-</ui:Page>
+</Page>

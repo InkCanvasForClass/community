@@ -1,11 +1,12 @@
-<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.HomePage"
+<Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.HomePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
-      xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-      xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+      xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d"
 
@@ -24,7 +25,7 @@
                 </Style>
             </FrameworkElement.Resources>
             <Grid>
-                <ikw:SimpleStackPanel MaxWidth="1000"
+                <vio:SimpleStackPanel MaxWidth="1000"
                     HorizontalAlignment="Stretch"
                     Spacing="{StaticResource SettingsCardSpacing}">
 
@@ -37,270 +38,270 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <ui:SettingsCard Header="{x:Static props:BtnStrings.Restart}" Description="{x:Static props:HomeStrings.Home_RestartApp}"
+                        <controls:SettingsCard Header="{x:Static props:BtnStrings.Restart}" Description="{x:Static props:HomeStrings.Home_RestartApp}"
                         IsClickEnabled="True" Click="BtnRestart_Click" Grid.Column="0" Margin="0,0,4,0">
-                            <ui:SettingsCard.HeaderIcon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" />
-                            </ui:SettingsCard.HeaderIcon>
-                        </ui:SettingsCard>
+                            <controls:SettingsCard.Icon>
+                                <ui:SymbolIcon Symbol="ArrowClockwise24" />
+                            </controls:SettingsCard.Icon>
+                        </controls:SettingsCard>
 
-                        <ui:SettingsCard Header="{x:Static props:HomeStrings.Home_Reset}" Description="{x:Static props:HomeStrings.Home_ResetSettings}"
+                        <controls:SettingsCard Header="{x:Static props:HomeStrings.Home_Reset}" Description="{x:Static props:HomeStrings.Home_ResetSettings}"
                         IsClickEnabled="True" Click="BtnResetToSuggestion_Click" Grid.Column="1" Margin="0,0,4,0">
-                            <ui:SettingsCard.HeaderIcon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Clear}" />
-                            </ui:SettingsCard.HeaderIcon>
-                        </ui:SettingsCard>
+                            <controls:SettingsCard.Icon>
+                                <ui:SymbolIcon Symbol="ClearFormatting24" />
+                            </controls:SettingsCard.Icon>
+                        </controls:SettingsCard>
 
-                        <ui:SettingsCard Header="{x:Static props:FloatingBarStrings.OldUI_Exit}" Description="{x:Static props:HomeStrings.Home_ExitApp}"
+                        <controls:SettingsCard Header="{x:Static props:FloatingBarStrings.OldUI_Exit}" Description="{x:Static props:HomeStrings.Home_ExitApp}"
                         IsClickEnabled="True" Click="BtnExit_Click" Grid.Column="2">
-                            <ui:SettingsCard.HeaderIcon>
-                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cancel}" />
-                            </ui:SettingsCard.HeaderIcon>
-                        </ui:SettingsCard>
+                            <controls:SettingsCard.Icon>
+                                <ui:SymbolIcon Symbol="Dismiss24" />
+                            </controls:SettingsCard.Icon>
+                        </controls:SettingsCard>
                     </Grid>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:HomeStrings.Home_Basic}" />
 
-                    <ui:SettingsCard Header="{x:Static props:StartupStrings.Start}" Description="{x:Static props:NavStrings.Nav_Startup_Tooltip}"
+                    <controls:SettingsCard Header="{x:Static props:StartupStrings.Start}" Description="{x:Static props:NavStrings.Nav_Startup_Tooltip}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="StartupPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Play}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="Play24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:NavStrings.Nav_Clock}" Description="{x:Static props:HomeStrings.Home_ClockSettings}"
+                    <controls:SettingsCard Header="{x:Static props:NavStrings.Nav_Clock}" Description="{x:Static props:HomeStrings.Home_ClockSettings}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="ClockPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Stopwatch}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="Timer24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:HomeStrings.Home_Privacy}" Description="{x:Static props:HomeStrings.Home_PrivacySettings}"
+                    <controls:SettingsCard Header="{x:Static props:HomeStrings.Home_Privacy}" Description="{x:Static props:HomeStrings.Home_PrivacySettings}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="PrivacyPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Shield}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="Shield24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:NavStrings.Settings_Nav_Security}" Description="{x:Static props:NavStrings.Settings_Nav_Security_Tooltip}"
+                    <controls:SettingsCard Header="{x:Static props:NavStrings.Settings_Nav_Security}" Description="{x:Static props:NavStrings.Settings_Nav_Security_Tooltip}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="SecurityPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Permissions}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="ShieldTask24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:NavStrings.Nav_Advanced}" Description="{x:Static props:NavStrings.Nav_Advanced_Settings}"
+                    <controls:SettingsCard Header="{x:Static props:NavStrings.Nav_Advanced}" Description="{x:Static props:NavStrings.Nav_Advanced_Settings}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="AdvancedPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="Settings24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:NavStrings.Nav_Performance}" Description="{x:Static props:HomeStrings.Home_PerformanceSettings}"
+                    <controls:SettingsCard Header="{x:Static props:NavStrings.Nav_Performance}" Description="{x:Static props:HomeStrings.Home_PerformanceSettings}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="PerformancePage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.SpeedHigh}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="Gauge24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
                     
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:HomeStrings.Home_MainUI}" />
-                    <ui:SettingsCard Header="{x:Static props:HomeStrings.Home_Window}" Description="{x:Static props:HomeStrings.Home_WindowSettings}"
+                    <controls:SettingsCard Header="{x:Static props:HomeStrings.Home_Window}" Description="{x:Static props:HomeStrings.Home_WindowSettings}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="WindowPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="Pin24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_GroupTitle}" Description="{x:Static props:NavStrings.Nav_Theme_Settings}"
+                    <controls:SettingsCard Header="{x:Static props:ThemeStrings.Theme_GroupTitle}" Description="{x:Static props:NavStrings.Nav_Theme_Settings}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="AppearancePage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Personalize}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="PaintBrush24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:NavStrings.Nav_Shortcuts}" Description="{x:Static props:NavStrings.Settings_Nav_Hotkey_Tooltip}"
+                    <controls:SettingsCard Header="{x:Static props:NavStrings.Nav_Shortcuts}" Description="{x:Static props:NavStrings.Settings_Nav_Hotkey_Tooltip}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="HotkeyPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.KeyboardStandard}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="Keyboard24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:NavStrings.Nav_ToolbarComponents}" Description="{x:Static props:NavStrings.Nav_ToolbarComponents_Tooltip}"
+                    <controls:SettingsCard Header="{x:Static props:NavStrings.Nav_ToolbarComponents}" Description="{x:Static props:NavStrings.Nav_ToolbarComponents_Tooltip}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="ToolbarPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Rename}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="Rename24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:NavStrings.Nav_ToolbarAppearance}" Description="{x:Static props:NavStrings.Nav_ToolbarAppearance_Tooltip}"
+                    <controls:SettingsCard Header="{x:Static props:NavStrings.Nav_ToolbarAppearance}" Description="{x:Static props:NavStrings.Nav_ToolbarAppearance_Tooltip}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="ToolbarAppearancePage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Personalize}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="PaintBrush24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:NavStrings.Nav_ToolbarMenu}" Description="{x:Static props:NavStrings.Nav_ToolbarMenu_Tooltip}"
+                    <controls:SettingsCard Header="{x:Static props:NavStrings.Nav_ToolbarMenu}" Description="{x:Static props:NavStrings.Nav_ToolbarMenu_Tooltip}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="ToolbarMenuPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BulletedList}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="TextBulletListLtr24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
                     
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:CanvasStrings.Canvas_GroupTitle}" />
-                    <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_GroupTitle}" Description="{x:Static props:HomeStrings.Home_CanvasSettings}"
+                    <controls:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_GroupTitle}" Description="{x:Static props:HomeStrings.Home_CanvasSettings}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="CanvasPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="Edit24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:CanvasStrings.InkRecog_Title}" Description="{x:Static props:HomeStrings.Home_InkRecognitionSettings}"
+                    <controls:SettingsCard Header="{x:Static props:CanvasStrings.InkRecog_Title}" Description="{x:Static props:HomeStrings.Home_InkRecognitionSettings}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="InkRecognitionPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Draw}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="DrawImage24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:PPTStrings.GroupTitle}" />
-                    <ui:SettingsCard Header="{x:Static props:PPTStrings.GroupTitle}" Description="{x:Static props:HomeStrings.Home_PPTSettings}"
+                    <controls:SettingsCard Header="{x:Static props:PPTStrings.GroupTitle}" Description="{x:Static props:HomeStrings.Home_PPTSettings}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="PowerPointPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Slideshow}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="SlideTransition24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:NotificationStrings.Type_Update}" />
-                    <ui:SettingsCard Header="{x:Static props:NotificationStrings.Type_Update}" Description="{x:Static props:HomeStrings.Home_UpdateSettings}"
+                    <controls:SettingsCard Header="{x:Static props:NotificationStrings.Type_Update}" Description="{x:Static props:HomeStrings.Home_UpdateSettings}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="UpdatePage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="ArrowSync24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:NotificationStrings.DefaultTitle}" />
-                    <ui:SettingsCard Header="{x:Static props:NotificationStrings.DefaultTitle}" Description="{x:Static props:NotificationStrings.NavTooltip}"
+                    <controls:SettingsCard Header="{x:Static props:NotificationStrings.DefaultTitle}" Description="{x:Static props:NotificationStrings.NavTooltip}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="NotificationPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Message}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="ChatMultiple24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:AnnouncementStrings.CenterTitle}" Description="{x:Static props:AnnouncementStrings.CenterHint}"
+                    <controls:SettingsCard Header="{x:Static props:AnnouncementStrings.CenterTitle}" Description="{x:Static props:AnnouncementStrings.CenterHint}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="AnnouncementCenterPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BulletedList}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="TextBulletListLtr24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:NotificationStrings.Type_Other}" />
-                    <ui:SettingsCard Header="{x:Static props:AdvancedStrings.Experimental}" Description="{x:Static props:AdvancedStrings.Experimental}"
+                    <controls:SettingsCard Header="{x:Static props:AdvancedStrings.Experimental}" Description="{x:Static props:AdvancedStrings.Experimental}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="ExperimentalPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="WindowDevTools24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:StorageStrings.Storage_Title}" Description="{x:Static props:StorageStrings.Storage_NavTooltip}"
+                    <controls:SettingsCard Header="{x:Static props:StorageStrings.Storage_Title}" Description="{x:Static props:StorageStrings.Storage_NavTooltip}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="StoragePage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.HardDrive}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="HardDrive24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:StorageStrings.Backup_Title}" Description="{x:Static props:HomeStrings.Home_BackupSettings}"
+                    <controls:SettingsCard Header="{x:Static props:StorageStrings.Backup_Title}" Description="{x:Static props:HomeStrings.Home_BackupSettings}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="BackupPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="ArrowSync24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_Manage}" Description="{x:Static props:HomeStrings.Home_CloudStorageSettings}"
+                    <controls:SettingsCard Header="{x:Static props:CloudStorageStrings.CloudStorage_Manage}" Description="{x:Static props:HomeStrings.Home_CloudStorageSettings}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="CloudStoragePage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Cloud}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="Cloud24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:NavStrings.Nav_Board}" />
-                    <ui:SettingsCard Header="{x:Static props:NavStrings.Nav_BoardComponents}" Description="{x:Static props:NavStrings.Nav_BoardComponents_Tooltip}"
+                    <controls:SettingsCard Header="{x:Static props:NavStrings.Nav_BoardComponents}" Description="{x:Static props:NavStrings.Nav_BoardComponents_Tooltip}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="BoardToolbarPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Rename}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="Rename24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:NavStrings.Nav_BoardAppearance}" Description="{x:Static props:NavStrings.Nav_BoardAppearance_Tooltip}"
+                    <controls:SettingsCard Header="{x:Static props:NavStrings.Nav_BoardAppearance}" Description="{x:Static props:NavStrings.Nav_BoardAppearance_Tooltip}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="BoardAppearancePage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Personalize}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="PaintBrush24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:NavStrings.Nav_BoardMenu}" Description="{x:Static props:NavStrings.Nav_BoardMenu_Tooltip}"
+                    <controls:SettingsCard Header="{x:Static props:NavStrings.Nav_BoardMenu}" Description="{x:Static props:NavStrings.Nav_BoardMenu_Tooltip}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="BoardMenuPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.BulletedList}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="TextBulletListLtr24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:AutomationStrings.Automation_Title}" Description="{x:Static props:NavStrings.Nav_Automation_Settings}"
+                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.Automation_Title}" Description="{x:Static props:NavStrings.Nav_Automation_Settings}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="AutomationWorkflowPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="ArrowSync24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:RandomStrings.Random_Title}" Description="{x:Static props:HomeStrings.Home_RandomAndTimer}"
+                    <controls:SettingsCard Header="{x:Static props:RandomStrings.Random_Title}" Description="{x:Static props:HomeStrings.Home_RandomAndTimer}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="RandomDrawPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.People}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="People24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard Header="Debug" Description="Debug"
+                    <controls:SettingsCard Header="Debug" Description="Debug"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="DebugPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="WindowDevTools24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:HomeStrings.Home_PluginSettings}" />
-                    <ui:SettingsCard Header="{x:Static props:NavStrings.Nav_Plugins}" Description="{x:Static props:NavStrings.Settings_Plugins}"
+                    <controls:SettingsCard Header="{x:Static props:NavStrings.Nav_Plugins}" Description="{x:Static props:NavStrings.Settings_Plugins}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="PluginPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Puzzle}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="PuzzlePiece24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:NavStrings.Nav_FriendlyLinks}" />
-                    <ui:SettingsCard Header="{x:Static props:NavStrings.Nav_FriendlyLinks}" Description="{x:Static props:HomeStrings.Home_FriendlyLinks}"
+                    <controls:SettingsCard Header="{x:Static props:NavStrings.Nav_FriendlyLinks}" Description="{x:Static props:HomeStrings.Home_FriendlyLinks}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="FriendlyLinksPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="Link24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
-                    <ui:SettingsCard Header="{x:Static props:AboutStrings.Title}" Description="{x:Static props:HomeStrings.Home_AboutApp}"
+                    <controls:SettingsCard Header="{x:Static props:AboutStrings.Title}" Description="{x:Static props:HomeStrings.Home_AboutApp}"
                         IsClickEnabled="True" Click="QuickNavCard_Click" Tag="AboutPage">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Info}" />
-                        </ui:SettingsCard.HeaderIcon>
-                    </ui:SettingsCard>
+                        <controls:SettingsCard.Icon>
+                            <ui:SymbolIcon Symbol="Info24" />
+                        </controls:SettingsCard.Icon>
+                    </controls:SettingsCard>
 
                     <Rectangle Height="48" />
 
-                </ikw:SimpleStackPanel>
+                </vio:SimpleStackPanel>
             </Grid>
         </Grid>
     </ScrollViewer>
-</ui:Page>
+</Page>

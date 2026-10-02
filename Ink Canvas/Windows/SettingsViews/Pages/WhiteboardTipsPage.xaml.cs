@@ -1,7 +1,7 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
+using Wpf.Ui.Controls;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -10,8 +10,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using ContentDialog = iNKORE.UI.WPF.Modern.Controls.ContentDialog;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using ContentDialog = Wpf.Ui.Controls.ContentDialog;
+using Page = System.Windows.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -38,7 +38,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var settings = SettingsManager.Settings;
             if (settings?.Appearance == null) return;
 
-            CardEnableChickenSoupInWhiteboardMode.IsOn = settings.Appearance.EnableChickenSoupInWhiteboardMode;
+            CardEnableChickenSoupInWhiteboardMode.IsChecked = settings.Appearance.EnableChickenSoupInWhiteboardMode;
 
             var position = settings.Appearance.ChickenSoupPosition;
             foreach (ComboBoxItem item in ComboBoxChickenSoupPosition.Items)
@@ -50,19 +50,19 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 }
             }
 
-            CardEnableAutoRotation.IsOn = settings.Appearance.EnableChickenSoupAutoRotation;
+            CardEnableAutoRotation.IsChecked = settings.Appearance.EnableChickenSoupAutoRotation;
             _lastValidInterval = settings.Appearance.ChickenSoupAutoRotationInterval;
             ComboBoxRotationInterval.Text = _lastValidInterval.ToString();
 
-            CardRotationInterval.Visibility = CardEnableAutoRotation.IsOn ? Visibility.Visible : Visibility.Collapsed;
+            CardRotationInterval.Visibility = ((CardEnableAutoRotation.IsChecked) == true) ? Visibility.Visible : Visibility.Collapsed;
 
-            CardEnableAutoHideOnInteraction.IsOn = settings.Appearance.EnableWhiteboardTipsAutoHideOnInteraction;
-            CardEnableInstantRestore.IsOn = settings.Appearance.EnableWhiteboardTipsInstantRestore;
+            CardEnableAutoHideOnInteraction.IsChecked = settings.Appearance.EnableWhiteboardTipsAutoHideOnInteraction;
+            CardEnableInstantRestore.IsChecked = settings.Appearance.EnableWhiteboardTipsInstantRestore;
             _lastValidAutoHideRestoreDelay = Math.Max(1, settings.Appearance.WhiteboardTipsAutoHideRestoreDelay);
             ComboBoxAutoHideRestoreDelay.Text = _lastValidAutoHideRestoreDelay.ToString();
 
             UpdateAutoHideChildCardsVisibility();
-            BtnCustomizeHitokoto.IsEnabled = CardEnableChickenSoupInWhiteboardMode.IsOn;
+            BtnCustomizeHitokoto.IsEnabled = ((CardEnableChickenSoupInWhiteboardMode.IsChecked) == true);
 
             UpdateChildControlsEnabled();
 
@@ -84,8 +84,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void UpdateChildControlsEnabled()
         {
-            bool master = CardEnableChickenSoupInWhiteboardMode.IsOn;
-            bool autoRotation = CardEnableAutoRotation.IsOn;
+            bool master = ((CardEnableChickenSoupInWhiteboardMode.IsChecked) == true);
+            bool autoRotation = ((CardEnableAutoRotation.IsChecked) == true);
 
             CardQuotePosition.IsEnabled = master;
             CardEnableAutoRotation.IsEnabled = master;
@@ -113,10 +113,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnableChickenSoupInWhiteboardMode_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.EnableChickenSoupInWhiteboardMode = CardEnableChickenSoupInWhiteboardMode.IsOn;
+            SettingsManager.Settings.Appearance.EnableChickenSoupInWhiteboardMode = ((CardEnableChickenSoupInWhiteboardMode.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
             UpdateChildControlsEnabled();
-            SettingsActionHub.OnChickenSoupInWhiteboardChanged(CardEnableChickenSoupInWhiteboardMode.IsOn, true);
+            SettingsActionHub.OnChickenSoupInWhiteboardChanged(((CardEnableChickenSoupInWhiteboardMode.IsChecked) == true), true);
         }
 
         private void ComboBoxChickenSoupPosition_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -132,9 +132,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnableAutoRotation_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.EnableChickenSoupAutoRotation = CardEnableAutoRotation.IsOn;
+            SettingsManager.Settings.Appearance.EnableChickenSoupAutoRotation = ((CardEnableAutoRotation.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
-            CardRotationInterval.Visibility = CardEnableAutoRotation.IsOn ? Visibility.Visible : Visibility.Collapsed;
+            CardRotationInterval.Visibility = ((CardEnableAutoRotation.IsChecked) == true) ? Visibility.Visible : Visibility.Collapsed;
             SettingsActionHub.OnChickenSoupAutoRotationChanged();
         }
 
@@ -167,7 +167,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnableAutoHideOnInteraction_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.EnableWhiteboardTipsAutoHideOnInteraction = CardEnableAutoHideOnInteraction.IsOn;
+            SettingsManager.Settings.Appearance.EnableWhiteboardTipsAutoHideOnInteraction = ((CardEnableAutoHideOnInteraction.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
             UpdateAutoHideChildCardsVisibility();
             SettingsActionHub.OnWhiteboardTipsAutoHideChanged();
@@ -176,7 +176,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnableInstantRestore_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.EnableWhiteboardTipsInstantRestore = CardEnableInstantRestore.IsOn;
+            SettingsManager.Settings.Appearance.EnableWhiteboardTipsInstantRestore = ((CardEnableInstantRestore.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
             UpdateAutoHideChildCardsVisibility();
             SettingsActionHub.OnWhiteboardTipsAutoHideChanged();
@@ -187,8 +187,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         /// </summary>
         private void UpdateAutoHideChildCardsVisibility()
         {
-            bool master = CardEnableAutoHideOnInteraction.IsOn;
-            bool instant = CardEnableInstantRestore.IsOn;
+            bool master = ((CardEnableAutoHideOnInteraction.IsChecked) == true);
+            bool instant = ((CardEnableInstantRestore.IsChecked) == true);
 
             CardEnableInstantRestore.Visibility = master ? Visibility.Visible : Visibility.Collapsed;
             CardAutoHideRestoreDelay.Visibility = (master && !instant) ? Visibility.Visible : Visibility.Collapsed;

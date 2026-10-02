@@ -4,10 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Ink_Canvas"
-        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-        xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
         xmlns:processbars="clr-namespace:Ink_Canvas.ProcessBars"
-        ui:ThemeManager.RequestedTheme="Light" Topmost="True" Background="Transparent"
+ Topmost="True" Background="Transparent"
         mc:Ignorable="d" WindowStyle="None" AllowsTransparency="True"
         ResizeMode="CanMinimize"
         Loaded="Window_Loaded" Closing="Window_Closing" WindowStartupLocation="CenterScreen"
@@ -19,7 +19,7 @@
             <Viewbox x:Name="BigViewController" Margin="20,20,20,20">
                 <Grid Height="180" Width="200">
                     <processbars:CycleProcessBar x:Name="ProcessBarTime" CurrentValue="0" Width="150" VerticalAlignment="Top"/>
-                    <ikw:SimpleStackPanel MouseMove="WindowDragMove" Orientation="Horizontal" Height="28.5" Margin="0,0,0,25"
+                    <vio:SimpleStackPanel MouseMove="WindowDragMove" Orientation="Horizontal" Height="28.5" Margin="0,0,0,25"
                                          VerticalAlignment="Center"
                                          HorizontalAlignment="Center">
                         <TextBlock Name="TextBlockHour" FontFamily="Segoe UI"
@@ -44,22 +44,22 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                         <Grid Name="GridAdjustHour" Visibility="Visible" Margin="-29,-30,0,-30" Width="29">
-                            <ikw:SimpleStackPanel Spacing="2">
+                            <vio:SimpleStackPanel Spacing="2">
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_1">
                                     <TextBlock x:Name="HourPlus5Text" Text="∧∧" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click">
                                     <TextBlock x:Name="HourPlus1Text" Text="∧" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
-                            </ikw:SimpleStackPanel>
-                            <ikw:SimpleStackPanel Spacing="2" VerticalAlignment="Bottom">
+                            </vio:SimpleStackPanel>
+                            <vio:SimpleStackPanel Spacing="2" VerticalAlignment="Bottom">
                                 <Button  Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_2">
                                     <TextBlock x:Name="HourMinus1Text" Text="∨" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_3">
                                     <TextBlock x:Name="HourMinus5Text" Text="∨∨" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
-                            </ikw:SimpleStackPanel>
+                            </vio:SimpleStackPanel>
                         </Grid>
                         <TextBlock Text=":"
                                    FontFamily="{Binding ElementName=TextBlockHour, Path=FontFamily}"
@@ -91,22 +91,22 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                         <Grid Visibility="{Binding ElementName=GridAdjustHour, Path=Visibility}" Margin="-29,-30,0,-30" Width="29">
-                            <ikw:SimpleStackPanel Spacing="2">
+                            <vio:SimpleStackPanel Spacing="2">
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_5">
                                     <TextBlock x:Name="MinutePlus5Text" Text="∧∧" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_4">
                                     <TextBlock x:Name="MinutePlus1Text" Text="∧" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
-                            </ikw:SimpleStackPanel>
-                            <ikw:SimpleStackPanel Spacing="2" VerticalAlignment="Bottom">
+                            </vio:SimpleStackPanel>
+                            <vio:SimpleStackPanel Spacing="2" VerticalAlignment="Bottom">
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_6">
                                     <TextBlock x:Name="MinuteMinus1Text" Text="∨" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_7">
                                     <TextBlock x:Name="MinuteMinus5Text" Text="∨∨" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
-                            </ikw:SimpleStackPanel>
+                            </vio:SimpleStackPanel>
                             <Border x:Name="BtnTimeSetOkay" MouseUp="Grid_MouseUp"
                                     Background="#0066BF"
                                     Height="20" Width="20"
@@ -116,7 +116,7 @@
                                     <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.1" BlurRadius="3"/>
                                 </Border.Effect>
                                 <Viewbox Margin="5.5">
-                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Save}" Foreground="White"/>
+                                    <ui:SymbolIcon Symbol="Save24" Foreground="White"/>
                                 </Viewbox>
                             </Border>
                         </Grid>
@@ -151,42 +151,42 @@
                         </ItemsControl>
                         <Grid Margin="-96.8,0,0,0" Width="96.8" Background="Transparent" MouseUp="Grid_MouseUp"/>
                         <Grid Visibility="{Binding ElementName=GridAdjustHour, Path=Visibility}" Margin="-29,-30,0,-30" Width="29">
-                            <ikw:SimpleStackPanel Spacing="2">
+                            <vio:SimpleStackPanel Spacing="2">
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_8">
                                     <TextBlock x:Name="SecondPlus5Text" Text="∧∧" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_9">
                                     <TextBlock x:Name="SecondPlus1Text" Text="∧" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
-                            </ikw:SimpleStackPanel>
-                            <ikw:SimpleStackPanel Spacing="2" VerticalAlignment="Bottom">
+                            </vio:SimpleStackPanel>
+                            <vio:SimpleStackPanel Spacing="2" VerticalAlignment="Bottom">
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_10">
                                     <TextBlock x:Name="SecondMinus1Text" Text="∨" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_11">
                                     <TextBlock x:Name="SecondMinus5Text" Text="∨∨" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
-                            </ikw:SimpleStackPanel>
+                            </vio:SimpleStackPanel>
                         </Grid>
-                    </ikw:SimpleStackPanel>
+                    </vio:SimpleStackPanel>
                     <Border x:Name="BorderStopTime" Background="{DynamicResource TimerWindowStopTimeBackground}" Margin="0,23,0,0"
                             Height="18" CornerRadius="9"
                             VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <ikw:SimpleStackPanel Margin="6,0" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <vio:SimpleStackPanel Margin="6,0" Orientation="Horizontal" HorizontalAlignment="Center">
                             <Image Margin="0,0,2,0" Source="{DynamicResource TimerWindowClockIcon}" RenderOptions.BitmapScalingMode="HighQuality" Height="10" Width="10"/>
                             <TextBlock Name="TextBlockStopTime" Text="12:30 PM" FontSize="9" VerticalAlignment="Center" Foreground="{DynamicResource TimerWindowStopTimeForeground}"/>
-                        </ikw:SimpleStackPanel>
+                        </vio:SimpleStackPanel>
                     </Border>
-                    <ikw:SimpleStackPanel Visibility="{Binding ElementName=ProcessBarTime, Path=Visibility}" Spacing="10" Orientation="Horizontal" Height="30" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                    <vio:SimpleStackPanel Visibility="{Binding ElementName=ProcessBarTime, Path=Visibility}" Spacing="10" Orientation="Horizontal" Height="30" HorizontalAlignment="Center" VerticalAlignment="Bottom">
                         <Grid>
                             <Border x:Name="BtnStart" MouseUp="BtnStart_MouseUp" Background="{DynamicResource TimerWindowPrimaryButtonBackground}" Height="20" Width="20" CornerRadius="100">
                                 <Viewbox Margin="5">
-                                    <ui:FontIcon Name="FontIconStart" Icon="{x:Static ui:SegoeFluentIcons.Play}" Foreground="White"/>
+                                    <ui:SymbolIcon Name="FontIconStart" Symbol="Play24" Foreground="White"/>
                                 </Viewbox>
                             </Border>
                             <Border x:Name="BtnStartCover" Visibility="Collapsed" Background="#BFBFBF" Height="20" Width="20" CornerRadius="100">
                                 <Viewbox Margin="5">
-                                    <ui:FontIcon Icon="{Binding ElementName=FontIconStart, Path=Icon}" Foreground="White"/>
+                                    <ui:SymbolIcon Symbol="{Binding ElementName=FontIconStart, Path=Icon}" Foreground="White"/>
                                 </Viewbox>
                             </Border>
                         </Grid>
@@ -196,20 +196,20 @@
                                     <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.15" BlurRadius="3"/>
                                 </Border.Effect>
                                 <Viewbox Margin="5.5">
-                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" Foreground="{DynamicResource TimerWindowButtonForeground}"/>
+                                    <ui:SymbolIcon Symbol="ArrowClockwise24" Foreground="{DynamicResource TimerWindowButtonForeground}"/>
                                 </Viewbox>
                             </Border>
                             <Border x:Name="BtnResetCover" Background="#F3F5F9" Height="20" Width="20" CornerRadius="100">
                                 <Viewbox Margin="5.5">
-                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" Foreground="#9D9D9E"/>
+                                    <ui:SymbolIcon Symbol="ArrowClockwise24" Foreground="#9D9D9E"/>
                                 </Viewbox>
                             </Border>
                         </Grid>
-                    </ikw:SimpleStackPanel>
+                    </vio:SimpleStackPanel>
                 </Grid>
             </Viewbox>
             <Viewbox Visibility="{Binding ElementName=BigViewController, Path=Visibility}" Margin="20,20,20,20" HorizontalAlignment="Right">
-                <ikw:SimpleStackPanel Height="180" Orientation="Horizontal">
+                <vio:SimpleStackPanel Height="180" Orientation="Horizontal">
                     <Border x:Name="BtnMinimal" Visibility="{Binding ElementName=BorderStopTime, Path=Visibility}" MouseUp="BtnMinimal_OnMouseUp" HorizontalAlignment="Right" VerticalAlignment="Bottom"
                             Margin="5"
                             Background="{DynamicResource TimerWindowButtonBackground}" Height="20" Width="20" CornerRadius="100">
@@ -217,7 +217,7 @@
                             <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.1" BlurRadius="3"/>
                         </Border.Effect>
                         <Viewbox Margin="5.5">
-                            <ui:FontIcon Name="FontIconMinimal" Icon="{x:Static ui:SegoeFluentIcons.HideBcc}" Foreground="{DynamicResource TimerWindowButtonForeground}"/>
+                            <ui:SymbolIcon Name="FontIconMinimal" Symbol="EyeOff24" Foreground="{DynamicResource TimerWindowButtonForeground}"/>
                         </Viewbox>
                     </Border>
                     <Border x:Name="BtnFullscreen" MouseUp="BtnFullscreen_MouseUp" HorizontalAlignment="Right" VerticalAlignment="Bottom"
@@ -227,7 +227,7 @@
                             <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.1" BlurRadius="3"/>
                         </Border.Effect>
                         <Viewbox Margin="5.5">
-                            <ui:FontIcon Name="FontIconFullscreen" Icon="{x:Static ui:SegoeFluentIcons.FullScreen}" Foreground="{DynamicResource TimerWindowButtonForeground}"/>
+                            <ui:SymbolIcon Name="FontIconFullscreen" Symbol="FullScreenMaximize24" Foreground="{DynamicResource TimerWindowButtonForeground}"/>
                         </Viewbox>
                     </Border>
                     <Border x:Name="BtnClose" MouseUp="BtnClose_MouseUp" HorizontalAlignment="Right" VerticalAlignment="Bottom"
@@ -237,10 +237,10 @@
                             <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.1" BlurRadius="3"/>
                         </Border.Effect>
                         <Viewbox Margin="5.5">
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Clear}"  Foreground="White"/>
+                            <ui:SymbolIcon Symbol="ClearFormatting24"  Foreground="White"/>
                         </Viewbox>
                     </Border>
-                </ikw:SimpleStackPanel>
+                </vio:SimpleStackPanel>
             </Viewbox>
             <MediaElement  Visibility="Collapsed" HorizontalAlignment="Left" Height="100" VerticalAlignment="Top" Width="100"/>
         </Grid>

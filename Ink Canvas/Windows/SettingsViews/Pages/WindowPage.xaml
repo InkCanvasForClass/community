@@ -1,12 +1,12 @@
-<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.WindowPage"
+<Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.WindowPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
       xmlns:helpers="clr-namespace:Ink_Canvas.Windows.SettingsViews.Helpers"
-      xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-      xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
       xmlns:c="clr-namespace:Ink_Canvas.Converter"
@@ -31,7 +31,7 @@
             </Style>
         </FrameworkElement.Resources>
             <Grid>
-                <ikw:SimpleStackPanel MaxWidth="1000"
+                <vio:SimpleStackPanel MaxWidth="1000"
                     HorizontalAlignment="Stretch"
                     Spacing="{StaticResource SettingsCardSpacing}">
 
@@ -41,28 +41,28 @@
                     <controls:LabeledSettingsCard x:Name="CardNoFocusMode"
                             Header="{x:Static props:StartupStrings.NoFocusMode}"
                             Description="{x:Static props:StartupStrings.NoFocusModeHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.View}"
+                            Symbol="Eye24"
                             SwitchName="ToggleSwitchNoFocusMode"
                             Toggled="ToggleSwitchNoFocusMode_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardWindowMode"
                             Header="{x:Static props:StartupStrings.NoBorderMode}"
                             Description="{x:Static props:StartupStrings.NoBorderModeHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.FullScreen}"
+                            Symbol="FullScreenMaximize24"
                             SwitchName="ToggleSwitchWindowMode"
                             Toggled="ToggleSwitchWindowMode_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardWindowChromeRendering"
                             Header="{x:Static props:WindowStrings.Window_WindowChromeRendering}"
                             Description="{x:Static props:WindowStrings.Window_WindowChromeRenderingHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.SpeedHigh}"
+                            Symbol="Gauge24"
                             SwitchName="ToggleSwitchWindowChromeRendering"
                             Toggled="ToggleSwitchWindowChromeRendering_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardAvoidFullScreen"
                             Header="{x:Static props:AdvancedStrings.AvoidFullScreenHelper}"
                             Description="{x:Static props:AdvancedStrings.AvoidFullScreenHelperHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.Cancel}"
+                            Symbol="Dismiss24"
                             SwitchName="ToggleSwitchAvoidFullScreen"
                             Toggled="ToggleSwitchAvoidFullScreen_Toggled" />
 
@@ -72,7 +72,7 @@
                             SwitchName="ToggleSwitchMultiScreenSupport"
                             Toggled="ToggleSwitchMultiScreenSupport_Toggled">
                         <controls:LabeledSettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Desktop_24_Regular}" />
+                            <ui:SymbolIcon Symbol="Desktop24" />
                         </controls:LabeledSettingsCard.HeaderIcon>
                     </controls:LabeledSettingsCard>
 
@@ -83,25 +83,26 @@
                             SwitchName="ToggleSwitchFollowMouseScreen"
                             Toggled="ToggleSwitchFollowMouseScreen_Toggled">
                         <controls:LabeledSettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:FluentSystemIcons.Desktop_24_Regular}" />
+                            <ui:SymbolIcon Symbol="Desktop24" />
                         </controls:LabeledSettingsCard.HeaderIcon>
                     </controls:LabeledSettingsCard>
 
-                    <ui:SettingsExpander x:Name="ExpanderAlwaysOnTop"
+                    <controls:SettingsExpander x:Name="ExpanderAlwaysOnTop"
                             Header="{x:Static props:StartupStrings.TopMost}"
                             Description="{x:Static props:StartupStrings.TopMostHint}"
                             IsExpanded="{Binding IsOn, ElementName=ToggleSwitchAlwaysOnTop, Mode=OneWay}"
                             d:Visibility="Visible" d:IsExpanded="True">
-                        <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}" />
-                        </ui:SettingsExpander.HeaderIcon>
+                        <controls:SettingsExpander.HeaderIcon>
+                            <ui:SymbolIcon Symbol="Pin24" />
+                        </controls:SettingsExpander.HeaderIcon>
                         <ui:ToggleSwitch x:Name="ToggleSwitchAlwaysOnTop"
-                                Toggled="ToggleSwitchAlwaysOnTop_Toggled" />
-                        <ui:SettingsExpander.ItemTemplate>
+                                Checked="ToggleSwitchAlwaysOnTop_Toggled"
+ Unchecked="ToggleSwitchAlwaysOnTop_Toggled" />
+                        <controls:SettingsExpander.ItemTemplate>
                             <helpers:TopMostModeTemplateSelector>
                                 <helpers:TopMostModeTemplateSelector.SelectionTemplate>
                                     <DataTemplate>
-                                        <ui:SettingsCard Header="{x:Static props:StartupStrings.TopMostMode}">
+                                        <controls:SettingsCard Header="{x:Static props:StartupStrings.TopMostMode}">
                                             <StackPanel Orientation="Horizontal">
                                                 <RadioButton Content="{x:Static props:StartupStrings.TopMostMode_Normal}"
                                                         GroupName="TopMostMode"
@@ -113,39 +114,39 @@
                                                         Checked="RadioTopMostUIA_Checked"
                                                         Loaded="RadioTopMostUIA_Loaded" />
                                             </StackPanel>
-                                        </ui:SettingsCard>
+                                        </controls:SettingsCard>
                                     </DataTemplate>
                                 </helpers:TopMostModeTemplateSelector.SelectionTemplate>
                                 <helpers:TopMostModeTemplateSelector.ButtonTemplate>
                                     <DataTemplate>
-                                        <ui:SettingsCard Header="{Binding ButtonHeader}">
+                                        <controls:SettingsCard Header="{Binding ButtonHeader}">
                                             <Button Content="{Binding ButtonContent}"
                                                     Click="BtnRestart_Click"
                                                     Tag="{Binding RestartAsAdmin}" />
-                                        </ui:SettingsCard>
+                                        </controls:SettingsCard>
                                     </DataTemplate>
                                 </helpers:TopMostModeTemplateSelector.ButtonTemplate>
                             </helpers:TopMostModeTemplateSelector>
-                        </ui:SettingsExpander.ItemTemplate>
-                    </ui:SettingsExpander>
+                        </controls:SettingsExpander.ItemTemplate>
+                    </controls:SettingsExpander>
 
-                    <ui:SettingsCard x:Name="CardUIAMode"
+                    <controls:SettingsCard x:Name="CardUIAMode"
                             Header="{x:Static props:StartupStrings.UIAMode_Label}"
                             Description="{x:Static props:StartupStrings.UIAMode_Description}"
                             Visibility="Collapsed"
                             Margin="0,-2,0,0">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Admin}" />
-                        </ui:SettingsCard.HeaderIcon>
+                        <controls:SettingsCard.HeaderIcon>
+                            <ui:SymbolIcon Symbol="Person24" />
+                        </controls:SettingsCard.HeaderIcon>
                         <ComboBox x:Name="ComboBoxUIAMode"
                                 SelectionChanged="ComboBoxUIAMode_SelectionChanged"
                                 MinWidth="180" />
-                    </ui:SettingsCard>
+                    </controls:SettingsCard>
 
                     <Rectangle Height="48" />
 
-                </ikw:SimpleStackPanel>
+                </vio:SimpleStackPanel>
             </Grid>
         </Grid>
     </ScrollViewer>
-</ui:Page>
+</Page>

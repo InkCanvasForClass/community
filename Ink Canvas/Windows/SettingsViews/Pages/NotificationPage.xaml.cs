@@ -5,7 +5,7 @@ using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Windows;
 using System.Windows.Controls;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using Page = System.Windows.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -38,11 +38,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _isLoaded = false;
             var notification = SettingsManager.Settings.Notification;
 
-            CardEnableAnnouncements.IsOn = notification.IsAnnouncementEnabled;
-            CardEnableForcePopup.IsOn = notification.IsForcePopupEnabled;
-            CardEnableDynamic.IsOn = notification.IsDynamicNotificationEnabled;
-            CardEnableWindowsToast.IsOn = notification.IsWindowsToastEnabled;
-            ToggleSwitchDictationDoNotDisturb.IsOn = notification.IsDictationDoNotDisturbEnabled;
+            CardEnableAnnouncements.IsChecked = notification.IsAnnouncementEnabled;
+            CardEnableForcePopup.IsChecked = notification.IsForcePopupEnabled;
+            CardEnableDynamic.IsChecked = notification.IsDynamicNotificationEnabled;
+            CardEnableWindowsToast.IsChecked = notification.IsWindowsToastEnabled;
+            ToggleSwitchDictationDoNotDisturb.IsChecked = notification.IsDictationDoNotDisturbEnabled;
             CheckBoxDictationDoNotDisturbPPT.IsChecked = notification.IsDictationDoNotDisturbInPPTEnabled;
             CheckBoxDictationDoNotDisturbWhiteboard.IsChecked = notification.IsDictationDoNotDisturbInWhiteboardEnabled;
 
@@ -138,7 +138,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnableAnnouncements_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Notification.IsAnnouncementEnabled = CardEnableAnnouncements.IsOn;
+            SettingsManager.Settings.Notification.IsAnnouncementEnabled = ((CardEnableAnnouncements.IsChecked) == true);
             SaveSettings();
             UpdateAnnouncementProviderEnabledState();
         }
@@ -146,7 +146,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnableForcePopup_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Notification.IsForcePopupEnabled = CardEnableForcePopup.IsOn;
+            SettingsManager.Settings.Notification.IsForcePopupEnabled = ((CardEnableForcePopup.IsChecked) == true);
             SaveSettings();
         }
 
@@ -159,14 +159,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnableDynamic_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Notification.IsDynamicNotificationEnabled = CardEnableDynamic.IsOn;
+            SettingsManager.Settings.Notification.IsDynamicNotificationEnabled = ((CardEnableDynamic.IsChecked) == true);
             SaveSettings();
         }
 
         private void ToggleSwitchEnableWindowsToast_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Notification.IsWindowsToastEnabled = CardEnableWindowsToast.IsOn;
+            SettingsManager.Settings.Notification.IsWindowsToastEnabled = ((CardEnableWindowsToast.IsChecked) == true);
             SaveSettings();
             LoadProviders();
         }
@@ -174,7 +174,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchDictationDoNotDisturb_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Notification.IsDictationDoNotDisturbEnabled = ToggleSwitchDictationDoNotDisturb.IsOn;
+            SettingsManager.Settings.Notification.IsDictationDoNotDisturbEnabled = ((ToggleSwitchDictationDoNotDisturb.IsChecked) == true);
             SaveSettings();
         }
 

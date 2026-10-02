@@ -11,7 +11,7 @@ using System.Windows.Media.Animation;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
-    public partial class StartupPage : iNKORE.UI.WPF.Modern.Controls.Page
+    public partial class StartupPage : System.Windows.Controls.Page
     {
         private bool _isLoaded = false;
 
@@ -85,7 +85,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 // 同步本页开关显示；用 _isLoaded 挡住 Toggled 事件避免重复注册
                 _isLoaded = false;
-                ToggleSwitchExternalProtocol.IsOn = true;
+                ToggleSwitchExternalProtocol.IsChecked = true;
                 _isLoaded = true;
                 return true;
             }
@@ -105,9 +105,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 var settings = SettingsManager.Settings;
 
                 bool runAtStartup = AutoStartHelper.IsAutoStartEnabled("Ink Canvas Annotation");
-                ToggleSwitchRunAtStartup.IsOn = runAtStartup;
+                ToggleSwitchRunAtStartup.IsChecked = runAtStartup;
 
-                ToggleSwitchExternalProtocol.IsOn = settings.Advanced.IsEnableUriScheme;
+                ToggleSwitchExternalProtocol.IsChecked = settings.Advanced.IsEnableUriScheme;
 
                 if (settings.Startup != null)
                 {
@@ -115,20 +115,20 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     if (crashAction < 0 || crashAction > 2) crashAction = 0;
                     ComboBoxCrashAction.SelectedIndex = crashAction;
 
-                    ToggleSwitchFoldAtStartup.IsOn = settings.Startup.IsFoldAtStartup;
+                    ToggleSwitchFoldAtStartup.IsChecked = settings.Startup.IsFoldAtStartup;
 
                     StartupMode startupMode = settings.Startup.StartupMode;
                     if (!Enum.IsDefined(typeof(StartupMode), startupMode)) startupMode = StartupMode.Default;
                     ComboBoxStartupMode.SelectedIndex = (int)startupMode;
                 }
 
-                CardPPTOnlyMode.IsOn = settings.ModeSettings.IsPPTOnlyMode;
+                CardPPTOnlyMode.IsChecked = settings.ModeSettings.IsPPTOnlyMode;
 
-                ToggleSwitchEnableTrayIcon.IsOn = settings.Appearance.EnableTrayIcon;
+                ToggleSwitchEnableTrayIcon.IsChecked = settings.Appearance.EnableTrayIcon;
                 ComboBoxTrayLeftClickAction.SelectedIndex = (int)settings.Appearance.TrayLeftClickAction;
                 ComboBoxTrayRightClickAction.SelectedIndex = (int)settings.Appearance.TrayRightClickAction;
 
-                ToggleSwitchEnableSplashScreen.IsOn = settings.Appearance.EnableSplashScreen;
+                ToggleSwitchEnableSplashScreen.IsChecked = settings.Appearance.EnableSplashScreen;
                 ComboBoxSplashScreenStyle.SelectedIndex = settings.Appearance.SplashScreenStyle;
                 UpdateCustomSplashImageVisibility();
 
@@ -162,7 +162,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                bool newState = ToggleSwitchRunAtStartup.IsOn;
+                bool newState = ((ToggleSwitchExternalProtocol.IsChecked) == true);
 
                 if (newState)
                 {
@@ -187,7 +187,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                SettingsManager.Settings.Startup.IsFoldAtStartup = ToggleSwitchFoldAtStartup.IsOn;
+                SettingsManager.Settings.Startup.IsFoldAtStartup = ((ToggleSwitchFoldAtStartup.IsChecked) == true);
                 SettingsManager.SaveSettingsToFile();
             }
             catch (Exception ex)
@@ -220,7 +220,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                bool newState = ToggleSwitchExternalProtocol.IsOn;
+                bool newState = ((ToggleSwitchExternalProtocol.IsChecked) == true);
                 bool success = false;
 
                 if (newState)
@@ -254,7 +254,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 else
                 {
                     _isLoaded = false;
-                    ToggleSwitchExternalProtocol.IsOn = !newState;
+                    ToggleSwitchExternalProtocol.IsChecked = !newState;
                     _isLoaded = true;
 
                     LogHelper.WriteLogToFile("设置外部协议失败，请检查权限或日志", LogHelper.LogType.Error);
@@ -275,7 +275,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                WindowSettingsHelper.ApplyPPTOnlyMode(Application.Current.MainWindow, CardPPTOnlyMode.IsOn);
+                WindowSettingsHelper.ApplyPPTOnlyMode(Application.Current.MainWindow, ((CardPPTOnlyMode.IsChecked) == true));
             }
             catch (Exception ex)
             {
@@ -327,13 +327,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnableTrayIcon_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.EnableTrayIcon = ToggleSwitchEnableTrayIcon.IsOn;
+            SettingsManager.Settings.Appearance.EnableTrayIcon = ((ToggleSwitchEnableTrayIcon.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
             try
             {
                 var _taskbar = Application.Current.Resources["TaskbarTrayIcon"];
                 if (_taskbar is FrameworkElement fe)
-                    fe.Visibility = ToggleSwitchEnableTrayIcon.IsOn ? Visibility.Visible : Visibility.Collapsed;
+                    fe.Visibility = ((ToggleSwitchEnableTrayIcon.IsChecked) == true) ? Visibility.Visible : Visibility.Collapsed;
             }
             catch (Exception ex)
             {
@@ -362,7 +362,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnableSplashScreen_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.EnableSplashScreen = ToggleSwitchEnableSplashScreen.IsOn;
+            SettingsManager.Settings.Appearance.EnableSplashScreen = ((ToggleSwitchEnableSplashScreen.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 

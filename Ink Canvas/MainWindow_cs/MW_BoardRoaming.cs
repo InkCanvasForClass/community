@@ -480,9 +480,9 @@ namespace Ink_Canvas
             try
             {
                 if (BoardRoamingPopupContent.TwoFingerZoomToggle != null)
-                    BoardRoamingPopupContent.TwoFingerZoomToggle.IsOn = Settings.Gesture.IsEnableTwoFingerZoomRoaming;
+                    BoardRoamingPopupContent.TwoFingerZoomToggle.IsChecked = Settings.Gesture.IsEnableTwoFingerZoomRoaming;
                 if (BoardRoamingPopupContent.TwoFingerRotationToggle != null)
-                    BoardRoamingPopupContent.TwoFingerRotationToggle.IsOn = Settings.Gesture.IsEnableTwoFingerRotationRoaming;
+                    BoardRoamingPopupContent.TwoFingerRotationToggle.IsChecked = Settings.Gesture.IsEnableTwoFingerRotationRoaming;
             }
             finally
             {
@@ -528,18 +528,18 @@ namespace Ink_Canvas
         private void BoardRoamingTwoFingerZoom_Toggled(object sender, RoutedEventArgs e)
         {
             if (_isSyncingBoardRoamingToggles) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
+            var toggle = sender as Wpf.Ui.Controls.ToggleSwitch;
             if (toggle == null) return;
-            Settings.Gesture.IsEnableTwoFingerZoomRoaming = toggle.IsOn;
+            Settings.Gesture.IsEnableTwoFingerZoomRoaming = ((toggle.IsChecked) == true);
             SaveSettingsToFile();
         }
 
         private void BoardRoamingTwoFingerRotation_Toggled(object sender, RoutedEventArgs e)
         {
             if (_isSyncingBoardRoamingToggles) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
+            var toggle = sender as Wpf.Ui.Controls.ToggleSwitch;
             if (toggle == null) return;
-            Settings.Gesture.IsEnableTwoFingerRotationRoaming = toggle.IsOn;
+            Settings.Gesture.IsEnableTwoFingerRotationRoaming = ((toggle.IsChecked) == true);
             SaveSettingsToFile();
         }
 

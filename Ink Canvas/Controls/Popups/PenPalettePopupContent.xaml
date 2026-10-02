@@ -3,8 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-             xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+             xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:primitives="clr-namespace:System.Windows.Controls.Primitives;assembly=PresentationFramework"
              xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
              xmlns:helpers="clr-namespace:Ink_Canvas.Helpers"
@@ -12,10 +12,10 @@ mc:Ignorable="d">
     <Grid>
         <controls:PopupTabShellContent x:Name="Shell"/>
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
-            <ikw:SimpleStackPanel  Margin="10,10,10,15">
-                <ikw:SimpleStackPanel x:Name="_CommonPropsPanel">
+            <vio:SimpleStackPanel  Margin="10,10,10,15">
+                <vio:SimpleStackPanel x:Name="_CommonPropsPanel">
                     <!--笔锋-->
-                    <ikw:SimpleStackPanel Orientation="Horizontal">
+                    <vio:SimpleStackPanel Orientation="Horizontal">
                         <Label Content="{x:Static props:FloatingBarStrings.FloatingBar_PenTipStyle}"
                                Foreground="{DynamicResource FloatingBarForegroundBrush}"
                                FontSize="16" FontWeight="Bold"
@@ -28,28 +28,28 @@ mc:Ignorable="d">
                             <ComboBoxItem Content="{x:Static props:FloatingBarStrings.FloatingBar_PenStyle_Velocity}" />
                             <ComboBoxItem Content="{x:Static props:FloatingBarStrings.FloatingBar_PenStyle_Off}" />
                         </ComboBox>
-                    </ikw:SimpleStackPanel>
+                    </vio:SimpleStackPanel>
                     <!--笔尖 纠正 加深-->
-                    <ikw:SimpleStackPanel Orientation="Horizontal">
-                        <ikw:SimpleStackPanel x:Name="NibModeSimpleStackPanel" Orientation="Horizontal" Spacing="4">
+                    <vio:SimpleStackPanel Orientation="Horizontal">
+                        <vio:SimpleStackPanel x:Name="NibModeSimpleStackPanel" Orientation="Horizontal" Spacing="4">
                             <Label Content="{x:Static props:StartupStrings.EnableNibMode}" FontSize="12"
                                 VerticalAlignment="Center" />
                             <ui:ToggleSwitch x:Name="ToggleSwitchEnableNibMode"
                                             MinWidth="0" OnContent="" OffContent="" />
-                        </ikw:SimpleStackPanel>
-                        <ikw:SimpleStackPanel x:Name="_InkToShapePanel" Orientation="Horizontal" Spacing="4">
+                        </vio:SimpleStackPanel>
+                        <vio:SimpleStackPanel x:Name="_InkToShapePanel" Orientation="Horizontal" Spacing="4">
                             <Label Content="{x:Static props:CanvasStrings.InkRecog_Title}" FontSize="12"
                                 VerticalAlignment="Center" />
                             <ui:ToggleSwitch x:Name="FloatingBarToggleSwitchEnableInkToShape"
                                             MinWidth="0" OnContent="" OffContent="" />
-                        </ikw:SimpleStackPanel>
-                        <ikw:SimpleStackPanel x:Name="_HighlighterOverlapPanel" Orientation="Horizontal" Spacing="4">
+                        </vio:SimpleStackPanel>
+                        <vio:SimpleStackPanel x:Name="_HighlighterOverlapPanel" Orientation="Horizontal" Spacing="4">
                             <Label Content="{x:Static props:FloatingBarStrings.FloatingBar_HighlighterOverlap}" FontSize="12"
                                 VerticalAlignment="Center" />
                             <ui:ToggleSwitch x:Name="ToggleSwitchHighlighterOverlap"
                                             MinWidth="0" OnContent="" OffContent="" />
-                        </ikw:SimpleStackPanel>
-                    </ikw:SimpleStackPanel>
+                        </vio:SimpleStackPanel>
+                    </vio:SimpleStackPanel>
                     <!--粗细-->
                     <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                         <Label Margin="0,0,10,0" Content="{x:Static props:FloatingBarStrings.OldUI_Thickness}" FontWeight="Bold"
@@ -128,10 +128,10 @@ mc:Ignorable="d">
                                    FontFamily="Consolas" VerticalAlignment="Center"
                                    Margin="10,0,0,0" FontSize="15" />
                     </StackPanel>
-                </ikw:SimpleStackPanel>
+                </vio:SimpleStackPanel>
                 <!--笔调色-->
-                <ikw:SimpleStackPanel x:Name="_DefaultPenColorsPanel" HorizontalAlignment="Center" Spacing="5">
-                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+                <vio:SimpleStackPanel x:Name="_DefaultPenColorsPanel" HorizontalAlignment="Center" Spacing="5">
+                    <vio:SimpleStackPanel Orientation="Horizontal" Spacing="10">
                         <Border x:Name="_ColorThemeSwitch"
                                 BorderBrush="{DynamicResource FloatingBarBorderBrush}"
                                 BorderThickness="1"
@@ -155,35 +155,35 @@ mc:Ignorable="d">
                         <controls:PenColorButton x:Name="BorderPenColorWhite" Color="White" BorderBrushColor="#71717a" CheckIconSource="/Resources/new-icons/checked-black.png" />
                         <controls:PenColorButton x:Name="BorderPenColorRed" Color="#dc2626" BorderBrushColor="#7f1d1d" />
                         <controls:PenColorButton x:Name="BorderPenColorYellow" Color="#eab308" BorderBrushColor="#713f12" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+                    </vio:SimpleStackPanel>
+                    <vio:SimpleStackPanel Orientation="Horizontal" Spacing="10">
                         <controls:PenColorButton x:Name="BorderPenColorGreen" Color="#16a34a" BorderBrushColor="#14532d" />
                         <controls:PenColorButton x:Name="BorderPenColorBlue" Color="#2563eb" BorderBrushColor="#1e3a8a" />
                         <controls:PenColorButton x:Name="BorderPenColorPink" Color="#db2777" BorderBrushColor="#831843" />
                         <controls:PenColorButton x:Name="BorderPenColorTeal" Color="#0d9488" BorderBrushColor="#134e4a" />
                         <controls:PenColorButton x:Name="BorderPenColorOrange" Color="#ea580c" BorderBrushColor="#7c2d12" />
-                    </ikw:SimpleStackPanel>
-                </ikw:SimpleStackPanel>
+                    </vio:SimpleStackPanel>
+                </vio:SimpleStackPanel>
                 <!--荧光笔调色-->
-                <ikw:SimpleStackPanel x:Name="_HighlighterPenColorsPanel" HorizontalAlignment="Center" Spacing="5">
-                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+                <vio:SimpleStackPanel x:Name="_HighlighterPenColorsPanel" HorizontalAlignment="Center" Spacing="5">
+                    <vio:SimpleStackPanel Orientation="Horizontal" Spacing="10">
                         <controls:PenColorButton x:Name="_HighlighterPenColorBlack" Color="Black" BorderBrushColor="#e4e4e7" IsHighlighter="True" />
                         <controls:PenColorButton x:Name="_HighlighterPenColorWhite" Color="White" BorderBrushColor="#dddddd" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
                         <controls:PenColorButton x:Name="_HighlighterPenColorRed" Color="#ef4444" BorderBrushColor="#fecaca" IsHighlighter="True" />
                         <controls:PenColorButton x:Name="_HighlighterPenColorYellow" Color="#eab308" BorderBrushColor="#fef08a" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
                         <controls:PenColorButton x:Name="_HighlighterPenColorGreen" Color="#22c55e" BorderBrushColor="#bbf7d0" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel Orientation="Horizontal"  Spacing="10">
+                    </vio:SimpleStackPanel>
+                    <vio:SimpleStackPanel Orientation="Horizontal"  Spacing="10">
                         <controls:PenColorButton x:Name="_HighlighterPenColorZinc" Color="#71717a" BorderBrushColor="#e4e4e7" IsHighlighter="True" />
                         <controls:PenColorButton x:Name="_HighlighterPenColorBlue" Color="#3b82f6" BorderBrushColor="#bfdbfe" IsHighlighter="True" />
                         <controls:PenColorButton x:Name="HighlighterPenPenColorPurple" Color="#a855f7" BorderBrushColor="#e9d5ff" IsHighlighter="True" />
                         <controls:PenColorButton x:Name="_HighlighterPenColorTeal" Color="#14b8a6" BorderBrushColor="#99f6e4" IsHighlighter="True" CheckIconSource="/Resources/new-icons/checked-black.png" />
                         <controls:PenColorButton x:Name="_HighlighterPenColorOrange" Color="#f97316" BorderBrushColor="#fed7aa" IsHighlighter="True" />
-                    </ikw:SimpleStackPanel>
-                </ikw:SimpleStackPanel>
+                    </vio:SimpleStackPanel>
+                </vio:SimpleStackPanel>
                 <!--激光笔调色-->
-                <ikw:SimpleStackPanel x:Name="_LaserPenColorsPanel" HorizontalAlignment="Center" Spacing="5">
-                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+                <vio:SimpleStackPanel x:Name="_LaserPenColorsPanel" HorizontalAlignment="Center" Spacing="5">
+                    <vio:SimpleStackPanel Orientation="Horizontal" Spacing="10">
                         <Border x:Name="_LaserPenColorThemeSwitch"
                                 BorderBrush="{DynamicResource FloatingBarBorderBrush}"
                                 BorderThickness="1"
@@ -207,16 +207,16 @@ mc:Ignorable="d">
                         <controls:PenColorButton x:Name="_LaserPenColorWhite" Color="White" BorderBrushColor="#71717a" CheckIconSource="/Resources/new-icons/checked-black.png" />
                         <controls:PenColorButton x:Name="_LaserPenColorRed" Color="#dc2626" BorderBrushColor="#7f1d1d" />
                         <controls:PenColorButton x:Name="_LaserPenColorYellow" Color="#eab308" BorderBrushColor="#713f12" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+                    </vio:SimpleStackPanel>
+                    <vio:SimpleStackPanel Orientation="Horizontal" Spacing="10">
                         <controls:PenColorButton x:Name="_LaserPenColorGreen" Color="#16a34a" BorderBrushColor="#14532d" />
                         <controls:PenColorButton x:Name="_LaserPenColorBlue" Color="#2563eb" BorderBrushColor="#1e3a8a" />
                         <controls:PenColorButton x:Name="_LaserPenColorPink" Color="#db2777" BorderBrushColor="#831843" />
                         <controls:PenColorButton x:Name="_LaserPenColorTeal" Color="#0d9488" BorderBrushColor="#134e4a" />
                         <controls:PenColorButton x:Name="_LaserPenColorOrange" Color="#ea580c" BorderBrushColor="#7c2d12" />
-                    </ikw:SimpleStackPanel>
-                </ikw:SimpleStackPanel>
-            </ikw:SimpleStackPanel>
+                    </vio:SimpleStackPanel>
+                </vio:SimpleStackPanel>
+            </vio:SimpleStackPanel>
         </ContentControl>
     </Grid>
 </UserControl>

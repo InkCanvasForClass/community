@@ -1,28 +1,29 @@
-<ui:Page xmlns:props="clr-namespace:Ink_Canvas.Properties"
+<Page xmlns:props="clr-namespace:Ink_Canvas.Properties"
          x:Class="Ink_Canvas.Windows.SettingsViews.Pages.FloatingBarThemePage"
          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-         xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+         xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
          mc:Ignorable="d"
          Title="FloatingBarThemePage">
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="32,0,32,32">
-            <ikw:SimpleStackPanel MaxWidth="900" Spacing="8">
+            <vio:SimpleStackPanel MaxWidth="900" Spacing="8">
                 <TextBlock Text="{x:Static props:ThemeStrings.Theme_FloatingBarThemesDescription}"
                            Style="{DynamicResource BodyTextBlockStyle}" Margin="0,0,0,16" />
 
-                <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_FloatingBarThemesFolder}">
+                <controls:SettingsCard Header="{x:Static props:ThemeStrings.Theme_FloatingBarThemesFolder}">
                     <Button Content="{x:Static props:ThemeStrings.Theme_FloatingBarThemesOpenFolder}"
                             Click="ButtonOpenThemeFolder_Click" />
-                </ui:SettingsCard>
+                </controls:SettingsCard>
 
                 <ItemsControl x:Name="ThemeItemsControl" Margin="0,8,0,0">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <ui:SettingsCard Header="{Binding DisplayName}"
+                            <controls:SettingsCard Header="{Binding DisplayName}"
                                              Description="{Binding Description}"
                                              Margin="0,0,0,8">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -36,7 +37,7 @@
                                             Click="ButtonDeleteTheme_Click"
                                             Margin="8,0,0,0" />
                                 </StackPanel>
-                            </ui:SettingsCard>
+                            </controls:SettingsCard>
                             <DataTemplate.Triggers>
                                 <DataTrigger Binding="{Binding IsApplied}" Value="True">
                                     <Setter TargetName="ApplyButton" Property="Content" Value="已应用" />
@@ -50,7 +51,7 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-            </ikw:SimpleStackPanel>
+            </vio:SimpleStackPanel>
         </Grid>
     </ScrollViewer>
-</ui:Page>
+</Page>

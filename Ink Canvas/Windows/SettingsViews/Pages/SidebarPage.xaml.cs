@@ -3,7 +3,7 @@ using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Windows;
 using System.Windows.Controls;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using Page = System.Windows.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -67,26 +67,26 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var settings = SettingsManager.Settings;
             if (settings?.Appearance == null) return;
 
-            ToggleSwitchEnableQuickPanel.IsOn = settings.Appearance.IsShowQuickPanel;
+            ToggleSwitchEnableQuickPanel.IsChecked = settings.Appearance.IsShowQuickPanel;
             QuickPanelBottomOffsetSlider.Value = settings.Appearance.QuickPanelBottomOffset;
             ComboBoxUnFoldBtnImg.SelectedIndex = settings.Appearance.UnFoldButtonImageType;
-            ToggleSwitchAllowDragSidePanel.IsOn = settings.Appearance.AllowDragSidePanel;
+            ToggleSwitchAllowDragSidePanel.IsChecked = settings.Appearance.AllowDragSidePanel;
             QuickPanelOpacitySlider.Value = settings.Appearance.QuickPanelOpacity;
-            ToggleSwitchAutoCollapseQuickPanel.IsOn = settings.Appearance.IsAutoCollapseQuickPanel;
+            ToggleSwitchAutoCollapseQuickPanel.IsChecked = settings.Appearance.IsAutoCollapseQuickPanel;
             AutoCollapseDelaySlider.Value = settings.Appearance.AutoCollapseQuickPanelDelay;
         }
 
         private void ToggleSwitchEnableQuickPanel_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.IsShowQuickPanel = ToggleSwitchEnableQuickPanel.IsOn;
+            SettingsManager.Settings.Appearance.IsShowQuickPanel = ((ToggleSwitchEnableQuickPanel.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchAllowDragSidePanel_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.AllowDragSidePanel = ToggleSwitchAllowDragSidePanel.IsOn;
+            SettingsManager.Settings.Appearance.AllowDragSidePanel = ((ToggleSwitchAllowDragSidePanel.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -102,7 +102,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchAutoCollapseQuickPanel_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.IsAutoCollapseQuickPanel = ToggleSwitchAutoCollapseQuickPanel.IsOn;
+            SettingsManager.Settings.Appearance.IsAutoCollapseQuickPanel = ((ToggleSwitchAutoCollapseQuickPanel.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
             SettingsActionHub.OnAutoCollapseQuickPanelChanged();
         }

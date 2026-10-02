@@ -3,7 +3,7 @@ using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Windows;
 using System.Windows.Controls;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using Page = System.Windows.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -47,38 +47,38 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _isLoaded = false;
             var ppt = SettingsManager.Settings.PowerPointSettings;
 
-            CardSupportPowerPoint.IsOn = ppt.PowerPointSupport;
+            CardSupportPowerPoint.IsChecked = ppt.PowerPointSupport;
             ComboBoxPPTArchitecture.SelectedIndex = (int)ppt.PPTLinkMode;
-            CardPowerPointEnhancement.IsOn = ppt.EnablePowerPointEnhancement;
-            CardSkipAnimationsWhenGoNext.IsOn = ppt.SkipAnimationsWhenGoNext;
-            CardSupportWPS.IsOn = ppt.IsSupportWPS;
-            CardEnableWppProcessKill.IsOn = ppt.EnableWppProcessKill;
+            CardPowerPointEnhancement.IsChecked = ppt.EnablePowerPointEnhancement;
+            CardSkipAnimationsWhenGoNext.IsChecked = ppt.SkipAnimationsWhenGoNext;
+            CardSupportWPS.IsChecked = ppt.IsSupportWPS;
+            CardEnableWppProcessKill.IsChecked = ppt.EnableWppProcessKill;
             UpdatePPTArchitectureDependentCards();
 
 
 
-            CardEnablePPTButtonPageClickable.IsOn = ppt.EnablePPTButtonPageClickable;
-            ToggleSwitchEnablePPTButtonEnhancedPreview.IsOn = ppt.EnablePPTButtonEnhancedPreview;
-            ToggleSwitchPPTEnhancedPreviewLoadingAnimation.IsOn = ppt.ShowPPTEnhancedPreviewLoadingAnimation;
-            CardEnablePPTButtonLongPressPageTurn.IsOn = ppt.EnablePPTButtonLongPressPageTurn;
+            CardEnablePPTButtonPageClickable.IsChecked = ppt.EnablePPTButtonPageClickable;
+            ToggleSwitchEnablePPTButtonEnhancedPreview.IsChecked = ppt.EnablePPTButtonEnhancedPreview;
+            ToggleSwitchPPTEnhancedPreviewLoadingAnimation.IsChecked = ppt.ShowPPTEnhancedPreviewLoadingAnimation;
+            CardEnablePPTButtonLongPressPageTurn.IsChecked = ppt.EnablePPTButtonLongPressPageTurn;
 
-            CardShowCanvasAtNewSlideShow.IsOn = ppt.IsShowCanvasAtNewSlideShow;
-            CardEnableSmartMode.IsOn = ppt.EnableSmartMode;
+            CardShowCanvasAtNewSlideShow.IsChecked = ppt.IsShowCanvasAtNewSlideShow;
+            CardEnableSmartMode.IsChecked = ppt.EnableSmartMode;
 
-            CardEnableTwoFingerGestureInPresentationMode.IsOn = ppt.IsEnableTwoFingerGestureInPresentationMode;
-            CardEnableFingerGestureSlideShowControl.IsOn = ppt.IsEnableFingerGestureSlideShowControl;
-            CardEnablePPTTimeCapsule.IsOn = ppt.EnablePPTTimeCapsule;
+            CardEnableTwoFingerGestureInPresentationMode.IsChecked = ppt.IsEnableTwoFingerGestureInPresentationMode;
+            CardEnableFingerGestureSlideShowControl.IsChecked = ppt.IsEnableFingerGestureSlideShowControl;
+            CardEnablePPTTimeCapsule.IsChecked = ppt.EnablePPTTimeCapsule;
             ComboBoxPPTTimeCapsulePosition.SelectedIndex = ppt.PPTTimeCapsulePosition;
-            CardShowPPTSidebarByDefault.IsOn = ppt.ShowPPTSidebarByDefault;
-            CardShowPPTModePrompt.IsOn = ppt.ShowPPTModePrompt;
+            CardShowPPTSidebarByDefault.IsChecked = ppt.ShowPPTSidebarByDefault;
+            CardShowPPTModePrompt.IsChecked = ppt.ShowPPTModePrompt;
 
-            CardAutoSaveScreenShotInPowerPoint.IsOn = ppt.IsAutoSaveScreenShotInPowerPoint;
-            CardAutoSaveStrokesInPowerPoint.IsOn = ppt.IsAutoSaveStrokesInPowerPoint;
+            CardAutoSaveScreenShotInPowerPoint.IsChecked = ppt.IsAutoSaveScreenShotInPowerPoint;
+            CardAutoSaveStrokesInPowerPoint.IsChecked = ppt.IsAutoSaveStrokesInPowerPoint;
 
-            CardNotifyPreviousPage.IsOn = ppt.IsNotifyPreviousPage;
-            CardAlwaysGoToFirstPageOnReenter.IsOn = ppt.IsAlwaysGoToFirstPageOnReenter;
-            CardNotifyHiddenPage.IsOn = ppt.IsNotifyHiddenPage;
-            CardNotifyAutoPlayPresentation.IsOn = ppt.IsNotifyAutoPlayPresentation;
+            CardNotifyPreviousPage.IsChecked = ppt.IsNotifyPreviousPage;
+            CardAlwaysGoToFirstPageOnReenter.IsChecked = ppt.IsAlwaysGoToFirstPageOnReenter;
+            CardNotifyHiddenPage.IsChecked = ppt.IsNotifyHiddenPage;
+            CardNotifyAutoPlayPresentation.IsChecked = ppt.IsNotifyAutoPlayPresentation;
 
             _isLoaded = true;
         }
@@ -98,28 +98,28 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             var ppt = SettingsManager.Settings.PowerPointSettings;
-            ppt.PowerPointSupport = CardSupportPowerPoint.IsOn;
+            ppt.PowerPointSupport = ((CardSupportPowerPoint.IsChecked) == true);
             if (!ppt.PowerPointSupport && ppt.IsSupportWPS)
             {
                 ppt.IsSupportWPS = false;
-                CardSupportWPS.IsOn = false;
+                CardSupportWPS.IsChecked = false;
             }
             SettingsManager.SaveSettingsToFile();
-            SettingsActionHub.OnPPTSupportChanged(CardSupportPowerPoint.IsOn);
+            SettingsActionHub.OnPPTSupportChanged(((CardSupportPowerPoint.IsChecked) == true));
         }
 
         private void ToggleSwitchPowerPointEnhancement_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
             var ppt = SettingsManager.Settings.PowerPointSettings;
-            ppt.EnablePowerPointEnhancement = CardPowerPointEnhancement.IsOn;
+            ppt.EnablePowerPointEnhancement = ((CardPowerPointEnhancement.IsChecked) == true);
             if (ppt.EnablePowerPointEnhancement)
             {
                 ppt.IsSupportWPS = false;
-                CardSupportWPS.IsOn = false;
+                CardSupportWPS.IsChecked = false;
             }
             SettingsManager.SaveSettingsToFile();
-            SettingsActionHub.OnPPTEnhancementChanged(CardPowerPointEnhancement.IsOn);
+            SettingsActionHub.OnPPTEnhancementChanged(((CardPowerPointEnhancement.IsChecked) == true));
         }
 
         private void ComboBoxPPTArchitecture_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -134,8 +134,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 ppt.EnablePowerPointEnhancement = false;
                 ppt.IsSupportWPS = false;
-                CardPowerPointEnhancement.IsOn = false;
-                CardSupportWPS.IsOn = false;
+                CardPowerPointEnhancement.IsChecked = false;
+                CardSupportWPS.IsChecked = false;
             }
             UpdatePPTArchitectureDependentCards();
             SettingsManager.SaveSettingsToFile();
@@ -149,27 +149,27 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchSkipAnimationsWhenGoNext_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.SkipAnimationsWhenGoNext = CardSkipAnimationsWhenGoNext.IsOn;
+            SettingsManager.Settings.PowerPointSettings.SkipAnimationsWhenGoNext = ((CardSkipAnimationsWhenGoNext.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
-            SettingsActionHub.OnSkipAnimationsWhenGoNextChanged(CardSkipAnimationsWhenGoNext.IsOn);
+            SettingsActionHub.OnSkipAnimationsWhenGoNextChanged(((CardSkipAnimationsWhenGoNext.IsChecked) == true));
         }
 
         private void ToggleSwitchSupportWPS_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
             var ppt = SettingsManager.Settings.PowerPointSettings;
-            ppt.IsSupportWPS = CardSupportWPS.IsOn;
+            ppt.IsSupportWPS = ((CardSupportWPS.IsChecked) == true);
             if (ppt.IsSupportWPS)
             {
                 if (!ppt.PowerPointSupport)
                 {
                     ppt.PowerPointSupport = true;
-                    CardSupportPowerPoint.IsOn = true;
+                    CardSupportPowerPoint.IsChecked = true;
                 }
                 if (ppt.EnablePowerPointEnhancement)
                 {
                     ppt.EnablePowerPointEnhancement = false;
-                    CardPowerPointEnhancement.IsOn = false;
+                    CardPowerPointEnhancement.IsChecked = false;
                 }
             }
             SettingsManager.SaveSettingsToFile();
@@ -179,7 +179,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnableWppProcessKill_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.EnableWppProcessKill = CardEnableWppProcessKill.IsOn;
+            SettingsManager.Settings.PowerPointSettings.EnableWppProcessKill = ((CardEnableWppProcessKill.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -198,7 +198,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchShowPPTSidebarByDefault_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.ShowPPTSidebarByDefault = CardShowPPTSidebarByDefault.IsOn;
+            SettingsManager.Settings.PowerPointSettings.ShowPPTSidebarByDefault = ((CardShowPPTSidebarByDefault.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
             SettingsActionHub.OnShowPPTSidebarByDefaultChanged();
         }
@@ -206,35 +206,35 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchShowPPTModePrompt_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.ShowPPTModePrompt = CardShowPPTModePrompt.IsOn;
+            SettingsManager.Settings.PowerPointSettings.ShowPPTModePrompt = ((CardShowPPTModePrompt.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchEnablePPTButtonPageClickable_OnToggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.EnablePPTButtonPageClickable = CardEnablePPTButtonPageClickable.IsOn;
+            SettingsManager.Settings.PowerPointSettings.EnablePPTButtonPageClickable = ((CardEnablePPTButtonPageClickable.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchEnablePPTButtonEnhancedPreview_OnToggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.EnablePPTButtonEnhancedPreview = ToggleSwitchEnablePPTButtonEnhancedPreview.IsOn;
+            SettingsManager.Settings.PowerPointSettings.EnablePPTButtonEnhancedPreview = ((ToggleSwitchEnablePPTButtonEnhancedPreview.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchPPTEnhancedPreviewLoadingAnimation_OnToggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.ShowPPTEnhancedPreviewLoadingAnimation = ToggleSwitchPPTEnhancedPreviewLoadingAnimation.IsOn;
+            SettingsManager.Settings.PowerPointSettings.ShowPPTEnhancedPreviewLoadingAnimation = ((ToggleSwitchPPTEnhancedPreviewLoadingAnimation.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchEnablePPTButtonLongPressPageTurn_OnToggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn = CardEnablePPTButtonLongPressPageTurn.IsOn;
+            SettingsManager.Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn = ((CardEnablePPTButtonLongPressPageTurn.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -247,35 +247,35 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchEnableSmartMode_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.EnableSmartMode = CardEnableSmartMode.IsOn;
+            SettingsManager.Settings.PowerPointSettings.EnableSmartMode = ((CardEnableSmartMode.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchShowCanvasAtNewSlideShow_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.IsShowCanvasAtNewSlideShow = CardShowCanvasAtNewSlideShow.IsOn;
+            SettingsManager.Settings.PowerPointSettings.IsShowCanvasAtNewSlideShow = ((CardShowCanvasAtNewSlideShow.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchEnableTwoFingerGestureInPresentationMode_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.IsEnableTwoFingerGestureInPresentationMode = CardEnableTwoFingerGestureInPresentationMode.IsOn;
+            SettingsManager.Settings.PowerPointSettings.IsEnableTwoFingerGestureInPresentationMode = ((CardEnableTwoFingerGestureInPresentationMode.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchEnableFingerGestureSlideShowControl_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.IsEnableFingerGestureSlideShowControl = CardEnableFingerGestureSlideShowControl.IsOn;
+            SettingsManager.Settings.PowerPointSettings.IsEnableFingerGestureSlideShowControl = ((CardEnableFingerGestureSlideShowControl.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchEnablePPTTimeCapsule_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.EnablePPTTimeCapsule = CardEnablePPTTimeCapsule.IsOn;
+            SettingsManager.Settings.PowerPointSettings.EnablePPTTimeCapsule = ((CardEnablePPTTimeCapsule.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
             SettingsActionHub.OnPPTTimeCapsuleChanged();
         }
@@ -329,42 +329,42 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchAutoSaveScreenShotInPowerPoint_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint = CardAutoSaveScreenShotInPowerPoint.IsOn;
+            SettingsManager.Settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint = ((CardAutoSaveScreenShotInPowerPoint.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchAutoSaveStrokesInPowerPoint_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint = CardAutoSaveStrokesInPowerPoint.IsOn;
+            SettingsManager.Settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint = ((CardAutoSaveStrokesInPowerPoint.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchNotifyPreviousPage_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.IsNotifyPreviousPage = CardNotifyPreviousPage.IsOn;
+            SettingsManager.Settings.PowerPointSettings.IsNotifyPreviousPage = ((CardNotifyPreviousPage.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchAlwaysGoToFirstPageOnReenter_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.IsAlwaysGoToFirstPageOnReenter = CardAlwaysGoToFirstPageOnReenter.IsOn;
+            SettingsManager.Settings.PowerPointSettings.IsAlwaysGoToFirstPageOnReenter = ((CardAlwaysGoToFirstPageOnReenter.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchNotifyHiddenPage_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.IsNotifyHiddenPage = CardNotifyHiddenPage.IsOn;
+            SettingsManager.Settings.PowerPointSettings.IsNotifyHiddenPage = ((CardNotifyHiddenPage.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchNotifyAutoPlayPresentation_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.IsNotifyAutoPlayPresentation = CardNotifyAutoPlayPresentation.IsOn;
+            SettingsManager.Settings.PowerPointSettings.IsNotifyAutoPlayPresentation = ((CardNotifyAutoPlayPresentation.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 

@@ -2,7 +2,8 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Plugins;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
+// 只别名导入 WPF-UI 专属控件，避免与 System.Windows.Controls 的同名类型（TextBlock/Image/Button/Border 等）产生 CS0104 歧义。
+using SymbolRegular = Wpf.Ui.Controls.SymbolRegular;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -1336,7 +1337,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         public string DisplayName => _info.DisplayName;
         public string Description => _info.Description;
         public string IconGeometry => _info.IconGeometry;
-        public FontIconData? IconKey => null;
+        public SymbolRegular? IconKey => null;
         public ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public bool DefaultShowSeparateBorder => false;
         public bool DefaultPreventHideOnDragClick => false;

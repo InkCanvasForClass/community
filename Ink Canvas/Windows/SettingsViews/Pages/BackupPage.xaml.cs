@@ -5,8 +5,8 @@ using System;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+using MessageBox = System.Windows.MessageBox;
+using Page = System.Windows.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -37,8 +37,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var settings = SettingsManager.Settings;
             if (settings?.Advanced == null) return;
 
-            ToggleSwitchIsAutoBackupBeforeUpdate.IsOn = settings.Advanced.IsAutoBackupBeforeUpdate;
-            ToggleSwitchIsAutoBackupEnabled.IsOn = settings.Advanced.IsAutoBackupEnabled;
+            ToggleSwitchIsAutoBackupBeforeUpdate.IsChecked = settings.Advanced.IsAutoBackupBeforeUpdate;
+            ToggleSwitchIsAutoBackupEnabled.IsChecked = settings.Advanced.IsAutoBackupEnabled;
 
             foreach (ComboBoxItem item in ComboBoxAutoBackupInterval.Items)
             {
@@ -53,14 +53,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchIsAutoBackupBeforeUpdate_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Advanced.IsAutoBackupBeforeUpdate = ToggleSwitchIsAutoBackupBeforeUpdate.IsOn;
+            SettingsManager.Settings.Advanced.IsAutoBackupBeforeUpdate = ((ToggleSwitchIsAutoBackupBeforeUpdate.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchIsAutoBackupEnabled_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Advanced.IsAutoBackupEnabled = ToggleSwitchIsAutoBackupEnabled.IsOn;
+            SettingsManager.Settings.Advanced.IsAutoBackupEnabled = ((ToggleSwitchIsAutoBackupEnabled.IsChecked) == true);
             SettingsManager.SaveSettingsToFile();
         }
 

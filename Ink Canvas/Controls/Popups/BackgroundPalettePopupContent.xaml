@@ -3,18 +3,18 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+             xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
              xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
 mc:Ignorable="d">
     <Grid>
         <controls:PopupShellContent x:Name="Shell" Title="{x:Static props:CanvasStrings.Canvas_BackgroundSettings}" d:Visibility="Collapsed" />
         <ContentControl x:Name="InnerContentHost" Visibility="Collapsed" d:Visibility="Visible">
-            <ikw:SimpleStackPanel Margin="8" Spacing="4">
+            <vio:SimpleStackPanel Margin="8" Spacing="4">
                 <TextBlock Text="{x:Static props:CanvasStrings.Canvas_WhiteboardMode}"
                            Foreground="{DynamicResource TextForeground}"
                            FontSize="10" FontWeight="Bold"
                            HorizontalAlignment="Center"/>
-                <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
+                <vio:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
                     <Border x:Name="WhiteboardModeBtn"
                             Width="50" Height="30"
                             Background="#2563eb"
@@ -42,7 +42,7 @@ mc:Ignorable="d">
                                    HorizontalAlignment="Center"
                                    VerticalAlignment="Center" />
                     </Border>
-                </ikw:SimpleStackPanel>
+                </vio:SimpleStackPanel>
                 <Border Height="1" d:Background="Green"
                         Background="{DynamicResource SettingsPageBorderBrush}"/>
                 <TextBlock Text="{x:Static props:CanvasStrings.Canvas_BackgroundColor}"
@@ -103,7 +103,7 @@ mc:Ignorable="d">
                         Background="#2563eb"
                         Foreground="Black"
                         HorizontalAlignment="Center" />
-            </ikw:SimpleStackPanel>
+            </vio:SimpleStackPanel>
         </ContentControl>
     </Grid>
 </UserControl>

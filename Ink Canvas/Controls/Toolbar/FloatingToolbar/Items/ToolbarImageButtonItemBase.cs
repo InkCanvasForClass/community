@@ -1,6 +1,6 @@
 using Ink_Canvas.Plugins;
 using Ink_Canvas.Properties;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
+using Wpf.Ui.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +30,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         protected virtual string IconBrushResourceKey => null;
         protected virtual string LabelBrushResourceKey => null;
         public virtual string IconGeometry => null;
-        public virtual FontIconData? IconKey => null;
+        public virtual SymbolRegular? IconKey => null;
 
         protected abstract void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e);
 
@@ -77,7 +77,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
             var oldIcon = buttonContent.Children.OfType<Image>().FirstOrDefault();
             if (oldIcon == null) return;
 
-            var fontIcon = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+            var fontIcon = new Wpf.Ui.Controls.FontIcon
             {
                 Icon = IconKey.Value,
                 Width = 24,

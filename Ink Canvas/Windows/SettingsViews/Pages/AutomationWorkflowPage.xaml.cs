@@ -18,7 +18,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
-using Page = iNKORE.UI.WPF.Modern.Controls.Page;
+// 设置页的根元素用原生 WPF Page（WPF-UI 不提供 Page 控件）。
+using Page = System.Windows.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -121,50 +122,50 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _isLoaded = false;
             var auto = SettingsManager.Settings.Automation;
 
-            CardAutoFoldInEasiNote.IsOn = auto.IsAutoFoldInEasiNote;
-            CardAutoFoldInEasiCamera.IsOn = auto.IsAutoFoldInEasiCamera;
-            CardAutoFoldInEasiNote3.IsOn = auto.IsAutoFoldInEasiNote3;
-            CardAutoFoldInEasiNote3C.IsOn = auto.IsAutoFoldInEasiNote3C;
-            CardAutoFoldInEasiNote5C.IsOn = auto.IsAutoFoldInEasiNote5C;
-            CardAutoFoldInSeewoPincoTeacher.IsOn = auto.IsAutoFoldInSeewoPincoTeacher;
-            CardAutoFoldInHiteTouchPro.IsOn = auto.IsAutoFoldInHiteTouchPro;
-            CardAutoFoldInHiteLightBoard.IsOn = auto.IsAutoFoldInHiteLightBoard;
-            CardAutoFoldInHiteCamera.IsOn = auto.IsAutoFoldInHiteCamera;
-            CardAutoFoldInWxBoardMain.IsOn = auto.IsAutoFoldInWxBoardMain;
-            CardAutoFoldInOldZyBoard.IsOn = auto.IsAutoFoldInOldZyBoard;
-            CardAutoFoldInMSWhiteboard.IsOn = auto.IsAutoFoldInMSWhiteboard;
-            CardAutoFoldInAdmoxWhiteboard.IsOn = auto.IsAutoFoldInAdmoxWhiteboard;
-            CardAutoFoldInAdmoxBooth.IsOn = auto.IsAutoFoldInAdmoxBooth;
-            CardAutoFoldInQPoint.IsOn = auto.IsAutoFoldInQPoint;
-            CardAutoFoldInYiYunVisualPresenter.IsOn = auto.IsAutoFoldInYiYunVisualPresenter;
-            CardAutoFoldInMaxHubWhiteboard.IsOn = auto.IsAutoFoldInMaxHubWhiteboard;
-            CardAutoFoldInPPTSlideShow.IsOn = auto.IsAutoFoldInPPTSlideShow;
+            CardAutoFoldInEasiNote.IsChecked = auto.IsAutoFoldInEasiNote;
+            CardAutoFoldInEasiCamera.IsChecked = auto.IsAutoFoldInEasiCamera;
+            CardAutoFoldInEasiNote3.IsChecked = auto.IsAutoFoldInEasiNote3;
+            CardAutoFoldInEasiNote3C.IsChecked = auto.IsAutoFoldInEasiNote3C;
+            CardAutoFoldInEasiNote5C.IsChecked = auto.IsAutoFoldInEasiNote5C;
+            CardAutoFoldInSeewoPincoTeacher.IsChecked = auto.IsAutoFoldInSeewoPincoTeacher;
+            CardAutoFoldInHiteTouchPro.IsChecked = auto.IsAutoFoldInHiteTouchPro;
+            CardAutoFoldInHiteLightBoard.IsChecked = auto.IsAutoFoldInHiteLightBoard;
+            CardAutoFoldInHiteCamera.IsChecked = auto.IsAutoFoldInHiteCamera;
+            CardAutoFoldInWxBoardMain.IsChecked = auto.IsAutoFoldInWxBoardMain;
+            CardAutoFoldInOldZyBoard.IsChecked = auto.IsAutoFoldInOldZyBoard;
+            CardAutoFoldInMSWhiteboard.IsChecked = auto.IsAutoFoldInMSWhiteboard;
+            CardAutoFoldInAdmoxWhiteboard.IsChecked = auto.IsAutoFoldInAdmoxWhiteboard;
+            CardAutoFoldInAdmoxBooth.IsChecked = auto.IsAutoFoldInAdmoxBooth;
+            CardAutoFoldInQPoint.IsChecked = auto.IsAutoFoldInQPoint;
+            CardAutoFoldInYiYunVisualPresenter.IsChecked = auto.IsAutoFoldInYiYunVisualPresenter;
+            CardAutoFoldInMaxHubWhiteboard.IsChecked = auto.IsAutoFoldInMaxHubWhiteboard;
+            CardAutoFoldInPPTSlideShow.IsChecked = auto.IsAutoFoldInPPTSlideShow;
 
-            CardAutoKillPPTService.IsOn = auto.IsAutoKillPPTService;
-            CardAutoKillEasiNote.IsOn = auto.IsAutoKillEasiNote;
-            CardAutoKillHiteAnnotation.IsOn = auto.IsAutoKillHiteAnnotation;
-            CardAutoKillVComYouJiao.IsOn = auto.IsAutoKillVComYouJiao;
-            CardAutoKillSeewoLauncher2DesktopAnnotation.IsOn = auto.IsAutoKillSeewoLauncher2DesktopAnnotation;
-            CardAutoKillInkCanvas.IsOn = auto.IsAutoKillInkCanvas;
-            CardAutoKillICA.IsOn = auto.IsAutoKillICA;
-            CardAutoKillIDT.IsOn = auto.IsAutoKillIDT;
-            CardAutoEnterAnnotationAfterKillHite.IsOn = auto.IsAutoEnterAnnotationAfterKillHite;
+            CardAutoKillPPTService.IsChecked = auto.IsAutoKillPPTService;
+            CardAutoKillEasiNote.IsChecked = auto.IsAutoKillEasiNote;
+            CardAutoKillHiteAnnotation.IsChecked = auto.IsAutoKillHiteAnnotation;
+            CardAutoKillVComYouJiao.IsChecked = auto.IsAutoKillVComYouJiao;
+            CardAutoKillSeewoLauncher2DesktopAnnotation.IsChecked = auto.IsAutoKillSeewoLauncher2DesktopAnnotation;
+            CardAutoKillInkCanvas.IsChecked = auto.IsAutoKillInkCanvas;
+            CardAutoKillICA.IsChecked = auto.IsAutoKillICA;
+            CardAutoKillIDT.IsChecked = auto.IsAutoKillIDT;
+            CardAutoEnterAnnotationAfterKillHite.IsChecked = auto.IsAutoEnterAnnotationAfterKillHite;
 
-            CardAutoEnterAnnotationModeWhenExitFoldMode.IsOn = auto.IsAutoEnterAnnotationModeWhenExitFoldMode;
-            CardAutoFoldWhenExitWhiteboard.IsOn = auto.IsAutoFoldWhenExitWhiteboard;
-            CardAutoFoldAfterPPTSlideShow.IsOn = auto.IsAutoFoldAfterPPTSlideShow;
-            CardKeepFoldAfterSoftwareExit.IsOn = auto.KeepFoldAfterSoftwareExit;
+            CardAutoEnterAnnotationModeWhenExitFoldMode.IsChecked = auto.IsAutoEnterAnnotationModeWhenExitFoldMode;
+            CardAutoFoldWhenExitWhiteboard.IsChecked = auto.IsAutoFoldWhenExitWhiteboard;
+            CardAutoFoldAfterPPTSlideShow.IsChecked = auto.IsAutoFoldAfterPPTSlideShow;
+            CardKeepFoldAfterSoftwareExit.IsChecked = auto.KeepFoldAfterSoftwareExit;
 
-            ToggleSwitchSaveScreenshotsInDateFolders.IsOn = auto.IsSaveScreenshotsInDateFolders;
-            ToggleSwitchAutoSaveStrokesAtScreenshot.IsOn = auto.IsAutoSaveStrokesAtScreenshot;
-            ToggleSwitchAutoSaveStrokesAtClear.IsOn = auto.IsAutoSaveScreenshotAtClear;
+            ToggleSwitchSaveScreenshotsInDateFolders.IsChecked = auto.IsSaveScreenshotsInDateFolders;
+            ToggleSwitchAutoSaveStrokesAtScreenshot.IsChecked = auto.IsAutoSaveStrokesAtScreenshot;
+            ToggleSwitchAutoSaveStrokesAtClear.IsChecked = auto.IsAutoSaveScreenshotAtClear;
 
             SyncScreenshotFormatSelection(auto.ScreenshotSaveFormat);
             ScreenshotJpegQualitySlider.Value = Math.Max(50, Math.Min(100, auto.ScreenshotJpegQuality));
             SyncScreenshotScaleSelection(auto.ScreenshotScaleMode);
-            CardSaveStrokesAsXML.IsOn = auto.IsSaveStrokesAsXML;
-            CardSaveStrokesAsUInk.IsOn = auto.IsSaveStrokesAsUInK;
-            CardEnableAutoSaveStrokes.IsOn = auto.IsEnableAutoSaveStrokes;
+            CardSaveStrokesAsXML.IsChecked = auto.IsSaveStrokesAsXML;
+            CardSaveStrokesAsUInk.IsChecked = auto.IsSaveStrokesAsUInK;
+            CardEnableAutoSaveStrokes.IsChecked = auto.IsEnableAutoSaveStrokes;
 
             var interval = auto.AutoSaveStrokesIntervalMinutes;
             foreach (ComboBoxItem item in ComboBoxAutoSaveStrokesInterval.Items)
@@ -176,7 +177,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 }
             }
 
-            CardAutoDelSavedFiles.IsOn = auto.AutoDelSavedFiles;
+            CardAutoDelSavedFiles.IsChecked = auto.AutoDelSavedFiles;
             ComboBoxAutoDelSavedFilesDaysThreshold.SelectedIndex = auto.AutoDelSavedFilesDaysThreshold switch
             {
                 7 => 0,
@@ -188,27 +189,27 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             };
 
             SideControlMinimumAutomationSlider.Value = auto.MinimumAutomationStrokeNumber;
-            CardSaveFullPageStrokes.IsOn = auto.IsSaveFullPageStrokes;
+            CardSaveFullPageStrokes.IsChecked = auto.IsSaveFullPageStrokes;
 
-            CardUseCustomSaveFileName.IsOn = auto.IsUseCustomSaveFileName;
+            CardUseCustomSaveFileName.IsChecked = auto.IsUseCustomSaveFileName;
             TextBoxCustomSaveFileNameTemplate.Text = auto.CustomSaveFileNameTemplate;
             SyncSaveFileNamePresetSelection(auto.CustomSaveFileNameTemplate);
 
             if (auto.FloatingWindowInterceptor.InterceptRules != null)
             {
-                ToggleSwitchSeewoWhiteboard3Floating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoWhiteboard3Floating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoWhiteboard3Floating"];
-                ToggleSwitchSeewoWhiteboard5Floating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoWhiteboard5Floating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoWhiteboard5Floating"];
-                ToggleSwitchSeewoWhiteboard5CFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoWhiteboard5CFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoWhiteboard5CFloating"];
-                ToggleSwitchSeewoPincoSideBarFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoPincoSideBarFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoPincoSideBarFloating"];
-                ToggleSwitchSeewoPincoDrawingFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoPincoDrawingFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoPincoDrawingFloating"];
-                ToggleSwitchSeewoPPTFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoPPTFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoPPTFloating"];
-                ToggleSwitchAiClassFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("AiClassFloating") && auto.FloatingWindowInterceptor.InterceptRules["AiClassFloating"];
-                ToggleSwitchHiteAnnotationFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("HiteAnnotationFloating") && auto.FloatingWindowInterceptor.InterceptRules["HiteAnnotationFloating"];
-                ToggleSwitchChangYanFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("ChangYanFloating") && auto.FloatingWindowInterceptor.InterceptRules["ChangYanFloating"];
-                ToggleSwitchChangYanPPTFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("ChangYanPPTFloating") && auto.FloatingWindowInterceptor.InterceptRules["ChangYanPPTFloating"];
-                ToggleSwitchIntelligentClassFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("IntelligentClassFloating") && auto.FloatingWindowInterceptor.InterceptRules["IntelligentClassFloating"];
-                ToggleSwitchSeewoDesktopAnnotationFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoDesktopAnnotationFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoDesktopAnnotationFloating"];
-                ToggleSwitchSeewoDesktopSideBarFloating.IsOn = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoDesktopSideBarFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoDesktopSideBarFloating"];
+                ToggleSwitchSeewoWhiteboard3Floating.IsChecked = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoWhiteboard3Floating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoWhiteboard3Floating"];
+                ToggleSwitchSeewoWhiteboard5Floating.IsChecked = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoWhiteboard5Floating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoWhiteboard5Floating"];
+                ToggleSwitchSeewoWhiteboard5CFloating.IsChecked = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoWhiteboard5CFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoWhiteboard5CFloating"];
+                ToggleSwitchSeewoPincoSideBarFloating.IsChecked = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoPincoSideBarFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoPincoSideBarFloating"];
+                ToggleSwitchSeewoPincoDrawingFloating.IsChecked = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoPincoDrawingFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoPincoDrawingFloating"];
+                ToggleSwitchSeewoPPTFloating.IsChecked = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoPPTFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoPPTFloating"];
+                ToggleSwitchAiClassFloating.IsChecked = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("AiClassFloating") && auto.FloatingWindowInterceptor.InterceptRules["AiClassFloating"];
+                ToggleSwitchHiteAnnotationFloating.IsChecked = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("HiteAnnotationFloating") && auto.FloatingWindowInterceptor.InterceptRules["HiteAnnotationFloating"];
+                ToggleSwitchChangYanFloating.IsChecked = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("ChangYanFloating") && auto.FloatingWindowInterceptor.InterceptRules["ChangYanFloating"];
+                ToggleSwitchChangYanPPTFloating.IsChecked = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("ChangYanPPTFloating") && auto.FloatingWindowInterceptor.InterceptRules["ChangYanPPTFloating"];
+                ToggleSwitchIntelligentClassFloating.IsChecked = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("IntelligentClassFloating") && auto.FloatingWindowInterceptor.InterceptRules["IntelligentClassFloating"];
+                ToggleSwitchSeewoDesktopAnnotationFloating.IsChecked = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoDesktopAnnotationFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoDesktopAnnotationFloating"];
+                ToggleSwitchSeewoDesktopSideBarFloating.IsChecked = auto.FloatingWindowInterceptor.InterceptRules.ContainsKey("SeewoDesktopSideBarFloating") && auto.FloatingWindowInterceptor.InterceptRules["SeewoDesktopSideBarFloating"];
             }
 
             UpdateFloatingWindowInterceptorEnabled();
@@ -218,46 +219,46 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         #region AutoFold
 
         private void ToggleSwitchAutoFoldInEasiNote_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInEasiNote = CardAutoFoldInEasiNote.IsOn; SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInEasiNote = ((CardAutoFoldInEasiNote.IsChecked) == true); SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
         private void ToggleSwitchAutoFoldInEasiCamera_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInEasiCamera = CardAutoFoldInEasiCamera.IsOn; SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInEasiCamera = ((CardAutoFoldInEasiCamera.IsChecked) == true); SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
         private void ToggleSwitchAutoFoldInEasiNote3_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInEasiNote3 = CardAutoFoldInEasiNote3.IsOn; SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInEasiNote3 = ((CardAutoFoldInEasiNote3.IsChecked) == true); SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
         private void ToggleSwitchAutoFoldInEasiNote3C_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInEasiNote3C = CardAutoFoldInEasiNote3C.IsOn; SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInEasiNote3C = ((CardAutoFoldInEasiNote3C.IsChecked) == true); SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
         private void ToggleSwitchAutoFoldInEasiNote5C_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInEasiNote5C = CardAutoFoldInEasiNote5C.IsOn; SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInEasiNote5C = ((CardAutoFoldInEasiNote5C.IsChecked) == true); SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
         private void ToggleSwitchAutoFoldInSeewoPincoTeacher_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInSeewoPincoTeacher = CardAutoFoldInSeewoPincoTeacher.IsOn; SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInSeewoPincoTeacher = ((CardAutoFoldInSeewoPincoTeacher.IsChecked) == true); SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
         private void ToggleSwitchAutoFoldInHiteTouchPro_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInHiteTouchPro = CardAutoFoldInHiteTouchPro.IsOn; SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInHiteTouchPro = ((CardAutoFoldInHiteTouchPro.IsChecked) == true); SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
         private void ToggleSwitchAutoFoldInHiteLightBoard_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInHiteLightBoard = CardAutoFoldInHiteLightBoard.IsOn; SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInHiteLightBoard = ((CardAutoFoldInHiteLightBoard.IsChecked) == true); SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
         private void ToggleSwitchAutoFoldInHiteCamera_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInHiteCamera = CardAutoFoldInHiteCamera.IsOn; SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInHiteCamera = ((CardAutoFoldInHiteCamera.IsChecked) == true); SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
         private void ToggleSwitchAutoFoldInWxBoardMain_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInWxBoardMain = CardAutoFoldInWxBoardMain.IsOn; SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInWxBoardMain = ((CardAutoFoldInWxBoardMain.IsChecked) == true); SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
         private void ToggleSwitchAutoFoldInOldZyBoard_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInOldZyBoard = CardAutoFoldInOldZyBoard.IsOn; SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInOldZyBoard = ((CardAutoFoldInOldZyBoard.IsChecked) == true); SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
         private void ToggleSwitchAutoFoldInMSWhiteboard_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInMSWhiteboard = CardAutoFoldInMSWhiteboard.IsOn; SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInMSWhiteboard = ((CardAutoFoldInMSWhiteboard.IsChecked) == true); SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
         private void ToggleSwitchAutoFoldInAdmoxWhiteboard_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInAdmoxWhiteboard = CardAutoFoldInAdmoxWhiteboard.IsOn; SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInAdmoxWhiteboard = ((CardAutoFoldInAdmoxWhiteboard.IsChecked) == true); SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
         private void ToggleSwitchAutoFoldInAdmoxBooth_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInAdmoxBooth = CardAutoFoldInAdmoxBooth.IsOn; SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInAdmoxBooth = ((CardAutoFoldInAdmoxBooth.IsChecked) == true); SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
         private void ToggleSwitchAutoFoldInQPoint_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInQPoint = CardAutoFoldInQPoint.IsOn; SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInQPoint = ((CardAutoFoldInQPoint.IsChecked) == true); SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
         private void ToggleSwitchAutoFoldInYiYunVisualPresenter_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInYiYunVisualPresenter = CardAutoFoldInYiYunVisualPresenter.IsOn; SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInYiYunVisualPresenter = ((CardAutoFoldInYiYunVisualPresenter.IsChecked) == true); SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
         private void ToggleSwitchAutoFoldInMaxHubWhiteboard_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInMaxHubWhiteboard = CardAutoFoldInMaxHubWhiteboard.IsOn; SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldInMaxHubWhiteboard = ((CardAutoFoldInMaxHubWhiteboard.IsChecked) == true); SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoFoldChanged(); }
 
         private void ToggleSwitchAutoFoldInPPTSlideShow_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
             var auto = SettingsManager.Settings.Automation;
             bool previousState = auto.IsAutoFoldInPPTSlideShow;
-            auto.IsAutoFoldInPPTSlideShow = CardAutoFoldInPPTSlideShow.IsOn;
+            auto.IsAutoFoldInPPTSlideShow = ((CardAutoFoldInPPTSlideShow.IsChecked) == true);
             if (previousState != auto.IsAutoFoldInPPTSlideShow)
                 LogHelper.WriteLogToFile($"PPT自动收纳设置已变更: {auto.IsAutoFoldInPPTSlideShow}", LogHelper.LogType.Trace);
             SettingsManager.SaveSettingsToFile();
@@ -271,45 +272,45 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void UpdateAutoKillTimer() => SettingsActionHub.OnAutoKillChanged();
 
         private void ToggleSwitchAutoKillPPTService_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoKillPPTService = CardAutoKillPPTService.IsOn; SettingsManager.SaveSettingsToFile(); UpdateAutoKillTimer(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoKillPPTService = ((CardAutoKillPPTService.IsChecked) == true); SettingsManager.SaveSettingsToFile(); UpdateAutoKillTimer(); }
         private void ToggleSwitchAutoKillEasiNote_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoKillEasiNote = CardAutoKillEasiNote.IsOn; SettingsManager.SaveSettingsToFile(); UpdateAutoKillTimer(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoKillEasiNote = ((CardAutoKillEasiNote.IsChecked) == true); SettingsManager.SaveSettingsToFile(); UpdateAutoKillTimer(); }
         private void ToggleSwitchAutoKillHiteAnnotation_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoKillHiteAnnotation = CardAutoKillHiteAnnotation.IsOn; SettingsManager.SaveSettingsToFile(); UpdateAutoKillTimer(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoKillHiteAnnotation = ((CardAutoKillHiteAnnotation.IsChecked) == true); SettingsManager.SaveSettingsToFile(); UpdateAutoKillTimer(); }
         private void ToggleSwitchAutoKillVComYouJiao_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoKillVComYouJiao = CardAutoKillVComYouJiao.IsOn; SettingsManager.SaveSettingsToFile(); UpdateAutoKillTimer(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoKillVComYouJiao = ((CardAutoKillVComYouJiao.IsChecked) == true); SettingsManager.SaveSettingsToFile(); UpdateAutoKillTimer(); }
         private void ToggleSwitchAutoKillSeewoLauncher2DesktopAnnotation_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoKillSeewoLauncher2DesktopAnnotation = CardAutoKillSeewoLauncher2DesktopAnnotation.IsOn; SettingsManager.SaveSettingsToFile(); UpdateAutoKillTimer(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoKillSeewoLauncher2DesktopAnnotation = ((CardAutoKillSeewoLauncher2DesktopAnnotation.IsChecked) == true); SettingsManager.SaveSettingsToFile(); UpdateAutoKillTimer(); }
         private void ToggleSwitchAutoKillInkCanvas_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoKillInkCanvas = CardAutoKillInkCanvas.IsOn; SettingsManager.SaveSettingsToFile(); UpdateAutoKillTimer(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoKillInkCanvas = ((CardAutoKillInkCanvas.IsChecked) == true); SettingsManager.SaveSettingsToFile(); UpdateAutoKillTimer(); }
         private void ToggleSwitchAutoKillICA_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoKillICA = CardAutoKillICA.IsOn; SettingsManager.SaveSettingsToFile(); UpdateAutoKillTimer(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoKillICA = ((CardAutoKillICA.IsChecked) == true); SettingsManager.SaveSettingsToFile(); UpdateAutoKillTimer(); }
         private void ToggleSwitchAutoKillIDT_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoKillIDT = CardAutoKillIDT.IsOn; SettingsManager.SaveSettingsToFile(); UpdateAutoKillTimer(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoKillIDT = ((CardAutoKillIDT.IsChecked) == true); SettingsManager.SaveSettingsToFile(); UpdateAutoKillTimer(); }
         private void ToggleSwitchAutoEnterAnnotationAfterKillHite_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoEnterAnnotationAfterKillHite = CardAutoEnterAnnotationAfterKillHite.IsOn; SettingsManager.SaveSettingsToFile(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoEnterAnnotationAfterKillHite = ((CardAutoEnterAnnotationAfterKillHite.IsChecked) == true); SettingsManager.SaveSettingsToFile(); }
 
         #endregion
 
         #region Fold Mode
 
         private void ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoEnterAnnotationModeWhenExitFoldMode = CardAutoEnterAnnotationModeWhenExitFoldMode.IsOn; SettingsManager.SaveSettingsToFile(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoEnterAnnotationModeWhenExitFoldMode = ((CardAutoEnterAnnotationModeWhenExitFoldMode.IsChecked) == true); SettingsManager.SaveSettingsToFile(); }
         private void ToggleSwitchAutoFoldWhenExitWhiteboard_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldWhenExitWhiteboard = CardAutoFoldWhenExitWhiteboard.IsOn; SettingsManager.SaveSettingsToFile(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldWhenExitWhiteboard = ((CardAutoFoldWhenExitWhiteboard.IsChecked) == true); SettingsManager.SaveSettingsToFile(); }
         private void ToggleSwitchAutoFoldAfterPPTSlideShow_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldAfterPPTSlideShow = CardAutoFoldAfterPPTSlideShow.IsOn; SettingsManager.SaveSettingsToFile(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldAfterPPTSlideShow = ((CardAutoFoldAfterPPTSlideShow.IsChecked) == true); SettingsManager.SaveSettingsToFile(); }
         private void ToggleSwitchKeepFoldAfterSoftwareExit_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.KeepFoldAfterSoftwareExit = CardKeepFoldAfterSoftwareExit.IsOn; SettingsManager.SaveSettingsToFile(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.KeepFoldAfterSoftwareExit = ((CardKeepFoldAfterSoftwareExit.IsChecked) == true); SettingsManager.SaveSettingsToFile(); }
 
         #endregion
 
         #region Storage & Save
 
         private void ToggleSwitchSaveScreenshotsInDateFolders_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsSaveScreenshotsInDateFolders = ToggleSwitchSaveScreenshotsInDateFolders.IsOn; SettingsManager.SaveSettingsToFile(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsSaveScreenshotsInDateFolders = ((ToggleSwitchSaveScreenshotsInDateFolders.IsChecked) == true); SettingsManager.SaveSettingsToFile(); }
         private void ToggleSwitchAutoSaveStrokesAtScreenshot_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoSaveStrokesAtScreenshot = ToggleSwitchAutoSaveStrokesAtScreenshot.IsOn; SettingsManager.SaveSettingsToFile(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoSaveStrokesAtScreenshot = ((ToggleSwitchAutoSaveStrokesAtScreenshot.IsChecked) == true); SettingsManager.SaveSettingsToFile(); }
 
         private void SyncScreenshotFormatSelection(int format)
         {
@@ -359,13 +360,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         }
 
         private void ToggleSwitchAutoSaveStrokesAtClear_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoSaveScreenshotAtClear = ToggleSwitchAutoSaveStrokesAtClear.IsOn; SettingsManager.SaveSettingsToFile(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoSaveScreenshotAtClear = ((ToggleSwitchAutoSaveStrokesAtClear.IsChecked) == true); SettingsManager.SaveSettingsToFile(); }
         private void ToggleSwitchSaveStrokesAsXML_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsSaveStrokesAsXML = CardSaveStrokesAsXML.IsOn; SettingsManager.SaveSettingsToFile(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsSaveStrokesAsXML = ((CardSaveStrokesAsXML.IsChecked) == true); SettingsManager.SaveSettingsToFile(); }
         private void ToggleSwitchSaveStrokesAsUInK_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsSaveStrokesAsUInK = CardSaveStrokesAsUInk.IsOn; SettingsManager.SaveSettingsToFile(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsSaveStrokesAsUInK = ((CardSaveStrokesAsUInk.IsChecked) == true); SettingsManager.SaveSettingsToFile(); }
         private void ToggleSwitchEnableAutoSaveStrokes_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsEnableAutoSaveStrokes = CardEnableAutoSaveStrokes.IsOn; SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoSaveStrokesChanged(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsEnableAutoSaveStrokes = ((CardEnableAutoSaveStrokes.IsChecked) == true); SettingsManager.SaveSettingsToFile(); SettingsActionHub.OnAutoSaveStrokesChanged(); }
 
         private void ComboBoxAutoSaveStrokesInterval_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -380,7 +381,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         }
 
         private void ToggleSwitchAutoDelSavedFiles_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.AutoDelSavedFiles = CardAutoDelSavedFiles.IsOn; SettingsManager.SaveSettingsToFile(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.AutoDelSavedFiles = ((CardAutoDelSavedFiles.IsChecked) == true); SettingsManager.SaveSettingsToFile(); }
 
         private void ComboBoxAutoDelSavedFilesDaysThreshold_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -394,9 +395,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         { if (!_isLoaded) return; SettingsManager.Settings.Automation.MinimumAutomationStrokeNumber = (int)SideControlMinimumAutomationSlider.Value; SettingsManager.SaveSettingsToFile(); }
 
         private void ToggleSwitchSaveFullPageStrokes_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsSaveFullPageStrokes = CardSaveFullPageStrokes.IsOn; SettingsManager.SaveSettingsToFile(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsSaveFullPageStrokes = ((CardSaveFullPageStrokes.IsChecked) == true); SettingsManager.SaveSettingsToFile(); }
         private void ToggleSwitchUseCustomSaveFileName_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsUseCustomSaveFileName = CardUseCustomSaveFileName.IsOn; SettingsManager.SaveSettingsToFile(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsUseCustomSaveFileName = ((CardUseCustomSaveFileName.IsChecked) == true); SettingsManager.SaveSettingsToFile(); }
 
         private void TextBoxCustomSaveFileNameTemplate_LostFocus(object sender, RoutedEventArgs e)
         { if (!_isLoaded) return; SettingsManager.Settings.Automation.CustomSaveFileNameTemplate = TextBoxCustomSaveFileNameTemplate.Text; SettingsManager.SaveSettingsToFile(); }
@@ -449,50 +450,50 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void UpdateFloatingWindowInterceptorEnabled()
         {
             var auto = SettingsManager.Settings.Automation;
-            bool anyOn = ToggleSwitchSeewoWhiteboard3Floating.IsOn
-                || ToggleSwitchSeewoWhiteboard5Floating.IsOn
-                || ToggleSwitchSeewoWhiteboard5CFloating.IsOn
-                || ToggleSwitchSeewoPincoSideBarFloating.IsOn
-                || ToggleSwitchSeewoPincoDrawingFloating.IsOn
-                || ToggleSwitchSeewoPPTFloating.IsOn
-                || ToggleSwitchAiClassFloating.IsOn
-                || ToggleSwitchHiteAnnotationFloating.IsOn
-                || ToggleSwitchChangYanFloating.IsOn
-                || ToggleSwitchChangYanPPTFloating.IsOn
-                || ToggleSwitchIntelligentClassFloating.IsOn
-                || ToggleSwitchSeewoDesktopAnnotationFloating.IsOn
-                || ToggleSwitchSeewoDesktopSideBarFloating.IsOn;
+            bool anyOn = ((ToggleSwitchSeewoWhiteboard3Floating.IsChecked) == true)
+                || ((ToggleSwitchSeewoWhiteboard5Floating.IsChecked) == true)
+                || ((ToggleSwitchSeewoWhiteboard5CFloating.IsChecked) == true)
+                || ((ToggleSwitchSeewoPincoSideBarFloating.IsChecked) == true)
+                || ((ToggleSwitchSeewoPincoDrawingFloating.IsChecked) == true)
+                || ((ToggleSwitchSeewoPPTFloating.IsChecked) == true)
+                || ((ToggleSwitchAiClassFloating.IsChecked) == true)
+                || ((ToggleSwitchHiteAnnotationFloating.IsChecked) == true)
+                || ((ToggleSwitchChangYanFloating.IsChecked) == true)
+                || ((ToggleSwitchChangYanPPTFloating.IsChecked) == true)
+                || ((ToggleSwitchIntelligentClassFloating.IsChecked) == true)
+                || ((ToggleSwitchSeewoDesktopAnnotationFloating.IsChecked) == true)
+                || ((ToggleSwitchSeewoDesktopSideBarFloating.IsChecked) == true);
             auto.FloatingWindowInterceptor.IsEnabled = anyOn;
             SettingsActionHub.OnFloatingWindowInterceptorEnabledCheck(anyOn);
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchSeewoWhiteboard3Floating_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("SeewoWhiteboard3Floating", ToggleSwitchSeewoWhiteboard3Floating.IsOn); UpdateFloatingWindowInterceptorEnabled(); }
+        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("SeewoWhiteboard3Floating", ((ToggleSwitchSeewoWhiteboard3Floating.IsChecked) == true)); UpdateFloatingWindowInterceptorEnabled(); }
         private void ToggleSwitchSeewoWhiteboard5Floating_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("SeewoWhiteboard5Floating", ToggleSwitchSeewoWhiteboard5Floating.IsOn); UpdateFloatingWindowInterceptorEnabled(); }
+        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("SeewoWhiteboard5Floating", ((ToggleSwitchSeewoWhiteboard5Floating.IsChecked) == true)); UpdateFloatingWindowInterceptorEnabled(); }
         private void ToggleSwitchSeewoWhiteboard5CFloating_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("SeewoWhiteboard5CFloating", ToggleSwitchSeewoWhiteboard5CFloating.IsOn); UpdateFloatingWindowInterceptorEnabled(); }
+        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("SeewoWhiteboard5CFloating", ((ToggleSwitchSeewoWhiteboard5CFloating.IsChecked) == true)); UpdateFloatingWindowInterceptorEnabled(); }
         private void ToggleSwitchSeewoPincoSideBarFloating_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("SeewoPincoSideBarFloating", ToggleSwitchSeewoPincoSideBarFloating.IsOn); UpdateFloatingWindowInterceptorEnabled(); }
+        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("SeewoPincoSideBarFloating", ((ToggleSwitchSeewoPincoSideBarFloating.IsChecked) == true)); UpdateFloatingWindowInterceptorEnabled(); }
         private void ToggleSwitchSeewoPincoDrawingFloating_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("SeewoPincoDrawingFloating", ToggleSwitchSeewoPincoDrawingFloating.IsOn); UpdateFloatingWindowInterceptorEnabled(); }
+        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("SeewoPincoDrawingFloating", ((ToggleSwitchSeewoPincoDrawingFloating.IsChecked) == true)); UpdateFloatingWindowInterceptorEnabled(); }
         private void ToggleSwitchSeewoPPTFloating_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("SeewoPPTFloating", ToggleSwitchSeewoPPTFloating.IsOn); UpdateFloatingWindowInterceptorEnabled(); }
+        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("SeewoPPTFloating", ((ToggleSwitchSeewoPPTFloating.IsChecked) == true)); UpdateFloatingWindowInterceptorEnabled(); }
         private void ToggleSwitchAiClassFloating_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("AiClassFloating", ToggleSwitchAiClassFloating.IsOn); UpdateFloatingWindowInterceptorEnabled(); }
+        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("AiClassFloating", ((ToggleSwitchAiClassFloating.IsChecked) == true)); UpdateFloatingWindowInterceptorEnabled(); }
         private void ToggleSwitchHiteAnnotationFloating_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("HiteAnnotationFloating", ToggleSwitchHiteAnnotationFloating.IsOn); UpdateFloatingWindowInterceptorEnabled(); }
+        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("HiteAnnotationFloating", ((ToggleSwitchHiteAnnotationFloating.IsChecked) == true)); UpdateFloatingWindowInterceptorEnabled(); }
         private void ToggleSwitchChangYanFloating_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("ChangYanFloating", ToggleSwitchChangYanFloating.IsOn); UpdateFloatingWindowInterceptorEnabled(); }
+        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("ChangYanFloating", ((ToggleSwitchChangYanFloating.IsChecked) == true)); UpdateFloatingWindowInterceptorEnabled(); }
         private void ToggleSwitchChangYanPPTFloating_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("ChangYanPPTFloating", ToggleSwitchChangYanPPTFloating.IsOn); UpdateFloatingWindowInterceptorEnabled(); }
+        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("ChangYanPPTFloating", ((ToggleSwitchChangYanPPTFloating.IsChecked) == true)); UpdateFloatingWindowInterceptorEnabled(); }
         private void ToggleSwitchIntelligentClassFloating_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("IntelligentClassFloating", ToggleSwitchIntelligentClassFloating.IsOn); UpdateFloatingWindowInterceptorEnabled(); }
+        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("IntelligentClassFloating", ((ToggleSwitchIntelligentClassFloating.IsChecked) == true)); UpdateFloatingWindowInterceptorEnabled(); }
         private void ToggleSwitchSeewoDesktopAnnotationFloating_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("SeewoDesktopAnnotationFloating", ToggleSwitchSeewoDesktopAnnotationFloating.IsOn); UpdateFloatingWindowInterceptorEnabled(); }
+        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("SeewoDesktopAnnotationFloating", ((ToggleSwitchSeewoDesktopAnnotationFloating.IsChecked) == true)); UpdateFloatingWindowInterceptorEnabled(); }
         private void ToggleSwitchSeewoDesktopSideBarFloating_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("SeewoDesktopSideBarFloating", ToggleSwitchSeewoDesktopSideBarFloating.IsOn); UpdateFloatingWindowInterceptorEnabled(); }
+        { if (!_isLoaded) return; SettingsActionHub.OnFloatingWindowInterceptorRuleChanged("SeewoDesktopSideBarFloating", ((ToggleSwitchSeewoDesktopSideBarFloating.IsChecked) == true)); UpdateFloatingWindowInterceptorEnabled(); }
 
         #endregion
 
@@ -621,7 +622,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 TextBoxWorkflowName.TextChanged += TextBoxWorkflowName_TextChanged;
 
                 CheckBoxIsRevertEnabled.IsChecked = workflow.ActionSet.IsRevertEnabled;
-                ToggleIsConditionEnabled.IsOn = workflow.IsConditionEnabled;
+                ToggleIsConditionEnabled.IsChecked = workflow.IsConditionEnabled;
 
                 // 触发器
                 TriggersItemsControl.ItemsSource = workflow.Triggers;
@@ -689,7 +690,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded || _isUpdatingEditor) return;
             if (SelectedWorkflow is Workflow workflow)
             {
-                workflow.IsConditionEnabled = ToggleIsConditionEnabled.IsOn;
+                workflow.IsConditionEnabled = ((ToggleIsConditionEnabled.IsChecked) == true);
                 UpdateConditionVisibility(workflow.IsConditionEnabled);
                 Service.SaveConfig("ConditionEnabledChanged");
             }

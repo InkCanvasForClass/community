@@ -58,9 +58,9 @@ namespace Ink_Canvas
 
             try
             {
-                var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
+                var toggle = sender as Wpf.Ui.Controls.ToggleSwitch;
                 if (toggle != null)
-                    Settings.Automation.FloatingWindowInterceptor.IsEnabled = toggle.IsOn;
+                    Settings.Automation.FloatingWindowInterceptor.IsEnabled = ((toggle.IsChecked) == true);
 
                 if (_floatingWindowInterceptorManager != null)
                 {
@@ -81,92 +81,92 @@ namespace Ink_Canvas
         private void ToggleSwitchSeewoWhiteboard3Floating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoWhiteboard3Floating, toggle.IsOn);
+            var toggle = sender as Wpf.Ui.Controls.ToggleSwitch;
+            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoWhiteboard3Floating, ((toggle.IsChecked) == true));
         }
 
         private void ToggleSwitchSeewoWhiteboard5Floating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoWhiteboard5Floating, toggle.IsOn);
+            var toggle = sender as Wpf.Ui.Controls.ToggleSwitch;
+            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoWhiteboard5Floating, ((toggle.IsChecked) == true));
         }
 
         private void ToggleSwitchSeewoWhiteboard5CFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoWhiteboard5CFloating, toggle.IsOn);
+            var toggle = sender as Wpf.Ui.Controls.ToggleSwitch;
+            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoWhiteboard5CFloating, ((toggle.IsChecked) == true));
         }
 
         private void ToggleSwitchSeewoPincoSideBarFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoPincoSideBarFloating, toggle.IsOn);
+            var toggle = sender as Wpf.Ui.Controls.ToggleSwitch;
+            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoPincoSideBarFloating, ((toggle.IsChecked) == true));
         }
 
         private void ToggleSwitchSeewoPincoDrawingFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoPincoDrawingFloating, toggle.IsOn);
+            var toggle = sender as Wpf.Ui.Controls.ToggleSwitch;
+            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoPincoDrawingFloating, ((toggle.IsChecked) == true));
         }
 
         private void ToggleSwitchSeewoPPTFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoPPTFloating, toggle.IsOn);
+            var toggle = sender as Wpf.Ui.Controls.ToggleSwitch;
+            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoPPTFloating, ((toggle.IsChecked) == true));
         }
 
         private void ToggleSwitchAiClassFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.AiClassFloating, toggle.IsOn);
+            var toggle = sender as Wpf.Ui.Controls.ToggleSwitch;
+            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.AiClassFloating, ((toggle.IsChecked) == true));
         }
 
         private void ToggleSwitchHiteAnnotationFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.HiteAnnotationFloating, toggle.IsOn);
+            var toggle = sender as Wpf.Ui.Controls.ToggleSwitch;
+            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.HiteAnnotationFloating, ((toggle.IsChecked) == true));
         }
 
         private void ToggleSwitchChangYanFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.ChangYanFloating, toggle.IsOn);
+            var toggle = sender as Wpf.Ui.Controls.ToggleSwitch;
+            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.ChangYanFloating, ((toggle.IsChecked) == true));
         }
 
         private void ToggleSwitchChangYanPPTFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.ChangYanPPTFloating, toggle.IsOn);
+            var toggle = sender as Wpf.Ui.Controls.ToggleSwitch;
+            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.ChangYanPPTFloating, ((toggle.IsChecked) == true));
         }
 
         private void ToggleSwitchIntelligentClassFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.IntelligentClassFloating, toggle.IsOn);
+            var toggle = sender as Wpf.Ui.Controls.ToggleSwitch;
+            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.IntelligentClassFloating, ((toggle.IsChecked) == true));
         }
 
         private void ToggleSwitchSeewoDesktopAnnotationFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoDesktopAnnotationFloating, toggle.IsOn);
+            var toggle = sender as Wpf.Ui.Controls.ToggleSwitch;
+            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoDesktopAnnotationFloating, ((toggle.IsChecked) == true));
         }
 
         private void ToggleSwitchSeewoDesktopSideBarFloating_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoDesktopSideBarFloating, toggle.IsOn);
+            var toggle = sender as Wpf.Ui.Controls.ToggleSwitch;
+            if (toggle != null) SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoDesktopSideBarFloating, ((toggle.IsChecked) == true));
         }
 
         public void SetInterceptRule(FloatingWindowInterceptor.InterceptType type, bool enabled)

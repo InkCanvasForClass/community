@@ -1,5 +1,6 @@
 using Ink_Canvas.Properties;
-using iNKORE.UI.WPF.Modern.Controls;
+// 只别名导入 WPF-UI 专属控件，避免与 System.Windows.Controls 的同名类型（TextBlock/Image/Button/Border）产生 CS0104 歧义。
+using ToggleSwitch = Wpf.Ui.Controls.ToggleSwitch;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;

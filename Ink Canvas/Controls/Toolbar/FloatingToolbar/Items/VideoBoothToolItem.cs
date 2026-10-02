@@ -1,8 +1,8 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
+// 只别名导入 WPF-UI 专属控件，避免与 System.Windows.Controls 同名类型冲突。
+using SymbolRegular = Wpf.Ui.Controls.SymbolRegular;
 using System.Windows.Input;
-using FluentSystemIcons = iNKORE.UI.WPF.Modern.Common.IconKeys.FluentSystemIcons;
 
 namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
 {
@@ -13,7 +13,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public override string Description => Strings.GetString("Board_VideoBooth") ?? "视频展台";
         public override string IconGeometry => null;
-        public override FontIconData? IconKey => FluentSystemIcons.Video_24_Regular;
+        public override SymbolRegular? IconKey => SymbolRegular.Video24;
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)
         {

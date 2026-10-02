@@ -1,7 +1,7 @@
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
-using iNKORE.UI.WPF.Modern.Controls;
+using Wpf.Ui.Controls;
+using Wpf.Ui.Controls;
 using System;
 using System.IO;
 using System.Windows;
@@ -59,9 +59,9 @@ namespace Ink_Canvas.Controls.Toolbar
                 }
             };
 
-            var locationToggle = new iNKORE.UI.WPF.Modern.Controls.ToggleSwitch
+            var locationToggle = new Wpf.Ui.Controls.ToggleSwitch
             {
-                IsOn = auto.IsSaveScreenshotToCustomLocation,
+                IsChecked = auto.IsSaveScreenshotToCustomLocation,
                 MinWidth = 0,
                 OnContent = "",
                 OffContent = "",
@@ -79,7 +79,7 @@ namespace Ink_Canvas.Controls.Toolbar
             {
                 Header = StorageStrings.Storage_ScreenshotSaveLocation,
                 Description = StorageStrings.Storage_ScreenshotSaveLocationDesc,
-                HeaderIcon = new FontIcon(SegoeFluentIcons.Folder),
+                HeaderIcon = new FontIcon(SymbolRegular.Folder),
                 Content = new StackPanel
                 {
                     Orientation = Orientation.Horizontal,
@@ -90,7 +90,7 @@ namespace Ink_Canvas.Controls.Toolbar
             // 同步启用状态：开关关时路径与浏览按钮变灰
             void UpdateLocationRowEnabled()
             {
-                var enabled = locationToggle.IsOn;
+                var enabled = locationToggle.IsChecked == true;
                 locationTextBox.IsEnabled = enabled;
                 browseButton.IsEnabled = enabled;
                 pathRow.Opacity = enabled ? 1.0 : 0.4;
@@ -99,7 +99,7 @@ namespace Ink_Canvas.Controls.Toolbar
 
             locationToggle.Toggled += (s, e) =>
             {
-                SettingsManager.Settings.Automation.IsSaveScreenshotToCustomLocation = locationToggle.IsOn;
+                SettingsManager.Settings.Automation.IsSaveScreenshotToCustomLocation = locationToggle.IsChecked == true;
                 SettingsManager.SaveSettingsToFile();
                 UpdateLocationRowEnabled();
             };
@@ -108,12 +108,12 @@ namespace Ink_Canvas.Controls.Toolbar
             var clipboardCard = new Ink_Canvas.Controls.LabeledSettingsCard
             {
                 Header = StorageStrings.Storage_CopyScreenshotToClipboard,
-                Icon = SegoeFluentIcons.Copy,
-                IsOn = auto.IsCopyScreenshotToClipboard
+                Icon = SymbolRegular.Copy,
+                IsChecked = auto.IsCopyScreenshotToClipboard
             };
             clipboardCard.Toggled += (s, e) =>
             {
-                SettingsManager.Settings.Automation.IsCopyScreenshotToClipboard = clipboardCard.IsOn;
+                SettingsManager.Settings.Automation.IsCopyScreenshotToClipboard = clipboardCard.IsChecked == true;
                 SettingsManager.SaveSettingsToFile();
             };
 
@@ -121,12 +121,12 @@ namespace Ink_Canvas.Controls.Toolbar
             var autoSaveStrokesCard = new Ink_Canvas.Controls.LabeledSettingsCard
             {
                 Header = StorageStrings.Storage_AutoSaveInkOnScreenshot,
-                Icon = SegoeFluentIcons.Save,
-                IsOn = auto.IsAutoSaveStrokesAtScreenshot
+                Icon = SymbolRegular.Save,
+                IsChecked = auto.IsAutoSaveStrokesAtScreenshot
             };
             autoSaveStrokesCard.Toggled += (s, e) =>
             {
-                SettingsManager.Settings.Automation.IsAutoSaveStrokesAtScreenshot = autoSaveStrokesCard.IsOn;
+                SettingsManager.Settings.Automation.IsAutoSaveStrokesAtScreenshot = autoSaveStrokesCard.IsChecked == true;
                 SettingsManager.SaveSettingsToFile();
             };
 
@@ -134,12 +134,12 @@ namespace Ink_Canvas.Controls.Toolbar
             var dateFolderCard = new Ink_Canvas.Controls.LabeledSettingsCard
             {
                 Header = StorageStrings.Storage_ScreenshotsByDateFolder,
-                Icon = SegoeFluentIcons.Folder,
-                IsOn = auto.IsSaveScreenshotsInDateFolders
+                Icon = SymbolRegular.Folder,
+                IsChecked = auto.IsSaveScreenshotsInDateFolders
             };
             dateFolderCard.Toggled += (s, e) =>
             {
-                SettingsManager.Settings.Automation.IsSaveScreenshotsInDateFolders = dateFolderCard.IsOn;
+                SettingsManager.Settings.Automation.IsSaveScreenshotsInDateFolders = dateFolderCard.IsChecked == true;
                 SettingsManager.SaveSettingsToFile();
             };
 
