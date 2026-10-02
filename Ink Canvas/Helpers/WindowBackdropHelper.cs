@@ -132,6 +132,15 @@ namespace Ink_Canvas.Helpers
                     // 同时补上 WindowChrome 玻璃帧，否则普通窗口的客户区不会被 DWM 绘制系统背景（会变成纯黑）
                     ConfigureWindowChrome(window, backdropType, false);
                     WindowBackdrop.RemoveBackground(window);
+
+                    // RemoveBackground 会把窗口 Background 涂成透明，整窗交给 DWM 系统背景绘制。
+                    // 但 DWM 画的是「窗口背后内容的模糊」，而这些浮窗背后常常是主程序的浅色画布，
+                    // 模糊结果为浅灰；深色主题的前景（TextFillColorPrimaryBrush）是白色，
+                    // 于是变成白底白字、导航/标签不可读。
+                    // 这里在 DWM 背板之下垫一层不透明的主题底色：毛玻璃仍在最上层绘制，
+                    // 但文字始终落在自身主题色上，任何壁纸/背后内容下都保持对比度。
+                    EnsureOpaqueBackdropBase(window);
+
                     WindowBackdrop.ApplyBackdrop(window, backdropType);
                 }
 
@@ -259,6 +268,9 @@ namespace Ink_Canvas.Helpers
 
                 for (int i = 0; i < count; i++)
                 {
+                    // 垫底色是取自主题字典的画刷实例，主题字典被替换后旧实例不会自动跟随，
+                    // 这里重新取一次，保证浮窗底色与当前主题一致。
+                    RefreshBackdropBase(alive[i]);
                     SyncWindowDarkMode(alive[i]);
                 }
             }
@@ -266,6 +278,34 @@ namespace Ink_Canvas.Helpers
             {
             }
         }
+
+        /// <summary>
+        /// 主题切换后重取浮窗的不透明垫底色。只处理曾由 <see cref="EnsureOpaqueBackdropBase"/>
+        /// 写入过垫底的窗口——那些窗口的原始透明背景已被 DWM 背板接管，不该被改回。
+        /// </summary>
+        private static void RefreshBackdropBase(Window window)
+        {
+            try
+            {
+                if ((bool)window.GetValue(BackdropBaseAppliedProperty) == false) return;
+
+                var baseBrush = window.TryFindResource("ApplicationBackgroundBrush") as SolidColorBrush;
+                if (baseBrush != null && baseBrush.Color.A > 0)
+                {
+                    window.Background = baseBrush;
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        private static readonly DependencyProperty BackdropBaseAppliedProperty =
+            DependencyProperty.RegisterAttached(
+                "BackdropBaseApplied",
+                typeof(bool),
+                typeof(WindowBackdropHelper),
+                new PropertyMetadata(false));
 
         private static readonly List<WeakReference<Window>> RegisteredWindows = new();
 
@@ -291,6 +331,39 @@ namespace Ink_Canvas.Helpers
                 }
 
                 RegisteredWindows.Add(new WeakReference<Window>(window));
+            }
+        }
+
+        /// <summary>
+        /// 在 DWM 背板之下垫一层不透明的主题底色。
+        ///
+        /// DWM 系统背板绘制的是「窗口背后内容的模糊」，其明暗取决于背后是什么——浮窗背后通常是
+        /// 主程序的浅色画布，模糊后为浅灰。此时深色主题的白色前景会与之撞成白底白字。
+        /// 垫上不透明的主题底色后，毛玻璃仍由 DWM 绘制在其上，但内容与文字始终落在自身主题色上，
+        /// 主题切换时通过 DynamicResource 自动跟随。
+        ///
+        /// 仅在窗口背景已被清成透明时才写入；窗口本来就有不透明背景（如点名/计时器窗口的
+        /// ApplicationBackgroundBrush）则保持原样。
+        /// </summary>
+        private static void EnsureOpaqueBackdropBase(Window window)
+        {
+            try
+            {
+                if (window.Background is SolidColorBrush existing && existing.Color.A > 0)
+                {
+                    // 已经是不透明背景，WPF 会盖住 DWM 背板，保持调用方设定的颜色不动
+                    return;
+                }
+
+                var baseBrush = window.TryFindResource("ApplicationBackgroundBrush") as SolidColorBrush;
+                if (baseBrush != null && baseBrush.Color.A > 0)
+                {
+                    window.Background = baseBrush;
+                    window.SetValue(BackdropBaseAppliedProperty, true);
+                }
+            }
+            catch
+            {
             }
         }
 
