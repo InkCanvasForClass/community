@@ -1,33 +1,16 @@
-<Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.UpdatePage"
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
-      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-      xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
-      xmlns:sys="clr-namespace:System;assembly=mscorlib"
-      xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
-      xmlns:c="clr-namespace:Ink_Canvas.Converter"
-      xmlns:mdxam="clr-namespace:MdXaml;assembly=MdXaml"
-      mc:Ignorable="d"
-      Title="{x:Static props:NotificationStrings.Type_Update}">
+<?xml version="1.0" encoding="utf-8"?><Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.UpdatePage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages" xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta" xmlns:sys="clr-namespace:System;assembly=mscorlib" xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls" xmlns:c="clr-namespace:Ink_Canvas.Converter" xmlns:mdxam="clr-namespace:MdXaml;assembly=MdXaml" mc:Ignorable="d" Title="{x:Static props:NotificationStrings.Type_Update}">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
             <FrameworkElement.Resources>
                 <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
                 <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-                <Style x:Key="SettingsSectionHeaderTextBlockStyle"
-                       BasedOn="{StaticResource BodyStrongTextBlockStyle}"
-                       TargetType="TextBlock">
+                <Style x:Key="SettingsSectionHeaderTextBlockStyle" BasedOn="{StaticResource BodyStrongTextBlockStyle}" TargetType="TextBlock">
                     <Setter Property="Margin" Value="1,30,0,6" />
                 </Style>
             </FrameworkElement.Resources>
 
-            <vio:SimpleStackPanel MaxWidth="1000"
-                                  HorizontalAlignment="Stretch"
-                                  Spacing="{StaticResource SettingsCardSpacing}">
+            <vio:SimpleStackPanel MaxWidth="1000" HorizontalAlignment="Stretch" Spacing="{StaticResource SettingsCardSpacing}">
 
                 <!-- 状态横幅 -->
                 <Border Margin="0,16,0,0">
@@ -37,91 +20,52 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <Grid Grid.Column="0"
-                              Width="48" Height="48"
-                              VerticalAlignment="Top"
-                              Margin="0,0,16,0">
+                        <Grid Grid.Column="0" Width="48" Height="48" VerticalAlignment="Top" Margin="0,0,16,0">
                             <Ellipse Fill="{DynamicResource SystemControlHighlightAccentBrush}" />
-                            <Grid x:Name="CompletedStatusGlyph"
-                                  Width="22" Height="22"
-                                  HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Grid x:Name="CompletedStatusGlyph" Width="22" Height="22" HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <Ellipse Stroke="White" StrokeThickness="2" />
-                                <Path Data="M 5,11 L 9,15 L 17,7"
-                                      Stroke="White"
-                                      StrokeThickness="2"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      StrokeLineJoin="Round" />
+                                <Path Data="M 5,11 L 9,15 L 17,7" Stroke="White" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
                             </Grid>
-                            <ui:SymbolIcon x:Name="StatusIcon"
-                                         FontSize="22"
-                                         Foreground="White"
-                                         Visibility="Collapsed"
-                                         HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <ui:SymbolIcon x:Name="StatusIcon" FontSize="22" Foreground="White" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Grid>
 
                         <vio:SimpleStackPanel Grid.Column="1" Spacing="4">
-                            <TextBlock x:Name="StatusTitle"
-                                       FontSize="22" FontWeight="SemiBold"
-                                       Text="{x:Static props:UpdateStrings.Status_Loading}" />
-                            <TextBlock x:Name="StatusSubtitle"
-                                       Opacity="0.75"
-                                       TextWrapping="Wrap"
-                                       Text="" />
+                            <TextBlock x:Name="StatusTitle" FontSize="22" FontWeight="SemiBold" Text="{x:Static props:UpdateStrings.Status_Loading}" />
+                            <TextBlock x:Name="StatusSubtitle" Opacity="0.75" TextWrapping="Wrap" Text="" />
 
                             <!-- 进度区 -->
-                            <vio:SimpleStackPanel x:Name="ProgressPanel"
-                                                  Visibility="Collapsed"
-                                                  Margin="0,8,0,0"
-                                                  Spacing="4">
+                            <vio:SimpleStackPanel x:Name="ProgressPanel" Visibility="Collapsed" Margin="0,8,0,0" Spacing="4">
                                 <TextBlock x:Name="ProgressText" FontSize="13" Opacity="0.8" />
-                                <ProgressBar x:Name="ProgressBar"
-                                             Style="{DynamicResource DefaultProgressBarStyle}"
-                                             Height="6"
-                                             Minimum="0" Maximum="100"
-                                             Value="0" />
+                                <ProgressBar x:Name="ProgressBar" Style="{DynamicResource DefaultProgressBarStyle}" Height="6" Minimum="0" Maximum="100" Value="0" />
                             </vio:SimpleStackPanel>
 
                             <!-- 操作按钮 -->
-                            <vio:SimpleStackPanel Orientation="Horizontal"
-                                                  Margin="0,12,0,0"
-                                                  Spacing="8">
-                                <Button x:Name="CheckUpdateButton"
-                                        Style="{DynamicResource AccentButtonStyle}"
-                                        Click="CheckUpdateButton_Click">
+                            <vio:SimpleStackPanel Orientation="Horizontal" Margin="0,12,0,0" Spacing="8">
+                                <ui:Button x:Name="CheckUpdateButton" Click="CheckUpdateButton_Click" Appearance="Primary">
                                     <vio:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                         <ui:SymbolIcon Symbol="ArrowClockwise24" FontSize="14" />
                                         <TextBlock Text="{x:Static props:UpdateStrings.Btn_CheckUpdate}" />
                                     </vio:SimpleStackPanel>
-                                </Button>
-                                <Button x:Name="UpdateNowButton"
-                                        Visibility="Collapsed"
-                                        Style="{DynamicResource AccentButtonStyle}"
-                                        Click="UpdateNowButton_Click">
+                                </ui:Button>
+                                <ui:Button x:Name="UpdateNowButton" Visibility="Collapsed" Click="UpdateNowButton_Click" Appearance="Primary">
                                     <vio:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                         <ui:SymbolIcon Symbol="ArrowDownload24" FontSize="14" />
                                         <TextBlock Text="{x:Static props:UpdateStrings.Btn_DownloadAndInstall}" />
                                     </vio:SimpleStackPanel>
-                                </Button>
-                                <Button x:Name="UpdateLaterButton"
-                                        Visibility="Collapsed"
-                                        Click="UpdateLaterButton_Click">
+                                </ui:Button>
+                                <Button x:Name="UpdateLaterButton" Visibility="Collapsed" Click="UpdateLaterButton_Click">
                                     <vio:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                         <ui:SymbolIcon Symbol="WeatherMoon24" FontSize="14" />
                                         <TextBlock Text="{x:Static props:UpdateStrings.Btn_InstallOnExit}" />
                                     </vio:SimpleStackPanel>
                                 </Button>
-                                <Button x:Name="SkipVersionButton"
-                                        Visibility="Collapsed"
-                                        Click="SkipVersionButton_Click">
+                                <Button x:Name="SkipVersionButton" Visibility="Collapsed" Click="SkipVersionButton_Click">
                                     <vio:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                         <ui:SymbolIcon Symbol="Dismiss24" FontSize="14" />
                                         <TextBlock Text="{x:Static props:UpdateStrings.Btn_SkipVersion}" />
                                     </vio:SimpleStackPanel>
                                 </Button>
-                                <Button x:Name="CancelDownloadButton"
-                                        Visibility="Collapsed"
-                                        Click="CancelDownloadButton_Click">
+                                <Button x:Name="CancelDownloadButton" Visibility="Collapsed" Click="CancelDownloadButton_Click">
                                     <vio:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                         <ui:SymbolIcon Symbol="Dismiss24" FontSize="14" />
                                         <TextBlock Text="{x:Static props:CommonStrings.Common_Cancel}" />
@@ -133,189 +77,149 @@
                 </Border>
 
                 <!-- Tab 切换 -->
-                <TabControl x:Name="UpdateTabControl"
-                            Margin="0,16,0,0"
-                            HorizontalContentAlignment="Left"
-                            Style="{StaticResource TabControlPivotStyle}"
-                            BorderThickness="0"
-                            Background="Transparent"
-                            SelectionChanged="UpdateTabControl_SelectionChanged">
+                <TabControl x:Name="UpdateTabControl" Margin="0,16,0,0" HorizontalContentAlignment="Left" Style="{StaticResource TabControlPivotStyle}" BorderThickness="0" Background="Transparent" SelectionChanged="UpdateTabControl_SelectionChanged">
                     <TabControl.Resources>
                         <sys:Double x:Key="PivotHeaderItemFontSize">16</sys:Double>
                     </TabControl.Resources>
                     <!-- 更新日志 -->
                     <TabItem Header="{x:Static props:UpdateStrings.Tab_Changelog}">
-                        <Border Margin="0,8,0,0"
-                                Padding="16"
-                                CornerRadius="8"
-                                MinHeight="200"
-                                Background="{DynamicResource LayerFillColorDefaultBrush}">
-                            <ScrollViewer VerticalScrollBarVisibility="Auto"
-                                          HorizontalScrollBarVisibility="Disabled"
-                                          PanningMode="VerticalOnly"
-                                          MaxHeight="500">
-                                <mdxam:MarkdownScrollViewer x:Name="ChangelogViewer"
-                                                            MarkdownStyleName="GithubLike" />
+                        <Border Margin="0,8,0,0" Padding="16" CornerRadius="8" MinHeight="200" Background="{DynamicResource LayerFillColorDefaultBrush}">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" PanningMode="VerticalOnly" MaxHeight="500">
+                                <mdxam:MarkdownScrollViewer x:Name="ChangelogViewer" MarkdownStyleName="GithubLike" />
                             </ScrollViewer>
                         </Border>
                     </TabItem>
 
                     <!-- 更新设置 -->
                     <TabItem Header="{x:Static props:UpdateStrings.Tab_UpdateSettings}">
-                        <vio:SimpleStackPanel Margin="0,8,0,0"
-                                              Spacing="{StaticResource SettingsCardSpacing}">
-                            <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                                       Text="{x:Static props:StorageStrings.Storage_Legend_Update}" />
+                        <vio:SimpleStackPanel Margin="0,8,0,0" Spacing="{StaticResource SettingsCardSpacing}">
+                            <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="{x:Static props:StorageStrings.Storage_Legend_Update}" />
 
-                            <controls:LabeledSettingsCard x:Name="CardAutoUpdate"
-                                                          Header="{x:Static props:UpdateStrings.Header_AutoUpdate}"
-                                                          Description="{x:Static props:StartupStrings.AutoUpdateHint}"
-                                                          Symbol="ArrowSync24"
-                                                          SwitchName="ToggleSwitchIsAutoUpdate"
-                                                          Toggled="ToggleSwitchIsAutoUpdate_Toggled" />
+                            <controls:LabeledSettingsCard x:Name="CardAutoUpdate" Header="{x:Static props:UpdateStrings.Header_AutoUpdate}" Description="{x:Static props:StartupStrings.AutoUpdateHint}" Symbol="ArrowSync24" SwitchName="ToggleSwitchIsAutoUpdate" Toggled="ToggleSwitchIsAutoUpdate_Toggled" />
 
-                            <controls:LabeledSettingsCard x:Name="CardSilentUpdate"
-                                                          Header="{x:Static props:UpdateStrings.Header_SilentUpdate}"
-                                                          Description="{x:Static props:StartupStrings.SilentUpdateHint}"
-                                                          Symbol="WeatherMoon24"
-                                                          SwitchName="ToggleSwitchIsAutoUpdateWithSilence"
-                                                          ShowWhen="{Binding IsOn, ElementName=CardAutoUpdate}"
-                                                          d:Visibility="Visible"
-                                                          Toggled="ToggleSwitchIsAutoUpdateWithSilence_Toggled" />
+                            <controls:LabeledSettingsCard x:Name="CardSilentUpdate" Header="{x:Static props:UpdateStrings.Header_SilentUpdate}" Description="{x:Static props:StartupStrings.SilentUpdateHint}" Symbol="WeatherMoon24" SwitchName="ToggleSwitchIsAutoUpdateWithSilence" ShowWhen="{Binding IsOn, ElementName=CardAutoUpdate}" d:Visibility="Visible" Toggled="ToggleSwitchIsAutoUpdateWithSilence_Toggled" />
 
-                            <controls:LabeledSettingsCard x:Name="CardSmartUpdate"
-                                                          Header="{x:Static props:StartupStrings.SmartUpdate}"
-                                                          Description="{x:Static props:StartupStrings.SmartUpdateHint}"
-                                                          Symbol="CloudArrowDown24"
-                                                          SwitchName="ToggleSwitchIsSmartUpdate"
-                                                          Toggled="ToggleSwitchIsSmartUpdate_Toggled" />
+                            <controls:LabeledSettingsCard x:Name="CardSmartUpdate" Header="{x:Static props:StartupStrings.SmartUpdate}" Description="{x:Static props:StartupStrings.SmartUpdateHint}" Symbol="CloudArrowDown24" SwitchName="ToggleSwitchIsSmartUpdate" Toggled="ToggleSwitchIsSmartUpdate_Toggled" />
 
-                            <controls:SettingsExpander x:Name="ExpanderSilentUpdateTime"
-                                                 Header="{x:Static props:StartupStrings.SilentUpdate_TimeRange}"
-                                                 Visibility="{Binding IsOn, ElementName=CardSilentUpdate, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                                 IsExpanded="{Binding IsOn, ElementName=CardSilentUpdate, Mode=OneWay}"
-                                                 d:Visibility="Visible" d:IsExpanded="True">
-                                <controls:SettingsExpander.HeaderIcon>
+                            <ui:CardExpander x:Name="ExpanderSilentUpdateTime" Visibility="{Binding IsOn, ElementName=CardSilentUpdate, Converter={StaticResource BooleanToVisibilityConverter}}" IsExpanded="{Binding IsOn, ElementName=CardSilentUpdate, Mode=OneWay}" d:Visibility="Visible" d:IsExpanded="True">
+                                <ui:CardExpander.Header>
+                                    <StackPanel>
+                                        <TextBlock Text="{x:Static props:StartupStrings.SilentUpdate_TimeRange}" />
+                                    </StackPanel>
+                                </ui:CardExpander.Header>
+                                <ui:CardExpander.Icon>
                                     <ui:SymbolIcon Symbol="Settings24" />
-                                </controls:SettingsExpander.HeaderIcon>
+                                </ui:CardExpander.Icon>
                                 <StackPanel>
-                                    <controls:SettingsCard Header="{x:Static props:UpdateStrings.SilentUpdate_TimeRangeSettings}"
-                                                     Description="{x:Static props:StartupStrings.SilentUpdateFullHint}">
-                                        <controls:SettingsCard.Content>
+                                    <ui:CardControl>
+                                        <ui:CardControl.Header>
+                                            <StackPanel>
+                                                <TextBlock Text="{x:Static props:UpdateStrings.SilentUpdate_TimeRangeSettings}" />
+                                                <TextBlock Text="{x:Static props:StartupStrings.SilentUpdateFullHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            </StackPanel>
+                                        </ui:CardControl.Header>
+                                        <ui:CardControl.Content>
                                             <vio:SimpleStackPanel Orientation="Horizontal" Spacing="12">
                                                 <vio:SimpleStackPanel Orientation="Horizontal">
-                                                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center"
-                                                               Text="{x:Static props:CommonStrings.Time_Start}" FontSize="14" />
-                                                    <ComboBox x:Name="AutoUpdateWithSilenceStartTimeComboBox"
-                                                              SelectionChanged="AutoUpdateWithSilenceStartTimeComboBox_SelectionChanged" />
+                                                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" Text="{x:Static props:CommonStrings.Time_Start}" FontSize="14" />
+                                                    <ComboBox x:Name="AutoUpdateWithSilenceStartTimeComboBox" SelectionChanged="AutoUpdateWithSilenceStartTimeComboBox_SelectionChanged" />
                                                 </vio:SimpleStackPanel>
                                                 <vio:SimpleStackPanel Orientation="Horizontal">
-                                                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center"
-                                                               Text="{x:Static props:CommonStrings.Time_End}" FontSize="14" />
-                                                    <ComboBox x:Name="AutoUpdateWithSilenceEndTimeComboBox"
-                                                              SelectionChanged="AutoUpdateWithSilenceEndTimeComboBox_SelectionChanged" />
+                                                    <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" Text="{x:Static props:CommonStrings.Time_End}" FontSize="14" />
+                                                    <ComboBox x:Name="AutoUpdateWithSilenceEndTimeComboBox" SelectionChanged="AutoUpdateWithSilenceEndTimeComboBox_SelectionChanged" />
                                                 </vio:SimpleStackPanel>
                                             </vio:SimpleStackPanel>
-                                        </controls:SettingsCard.Content>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:StartupStrings.TimePeriodHint}" />
+                                        </ui:CardControl.Content>
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:StartupStrings.TimePeriodHint}" />
                                 </StackPanel>
-                            </controls:SettingsExpander>
+                            </ui:CardExpander>
 
-                            <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                                       Text="{x:Static props:UpdateStrings.Update_Channel}" />
+                            <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="{x:Static props:UpdateStrings.Update_Channel}" />
 
-                            <controls:SettingsCard Header="{x:Static props:UpdateStrings.Update_Channel}"
-                                             Description="{x:Static props:StartupStrings.UpdateChannelHint}">
-                                <controls:SettingsCard.HeaderIcon>
+                            <ui:CardControl>
+                                <ui:CardControl.Header>
+                                    <StackPanel>
+                                        <TextBlock Text="{x:Static props:UpdateStrings.Update_Channel}" />
+                                        <TextBlock Text="{x:Static props:StartupStrings.UpdateChannelHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    </StackPanel>
+                                </ui:CardControl.Header>
+                                <ui:CardControl.Icon>
                                     <ui:SymbolIcon Symbol="FolderSync24" />
-                                </controls:SettingsCard.HeaderIcon>
-                                <ComboBox x:Name="UpdateChannelSelector"
-                                          SelectionChanged="UpdateChannelSelector_SelectionChanged">
+                                </ui:CardControl.Icon>
+                                <ComboBox x:Name="UpdateChannelSelector" SelectionChanged="UpdateChannelSelector_SelectionChanged">
                                     <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_Release}" Tag="Release" />
                                     <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_Preview}" Tag="Preview" />
                                     <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_Beta}" Tag="Beta" />
                                 </ComboBox>
-                            </controls:SettingsCard>
+                            </ui:CardControl>
 
-                            <controls:SettingsCard Header="{x:Static props:StartupStrings.UpdatePackageArchitecture}"
-                                             Description="{x:Static props:StartupStrings.UpdatePackageArchitectureHint}">
-                                <controls:SettingsCard.HeaderIcon>
+                            <ui:CardControl>
+                                <ui:CardControl.Header>
+                                    <StackPanel>
+                                        <TextBlock Text="{x:Static props:StartupStrings.UpdatePackageArchitecture}" />
+                                        <TextBlock Text="{x:Static props:StartupStrings.UpdatePackageArchitectureHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    </StackPanel>
+                                </ui:CardControl.Header>
+                                <ui:CardControl.Icon>
                                     <ui:SymbolIcon Symbol="WindowDevTools24" />
-                                </controls:SettingsCard.HeaderIcon>
-                                <ComboBox x:Name="UpdatePackageArchitectureSelector"
-                                          SelectionChanged="UpdatePackageArchitectureSelector_SelectionChanged">
+                                </ui:CardControl.Icon>
+                                <ComboBox x:Name="UpdatePackageArchitectureSelector" SelectionChanged="UpdatePackageArchitectureSelector_SelectionChanged">
                                     <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageArch_X86}" Tag="X86" />
                                     <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageArch_X64}" Tag="X64" />
                                 </ComboBox>
-                            </controls:SettingsCard>
+                            </ui:CardControl>
 
-                            <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                                       Text="{x:Static props:UpdateStrings.Section_Maintenance}" />
+                            <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="{x:Static props:UpdateStrings.Section_Maintenance}" />
 
-                            <controls:SettingsCard Header="{x:Static props:BtnStrings.VersionFix}"
-                                             Description="{x:Static props:StartupStrings.FixVersionHint}">
-                                <controls:SettingsCard.HeaderIcon>
+                            <ui:CardControl>
+                                <ui:CardControl.Header>
+                                    <StackPanel>
+                                        <TextBlock Text="{x:Static props:BtnStrings.VersionFix}" />
+                                        <TextBlock Text="{x:Static props:StartupStrings.FixVersionHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    </StackPanel>
+                                </ui:CardControl.Header>
+                                <ui:CardControl.Icon>
                                     <ui:SymbolIcon Symbol="Wrench24" />
-                                </controls:SettingsCard.HeaderIcon>
-                                <Button x:Name="FixVersionButton" Content="{x:Static props:BtnStrings.VersionFix}"
-                                        Click="FixVersionButton_Click" />
-                            </controls:SettingsCard>
+                                </ui:CardControl.Icon>
+                                <Button x:Name="FixVersionButton" Content="{x:Static props:BtnStrings.VersionFix}" Click="FixVersionButton_Click" />
+                            </ui:CardControl>
                         </vio:SimpleStackPanel>
                     </TabItem>
 
                     <!-- 历史版本 -->
                     <TabItem x:Name="HistoryTabItem" Header="{x:Static props:UpdateStrings.Tab_HistoryVersions}">
                         <vio:SimpleStackPanel Margin="0,8,0,0" Spacing="12">
-                            <controls:SettingsCard Header="{x:Static props:UpdateStrings.History_SelectVersion}"
-                                             Description="{x:Static props:UpdateStrings.History_SelectVersionDesc}">
-                                <controls:SettingsCard.HeaderIcon>
+                            <ui:CardControl>
+                                <ui:CardControl.Header>
+                                    <StackPanel>
+                                        <TextBlock Text="{x:Static props:UpdateStrings.History_SelectVersion}" />
+                                        <TextBlock Text="{x:Static props:UpdateStrings.History_SelectVersionDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    </StackPanel>
+                                </ui:CardControl.Header>
+                                <ui:CardControl.Icon>
                                     <ui:SymbolIcon Symbol="History24" />
-                                </controls:SettingsCard.HeaderIcon>
-                                <ComboBox x:Name="VersionComboBox"
-                                          DisplayMemberPath="Version"
-                                          SelectionChanged="VersionComboBox_SelectionChanged" />
-                            </controls:SettingsCard>
+                                </ui:CardControl.Icon>
+                                <ComboBox x:Name="VersionComboBox" DisplayMemberPath="Version" SelectionChanged="VersionComboBox_SelectionChanged" />
+                            </ui:CardControl>
 
-                            <Border Padding="16"
-                                    CornerRadius="8"
-                                    MinHeight="200"
-                                    Background="{DynamicResource LayerFillColorDefaultBrush}">
-                                <ScrollViewer x:Name="ReleaseNotesScrollViewer"
-                                              VerticalScrollBarVisibility="Auto"
-                                              HorizontalScrollBarVisibility="Disabled"
-                                              PanningMode="VerticalOnly"
-                                              MaxHeight="350">
-                                    <mdxam:MarkdownScrollViewer x:Name="ReleaseNotesViewer"
-                                                                MarkdownStyleName="GithubLike"
-                                                                IsHitTestVisible="False" />
+                            <Border Padding="16" CornerRadius="8" MinHeight="200" Background="{DynamicResource LayerFillColorDefaultBrush}">
+                                <ScrollViewer x:Name="ReleaseNotesScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" PanningMode="VerticalOnly" MaxHeight="350">
+                                    <mdxam:MarkdownScrollViewer x:Name="ReleaseNotesViewer" MarkdownStyleName="GithubLike" IsHitTestVisible="False" />
                                 </ScrollViewer>
                             </Border>
 
-                            <Button x:Name="RollbackButton"
-                                    HorizontalAlignment="Left"
-                                    IsEnabled="False"
-                                    Style="{DynamicResource AccentButtonStyle}"
-                                    Click="RollbackButton_Click">
+                            <ui:Button x:Name="RollbackButton" HorizontalAlignment="Left" IsEnabled="False" Click="RollbackButton_Click" Appearance="Primary">
                                 <vio:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                                     <ui:SymbolIcon Symbol="ArrowUndo24" FontSize="14" />
                                     <TextBlock Text="{x:Static props:UpdateStrings.Btn_RollbackToVersion}" />
                                 </vio:SimpleStackPanel>
-                            </Button>
+                            </ui:Button>
 
-                            <Border x:Name="RollbackProgressPanel"
-                                    Visibility="Collapsed"
-                                    Padding="12"
-                                    CornerRadius="8"
-                                    Background="{DynamicResource LayerFillColorDefaultBrush}"
-                                    BorderBrush="{DynamicResource SettingsPageBorderBrush}"
-                                    BorderThickness="1">
+                            <Border x:Name="RollbackProgressPanel" Visibility="Collapsed" Padding="12" CornerRadius="8" Background="{DynamicResource LayerFillColorDefaultBrush}" BorderBrush="{DynamicResource SettingsPageBorderBrush}" BorderThickness="1">
                                 <vio:SimpleStackPanel Spacing="6">
                                     <TextBlock x:Name="RollbackProgressText" Text="{x:Static props:UpdateStrings.Progress_PreparingDownload}" FontSize="13" />
-                                    <ProgressBar x:Name="RollbackProgressBar"
-                                                 Style="{DynamicResource DefaultProgressBarStyle}"
-                                                 Height="6"
-                                                 Minimum="0" Maximum="100" Value="0" />
+                                    <ProgressBar x:Name="RollbackProgressBar" Style="{DynamicResource DefaultProgressBarStyle}" Height="6" Minimum="0" Maximum="100" Value="0" />
                                 </vio:SimpleStackPanel>
                             </Border>
                         </vio:SimpleStackPanel>

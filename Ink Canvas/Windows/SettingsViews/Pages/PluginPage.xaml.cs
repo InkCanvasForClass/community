@@ -52,9 +52,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                         HorizontalAlignment = HorizontalAlignment.Center,
                         Margin = new Thickness(0, 40, 0, 0)
                     };
-                    var icon = new Wpf.Ui.Controls.FontIcon
+                    var icon = new Wpf.Ui.Controls.SymbolIcon
                     {
-                        Icon = SymbolRegular.Puzzle,
+                        Symbol = SymbolRegular.PuzzlePiece24,
                         FontSize = 48,
                         Opacity = 0.4,
                         HorizontalAlignment = HorizontalAlignment.Center,
@@ -112,9 +112,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 CornerRadius = new CornerRadius(6),
                 Margin = new Thickness(0, 0, 12, 0),
                 VerticalAlignment = VerticalAlignment.Center,
-                Child = new Wpf.Ui.Controls.FontIcon
+                Child = new Wpf.Ui.Controls.SymbolIcon
                 {
-                    Icon = SymbolRegular.Puzzle,
+                    Symbol = SymbolRegular.PuzzlePiece24,
                     FontSize = 20,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center
@@ -204,9 +204,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 Tag = pluginInfo
             };
             folderBtn.Click += OpenFolder_Click;
-            folderBtn.Content = new Wpf.Ui.Controls.FontIcon
+            folderBtn.Content = new Wpf.Ui.Controls.SymbolIcon
             {
-                Icon = SymbolRegular.FolderOpen,
+                Symbol = SymbolRegular.FolderOpen24,
                 FontSize = 14
             };
             actionPanel.Children.Add(folderBtn);
@@ -221,9 +221,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 Tag = pluginInfo
             };
             toggleBtn.Click += TogglePluginLoad_Click;
-            toggleBtn.Content = new Wpf.Ui.Controls.FontIcon
+            toggleBtn.Content = new Wpf.Ui.Controls.SymbolIcon
             {
-                Icon = isLoaded ? SymbolRegular.Upload : SymbolRegular.Download,
+                Symbol = isLoaded ? SymbolRegular.ArrowUpload24 : SymbolRegular.ArrowDownload24,
                 FontSize = 14
             };
             actionPanel.Children.Add(toggleBtn);
@@ -231,18 +231,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // 待应用更新：尝试热安装；失败时才提供重启
             if (hasPendingUpdate)
             {
-                var applyBtn = new Button
+                var applyBtn = new Wpf.Ui.Controls.Button
                 {
-                    Style = Application.Current.TryFindResource("AccentButtonStyle") as Style,
+                    Appearance = Wpf.Ui.Controls.ControlAppearance.Primary,
                     Padding = new Thickness(6),
                     Margin = new Thickness(0, 0, 4, 0),
                     ToolTip = PluginStrings.Market_ApplyPendingUpdate,
                     Tag = pluginInfo.Id
                 };
                 applyBtn.Click += ApplyPendingUpdate_Click;
-                applyBtn.Content = new Wpf.Ui.Controls.FontIcon
+                applyBtn.Content = new Wpf.Ui.Controls.SymbolIcon
                 {
-                    Icon = SymbolRegular.Refresh,
+                    Symbol = SymbolRegular.ArrowSync24,
                     FontSize = 14
                 };
                 actionPanel.Children.Add(applyBtn);
@@ -250,18 +250,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             else if (marketInfo != null)
             {
                 // 有新版本可更新
-                var updateBtn = new Button
+                var updateBtn = new Wpf.Ui.Controls.Button
                 {
-                    Style = Application.Current.TryFindResource("AccentButtonStyle") as Style,
+                    Appearance = Wpf.Ui.Controls.ControlAppearance.Primary,
                     Padding = new Thickness(6),
                     Margin = new Thickness(0, 0, 4, 0),
                     ToolTip = PluginStrings.Plugin_Update,
                     Tag = marketInfo
                 };
                 updateBtn.Click += UpdatePlugin_Click;
-                updateBtn.Content = new Wpf.Ui.Controls.FontIcon
+                updateBtn.Content = new Wpf.Ui.Controls.SymbolIcon
                 {
-                    Icon = SymbolRegular.Upload,
+                    Symbol = SymbolRegular.ArrowUpload24,
                     FontSize = 14
                 };
                 actionPanel.Children.Add(updateBtn);
@@ -276,9 +276,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 Tag = pluginInfo
             };
             deleteBtn.Click += DeletePlugin_Click;
-            deleteBtn.Content = new Wpf.Ui.Controls.FontIcon
+            deleteBtn.Content = new Wpf.Ui.Controls.SymbolIcon
             {
-                Icon = SymbolRegular.Delete,
+                Symbol = SymbolRegular.Delete24,
                 FontSize = 14
             };
             actionPanel.Children.Add(deleteBtn);
@@ -292,9 +292,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 Tag = pluginInfo
             };
             exportBtn.Click += ExportConfig_Click;
-            exportBtn.Content = new Wpf.Ui.Controls.FontIcon
+            exportBtn.Content = new Wpf.Ui.Controls.SymbolIcon
             {
-                Icon = SymbolRegular.Save,
+                Symbol = SymbolRegular.Save24,
                 FontSize = 14
             };
             actionPanel.Children.Add(exportBtn);
@@ -308,9 +308,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 Tag = pluginInfo
             };
             importBtn.Click += ImportConfig_Click;
-            importBtn.Content = new Wpf.Ui.Controls.FontIcon
+            importBtn.Content = new Wpf.Ui.Controls.SymbolIcon
             {
-                Icon = SymbolRegular.OpenFile,
+                Symbol = SymbolRegular.Open24,
                 FontSize = 14
             };
             actionPanel.Children.Add(importBtn);
@@ -327,9 +327,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     Tag = pluginInfo
                 };
                 resetBtn.Click += ResetError_Click;
-                resetBtn.Content = new Wpf.Ui.Controls.FontIcon
+                resetBtn.Content = new Wpf.Ui.Controls.SymbolIcon
                 {
-                    Icon = SymbolRegular.Refresh,
+                    Symbol = SymbolRegular.ArrowSync24,
                     FontSize = 14,
                     Foreground = new SolidColorBrush(Colors.OrangeRed)
                 };

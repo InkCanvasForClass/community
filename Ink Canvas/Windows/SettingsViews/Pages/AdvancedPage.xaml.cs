@@ -2,7 +2,8 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 // 只别名导入 WPF-UI 专属控件，避免与 System.Windows.Controls 的同名类型（TextBlock/Image/Button/Border 等）产生 CS0104 歧义。
-using ContentDialog = Wpf.Ui.Controls.ContentDialog;
+using ContentDialog = Wpf.Ui.Violeta.Controls.ContentDialog;
+using ContentDialogResult = Wpf.Ui.Violeta.Controls.ContentDialogResult;
 using System;
 using System.Linq;
 using System.Windows;

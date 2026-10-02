@@ -151,10 +151,10 @@ namespace Ink_Canvas.Helpers
             var owner = GetDefaultOwner(context);
             if (owner != null && owner.IsLoaded && owner.IsVisible)
             {
-                return await MessageBox.ShowAsync(owner, messageBoxText, caption, button, icon, defaultResult);
+                return await Wpf.Ui.Violeta.Controls.MessageBox.ShowAsync(owner, messageBoxText, caption, button, icon, defaultResult);
             }
 
-            return await MessageBox.ShowAsync(messageBoxText, caption, button, icon, defaultResult);
+            return await Wpf.Ui.Violeta.Controls.MessageBox.ShowAsync(messageBoxText, caption, button, icon, defaultResult);
         }
 
         public static Task<MessageBoxResult> ShowAsync(
@@ -218,7 +218,8 @@ namespace Ink_Canvas.Helpers
             var owner = GetDefaultOwner(context);
             var box = CreatePositionedMessageBox(owner, screenX, screenY, messageBoxText, caption, button, icon);
             configure?.Invoke(box);
-            return box.ShowDialog();
+            box.ShowDialog();
+            return box.Result;
         }
 
         /// <summary>

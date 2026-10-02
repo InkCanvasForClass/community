@@ -1,8 +1,10 @@
-﻿using H.NotifyIcon;
+using H.NotifyIcon;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Plugins;
 using Ink_Canvas.Properties;
 using Wpf.Ui.Controls;
+using ScrollViewerEx = Wpf.Ui.Violeta.Controls.Compat.ScrollViewerEx;
+using MessageBoxButton = System.Windows.MessageBoxButton;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using System;

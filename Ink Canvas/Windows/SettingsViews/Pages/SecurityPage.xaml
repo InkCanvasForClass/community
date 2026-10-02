@@ -1,180 +1,107 @@
-<Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.SecurityPage"
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
-      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-      xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
-      xmlns:sys="clr-namespace:System;assembly=mscorlib"
-      xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
-      mc:Ignorable="d"
-
-      Title="{x:Static props:NavStrings.Settings_Nav_Security}">
+<?xml version="1.0" encoding="utf-8"?><Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.SecurityPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages" xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta" xmlns:sys="clr-namespace:System;assembly=mscorlib" xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls" mc:Ignorable="d" Title="{x:Static props:NavStrings.Settings_Nav_Security}">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
             <FrameworkElement.Resources>
                 <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
-                <Style x:Key="SettingsSectionHeaderTextBlockStyle"
-                    BasedOn="{StaticResource BodyStrongTextBlockStyle}"
-                    TargetType="TextBlock">
+                <Style x:Key="SettingsSectionHeaderTextBlockStyle" BasedOn="{StaticResource BodyStrongTextBlockStyle}" TargetType="TextBlock">
                     <Style.Setters>
                         <Setter Property="Margin" Value="1,30,0,6" />
                     </Style.Setters>
                 </Style>
             </FrameworkElement.Resources>
             <Grid>
-                <vio:SimpleStackPanel MaxWidth="1000"
-                    HorizontalAlignment="Stretch"
-                    Spacing="{StaticResource SettingsCardSpacing}">
+                <vio:SimpleStackPanel MaxWidth="1000" HorizontalAlignment="Stretch" Spacing="{StaticResource SettingsCardSpacing}">
 
                     <!-- 安全密码 -->
-                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{x:Static props:SecurityStrings.Security_SectionPassword}" />
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="{x:Static props:SecurityStrings.Security_SectionPassword}" />
 
-                    <ui:InfoBar IsClosable="False"
-                                IsOpen="True"
-                                Severity="Informational"
-                                Title="{x:Static props:SecurityStrings.Security_InfoBarTitle}"
-                                Message="{x:Static props:SecurityStrings.Security_PasswordInfoBarMessage}" />
+                    <ui:InfoBar IsClosable="False" IsOpen="True" Severity="Informational" Title="{x:Static props:SecurityStrings.Security_InfoBarTitle}" Message="{x:Static props:SecurityStrings.Security_PasswordInfoBarMessage}" />
 
-                    <controls:LabeledSettingsCard x:Name="CardPasswordEnabled"
-                            Header="{x:Static props:SecurityStrings.Security_EnablePassword}"
-                            Description="{x:Static props:SecurityStrings.SecurityPanel_Hint}"
-                            Symbol="ShieldTask24"
-                            SwitchName="ToggleSwitchPasswordEnabled"
-                            Toggled="ToggleSwitchPasswordEnabled_Toggled" />
+                    <controls:LabeledSettingsCard x:Name="CardPasswordEnabled" Header="{x:Static props:SecurityStrings.Security_EnablePassword}" Description="{x:Static props:SecurityStrings.SecurityPanel_Hint}" Symbol="ShieldTask24" SwitchName="ToggleSwitchPasswordEnabled" Toggled="ToggleSwitchPasswordEnabled_Toggled" />
 
-                    <controls:SettingsCard x:Name="CardPasswordManage"
-                                     Header="{x:Static props:SecurityStrings.Security_PasswordManagement}"
-                                     Description="{x:Static props:SecurityStrings.SecurityPanel_Hint_1}">
-                        <controls:SettingsCard.HeaderIcon>
+                    <ui:CardControl x:Name="CardPasswordManage">
+                        <ui:CardControl.Header>
+                            <StackPanel>
+                                <TextBlock Text="{x:Static props:SecurityStrings.Security_PasswordManagement}" />
+                                <TextBlock Text="{x:Static props:SecurityStrings.SecurityPanel_Hint_1}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                        <ui:CardControl.Icon>
                             <ui:SymbolIcon Symbol="LockClosed24" />
-                        </controls:SettingsCard.HeaderIcon>
-                        <Button x:Name="BtnSetOrChangePassword"
-                                Content="{x:Static props:SecurityStrings.Security_SetOrChangePassword}"
-                                MinWidth="120"
-                                Click="BtnSetOrChangePassword_Click" />
-                    </controls:SettingsCard>
+                        </ui:CardControl.Icon>
+                        <Button x:Name="BtnSetOrChangePassword" Content="{x:Static props:SecurityStrings.Security_SetOrChangePassword}" MinWidth="120" Click="BtnSetOrChangePassword_Click" />
+                    </ui:CardControl>
 
-                    <controls:LabeledSettingsCard x:Name="CardTotpEnabled"
-                            Header="{x:Static props:SecurityStrings.Security_EnableTotp}"
-                            Description="{x:Static props:SecurityStrings.Security_EnableTotpHint}"
-                            Symbol="ShieldTask24"
-                            SwitchName="ToggleSwitchTotpEnabled"
-                            Toggled="ToggleSwitchTotpEnabled_Toggled" />
+                    <controls:LabeledSettingsCard x:Name="CardTotpEnabled" Header="{x:Static props:SecurityStrings.Security_EnableTotp}" Description="{x:Static props:SecurityStrings.Security_EnableTotpHint}" Symbol="ShieldTask24" SwitchName="ToggleSwitchTotpEnabled" Toggled="ToggleSwitchTotpEnabled_Toggled" />
 
-                    <controls:SettingsCard x:Name="CardTotpManage"
-                                     Header="{x:Static props:SecurityStrings.Security_TotpSecretKey}"
-                                     Description="{x:Static props:SecurityStrings.Security_TotpSecretKeyHint}">
-                        <controls:SettingsCard.HeaderIcon>
+                    <ui:CardControl x:Name="CardTotpManage">
+                        <ui:CardControl.Header>
+                            <StackPanel>
+                                <TextBlock Text="{x:Static props:SecurityStrings.Security_TotpSecretKey}" />
+                                <TextBlock Text="{x:Static props:SecurityStrings.Security_TotpSecretKeyHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                        <ui:CardControl.Icon>
                             <ui:SymbolIcon Symbol="LockClosed24" />
-                        </controls:SettingsCard.HeaderIcon>
+                        </ui:CardControl.Icon>
                         <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBox x:Name="TextBoxTotpSecret"
-                                     Width="260"
-                                     IsReadOnly="True" />
-                            <Button x:Name="BtnGenerateTotpSecret"
-                                    Content="{x:Static props:SecurityStrings.Security_GenerateOrResetKey}"
-                                    MinWidth="120"
-                                    Click="BtnGenerateTotpSecret_Click" />
+                            <TextBox x:Name="TextBoxTotpSecret" Width="260" IsReadOnly="True" />
+                            <Button x:Name="BtnGenerateTotpSecret" Content="{x:Static props:SecurityStrings.Security_GenerateOrResetKey}" MinWidth="120" Click="BtnGenerateTotpSecret_Click" />
                         </vio:SimpleStackPanel>
-                    </controls:SettingsCard>
+                    </ui:CardControl>
 
-                    <controls:LabeledSettingsCard x:Name="CardRequirePasswordOnExit"
-                            Header="{x:Static props:SecurityStrings.Security_RequirePasswordOnExit}"
-                            Description="{x:Static props:SecurityStrings.SecurityPanel__InkCanvasForClass_Hint}"
-                            Symbol="ArrowExit24"
-                            SwitchName="ToggleSwitchRequirePasswordOnExit"
-                            Toggled="ToggleSwitchRequirePasswordOnExit_Toggled" />
+                    <controls:LabeledSettingsCard x:Name="CardRequirePasswordOnExit" Header="{x:Static props:SecurityStrings.Security_RequirePasswordOnExit}" Description="{x:Static props:SecurityStrings.SecurityPanel__InkCanvasForClass_Hint}" Symbol="ArrowExit24" SwitchName="ToggleSwitchRequirePasswordOnExit" Toggled="ToggleSwitchRequirePasswordOnExit_Toggled" />
 
-                    <controls:LabeledSettingsCard x:Name="CardRequirePasswordOnEnterSettings"
-                            Header="{x:Static props:SecurityStrings.Security_RequirePasswordOnEnterSettings}"
-                            Description="{x:Static props:SecurityStrings.SecurityPanel_Hint_2}"
-                            Symbol="Settings24"
-                            SwitchName="ToggleSwitchRequirePasswordOnEnterSettings"
-                            Toggled="ToggleSwitchRequirePasswordOnEnterSettings_Toggled" />
+                    <controls:LabeledSettingsCard x:Name="CardRequirePasswordOnEnterSettings" Header="{x:Static props:SecurityStrings.Security_RequirePasswordOnEnterSettings}" Description="{x:Static props:SecurityStrings.SecurityPanel_Hint_2}" Symbol="Settings24" SwitchName="ToggleSwitchRequirePasswordOnEnterSettings" Toggled="ToggleSwitchRequirePasswordOnEnterSettings_Toggled" />
 
-                    <controls:LabeledSettingsCard x:Name="CardRequirePasswordOnResetConfig"
-                            Header="{x:Static props:SecurityStrings.Security_RequirePasswordOnResetConfig}"
-                            Description="{x:Static props:SecurityStrings.SecurityPanel__Settingsjson_Hint}"
-                            Symbol="ArrowClockwise24"
-                            SwitchName="ToggleSwitchRequirePasswordOnResetConfig"
-                            Toggled="ToggleSwitchRequirePasswordOnResetConfig_Toggled" />
+                    <controls:LabeledSettingsCard x:Name="CardRequirePasswordOnResetConfig" Header="{x:Static props:SecurityStrings.Security_RequirePasswordOnResetConfig}" Description="{x:Static props:SecurityStrings.SecurityPanel__Settingsjson_Hint}" Symbol="ArrowClockwise24" SwitchName="ToggleSwitchRequirePasswordOnResetConfig" Toggled="ToggleSwitchRequirePasswordOnResetConfig_Toggled" />
 
-                    <controls:LabeledSettingsCard x:Name="CardRequirePasswordOnModifyOrClearNameList"
-                            Header="{x:Static props:SecurityStrings.Security_RequirePasswordOnModifyOrClearNameList}"
-                            Description="{x:Static props:SecurityStrings.Security_RequirePasswordOnModifyOrClearNameList_Hint}"
-                            Symbol="People24"
-                            SwitchName="ToggleSwitchRequirePasswordOnModifyOrClearNameList"
-                            Toggled="ToggleSwitchRequirePasswordOnModifyOrClearNameList_Toggled" />
+                    <controls:LabeledSettingsCard x:Name="CardRequirePasswordOnModifyOrClearNameList" Header="{x:Static props:SecurityStrings.Security_RequirePasswordOnModifyOrClearNameList}" Description="{x:Static props:SecurityStrings.Security_RequirePasswordOnModifyOrClearNameList_Hint}" Symbol="People24" SwitchName="ToggleSwitchRequirePasswordOnModifyOrClearNameList" Toggled="ToggleSwitchRequirePasswordOnModifyOrClearNameList_Toggled" />
 
                     <!-- U盘验证 -->
-                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{x:Static props:SecurityStrings.Security_UsbSectionHeader}" />
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="{x:Static props:SecurityStrings.Security_UsbSectionHeader}" />
 
-                    <ui:InfoBar IsClosable="False"
-                                IsOpen="True"
-                                Severity="Informational"
-                                Title="{x:Static props:SecurityStrings.Security_InfoBarTitle}"
-                                Message="{x:Static props:SecurityStrings.Security_UsbInfoBarMessage}" />
+                    <ui:InfoBar IsClosable="False" IsOpen="True" Severity="Informational" Title="{x:Static props:SecurityStrings.Security_InfoBarTitle}" Message="{x:Static props:SecurityStrings.Security_UsbInfoBarMessage}" />
 
-                    <controls:LabeledSettingsCard x:Name="CardUsbVerificationEnabled"
-                            Header="{x:Static props:SecurityStrings.Security_EnableUsbVerification}"
-                            Description="{x:Static props:SecurityStrings.Security_EnableUsbVerification_Hint}"
-                            Symbol="ShieldTask24"
-                            SwitchName="ToggleSwitchUsbVerificationEnabled"
-                            Toggled="ToggleSwitchUsbVerificationEnabled_Toggled" />
+                    <controls:LabeledSettingsCard x:Name="CardUsbVerificationEnabled" Header="{x:Static props:SecurityStrings.Security_EnableUsbVerification}" Description="{x:Static props:SecurityStrings.Security_EnableUsbVerification_Hint}" Symbol="ShieldTask24" SwitchName="ToggleSwitchUsbVerificationEnabled" Toggled="ToggleSwitchUsbVerificationEnabled_Toggled" />
 
-                    <controls:SettingsCard x:Name="CardUsbSnManage"
-                                     Header="{x:Static props:SecurityStrings.Security_UsbAuthorizedSns}"
-                                     Description="{x:Static props:SecurityStrings.Security_UsbAuthorizedSns_Hint}">
-                        <controls:SettingsCard.HeaderIcon>
+                    <ui:CardControl x:Name="CardUsbSnManage">
+                        <ui:CardControl.Header>
+                            <StackPanel>
+                                <TextBlock Text="{x:Static props:SecurityStrings.Security_UsbAuthorizedSns}" />
+                                <TextBlock Text="{x:Static props:SecurityStrings.Security_UsbAuthorizedSns_Hint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                        <ui:CardControl.Icon>
                             <ui:SymbolIcon Symbol="LockClosed24" />
-                        </controls:SettingsCard.HeaderIcon>
-                        <TextBox x:Name="TextBoxUsbAuthorizedSns"
-                                 Width="320"
-                                 TextChanged="TextBoxUsbAuthorizedSns_TextChanged" />
-                    </controls:SettingsCard>
+                        </ui:CardControl.Icon>
+                        <TextBox x:Name="TextBoxUsbAuthorizedSns" Width="320" TextChanged="TextBoxUsbAuthorizedSns_TextChanged" />
+                    </ui:CardControl>
 
-                    <controls:SettingsCard x:Name="CardUsbSnRegister"
-                                     Header="{x:Static props:SecurityStrings.Security_UsbDetectAndAuthorize}"
-                                     Description="{x:Static props:SecurityStrings.Security_UsbDetectAndAuthorize_Hint}">
-                        <controls:SettingsCard.HeaderIcon>
+                    <ui:CardControl x:Name="CardUsbSnRegister">
+                        <ui:CardControl.Header>
+                            <StackPanel>
+                                <TextBlock Text="{x:Static props:SecurityStrings.Security_UsbDetectAndAuthorize}" />
+                                <TextBlock Text="{x:Static props:SecurityStrings.Security_UsbDetectAndAuthorize_Hint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                        <ui:CardControl.Icon>
                             <ui:SymbolIcon Symbol="ShieldTask24" />
-                        </controls:SettingsCard.HeaderIcon>
+                        </ui:CardControl.Icon>
                         <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <ComboBox x:Name="ComboBoxUsbDrives"
-                                      MinWidth="240" />
-                            <Button x:Name="BtnRefreshUsbDrives"
-                                    Content="{x:Static props:SecurityStrings.Security_UsbRefreshDrives}"
-                                    MinWidth="80"
-                                    Click="BtnRefreshUsbDrives_Click" />
-                            <Button x:Name="BtnAuthorizeSelectedDrive"
-                                    Content="{x:Static props:SecurityStrings.Security_UsbAuthorizeDrive}"
-                                    MinWidth="100"
-                                    Style="{StaticResource AccentButtonStyle}"
-                                    Click="BtnAuthorizeSelectedDrive_Click" />
+                            <ComboBox x:Name="ComboBoxUsbDrives" MinWidth="240" />
+                            <Button x:Name="BtnRefreshUsbDrives" Content="{x:Static props:SecurityStrings.Security_UsbRefreshDrives}" MinWidth="80" Click="BtnRefreshUsbDrives_Click" />
+                            <ui:Button x:Name="BtnAuthorizeSelectedDrive" Content="{x:Static props:SecurityStrings.Security_UsbAuthorizeDrive}" MinWidth="100" Click="BtnAuthorizeSelectedDrive_Click" Appearance="Primary" />
                         </vio:SimpleStackPanel>
-                    </controls:SettingsCard>
+                    </ui:CardControl>
 
                     <!-- 进程保护 -->
-                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                        Text="{x:Static props:SecurityStrings.Security_ProcessProtection}" />
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="{x:Static props:SecurityStrings.Security_ProcessProtection}" />
 
-                    <ui:InfoBar IsClosable="False"
-                                IsOpen="True"
-                                Severity="Informational"
-                                Title="{x:Static props:SecurityStrings.Security_InfoBarTitle}"
-                                Message="{x:Static props:SecurityStrings.Security_ProcessProtectionInfoBarMessage}" />
+                    <ui:InfoBar IsClosable="False" IsOpen="True" Severity="Informational" Title="{x:Static props:SecurityStrings.Security_InfoBarTitle}" Message="{x:Static props:SecurityStrings.Security_ProcessProtectionInfoBarMessage}" />
 
-                    <controls:LabeledSettingsCard x:Name="CardEnableProcessProtection"
-                            Header="{x:Static props:SecurityStrings.Security_ProcessProtection}"
-                            Description="{x:Static props:SecurityStrings.SecurityPanel_Hint_4}"
-                            Symbol="Shield24"
-                            SwitchName="ToggleSwitchEnableProcessProtection"
-                            Toggled="ToggleSwitchEnableProcessProtection_Toggled" />
+                    <controls:LabeledSettingsCard x:Name="CardEnableProcessProtection" Header="{x:Static props:SecurityStrings.Security_ProcessProtection}" Description="{x:Static props:SecurityStrings.SecurityPanel_Hint_4}" Symbol="Shield24" SwitchName="ToggleSwitchEnableProcessProtection" Toggled="ToggleSwitchEnableProcessProtection_Toggled" />
 
                     <Rectangle Height="48" />
 

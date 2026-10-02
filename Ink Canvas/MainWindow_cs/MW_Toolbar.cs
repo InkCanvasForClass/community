@@ -36,7 +36,7 @@ namespace Ink_Canvas
             }
         }
         internal Wpf.Ui.Controls.ToggleSwitch ToggleSwitchDrawShapeBorderAutoHide { get; } =
-            new Wpf.Ui.Controls.ToggleSwitch { IsOn = true };
+            new Wpf.Ui.Controls.ToggleSwitch { IsChecked = true };
 
         internal GeometryButton ImageDrawLine => ShapeDrawPopupContent?.DrawLineBtn;
         internal GeometryButton ImageDrawDashedLine => ShapeDrawPopupContent?.DrawDashedLineBtn;

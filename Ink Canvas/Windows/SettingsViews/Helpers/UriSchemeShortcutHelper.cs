@@ -1,4 +1,8 @@
 using Wpf.Ui.Controls;
+using Wpf.Ui.Extensions;
+using Border = System.Windows.Controls.Border;
+using Grid = System.Windows.Controls.Grid;
+using TextBlock = System.Windows.Controls.TextBlock;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using IWshRuntimeLibrary;
@@ -9,7 +13,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using FontIcon = Wpf.Ui.Controls.FontIcon;
+using SymbolIcon = Wpf.Ui.Controls.SymbolIcon;
 
 namespace Ink_Canvas.Windows.SettingsViews.Helpers
 {
@@ -75,9 +79,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             switch (feature)
             {
                 case FeatureBoard: return XamlGraphicsIconGeometries.WhiteboardFloatingBarBtnIcon;
-                case FeatureBooth: return FluentSystemIcons.Video_24_Regular;
+                case FeatureBooth: return SymbolRegular.Video24;
                 case FeatureRandom: return XamlGraphicsIconGeometries.RandomDrawIconGeometry;
-                case FeatureSettings: return SymbolRegular.Settings;
+                case FeatureSettings: return SymbolRegular.Settings24;
                 case FeatureAnnotate: return XamlGraphicsIconGeometries.SolidPenIcon;
                 default: return null;
             }
@@ -128,14 +132,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
 
             if (icon is SymbolRegular fontIconData)
             {
-                var fontIcon = new FontIcon
+                var fontIcon = new SymbolIcon
                 {
-                    Icon = fontIconData,
+                    Symbol = fontIconData,
                     FontSize = iconSize,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
                 };
-                fontIcon.SetResourceReference(FontIcon.ForegroundProperty, ThemeForegroundBrushKey);
+                fontIcon.SetResourceReference(SymbolIcon.ForegroundProperty, ThemeForegroundBrushKey);
                 return fontIcon;
             }
 
@@ -245,8 +249,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
 
             if (icon is SymbolRegular fontIconData)
             {
-                var typeface = new Typeface(fontIconData.FontFamily, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
-                var text = new FormattedText(fontIconData.Glyph, CultureInfo.InvariantCulture,
+                var fontFamily = (FontFamily)Application.Current.TryFindResource("FluentSystemIcons");
+                var typeface = new Typeface(fontFamily, FontStyles.Normal, FontWeights.Normal, FontStretches.Normal);
+                var text = new FormattedText(fontIconData.GetString(), CultureInfo.InvariantCulture,
                     FlowDirection.LeftToRight, typeface, fitBox, brush, 1.0);
                 dc.DrawText(text, new Point(center.X - text.Width / 2, center.Y - text.Height / 2));
                 return;

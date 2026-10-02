@@ -1,6 +1,8 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Wpf.Ui.Controls;
+using Grid = System.Windows.Controls.Grid;
+using TextBlock = System.Windows.Controls.TextBlock;
 using System;
 using System.Linq;
 using System.Windows;
@@ -48,6 +50,8 @@ namespace Ink_Canvas.Windows
             // 记录 XAML 中的设计最小尺寸，实际生效值会按屏幕工作区收敛
             _designMinWidth = MinWidth;
             _designMinHeight = MinHeight;
+            // 内容顶部有 40px 高的自定义标题栏（原 iNKORE ui:TitleBar.Height="40"）
+            WindowBackdropHelper.SetExtendedTitleBarHeight(this, 40);
             WindowBackdropHelper.Apply(this, _settings);
 
             Opacity = 0;
@@ -75,6 +79,30 @@ namespace Ink_Canvas.Windows
                 NavItemLuckyRandom,
                 NavItemAdvanced,
             };
+
+            // WPF-UI 的 NavigationView 点击导航依赖导航项的 TargetPageType：
+            // 本窗口的导航项没有对应页面类型（页面是靠显示/隐藏面板切换的），库的
+            // NavigationViewItem.OnClick 会跳过导航，SelectedItem 不变，SelectionChanged 也就不会触发。
+            // 因此这里直接挂 Click（OnClick 内部一定会调用 base.OnClick 触发该事件）按 Tag/名称映射到步骤。
+            foreach (
+                var item in new[]
+                {
+                    NavItemWelcome,
+                    NavItemTelemetry,
+                    NavItemCanvas,
+                    NavItemGestures,
+                    NavItemAppearance,
+                    NavItemPPT,
+                    NavItemAutomation,
+                    NavItemLuckyRandom,
+                    NavItemAdvanced,
+                    NavItemFinish,
+                }
+            )
+            {
+                if (item != null)
+                    item.Click += OobeNavItem_Click;
+            }
 
             InitializeFromSettings();
             UpdateView(animateDirection: 0, instant: true);
@@ -386,11 +414,25 @@ namespace Ink_Canvas.Windows
         {
             if (_suppressNavSelection) return;
 
-            int target = ResolveTargetFromNavItem(args.SelectedItem as NavigationViewItem);
+            int target = ResolveTargetFromNavItem(sender.SelectedItem as NavigationViewItem);
             if (target == _currentStep) return;
 
             int direction = target > _currentStep ? 1 : -1;
             NavigateTo(target, direction);
+        }
+
+        /// <summary>
+        /// 导航项点击：库不会为本窗口的导航项发起导航（无 TargetPageType），
+        /// 故直接按点击到的项切换到对应步骤。
+        /// </summary>
+        private void OobeNavItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (_suppressNavSelection) return;
+
+            int target = ResolveTargetFromNavItem(sender as NavigationViewItem);
+            if (target == _currentStep) return;
+
+            NavigateTo(target, target > _currentStep ? 1 : -1);
         }
 
         private int ResolveTargetFromNavItem(NavigationViewItem item)
@@ -420,11 +462,11 @@ namespace Ink_Canvas.Windows
             try
             {
                 if (_currentStep == WelcomeIndex)
-                    NavView.SelectedItem = NavItemWelcome;
+                    NavItemWelcome.IsActive = true;
                 else if (_currentStep == FinishIndex)
-                    NavView.SelectedItem = NavItemFinish;
+                    NavItemFinish.IsActive = true;
                 else
-                    NavView.SelectedItem = _navItems[_currentStep];
+                    _navItems[_currentStep].IsActive = true;
             }
             finally
             {
@@ -675,12 +717,12 @@ namespace Ink_Canvas.Windows
                 if (isFinish)
                 {
                     BtnConfirmText.Text = Properties.OobeStrings.Oobe_SaveAndStart;
-                    BtnConfirmIcon.Symbol = SymbolRegular.Accept;
+                    BtnConfirmIcon.Symbol = SymbolRegular.Checkmark24;
                 }
                 else
                 {
                     BtnConfirmText.Text = Properties.OobeStrings.Oobe_Next;
-                    BtnConfirmIcon.Symbol = SymbolRegular.ChevronRight;
+                    BtnConfirmIcon.Symbol = SymbolRegular.ChevronRight24;
                 }
 
                 UpdateConfirmEnabled();
@@ -768,15 +810,15 @@ namespace Ink_Canvas.Windows
                 default: themeText = ThemeStrings.Theme_System; break;
             }
 
-            AddSummaryRow(SymbolRegular.Shield, Properties.OobeStrings.Oobe_SummaryTelemetryLevel, telemetryText);
-            AddSummaryRow(SymbolRegular.Sync, UpdateStrings.Header_AutoUpdate, BoolText(((CardAutoUpdate.IsChecked) == true)));
-            AddSummaryRow(SymbolRegular.Personalize, Properties.OobeStrings.Oobe_SummaryAppTheme, themeText);
-            AddSummaryRow(SymbolRegular.FullScreen, ThemeStrings.Theme_WindowBackdrop, backdropText);
-            AddSummaryRow(SymbolRegular.Slideshow, Properties.OobeStrings.Oobe_SummaryPPTLink, BoolText(((CardPPTSupport.IsChecked) == true)));
-            AddSummaryRow(SymbolRegular.TouchPointer, Properties.OobeStrings.Oobe_SummaryTwoFingerZoom,
+            AddSummaryRow(SymbolRegular.Shield24, Properties.OobeStrings.Oobe_SummaryTelemetryLevel, telemetryText);
+            AddSummaryRow(SymbolRegular.ArrowSync24, UpdateStrings.Header_AutoUpdate, BoolText(((CardAutoUpdate.IsChecked) == true)));
+            AddSummaryRow(SymbolRegular.PaintBrush24, Properties.OobeStrings.Oobe_SummaryAppTheme, themeText);
+            AddSummaryRow(SymbolRegular.FullScreenMaximize24, ThemeStrings.Theme_WindowBackdrop, backdropText);
+            AddSummaryRow(SymbolRegular.ProjectionScreen24, Properties.OobeStrings.Oobe_SummaryPPTLink, BoolText(((CardPPTSupport.IsChecked) == true)));
+            AddSummaryRow(SymbolRegular.HandPoint24, Properties.OobeStrings.Oobe_SummaryTwoFingerZoom,
                 $"{BoolText(((CardTwoFingerZoom.IsChecked) == true))} / {BoolText(((CardTwoFingerTranslate.IsChecked) == true))}");
-            AddSummaryRow(SymbolRegular.Pin, Properties.OobeStrings.Oobe_SummaryTrayIcon, BoolText(((CardEnableTrayIcon.IsChecked) == true)));
-            AddSummaryRow(SymbolRegular.Document, Properties.OobeStrings.Oobe_SummaryLogEnabled, BoolText(((CardIsLogEnabled.IsChecked) == true)));
+            AddSummaryRow(SymbolRegular.Pin24, Properties.OobeStrings.Oobe_SummaryTrayIcon, BoolText(((CardEnableTrayIcon.IsChecked) == true)));
+            AddSummaryRow(SymbolRegular.Document24, Properties.OobeStrings.Oobe_SummaryLogEnabled, BoolText(((CardIsLogEnabled.IsChecked) == true)));
         }
 
         private static string BoolText(bool value) => value ? Properties.OobeStrings.Oobe_BoolEnabled : Properties.OobeStrings.Oobe_BoolDisabled;
@@ -793,7 +835,7 @@ namespace Ink_Canvas.Windows
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(180) });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-            var fontIcon = new FontIcon { Icon = icon, FontSize = 16, Opacity = 0.85 };
+            var fontIcon = new Wpf.Ui.Controls.SymbolIcon { Symbol = icon, FontSize = 16, Opacity = 0.85 };
             Grid.SetColumn(fontIcon, 0);
             grid.Children.Add(fontIcon);
 

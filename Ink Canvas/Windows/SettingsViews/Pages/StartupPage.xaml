@@ -1,124 +1,121 @@
-<Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.StartupPage"
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
-      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-      xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
-      xmlns:sys="clr-namespace:System;assembly=mscorlib"
-      xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
-      mc:Ignorable="d"
-
-      Title="{x:Static props:NavStrings.Nav_Startup}">
+<?xml version="1.0" encoding="utf-8"?><Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.StartupPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages" xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta" xmlns:sys="clr-namespace:System;assembly=mscorlib" xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls" mc:Ignorable="d" Title="{x:Static props:NavStrings.Nav_Startup}">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
             <FrameworkElement.Resources>
             <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
-            <Style x:Key="SettingsSectionHeaderTextBlockStyle"
-                BasedOn="{StaticResource BodyStrongTextBlockStyle}"
-                TargetType="TextBlock">
+            <Style x:Key="SettingsSectionHeaderTextBlockStyle" BasedOn="{StaticResource BodyStrongTextBlockStyle}" TargetType="TextBlock">
                 <Style.Setters>
                     <Setter Property="Margin" Value="1,30,0,6" />
                 </Style.Setters>
             </Style>
         </FrameworkElement.Resources>
             <Grid>
-                <vio:SimpleStackPanel MaxWidth="1000"
-                    HorizontalAlignment="Stretch"
-                    Spacing="{StaticResource SettingsCardSpacing}">
+                <vio:SimpleStackPanel MaxWidth="1000" HorizontalAlignment="Stretch" Spacing="{StaticResource SettingsCardSpacing}">
 
-                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                   Text="{x:Static props:StartupStrings.Startup_Behavior}" />
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="{x:Static props:StartupStrings.Startup_Behavior}" />
 
-        <controls:SettingsCard Header="{x:Static props:StartupStrings.RunAtStartup}"
-                         Description="{x:Static props:StartupStrings.RunAtStartupHint}">
-            <controls:SettingsCard.HeaderIcon>
+        <ui:CardControl>
+            <ui:CardControl.Header>
+                <StackPanel>
+                    <TextBlock Text="{x:Static props:StartupStrings.RunAtStartup}" />
+                    <TextBlock Text="{x:Static props:StartupStrings.RunAtStartupHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+            </ui:CardControl.Header>
+            <ui:CardControl.Icon>
                 <ui:SymbolIcon Symbol="Settings24" />
-            </controls:SettingsCard.HeaderIcon>
-            <ui:ToggleSwitch x:Name="ToggleSwitchRunAtStartup"
-                             Checked="ToggleSwitchRunAtStartup_Toggled"
- Unchecked="ToggleSwitchRunAtStartup_Toggled" />
-        </controls:SettingsCard>
+            </ui:CardControl.Icon>
+            <ui:ToggleSwitch x:Name="ToggleSwitchRunAtStartup" Checked="ToggleSwitchRunAtStartup_Toggled" Unchecked="ToggleSwitchRunAtStartup_Toggled" />
+        </ui:CardControl>
 
-        <controls:SettingsCard Header="{x:Static props:StartupStrings.FoldAtStartup}"
-                         Description="{x:Static props:StartupStrings.FoldAtStartupHint}">
-            <controls:SettingsCard.HeaderIcon>
+        <ui:CardControl>
+            <ui:CardControl.Header>
+                <StackPanel>
+                    <TextBlock Text="{x:Static props:StartupStrings.FoldAtStartup}" />
+                    <TextBlock Text="{x:Static props:StartupStrings.FoldAtStartupHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+            </ui:CardControl.Header>
+            <ui:CardControl.Icon>
                 <ui:SymbolIcon Symbol="ChevronLeft24" />
-            </controls:SettingsCard.HeaderIcon>
-            <ui:ToggleSwitch x:Name="ToggleSwitchFoldAtStartup"
-                             Checked="ToggleSwitchFoldAtStartup_Toggled"
- Unchecked="ToggleSwitchFoldAtStartup_Toggled" />
-        </controls:SettingsCard>
+            </ui:CardControl.Icon>
+            <ui:ToggleSwitch x:Name="ToggleSwitchFoldAtStartup" Checked="ToggleSwitchFoldAtStartup_Toggled" Unchecked="ToggleSwitchFoldAtStartup_Toggled" />
+        </ui:CardControl>
 
-        <controls:SettingsCard Header="{x:Static props:StartupStrings.StartupMode}"
-                         Description="{x:Static props:StartupStrings.StartupModeHint}">
-            <controls:SettingsCard.HeaderIcon>
+        <ui:CardControl>
+            <ui:CardControl.Header>
+                <StackPanel>
+                    <TextBlock Text="{x:Static props:StartupStrings.StartupMode}" />
+                    <TextBlock Text="{x:Static props:StartupStrings.StartupModeHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+            </ui:CardControl.Header>
+            <ui:CardControl.Icon>
                 <ui:SymbolIcon Symbol="Settings24" />
-            </controls:SettingsCard.HeaderIcon>
-            <ComboBox x:Name="ComboBoxStartupMode"
-                      SelectedIndex="0"
-                      SelectionChanged="ComboBoxStartupMode_SelectionChanged">
+            </ui:CardControl.Icon>
+            <ComboBox x:Name="ComboBoxStartupMode" SelectedIndex="0" SelectionChanged="ComboBoxStartupMode_SelectionChanged">
                 <ComboBoxItem Content="{x:Static props:StartupStrings.StartupMode_Default}" />
                 <ComboBoxItem Content="{x:Static props:StartupStrings.StartupMode_Faster}" />
                 <ComboBoxItem Content="{x:Static props:StartupStrings.StartupMode_Fastest}" />
             </ComboBox>
-        </controls:SettingsCard>
+        </ui:CardControl>
 
-                    <controls:LabeledSettingsCard x:Name="CardPPTOnlyMode"
-                            Header="{x:Static props:StartupStrings.PPTOnlyMode}"
-                            Description="{x:Static props:StartupStrings.PPTOnlyModeHint}"
-                            Symbol="SlideTransition24"
-                            SwitchName="ToggleSwitchPPTOnlyMode" Toggled="ToggleSwitchPPTOnlyMode_Toggled" />
+                    <controls:LabeledSettingsCard x:Name="CardPPTOnlyMode" Header="{x:Static props:StartupStrings.PPTOnlyMode}" Description="{x:Static props:StartupStrings.PPTOnlyModeHint}" Symbol="SlideTransition24" SwitchName="ToggleSwitchPPTOnlyMode" Toggled="ToggleSwitchPPTOnlyMode_Toggled" />
 
-                    <controls:SettingsExpander Header="{x:Static props:StartupStrings.ExternalProtocol}"
-                            Description="{x:Static props:StartupStrings.ExternalProtocolHint}"
-                            IsExpanded="True">
-                        <controls:SettingsExpander.HeaderIcon>
+                    <ui:CardExpander IsExpanded="True">
+                        <ui:CardExpander.Header>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="{x:Static props:StartupStrings.ExternalProtocol}" />
+                                    <TextBlock Text="{x:Static props:StartupStrings.ExternalProtocolHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                </StackPanel>
+                                <ui:ToggleSwitch x:Name="ToggleSwitchExternalProtocol" Checked="ToggleSwitchExternalProtocol_Toggled" Unchecked="ToggleSwitchExternalProtocol_Toggled" Grid.Column="1" />
+                            </Grid>
+                        </ui:CardExpander.Header>
+                        <ui:CardExpander.Icon>
                             <ui:SymbolIcon Symbol="Link24" />
-                        </controls:SettingsExpander.HeaderIcon>
-                        <ui:ToggleSwitch x:Name="ToggleSwitchExternalProtocol"
-                                        Checked="ToggleSwitchExternalProtocol_Toggled"
- Unchecked="ToggleSwitchExternalProtocol_Toggled" />
+                        </ui:CardExpander.Icon>
                         <StackPanel>
-                            <controls:SettingsCard Header="{x:Static props:StartupStrings.ExternalProtocol_ShortcutCreate}"
-                                             Description="{x:Static props:StartupStrings.ExternalProtocol_ShortcutCreateHint}">
+                            <ui:CardControl>
+                                <ui:CardControl.Header>
+                                    <StackPanel>
+                                        <TextBlock Text="{x:Static props:StartupStrings.ExternalProtocol_ShortcutCreate}" />
+                                        <TextBlock Text="{x:Static props:StartupStrings.ExternalProtocol_ShortcutCreateHint}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    </StackPanel>
+                                </ui:CardControl.Header>
                                 <vio:SimpleStackPanel Orientation="Horizontal" Spacing="10">
-                                    <Button x:Name="BtnShortcutBoard"
-                                            Click="BtnShortcut_Click" Tag="board"
-                                            Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand" />
-                                    <Button x:Name="BtnShortcutBooth"
-                                            Click="BtnShortcut_Click" Tag="booth"
-                                            Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand" />
-                                    <Button x:Name="BtnShortcutRandom"
-                                            Click="BtnShortcut_Click" Tag="rand"
-                                            Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand" />
-                                    <Button x:Name="BtnShortcutSettings"
-                                            Click="BtnShortcut_Click" Tag="settings"
-                                            Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand" />
-                                    <Button x:Name="BtnShortcutAnnotate"
-                                            Click="BtnShortcut_Click" Tag="annotate"
-                                            Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand" />
+                                    <Button x:Name="BtnShortcutBoard" Click="BtnShortcut_Click" Tag="board" Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand" />
+                                    <Button x:Name="BtnShortcutBooth" Click="BtnShortcut_Click" Tag="booth" Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand" />
+                                    <Button x:Name="BtnShortcutRandom" Click="BtnShortcut_Click" Tag="rand" Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand" />
+                                    <Button x:Name="BtnShortcutSettings" Click="BtnShortcut_Click" Tag="settings" Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand" />
+                                    <Button x:Name="BtnShortcutAnnotate" Click="BtnShortcut_Click" Tag="annotate" Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand" />
                                 </vio:SimpleStackPanel>
-                            </controls:SettingsCard>
+                            </ui:CardControl>
                         </StackPanel>
-                    </controls:SettingsExpander>
+                    </ui:CardExpander>
 
-                    <controls:SettingsExpander Header="{x:Static props:WindowStrings.Tray_GroupTitle}"
-                            Description="{x:Static props:WindowStrings.Tray_EnableTrayIcon}"
-                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchEnableTrayIcon, Mode=OneWay}">
-                        <controls:SettingsExpander.HeaderIcon>
+                    <ui:CardExpander IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchEnableTrayIcon, Mode=OneWay}">
+                        <ui:CardExpander.Header>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="{x:Static props:WindowStrings.Tray_GroupTitle}" />
+                                    <TextBlock Text="{x:Static props:WindowStrings.Tray_EnableTrayIcon}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                </StackPanel>
+                                <ui:ToggleSwitch x:Name="ToggleSwitchEnableTrayIcon" Checked="ToggleSwitchEnableTrayIcon_Toggled" Unchecked="ToggleSwitchEnableTrayIcon_Toggled" Grid.Column="1" />
+                            </Grid>
+                        </ui:CardExpander.Header>
+                        <ui:CardExpander.Icon>
                             <ui:SymbolIcon Symbol="Pin24" />
-                        </controls:SettingsExpander.HeaderIcon>
-                        <ui:ToggleSwitch x:Name="ToggleSwitchEnableTrayIcon"
-                                        Checked="ToggleSwitchEnableTrayIcon_Toggled"
- Unchecked="ToggleSwitchEnableTrayIcon_Toggled" />
+                        </ui:CardExpander.Icon>
                         <StackPanel>
-                            <controls:SettingsCard Header="{x:Static props:WindowStrings.Tray_LeftClickAction}">
-                                <ComboBox x:Name="ComboBoxTrayLeftClickAction"
-                                          SelectedIndex="0"
-                                          SelectionChanged="ComboBoxTrayLeftClickAction_SelectionChanged">
+                            <ui:CardControl Header="{x:Static props:WindowStrings.Tray_LeftClickAction}">
+                                <ComboBox x:Name="ComboBoxTrayLeftClickAction" SelectedIndex="0" SelectionChanged="ComboBoxTrayLeftClickAction_SelectionChanged">
                                     <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_ShowMenu}" />
                                     <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_HideShowMainWindow}" />
                                     <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_TempShowMainWindow}" />
@@ -131,11 +128,9 @@
                                     <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_CloseApp}" />
                                     <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_NoAction}" />
                                 </ComboBox>
-                            </controls:SettingsCard>
-                            <controls:SettingsCard Header="{x:Static props:WindowStrings.Tray_RightClickAction}">
-                                <ComboBox x:Name="ComboBoxTrayRightClickAction"
-                                          SelectedIndex="0"
-                                          SelectionChanged="ComboBoxTrayRightClickAction_SelectionChanged">
+                            </ui:CardControl>
+                            <ui:CardControl Header="{x:Static props:WindowStrings.Tray_RightClickAction}">
+                                <ComboBox x:Name="ComboBoxTrayRightClickAction" SelectedIndex="0" SelectionChanged="ComboBoxTrayRightClickAction_SelectionChanged">
                                     <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_ShowMenu}" />
                                     <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_HideShowMainWindow}" />
                                     <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_TempShowMainWindow}" />
@@ -148,37 +143,47 @@
                                     <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_CloseApp}" />
                                     <ComboBoxItem Content="{x:Static props:WindowStrings.Tray_ClickAction_NoAction}" />
                                 </ComboBox>
-                            </controls:SettingsCard>
+                            </ui:CardControl>
                         </StackPanel>
-                    </controls:SettingsExpander>
+                    </ui:CardExpander>
 
-                    <controls:SettingsCard Header="{x:Static props:CrashStrings.Crash_Title}"
-                            Description="{x:Static props:CrashStrings.Crash_Desc}">
-                        <controls:SettingsCard.HeaderIcon>
+                    <ui:CardControl>
+                        <ui:CardControl.Header>
+                            <StackPanel>
+                                <TextBlock Text="{x:Static props:CrashStrings.Crash_Title}" />
+                                <TextBlock Text="{x:Static props:CrashStrings.Crash_Desc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </ui:CardControl.Header>
+                        <ui:CardControl.Icon>
                             <ui:SymbolIcon Symbol="Warning24" />
-                        </controls:SettingsCard.HeaderIcon>
-                        <ComboBox x:Name="ComboBoxCrashAction"
-                                  SelectionChanged="ComboBoxCrashAction_SelectionChanged">
+                        </ui:CardControl.Icon>
+                        <ComboBox x:Name="ComboBoxCrashAction" SelectionChanged="ComboBoxCrashAction_SelectionChanged">
                             <ComboBoxItem Content="{x:Static props:CrashStrings.Crash_SilentRestart}" Tag="0" />
                             <ComboBoxItem Content="{x:Static props:CrashStrings.Crash_NoAction}" Tag="1" />
                             <ComboBoxItem Content="{x:Static props:CrashStrings.Crash_ShowCrashWindow}" Tag="2" />
                         </ComboBox>
-                    </controls:SettingsCard>
+                    </ui:CardControl>
 
-                    <controls:SettingsExpander Header="{x:Static props:ThemeStrings.Theme_EnableSplash}"
-                            Description="{x:Static props:ThemeStrings.Theme_EnableSplash}"
-                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchEnableSplashScreen, Mode=OneWay}">
-                        <controls:SettingsExpander.HeaderIcon>
+                    <ui:CardExpander IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchEnableSplashScreen, Mode=OneWay}">
+                        <ui:CardExpander.Header>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="{x:Static props:ThemeStrings.Theme_EnableSplash}" />
+                                    <TextBlock Text="{x:Static props:ThemeStrings.Theme_EnableSplash}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                </StackPanel>
+                                <ui:ToggleSwitch x:Name="ToggleSwitchEnableSplashScreen" Checked="ToggleSwitchEnableSplashScreen_Toggled" Unchecked="ToggleSwitchEnableSplashScreen_Toggled" Grid.Column="1" />
+                            </Grid>
+                        </ui:CardExpander.Header>
+                        <ui:CardExpander.Icon>
                             <ui:SymbolIcon Symbol="Image24" />
-                        </controls:SettingsExpander.HeaderIcon>
-                        <ui:ToggleSwitch x:Name="ToggleSwitchEnableSplashScreen"
-                                        Checked="ToggleSwitchEnableSplashScreen_Toggled"
- Unchecked="ToggleSwitchEnableSplashScreen_Toggled" />
+                        </ui:CardExpander.Icon>
                         <StackPanel>
-                            <controls:SettingsCard Header="{x:Static props:ThemeStrings.Theme_SplashStyle}">
-                                <ComboBox x:Name="ComboBoxSplashScreenStyle"
-                                          SelectedIndex="1"
-                                          SelectionChanged="ComboBoxSplashScreenStyle_SelectionChanged">
+                            <ui:CardControl Header="{x:Static props:ThemeStrings.Theme_SplashStyle}">
+                                <ComboBox x:Name="ComboBoxSplashScreenStyle" SelectedIndex="1" SelectionChanged="ComboBoxSplashScreenStyle_SelectionChanged">
                                     <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Splash_Random}" />
                                     <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Splash_Seasonal}" />
                                     <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Splash_Spring}" />
@@ -188,97 +193,56 @@
                                     <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Splash_Horse}" />
                                     <ComboBoxItem Content="{x:Static props:ThemeStrings.Theme_Splash_Custom}" />
                                 </ComboBox>
-                            </controls:SettingsCard>
-                            <controls:SettingsCard x:Name="CardCustomSplashImage"
-                                             Header="{x:Static props:ThemeStrings.Theme_CustomSplashImage}"
-                                             Description="{x:Static props:ThemeStrings.Theme_CustomSplashImage_Desc}"
-                                             Visibility="Collapsed">
+                            </ui:CardControl>
+                            <ui:CardControl x:Name="CardCustomSplashImage" Visibility="Collapsed">
+                                <ui:CardControl.Header>
+                                    <StackPanel>
+                                        <TextBlock Text="{x:Static props:ThemeStrings.Theme_CustomSplashImage}" />
+                                        <TextBlock Text="{x:Static props:ThemeStrings.Theme_CustomSplashImage_Desc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    </StackPanel>
+                                </ui:CardControl.Header>
                                 <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                    <TextBlock x:Name="TextBlockCustomSplashPath"
-                                               Text="{x:Static props:ThemeStrings.Theme_CustomSplash_NotSelected}"
-                                               VerticalAlignment="Center"
-                                               MaxWidth="200"
-                                               TextTrimming="CharacterEllipsis"
-                                               Foreground="Gray"/>
-                                    <Button x:Name="ButtonBrowseCustomSplash"
-                                            Content="{x:Static props:StorageStrings.Storage_PathBrowse}"
-                                            Padding="10,3"
-                                            Click="ButtonBrowseCustomSplash_Click"/>
-                                    <Button x:Name="ButtonClearCustomSplash"
-                                            Content="{x:Static props:ThemeStrings.Theme_Clear}"
-                                            Padding="10,3"
-                                            Click="ButtonClearCustomSplash_Click"/>
+                                    <TextBlock x:Name="TextBlockCustomSplashPath" Text="{x:Static props:ThemeStrings.Theme_CustomSplash_NotSelected}" VerticalAlignment="Center" MaxWidth="200" TextTrimming="CharacterEllipsis" Foreground="Gray" />
+                                    <Button x:Name="ButtonBrowseCustomSplash" Content="{x:Static props:StorageStrings.Storage_PathBrowse}" Padding="10,3" Click="ButtonBrowseCustomSplash_Click" />
+                                    <Button x:Name="ButtonClearCustomSplash" Content="{x:Static props:ThemeStrings.Theme_Clear}" Padding="10,3" Click="ButtonClearCustomSplash_Click" />
                                 </vio:SimpleStackPanel>
-                            </controls:SettingsCard>
-                            <controls:SettingsCard x:Name="CardCustomSplashTextPosition"
-                                             Header="{x:Static props:ThemeStrings.Theme_CustomSplashTextPosition}"
-                                             Description="{x:Static props:ThemeStrings.Theme_CustomSplashTextPosition_Desc}"
-                                             Visibility="Collapsed">
-                                <Border CornerRadius="4"
-                                        BorderThickness="1"
-                                        BorderBrush="#30808080"
-                                        Background="Transparent"
-                                        Width="110"
-                                        Height="32">
+                            </ui:CardControl>
+                            <ui:CardControl x:Name="CardCustomSplashTextPosition" Visibility="Collapsed">
+                                <ui:CardControl.Header>
+                                    <StackPanel>
+                                        <TextBlock Text="{x:Static props:ThemeStrings.Theme_CustomSplashTextPosition}" />
+                                        <TextBlock Text="{x:Static props:ThemeStrings.Theme_CustomSplashTextPosition_Desc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    </StackPanel>
+                                </ui:CardControl.Header>
+                                <Border CornerRadius="4" BorderThickness="1" BorderBrush="#30808080" Background="Transparent" Width="110" Height="32">
                                     <Grid ClipToBounds="True">
-                                        <Border x:Name="SelectionIndicator"
-                                                CornerRadius="3"
-                                                Background="#200078D7"
-                                                BorderBrush="#800078D7"
-                                                BorderThickness="1"
-                                                Width="34"
-                                                Height="28"
-                                                HorizontalAlignment="Left"
-                                                VerticalAlignment="Center"
-                                                Margin="1,1,0,1"
-                                                Panel.ZIndex="1">
+                                        <Border x:Name="SelectionIndicator" CornerRadius="3" Background="#200078D7" BorderBrush="#800078D7" BorderThickness="1" Width="34" Height="28" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="1,1,0,1" Panel.ZIndex="1">
                                             <Border.RenderTransform>
-                                                <TranslateTransform x:Name="IndicatorTranslateTransform" X="0"/>
+                                                <TranslateTransform x:Name="IndicatorTranslateTransform" X="0" />
                                             </Border.RenderTransform>
                                         </Border>
                                         <vio:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <Border x:Name="BorderTextAlignLeft"
-                                                    Width="36" Height="30"
-                                                    PreviewMouseLeftButtonDown="BorderTextAlign_Click"
-                                                    Tag="0"
-                                                    Cursor="Hand"
-                                                    Panel.ZIndex="2">
+                                            <Border x:Name="BorderTextAlignLeft" Width="36" Height="30" PreviewMouseLeftButtonDown="BorderTextAlign_Click" Tag="0" Cursor="Hand" Panel.ZIndex="2">
                                                 <Canvas>
-                                                    <ui:SymbolIcon Symbol="AlignLeft24" FontSize="14"
-                                                                 Canvas.Left="11" Canvas.Top="8"
-                                                                 Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                                                    <ui:SymbolIcon Symbol="AlignLeft24" FontSize="14" Canvas.Left="11" Canvas.Top="8" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
                                                 </Canvas>
                                             </Border>
-                                            <Border x:Name="BorderTextAlignCenter"
-                                                    Width="36" Height="30"
-                                                    PreviewMouseLeftButtonDown="BorderTextAlign_Click"
-                                                    Tag="1"
-                                                    Cursor="Hand"
-                                                    Panel.ZIndex="2">
+                                            <Border x:Name="BorderTextAlignCenter" Width="36" Height="30" PreviewMouseLeftButtonDown="BorderTextAlign_Click" Tag="1" Cursor="Hand" Panel.ZIndex="2">
                                                 <Canvas>
-                                                    <ui:SymbolIcon Symbol="AlignCenterHorizontal24" FontSize="14"
-                                                                 Canvas.Left="11" Canvas.Top="8"
-                                                                 Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                                                    <ui:SymbolIcon Symbol="AlignCenterHorizontal24" FontSize="14" Canvas.Left="11" Canvas.Top="8" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
                                                 </Canvas>
                                             </Border>
-                                            <Border x:Name="BorderTextAlignRight"
-                                                    Width="36" Height="30"
-                                                    PreviewMouseLeftButtonDown="BorderTextAlign_Click"
-                                                    Tag="2"
-                                                    Cursor="Hand"
-                                                    Panel.ZIndex="2">
+                                            <Border x:Name="BorderTextAlignRight" Width="36" Height="30" PreviewMouseLeftButtonDown="BorderTextAlign_Click" Tag="2" Cursor="Hand" Panel.ZIndex="2">
                                                 <Canvas>
-                                                    <ui:SymbolIcon Symbol="AlignRight24" FontSize="14"
-                                                                 Canvas.Left="11" Canvas.Top="8"
-                                                                 Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+                                                    <ui:SymbolIcon Symbol="AlignRight24" FontSize="14" Canvas.Left="11" Canvas.Top="8" Foreground="{DynamicResource SystemControlForegroundBaseHighBrush}" />
                                                 </Canvas>
                                             </Border>
                                         </vio:SimpleStackPanel>
                                     </Grid>
                                 </Border>
-                            </controls:SettingsCard>
+                            </ui:CardControl>
                         </StackPanel>
-                    </controls:SettingsExpander>
+                    </ui:CardExpander>
 
                     <Rectangle Height="48" />
 

@@ -2,6 +2,7 @@ using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
 using Wpf.Ui.Appearance;
+using WindowBackdropType = Wpf.Ui.Controls.WindowBackdropType;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -32,9 +33,15 @@ namespace Ink_Canvas
             var resourcesToRemove = new List<ResourceDictionary>();
             foreach (var dict in Application.Current.Resources.MergedDictionaries)
             {
-                if (dict.Source != null &&
-                    (dict.Source.ToString().Contains("Light.xaml") ||
-                     dict.Source.ToString().Contains("Dark.xaml")))
+                // 只移除本应用自己的主题字典（Source 是相对 Uri）。
+                // 注意不能用 Contains("Light.xaml"/"Dark.xaml") 盲匹配：WPF-UI 与 Violeta 的主题字典
+                // Source 是 pack://.../Resources/Theme/Dark.xaml 这类绝对 Uri，同样含有该片段，
+                // 一旦被误删，CardBackground/CardBorderBrush 等全部 WPF-UI 主题画刷都会在运行时丢失
+                // （表现为设计器里卡片有边框、实际运行时没有）。
+                if (dict.Source == null || dict.Source.IsAbsoluteUri) continue;
+
+                var source = dict.Source.OriginalString;
+                if (source.Contains("Light.xaml") || source.Contains("Dark.xaml"))
                 {
                     resourcesToRemove.Add(dict);
                 }
@@ -47,7 +54,7 @@ namespace Ink_Canvas
 
             var isLightTheme = theme == ThemeLight;
             var themePath = isLightTheme ? LightThemePath : DarkThemePath;
-            var elementTheme = isLightTheme ? ElementTheme.Light : ElementTheme.Dark;
+            var applicationTheme = isLightTheme ? ApplicationTheme.Light : ApplicationTheme.Dark;
 
             var rd1 = new ResourceDictionary { Source = new Uri(themePath, UriKind.Relative) };
             Application.Current.Resources.MergedDictionaries.Add(rd1);
@@ -63,7 +70,8 @@ namespace Ink_Canvas
                 });
             });
 
-            ThemeManager.SetRequestedTheme(this, elementTheme);
+            // WPF-UI 主题是应用级的（没有 iNKORE 的逐窗口 RequestedTheme）
+            ThemeHelper.ApplyApplicationTheme(applicationTheme);
 
             InitializeFloatBarForegroundColor();
             RefreshQuickPanelIcons();
@@ -358,8 +366,8 @@ namespace Ink_Canvas
         private void ApplyFollowedSystemTheme(bool systemLight)
         {
             // 应用级主题（App 级 ThemeResources / Default 主题控件与 Popup）必须与
-            // 窗口级 RequestedTheme 同步翻转，否则切换后会出现深浅混搭
-            ThemeManager.Current.ApplicationTheme = systemLight ? ApplicationTheme.Light : ApplicationTheme.Dark;
+            // 窗口级主题同步翻转，否则切换后会出现深浅混搭
+            ThemeHelper.ApplyApplicationTheme(systemLight ? ApplicationTheme.Light : ApplicationTheme.Dark);
             SetTheme(systemLight ? ThemeLight : ThemeDark, autoSwitchIcon: true);
             ViewboxFloatingBar.Opacity = 1.0;
             RefreshNotificationColors();
@@ -466,12 +474,17 @@ namespace Ink_Canvas
             {
                 if (isLoaded)
                 {
+                    // WPF-UI 主题统一作用于整个应用，先全局应用一次，再让其余窗口重绘
+                    ThemeHelper.ApplyApplicationTheme(IsCurrentThemeDark() ? ApplicationTheme.Dark : ApplicationTheme.Light);
+
                     foreach (Window window in Application.Current.Windows)
                     {
                         if (window == this || window == null) continue;
 
-                        ThemeManager.SetRequestedTheme(window, IsCurrentThemeDark() ? ElementTheme.Dark : ElementTheme.Light);
                         window.InvalidateVisual();
+
+                        // WPF-UI 的主题切换会移除窗口背景（含 Owned 窗口），这里按设置重新应用
+                        WindowBackdropHelper.Apply(window);
                     }
                 }
             }

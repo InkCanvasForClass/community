@@ -15,12 +15,23 @@ namespace Ink_Canvas.Controls
         public Wpf.Ui.Controls.ToggleSwitch ToggleSwitchControl => ToggleSwitch;
 
         public static readonly DependencyProperty HeaderProperty = DependencyProperty.Register(
-            nameof(Header), typeof(string), typeof(LabeledSettingsCard), new PropertyMetadata(string.Empty));
+            nameof(Header), typeof(string), typeof(LabeledSettingsCard),
+            new PropertyMetadata(string.Empty, OnHeaderChanged));
 
         public string Header
         {
             get => (string)GetValue(HeaderProperty);
             set => SetValue(HeaderProperty, value);
+        }
+
+        private static void OnHeaderChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            // CardControl.Header 不是 ContentControl 的内容，挂不到逻辑树上，
+            // RelativeSource 祖先绑定解析不到本控件，因此标题文字在代码后置里直接写入。
+            if (d is LabeledSettingsCard control && control.HeaderText != null)
+            {
+                control.HeaderText.Text = e.NewValue as string ?? string.Empty;
+            }
         }
 
         public static readonly DependencyProperty DescriptionProperty = DependencyProperty.Register(
@@ -38,7 +49,9 @@ namespace Ink_Canvas.Controls
             // CardControl 没有 Description 属性，描述文字放在 Header 的第二行；为空时整行隐藏。
             if (d is LabeledSettingsCard control && control.DescriptionText != null)
             {
-                control.DescriptionText.Visibility = string.IsNullOrEmpty(e.NewValue as string)
+                var text = e.NewValue as string;
+                control.DescriptionText.Text = text ?? string.Empty;
+                control.DescriptionText.Visibility = string.IsNullOrEmpty(text)
                     ? Visibility.Collapsed
                     : Visibility.Visible;
             }
@@ -78,6 +91,24 @@ namespace Ink_Canvas.Controls
                 control.ApplyIcon();
         }
 
+        /// <summary>
+        /// 图标：可接受 <c>IconElement</c> / <see cref="SymbolRegular"/> 枚举 / <see cref="ImageSource"/> / 字符串（SymbolRegular 成员名）。
+        /// </summary>
+        public static readonly DependencyProperty IconProperty = DependencyProperty.Register(
+            nameof(Icon), typeof(object), typeof(LabeledSettingsCard), new PropertyMetadata(null, OnIconChanged));
+
+        public object Icon
+        {
+            get => GetValue(IconProperty);
+            set => SetValue(IconProperty, value);
+        }
+
+        private static void OnIconChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is LabeledSettingsCard control)
+                control.ApplyIcon();
+        }
+
         public static readonly DependencyProperty HeaderIconProperty = DependencyProperty.Register(
             nameof(HeaderIcon), typeof(object), typeof(LabeledSettingsCard), new PropertyMetadata(null, OnHeaderIconChanged));
 
@@ -106,6 +137,28 @@ namespace Ink_Canvas.Controls
                     Width = 16,
                     Height = 16,
                 };
+            }
+            else if (Icon is Wpf.Ui.Controls.IconElement directIcon)
+            {
+                SettingsCard.Icon = directIcon;
+            }
+            else if (Icon is SymbolRegular symbol)
+            {
+                SettingsCard.Icon = new SymbolIcon(symbol);
+            }
+            else if (Icon is ImageSource iconImage)
+            {
+                SettingsCard.Icon = new ImageIcon
+                {
+                    Source = iconImage,
+                    Width = 16,
+                    Height = 16,
+                };
+            }
+            else if (Icon is string iconText
+                     && Enum.TryParse<SymbolRegular>(iconText, true, out var iconParsed))
+            {
+                SettingsCard.Icon = new SymbolIcon(iconParsed);
             }
             else if (!string.IsNullOrWhiteSpace(Symbol)
                      && Enum.TryParse<SymbolRegular>(Symbol, true, out var parsed))
@@ -183,8 +236,13 @@ namespace Ink_Canvas.Controls
         {
             if (!string.IsNullOrEmpty(SwitchName) && ToggleSwitch != null)
                 ToggleSwitch.Name = SwitchName;
+            if (HeaderText != null)
+                HeaderText.Text = Header ?? string.Empty;
             if (DescriptionText != null)
+            {
+                DescriptionText.Text = Description ?? string.Empty;
                 DescriptionText.Visibility = string.IsNullOrEmpty(Description) ? Visibility.Collapsed : Visibility.Visible;
+            }
             ApplyIcon();
         }
 

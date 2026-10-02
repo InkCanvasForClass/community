@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using WindowBackdropType = Wpf.Ui.Controls.WindowBackdropType;
 using System;
 using System.ComponentModel;
 using System.IO;
@@ -18,10 +19,11 @@ namespace Ink_Canvas
         public PrivacyAgreementWindow()
         {
             InitializeComponent();
-            WindowBackdropHelper.Apply(this);
             Topmost = true;
             AnimationsHelper.ShowWithSlideFromBottomAndFade(this, 0.25);
+            // 先应用主题再应用背景：WPF-UI 的主题切换会连带移除窗口背景，顺序反了会丢背景
             ApplyTheme();
+            WindowBackdropHelper.Apply(this);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -110,7 +112,7 @@ namespace Ink_Canvas
                             ? Wpf.Ui.Appearance.ApplicationTheme.Light
                             : Wpf.Ui.Appearance.ApplicationTheme.Dark; break;
                 }
-                Wpf.Ui.Appearance.ApplicationThemeManager.SetRequestedTheme(this, target);
+                ThemeHelper.ApplyApplicationTheme(target);
             }
             catch (Exception ex)
             {

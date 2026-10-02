@@ -604,10 +604,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                     foreach (var setting in customSettings)
                     {
-                        var card = new Ink_Canvas.Controls.SettingsCard
+                        var card = new Wpf.Ui.Controls.CardControl
                         {
-                            Header = setting.DisplayName,
-                            Description = setting.Description
+                            Header = BuildCardHeader(setting.DisplayName, setting.Description)
                         };
 
                         switch (setting.Type)
@@ -647,7 +646,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                                 var boolValue = entry.GetSettingBool(setting.Key);
                                 if (setting.DefaultValue == "true") toggle.IsChecked = boolValue || !entry.Settings.ContainsKey(setting.Key);
                                 else toggle.IsChecked = boolValue;
-                                toggle.Toggled += PluginCustomSetting_Toggle_Toggled;
+                                toggle.Checked += PluginCustomSetting_Toggle_Toggled;
+                                toggle.Unchecked += PluginCustomSetting_Toggle_Toggled;
                                 card.Content = toggle;
                                 break;
 
@@ -705,6 +705,28 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 SettingsTabControl.SelectedIndex = 2;
             }
+        }
+
+        /// <summary>
+        /// 构造「标题 + 说明」两行卡片头（与 XAML 里 CardControl.Header 的 StackPanel 结构一致）。
+        /// </summary>
+        private static StackPanel BuildCardHeader(string header, string description)
+        {
+            var panel = new StackPanel();
+            panel.Children.Add(new TextBlock { Text = header });
+            if (!string.IsNullOrEmpty(description))
+            {
+                var descriptionText = new TextBlock
+                {
+                    Text = description,
+                    Margin = new Thickness(0, 2, 0, 0),
+                    FontSize = 12,
+                    TextWrapping = TextWrapping.Wrap
+                };
+                descriptionText.SetResourceReference(TextBlock.ForegroundProperty, "TextFillColorSecondaryBrush");
+                panel.Children.Add(descriptionText);
+            }
+            return panel;
         }
 
         private void PluginCustomSetting_ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -2,7 +2,9 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Wpf.Ui.Controls;
-using Wpf.Ui.Controls;
+using MessageBoxButton = System.Windows.MessageBoxButton;
+using MessageBoxResult = System.Windows.MessageBoxResult;
+using TextBlock = System.Windows.Controls.TextBlock;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -396,14 +398,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             switch (state)
             {
                 case UpdateUiState.Idle:
-                    StatusIcon.Icon = SymbolRegular.Completed;
+                    StatusIcon.Symbol = SymbolRegular.CheckmarkCircle24;
                     StatusTitle.Text = UpdateStrings.Status_UpToDate;
                     StatusSubtitle.Text = customSubtitle ?? BuildLastCheckSubtitle();
                     CheckUpdateButton.Visibility = Visibility.Visible;
                     break;
 
                 case UpdateUiState.Checking:
-                    StatusIcon.Icon = SymbolRegular.Sync;
+                    StatusIcon.Symbol = SymbolRegular.ArrowSync24;
                     StatusTitle.Text = UpdateStrings.Status_Checking;
                     StatusSubtitle.Text = "";
                     CheckUpdateButton.Visibility = Visibility.Visible;
@@ -414,7 +416,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     break;
 
                 case UpdateUiState.UpdateAvailable:
-                    StatusIcon.Icon = SymbolRegular.Upload;
+                    StatusIcon.Symbol = SymbolRegular.ArrowUpload24;
                     StatusTitle.Text = string.Format(UpdateStrings.Status_NewVersionAvailable, _remoteVersion);
                     StatusSubtitle.Text = customSubtitle ?? string.Format(UpdateStrings.Status_VersionTransition, GetCurrentVersion(), _remoteVersion);
                     UpdateNowButton.Visibility = Visibility.Visible;
@@ -423,7 +425,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     break;
 
                 case UpdateUiState.Downloading:
-                    StatusIcon.Icon = SymbolRegular.Download;
+                    StatusIcon.Symbol = SymbolRegular.ArrowDownload24;
                     StatusTitle.Text = UpdateStrings.Status_Downloading;
                     StatusSubtitle.Text = customSubtitle ?? string.Format(UpdateStrings.Status_TargetVersion, _remoteVersion);
                     ProgressPanel.Visibility = Visibility.Visible;
@@ -431,14 +433,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     break;
 
                 case UpdateUiState.Downloaded:
-                    StatusIcon.Icon = SymbolRegular.Download;
+                    StatusIcon.Symbol = SymbolRegular.ArrowDownload24;
                     StatusTitle.Text = UpdateStrings.Status_Downloaded;
                     StatusSubtitle.Text = customSubtitle ?? string.Format(UpdateStrings.Status_WillInstallOnExit, _remoteVersion);
                     CheckUpdateButton.Visibility = Visibility.Visible;
                     break;
 
                 case UpdateUiState.NetworkError:
-                    StatusIcon.Icon = SymbolRegular.Error;
+                    StatusIcon.Symbol = SymbolRegular.ErrorCircle24;
                     StatusTitle.Text = UpdateStrings.Status_NetworkError;
                     StatusSubtitle.Text = customSubtitle ?? UpdateStrings.Status_NetworkErrorHint;
                     CheckUpdateButton.Visibility = Visibility.Visible;

@@ -1,5 +1,6 @@
 using Ink_Canvas.Helpers;
 using Wpf.Ui.Controls;
+using MessageBoxButton = System.Windows.MessageBoxButton;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;

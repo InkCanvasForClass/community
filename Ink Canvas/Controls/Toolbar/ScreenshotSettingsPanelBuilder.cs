@@ -1,7 +1,9 @@
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Wpf.Ui.Controls;
-using Wpf.Ui.Controls;
+using Button = System.Windows.Controls.Button;
+using StackPanel = System.Windows.Controls.StackPanel;
+using TextBox = System.Windows.Controls.TextBox;
 using System;
 using System.IO;
 using System.Windows;
@@ -75,11 +77,10 @@ namespace Ink_Canvas.Controls.Toolbar
                 Children = { locationTextBox, browseButton }
             };
 
-            var locationCard = new SettingsCard
+            var locationCard = new Wpf.Ui.Controls.CardControl
             {
-                Header = StorageStrings.Storage_ScreenshotSaveLocation,
-                Description = StorageStrings.Storage_ScreenshotSaveLocationDesc,
-                HeaderIcon = new FontIcon(SymbolRegular.Folder),
+                Header = BuildCardHeader(StorageStrings.Storage_ScreenshotSaveLocation, StorageStrings.Storage_ScreenshotSaveLocationDesc),
+                Icon = new SymbolIcon { Symbol = SymbolRegular.Folder24 },
                 Content = new StackPanel
                 {
                     Orientation = Orientation.Horizontal,
@@ -97,18 +98,20 @@ namespace Ink_Canvas.Controls.Toolbar
             }
             UpdateLocationRowEnabled();
 
-            locationToggle.Toggled += (s, e) =>
+            void OnLocationToggled(object s, RoutedEventArgs e)
             {
                 SettingsManager.Settings.Automation.IsSaveScreenshotToCustomLocation = locationToggle.IsChecked == true;
                 SettingsManager.SaveSettingsToFile();
                 UpdateLocationRowEnabled();
-            };
+            }
+            locationToggle.Checked += OnLocationToggled;
+            locationToggle.Unchecked += OnLocationToggled;
 
             // 2. 截图后复制到剪贴板
             var clipboardCard = new Ink_Canvas.Controls.LabeledSettingsCard
             {
                 Header = StorageStrings.Storage_CopyScreenshotToClipboard,
-                Icon = SymbolRegular.Copy,
+                Icon = SymbolRegular.Copy24,
                 IsChecked = auto.IsCopyScreenshotToClipboard
             };
             clipboardCard.Toggled += (s, e) =>
@@ -121,7 +124,7 @@ namespace Ink_Canvas.Controls.Toolbar
             var autoSaveStrokesCard = new Ink_Canvas.Controls.LabeledSettingsCard
             {
                 Header = StorageStrings.Storage_AutoSaveInkOnScreenshot,
-                Icon = SymbolRegular.Save,
+                Icon = SymbolRegular.Save24,
                 IsChecked = auto.IsAutoSaveStrokesAtScreenshot
             };
             autoSaveStrokesCard.Toggled += (s, e) =>
@@ -134,7 +137,7 @@ namespace Ink_Canvas.Controls.Toolbar
             var dateFolderCard = new Ink_Canvas.Controls.LabeledSettingsCard
             {
                 Header = StorageStrings.Storage_ScreenshotsByDateFolder,
-                Icon = SymbolRegular.Folder,
+                Icon = SymbolRegular.Folder24,
                 IsChecked = auto.IsSaveScreenshotsInDateFolders
             };
             dateFolderCard.Toggled += (s, e) =>
@@ -148,6 +151,28 @@ namespace Ink_Canvas.Controls.Toolbar
             panel.Children.Add(autoSaveStrokesCard);
             panel.Children.Add(dateFolderCard);
 
+            return panel;
+        }
+
+        /// <summary>
+        /// 构造「标题 + 说明」两行卡片头（与 XAML 里 CardControl.Header 的 StackPanel 结构一致）。
+        /// </summary>
+        private static System.Windows.Controls.StackPanel BuildCardHeader(string header, string description)
+        {
+            var panel = new System.Windows.Controls.StackPanel();
+            panel.Children.Add(new System.Windows.Controls.TextBlock { Text = header });
+            if (!string.IsNullOrEmpty(description))
+            {
+                var descriptionText = new System.Windows.Controls.TextBlock
+                {
+                    Text = description,
+                    Margin = new Thickness(0, 2, 0, 0),
+                    FontSize = 12,
+                    TextWrapping = TextWrapping.Wrap
+                };
+                descriptionText.SetResourceReference(System.Windows.Controls.TextBlock.ForegroundProperty, "TextFillColorSecondaryBrush");
+                panel.Children.Add(descriptionText);
+            }
             return panel;
         }
     }

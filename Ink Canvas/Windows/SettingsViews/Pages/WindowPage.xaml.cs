@@ -64,7 +64,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     };
                     _topMostModeItems.Add(btnItem);
 
-                    ExpanderAlwaysOnTop.ItemsSource = _topMostModeItems;
+                    AlwaysOnTopSelectionHost.Content = _topMostModeItems[0];
+                    AlwaysOnTopButtonHost.Content = _topMostModeItems[1];
 
                     // 初始化 UIA 方案下拉框
                     if (ComboBoxUIAMode != null)

@@ -76,7 +76,7 @@ namespace Ink_Canvas
                         TextBlockSecond.Text = "00";
                         timer.Stop();
                         isTimerRunning = false;
-                        FontIconStart.Icon = SymbolRegular.Play;
+                        FontIconStart.Symbol = SymbolRegular.Play24;
                         BtnStartCover.Visibility = Visibility.Visible;
                         var textForeground = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
                         if (textForeground != null)
@@ -265,12 +265,12 @@ namespace Ink_Canvas
             if (WindowState == WindowState.Normal)
             {
                 WindowState = WindowState.Maximized;
-                FontIconFullscreen.Icon = SymbolRegular.BackToWindow;
+                FontIconFullscreen.Symbol = SymbolRegular.FullScreenMinimize24;
             }
             else
             {
                 WindowState = WindowState.Normal;
-                FontIconFullscreen.Icon = SymbolRegular.FullScreen;
+                FontIconFullscreen.Symbol = SymbolRegular.FullScreenMaximize24;
             }
         }
 
@@ -306,7 +306,7 @@ namespace Ink_Canvas
                     TextBlockHour.Foreground = textForeground3;
                 else
                     TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
-                FontIconStart.Icon = SymbolRegular.Play;
+                FontIconStart.Symbol = SymbolRegular.Play24;
                 isTimerRunning = false;
                 timer.Stop();
                 isPaused = false;
@@ -363,7 +363,7 @@ namespace Ink_Canvas
                     TextBlockHour.Foreground = textForeground1;
                 else
                     TextBlockHour.Foreground = Brushes.Black;
-                FontIconStart.Icon = SymbolRegular.Pause;
+                FontIconStart.Symbol = SymbolRegular.Pause24;
                 isPaused = false;
                 timer.Start();
                 UpdateStopTime();
@@ -379,7 +379,7 @@ namespace Ink_Canvas
                     TextBlockHour.Foreground = textForeground3;
                 else
                     TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
-                FontIconStart.Icon = SymbolRegular.Play;
+                FontIconStart.Symbol = SymbolRegular.Play24;
                 BorderStopTime.Visibility = Visibility.Collapsed;
                 isPaused = true;
                 timer.Stop();
@@ -395,7 +395,7 @@ namespace Ink_Canvas
                     TextBlockHour.Foreground = textForeground2;
                 else
                     TextBlockHour.Foreground = Brushes.Black;
-                FontIconStart.Icon = SymbolRegular.Pause;
+                FontIconStart.Symbol = SymbolRegular.Pause24;
                 BtnResetCover.Visibility = Visibility.Collapsed;
 
                 if (totalSeconds <= 10)

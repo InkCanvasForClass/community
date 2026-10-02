@@ -28,7 +28,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             // 未启用恢复时，IsOn 不应阻止重复触发
             if (actionSet.IsRevertEnabled)
             {
-                actionSet.IsChecked = true;
+                actionSet.IsOn = true;
             }
 
             // 异步执行行动，避免阻塞 UI 线程
@@ -46,13 +46,13 @@ namespace Ink_Canvas.WorkflowAutomation.Services
         /// </summary>
         public void Revert(ActionSet actionSet)
         {
-            if (!((actionSet.IsChecked) == true)) return;
+            if (!actionSet.IsOn) return;
 
             // 先清除所有行动的错误状态
             foreach (var action in actionSet.Actions)
                 action.Exception = null;
 
-            actionSet.IsChecked = false;
+            actionSet.IsOn = false;
 
             // 异步执行恢复，避免阻塞 UI 线程
             Task.Run(() =>

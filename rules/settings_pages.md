@@ -242,7 +242,7 @@ public class Canvas
 
 #### 2. 在对应页面的 XAML 中添加设置控件
 
-使用 `controls:LabeledSettingsCard` 或 `ui:SettingsCard`：
+使用 `controls:LabeledSettingsCard` 或 `ui:CardControl`：
 
 ```xml
 <controls:LabeledSettingsCard x:Name="CardEnableInkFade"

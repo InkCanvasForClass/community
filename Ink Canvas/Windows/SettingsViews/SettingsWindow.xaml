@@ -1,15 +1,19 @@
-<Window xmlns:props="clr-namespace:Ink_Canvas.Properties"
+<ui:FluentWindow
     x:Class="Ink_Canvas.Windows.SettingsViews.SettingsWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:props="clr-namespace:Ink_Canvas.Properties"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
-Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
+    Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
     Width="1138" Height="750"
-    MinWidth="270" MinHeight="220"
+    MinWidth="560" MinHeight="420"
     WindowStartupLocation="CenterScreen"
+    ExtendsContentIntoTitleBar="True"
+    WindowCornerPreference="Default"
+    ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
+    ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
 
 
 
@@ -18,73 +22,31 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
 
     mc:Ignorable="d">
 
-    <Window.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-            </ResourceDictionary.MergedDictionaries>
-            <!--  L-Pattern Overwriting resources  -->
-            <Thickness x:Key="NavigationViewContentMargin">0,48,0,0</Thickness>
-            <Thickness x:Key="NavigationViewContentGridBorderThickness">1,1,0,0</Thickness>
-            <CornerRadius x:Key="NavigationViewContentGridCornerRadius">8,0,0,0</CornerRadius>
-            <Thickness x:Key="NavigationViewHeaderMargin">56,34,0,0</Thickness>
-        </ResourceDictionary>
-    </Window.Resources>
-
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="13*"/>
-            <RowDefinition Height="134*"/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
-
-        <Border
-            x:Name="AppTitleBar"
-            Grid.Column="1"
-            Height="{Binding ElementName=NavigationViewControl, Path=CompactPaneLength}"
-            VerticalAlignment="Top"
-            Background="Transparent"
-            IsHitTestVisible="True"
-            Canvas.ZIndex="10">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition Width="137"/>
-                </Grid.ColumnDefinitions>
-                <vio:SimpleStackPanel x:Name="AppTitle" Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                    <Image Source="\Resources\icc.ico" Width="20" RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <TextBlock x:Name="AppTitleText"
-                        VerticalAlignment="Center"
-                        Text="{x:Static props:NavStrings.Nav_AppSettings}" TextWrapping="NoWrap"/>
-                </vio:SimpleStackPanel>
-            </Grid>
-        </Border>
 
         <ui:NavigationView
             x:Name="NavigationViewControl"
-            Grid.Column="1"
-            AlwaysShowHeader="True"
-            Canvas.ZIndex="0"
-            Header=" " 
-            IsFooterSeparatorVisible="True"
-            PaneTitle=""
-            IsTabStop="False"
-
-            PaneDisplayMode="Auto"
-            SelectionChanged="OnNavigationViewSelectionChanged"
-            BackRequested="OnNavigationViewBackRequested"
-
+            FrameMargin="0"
             IsBackButtonVisible="Visible"
-
+            IsFooterSeparatorVisible="True"
+            IsPaneToggleVisible="True"
+            IsTopSeparatorVisible="False"
             OpenPaneLength="240"
-            ScrollViewer.VerticalScrollBarVisibility="Auto"
-            ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.RowSpan="2">
+            PaneDisplayMode="Left"
+            TitleBar="{Binding ElementName=TitleBar, Mode=OneWay}"
+            Transition="FadeInWithSlide"
+            BackRequested="OnNavigationViewBackRequested">
 
-            <!-- Header 由 code-behind 在导航时动态设置为当前页面标题（见 OnRootFrameNavigated），
-                 XAML 侧只在上面用 Header=" " 占位，故此处不再声明 Header/HeaderTemplate。 -->
+            <ui:NavigationView.Header>
+                <!-- 当前页面标题，由 code-behind 在导航时更新（见 OnPageContentChanged） -->
+                <TextBlock
+                    x:Name="PageTitleTextBlock"
+                    Margin="59,28,59,8"
+                    FontSize="20"
+                    FontWeight="SemiBold"
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                    TextTrimming="CharacterEllipsis" />
+            </ui:NavigationView.Header>
 
             <ui:NavigationView.AutoSuggestBox>
                 <ui:AutoSuggestBox
@@ -548,6 +510,16 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
             </ui:NavigationView.MenuItems>
 
             <ui:NavigationView.FooterMenuItems>
+                <!-- WPF-UI 没有 iNKORE 内建的 SettingsItem（齿轮），这里补一个等价的设置入口，
+                     供导航高亮与 FindNavigationViewItemByTag("Settings") 使用 -->
+                <ui:NavigationViewItem
+                    x:Name="SettingsItem"
+                    Content="{x:Static props:NavStrings.Settings_Title}"
+                    Tag="Settings">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Settings24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
                 <ui:NavigationViewItem
                     x:Name="FriendlyLinksItem"
                     Content="{x:Static props:NavStrings.Nav_FriendlyLinks}"
@@ -561,30 +533,34 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                     Content="{x:Static props:NavStrings.Nav_AboutInkCanvas}"
                     Tag="AboutPage">
                     <ui:NavigationViewItem.Icon>
-                        <ui:SymbolIcon Symbol="Help" />
+                        <ui:SymbolIcon Symbol="QuestionCircle24" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
             </ui:NavigationView.FooterMenuItems>
 
-            <!-- WPF-UI 的 NavigationView 不接受直接子内容，内容区必须放在 ContentOverlay 里 -->
+            <!-- 叠加层只放瞬态通知；页面内容由 NavigationView 自带的 NavigationViewContentPresenter 承载
+                 （见 code-behind 的 ReplaceContent），这样顶部标题与页面内容不会互相覆盖。 -->
             <ui:NavigationView.ContentOverlay>
-                <Frame x:Name="rootFrame" Navigated="OnRootFrameNavigated" NavigationUIVisibility="Hidden" />
+                <ui:InfoBar
+                    x:Name="CopyUriInfoBar"
+                    IsOpen="False"
+                    IsClosable="False"
+                    Severity="Success"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    Margin="0,0,0,24"
+                    MaxWidth="420"
+                    Visibility="Collapsed" />
             </ui:NavigationView.ContentOverlay>
         </ui:NavigationView>
 
-        <!-- 复制设置项 URL 后的瞬态通知 -->
-        <ui:InfoBar
-            x:Name="CopyUriInfoBar"
-            Grid.Column="1"
-            Grid.RowSpan="2"
-            IsOpen="False"
-            IsClosable="False"
-            Severity="Success"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Bottom"
-            Margin="0,0,0,24"
-            MaxWidth="420"
-            Canvas.ZIndex="20"
-            Visibility="Collapsed" />
+        <ui:TitleBar
+            x:Name="TitleBar"
+            Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
+            CloseWindowByDoubleClickOnIcon="True">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="/Resources/icc.ico" />
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
     </Grid>
-</Window>
+</ui:FluentWindow>

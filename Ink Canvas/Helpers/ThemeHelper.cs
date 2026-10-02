@@ -1,4 +1,5 @@
 using Wpf.Ui.Appearance;
+using WindowBackdropType = Wpf.Ui.Controls.WindowBackdropType;
 using Microsoft.Win32;
 using System;
 using System.Windows;
@@ -190,7 +191,7 @@ namespace Ink_Canvas.Helpers
             if (settings == null) return;
             try
             {
-                ApplicationThemeManager.Apply(GetEffectiveTheme(settings), updateAccent: false);
+                ApplyApplicationTheme(GetEffectiveTheme(settings));
                 ApplySystemAccentColor();
             }
             catch (Exception ex)
@@ -205,13 +206,50 @@ namespace Ink_Canvas.Helpers
             try
             {
                 var theme = GetEffectiveTheme(settings);
-                ApplicationThemeManager.Apply(theme, updateAccent: false);
+                ApplyApplicationTheme(theme);
                 ApplySystemAccentColor();
                 onThemeApplied?.Invoke(theme == ApplicationTheme.Dark ? "Dark" : "Light");
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"应用主题失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 应用应用级主题（带 MainWindow 保护）。
+        ///
+        /// WPF-UI 的 ApplicationThemeManager.Apply 会对 Application.Current.MainWindow 执行
+        /// WindowBackgroundManager.UpdateBackground：内部先调用 WindowBackdrop.RemoveBackdrop，
+        /// 而 RestoreContentBackground 会把窗口 Background 涂成 ApplicationBackgroundBrush（不透明）
+        /// 并把合成背景重置为 SystemColors.WindowColor；backdrop 非 None 时随后会被 RemoveBackground
+        /// 改回透明，None 时则保持不透明——ICC 主窗口是无边框透明窗口，一旦被涂上不透明底色就会出现
+        /// 全屏纯色遮挡。这里在切换期间临时摘掉 MainWindow 引用，让主题字典/强调色正常更新但不动主窗口，
+        /// 并在切换后对主窗口重新断言透明背景作为兜底。
+        /// </summary>
+        public static void ApplyApplicationTheme(ApplicationTheme theme, bool updateAccent = false)
+        {
+            var application = Application.Current;
+            var mainWindow = application?.MainWindow;
+
+            try
+            {
+                if (application != null && mainWindow != null)
+                {
+                    application.MainWindow = null;
+                }
+
+                ApplicationThemeManager.Apply(theme, WindowBackdropType.None, updateAccent: updateAccent);
+            }
+            finally
+            {
+                if (application != null && mainWindow != null)
+                {
+                    application.MainWindow = mainWindow;
+
+                    // 兜底恢复主窗口的透明背景，避免不透明底色残留成全屏遮挡
+                    Wpf.Ui.Controls.WindowBackdrop.RemoveBackground(mainWindow);
+                }
             }
         }
     }

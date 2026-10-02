@@ -232,7 +232,7 @@ namespace Ink_Canvas.Plugins
             MessageBoxResult result;
             if (owner != null && owner.IsLoaded)
             {
-                result = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                result = Wpf.Ui.Violeta.Controls.MessageBox.Show(
                     owner,
                     message,
                     PluginStrings.Plugin_ExternalDllAuthorizationTitle,
@@ -241,7 +241,7 @@ namespace Ink_Canvas.Plugins
             }
             else
             {
-                result = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                result = Wpf.Ui.Violeta.Controls.MessageBox.Show(
                     message,
                     PluginStrings.Plugin_ExternalDllAuthorizationTitle,
                     MessageBoxButton.YesNo,

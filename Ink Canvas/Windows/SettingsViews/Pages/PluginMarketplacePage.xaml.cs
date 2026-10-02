@@ -13,6 +13,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using SymbolRegular = Wpf.Ui.Controls.SymbolRegular;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
@@ -174,13 +175,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             try
             {
                 var content = new PluginMarketSourcesWindow(_market.Sources);
-                var dialog = new Wpf.Ui.Controls.ContentDialog
+                var dialog = new Wpf.Ui.Violeta.Controls.ContentDialog
                 {
                     Title = PluginStrings.Market_ManageSources,
                     Content = content,
                     CloseButtonText = Properties.NotificationStrings.AnimationOff,
                     Owner = Window.GetWindow(this) ?? Application.Current?.MainWindow,
-                    DefaultButton = Wpf.Ui.Controls.ContentDialogButton.Close,
+                    DefaultButton = Wpf.Ui.Violeta.Controls.ContentDialogButton.Close,
                     Resources =
                     {
                         ["ContentDialogMaxWidth"] = 860d,
@@ -286,9 +287,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 CornerRadius = new CornerRadius(6),
                 Margin = new Thickness(0, 0, 10, 0),
                 VerticalAlignment = VerticalAlignment.Center,
-                Child = new Wpf.Ui.Controls.FontIcon
+                Child = new Wpf.Ui.Controls.SymbolIcon
                 {
-                    Icon = SymbolRegular.Puzzle,
+                    Symbol = SymbolRegular.PuzzlePiece24,
                     FontSize = 18,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center
@@ -343,9 +344,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 var btn = new Button { Padding = new Thickness(4), Tag = p.Id, ToolTip = PluginStrings.Market_Install };
                 btn.Click += InstallButton_Click;
-                btn.Content = new Wpf.Ui.Controls.FontIcon
+                btn.Content = new Wpf.Ui.Controls.SymbolIcon
                 {
-                    Icon = SymbolRegular.Download,
+                    Symbol = SymbolRegular.ArrowDownload24,
                     FontSize = 14
                 };
                 actionPanel.Children.Add(btn);
@@ -354,18 +355,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 var btn = new Button { Padding = new Thickness(4), Tag = p.Id, ToolTip = PluginStrings.Market_Update, Margin = new Thickness(4, 0, 0, 0) };
                 btn.Click += InstallButton_Click;
-                btn.Content = new Wpf.Ui.Controls.FontIcon
+                btn.Content = new Wpf.Ui.Controls.SymbolIcon
                 {
-                    Icon = SymbolRegular.Upload,
+                    Symbol = SymbolRegular.ArrowUpload24,
                     FontSize = 14
                 };
                 actionPanel.Children.Add(btn);
             }
             if (p.IsLocal)
             {
-                var checkIcon = new Wpf.Ui.Controls.FontIcon
+                var checkIcon = new Wpf.Ui.Controls.SymbolIcon
                 {
-                    Icon = SymbolRegular.Completed,
+                    Symbol = SymbolRegular.CheckmarkCircle24,
                     FontSize = 14,
                     Margin = new Thickness(4, 0, 0, 0),
                     Foreground = new SolidColorBrush((Color)Application.Current.FindResource("SystemAccentColor"))
@@ -418,7 +419,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var projectUrl = p.MarketEntry?.Manifest?.Url;
             if (string.IsNullOrWhiteSpace(projectUrl))
                 projectUrl = p.LocalInfo?.Manifest?.Url;
-            DetailUrl.NavigateUri = TryGetWebUri(projectUrl, out var homepage) ? homepage : null;
+            DetailUrl.NavigateUri = TryGetWebUri(projectUrl, out var homepage) ? homepage?.ToString() : null;
             DetailUrl.Visibility = DetailUrl.NavigateUri != null ? Visibility.Visible : Visibility.Collapsed;
 
             // 按钮状态

@@ -782,9 +782,9 @@ namespace Ink_Canvas
             deleteBtnFactory.SetBinding(UIElement.VisibilityProperty,
                 new System.Windows.Data.Binding("ShowDeleteButton") { Converter = boolToVis });
 
-            var fontIconFactory = new FrameworkElementFactory(typeof(Wpf.Ui.Controls.FontIcon));
-            fontIconFactory.SetValue(Wpf.Ui.Controls.FontIcon.IconProperty,
-                SymbolRegular.Delete);
+            var fontIconFactory = new FrameworkElementFactory(typeof(Wpf.Ui.Controls.SymbolIcon));
+            fontIconFactory.SetValue(Wpf.Ui.Controls.SymbolIcon.SymbolProperty,
+                SymbolRegular.Delete24);
             deleteBtnFactory.AppendChild(fontIconFactory);
 
             // 选中小蓝条：朝向屏幕中央——左侧控件弹出的列表条在右，右侧控件弹出的条在左

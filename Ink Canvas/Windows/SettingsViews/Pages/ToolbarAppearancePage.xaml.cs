@@ -511,14 +511,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (mw == null) return;
 
             var content = new AddCustomIconWindow(mw);
-            var dialog = new Wpf.Ui.Controls.ContentDialog
+            var dialog = new Wpf.Ui.Violeta.Controls.ContentDialog
             {
                 Title = Properties.RandomStrings.Random_AddIcon_WindowTitle,
                 Content = content,
                 PrimaryButtonText = FloatingBarStrings.Tools_Save,
                 CloseButtonText = Properties.RandomStrings.Random_Cancel,
                 Owner = Window.GetWindow(this) ?? mw,
-                DefaultButton = Wpf.Ui.Controls.ContentDialogButton.Primary
+                DefaultButton = Wpf.Ui.Violeta.Controls.ContentDialogButton.Primary
             };
 
             content.OnInputChanged += () =>
@@ -547,13 +547,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (mw == null) return;
 
             var content = new CustomIconWindow(mw);
-            var dialog = new Wpf.Ui.Controls.ContentDialog
+            var dialog = new Wpf.Ui.Violeta.Controls.ContentDialog
             {
                 Title = Properties.ThemeStrings.Theme_CustomFloatingIconLabel,
                 Content = content,
                 CloseButtonText = Properties.NotificationStrings.AnimationOff,
                 Owner = Window.GetWindow(this) ?? mw,
-                DefaultButton = Wpf.Ui.Controls.ContentDialogButton.Close
+                DefaultButton = Wpf.Ui.Violeta.Controls.ContentDialogButton.Close
             };
             await dialog.ShowAsync();
         }

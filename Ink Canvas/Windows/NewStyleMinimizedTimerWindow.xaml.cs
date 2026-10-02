@@ -172,7 +172,7 @@ namespace Ink_Canvas.Windows
             }
             else
             {
-                MainBorder.Background = (Brush)FindResource(ThemeKeys.CardBackgroundFillColorDefaultBrushKey);//还原
+                MainBorder.Background = (Brush)FindResource("CardBackgroundFillColorDefaultBrush");//还原
                 SettingsManager.Settings.Timer.IsOpenTransparency = true;
                 SettingsManager.SaveSettingsToFile();
             }

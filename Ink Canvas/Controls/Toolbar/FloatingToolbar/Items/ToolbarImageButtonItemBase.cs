@@ -1,6 +1,8 @@
 using Ink_Canvas.Plugins;
 using Ink_Canvas.Properties;
 using Wpf.Ui.Controls;
+using Grid = System.Windows.Controls.Grid;
+using Image = System.Windows.Controls.Image;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -77,9 +79,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
             var oldIcon = buttonContent.Children.OfType<Image>().FirstOrDefault();
             if (oldIcon == null) return;
 
-            var fontIcon = new Wpf.Ui.Controls.FontIcon
+            var fontIcon = new Wpf.Ui.Controls.SymbolIcon
             {
-                Icon = IconKey.Value,
+                Symbol = IconKey.Value,
                 Width = 24,
                 Height = 24,
                 VerticalAlignment = VerticalAlignment.Top,

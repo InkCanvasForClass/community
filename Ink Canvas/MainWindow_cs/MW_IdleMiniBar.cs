@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using SymbolRegular = Wpf.Ui.Controls.SymbolRegular;
 using System;
 using System.Windows;
 using System.Windows.Input;
@@ -341,10 +342,10 @@ namespace Ink_Canvas
         private void UpdateIdleMiniBarExpandArrow(bool left, bool right, bool top, bool bottom)
         {
             if (IdleMiniBarExpandIcon == null) return;
-            if (left) IdleMiniBarExpandIcon.Icon = SymbolRegular.ChevronRight;
-            else if (right) IdleMiniBarExpandIcon.Icon = SymbolRegular.ChevronLeft;
-            else if (top) IdleMiniBarExpandIcon.Icon = SymbolRegular.ChevronDown;
-            else if (bottom) IdleMiniBarExpandIcon.Icon = SymbolRegular.ChevronUp;
+            if (left) IdleMiniBarExpandIcon.Symbol = SymbolRegular.ChevronRight24;
+            else if (right) IdleMiniBarExpandIcon.Symbol = SymbolRegular.ChevronLeft24;
+            else if (top) IdleMiniBarExpandIcon.Symbol = SymbolRegular.ChevronDown24;
+            else if (bottom) IdleMiniBarExpandIcon.Symbol = SymbolRegular.ChevronUp24;
         }
 
         private void AnimateIdleMiniBarTo(double left, double top)

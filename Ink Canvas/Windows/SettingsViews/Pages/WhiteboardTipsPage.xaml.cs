@@ -2,6 +2,11 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Wpf.Ui.Controls;
+using Button = System.Windows.Controls.Button;
+using StackPanel = System.Windows.Controls.StackPanel;
+using TextBlock = System.Windows.Controls.TextBlock;
+using TextBox = System.Windows.Controls.TextBox;
+using MessageBoxButton = System.Windows.MessageBoxButton;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -10,7 +15,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using ContentDialog = Wpf.Ui.Controls.ContentDialog;
+using ContentDialog = Wpf.Ui.Violeta.Controls.ContentDialog;
+using ContentDialogButton = Wpf.Ui.Violeta.Controls.ContentDialogButton;
+using ContentDialogResult = Wpf.Ui.Violeta.Controls.ContentDialogResult;
 using Page = System.Windows.Controls.Page;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages

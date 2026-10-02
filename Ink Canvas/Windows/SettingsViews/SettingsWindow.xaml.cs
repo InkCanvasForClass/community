@@ -2,6 +2,7 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Pages;
+using WindowBackdropType = Wpf.Ui.Controls.WindowBackdropType;
 // 只别名导入 WPF-UI 专属控件，避免与 System.Windows.Controls 的同名类型（TextBlock/Image/Button/Border 等）产生 CS0104 歧义。
 using AutoSuggestBox = Wpf.Ui.Controls.AutoSuggestBox;
 using AutoSuggestBoxQuerySubmittedEventArgs = Wpf.Ui.Controls.AutoSuggestBoxQuerySubmittedEventArgs;
@@ -28,7 +29,7 @@ using Screen = System.Windows.Forms.Screen;
 
 namespace Ink_Canvas.Windows.SettingsViews
 {
-    public partial class SettingsWindow : Window
+    public partial class SettingsWindow : Wpf.Ui.Controls.FluentWindow
     {
         private readonly Dictionary<string, Type> _pageTypes = new Dictionary<string, Type>
         {
@@ -85,8 +86,19 @@ namespace Ink_Canvas.Windows.SettingsViews
         // 标记窗口是否曾经最大化过
         private bool _wasMaximized = false;
 
-        private bool _isNavigating = false;
         private bool _updateBadgeDismissed = false;
+
+        /// <summary>当前承载在 NavigationViewContentPresenter 中的页面实例（与 _pages 缓存一致）。</summary>
+        private FrameworkElement _currentPage;
+
+        /// <summary>当前页面对应的 _pageTypes tag，用于深链接与页面实例反查。</summary>
+        private string _currentPageTag;
+
+        /// <summary>
+        /// 点击导航项时临时记下的 tag。插件设置页共用 PluginSettingsPage 类型，
+        /// 只有靠 tag 才能让页面提供器返回正确的缓存实例。
+        /// </summary>
+        private string _pendingPageTag;
 
         /// <summary>
         /// 若为 true，则跳过 Loaded 中默认导航到 HomePage 的行为。
@@ -107,7 +119,7 @@ namespace Ink_Canvas.Windows.SettingsViews
         {
             _pendingHighlightKey = key;
             // 若页面已加载（窗口已打开但用户再次导航），尝试立即触发
-            if (rootFrame?.Content is FrameworkElement page && page.IsLoaded)
+            if (_currentPage is { IsLoaded: true })
             {
                 TryApplyPendingHighlight();
             }
@@ -118,7 +130,6 @@ namespace Ink_Canvas.Windows.SettingsViews
             InitializeComponent();
 
             ApplyCurrentTheme();
-            global::Ink_Canvas.Helpers.WindowBackdropHelper.Apply(this, Helpers.SettingsManager.Settings);
 
             // 初始化内置页面映射
             _pageTypes = new Dictionary<string, Type>
@@ -165,9 +176,14 @@ namespace Ink_Canvas.Windows.SettingsViews
                 { "PPTPageFlipPreviewPage", typeof(PPTPageFlipPreviewPage) }
             };
 
-            // 初始页面统一在 Loaded 阶段导航，避免构造阶段与深链接导航互相覆盖。
-            UpdateAppTitleBarMargin();
+            // 点击导航项的导航由 NavigationView 自己发起（NavigationViewItem.OnClick），
+            // 需要先给每个导航项补上 TargetPageTag/TargetPageType，并接上页面提供器，
+            // 否则点击导航项不会有任何反应（库会因为 TargetPageType 为空而直接跳过导航）。
+            ConfigureNavigationTargets();
+            NavigationViewControl.SetPageProviderService(new SettingsPageProvider(this));
+            NavigationViewControl.Navigated += OnNavigationViewNavigated;
 
+            // 初始页面统一在 Loaded 阶段导航，避免构造阶段与深链接导航互相覆盖。
             this.Loaded += (sender, e) =>
             {
                 SetMaxSizeAndCenter();
@@ -178,8 +194,8 @@ namespace Ink_Canvas.Windows.SettingsViews
                     if (!SuppressInitialNavigation)
                     {
                         NavigateToPage("HomePage");
-                        NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems[0];
-                        NavigationViewControl.Header = NavStrings.Nav_Home;
+                        if (NavigationViewControl.MenuItems[0] is NavigationViewItem homeItem) homeItem.IsActive = true;
+                        SetPageTitle(NavStrings.Nav_Home);
                     }
 
                     Dispatcher.BeginInvoke(new Action(() =>
@@ -238,27 +254,38 @@ namespace Ink_Canvas.Windows.SettingsViews
                 {
                     SetMaxSizeOnly();
                 }
-                UpdateAppTitleBarMargin();
-            };
-
-            this.SizeChanged += (sender, e) =>
-            {
-                if (NavigationViewControl.DisplayMode == NavigationViewDisplayMode.Minimal)
-                {
-                    UpdateAppTitleBarMargin();
-                }
             };
         }
 
         public void RefreshTheme()
         {
             ApplyCurrentTheme();
-            global::Ink_Canvas.Helpers.WindowBackdropHelper.Apply(this, Helpers.SettingsManager.Settings);
         }
 
+        /// <summary>
+        /// 按设置里的背景名应用窗口背景。设置窗口是 FluentWindow，直接使用 WPF-UI 原生的
+        /// <see cref="Wpf.Ui.Controls.FluentWindow.WindowBackdropType"/>（由库自身处理 WindowChrome 与 DWM 背景），
+        /// 不再走 InkCanvas 自定义的窗口背景助手，避免与 TitleBar 的拖拽区/系统按钮冲突。
+        /// </summary>
         public void ApplyWindowBackdrop(string backdropName)
         {
-            global::Ink_Canvas.Helpers.WindowBackdropHelper.Apply(this, backdropName);
+            Wpf.Ui.Controls.WindowBackdropType backdropType;
+            if (string.IsNullOrWhiteSpace(backdropName))
+            {
+                backdropType = Wpf.Ui.Controls.WindowBackdropType.None;
+            }
+            else if (string.Equals(backdropName, "Acrylic10", StringComparison.OrdinalIgnoreCase) ||
+                     string.Equals(backdropName, "Acrylic11", StringComparison.OrdinalIgnoreCase))
+            {
+                // 自定义的 Win10/Win11 亚克力名归一化为 WPF-UI 的 Acrylic
+                backdropType = Wpf.Ui.Controls.WindowBackdropType.Acrylic;
+            }
+            else if (!Enum.TryParse(backdropName, true, out backdropType))
+            {
+                backdropType = Wpf.Ui.Controls.WindowBackdropType.None;
+            }
+
+            this.WindowBackdropType = backdropType;
         }
 
         private void ApplyCurrentTheme()
@@ -272,7 +299,10 @@ namespace Ink_Canvas.Windows.SettingsViews
                     1 => Wpf.Ui.Appearance.ApplicationTheme.Dark,
                     _ => IsSystemThemeLight() ? Wpf.Ui.Appearance.ApplicationTheme.Light : Wpf.Ui.Appearance.ApplicationTheme.Dark,
                 };
-                Wpf.Ui.Appearance.ApplicationThemeManager.SetRequestedTheme(this, elementTheme);
+                ThemeHelper.ApplyApplicationTheme(elementTheme);
+
+                // 主题切换会重置窗口背景，这里按设置重新应用
+                ApplyWindowBackdrop(Helpers.SettingsManager.Settings.Appearance.WindowBackdrop);
             }
             catch (Exception ex)
             {
@@ -389,49 +419,173 @@ namespace Ink_Canvas.Windows.SettingsViews
         #endregion
 
         #region 导航逻辑优化（含页面缓存）
-        private void OnNavigationViewSelectionChanged(NavigationView sender, RoutedEventArgs args)
+
+        /// <summary>
+        /// 页面提供器：把设置页实例（含缓存与插件注入）交给 WPF-UI 的 NavigationView 原生导航使用。
+        ///
+        /// 必须提供：NavigationViewItem 的点击是走库自身的 <c>OnClick → OnNavigationViewItemClick →
+        /// NavigateInternal</c>，其中页面实例由 INavigationViewPageProvider（未注册时用反射）创建。
+        /// 只有接上提供器，点击导航项才会复用我们缓存的实例（否则每次都会新建，插件页也会丢状态）。
+        /// </summary>
+        private sealed class SettingsPageProvider : Wpf.Ui.Abstractions.INavigationViewPageProvider
         {
-            if (_isNavigating)
-            {
-                return;
-            }
+            private readonly SettingsWindow _owner;
 
-            if (args.IsSettingsSelected)
-            {
-                NavigateToPage("Settings");
-                NavigationViewControl.Header = NavStrings.Settings_Title;
-                return;
-            }
+            public SettingsPageProvider(SettingsWindow owner) => _owner = owner;
 
-            // 处理普通导航项
-            if (args.SelectedItem is NavigationViewItem selectedItem)
+            public object GetPage(Type pageType) => _owner.GetOrCreatePage(pageType);
+        }
+
+        /// <summary>
+        /// 取得（或创建）指定页面类型的实例，与 _pages 缓存保持一致。
+        /// </summary>
+        private object GetOrCreatePage(Type pageType)
+        {
+            // 插件页共用一个 PluginSettingsPage 类型，靠点击时记下的 tag 精确定位实例
+            string tag = null;
+            if (!string.IsNullOrEmpty(_pendingPageTag)
+                && _pageTypes.TryGetValue(_pendingPageTag, out var pendingType)
+                && pendingType == pageType)
             {
-                string tag = selectedItem.Tag as string;
-                if (!string.IsNullOrEmpty(tag) && _pageTypes.ContainsKey(tag))
+                tag = _pendingPageTag;
+            }
+            _pendingPageTag = null;
+
+            if (tag == null)
+            {
+                foreach (var kv in _pageTypes)
                 {
-                    Ink_Canvas.Plugins.PluginInfo pluginInfo = null;
-                    _pluginPages.TryGetValue(tag, out pluginInfo);
-
-                    object cachedPage = null;
-                    _pages.TryGetValue(tag, out cachedPage);
-
-                    if (cachedPage == null || rootFrame.Content != cachedPage)
-                    {
-                        NavigateToPage(tag, pluginInfo);
-                    }
-                    else if (cachedPage is PluginSettingsPage pluginSettingsPage && pluginInfo != null)
-                    {
-                        pluginSettingsPage.CurrentPlugin = pluginInfo;
-                    }
-                    NavigationViewControl.Header = selectedItem.Content;
-
-                    if (tag == "UpdatePage")
-                    {
-                        _updateBadgeDismissed = true;
-                        UpdateUpdateBadgeVisibility();
-                    }
+                    if (kv.Value == pageType) { tag = kv.Key; break; }
                 }
             }
+
+            object page = null;
+            if (!string.IsNullOrEmpty(tag)) _pages.TryGetValue(tag, out page);
+
+            if (page == null)
+            {
+                try
+                {
+                    page = Activator.CreateInstance(pageType);
+                    if (!string.IsNullOrEmpty(tag)) _pages[tag] = page;
+                }
+                catch (Exception ex)
+                {
+                    // 某个设置页构造失败（例如 XAML 里引用了失效的资源键）时，
+                    // 点击导航项是走 WPF-UI 的 OnClick → NavigateInternal，异常会直接抛到 UI 线程
+                    // 导致整个应用崩溃。这里兜住并返回占位页，用户仍可继续使用其它设置页。
+                    LogHelper.WriteLogToFile($"[Settings] 构造设置页面 {pageType?.FullName} 失败: {ex}", LogHelper.LogType.Error);
+                    return CreatePageLoadFailureView(pageType, ex);
+                }
+            }
+
+            PreparePageForHost(page as FrameworkElement);
+            return page;
+        }
+
+        /// <summary>
+        /// 页面构造失败时的占位内容，避免导航把整个 UI 线程带崩。
+        /// </summary>
+        private static FrameworkElement CreatePageLoadFailureView(Type pageType, Exception ex)
+        {
+            var panel = new StackPanel { Margin = new Thickness(59, 28, 59, 28) };
+
+            panel.Children.Add(new TextBlock
+            {
+                Text = pageType?.FullName ?? string.Empty,
+                FontSize = 16,
+                FontWeight = FontWeights.SemiBold,
+                Margin = new Thickness(0, 0, 0, 8),
+            });
+
+            panel.Children.Add(new TextBlock
+            {
+                Text = string.Format(NavStrings.Nav_NavigateError, ex?.Message),
+                TextWrapping = TextWrapping.Wrap,
+            });
+
+            var page = new Page { Content = panel };
+            ScrollViewer.SetCanContentScroll(page, false);
+            return page;
+        }
+
+        /// <summary>
+        /// 页面被 NavigationView 承载前的准备。
+        ///
+        /// NavigationViewContentPresenter 会在 OnNavigated 里用 <c>ScrollViewer.GetCanContentScroll(页面)</c>
+        /// 决定是否把页面塞进 DynamicScrollViewer。WPF-UI 把 Page 的 CanContentScroll 覆写为 true，
+        /// 于是页面被 DynamicScrollViewer（VerticalScrollBarVisibility=Auto）包裹，页内 ScrollViewer
+        /// 被以无限高度测量 —— 表现为鼠标滚轮与触摸下滑都滚不动。
+        /// 这里显式置 false，让页面直接放在 ContentPresenter 中，由页面自己的 ScrollViewer 正常滚动。
+        /// </summary>
+        private static void PreparePageForHost(FrameworkElement page)
+        {
+            if (page == null) return;
+            ScrollViewer.SetCanContentScroll(page, false);
+        }
+
+        /// <summary>
+        /// 给导航项补上 WPF-UI 原生导航所需的 TargetPageTag / TargetPageType。
+        /// 没有 TargetPageType 时 NavigationViewItem.OnClick 不会触发任何导航（点击完全没反应）。
+        /// </summary>
+        private void ConfigureNavigationTargets()
+        {
+            foreach (var item in EnumerateNavigationItems(NavigationViewControl.MenuItems))
+                ApplyNavigationTarget(item);
+            foreach (var item in EnumerateNavigationItems(NavigationViewControl.FooterMenuItems))
+                ApplyNavigationTarget(item);
+        }
+
+        private static IEnumerable<NavigationViewItem> EnumerateNavigationItems(System.Collections.IEnumerable items)
+        {
+            if (items == null) yield break;
+
+            foreach (var obj in items)
+            {
+                if (obj is not NavigationViewItem item) continue;
+
+                yield return item;
+
+                foreach (var child in EnumerateNavigationItems(item.MenuItems)) yield return child;
+            }
+        }
+
+        private void ApplyNavigationTarget(NavigationViewItem item)
+        {
+            if (item?.Tag is not string tag || string.IsNullOrEmpty(tag)) return;
+            if (!_pageTypes.TryGetValue(tag, out var pageType)) return;
+
+            if (string.IsNullOrEmpty(item.TargetPageTag)) item.TargetPageTag = tag;
+            if (item.TargetPageType == null) item.TargetPageType = pageType;
+
+            // 插件页共用 PluginSettingsPage 类型，点击时先记下具体 tag 供页面提供器取正确实例
+            item.PreviewMouseLeftButtonDown += (s, e) => _pendingPageTag = tag;
+        }
+
+        /// <summary>
+        /// NavigationView 原生导航完成（点击导航项、Navigate() 与返回都会触发）。
+        /// </summary>
+        private void OnNavigationViewNavigated(NavigationView sender, Wpf.Ui.Controls.NavigatedEventArgs args)
+        {
+            var page = args.Page as FrameworkElement;
+            if (page == null) return;
+
+            _currentPage = page;
+            _currentPageTag = FindTagForPage(page) ?? _currentPageTag;
+
+            OnPageContentChanged(_currentPageTag, page);
+        }
+
+        /// <summary>
+        /// 由页面实例反查其注册 tag（_pages 是 tag→实例且实例唯一，故可精确匹配）。
+        /// </summary>
+        private string FindTagForPage(object page)
+        {
+            foreach (var kv in _pages)
+            {
+                if (ReferenceEquals(kv.Value, page)) return kv.Key;
+            }
+            return null;
         }
 
         public void NavigateToPage(string pageTag, Ink_Canvas.Plugins.PluginInfo pluginInfo = null)
@@ -442,27 +596,27 @@ namespace Ink_Canvas.Windows.SettingsViews
                 return;
             }
 
+            _pendingPageTag = pageTag;
+
+            // 插件页需要先把当前插件注入到缓存实例上
+            if (pluginInfo != null && GetOrCreatePage(pageType) is PluginSettingsPage pluginSettingsPage)
+            {
+                pluginSettingsPage.CurrentPlugin = pluginInfo;
+            }
+            _currentPageTag = pageTag;
+
             try
             {
-                _isNavigating = true;
-
-                if (!_pages.TryGetValue(pageTag, out var cachedPage))
+                // 走 WPF-UI 原生导航：写入 Journal、同步 SelectedItem，并触发 Navigated
+                if (!NavigationViewControl.Navigate(pageType))
                 {
-                    cachedPage = Activator.CreateInstance(pageType);
-                    _pages.Add(pageTag, cachedPage);
+                    // 兜底：类型未注册到导航字典时直接落内容（不写 Journal，仅保证页面可见）
+                    var fallbackPage = GetOrCreatePage(pageType) as FrameworkElement;
+                    _currentPage = fallbackPage;
+                    NavigationViewControl.ReplaceContent((UIElement)fallbackPage);
+                    OnPageContentChanged(pageTag, fallbackPage);
                 }
 
-                if (cachedPage is PluginSettingsPage pluginSettingsPage && pluginInfo != null)
-                {
-                    pluginSettingsPage.CurrentPlugin = pluginInfo;
-                }
-
-
-
-                rootFrame.NavigationUIVisibility = NavigationUIVisibility.Hidden;
-                rootFrame.RemoveBackEntry();
-                rootFrame.Navigate(cachedPage);
-                rootFrame.RemoveBackEntry();
                 LogHelper.WriteLogToFile(
                     $"[Nav] 已导航到设置页面 {pageTag}{(pluginInfo != null ? " (插件: " + pluginInfo.Id + ")" : "")}",
                     LogHelper.LogType.Info);
@@ -478,61 +632,62 @@ namespace Ink_Canvas.Windows.SettingsViews
                 Ink_Canvas.Helpers.LogHelper.WriteLogToFile($"SettingsWindow: 导航到 {pageTag} 异常: {detail}", Ink_Canvas.Helpers.LogHelper.LogType.Error);
                 MessageBoxHelper.Show(this, string.Format(NavStrings.Nav_NavigateError, ex.InnerException?.Message ?? ex.Message), NavStrings.Nav_Error, MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            finally
-            {
-                _isNavigating = false;
-            }
         }
-
 
         private void OnNavigationViewBackRequested(NavigationView sender, RoutedEventArgs args)
         {
-            if (rootFrame.CanGoBack) rootFrame.GoBack();
+            // 返回动作由 NavigationView 自身的 Journal 完成（BackButton → GoBack → NavigateInternal），
+            // 这里无需再做处理；无历史时库不会触发本事件。
         }
-        private void OnRootFrameNavigated(object sender, NavigationEventArgs e)
+
+        /// <summary>
+        /// 页面进入内容区后的统一收尾：切换导航面板形态、同步选中项与页头标题、
+        /// 挂载滚动/输入处理，并应用待处理的高亮。
+        /// </summary>
+        private void OnPageContentChanged(string pageTag, FrameworkElement page)
         {
-            Type currentPageType = rootFrame.SourcePageType;
-            if (currentPageType == typeof(PPTPageFlipPreviewPage))
-            {
-                NavigationViewControl.PaneDisplayMode = Wpf.Ui.Controls.NavigationViewPaneDisplayMode.LeftMinimal;
-            }
-            else
-            {
-                NavigationViewControl.PaneDisplayMode = Wpf.Ui.Controls.NavigationViewPaneDisplayMode.Auto;
-            }
+            Type currentPageType = page?.GetType();
 
-            if (_isNavigating)
-            {
-                return;
-            }
+            // 浮动栏翻页预览页使用紧凑导航面板，其余页面还原为常规左侧面板
+            NavigationViewControl.PaneDisplayMode = currentPageType == typeof(PPTPageFlipPreviewPage)
+                ? Wpf.Ui.Controls.NavigationViewPaneDisplayMode.LeftMinimal
+                : Wpf.Ui.Controls.NavigationViewPaneDisplayMode.Left;
 
-            // 处理设置项的选中状态
-            if (currentPageType == typeof(SettingsPage))
+            // 归一化 tag：优先用调用方给出的（插件页靠它区分具体插件），否则按页面类型反查
+            if (string.IsNullOrEmpty(pageTag)
+                || !_pageTypes.TryGetValue(pageTag, out var taggedType)
+                || taggedType != currentPageType)
             {
-                NavigationViewControl.SelectedItem = NavigationViewControl.SettingsItem;
-                NavigationViewControl.Header = NavStrings.Settings_Title;
-                return;
-            }
-
-            // 同步其他页面的选中状态
-            foreach (var kvp in _pageTypes)
-            {
-                if (kvp.Value == currentPageType)
+                pageTag = null;
+                foreach (var kv in _pageTypes)
                 {
-                    var targetItem = FindNavigationViewItemByTag(kvp.Key);
-                    if (targetItem != null && NavigationViewControl.SelectedItem != targetItem)
-                    {
-                        NavigationViewControl.SelectedItem = targetItem;
-                        NavigationViewControl.Header = targetItem.Content;
-                    }
-                    break;
+                    if (kv.Value == currentPageType) { pageTag = kv.Key; break; }
                 }
             }
 
-            // 重置当前页面的选中设置项（页面可在 Loaded 中再设置）
+            if (!string.IsNullOrEmpty(pageTag)) _currentPageTag = pageTag;
 
-            ApplySmoothScrollingToPage(e.Content as FrameworkElement);
-            HookSettingsCardInputHandlers(e.Content as FrameworkElement);
+            // 同步导航项选中态与页头标题
+            var targetItem = string.IsNullOrEmpty(pageTag) ? null : FindNavigationViewItemByTag(pageTag);
+            if (targetItem != null)
+            {
+                targetItem.IsActive = true;
+                SetPageTitle(targetItem.Content);
+            }
+            else if (currentPageType == typeof(SettingsPage))
+            {
+                SetPageTitle(NavStrings.Settings_Title);
+            }
+
+            // 进入「更新」页后熄灭导航项上的红点
+            if (pageTag == "UpdatePage" && !_updateBadgeDismissed)
+            {
+                _updateBadgeDismissed = true;
+                UpdateUpdateBadgeVisibility();
+            }
+
+            ApplySmoothScrollingToPage(page);
+            HookSettingsCardInputHandlers(page);
 
             // 应用 URI 处理器留下的待处理高亮 key（等待页面 Loaded 完成，确保可视树已构建）
             TryApplyPendingHighlight();
@@ -540,14 +695,25 @@ namespace Ink_Canvas.Windows.SettingsViews
             // 如果导航到了浮动栏主题管理页，确保刷新主题列表（比如从主题市场安装后返回能立即看到）
             try
             {
-                if (currentPageType == typeof(FloatingBarThemePage))
+                if (page is FloatingBarThemePage floatingBarThemePage)
                 {
-                    (rootFrame.Content as FloatingBarThemePage)?.RefreshThemes();
+                    floatingBarThemePage.RefreshThemes();
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"[Settings] 导航后刷新浮动栏主题列表失败: {ex.Message}", LogHelper.LogType.Info);
+            }
+        }
+
+        /// <summary>
+        /// 更新 NavigationView 页头显示的当前页面标题。
+        /// </summary>
+        private void SetPageTitle(object content)
+        {
+            if (PageTitleTextBlock != null)
+            {
+                PageTitleTextBlock.Text = content?.ToString() ?? string.Empty;
             }
         }
 
@@ -558,7 +724,7 @@ namespace Ink_Canvas.Windows.SettingsViews
         {
             try
             {
-                (rootFrame.Content as FloatingBarThemePage)?.RefreshThemes();
+                (_currentPage as FloatingBarThemePage)?.RefreshThemes();
             }
             catch (Exception ex)
             {
@@ -572,7 +738,7 @@ namespace Ink_Canvas.Windows.SettingsViews
         private void TryApplyPendingHighlight()
         {
             if (string.IsNullOrEmpty(_pendingHighlightKey)) return;
-            if (rootFrame?.Content is not FrameworkElement page) return;
+            if (_currentPage is not FrameworkElement page) return;
 
             var pendingKey = _pendingHighlightKey;
             _pendingHighlightKey = null;
@@ -652,41 +818,6 @@ namespace Ink_Canvas.Windows.SettingsViews
                         queue.Enqueue(childDep);
                 }
             }
-        }
-
-        private void NavigationViewControl_DisplayModeChanged(NavigationView sender, RoutedEventArgs args)
-        {
-            UpdateAppTitleBarMargin(sender);
-        }
-
-        private void UpdateAppTitleBarMargin()
-        {
-            UpdateAppTitleBarMargin(NavigationViewControl);
-        }
-
-        private void UpdateAppTitleBarMargin(NavigationView sender)
-        {
-            Thickness currMargin = AppTitleBar.Margin;
-            if (sender.DisplayMode == NavigationViewDisplayMode.Minimal)
-            {
-                AppTitleBar.Margin = new Thickness((sender.CompactPaneLength * 2), currMargin.Top, currMargin.Right, currMargin.Bottom);
-
-                // 当窗口宽度非常小时，隐藏图标和应用设置文字
-                if (this.ActualWidth < 400)
-                {
-                    AppTitle.Visibility = Visibility.Collapsed;
-                }
-                else
-                {
-                    AppTitle.Visibility = Visibility.Visible;
-                }
-            }
-            else
-            {
-                AppTitleBar.Margin = new Thickness(sender.CompactPaneLength, currMargin.Top, currMargin.Right, currMargin.Bottom);
-                AppTitle.Visibility = Visibility.Visible;
-            }
-            AppTitleBar.Visibility = sender.PaneDisplayMode == NavigationViewPaneDisplayMode.Top ? Visibility.Collapsed : Visibility.Visible;
         }
 
         private NavigationViewItem FindNavigationViewItemByTag(string tag)
@@ -808,25 +939,14 @@ namespace Ink_Canvas.Windows.SettingsViews
                 {
                     header = lsc.Header;
                 }
-                else if (node is Ink_Canvas.Controls.SettingsCard sc)
+                else if (node is Wpf.Ui.Controls.CardControl cardControl)
                 {
-                    header = sc.Header?.ToString();
+                    header = GetCardHeaderText(cardControl.Header);
                 }
-                else if (node is Ink_Canvas.Controls.SettingsExpander se)
+                else if (node is Wpf.Ui.Controls.CardExpander cardExpander)
                 {
-                    header = se.Header?.ToString();
-
-                    // 展开器（SettingsExpander）内部的子设置卡片并不会总被 LogicalTreeHelper
-                    // 枚举到（需展开/加载后才生成容器），因此直接遍历其 Items 集合，
-                    // 确保嵌套的「创建快捷方式」「批注状态点提示」等子项也能被设置搜索检索到。
-                    if (se.Items is System.Collections.IEnumerable seItems)
-                    {
-                        foreach (var seItem in seItems)
-                        {
-                            if (seItem is DependencyObject seItemDep)
-                                CollectEntriesFromPage(seItemDep, pageTag);
-                        }
-                    }
+                    // 展开器（CardExpander）内部的子设置卡片是普通逻辑子级，会由树遍历自然覆盖。
+                    header = GetCardHeaderText(cardExpander.Header);
                 }
 
                 if (!string.IsNullOrWhiteSpace(header) && target != null)
@@ -867,8 +987,8 @@ namespace Ink_Canvas.Windows.SettingsViews
             var navItem = FindNavigationViewItemByTag(entry.PageTag);
             if (navItem != null && NavigationViewControl.SelectedItem != navItem)
             {
-                NavigationViewControl.SelectedItem = navItem;
-                NavigationViewControl.Header = navItem.Content;
+                navItem.IsActive = true;
+                SetPageTitle(navItem.Content);
             }
 
             if (entry.Target != null && entry.Target.TryGetTarget(out var fe))
@@ -887,7 +1007,7 @@ namespace Ink_Canvas.Windows.SettingsViews
         {
             EnsureSearchIndexBuilt();
 
-            string raw = (args.ChosenSuggestion as string) ?? args.QueryText;
+            string raw = args.QueryText;
             if (string.IsNullOrWhiteSpace(raw)) return;
 
             string query = raw.Trim();
@@ -900,7 +1020,7 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         private void OnControlsSearchBoxTextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
-            if (args.Reason != AutoSuggestionBoxTextChangeReason.UserInput) return;
+            if (args.Reason != Wpf.Ui.Controls.AutoSuggestionBoxTextChangeReason.UserInput) return;
 
             EnsureSearchIndexBuilt();
 
@@ -992,6 +1112,9 @@ namespace Ink_Canvas.Windows.SettingsViews
                     }
                 };
                 NavigationViewControl.MenuItems.Add(navItem);
+
+                // 插件导航项同样需要原生导航目标，点击才会跳转
+                ApplyNavigationTarget(navItem);
             }
         }
 
@@ -1029,7 +1152,7 @@ namespace Ink_Canvas.Windows.SettingsViews
         /// </summary>
         private string GetCurrentPageTag()
         {
-            var t = rootFrame?.SourcePageType;
+            var t = _currentPage?.GetType();
             if (t == null) return null;
             foreach (var kv in _pageTypes)
             {
@@ -1043,7 +1166,7 @@ namespace Ink_Canvas.Windows.SettingsViews
         /// </summary>
         public void HighlightSetting(string settingKey)
         {
-            if (string.IsNullOrEmpty(settingKey) || rootFrame?.Content is not FrameworkElement root)
+            if (string.IsNullOrEmpty(settingKey) || _currentPage is not FrameworkElement root)
                 return;
 
             try
@@ -1353,7 +1476,7 @@ namespace Ink_Canvas.Windows.SettingsViews
         }
 
         /// <summary>
-        /// 沿可视树向上查找最近的 SettingsCard / SettingsExpander / LabeledSettingsCard。
+        /// 沿可视树向上查找最近的 CardControl / CardExpander / LabeledSettingsCard。
         /// </summary>
         private FrameworkElement FindSettingsContainer(DependencyObject source)
         {
@@ -1362,10 +1485,10 @@ namespace Ink_Canvas.Windows.SettingsViews
             {
                 if (current is Ink_Canvas.Controls.LabeledSettingsCard lsc)
                     return lsc;
-                if (current is Ink_Canvas.Controls.SettingsCard sc)
-                    return sc;
-                if (current is Ink_Canvas.Controls.SettingsExpander se)
-                    return se;
+                if (current is Wpf.Ui.Controls.CardControl cardControl)
+                    return cardControl;
+                if (current is Wpf.Ui.Controls.CardExpander cardExpander)
+                    return cardExpander;
 
                 current = VisualTreeHelper.GetParent(current);
             }
@@ -1407,16 +1530,39 @@ namespace Ink_Canvas.Windows.SettingsViews
             {
                 if (target is Ink_Canvas.Controls.LabeledSettingsCard lsc)
                     return lsc.Header?.Trim();
-                if (target is Ink_Canvas.Controls.SettingsCard sc)
-                    return (sc.Header as string)?.Trim() ?? sc.Header?.ToString()?.Trim();
-                if (target is Ink_Canvas.Controls.SettingsExpander se)
-                    return (se.Header as string)?.Trim() ?? se.Header?.ToString()?.Trim();
+                if (target is Wpf.Ui.Controls.CardControl cardControl)
+                    return GetCardHeaderText(cardControl.Header)?.Trim();
+                if (target is Wpf.Ui.Controls.CardExpander cardExpander)
+                    return GetCardHeaderText(cardExpander.Header)?.Trim();
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"[Settings] 读取设置项标题文本失败: {ex.Message}", LogHelper.LogType.Info);
             }
             return null;
+        }
+
+        /// <summary>
+        /// 从卡片 Header 中提取用于搜索/复制 URL 的文本（Header 可能是字符串，也可能是「标题 + 说明」StackPanel）。
+        /// </summary>
+        private static string GetCardHeaderText(object header)
+        {
+            if (header == null) return null;
+            if (header is string text) return text;
+            if (header is Panel panel)
+            {
+                var sb = new System.Text.StringBuilder();
+                foreach (var child in panel.Children)
+                {
+                    if (child is TextBlock textBlock && !string.IsNullOrWhiteSpace(textBlock.Text))
+                    {
+                        if (sb.Length > 0) sb.Append(' ');
+                        sb.Append(textBlock.Text.Trim());
+                    }
+                }
+                if (sb.Length > 0) return sb.ToString();
+            }
+            return header.ToString();
         }
 
         private DispatcherTimer _copyUriInfoBarTimer;
@@ -1531,7 +1677,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                     var count = AnnouncementService.GetUnreadCount(Helpers.SettingsManager.Settings);
                     if (AnnouncementUnreadInfoBadge != null)
                     {
-                        AnnouncementUnreadInfoBadge.Value = count;
+                        AnnouncementUnreadInfoBadge.Value = count.ToString();
                         AnnouncementUnreadInfoBadge.Visibility = count > 0 ? Visibility.Visible : Visibility.Collapsed;
                     }
                 }

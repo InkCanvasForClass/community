@@ -1,6 +1,7 @@
 using Ink_Canvas.Helpers;
 using Wpf.Ui.Controls;
-using Wpf.Ui.Controls;
+using MessageBoxButton = System.Windows.MessageBoxButton;
+using MessageBoxResult = System.Windows.MessageBoxResult;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -168,7 +169,7 @@ namespace Ink_Canvas
             {
                 symbolIcon.Symbol = ((ToggleSwitchDrawShapeBorderAutoHide.IsChecked) == true)
                     ? SymbolRegular.Pin24
-                    : SymbolRegular.Unpin24;
+                    : SymbolRegular.PinOff24;
             }
         }
 

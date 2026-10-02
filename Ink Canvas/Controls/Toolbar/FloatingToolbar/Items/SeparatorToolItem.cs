@@ -1,5 +1,6 @@
 using Ink_Canvas.Properties;
 using Wpf.Ui.Controls;
+using Border = System.Windows.Controls.Border;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;

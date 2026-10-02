@@ -1,5 +1,6 @@
 using Ink_Canvas.Properties;
 using Wpf.Ui.Controls;
+using StackPanel = System.Windows.Controls.StackPanel;
 using System.Windows;
 using System.Windows.Controls;
 

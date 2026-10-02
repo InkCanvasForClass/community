@@ -1,24 +1,4 @@
-<Window xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.OobePresetWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-        xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
-        mc:Ignorable="d"
-        Title="{x:Static props:OobeStrings.Oobe_PresetTitle}"
-        Height="560" Width="680"
-        MinHeight="420" MinWidth="520"
-        WindowStartupLocation="CenterOwner"
-        Topmost="True"
-
-
-
-
-
-
-        Loaded="OobePresetWindow_OnLoaded"
-        Closing="OobePresetWindow_OnClosing">
+<?xml version="1.0" encoding="utf-8"?><Window xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.OobePresetWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta" mc:Ignorable="d" Title="{x:Static props:OobeStrings.Oobe_PresetTitle}" Height="560" Width="680" MinHeight="420" MinWidth="520" WindowStartupLocation="CenterOwner" Topmost="True" Loaded="OobePresetWindow_OnLoaded" Closing="OobePresetWindow_OnClosing">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -36,39 +16,23 @@
         </Grid.RowDefinitions>
 
         <!-- 标题栏 -->
-        <Border Grid.Row="0"
-                x:Name="AppTitleBar"
-                Height="32"
-                Background="Transparent"
-                IsHitTestVisible="True"
-                Canvas.ZIndex="10">
+        <Border Grid.Row="0" x:Name="AppTitleBar" Height="32" Background="Transparent" IsHitTestVisible="True" Canvas.ZIndex="10">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition />
                     <ColumnDefinition Width="137" />
                 </Grid.ColumnDefinitions>
-                <vio:SimpleStackPanel Grid.Column="0"
-                                      Orientation="Horizontal"
-                                      Spacing="12"
-                                      VerticalAlignment="Center"
-                                      Margin="16,0,0,0">
-                    <Image Source="\Resources\icc.ico" Width="18"
-                           RenderOptions.BitmapScalingMode="HighQuality" />
-                    <TextBlock VerticalAlignment="Center"
-                               Text="{x:Static props:OobeStrings.Oobe_PresetTitle}"
-                               TextWrapping="NoWrap" />
+                <vio:SimpleStackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center" Margin="16,0,0,0">
+                    <Image Source="\Resources\icc.ico" Width="18" RenderOptions.BitmapScalingMode="HighQuality" />
+                    <TextBlock VerticalAlignment="Center" Text="{x:Static props:OobeStrings.Oobe_PresetTitle}" TextWrapping="NoWrap" />
                 </vio:SimpleStackPanel>
-                <Rectangle Grid.Column="2"
-                           Width="138" />
+                <Rectangle Grid.Column="2" Width="138" />
             </Grid>
         </Border>
 
         <!-- Banner Header -->
-        <Border Grid.Row="1"
-                Padding="36,16,36,16"
-                BorderThickness="0,0,0,1"
-                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
+        <Border Grid.Row="1" Padding="36,16,36,16" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
             <Border.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                     <GradientStop Color="#1F3B82F6" Offset="0" />
@@ -80,42 +44,22 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Border Grid.Column="0"
-                        Width="44" Height="44"
-                        Margin="0,0,14,0"
-                        CornerRadius="10"
-                        Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
-                    <ui:SymbolIcon Symbol="Wrench24"
-                                 FontSize="22"
-                                 HorizontalAlignment="Center"
-                                 VerticalAlignment="Center" />
+                <Border Grid.Column="0" Width="44" Height="44" Margin="0,0,14,0" CornerRadius="10" Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
+                    <ui:SymbolIcon Symbol="Wrench24" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
                 <vio:SimpleStackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
-                    <TextBlock Style="{DynamicResource TitleTextBlockStyle}"
-                               Text="{x:Static props:OobeStrings.Oobe_PresetTitle}" />
-                    <TextBlock Style="{DynamicResource BodyTextBlockStyle}"
-                               Opacity="0.85"
-                               TextWrapping="Wrap"
-                               Text="{x:Static props:OobeStrings.Oobe_PresetSubtitle}" />
+                    <TextBlock Style="{DynamicResource TitleTextBlockStyle}" Text="{x:Static props:OobeStrings.Oobe_PresetTitle}" />
+                    <TextBlock Style="{DynamicResource BodyTextBlockStyle}" Opacity="0.85" TextWrapping="Wrap" Text="{x:Static props:OobeStrings.Oobe_PresetSubtitle}" />
                 </vio:SimpleStackPanel>
             </Grid>
         </Border>
 
         <!-- 预设列表 -->
-        <ScrollViewer Grid.Row="2"
-                      VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled"
-                      PanningMode="VerticalFirst"
-                      Padding="36,16,36,8">
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" PanningMode="VerticalFirst" Padding="36,16,36,8">
             <vio:SimpleStackPanel Spacing="10">
 
                 <!-- 预设卡片: 课堂标准配置 -->
-                <Border x:Name="CardStandard"
-                        CornerRadius="8"
-                        Padding="20,16"
-                        BorderThickness="2"
-                        Cursor="Hand"
-                        MouseLeftButtonDown="CardStandard_Click">
+                <Border x:Name="CardStandard" CornerRadius="8" Padding="20,16" BorderThickness="2" Cursor="Hand" MouseLeftButtonDown="CardStandard_Click">
                     <Border.Style>
                         <Style TargetType="Border">
                             <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseLowBrush}" />
@@ -128,60 +72,30 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0"
-                                Width="40" Height="40"
-                                CornerRadius="8"
-                                Margin="0,0,14,0"
-                                Background="{DynamicResource SystemControlBackgroundAccentBrush}">
-                            <ui:SymbolIcon Symbol="SlideTransition24"
-                                         FontSize="20"
-                                         Foreground="White"
-                                         HorizontalAlignment="Center"
-                                         VerticalAlignment="Center" />
+                        <Border Grid.Column="0" Width="40" Height="40" CornerRadius="8" Margin="0,0,14,0" Background="{DynamicResource SystemControlBackgroundAccentBrush}">
+                            <ui:SymbolIcon Symbol="SlideTransition24" FontSize="20" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <vio:SimpleStackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
-                            <TextBlock Style="{DynamicResource BodyStrongTextBlockStyle}"
-                                       Text="{x:Static props:OobeStrings.Oobe_PresetStandard}" />
-                            <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
-                                       Opacity="0.75"
-                                       TextWrapping="Wrap"
-                                       Text="{x:Static props:OobeStrings.Oobe_PresetStandardDesc}" />
+                            <TextBlock Style="{DynamicResource BodyStrongTextBlockStyle}" Text="{x:Static props:OobeStrings.Oobe_PresetStandard}" />
+                            <TextBlock Style="{DynamicResource CaptionTextBlockStyle}" Opacity="0.75" TextWrapping="Wrap" Text="{x:Static props:OobeStrings.Oobe_PresetStandardDesc}" />
                             <vio:SimpleStackPanel Orientation="Horizontal" Spacing="6" Margin="0,4,0,0">
-                                <Border CornerRadius="4" Padding="6,2"
-                                        Background="{DynamicResource SystemControlBackgroundAccentBrush}">
-                                    <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
-                                               Foreground="White" Text="{x:Static props:OobeStrings.Oobe_PresetTagPPTLink}" />
+                                <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource SystemControlBackgroundAccentBrush}">
+                                    <TextBlock Style="{DynamicResource CaptionTextBlockStyle}" Foreground="White" Text="{x:Static props:OobeStrings.Oobe_PresetTagPPTLink}" />
                                 </Border>
-                                <Border CornerRadius="4" Padding="6,2"
-                                        Background="{DynamicResource SystemControlBackgroundAccentBrush}">
-                                    <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
-                                               Foreground="White" Text="{x:Static props:StorageStrings.AutoSave_Title}" />
+                                <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource SystemControlBackgroundAccentBrush}">
+                                    <TextBlock Style="{DynamicResource CaptionTextBlockStyle}" Foreground="White" Text="{x:Static props:StorageStrings.AutoSave_Title}" />
                                 </Border>
-                                <Border CornerRadius="4" Padding="6,2"
-                                        Background="{DynamicResource SystemControlBackgroundAccentBrush}">
-                                    <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
-                                               Foreground="White" Text="{x:Static props:OobeStrings.Oobe_PresetTagTwoFinger}" />
+                                <Border CornerRadius="4" Padding="6,2" Background="{DynamicResource SystemControlBackgroundAccentBrush}">
+                                    <TextBlock Style="{DynamicResource CaptionTextBlockStyle}" Foreground="White" Text="{x:Static props:OobeStrings.Oobe_PresetTagTwoFinger}" />
                                 </Border>
                             </vio:SimpleStackPanel>
                         </vio:SimpleStackPanel>
-                        <ui:SymbolIcon x:Name="IconStandard"
-                                     Grid.Column="2"
-                                     Symbol="RadioButton24"
-                                     FontSize="20"
-                                     Margin="12,0,0,0"
-                                     Opacity="0"
-                                     Foreground="{DynamicResource SystemControlForegroundAccentBrush}"
-                                     VerticalAlignment="Center" />
+                        <ui:SymbolIcon x:Name="IconStandard" Grid.Column="2" Symbol="RadioButton24" FontSize="20" Margin="12,0,0,0" Opacity="0" Foreground="{DynamicResource SystemControlForegroundAccentBrush}" VerticalAlignment="Center" />
                     </Grid>
                 </Border>
 
                 <!-- 预设卡片: 简洁轻量配置 -->
-                <Border x:Name="CardLite"
-                        CornerRadius="8"
-                        Padding="20,16"
-                        BorderThickness="2"
-                        Cursor="Hand"
-                        MouseLeftButtonDown="CardLite_Click">
+                <Border x:Name="CardLite" CornerRadius="8" Padding="20,16" BorderThickness="2" Cursor="Hand" MouseLeftButtonDown="CardLite_Click">
                     <Border.Style>
                         <Style TargetType="Border">
                             <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseLowBrush}" />
@@ -194,50 +108,25 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0"
-                                Width="40" Height="40"
-                                CornerRadius="8"
-                                Margin="0,0,14,0"
-                                Background="#FF6366F1">
-                            <ui:SymbolIcon Symbol="Edit24"
-                                         FontSize="20"
-                                         Foreground="White"
-                                         HorizontalAlignment="Center"
-                                         VerticalAlignment="Center" />
+                        <Border Grid.Column="0" Width="40" Height="40" CornerRadius="8" Margin="0,0,14,0" Background="#FF6366F1">
+                            <ui:SymbolIcon Symbol="Edit24" FontSize="20" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <vio:SimpleStackPanel Grid.Column="1" Spacing="3" VerticalAlignment="Center">
-                            <TextBlock Style="{DynamicResource BodyStrongTextBlockStyle}"
-                                       Text="{x:Static props:OobeStrings.Oobe_PresetLite}" />
-                            <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
-                                       Opacity="0.75"
-                                       TextWrapping="Wrap"
-                                       Text="{x:Static props:OobeStrings.Oobe_PresetLiteDesc}" />
+                            <TextBlock Style="{DynamicResource BodyStrongTextBlockStyle}" Text="{x:Static props:OobeStrings.Oobe_PresetLite}" />
+                            <TextBlock Style="{DynamicResource CaptionTextBlockStyle}" Opacity="0.75" TextWrapping="Wrap" Text="{x:Static props:OobeStrings.Oobe_PresetLiteDesc}" />
                             <vio:SimpleStackPanel Orientation="Horizontal" Spacing="6" Margin="0,4,0,0">
-                                <Border CornerRadius="4" Padding="6,2"
-                                        Background="#FF6366F1">
-                                    <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
-                                               Foreground="White" Text="{x:Static props:OobeStrings.Oobe_PresetTagPPTLink}" />
+                                <Border CornerRadius="4" Padding="6,2" Background="#FF6366F1">
+                                    <TextBlock Style="{DynamicResource CaptionTextBlockStyle}" Foreground="White" Text="{x:Static props:OobeStrings.Oobe_PresetTagPPTLink}" />
                                 </Border>
-                                <Border CornerRadius="4" Padding="6,2"
-                                        Background="#FF6366F1">
-                                    <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
-                                               Foreground="White" Text="{x:Static props:OobeStrings.Oobe_PresetTagTrayIcon}" />
+                                <Border CornerRadius="4" Padding="6,2" Background="#FF6366F1">
+                                    <TextBlock Style="{DynamicResource CaptionTextBlockStyle}" Foreground="White" Text="{x:Static props:OobeStrings.Oobe_PresetTagTrayIcon}" />
                                 </Border>
-                                <Border CornerRadius="4" Padding="6,2"
-                                        Background="#FF6366F1">
-                                    <TextBlock Style="{DynamicResource CaptionTextBlockStyle}"
-                                               Foreground="White" Text="{x:Static props:StorageStrings.AutoSave_Title}" />
+                                <Border CornerRadius="4" Padding="6,2" Background="#FF6366F1">
+                                    <TextBlock Style="{DynamicResource CaptionTextBlockStyle}" Foreground="White" Text="{x:Static props:StorageStrings.AutoSave_Title}" />
                                 </Border>
                             </vio:SimpleStackPanel>
                         </vio:SimpleStackPanel>
-                        <ui:SymbolIcon x:Name="IconLite"
-                                     Grid.Column="2"
-                                     Symbol="RadioButton24"
-                                     FontSize="20"
-                                     Margin="12,0,0,0"
-                                     Opacity="0"
-                                     Foreground="{DynamicResource SystemControlForegroundAccentBrush}"
-                                     VerticalAlignment="Center" />
+                        <ui:SymbolIcon x:Name="IconLite" Grid.Column="2" Symbol="RadioButton24" FontSize="20" Margin="12,0,0,0" Opacity="0" Foreground="{DynamicResource SystemControlForegroundAccentBrush}" VerticalAlignment="Center" />
                     </Grid>
                 </Border>
 
@@ -245,10 +134,7 @@
         </ScrollViewer>
 
         <!-- Footer -->
-        <Border Grid.Row="3"
-                Padding="36,12,36,16"
-                BorderThickness="0,1,0,0"
-                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
+        <Border Grid.Row="3" Padding="36,12,36,16" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -256,37 +142,21 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="0"
-                           VerticalAlignment="Center"
-                           Style="{DynamicResource CaptionTextBlockStyle}"
-                           Opacity="0.7"
-                           TextWrapping="Wrap"
-                           Text="{x:Static props:OobeStrings.Oobe_PresetNote}" />
+                <TextBlock Grid.Column="0" VerticalAlignment="Center" Style="{DynamicResource CaptionTextBlockStyle}" Opacity="0.7" TextWrapping="Wrap" Text="{x:Static props:OobeStrings.Oobe_PresetNote}" />
 
-                <Button Grid.Column="1"
-                        x:Name="BtnCancel"
-                        MinWidth="96"
-                        Height="32"
-                        Margin="0,0,8,0"
-                        Click="BtnCancel_Click">
+                <Button Grid.Column="1" x:Name="BtnCancel" MinWidth="96" Height="32" Margin="0,0,8,0" Click="BtnCancel_Click">
                     <vio:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                         <ui:SymbolIcon Symbol="ArrowLeft24" FontSize="12" />
                         <TextBlock Text="{x:Static props:OobeStrings.Oobe_PresetBack}" />
                     </vio:SimpleStackPanel>
                 </Button>
 
-                <Button Grid.Column="2"
-                        x:Name="BtnApply"
-                        MinWidth="140"
-                        Height="32"
-                        IsEnabled="False"
-                        Style="{DynamicResource AccentButtonStyle}"
-                        Click="BtnApply_Click">
+                <ui:Button Grid.Column="2" x:Name="BtnApply" MinWidth="140" Height="32" IsEnabled="False" Click="BtnApply_Click" Appearance="Primary">
                     <vio:SimpleStackPanel Orientation="Horizontal" Spacing="6">
                         <ui:SymbolIcon Symbol="Checkmark24" FontSize="12" />
                         <TextBlock Text="{x:Static props:OobeStrings.Oobe_PresetApply}" />
                     </vio:SimpleStackPanel>
-                </Button>
+                </ui:Button>
             </Grid>
         </Border>
     </Grid>

@@ -2,6 +2,7 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.WorkflowAutomation;
 using InkCanvasPPTAgent.Contracts;
 using Wpf.Ui.Appearance;
+using WindowBackdropType = Wpf.Ui.Controls.WindowBackdropType;
 using Microsoft.Office.Core;
 using Microsoft.Office.Interop.PowerPoint;
 using System;
@@ -2010,10 +2011,10 @@ namespace Ink_Canvas
                         isPresentationHaveBlackSpace = false;
 
                         // 恢复主题
-                        if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Light)
+                        if (ApplicationThemeManager.GetAppTheme() == ApplicationTheme.Light)
                         {
                             { /* Old UI removed */ }
-                            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
+                            ThemeHelper.ApplyApplicationTheme(ApplicationTheme.Light);
                         }
 
                         // 更新UI状态

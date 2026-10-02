@@ -8,6 +8,7 @@ using Ink_Canvas.Windows.SettingsViews;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Ink_Canvas.WorkflowAutomation;
 using Wpf.Ui.Appearance;
+using WindowBackdropType = Wpf.Ui.Controls.WindowBackdropType;
 // 只别名导入 WPF-UI 专属控件，避免与 System.Windows.Controls 的同名类型（TextBlock/Image/Button/Border 等）产生 CS0104 歧义。
 using ToggleSwitch = Wpf.Ui.Controls.ToggleSwitch;
 using Microsoft.Win32;
@@ -286,7 +287,8 @@ namespace Ink_Canvas
             content.DrawParabolaWithFocalPointBtn.ButtonMouseUp += BtnDrawParabolaWithFocalPoint_Click;
             content.DrawParabola2Btn.ButtonMouseUp += BtnDrawParabola2_Click;
             content.CloseButtonControl.Click += CloseBordertools_Click;
-            content.ShowCircleCenterToggle.Toggled += ToggleSwitchShowCircleCenter_Toggled;
+            content.ShowCircleCenterToggle.Checked += ToggleSwitchShowCircleCenter_Toggled;
+            content.ShowCircleCenterToggle.Unchecked += ToggleSwitchShowCircleCenter_Toggled;
         }
 
         private bool _penPaletteEventsWired;
@@ -308,13 +310,16 @@ namespace Ink_Canvas
             if (content == null) return;
 
             content.PenStyleComboBox.SelectionChanged += ComboBoxPenStyle_SelectionChanged;
-            content.NibModeToggle.Toggled += ToggleSwitchEnableNibMode_Toggled;
-            content.InkToShapeToggle.Toggled += ToggleSwitchEnableInkToShape_Toggled;
+            content.NibModeToggle.Checked += ToggleSwitchEnableNibMode_Toggled;
+            content.NibModeToggle.Unchecked += ToggleSwitchEnableNibMode_Toggled;
+            content.InkToShapeToggle.Checked += ToggleSwitchEnableInkToShape_Toggled;
+            content.InkToShapeToggle.Unchecked += ToggleSwitchEnableInkToShape_Toggled;
             content.PenWidthSlider.ValueChanged += PenWidthSlider_ValueChanged;
             content.PenAlphaSlider.ValueChanged += PenAlphaSlider_ValueChanged;
             content.LaserPenFadeTimeSlider.ValueChanged += LaserPenFadeTimeSlider_ValueChanged;
             content.LaserPenFadeSpeedSlider.ValueChanged += LaserPenFadeSpeedSlider_ValueChanged;
-            content.HighlighterOverlapToggle.Toggled += HighlighterOverlapToggle_Toggled;
+            content.HighlighterOverlapToggle.Checked += HighlighterOverlapToggle_Toggled;
+            content.HighlighterOverlapToggle.Unchecked += HighlighterOverlapToggle_Toggled;
 
             content.TabBar.SelectedIndexChanged += (s, idx) =>
             {
@@ -392,10 +397,14 @@ namespace Ink_Canvas
         {
             if (content == null) return;
 
-            content.MultiTouchToggle.Toggled += ToggleSwitchEnableMultiTouchMode_Toggled;
-            content.TwoFingerTranslateToggle.Toggled += ToggleSwitchEnableTwoFingerTranslate_Toggled;
-            content.TwoFingerZoomToggle.Toggled += ToggleSwitchEnableTwoFingerZoom_Toggled;
-            content.TwoFingerRotationToggle.Toggled += ToggleSwitchEnableTwoFingerRotation_Toggled;
+            content.MultiTouchToggle.Checked += ToggleSwitchEnableMultiTouchMode_Toggled;
+            content.MultiTouchToggle.Unchecked += ToggleSwitchEnableMultiTouchMode_Toggled;
+            content.TwoFingerTranslateToggle.Checked += ToggleSwitchEnableTwoFingerTranslate_Toggled;
+            content.TwoFingerTranslateToggle.Unchecked += ToggleSwitchEnableTwoFingerTranslate_Toggled;
+            content.TwoFingerZoomToggle.Checked += ToggleSwitchEnableTwoFingerZoom_Toggled;
+            content.TwoFingerZoomToggle.Unchecked += ToggleSwitchEnableTwoFingerZoom_Toggled;
+            content.TwoFingerRotationToggle.Checked += ToggleSwitchEnableTwoFingerRotation_Toggled;
+            content.TwoFingerRotationToggle.Unchecked += ToggleSwitchEnableTwoFingerRotation_Toggled;
             content.CloseButtonControl.Click += CloseBordertools_Click;
         }
 
@@ -455,7 +464,8 @@ namespace Ink_Canvas
             content.DrawParabolaWithFocalPointBtn.ButtonMouseUp += BtnDrawParabolaWithFocalPoint_Click;
             content.DrawParabola2Btn.ButtonMouseUp += BtnDrawParabola2_Click;
             content.CloseButtonControl.Click += CloseBordertools_Click;
-            content.ShowCircleCenterToggle.Toggled += ToggleSwitchShowCircleCenter_Toggled;
+            content.ShowCircleCenterToggle.Checked += ToggleSwitchShowCircleCenter_Toggled;
+            content.ShowCircleCenterToggle.Unchecked += ToggleSwitchShowCircleCenter_Toggled;
         }
 
         private bool _boothPopupEventsWired;
@@ -1579,23 +1589,23 @@ namespace Ink_Canvas
             switch (Settings.Appearance.Theme)
             {
                 case 0: // 浅色主题
-                    ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
+                    ThemeHelper.ApplyApplicationTheme(ApplicationTheme.Light);
                     SetTheme("Light");
                     break;
                 case 1: // 深色主题
-                    ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
+                    ThemeHelper.ApplyApplicationTheme(ApplicationTheme.Dark);
                     SetTheme("Dark");
                     break;
                 case 2: // 跟随系统
                     _lastFollowedSystemThemeLight = ThemeHelper.IsSystemThemeLight();
                     if (_lastFollowedSystemThemeLight.Value)
                     {
-                        ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
+                        ThemeHelper.ApplyApplicationTheme(ApplicationTheme.Light);
                         SetTheme("Light");
                     }
                     else
                     {
-                        ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
+                        ThemeHelper.ApplyApplicationTheme(ApplicationTheme.Dark);
                         SetTheme("Dark");
                     }
                     break;
@@ -3713,13 +3723,13 @@ namespace Ink_Canvas
                 switch (themeIndex)
                 {
                     case 0: // 浅色主题
-                        ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
+                        ThemeHelper.ApplyApplicationTheme(ApplicationTheme.Light);
                         SetTheme("Light", true);
                         // 浅色主题下设置浮动栏为完全不透明
                         ViewboxFloatingBar.Opacity = 1.0;
                         break;
                     case 1: // 深色主题
-                        ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
+                        ThemeHelper.ApplyApplicationTheme(ApplicationTheme.Dark);
                         SetTheme("Dark", true);
                         // 深色主题下设置浮动栏为完全不透明
                         ViewboxFloatingBar.Opacity = 1.0;
@@ -3727,13 +3737,13 @@ namespace Ink_Canvas
                     case 2: // 跟随系统
                         if (ThemeHelper.IsSystemThemeLight())
                         {
-                            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
+                            ThemeHelper.ApplyApplicationTheme(ApplicationTheme.Light);
                             SetTheme("Light", true);
                             ViewboxFloatingBar.Opacity = 1.0;
                         }
                         else
                         {
-                            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
+                            ThemeHelper.ApplyApplicationTheme(ApplicationTheme.Dark);
                             SetTheme("Dark", true);
                             ViewboxFloatingBar.Opacity = 1.0;
                         }

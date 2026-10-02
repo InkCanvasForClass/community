@@ -100,6 +100,20 @@ namespace Ink_Canvas.Helpers
         /// <summary>自定义次按钮文案（批注气泡的"退出"按钮）。</summary>
         public string SecondaryButtonText { get; set; }
 
+        /// <summary>自定义主按钮文案（与原 iNKORE MessageBox API 一致的别名）。</summary>
+        public string YesButtonText
+        {
+            get => PrimaryButtonText;
+            set => PrimaryButtonText = value;
+        }
+
+        /// <summary>自定义次按钮文案（与原 iNKORE MessageBox API 一致的别名）。</summary>
+        public string NoButtonText
+        {
+            get => SecondaryButtonText;
+            set => SecondaryButtonText = value;
+        }
+
         protected override void OnContentRendered(EventArgs e)
         {
             base.OnContentRendered(e);

@@ -1,5 +1,5 @@
 // 只别名导入 WPF-UI 专属控件，避免与 System.Windows.Controls 同名类型冲突。
-using FontIcon = Wpf.Ui.Controls.FontIcon;
+using SymbolIcon = Wpf.Ui.Controls.SymbolIcon;
 using SymbolRegular = Wpf.Ui.Controls.SymbolRegular;
 using System.Windows;
 using System.Windows.Controls;
@@ -49,9 +49,9 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar.Items
                     return;
 
                 grid.Children.RemoveAt(0);
-                var fontIcon = new FontIcon
+                var fontIcon = new SymbolIcon
                 {
-                    Icon = SymbolRegular.Video24,
+                    Symbol = SymbolRegular.Video24,
                     Width = 24,
                     Height = 24,
                     VerticalAlignment = VerticalAlignment.Top,

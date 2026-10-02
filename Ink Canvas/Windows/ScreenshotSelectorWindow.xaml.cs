@@ -41,9 +41,9 @@ namespace Ink_Canvas
         private WpfPoint _lastBlankClickPosition;
         private readonly BitmapSource _inkOverlayPreview;
 
-        private readonly System.Windows.Media.Brush _modeButtonDefaultBrush = System.Windows.Application.Current.TryFindResource(Wpf.Ui.Controls.ButtonBackgroundKey) as System.Windows.Media.Brush
+        private readonly System.Windows.Media.Brush _modeButtonDefaultBrush = System.Windows.Application.Current.TryFindResource("ControlFillColorDefaultBrush") as System.Windows.Media.Brush
             ?? new SolidColorBrush(Color.FromRgb(45, 45, 45));
-        private readonly System.Windows.Media.Brush _modeButtonActiveBrush = System.Windows.Application.Current.TryFindResource(Wpf.Ui.Controls.AccentFillColorDefaultBrushKey) as System.Windows.Media.Brush
+        private readonly System.Windows.Media.Brush _modeButtonActiveBrush = System.Windows.Application.Current.TryFindResource("AccentFillColorDefaultBrush") as System.Windows.Media.Brush
             ?? new SolidColorBrush(Color.FromRgb(0, 120, 212));
 
         private const int DoubleClickTimeThresholdMs = 300; // 双击判定时间阈值（常见范围 200~500ms）

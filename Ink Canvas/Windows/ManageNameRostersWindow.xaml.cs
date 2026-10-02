@@ -2,7 +2,10 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 // 只别名导入 WPF-UI 专属控件，避免与 System.Windows.Controls 的同名类型（TextBlock/Image/Button/Border 等）产生 CS0104 歧义。
-using ContentDialog = Wpf.Ui.Controls.ContentDialog;
+using ContentDialog = Wpf.Ui.Violeta.Controls.ContentDialog;
+using ContentDialogButton = Wpf.Ui.Violeta.Controls.ContentDialogButton;
+using ContentDialogResult = Wpf.Ui.Violeta.Controls.ContentDialogResult;
+using ContentDialogButtonClickEventArgs = Wpf.Ui.Violeta.Controls.ContentDialogButtonClickEventArgs;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -355,9 +358,9 @@ namespace Ink_Canvas
             bool oldPrimaryEnabled = existing.IsPrimaryButtonEnabled;
             bool oldSecondaryEnabled = existing.IsSecondaryButtonEnabled;
 
-            TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs> primaryHandler = null;
-            TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs> closeHandler = null;
-            TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs> secondaryHandler = null;
+            Wpf.Ui.Controls.TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs> primaryHandler = null;
+            Wpf.Ui.Controls.TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs> closeHandler = null;
+            Wpf.Ui.Controls.TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs> secondaryHandler = null;
 
             void Restore()
             {

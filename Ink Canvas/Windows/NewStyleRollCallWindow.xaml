@@ -70,9 +70,9 @@
                 <Setter Property="Foreground" Value="White" />
                 <Setter Property="Cursor" Value="Hand" />
                 <Style.Resources>
-                    <SolidColorBrush x:Key="{DynamicResource ControlBackgroundPointerOver}" Color="#43A047" />
-                    <SolidColorBrush x:Key="{DynamicResource ControlBackgroundPressed}" Color="#388E3C" />
-                    <SolidColorBrush x:Key="{DynamicResource TextFillColorPrimaryBrush}" Color="White" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#43A047" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#388E3C" />
+                    <SolidColorBrush x:Key="ButtonForeground" Color="White" />
                 </Style.Resources>
             </Style>
 
@@ -87,9 +87,9 @@
                 <Setter Property="Foreground" Value="White" />
                 <Setter Property="Cursor" Value="Hand" />
                 <Style.Resources>
-                    <SolidColorBrush x:Key="{DynamicResource ControlBackgroundPointerOver}" Color="#B3261E" />
-                    <SolidColorBrush x:Key="{DynamicResource ControlBackgroundPressed}" Color="#8C1D18" />
-                    <SolidColorBrush x:Key="{DynamicResource TextFillColorPrimaryBrush}" Color="White" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#B3261E" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#8C1D18" />
+                    <SolidColorBrush x:Key="ButtonForeground" Color="White" />
                 </Style.Resources>
             </Style>
         </ResourceDictionary>

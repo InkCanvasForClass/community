@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using WindowBackdropType = Wpf.Ui.Controls.WindowBackdropType;
 using Ink_Canvas.Properties;
 using System;
 using System.Windows;
@@ -16,10 +17,11 @@ namespace Ink_Canvas
         public CrashWindow()
         {
             InitializeComponent();
-            WindowBackdropHelper.Apply(this);
             Topmost = true;
             AnimationsHelper.ShowWithSlideFromBottomAndFade(this, 0.25);
+            // 先应用主题再应用背景：WPF-UI 的主题切换会连带移除窗口背景，顺序反了会丢背景
             ApplyTheme();
+            WindowBackdropHelper.Apply(this);
             LogHelper.WriteLogToFile("[Crash] 崩溃详情窗口已创建", LogHelper.LogType.Info);
         }
 
@@ -94,7 +96,7 @@ namespace Ink_Canvas
                             ? Wpf.Ui.Appearance.ApplicationTheme.Light
                             : Wpf.Ui.Appearance.ApplicationTheme.Dark; break;
                 }
-                Wpf.Ui.Appearance.ApplicationThemeManager.SetRequestedTheme(this, target);
+                ThemeHelper.ApplyApplicationTheme(target);
             }
             catch (Exception ex)
             {

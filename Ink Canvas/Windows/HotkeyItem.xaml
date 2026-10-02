@@ -1,27 +1,17 @@
-<UserControl xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.HotkeyItem"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-             xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
-             xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
-mc:Ignorable="d"
-             d:DesignHeight="68"
-             d:DesignWidth="600">
+<?xml version="1.0" encoding="utf-8"?><UserControl xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.HotkeyItem" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls" xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta" mc:Ignorable="d" d:DesignHeight="68" d:DesignWidth="600">
 
-    <controls:SettingsCard x:Name="RootCard"
-                     Header="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                     Description="{Binding Description, RelativeSource={RelativeSource AncestorType=UserControl}}">
-        <controls:SettingsCard.Icon>
+    <ui:CardControl x:Name="RootCard">
+        <ui:CardControl.Header>
+            <StackPanel>
+                <TextBlock Text="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                <TextBlock Text="{Binding Description, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+        </ui:CardControl.Header>
+        <ui:CardControl.Icon>
             <ui:SymbolIcon x:Name="HeaderFontIcon" Symbol="Keyboard24" />
-        </controls:SettingsCard.Icon>
-        <Button x:Name="BtnSetHotkey"
-                MinWidth="120"
-                FontFamily="Consolas"
-                FontWeight="SemiBold"
-                Click="BtnSetHotkey_Click">
+        </ui:CardControl.Icon>
+        <Button x:Name="BtnSetHotkey" MinWidth="120" FontFamily="Consolas" FontWeight="SemiBold" Click="BtnSetHotkey_Click">
             <TextBlock x:Name="CurrentHotkeyTextBlock" Text="{x:Static props:CommonStrings.Hotkey_NotSet}" />
         </Button>
-    </controls:SettingsCard>
+    </ui:CardControl>
 </UserControl>

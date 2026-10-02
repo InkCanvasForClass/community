@@ -19,7 +19,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Frame x:Name="ContentFrame" Grid.Row="0" NavigationUIVisibility="Hidden" />
+        <vio:Frame x:Name="ContentFrame" Grid.Row="0" NavigationUIVisibility="Hidden" />
 
         <Grid Grid.Row="1" VerticalAlignment="Bottom" Margin="0,20,0,0">
             <vio:SimpleStackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal" Spacing="12">

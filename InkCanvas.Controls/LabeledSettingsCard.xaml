@@ -4,13 +4,16 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <ui:CardControl x:Name="SettingsCard">
         <!-- iuwm SettingsCard 的 Header+Description 双行结构；WPF-UI CardControl 只有 Header，
-             故把描述文字组合进 Header 的 StackPanel。 -->
+             故把描述文字组合进 Header 的 StackPanel。
+             注意：这里不用 {Binding ..., RelativeSource={RelativeSource AncestorType=UserControl}}。
+             CardControl.Header 是普通 object 依赖属性（不是 ContentControl 的内容），其内容不会被挂到
+             逻辑树上，RelativeSource 的祖先查找拿不到本 UserControl，绑定会解析成空串。
+             改为在代码后置里直接赋值（见 LabeledSettingsCard.xaml.cs）。 -->
         <ui:CardControl.Header>
             <StackPanel>
-                <TextBlock Text="{Binding Header, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                <TextBlock x:Name="HeaderText"
                            FontSize="14" />
                 <TextBlock x:Name="DescriptionText"
-                           Text="{Binding Description, RelativeSource={RelativeSource AncestorType=UserControl}}"
                            FontSize="12"
                            Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                            TextWrapping="Wrap"

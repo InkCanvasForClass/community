@@ -4,6 +4,7 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.WorkflowAutomation;
 using Wpf.Ui.Appearance;
+using WindowBackdropType = Wpf.Ui.Controls.WindowBackdropType;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -1171,7 +1172,7 @@ namespace Ink_Canvas
                 CursorIcon_Click(null, null);
 
             { /* Old UI removed */ }
-            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
+            ThemeHelper.ApplyApplicationTheme(ApplicationTheme.Dark);
 
             new Thread(() =>
             {
@@ -3615,7 +3616,7 @@ namespace Ink_Canvas
                 RestoreStrokes();
             }
 
-            if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
+            if (ApplicationThemeManager.GetAppTheme() == ApplicationTheme.Dark)
             { /* Old UI removed */ }
             else
             { /* Old UI removed */ }
@@ -3712,7 +3713,7 @@ namespace Ink_Canvas
 
                 if (GridBackgroundCover.Visibility == Visibility.Collapsed)
                 {
-                    if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
+                    if (ApplicationThemeManager.GetAppTheme() == ApplicationTheme.Dark)
                     { /* Old UI removed */ }
                     else
                     { /* Old UI removed */ }
@@ -4757,7 +4758,7 @@ namespace Ink_Canvas
                     RestoreStrokes(true);
 
 
-                    if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
+                    if (ApplicationThemeManager.GetAppTheme() == ApplicationTheme.Dark)
                     {
                         { /* Old UI removed */ }
                         { /* Old UI removed */ }
@@ -4768,12 +4769,12 @@ namespace Ink_Canvas
                         if (isPresentationHaveBlackSpace)
                         {
                             { /* Old UI removed */ }
-                            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
+                            ThemeHelper.ApplyApplicationTheme(ApplicationTheme.Dark);
                         }
                         else
                         {
                             { /* Old UI removed */ }
-                            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
+                            ThemeHelper.ApplyApplicationTheme(ApplicationTheme.Light);
                         }
                     }
 
@@ -4851,11 +4852,11 @@ namespace Ink_Canvas
                             });
                         }
 
-                        if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
+                        if (ApplicationThemeManager.GetAppTheme() == ApplicationTheme.Dark)
                         {
                             { /* Old UI removed */ }
                             { /* Old UI removed */ }
-                            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
+                            ThemeHelper.ApplyApplicationTheme(ApplicationTheme.Dark);
                         }
                         else
                         {
@@ -4863,12 +4864,12 @@ namespace Ink_Canvas
                             if (isPresentationHaveBlackSpace)
                             {
                                 { /* Old UI removed */ }
-                                ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
+                                ThemeHelper.ApplyApplicationTheme(ApplicationTheme.Dark);
                             }
                             else
                             {
                                 { /* Old UI removed */ }
-                                ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
+                                ThemeHelper.ApplyApplicationTheme(ApplicationTheme.Light);
                             }
                         }
 
@@ -4907,15 +4908,15 @@ namespace Ink_Canvas
                         ViewboxFloatingBar.Visibility = Visibility.Collapsed;
 
                         { /* Old UI removed */ }
-                        if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
+                        if (ApplicationThemeManager.GetAppTheme() == ApplicationTheme.Dark)
                         {
                             { /* Old UI removed */ }
-                            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
+                            ThemeHelper.ApplyApplicationTheme(ApplicationTheme.Dark);
                         }
                         else
                         {
                             { /* Old UI removed */ }
-                            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
+                            ThemeHelper.ApplyApplicationTheme(ApplicationTheme.Light);
                         }
 
                         if (Settings.Canvas.UsingWhiteboard)
@@ -4977,7 +4978,7 @@ namespace Ink_Canvas
 
                 if (GridBackgroundCover.Visibility == Visibility.Collapsed)
                 {
-                    if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
+                    if (ApplicationThemeManager.GetAppTheme() == ApplicationTheme.Dark)
                     { /* Old UI removed */ }
                     else
                     { /* Old UI removed */ }
@@ -5065,7 +5066,7 @@ namespace Ink_Canvas
                     RestoreStrokes(true);
                 }
 
-                if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
+                if (ApplicationThemeManager.GetAppTheme() == ApplicationTheme.Dark)
                 { /* Old UI removed */ }
                 else
                 { /* Old UI removed */ }

@@ -1,61 +1,67 @@
-<UserControl
-    x:Class="Ink_Canvas.Windows.FeedbackPages.FeedbackPage2"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-             xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
-    xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
-    xmlns:props="clr-namespace:Ink_Canvas.Properties"
-    mc:Ignorable="d"
-    d:DesignHeight="450" d:DesignWidth="600">
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                  IsManipulationEnabled="True" PanningMode="VerticalOnly">
+<?xml version="1.0" encoding="utf-8"?><UserControl x:Class="Ink_Canvas.Windows.FeedbackPages.FeedbackPage2" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls" xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta" xmlns:props="clr-namespace:Ink_Canvas.Properties" mc:Ignorable="d" d:DesignHeight="450" d:DesignWidth="600">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" IsManipulationEnabled="True" PanningMode="VerticalOnly">
         <vio:SimpleStackPanel Spacing="12" Margin="0,0,0,20">
-            <TextBlock FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10"
-                       Text="{x:Static props:FeedbackStrings.Page2Title}"/>
+            <TextBlock FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10" Text="{x:Static props:FeedbackStrings.Page2Title}" />
 
-            <controls:SettingsCard Header="{x:Static props:FeedbackStrings.Page2_SoftwareInfo}"
-                             Description="{x:Static props:FeedbackStrings.Page2_SoftwareInfoDesc}">
-                <controls:SettingsCard.Icon>
-                    <ui:SymbolIcon Symbol="Apps24"/>
-                </controls:SettingsCard.Icon>
+            <ui:CardControl>
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="{x:Static props:FeedbackStrings.Page2_SoftwareInfo}" />
+                        <TextBlock Text="{x:Static props:FeedbackStrings.Page2_SoftwareInfoDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:CardControl.Icon>
+                    <ui:SymbolIcon Symbol="Apps24" />
+                </ui:CardControl.Icon>
                 <vio:SimpleStackPanel Spacing="8">
-                    <TextBlock x:Name="TextAppVersionInfo" Text="" FontSize="14" TextWrapping="Wrap"/>
+                    <TextBlock x:Name="TextAppVersionInfo" Text="" FontSize="14" TextWrapping="Wrap" />
                 </vio:SimpleStackPanel>
-            </controls:SettingsCard>
+            </ui:CardControl>
 
-            <controls:SettingsCard Header="{x:Static props:FeedbackStrings.Page2_SystemInfo}"
-                             Description="{x:Static props:FeedbackStrings.Page2_SystemInfoDesc}">
-                <controls:SettingsCard.Icon>
-                    <ui:SymbolIcon Symbol="Desktop24"/>
-                </controls:SettingsCard.Icon>
+            <ui:CardControl>
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="{x:Static props:FeedbackStrings.Page2_SystemInfo}" />
+                        <TextBlock Text="{x:Static props:FeedbackStrings.Page2_SystemInfoDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:CardControl.Icon>
+                    <ui:SymbolIcon Symbol="Desktop24" />
+                </ui:CardControl.Icon>
                 <vio:SimpleStackPanel Spacing="8">
-                    <TextBlock x:Name="TextSystemInfo" Text="" FontSize="14" TextWrapping="Wrap"/>
+                    <TextBlock x:Name="TextSystemInfo" Text="" FontSize="14" TextWrapping="Wrap" />
                 </vio:SimpleStackPanel>
-            </controls:SettingsCard>
+            </ui:CardControl>
 
-            <controls:SettingsCard Header="{x:Static props:FeedbackStrings.Page2_DeviceInfo}"
-                             Description="{x:Static props:FeedbackStrings.Page2_DeviceInfoDesc}">
-                <controls:SettingsCard.Icon>
-                    <ui:SymbolIcon Symbol="DeviceEq24"/>
-                </controls:SettingsCard.Icon>
+            <ui:CardControl>
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="{x:Static props:FeedbackStrings.Page2_DeviceInfo}" />
+                        <TextBlock Text="{x:Static props:FeedbackStrings.Page2_DeviceInfoDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:CardControl.Icon>
+                    <ui:SymbolIcon Symbol="DeviceEq24" />
+                </ui:CardControl.Icon>
                 <vio:SimpleStackPanel Spacing="8">
-                    <TextBlock x:Name="TextDeviceInfo" Text="" FontSize="14" TextWrapping="Wrap"/>
+                    <TextBlock x:Name="TextDeviceInfo" Text="" FontSize="14" TextWrapping="Wrap" />
                 </vio:SimpleStackPanel>
-            </controls:SettingsCard>
+            </ui:CardControl>
 
-            <controls:SettingsCard x:Name="CardConfiguration"
-                             Header="{x:Static props:FeedbackStrings.Page2_Config}"
-                             Description="{x:Static props:FeedbackStrings.Page2_ConfigDesc}">
-                <controls:SettingsCard.Icon>
-                    <ui:SymbolIcon Symbol="Settings24"/>
-                </controls:SettingsCard.Icon>
+            <ui:CardControl x:Name="CardConfiguration">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="{x:Static props:FeedbackStrings.Page2_Config}" />
+                        <TextBlock Text="{x:Static props:FeedbackStrings.Page2_ConfigDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:CardControl.Icon>
+                    <ui:SymbolIcon Symbol="Settings24" />
+                </ui:CardControl.Icon>
                 <vio:SimpleStackPanel Spacing="8">
-                    <TextBlock x:Name="TextConfigurationInfo" Text="" FontSize="14" TextWrapping="Wrap"/>
+                    <TextBlock x:Name="TextConfigurationInfo" Text="" FontSize="14" TextWrapping="Wrap" />
                 </vio:SimpleStackPanel>
-            </controls:SettingsCard>
+            </ui:CardControl>
         </vio:SimpleStackPanel>
     </ScrollViewer>
 </UserControl>

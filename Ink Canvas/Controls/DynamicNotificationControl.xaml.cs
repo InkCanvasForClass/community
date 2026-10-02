@@ -2,6 +2,7 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Models;
 using Ink_Canvas.Properties;
 using Wpf.Ui.Controls;
+using Button = System.Windows.Controls.Button;
 using System;
 using System.Diagnostics;
 using System.Windows;
@@ -76,9 +77,9 @@ namespace Ink_Canvas.Controls
                 case NotificationMessageType.Important:
                     return SymbolRegular.Important24;
                 case NotificationMessageType.Update:
-                    return SymbolRegular.Sync24;
+                    return SymbolRegular.ArrowSync24;
                 case NotificationMessageType.Reminder:
-                    return SymbolRegular.Stopwatch24;
+                    return SymbolRegular.Timer24;
                 default:
                     return SymbolRegular.Info24;
             }

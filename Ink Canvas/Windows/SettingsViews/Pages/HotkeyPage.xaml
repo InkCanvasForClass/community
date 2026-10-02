@@ -1,25 +1,10 @@
-<Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.HotkeyPage"
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
-      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-      xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
-      xmlns:sys="clr-namespace:System;assembly=mscorlib"
-      xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
-      xmlns:helpers="clr-namespace:Ink_Canvas.Windows.SettingsViews.Helpers"
-      xmlns:hk="clr-namespace:Ink_Canvas.Windows"
-      mc:Ignorable="d"
-      Title="{x:Static props:NavStrings.Nav_Shortcuts}">
+<?xml version="1.0" encoding="utf-8"?><Page xmlns:props="clr-namespace:Ink_Canvas.Properties" x:Class="Ink_Canvas.Windows.SettingsViews.Pages.HotkeyPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages" xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta" xmlns:sys="clr-namespace:System;assembly=mscorlib" xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls" xmlns:helpers="clr-namespace:Ink_Canvas.Windows.SettingsViews.Helpers" xmlns:hk="clr-namespace:Ink_Canvas.Windows" mc:Ignorable="d" Title="{x:Static props:NavStrings.Nav_Shortcuts}">
 
     <ScrollViewer PanningMode="VerticalFirst">
         <Grid Margin="59,0,59,0">
             <FrameworkElement.Resources>
                 <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
-                <Style x:Key="SettingsSectionHeaderTextBlockStyle"
-                    BasedOn="{StaticResource BodyStrongTextBlockStyle}"
-                    TargetType="TextBlock">
+                <Style x:Key="SettingsSectionHeaderTextBlockStyle" BasedOn="{StaticResource BodyStrongTextBlockStyle}" TargetType="TextBlock">
                     <Style.Setters>
                         <Setter Property="Margin" Value="1,30,0,6" />
                     </Style.Setters>
@@ -27,171 +12,58 @@
             </FrameworkElement.Resources>
 
             <Grid>
-                <vio:SimpleStackPanel MaxWidth="1000"
-                    HorizontalAlignment="Stretch"
-                    Spacing="{StaticResource SettingsCardSpacing}">
+                <vio:SimpleStackPanel MaxWidth="1000" HorizontalAlignment="Stretch" Spacing="{StaticResource SettingsCardSpacing}">
 
-                    <ui:InfoBar IsClosable="False"
-                                IsOpen="True"
-                                Severity="Informational"
-                                Title="{x:Static props:HotkeyStrings.Hotkey_InfoBarTitle}"
-                                Message="{x:Static props:HotkeyStrings.Hotkey_InfoBarMessage}" />
+                    <ui:InfoBar IsClosable="False" IsOpen="True" Severity="Informational" Title="{x:Static props:HotkeyStrings.Hotkey_InfoBarTitle}" Message="{x:Static props:HotkeyStrings.Hotkey_InfoBarMessage}" />
 
                     <!-- 鼠标模式 -->
-                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                               Text="{x:Static props:HotkeyStrings.Hotkey_MouseMode}" />
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="{x:Static props:HotkeyStrings.Hotkey_MouseMode}" />
 
-                    <controls:LabeledSettingsCard x:Name="CardEnableHotkeysInMouseMode"
-                            Header="{x:Static props:HotkeyStrings.Hotkey_EnableHotkeysInMouseMode}"
-                            Description="{x:Static props:HotkeyStrings.Hotkey_EnableHotkeysInMouseModeHint}"
-                            Symbol="Keyboard24"
-                            SwitchName="ToggleSwitchEnableHotkeysInMouseMode"
-                            Toggled="ToggleSwitchEnableHotkeysInMouseMode_Toggled" />
+                    <controls:LabeledSettingsCard x:Name="CardEnableHotkeysInMouseMode" Header="{x:Static props:HotkeyStrings.Hotkey_EnableHotkeysInMouseMode}" Description="{x:Static props:HotkeyStrings.Hotkey_EnableHotkeysInMouseModeHint}" Symbol="Keyboard24" SwitchName="ToggleSwitchEnableHotkeysInMouseMode" Toggled="ToggleSwitchEnableHotkeysInMouseMode_Toggled" />
 
-                    <controls:LabeledSettingsCard x:Name="CardPassThroughMouseWheelInDrawingMode"
-                            Header="{x:Static props:HotkeyStrings.Hotkey_PassThroughMouseWheelInDrawingMode}"
-                            Description="{x:Static props:HotkeyStrings.Hotkey_PassThroughMouseWheelInDrawingModeHint}"
-                            Symbol="KeyboardMouse16"
-                            SwitchName="ToggleSwitchPassThroughMouseWheelInDrawingMode"
-                            Toggled="ToggleSwitchPassThroughMouseWheelInDrawingMode_Toggled" />
+                    <controls:LabeledSettingsCard x:Name="CardPassThroughMouseWheelInDrawingMode" Header="{x:Static props:HotkeyStrings.Hotkey_PassThroughMouseWheelInDrawingMode}" Description="{x:Static props:HotkeyStrings.Hotkey_PassThroughMouseWheelInDrawingModeHint}" Symbol="KeyboardMouse16" SwitchName="ToggleSwitchPassThroughMouseWheelInDrawingMode" Toggled="ToggleSwitchPassThroughMouseWheelInDrawingMode_Toggled" />
 
-                    <controls:LabeledSettingsCard x:Name="CardEnablePPTPageKeyHook"
-                            helpers:SettingsNavigator.SettingsKey="enablePPTPageKeyHook"
-                            Header="{x:Static props:HotkeyStrings.Hotkey_EnablePPTPageKeyHook}"
-                            Description="{x:Static props:HotkeyStrings.Hotkey_EnablePPTPageKeyHookHint}"
-                            Symbol="Keyboard24"
-                            SwitchName="ToggleSwitchEnablePPTPageKeyHook"
-                            Toggled="ToggleSwitchEnablePPTPageKeyHook_Toggled" />
+                    <controls:LabeledSettingsCard x:Name="CardEnablePPTPageKeyHook" helpers:SettingsNavigator.SettingsKey="enablePPTPageKeyHook" Header="{x:Static props:HotkeyStrings.Hotkey_EnablePPTPageKeyHook}" Description="{x:Static props:HotkeyStrings.Hotkey_EnablePPTPageKeyHookHint}" Symbol="Keyboard24" SwitchName="ToggleSwitchEnablePPTPageKeyHook" Toggled="ToggleSwitchEnablePPTPageKeyHook_Toggled" />
 
                     <!-- 基本操作 -->
-                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                               Text="{x:Static props:HotkeyStrings.Hotkey_BasicOperations}" />
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="{x:Static props:HotkeyStrings.Hotkey_BasicOperations}" />
 
-                    <hk:HotkeyItem x:Name="UndoHotkey"
-                                   Title="{x:Static props:FloatingBarStrings.Board_Undo}"
-                                   Description="{x:Static props:HotkeyStrings.Hotkey_UndoDesc}"
-                                   DefaultKey="Z"
-                                   DefaultModifiers="Control" />
-                    <hk:HotkeyItem x:Name="RedoHotkey"
-                                   Title="{x:Static props:FloatingBarStrings.Board_Redo}"
-                                   Description="{x:Static props:HotkeyStrings.Hotkey_RedoDesc}"
-                                   DefaultKey="Y"
-                                   DefaultModifiers="Control" />
-                    <hk:HotkeyItem x:Name="ClearHotkey"
-                                   Title="{x:Static props:FloatingBarStrings.FloatingBar_Clear}"
-                                   Description="{x:Static props:HotkeyStrings.Hotkey_ClearDesc}"
-                                   DefaultKey="E"
-                                   DefaultModifiers="Control" />
-                    <hk:HotkeyItem x:Name="PasteHotkey"
-                                   Title="{x:Static props:HotkeyStrings.Hotkey_Paste}"
-                                   Description="{x:Static props:HotkeyStrings.Hotkey_PasteDesc}"
-                                   DefaultKey="V"
-                                   DefaultModifiers="Control" />
+                    <hk:HotkeyItem x:Name="UndoHotkey" Title="{x:Static props:FloatingBarStrings.Board_Undo}" Description="{x:Static props:HotkeyStrings.Hotkey_UndoDesc}" DefaultKey="Z" DefaultModifiers="Control" />
+                    <hk:HotkeyItem x:Name="RedoHotkey" Title="{x:Static props:FloatingBarStrings.Board_Redo}" Description="{x:Static props:HotkeyStrings.Hotkey_RedoDesc}" DefaultKey="Y" DefaultModifiers="Control" />
+                    <hk:HotkeyItem x:Name="ClearHotkey" Title="{x:Static props:FloatingBarStrings.FloatingBar_Clear}" Description="{x:Static props:HotkeyStrings.Hotkey_ClearDesc}" DefaultKey="E" DefaultModifiers="Control" />
+                    <hk:HotkeyItem x:Name="PasteHotkey" Title="{x:Static props:HotkeyStrings.Hotkey_Paste}" Description="{x:Static props:HotkeyStrings.Hotkey_PasteDesc}" DefaultKey="V" DefaultModifiers="Control" />
 
                     <!-- 工具切换 -->
-                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                               Text="{x:Static props:HotkeyStrings.Hotkey_ToolSwitch}" />
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="{x:Static props:HotkeyStrings.Hotkey_ToolSwitch}" />
 
-                    <hk:HotkeyItem x:Name="SelectToolHotkey"
-                                   Title="{x:Static props:HotkeyStrings.Hotkey_SelectTool}"
-                                   Description="{x:Static props:HotkeyStrings.Hotkey_SelectToolDesc}"
-                                   DefaultKey="S"
-                                   DefaultModifiers="Alt" />
-                    <hk:HotkeyItem x:Name="DrawToolHotkey"
-                                   Title="{x:Static props:HotkeyStrings.Hotkey_DrawTool}"
-                                   Description="{x:Static props:HotkeyStrings.Hotkey_DrawToolDesc}"
-                                   DefaultKey="D"
-                                   DefaultModifiers="Alt" />
-                    <hk:HotkeyItem x:Name="EraserToolHotkey"
-                                   Title="{x:Static props:HotkeyStrings.Hotkey_EraserTool}"
-                                   Description="{x:Static props:HotkeyStrings.Hotkey_EraserToolDesc}"
-                                   DefaultKey="E"
-                                   DefaultModifiers="Alt" />
-                    <hk:HotkeyItem x:Name="BlackboardToolHotkey"
-                                   Title="{x:Static props:HotkeyStrings.Hotkey_BlackboardTool}"
-                                   Description="{x:Static props:HotkeyStrings.Hotkey_BlackboardToolDesc}"
-                                   DefaultKey="B"
-                                   DefaultModifiers="Alt" />
-                    <hk:HotkeyItem x:Name="QuitDrawToolHotkey"
-                                   Title="{x:Static props:HotkeyStrings.Hotkey_QuitDrawTool}"
-                                   Description="{x:Static props:HotkeyStrings.Hotkey_QuitDrawToolDesc}"
-                                   DefaultKey="Q"
-                                   DefaultModifiers="Alt" />
+                    <hk:HotkeyItem x:Name="SelectToolHotkey" Title="{x:Static props:HotkeyStrings.Hotkey_SelectTool}" Description="{x:Static props:HotkeyStrings.Hotkey_SelectToolDesc}" DefaultKey="S" DefaultModifiers="Alt" />
+                    <hk:HotkeyItem x:Name="DrawToolHotkey" Title="{x:Static props:HotkeyStrings.Hotkey_DrawTool}" Description="{x:Static props:HotkeyStrings.Hotkey_DrawToolDesc}" DefaultKey="D" DefaultModifiers="Alt" />
+                    <hk:HotkeyItem x:Name="EraserToolHotkey" Title="{x:Static props:HotkeyStrings.Hotkey_EraserTool}" Description="{x:Static props:HotkeyStrings.Hotkey_EraserToolDesc}" DefaultKey="E" DefaultModifiers="Alt" />
+                    <hk:HotkeyItem x:Name="BlackboardToolHotkey" Title="{x:Static props:HotkeyStrings.Hotkey_BlackboardTool}" Description="{x:Static props:HotkeyStrings.Hotkey_BlackboardToolDesc}" DefaultKey="B" DefaultModifiers="Alt" />
+                    <hk:HotkeyItem x:Name="QuitDrawToolHotkey" Title="{x:Static props:HotkeyStrings.Hotkey_QuitDrawTool}" Description="{x:Static props:HotkeyStrings.Hotkey_QuitDrawToolDesc}" DefaultKey="Q" DefaultModifiers="Alt" />
 
                     <!-- 画笔设置 -->
-                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                               Text="{x:Static props:HotkeyStrings.Hotkey_PenSettings}" />
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="{x:Static props:HotkeyStrings.Hotkey_PenSettings}" />
 
-                    <hk:HotkeyItem x:Name="Pen1Hotkey"
-                                   Title="{x:Static props:HotkeyStrings.Hotkey_Pen1}"
-                                   Description="{x:Static props:HotkeyStrings.Hotkey_Pen1Desc}"
-                                   DefaultKey="D1"
-                                   DefaultModifiers="Alt" />
-                    <hk:HotkeyItem x:Name="Pen2Hotkey"
-                                   Title="{x:Static props:HotkeyStrings.Hotkey_Pen2}"
-                                   Description="{x:Static props:HotkeyStrings.Hotkey_Pen2Desc}"
-                                   DefaultKey="D2"
-                                   DefaultModifiers="Alt" />
-                    <hk:HotkeyItem x:Name="Pen3Hotkey"
-                                   Title="{x:Static props:HotkeyStrings.Hotkey_Pen3}"
-                                   Description="{x:Static props:HotkeyStrings.Hotkey_Pen3Desc}"
-                                   DefaultKey="D3"
-                                   DefaultModifiers="Alt" />
-                    <hk:HotkeyItem x:Name="Pen4Hotkey"
-                                   Title="{x:Static props:HotkeyStrings.Hotkey_Pen4}"
-                                   Description="{x:Static props:HotkeyStrings.Hotkey_Pen4Desc}"
-                                   DefaultKey="D4"
-                                   DefaultModifiers="Alt" />
-                    <hk:HotkeyItem x:Name="Pen5Hotkey"
-                                   Title="{x:Static props:HotkeyStrings.Hotkey_Pen5}"
-                                   Description="{x:Static props:HotkeyStrings.Hotkey_Pen5Desc}"
-                                   DefaultKey="D5"
-                                   DefaultModifiers="Alt" />
+                    <hk:HotkeyItem x:Name="Pen1Hotkey" Title="{x:Static props:HotkeyStrings.Hotkey_Pen1}" Description="{x:Static props:HotkeyStrings.Hotkey_Pen1Desc}" DefaultKey="D1" DefaultModifiers="Alt" />
+                    <hk:HotkeyItem x:Name="Pen2Hotkey" Title="{x:Static props:HotkeyStrings.Hotkey_Pen2}" Description="{x:Static props:HotkeyStrings.Hotkey_Pen2Desc}" DefaultKey="D2" DefaultModifiers="Alt" />
+                    <hk:HotkeyItem x:Name="Pen3Hotkey" Title="{x:Static props:HotkeyStrings.Hotkey_Pen3}" Description="{x:Static props:HotkeyStrings.Hotkey_Pen3Desc}" DefaultKey="D3" DefaultModifiers="Alt" />
+                    <hk:HotkeyItem x:Name="Pen4Hotkey" Title="{x:Static props:HotkeyStrings.Hotkey_Pen4}" Description="{x:Static props:HotkeyStrings.Hotkey_Pen4Desc}" DefaultKey="D4" DefaultModifiers="Alt" />
+                    <hk:HotkeyItem x:Name="Pen5Hotkey" Title="{x:Static props:HotkeyStrings.Hotkey_Pen5}" Description="{x:Static props:HotkeyStrings.Hotkey_Pen5Desc}" DefaultKey="D5" DefaultModifiers="Alt" />
 
                     <!-- 功能快捷键 -->
-                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                               Text="{x:Static props:HotkeyStrings.Hotkey_FunctionHotkeys}" />
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" Text="{x:Static props:HotkeyStrings.Hotkey_FunctionHotkeys}" />
 
-                    <hk:HotkeyItem x:Name="DrawLineHotkey"
-                                   Title="{x:Static props:HotkeyStrings.Hotkey_DrawLine}"
-                                   Description="{x:Static props:HotkeyStrings.Hotkey_DrawLineDesc}"
-                                   DefaultKey="L"
-                                   DefaultModifiers="Alt" />
-                    <hk:HotkeyItem x:Name="ScreenshotHotkey"
-                                   Title="{x:Static props:FloatingBarStrings.Board_Screenshot}"
-                                   Description="{x:Static props:HotkeyStrings.Hotkey_ScreenshotDesc}"
-                                   DefaultKey="C"
-                                   DefaultModifiers="Alt" />
-                    <hk:HotkeyItem x:Name="QuickDrawHotkey"
-                                   Title="{x:Static props:HotkeyStrings.Hotkey_QuickDraw}"
-                                   Description="{x:Static props:HotkeyStrings.Hotkey_QuickDrawDesc}"
-                                   DefaultKey="K"
-                                   DefaultModifiers="Alt" />
-                    <hk:HotkeyItem x:Name="HideHotkey"
-                                   Title="{x:Static props:FloatingBarStrings.FloatingBar_Hide}"
-                                   Description="{x:Static props:HotkeyStrings.Hotkey_HideDesc}"
-                                   DefaultKey="V"
-                                   DefaultModifiers="Alt" />
-                    <hk:HotkeyItem x:Name="ExitHotkey"
-                                   Title="{x:Static props:FloatingBarStrings.OldUI_Exit}"
-                                   Description="{x:Static props:HotkeyStrings.Hotkey_ExitDesc}"
-                                   DefaultKey="Escape"
-                                   DefaultModifiers="None" />
+                    <hk:HotkeyItem x:Name="DrawLineHotkey" Title="{x:Static props:HotkeyStrings.Hotkey_DrawLine}" Description="{x:Static props:HotkeyStrings.Hotkey_DrawLineDesc}" DefaultKey="L" DefaultModifiers="Alt" />
+                    <hk:HotkeyItem x:Name="ScreenshotHotkey" Title="{x:Static props:FloatingBarStrings.Board_Screenshot}" Description="{x:Static props:HotkeyStrings.Hotkey_ScreenshotDesc}" DefaultKey="C" DefaultModifiers="Alt" />
+                    <hk:HotkeyItem x:Name="QuickDrawHotkey" Title="{x:Static props:HotkeyStrings.Hotkey_QuickDraw}" Description="{x:Static props:HotkeyStrings.Hotkey_QuickDrawDesc}" DefaultKey="K" DefaultModifiers="Alt" />
+                    <hk:HotkeyItem x:Name="HideHotkey" Title="{x:Static props:FloatingBarStrings.FloatingBar_Hide}" Description="{x:Static props:HotkeyStrings.Hotkey_HideDesc}" DefaultKey="V" DefaultModifiers="Alt" />
+                    <hk:HotkeyItem x:Name="ExitHotkey" Title="{x:Static props:FloatingBarStrings.OldUI_Exit}" Description="{x:Static props:HotkeyStrings.Hotkey_ExitDesc}" DefaultKey="Escape" DefaultModifiers="None" />
 
                     <!-- 操作按钮 -->
-                    <vio:SimpleStackPanel Orientation="Horizontal"
-                                          HorizontalAlignment="Right"
-                                          Spacing="10"
-                                          Margin="0,20,0,0">
-                        <Button x:Name="BtnResetToDefault"
-                                Content="{x:Static props:HotkeyStrings.Hotkey_ResetToDefault}"
-                                MinWidth="120"
-                                Click="BtnResetToDefault_Click" />
-                        <Button x:Name="BtnSave"
-                                Content="{x:Static props:HotkeyStrings.Hotkey_SaveSettings}"
-                                MinWidth="120"
-                                Style="{StaticResource AccentButtonStyle}"
-                                Click="BtnSave_Click" />
+                    <vio:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,20,0,0">
+                        <Button x:Name="BtnResetToDefault" Content="{x:Static props:HotkeyStrings.Hotkey_ResetToDefault}" MinWidth="120" Click="BtnResetToDefault_Click" />
+                        <ui:Button x:Name="BtnSave" Content="{x:Static props:HotkeyStrings.Hotkey_SaveSettings}" MinWidth="120" Click="BtnSave_Click" Appearance="Primary" />
                     </vio:SimpleStackPanel>
 
                     <Rectangle Height="48" />

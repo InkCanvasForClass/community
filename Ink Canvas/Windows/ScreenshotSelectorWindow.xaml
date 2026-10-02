@@ -54,9 +54,9 @@
             <Setter Property="Foreground" Value="White" />
             <Setter Property="Cursor" Value="Hand" />
             <Style.Resources>
-                <SolidColorBrush x:Key="{DynamicResource TextFillColorPrimaryBrush}" Color="White" />
-                <SolidColorBrush x:Key="{DynamicResource TextFillColorPrimaryBrush}" Color="White" />
-                <SolidColorBrush x:Key="{DynamicResource TextFillColorPrimaryBrush}" Color="White" />
+                <SolidColorBrush x:Key="ButtonForeground" Color="White" />
+                <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="White" />
+                <SolidColorBrush x:Key="ButtonForegroundPressed" Color="White" />
             </Style.Resources>
         </Style>
     </Window.Resources>
@@ -200,8 +200,8 @@
                         BorderBrush="{StaticResource ScreenshotBarPrimaryBrush}"
                         Click="ConfirmButton_Click">
                     <Button.Resources>
-                        <SolidColorBrush x:Key="{DynamicResource ControlBackgroundPointerOver}" Color="#10B981" />
-                        <SolidColorBrush x:Key="{DynamicResource ControlBackgroundPressed}" Color="#047857" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#10B981" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#047857" />
                     </Button.Resources>
                 </Button>
                 <Button Name="AddToWhiteboardButton"
@@ -211,8 +211,8 @@
                         BorderBrush="{StaticResource ScreenshotBarAccentBrush}"
                         Click="AddToWhiteboardButton_Click">
                     <Button.Resources>
-                        <SolidColorBrush x:Key="{DynamicResource ControlBackgroundPointerOver}" Color="#3B82F6" />
-                        <SolidColorBrush x:Key="{DynamicResource ControlBackgroundPressed}" Color="#1D4ED8" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#3B82F6" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#1D4ED8" />
                     </Button.Resources>
                 </Button>
                 <Button Name="CancelButton"
@@ -222,8 +222,8 @@
                         BorderBrush="{StaticResource ScreenshotBarDangerBrush}"
                         Click="CancelButton_Click">
                     <Button.Resources>
-                        <SolidColorBrush x:Key="{DynamicResource ControlBackgroundPointerOver}" Color="#EF4444" />
-                        <SolidColorBrush x:Key="{DynamicResource ControlBackgroundPressed}" Color="#B91C1C" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#EF4444" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#B91C1C" />
                     </Button.Resources>
                 </Button>
             </vio:SimpleStackPanel>

@@ -307,13 +307,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // 覆盖默认 ContentDialogMaxWidth(548)：内容 UserControl 固定 640×360，
             // 列表在控件内部纵向滚动，避免横向裁切操作按钮。
             var content = new ManageNameRostersWindow();
-            var dialog = new Wpf.Ui.Controls.ContentDialog
+            var dialog = new Wpf.Ui.Violeta.Controls.ContentDialog
             {
                 Title = RandomStrings.Random_Roster_ManageWindowTitle,
                 Content = content,
                 CloseButtonText = NotificationStrings.AnimationOff,
                 Owner = Window.GetWindow(this) ?? mw,
-                DefaultButton = Wpf.Ui.Controls.ContentDialogButton.Close,
+                DefaultButton = Wpf.Ui.Violeta.Controls.ContentDialogButton.Close,
                 Resources =
                 {
                     ["ContentDialogMaxWidth"] = 720d,
@@ -360,14 +360,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (mw == null) return;
 
             var content = new AddPickNameBackgroundWindow(mw);
-            var dialog = new Wpf.Ui.Controls.ContentDialog
+            var dialog = new Wpf.Ui.Violeta.Controls.ContentDialog
             {
                 Title = Properties.RandomStrings.Random_AddBg_WindowTitle,
                 Content = content,
                 PrimaryButtonText = FloatingBarStrings.Tools_Save,
                 CloseButtonText = Properties.RandomStrings.Random_Cancel,
                 Owner = Window.GetWindow(this) ?? mw,
-                DefaultButton = Wpf.Ui.Controls.ContentDialogButton.Primary
+                DefaultButton = Wpf.Ui.Violeta.Controls.ContentDialogButton.Primary
             };
 
             content.OnInputChanged += () =>
@@ -396,13 +396,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (mw == null) return;
 
             var content = new ManagePickNameBackgroundsWindow(mw);
-            var dialog = new Wpf.Ui.Controls.ContentDialog
+            var dialog = new Wpf.Ui.Violeta.Controls.ContentDialog
             {
                 Title = Properties.RandomStrings.Random_ManageBg_WindowTitle,
                 Content = content,
                 CloseButtonText = Properties.NotificationStrings.AnimationOff,
                 Owner = Window.GetWindow(this) ?? mw,
-                DefaultButton = Wpf.Ui.Controls.ContentDialogButton.Close
+                DefaultButton = Wpf.Ui.Violeta.Controls.ContentDialogButton.Close
             };
             await dialog.ShowAsync();
         }

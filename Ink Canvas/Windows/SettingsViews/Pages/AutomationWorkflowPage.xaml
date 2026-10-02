@@ -1,105 +1,74 @@
-<Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.AutomationWorkflowPage"
-         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-         xmlns:d="http://schemas.microsoft.com/expression/blend"
-         xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
-         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-         xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
-         xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
-         xmlns:c="clr-namespace:Ink_Canvas.Converter"
-         xmlns:props="clr-namespace:Ink_Canvas.Properties"
-         xmlns:sys="clr-namespace:System;assembly=mscorlib"
-         xmlns:dd="urn:gong-wpf-dragdrop"
-         xmlns:touch="clr-namespace:Ink_Canvas.Helpers"
-         mc:Ignorable="d"
-         d:DesignHeight="800"
-         d:DesignWidth="1200"
-         Title="{x:Static props:AutomationStrings.Automation_Title}">
+<?xml version="1.0" encoding="utf-8"?><Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.AutomationWorkflowPage" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:d="http://schemas.microsoft.com/expression/blend" xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages" xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta" xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls" xmlns:c="clr-namespace:Ink_Canvas.Converter" xmlns:props="clr-namespace:Ink_Canvas.Properties" xmlns:sys="clr-namespace:System;assembly=mscorlib" xmlns:dd="urn:gong-wpf-dragdrop" xmlns:touch="clr-namespace:Ink_Canvas.Helpers" mc:Ignorable="d" d:DesignHeight="800" d:DesignWidth="1200" Title="{x:Static props:AutomationStrings.Automation_Title}">
 
     <Page.Resources>
-        <c:BooleanToVisibilityConverter x:Key="BoolToVis"/>
-        <c:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis"/>
+        <c:BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <c:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
         <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
         <sys:Double x:Key="SettingsCardHeaderIconMaxSize">24</sys:Double>
 
         <Style TargetType="Ellipse" x:Key="StateIndicatorStyle">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding State, Mode=OneWay}" Value="2">
-                    <Setter Property="Fill" Value="Green"/>
-                    <Setter Property="ToolTip" Value="已满足"/>
+                    <Setter Property="Fill" Value="Green" />
+                    <Setter Property="ToolTip" Value="已满足" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding State, Mode=OneWay}" Value="1">
-                    <Setter Property="Fill" Value="IndianRed"/>
-                    <Setter Property="ToolTip" Value="不满足"/>
+                    <Setter Property="Fill" Value="IndianRed" />
+                    <Setter Property="ToolTip" Value="不满足" />
                 </DataTrigger>
             </Style.Triggers>
-            <Setter Property="Fill" Value="DarkGray"/>
-            <Setter Property="ToolTip" Value="未知"/>
+            <Setter Property="Fill" Value="DarkGray" />
+            <Setter Property="ToolTip" Value="未知" />
         </Style>
 
-        <local:RulesetLogicalModeToIntConverter x:Key="LogicalModeToIntConverter"/>
+        <local:RulesetLogicalModeToIntConverter x:Key="LogicalModeToIntConverter" />
     </Page.Resources>
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="280" MinWidth="220"/>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="280" MinWidth="220" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
         <!-- ==================== 左侧：导航列表 ==================== -->
         <Grid Grid.Column="0" Margin="16,8">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
             <!-- 添加按钮 -->
-            <Button Grid.Row="0" x:Name="BtnAddWorkflow"
-                    Content="添加自动化"
-                    Click="BtnAddWorkflow_Click"
-                    Padding="12,6" Margin="0,0,0,8" HorizontalAlignment="Left"/>
+            <Button Grid.Row="0" x:Name="BtnAddWorkflow" Content="添加自动化" Click="BtnAddWorkflow_Click" Padding="12,6" Margin="0,0,0,8" HorizontalAlignment="Left" />
 
             <!-- 导航列表 -->
-            <ui:ListView Grid.Row="1"
-                         x:Name="NavigationListBox"
-                         Background="Transparent"
-                         BorderThickness="0"
-                         SelectionChanged="NavigationListBox_SelectionChanged"
-                         HorizontalContentAlignment="Stretch"
-                         dd:DragDrop.IsDragSource="True"
-                         dd:DragDrop.IsDropTarget="True"
-                         touch:TouchAwareDragDropHelper.IsEnabled="True">
+            <ui:ListView Grid.Row="1" x:Name="NavigationListBox" Background="Transparent" BorderThickness="0" SelectionChanged="NavigationListBox_SelectionChanged" HorizontalContentAlignment="Stretch" dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" touch:TouchAwareDragDropHelper.IsEnabled="True">
                 <ui:ListView.Template>
                     <ControlTemplate TargetType="ui:ListView">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}">
-                            <ScrollViewer HorizontalScrollBarVisibility="Disabled"
-                                          VerticalScrollBarVisibility="Auto">
-                                <ItemsPresenter HorizontalAlignment="Stretch"/>
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                                <ItemsPresenter HorizontalAlignment="Stretch" />
                             </ScrollViewer>
                         </Border>
                     </ControlTemplate>
                 </ui:ListView.Template>
                 <ui:ListView.ItemContainerStyle>
                     <Style TargetType="ui:ListViewItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                        <Setter Property="Padding" Value="8,4"/>
-                        <Setter Property="MinHeight" Value="36"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Padding" Value="8,4" />
+                        <Setter Property="MinHeight" Value="36" />
                     </Style>
                 </ui:ListView.ItemContainerStyle>
                 <ui:ListView.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <StackPanel/>
+                        <StackPanel />
                     </ItemsPanelTemplate>
                 </ui:ListView.ItemsPanel>
                 <!-- 预设自动化固定项 -->
                 <ui:ListViewItem x:Name="NavPresetItem">
                     <StackPanel Orientation="Horizontal">
-                        <ui:SymbolIcon Symbol="Settings24" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="预设自动化" VerticalAlignment="Center"/>
+                        <ui:SymbolIcon Symbol="Settings24" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="预设自动化" VerticalAlignment="Center" />
                     </StackPanel>
                 </ui:ListViewItem>
                 <!-- 工作流项通过 DataTemplate 渲染 -->
@@ -107,31 +76,19 @@
                     <DataTemplate>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
-                            <Border Grid.Column="0" touch:TouchAwareDragDropHelper.IsGripHandle="True"
-                                    Background="Transparent" Padding="2,4" Margin="0,0,4,0"
-                                    Cursor="SizeAll">
-                                <ui:SymbolIcon Symbol="Rename24" Width="16" Height="16"
-                                             VerticalAlignment="Center"/>
+                            <Border Grid.Column="0" touch:TouchAwareDragDropHelper.IsGripHandle="True" Background="Transparent" Padding="2,4" Margin="0,0,4,0" Cursor="SizeAll">
+                                <ui:SymbolIcon Symbol="Rename24" Width="16" Height="16" VerticalAlignment="Center" />
                             </Border>
-                            <TextBlock Grid.Column="1" Text="{Binding ActionSet.Name}"
-                                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Grid.Column="1" Text="{Binding ActionSet.Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                <ui:ToggleSwitch IsChecked="{Binding ActionSet.IsEnabled}"
-                                                 Checked="ToggleWorkflowEnabled_Toggled"
- Unchecked="ToggleWorkflowEnabled_Toggled"
-                                                 MinWidth="0" OnContent="" OffContent=""
-                                                 Margin="0,0,8,0"/>
-                                <Button Content="⧉" Click="BtnDuplicateWorkflow_Click"
-                                        Padding="4,0" Tag="{Binding}" Margin="0,0,4,0"
-                                        ToolTip="复制"/>
-                                <Button Content="✕" Click="BtnRemoveWorkflow_Click"
-                                        Padding="4,0" Tag="{Binding}"
-                                        ToolTip="删除"/>
+                                <ui:ToggleSwitch IsChecked="{Binding ActionSet.IsEnabled}" Checked="ToggleWorkflowEnabled_Toggled" Unchecked="ToggleWorkflowEnabled_Toggled" MinWidth="0" OnContent="" OffContent="" Margin="0,0,8,0" />
+                                <Button Content="⧉" Click="BtnDuplicateWorkflow_Click" Padding="4,0" Tag="{Binding}" Margin="0,0,4,0" ToolTip="复制" />
+                                <Button Content="✕" Click="BtnRemoveWorkflow_Click" Padding="4,0" Tag="{Binding}" ToolTip="删除" />
                             </StackPanel>
                         </Grid>
                     </DataTemplate>
@@ -139,7 +96,7 @@
             </ui:ListView>
         </Grid>
 
-        <GridSplitter Grid.Column="1" Width="1" Background="{DynamicResource ControlStrokeColorDefaultBrush}"/>
+        <GridSplitter Grid.Column="1" Width="1" Background="{DynamicResource ControlStrokeColorDefaultBrush}" />
 
         <!-- ==================== 右侧：内容区域 ==================== -->
         <Grid Grid.Column="2">
@@ -150,449 +107,412 @@
                     <FrameworkElement.Resources>
                         <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
                         <sys:Double x:Key="SettingsCardHeaderIconMaxSize">24</sys:Double>
-                        <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-                        <Style TargetType="TextBlock"
-                               x:Key="SettingsSectionHeaderTextBlockStyle"
-                               BasedOn="{StaticResource BodyStrongTextBlockStyle}">
+                        <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+                        <Style TargetType="TextBlock" x:Key="SettingsSectionHeaderTextBlockStyle" BasedOn="{StaticResource BodyStrongTextBlockStyle}">
                             <Style.Setters>
-                                <Setter Property="Margin" Value="1,30,0,6"/>
+                                <Setter Property="Margin" Value="1,30,0,6" />
                             </Style.Setters>
                         </Style>
                     </FrameworkElement.Resources>
                     <Grid>
-                        <vio:SimpleStackPanel MaxWidth="1000"
-                                              HorizontalAlignment="Stretch"
-                                              Spacing="{StaticResource SettingsCardSpacing}">
+                        <vio:SimpleStackPanel MaxWidth="1000" HorizontalAlignment="Stretch" Spacing="{StaticResource SettingsCardSpacing}">
 
-                            <TextBlock Text="{x:Static props:AutomationStrings.Automation_AutoFoldTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
+                            <TextBlock Text="{x:Static props:AutomationStrings.Automation_AutoFoldTitle}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
 
-                            <controls:SettingsExpander Header="{x:Static props:AutomationStrings.AutoFold_Group_Seewo}" IsExpanded="True">
-                                <controls:SettingsExpander.HeaderIcon>
-                                    <ui:ImageIcon Source="/Resources/Icons-png/EasiNote.png"/>
-                                </controls:SettingsExpander.HeaderIcon>
+                            <ui:CardExpander IsExpanded="True">
+                                <ui:CardExpander.Header>
+                                    <StackPanel>
+                                        <TextBlock Text="{x:Static props:AutomationStrings.AutoFold_Group_Seewo}" />
+                                    </StackPanel>
+                                </ui:CardExpander.Header>
+                                <ui:CardExpander.Icon>
+                                    <ui:ImageIcon Source="/Resources/Icons-png/EasiNote.png" />
+                                </ui:CardExpander.Icon>
                                 <StackPanel>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoBoard5}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="CardAutoFoldInEasiNote" Checked="ToggleSwitchAutoFoldInEasiNote_Toggled"
- Unchecked="ToggleSwitchAutoFoldInEasiNote_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoCamera}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/EasiCamera.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="CardAutoFoldInEasiCamera" Checked="ToggleSwitchAutoFoldInEasiCamera_Toggled"
- Unchecked="ToggleSwitchAutoFoldInEasiCamera_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoBoard3}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote3.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="CardAutoFoldInEasiNote3" Checked="ToggleSwitchAutoFoldInEasiNote3_Toggled"
- Unchecked="ToggleSwitchAutoFoldInEasiNote3_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoLightBoard}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote3C.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="CardAutoFoldInEasiNote3C" Checked="ToggleSwitchAutoFoldInEasiNote3C_Toggled"
- Unchecked="ToggleSwitchAutoFoldInEasiNote3C_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoLightBoard5C}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote5C.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="CardAutoFoldInEasiNote5C" Checked="ToggleSwitchAutoFoldInEasiNote5C_Toggled"
- Unchecked="ToggleSwitchAutoFoldInEasiNote5C_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoPinco}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/SeewoPinco.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="CardAutoFoldInSeewoPincoTeacher" Checked="ToggleSwitchAutoFoldInSeewoPincoTeacher_Toggled"
- Unchecked="ToggleSwitchAutoFoldInSeewoPincoTeacher_Toggled"/>
-                                    </controls:SettingsCard>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoBoard5}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="CardAutoFoldInEasiNote" Checked="ToggleSwitchAutoFoldInEasiNote_Toggled" Unchecked="ToggleSwitchAutoFoldInEasiNote_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoCamera}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/EasiCamera.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="CardAutoFoldInEasiCamera" Checked="ToggleSwitchAutoFoldInEasiCamera_Toggled" Unchecked="ToggleSwitchAutoFoldInEasiCamera_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoBoard3}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote3.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="CardAutoFoldInEasiNote3" Checked="ToggleSwitchAutoFoldInEasiNote3_Toggled" Unchecked="ToggleSwitchAutoFoldInEasiNote3_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoLightBoard}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote3C.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="CardAutoFoldInEasiNote3C" Checked="ToggleSwitchAutoFoldInEasiNote3C_Toggled" Unchecked="ToggleSwitchAutoFoldInEasiNote3C_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoLightBoard5C}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote5C.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="CardAutoFoldInEasiNote5C" Checked="ToggleSwitchAutoFoldInEasiNote5C_Toggled" Unchecked="ToggleSwitchAutoFoldInEasiNote5C_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoPinco}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/SeewoPinco.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="CardAutoFoldInSeewoPincoTeacher" Checked="ToggleSwitchAutoFoldInSeewoPincoTeacher_Toggled" Unchecked="ToggleSwitchAutoFoldInSeewoPincoTeacher_Toggled" />
+                                    </ui:CardControl>
                                 </StackPanel>
-                            </controls:SettingsExpander>
+                            </ui:CardExpander>
 
-                            <controls:SettingsExpander Header="{x:Static props:AutomationStrings.AutoFold_Group_Hite}" IsExpanded="True">
-                                <controls:SettingsExpander.HeaderIcon><ui:SymbolIcon Symbol="Edit24"/></controls:SettingsExpander.HeaderIcon>
+                            <ui:CardExpander IsExpanded="True">
+                                <ui:CardExpander.Header>
+                                    <StackPanel>
+                                        <TextBlock Text="{x:Static props:AutomationStrings.AutoFold_Group_Hite}" />
+                                    </StackPanel>
+                                </ui:CardExpander.Header>
+                                <ui:CardExpander.Icon><ui:SymbolIcon Symbol="Edit24" /></ui:CardExpander.Icon>
                                 <StackPanel>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.AutoFold_App_HiteBoard}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/HiteBoard.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="CardAutoFoldInHiteTouchPro" Checked="ToggleSwitchAutoFoldInHiteTouchPro_Toggled"
- Unchecked="ToggleSwitchAutoFoldInHiteTouchPro_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.AutoFold_App_HiteCamera}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/HiteCamera.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="CardAutoFoldInHiteCamera" Checked="ToggleSwitchAutoFoldInHiteCamera_Toggled"
- Unchecked="ToggleSwitchAutoFoldInHiteCamera_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.AutoFold_App_HiteLightBoard}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/HiteLightBoard.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="CardAutoFoldInHiteLightBoard" Checked="ToggleSwitchAutoFoldInHiteLightBoard_Toggled"
- Unchecked="ToggleSwitchAutoFoldInHiteLightBoard_Toggled"/>
-                                    </controls:SettingsCard>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_HiteBoard}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/HiteBoard.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="CardAutoFoldInHiteTouchPro" Checked="ToggleSwitchAutoFoldInHiteTouchPro_Toggled" Unchecked="ToggleSwitchAutoFoldInHiteTouchPro_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_HiteCamera}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/HiteCamera.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="CardAutoFoldInHiteCamera" Checked="ToggleSwitchAutoFoldInHiteCamera_Toggled" Unchecked="ToggleSwitchAutoFoldInHiteCamera_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_HiteLightBoard}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/HiteLightBoard.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="CardAutoFoldInHiteLightBoard" Checked="ToggleSwitchAutoFoldInHiteLightBoard_Toggled" Unchecked="ToggleSwitchAutoFoldInHiteLightBoard_Toggled" />
+                                    </ui:CardControl>
                                 </StackPanel>
-                            </controls:SettingsExpander>
+                            </ui:CardExpander>
 
-                            <controls:SettingsExpander Header="{x:Static props:AutomationStrings.AutoFold_Group_Other}" IsExpanded="True">
-                                <controls:SettingsExpander.HeaderIcon><ui:SymbolIcon Symbol="Edit24"/></controls:SettingsExpander.HeaderIcon>
+                            <ui:CardExpander IsExpanded="True">
+                                <ui:CardExpander.Header>
+                                    <StackPanel>
+                                        <TextBlock Text="{x:Static props:AutomationStrings.AutoFold_Group_Other}" />
+                                    </StackPanel>
+                                </ui:CardExpander.Header>
+                                <ui:CardExpander.Icon><ui:SymbolIcon Symbol="Edit24" /></ui:CardExpander.Icon>
                                 <StackPanel>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.AutoFold_App_WenXiangBoard}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/WenXiang.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="CardAutoFoldInWxBoardMain" Checked="ToggleSwitchAutoFoldInWxBoardMain_Toggled"
- Unchecked="ToggleSwitchAutoFoldInWxBoardMain_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.AutoFold_App_MSWhiteboard}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/Whiteboard.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="CardAutoFoldInMSWhiteboard" Checked="ToggleSwitchAutoFoldInMSWhiteboard_Toggled"
- Unchecked="ToggleSwitchAutoFoldInMSWhiteboard_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.AutoFold_App_AdmoxBoard}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/AdmoxWhiteboard.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="CardAutoFoldInAdmoxWhiteboard" Checked="ToggleSwitchAutoFoldInAdmoxWhiteboard_Toggled"
- Unchecked="ToggleSwitchAutoFoldInAdmoxWhiteboard_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.AutoFold_App_AdmoxBooth}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/AdmoxBooth.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="CardAutoFoldInAdmoxBooth" Checked="ToggleSwitchAutoFoldInAdmoxBooth_Toggled"
- Unchecked="ToggleSwitchAutoFoldInAdmoxBooth_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.AutoFold_App_YiYunBoard}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/YiYunWhiteboard.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="CardAutoFoldInQPoint" Checked="ToggleSwitchAutoFoldInQPoint_Toggled"
- Unchecked="ToggleSwitchAutoFoldInQPoint_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.AutoFold_App_YiYunBooth}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/YiYunVisualPresenter.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="CardAutoFoldInYiYunVisualPresenter" Checked="ToggleSwitchAutoFoldInYiYunVisualPresenter_Toggled"
- Unchecked="ToggleSwitchAutoFoldInYiYunVisualPresenter_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.AutoFold_App_MaxHubBoard}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/MaxHubWhiteboard.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="CardAutoFoldInMaxHubWhiteboard" Checked="ToggleSwitchAutoFoldInMaxHubWhiteboard_Toggled"
- Unchecked="ToggleSwitchAutoFoldInMaxHubWhiteboard_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.AutoFold_OldZyBoard}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/Donview.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="CardAutoFoldInOldZyBoard" Checked="ToggleSwitchAutoFoldInOldZyBoard_Toggled"
- Unchecked="ToggleSwitchAutoFoldInOldZyBoard_Toggled"/>
-                                    </controls:SettingsCard>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_WenXiangBoard}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/WenXiang.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="CardAutoFoldInWxBoardMain" Checked="ToggleSwitchAutoFoldInWxBoardMain_Toggled" Unchecked="ToggleSwitchAutoFoldInWxBoardMain_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_MSWhiteboard}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/Whiteboard.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="CardAutoFoldInMSWhiteboard" Checked="ToggleSwitchAutoFoldInMSWhiteboard_Toggled" Unchecked="ToggleSwitchAutoFoldInMSWhiteboard_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_AdmoxBoard}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/AdmoxWhiteboard.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="CardAutoFoldInAdmoxWhiteboard" Checked="ToggleSwitchAutoFoldInAdmoxWhiteboard_Toggled" Unchecked="ToggleSwitchAutoFoldInAdmoxWhiteboard_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_AdmoxBooth}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/AdmoxBooth.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="CardAutoFoldInAdmoxBooth" Checked="ToggleSwitchAutoFoldInAdmoxBooth_Toggled" Unchecked="ToggleSwitchAutoFoldInAdmoxBooth_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_YiYunBoard}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/YiYunWhiteboard.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="CardAutoFoldInQPoint" Checked="ToggleSwitchAutoFoldInQPoint_Toggled" Unchecked="ToggleSwitchAutoFoldInQPoint_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_YiYunBooth}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/YiYunVisualPresenter.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="CardAutoFoldInYiYunVisualPresenter" Checked="ToggleSwitchAutoFoldInYiYunVisualPresenter_Toggled" Unchecked="ToggleSwitchAutoFoldInYiYunVisualPresenter_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_MaxHubBoard}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/MaxHubWhiteboard.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="CardAutoFoldInMaxHubWhiteboard" Checked="ToggleSwitchAutoFoldInMaxHubWhiteboard_Toggled" Unchecked="ToggleSwitchAutoFoldInMaxHubWhiteboard_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_OldZyBoard}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/Donview.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="CardAutoFoldInOldZyBoard" Checked="ToggleSwitchAutoFoldInOldZyBoard_Toggled" Unchecked="ToggleSwitchAutoFoldInOldZyBoard_Toggled" />
+                                    </ui:CardControl>
                                 </StackPanel>
-                            </controls:SettingsExpander>
+                            </ui:CardExpander>
 
-                            <controls:LabeledSettingsCard x:Name="CardAutoFoldInPPTSlideShow"
-                                Header="{x:Static props:AutomationStrings.Automation_AutoFoldInPPT}" Toggled="ToggleSwitchAutoFoldInPPTSlideShow_Toggled">
+                            <controls:LabeledSettingsCard x:Name="CardAutoFoldInPPTSlideShow" Header="{x:Static props:AutomationStrings.Automation_AutoFoldInPPT}" Toggled="ToggleSwitchAutoFoldInPPTSlideShow_Toggled">
                                 <controls:LabeledSettingsCard.HeaderIcon>
-                                    <ui:ImageIcon Source="/Resources/Icons-png/PowerPoint.png"/>
+                                    <ui:ImageIcon Source="/Resources/Icons-png/PowerPoint.png" />
                                 </controls:LabeledSettingsCard.HeaderIcon>
                             </controls:LabeledSettingsCard>
 
-                            <controls:LabeledSettingsCard x:Name="CardAutoFoldWhenExitWhiteboard"
-                                Header="{x:Static props:AutomationStrings.FoldMode_AutoFoldAfterWhiteboard}"
-                                Description="{x:Static props:AutomationStrings.FoldMode_AutoFoldAfterWhiteboardHint}"
-                                Symbol="ArrowLeft24"
-                                Toggled="ToggleSwitchAutoFoldWhenExitWhiteboard_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardAutoFoldWhenExitWhiteboard" Header="{x:Static props:AutomationStrings.FoldMode_AutoFoldAfterWhiteboard}" Description="{x:Static props:AutomationStrings.FoldMode_AutoFoldAfterWhiteboardHint}" Symbol="ArrowLeft24" Toggled="ToggleSwitchAutoFoldWhenExitWhiteboard_Toggled" />
 
-                            <controls:LabeledSettingsCard x:Name="CardAutoFoldAfterPPTSlideShow"
-                                Header="{x:Static props:AutomationStrings.FoldMode_AutoFoldAfterPPT}"
-                                Description="{x:Static props:AutomationStrings.FoldMode_AutoFoldAfterPPTHint}"
-                                IconSource="/Resources/Icons-png/PPTTools.png"
-                                Toggled="ToggleSwitchAutoFoldAfterPPTSlideShow_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardAutoFoldAfterPPTSlideShow" Header="{x:Static props:AutomationStrings.FoldMode_AutoFoldAfterPPT}" Description="{x:Static props:AutomationStrings.FoldMode_AutoFoldAfterPPTHint}" IconSource="/Resources/Icons-png/PPTTools.png" Toggled="ToggleSwitchAutoFoldAfterPPTSlideShow_Toggled" />
 
-                            <controls:LabeledSettingsCard x:Name="CardKeepFoldAfterSoftwareExit"
-                                Header="{x:Static props:AutomationStrings.Automation_KeepFoldAfterExit}"
-                                Description="{x:Static props:AutomationStrings.Automation_KeepFoldAfterExitHint}"
-                                Symbol="Pin24"
-                                Toggled="ToggleSwitchKeepFoldAfterSoftwareExit_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardKeepFoldAfterSoftwareExit" Header="{x:Static props:AutomationStrings.Automation_KeepFoldAfterExit}" Description="{x:Static props:AutomationStrings.Automation_KeepFoldAfterExitHint}" Symbol="Pin24" Toggled="ToggleSwitchKeepFoldAfterSoftwareExit_Toggled" />
 
-                            <TextBlock Text="{x:Static props:AutomationStrings.AutoKill_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
+                            <TextBlock Text="{x:Static props:AutomationStrings.AutoKill_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
 
-                            <controls:LabeledSettingsCard x:Name="CardAutoKillPPTService"
-                                Header="{x:Static props:AutomationStrings.AutoKill_PPTTools}"
-                                Description="{x:Static props:AutomationStrings.AutoKill_PPTToolsHint}"
-                                IconSource="/Resources/Icons-png/PPTTools.png"
-                                Toggled="ToggleSwitchAutoKillPPTService_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardAutoKillPPTService" Header="{x:Static props:AutomationStrings.AutoKill_PPTTools}" Description="{x:Static props:AutomationStrings.AutoKill_PPTToolsHint}" IconSource="/Resources/Icons-png/PPTTools.png" Toggled="ToggleSwitchAutoKillPPTService_Toggled" />
 
-                            <controls:LabeledSettingsCard x:Name="CardAutoKillEasiNote"
-                                Header="{x:Static props:AutomationStrings.AutoKill_EasiNote5}"
-                                IconSource="/Resources/Icons-png/EasiNote.png"
-                                Toggled="ToggleSwitchAutoKillEasiNote_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardAutoKillEasiNote" Header="{x:Static props:AutomationStrings.AutoKill_EasiNote5}" IconSource="/Resources/Icons-png/EasiNote.png" Toggled="ToggleSwitchAutoKillEasiNote_Toggled" />
 
-                            <controls:LabeledSettingsCard x:Name="CardAutoKillHiteAnnotation"
-                                Header="{x:Static props:AutomationStrings.AutoKill_HiteAnnotation}"
-                                IconSource="/Resources/Icons-png/HiteAnnotation.png"
-                                Toggled="ToggleSwitchAutoKillHiteAnnotation_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardAutoKillHiteAnnotation" Header="{x:Static props:AutomationStrings.AutoKill_HiteAnnotation}" IconSource="/Resources/Icons-png/HiteAnnotation.png" Toggled="ToggleSwitchAutoKillHiteAnnotation_Toggled" />
 
-                            <controls:LabeledSettingsCard x:Name="CardAutoKillVComYouJiao"
-                                Header="{x:Static props:AutomationStrings.AutoKill_YouJiao}"
-                                IconSource="/Resources/Icons-png/VComYouJiao.png"
-                                Toggled="ToggleSwitchAutoKillVComYouJiao_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardAutoKillVComYouJiao" Header="{x:Static props:AutomationStrings.AutoKill_YouJiao}" IconSource="/Resources/Icons-png/VComYouJiao.png" Toggled="ToggleSwitchAutoKillVComYouJiao_Toggled" />
 
-                            <controls:LabeledSettingsCard x:Name="CardAutoKillSeewoLauncher2DesktopAnnotation"
-                                Header="{x:Static props:AutomationStrings.AutoKill_SeewoDesktop2Anno}"
-                                Description="{x:Static props:AutomationStrings.AutoKill_SeewoDesktop2AnnoHint}"
-                                IconSource="/Resources/Icons-png/Seewo2Annotation.png"
-                                Toggled="ToggleSwitchAutoKillSeewoLauncher2DesktopAnnotation_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardAutoKillSeewoLauncher2DesktopAnnotation" Header="{x:Static props:AutomationStrings.AutoKill_SeewoDesktop2Anno}" Description="{x:Static props:AutomationStrings.AutoKill_SeewoDesktop2AnnoHint}" IconSource="/Resources/Icons-png/Seewo2Annotation.png" Toggled="ToggleSwitchAutoKillSeewoLauncher2DesktopAnnotation_Toggled" />
 
-                            <controls:LabeledSettingsCard x:Name="CardAutoKillInkCanvas"
-                                Header="{x:Static props:AutomationStrings.AutoKill_InkCanvasIC}"
-                                IconSource="/Resources/Icons-png/InkCanvas.png"
-                                Toggled="ToggleSwitchAutoKillInkCanvas_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardAutoKillInkCanvas" Header="{x:Static props:AutomationStrings.AutoKill_InkCanvasIC}" IconSource="/Resources/Icons-png/InkCanvas.png" Toggled="ToggleSwitchAutoKillInkCanvas_Toggled" />
 
-                            <controls:LabeledSettingsCard x:Name="CardAutoKillICA"
-                                Header="{x:Static props:AutomationStrings.AutoKill_ICA}"
-                                IconSource="/Resources/Icons-png/ICA.png"
-                                Toggled="ToggleSwitchAutoKillICA_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardAutoKillICA" Header="{x:Static props:AutomationStrings.AutoKill_ICA}" IconSource="/Resources/Icons-png/ICA.png" Toggled="ToggleSwitchAutoKillICA_Toggled" />
 
-                            <controls:LabeledSettingsCard x:Name="CardAutoKillIDT"
-                                Header="{x:Static props:AutomationStrings.AutoKill_Inkeys}"
-                                IconSource="/Resources/Icons-png/idt.png"
-                                Toggled="ToggleSwitchAutoKillIDT_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardAutoKillIDT" Header="{x:Static props:AutomationStrings.AutoKill_Inkeys}" IconSource="/Resources/Icons-png/idt.png" Toggled="ToggleSwitchAutoKillIDT_Toggled" />
 
-                            <TextBlock Text="{x:Static props:AutomationStrings.AutoFold_Mode}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
+                            <TextBlock Text="{x:Static props:AutomationStrings.AutoFold_Mode}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
 
-                            <controls:LabeledSettingsCard x:Name="CardAutoEnterAnnotationModeWhenExitFoldMode"
-                                Header="{x:Static props:AutomationStrings.FoldMode_ExitToAnnotation}"
-                                Description="{x:Static props:AutomationStrings.FoldMode_ExitToAnnotationHint}"
-                                Symbol="Edit24"
-                                Toggled="ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardAutoEnterAnnotationModeWhenExitFoldMode" Header="{x:Static props:AutomationStrings.FoldMode_ExitToAnnotation}" Description="{x:Static props:AutomationStrings.FoldMode_ExitToAnnotationHint}" Symbol="Edit24" Toggled="ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode_Toggled" />
 
-                            <controls:LabeledSettingsCard x:Name="CardAutoEnterAnnotationAfterKillHite"
-                                Header="{x:Static props:AutomationStrings.AutoKill_HiteAfterKillEnterAnnotation}"
-                                IconSource="/Resources/Icons-png/HiteAnnotation.png"
-                                Toggled="ToggleSwitchAutoEnterAnnotationAfterKillHite_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardAutoEnterAnnotationAfterKillHite" Header="{x:Static props:AutomationStrings.AutoKill_HiteAfterKillEnterAnnotation}" IconSource="/Resources/Icons-png/HiteAnnotation.png" Toggled="ToggleSwitchAutoEnterAnnotationAfterKillHite_Toggled" />
 
-                            <TextBlock Text="{x:Static props:StorageStrings.AutoSave_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
+                            <TextBlock Text="{x:Static props:StorageStrings.AutoSave_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
 
-                            <controls:SettingsExpander Header="{x:Static props:StorageStrings.Storage_ScreenshotSettings}"
-                                                 Description="{x:Static props:StorageStrings.Storage_ScreenshotSettingsDesc}"
-                                                 IsExpanded="{Binding IsOn, ElementName=ToggleSwitchSaveScreenshotsInDateFolders, Mode=OneWay}">
-                                <controls:SettingsExpander.HeaderIcon>
-                                    <ui:SymbolIcon Symbol="Camera24"/>
-                                </controls:SettingsExpander.HeaderIcon>
-                                <ui:ToggleSwitch x:Name="ToggleSwitchSaveScreenshotsInDateFolders" d:IsOn="True"
-                                                 Checked="ToggleSwitchSaveScreenshotsInDateFolders_Toggled"
- Unchecked="ToggleSwitchSaveScreenshotsInDateFolders_Toggled"/>
+                            <ui:CardExpander IsExpanded="{Binding IsChecked, ElementName=ToggleSwitchSaveScreenshotsInDateFolders, Mode=OneWay}">
+                                <ui:CardExpander.Header>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="{x:Static props:StorageStrings.Storage_ScreenshotSettings}" />
+                                            <TextBlock Text="{x:Static props:StorageStrings.Storage_ScreenshotSettingsDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                        </StackPanel>
+                                        <ui:ToggleSwitch x:Name="ToggleSwitchSaveScreenshotsInDateFolders" d:IsOn="True" Checked="ToggleSwitchSaveScreenshotsInDateFolders_Toggled" Unchecked="ToggleSwitchSaveScreenshotsInDateFolders_Toggled" Grid.Column="1" />
+                                    </Grid>
+                                </ui:CardExpander.Header>
+                                <ui:CardExpander.Icon>
+                                    <ui:SymbolIcon Symbol="Camera24" />
+                                </ui:CardExpander.Icon>
                                 <StackPanel>
-                                    <controls:SettingsCard Header="{x:Static props:StorageStrings.Storage_ScreenshotFormat}">
-                                        <controls:SettingsCard.HeaderIcon>
-                                            <ui:SymbolIcon Symbol="Image24"/>
-                                        </controls:SettingsCard.HeaderIcon>
+                                    <ui:CardControl Header="{x:Static props:StorageStrings.Storage_ScreenshotFormat}">
+                                        <ui:CardControl.Icon>
+                                            <ui:SymbolIcon Symbol="Image24" />
+                                        </ui:CardControl.Icon>
                                         <ComboBox x:Name="ComboBoxScreenshotFormat" SelectionChanged="ComboBoxScreenshotFormat_SelectionChanged">
-                                            <ComboBoxItem Content="PNG" Tag="0"/>
-                                            <ComboBoxItem Content="JPG" Tag="1"/>
+                                            <ComboBoxItem Content="PNG" Tag="0" />
+                                            <ComboBoxItem Content="JPG" Tag="1" />
                                         </ComboBox>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard x:Name="CardScreenshotJpegQuality"
-                                                     Header="{x:Static props:StorageStrings.Storage_ScreenshotJpegQuality}"
-                                                     Visibility="Collapsed">
-                                        <controls:SettingsCard.HeaderIcon>
-                                            <ui:SymbolIcon Symbol="Crop24"/>
-                                        </controls:SettingsCard.HeaderIcon>
+                                    </ui:CardControl>
+                                    <ui:CardControl x:Name="CardScreenshotJpegQuality" Header="{x:Static props:StorageStrings.Storage_ScreenshotJpegQuality}" Visibility="Collapsed">
+                                        <ui:CardControl.Icon>
+                                            <ui:SymbolIcon Symbol="Crop24" />
+                                        </ui:CardControl.Icon>
                                         <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                            <TextBlock x:Name="ScreenshotJpegQualityText" VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
-                                            <Slider x:Name="ScreenshotJpegQualitySlider" Width="200" Minimum="50" Maximum="100"
-                                                    IsSnapToTickEnabled="True" TickFrequency="1" TickPlacement="None"
-                                                    ValueChanged="ScreenshotJpegQualitySlider_ValueChanged"/>
+                                            <TextBlock x:Name="ScreenshotJpegQualityText" VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" />
+                                            <Slider x:Name="ScreenshotJpegQualitySlider" Width="200" Minimum="50" Maximum="100" IsSnapToTickEnabled="True" TickFrequency="1" TickPlacement="None" ValueChanged="ScreenshotJpegQualitySlider_ValueChanged" />
                                         </vio:SimpleStackPanel>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:StorageStrings.Storage_ScreenshotScale}">
-                                        <controls:SettingsCard.HeaderIcon>
-                                            <ui:SymbolIcon Symbol="ZoomIn24"/>
-                                        </controls:SettingsCard.HeaderIcon>
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:StorageStrings.Storage_ScreenshotScale}">
+                                        <ui:CardControl.Icon>
+                                            <ui:SymbolIcon Symbol="ZoomIn24" />
+                                        </ui:CardControl.Icon>
                                         <ComboBox x:Name="ComboBoxScreenshotScale" SelectionChanged="ComboBoxScreenshotScale_SelectionChanged">
-                                            <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_ScreenshotScale_100}" Tag="0"/>
-                                            <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_ScreenshotScale_75}" Tag="1"/>
-                                            <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_ScreenshotScale_50}" Tag="2"/>
-                                            <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_ScreenshotScale_25}" Tag="3"/>
+                                            <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_ScreenshotScale_100}" Tag="0" />
+                                            <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_ScreenshotScale_75}" Tag="1" />
+                                            <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_ScreenshotScale_50}" Tag="2" />
+                                            <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_ScreenshotScale_25}" Tag="3" />
                                         </ComboBox>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:StorageStrings.Storage_AutoSaveInkOnScreenshot}">
-                                        <controls:SettingsCard.HeaderIcon>
-                                            <ui:SymbolIcon Symbol="Save24"/>
-                                        </controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="ToggleSwitchAutoSaveStrokesAtScreenshot"
-                                                         Checked="ToggleSwitchAutoSaveStrokesAtScreenshot_Toggled"
- Unchecked="ToggleSwitchAutoSaveStrokesAtScreenshot_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:StorageStrings.Storage_AutoScreenshotOnClear}">
-                                        <controls:SettingsCard.HeaderIcon>
-                                            <ui:SymbolIcon Symbol="Save24"/>
-                                        </controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="ToggleSwitchAutoSaveStrokesAtClear"
-                                                         Checked="ToggleSwitchAutoSaveStrokesAtClear_Toggled"
- Unchecked="ToggleSwitchAutoSaveStrokesAtClear_Toggled"/>
-                                    </controls:SettingsCard>
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:StorageStrings.Storage_AutoSaveInkOnScreenshot}">
+                                        <ui:CardControl.Icon>
+                                            <ui:SymbolIcon Symbol="Save24" />
+                                        </ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="ToggleSwitchAutoSaveStrokesAtScreenshot" Checked="ToggleSwitchAutoSaveStrokesAtScreenshot_Toggled" Unchecked="ToggleSwitchAutoSaveStrokesAtScreenshot_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:StorageStrings.Storage_AutoScreenshotOnClear}">
+                                        <ui:CardControl.Icon>
+                                            <ui:SymbolIcon Symbol="Save24" />
+                                        </ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="ToggleSwitchAutoSaveStrokesAtClear" Checked="ToggleSwitchAutoSaveStrokesAtClear_Toggled" Unchecked="ToggleSwitchAutoSaveStrokesAtClear_Toggled" />
+                                    </ui:CardControl>
                                 </StackPanel>
-                            </controls:SettingsExpander>
+                            </ui:CardExpander>
 
-                            <controls:LabeledSettingsCard x:Name="CardSaveStrokesAsXML"
-                                Header="{x:Static props:StorageStrings.Storage_SaveAsXml}"
-                                Symbol="Save24" Toggled="ToggleSwitchSaveStrokesAsXML_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardSaveStrokesAsXML" Header="{x:Static props:StorageStrings.Storage_SaveAsXml}" Symbol="Save24" Toggled="ToggleSwitchSaveStrokesAsXML_Toggled" />
 
-                            <controls:LabeledSettingsCard x:Name="CardSaveStrokesAsUInk"
-                                Header="{x:Static props:StorageStrings.Storage_SaveAsUInk}"
-                                Symbol="Save24"
-                                Toggled="ToggleSwitchSaveStrokesAsUInK_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardSaveStrokesAsUInk" Header="{x:Static props:StorageStrings.Storage_SaveAsUInk}" Symbol="Save24" Toggled="ToggleSwitchSaveStrokesAsUInK_Toggled" />
 
-                            <controls:LabeledSettingsCard x:Name="CardEnableAutoSaveStrokes"
-                                Header="{x:Static props:StorageStrings.Storage_AutoSaveInk}"
-                                Description="{x:Static props:CanvasStrings.CanvasAndInkPanel_Hint_9}"
-                                Symbol="Save24"
-                                Toggled="ToggleSwitchEnableAutoSaveStrokes_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardEnableAutoSaveStrokes" Header="{x:Static props:StorageStrings.Storage_AutoSaveInk}" Description="{x:Static props:CanvasStrings.CanvasAndInkPanel_Hint_9}" Symbol="Save24" Toggled="ToggleSwitchEnableAutoSaveStrokes_Toggled" />
 
-                            <controls:SettingsCard Header="{x:Static props:StorageStrings.Storage_AutoSaveInterval}">
-                                <controls:SettingsCard.HeaderIcon><ui:SymbolIcon Symbol="WeatherMoon24"/></controls:SettingsCard.HeaderIcon>
+                            <ui:CardControl Header="{x:Static props:StorageStrings.Storage_AutoSaveInterval}">
+                                <ui:CardControl.Icon><ui:SymbolIcon Symbol="WeatherMoon24" /></ui:CardControl.Icon>
                                 <ComboBox x:Name="ComboBoxAutoSaveStrokesInterval" SelectionChanged="ComboBoxAutoSaveStrokesInterval_SelectionChanged">
-                                    <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_AutoSaveInterval_1Min}" Tag="1"/>
-                                    <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_AutoSaveInterval_3Min}" Tag="3"/>
-                                    <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_AutoSaveInterval_5Min}" Tag="5"/>
-                                    <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_AutoSaveInterval_10Min}" Tag="10"/>
-                                    <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_AutoSaveInterval_30Min}" Tag="30"/>
+                                    <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_AutoSaveInterval_1Min}" Tag="1" />
+                                    <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_AutoSaveInterval_3Min}" Tag="3" />
+                                    <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_AutoSaveInterval_5Min}" Tag="5" />
+                                    <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_AutoSaveInterval_10Min}" Tag="10" />
+                                    <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_AutoSaveInterval_30Min}" Tag="30" />
                                 </ComboBox>
-                            </controls:SettingsCard>
+                            </ui:CardControl>
 
-                            <controls:LabeledSettingsCard x:Name="CardAutoDelSavedFiles"
-                                Header="{x:Static props:StorageStrings.Storage_AutoDeleteTitle}"
-                                Symbol="Delete24"
-                                Toggled="ToggleSwitchAutoDelSavedFiles_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardAutoDelSavedFiles" Header="{x:Static props:StorageStrings.Storage_AutoDeleteTitle}" Symbol="Delete24" Toggled="ToggleSwitchAutoDelSavedFiles_Toggled" />
 
-                            <controls:SettingsCard Header="{x:Static props:AutomationStrings.Storage_AutoDeleteDaysThreshold}">
-                                <controls:SettingsCard.HeaderIcon><ui:SymbolIcon Symbol="Calendar24"/></controls:SettingsCard.HeaderIcon>
+                            <ui:CardControl Header="{x:Static props:AutomationStrings.Storage_AutoDeleteDaysThreshold}">
+                                <ui:CardControl.Icon><ui:SymbolIcon Symbol="Calendar24" /></ui:CardControl.Icon>
                                 <ComboBox x:Name="ComboBoxAutoDelSavedFilesDaysThreshold" SelectionChanged="ComboBoxAutoDelSavedFilesDaysThreshold_SelectionChanged">
-                                    <ComboBoxItem Content="7"/><ComboBoxItem Content="14"/><ComboBoxItem Content="30"/><ComboBoxItem Content="60"/><ComboBoxItem Content="90"/>
+                                    <ComboBoxItem Content="7" /><ComboBoxItem Content="14" /><ComboBoxItem Content="30" /><ComboBoxItem Content="60" /><ComboBoxItem Content="90" />
                                 </ComboBox>
-                            </controls:SettingsCard>
+                            </ui:CardControl>
 
-                            <controls:SettingsCard Header="{x:Static props:AutomationStrings.Storage_MinAutomationStrokes}">
-                                <controls:SettingsCard.HeaderIcon><ui:SymbolIcon Symbol="Calculator24"/></controls:SettingsCard.HeaderIcon>
-                                <Slider x:Name="SideControlMinimumAutomationSlider" Minimum="1" Maximum="50" Width="200" ValueChanged="SideControlMinimumAutomationSlider_ValueChanged"/>
-                            </controls:SettingsCard>
+                            <ui:CardControl Header="{x:Static props:AutomationStrings.Storage_MinAutomationStrokes}">
+                                <ui:CardControl.Icon><ui:SymbolIcon Symbol="Calculator24" /></ui:CardControl.Icon>
+                                <Slider x:Name="SideControlMinimumAutomationSlider" Minimum="1" Maximum="50" Width="200" ValueChanged="SideControlMinimumAutomationSlider_ValueChanged" />
+                            </ui:CardControl>
 
-                            <controls:LabeledSettingsCard x:Name="CardSaveFullPageStrokes"
-                                Header="{x:Static props:StorageStrings.Storage_SaveFullPageStrokes}"
-                                Symbol="Save24"
-                                Toggled="ToggleSwitchSaveFullPageStrokes_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardSaveFullPageStrokes" Header="{x:Static props:StorageStrings.Storage_SaveFullPageStrokes}" Symbol="Save24" Toggled="ToggleSwitchSaveFullPageStrokes_Toggled" />
 
-                            <controls:LabeledSettingsCard x:Name="CardUseCustomSaveFileName"
-                                Header="{x:Static props:AutomationStrings.Automation_UseCustomSaveFileName_Header}"
-                                Description="{x:Static props:AutomationStrings.Automation_UseCustomSaveFileName_Desc}"
-                                Symbol="Edit24"
-                                Toggled="ToggleSwitchUseCustomSaveFileName_Toggled"/>
+                            <controls:LabeledSettingsCard x:Name="CardUseCustomSaveFileName" Header="{x:Static props:AutomationStrings.Automation_UseCustomSaveFileName_Header}" Description="{x:Static props:AutomationStrings.Automation_UseCustomSaveFileName_Desc}" Symbol="Edit24" Toggled="ToggleSwitchUseCustomSaveFileName_Toggled" />
 
-                            <controls:SettingsExpander x:Name="CardSaveFileNamePreset" Header="{x:Static props:AutomationStrings.Automation_SaveFileNameFormat}" IsExpanded="True">
-                                <controls:SettingsExpander.HeaderIcon><ui:SymbolIcon Symbol="Edit24"/></controls:SettingsExpander.HeaderIcon>
-                                <ComboBox x:Name="ComboBoxSaveFileNamePreset" SelectionChanged="ComboBoxSaveFileNamePreset_SelectionChanged">
-                                    <ComboBoxItem Content="{x:Static props:AutomationStrings.Automation_SaveFileName_Timestamp}" Tag="{}{datetime}"/>
-                                    <ComboBoxItem Content="{x:Static props:AutomationStrings.Automation_SaveFileName_Date}" Tag="{}{date}"/>
-                                    <ComboBoxItem Content="{x:Static props:AutomationStrings.Automation_SaveFileName_DateTime}" Tag="{}{date}_{time}"/>
-                                    <ComboBoxItem Content="{x:Static props:AutomationStrings.Automation_SaveFileName_DateMode}" Tag="{}{date}_{mode}"/>
-                                    <ComboBoxItem Content="{x:Static props:AutomationStrings.Automation_SaveFileName_DateModePage}" Tag="{}{date}_{mode}_Page-{page}"/>
-                                    <ComboBoxItem Content="{x:Static props:AutomationStrings.Automation_SaveFileName_DateModePageCount}" Tag="{}{date}_{mode}_Page-{page}_Strokes-{count}"/>
-                                    <ComboBoxItem Content="{x:Static props:AutomationStrings.Automation_SaveFileName_Custom}" Tag="__custom__"/>
+                            <ui:CardExpander x:Name="CardSaveFileNamePreset" IsExpanded="True">
+                                <ui:CardExpander.Header>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="{x:Static props:AutomationStrings.Automation_SaveFileNameFormat}" />
+                                        </StackPanel>
+                                        <ComboBox x:Name="ComboBoxSaveFileNamePreset" SelectionChanged="ComboBoxSaveFileNamePreset_SelectionChanged" Grid.Column="1">
+                                    <ComboBoxItem Content="{x:Static props:AutomationStrings.Automation_SaveFileName_Timestamp}" Tag="{}{datetime}" />
+                                    <ComboBoxItem Content="{x:Static props:AutomationStrings.Automation_SaveFileName_Date}" Tag="{}{date}" />
+                                    <ComboBoxItem Content="{x:Static props:AutomationStrings.Automation_SaveFileName_DateTime}" Tag="{}{date}_{time}" />
+                                    <ComboBoxItem Content="{x:Static props:AutomationStrings.Automation_SaveFileName_DateMode}" Tag="{}{date}_{mode}" />
+                                    <ComboBoxItem Content="{x:Static props:AutomationStrings.Automation_SaveFileName_DateModePage}" Tag="{}{date}_{mode}_Page-{page}" />
+                                    <ComboBoxItem Content="{x:Static props:AutomationStrings.Automation_SaveFileName_DateModePageCount}" Tag="{}{date}_{mode}_Page-{page}_Strokes-{count}" />
+                                    <ComboBoxItem Content="{x:Static props:AutomationStrings.Automation_SaveFileName_Custom}" Tag="__custom__" />
                                 </ComboBox>
+                                    </Grid>
+                                </ui:CardExpander.Header>
+                                <ui:CardExpander.Icon><ui:SymbolIcon Symbol="Edit24" /></ui:CardExpander.Icon>
                                 <StackPanel>
-                                    <controls:SettingsCard x:Name="CardCustomSaveFileNameTemplate"
-                                        Header="{x:Static props:AutomationStrings.Automation_SaveFileName_CustomTemplate_Header}"
-                                        Description="{x:Static props:AutomationStrings.Automation_SaveFileName_CustomTemplate_Desc}"
-                                        Visibility="Collapsed">
-                                        <TextBox x:Name="TextBoxCustomSaveFileNameTemplate" MinWidth="260" LostFocus="TextBoxCustomSaveFileNameTemplate_LostFocus"/>
-                                    </controls:SettingsCard>
+                                    <ui:CardControl x:Name="CardCustomSaveFileNameTemplate" Visibility="Collapsed">
+                                        <ui:CardControl.Header>
+                                            <StackPanel>
+                                                <TextBlock Text="{x:Static props:AutomationStrings.Automation_SaveFileName_CustomTemplate_Header}" />
+                                                <TextBlock Text="{x:Static props:AutomationStrings.Automation_SaveFileName_CustomTemplate_Desc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            </StackPanel>
+                                        </ui:CardControl.Header>
+                                        <TextBox x:Name="TextBoxCustomSaveFileNameTemplate" MinWidth="260" LostFocus="TextBoxCustomSaveFileNameTemplate_LostFocus" />
+                                    </ui:CardControl>
                                 </StackPanel>
-                            </controls:SettingsExpander>
+                            </ui:CardExpander>
 
-                            <TextBlock Text="{x:Static props:AutomationStrings.FloatingInterceptor_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
+                            <TextBlock Text="{x:Static props:AutomationStrings.FloatingInterceptor_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
 
-                            <controls:SettingsExpander Header="{x:Static props:AutomationStrings.FloatingInterceptor_Group_Seewo}" IsExpanded="True">
-                                <controls:SettingsExpander.HeaderIcon><ui:SymbolIcon Symbol="Edit24"/></controls:SettingsExpander.HeaderIcon>
+                            <ui:CardExpander IsExpanded="True">
+                                <ui:CardExpander.Header>
+                                    <StackPanel>
+                                        <TextBlock Text="{x:Static props:AutomationStrings.FloatingInterceptor_Group_Seewo}" />
+                                    </StackPanel>
+                                </ui:CardExpander.Header>
+                                <ui:CardExpander.Icon><ui:SymbolIcon Symbol="Edit24" /></ui:CardExpander.Icon>
                                 <StackPanel>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoBoard3}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote3.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="ToggleSwitchSeewoWhiteboard3Floating" Checked="ToggleSwitchSeewoWhiteboard3Floating_Toggled"
- Unchecked="ToggleSwitchSeewoWhiteboard3Floating_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoBoard5}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="ToggleSwitchSeewoWhiteboard5Floating" Checked="ToggleSwitchSeewoWhiteboard5Floating_Toggled"
- Unchecked="ToggleSwitchSeewoWhiteboard5Floating_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoBoard5C}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote5C.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="ToggleSwitchSeewoWhiteboard5CFloating" Checked="ToggleSwitchSeewoWhiteboard5CFloating_Toggled"
- Unchecked="ToggleSwitchSeewoWhiteboard5CFloating_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoPinco}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/SeewoPinco.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="ToggleSwitchSeewoPincoSideBarFloating" Checked="ToggleSwitchSeewoPincoSideBarFloating_Toggled"
- Unchecked="ToggleSwitchSeewoPincoSideBarFloating_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoPincoDrawing}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/SeewoPinco.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="ToggleSwitchSeewoPincoDrawingFloating" Checked="ToggleSwitchSeewoPincoDrawingFloating_Toggled"
- Unchecked="ToggleSwitchSeewoPincoDrawingFloating_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoPPTTools}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/PPTTools.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="ToggleSwitchSeewoPPTFloating" Checked="ToggleSwitchSeewoPPTFloating_Toggled"
- Unchecked="ToggleSwitchSeewoPPTFloating_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoDesktopAnnotation}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/SeewoPinco.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="ToggleSwitchSeewoDesktopAnnotationFloating" Checked="ToggleSwitchSeewoDesktopAnnotationFloating_Toggled"
- Unchecked="ToggleSwitchSeewoDesktopAnnotationFloating_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoDesktopSideBar}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/SeewoPinco.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="ToggleSwitchSeewoDesktopSideBarFloating" Checked="ToggleSwitchSeewoDesktopSideBarFloating_Toggled"
- Unchecked="ToggleSwitchSeewoDesktopSideBarFloating_Toggled"/>
-                                    </controls:SettingsCard>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoBoard3}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote3.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="ToggleSwitchSeewoWhiteboard3Floating" Checked="ToggleSwitchSeewoWhiteboard3Floating_Toggled" Unchecked="ToggleSwitchSeewoWhiteboard3Floating_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.AutoFold_App_SeewoBoard5}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="ToggleSwitchSeewoWhiteboard5Floating" Checked="ToggleSwitchSeewoWhiteboard5Floating_Toggled" Unchecked="ToggleSwitchSeewoWhiteboard5Floating_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoBoard5C}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/EasiNote5C.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="ToggleSwitchSeewoWhiteboard5CFloating" Checked="ToggleSwitchSeewoWhiteboard5CFloating_Toggled" Unchecked="ToggleSwitchSeewoWhiteboard5CFloating_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoPinco}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/SeewoPinco.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="ToggleSwitchSeewoPincoSideBarFloating" Checked="ToggleSwitchSeewoPincoSideBarFloating_Toggled" Unchecked="ToggleSwitchSeewoPincoSideBarFloating_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoPincoDrawing}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/SeewoPinco.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="ToggleSwitchSeewoPincoDrawingFloating" Checked="ToggleSwitchSeewoPincoDrawingFloating_Toggled" Unchecked="ToggleSwitchSeewoPincoDrawingFloating_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoPPTTools}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/PPTTools.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="ToggleSwitchSeewoPPTFloating" Checked="ToggleSwitchSeewoPPTFloating_Toggled" Unchecked="ToggleSwitchSeewoPPTFloating_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoDesktopAnnotation}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/SeewoPinco.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="ToggleSwitchSeewoDesktopAnnotationFloating" Checked="ToggleSwitchSeewoDesktopAnnotationFloating_Toggled" Unchecked="ToggleSwitchSeewoDesktopAnnotationFloating_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_SeewoDesktopSideBar}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/SeewoPinco.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="ToggleSwitchSeewoDesktopSideBarFloating" Checked="ToggleSwitchSeewoDesktopSideBarFloating_Toggled" Unchecked="ToggleSwitchSeewoDesktopSideBarFloating_Toggled" />
+                                    </ui:CardControl>
                                 </StackPanel>
-                            </controls:SettingsExpander>
+                            </ui:CardExpander>
 
-                            <controls:SettingsExpander Header="{x:Static props:NotificationStrings.Type_Other}" IsExpanded="True">
-                                <controls:SettingsExpander.HeaderIcon><ui:SymbolIcon Symbol="Edit24"/></controls:SettingsExpander.HeaderIcon>
+                            <ui:CardExpander IsExpanded="True">
+                                <ui:CardExpander.Header>
+                                    <StackPanel>
+                                        <TextBlock Text="{x:Static props:NotificationStrings.Type_Other}" />
+                                    </StackPanel>
+                                </ui:CardExpander.Header>
+                                <ui:CardExpander.Icon><ui:SymbolIcon Symbol="Edit24" /></ui:CardExpander.Icon>
                                 <StackPanel>
-                                    <controls:SettingsCard Header="AiClass">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/AiClass.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="ToggleSwitchAiClassFloating" Checked="ToggleSwitchAiClassFloating_Toggled"
- Unchecked="ToggleSwitchAiClassFloating_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_HiteAnnotation}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/HiteAnnotation.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="ToggleSwitchHiteAnnotationFloating" Checked="ToggleSwitchHiteAnnotationFloating_Toggled"
- Unchecked="ToggleSwitchHiteAnnotationFloating_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_ChangYanClass}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/畅言智慧课堂.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="ToggleSwitchChangYanFloating" Checked="ToggleSwitchChangYanFloating_Toggled"
- Unchecked="ToggleSwitchChangYanFloating_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_ChangYanPPT}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/畅言智慧课堂.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="ToggleSwitchChangYanPPTFloating" Checked="ToggleSwitchChangYanPPTFloating_Toggled"
- Unchecked="ToggleSwitchChangYanPPTFloating_Toggled"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_IntelligentClass}">
-                                        <controls:SettingsCard.HeaderIcon><ui:ImageIcon Source="/Resources/Icons-png/天喻教育云.png"/></controls:SettingsCard.HeaderIcon>
-                                        <ui:ToggleSwitch x:Name="ToggleSwitchIntelligentClassFloating" Checked="ToggleSwitchIntelligentClassFloating_Toggled"
- Unchecked="ToggleSwitchIntelligentClassFloating_Toggled"/>
-                                    </controls:SettingsCard>
+                                    <ui:CardControl Header="AiClass">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/AiClass.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="ToggleSwitchAiClassFloating" Checked="ToggleSwitchAiClassFloating_Toggled" Unchecked="ToggleSwitchAiClassFloating_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_HiteAnnotation}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/HiteAnnotation.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="ToggleSwitchHiteAnnotationFloating" Checked="ToggleSwitchHiteAnnotationFloating_Toggled" Unchecked="ToggleSwitchHiteAnnotationFloating_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_ChangYanClass}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/畅言智慧课堂.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="ToggleSwitchChangYanFloating" Checked="ToggleSwitchChangYanFloating_Toggled" Unchecked="ToggleSwitchChangYanFloating_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_ChangYanPPT}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/畅言智慧课堂.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="ToggleSwitchChangYanPPTFloating" Checked="ToggleSwitchChangYanPPTFloating_Toggled" Unchecked="ToggleSwitchChangYanPPTFloating_Toggled" />
+                                    </ui:CardControl>
+                                    <ui:CardControl Header="{x:Static props:AutomationStrings.FloatingInterceptor_App_IntelligentClass}">
+                                        <ui:CardControl.Icon><ui:ImageIcon Source="/Resources/Icons-png/天喻教育云.png" /></ui:CardControl.Icon>
+                                        <ui:ToggleSwitch x:Name="ToggleSwitchIntelligentClassFloating" Checked="ToggleSwitchIntelligentClassFloating_Toggled" Unchecked="ToggleSwitchIntelligentClassFloating_Toggled" />
+                                    </ui:CardControl>
                                 </StackPanel>
-                            </controls:SettingsExpander>
+                            </ui:CardExpander>
 
-                            <TextBlock Text="{x:Static props:SecurityStrings.FileAssoc_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
+                            <TextBlock Text="{x:Static props:SecurityStrings.FileAssoc_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}" />
 
-                            <controls:SettingsExpander Header="{x:Static props:SecurityStrings.FileAssoc_Check}"
-                                Description="{x:Static props:AutomationStrings.FileAssoc_CheckDesc}" IsExpanded="True">
-                                <controls:SettingsExpander.HeaderIcon><ui:SymbolIcon Symbol="Link24"/></controls:SettingsExpander.HeaderIcon>
-                                    <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                        <TextBlock x:Name="TextBlockFileAssociationStatus" Text="{x:Static props:AutomationStrings.FileAssoc_NotChecked}" VerticalAlignment="Center" FontWeight="SemiBold"/>
-                                        <Button x:Name="BtnCheckFileAssociation" Content="{x:Static props:SecurityStrings.FileAssoc_Check}" Click="BtnCheckFileAssociation_Click"/>
+                            <ui:CardExpander IsExpanded="True">
+                                <ui:CardExpander.Header>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0">
+                                            <TextBlock Text="{x:Static props:SecurityStrings.FileAssoc_Check}" />
+                                            <TextBlock Text="{x:Static props:AutomationStrings.FileAssoc_CheckDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                        </StackPanel>
+                                        <vio:SimpleStackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Grid.Column="1">
+                                        <TextBlock x:Name="TextBlockFileAssociationStatus" Text="{x:Static props:AutomationStrings.FileAssoc_NotChecked}" VerticalAlignment="Center" FontWeight="SemiBold" />
+                                        <Button x:Name="BtnCheckFileAssociation" Content="{x:Static props:SecurityStrings.FileAssoc_Check}" Click="BtnCheckFileAssociation_Click" />
                                     </vio:SimpleStackPanel>
+                                    </Grid>
+                                </ui:CardExpander.Header>
+                                <ui:CardExpander.Icon><ui:SymbolIcon Symbol="Link24" /></ui:CardExpander.Icon>
                                 <StackPanel>
-                                    <controls:SettingsCard Header="{x:Static props:AutomationStrings.FileAssoc_RegisterHeader}" Description="{x:Static props:AutomationStrings.FileAssoc_RegisterDesc}">
-                                        <controls:SettingsCard.HeaderIcon><ui:SymbolIcon Symbol="Add24"/></controls:SettingsCard.HeaderIcon>
-                                        <Button x:Name="BtnRegisterFileAssociation" Content="{x:Static props:AutomationStrings.FileAssoc_RegisterHeader}" Click="BtnRegisterFileAssociation_Click"/>
-                                    </controls:SettingsCard>
-                                    <controls:SettingsCard Header="{x:Static props:SecurityStrings.FileAssoc_Unregister}" Description="{x:Static props:AutomationStrings.FileAssoc_UnregisterDesc}">
-                                        <controls:SettingsCard.HeaderIcon><ui:SymbolIcon Symbol="Dismiss24"/></controls:SettingsCard.HeaderIcon>
-                                        <Button x:Name="BtnUnregisterFileAssociation" Content="{x:Static props:SecurityStrings.FileAssoc_Unregister}" Click="BtnUnregisterFileAssociation_Click"/>
-                                    </controls:SettingsCard>
+                                    <ui:CardControl>
+                                        <ui:CardControl.Header>
+                                            <StackPanel>
+                                                <TextBlock Text="{x:Static props:AutomationStrings.FileAssoc_RegisterHeader}" />
+                                                <TextBlock Text="{x:Static props:AutomationStrings.FileAssoc_RegisterDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            </StackPanel>
+                                        </ui:CardControl.Header>
+                                        <ui:CardControl.Icon><ui:SymbolIcon Symbol="Add24" /></ui:CardControl.Icon>
+                                        <Button x:Name="BtnRegisterFileAssociation" Content="{x:Static props:AutomationStrings.FileAssoc_RegisterHeader}" Click="BtnRegisterFileAssociation_Click" />
+                                    </ui:CardControl>
+                                    <ui:CardControl>
+                                        <ui:CardControl.Header>
+                                            <StackPanel>
+                                                <TextBlock Text="{x:Static props:SecurityStrings.FileAssoc_Unregister}" />
+                                                <TextBlock Text="{x:Static props:AutomationStrings.FileAssoc_UnregisterDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            </StackPanel>
+                                        </ui:CardControl.Header>
+                                        <ui:CardControl.Icon><ui:SymbolIcon Symbol="Dismiss24" /></ui:CardControl.Icon>
+                                        <Button x:Name="BtnUnregisterFileAssociation" Content="{x:Static props:SecurityStrings.FileAssoc_Unregister}" Click="BtnUnregisterFileAssociation_Click" />
+                                    </ui:CardControl>
                                 </StackPanel>
-                            </controls:SettingsExpander>
+                            </ui:CardExpander>
 
-                            <Rectangle Height="48"/>
+                            <Rectangle Height="48" />
                         </vio:SimpleStackPanel>
                     </Grid>
                 </Grid>
@@ -606,87 +526,66 @@
                         <Style TargetType="StackPanel">
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ActionSet.IsEnabled}" Value="False">
-                                    <Setter Property="Opacity" Value="0.56"/>
+                                    <Setter Property="Opacity" Value="0.56" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </StackPanel.Style>
 
                     <!-- ===== 顶部：名称 + 选项 ===== -->
-                    <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
-                            CornerRadius="8" Padding="12" Margin="0,0,0,12">
+                    <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" CornerRadius="8" Padding="12" Margin="0,0,0,12">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Orientation="Vertical">
-                                <TextBlock Text="名称" FontWeight="Medium" Margin="0,0,0,4"/>
-                                <TextBox x:Name="TextBoxWorkflowName"
-                                         Padding="8,6" MinWidth="200"
-                                         BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                                         BorderThickness="1"/>
+                                <TextBlock Text="名称" FontWeight="Medium" Margin="0,0,0,4" />
+                                <TextBox x:Name="TextBoxWorkflowName" Padding="8,6" MinWidth="200" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" />
                             </StackPanel>
 
                             <StackPanel Grid.Column="1" Orientation="Vertical" HorizontalAlignment="Right">
-                                <CheckBox x:Name="CheckBoxIsRevertEnabled" Content="启用恢复" Margin="0,0,0,8"
-                                          Checked="CheckBoxIsRevertEnabled_Changed"
-                                          Unchecked="CheckBoxIsRevertEnabled_Changed"/>
+                                <CheckBox x:Name="CheckBoxIsRevertEnabled" Content="启用恢复" Margin="0,0,0,8" Checked="CheckBoxIsRevertEnabled_Changed" Unchecked="CheckBoxIsRevertEnabled_Changed" />
                                 <StackPanel Orientation="Horizontal">
-                                    <Button x:Name="BtnInvokeAction" Content="触发" Padding="12,4" Margin="0,0,8,0" Click="BtnInvokeAction_Click"/>
-                                    <Button x:Name="BtnRevertAction" Content="恢复" Padding="12,4" Click="BtnRevertAction_Click"/>
+                                    <Button x:Name="BtnInvokeAction" Content="触发" Padding="12,4" Margin="0,0,8,0" Click="BtnInvokeAction_Click" />
+                                    <Button x:Name="BtnRevertAction" Content="恢复" Padding="12,4" Click="BtnRevertAction_Click" />
                                 </StackPanel>
                             </StackPanel>
                         </Grid>
                     </Border>
 
                     <!-- ===== 触发器编辑区 ===== -->
-                    <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
-                            CornerRadius="8" Padding="12" Margin="0,0,0,12">
+                    <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" CornerRadius="8" Padding="12" Margin="0,0,0,12">
                         <StackPanel>
                             <!-- 标题 -->
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                <ui:SymbolIcon Symbol="Important24" FontSize="16" Margin="0,0,8,0"/>
-                                <TextBlock Text="当以下事件触发时" FontWeight="Medium" VerticalAlignment="Center"/>
+                                <ui:SymbolIcon Symbol="Important24" FontSize="16" Margin="0,0,8,0" />
+                                <TextBlock Text="当以下事件触发时" FontWeight="Medium" VerticalAlignment="Center" />
                             </StackPanel>
 
                             <!-- 触发器列表 -->
-                            <ItemsControl x:Name="TriggersItemsControl" Margin="0,0,0,8"
-                                          dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True"
-                                          touch:TouchAwareDragDropHelper.IsEnabled="True">
+                            <ItemsControl x:Name="TriggersItemsControl" Margin="0,0,0,8" dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" touch:TouchAwareDragDropHelper.IsEnabled="True">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Background="{DynamicResource ControlFillColorDefaultBrush}"
-                                                CornerRadius="4" Padding="8" Margin="0,2">
+                                        <Border Background="{DynamicResource ControlFillColorDefaultBrush}" CornerRadius="4" Padding="8" Margin="0,2">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
                                                 </Grid.ColumnDefinitions>
 
                                                 <!-- 拖动按钮 -->
-                                                <Border Grid.Column="0" touch:TouchAwareDragDropHelper.IsGripHandle="True"
-                                                        Background="Transparent" Padding="2,4" Margin="0,0,4,0"
-                                                        Cursor="SizeAll">
-                                                    <TextBlock Text="&#xE76F;" FontFamily="Segoe MDL2 Assets" FontSize="10"
-                                                               VerticalAlignment="Center" Opacity="0.45"/>
+                                                <Border Grid.Column="0" touch:TouchAwareDragDropHelper.IsGripHandle="True" Background="Transparent" Padding="2,4" Margin="0,0,4,0" Cursor="SizeAll">
+                                                    <TextBlock Text="" FontFamily="Segoe MDL2 Assets" FontSize="10" VerticalAlignment="Center" Opacity="0.45" />
                                                 </Border>
 
                                                 <!-- 删除按钮 -->
-                                                <Button Grid.Column="1" Content="✕" Padding="4,0"
-                                                        Margin="0,0,8,0" Click="BtnRemoveTrigger_Click"
-                                                        Tag="{Binding}" ToolTip="删除"/>
+                                                <Button Grid.Column="1" Content="✕" Padding="4,0" Margin="0,0,8,0" Click="BtnRemoveTrigger_Click" Tag="{Binding}" ToolTip="删除" />
 
                                                 <!-- 触发器类型选择 -->
-                                                <ComboBox Grid.Column="2"
-                                                          ItemsSource="{x:Static local:AutomationWorkflowPage.RegisteredTriggersList}"
-                                                          DisplayMemberPath="Name" SelectedValuePath="Id"
-                                                          SelectedValue="{Binding Id, Mode=TwoWay}"
-                                                          SelectionChanged="ComboBoxTriggerType_SelectionChanged"
-                                                          Tag="{Binding}" Padding="8,6" MinWidth="150"
-                                                          VerticalAlignment="Center"/>
+                                                <ComboBox Grid.Column="2" ItemsSource="{x:Static local:AutomationWorkflowPage.RegisteredTriggersList}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding Id, Mode=TwoWay}" SelectionChanged="ComboBoxTriggerType_SelectionChanged" Tag="{Binding}" Padding="8,6" MinWidth="150" VerticalAlignment="Center" />
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -694,102 +593,67 @@
                             </ItemsControl>
 
                             <!-- 添加触发器 -->
-                            <Button Content="添加触发器" Click="BtnAddTrigger_Click"
-                                    Padding="12,6" HorizontalAlignment="Left"/>
+                            <Button Content="添加触发器" Click="BtnAddTrigger_Click" Padding="12,6" HorizontalAlignment="Left" />
                         </StackPanel>
                     </Border>
 
                     <!-- ===== 条件编辑区（规则集） ===== -->
-                    <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
-                            CornerRadius="8" Padding="12" Margin="0,0,0,12">
+                    <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" CornerRadius="8" Padding="12" Margin="0,0,0,12">
                         <StackPanel>
                             <!-- 标题 + 启用开关 -->
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                <ui:ToggleSwitch x:Name="ToggleIsConditionEnabled" Margin="0,0,8,0"
-                                                 Checked="ToggleIsConditionEnabled_Toggled"
- Unchecked="ToggleIsConditionEnabled_Toggled"/>
-                                <ui:SymbolIcon Symbol="Tag24" FontSize="16" Margin="0,0,8,0"/>
-                                <TextBlock Text="并且满足以下条件时" FontWeight="Medium" VerticalAlignment="Center"/>
+                                <ui:ToggleSwitch x:Name="ToggleIsConditionEnabled" Margin="0,0,8,0" Checked="ToggleIsConditionEnabled_Toggled" Unchecked="ToggleIsConditionEnabled_Toggled" />
+                                <ui:SymbolIcon Symbol="Tag24" FontSize="16" Margin="0,0,8,0" />
+                                <TextBlock Text="并且满足以下条件时" FontWeight="Medium" VerticalAlignment="Center" />
                             </StackPanel>
 
                             <!-- 条件禁用提示 -->
-                            <TextBlock x:Name="ConditionDisabledHint"
-                                       Text="工作流运行时不会考虑条件。" Opacity="0.5" Margin="0,0,0,8"/>
+                            <TextBlock x:Name="ConditionDisabledHint" Text="工作流运行时不会考虑条件。" Opacity="0.5" Margin="0,0,0,8" />
 
                             <!-- 条件编辑面板 -->
                             <StackPanel x:Name="ConditionEditorPanel">
                                 <!-- 规则集级别控制 -->
                                 <WrapPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                    <ComboBox x:Name="ComboBoxRulesetMode" Padding="8,6" Margin="0,0,8,0"
-                                              SelectionChanged="ComboBoxRulesetMode_SelectionChanged">
-                                        <ComboBoxItem Content="当以下任意条件组满足时"/>
-                                        <ComboBoxItem Content="当以下所有条件组满足时"/>
+                                    <ComboBox x:Name="ComboBoxRulesetMode" Padding="8,6" Margin="0,0,8,0" SelectionChanged="ComboBoxRulesetMode_SelectionChanged">
+                                        <ComboBoxItem Content="当以下任意条件组满足时" />
+                                        <ComboBoxItem Content="当以下所有条件组满足时" />
                                     </ComboBox>
-                                    <CheckBox x:Name="CheckBoxRulesetReversed" Content="反转"
-                                              Margin="0,0,8,0" VerticalAlignment="Center"
-                                              Checked="CheckBoxRulesetReversed_Changed"
-                                              Unchecked="CheckBoxRulesetReversed_Changed"/>
-                                    <Button Content="添加组" Padding="8,4" VerticalAlignment="Center"
-                                            Click="BtnAddRuleGroup_Click"/>
-                                    <Ellipse x:Name="EllipseRulesetState" Width="10" Height="10"
-                                             Margin="8,0,0,0" VerticalAlignment="Center"
-                                             Fill="DarkGray"/>
+                                    <CheckBox x:Name="CheckBoxRulesetReversed" Content="反转" Margin="0,0,8,0" VerticalAlignment="Center" Checked="CheckBoxRulesetReversed_Changed" Unchecked="CheckBoxRulesetReversed_Changed" />
+                                    <Button Content="添加组" Padding="8,4" VerticalAlignment="Center" Click="BtnAddRuleGroup_Click" />
+                                    <Ellipse x:Name="EllipseRulesetState" Width="10" Height="10" Margin="8,0,0,0" VerticalAlignment="Center" Fill="DarkGray" />
                                 </WrapPanel>
 
                                 <!-- 条件组列表 -->
-                                <ItemsControl x:Name="RuleGroupsItemsControl"
-                                              dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True"
-                                              touch:TouchAwareDragDropHelper.IsEnabled="True">
+                                <ItemsControl x:Name="RuleGroupsItemsControl" dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" touch:TouchAwareDragDropHelper.IsEnabled="True">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                                                    BorderThickness="1" CornerRadius="6" Padding="8"
-                                                    Margin="0,4" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}">
+                                            <Border BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="6" Padding="8" Margin="0,4" Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}">
                                                 <Grid>
                                                     <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="*" />
                                                     </Grid.ColumnDefinitions>
 
                                                     <!-- 拖动按钮 -->
-                                                    <Border Grid.Column="0" touch:TouchAwareDragDropHelper.IsGripHandle="True"
-                                                            Background="Transparent" Padding="2,4" Margin="0,0,4,0"
-                                                            Cursor="SizeAll">
-                                                        <TextBlock Text="&#xE76F;" FontFamily="Segoe MDL2 Assets" FontSize="10"
-                                                                   VerticalAlignment="Center" Opacity="0.45"/>
+                                                    <Border Grid.Column="0" touch:TouchAwareDragDropHelper.IsGripHandle="True" Background="Transparent" Padding="2,4" Margin="0,0,4,0" Cursor="SizeAll">
+                                                        <TextBlock Text="" FontFamily="Segoe MDL2 Assets" FontSize="10" VerticalAlignment="Center" Opacity="0.45" />
                                                     </Border>
 
                                                     <StackPanel Grid.Column="1">
                                                     <!-- 条件组头部 -->
                                                     <WrapPanel Orientation="Horizontal" Margin="0,0,0,6">
-                                                        <ComboBox Padding="8,6" Margin="0,0,8,0"
-                                                                  SelectedIndex="{Binding Mode, Converter={StaticResource LogicalModeToIntConverter}, Mode=TwoWay}"
-                                                                  SelectionChanged="ComboBoxGroupMode_SelectionChanged"
-                                                                  Tag="{Binding}">
-                                                            <ComboBoxItem Content="当以下任意条件满足时"/>
-                                                            <ComboBoxItem Content="当以下所有条件满足时"/>
+                                                        <ComboBox Padding="8,6" Margin="0,0,8,0" SelectedIndex="{Binding Mode, Converter={StaticResource LogicalModeToIntConverter}, Mode=TwoWay}" SelectionChanged="ComboBoxGroupMode_SelectionChanged" Tag="{Binding}">
+                                                            <ComboBoxItem Content="当以下任意条件满足时" />
+                                                            <ComboBoxItem Content="当以下所有条件满足时" />
                                                         </ComboBox>
-                                                        <CheckBox Content="反转" IsChecked="{Binding IsReversed}"
-                                                                  Checked="CheckBoxGroupReversed_Changed"
-                                                                  Unchecked="CheckBoxGroupReversed_Changed"
-                                                                  Margin="0,0,8,0" VerticalAlignment="Center"/>
-                                                        <Button Content="添加规则" Padding="6,2" Margin="0,0,8,0"
-                                                                VerticalAlignment="Center" Click="BtnAddRuleToGroup_Click"
-                                                                Tag="{Binding}"/>
+                                                        <CheckBox Content="反转" IsChecked="{Binding IsReversed}" Checked="CheckBoxGroupReversed_Changed" Unchecked="CheckBoxGroupReversed_Changed" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                                        <Button Content="添加规则" Padding="6,2" Margin="0,0,8,0" VerticalAlignment="Center" Click="BtnAddRuleToGroup_Click" Tag="{Binding}" />
 
-                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
-                                                                    VerticalAlignment="Center" Margin="8,0,0,0">
-                                                            <Ellipse Width="8" Height="8" Margin="0,0,4,0"
-                                                                     Style="{StaticResource StateIndicatorStyle}"/>
-                                                            <ui:ToggleSwitch IsChecked="{Binding IsEnabled}"
-                                                                             Checked="CheckBoxGroupEnabled_Toggled"
- Unchecked="CheckBoxGroupEnabled_Toggled"
-                                                                             Width="44" Height="24" Margin="0,0,4,0"
-                                                                             ToolTip="启用条件组"/>
-                                                            <Button Content="⧉" Padding="4,2" Margin="0,0,4,0"
-                                                                    Click="BtnDuplicateGroup_Click" Tag="{Binding}" ToolTip="复制"/>
-                                                            <Button Content="✕" Padding="4,2"
-                                                                    Click="BtnDeleteGroup_Click" Tag="{Binding}" ToolTip="删除"/>
+                                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                            <Ellipse Width="8" Height="8" Margin="0,0,4,0" Style="{StaticResource StateIndicatorStyle}" />
+                                                            <ui:ToggleSwitch IsChecked="{Binding IsEnabled}" Checked="CheckBoxGroupEnabled_Toggled" Unchecked="CheckBoxGroupEnabled_Toggled" Width="44" Height="24" Margin="0,0,4,0" ToolTip="启用条件组" />
+                                                            <Button Content="⧉" Padding="4,2" Margin="0,0,4,0" Click="BtnDuplicateGroup_Click" Tag="{Binding}" ToolTip="复制" />
+                                                            <Button Content="✕" Padding="4,2" Click="BtnDeleteGroup_Click" Tag="{Binding}" ToolTip="删除" />
                                                         </StackPanel>
                                                     </WrapPanel>
 
@@ -799,34 +663,17 @@
                                                             <DataTemplate>
                                                                 <Grid Margin="0,2">
                                                                     <Grid.ColumnDefinitions>
-                                                                        <ColumnDefinition Width="Auto"/>
-                                                                        <ColumnDefinition Width="Auto"/>
-                                                                        <ColumnDefinition Width="Auto"/>
-                                                                            <ColumnDefinition Width="220"/>
-                                                                            <ColumnDefinition Width="*"/>
+                                                                        <ColumnDefinition Width="Auto" />
+                                                                        <ColumnDefinition Width="Auto" />
+                                                                        <ColumnDefinition Width="Auto" />
+                                                                            <ColumnDefinition Width="220" />
+                                                                            <ColumnDefinition Width="*" />
                                                                     </Grid.ColumnDefinitions>
-                                                                    <Button Grid.Column="0" Content="✕" FontSize="10"
-                                                                            Click="BtnRemoveRule_Click" Padding="4,1"
-                                                                            Margin="0,0,4,0" Tag="{Binding}" ToolTip="删除"/>
-                                                                    <Ellipse Grid.Column="1" Width="8" Height="8"
-                                                                             Margin="0,0,4,0" VerticalAlignment="Center"
-                                                                             Style="{StaticResource StateIndicatorStyle}"/>
-                                                                    <CheckBox Grid.Column="2" Content="反转"
-                                                                              IsChecked="{Binding IsReversed}"
-                                                                              Checked="CheckBoxRuleReversed_Changed"
-                                                                              Unchecked="CheckBoxRuleReversed_Changed"
-                                                                              Margin="0,0,4,0" VerticalAlignment="Center"/>
-                                                                    <ComboBox Grid.Column="3"
-                                                                              ItemsSource="{x:Static local:AutomationWorkflowPage.RegisteredRulesList}"
-                                                                              DisplayMemberPath="Name" SelectedValuePath="Id"
-                                                                              SelectedValue="{Binding Id, Mode=TwoWay}"
-                                                                              SelectionChanged="ComboBoxRuleType_SelectionChanged"
-                                                                              Tag="{Binding}" Padding="8,6"/>
-                                                                        <local:AutomationSettingsPresenter Grid.Column="4"
-                                                                                                           Margin="8,0,0,0"
-                                                                                                           VerticalAlignment="Center"
-                                                                                                           Item="{Binding}"
-                                                                                                           SettingsChanged="RuleSettingsPresenter_SettingsChanged"/>
+                                                                    <Button Grid.Column="0" Content="✕" FontSize="10" Click="BtnRemoveRule_Click" Padding="4,1" Margin="0,0,4,0" Tag="{Binding}" ToolTip="删除" />
+                                                                    <Ellipse Grid.Column="1" Width="8" Height="8" Margin="0,0,4,0" VerticalAlignment="Center" Style="{StaticResource StateIndicatorStyle}" />
+                                                                    <CheckBox Grid.Column="2" Content="反转" IsChecked="{Binding IsReversed}" Checked="CheckBoxRuleReversed_Changed" Unchecked="CheckBoxRuleReversed_Changed" Margin="0,0,4,0" VerticalAlignment="Center" />
+                                                                    <ComboBox Grid.Column="3" ItemsSource="{x:Static local:AutomationWorkflowPage.RegisteredRulesList}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding Id, Mode=TwoWay}" SelectionChanged="ComboBoxRuleType_SelectionChanged" Tag="{Binding}" Padding="8,6" />
+                                                                        <local:AutomationSettingsPresenter Grid.Column="4" Margin="8,0,0,0" VerticalAlignment="Center" Item="{Binding}" SettingsChanged="RuleSettingsPresenter_SettingsChanged" />
                                                                 </Grid>
                                                             </DataTemplate>
                                                         </ItemsControl.ItemTemplate>
@@ -842,57 +689,38 @@
                     </Border>
 
                     <!-- ===== 行动编辑区 ===== -->
-                    <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
-                            CornerRadius="8" Padding="12" Margin="0,0,0,12">
+                    <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" CornerRadius="8" Padding="12" Margin="0,0,0,12">
                         <StackPanel>
                             <!-- 标题 -->
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                <ui:SymbolIcon Symbol="Play24" FontSize="16" Margin="0,0,8,0"/>
-                                <TextBlock Text="触发行动" FontWeight="Medium" VerticalAlignment="Center"/>
+                                <ui:SymbolIcon Symbol="Play24" FontSize="16" Margin="0,0,8,0" />
+                                <TextBlock Text="触发行动" FontWeight="Medium" VerticalAlignment="Center" />
                             </StackPanel>
 
                             <!-- 行动列表 -->
-                            <ItemsControl x:Name="ActionsItemsControl" Margin="0,0,0,8"
-                                          dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True"
-                                          touch:TouchAwareDragDropHelper.IsEnabled="True">
+                            <ItemsControl x:Name="ActionsItemsControl" Margin="0,0,0,8" dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" touch:TouchAwareDragDropHelper.IsEnabled="True">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Background="{DynamicResource ControlFillColorDefaultBrush}"
-                                                CornerRadius="4" Padding="8" Margin="0,2">
+                                        <Border Background="{DynamicResource ControlFillColorDefaultBrush}" CornerRadius="4" Padding="8" Margin="0,2">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="Auto"/>
-                                                    <ColumnDefinition Width="220"/>
-                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="220" />
+                                                    <ColumnDefinition Width="*" />
                                                 </Grid.ColumnDefinitions>
 
                                                 <!-- 拖动按钮 -->
-                                                <Border Grid.Column="0" touch:TouchAwareDragDropHelper.IsGripHandle="True"
-                                                        Background="Transparent" Padding="2,4" Margin="0,0,4,0"
-                                                        Cursor="SizeAll">
-                                                    <TextBlock Text="&#xE76F;" FontFamily="Segoe MDL2 Assets" FontSize="10"
-                                                               VerticalAlignment="Center" Opacity="0.45"/>
+                                                <Border Grid.Column="0" touch:TouchAwareDragDropHelper.IsGripHandle="True" Background="Transparent" Padding="2,4" Margin="0,0,4,0" Cursor="SizeAll">
+                                                    <TextBlock Text="" FontFamily="Segoe MDL2 Assets" FontSize="10" VerticalAlignment="Center" Opacity="0.45" />
                                                 </Border>
 
                                                 <!-- 删除按钮 -->
-                                                <Button Grid.Column="1" Content="✕" Padding="4,0"
-                                                        Margin="0,0,8,0" Click="BtnRemoveAction_Click"
-                                                        Tag="{Binding}" ToolTip="删除"/>
+                                                <Button Grid.Column="1" Content="✕" Padding="4,0" Margin="0,0,8,0" Click="BtnRemoveAction_Click" Tag="{Binding}" ToolTip="删除" />
 
                                                 <!-- 行动类型选择 -->
-                                                <ComboBox Grid.Column="2"
-                                                          ItemsSource="{x:Static local:AutomationWorkflowPage.RegisteredActionsList}"
-                                                          DisplayMemberPath="Name" SelectedValuePath="Id"
-                                                          SelectedValue="{Binding Id, Mode=TwoWay}"
-                                                          SelectionChanged="ComboBoxActionType_SelectionChanged"
-                                                          Tag="{Binding}" Padding="8,6" MinWidth="150"
-                                                          VerticalAlignment="Center"/>
-                                                <local:AutomationSettingsPresenter Grid.Column="3"
-                                                                                   Margin="8,0,0,0"
-                                                                                   VerticalAlignment="Center"
-                                                                                   Item="{Binding}"
-                                                                                   SettingsChanged="ActionSettingsPresenter_SettingsChanged"/>
+                                                <ComboBox Grid.Column="2" ItemsSource="{x:Static local:AutomationWorkflowPage.RegisteredActionsList}" DisplayMemberPath="Name" SelectedValuePath="Id" SelectedValue="{Binding Id, Mode=TwoWay}" SelectionChanged="ComboBoxActionType_SelectionChanged" Tag="{Binding}" Padding="8,6" MinWidth="150" VerticalAlignment="Center" />
+                                                <local:AutomationSettingsPresenter Grid.Column="3" Margin="8,0,0,0" VerticalAlignment="Center" Item="{Binding}" SettingsChanged="ActionSettingsPresenter_SettingsChanged" />
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -900,25 +728,22 @@
                             </ItemsControl>
 
                             <!-- 添加行动 -->
-                            <Button Content="添加行动" Click="BtnAddAction_Click"
-                                    Padding="12,6" HorizontalAlignment="Left"/>
+                            <Button Content="添加行动" Click="BtnAddAction_Click" Padding="12,6" HorizontalAlignment="Left" />
                         </StackPanel>
                     </Border>
 
                     <!-- ===== 恢复提示 ===== -->
                     <StackPanel x:Name="RevertHintPanel" Orientation="Horizontal" Margin="0,0,0,16" Opacity="0.6">
-                        <ui:SymbolIcon Symbol="Stop24" FontSize="14" Margin="0,0,6,0"/>
-                        <TextBlock Text="当规则不再满足时，将自动恢复行动。" FontSize="12" VerticalAlignment="Center"/>
+                        <ui:SymbolIcon Symbol="Stop24" FontSize="14" Margin="0,0,6,0" />
+                        <TextBlock Text="当规则不再满足时，将自动恢复行动。" FontSize="12" VerticalAlignment="Center" />
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>
 
             <!-- ========== 未选择工作流时的占位符 ========== -->
-            <StackPanel x:Name="EmptyStatePanel" Visibility="Collapsed"
-                        VerticalAlignment="Center" HorizontalAlignment="Center">
-                <ui:SymbolIcon Symbol="Rename24" FontSize="48" HorizontalAlignment="Center" Opacity="0.4"/>
-                <TextBlock Text="在左侧选择或添加一个自动化，然后在此处进行设置。"
-                           TextWrapping="Wrap" HorizontalAlignment="Center" Margin="0,8,0,0" Opacity="0.6"/>
+            <StackPanel x:Name="EmptyStatePanel" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <ui:SymbolIcon Symbol="Rename24" FontSize="48" HorizontalAlignment="Center" Opacity="0.4" />
+                <TextBlock Text="在左侧选择或添加一个自动化，然后在此处进行设置。" TextWrapping="Wrap" HorizontalAlignment="Center" Margin="0,8,0,0" Opacity="0.6" />
             </StackPanel>
         </Grid>
     </Grid>

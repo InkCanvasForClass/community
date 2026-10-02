@@ -1,5 +1,8 @@
 using Ink_Canvas.Properties;
 using Wpf.Ui.Controls;
+using Border = System.Windows.Controls.Border;
+using Grid = System.Windows.Controls.Grid;
+using TextBlock = System.Windows.Controls.TextBlock;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;

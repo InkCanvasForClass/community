@@ -1,5 +1,6 @@
 using Ink_Canvas.Helpers;
 using Wpf.Ui.Appearance;
+using WindowBackdropType = Wpf.Ui.Controls.WindowBackdropType;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -56,7 +57,7 @@ namespace Ink_Canvas
             ICCWaterMarkWhite.Visibility = Visibility.Collapsed;
             SwitchBackground(null, null);
             { /* Old UI removed */ }
-            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
+            ThemeHelper.ApplyApplicationTheme(ApplicationTheme.Dark);
             new Thread(() =>
             {
                 Thread.Sleep(200);

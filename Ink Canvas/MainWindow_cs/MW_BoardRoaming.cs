@@ -507,9 +507,15 @@ namespace Ink_Canvas
                     BoardRoamingCloseButton_PreviewStylusDown;
             }
             if (BoardRoamingPopupContent.TwoFingerZoomToggle != null)
-                BoardRoamingPopupContent.TwoFingerZoomToggle.Toggled += BoardRoamingTwoFingerZoom_Toggled;
+            {
+                BoardRoamingPopupContent.TwoFingerZoomToggle.Checked += BoardRoamingTwoFingerZoom_Toggled;
+                BoardRoamingPopupContent.TwoFingerZoomToggle.Unchecked += BoardRoamingTwoFingerZoom_Toggled;
+            }
             if (BoardRoamingPopupContent.TwoFingerRotationToggle != null)
-                BoardRoamingPopupContent.TwoFingerRotationToggle.Toggled += BoardRoamingTwoFingerRotation_Toggled;
+            {
+                BoardRoamingPopupContent.TwoFingerRotationToggle.Checked += BoardRoamingTwoFingerRotation_Toggled;
+                BoardRoamingPopupContent.TwoFingerRotationToggle.Unchecked += BoardRoamingTwoFingerRotation_Toggled;
+            }
             _boardRoamingPopupEventsAttached = true;
         }
 

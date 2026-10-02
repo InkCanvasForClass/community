@@ -212,13 +212,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 }
                 else if (element is Wpf.Ui.Controls.ToggleSwitch ts)
                 {
-                    ts.Toggled += (s, e) =>
+                    void OnToggleChanged(object s, RoutedEventArgs e)
                     {
                         if (_isInitializing) return;
                         SetValueToSettings(propertyPath, ((ts.IsChecked) == true));
                         SettingsManager.SaveSettingsToFile();
                         InvokeSettingsChanged(element, ((ts.IsChecked) == true));
-                    };
+                    }
+                    ts.Checked += OnToggleChanged;
+                    ts.Unchecked += OnToggleChanged;
                 }
             }
             else if (element is ComboBox cb)

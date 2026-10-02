@@ -541,7 +541,7 @@ namespace Ink_Canvas
                 }
                 if (navItem != null)
                 {
-                    navView.SelectedItem = navItem;
+                    navItem.IsActive = true;
                 }
 
                 if (!string.IsNullOrEmpty(settingKey))

@@ -1,138 +1,140 @@
-<UserControl
-    x:Class="Ink_Canvas.Windows.FeedbackPages.FeedbackPage3"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-             xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
-    xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta"
-    xmlns:props="clr-namespace:Ink_Canvas.Properties"
-    mc:Ignorable="d"
-    d:DesignHeight="450" d:DesignWidth="600">
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                  IsManipulationEnabled="True" PanningMode="VerticalOnly">
+<?xml version="1.0" encoding="utf-8"?><UserControl x:Class="Ink_Canvas.Windows.FeedbackPages.FeedbackPage3" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls" xmlns:vio="http://schemas.lepo.co/wpfui/2022/xaml/violeta" xmlns:props="clr-namespace:Ink_Canvas.Properties" mc:Ignorable="d" d:DesignHeight="450" d:DesignWidth="600">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" IsManipulationEnabled="True" PanningMode="VerticalOnly">
         <vio:SimpleStackPanel Spacing="12" Margin="0,0,0,20">
-            <TextBlock FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10"
-                       Text="{x:Static props:FeedbackStrings.Page3Title}"/>
+            <TextBlock FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10" Text="{x:Static props:FeedbackStrings.Page3Title}" />
 
             <!-- 飞书反馈 -->
-            <controls:SettingsExpander x:Name="ExpanderFeishuFeedback"
-                             Header="{x:Static props:FeedbackStrings.Page3_Feishu}"
-                             Description="{x:Static props:FeedbackStrings.Page3_FeishuDesc}">
-                <controls:SettingsExpander.Icon>
-                    <ui:SymbolIcon Symbol="ChatHelp24"/>
-                </controls:SettingsExpander.Icon>
-                <Button x:Name="BtnOpenFeishuForm"
-                        Content="{x:Static props:FeedbackStrings.Page3_OpenFeishu}">
+            <ui:CardExpander x:Name="ExpanderFeishuFeedback">
+                <ui:CardExpander.Header>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="{x:Static props:FeedbackStrings.Page3_Feishu}" />
+                            <TextBlock Text="{x:Static props:FeedbackStrings.Page3_FeishuDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                        <Button x:Name="BtnOpenFeishuForm" Content="{x:Static props:FeedbackStrings.Page3_OpenFeishu}" Grid.Column="1">
                     <Button.Style>
-                        <Style TargetType="Button"/>
+                        <Style TargetType="Button" />
                     </Button.Style>
                 </Button>
+                    </Grid>
+                </ui:CardExpander.Header>
+                <ui:CardExpander.Icon>
+                    <ui:SymbolIcon Symbol="ChatHelp24" />
+                </ui:CardExpander.Icon>
                 <StackPanel>
-                    <controls:SettingsCard x:Name="CardCopyFeishuUrl"
-                                     Header="{x:Static props:FeedbackStrings.Page3_CopyFeishuUrl}"
-                                     IsClickEnabled="True">
-                        <controls:SettingsCard.ActionIcon>
-                            <ui:SymbolIcon Symbol="Copy24"/>
-                        </controls:SettingsCard.ActionIcon>
-                    </controls:SettingsCard>
+                    <ui:CardControl x:Name="CardCopyFeishuUrl" Header="{x:Static props:FeedbackStrings.Page3_CopyFeishuUrl}">
+                        <ui:CardControl.Content>
+                            <ui:SymbolIcon Symbol="Copy24" />
+                        </ui:CardControl.Content>
+                    </ui:CardControl>
                 </StackPanel>
-            </controls:SettingsExpander>
+            </ui:CardExpander>
 
             <!-- Pastebin 上传：POST 脱敏 JSON 到 pastebin 端 -->
-            <controls:SettingsExpander x:Name="ExpanderPastebin"
-                             Header="{x:Static props:FeedbackStrings.Page3_PastebinUpload}"
-                             Description="{x:Static props:FeedbackStrings.Page3_PastebinUploadDesc}">
-                <controls:SettingsExpander.Icon>
-                    <ui:SymbolIcon Symbol="Cloud24"/>
-                </controls:SettingsExpander.Icon>
-                <Button x:Name="BtnUploadPastebin"
-                        Content="{x:Static props:FeedbackStrings.Page3_UploadToPastebin}">
+            <ui:CardExpander x:Name="ExpanderPastebin">
+                <ui:CardExpander.Header>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="{x:Static props:FeedbackStrings.Page3_PastebinUpload}" />
+                            <TextBlock Text="{x:Static props:FeedbackStrings.Page3_PastebinUploadDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                        <Button x:Name="BtnUploadPastebin" Content="{x:Static props:FeedbackStrings.Page3_UploadToPastebin}" Grid.Column="1">
                     <Button.Style>
-                        <Style TargetType="Button"/>
+                        <Style TargetType="Button" />
                     </Button.Style>
                 </Button>
+                    </Grid>
+                </ui:CardExpander.Header>
+                <ui:CardExpander.Icon>
+                    <ui:SymbolIcon Symbol="Cloud24" />
+                </ui:CardExpander.Icon>
                 <StackPanel>
-                    <controls:SettingsCard ContentAlignment="Left">
+                    <ui:CardControl>
                         <vio:SimpleStackPanel Spacing="8" MinWidth="280">
-                            <TextBlock Text="{x:Static props:FeedbackStrings.Page1_PastebinServer}"
-                                       FontSize="12"
-                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
-                            <TextBox x:Name="TextBoxPastebinUrl"
-                                     VerticalAlignment="Center"
-                                     FontFamily="Consolas"
-                                     FontSize="12"/>
+                            <TextBlock Text="{x:Static props:FeedbackStrings.Page1_PastebinServer}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBox x:Name="TextBoxPastebinUrl" VerticalAlignment="Center" FontFamily="Consolas" FontSize="12" />
                         </vio:SimpleStackPanel>
-                    </controls:SettingsCard>
-                    <controls:SettingsCard x:Name="CardPasteResult"
-                                     Header=""
-                                     Visibility="Collapsed">
-                        <controls:SettingsCard.Icon>
-                            <ui:SymbolIcon Symbol="Link24"/>
-                        </controls:SettingsCard.Icon>
-                        <Button x:Name="BtnCopyPasteUrl"
-                                Content="{x:Static props:FeedbackStrings.Page3_CopyPastebinUrl}">
+                    </ui:CardControl>
+                    <ui:CardControl x:Name="CardPasteResult" Header="" Visibility="Collapsed">
+                        <ui:CardControl.Icon>
+                            <ui:SymbolIcon Symbol="Link24" />
+                        </ui:CardControl.Icon>
+                        <Button x:Name="BtnCopyPasteUrl" Content="{x:Static props:FeedbackStrings.Page3_CopyPastebinUrl}">
                             <Button.Style>
-                                <Style TargetType="Button"/>
+                                <Style TargetType="Button" />
                             </Button.Style>
                         </Button>
-                    </controls:SettingsCard>
+                    </ui:CardControl>
                 </StackPanel>
-            </controls:SettingsExpander>
+            </ui:CardExpander>
 
             <!-- GitHub 反馈 -->
-            <controls:SettingsExpander x:Name="ExpanderGitHubFeedback"
-                             Header="{x:Static props:FeedbackStrings.Page3_GitHub}"
-                             Description="{x:Static props:FeedbackStrings.Page3_GitHubDesc}">
-                <controls:SettingsExpander.Icon>
-                    <ui:SymbolIcon Symbol="Mail24"/>
-                </controls:SettingsExpander.Icon>
-                <Button x:Name="BtnOpenGitHubIssue"
-                        Content="{x:Static props:FeedbackStrings.Page3_OpenGitHub}">
+            <ui:CardExpander x:Name="ExpanderGitHubFeedback">
+                <ui:CardExpander.Header>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="{x:Static props:FeedbackStrings.Page3_GitHub}" />
+                            <TextBlock Text="{x:Static props:FeedbackStrings.Page3_GitHubDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                        <Button x:Name="BtnOpenGitHubIssue" Content="{x:Static props:FeedbackStrings.Page3_OpenGitHub}" Grid.Column="1">
                     <Button.Style>
-                        <Style TargetType="Button"/>
+                        <Style TargetType="Button" />
                     </Button.Style>
                 </Button>
+                    </Grid>
+                </ui:CardExpander.Header>
+                <ui:CardExpander.Icon>
+                    <ui:SymbolIcon Symbol="Mail24" />
+                </ui:CardExpander.Icon>
                 <StackPanel>
-                    <controls:SettingsCard x:Name="CardCopyIssueUrl"
-                                     Header="{x:Static props:FeedbackStrings.Page3_CopyIssueUrl}"
-                                     IsClickEnabled="True">
-                        <controls:SettingsCard.ActionIcon>
-                            <ui:SymbolIcon Symbol="Copy24"/>
-                        </controls:SettingsCard.ActionIcon>
-                    </controls:SettingsCard>
+                    <ui:CardControl x:Name="CardCopyIssueUrl" Header="{x:Static props:FeedbackStrings.Page3_CopyIssueUrl}">
+                        <ui:CardControl.Content>
+                            <ui:SymbolIcon Symbol="Copy24" />
+                        </ui:CardControl.Content>
+                    </ui:CardControl>
                 </StackPanel>
-            </controls:SettingsExpander>
+            </ui:CardExpander>
 
             <!-- Markdown 模板 -->
-            <controls:SettingsExpander x:Name="ExpanderMarkdownTemplate"
-                             Header="{x:Static props:FeedbackStrings.Page3_Markdown}"
-                             Description="{x:Static props:FeedbackStrings.Page3_MarkdownDesc}">
-                <controls:SettingsExpander.Icon>
-                    <ui:SymbolIcon Symbol="Code24"/>
-                </controls:SettingsExpander.Icon>
-                <Button x:Name="BtnCopyMarkdown"
-                        Content="{x:Static props:FeedbackStrings.Page3_CopyMarkdown}">
+            <ui:CardExpander x:Name="ExpanderMarkdownTemplate">
+                <ui:CardExpander.Header>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="{x:Static props:FeedbackStrings.Page3_Markdown}" />
+                            <TextBlock Text="{x:Static props:FeedbackStrings.Page3_MarkdownDesc}" Margin="0,2,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                        <Button x:Name="BtnCopyMarkdown" Content="{x:Static props:FeedbackStrings.Page3_CopyMarkdown}" Grid.Column="1">
                     <Button.Style>
-                        <Style TargetType="Button"/>
+                        <Style TargetType="Button" />
                     </Button.Style>
                 </Button>
+                    </Grid>
+                </ui:CardExpander.Header>
+                <ui:CardExpander.Icon>
+                    <ui:SymbolIcon Symbol="Code24" />
+                </ui:CardExpander.Icon>
                 <StackPanel>
-                    <controls:SettingsCard ContentAlignment="Left">
-                        <TextBox x:Name="TextBoxMarkdownTemplate"
-                                 MinHeight="200"
-                                 IsReadOnly="True"
-                                 BorderThickness="0"
-                                 Background="Transparent"
-                                 FontFamily="Consolas"
-                                 FontSize="12"
-                                 TextWrapping="Wrap"
-                                 AcceptsReturn="True"
-                                 VerticalScrollBarVisibility="Auto"/>
-                    </controls:SettingsCard>
+                    <ui:CardControl>
+                        <TextBox x:Name="TextBoxMarkdownTemplate" MinHeight="200" IsReadOnly="True" BorderThickness="0" Background="Transparent" FontFamily="Consolas" FontSize="12" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
+                    </ui:CardControl>
                 </StackPanel>
-            </controls:SettingsExpander>
+            </ui:CardExpander>
         </vio:SimpleStackPanel>
     </ScrollViewer>
 </UserControl>
