@@ -300,6 +300,9 @@
   <data name="Random_NamesInput_Hint" xml:space="preserve">
     <value>请在下方输入名单，每行一人（建议直接粘贴表格姓名列）</value>
   </data>
+  <data name="Random_NamesInput_Confirm" xml:space="preserve">
+    <value>确定</value>
+  </data>
   <data name="Random_NamesInput_SaveConfirm" xml:space="preserve">
     <value>是否保存？</value>
   </data>

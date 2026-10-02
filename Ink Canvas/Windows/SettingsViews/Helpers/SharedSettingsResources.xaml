@@ -8,7 +8,12 @@
     <sys:Double x:Key="ListViewItemMinWidth">0</sys:Double>
     <sys:Double x:Key="ListViewItemMinHeight">36</sys:Double>
 
-    <Style x:Key="BorderlessIconButtonStyle" TargetType="Button">
+    <!-- 必须 BasedOn 显式继承隐式 Button 样式：显式声明 TargetType 会屏蔽
+         ControlsDictionary 里的隐式 Button 模板，导致按钮退回 WPF 系统默认外观
+         （灰底方角、悬停无反馈），与整体 Fluent 风格割裂。 -->
+    <Style x:Key="BorderlessIconButtonStyle"
+           TargetType="Button"
+           BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderBrush" Value="Transparent"/>
         <Setter Property="BorderThickness" Value="0"/>

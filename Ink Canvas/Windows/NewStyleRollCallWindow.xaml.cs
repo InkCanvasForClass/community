@@ -333,54 +333,12 @@ namespace Ink_Canvas
         {
             ThemeHelper.ApplyTheme(this, settings, theme =>
             {
-                ApplyThemeResources(theme);
                 WindowBackdropHelper.Apply(this, settings);
                 UpdateRollCallModeTabSelection();
             });
-        }
 
-        /// <summary>
-        /// 应用主题资源
-        /// </summary>
-        /// <param name="theme">主题类型（Light或Dark）</param>
-        private void ApplyThemeResources(string theme)
-        {
-            try
-            {
-                // 更新窗口资源
-                var resources = this.Resources;
-
-                if (theme == "Light")
-                {
-                    // 应用浅色主题资源
-                    resources["NewRollCallWindowBackground"] = new SolidColorBrush(Color.FromRgb(249, 249, 249));
-                    resources["NewRollCallWindowBorderBrush"] = new SolidColorBrush(Color.FromRgb(235, 235, 235));
-                    resources["NewRollCallWindowTitleForeground"] = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                    resources["NewRollCallWindowDigitForeground"] = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                    resources["NewRollCallWindowButtonBackground"] = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-                    resources["NewRollCallWindowButtonForeground"] = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                    resources["NewRollCallWindowPrimaryButtonBackground"] = new SolidColorBrush(Color.FromRgb(76, 175, 80));
-                    resources["NewRollCallWindowPrimaryButtonForeground"] = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-                    resources["NewRollCallWindowSecondaryTextForeground"] = new SolidColorBrush(Color.FromRgb(113, 113, 122));
-                }
-                else
-                {
-                    // 应用深色主题资源
-                    resources["NewRollCallWindowBackground"] = new SolidColorBrush(Color.FromRgb(32, 32, 32));
-                    resources["NewRollCallWindowBorderBrush"] = new SolidColorBrush(Color.FromRgb(64, 64, 64));
-                    resources["NewRollCallWindowTitleForeground"] = new SolidColorBrush(Colors.White);
-                    resources["NewRollCallWindowDigitForeground"] = new SolidColorBrush(Colors.White);
-                    resources["NewRollCallWindowButtonBackground"] = new SolidColorBrush(Color.FromRgb(45, 45, 45));
-                    resources["NewRollCallWindowButtonForeground"] = new SolidColorBrush(Colors.White);
-                    resources["NewRollCallWindowPrimaryButtonBackground"] = new SolidColorBrush(Color.FromRgb(76, 175, 80));
-                    resources["NewRollCallWindowPrimaryButtonForeground"] = new SolidColorBrush(Colors.White);
-                    resources["NewRollCallWindowSecondaryTextForeground"] = new SolidColorBrush(Color.FromRgb(156, 163, 175));
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"应用新点名UI窗口主题资源出错: {ex.Message}", LogHelper.LogType.Error);
-            }
+            // 登记后，主题切换时会自动同步本窗口的 DWM 深色模式
+            WindowBackdropHelper.RegisterForThemeSync(this);
         }
 
         #endregion
@@ -1402,24 +1360,21 @@ namespace Ink_Canvas
         {
             try
             {
-                // 更新图标
+                // 更新图标与文字
                 if (StartRollCallBtnIcon != null)
                 {
                     StartRollCallBtnIcon.Data = Geometry.Parse(externalCallerBtnIconData);
-                    StartRollCallBtnIcon.Stroke = (Brush)FindResource("NewRollCallWindowButtonForeground");
                 }
 
-                // 更新文字
                 if (StartRollCallBtnText != null)
                 {
                     StartRollCallBtnText.Text = externalCallerBtnText;
-                    StartRollCallBtnText.Foreground = (Brush)FindResource("NewRollCallWindowButtonForeground");
                 }
 
-                // 更新按钮背景色为普通按钮背景
-                StartRollCallBtn.Background = (Brush)FindResource("NewRollCallWindowButtonBackground");
-                StartRollCallBtn.BorderBrush = (Brush)FindResource("NewRollCallWindowBorderBrush");
-                StartRollCallBtn.Foreground = (Brush)FindResource("NewRollCallWindowButtonForeground");
+                // 外部点名是「转发给别的应用」，语义上不再是本窗口的主操作，
+                // 换成普通按钮样式。颜色全部交给 Fluent 模板，主题切换自动跟随。
+                StartRollCallBtn.Style = (Style)FindResource("ModernRollCallSmallButtonStyle");
+                StartRollCallBtn.MinWidth = 104;
             }
             catch (Exception ex)
             {
@@ -1434,24 +1389,20 @@ namespace Ink_Canvas
         {
             try
             {
-                // 恢复图标
+                // 恢复图标与文字
                 if (StartRollCallBtnIcon != null)
                 {
                     StartRollCallBtnIcon.Data = Geometry.Parse(originalStartBtnIconData);
-                    StartRollCallBtnIcon.Stroke = (Brush)FindResource("NewRollCallWindowPrimaryButtonForeground");
                 }
 
-                // 恢复文字
                 if (StartRollCallBtnText != null)
                 {
                     StartRollCallBtnText.Text = originalStartBtnText;
-                    StartRollCallBtnText.Foreground = (Brush)FindResource("NewRollCallWindowPrimaryButtonForeground");
                 }
 
-                // 恢复按钮背景色为主按钮背景
-                StartRollCallBtn.Background = (Brush)FindResource("NewRollCallWindowPrimaryButtonBackground");
-                StartRollCallBtn.BorderBrush = (Brush)FindResource("NewRollCallWindowPrimaryButtonBackground");
-                StartRollCallBtn.Foreground = (Brush)FindResource("NewRollCallWindowPrimaryButtonForeground");
+                // 恢复强调按钮样式
+                StartRollCallBtn.Style = (Style)FindResource("ModernRollCallPrimaryButtonStyle");
+                StartRollCallBtn.MinWidth = 136;
             }
             catch (Exception ex)
             {

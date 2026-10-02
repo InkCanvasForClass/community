@@ -300,6 +300,9 @@ If not installed, please download and install it from the official website. If a
   <data name="Random_NamesInput_Hint" xml:space="preserve">
     <value>Enter names below, one per line (paste from spreadsheet recommended)</value>
   </data>
+  <data name="Random_NamesInput_Confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
   <data name="Random_NamesInput_SaveConfirm" xml:space="preserve">
     <value>Save changes?</value>
   </data>

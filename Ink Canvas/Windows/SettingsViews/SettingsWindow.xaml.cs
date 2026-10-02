@@ -259,33 +259,40 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         public void RefreshTheme()
         {
-            ApplyCurrentTheme();
+            // 强制重建主题字典：调用方（外观设置页）刚刚改过主题，这里不能走
+            // ApplyCurrentTheme 的「一致则跳过」短路，否则新主题不会生效。
+            try
+            {
+                int themeIndex = Helpers.SettingsManager.Settings.Appearance.Theme;
+                var elementTheme = themeIndex switch
+                {
+                    0 => Wpf.Ui.Appearance.ApplicationTheme.Light,
+                    1 => Wpf.Ui.Appearance.ApplicationTheme.Dark,
+                    _ => IsSystemThemeLight() ? Wpf.Ui.Appearance.ApplicationTheme.Light : Wpf.Ui.Appearance.ApplicationTheme.Dark,
+                };
+                ThemeHelper.ApplyApplicationTheme(elementTheme);
+                ApplyWindowBackdrop(Helpers.SettingsManager.Settings.Appearance.WindowBackdrop);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Settings] 刷新设置窗口主题失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         /// <summary>
-        /// 按设置里的背景名应用窗口背景。设置窗口是 FluentWindow，直接使用 WPF-UI 原生的
-        /// <see cref="Wpf.Ui.Controls.FluentWindow.WindowBackdropType"/>（由库自身处理 WindowChrome 与 DWM 背景），
-        /// 不再走 InkCanvas 自定义的窗口背景助手，避免与 TitleBar 的拖拽区/系统按钮冲突。
+        /// 按设置里的背景名应用窗口背景。
+        ///
+        /// 设置窗口强制使用 <see cref="Wpf.Ui.Controls.WindowBackdropType.None"/>：亚克力/材质背板会把
+        /// 窗口背后的桌面内容模糊透出，而设置窗口背后常常是主程序的浅色画布，模糊结果为浅灰，
+        /// 叠加深色主题的白色前景（TextFillColorPrimaryBrush）就成了白底白字、左侧导航项完全不可读。
+        /// 这里的取舍是：设置窗口内容多、信息密度高，可读性优先于毛玻璃质感；需要毛玻璃的浮动窗口
+        /// （点名、计时器等）仍各自使用 WindowBackdropHelper，不受此限制。
         /// </summary>
         public void ApplyWindowBackdrop(string backdropName)
         {
-            Wpf.Ui.Controls.WindowBackdropType backdropType;
-            if (string.IsNullOrWhiteSpace(backdropName))
-            {
-                backdropType = Wpf.Ui.Controls.WindowBackdropType.None;
-            }
-            else if (string.Equals(backdropName, "Acrylic10", StringComparison.OrdinalIgnoreCase) ||
-                     string.Equals(backdropName, "Acrylic11", StringComparison.OrdinalIgnoreCase))
-            {
-                // 自定义的 Win10/Win11 亚克力名归一化为 WPF-UI 的 Acrylic
-                backdropType = Wpf.Ui.Controls.WindowBackdropType.Acrylic;
-            }
-            else if (!Enum.TryParse(backdropName, true, out backdropType))
-            {
-                backdropType = Wpf.Ui.Controls.WindowBackdropType.None;
-            }
-
-            this.WindowBackdropType = backdropType;
+            // backdropName 保留是为了兼容既有调用签名；设置窗口已强制不透明，不再据此设置背板。
+            _ = backdropName;
+            this.WindowBackdropType = Wpf.Ui.Controls.WindowBackdropType.None;
         }
 
         private void ApplyCurrentTheme()
@@ -299,7 +306,15 @@ namespace Ink_Canvas.Windows.SettingsViews
                     1 => Wpf.Ui.Appearance.ApplicationTheme.Dark,
                     _ => IsSystemThemeLight() ? Wpf.Ui.Appearance.ApplicationTheme.Light : Wpf.Ui.Appearance.ApplicationTheme.Dark,
                 };
-                ThemeHelper.ApplyApplicationTheme(elementTheme);
+
+                // ApplyApplicationTheme 会整体替换 WPF-UI 的主题资源字典。设置窗口在构造函数里
+                // 调本方法时元素树已用旧资源完成绑定，字典被换掉的瞬间会与首帧布局交错，
+                // 表现为控件背景/边框渲染不完整（与浅色/深色无关，两种主题都会触发）。
+                // 应用级主题在主窗口启动时已经应用过，这里只在确实不一致时才重建字典。
+                if (Wpf.Ui.Appearance.ApplicationThemeManager.GetAppTheme() != elementTheme)
+                {
+                    ThemeHelper.ApplyApplicationTheme(elementTheme);
+                }
 
                 // 主题切换会重置窗口背景，这里按设置重新应用
                 ApplyWindowBackdrop(Helpers.SettingsManager.Settings.Appearance.WindowBackdrop);

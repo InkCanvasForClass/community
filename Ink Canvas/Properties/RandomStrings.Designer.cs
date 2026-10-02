@@ -205,6 +205,8 @@ namespace Ink_Canvas.Properties
 
         public static string Random_NamesInput_Hint => ResourceManager.GetString(nameof(Random_NamesInput_Hint), _resourceCulture);
 
+        public static string Random_NamesInput_Confirm => ResourceManager.GetString(nameof(Random_NamesInput_Confirm), _resourceCulture);
+
         public static string Random_NamesInput_SaveConfirm => ResourceManager.GetString(nameof(Random_NamesInput_SaveConfirm), _resourceCulture);
 
         public static string Random_NamesInput_Title => ResourceManager.GetString(nameof(Random_NamesInput_Title), _resourceCulture);

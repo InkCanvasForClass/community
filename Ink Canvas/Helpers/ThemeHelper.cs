@@ -250,6 +250,10 @@ namespace Ink_Canvas.Helpers
                     // 兜底恢复主窗口的透明背景，避免不透明底色残留成全屏遮挡
                     Wpf.Ui.Controls.WindowBackdrop.RemoveBackground(mainWindow);
                 }
+
+                // DWM 深色模式是原生窗口属性，不会跟随主题字典更新，
+                // 切换完成后统一给已登记的浮窗重写一次。
+                WindowBackdropHelper.SyncAllWindowsDarkMode();
             }
         }
     }

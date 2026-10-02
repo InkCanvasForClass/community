@@ -12,6 +12,7 @@
     WindowStartupLocation="CenterScreen"
     ExtendsContentIntoTitleBar="True"
     WindowCornerPreference="Default"
+    Background="{DynamicResource ApplicationBackgroundBrush}"
     ui:Design.Background="{DynamicResource ApplicationBackgroundBrush}"
     ui:Design.Foreground="{DynamicResource TextFillColorPrimaryBrush}"
 

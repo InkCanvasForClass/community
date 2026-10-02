@@ -1,6 +1,7 @@
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -226,6 +227,71 @@ namespace Ink_Canvas.Helpers
             }
 
             return Enum.TryParse(name, true, out WindowBackdropType type) ? type : WindowBackdropType.None;
+        }
+
+        /// <summary>
+        /// 同步所有已登记窗口的 DWM 深色模式。
+        ///
+        /// DWMWA_USE_IMMERSIVE_DARK_MODE 是写进 DWM 的窗口属性，不会随 WPF-UI 换主题字典而更新，
+        /// 必须在主题切换后对每个仍打开的窗口重写一次，否则浅色主题下仍留着深色标题栏。
+        /// 窗口用 WeakReference 登记，关闭后自动回收，不必反注册。
+        /// </summary>
+        public static void SyncAllWindowsDarkMode()
+        {
+            try
+            {
+                Window[] alive;
+                int count;
+
+                lock (RegisteredWindows)
+                {
+                    alive = new Window[RegisteredWindows.Count];
+                    count = 0;
+
+                    foreach (var weak in RegisteredWindows)
+                    {
+                        if (weak.TryGetTarget(out var window) && window.IsLoaded)
+                        {
+                            alive[count++] = window;
+                        }
+                    }
+                }
+
+                for (int i = 0; i < count; i++)
+                {
+                    SyncWindowDarkMode(alive[i]);
+                }
+            }
+            catch
+            {
+            }
+        }
+
+        private static readonly List<WeakReference<Window>> RegisteredWindows = new();
+
+        /// <summary>
+        /// 登记窗口以参与主题切换时的深色模式同步。重复登记同一窗口是安全的。
+        /// </summary>
+        public static void RegisterForThemeSync(Window window)
+        {
+            if (window == null) return;
+
+            lock (RegisteredWindows)
+            {
+                for (int i = RegisteredWindows.Count - 1; i >= 0; i--)
+                {
+                    if (!RegisteredWindows[i].TryGetTarget(out var existing))
+                    {
+                        RegisteredWindows.RemoveAt(i);
+                    }
+                    else if (ReferenceEquals(existing, window))
+                    {
+                        return;
+                    }
+                }
+
+                RegisteredWindows.Add(new WeakReference<Window>(window));
+            }
         }
 
         /// <summary>

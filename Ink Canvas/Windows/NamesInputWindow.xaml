@@ -17,12 +17,19 @@
 
 >
     <Window.Resources>
-        <!-- 主题资源 -->
-        <SolidColorBrush x:Key="NamesInputWindowBackground" Color="White"/>
-        <SolidColorBrush x:Key="NamesInputWindowForeground" Color="Black"/>
-        <SolidColorBrush x:Key="NamesInputWindowButtonBackground" Color="#F4F4F5"/>
-        <SolidColorBrush x:Key="NamesInputWindowButtonForeground" Color="Black"/>
-        <SolidColorBrush x:Key="NamesInputWindowBorderBrush" Color="#E4E4E7"/>
+        <!-- 颜色全部走 WPF-UI 原生资源键，深浅色主题自动跟随，无需在代码里覆盖 -->
+        <Style x:Key="NamesInputWindowConfirmButtonStyle"
+               TargetType="Button"
+               BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Width" Value="100" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+            <Setter Property="Margin" Value="10" />
+            <Setter Property="Background" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+            <!-- 强调色为饱和色，白字在其上始终可读；用字面量避免依赖未经本项目验证的资源键 -->
+            <Setter Property="Foreground" Value="White" />
+        </Style>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -55,29 +62,21 @@
         </Border>
         
         <!-- 主内容区 -->
-        <Grid Grid.Row="1" Background="{DynamicResource NamesInputWindowBackground}" Margin="10,10,10,10">
-            <Label Content="{x:Static props:RandomStrings.Random_NamesInput_Hint}" 
-                   Margin="10" 
-                   Foreground="{DynamicResource NamesInputWindowForeground}"
+        <Grid Grid.Row="1" Background="{DynamicResource LayerFillColorDefaultBrush}" Margin="10,10,10,10">
+            <Label Content="{x:Static props:RandomStrings.Random_NamesInput_Hint}"
+                   Margin="10"
+                   Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                   />
-            <TextBox Name="TextBoxNames" 
-                     
-                     VerticalScrollBarVisibility="Auto" 
-                     AcceptsReturn="True" 
+            <TextBox Name="TextBoxNames"
+                     VerticalScrollBarVisibility="Auto"
+                     AcceptsReturn="True"
                      Margin="10,40,10,50"
-                     Background="{DynamicResource NamesInputWindowBackground}"
-                     Foreground="{DynamicResource NamesInputWindowForeground}"
-                     BorderBrush="{DynamicResource NamesInputWindowBorderBrush}"/>
-            <Button Margin="10" 
-                    VerticalAlignment="Bottom" 
-                    HorizontalAlignment="Right"
-                    Content="{x:Static props:NotificationStrings.AnimationOff}" 
-                   
-                    Width="100" 
-                    Click="Button_Click"
-                    Background="{DynamicResource NamesInputWindowButtonBackground}"
-                    Foreground="{DynamicResource NamesInputWindowButtonForeground}"
-                    BorderBrush="{DynamicResource NamesInputWindowBorderBrush}"/>
+                     Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
+                     Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                     BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"/>
+            <Button Style="{StaticResource NamesInputWindowConfirmButtonStyle}"
+                    Content="{x:Static props:RandomStrings.Random_NamesInput_Confirm}"
+                    Click="Button_Click" />
         </Grid>
     </Grid>
 </Window>
