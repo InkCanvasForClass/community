@@ -150,6 +150,9 @@
   <data name="FloatingBar_ClearAndMouse" xml:space="preserve">
     <value>清完就溜</value>
   </data>
+  <data name="FloatingBar_MouseClear" xml:space="preserve">
+    <value>鼠标(清空)</value>
+  </data>
   <data name="FloatingBar_ExitButton" xml:space="preserve">
     <value>溜了</value>
   </data>
@@ -287,6 +290,12 @@
   </data>
   <data name="ToolbarPage_QuickPaletteDisplayModeDesc" xml:space="preserve">
     <value>选调色盘的 Buff 数量</value>
+  </data>
+  <data name="ToolbarPage_ComponentName" xml:space="preserve">
+    <value>装备叫啥</value>
+  </data>
+  <data name="ToolbarPage_ComponentNameDesc" xml:space="preserve">
+    <value>按需选个顺眼的装备名字</value>
   </data>
   <data name="ToolbarPage_Size" xml:space="preserve">
     <value>体型</value>

@@ -1189,7 +1189,13 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             {
                 var fontSize = entry.GetSettingDouble(ComponentSettingKeys.FontSize);
                 if (fontSize.HasValue && fontSize.Value > 0)
+                {
                     btn.LabelFontSize = fontSize.Value;
+                    if (btn.LabelTextBlockControl != null)
+                    {
+                        AutoFontSizeHelper.SetOriginalFontSize(btn.LabelTextBlockControl, fontSize.Value);
+                    }
+                }
 
                 var iconSize = entry.GetSettingDouble(ComponentSettingKeys.IconSize);
                 if (iconSize.HasValue && iconSize.Value > 0)
@@ -1198,6 +1204,49 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 if (entry.GetSettingBool(ComponentSettingKeys.UseRedStyle))
                 {
                     ApplyRedStyle(btn);
+                }
+
+                if (entry.Id == "builtin.cursorWithDel")
+                {
+                    var buttonName = entry.GetSettingString(ComponentSettingKeys.ButtonName);
+                    bool isLongName = buttonName == "1" || buttonName == FloatingBarStrings.FloatingBar_MouseClear;
+                    btn.Label = isLongName
+                        ? FloatingBarStrings.FloatingBar_MouseClear
+                        : FloatingBarStrings.FloatingBar_ClearAndMouse;
+
+                    double targetFontSize = isLongName
+                        ? ((fontSize.HasValue && fontSize.Value > 0) ? Math.Min(fontSize.Value, 8) : 8)
+                        : ((fontSize.HasValue && fontSize.Value > 0) ? fontSize.Value : 13);
+
+                    btn.LabelFontSize = targetFontSize;
+
+                    var tb = btn.LabelTextBlockControl;
+                    if (tb != null)
+                    {
+                        if (isLongName)
+                        {
+                            AutoFontSizeHelper.SetIsEnabled(tb, false);
+                            AutoFontSizeHelper.SetOriginalFontSize(tb, targetFontSize);
+                        }
+                        else
+                        {
+                            AutoFontSizeHelper.SetOriginalFontSize(tb, targetFontSize);
+                            AutoFontSizeHelper.SetIsEnabled(tb, true);
+                        }
+                    }
+
+                    btn.Loaded += (s, e) =>
+                    {
+                        if (isLongName)
+                        {
+                            btn.LabelFontSize = targetFontSize;
+                            if (btn.LabelTextBlockControl != null)
+                            {
+                                AutoFontSizeHelper.SetIsEnabled(btn.LabelTextBlockControl, false);
+                                AutoFontSizeHelper.SetOriginalFontSize(btn.LabelTextBlockControl, targetFontSize);
+                            }
+                        }
+                    };
                 }
             }
 

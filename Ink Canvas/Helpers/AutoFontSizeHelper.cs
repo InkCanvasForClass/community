@@ -66,15 +66,15 @@ namespace Ink_Canvas.Helpers
         private static void SetIsAdjusting(DependencyObject element, bool value) => element.SetValue(IsAdjustingProperty, value);
         private static bool GetIsAdjusting(DependencyObject element) => (bool)element.GetValue(IsAdjustingProperty);
 
-        private static readonly DependencyProperty OriginalFontSizeProperty =
+        public static readonly DependencyProperty OriginalFontSizeProperty =
             DependencyProperty.RegisterAttached(
                 "OriginalFontSize",
                 typeof(double),
                 typeof(AutoFontSizeHelper),
                 new PropertyMetadata(double.NaN));
 
-        private static void SetOriginalFontSize(DependencyObject element, double value) => element.SetValue(OriginalFontSizeProperty, value);
-        private static double GetOriginalFontSize(DependencyObject element) => (double)element.GetValue(OriginalFontSizeProperty);
+        public static void SetOriginalFontSize(DependencyObject element, double value) => element.SetValue(OriginalFontSizeProperty, value);
+        public static double GetOriginalFontSize(DependencyObject element) => (double)element.GetValue(OriginalFontSizeProperty);
 
         private static void OnIsEnabledChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -296,6 +296,8 @@ namespace Ink_Canvas.Helpers
 
         private static void RestoreOriginalFontSize(FrameworkElement fe)
         {
+            if (!GetIsEnabled(fe)) return;
+
             var original = GetOriginalFontSize(fe);
             if (double.IsNaN(original) || original <= 0) return;
 
