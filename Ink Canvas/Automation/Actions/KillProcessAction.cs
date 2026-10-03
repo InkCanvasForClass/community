@@ -43,15 +43,15 @@ namespace Ink_Canvas.WorkflowAutomation.Actions
                         {
                             process.Kill();
                         }
-                        catch (Exception ex)
+                        catch (System.Exception ex)
                         {
-                            LogHelper.WriteLogToFile($"[Automation] 结束进程 行动: 结束进程 \"{s.ProcessName}\" 中的某个进程失败: {ex.Message}", LogHelper.LogType.Info);
+                            Helpers.LogService.LogException(ex);
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
-                    LogHelper.WriteLogToFile($"[Automation] 结束进程 行动: 枚举进程 \"{s.ProcessName}\" 失败: {ex.Message}", LogHelper.LogType.Info);
+                    Helpers.LogService.LogException(ex);
                 }
             };
 

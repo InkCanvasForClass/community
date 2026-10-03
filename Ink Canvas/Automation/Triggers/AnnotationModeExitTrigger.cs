@@ -65,9 +65,9 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
                     mw.inkCanvas.EditingModeChanged += OnEditingModeChanged;
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Automation] 批注模式退出触发器订阅 inkCanvas.EditingModeChanged 失败: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
         }
 
@@ -81,9 +81,9 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
                     mw.inkCanvas.EditingModeChanged -= OnEditingModeChanged;
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Automation] 批注模式退出触发器退订 inkCanvas.EditingModeChanged 失败: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
         }
 

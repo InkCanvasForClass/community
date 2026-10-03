@@ -41,7 +41,7 @@
         <ResourceDictionary>
             <!-- 合并新橡皮擦资源 -->
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="MainWindow_cs/MW_Eraser.xaml"/>
+                <ResourceDictionary Source="MainWindow/MW_Eraser.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <c:IsEnabledToOpacityConverter x:Key="IsEnabledToOpacityConverter" />

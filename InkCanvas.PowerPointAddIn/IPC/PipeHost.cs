@@ -55,7 +55,7 @@ namespace InkCanvas.PowerPointAddIn.IPC
 
         public void Stop()
         {
-            try { _cts?.Cancel(); } catch { }
+            try { _cts?.Cancel(); } catch (Exception ex) { LogService.LogException(ex); }
             _cts?.Dispose();
             _cts = null;
             _clientConnected = false;
@@ -98,7 +98,7 @@ namespace InkCanvas.PowerPointAddIn.IPC
                 {
                     _clientConnected = false;
                     _currentPipe = null;
-                    try { pipe?.Dispose(); } catch { }
+                    try { pipe?.Dispose(); } catch (Exception ex) { LogService.LogException(ex); }
                 }
             }
         }

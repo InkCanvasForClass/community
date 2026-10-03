@@ -316,21 +316,9 @@ namespace Ink_Canvas.Plugins
             if (_disposed) return;
             _disposed = true;
 
-            try { _cts.Cancel(); }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Plugin] PluginIpc 释放时取消 CancellationTokenSource 失败: {ex.Message}", LogHelper.LogType.Info);
-            }
-            try { _listenTask?.Wait(TimeSpan.FromSeconds(1)); }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Plugin] PluginIpc 释放时等待监听任务结束失败（监听循环可能仍在运行）: {ex.Message}", LogHelper.LogType.Info);
-            }
-            try { _cts.Dispose(); }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Plugin] PluginIpc 释放时释放 CancellationTokenSource 失败: {ex.Message}", LogHelper.LogType.Info);
-            }
+            try { _cts.Cancel(); } catch (Exception ex) { LogService.LogException(ex); }
+            try { _listenTask?.Wait(TimeSpan.FromSeconds(1)); } catch (Exception ex) { LogService.LogException(ex); }
+            try { _cts.Dispose(); } catch (Exception ex) { LogService.LogException(ex); }
         }
     }
 }

@@ -447,10 +447,9 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                 }
                 catch (Exception innerEx)
                 {
-                    try { if (File.Exists(tmpPath)) File.Delete(tmpPath); }
-                    catch (Exception ex)
+                    try { if (File.Exists(tmpPath)) File.Delete(tmpPath); } catch (System.Exception ex)
                     {
-                        LogHelper.WriteLogToFile($"[Toolbar] BoardToolbarRegistry 原子写入失败后删除临时文件 {Path.GetFileName(tmpPath)} 失败: {ex.Message}", LogHelper.LogType.Info);
+                        Helpers.LogService.LogException(ex);
                     }
                     throw new Exception($"原子写入失败: {innerEx.Message}", innerEx);
                 }
