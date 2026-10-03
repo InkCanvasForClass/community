@@ -32,6 +32,8 @@ By using this version of InkCanvasForClass, you agree to assume all potential is
 
 **Smart Education Alliance InkCanvasForClass Community Edition Section:** [forum.smart-teach.cn/t/icc-ce](https://forum.smart-teach.cn/t/icc-ce). This is where we post version update logs. You are also welcome to ask questions or share your experience here, provided you comply with the forum management rules and the section's terms of service.
 
+**Official Website Address:** [iccce.ink](https://iccce.ink)
+
 ## ⚠️ Important Notice
 
 Before using and distributing this software, please make sure you understand the relevant open-source licenses. This software is modified based on <https://github.com/InkCanvasForClass/icc-20240610-stable>, which in turn is modified based on <https://github.com/ChangSakura/Ink-Canvas>. Meanwhile, ICA is based on <https://github.com/WXRIW/Ink-Canvas> with additional features including, but not limited to, hiding to the sidebar, alongside modified UI and software interaction logic. For feedback regarding ink writing functionality or features unique to ICA, it is recommended to check <https://github.com/WXRIW/Ink-Canvas/issues> first. **Please bring your brain along before using.**
