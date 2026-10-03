@@ -137,7 +137,10 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"[CapturableVideoCaptureElement] {message}", LogHelper.LogType.Info);
                 Debug.WriteLine($"[CapturableVideoCaptureElement] {message}");
             }
-            catch { }
+            catch (System.Exception ex)
+            {
+                Helpers.LogService.LogException(ex);
+            }
         }
     }
 }

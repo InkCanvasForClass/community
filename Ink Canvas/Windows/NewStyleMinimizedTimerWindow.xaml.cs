@@ -139,8 +139,7 @@ namespace Ink_Canvas.Windows
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile(
-                    $"[Timer] 最小化计时器窗口拖动 DragMove 失败: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
         }
 

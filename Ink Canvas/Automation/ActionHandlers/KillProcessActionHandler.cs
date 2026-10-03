@@ -19,16 +19,15 @@ namespace Ink_Canvas.WorkflowAutomation.ActionHandlers
                 {
                     foreach (var process in Process.GetProcessesByName(s.ProcessName))
                     {
-                        try { process.Kill(); }
-                        catch (Exception ex)
+                        try { process.Kill(); } catch (System.Exception ex)
                         {
-                            LogHelper.WriteLogToFile($"[Automation] 结束进程 处理器: 结束进程 \"{s.ProcessName}\" 中的某个进程失败: {ex.Message}", LogHelper.LogType.Info);
+                            Helpers.LogService.LogException(ex);
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
-                    LogHelper.WriteLogToFile($"[Automation] 结束进程 处理器: 枚举进程 \"{s.ProcessName}\" 失败: {ex.Message}", LogHelper.LogType.Info);
+                    Helpers.LogService.LogException(ex);
                 }
             });
         }

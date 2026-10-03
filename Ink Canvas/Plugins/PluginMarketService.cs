@@ -533,11 +533,7 @@ namespace Ink_Canvas.Plugins
 
                 if (task.IsCancelled)
                 {
-                    try { File.Delete(tempFile); }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[Plugin] 插件下载取消后删除临时文件失败: {tempFile}, 原因: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    try { File.Delete(tempFile); } catch (Exception ex) { LogService.LogException(ex); }
                     return false;
                 }
 
@@ -548,11 +544,7 @@ namespace Ink_Canvas.Plugins
                     if (!string.Equals(hash, merged.MarketEntry.DownloadSha256, StringComparison.OrdinalIgnoreCase))
                     {
                         task.Error = "文件校验失败，可能已损坏。";
-                        try { File.Delete(tempFile); }
-                        catch (Exception ex)
-                        {
-                            LogHelper.WriteLogToFile($"[Plugin] 插件包 SHA256 校验失败后删除临时文件失败: {tempFile}, 原因: {ex.Message}", LogHelper.LogType.Info);
-                        }
+                        try { File.Delete(tempFile); } catch (Exception ex) { LogService.LogException(ex); }
                         return false;
                     }
                 }
@@ -758,10 +750,7 @@ namespace Ink_Canvas.Plugins
                 var json = JsonConvert.DeserializeAnonymousType(File.ReadAllText(IndexMetaPath), new { lastRefresh = "" });
                 if (DateTime.TryParse(json?.lastRefresh, out var dt)) return dt;
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Plugin] 读取插件市场索引最后刷新时间失败（将视为无刷新时间）: {IndexMetaPath}, 原因: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
             return null;
         }
 

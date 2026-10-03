@@ -209,7 +209,7 @@ namespace Ink_Canvas.Converter
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[UI] 几何字符串解析失败，图标将不显示: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
             return null;
         }

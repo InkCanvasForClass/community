@@ -54,7 +54,7 @@ namespace Ink_Canvas
         private GlobalHotkeyManager _globalHotkeyManager;
         internal GlobalHotkeyManager GlobalHotkeyManagerInstance => _globalHotkeyManager;
 
-        // 全局热键配置服务（M16）：HotkeyConfig.json 读写与加载编排，随管理器一并创建
+        // 全局热键配置服务：HotkeyConfig.json 读写与加载编排，随管理器一并创建
         private Services.Shell.HotkeyService _hotkeyService;
 
         // PPT PageUp/PageDown 低级键盘钩子
@@ -838,7 +838,7 @@ namespace Ink_Canvas
 
             Dispatcher.BeginInvoke(new Action(CheckAndShowOobe), DispatcherPriority.Loaded);
 
-            // M11：设置存储服务（寄生提取），供各 partial 中的转发壳使用
+            // 设置存储服务（寄生提取），供各 partial 中的转发壳使用
             _settingsStore = new Services.SettingsStore();
         }
 
@@ -1914,7 +1914,7 @@ namespace Ink_Canvas
                             catch (Exception ex)
                             {
                                 // 走到这里说明验证流程中途失败且未置位放行标志，窗口会表现为"点关闭没反应"
-                                LogHelper.WriteLogToFile($"[Exit] 退出密码验证流程异常，本次关闭未放行: {ex.Message}", LogHelper.LogType.Info);
+                                LogService.LogException(ex);
                             }
                             finally
                             {
@@ -1926,7 +1926,7 @@ namespace Ink_Canvas
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.WriteLogToFile($"[Exit] 检查是否需要退出密码验证失败: {ex.Message}", LogHelper.LogType.Info);
+                    LogService.LogException(ex);
                 }
 
                 if (!CloseIsFromButton && Settings.Advanced.IsSecondConfirmWhenShutdownApp)
@@ -2170,7 +2170,7 @@ namespace Ink_Canvas
                         {
                             LogHelper.WriteLogToFile($"AutoUpdate | 暂停期已过，恢复自动更新检查");
                             Settings.Startup.AutoUpdatePauseUntilDate = "";
-                            try { await Dispatcher.InvokeAsync(() => SaveSettingsToFile()); } catch (TaskCanceledException) { } catch (ObjectDisposedException) { }
+                            try { await Dispatcher.InvokeAsync(() => SaveSettingsToFile()); } catch (TaskCanceledException ex) { LogService.LogException(ex); } catch (ObjectDisposedException ex) { LogService.LogException(ex); }
                         }
                     }
                 }
@@ -2201,8 +2201,8 @@ namespace Ink_Canvas
                             updateCheckRetryCount = 0;
                         });
                     }
-                    catch (TaskCanceledException) { }
-                    catch (ObjectDisposedException) { }
+                    catch (TaskCanceledException ex) { LogService.LogException(ex); }
+                    catch (ObjectDisposedException ex) { LogService.LogException(ex); }
 
                     // 检测到新版本
                     LogHelper.WriteLogToFile($"AutoUpdate | New version available: {AvailableLatestVersion}");
@@ -2251,7 +2251,7 @@ namespace Ink_Canvas
                     {
                         LogHelper.WriteLogToFile($"AutoUpdate | Detected new version {AvailableLatestVersion} different from skipped version {Settings.Startup.SkippedVersion}, clearing skip record");
                         Settings.Startup.SkippedVersion = "";
-                        try { await Dispatcher.InvokeAsync(() => SaveSettingsToFile()); } catch (TaskCanceledException) { } catch (ObjectDisposedException) { }
+                        try { await Dispatcher.InvokeAsync(() => SaveSettingsToFile()); } catch (TaskCanceledException ex) { LogService.LogException(ex); } catch (ObjectDisposedException ex) { LogService.LogException(ex); }
                     }
 
                     // 如果启用了静默更新，则自动下载更新而不显示提示
@@ -2267,7 +2267,7 @@ namespace Ink_Canvas
                             LogHelper.WriteLogToFile("AutoUpdate | Update downloaded successfully, will install when conditions are met");
 
                             // 启动检查定时器，定期检查是否可以安装
-                            try { await Dispatcher.InvokeAsync(() => timerCheckAutoUpdateWithSilence.Start()); } catch (TaskCanceledException) { } catch (ObjectDisposedException) { }
+                            try { await Dispatcher.InvokeAsync(() => timerCheckAutoUpdateWithSilence.Start()); } catch (TaskCanceledException ex) { LogService.LogException(ex); } catch (ObjectDisposedException ex) { LogService.LogException(ex); }
                         }
                         else
                         {
@@ -2294,8 +2294,8 @@ namespace Ink_Canvas
                             updateCheckRetryCount = 0;
                         });
                     }
-                    catch (TaskCanceledException) { }
-                    catch (ObjectDisposedException) { }
+                    catch (TaskCanceledException ex) { LogService.LogException(ex); }
+                    catch (ObjectDisposedException ex) { LogService.LogException(ex); }
                 }
                 else
                 {
@@ -2306,7 +2306,7 @@ namespace Ink_Canvas
                     updateCheckRetryCount = 0;
 
                     // 启动重试定时器，10分钟后重新检查
-                    try { await Dispatcher.InvokeAsync(() => timerCheckAutoUpdateRetry.Start()); } catch (TaskCanceledException) { } catch (ObjectDisposedException) { }
+                    try { await Dispatcher.InvokeAsync(() => timerCheckAutoUpdateRetry.Start()); } catch (TaskCanceledException ex) { LogService.LogException(ex); } catch (ObjectDisposedException ex) { LogService.LogException(ex); }
 
                     // 清理更新文件夹
                     AutoUpdateHelper.DeleteUpdatesFolder();
@@ -2767,7 +2767,7 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 装配通知服务（M13）：注入 x:Name 控件强类型引用与访问主窗口私有状态的委托，
+        /// 装配通知服务：注入 x:Name 控件强类型引用与访问主窗口私有状态的委托，
         /// 服务本身不引用 MainWindow 类型、不直接引用 UI 线程调度器。
         /// </summary>
         private NotificationService CreateNotificationService()
@@ -2792,7 +2792,7 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 装配截图服务（M15）：注入设置读取、墨迹快照、白板页索引、DPI 缩放、通知与
+        /// 装配截图服务：注入设置读取、墨迹快照、白板页索引、DPI 缩放、通知与
         /// UI 线程调度委托，服务本身不引用 MainWindow 类型、不直接引用 UI 线程调度器。
         /// 通知文本（MainWindowStrings 资源）保留在主窗口侧格式化，服务只接收格式化入口。
         /// </summary>
@@ -3114,7 +3114,7 @@ namespace Ink_Canvas
                 if (_globalHotkeyManager == null)
                 {
                     _globalHotkeyManager = new GlobalHotkeyManager(this);
-                    // M16：热键配置服务与管理器同栈创建，内置热键回调以字典注入（回调本体在 MW_Hotkeys.cs）
+                    // 热键配置服务与管理器同栈创建，内置热键回调以字典注入（回调本体在 MW_Hotkeys.cs）
                     _hotkeyService = new Services.Shell.HotkeyService(_globalHotkeyManager, BuildBuiltinHotkeyActions());
                     // 启动时加载快捷键，但默认为鼠标模式，禁用快捷键以放行键盘操作
                     _globalHotkeyManager.EnableHotkeyRegistration();

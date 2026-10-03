@@ -1015,8 +1015,9 @@ namespace Ink_Canvas
                         {
                             LogHelper.WriteLogToFile($"进入白板模式时更新名言失败: {t.Exception?.GetBaseException().Message}", LogHelper.LogType.Warning);
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            LogService.LogException(ex);
                         }
                         if (Settings.Appearance.EnableChickenSoupInWhiteboardMode && Settings.Appearance.ChickenSoupSource != 3)
                         {
@@ -5433,10 +5434,7 @@ namespace Ink_Canvas
                 Pen_Icon.Icon.Brush = new SolidColorBrush(inkColor);
                 ApplyPenIconOutlineForContrast();
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Toolbar] 更新浮动栏批注图标颜色为当前画笔颜色失败: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
         }
 
         /// <summary>
@@ -5470,10 +5468,7 @@ namespace Ink_Canvas
                 if (Application.Current.TryFindResource("FloatBarBackground") is SolidColorBrush backgroundBrush)
                     return backgroundBrush.Color;
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Toolbar] 读取浮动栏背景色资源 FloatBarBackground 失败，将按主题推断: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
 
             bool isDarkTheme = Settings.Appearance.Theme == 1 ||
                                 (Settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
@@ -5503,10 +5498,7 @@ namespace Ink_Canvas
                     Pen_Icon.ClearIconInnerOutline();
                 }
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Toolbar] 按对比度为浮动栏批注图标添加/移除内描边失败: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
         }
 
         /// <summary>
@@ -5831,10 +5823,7 @@ namespace Ink_Canvas
                             _activeIndicatorCompletedHandler = null;
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[Toolbar] 切换浮动栏高亮指示条位置时停止旧动画并解绑 Completed 失败: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    catch (Exception ex) { LogService.LogException(ex); }
                     indicatorBar.RenderTransform = null;
                     indicatorBar.Opacity = 1.0;
                 }

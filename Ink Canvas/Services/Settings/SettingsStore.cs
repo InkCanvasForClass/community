@@ -10,7 +10,7 @@ using System.Text;
 namespace Ink_Canvas.Services
 {
     /// <summary>
-    /// 设置存储服务（M11 寄生提取首站）。承载从 MainWindow 搬出的纯设置读写逻辑。
+    /// 设置存储服务（寄生提取首站）。承载从 MainWindow 搬出的纯设置读写逻辑。
     /// 全局设置实例经 <see cref="SettingsManager.Settings"/> 静态可达，故本类零依赖注入；
     /// 禁止持有 MainWindow 或任何 Visual 类型引用。
     /// </summary>

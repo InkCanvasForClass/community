@@ -4,7 +4,7 @@ using Ink_Canvas.Models;
 namespace Ink_Canvas
 {
     /// <summary>
-    /// 通知转发壳（M13）：实现已整体搬至 <see cref="Ink_Canvas.Services.NotificationService"/>，
+    /// 通知转发壳：实现已整体搬至 <see cref="Ink_Canvas.Services.NotificationService"/>，
     /// 本文件仅保留对外入口签名，方法体为一行转发。
     /// 通知队列与去重逻辑由 <see cref="NotificationCenterService"/>（纯逻辑静态类）承载。
     /// </summary>

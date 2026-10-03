@@ -22,7 +22,7 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
-        // M11 寄生提取：设置存储服务，构造函数末尾初始化；壳在全部提取模块完成后删除。
+        // 寄生提取：设置存储服务，构造函数末尾初始化；壳在全部提取模块完成后删除。
         private readonly Services.SettingsStore _settingsStore;
 
         #region Behavior
@@ -124,7 +124,7 @@ namespace Ink_Canvas
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.WriteLogToFile($"[Settings] 创建一言 HttpClient 时设置 User-Agent 头失败: {ex.Message}", LogHelper.LogType.Info);
+                    LogService.LogException(ex);
                 }
                 return client;
             }
@@ -134,8 +134,9 @@ namespace Ink_Canvas
                 {
                     LogHelper.WriteLogToFile($"无法创建 HttpClient (System.Net.Http 可能缺失): {ex.Message}", LogHelper.LogType.Warning);
                 }
-                catch
+                catch (Exception ex2)
                 {
+                    LogService.LogException(ex2);
                 }
                 return null;
             }
@@ -157,7 +158,7 @@ namespace Ink_Canvas
             }
         }
 
-        // M11 壳：实现已搬移至 Services/Settings/SettingsStore.cs
+        // 壳：实现已搬移至 Services/Settings/SettingsStore.cs
         private string BuildHitokotoRequestUrl() => _settingsStore.BuildHitokotoRequestUrl();
 
         private async Task<string> FetchHitokotoTextCoreAsync(HttpClient client, string requestUrl)
@@ -696,10 +697,10 @@ namespace Ink_Canvas
         #region Canvas
 
         /// <summary>笔锋下拉 UI 顺序：0 实时笔锋，1 基于点集，2 基于速率，3 关闭。与存储值 InkStyle：3,0,1,2 对应。</summary>
-        // M11 壳：实现已搬移至 Services/Settings/SettingsStore.cs
+        // 壳：实现已搬移至 Services/Settings/SettingsStore.cs
         private static int PenStyleUiIndexFromInkStyle(int inkStyle) => Services.SettingsStore.PenStyleUiIndexFromInkStyle(inkStyle);
 
-        // M11 壳：实现已搬移至 Services/Settings/SettingsStore.cs
+        // 壳：实现已搬移至 Services/Settings/SettingsStore.cs
         private static int InkStyleFromPenStyleUiIndex(int uiIndex) => Services.SettingsStore.InkStyleFromPenStyleUiIndex(uiIndex);
 
         private void ComboBoxPenStyle_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1075,7 +1076,7 @@ namespace Ink_Canvas
         /// 该方法会重新创建全局 Settings 实例并应用推荐值，覆盖大部分子模块配置（如外观、画布、自动化、PPT、手势、高级选项等）。
         /// 在重置过程中会保留并恢复当前 Settings.Automation 中的 AutoDelSavedFiles 与 AutoDelSavedFilesDaysThreshold 两项值以避免意外删除策略变化。
         /// </remarks>
-        // M11 壳：实现已搬移至 Services/Settings/SettingsStore.cs
+        // 壳：实现已搬移至 Services/Settings/SettingsStore.cs
         public static void SetSettingsToRecommendation() => Services.SettingsStore.SetSettingsToRecommendation();
 
         /// <summary>
@@ -1096,7 +1097,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Settings] 重置为推荐设置前的密码/TOTP 校验调用失败，将继续重置: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
 
             try
@@ -1118,11 +1119,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
-            try { ShowNotification(Properties.MainWindowStrings.Main_Settings_ResetDone); }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Settings] 重置为推荐设置完成后弹出「重置完成」通知失败: {ex.Message}", LogHelper.LogType.Info);
-            }
+            try { ShowNotification(Properties.MainWindowStrings.Main_Settings_ResetDone); } catch (Exception ex) { LogService.LogException(ex); }
         }
 
         private async void SpecialVersionResetToSuggestion_Click()
@@ -1195,7 +1192,7 @@ namespace Ink_Canvas
             }
         }
 
-        // M11 壳：实现已搬移至 Services/Settings/SettingsStore.cs
+        // 壳：实现已搬移至 Services/Settings/SettingsStore.cs
         public string GetCorrectIcon(string iconType, bool isSolid = false) => _settingsStore.GetCorrectIcon(iconType, isSolid);
 
         #region 浮动栏按钮显示控制
@@ -1236,7 +1233,7 @@ namespace Ink_Canvas
         /// <remarks>
         /// 在写入前会确保目标目录/文件具有写入权限（使用 ProcessProtectionManager）。任何写入失败或异常都会被吞掉，调用方不会收到异常抛出。
         /// </remarks>
-        // M11 壳：实现已搬移至 Services/Settings/SettingsStore.cs
+        // 壳：实现已搬移至 Services/Settings/SettingsStore.cs
         public static void SaveSettingsToFile() => Services.SettingsStore.SaveSettingsToFile();
 
         private void SCManipulationBoundaryFeedback(object sender, ManipulationBoundaryFeedbackEventArgs e)
