@@ -18,12 +18,12 @@ using Size = System.Drawing.Size;
 namespace Ink_Canvas.Services.Shell
 {
     /// <summary>
-    /// 截图服务（M15 寄生提取）。承载从主窗口截图 partial（MW_Screenshot.cs）与
+    /// 截图服务（寄生提取）。承载从主窗口截图 partial（MW_Screenshot.cs）与
     /// 插图 partial（MW_ImageInsert.cs）搬出的截图执行段：屏幕捕获（GDI CopyFromScreen）、
     /// 位图加工（墨迹叠加、形状遮罩、格式转换）、编码落盘与剪贴板写入。
     /// 区域选择的交互段（选区窗口、窗口显隐编排、贴图回白板编排）仍留在主窗口壳中。
     /// 禁止引用主窗口类型：设置、墨迹快照、白板页索引、DPI 缩放、通知与 UI 线程调度
-    /// 均经 <see cref="Hooks"/> 委托注入（M30 统一收敛为 ISyncService 前的过渡形态）。
+    /// 均经 <see cref="Hooks"/> 委托注入（统一收敛为 ISyncService 前的过渡形态）。
     /// </summary>
     internal sealed class ScreenshotService
     {
@@ -44,7 +44,7 @@ namespace Ink_Canvas.Services.Shell
             public Func<double> GetDpiScale { get; set; }
             /// <summary>显示截图保存成功通知（参数为保存路径，资源格式化由主窗口侧完成）。</summary>
             public Action<string> ShowScreenshotSaveSuccess { get; set; }
-            /// <summary>在 UI 线程上执行委托（过渡形态，M30 收敛为 ISyncService）。</summary>
+            /// <summary>在 UI 线程上执行委托（过渡形态，后续收敛为 ISyncService）。</summary>
             public Action<Action> UiInvoke { get; set; }
             /// <summary>截图后自动保存墨迹（对应主窗口 SaveInkCanvasStrokes(false)）。</summary>
             public Action SaveInkStrokesAtScreenshot { get; set; }
@@ -147,10 +147,7 @@ namespace Ink_Canvas.Services.Shell
                         }
                         catch
                         {
-                            try { if (File.Exists(tmpStrokePath)) File.Delete(tmpStrokePath); } catch (Exception ex)
-                            {
-                                LogHelper.WriteLogToFile($"[Screenshot] 清理临时笔画文件失败: {ex.Message}", LogHelper.LogType.Info);
-                            }
+                            try { if (File.Exists(tmpStrokePath)) File.Delete(tmpStrokePath); } catch (Exception ex) { LogService.LogException(ex); }
                             throw;
                         }
                     }
@@ -415,7 +412,7 @@ namespace Ink_Canvas.Services.Shell
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.WriteLogToFile($"[Screenshot] 截图上传失败（本地文件已保存）: {ex.Message}", LogHelper.LogType.Info);
+                    LogService.LogException(ex);
                 }
             });
         }

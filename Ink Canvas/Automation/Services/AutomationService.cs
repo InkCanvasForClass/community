@@ -329,7 +329,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Automation] 卸载触发器 \"{trigger.Id}\" 的 UnLoaded() 失败: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
 
             trigger.TriggerInstance.Triggered -= TriggerTriggered;

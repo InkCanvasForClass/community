@@ -125,7 +125,7 @@ namespace Ink_Canvas.Windows
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"NewStyleTimerWindow | 取消系统事件订阅失败: {ex.Message}", LogHelper.LogType.Warning);
+                LogService.LogException(ex);
             }
             _timerService.Dispose();
             hideTimer?.Stop();
@@ -170,7 +170,7 @@ namespace Ink_Canvas.Windows
         #endregion
 
 
-        // 计时状态机已提取至 TimerService（M14）；本窗口仅订阅状态并渲染。
+        // 计时状态机已提取至 TimerService；本窗口仅订阅状态并渲染。
         private void OnTimerStateChanged(TimerState state)
         {
             Application.Current.Dispatcher.Invoke(() => RenderTick(state));
@@ -250,7 +250,7 @@ namespace Ink_Canvas.Windows
         private Timer hideTimer;
         private DateTime lastActivityTime;
 
-        // 计时状态机（M14 提取）。设定时间经 Hour/Minute/Second 属性读写。
+        // 计时状态机。设定时间经 Hour/Minute/Second 属性读写。
         private readonly TimerService _timerService;
 
         public TimeSpan? GetTotalTimeSpan()
@@ -1004,8 +1004,7 @@ namespace Ink_Canvas.Windows
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile(
-                    $"[Timer] 刷新最近计时显示失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -1081,9 +1080,7 @@ namespace Ink_Canvas.Windows
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile(
-                    $"[Timer] 保存最近计时记录到 {RecentTimersJsonPath} 失败: {ex.Message}",
-                    LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -1098,8 +1095,7 @@ namespace Ink_Canvas.Windows
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile(
-                    $"[Timer] 刷新计时器窗口边框资源失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -1147,8 +1143,7 @@ namespace Ink_Canvas.Windows
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile(
-                    $"[Timer] 计时器窗口拖动 DragMove 失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 

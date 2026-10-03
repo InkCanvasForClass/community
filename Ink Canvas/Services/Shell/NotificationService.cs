@@ -12,14 +12,14 @@ using System.Windows.Controls;
 namespace Ink_Canvas.Services
 {
     /// <summary>
-    /// 通知服务（M13 寄生提取）。承载从 MW_Notification.cs 搬出的通知 UI 编排逻辑：
+    /// 通知服务（寄生提取）。承载从 MW_Notification.cs 搬出的通知 UI 编排逻辑：
     /// 提供者初始化、通知请求分发（Windows Toast / 灵动通知 / 旧版动画通知）、位置计算、
     /// 听写勿扰抑制、启动未读公告提示与插件回调摘除。
     /// 通知队列、去重与历史由既有 <see cref="NotificationCenterService"/>（纯逻辑静态类，
     /// 不接触任何 UI 线程对象）承载，本服务只做 UI 呈现编排。
     /// 禁止引用主窗口类型：主窗口私有状态经 <see cref="Hooks"/> 委托注入，x:Name 控件经
-    /// 构造函数以强类型引用注入（GLOBAL-RULES 第六条 1），禁止按名查找视觉树。
-    /// UI 线程切换经注入的 <c>UiInvoke</c> 委托完成（M30 统一替换为 ISyncService 前的过渡形态）。
+    /// 构造函数以强类型引用注入，禁止按名查找视觉树。
+    /// UI 线程切换经注入的 <c>UiInvoke</c> 委托完成（统一替换为 ISyncService 前的过渡形态）。
     /// </summary>
     internal sealed class NotificationService
     {
@@ -42,7 +42,7 @@ namespace Ink_Canvas.Services
             public Func<bool> IsFloatingBarChangingHideMode { get; set; }
             /// <summary>获取宿主窗口（以 Window 基类形态返回，服务不接触主窗口类型）。</summary>
             public Func<Window> GetHostWindow { get; set; }
-            /// <summary>在 UI 线程上异步执行委托（默认优先级；过渡形态，M30 收敛为 ISyncService）。</summary>
+            /// <summary>在 UI 线程上异步执行委托（默认优先级；过渡形态，后续收敛为 ISyncService）。</summary>
             public Action<Action> UiInvoke { get; set; }
             /// <summary>在 UI 线程空闲优先级异步执行委托（用于公告服务延迟启动）。</summary>
             public Action<Action> UiInvokeContextIdle { get; set; }
@@ -137,8 +137,9 @@ namespace Ink_Canvas.Services
                         await Task.Delay(TimeSpan.FromSeconds(3), _providerCancellation.Token);
                         await _announcementService.StartAsync(_providerCancellation.Token);
                     }
-                    catch (OperationCanceledException)
+                    catch (OperationCanceledException oce)
                     {
+                        LogService.LogException(oce);
                     }
                     catch (Exception ex)
                     {
@@ -283,7 +284,7 @@ namespace Ink_Canvas.Services
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Notification] 计算通知悬浮栏位置失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -357,7 +358,7 @@ namespace Ink_Canvas.Services
                 AnimationsHelper.ShowWithSlideFromBottomAndFade(_gridNotifications);
 
                 // 原实现为独立线程 Sleep 后经 UI 线程调度器隐藏；等价改写为单次计时器 +
-                // UiInvoke 回 UI 线程（新类不得创建 Thread 访问 UI 线程对象，同 M12 过渡形态）。
+                // UiInvoke 回 UI 线程（新类不得创建 Thread 访问 UI 线程对象，同为过渡形态）。
                 StopLegacyHideTimer();
                 _legacyHideTimer = new Timer(_ =>
                 {

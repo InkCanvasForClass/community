@@ -61,7 +61,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[I18n] 应用 ToggleSwitch 本地化失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -106,7 +106,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[I18n] 反射替换 iNKORE Strings 的 ResourceManager 失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -161,7 +161,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[I18n] 遍历窗口更新 ToggleSwitch 失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -185,7 +185,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[I18n] 遍历逻辑树更新 ToggleSwitch 失败 (node={parent?.GetType().Name}): {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -211,7 +211,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[I18n] 更新单个 ToggleSwitch 文本失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -228,7 +228,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[I18n] 为设置窗口绑定 ToggleSwitch 文本失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -278,7 +278,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[I18n] 按名称创建自定义 Culture 失败 (name={name}): {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
 
             try
@@ -301,7 +301,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[I18n] 反射克隆父 Culture 失败，将回退 zh-CN (name={name}): {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
 
             return CultureInfo.GetCultureInfo("zh-CN");
@@ -409,7 +409,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[I18n] 加载内嵌 .resources 失败 ({resName}): {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
 
             if (result.Count > 0)
@@ -429,7 +429,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[I18n] 加载程序集内嵌 .resx 失败 ({resxName}): {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
 
             if (result.Count > 0)
@@ -452,7 +452,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[I18n] 从程序目录加载 .resx 失败 ({className}.{cultureName}): {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
 
             _embeddedCache[cacheKey] = result;

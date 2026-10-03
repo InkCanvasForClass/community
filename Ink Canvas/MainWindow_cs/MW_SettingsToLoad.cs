@@ -176,7 +176,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[ProcGuard] 按设置应用进程保护失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
 
             // Startup
@@ -734,7 +734,7 @@ namespace Ink_Canvas
         /// 4. 如果有清理操作，重新反序列化并保存
         /// 5. 记录清理结果到日志
         /// </remarks>
-        // M11 壳：实现已搬移至 Services/Settings/SettingsStore.cs
+        // 壳：实现已搬移至 Services/Settings/SettingsStore.cs
         private void CleanupObsoleteSettings(string userConfigJson) => _settingsStore.CleanupObsoleteSettings(userConfigJson);
 
         /// <summary>
@@ -754,15 +754,15 @@ namespace Ink_Canvas
         /// 7. 删除标记的键
         /// 8. 设置变更标志
         /// </remarks>
-        // M11 壳：实现已搬移至 Services/Settings/SettingsStore.cs
+        // 壳：实现已搬移至 Services/Settings/SettingsStore.cs
         private static void MigrateLegacyStartupMode(JObject userConfigObj, ref bool hasChanges) =>
             Services.SettingsStore.MigrateLegacyStartupMode(userConfigObj, ref hasChanges);
 
-        // M11 壳：实现已搬移至 Services/Settings/SettingsStore.cs
+        // 壳：实现已搬移至 Services/Settings/SettingsStore.cs
         private static void EnsureDefaultConfigSchemaIncludesIgnoredNullKeys(JObject defaultConfigObj) =>
             Services.SettingsStore.EnsureDefaultConfigSchemaIncludesIgnoredNullKeys(defaultConfigObj);
 
-        // M11 壳：实现已搬移至 Services/Settings/SettingsStore.cs
+        // 壳：实现已搬移至 Services/Settings/SettingsStore.cs
         private void RemoveObsoleteProperties(JObject userObj, JObject defaultObj, ref bool hasChanges) =>
             _settingsStore.RemoveObsoleteProperties(userObj, defaultObj, ref hasChanges);
 

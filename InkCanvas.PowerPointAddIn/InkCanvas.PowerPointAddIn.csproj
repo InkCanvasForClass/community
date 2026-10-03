@@ -215,6 +215,9 @@
     <Compile Include="ThisAddIn.Designer.cs">
       <DependentUpon>ThisAddIn.Designer.xml</DependentUpon>
     </Compile>
+    <Compile Include="LogService.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Core\PPTController.cs">
       <SubType>Code</SubType>
     </Compile>

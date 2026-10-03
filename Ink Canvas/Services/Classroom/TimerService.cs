@@ -5,7 +5,7 @@ using System.Timers;
 namespace Ink_Canvas.Services.Classroom
 {
     /// <summary>
-    /// 课堂倒计时状态机（M14 寄生提取）。承载 CountdownTimerWindow / NewStyleTimerWindow
+    /// 课堂倒计时状态机（寄生提取）。承载 CountdownTimerWindow / NewStyleTimerWindow
     /// 共有的纯计时逻辑：设定时间、开始/暂停/继续/重置、tick 递减、超时正计时模式。
     /// 纪律：禁止引用 UI 调度器 / 主窗体 / 任何 Visual 类型；设置项经 Func 注入；
     /// 定时器保持 System.Timers.Timer 原类型（回调在线程池），UI 触碰由订阅端自行调度。
@@ -75,7 +75,7 @@ namespace Ink_Canvas.Services.Classroom
         private bool isOvertimeMode = false;
         private bool hasPlayedProgressiveReminder = false;
 
-        // 无调用方的历史遗留成员，随状态机原样搬入（详见 extraction-backlog M14 节）
+        // 无调用方的历史遗留成员，随状态机原样搬入
         private TimeSpan remainingTime = TimeSpan.Zero;
 
         public int Hour { get => hour; set => hour = value; }

@@ -764,7 +764,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[PPT] 连接后补发 SlideShowBegin 时访问 SlideShowWindows 失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
             finally
             {
@@ -808,7 +808,7 @@ namespace Ink_Canvas.Helpers
                     }
                     catch (Exception ex)
                     {
-                        LogHelper.WriteLogToFile($"[PPT] 解绑 COM 事件（SlideShowNextSlide/Begin/End/PresentationBeforeClose）失败: {ex.Message}", LogHelper.LogType.Info);
+                        LogService.LogException(ex);
                     }
 
                     _bindingEvents = false;
@@ -816,7 +816,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[PPT] UnbindEvents 重置事件绑定标记失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -998,12 +998,13 @@ namespace Ink_Canvas.Helpers
                     }
                     catch (Exception ex)
                     {
-                        LogHelper.WriteLogToFile($"[PPT] 终态释放回退为循环 ReleaseComObject 失败（{objectName}）: {ex.Message}", LogHelper.LogType.Info);
+                        LogService.LogException(ex);
                     }
                 }
             }
-            catch (InvalidComObjectException)
+            catch (InvalidComObjectException ex)
             {
+                LogService.LogException(ex);
             }
             catch (COMException comEx) when (IsIgnorableDisconnectComException(comEx))
             {
@@ -1235,7 +1236,7 @@ namespace Ink_Canvas.Helpers
                     }
                     catch (Exception ex)
                     {
-                        LogHelper.WriteLogToFile($"[PPT] PresentationOpen 时读取 ActivePresentation 失败: {ex.Message}", LogHelper.LogType.Info);
+                        LogService.LogException(ex);
                     }
                 }
 
@@ -1278,7 +1279,7 @@ namespace Ink_Canvas.Helpers
                     }
                     catch (Exception ex)
                     {
-                        LogHelper.WriteLogToFile($"[PPT] PresentationBeforeClose 时解绑 COM 事件失败: {ex.Message}", LogHelper.LogType.Info);
+                        LogService.LogException(ex);
                     }
 
                     _bindingEvents = false;
@@ -2436,7 +2437,7 @@ namespace Ink_Canvas.Helpers
                     }
                     catch (Exception ex)
                     {
-                        LogCallbackException("EnumWindows 回调中读取单个窗口信息失败", ex);
+                        LogService.LogException(ex);
                     }
                     return true;
                 }, IntPtr.Zero);
@@ -2575,23 +2576,19 @@ namespace Ink_Canvas.Helpers
                 // 确保清理状态
                 if (CurrentSlide != null && Marshal.IsComObject(CurrentSlide))
                 {
-                    try { Marshal.ReleaseComObject(CurrentSlide); }
-                    catch (Exception ex) { LogHelper.WriteLogToFile($"[PPT] 结束WPS进程后释放 CurrentSlide 失败: {ex.Message}", LogHelper.LogType.Info); }
+                    try { Marshal.ReleaseComObject(CurrentSlide); } catch (Exception ex) { LogService.LogException(ex); }
                 }
                 if (CurrentSlides != null && Marshal.IsComObject(CurrentSlides))
                 {
-                    try { Marshal.ReleaseComObject(CurrentSlides); }
-                    catch (Exception ex) { LogHelper.WriteLogToFile($"[PPT] 结束WPS进程后释放 CurrentSlides 失败: {ex.Message}", LogHelper.LogType.Info); }
+                    try { Marshal.ReleaseComObject(CurrentSlides); } catch (Exception ex) { LogService.LogException(ex); }
                 }
                 if (CurrentPresentation != null && Marshal.IsComObject(CurrentPresentation))
                 {
-                    try { Marshal.ReleaseComObject(CurrentPresentation); }
-                    catch (Exception ex) { LogHelper.WriteLogToFile($"[PPT] 结束WPS进程后释放 CurrentPresentation 失败: {ex.Message}", LogHelper.LogType.Info); }
+                    try { Marshal.ReleaseComObject(CurrentPresentation); } catch (Exception ex) { LogService.LogException(ex); }
                 }
                 if (PPTApplication != null && Marshal.IsComObject(PPTApplication))
                 {
-                    try { Marshal.ReleaseComObject(PPTApplication); }
-                    catch (Exception ex) { LogHelper.WriteLogToFile($"[PPT] 结束WPS进程后释放 PPTApplication 失败: {ex.Message}", LogHelper.LogType.Info); }
+                    try { Marshal.ReleaseComObject(PPTApplication); } catch (Exception ex) { LogService.LogException(ex); }
                 }
 
                 CurrentSlide = null;
@@ -2754,7 +2751,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[PPT] GetWindowInfo 取进程名失败（pid={processId}，进程可能已退出）: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
 
             return windowInfo;
@@ -2972,7 +2969,7 @@ namespace Ink_Canvas.Helpers
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.WriteLogToFile($"[PPT] GetPPTHwnd 备用路径读取 pres.FullName/PPTApplication.Name 失败: {ex.Message}", LogHelper.LogType.Info);
+                    LogService.LogException(ex);
                 }
             }
 
@@ -3009,13 +3006,13 @@ namespace Ink_Canvas.Helpers
                     }
                     catch (Exception ex)
                     {
-                        LogHelper.WriteLogToFile($"[PPT] GetPPTHwndFromSlideShowWindow 走 dynamic 读 HWND 失败: {ex.Message}", LogHelper.LogType.Info);
+                        LogService.LogException(ex);
                     }
                 }
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[PPT] GetPPTHwndFromSlideShowWindow 强类型转换或读取 HWND 失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
 
             return hwnd;
