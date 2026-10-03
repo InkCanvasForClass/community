@@ -14,11 +14,11 @@ using Application = System.Windows.Application;
 namespace Ink_Canvas.Services
 {
     /// <summary>
-    /// 系统托盘服务（M12 寄生提取）。承载从 App（原 MW_TrayIcon.cs）搬出的托盘图标与右键菜单逻辑。
+    /// 系统托盘服务（寄生提取）。承载从 App（原 MW_TrayIcon.cs）搬出的托盘图标与右键菜单逻辑。
     /// 禁止引用 MainWindow 类型：所有对 MainWindow/App 私有成员的调用经 <see cref="Hooks"/> 委托注入，
     /// 事件出抛方向唯一（Service → App）。
     /// 计时器使用 <see cref="System.Threading.Timer"/> + 注入的 <c>UiInvoke</c> 回到 UI 线程
-    ///（M30 统一替换为 ISyncService 前的过渡形态）。
+    ///（统一替换为 ISyncService 前的过渡形态）。
     /// </summary>
     internal sealed class TrayIconService : IDisposable
     {
@@ -47,7 +47,7 @@ namespace Ink_Canvas.Services
             public Action ResetFloatingBarPosition { get; set; }
             /// <summary>写入托盘临时显示的截止时间（MainWindow 静态字段）。</summary>
             public Action<DateTime?> SetTrayTemporaryShowUntilUtc { get; set; }
-            /// <summary>在 UI 线程上执行委托（过渡形态，M30 收敛为 ISyncService）。</summary>
+            /// <summary>在 UI 线程上执行委托（过渡形态，后续收敛为 ISyncService）。</summary>
             public Action<Action> UiInvoke { get; set; }
             /// <summary>打开设置窗口（反射调用 MainWindow.BtnSettings_Click）。</summary>
             public Action OpenSettings { get; set; }
@@ -334,7 +334,7 @@ namespace Ink_Canvas.Services
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Tray] 查找托盘「隐藏主窗口」菜单项失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
 
             _trayTemporaryShowRestoreHideChecked = hideItem?.IsChecked == true;

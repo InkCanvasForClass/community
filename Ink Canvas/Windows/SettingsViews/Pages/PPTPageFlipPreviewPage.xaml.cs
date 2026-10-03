@@ -175,11 +175,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 {
                     PPTPageFlipPreviewOverlayWindow.ActiveInstance.Close();
                 }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile(
-                        $"[UI] 关闭 PPT 翻页预览浮层窗口失败: {ex.Message}", LogHelper.LogType.Info);
-                }
+                catch (Exception ex) { LogService.LogException(ex); }
             }
             if (PPTPageFlipPreviewWindow.ActiveInstance != null)
             {
@@ -188,11 +184,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     WindowTopmostManager.UnregisterWindow(PPTPageFlipPreviewWindow.ActiveInstance);
                     PPTPageFlipPreviewWindow.ActiveInstance.Close();
                 }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile(
-                        $"[UI] 注销置顶并关闭 PPT 翻页预览窗口失败: {ex.Message}", LogHelper.LogType.Info);
-                }
+                catch (Exception ex) { LogService.LogException(ex); }
             }
         }
 

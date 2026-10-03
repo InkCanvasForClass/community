@@ -3,8 +3,8 @@ using System.Collections.Generic;
 namespace Ink_Canvas.Models
 {
     /// <summary>
-    /// 工具模式（M17）。MainWindow 当前以字符串字面量表示工具模式（<c>_currentToolMode</c>），
-    /// 本枚举是其类型化对应物；M18 起逐步替换字符串比较点。
+    /// 工具模式。MainWindow 当前以字符串字面量表示工具模式（<c>_currentToolMode</c>），
+    /// 本枚举是其类型化对应物，用于逐步替换字符串比较点。
     /// </summary>
     /// <remarks>
     /// 枚举成员名 = 字面量的 PascalCase。字面量集合经 MainWindow/ 全量 grep 穷举确认，
@@ -34,7 +34,7 @@ namespace Ink_Canvas.Models
     }
 
     /// <summary>
-    /// <see cref="ToolMode"/> 与现有字符串字面量之间的无损双向往返映射（M17）。
+    /// <see cref="ToolMode"/> 与现有字符串字面量之间的无损双向往返映射。
     /// </summary>
     internal static class ToolModeMapping
     {

@@ -3,7 +3,7 @@ using System;
 namespace Ink_Canvas.Models
 {
     /// <summary>
-    /// 计时器模式（M14）。描述倒计时状态机的当前阶段。
+    /// 计时器模式。描述倒计时状态机的当前阶段。
     /// </summary>
     internal enum TimerMode
     {
@@ -18,7 +18,7 @@ namespace Ink_Canvas.Models
     }
 
     /// <summary>
-    /// 计时器状态快照（M14，POCO）。由 <see cref="Services.Classroom.TimerService"/> 在每次 tick
+    /// 计时器状态快照（POCO）。由 <see cref="Services.Classroom.TimerService"/> 在每次 tick
     /// 或状态变更时产生，经 StateChanged 事件推送给窗口壳；窗口只读渲染，不回写。
     /// </summary>
     internal sealed class TimerState

@@ -619,7 +619,7 @@ namespace Ink_Canvas
                 catch (InvalidOperationException ex)
                 {
                     // TransformToAncestor 失败通常意味着该元素不在 inkCanvas 可视树内（状态不同步）
-                    LogHelper.WriteLogToFile($"[Board] 计算子元素边界失败，元素可能不在画布可视树内: {ex.Message}", LogHelper.LogType.Info);
+                    LogService.LogException(ex);
                 }
             }
 
