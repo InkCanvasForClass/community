@@ -39,6 +39,7 @@ namespace Ink_Canvas.Helpers
                 // 验证设置
                 if (string.IsNullOrEmpty(webDavUrl))
                 {
+                    LogHelper.WriteLogToFile($"[Cloud] 跳过上传，未配置 WebDAV 地址: {Path.GetFileName(filePath)}", LogHelper.LogType.Warning);
                     return false;
                 }
 
@@ -70,6 +71,7 @@ namespace Ink_Canvas.Helpers
                         var result = await client.PutFile(targetPath, fileStream);
                         if (result.IsSuccessful)
                         {
+                            LogHelper.WriteLogToFile($"[Cloud] 上传成功: {targetPath}", LogHelper.LogType.Info);
                             return true;
                         }
                         else
@@ -85,12 +87,16 @@ namespace Ink_Canvas.Helpers
                                 using (var retryStream = File.OpenRead(filePath))
                                 {
                                     var retryResult = await client.PutFile(targetPath, retryStream);
+                                    LogHelper.WriteLogToFile(
+                                        $"[Cloud] 创建目录后重试上传{(retryResult.IsSuccessful ? "成功" : "仍失败")}: {targetPath}",
+                                        retryResult.IsSuccessful ? LogHelper.LogType.Info : LogHelper.LogType.Warning);
                                     return retryResult.IsSuccessful;
                                 }
                             }
                             else
                             {
                                 // 没有目录路径，直接返回失败
+                                LogHelper.WriteLogToFile($"[Cloud] 上传失败且无法确定目标目录: {targetPath}", LogHelper.LogType.Warning);
                                 return false;
                             }
                         }
@@ -101,8 +107,9 @@ namespace Ink_Canvas.Helpers
             {
                 throw;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Cloud] 上传异常: {Path.GetFileName(filePath)} - {ex.Message}", LogHelper.LogType.Warning);
                 return false;
             }
         }

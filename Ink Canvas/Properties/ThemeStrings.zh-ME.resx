@@ -306,6 +306,12 @@
   <data name="Theme_HideFloatingBarBorderHint" xml:space="preserve">
     <value>物理超度</value>
   </data>
+  <data name="Theme_ColorfulFloatingBar" xml:space="preserve">
+    <value>彩虹屁保护罩</value>
+  </data>
+  <data name="Theme_ColorfulFloatingBarHint" xml:space="preserve">
+    <value>给装备栏披上渐变圣光</value>
+  </data>
   <data name="Theme_FloatingBarBorderColor" xml:space="preserve">
     <value>装备栏边框颜色</value>
   </data>

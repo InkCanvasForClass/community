@@ -238,7 +238,6 @@ namespace Ink_Canvas.Windows
             settings.Canvas.DisablePressure = false;
             settings.Canvas.HideStrokeWhenSelecting = true;
             settings.Canvas.EnablePalmEraser = false;
-            settings.Canvas.IsEnableAnnotationDotHint = false;
 
             // 墨迹纠正
             settings.InkToShape.IsInkToShapeEnabled = false;

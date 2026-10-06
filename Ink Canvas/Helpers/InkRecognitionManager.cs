@@ -13,6 +13,9 @@ namespace Ink_Canvas.Helpers
         private bool _isModernSystemAvailable;
         private bool _isInitialized;
 
+        // 仅用于避免在高频识别路径上重复输出同一后端信息
+        private static string _lastLoggedBackend;
+
         public static InkRecognitionManager Instance
         {
             get
@@ -41,6 +44,9 @@ namespace Ink_Canvas.Helpers
                 // 启动阶段只做能力探测，不做 WinRT 组件实例化（避免冷启动延迟）
                 _isModernSystemAvailable = WinRtInkShapeRecognizer.IsApiAvailable;
                 _isInitialized = true;
+                LogHelper.WriteLogToFile(
+                    $"[Ink] 识别管理器初始化完成: WinRT 图形识别可用={_isModernSystemAvailable}, 形状识别后端={ShapeRecognitionRouter.FromSettingsInt(Ink_Canvas.Windows.SettingsViews.Helpers.SettingsManager.Settings?.InkToShape?.ShapeRecognitionEngine ?? 0)}",
+                    LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
@@ -72,11 +78,21 @@ namespace Ink_Canvas.Helpers
                 if (ShapeRecognitionRouter.ResolveUseWinRt(mode)
                     && WinRtInkShapeRecognizer.IsApiAvailable)
                 {
+                    if (_lastLoggedBackend != "WinRT")
+                    {
+                        _lastLoggedBackend = "WinRT";
+                        LogHelper.WriteLogToFile("[Ink] 形状识别后端: WinRT", LogHelper.LogType.Info);
+                    }
                     return RecognizeShapeWinRtOnDispatcherContext(strokes);
                 }
 
                 // IACore 必须走 IPC 辅助进程（x86/.NET 4.7.2）。
                 // 在 .NET 6 x64 主进程中本地加载 IAWinFX 会失败，故不再本地回退。
+                if (_lastLoggedBackend != "IACore")
+                {
+                    _lastLoggedBackend = "IACore";
+                    LogHelper.WriteLogToFile("[Ink] 形状识别后端: IACore (IPC 辅助进程)", LogHelper.LogType.Info);
+                }
                 var ipcResult = IpcIACoreClient.Instance.Recognize(strokes);
                 return Task.FromResult(ipcResult);
             }
@@ -242,6 +258,7 @@ namespace Ink_Canvas.Helpers
 
         public void Dispose()
         {
+            LogHelper.WriteLogToFile("[Ink] 识别管理器已释放", LogHelper.LogType.Info);
             _isInitialized = false;
         }
     }

@@ -266,10 +266,13 @@ namespace Ink_Canvas
                         inkCanvas.EditingMode = previousEditingMode;
                         currentSelectedElement = null;
                     }
+                    var previousPluginPageIndex = CurrentWhiteboardIndex;
+                    BeginPluginWhiteboardPageChange(index + 1);
                     SaveStrokes();
                     ClearStrokes(true);
                     CurrentWhiteboardIndex = index + 1;
                     RestoreStrokes();
+                    CompletePluginWhiteboardPageChange(previousPluginPageIndex);
                     UpdateIndexInfoDisplay();
                 }
                 if (leftPageListView != null) leftPageListView.SelectedIndex = index;
@@ -371,10 +374,13 @@ namespace Ink_Canvas
                         currentSelectedElement = null;
                     }
 
+                    var previousPluginPageIndex = CurrentWhiteboardIndex;
+                    BeginPluginWhiteboardPageChange(index + 1);
                     SaveStrokes();
                     ClearStrokes(true);
                     CurrentWhiteboardIndex = index + 1;
                     RestoreStrokes();
+                    CompletePluginWhiteboardPageChange(previousPluginPageIndex);
                     UpdateIndexInfoDisplay();
                 }
                 leftPageListView.SelectedIndex = index;
@@ -430,10 +436,13 @@ namespace Ink_Canvas
                         currentSelectedElement = null;
                     }
 
+                    var previousPluginPageIndex = CurrentWhiteboardIndex;
+                    BeginPluginWhiteboardPageChange(index + 1);
                     SaveStrokes();
                     ClearStrokes(true);
                     CurrentWhiteboardIndex = index + 1;
                     RestoreStrokes();
+                    CompletePluginWhiteboardPageChange(previousPluginPageIndex);
                     UpdateIndexInfoDisplay();
                 }
                 rightPageListView.SelectedIndex = index;

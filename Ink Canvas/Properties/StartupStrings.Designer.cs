@@ -52,9 +52,15 @@ namespace Ink_Canvas.Properties
 
         public static string ExternalProtocolHint => ResourceManager.GetString(nameof(ExternalProtocolHint), _resourceCulture);
 
-        public static string FastStartup => ResourceManager.GetString(nameof(FastStartup), _resourceCulture);
+        public static string StartupMode => ResourceManager.GetString(nameof(StartupMode), _resourceCulture);
 
-        public static string FastStartupHint => ResourceManager.GetString(nameof(FastStartupHint), _resourceCulture);
+        public static string StartupModeHint => ResourceManager.GetString(nameof(StartupModeHint), _resourceCulture);
+
+        public static string StartupMode_Default => ResourceManager.GetString(nameof(StartupMode_Default), _resourceCulture);
+
+        public static string StartupMode_Faster => ResourceManager.GetString(nameof(StartupMode_Faster), _resourceCulture);
+
+        public static string StartupMode_Fastest => ResourceManager.GetString(nameof(StartupMode_Fastest), _resourceCulture);
 
         public static string FixVersionHint => ResourceManager.GetString(nameof(FixVersionHint), _resourceCulture);
 
@@ -127,5 +133,23 @@ namespace Ink_Canvas.Properties
         public static string UpdatePackageArchitecture => ResourceManager.GetString(nameof(UpdatePackageArchitecture), _resourceCulture);
 
         public static string UpdatePackageArchitectureHint => ResourceManager.GetString(nameof(UpdatePackageArchitectureHint), _resourceCulture);
+
+        public static string ExternalProtocol_ShortcutCreate => ResourceManager.GetString(nameof(ExternalProtocol_ShortcutCreate), _resourceCulture);
+
+        public static string ExternalProtocol_ShortcutCreateHint => ResourceManager.GetString(nameof(ExternalProtocol_ShortcutCreateHint), _resourceCulture);
+
+        public static string ExternalProtocol_Shortcut_Board => ResourceManager.GetString(nameof(ExternalProtocol_Shortcut_Board), _resourceCulture);
+
+        public static string ExternalProtocol_Shortcut_Booth => ResourceManager.GetString(nameof(ExternalProtocol_Shortcut_Booth), _resourceCulture);
+
+        public static string ExternalProtocol_Shortcut_Random => ResourceManager.GetString(nameof(ExternalProtocol_Shortcut_Random), _resourceCulture);
+
+        public static string ExternalProtocol_Shortcut_Settings => ResourceManager.GetString(nameof(ExternalProtocol_Shortcut_Settings), _resourceCulture);
+
+        public static string ExternalProtocol_Shortcut_Annotate => ResourceManager.GetString(nameof(ExternalProtocol_Shortcut_Annotate), _resourceCulture);
+
+        public static string ExternalProtocol_Shortcut_Created => ResourceManager.GetString(nameof(ExternalProtocol_Shortcut_Created), _resourceCulture);
+
+        public static string ExternalProtocol_Shortcut_Failed => ResourceManager.GetString(nameof(ExternalProtocol_Shortcut_Failed), _resourceCulture);
     }
 }

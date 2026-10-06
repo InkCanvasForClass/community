@@ -28,7 +28,7 @@ DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 LicenseFile=LICENSE
 ; 取消注释以下行以在非管理员安装模式下运行 (仅为当前用户安装)。
-;PrivilegesRequired=lowest
+PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=.
 OutputBaseFilename=InkCanvasForClass CE Setup

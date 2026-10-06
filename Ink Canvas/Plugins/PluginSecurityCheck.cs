@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -125,7 +126,11 @@ namespace Ink_Canvas.Plugins
         /// </summary>
         public bool RequiresUserConfirmation(SecurityVerdict verdict)
         {
-            return verdict.TrustLevel == PluginTrustLevel.Unknown;
+            var requires = verdict.TrustLevel == PluginTrustLevel.Unknown;
+            LogHelper.WriteLogToFile(
+                $"[PluginSecurity] 安装评估: 信任等级={verdict.TrustLevel}, 需用户确认={requires}, 原因={string.Join(" ", verdict.Reasons)}",
+                LogHelper.LogType.Info);
+            return requires;
         }
 
         /// <summary>

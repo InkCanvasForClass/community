@@ -338,20 +338,64 @@
 
                             <TextBlock Text="{x:Static props:StorageStrings.AutoSave_Title}" Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"/>
 
-                            <controls:LabeledSettingsCard x:Name="CardSaveScreenshotsInDateFolders"
-                                Header="{x:Static props:StorageStrings.Storage_ScreenshotsByDateFolder}"
-                                Icon="{x:Static ui:SegoeFluentIcons.Folder}"
-                                Toggled="ToggleSwitchSaveScreenshotsInDateFolders_Toggled"/>
-
-                            <controls:LabeledSettingsCard x:Name="CardAutoSaveStrokesAtScreenshot"
-                                Header="{x:Static props:StorageStrings.Storage_AutoSaveInkOnScreenshot}"
-                                Icon="{x:Static ui:SegoeFluentIcons.Save}"
-                                Toggled="ToggleSwitchAutoSaveStrokesAtScreenshot_Toggled"/>
-
-                            <controls:LabeledSettingsCard x:Name="CardAutoSaveStrokesAtClear"
-                                Header="{x:Static props:StorageStrings.Storage_AutoScreenshotOnClear}"
-                                Icon="{x:Static ui:SegoeFluentIcons.Save}"
-                                Toggled="ToggleSwitchAutoSaveStrokesAtClear_Toggled"/>
+                            <ui:SettingsExpander Header="{x:Static props:StorageStrings.Storage_ScreenshotSettings}"
+                                                 Description="{x:Static props:StorageStrings.Storage_ScreenshotSettingsDesc}"
+                                                 IsExpanded="{Binding IsOn, ElementName=ToggleSwitchSaveScreenshotsInDateFolders, Mode=OneWay}">
+                                <ui:SettingsExpander.HeaderIcon>
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Camera}"/>
+                                </ui:SettingsExpander.HeaderIcon>
+                                <ui:ToggleSwitch x:Name="ToggleSwitchSaveScreenshotsInDateFolders" d:IsOn="True"
+                                                 Toggled="ToggleSwitchSaveScreenshotsInDateFolders_Toggled"/>
+                                <ui:SettingsExpander.Items>
+                                    <ui:SettingsCard Header="{x:Static props:StorageStrings.Storage_ScreenshotFormat}">
+                                        <ui:SettingsCard.HeaderIcon>
+                                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Photo}"/>
+                                        </ui:SettingsCard.HeaderIcon>
+                                        <ComboBox x:Name="ComboBoxScreenshotFormat" SelectionChanged="ComboBoxScreenshotFormat_SelectionChanged">
+                                            <ComboBoxItem Content="PNG" Tag="0"/>
+                                            <ComboBoxItem Content="JPG" Tag="1"/>
+                                        </ComboBox>
+                                    </ui:SettingsCard>
+                                    <ui:SettingsCard x:Name="CardScreenshotJpegQuality"
+                                                     Header="{x:Static props:StorageStrings.Storage_ScreenshotJpegQuality}"
+                                                     Visibility="Collapsed">
+                                        <ui:SettingsCard.HeaderIcon>
+                                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Crop}"/>
+                                        </ui:SettingsCard.HeaderIcon>
+                                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock x:Name="ScreenshotJpegQualityText" VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                            <Slider x:Name="ScreenshotJpegQualitySlider" Width="200" Minimum="50" Maximum="100"
+                                                    IsSnapToTickEnabled="True" TickFrequency="1" TickPlacement="None"
+                                                    ValueChanged="ScreenshotJpegQualitySlider_ValueChanged"/>
+                                        </ikw:SimpleStackPanel>
+                                    </ui:SettingsCard>
+                                    <ui:SettingsCard Header="{x:Static props:StorageStrings.Storage_ScreenshotScale}">
+                                        <ui:SettingsCard.HeaderIcon>
+                                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Zoom}"/>
+                                        </ui:SettingsCard.HeaderIcon>
+                                        <ComboBox x:Name="ComboBoxScreenshotScale" SelectionChanged="ComboBoxScreenshotScale_SelectionChanged">
+                                            <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_ScreenshotScale_100}" Tag="0"/>
+                                            <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_ScreenshotScale_75}" Tag="1"/>
+                                            <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_ScreenshotScale_50}" Tag="2"/>
+                                            <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_ScreenshotScale_25}" Tag="3"/>
+                                        </ComboBox>
+                                    </ui:SettingsCard>
+                                    <ui:SettingsCard Header="{x:Static props:StorageStrings.Storage_AutoSaveInkOnScreenshot}">
+                                        <ui:SettingsCard.HeaderIcon>
+                                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Save}"/>
+                                        </ui:SettingsCard.HeaderIcon>
+                                        <ui:ToggleSwitch x:Name="ToggleSwitchAutoSaveStrokesAtScreenshot"
+                                                         Toggled="ToggleSwitchAutoSaveStrokesAtScreenshot_Toggled"/>
+                                    </ui:SettingsCard>
+                                    <ui:SettingsCard Header="{x:Static props:StorageStrings.Storage_AutoScreenshotOnClear}">
+                                        <ui:SettingsCard.HeaderIcon>
+                                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Save}"/>
+                                        </ui:SettingsCard.HeaderIcon>
+                                        <ui:ToggleSwitch x:Name="ToggleSwitchAutoSaveStrokesAtClear"
+                                                         Toggled="ToggleSwitchAutoSaveStrokesAtClear_Toggled"/>
+                                    </ui:SettingsCard>
+                                </ui:SettingsExpander.Items>
+                            </ui:SettingsExpander>
 
                             <controls:LabeledSettingsCard x:Name="CardSaveStrokesAsXML"
                                 Header="{x:Static props:StorageStrings.Storage_SaveAsXml}"

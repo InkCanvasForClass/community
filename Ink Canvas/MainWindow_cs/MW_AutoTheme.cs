@@ -79,6 +79,7 @@ namespace Ink_Canvas
 
             InvalidateVisual();
             RefreshOtherWindowsTheme();
+            LogHelper.WriteLogToFile($"[Theme] 主题已应用: {theme} (自动切换图标={autoSwitchIcon})", LogHelper.LogType.Info);
         }
 
         void LoadImageResourceDictionary(string path)
@@ -93,6 +94,8 @@ namespace Ink_Canvas
             {
                 FloatBarForegroundColor = (Color)Application.Current.FindResource("FloatBarForegroundColor");
                 RefreshFloatingBarButtonColors();
+                // 主题切换后浮动栏背景变化，重新评估批注图标描边是否需要
+                UpdatePenIconColor();
             }
             catch (Exception)
             {
@@ -109,8 +112,9 @@ namespace Ink_Canvas
                 LeftSidePanel?.InvalidateVisual();
                 RightSidePanel?.InvalidateVisual();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 刷新快捷面板图标失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -159,8 +163,9 @@ namespace Ink_Canvas
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 刷新浮动栏高亮配色失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -249,8 +254,9 @@ namespace Ink_Canvas
                         break;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 刷新浮动栏按钮配色失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -280,22 +286,83 @@ namespace Ink_Canvas
             SetFloatingBarButtonBrush(Exit_Icon);
         }
 
+        // 跟随系统模式下最近一次应用的系统深浅色；null 表示尚未建立基线
+        private bool? _lastFollowedSystemThemeLight;
+        private DispatcherTimer _systemThemeRetryTimer;
+        private int _systemThemeRetryCount;
+        private const int SystemThemeRetryLimit = 10;
+        private static readonly TimeSpan SystemThemeRetryInterval = TimeSpan.FromMilliseconds(300);
+
         private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
         {
-            switch (Settings.Appearance.Theme)
+            // e 为 null 表示由代码主动调用（如设置加载完成后的主题刷新），此时跳过类别过滤
+            // 只关心外观类偏好变化；键盘/鼠标/电源等类别与主题无关
+            if (e != null && e.Category != UserPreferenceCategory.General) return;
+            // SystemEvents 的事件不保证在 UI 线程触发，统一调度回 UI 线程
+            Dispatcher.BeginInvoke(new Action(CheckSystemThemeSwitch));
+        }
+
+        /// <summary>
+        /// 系统深浅色切换检测：AppsUseLightTheme 注册表的写入可能晚于系统广播，
+        /// 首次读到旧值时延迟重试，确认真正翻转后再走完整主题管线。
+        /// </summary>
+        private void CheckSystemThemeSwitch()
+        {
+            // 仅「跟随系统」需要响应；固定主题重复应用反而会打断黑板/PPT 模式的深色覆盖
+            if (Settings.Appearance.Theme != 2) return;
+
+            bool systemLight = ThemeHelper.IsSystemThemeLight();
+
+            if (_lastFollowedSystemThemeLight == null)
             {
-                case 0:
-                    SetTheme(ThemeLight);
-                    break;
-                case 1:
-                    SetTheme(ThemeDark);
-                    break;
-                case 2:
-                    // 与 IsCurrentThemeDark / GetEffectiveTheme / 浮动栏一致，统一读 AppsUseLightTheme，
-                    // 否则 SystemUsesLightTheme 与 AppsUseLightTheme 可独立取值时主题会混搭
-                    SetTheme(ThemeHelper.IsSystemThemeLight() ? ThemeLight : ThemeDark);
-                    break;
+                // 首次只建立基线，不重复应用当前主题
+                _lastFollowedSystemThemeLight = systemLight;
+                return;
             }
+
+            if (systemLight == _lastFollowedSystemThemeLight)
+            {
+                // 广播先于注册表写入的情况：延迟重读，确认值确实没变再放弃
+                StartSystemThemeRetry();
+                return;
+            }
+
+            StopSystemThemeRetry();
+            _lastFollowedSystemThemeLight = systemLight;
+            ApplyFollowedSystemTheme(systemLight);
+        }
+
+        private void StartSystemThemeRetry()
+        {
+            if (_systemThemeRetryCount >= SystemThemeRetryLimit) return;
+
+            _systemThemeRetryCount++;
+            if (_systemThemeRetryTimer == null)
+            {
+                _systemThemeRetryTimer = new DispatcherTimer { Interval = SystemThemeRetryInterval };
+                _systemThemeRetryTimer.Tick += (s, args) =>
+                {
+                    _systemThemeRetryTimer.Stop();
+                    CheckSystemThemeSwitch();
+                };
+            }
+            _systemThemeRetryTimer.Start();
+        }
+
+        private void StopSystemThemeRetry()
+        {
+            _systemThemeRetryTimer?.Stop();
+            _systemThemeRetryCount = 0;
+        }
+
+        private void ApplyFollowedSystemTheme(bool systemLight)
+        {
+            // 应用级主题（App 级 ThemeResources / Default 主题控件与 Popup）必须与
+            // 窗口级 RequestedTheme 同步翻转，否则切换后会出现深浅混搭
+            ThemeManager.Current.ApplicationTheme = systemLight ? ApplicationTheme.Light : ApplicationTheme.Dark;
+            SetTheme(systemLight ? ThemeLight : ThemeDark, autoSwitchIcon: true);
+            ViewboxFloatingBar.Opacity = 1.0;
+            RefreshNotificationColors();
         }
 
         private void AutoSwitchFloatingBarIconForTheme(string theme)
@@ -306,8 +373,9 @@ namespace Ink_Canvas
                 UpdateFloatingBarIcon();
                 UpdateFloatingBarIconComboBox();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 按主题自动切换浮动栏图标失败 (theme={theme}): {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -327,8 +395,9 @@ namespace Ink_Canvas
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 同步浮动栏图标下拉框失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -355,8 +424,9 @@ namespace Ink_Canvas
                     BorderStrokeSelectionControl.InvalidateVisual();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 刷新墨迹选择栏图标失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -369,8 +439,9 @@ namespace Ink_Canvas
                     BorderImageSelectionControl.InvalidateVisual();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 刷新图片选择栏图标失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -383,8 +454,9 @@ namespace Ink_Canvas
                     CheckEnableTwoFingerGestureBtnColorPrompt();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 刷新手势按钮图标失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -403,8 +475,9 @@ namespace Ink_Canvas
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 刷新其它窗口主题失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
     }

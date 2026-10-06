@@ -112,8 +112,16 @@ namespace Ink_Canvas.Windows
             InitializeAudio();
             ApplyTheme();
 
-            // 监听主题变化
-            SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+            // 监听主题变化。SystemEvents 在 UIAccess 降权子进程等特殊上下文下会抛
+            // PlatformNotSupportedException，订阅失败降级，不阻断控件构造。
+            try
+            {
+                SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"PPTQuickPanel | 订阅系统主题变化失败，已降级: {ex.Message}", LogHelper.LogType.Warning);
+            }
 
             Loaded += PPTQuickPanel_Loaded;
             Unloaded += PPTQuickPanel_Unloaded;
@@ -489,7 +497,14 @@ namespace Ink_Canvas.Windows
 
         private void PPTQuickPanel_Unloaded(object sender, RoutedEventArgs e)
         {
-            SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
+            try
+            {
+                SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"PPTQuickPanel | 取消系统事件订阅失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
             UnsubscribeFromInkCanvasChildrenChanges();
         }
 
@@ -547,8 +562,9 @@ namespace Ink_Canvas.Windows
                 device.Activate(ref IID_IAudioEndpointVolume, 0, IntPtr.Zero, out interfacePointer);
                 _audioEndpointVolume = interfacePointer as IAudioEndpointVolume;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[PPT] 初始化默认音频端点音量接口失败（音量控制将不可用）: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 

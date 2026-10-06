@@ -188,8 +188,7 @@ namespace Ink_Canvas
                 var factoryName = string.Equals(info.Type, "SvgSceneGroup", StringComparison.OrdinalIgnoreCase)
                     ? "FromSerializedScene"
                     : "FromSerializedElement";
-                var factory = type?.GetMethod(factoryName, BindingFlags.Public | BindingFlags.Static);
-                if (factory?.Invoke(null, new object[] { info.SceneElementJson, 1d }) is not FrameworkElement element) return;
+                if (!TryInvokeSerializedElementFactory(type, factoryName, info.SceneElementJson, out var element)) return;
                 element.Name = "svgscene_restore_" + DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
                 InkCanvas.SetLeft(element, double.IsNaN(info.Left) ? 0 : info.Left);
                 InkCanvas.SetTop(element, double.IsNaN(info.Top) ? 0 : info.Top);
@@ -239,14 +238,11 @@ namespace Ink_Canvas
                 element.Arrange(new Rect(new System.Windows.Point(0, 0), size));
                 element.UpdateLayout();
                 element.InvalidateVisual();
-                LogHelper.WriteLogToFile($"[SecAgentDiag] RESTORE_LAYOUT type={element.GetType().Name} " +
-                    $"actual=({element.ActualWidth:0.##}x{element.ActualHeight:0.##}) " +
-                    $"size=({element.Width:0.##}x{element.Height:0.##}) " +
-                    $"visible={element.Visibility} hit={element.IsHitTestVisible}", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[SecAgentDiag] RESTORE_LAYOUT_FAILED type={element.GetType().FullName} error={ex}", LogHelper.LogType.Error);
+                // Layout refresh is best-effort while restoring plugin elements.
+                LogHelper.WriteLogToFile($"[Settings] 恢复插件元素后强制刷新布局（Measure/Arrange/ForceLayout）失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -600,8 +596,9 @@ namespace Ink_Canvas
                                         {
                                             await Helpers.UploadHelper.UploadFileAsync(pageFileName);
                                         }
-                                        catch (Exception)
+                                        catch (Exception ex)
                                         {
+                                            LogHelper.WriteLogToFile($"[Settings] 异步上传分页 XML 墨迹文件失败: {ex.Message}", LogHelper.LogType.Info);
                                         }
                                     });
                                 }
@@ -630,6 +627,7 @@ namespace Ink_Canvas
                         // 单页面XML保存
                         string xmlPath = Path.ChangeExtension(savePathWithName, ".xml");
                         SaveStrokesAsXML(inkCanvas.Strokes, xmlPath);
+                        SavePluginPageDocumentSidecar(xmlPath, CurrentWhiteboardIndex);
                         if (newNotice)
                         {
                             Task.Delay(100).ContinueWith(t =>
@@ -763,13 +761,14 @@ namespace Ink_Canvas
                         for (int i = 0; i < allPageStrokes.Count; i++)
                         {
                             var strokes = allPageStrokes[i];
-                            if (strokes.Count > 0)
+                            if (strokes.Count > 0 || HasPluginPageState(i + 1))
                             {
                                 string pageFileName = Path.Combine(basePath, $"{baseFileName}_Page-{i + 1}.icstk");
                                 using (var fs = new FileStream(pageFileName, FileMode.Create))
                                 {
                                     strokes.Save(fs);
                                 }
+                                SavePluginPageDocumentSidecar(pageFileName, i + 1);
 
                                 // 异步上传每个icstk文件
                                 _ = Task.Run(async () =>
@@ -778,8 +777,9 @@ namespace Ink_Canvas
                                     {
                                         await Helpers.UploadHelper.UploadFileAsync(pageFileName);
                                     }
-                                    catch (Exception)
+                                    catch (Exception ex)
                                     {
+                                        LogHelper.WriteLogToFile($"[Settings] 异步上传分页 icstk 墨迹文件失败: {ex.Message}", LogHelper.LogType.Info);
                                     }
                                 });
                             }
@@ -804,6 +804,7 @@ namespace Ink_Canvas
                             // 保存为XML格式
                             string xmlPath = Path.ChangeExtension(savePathWithName, ".xml");
                             SaveStrokesAsXML(inkCanvas.Strokes, xmlPath);
+                            SavePluginPageDocumentSidecar(xmlPath, CurrentWhiteboardIndex);
                             if (newNotice)
                             {
                                 Task.Delay(100).ContinueWith(t =>
@@ -834,9 +835,14 @@ namespace Ink_Canvas
                             }
                             catch
                             {
-                                try { if (File.Exists(tmpPath)) File.Delete(tmpPath); } catch { }
+                                try { if (File.Exists(tmpPath)) File.Delete(tmpPath); }
+                                catch (Exception ex)
+                                {
+                                    LogHelper.WriteLogToFile($"[Settings] 原子写入墨迹文件失败后删除临时文件 {Path.GetFileName(tmpPath)} 失败: {ex.Message}", LogHelper.LogType.Info);
+                                }
                                 throw;
                             }
+                            SavePluginPageDocumentSidecar(savePathWithName, CurrentWhiteboardIndex);
                             if (newNotice)
                             {
                                 Task.Delay(100).ContinueWith(t =>
@@ -857,8 +863,9 @@ namespace Ink_Canvas
                                 string uploadPath = Settings.Automation.IsSaveStrokesAsXML ? Path.ChangeExtension(savePathWithName, ".xml") : savePathWithName;
                                 await Helpers.UploadHelper.UploadFileAsync(uploadPath);
                             }
-                            catch (Exception)
+                            catch (Exception ex)
                             {
+                                LogHelper.WriteLogToFile($"[Settings] 异步上传单页墨迹文件失败: {ex.Message}", LogHelper.LogType.Info);
                             }
                         });
 
@@ -927,8 +934,9 @@ namespace Ink_Canvas
                         {
                             await Helpers.UploadHelper.UploadFileAsync(xmlPath);
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
+                            LogHelper.WriteLogToFile($"[Settings] 异步上传 XML 墨迹文件失败: {ex.Message}", LogHelper.LogType.Info);
                         }
                     });
                 }
@@ -973,7 +981,7 @@ namespace Ink_Canvas
                     for (int i = 0; i < allPageStrokes.Count; i++)
                     {
                         var strokes = allPageStrokes[i];
-                        if (strokes.Count > 0)
+                        if (strokes.Count > 0 || HasPluginPageState(i + 1))
                         {
                             // 保存XML文件（临时文件，不触发上传）
                             string xmlFileName = Path.Combine(tempDir, $"page_{i + 1:D4}.xml");
@@ -1011,6 +1019,7 @@ namespace Ink_Canvas
                     if (File.Exists(zipFileName))
                         File.Delete(zipFileName);
 
+                    SavePluginDocumentStateToDirectory(tempDir);
                     ZipFile.CreateFromDirectory(tempDir, zipFileName);
 
                     // 异步上传ZIP文件到Dlass
@@ -1020,8 +1029,9 @@ namespace Ink_Canvas
                         {
                             await Helpers.UploadHelper.UploadFileAsync(zipFileName);
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
+                            LogHelper.WriteLogToFile($"[Settings] 异步上传多页 XML 压缩包失败: {ex.Message}", LogHelper.LogType.Info);
                         }
                     });
 
@@ -1074,7 +1084,7 @@ namespace Ink_Canvas
                     for (int i = 0; i < allPageStrokes.Count; i++)
                     {
                         var strokes = allPageStrokes[i];
-                        if (strokes.Count > 0)
+                        if (strokes.Count > 0 || HasPluginPageState(i + 1))
                         {
                             // 保存墨迹文件
                             string strokeFileName = Path.Combine(tempDir, $"page_{i + 1:D4}.icstk");
@@ -1122,6 +1132,7 @@ namespace Ink_Canvas
                         File.Delete(zipFileName);
 
                     // 使用System.IO.Compression.FileSystem来创建ZIP
+                    SavePluginDocumentStateToDirectory(tempDir);
                     ZipFile.CreateFromDirectory(tempDir, zipFileName);
 
                     // 异步上传ZIP文件到Dlass
@@ -1131,8 +1142,9 @@ namespace Ink_Canvas
                         {
                             await Helpers.UploadHelper.UploadFileAsync(zipFileName);
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
+                            LogHelper.WriteLogToFile($"[Settings] 异步上传多页墨迹压缩包失败: {ex.Message}", LogHelper.LogType.Info);
                         }
                     });
 
@@ -1237,8 +1249,9 @@ namespace Ink_Canvas
                                 {
                                     await Helpers.UploadHelper.UploadFileAsync(imagePathWithName);
                                 }
-                                catch (Exception)
+                                catch (Exception ex)
                                 {
+                                    LogHelper.WriteLogToFile($"[Screenshot] 异步上传带墨迹截图 PNG 失败: {ex.Message}", LogHelper.LogType.Info);
                                 }
                             });
                         } // using imgBitmap
@@ -1668,6 +1681,7 @@ namespace Ink_Canvas
                     TimeMachineHistories[pair.Key] = pair.Value;
 
                 // 恢复第一页的墨迹
+                LoadPluginDocumentStateFromDirectory(tempDir);
                 if (TimeMachineHistories[1] != null)
                 {
                     RestoreStrokes();
@@ -1730,6 +1744,7 @@ namespace Ink_Canvas
                 timeMachine.ClearStrokeHistory();
                 inkCanvas.Strokes.Add(strokes);
                 LogHelper.NewLog($"XML Strokes Insert: Strokes Count: {inkCanvas.Strokes.Count}");
+                LoadPluginPageDocumentSidecar(filePath);
 
                 // 恢复元素信息
                 var elementsFile = Path.ChangeExtension(filePath, ".elements.json");
@@ -1900,6 +1915,8 @@ namespace Ink_Canvas
                     LogHelper.NewLog($"Strokes Insert: Strokes Count: {inkCanvas.Strokes.Count.ToString()}");
                 }
             }
+
+            LoadPluginPageDocumentSidecar(filePath);
 
             // 恢复元素信息
             var elementsFile = Path.ChangeExtension(filePath, ".elements.json");

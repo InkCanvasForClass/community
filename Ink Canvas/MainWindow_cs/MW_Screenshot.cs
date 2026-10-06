@@ -83,7 +83,7 @@ namespace Ink_Canvas
                         var directory = Path.GetDirectoryName(path);
                         if (!Directory.Exists(directory))
                             Directory.CreateDirectory(directory);
-                        bitmapToSave.Save(path, ImageFormat.Png);
+                        Helpers.ScreenshotImageSaveHelper.Save(bitmapToSave, path);
                         bitmapToSave.Dispose();
                     }
 
@@ -105,7 +105,10 @@ namespace Ink_Canvas
                         }
                         catch
                         {
-                            try { if (File.Exists(tmpStrokePath)) File.Delete(tmpStrokePath); } catch { }
+                            try { if (File.Exists(tmpStrokePath)) File.Delete(tmpStrokePath); } catch (Exception ex)
+                            {
+                                LogHelper.WriteLogToFile($"[Screenshot] 清理临时笔画文件失败: {ex.Message}", LogHelper.LogType.Info);
+                            }
                             throw;
                         }
                     }
@@ -493,6 +496,9 @@ namespace Ink_Canvas
 
                 // 使用PNG格式保存，确保透明度信息不丢失
                 bitmap.Save(savePath, ImageFormat.Png);
+                LogHelper.WriteLogToFile(
+                    $"[Screenshot] 截图已保存: {savePath} ({rc.Width}x{rc.Height}), 复制到剪贴板={copyToClipboard}",
+                    LogHelper.LogType.Info);
 
                 // 截图后复制到剪贴板
                 if (copyToClipboard)
@@ -519,8 +525,9 @@ namespace Ink_Canvas
                     // 使用上传帮助类上传到所有启用的服务
                     await Helpers.UploadHelper.UploadFileAsync(savePath);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    LogHelper.WriteLogToFile($"[Screenshot] 截图上传失败（本地文件已保存）: {ex.Message}", LogHelper.LogType.Info);
                 }
             });
         }
@@ -554,7 +561,7 @@ namespace Ink_Canvas
                 basePath,
                 "Auto Saved - Screenshots",
                 dateFolder,
-                safeRelativePath + ".png");
+                safeRelativePath + Helpers.ScreenshotImageSaveHelper.GetExtension());
         }
 
         private static string SanitizeScreenshotRelativePath(string relativePath)
@@ -602,7 +609,7 @@ namespace Ink_Canvas
 
             return Path.Combine(
                 screenshotsFolder,
-                $"{GetScreenshotFileNameStem()}.png");
+                GetScreenshotFileNameStem() + Helpers.ScreenshotImageSaveHelper.GetExtension());
         }
 
         private string GetScreenshotFileNameStem()

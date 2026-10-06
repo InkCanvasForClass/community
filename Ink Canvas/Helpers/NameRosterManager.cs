@@ -38,8 +38,22 @@ namespace Ink_Canvas.Helpers
         {
             string names = "";
             string replace = "";
-            try { if (File.Exists(NamesFilePath)) names = File.ReadAllText(NamesFilePath); } catch { }
-            try { if (File.Exists(ReplaceFilePath)) replace = File.ReadAllText(ReplaceFilePath); } catch { }
+            try
+            {
+                if (File.Exists(NamesFilePath)) names = File.ReadAllText(NamesFilePath);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Roster] 读取当前名单文件 Names.txt 失败，保存为方案时该部分将为空: {ex.Message}", LogHelper.LogType.Info);
+            }
+            try
+            {
+                if (File.Exists(ReplaceFilePath)) replace = File.ReadAllText(ReplaceFilePath);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Roster] 读取当前替换表文件 Replace.txt 失败，保存为方案时该部分将为空: {ex.Message}", LogHelper.LogType.Info);
+            }
             return (names, replace);
         }
 

@@ -533,14 +533,35 @@ namespace Ink_Canvas
         /// </remarks>
         private void GridInkCanvasSelectionCover_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            // The lasso cover is above InkCanvas. Give editable SVG scenes priority so
-            // their own selection frame handles the click instead of stroke selection.
-            var scenePoint = e.GetPosition(inkCanvas);
-            var sceneElement = FindSecAgentSceneElementAtCanvasPoint(scenePoint);
+            if (TryBlockFrozenPageMutation("移动墨迹"))
+            {
+                e.Handled = true;
+                return;
+            }
+
+            var clickPoint = e.GetPosition(inkCanvas);
+            var selectedStrokes = inkCanvas.GetSelectedStrokes();
+            if (selectedStrokes.Count > 0)
+            {
+                var selectionBounds = inkCanvas.GetSelectionBounds();
+                if (selectionBounds.Contains(clickPoint))
+                {
+                    // A click inside an existing stroke selection belongs to the stroke
+                    // drag gesture, even when an SVG scene occupies the same area.
+                    isGridInkCanvasSelectionCoverMouseDown = true;
+                    isStrokeDragging = true;
+                    strokeDragStartPoint = clickPoint;
+                    GridInkCanvasSelectionCover.CaptureMouse();
+                    GridInkCanvasSelectionCover.Cursor = Cursors.SizeAll;
+                    e.Handled = true;
+                    return;
+                }
+            }
+
+            // Only let an SVG scene handle clicks outside the active stroke selection.
+            var sceneElement = FindSecAgentSceneElementAtCanvasPoint(clickPoint);
             if (sceneElement != null)
             {
-                SecAgentDiag($"LASSO_SCENE_PRIORITY point={scenePoint} element={SecAgentDiagElement(sceneElement)} " +
-                             $"strokes={inkCanvas.GetSelectedStrokes().Count} overlay={GridInkCanvasSelectionCover.Visibility}");
                 isGridInkCanvasSelectionCoverMouseDown = false;
                 isStrokeDragging = false;
                 GridInkCanvasSelectionCover.ReleaseMouseCapture();
@@ -550,39 +571,16 @@ namespace Ink_Canvas
                 return;
             }
 
-            if (TryBlockFrozenPageMutation("移动墨迹"))
+            isGridInkCanvasSelectionCoverMouseDown = selectedStrokes.Count > 0;
+            isStrokeDragging = false;
+            if (selectedStrokes.Count > 0)
             {
-                e.Handled = true;
-                return;
+                // Clicking outside the selection clears the stroke selection.
+                inkCanvas.Select(new StrokeCollection());
+                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
             }
-            isGridInkCanvasSelectionCoverMouseDown = true;
 
-            // 检查是否有选中的墨迹
-            if (inkCanvas.GetSelectedStrokes().Count > 0)
-            {
-                // 获取鼠标点击位置
-                var clickPoint = e.GetPosition(inkCanvas);
-                var selectionBounds = inkCanvas.GetSelectionBounds();
-
-                // 检查点击位置是否在选择框边界内
-                if (clickPoint.X >= selectionBounds.Left &&
-                    clickPoint.X <= selectionBounds.Right &&
-                    clickPoint.Y >= selectionBounds.Top &&
-                    clickPoint.Y <= selectionBounds.Bottom)
-                {
-                    // 只有在选择框边界内才允许拖动
-                    isStrokeDragging = true;
-                    strokeDragStartPoint = clickPoint;
-                    GridInkCanvasSelectionCover.CaptureMouse();
-                    GridInkCanvasSelectionCover.Cursor = Cursors.SizeAll;
-                }
-                else
-                {
-                    // 点击在选择框外，取消选择
-                    inkCanvas.Select(new StrokeCollection());
-                    GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-                }
-            }
+            e.Handled = true;
         }
 
         /// <summary>
@@ -606,7 +604,6 @@ namespace Ink_Canvas
                 var bounds = GetSceneElementBounds(child);
                 if (bounds.Contains(canvasPoint))
                 {
-                    SecAgentDiag($"LASSO_SCENE_HIT point={canvasPoint} bounds={bounds} element={SecAgentDiagElement(child)}");
                     return child;
                 }
             }
@@ -1282,6 +1279,30 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 校验按下缩放锚点时的选区快照是否可用于缩放。
+        /// </summary>
+        /// <remarks>
+        /// 退化边界（没有选中笔画、或选区 0 宽/0 高）不能作为缩放分母：<see cref="Stroke.Transform"/> 是就地改写，
+        /// 一旦用 Infinity/NaN 矩阵变换就会把笔画坐标写坏，且撤销无法恢复（history 持有的是同一批对象）。
+        /// 命中退化时记录完整上下文并返回 false，调用方应放弃本次缩放。
+        /// </remarks>
+        private bool IsResizeBaselineUsable(Rect snapshot, string source)
+        {
+            var selectedCount = inkCanvas?.GetSelectedStrokes().Count ?? 0;
+            if (selectedCount > 0 && !snapshot.IsEmpty && snapshot.Width > 0 && snapshot.Height > 0)
+            {
+                return true;
+            }
+
+            LogHelper.WriteLogToFile(
+                $"[Ink] 缩放锚点：选区快照不可用，已忽略本次按下 (source={source}, snapshot={snapshot}, " +
+                $"live={inkCanvas?.GetSelectionBounds()}, selected={selectedCount}, " +
+                $"cover={(GridInkCanvasSelectionCover?.Visibility.ToString() ?? "null")}, mode={inkCanvas?.EditingMode})",
+                LogHelper.LogType.Warning);
+            return false;
+        }
+
+        /// <summary>
         /// 在用户按下选择框的缩放把手时开始缩放操作。
         /// </summary>
         /// <remarks>
@@ -1298,10 +1319,19 @@ namespace Ink_Canvas
             }
             if (sender is Rectangle handle)
             {
+                var snapshot = inkCanvas.GetSelectionBounds();
+                if (!IsResizeBaselineUsable(snapshot, "mouse"))
+                {
+                    // 选择框仍挂在界面上但没有有效选中态：拒绝进入缩放，避免把不一致状态带进就地变换。
+                    handle.ReleaseMouseCapture();
+                    e.Handled = true;
+                    return;
+                }
+
                 isResizing = true;
                 currentResizeHandle = handle.Name;
                 resizeStartPoint = e.GetPosition(inkCanvas);
-                originalSelectionBounds = inkCanvas.GetSelectionBounds();
+                originalSelectionBounds = snapshot;
                 handle.CaptureMouse();
                 e.Handled = true;
             }
@@ -1326,8 +1356,8 @@ namespace Ink_Canvas
 
             var newBounds = CalculateNewBounds(originalSelectionBounds, delta, currentResizeHandle);
 
-            // 应用新的边界到选中的墨迹
-            ApplyBoundsToStrokes(newBounds);
+            // 应用新的边界到选中的墨迹（分母用按下时的快照，避免与 live 选区漂移）
+            ApplyBoundsToStrokes(newBounds, originalSelectionBounds);
 
             // 更新选择框显示
             UpdateSelectionDisplay();
@@ -1363,11 +1393,19 @@ namespace Ink_Canvas
             }
             if (sender is Rectangle handle)
             {
+                var touchPoint = e.GetTouchPoint(inkCanvas);
+                var snapshot = inkCanvas.GetSelectionBounds();
+                if (!IsResizeBaselineUsable(snapshot, "touch"))
+                {
+                    // 同上：选择框可见但没有有效选中态时放弃缩放。
+                    e.Handled = true;
+                    return;
+                }
+
                 isResizing = true;
                 currentResizeHandle = handle.Name;
-                var touchPoint = e.GetTouchPoint(inkCanvas);
                 resizeStartPoint = touchPoint.Position;
-                originalSelectionBounds = inkCanvas.GetSelectionBounds();
+                originalSelectionBounds = snapshot;
                 e.Handled = true;
             }
         }
@@ -1388,8 +1426,8 @@ namespace Ink_Canvas
 
             var newBounds = CalculateNewBounds(originalSelectionBounds, delta, currentResizeHandle);
 
-            // 应用新的边界到选中的墨迹
-            ApplyBoundsToStrokes(newBounds);
+            // 应用新的边界到选中的墨迹（分母用按下时的快照，避免与 live 选区漂移）
+            ApplyBoundsToStrokes(newBounds, originalSelectionBounds);
 
             // 更新选择框显示
             UpdateSelectionDisplay();
@@ -1478,22 +1516,43 @@ namespace Ink_Canvas
         /// <summary>
         /// 应用新的边界到选中的墨迹
         /// </summary>
-        /// <param name="newBounds">新的边界矩形</param>
+        /// <param name="newBounds">本次拖动计算出的目标边界。</param>
+        /// <param name="originalBounds">按下锚点时的选区快照。必须与 <paramref name="newBounds"/> 来自同一时刻：
+        /// 缩放分母由此提供，若改为实时重读，选区在拖动途中变化会让分母退化为 0 并产生 Infinity/NaN 矩阵。</param>
         /// <remarks>
         /// 计算缩放比例和平移量
         /// 创建变换矩阵
         /// 应用变换到选中的墨迹
         /// </remarks>
-        private void ApplyBoundsToStrokes(Rect newBounds)
+        private void ApplyBoundsToStrokes(Rect newBounds, Rect originalBounds)
         {
             var selectedStrokes = inkCanvas.GetSelectedStrokes();
             if (selectedStrokes.Count == 0) return;
 
-            var originalBounds = inkCanvas.GetSelectionBounds();
+            // 分母退化必须直接放弃：Stroke.Transform 就地改写坐标，写成 NaN 后连撤销都救不回来。
+            if (originalBounds.IsEmpty || originalBounds.Width <= 0 || originalBounds.Height <= 0)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[Ink] 缩放锚点：选区快照边界退化，已跳过本次变换 (snapshot={originalBounds}, " +
+                    $"live={inkCanvas.GetSelectionBounds()}, newBounds={newBounds}, selected={selectedStrokes.Count}, " +
+                    $"handle={currentResizeHandle}, resizing={isResizing}, " +
+                    $"cover={(GridInkCanvasSelectionCover?.Visibility.ToString() ?? "null")}, mode={inkCanvas.EditingMode})",
+                    LogHelper.LogType.Warning);
+                return;
+            }
 
             // 计算缩放比例
             var scaleX = newBounds.Width / originalBounds.Width;
             var scaleY = newBounds.Height / originalBounds.Height;
+
+            if (!double.IsFinite(scaleX) || !double.IsFinite(scaleY) || scaleX <= 0 || scaleY <= 0)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[Ink] 缩放锚点：缩放系数非法，已跳过本次变换 (scaleX={scaleX}, scaleY={scaleY}, " +
+                    $"newBounds={newBounds}, snapshot={originalBounds}, handle={currentResizeHandle})",
+                    LogHelper.LogType.Warning);
+                return;
+            }
 
             // 计算平移量
             var translateX = newBounds.X - originalBounds.X;

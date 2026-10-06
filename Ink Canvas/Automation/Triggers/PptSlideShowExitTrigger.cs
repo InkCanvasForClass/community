@@ -1,4 +1,6 @@
+using Ink_Canvas.Helpers;
 using Ink_Canvas.WorkflowAutomation.Abstractions;
+using System;
 using System.Diagnostics;
 
 namespace Ink_Canvas.WorkflowAutomation.Triggers
@@ -18,6 +20,15 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
     public class PPTSlideShowExitTrigger : TriggerBase<PPTSlideShowExitSettings>
     {
         private bool _wasInSlideShow = false;
+
+        private static int _diagExceptionCount;
+
+        private static void LogCallbackException(string what, Exception ex)
+        {
+            var n = System.Threading.Interlocked.Increment(ref _diagExceptionCount);
+            if (n == 1 || n % 100 == 0)
+                LogHelper.WriteLogToFile($"[Automation] {what} 异常（累计 {n} 次）: {ex.Message}", LogHelper.LogType.Info);
+        }
 
         public override void Loaded()
         {
@@ -72,12 +83,16 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
                             return true;
                         }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        LogCallbackException("读取 POWERPNT 进程主窗口标题判断是否处于放映", ex);
+                    }
                 }
                 return false;
             }
-            catch
+            catch (Exception ex)
             {
+                LogCallbackException("枚举 POWERPNT 进程判断是否处于放映", ex);
                 return false;
             }
         }

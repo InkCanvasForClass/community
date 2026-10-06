@@ -104,7 +104,7 @@ namespace Ink_Canvas.Helpers
         // 属性写入驱动 KSPROPERTY 后全局生效，VideoCaptureElement 的画面随之改变。
 
         /// <summary>
-        /// 亮度（曝光度）归一化值，范围 -100..100，0 表示摄像头默认值。
+        /// 亮度（曝光度）归一化值，范围 -100..100，0 表示摄像头默认状态（写 Auto 标志回到自动控制）。
         /// 等价于 <see cref="GetCameraPropertyValue"/>(<see cref="BoothCameraProperty.Brightness"/>)，
         /// 保留是为了与早期代码兼容。setter 会异步把值应用到硬件。
         /// 摄像头不支持时 setter 静默忽略。
@@ -130,10 +130,10 @@ namespace Ink_Canvas.Helpers
 
         // --- 统一属性 API（推荐新代码使用）---
 
-        /// <summary>当前摄像头所有属性的支持状态与归一化值（-100..100，0=默认）。需先 ProbeCameraPropertiesAsync。</summary>
+        /// <summary>当前摄像头所有属性的支持状态与归一化值（-100..100，0=默认（Auto））。需先 ProbeCameraPropertiesAsync。</summary>
         IReadOnlyDictionary<BoothCameraProperty, CameraPropState> CameraProperties { get; }
 
-        /// <summary>读取指定属性的归一化值（-100..100，0=默认）。未支持/未探测时返回 0。</summary>
+        /// <summary>读取指定属性的归一化值（-100..100，0=默认（Auto））。未支持/未探测时返回 0。</summary>
         int GetCameraPropertyValue(BoothCameraProperty prop);
 
         /// <summary>
@@ -191,7 +191,9 @@ namespace Ink_Canvas.Helpers
         public int HwMax;
         /// <summary>硬件默认值。</summary>
         public int HwDefault;
-        /// <summary>归一化值 -100..100，0=默认。+100=max，-100=min。</summary>
+        /// <summary>摄像头是否支持 Auto（自动）模式。归一化值为 0 时优先写 Auto 让摄像头回到自动控制，而非锁死在 Manual+默认值。</summary>
+        public bool SupportsAuto;
+        /// <summary>归一化值 -100..100，0=默认（Auto）。+100=max，-100=min。</summary>
         public int NormalizedValue;
     }
 

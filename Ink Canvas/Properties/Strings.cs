@@ -418,6 +418,7 @@ namespace Ink_Canvas.Properties
             dict["FloatingBar_Hide"] = ("FloatingBarStrings", "FloatingBar_Hide");
             dict["FloatingBar_LassoSelect"] = ("FloatingBarStrings", "FloatingBar_LassoSelect");
             dict["FloatingBar_Mouse"] = ("FloatingBarStrings", "FloatingBar_Mouse");
+            dict["FloatingBar_MouseClear"] = ("FloatingBarStrings", "FloatingBar_MouseClear");
             dict["FloatingBar_StrokeEraser"] = ("FloatingBarStrings", "FloatingBar_StrokeEraser");
             dict["FloatingBar_Unfreeze"] = ("FloatingBarStrings", "FloatingBar_Unfreeze");
             dict["FloatingBar_Whiteboard"] = ("FloatingBarStrings", "FloatingBar_Whiteboard");
@@ -1284,6 +1285,8 @@ namespace Ink_Canvas.Properties
             dict["ToolbarPage_SeparateBorderDesc"] = ("FloatingBarStrings", "ToolbarPage_SeparateBorderDesc");
             dict["ToolbarPage_DisplayMode"] = ("FloatingBarStrings", "ToolbarPage_DisplayMode");
             dict["ToolbarPage_QuickPaletteDisplayModeDesc"] = ("FloatingBarStrings", "ToolbarPage_QuickPaletteDisplayModeDesc");
+            dict["ToolbarPage_ComponentName"] = ("FloatingBarStrings", "ToolbarPage_ComponentName");
+            dict["ToolbarPage_ComponentNameDesc"] = ("FloatingBarStrings", "ToolbarPage_ComponentNameDesc");
             dict["ToolbarPage_Size"] = ("FloatingBarStrings", "ToolbarPage_Size");
             dict["ToolbarPage_FixedWidth"] = ("FloatingBarStrings", "ToolbarPage_FixedWidth");
             dict["ToolbarPage_FixedHeight"] = ("FloatingBarStrings", "ToolbarPage_FixedHeight");

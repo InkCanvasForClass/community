@@ -46,9 +46,11 @@ namespace Ink_Canvas
             {
                 AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
                 AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderDrawShape);
+                LogHelper.WriteLogToFile("[Shape] 几何工具面板已关闭", LogHelper.LogType.Info);
             }
             else
             {
+                LogHelper.WriteLogToFile($"[Shape] 几何工具面板已打开 (mode={currentMode})", LogHelper.LogType.Info);
                 HideSubPanels();
                 if (currentMode == 0)
                 {
@@ -2787,6 +2789,8 @@ namespace Ink_Canvas
                 return;
             }
 
+            var completedShapeMode = drawingShapeMode;
+
             if (_isMouseRealtimeInking)
             {
                 StrokeVisual sv = null;
@@ -2967,6 +2971,12 @@ namespace Ink_Canvas
                 else if (lastTempStroke != null) collection = new StrokeCollection { lastTempStroke };
                 if (collection != null) timeMachine.CommitStrokeUserInputHistory(collection);
             }
+
+            if (completedShapeMode == 1 && lastTempStroke != null &&
+                inkCanvas.Strokes.Contains(lastTempStroke))
+                PublishPluginCanvasLineCandidate(
+                    lastTempStroke,
+                    Plugins.CanvasLineSource.GeometryLine);
 
             lastTempStroke = null;
             lastTempStrokeCollection = null;

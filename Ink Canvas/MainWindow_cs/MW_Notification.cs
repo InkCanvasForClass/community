@@ -79,6 +79,10 @@ namespace Ink_Canvas
                     }
                 }), DispatcherPriority.ContextIdle);
             }
+
+            LogHelper.WriteLogToFile(
+                $"[Notification] 通知提供商已初始化: 公告已启用={Settings?.Notification?.IsAnnouncementEnabled == true}, 公告服务实例={_announcementService != null}",
+                LogHelper.LogType.Info);
         }
 
         /// <summary>
@@ -188,7 +192,10 @@ namespace Ink_Canvas
 
         private void ApplyDynamicNotificationFloatingBarPlacement()
         {
-            if (DynamicNotification == null || ViewboxFloatingBar == null || ViewboxFloatingBar.Visibility != Visibility.Visible)
+            // 收纳或收纳动画期间浮动栏已移出可用区域，保留默认的顶部居中位置，避免通知跟随到屏幕外。
+            if (DynamicNotification == null || ViewboxFloatingBar == null ||
+                ViewboxFloatingBar.Visibility != Visibility.Visible ||
+                isFloatingBarFolded || isFloatingBarChangingHideMode)
             {
                 return;
             }
@@ -209,8 +216,9 @@ namespace Ink_Canvas
                 DynamicNotification.VerticalAlignment = VerticalAlignment.Top;
                 DynamicNotification.Margin = new Thickness(left, top, 0, 0);
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Notification] 计算通知悬浮栏位置失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 

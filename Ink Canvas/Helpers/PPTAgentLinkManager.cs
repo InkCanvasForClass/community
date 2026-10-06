@@ -45,7 +45,7 @@ namespace Ink_Canvas.Helpers
             _client.EventReceived += (eventName, state) => HandleState(state, eventName);
             _client.Start();
 
-            LogHelper.WriteLogToFile("PPT Agent 联动监控已启动", LogHelper.LogType.Event);
+            LogHelper.WriteLogToFile("[PPT-Agent] 联动监控已启动", LogHelper.LogType.Info);
         }
 
         public void StopMonitoring(bool isShutdown = false)
@@ -57,7 +57,7 @@ namespace Ink_Canvas.Helpers
             client.Dispose();
             _client = null;
             OnConnectionChanged(false);
-            LogHelper.WriteLogToFile("PPT Agent 联动监控已停止", LogHelper.LogType.Event);
+            LogHelper.WriteLogToFile("[PPT-Agent] 联动监控已停止", LogHelper.LogType.Info);
         }
 
         public void ReloadConnection()
@@ -119,8 +119,14 @@ namespace Ink_Canvas.Helpers
         private bool Send(string command, object data = null)
         {
             var result = _client?.SendCommand(command, data) == true;
-            if (!result)
+            if (result)
+            {
+                LogHelper.WriteLogToFile($"[PPT-Agent] 命令已发送: {command}", LogHelper.LogType.Info);
+            }
+            else
+            {
                 LogHelper.WriteLogToFile($"PPT Agent 命令发送失败: {command}", LogHelper.LogType.Warning);
+            }
             return result;
         }
 
@@ -139,6 +145,9 @@ namespace Ink_Canvas.Helpers
                 }
             }
 
+            LogHelper.WriteLogToFile(
+                $"[PPT-Agent] 连接状态变化: connected={connected}, slide={GetStateSnapshot().SlideIndex}, running={GetStateSnapshot().IsRunning}",
+                LogHelper.LogType.Info);
             PPTConnectionChanged?.Invoke(connected);
             if (!connected)
                 SlideShowStateChanged?.Invoke(false);
@@ -200,6 +209,14 @@ namespace Ink_Canvas.Helpers
                 }
             }
 
+            if (raiseConnection || raisePresentationOpen || raisePresentationClose || raiseShowStateChanged || raiseSlideShowBegin || raiseSlideShowNext || raiseSlideShowEnd)
+            {
+                var reportedEvent = string.IsNullOrEmpty(eventName) ? "state" : eventName;
+                LogHelper.WriteLogToFile(
+                    $"[PPT-Agent] 状态事件: event={reportedEvent}, slide={state.SlideIndex}, running={state.IsRunning}, presentation={state.PresentationName}",
+                    LogHelper.LogType.Info);
+            }
+
             if (raiseConnection) PPTConnectionChanged?.Invoke(true);
             if (raisePresentationOpen) PresentationOpen?.Invoke(state);
             if (raisePresentationClose) PresentationClose?.Invoke(state);
@@ -229,8 +246,10 @@ namespace Ink_Canvas.Helpers
         public void Dispose()
         {
             if (_disposed) return;
+            LogHelper.WriteLogToFile("[PPT-Agent] 开始释放联动管理器", LogHelper.LogType.Info);
             _disposed = true;
             StopMonitoring();
+            LogHelper.WriteLogToFile("[PPT-Agent] 联动管理器已释放", LogHelper.LogType.Info);
         }
     }
 }

@@ -5,6 +5,7 @@ using OSVersionExtension;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 
 namespace Ink_Canvas
 {
@@ -54,6 +55,9 @@ namespace Ink_Canvas
 
         [JsonProperty("notification")]
         public NotificationSettings Notification { get; set; } = new NotificationSettings();
+
+        [JsonProperty("timer")]
+        public TimerSettings Timer { get; set; } = new TimerSettings();
 
         [JsonProperty("toolbar")]
         public ToolbarLayoutSettings Toolbar { get; set; } = new ToolbarLayoutSettings();
@@ -299,6 +303,12 @@ namespace Ink_Canvas
         public bool IsDictationDoNotDisturbInWhiteboardEnabled { get; set; } = true;
     }
 
+    public class TimerSettings
+    {
+        [JsonProperty("isOpenTransparency")]
+        public bool IsOpenTransparency { get; set; } = true;
+    }
+
     public class Security
     {
         [JsonProperty("passwordEnabled")]
@@ -416,6 +426,9 @@ namespace Ink_Canvas
         public bool IsCompressPicturesUploaded { get; set; }
         [JsonProperty("enablePalmEraser")]
         public bool EnablePalmEraser { get; set; } = true;
+        /// <summary>实验性：启用 WinRT 系统墨迹管线（CoreInkIndependentInputSource + 系统 Wet Ink），关闭时回退 WPF 原生墨迹。</summary>
+        [JsonProperty("useWinRTInk")]
+        public bool UseWinRTInk { get; set; } = false;
         [JsonProperty("palmEraserSensitivity")]
         public int PalmEraserSensitivity { get; set; } = 0; // 0-低敏感度, 1-中敏感度, 2-高敏感度
         [JsonProperty("clearCanvasAlsoClearImages")]
@@ -515,6 +528,13 @@ namespace Ink_Canvas
         /// <summary>垂直镜像（上下翻转）。</summary>
         [JsonProperty("videoPresenterMirrorVertical")]
         public bool VideoPresenterMirrorVertical { get; set; } = false;
+
+        /// <summary>
+        /// 视频展台旋转角度，0/1/2/3 分别对应 0°/90°/180°/270°，0 为摄像头默认方向。
+        /// 与 <see cref="CameraSettings.RotationAngle"/> 独立，仅作用于展台预览/拍照。
+        /// </summary>
+        [JsonProperty("videoPresenterRotationAngle")]
+        public int VideoPresenterRotationAngle { get; set; } = 0;
 
         /// <summary>
         /// 是否在书写位置贴近画布边缘时显示"扩展画布"提示按钮。
@@ -617,6 +637,11 @@ namespace Ink_Canvas
         public bool IsEnableTwoFingerTranslateBoard { get; set; } = true;
         [JsonProperty("isEnableTwoFingerRotationBoard")]
         public bool IsEnableTwoFingerRotationBoard { get; set; }
+
+        [JsonProperty("isEnableTwoFingerZoomRoaming")]
+        public bool IsEnableTwoFingerZoomRoaming { get; set; } = true;
+        [JsonProperty("isEnableTwoFingerRotationRoaming")]
+        public bool IsEnableTwoFingerRotationRoaming { get; set; }
     }
 
     // 更新通道枚举
@@ -655,8 +680,18 @@ namespace Ink_Canvas
         Extended = 2
     }
 
+    public enum StartupMode
+    {
+        Default = 0,
+        Faster = 1,
+        Fastest = 2
+    }
+
     public class Startup
     {
+        private StartupMode _startupMode = StartupMode.Default;
+        private bool _hasExplicitStartupMode;
+
         [JsonProperty("isAutoUpdate")]
         public bool IsAutoUpdate { get; set; } = true;
         [JsonProperty("isAutoUpdateWithSilence")]
@@ -679,8 +714,18 @@ namespace Ink_Canvas
         public bool IsEnableNibMode { get; set; }
         [JsonProperty("isFoldAtStartup")]
         public bool IsFoldAtStartup { get; set; }
-        [JsonProperty("enableFastStartup")]
-        public bool EnableFastStartup { get; set; }
+        [JsonProperty("startupMode")]
+        public StartupMode StartupMode
+        {
+            get => _startupMode;
+            set
+            {
+                _startupMode = Enum.IsDefined(typeof(StartupMode), value) ? value : StartupMode.Default;
+                _hasExplicitStartupMode = true;
+            }
+        }
+        [JsonProperty("enableFastStartup", NullValueHandling = NullValueHandling.Ignore)]
+        private bool? LegacyEnableFastStartup { get; set; }
         [JsonProperty("crashAction")]
         public int CrashAction { get; set; } = 2;
         [JsonProperty("telemetryUploadLevel")]
@@ -691,6 +736,17 @@ namespace Ink_Canvas
         public bool HasShownOobe { get; set; } = false;
         [JsonProperty("enableWindowChromeRendering")]
         public bool EnableWindowChromeRendering { get; set; } = false;
+
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
+        {
+            if (!_hasExplicitStartupMode && LegacyEnableFastStartup.HasValue)
+            {
+                _startupMode = LegacyEnableFastStartup.Value ? StartupMode.Fastest : StartupMode.Faster;
+            }
+
+            LegacyEnableFastStartup = null;
+        }
     }
 
     public enum TrayClickAction
@@ -1347,6 +1403,15 @@ namespace Ink_Canvas
 
         [JsonProperty("isSaveScreenshotsInDateFolders")]
         public bool IsSaveScreenshotsInDateFolders { get; set; }
+
+        [JsonProperty("screenshotSaveFormat")]
+        public int ScreenshotSaveFormat { get; set; } = 0;
+
+        [JsonProperty("screenshotJpegQuality")]
+        public long ScreenshotJpegQuality { get; set; } = 90;
+
+        [JsonProperty("screenshotScaleMode")]
+        public int ScreenshotScaleMode { get; set; } = 0;
 
         [JsonProperty("isAutoSaveStrokesAtScreenshot")]
         public bool IsAutoSaveStrokesAtScreenshot { get; set; }

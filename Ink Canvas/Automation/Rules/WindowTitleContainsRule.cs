@@ -1,7 +1,6 @@
 using Ink_Canvas.WorkflowAutomation.Models;
 using System;
 using System.ComponentModel;
-using System.Text;
 using Windows.Win32;
 
 namespace Ink_Canvas.WorkflowAutomation.Rules
@@ -52,11 +51,11 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
                     var handle = PInvoke.GetForegroundWindow();
                     if (handle == IntPtr.Zero) return false;
 
-                    var sb = new StringBuilder(512);
-                    int length = PInvoke.GetWindowText(handle, new Span<char>(sb.ToString().ToCharArray()));
+                    var titleBuffer = new char[512];
+                    int length = PInvoke.GetWindowText(handle, new Span<char>(titleBuffer));
                     if (length <= 0) return false;
 
-                    string windowTitle = sb.ToString(0, length);
+                    string windowTitle = new string(titleBuffer, 0, length);
 
                     if (s.IgnoreCase)
                     {
@@ -88,10 +87,10 @@ namespace Ink_Canvas.WorkflowAutomation.Rules
             {
                 var handle = PInvoke.GetForegroundWindow();
                 if (handle == IntPtr.Zero) return false;
-                var sb = new StringBuilder(512);
-                int length = PInvoke.GetWindowText(handle, new Span<char>(sb.ToString().ToCharArray()));
+                var titleBuffer = new char[512];
+                int length = PInvoke.GetWindowText(handle, new Span<char>(titleBuffer));
                 if (length <= 0) return false;
-                string windowTitle = sb.ToString(0, length);
+                string windowTitle = new string(titleBuffer, 0, length);
                 if (s.IgnoreCase)
                     return windowTitle.IndexOf(s.TitleContains, StringComparison.OrdinalIgnoreCase) >= 0;
                 else

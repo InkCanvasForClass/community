@@ -161,8 +161,20 @@ Continue?</value>
   <data name="Plugin_Reload" xml:space="preserve">
     <value>Hot reload plugin</value>
   </data>
-  <data name="Plugin_ReloadSuccess" xml:space="preserve">
-    <value>Plugin hot-reloaded successfully. No restart is required.</value>
+  <data name="Plugin_Unload" xml:space="preserve">
+    <value>Unload plugin</value>
+  </data>
+  <data name="Plugin_Load" xml:space="preserve">
+    <value>Load plugin</value>
+  </data>
+  <data name="Plugin_UnloadSuccess" xml:space="preserve">
+    <value>Plugin unloaded.</value>
+  </data>
+  <data name="Plugin_LoadSuccess" xml:space="preserve">
+    <value>Plugin loaded.</value>
+  </data>
+  <data name="Plugin_LoadFailed" xml:space="preserve">
+    <value>Plugin load failed: {0}</value>
   </data>
   <data name="Plugin_ReloadPartial" xml:space="preserve">
     <value>The plugin was reloaded, but the old assembly is still in memory. Restart the app to release the old version completely.</value>

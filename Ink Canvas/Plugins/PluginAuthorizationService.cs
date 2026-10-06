@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using System;
 using System.Collections.Generic;
@@ -295,7 +296,10 @@ namespace Ink_Canvas.Plugins
                         return;
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Plugin] 授权记录按 v2 版本化格式解析失败，回退尝试旧平铺格式: {ex.Message}", LogHelper.LogType.Info);
+                }
 
                 // 旧平铺格式（key = pluginId|fullPath，value = SHA-256）。
                 // 迁移：插件只要曾授权过任意一个 DLL，即升级为插件级信任，
@@ -316,7 +320,10 @@ namespace Ink_Canvas.Plugins
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Plugin] 读取插件授权记录失败（已授权列表可能为空）: {_filePath}, 原因: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         private void Save()
@@ -334,7 +341,10 @@ namespace Ink_Canvas.Plugins
                 File.WriteAllText(_filePath, JsonSerializer.Serialize(store,
                     new JsonSerializerOptions { WriteIndented = true }));
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Plugin] 保存插件授权记录失败（本次授权可能无法在下次启动后免询问）: {_filePath}, 原因: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         private static string ComputeHash(string path)

@@ -252,7 +252,7 @@
                     </ui:SettingsCard>
 
                     <ui:SettingsCard Header="{x:Static props:AutomationStrings.Automation_Title}" Description="{x:Static props:NavStrings.Nav_Automation_Settings}"
-                        IsClickEnabled="True" Click="QuickNavCard_Click" Tag="AutomationPage">
+                        IsClickEnabled="True" Click="QuickNavCard_Click" Tag="AutomationWorkflowPage">
                         <ui:SettingsCard.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" />
                         </ui:SettingsCard.HeaderIcon>

@@ -33,6 +33,8 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar.Items
                 FontWeight = FontWeights.Bold,
                 TextAlignment = TextAlignment.Center
             };
+            pageInfoTextBlock.SetResourceReference(TextBlock.ForegroundProperty, "FloatingBarForegroundBrush");
+
             if (areaId != null)
                 host.RegisterView($"board.pageInfo.{areaId}", pageInfoTextBlock);
             else
@@ -41,11 +43,11 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar.Items
             var pageLabel = new TextBlock
             {
                 Text = FloatingBarStrings.Board_Page,
-                Foreground = (Brush)Application.Current.TryFindResource("FloatingBarForegroundBrush"),
                 VerticalAlignment = VerticalAlignment.Bottom,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 FontSize = 12
             };
+            pageLabel.SetResourceReference(TextBlock.ForegroundProperty, "FloatingBarForegroundBrush");
 
             var grid = new Grid { Margin = new Thickness(6, 6, 6, 4) };
             grid.Children.Add(pageInfoTextBlock);

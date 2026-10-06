@@ -1,5 +1,7 @@
+using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Ink_Canvas.UInk
 {
@@ -38,6 +40,9 @@ namespace Ink_Canvas.UInk
                 blocks.Add(b);
             }
             UInkWriter.AppendBlocks(path, blocks);
+            LogHelper.WriteLogToFile(
+                $"[UInk] 增量追加完成: {Path.GetFileName(path)}, 块 {blocks.Count} 个",
+                LogHelper.LogType.Info);
             return true;
         }
 

@@ -41,6 +41,17 @@ namespace Ink_Canvas.Helpers
         private bool _disposed;
         private bool _available;
 
+        // KillHelper 位于每次识别请求失败的路径上，helper 反复异常时会高频进入，
+        // 直接写日志会瞬间写爆 5MB 上限，故做节流记录。
+        private static int _diagExceptionCount;
+
+        private static void LogCallbackException(string what, Exception ex)
+        {
+            var n = Interlocked.Increment(ref _diagExceptionCount);
+            if (n == 1 || n % 100 == 0)
+                LogHelper.WriteLogToFile($"[IACore] {what} 异常（累计 {n} 次）: {ex.Message}", LogHelper.LogType.Info);
+        }
+
         private static string HelperExePath =>
             Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "InkCanvas.IACoreHelper.exe");
 
@@ -160,6 +171,9 @@ namespace Ink_Canvas.Helpers
                 _available = pipeReady;
                 if (!pipeReady)
                     ReleaseSharedMemory();
+                LogHelper.WriteLogToFile(
+                    $"[IACore] 辅助进程{(pipeReady ? "启动成功" : "启动失败（管道未就绪）")}: pid={_helperProcess?.Id}, 共享内存={_sharedMemoryCapacity / 1024 / 1024}MB",
+                    pipeReady ? LogHelper.LogType.Info : LogHelper.LogType.Warning);
                 return pipeReady;
             }
             catch
@@ -557,9 +571,10 @@ namespace Ink_Canvas.Helpers
                         }
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
                     // 同步唤起失败无影响，下次真实请求时 helper 仍会按 generation 不匹配重开。
+                    LogHelper.WriteLogToFile($"[IACore] 通知 helper 共享内存代数变更（generation={_sharedMemoryGeneration}）失败，将等下次真实请求再重开: {ex.Message}", LogHelper.LogType.Info);
                 }
             }
         }
@@ -603,7 +618,8 @@ namespace Ink_Canvas.Helpers
             }
             try
             {
-                try { _helperProcess.Exited -= OnHelperExited; } catch { }
+                try { _helperProcess.Exited -= OnHelperExited; }
+                catch (Exception ex) { LogCallbackException("解绑 helper 退出事件", ex); }
 
                 if (!_helperProcess.HasExited)
                 {
@@ -616,15 +632,19 @@ namespace Ink_Canvas.Helpers
                                 w.Write(CmdShutdown);
                         }
                     }
-                    catch { }
+                    catch (Exception ex) { LogCallbackException("向 helper 管道发送关闭指令", ex); }
 
                     if (!_helperProcess.WaitForExit(800))
                         _helperProcess.Kill();
                 }
             }
-            catch { }
+            catch (Exception ex) { LogCallbackException("结束 helper 进程（判活/等待退出）", ex); }
             finally
             {
+                if (_helperProcess != null)
+                {
+                    LogHelper.WriteLogToFile("[IACore] 辅助进程已停止并释放共享内存", LogHelper.LogType.Info);
+                }
                 _helperProcess?.Dispose();
                 _helperProcess = null;
                 _available = false;

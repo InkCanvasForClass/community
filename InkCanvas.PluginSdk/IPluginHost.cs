@@ -53,13 +53,16 @@ namespace Ink_Canvas.Plugins
         void RegisterService<T>(T service) where T : class;
 
         /// <summary>
-        /// 向浮动工具栏注册插件组件。
+        /// 向工具栏注册插件组件。目标工具栏由 <see cref="PluginToolbarItemInfo.Surface"/> 决定：
+        /// Whiteboard 注册到白板工具栏，其余注册到浮动工具栏。
         /// </summary>
         /// <param name="itemInfo">要注册的工具栏组件信息。</param>
         void RegisterToolbarItem(PluginToolbarItemInfo itemInfo);
 
         /// <summary>
-        /// 向白板工具栏注册插件组件。行为与 <see cref="RegisterToolbarItem"/> 相同，仅目标工具栏不同。
+        /// 旧版接口：固定向白板工具栏注册插件组件，与 <see cref="RegisterToolbarItem"/> 共用同一实现。
+        /// 新插件请改用 <see cref="RegisterToolbarItem"/> 并设置 <see cref="PluginToolbarItemInfo.Surface"/>
+        /// = <see cref="PluginToolbarSurface.Whiteboard"/>。
         /// </summary>
         /// <param name="itemInfo">要注册的工具栏组件信息。</param>
         void RegisterBoardToolbarItem(PluginToolbarItemInfo itemInfo);
@@ -127,10 +130,19 @@ namespace Ink_Canvas.Plugins
     /// <summary>
     /// 插件工具栏项信息，用于向主程序注册工具栏组件。
     /// </summary>
+    public enum PluginToolbarSurface
+    {
+        Floating = 0,
+        Whiteboard = 1
+    }
+
     public class PluginToolbarItemInfo
     {
         /// <summary>组件唯一标识（在目标工具栏内必须唯一，建议用反域名风格如 "com.example.tool"）。</summary>
         public string Id { get; set; }
+
+        /// <summary>组件注册的目标工具栏（浮动/白板）。</summary>
+        public PluginToolbarSurface Surface { get; set; }
 
         /// <summary>组件在工具栏上显示的名称。</summary>
         public string DisplayName { get; set; }
@@ -158,6 +170,14 @@ namespace Ink_Canvas.Plugins
         /// 返回的 FrameworkElement 将作为 Popup 的 Child 显示。
         /// </summary>
         public Func<FrameworkElement> PopupContentFactory { get; set; }
+
+        /// <summary>
+        /// 宿主创建弹窗后调用此绑定回调，并提供一个可供插件请求打开或关闭弹窗的函数。
+        /// </summary>
+        public Action<Action<bool>> BindPopupController { get; set; }
+
+        /// <summary>弹窗实际打开或关闭时由宿主通知插件。</summary>
+        public Action<bool> PopupStateChanged { get; set; }
     }
 
     /// <summary>

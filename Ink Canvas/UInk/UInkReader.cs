@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using System;
 using System.Buffers;
 using System.IO;
@@ -142,7 +143,19 @@ namespace Ink_Canvas.UInk
                 }
             }
 
-            return headerSeen ? doc : null;
+            if (!headerSeen)
+            {
+                LogHelper.WriteLogToFile("[UInk] 读取中止：未找到合法 Header 块，按非 UInk 文件处理", LogHelper.LogType.Warning);
+                return null;
+            }
+
+            int blockCount = 0;
+            foreach (var rec in doc.Canvases)
+                blockCount += rec.Blocks.Count;
+            LogHelper.WriteLogToFile(
+                $"[UInk] 读取完成: 画布 {doc.Canvases.Count} 个, 内容块 {blockCount} 个, 资源扩展={(doc.HeaderExtension != null)}",
+                LogHelper.LogType.Info);
+            return doc;
         }
 
         /// <summary>读取块类型：Header 是 array，其余是带 "type" 键的 Map。</summary>

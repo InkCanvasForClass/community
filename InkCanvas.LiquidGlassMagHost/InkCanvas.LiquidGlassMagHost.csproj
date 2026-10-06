@@ -20,6 +20,7 @@
     <!-- 不生成 PDB -->
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
+    <CetCompat>false</CetCompat>
     <!-- 输出到自己的 bin\$(Configuration)\$(TargetFramework)\，
          由主项目 CopyLiquidGlassMagHost 在 Build/Publish 后复制到主程序输出目录。
          与 IACoreHelper 的 Copy target 模式一致，AnyCPU(=x64 产物)/x86/x64 的 CI 构建都能带上 exe。 -->

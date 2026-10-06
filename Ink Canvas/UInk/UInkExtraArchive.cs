@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -51,13 +52,18 @@ namespace Ink_Canvas.UInk
             if (File.Exists(zipPath)) File.Delete(zipPath);
             using var archive = ZipFile.Open(zipPath, ZipArchiveMode.Create);
             var seen = new HashSet<string>(StringComparer.Ordinal);
+            int written = 0;
             foreach (var (entryPath, sourceFile) in resources)
             {
                 if (string.IsNullOrEmpty(sourceFile) || !File.Exists(sourceFile)) continue;
                 var safe = NormalizeEntryPath(entryPath);
                 if (safe == null || !seen.Add(safe)) continue;
                 archive.CreateEntryFromFile(sourceFile, safe, CompressionLevel.Optimal);
+                written++;
             }
+            LogHelper.WriteLogToFile(
+                $"[UInk] 资源包已写入: {Path.GetFileName(zipPath)}, 条目 {written}/{resources.Count}",
+                LogHelper.LogType.Info);
         }
 
         /// <summary>

@@ -108,13 +108,16 @@ namespace Ink_Canvas.Helpers
                     // 自动迁移：用 SHA256 重新派生并更新存储
                     var upgradedHash = DeriveKey(password, salt, expected.Length);
                     settings.Security.PasswordHash = Convert.ToBase64String(upgradedHash);
+                    LogHelper.WriteLogToFile("[Security] 旧版密码哈希已自动升级为 SHA256", LogHelper.LogType.Info);
                     return true;
                 }
 
+                LogHelper.WriteLogToFile("[Security] 密码校验未通过", LogHelper.LogType.Warning);
                 return false;
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Security] 密码校验异常: {ex.GetType().Name}", LogHelper.LogType.Warning);
                 return false;
             }
         }
@@ -571,6 +574,7 @@ namespace Ink_Canvas.Helpers
 
             settings.Security.PasswordSalt = Convert.ToBase64String(salt);
             settings.Security.PasswordHash = Convert.ToBase64String(hash);
+            LogHelper.WriteLogToFile("[Security] 已设置新的访问密码", LogHelper.LogType.Info);
         }
 
         /// <summary>
@@ -582,6 +586,7 @@ namespace Ink_Canvas.Helpers
             if (settings?.Security == null) return;
             settings.Security.PasswordSalt = "";
             settings.Security.PasswordHash = "";
+            LogHelper.WriteLogToFile("[Security] 已清除访问密码", LogHelper.LogType.Info);
         }
 
         public static string GenerateTotpSecret()

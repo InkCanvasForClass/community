@@ -376,6 +376,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             if (mw != null) mw.ApplyFloatingBarBorderColor();
         }
 
+        public static void OnColorfulFloatingBarChanged()
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.ApplyColorfulFloatingBar();
+        }
+
         public static void OnEnableIdleMiniBarChanged(bool isOn)
         {
             var mw = GetMainWindow();

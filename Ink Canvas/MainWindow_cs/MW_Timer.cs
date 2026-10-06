@@ -275,6 +275,23 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 定时器热路径的异常累计计数（配合 LogTimerDiagException 使用）
+        /// </summary>
+        private static int _timerDiagExceptionCount;
+
+        /// <summary>
+        /// 定时器 Tick 热路径的异常节流日志：仅在第 1 次与每 100 次写一行并带上累计次数。
+        /// 避免异常环境下每 500ms / 每秒记一条，瞬间写满 5MB 日志并触发 LogHelper 的
+        /// 整目录清理，把其它现场证据一起清掉。
+        /// </summary>
+        private static void LogTimerDiagException(string what, Exception ex)
+        {
+            var n = System.Threading.Interlocked.Increment(ref _timerDiagExceptionCount);
+            if (n == 1 || n % 100 == 0)
+                LogHelper.WriteLogToFile($"[Settings] 定时器热路径 {what} 异常（累计 {n} 次）: {ex.Message}", LogHelper.LogType.Info);
+        }
+
+        /// <summary>
         /// 初始化定时保存墨迹定时器
         /// </summary>
         /// <remarks>
@@ -336,8 +353,9 @@ namespace Ink_Canvas
                     SaveInkCanvasStrokes(false, false);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Timer] 自动保存墨迹失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -918,7 +936,10 @@ namespace Ink_Canvas
                                 else if (prodName.Contains("3C") && Settings.Automation.IsAutoFoldInEasiNote3C)
                                     return true;
                             }
-                            catch { }
+                            catch (Exception ex)
+                            {
+                                LogHelper.WriteLogToFile($"[Timer] 读取易记笔记版本信息失败，自动收纳判定可能不准: {ex.Message}", LogHelper.LogType.Info);
+                            }
                         }
                     }
                     else if (Settings.Automation.IsAutoFoldInEasiCamera && windowProcessName == "EasiCamera")
@@ -959,7 +980,10 @@ namespace Ink_Canvas
                                 if (version.StartsWith("6.") && prodName == "WhiteBoard")
                                     return true;
                             }
-                            catch { }
+                            catch (Exception ex)
+                            {
+                                LogHelper.WriteLogToFile($"[Timer] 读取希沃白板版本信息失败，自动收纳判定可能不准: {ex.Message}", LogHelper.LogType.Info);
+                            }
                         }
                     }
                 }
@@ -1011,7 +1035,10 @@ namespace Ink_Canvas
                             else if (prodName.Contains("3C") && Settings.Automation.IsAutoFoldInEasiNote3C)
                                 return true;
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            LogTimerDiagException("检测前台易记笔记时读取版本信息", ex);
+                        }
                     }
                 }
                 else if (Settings.Automation.IsAutoFoldInEasiCamera && windowProcessName == "EasiCamera")
@@ -1287,8 +1314,9 @@ namespace Ink_Canvas
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogTimerDiagException("自动收纳定时器 Tick", ex);
             }
         }
 
@@ -1457,7 +1485,10 @@ namespace Ink_Canvas
                         // 使用 BeginInvoke 避免在 Invoke 闭包内同步等待自身调度导致 UI 死锁
                         Dispatcher.BeginInvoke(new Action(() => { Application.Current.Shutdown(); }));
                     }
-                    catch (Exception) { }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Settings] 静默更新安装后投递 Application.Shutdown 失败: {ex.Message}", LogHelper.LogType.Info);
+                    }
                 }
                 else
                 {
@@ -1774,7 +1805,10 @@ namespace Ink_Canvas
                     StopEraserAutoSwitchBackTimer();
                     LogHelper.WriteLogToFile("橡皮擦自动切换回批注模式", LogHelper.LogType.Event);
                 }
-                catch (Exception) { }
+                catch (Exception ex)
+                {
+                    LogTimerDiagException("橡皮擦自动切回批注模式时切换笔模式", ex);
+                }
             }
             catch (Exception ex)
             {

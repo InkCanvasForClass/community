@@ -252,8 +252,9 @@ namespace Ink_Canvas
                 hideItem = trayMenu?.Items.OfType<MenuItem>()
                     .FirstOrDefault(mi => mi.Name == "HideICCMainWindowTrayIconMenuItem");
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Tray] 查找托盘「隐藏主窗口」菜单项失败: {ex.Message}", LogHelper.LogType.Info);
             }
 
             _trayTemporaryShowRestoreHideChecked = hideItem?.IsChecked == true;

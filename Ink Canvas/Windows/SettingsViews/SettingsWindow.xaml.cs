@@ -188,10 +188,14 @@ namespace Ink_Canvas.Windows.SettingsViews
             };
 
             AnnouncementService.UnreadCountChanged += UpdateAnnouncementUnreadBadge;
+            Ink_Canvas.Plugins.PluginManager.Instance.PluginLoaded += PluginManager_PluginsChanged;
+            Ink_Canvas.Plugins.PluginManager.Instance.PluginUnloaded += PluginManager_PluginsChanged;
 
             this.Closed += (sender, e) =>
             {
                 AnnouncementService.UnreadCountChanged -= UpdateAnnouncementUnreadBadge;
+                Ink_Canvas.Plugins.PluginManager.Instance.PluginLoaded -= PluginManager_PluginsChanged;
+                Ink_Canvas.Plugins.PluginManager.Instance.PluginUnloaded -= PluginManager_PluginsChanged;
                 UnregisterDpiChangedListener();
                 _pages.Clear();
                 _pageTypes.Clear();
@@ -262,7 +266,10 @@ namespace Ink_Canvas.Windows.SettingsViews
                 };
                 iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, elementTheme);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Settings] 应用设置窗口主题失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         private static bool IsSystemThemeLight()
@@ -275,7 +282,10 @@ namespace Ink_Canvas.Windows.SettingsViews
                     if (themeKey?.GetValue("AppsUseLightTheme") is int v) return v == 1;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Settings] 读取系统深浅色注册表项失败: {ex.Message}", LogHelper.LogType.Info);
+            }
             return false;
         }
 
@@ -445,6 +455,9 @@ namespace Ink_Canvas.Windows.SettingsViews
                 rootFrame.RemoveBackEntry();
                 rootFrame.Navigate(cachedPage);
                 rootFrame.RemoveBackEntry();
+                LogHelper.WriteLogToFile(
+                    $"[Nav] 已导航到设置页面 {pageTag}{(pluginInfo != null ? " (插件: " + pluginInfo.Id + ")" : "")}",
+                    LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
@@ -524,7 +537,10 @@ namespace Ink_Canvas.Windows.SettingsViews
                     (rootFrame.Content as FloatingBarThemePage)?.RefreshThemes();
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Settings] 导航后刷新浮动栏主题列表失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         /// <summary>
@@ -536,7 +552,10 @@ namespace Ink_Canvas.Windows.SettingsViews
             {
                 (rootFrame.Content as FloatingBarThemePage)?.RefreshThemes();
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Settings] 外部请求刷新浮动栏主题页失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         /// <summary>
@@ -742,7 +761,10 @@ namespace Ink_Canvas.Windows.SettingsViews
                     {
                         if (!feRoot.IsLoaded)
                         {
-                            try { feRoot.ApplyTemplate(); } catch { }
+                            try { feRoot.ApplyTemplate(); } catch (Exception ex)
+                            {
+                                LogHelper.WriteLogToFile($"[Settings] 预展开页面模板失败，搜索索引可能不完整 (tag={tag}): {ex.Message}", LogHelper.LogType.Info);
+                            }
                         }
                         CollectEntriesFromPage(feRoot, tag);
                     }
@@ -785,6 +807,18 @@ namespace Ink_Canvas.Windows.SettingsViews
                 else if (node is iNKORE.UI.WPF.Modern.Controls.SettingsExpander se)
                 {
                     header = se.Header?.ToString();
+
+                    // 展开器（SettingsExpander）内部的子设置卡片并不会总被 LogicalTreeHelper
+                    // 枚举到（需展开/加载后才生成容器），因此直接遍历其 Items 集合，
+                    // 确保嵌套的「创建快捷方式」「批注状态点提示」等子项也能被设置搜索检索到。
+                    if (se.Items is System.Collections.IEnumerable seItems)
+                    {
+                        foreach (var seItem in seItems)
+                        {
+                            if (seItem is DependencyObject seItemDep)
+                                CollectEntriesFromPage(seItemDep, pageTag);
+                        }
+                    }
                 }
 
                 if (!string.IsNullOrWhiteSpace(header) && target != null)
@@ -833,7 +867,10 @@ namespace Ink_Canvas.Windows.SettingsViews
             {
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    try { fe.BringIntoView(); } catch { }
+                    try { fe.BringIntoView(); } catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Settings] 滚动到搜索命中的设置项失败: {ex.Message}", LogHelper.LogType.Info);
+                    }
                 }), System.Windows.Threading.DispatcherPriority.Background);
             }
         }
@@ -907,45 +944,54 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         private void LoadPluginSettingsPages()
         {
-            var pluginManager = Ink_Canvas.Plugins.PluginManager.Instance;
-            var plugins = pluginManager.Plugins;
-
-            foreach (var plugin in plugins)
+            var staleTags = _pluginPages.Keys.ToList();
+            foreach (var tag in staleTags)
             {
-                // \u5355\u4E2A\u63D2\u4EF6\u7684\u8BBE\u7F6E\u9875\u5931\u8D25\uFF08\u7F3A\u4F9D\u8D56\u3001XAML \u89E3\u6790\u5F02\u5E38\u7B49\uFF09\u4E0D\u5E94\u4E2D\u6B62\u5176\u5B83\u63D2\u4EF6\u7684\u8BBE\u7F6E\u9875\u52A0\u8F7D\u3002
-                // \u4E4B\u524D\u7684\u6574\u4F53 try/catch \u4F1A\u8BA9\u6392\u5728\u5931\u8D25\u63D2\u4EF6\u4E4B\u540E\u7684\u6240\u6709\u63D2\u4EF6\u8BBE\u7F6E\u9875\u90FD\u51FA\u4E0D\u6765\u3002
-                try
-                {
-                    if (plugin.Instance == null) continue;
-
-                    var settingsView = plugin.Instance.GetSettingsView();
-                    if (settingsView != null)
-                    {
-                        var pageTag = string.Format("PluginSettings_{0}", plugin.Id);
-
-                        _pageTypes[pageTag] = typeof(PluginSettingsPage);
-                        _pluginPages[pageTag] = plugin;
-
-                        var navItem = new NavigationViewItem
-                        {
-                            Content = string.Format(NavStrings.Nav_PluginSettingsFormat, plugin.Name),
-                            Tag = pageTag
-                        };
-
-                        navItem.Icon = new FontIcon
-                        {
-                            Glyph = "\uE713"
-                        };
-
-                        NavigationViewControl.MenuItems.Add(navItem);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    pluginManager.LogError(string.Format(
-                        NavStrings.Nav_LoadPluginSettingsFailed, plugin.Name + ": " + ex.Message), ex);
-                }
+                _pluginPages.Remove(tag);
+                _pageTypes.Remove(tag);
+                if (_pages.TryGetValue(tag, out var page) && page is PluginSettingsPage settingsPage)
+                    settingsPage.CurrentPlugin = null;
+                _pages.Remove(tag);
             }
+
+            for (var i = NavigationViewControl.MenuItems.Count - 1; i >= 0; i--)
+            {
+                if (NavigationViewControl.MenuItems[i] is NavigationViewItem item &&
+                    item.Tag is string tag && tag.StartsWith("PluginSettings_", StringComparison.Ordinal))
+                    NavigationViewControl.MenuItems.RemoveAt(i);
+            }
+
+            var pluginManager = Ink_Canvas.Plugins.PluginManager.Instance;
+            var entries = Ink_Canvas.Plugins.PluginSettingsNavigationRegistry.Discover(
+                pluginManager.Plugins,
+                (plugin, ex) => pluginManager.LogError(string.Format(
+                    NavStrings.Nav_LoadPluginSettingsFailed,
+                    $"{plugin?.Id}: {ex.Message}"), ex));
+            foreach (var entry in entries)
+            {
+                var plugin = entry.Plugin;
+                var pageTag = entry.PageTag;
+                _pageTypes[pageTag] = typeof(PluginSettingsPage);
+                _pluginPages[pageTag] = plugin;
+
+                var navItem = new NavigationViewItem
+                {
+                    Content = string.Format(NavStrings.Nav_PluginSettingsFormat, plugin.Name),
+                    Tag = pageTag,
+                    Icon = new FontIcon
+                    {
+                        Glyph = "\uE713"
+                    }
+                };
+                NavigationViewControl.MenuItems.Add(navItem);
+            }
+        }
+
+        private void PluginManager_PluginsChanged(object sender, Ink_Canvas.Plugins.PluginInfo e)
+        {
+            Dispatcher.BeginInvoke(
+                new Action(LoadPluginSettingsPages),
+                System.Windows.Threading.DispatcherPriority.Background);
         }
         #endregion
 
@@ -1052,7 +1098,10 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         private void FlashHighlight(FrameworkElement target)
         {
-            try { target.BringIntoView(); } catch { }
+            try { target.BringIntoView(); } catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Settings] 高亮前滚动到目标设置项失败: {ex.Message}", LogHelper.LogType.Info);
+            }
 
             Dispatcher.BeginInvoke(new Action(() =>
             {
@@ -1091,11 +1140,17 @@ namespace Ink_Canvas.Windows.SettingsViews
                                 layer.Remove(adorner);
                             }
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"[Settings] 高亮闪烁切换可见性失败: {ex.Message}", LogHelper.LogType.Info);
+                        }
                     };
                     timer.Start();
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Settings] 挂载设置项高亮装饰器失败: {ex.Message}", LogHelper.LogType.Info);
+                }
             }), DispatcherPriority.Background);
         }
 
@@ -1133,7 +1188,10 @@ namespace Ink_Canvas.Windows.SettingsViews
                 };
                 timer.Start();
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Settings] 设置项高亮（Effect 退路方案）失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         /// <summary>
@@ -1189,7 +1247,10 @@ namespace Ink_Canvas.Windows.SettingsViews
                 root.PreviewTouchUp -= SettingsCard_TouchUp;
                 root.PreviewTouchUp += SettingsCard_TouchUp;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Settings] 挂载设置项右键/长按事件失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         private void SettingsCard_RightButtonUp(object sender, MouseButtonEventArgs e)
@@ -1234,7 +1295,10 @@ namespace Ink_Canvas.Windows.SettingsViews
                         // 长按触发后取消后续的触摸提升（避免立即触发点击）
                         e.TouchDevice.Capture(null);
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Settings] 长按后释放触摸捕获失败: {ex.Message}", LogHelper.LogType.Info);
+                    }
 
                     CopySettingUriFromElement(target);
                 };
@@ -1261,7 +1325,10 @@ namespace Ink_Canvas.Windows.SettingsViews
                     _longPressTimer.Stop();
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Settings] 处理设置项触摸移动失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         private void SettingsCard_TouchUp(object sender, TouchEventArgs e)
@@ -1271,7 +1338,10 @@ namespace Ink_Canvas.Windows.SettingsViews
                 _longPressTimer?.Stop();
                 _longPressTimer = null;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Settings] 停止设置项长按计时器失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         /// <summary>
@@ -1310,7 +1380,10 @@ namespace Ink_Canvas.Windows.SettingsViews
                 string pageTag = GetCurrentPageTag();
                 string uri = BuildSettingsUri(pageTag, key);
 
-                try { Clipboard.SetText(uri); } catch { }
+                try { Clipboard.SetText(uri); } catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Settings] 复制设置项 URL 到剪贴板失败: {ex.Message}", LogHelper.LogType.Info);
+                }
 
                 ShowCopyUriInfoBar();
             }
@@ -1331,7 +1404,10 @@ namespace Ink_Canvas.Windows.SettingsViews
                 if (target is iNKORE.UI.WPF.Modern.Controls.SettingsExpander se)
                     return (se.Header as string)?.Trim() ?? se.Header?.ToString()?.Trim();
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Settings] 读取设置项标题文本失败: {ex.Message}", LogHelper.LogType.Info);
+            }
             return null;
         }
 
@@ -1357,11 +1433,17 @@ namespace Ink_Canvas.Windows.SettingsViews
                         CopyUriInfoBar.IsOpen = false;
                         CopyUriInfoBar.Visibility = Visibility.Collapsed;
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Settings] 收起复制成功提示条失败: {ex.Message}", LogHelper.LogType.Info);
+                    }
                 };
                 _copyUriInfoBarTimer.Start();
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Settings] 显示复制成功提示条失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         #endregion
@@ -1426,7 +1508,10 @@ namespace Ink_Canvas.Windows.SettingsViews
                     badge.Visibility = (hasUpdate && !_updateBadgeDismissed) ? Visibility.Visible : Visibility.Collapsed;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Settings] 更新「更新」导航项徽标失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         public void UpdateAnnouncementUnreadBadge()
@@ -1442,7 +1527,10 @@ namespace Ink_Canvas.Windows.SettingsViews
                         AnnouncementUnreadInfoBadge.Visibility = count > 0 ? Visibility.Visible : Visibility.Collapsed;
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Settings] 更新公告未读徽标失败: {ex.Message}", LogHelper.LogType.Info);
+                }
             });
         }
     }

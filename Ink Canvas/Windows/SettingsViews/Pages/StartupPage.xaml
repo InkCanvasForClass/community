@@ -50,13 +50,18 @@
                              Toggled="ToggleSwitchFoldAtStartup_Toggled" />
         </ui:SettingsCard>
 
-        <ui:SettingsCard Header="{x:Static props:StartupStrings.FastStartup}"
-                         Description="{x:Static props:StartupStrings.FastStartupHint}">
+        <ui:SettingsCard Header="{x:Static props:StartupStrings.StartupMode}"
+                         Description="{x:Static props:StartupStrings.StartupModeHint}">
             <ui:SettingsCard.HeaderIcon>
                 <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
             </ui:SettingsCard.HeaderIcon>
-            <ui:ToggleSwitch x:Name="ToggleSwitchFastStartup"
-                             Toggled="ToggleSwitchFastStartup_Toggled" />
+            <ComboBox x:Name="ComboBoxStartupMode"
+                      SelectedIndex="0"
+                      SelectionChanged="ComboBoxStartupMode_SelectionChanged">
+                <ComboBoxItem Content="{x:Static props:StartupStrings.StartupMode_Default}" />
+                <ComboBoxItem Content="{x:Static props:StartupStrings.StartupMode_Faster}" />
+                <ComboBoxItem Content="{x:Static props:StartupStrings.StartupMode_Fastest}" />
+            </ComboBox>
         </ui:SettingsCard>
 
                     <controls:LabeledSettingsCard x:Name="CardPPTOnlyMode"
@@ -66,14 +71,37 @@
                             SwitchName="ToggleSwitchPPTOnlyMode"
                             Toggled="ToggleSwitchPPTOnlyMode_Toggled" />
 
-                    <ui:SettingsCard Header="{x:Static props:StartupStrings.ExternalProtocol}"
-                            Description="{x:Static props:StartupStrings.ExternalProtocolHint}">
-                        <ui:SettingsCard.HeaderIcon>
+                    <ui:SettingsExpander Header="{x:Static props:StartupStrings.ExternalProtocol}"
+                            Description="{x:Static props:StartupStrings.ExternalProtocolHint}"
+                            IsExpanded="True">
+                        <ui:SettingsExpander.HeaderIcon>
                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Link}" />
-                        </ui:SettingsCard.HeaderIcon>
+                        </ui:SettingsExpander.HeaderIcon>
                         <ui:ToggleSwitch x:Name="ToggleSwitchExternalProtocol"
                                         Toggled="ToggleSwitchExternalProtocol_Toggled" />
-                    </ui:SettingsCard>
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="{x:Static props:StartupStrings.ExternalProtocol_ShortcutCreate}"
+                                             Description="{x:Static props:StartupStrings.ExternalProtocol_ShortcutCreateHint}">
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+                                    <Button x:Name="BtnShortcutBoard"
+                                            Click="BtnShortcut_Click" Tag="board"
+                                            Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand" />
+                                    <Button x:Name="BtnShortcutBooth"
+                                            Click="BtnShortcut_Click" Tag="booth"
+                                            Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand" />
+                                    <Button x:Name="BtnShortcutRandom"
+                                            Click="BtnShortcut_Click" Tag="rand"
+                                            Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand" />
+                                    <Button x:Name="BtnShortcutSettings"
+                                            Click="BtnShortcut_Click" Tag="settings"
+                                            Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand" />
+                                    <Button x:Name="BtnShortcutAnnotate"
+                                            Click="BtnShortcut_Click" Tag="annotate"
+                                            Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand" />
+                                </ikw:SimpleStackPanel>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
 
                     <ui:SettingsExpander Header="{x:Static props:WindowStrings.Tray_GroupTitle}"
                             Description="{x:Static props:WindowStrings.Tray_EnableTrayIcon}"

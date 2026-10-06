@@ -352,7 +352,8 @@
 │   │   │   │   ├── TextBlock "组件属性"
 │   │   │   │   │   ├── SettingsCard: 分隔边框 → CheckBox
 │   │   │   │   │   ├── SettingsCard: 红色样式 → CheckBox
-│   │   │   │   │   └── StackPanel: 快速调色板显示模式 → ComboBox
+│   │   │   │   │   ├── StackPanel: 快速调色板显示模式 → ComboBox
+│   │   │   │   │   └── SettingsCard: 清并鼠组件名称 → ComboBox
 │   │   │   │   ├── TextBlock "尺寸"
 │   │   │   │   │   └── Grid: 固定宽高/最小最大宽高 → TextBox × 6
 │   │   │   │   ├── TextBlock "对齐"

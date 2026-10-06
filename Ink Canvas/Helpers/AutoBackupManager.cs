@@ -82,6 +82,7 @@ namespace Ink_Canvas.Helpers
                 // 更新最后备份时间
                 settings.Advanced.LastAutoBackupTime = DateTime.Now;
                 MainWindow.SaveSettingsToFile();
+                LogHelper.WriteLogToFile($"[Backup] 自动备份完成: {backupFileName}", LogHelper.LogType.Info);
                 return true;
             }
             catch (Exception ex)
@@ -149,6 +150,7 @@ namespace Ink_Canvas.Helpers
 
                 // 从备份恢复配置文件
                 ProcessProtectionManager.WithWriteAccess(SettingsFile, () => File.Copy(latestBackup, SettingsFile, true));
+                LogHelper.WriteLogToFile($"[Backup] 已从备份恢复设置: {Path.GetFileName(latestBackup)}", LogHelper.LogType.Info);
                 return true;
             }
             catch (Exception ex)

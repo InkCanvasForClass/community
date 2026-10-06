@@ -386,7 +386,6 @@ namespace Ink_Canvas
         private void BoardSymbolIconDelete_MouseUp(object sender, RoutedEventArgs e)
         {
             if (TryBlockFrozenPageMutation("清除冻结页面内容")) return;
-            SecAgentDiag($"CLEAR_BEGIN kind=canvas sender={sender?.GetType().Name} {SecAgentDiagCanvasState()}");
             PenIcon_Click(null, null);
             SymbolIconDelete_MouseUp(null, null);
 
@@ -398,23 +397,18 @@ namespace Ink_Canvas
             if (Settings.Canvas.ClearCanvasAlsoClearImages)
             {
                 // 如果设置为清空图片，则直接清空所有子元素
-                Debug.WriteLine("BoardSymbolIconDelete: Clearing all children including images");
                 ShutdownAllCanvasMediaElements();
                 inkCanvas.Children.Clear();
             }
             else
             {
                 // 保存非笔画元素（如图片）
-                Debug.WriteLine("BoardSymbolIconDelete: Preserving non-stroke elements (images)");
                 var preservedElements = PreserveNonStrokeElements();
-                Debug.WriteLine($"BoardSymbolIconDelete: Preserved elements count: {preservedElements.Count}");
                 inkCanvas.Children.Clear();
                 // 恢复非笔画元素
                 RestoreNonStrokeElements(preservedElements);
                 ClearSecAgentSceneElements();
-                Debug.WriteLine($"BoardSymbolIconDelete: inkCanvas.Children.Count after restore: {inkCanvas.Children.Count}");
             }
-            SecAgentDiag($"CLEAR_DONE kind=canvas {SecAgentDiagCanvasState()}");
         }
         /// <summary>
         /// 处理删除墨迹和历史记录图标点击事件，清空画布内容和时间机器历史
@@ -432,7 +426,6 @@ namespace Ink_Canvas
         private void BoardSymbolIconDeleteInkAndHistories_MouseUp(object sender, RoutedEventArgs e)
         {
             if (TryBlockFrozenPageMutation("清除冻结页面内容")) return;
-            SecAgentDiag($"CLEAR_BEGIN kind=canvas-and-history sender={sender?.GetType().Name} {SecAgentDiagCanvasState()}");
             PenIcon_Click(null, null);
             SymbolIconDelete_MouseUp(null, null);
             if (!Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
@@ -444,23 +437,18 @@ namespace Ink_Canvas
             if (Settings.Canvas.ClearCanvasAlsoClearImages)
             {
                 // 如果设置为清空图片，则直接清空所有子元素
-                Debug.WriteLine("BoardSymbolIconDeleteInkAndHistories: Clearing all children including images");
                 ShutdownAllCanvasMediaElements();
                 inkCanvas.Children.Clear();
             }
             else
             {
                 // 保存非笔画元素（如图片）
-                Debug.WriteLine("BoardSymbolIconDeleteInkAndHistories: Preserving non-stroke elements (images)");
                 var preservedElements = PreserveNonStrokeElements();
-                Debug.WriteLine($"BoardSymbolIconDeleteInkAndHistories: Preserved elements count: {preservedElements.Count}");
                 inkCanvas.Children.Clear();
                 // 恢复非笔画元素
                 RestoreNonStrokeElements(preservedElements);
                 ClearSecAgentSceneElements();
-                Debug.WriteLine($"BoardSymbolIconDeleteInkAndHistories: inkCanvas.Children.Count after restore: {inkCanvas.Children.Count}");
             }
-            SecAgentDiag($"CLEAR_DONE kind=canvas-and-history {SecAgentDiagCanvasState()}");
         }
 
         /// <summary>

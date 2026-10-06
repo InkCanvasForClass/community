@@ -450,6 +450,15 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 插件注册/注销后重建浮动与白板两套插件工具栏（调用方通常经 Dispatcher 排队调用）。
+        /// </summary>
+        internal void RebuildPluginToolbars()
+        {
+            RebuildToolbar();
+            RebuildBoardToolbar();
+        }
+
+        /// <summary>
         /// 紧凑模式浮动栏整体缩放倍率（相对用户设置的倍率再缩小至此比例，保持纵横比）。
         /// </summary>
         public const double CompactFloatingBarScaleFactor = 0.85;

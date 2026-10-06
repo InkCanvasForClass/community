@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -49,6 +50,31 @@ namespace Ink_Canvas.Helpers
 
         private const uint SE_PRIVILEGE_ENABLED = 0x00000002;
         private const string SE_ASSIGNPRIMARYTOKEN_NAME = "SeAssignPrimaryTokenPrivilege";
+
+        /// <summary>
+        /// 提权 helper 模式开关：以管理员身份启动自身，只负责拉起 UIA 子进程，不进入正常启动流程。
+        /// </summary>
+        public const string UIA_HELPER_SWITCH = "--enable-uia-topmost-helper";
+
+        /// <summary>
+        /// 原始启动参数转发开关：helper 通过它接收「发起提权重启的进程」的命令行参数
+        /// （如 icc:// 深链接、.icstk 文件路径），值为 NUL 分隔参数的 Base64 编码。
+        /// </summary>
+        public const string FORWARD_ARGS_SWITCH = "--uia-forward-args";
+
+        private const string UIA_SOURCE_PID_SWITCH = "--uia-source-pid";
+        private const string SKIP_MUTEX_CHECK_SWITCH = "--skip-mutex-check";
+
+        // CreateProcessWithTokenW 返回成功只代表进程已创建，UIA 子进程仍可能在启动阶段崩溃。
+        // 留出一段观察窗口，只有子进程在窗口内退出才判定为启动失败。
+        private const uint UIA_STARTUP_GRACE_PERIOD_MS = 10000;
+        // 观察窗口内的轮询步长：分段等待而非一次性阻塞满 10s，子进程若崩溃可立即感知并返回失败。
+        private const uint UIA_STARTUP_POLL_STEP_MS = 500;
+        // 子进程崩溃时的重试次数：0xC0000374(堆损坏) 等启动早期崩溃具有偶发性，重试通常即可成功。
+        private const int UIA_STARTUP_MAX_RETRIES = 2;
+        private const uint WAIT_OBJECT_0 = 0x00000000;
+        private const uint WAIT_TIMEOUT = 0x00000102;
+        private const uint WAIT_FAILED = 0xFFFFFFFF;
 
         private static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
 
@@ -213,6 +239,13 @@ namespace Ink_Canvas.Helpers
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         private static extern void GetStartupInfoW(ref STARTUPINFOW lpStartupInfo);
 
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern uint WaitForSingleObject(IntPtr hHandle, uint dwMilliseconds);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool GetExitCodeProcess(IntPtr hProcess, out uint lpExitCode);
+
         [DllImport("userenv.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool CreateEnvironmentBlock(out IntPtr lpEnvironment, IntPtr hToken, bool bInherit);
@@ -277,7 +310,7 @@ namespace Ink_Canvas.Helpers
 
                 try
                 {
-                    return LaunchWithToken(uiaToken, extraArgs);
+                    return LaunchWithToken(uiaToken, extraArgs, validateStartup: true);
                 }
                 finally
                 {
@@ -368,7 +401,7 @@ namespace Ink_Canvas.Helpers
                         }
 
                         LogHelper.WriteLogToFile("UIAccess | 已为普通用户令牌设置 UIAccess");
-                        return LaunchWithToken(userToken, extraArgs);
+                        return LaunchWithToken(userToken, extraArgs, validateStartup: true);
                     }
                     finally
                     {
@@ -452,7 +485,7 @@ namespace Ink_Canvas.Helpers
                         }
 
                         LogHelper.WriteLogToFile("UIAccess | 已为普通用户令牌设置 UIAccess（原进程令牌方案）");
-                        return LaunchWithToken_ProcessToken(userToken, AppendExtraArg(extraArgs, "--uia-child"));
+                        return LaunchWithToken_ProcessToken(userToken, AppendExtraArg(extraArgs, "--uia-child"), validateStartup: true);
                     }
                     finally
                     {
@@ -801,39 +834,13 @@ namespace Ink_Canvas.Helpers
 
         #region Process Launch
 
-        private static bool LaunchWithToken(IntPtr token, string extraArgs)
+        private static bool LaunchWithToken(IntPtr token, string extraArgs, bool validateStartup = false)
         {
             string exePath = GetExecutablePathForRelaunch();
             string workDir = System.IO.Path.GetDirectoryName(exePath);
 
             // 重建命令行：保留原始参数，追加 --skip-mutex-check 防止单实例阻塞
-            var cmdBuilder = new StringBuilder(32768);
-            cmdBuilder.Append('"').Append(exePath).Append('"');
-
-            string[] args = Environment.GetCommandLineArgs();
-            for (int i = 1; i < args.Length; i++)
-            {
-                if (string.Equals(args[i], "--enable-uia-topmost-helper", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                // 单文件发布下，托管入口程序集位于 bundle 解压目录；重启时必须使用真实 exe，
-                // 不能把 EntryAssembly.Location / 解压路径带给新进程。
-                if (string.Equals(args[i], exePath, StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                cmdBuilder.Append(' ');
-                AppendQuoted(cmdBuilder, args[i]);
-            }
-
-            if (!string.IsNullOrEmpty(extraArgs))
-                cmdBuilder.Append(' ').Append(extraArgs);
-
-            // 防止单实例 Mutex 阻塞新进程
-            if (Array.IndexOf(args, "--skip-mutex-check") < 0
-                && (extraArgs == null || extraArgs.IndexOf("--skip-mutex-check", StringComparison.Ordinal) < 0))
-            {
-                cmdBuilder.Append(" --skip-mutex-check");
-            }
+            var cmdBuilder = BuildRelaunchCommandLine(exePath, extraArgs);
 
             var si = new STARTUPINFOW { cb = (uint)Marshal.SizeOf(typeof(STARTUPINFOW)) };
             GetStartupInfoW(ref si);
@@ -852,28 +859,48 @@ namespace Ink_Canvas.Helpers
 
             try
             {
-                bool ok = CreateProcessWithTokenW(
-                    token,
-                    LOGON_WITH_PROFILE,
-                    exePath,
-                    cmdBuilder,
-                    creationFlags,
-                    environment,
-                    workDir,
-                    ref si,
-                    out PROCESS_INFORMATION pi);
-
-                if (!ok)
+                for (int attempt = 1; ; attempt++)
                 {
-                    int err = Marshal.GetLastWin32Error();
-                    LogHelper.WriteLogToFile($"UIAccess | CreateProcessWithTokenW 失败: {err}; Exe={exePath}; WorkDir={workDir}; Cmd={cmdBuilder}", LogHelper.LogType.Error);
+                    bool ok = CreateProcessWithTokenW(
+                        token,
+                        LOGON_WITH_PROFILE,
+                        exePath,
+                        cmdBuilder,
+                        creationFlags,
+                        environment,
+                        workDir,
+                        ref si,
+                        out PROCESS_INFORMATION pi);
+
+                    if (!ok)
+                    {
+                        int err = Marshal.GetLastWin32Error();
+                        LogHelper.WriteLogToFile($"UIAccess | CreateProcessWithTokenW 失败: {err}; Exe={exePath}; WorkDir={workDir}; Cmd={cmdBuilder}", LogHelper.LogType.Error);
+                        return false;
+                    }
+
+                    UIAChildStartupResult startupResult = validateStartup
+                        ? WaitForUIAChildStartup(pi.hProcess, pi.dwProcessId)
+                        : UIAChildStartupResult.Survived;
+                    uint childPid = pi.dwProcessId;
+                    CloseHandle(pi.hProcess);
+                    CloseHandle(pi.hThread);
+
+                    if (startupResult == UIAChildStartupResult.Survived)
+                    {
+                        LogHelper.WriteLogToFile($"UIAccess | 已使用 UIAccess 令牌启动新进程 (PID={childPid}, Exe={exePath}, 尝试第{attempt}次)");
+                        return true;
+                    }
+
+                    // 仅对「进程在观察期内退出」这种偶发启动崩溃重试；等待失败无法判定，不重试。
+                    if (startupResult == UIAChildStartupResult.Exited && attempt <= UIA_STARTUP_MAX_RETRIES)
+                    {
+                        LogHelper.WriteLogToFile($"UIAccess | UIA 子进程启动失败，准备重试 (第{attempt}次失败，共允许{UIA_STARTUP_MAX_RETRIES}次重试)", LogHelper.LogType.Warning);
+                        continue;
+                    }
+
                     return false;
                 }
-
-                CloseHandle(pi.hProcess);
-                CloseHandle(pi.hThread);
-                LogHelper.WriteLogToFile($"UIAccess | 已使用 UIAccess 令牌启动新进程 (PID={pi.dwProcessId}, Exe={exePath})");
-                return true;
             }
             finally
             {
@@ -887,73 +914,271 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 使用原进程令牌方案启动新进程（不使用 CreateEnvironmentBlock）
         /// </summary>
-        private static bool LaunchWithToken_ProcessToken(IntPtr token, string extraArgs)
+        private static bool LaunchWithToken_ProcessToken(IntPtr token, string extraArgs, bool validateStartup = false)
         {
             string exePath = GetExecutablePathForRelaunch();
 
-            var cmdBuilder = new StringBuilder(32768);
-            cmdBuilder.Append('"').Append(exePath).Append('"');
+            var cmdBuilder = BuildRelaunchCommandLine(exePath, extraArgs);
 
-            string[] args = Environment.GetCommandLineArgs();
-            for (int i = 1; i < args.Length; i++)
+            var si = new STARTUPINFOW { cb = (uint)Marshal.SizeOf(typeof(STARTUPINFOW)) };
+            GetStartupInfoW(ref si);
+
+            for (int attempt = 1; ; attempt++)
             {
-                if (string.Equals(args[i], "--enable-uia-topmost-helper", StringComparison.OrdinalIgnoreCase))
+                LogHelper.WriteLogToFile($"UIAccess | CreateProcessWithTokenW 启动（原进程令牌方案，第{attempt}次）: Cmd={cmdBuilder}");
+                bool ok = CreateProcessWithTokenW(
+                    token,
+                    LOGON_WITH_PROFILE,
+                    null,
+                    cmdBuilder,
+                    CREATE_NEW_CONSOLE,
+                    IntPtr.Zero,
+                    null,
+                    ref si,
+                    out PROCESS_INFORMATION pi);
+
+                if (!ok)
                 {
+                    int err = Marshal.GetLastWin32Error();
+                    LogHelper.WriteLogToFile($"UIAccess | CreateProcessWithTokenW 失败（原进程令牌方案）: {err}; Exe={exePath}; Cmd={cmdBuilder}", LogHelper.LogType.Error);
+                    return false;
+                }
+
+                UIAChildStartupResult startupResult = validateStartup
+                    ? WaitForUIAChildStartup(pi.hProcess, pi.dwProcessId)
+                    : UIAChildStartupResult.Survived;
+                uint childPid = pi.dwProcessId;
+                CloseHandle(pi.hProcess);
+                CloseHandle(pi.hThread);
+
+                if (startupResult == UIAChildStartupResult.Survived)
+                {
+                    LogHelper.WriteLogToFile($"UIAccess | 已使用 UIAccess 令牌启动新进程（原进程令牌方案） (PID={childPid}, Exe={exePath}, 尝试第{attempt}次)");
+                    return true;
+                }
+
+                if (startupResult == UIAChildStartupResult.Exited && attempt <= UIA_STARTUP_MAX_RETRIES)
+                {
+                    LogHelper.WriteLogToFile($"UIAccess | UIA 子进程启动失败（原进程令牌方案），准备重试 (第{attempt}次失败，共允许{UIA_STARTUP_MAX_RETRIES}次重试)", LogHelper.LogType.Warning);
                     continue;
                 }
 
-                if (string.Equals(args[i], "--uia-source-pid", StringComparison.OrdinalIgnoreCase))
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 观察 UIA 子进程的启动阶段结果。
+        /// </summary>
+        private enum UIAChildStartupResult
+        {
+            /// <summary>存活满观察窗口，认为启动成功。</summary>
+            Survived,
+            /// <summary>在观察窗口内退出（崩溃或自行退出），可重试。</summary>
+            Exited,
+            /// <summary>等待句柄失败，无法判定，不重试。</summary>
+            WaitFailed,
+        }
+
+        /// <summary>
+        /// 分段轮询观察 UIA 子进程是否熬过启动阶段。
+        /// 不一次性阻塞满 <see cref="UIA_STARTUP_GRACE_PERIOD_MS"/>，而是按 <see cref="UIA_STARTUP_POLL_STEP_MS"/>
+        /// 逐段等待：子进程若在窗口内崩溃可立即感知并返回，避免白等满 10s；存活至窗口结束才判定成功。
+        /// </summary>
+        private static UIAChildStartupResult WaitForUIAChildStartup(IntPtr processHandle, uint processId)
+        {
+            uint elapsed = 0;
+            while (elapsed < UIA_STARTUP_GRACE_PERIOD_MS)
+            {
+                uint step = Math.Min(UIA_STARTUP_POLL_STEP_MS, UIA_STARTUP_GRACE_PERIOD_MS - elapsed);
+                uint waitResult = WaitForSingleObject(processHandle, step);
+
+                if (waitResult == WAIT_TIMEOUT)
+                {
+                    elapsed += step;
+                    continue;
+                }
+
+                if (waitResult == WAIT_OBJECT_0)
+                {
+                    if (GetExitCodeProcess(processHandle, out uint exitCode))
+                    {
+                        LogHelper.WriteLogToFile($"UIAccess | UIA 子进程在启动观察期内退出 (PID={processId}, 存活约{elapsed}ms, ExitCode={exitCode}, Hex=0x{exitCode:X8})", LogHelper.LogType.Error);
+                    }
+                    else
+                    {
+                        int exitCodeError = Marshal.GetLastWin32Error();
+                        LogHelper.WriteLogToFile($"UIAccess | UIA 子进程在启动观察期内退出，但读取退出码失败 (PID={processId}, 存活约{elapsed}ms, LastError={exitCodeError})", LogHelper.LogType.Error);
+                    }
+                    return UIAChildStartupResult.Exited;
+                }
+
+                int error = Marshal.GetLastWin32Error();
+                string result = waitResult == WAIT_FAILED ? $"WAIT_FAILED/{error}" : waitResult.ToString();
+                LogHelper.WriteLogToFile($"UIAccess | 等待 UIA 子进程启动状态失败 (PID={processId}, Result={result})", LogHelper.LogType.Error);
+                return UIAChildStartupResult.WaitFailed;
+            }
+
+            LogHelper.WriteLogToFile($"UIAccess | UIA 子进程已存活 {UIA_STARTUP_GRACE_PERIOD_MS}ms，认为启动阶段通过 (PID={processId})");
+            return UIAChildStartupResult.Survived;
+        }
+
+        /// <summary>
+        /// 生成转发原始启动参数的命令行片段（形如 " --uia-forward-args &lt;base64&gt;"，含前导空格）。
+        /// 提权重启链会经过一个管理员 helper 进程，helper 自身不带用户参数，
+        /// 因此发起重启的进程必须用它把自己的命令行参数交给 helper；没有需要转发的参数时返回空串。
+        /// </summary>
+        public static string BuildForwardArgsArgument()
+        {
+            string payload = EncodeCurrentProcessArgs();
+            return string.IsNullOrEmpty(payload) ? string.Empty : $" {FORWARD_ARGS_SWITCH} {payload}";
+        }
+
+        /// <summary>
+        /// 把当前进程的启动参数（不含 exe 路径）打包成 Base64。
+        /// 参数之间用 NUL 分隔：Windows 命令行本身不允许 NUL，因此不会与参数内容冲突。
+        /// </summary>
+        private static string EncodeCurrentProcessArgs()
+        {
+            try
+            {
+                string[] args = Environment.GetCommandLineArgs();
+                var forwarded = new List<string>();
+                for (int i = 1; i < args.Length; i++)
+                {
+                    // 只转发用户启动意图，UIA 内部开关一律剥离
+                    if (string.Equals(args[i], UIA_HELPER_SWITCH, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    if (string.Equals(args[i], UIA_SOURCE_PID_SWITCH, StringComparison.OrdinalIgnoreCase))
+                    {
+                        i++; // 跳过 PID 值
+                        continue;
+                    }
+
+                    if (string.Equals(args[i], FORWARD_ARGS_SWITCH, StringComparison.OrdinalIgnoreCase))
+                    {
+                        i++; // 跳过上一级载荷，避免参数层层嵌套
+                        continue;
+                    }
+
+                    forwarded.Add(args[i]);
+                }
+
+                if (forwarded.Count == 0)
+                    return null;
+
+                return Convert.ToBase64String(Encoding.UTF8.GetBytes(string.Join("\0", forwarded)));
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"UIAccess | 打包转发参数失败: {ex.Message}", LogHelper.LogType.Warning);
+                return null;
+            }
+        }
+
+        private static bool TryDecodeForwardedArgs(string payload, out string[] args)
+        {
+            args = null;
+            if (string.IsNullOrWhiteSpace(payload))
+                return false;
+
+            try
+            {
+                string joined = Encoding.UTF8.GetString(Convert.FromBase64String(payload));
+                if (string.IsNullOrEmpty(joined))
+                    return false;
+
+                args = joined.Split('\0');
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"UIAccess | 解析转发参数失败: {ex.Message}", LogHelper.LogType.Warning);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 取出应当传递给 UIA 子进程的参数。
+        /// 提权 helper 优先使用 --uia-forward-args 携带的原始进程参数，
+        /// 否则回退到当前进程自身的参数（helper 内部开关一律剥离）。
+        /// </summary>
+        private static string[] BuildRelaunchArgs()
+        {
+            string[] ownArgs = Environment.GetCommandLineArgs();
+
+            for (int i = 1; i < ownArgs.Length; i++)
+            {
+                if (!string.Equals(ownArgs[i], FORWARD_ARGS_SWITCH, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                if (i + 1 < ownArgs.Length && TryDecodeForwardedArgs(ownArgs[i + 1], out string[] forwarded))
+                    return forwarded;
+
+                LogHelper.WriteLogToFile("UIAccess | 未取得可用的转发参数，回退使用 helper 自身参数", LogHelper.LogType.Warning);
+                break;
+            }
+
+            var result = new List<string>();
+            for (int i = 1; i < ownArgs.Length; i++)
+            {
+                if (string.Equals(ownArgs[i], UIA_HELPER_SWITCH, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                if (string.Equals(ownArgs[i], UIA_SOURCE_PID_SWITCH, StringComparison.OrdinalIgnoreCase))
                 {
                     i++; // 跳过 PID 值
                     continue;
                 }
 
-                if (string.Equals(args[i], exePath, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(ownArgs[i], FORWARD_ARGS_SWITCH, StringComparison.OrdinalIgnoreCase))
                 {
+                    i++; // 跳过转发载荷
                     continue;
                 }
 
+                result.Add(ownArgs[i]);
+            }
+
+            return result.ToArray();
+        }
+
+        /// <summary>
+        /// 重建 UIA 子进程的命令行：保留原始启动参数（URI、文件路径等），追加 UIA 内部参数，
+        /// 并在原参数未包含 --skip-mutex-check 时补上，防止新进程被单实例 Mutex 阻塞。
+        /// </summary>
+        private static StringBuilder BuildRelaunchCommandLine(string exePath, string extraArgs)
+        {
+            var cmdBuilder = new StringBuilder(32768);
+            cmdBuilder.Append('"').Append(exePath).Append('"');
+
+            bool hasSkipMutexCheck = false;
+            foreach (string arg in BuildRelaunchArgs())
+            {
+                // 单文件发布下，托管入口程序集位于 bundle 解压目录；重启时必须使用真实 exe，
+                // 不能把 EntryAssembly.Location / 解压路径带给新进程。
+                if (string.Equals(arg, exePath, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                if (string.Equals(arg, SKIP_MUTEX_CHECK_SWITCH, StringComparison.OrdinalIgnoreCase))
+                    hasSkipMutexCheck = true;
+
                 cmdBuilder.Append(' ');
-                AppendQuoted(cmdBuilder, args[i]);
+                AppendQuoted(cmdBuilder, arg);
             }
 
             if (!string.IsNullOrWhiteSpace(extraArgs))
             {
                 cmdBuilder.Append(' ').Append(extraArgs);
+                if (extraArgs.IndexOf(SKIP_MUTEX_CHECK_SWITCH, StringComparison.OrdinalIgnoreCase) >= 0)
+                    hasSkipMutexCheck = true;
             }
 
-            if (Array.IndexOf(args, "--skip-mutex-check") < 0
-                && (extraArgs == null || extraArgs.IndexOf("--skip-mutex-check", StringComparison.OrdinalIgnoreCase) < 0))
-            {
-                cmdBuilder.Append(" --skip-mutex-check");
-            }
+            if (!hasSkipMutexCheck)
+                cmdBuilder.Append(' ').Append(SKIP_MUTEX_CHECK_SWITCH);
 
-            var si = new STARTUPINFOW { cb = (uint)Marshal.SizeOf(typeof(STARTUPINFOW)) };
-            GetStartupInfoW(ref si);
-
-            LogHelper.WriteLogToFile($"UIAccess | CreateProcessWithTokenW 启动（原进程令牌方案）: Cmd={cmdBuilder}");
-            bool ok = CreateProcessWithTokenW(
-                token,
-                LOGON_WITH_PROFILE,
-                null,
-                cmdBuilder,
-                CREATE_NEW_CONSOLE,
-                IntPtr.Zero,
-                null,
-                ref si,
-                out PROCESS_INFORMATION pi);
-
-            if (!ok)
-            {
-                int err = Marshal.GetLastWin32Error();
-                LogHelper.WriteLogToFile($"UIAccess | CreateProcessWithTokenW 失败（原进程令牌方案）: {err}; Exe={exePath}; Cmd={cmdBuilder}", LogHelper.LogType.Error);
-                return false;
-            }
-
-            CloseHandle(pi.hProcess);
-            CloseHandle(pi.hThread);
-            LogHelper.WriteLogToFile($"UIAccess | 已使用 UIAccess 令牌启动新进程（原进程令牌方案） (PID={pi.dwProcessId}, Exe={exePath})");
-            return true;
+            return cmdBuilder;
         }
 
         private static string AppendExtraArg(string existing, string newArg)
@@ -970,7 +1195,10 @@ namespace Ink_Canvas.Helpers
             {
                 mainModulePath = Process.GetCurrentProcess().MainModule?.FileName;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[ProcGuard] 以 UIAccess/普通用户身份重启前读取当前主模块路径失败，将回退到 Environment.ProcessPath: {ex.Message}", LogHelper.LogType.Info);
+            }
 
             if (!string.IsNullOrEmpty(mainModulePath) && System.IO.File.Exists(mainModulePath))
                 return mainModulePath;

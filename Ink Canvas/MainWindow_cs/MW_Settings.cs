@@ -119,8 +119,9 @@ namespace Ink_Canvas
                 {
                     client.DefaultRequestHeaders.UserAgent.ParseAdd("InkCanvas-Hitokoto/1.0");
                 }
-                catch
+                catch (Exception ex)
                 {
+                    LogHelper.WriteLogToFile($"[Settings] 创建一言 HttpClient 时设置 User-Agent 头失败: {ex.Message}", LogHelper.LogType.Info);
                 }
                 return client;
             }
@@ -915,6 +916,7 @@ namespace Ink_Canvas
             }
 
             CheckEnableTwoFingerGestureBtnColorPrompt();
+            PushWinRTInkGateSnapshots();
             SaveSettingsToFile();
         }
 
@@ -1033,6 +1035,7 @@ namespace Ink_Canvas
             }
 
             CheckEnableTwoFingerGestureBtnColorPrompt();
+            PushWinRTInkGateSnapshots();
             SaveSettingsToFile();
         }
 
@@ -1057,6 +1060,7 @@ namespace Ink_Canvas
             }
 
             CheckEnableTwoFingerGestureBtnColorPrompt();
+            PushWinRTInkGateSnapshots();
             SaveSettingsToFile();
         }
 
@@ -1081,6 +1085,7 @@ namespace Ink_Canvas
             }
 
             CheckEnableTwoFingerGestureBtnColorPrompt();
+            PushWinRTInkGateSnapshots();
             SaveSettingsToFile();
         }
 
@@ -1173,6 +1178,9 @@ namespace Ink_Canvas
             Settings.Automation.IsAutoKillIDT = false;
             Settings.Automation.IsAutoKillSeewoLauncher2DesktopAnnotation = false;
             Settings.Automation.IsSaveScreenshotsInDateFolders = false;
+            Settings.Automation.ScreenshotSaveFormat = 0;
+            Settings.Automation.ScreenshotJpegQuality = 90;
+            Settings.Automation.ScreenshotScaleMode = 0;
             Settings.Automation.IsAutoSaveStrokesAtScreenshot = true;
             Settings.Automation.IsAutoSaveScreenshotAtClear = true;
             Settings.Automation.IsAutoClearWhenExitingWritingMode = false;
@@ -1242,7 +1250,7 @@ namespace Ink_Canvas
             Settings.Startup.AutoUpdateWithSilenceStartTime = "06:00";
             Settings.Startup.AutoUpdateWithSilenceEndTime = "22:00";
             Settings.Startup.IsFoldAtStartup = false;
-            Settings.Startup.EnableFastStartup = false;
+            Settings.Startup.StartupMode = StartupMode.Default;
         }
 
         /// <summary>
@@ -1261,8 +1269,9 @@ namespace Ink_Canvas
                     if (!ok) return;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Settings] 重置为推荐设置前的密码/TOTP 校验调用失败，将继续重置: {ex.Message}", LogHelper.LogType.Info);
             }
 
             try
@@ -1284,7 +1293,11 @@ namespace Ink_Canvas
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
-            try { ShowNotification(Properties.MainWindowStrings.Main_Settings_ResetDone); } catch { }
+            try { ShowNotification(Properties.MainWindowStrings.Main_Settings_ResetDone); }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Settings] 重置为推荐设置完成后弹出「重置完成」通知失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         private async void SpecialVersionResetToSuggestion_Click()

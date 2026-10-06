@@ -2,7 +2,7 @@
 
 ## 位置与命名空间
 
-插件 SDK 位于 `InkCanvas.PluginSdk/`，命名空间 **`Ink_Canvas.Plugins`**，目标框架 net6.0-windows10.0.19041.0。
+插件 SDK 位于 `InkCanvas.PluginSdk/`，命名空间 **`Ink_Canvas.Plugins`**，当前 net10 分支目标框架为 net10.0-windows10.0.19041.0；net6 维护分支保持 net6 目标。
 SDK 已发布到 nuget.org（包名 `InkCanvas.PluginSdk`），用 Nerdbank.GitVersioning 生成版本号（自引用 NBGV，防 NU1504）。
 
 > 给 SDK 加接口/改接口 = 对外契约变更，发布后旧插件可能不兼容。新增能力优先**加新接口**而非改旧接口；接口方法签名变更需同步更新插件市场内受影响插件。
@@ -186,6 +186,9 @@ SecurityVerdict verdict = host.EvaluateTrust(packagePath, expectedSha256, declar
 | `IFileDialogService` | 文件对话框（**无 Owner 属性**，对话框默认以主窗口为宿主） |
 | `IClipboardService` | 剪贴板读写（`PasteClipboardImageAsync` 返回 `Task`） |
 | `IScreenshotService` | 截图 |
+| `IScreenElementService` | UI Automation 只读快照：按屏幕点/窗口读取名称、AutomationId、控件类型和屏幕物理像素边界；不返回可操作的 AutomationElement |
+| `ICanvasCoordinateService` | 屏幕物理像素与画布 DIP 坐标互转，处理当前 DPI、多屏和负坐标 |
+| `IInkTextService` | 将文字渲染为 `StrokeCollection` 或直接作为可撤销真实墨迹插入画布 |
 | `ICameraService` | 摄像头 |
 | `INameRosterService` | 花名册 |
 | `IUpdateService` | 应用更新（`PluginUpdateChannel`） |
@@ -275,3 +278,5 @@ uri.RegisterHandler("open", req => {
 4. 新增服务接口 = 对外契约变更，走 NuGet 发版，同步更新插件市场
 5. UI 文案做 i18n（默认/en-US/zh-ME），插件内同理
 6. 修改 `InkCanvas.PluginSdk` 后构建校验：主解决方案 Debug x64 + PowerPointAddIn 双构建
+7. 当前 net10 分支新增屏幕元素、坐标和文字墨迹接口后，`HostApiRequirement.CurrentApiVersion` 为 `1.13.0`；插件 manifest 应声明 `ApiVersion: 1.13.0`。
+8. 屏幕截图/UIA 数据属于敏感上下文：插件默认只在用户主动触发时读取，发送到模型前应在 UI 中明确提示并提供关闭选项。

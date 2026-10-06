@@ -306,6 +306,12 @@
   <data name="Theme_HideFloatingBarBorderHint" xml:space="preserve">
     <value>开启后将浮动栏边框厚度设为 0，实现无白边效果。</value>
   </data>
+  <data name="Theme_ColorfulFloatingBar" xml:space="preserve">
+    <value>彩色浮动工具栏</value>
+  </data>
+  <data name="Theme_ColorfulFloatingBarHint" xml:space="preserve">
+    <value>开启后浮动工具栏背景显示蓝绿半透明渐变，覆盖当前浮动栏主题的背景颜色。</value>
+  </data>
   <data name="Theme_FloatingBarBorderColor" xml:space="preserve">
     <value>浮动栏边框颜色</value>
   </data>

@@ -105,6 +105,23 @@ namespace Ink_Canvas
         private DateTime _lastCaptureTime = DateTime.MinValue;
         private const int VideoPresenterCaptureCooldownMs = 1000;
 
+        /// <summary>
+        /// 展台热路径（逐帧回调 / 拖动缩放中的鼠标移动 / 200ms 纸框检测 Tick）的异常计数。
+        /// 坏摄像头或坏设备下这些回调可能每次都抛异常，直接写 Info 会瞬间刷爆 5MB 日志，
+        /// 触发 LogHelper 的整目录清理把现场证据清掉。
+        /// </summary>
+        private static int _boothDiagExceptionCount;
+
+        /// <summary>展台热路径异常节流日志：只写第 1 次与每第 100 次，并带上累计次数。</summary>
+        private static void LogBoothCallbackException(string what, Exception ex)
+        {
+            var n = System.Threading.Interlocked.Increment(ref _boothDiagExceptionCount);
+            if (n == 1 || n % 100 == 0)
+                LogHelper.WriteLogToFile(
+                    $"[Booth] {what} 异常（累计 {n} 次）: {ex.Message}",
+                    LogHelper.LogType.Info);
+        }
+
         // A4 纸实时识别框：定时检测间隔与矫正框动画时长对齐到 200ms，
         // 动画能完整跑完不被打断，避免拖影感。检测仍由 Interlocked 防重入保证不会堆积。
         private DispatcherTimer _paperDetectTimer;
@@ -113,6 +130,17 @@ namespace Ink_Canvas
         private System.Windows.Point[] _lastOverlayCorners;
         // 实时检测任务防重入标志（上一次后台检测未完成时不启动新的）
         private int _paperDetectRunning;
+
+        // 预览兜底重启次数上限：
+        // StartVideoCaptureElementPreviewAsync 内的 1.5s 兜底定时器在 MediaOpened 未触发时会
+        // 再次调用 StartVideoCaptureElementPreviewAsync，而后者又会创建新的兜底定时器，
+        // 形成"每 1.75s 重启一次 DirectShow 图"的无限自循环 —— 设备能枚举到但打不开
+        // （虚拟摄像头、驱动异常、设备被占用）时既不 MediaOpened 也不 MediaFailed，
+        // 循环永不停止，反复重建 FilterGraph 与 D3DImage，最终 CPU 打满 / COM 资源耗尽卡死。
+        private int _boothPreviewRestartRetryCount;
+        private const int MaxBoothPreviewRestartRetries = 2;
+        // 预览是否真的起来过（MediaOpened 触发过）。用于判断展台是否处于"空壳"状态。
+        private bool _boothMediaOpened;
 
         // 矫正框移动动画：检测到新角点时，从上一帧位置平滑过渡到新位置，避免跳变。
         // 动画期间 _lastOverlayCorners 实时记录"当前显示的中间位置"，新目标到来时以此为新起点，自然衔接。
@@ -188,6 +216,12 @@ namespace Ink_Canvas
                 // 菜单可见时点击视频展台按钮 = 仅关闭菜单（与右上角 X 一致），
                 // 不退出视频展台模式。完全退出由菜单内"关闭"按钮（BtnExitVideoPresenter_Click）负责。
                 AnimationsHelper.HidePopupWithSlideAndFade(BoothPopup);
+                // 例外：预览从未成功启动（没摄像头 / 设备打不开）时，收起菜单会把特殊模式的
+                // 全屏遮罩留在原地，白板彻底无法操作。此时直接完整退出展台。
+                if (!_boothMediaOpened)
+                {
+                    BtnExitVideoPresenter_Click(null, null);
+                }
                 return;
             }
 
@@ -374,6 +408,12 @@ namespace Ink_Canvas
         {
             if (_isVideoPresenterSpecialMode) return;
             _isVideoPresenterSpecialMode = true;
+            // 每次进入展台都重置预览成功标记与兜底重试计数
+            _boothMediaOpened = false;
+            _boothPreviewRestartRetryCount = 0;
+            LogHelper.WriteLogToFile(
+                $"[Booth] 进入视频展台拍摄模式: 页面={_boothCurrentPhotoIndex}, 编辑模式={inkCanvas?.EditingMode}",
+                LogHelper.LogType.Info);
 
             // 重置虚拟分页状态：进入特殊模式时默认回到直播页，但保留上次拍照列表
             _boothCurrentPhotoIndex = -1;
@@ -422,7 +462,11 @@ namespace Ink_Canvas
                 }
                 // VideoCaptureElement 自己管理渲染（VMR9 + D3DImage），不需要清空 Source
                 // 若之前的预览仍在运行，先停止避免设备占用
-                try { VideoPresenterFullCanvasImage?.Stop(); } catch { }
+                try { VideoPresenterFullCanvasImage?.Stop(); }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Booth] 进入展台特殊模式前停止上一次的实时预览失败: {ex.Message}", LogHelper.LogType.Info);
+                }
 
                 // 重置缩放
                 _boothPreviewScale = 1.0;
@@ -452,6 +496,9 @@ namespace Ink_Canvas
         {
             if (!_isVideoPresenterSpecialMode) return;
             _isVideoPresenterSpecialMode = false;
+            _boothMediaOpened = false;
+            _boothPreviewRestartRetryCount = 0;
+            LogHelper.WriteLogToFile("[Booth] 退出视频展台拍摄模式，已丢弃拍摄态墨迹", LogHelper.LogType.Info);
 
             // 停止 A4 纸实时识别定时器并隐藏覆盖层
             StopPaperDetectTimer();
@@ -493,19 +540,31 @@ namespace Ink_Canvas
                 _liveStrokesSnapshot.Clear();
                 foreach (var p in _capturedPhotos)
                 {
-                    try { p?.Strokes?.Clear(); } catch { }
+                    try { p?.Strokes?.Clear(); }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Booth] 退出特殊模式时清空已拍摄照片槽位中的墨迹失败: {ex.Message}", LogHelper.LogType.Info);
+                    }
                 }
 
                 // 清理鼠标拖动状态（防止退出时鼠标仍被捕获）
                 if (_isBoothMouseDragging)
                 {
                     _isBoothMouseDragging = false;
-                    try { inkCanvas?.ReleaseMouseCapture(); } catch { }
+                    try { inkCanvas?.ReleaseMouseCapture(); }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Booth] 退出特殊模式时释放画布鼠标捕获失败: {ex.Message}", LogHelper.LogType.Info);
+                    }
                 }
                 _boothTouchSavedInkEditingMode = null;
 
                 // 停止 VideoCaptureElement 预览，释放 DirectShow 图
-                try { VideoPresenterFullCanvasImage?.Stop(); } catch { }
+                try { VideoPresenterFullCanvasImage?.Stop(); }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Booth] 退出特殊模式时停止展台实时预览失败: {ex.Message}", LogHelper.LogType.Info);
+                }
                 // 释放摄像头属性控制占用的常驻 FilterGraphNoThread 资源。
                 // 必须延迟到后台线程执行：VideoCaptureElement.Stop() 是异步的（WPFMediaKit 内部异步清理 FilterGraph），
                 // 立即同步释放 source filter 的 COM 对象会与 VideoCaptureElement 的 DirectShow 图清理竞争设备锁，
@@ -533,13 +592,23 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"ExitVideoPresenterSpecialMode 异常: {ex.Message}", LogHelper.LogType.Error);
             }
 
-            // 退出特殊模式后恢复白板正常页码显示
-            UpdateIndexInfoDisplay();
-            // 恢复白板侧栏页码列表（覆盖视频展台虚拟分页项，重新填充实际白板页）
-            RefreshBlackBoardSidePageListView();
+            // 退出特殊模式后恢复白板正常页码显示。
+            // 这三个恢复动作都在 try 之外（上面 catch 只包住清理逻辑），
+            // 展台期间页码列表被换成虚拟分页项，CurrentWhiteboardIndex / 集合长度可能不一致，
+            // 任一步抛异常都会从 Click 处理器冒泡成 UI 线程未处理异常 —— 必须兜住。
+            try
+            {
+                UpdateIndexInfoDisplay();
+                // 恢复白板侧栏页码列表（覆盖视频展台虚拟分页项，重新填充实际白板页）
+                RefreshBlackBoardSidePageListView();
 
-            // 恢复翻页按钮（显示"新页面"按钮，全部启用）
-            RestoreBoothPagingButtons();
+                // 恢复翻页按钮（显示"新页面"按钮，全部启用）
+                RestoreBoothPagingButtons();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"ExitVideoPresenterSpecialMode 恢复白板状态异常: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>隐藏所有选择框（墨迹选择框、图片选择框、图片缩放手柄）。</summary>
@@ -869,11 +938,17 @@ namespace Ink_Canvas
                             VideoPresenterSearchingText.Text = "正在查找展台设备...";
                         }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Booth] 展台临时提示 2.5s 后自动隐藏失败: {ex.Message}", LogHelper.LogType.Info);
+                    }
                 };
                 timer.Start();
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Booth] 显示展台临时提示失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         /// <summary>
@@ -928,6 +1003,8 @@ namespace Ink_Canvas
             _cameraService = CameraServiceFactory.Create();
             _cameraService.FrameReceived += CameraService_FrameReceived;
             _cameraService.ErrorOccurred += CameraService_ErrorOccurred;
+            // 恢复上次退出时保存的展台旋转角度（0..3），使预览/拍照方向与应用保持一致
+            _cameraService.RotationAngle = NormalizeBoothRotationAngle(Settings?.Canvas?.VideoPresenterRotationAngle ?? 0);
             SyncBoothResolutionToCameraService();
         }
 
@@ -1092,11 +1169,17 @@ namespace Ink_Canvas
                     VideoPresenterSearchingText.Visibility = Visibility.Collapsed;
                 }
                 if (BtnCapturePhoto != null) BtnCapturePhoto.IsEnabled = true;
+                // 预览真的起来了：标记成功并清零兜底重试计数
+                _boothMediaOpened = true;
+                _boothPreviewRestartRetryCount = 0;
                 LogHelper.WriteLogToFile(
                     "[VideoPresenter] MediaOpened: 摄像头已打开，隐藏占位文字",
                     LogHelper.LogType.Info);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Booth] MediaOpened 处理失败（隐藏占位文字/启用拍照按钮）: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         /// <summary>
@@ -1122,7 +1205,10 @@ namespace Ink_Canvas
                     LogHelper.LogType.Error);
                 ErrorOccurredRelay?.Invoke(this, $"摄像头打开失败: {msg}");
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Booth] MediaFailed 处理失败（写日志/抛出失败通知）: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         /// <summary>
@@ -1342,6 +1428,20 @@ namespace Ink_Canvas
         /// 若未检测到摄像头，会在面板中显示提示文本；若存在设备，则为每个设备创建一个用于选择的单选按钮，选择某项会启动对应的摄像头预览。函数在列表生成后会尝试恢复并启动当前页面在 _cameraIndexByPage 中存储的摄像头索引，仅当没有保存的索引时才会选择并启动第一个可用设备。保存的每页选择优先于默认选择第一个设备。
         /// </remarks>
         private async void RefreshVideoPresenterDeviceList()
+        {
+            // async void 里未捕获的异常会直接打到 UI Dispatcher（不会沿调用栈传播），
+            // 表现为"点一下展台程序就没了"。整体兜一层，异常只记日志不外抛。
+            try
+            {
+                await RefreshVideoPresenterDeviceListCoreAsync();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"RefreshVideoPresenterDeviceList 异常: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private async System.Threading.Tasks.Task RefreshVideoPresenterDeviceListCoreAsync()
         {
             if (_cameraService == null) return;
             if (CameraDevicesComboBox == null) return;
@@ -1604,6 +1704,10 @@ namespace Ink_Canvas
         {
             if (!_isVideoPresenterSpecialMode) return;
 
+            // 展台双指捏合/拖动接管预览变换：取消 WinRT 墨迹在途湿墨。
+            if ((e.Manipulators?.Count() ?? 0) >= 2)
+                CancelActiveWinRTInk();
+
             try
             {
                 var delta = e.DeltaManipulation;
@@ -1637,7 +1741,10 @@ namespace Ink_Canvas
                         // 墨迹位置已改变，旋转基准过期，重置以便下次旋转重新保存
                         ResetRotationBaseline();
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        LogBoothCallbackException("展台触摸拖动平移后同步变换画布墨迹与历史", ex);
+                    }
                 }
 
                 // === 2. 处理缩放（仅双指）===
@@ -1787,10 +1894,61 @@ namespace Ink_Canvas
                         // 墨迹位置已改变，旋转基准过期，重置以便下次旋转重新保存
                         ResetRotationBaseline();
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        LogBoothCallbackException("展台鼠标拖动平移预览后同步变换画布墨迹与历史", ex);
+                    }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogBoothCallbackException("展台鼠标拖动移动（更新预览平移量）", ex);
+            }
+        }
+
+        /// <summary>
+        /// 恢复进入视频展台特殊模式前保存的画布编辑模式。
+        /// </summary>
+        /// <remarks>
+        /// 进入特殊模式时 EditingMode 被临时压成 None（用于抑制 InkCanvas 内部框选），退出时靠这里恢复。
+        /// EditingMode 的 setter 会同步跑 <c>inkCanvas_EditingModeChanged</c>，其中包含插件回调
+        /// (<c>NotifyPluginPenModeChanged</c>)、光标加载与橡皮擦覆盖层初始化，任一处抛异常都会让赋值整体失败。
+        /// 若在此静默吞掉，画布会永久停在 None —— 表现为画不了、输入落到 manipulation 上变成拖动。
+        /// 因此：先消费保存值（避免重复恢复同一份状态），失败留 Warning 并尝试一次保底恢复，两次都留痕以便区分
+        /// 「插件回调抛异常（重试无意义）」与「瞬时状态导致（重试可救）」。
+        /// </remarks>
+        private void RestoreBoothInkEditingMode(string source)
+        {
+            if (!_boothTouchSavedInkEditingMode.HasValue || inkCanvas == null) return;
+
+            var savedMode = _boothTouchSavedInkEditingMode.Value;
+            _boothTouchSavedInkEditingMode = null;
+
+            try
+            {
+                inkCanvas.EditingMode = savedMode;
+                return;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[Booth] 恢复画布编辑模式失败，尝试保底恢复 (source={source}, saved={savedMode}, current={inkCanvas.EditingMode}): {ex}",
+                    LogHelper.LogType.Warning);
+            }
+
+            try
+            {
+                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                LogHelper.WriteLogToFile(
+                    $"[Booth] 已保底恢复到批注模式 (source={source})",
+                    LogHelper.LogType.Info);
+            }
+            catch (Exception fallbackEx)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[Booth] 保底恢复同样失败，画布可能停在 {inkCanvas.EditingMode} (source={source}): {fallbackEx}",
+                    LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>鼠标松开处理：结束拖动，恢复 EditingMode。</summary>
@@ -1801,16 +1959,8 @@ namespace Ink_Canvas
             _isBoothMouseDragging = false;
             inkCanvas?.ReleaseMouseCapture();
 
-            // 恢复用户选择的 EditingMode
-            if (_boothTouchSavedInkEditingMode.HasValue && inkCanvas != null)
-            {
-                try
-                {
-                    inkCanvas.EditingMode = _boothTouchSavedInkEditingMode.Value;
-                }
-                catch { }
-                _boothTouchSavedInkEditingMode = null;
-            }
+            // 恢复用户选择的 EditingMode（失败时保证不会把画布留在 None）
+            RestoreBoothInkEditingMode("mouse-up");
             e.Handled = true;
         }
 
@@ -1990,12 +2140,20 @@ namespace Ink_Canvas
                     }
 
                     // 若已在播放同一设备，先停止
-                    try { VideoPresenterFullCanvasImage.Stop(); } catch { }
+                    try { VideoPresenterFullCanvasImage.Stop(); }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Booth] 重建预览图前停止同设备的实时预览失败: {ex.Message}", LogHelper.LogType.Info);
+                    }
                     // 关键：显式将 VideoCaptureDevice 置为 null，强制依赖属性变化回调触发 CleanUp()。
                     // 否则后续 VideoCaptureDevice = device（同一个 DsDevice 引用）会被 WPF 依赖属性系统判定为
                     // "未变化"，OnVideoCaptureDeviceChanged 不触发，WPFMediaKit 不会重建 FilterGraph，
                     // 导致切换分辨率/帧率时 DesiredPixelWidth/Height/FPS 不生效（仍是旧分辨率）。
-                    try { VideoPresenterFullCanvasImage.VideoCaptureDevice = null; } catch { }
+                    try { VideoPresenterFullCanvasImage.VideoCaptureDevice = null; }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Booth] 重建预览图前把 VideoCaptureDevice 置空以强制 CleanUp 失败: {ex.Message}", LogHelper.LogType.Info);
+                    }
                     // 等待 FilterGraph 完全释放设备占用：
                     // WPFMediaKit 的 Stop() + CleanUp() 是异步的，FilterGraph 释放需要时间。
                     // 立即 BeginInit/EndInit/Play 会导致设备仍被占用，新图构建失败，
@@ -2079,14 +2237,30 @@ namespace Ink_Canvas
                                         if (VideoPresenterSearchingText != null
                                             && VideoPresenterSearchingText.Visibility != Visibility.Visible)
                                         {
+                                            _boothPreviewRestartRetryCount = 0;
                                             btnRef.IsEnabled = true;
                                             return;
                                         }
 
-                                        // MediaOpened 没触发（SearchingText 仍可见）：重试一次重启预览
-                                        // 首次 Stop→Play 可能因为设备占用/FILTER_GRAPH 状态不稳导致 MediaOpened 丢失
+                                        // MediaOpened 没触发（SearchingText 仍可见）：有限次重试重启预览
+                                        // 首次 Stop→Play 可能因为设备占用/FILTER_GRAPH 状态不稳导致 MediaOpened 丢失。
+                                        // 必须限制次数：重试会再次进入本方法并创建新的兜底定时器，
+                                        // 若无上限且设备始终打不开（既不 MediaOpened 也不 MediaFailed），
+                                        // 就会变成每 1.75s 重建一次 FilterGraph + D3DImage 的无限循环，最终卡死。
+                                        if (_boothPreviewRestartRetryCount >= MaxBoothPreviewRestartRetries)
+                                        {
+                                            LogHelper.WriteLogToFile(
+                                                $"[VideoPresenter] 兜底重试已达上限({MaxBoothPreviewRestartRetries})，停止重启预览；设备可能不可用",
+                                                LogHelper.LogType.Warning);
+                                            if (VideoPresenterSearchingText != null)
+                                            {
+                                                VideoPresenterSearchingText.Text = "摄像头启动失败，请检查设备后重试";
+                                            }
+                                            return;
+                                        }
+                                        _boothPreviewRestartRetryCount++;
                                         LogHelper.WriteLogToFile(
-                                            "[VideoPresenter] 兜底定时器：MediaOpened 1.5s 未触发，重试重启预览",
+                                            $"[VideoPresenter] 兜底定时器：MediaOpened 1.5s 未触发，重试重启预览（{_boothPreviewRestartRetryCount}/{MaxBoothPreviewRestartRetries}）",
                                             LogHelper.LogType.Warning);
                                         int camIdx = FindCurrentCameraIndex();
                                         if (camIdx >= 0)
@@ -2094,7 +2268,10 @@ namespace Ink_Canvas
                                             _ = StartVideoCaptureElementPreviewAsync(camIdx).ConfigureAwait(false);
                                         }
                                     }
-                                    catch { }
+                                    catch (Exception ex)
+                                    {
+                                        LogHelper.WriteLogToFile($"[Booth] MediaOpened 兜底定时器（1.5s 未触发则重启预览）处理失败: {ex.Message}", LogHelper.LogType.Info);
+                                    }
                                 };
                                 fallbackTimer.Start();
                             }
@@ -2516,6 +2693,29 @@ namespace Ink_Canvas
             catch { return null; }
         }
 
+        /// <summary>把任意旋转角度归一化到 0..3（对应 0°/90°/180°/270°）。</summary>
+        private static int NormalizeBoothRotationAngle(int angle)
+        {
+            return ((angle % 4) + 4) % 4;
+        }
+
+        /// <summary>把当前展台旋转角度（_cameraService.RotationAngle）持久化到设置文件。</summary>
+        private void PersistBoothRotation()
+        {
+            try
+            {
+                if (_cameraService == null || Settings?.Canvas == null) return;
+                int angle = NormalizeBoothRotationAngle(_cameraService.RotationAngle);
+                if (Settings.Canvas.VideoPresenterRotationAngle == angle) return;
+                Settings.Canvas.VideoPresenterRotationAngle = angle;
+                ScheduleBoothPropsSaveDebounced();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"保存展台旋转角度失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
         /// <summary>
         /// 旋转按钮入口：把预览 LayoutTransform 与画布墨迹一起转到目标角度，
         /// 走基准重放管线避免持续缩小。冻结照片先回退到实时画面再旋转。
@@ -2619,6 +2819,8 @@ namespace Ink_Canvas
 
                 EnsureCameraService();
                 _cameraService.RotationAngle = (_cameraService.RotationAngle + 1) % 4;
+                // 持久化旋转角度，下次启动展台时恢复同一方向
+                PersistBoothRotation();
 
                 if (_isVideoPresenterSpecialMode)
                 {
@@ -2680,7 +2882,10 @@ namespace Ink_Canvas
                 if (accelIdx >= 0 && accelIdx < cb.Items.Count && cb.SelectedIndex != accelIdx)
                     cb.SelectedIndex = accelIdx;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Booth] 同步相片校正加速度下拉框选中项失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         // ====================================================================
@@ -2799,7 +3004,10 @@ namespace Ink_Canvas
 
                 RefreshBoothPropSlidersEnabled();
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Booth] 刷新摄像头属性滑块取值失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         /// <summary>按 _cameraService 支持情况启用/禁用全部属性滑块并刷新 tooltip。</summary>
@@ -2818,7 +3026,10 @@ namespace Ink_Canvas
                         : Ink_Canvas.Properties.BoothStrings.ResourceManager.GetString(b.notSupportedTooltipKey, Ink_Canvas.Properties.BoothStrings.Culture);
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Booth] 按摄像头支持情况刷新属性滑块启用状态与 tooltip 失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         /// <summary>
@@ -3187,7 +3398,10 @@ namespace Ink_Canvas
             // 拿当前帧（D3DImage.CopyBackBuffer）
             BitmapSource frameSrc = null;
             try { frameSrc = VideoPresenterFullCanvasImage.CaptureCurrentFrame(); }
-            catch { }
+            catch (Exception ex)
+            {
+                LogBoothCallbackException("纸框实时检测 Tick 中抓取当前帧", ex);
+            }
             if (frameSrc == null)
             {
                 System.Threading.Interlocked.Exchange(ref _paperDetectRunning, 0);
@@ -3329,7 +3543,11 @@ namespace Ink_Canvas
                         new System.Windows.Point(screenX, screenY), PaperDetectOverlayCanvas);
                     return pt;
                 }
-                catch { /* 转换失败时退回到直接返回 screenX/screenY（视为偏移=0） */ }
+                catch (Exception ex)
+                {
+                    LogBoothCallbackException("把帧内检测点映射到识别框覆盖层坐标", ex);
+                    // 转换失败时退回到直接返回 screenX/screenY（视为偏移=0）
+                }
             }
 
             return new System.Windows.Point(screenX, screenY);
@@ -3543,6 +3761,10 @@ namespace Ink_Canvas
                     UpdateBoothPageInfoDisplay();
                     // 刷新页码列表：第 0 项（直播页文字）+ 第 1..N 项（各照片缩略图）
                     RefreshBoothPageListView();
+                    // 拍照后自动展开右侧页码面板并滚动到最新照片：
+                    // 无论通过展台菜单拍照按钮还是硬件按键热键（最后都走 BtnCapturePhoto_Click），
+                    // 用户都能立即看到新照片缩略图；面板已展开时该方法直接返回。
+                    ShowPageListRightPanel(scrollToLastPhoto: true);
                 }
                 catch (Exception ex)
                 {
@@ -3604,7 +3826,10 @@ namespace Ink_Canvas
                     VideoPresenterFrozenFrameImage.RenderTransform = _frozenFrameOriginalRenderTransform;
                 // VideoPresenterFrozenOverlay（旧全屏蒙版）和 VideoPresenterFrozenThumbnail（侧栏小预览）均已从 XAML 移除
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Booth] 清除展台冻结画面（恢复实时预览）失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         /// <summary>
@@ -3704,7 +3929,11 @@ namespace Ink_Canvas
             // （Stretch=Uniform 留黑边处会看到底层实时画面，必须停止+隐藏）
             if (VideoPresenterFullCanvasImage != null)
             {
-                try { VideoPresenterFullCanvasImage.Stop(); } catch { }
+                try { VideoPresenterFullCanvasImage.Stop(); }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Booth] 切换到照片预览页时停止展台实时预览失败: {ex.Message}", LogHelper.LogType.Info);
+                }
                 VideoPresenterFullCanvasImage.Visibility = Visibility.Collapsed;
             }
 
@@ -3991,5 +4220,167 @@ namespace Ink_Canvas
 
         private static double Dist(OpenCvSharp.Point a, OpenCvSharp.Point b)
             => Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
+        #region 视频展台插件服务包装（IVideoBoothService 后端入口）
+
+        /// <summary>
+        /// 当前是否处于视频展台特殊模式（全屏预览激活）。供 IVideoBoothService 读取。
+        /// </summary>
+        public bool IsVideoBoothActive => _isVideoPresenterSpecialMode;
+
+        /// <summary>
+        /// 当前是否处于展台照片预览页（特殊模式下正在查看已拍照片，而非直播画面）。
+        /// 供 IVideoBoothService 读取。
+        /// </summary>
+        public bool IsVideoBoothPhotoPreviewActive => _isVideoPresenterSpecialMode && _boothCurrentPhotoIndex >= 0;
+
+        /// <summary>
+        /// 从照片预览页返回直播（摄像头）画面。未处于照片预览页时为空操作。
+        /// 供 IVideoBoothService 调用，须在 UI 线程。
+        /// </summary>
+        public void VideoBoothSwitchToLiveView()
+        {
+            if (!_isVideoPresenterSpecialMode || _boothCurrentPhotoIndex < 0) return;
+            SwitchBoothToLivePage();
+        }
+
+        /// <summary>当前展台预览缩放倍率（未激活时为 1.0）。供 IVideoBoothService 读取。</summary>
+        public double VideoBoothZoomScale => _isVideoPresenterSpecialMode ? _boothPreviewScale : 1.0;
+
+        /// <summary>记录 P 打开展台前是否已处于白板模式：退出展台时据此决定是否连白板一起退出（从哪里来回哪去）。</summary>
+        private bool _boothToggleCameFromWhiteboard = true;
+
+        /// <summary>
+        /// 开关视频展台：未激活时进入白板并打开展台（不弹菜单，直接进全屏预览）；
+        /// 已激活时完全退出（等同展台菜单「关闭」按钮），
+        /// 且「从哪里来回哪去」——若进入展台前不在白板，退出展台后连白板一起退出回到桌面。
+        /// 供 IVideoBoothService 调用，须在 UI 线程。
+        /// </summary>
+        public void ToggleVideoBooth()
+        {
+            if (_isVideoPresenterSpecialMode)
+            {
+                var cameFromWhiteboard = _boothToggleCameFromWhiteboard;
+                _boothToggleCameFromWhiteboard = true;
+
+                BtnExitVideoPresenter_Click(null, null);
+
+                // 从哪里来回哪去：进入展台前不在白板 → 退出展台后也退出白板
+                if (!cameFromWhiteboard && currentMode == 1)
+                {
+                    ImageBlackboard_MouseUp(null, null);
+                }
+                return;
+            }
+
+            // 打开展台前记录当前是否已在白板
+            _boothToggleCameFromWhiteboard = currentMode == 1;
+            if (currentMode != 1)
+            {
+                // ImageBlackboard_MouseUp 是切换语义：只在非白板时调用一次进入白板
+                ImageBlackboard_MouseUp(null, null);
+            }
+
+            // 与白板工具栏「视频展台」按钮不同：插件入口直接进内置展台全屏预览，
+            // 不弹 BoothPopup 菜单，也不检查 LaunchSeewoVideoShowcaseForWhiteboardBooth
+            EnterVideoBoothDirect();
+        }
+
+        /// <summary>
+        /// 直接进入视频展台特殊模式并启动预览，不弹出展台菜单。
+        /// 与 ToggleVideoPresenterSidebar 的「首次打开」分支一致，仅省略 ShowPopup。
+        /// 进入前若存在残留状态（_isVideoPresenterSpecialMode 但预览已停，或 BoothPopup 还开着），
+        /// 先硬清理再进入，保证「手动退出后再次按 P」也能重新启动预览。
+        /// </summary>
+        private void EnterVideoBoothDirect()
+        {
+            if (BoothPopup == null) return;
+
+            // 清理残留：菜单可能处于淡出动画中（IsOpen 仍为 true）；模式标志可能残留导致
+            // EnterVideoPresenterSpecialMode 提前 return、预览不再启动（表现为再次按 P 后按键失效）
+            if (_isVideoPresenterSpecialMode)
+            {
+                ExitVideoPresenterSpecialMode();
+                CloseVideoPresenterSidebarAndReleaseResources();
+            }
+            else if (BoothPopup.IsOpen)
+            {
+                AnimationsHelper.HidePopupWithSlideAndFade(BoothPopup);
+            }
+
+            SyncPhotoCorrectionAccelerationComboBox();
+            SyncBoothBrightnessSlider();
+            SyncBoothMirrorToggles();
+
+            EnsureCameraService();
+            if (BtnCapturePhoto != null) BtnCapturePhoto.IsEnabled = false;
+
+            EnterVideoPresenterSpecialMode();
+
+            RefreshVideoPresenterDeviceList();
+            // ComboBox 会在 StartVideoPresenterPreview 完成后被填充
+            RefreshBoothResolutionComboBox();
+
+            if (ToggleBtnPhotoCorrection != null)
+            {
+                ToggleBtnPhotoCorrection.IsChecked = Settings?.Automation?.IsEnablePhotoCorrection ?? false;
+            }
+        }
+
+        /// <summary>展台拍照（复用菜单拍照按钮完整管线）。供 IVideoBoothService 调用，须在 UI 线程。</summary>
+        public void VideoBoothCapturePhoto()
+        {
+            if (!_isVideoPresenterSpecialMode) return;
+            BtnCapturePhoto_Click(null, null);
+        }
+
+        /// <summary>展台旋转 90°（复用菜单旋转按钮，直播页/照片页自适应）。供 IVideoBoothService 调用，须在 UI 线程。</summary>
+        public void VideoBoothRotate90()
+        {
+            if (!_isVideoPresenterSpecialMode) return;
+            BtnRotateImage_Click(null, null);
+        }
+
+        /// <summary>
+        /// 以画面中心为锚点按 <paramref name="scaleFactor"/> 缩放预览（与滚轮缩放同管线，含墨迹同步）。
+        /// 供 IVideoBoothService 调用，须在 UI 线程。
+        /// </summary>
+        public void VideoBoothZoom(double scaleFactor)
+        {
+            if (!_isVideoPresenterSpecialMode) return;
+            try
+            {
+                double newScale = Math.Max(0.1, Math.Min(10.0, _boothPreviewScale * scaleFactor));
+                if (Math.Abs(newScale - _boothPreviewScale) < 0.0001) return;
+
+                double containerW = VideoPresenterSpecialModeContainer?.ActualWidth ?? 0;
+                double containerH = VideoPresenterSpecialModeContainer?.ActualHeight ?? 0;
+                var origin = new System.Windows.Point(containerW / 2.0, containerH / 2.0);
+
+                double ratio = newScale / _boothPreviewScale;
+                _boothPreviewTranslateX = origin.X - (origin.X - _boothPreviewTranslateX) * ratio;
+                _boothPreviewTranslateY = origin.Y - (origin.Y - _boothPreviewTranslateY) * ratio;
+                _boothPreviewScale = newScale;
+                ApplyBoothPreviewTransform();
+
+                // 与滚轮缩放一致：同步缩放画布墨迹
+                ScaleInkCanvasStrokes(origin, ratio);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"VideoBoothZoom 异常: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>重置展台缩放/平移到默认状态。供 IVideoBoothService 调用，须在 UI 线程。</summary>
+        public void VideoBoothResetZoom()
+        {
+            if (!_isVideoPresenterSpecialMode) return;
+            _boothPreviewScale = 1.0;
+            _boothPreviewTranslateX = 0;
+            _boothPreviewTranslateY = 0;
+            ApplyBoothPreviewTransform();
+        }
+
+        #endregion
     }
 }

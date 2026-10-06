@@ -206,7 +206,10 @@ namespace Ink_Canvas.Helpers
                                 if (vpa == null) vpa = capPin as IAMVideoProcAmp;
                                 if (cc == null) cc = capPin as IAMCameraControl;
                             }
-                            catch { }
+                            catch (Exception ex)
+                            {
+                                LogHelper.WriteLogToFile($"[Booth] 探测摄像头属性时从采集 pin 获取 IAMVideoProcAmp/IAMCameraControl 失败: {ex.Message}", LogHelper.LogType.Info);
+                            }
                         }
 
                         // 遍历属性规格表，对每个属性调用对应接口的 GetRange
@@ -220,6 +223,7 @@ namespace Ink_Canvas.Helpers
                             }
                             state.Supported = false;
                             state.NormalizedValue = 0;
+                            state.SupportsAuto = false;
 
                             if (spec.isVideoProcAmp)
                             {
@@ -236,6 +240,7 @@ namespace Ink_Canvas.Helpers
                                 state.HwMin = min;
                                 state.HwMax = max;
                                 state.HwDefault = def;
+                                state.SupportsAuto = (flags & VideoProcAmpFlags.Auto) != 0;
                                 state.Supported = true;
                                 supportedCount++;
                             }
@@ -254,6 +259,7 @@ namespace Ink_Canvas.Helpers
                                 state.HwMin = min;
                                 state.HwMax = max;
                                 state.HwDefault = def;
+                                state.SupportsAuto = (flags & CameraControlFlags.Auto) != 0;
                                 state.Supported = true;
                                 supportedCount++;
                             }
@@ -315,8 +321,10 @@ namespace Ink_Canvas.Helpers
             if (!_cameraPropStates.TryGetValue(prop, out var state) || !state.Supported) return false;
             try
             {
-                // 归一化 -100..100 映射到硬件 [min,max]，0=def：
+                // 归一化 -100..100 映射到硬件 [min,max]：
+                //   0 = 默认（Auto）：写 Auto 标志让摄像头回到自动控制（驱动不支持 Auto 时退化为 Manual + 默认值）；
                 //   value>0: def → max 插值；value<0: min → def 插值
+                bool useAuto = state.NormalizedValue == 0 && state.SupportsAuto;
                 int hwValue;
                 if (state.NormalizedValue == 0)
                 {
@@ -352,13 +360,15 @@ namespace Ink_Canvas.Helpers
                 if (isVideoProcAmp)
                 {
                     if (_propVideoProcAmp == null) return false;
-                    // Manual flag：写入同时关闭 Auto（色温/焦距/快门等需要切到手动模式）
-                    hr = _propVideoProcAmp.Set((VideoProcAmpProperty)nativeProp, hwValue, VideoProcAmpFlags.Manual);
+                    // 0（默认）写 Auto 让摄像头回到自动控制；非 0 写 Manual（色温/焦距/快门等需切到手动模式）
+                    var flags = useAuto ? VideoProcAmpFlags.Auto : VideoProcAmpFlags.Manual;
+                    hr = _propVideoProcAmp.Set((VideoProcAmpProperty)nativeProp, hwValue, flags);
                 }
                 else
                 {
                     if (_propCameraControl == null) return false;
-                    hr = _propCameraControl.Set((CameraControlProperty)nativeProp, hwValue, CameraControlFlags.Manual);
+                    var flags = useAuto ? CameraControlFlags.Auto : CameraControlFlags.Manual;
+                    hr = _propCameraControl.Set((CameraControlProperty)nativeProp, hwValue, flags);
                 }
                 if (hr != 0)
                 {
@@ -379,22 +389,38 @@ namespace Ink_Canvas.Helpers
         {
             if (_propVideoProcAmp != null)
             {
-                try { Marshal.ReleaseComObject(_propVideoProcAmp); } catch { }
+                try { Marshal.ReleaseComObject(_propVideoProcAmp); }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Booth] 释放 IAMVideoProcAmp COM 引用失败: {ex.Message}", LogHelper.LogType.Info);
+                }
                 _propVideoProcAmp = null;
             }
             if (_propCameraControl != null)
             {
-                try { Marshal.ReleaseComObject(_propCameraControl); } catch { }
+                try { Marshal.ReleaseComObject(_propCameraControl); }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Booth] 释放 IAMCameraControl COM 引用失败: {ex.Message}", LogHelper.LogType.Info);
+                }
                 _propCameraControl = null;
             }
             if (_propSourceFilter != null)
             {
-                try { Marshal.ReleaseComObject(_propSourceFilter); } catch { }
+                try { Marshal.ReleaseComObject(_propSourceFilter); }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Booth] 释放属性探测用 source filter COM 引用失败: {ex.Message}", LogHelper.LogType.Info);
+                }
                 _propSourceFilter = null;
             }
             if (_propGraph != null)
             {
-                try { Marshal.ReleaseComObject(_propGraph); } catch { }
+                try { Marshal.ReleaseComObject(_propGraph); }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Booth] 释放属性探测用 FilterGraphNoThread COM 引用失败: {ex.Message}", LogHelper.LogType.Info);
+                }
                 _propGraph = null;
             }
             // 不清 _cameraPropStates 的 Supported 状态：调用方切换摄像头后会重新 Probe 覆盖；
@@ -465,7 +491,10 @@ namespace Ink_Canvas.Helpers
                 }
                 result.Sort((a, b) => b.CompareTo(a)); // 降序，常用 60fps 在前
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Booth] 汇总指定分辨率({width}x{height})支持的帧率列表失败: {ex.Message}", LogHelper.LogType.Info);
+            }
             return result;
         }
 
@@ -1265,7 +1294,11 @@ namespace Ink_Canvas.Helpers
             {
                 if (_mediaControl != null)
                 {
-                    try { _mediaControl.Stop(); } catch { }
+                    try { _mediaControl.Stop(); }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Booth] 内部停止预览时停止 IMediaControl 图失败: {ex.Message}", LogHelper.LogType.Info);
+                    }
                 }
                 CleanupGraph();
                 _isCapturing = false;
@@ -1287,7 +1320,11 @@ namespace Ink_Canvas.Helpers
 
                 if (_mediaControl != null)
                 {
-                    try { _mediaControl.Stop(); } catch { }
+                    try { _mediaControl.Stop(); }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Booth] 停止摄像头预览时停止 IMediaControl 图失败: {ex.Message}", LogHelper.LogType.Info);
+                    }
                 }
                 CleanupGraph();
 
@@ -1319,7 +1356,11 @@ namespace Ink_Canvas.Helpers
                     // 先断开 sample grabber 回调，避免释放过程中触发
                     if (_sampleGrabber != null)
                     {
-                        try { _sampleGrabber.SetCallback(null, 0); } catch { }
+                        try { _sampleGrabber.SetCallback(null, 0); }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"[Booth] 清理 DirectShow 图前断开 SampleGrabber 回调失败: {ex.Message}", LogHelper.LogType.Info);
+                        }
                     }
 
                     // 释放子 filter RCW（每个是独立的 RCW）

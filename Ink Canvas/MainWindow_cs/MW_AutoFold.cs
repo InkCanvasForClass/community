@@ -127,6 +127,7 @@ namespace Ink_Canvas
             {
                 isFloatingBarChangingHideMode = true;
                 isFloatingBarFolded = true;
+                LogHelper.WriteLogToFile($"[Toolbar] 浮动栏已折叠: 用户触发={foldFloatingBarByUser}, 自动折叠命令={isAutoFoldCommand}", LogHelper.LogType.Info);
                 HideEdgeExpandHint(); // 浮动栏收起后批注界面整体隐藏，扩展画布提示立即消失
                 if (currentMode != 0) CloseWhiteboardImmediately();
                 if (IsAnnotating)
@@ -401,6 +402,7 @@ namespace Ink_Canvas
             {
                 isFloatingBarChangingHideMode = true;
                 isFloatingBarFolded = false;
+                LogHelper.WriteLogToFile($"[Toolbar] 浮动栏已展开: 用户触发={unfoldFloatingBarByUser}", LogHelper.LogType.Info);
             });
 
             await Task.Delay(0);
@@ -685,16 +687,12 @@ namespace Ink_Canvas
                 || IsDescendantOf(source, ImageSelectionOverlay)
                 || IsDescendantOf(source, ViewboxFloatingBar))
             {
-                SecAgentDiag($"CURSOR_SELECTION_CHROME_CLICK source={source?.GetType().FullName ?? "null"} " +
-                             $"element={SecAgentDiagElement(currentSelectedElement)}");
                 return;
             }
 
             var point = e.GetPosition(inkCanvas);
             var bounds = GetSceneElementBounds(currentSelectedElement);
             var inside = bounds.Contains(point);
-            SecAgentDiag($"CURSOR_SELECTION_BOUNDARY point={point} bounds={bounds} inside={inside} " +
-                         $"element={SecAgentDiagElement(currentSelectedElement)} source={source?.GetType().FullName ?? "null"}");
             if (inside) return;
 
             var oldElement = currentSelectedElement;
@@ -707,7 +705,6 @@ namespace Ink_Canvas
             // window can receive the outside click. Restore pass-through immediately after
             // clearing the selection; the next click then reaches the underlying desktop.
             SetTransparentHitThrough();
-            SecAgentDiag($"CURSOR_SELECTION_CLEARED_OUTSIDE element={SecAgentDiagElement(oldElement)} point={point}");
         }
 
         private bool IsFloatingBarUiAbsentFromScreens()
