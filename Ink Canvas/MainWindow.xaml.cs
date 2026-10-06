@@ -1532,6 +1532,7 @@ namespace Ink_Canvas
         {
             LogHelper.WriteLogToFile($"[Startup] 主窗口加载开始，启动模式={App.CurrentStartupMode}", LogHelper.LogType.Info);
             loadPenCanvas();
+            InitDuskEngine();
             // 工具栏插件化按钮先注入到容器，确保 LoadSettings 内部对 Cursor_Icon / Pen_Icon 等的访问非空。
             // Settings.Toolbar 此时尚为默认值（全部可见），与旧 XAML 行为一致。
             InitializeToolbarPlugins();
@@ -1991,6 +1992,7 @@ namespace Ink_Canvas
         private void Window_Closed(object sender, EventArgs e)
         {
             LogHelper.WriteLogToFile("[Exit] 主窗口 Closed，开始释放资源", LogHelper.LogType.Info);
+            DisposeDuskEngine();
             RealtimeInkFrameScheduler.Clear();
             try
             {
@@ -3544,6 +3546,30 @@ namespace Ink_Canvas
                 // 执行模式切换
                 inkCanvas.EditingMode = newMode;
                 SyncWinRTInkPipelineWithLogicalTool();
+
+                // 同步切换 Dusk 原生内核墨迹引擎状态
+                switch (newMode)
+                {
+                    case InkCanvasEditingMode.Ink:
+                        SetDuskCanvasActive(true);
+                        SetDuskEditingMode(Dusk.Wpf.Shell.ShellEditingMode.Ink);
+                        SyncDuskPenAttributes(drawingAttributes?.Color ?? Ink_DefaultColor, drawingAttributes != null && drawingAttributes.Width > 0 ? drawingAttributes.Width : 2.5);
+                        break;
+                    case InkCanvasEditingMode.EraseByPoint:
+                        SetDuskCanvasActive(true);
+                        SetDuskEditingMode(Dusk.Wpf.Shell.ShellEditingMode.EraseByPoint);
+                        SetDuskEraserRadius(eraserWidth > 0 ? eraserWidth / 2 : 24.0);
+                        break;
+                    case InkCanvasEditingMode.EraseByStroke:
+                        SetDuskCanvasActive(true);
+                        SetDuskEditingMode(Dusk.Wpf.Shell.ShellEditingMode.EraseByStroke);
+                        SetDuskEraserRadius(eraserWidth > 0 ? eraserWidth / 2 : 24.0);
+                        break;
+                    default:
+                        SetDuskCanvasActive(false);
+                        SetDuskEditingMode(Dusk.Wpf.Shell.ShellEditingMode.None);
+                        break;
+                }
 
                 // 根据模式确定是否为鼠标模式（无工具模式）
                 bool isMouseMode = newMode == InkCanvasEditingMode.None;

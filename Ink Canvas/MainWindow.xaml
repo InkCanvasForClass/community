@@ -13,6 +13,7 @@
         xmlns:helpers="clr-namespace:Ink_Canvas.Helpers"
         xmlns:wmk="clr-namespace:WPFMediaKit.DirectShow.Controls;assembly=WPFMediaKit"
         xmlns:icons="clr-namespace:Ink_Canvas"
+        xmlns:dusk="clr-namespace:Dusk.Wpf.Shell;assembly=Dusk.Wpf.Shell"
         mc:Ignorable="d"
         WindowStyle="None"
         ResizeMode="NoResize"
@@ -226,7 +227,8 @@
         <Grid Name="GridTransparencyFakeBackground" Opacity="0" />
         <Label Name="Label" Visibility="Collapsed" Foreground="Gray" Content="0" />
         <Grid Name="InkCanvasGridForInkReplay" d:Visibility="Collapsed">
-            <InkCanvas x:Name="inkCanvas" ForceCursor="True" UseCustomCursor="True"
+            <InkCanvas x:Name="inkCanvas" Visibility="Hidden" IsHitTestVisible="False"
+                       ForceCursor="True" UseCustomCursor="True"
                        TouchDown="Main_Grid_TouchDown"
                        TouchMove="inkCanvas_TouchMove"
                        ManipulationDelta="Main_Grid_ManipulationDelta"
@@ -245,6 +247,12 @@
                        StrokeCollected="inkCanvas_StrokeCollected" 
                        ClipToBounds="False" 
                        Background="Transparent" />
+
+            <!-- Dusk 原生内核墨迹画布：全屏置顶接管书写与渲染 -->
+            <dusk:WpfNativeInkCanvas x:Name="duskCanvas"
+                                     HorizontalAlignment="Stretch"
+                                     VerticalAlignment="Stretch"
+                                     Focusable="True" />
 
             <Canvas x:Name="EraserOverlayCanvas" d:Visibility="Collapsed"
                     Background="Transparent"
