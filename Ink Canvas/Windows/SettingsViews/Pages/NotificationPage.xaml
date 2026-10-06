@@ -130,6 +130,7 @@
                         <ComboBoxItem Content="{x:Static props:NotificationStrings.PlacementTopRight}" Tag="TopRight" />
                         <ComboBoxItem Content="{x:Static props:NotificationStrings.PlacementTopLeft}" Tag="TopLeft" />
                         <ComboBoxItem Content="{x:Static props:NotificationStrings.PlacementFloatingBarAbove}" Tag="FloatingBarAbove" />
+                        <ComboBoxItem Content="{x:Static props:NotificationStrings.PlacementBottomBarAbove}" Tag="BottomBarAbove" />
                     </ComboBox>
                 </ui:SettingsCard>
 

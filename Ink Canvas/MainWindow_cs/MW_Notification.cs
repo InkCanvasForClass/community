@@ -180,6 +180,9 @@ namespace Ink_Canvas
                 case "FloatingBarAbove":
                     ApplyDynamicNotificationFloatingBarPlacement();
                     break;
+                case "BottomBarAbove":
+                    ApplyDynamicNotificationBottomBarPlacement();
+                    break;
             }
         }
 
@@ -211,6 +214,54 @@ namespace Ink_Canvas
             }
         }
 
+        private void ApplyDynamicNotificationBottomBarPlacement()
+        {
+            if (DynamicNotification == null || ViewboxFloatingBar == null)
+            {
+                return;
+            }
+            try
+            {
+                if(ViewboxFloatingBar.Visibility == Visibility.Visible)
+                {
+                    //这里浮动栏是在的，直接采用浮动栏上方的计算方法
+                    ApplyDynamicNotificationFloatingBarPlacement();
+                    return;
+                }
+                else
+                {
+                    if(isFloatingBarFolded && BlackboardCenterSide.Visibility!=Visibility.Visible || BlackboardCenterSide.ActualWidth < 1 || BlackboardCenterSide.ActualHeight < 1)
+                    {
+                        //这时的情况应是点击了浮动栏隐藏或白板未完成布局，直接顶部居中
+                        DynamicNotification.HorizontalAlignment = HorizontalAlignment.Center;
+                        DynamicNotification.VerticalAlignment = VerticalAlignment.Top;
+                        DynamicNotification.Margin = new Thickness(0);
+                        return;
+                    }
+                    if (BlackboardCenterSide.Visibility == Visibility.Visible)
+                    {
+                        //进白板了
+                        var topLeft = BlackboardCenterSide.TranslatePoint(new Point(0, 0), this);
+                        var bottomRight = BlackboardCenterSide.TranslatePoint(
+                            new Point(BlackboardCenterSide.ActualWidth, BlackboardCenterSide.ActualHeight), this);
+                        double notificationWidth = DynamicNotification.ActualWidth > 0 ? DynamicNotification.ActualWidth : DynamicNotification.Width;
+                        double notificationHeight = DynamicNotification.ActualHeight > 0 ? DynamicNotification.ActualHeight : 72;
+                        double left = (topLeft.X + bottomRight.X) / 2 - notificationWidth / 2;
+                        double top = topLeft.Y - notificationHeight - 12;
+                        left = Math.Max(12, Math.Min(ActualWidth - notificationWidth - 12, left));
+                        top = Math.Max(12, top);
+
+                        DynamicNotification.HorizontalAlignment = HorizontalAlignment.Left;
+                        DynamicNotification.VerticalAlignment = VerticalAlignment.Top;
+                        DynamicNotification.Margin = new Thickness(left, top, 0, 0);
+                    }
+                }
+            }
+            catch
+            {
+
+            }
+        }
         private void OnAnnouncementUnreadCountChanged()
         {
             if (_startupUnreadNotificationShown) return;
