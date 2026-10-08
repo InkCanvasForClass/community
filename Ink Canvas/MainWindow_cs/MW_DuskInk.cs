@@ -83,7 +83,7 @@ namespace Ink_Canvas
                 DuskSyncSlot();
             }
             duskCanvas.IsHitTestVisible = active;
-            duskCanvas.Visibility = active ? Visibility.Visible : Visibility.Hidden;
+            duskCanvas.Visibility = Visibility.Visible;
 
             // 无论 Dusk 是否激活，旧 inkCanvas 均保持静默以防输入冲突
             if (inkCanvas != null)

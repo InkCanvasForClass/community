@@ -252,7 +252,7 @@
             <dusk:WpfNativeInkCanvas x:Name="duskCanvas"
                                      HorizontalAlignment="Stretch"
                                      VerticalAlignment="Stretch"
-                                     Focusable="True" />
+                                     Focusable="False" />
 
             <Canvas x:Name="EraserOverlayCanvas" d:Visibility="Collapsed"
                     Background="Transparent"
@@ -784,7 +784,7 @@
                                             Panel.ZIndex="1000" />
 
         </Grid>
-        <Grid Visibility="Collapsed"  d:Visibility="Visible">
+        <Grid Visibility="Collapsed"  d:Visibility="Visible" Panel.ZIndex="1000">
             <Grid Visibility="{Binding ElementName=GridBackgroundCoverHolder, Path=Visibility}" d:Visibility="Visible">
                 <Viewbox Margin="10" Height="50" HorizontalAlignment="Right" VerticalAlignment="Bottom">
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="5">
@@ -819,7 +819,7 @@
             </Grid>
         </Grid>
         <!--白板-->
-        <Grid Name="BlackboardUIGridForInkReplay">
+        <Grid Name="BlackboardUIGridForInkReplay" Panel.ZIndex="1000">
             <Grid Visibility="{Binding ElementName=GridBackgroundCoverHolder, Path=Visibility}">
                 <!-- 左下角 -->
                 <Viewbox x:Name="ViewboxBlackboardLeftSide" Margin="3,0,0,0" Height="55" HorizontalAlignment="Left"
@@ -1036,7 +1036,7 @@
                                  Margin="0,0,6,0"
                                  HorizontalAlignment="Right" VerticalAlignment="Center"/>
         <!--浮动工具栏-->
-        <Grid Name="FloatingbarUIForInkReplay" d:Visibility="Collapsed">
+        <Grid Name="FloatingbarUIForInkReplay" Panel.ZIndex="1000" d:Visibility="Collapsed">
             <Viewbox Name="ViewboxFloatingBar" Margin="-500,0,0,0" Cursor="Arrow"
                      Visibility="Collapsed"  d:Visibility="Visible"
                      HorizontalAlignment="Left" VerticalAlignment="Top"
@@ -1338,7 +1338,7 @@
                                        Visibility="Visible" Margin="-60,0,0,-150"
                                        HorizontalAlignment="Left" VerticalAlignment="Center" />
         <!--收纳下的快捷面板//左-->
-        <Viewbox Width="50" Visibility="Collapsed"  d:Visibility="Visible" Name="LeftUnFoldButtonQuickPanel" Margin="-60,0,0,-150" d:Margin="-60,0,0,500"
+        <Viewbox Width="50" Panel.ZIndex="1000" Visibility="Collapsed"  d:Visibility="Visible" Name="LeftUnFoldButtonQuickPanel" Margin="-60,0,0,-150" d:Margin="-60,0,0,500"
                  HorizontalAlignment="Left" VerticalAlignment="Center">
             <Border x:Name="LeftQuickPanelBorder" ClipToBounds="False" Visibility="Visible" CornerRadius="6" Background="{DynamicResource FloatingBarBackgroundBrush}" Opacity="1"
                     BorderThickness="1" BorderBrush="{DynamicResource FloatingBarBorderBrush}" d:BorderBrush="Red" d:Background="Green" Width="32">
@@ -1362,7 +1362,7 @@
                                        Margin="0,0,-60,-150" IsRightSide="True"
                                        HorizontalAlignment="Right" VerticalAlignment="Center" />
         <!--收纳下的快捷面板//右-->
-        <Viewbox Width="50" Visibility="Collapsed"  d:Visibility="Visible" Name="RightUnFoldButtonQuickPanel" Margin="0,0,-60,-150" d:Margin="0,0,-60,500"
+        <Viewbox Width="50" Panel.ZIndex="1000" Visibility="Collapsed"  d:Visibility="Visible" Name="RightUnFoldButtonQuickPanel" Margin="0,0,-60,-150" d:Margin="0,0,-60,500"
                  HorizontalAlignment="Right" VerticalAlignment="Center">
             <Border x:Name="RightQuickPanelBorder" ClipToBounds="False" Visibility="Visible" CornerRadius="6" Background="{DynamicResource FloatingBarBackgroundBrush}" Opacity="1"
                     BorderThickness="1" BorderBrush="{DynamicResource FloatingBarBorderBrush}" d:BorderBrush="Red" d:Background="Green" Width="32">
