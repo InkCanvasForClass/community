@@ -26,6 +26,18 @@ namespace Ink_Canvas
         private static readonly Dictionary<string, DateTime> _uriCommandLastExecuted = new Dictionary<string, DateTime>();
         private static readonly TimeSpan _uriCommandDebounceWindow = TimeSpan.FromSeconds(3);
 
+        // 打开/关闭类命令的点击缓冲：1s 内重复触发（频繁点击 URL/快捷方式）只处理一次，
+        // 避免"刚打开又被关闭"。基准为"上次被处理的时刻"：间隔 0.999s 重复触发仍只处理一次，
+        // 间隔 ≥1.001s 后才再次处理。
+        private static readonly HashSet<string> _uriToggleCommands = new HashSet<string>
+        {
+            "fold", "unfold", "show", "toggle",
+            "thoroughhideon", "thoroughhideoff", "thoroughhidetoggle",
+            "board", "whiteboard", "booth", "videopresenter",
+            "rand", "randone", "timer", "annotate", "annotation"
+        };
+        private static readonly TimeSpan _uriToggleDebounceWindow = TimeSpan.FromSeconds(1);
+
         // URL 启动去抖：同一 URI 在 300ms 内重复到达（如双击快捷方式/链接触发两次启动）时忽略后一次
         private static readonly object _uriRepeatLock = new object();
         private static string _lastUriRaw;
@@ -65,6 +77,18 @@ namespace Ink_Canvas
 
                 string path = command;
                 string pathLower = path.ToLowerInvariant();
+
+                // 打开/关闭类命令：1s 内重复触发（频繁点击 URL/快捷方式）只处理一次，避免"刚打开又被关闭"
+                if (_uriToggleCommands.Contains(pathLower))
+                {
+                    if (_uriCommandLastExecuted.TryGetValue(pathLower, out DateTime lastToggleTime)
+                        && DateTime.Now - lastToggleTime < _uriToggleDebounceWindow)
+                    {
+                        LogHelper.WriteLogToFile($"URI 打开/关闭命令在 {_uriToggleDebounceWindow.TotalMilliseconds:0}ms 内重复触发，已忽略: {pathLower}", LogHelper.LogType.Warning);
+                        return;
+                    }
+                    _uriCommandLastExecuted[pathLower] = DateTime.Now;
+                }
 
                 // 防止危险命令（restart/exit等）在短时间内重复执行
                 if (_uriNonRepeatableCommands.Contains(pathLower))
