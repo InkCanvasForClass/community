@@ -1,3 +1,4 @@
+using System.Windows.Controls;
 using Dusk.Wpf.Shell;
 using Ink_Canvas.Helpers;
 using System;
@@ -72,11 +73,70 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 应用指定的墨迹引擎（WPF、Dusk、WinRT）
+        /// </summary>
+        internal void ApplyInkEngine(InkEngineType engine)
+        {
+            LogHelper.WriteLogToFile($"[InkEngine] 切换墨迹引擎: {engine}", LogHelper.LogType.Warning);
+            switch (engine)
+            {
+                case InkEngineType.Dusk:
+                    ShutdownWinRTInkPipeline();
+                    InitDuskEngine();
+                    if (duskCanvas != null)
+                    {
+                        duskCanvas.Visibility = Visibility.Visible;
+                        duskCanvas.IsHitTestVisible = (inkCanvas?.EditingMode != InkCanvasEditingMode.None);
+                    }
+                    if (inkCanvas != null)
+                    {
+                        inkCanvas.Visibility = Visibility.Hidden;
+                        inkCanvas.IsHitTestVisible = false;
+                    }
+                    break;
+
+                case InkEngineType.WinRT:
+                    if (duskCanvas != null)
+                    {
+                        duskCanvas.IsHitTestVisible = false;
+                        duskCanvas.Visibility = Visibility.Collapsed;
+                    }
+                    if (inkCanvas != null)
+                    {
+                        inkCanvas.Visibility = Visibility.Visible;
+                        inkCanvas.IsHitTestVisible = (inkCanvas.EditingMode != InkCanvasEditingMode.None);
+                    }
+                    SyncWinRTInkPipelineWithLogicalTool();
+                    break;
+
+                case InkEngineType.Wpf:
+                default:
+                    ShutdownWinRTInkPipeline();
+                    if (duskCanvas != null)
+                    {
+                        duskCanvas.IsHitTestVisible = false;
+                        duskCanvas.Visibility = Visibility.Collapsed;
+                    }
+                    if (inkCanvas != null)
+                    {
+                        inkCanvas.Visibility = Visibility.Visible;
+                        inkCanvas.IsHitTestVisible = (inkCanvas.EditingMode != InkCanvasEditingMode.None);
+                    }
+                    break;
+            }
+        }
+
+        /// <summary>
         /// 设置 Dusk 画布激活状态（命中测试与可见性）
         /// </summary>
         internal void SetDuskCanvasActive(bool active)
         {
             if (duskCanvas == null) return;
+            if (Settings?.Canvas?.InkEngine != InkEngineType.Dusk)
+            {
+                duskCanvas.IsHitTestVisible = false;
+                return;
+            }
             LogHelper.WriteLogToFile($"[Dusk.Bridge] SetDuskCanvasActive: active={active}", LogHelper.LogType.Warning);
             if (active)
             {
@@ -85,7 +145,6 @@ namespace Ink_Canvas
             duskCanvas.IsHitTestVisible = active;
             duskCanvas.Visibility = Visibility.Visible;
 
-            // 无论 Dusk 是否激活，旧 inkCanvas 均保持静默以防输入冲突
             if (inkCanvas != null)
             {
                 inkCanvas.IsHitTestVisible = false;

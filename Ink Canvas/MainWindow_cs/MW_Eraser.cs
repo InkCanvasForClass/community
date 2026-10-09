@@ -155,7 +155,7 @@ namespace Ink_Canvas
                 eraserFeedback.Visibility = Visibility.Collapsed;
             }
 
-            if (startPos.HasValue && duskCanvas != null)
+            if (Settings?.Canvas?.InkEngine == InkEngineType.Dusk && startPos.HasValue && duskCanvas != null)
             {
                 duskCanvas.EraseAt(startPos.Value, eraserWidth > 0 ? eraserWidth / 2 : 24.0, isUsingStrokesEraser ? 2 : 1);
             }
@@ -218,7 +218,7 @@ namespace Ink_Canvas
 
             EraseSecAgentSceneElementsAt(pt);
 
-            if (duskCanvas != null)
+            if (Settings?.Canvas?.InkEngine == InkEngineType.Dusk && duskCanvas != null)
             {
                 duskCanvas.EraseAt(pt, eraserWidth > 0 ? eraserWidth / 2 : 24.0, isUsingStrokesEraser ? 2 : 1);
             }

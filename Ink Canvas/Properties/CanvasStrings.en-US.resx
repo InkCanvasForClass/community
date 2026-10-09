@@ -378,6 +378,15 @@
   <data name="Canvas_DarkMode" xml:space="preserve">
     <value>Dark</value>
   </data>
+  <data name="Canvas_InkEngine" xml:space="preserve">
+    <value>Ink Engine</value>
+  </data>
+  <data name="Canvas_InkEngineHint" xml:space="preserve">
+    <value>Select the ink rendering and input processing engine. Takes effect immediately.</value>
+  </data>
+  <data name="Canvas_InkEngine_WPF" xml:space="preserve">
+    <value>WPF Native</value>
+  </data>
   <data name="Canvas_UseWinRTInk" xml:space="preserve">
     <value>Use WinRT ink engine (experimental)</value>
   </data>

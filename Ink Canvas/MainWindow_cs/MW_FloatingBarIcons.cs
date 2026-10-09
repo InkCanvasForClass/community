@@ -1242,7 +1242,7 @@ namespace Ink_Canvas
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                 HideSelectionDisplay();
             }
-            else if (inkCanvas.Strokes.Count > 0 || (duskCanvas != null && duskCanvas.StrokeCount > 0) || HasSecAgentSceneElementsOnCanvas())
+            else if (inkCanvas.Strokes.Count > 0 || (Settings?.Canvas?.InkEngine == InkEngineType.Dusk && duskCanvas != null && duskCanvas.StrokeCount > 0) || HasSecAgentSceneElementsOnCanvas())
             {
                 if (Settings.Automation.IsAutoSaveScreenshotAtClear &&
                     inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
@@ -4481,7 +4481,7 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void BtnUndo_Click(object sender, RoutedEventArgs e)
         {
-            if (duskCanvas != null && duskCanvas.CanUndo)
+            if (Settings?.Canvas?.InkEngine == InkEngineType.Dusk && duskCanvas != null && duskCanvas.CanUndo)
             {
                 duskCanvas.Undo();
                 return;
@@ -4504,7 +4504,7 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void BtnRedo_Click(object sender, RoutedEventArgs e)
         {
-            if (duskCanvas != null && duskCanvas.CanRedo)
+            if (Settings?.Canvas?.InkEngine == InkEngineType.Dusk && duskCanvas != null && duskCanvas.CanRedo)
             {
                 duskCanvas.Redo();
                 return;
