@@ -639,6 +639,12 @@ namespace Ink_Canvas
             UpdatePenIconColor();
             // 更新白板工具栏画笔图标颜色
             UpdateBoardPenIconColor();
+
+            // 同步笔触属性给 Dusk 原生内核
+            if (duskCanvas != null && inkCanvas != null)
+            {
+                SyncDuskPenAttributes(inkCanvas.DefaultDrawingAttributes.Color, inkCanvas.DefaultDrawingAttributes.Width);
+            }
         }
 
         /// <summary>

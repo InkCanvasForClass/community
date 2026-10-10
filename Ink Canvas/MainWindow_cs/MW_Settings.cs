@@ -801,6 +801,10 @@ namespace Ink_Canvas
                 drawingAttributes.Height = value;
                 Settings.Canvas.LaserPenWidth = value;
             }
+            if (duskCanvas != null && drawingAttributes != null)
+            {
+                SyncDuskPenAttributes(drawingAttributes.Color, drawingAttributes.Width);
+            }
             SaveSettingsToFile();
         }
 

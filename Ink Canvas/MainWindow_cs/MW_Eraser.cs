@@ -58,7 +58,7 @@ namespace Ink_Canvas
             canvas.StylusDown += ((o, args) =>
             {
                 if (args.StylusDevice.TabletDevice.Type == TabletDeviceType.Stylus) canvas.CaptureStylus();
-                EraserOverlay_PointerDown(sender);
+                EraserOverlay_PointerDown(sender, args.GetPosition(inkCanvas));
             });
             canvas.StylusUp += ((o, args) =>
             {
@@ -72,7 +72,7 @@ namespace Ink_Canvas
             canvas.MouseDown += ((o, args) =>
             {
                 canvas.CaptureMouse();
-                EraserOverlay_PointerDown(sender);
+                EraserOverlay_PointerDown(sender, args.GetPosition(inkCanvas));
             });
             canvas.MouseUp += ((o, args) =>
             {
@@ -108,7 +108,7 @@ namespace Ink_Canvas
         /// <summary>
         /// 橡皮擦按下事件处理
         /// </summary>
-        private void EraserOverlay_PointerDown(object sender)
+        private void EraserOverlay_PointerDown(object sender, Point? startPos = null)
         {
             _secAgentEraseInitialStates.Clear();
             if (currentSelectedElement != null)
@@ -153,6 +153,11 @@ namespace Ink_Canvas
                 eraserFeedback.Height = isEraserCircleShape ? eraserFeedback.Width : _h;
                 eraserFeedback.Measure(new Size(Double.PositiveInfinity, Double.PositiveInfinity));
                 eraserFeedback.Visibility = Visibility.Collapsed;
+            }
+
+            if (Settings?.Canvas?.InkEngine == InkEngineType.Dusk && startPos.HasValue && duskCanvas != null)
+            {
+                duskCanvas.EraseAt(startPos.Value, eraserWidth > 0 ? eraserWidth / 2 : 24.0, isUsingStrokesEraser ? 2 : 1);
             }
         }
 
@@ -212,6 +217,11 @@ namespace Ink_Canvas
             if (!isUsingGeometryEraser) return;
 
             EraseSecAgentSceneElementsAt(pt);
+
+            if (Settings?.Canvas?.InkEngine == InkEngineType.Dusk && duskCanvas != null)
+            {
+                duskCanvas.EraseAt(pt, eraserWidth > 0 ? eraserWidth / 2 : 24.0, isUsingStrokesEraser ? 2 : 1);
+            }
 
             if (isUsingStrokesEraser)
             {

@@ -975,6 +975,7 @@ namespace Ink_Canvas
                     if (currentMode == 1)
                     {
                         currentMode = 0;
+                        DuskSwitchSlot(0);
                         AutomationBootstrap.Monitor?.NotifyInternalStateChanged();
                         GridBackgroundCover.Visibility = Visibility.Collapsed;
                         AnimationsHelper.HideWithSlideAndFade(BlackboardLeftSide);
@@ -1241,7 +1242,7 @@ namespace Ink_Canvas
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                 HideSelectionDisplay();
             }
-            else if (inkCanvas.Strokes.Count > 0 || HasSecAgentSceneElementsOnCanvas())
+            else if (inkCanvas.Strokes.Count > 0 || (Settings?.Canvas?.InkEngine == InkEngineType.Dusk && duskCanvas != null && duskCanvas.StrokeCount > 0) || HasSecAgentSceneElementsOnCanvas())
             {
                 if (Settings.Automation.IsAutoSaveScreenshotAtClear &&
                     inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
@@ -3701,8 +3702,9 @@ namespace Ink_Canvas
                 GridTransparencyFakeBackground.Background = new SolidColorBrush(StringToColor("#01FFFFFF"));
                 SetTransparentNotHitThrough();
 
-                inkCanvas.IsHitTestVisible = true;
-                inkCanvas.Visibility = Visibility.Visible;
+                SetDuskCanvasActive(true);
+                SetDuskEditingMode(Dusk.Wpf.Shell.ShellEditingMode.Ink);
+                SyncDuskPenAttributes(drawingAttributes?.Color ?? Ink_DefaultColor, drawingAttributes != null && drawingAttributes.Width > 0 ? drawingAttributes.Width : 2.5);
 
                 GridBackgroundCoverHolder.Visibility = Visibility.Visible;
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
@@ -4479,6 +4481,12 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void BtnUndo_Click(object sender, RoutedEventArgs e)
         {
+            if (Settings?.Canvas?.InkEngine == InkEngineType.Dusk && duskCanvas != null && duskCanvas.CanUndo)
+            {
+                duskCanvas.Undo();
+                return;
+            }
+
             if (inkCanvas.GetSelectedStrokes().Count != 0)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
@@ -4496,6 +4504,12 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void BtnRedo_Click(object sender, RoutedEventArgs e)
         {
+            if (Settings?.Canvas?.InkEngine == InkEngineType.Dusk && duskCanvas != null && duskCanvas.CanRedo)
+            {
+                duskCanvas.Redo();
+                return;
+            }
+
             if (inkCanvas.GetSelectedStrokes().Count != 0)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
@@ -4646,6 +4660,7 @@ namespace Ink_Canvas
             }
 
             ClearStrokes(false);
+            DuskClear();
             // 保存非笔画元素（如图片）
             var preservedElements = PreserveNonStrokeElements();
             inkCanvas.Children.Clear();
@@ -4968,8 +4983,9 @@ namespace Ink_Canvas
                 GridTransparencyFakeBackground.Opacity = 1;
                 GridTransparencyFakeBackground.Background = new SolidColorBrush(StringToColor("#01FFFFFF"));
                 SetTransparentNotHitThrough();
-                inkCanvas.IsHitTestVisible = true;
-                inkCanvas.Visibility = Visibility.Visible;
+                SetDuskCanvasActive(true);
+                SetDuskEditingMode(Dusk.Wpf.Shell.ShellEditingMode.Ink);
+                SyncDuskPenAttributes(drawingAttributes?.Color ?? Ink_DefaultColor, drawingAttributes != null && drawingAttributes.Width > 0 ? drawingAttributes.Width : 2.5);
 
                 GridBackgroundCoverHolder.Visibility = Visibility.Visible;
 
@@ -5021,8 +5037,8 @@ namespace Ink_Canvas
                             //BtnClear_Click(null, null);
                         }
 
-                    inkCanvas.IsHitTestVisible = true;
-                    inkCanvas.Visibility = Visibility.Visible;
+                    SetDuskCanvasActive(false);
+                    SetDuskEditingMode(Dusk.Wpf.Shell.ShellEditingMode.None);
                 }
                 else
                 {
@@ -5038,16 +5054,8 @@ namespace Ink_Canvas
                         }
 
 
-                    if (Settings.PowerPointSettings.IsShowStrokeOnSelectInPowerPoint)
-                    {
-                        inkCanvas.Visibility = Visibility.Visible;
-                        inkCanvas.IsHitTestVisible = true;
-                    }
-                    else
-                    {
-                        inkCanvas.IsHitTestVisible = true;
-                        inkCanvas.Visibility = Visibility.Visible;
-                    }
+                    SetDuskCanvasActive(false);
+                    SetDuskEditingMode(Dusk.Wpf.Shell.ShellEditingMode.None);
                 }
 
                 GridTransparencyFakeBackground.Opacity = 0;
@@ -5600,6 +5608,27 @@ namespace Ink_Canvas
                     case "shape":
                         targetButton = ShapeDrawFloatingBarBtn;
                         break;
+                }
+
+                if (duskCanvas != null)
+                {
+                    switch (mode)
+                    {
+                        case "pen":
+                        case "color":
+                            duskCanvas.EditingMode = Dusk.Wpf.Shell.ShellEditingMode.Ink;
+                            break;
+                        case "eraser":
+                            duskCanvas.EraserRadius = eraserWidth > 0 ? eraserWidth / 2 : 24.0;
+                            duskCanvas.EditingMode = Dusk.Wpf.Shell.ShellEditingMode.EraseByPoint;
+                            break;
+                        case "eraserByStrokes":
+                            duskCanvas.EditingMode = Dusk.Wpf.Shell.ShellEditingMode.EraseByStroke;
+                            break;
+                        default:
+                            duskCanvas.EditingMode = Dusk.Wpf.Shell.ShellEditingMode.None;
+                            break;
+                    }
                 }
 
                 if (targetButton != null && targetIconType != null)

@@ -202,6 +202,7 @@ namespace Ink_Canvas
             // here as well so page switches, loads and code/UI clears cannot leave them behind.
             ClearSecAgentSceneElements();
             inkCanvas.Strokes.Clear();
+            DuskClear(isErasedByCode);
             // 只隐藏 hint，不暂停（ClearStrokes 在切换页面、保存加载时都会被调用，
             // 设置 _edgeExpandHintSuspended 会导致后续书写永远无法触发提示）。
             HideEdgeExpandHint();
@@ -258,6 +259,7 @@ namespace Ink_Canvas
                 }
 
                 var targetIndex = isBackupMain ? 0 : CurrentWhiteboardIndex;
+                DuskSwitchSlot(targetIndex);
 
                 // 先清空当前画布的墨迹
                 inkCanvas.Strokes.Clear();
@@ -811,6 +813,7 @@ namespace Ink_Canvas
             var deletingCurrentPluginPage = pageIndex == CurrentWhiteboardIndex;
             if (deletingCurrentPluginPage) CaptureCurrentPluginPageStates();
             var removedPluginPage = RemovePluginWhiteboardPageId(pageIndex, oldPluginPageCount);
+            DuskDeleteSlot(pageIndex);
 
             if (pageIndex == CurrentWhiteboardIndex)
             {
