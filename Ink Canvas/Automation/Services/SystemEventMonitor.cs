@@ -258,7 +258,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             }
             catch (Exception ex)
             {
-                LogCallbackException("前台窗口兜底轮询获取当前前台窗口", ex);
+                Helpers.LogService.LogException(ex);
             }
         }
 
@@ -284,10 +284,9 @@ namespace Ink_Canvas.WorkflowAutomation.Services
 
             if (_foregroundHook != HWINEVENTHOOK.Null)
             {
-                try { PInvoke.UnhookWinEvent(_foregroundHook); }
-                catch (Exception ex)
+                try { PInvoke.UnhookWinEvent(_foregroundHook); } catch (Exception ex)
                 {
-                    LogHelper.WriteLogToFile($"[Automation] SystemEventMonitor 释放时卸载前台窗口 WinEvent 钩子失败: {ex.Message}", LogHelper.LogType.Info);
+                    Helpers.LogService.LogException(ex);
                 }
                 _foregroundHook = HWINEVENTHOOK.Null;
             }

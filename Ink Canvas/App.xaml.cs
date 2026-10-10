@@ -1,6 +1,7 @@
 ﻿using H.NotifyIcon;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Plugins;
+using Ink_Canvas.Services;
 using Ink_Canvas.Properties;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Win32;
@@ -209,6 +210,8 @@ namespace Ink_Canvas
             }
             catch
             {
+                // 此处守卫的正是日志写入本身：日志系统尚未就绪或写盘失败时无法再记录，
+                // 只能静默吞掉以保证启动流程不被日志故障中断（这是全仓唯一允许无日志的空 catch）。
             }
 
             System.Windows.Forms.Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
@@ -237,7 +240,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[App] 设置 AppUserModelID 失败（任务栏分组可能异常）: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
 
             // 配置TLS协议以支持Windows 7
@@ -434,7 +437,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[App] TLS 兼容配置失败: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
         }
 
@@ -524,7 +527,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Crash] 绑定主窗口 SourceInitialized 事件失败: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
         }
 
@@ -547,7 +550,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Crash] 注册主窗口销毁监听失败: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
         }
 
@@ -605,7 +608,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Crash] 卸载窗口销毁 WinEvent 钩子失败: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
         }
 
@@ -1039,16 +1042,15 @@ namespace Ink_Canvas
             try
             {
                 int crashAction = 2;
-                try { crashAction = (int)(parsedSettings?["startup"]?["crashAction"] ?? 2); }
-                catch (Exception ex)
+                try { crashAction = (int)(parsedSettings?["startup"]?["crashAction"] ?? 2); } catch (Exception ex)
                 {
-                    LogHelper.WriteLogToFile($"[App] 解析崩溃后动作设置失败，改用默认值 2: {ex.Message}", LogHelper.LogType.Info);
+                    Helpers.LogService.LogException(ex);
                 }
                 CrashAction = (CrashActionType)crashAction;
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[App] 同步崩溃后动作失败: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
         }
 
@@ -2260,9 +2262,74 @@ namespace Ink_Canvas
             }
         }
 
+        // 装配托盘服务的依赖委托。MainWindow/App 私有成员的访问全部经此处注入，
+        // TrayIconService 不引用 MainWindow 类型（事件出抛方向唯一：Service → App）。
+        private TrayIconService CreateTrayIconService()
+        {
+            var service = new TrayIconService(new TrayIconService.Hooks
+            {
+                GetMainWindow = () => Current.MainWindow,
+                GetTrayLeftClickAction = () => Ink_Canvas.MainWindow.Settings.Appearance.TrayLeftClickAction,
+                GetTrayRightClickAction = () => Ink_Canvas.MainWindow.Settings.Appearance.TrayRightClickAction,
+                IsAlwaysOnTop = () => Ink_Canvas.MainWindow.Settings.Advanced.IsAlwaysOnTop,
+                IsNoFocusMode = () => Ink_Canvas.MainWindow.Settings.Advanced.IsNoFocusMode,
+                IsFloatingBarFolded = () => ((MainWindow)Current.MainWindow).isFloatingBarFolded,
+                FoldFloatingBar = () => ((MainWindow)Current.MainWindow).FoldFloatingBar_MouseUp(new object(), null),
+                UnfoldFloatingBar = () => ((MainWindow)Current.MainWindow).UnFoldFloatingBar_MouseUp(new object(), null),
+                ResetFloatingBarPosition = () =>
+                {
+                    var mw = (MainWindow)Current.MainWindow;
+                    var isInPPTPresentationMode = mw.IsInPPTPresentationMode;
+                    if (!mw.isFloatingBarFolded)
+                    {
+                        // 清空保存的状态，强制动画走默认位置分支
+                        mw._userHasDraggedFloatingBar = false;
+                        mw.pointDesktop = new Point(-1, -1);
+                        mw.pointPPT = new Point(-1, -1);
+
+                        if (!isInPPTPresentationMode) mw.PureViewboxFloatingBarMarginAnimationInDesktopMode();
+                        else mw.PureViewboxFloatingBarMarginAnimationInPPTMode();
+                    }
+                },
+                SetTrayTemporaryShowUntilUtc = value => Ink_Canvas.MainWindow.TrayTemporaryShowUntilUtc = value,
+                UiInvoke = action => Dispatcher.BeginInvoke(action),
+                OpenSettings = () =>
+                {
+                    try
+                    {
+                        var method = typeof(MainWindow).GetMethod("BtnSettings_Click", BindingFlags.NonPublic | BindingFlags.Instance);
+                        method?.Invoke(Current.MainWindow, new object[] { null, null });
+                    }
+                    catch (Exception ex) { LogHelper.WriteLogToFile($"Open settings from tray failed: {ex.Message}", LogHelper.LogType.Error); }
+                },
+                MarkExitByUser = () => IsAppExitByUser = true,
+                ExitApplicationByUser = () =>
+                {
+                    IsAppExitByUser = true;
+                    ((MainWindow)Current.MainWindow).ExitApplication(null, null);
+                },
+                Shutdown = () => Current.Shutdown(),
+                ForceFullScreen = () =>
+                {
+                    var mw = (MainWindow)Current.MainWindow;
+                    Ink_Canvas.MainWindow.MoveWindow(new WindowInteropHelper(mw).Handle, 0, 0,
+                        Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height, true);
+                    Ink_Canvas.MainWindow.ShowNewMessage($"已强制全屏化：{Screen.PrimaryScreen.Bounds.Width}x{Screen.PrimaryScreen.Bounds.Height}（缩放比例为{Screen.PrimaryScreen.Bounds.Width / SystemParameters.PrimaryScreenWidth}x{Screen.PrimaryScreen.Bounds.Height / SystemParameters.PrimaryScreenHeight}）");
+                },
+                CheckMainWindowVisibility = () => ((MainWindow)Current.MainWindow).CheckMainWindowVisibility(),
+                GetGlobalHotkeyManager = () => typeof(MainWindow)
+                    .GetField("_globalHotkeyManager", BindingFlags.NonPublic | BindingFlags.Instance)
+                    ?.GetValue(Current.MainWindow) as GlobalHotkeyManager,
+            });
+            service.TrayLeftClicked += () => PluginTrayLeftClicked?.Invoke();
+            service.TrayRightClicked += () => PluginTrayRightClicked?.Invoke();
+            return service;
+        }
+
         private void App_Exit(object sender, ExitEventArgs e)
         {
             isAppExiting = true;
+            _trayIconService?.Dispose();
             LogHelper.WriteLogToFile(
                 $"[Exit] 开始应用退出清理: user={IsAppExitByUser}, code={e.ApplicationExitCode}, crashAction={CrashAction}",
                 LogHelper.LogType.Info);
@@ -2279,11 +2346,11 @@ namespace Ink_Canvas
 
             try { heartbeatTimer?.Stop(); } catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Exit] 停止心跳计时器失败: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
             try { watchdogTimer?.Change(Timeout.Infinite, Timeout.Infinite); watchdogTimer?.Dispose(); } catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Exit] 释放看门狗计时器失败: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
             MemoryBreakdownHelper.StopAutomaticDumpMonitor();
 
@@ -2311,7 +2378,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Exit] 释放单实例互斥体失败: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
 
             // 卸载所有插件

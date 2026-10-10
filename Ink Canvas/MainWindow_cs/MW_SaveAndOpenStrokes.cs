@@ -598,7 +598,7 @@ namespace Ink_Canvas
                                         }
                                         catch (Exception ex)
                                         {
-                                            LogHelper.WriteLogToFile($"[Settings] 异步上传分页 XML 墨迹文件失败: {ex.Message}", LogHelper.LogType.Info);
+                                            LogService.LogException(ex);
                                         }
                                     });
                                 }
@@ -779,7 +779,7 @@ namespace Ink_Canvas
                                     }
                                     catch (Exception ex)
                                     {
-                                        LogHelper.WriteLogToFile($"[Settings] 异步上传分页 icstk 墨迹文件失败: {ex.Message}", LogHelper.LogType.Info);
+                                        LogService.LogException(ex);
                                     }
                                 });
                             }
@@ -835,11 +835,7 @@ namespace Ink_Canvas
                             }
                             catch
                             {
-                                try { if (File.Exists(tmpPath)) File.Delete(tmpPath); }
-                                catch (Exception ex)
-                                {
-                                    LogHelper.WriteLogToFile($"[Settings] 原子写入墨迹文件失败后删除临时文件 {Path.GetFileName(tmpPath)} 失败: {ex.Message}", LogHelper.LogType.Info);
-                                }
+                                try { if (File.Exists(tmpPath)) File.Delete(tmpPath); } catch (Exception ex) { LogService.LogException(ex); }
                                 throw;
                             }
                             SavePluginPageDocumentSidecar(savePathWithName, CurrentWhiteboardIndex);
@@ -865,7 +861,7 @@ namespace Ink_Canvas
                             }
                             catch (Exception ex)
                             {
-                                LogHelper.WriteLogToFile($"[Settings] 异步上传单页墨迹文件失败: {ex.Message}", LogHelper.LogType.Info);
+                                LogService.LogException(ex);
                             }
                         });
 
@@ -936,7 +932,7 @@ namespace Ink_Canvas
                         }
                         catch (Exception ex)
                         {
-                            LogHelper.WriteLogToFile($"[Settings] 异步上传 XML 墨迹文件失败: {ex.Message}", LogHelper.LogType.Info);
+                            LogService.LogException(ex);
                         }
                     });
                 }
@@ -1031,7 +1027,7 @@ namespace Ink_Canvas
                         }
                         catch (Exception ex)
                         {
-                            LogHelper.WriteLogToFile($"[Settings] 异步上传多页 XML 压缩包失败: {ex.Message}", LogHelper.LogType.Info);
+                            LogService.LogException(ex);
                         }
                     });
 
@@ -1144,7 +1140,7 @@ namespace Ink_Canvas
                         }
                         catch (Exception ex)
                         {
-                            LogHelper.WriteLogToFile($"[Settings] 异步上传多页墨迹压缩包失败: {ex.Message}", LogHelper.LogType.Info);
+                            LogService.LogException(ex);
                         }
                     });
 
@@ -1251,7 +1247,7 @@ namespace Ink_Canvas
                                 }
                                 catch (Exception ex)
                                 {
-                                    LogHelper.WriteLogToFile($"[Screenshot] 异步上传带墨迹截图 PNG 失败: {ex.Message}", LogHelper.LogType.Info);
+                                    LogService.LogException(ex);
                                 }
                             });
                         } // using imgBitmap

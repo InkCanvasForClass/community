@@ -1,6 +1,7 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Models;
 using iNKORE.UI.WPF.Modern;
 using Microsoft.Win32;
 using System;
@@ -114,7 +115,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Theme] 刷新快捷面板图标失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -165,7 +166,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Theme] 刷新浮动栏高亮配色失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -234,29 +235,29 @@ namespace Ink_Canvas
                     if (btn != null && !ToolbarRegistry.GetUseRedStyle(btn)) btn.Icon.Brush = new SolidColorBrush(selectedColor);
                 }
 
-                switch (_currentToolMode)
+                switch (_currentToolModeEnum)
                 {
-                    case "cursor":
+                    case ToolMode.Cursor:
                         SetSelectedFloatingBarButtonBrush(Cursor_Icon);
                         break;
-                    case "pen":
-                    case "color":
+                    case ToolMode.Pen:
+                    case ToolMode.Color:
                         SetSelectedFloatingBarButtonBrush(Pen_Icon);
                         break;
-                    case "eraser":
+                    case ToolMode.Eraser:
                         SetSelectedFloatingBarButtonBrush(Eraser_Icon);
                         break;
-                    case "eraserByStrokes":
+                    case ToolMode.EraserByStrokes:
                         SetSelectedFloatingBarButtonBrush(EraserByStrokes_Icon);
                         break;
-                    case "select":
+                    case ToolMode.Select:
                         SetSelectedFloatingBarButtonBrush(SymbolIconSelect);
                         break;
                 }
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Theme] 刷新浮动栏按钮配色失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -375,7 +376,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Theme] 按主题自动切换浮动栏图标失败 (theme={theme}): {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -397,7 +398,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Theme] 同步浮动栏图标下拉框失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -426,7 +427,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Theme] 刷新墨迹选择栏图标失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -441,7 +442,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Theme] 刷新图片选择栏图标失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -456,7 +457,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Theme] 刷新手势按钮图标失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -477,7 +478,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Theme] 刷新其它窗口主题失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
     }

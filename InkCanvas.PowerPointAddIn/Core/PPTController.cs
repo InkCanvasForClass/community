@@ -43,13 +43,13 @@ namespace InkCanvas.PowerPointAddIn.Core
                 {
                     var pres = _application.ActivePresentation;
                     state.PresentationName = pres.Name;
-                    try { state.PresentationFullName = pres.FullName; } catch { }
+                    try { state.PresentationFullName = pres.FullName; } catch (Exception ex) { LogService.LogException(ex); }
                     state.TotalSlides = pres.Slides.Count;
                     state.HasHiddenSlides = HasHiddenSlides(pres);
                     state.HasAutoPlayTimings = HasAutoPlayTimings(pres);
                 }
             }
-            catch { }
+            catch (Exception ex) { LogService.LogException(ex); }
 
             try
             {
@@ -59,7 +59,7 @@ namespace InkCanvas.PowerPointAddIn.Core
                     state.SlideIndex = _application.SlideShowWindows[1].View.CurrentShowPosition;
                 }
             }
-            catch { }
+            catch (Exception ex) { LogService.LogException(ex); }
 
             return state;
         }
@@ -314,7 +314,7 @@ namespace InkCanvas.PowerPointAddIn.Core
                                 return true;
                         }
                     }
-                    catch { }
+                    catch (Exception ex) { LogService.LogException(ex); }
                     // 无法确认是否为媒体播放器时，不视为视频，避免把普通 ActiveX 控件误判为视频
                     return false;
                 }
@@ -327,10 +327,10 @@ namespace InkCanvas.PowerPointAddIn.Core
                         if ((int)(object)shape.MediaType == 3)  // ppMediaTypeMovie
                             return true;
                     }
-                    catch { }
+                    catch (Exception ex) { LogService.LogException(ex); }
                 }
             }
-            catch { }
+            catch (Exception ex2) { LogService.LogException(ex2); }
 
             return false;
         }
@@ -345,7 +345,7 @@ namespace InkCanvas.PowerPointAddIn.Core
                         return true;
                 }
             }
-            catch { }
+            catch (Exception ex) { LogService.LogException(ex); }
             return false;
         }
 
@@ -360,7 +360,7 @@ namespace InkCanvas.PowerPointAddIn.Core
                         return true;
                 }
             }
-            catch { }
+            catch (Exception ex) { LogService.LogException(ex); }
             return false;
         }
     }

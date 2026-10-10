@@ -22,6 +22,9 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
+        // 寄生提取：设置存储服务，构造函数末尾初始化；壳在全部提取模块完成后删除。
+        private readonly Services.SettingsStore _settingsStore;
+
         #region Behavior
 
 
@@ -121,7 +124,7 @@ namespace Ink_Canvas
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.WriteLogToFile($"[Settings] 创建一言 HttpClient 时设置 User-Agent 头失败: {ex.Message}", LogHelper.LogType.Info);
+                    LogService.LogException(ex);
                 }
                 return client;
             }
@@ -131,8 +134,9 @@ namespace Ink_Canvas
                 {
                     LogHelper.WriteLogToFile($"无法创建 HttpClient (System.Net.Http 可能缺失): {ex.Message}", LogHelper.LogType.Warning);
                 }
-                catch
+                catch (Exception ex2)
                 {
+                    LogService.LogException(ex2);
                 }
                 return null;
             }
@@ -154,20 +158,8 @@ namespace Ink_Canvas
             }
         }
 
-        private string BuildHitokotoRequestUrl()
-        {
-            var cats = Settings.Appearance.HitokotoCategories;
-            if (cats == null || cats.Count == 0)
-                cats = new List<string> { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l" };
-
-            var urlBuilder = new StringBuilder("https://v1.hitokoto.cn/?encode=text");
-            foreach (var category in cats)
-            {
-                urlBuilder.Append($"&c={category}");
-            }
-
-            return urlBuilder.ToString();
-        }
+        // 壳：实现已搬移至 Services/Settings/SettingsStore.cs
+        private string BuildHitokotoRequestUrl() => _settingsStore.BuildHitokotoRequestUrl();
 
         private async Task<string> FetchHitokotoTextCoreAsync(HttpClient client, string requestUrl)
         {
@@ -705,29 +697,11 @@ namespace Ink_Canvas
         #region Canvas
 
         /// <summary>笔锋下拉 UI 顺序：0 实时笔锋，1 基于点集，2 基于速率，3 关闭。与存储值 InkStyle：3,0,1,2 对应。</summary>
-        private static int PenStyleUiIndexFromInkStyle(int inkStyle)
-        {
-            switch (inkStyle)
-            {
-                case 3: return 0;
-                case 0: return 1;
-                case 1: return 2;
-                case 2: return 3;
-                default: return 1;
-            }
-        }
+        // 壳：实现已搬移至 Services/Settings/SettingsStore.cs
+        private static int PenStyleUiIndexFromInkStyle(int inkStyle) => Services.SettingsStore.PenStyleUiIndexFromInkStyle(inkStyle);
 
-        private static int InkStyleFromPenStyleUiIndex(int uiIndex)
-        {
-            switch (uiIndex)
-            {
-                case 0: return 3;
-                case 1: return 0;
-                case 2: return 1;
-                case 3: return 2;
-                default: return 0;
-            }
-        }
+        // 壳：实现已搬移至 Services/Settings/SettingsStore.cs
+        private static int InkStyleFromPenStyleUiIndex(int uiIndex) => Services.SettingsStore.InkStyleFromPenStyleUiIndex(uiIndex);
 
         private void ComboBoxPenStyle_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -1102,156 +1076,8 @@ namespace Ink_Canvas
         /// 该方法会重新创建全局 Settings 实例并应用推荐值，覆盖大部分子模块配置（如外观、画布、自动化、PPT、手势、高级选项等）。
         /// 在重置过程中会保留并恢复当前 Settings.Automation 中的 AutoDelSavedFiles 与 AutoDelSavedFilesDaysThreshold 两项值以避免意外删除策略变化。
         /// </remarks>
-        public static void SetSettingsToRecommendation()
-        {
-            var AutoDelSavedFilesDays = Settings.Automation.AutoDelSavedFiles;
-            var AutoDelSavedFilesDaysThreshold = Settings.Automation.AutoDelSavedFilesDaysThreshold;
-            Settings = new Settings();
-            Settings.Advanced.IsSpecialScreen = true;
-            Settings.Advanced.IsQuadIR = false;
-            Settings.Advanced.TouchMultiplier = 0.3;
-            Settings.Advanced.NibModeBoundsWidth = 5;
-            Settings.Advanced.FingerModeBoundsWidth = 20;
-            Settings.Advanced.NibModeBoundsWidthThresholdValue = 2.5;
-            Settings.Advanced.FingerModeBoundsWidthThresholdValue = 2.5;
-            Settings.Advanced.NibModeBoundsWidthEraserSize = 0.8;
-            Settings.Advanced.FingerModeBoundsWidthEraserSize = 0.8;
-            Settings.Advanced.EraserBindTouchMultiplier = true;
-            Settings.Advanced.IsLogEnabled = true;
-            Settings.Advanced.IsSecondConfirmWhenShutdownApp = false;
-            Settings.Advanced.IsEnableEdgeGestureUtil = false;
-            Settings.Advanced.EdgeGestureUtilOnlyAffectBlackboardMode = false;
-            Settings.Advanced.IsEnableFullScreenHelper = false;
-            Settings.Advanced.IsEnableAvoidFullScreenHelper = OSVersion.GetOperatingSystem() >= OSVersionExtension.OperatingSystem.Windows11;
-            Settings.Advanced.IsEnableForceFullScreen = false;
-            Settings.Advanced.IsEnableDPIChangeDetection = false;
-            Settings.Advanced.IsEnableResolutionChangeDetection = false;
-            Settings.Advanced.EnableMultiScreenSupport = true;
-            Settings.Advanced.FollowMouseForScreenSelection = true;
-
-            Settings.Appearance.IsColorfulViewboxFloatingBar = false;
-            Settings.Appearance.ViewboxFloatingBarScaleTransformValue = 1;
-            Settings.Appearance.ViewboxBlackBoardScaleTransformValue = 0.8;
-            Settings.Appearance.IsTransparentButtonBackground = true;
-            Settings.Appearance.IsShowExitButton = true;
-            Settings.Appearance.IsShowEraserButton = true;
-            Settings.Appearance.IsShowHideControlButton = false;
-            Settings.Appearance.IsShowLRSwitchButton = false;
-            Settings.Appearance.IsShowModeFingerToggleSwitch = true;
-            Settings.Appearance.IsShowQuickPanel = true;
-            Settings.Appearance.Theme = 0;
-            Settings.Appearance.EnableChickenSoupInWhiteboardMode = true;
-            Settings.Appearance.EnableTimeDisplayInWhiteboardMode = true;
-            Settings.Appearance.ChickenSoupSource = 1;
-            Settings.Appearance.ViewboxFloatingBarOpacityValue = 1.0;
-            Settings.Appearance.ViewboxFloatingBarOpacityInPPTValue = 1.0;
-            Settings.Appearance.EnableTrayIcon = true;
-
-            // 浮动栏按钮显示控制默认值
-            Settings.Appearance.IsShowQuickColorPalette = false;
-            Settings.Appearance.QuickColorPaletteDisplayMode = 1;
-            Settings.Appearance.EraserDisplayOption = 0;
-
-            Settings.Automation.IsAutoFoldInEasiNote = true;
-            Settings.Automation.IsAutoFoldInEasiNoteIgnoreDesktopAnno = true;
-            Settings.Automation.IsAutoFoldInEasiCamera = true;
-            Settings.Automation.IsAutoFoldInEasiNote3C = false;
-            Settings.Automation.IsAutoFoldInEasiNote3 = false;
-            Settings.Automation.IsAutoFoldInEasiNote5C = true;
-            Settings.Automation.IsAutoFoldInSeewoPincoTeacher = false;
-            Settings.Automation.IsAutoFoldInHiteTouchPro = false;
-            Settings.Automation.IsAutoFoldInHiteCamera = false;
-            Settings.Automation.IsAutoFoldInWxBoardMain = false;
-            Settings.Automation.IsAutoFoldInOldZyBoard = false;
-            Settings.Automation.IsAutoFoldInMSWhiteboard = false;
-            Settings.Automation.IsAutoFoldInAdmoxWhiteboard = false;
-            Settings.Automation.IsAutoFoldInAdmoxBooth = false;
-            Settings.Automation.IsAutoFoldInQPoint = false;
-            Settings.Automation.IsAutoFoldInYiYunVisualPresenter = false;
-            Settings.Automation.IsAutoFoldInMaxHubWhiteboard = false;
-            Settings.Automation.IsAutoFoldInPPTSlideShow = false;
-            Settings.Automation.IsAutoKillPPTService = false;
-            Settings.Automation.IsAutoKillEasiNote = false;
-            Settings.Automation.IsAutoKillVComYouJiao = false;
-            Settings.Automation.IsAutoKillInkCanvas = false;
-            Settings.Automation.IsAutoKillICA = false;
-            Settings.Automation.IsAutoKillIDT = false;
-            Settings.Automation.IsAutoKillSeewoLauncher2DesktopAnnotation = false;
-            Settings.Automation.IsSaveScreenshotsInDateFolders = false;
-            Settings.Automation.ScreenshotSaveFormat = 0;
-            Settings.Automation.ScreenshotJpegQuality = 90;
-            Settings.Automation.ScreenshotScaleMode = 0;
-            Settings.Automation.IsAutoSaveStrokesAtScreenshot = true;
-            Settings.Automation.IsAutoSaveScreenshotAtClear = true;
-            Settings.Automation.IsAutoClearWhenExitingWritingMode = false;
-            Settings.Automation.MinimumAutomationStrokeNumber = 0;
-            Settings.Automation.AutoDelSavedFiles = AutoDelSavedFilesDays;
-            Settings.Automation.AutoDelSavedFilesDaysThreshold = AutoDelSavedFilesDaysThreshold;
-
-            //Settings.PowerPointSettings.IsShowPPTNavigation = true;
-            //Settings.PowerPointSettings.IsShowBottomPPTNavigationPanel = false;
-            //Settings.PowerPointSettings.IsShowSidePPTNavigationPanel = true;
-            Settings.PowerPointSettings.PowerPointSupport = true;
-            Settings.PowerPointSettings.IsShowCanvasAtNewSlideShow = false;
-            Settings.PowerPointSettings.IsNoClearStrokeOnSelectWhenInPowerPoint = true;
-            Settings.PowerPointSettings.IsShowStrokeOnSelectInPowerPoint = false;
-            Settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint = true;
-            Settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint = true;
-            Settings.PowerPointSettings.IsNotifyPreviousPage = false;
-            Settings.PowerPointSettings.IsNotifyHiddenPage = false;
-            Settings.PowerPointSettings.IsEnableTwoFingerGestureInPresentationMode = false;
-            Settings.PowerPointSettings.IsEnableFingerGestureSlideShowControl = false;
-            Settings.PowerPointSettings.IsSupportWPS = false;
-            Settings.PowerPointSettings.EnablePPTButtonEnhancedPreview = false;
-            Settings.PowerPointSettings.ShowPPTEnhancedPreviewLoadingAnimation = true;
-
-            Settings.Canvas.InkWidth = 2.5;
-            Settings.Canvas.IsShowCursor = false;
-            Settings.Canvas.InkStyle = 0;
-            Settings.Canvas.HighlighterWidth = 20;
-            Settings.Canvas.EraserSize = 1;
-            Settings.Canvas.EraserType = 0;
-            Settings.Canvas.EraserShapeType = 1;
-            Settings.Canvas.HideStrokeWhenSelecting = false;
-            Settings.Canvas.ClearCanvasAndClearTimeMachine = false;
-            Settings.Canvas.FitToCurve = false;
-            Settings.Canvas.UseAdvancedBezierSmoothing = true;
-            Settings.Canvas.MergeInkSmoothingWithUndo = false;
-            Settings.Canvas.EnablePressureTouchMode = false;
-            Settings.Canvas.DisablePressure = false;
-            Settings.Canvas.AutoStraightenLine = true;
-            Settings.Canvas.AutoStraightenLineThreshold = 80;
-            Settings.Canvas.PauseStraightenLine = false;
-            Settings.Canvas.PauseStraightenDelay = 300;
-            Settings.Canvas.LineEndpointSnapping = true;
-            Settings.Canvas.LineEndpointSnappingThreshold = 15;
-            Settings.Canvas.UsingWhiteboard = false;
-            Settings.Canvas.HyperbolaAsymptoteOption = 0;
-
-            Settings.Gesture.IsEnableTwoFingerTranslate = true;
-            Settings.Gesture.IsEnableTwoFingerZoom = false;
-            Settings.Gesture.IsEnableTwoFingerRotation = false;
-            Settings.Gesture.IsEnableTwoFingerRotationOnSelection = false;
-
-            Settings.InkToShape.IsInkToShapeEnabled = true;
-            Settings.InkToShape.IsInkToShapeNoFakePressureRectangle = false;
-            Settings.InkToShape.IsInkToShapeNoFakePressureTriangle = false;
-            Settings.InkToShape.IsInkToShapeTriangle = true;
-            Settings.InkToShape.IsInkToShapeRectangle = true;
-            Settings.InkToShape.IsInkToShapeRounded = true;
-            Settings.InkToShape.EnableWinRtHandwritingStrokeBeautify = false;
-            Settings.InkToShape.HandwritingCorrectionFontFamily = "Ink Free,KaiTi,Segoe Script";
-            Settings.InkToShape.HandwritingLanguageOverrideLcid = 0;
-            Settings.InkToShape.HandwritingBeautifyDebounceMs = 2000;
-
-            Settings.Startup.IsEnableNibMode = false;
-            Settings.Startup.IsAutoUpdate = true;
-            Settings.Startup.IsAutoUpdateWithSilence = true;
-            Settings.Startup.AutoUpdateWithSilenceStartTime = "06:00";
-            Settings.Startup.AutoUpdateWithSilenceEndTime = "22:00";
-            Settings.Startup.IsFoldAtStartup = false;
-            Settings.Startup.StartupMode = StartupMode.Default;
-        }
+        // 壳：实现已搬移至 Services/Settings/SettingsStore.cs
+        public static void SetSettingsToRecommendation() => Services.SettingsStore.SetSettingsToRecommendation();
 
         /// <summary>
         /// 将应用设置重置为推荐的默认值，并保存与重新加载配置以应用更改。
@@ -1271,7 +1097,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Settings] 重置为推荐设置前的密码/TOTP 校验调用失败，将继续重置: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
 
             try
@@ -1293,11 +1119,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
-            try { ShowNotification(Properties.MainWindowStrings.Main_Settings_ResetDone); }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Settings] 重置为推荐设置完成后弹出「重置完成」通知失败: {ex.Message}", LogHelper.LogType.Info);
-            }
+            try { ShowNotification(Properties.MainWindowStrings.Main_Settings_ResetDone); } catch (Exception ex) { LogService.LogException(ex); }
         }
 
         private async void SpecialVersionResetToSuggestion_Click()
@@ -1370,44 +1192,8 @@ namespace Ink_Canvas
             }
         }
 
-        public string GetCorrectIcon(string iconType, bool isSolid = false)
-        {
-            if (Settings.Appearance.UseLegacyFloatingBarUI)
-            {
-                // 使用老版图标
-                switch (iconType)
-                {
-                    case "cursor":
-                        return isSolid ? XamlGraphicsIconGeometries.LegacySolidCursorIcon : XamlGraphicsIconGeometries.LegacyLinedCursorIcon;
-                    case "pen":
-                        return isSolid ? XamlGraphicsIconGeometries.LegacySolidPenIcon : XamlGraphicsIconGeometries.LegacyLinedPenIcon;
-                    case "eraserStroke":
-                        return isSolid ? XamlGraphicsIconGeometries.LegacySolidEraserStrokeIcon : XamlGraphicsIconGeometries.LegacyLinedEraserStrokeIcon;
-                    case "eraserCircle":
-                        return isSolid ? XamlGraphicsIconGeometries.LegacySolidEraserCircleIcon : XamlGraphicsIconGeometries.LegacyLinedEraserCircleIcon;
-                    case "lassoSelect":
-                        return isSolid ? XamlGraphicsIconGeometries.LegacySolidLassoSelectIcon : XamlGraphicsIconGeometries.LegacyLinedLassoSelectIcon;
-                }
-            }
-            else
-            {
-                // 使用新版图标
-                switch (iconType)
-                {
-                    case "cursor":
-                        return isSolid ? XamlGraphicsIconGeometries.SolidCursorIcon : XamlGraphicsIconGeometries.LinedCursorIcon;
-                    case "pen":
-                        return isSolid ? XamlGraphicsIconGeometries.SolidPenIcon : XamlGraphicsIconGeometries.LinedPenIcon;
-                    case "eraserStroke":
-                        return isSolid ? XamlGraphicsIconGeometries.SolidEraserStrokeIcon : XamlGraphicsIconGeometries.LinedEraserStrokeIcon;
-                    case "eraserCircle":
-                        return isSolid ? XamlGraphicsIconGeometries.SolidEraserCircleIcon : XamlGraphicsIconGeometries.LinedEraserCircleIcon;
-                    case "lassoSelect":
-                        return isSolid ? XamlGraphicsIconGeometries.SolidLassoSelectIcon : XamlGraphicsIconGeometries.LinedLassoSelectIcon;
-                }
-            }
-            return "";
-        }
+        // 壳：实现已搬移至 Services/Settings/SettingsStore.cs
+        public string GetCorrectIcon(string iconType, bool isSolid = false) => _settingsStore.GetCorrectIcon(iconType, isSolid);
 
         #region 浮动栏按钮显示控制
 
@@ -1447,7 +1233,8 @@ namespace Ink_Canvas
         /// <remarks>
         /// 在写入前会确保目标目录/文件具有写入权限（使用 ProcessProtectionManager）。任何写入失败或异常都会被吞掉，调用方不会收到异常抛出。
         /// </remarks>
-        public static void SaveSettingsToFile() => SettingsManager.SaveSettingsToFile();
+        // 壳：实现已搬移至 Services/Settings/SettingsStore.cs
+        public static void SaveSettingsToFile() => Services.SettingsStore.SaveSettingsToFile();
 
         private void SCManipulationBoundaryFeedback(object sender, ManipulationBoundaryFeedbackEventArgs e)
         {

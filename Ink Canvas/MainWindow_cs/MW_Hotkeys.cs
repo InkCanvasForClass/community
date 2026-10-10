@@ -1,5 +1,6 @@
 using Ink_Canvas.Helpers;
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -174,7 +175,7 @@ namespace Ink_Canvas
                 // 记录原始 ExStyle
                 prevExStyle = GetWindowLongPtr(handle, GWL_EXSTYLE);
                 long originalStyle = prevExStyle.ToInt64();
-                try { LogHelper.WriteLogToFile($"[MouseWheel] origExStyle=0x{originalStyle:X}", LogHelper.LogType.Trace); } catch { }
+                try { LogHelper.WriteLogToFile($"[MouseWheel] origExStyle=0x{originalStyle:X}", LogHelper.LogType.Trace); } catch (Exception ex) { LogService.LogException(ex); }
 
                 // 1) 加 WS_EX_TRANSPARENT，让命中测试能临时"看穿"我们到下层
                 long newStyle = originalStyle | WS_EX_TRANSPARENT;
@@ -183,7 +184,7 @@ namespace Ink_Canvas
                     SetWindowLongPtr(handle, GWL_EXSTYLE, new IntPtr(newStyle));
                     exStyleChanged = true;
                     long after = GetWindowLongPtr(handle, GWL_EXSTYLE).ToInt64();
-                    try { LogHelper.WriteLogToFile($"[MouseWheel] afterExStyle=0x{after:X}", LogHelper.LogType.Trace); } catch { }
+                    try { LogHelper.WriteLogToFile($"[MouseWheel] afterExStyle=0x{after:X}", LogHelper.LogType.Trace); } catch (Exception ex) { LogService.LogException(ex); }
                 }
 
                 // 2) 注入滚轮事件（系统会按 Z 序派发到下层，因为我们已 WS_EX_TRANSPARENT）
@@ -202,13 +203,13 @@ namespace Ink_Canvas
                     }
                 };
                 bool ok = SendInput(1, new[] { input }, Marshal.SizeOf(typeof(INPUT)));
-                try { LogHelper.WriteLogToFile($"[MouseWheel] SendInput ret={ok} delta={e.Delta}", LogHelper.LogType.Trace); } catch { }
+                try { LogHelper.WriteLogToFile($"[MouseWheel] SendInput ret={ok} delta={e.Delta}", LogHelper.LogType.Trace); } catch (Exception ex) { LogService.LogException(ex); }
 
                 e.Handled = true;
             }
             catch (Exception ex)
             {
-                try { LogHelper.WriteLogToFile($"[MouseWheel] 注入滚轮失败: {ex.Message}", LogHelper.LogType.Error); } catch { }
+                try { LogHelper.WriteLogToFile($"[MouseWheel] 注入滚轮失败: {ex.Message}", LogHelper.LogType.Error); } catch (Exception ex2) { LogService.LogException(ex2); }
             }
             finally
             {
@@ -224,7 +225,7 @@ namespace Ink_Canvas
                     }
                     catch (Exception ex)
                     {
-                        try { LogHelper.WriteLogToFile($"[MouseWheel] 恢复窗口样式失败: {ex.Message}", LogHelper.LogType.Error); } catch { }
+                        try { LogHelper.WriteLogToFile($"[MouseWheel] 恢复窗口样式失败: {ex.Message}", LogHelper.LogType.Error); } catch (Exception ex2) { LogService.LogException(ex2); }
                     }
                     finally
                     {
@@ -471,6 +472,38 @@ namespace Ink_Canvas
         private void KeyHide(object sender, ExecutedRoutedEventArgs e)
         {
             SymbolIconEmoji_MouseUp(null, null);
+        }
+
+        /// <summary>
+        /// 构建内置热键「名称 → 触发回调」字典（HotkeyService 构造注入，
+        /// 替代原 GlobalHotkeyManager.GetActionByName 的 switch 硬编码）。
+        /// 键集合与原 switch 完全一致；Pen1-5 的笔型映射复刻原 SwitchToPenType：
+        /// 0/3/4→默认笔、1→荧光笔、2→激光笔（原为反射调用，此处直接调用，等价）。
+        /// </summary>
+        private Dictionary<string, Action> BuildBuiltinHotkeyActions()
+        {
+            return new Dictionary<string, Action>(StringComparer.Ordinal)
+            {
+                { "Undo", () => SymbolIconUndo_MouseUp(null, null) },
+                { "Redo", () => SymbolIconRedo_MouseUp(null, null) },
+                { "Clear", () => SymbolIconDelete_MouseUp(null, null) },
+                { "Paste", () => HandleGlobalPaste(null, null) },
+                { "SelectTool", () => SwitchToSelectFromHotkey() },
+                { "DrawTool", () => PenIcon_Click(null, null) },
+                { "EraserTool", () => SwitchToEraserFromHotkey() },
+                { "BlackboardTool", () => ImageBlackboard_MouseUp(null, null) },
+                { "QuitDrawTool", () => KeyChangeToQuitDrawTool(null, null) },
+                { "Pen1", () => SwitchToDefaultPen(null, null) },
+                { "Pen2", () => SwitchToHighlighterPen(null, null) },
+                { "Pen3", () => SwitchToLaserPen(null, null) },
+                { "Pen4", () => SwitchToDefaultPen(null, null) },
+                { "Pen5", () => SwitchToDefaultPen(null, null) },
+                { "DrawLine", () => DrawLineFromHotkey() },
+                { "Screenshot", () => SaveScreenShotToDesktop() },
+                { "QuickDraw", () => OpenQuickDrawFromHotkey() },
+                { "Hide", () => SymbolIconEmoji_MouseUp(null, null) },
+                { "Exit", () => KeyExit(null, null) },
+            };
         }
     }
 }

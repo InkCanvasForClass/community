@@ -103,9 +103,9 @@ namespace Ink_Canvas.Helpers
                     Console.WriteLine(line);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
-                LogHelper.WriteLogToFile($"[UI] 写入调试控制台失败: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
         }
     }

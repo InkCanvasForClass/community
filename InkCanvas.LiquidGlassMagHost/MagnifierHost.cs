@@ -243,7 +243,7 @@ namespace InkCanvas.LiquidGlassMagHost
             DestroyHost();
             if (_magInitialized)
             {
-                try { MagUninitialize(); } catch { }
+                try { MagUninitialize(); } catch (Exception ex) { LogService.LogException(ex); }
                 _magInitialized = false;
             }
         }

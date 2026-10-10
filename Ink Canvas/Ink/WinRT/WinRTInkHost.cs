@@ -403,10 +403,7 @@ namespace Ink_Canvas.Ink.WinRT
                         _independentInput.PointerLost -= _onPointerLost;
                         _independentInput.PointerExiting -= _onPointerExiting;
                     }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[WinRTInk] 取消输入源事件订阅失败: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    catch (Exception ex) { LogService.LogException(ex); }
                     _independentInput = null;
                 }
 
@@ -418,10 +415,7 @@ namespace Ink_Canvas.Ink.WinRT
                         _presenter.StrokeInput.StrokeCanceled -= _onStrokeCanceled;
                         _presenter.StrokesCollected -= _onStrokesCollected;
                     }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[WinRTInk] 取消 Presenter 事件订阅失败: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    catch (Exception ex) { LogService.LogException(ex); }
                     _presenter = null;
                 }
 
@@ -440,10 +434,7 @@ namespace Ink_Canvas.Ink.WinRT
                 if (_host != null)
                 {
                     try { Marshal.FinalReleaseComObject(_host); }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[WinRTInk] 释放 InkDesktopHost COM 对象失败: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    catch (Exception ex) { LogService.LogException(ex); }
                     _host = null;
                 }
             }
