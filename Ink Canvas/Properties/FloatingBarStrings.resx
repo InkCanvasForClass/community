@@ -150,6 +150,9 @@
   <data name="FloatingBar_ClearAndMouse" xml:space="preserve">
     <value>清并鼠</value>
   </data>
+  <data name="FloatingBar_MouseClear" xml:space="preserve">
+    <value>鼠标(清空)</value>
+  </data>
   <data name="FloatingBar_ExitButton" xml:space="preserve">
     <value>退出</value>
   </data>
@@ -287,6 +290,12 @@
   </data>
   <data name="ToolbarPage_QuickPaletteDisplayModeDesc" xml:space="preserve">
     <value>选择快捷调色盘的颜色数量</value>
+  </data>
+  <data name="ToolbarPage_ComponentName" xml:space="preserve">
+    <value>组件名称</value>
+  </data>
+  <data name="ToolbarPage_ComponentNameDesc" xml:space="preserve">
+    <value>根据需求选择不同的名称</value>
   </data>
   <data name="ToolbarPage_Size" xml:space="preserve">
     <value>尺寸</value>

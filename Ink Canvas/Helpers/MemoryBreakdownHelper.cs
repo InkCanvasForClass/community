@@ -439,7 +439,10 @@ namespace Ink_Canvas.Helpers
                     return c.Count;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Memory] 反射读取实例集合计数失败 (field={fieldName}): {ex.Message}", LogHelper.LogType.Info);
+            }
             return 0;
         }
 
@@ -456,7 +459,10 @@ namespace Ink_Canvas.Helpers
                     catch { return default; }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Memory] 反射读取实例字段失败 (field={fieldName}): {ex.Message}", LogHelper.LogType.Info);
+            }
             return default;
         }
 
@@ -506,7 +512,10 @@ namespace Ink_Canvas.Helpers
                             }
                         }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Memory] 读取 TimeMachine 字段失败 (field={f.Name}): {ex.Message}", LogHelper.LogType.Info);
+                    }
                 }
                 return best;
             }
@@ -546,7 +555,10 @@ namespace Ink_Canvas.Helpers
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Memory] 读取墨迹平滑采样数失败: {ex.Message}", LogHelper.LogType.Info);
+            }
             return 0;
         }
 
@@ -571,7 +583,10 @@ namespace Ink_Canvas.Helpers
                             totalBytes += bytes;
                         }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Memory] 读取程序集大小失败 (asm={asm.GetName().Name}): {ex.Message}", LogHelper.LogType.Info);
+                    }
 
                     sb2.AppendLine($"  {asm.GetName().Name,-50} v{asm.GetName().Version?.ToString() ?? "?"}  ({bytes / 1024} KB)");
                 }
@@ -640,7 +655,10 @@ namespace Ink_Canvas.Helpers
                 foreach (System.Windows.Ink.Stroke stroke in collection)
                 {
                     strokeCount++;
-                    try { pointCount += stroke.StylusPoints.Count; } catch { }
+                    try { pointCount += stroke.StylusPoints.Count; } catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Memory] 读取 Stroke 采样点数失败: {ex.Message}", LogHelper.LogType.Info);
+                    }
                 }
                 return;
             }
@@ -648,7 +666,10 @@ namespace Ink_Canvas.Helpers
             if (value is System.Windows.Ink.Stroke strokeValue)
             {
                 strokeCount++;
-                try { pointCount += strokeValue.StylusPoints.Count; } catch { }
+                try { pointCount += strokeValue.StylusPoints.Count; } catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Memory] 读取 Stroke 采样点数失败: {ex.Message}", LogHelper.LogType.Info);
+                }
                 return;
             }
 
@@ -743,7 +764,10 @@ namespace Ink_Canvas.Helpers
                     return dict.Count;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Memory] 读取设置窗口页面缓存数量失败: {ex.Message}", LogHelper.LogType.Info);
+            }
             return 0;
         }
 
@@ -755,7 +779,10 @@ namespace Ink_Canvas.Helpers
                 if (fi?.GetValue(null) is ICollection<T> coll) return coll.Count;
                 if (fi?.GetValue(null) is System.Collections.ICollection legacy) return legacy.Count;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Memory] 读取静态集合字段失败 (type={type?.Name}, field={fieldName}): {ex.Message}", LogHelper.LogType.Info);
+            }
             return 0;
         }
 

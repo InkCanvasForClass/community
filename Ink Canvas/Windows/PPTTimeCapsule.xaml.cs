@@ -28,6 +28,21 @@ namespace Ink_Canvas.Windows
         private double originalCapsuleWidth = 0;
         private string lastCountdownText = ""; // 上次的倒计时文本，用于检测文本变化
         private Storyboard currentWidthAnimation; // 当前正在运行的宽度动画
+
+        #region Throttled diagnostics
+        private static int _diagExceptionCount;
+
+        /// <summary>
+        /// 定时器 Tick 路径（1s 时间刷新 / 250ms 倒计时刷新）用的节流日志。
+        /// 调度器关闭等异常若每 Tick 都记，会瞬间刷爆 5MB 日志并触发 LogHelper 清空整个 Logs 目录。
+        /// </summary>
+        private static void LogCallbackException(string what, Exception ex)
+        {
+            var n = System.Threading.Interlocked.Increment(ref _diagExceptionCount);
+            if (n == 1 || n % 100 == 0)
+                LogHelper.WriteLogToFile($"[PPT] {what} 异常（累计 {n} 次）: {ex.Message}", LogHelper.LogType.Info);
+        }
+        #endregion
         private volatile bool isDisposed = false;
 
         // 拖拽状态
@@ -43,8 +58,17 @@ namespace Ink_Canvas.Windows
             InitializeTimers();
             ApplyTheme();
 
-            // 监听主题变化
-            SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+            // 监听主题变化。SystemEvents 依赖消息泵/桌面窗口，在 UIAccess 降权子进程等
+            // 特殊启动上下文下会抛 PlatformNotSupportedException；订阅失败时降级（不随系统
+            // 主题实时切换），绝不能让异常冒泡炸掉整个 MainWindow 的 XAML 构造。
+            try
+            {
+                SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"PPTTimeCapsule | 订阅系统主题变化失败，已降级: {ex.Message}", LogHelper.LogType.Warning);
+            }
 
             Loaded += PPTTimeCapsule_Loaded;
             Unloaded += PPTTimeCapsule_Unloaded;
@@ -98,7 +122,10 @@ namespace Ink_Canvas.Windows
             {
                 SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[PPT] 释放时取消 SystemEvents.UserPreferenceChanged 订阅失败: {ex.Message}", LogHelper.LogType.Info);
+            }
 
             // 停止并释放定时器，确保不再触发回调
             try
@@ -106,27 +133,38 @@ namespace Ink_Canvas.Windows
                 if (timeUpdateTimer != null)
                 {
                     timeUpdateTimer.Elapsed -= TimeUpdateTimer_Elapsed;
-                    try { timeUpdateTimer.Stop(); } catch { }
-                    try { timeUpdateTimer.Dispose(); } catch { }
+                    try { timeUpdateTimer.Stop(); }
+                    catch (Exception ex) { LogHelper.WriteLogToFile($"[PPT] 释放时停止 timeUpdateTimer 失败: {ex.Message}", LogHelper.LogType.Info); }
+                    try { timeUpdateTimer.Dispose(); }
+                    catch (Exception ex) { LogHelper.WriteLogToFile($"[PPT] 释放时处置 timeUpdateTimer 失败: {ex.Message}", LogHelper.LogType.Info); }
                     timeUpdateTimer = null;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[PPT] 释放 timeUpdateTimer 整体失败: {ex.Message}", LogHelper.LogType.Info);
+            }
 
             try
             {
                 if (countdownUpdateTimer != null)
                 {
                     countdownUpdateTimer.Elapsed -= CountdownUpdateTimer_Elapsed;
-                    try { countdownUpdateTimer.Stop(); } catch { }
-                    try { countdownUpdateTimer.Dispose(); } catch { }
+                    try { countdownUpdateTimer.Stop(); }
+                    catch (Exception ex) { LogHelper.WriteLogToFile($"[PPT] 释放时停止 countdownUpdateTimer 失败: {ex.Message}", LogHelper.LogType.Info); }
+                    try { countdownUpdateTimer.Dispose(); }
+                    catch (Exception ex) { LogHelper.WriteLogToFile($"[PPT] 释放时处置 countdownUpdateTimer 失败: {ex.Message}", LogHelper.LogType.Info); }
                     countdownUpdateTimer = null;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[PPT] 释放 countdownUpdateTimer 整体失败: {ex.Message}", LogHelper.LogType.Info);
+            }
 
             // 停止动画
-            try { StopColonBlinkAnimation(); } catch { }
+            try { StopColonBlinkAnimation(); }
+            catch (Exception ex) { LogHelper.WriteLogToFile($"[PPT] 释放时停止冒号闪烁动画失败: {ex.Message}", LogHelper.LogType.Info); }
         }
 
         private void InitializeTimers()
@@ -155,7 +193,10 @@ namespace Ink_Canvas.Windows
                     UpdateTimeDisplay();
                 }), DispatcherPriority.Normal);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogCallbackException("时间刷新定时器向 UI 线程投递 UpdateTimeDisplay 失败", ex);
+            }
         }
 
         private void CountdownUpdateTimer_Elapsed(object sender, ElapsedEventArgs e)
@@ -174,7 +215,10 @@ namespace Ink_Canvas.Windows
                     UpdateCountdownDisplay();
                 }), DispatcherPriority.Normal);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogCallbackException("倒计时定时器向 UI 线程投递 UpdateCountdownDisplay 失败", ex);
+            }
         }
 
         private void StartTimeUpdate()
@@ -849,7 +893,10 @@ namespace Ink_Canvas.Windows
                     ApplyTheme();
                 }), DispatcherPriority.Normal);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[PPT] 系统主题变更后向 UI 线程投递 ApplyTheme 失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         private void ApplyTheme()

@@ -221,6 +221,7 @@ _pageTypes = new Dictionary<string, Type>
 ### 其它 `icc://` 命令
 
 - `icc://restart` / `icc://restart/admin` / `icc://restart/normal` / `icc://exit` / `icc://quit`（3 秒防抖，`_uriNonRepeatableCommands`）
+- 打开/关闭类命令 1 秒点击缓冲（`_uriToggleCommands` / `_uriToggleDebounceWindow`）：`fold`/`unfold`/`show`/`toggle`、`thoroughhideon|off|toggle`、`board`/`whiteboard`、`booth`/`videopresenter`、`rand`/`randone`/`timer`、`annotate`/`annotation` 在 1s 内重复触发只处理一次，避免频繁点击导致"刚打开又被关闭"（基准为上次被处理的时刻，间隔 ≥1.001s 才再次处理）
 - `icc://config-profile/list` → 输出 `%TEMP%\InkCanvasConfigProfileList.json`
 - `icc://config-profile/switch?name=<方案名>` → 输出 `%TEMP%\InkCanvasConfigProfileSwitchResult.txt`
 

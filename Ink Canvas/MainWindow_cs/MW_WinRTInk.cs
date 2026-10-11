@@ -57,6 +57,22 @@ namespace Ink_Canvas
         internal bool IsWinRTInkPipelineAvailable =>
             _winRTInkStarted && !_winRTInkDisabled;
 
+        /// <summary>
+        /// 逐指针 / 逐手势增量热路径的异常计数。坏设备下这些回调可能每帧抛异常，
+        /// 直接写 Info 会瞬间刷爆 5MB 日志并触发 LogHelper 的整目录清理，把现场证据清掉。
+        /// </summary>
+        private static int _winRTInkDiagExceptionCount;
+
+        /// <summary>热路径异常节流日志：只写第 1 次与每第 100 次，并带上累计次数。</summary>
+        private static void LogWinRTInkCallbackException(string what, Exception ex)
+        {
+            var n = Interlocked.Increment(ref _winRTInkDiagExceptionCount);
+            if (n == 1 || n % 100 == 0)
+                LogHelper.WriteLogToFile(
+                    $"[WinRTInk] {what} 异常（累计 {n} 次）: {ex.Message}",
+                    LogHelper.LogType.Info);
+        }
+
         internal void SyncWinRTInkPipelineWithLogicalTool()
         {
             if (inkCanvas == null)
@@ -191,8 +207,8 @@ namespace Ink_Canvas
                 UpdateWinRTInkTarget();
 
                 LogHelper.WriteLogToFile(
-                    "[WinRTInk] InkDesktopHost + system wet ink pipeline started.",
-                    LogHelper.LogType.Event);
+                    $"[WinRTInk] 新墨迹管线已挂载: 覆盖层 {config.WidthPx}x{config.HeightPx}px, 已通知失败={_winRTInkDisabled}",
+                    LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
@@ -209,6 +225,7 @@ namespace Ink_Canvas
             if (!_winRTInkStarted && _winRTInkHost == null)
                 return;
 
+            LogHelper.WriteLogToFile("[WinRTInk] 开始卸载新墨迹管线", LogHelper.LogType.Info);
             UnwireWinRTInkGeometryListeners();
             ShutdownWinRTInkPauseStraighten();
             _winRTInkTwoFingerGestureActive = false;
@@ -216,20 +233,35 @@ namespace Ink_Canvas
             if (_winRTInkAttributesChangedHandler != null)
             {
                 try { inkCanvas.DefaultDrawingAttributes.AttributeChanged -= _winRTInkAttributesChangedHandler; }
-                catch { /* best-effort */ }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[WinRTInk] 卸载管线时解绑 DefaultDrawingAttributes.AttributeChanged 失败: {ex.Message}", LogHelper.LogType.Info);
+                }
                 _winRTInkAttributesChangedHandler = null;
             }
 
             try { _winRTInkFrameFence?.CancelAll(); }
-            catch { /* best-effort */ }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[WinRTInk] 卸载管线时取消渲染栅栏待回调失败: {ex.Message}", LogHelper.LogType.Info);
+            }
             try { _winRTInkFrameFence?.Dispose(); }
-            catch { /* best-effort */ }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[WinRTInk] 卸载管线时释放渲染栅栏失败: {ex.Message}", LogHelper.LogType.Info);
+            }
             _winRTInkFrameFence = null;
 
             try { _winRTInkHost?.CancelActiveStrokes(); }
-            catch { /* best-effort */ }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[WinRTInk] 卸载管线时取消在场笔迹失败: {ex.Message}", LogHelper.LogType.Info);
+            }
             try { _winRTInkHost?.Dispose(); }
-            catch { /* best-effort */ }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[WinRTInk] 卸载管线时释放墨迹宿主失败: {ex.Message}", LogHelper.LogType.Info);
+            }
             _winRTInkHost = null;
 
             // Keep the overlay HWND alive (cloaked) across tool switches: it is expensive to
@@ -237,7 +269,10 @@ namespace Ink_Canvas
             // cloaked window is invisible to composition and hit-testing, so an idle overlay
             // is completely inert. It is destroyed with its owner on app exit.
             try { _winRTInkOverlay?.SetOnScreen(false); }
-            catch { /* best-effort */ }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[WinRTInk] 卸载管线时隐藏覆盖层窗口失败: {ex.Message}", LogHelper.LogType.Info);
+            }
 
             _winRTInkInputGate = null;
             _chromeInputForwarder = null;
@@ -251,8 +286,15 @@ namespace Ink_Canvas
                 && inkCanvas?.EditingMode == InkCanvasEditingMode.None)
             {
                 try { inkCanvas.EditingMode = InkCanvasEditingMode.Ink; }
-                catch { /* best-effort fallback to WPF ink */ }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[WinRTInk] 卸载管线后把画布编辑模式回退到批注模式失败: {ex.Message}", LogHelper.LogType.Info);
+                }
             }
+
+            LogHelper.WriteLogToFile(
+                $"[WinRTInk] 新墨迹管线已卸载，回退到旧墨迹 (editingMode={inkCanvas?.EditingMode})",
+                LogHelper.LogType.Info);
         }
 
         private void WireWinRTInkGeometryListeners()
@@ -488,7 +530,10 @@ namespace Ink_Canvas
                     timeMachine?.TransformStrokesInHistory(translateMatrix, inkCanvas.Strokes);
                     ResetRotationBaseline();
                 }
-                catch { /* best-effort synchronization */ }
+                catch (Exception ex)
+                {
+                    LogWinRTInkCallbackException("双指手势平移后同步变换画布墨迹与历史", ex);
+                }
             }
 
             var previousDistance = GetDistance(previousFirst, previousSecond);
@@ -1289,13 +1334,19 @@ namespace Ink_Canvas
                                     zone = ResolveHitZone(windowPoint.X, windowPoint.Y, out _);
                                     classified = true;
                                 }
-                                catch { /* classification failure -> not classified */ }
+                                catch (Exception ex)
+                                {
+                                    LogWinRTInkCallbackException("指针门控内解析命中区域分类", ex);
+                                }
                             }),
                             DispatcherPriority.Send,
                             CancellationToken.None,
                             TimeSpan.FromMilliseconds(300));
                     }
-                    catch { /* dispatcher shutting down -> suppressed */ }
+                    catch (Exception ex)
+                    {
+                        LogWinRTInkCallbackException("指针门控向 UI 线程派发命中区域分类", ex);
+                    }
                 }
 
                 LogHelper.WriteLogToFile(
@@ -1371,7 +1422,10 @@ namespace Ink_Canvas
                     return;
                 _chromeInputForwarder?.ForwardMove(screenX, screenY);
             }
-            catch { /* forwarding is best-effort */ }
+            catch (Exception ex)
+            {
+                LogWinRTInkCallbackException("转发界面区域指针移动到主窗口", ex);
+            }
         }
 
         private void ForwardWinRTInkChromePointerUp(global::Windows.UI.Core.PointerEventArgs e)
@@ -1504,7 +1558,10 @@ namespace Ink_Canvas
                     return (m.M11 > 0 ? m.M11 : 1.0, m.M22 > 0 ? m.M22 : 1.0);
                 }
             }
-            catch { /* fall through */ }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[WinRTInk] 读取 WinRT 墨迹覆盖层 DPI 缩放失败，回退到 GetDpiScale(): {ex.Message}", LogHelper.LogType.Info);
+            }
 
             var scale = GetDpiScale();
             return (scale > 0 ? scale : 1.0, scale > 0 ? scale : 1.0);
@@ -1522,13 +1579,19 @@ namespace Ink_Canvas
                     _winRTInkOverlay.SetOnScreen(onScreen);
                 }
             }
-            catch { /* best-effort */ }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[WinRTInk] 刷新覆盖层窗口可见状态失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         internal void CancelActiveWinRTInk()
         {
             try { _winRTInkHost?.CancelActiveStrokes(); }
-            catch { /* best-effort */ }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[WinRTInk] 取消在场笔迹失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         /// <summary>Ink-thread StrokeEnded for a live stroke. Queue only the pointer ID;</summary>
@@ -1616,7 +1679,11 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile(
                     $"[WinRTInk] Dry materialize failed: {ex}",
                     LogHelper.LogType.Error);
-                try { CompleteWinRTInkDry(); } catch { /* best-effort */ }
+                try { CompleteWinRTInkDry(); }
+                catch (Exception completeEx)
+                {
+                    LogHelper.WriteLogToFile($"[WinRTInk] 墨迹转干失败后调用 CompleteWinRTInkDry 收尾失败: {completeEx.Message}", LogHelper.LogType.Info);
+                }
                 DisableWinRTInkAfterFailure(ex, notify: true);
             }
         }
@@ -1726,7 +1793,10 @@ namespace Ink_Canvas
                         if (inkCanvas.Strokes.Contains(stroke))
                             inkCanvas.Strokes.Remove(stroke);
                     }
-                    catch { /* best-effort rollback */ }
+                    catch (Exception removeEx)
+                    {
+                        LogHelper.WriteLogToFile($"[WinRTInk] 墨迹转干提交失败后回滚移除已提交笔画失败: {removeEx.Message}", LogHelper.LogType.Info);
+                    }
                 }
                 CompleteWinRTInkDry();
                 DisableWinRTInkAfterFailure(ex, notify: true);
@@ -1795,9 +1865,15 @@ namespace Ink_Canvas
                 _winRTInkHost?.SetInputEnabled(false);
                 _winRTInkOverlay?.SetOnScreen(false);
             }
-            catch { /* best-effort */ }
+            catch (Exception cleanupEx)
+            {
+                LogHelper.WriteLogToFile($"[WinRTInk] 失败后关闭输入门控/宿主输入/隐藏覆盖层失败: {cleanupEx.Message}", LogHelper.LogType.Info);
+            }
             try { CancelActiveWinRTInk(); }
-            catch { /* best-effort */ }
+            catch (Exception cleanupEx)
+            {
+                LogHelper.WriteLogToFile($"[WinRTInk] 失败后取消在场笔迹失败: {cleanupEx.Message}", LogHelper.LogType.Info);
+            }
 
             try
             {
@@ -1808,7 +1884,10 @@ namespace Ink_Canvas
                     inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                 }
             }
-            catch { /* best-effort */ }
+            catch (Exception cleanupEx)
+            {
+                LogHelper.WriteLogToFile($"[WinRTInk] 失败后恢复画布批注编辑模式失败: {cleanupEx.Message}", LogHelper.LogType.Info);
+            }
 
             if (notify && !_winRTInkDeviceFailureNotified)
             {
@@ -1817,7 +1896,10 @@ namespace Ink_Canvas
                 {
                     ShowNotification(Properties.CanvasStrings.Canvas_WetInkRendererFailed);
                 }
-                catch { /* never throw from failure path */ }
+                catch (Exception notifyEx)
+                {
+                    LogHelper.WriteLogToFile($"[WinRTInk] 失败后弹出新墨迹渲染器故障通知失败: {notifyEx.Message}", LogHelper.LogType.Info);
+                }
             }
 
             LogHelper.WriteLogToFile(

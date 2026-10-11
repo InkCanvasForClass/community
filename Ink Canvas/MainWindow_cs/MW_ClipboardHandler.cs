@@ -89,6 +89,7 @@ namespace Ink_Canvas
                 else
                     SourceInitialized += OnSourceInitializedForClipboard;
                 Dispatcher.BeginInvoke(new Action(EnsureClipboardHookInstalled), DispatcherPriority.Loaded);
+                LogHelper.WriteLogToFile("[Clipboard] 剪贴板监控已启用", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {

@@ -292,6 +292,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         public const string Opacity = "opacity";
         public const string UseRedStyle = "useRedStyle";
         public const string DisplayMode = "displayMode";
+        public const string ButtonName = "buttonName";
     }
 
     public class ToolbarLayoutSettings

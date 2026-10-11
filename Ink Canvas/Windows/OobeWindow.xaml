@@ -18,6 +18,7 @@
         Topmost="True"
         Loaded="OobeWindow_OnLoaded"
         Closing="OobeWindow_OnClosing"
+        StateChanged="OobeWindow_OnStateChanged"
         ui:ThemeManager.IsThemeAware="True"
         ui:TitleBar.ExtendViewIntoTitleBar="True"
         ui:WindowHelper.SystemBackdropType="None"

@@ -150,6 +150,9 @@
   <data name="FloatingBar_ClearAndMouse" xml:space="preserve">
     <value>Clear &amp; cursor</value>
   </data>
+  <data name="FloatingBar_MouseClear" xml:space="preserve">
+    <value>Cursor (Clear)</value>
+  </data>
   <data name="FloatingBar_ExitButton" xml:space="preserve">
     <value>Exit</value>
   </data>
@@ -287,6 +290,12 @@
   </data>
   <data name="ToolbarPage_QuickPaletteDisplayModeDesc" xml:space="preserve">
     <value>Choose color count for quick palette</value>
+  </data>
+  <data name="ToolbarPage_ComponentName" xml:space="preserve">
+    <value>Component Name</value>
+  </data>
+  <data name="ToolbarPage_ComponentNameDesc" xml:space="preserve">
+    <value>Choose different names based on your needs</value>
   </data>
   <data name="ToolbarPage_Size" xml:space="preserve">
     <value>Size</value>

@@ -79,6 +79,7 @@ namespace Ink_Canvas
 
             InvalidateVisual();
             RefreshOtherWindowsTheme();
+            LogHelper.WriteLogToFile($"[Theme] 主题已应用: {theme} (自动切换图标={autoSwitchIcon})", LogHelper.LogType.Info);
         }
 
         void LoadImageResourceDictionary(string path)
@@ -111,8 +112,9 @@ namespace Ink_Canvas
                 LeftSidePanel?.InvalidateVisual();
                 RightSidePanel?.InvalidateVisual();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 刷新快捷面板图标失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -161,8 +163,9 @@ namespace Ink_Canvas
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 刷新浮动栏高亮配色失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -251,8 +254,9 @@ namespace Ink_Canvas
                         break;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 刷新浮动栏按钮配色失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -291,8 +295,8 @@ namespace Ink_Canvas
 
         private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
         {
+            // e 为 null 表示由代码主动调用（如设置加载完成后的主题刷新），此时跳过类别过滤
             // 只关心外观类偏好变化；键盘/鼠标/电源等类别与主题无关
-            // e 为空时表示程序加载设置后的内部初始化调用，此时直接建立主题基线。
             if (e != null && e.Category != UserPreferenceCategory.General) return;
             if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
             // SystemEvents 的事件不保证在 UI 线程触发，统一调度回 UI 线程
@@ -370,8 +374,9 @@ namespace Ink_Canvas
                 UpdateFloatingBarIcon();
                 UpdateFloatingBarIconComboBox();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 按主题自动切换浮动栏图标失败 (theme={theme}): {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -391,8 +396,9 @@ namespace Ink_Canvas
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 同步浮动栏图标下拉框失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -419,8 +425,9 @@ namespace Ink_Canvas
                     BorderStrokeSelectionControl.InvalidateVisual();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 刷新墨迹选择栏图标失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -433,8 +440,9 @@ namespace Ink_Canvas
                     BorderImageSelectionControl.InvalidateVisual();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 刷新图片选择栏图标失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -447,8 +455,9 @@ namespace Ink_Canvas
                     CheckEnableTwoFingerGestureBtnColorPrompt();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 刷新手势按钮图标失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -467,8 +476,9 @@ namespace Ink_Canvas
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 刷新其它窗口主题失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
     }

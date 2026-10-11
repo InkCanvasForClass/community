@@ -462,6 +462,7 @@
                                     <TreeViewItem Header="SettingsCard: 分隔边框 → CheckBox" />
                                     <TreeViewItem Header="SettingsCard: 红色样式 → CheckBox" />
                                     <TreeViewItem Header="StackPanel: 快速调色板显示模式 → ComboBox" />
+                                    <TreeViewItem Header="SettingsCard: 清并鼠组件名称 → ComboBox" />
                                 </TreeViewItem>
                                 <TreeViewItem Header='TextBlock "尺寸"'>
                                     <TreeViewItem Header="Grid: 固定宽高/最小最大宽高 → TextBox × 6" />

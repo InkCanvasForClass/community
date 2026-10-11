@@ -130,7 +130,12 @@ namespace Ink_Canvas
                     if (!isCurrent)
                         NameRosterManager.WriteCurrentFiles(prevNames, prevReplace);
                 }
-                catch { /* ignore restore errors */ }
+                catch (Exception restoreEx) /* ignore restore errors */
+                {
+                    LogHelper.WriteLogToFile(
+                        $"[Random] 随机点名档案操作失败后回写原名册文件失败: {restoreEx.Message}",
+                        LogHelper.LogType.Info);
+                }
 
                 MessageBox.Show(string.Format(RandomStrings.Random_Roster_OperationFailedFormat, ex.Message),
                     RandomStrings.Random_Error, MessageBoxButton.OK, MessageBoxImage.Error);
@@ -289,7 +294,13 @@ namespace Ink_Canvas
             if (owner != null)
             {
                 try { existing = ContentDialog.GetOpenDialog(owner); }
-                catch { existing = null; }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"[Random] 随机点名档案重命名时获取已打开对话框失败: {ex.Message}",
+                        LogHelper.LogType.Info);
+                    existing = null;
+                }
             }
 
             if (existing != null)

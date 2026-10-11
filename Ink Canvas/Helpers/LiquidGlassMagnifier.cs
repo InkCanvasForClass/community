@@ -35,6 +35,17 @@ namespace Ink_Canvas.Helpers
         private static Stream _stdout;
         private static int _hostPid;
 
+        // 抓屏失败会反复走 MarkHostDead（在每次 CaptureRegion 失败时触发），
+        // 子进程句柄异常若每次都记会瞬间写爆 5MB 日志上限，故做节流记录。
+        private static int _diagExceptionCount;
+
+        private static void LogCallbackException(string what, Exception ex)
+        {
+            var n = System.Threading.Interlocked.Increment(ref _diagExceptionCount);
+            if (n == 1 || n % 100 == 0)
+                LogHelper.WriteLogToFile($"[LiquidGlass] {what} 异常（累计 {n} 次）: {ex.Message}", LogHelper.LogType.Info);
+        }
+
         internal static bool IsAvailable
         {
             get { lock (Sync) return _available; }
@@ -166,13 +177,18 @@ namespace Ink_Canvas.Helpers
             {
                 if (!host.HasExited)
                 {
-                    try { host.StandardInput.Close(); } catch { }
-                    try { host.Kill(); } catch { }
+                    try { host.StandardInput.Close(); } catch (Exception ex) { LogHelper.WriteLogToFile($"[LiquidGlass] 关闭放大镜子进程标准输入失败: {ex.Message}", LogHelper.LogType.Info); }
+                    try { host.Kill(); } catch (Exception ex) { LogHelper.WriteLogToFile($"[LiquidGlass] 强制结束放大镜子进程失败: {ex.Message}", LogHelper.LogType.Info); }
                     host.WaitForExit(1000);
                 }
             }
-            catch { /* 退出期 */ }
-            try { host.Dispose(); } catch { }
+            catch (Exception ex)
+            {
+                /* 退出期 */
+                LogHelper.WriteLogToFile($"[LiquidGlass] 关闭放大镜子进程（标准输入/结束/等待退出）失败: {ex.Message}", LogHelper.LogType.Info);
+            }
+            try { host.Dispose(); } catch (Exception ex) { LogHelper.WriteLogToFile($"[LiquidGlass] 释放放大镜子进程对象失败: {ex.Message}", LogHelper.LogType.Info); }
+            LogHelper.WriteLogToFile("[LiquidGlass] 放大镜辅助进程已关闭", LogHelper.LogType.Info);
         }
 
         private static bool EnsureHost()
@@ -231,7 +247,7 @@ namespace Ink_Canvas.Helpers
             {
                 if (!_available)
                 {
-                    try { proc.Kill(); } catch { }
+                    try { proc.Kill(); } catch (Exception ex) { LogHelper.WriteLogToFile($"[LiquidGlass] 启动后判定放大镜已不可用，结束刚拉起的子进程失败: {ex.Message}", LogHelper.LogType.Info); }
                     return false;
                 }
                 _host = proc;
@@ -239,7 +255,7 @@ namespace Ink_Canvas.Helpers
                 _stdout = proc.StandardOutput.BaseStream;
                 _hostPid = proc.Id;
             }
-            LogHelper.WriteLogToFile($"液态玻璃放大镜子进程已启动: pid={proc.Id}", LogHelper.LogType.Warning);
+            LogHelper.WriteLogToFile($"[LiquidGlass] 放大镜辅助进程已启动: pid={proc.Id}", LogHelper.LogType.Info);
             return true;
         }
 
@@ -278,7 +294,16 @@ namespace Ink_Canvas.Helpers
         {
             lock (Sync)
             {
-                try { _host?.Kill(); } catch { }
+                if (_host != null)
+                    LogHelper.WriteLogToFile("[LiquidGlass] 放大镜辅助进程已失效，标记为不可用", LogHelper.LogType.Warning);
+                try
+                {
+                    _host?.Kill();
+                }
+                catch (Exception ex)
+                {
+                    LogCallbackException("标记失效时结束放大镜子进程", ex);
+                }
                 _host = null;
                 _stdin = null;
                 _stdout = null;

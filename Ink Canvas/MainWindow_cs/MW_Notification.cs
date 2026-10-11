@@ -79,6 +79,10 @@ namespace Ink_Canvas
                     }
                 }), DispatcherPriority.ContextIdle);
             }
+
+            LogHelper.WriteLogToFile(
+                $"[Notification] 通知提供商已初始化: 公告已启用={Settings?.Notification?.IsAnnouncementEnabled == true}, 公告服务实例={_announcementService != null}",
+                LogHelper.LogType.Info);
         }
 
         /// <summary>
@@ -209,8 +213,9 @@ namespace Ink_Canvas
                 DynamicNotification.VerticalAlignment = VerticalAlignment.Top;
                 DynamicNotification.Margin = new Thickness(left, top, 0, 0);
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Notification] 计算通知悬浮栏位置失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 

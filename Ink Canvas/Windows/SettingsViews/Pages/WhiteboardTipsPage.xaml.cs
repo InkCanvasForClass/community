@@ -482,7 +482,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     {
                         nameBox.Text = Path.GetFileNameWithoutExtension(ofd.FileName);
                         try { contentBox.Text = File.ReadAllText(ofd.FileName); }
-                        catch { /* ignore read errors */ }
+                        catch (Exception ex) /* ignore read errors */
+                        {
+                            LogHelper.WriteLogToFile(
+                                $"[Settings] 白板提示语方案从所选文本文件读取内容失败: {ex.Message}",
+                                LogHelper.LogType.Info);
+                        }
                     }
                 };
                 panel.Children.Add(importButton);

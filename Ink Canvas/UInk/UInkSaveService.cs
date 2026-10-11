@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -48,9 +49,14 @@ namespace Ink_Canvas.UInk
                 if (File.Exists(tmpExtra))
                     AtomicReplace(tmpExtra, extraPath);
                 AtomicReplace(tmpMain, mainPath);
+
+                LogHelper.WriteLogToFile(
+                    $"[UInk] 两阶段提交完成: {mainPath}, 资源 {union.Count} 个, 主文件 {new FileInfo(mainPath).Length} 字节",
+                    LogHelper.LogType.Info);
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[UInk] 两阶段提交失败，已回滚临时文件: {mainPath}, 原因: {ex.Message}", LogHelper.LogType.Error);
                 TryDelete(tmpMain);
                 TryDelete(tmpExtra);
                 throw;
@@ -59,7 +65,11 @@ namespace Ink_Canvas.UInk
             {
                 if (workDir != null)
                 {
-                    try { if (Directory.Exists(workDir)) Directory.Delete(workDir, true); } catch { }
+                    try { if (Directory.Exists(workDir)) Directory.Delete(workDir, true); }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[UInk] 两阶段提交后删除资源并集临时目录失败: {workDir}, 原因: {ex.Message}", LogHelper.LogType.Info);
+                    }
                 }
             }
         }
@@ -90,7 +100,12 @@ namespace Ink_Canvas.UInk
             if (File.Exists(mainPath) && File.Exists(extraPath))
             {
                 UInkDocument oldDoc = null;
-                try { oldDoc = UInkReader.Load(mainPath); } catch { oldDoc = null; }
+                try { oldDoc = UInkReader.Load(mainPath); }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[UInk] 读取旧主文件以并集旧资源引用失败: {mainPath}, 原因: {ex.Message}", LogHelper.LogType.Info);
+                    oldDoc = null;
+                }
                 if (oldDoc != null)
                 {
                     var oldPaths = new HashSet<string>(StringComparer.Ordinal);
@@ -115,7 +130,10 @@ namespace Ink_Canvas.UInk
                                 }
                             }
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"[UInk] 提取旧资源包以保留旧主文件引用失败: {extraPath}, 原因: {ex.Message}", LogHelper.LogType.Info);
+                        }
                     }
                 }
             }
@@ -132,7 +150,11 @@ namespace Ink_Canvas.UInk
 
         private static void TryDelete(string path)
         {
-            try { if (File.Exists(path)) File.Delete(path); } catch { }
+            try { if (File.Exists(path)) File.Delete(path); }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[UInk] 删除临时文件失败: {path}, 原因: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
     }
 }

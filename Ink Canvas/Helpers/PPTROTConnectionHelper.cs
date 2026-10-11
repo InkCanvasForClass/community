@@ -193,10 +193,10 @@ namespace Ink_Canvas.Helpers
                 }
 
                 IMoniker[] moniker = new IMoniker[1];
-                IntPtr fetched = IntPtr.Zero;
+                uint fetched = 0;
                 string[] applicationMonikersFromProgIds = GetApplicationMonikersFromProgIds();
 
-                while (enumMoniker.Next(1, moniker, (uint*)fetched.ToPointer()) == 0)
+                while (enumMoniker.Next(1, moniker, &fetched) == 0 && fetched == 1)
                 {
                     IBindCtx bindCtx = null;
                     object comObject = null;
@@ -205,13 +205,13 @@ namespace Ink_Canvas.Helpers
                     dynamic activePres = null;
                     dynamic ssWindow = null;
                     bool keepAlive = false;
+                    IntPtr displayNamePtr = IntPtr.Zero;
 
                     try
                     {
                         PInvoke.CreateBindCtx(0, out bindCtx);
-                        PWSTR* pDisplayName = null;
-                        moniker[0].GetDisplayName(bindCtx, null, pDisplayName);
-                        displayName = Marshal.PtrToStringUni((IntPtr)pDisplayName);
+                        moniker[0].GetDisplayName(bindCtx, null, (PWSTR*)&displayNamePtr);
+                        displayName = Marshal.PtrToStringUni(displayNamePtr) ?? string.Empty;
                         bool looksLikePresentationFile = LooksLikePresentationFile(displayName);
                         bool isApplicationMoniker = ContainsMoniker(applicationMonikersFromProgIds, displayName);
                         if (!isApplicationMoniker)
@@ -346,6 +346,12 @@ namespace Ink_Canvas.Helpers
                     }
                     finally
                     {
+                        if (displayNamePtr != IntPtr.Zero)
+                        {
+                            Marshal.FreeCoTaskMem(displayNamePtr);
+                            displayNamePtr = IntPtr.Zero;
+                        }
+
                         SafeReleaseComObject(ssWindow);
                         SafeReleaseComObject(activePres);
 

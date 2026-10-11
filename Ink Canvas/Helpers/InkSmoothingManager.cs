@@ -210,6 +210,10 @@ namespace Ink_Canvas.Helpers
             _asyncSmoothing.MaxConcurrentTasks = newConfig.MaxConcurrentTasks;
             _asyncSmoothing.UseAdaptiveInterpolation = newConfig.UseAdaptiveInterpolation;
             _asyncSmoothing.CurveTension = newConfig.CurveTension;
+
+            LogHelper.WriteLogToFile(
+                $"[Ink] 平滑器配置已更新: 强度={newConfig.SmoothingStrength}, 重采样={newConfig.ResampleInterval}, 硬件加速={newConfig.UseHardwareAcceleration}, 并发={newConfig.MaxConcurrentTasks}",
+                LogHelper.LogType.Info);
         }
 
         /// <summary>

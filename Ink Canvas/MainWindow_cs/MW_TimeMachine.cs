@@ -390,14 +390,12 @@ namespace Ink_Canvas
             try
             {
                 var type = currentElement.GetType();
-                var method = type.GetMethod("FromSerializedScene", BindingFlags.Public | BindingFlags.Static)
-                    ?? type.GetMethod("FromSerializedElement", BindingFlags.Public | BindingFlags.Static);
-                if (method == null) return currentElement;
-                var parameters = method.GetParameters().Length == 1
-                    ? new object[] { serializedState }
-                    : new object[] { serializedState, 1d };
-                if (method.Invoke(null, parameters) is not FrameworkElement replacement)
+                FrameworkElement replacement;
+                if (!TryInvokeSerializedElementFactory(type, "FromSerializedScene", serializedState, out replacement)
+                    && !TryInvokeSerializedElementFactory(type, "FromSerializedElement", serializedState, out replacement))
+                {
                     return currentElement;
+                }
 
                 if (ReferenceEquals(currentSelectedElement, currentElement))
                 {
@@ -427,6 +425,68 @@ namespace Ink_Canvas
                 Debug.WriteLine($"RestoreEditableElement failed: {ex.Message}");
                 return currentElement;
             }
+        }
+
+        private static bool TryInvokeSerializedElementFactory(
+            Type elementType,
+            string factoryName,
+            string serializedState,
+            out FrameworkElement element)
+        {
+            element = null;
+            if (elementType == null || string.IsNullOrWhiteSpace(factoryName)
+                || string.IsNullOrWhiteSpace(serializedState))
+            {
+                return false;
+            }
+
+            var factory = elementType.GetMethod(
+                factoryName,
+                BindingFlags.Public | BindingFlags.Static,
+                binder: null,
+                types: new[] { typeof(string), typeof(double) },
+                modifiers: null);
+            if (factory != null)
+            {
+                return TryInvokeSerializedElementFactory(
+                    factory,
+                    new object[] { serializedState, 1d },
+                    out element);
+            }
+
+            factory = elementType.GetMethod(
+                factoryName,
+                BindingFlags.Public | BindingFlags.Static,
+                binder: null,
+                types: new[] { typeof(string) },
+                modifiers: null);
+            return factory != null
+                && TryInvokeSerializedElementFactory(
+                    factory,
+                    new object[] { serializedState },
+                    out element);
+        }
+
+        private static bool TryInvokeSerializedElementFactory(
+            MethodInfo factory,
+            object[] parameters,
+            out FrameworkElement element)
+        {
+            element = null;
+            try
+            {
+                if (factory.Invoke(null, parameters) is FrameworkElement frameworkElement)
+                {
+                    element = frameworkElement;
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Serialized element factory failed: {ex.Message}");
+            }
+
+            return false;
         }
 
         private static bool IsEmptyEditableState(string serializedState)

@@ -667,8 +667,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 _connectionTestCts.Cancel();
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile(
+                    $"[Settings] 取消云存储连接测试失败: {ex.Message}", LogHelper.LogType.Info);
             }
             finally
             {

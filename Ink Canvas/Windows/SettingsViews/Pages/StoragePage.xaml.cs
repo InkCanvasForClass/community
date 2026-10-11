@@ -180,7 +180,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[Settings] 统计存储占用时读取磁盘容量失败: {ex.Message}", LogHelper.LogType.Info);
+            }
             DiskPercentTextBlock.Text = "—";
         }
 
@@ -292,14 +296,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 foreach (var file in SafeEnumerateFiles(path, recursive: true))
                     total += SafeFileLength(file);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogStorageDiagException($"统计目录占用 {Path.GetFileName(path)} 失败", ex);
+            }
             return total;
         }
 
         private static System.Collections.Generic.IEnumerable<string> SafeEnumerateDirectories(string path)
         {
             try { return Directory.EnumerateDirectories(path); }
-            catch { return System.Linq.Enumerable.Empty<string>(); }
+            catch (Exception ex)
+            {
+                LogStorageDiagException($"枚举目录 {Path.GetFileName(path)} 失败", ex);
+                return System.Linq.Enumerable.Empty<string>();
+            }
         }
 
         private static System.Collections.Generic.IEnumerable<string> SafeEnumerateFiles(string path, bool recursive = false)
@@ -309,23 +320,55 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 return Directory.EnumerateFiles(path, "*",
                     recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
             }
-            catch { return System.Linq.Enumerable.Empty<string>(); }
+            catch (Exception ex)
+            {
+                LogStorageDiagException($"枚举文件 {Path.GetFileName(path)} 失败", ex);
+                return System.Linq.Enumerable.Empty<string>();
+            }
         }
 
         private static long SafeFileLength(string path)
         {
             try { return new FileInfo(path).Length; }
-            catch { return 0; }
+            catch (Exception ex)
+            {
+                LogStorageDiagException($"读取文件长度 {Path.GetFileName(path)} 失败", ex);
+                return 0;
+            }
         }
 
         private static void TryDeleteFile(string path)
         {
-            try { File.Delete(path); } catch { }
+            try { File.Delete(path); }
+            catch (Exception ex)
+            {
+                LogStorageDiagException($"删除文件 {Path.GetFileName(path)} 失败", ex);
+            }
         }
 
         private static void TryDeleteDirectory(string path)
         {
-            try { Directory.Delete(path, true); } catch { }
+            try { Directory.Delete(path, true); }
+            catch (Exception ex)
+            {
+                LogStorageDiagException($"删除目录 {Path.GetFileName(path)} 失败", ex);
+            }
+        }
+
+        // 上述遍历/删除辅助方法对磁盘上每个文件调用一次，坏设备（掉盘、权限拒绝、文件被占）
+        // 下会连续抛成千上万次，直接写日志会瞬间刷爆 5MB 日志并触发 LogHelper 清空整个
+        // Logs 目录把现场证据一起清掉，因此统一节流：只记第 1 次和每 100 次。
+        private static int _storageDiagCount;
+
+        private static void LogStorageDiagException(string what, Exception ex)
+        {
+            var n = System.Threading.Interlocked.Increment(ref _storageDiagCount);
+            if (n == 1 || n % 100 == 0)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[Settings] 存储清理/统计时 {what}（累计 {n} 次）: {ex.Message}",
+                    LogHelper.LogType.Info);
+            }
         }
 
         private static string FormatSize(long bytes)

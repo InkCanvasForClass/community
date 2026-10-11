@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
+using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas.Converter
 {
@@ -206,8 +207,9 @@ namespace Ink_Canvas.Converter
                     return Geometry.Parse(geometryString);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[UI] 几何字符串解析失败，图标将不显示: {ex.Message}", LogHelper.LogType.Info);
             }
             return null;
         }

@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -151,6 +152,9 @@ namespace Ink_Canvas.Plugins
 
             report.HasErrors = report.Issues.Any(i => i.Severity == IssueSeverity.Error);
             report.HasWarnings = report.Issues.Any(i => i.Severity == IssueSeverity.Warning);
+            LogHelper.WriteLogToFile(
+                $"[Plugin] 依赖分析完成: 候选 {pluginList.Count} 个, 问题 {report.Issues.Count} 条 (错误={report.HasErrors}, 警告={report.HasWarnings})",
+                report.HasErrors ? LogHelper.LogType.Warning : LogHelper.LogType.Info);
             return report;
         }
     }

@@ -234,8 +234,9 @@ namespace Ink_Canvas.Helpers
                     currentDir = parentDir.FullName;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Upload] 向上查找遥测令牌文件失败: {ex.Message}", LogHelper.LogType.Info);
             }
 
             return string.Empty;

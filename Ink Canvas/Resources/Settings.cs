@@ -530,6 +530,13 @@ namespace Ink_Canvas
         public bool VideoPresenterMirrorVertical { get; set; } = false;
 
         /// <summary>
+        /// 视频展台旋转角度，0/1/2/3 分别对应 0°/90°/180°/270°，0 为摄像头默认方向。
+        /// 与 <see cref="CameraSettings.RotationAngle"/> 独立，仅作用于展台预览/拍照。
+        /// </summary>
+        [JsonProperty("videoPresenterRotationAngle")]
+        public int VideoPresenterRotationAngle { get; set; } = 0;
+
+        /// <summary>
         /// 是否在书写位置贴近画布边缘时显示"扩展画布"提示按钮。
         /// 默认关闭，避免在 PPT 演示、桌面批注等场景干扰；开启后在白板书写时贴近边缘会自动浮现提示。
         /// </summary>

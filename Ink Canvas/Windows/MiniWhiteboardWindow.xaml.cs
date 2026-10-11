@@ -277,7 +277,11 @@ namespace Ink_Canvas
                 {
                     MiniInkCanvas.DefaultDrawingAttributes.Color = (Color)ColorConverter.ConvertFromString(settings.PenColor);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"[MiniBoard] 迷你白板按颜色字符串设置笔色失败: {ex.Message}", LogHelper.LogType.Info);
+                }
             }
 
             MiniInkCanvas.DefaultDrawingAttributes.Width = settings.PenWidth;

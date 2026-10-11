@@ -104,6 +104,8 @@ namespace Ink_Canvas.Helpers
                     PInvoke.SetWindowPos(new HWND(hwnd), new HWND((IntPtr)HwndZOrder.HWND_TOPMOST), rect.left, rect.top, rect.Width,
                         rect.Height, SET_WINDOW_POS_FLAGS.SWP_NOZORDER);
                 }
+
+                LogHelper.WriteLogToFile($"[Window] 已进入全屏: {window.GetType().Name}, hwnd=0x{hwnd.ToInt64():X}", LogHelper.LogType.Info);
             }
         }
 
@@ -193,6 +195,8 @@ namespace Ink_Canvas.Helpers
                 //删除保存的状态
                 window.ClearValue(BeforeFullScreenWindowPlacementProperty);
                 window.ClearValue(BeforeFullScreenWindowStyleProperty);
+
+                LogHelper.WriteLogToFile($"[Window] 已退出全屏: {window.GetType().Name}", LogHelper.LogType.Info);
             }
         }
 

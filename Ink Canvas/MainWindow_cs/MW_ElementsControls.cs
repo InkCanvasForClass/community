@@ -362,8 +362,13 @@ namespace Ink_Canvas
 
 
                 // 使用滚轮缩放的核心机制
-                // 浣跨敤婊氳疆缂╂斁鐨勬牳蹇冩満鍒?
-                if (inkCanvas.EditingMode != InkCanvasEditingMode.Select)
+                // Select mode keeps the existing behavior. In pen/mouse mode, only the
+                // explicitly selected element may consume the wheel event.
+                var canScaleInCurrentMode = inkCanvas.EditingMode == InkCanvasEditingMode.Select
+                    || ((inkCanvas.EditingMode == InkCanvasEditingMode.Ink
+                         || inkCanvas.EditingMode == InkCanvasEditingMode.None)
+                        && ReferenceEquals(currentSelectedElement, element));
+                if (!canScaleInCurrentMode)
                 {
                     e.Handled = false;
                     return;

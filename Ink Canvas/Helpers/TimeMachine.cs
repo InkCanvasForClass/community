@@ -104,6 +104,7 @@ namespace Ink_Canvas.Helpers
 
         public void ClearStrokeHistory()
         {
+            LogHelper.WriteLogToFile($"[Ink] 撤销历史已清空 (原有 {_currentStrokeHistory.Count} 条)", LogHelper.LogType.Info);
             _currentStrokeHistory.Clear();
             _currentIndex = -1;
             NotifyUndoRedoState();
@@ -148,6 +149,7 @@ namespace Ink_Canvas.Helpers
 
         public bool ImportTimeMachineHistory(TimeMachineHistory[] sourceHistory)
         {
+            LogHelper.WriteLogToFile($"[Ink] 撤销历史已导入: {sourceHistory?.Length ?? 0} 条", LogHelper.LogType.Info);
             _currentStrokeHistory.Clear();
             _currentStrokeHistory.AddRange(sourceHistory);
             _currentIndex = _currentStrokeHistory.Count - 1;

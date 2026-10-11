@@ -378,12 +378,15 @@ namespace Ink_Canvas.Helpers
                 RequiresAdmin = false,
                 Description = "希沃白板5 桌面悬浮窗",
                 HasWindowStyle = true,
-                // WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_SYSMENU
-                WindowStyle = 0x06080000,
-                StyleMatchType = WindowStyleMatchType.Subset,
+                // 实测（5.2.4.11451）：悬浮窗样式恰为 0x16080000（WS_VISIBLE|WS_CLIPSIBLINGS|WS_CLIPCHILDREN|WS_SYSMENU，无边框无标题栏）。
+                // 必须精确匹配：若用子集匹配，全屏授课的主窗口（带 WS_CAPTION|WS_SYSMENU）同样满足子集，
+                // 会被一起隐藏，表现为"白板主程序被杀"。
+                WindowStyle = 0x16080000,
+                StyleMatchType = WindowStyleMatchType.Exact,
                 WindowSizeMatches = new List<WindowSizeMatch>
                 {
-                    new WindowSizeMatch { MatchType = WindowSizeMatchType.FullScreen },
+                    // 实测悬浮窗物理尺寸 = 550x200 * 窗口 DPI。不要加全屏匹配，全屏尺寸是主窗口的特征。
+                    new WindowSizeMatch { MatchType = WindowSizeMatchType.DpiScale, Width = 550, Height = 200 },
                     new WindowSizeMatch { MatchType = WindowSizeMatchType.Scale, Width = 550, Height = 200 }
                 },
                 ExactTitleMatch = false,
@@ -401,12 +404,12 @@ namespace Ink_Canvas.Helpers
                 RequiresAdmin = false,
                 Description = "希沃白板5C 桌面悬浮窗",
                 HasWindowStyle = true,
-                // WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_SYSMENU
-                WindowStyle = 0x06080000,
-                StyleMatchType = WindowStyleMatchType.Subset,
+                // 与希沃白板5 相同：精确匹配 0x16080000，禁止子集匹配与全屏尺寸匹配，避免误伤主窗口。
+                WindowStyle = 0x16080000,
+                StyleMatchType = WindowStyleMatchType.Exact,
                 WindowSizeMatches = new List<WindowSizeMatch>
                 {
-                    new WindowSizeMatch { MatchType = WindowSizeMatchType.FullScreen },
+                    new WindowSizeMatch { MatchType = WindowSizeMatchType.DpiScale, Width = 550, Height = 200 },
                     new WindowSizeMatch { MatchType = WindowSizeMatchType.Scale, Width = 550, Height = 200 }
                 },
                 ExactTitleMatch = false,
@@ -1194,7 +1197,8 @@ namespace Ink_Canvas.Helpers
                     }
                 }
 
-                // 同一规则可配置多个尺寸变体，例如希沃白板 5/5C 的全屏画布和工具悬浮窗。
+                // 同一规则可配置多个尺寸变体。注意：悬浮窗规则严禁加入 FullScreen 变体，
+                // 全屏尺寸是主窗口的特征，加入会把主程序窗口一并隐藏。
                 if (rule.WindowSizeMatches != null && rule.WindowSizeMatches.Count > 0)
                 {
                     return rule.WindowSizeMatches.Any(windowSize => MatchesWindowSize(hwnd, windowSize));
@@ -1258,7 +1262,8 @@ namespace Ink_Canvas.Helpers
                         var scale = (horizontalDpi + verticalDpi) / 2.0f / 96.0f;
                         var scaledWidth = (int)(windowSize.Width * scale);
                         var scaledHeight = (int)(windowSize.Height * scale);
-                        return Math.Abs(scaledWidth - width) <= 1 && Math.Abs(scaledHeight - height) <= 1;
+                        // 容差 2px：覆盖目标窗口 SetWindowPos 的整数取整误差。
+                        return Math.Abs(scaledWidth - width) <= 2 && Math.Abs(scaledHeight - height) <= 2;
                     }
                     finally
                     {

@@ -215,6 +215,7 @@ namespace Ink_Canvas
                 UpdateBoardToolbarState();
                 UpdateBoardRoamingButtonState();
                 CheckEnableTwoFingerGestureBtnColorPrompt();
+                LogHelper.WriteLogToFile("[BoardToolbar] 白板工具栏初始化完成", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
@@ -236,6 +237,7 @@ namespace Ink_Canvas
                 UpdateBoardToolbarState();
                 UpdateBoardRoamingButtonState();
                 CheckEnableTwoFingerGestureBtnColorPrompt();
+                LogHelper.WriteLogToFile("[BoardToolbar] 白板工具栏已重建", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {

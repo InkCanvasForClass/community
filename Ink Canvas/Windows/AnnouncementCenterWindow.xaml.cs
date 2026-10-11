@@ -1,5 +1,6 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Models;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows;
@@ -54,8 +55,11 @@ namespace Ink_Canvas.Windows
                     Process.Start(new ProcessStartInfo(item.ActionUrl) { UseShellExecute = true });
                     return;
                 }
-                catch
+                catch (Exception ex)
                 {
+                    LogHelper.WriteLogToFile(
+                        $"[Announcement] 公告详情点击打开链接 {item.ActionUrl} 失败: {ex.Message}",
+                        LogHelper.LogType.Info);
                 }
             }
 

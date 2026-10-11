@@ -303,6 +303,7 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public void Enable()
         {
+            LogHelper.WriteLogToFile("[Ink] 墨迹渐隐已启用", LogHelper.LogType.Info);
             IsEnabled = true;
         }
 
@@ -311,6 +312,7 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public void Disable()
         {
+            LogHelper.WriteLogToFile("[Ink] 墨迹渐隐已禁用", LogHelper.LogType.Info);
             IsEnabled = false;
         }
         #endregion

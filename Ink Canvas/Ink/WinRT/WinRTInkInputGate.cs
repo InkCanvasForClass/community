@@ -114,6 +114,22 @@ namespace Ink_Canvas.Ink.WinRT
         private uint _gestureSecondPointerId;
         private bool _isGestureInProgress;
 
+        // Gesture feed state: the contact pair at the last delta already handed to the UI
+        // thread (the next increment is measured from there, so thinning the feed changes the
+        // step size but never the total transform) and the throttle stamp. The UI thread
+        // applies every delta synchronously at DispatcherPriority.Normal, which outranks WPF's
+        // render work, so an unthrottled per-move feed keeps that queue non-empty for the whole
+        // gesture and the canvas visibly moves only once the fingers stop.
+        private const double GestureDeltaMinIntervalMs = 15.0;
+        private bool _hasGestureBaseline;
+        private Point _gestureBaselineFirst;
+        private Point _gestureBaselineSecond;
+        private long _lastGestureDeltaTicks;
+        // Per-gesture counters for the end-of-gesture summary log (forwarded vs. rate-limited).
+        private long _gestureStartTicks;
+        private int _gestureForwardedDeltas;
+        private int _gestureThrottledDeltas;
+
         public WinRTInkInputGate(
             Func<PointerEventArgs, PointerGateResult> classifyPointer,
             Action<PointerEventArgs> onChromePointerDown,
@@ -209,7 +225,7 @@ namespace Ink_Canvas.Ink.WinRT
                 {
                     _mouseForwardingPointerId = pointerId;
                     try { _onChromePointerDown?.Invoke(e); }
-                    catch { /* forwarding is best-effort */ }
+                    catch (Exception ex) { LogCallbackException("转发指针按下到界面区域", ex); }
                 }
                 return;
             }
@@ -259,12 +275,12 @@ namespace Ink_Canvas.Ink.WinRT
                 }
 
                 try { _onTouchPointerPress?.Invoke(pointerId, position); }
-                catch { /* tracking is best-effort */ }
+                catch (Exception ex) { LogCallbackException("转发触摸按下", ex); }
             }
 
             _inkingPointers.Add(pointerId);
             try { _onInkPointerPress?.Invoke(pointerId, device, position); }
-            catch { /* tracking is best-effort */ }
+            catch (Exception ex) { LogCallbackException("转发墨迹按下", ex); }
         }
 
         public void OnPointerMoving(CoreInkIndependentInputSource sender, PointerEventArgs e)
@@ -280,18 +296,20 @@ namespace Ink_Canvas.Ink.WinRT
 
             if (_activeTouchPointers.Contains(pointerId))
             {
-                var previous = GetTouchPosition(pointerId, position);
                 _touchPoints[pointerId] = position;
-                try { _onTouchPointerMove?.Invoke(pointerId, position); }
-                catch { /* tracking is best-effort */ }
 
                 if (_gesturePointers.Contains(pointerId))
                 {
+                    // A gesture contact belongs to the two-finger path (roaming mode receives
+                    // those contacts through the gesture callbacks as well), so skip the
+                    // per-move roaming feed and forward the canvas increment rate-limited.
                     e.Handled = true;
-                    _lastChangedPointerId = pointerId;
-                    EmitGestureDelta(previous);
+                    EmitGestureDelta(force: false);
                     return;
                 }
+
+                try { _onTouchPointerMove?.Invoke(pointerId, position); }
+                catch (Exception ex) { LogCallbackException("转发触摸移动", ex); }
             }
 
             if (_chromeForwardedPointers.Contains(pointerId))
@@ -300,7 +318,7 @@ namespace Ink_Canvas.Ink.WinRT
                 if (_mouseForwardingPointerId == pointerId)
                 {
                     try { _onChromePointerMove?.Invoke(e); }
-                    catch { /* forwarding is best-effort */ }
+                    catch (Exception ex) { LogCallbackException("转发指针移动到界面区域", ex); }
                 }
                 return;
             }
@@ -323,7 +341,7 @@ namespace Ink_Canvas.Ink.WinRT
                             e.CurrentPoint.PointerDevice.PointerDeviceType,
                             position);
                     }
-                    catch { /* tracking is best-effort */ }
+                    catch (Exception ex) { LogCallbackException("转发墨迹移动", ex); }
                 }
             }
         }
@@ -377,8 +395,14 @@ namespace Ink_Canvas.Ink.WinRT
             if (_activeTouchPointers.Contains(pointerId))
             {
                 _touchPoints[pointerId] = position;
+                // Flush the increment between the last forwarded delta and this lift while both
+                // contacts are still known, so the canvas always lands on the fingers' final
+                // position. Runs before the release callback below because the roaming bridge
+                // drops the contact there (the second flush in EndTwoFingerGesture is a no-op).
+                if (_gesturePointers.Contains(pointerId))
+                    EmitGestureDelta(force: true);
                 try { _onTouchPointerRelease?.Invoke(pointerId, position); }
-                catch { /* tracking is best-effort */ }
+                catch (Exception ex) { LogCallbackException("转发触摸抬起", ex); }
             }
 
             if (_gesturePointers.Remove(pointerId))
@@ -397,7 +421,7 @@ namespace Ink_Canvas.Ink.WinRT
                 if (!string.Equals(reason, "pointer-released", StringComparison.Ordinal))
                     _canceledStrokePointers.Add(pointerId);
                 try { _onInkPointerRelease?.Invoke(pointerId, device, position); }
-                catch { /* tracking is best-effort */ }
+                catch (Exception ex) { LogCallbackException("转发墨迹抬起", ex); }
                 _lastInkMoveForwardTicks.Remove(pointerId);
             }
 
@@ -408,7 +432,7 @@ namespace Ink_Canvas.Ink.WinRT
                 {
                     _mouseForwardingPointerId = 0;
                     try { _onChromePointerRelease?.Invoke(e); }
-                    catch { /* forwarding is best-effort */ }
+                    catch (Exception ex) { LogCallbackException("转发指针抬起到界面区域", ex); }
                 }
             }
             else if (_cancelAll || _canceledStrokePointers.Contains(pointerId))
@@ -420,6 +444,22 @@ namespace Ink_Canvas.Ink.WinRT
             if (_inkingPointers.Count == 0 && _activeTouchPointers.Count == 0)
                 _cancelAll = false;
             LogGatePress(device, e, reason);
+        }
+
+        // 逐指针事件路径上的异常日志节流：这些 catch 都在 PointerPressing/Moving/Releasing
+        // 的热路径里（触摸可达 120Hz+），异常若每次都记会瞬间刷爆日志并触发 5MB 整目录清理，
+        // 反而把现场证据清掉。这里首次必记，之后每 100 次记一次并带累计次数。
+        private static int _diagExceptionCount;
+
+        private static void LogCallbackException(string what, Exception ex)
+        {
+            var n = Interlocked.Increment(ref _diagExceptionCount);
+            if (n == 1 || n % 100 == 0)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[WinRTInk] 输入门控回调异常（累计 {n} 次）: {what} - {ex.Message}",
+                    LogHelper.LogType.Info);
+            }
         }
 
         private void TrackTouchPress(uint pointerId, Point position)
@@ -469,12 +509,19 @@ namespace Ink_Canvas.Ink.WinRT
                             PointerDeviceType.Touch,
                             GetTouchPosition(pointerId, new Point()));
                     }
-                    catch { /* tracking is best-effort */ }
+                    catch (Exception ex) { LogCallbackException("手势开始时补发墨迹抬起", ex); }
                 }
             }
 
             var first = GetTouchPosition(firstPointerId, new Point());
             var second = GetTouchPosition(secondPointerId, new Point());
+            _hasGestureBaseline = true;
+            _gestureBaselineFirst = first;
+            _gestureBaselineSecond = second;
+            _lastGestureDeltaTicks = 0;
+            _gestureStartTicks = System.Diagnostics.Stopwatch.GetTimestamp();
+            _gestureForwardedDeltas = 0;
+            _gestureThrottledDeltas = 0;
             var snapshot = new WinRTInkGestureSnapshot(
                 firstPointerId,
                 secondPointerId,
@@ -483,53 +530,92 @@ namespace Ink_Canvas.Ink.WinRT
                 first,
                 second);
             try { _onTwoFingerGestureStarted?.Invoke(snapshot); }
-            catch { /* gesture forwarding is best-effort */ }
+            catch (Exception ex) { LogCallbackException("转发双指手势开始", ex); }
         }
 
-        private void EmitGestureDelta(Point changedPrevious)
+        /// <summary>
+        /// Forwards one two-finger canvas increment to the UI thread. The increment runs from
+        /// the contact pair at the last forwarded delta to the current pair, so a rate-limited
+        /// feed produces bigger steps — never a different total transform. <paramref name="force"/>
+        /// bypasses the rate limit for the final flush on lift.
+        /// </summary>
+        private void EmitGestureDelta(bool force)
         {
-            if (!_isGestureInProgress
-                || !_touchPoints.TryGetValue(_gestureFirstPointerId, out var currentFirst)
+            if (!_isGestureInProgress || !_hasGestureBaseline)
+                return;
+
+            if (!_touchPoints.TryGetValue(_gestureFirstPointerId, out var currentFirst)
                 || !_touchPoints.TryGetValue(_gestureSecondPointerId, out var currentSecond))
                 return;
 
-            var previousFirst = _touchPoints[_gestureFirstPointerId];
-            var previousSecond = _touchPoints[_gestureSecondPointerId];
-            if (_gestureFirstPointerId == _gestureSecondPointerId)
+            if (currentFirst == _gestureBaselineFirst && currentSecond == _gestureBaselineSecond)
                 return;
 
-            // The changed pointer's previous position is passed in by the caller; the other
-            // pointer is unchanged for this event. Restore the current value only after the
-            // snapshot is built so the UI receives a true incremental transform.
-            if (_lastChangedPointerId == _gestureFirstPointerId)
-                previousFirst = changedPrevious;
-            else if (_lastChangedPointerId == _gestureSecondPointerId)
-                previousSecond = changedPrevious;
+            if (!force)
+            {
+                var now = System.Diagnostics.Stopwatch.GetTimestamp();
+                if (_lastGestureDeltaTicks != 0)
+                {
+                    var elapsedMs = (now - _lastGestureDeltaTicks)
+                                    * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+                    if (elapsedMs < GestureDeltaMinIntervalMs)
+                    {
+                        _gestureThrottledDeltas++;
+                        return;
+                    }
+                }
+                _lastGestureDeltaTicks = now;
+            }
 
             var snapshot = new WinRTInkGestureSnapshot(
                 _gestureFirstPointerId,
                 _gestureSecondPointerId,
-                previousFirst,
-                previousSecond,
+                _gestureBaselineFirst,
+                _gestureBaselineSecond,
                 currentFirst,
                 currentSecond);
-            try { _onTwoFingerGestureDelta?.Invoke(snapshot); }
-            catch { /* gesture forwarding is best-effort */ }
-        }
 
-        private uint _lastChangedPointerId;
+            _gestureBaselineFirst = currentFirst;
+            _gestureBaselineSecond = currentSecond;
+            _gestureForwardedDeltas++;
+
+            try { _onTwoFingerGestureDelta?.Invoke(snapshot); }
+            catch (Exception ex) { LogCallbackException("转发双指手势增量", ex); }
+        }
 
         private void EndTwoFingerGesture()
         {
             if (!_isGestureInProgress)
                 return;
 
+            EmitGestureDelta(force: true);
+            var elapsedMs = (System.Diagnostics.Stopwatch.GetTimestamp() - _gestureStartTicks)
+                            * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+            LogGestureSummary(_gestureForwardedDeltas, _gestureThrottledDeltas, elapsedMs);
             _isGestureInProgress = false;
+            _hasGestureBaseline = false;
             _gesturePointers.Clear();
             _gestureFirstPointerId = 0;
             _gestureSecondPointerId = 0;
             try { _onTwoFingerGestureCompleted?.Invoke(); }
-            catch { /* gesture forwarding is best-effort */ }
+            catch (Exception ex) { LogCallbackException("转发双指手势结束", ex); }
+        }
+
+        /// <summary>
+        /// One line per two-finger gesture: how many canvas increments reached the UI thread,
+        /// how many the rate limit thinned, and the gesture duration. A gesture that reports
+        /// zero forwarded deltas never produced pointer movement at all, which separates an
+        /// input-delivery problem from a UI-thread lag problem.
+        /// </summary>
+        private static void LogGestureSummary(int forwarded, int throttled, double elapsedMs)
+        {
+            try
+            {
+                LogHelper.WriteLogToFile(
+                    $"[WinRTInk] gesture end: forwarded={forwarded} throttled={throttled} elapsedMs={elapsedMs:0}",
+                    LogHelper.LogType.Event);
+            }
+            catch { /* never throw from the input gate */ }
         }
 
         private bool TryGetGesturePointerIds(out uint firstPointerId, out uint secondPointerId)

@@ -130,6 +130,8 @@ namespace Ink_Canvas.Properties
 
         public static string FloatingBar_Mouse => ResourceManager.GetString(nameof(FloatingBar_Mouse), _resourceCulture);
 
+        public static string FloatingBar_MouseClear => ResourceManager.GetString(nameof(FloatingBar_MouseClear), _resourceCulture);
+
         public static string FloatingBar_StrokeEraser => ResourceManager.GetString(nameof(FloatingBar_StrokeEraser), _resourceCulture);
 
         public static string FloatingBar_Unfreeze => ResourceManager.GetString(nameof(FloatingBar_Unfreeze), _resourceCulture);
@@ -311,6 +313,10 @@ namespace Ink_Canvas.Properties
         public static string ToolbarPage_RedStyleDesc => ResourceManager.GetString(nameof(ToolbarPage_RedStyleDesc), _resourceCulture);
 
         public static string ToolbarPage_QuickPaletteDisplayModeDesc => ResourceManager.GetString(nameof(ToolbarPage_QuickPaletteDisplayModeDesc), _resourceCulture);
+
+        public static string ToolbarPage_ComponentName => ResourceManager.GetString(nameof(ToolbarPage_ComponentName), _resourceCulture);
+
+        public static string ToolbarPage_ComponentNameDesc => ResourceManager.GetString(nameof(ToolbarPage_ComponentNameDesc), _resourceCulture);
 
         public static string ToolbarPage_ResetComponentSettings => ResourceManager.GetString(nameof(ToolbarPage_ResetComponentSettings), _resourceCulture);
 

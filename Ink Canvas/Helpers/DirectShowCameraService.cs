@@ -206,7 +206,10 @@ namespace Ink_Canvas.Helpers
                                 if (vpa == null) vpa = capPin as IAMVideoProcAmp;
                                 if (cc == null) cc = capPin as IAMCameraControl;
                             }
-                            catch { }
+                            catch (Exception ex)
+                            {
+                                LogHelper.WriteLogToFile($"[Booth] 探测摄像头属性时从采集 pin 获取 IAMVideoProcAmp/IAMCameraControl 失败: {ex.Message}", LogHelper.LogType.Info);
+                            }
                         }
 
                         // 遍历属性规格表，对每个属性调用对应接口的 GetRange
@@ -386,22 +389,38 @@ namespace Ink_Canvas.Helpers
         {
             if (_propVideoProcAmp != null)
             {
-                try { Marshal.ReleaseComObject(_propVideoProcAmp); } catch { }
+                try { Marshal.ReleaseComObject(_propVideoProcAmp); }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Booth] 释放 IAMVideoProcAmp COM 引用失败: {ex.Message}", LogHelper.LogType.Info);
+                }
                 _propVideoProcAmp = null;
             }
             if (_propCameraControl != null)
             {
-                try { Marshal.ReleaseComObject(_propCameraControl); } catch { }
+                try { Marshal.ReleaseComObject(_propCameraControl); }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Booth] 释放 IAMCameraControl COM 引用失败: {ex.Message}", LogHelper.LogType.Info);
+                }
                 _propCameraControl = null;
             }
             if (_propSourceFilter != null)
             {
-                try { Marshal.ReleaseComObject(_propSourceFilter); } catch { }
+                try { Marshal.ReleaseComObject(_propSourceFilter); }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Booth] 释放属性探测用 source filter COM 引用失败: {ex.Message}", LogHelper.LogType.Info);
+                }
                 _propSourceFilter = null;
             }
             if (_propGraph != null)
             {
-                try { Marshal.ReleaseComObject(_propGraph); } catch { }
+                try { Marshal.ReleaseComObject(_propGraph); }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Booth] 释放属性探测用 FilterGraphNoThread COM 引用失败: {ex.Message}", LogHelper.LogType.Info);
+                }
                 _propGraph = null;
             }
             // 不清 _cameraPropStates 的 Supported 状态：调用方切换摄像头后会重新 Probe 覆盖；
@@ -472,7 +491,10 @@ namespace Ink_Canvas.Helpers
                 }
                 result.Sort((a, b) => b.CompareTo(a)); // 降序，常用 60fps 在前
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Booth] 汇总指定分辨率({width}x{height})支持的帧率列表失败: {ex.Message}", LogHelper.LogType.Info);
+            }
             return result;
         }
 
@@ -1272,7 +1294,11 @@ namespace Ink_Canvas.Helpers
             {
                 if (_mediaControl != null)
                 {
-                    try { _mediaControl.Stop(); } catch { }
+                    try { _mediaControl.Stop(); }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Booth] 内部停止预览时停止 IMediaControl 图失败: {ex.Message}", LogHelper.LogType.Info);
+                    }
                 }
                 CleanupGraph();
                 _isCapturing = false;
@@ -1294,7 +1320,11 @@ namespace Ink_Canvas.Helpers
 
                 if (_mediaControl != null)
                 {
-                    try { _mediaControl.Stop(); } catch { }
+                    try { _mediaControl.Stop(); }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Booth] 停止摄像头预览时停止 IMediaControl 图失败: {ex.Message}", LogHelper.LogType.Info);
+                    }
                 }
                 CleanupGraph();
 
@@ -1326,7 +1356,11 @@ namespace Ink_Canvas.Helpers
                     // 先断开 sample grabber 回调，避免释放过程中触发
                     if (_sampleGrabber != null)
                     {
-                        try { _sampleGrabber.SetCallback(null, 0); } catch { }
+                        try { _sampleGrabber.SetCallback(null, 0); }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"[Booth] 清理 DirectShow 图前断开 SampleGrabber 回调失败: {ex.Message}", LogHelper.LogType.Info);
+                        }
                     }
 
                     // 释放子 filter RCW（每个是独立的 RCW）
