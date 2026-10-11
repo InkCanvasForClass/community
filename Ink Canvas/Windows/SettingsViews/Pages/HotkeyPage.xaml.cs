@@ -410,10 +410,5 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
-        private void CardKeepDrawingHotkeysInMouseMode_Loaded(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }

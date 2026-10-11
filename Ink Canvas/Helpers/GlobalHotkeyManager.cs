@@ -522,22 +522,16 @@ namespace Ink_Canvas.Helpers
             try
             {
                 _isContextHotkeyDisabled = false;
-                if (_hotkeysShouldBeRegistered)
-                {
-                    _hotkeysShouldBeRegistered = false;
+                _hotkeysShouldBeRegistered = false;
 
-                    // 停止鼠标位置监控定时器
-                    if (_mousePositionTimer != null && _mousePositionTimer.IsEnabled)
-                    {
-                        _mousePositionTimer.Stop();
-                    }
-
-                    // 注销所有快捷键（含插件热键——这是用户/插件的显式停用）
-                    UnregisterAllHotkeys(true);
-                }
-                else
+                // 停止鼠标位置监控定时器
+                if (_mousePositionTimer != null && _mousePositionTimer.IsEnabled)
                 {
+                    _mousePositionTimer.Stop();
                 }
+
+                // 鼠标模式可能仍保留绘图热键，显式停用必须无条件注销全部热键。
+                UnregisterAllHotkeys(true);
             }
             catch (Exception ex)
             {
@@ -639,8 +633,11 @@ namespace Ink_Canvas.Helpers
                 {
                     // 非鼠标模式下启用快捷键
                     EnableHotkeyRegistration();
-                    _isContextHotkeyDisabled = false;
-                    LoadHotkeysFromSettings();
+
+                    if (_hotkeysShouldBeRegistered && _registeredHotkeys.Count == 0)
+                    {
+                        LoadHotkeysFromSettings();
+                    }
                 }
             }
             catch (Exception ex)

@@ -298,7 +298,6 @@ namespace Ink_Canvas
             // e 为 null 表示由代码主动调用（如设置加载完成后的主题刷新），此时跳过类别过滤
             // 只关心外观类偏好变化；键盘/鼠标/电源等类别与主题无关
             if (e != null && e.Category != UserPreferenceCategory.General) return;
-            if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
             // SystemEvents 的事件不保证在 UI 线程触发，统一调度回 UI 线程
             Dispatcher.BeginInvoke(new Action(CheckSystemThemeSwitch));
         }
