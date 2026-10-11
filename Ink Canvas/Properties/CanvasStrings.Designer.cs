@@ -264,6 +264,12 @@ namespace Ink_Canvas.Properties
 
         public static string Canvas_DarkMode => ResourceManager.GetString(nameof(Canvas_DarkMode), _resourceCulture);
 
+        public static string Canvas_InkEngine => ResourceManager.GetString(nameof(Canvas_InkEngine), _resourceCulture);
+
+        public static string Canvas_InkEngineHint => ResourceManager.GetString(nameof(Canvas_InkEngineHint), _resourceCulture);
+
+        public static string Canvas_InkEngine_WPF => ResourceManager.GetString(nameof(Canvas_InkEngine_WPF), _resourceCulture);
+
         public static string Canvas_UseWinRTInk => ResourceManager.GetString(nameof(Canvas_UseWinRTInk), _resourceCulture);
 
         public static string Canvas_UseWinRTInkHint => ResourceManager.GetString(nameof(Canvas_UseWinRTInkHint), _resourceCulture);

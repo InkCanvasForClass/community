@@ -378,6 +378,15 @@
   <data name="Canvas_DarkMode" xml:space="preserve">
     <value>暗黑系</value>
   </data>
+  <data name="Canvas_InkEngine" xml:space="preserve">
+    <value>墨迹引擎</value>
+  </data>
+  <data name="Canvas_InkEngineHint" xml:space="preserve">
+    <value>选择墨迹渲染与输入处理引擎。切换后即时生效。</value>
+  </data>
+  <data name="Canvas_InkEngine_WPF" xml:space="preserve">
+    <value>WPF 原生</value>
+  </data>
   <data name="Canvas_UseWinRTInk" xml:space="preserve">
     <value>采用 WinRT 墨迹引擎（内测中）</value>
   </data>

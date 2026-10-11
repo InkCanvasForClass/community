@@ -36,7 +36,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 {
                     CardEnablePressureTouchMode.IsOn = settings.Canvas.EnablePressureTouchMode;
                     CardDisablePressure.IsOn = settings.Canvas.DisablePressure;
-                    CardUseWinRTInk.IsOn = settings.Canvas.UseWinRTInk;
+                    ComboBoxInkEngine.SelectedIndex = (int)settings.Canvas.InkEngine;
 
                     int curveMode = 0;
                     if (settings.Canvas.UseAdvancedBezierSmoothing) curveMode = 2;
@@ -125,13 +125,19 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.SaveSettingsToFile();
         }
 
-        private void ToggleSwitchUseWinRTInk_Toggled(object sender, RoutedEventArgs e)
+        private void ComboBoxInkEngine_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.UseWinRTInk = CardUseWinRTInk.IsOn;
-            SettingsManager.SaveSettingsToFile();
-            // 切换实验性墨迹管线：让 MainWindow 按当前逻辑工具挂载/卸载系统湿墨。
-            (Application.Current.MainWindow as MainWindow)?.SyncWinRTInkPipelineWithLogicalTool();
+            var item = ComboBoxInkEngine?.SelectedItem as ComboBoxItem;
+            if (item == null) return;
+            var tag = item.Tag?.ToString() ?? "1";
+            if (int.TryParse(tag, out int index) && Enum.IsDefined(typeof(InkEngineType), index))
+            {
+                var engine = (InkEngineType)index;
+                SettingsManager.Settings.Canvas.InkEngine = engine;
+                SettingsManager.SaveSettingsToFile();
+                (Application.Current.MainWindow as MainWindow)?.ApplyInkEngine(engine);
+            }
         }
 
         private void ComboBoxCurveSmoothingMode_SelectionChanged(object sender, SelectionChangedEventArgs e)

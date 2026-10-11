@@ -340,6 +340,13 @@ namespace Ink_Canvas
         public string UsbAuthorizedSns { get; set; } = "";
     }
 
+    public enum InkEngineType
+    {
+        Wpf = 0,
+        Dusk = 1,
+        WinRT = 2
+    }
+
     public class Canvas
     {
         [JsonProperty("inkWidth")]
@@ -426,9 +433,27 @@ namespace Ink_Canvas
         public bool IsCompressPicturesUploaded { get; set; }
         [JsonProperty("enablePalmEraser")]
         public bool EnablePalmEraser { get; set; } = true;
-        /// <summary>实验性：启用 WinRT 系统墨迹管线（CoreInkIndependentInputSource + 系统 Wet Ink），关闭时回退 WPF 原生墨迹。</summary>
+        /// <summary>墨迹引擎：0 = WPF 原生, 1 = Dusk, 2 = WinRT 系统湿墨。</summary>
+        [JsonProperty("inkEngine")]
+        public InkEngineType InkEngine { get; set; } = InkEngineType.Dusk;
+
+        /// <summary>实验性：兼容旧设置项（为 true 时对应 WinRT 引擎）。</summary>
         [JsonProperty("useWinRTInk")]
-        public bool UseWinRTInk { get; set; } = false;
+        public bool UseWinRTInk
+        {
+            get => InkEngine == InkEngineType.WinRT;
+            set
+            {
+                if (value)
+                {
+                    InkEngine = InkEngineType.WinRT;
+                }
+                else if (InkEngine == InkEngineType.WinRT)
+                {
+                    InkEngine = InkEngineType.Wpf;
+                }
+            }
+        }
         [JsonProperty("palmEraserSensitivity")]
         public int PalmEraserSensitivity { get; set; } = 0; // 0-低敏感度, 1-中敏感度, 2-高敏感度
         [JsonProperty("clearCanvasAlsoClearImages")]
