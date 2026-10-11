@@ -323,16 +323,7 @@ namespace Ink_Canvas
 
                 // 初始化UI管理器
                 _pptUIManager = new PPTUIManager(this);
-                _pptUIManager.ShowPPTButton = Settings.PowerPointSettings.ShowPPTButton;
-                _pptUIManager.PPTButtonsDisplayOption = Settings.PowerPointSettings.PPTButtonsDisplayOption;
-                _pptUIManager.PPTSButtonsOption = Settings.PowerPointSettings.PPTSButtonsOption;
-                _pptUIManager.PPTBButtonsOption = Settings.PowerPointSettings.PPTBButtonsOption;
-                _pptUIManager.PPTLSButtonPosition = Settings.PowerPointSettings.PPTLSButtonPosition;
-                _pptUIManager.PPTRSButtonPosition = Settings.PowerPointSettings.PPTRSButtonPosition;
-                _pptUIManager.PPTLBButtonPosition = Settings.PowerPointSettings.PPTLBButtonPosition;
-                _pptUIManager.PPTRBButtonPosition = Settings.PowerPointSettings.PPTRBButtonPosition;
-                _pptUIManager.EnablePPTButtonPageClickable = Settings.PowerPointSettings.EnablePPTButtonPageClickable;
-                _pptUIManager.EnablePPTButtonLongPressPageTurn = Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn;
+                _pptUIManager.SyncSettings();
 
                 LogHelper.WriteLogToFile(
                     $"[PPT] 管理器初始化完成: manager={_pptManager?.GetType().Name}, autoSaveInk={_singlePPTInkManager?.IsAutoSaveEnabled}",
