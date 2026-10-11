@@ -43,6 +43,58 @@ namespace Ink_Canvas.Helpers
         {
             _mainWindow = mainWindow ?? throw new ArgumentNullException(nameof(mainWindow));
             _dispatcher = _mainWindow.Dispatcher;
+            SyncSettings();
+        }
+
+        /// <summary>
+        /// 从设置中同步有效值到 UI 管理器
+        /// </summary>
+        public void SyncSettings()
+        {
+            var ppt = MainWindow.Settings?.PowerPointSettings;
+            if (ppt == null) return;
+
+            ShowPPTButton = ppt.ShowPPTButton;
+
+            PPTLSButtonPosition = ppt.PPTLSUseGlobalSettings ? ppt.PPTGlobalSideButtonPosition : ppt.PPTLSButtonPosition;
+            PPTRSButtonPosition = ppt.PPTRSUseGlobalSettings ? ppt.PPTGlobalSideButtonPosition : ppt.PPTRSButtonPosition;
+            PPTLBButtonPosition = ppt.PPTLBUseGlobalSettings ? ppt.PPTGlobalBottomButtonPosition : ppt.PPTLBButtonPosition;
+            PPTRBButtonPosition = ppt.PPTRBUseGlobalSettings ? ppt.PPTGlobalBottomButtonPosition : ppt.PPTRBButtonPosition;
+
+            PPTLSButtonOpacity = ppt.PPTLSUseGlobalSettings ? ppt.PPTGlobalButtonOpacity : ppt.PPTLSButtonOpacity;
+            PPTRSButtonOpacity = ppt.PPTRSUseGlobalSettings ? ppt.PPTGlobalButtonOpacity : ppt.PPTRSButtonOpacity;
+            PPTLBButtonOpacity = ppt.PPTLBUseGlobalSettings ? ppt.PPTGlobalButtonOpacity : ppt.PPTLBButtonOpacity;
+            PPTRBButtonOpacity = ppt.PPTRBUseGlobalSettings ? ppt.PPTGlobalButtonOpacity : ppt.PPTRBButtonOpacity;
+
+            PPTLSButtonScale = ppt.PPTLSUseGlobalSettings ? ppt.PPTNavBarScale : ppt.PPTLSButtonScale;
+            PPTRSButtonScale = ppt.PPTRSUseGlobalSettings ? ppt.PPTNavBarScale : ppt.PPTRSButtonScale;
+            PPTLBButtonScale = ppt.PPTLBUseGlobalSettings ? ppt.PPTNavBarScale : ppt.PPTLBButtonScale;
+            PPTRBButtonScale = ppt.PPTRBUseGlobalSettings ? ppt.PPTNavBarScale : ppt.PPTRBButtonScale;
+
+            string str = ppt.PPTButtonsDisplayOption.ToString("D4");
+            if (str.Length < 4) str = "2222";
+            char[] c = str.ToCharArray();
+            // display option index: 0=LB, 1=RB, 2=LS, 3=RS
+            if (ppt.PPTLBUseGlobalSettings) c[0] = ppt.PPTGlobalButtonEnabled ? '2' : '1';
+            if (ppt.PPTRBUseGlobalSettings) c[1] = ppt.PPTGlobalButtonEnabled ? '2' : '1';
+            if (ppt.PPTLSUseGlobalSettings) c[2] = ppt.PPTGlobalButtonEnabled ? '2' : '1';
+            if (ppt.PPTRSUseGlobalSettings) c[3] = ppt.PPTGlobalButtonEnabled ? '2' : '1';
+            PPTButtonsDisplayOption = int.Parse(new string(c));
+
+            PPTSButtonsOption = ppt.PPTSButtonsOption;
+            PPTBButtonsOption = ppt.PPTBButtonsOption;
+            EnablePPTButtonPageClickable = ppt.EnablePPTButtonPageClickable;
+            EnablePPTButtonLongPressPageTurn = ppt.EnablePPTButtonLongPressPageTurn;
+            PPTNavBarScale = ppt.PPTNavBarScale;
+
+            if (ppt.PPTLSUseGlobalSettings) ppt.PPTLSShowPageNumber = ppt.PPTGlobalShowPageNumber;
+            if (ppt.PPTRSUseGlobalSettings) ppt.PPTRSShowPageNumber = ppt.PPTGlobalShowPageNumber;
+            if (ppt.PPTLBUseGlobalSettings) ppt.PPTLBShowPageNumber = ppt.PPTGlobalShowPageNumber;
+            if (ppt.PPTRBUseGlobalSettings) ppt.PPTRBShowPageNumber = ppt.PPTGlobalShowPageNumber;
+            if (ppt.PPTLSUseGlobalSettings) ppt.PPTLSBlackBackground = ppt.PPTGlobalBlackBackground;
+            if (ppt.PPTRSUseGlobalSettings) ppt.PPTRSBlackBackground = ppt.PPTGlobalBlackBackground;
+            if (ppt.PPTLBUseGlobalSettings) ppt.PPTLBBlackBackground = ppt.PPTGlobalBlackBackground;
+            if (ppt.PPTRBUseGlobalSettings) ppt.PPTRBBlackBackground = ppt.PPTGlobalBlackBackground;
         }
         #endregion
 
@@ -99,8 +151,7 @@ namespace Ink_Canvas.Helpers
                         // 同步页码到所有翻页条 + 兼容旧绑定的隐藏 placeholder
                         SetPageNumberOnAllBars(currentSlide, totalSlides);
 
-                        UpdateNavigationPanelsVisibility();
-                        UpdateNavigationButtonStyles();
+                        _mainWindow.UpdatePPTUIManagerSettings();
                         _mainWindow.UpdatePPTTimeCapsuleVisibility();
                         _mainWindow.UpdatePPTQuickPanelVisibility();
                         if (!wasInSlideShow)
@@ -241,6 +292,7 @@ namespace Ink_Canvas.Helpers
             {
                 try
                 {
+                    SyncSettings();
                     // 检查是否应该显示PPT按钮
                     // 不仅要检查按钮设置，还要确保确实在PPT放映模式下且页数有效
                     // 放映来源有两种：真实 PowerPoint，或插件注册的外部演示源（PDF 等）。
@@ -319,6 +371,7 @@ namespace Ink_Canvas.Helpers
             {
                 try
                 {
+                    SyncSettings();
                     UpdateSideButtonStyles();
                     UpdateBottomButtonStyles();
                     ApplyNavBarScale();
@@ -419,17 +472,20 @@ namespace Ink_Canvas.Helpers
             {
                 var ppt = MainWindow.Settings.PowerPointSettings;
 
+                bool lsShowPage = ppt.PPTLSUseGlobalSettings ? ppt.PPTGlobalShowPageNumber : ppt.PPTLSShowPageNumber;
+                bool rsShowPage = ppt.PPTRSUseGlobalSettings ? ppt.PPTGlobalShowPageNumber : ppt.PPTRSShowPageNumber;
+                bool lsBlackBg = ppt.PPTLSUseGlobalSettings ? ppt.PPTGlobalBlackBackground : ppt.PPTLSBlackBackground;
+                bool rsBlackBg = ppt.PPTRSUseGlobalSettings ? ppt.PPTGlobalBlackBackground : ppt.PPTRSBlackBackground;
+
                 // 左侧
-                var leftPageButtonVisibility = ppt.PPTLSShowPageNumber ? Visibility.Visible : Visibility.Collapsed;
-                _mainWindow.LeftSidePanelForPPTNavigation.SetPageButtonVisibility(leftPageButtonVisibility);
-                _mainWindow.LeftSidePanelForPPTNavigation.SetBarOpacity(ppt.PPTLSButtonOpacity);
-                _mainWindow.LeftSidePanelForPPTNavigation.ApplyTheme(ppt.PPTLSBlackBackground);
+                _mainWindow.LeftSidePanelForPPTNavigation.SetPageButtonVisibility(lsShowPage ? Visibility.Visible : Visibility.Collapsed);
+                _mainWindow.LeftSidePanelForPPTNavigation.SetBarOpacity(PPTLSButtonOpacity);
+                _mainWindow.LeftSidePanelForPPTNavigation.ApplyTheme(lsBlackBg);
 
                 // 右侧
-                var rightPageButtonVisibility = ppt.PPTRSShowPageNumber ? Visibility.Visible : Visibility.Collapsed;
-                _mainWindow.RightSidePanelForPPTNavigation.SetPageButtonVisibility(rightPageButtonVisibility);
-                _mainWindow.RightSidePanelForPPTNavigation.SetBarOpacity(ppt.PPTRSButtonOpacity);
-                _mainWindow.RightSidePanelForPPTNavigation.ApplyTheme(ppt.PPTRSBlackBackground);
+                _mainWindow.RightSidePanelForPPTNavigation.SetPageButtonVisibility(rsShowPage ? Visibility.Visible : Visibility.Collapsed);
+                _mainWindow.RightSidePanelForPPTNavigation.SetBarOpacity(PPTRSButtonOpacity);
+                _mainWindow.RightSidePanelForPPTNavigation.ApplyTheme(rsBlackBg);
             }
             catch (Exception ex)
             {
@@ -443,17 +499,20 @@ namespace Ink_Canvas.Helpers
             {
                 var ppt = MainWindow.Settings.PowerPointSettings;
 
+                bool lbShowPage = ppt.PPTLBUseGlobalSettings ? ppt.PPTGlobalShowPageNumber : ppt.PPTLBShowPageNumber;
+                bool rbShowPage = ppt.PPTRBUseGlobalSettings ? ppt.PPTGlobalShowPageNumber : ppt.PPTRBShowPageNumber;
+                bool lbBlackBg = ppt.PPTLBUseGlobalSettings ? ppt.PPTGlobalBlackBackground : ppt.PPTLBBlackBackground;
+                bool rbBlackBg = ppt.PPTRBUseGlobalSettings ? ppt.PPTGlobalBlackBackground : ppt.PPTRBBlackBackground;
+
                 // 左下
-                var leftBottomPageButtonVisibility = ppt.PPTLBShowPageNumber ? Visibility.Visible : Visibility.Collapsed;
-                _mainWindow.LeftBottomPanelForPPTNavigation.SetPageButtonVisibility(leftBottomPageButtonVisibility);
-                _mainWindow.LeftBottomPanelForPPTNavigation.SetBarOpacity(ppt.PPTLBButtonOpacity);
-                _mainWindow.LeftBottomPanelForPPTNavigation.ApplyTheme(ppt.PPTLBBlackBackground);
+                _mainWindow.LeftBottomPanelForPPTNavigation.SetPageButtonVisibility(lbShowPage ? Visibility.Visible : Visibility.Collapsed);
+                _mainWindow.LeftBottomPanelForPPTNavigation.SetBarOpacity(PPTLBButtonOpacity);
+                _mainWindow.LeftBottomPanelForPPTNavigation.ApplyTheme(lbBlackBg);
 
                 // 右下
-                var rightBottomPageButtonVisibility = ppt.PPTRBShowPageNumber ? Visibility.Visible : Visibility.Collapsed;
-                _mainWindow.RightBottomPanelForPPTNavigation.SetPageButtonVisibility(rightBottomPageButtonVisibility);
-                _mainWindow.RightBottomPanelForPPTNavigation.SetBarOpacity(ppt.PPTRBButtonOpacity);
-                _mainWindow.RightBottomPanelForPPTNavigation.ApplyTheme(ppt.PPTRBBlackBackground);
+                _mainWindow.RightBottomPanelForPPTNavigation.SetPageButtonVisibility(rbShowPage ? Visibility.Visible : Visibility.Collapsed);
+                _mainWindow.RightBottomPanelForPPTNavigation.SetBarOpacity(PPTRBButtonOpacity);
+                _mainWindow.RightBottomPanelForPPTNavigation.ApplyTheme(rbBlackBg);
             }
             catch (Exception ex)
             {
