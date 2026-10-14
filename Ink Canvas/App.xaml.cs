@@ -229,7 +229,7 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    LogHelper.WriteLogToFile("App | UIAccess 进程跳过 SetCurrentProcessExplicitAppUserModelID（规避 Shell/COM 堆损坏）", LogHelper.LogType.Trace);
+                    LogHelper.WriteLogToFile("App | UIAccess 进程跳过 SetCurrentProcessExplicitAppUserModelID（规避 Shell/COM 堆损坏）", LogHelper.LogType.Info);
                 }
             }
             catch
