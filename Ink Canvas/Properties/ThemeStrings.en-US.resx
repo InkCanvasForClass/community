@@ -306,6 +306,9 @@
   <data name="Theme_HideFloatingBarBorderHint" xml:space="preserve">
     <value>Sets the floating bar border thickness to 0 for a borderless look.</value>
   </data>
+  <data name="Theme_FlipContentOnAutoFlip" xml:space="preserve">
+    <value>Flip toolbar content when auto-flipping</value>
+  </data>
   <data name="Theme_ColorfulFloatingBar" xml:space="preserve">
     <value>Colorful floating toolbar</value>
   </data>

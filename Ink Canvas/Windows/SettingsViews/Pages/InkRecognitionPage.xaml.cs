@@ -68,8 +68,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 {
                     ToggleSwitchAutoStraightenLine.IsOn = settings.Canvas.AutoStraightenLine;
                     AutoStraightenLineThresholdSlider.Value = settings.Canvas.AutoStraightenLineThreshold;
-                    ToggleSwitchHighPrecisionLineStraighten.IsOn = settings.Canvas.HighPrecisionLineStraighten;
-                    ToggleSwitchPauseStraightenLine.IsOn = settings.Canvas.PauseStraightenLine;
+                    ToggleSwitchHighPrecisionLineStraighten.IsChecked = settings.Canvas.HighPrecisionLineStraighten;
+                    ToggleSwitchPauseStraightenLine.IsChecked = settings.Canvas.PauseStraightenLine;
                     PauseStraightenDelaySlider.Value = settings.Canvas.PauseStraightenDelay;
                     ToggleSwitchLineEndpointSnapping.IsOn = settings.Canvas.LineEndpointSnapping;
                 }
@@ -202,14 +202,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchHighPrecisionLineStraighten_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.HighPrecisionLineStraighten = ToggleSwitchHighPrecisionLineStraighten.IsOn;
+            SettingsManager.Settings.Canvas.HighPrecisionLineStraighten = ToggleSwitchHighPrecisionLineStraighten.IsChecked == true;
             SettingsManager.SaveSettingsToFile();
         }
 
         private void ToggleSwitchPauseStraightenLine_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Canvas.PauseStraightenLine = ToggleSwitchPauseStraightenLine.IsOn;
+            SettingsManager.Settings.Canvas.PauseStraightenLine = ToggleSwitchPauseStraightenLine.IsChecked == true;
             SettingsManager.SaveSettingsToFile();
         }
 

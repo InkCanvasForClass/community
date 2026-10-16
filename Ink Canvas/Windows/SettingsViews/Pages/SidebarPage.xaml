@@ -55,12 +55,11 @@
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
 
-                            <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_AllowDragSidePanel}">
-                                <ui:SettingsCard.HeaderIcon>
-                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Touch}" />
-                                </ui:SettingsCard.HeaderIcon>
-                                <ui:ToggleSwitch x:Name="ToggleSwitchAllowDragSidePanel"
-                                                Toggled="ToggleSwitchAllowDragSidePanel_Toggled" />
+                            <ui:SettingsCard ContentAlignment="Left">
+                                <CheckBox x:Name="ToggleSwitchAllowDragSidePanel"
+                                          Content="{x:Static props:ThemeStrings.Theme_AllowDragSidePanel}"
+                                          Checked="ToggleSwitchAllowDragSidePanel_Toggled"
+                                          Unchecked="ToggleSwitchAllowDragSidePanel_Toggled" />
                             </ui:SettingsCard>
 
                             <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_UnfoldButtonIcon}">

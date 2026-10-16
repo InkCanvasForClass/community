@@ -59,7 +59,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             CardEnablePPTButtonPageClickable.IsOn = ppt.EnablePPTButtonPageClickable;
             ToggleSwitchEnablePPTButtonEnhancedPreview.IsOn = ppt.EnablePPTButtonEnhancedPreview;
-            ToggleSwitchPPTEnhancedPreviewLoadingAnimation.IsOn = ppt.ShowPPTEnhancedPreviewLoadingAnimation;
+            ToggleSwitchPPTEnhancedPreviewLoadingAnimation.IsChecked = ppt.ShowPPTEnhancedPreviewLoadingAnimation;
             CardEnablePPTButtonLongPressPageTurn.IsOn = ppt.EnablePPTButtonLongPressPageTurn;
 
             CardShowCanvasAtNewSlideShow.IsOn = ppt.IsShowCanvasAtNewSlideShow;
@@ -227,7 +227,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchPPTEnhancedPreviewLoadingAnimation_OnToggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.ShowPPTEnhancedPreviewLoadingAnimation = ToggleSwitchPPTEnhancedPreviewLoadingAnimation.IsOn;
+            SettingsManager.Settings.PowerPointSettings.ShowPPTEnhancedPreviewLoadingAnimation = ToggleSwitchPPTEnhancedPreviewLoadingAnimation.IsChecked == true;
             SettingsManager.SaveSettingsToFile();
         }
 

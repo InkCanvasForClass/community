@@ -59,11 +59,11 @@
                         <ui:ToggleSwitch x:Name="ToggleSwitchCompactFloatingBar"
                                 Toggled="ToggleSwitchCompactFloatingBar_Toggled" />
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard x:Name="CardHideFloatingBarBorder"
-                                    Header="{x:Static props:ThemeStrings.Theme_HideFloatingBarBorder}"
-                                    Description="{x:Static props:ThemeStrings.Theme_HideFloatingBarBorderHint}">
-                                <ui:ToggleSwitch x:Name="ToggleSwitchHideFloatingBarBorder"
-                                        Toggled="ToggleSwitchHideFloatingBarBorder_Toggled" />
+                            <ui:SettingsCard ContentAlignment="Left">
+                                <CheckBox x:Name="ToggleSwitchHideFloatingBarBorder"
+                                          Content="{x:Static props:ThemeStrings.Theme_HideFloatingBarBorder}"
+                                          Checked="ToggleSwitchHideFloatingBarBorder_Toggled"
+                                          Unchecked="ToggleSwitchHideFloatingBarBorder_Toggled" />
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>
@@ -240,11 +240,11 @@
                         <ui:ToggleSwitch x:Name="ToggleSwitchAutoFlipWhenSpaceInsufficient"
                                 Toggled="AutoFlipWhenSpaceInsufficientToggleSwitch_Toggled" />
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard x:Name="CardFlipContentOnAutoFlip"
-                                    Header="自动翻转后翻转组件内容"
-                                    Description="开启后自动翻转时仅移动拖动图标位置，组件内容保持原顺序，更改后建议重启应用">
-                                <ui:ToggleSwitch x:Name="ToggleSwitchFlipContentOnAutoFlip"
-                                        Toggled="FlipContentOnAutoFlipToggleSwitch_Toggled" />
+                            <ui:SettingsCard ContentAlignment="Left">
+                                <CheckBox x:Name="ToggleSwitchFlipContentOnAutoFlip"
+                                          Content="{x:Static props:ThemeStrings.Theme_FlipContentOnAutoFlip}"
+                                          Checked="FlipContentOnAutoFlipToggleSwitch_Toggled"
+                                          Unchecked="FlipContentOnAutoFlipToggleSwitch_Toggled" />
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>

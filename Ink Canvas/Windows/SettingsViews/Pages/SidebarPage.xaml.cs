@@ -70,7 +70,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ToggleSwitchEnableQuickPanel.IsOn = settings.Appearance.IsShowQuickPanel;
             QuickPanelBottomOffsetSlider.Value = settings.Appearance.QuickPanelBottomOffset;
             ComboBoxUnFoldBtnImg.SelectedIndex = settings.Appearance.UnFoldButtonImageType;
-            ToggleSwitchAllowDragSidePanel.IsOn = settings.Appearance.AllowDragSidePanel;
+            ToggleSwitchAllowDragSidePanel.IsChecked = settings.Appearance.AllowDragSidePanel;
             QuickPanelOpacitySlider.Value = settings.Appearance.QuickPanelOpacity;
             ToggleSwitchAutoCollapseQuickPanel.IsOn = settings.Appearance.IsAutoCollapseQuickPanel;
             AutoCollapseDelaySlider.Value = settings.Appearance.AutoCollapseQuickPanelDelay;
@@ -86,7 +86,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchAllowDragSidePanel_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            SettingsManager.Settings.Appearance.AllowDragSidePanel = ToggleSwitchAllowDragSidePanel.IsOn;
+            SettingsManager.Settings.Appearance.AllowDragSidePanel = ToggleSwitchAllowDragSidePanel.IsChecked == true;
             SettingsManager.SaveSettingsToFile();
         }
 
