@@ -874,6 +874,12 @@ namespace Ink_Canvas
         [JsonProperty("hideFloatingBarBorder")]
         public bool HideFloatingBarBorder { get; set; } = false;
 
+        [JsonProperty("enableFloatingBarShadow")]
+        public bool EnableFloatingBarShadow { get; set; } = true;
+
+        [JsonProperty("floatingBarShadowSize")]
+        public double FloatingBarShadowSize { get; set; } = 16;
+
         [JsonProperty("floatingBarBorderColor")]
         public string FloatingBarBorderColor { get; set; } = "";
 
@@ -1046,6 +1052,13 @@ namespace Ink_Canvas
 
         [JsonProperty("pptNavBarScale")]
         public double PPTNavBarScale { get; set; } = 1.0;
+
+        // 翻页按钮的四边投影阴影（独立于浮动栏阴影设置）
+        [JsonProperty("enablePPTNavBarShadow")]
+        public bool EnablePPTNavBarShadow { get; set; } = true;
+
+        [JsonProperty("pptNavBarShadowSize")]
+        public double PPTNavBarShadowSize { get; set; } = 16;
 
         // 全局默认设置（各位置"使用全局设置"开启时引用这些值）
         [JsonProperty("pptGlobalButtonEnabled")]

@@ -121,6 +121,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (ToggleSwitchHideFloatingBarBorder != null)
                 ToggleSwitchHideFloatingBarBorder.IsChecked = settings.Appearance.HideFloatingBarBorder;
 
+            // 加载浮动栏阴影设置
+            if (CardFloatingBarShadow != null)
+                CardFloatingBarShadow.IsOn = settings.Appearance.EnableFloatingBarShadow;
+            if (FloatingBarShadowSizeSlider != null)
+                FloatingBarShadowSizeSlider.Value = settings.Appearance.FloatingBarShadowSize;
+
             // 加载浮动栏边框颜色设置
             int mode = settings.Appearance.FloatingBarBorderColorMode;
             if (mode < 0 || mode > 2) mode = 0;
@@ -138,6 +144,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdateSliderText(IdleMiniBarOpacitySlider, IdleMiniBarOpacityText, "{0:F2}");
             UpdateSliderText(IdleMiniBarAutoRestoreSlider, IdleMiniBarAutoRestoreText, "{0:F0}s");
             UpdateSliderText(LiquidGlassBarOpacitySlider, LiquidGlassBarOpacityText, "{0:F2}");
+            UpdateSliderText(FloatingBarShadowSizeSlider, FloatingBarShadowSizeText, "{0:F0}");
             UpdateFloatingBarActualScaleText();
         }
 
@@ -300,6 +307,24 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.Settings.Appearance.HideFloatingBarBorder = ToggleSwitchHideFloatingBarBorder.IsChecked == true;
             SettingsManager.SaveSettingsToFile();
             SettingsActionHub.OnHideFloatingBarBorderChanged(ToggleSwitchHideFloatingBarBorder.IsChecked == true);
+        }
+
+        private void ToggleSwitchFloatingBarShadow_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            if (CardFloatingBarShadow == null) return;
+            SettingsManager.Settings.Appearance.EnableFloatingBarShadow = CardFloatingBarShadow.IsOn;
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnFloatingBarShadowChanged();
+        }
+
+        private void FloatingBarShadowSizeSlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            UpdateSliderText(FloatingBarShadowSizeSlider, FloatingBarShadowSizeText, "{0:F0}");
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Appearance.FloatingBarShadowSize = FloatingBarShadowSizeSlider.Value;
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnFloatingBarShadowChanged();
         }
 
         /// <summary>

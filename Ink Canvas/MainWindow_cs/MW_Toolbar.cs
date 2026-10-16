@@ -5,6 +5,8 @@ using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Effects;
 namespace Ink_Canvas
 {
     public partial class MainWindow
@@ -318,6 +320,8 @@ namespace Ink_Canvas
 
                 ApplyHideFloatingBarBorder(Settings.Appearance.HideFloatingBarBorder);
                 ApplyFloatingBarBorderColor();
+                ApplyFloatingBarShadow();
+                ApplyPPTNavBarShadow();
             }
             catch (Exception ex)
             {
@@ -586,6 +590,58 @@ namespace Ink_Canvas
                         break;
                 }
             }
+        }
+
+        private static DropShadowEffect _floatingBarShadowEffect;
+
+        private static DropShadowEffect FloatingBarShadowEffect
+        {
+            get
+            {
+                if (_floatingBarShadowEffect == null)
+                {
+                    // ShadowDepth=0 表示四周等距的柔和阴影，让边框在白色背景下依然可辨
+                    _floatingBarShadowEffect = new DropShadowEffect
+                    {
+                        Color = Colors.Black,
+                        ShadowDepth = 0,
+                        Opacity = 0.6
+                    };
+                }
+                return _floatingBarShadowEffect;
+            }
+        }
+
+        /// <summary>
+        /// 应用/移除浮动工具栏的四边投影阴影（Issue #569）。阴影大小取自设置里的滑块值。
+        /// </summary>
+        internal void ApplyFloatingBarShadow()
+        {
+            if (StackPanelFloatingBarRoot == null) return;
+
+            if (Settings.Appearance.EnableFloatingBarShadow)
+            {
+                var effect = FloatingBarShadowEffect;
+                effect.BlurRadius = Settings.Appearance.FloatingBarShadowSize;
+                StackPanelFloatingBarRoot.Effect = effect;
+            }
+            else
+            {
+                StackPanelFloatingBarRoot.Effect = null;
+            }
+        }
+
+        /// <summary>
+        /// 应用/移除 PPT 翻页按钮的四边投影阴影（Issue #569）。与浮动栏阴影相互独立，
+        /// 在"翻页按钮的外观与位置"页面单独设置。
+        /// </summary>
+        internal void ApplyPPTNavBarShadow()
+        {
+            bool enabled = Settings.PowerPointSettings.EnablePPTNavBarShadow;
+            double size = Settings.PowerPointSettings.PPTNavBarShadowSize;
+
+            LeftSidePanelForPPTNavigation?.SetShadow(enabled, size);
+            RightSidePanelForPPTNavigation?.SetShadow(enabled, size);
         }
 
         /// <summary>

@@ -321,6 +321,24 @@
   <data name="Theme_FloatingBarBorderColorHint" xml:space="preserve">
     <value>设置浮动工具栏的边框颜色。默认使用主题色，跟随背景颜色可与背景融为一体，自定义可指定任意颜色。</value>
   </data>
+  <data name="Theme_FloatingBarShadow" xml:space="preserve">
+    <value>阴影效果</value>
+  </data>
+  <data name="Theme_FloatingBarShadowHint" xml:space="preserve">
+    <value>为浮动工具栏添加四边等距的投影阴影，便于在白色背景上分辨边框。</value>
+  </data>
+  <data name="Theme_FloatingBarShadowSize" xml:space="preserve">
+    <value>阴影大小</value>
+  </data>
+  <data name="Theme_PPTNavBarShadow" xml:space="preserve">
+    <value>翻页按钮阴影</value>
+  </data>
+  <data name="Theme_PPTNavBarShadowHint" xml:space="preserve">
+    <value>为 PPT 翻页按钮添加四边等距的投影阴影，便于在白色背景上分辨边框。</value>
+  </data>
+  <data name="Theme_PPTNavBarShadowSize" xml:space="preserve">
+    <value>阴影大小</value>
+  </data>
   <data name="Theme_FloatingBarBorderColorReset" xml:space="preserve">
     <value>重置</value>
   </data>

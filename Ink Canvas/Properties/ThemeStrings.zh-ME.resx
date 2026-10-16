@@ -321,6 +321,24 @@
   <data name="Theme_FloatingBarBorderColorHint" xml:space="preserve">
     <value>隐身术 皮肤自由</value>
   </data>
+  <data name="Theme_FloatingBarShadow" xml:space="preserve">
+    <value>贴脸阴影术</value>
+  </data>
+  <data name="Theme_FloatingBarShadowHint" xml:space="preserve">
+    <value>给浮动工具栏四周糊上一层柔光阴影，白底上边框也能一眼看清，奥利给~</value>
+  </data>
+  <data name="Theme_FloatingBarShadowSize" xml:space="preserve">
+    <value>阴影厚度</value>
+  </data>
+  <data name="Theme_PPTNavBarShadow" xml:space="preserve">
+    <value>翻页神器阴影</value>
+  </data>
+  <data name="Theme_PPTNavBarShadowHint" xml:space="preserve">
+    <value>给 PPT 翻页神器四周糊上一层柔光阴影，白底上边框也能一眼看清，奥利给~</value>
+  </data>
+  <data name="Theme_PPTNavBarShadowSize" xml:space="preserve">
+    <value>阴影厚度</value>
+  </data>
   <data name="Theme_FloatingBarBorderColorReset" xml:space="preserve">
     <value>v50</value>
   </data>

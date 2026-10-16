@@ -60,7 +60,7 @@
     <Border x:Name="RootBorder" BorderThickness="1" BorderBrush="#a1a1aa"
             Background="#f4f4f5" Opacity="1" CornerRadius="6">
         <Border.Effect>
-            <DropShadowEffect Color="#000000" BlurRadius="14" ShadowDepth="2" Opacity="0.16"/>
+            <DropShadowEffect Color="#000000" BlurRadius="16" ShadowDepth="0" Opacity="0.6"/>
         </Border.Effect>
         <DockPanel x:Name="LayoutRoot" LastChildFill="True">
             <ListBox x:Name="PreviewList"
