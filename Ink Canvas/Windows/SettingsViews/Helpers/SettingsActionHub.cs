@@ -364,6 +364,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             if (mw != null) mw.ApplyHideFloatingBarBorder(isOn);
         }
 
+        public static void OnFloatingBarShadowChanged()
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.ApplyFloatingBarShadow();
+        }
+
+        public static void OnPPTNavBarShadowChanged()
+        {
+            var mw = GetMainWindow();
+            if (mw != null) mw.ApplyPPTNavBarShadow();
+        }
+
         public static void OnFloatingBarBorderColorChanged()
         {
             var mw = GetMainWindow();

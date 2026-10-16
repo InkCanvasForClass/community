@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 
 namespace Ink_Canvas.Controls
@@ -97,7 +98,21 @@ namespace Ink_Canvas.Controls
         public PPTNavBar()
         {
             InitializeComponent();
+            _shadowEffect = RootBorder.Effect as DropShadowEffect;
             ApplyDirection(Direction);
+        }
+
+        private readonly DropShadowEffect _shadowEffect;
+
+        /// <summary>
+        /// 应用翻页按钮的四边投影阴影（Issue #569）：enabled 控制开关，blurRadius 控制阴影大小。
+        /// 阴影效果定义在 RootBorder 上。
+        /// </summary>
+        public void SetShadow(bool enabled, double blurRadius)
+        {
+            if (_shadowEffect == null) return;
+            _shadowEffect.BlurRadius = blurRadius;
+            RootBorder.Effect = enabled ? _shadowEffect : null;
         }
 
         private static void OnDirectionChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)

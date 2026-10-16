@@ -184,6 +184,26 @@
                             </ikw:SimpleStackPanel>
                         </ikw:SimpleStackPanel>
 
+                        <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                                   Text="{x:Static props:ThemeStrings.Theme_PPTNavBarShadow}"/>
+
+                        <ui:SettingsCard x:Name="CardPPTNavBarShadow"
+                                         Header="{x:Static props:ThemeStrings.Theme_PPTNavBarShadow}"
+                                         Description="{x:Static props:ThemeStrings.Theme_PPTNavBarShadowHint}">
+                            <ui:ToggleSwitch x:Name="ToggleSwitchPPTNavBarShadow" Toggled="ToggleSwitchPPTNavBarShadow_Toggled"/>
+                        </ui:SettingsCard>
+
+                        <ui:SettingsCard x:Name="CardPPTNavBarShadowSize"
+                                         Header="{x:Static props:ThemeStrings.Theme_PPTNavBarShadowSize}">
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock x:Name="TextBlockPPTNavBarShadowSizeValue" VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="40"/>
+                                <Slider x:Name="SliderPPTNavBarShadowSize" Minimum="0" Maximum="60" Width="200"
+                                        IsSnapToTickEnabled="True" Value="16" TickFrequency="1"
+                                        TickPlacement="None" AutoToolTipPlacement="None"
+                                        ValueChanged="SliderPPTNavBarShadowSize_ValueChanged"/>
+                            </ikw:SimpleStackPanel>
+                        </ui:SettingsCard>
+
                     </ikw:SimpleStackPanel>
                 </Grid>
             </Grid>

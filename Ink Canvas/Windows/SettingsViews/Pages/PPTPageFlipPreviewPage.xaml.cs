@@ -108,6 +108,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             LoadSelectedPositionSettings();
             UpdateInlinePreview();
             previewWin.UpdatePreview();
+            LoadShadowSettings();
 
             SliderTouchHelper.AddTouchSupportToAllSliders(this);
         }
@@ -234,6 +235,39 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _isLoaded = false;
             LoadPositionSettings();
             _isLoaded = wasLoaded;
+        }
+
+        /// <summary>
+        /// 加载翻页按钮阴影设置（全局，不随位置 tab 变化）。
+        /// </summary>
+        private void LoadShadowSettings()
+        {
+            bool wasLoaded = _isLoaded;
+            _isLoaded = false;
+            var ppt = SettingsManager.Settings.PowerPointSettings;
+            ToggleSwitchPPTNavBarShadow.IsOn = ppt.EnablePPTNavBarShadow;
+            SliderPPTNavBarShadowSize.Value = ppt.PPTNavBarShadowSize;
+            UpdateSliderText(SliderPPTNavBarShadowSize, TextBlockPPTNavBarShadowSizeValue, "{0:F0}");
+            _isLoaded = wasLoaded;
+        }
+
+        private void ToggleSwitchPPTNavBarShadow_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.PowerPointSettings.EnablePPTNavBarShadow = ToggleSwitchPPTNavBarShadow.IsOn;
+            SettingsManager.SaveSettingsToFile();
+            SettingsActionHub.OnPPTNavBarShadowChanged();
+            UpdatePreviews();
+        }
+
+        private void SliderPPTNavBarShadowSize_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            UpdateSliderText(SliderPPTNavBarShadowSize, TextBlockPPTNavBarShadowSizeValue, "{0:F0}");
+            if (!_isLoaded) return;
+            SettingsManager.Settings.PowerPointSettings.PPTNavBarShadowSize = SliderPPTNavBarShadowSize.Value;
+            SettingsActionHub.OnPPTNavBarShadowChanged();
+            UpdatePreviews();
+            _sliderDelayAction.DebounceAction(2000, null, () => SettingsManager.SaveSettingsToFile());
         }
 
         private void LoadPositionSettings()
@@ -561,6 +595,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             PreviewRS.ApplyTheme(rsBlackBg);
             PreviewLB.ApplyTheme(lbBlackBg);
             PreviewRB.ApplyTheme(rbBlackBg);
+
+            // 7. Apply shadow (Issue #569)
+            bool shadowEnabled = SettingsManager.Settings.PowerPointSettings.EnablePPTNavBarShadow;
+            double shadowSize = SettingsManager.Settings.PowerPointSettings.PPTNavBarShadowSize;
+            PreviewLS.SetShadow(shadowEnabled, shadowSize);
+            PreviewRS.SetShadow(shadowEnabled, shadowSize);
+            PreviewLB.SetShadow(shadowEnabled, shadowSize);
+            PreviewRB.SetShadow(shadowEnabled, shadowSize);
         }
 
         private void PreviewLS_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)

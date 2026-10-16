@@ -321,6 +321,24 @@
   <data name="Theme_FloatingBarBorderColorHint" xml:space="preserve">
     <value>Sets the floating toolbar border color. Default uses the theme color, Follow background blends with the background, Custom lets you pick any color.</value>
   </data>
+  <data name="Theme_FloatingBarShadow" xml:space="preserve">
+    <value>Shadow effect</value>
+  </data>
+  <data name="Theme_FloatingBarShadowHint" xml:space="preserve">
+    <value>Adds an even drop shadow around the floating toolbar so its border stays visible on white backgrounds.</value>
+  </data>
+  <data name="Theme_FloatingBarShadowSize" xml:space="preserve">
+    <value>Shadow size</value>
+  </data>
+  <data name="Theme_PPTNavBarShadow" xml:space="preserve">
+    <value>Page-turn button shadow</value>
+  </data>
+  <data name="Theme_PPTNavBarShadowHint" xml:space="preserve">
+    <value>Adds an even drop shadow around the PPT page-turn buttons so their borders stay visible on white backgrounds.</value>
+  </data>
+  <data name="Theme_PPTNavBarShadowSize" xml:space="preserve">
+    <value>Shadow size</value>
+  </data>
   <data name="Theme_FloatingBarBorderColorReset" xml:space="preserve">
     <value>Reset</value>
   </data>
