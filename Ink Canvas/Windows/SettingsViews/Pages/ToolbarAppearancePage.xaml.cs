@@ -122,8 +122,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ToggleSwitchHideFloatingBarBorder.IsChecked = settings.Appearance.HideFloatingBarBorder;
 
             // 加载浮动栏阴影设置
-            if (CardFloatingBarShadow != null)
-                CardFloatingBarShadow.IsOn = settings.Appearance.EnableFloatingBarShadow;
+            if (ToggleSwitchFloatingBarShadow != null)
+                ToggleSwitchFloatingBarShadow.IsOn = settings.Appearance.EnableFloatingBarShadow;
             if (FloatingBarShadowSizeSlider != null)
                 FloatingBarShadowSizeSlider.Value = settings.Appearance.FloatingBarShadowSize;
 
@@ -312,8 +312,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchFloatingBarShadow_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            if (CardFloatingBarShadow == null) return;
-            SettingsManager.Settings.Appearance.EnableFloatingBarShadow = CardFloatingBarShadow.IsOn;
+            SettingsManager.Settings.Appearance.EnableFloatingBarShadow = ToggleSwitchFloatingBarShadow.IsOn;
             SettingsManager.SaveSettingsToFile();
             SettingsActionHub.OnFloatingBarShadowChanged();
         }
