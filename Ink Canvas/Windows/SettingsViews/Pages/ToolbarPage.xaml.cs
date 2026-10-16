@@ -112,8 +112,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var entry = ActiveEntry;
             if (entry == null) return;
             _suppressSave = true;
-            CheckBoxShowSeparateBorder.IsChecked = entry.ShowSeparateBorder;
-            CheckBoxUseRedStyle.IsChecked = entry.GetSettingBool(ComponentSettingKeys.UseRedStyle);
+            CardShowSeparateBorder.IsOn = entry.ShowSeparateBorder;
+            CheckBoxRedStyleIcon.IsChecked = entry.GetSettingBool(ComponentSettingKeys.RedStyleIcon);
+            CheckBoxRedStyleText.IsChecked = entry.GetSettingBool(ComponentSettingKeys.RedStyleText);
 
             // 组件自定义设置：动态生成设置面板（内置组件和插件组件共用）
             UpdatePluginCustomSettingsPanel(entry);
@@ -418,6 +419,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 {
                     entry.Children = new List<ToolbarComponentEntry>();
                 }
+                ApplyItemRedStyleDefaults(entry, item);
                 AddedComponents.Add(entry);
                 SelectedEntry = entry;
                 SaveSettings();
@@ -474,6 +476,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 {
                     entry.Children = new List<ToolbarComponentEntry>();
                 }
+                ApplyItemRedStyleDefaults(entry, item);
                 var insertIndex = dropInfo.UnfilteredInsertIndex;
                 if (insertIndex < 0 || insertIndex > AddedComponents.Count)
                     insertIndex = AddedComponents.Count;
@@ -555,21 +558,34 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 SettingsListItemHelper.UpdateButtonVisibility(itemsControl, "BtnAddItem");
         }
 
-        private void CheckBoxShowSeparateBorder_Changed(object sender, RoutedEventArgs e)
+        private void CardShowSeparateBorder_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded || ActiveEntry == null) return;
-            ActiveEntry.ShowSeparateBorder = CheckBoxShowSeparateBorder.IsChecked == true;
+            ActiveEntry.ShowSeparateBorder = CardShowSeparateBorder.IsOn;
             SaveSettings();
         }
 
-        private void CheckBoxUseRedStyle_Changed(object sender, RoutedEventArgs e)
+        private void CheckBoxRedStyleIcon_Changed(object sender, RoutedEventArgs e)
+            => ApplyRedStyleSetting(ComponentSettingKeys.RedStyleIcon, CheckBoxRedStyleIcon.IsChecked == true);
+
+        private void CheckBoxRedStyleText_Changed(object sender, RoutedEventArgs e)
+            => ApplyRedStyleSetting(ComponentSettingKeys.RedStyleText, CheckBoxRedStyleText.IsChecked == true);
+
+        private void ApplyRedStyleSetting(string key, bool value)
         {
             if (!_isLoaded || ActiveEntry == null || _suppressSave) return;
-            if (CheckBoxUseRedStyle.IsChecked == true)
-                ActiveEntry.SetSetting(ComponentSettingKeys.UseRedStyle, true);
+            if (value)
+                ActiveEntry.SetSetting(key, true);
             else
-                ActiveEntry.Settings?.Remove(ComponentSettingKeys.UseRedStyle);
+                ActiveEntry.Settings?.Remove(key);
             SaveSettings();
+        }
+
+        // 新加入的组件按其默认值初始化“红色强调”设置（如清除/删除组件默认强调）
+        internal static void ApplyItemRedStyleDefaults(ToolbarComponentEntry entry, IToolbarItem item)
+        {
+            if (item.DefaultRedStyleIcon) entry.SetSetting(ComponentSettingKeys.RedStyleIcon, true);
+            if (item.DefaultRedStyleText) entry.SetSetting(ComponentSettingKeys.RedStyleText, true);
         }
 
         private void UpdatePluginCustomSettingsPanel(ToolbarComponentEntry entry)
@@ -982,6 +998,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     ShowSeparateBorder = item.DefaultShowSeparateBorder,
                     PreventHideOnDragClick = item.DefaultPreventHideOnDragClick
                 };
+                ToolbarPage.ApplyItemRedStyleDefaults(entry, item);
                 var insertIndex = dropInfo.UnfilteredInsertIndex;
                 if (insertIndex < 0 || insertIndex > _page.GroupChildren.Count)
                     insertIndex = _page.GroupChildren.Count;

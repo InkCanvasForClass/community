@@ -363,6 +363,12 @@
   <data name="ToolbarPage_RedStyleDesc" xml:space="preserve">
     <value>将该组件的图标和文字显示为红色</value>
   </data>
+  <data name="ToolbarPage_RedStyleIcon" xml:space="preserve">
+    <value>强调图标</value>
+  </data>
+  <data name="ToolbarPage_RedStyleText" xml:space="preserve">
+    <value>强调文字</value>
+  </data>
   <data name="ToolbarPage_Margin" xml:space="preserve">
     <value>边距</value>
   </data>

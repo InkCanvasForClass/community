@@ -363,6 +363,12 @@
   <data name="ToolbarPage_RedStyleDesc" xml:space="preserve">
     <value>Display this component's icon and label in red</value>
   </data>
+  <data name="ToolbarPage_RedStyleIcon" xml:space="preserve">
+    <value>Emphasize icon</value>
+  </data>
+  <data name="ToolbarPage_RedStyleText" xml:space="preserve">
+    <value>Emphasize label</value>
+  </data>
   <data name="ToolbarPage_Margin" xml:space="preserve">
     <value>Margin</value>
   </data>
