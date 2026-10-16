@@ -26,6 +26,16 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         bool DefaultPreventHideOnDragClick { get; }
 
         /// <summary>
+        /// 该组件的“强调图标”默认值（红色强调）。默认 false。
+        /// </summary>
+        bool DefaultRedStyleIcon => false;
+
+        /// <summary>
+        /// 该组件的“强调文字”默认值（红色强调）。默认 false。
+        /// </summary>
+        bool DefaultRedStyleText => false;
+
+        /// <summary>
         /// 组件自定义设置声明。内置组件和插件组件均可通过此属性声明需要在设置页面动态生成的配置项。
         /// 默认为空列表，表示无自定义设置。
         /// </summary>
