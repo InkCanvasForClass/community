@@ -380,17 +380,19 @@
                                             <ComboBoxItem Content="{x:Static props:StorageStrings.Storage_ScreenshotScale_25}" Tag="3"/>
                                         </ComboBox>
                                     </ui:SettingsCard>
-                                    <ui:SettingsCard ContentAlignment="Left">
-                                        <CheckBox x:Name="ToggleSwitchAutoSaveStrokesAtScreenshot"
-                                                  Content="{x:Static props:StorageStrings.Storage_AutoSaveInkOnScreenshot}"
-                                                  Checked="ToggleSwitchAutoSaveStrokesAtScreenshot_Toggled"
-                                                  Unchecked="ToggleSwitchAutoSaveStrokesAtScreenshot_Toggled"/>
+                                    <ui:SettingsCard Header="{x:Static props:StorageStrings.Storage_AutoSaveInkOnScreenshot}">
+                                        <ui:SettingsCard.HeaderIcon>
+                                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Save}"/>
+                                        </ui:SettingsCard.HeaderIcon>
+                                        <ui:ToggleSwitch x:Name="ToggleSwitchAutoSaveStrokesAtScreenshot"
+                                                         Toggled="ToggleSwitchAutoSaveStrokesAtScreenshot_Toggled"/>
                                     </ui:SettingsCard>
-                                    <ui:SettingsCard ContentAlignment="Left">
-                                        <CheckBox x:Name="ToggleSwitchAutoSaveStrokesAtClear"
-                                                  Content="{x:Static props:StorageStrings.Storage_AutoScreenshotOnClear}"
-                                                  Checked="ToggleSwitchAutoSaveStrokesAtClear_Toggled"
-                                                  Unchecked="ToggleSwitchAutoSaveStrokesAtClear_Toggled"/>
+                                    <ui:SettingsCard Header="{x:Static props:StorageStrings.Storage_AutoScreenshotOnClear}">
+                                        <ui:SettingsCard.HeaderIcon>
+                                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Save}"/>
+                                        </ui:SettingsCard.HeaderIcon>
+                                        <ui:ToggleSwitch x:Name="ToggleSwitchAutoSaveStrokesAtClear"
+                                                         Toggled="ToggleSwitchAutoSaveStrokesAtClear_Toggled"/>
                                     </ui:SettingsCard>
                                 </ui:SettingsExpander.Items>
                             </ui:SettingsExpander>
