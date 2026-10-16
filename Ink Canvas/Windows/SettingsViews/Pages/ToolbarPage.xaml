@@ -326,17 +326,30 @@
 
                         <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentProperties}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
 
-                        <ui:SettingsCard Header="{x:Static props:FloatingBarStrings.ToolbarPage_SeparateBorder}" Description="{x:Static props:FloatingBarStrings.ToolbarPage_SeparateBorderDesc}">
-                            <CheckBox x:Name="CheckBoxShowSeparateBorder"
-                                      Checked="CheckBoxShowSeparateBorder_Changed"
-                                      Unchecked="CheckBoxShowSeparateBorder_Changed"/>
-                        </ui:SettingsCard>
+                        <controls:LabeledSettingsCard x:Name="CardShowSeparateBorder"
+                                                      Header="{x:Static props:FloatingBarStrings.ToolbarPage_SeparateBorder}"
+                                                      Description="{x:Static props:FloatingBarStrings.ToolbarPage_SeparateBorderDesc}"
+                                                      SwitchName="ToggleSwitchShowSeparateBorder"
+                                                      Toggled="CardShowSeparateBorder_Toggled"/>
 
-                        <ui:SettingsCard Header="{x:Static props:FloatingBarStrings.ToolbarPage_RedStyle}" Description="{x:Static props:FloatingBarStrings.ToolbarPage_RedStyleDesc}">
-                            <CheckBox x:Name="CheckBoxUseRedStyle"
-                                      Checked="CheckBoxUseRedStyle_Changed"
-                                      Unchecked="CheckBoxUseRedStyle_Changed"/>
-                        </ui:SettingsCard>
+                        <ui:SettingsExpander Header="{x:Static props:FloatingBarStrings.ToolbarPage_RedStyle}"
+                                             Description="{x:Static props:FloatingBarStrings.ToolbarPage_RedStyleDesc}"
+                                             IsExpanded="True">
+                            <ui:SettingsExpander.Items>
+                                <ui:SettingsCard ContentAlignment="Left">
+                                    <CheckBox x:Name="CheckBoxRedStyleIcon"
+                                              Content="{x:Static props:FloatingBarStrings.ToolbarPage_RedStyleIcon}"
+                                              Checked="CheckBoxRedStyleIcon_Changed"
+                                              Unchecked="CheckBoxRedStyleIcon_Changed"/>
+                                </ui:SettingsCard>
+                                <ui:SettingsCard ContentAlignment="Left">
+                                    <CheckBox x:Name="CheckBoxRedStyleText"
+                                              Content="{x:Static props:FloatingBarStrings.ToolbarPage_RedStyleText}"
+                                              Checked="CheckBoxRedStyleText_Changed"
+                                              Unchecked="CheckBoxRedStyleText_Changed"/>
+                                </ui:SettingsCard>
+                            </ui:SettingsExpander.Items>
+                        </ui:SettingsExpander>
 
                     </ikw:SimpleStackPanel>
                 </ScrollViewer>

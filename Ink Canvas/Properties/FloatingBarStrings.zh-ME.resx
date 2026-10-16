@@ -363,6 +363,12 @@
   <data name="ToolbarPage_RedStyleDesc" xml:space="preserve">
     <value>让这件装备的图标和字红得发慌</value>
   </data>
+  <data name="ToolbarPage_RedStyleIcon" xml:space="preserve">
+    <value>图标变红</value>
+  </data>
+  <data name="ToolbarPage_RedStyleText" xml:space="preserve">
+    <value>文字变红</value>
+  </data>
   <data name="ToolbarPage_Margin" xml:space="preserve">
     <value>安全距离</value>
   </data>

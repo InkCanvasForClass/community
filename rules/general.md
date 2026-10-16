@@ -88,6 +88,39 @@ public void AddFadingStroke(Stroke stroke, Point startPoint, Point endPoint, lon
 - XAML 控件名使用 PascalCase，如 `CardEnableInkFade`
 - XAML 资源键使用 PascalCase，如 `PivotHeaderItemFontSize`
 
+## 持久化与迁移
+
+**凡是对持久化数据（设置字段、配置文件、序列化 schema、i18n 资源键等）做出改动的，必须同时提供对应迁移，保证旧数据能自动升级，而不是静默丢弃或读取失败。**
+
+| 改动类型 | 迁移要求 |
+|---------|---------|
+| 新增字段 | 老数据缺失时按默认值兜底，不影响读取 |
+| 重命名 / 拆分字段 | 加载时把旧字段迁移为新字段，并回写 |
+| 删除字段 | 迁移时清理旧字段，避免脏数据长期残留 |
+| 修改资源键 / 映射表 | 保留旧键或补齐映射（`*.resx` / `key_mapping.json` / `Strings.cs`） |
+
+要点：
+
+- 迁移在**加载持久化数据时统一执行**，并**递归**处理嵌套项（如分组的子项）。
+- 迁移必须**幂等**：累计 `changed`，仅在确有变更时回写文件并写日志，无变更不写盘。
+- 对缺失 / 损坏数据做兜底，迁移失败不得阻塞加载。
+
+示例（参考工具栏配置迁移 `ToolbarRegistry`）：
+
+```csharp
+// 加载配置后统一迁移
+private static void MigrateConfig(ToolbarLayoutSettings layout, string configName)
+{
+    bool changed = false;
+    foreach (var component in layout.Components)
+    {
+        changed |= MigrateEntryConditionIds(component); // 旧 ConditionId 大小写
+        changed |= MigrateEntryRedStyle(component);      // 旧 useRedStyle → redStyleIcon / redStyleText
+    }
+    if (changed) SaveConfigFile(configName, layout);
+}
+```
+
 ## WPF 常见陷阱
 
 ### Geometry 冻结（只读）问题

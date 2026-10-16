@@ -10,8 +10,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public override ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public override string Description => FloatingBarStrings.ToolbarItem_Desc_Clear;
 
-        protected override string IconBrushResourceKey => "RedBrush";
-        protected override string LabelBrushResourceKey => "RedBrush";
+        public override bool DefaultRedStyleIcon => true;
+        public override bool DefaultRedStyleText => true;
         public override string IconGeometry => XamlGraphicsIconGeometries.ClearInkIconGeometry;
 
         protected override void OnClick(IToolbarHost host, object sender, MouseButtonEventArgs e)

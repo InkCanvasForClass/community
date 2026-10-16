@@ -290,7 +290,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         public const string PaddingRight = "paddingRight";
         public const string PaddingBottom = "paddingBottom";
         public const string Opacity = "opacity";
-        public const string UseRedStyle = "useRedStyle";
+        public const string UseRedStyle = "useRedStyle"; // 旧键，仅用于旧配置迁移
+        public const string RedStyleIcon = "redStyleIcon";
+        public const string RedStyleText = "redStyleText";
         public const string DisplayMode = "displayMode";
         public const string ButtonName = "buttonName";
     }

@@ -583,15 +583,64 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             foreach (var component in layout.Components)
             {
                 changed |= MigrateEntryConditionIds(component);
+                changed |= MigrateEntryRedStyle(component);
             }
 
             if (changed)
             {
                 SaveConfigFile(configName, layout);
                 LogHelper.WriteLogToFile(
-                    $"ToolbarRegistry: 已修正配置 [{configName}] 中 ConditionId 大小写",
+                    $"ToolbarRegistry: 已迁移配置 [{configName}] 中的旧版字段（ConditionId 大小写 / 红色强调）",
                     LogHelper.LogType.Info);
             }
+        }
+
+        /// <summary>
+        /// 迁移旧的“红色强调”设置：
+        /// 旧版单一开关 useRedStyle → 新版 redStyleIcon / redStyleText 两个独立开关；
+        /// 旧版 builtin.clear（清除/删除）的红色是硬编码的、配置里没有对应设置，
+        /// 迁移时为其补上默认强调，避免升级后失去红色外观。
+        /// </summary>
+        private static bool MigrateEntryRedStyle(ToolbarComponentEntry entry)
+        {
+            if (entry == null) return false;
+            bool changed = false;
+
+            bool hasLegacy = entry.Settings != null && entry.Settings.ContainsKey(ComponentSettingKeys.UseRedStyle);
+            if (hasLegacy)
+            {
+                bool legacy = entry.GetSettingBool(ComponentSettingKeys.UseRedStyle);
+                entry.Settings.Remove(ComponentSettingKeys.UseRedStyle);
+                if (legacy)
+                {
+                    entry.Settings[ComponentSettingKeys.RedStyleIcon] = true;
+                    entry.Settings[ComponentSettingKeys.RedStyleText] = true;
+                }
+                else
+                {
+                    entry.Settings.Remove(ComponentSettingKeys.RedStyleIcon);
+                    entry.Settings.Remove(ComponentSettingKeys.RedStyleText);
+                }
+                changed = true;
+            }
+            else if (entry.Id == "builtin.clear"
+                && (entry.Settings == null || !entry.Settings.ContainsKey(ComponentSettingKeys.RedStyleIcon))
+                && (entry.Settings == null || !entry.Settings.ContainsKey(ComponentSettingKeys.RedStyleText)))
+            {
+                entry.SetSetting(ComponentSettingKeys.RedStyleIcon, true);
+                entry.SetSetting(ComponentSettingKeys.RedStyleText, true);
+                changed = true;
+            }
+
+            if (entry.Children != null)
+            {
+                foreach (var child in entry.Children)
+                {
+                    changed |= MigrateEntryRedStyle(child);
+                }
+            }
+
+            return changed;
         }
 
         private static bool MigrateEntryConditionIds(ToolbarComponentEntry entry)
@@ -657,7 +706,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             public List<DisplayItem> Items { get; set; } = new();
         }
 
-        private static List<DisplayItem> FlattenEntries(IToolbarHost host, List<ToolbarComponentEntry> entries, Dictionary<string, IToolbarItem> itemMap, Orientation orientation = Orientation.Horizontal, bool inheritedUseRedStyle = false)
+        private static List<DisplayItem> FlattenEntries(IToolbarHost host, List<ToolbarComponentEntry> entries, Dictionary<string, IToolbarItem> itemMap, Orientation orientation = Orientation.Horizontal, bool inheritedRedStyleIcon = false, bool inheritedRedStyleText = false)
         {
             var result = new List<DisplayItem>();
             foreach (var entry in entries)
@@ -665,7 +714,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 if (entry.IsGroup)
                 {
                     var groupRuleset = GetEffectiveRuleset(entry);
-                    var groupUseRedStyle = inheritedUseRedStyle || entry.GetSettingBool(ComponentSettingKeys.UseRedStyle);
+                    var groupRedStyleIcon = inheritedRedStyleIcon || entry.GetSettingBool(ComponentSettingKeys.RedStyleIcon);
+                    var groupRedStyleText = inheritedRedStyleText || entry.GetSettingBool(ComponentSettingKeys.RedStyleText);
                     var groupContentItems = new List<DisplayItem>();
 
                     foreach (var childEntry in entry.Children)
@@ -677,7 +727,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                                 FlushGroupContentItems(result, groupContentItems, groupRuleset, entry.ShowSeparateBorder, orientation);
                                 groupContentItems.Clear();
                             }
-                            var nestedItems = FlattenEntries(host, new List<ToolbarComponentEntry> { childEntry }, itemMap, orientation, groupUseRedStyle);
+                            var nestedItems = FlattenEntries(host, new List<ToolbarComponentEntry> { childEntry }, itemMap, orientation, groupRedStyleIcon, groupRedStyleText);
                             foreach (var nestedItem in nestedItems)
                             {
                                 result.Add(nestedItem);
@@ -690,10 +740,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                         if (view == null) continue;
                         view.Tag = InjectedTag;
                         ApplyComponentSettings(view, childEntry);
-                        if (groupUseRedStyle && view is ToolbarImageButton groupButton)
+                        if ((groupRedStyleIcon || groupRedStyleText) && view is ToolbarImageButton groupButton)
                         {
-                            SetUseRedStyle(groupButton, true);
-                            ApplyRedStyle(groupButton);
+                            ApplyRedStyle(groupButton, groupRedStyleIcon, groupRedStyleText);
                         }
                         var childRuleset = GetEffectiveRuleset(childEntry);
                         SetHidingRuleset(view, childRuleset);
@@ -741,13 +790,13 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     if (view == null) continue;
                     view.Tag = InjectedTag;
                     ApplyComponentSettings(view, entry);
-                    if (inheritedUseRedStyle && view is ToolbarImageButton inheritedButton)
+                    if ((inheritedRedStyleIcon || inheritedRedStyleText) && view is ToolbarImageButton inheritedButton)
                     {
-                        ApplyRedStyle(inheritedButton);
+                        ApplyRedStyle(inheritedButton, inheritedRedStyleIcon, inheritedRedStyleText);
                     }
                     var ruleset = GetEffectiveRuleset(entry);
                     SetHidingRuleset(view, ruleset);
-                    if (entry.GetSettingBool(ComponentSettingKeys.UseRedStyle))
+                    if (entry.GetSettingBool(ComponentSettingKeys.RedStyleIcon) || entry.GetSettingBool(ComponentSettingKeys.RedStyleText))
                         SetUseRedStyle(view, true);
                     result.Add(new DisplayItem
                     {
@@ -1193,9 +1242,11 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 if (iconSize.HasValue && iconSize.Value > 0)
                     btn.IconHeight = iconSize.Value;
 
-                if (entry.GetSettingBool(ComponentSettingKeys.UseRedStyle))
+                bool redStyleIcon = entry.GetSettingBool(ComponentSettingKeys.RedStyleIcon);
+                bool redStyleText = entry.GetSettingBool(ComponentSettingKeys.RedStyleText);
+                if (redStyleIcon || redStyleText)
                 {
-                    ApplyRedStyle(btn);
+                    ApplyRedStyle(btn, redStyleIcon, redStyleText);
                 }
 
                 if (entry.Id == "builtin.cursorWithDel")
@@ -1263,20 +1314,23 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             }
         }
 
-        private static void ApplyRedStyle(ToolbarImageButton btn)
+        private static void ApplyRedStyle(ToolbarImageButton btn, bool icon, bool text)
         {
             if (btn == null) return;
 
-            SetUseRedStyle(btn, true);
-            if (btn.TryFindResource("RedBrush") is Brush redBrush)
+            // 仅当图标使用红色强调时标记该按钮，避免主题配色逻辑覆盖红色图标
+            SetUseRedStyle(btn, icon);
+
+            var redBrush = btn.TryFindResource("RedBrush") as Brush;
+            if (icon)
             {
-                btn.IconBrush = redBrush;
-                btn.LabelBrush = redBrush;
+                if (redBrush != null) btn.IconBrush = redBrush;
+                else btn.SetResourceReference(ToolbarImageButton.IconBrushProperty, "RedBrush");
             }
-            else
+            if (text)
             {
-                btn.SetResourceReference(ToolbarImageButton.IconBrushProperty, "RedBrush");
-                btn.SetResourceReference(ToolbarImageButton.LabelBrushProperty, "RedBrush");
+                if (redBrush != null) btn.LabelBrush = redBrush;
+                else btn.SetResourceReference(ToolbarImageButton.LabelBrushProperty, "RedBrush");
             }
         }
 
@@ -1290,7 +1344,16 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     new ToolbarComponentEntry { Id = "builtin.pen", HidingRuleset = ToolbarRuleset.AlwaysShow().WithHideOnCollapsed() },
                     new ToolbarComponentEntry { Id = "builtin.quickColorPalette", HidingRuleset = ToolbarRuleset.AnnotationOnly().WithHideOnCollapsed() },
                     new ToolbarComponentEntry { Id = "builtin.inkFreeze", HidingRuleset = ToolbarRuleset.AlwaysShow().WithHideOnCollapsed() },
-                    new ToolbarComponentEntry { Id = "builtin.clear", HidingRuleset = ToolbarRuleset.AlwaysShow().WithHideOnCollapsed() },
+                    new ToolbarComponentEntry
+                    {
+                        Id = "builtin.clear",
+                        HidingRuleset = ToolbarRuleset.AlwaysShow().WithHideOnCollapsed(),
+                        Settings = new Dictionary<string, object>
+                        {
+                            [ComponentSettingKeys.RedStyleIcon] = true,
+                            [ComponentSettingKeys.RedStyleText] = true
+                        }
+                    },
                     new ToolbarComponentEntry
                     {
                         Id = "builtin.group",

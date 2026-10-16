@@ -18,6 +18,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
         public virtual ToolbarRuleset DefaultHidingRuleset => ToolbarRuleset.AlwaysShow().WithHideOnCollapsed();
         public virtual bool DefaultShowSeparateBorder => false;
         public virtual bool DefaultPreventHideOnDragClick => false;
+        public virtual bool DefaultRedStyleIcon => false;
+        public virtual bool DefaultRedStyleText => false;
         public virtual string Description => "";
 
         // 显式声明为 virtual，确保派生类的 override 能正确映射到接口成员
