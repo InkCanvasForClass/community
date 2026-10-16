@@ -174,26 +174,28 @@
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
 
-                    <controls:LabeledSettingsCard x:Name="CardFloatingBarShadow"
+                    <ui:SettingsExpander x:Name="ExpanderFloatingBarShadow"
                             Header="{x:Static props:ThemeStrings.Theme_FloatingBarShadow}"
                             Description="{x:Static props:ThemeStrings.Theme_FloatingBarShadowHint}"
-                            Icon="{x:Static ui:SegoeFluentIcons.MapLayers}"
-                            SwitchName="ToggleSwitchFloatingBarShadow"
-                            Toggled="ToggleSwitchFloatingBarShadow_Toggled" />
-
-                    <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_FloatingBarShadowSize}">
-                        <ui:SettingsCard.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Zoom}" />
-                        </ui:SettingsCard.HeaderIcon>
-                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock x:Name="FloatingBarShadowSizeText"
-                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="40"/>
-                            <Slider x:Name="FloatingBarShadowSizeSlider" Minimum="0" Maximum="60" Width="200"
-                                    IsSnapToTickEnabled="True" Value="16" TickFrequency="1"
-                                    TickPlacement="None" AutoToolTipPlacement="None"
-                                    ValueChanged="FloatingBarShadowSizeSlider_ValueChanged"/>
-                        </ikw:SimpleStackPanel>
-                    </ui:SettingsCard>
+                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchFloatingBarShadow, Mode=OneWay}">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.MapLayers}" />
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchFloatingBarShadow" d:IsOn="True"
+                                Toggled="ToggleSwitchFloatingBarShadow_Toggled" />
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_FloatingBarShadowSize}">
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock x:Name="FloatingBarShadowSizeText"
+                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="40"/>
+                                    <Slider x:Name="FloatingBarShadowSizeSlider" Minimum="0" Maximum="60" Width="200"
+                                            IsSnapToTickEnabled="True" Value="16" TickFrequency="1"
+                                            TickPlacement="None" AutoToolTipPlacement="None"
+                                            ValueChanged="FloatingBarShadowSizeSlider_ValueChanged"/>
+                                </ikw:SimpleStackPanel>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
 
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:ThemeStrings.Theme_FloatingBarIcon}" />
