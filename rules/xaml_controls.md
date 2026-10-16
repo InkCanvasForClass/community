@@ -174,8 +174,10 @@ private void SomeFloatSlider_ValueChanged(object sender, RoutedPropertyChangedEv
 **关键规则：**
 
 1. **`ui:SettingsExpander.Items` 内的子卡片必须使用 `ui:SettingsCard`，不得使用 `controls:LabeledSettingsCard`。** 因为 `LabeledSettingsCard` 是 `UserControl`，无法作为 `SettingsExpander` 的子项正确渲染。
-2. **开关控件分工（重要）**：当一组设置需要「主项 + 子项都要开/关」时，主项统一使用 `ui:ToggleSwitch`（作为 `SettingsExpander` 的直接内容，默认居右）；子项统一使用 `CheckBox`，**不得**使用 `ui:ToggleSwitch`。
-3. `SettingsExpander` 的直接内容区域（非 Items）放置 `ui:ToggleSwitch` 作为该组的总开关（居右）；`Items` 内的子项开关一律使用 `CheckBox`。
+2. **子项开关样式由「整组子项类型」决定（重要）**：
+   - **子项全部都是开/关**时：子项统一用左对齐的 `CheckBox`，文字写在 `CheckBox.Content` 内（不要额外用 `TextBlock`）。
+   - **子项不全是开/关**（同组还含 `ComboBox`、`Slider`、`TextBox` 等）时：开/关子项**不要用 `CheckBox`**，改用 `ui:SettingsCard Header="..."` + `ui:ToggleSwitch`（标题在左、开关在右），与同组其它子项保持一致。
+3. `SettingsExpander` 的直接内容区域（非 Items）放置 `ui:ToggleSwitch` 作为该组的总开关（居右）。
 
 **IsExpanded 属性规则：**
 
@@ -203,10 +205,10 @@ private void SomeFloatSlider_ValueChanged(object sender, RoutedPropertyChangedEv
 </ui:SettingsExpander>
 ```
 
-**主项 / 子项开关的正确写法：**
+**子项开关的正确写法（按整组子项类型二选一）：**
 
 ```xml
-<!-- ✅ 正确：主项用 ToggleSwitch 作为直接内容（居右），子项用左对齐的 CheckBox -->
+<!-- ✅ 情况一：整组子项全是开/关 → 主项 ToggleSwitch（居右），子项用左对齐的 CheckBox -->
 <ui:SettingsExpander Header="组标题"
                      IsExpanded="{Binding IsOn, ElementName=ToggleSwitchGroup, Mode=OneWay}">
     <ui:ToggleSwitch x:Name="ToggleSwitchGroup" d:IsOn="True"
@@ -221,6 +223,17 @@ private void SomeFloatSlider_ValueChanged(object sender, RoutedPropertyChangedEv
     </ui:SettingsExpander.Items>
 </ui:SettingsExpander>
 
+<!-- ✅ 情况二：整组子项不全是开/关（含下拉框/滑块等）→ 开关子项用 Header + ToggleSwitch -->
+<ui:SettingsExpander.Items>
+    <ui:SettingsCard Header="下拉框子项">
+        <ComboBox x:Name="ComboBoxOption1" />
+    </ui:SettingsCard>
+    <ui:SettingsCard Header="开关子项">
+        <ui:ToggleSwitch x:Name="ToggleSwitchOption1"
+                         Toggled="ToggleSwitchOption1_Toggled" />
+    </ui:SettingsCard>
+</ui:SettingsExpander.Items>
+
 <!-- ❌ 错误：不要在 CheckBox 外额外添加 TextBlock 显示标签 -->
 <ui:SettingsExpander.Items>
     <ui:SettingsCard ContentAlignment="Left">
@@ -231,10 +244,13 @@ private void SomeFloatSlider_ValueChanged(object sender, RoutedPropertyChangedEv
     </ui:SettingsCard>
 </ui:SettingsExpander.Items>
 
-<!-- ❌ 错误：子项开关不得使用 ui:ToggleSwitch（应改为左对齐的 CheckBox） -->
+<!-- ❌ 错误：整组子项全是开/关时不得混用 ui:ToggleSwitch（应统一为左对齐的 CheckBox） -->
 <ui:SettingsExpander.Items>
-    <ui:SettingsCard Header="选项1">
-        <ui:ToggleSwitch x:Name="ToggleSwitchOption1" />
+    <ui:SettingsCard ContentAlignment="Left">
+        <CheckBox x:Name="CheckboxOption1" IsChecked="True" />
+    </ui:SettingsCard>
+    <ui:SettingsCard Header="选项2">
+        <ui:ToggleSwitch x:Name="ToggleSwitchOption2" />
     </ui:SettingsCard>
 </ui:SettingsExpander.Items>
 
@@ -290,5 +306,6 @@ private void SomeFloatSlider_ValueChanged(object sender, RoutedPropertyChangedEv
 | 右侧放 Slider/Button 等 | `ui:SettingsCard` |
 | 点击后导航/跳转 | `ui:SettingsCard` + `IsClickEnabled="True"` |
 | 多个相关设置折叠为一组 | `ui:SettingsExpander` |
-| Expander 子项带开关 | `ui:SettingsCard ContentAlignment="Left"` + `CheckBox`（文字写在 `Content`） |
+| Expander 子项**全是**开/关 | `ui:SettingsCard ContentAlignment="Left"` + `CheckBox`（文字写在 `Content`） |
+| Expander 子项**混有**下拉框/滑块等 | 开关子项用 `ui:SettingsCard Header` + `ui:ToggleSwitch` |
 | Expander 子项放其他控件 | `ui:SettingsCard` |

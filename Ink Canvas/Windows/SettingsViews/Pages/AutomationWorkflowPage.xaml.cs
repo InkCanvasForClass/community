@@ -156,8 +156,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardKeepFoldAfterSoftwareExit.IsOn = auto.KeepFoldAfterSoftwareExit;
 
             ToggleSwitchSaveScreenshotsInDateFolders.IsOn = auto.IsSaveScreenshotsInDateFolders;
-            ToggleSwitchAutoSaveStrokesAtScreenshot.IsChecked = auto.IsAutoSaveStrokesAtScreenshot;
-            ToggleSwitchAutoSaveStrokesAtClear.IsChecked = auto.IsAutoSaveScreenshotAtClear;
+            ToggleSwitchAutoSaveStrokesAtScreenshot.IsOn = auto.IsAutoSaveStrokesAtScreenshot;
+            ToggleSwitchAutoSaveStrokesAtClear.IsOn = auto.IsAutoSaveScreenshotAtClear;
 
             SyncScreenshotFormatSelection(auto.ScreenshotSaveFormat);
             ScreenshotJpegQualitySlider.Value = Math.Max(50, Math.Min(100, auto.ScreenshotJpegQuality));
@@ -309,7 +309,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ToggleSwitchSaveScreenshotsInDateFolders_Toggled(object sender, RoutedEventArgs e)
         { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsSaveScreenshotsInDateFolders = ToggleSwitchSaveScreenshotsInDateFolders.IsOn; SettingsManager.SaveSettingsToFile(); }
         private void ToggleSwitchAutoSaveStrokesAtScreenshot_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoSaveStrokesAtScreenshot = ToggleSwitchAutoSaveStrokesAtScreenshot.IsChecked == true; SettingsManager.SaveSettingsToFile(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoSaveStrokesAtScreenshot = ToggleSwitchAutoSaveStrokesAtScreenshot.IsOn; SettingsManager.SaveSettingsToFile(); }
 
         private void SyncScreenshotFormatSelection(int format)
         {
@@ -359,7 +359,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         }
 
         private void ToggleSwitchAutoSaveStrokesAtClear_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoSaveScreenshotAtClear = ToggleSwitchAutoSaveStrokesAtClear.IsChecked == true; SettingsManager.SaveSettingsToFile(); }
+        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoSaveScreenshotAtClear = ToggleSwitchAutoSaveStrokesAtClear.IsOn; SettingsManager.SaveSettingsToFile(); }
         private void ToggleSwitchSaveStrokesAsXML_Toggled(object sender, RoutedEventArgs e)
         { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsSaveStrokesAsXML = CardSaveStrokesAsXML.IsOn; SettingsManager.SaveSettingsToFile(); }
         private void ToggleSwitchSaveStrokesAsUInK_Toggled(object sender, RoutedEventArgs e)
