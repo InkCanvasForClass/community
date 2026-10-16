@@ -73,15 +73,15 @@
                                       Toggled="ToggleSwitchDictationDoNotDisturb_Toggled" />
                     </ui:SettingsExpander.Content>
                     <ui:SettingsExpander.Items>
-                        <ui:SettingsCard Header="{x:Static props:NotificationStrings.DictationDoNotDisturbPPT}"
-                                         Description="{x:Static props:NotificationStrings.DictationDoNotDisturbPPTHint}">
+                        <ui:SettingsCard ContentAlignment="Left">
                             <CheckBox x:Name="CheckBoxDictationDoNotDisturbPPT"
+                                      Content="{x:Static props:NotificationStrings.DictationDoNotDisturbPPT}"
                                       Checked="DictationDoNotDisturbMode_CheckChanged"
                                       Unchecked="DictationDoNotDisturbMode_CheckChanged" />
                         </ui:SettingsCard>
-                        <ui:SettingsCard Header="{x:Static props:NotificationStrings.DictationDoNotDisturbWhiteboard}"
-                                         Description="{x:Static props:NotificationStrings.DictationDoNotDisturbWhiteboardHint}">
+                        <ui:SettingsCard ContentAlignment="Left">
                             <CheckBox x:Name="CheckBoxDictationDoNotDisturbWhiteboard"
+                                      Content="{x:Static props:NotificationStrings.DictationDoNotDisturbWhiteboard}"
                                       Checked="DictationDoNotDisturbMode_CheckChanged"
                                       Unchecked="DictationDoNotDisturbMode_CheckChanged" />
                         </ui:SettingsCard>

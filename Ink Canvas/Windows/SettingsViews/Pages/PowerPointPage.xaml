@@ -108,10 +108,11 @@
                                 d:IsOn="True"
                                 Toggled="ToggleSwitchEnablePPTButtonEnhancedPreview_OnToggled"/>
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{x:Static props:PPTStrings.EnhancedPreviewLoadingAnimation}"
-                                    Description="{x:Static props:PPTStrings.EnhancedPreviewLoadingAnimationHint}">
-                                <ui:ToggleSwitch x:Name="ToggleSwitchPPTEnhancedPreviewLoadingAnimation"
-                                        Toggled="ToggleSwitchPPTEnhancedPreviewLoadingAnimation_OnToggled"/>
+                            <ui:SettingsCard ContentAlignment="Left">
+                                <CheckBox x:Name="ToggleSwitchPPTEnhancedPreviewLoadingAnimation"
+                                          Content="{x:Static props:PPTStrings.EnhancedPreviewLoadingAnimation}"
+                                          Checked="ToggleSwitchPPTEnhancedPreviewLoadingAnimation_OnToggled"
+                                          Unchecked="ToggleSwitchPPTEnhancedPreviewLoadingAnimation_OnToggled"/>
                             </ui:SettingsCard>
                         </ui:SettingsExpander.Items>
                     </ui:SettingsExpander>

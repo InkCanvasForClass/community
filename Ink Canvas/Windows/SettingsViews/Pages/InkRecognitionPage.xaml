@@ -148,15 +148,17 @@
                                             ValueChanged="LineStraightenSensitivitySlider_ValueChanged" />
                                 </ikw:SimpleStackPanel>
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="{x:Static props:CanvasStrings.InkRecog_HighPrecisionStraighten}"
-                                    Description="{x:Static props:CanvasStrings.InkRecog_HighPrecisionHint}">
-                                <ui:ToggleSwitch x:Name="ToggleSwitchHighPrecisionLineStraighten"
-                                        Toggled="ToggleSwitchHighPrecisionLineStraighten_Toggled" />
+                            <ui:SettingsCard ContentAlignment="Left">
+                                <CheckBox x:Name="ToggleSwitchHighPrecisionLineStraighten"
+                                          Content="{x:Static props:CanvasStrings.InkRecog_HighPrecisionStraighten}"
+                                          Checked="ToggleSwitchHighPrecisionLineStraighten_Toggled"
+                                          Unchecked="ToggleSwitchHighPrecisionLineStraighten_Toggled" />
                             </ui:SettingsCard>
-                            <ui:SettingsCard Header="{x:Static props:CanvasStrings.InkRecog_PauseStraightenLine}"
-                                    Description="{x:Static props:CanvasStrings.InkRecog_PauseStraightenHint}">
-                                <ui:ToggleSwitch x:Name="ToggleSwitchPauseStraightenLine"
-                                        Toggled="ToggleSwitchPauseStraightenLine_Toggled" />
+                            <ui:SettingsCard ContentAlignment="Left">
+                                <CheckBox x:Name="ToggleSwitchPauseStraightenLine"
+                                          Content="{x:Static props:CanvasStrings.InkRecog_PauseStraightenLine}"
+                                          Checked="ToggleSwitchPauseStraightenLine_Toggled"
+                                          Unchecked="ToggleSwitchPauseStraightenLine_Toggled" />
                             </ui:SettingsCard>
                             <ui:SettingsCard Header="{x:Static props:CanvasStrings.InkRecog_PauseStraightenDelay}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
