@@ -159,6 +159,54 @@
   <data name="Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint" xml:space="preserve">
     <value>When enabled, the whiteboard toolbar Booth button launches Seewo Video Showcase (must be installed). When disabled, the built-in booth is used.</value>
   </data>
+  <data name="Canvas_VideoBoothMode" xml:space="preserve">
+    <value>Video presenter mode</value>
+  </data>
+  <data name="Canvas_VideoBoothModeHint" xml:space="preserve">
+    <value>Choose the behavior when clicking the Video Presenter button on the whiteboard or toolbar</value>
+  </data>
+  <data name="Canvas_VideoBoothMode_BuiltIn" xml:space="preserve">
+    <value>Built-in presenter</value>
+  </data>
+  <data name="Canvas_VideoBoothMode_Seewo" xml:space="preserve">
+    <value>Seewo Video Showcase</value>
+  </data>
+  <data name="Canvas_VideoBoothMode_Custom" xml:space="preserve">
+    <value>Custom third-party software</value>
+  </data>
+  <data name="Canvas_VideoBoothCustomAppPath" xml:space="preserve">
+    <value>Program path</value>
+  </data>
+  <data name="Canvas_VideoBoothCustomAppPathHint" xml:space="preserve">
+    <value>Select the executable file (.exe) of the third-party presenter software</value>
+  </data>
+  <data name="Canvas_VideoBoothSelectApp" xml:space="preserve">
+    <value>Browse...</value>
+  </data>
+  <data name="Canvas_VideoBoothCustomAppArgs" xml:space="preserve">
+    <value>Launch arguments</value>
+  </data>
+  <data name="Canvas_VideoBoothCustomAppArgsHint" xml:space="preserve">
+    <value>Command-line arguments to pass to the external program (optional)</value>
+  </data>
+  <data name="Canvas_VideoBoothTestLaunch" xml:space="preserve">
+    <value>Test launch</value>
+  </data>
+  <data name="Canvas_VideoBoothCustomAppNotConfigured" xml:space="preserve">
+    <value>Third-party presenter path is not configured. Please configure it in Settings > Canvas.</value>
+  </data>
+  <data name="Canvas_VideoBoothCustomAppNotFound" xml:space="preserve">
+    <value>The specified presenter executable was not found:&#xA;{0}&#xA;Please check if the path is correct.</value>
+  </data>
+  <data name="Canvas_VideoBoothCustomAppLaunchFailed" xml:space="preserve">
+    <value>Failed to launch third-party presenter software: </value>
+  </data>
+  <data name="Canvas_SelectCustomBoothApp" xml:space="preserve">
+    <value>Select Video Presenter Executable</value>
+  </data>
+  <data name="Canvas_CustomBoothAppFilter" xml:space="preserve">
+    <value>Executable files (*.exe)|*.exe|All files (*.*)|*.*</value>
+  </data>
   <data name="Canvas_LongPressUndoClear" xml:space="preserve">
     <value>Long-press undo to clear canvas</value>
   </data>

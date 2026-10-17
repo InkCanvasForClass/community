@@ -51,6 +51,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     CustomPenCursorPathText.Text = settings.Canvas.CustomPenCursorPath ?? string.Empty;
                     UpdateCustomPenCursorPathVisibility();
 
+                    // 加载视频展台启动模式
+                    int boothModeIndex = (int)settings.Canvas.VideoBoothMode;
+                    if (boothModeIndex < 0 || boothModeIndex > 2) boothModeIndex = 0;
+                    ComboBoxVideoBoothMode.SelectedIndex = boothModeIndex;
+                    CustomBoothPathText.Text = settings.Canvas.VideoBoothCustomAppPath ?? string.Empty;
+                    CustomBoothArgsTextBox.Text = settings.Canvas.VideoBoothCustomAppArgs ?? string.Empty;
+                    UpdateVideoBoothModeUI(boothModeIndex);
+
                     // 加载扩展画布提示自动隐藏延时（设置存储为毫秒，界面以秒为单位）
                     if (settings.Canvas.EdgeExpandAutoHideMs < 1000 || settings.Canvas.EdgeExpandAutoHideMs > 30000)
                     {
@@ -438,6 +446,80 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 SettingsManager.SaveSettingsToFile();
                 SettingsActionHub.OnCustomPenCursorPathChanged();
             }
+        }
+
+        private void UpdateVideoBoothModeUI(int modeIndex)
+        {
+            bool isCustom = modeIndex == 2;
+            if (ExpanderVideoBoothMode != null)
+            {
+                ExpanderVideoBoothMode.IsExpanded = isCustom;
+            }
+            if (CardCustomBoothPath != null)
+            {
+                CardCustomBoothPath.IsEnabled = isCustom;
+            }
+            if (CardCustomBoothArgs != null)
+            {
+                CardCustomBoothArgs.IsEnabled = isCustom;
+            }
+        }
+
+        private void ComboBoxVideoBoothMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ComboBoxVideoBoothMode == null) return;
+            int index = ComboBoxVideoBoothMode.SelectedIndex;
+            UpdateVideoBoothModeUI(index);
+
+            if (!_isLoaded) return;
+            if (index >= 0 && index <= 2)
+            {
+                SettingsManager.Settings.Canvas.VideoBoothMode = (VideoBoothMode)index;
+                SettingsManager.SaveSettingsToFile();
+            }
+        }
+
+        private void ExpanderVideoBoothMode_Expanded(object sender, EventArgs e)
+        {
+            if (ComboBoxVideoBoothMode?.SelectedIndex != 2 && ExpanderVideoBoothMode != null)
+            {
+                ExpanderVideoBoothMode.IsExpanded = false;
+            }
+        }
+
+        private void SelectCustomBoothPath_Click(object sender, RoutedEventArgs e)
+        {
+            var filter = CanvasStrings.Canvas_CustomBoothAppFilter;
+            if (string.IsNullOrWhiteSpace(filter))
+                filter = "Executable files (*.exe)|*.exe|All files (*.*)|*.*";
+
+            var dialog = new OpenFileDialog
+            {
+                Filter = filter,
+                Title = CanvasStrings.Canvas_SelectCustomBoothApp
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                var path = dialog.FileName;
+                SettingsManager.Settings.Canvas.VideoBoothCustomAppPath = path;
+                CustomBoothPathText.Text = path;
+                SettingsManager.SaveSettingsToFile();
+            }
+        }
+
+        private void TestLaunchCustomBooth_Click(object sender, RoutedEventArgs e)
+        {
+            var path = SettingsManager.Settings?.Canvas?.VideoBoothCustomAppPath;
+            var args = SettingsManager.Settings?.Canvas?.VideoBoothCustomAppArgs;
+            SoftwareLauncher.LaunchCustomBooth(path, args);
+        }
+
+        private void CustomBoothArgsTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Canvas.VideoBoothCustomAppArgs = CustomBoothArgsTextBox.Text?.Trim() ?? string.Empty;
+            SettingsManager.SaveSettingsToFile();
         }
     }
 }

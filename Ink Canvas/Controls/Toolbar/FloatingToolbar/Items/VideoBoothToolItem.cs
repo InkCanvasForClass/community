@@ -22,10 +22,18 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar.Items
                 var mw = host.Window;
                 if (mw == null) return;
 
-                if (MainWindow.Settings?.Canvas?.LaunchSeewoVideoShowcaseForWhiteboardBooth == true)
+                var mode = MainWindow.Settings?.Canvas?.VideoBoothMode ?? VideoBoothMode.BuiltIn;
+                if (mode == VideoBoothMode.Seewo || (mode == VideoBoothMode.BuiltIn && MainWindow.Settings?.Canvas?.LaunchSeewoVideoShowcaseForWhiteboardBooth == true))
                 {
                     // 开启希沃视频展台设置时：直接启动希沃视频展台
                     SoftwareLauncher.LaunchEasiCamera("希沃视频展台");
+                }
+                else if (mode == VideoBoothMode.Custom)
+                {
+                    // 开启自定义第三方展台软件时：直接启动自定义软件
+                    SoftwareLauncher.LaunchCustomBooth(
+                        MainWindow.Settings?.Canvas?.VideoBoothCustomAppPath,
+                        MainWindow.Settings?.Canvas?.VideoBoothCustomAppArgs);
                 }
                 else
                 {

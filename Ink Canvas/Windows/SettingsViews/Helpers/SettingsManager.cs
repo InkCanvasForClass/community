@@ -118,5 +118,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 }
             }
         }
+
+        public static void MigrateVideoBoothSettings()
+        {
+            if (Settings?.Canvas == null) return;
+
+            if (Settings.Canvas.LaunchSeewoVideoShowcaseForWhiteboardBooth && Settings.Canvas.VideoBoothMode == VideoBoothMode.BuiltIn)
+            {
+                Settings.Canvas.VideoBoothMode = VideoBoothMode.Seewo;
+            }
+        }
     }
 }
