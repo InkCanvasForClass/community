@@ -129,11 +129,7 @@ namespace Ink_Canvas
                     if (value is int i) return i == 1;
                 }
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile(
-                    $"[UI] 隐私说明窗口读取系统主题注册表项失败: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
             return true;
         }
     }

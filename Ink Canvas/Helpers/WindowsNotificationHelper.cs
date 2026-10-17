@@ -41,7 +41,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Notify] 弹出系统通知（{message?.Type}）失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -61,7 +61,7 @@ namespace Ink_Canvas.Helpers
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.WriteLogToFile($"[Notify] 通过任务栏气泡显示通知（{message?.Type}）失败: {ex.Message}", LogHelper.LogType.Info);
+                    LogService.LogException(ex);
                 }
             });
         }

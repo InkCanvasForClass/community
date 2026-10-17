@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Models;
 using System;
 using System.Windows;
 using System.Windows.Input;
@@ -49,7 +50,7 @@ namespace Ink_Canvas
             if (IdleMiniBar == null) return false;
             if (isFloatingBarFolded) return false;
             if (currentMode == 1) return false;              // 白板模式使用独立工具栏
-            if (_currentToolMode != "cursor") return false;  // 仅闲置（光标）状态
+            if (_currentToolModeEnum != ToolMode.Cursor) return false;  // 仅闲置（光标）状态
             return true;
         }
 
