@@ -978,13 +978,59 @@ namespace Ink_Canvas.Windows.SettingsViews
                 {
                     Content = string.Format(NavStrings.Nav_PluginSettingsFormat, plugin.Name),
                     Tag = pageTag,
-                    Icon = new FontIcon
-                    {
-                        Glyph = "\uE713"
-                    }
+                    Icon = CreatePluginNavItemIcon(plugin)
                 };
                 NavigationViewControl.MenuItems.Add(navItem);
             }
+        }
+
+        private static object CreatePluginNavItemIcon(Ink_Canvas.Plugins.PluginInfo plugin)
+        {
+            try
+            {
+                if (plugin != null && !string.IsNullOrEmpty(plugin.PluginFolderPath))
+                {
+                    var iconRelativePath = plugin.Manifest?.Icon;
+                    string iconPath = null;
+                    if (!string.IsNullOrEmpty(iconRelativePath))
+                    {
+                        var candidate = System.IO.Path.Combine(plugin.PluginFolderPath, iconRelativePath);
+                        if (System.IO.File.Exists(candidate)) iconPath = candidate;
+                    }
+                    if (iconPath == null)
+                    {
+                        var candidateMono = System.IO.Path.Combine(plugin.PluginFolderPath, "icon_mono.png");
+                        if (System.IO.File.Exists(candidateMono)) iconPath = candidateMono;
+                        else
+                        {
+                            var candidatePng = System.IO.Path.Combine(plugin.PluginFolderPath, "icon.png");
+                            if (System.IO.File.Exists(candidatePng)) iconPath = candidatePng;
+                        }
+                    }
+
+                    if (iconPath != null)
+                    {
+                        return new BitmapIcon
+                        {
+                            UriSource = new Uri(iconPath, UriKind.Absolute),
+                            ShowAsMonochrome = true,
+                            Width = 16,
+                            Height = 16,
+                            VerticalAlignment = VerticalAlignment.Center,
+                            HorizontalAlignment = HorizontalAlignment.Center
+                        };
+                    }
+                }
+            }
+            catch
+            {
+                // Fallback to default glyph
+            }
+
+            return new FontIcon
+            {
+                Glyph = "\uE713"
+            };
         }
 
         private void PluginManager_PluginsChanged(object sender, Ink_Canvas.Plugins.PluginInfo e)
