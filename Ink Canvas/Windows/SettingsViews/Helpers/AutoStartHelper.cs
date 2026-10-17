@@ -21,11 +21,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 shortcut.Save();
                 return true;
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile(
-                    $"[Settings] 创建开机自启快捷方式 {exeName}.lnk 失败: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { Ink_Canvas.Helpers.LogService.LogException(ex); }
 
             return false;
         }
@@ -38,11 +34,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                             ".lnk");
                 return true;
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile(
-                    $"[Settings] 删除开机自启快捷方式 {exeName}.lnk 失败: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { Ink_Canvas.Helpers.LogService.LogException(ex); }
 
             return false;
         }
