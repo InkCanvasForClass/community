@@ -165,9 +165,10 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">触发事件的源对象。</param>
         /// <param name="e">鼠标按钮事件的参数。</param>
-        private void BtnToggleVideoPresenter_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void LaunchConfiguredVideoBooth(Action onBuiltInLaunch)
         {
-            if (Settings?.Canvas?.LaunchSeewoVideoShowcaseForWhiteboardBooth == true)
+            var mode = Settings?.Canvas?.VideoBoothMode ?? VideoBoothMode.BuiltIn;
+            if (mode == VideoBoothMode.Seewo || (mode == VideoBoothMode.BuiltIn && Settings?.Canvas?.LaunchSeewoVideoShowcaseForWhiteboardBooth == true))
             {
                 // 与主窗口「希沃视频展台」入口（BoardLaunchEasiCamera_MouseUp）一致：先走黑板/白板入口逻辑再启动
                 ImageBlackboard_MouseUp(null, null);
@@ -175,19 +176,26 @@ namespace Ink_Canvas
                 return;
             }
 
-            ToggleVideoPresenterSidebar();
+            if (mode == VideoBoothMode.Custom)
+            {
+                ImageBlackboard_MouseUp(null, null);
+                SoftwareLauncher.LaunchCustomBooth(
+                    Settings?.Canvas?.VideoBoothCustomAppPath,
+                    Settings?.Canvas?.VideoBoothCustomAppArgs);
+                return;
+            }
+
+            onBuiltInLaunch?.Invoke();
+        }
+
+        private void BtnToggleVideoPresenter_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            LaunchConfiguredVideoBooth(() => ToggleVideoPresenterSidebar());
         }
 
         public void ToggleVideoPresenterSidebarPublic()
         {
-            if (Settings?.Canvas?.LaunchSeewoVideoShowcaseForWhiteboardBooth == true)
-            {
-                ImageBlackboard_MouseUp(null, null);
-                SoftwareLauncher.LaunchEasiCamera("希沃视频展台");
-                return;
-            }
-
-            ToggleVideoPresenterSidebar();
+            LaunchConfiguredVideoBooth(() => ToggleVideoPresenterSidebar());
         }
 
         /// <summary>

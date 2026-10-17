@@ -153,6 +153,7 @@ namespace Ink_Canvas
 
             // Migrate legacy chicken soup source setting to new multi-source format
             SettingsManager.MigrateChickenSoupSettings();
+            SettingsManager.MigrateVideoBoothSettings();
 
             try
             {

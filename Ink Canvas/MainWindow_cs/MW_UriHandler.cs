@@ -165,11 +165,15 @@ namespace Ink_Canvas
                         ImageBlackboard_MouseUp(null, null);
                         return;
                     case "booth":
-                        // 与浮动栏「视频展台」按钮一致：希沃模式下直接启动希沃视频展台，
-                        // 否则先打开白板，再触发内置展台
-                        if (Settings.Canvas.LaunchSeewoVideoShowcaseForWhiteboardBooth == true)
+                        // 与浮动栏「视频展台」按钮一致：按配置模式启动对应展台
+                        var boothMode = Settings.Canvas.VideoBoothMode;
+                        if (boothMode == VideoBoothMode.Seewo || (boothMode == VideoBoothMode.BuiltIn && Settings.Canvas.LaunchSeewoVideoShowcaseForWhiteboardBooth == true))
                         {
                             SoftwareLauncher.LaunchEasiCamera("希沃视频展台");
+                        }
+                        else if (boothMode == VideoBoothMode.Custom)
+                        {
+                            SoftwareLauncher.LaunchCustomBooth(Settings.Canvas.VideoBoothCustomAppPath, Settings.Canvas.VideoBoothCustomAppArgs);
                         }
                         else
                         {

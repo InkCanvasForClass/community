@@ -470,9 +470,35 @@ namespace Ink_Canvas
         [JsonProperty("enableVelocityBrushTip")]
         public bool EnableVelocityBrushTip { get; set; }
 
-        /// <summary>为 true 时，白板工具栏「展台」按钮启动希沃视频展台（sweclauncher），否则使用内置展台。</summary>
+        /// <summary>为 true 时，白板工具栏「展台」按钮启动希沃视频展台（sweclauncher），否则使用内置展台。保留作为兼容属性。</summary>
         [JsonProperty("launchSeewoVideoShowcaseForWhiteboardBooth")]
-        public bool LaunchSeewoVideoShowcaseForWhiteboardBooth { get; set; } = false;
+        public bool LaunchSeewoVideoShowcaseForWhiteboardBooth
+        {
+            get => VideoBoothMode == VideoBoothMode.Seewo;
+            set
+            {
+                if (value && VideoBoothMode != VideoBoothMode.Custom)
+                {
+                    VideoBoothMode = VideoBoothMode.Seewo;
+                }
+                else if (!value && VideoBoothMode == VideoBoothMode.Seewo)
+                {
+                    VideoBoothMode = VideoBoothMode.BuiltIn;
+                }
+            }
+        }
+
+        /// <summary>视频展台启动模式：0=内置展台，1=希沃视频展台，2=自定义第三方展台软件。</summary>
+        [JsonProperty("videoBoothMode")]
+        public VideoBoothMode VideoBoothMode { get; set; } = VideoBoothMode.BuiltIn;
+
+        /// <summary>自定义第三方视频展台软件的可执行文件路径（.exe）。</summary>
+        [JsonProperty("videoBoothCustomAppPath")]
+        public string VideoBoothCustomAppPath { get; set; } = string.Empty;
+
+        /// <summary>自定义第三方视频展台软件的启动参数（可选）。</summary>
+        [JsonProperty("videoBoothCustomAppArgs")]
+        public string VideoBoothCustomAppArgs { get; set; } = string.Empty;
 
         /// <summary>
         /// 视频展台持久化：上次选中的摄像头设备名（DsDevice.Name）。
@@ -608,6 +634,13 @@ namespace Ink_Canvas
         Yes,
         No,
         Ask
+    }
+
+    public enum VideoBoothMode
+    {
+        BuiltIn = 0,
+        Seewo = 1,
+        Custom = 2
     }
 
     public class Gesture

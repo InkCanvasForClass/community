@@ -118,6 +118,38 @@ namespace Ink_Canvas.Properties
 
         public static string Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint => ResourceManager.GetString(nameof(Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint), _resourceCulture);
 
+        public static string Canvas_VideoBoothMode => ResourceManager.GetString(nameof(Canvas_VideoBoothMode), _resourceCulture);
+
+        public static string Canvas_VideoBoothModeHint => ResourceManager.GetString(nameof(Canvas_VideoBoothModeHint), _resourceCulture);
+
+        public static string Canvas_VideoBoothMode_BuiltIn => ResourceManager.GetString(nameof(Canvas_VideoBoothMode_BuiltIn), _resourceCulture);
+
+        public static string Canvas_VideoBoothMode_Seewo => ResourceManager.GetString(nameof(Canvas_VideoBoothMode_Seewo), _resourceCulture);
+
+        public static string Canvas_VideoBoothMode_Custom => ResourceManager.GetString(nameof(Canvas_VideoBoothMode_Custom), _resourceCulture);
+
+        public static string Canvas_VideoBoothCustomAppPath => ResourceManager.GetString(nameof(Canvas_VideoBoothCustomAppPath), _resourceCulture);
+
+        public static string Canvas_VideoBoothCustomAppPathHint => ResourceManager.GetString(nameof(Canvas_VideoBoothCustomAppPathHint), _resourceCulture);
+
+        public static string Canvas_VideoBoothSelectApp => ResourceManager.GetString(nameof(Canvas_VideoBoothSelectApp), _resourceCulture);
+
+        public static string Canvas_VideoBoothCustomAppArgs => ResourceManager.GetString(nameof(Canvas_VideoBoothCustomAppArgs), _resourceCulture);
+
+        public static string Canvas_VideoBoothCustomAppArgsHint => ResourceManager.GetString(nameof(Canvas_VideoBoothCustomAppArgsHint), _resourceCulture);
+
+        public static string Canvas_VideoBoothTestLaunch => ResourceManager.GetString(nameof(Canvas_VideoBoothTestLaunch), _resourceCulture);
+
+        public static string Canvas_VideoBoothCustomAppNotConfigured => ResourceManager.GetString(nameof(Canvas_VideoBoothCustomAppNotConfigured), _resourceCulture);
+
+        public static string Canvas_VideoBoothCustomAppNotFound => ResourceManager.GetString(nameof(Canvas_VideoBoothCustomAppNotFound), _resourceCulture);
+
+        public static string Canvas_VideoBoothCustomAppLaunchFailed => ResourceManager.GetString(nameof(Canvas_VideoBoothCustomAppLaunchFailed), _resourceCulture);
+
+        public static string Canvas_SelectCustomBoothApp => ResourceManager.GetString(nameof(Canvas_SelectCustomBoothApp), _resourceCulture);
+
+        public static string Canvas_CustomBoothAppFilter => ResourceManager.GetString(nameof(Canvas_CustomBoothAppFilter), _resourceCulture);
+
         public static string Canvas_LongPressUndoClear => ResourceManager.GetString(nameof(Canvas_LongPressUndoClear), _resourceCulture);
 
         public static string Canvas_LongPressUndoClearHint => ResourceManager.GetString(nameof(Canvas_LongPressUndoClearHint), _resourceCulture);

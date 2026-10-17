@@ -159,6 +159,54 @@
   <data name="Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint" xml:space="preserve">
     <value>开启后点「展台」会呼叫希沃视频展台（需已安装）；关掉则用内置展台，自给自足。</value>
   </data>
+  <data name="Canvas_VideoBoothMode" xml:space="preserve">
+    <value>展台召唤术</value>
+  </data>
+  <data name="Canvas_VideoBoothModeHint" xml:space="preserve">
+    <value>决定点下「展台」按钮时，究竟是自力更生、呼叫希沃外援，还是召唤野生第三方</value>
+  </data>
+  <data name="Canvas_VideoBoothMode_BuiltIn" xml:space="preserve">
+    <value>自力更生（内置展台）</value>
+  </data>
+  <data name="Canvas_VideoBoothMode_Seewo" xml:space="preserve">
+    <value>呼叫希沃外援</value>
+  </data>
+  <data name="Canvas_VideoBoothMode_Custom" xml:space="preserve">
+    <value>召唤野生软件</value>
+  </data>
+  <data name="Canvas_VideoBoothCustomAppPath" xml:space="preserve">
+    <value>藏身之处（程序路径）</value>
+  </data>
+  <data name="Canvas_VideoBoothCustomAppPathHint" xml:space="preserve">
+    <value>哪位大仙的可执行文件（.exe），指个路</value>
+  </data>
+  <data name="Canvas_VideoBoothSelectApp" xml:space="preserve">
+    <value>翻箱倒柜...</value>
+  </data>
+  <data name="Canvas_VideoBoothCustomAppArgs" xml:space="preserve">
+    <value>召唤咒语（启动参数）</value>
+  </data>
+  <data name="Canvas_VideoBoothCustomAppArgsHint" xml:space="preserve">
+    <value>给外部程序灌的命令行迷魂药（不懂留空就行）</value>
+  </data>
+  <data name="Canvas_VideoBoothTestLaunch" xml:space="preserve">
+    <value>戳它一下</value>
+  </data>
+  <data name="Canvas_VideoBoothCustomAppNotConfigured" xml:space="preserve">
+    <value>还没指定野生展台软件的路径呢，快去设置里给它指个路！</value>
+  </data>
+  <data name="Canvas_VideoBoothCustomAppNotFound" xml:space="preserve">
+    <value>翻遍了也没找到这个程序：&#xA;{0}&#xA;是不是被物理超度了？</value>
+  </data>
+  <data name="Canvas_VideoBoothCustomAppLaunchFailed" xml:space="preserve">
+    <value>召唤野生展台软件失败，翻车原因：</value>
+  </data>
+  <data name="Canvas_SelectCustomBoothApp" xml:space="preserve">
+    <value>选妃（挑选展台可执行文件）</value>
+  </data>
+  <data name="Canvas_CustomBoothAppFilter" xml:space="preserve">
+    <value>可执行文件 (*.exe)|*.exe|各种妖魔鬼怪 (*.*)|*.*</value>
+  </data>
   <data name="Canvas_LongPressUndoClear" xml:space="preserve">
     <value>长按撤销＝清屏核弹</value>
   </data>

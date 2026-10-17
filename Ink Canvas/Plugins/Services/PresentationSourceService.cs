@@ -79,6 +79,9 @@ namespace Ink_Canvas.Plugins.Services
                 // 浮动栏像真实 PPT 放映一样重新定位（居中、缩进）。
                 _mainWindow.UpdateToolbarPosition();
 
+                // 外部放映期间开启主窗口置顶维护，确保工具栏和翻页条始终悬浮于课件视窗上方
+                WindowTopmostManager.StartTopmostMaintenance(_mainWindow);
+
                 _mainWindow.PPTUIManager?.UpdateSlideShowStatus(
                     isInSlideShow: true,
                     currentSlide: CurrentPage,
@@ -142,6 +145,9 @@ namespace Ink_Canvas.Plugins.Services
 
             // 浮动栏恢复到桌面模式的定位。
             _mainWindow.UpdateToolbarPosition();
+
+            // 退出外部放映，停止置顶维护
+            WindowTopmostManager.StopTopmostMaintenance();
 
             LogHelper.WriteLogToFile(
                 $"外部演示源 [{activeId}] 已结束。",

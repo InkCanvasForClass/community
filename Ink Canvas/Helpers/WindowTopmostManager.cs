@@ -20,6 +20,8 @@ namespace Ink_Canvas.Helpers
         private static readonly TimeSpan MaintenanceInterval = TimeSpan.FromMilliseconds(500);
 
         private static readonly List<ManagedWindow> ManagedWindows = new List<ManagedWindow>();
+        private static readonly HashSet<Window> ExcludedWindows = new HashSet<Window>();
+        private static readonly HashSet<IntPtr> ExcludedHandles = new HashSet<IntPtr>();
         private static readonly object SyncRoot = new object();
         private static DispatcherTimer _maintenanceTimer;
         private static Window _mainWindow;
@@ -191,6 +193,78 @@ namespace Ink_Canvas.Helpers
             });
         }
 
+        public static void ExcludeWindow(Window window)
+        {
+            if (window == null) return;
+
+            RunOnDispatcher(() =>
+            {
+                lock (SyncRoot)
+                {
+                    ExcludedWindows.Add(window);
+                    var handle = new WindowInteropHelper(window).Handle;
+                    if (handle != IntPtr.Zero)
+                    {
+                        ExcludedHandles.Add(handle);
+                    }
+                    UnregisterWindowCore(window);
+                    ApplyZOrderCore();
+                }
+            });
+        }
+
+        public static void ExcludeWindow(IntPtr handle)
+        {
+            if (handle == IntPtr.Zero) return;
+
+            RunOnDispatcher(() =>
+            {
+                lock (SyncRoot)
+                {
+                    ExcludedHandles.Add(handle);
+                    var managed = ManagedWindows.FirstOrDefault(w => w.Handle == handle);
+                    if (managed != null)
+                    {
+                        UnregisterWindowCore(managed.Window);
+                    }
+                    ApplyZOrderCore();
+                }
+            });
+        }
+
+        private static bool IsWindowExcluded(Window window)
+        {
+            if (window == null) return false;
+            if (ExcludedWindows.Contains(window)) return true;
+            if (window.Tag is string tag && tag.Contains("ExcludeFromTopmostManager"))
+            {
+                ExcludedWindows.Add(window);
+                var h = new WindowInteropHelper(window).Handle;
+                if (h != IntPtr.Zero) ExcludedHandles.Add(h);
+                return true;
+            }
+            return false;
+        }
+
+        private static bool IsHandleExcluded(IntPtr handle)
+        {
+            if (handle == IntPtr.Zero) return false;
+            if (ExcludedHandles.Contains(handle)) return true;
+            foreach (var win in ExcludedWindows)
+            {
+                try
+                {
+                    if (new WindowInteropHelper(win).Handle == handle)
+                    {
+                        ExcludedHandles.Add(handle);
+                        return true;
+                    }
+                }
+                catch { }
+            }
+            return false;
+        }
+
         private static void MaintenanceTimer_Tick(object sender, EventArgs e)
         {
             try
@@ -246,6 +320,7 @@ namespace Ink_Canvas.Helpers
         {
             if (sender is Window window)
             {
+                if (IsWindowExcluded(window)) return;
                 RegisterWindow(window, window == _mainWindow || window == Application.Current?.MainWindow);
             }
         }
@@ -254,6 +329,7 @@ namespace Ink_Canvas.Helpers
         {
             if (sender is Window window)
             {
+                if (IsWindowExcluded(window)) return;
                 RegisterWindow(window, window == _mainWindow || window == Application.Current?.MainWindow);
             }
         }
@@ -261,6 +337,7 @@ namespace Ink_Canvas.Helpers
         private static void Window_Activated(object sender, EventArgs e)
         {
             if (sender is not Window window) return;
+            if (IsWindowExcluded(window)) return;
 
             lock (SyncRoot)
             {
@@ -316,6 +393,7 @@ namespace Ink_Canvas.Helpers
         private static void RegisterWindowCore(Window window, bool isMainWindow)
         {
             if (window == null) return;
+            if (IsWindowExcluded(window)) return;
 
             var helper = new WindowInteropHelper(window);
             var handle = helper.Handle;
@@ -463,9 +541,27 @@ namespace Ink_Canvas.Helpers
                 {
                     if (!NativeWindowHelper.IsWindowReady(hWnd)) return true;
 
+                    if (IsHandleExcluded(hWnd)) return true;
+
                     var isManaged = ManagedWindows.Any(w => w.Handle == hWnd);
                     if (!isManaged)
                     {
+                        if (Application.Current != null)
+                        {
+                            foreach (Window win in Application.Current.Windows)
+                            {
+                                try
+                                {
+                                    if (new WindowInteropHelper(win).Handle == hWnd && IsWindowExcluded(win))
+                                    {
+                                        ExcludedHandles.Add(hWnd);
+                                        return true;
+                                    }
+                                }
+                                catch { }
+                            }
+                        }
+
                         popupHandles.Add(hWnd);
                     }
 
