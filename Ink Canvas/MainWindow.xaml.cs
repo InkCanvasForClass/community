@@ -2781,6 +2781,7 @@ namespace Ink_Canvas
                 GridNotifications,
                 ViewboxFloatingBar,
                 BlackboardCenterSide,
+                ((App)Application.Current).SyncService,
                 new NotificationService.Hooks
                 {
                     GetSettings = () => Settings,
@@ -2789,9 +2790,7 @@ namespace Ink_Canvas
                     GetCurrentMode = () => currentMode,
                     IsFloatingBarFolded = () => isFloatingBarFolded,
                     IsFloatingBarChangingHideMode = () => isFloatingBarChangingHideMode,
-                    GetHostWindow = () => this,
-                    UiInvoke = a => Dispatcher.BeginInvoke(a),
-                    UiInvokeContextIdle = a => Dispatcher.BeginInvoke(a, DispatcherPriority.ContextIdle)
+                    GetHostWindow = () => this
                 });
         }
 
@@ -2803,6 +2802,7 @@ namespace Ink_Canvas
         private Services.Shell.ScreenshotService CreateScreenshotService()
         {
             return new Services.Shell.ScreenshotService(
+                ((App)Application.Current).SyncService,
                 new Services.Shell.ScreenshotService.Hooks
                 {
                     GetSettings = () => Settings,
@@ -2811,7 +2811,6 @@ namespace Ink_Canvas
                     GetCurrentWhiteboardIndex = () => CurrentWhiteboardIndex,
                     GetDpiScale = GetDpiScale,
                     ShowScreenshotSaveSuccess = path => ShowNotification(string.Format(Properties.MainWindowStrings.Main_Screenshot_SaveSuccess, path)),
-                    UiInvoke = a => Dispatcher.Invoke(a),
                     SaveInkStrokesAtScreenshot = () => SaveInkCanvasStrokes(false)
                 });
         }
