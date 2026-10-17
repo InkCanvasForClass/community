@@ -105,8 +105,10 @@ namespace Ink_Canvas.Helpers
 
                 SyncWindowDarkMode(window);
             }
-            catch
+            catch (Exception ex)
             {
+                // DWM 背景应用为尽力而为的视觉增强，失败不影响窗口功能，但需留可诊断记录。
+                LogService.LogException(ex);
             }
         }
 
@@ -130,8 +132,10 @@ namespace Ink_Canvas.Helpers
                     BackdropHelper.RemoveDarkMode(window);
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                // DWM 深色模式同步为尽力而为的视觉增强，失败不影响窗口功能，但需留可诊断记录。
+                LogService.LogException(ex);
             }
         }
 
@@ -161,8 +165,10 @@ namespace Ink_Canvas.Helpers
                 };
                 window.Loaded += onLoaded;
             }
-            catch
+            catch (Exception ex)
             {
+                // 重应用挂载失败仅意味着系统背景不在首帧后刷新，不影响既有背景，但需留可诊断记录。
+                LogService.LogException(ex);
             }
         }
 
@@ -182,8 +188,10 @@ namespace Ink_Canvas.Helpers
                 method.Invoke(null, new object[] { window, backdropType });
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                // 反射探测失败按"路径不可用"回落（返回 false），属预期分支，但仍记录以便排查库版本漂移。
+                LogService.LogException(ex);
                 return false;
             }
         }
@@ -206,8 +214,10 @@ namespace Ink_Canvas.Helpers
                     return true;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                // 反射探测失败按"路径不可用"回落（返回 false + None），属预期分支，但仍记录以便排查库版本漂移。
+                LogService.LogException(ex);
             }
 
             return false;
