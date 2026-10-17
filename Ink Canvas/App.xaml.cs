@@ -210,6 +210,8 @@ namespace Ink_Canvas
             }
             catch
             {
+                // 此处守卫的正是日志写入本身：日志系统尚未就绪或写盘失败时无法再记录，
+                // 只能静默吞掉以保证启动流程不被日志故障中断（这是全仓唯一允许无日志的空 catch）。
             }
 
             System.Windows.Forms.Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
@@ -238,7 +240,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[App] 设置 AppUserModelID 失败（任务栏分组可能异常）: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
 
             // 配置TLS协议以支持Windows 7
@@ -435,7 +437,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[App] TLS 兼容配置失败: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
         }
 
@@ -525,7 +527,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Crash] 绑定主窗口 SourceInitialized 事件失败: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
         }
 
@@ -548,7 +550,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Crash] 注册主窗口销毁监听失败: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
         }
 
@@ -606,7 +608,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Crash] 卸载窗口销毁 WinEvent 钩子失败: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
         }
 
@@ -1040,16 +1042,15 @@ namespace Ink_Canvas
             try
             {
                 int crashAction = 2;
-                try { crashAction = (int)(parsedSettings?["startup"]?["crashAction"] ?? 2); }
-                catch (Exception ex)
+                try { crashAction = (int)(parsedSettings?["startup"]?["crashAction"] ?? 2); } catch (Exception ex)
                 {
-                    LogHelper.WriteLogToFile($"[App] 解析崩溃后动作设置失败，改用默认值 2: {ex.Message}", LogHelper.LogType.Info);
+                    Helpers.LogService.LogException(ex);
                 }
                 CrashAction = (CrashActionType)crashAction;
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[App] 同步崩溃后动作失败: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
         }
 
@@ -2261,7 +2262,7 @@ namespace Ink_Canvas
             }
         }
 
-        // M12：装配托盘服务的依赖委托。MainWindow/App 私有成员的访问全部经此处注入，
+        // 装配托盘服务的依赖委托。MainWindow/App 私有成员的访问全部经此处注入，
         // TrayIconService 不引用 MainWindow 类型（事件出抛方向唯一：Service → App）。
         private TrayIconService CreateTrayIconService()
         {
@@ -2345,11 +2346,11 @@ namespace Ink_Canvas
 
             try { heartbeatTimer?.Stop(); } catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Exit] 停止心跳计时器失败: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
             try { watchdogTimer?.Change(Timeout.Infinite, Timeout.Infinite); watchdogTimer?.Dispose(); } catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Exit] 释放看门狗计时器失败: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
             MemoryBreakdownHelper.StopAutomaticDumpMonitor();
 
@@ -2377,7 +2378,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Exit] 释放单实例互斥体失败: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
 
             // 卸载所有插件

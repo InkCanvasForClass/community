@@ -9,12 +9,12 @@ using System.Windows.Input;
 namespace Ink_Canvas.Services.Shell
 {
     /// <summary>
-    /// 全局热键配置服务（M16 寄生提取）。承载从 <c>Helpers/GlobalHotkeyManager</c> 搬出的
+    /// 全局热键配置服务（寄生提取）。承载从 <c>Helpers/GlobalHotkeyManager</c> 搬出的
     /// 配置层：HotkeyConfig.json 的读写解析、默认配置定义、从配置/默认集合到注册引擎的
     /// 加载编排。热键触发回调本体留在主窗口壳（MW_Hotkeys.cs），以「热键名 → <see cref="Action"/>」
     /// 字典在构造时注入，替代原 <c>GetActionByName</c> switch 的硬编码回调。
     /// NHotkey 注册引擎与多屏/焦点上下文门控仍在 <see cref="GlobalHotkeyManager"/> 中，
-    /// 本服务不引用主窗口类型、不做任何 UI 线程调度（M30 门禁）。
+    /// 本服务不引用主窗口类型、不做任何 UI 线程调度。
     /// 注意与插件服务 <c>Ink_Canvas.Plugins.HotkeyService</c> 同名不同命名空间，勿混淆。
     /// </summary>
     internal sealed class HotkeyService
@@ -426,7 +426,7 @@ namespace Ink_Canvas.Services.Shell
         }
 
         /// <summary>
-        /// 根据快捷键名称获取对应的动作（M16：原 switch 硬编码改为构造注入的动作字典查表）
+        /// 根据快捷键名称获取对应的动作（原 switch 硬编码改为构造注入的动作字典查表）
         /// </summary>
         /// <param name="hotkeyName">快捷键名称</param>
         /// <returns>对应的动作，如果不存在则返回null</returns>

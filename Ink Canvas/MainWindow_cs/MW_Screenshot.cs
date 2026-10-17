@@ -13,7 +13,7 @@ namespace Ink_Canvas
         /// <summary>
         /// 在切页/加页场景下使用：先捕获当前画面到内存并克隆墨迹，然后立即返回；截图与墨迹保存在后台异步执行，不阻塞切页。
         /// 调用方应在调用本方法后立即执行 SaveStrokes、ClearStrokes、切页、RestoreStrokes 等逻辑。
-        /// 壳：本体已搬入 <see cref="ScreenshotService"/>（M15）。
+        /// 壳：本体已搬入 <see cref="ScreenshotService"/>。
         /// </summary>
         /// <param name="isHideNotification">是否隐藏保存成功通知</param>
         /// <param name="fileName">截图文件名（可选）</param>
@@ -22,19 +22,19 @@ namespace Ink_Canvas
 
         /// <summary>
         /// 供插件截图服务调用的全屏捕获入口（调用方负责 Dispose 返回值）。
-        /// 壳：本体已搬入 <see cref="ScreenshotService"/>（M15）。
+        /// 壳：本体已搬入 <see cref="ScreenshotService"/>。
         /// </summary>
         internal System.Drawing.Bitmap CapturePluginFullScreen() => ScreenshotService.CaptureScreenshotToBitmap();
 
         /// <summary>
         /// 供插件截图服务调用的区域捕获入口（调用方负责 Dispose 返回值）。
-        /// 壳：本体已搬入 <see cref="ScreenshotService"/>（M15）。
+        /// 壳：本体已搬入 <see cref="ScreenshotService"/>。
         /// </summary>
         internal System.Drawing.Bitmap CapturePluginScreenArea(Rectangle area) => ScreenshotService.CaptureScreenArea(area);
 
         /// <summary>
         /// 保存截图
-        /// 壳：本体已搬入 <see cref="ScreenshotService"/>（M15）。
+        /// 壳：本体已搬入 <see cref="ScreenshotService"/>。
         /// </summary>
         /// <param name="isHideNotification">是否隐藏通知</param>
         /// <param name="fileName">文件名</param>
@@ -49,7 +49,7 @@ namespace Ink_Canvas
 
         /// <summary>
         /// 保存截图到配置的保存目录
-        /// 壳：本体已搬入 <see cref="ScreenshotService"/>（M15）。
+        /// 壳：本体已搬入 <see cref="ScreenshotService"/>。
         /// </summary>
         /// <remarks>
         /// 该方法会：
@@ -93,7 +93,7 @@ namespace Ink_Canvas
                     _screenshotService.GetScreenshotSaveDirectory(),
                     $"{_screenshotService.GetScreenshotFileNameStem()}.png");
 
-                // 执行段（捕获→叠墨→遮罩→落盘→剪贴板）已搬入 ScreenshotService（M15）；
+                // 执行段（捕获→叠墨→遮罩→落盘→剪贴板）已搬入 ScreenshotService；
                 // 成功/失败通知保持原有相对顺序：落盘（+剪贴板）之后、自动保存墨迹之前。
                 if (!_screenshotService.SaveAreaScreenshot(screenshotResult.Value, savePath, Settings.Automation.IsCopyScreenshotToClipboard))
                 {
