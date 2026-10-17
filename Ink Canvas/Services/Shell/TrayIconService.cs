@@ -17,8 +17,7 @@ namespace Ink_Canvas.Services
     /// 系统托盘服务（寄生提取）。承载从 App（原 MW_TrayIcon.cs）搬出的托盘图标与右键菜单逻辑。
     /// 禁止引用 MainWindow 类型：所有对 MainWindow/App 私有成员的调用经 <see cref="Hooks"/> 委托注入，
     /// 事件出抛方向唯一（Service → App）。
-    /// 计时器使用 <see cref="System.Threading.Timer"/> + 注入的 <c>UiInvoke</c> 回到 UI 线程
-    ///（统一替换为 ISyncService 前的过渡形态）。
+    /// 计时器使用 <see cref="System.Threading.Timer"/> + 注入的 <see cref="ISyncService"/> 回到 UI 线程。
     /// </summary>
     internal sealed class TrayIconService : IDisposable
     {
@@ -47,8 +46,6 @@ namespace Ink_Canvas.Services
             public Action ResetFloatingBarPosition { get; set; }
             /// <summary>写入托盘临时显示的截止时间（MainWindow 静态字段）。</summary>
             public Action<DateTime?> SetTrayTemporaryShowUntilUtc { get; set; }
-            /// <summary>在 UI 线程上执行委托（过渡形态，后续收敛为 ISyncService）。</summary>
-            public Action<Action> UiInvoke { get; set; }
             /// <summary>打开设置窗口（反射调用 MainWindow.BtnSettings_Click）。</summary>
             public Action OpenSettings { get; set; }
             /// <summary>标记本次退出为用户主动退出。</summary>
@@ -67,14 +64,17 @@ namespace Ink_Canvas.Services
 
         private const int TrayTemporaryShowMinutes = 2;
 
+        private readonly ISyncService _syncService;
         private readonly Hooks _hooks;
 
         private Timer _trayTemporaryShowTimer;
 
         private bool _trayTemporaryShowRestoreHideChecked;
 
-        public TrayIconService(Hooks hooks)
+        /// <param name="syncService">UI 线程调度（主窗口/App 端为 BeginInvoke 语义）。</param>
+        public TrayIconService(ISyncService syncService, Hooks hooks)
         {
+            _syncService = syncService ?? throw new ArgumentNullException(nameof(syncService));
             _hooks = hooks ?? throw new ArgumentNullException(nameof(hooks));
         }
 
@@ -345,7 +345,7 @@ namespace Ink_Canvas.Services
 
             StopTemporaryShowTimer();
             _trayTemporaryShowTimer = new Timer(
-                _ => _hooks.UiInvoke(TemporaryShowTimerTick), null,
+                _ => _syncService.BeginInvoke(TemporaryShowTimerTick), null,
                 TimeSpan.FromMinutes(TrayTemporaryShowMinutes), Timeout.InfiniteTimeSpan);
         }
 

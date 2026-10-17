@@ -22,8 +22,8 @@ namespace Ink_Canvas.Services.Shell
     /// 插图 partial（MW_ImageInsert.cs）搬出的截图执行段：屏幕捕获（GDI CopyFromScreen）、
     /// 位图加工（墨迹叠加、形状遮罩、格式转换）、编码落盘与剪贴板写入。
     /// 区域选择的交互段（选区窗口、窗口显隐编排、贴图回白板编排）仍留在主窗口壳中。
-    /// 禁止引用主窗口类型：设置、墨迹快照、白板页索引、DPI 缩放、通知与 UI 线程调度
-    /// 均经 <see cref="Hooks"/> 委托注入（统一收敛为 ISyncService 前的过渡形态）。
+    /// 禁止引用主窗口类型：设置、墨迹快照、白板页索引、DPI 缩放、通知经 <see cref="Hooks"/>
+    /// 委托注入，UI 线程调度经注入的 <see cref="ISyncService"/> 完成。
     /// </summary>
     internal sealed class ScreenshotService
     {
@@ -44,16 +44,17 @@ namespace Ink_Canvas.Services.Shell
             public Func<double> GetDpiScale { get; set; }
             /// <summary>显示截图保存成功通知（参数为保存路径，资源格式化由主窗口侧完成）。</summary>
             public Action<string> ShowScreenshotSaveSuccess { get; set; }
-            /// <summary>在 UI 线程上执行委托（过渡形态，后续收敛为 ISyncService）。</summary>
-            public Action<Action> UiInvoke { get; set; }
             /// <summary>截图后自动保存墨迹（对应主窗口 SaveInkCanvasStrokes(false)）。</summary>
             public Action SaveInkStrokesAtScreenshot { get; set; }
         }
 
+        private readonly ISyncService _syncService;
         private readonly Hooks _hooks;
 
-        public ScreenshotService(Hooks hooks)
+        /// <param name="syncService">UI 线程调度（主窗口端为同步 Invoke 语义）。</param>
+        public ScreenshotService(ISyncService syncService, Hooks hooks)
         {
+            _syncService = syncService ?? throw new ArgumentNullException(nameof(syncService));
             _hooks = hooks ?? throw new ArgumentNullException(nameof(hooks));
         }
 
@@ -154,7 +155,7 @@ namespace Ink_Canvas.Services.Shell
 
                     if (!hideNotification && !string.IsNullOrEmpty(path))
                     {
-                        _hooks.UiInvoke(() => _hooks.ShowScreenshotSaveSuccess(path));
+                        _syncService.Invoke(() => _hooks.ShowScreenshotSaveSuccess(path));
                     }
 
                     // 使用上传帮助类上传到所有启用的服务
@@ -400,7 +401,7 @@ namespace Ink_Canvas.Services.Shell
             {
                 Task.Delay(100).ContinueWith(t =>
                 {
-                    _hooks.UiInvoke(() => _hooks.ShowScreenshotSaveSuccess(savePath));
+                    _syncService.Invoke(() => _hooks.ShowScreenshotSaveSuccess(savePath));
                 });
             }
             _ = Task.Run(async () =>

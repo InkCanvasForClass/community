@@ -19,7 +19,7 @@ namespace Ink_Canvas.Services
     /// 不接触任何 UI 线程对象）承载，本服务只做 UI 呈现编排。
     /// 禁止引用主窗口类型：主窗口私有状态经 <see cref="Hooks"/> 委托注入，x:Name 控件经
     /// 构造函数以强类型引用注入，禁止按名查找视觉树。
-    /// UI 线程切换经注入的 <c>UiInvoke</c> 委托完成（统一替换为 ISyncService 前的过渡形态）。
+    /// UI 线程切换经注入的 <see cref="ISyncService"/> 完成。
     /// </summary>
     internal sealed class NotificationService
     {
@@ -42,10 +42,6 @@ namespace Ink_Canvas.Services
             public Func<bool> IsFloatingBarChangingHideMode { get; set; }
             /// <summary>获取宿主窗口（以 Window 基类形态返回，服务不接触主窗口类型）。</summary>
             public Func<Window> GetHostWindow { get; set; }
-            /// <summary>在 UI 线程上异步执行委托（默认优先级；过渡形态，后续收敛为 ISyncService）。</summary>
-            public Action<Action> UiInvoke { get; set; }
-            /// <summary>在 UI 线程空闲优先级异步执行委托（用于公告服务延迟启动）。</summary>
-            public Action<Action> UiInvokeContextIdle { get; set; }
         }
 
         private readonly DynamicNotificationControl _dynamicNotification;
@@ -53,6 +49,7 @@ namespace Ink_Canvas.Services
         private readonly Grid _gridNotifications;
         private readonly Viewbox _viewboxFloatingBar;
         private readonly Grid _blackboardCenterSide;
+        private readonly ISyncService _syncService;
         private readonly Hooks _hooks;
 
         private int _lastNotificationShowTime;
@@ -68,6 +65,7 @@ namespace Ink_Canvas.Services
             Grid gridNotifications,
             Viewbox viewboxFloatingBar,
             Grid blackboardCenterSide,
+            ISyncService syncService,
             Hooks hooks)
         {
             _dynamicNotification = dynamicNotification;
@@ -75,6 +73,7 @@ namespace Ink_Canvas.Services
             _gridNotifications = gridNotifications;
             _viewboxFloatingBar = viewboxFloatingBar;
             _blackboardCenterSide = blackboardCenterSide;
+            _syncService = syncService ?? throw new ArgumentNullException(nameof(syncService));
             _hooks = hooks ?? throw new ArgumentNullException(nameof(hooks));
         }
 
@@ -133,7 +132,7 @@ namespace Ink_Canvas.Services
                 AnnouncementService.UnreadCountChanged -= OnAnnouncementUnreadCountChanged;
                 AnnouncementService.UnreadCountChanged += OnAnnouncementUnreadCountChanged;
 
-                _hooks.UiInvokeContextIdle(async () =>
+                _syncService.BeginInvoke(SyncPriority.ContextIdle, async () =>
                 {
                     try
                     {
@@ -176,7 +175,7 @@ namespace Ink_Canvas.Services
 
         private void NotificationCenterService_NotificationRequested(NotificationMessage message)
         {
-            _hooks.UiInvoke(() =>
+            _syncService.BeginInvoke(() =>
             {
                 try
                 {
@@ -320,7 +319,7 @@ namespace Ink_Canvas.Services
         {
             if (_startupUnreadNotificationShown) return;
 
-            _hooks.UiInvoke(() =>
+            _syncService.BeginInvoke(() =>
             {
                 if (_startupUnreadNotificationShown) return;
                 ShowStartupUnreadNotification();
@@ -386,13 +385,13 @@ namespace Ink_Canvas.Services
                 AnimationsHelper.ShowWithSlideFromBottomAndFade(_gridNotifications);
 
                 // 原实现为独立线程 Sleep 后经 UI 线程调度器隐藏；等价改写为单次计时器 +
-                // UiInvoke 回 UI 线程（新类不得创建 Thread 访问 UI 线程对象，同为过渡形态）。
+                // ISyncService 回 UI 线程（新类不得创建 Thread 访问 UI 线程对象）。
                 StopLegacyHideTimer();
                 _legacyHideTimer = new Timer(_ =>
                 {
                     if (Environment.TickCount - _lastNotificationShowTime >= _notificationShowTime)
                     {
-                        _hooks.UiInvoke(() =>
+                        _syncService.BeginInvoke(() =>
                         {
                             AnimationsHelper.HideWithSlideAndFade(_gridNotifications);
                             NotificationCenterService.NotifyCurrentClosed();

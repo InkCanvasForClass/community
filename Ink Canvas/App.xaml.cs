@@ -2262,11 +2262,17 @@ namespace Ink_Canvas
             }
         }
 
+        // 单一 ISyncService 实例，供 App 侧（TrayIconService）与 MainWindow 侧
+        //（NotificationService/ScreenshotService）共享。首次访问发生在 UI 线程
+        //（托盘事件或主窗口构造），WpfSyncService 构造时捕获当前 UI Dispatcher。
+        private ISyncService _syncService;
+        internal ISyncService SyncService => _syncService ??= new WpfSyncService();
+
         // 装配托盘服务的依赖委托。MainWindow/App 私有成员的访问全部经此处注入，
         // TrayIconService 不引用 MainWindow 类型（事件出抛方向唯一：Service → App）。
         private TrayIconService CreateTrayIconService()
         {
-            var service = new TrayIconService(new TrayIconService.Hooks
+            var service = new TrayIconService(SyncService, new TrayIconService.Hooks
             {
                 GetMainWindow = () => Current.MainWindow,
                 GetTrayLeftClickAction = () => Ink_Canvas.MainWindow.Settings.Appearance.TrayLeftClickAction,
@@ -2292,7 +2298,6 @@ namespace Ink_Canvas
                     }
                 },
                 SetTrayTemporaryShowUntilUtc = value => Ink_Canvas.MainWindow.TrayTemporaryShowUntilUtc = value,
-                UiInvoke = action => Dispatcher.BeginInvoke(action),
                 OpenSettings = () =>
                 {
                     try
