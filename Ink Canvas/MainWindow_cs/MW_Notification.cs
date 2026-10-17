@@ -189,22 +189,47 @@ namespace Ink_Canvas
 
         private void ApplyDynamicNotificationFloatingBarPlacement()
         {
-            // 收纳或收纳动画期间浮动栏已移出可用区域，保留默认的顶部居中位置，避免通知跟随到屏幕外。
+            // 收纳或收纳动画期间浮动栏已移出可用区域且白板未开启，保留默认的顶部居中位置，避免通知跟随到屏幕外。
             if (DynamicNotification == null || ViewboxFloatingBar == null ||
-                ViewboxFloatingBar.Visibility != Visibility.Visible ||
-                isFloatingBarFolded || isFloatingBarChangingHideMode)
+                ViewboxFloatingBar.Visibility != Visibility.Visible && BlackboardCenterSide.Visibility != Visibility.Visible ||
+                isFloatingBarFolded && BlackboardCenterSide.Visibility != Visibility.Visible || 
+                isFloatingBarChangingHideMode && BlackboardCenterSide.Visibility != Visibility.Visible||
+                BlackboardCenterSide.ActualWidth < 1 && isFloatingBarFolded || 
+                BlackboardCenterSide.ActualHeight < 1 && isFloatingBarFolded
+                )
             {
                 return;
             }
 
             try
             {
+                double notificationWidth, notificationHeight, left, top;
+
+                if (BlackboardCenterSide.Visibility == Visibility.Visible)
+                {
+                    //进白板了
+                    var topLeft = BlackboardCenterSide.TranslatePoint(new Point(0, 0), this);
+                    var bottomRight = BlackboardCenterSide.TranslatePoint(
+                        new Point(BlackboardCenterSide.ActualWidth, BlackboardCenterSide.ActualHeight), this);
+                    notificationWidth = DynamicNotification.ActualWidth > 0 ? DynamicNotification.ActualWidth : DynamicNotification.Width;
+                    notificationHeight = DynamicNotification.ActualHeight > 0 ? DynamicNotification.ActualHeight : 72;
+                    left = (topLeft.X + bottomRight.X) / 2 - notificationWidth / 2;
+                    top = topLeft.Y - notificationHeight - 12;
+                    left = Math.Max(12, Math.Min(ActualWidth - notificationWidth - 12, left));
+                    top = Math.Max(12, top);
+
+                    DynamicNotification.HorizontalAlignment = HorizontalAlignment.Left;
+                    DynamicNotification.VerticalAlignment = VerticalAlignment.Top;
+                    DynamicNotification.Margin = new Thickness(left, top, 0, 0);
+                    return;
+                }
+
                 var position = ViewboxFloatingBar.TransformToAncestor(this).Transform(new Point(0, 0));
-                double notificationWidth = DynamicNotification.ActualWidth > 0 ? DynamicNotification.ActualWidth : DynamicNotification.Width;
-                double notificationHeight = DynamicNotification.ActualHeight > 0 ? DynamicNotification.ActualHeight : 72;
+                notificationWidth = DynamicNotification.ActualWidth > 0 ? DynamicNotification.ActualWidth : DynamicNotification.Width;
+                notificationHeight = DynamicNotification.ActualHeight > 0 ? DynamicNotification.ActualHeight : 72;
                 double floatingBarWidth = ViewboxFloatingBar.ActualWidth;
-                double left = position.X + floatingBarWidth / 2 - notificationWidth / 2;
-                double top = position.Y - notificationHeight - 12;
+               left = position.X + floatingBarWidth / 2 - notificationWidth / 2;
+                top = position.Y - notificationHeight - 12;
 
                 left = Math.Max(12, Math.Min(ActualWidth - notificationWidth - 12, left));
                 top = Math.Max(12, top);
@@ -218,7 +243,6 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"[Notification] 计算通知悬浮栏位置失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
-
         private void OnAnnouncementUnreadCountChanged()
         {
             if (_startupUnreadNotificationShown) return;
