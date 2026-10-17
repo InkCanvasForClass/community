@@ -14,6 +14,7 @@ namespace Ink_Canvas.Plugins
         private readonly string _logsRoot;
         private readonly string _pluginId;
         private readonly object _writeLock = new object();
+        private DateTime _nextRotateAttemptUtc = DateTime.MinValue;
 
         /// <summary>
         /// 单文件最大字节数（默认 1MB），超过后会重命名为 <c>.1.log</c> 并新建。
@@ -107,6 +108,7 @@ namespace Ink_Canvas.Plugins
         {
             try
             {
+                if (DateTime.UtcNow < _nextRotateAttemptUtc) return false;
                 if (!File.Exists(path)) return false;
                 var len = new FileInfo(path).Length;
                 return len >= MaxFileSizeBytes;
@@ -150,8 +152,9 @@ namespace Ink_Canvas.Plugins
             }
             catch (Exception ex)
             {
+                _nextRotateAttemptUtc = DateTime.UtcNow.AddMinutes(1);
                 LogHelper.WriteLogToFile(
-                    $"PluginLogger | 轮转失败 [{_pluginId}] {ex.Message}",
+                    $"PluginLogger | 轮转失败 [{_pluginId}] {ex.Message}（已冷却 1 分钟）",
                     LogHelper.LogType.Warning);
             }
         }
