@@ -101,9 +101,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 var n = System.Threading.Interlocked.Increment(ref _usageRefreshDiagCount);
                 if (n == 1 || n % 100 == 0)
                 {
-                    LogHelper.WriteLogToFile(
-                        $"[Settings] 关于页面刷新累计使用时长失败（累计 {n} 次）: {ex.Message}",
-                        LogHelper.LogType.Info);
+                    LogService.LogException(ex);
                 }
             }
         }

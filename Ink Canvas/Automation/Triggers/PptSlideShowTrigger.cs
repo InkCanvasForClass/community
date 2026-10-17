@@ -84,9 +84,9 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
                             return true;
                         }
                     }
-                    catch (Exception ex)
+                    catch (System.Exception ex)
                     {
-                        LogCallbackException("读取 POWERPNT 进程主窗口标题判断是否处于放映", ex);
+                        Helpers.LogService.LogException(ex);
                     }
                 }
                 return false;

@@ -208,7 +208,7 @@ namespace Ink_Canvas.Helpers
                             }
                             catch (Exception ex)
                             {
-                                LogHelper.WriteLogToFile($"[Booth] 探测摄像头属性时从采集 pin 获取 IAMVideoProcAmp/IAMCameraControl 失败: {ex.Message}", LogHelper.LogType.Info);
+                                LogService.LogException(ex);
                             }
                         }
 
@@ -389,38 +389,22 @@ namespace Ink_Canvas.Helpers
         {
             if (_propVideoProcAmp != null)
             {
-                try { Marshal.ReleaseComObject(_propVideoProcAmp); }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"[Booth] 释放 IAMVideoProcAmp COM 引用失败: {ex.Message}", LogHelper.LogType.Info);
-                }
+                try { Marshal.ReleaseComObject(_propVideoProcAmp); } catch (Exception ex) { LogService.LogException(ex); }
                 _propVideoProcAmp = null;
             }
             if (_propCameraControl != null)
             {
-                try { Marshal.ReleaseComObject(_propCameraControl); }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"[Booth] 释放 IAMCameraControl COM 引用失败: {ex.Message}", LogHelper.LogType.Info);
-                }
+                try { Marshal.ReleaseComObject(_propCameraControl); } catch (Exception ex) { LogService.LogException(ex); }
                 _propCameraControl = null;
             }
             if (_propSourceFilter != null)
             {
-                try { Marshal.ReleaseComObject(_propSourceFilter); }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"[Booth] 释放属性探测用 source filter COM 引用失败: {ex.Message}", LogHelper.LogType.Info);
-                }
+                try { Marshal.ReleaseComObject(_propSourceFilter); } catch (Exception ex) { LogService.LogException(ex); }
                 _propSourceFilter = null;
             }
             if (_propGraph != null)
             {
-                try { Marshal.ReleaseComObject(_propGraph); }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"[Booth] 释放属性探测用 FilterGraphNoThread COM 引用失败: {ex.Message}", LogHelper.LogType.Info);
-                }
+                try { Marshal.ReleaseComObject(_propGraph); } catch (Exception ex) { LogService.LogException(ex); }
                 _propGraph = null;
             }
             // 不清 _cameraPropStates 的 Supported 状态：调用方切换摄像头后会重新 Probe 覆盖；
@@ -493,7 +477,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Booth] 汇总指定分辨率({width}x{height})支持的帧率列表失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
             return result;
         }
@@ -864,7 +848,10 @@ namespace Ink_Canvas.Helpers
                                 $"formatType={mt.formatType}",
                                 LogHelper.LogType.Info);
                         }
-                        catch { }
+                        catch (Exception ex)
+                        {
+                            LogService.LogException(ex);
+                        }
 
                         // === 帧率枚举策略（修复 50fps 误判） ===
                         // 驱动通过两种方式暴露帧率：
@@ -1294,11 +1281,7 @@ namespace Ink_Canvas.Helpers
             {
                 if (_mediaControl != null)
                 {
-                    try { _mediaControl.Stop(); }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[Booth] 内部停止预览时停止 IMediaControl 图失败: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    try { _mediaControl.Stop(); } catch (Exception ex) { LogService.LogException(ex); }
                 }
                 CleanupGraph();
                 _isCapturing = false;
@@ -1320,11 +1303,7 @@ namespace Ink_Canvas.Helpers
 
                 if (_mediaControl != null)
                 {
-                    try { _mediaControl.Stop(); }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[Booth] 停止摄像头预览时停止 IMediaControl 图失败: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    try { _mediaControl.Stop(); } catch (Exception ex) { LogService.LogException(ex); }
                 }
                 CleanupGraph();
 
@@ -1356,11 +1335,7 @@ namespace Ink_Canvas.Helpers
                     // 先断开 sample grabber 回调，避免释放过程中触发
                     if (_sampleGrabber != null)
                     {
-                        try { _sampleGrabber.SetCallback(null, 0); }
-                        catch (Exception ex)
-                        {
-                            LogHelper.WriteLogToFile($"[Booth] 清理 DirectShow 图前断开 SampleGrabber 回调失败: {ex.Message}", LogHelper.LogType.Info);
-                        }
+                        try { _sampleGrabber.SetCallback(null, 0); } catch (Exception ex) { LogService.LogException(ex); }
                     }
 
                     // 释放子 filter RCW（每个是独立的 RCW）
