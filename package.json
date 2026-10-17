@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "lint": "node scripts/check-empty-catch.mjs",
     "test": "dotnet test \"Ink Canvas.sln\" -c Debug --no-restore",
     "build": "dotnet build \"Ink Canvas.sln\" -c Debug"
   },
