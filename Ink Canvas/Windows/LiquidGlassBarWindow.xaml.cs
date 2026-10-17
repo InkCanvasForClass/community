@@ -611,7 +611,7 @@ namespace Ink_Canvas
         /// 按主窗当前状态点亮对应按钮。选中用 Tag="on" 驱动样式里的填充胶囊，
         /// 参考 GitHub 移动端底栏：玻璃背景下只换图标颜色区分度不够。
         /// </summary>
-        /// <param name="toolMode">主窗的 _currentToolMode。</param>
+        /// <param name="toolMode">主窗当前工具模式的内部字符串（ToolModeMapping.ToInternalString 输出）。</param>
         /// <param name="penType">0 = 普通笔，1 = 荧光笔。</param>
         /// <param name="color">当前画笔颜色，用于点亮颜色圆点。</param>
         internal void SyncActiveState(string toolMode, int penType, Color? color)

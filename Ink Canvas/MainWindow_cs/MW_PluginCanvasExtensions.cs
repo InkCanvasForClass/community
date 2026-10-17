@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Models;
 using Ink_Canvas.Plugins;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace Ink_Canvas
             new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         private PluginCanvasToolSession _activePluginCanvasToolSession;
-        private string _pluginToolPreviousLogicalMode;
+        private ToolMode _pluginToolPreviousLogicalMode;
         private bool _pluginCanvasToolActive;
 
         internal bool IsPluginCanvasToolActive => _pluginCanvasToolActive;
@@ -164,7 +165,7 @@ namespace Ink_Canvas
                     EndPluginCanvasTool(_activePluginCanvasToolSession);
                 }
 
-                _pluginToolPreviousLogicalMode = _currentToolMode;
+                _pluginToolPreviousLogicalMode = _currentToolModeEnum;
                 _pluginCanvasToolActive = true;
                 // 插件画布工具接管输入前取消 WinRT 墨迹管线在途湿墨（如启用），
                 // 并以 WPF 实时墨迹的等价取消兜底，避免残留半截笔迹。
@@ -235,26 +236,26 @@ namespace Ink_Canvas
                 _pluginCanvasToolActive = false;
 
                 RestoreToolModeAfterPluginSession(_pluginToolPreviousLogicalMode);
-                _pluginToolPreviousLogicalMode = null;
+                _pluginToolPreviousLogicalMode = ToolMode.Unknown;
             });
         }
 
-        private void RestoreToolModeAfterPluginSession(string mode)
+        private void RestoreToolModeAfterPluginSession(ToolMode mode)
         {
             var editingMode = InkCanvasEditingMode.None;
             switch (mode)
             {
-                case "pen":
-                case "color":
+                case ToolMode.Pen:
+                case ToolMode.Color:
                     editingMode = InkCanvasEditingMode.Ink;
                     break;
-                case "select":
+                case ToolMode.Select:
                     editingMode = InkCanvasEditingMode.Select;
                     break;
-                case "eraser":
+                case ToolMode.Eraser:
                     editingMode = InkCanvasEditingMode.EraseByPoint;
                     break;
-                case "eraserByStrokes":
+                case ToolMode.EraserByStrokes:
                     editingMode = InkCanvasEditingMode.EraseByStroke;
                     break;
             }
@@ -262,10 +263,10 @@ namespace Ink_Canvas
             if (!SetCurrentToolMode(editingMode))
             {
                 SetCurrentToolMode(InkCanvasEditingMode.None);
-                mode = "cursor";
+                mode = ToolMode.Cursor;
             }
 
-            UpdateCurrentToolMode(string.IsNullOrWhiteSpace(mode) ? "cursor" : mode);
+            UpdateCurrentToolMode(mode == ToolMode.Unknown ? "cursor" : ToolModeMapping.ToInternalString(mode));
         }
 
         private void AttachPluginCanvasToolInput()
