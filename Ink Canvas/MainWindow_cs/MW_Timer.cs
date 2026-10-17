@@ -355,7 +355,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Timer] 自动保存墨迹失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -936,10 +936,7 @@ namespace Ink_Canvas
                                 else if (prodName.Contains("3C") && Settings.Automation.IsAutoFoldInEasiNote3C)
                                     return true;
                             }
-                            catch (Exception ex)
-                            {
-                                LogHelper.WriteLogToFile($"[Timer] 读取易记笔记版本信息失败，自动收纳判定可能不准: {ex.Message}", LogHelper.LogType.Info);
-                            }
+                            catch (Exception ex) { LogService.LogException(ex); }
                         }
                     }
                     else if (Settings.Automation.IsAutoFoldInEasiCamera && windowProcessName == "EasiCamera")
@@ -980,10 +977,7 @@ namespace Ink_Canvas
                                 if (version.StartsWith("6.") && prodName == "WhiteBoard")
                                     return true;
                             }
-                            catch (Exception ex)
-                            {
-                                LogHelper.WriteLogToFile($"[Timer] 读取希沃白板版本信息失败，自动收纳判定可能不准: {ex.Message}", LogHelper.LogType.Info);
-                            }
+                            catch (Exception ex) { LogService.LogException(ex); }
                         }
                     }
                 }
@@ -1485,10 +1479,7 @@ namespace Ink_Canvas
                         // 使用 BeginInvoke 避免在 Invoke 闭包内同步等待自身调度导致 UI 死锁
                         Dispatcher.BeginInvoke(new Action(() => { Application.Current.Shutdown(); }));
                     }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[Settings] 静默更新安装后投递 Application.Shutdown 失败: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    catch (Exception ex) { LogService.LogException(ex); }
                 }
                 else
                 {
