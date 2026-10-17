@@ -168,8 +168,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                // 非 JSON 响应属预期分支（纯 URL / HTML 页面），仅留痕便于排查上传异常
-                LogHelper.WriteLogToFile($"[Upload] 上传响应不是 JSON，按纯文本/HTML 继续解析: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
 
             // 纯 URL

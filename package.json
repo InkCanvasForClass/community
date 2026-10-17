@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "test": "dotnet test \"Ink Canvas.sln\" -c Debug --no-restore",
+    "build": "dotnet build \"Ink Canvas.sln\" -c Debug"
+  },
   "dependencies": {
     "cors": "^2.8.6",
     "express": "^5.2.1"
