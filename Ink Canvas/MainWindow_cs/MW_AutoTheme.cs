@@ -1,6 +1,7 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Models;
 using iNKORE.UI.WPF.Modern;
 using Microsoft.Win32;
 using System;
@@ -234,22 +235,22 @@ namespace Ink_Canvas
                     if (btn != null && !ToolbarRegistry.GetUseRedStyle(btn)) btn.Icon.Brush = new SolidColorBrush(selectedColor);
                 }
 
-                switch (_currentToolMode)
+                switch (_currentToolModeEnum)
                 {
-                    case "cursor":
+                    case ToolMode.Cursor:
                         SetSelectedFloatingBarButtonBrush(Cursor_Icon);
                         break;
-                    case "pen":
-                    case "color":
+                    case ToolMode.Pen:
+                    case ToolMode.Color:
                         SetSelectedFloatingBarButtonBrush(Pen_Icon);
                         break;
-                    case "eraser":
+                    case ToolMode.Eraser:
                         SetSelectedFloatingBarButtonBrush(Eraser_Icon);
                         break;
-                    case "eraserByStrokes":
+                    case ToolMode.EraserByStrokes:
                         SetSelectedFloatingBarButtonBrush(EraserByStrokes_Icon);
                         break;
-                    case "select":
+                    case ToolMode.Select:
                         SetSelectedFloatingBarButtonBrush(SymbolIconSelect);
                         break;
                 }

@@ -1,5 +1,6 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Models;
 using Ink_Canvas.Properties;
 using System;
 using System.Collections.Generic;
@@ -74,7 +75,7 @@ namespace Ink_Canvas
         }
 
         private bool IsBoardRoamingMode
-            => currentMode == 1 && string.Equals(_currentToolMode, "roaming", StringComparison.Ordinal);
+            => currentMode == 1 && _currentToolModeEnum == ToolMode.Roaming;
 
         private void UpdateBoardRoamingButtonState()
         {

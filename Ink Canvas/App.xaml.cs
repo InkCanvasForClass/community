@@ -1,6 +1,7 @@
 ﻿using H.NotifyIcon;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Plugins;
+using Ink_Canvas.Services;
 using Ink_Canvas.Properties;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Win32;
@@ -2260,9 +2261,74 @@ namespace Ink_Canvas
             }
         }
 
+        // M12：装配托盘服务的依赖委托。MainWindow/App 私有成员的访问全部经此处注入，
+        // TrayIconService 不引用 MainWindow 类型（事件出抛方向唯一：Service → App）。
+        private TrayIconService CreateTrayIconService()
+        {
+            var service = new TrayIconService(new TrayIconService.Hooks
+            {
+                GetMainWindow = () => Current.MainWindow,
+                GetTrayLeftClickAction = () => Ink_Canvas.MainWindow.Settings.Appearance.TrayLeftClickAction,
+                GetTrayRightClickAction = () => Ink_Canvas.MainWindow.Settings.Appearance.TrayRightClickAction,
+                IsAlwaysOnTop = () => Ink_Canvas.MainWindow.Settings.Advanced.IsAlwaysOnTop,
+                IsNoFocusMode = () => Ink_Canvas.MainWindow.Settings.Advanced.IsNoFocusMode,
+                IsFloatingBarFolded = () => ((MainWindow)Current.MainWindow).isFloatingBarFolded,
+                FoldFloatingBar = () => ((MainWindow)Current.MainWindow).FoldFloatingBar_MouseUp(new object(), null),
+                UnfoldFloatingBar = () => ((MainWindow)Current.MainWindow).UnFoldFloatingBar_MouseUp(new object(), null),
+                ResetFloatingBarPosition = () =>
+                {
+                    var mw = (MainWindow)Current.MainWindow;
+                    var isInPPTPresentationMode = mw.IsInPPTPresentationMode;
+                    if (!mw.isFloatingBarFolded)
+                    {
+                        // 清空保存的状态，强制动画走默认位置分支
+                        mw._userHasDraggedFloatingBar = false;
+                        mw.pointDesktop = new Point(-1, -1);
+                        mw.pointPPT = new Point(-1, -1);
+
+                        if (!isInPPTPresentationMode) mw.PureViewboxFloatingBarMarginAnimationInDesktopMode();
+                        else mw.PureViewboxFloatingBarMarginAnimationInPPTMode();
+                    }
+                },
+                SetTrayTemporaryShowUntilUtc = value => Ink_Canvas.MainWindow.TrayTemporaryShowUntilUtc = value,
+                UiInvoke = action => Dispatcher.BeginInvoke(action),
+                OpenSettings = () =>
+                {
+                    try
+                    {
+                        var method = typeof(MainWindow).GetMethod("BtnSettings_Click", BindingFlags.NonPublic | BindingFlags.Instance);
+                        method?.Invoke(Current.MainWindow, new object[] { null, null });
+                    }
+                    catch (Exception ex) { LogHelper.WriteLogToFile($"Open settings from tray failed: {ex.Message}", LogHelper.LogType.Error); }
+                },
+                MarkExitByUser = () => IsAppExitByUser = true,
+                ExitApplicationByUser = () =>
+                {
+                    IsAppExitByUser = true;
+                    ((MainWindow)Current.MainWindow).ExitApplication(null, null);
+                },
+                Shutdown = () => Current.Shutdown(),
+                ForceFullScreen = () =>
+                {
+                    var mw = (MainWindow)Current.MainWindow;
+                    Ink_Canvas.MainWindow.MoveWindow(new WindowInteropHelper(mw).Handle, 0, 0,
+                        Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height, true);
+                    Ink_Canvas.MainWindow.ShowNewMessage($"已强制全屏化：{Screen.PrimaryScreen.Bounds.Width}x{Screen.PrimaryScreen.Bounds.Height}（缩放比例为{Screen.PrimaryScreen.Bounds.Width / SystemParameters.PrimaryScreenWidth}x{Screen.PrimaryScreen.Bounds.Height / SystemParameters.PrimaryScreenHeight}）");
+                },
+                CheckMainWindowVisibility = () => ((MainWindow)Current.MainWindow).CheckMainWindowVisibility(),
+                GetGlobalHotkeyManager = () => typeof(MainWindow)
+                    .GetField("_globalHotkeyManager", BindingFlags.NonPublic | BindingFlags.Instance)
+                    ?.GetValue(Current.MainWindow) as GlobalHotkeyManager,
+            });
+            service.TrayLeftClicked += () => PluginTrayLeftClicked?.Invoke();
+            service.TrayRightClicked += () => PluginTrayRightClicked?.Invoke();
+            return service;
+        }
+
         private void App_Exit(object sender, ExitEventArgs e)
         {
             isAppExiting = true;
+            _trayIconService?.Dispose();
             LogHelper.WriteLogToFile(
                 $"[Exit] 开始应用退出清理: user={IsAppExitByUser}, code={e.ApplicationExitCode}, crashAction={CrashAction}",
                 LogHelper.LogType.Info);
