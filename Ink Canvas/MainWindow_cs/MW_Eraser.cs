@@ -208,11 +208,16 @@ namespace Ink_Canvas
                     eraserFeedback.Visibility = Visibility.Visible;
                 }
 
-                // 更新橡皮擦位置
+                // 更新橡皮擦位置：控件折叠或刚改尺寸时 ActualWidth/ActualHeight 可能仍是 0/旧值，
+                // 直接用它居中会让图标从触点向下偏移。优先用显式设置的 Width/Height。
                 if (eraserFeedbackTranslateTransform != null)
                 {
-                    eraserFeedbackTranslateTransform.X = pt.X - eraserFeedback.ActualWidth / 2;
-                    eraserFeedbackTranslateTransform.Y = pt.Y - eraserFeedback.ActualHeight / 2;
+                    double feedbackWidth = eraserFeedback.Width;
+                    double feedbackHeight = eraserFeedback.Height;
+                    if (!(feedbackWidth > 0)) feedbackWidth = eraserFeedback.ActualWidth;
+                    if (!(feedbackHeight > 0)) feedbackHeight = eraserFeedback.ActualHeight;
+                    if (feedbackWidth > 0) eraserFeedbackTranslateTransform.X = pt.X - feedbackWidth / 2;
+                    if (feedbackHeight > 0) eraserFeedbackTranslateTransform.Y = pt.Y - feedbackHeight / 2;
                 }
 
                 // 添加点到碰撞检测器
