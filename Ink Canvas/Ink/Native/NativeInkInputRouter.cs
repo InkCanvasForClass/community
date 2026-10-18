@@ -295,24 +295,22 @@ namespace Ink_Canvas.Ink.Native
             out double eraserWidthDip)
         {
             eraserWidthDip = 0;
-            if (!policy.Enabled || policy.IsActive)
-                return policy.IsActive;
-            if (policy.IsSpecialScreen && policy.TouchMultiplier == 0)
+            if (!policy.Enabled)
                 return false;
 
-            var boundWidth = policy.IsQuadIr
-                ? Math.Sqrt(Math.Max(0, pointer.ContactWidthDip * pointer.ContactHeightDip))
-                : pointer.ContactWidthDip;
-            var threshold = policy.BoundsWidthDip
-                            * policy.ThresholdFactor
-                            * policy.SensitivityMultiplier;
-            if (boundWidth <= policy.BoundsWidthDip || boundWidth <= threshold)
-                return false;
-
-            eraserWidthDip = boundWidth
-                             * policy.EraserSizeFactor
+            var threshold = Math.Max(
+                policy.BoundsWidthDip,
+                policy.BoundsWidthDip * policy.ThresholdFactor * policy.SensitivityMultiplier);
+            var sizeFactor = policy.EraserSizeFactor
                              * (policy.IsSpecialScreen ? policy.TouchMultiplier : 1);
-            return true;
+            return PalmEraserContactTracker.TryGetEraserSize(
+                pointer.ContactWidthDip,
+                pointer.ContactHeightDip,
+                threshold,
+                sizeFactor,
+                false,
+                out eraserWidthDip,
+                out _);
         }
 
         private static bool IsUiZone(CanvasHitZone hitZone)

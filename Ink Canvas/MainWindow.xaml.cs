@@ -1361,6 +1361,9 @@ namespace Ink_Canvas
             var inkCanvas1 = sender as InkCanvas;
             if (inkCanvas1 == null) return;
 
+            if (isPalmEraserActive && !_changingPalmMode)
+                EndPalmEraser(false);
+
             NotifyPluginPenModeChanged(inkCanvas1.EditingMode);
 
             if (IsCurrentPageFrozen && IsFreezeMutatingMode(inkCanvas1.EditingMode))
