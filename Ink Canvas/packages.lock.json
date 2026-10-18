@@ -67,15 +67,6 @@
           "iNKORE.UI.WPF.Modern": "0.10.2.1-icc.4"
         }
       },
-      "JerryShaw.WPFMediaKit": {
-        "type": "Direct",
-        "requested": "[1.0.1, )",
-        "resolved": "1.0.1",
-        "contentHash": "t4yTVIKP/dABO7lpflH6hDlI7B4C4MKcj3LI22yu5LKo+ppTkirUefnpdZK5l95LDsqmdn1jMovCHEN2bSrGDg==",
-        "dependencies": {
-          "JerryShaw.DirectShowLib": "1.0.1"
-        }
-      },
       "MdXaml": {
         "type": "Direct",
         "requested": "[1.27.0, )",
