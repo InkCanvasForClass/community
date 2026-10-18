@@ -224,6 +224,27 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
   </ItemGroup>
+  <ItemGroup Condition="Exists('..\..\Dusk\sdk\Dusk.Wpf.Shell\Dusk.Wpf.Shell.csproj')">
+    <ProjectReference Include="..\..\Dusk\sdk\Dusk.Wpf.Shell\Dusk.Wpf.Shell.csproj">
+      <Private>True</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup Condition="!Exists('..\..\Dusk\sdk\Dusk.Wpf.Shell\Dusk.Wpf.Shell.csproj')">
+    <Reference Include="Dusk.Wpf.Shell">
+      <HintPath>libs\Dusk.Wpf.Shell.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <None Include="libs\Dusk.Wpf.Shell.dll">
+      <Link>Dusk.Wpf.Shell.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="libs\Dusk.Native.dll">
+      <Link>Dusk.Native.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <ItemGroup>
     <None Include="Resources\TimerDownNotice.wav" />
     <None Include="Resources\ProgressiveAudio.wav" />
