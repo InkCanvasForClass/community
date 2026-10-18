@@ -36,13 +36,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         // 设置已丢失。先到先写、后到排队。
         private static readonly object _saveGate = new object();
 
-        public static void SaveSettingsToFile()
+        public static void SaveSettingsToFile() => TrySaveSettingsToFile();
+
+        public static bool TrySaveSettingsToFile()
         {
-            var text = JsonConvert.SerializeObject(Settings, Formatting.Indented);
             lock (_saveGate)
             {
                 try
                 {
+                    var text = JsonConvert.SerializeObject(Settings, Formatting.Indented);
                     string configsDir = Path.Combine(App.RootPath, "Configs");
                     if (!Directory.Exists(configsDir))
                     {
@@ -68,11 +70,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                     catch
                     {
                         try { if (File.Exists(tmpPath)) File.Delete(tmpPath); } catch { }
-                        // 回退到直接覆盖，保持旧行为仍可用
-                        ProcessProtectionManager.WithWriteAccess(path, () => File.WriteAllText(path, text));
+                        throw; // Keep the last complete settings file if atomic replacement fails.
                     }
 
                     App.UpdateCachedSettingsJson(text);
+                    return true;
                 }
                 catch (Exception ex)
                 {
@@ -85,7 +87,29 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                     {
                         System.Diagnostics.Debug.WriteLine(ex);
                     }
+                    return false;
                 }
+            }
+        }
+
+        public static bool TrySaveCalibration(Ink.TouchCalibrationRecord record, int? nibWidth = null)
+        {
+            if (record != null && !record.IsValid()) return false;
+            lock (_saveGate)
+            {
+                var previous = Settings.Advanced.TouchCalibration;
+                var previousNib = Settings.Advanced.NibModeBoundsWidth;
+                Settings.Advanced.TouchCalibration = record;
+                if (nibWidth.HasValue) Settings.Advanced.NibModeBoundsWidth = Math.Clamp(nibWidth.Value, 1, 50);
+                if (TrySaveSettingsToFile())
+                {
+                    (System.Windows.Application.Current.MainWindow as MainWindow)?.ResetTouchCalibrationInput();
+                    SettingsActionHub.OnNibModeBoundsWidthChanged();
+                    return true;
+                }
+                Settings.Advanced.TouchCalibration = previous;
+                Settings.Advanced.NibModeBoundsWidth = previousNib;
+                return false;
             }
         }
 

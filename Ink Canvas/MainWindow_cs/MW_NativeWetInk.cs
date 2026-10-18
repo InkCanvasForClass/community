@@ -554,6 +554,10 @@ namespace Ink_Canvas
             var context = BuildRouteContext(facts);
             var decision = NativeInkInputRouter.DecideDown(facts, context);
             _nativeCapturedRoutes[batch.PointerId] = decision;
+            if (TryHandleNativePalm(batch, facts,
+                (decision.Route == NativeInputRoute.Ink || decision.Route == NativeInputRoute.PointErase)
+                && !(context.TwoFingerGestureAllowed && context.ActiveTouchCount > 1)))
+                return true;
 
             if (decision.Route == NativeInputRoute.BlockedFrozen)
             {
@@ -601,6 +605,12 @@ namespace Ink_Canvas
             var facts = CreatePointerFacts(batch);
             var context = BuildCapturedRouteContext(captured, batch.InputKind);
             var decision = NativeInkInputRouter.DecideCaptured(facts, context, captured);
+            if (TryHandleNativePalm(batch, facts,
+                (captured.Route == NativeInputRoute.Ink || captured.Route == NativeInputRoute.PointErase)
+                && decision.Route != NativeInputRoute.BlockedFrozen
+                && decision.Route != NativeInputRoute.CanvasGesture
+                && !(context.TwoFingerGestureAllowed && context.ActiveTouchCount > 1)))
+                return true;
 
             if (decision.Route == NativeInputRoute.BlockedFrozen
                 || decision.Route == NativeInputRoute.CanvasGesture
@@ -653,6 +663,11 @@ namespace Ink_Canvas
             if (batch.InputKind == NativeInkInputKind.Touch)
                 _nativeActiveTouchPointers.Remove(batch.PointerId);
 
+            if (FinishNativePalm(batch))
+            {
+                StopPauseStraightenTimerForPointer(batch.PointerId);
+                return true;
+            }
             if (captured.Route != NativeInputRoute.Ink)
                 return captured.Route != default && captured.ConsumeNativeMessage;
 
@@ -694,6 +709,7 @@ namespace Ink_Canvas
 
         private bool HandleNativePointerCaptureLost(NativePointerInputBatch batch)
         {
+            bool palmHandled = FinishNativePalm(batch);
             _nativeCapturedRoutes.Remove(batch.PointerId);
             if (batch.InputKind == NativeInkInputKind.Touch)
                 _nativeActiveTouchPointers.Remove(batch.PointerId);
@@ -710,7 +726,7 @@ namespace Ink_Canvas
             }
 
             StopPauseStraightenTimerForPointer(batch.PointerId);
-            return false;
+            return palmHandled;
         }
 
         private void CommitNativeStrokePayload(NativeStrokeCommitPayload payload)
@@ -1116,11 +1132,16 @@ namespace Ink_Canvas
             return Settings.Gesture.IsEnableTwoFingerGesture;
         }
 
-        private PalmRoutePolicy BuildPalmRoutePolicy()
+        private PalmRoutePolicy BuildPalmRoutePolicy(string source = "Pointer")
         {
             var canvas = Settings.Canvas;
             var advanced = Settings.Advanced;
             var isNib = Settings.Startup.IsEnableNibMode;
+            if (TouchCalibrationPolicy.TryResolve(advanced.TouchCalibration,
+                TouchCalibrationDisplay.Capture(this, source), canvas.PalmEraserSensitivity,
+                out var calibratedThreshold, out var calibratedScale))
+                return new PalmRoutePolicy(canvas.EnablePalmEraser, isPalmEraserActive, false, false,
+                    calibratedThreshold, 1, 1, calibratedScale, 1);
 
             double sensitivityMultiplier;
             switch (canvas.PalmEraserSensitivity)

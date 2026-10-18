@@ -8,6 +8,12 @@
     <LangVersion>10</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <Compile Include="..\Ink Canvas\Ink\TouchCalibrationRecordConverter.cs" Link="Ink\TouchCalibrationRecordConverter.cs" />
+    <Compile Include="..\Ink Canvas\Ink\PalmEraserContactTracker.cs" Link="Ink\PalmEraserContactTracker.cs" />
+    <Compile Include="..\Ink Canvas\Ink\PalmContactGroupTracker.cs" Link="Ink\PalmContactGroupTracker.cs" />
+    <Compile Include="..\Ink Canvas\Ink\TouchCalibrationRecord.cs" Link="Ink\TouchCalibrationRecord.cs" />
+    <Compile Include="..\Ink Canvas\Ink\TouchCalibrationSession.cs" Link="Ink\TouchCalibrationSession.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\NativeInkModels.cs" Link="Ink\Native\NativeInkModels.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\InkSampleHistoryNormalizer.cs" Link="Ink\Native\InkSampleHistoryNormalizer.cs" />
     <Compile Include="..\Ink Canvas\Ink\Native\InkSampleProcessor.cs" Link="Ink\Native\InkSampleProcessor.cs" />

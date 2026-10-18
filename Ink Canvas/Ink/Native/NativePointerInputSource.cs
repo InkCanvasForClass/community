@@ -74,7 +74,8 @@ namespace Ink_Canvas.Ink.Native
             HwndSource source,
             NativePointerInputHandler handler,
             double dpiScaleX,
-            double dpiScaleY)
+            double dpiScaleY,
+            bool registerRawMouse = true)
         {
             _source = source ?? throw new ArgumentNullException(nameof(source));
             _handler = handler ?? throw new ArgumentNullException(nameof(handler));
@@ -83,7 +84,7 @@ namespace Ink_Canvas.Ink.Native
             _dpiScaleX = dpiScaleX;
             _dpiScaleY = dpiScaleY;
             _source.AddHook(WndProc);
-            TryRegisterRawMouse(source.Handle);
+            if (registerRawMouse) TryRegisterRawMouse(source.Handle);
         }
 
         /// <summary>

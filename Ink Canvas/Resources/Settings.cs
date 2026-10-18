@@ -1403,6 +1403,16 @@ namespace Ink_Canvas
 
     public class Advanced
     {
+        [JsonProperty("touchCalibration")]
+        [JsonConverter(typeof(Ink.TouchCalibrationRecordConverter))]
+        public Ink.TouchCalibrationRecord TouchCalibration { get; set; }
+
+        [System.Runtime.Serialization.OnDeserialized]
+        private void ValidateCalibration(System.Runtime.Serialization.StreamingContext context)
+        {
+            // Missing records remain null; invalid/unknown versions never block old profiles.
+            if (TouchCalibration?.IsValid() != true) TouchCalibration = null;
+        }
         [JsonProperty("isSpecialScreen")]
         public bool IsSpecialScreen { get; set; }
 

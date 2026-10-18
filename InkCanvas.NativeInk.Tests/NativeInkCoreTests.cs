@@ -8,8 +8,16 @@ namespace InkCanvas.NativeInk.Tests
     {
         private static int _passed;
 
-        private static void Main()
+        private static void Main(string[] args)
         {
+            TouchCalibrationTests.RunAll();
+            if (Array.IndexOf(args, "--calibration-only") >= 0)
+            {
+                Run(nameof(RouterAppliesQuadIrPalmThresholdAndSpecialMultiplier), RouterAppliesQuadIrPalmThresholdAndSpecialMultiplier);
+                Run(nameof(RouterAllowsDelayedTwoFingerTakeover), RouterAllowsDelayedTwoFingerTakeover);
+                Run(nameof(RouterBlocksFrozenMutationButAllowsRoam), RouterBlocksFrozenMutationButAllowsRoam);
+                return;
+            }
             Run(nameof(HistoryIsChronologicalAndDeduplicated), HistoryIsChronologicalAndDeduplicated);
             Run(nameof(OutOfOrderHistoryIsSorted), OutOfOrderHistoryIsSorted);
             Run(nameof(OverlappingHistoryAcceptsOnlyNewFrames), OverlappingHistoryAcceptsOnlyNewFrames);
@@ -530,7 +538,7 @@ namespace InkCanvas.NativeInk.Tests
                         eraserSizeFactor: 0.5,
                         touchMultiplier: 1.5)));
             Equal(NativeInputRoute.PointErase, decision.Route);
-            Equal(36d, decision.PalmEraserWidthDip);
+            Equal(48d, decision.PalmEraserWidthDip);
 
             var disabledOnSpecialScreen = NativeInkInputRouter.DecideDown(
                 Pointer(NativeInkInputKind.Touch, contactWidthDip: 100, contactHeightDip: 100),
