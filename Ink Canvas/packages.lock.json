@@ -61,6 +61,16 @@
         "resolved": "1.2.8",
         "contentHash": "7b+z25JFdhGAfyJqlVIF0vLbmgsRvqDZMvhGPTz20gzQigDPMqVUOoCCKB5824GtYsjFCYNilmaowb+4yWATkQ=="
       },
+      "iNKORE.UI.WPF.Modern.Controls": {
+        "type": "Direct",
+        "requested": "[0.10.2.1-icc.4, )",
+        "resolved": "0.10.2.1-icc.4",
+        "contentHash": "094jZnm+Fg0rckruqWW7wBHQhlUonU26+188HQ/IkNADoT4erw0xuzInQdl1UqV7pbf8Tq04Mw6dwgv/6xEkwg==",
+        "dependencies": {
+          "iNKORE.UI.WPF": "1.2.8",
+          "iNKORE.UI.WPF.Modern": "0.10.2.1-icc.4"
+        }
+      },
       "JerryShaw.WPFMediaKit": {
         "type": "Direct",
         "requested": "[1.0.1, )",
@@ -298,6 +308,14 @@
         "contentHash": "puxd5k0RQQilmIReQZjz+lyJWWmko/WWYkNbEUpqymPXZsCv9ILrhdz1j6YARR1OJCl9RWykV7WWvxYJRsVdMw==",
         "dependencies": {
           "H.GeneratedIcons.System.Drawing": "2.1.4"
+        }
+      },
+      "iNKORE.UI.WPF.Modern": {
+        "type": "Transitive",
+        "resolved": "0.10.2.1-icc.4",
+        "contentHash": "FaqBNxWQamGvG1NU6uDa8HkGzBVOalf5q+Gb2HntetYCisJKEAG0aowhVy7a7fp4eHelyLZJKEEhABaybx31YQ==",
+        "dependencies": {
+          "iNKORE.UI.WPF": "1.2.8"
         }
       },
       "JerryShaw.DirectShowLib": {
