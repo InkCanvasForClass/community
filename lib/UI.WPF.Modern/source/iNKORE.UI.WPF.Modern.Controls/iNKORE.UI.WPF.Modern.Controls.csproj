@@ -4,7 +4,7 @@
 		<TargetFrameworks>net6.0-windows10.0.18362.0;net452</TargetFrameworks>
 		<UseWPF>true</UseWPF>
 		<NeutralLanguage>en-US</NeutralLanguage>
-		<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);GetDocumentationFile</TargetsForTfmSpecificBuildOutput>
+		<!-- Documentation is included by the SDK when generated. -->
 		<!--<NuspecFile>$(MSBuildThisFileDirectory)iNKORE.UI.WPF.ModernUI.nuspec</NuspecFile>-->
 		<!--<PackageId>$(AssemblyName)</PackageId>-->
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>

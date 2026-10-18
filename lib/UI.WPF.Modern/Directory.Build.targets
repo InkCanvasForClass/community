@@ -1,6 +1,14 @@
 ﻿<Project>
+  <PropertyGroup>
+    <Authors>iNKORE Studios and contributors</Authors>
+    <Description>Modern styles and controls for WPF, built from source for ICC-CE.</Description>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <RepositoryUrl>https://github.com/iNKORE-NET/UI.WPF.Modern</RepositoryUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)LICENSE.md" Pack="true" PackagePath="" />
+  </ItemGroup>
   <PropertyGroup Condition="'$(PackageId)' != ''">
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/InkoreStudios/UI.WPF.Modern</PackageProjectUrl>
     <PackageTags>WPF XAML UI Theme Controls Fluent Modern Metro WinUI</PackageTags>
     <PackageOutputPath>$(MSBuildThisFileDirectory)artifacts</PackageOutputPath>

@@ -61,15 +61,6 @@
         "resolved": "1.2.8",
         "contentHash": "7b+z25JFdhGAfyJqlVIF0vLbmgsRvqDZMvhGPTz20gzQigDPMqVUOoCCKB5824GtYsjFCYNilmaowb+4yWATkQ=="
       },
-      "iNKORE.UI.WPF.Modern": {
-        "type": "Direct",
-        "requested": "[0.10.2.1, )",
-        "resolved": "0.10.2.1",
-        "contentHash": "nGwuuVul+TcLCTgPmaAZCc0fYFqUpCNZ8PiulVT3gZnsWt/AvxMZ0DSPpuyI/iRPc/NhFIg9lSIR7uaHWV0I/Q==",
-        "dependencies": {
-          "iNKORE.UI.WPF": "1.2.8"
-        }
-      },
       "JerryShaw.WPFMediaKit": {
         "type": "Direct",
         "requested": "[1.0.1, )",
@@ -548,7 +539,7 @@
         "type": "Project",
         "dependencies": {
           "iNKORE.UI.WPF": "[1.2.8, )",
-          "iNKORE.UI.WPF.Modern": "[0.10.2.1, )"
+          "iNKORE.UI.WPF.Modern.Controls": "[0.10.2.1-icc.4, )"
         }
       },
       "inkcanvas.pluginsdk": {
