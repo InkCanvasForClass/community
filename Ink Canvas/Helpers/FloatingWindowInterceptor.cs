@@ -1026,7 +1026,7 @@ namespace Ink_Canvas.Helpers
                     foreach (var hWnd in rule.FoundWindows)
                     {
                         bool shouldIntercept = !_interceptedWindows.ContainsKey(hWnd) ||
-                                             (_interceptedWindows.ContainsKey(hWnd) && PInvoke.IsWindowVisible(new HWND(hWnd)));
+                                             (_interceptedWindows.ContainsKey(hWnd) && IsWindowVisibleToUser(new HWND(hWnd)));
 
                         if (shouldIntercept)
                         {
@@ -1340,6 +1340,15 @@ namespace Ink_Canvas.Helpers
             return MatchesRulePrecise(windowInfo.Handle, rule);
         }
 
+        /// <summary>
+        /// 判断窗口是否真正暴露给用户：需同时满足 WS_VISIBLE 且未被最小化。
+        /// 被 SW_FORCEMINIMIZE 处理过的窗口仍保留 WS_VISIBLE，但用户已看不到它。
+        /// </summary>
+        private static bool IsWindowVisibleToUser(HWND hwnd)
+        {
+            return PInvoke.IsWindowVisible(hwnd) && !PInvoke.IsIconic(hwnd);
+        }
+
         private void InterceptWindow(IntPtr hWnd, InterceptRule rule)
         {
             try
@@ -1355,16 +1364,38 @@ namespace Ink_Canvas.Helpers
                 }
 
                 // 直接隐藏窗口，不发送关闭消息；如果窗口仍报告可见，再用 SetWindowPos 补一次隐藏。
-                PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_HIDE);
-                if (PInvoke.IsWindowVisible(hwnd))
+                // 部分悬浮窗（如希沃白板5 的 WPF 悬浮窗）在跨进程调用 ShowWindow 时会异步处理，
+                // 单次调用后立即查询 IsWindowVisible 可能仍是 true，因此这里做多次重试。
+                for (int attempt = 0; attempt < 3; attempt++)
                 {
+                    PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_HIDE);
+                    if (!PInvoke.IsWindowVisible(hwnd))
+                        break;
+
                     PInvoke.SetWindowPos(hwnd, HWND.Null, 0, 0, 0, 0,
                         SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE |
                         SET_WINDOW_POS_FLAGS.SWP_NOZORDER | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE |
                         SET_WINDOW_POS_FLAGS.SWP_HIDEWINDOW);
+                    if (!PInvoke.IsWindowVisible(hwnd))
+                        break;
+
+                    if (attempt < 2)
+                        Thread.Sleep(50);
                 }
 
-                if (PInvoke.IsWindowVisible(hwnd))
+                // 仍然可见：目标窗口所在线程可能无响应，ShowWindow 的隐藏请求无法完成。
+                // SW_FORCEMINIMIZE 明确支持跨线程强制最小化，作为最后手段让窗口离开屏幕；
+                // 随后再尝试一次隐藏，能隐藏则彻底隐藏，否则保留最小化状态（同样不可见）。
+                if (IsWindowVisibleToUser(hwnd))
+                {
+                    PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_FORCEMINIMIZE);
+                    if (PInvoke.IsIconic(hwnd))
+                    {
+                        PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_HIDE);
+                    }
+                }
+
+                if (IsWindowVisibleToUser(hwnd))
                 {
                     LogHelper.WriteLogToFile($"隐藏悬浮窗失败: {hWnd} ({rule.Type})", LogHelper.LogType.Warning);
                     return;
