@@ -305,6 +305,8 @@ namespace Ink_Canvas.Helpers
 
         private readonly Dictionary<InterceptType, InterceptRule> _interceptRules;
         private readonly Dictionary<IntPtr, InterceptType> _interceptedWindows;
+        private readonly Dictionary<IntPtr, RECT> _originalWindowBounds = new Dictionary<IntPtr, RECT>();
+        private readonly Dictionary<IntPtr, FailedInterceptState> _failedWindows = new Dictionary<IntPtr, FailedInterceptState>();
         private readonly object _scanLock = new object();
         private readonly Timer _scanTimer;
         private readonly Dispatcher _dispatcher;
@@ -314,6 +316,12 @@ namespace Ink_Canvas.Helpers
         // 简化的性能统计
         private int _consecutiveEmptyScans = 0;
         private DateTime _lastSuccessfulScan = DateTime.Now;
+
+        private class FailedInterceptState
+        {
+            public int FailureCount { get; set; }
+            public DateTime NextRetryUtc { get; set; }
+        }
 
         #endregion
 
@@ -945,6 +953,17 @@ namespace Ink_Canvas.Helpers
 
             if (PInvoke.IsWindow(hwnd))
             {
+                // 如果之前为了隐藏移出过屏幕可视区，恢复其原始坐标与大小
+                if (_originalWindowBounds.TryGetValue(hWnd, out var origRect))
+                {
+                    int width = origRect.right - origRect.left;
+                    int height = origRect.bottom - origRect.top;
+                    PInvoke.SetWindowPos(hwnd, HWND.Null, origRect.left, origRect.top, width, height,
+                        SET_WINDOW_POS_FLAGS.SWP_NOZORDER | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE |
+                        SET_WINDOW_POS_FLAGS.SWP_SHOWWINDOW);
+                    _originalWindowBounds.Remove(hWnd);
+                }
+
                 // 恢复显示但不抢前台，也不改变窗口原有的 Z 序
                 PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_RESTORE);
                 PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_SHOWNOACTIVATE);
@@ -965,6 +984,7 @@ namespace Ink_Canvas.Helpers
             }
 
             _interceptedWindows.Remove(hWnd);
+            _originalWindowBounds.Remove(hWnd);
             return false;
         }
 
@@ -990,6 +1010,13 @@ namespace Ink_Canvas.Helpers
             foreach (var hWnd in invalidWindows)
             {
                 _interceptedWindows.Remove(hWnd);
+                _originalWindowBounds.Remove(hWnd);
+            }
+
+            var invalidFailed = _failedWindows.Keys.Where(h => !PInvoke.IsWindow(new HWND(h))).ToList();
+            foreach (var h in invalidFailed)
+            {
+                _failedWindows.Remove(h);
             }
         }
 
@@ -1025,8 +1052,14 @@ namespace Ink_Canvas.Helpers
 
                     foreach (var hWnd in rule.FoundWindows)
                     {
+                        // 若处于失败冷却期，跳过重试以防日志刷屏
+                        if (_failedWindows.TryGetValue(hWnd, out var failState) && DateTime.UtcNow < failState.NextRetryUtc)
+                        {
+                            continue;
+                        }
+
                         bool shouldIntercept = !_interceptedWindows.ContainsKey(hWnd) ||
-                                             (_interceptedWindows.ContainsKey(hWnd) && PInvoke.IsWindowVisible(new HWND(hWnd)));
+                                             (_interceptedWindows.ContainsKey(hWnd) && IsWindowVisibleToUser(new HWND(hWnd)));
 
                         if (shouldIntercept)
                         {
@@ -1287,7 +1320,7 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        private bool TryGetWindowBounds(HWND hwnd, out RECT rect)
+        private static bool TryGetWindowBounds(HWND hwnd, out RECT rect)
         {
             var frameBounds = new byte[Marshal.SizeOf<RECT>()];
             if (PInvoke.DwmGetWindowAttribute(
@@ -1340,37 +1373,119 @@ namespace Ink_Canvas.Helpers
             return MatchesRulePrecise(windowInfo.Handle, rule);
         }
 
+        /// <summary>
+        /// 判断窗口是否真正暴露给用户：需同时满足 WS_VISIBLE 且未被最小化，且未被移出屏幕可视范围。
+        /// 被 SW_FORCEMINIMIZE 处理过的窗口仍保留 WS_VISIBLE，但用户已看不到它。
+        /// </summary>
+        private static bool IsWindowVisibleToUser(HWND hwnd)
+        {
+            if (!PInvoke.IsWindow(hwnd) || !PInvoke.IsWindowVisible(hwnd) || PInvoke.IsIconic(hwnd))
+                return false;
+
+            // 若窗口已被移出屏幕可视范围（如左上角小于 -10000），对用户而言已不可见
+            if (TryGetWindowBounds(hwnd, out var rect))
+            {
+                if (rect.right <= -10000 || rect.bottom <= -10000 || rect.left <= -10000 || rect.top <= -10000)
+                    return false;
+            }
+
+            return true;
+        }
+
         private void InterceptWindow(IntPtr hWnd, InterceptRule rule)
         {
             try
             {
                 HWND hwnd = new HWND(hWnd);
-                if (!PInvoke.IsWindow(hwnd) || !PInvoke.IsWindowVisible(hwnd))
+                if (!PInvoke.IsWindow(hwnd) || !IsWindowVisibleToUser(hwnd))
                 {
                     if (_interceptedWindows.ContainsKey(hWnd))
                     {
                         _interceptedWindows.Remove(hWnd);
+                        _originalWindowBounds.Remove(hWnd);
                     }
+                    _failedWindows.Remove(hWnd);
                     return;
                 }
 
-                // 直接隐藏窗口，不发送关闭消息；如果窗口仍报告可见，再用 SetWindowPos 补一次隐藏。
-                PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_HIDE);
-                if (PInvoke.IsWindowVisible(hwnd))
+                // 尝试记录原始位置供后续恢复或移出屏幕时使用
+                if (!_originalWindowBounds.ContainsKey(hWnd) && TryGetWindowBounds(hwnd, out var currentBounds))
                 {
+                    if (currentBounds.left > -10000 && currentBounds.top > -10000)
+                    {
+                        _originalWindowBounds[hWnd] = currentBounds;
+                    }
+                }
+
+                // 直接隐藏窗口，不发送关闭消息；如果窗口仍报告可见，再用 SetWindowPos 补一次隐藏。
+                // 部分悬浮窗（如希沃白板5 的 WPF 悬浮窗）在跨进程调用 ShowWindow 时会异步处理，
+                // 单次调用后立即查询 IsWindowVisible 可能仍是 true，因此这里做多次重试。
+                for (int attempt = 0; attempt < 3; attempt++)
+                {
+                    PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_HIDE);
+                    if (!PInvoke.IsWindowVisible(hwnd))
+                        break;
+
                     PInvoke.SetWindowPos(hwnd, HWND.Null, 0, 0, 0, 0,
                         SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE |
                         SET_WINDOW_POS_FLAGS.SWP_NOZORDER | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE |
                         SET_WINDOW_POS_FLAGS.SWP_HIDEWINDOW);
+                    if (!PInvoke.IsWindowVisible(hwnd))
+                        break;
+
+                    if (attempt < 2)
+                        Thread.Sleep(50);
                 }
 
-                if (PInvoke.IsWindowVisible(hwnd))
+                // 仍然可见：目标窗口所在线程可能无响应，ShowWindow 的隐藏请求无法完成。
+                // SW_FORCEMINIMIZE 明确支持跨线程强制最小化，作为最后手段让窗口离开屏幕；
+                // 随后再尝试一次隐藏，能隐藏则彻底隐藏，否则保留最小化状态（同样不可见）。
+                if (IsWindowVisibleToUser(hwnd))
                 {
-                    LogHelper.WriteLogToFile($"隐藏悬浮窗失败: {hWnd} ({rule.Type})", LogHelper.LogType.Warning);
+                    PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_FORCEMINIMIZE);
+                    if (PInvoke.IsIconic(hwnd))
+                    {
+                        PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_HIDE);
+                    }
+                }
+
+                // 兜底手段：如果无边框浮窗（如希沃无最小化样式的 WPF 浮窗）依然顽固可见，尝试将其移出屏幕可视范围（-32000, -32000）
+                if (IsWindowVisibleToUser(hwnd))
+                {
+                    PInvoke.SetWindowPos(hwnd, HWND.Null, -32000, -32000, 0, 0,
+                        SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOZORDER | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE);
+                }
+
+                if (IsWindowVisibleToUser(hwnd))
+                {
+                    int win32Error = Marshal.GetLastWin32Error();
+                    if (!_failedWindows.TryGetValue(hWnd, out var failState))
+                    {
+                        failState = new FailedInterceptState();
+                        _failedWindows[hWnd] = failState;
+                    }
+                    failState.FailureCount++;
+                    int cooldownSeconds = failState.FailureCount switch
+                    {
+                        1 => 30,
+                        2 => 60,
+                        _ => 180
+                    };
+                    failState.NextRetryUtc = DateTime.UtcNow.AddSeconds(cooldownSeconds);
+
+                    // 仅在首次失败或达到退避阈值时记录警告日志，杜绝每 2 秒高频刷屏
+                    if (failState.FailureCount <= 2 || failState.FailureCount % 10 == 0)
+                    {
+                        string reason = win32Error == 5
+                            ? "拒绝访问 (Win32 Error 5)。目标窗口拥有更高的管理员权限，请尝试以管理员身份运行 Ink Canvas 以完成拦截"
+                            : $"Win32错误码: {win32Error}";
+                        LogHelper.WriteLogToFile($"隐藏悬浮窗失败: 0x{hWnd.ToInt64():X8} ({rule.Type})，{reason}，将在 {cooldownSeconds} 秒后重试", LogHelper.LogType.Warning);
+                    }
                     return;
                 }
 
-                // 记录拦截的窗口
+                // 成功隐藏：清除失败记录，登记到已拦截窗口
+                _failedWindows.Remove(hWnd);
                 _interceptedWindows[hWnd] = rule.Type;
 
                 // 触发事件

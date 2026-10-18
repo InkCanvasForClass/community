@@ -202,6 +202,7 @@ namespace Ink_Canvas
         /// </summary>
         internal void AbortAllActiveTouchInputs()
         {
+            ResetPalmEraser();
             if (_activeRealtimeTouchStrokeIds.Count > 0)
             {
                 foreach (var strokeId in _activeRealtimeTouchStrokeIds)
@@ -2007,6 +2008,8 @@ namespace Ink_Canvas
                 return;
             }
 
+            if (TryHandlePalmTouch(e, true)) return;
+
             if (ShouldUseRealtimeVelocityBrushTipForTouch()
                 && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
                 && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
@@ -2058,33 +2061,6 @@ namespace Ink_Canvas
                 return;
             }
 
-            if (Settings.Canvas.EnablePalmEraser && !isPalmEraserActive && drawingShapeMode == 0)
-            {
-                var touchPoint = e.GetTouchPoint(inkCanvas);
-                var touchBounds = e.GetTouchPoint(null).Bounds;
-                var palmEvaluation = PalmEraserCalculator.Evaluate(
-                    touchBounds.Width,
-                    touchBounds.Height,
-                    BuildPalmEraserPolicy());
-
-                if (palmEvaluation.ActivatesEraser)
-                {
-                    palmEraserPreviousEditingMode = inkCanvas.EditingMode;
-                    inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
-                    isPalmEraserActive = true;
-
-                    EnableEraserOverlay();
-                    eraserWidth = palmEvaluation.EraserWidthDip;
-                    UpdateEraserStyle();
-                    EraserOverlay_PointerDown(sender);
-                    EraserOverlay_PointerMove(sender, touchPoint.Position);
-                    if (Settings.Canvas.IsShowCursor)
-                    {
-                        inkCanvas.ForceCursor = false;
-                        inkCanvas.UseCustomCursor = false;
-                    }
-                }
-            }
 
             if (dec.Count == 1)
             {
@@ -2138,12 +2114,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void InkCanvas_PreviewTouchMove(object sender, TouchEventArgs e)
         {
-            if (isPalmEraserActive)
-            {
-                var touchPoint = e.GetTouchPoint(inkCanvas);
-                EraserOverlay_PointerMove(sender, touchPoint.Position);
-                return;
-            }
+            if (TryHandlePalmTouch(e, false)) return;
 
             var touchId = e.TouchDevice.Id;
             if (_activeRealtimeTouchStrokeIds.Contains(touchId))
@@ -2203,6 +2174,8 @@ namespace Ink_Canvas
         /// </remarks>
         private void InkCanvas_PreviewTouchUp(object sender, TouchEventArgs e)
         {
+            if (FinishPalmTouch(e)) return;
+
             // 视频展台特殊模式：所有手指抬起后恢复用户原本的 EditingMode
             // （PreviewTouchDown 中为了抑制 InkCanvas 内部框选临时切到了 None）
             if (_isVideoPresenterSpecialMode)
@@ -2361,16 +2334,6 @@ namespace Ink_Canvas
                         }
                     }
 
-                    if (isPalmEraserActive)
-                    {
-                        isPalmEraserActive = false;
-                        DisableEraserOverlay();
-                        if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
-                        {
-                            inkCanvas.EditingMode = palmEraserPreviousEditingMode;
-                            SetCursorBasedOnEditingMode(inkCanvas);
-                        }
-                    }
                 }
             }
 
