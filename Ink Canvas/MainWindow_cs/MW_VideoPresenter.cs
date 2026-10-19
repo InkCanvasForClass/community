@@ -411,11 +411,71 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 是否启用多指书写（桌面/白板各自取对应设置，临时多指模式优先）。
+        /// 普通模式与视频展台模式共用：开启时每个触点独立成笔，双指手势让位给书写。
+        /// </summary>
+        private bool MultiTouchWritingEnabled => isInMultiTouchMode
+            || (currentMode == 1
+                ? Settings?.Gesture?.IsEnableMultiTouchModeBoard == true
+                : Settings?.Gesture?.IsEnableMultiTouchMode == true);
+
+        /// <summary>展台模式：是否允许双指移动预览。</summary>
+        private bool BoothTwoFingerTranslateEnabled => currentMode == 1
+            ? Settings?.Gesture?.IsEnableTwoFingerTranslateBoard == true
+            : Settings?.Gesture?.IsEnableTwoFingerTranslate == true;
+
+        /// <summary>展台模式：是否允许双指缩放预览。</summary>
+        private bool BoothTwoFingerZoomEnabled => currentMode == 1
+            ? Settings?.Gesture?.IsEnableTwoFingerZoomBoard == true
+            : Settings?.Gesture?.IsEnableTwoFingerZoom == true;
+
+        /// <summary>
+        /// 展台：单指触摸是否应驱动预览的平移/缩放。
+        /// 书写（笔/图形）与擦除工具下单指只负责画墨迹或擦除，不再同时拖动预览；
+        /// 选择/光标/漫游工具下保留"单指拖动预览"的既有行为。
+        /// 判定依据是当前工具（<see cref="ResolveLogicalInkTool"/>），而不是 EditingMode
+        /// —— 某些墨迹管线下笔模式 EditingMode 并不是 Ink，只看它会导致单指同时写字和拖画面。
+        /// </summary>
+        private bool AllowBoothSingleFingerPreview()
+        {
+            switch (ResolveLogicalInkTool())
+            {
+                case LogicalInkTool.Select:
+                case LogicalInkTool.Cursor:
+                case LogicalInkTool.BoardRoam:
+                    return true;
+                default:
+                    // Pen / PointEraser / StrokeEraser / Shape：单指用于书写或擦除
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// 展台模式不支持双指旋转手势（画面旋转请用展台菜单的旋转按钮），
+        /// 进入/退出展台时把手势面板里的"双指旋转"开关置灰禁用。
+        /// </summary>
+        private void SetBoothGestureRotationUiEnabled(bool enabled)
+        {
+            SetRow(FloatingBarGesturePopupContent);
+            SetRow(BoardGesturePopupContent);
+
+            void SetRow(Ink_Canvas.Controls.GesturePopupContent content)
+            {
+                if (content == null) return;
+                content.TwoFingerRotationToggle.IsEnabled = enabled;
+                content.TwoFingerRotationRow.IsEnabled = enabled;
+                content.TwoFingerRotationRow.Opacity = enabled ? 1.0 : 0.4;
+            }
+        }
+
         /// <summary>进入视频展台特殊模式：白板背景变 #333333，隐藏所有选择框，准备全屏预览。</summary>
         private void EnterVideoPresenterSpecialMode()
         {
             if (_isVideoPresenterSpecialMode) return;
             _isVideoPresenterSpecialMode = true;
+            // 展台不支持双指旋转手势，置灰对应开关
+            SetBoothGestureRotationUiEnabled(false);
             // 每次进入展台都重置预览成功标记与兜底重试计数
             _boothMediaOpened = false;
             _boothPreviewRestartRetryCount = 0;
@@ -504,6 +564,8 @@ namespace Ink_Canvas
         {
             if (!_isVideoPresenterSpecialMode) return;
             _isVideoPresenterSpecialMode = false;
+            // 退出展台后恢复双指旋转开关
+            SetBoothGestureRotationUiEnabled(true);
             _boothMediaOpened = false;
             _boothPreviewRestartRetryCount = 0;
             LogHelper.WriteLogToFile("[Booth] 退出视频展台拍摄模式，已丢弃拍摄态墨迹", LogHelper.LogType.Info);
@@ -1695,9 +1757,31 @@ namespace Ink_Canvas
         /// - 双指旋转：Rotation（暂不处理，丢弃避免误操作）</summary>
         private void VideoPresenterSpecialMode_ManipulationStarting(object sender, ManipulationStartingEventArgs e)
         {
-            // 必须 Scale + Translate 才能让单指拖动产生 DeltaManipulation.Translation
-            // 不加 Rotation 避免双指误旋转
-            e.Mode = ManipulationModes.Scale | ManipulationModes.Translate;
+            int manipulatorCount = e.Manipulators?.Count() ?? 0;
+            // 单指 + 书写/擦除工具：触摸只用于写字或擦除，不启动预览手势会话。
+            // （否则会出现"一根手指既画墨迹又拖动预览画面"）
+            if (manipulatorCount < 2 && !AllowBoothSingleFingerPreview())
+            {
+                e.Mode = ManipulationModes.None;
+                e.Handled = true;
+                return;
+            }
+            // 多指书写开启时，双指留给墨迹，不接管预览手势
+            if (manipulatorCount >= 2 && MultiTouchWritingEnabled)
+            {
+                e.Mode = ManipulationModes.None;
+                e.Handled = true;
+                return;
+            }
+
+            // 双指移动/缩放由手势开关控制；单指拖动预览不受"双指"开关限制
+            var modes = ManipulationModes.None;
+            if (manipulatorCount < 2 || BoothTwoFingerTranslateEnabled)
+                modes |= ManipulationModes.Translate;
+            if (BoothTwoFingerZoomEnabled)
+                modes |= ManipulationModes.Scale;
+            // 展台不支持双指旋转（画面旋转用展台菜单的旋转按钮）
+            e.Mode = modes;
             // ManipulationContainer 默认是 e.Source，即 VideoPresenterSpecialModeContainer，
             // 这样 e.ManipulationOrigin 已经是容器坐标，可以直接用于缩放锚点。
             e.Handled = true;
@@ -1713,13 +1797,24 @@ namespace Ink_Canvas
             if (!_isVideoPresenterSpecialMode) return;
 
             // 展台双指捏合/拖动接管预览变换：取消 WinRT 墨迹在途湿墨。
-            if ((e.Manipulators?.Count() ?? 0) >= 2)
+            // 多指书写开启时不取消——双指仍用于写字。
+            if (!MultiTouchWritingEnabled && (e.Manipulators?.Count() ?? 0) >= 2)
                 CancelActiveWinRTInk();
 
             try
             {
                 var delta = e.DeltaManipulation;
                 int manipulatorCount = e.Manipulators?.Count() ?? 0;
+
+                // 单指 + 书写/擦除工具：预览不平移/缩放（兜底 ManipulationStarting 的守门）
+                if (manipulatorCount < 2 && !AllowBoothSingleFingerPreview()) return;
+
+                // 多指书写开启：双指留给墨迹，不操作预览
+                if (manipulatorCount >= 2 && MultiTouchWritingEnabled) return;
+
+                // 双指移动/缩放由手势开关控制（单指拖动预览始终可用）
+                bool translateEnabled = manipulatorCount < 2 || BoothTwoFingerTranslateEnabled;
+                bool zoomEnabled = manipulatorCount >= 2 && BoothTwoFingerZoomEnabled;
 
                 // 锚点：ManipulationOrigin（容器坐标）
                 // - 单指时是手指位置
@@ -1729,7 +1824,7 @@ namespace Ink_Canvas
                 // === 1. 处理平移（单指拖动 或 双指平移）===
                 double dx = delta.Translation.X;
                 double dy = delta.Translation.Y;
-                if (Math.Abs(dx) > 0.001 || Math.Abs(dy) > 0.001)
+                if (translateEnabled && (Math.Abs(dx) > 0.001 || Math.Abs(dy) > 0.001))
                 {
                     _boothPreviewTranslateX += dx;
                     _boothPreviewTranslateY += dy;
@@ -1759,7 +1854,7 @@ namespace Ink_Canvas
                 double scaleFactor = delta.Scale.Length > 0
                     ? (delta.Scale.X + delta.Scale.Y) / 2.0
                     : 1.0;
-                if (manipulatorCount >= 2 && Math.Abs(scaleFactor - 1.0) >= 0.001)
+                if (zoomEnabled && Math.Abs(scaleFactor - 1.0) >= 0.001)
                 {
                     // 限制缩放范围 0.1 - 10.0
                     double newScale = Math.Max(0.1, Math.Min(10.0, _boothPreviewScale * scaleFactor));
@@ -3416,17 +3511,11 @@ namespace Ink_Canvas
                 return;
             }
 
-            // 应用旋转（与拍照路径一致：D3DImage 拿到的是原始帧，需要手动旋转）
-            int rotation = _cameraService?.RotationAngle ?? 0;
-            BitmapSource rotated = rotation != 0 ? ApplyRotationToBitmapSource(frameSrc, rotation) : frameSrc;
-            if (rotated == null)
-            {
-                System.Threading.Interlocked.Exchange(ref _paperDetectRunning, 0);
-                return;
-            }
-
-            int frameW = rotated.PixelWidth;
-            int frameH = rotated.PixelHeight;
+            // 注意：这里必须用原始帧（未旋转）做检测，角点也保持原始帧坐标。
+            // 旋转/镜像不在这里应用——否则会和 MapFramePointToOverlay 里的元素变换叠加，
+            // 导致 180° 转两次（看起来没转）、90°/270° 多转 90°（框偏到左下）。
+            int frameW = frameSrc.PixelWidth;
+            int frameH = frameSrc.PixelHeight;
 
             // 后台线程做检测（TryDetectPaperCorners 内部会下采样，~30ms）
             System.Threading.Tasks.Task.Run(() =>
@@ -3435,7 +3524,7 @@ namespace Ink_Canvas
                 List<OpenCvSharp.Point> corners = null;
                 try
                 {
-                    bmp = BitmapSourceToBitmap(rotated);
+                    bmp = BitmapSourceToBitmap(frameSrc);
                     if (bmp != null)
                     {
                         // verbose=false：实时检测不输出日志/不保存诊断图，避免每 400ms 刷屏
@@ -3448,21 +3537,20 @@ namespace Ink_Canvas
                     bmp?.Dispose();
                 }
 
-                // 映射角点到 overlay 坐标
-                System.Windows.Point[] overlayPts = null;
-                if (corners != null && corners.Count == 4)
-                {
-                    overlayPts = new System.Windows.Point[4];
-                    for (int i = 0; i < 4; i++)
-                    {
-                        overlayPts[i] = MapFramePointToOverlay(
-                            corners[i].X, corners[i].Y, frameW, frameH);
-                    }
-                }
-
-                // 回到 UI 线程画框
+                // 回到 UI 线程映射角点并画框（映射依赖 WPF 元素布局，必须在 UI 线程执行）
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
+                    System.Windows.Point[] overlayPts = null;
+                    if (corners != null && corners.Count == 4)
+                    {
+                        overlayPts = new System.Windows.Point[4];
+                        for (int i = 0; i < 4; i++)
+                        {
+                            overlayPts[i] = MapFramePointToOverlay(
+                                corners[i].X, corners[i].Y, frameW, frameH);
+                        }
+                    }
+
                     DrawPaperDetectOverlay(overlayPts);
                     System.Threading.Interlocked.Exchange(ref _paperDetectRunning, 0);
                 }));
@@ -3470,95 +3558,35 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 把帧坐标 (frameX, frameY) 映射到 PaperDetectOverlayCanvas 的坐标空间。
-        /// 需要考虑：VideoCaptureElement 的 Stretch=Uniform + LayoutTransform 旋转 + RenderTransform(缩放/平移)。
-        /// 映射流程：帧坐标 → 旋转后帧坐标 → Uniform 缩放到 VideoCaptureElement 布局尺寸
-        ///          → 应用 RenderTransform(Scale + Translate，含 RenderTransformOrigin=(0,0) 规则)
-        ///          → 加 VideoCaptureElement 在 overlay 中的布局偏移
-        ///          → overlay 坐标
-        /// 注意：RenderTransformOrigin=(0,0)，缩放公式为 translate_new = origin - (origin - translate_old) * ratio，
-        ///       在 origin=(0,0) 下化简为 translate_new = translate_old * ratio，即缩放是以"平移后的左上角"为锚点。
-        ///       最终屏幕位置 = Scale * 布局坐标 + Translate。
+        /// 把原始帧坐标 (frameX, frameY) 映射到 PaperDetectOverlayCanvas 的坐标空间。
+        /// 复用墨迹跟随画面的同一套变换：
+        ///   1. 原始帧 → 0° 时的画面坐标（Uniform 铺满容器并居中，与墨迹画布坐标一致）
+        ///   2. 应用预览的 RenderTransform（缩放 + 平移，RenderTransformOrigin=(0,0)）
+        ///   3. 应用 <see cref="GetBoothRotationMatrix"/>（绕画面视觉中心旋转 + 90/270 的 fit 缩放），
+        ///      与 RotateBoothStrokesFromBaseline 中墨迹使用的矩阵完全相同。
+        /// 注意：传入的必须是未旋转的原始帧坐标；本方法读取 WPF 元素尺寸，须在 UI 线程调用。
         /// </summary>
         private System.Windows.Point MapFramePointToOverlay(double frameX, double frameY, int frameW, int frameH)
         {
             if (PaperDetectOverlayCanvas == null) return new System.Windows.Point(0, 0);
-            double overlayW = PaperDetectOverlayCanvas.ActualWidth;
-            double overlayH = PaperDetectOverlayCanvas.ActualHeight;
-            if (overlayW <= 0 || overlayH <= 0) return new System.Windows.Point(0, 0);
 
-            int rotation = _cameraService?.RotationAngle ?? 0;
+            double containerW = VideoPresenterSpecialModeContainer?.ActualWidth ?? PaperDetectOverlayCanvas.ActualWidth;
+            double containerH = VideoPresenterSpecialModeContainer?.ActualHeight ?? PaperDetectOverlayCanvas.ActualHeight;
+            if (containerW <= 0 || containerH <= 0 || frameW <= 0 || frameH <= 0)
+                return new System.Windows.Point(0, 0);
 
-            // 1. 帧坐标 → 旋转后坐标（旋转后帧的"显示"尺寸会宽高交换）
-            double rx, ry, rotW, rotH;
-            if (rotation == 1) // 90° 顺时针
-            {
-                rx = frameH - frameY;
-                ry = frameX;
-                rotW = frameH; rotH = frameW;
-            }
-            else if (rotation == 2) // 180°
-            {
-                rx = frameW - frameX;
-                ry = frameH - frameY;
-                rotW = frameW; rotH = frameH;
-            }
-            else if (rotation == 3) // 270°
-            {
-                rx = frameY;
-                ry = frameW - frameX;
-                rotW = frameH; rotH = frameW;
-            }
-            else // 0°
-            {
-                rx = frameX; ry = frameY;
-                rotW = frameW; rotH = frameH;
-            }
+            // 1. 原始帧 → 0° 画面坐标（Uniform 铺满容器并居中，与墨迹同一坐标系）
+            double fit = Math.Min(containerW / frameW, containerH / frameH);
+            double x0 = frameX * fit + (containerW - frameW * fit) / 2.0;
+            double y0 = frameY * fit + (containerH - frameH * fit) / 2.0;
 
-            // 2. VideoCaptureElement 的布局尺寸（经过 LayoutTransform 旋转后的实际占用尺寸）
-            //    父容器用 Grid.Stretch=Fill 或类似布局，VideoCaptureElement 自身 Stretch=Uniform
-            //    所以它的布局尺寸 = 父容器尺寸（overlay 尺寸），再在内部 Uniform 拉伸留黑边
-            double elemW = VideoPresenterFullCanvasImage?.ActualWidth ?? overlayW;
-            double elemH = VideoPresenterFullCanvasImage?.ActualHeight ?? overlayH;
-            if (elemW <= 0 || elemH <= 0) { elemW = overlayW; elemH = overlayH; }
+            // 2. 预览缩放/平移（与 VideoPresenterFullCanvasScale/Translate 一致，origin=(0,0)）
+            double px = x0 * _boothPreviewScale + _boothPreviewTranslateX;
+            double py = y0 * _boothPreviewScale + _boothPreviewTranslateY;
 
-            // 3. Uniform 缩放：旋转后帧 → VideoCaptureElement 布局框（留黑边居中）
-            double stretch = Math.Min(elemW / rotW, elemH / rotH);
-            double uniformX = rx * stretch;   // VideoCaptureElement 内部坐标（左上角对齐）
-            double uniformY = ry * stretch;
-            // Uniform 居中偏移（黑边）
-            double uniformOffsetX = (elemW - rotW * stretch) / 2.0;
-            double uniformOffsetY = (elemH - rotH * stretch) / 2.0;
-            double layoutX = uniformX + uniformOffsetX;   // VideoCaptureElement 布局坐标
-            double layoutY = uniformY + uniformOffsetY;
-
-            // 4. 应用 RenderTransform：Scale + Translate（RenderTransformOrigin=(0,0)）
-            //    屏幕坐标 = Scale * 布局坐标 + Translate
-            double scale = _boothPreviewScale;
-            double tx = _boothPreviewTranslateX;
-            double ty = _boothPreviewTranslateY;
-            double screenX = layoutX * scale + tx;
-            double screenY = layoutY * scale + ty;
-
-            // 5. VideoCaptureElement 在 overlay 中的偏移（Grid 布局通常对齐到 overlay 左上角，偏移=0）
-            //    若 Grid 有 Margin/非零对齐，需要加 VideoCaptureElement 相对 overlay 的偏移；
-            //    这里用 TranslatePoint 从 VideoCaptureElement 坐标系转换到 overlay 坐标系，更鲁棒
-            if (VideoPresenterFullCanvasImage != null && PaperDetectOverlayCanvas != null)
-            {
-                try
-                {
-                    var pt = VideoPresenterFullCanvasImage.TranslatePoint(
-                        new System.Windows.Point(screenX, screenY), PaperDetectOverlayCanvas);
-                    return pt;
-                }
-                catch (Exception ex)
-                {
-                    LogBoothCallbackException("把帧内检测点映射到识别框覆盖层坐标", ex);
-                    // 转换失败时退回到直接返回 screenX/screenY（视为偏移=0）
-                }
-            }
-
-            return new System.Windows.Point(screenX, screenY);
+            // 3. 旋转：直接复用墨迹跟随画面的矩阵，保证红框与墨迹/画面完全同步
+            var matrix = GetBoothRotationMatrix(GetBoothVisualAngle(), containerW, containerH, frameW, frameH);
+            return matrix.Transform(new System.Windows.Point(px, py));
         }
 
         /// <summary>
