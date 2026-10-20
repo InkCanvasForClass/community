@@ -211,10 +211,6 @@ namespace Ink_Canvas.Helpers
                         }
                     }
 
-                    // 强制回收以释放文件句柄
-                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
-                    GC.WaitForPendingFinalizers();
-
                     action();
                 }
                 finally
@@ -277,10 +273,6 @@ namespace Ink_Canvas.Helpers
                         try { kv.Value.Dispose(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                     }
                 }
-
-                // 强制回收以释放文件句柄
-                GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true);
-                GC.WaitForPendingFinalizers();
 
                 action();
             }
