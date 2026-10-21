@@ -67,6 +67,28 @@ host.LogError("出错了", ex);
 
 **插件日志路由到 `PluginLogs/<plugin-id>/<yyyy-MM-dd>.log`，不混入宿主日志 `PluginLogs/host/`，也不进入主程序日志。** 插件禁止自行写文件，也禁止往宿主日志目录写。
 
+### 统一配置存储（IPluginConfigurationStore）
+
+宿主通过 `IPluginHost.Configuration` 提供当前插件独立的配置存储，所有操作均相对于宿主分配的 `PluginConfigs/<plugin-id>/` 目录。插件不需要自行拼接绝对路径、创建目录或实现临时文件替换。
+
+```csharp
+// 读取 JSON；文件不存在时返回默认配置
+var config = host.Configuration.ReadJson("config.json", new PluginConfig());
+
+// 保存 JSON（宿主使用临时文件替换，降低写入中断导致文件损坏的风险）
+host.Configuration.WriteJson("config.json", config);
+
+// 也可直接读写文本
+if (host.Configuration.Exists("token.json"))
+{
+    var json = host.Configuration.ReadAllText("token.json");
+}
+host.Configuration.WriteAllText("token.json", json);
+host.Configuration.Delete("obsolete.json");
+```
+
+存储 API 只接受相对路径，并拒绝越出当前插件配置目录的路径。它不负责业务级加密；需要加密的插件应在序列化前加密、读取后解密。已有加密配置可继续保留其格式与迁移逻辑。
+
 ### 服务注册 / 获取（DI）
 
 ```csharp
