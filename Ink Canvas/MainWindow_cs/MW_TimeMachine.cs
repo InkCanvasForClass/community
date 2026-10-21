@@ -499,6 +499,19 @@ namespace Ink_Canvas
                 ResetRotationBaseline();
             }
 
+            if (e?.Removed != null && e.Removed.Count > 0 && inkCanvas != null)
+            {
+                var remainingSelected = inkCanvas.GetSelectedStrokes();
+                if (remainingSelected.Count == 0 && currentSelectedElement == null)
+                {
+                    HideSelectionDisplay();
+                }
+                else if (remainingSelected.Count > 0)
+                {
+                    UpdateSelectionDisplay();
+                }
+            }
+
             foreach (var stroke in e?.Removed)
             {
                 stroke.StylusPointsChanged -= Stroke_StylusPointsChanged;

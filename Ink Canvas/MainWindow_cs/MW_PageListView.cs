@@ -224,13 +224,9 @@ namespace Ink_Canvas
 
                 if (index + 1 != CurrentWhiteboardIndex)
                 {
-                    if (currentSelectedElement != null)
-                    {
-                        var previousEditingMode = inkCanvas.EditingMode;
-                        UnselectElement(currentSelectedElement);
-                        inkCanvas.EditingMode = previousEditingMode;
-                        currentSelectedElement = null;
-                    }
+                    var previousEditingMode = inkCanvas.EditingMode;
+                    ClearAllSelection();
+                    inkCanvas.EditingMode = previousEditingMode;
                     SaveStrokes();
                     ClearStrokes(true);
                     CurrentWhiteboardIndex = index + 1;
@@ -328,13 +324,9 @@ namespace Ink_Canvas
 
                 if (index + 1 != CurrentWhiteboardIndex)
                 {
-                    if (currentSelectedElement != null)
-                    {
-                        var previousEditingMode = inkCanvas.EditingMode;
-                        UnselectElement(currentSelectedElement);
-                        inkCanvas.EditingMode = previousEditingMode;
-                        currentSelectedElement = null;
-                    }
+                    var previousEditingMode = inkCanvas.EditingMode;
+                    ClearAllSelection();
+                    inkCanvas.EditingMode = previousEditingMode;
 
                     SaveStrokes();
                     ClearStrokes(true);
@@ -387,13 +379,9 @@ namespace Ink_Canvas
 
                 if (index + 1 != CurrentWhiteboardIndex)
                 {
-                    if (currentSelectedElement != null)
-                    {
-                        var previousEditingMode = inkCanvas.EditingMode;
-                        UnselectElement(currentSelectedElement);
-                        inkCanvas.EditingMode = previousEditingMode;
-                        currentSelectedElement = null;
-                    }
+                    var previousEditingMode = inkCanvas.EditingMode;
+                    ClearAllSelection();
+                    inkCanvas.EditingMode = previousEditingMode;
 
                     SaveStrokes();
                     ClearStrokes(true);

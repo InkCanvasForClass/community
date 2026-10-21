@@ -92,6 +92,29 @@ namespace Ink_Canvas.Controls
             MoveSurface.MouseLeftButtonDown += BeginMove;
             MoveSurface.MouseMove += MoveMove;
             MoveSurface.MouseLeftButtonUp += EndMove;
+
+            TopLeftHandle.TouchDown += (s, e) => BeginResizeTouch(ImageResizeCorner.TopLeft, e, TopLeftHandle);
+            TopRightHandle.TouchDown += (s, e) => BeginResizeTouch(ImageResizeCorner.TopRight, e, TopRightHandle);
+            BottomLeftHandle.TouchDown += (s, e) => BeginResizeTouch(ImageResizeCorner.BottomLeft, e, BottomLeftHandle);
+            BottomRightHandle.TouchDown += (s, e) => BeginResizeTouch(ImageResizeCorner.BottomRight, e, BottomRightHandle);
+
+            TopLeftHandle.TouchMove += ResizeMoveTouch;
+            TopRightHandle.TouchMove += ResizeMoveTouch;
+            BottomLeftHandle.TouchMove += ResizeMoveTouch;
+            BottomRightHandle.TouchMove += ResizeMoveTouch;
+
+            TopLeftHandle.TouchUp += EndResizeTouch;
+            TopRightHandle.TouchUp += EndResizeTouch;
+            BottomLeftHandle.TouchUp += EndResizeTouch;
+            BottomRightHandle.TouchUp += EndResizeTouch;
+
+            RotationHandle.TouchDown += BeginRotateTouch;
+            RotationHandle.TouchMove += RotateMoveTouch;
+            RotationHandle.TouchUp += EndRotateTouch;
+
+            MoveSurface.TouchDown += BeginMoveTouch;
+            MoveSurface.TouchMove += MoveMoveTouch;
+            MoveSurface.TouchUp += EndMoveTouch;
         }
 
         /// <summary>
@@ -214,6 +237,108 @@ namespace Ink_Canvas.Controls
             if (!_isRotating) return;
             RotationHandle.ReleaseMouseCapture();
             _isRotating = false;
+            InteractionEnded?.Invoke(this, EventArgs.Empty);
+            e.Handled = true;
+        }
+
+        private void BeginResizeTouch(ImageResizeCorner corner, TouchEventArgs e, Ellipse handle)
+        {
+            var source = GetSource();
+            if (source == null) return;
+            _isResizing = true;
+            _activeCorner = corner;
+            _lastPoint = e.GetTouchPoint(source).Position;
+            handle.CaptureTouch(e.TouchDevice);
+            InteractionStarted?.Invoke(this, EventArgs.Empty);
+            e.Handled = true;
+        }
+
+        private void ResizeMoveTouch(object sender, TouchEventArgs e)
+        {
+            if (!_isResizing || !(sender is Ellipse handle) || !handle.AreAnyTouchesCaptured) return;
+            var source = GetSource();
+            if (source == null) return;
+            var current = e.GetTouchPoint(source).Position;
+            var delta = current - _lastPoint;
+            bool lockAspect = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift;
+            ResizeDelta?.Invoke(this, new ImageResizeDeltaEventArgs(_activeCorner, delta, lockAspect));
+            _lastPoint = current;
+            e.Handled = true;
+        }
+
+        private void EndResizeTouch(object sender, TouchEventArgs e)
+        {
+            if (!_isResizing) return;
+            if (sender is Ellipse handle) handle.ReleaseTouchCapture(e.TouchDevice);
+            _isResizing = false;
+            InteractionEnded?.Invoke(this, EventArgs.Empty);
+            e.Handled = true;
+        }
+
+        private void BeginRotateTouch(object sender, TouchEventArgs e)
+        {
+            var source = GetSource();
+            if (source == null) return;
+            _isRotating = true;
+            var p = e.GetTouchPoint(source).Position;
+            _lastRotationAngle = AngleFromCenter(p);
+            RotationHandle.CaptureTouch(e.TouchDevice);
+            InteractionStarted?.Invoke(this, EventArgs.Empty);
+            e.Handled = true;
+        }
+
+        private void RotateMoveTouch(object sender, TouchEventArgs e)
+        {
+            if (!_isRotating || !RotationHandle.AreAnyTouchesCaptured) return;
+            var source = GetSource();
+            if (source == null) return;
+            var p = e.GetTouchPoint(source).Position;
+            double angle = AngleFromCenter(p);
+            double delta = angle - _lastRotationAngle;
+            if (delta > 180) delta -= 360;
+            else if (delta < -180) delta += 360;
+            _lastRotationAngle = angle;
+            RotateDelta?.Invoke(this, new ImageRotateDeltaEventArgs(delta));
+            e.Handled = true;
+        }
+
+        private void EndRotateTouch(object sender, TouchEventArgs e)
+        {
+            if (!_isRotating) return;
+            RotationHandle.ReleaseTouchCapture(e.TouchDevice);
+            _isRotating = false;
+            InteractionEnded?.Invoke(this, EventArgs.Empty);
+            e.Handled = true;
+        }
+
+        private void BeginMoveTouch(object sender, TouchEventArgs e)
+        {
+            var source = GetSource();
+            if (source == null) return;
+            _isMoving = true;
+            _lastPoint = e.GetTouchPoint(source).Position;
+            MoveSurface.CaptureTouch(e.TouchDevice);
+            InteractionStarted?.Invoke(this, EventArgs.Empty);
+            e.Handled = true;
+        }
+
+        private void MoveMoveTouch(object sender, TouchEventArgs e)
+        {
+            if (!_isMoving || !MoveSurface.AreAnyTouchesCaptured) return;
+            var source = GetSource();
+            if (source == null) return;
+            var current = e.GetTouchPoint(source).Position;
+            var delta = current - _lastPoint;
+            _lastPoint = current;
+            MoveDelta?.Invoke(this, new ImageMoveDeltaEventArgs(delta));
+            e.Handled = true;
+        }
+
+        private void EndMoveTouch(object sender, TouchEventArgs e)
+        {
+            if (!_isMoving) return;
+            MoveSurface.ReleaseTouchCapture(e.TouchDevice);
+            _isMoving = false;
             InteractionEnded?.Invoke(this, EventArgs.Empty);
             e.Handled = true;
         }
