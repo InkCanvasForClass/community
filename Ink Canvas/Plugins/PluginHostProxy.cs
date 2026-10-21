@@ -16,12 +16,14 @@ namespace Ink_Canvas.Plugins
         private readonly PluginManager _manager;
         private readonly PluginLogger _logger;
         private readonly string _pluginId;
+        private readonly IPluginConfigurationStore _configuration;
 
         public PluginHostProxy(PluginManager manager, PluginLogger logger, string pluginId)
         {
             _manager = manager;
             _logger = logger;
             _pluginId = pluginId;
+            _configuration = new PluginConfigurationStore(manager.GetPluginConfigDirectory(pluginId));
         }
 
         /// <summary>
@@ -39,6 +41,8 @@ namespace Ink_Canvas.Plugins
         {
             _logger?.Error(_pluginId, message, ex);
         }
+
+        public IPluginConfigurationStore Configuration => _configuration;
 
         public IServiceCollection Services => _manager.Services;
 
