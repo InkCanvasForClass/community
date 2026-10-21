@@ -7,7 +7,7 @@ namespace Ink_Canvas.Plugins
     /// <summary>
     /// 文件系统实现。实例的根目录由宿主按插件 ID 分配；调用者只能访问根目录内的相对路径。
     /// </summary>
-    internal sealed class PluginConfigurationStore : IPluginConfigurationStore
+    public sealed class PluginConfigurationStore : IPluginConfigurationStore
     {
         private readonly string _rootDirectory;
         private static readonly JsonSerializerOptions DefaultJsonOptions = new JsonSerializerOptions
