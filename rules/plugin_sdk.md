@@ -300,5 +300,5 @@ uri.RegisterHandler("open", req => {
 4. 新增服务接口 = 对外契约变更，走 NuGet 发版，同步更新插件市场
 5. UI 文案做 i18n（默认/en-US/zh-ME），插件内同理
 6. 修改 `InkCanvas.PluginSdk` 后构建校验：主解决方案 Debug x64 + PowerPointAddIn 双构建
-7. 当前 net10 分支新增屏幕元素、坐标和文字墨迹接口后，`HostApiRequirement.CurrentApiVersion` 为 `1.13.0`；插件 manifest 应声明 `ApiVersion: 1.13.0`。
+7. 当前 net10 分支新增统一插件配置存储接口后，`HostApiRequirement.CurrentApiVersion` 为 `1.14.0`；使用该接口的插件 manifest 应声明 `ApiVersion: 1.14.0`。
 8. 屏幕截图/UIA 数据属于敏感上下文：插件默认只在用户主动触发时读取，发送到模型前应在 UI 中明确提示并提供关闭选项。
