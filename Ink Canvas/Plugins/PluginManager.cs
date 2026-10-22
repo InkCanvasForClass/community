@@ -1934,35 +1934,6 @@ namespace Ink_Canvas.Plugins
 
         #region IPluginHost Implementation
 
-        /// <summary>
-        /// 当前插件专属配置存储。此属性仅在插件 Initialize 期间有调用上下文；
-        /// 正常插件代码应通过宿主为其创建的 PluginHostProxy 访问。
-        /// </summary>
-        public IPluginConfigurationStore Configuration
-        {
-            get
-            {
-                var pluginId = _currentLoadingPlugin?.Id;
-                if (string.IsNullOrWhiteSpace(pluginId))
-                    throw new InvalidOperationException("Plugin configuration storage is only available in a plugin-scoped host context.");
-                return new PluginConfigurationStore(GetPluginConfigDirectory(pluginId));
-            }
-        }
-
-        internal string GetPluginConfigDirectory(string pluginId)
-        {
-            if (!IsValidPluginId(pluginId))
-                throw new ArgumentException("A valid plugin ID is required.", nameof(pluginId));
-
-            var plugin = _plugins.FirstOrDefault(p =>
-                string.Equals(p.Id, pluginId, StringComparison.OrdinalIgnoreCase));
-            var path = !string.IsNullOrWhiteSpace(plugin?.PluginConfigFolder)
-                ? plugin.PluginConfigFolder
-                : Path.Combine(_pluginConfigsDirectory, pluginId);
-            EnsureDirectoryExists(path);
-            return path;
-        }
-
         public IServiceCollection Services => _serviceCollection;
 
         public IServiceProvider ServiceProvider => _serviceProvider;
