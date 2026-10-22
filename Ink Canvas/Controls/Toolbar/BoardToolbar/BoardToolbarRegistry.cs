@@ -23,6 +23,27 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
         private static readonly List<PluginToolbarItemInfo> _pluginItems = new List<PluginToolbarItemInfo>();
         private static readonly string ConfigSubDir = Path.Combine("Configs", "BoardToolbarConfigs");
 
+        #region 视频展台专用组件
+
+        public const string BoothCaptureItemId = "board.boothCapture";
+        public const string BoothRotateItemId = "board.boothRotate";
+        public const string BoothCorrectionItemId = "board.boothCorrection";
+        public const string BoothMenuItemId = "board.boothMenu";
+        public const string BoothExpandItemId = "board.boothExpand";
+
+        /// <summary>是否属于"仅视频展台模式显示"的组件。</summary>
+        public static bool IsBoothItem(string id)
+            => !string.IsNullOrEmpty(id)
+               && id.StartsWith("board.booth", StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// 本次渲染是否处于视频展台模式。用于让设置了「仅视频展台显示」的组件
+        /// 在非展台模式下隐藏（渲染前由 MainWindow 设置）。
+        /// </summary>
+        public static bool RenderInBoothMode { get; set; }
+
+        #endregion
+
         public static IReadOnlyList<IBoardToolbarItem> Discover()
         {
             if (_items != null) return _items;
@@ -338,6 +359,12 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             if (opacity.HasValue)
                 view.Opacity = Math.Clamp(opacity.Value, 0, 1);
 
+            // 按规则隐藏：仅在视频展台模式下显示的组件，在普通白板模式下不渲染。
+            // 展台专用组件（board.booth*）本身也只服务于展台，一律遵循该规则。
+            bool boothOnly = entry.GetSettingBool(ShowInBoothOnlySettingKey) || IsBoothItem(entry.Id);
+            if (boothOnly && !RenderInBoothMode)
+                view.Visibility = Visibility.Collapsed;
+
             // 插件自定义设置：通过 PluginToolbarItemInfo.ApplySettings 回调应用。
             var pluginItem = _pluginItems.FirstOrDefault(p => p.Id == entry.Id);
             if (pluginItem != null)
@@ -554,6 +581,171 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
 
         #endregion
 
+        #region 视频展台组件首次播种
+
+        /// <summary>
+        /// 首次运行时把展台专用组件播种到"中间区域末尾（中间栏最右侧）"的独立分组里，只播一次。
+        /// 播种后用户如果手动删除了它们，不会再次自动恢复。
+        /// 另外会把旧版本误放在右侧区域的同名分组迁移到中间区域。
+        /// </summary>
+        public static void EnsureBoothComponentsSeeded()
+        {
+            try
+            {
+                if (SettingsManager.Settings == null) return;
+
+                var configName = SettingsManager.Settings.BoardToolbarConfigName;
+                if (string.IsNullOrWhiteSpace(configName)) configName = "default";
+
+                var layout = LoadConfigFile(configName);
+                if (layout == null) return;
+                layout.Areas ??= new List<BoardToolbarAreaEntry>();
+
+                var centerArea = layout.Areas.FirstOrDefault(a => string.Equals(a.Id, "center", StringComparison.OrdinalIgnoreCase));
+                bool changed = false;
+
+                // 迁移：旧版本把分组放在右侧区域，这里搬到中间区域末尾。
+                // 仅在中间区域还没有该分组时执行，避免用户之后手动摆放的位置被反复挪动。
+                var hasCenterGroup = centerArea?.Groups?.Any(g => string.Equals(g.Id, "videoBooth", StringComparison.OrdinalIgnoreCase)) == true;
+                var rightArea = layout.Areas.FirstOrDefault(a => string.Equals(a.Id, "right", StringComparison.OrdinalIgnoreCase));
+                var misplaced = rightArea?.Groups?.FirstOrDefault(g => string.Equals(g.Id, "videoBooth", StringComparison.OrdinalIgnoreCase));
+                if (misplaced != null && !hasCenterGroup)
+                {
+                    rightArea.Groups.Remove(misplaced);
+                    if (centerArea == null)
+                    {
+                        centerArea = new BoardToolbarAreaEntry { Id = "center", Groups = new List<BoardToolbarGroupEntry>() };
+                        layout.Areas.Add(centerArea);
+                    }
+                    centerArea.Groups ??= new List<BoardToolbarGroupEntry>();
+                    centerArea.Groups.Add(misplaced);
+                    changed = true;
+                    LogHelper.WriteLogToFile("BoardToolbarRegistry: 展台分组已从右侧区域迁移到中间区域", LogHelper.LogType.Info);
+                }
+
+                // 播种（只做一次）：用户删掉后不再补回
+                if (!SettingsManager.Settings.BoothToolbarSeeded)
+                {
+                    if (centerArea == null)
+                    {
+                        centerArea = new BoardToolbarAreaEntry { Id = "center", Groups = new List<BoardToolbarGroupEntry>() };
+                        layout.Areas.Add(centerArea);
+                    }
+                    centerArea.Groups ??= new List<BoardToolbarGroupEntry>();
+
+                    var group = centerArea.Groups.FirstOrDefault(g => string.Equals(g.Id, "videoBooth", StringComparison.OrdinalIgnoreCase));
+                    if (group == null)
+                    {
+                        group = new BoardToolbarGroupEntry
+                        {
+                            Id = "videoBooth",
+                            Components = new List<BoardToolbarComponentEntry>()
+                        };
+                        // 追加到中间区域末尾 = 中间栏最右侧（紧跟在原有工具之后）
+                        centerArea.Groups.Add(group);
+                    }
+                    group.Components ??= new List<BoardToolbarComponentEntry>();
+
+                    foreach (var id in BoothToolbarComponentIds)
+                    {
+                        if (group.Components.Any(c => string.Equals(c.Id, id, StringComparison.OrdinalIgnoreCase)))
+                            continue;
+
+                        var entry = new BoardToolbarComponentEntry { Id = id };
+                        entry.SetSetting(ShowInBoothOnlySettingKey, true);
+                        group.Components.Add(entry);
+                        changed = true;
+                    }
+
+                    SettingsManager.Settings.BoothToolbarSeeded = true;
+                    SettingsManager.SaveSettingsToFile();
+                    LogHelper.WriteLogToFile(
+                        $"BoardToolbarRegistry: 已把展台组件播种到 center→videoBooth（末尾）(配置={configName})",
+                        LogHelper.LogType.Info);
+                }
+
+                if (changed)
+                    SaveConfigFile(configName, layout);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"BoardToolbarRegistry: 播种展台组件失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        /// <summary>
+        /// 首次运行时把独立的「展开」组件放到右侧区域最左侧（"新页面"按钮所在组的第一个位置）。
+        /// 展台模式下"新页面"被隐藏，正好由它占位；只播一次，用户删除后不再补回。
+        /// </summary>
+        public static void EnsureBoothExpandSeeded()
+        {
+            try
+            {
+                if (SettingsManager.Settings == null) return;
+                if (SettingsManager.Settings.BoothExpandToolbarSeeded) return;
+
+                var configName = SettingsManager.Settings.BoardToolbarConfigName;
+                if (string.IsNullOrWhiteSpace(configName)) configName = "default";
+
+                var layout = LoadConfigFile(configName);
+                if (layout == null) return;
+                layout.Areas ??= new List<BoardToolbarAreaEntry>();
+
+                var rightArea = layout.Areas.FirstOrDefault(a => string.Equals(a.Id, "right", StringComparison.OrdinalIgnoreCase));
+                if (rightArea == null)
+                {
+                    rightArea = new BoardToolbarAreaEntry { Id = "right", Groups = new List<BoardToolbarGroupEntry>() };
+                    layout.Areas.Add(rightArea);
+                }
+                rightArea.Groups ??= new List<BoardToolbarGroupEntry>();
+
+                var addGroup = rightArea.Groups.FirstOrDefault(g => string.Equals(g.Id, "addPage", StringComparison.OrdinalIgnoreCase));
+                if (addGroup == null)
+                {
+                    addGroup = new BoardToolbarGroupEntry
+                    {
+                        Id = "addPage",
+                        Components = new List<BoardToolbarComponentEntry>()
+                    };
+                    rightArea.Groups.Insert(0, addGroup);
+                }
+                addGroup.Components ??= new List<BoardToolbarComponentEntry>();
+
+                if (!addGroup.Components.Any(c => string.Equals(c.Id, BoothExpandItemId, StringComparison.OrdinalIgnoreCase)))
+                {
+                    var entry = new BoardToolbarComponentEntry { Id = BoothExpandItemId };
+                    entry.SetSetting(ShowInBoothOnlySettingKey, true);
+                    // 放在"新页面"左侧，展台下正好占据被隐藏按钮的位置
+                    addGroup.Components.Insert(0, entry);
+                    SaveConfigFile(configName, layout);
+                }
+
+                SettingsManager.Settings.BoothExpandToolbarSeeded = true;
+                SettingsManager.SaveSettingsToFile();
+                LogHelper.WriteLogToFile(
+                    $"BoardToolbarRegistry: 已把「展开」组件放到 right→addPage 首位 (配置={configName})",
+                    LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"BoardToolbarRegistry: 播种「展开」组件失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        /// <summary>组件设置键：仅在视频展台模式下显示该组件。</summary>
+        public const string ShowInBoothOnlySettingKey = "showInBoothOnly";
+
+        /// <summary>播种到中间栏末尾分组的展台组件（顺序即默认显示顺序）。</summary>
+        private static readonly string[] BoothToolbarComponentIds =
+        {
+            BoothCaptureItemId,
+            BoothRotateItemId,
+            BoothCorrectionItemId,
+            BoothMenuItemId
+        };
+
+        #endregion
+
         #region Rebuild methods
 
         public static void RebuildToolbar(IBoardToolbarHost host, Panel leftContainer, Panel centerContainer, Panel rightContainer)
@@ -562,10 +754,16 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             RebuildToolbar(host, leftContainer, centerContainer, rightContainer, layout);
         }
 
-        public static void RebuildToolbar(IBoardToolbarHost host, Panel leftContainer, Panel centerContainer, Panel rightContainer, BoardToolbarLayoutSettings layout)
+        /// <summary>
+        /// 重建白板工具栏。<paramref name="boothMode"/> 决定「仅视频展台显示」的组件是否可见。
+        /// </summary>
+        public static void RebuildToolbar(IBoardToolbarHost host, Panel leftContainer, Panel centerContainer, Panel rightContainer,
+            BoardToolbarLayoutSettings layout, bool boothMode = false)
         {
             if (layout == null)
                 layout = BoardToolbarLayoutSettings.CreateDefault();
+
+            RenderInBoothMode = boothMode;
 
             foreach (var area in layout.Areas)
             {
@@ -594,6 +792,9 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             foreach (var group in area.Groups)
             {
                 var views = BuildGroup(host, group.Components, area.Id);
+                // 整组都被"按规则隐藏"时（如非展台模式下的展台分组）不渲染空胶囊
+                if (views.Count > 0 && views.All(v => v.Visibility == Visibility.Collapsed))
+                    continue;
                 if (views.Count > 0)
                 {
                     var groupBorder = CreateGroupBorder(views);

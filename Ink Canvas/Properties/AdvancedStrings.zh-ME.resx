@@ -1,5 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
+  <data name="CalibrationReturnSettings" xml:space="preserve"><value>返回進階設定</value></data>
+  <data name="CalibrationSimulate" xml:space="preserve"><value>使用手繪面積模擬</value></data>
+  <data name="CalibrationSimulateHint" xml:space="preserve"><value>描摹手掌或填寫寬高後即可測試。用滑鼠或少量觸點書寫；在時間窗口內按下足夠多、集中於手繪手掌範圍內的觸點，會自動觸發手掌擦，無需裝置回報接觸面積。</value></data>
+  <data name="CalibrationSimulateErase" xml:space="preserve"><value>多觸點自動判定手掌</value></data>
+  <data name="CalibrationSimulationOnly" xml:space="preserve"><value>手繪面積決定擦除大小，觸點數量、按下時間及聚集範圍決定是否擦除。判定保持到抬手。本頁僅預覽，不覆蓋裝置校準。</value></data>
+  <data name="CalibrationGroupCount" xml:space="preserve"><value>最少觸點數</value></data>
+  <data name="CalibrationGroupWindow" xml:space="preserve"><value>按下時間窗口</value></data>
+  <data name="CalibrationGroupTolerance" xml:space="preserve"><value>手掌範圍倍率</value></data>
+  <data name="CalibrationGroupStatus" xml:space="preserve"><value>目前觸點：{0} / 至少 {1}；狀態：{2}</value></data>
+  <data name="CalibrationGroupPalm" xml:space="preserve"><value>手掌擦</value></data>
+  <data name="CalibrationGroupWriting" xml:space="preserve"><value>書寫 / 等待判定</value></data>
+  <data name="CalibrationTitle" xml:space="preserve"><value>觸控與手掌擦校準</value></data>
+  <data name="CalibrationDescription" xml:space="preserve"><value>描摹手掌，多次按壓取樣，並在獨立畫布上試寫試擦；套用前不會修改設定。</value></data>
+  <data name="CalibrationStart" xml:space="preserve"><value>開始 / 重新校準</value></data>
+  <data name="CalibrationClear" xml:space="preserve"><value>清除校準</value></data>
+  <data name="CalibrationClearConfirm" xml:space="preserve"><value>清除校準並恢復舊觸控策略？</value></data>
+  <data name="CalibrationNone" xml:space="preserve"><value>尚未校準，使用舊觸控策略。</value></data>
+  <data name="CalibrationSaved" xml:space="preserve"><value>已校準。僅在相符的螢幕、DPI 和輸入來源上生效。</value></data>
+  <data name="CalibrationMismatch" xml:space="preserve"><value>顯示環境不相符，請在使用的螢幕上重新校準。</value></data>
+  <data name="CalibrationStep" xml:space="preserve"><value>步驟 {0} / {1}</value></data>
+  <data name="CalibrationOutline" xml:space="preserve"><value>描摹或輸入手掌尺寸</value></data>
+  <data name="CalibrationPalm" xml:space="preserve"><value>手掌按壓</value></data>
+  <data name="CalibrationFinger" xml:space="preserve"><value>手指按壓</value></data>
+  <data name="CalibrationNib" xml:space="preserve"><value>選用筆尖取樣</value></data>
+  <data name="CalibrationPreview" xml:space="preserve"><value>試寫試擦</value></data>
+  <data name="CalibrationOutlineHint" xml:space="preserve"><value>移開手掌後用滑鼠或筆描摹輪廓，或手動輸入寬高（DIP）。可最大化視窗以擴大取樣區。</value></data>
+  <data name="CalibrationPressHint" xml:space="preserve"><value>在下方區域按下、稍作停留並抬起，重複至少三次。每次僅接受一個接觸框；取消或離開區域的按壓不計數。</value></data>
+  <data name="CalibrationNibHint" xml:space="preserve"><value>選用：使用能回報接觸尺寸的被動筆尖按壓三次。主動筆只有壓力時請略過；略過保持舊筆尖閾值。</value></data>
+  <data name="CalibrationPreviewHint" xml:space="preserve"><value>用滑鼠、筆或手指書寫，用手掌擦除。此畫布獨立於目前頁面；調整尺寸不改變識別閾值。</value></data>
+  <data name="CalibrationWidth" xml:space="preserve"><value>寬度 (DIP)</value></data>
+  <data name="CalibrationHeight" xml:space="preserve"><value>高度 (DIP)</value></data>
+  <data name="CalibrationSize" xml:space="preserve"><value>面積倍率調整 (0.5–2)</value></data>
+  <data name="CalibrationRetry" xml:space="preserve"><value>清空 / 重新取樣</value></data>
+  <data name="CalibrationBack" xml:space="preserve"><value>上一步</value></data>
+  <data name="CalibrationSkip" xml:space="preserve"><value>略過筆尖</value></data>
+  <data name="CalibrationNext" xml:space="preserve"><value>下一步</value></data>
+  <data name="CalibrationCancel" xml:space="preserve"><value>取消</value></data>
+  <data name="CalibrationApply" xml:space="preserve"><value>確認套用</value></data>
+  <data name="CalibrationReady" xml:space="preserve"><value>等待輸入。首次按壓鎖定輸入來源和顯示環境。</value></data>
+  <data name="CalibrationEnvironmentChanged" xml:space="preserve"><value>螢幕或 DPI 已改變，已中斷取樣。請重新取樣。</value></data>
+  <data name="CalibrationMultipleContacts" xml:space="preserve"><value>偵測到多個接觸框，本次作廢。裝置須提供單一手掌接觸框；不能把多個手指面積相加。</value></data>
+  <data name="CalibrationNoArea" xml:space="preserve"><value>沒有有效接觸尺寸。僅壓力資料不能用於面積校準；請確認硬體支援，或略過選用筆尖。</value></data>
+  <data name="CalibrationLive" xml:space="preserve"><value>{0:F1} × {1:F1} DIP · {2:F1} DIP² · 已完成 {3} / 3 次 · 來源 {4}</value></data>
+  <data name="CalibrationRecorded" xml:space="preserve"><value>已完成 {0} / 3 次 · 峰值中位數 {1:F1} DIP²</value></data>
+  <data name="CalibrationPolicy" xml:space="preserve"><value>面積閾值 {0:F1} DIP² · 面積倍率 {1:F2} · 目前靈敏度 {2}（0 低 / 1 中 / 2 高）</value></data>
+  <data name="CalibrationLift" xml:space="preserve"><value>請先抬起所有接觸，再切換步驟。</value></data>
+  <data name="CalibrationInvalidOutline" xml:space="preserve"><value>請輸入有效寬高（大於 0 且不超過 4096 DIP）。</value></data>
+  <data name="CalibrationNeedThree" xml:space="preserve"><value>至少完成三次有效按壓後才能繼續。</value></data>
+  <data name="CalibrationOverlap" xml:space="preserve"><value>手掌和手指樣本重疊或資料無效。請返回重新取樣；此裝置可能無法按面積區分手掌。</value></data>
+  <data name="CalibrationSaveFailed" xml:space="preserve"><value>儲存失敗，原設定未改變。草稿已保留，請檢查設定目錄權限後重試。</value></data>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">

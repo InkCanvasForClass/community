@@ -473,11 +473,22 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             TextBoxMarginTop.Text = entry.GetSettingDouble("marginTop")?.ToString() ?? "";
             TextBoxMarginRight.Text = entry.GetSettingDouble("marginRight")?.ToString() ?? "";
             TextBoxMarginBottom.Text = entry.GetSettingDouble("marginBottom")?.ToString() ?? "";
+            CheckBoxShowInBoothOnly.IsChecked =
+                entry.GetSettingBool(BoardToolbarRegistry.ShowInBoothOnlySettingKey)
+                || BoardToolbarRegistry.IsBoothItem(entry.Id);
 
             _suppressSave = false;
         }
 
         private void ComponentSetting_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!_isLoaded || SelectedEntry == null || _suppressSave) return;
+            WriteComponentSettingsFromUI(SelectedEntry);
+            SaveSettings();
+        }
+
+        /// <summary>复选框类组件设置的变更入口（如「仅在视频展台显示」）。</summary>
+        private void ComponentSetting_CheckChanged(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded || SelectedEntry == null || _suppressSave) return;
             WriteComponentSettingsFromUI(SelectedEntry);
@@ -496,6 +507,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             WriteDoubleIfNotEmpty(entry, "marginTop", TextBoxMarginTop.Text);
             WriteDoubleIfNotEmpty(entry, "marginRight", TextBoxMarginRight.Text);
             WriteDoubleIfNotEmpty(entry, "marginBottom", TextBoxMarginBottom.Text);
+
+            if (CheckBoxShowInBoothOnly.IsChecked == true)
+                entry.SetSetting(BoardToolbarRegistry.ShowInBoothOnlySettingKey, true);
+            else
+                entry.Settings?.Remove(BoardToolbarRegistry.ShowInBoothOnlySettingKey);
         }
 
         private static void WriteDoubleIfNotEmpty(BoardToolbarComponentEntry entry, string key, string text)
