@@ -233,6 +233,9 @@ PublishScripts/
 **/[Pp]ackages/*
 # except build/, which is used as an MSBuild target.
 !**/[Pp]ackages/build/
+# Checked-in local Modern packages are required by GitHub Actions restore.
+!/lib/packages/*.nupkg
+!/lib/packages/README.md
 # Uncomment if necessary however generally it will be regenerated when needed
 #!**/[Pp]ackages/repositories.config
 # NuGet v3's project.json files produces more ignorable files
