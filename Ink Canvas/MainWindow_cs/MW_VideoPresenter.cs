@@ -199,6 +199,37 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 打开/收起视频展台菜单（不改动展台开关状态）。
+        /// 供工具栏「展台菜单」组件调用；首次点击且展台未开启时会顺带进入展台预览。
+        /// </summary>
+        public void VideoBoothShowMenu(FrameworkElement placementTarget)
+        {
+            if (BoothPopup == null) return;
+
+            // 把按钮自身作为菜单定位目标，避免菜单跑到屏幕顶部
+            if (placementTarget != null)
+                SetBoothPopupPlacementTarget(placementTarget);
+
+            LaunchConfiguredVideoBooth(() => ToggleVideoPresenterSidebar());
+        }
+
+        /// <summary>
+        /// 视频展台模式下展开/收起右侧页码预览面板（等同点击右侧页码按钮）。
+        /// 供右侧工具栏的「展开」按钮调用，须在 UI 线程。
+        /// </summary>
+        public void ToggleBoothPageListPanel()
+        {
+            var rightPanel = FindView("board.pageList.rightBorder") as Border;
+            if (rightPanel != null && rightPanel.Visibility == Visibility.Visible)
+            {
+                AnimationsHelper.HideWithSlideAndFade(rightPanel);
+                return;
+            }
+
+            ShowPageListRightPanel();
+        }
+
+        /// <summary>
         /// 切换视频演示菜单的显示状态并在显示时初始化相关控件与状态。
         /// </summary>
         /// <remarks>
@@ -384,6 +415,7 @@ namespace Ink_Canvas
                 }
             }
             // "新页面"组件 Id 是 board.addNewPage（不是 board.addPage）
+            // 展台模式下隐藏"新页面"，该位置由独立的展台组件「展开」占位
             foreach (var key in new[] { "board.addNewPage.left", "board.addNewPage.right" })
             {
                 if (FindView(key) is Controls.BoardToolbarButton btn) btn.Visibility = Visibility.Collapsed;
@@ -588,6 +620,13 @@ namespace Ink_Canvas
                 {
                     StartPaperDetectTimer();
                 }
+
+                // 重建白板工具栏：让"仅视频展台显示"的展台组件出现
+                RebuildBoardToolbar();
+
+                // 重建后按钮是全新的，需要重新套用展台分页状态
+                // （"新页面"按钮在此位置复用为"展开页码预览"）
+                UpdateBoothPageInfoDisplay();
             }
             catch (Exception ex)
             {
@@ -664,6 +703,9 @@ namespace Ink_Canvas
                     }
                 }
                 _boothTouchSavedInkEditingMode = null;
+
+                // 退出展台：重建白板工具栏，移除展台专用组件
+                RebuildBoardToolbar();
 
                 // 停止 VideoCaptureElement 预览，释放 DirectShow 图
                 try { VideoPresenterFullCanvasImage?.Stop(); }
@@ -4023,6 +4065,9 @@ namespace Ink_Canvas
 
             // 切换后恢复该照片的墨迹（每张照片独立保存，互不干扰）
             RestoreBoothStrokesFromSlot(photoIndex);
+
+            // 拍照按钮变为「返回拍照」
+            UpdateBoothToolbarItemStates();
         }
 
         /// <summary>
@@ -4096,6 +4141,9 @@ namespace Ink_Canvas
 
             // 恢复直播页墨迹快照（与照片页墨迹相互独立）
             RestoreBoothStrokesFromSlot(-1);
+
+            // 拍照按钮恢复为「拍照」
+            UpdateBoothToolbarItemStates();
         }
 
         /// <summary>
@@ -4402,11 +4450,37 @@ namespace Ink_Canvas
             BtnCapturePhoto_Click(null, null);
         }
 
-        /// <summary>展台旋转 90°（复用菜单旋转按钮，直播页/照片页自适应）。供 IVideoBoothService 调用，须在 UI 线程。</summary>
+        /// <summary>展台旋转 90°（复用菜单旋转按钮，直播页/照片页自适应）。供 IVideoBoothService / 工具栏调用，须在 UI 线程。</summary>
         public void VideoBoothRotate90()
         {
             if (!_isVideoPresenterSpecialMode) return;
             BtnRotateImage_Click(null, null);
+        }
+
+        /// <summary>当前是否开启照片矫正。供展台工具栏按钮反映开/关状态。</summary>
+        public bool IsBoothPhotoCorrectionEnabled => Settings?.Automation?.IsEnablePhotoCorrection == true;
+
+        /// <summary>
+        /// 切换照片矫正开关（复用菜单里的矫正开关，包含实时识别框定时器的启停与设置持久化）。
+        /// 供展台工具栏按钮调用，须在 UI 线程。
+        /// </summary>
+        public void VideoBoothTogglePhotoCorrection()
+        {
+            if (!_isVideoPresenterSpecialMode) return;
+
+            bool next = !IsBoothPhotoCorrectionEnabled;
+
+            // 优先走菜单开关：它的 Checked/Unchecked 处理器会同步设置、持久化并启停识别定时器
+            if (ToggleBtnPhotoCorrection != null)
+            {
+                ToggleBtnPhotoCorrection.IsChecked = next;
+                return;
+            }
+
+            Settings.Automation.IsEnablePhotoCorrection = next;
+            SaveSettingsToFile();
+            if (next) StartPaperDetectTimer();
+            else StopPaperDetectTimer();
         }
 
         /// <summary>
