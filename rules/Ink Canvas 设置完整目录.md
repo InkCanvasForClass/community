@@ -56,6 +56,11 @@
 │       │   ├── LabeledSettingsCard: 橡皮擦绑定触控倍率 → ToggleSwitch
 │       │   ├── SettingsCard: 笔尖模式边界宽度 → Slider
 │       │   ├── SettingsCard: 手指模式边界宽度 → Slider
+│       │   ├── SettingsExpander: 触摸与手掌擦校准（CardAutoCalibrate）
+│       │   │   ├── 校准状态 → TextBlock
+│       │   │   ├── 开始/重新校准 → 设置子页 TouchCalibrationPage：描摹 → 手掌 → 手指 → 可选笔尖 → 试写试擦/应用
+│       │   │   ├── 手绘面积模拟 → 按触点数、时间窗口、空间范围自动判掌（不依赖接触面积上报）
+│       │   │   └── 清除校准 → Button（确认后恢复未校准策略）
 │       │   └── LabeledSettingsCard: 四点红外模式 → ToggleSwitch
 │       ├── TextBlock "日志"
 │       │   ├── LabeledSettingsCard: 启用日志 → ToggleSwitch

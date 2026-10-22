@@ -48,6 +48,15 @@
   <data name="Capture" xml:space="preserve">
     <value>拍照</value>
   </data>
+  <data name="BackToCapture" xml:space="preserve">
+    <value>返回拍照</value>
+  </data>
+  <data name="ToolbarMenu" xml:space="preserve">
+    <value>展台菜单</value>
+  </data>
+  <data name="ExpandAlbum" xml:space="preserve">
+    <value>展开相册</value>
+  </data>
   <data name="Acceleration" xml:space="preserve">
     <value>加速模式</value>
   </data>
