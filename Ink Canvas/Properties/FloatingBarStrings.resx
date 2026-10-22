@@ -627,6 +627,9 @@
   <data name="BoardToolbarPage_GroupVideoBooth" xml:space="preserve">
     <value>视频展台</value>
   </data>
+  <data name="BoardToolbarPage_ShowInBoothOnly" xml:space="preserve">
+    <value>仅在视频展台模式显示</value>
+  </data>
   <data name="BoardToolbarPage_GroupGesture" xml:space="preserve">
     <value>手势与背景</value>
   </data>
