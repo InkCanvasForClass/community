@@ -627,6 +627,9 @@
   <data name="BoardToolbarPage_GroupVideoBooth" xml:space="preserve">
     <value>Video Booth</value>
   </data>
+  <data name="BoardToolbarPage_ShowInBoothOnly" xml:space="preserve">
+    <value>Show only in Video Booth mode</value>
+  </data>
   <data name="BoardToolbarPage_GroupGesture" xml:space="preserve">
     <value>Gesture &amp; Background</value>
   </data>
