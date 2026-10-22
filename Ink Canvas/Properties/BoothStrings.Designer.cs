@@ -44,6 +44,12 @@ namespace Ink_Canvas.Properties
 
         public static string Capture => ResourceManager.GetString(nameof(Capture), _resourceCulture);
 
+        public static string BackToCapture => ResourceManager.GetString(nameof(BackToCapture), _resourceCulture);
+
+        public static string ToolbarMenu => ResourceManager.GetString(nameof(ToolbarMenu), _resourceCulture);
+
+        public static string ExpandAlbum => ResourceManager.GetString(nameof(ExpandAlbum), _resourceCulture);
+
         public static string Acceleration => ResourceManager.GetString(nameof(Acceleration), _resourceCulture);
 
         public static string Acceleration_Tooltip => ResourceManager.GetString(nameof(Acceleration_Tooltip), _resourceCulture);

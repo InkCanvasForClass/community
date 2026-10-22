@@ -48,6 +48,15 @@
   <data name="Capture" xml:space="preserve">
     <value>咔嚓留念</value>
   </data>
+  <data name="BackToCapture" xml:space="preserve">
+    <value>回到咔嚓现场</value>
+  </data>
+  <data name="ToolbarMenu" xml:space="preserve">
+    <value>投影法阵菜单</value>
+  </data>
+  <data name="ExpandAlbum" xml:space="preserve">
+    <value>展开相簿</value>
+  </data>
   <data name="Acceleration" xml:space="preserve">
     <value>加速模式</value>
   </data>
