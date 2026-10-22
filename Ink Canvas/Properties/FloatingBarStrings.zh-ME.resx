@@ -627,6 +627,9 @@
   <data name="BoardToolbarPage_GroupVideoBooth" xml:space="preserve">
     <value>投影法阵</value>
   </data>
+  <data name="BoardToolbarPage_ShowInBoothOnly" xml:space="preserve">
+    <value>仅在投影法阵模式显现</value>
+  </data>
   <data name="BoardToolbarPage_GroupGesture" xml:space="preserve">
     <value>结印与贴膜</value>
   </data>

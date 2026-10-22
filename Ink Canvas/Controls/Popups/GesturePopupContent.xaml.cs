@@ -16,6 +16,7 @@ namespace Ink_Canvas.Controls
         public ToggleSwitch TwoFingerTranslateToggle => ToggleSwitchEnableTwoFingerTranslate;
         public ToggleSwitch TwoFingerZoomToggle => ToggleSwitchEnableTwoFingerZoom;
         public ToggleSwitch TwoFingerRotationToggle => ToggleSwitchEnableTwoFingerRotation;
+        public FrameworkElement TwoFingerRotationRow => TwoFingerRotateRow;
 
         public Button CloseButtonControl => Shell?.CloseButtonControl;
 

@@ -63,7 +63,8 @@ namespace Ink_Canvas.Windows.SettingsViews
             { "PluginPage", typeof(PluginPage) },
             { "PluginSettingsPage", typeof(PluginSettingsPage) },
             { "PluginMarketplacePage", typeof(PluginMarketplacePage) },
-            { "PPTPageFlipPreviewPage", typeof(PPTPageFlipPreviewPage) }
+            { "PPTPageFlipPreviewPage", typeof(PPTPageFlipPreviewPage) },
+            { "TouchCalibrationPage", typeof(TouchCalibrationPage) }
         };
         private readonly Dictionary<string, object> _pages = new Dictionary<string, object>();
         private readonly Dictionary<string, Ink_Canvas.Plugins.PluginInfo> _pluginPages = new Dictionary<string, Ink_Canvas.Plugins.PluginInfo>();
@@ -154,7 +155,8 @@ namespace Ink_Canvas.Windows.SettingsViews
                 { "PluginPage", typeof(PluginPage) },
                 { "PluginSettingsPage", typeof(PluginSettingsPage) },
                 { "PluginMarketplacePage", typeof(PluginMarketplacePage) },
-                { "PPTPageFlipPreviewPage", typeof(PPTPageFlipPreviewPage) }
+                { "PPTPageFlipPreviewPage", typeof(PPTPageFlipPreviewPage) },
+            { "TouchCalibrationPage", typeof(TouchCalibrationPage) }
             };
 
             // 初始页面统一在 Loaded 阶段导航，避免构造阶段与深链接导航互相覆盖。
@@ -479,12 +481,19 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         private void OnNavigationViewBackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
         {
-            if (rootFrame.CanGoBack) rootFrame.GoBack();
+            if (rootFrame.Content is TouchCalibrationPage) NavigateToPage("AdvancedPage");
+            else if (rootFrame.CanGoBack) rootFrame.GoBack();
         }
         private void OnRootFrameNavigated(object sender, NavigationEventArgs e)
         {
             Type currentPageType = rootFrame.SourcePageType;
-            if (currentPageType == typeof(PPTPageFlipPreviewPage))
+            NavigationViewControl.IsBackEnabled = currentPageType == typeof(TouchCalibrationPage) || rootFrame.CanGoBack;
+            if (currentPageType == typeof(TouchCalibrationPage))
+            {
+                NavigationViewControl.IsBackEnabled = true;
+                NavigationViewControl.Header = Ink_Canvas.Properties.AdvancedStrings.CalibrationTitle;
+            }
+            else if (currentPageType == typeof(PPTPageFlipPreviewPage))
             {
                 NavigationViewControl.PaneDisplayMode = iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode.LeftMinimal;
             }
