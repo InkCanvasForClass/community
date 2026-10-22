@@ -1,5 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
+  <data name="CalibrationReturnSettings" xml:space="preserve"><value>Back to advanced settings</value></data>
+  <data name="CalibrationSimulate" xml:space="preserve"><value>Simulate with traced area</value></data>
+  <data name="CalibrationSimulateHint" xml:space="preserve"><value>Trace your palm or enter its dimensions. Write with a mouse or a few contacts. Enough contacts pressed within the time window and clustered within the traced palm bounds automatically erase, without contact-area reports.</value></data>
+  <data name="CalibrationSimulateErase" xml:space="preserve"><value>Detect palms from multiple contacts</value></data>
+  <data name="CalibrationSimulationOnly" xml:space="preserve"><value>The traced area sets eraser size; contact count, timing and spatial bounds trigger erasing. Decisions persist until lift-off. Preview only; device calibration is not overwritten.</value></data>
+  <data name="CalibrationGroupCount" xml:space="preserve"><value>Minimum contacts</value></data>
+  <data name="CalibrationGroupWindow" xml:space="preserve"><value>Press time window</value></data>
+  <data name="CalibrationGroupTolerance" xml:space="preserve"><value>Palm bounds multiplier</value></data>
+  <data name="CalibrationGroupStatus" xml:space="preserve"><value>Contacts: {0} / minimum {1}; state: {2}</value></data>
+  <data name="CalibrationGroupPalm" xml:space="preserve"><value>Palm erasing</value></data>
+  <data name="CalibrationGroupWriting" xml:space="preserve"><value>Writing / awaiting decision</value></data>
+  <data name="CalibrationTitle" xml:space="preserve"><value>Touch and palm eraser calibration</value></data>
+  <data name="CalibrationDescription" xml:space="preserve"><value>Trace your palm, collect repeated presses, and try writing and erasing on a separate canvas. Settings change only when applied.</value></data>
+  <data name="CalibrationStart" xml:space="preserve"><value>Start / recalibrate</value></data>
+  <data name="CalibrationClear" xml:space="preserve"><value>Clear calibration</value></data>
+  <data name="CalibrationClearConfirm" xml:space="preserve"><value>Clear calibration and restore the legacy touch policy?</value></data>
+  <data name="CalibrationNone" xml:space="preserve"><value>Not calibrated. Using the legacy touch policy.</value></data>
+  <data name="CalibrationSaved" xml:space="preserve"><value>Calibrated. Applied only to the matching display, DPI, and input source.</value></data>
+  <data name="CalibrationMismatch" xml:space="preserve"><value>Display settings do not match. Recalibrate on the display you use.</value></data>
+  <data name="CalibrationStep" xml:space="preserve"><value>Step {0} / {1}</value></data>
+  <data name="CalibrationOutline" xml:space="preserve"><value>Trace or enter palm dimensions</value></data>
+  <data name="CalibrationPalm" xml:space="preserve"><value>Palm presses</value></data>
+  <data name="CalibrationFinger" xml:space="preserve"><value>Finger presses</value></data>
+  <data name="CalibrationNib" xml:space="preserve"><value>Optional nib sampling</value></data>
+  <data name="CalibrationPreview" xml:space="preserve"><value>Try writing and erasing</value></data>
+  <data name="CalibrationOutlineHint" xml:space="preserve"><value>Remove your palm, then trace its outline with a mouse or pen, or enter width and height in DIPs. Maximize the window for a larger capture area.</value></data>
+  <data name="CalibrationPressHint" xml:space="preserve"><value>Press inside the area below, hold briefly, then lift. Repeat at least three times. Only one contact box is accepted per press; canceled presses or contacts leaving the area do not count.</value></data>
+  <data name="CalibrationNibHint" xml:space="preserve"><value>Optional: press three times with a passive nib that reports contact dimensions. Skip active pens that report pressure only; skipping preserves the old nib threshold.</value></data>
+  <data name="CalibrationPreviewHint" xml:space="preserve"><value>Write with a mouse, pen, or finger and erase with your palm. This canvas is separate from your page. Size adjustments do not change the recognition threshold.</value></data>
+  <data name="CalibrationWidth" xml:space="preserve"><value>Width (DIP)</value></data>
+  <data name="CalibrationHeight" xml:space="preserve"><value>Height (DIP)</value></data>
+  <data name="CalibrationSize" xml:space="preserve"><value>Area scale adjustment (0.5–2)</value></data>
+  <data name="CalibrationRetry" xml:space="preserve"><value>Clear / resample</value></data>
+  <data name="CalibrationBack" xml:space="preserve"><value>Back</value></data>
+  <data name="CalibrationSkip" xml:space="preserve"><value>Skip nib</value></data>
+  <data name="CalibrationNext" xml:space="preserve"><value>Next</value></data>
+  <data name="CalibrationCancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="CalibrationApply" xml:space="preserve"><value>Confirm and apply</value></data>
+  <data name="CalibrationReady" xml:space="preserve"><value>Waiting for input. The first press locks the input source and display environment.</value></data>
+  <data name="CalibrationEnvironmentChanged" xml:space="preserve"><value>Display or DPI changed. Collection was interrupted. Please resample.</value></data>
+  <data name="CalibrationMultipleContacts" xml:space="preserve"><value>Multiple contact boxes detected; this press was discarded. The device must report a single palm box. Separate finger areas cannot be added together.</value></data>
+  <data name="CalibrationNoArea" xml:space="preserve"><value>No valid contact dimensions. Pressure alone cannot calibrate area. Check hardware support, or skip the optional nib step.</value></data>
+  <data name="CalibrationLive" xml:space="preserve"><value>{0:F1} × {1:F1} DIP · {2:F1} DIP² · {3} / 3 presses · Source: {4}</value></data>
+  <data name="CalibrationRecorded" xml:space="preserve"><value>{0} / 3 presses completed · Median peak: {1:F1} DIP²</value></data>
+  <data name="CalibrationPolicy" xml:space="preserve"><value>Area threshold: {0:F1} DIP² · Area scale: {1:F2} · Current sensitivity: {2} (0 low / 1 medium / 2 high)</value></data>
+  <data name="CalibrationLift" xml:space="preserve"><value>Lift all contacts before changing steps.</value></data>
+  <data name="CalibrationInvalidOutline" xml:space="preserve"><value>Enter valid dimensions greater than 0 and no larger than 4096 DIPs.</value></data>
+  <data name="CalibrationNeedThree" xml:space="preserve"><value>Complete at least three valid presses to continue.</value></data>
+  <data name="CalibrationOverlap" xml:space="preserve"><value>Palm and finger samples overlap or are invalid. Go back and resample. This device may not distinguish palms by area.</value></data>
+  <data name="CalibrationSaveFailed" xml:space="preserve"><value>Saving failed; previous settings are unchanged. Your draft is retained. Check configuration folder permissions and retry.</value></data>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">

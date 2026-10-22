@@ -351,6 +351,12 @@
                             </StackPanel>
                         </Grid>
 
+                        <!-- 显示条件：仅视频展台模式显示（用于展台专用组件等） -->
+                        <CheckBox x:Name="CheckBoxShowInBoothOnly" Margin="0,4,0,0" FontSize="12"
+                                  Content="{x:Static props:FloatingBarStrings.BoardToolbarPage_ShowInBoothOnly}"
+                                  Checked="ComponentSetting_CheckChanged"
+                                  Unchecked="ComponentSetting_CheckChanged"/>
+
                         <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_Margin}" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,4"/>
                         <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_MarginHint}" FontSize="12" Opacity="0.65" Margin="0,0,0,4"/>
                         <Grid Margin="0,0,0,4">

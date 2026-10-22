@@ -68,6 +68,19 @@ namespace Ink_Canvas
         [JsonProperty("boardToolbarConfigName")]
         public string BoardToolbarConfigName { get; set; } = "default";
 
+        /// <summary>
+        /// 是否已把视频展台专用组件（拍照/旋转/矫正/展台菜单）播种到白板工具栏右侧分组。
+        /// 只播种一次：用户之后手动删除这些组件，不会再次自动加回。
+        /// </summary>
+        [JsonProperty("boothToolbarSeeded")]
+        public bool BoothToolbarSeeded { get; set; } = false;
+
+        /// <summary>
+        /// 是否已把独立的「展开」组件播种到右侧区域最左侧（仅播一次，删除后不再补回）。
+        /// </summary>
+        [JsonProperty("boothExpandToolbarSeeded")]
+        public bool BoothExpandToolbarSeeded { get; set; } = false;
+
         [JsonProperty("performance")]
         public PerformanceSettings Performance { get; set; } = new PerformanceSettings();
 
@@ -1581,6 +1594,16 @@ namespace Ink_Canvas
 
     public class Advanced
     {
+        [JsonProperty("touchCalibration")]
+        [JsonConverter(typeof(Ink.TouchCalibrationRecordConverter))]
+        public Ink.TouchCalibrationRecord TouchCalibration { get; set; }
+
+        [System.Runtime.Serialization.OnDeserialized]
+        private void ValidateCalibration(System.Runtime.Serialization.StreamingContext context)
+        {
+            // Missing records remain null; invalid/unknown versions never block old profiles.
+            if (TouchCalibration?.IsValid() != true) TouchCalibration = null;
+        }
         [JsonProperty("isSpecialScreen")]
         public bool IsSpecialScreen { get; set; }
 

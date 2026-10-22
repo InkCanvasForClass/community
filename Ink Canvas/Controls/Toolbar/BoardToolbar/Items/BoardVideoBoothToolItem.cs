@@ -1,66 +1,40 @@
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
-using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using FluentSystemIcons = iNKORE.UI.WPF.Modern.Common.IconKeys.FluentSystemIcons;
-using FontIcon = iNKORE.UI.WPF.Modern.Controls.FontIcon;
 
 namespace Ink_Canvas.Controls.Toolbar.BoardToolbar.Items
 {
-    internal sealed class BoardVideoBoothToolItem : BoardToolbarImageButtonItemBase
+    /// <summary>
+    /// 视频展台开关：点击进入/退出视频展台；处于展台模式时按钮背景高亮（与选中工具同一套配色）。
+    /// </summary>
+    internal sealed class BoardVideoBoothToolItem : BoardBoothFontIconItemBase
     {
         public override string Id => "board.videoBooth";
         public override string LocalizationKey => "Board_VideoBooth";
         public override string Description => "视频展台";
-        public override string IconGeometry => null;
-        public override FontIconData? IconKey => FluentSystemIcons.Video_24_Regular;
         public override ButtonPosition DefaultPosition => ButtonPosition.Single;
+
+        protected override FontIconData IconData => FluentSystemIcons.Video_24_Regular;
 
         protected override void OnClick(IBoardToolbarHost host, object sender, MouseButtonEventArgs e)
         {
-            host.Window.Dispatcher.Invoke(() =>
-            {
-                var mw = host.Window;
-                if (mw == null) return;
-
-                // 把按钮自身作为 BoothPopup 的 PlacementTarget，
-                // 让 CustomPopupPlacementCallback 中的 targetSize 取按钮尺寸，
-                // 菜单才能定位到按钮上方（否则会退化为父级 Grid 屏幕尺寸，菜单跑到屏幕顶部中心上方）
-                if (sender is System.Windows.FrameworkElement fe)
-                {
-                    mw.SetBoothPopupPlacementTarget(fe);
-                }
-
-                mw.ToggleVideoPresenterSidebarPublic();
-            });
+            // 开关语义：未开启时进入展台，已开启时退出展台
+            host.Window.ToggleVideoBooth();
+            UpdateState(sender as BoardToolbarButton, host.Window);
         }
 
         protected override void AfterBuild(IBoardToolbarHost host, BoardToolbarButton view)
         {
-            host.RegisterView(Id, view);
-            view.Loaded += (s, e) =>
-            {
-                var grid = view.ButtonBorderControl.Child as Grid;
-                if (grid == null || grid.Children.Count == 0)
-                    return;
+            base.AfterBuild(host, view);
+            UpdateState(view, host.Window);
+            view.Loaded += (s, e) => UpdateState(view, host.Window);
+        }
 
-                var oldIcon = grid.Children[0] as Image;
-                if (oldIcon == null)
-                    return;
-
-                grid.Children.RemoveAt(0);
-                var fontIcon = new FontIcon
-                {
-                    Icon = FluentSystemIcons.Video_24_Regular,
-                    Width = 24,
-                    Height = 24,
-                    VerticalAlignment = VerticalAlignment.Top,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    FontSize = 24,
-                    Margin = new Thickness(0, -1, 0, 0)
-                };
-                grid.Children.Insert(0, fontIcon);
-            };
+        /// <summary>展台开启时按钮高亮，关闭时恢复透明。</summary>
+        internal static void UpdateState(BoardToolbarButton view, MainWindow window)
+        {
+            if (view == null || window == null) return;
+            SetActiveAppearance(view, window.IsVideoBoothActive);
         }
     }
 }

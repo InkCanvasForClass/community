@@ -48,6 +48,15 @@
   <data name="Capture" xml:space="preserve">
     <value>Capture</value>
   </data>
+  <data name="BackToCapture" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="ToolbarMenu" xml:space="preserve">
+    <value>Booth Menu</value>
+  </data>
+  <data name="ExpandAlbum" xml:space="preserve">
+    <value>Album</value>
+  </data>
   <data name="Acceleration" xml:space="preserve">
     <value>Acceleration</value>
   </data>

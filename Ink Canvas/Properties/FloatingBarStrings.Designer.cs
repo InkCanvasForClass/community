@@ -428,6 +428,8 @@ namespace Ink_Canvas.Properties
 
         public static string BoardToolbarPage_GroupVideoBooth => ResourceManager.GetString(nameof(BoardToolbarPage_GroupVideoBooth), _resourceCulture);
 
+        public static string BoardToolbarPage_ShowInBoothOnly => ResourceManager.GetString(nameof(BoardToolbarPage_ShowInBoothOnly), _resourceCulture);
+
         public static string BoardToolbarPage_GroupGesture => ResourceManager.GetString(nameof(BoardToolbarPage_GroupGesture), _resourceCulture);
 
         public static string BoardToolbarPage_GroupTools => ResourceManager.GetString(nameof(BoardToolbarPage_GroupTools), _resourceCulture);
