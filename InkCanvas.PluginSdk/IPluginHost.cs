@@ -29,12 +29,6 @@ namespace Ink_Canvas.Plugins
         void LogError(string message, Exception ex = null);
 
         /// <summary>
-        /// 当前插件专属的统一配置存储。文件路径相对于宿主分配的插件配置目录，
-        /// 不应再由插件自行拼接宿主目录或直接操作配置文件。
-        /// </summary>
-        IPluginConfigurationStore Configuration { get; }
-
-        /// <summary>
         /// 依赖注入服务集合。插件可在 Initialize 阶段向此集合注册自己的服务。
         /// </summary>
         IServiceCollection Services { get; }
