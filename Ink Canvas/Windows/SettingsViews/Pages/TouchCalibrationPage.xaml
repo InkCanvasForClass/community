@@ -1,0 +1,83 @@
+<ui:Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.TouchCalibrationPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:p="clr-namespace:Ink_Canvas.Properties"
+    Title="{x:Static p:AdvancedStrings.CalibrationTitle}"
+    Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}">
+    <ui:Page.Resources>
+        <Style TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}"/>
+        </Style>
+    </ui:Page.Resources>
+    <Grid Margin="24,12,24,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <DockPanel Margin="0,0,0,16">
+            <Button x:Name="ReturnButton" Click="ReturnToSettings" Margin="0,0,16,0" VerticalAlignment="Top"/>
+            <StackPanel>
+                <TextBlock x:Name="StepTitle" FontSize="24" FontWeight="SemiBold"/>
+                <TextBlock x:Name="Hint" Margin="0,8,0,0" TextWrapping="Wrap"/>
+            </StackPanel>
+        </DockPanel>
+        <Grid x:Name="ContentGrid" Grid.Row="1" SizeChanged="ContentSizeChanged">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="SurfaceColumn" Width="*"/>
+                <ColumnDefinition x:Name="OptionsColumn" Width="320"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition x:Name="OptionsRow" Height="0"/>
+            </Grid.RowDefinitions>
+            <Border x:Name="SurfaceBorder" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" BorderThickness="2" CornerRadius="8" ClipToBounds="True">
+                <Grid>
+                    <InkCanvas x:Name="Surface" Background="{DynamicResource ControlFillColorDefaultBrush}"
+                        PreviewTouchDown="TouchDownSample" PreviewTouchMove="TouchMoveSample" PreviewTouchUp="TouchUpSample"
+                        LostTouchCapture="TouchCaptureLost" StrokeCollected="OutlineCollected"/>
+                    <Canvas IsHitTestVisible="False" ClipToBounds="True">
+                        <Rectangle x:Name="ContactBox" Visibility="Collapsed" Stroke="{DynamicResource AccentFillColorDefaultBrush}" StrokeThickness="2"/>
+                    </Canvas>
+                </Grid>
+            </Border>
+            <ScrollViewer x:Name="OptionsPanel" Grid.Column="1" Margin="20,0,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" PanningMode="VerticalOnly">
+                <StackPanel>
+                    <StackPanel x:Name="OutlinePanel" Margin="0,0,0,12">
+                        <TextBlock Text="{x:Static p:AdvancedStrings.CalibrationWidth}"/>
+                        <TextBox x:Name="OutlineWidth" Margin="0,6,0,12"/>
+                        <TextBlock Text="{x:Static p:AdvancedStrings.CalibrationHeight}"/>
+                        <TextBox x:Name="OutlineHeight" Margin="0,6,0,12"/>
+                        <Button x:Name="SimulateButton" Click="StartSimulation" HorizontalAlignment="Stretch"/>
+                        <TextBlock x:Name="SimulationHint" TextWrapping="Wrap" Margin="0,8,0,0"/>
+                    </StackPanel>
+                    <StackPanel x:Name="PreviewPanel" Visibility="Collapsed" Margin="0,0,0,12">
+                        <TextBlock x:Name="PreviewPolicy" TextWrapping="Wrap"/>
+                        <TextBlock Text="{x:Static p:AdvancedStrings.CalibrationSize}" Margin="0,12,0,8"/>
+                        <Slider x:Name="SizeAdjustment" Minimum="0.5" Maximum="2" Value="1" TickFrequency="0.1" IsSnapToTickEnabled="True" ValueChanged="SizeAdjustmentChanged"/>
+                        <CheckBox x:Name="SimulateErase" Margin="0,12,0,0" Checked="SimulationModeChanged" Unchecked="SimulationModeChanged"/>
+                        <TextBlock x:Name="GroupCountLabel" Margin="0,12,0,4"/>
+                        <ComboBox x:Name="GroupCount" SelectedIndex="1" SelectionChanged="GroupOptionsChanged">
+                            <ComboBoxItem Content="2"/><ComboBoxItem Content="3"/><ComboBoxItem Content="4"/><ComboBoxItem Content="5"/>
+                        </ComboBox>
+                        <TextBlock x:Name="GroupWindowLabel" Margin="0,12,0,4"/>
+                        <Slider x:Name="GroupWindow" Minimum="0" Maximum="1000" Value="200" TickFrequency="50" IsSnapToTickEnabled="True" ValueChanged="GroupOptionsChanged"/>
+                        <TextBlock Text="{Binding ElementName=GroupWindow, Path=Value, StringFormat={}{0:0} ms}"/>
+                        <TextBlock x:Name="GroupToleranceLabel" Margin="0,12,0,4"/>
+                        <Slider x:Name="GroupTolerance" Minimum="1" Maximum="2" Value="1" TickFrequency="0.05" IsSnapToTickEnabled="True" ValueChanged="GroupOptionsChanged"/>
+                        <TextBlock Text="{Binding ElementName=GroupTolerance, Path=Value, StringFormat=×{0:F2}}"/>
+                    </StackPanel>
+                    <TextBlock x:Name="Status" Margin="0,0,0,10" TextWrapping="Wrap" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+        <WrapPanel Grid.Row="2" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="{x:Static p:AdvancedStrings.CalibrationRetry}" Click="Retry" Margin="0,0,8,8"/>
+            <Button x:Name="BackButton" Content="{x:Static p:AdvancedStrings.CalibrationBack}" Click="Back" Margin="0,0,8,8"/>
+            <Button x:Name="SkipButton" Content="{x:Static p:AdvancedStrings.CalibrationSkip}" Click="Skip" Margin="0,0,8,8"/>
+            <Button x:Name="NextButton" Content="{x:Static p:AdvancedStrings.CalibrationNext}" Click="Next" Margin="0,0,8,8"/>
+            <Button Content="{x:Static p:AdvancedStrings.CalibrationCancel}" Click="ReturnToSettings" Margin="0,0,0,8"/>
+        </WrapPanel>
+    </Grid>
+</ui:Page>

@@ -179,6 +179,23 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 刷新展台相关工具栏组件的显示状态：
+        /// 拍照按钮在照片预览页显示「返回拍照」，矫正/展台开关按当前状态高亮。
+        /// 页面切换（直播 ↔ 照片）后调用。
+        /// </summary>
+        internal void UpdateBoothToolbarItemStates()
+        {
+            if (!_isVideoPresenterSpecialMode) return;
+
+            if (FindView("board.boothCapture") is BoardToolbarButton captureBtn)
+                Controls.Toolbar.BoardToolbar.Items.BoardBoothCaptureToolItem.UpdateLabel(captureBtn, this);
+            if (FindView("board.boothCorrection") is BoardToolbarButton correctionBtn)
+                Controls.Toolbar.BoardToolbar.Items.BoardBoothCorrectionToolItem.UpdateState(correctionBtn, this);
+            if (FindView("board.videoBooth") is BoardToolbarButton boothBtn)
+                Controls.Toolbar.BoardToolbar.Items.BoardVideoBoothToolItem.UpdateState(boothBtn, this);
+        }
+
         private static TextBlock FindTextBlockInVisualTree(DependencyObject parent)
         {
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
@@ -202,6 +219,11 @@ namespace Ink_Canvas
             try
             {
                 BoardToolbarRegistry.EnsureDefaultConfigExists();
+                // 首次运行把展台组件（拍照/旋转/矫正/展台菜单）播种到中间栏末尾；
+                // 用户之后手动删除不会自动恢复。
+                BoardToolbarRegistry.EnsureBoothComponentsSeeded();
+                // 独立的「展开」组件：放在右侧"新页面"位置（展台下"新页面"隐藏，由它占位）
+                BoardToolbarRegistry.EnsureBoothExpandSeeded();
 
                 var host = (IBoardToolbarHost)this;
 
@@ -210,7 +232,11 @@ namespace Ink_Canvas
                 BindPopupPlacementTargets();
                 BindPageInfoClickHandler();
                 CreatePagePreviewUI();
-                RefreshBlackBoardSidePageListView();
+                // 展台模式下列表内容是虚拟分页（直播页 + 照片），不能被白板页预览覆盖
+                if (_isVideoPresenterSpecialMode)
+                    RefreshBoothPageListView();
+                else
+                    RefreshBlackBoardSidePageListView();
 
                 UpdateBoardToolbarState();
                 UpdateBoardRoamingButtonState();
@@ -231,13 +257,24 @@ namespace Ink_Canvas
                 BlackboardLeftSidePanel.Children.Clear();
                 BlackboardCenterSidePanel.Children.Clear();
                 BlackboardRightSidePanel.Children.Clear();
-                BoardToolbarRegistry.RebuildToolbar(host, BlackboardLeftSidePanel, BlackboardCenterSidePanel, BlackboardRightSidePanel);
+
+                // 视频展台模式：让"仅展台显示"的组件（右侧展台分组）显示出来
+                BoardToolbarRegistry.RebuildToolbar(
+                    host, BlackboardLeftSidePanel, BlackboardCenterSidePanel, BlackboardRightSidePanel,
+                    BoardToolbarRegistry.LoadActiveConfig(), _isVideoPresenterSpecialMode);
+
                 BindPopupPlacementTargets();
                 BindPageInfoClickHandler();
+                // 页码预览面板是动态插入到页码按钮旁边的，重建工具栏会连同父面板一起清空，
+                // 必须在这里重新创建，否则"点击页码展开预览"会失效
+                CreatePagePreviewUI();
+                RefreshBlackBoardSidePageListView();
                 UpdateBoardToolbarState();
                 UpdateBoardRoamingButtonState();
                 CheckEnableTwoFingerGestureBtnColorPrompt();
-                LogHelper.WriteLogToFile("[BoardToolbar] 白板工具栏已重建", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile(
+                    $"[BoardToolbar] 白板工具栏已重建 (视频展台模式={_isVideoPresenterSpecialMode})",
+                    LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {

@@ -108,6 +108,15 @@ namespace Ink_Canvas
         /// <summary>
         /// 橡皮擦按下事件处理
         /// </summary>
+        private StylusShape CreateGeometryEraserShape()
+        {
+            double height = isPalmEraserActive ? _palmHeight
+                : isEraserCircleShape ? eraserWidth : eraserWidth * 56 / 38;
+            return isEraserCircleShape
+                ? new EllipseStylusShape(eraserWidth, height)
+                : new RectangleStylusShape(eraserWidth, height);
+        }
+
         private void EraserOverlay_PointerDown(object sender)
         {
             _secAgentEraseInitialStates.Clear();
@@ -124,20 +133,11 @@ namespace Ink_Canvas
             isUsingGeometryEraser = true;
 
             // 计算高度
-            var _h = eraserWidth * 56 / 38;
+            var _h = isPalmEraserActive ? _palmHeight
+                : isEraserCircleShape ? eraserWidth : eraserWidth * 56 / 38;
 
             // 初始化碰撞检测器
-            StylusShape eraserShape;
-            if (isEraserCircleShape)
-            {
-                eraserShape = new EllipseStylusShape(eraserWidth, eraserWidth);
-            }
-            else
-            {
-                eraserShape = new RectangleStylusShape(eraserWidth, _h);
-            }
-
-            hitTester = inkCanvas.Strokes.GetIncrementalStrokeHitTester(eraserShape);
+            hitTester = inkCanvas.Strokes.GetIncrementalStrokeHitTester(CreateGeometryEraserShape());
             hitTester.StrokeHit += EraserGeometry_StrokeHit;
 
             // 计算缩放矩阵
@@ -149,8 +149,8 @@ namespace Ink_Canvas
             // 设置橡皮擦反馈大小
             if (eraserFeedback != null)
             {
-                eraserFeedback.Width = Math.Max(eraserWidth, 10);
-                eraserFeedback.Height = isEraserCircleShape ? eraserFeedback.Width : _h;
+                eraserFeedback.Width = isPalmEraserActive ? eraserWidth : Math.Max(eraserWidth, 10);
+                eraserFeedback.Height = _h;
                 eraserFeedback.Measure(new Size(Double.PositiveInfinity, Double.PositiveInfinity));
                 eraserFeedback.Visibility = Visibility.Collapsed;
             }
@@ -230,11 +230,16 @@ namespace Ink_Canvas
                     eraserFeedback.Visibility = Visibility.Visible;
                 }
 
-                // 更新橡皮擦位置
+                // 更新橡皮擦位置：控件折叠或刚改尺寸时 ActualWidth/ActualHeight 可能仍是 0/旧值，
+                // 直接用它居中会让图标从触点向下偏移。优先用显式设置的 Width/Height。
                 if (eraserFeedbackTranslateTransform != null)
                 {
-                    eraserFeedbackTranslateTransform.X = pt.X - eraserFeedback.ActualWidth / 2;
-                    eraserFeedbackTranslateTransform.Y = pt.Y - eraserFeedback.ActualHeight / 2;
+                    double feedbackWidth = eraserFeedback.Width;
+                    double feedbackHeight = eraserFeedback.Height;
+                    if (!(feedbackWidth > 0)) feedbackWidth = eraserFeedback.ActualWidth;
+                    if (!(feedbackHeight > 0)) feedbackHeight = eraserFeedback.ActualHeight;
+                    if (feedbackWidth > 0) eraserFeedbackTranslateTransform.X = pt.X - feedbackWidth / 2;
+                    if (feedbackHeight > 0) eraserFeedbackTranslateTransform.Y = pt.Y - feedbackHeight / 2;
                 }
 
                 // 添加点到碰撞检测器
