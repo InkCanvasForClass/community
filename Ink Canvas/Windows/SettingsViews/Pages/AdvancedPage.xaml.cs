@@ -19,12 +19,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private bool _isRefreshingConfigProfileList = false;
         private string _lastAppliedProfileName;
 
-        // 自动校准相关
-        private int _calibrateStep = 0;
-        private double _nibTouchWidth = 0;
-        private double _fingerTouchWidth = 0;
-        private double _palmTouchWidth = 0;
-
         public AdvancedPage()
         {
             InitializeComponent();
@@ -85,6 +79,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ToggleSwitchIsSecondConfimeWhenShutdownApp.IsOn = settings.Advanced.IsSecondConfirmWhenShutdownApp;
 
             CardTouchMultiplier.IsExpanded = settings.Advanced.IsSpecialScreen;
+            UpdateCalibrationStatus();
         }
 
         #region Special Screen & Touch Multiplier
@@ -168,87 +163,31 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void BtnStartCalibrate_Click(object sender, RoutedEventArgs e)
         {
-            _calibrateStep = 1;
-            _nibTouchWidth = 0;
-            _fingerTouchWidth = 0;
-            _palmTouchWidth = 0;
-
-            BtnStartCalibrate.IsEnabled = false;
-            BorderCalibrate.IsEnabled = true;
-            TextCalibrateHint.Text = "请用 笔尖 点击此处";
-            TextNibCalibrated.Text = "笔尖值: 等待校准...";
-            TextFingerCalibrated.Text = "手指值: 未校准";
-            TextPalmCalibrated.Text = "手掌值: 未校准";
-            TextCalibrateResult.Text = "";
+            GetMainWindow()?.ResetTouchCalibrationInput();
+            if (Window.GetWindow(this) is SettingsWindow settingsWindow)
+                settingsWindow.NavigateToPage("TouchCalibrationPage");
         }
 
-        private void BorderCalibrate_TouchDown(object sender, TouchEventArgs e)
+        private void ClearCalibration_Click(object sender, RoutedEventArgs e)
         {
-            var args = e.GetTouchPoint(null).Bounds;
-            double touchWidth;
-            if (!SettingsManager.Settings.Advanced.IsQuadIR)
-                touchWidth = args.Width;
-            else
-                touchWidth = Math.Sqrt(args.Width * args.Height);
+            if (MessageBox.Show(AdvancedStrings.GetString("CalibrationClearConfirm"), AdvancedStrings.CalibrationTitle,
+                MessageBoxButton.YesNo) != MessageBoxResult.Yes) return;
+            if (!SettingsManager.TrySaveCalibration(null))
+                TextCalibrateStatus.Text = AdvancedStrings.GetString("CalibrationSaveFailed");
+            else UpdateCalibrationStatus();
+        }
 
-            switch (_calibrateStep)
+        private void UpdateCalibrationStatus()
+        {
+            var record = SettingsManager.Settings.Advanced.TouchCalibration;
+            string key = "CalibrationNone";
+            if (record?.IsValid() == true)
             {
-                case 1:
-                    _nibTouchWidth = touchWidth;
-                    TextNibCalibrated.Text = $"笔尖值: {touchWidth:F2}";
-                    TextCalibrateHint.Text = "请用 手指 点击此处";
-                    _calibrateStep = 2;
-                    break;
-
-                case 2:
-                    _fingerTouchWidth = touchWidth;
-                    TextFingerCalibrated.Text = $"手指值: {touchWidth:F2}";
-                    TextCalibrateHint.Text = "请用 手掌 点击此处（模拟误触）";
-                    _calibrateStep = 3;
-                    break;
-
-                case 3:
-                    _palmTouchWidth = touchWidth;
-                    TextPalmCalibrated.Text = $"手掌值: {touchWidth:F2}";
-                    ApplyCalibratedSettings();
-                    _calibrateStep = 0;
-                    BtnStartCalibrate.IsEnabled = true;
-                    BorderCalibrate.IsEnabled = false;
-                    TextCalibrateHint.Text = "校准完成！点击按钮重新校准";
-                    break;
+                var window = GetMainWindow() ?? Window.GetWindow(this);
+                key = record.Environment.Matches(Ink.TouchCalibrationDisplay.Capture(window, record.Environment.Source))
+                    ? "CalibrationSaved" : "CalibrationMismatch";
             }
-
-            e.Handled = true;
-        }
-
-        private void ApplyCalibratedSettings()
-        {
-            if (!_isLoaded) return;
-
-            // 计算笔尖模式阈值：笔尖值 × 1.5，在 1-50 之间
-            double nibThreshold = _nibTouchWidth * 1.5;
-            nibThreshold = Math.Max(1, Math.Min(50, nibThreshold));
-            SettingsManager.Settings.Advanced.NibModeBoundsWidth = (int)Math.Round(nibThreshold);
-            NibModeBoundsWidthSlider.Value = SettingsManager.Settings.Advanced.NibModeBoundsWidth;
-
-            // 计算手指模式阈值：手指值 × 1.5，在 1-50 之间
-            double fingerThreshold = _fingerTouchWidth * 1.5;
-            fingerThreshold = Math.Max(1, Math.Min(50, fingerThreshold));
-            SettingsManager.Settings.Advanced.FingerModeBoundsWidth = (int)Math.Round(fingerThreshold);
-            FingerModeBoundsWidthSlider.Value = SettingsManager.Settings.Advanced.FingerModeBoundsWidth;
-
-            // 计算触摸倍率：使用手指值，和原来的公式一致
-            double touchMultiplier = 5 / (_fingerTouchWidth * 1.1);
-            touchMultiplier = Math.Max(0, Math.Min(2, touchMultiplier));
-            SettingsManager.Settings.Advanced.TouchMultiplier = Math.Round(touchMultiplier, 2);
-            TouchMultiplierSlider.Value = SettingsManager.Settings.Advanced.TouchMultiplier;
-
-            UpdateAllSliderTexts();
-            SettingsActionHub.OnNibModeBoundsWidthChanged();
-            SettingsActionHub.OnFingerModeBoundsWidthChanged();
-            SettingsManager.SaveSettingsToFile();
-
-            TextCalibrateResult.Text = $"校准成功！笔尖阈值={(int)nibThreshold}，手指阈值={(int)fingerThreshold}，触摸倍率={touchMultiplier:F2}";
+            TextCalibrateStatus.Text = AdvancedStrings.GetString(key);
         }
 
         #endregion
