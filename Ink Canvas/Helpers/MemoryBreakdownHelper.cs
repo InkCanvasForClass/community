@@ -268,8 +268,7 @@ namespace Ink_Canvas.Helpers
                                   $"Fragmented={ToMb(genInfo.FragmentationAfterBytes):F2} MB");
                 }
 
-                sb.AppendLine($"  Total Allocated     : {ToMb(GC.GetTotalMemory(forceFullCollection: false)):F1} MB");
-                sb.AppendLine($"  Total Allocated(FC) : {ToMb(GC.GetTotalMemory(forceFullCollection: true)):F1} MB");
+                sb.AppendLine($"  Total Allocated (snapshot): {ToMb(GC.GetTotalMemory(forceFullCollection: false)):F1} MB");
                 gcHeapMb = ToMb(info.HeapSizeBytes);
             }
             catch (Exception ex)
