@@ -29,6 +29,14 @@ namespace Ink_Canvas
         /// </summary>
         private List<int> dec = new List<int>();
         /// <summary>
+        /// 视频展台：自己维护的"当前按下的触点"集合。
+        /// 不能用 e.Manipulators.Count() 作为"几根手指"的判据 —— 多指书写收笔后
+        /// WPF 的操纵会话可能残留接触，导致之后单指触摸被报成 2 个 manipulator，
+        /// 从而把"单指写字"误判成"双指平移/缩放"。
+        /// 本集合在 PreviewTouchDown 无条件加入、PreviewTouchUp 无条件移除，成对可靠。
+        /// </summary>
+        private readonly HashSet<int> _boothDownTouchIds = new HashSet<int>();
+        /// <summary>
         /// 是否处于单指拖动模式
         /// </summary>
         private bool isSingleFingerDragMode;
@@ -1907,6 +1915,9 @@ namespace Ink_Canvas
             // 仍维护 dec，保证 InkCanvas_PreviewTouchUp 中的 dec.Remove 配对。
             if (_isVideoPresenterSpecialMode)
             {
+                // 展台：触点按下先无条件记账，后续一切判定都用它作为"几根手指"的依据
+                _boothDownTouchIds.Add(e.TouchDevice.Id);
+
                 // 几何图形绘制：与普通模式一致，走图形起点初始化（图形不受展台预览手势影响）
                 if (drawingShapeMode != 0)
                 {
@@ -2220,6 +2231,10 @@ namespace Ink_Canvas
         /// </remarks>
         private void InkCanvas_PreviewTouchUp(object sender, TouchEventArgs e)
         {
+            // 展台：触点抬起先无条件记账（必须在 FinishPalmTouch 提前返回之前），
+            // 保证 _boothDownTouchIds 与真实手指状态始终一致
+            _boothDownTouchIds.Remove(e.TouchDevice.Id);
+
             if (FinishPalmTouch(e)) return;
 
             // 视频展台特殊模式：所有手指抬起后恢复用户原本的 EditingMode
@@ -2454,6 +2469,8 @@ namespace Ink_Canvas
             // PreviewTouchUp 已经在所有手指抬起后恢复用户原本的模式
             if (_isVideoPresenterSpecialMode)
             {
+                // 操纵会话结束 = 手指已全部抬起，清空触点记账，避免残留影响后续判定
+                _boothDownTouchIds.Clear();
                 return;
             }
 
@@ -2527,11 +2544,13 @@ namespace Ink_Canvas
             // 根本到不了 Container 上的处理器，必须在此转发。
             if (_isVideoPresenterSpecialMode && inkCanvas != null)
             {
-                int manipulatorCount = e.Manipulators?.Count() ?? 0;
+                int manipulatorCount = ResolveBoothGestureFingerCount(e.Manipulators?.Count() ?? 0);
                 // 图形绘制优先：绘制几何图形时不把触摸转发为预览拖动/缩放
                 if (drawingShapeMode != 0) return;
-                // 多指书写：正在手动采集笔迹时，触摸一律用于写字，不转发为预览拖动/缩放
-                if (_activeTouchStrokeIds.Count > 0 || _activeRealtimeTouchStrokeIds.Count > 0) return;
+                // 多指书写开启：双指留给墨迹，不转发为预览拖动/缩放。
+                // 这里只看"当前设置 + 真实触点数"，不看 _active*StrokeIds 集合
+                // —— 集合是运行时状态，一旦有残留就会长期误拦/误放
+                if (manipulatorCount >= 2 && MultiTouchWritingEnabled) return;
                 // 单指 + 书写/擦除工具：不转发为预览拖动/缩放（与 VideoPresenterSpecialMode_ManipulationStarting 判定一致）
                 if (manipulatorCount < 2 && !AllowBoothSingleFingerPreview()) return;
                 VideoPresenterSpecialMode_ManipulationDelta(sender, e);

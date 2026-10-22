@@ -431,22 +431,56 @@ namespace Ink_Canvas
             : Settings?.Gesture?.IsEnableTwoFingerZoom == true;
 
         /// <summary>
+        /// 展台手势判定用的"当前手指数量"。
+        /// 以我们自己记账的触点数（<see cref="_boothDownTouchIds"/>）与 WPF 上报的 manipulator 数取较小者。
+        /// 原因：多指书写收笔后 WPF 的操纵会话可能残留接触，单指会被上报成 2 个 manipulator；
+        /// 取较小者可确保"单指写字"不会被误判成"双指平移/缩放"。
+        /// </summary>
+        private int ResolveBoothGestureFingerCount(int reportedCount)
+        {
+            int downCount = _boothDownTouchIds.Count;
+            if (downCount <= 0) return reportedCount;
+            return Math.Min(reportedCount, downCount);
+        }
+
+        /// <summary>
         /// 展台：单指触摸是否应驱动预览的平移/缩放。
-        /// 书写（笔/图形）与擦除工具下单指只负责画墨迹或擦除，不再同时拖动预览；
-        /// 选择/光标/漫游工具下保留"单指拖动预览"的既有行为。
-        /// 判定依据是当前工具（<see cref="ResolveLogicalInkTool"/>），而不是 EditingMode
-        /// —— 某些墨迹管线下笔模式 EditingMode 并不是 Ink，只看它会导致单指同时写字和拖画面。
+        /// 判定取"保守并集"——只要任一信号表明当前是书写/擦除，就禁止单指驱动预览：
+        ///   1. 画布处于书写/擦除编辑模式（EditingMode = Ink / 点擦 / 线擦）；
+        ///   2. 多指书写正在采集笔迹（该触点属于书写，不是手势）；
+        ///   3. 逻辑工具是笔 / 橡皮 / 图形（Cursor 亦不允许，见下方说明）。
+        /// 只有明确的"选择 / 漫游"工具才允许单指拖动预览。
+        /// 之所以要多个信号取并集：实测存在"工具模式与编辑模式不一致"的启动态
+        /// （逻辑工具报 Cursor，但 EditingMode 已是 Ink，用户看到的就是笔模式），
+        /// 只看逻辑工具会让单指既写字又把画面拖走。
         /// </summary>
         private bool AllowBoothSingleFingerPreview()
         {
+            if (inkCanvas == null) return false;
+
+            // 1. 画布处于书写/擦除模式：单指一定用于书写或擦除
+            var mode = inkCanvas.EditingMode;
+            if (mode == InkCanvasEditingMode.Ink
+                || mode == InkCanvasEditingMode.EraseByPoint
+                || mode == InkCanvasEditingMode.EraseByStroke)
+                return false;
+
+            // 2. 多指书写正在采集笔迹：该触点归属书写
+            if (MultiTouchWritingEnabled
+                && (_activeTouchStrokeIds.Count > 0 || _activeRealtimeTouchStrokeIds.Count > 0))
+                return false;
+
+            // 3. 逻辑工具：只有明确的选择/漫游工具才允许单指拖动预览。
+            //    注意这里**不接受 Cursor**：_currentToolMode 的初始值就是 "cursor"，
+            //    在用户没点过任何工具时它会与真实画布状态不一致（画布已是笔模式、工具却报 Cursor），
+            //    之前正是这个不一致让"笔下单指"被当成可拖动预览。
             switch (ResolveLogicalInkTool())
             {
                 case LogicalInkTool.Select:
-                case LogicalInkTool.Cursor:
                 case LogicalInkTool.BoardRoam:
                     return true;
                 default:
-                    // Pen / PointEraser / StrokeEraser / Shape：单指用于书写或擦除
+                    // Pen / PointEraser / StrokeEraser / Shape / Cursor：不驱动预览
                     return false;
             }
         }
@@ -474,6 +508,8 @@ namespace Ink_Canvas
         {
             if (_isVideoPresenterSpecialMode) return;
             _isVideoPresenterSpecialMode = true;
+            // 清空触点记账，避免上一次展台会话残留影响手势判定
+            _boothDownTouchIds.Clear();
             // 展台不支持双指旋转手势，置灰对应开关
             SetBoothGestureRotationUiEnabled(false);
             // 每次进入展台都重置预览成功标记与兜底重试计数
@@ -1757,15 +1793,13 @@ namespace Ink_Canvas
         /// - 双指旋转：Rotation（暂不处理，丢弃避免误操作）</summary>
         private void VideoPresenterSpecialMode_ManipulationStarting(object sender, ManipulationStartingEventArgs e)
         {
-            int manipulatorCount = e.Manipulators?.Count() ?? 0;
-            // 单指 + 书写/擦除工具：触摸只用于写字或擦除，不启动预览手势会话。
-            // （否则会出现"一根手指既画墨迹又拖动预览画面"）
-            if (manipulatorCount < 2 && !AllowBoothSingleFingerPreview())
-            {
-                e.Mode = ManipulationModes.None;
-                e.Handled = true;
-                return;
-            }
+            int manipulatorCount = ResolveBoothGestureFingerCount(e.Manipulators?.Count() ?? 0);
+            // 这里只配置"允许哪些手势"，不做单指禁用。
+            // 原因：ManipulationStarting 每个手势会话只在第一根手指落下时触发一次，
+            // 此时 e.Mode 就被固定下来。若在这里按"单指 + 书写工具"把 Mode 设为 None，
+            // 那么"单指起手、随后补第二指"的双指平移/缩放会整场失效。
+            // 真正的单指抑制放在每帧都会重新评估触点数的地方
+            // （Main_Grid_ManipulationDelta 与 VideoPresenterSpecialMode_ManipulationDelta）。
             // 多指书写开启时，双指留给墨迹，不接管预览手势
             if (manipulatorCount >= 2 && MultiTouchWritingEnabled)
             {
@@ -1804,7 +1838,7 @@ namespace Ink_Canvas
             try
             {
                 var delta = e.DeltaManipulation;
-                int manipulatorCount = e.Manipulators?.Count() ?? 0;
+                int manipulatorCount = ResolveBoothGestureFingerCount(e.Manipulators?.Count() ?? 0);
 
                 // 单指 + 书写/擦除工具：预览不平移/缩放（兜底 ManipulationStarting 的守门）
                 if (manipulatorCount < 2 && !AllowBoothSingleFingerPreview()) return;
@@ -1929,17 +1963,16 @@ namespace Ink_Canvas
             if (!_isVideoPresenterSpecialMode) return false;
             if (e.ChangedButton != MouseButton.Left) return false;
             if (inkCanvas == null) return false;
-            // 橡皮擦模式让 InkCanvas 正常擦除，不启动预览拖动
-            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
-                || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke) return false;
             // 漫游模式交给漫游路径处理（会同步移动预览画面与墨迹）
             if (IsBoardRoamingMode) return false;
-            // Ink 模式下让 InkCanvas 正常绘制墨迹
-            if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink) return false;
             // 图形绘制模式下让正常绘制流程处理（不拦截为拖动）
             if (drawingShapeMode != 0) return false;
+            // 书写/擦除工具下一律不拖动预览。
+            // 注意：不能只看 EditingMode == Ink —— 多指书写、实时笔锋等管线会把 EditingMode 压成 None，
+            // 而触摸会被 WPF 提升成鼠标事件；只看 EditingMode 的话，"单指写字"会同时把预览画面拖走。
+            if (!AllowBoothSingleFingerPreview()) return false;
 
-            // 非 Ink/擦除/漫游模式（Select/Cursor 等）：阻止 InkCanvas 框选，启动鼠标拖动
+            // 选择/漫游工具：阻止 InkCanvas 框选，启动鼠标拖动
             _isBoothMouseDragging = true;
             _boothMouseDragStartOrigin = e.GetPosition(VideoPresenterSpecialModeContainer);
             _boothMouseDragStartTranslateX = _boothPreviewTranslateX;
