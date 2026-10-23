@@ -1,6 +1,7 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
+using System.Threading.Tasks;
 using System.Windows;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
@@ -125,12 +126,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         }
 
         // Issue #546 排查辅助:强制 GC 一次,记录前后 Working Set。不可滥用,仅用于诊断。
-        private void BtnForceGC_Click(object sender, RoutedEventArgs e)
+        private async void BtnForceGC_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 BtnForceGC.IsEnabled = false;
-                var summary = MemoryBreakdownHelper.ForceFullGc();
+                var summary = await Task.Run(MemoryBreakdownHelper.ForceFullGc);
                 LogHelper.WriteLogToFile($"[MemoryBreakdown] 强制 GC 触发 - {summary}", LogHelper.LogType.Info);
             }
             catch (Exception ex)
