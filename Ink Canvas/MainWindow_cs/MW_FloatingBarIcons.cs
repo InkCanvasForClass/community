@@ -1286,6 +1286,8 @@ namespace Ink_Canvas
             if (lastBorderMouseDownObject is Panel panel)
                 panel.Background = new SolidColorBrush(Colors.Transparent);
 
+            if (TryEnterPresentationElementSelection()) return;
+
             // 如果当前不在批注模式，先切换到批注模式
             if (!IsAnnotating)
             {
@@ -3523,6 +3525,52 @@ namespace Ink_Canvas
                 else CaptureAndEnqueueScreenshotSave(true);
             }
 
+            ApplyCursorInputRouting();
+
+            // 点击鼠标按钮退出批注模式时的全屏还原
+            RestoreFullScreenOnExitAnnotationMode();
+
+            inkCanvas.Select(new StrokeCollection());
+            GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+
+            // 视频展台特殊模式下不执行 SaveStrokes/RestoreStrokes，
+            // 否则会清空 timeMachine 历史并 Children.Clear() 移除直播帧，
+            // 导致撤销变灰色且视频预览消失
+            if (currentMode != 0 && !_isVideoPresenterSpecialMode)
+            {
+                SaveStrokes();
+                RestoreStrokes();
+            }
+
+            if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
+            { /* Old UI removed */ }
+            else
+            { /* Old UI removed */ }
+
+            { /* Old UI removed */ }
+            { /* Old UI removed */ }
+            UpdateToolbarComponentVisibility();
+
+
+            UpdateToolbarComponentVisibility();
+
+            // 注意：快捷调色盘的可见性现在完全由工具栏规则集管理，不需要手动设置
+
+            if (!isFloatingBarFolded)
+            {
+                HideSubPanels("cursor", true);
+                await Task.Delay(50);
+
+                if (IsInPPTPresentationMode)
+                    ViewboxFloatingBarMarginAnimation(60);
+                else
+                    ViewboxFloatingBarMarginAnimation(100, true);
+            }
+        }
+
+        // 鼠标入口与演示结束共用；不截图、不保存墨迹、不异步切换工具。
+        internal void ApplyCursorInputRouting()
+        {
             // 鼠标工具下如果仍有已选中的图片/SVG，不能把整个 InkCanvas 设为不可命中。
             // 这些元素位于 InkCanvas 的子树中；否则即使元素仍显示、选框仍显示，
             // 元素本身及其透明外接矩形也都收不到拖动事件。
@@ -3600,45 +3648,6 @@ namespace Ink_Canvas
 
             GridBackgroundCoverHolder.Visibility = Visibility.Collapsed;
 
-            // 点击鼠标按钮退出批注模式时的全屏还原
-            RestoreFullScreenOnExitAnnotationMode();
-
-            inkCanvas.Select(new StrokeCollection());
-            GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-
-            // 视频展台特殊模式下不执行 SaveStrokes/RestoreStrokes，
-            // 否则会清空 timeMachine 历史并 Children.Clear() 移除直播帧，
-            // 导致撤销变灰色且视频预览消失
-            if (currentMode != 0 && !_isVideoPresenterSpecialMode)
-            {
-                SaveStrokes();
-                RestoreStrokes();
-            }
-
-            if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
-            { /* Old UI removed */ }
-            else
-            { /* Old UI removed */ }
-
-            { /* Old UI removed */ }
-            { /* Old UI removed */ }
-            UpdateToolbarComponentVisibility();
-
-
-            UpdateToolbarComponentVisibility();
-
-            // 注意：快捷调色盘的可见性现在完全由工具栏规则集管理，不需要手动设置
-
-            if (!isFloatingBarFolded)
-            {
-                HideSubPanels("cursor", true);
-                await Task.Delay(50);
-
-                if (IsInPPTPresentationMode)
-                    ViewboxFloatingBarMarginAnimation(60);
-                else
-                    ViewboxFloatingBarMarginAnimation(100, true);
-            }
         }
 
         /// <summary>
@@ -6310,6 +6319,7 @@ namespace Ink_Canvas
         /// <param name="mode">模式名称</param>
         private void UpdateCurrentToolMode(string mode)
         {
+            if (mode != "select") LeavePresentationElementSelection();
             _currentToolMode = NormalizeToolModeForFreeze(mode);
 
             // 工具切换为非笔模式（橡皮/框选/图形/漫游/鼠标）时，扩展画布提示立即消失
