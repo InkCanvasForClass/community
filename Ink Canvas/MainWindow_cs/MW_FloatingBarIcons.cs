@@ -1228,8 +1228,10 @@ namespace Ink_Canvas
             if (TryBlockFrozenPageMutation("清除冻结页面内容")) return;
             if (inkCanvas.GetSelectedStrokes().Count > 0)
             {
-                inkCanvas.Strokes.Remove(inkCanvas.GetSelectedStrokes());
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+                var selectedStrokes = inkCanvas.GetSelectedStrokes();
+                timeMachine.CommitStrokeEraseHistory(selectedStrokes);
+                inkCanvas.Strokes.Remove(selectedStrokes);
+                ClearAllSelection();
             }
             else if (inkCanvas.Strokes.Count > 0)
             {
@@ -3587,12 +3589,7 @@ namespace Ink_Canvas
             if (lastBorderMouseDownObject is Panel panel)
                 panel.Background = new SolidColorBrush(Colors.Transparent);
 
-            // 如果当前有选中的图片元素，先取消选中
-            if (currentSelectedElement != null)
-            {
-                UnselectElement(currentSelectedElement);
-                currentSelectedElement = null;
-            }
+            ClearAllSelection();
 
             // 禁用高级橡皮擦系统
             DisableEraserOverlay();
@@ -4410,11 +4407,7 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void BtnUndo_Click(object sender, RoutedEventArgs e)
         {
-            if (inkCanvas.GetSelectedStrokes().Count != 0)
-            {
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-                inkCanvas.Select(new StrokeCollection());
-            }
+            ClearAllSelection();
 
             var item = timeMachine.Undo();
             ApplyHistoryToCanvas(item);
@@ -4427,11 +4420,7 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void BtnRedo_Click(object sender, RoutedEventArgs e)
         {
-            if (inkCanvas.GetSelectedStrokes().Count != 0)
-            {
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-                inkCanvas.Select(new StrokeCollection());
-            }
+            ClearAllSelection();
 
             var item = timeMachine.Redo();
             ApplyHistoryToCanvas(item);
@@ -4547,6 +4536,7 @@ namespace Ink_Canvas
         private void BtnClear_Click(object sender, RoutedEventArgs e)
         {
             if (TryBlockFrozenPageMutation("清空冻结页面内容")) return;
+            ClearAllSelection();
             forceEraser = false;
             //BorderClearInDelete.Visibility = Visibility.Collapsed;
 

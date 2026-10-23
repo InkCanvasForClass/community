@@ -759,8 +759,10 @@ namespace Ink_Canvas
                 // 显示图片缩放选择点
                 ShowImageResizeHandles(element);
 
-                // 墨迹选择工具栏通过GridInkCanvasSelectionCover的可见性来控制
-                // 不需要直接设置BorderStrokeSelectionControl.Visibility
+                if (BorderStrokeSelectionControl != null)
+                {
+                    BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
+                }
             }
             else
             {
@@ -773,8 +775,10 @@ namespace Ink_Canvas
                 // 隐藏图片缩放选择点
                 HideImageResizeHandles();
 
-                // 墨迹选择工具栏通过GridInkCanvasSelectionCover的可见性来控制
-                // 不需要直接设置BorderStrokeSelectionControl.Visibility
+                if (BorderStrokeSelectionControl != null)
+                {
+                    BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
+                }
             }
 
             // 确保选择框不显示，避免蓝色边框
@@ -818,8 +822,10 @@ namespace Ink_Canvas
             // 隐藏图片缩放选择点
             HideImageResizeHandles();
 
-            // 墨迹选择工具栏通过GridInkCanvasSelectionCover的可见性来控制
-            // 不需要直接设置BorderStrokeSelectionControl.Visibility
+            if (BorderStrokeSelectionControl != null && (inkCanvas == null || inkCanvas.GetSelectedStrokes().Count == 0))
+            {
+                BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
+            }
 
             // 确保选择框隐藏
             if (GridInkCanvasSelectionCover != null)
@@ -2768,6 +2774,7 @@ namespace Ink_Canvas
 
         private bool _imageOverlayHooked;
         private FrameworkElement _overlayTrackedElement;
+        private readonly System.Collections.Generic.Dictionary<Stroke, StylusPointCollection> _strokeTransformInitialPoints = new();
 
         private void EnsureImageOverlayHooks()
         {
@@ -2776,7 +2783,45 @@ namespace Ink_Canvas
             ImageSelectionOverlay.ResizeDelta += ImageSelectionOverlay_ResizeDelta;
             ImageSelectionOverlay.MoveDelta += ImageSelectionOverlay_MoveDelta;
             ImageSelectionOverlay.RotateDelta += ImageSelectionOverlay_RotateDelta;
+            ImageSelectionOverlay.InteractionStarted += ImageSelectionOverlay_InteractionStarted;
+            ImageSelectionOverlay.InteractionEnded += ImageSelectionOverlay_InteractionEnded;
             _imageOverlayHooked = true;
+        }
+
+        private void ImageSelectionOverlay_InteractionStarted(object sender, EventArgs e)
+        {
+            if (currentSelectedElement == null && inkCanvas != null && inkCanvas.GetSelectedStrokes().Count > 0)
+            {
+                _strokeTransformInitialPoints.Clear();
+                foreach (var stroke in inkCanvas.GetSelectedStrokes())
+                {
+                    _strokeTransformInitialPoints[stroke] = stroke.StylusPoints.Clone();
+                }
+            }
+        }
+
+        private void ImageSelectionOverlay_InteractionEnded(object sender, EventArgs e)
+        {
+            if (currentSelectedElement == null && inkCanvas != null && _strokeTransformInitialPoints.Count > 0)
+            {
+                var history = new System.Collections.Generic.Dictionary<Stroke, Tuple<StylusPointCollection, StylusPointCollection>>();
+                foreach (var stroke in inkCanvas.GetSelectedStrokes())
+                {
+                    if (_strokeTransformInitialPoints.TryGetValue(stroke, out var initialPoints))
+                    {
+                        history[stroke] = Tuple.Create(initialPoints, stroke.StylusPoints.Clone());
+                    }
+                }
+                if (history.Count > 0)
+                {
+                    timeMachine.CommitStrokeManipulationHistory(history);
+                    foreach (var item in history)
+                    {
+                        StrokeInitialHistory[item.Key] = item.Value.Item2;
+                    }
+                }
+                _strokeTransformInitialPoints.Clear();
+            }
         }
 
         private void AttachOverlayTracking(FrameworkElement element)
@@ -2939,65 +2984,92 @@ namespace Ink_Canvas
 
         private void ImageSelectionOverlay_ResizeDelta(object sender, ImageResizeDeltaEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("缩放图片")) return;
+            if (TryBlockFrozenPageMutation("缩放")) return;
             try
             {
-                if (!IsBitmapLikeCanvasElement(currentSelectedElement)) return;
-                ResizeImageByCorner(currentSelectedElement, e.CanvasDelta, e.Corner, e.LockAspectRatio);
+                if (currentSelectedElement != null && IsBitmapLikeCanvasElement(currentSelectedElement))
+                {
+                    ResizeImageByCorner(currentSelectedElement, e.CanvasDelta, e.Corner, e.LockAspectRatio);
+                    return;
+                }
+
+                if (inkCanvas != null && inkCanvas.GetSelectedStrokes().Count > 0)
+                {
+                    ResizeSelectedStrokesByCorner(e.CanvasDelta, e.Corner, e.LockAspectRatio);
+                    return;
+                }
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"图片缩放失败: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"缩放失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
         private void ImageSelectionOverlay_MoveDelta(object sender, ImageMoveDeltaEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("移动图片")) return;
+            if (TryBlockFrozenPageMutation("移动")) return;
             try
             {
-                if (currentSelectedElement == null) return;
-                if (currentSelectedElement.RenderTransform is TransformGroup tg)
+                if (currentSelectedElement != null)
                 {
-                    var tt = tg.Children.OfType<TranslateTransform>().FirstOrDefault();
-                    var rt = tg.Children.OfType<RotateTransform>().FirstOrDefault();
-                    if (tt != null)
+                    if (currentSelectedElement.RenderTransform is TransformGroup tg)
                     {
-                        tt.X += e.CanvasDelta.X;
-                        tt.Y += e.CanvasDelta.Y;
-                        // Keep rotation center locked to the visual center so the element
-                        // translates rigidly instead of swinging around an old pivot.
-                        if (rt != null)
+                        var tt = tg.Children.OfType<TranslateTransform>().FirstOrDefault();
+                        var rt = tg.Children.OfType<RotateTransform>().FirstOrDefault();
+                        if (tt != null)
                         {
-                            rt.CenterX += e.CanvasDelta.X;
-                            rt.CenterY += e.CanvasDelta.Y;
+                            tt.X += e.CanvasDelta.X;
+                            tt.Y += e.CanvasDelta.Y;
+                            // Keep rotation center locked to the visual center so the element
+                            // translates rigidly instead of swinging around an old pivot.
+                            if (rt != null)
+                            {
+                                rt.CenterX += e.CanvasDelta.X;
+                                rt.CenterY += e.CanvasDelta.Y;
+                            }
                         }
                     }
+                    UpdateImageResizeHandlesPosition(default);
+                    if (BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                        UpdateImageSelectionToolbarPosition(currentSelectedElement);
+                    return;
                 }
-                UpdateImageResizeHandlesPosition(default);
-                if (BorderImageSelectionControl?.Visibility == Visibility.Visible)
-                    UpdateImageSelectionToolbarPosition(currentSelectedElement);
+
+                if (inkCanvas != null && inkCanvas.GetSelectedStrokes().Count > 0)
+                {
+                    MoveSelectedStrokes(e.CanvasDelta);
+                    return;
+                }
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"图片拖动失败: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"拖动失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
         private void ImageSelectionOverlay_RotateDelta(object sender, ImageRotateDeltaEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("旋转图片")) return;
+            if (TryBlockFrozenPageMutation("旋转")) return;
             try
             {
-                if (currentSelectedElement == null) return;
-                ApplyRotateTransform(currentSelectedElement, e.AngleDelta);
-                UpdateImageResizeHandlesPosition(default);
-                if (BorderImageSelectionControl?.Visibility == Visibility.Visible)
-                    UpdateImageSelectionToolbarPosition(currentSelectedElement);
+                if (currentSelectedElement != null)
+                {
+                    ApplyRotateTransform(currentSelectedElement, e.AngleDelta);
+                    UpdateImageResizeHandlesPosition(default);
+                    if (BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                        UpdateImageSelectionToolbarPosition(currentSelectedElement);
+                    return;
+                }
+
+                if (inkCanvas != null && inkCanvas.GetSelectedStrokes().Count > 0)
+                {
+                    RotateSelectedStrokes(e.AngleDelta);
+                    return;
+                }
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"图片旋转失败: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"旋转失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 

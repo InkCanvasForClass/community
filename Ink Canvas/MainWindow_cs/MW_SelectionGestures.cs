@@ -503,24 +503,6 @@ namespace Ink_Canvas
         /// </summary>
         private StrokeCollection StrokesSelectionClone = new StrokeCollection();
 
-        // 选择框和选择点相关变量
-        /// <summary>
-        /// 调整大小状态
-        /// </summary>
-        private bool isResizing = false;
-        /// <summary>
-        /// 当前调整把手
-        /// </summary>
-        private string currentResizeHandle = "";
-        /// <summary>
-        /// 调整起始点
-        /// </summary>
-        private Point resizeStartPoint;
-        /// <summary>
-        /// 原始选择边界
-        /// </summary>
-        private Rect originalSelectionBounds;
-
         /// <summary>
         /// 处理墨迹选择覆盖层鼠标按下事件
         /// </summary>
@@ -723,43 +705,53 @@ namespace Ink_Canvas
                 if (currentSelectedElement != null)
                 {
                     currentSelectedElement = null;
-                    // 隐藏图片选择工具栏
                     if (BorderImageSelectionControl != null)
                     {
                         BorderImageSelectionControl.Visibility = Visibility.Collapsed;
                     }
                 }
 
-                // 显示墨迹选择栏和选择框
-                GridInkCanvasSelectionCover.Visibility = Visibility.Visible;
+                // 显示墨迹选择栏和选择框（与图片共用 ImageSelectionOverlay）
                 BorderStrokeSelectionClone.Background = Brushes.Transparent;
-                updateBorderStrokeSelectionControlLocation();
                 UpdateSelectionDisplay();
                 return;
             }
 
             // 检查是否有图片元素被选中（通过InkCanvas的选中元素）
             var selectedElements = inkCanvas.GetSelectedElements();
-            bool hasImageElement = selectedElements.Any(element => element is Image || element is PdfEmbeddedView);
+            var selectedImageElement = selectedElements
+                .FirstOrDefault(element => element is Image || element is PdfEmbeddedView) as FrameworkElement;
 
-            // 如果有图片元素被选中，不显示选择框
-            if (hasImageElement)
+            if (selectedImageElement != null)
             {
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                 HideSelectionDisplay();
+
+                isProgramChangeStrokeSelection = true;
+                try
+                {
+                    if (currentSelectedElement != null && !ReferenceEquals(currentSelectedElement, selectedImageElement))
+                    {
+                        var previousEditingMode = inkCanvas.EditingMode;
+                        UnselectElement(currentSelectedElement);
+                        inkCanvas.EditingMode = previousEditingMode;
+                    }
+                    SelectElement(selectedImageElement);
+                }
+                finally
+                {
+                    isProgramChangeStrokeSelection = false;
+                }
                 return;
             }
 
             // 检查是否有图片元素被选中（通过currentSelectedElement）
             if (currentSelectedElement != null && IsBitmapLikeCanvasElement(currentSelectedElement))
             {
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                 HideSelectionDisplay();
                 return;
             }
 
-            // 没有选中任何内容，隐藏选择框
-            GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+            // 没有选中任何内容，隐藏选择框与墨迹工具栏
             HideSelectionDisplay();
         }
 
@@ -1121,355 +1113,325 @@ namespace Ink_Canvas
         #region Selection Display and Resize Handles
 
         /// <summary>
-        /// 在画布上显示当前选中墨迹的可视选择框与调整控件（如有选中墨迹则显示，否则隐藏）。
+        /// 在画布上显示当前选中墨迹的可视选择框与墨迹工具栏（与图片共用 ImageSelectionOverlay）。
         /// </summary>
-        /// <remarks>
-        /// 如果没有选中任何墨迹，隐藏选择显示；否则计算选区边界，将选择框在所有方向各扩展 8 像素，设置选择框的位置与尺寸，并更新调整句柄的位置后显示句柄画布。
-        /// </remarks>
         private void UpdateSelectionDisplay()
         {
-            if (inkCanvas.GetSelectedStrokes().Count == 0)
-            {
-                HideSelectionDisplay();
-                return;
-            }
-
-            var selectionBounds = inkCanvas.GetSelectionBounds();
-
-            // 向外扩展8像素
-            double expandOffset = 8;
-
-            // 更新选择框，向外扩展8像素
-            SelectionRectangle.Visibility = Visibility.Visible;
-            SelectionRectangle.Margin = new Thickness(selectionBounds.Left - expandOffset, selectionBounds.Top - expandOffset, 0, 0);
-            SelectionRectangle.Width = selectionBounds.Width + expandOffset * 2;
-            SelectionRectangle.Height = selectionBounds.Height + expandOffset * 2;
-
-            // 更新选择点位置
-            UpdateSelectionHandles(selectionBounds);
-            SelectionHandlesCanvas.Visibility = Visibility.Visible;
+            UpdateStrokeSelectionOverlay();
         }
 
         /// <summary>
-        /// 隐藏选择显示
+        /// 隐藏墨迹选中框与墨迹工具栏。
         /// </summary>
-        /// <remarks>
-        /// 隐藏选择矩形和选择把手画布
-        /// </remarks>
         private void HideSelectionDisplay()
         {
-            SelectionRectangle.Visibility = Visibility.Collapsed;
-            SelectionHandlesCanvas.Visibility = Visibility.Collapsed;
+            HideStrokeSelectionOverlay();
         }
 
-        /// <summary>
-        /// 根据给定的选择边界定位并设置八个缩放/移动把手的位置，四个把手在各边外扩展 8 像素，四个角把手完全位于外部。
-        /// </summary>
-        /// <param name="bounds">当前选区在画布坐标系中的边界矩形（未包含用于显示的 8 像素外扩展）。</param>
-        private void UpdateSelectionHandles(Rect bounds)
+        private void UpdateStrokeSelectionOverlay()
         {
-            // 四个边选择点，向外扩展8像素
-            TopHandle.Margin = new Thickness(bounds.Left + bounds.Width / 2 - 4, bounds.Top - 12, 0, 0);
-            BottomHandle.Margin = new Thickness(bounds.Left + bounds.Width / 2 - 4, bounds.Bottom + 4, 0, 0);
-            LeftHandle.Margin = new Thickness(bounds.Left - 12, bounds.Top + bounds.Height / 2 - 4, 0, 0);
-            RightHandle.Margin = new Thickness(bounds.Right + 4, bounds.Top + bounds.Height / 2 - 4, 0, 0);
-
-            // 四个角选择点，完全位于选择框外部
-            TopLeftHandle.Margin = new Thickness(bounds.Left - 12, bounds.Top - 12, 0, 0);
-            TopRightHandle.Margin = new Thickness(bounds.Right + 4, bounds.Top - 12, 0, 0);
-            BottomLeftHandle.Margin = new Thickness(bounds.Left - 12, bounds.Bottom + 4, 0, 0);
-            BottomRightHandle.Margin = new Thickness(bounds.Right + 4, bounds.Bottom + 4, 0, 0);
-        }
-
-        /// <summary>
-        /// 校验按下缩放锚点时的选区快照是否可用于缩放。
-        /// </summary>
-        /// <remarks>
-        /// 退化边界（没有选中笔画、或选区 0 宽/0 高）不能作为缩放分母：<see cref="Stroke.Transform"/> 是就地改写，
-        /// 一旦用 Infinity/NaN 矩阵变换就会把笔画坐标写坏，且撤销无法恢复（history 持有的是同一批对象）。
-        /// 命中退化时记录完整上下文并返回 false，调用方应放弃本次缩放。
-        /// </remarks>
-        private bool IsResizeBaselineUsable(Rect snapshot, string source)
-        {
-            var selectedCount = inkCanvas?.GetSelectedStrokes().Count ?? 0;
-            if (selectedCount > 0 && !snapshot.IsEmpty && snapshot.Width > 0 && snapshot.Height > 0)
+            try
             {
-                return true;
-            }
-
-            LogHelper.WriteLogToFile(
-                $"[Ink] 缩放锚点：选区快照不可用，已忽略本次按下 (source={source}, snapshot={snapshot}, " +
-                $"live={inkCanvas?.GetSelectionBounds()}, selected={selectedCount}, " +
-                $"cover={(GridInkCanvasSelectionCover?.Visibility.ToString() ?? "null")}, mode={inkCanvas?.EditingMode})",
-                LogHelper.LogType.Warning);
-            return false;
-        }
-
-        /// <summary>
-        /// 在用户按下选择框的缩放把手时开始缩放操作。
-        /// </summary>
-        /// <remarks>
-        /// 记录缩放开始位置和当前选区的初始边界，设置当前活动把手并捕获鼠标以便后续移动/释放事件处理。
-        /// </remarks>
-        /// <param name="sender">触发事件的缩放把手，预期为一个 Rectangle。</param>
-        /// <param name="e">包含鼠标按下事件的位置信息和处理标志的 <see cref="MouseButtonEventArgs"/> 实例。</param>
-        private void SelectionHandle_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (TryBlockFrozenPageMutation("调整墨迹大小"))
-            {
-                e.Handled = true;
-                return;
-            }
-            if (sender is Rectangle handle)
-            {
-                var snapshot = inkCanvas.GetSelectionBounds();
-                if (!IsResizeBaselineUsable(snapshot, "mouse"))
+                if (inkCanvas == null || ImageSelectionOverlay == null) return;
+                var selectedStrokes = inkCanvas.GetSelectedStrokes();
+                if (selectedStrokes.Count == 0)
                 {
-                    // 选择框仍挂在界面上但没有有效选中态：拒绝进入缩放，避免把不一致状态带进就地变换。
-                    handle.ReleaseMouseCapture();
-                    e.Handled = true;
+                    HideStrokeSelectionOverlay();
                     return;
                 }
 
-                isResizing = true;
-                currentResizeHandle = handle.Name;
-                resizeStartPoint = e.GetPosition(inkCanvas);
-                originalSelectionBounds = snapshot;
-                handle.CaptureMouse();
-                e.Handled = true;
-            }
-        }
-
-        /// <summary>
-        /// 处理选择把手鼠标移动事件
-        /// </summary>
-        /// <param name="sender">事件发送者</param>
-        /// <param name="e">鼠标事件参数</param>
-        /// <remarks>
-        /// 如果正在调整大小，计算新的边界
-        /// 应用新的边界到选中的墨迹
-        /// 更新选择框显示
-        /// </remarks>
-        private void SelectionHandle_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (!isResizing || !(sender is Rectangle handle)) return;
-
-            var currentPoint = e.GetPosition(inkCanvas);
-            var delta = new Point(currentPoint.X - resizeStartPoint.X, currentPoint.Y - resizeStartPoint.Y);
-
-            var newBounds = CalculateNewBounds(originalSelectionBounds, delta, currentResizeHandle);
-
-            // 应用新的边界到选中的墨迹（分母用按下时的快照，避免与 live 选区漂移）
-            ApplyBoundsToStrokes(newBounds, originalSelectionBounds);
-
-            // 更新选择框显示
-            UpdateSelectionDisplay();
-        }
-
-        /// <summary>
-        /// 在选择框的大小调整句柄上释放鼠标时结束调整操作、释放句柄的鼠标捕获并将事件标记为已处理。
-        /// </summary>
-        /// <param name="sender">触发事件的对象，应为表示调整句柄的 <see cref="System.Windows.Shapes.Rectangle"/>。</param>
-        /// <param name="e">鼠标事件参数；在处理后该事件会被标记为已处理。</param>
-        private void SelectionHandle_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (sender is Rectangle handle)
-            {
-                isResizing = false;
-                currentResizeHandle = "";
-                handle.ReleaseMouseCapture();
-                e.Handled = true;
-            }
-        }
-
-        /// <summary>
-        /// 在触摸按下选择调整句柄时开始调整操作并记录初始状态（活动句柄、起始点和当前选区边界）。
-        /// </summary>
-        /// <param name="sender">触发事件的调整句柄（应为 Rectangle）。</param>
-        /// <param name="e">触摸事件数据；方法会标记事件为已处理并使用其触点相对于 inkCanvas 的位置。</param>
-        private void SelectionHandle_TouchDown(object sender, TouchEventArgs e)
-        {
-            if (TryBlockFrozenPageMutation("调整墨迹大小"))
-            {
-                e.Handled = true;
-                return;
-            }
-            if (sender is Rectangle handle)
-            {
-                var touchPoint = e.GetTouchPoint(inkCanvas);
-                var snapshot = inkCanvas.GetSelectionBounds();
-                if (!IsResizeBaselineUsable(snapshot, "touch"))
+                var bounds = inkCanvas.GetSelectionBounds();
+                if (bounds.IsEmpty || bounds.Width <= 0 || bounds.Height <= 0)
                 {
-                    // 同上：选择框可见但没有有效选中态时放弃缩放。
-                    e.Handled = true;
+                    HideStrokeSelectionOverlay();
                     return;
                 }
 
-                isResizing = true;
-                currentResizeHandle = handle.Name;
-                resizeStartPoint = touchPoint.Position;
-                originalSelectionBounds = snapshot;
-                e.Handled = true;
+                EnsureImageOverlayHooks();
+                var center = new Point(bounds.Left + bounds.Width / 2, bounds.Top + bounds.Height / 2);
+                ImageSelectionOverlay.UpdateFrame(center, bounds.Width, bounds.Height, 0);
+                ImageSelectionOverlay.Visibility = Visibility.Visible;
+
+                if (BorderStrokeSelectionControl != null)
+                {
+                    BorderStrokeSelectionControl.Visibility = Visibility.Visible;
+                    updateBorderStrokeSelectionControlLocation();
+                }
+
+                // 抑制原生选择框，确保仅显示统一的新选择框
+                SuppressNativeInkCanvasSelectionAdorners();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新墨迹选中框失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void HideStrokeSelectionOverlay()
+        {
+            try
+            {
+                if (BorderStrokeSelectionControl != null)
+                {
+                    BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
+                }
+                if (currentSelectedElement == null && ImageSelectionOverlay != null)
+                {
+                    ImageSelectionOverlay.Visibility = Visibility.Collapsed;
+                }
+                if (GridInkCanvasSelectionCover != null)
+                {
+                    GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"隐藏墨迹选中框失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
         /// <summary>
-        /// 在触摸移动时根据拖动更新选区的边界并将其应用到当前所选的墨迹。
+        /// 全局清除所有选择状态（包括墨迹和图片），并关闭所有选择框与工具栏
         /// </summary>
-        /// <param name="sender">触发事件的调整句柄（应为一个 Rectangle）。</param>
-        /// <param name="e">包含触摸位置和状态的事件参数。</param>
-        /// <remarks>计算新的选择边界、将其应用到所选墨迹并刷新选择显示；将事件标记为已处理。</remarks>
-        private void SelectionHandle_TouchMove(object sender, TouchEventArgs e)
+        public void ClearAllSelection()
         {
-            if (!isResizing || !(sender is Rectangle handle)) return;
-
-            var touchPoint = e.GetTouchPoint(inkCanvas);
-            var currentPoint = touchPoint.Position;
-            var delta = new Point(currentPoint.X - resizeStartPoint.X, currentPoint.Y - resizeStartPoint.Y);
-
-            var newBounds = CalculateNewBounds(originalSelectionBounds, delta, currentResizeHandle);
-
-            // 应用新的边界到选中的墨迹（分母用按下时的快照，避免与 live 选区漂移）
-            ApplyBoundsToStrokes(newBounds, originalSelectionBounds);
-
-            // 更新选择框显示
-            UpdateSelectionDisplay();
-
-            e.Handled = true;
-        }
-
-        /// <summary>
-        /// 结束触摸对选择框调整大小的交互，重置调整状态并标记事件已处理。
-        /// </summary>
-        /// <param name="sender">触发事件的调整句柄（Rectangle）。</param>
-        /// <param name="e">触摸事件数据；方法会将其标记为已处理。</param>
-        private void SelectionHandle_TouchUp(object sender, TouchEventArgs e)
-        {
-            if (sender is Rectangle handle)
+            try
             {
-                isResizing = false;
-                currentResizeHandle = "";
-                e.Handled = true;
+                // 1. 清除图片/元素选择
+                if (currentSelectedElement != null)
+                {
+                    var element = currentSelectedElement;
+                    currentSelectedElement = null;
+                    UnselectElement(element);
+                }
+
+                // 2. 清除墨迹选择
+                if (inkCanvas != null && inkCanvas.GetSelectedStrokes().Count > 0)
+                {
+                    isProgramChangeStrokeSelection = true;
+                    try
+                    {
+                        inkCanvas.Select(new StrokeCollection());
+                    }
+                    finally
+                    {
+                        isProgramChangeStrokeSelection = false;
+                    }
+                }
+
+                // 3. 隐藏新旧选择框与浮动栏
+                HideSelectionDisplay();
+                HideImageResizeHandles();
+
+                if (BorderStrokeSelectionControl != null)
+                    BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
+
+                if (BorderImageSelectionControl != null)
+                    BorderImageSelectionControl.Visibility = Visibility.Collapsed;
+
+                if (ImageSelectionOverlay != null)
+                    ImageSelectionOverlay.Visibility = Visibility.Collapsed;
+
+                if (GridInkCanvasSelectionCover != null)
+                    GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+
+                // 4. 重置缓存
+                StrokesSelectionClone?.Clear();
+                _strokeTransformInitialPoints?.Clear();
+
+                // 5. 再次抑制原生选择修饰器
+                SuppressNativeInkCanvasSelectionAdorners();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Selection] ClearAllSelection 异常: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
         /// <summary>
-        /// 根据指定的拖动增量和所操作的调整柄，计算并返回调整后的边界矩形。
+        /// 抑制 WPF InkCanvas 内部原生选择修饰器（InkCanvasSelectionAdorner），
+        /// 彻底消除新旧两套选择框共存的问题。
         /// </summary>
-        /// <param name="originalBounds">调整前的原始边界矩形。</param>
-        /// <param name="delta">从初始位置到当前拖动位置的偏移量，用于更新对应边或角的位置和尺寸。</param>
-        /// <param name="handleName">被拖动的调整柄的名称，支持的值：`TopLeftHandle`、`TopRightHandle`、`BottomLeftHandle`、`BottomRightHandle`、`TopHandle`、`BottomHandle`、`LeftHandle`、`RightHandle`。</param>
-        /// <returns>应用偏移并强制最小宽高限制（10×10）后的新的边界矩形。</returns>
-        private Rect CalculateNewBounds(Rect originalBounds, Point delta, string handleName)
+        private void SuppressNativeInkCanvasSelectionAdorners()
         {
-            var newBounds = originalBounds;
-            double newWidth = originalBounds.Width;
-            double newHeight = originalBounds.Height;
-            double newX = originalBounds.X;
-            double newY = originalBounds.Y;
-
-            switch (handleName)
+            if (inkCanvas == null) return;
+            try
             {
-                case "TopLeftHandle":
-                    newX = originalBounds.X + delta.X;
-                    newY = originalBounds.Y + delta.Y;
-                    newWidth = originalBounds.Width - delta.X;
-                    newHeight = originalBounds.Height - delta.Y;
-                    break;
-                case "TopRightHandle":
-                    newY = originalBounds.Y + delta.Y;
-                    newWidth = originalBounds.Width + delta.X;
-                    newHeight = originalBounds.Height - delta.Y;
-                    break;
-                case "BottomLeftHandle":
-                    newX = originalBounds.X + delta.X;
-                    newWidth = originalBounds.Width - delta.X;
-                    newHeight = originalBounds.Height + delta.Y;
-                    break;
-                case "BottomRightHandle":
-                    newWidth = originalBounds.Width + delta.X;
-                    newHeight = originalBounds.Height + delta.Y;
-                    break;
-                case "TopHandle":
-                    newY = originalBounds.Y + delta.Y;
-                    newHeight = originalBounds.Height - delta.Y;
-                    break;
-                case "BottomHandle":
-                    newHeight = originalBounds.Height + delta.Y;
-                    break;
-                case "LeftHandle":
-                    newX = originalBounds.X + delta.X;
-                    newWidth = originalBounds.Width - delta.X;
-                    break;
-                case "RightHandle":
-                    newWidth = originalBounds.Width + delta.X;
-                    break;
+                SuppressVisualTreeAdorners(inkCanvas);
             }
-
-            // 确保最小尺寸和正值
-            if (newWidth < 10) newWidth = 10;
-            if (newHeight < 10) newHeight = 10;
-
-            // 创建新的Rect，确保所有值都是有效的
-            newBounds = new Rect(newX, newY, newWidth, newHeight);
-
-            return newBounds;
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Ink] 抑制原生选择修饰器失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
         }
 
-        /// <summary>
-        /// 应用新的边界到选中的墨迹
-        /// </summary>
-        /// <param name="newBounds">本次拖动计算出的目标边界。</param>
-        /// <param name="originalBounds">按下锚点时的选区快照。必须与 <paramref name="newBounds"/> 来自同一时刻：
-        /// 缩放分母由此提供，若改为实时重读，选区在拖动途中变化会让分母退化为 0 并产生 Infinity/NaN 矩阵。</param>
-        /// <remarks>
-        /// 计算缩放比例和平移量
-        /// 创建变换矩阵
-        /// 应用变换到选中的墨迹
-        /// </remarks>
-        private void ApplyBoundsToStrokes(Rect newBounds, Rect originalBounds)
+        private void SuppressVisualTreeAdorners(DependencyObject parent)
         {
-            var selectedStrokes = inkCanvas.GetSelectedStrokes();
-            if (selectedStrokes.Count == 0) return;
-
-            // 分母退化必须直接放弃：Stroke.Transform 就地改写坐标，写成 NaN 后连撤销都救不回来。
-            if (originalBounds.IsEmpty || originalBounds.Width <= 0 || originalBounds.Height <= 0)
+            if (parent == null) return;
+            int count = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < count; i++)
             {
-                LogHelper.WriteLogToFile(
-                    $"[Ink] 缩放锚点：选区快照边界退化，已跳过本次变换 (snapshot={originalBounds}, " +
-                    $"live={inkCanvas.GetSelectionBounds()}, newBounds={newBounds}, selected={selectedStrokes.Count}, " +
-                    $"handle={currentResizeHandle}, resizing={isResizing}, " +
-                    $"cover={(GridInkCanvasSelectionCover?.Visibility.ToString() ?? "null")}, mode={inkCanvas.EditingMode})",
-                    LogHelper.LogType.Warning);
-                return;
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is System.Windows.Documents.AdornerDecorator adornerDecorator && adornerDecorator.AdornerLayer != null)
+                {
+                    adornerDecorator.AdornerLayer.Visibility = Visibility.Collapsed;
+                    adornerDecorator.AdornerLayer.Opacity = 0;
+                    adornerDecorator.AdornerLayer.IsHitTestVisible = false;
+                }
+                else if (child is System.Windows.Documents.AdornerLayer adornerLayer)
+                {
+                    adornerLayer.Visibility = Visibility.Collapsed;
+                    adornerLayer.Opacity = 0;
+                    adornerLayer.IsHitTestVisible = false;
+                }
+                else if (child is System.Windows.Documents.Adorner adorner)
+                {
+                    adorner.Visibility = Visibility.Collapsed;
+                    adorner.Opacity = 0;
+                    adorner.IsHitTestVisible = false;
+                }
+                SuppressVisualTreeAdorners(child);
             }
+        }
 
-            // 计算缩放比例
-            var scaleX = newBounds.Width / originalBounds.Width;
-            var scaleY = newBounds.Height / originalBounds.Height;
-
-            if (!double.IsFinite(scaleX) || !double.IsFinite(scaleY) || scaleX <= 0 || scaleY <= 0)
+        private void MoveSelectedStrokes(Vector delta)
+        {
+            if (TryBlockFrozenPageMutation("移动墨迹")) return;
+            try
             {
-                LogHelper.WriteLogToFile(
-                    $"[Ink] 缩放锚点：缩放系数非法，已跳过本次变换 (scaleX={scaleX}, scaleY={scaleY}, " +
-                    $"newBounds={newBounds}, snapshot={originalBounds}, handle={currentResizeHandle})",
-                    LogHelper.LogType.Warning);
-                return;
+                var selectedStrokes = inkCanvas?.GetSelectedStrokes();
+                if (selectedStrokes == null || selectedStrokes.Count == 0) return;
+
+                var matrix = new Matrix();
+                matrix.Translate(delta.X, delta.Y);
+
+                foreach (var stroke in selectedStrokes)
+                {
+                    stroke.Transform(matrix, false);
+                }
+
+                UpdateStrokeSelectionOverlay();
+                updateBorderStrokeSelectionControlLocation();
             }
-
-            // 计算平移量
-            var translateX = newBounds.X - originalBounds.X;
-            var translateY = newBounds.Y - originalBounds.Y;
-
-            // 创建变换矩阵
-            var matrix = new Matrix();
-            matrix.Translate(translateX, translateY);
-            matrix.ScaleAt(scaleX, scaleY, originalBounds.X + originalBounds.Width / 2, originalBounds.Y + originalBounds.Height / 2);
-
-            // 应用变换到选中的墨迹
-            foreach (var stroke in selectedStrokes)
+            catch (Exception ex)
             {
-                stroke.Transform(matrix, false);
+                LogHelper.WriteLogToFile($"移动墨迹失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void RotateSelectedStrokes(double angleDelta)
+        {
+            if (TryBlockFrozenPageMutation("旋转墨迹")) return;
+            try
+            {
+                var selectedStrokes = inkCanvas?.GetSelectedStrokes();
+                if (selectedStrokes == null || selectedStrokes.Count == 0) return;
+
+                var bounds = inkCanvas.GetSelectionBounds();
+                if (bounds.IsEmpty || bounds.Width <= 0 || bounds.Height <= 0) return;
+
+                var center = new Point(bounds.Left + bounds.Width / 2, bounds.Top + bounds.Height / 2);
+                var matrix = new Matrix();
+                matrix.RotateAt(angleDelta, center.X, center.Y);
+
+                foreach (var stroke in selectedStrokes)
+                {
+                    stroke.Transform(matrix, false);
+                }
+
+                UpdateStrokeSelectionOverlay();
+                updateBorderStrokeSelectionControlLocation();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"旋��墨迹失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void ResizeSelectedStrokesByCorner(Vector canvasDelta, ImageResizeCorner corner, bool lockAspect)
+        {
+            if (TryBlockFrozenPageMutation("缩放墨迹")) return;
+            try
+            {
+                var selectedStrokes = inkCanvas?.GetSelectedStrokes();
+                if (selectedStrokes == null || selectedStrokes.Count == 0) return;
+
+                var bounds = inkCanvas.GetSelectionBounds();
+                if (bounds.IsEmpty || bounds.Width <= 0 || bounds.Height <= 0)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"[Ink] 缩放锚点：选区边界退化，已跳过本次变换 (bounds={bounds}, selected={selectedStrokes.Count})",
+                        LogHelper.LogType.Warning);
+                    return;
+                }
+
+                double curW = bounds.Width;
+                double curH = bounds.Height;
+                double newW = curW;
+                double newH = curH;
+                Point pivot = new Point(0, 0);
+
+                switch (corner)
+                {
+                    case ImageResizeCorner.TopLeft:
+                        newW = curW - canvasDelta.X;
+                        newH = curH - canvasDelta.Y;
+                        pivot = new Point(bounds.Right, bounds.Bottom);
+                        break;
+                    case ImageResizeCorner.TopRight:
+                        newW = curW + canvasDelta.X;
+                        newH = curH - canvasDelta.Y;
+                        pivot = new Point(bounds.Left, bounds.Bottom);
+                        break;
+                    case ImageResizeCorner.BottomLeft:
+                        newW = curW - canvasDelta.X;
+                        newH = curH + canvasDelta.Y;
+                        pivot = new Point(bounds.Right, bounds.Top);
+                        break;
+                    case ImageResizeCorner.BottomRight:
+                        newW = curW + canvasDelta.X;
+                        newH = curH + canvasDelta.Y;
+                        pivot = new Point(bounds.Left, bounds.Top);
+                        break;
+                }
+
+                // 强制最小尺寸，避免退化为 0 或负数（彻底杜绝 Issue 654）
+                const double minDimension = 10.0;
+                newW = Math.Max(minDimension, newW);
+                newH = Math.Max(minDimension, newH);
+
+                if (lockAspect && curW > 0 && curH > 0)
+                {
+                    double uniform = Math.Min(newW / curW, newH / curH);
+                    newW = curW * uniform;
+                    newH = curH * uniform;
+                }
+
+                double scaleX = newW / curW;
+                double scaleY = newH / curH;
+
+                if (!double.IsFinite(scaleX) || !double.IsFinite(scaleY) || scaleX <= 0 || scaleY <= 0)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"[Ink] 缩放锚点：缩放系数非法，已跳过本次变换 (scaleX={scaleX}, scaleY={scaleY}, curW={curW}, curH={curH}, newW={newW}, newH={newH})",
+                        LogHelper.LogType.Warning);
+                    return;
+                }
+
+                var matrix = new Matrix();
+                matrix.ScaleAt(scaleX, scaleY, pivot.X, pivot.Y);
+
+                foreach (var stroke in selectedStrokes)
+                {
+                    stroke.Transform(matrix, false);
+                }
+
+                UpdateStrokeSelectionOverlay();
+                updateBorderStrokeSelectionControlLocation();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"缩放墨迹失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
