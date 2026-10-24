@@ -120,5 +120,44 @@ namespace Ink_Canvas.Plugins
         /// 工具栏仍可操作；结束放映时一定退出选择。插件应同步自己的播放器交互模式。
         /// </summary>
         public Action<bool> ElementSelectionChanged { get; set; }
+
+        /// <summary>由演示源接管全部批注输入；宿主只保留工具栏。</summary>
+        public bool SupportsExternalAnnotation { get; set; }
+        public Action<PresentationAnnotationState> AnnotationStateChanged { get; set; }
+        public Action<string> AnnotationCommand { get; set; }
+        /// <summary>播放器更新状态，宿主在 UI 线程读取。</summary>
+        public PresentationAnnotationStatus AnnotationStatus { get; set; }
+    }
+
+    public class PresentationAnnotationState
+    {
+        public string Tool { get; set; } = "play";
+        public string Color { get; set; } = "#e53935";
+        public double Width { get; set; } = 4;
+        public double Opacity { get; set; } = 1;
+        public bool Pressure { get; set; }
+        public string BrushKind { get; set; } = "pen";
+        public double Height { get; set; } = 4;
+        public string Tip { get; set; } = "ellipse";
+        public int InkStyle { get; set; } = 2;
+        public double VelocityMix { get; set; } = 0.45;
+        public double MinDistanceScale { get; set; } = 0.5;
+        public bool HighlighterOverlap { get; set; }
+        public bool FadeEnabled { get; set; }
+        public double FadeDelay { get; set; } = 3000;
+        public double FadeSpeed { get; set; } = 1;
+        public bool Smoothing { get; set; }
+        public int SmoothingQuality { get; set; } = 2;
+        public double EraserWidth { get; set; } = 64;
+        public string EraserShape { get; set; } = "rectangle";
+        public bool Frozen { get; set; }
+    }
+
+    public class PresentationAnnotationStatus
+    {
+        public string Tool { get; set; } = "play";
+        public bool CanUndo { get; set; }
+        public bool CanRedo { get; set; }
+        public bool Frozen { get; set; }
     }
 }

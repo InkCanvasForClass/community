@@ -19,6 +19,11 @@ namespace Ink_Canvas
         internal void AttachPresentationSelection(PresentationSourceDescriptor source)
         {
             DetachPresentationSelection();
+            if (source.SupportsExternalAnnotation)
+            {
+                AttachPresentationAnnotation(source);
+                return;
+            }
             if (!source.SupportsElementSelection) return;
             _selectionPresentation = source;
             if (_currentToolMode == "select") TryEnterPresentationElementSelection();
@@ -91,6 +96,7 @@ namespace Ink_Canvas
 
         internal void DetachPresentationSelection()
         {
+            DetachPresentationAnnotation();
             var wasSelecting = _presentationElementSelection;
             LeavePresentationElementSelection();
             _selectionPresentation = null;

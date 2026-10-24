@@ -132,6 +132,7 @@ namespace Ink_Canvas
             if (TryBlockFrozenPageMutation("清空冻结页面内容")) return;
 
             _undoLongPressClearFired = true;
+            if (TryPresentationAnnotationCommand("clear")) return;
 
             // 显式提交清屏历史：保证长按清屏后可撤销恢复墨迹，不受当前工具模式影响。
             // 克隆一份，避免随后清空画布使历史引用失效。

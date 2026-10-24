@@ -1038,7 +1038,7 @@ namespace Ink_Canvas
                 return;
 
             _winRTInkInputGate.CanvasInputEnabled =
-                IsEnabled && IsVisible && inkCanvas != null && !IsPluginCanvasToolActive;
+                IsEnabled && IsVisible && inkCanvas != null && !IsPluginCanvasToolActive && !IsExternalAnnotationActive;
             _winRTInkInputGate.PageFrozen = IsCurrentPageFrozen;
             _winRTInkInputGate.MultiTouchWriting = currentMode == 0
                 ? Settings.Gesture.IsEnableMultiTouchMode || isInMultiTouchMode
@@ -1076,7 +1076,7 @@ namespace Ink_Canvas
 
         private LogicalInkTool ResolveLogicalInkTool()
         {
-            if (_presentationElementSelection)
+            if (_presentationElementSelection || IsExternalAnnotationActive)
                 return LogicalInkTool.Cursor;
             if (IsBoardRoamingMode)
                 return LogicalInkTool.BoardRoam;
