@@ -1,4 +1,4 @@
-﻿using H.NotifyIcon;
+using H.NotifyIcon;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Plugins;
 using Ink_Canvas.Properties;
@@ -373,6 +373,7 @@ namespace Ink_Canvas
                 (typeof(Plugins.INameRosterService),      new Plugins.NameRosterService()),
                 (typeof(Plugins.IInkEffectService),       new Plugins.InkEffectService(mainWindow)),
                 (typeof(Plugins.ICameraService),          new Plugins.CameraService()),
+                (typeof(Plugins.ICameraProviderService),  new Plugins.CameraProviderService()),
                 (typeof(Plugins.IVideoBoothService),      new Plugins.VideoBoothService(mainWindow)),
                 (typeof(Plugins.ISystemInfoService),      new Plugins.SystemInfoService()),
                 (typeof(Plugins.IBackupService),          new Plugins.BackupService()),

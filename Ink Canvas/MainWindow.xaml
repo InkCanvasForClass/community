@@ -188,6 +188,15 @@
                             </TransformGroup>
                         </helpers:CapturableVideoCaptureElement.RenderTransform>
                     </helpers:CapturableVideoCaptureElement>
+                    <!-- 插件摄像头（camera provider）预览：非 DirectShow 路径。
+                         插件通过 IPluginCameraFrameSink 推 BGR24 帧，宿主在这里用 WPF Image 渲染。
+                         代码里（PrepareProviderImageView）会把它的 LayoutTransform/RenderTransform
+                         指向 VideoCaptureElement 的同名实例，因此缩放/旋转/镜像/批注与 DirectShow
+                         预览走完全相同的变换管线；同一时刻只会显示两者之一。 -->
+                    <Image x:Name="VideoPresenterProviderImage"
+                           Stretch="Uniform"
+                           RenderTransformOrigin="0,0"
+                           Visibility="Collapsed" />
                     <!-- 拍照后冻结画面：覆盖在 VideoCaptureElement 之上，显示拍照的照片，
                          让用户在照片上批注。用 FillImage（重写 MeasureOverride 返回 availableSize）
                          让照片像 VideoCaptureElement 一样填满容器，使 LayoutTransform 旋转、
