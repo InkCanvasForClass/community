@@ -1481,6 +1481,9 @@ namespace Ink_Canvas
 
                 int prev = _previousSlideID;
 
+                // 翻页后文字行缓存必然失效，先丢掉再走加载流程。
+                InvalidatePptHighlighterSnapCache();
+
                 Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     MemoryStream ms;
@@ -2437,6 +2440,13 @@ namespace Ink_Canvas
                 // 重置当前播放页码跟踪
                 _currentSlideShowPosition = 0;
                 _previousSlideID = 0;
+
+                // 放映结束：文字行缓存与纠正映射一并失效，避免下一次放映沿用旧坐标。
+                InvalidatePptHighlighterSnapCache();
+                _pptHighlighterSnapHistory.Clear();
+                _pptHighlighterSnapReverse.Clear();
+                _pptHighlighterSnapOrder.Clear();
+
                 lock (_memoryStreams)
                 {
                     foreach (var stream in _memoryStreams.Values)

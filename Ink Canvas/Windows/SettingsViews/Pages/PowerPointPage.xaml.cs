@@ -64,6 +64,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             CardShowCanvasAtNewSlideShow.IsOn = ppt.IsShowCanvasAtNewSlideShow;
             CardEnableSmartMode.IsOn = ppt.EnableSmartMode;
+            CardEnableHighlighterSnap.IsOn = ppt.EnableHighlighterSnapToText;
 
             CardEnableTwoFingerGestureInPresentationMode.IsOn = ppt.IsEnableTwoFingerGestureInPresentationMode;
             CardEnableFingerGestureSlideShowControl.IsOn = ppt.IsEnableFingerGestureSlideShowControl;
@@ -248,6 +249,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.PowerPointSettings.EnableSmartMode = CardEnableSmartMode.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchEnableHighlighterSnap_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.PowerPointSettings.EnableHighlighterSnapToText = CardEnableHighlighterSnap.IsOn;
             SettingsManager.SaveSettingsToFile();
         }
 

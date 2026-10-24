@@ -378,6 +378,23 @@ namespace Ink_Canvas
             var strokeDrawingAttributes = e.Stroke?.DrawingAttributes;
             var isPauseStraightened = e.Stroke.ContainsPropertyData(WinRTStrokeConverter.PauseStraightenedGuid);
 
+            // PPT 荧光笔墨迹纠正：把随手画的荧光笔迹规整成贴合文字行的高亮条。
+            // 必须放在墨迹渐隐判断之前 —— 渐隐会立即把笔画移出画布，之后再纠正就没有意义。
+            // 也必须在压感/平滑/拉直/形状识别之前 —— 纠正产生的是规整矩形条，
+            // 再走平滑或形状识别只会把矩形揉变形。命中后直接返回，跳过整条美化流水线。
+            try
+            {
+                if (e.Stroke != null
+                    && TryApplyPptHighlighterSnap(e.Stroke, strokeDrawingAttributes?.IsHighlighter == true))
+                {
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[PptHighlightSnap] 纠正入口异常，按原流程继续: {ex.Message}", LogHelper.LogType.Warning);
+            }
+
             // 手写识别输入在收笔尾部从最终画布 Stroke 复制，避免使用压感/平滑前快照。
             // Issue #286 — 边缘扩展画布提示：在笔画收集后立即判断位置。
             // HandleEdgeExpandHintAfterStroke 内部已做 eligible 检查与异常吞咽。

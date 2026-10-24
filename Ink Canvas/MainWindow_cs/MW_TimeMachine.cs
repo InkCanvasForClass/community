@@ -124,7 +124,9 @@ namespace Ink_Canvas
                 {
                     foreach (var strokes in item.CurrentStroke)
                         if (!canvas.Strokes.Contains(strokes))
-                            canvas.Strokes.Add(strokes);
+                            // PPT 荧光笔纠正：历史里存的是纠正前的原始笔画，
+                            // 还原时换成纠正后的高亮条，保证撤销/重做观感一致。
+                            canvas.Strokes.Add(ResolvePptHighlighterSnapForRestore(strokes));
                 }
                 else
                 {

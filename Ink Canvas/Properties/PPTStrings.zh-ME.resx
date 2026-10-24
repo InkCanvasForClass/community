@@ -303,4 +303,10 @@
   <data name="SmartModeHint" xml:space="preserve">
     <value>自动检测 PPT 中的视频控件区域，鼠标进入时切指针形态，离开后恢复批注形态（所有联动架构都能用）</value>
   </data>
+  <data name="HighlighterSnap" xml:space="preserve">
+    <value>荧光笔纠偏神器</value>
+  </data>
+  <data name="HighlighterSnapHint" xml:space="preserve">
+    <value>放映时一划拉，手抖画歪的高亮线自动被掰直、啪地拍进文字上；画圈画竖线它就不插手啦</value>
+  </data>
 </root>

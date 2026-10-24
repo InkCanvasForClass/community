@@ -303,4 +303,10 @@
   <data name="SmartModeHint" xml:space="preserve">
     <value>自动检测 PPT 中的视频控件区域，鼠标进入时切换为指针模式，离开后恢复批注模式</value>
   </data>
+  <data name="HighlighterSnap" xml:space="preserve">
+    <value>荧光笔墨迹纠正</value>
+  </data>
+  <data name="HighlighterSnapHint" xml:space="preserve">
+    <value>放映时用荧光笔书写，自动把笔迹规整成贴合文字的横向高亮条；画圈、画竖线等非横穿文字的笔迹不受影响</value>
+  </data>
 </root>

@@ -1336,6 +1336,12 @@ namespace Ink_Canvas
         public bool ShowPPTModePrompt { get; set; } = false;
         [JsonProperty("enableSmartMode")]
         public bool EnableSmartMode { get; set; } = false;
+
+        /// <summary>
+        /// PPT 放映时用荧光笔书写，自动把笔迹规整成贴合文字的横向高亮条。
+        /// </summary>
+        [JsonProperty("enableHighlighterSnapToText")]
+        public bool EnableHighlighterSnapToText { get; set; } = false;
     }
 
     /// <summary>

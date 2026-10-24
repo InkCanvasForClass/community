@@ -303,4 +303,10 @@
   <data name="SmartModeHint" xml:space="preserve">
     <value>Auto-detect video controls in PPT slides; switch to pointer mode when the cursor enters a video region, and restore annotation mode when it leaves</value>
   </data>
+  <data name="HighlighterSnap" xml:space="preserve">
+    <value>Highlighter ink correction</value>
+  </data>
+  <data name="HighlighterSnapHint" xml:space="preserve">
+    <value>While presenting, highlighter strokes are automatically squared up into horizontal bars that hug the text lines; circles, vertical lines and other non-horizontal strokes are left untouched</value>
+  </data>
 </root>

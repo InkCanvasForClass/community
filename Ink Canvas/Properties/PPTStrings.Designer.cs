@@ -213,5 +213,9 @@ namespace Ink_Canvas.Properties
         public static string SmartMode => ResourceManager.GetString(nameof(SmartMode), _resourceCulture);
 
         public static string SmartModeHint => ResourceManager.GetString(nameof(SmartModeHint), _resourceCulture);
+
+        public static string HighlighterSnap => ResourceManager.GetString(nameof(HighlighterSnap), _resourceCulture);
+
+        public static string HighlighterSnapHint => ResourceManager.GetString(nameof(HighlighterSnapHint), _resourceCulture);
     }
 }
