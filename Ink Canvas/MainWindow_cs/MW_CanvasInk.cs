@@ -279,7 +279,8 @@ namespace Ink_Canvas
             drawingShapeMode = 0;
             SetCurrentToolMode(InkCanvasEditingMode.Select);
             UpdateCurrentToolMode("select");
-            HideSubPanels("select");
+            // 从鼠标模式进入选择模式会改变工具栏长度，复用布局更新后的居中流程。
+            HideSubPanels("select", autoAlignCenter: true);
             LogHelper.WriteLogToFile($"插件图片插入完成: 尺寸({element.Width}x{element.Height}), 画布({canvasWidth}x{canvasHeight})");
             return true;
         }
