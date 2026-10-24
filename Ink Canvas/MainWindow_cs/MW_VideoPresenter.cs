@@ -38,6 +38,17 @@ namespace Ink_Canvas
         private readonly object _videoPresenterFrameLock = new object();
         private Bitmap _lastFrame;
 
+        // === 插件摄像头（camera provider）预览状态 ===
+        // 插件摄像头不经过 DirectShow：由插件通过 IPluginCameraFrameSink 推 BGR24 帧，
+        // 宿主在 VideoPresenterProviderImage 上渲染（与 VideoCaptureElement 共享变换实例），
+        // 拍照直接取 CameraProviderRegistry 缓存的最近一帧。
+        private bool _boothProviderCameraActive;
+        private WriteableBitmap _boothProviderWriteableBitmap;
+        // 帧到达通知合并标志：插件推帧频率可能高于 UI 渲染，已有一次渲染排队时丢弃后续通知
+        private bool _boothProviderFrameRenderPending;
+        // 是否已订阅 CameraProviderRegistry.CamerasChanged（避免重复订阅/重复刷新）
+        private bool _cameraProviderListChangedHooked;
+
         // 视频展台特殊模式：开启后整个白板进入深色背景模式，预览铺满画布
         private bool _isVideoPresenterSpecialMode;
         // 视频展台虚拟分页：当前所在的页。-1=直播页，0..N-1=_capturedPhotos 中的照片索引
@@ -1132,6 +1143,9 @@ namespace Ink_Canvas
             // 左上角侧栏预览已移除（VideoPresenterPreviewImage 已从 XAML 删除），
             // 不再需要清理 Image.Source。clearPreviewImage 参数保留用于调用方语义兼容。
 
+            // 插件摄像头：停止插件侧推流并清空画面（非 DirectShow 路径）
+            StopBoothProviderCamera();
+
             try { VideoPresenterFullCanvasImage?.Stop(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
             try { _cameraService?.StopPreview(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
             lock (_videoPresenterFrameLock)
@@ -1154,6 +1168,20 @@ namespace Ink_Canvas
             // 恢复上次退出时保存的展台旋转角度（0..3），使预览/拍照方向与应用保持一致
             _cameraService.RotationAngle = NormalizeBoothRotationAngle(Settings?.Canvas?.VideoPresenterRotationAngle ?? 0);
             SyncBoothResolutionToCameraService();
+
+            // 订阅插件摄像头列表变化：插件在展台打开期间注册/注销/增删虚拟摄像头时即时刷新下拉框
+            if (!_cameraProviderListChangedHooked)
+            {
+                try
+                {
+                    CameraProviderRegistry.Instance.CamerasChanged += CameraProviderRegistry_CamerasChanged;
+                    _cameraProviderListChangedHooked = true;
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[CameraProvider] 订阅摄像头列表变化失败: {ex.Message}", LogHelper.LogType.Warning);
+                }
+            }
         }
 
         internal void SyncBoothResolutionToCameraService()
@@ -2187,19 +2215,28 @@ namespace Ink_Canvas
 
                 if (_isVideoPresenterSpecialMode)
                 {
-                    // 特殊模式：直接启动 VideoCaptureElement（DirectShow + VMR9 + D3DImage 零拷贝）
-                    bool ok = await StartVideoCaptureElementPreviewAsync(cameraIndex);
+                    // 特殊模式：DirectShow 摄像头走 VideoCaptureElement（VMR9 + D3DImage 零拷贝）；
+                    // 插件摄像头（camera provider）走非 DirectShow 路径（WPF Image + 插件推帧）。
+                    bool ok;
+                    if (IsProviderCameraIndex(cameraIndex))
+                    {
+                        ok = await StartProviderCameraPreviewAsync(cameraIndex);
+                    }
+                    else
+                    {
+                        ok = await StartVideoCaptureElementPreviewAsync(cameraIndex);
+                    }
                     if (ok)
                     {
                         // 不在此处启用拍照按钮 —— Play() 返回 true 不代表 D3DImage 已分配表面，
-                        // 此时 CopyBackBuffer 仍可能返回 null。改为在 MediaOpened 事件中启用按钮
-                        // （VideoPresenterFullCanvasImage_MediaOpened 已实现）。
+                        // 此时 CopyBackBuffer 仍可能返回 null。改为在 MediaOpened / 插件首帧事件中启用按钮
+                        // （VideoPresenterFullCanvasImage_MediaOpened 与 RenderBoothProviderFrame 已实现）。
                         RefreshBoothResolutionComboBox();
                     }
                     else
                     {
                         LogHelper.WriteLogToFile(
-                            "StartVideoPresenterPreview: VideoCaptureElement 启动失败",
+                            $"StartVideoPresenterPreview: 预览启动失败（插件摄像头={IsProviderCameraIndex(cameraIndex)}）",
                             LogHelper.LogType.Warning);
                     }
                 }
@@ -2225,12 +2262,355 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>当前摄像头索引是否为插件摄像头（camera provider，非 DirectShow）。</summary>
+        private bool IsProviderCameraIndex(int cameraIndex)
+        {
+            var cameras = _cameraService?.AvailableCameras;
+            return cameras != null
+                && cameraIndex >= 0
+                && cameraIndex < cameras.Count
+                && cameras[cameraIndex] != null
+                && cameras[cameraIndex].IsProviderCamera;
+        }
+
+        /// <summary>
+        /// 启动插件摄像头（camera provider）预览。非 DirectShow 路径：
+        /// 插件通过 <see cref="Ink_Canvas.Plugins.IPluginCameraFrameSink"/> 推 BGR24 帧，
+        /// 宿主在 VideoPresenterProviderImage 上渲染（与 VideoCaptureElement 共享变换实例），
+        /// 拍照取 CameraProviderRegistry 缓存的最近一帧。
+        /// 返回是否成功启动（首帧是否到达由 RenderBoothProviderFrame 处理）。
+        /// </summary>
+        private async Task<bool> StartProviderCameraPreviewAsync(int cameraIndex)
+        {
+            try
+            {
+                if (VideoPresenterProviderImage == null)
+                {
+                    LogHelper.WriteLogToFile(
+                        "[VideoPresenter] StartProviderCameraPreviewAsync: VideoPresenterProviderImage 为 null",
+                        LogHelper.LogType.Warning);
+                    return false;
+                }
+                if (!IsProviderCameraIndex(cameraIndex))
+                {
+                    return false;
+                }
+
+                var camera = _cameraService.AvailableCameras[cameraIndex];
+                var registry = CameraProviderRegistry.Instance;
+                var registration = registry.Find(camera.ProviderId, camera.ProviderCameraId);
+                if (registration == null)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"[VideoPresenter] StartProviderCameraPreviewAsync: 插件摄像头未注册 {camera.Name}（{camera.MonikerString}）",
+                        LogHelper.LogType.Warning);
+                    if (VideoPresenterSearchingText != null)
+                    {
+                        VideoPresenterSearchingText.Text = "插件摄像头不可用";
+                        VideoPresenterSearchingText.Visibility = Visibility.Visible;
+                    }
+                    return false;
+                }
+
+                // 1) 停掉 DirectShow 预览（若正在播放），避免两路画面叠加
+                try { VideoPresenterFullCanvasImage?.Stop(); }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[VideoPresenter] 启动插件摄像头前停止 DirectShow 预览失败: {ex.Message}", LogHelper.LogType.Info);
+                }
+                try { VideoPresenterFullCanvasImage.VideoCaptureDevice = null; }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[VideoPresenter] 启动插件摄像头前释放 DirectShow 设备失败: {ex.Message}", LogHelper.LogType.Info);
+                }
+                if (VideoPresenterFullCanvasImage != null)
+                {
+                    VideoPresenterFullCanvasImage.Visibility = Visibility.Collapsed;
+                }
+
+                // 2) 准备插件画面 Image：共享 VideoCaptureElement 的变换实例，保证缩放/旋转/镜像/批注一致
+                //    注意：必须先停掉上一路插件推流（StopBoothProviderCamera 会把 Image 复位为 Collapsed），
+                //    再让它可见，否则画面会渲染到一个 Collapsed 的 Image 上（用户看不到预览）。
+                StopBoothProviderCamera();
+                PrepareProviderImageView();
+                if (VideoPresenterFullCanvasRotation != null && _cameraService != null)
+                {
+                    VideoPresenterFullCanvasRotation.Angle = _cameraService.RotationAngle * 90.0;
+                }
+                ApplyBoothPreviewTransform();
+
+                // 3) 清掉其它路径的拍照缓存：插件摄像头拍照改走最近帧
+                lock (_videoPresenterFrameLock)
+                {
+                    _lastFrame?.Dispose();
+                    _lastFrame = null;
+                }
+
+                // 4) 目标分辨率：分辨率下拉框当前选中的能力项（也是 EnumerateResolutionsAsync 的默认项）
+                int width = 0, height = 0, frameRate = 0;
+                int selIdx = _cameraService.SelectedResolutionIndex;
+                var resolutions = _cameraService.NativeResolutions;
+                if (selIdx >= 0 && selIdx < (resolutions?.Count ?? 0))
+                {
+                    var resolution = resolutions[selIdx];
+                    width = resolution.Width;
+                    height = resolution.Height;
+                    frameRate = resolution.FrameRate;
+                }
+
+                // 5) 订阅必须在 StartCamera 之前：插件可能在 StartCamera 内部就同步推出第一帧
+                registry.FrameSubmitted += CameraProviderRegistry_FrameSubmitted;
+                _boothProviderCameraActive = true;
+                _boothProviderFrameRenderPending = false;
+
+                if (VideoPresenterSearchingText != null)
+                {
+                    VideoPresenterSearchingText.Text = "正在启动摄像头...";
+                    VideoPresenterSearchingText.Visibility = Visibility.Visible;
+                }
+                if (BtnCapturePhoto != null) BtnCapturePhoto.IsEnabled = false;
+
+                // 插件 StartCamera 可能同步做网络连接，放到后台线程避免卡住 UI
+                string startError = null;
+                bool started = false;
+                await Task.Run(() =>
+                {
+                    try
+                    {
+                        started = registry.TryStartCamera(registration, width, height, frameRate, out startError);
+                    }
+                    catch (Exception ex)
+                    {
+                        startError = ex.Message;
+                    }
+                });
+
+                if (!started)
+                {
+                    StopBoothProviderCamera();
+                    LogHelper.WriteLogToFile(
+                        $"[VideoPresenter] 插件摄像头启动失败: {camera.Name}，原因={startError}",
+                        LogHelper.LogType.Warning);
+                    if (VideoPresenterSearchingText != null)
+                    {
+                        VideoPresenterSearchingText.Text = "插件摄像头启动失败";
+                        VideoPresenterSearchingText.Visibility = Visibility.Visible;
+                    }
+                    ShowBoothTransientMessage("插件摄像头启动失败");
+                    return false;
+                }
+
+                _cameraIndexByPage[GetCurrentPageIndex()] = cameraIndex;
+                LogHelper.WriteLogToFile(
+                    $"[VideoPresenter] 插件摄像头预览已启动: {camera.Name}，请求格式={width}×{height}@{frameRate}",
+                    LogHelper.LogType.Info);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                StopBoothProviderCamera();
+                LogHelper.WriteLogToFile(
+                    $"[VideoPresenter] StartProviderCameraPreviewAsync 异常: {ex.Message}",
+                    LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 准备插件摄像头画面 Image：把它与 VideoCaptureElement 的 LayoutTransform/RenderTransform
+        /// 指向同一批实例。这样：
+        /// <list type="bullet">
+        /// <item>镜像：SyncBoothMirrorToggles 改 VideoPresenterFullCanvasMirror；</item>
+        /// <item>旋转：VideoPresenterFullCanvasRotation.Angle = RotationAngle * 90；</item>
+        /// <item>缩放/平移：ApplyBoothPreviewTransform 改 VideoPresenterFullCanvasScale/Translate；</item>
+        /// </list>
+        /// 都会同时作用于插件画面，批注缩放/旋转中心与 DirectShow 预览完全一致。
+        /// </summary>
+        private void PrepareProviderImageView()
+        {
+            if (VideoPresenterProviderImage == null) return;
+            if (VideoPresenterFullCanvasImage != null)
+            {
+                if (!ReferenceEquals(VideoPresenterProviderImage.LayoutTransform, VideoPresenterFullCanvasImage.LayoutTransform))
+                {
+                    VideoPresenterProviderImage.LayoutTransform = VideoPresenterFullCanvasImage.LayoutTransform;
+                }
+                if (!ReferenceEquals(VideoPresenterProviderImage.RenderTransform, VideoPresenterFullCanvasImage.RenderTransform))
+                {
+                    VideoPresenterProviderImage.RenderTransform = VideoPresenterFullCanvasImage.RenderTransform;
+                }
+                VideoPresenterProviderImage.RenderTransformOrigin = VideoPresenterFullCanvasImage.RenderTransformOrigin;
+            }
+            VideoPresenterProviderImage.Visibility = Visibility.Visible;
+        }
+
+        /// <summary>停止插件摄像头预览并清理 UI/订阅（幂等）。</summary>
+        private void StopBoothProviderCamera()
+        {
+            bool wasActive = _boothProviderCameraActive;
+            _boothProviderCameraActive = false;
+            _boothProviderFrameRenderPending = false;
+
+            try
+            {
+                CameraProviderRegistry.Instance.FrameSubmitted -= CameraProviderRegistry_FrameSubmitted;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[CameraProvider] 取消插件帧订阅失败: {ex.Message}", LogHelper.LogType.Info);
+            }
+
+            if (wasActive)
+            {
+                try
+                {
+                    CameraProviderRegistry.Instance.StopActiveCamera();
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[CameraProvider] 停止插件摄像头失败: {ex.Message}", LogHelper.LogType.Warning);
+                }
+            }
+
+            _boothProviderWriteableBitmap = null;
+            try
+            {
+                if (VideoPresenterProviderImage != null)
+                {
+                    VideoPresenterProviderImage.Source = null;
+                    VideoPresenterProviderImage.Visibility = Visibility.Collapsed;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[CameraProvider] 清理插件摄像头画面失败: {ex.Message}", LogHelper.LogType.Info);
+            }
+        }
+
+        /// <summary>
+        /// 插件推帧线程回调：合并高频帧通知，只在 UI 线程渲染最近一帧。
+        /// 插件推帧频率可能高于渲染帧率，这里用 _boothProviderFrameRenderPending 去重。
+        /// </summary>
+        private void CameraProviderRegistry_FrameSubmitted(object sender, EventArgs e)
+        {
+            if (!_boothProviderCameraActive) return;
+            if (_boothProviderFrameRenderPending) return;
+            _boothProviderFrameRenderPending = true;
+            try
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    _boothProviderFrameRenderPending = false;
+                    RenderBoothProviderFrame();
+                }), DispatcherPriority.Render);
+            }
+            catch (Exception ex)
+            {
+                _boothProviderFrameRenderPending = false;
+                LogHelper.WriteLogToFile($"[CameraProvider] 排队渲染插件帧失败: {ex.Message}", LogHelper.LogType.Info);
+            }
+        }
+
+        /// <summary>
+        /// 在 UI 线程把插件摄像头最近一帧渲染到 VideoPresenterProviderImage。
+        /// 首帧到达时隐藏占位文字、启用拍照按钮（与 DirectShow 的 MediaOpened 语义对齐）。
+        /// </summary>
+        private void RenderBoothProviderFrame()
+        {
+            if (!_boothProviderCameraActive) return;
+            if (VideoPresenterProviderImage == null) return;
+            // 照片预览页不渲染直播帧（与 VideoCaptureElement 在照片页被 Collapsed 的行为一致）
+            if (_boothCurrentPhotoIndex >= 0) return;
+
+            try
+            {
+                var registry = CameraProviderRegistry.Instance;
+                if (!registry.TryGetLatestFrameInfo(out int width, out int height, out int stride, out _))
+                {
+                    return;
+                }
+
+                if (_boothProviderWriteableBitmap == null
+                    || _boothProviderWriteableBitmap.PixelWidth != width
+                    || _boothProviderWriteableBitmap.PixelHeight != height)
+                {
+                    _boothProviderWriteableBitmap = new WriteableBitmap(
+                        width, height, 96, 96, System.Windows.Media.PixelFormats.Bgr24, null);
+                    VideoPresenterProviderImage.Source = _boothProviderWriteableBitmap;
+                }
+
+                if (!registry.RenderLatestFrame(_boothProviderWriteableBitmap))
+                {
+                    return;
+                }
+
+                if (VideoPresenterSearchingText != null
+                    && VideoPresenterSearchingText.Visibility == Visibility.Visible)
+                {
+                    VideoPresenterSearchingText.Visibility = Visibility.Collapsed;
+                }
+                if (BtnCapturePhoto != null) BtnCapturePhoto.IsEnabled = true;
+                if (!_boothMediaOpened)
+                {
+                    _boothMediaOpened = true;
+                    _boothPreviewRestartRetryCount = 0;
+                    LogHelper.WriteLogToFile(
+                        "[VideoPresenter] 插件摄像头首帧已到达，隐藏占位文字",
+                        LogHelper.LogType.Info);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogBoothCallbackException("渲染插件摄像头帧", ex);
+            }
+        }
+
+        /// <summary>
+        /// 插件摄像头列表变化（注册/注销/增删摄像头）：展台打开期间刷新设备下拉框。
+        /// 事件可能在插件线程触发，这里切到 UI 线程执行。
+        /// </summary>
+        private void CameraProviderRegistry_CamerasChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        if (!_isVideoPresenterSpecialMode) return;
+                        LogHelper.WriteLogToFile(
+                            "[CameraProvider] 插件摄像头列表变化，刷新展台设备下拉框",
+                            LogHelper.LogType.Info);
+                        RefreshVideoPresenterDeviceList();
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[CameraProvider] 刷新展台设备列表失败: {ex.Message}", LogHelper.LogType.Warning);
+                    }
+                }));
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[CameraProvider] 调度设备列表刷新失败: {ex.Message}", LogHelper.LogType.Info);
+            }
+        }
+
         /// <summary>
         /// 启动 VideoCaptureElement 预览（DirectShow + VMR9 Renderless + D3DImage 自动渲染）。
         /// 返回是否成功启动。所有调用必须在 UI 线程上。
         /// </summary>
         private Task<bool> StartVideoCaptureElementPreviewAsync(int cameraIndex)
         {
+            // 兜底：若调用方拿到的是插件摄像头索引（如 1.5s 重启定时器、旋转后恢复预览、
+            // 分辨率下拉框切换等），转发到非 DirectShow 路径，避免去 MultimediaUtil 里找不存在的 DsDevice。
+            if (IsProviderCameraIndex(cameraIndex))
+            {
+                return StartProviderCameraPreviewAsync(cameraIndex);
+            }
+
+            // 若当前是插件摄像头预览，先停掉插件推流并隐藏插件画面，避免两路画面叠加
+            StopBoothProviderCamera();
+
             // 不要在这里隐藏 SearchingText：
             // Play() 后到 MediaOpened 触发前有 500-1500ms 的 D3DImage 分配/FilterGraph 构建延迟，
             // 这段时间用户看到的是纯深色背景，没有任何提示，会以为卡住了。
@@ -2603,28 +2983,44 @@ namespace Ink_Canvas
                 // 优先用 _lastFrame（System.Drawing.Bitmap，已应用旋转）；
                 // 若为 null（NewVideoSample 未触发），用 CaptureCurrentFrame 直接拿 BitmapSource。
                 Bitmap frame = null;
-                lock (_videoPresenterFrameLock)
+                // 插件摄像头：始终走第二条路径（取最近帧），避免复用其它路径留下的 _lastFrame
+                // 而漏掉下面的旋转/镜像处理（路径1 假定帧内容已由采样回调旋转好）。
+                if (!_boothProviderCameraActive)
                 {
-                    if (_lastFrame != null)
-                        frame = (Bitmap)_lastFrame.Clone();
+                    lock (_videoPresenterFrameLock)
+                    {
+                        if (_lastFrame != null)
+                            frame = (Bitmap)_lastFrame.Clone();
+                    }
                 }
 
                 BitmapSource fallbackBitmapSource = null;
                 if (frame == null && _isVideoPresenterSpecialMode)
                 {
-                    // SampleGrabber 路径未填充 _lastFrame，尝试直接从 D3DImage 拿帧
-                    fallbackBitmapSource = VideoPresenterFullCanvasImage?.CaptureCurrentFrame();
+                    // SampleGrabber 路径未填充 _lastFrame，走第二条路径拿帧：
+                    //   - 插件摄像头（camera provider）：直接取宿主缓存的最近一帧（不依赖 D3DImage）
+                    //   - DirectShow 摄像头：从 D3DImage.CopyBackBuffer 回读
+                    if (_boothProviderCameraActive)
+                    {
+                        fallbackBitmapSource = CameraProviderRegistry.Instance.GetLatestFrameBitmapSource();
+                    }
+                    else
+                    {
+                        fallbackBitmapSource = VideoPresenterFullCanvasImage?.CaptureCurrentFrame();
+                    }
                     if (fallbackBitmapSource == null)
                     {
                         LogHelper.WriteLogToFile(
-                            "视频展台拍照: _lastFrame 为 null 且 D3DImage 不可用，无法拍照",
+                            "视频展台拍照: _lastFrame 为 null 且第二条路径拿不到帧，无法拍照"
+                            + $"（插件摄像头={_boothProviderCameraActive}）",
                             LogHelper.LogType.Warning);
                         // 给用户可见反馈（按钮可能被过早点击，或预览未真正就绪）
                         ShowBoothTransientMessage("预览未就绪，请稍后再试");
                         return;
                     }
                     LogHelper.WriteLogToFile(
-                        $"视频展台拍照: 走路径2(D3DImage) BitmapSource={fallbackBitmapSource.PixelWidth}x{fallbackBitmapSource.PixelHeight}",
+                        $"视频展台拍照: 走路径2 BitmapSource={fallbackBitmapSource.PixelWidth}x{fallbackBitmapSource.PixelHeight}"
+                        + $"（插件摄像头={_boothProviderCameraActive}）",
                         LogHelper.LogType.Trace);
                 }
                 else if (frame == null)
@@ -2910,7 +3306,6 @@ namespace Ink_Canvas
                 ClearFrozenFrame();
                 if (VideoPresenterFullCanvasImage != null)
                 {
-                    VideoPresenterFullCanvasImage.Visibility = Visibility.Visible;
                     int page = GetCurrentPageIndex();
                     int camIdx = -1;
                     if (_cameraIndexByPage.TryGetValue(page, out int savedIdx)
@@ -2918,8 +3313,21 @@ namespace Ink_Canvas
                         camIdx = savedIdx;
                     if (camIdx < 0 && _cameraService.AvailableCameras.Count > 0)
                         camIdx = 0;
+
+                    bool providerCamera = IsProviderCameraIndex(camIdx);
+                    VideoPresenterFullCanvasImage.Visibility = providerCamera
+                        ? Visibility.Collapsed
+                        : Visibility.Visible;
+                    if (providerCamera && VideoPresenterProviderImage != null)
+                        VideoPresenterProviderImage.Visibility = Visibility.Visible;
+
                     if (camIdx >= 0)
-                        _ = StartVideoCaptureElementPreviewAsync(camIdx);
+                    {
+                        if (providerCamera)
+                            _ = StartProviderCameraPreviewAsync(camIdx);
+                        else
+                            _ = StartVideoCaptureElementPreviewAsync(camIdx);
+                    }
                 }
             }
 
@@ -4047,6 +4455,11 @@ namespace Ink_Canvas
                 }
                 VideoPresenterFullCanvasImage.Visibility = Visibility.Collapsed;
             }
+            // 插件摄像头：照片预览页同样隐藏实时画面（推流不断，返回直播页时再恢复）
+            if (VideoPresenterProviderImage != null)
+            {
+                VideoPresenterProviderImage.Visibility = Visibility.Collapsed;
+            }
 
             // 拍照按钮变灰（在照片预览页不允许拍照）
             if (BtnCapturePhoto != null)
@@ -4094,20 +4507,9 @@ namespace Ink_Canvas
                     VideoPresenterFrozenFrameImage.RenderTransform = _frozenFrameOriginalRenderTransform;
             }
 
-            // 恢复 VideoCaptureElement 实时预览
+            // 恢复实时预览（DirectShow 走 VideoCaptureElement，插件摄像头走 ProviderImage）
             if (VideoPresenterFullCanvasImage != null && _cameraService != null)
             {
-                VideoPresenterFullCanvasImage.Visibility = Visibility.Visible;
-                // 照片预览页共享了 VideoPresenterFullCanvasRotation，退出时恢复直播画面角度
-                // （_cameraService.RotationAngle 在照片预览期间未变，直接用它的角度）
-                if (VideoPresenterFullCanvasRotation != null)
-                    VideoPresenterFullCanvasRotation.Angle = _cameraService.RotationAngle * 90.0;
-                // 重置缩放/平移为默认状态（直播页与照片页缩放状态不通用）
-                _boothPreviewScale = 1.0;
-                _boothPreviewTranslateX = 0;
-                _boothPreviewTranslateY = 0;
-                ApplyBoothPreviewTransform();
-
                 int page = GetCurrentPageIndex();
                 int camIdx = -1;
                 if (_cameraIndexByPage.TryGetValue(page, out int savedIdx)
@@ -4119,9 +4521,46 @@ namespace Ink_Canvas
                 {
                     camIdx = 0;
                 }
+
+                bool providerCamera = IsProviderCameraIndex(camIdx);
+                if (providerCamera)
+                {
+                    // 插件摄像头：保持 VideoCaptureElement 隐藏，显示插件画面并重新启动插件推流
+                    VideoPresenterFullCanvasImage.Visibility = Visibility.Collapsed;
+                    if (VideoPresenterProviderImage != null)
+                    {
+                        VideoPresenterProviderImage.Visibility = Visibility.Visible;
+                    }
+                }
+                else
+                {
+                    VideoPresenterFullCanvasImage.Visibility = Visibility.Visible;
+                    if (VideoPresenterProviderImage != null)
+                    {
+                        VideoPresenterProviderImage.Visibility = Visibility.Collapsed;
+                    }
+                }
+
+                // 照片预览页共享了 VideoPresenterFullCanvasRotation，退出时恢复直播画面角度
+                // （_cameraService.RotationAngle 在照片预览期间未变，直接用它的角度）
+                if (VideoPresenterFullCanvasRotation != null)
+                    VideoPresenterFullCanvasRotation.Angle = _cameraService.RotationAngle * 90.0;
+                // 重置缩放/平移为默认状态（直播页与照片页缩放状态不通用）
+                _boothPreviewScale = 1.0;
+                _boothPreviewTranslateX = 0;
+                _boothPreviewTranslateY = 0;
+                ApplyBoothPreviewTransform();
+
                 if (camIdx >= 0)
                 {
-                    _ = StartVideoCaptureElementPreviewAsync(camIdx);
+                    if (providerCamera)
+                    {
+                        _ = StartProviderCameraPreviewAsync(camIdx);
+                    }
+                    else
+                    {
+                        _ = StartVideoCaptureElementPreviewAsync(camIdx);
+                    }
                 }
             }
 
