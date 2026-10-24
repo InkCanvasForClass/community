@@ -1232,6 +1232,7 @@ namespace Ink_Canvas
         /// <param name="e">鼠标按钮事件参数</param>
         internal void SymbolIconDelete_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (TryPresentationAnnotationCommand("clear")) return;
             if (TryBlockFrozenPageMutation("清除冻结页面内容")) return;
             if (inkCanvas.GetSelectedStrokes().Count > 0)
             {
@@ -1282,9 +1283,20 @@ namespace Ink_Canvas
         /// <param name="e">鼠标按钮事件参数</param>
         internal void SymbolIconSelect_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (IsExternalAnnotationActive)
+            {
+                if (SetCurrentToolMode(InkCanvasEditingMode.Select))
+                {
+                    SetFloatingBarHighlightPosition("select");
+                    HideSubPanels("select");
+                }
+                return;
+            }
 
             if (lastBorderMouseDownObject is Panel panel)
                 panel.Background = new SolidColorBrush(Colors.Transparent);
+
+            if (TryEnterPresentationElementSelection()) return;
 
             // 如果当前不在批注模式，先切换到批注模式
             if (!IsAnnotating)
@@ -3523,6 +3535,53 @@ namespace Ink_Canvas
                 else CaptureAndEnqueueScreenshotSave(true);
             }
 
+            ApplyCursorInputRouting();
+
+            // 点击鼠标按钮退出批注模式时的全屏还原
+            RestoreFullScreenOnExitAnnotationMode();
+
+            inkCanvas.Select(new StrokeCollection());
+            GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+
+            // 视频展台特殊模式下不执行 SaveStrokes/RestoreStrokes，
+            // 否则会清空 timeMachine 历史并 Children.Clear() 移除直播帧，
+            // 导致撤销变灰色且视频预览消失
+            if (currentMode != 0 && !_isVideoPresenterSpecialMode)
+            {
+                SaveStrokes();
+                RestoreStrokes();
+            }
+
+            if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
+            { /* Old UI removed */ }
+            else
+            { /* Old UI removed */ }
+
+            { /* Old UI removed */ }
+            { /* Old UI removed */ }
+            UpdateToolbarComponentVisibility();
+
+
+            UpdateToolbarComponentVisibility();
+
+            // 注意：快捷调色盘的可见性现在完全由工具栏规则集管理，不需要手动设置
+
+            if (!isFloatingBarFolded)
+            {
+                HideSubPanels("cursor", true);
+                await Task.Delay(50);
+
+                if (IsInPPTPresentationMode)
+                    ViewboxFloatingBarMarginAnimation(60);
+                else
+                    ViewboxFloatingBarMarginAnimation(100, true);
+            }
+        }
+
+        // 鼠标入口与演示结束共用；不截图、不保存墨迹、不异步切换工具。
+        internal void ApplyCursorInputRouting()
+        {
+            if (IsExternalAnnotationActive) { ApplyPresentationAnnotationRouting(); return; }
             // 鼠标工具下如果仍有已选中的图片/SVG，不能把整个 InkCanvas 设为不可命中。
             // 这些元素位于 InkCanvas 的子树中；否则即使元素仍显示、选框仍显示，
             // 元素本身及其透明外接矩形也都收不到拖动事件。
@@ -3600,45 +3659,6 @@ namespace Ink_Canvas
 
             GridBackgroundCoverHolder.Visibility = Visibility.Collapsed;
 
-            // 点击鼠标按钮退出批注模式时的全屏还原
-            RestoreFullScreenOnExitAnnotationMode();
-
-            inkCanvas.Select(new StrokeCollection());
-            GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-
-            // 视频展台特殊模式下不执行 SaveStrokes/RestoreStrokes，
-            // 否则会清空 timeMachine 历史并 Children.Clear() 移除直播帧，
-            // 导致撤销变灰色且视频预览消失
-            if (currentMode != 0 && !_isVideoPresenterSpecialMode)
-            {
-                SaveStrokes();
-                RestoreStrokes();
-            }
-
-            if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
-            { /* Old UI removed */ }
-            else
-            { /* Old UI removed */ }
-
-            { /* Old UI removed */ }
-            { /* Old UI removed */ }
-            UpdateToolbarComponentVisibility();
-
-
-            UpdateToolbarComponentVisibility();
-
-            // 注意：快捷调色盘的可见性现在完全由工具栏规则集管理，不需要手动设置
-
-            if (!isFloatingBarFolded)
-            {
-                HideSubPanels("cursor", true);
-                await Task.Delay(50);
-
-                if (IsInPPTPresentationMode)
-                    ViewboxFloatingBarMarginAnimation(60);
-                else
-                    ViewboxFloatingBarMarginAnimation(100, true);
-            }
         }
 
         /// <summary>
@@ -4479,6 +4499,7 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void BtnUndo_Click(object sender, RoutedEventArgs e)
         {
+            if (TryPresentationAnnotationCommand("undo")) return;
             if (inkCanvas.GetSelectedStrokes().Count != 0)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
@@ -4496,6 +4517,7 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void BtnRedo_Click(object sender, RoutedEventArgs e)
         {
+            if (TryPresentationAnnotationCommand("redo")) return;
             if (inkCanvas.GetSelectedStrokes().Count != 0)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
@@ -4629,6 +4651,7 @@ namespace Ink_Canvas
         /// </param>
         private void PerformCanvasClear(bool preserveClearHistory = false)
         {
+            if (TryPresentationAnnotationCommand("clear")) return;
             if (TryBlockFrozenPageMutation("清空冻结页面内容")) return;
             NotifyPluginWhiteboardPageClearing();
             forceEraser = false;
@@ -4735,6 +4758,14 @@ namespace Ink_Canvas
         /// </remarks>
         private void SwitchBackground(object sender, RoutedEventArgs e)
         {
+            if (IsExternalAnnotationActive)
+            {
+                // The board owns its native canvas; only the courseware region uses Web ink.
+                inkCanvas.Visibility = Visibility.Visible;
+                inkCanvas.IsHitTestVisible = true;
+                IsUndoEnabled = _annotationUndo;
+                IsRedoEnabled = _annotationRedo;
+            }
             if (GridTransparencyFakeBackground.Background == Brushes.Transparent)
             {
                 if (currentMode == 0)
@@ -6310,7 +6341,16 @@ namespace Ink_Canvas
         /// <param name="mode">模式名称</param>
         private void UpdateCurrentToolMode(string mode)
         {
+            if (mode != "select") LeavePresentationElementSelection();
             _currentToolMode = NormalizeToolModeForFreeze(mode);
+            if (IsExternalAnnotationActive)
+            {
+                SyncPresentationAnnotation();
+                // Tool button handlers may restore their native overlays after updating the
+                // logical mode. Reapply before the next input event is dispatched.
+                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Send,
+                    new Action(ApplyPresentationAnnotationRouting));
+            }
 
             // 工具切换为非笔模式（橡皮/框选/图形/漫游/鼠标）时，扩展画布提示立即消失
             if (_currentToolMode != "pen" && _currentToolMode != "color")

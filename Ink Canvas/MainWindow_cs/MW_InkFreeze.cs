@@ -41,7 +41,7 @@ namespace Ink_Canvas
             => IsValidFreezePageIndex(pageIndex) && frozenPages[pageIndex];
 
         private bool IsCurrentPageFrozen
-            => IsPageFrozen(GetCurrentFreezePageIndex());
+            => IsExternalAnnotationActive ? _annotationFrozen : IsPageFrozen(GetCurrentFreezePageIndex());
 
         private bool IsFreezeMutatingMode(InkCanvasEditingMode mode)
             => mode == InkCanvasEditingMode.Ink
@@ -168,6 +168,15 @@ namespace Ink_Canvas
 
         internal async void ToggleInkFreeze_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (IsExternalAnnotationActive)
+            {
+                _annotationFrozen = !_annotationFrozen;
+                if (_annotationPresentation.AnnotationStatus != null)
+                    _annotationPresentation.AnnotationStatus.Frozen = _annotationFrozen;
+                SyncPresentationAnnotation();
+                UpdateInkFreezeButtonState();
+                return;
+            }
             try
             {
                 int pageIndex = GetCurrentFreezePageIndex();
@@ -207,7 +216,7 @@ namespace Ink_Canvas
             {
                 if (Freeze_Icon != null)
                 {
-                    bool isFrozen = IsCurrentPageFrozen;
+                    bool isFrozen = IsExternalAnnotationActive ? _annotationFrozen : IsCurrentPageFrozen;
                     Freeze_Icon.Label = isFrozen ? FloatingBarStrings.FloatingBar_Unfreeze : FloatingBarStrings.FloatingBar_Freeze;
                     Freeze_Icon.Icon.Geometry = Geometry.Parse(isFrozen
                         ? XamlGraphicsIconGeometries.UnfreezeIconGeometry

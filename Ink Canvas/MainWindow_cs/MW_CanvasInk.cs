@@ -114,6 +114,7 @@ namespace Ink_Canvas
         /// </summary>
         internal bool TryClearPluginStrokes()
         {
+            if (TryPresentationAnnotationCommand("clear")) return true;
             if (inkCanvas == null) return false;
             if (inkCanvas.Strokes.Count == 0) return false;
             if (IsCurrentPageFrozen)
