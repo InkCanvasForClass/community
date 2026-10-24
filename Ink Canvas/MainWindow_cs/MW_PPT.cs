@@ -120,11 +120,6 @@ namespace Ink_Canvas
         /// </summary>
         private bool isEnteredSlideShowEndEvent;
 
-        /// <summary>
-        /// 演示文稿是否有黑边的指示标志。
-        /// </summary>
-        private bool isPresentationHaveBlackSpace;
-
         // 长按翻页相关字段
         /// <summary>
         /// 用于处理长按翻页功能的定时器。
@@ -1998,15 +1993,6 @@ namespace Ink_Canvas
                 {
                     try
                     {
-                        isPresentationHaveBlackSpace = false;
-
-                        // 恢复主题
-                        if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Light)
-                        {
-                            { /* Old UI removed */ }
-                            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
-                        }
-
                         // 更新UI状态
                         _pptUIManager?.UpdateSlideShowStatus(false);
                         _pptUIManager?.UpdateSidebarExitButtons(false);
@@ -2409,11 +2395,10 @@ namespace Ink_Canvas
         /// 将与 PowerPoint 播放和状态追踪相关的内部字段重置为初始默认值。
         /// 具体重置的字段包括：
         /// 1. 播放结束重入保护标志（isEnteredSlideShowEndEvent）
-        /// 2. 演示文稿黑边指示（isPresentationHaveBlackSpace）
-        /// 3. 上次播放页码（_lastPlaybackPage）
-        /// 4. 导航标志（_shouldNavigateToLastPage）
-        /// 5. 当前放映位置（_currentSlideShowPosition）
-        /// 6. 滑动切换处理状态（_isProcessingSlideSwitch）
+        /// 2. 上次播放页码（_lastPlaybackPage）
+        /// 3. 导航标志（_shouldNavigateToLastPage）
+        /// 4. 当前放映位置（_currentSlideShowPosition）
+        /// 5. 滑动切换处理状态（_isProcessingSlideSwitch）
         /// 
         /// 该方法在执行过程中会：
         /// - 使用线程安全的方式重置滑动切换处理状态
@@ -2426,9 +2411,6 @@ namespace Ink_Canvas
             {
                 // 重置PPT放映结束事件标志
                 isEnteredSlideShowEndEvent = false;
-
-                // 重置演示文稿黑边状态
-                isPresentationHaveBlackSpace = false;
 
                 // 重置上次播放位置相关字段
                 _lastPlaybackPage = 0;
