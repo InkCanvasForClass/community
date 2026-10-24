@@ -41,7 +41,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private async void StoragePage_Loaded(object sender, RoutedEventArgs e)
         {
-            await RefreshAsync();
+            try
+            {
+                await RefreshAsync();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] StoragePage_Loaded 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private void BtnRefresh_Click(object sender, RoutedEventArgs e)

@@ -344,20 +344,27 @@ namespace Ink_Canvas
 
         private async void BorderBtnHelp_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (SecurityManager.IsPasswordRequiredForModifyOrClearNameList(MainWindow.Settings))
+            try
             {
-                bool ok = await SecurityManager.PromptAndVerifyPasswordOrTotpAsync(
-                    MainWindow.Settings,
-                    this,
-                    Properties.RandomStrings.Random_RollCall_NameListVerifyTitle,
-                    Properties.RandomStrings.Random_RollCall_NameListVerifyMessage);
-                if (!ok) return;
-            }
+                if (SecurityManager.IsPasswordRequiredForModifyOrClearNameList(MainWindow.Settings))
+                {
+                    bool ok = await SecurityManager.PromptAndVerifyPasswordOrTotpAsync(
+                        MainWindow.Settings,
+                        this,
+                        Properties.RandomStrings.Random_RollCall_NameListVerifyTitle,
+                        Properties.RandomStrings.Random_RollCall_NameListVerifyMessage);
+                    if (!ok) return;
+                }
 
-            var namesInputWindow = new NamesInputWindow();
-            namesInputWindow.Owner = this;
-            namesInputWindow.ShowDialog();
-            Window_Loaded(this, null);
+                var namesInputWindow = new NamesInputWindow();
+                namesInputWindow.Owner = this;
+                namesInputWindow.ShowDialog();
+                Window_Loaded(this, null);
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BorderBtnHelp_MouseUp 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private void BtnClose_MouseUp(object sender, MouseButtonEventArgs e)

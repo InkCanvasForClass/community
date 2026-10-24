@@ -412,33 +412,40 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private async void UpdatePlugin_Click(object sender, RoutedEventArgs e)
         {
-            var btn = sender as FrameworkElement;
-            var marketInfo = btn?.Tag as MergedPluginInfo;
-            if (marketInfo == null) return;
-
-            var result = MessageBoxHelper.Show(this,
-                string.Format(PluginStrings.Plugin_UpdateAvailable, marketInfo.MarketVersion) + "\n\n" + PluginStrings.Market_HotUpdateMessage,
-                PluginStrings.Plugin_Update,
-                MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-            if (result != MessageBoxResult.Yes) return;
-
-            // 解析依赖
-            var deps = _market.ResolveDependencies(marketInfo.Id);
-            foreach (var dep in deps)
-                await _market.RequestDownloadPluginAsync(dep);
-
-            await _market.RequestDownloadPluginAsync(marketInfo.Id);
-            LoadPlugins();
-
-            // 下载后热安装通常已消费包；若仍有残留包再提示可手动应用/重启
-            var pending = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PluginPackages", marketInfo.Id + ".icpx");
-            if (File.Exists(pending))
+            try
             {
-                MessageBoxHelper.Show(this,
-                    PluginStrings.Market_HotInstallPending,
+                var btn = sender as FrameworkElement;
+                var marketInfo = btn?.Tag as MergedPluginInfo;
+                if (marketInfo == null) return;
+
+                var result = MessageBoxHelper.Show(this,
+                    string.Format(PluginStrings.Plugin_UpdateAvailable, marketInfo.MarketVersion) + "\n\n" + PluginStrings.Market_HotUpdateMessage,
                     PluginStrings.Plugin_Update,
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (result != MessageBoxResult.Yes) return;
+
+                // 解析依赖
+                var deps = _market.ResolveDependencies(marketInfo.Id);
+                foreach (var dep in deps)
+                    await _market.RequestDownloadPluginAsync(dep);
+
+                await _market.RequestDownloadPluginAsync(marketInfo.Id);
+                LoadPlugins();
+
+                // 下载后热安装通常已消费包；若仍有残留包再提示可手动应用/重启
+                var pending = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PluginPackages", marketInfo.Id + ".icpx");
+                if (File.Exists(pending))
+                {
+                    MessageBoxHelper.Show(this,
+                        PluginStrings.Market_HotInstallPending,
+                        PluginStrings.Plugin_Update,
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] UpdatePlugin_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
             }
         }
 

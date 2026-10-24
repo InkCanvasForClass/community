@@ -531,55 +531,69 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private async void ButtonAddCustomIcon_Click(object sender, RoutedEventArgs e)
         {
-            var mw = Application.Current.MainWindow as MainWindow;
-            if (mw == null) return;
-
-            var content = new AddCustomIconWindow(mw);
-            var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+            try
             {
-                Title = Properties.RandomStrings.Random_AddIcon_WindowTitle,
-                Content = content,
-                PrimaryButtonText = FloatingBarStrings.Tools_Save,
-                CloseButtonText = Properties.RandomStrings.Random_Cancel,
-                Owner = Window.GetWindow(this) ?? mw,
-                DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Primary
-            };
+                var mw = Application.Current.MainWindow as MainWindow;
+                if (mw == null) return;
 
-            content.OnInputChanged += () =>
-            {
-                dialog.IsPrimaryButtonEnabled = content.CanSave();
-            };
-            dialog.IsPrimaryButtonEnabled = content.CanSave();
-
-            dialog.PrimaryButtonClick += (s, args) =>
-            {
-                var deferral = args.GetDeferral();
-                if (content.Save())
+                var content = new AddCustomIconWindow(mw);
+                var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
                 {
-                    ComboBoxFloatingBarImg.SelectedIndex = ComboBoxFloatingBarImg.Items.Count - 1;
-                    dialog.Hide();
-                }
-                deferral.Complete();
-            };
+                    Title = Properties.RandomStrings.Random_AddIcon_WindowTitle,
+                    Content = content,
+                    PrimaryButtonText = FloatingBarStrings.Tools_Save,
+                    CloseButtonText = Properties.RandomStrings.Random_Cancel,
+                    Owner = Window.GetWindow(this) ?? mw,
+                    DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Primary
+                };
 
-            await dialog.ShowAsync();
+                content.OnInputChanged += () =>
+                {
+                    dialog.IsPrimaryButtonEnabled = content.CanSave();
+                };
+                dialog.IsPrimaryButtonEnabled = content.CanSave();
+
+                dialog.PrimaryButtonClick += (s, args) =>
+                {
+                    var deferral = args.GetDeferral();
+                    if (content.Save())
+                    {
+                        ComboBoxFloatingBarImg.SelectedIndex = ComboBoxFloatingBarImg.Items.Count - 1;
+                        dialog.Hide();
+                    }
+                    deferral.Complete();
+                };
+
+                await dialog.ShowAsync();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] ButtonAddCustomIcon_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private async void ButtonManageCustomIcons_Click(object sender, RoutedEventArgs e)
         {
-            var mw = Application.Current.MainWindow as MainWindow;
-            if (mw == null) return;
-
-            var content = new CustomIconWindow(mw);
-            var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+            try
             {
-                Title = Properties.ThemeStrings.Theme_CustomFloatingIconLabel,
-                Content = content,
-                CloseButtonText = Properties.NotificationStrings.AnimationOff,
-                Owner = Window.GetWindow(this) ?? mw,
-                DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Close
-            };
-            await dialog.ShowAsync();
+                var mw = Application.Current.MainWindow as MainWindow;
+                if (mw == null) return;
+
+                var content = new CustomIconWindow(mw);
+                var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+                {
+                    Title = Properties.ThemeStrings.Theme_CustomFloatingIconLabel,
+                    Content = content,
+                    CloseButtonText = Properties.NotificationStrings.AnimationOff,
+                    Owner = Window.GetWindow(this) ?? mw,
+                    DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Close
+                };
+                await dialog.ShowAsync();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] ButtonManageCustomIcons_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         #endregion

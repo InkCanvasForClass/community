@@ -289,41 +289,55 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private async void ButtonAddNameRoster_Click(object sender, RoutedEventArgs e)
         {
-            var owner = Window.GetWindow(this) ?? Application.Current.MainWindow;
-            string guid = await ManageNameRostersWindow.AddNewRosterDialogAsync(owner);
-            if (string.IsNullOrEmpty(guid)) return;
+            try
+            {
+                var owner = Window.GetWindow(this) ?? Application.Current.MainWindow;
+                string guid = await ManageNameRostersWindow.AddNewRosterDialogAsync(owner);
+                if (string.IsNullOrEmpty(guid)) return;
 
-            // 新建后自动设为当前方案
-            NameRosterManager.SelectAndApply(guid);
-            UpdateNameRostersInComboBox();
+                // 新建后自动设为当前方案
+                NameRosterManager.SelectAndApply(guid);
+                UpdateNameRostersInComboBox();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] ButtonAddNameRoster_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private async void ButtonManageNameRosters_Click(object sender, RoutedEventArgs e)
         {
-            var mw = Application.Current.MainWindow as MainWindow;
-            if (mw == null) return;
-
-            // 增设/重命名在控件内部用 ContentDialog 完成（同一时刻只能开一个，
-            // 已打开时会就地切换内容）；此处只负责展示管理列表。
-            // 覆盖默认 ContentDialogMaxWidth(548)：内容 UserControl 固定 640×360，
-            // 列表在控件内部纵向滚动，避免横向裁切操作按钮。
-            var content = new ManageNameRostersWindow();
-            var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+            try
             {
-                Title = RandomStrings.Random_Roster_ManageWindowTitle,
-                Content = content,
-                CloseButtonText = NotificationStrings.AnimationOff,
-                Owner = Window.GetWindow(this) ?? mw,
-                DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Close,
-                Resources =
-                {
-                    ["ContentDialogMaxWidth"] = 720d,
-                    ["ContentDialogMaxHeight"] = 560d
-                }
-            };
+                var mw = Application.Current.MainWindow as MainWindow;
+                if (mw == null) return;
 
-            await dialog.ShowAsync();
-            UpdateNameRostersInComboBox();
+                // 增设/重命名在控件内部用 ContentDialog 完成（同一时刻只能开一个，
+                // 已打开时会就地切换内容）；此处只负责展示管理列表。
+                // 覆盖默认 ContentDialogMaxWidth(548)：内容 UserControl 固定 640×360，
+                // 列表在控件内部纵向滚动，避免横向裁切操作按钮。
+                var content = new ManageNameRostersWindow();
+                var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+                {
+                    Title = RandomStrings.Random_Roster_ManageWindowTitle,
+                    Content = content,
+                    CloseButtonText = NotificationStrings.AnimationOff,
+                    Owner = Window.GetWindow(this) ?? mw,
+                    DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Close,
+                    Resources =
+                    {
+                        ["ContentDialogMaxWidth"] = 720d,
+                        ["ContentDialogMaxHeight"] = 560d
+                    }
+                };
+
+                await dialog.ShowAsync();
+                UpdateNameRostersInComboBox();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] ButtonManageNameRosters_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         #endregion
@@ -357,55 +371,69 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private async void ButtonAddCustomBackground_Click(object sender, RoutedEventArgs e)
         {
-            var mw = Application.Current.MainWindow as MainWindow;
-            if (mw == null) return;
-
-            var content = new AddPickNameBackgroundWindow(mw);
-            var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+            try
             {
-                Title = Properties.RandomStrings.Random_AddBg_WindowTitle,
-                Content = content,
-                PrimaryButtonText = FloatingBarStrings.Tools_Save,
-                CloseButtonText = Properties.RandomStrings.Random_Cancel,
-                Owner = Window.GetWindow(this) ?? mw,
-                DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Primary
-            };
+                var mw = Application.Current.MainWindow as MainWindow;
+                if (mw == null) return;
 
-            content.OnInputChanged += () =>
-            {
-                dialog.IsPrimaryButtonEnabled = content.CanSave();
-            };
-            dialog.IsPrimaryButtonEnabled = content.CanSave();
-
-            dialog.PrimaryButtonClick += (s, args) =>
-            {
-                var deferral = args.GetDeferral();
-                if (content.Save())
+                var content = new AddPickNameBackgroundWindow(mw);
+                var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
                 {
-                    ComboBoxPickNameBackground.SelectedIndex = ComboBoxPickNameBackground.Items.Count - 1;
-                    dialog.Hide();
-                }
-                deferral.Complete();
-            };
+                    Title = Properties.RandomStrings.Random_AddBg_WindowTitle,
+                    Content = content,
+                    PrimaryButtonText = FloatingBarStrings.Tools_Save,
+                    CloseButtonText = Properties.RandomStrings.Random_Cancel,
+                    Owner = Window.GetWindow(this) ?? mw,
+                    DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Primary
+                };
 
-            await dialog.ShowAsync();
+                content.OnInputChanged += () =>
+                {
+                    dialog.IsPrimaryButtonEnabled = content.CanSave();
+                };
+                dialog.IsPrimaryButtonEnabled = content.CanSave();
+
+                dialog.PrimaryButtonClick += (s, args) =>
+                {
+                    var deferral = args.GetDeferral();
+                    if (content.Save())
+                    {
+                        ComboBoxPickNameBackground.SelectedIndex = ComboBoxPickNameBackground.Items.Count - 1;
+                        dialog.Hide();
+                    }
+                    deferral.Complete();
+                };
+
+                await dialog.ShowAsync();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] ButtonAddCustomBackground_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private async void ButtonManageBackgrounds_Click(object sender, RoutedEventArgs e)
         {
-            var mw = Application.Current.MainWindow as MainWindow;
-            if (mw == null) return;
-
-            var content = new ManagePickNameBackgroundsWindow(mw);
-            var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+            try
             {
-                Title = Properties.RandomStrings.Random_ManageBg_WindowTitle,
-                Content = content,
-                CloseButtonText = Properties.NotificationStrings.AnimationOff,
-                Owner = Window.GetWindow(this) ?? mw,
-                DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Close
-            };
-            await dialog.ShowAsync();
+                var mw = Application.Current.MainWindow as MainWindow;
+                if (mw == null) return;
+
+                var content = new ManagePickNameBackgroundsWindow(mw);
+                var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+                {
+                    Title = Properties.RandomStrings.Random_ManageBg_WindowTitle,
+                    Content = content,
+                    CloseButtonText = Properties.NotificationStrings.AnimationOff,
+                    Owner = Window.GetWindow(this) ?? mw,
+                    DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Close
+                };
+                await dialog.ShowAsync();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] ButtonManageBackgrounds_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         #endregion

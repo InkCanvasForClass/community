@@ -3595,7 +3595,14 @@ namespace Ink_Canvas
         /// </remarks>
         internal async void ImagePPTControlEnd_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            await ExitPPTPresentation();
+            try
+            {
+                await ExitPPTPresentation();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] ImagePPTControlEnd_MouseUp 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private void ShowFloatingBarExitPPTBtn()

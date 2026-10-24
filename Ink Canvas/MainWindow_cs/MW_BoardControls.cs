@@ -477,60 +477,66 @@ namespace Ink_Canvas
 
         private async void BtnWhiteBoardPageIndex_Click(object sender, EventArgs e)
         {
-            var BtnLeftPageListWB = FindView("board.pageList.leftBtn") as Border;
-            var BtnRightPageListWB = FindView("board.pageList.rightBtn") as Border;
-            var BoardBorderLeftPageListView = FindView("board.pageList.leftBorder") as Border;
-            var BoardBorderRightPageListView = FindView("board.pageList.rightBorder") as Border;
-            var BlackBoardLeftSidePageListView = FindView("board.pageList.left") as System.Windows.Controls.ListView;
-            var BlackBoardRightSidePageListView = FindView("board.pageList.right") as System.Windows.Controls.ListView;
-            var BlackBoardLeftSidePageListScrollViewer = FindView("board.pageList.leftScrollViewer") as ScrollViewer;
-            var BlackBoardRightSidePageListScrollViewer = FindView("board.pageList.rightScrollViewer") as ScrollViewer;
-
-            if (sender == BtnLeftPageListWB)
+            try
             {
-                if (BoardBorderLeftPageListView?.Visibility == Visibility.Visible)
+                var BtnLeftPageListWB = FindView("board.pageList.leftBtn") as Border;
+                var BtnRightPageListWB = FindView("board.pageList.rightBtn") as Border;
+                var BoardBorderLeftPageListView = FindView("board.pageList.leftBorder") as Border;
+                var BoardBorderRightPageListView = FindView("board.pageList.rightBorder") as Border;
+                var BlackBoardLeftSidePageListView = FindView("board.pageList.left") as System.Windows.Controls.ListView;
+                var BlackBoardRightSidePageListView = FindView("board.pageList.right") as System.Windows.Controls.ListView;
+                var BlackBoardLeftSidePageListScrollViewer = FindView("board.pageList.leftScrollViewer") as ScrollViewer;
+                var BlackBoardRightSidePageListScrollViewer = FindView("board.pageList.rightScrollViewer") as ScrollViewer;
+
+                if (sender == BtnLeftPageListWB)
                 {
-                    AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
-                }
-                else
-                {
-                    AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
-                    // 视频展台特殊模式：刷新虚拟分页项（直播页文字 + 照片缩略图），不刷新普通白板页
-                    // 否则 RefreshBlackBoardSidePageListView 会用普通白板页的墨迹预览覆盖虚拟分页项
-                    if (_isVideoPresenterSpecialMode)
-                        RefreshBoothPageListView();
-                    else
-                        RefreshBlackBoardSidePageListView();
-                    EnsurePageListPanelHeight(BoardBorderLeftPageListView, BlackBoardLeftSidePageListScrollViewer, BtnLeftPageListWB);
-                    AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderLeftPageListView);
-                    await Task.Delay(1);
-                    if (BlackBoardLeftSidePageListView != null)
+                    if (BoardBorderLeftPageListView?.Visibility == Visibility.Visible)
                     {
-                        // 特殊模式下滚动到当前虚拟页（-1=直播页→0，0..N-1=照片页→index+1）
-                        int scrollIndex = _isVideoPresenterSpecialMode
-                            ? (_boothCurrentPhotoIndex + 1)
-                            : CurrentWhiteboardIndex - 1;
-                        var leftContainer = BlackBoardLeftSidePageListView.ItemContainerGenerator.ContainerFromIndex(
-                            scrollIndex) as ListViewItem;
-                        if (leftContainer != null)
+                        AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
+                    }
+                    else
+                    {
+                        AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
+                        // 视频展台特殊模式：刷新虚拟分页项（直播页文字 + 照片缩略图），不刷新普通白板页
+                        // 否则 RefreshBlackBoardSidePageListView 会用普通白板页的墨迹预览覆盖虚拟分页项
+                        if (_isVideoPresenterSpecialMode)
+                            RefreshBoothPageListView();
+                        else
+                            RefreshBlackBoardSidePageListView();
+                        EnsurePageListPanelHeight(BoardBorderLeftPageListView, BlackBoardLeftSidePageListScrollViewer, BtnLeftPageListWB);
+                        AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderLeftPageListView);
+                        await Task.Delay(1);
+                        if (BlackBoardLeftSidePageListView != null)
                         {
-                            ScrollViewToVerticalTop(leftContainer, BlackBoardLeftSidePageListScrollViewer);
+                            // 特殊模式下滚动到当前虚拟页（-1=直播页→0，0..N-1=照片页→index+1）
+                            int scrollIndex = _isVideoPresenterSpecialMode
+                                ? (_boothCurrentPhotoIndex + 1)
+                                : CurrentWhiteboardIndex - 1;
+                            var leftContainer = BlackBoardLeftSidePageListView.ItemContainerGenerator.ContainerFromIndex(
+                                scrollIndex) as ListViewItem;
+                            if (leftContainer != null)
+                            {
+                                ScrollViewToVerticalTop(leftContainer, BlackBoardLeftSidePageListScrollViewer);
+                            }
                         }
                     }
                 }
+                else if (sender == BtnRightPageListWB)
+                {
+                    if (BoardBorderRightPageListView?.Visibility == Visibility.Visible)
+                    {
+                        AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
+                    }
+                    else
+                    {
+                        ShowPageListRightPanel();
+                    }
+                }
             }
-            else if (sender == BtnRightPageListWB)
+            catch (Exception __ex)
             {
-                if (BoardBorderRightPageListView?.Visibility == Visibility.Visible)
-                {
-                    AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
-                }
-                else
-                {
-                    ShowPageListRightPanel();
-                }
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnWhiteBoardPageIndex_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
             }
-
         }
 
         /// <summary>

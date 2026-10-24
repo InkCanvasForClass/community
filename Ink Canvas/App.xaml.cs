@@ -1157,6 +1157,78 @@ namespace Ink_Canvas
         /// 另外也可能包含以 "icc:" 开头的 URI 参数或 .icstk 文件路径用于启动时的 IPC 交互。</param>
         async void App_Startup(object sender, StartupEventArgs e)
         {
+            // 启动阶段顶层异常兜底：
+            // App_Startup 是 async void，任何未捕获异常都会直接逃逸到 Dispatcher。
+            // 而此时主窗口往往尚未创建，全局异常处理器中依赖 MainWindow 的分支会二次抛异常，
+            // 用户看到的现象就是「双击图标毫无反应 / 一闪而过」。
+            // 这里显式兜底：记录完整堆栈 + 给出可读提示 + 关闭启动画面，避免静默失败。
+            try
+            {
+                await App_StartupCore(e);
+            }
+            catch (Exception ex)
+            {
+                HandleStartupFatal(ex);
+            }
+        }
+
+        /// <summary>
+        /// 处理启动阶段的致命异常：记录日志、关闭可能仍显示的启动画面，并尽量向用户展示失败原因。
+        /// 本方法自身不得抛出异常，否则会再次逃逸到 Dispatcher。
+        /// </summary>
+        private void HandleStartupFatal(Exception ex)
+        {
+            try
+            {
+                lastErrorMessage = ex?.ToString() ?? "未知启动异常";
+                LogHelper.WriteLogToFile(
+                    $"[Startup][Fatal] 启动流程中断: {lastErrorMessage}",
+                    LogHelper.LogType.Error);
+                WriteCrashLog($"启动失败: {lastErrorMessage}");
+            }
+            catch (Exception logEx)
+            {
+                System.Diagnostics.Debug.WriteLine(logEx);
+            }
+
+            // 启动画面若仍显示会把错误提示挡住，先关掉
+            try
+            {
+                CloseSplashScreen();
+            }
+            catch (Exception splashEx)
+            {
+                System.Diagnostics.Debug.WriteLine(splashEx);
+            }
+
+            try
+            {
+                var message = $"Ink Canvas 启动失败。\n\n{ex?.GetType().Name}: {ex?.Message}\n\n" +
+                              "详细信息已写入 Logs 与 Crashes 目录。\n" +
+                              "如问题持续出现，可尝试删除 Configs 目录下的配置文件后重启。";
+                MessageBox.Show(message, "启动失败", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            catch (Exception msgEx)
+            {
+                // 连提示框都无法显示时（例如 UI 线程已损坏），退化为日志
+                System.Diagnostics.Debug.WriteLine(msgEx);
+            }
+
+            try
+            {
+                Shutdown(1);
+            }
+            catch (Exception shutdownEx)
+            {
+                System.Diagnostics.Debug.WriteLine(shutdownEx);
+            }
+        }
+
+        /// <summary>
+        /// 原 App_Startup 主体，保持原有逻辑不变，仅由 App_Startup 包裹以统一处理异常。
+        /// </summary>
+        private async Task App_StartupCore(StartupEventArgs e)
+        {
             appStartTime = DateTime.Now;
             LogHelper.WriteLogToFile(
                 $"[Startup] App_Startup 开始，参数 {e.Args.Length} 个: {string.Join(" ", e.Args)}",

@@ -98,69 +98,83 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private async void ToggleSwitchPasswordEnabled_Toggled(object sender, RoutedEventArgs e)
         {
-            if (!_isLoaded) return;
-            var settings = SettingsManager.Settings;
-            if (settings == null) return;
-            if (settings.Security == null) settings.Security = new Security();
-            var sec = settings.Security;
-
-            bool newState = CardPasswordEnabled.IsOn;
-            var owner = Window.GetWindow(this);
-
-            if (newState)
+            try
             {
-                var havePassword = SecurityManager.HasPasswordConfigured(settings);
-                if (!havePassword)
-                {
-                    var pwd = await SecurityManager.PromptSetNewPasswordAsync(owner);
-                    if (string.IsNullOrEmpty(pwd))
-                    {
-                        SetCardIsOnSilently(CardPasswordEnabled, false);
-                        return;
-                    }
-                    SecurityManager.SetPassword(settings, pwd);
-                }
+                if (!_isLoaded) return;
+                var settings = SettingsManager.Settings;
+                if (settings == null) return;
+                if (settings.Security == null) settings.Security = new Security();
+                var sec = settings.Security;
 
-                sec.PasswordEnabled = true;
-                SettingsManager.SaveSettingsToFile();
-                UpdatePasswordUiState();
+                bool newState = CardPasswordEnabled.IsOn;
+                var owner = Window.GetWindow(this);
+
+                if (newState)
+                {
+                    var havePassword = SecurityManager.HasPasswordConfigured(settings);
+                    if (!havePassword)
+                    {
+                        var pwd = await SecurityManager.PromptSetNewPasswordAsync(owner);
+                        if (string.IsNullOrEmpty(pwd))
+                        {
+                            SetCardIsOnSilently(CardPasswordEnabled, false);
+                            return;
+                        }
+                        SecurityManager.SetPassword(settings, pwd);
+                    }
+
+                    sec.PasswordEnabled = true;
+                    SettingsManager.SaveSettingsToFile();
+                    UpdatePasswordUiState();
+                }
+                else
+                {
+                    if (SecurityManager.HasPasswordConfigured(settings))
+                    {
+                        bool ok = await SecurityManager.PromptAndVerifyPasswordOrTotpAsync(settings, owner,
+                            SecurityStrings.Security_DisablePasswordTitle, SecurityStrings.Security_DisablePasswordMessage);
+                        if (!ok)
+                        {
+                            SetCardIsOnSilently(CardPasswordEnabled, true);
+                            return;
+                        }
+                    }
+
+                    sec.PasswordEnabled = false;
+                    SecurityManager.ClearPassword(settings);
+                    SettingsManager.SaveSettingsToFile();
+                    UpdatePasswordUiState();
+                }
             }
-            else
+            catch (Exception __ex)
             {
-                if (SecurityManager.HasPasswordConfigured(settings))
-                {
-                    bool ok = await SecurityManager.PromptAndVerifyPasswordOrTotpAsync(settings, owner,
-                        SecurityStrings.Security_DisablePasswordTitle, SecurityStrings.Security_DisablePasswordMessage);
-                    if (!ok)
-                    {
-                        SetCardIsOnSilently(CardPasswordEnabled, true);
-                        return;
-                    }
-                }
-
-                sec.PasswordEnabled = false;
-                SecurityManager.ClearPassword(settings);
-                SettingsManager.SaveSettingsToFile();
-                UpdatePasswordUiState();
+                LogHelper.WriteLogToFile($"[AsyncGuard] ToggleSwitchPasswordEnabled_Toggled 执行异常: {__ex.Message}", LogHelper.LogType.Error);
             }
         }
 
         private async void BtnSetOrChangePassword_Click(object sender, RoutedEventArgs e)
         {
-            var settings = SettingsManager.Settings;
-            if (settings == null) return;
-            if (settings.Security == null) settings.Security = new Security();
-
-            var owner = Window.GetWindow(this);
-            var newPwd = await SecurityManager.PromptChangePasswordAsync(settings, owner);
-            if (!string.IsNullOrEmpty(newPwd))
+            try
             {
-                SecurityManager.SetPassword(settings, newPwd);
-                settings.Security.PasswordEnabled = true;
-                SettingsManager.SaveSettingsToFile();
+                var settings = SettingsManager.Settings;
+                if (settings == null) return;
+                if (settings.Security == null) settings.Security = new Security();
 
-                SetCardIsOnSilently(CardPasswordEnabled, true);
-                UpdatePasswordUiState();
+                var owner = Window.GetWindow(this);
+                var newPwd = await SecurityManager.PromptChangePasswordAsync(settings, owner);
+                if (!string.IsNullOrEmpty(newPwd))
+                {
+                    SecurityManager.SetPassword(settings, newPwd);
+                    settings.Security.PasswordEnabled = true;
+                    SettingsManager.SaveSettingsToFile();
+
+                    SetCardIsOnSilently(CardPasswordEnabled, true);
+                    UpdatePasswordUiState();
+                }
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnSetOrChangePassword_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -222,21 +236,28 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private async void BtnGenerateTotpSecret_Click(object sender, RoutedEventArgs e)
         {
-            var settings = SettingsManager.Settings;
-            if (settings == null) return;
-            if (settings.Security == null) settings.Security = new Security();
+            try
+            {
+                var settings = SettingsManager.Settings;
+                if (settings == null) return;
+                if (settings.Security == null) settings.Security = new Security();
 
-            var owner = Window.GetWindow(this);
-            bool ok = await SecurityManager.PromptAndVerifyPasswordOrTotpAsync(settings, owner,
-                SecurityStrings.Security_ResetTotpTitle, SecurityStrings.Security_ResetTotpMessage);
-            if (!ok) return;
+                var owner = Window.GetWindow(this);
+                bool ok = await SecurityManager.PromptAndVerifyPasswordOrTotpAsync(settings, owner,
+                    SecurityStrings.Security_ResetTotpTitle, SecurityStrings.Security_ResetTotpMessage);
+                if (!ok) return;
 
-            settings.Security.TotpSecret = SecurityManager.GenerateTotpSecret();
-            settings.Security.TotpEnabled = true;
-            TextBoxTotpSecret.Text = settings.Security.TotpSecret;
-            SetCardIsOnSilently(CardTotpEnabled, true);
-            SettingsManager.SaveSettingsToFile();
-            UpdatePasswordUiState();
+                settings.Security.TotpSecret = SecurityManager.GenerateTotpSecret();
+                settings.Security.TotpEnabled = true;
+                TextBoxTotpSecret.Text = settings.Security.TotpSecret;
+                SetCardIsOnSilently(CardTotpEnabled, true);
+                SettingsManager.SaveSettingsToFile();
+                UpdatePasswordUiState();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnGenerateTotpSecret_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private void RefreshUsbDrives()

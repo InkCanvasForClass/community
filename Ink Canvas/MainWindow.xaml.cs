@@ -2703,7 +2703,14 @@ namespace Ink_Canvas
         // 快速面板退出PPT放映按钮事件
         private async void ExitPPTSlideShow_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            await ExitPPTPresentation();
+            try
+            {
+                await ExitPPTPresentation();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] ExitPPTSlideShow_MouseUp 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private DispatcherTimer autoSaveStrokesTimer;
