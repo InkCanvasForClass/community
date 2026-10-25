@@ -18,17 +18,25 @@ namespace Ink_Canvas.Helpers
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "InkCanvasForClass", "logs");
 
-        private static string LogFile => Path.Combine(LogDirectory, "refactor.log");
-
         public static void LogException(Exception ex, [CallerMemberName] string member = "")
+        {
+            LogExceptionCore(ex, member, LogDirectory, MaxFileSizeBytes);
+        }
+
+        /// <summary>
+        /// 写入核心（可测试性参数化）。生产路径 <see cref="LogException"/> 以默认值调用本方法，
+        /// 行为逐字节不变；测试可注入临时目录与小阈值验证写入与滚动。
+        /// </summary>
+        internal static void LogExceptionCore(Exception ex, string member, string logDirectory, long maxFileSizeBytes)
         {
             try
             {
                 lock (WriteLock)
                 {
-                    Directory.CreateDirectory(LogDirectory);
-                    RollIfNeeded();
-                    File.AppendAllText(LogFile,
+                    Directory.CreateDirectory(logDirectory);
+                    var logFile = Path.Combine(logDirectory, "refactor.log");
+                    RollIfNeeded(logFile, maxFileSizeBytes);
+                    File.AppendAllText(logFile,
                         $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} [{member}] {ex}{Environment.NewLine}");
                 }
             }
@@ -38,17 +46,17 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        private static void RollIfNeeded()
+        private static void RollIfNeeded(string logFile, long maxFileSizeBytes)
         {
-            if (!File.Exists(LogFile) || new FileInfo(LogFile).Length < MaxFileSizeBytes) return;
+            if (!File.Exists(logFile) || new FileInfo(logFile).Length < maxFileSizeBytes) return;
             for (var i = RetainedFiles - 1; i >= 1; i--)
             {
-                var older = $"{LogFile}.{i}";
-                var newer = $"{LogFile}.{i + 1}";
+                var older = $"{logFile}.{i}";
+                var newer = $"{logFile}.{i + 1}";
                 if (File.Exists(newer)) File.Delete(newer);
                 if (File.Exists(older)) File.Move(older, newer);
             }
-            File.Move(LogFile, $"{LogFile}.1");
+            File.Move(logFile, $"{logFile}.1");
         }
     }
 }
