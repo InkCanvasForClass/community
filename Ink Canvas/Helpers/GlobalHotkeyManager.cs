@@ -40,7 +40,7 @@ namespace Ink_Canvas.Helpers
         private bool _isMouseOverWindow = false;
         private System.Windows.Threading.DispatcherTimer _mousePositionTimer;
 
-        // M16：HotkeyConfig.json 读写与加载编排已提取至 Services.Shell.HotkeyService。
+        // HotkeyConfig.json 读写与加载编排已提取至 Services.Shell.HotkeyService。
         // 以下委托由 HotkeyService 构造时接线；原位 public 方法为转发壳，对外签名与语义不变。
         internal Action LoadHotkeysHandler { get; set; }
         internal Action SaveHotkeysHandler { get; set; }
@@ -48,7 +48,7 @@ namespace Ink_Canvas.Helpers
         internal Action RegisterDefaultsHandler { get; set; }
         internal Func<string, Action> ActionByNameProvider { get; set; }
 
-        // M16：供 HotkeyService 读写（原私有字段，等价改写为 internal 访问器）
+        // 供 HotkeyService 读写（原私有字段，等价改写为 internal 访问器）
         internal bool HotkeysShouldBeRegistered
         {
             get => _hotkeysShouldBeRegistered;
@@ -66,7 +66,7 @@ namespace Ink_Canvas.Helpers
             // 初始化多屏幕支持
             InitializeMultiScreenSupport();
 
-            // M16：启动时确保配置文件存在的职责随配置层搬入 HotkeyService 构造函数，
+            // 启动时确保配置文件存在的职责随配置层搬入 HotkeyService 构造函数，
             // 由主窗口在创建本管理器后立即创建服务（同一调用栈，时序不变）。
         }
         #endregion
@@ -106,7 +106,7 @@ namespace Ink_Canvas.Helpers
                     }
                     catch (Exception ex)
                     {
-                        LogHelper.WriteLogToFile($"[Hotkey] 注册前清理全局热键 {hotkeyName} 的旧注册失败，将直接覆盖: {ex.Message}", LogHelper.LogType.Info);
+                        LogService.LogException(ex);
                     }
                 }
 
@@ -172,7 +172,7 @@ namespace Ink_Canvas.Helpers
                     }
                     catch (Exception ex)
                     {
-                        LogHelper.WriteLogToFile($"[Hotkey] 注册插件热键前清理同名全局热键 {hotkeyName} 失败，将直接覆盖: {ex.Message}", LogHelper.LogType.Info);
+                        LogService.LogException(ex);
                     }
 
                     _registeredHotkeys.Remove(hotkeyName);
@@ -318,7 +318,7 @@ namespace Ink_Canvas.Helpers
 
         /// <summary>
         /// 获取配置文件中的快捷键信息（不注册，仅用于显示）
-        /// M16：实现已提取至 Services.Shell.HotkeyService，本方法为转发壳。
+        /// 实现已提取至 Services.Shell.HotkeyService，本方法为转发壳。
         /// </summary>
         /// <returns>配置文件中的快捷键列表</returns>
         public List<HotkeyInfo> GetHotkeysFromConfigFile()
@@ -328,7 +328,7 @@ namespace Ink_Canvas.Helpers
 
         /// <summary>
         /// 注册默认快捷键集合
-        /// M16：实现已提取至 Services.Shell.HotkeyService，本方法为转发壳。
+        /// 实现已提取至 Services.Shell.HotkeyService，本方法为转发壳。
         /// </summary>
         public void RegisterDefaultHotkeys()
         {
@@ -337,7 +337,7 @@ namespace Ink_Canvas.Helpers
 
         /// <summary>
         /// 从配置文件加载快捷键
-        /// M16：实现已提取至 Services.Shell.HotkeyService，本方法为转发壳。
+        /// 实现已提取至 Services.Shell.HotkeyService，本方法为转发壳。
         /// </summary>
         public void LoadHotkeysFromSettings()
         {
@@ -346,7 +346,7 @@ namespace Ink_Canvas.Helpers
 
         /// <summary>
         /// 保存快捷键配置到设置
-        /// M16：实现已提取至 Services.Shell.HotkeyService，本方法为转发壳。
+        /// 实现已提取至 Services.Shell.HotkeyService，本方法为转发壳。
         /// </summary>
         public void SaveHotkeysToSettings()
         {

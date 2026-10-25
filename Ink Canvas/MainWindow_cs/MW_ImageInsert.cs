@@ -294,7 +294,7 @@ namespace Ink_Canvas
 
         /// <summary>
         /// 截取指定屏幕区域。
-        /// 壳：本体已搬入 <see cref="ScreenshotService"/>（M15）。
+        /// 壳：本体已搬入 <see cref="ScreenshotService"/>。
         /// </summary>
         /// <param name="area">要截取的屏幕区域</param>
         /// <returns>截取的位图</returns>
@@ -361,14 +361,14 @@ namespace Ink_Canvas
 
         /// <summary>
         /// 在捕获位图上叠加墨迹预览。
-        /// 壳：本体已搬入 <see cref="ScreenshotService"/>（M15）。
+        /// 壳：本体已搬入 <see cref="ScreenshotService"/>。
         /// </summary>
         private Bitmap OverlayInkOnCapturedBitmap(Bitmap capturedBitmap, Rectangle captureArea, BitmapSource inkOverlayBitmapSource)
             => ScreenshotService.OverlayInkOnCapturedBitmap(capturedBitmap, captureArea, inkOverlayBitmapSource);
 
         /// <summary>
         /// 将 WPF BitmapSource 转换为 System.Drawing.Bitmap。
-        /// 壳：本体已搬入 <see cref="ScreenshotService"/>（M15）。
+        /// 壳：本体已搬入 <see cref="ScreenshotService"/>。
         /// </summary>
         private Bitmap ConvertBitmapSourceToBitmap(BitmapSource bitmapSource)
             => ScreenshotService.ConvertBitmapSourceToBitmap(bitmapSource);
@@ -743,7 +743,7 @@ namespace Ink_Canvas
 
         /// <summary>
         /// 将System.Drawing.Bitmap转换为WPF BitmapSource。
-        /// 壳：本体（含备用/最简两条降级路径）已搬入 <see cref="ScreenshotService"/>（M15）。
+        /// 壳：本体（含备用/最简两条降级路径）已搬入 <see cref="ScreenshotService"/>。
         /// </summary>
         /// <param name="bitmap">要转换的位图</param>
         /// <returns>转换后的BitmapSource</returns>

@@ -35,7 +35,7 @@ namespace Ink_Canvas
 #if ICC_NATIVE_WET_INK
                 && ResolveLogicalInkTool() == LogicalInkTool.Pen
 #else
-                && (_currentToolMode == "pen" || _currentToolMode == "color")
+                && (_currentToolModeEnum == Models.ToolMode.Pen || _currentToolModeEnum == Models.ToolMode.Color)
 #endif
                 && !isInMultiTouchMode
                 && !(currentMode == 1 ? Settings.Gesture.IsEnableMultiTouchModeBoard : Settings.Gesture.IsEnableMultiTouchMode);

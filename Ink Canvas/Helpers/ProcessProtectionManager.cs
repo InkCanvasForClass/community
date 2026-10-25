@@ -72,7 +72,10 @@ namespace Ink_Canvas.Helpers
                     {
                         LogHelper.WriteLogToFile($"ProcessProtectionManager.SetEnabled 后台执行失败: {ex.Message}", LogHelper.LogType.Warning);
                     }
-                    catch { }
+                    catch (Exception ex2)
+                    {
+                        LogService.LogException(ex2);
+                    }
                 }
             });
         }
@@ -100,11 +103,7 @@ namespace Ink_Canvas.Helpers
                     if (_lockedDirs.TryGetValue(d, out var handle))
                     {
                         _lockedDirs.Remove(d);
-                        try { handle.Dispose(); }
-                        catch (Exception ex)
-                        {
-                            LogHelper.WriteLogToFile($"[ProcGuard] 释放目录锁句柄失败 (path={d}): {ex.Message}", LogHelper.LogType.Info);
-                        }
+                        try { handle.Dispose(); } catch (Exception ex) { LogService.LogException(ex); }
                     }
                 }
 
@@ -118,11 +117,7 @@ namespace Ink_Canvas.Helpers
                     if (_lockedFiles.TryGetValue(fp, out var fs))
                     {
                         _lockedFiles.Remove(fp);
-                        try { fs.Dispose(); }
-                        catch (Exception ex)
-                        {
-                            LogHelper.WriteLogToFile($"[ProcGuard] 释放文件锁句柄失败 (path={fp}): {ex.Message}", LogHelper.LogType.Info);
-                        }
+                        try { fs.Dispose(); } catch (Exception ex) { LogService.LogException(ex); }
                     }
                 }
             }
@@ -226,7 +221,7 @@ namespace Ink_Canvas.Helpers
                     }
                     catch (Exception ex)
                     {
-                        LogHelper.WriteLogToFile($"[ProcGuard] 写入门控结束后按路径链恢复文件锁失败: {ex.Message}", LogHelper.LogType.Info);
+                        LogService.LogException(ex);
                     }
                 }
                 return;
@@ -289,7 +284,7 @@ namespace Ink_Canvas.Helpers
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.WriteLogToFile($"[ProcGuard] 写入门控结束后恢复文件锁失败: {ex.Message}", LogHelper.LogType.Info);
+                    LogService.LogException(ex);
                 }
 
                 Interlocked.Exchange(ref _writeGate, 0);
@@ -374,9 +369,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile(
-                    $"[ProcGuard] 建立文件/目录锁失败 (rescanRoot={rescanRoot}): {ex.Message}",
-                    LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -440,7 +433,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[ProcGuard] 递归锁定目录失败 (root={root}): {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -477,7 +470,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[ProcGuard] 递归锁定文件失败 (root={root}): {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -498,7 +491,7 @@ namespace Ink_Canvas.Helpers
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.WriteLogToFile($"[ProcGuard] 锁定文件失败（可能被占用）: {filePath} - {ex.Message}", LogHelper.LogType.Info);
+                    LogService.LogException(ex);
                 }
             }
         }
@@ -523,7 +516,7 @@ namespace Ink_Canvas.Helpers
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.WriteLogToFile($"[ProcGuard] 锁定目录失败: {dirPath} - {ex.Message}", LogHelper.LogType.Info);
+                    LogService.LogException(ex);
                 }
             }
         }
@@ -570,7 +563,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[ProcGuard] 计算到应用根目录的路径链失败 (path={path}): {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
             return list;
         }
@@ -598,7 +591,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[ProcGuard] 判断路径是否属于排除目录失败 (path={path}): {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
             return false;
         }
