@@ -31,8 +31,11 @@ namespace InkCanvas.DevTools
         /// <summary>是否产出可执行文件（false 表示只产出 dll）。</summary>
         public bool IsExecutable { get; }
 
-        /// <summary>Debug/Release 构建产物目录（相对项目目录）。</summary>
+        /// <summary>Debug 构建产物目录（相对项目目录）。</summary>
         public string DebugOutputDirectory { get; }
+
+        /// <summary>Release 构建产物目录（相对项目目录）。</summary>
+        public string ReleaseOutputDirectory { get; }
 
         /// <summary>Publish 产物目录（相对项目目录）。</summary>
         public string PublishOutputDirectory { get; }
@@ -41,13 +44,14 @@ namespace InkCanvas.DevTools
         public string ExecutableName { get; }
 
         public ProjectDefinition(string displayName, string projectDirectory, bool isExecutable,
-                                 string debugOutputDirectory, string publishOutputDirectory,
-                                 string executableName)
+                                 string debugOutputDirectory, string releaseOutputDirectory,
+                                 string publishOutputDirectory, string executableName)
         {
             DisplayName = displayName;
             ProjectDirectory = projectDirectory;
             IsExecutable = isExecutable;
             DebugOutputDirectory = debugOutputDirectory;
+            ReleaseOutputDirectory = releaseOutputDirectory;
             PublishOutputDirectory = publishOutputDirectory;
             ExecutableName = executableName;
         }
@@ -79,6 +83,7 @@ namespace InkCanvas.DevTools
                 "Ink Canvas",
                 true,
                 Path.Combine("bin", "Debug", "AnyCPU", Tfm),
+                Path.Combine("bin", "Release", "AnyCPU", Tfm),
                 Path.Combine("bin", "Release", "AnyCPU", Tfm, "publish"),
                 "InkCanvasForClass.exe"),
 
@@ -86,6 +91,7 @@ namespace InkCanvas.DevTools
                 "InkCanvas.Controls（DLL）",
                 "InkCanvas.Controls",
                 false,
+                null,
                 null,
                 null,
                 null),
@@ -96,6 +102,7 @@ namespace InkCanvas.DevTools
                 false,
                 null,
                 null,
+                null,
                 null),
 
             new ProjectDefinition(
@@ -104,6 +111,7 @@ namespace InkCanvas.DevTools
                 false,
                 null,
                 null,
+                null,
                 null),
 
             new ProjectDefinition(
@@ -111,6 +119,7 @@ namespace InkCanvas.DevTools
                 "InkCanvas.SettingsTreeView",
                 true,
                 Path.Combine("bin", "Debug", Tfm),
+                Path.Combine("bin", "Release", Tfm),
                 Path.Combine("bin", "Release", Tfm, "publish"),
                 "InkCanvas.SettingsTreeView.exe"),
 
@@ -119,6 +128,7 @@ namespace InkCanvas.DevTools
                 "InkCanvas.LiquidGlassMagHost",
                 true,
                 Path.Combine("bin", "Debug", Tfm),
+                Path.Combine("bin", "Release", Tfm),
                 Path.Combine("bin", "Release", Tfm, "publish"),
                 "InkCanvas.LiquidGlassMagHost.exe")
         };
@@ -163,9 +173,21 @@ namespace InkCanvas.DevTools
             if (!project.IsExecutable)
                 return null;
 
-            string relativeDir = mode == BuildMode.Publish
-                ? project.PublishOutputDirectory
-                : project.DebugOutputDirectory;
+            string relativeDir;
+            switch (mode)
+            {
+                case BuildMode.Debug:
+                    relativeDir = project.DebugOutputDirectory;
+                    break;
+                case BuildMode.Release:
+                    relativeDir = project.ReleaseOutputDirectory;
+                    break;
+                case BuildMode.Publish:
+                    relativeDir = project.PublishOutputDirectory;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(mode));
+            }
 
             return Path.Combine(RepositoryRoot, project.ProjectDirectory, relativeDir, project.ExecutableName);
         }
@@ -178,7 +200,10 @@ namespace InkCanvas.DevTools
             string args = GetDotnetArguments(mode);
             string workingDirectory = GetWorkingDirectory(project);
 
-            output?.Report($"> dotnet {args}   （目录：{workingDirectory}）\n");
+            // 命令本身不带任何参数；通过进程环境变量 Configuration 让 MSBuild 使用对应配置。
+            string configuration = mode == BuildMode.Debug ? "Debug" : "Release";
+
+            output?.Report($"> dotnet {args}   （目录：{workingDirectory}，Configuration={configuration}）\n");
 
             var psi = new ProcessStartInfo
             {
@@ -192,6 +217,7 @@ namespace InkCanvas.DevTools
                 StandardOutputEncoding = Encoding.UTF8,
                 StandardErrorEncoding = Encoding.UTF8
             };
+            psi.EnvironmentVariables["Configuration"] = configuration;
 
             using var process = new Process { StartInfo = psi, EnableRaisingEvents = true };
 
