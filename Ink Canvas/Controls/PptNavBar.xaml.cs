@@ -115,6 +115,12 @@ namespace Ink_Canvas.Controls
             RootBorder.Effect = enabled ? _shadowEffect : null;
         }
 
+        public void ApplyShadowSettings(PowerPointSettings settings)
+        {
+            var shadow = settings.GetPPTNavBarShadow(Direction);
+            SetShadow(shadow.Enabled, shadow.Size);
+        }
+
         private static void OnDirectionChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is PPTNavBar bar) bar.ApplyDirection((NavDirection)e.NewValue);
