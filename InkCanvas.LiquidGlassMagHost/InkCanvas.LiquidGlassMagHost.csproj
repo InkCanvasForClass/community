@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <!-- 声明支持的全部 RID：CI include_runtime 分支用 dotnet publish -r win-x64/win-x86
          （带 no-restore）时，RID 会以全局属性传给 ProjectReference 的 MagHost。
          不声明 RuntimeIdentifiers，restore 就不会为 MagHost 生成对应的 RID 目标，
