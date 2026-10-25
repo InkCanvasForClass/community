@@ -40,7 +40,7 @@ namespace Ink_Canvas
             return new CountdownTimerWindow();
         }
 
-        // 计时状态机已提取至 TimerService（M14）；本窗口仅订阅状态并渲染。
+        // 计时状态机已提取至 TimerService；本窗口仅订阅状态并渲染。
         private readonly TimerService _timerService;
 
         private void OnTimerStateChanged(TimerState state)

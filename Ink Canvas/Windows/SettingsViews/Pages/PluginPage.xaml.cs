@@ -354,12 +354,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (Directory.Exists(info.PluginFolderPath))
                     Process.Start(new ProcessStartInfo { FileName = info.PluginFolderPath, UseShellExecute = true });
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile(
-                    $"[Settings] 打开插件目录 {info.PluginFolderPath} 失败: {ex.Message}",
-                    LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
         }
 
         private void TogglePluginLoad_Click(object sender, RoutedEventArgs e)

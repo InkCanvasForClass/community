@@ -107,10 +107,7 @@ namespace Ink_Canvas.Helpers
                     LogHelper.WriteLogToFile("VSTO 旧注册表项已清理", LogHelper.LogType.Trace);
                 }
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[PPT] 清理 VSTO 旧注册表项 {AddInKeyName} 失败: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
         }
 
         public static bool Unregister()

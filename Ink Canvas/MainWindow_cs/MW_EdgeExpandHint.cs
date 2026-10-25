@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Models;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -148,11 +149,11 @@ namespace Ink_Canvas
             // 工具选择不是笔（橡皮/框选/图形/漫游/鼠标）时不提示。
             // 注意：原生湿墨水下笔工具的物理 EditingMode 为 None，因此以逻辑工具状态判定。
             // 特例：进入白板的部分入口（启动时恢复白板状态等）直接调用 SwitchBackground，
-            // 绕过了 ImageBlackboard_MouseUp 的切笔逻辑，_currentToolMode 会停留在 "cursor"，
+            // 绕过了 ImageBlackboard_MouseUp 的切笔逻辑，_currentToolModeEnum 会停留在 cursor，
             // 导致进入白板后的首次书写被误判为非笔工具。白板模式没有"鼠标"工具且进入时
             // 必然切回笔，因此白板下的 cursor 按笔对待。
-            bool isPenToolSelected = _currentToolMode == "pen" || _currentToolMode == "color";
-            if (!isPenToolSelected && !(IsWhiteboardMode && _currentToolMode == "cursor")) return false;
+            bool isPenToolSelected = _currentToolModeEnum == ToolMode.Pen || _currentToolModeEnum == ToolMode.Color;
+            if (!isPenToolSelected && !(IsWhiteboardMode && _currentToolModeEnum == ToolMode.Cursor)) return false;
             if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink
                 && inkCanvas.EditingMode != InkCanvasEditingMode.None)
                 return false;

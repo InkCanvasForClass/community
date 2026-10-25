@@ -235,10 +235,7 @@ namespace Ink_Canvas.Plugins
                     foreach (var id in list) _disabledPlugins.Add(id);
                 }
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Plugin] 读取已禁用插件列表失败（禁用状态可能丢失）: {_disabledPluginsFile}, 原因: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
         }
 
         private void SaveDisabledPlugins()
@@ -251,10 +248,7 @@ namespace Ink_Canvas.Plugins
                     System.Text.Json.JsonSerializer.Serialize(_disabledPlugins.ToList(),
                     new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Plugin] 保存已禁用插件列表失败（禁用状态可能无法持久化）: {_disabledPluginsFile}, 原因: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
         }
 
         /// <summary>
@@ -299,10 +293,7 @@ namespace Ink_Canvas.Plugins
                     DateTime.Now, level, message, Environment.NewLine);
                 File.AppendAllText(logFile, line);
             }
-            catch (Exception ex)
-            {
-                LogCallbackException($"写入插件 \"{pluginId}\" 的独立日志文件", ex);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
         }
 
         /// <summary>
@@ -1489,10 +1480,7 @@ namespace Ink_Canvas.Plugins
                     File.WriteAllText(Path.Combine(folder, ".uninstall"), "");
                 }
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Plugin] 写入 .uninstall 标记文件失败（该插件目录下次启动不会被兜底清理）: {folder}, 原因: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
         }
 
         /// <summary>
@@ -1680,10 +1668,7 @@ namespace Ink_Canvas.Plugins
                             if (string.IsNullOrEmpty(module.FileName)) continue;
                             loaded.Add(module.FileName);
                         }
-                        catch (Exception ex)
-                        {
-                            LogCallbackException("诊断插件占用: 读取进程已加载模块信息失败（跳过该模块）", ex);
-                        }
+                        catch (Exception ex) { LogService.LogException(ex); }
                     }
                 }
                 catch (Exception ex)
@@ -1797,10 +1782,7 @@ namespace Ink_Canvas.Plugins
                             if (AssemblyLoadContext.GetLoadContext(t.Assembly) == target && seenPath.Add(path))
                                 Log(string.Format("Pinning reference: {0} (Type={1})", path, t.FullName));
                         }
-                        catch (Exception ex)
-                        {
-                            LogCallbackException("诊断插件占用: 检查类型是否归属目标 ALC", ex);
-                        }
+                        catch (Exception ex) { LogService.LogException(ex); }
                     }
                     else if (depth > 0)
                     {
@@ -2490,11 +2472,7 @@ namespace Ink_Canvas.Plugins
                                 var assembly = depContext.Load(assemblyName);
                                 if (assembly != null) return assembly;
                             }
-                            catch (Exception ex)
-                            {
-                                LogCallbackException(
-                                    $"插件 ALC 解析: 从依赖插件 \"{dep.Id}\" 的上下文加载程序集 \"{assemblyName.Name}\"", ex);
-                            }
+                            catch (Exception ex) { LogService.LogException(ex); }
                         }
                     }
                 }

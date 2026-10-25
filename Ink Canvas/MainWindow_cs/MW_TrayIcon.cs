@@ -8,7 +8,7 @@ namespace Ink_Canvas
 {
     public partial class App : Application
     {
-        // M12：托盘逻辑已提取至 Services/Shell/TrayIconService.cs，本文件仅保留
+        // 托盘逻辑已提取至 Services/Shell/TrayIconService.cs，本文件仅保留
         // XAML wired 事件处理器与插件托盘 API 的转发壳（壳删除试点）。
         // 服务的依赖装配在 App.xaml.cs 的 CreateTrayIconService，释放在 App_Exit。
         private TrayIconService _trayIconService;

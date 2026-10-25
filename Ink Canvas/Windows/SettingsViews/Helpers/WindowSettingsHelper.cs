@@ -89,10 +89,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             {
                 _pptOnlyVisibilityProbeTimer?.Stop();
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"停止仅PPT可见性探测计时器失败: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
         }
 
         private static void PPTOnlyVisibilityProbeTimer_Tick(object sender, EventArgs e)

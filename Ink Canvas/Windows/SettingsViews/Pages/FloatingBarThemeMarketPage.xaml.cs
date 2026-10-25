@@ -49,13 +49,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (installed)
                 {
                     // mark this entry as installed immediately so UI reflects state even if subsequent refresh fails
-                    try { entry.IsInstalled = true; }
-                    catch (System.Exception ex)
-                    {
-                        LogHelper.WriteLogToFile(
-                            $"[UI] 主题市场安装成功后回写条目 {entry?.Manifest?.Id} 已安装标记失败: {ex.Message}",
-                            LogHelper.LogType.Info);
-                    }
+                    try { entry.IsInstalled = true; } catch (System.Exception ex) { LogService.LogException(ex); }
 
                     var mainWindow = Application.Current.MainWindow as MainWindow;
                     mainWindow?.FloatingBarThemeService?.LoadThemes();
@@ -68,20 +62,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     {
                         Debug.WriteLine($"FloatingBarThemeMarketPage | Refresh after install failed: {ex}");
                         // refresh failed: revert temporary installed flag and re-enable button so user can retry
-                        try { entry.IsInstalled = false; }
-                        catch (System.Exception rollbackEx)
-                        {
-                            LogHelper.WriteLogToFile(
-                                $"[UI] 主题市场刷新失败后回滚条目 {entry?.Manifest?.Id} 已安装标记失败: {rollbackEx.Message}",
-                                LogHelper.LogType.Info);
-                        }
-                        try { button.IsEnabled = true; }
-                        catch (System.Exception buttonEx)
-                        {
-                            LogHelper.WriteLogToFile(
-                                $"[UI] 主题市场刷新失败后恢复安装按钮可用状态失败: {buttonEx.Message}",
-                                LogHelper.LogType.Info);
-                        }
+                        try { entry.IsInstalled = false; } catch (System.Exception ex2) { LogService.LogException(ex2); }
+                        try { button.IsEnabled = true; } catch (System.Exception ex3) { LogService.LogException(ex3); }
                     }
 
                     // 如果设置窗口中的主题管理页存在，则让它也刷新（使安装的主题立刻在管理页可见）

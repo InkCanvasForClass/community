@@ -49,7 +49,7 @@ namespace InkCanvas.IACoreHelper
                         {
                             parent.WaitForExit();
                         }
-                        catch { }
+                        catch (Exception ex) { LogService.LogException(ex); }
                         finally
                         {
                             parentExited.Set();
@@ -76,7 +76,7 @@ namespace InkCanvas.IACoreHelper
                     // 主线程阻塞直到父进程消失。守护线程一旦 Set，主线程退出，进程随之终止。
                     parentExited.Wait();
                 }
-                try { parent.Dispose(); } catch { }
+                try { parent.Dispose(); } catch (Exception ex) { LogService.LogException(ex); }
                 Environment.Exit(0);
             }
             catch (Exception ex)
@@ -104,7 +104,7 @@ namespace InkCanvas.IACoreHelper
                         if (!shouldExit())
                             continue;
                         var server = currentServer;
-                        try { server?.Dispose(); } catch { }
+                        try { server?.Dispose(); } catch (Exception ex) { LogService.LogException(ex); }
                         return;
                     }
                 })
@@ -226,7 +226,7 @@ namespace InkCanvas.IACoreHelper
                     }
                     finally
                     {
-                        try { server.Dispose(); } catch { }
+                        try { server.Dispose(); } catch (Exception ex) { LogService.LogException(ex); }
                         currentServer = null;
                     }
                 }

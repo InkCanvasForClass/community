@@ -70,13 +70,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                     catch
                     {
                         try { if (File.Exists(tmpPath)) File.Delete(tmpPath); }
-                        catch (Exception ex)
-                        {
-                            LogHelper.WriteLogToFile(
-                                $"[Settings] 保存设置失败后清理临时文件 {tmpPath} 失败: {ex.Message}",
-                                LogHelper.LogType.Info);
-                        }
-                        throw; // Keep the last complete settings file if atomic replacement fails.
+                        catch (Exception ex) { LogService.LogException(ex); }
+                        throw; // 原子替换失败时保留上一份完整设置文件
                     }
 
                     App.UpdateCachedSettingsJson(text);

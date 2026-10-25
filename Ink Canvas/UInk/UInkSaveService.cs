@@ -65,11 +65,7 @@ namespace Ink_Canvas.UInk
             {
                 if (workDir != null)
                 {
-                    try { if (Directory.Exists(workDir)) Directory.Delete(workDir, true); }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[UInk] 两阶段提交后删除资源并集临时目录失败: {workDir}, 原因: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    try { if (Directory.Exists(workDir)) Directory.Delete(workDir, true); } catch (Exception ex) { LogService.LogException(ex); }
                 }
             }
         }
@@ -130,10 +126,7 @@ namespace Ink_Canvas.UInk
                                 }
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            LogHelper.WriteLogToFile($"[UInk] 提取旧资源包以保留旧主文件引用失败: {extraPath}, 原因: {ex.Message}", LogHelper.LogType.Info);
-                        }
+                        catch (Exception ex) { LogService.LogException(ex); }
                     }
                 }
             }
@@ -150,11 +143,7 @@ namespace Ink_Canvas.UInk
 
         private static void TryDelete(string path)
         {
-            try { if (File.Exists(path)) File.Delete(path); }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[UInk] 删除临时文件失败: {path}, 原因: {ex.Message}", LogHelper.LogType.Info);
-            }
+            try { if (File.Exists(path)) File.Delete(path); } catch (Exception ex) { LogService.LogException(ex); }
         }
     }
 }

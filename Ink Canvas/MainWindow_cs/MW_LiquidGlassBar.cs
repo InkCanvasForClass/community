@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Models;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Windows;
@@ -176,7 +177,7 @@ namespace Ink_Canvas
 
             try
             {
-                _liquidGlassBar.SyncActiveState(_currentToolMode, penType, drawingAttributes?.Color);
+                _liquidGlassBar.SyncActiveState(ToolModeMapping.ToInternalString(_currentToolModeEnum), penType, drawingAttributes?.Color);
             }
             catch (Exception ex)
             {
