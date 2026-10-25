@@ -128,31 +128,71 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 计算最终的纵向中心；行盒被修正过时，中心也要跟着落到修正后的位置。
+        /// 按「字号推算的墨迹高度」确定高亮条的纵向尺寸与中心。
         /// </summary>
         /// <remarks>
-        /// 行盒被修正意味着「盒顶是可信的，但盒高被低报」。
+        /// 为什么不再用 PPT 给的行盒高度定条厚：
         /// <para>
-        /// 两个锚点必须对齐：横向命中判定用的是 <see cref="RawBoxCenterY"/>（原始行盒几何中心，
-        /// 也就是 <see cref="GlyphCenterY"/> 的语义），因此修正后的中心必须与它同源 ——
-        /// 同样取「盒顶 + 盒高 × <see cref="GlyphCenterInLineBox"/>」，只是换成修正后的盒高。
+        /// <c>TextRange2.BoundHeight</c> 的语义随版本、行距设置、占位符类型漂移。
+        /// 两轮实测截图分别是它的两种失效形态：
         /// </para>
+        /// <list type="bullet">
+        /// <item>报得偏小（只给字号、不含行距）→ 条偏细、中心偏上，字形下半截露出；</item>
+        /// <item>报得偏大（字号的 2 倍以上，行距或段前段后被算进去）→ 条高成字高的
+        /// 1.6~2.35 倍，三行溢出相连成一大块。</item>
+        /// </list>
         /// <para>
-        /// 不能假设「盒顶代表字形顶部、盒子向下撑高」。实测（见用户截图：条高 68 已能覆盖
-        /// 71 的字形，却整体偏上 18.5px）表明 BoundTop 是含上半个行距的排版盒顶，
-        /// 不是墨迹顶。按墨迹顶对齐会让条整体再上移约半个行距，反而更糟。
+        /// 而「中文字形墨迹高度 ≈ 字号 × <see cref="CjkInkToEmRatio"/>」由字体自身决定，
+        /// 与 PPT 怎么报边界无关，因此改以它为唯一基准。行盒只保留两个用途：
+        /// 横向 clamp，以及中心定位（字形在行盒里是居中的，行盒整体偏大不会让中心跑偏）。
+        /// 读不到字号时才退回行盒方案。
         /// </para>
         /// </remarks>
-        private static double ResolveEffectiveCenterY(PptTextLineRect line, double effectiveLineHeight, double thickness)
+        private static void ResolveBarVertical(
+            PptTextLineRect line,
+            PptTextFitOptions fitOptions,
+            double highlighterWidth,
+            out double thickness,
+            out double centerY,
+            out double gestureExtend)
         {
-            double boxHeight = line.Rect.Height;
+            double lineHeight = line.Rect.Height;
+            double inkHeight = line.GlyphInkHeight;
+            bool inkUsable = inkHeight > 0
+                && !double.IsNaN(inkHeight) && !double.IsInfinity(inkHeight);
 
-            // 行盒未被修正：中心就是行盒几何中心。
-            if (Math.Abs(effectiveLineHeight - boxHeight) < 0.01)
-                return RawBoxCenterY(line);
+            if (fitOptions != null)
+            {
+                if (inkUsable)
+                {
+                    // 主路径：条厚 = 墨迹高 × 铺满系数，与 PPT 报的行盒无关。
+                    thickness = inkHeight * fitOptions.FillRatio;
+                    // 上限挂在墨迹高上而不是行盒高上：行盒可能被高报 2 倍以上，
+                    // 用它当闸门等于没有闸门。
+                    thickness = Math.Min(thickness, inkHeight * fitOptions.MaxThicknessRatio);
+                }
+                else
+                {
+                    // 退化路径：读不到字号，只能信行盒（仍走低报自校准）。
+                    double effective = ResolveEffectiveLineHeight(line);
+                    thickness = effective * fitOptions.FillRatio;
+                    thickness = Math.Min(thickness, effective * fitOptions.MaxThicknessRatio);
+                }
 
-            // 行盒被撑高：盒顶与本行的几何关系不变，中心随新盒高下移。
-            return line.Rect.Top + effectiveLineHeight * GlyphCenterInLineBox;        }
+                thickness = Math.Max(1.5, thickness);
+                gestureExtend = thickness * fitOptions.ExtendRatio;
+            }
+            else
+            {
+                // 固定模式：条厚跟随荧光笔宽度，只在行高极小时收敛。
+                thickness = Math.Max(1.0, highlighterWidth);
+                if (lineHeight > 0)
+                    thickness = Math.Min(thickness, lineHeight * 1.15);
+                gestureExtend = Math.Max(0, highlighterWidth) * 0.5;
+            }
+
+            centerY = line.Rect.Top + line.Rect.Height * GlyphCenterInLineBox;
+        }
 
         /// <summary>
         /// 中文字形墨迹高度占 em 字号的典型比例。
@@ -384,48 +424,12 @@ namespace Ink_Canvas.Helpers
                 return null;
             }
 
-            // 6) 高亮条尺寸。
-            //    自适应模式：按文字行自身的实际高度铺满，解决「字大条细、只包住一小条」的问题；
-            //    固定模式：沿用荧光笔宽度，字号大时条会明显偏细。
-            double lineHeight = bestLine.Rect.Height;
+            // 6) 高亮条尺寸。基准是「字号推算的墨迹高度」而非 PPT 报的行盒高度，
+            //    原因见 ResolveBarVertical 的注释（行盒两个方向都可能报错）。
             double thickness;
+            double centerY;
             double gestureExtend;
-
-            // 实际参与排版的行高。固定模式直接就是行盒高度；
-            // 自适应模式下会被 ResolveEffectiveLineHeight 自校准（见下）。
-            double effectiveLineHeight = lineHeight;
-
-            if (fitOptions != null)
-            {
-                // 先用字号推算的墨迹高度校验行盒：PPT 的 BoundHeight 在部分版本/行距/占位符下
-                // 只等于字号而不含行距，导致行盒偏小、中心偏上（条压住字的上半截）。
-                // 墨迹高度是稳定物理量，用它反推才靠得住。
-                effectiveLineHeight = ResolveEffectiveLineHeight(bestLine);
-
-                // 条厚直接由「行盒高度 × 铺满系数」决定。
-                //
-                // 曾经这里算的是 lineHeight × glyphRatio，而 glyphRatio 又是
-                // fontSize × 0.93 ÷ lineHeight —— 代入后 lineHeight 被约掉，
-                // 结果等于 fontSize × 0.93，行盒尺寸完全没参与计算。
-                // 一旦 Font.Size 读数偏小（主题字号、占位符缩放、混排都会导致），
-                // 条就整体偏小且偏上。改用行盒这个「看得见、量得准」的量作基准。
-                thickness = effectiveLineHeight * fitOptions.FillRatio;
-
-                // 上下限兜底：至少能看见，也别超过行高的 1.5 倍。
-                thickness = Math.Max(1.5, thickness);
-                thickness = Math.Min(thickness, effectiveLineHeight * fitOptions.MaxThicknessRatio);
-
-                // 横向外扩同样按行盒高走，中文标点右侧留白靠这一步才能覆盖到。
-                gestureExtend = fitOptions.ExtendRatio * effectiveLineHeight;
-            }
-            else
-            {
-                thickness = Math.Max(1.0, highlighterWidth);
-                if (lineHeight > 0)
-                    thickness = Math.Min(thickness, lineHeight * 1.15);
-                thickness = Math.Max(1.0, Math.Min(thickness, lineHeight * 1.5));
-                gestureExtend = Math.Max(0, highlighterWidth) * 0.5;
-            }
+            ResolveBarVertical(bestLine, fitOptions, highlighterWidth, out thickness, out centerY, out gestureExtend);
 
             // 自适应模式下用字形外扩重算左右边界：外扩量通常大于固定模式，
             // 但不允许越出文字行自身的左右边界太多（避免刷到相邻文本框上）。
@@ -446,7 +450,6 @@ namespace Ink_Canvas.Helpers
                 return null;
             }
 
-            double centerY = ResolveEffectiveCenterY(bestLine, effectiveLineHeight, thickness);
             double top = centerY - thickness / 2.0;
 
             var rect = new Rect(left, top, right - left, thickness);

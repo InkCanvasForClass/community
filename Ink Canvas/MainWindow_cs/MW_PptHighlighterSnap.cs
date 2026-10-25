@@ -302,10 +302,16 @@ namespace Ink_Canvas
                 detail.Append($"[PptHighlightSnap] 第 {slide} 页文字行明细：");
                 foreach (var line in mapped)
                 {
+                    // ink 是本行的高亮条基准（字号 × 0.8）；box 是 PPT 报的行盒高。
+                    // 两者比例偏离 1 太多，说明这一页的行距或段前段后被算进了 BoundHeight，
+                    // 属于「行盒不可信」的情况 —— 算法已不依赖它，但日志留证据便于排查。
+                    double ink = line.GlyphInkHeight;
+                    double box = line.Rect.Height;
+                    double ratio = ink > 0 ? box / ink : 0;
                     detail.Append(
                         $" [{line.ShapeName} x{line.Rect.Left:F0}~{line.Rect.Right:F0} " +
                         $"y{line.Rect.Top:F0}~{line.Rect.Bottom:F0} " +
-                        $"h{line.Rect.Height:F1} c{line.GlyphCenterY:F1} r{line.GlyphHeightRatio:F3}]");
+                        $"box{box:F1} ink{ink:F1} box/ink{ratio:F2} c{line.GlyphCenterY:F1}]");
                 }
                 LogHelper.WriteLogToFile(detail.ToString(), LogHelper.LogType.Trace);
             }
@@ -441,6 +447,18 @@ namespace Ink_Canvas
                 result.GlyphHeightRatio = inkHeight > 0 && result.Lines[0].Height > 0
                     ? inkHeight / result.Lines[0].Height
                     : 0;
+
+                // 行盒高度 / 墨迹高度 的比值能直接暴露「BoundHeight 语义漂移」：
+                // 正常单倍行距约 1.2，双倍行距或含段前段后会到 2 以上。
+                // 只记一次，不逐行刷屏 —— 同一形状各行行距一致。
+                if (LogHelper.LogLevel == LogHelper.LogType.Trace && inkHeight > 0)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"[PptHighlightSnap] 形状 [{shape.Name}] 字号 {inkHeight / CjkGlyphInkPerEm:F1}磅 " +
+                        $"墨迹高 {inkHeight:F1} 行盒高 {result.Lines[0].Height:F1} " +
+                        $"box/ink {result.Lines[0].Height / inkHeight:F2} 行数 {result.Lines.Count}",
+                        LogHelper.LogType.Trace);
+                }
             }
 
             return result;
