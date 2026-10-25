@@ -50,7 +50,7 @@ dotnet build "InkCanvas.SettingsTreeView\InkCanvas.SettingsTreeView.csproj"
 | InkCanvas.Controls | `InkCanvas.Controls/InkCanvas.Controls.csproj` | net6.0-windows10.0.19041.0 | 全部 Any CPU |
 | InkCanvas.PluginSdk | `InkCanvas.PluginSdk/InkCanvas.PluginSdk.csproj` | net6.0-windows10.0.19041.0 | 全部 Any CPU |
 | InkCanvas.SettingsTreeView | `InkCanvas.SettingsTreeView/InkCanvas.SettingsTreeView.csproj` | net6.0-windows10.0.19041.0 | 全部 Any CPU |
-| InkCanvas.PptAgent.Contracts | `InkCanvas.PPTAgent.Contracts/InkCanvas.PptAgent.Contracts.csproj` | netstandard2.0 | 全部 Any CPU |
+| InkCanvas.PptAgent.Contracts | `InkCanvas.PPTAgent.Contracts/InkCanvas.PPTAgent.Contracts.csproj` | netstandard2.0 | 全部 Any CPU |
 | InkCanvas.IACoreHelper | `InkCanvas.IACoreHelper/InkCanvas.IACoreHelper.csproj` | net472 | **所有配置一律映射到 x86** |
 | InkCanvas.LiquidGlassMagHost | `InkCanvas.LiquidGlassMagHost/InkCanvas.LiquidGlassMagHost.csproj` | net6.0-windows10.0.19041.0 | 真·多平台：AnyCPU/ARM→x64，ARM64→ARM64，x86→x86 |
 
