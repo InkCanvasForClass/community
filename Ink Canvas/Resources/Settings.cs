@@ -1342,6 +1342,35 @@ namespace Ink_Canvas
         /// </summary>
         [JsonProperty("enableHighlighterSnapToText")]
         public bool EnableHighlighterSnapToText { get; set; } = false;
+
+        /// <summary>
+        /// 纠正时自动贴合文字大小：高亮条的厚度与长度随文字行自适应，而不是固定跟随荧光笔宽度。
+        /// </summary>
+        /// <remarks>
+        /// 字号较大时固定笔宽会显得「只包住一小条」，开启后按文字行的实际字形尺寸铺满。
+        /// </remarks>
+        [JsonProperty("highlighterSnapFitTextSize")]
+        public bool HighlighterSnapFitTextSize { get; set; } = true;
+
+        /// <summary>
+        /// 自动贴合时的纵向铺满系数（0.8 ~ 1.4）。
+        /// </summary>
+        /// <remarks>
+        /// 1.0 表示高亮条高度等于文字行的字形高度；由于中文行盒自带上下留白，
+        /// 默认取 1.15 让高亮块视觉上饱满地包住文字，又不至于糊到相邻行。
+        /// </remarks>
+        [JsonProperty("highlighterSnapTextFillRatio")]
+        public double HighlighterSnapTextFillRatio { get; set; } = 1.15;
+
+        /// <summary>
+        /// 自动贴合时的横向外扩系数（0 ~ 1.5 倍字号）。
+        /// </summary>
+        /// <remarks>
+        /// 中文标点右侧有大片留白，按文字行边界刷会显得没包住句号；
+        /// 默认按 0.15 倍行高外扩，把句读也覆盖进去。
+        /// </remarks>
+        [JsonProperty("highlighterSnapTextExtendRatio")]
+        public double HighlighterSnapTextExtendRatio { get; set; } = 0.15;
     }
 
     /// <summary>

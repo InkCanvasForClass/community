@@ -309,4 +309,37 @@
   <data name="HighlighterSnapHint" xml:space="preserve">
     <value>放映时用荧光笔书写，自动把笔迹规整成贴合文字的横向高亮条；画圈、画竖线等非横穿文字的笔迹不受影响</value>
   </data>
+  <data name="HighlighterSnapFitTextSize" xml:space="preserve">
+    <value>自动贴合文字大小</value>
+  </data>
+  <data name="HighlighterSnapFitTextSizeHint" xml:space="preserve">
+    <value>高亮条的粗细与长度随文字字号自适应，饱满包住整行文字；关闭后条的粗细改为跟随荧光笔宽度</value>
+  </data>
+  <data name="HighlighterSnapTuning" xml:space="preserve">
+    <value>贴合效果微调</value>
+  </data>
+  <data name="HighlighterSnapTuningHint" xml:space="preserve">
+    <value>觉得条偏薄或偏厚时在这里调，改动立即生效</value>
+  </data>
+  <data name="HighlighterSnapFillRatio" xml:space="preserve">
+    <value>纵向饱满度</value>
+  </data>
+  <data name="HighlighterSnapFillRatioHint" xml:space="preserve">
+    <value>1.00 恰好等于字形高度，越大条越厚。建议 1.10 ~ 1.25</value>
+  </data>
+  <data name="HighlighterSnapExtendRatio" xml:space="preserve">
+    <value>横向外扩</value>
+  </data>
+  <data name="HighlighterSnapExtendRatioHint" xml:space="preserve">
+    <value>条的首尾各超出笔迹多少，单位是字高倍数，用来把句末标点也覆盖进去</value>
+  </data>
+  <data name="HighlighterSnapReset" xml:space="preserve">
+    <value>恢复默认</value>
+  </data>
+  <data name="HighlighterSnapResetHint" xml:space="preserve">
+    <value>回到按中文字形实测得到的推荐值</value>
+  </data>
+  <data name="HighlighterSnapResetButton" xml:space="preserve">
+    <value>恢复默认值</value>
+  </data>
 </root>

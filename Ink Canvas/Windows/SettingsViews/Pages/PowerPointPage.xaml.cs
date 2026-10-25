@@ -29,6 +29,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void UpdateAllSliderTexts()
         {
+            UpdateSliderText(SliderHighlighterSnapFillRatio, TextHighlighterSnapFillRatio, "{0:0.00}");
+            UpdateSliderText(SliderHighlighterSnapExtendRatio, TextHighlighterSnapExtendRatio, "{0:0.00}");
         }
 
         private void UpdateSliderText(Slider slider, TextBlock textBlock, string format)
@@ -65,6 +67,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardShowCanvasAtNewSlideShow.IsOn = ppt.IsShowCanvasAtNewSlideShow;
             CardEnableSmartMode.IsOn = ppt.EnableSmartMode;
             CardEnableHighlighterSnap.IsOn = ppt.EnableHighlighterSnapToText;
+            CardHighlighterSnapFitTextSize.IsOn = ppt.HighlighterSnapFitTextSize;
+            SliderHighlighterSnapFillRatio.Value = Math.Max(
+                SliderHighlighterSnapFillRatio.Minimum,
+                Math.Min(SliderHighlighterSnapFillRatio.Maximum, ppt.HighlighterSnapTextFillRatio));
+            SliderHighlighterSnapExtendRatio.Value = Math.Max(
+                SliderHighlighterSnapExtendRatio.Minimum,
+                Math.Min(SliderHighlighterSnapExtendRatio.Maximum, ppt.HighlighterSnapTextExtendRatio));
+            UpdateHighlighterSnapDependentCards();
 
             CardEnableTwoFingerGestureInPresentationMode.IsOn = ppt.IsEnableTwoFingerGestureInPresentationMode;
             CardEnableFingerGestureSlideShowControl.IsOn = ppt.IsEnableFingerGestureSlideShowControl;
@@ -257,6 +267,62 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             SettingsManager.Settings.PowerPointSettings.EnableHighlighterSnapToText = CardEnableHighlighterSnap.IsOn;
             SettingsManager.SaveSettingsToFile();
+            UpdateHighlighterSnapDependentCards();
+        }
+
+        /// <summary>
+        /// 「自动贴合文字大小」开关。只有主开关打开时这项才可用，避免用户改了没生效。
+        /// </summary>
+        private void ToggleSwitchHighlighterSnapFitTextSize_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.PowerPointSettings.HighlighterSnapFitTextSize = CardHighlighterSnapFitTextSize.IsOn;
+            SettingsManager.SaveSettingsToFile();
+            UpdateHighlighterSnapDependentCards();
+        }
+
+        private void SliderHighlighterSnapFillRatio_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            UpdateSliderText(SliderHighlighterSnapFillRatio, TextHighlighterSnapFillRatio, "{0:0.00}");
+            if (!_isLoaded) return;
+            SettingsManager.Settings.PowerPointSettings.HighlighterSnapTextFillRatio = SliderHighlighterSnapFillRatio.Value;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void SliderHighlighterSnapExtendRatio_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            UpdateSliderText(SliderHighlighterSnapExtendRatio, TextHighlighterSnapExtendRatio, "{0:0.00}");
+            if (!_isLoaded) return;
+            SettingsManager.Settings.PowerPointSettings.HighlighterSnapTextExtendRatio = SliderHighlighterSnapExtendRatio.Value;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        /// <summary>
+        /// 恢复默认调参值：默认值是按中文字形实测算出来的，用户调乱后可一键回到可用状态。
+        /// </summary>
+        private void ButtonResetHighlighterSnapTuning_Click(object sender, RoutedEventArgs e)
+        {
+            SliderHighlighterSnapFillRatio.Value = 1.15;
+            SliderHighlighterSnapExtendRatio.Value = 0.15;
+
+            if (!_isLoaded) return;
+            SettingsManager.Settings.PowerPointSettings.HighlighterSnapTextFillRatio = 1.15;
+            SettingsManager.Settings.PowerPointSettings.HighlighterSnapTextExtendRatio = 0.15;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        /// <summary>
+        /// 根据主开关与自适应开关的当前状态，决定相关控件的可用性。
+        /// </summary>
+        private void UpdateHighlighterSnapDependentCards()
+        {
+            bool snapOn = CardEnableHighlighterSnap != null && CardEnableHighlighterSnap.IsOn;
+            if (CardHighlighterSnapFitTextSize != null)
+                CardHighlighterSnapFitTextSize.IsEnabled = snapOn;
+            if (ExpanderHighlighterSnapTuning != null)
+                ExpanderHighlighterSnapTuning.IsEnabled = snapOn
+                    && CardHighlighterSnapFitTextSize != null
+                    && CardHighlighterSnapFitTextSize.IsOn;
         }
 
         private void ToggleSwitchShowCanvasAtNewSlideShow_Toggled(object sender, RoutedEventArgs e)

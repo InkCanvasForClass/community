@@ -20,6 +20,15 @@ namespace Ink_Canvas.Helpers
         /// <summary>字形本身的估算纵向中心（用于修正基线漂移，非外接矩形中心）。</summary>
         public double GlyphCenterY { get; set; }
 
+        /// <summary>
+        /// 该行字形实际高度占行盒的比例；≤0 表示未知，用默认估值。
+        /// </summary>
+        /// <remarks>
+        /// 逐行携带而不是全局一个值：同一张幻灯片里大小标题字号往往差一倍，
+        /// 统一系数会让大字号那行明显偏细、小字号那行偏粗。
+        /// </remarks>
+        public double GlyphHeightRatio { get; set; }
+
         /// <summary>来源形状名称，仅用于日志定位。</summary>
         public string ShapeName { get; set; }
     }
@@ -60,6 +69,18 @@ namespace Ink_Canvas.Helpers
         private const double MaxSlantAngleDegrees = 45.0;
 
         /// <summary>
+        /// 中文行盒里「字形实际墨迹」的纵向占比的兜底估值。
+        /// </summary>
+        /// <remarks>
+        /// 实测中文字体（WPF BuildGeometry，100px 字号）墨迹高度占 Em：
+        /// 微软雅黑 0.983、黑体 0.934、宋体 0.930、等线 0.957、楷体 0.913。
+        /// 而 PPT 的文字行 BoundHeight 通常等于「字号 × 行距」，自带上下留白，
+        /// 因此字形在行盒内只占其中一部分。0.85 是取中偏保守的估值：
+        /// 略小会让条稍窄，绝不会糊到相邻行，是「宁可欠一点」的安全侧。
+        /// </remarks>
+        public const double DefaultGlyphHeightRatio = 0.85;
+
+        /// <summary>
         /// 对单条笔画做「纠正到文字行」处理。
         /// </summary>
         /// <param name="stroke">待处理的笔画；必须已经处于目标墨迹画布坐标系。</param>
@@ -73,6 +94,29 @@ namespace Ink_Canvas.Helpers
             IReadOnlyList<PptTextLineRect> lines,
             double highlighterWidth,
             bool isHighlighter,
+            out string reason)
+        {
+            return TrySnap(stroke, lines, highlighterWidth, isHighlighter, null, out reason);
+        }
+
+        /// <summary>
+        /// 对单条笔画做「纠正到文字行」处理，可选择自动贴合文字大小。
+        /// </summary>
+        /// <param name="stroke">待处理的笔画；必须已经处于目标墨迹画布坐标系。</param>
+        /// <param name="lines">当前幻灯片可用的文字行矩形集合（同一坐标系）。</param>
+        /// <param name="highlighterWidth">荧光笔宽度，作为未启用自适应时的条厚度。</param>
+        /// <param name="isHighlighter">该笔画是否为荧光笔笔迹。</param>
+        /// <param name="fitOptions">
+        /// 自动贴合文字大小的参数；传 <c>null</c> 表示关闭，条厚度回到跟随荧光笔宽度。
+        /// </param>
+        /// <param name="reason">输出参数：未纠正时给出可读原因，便于日志排查。</param>
+        /// <returns>纠正后的笔画；若不应纠正则返回 <c>null</c>。</returns>
+        public static Stroke TrySnap(
+            Stroke stroke,
+            IReadOnlyList<PptTextLineRect> lines,
+            double highlighterWidth,
+            bool isHighlighter,
+            PptTextFitOptions fitOptions,
             out string reason)
         {
             reason = null;
@@ -216,13 +260,58 @@ namespace Ink_Canvas.Helpers
                 return null;
             }
 
-            // 6) 高亮条厚度：默认与荧光笔宽度一致；文字行较矮时收敛到行高的 1.15 倍，
-            //    避免高亮块糊到相邻两行。
+            // 6) 高亮条尺寸。
+            //    自适应模式：按文字行的字形尺寸铺满，解决「字大条细、只包住一小条」的问题；
+            //    固定模式：沿用荧光笔宽度，字号大时条会明显偏细。
             double lineHeight = bestLine.Rect.Height;
-            double thickness = Math.Max(1.0, highlighterWidth);
-            if (lineHeight > 0)
-                thickness = Math.Min(thickness, lineHeight * 1.15);
-            thickness = Math.Max(1.0, Math.Min(thickness, bestLine.Rect.Height * 1.5));
+            double thickness;
+            double gestureExtend;
+
+            if (fitOptions != null)
+            {
+                // 字形在行盒内的实际高度。优先用该行自己算出的比例，
+                // 拿不到才退回调用方给的默认值 —— 大字号行用统一系数会明显偏细。
+                double glyphRatio = bestLine.GlyphHeightRatio > 0
+                    ? bestLine.GlyphHeightRatio
+                    : fitOptions.GlyphHeightRatio;
+                double glyphHeight = lineHeight * glyphRatio;
+                thickness = glyphHeight * fitOptions.FillRatio;
+
+                // 上下限兜底：至少能看见，也别超过行高的 1.5 倍。
+                thickness = Math.Max(1.5, thickness);
+                thickness = Math.Min(thickness, lineHeight * 1.5);
+
+                // 横向外扩按字号走（行高的主要成分就是字号），
+                // 中文标点右侧留白靠这一步才能覆盖到。
+                gestureExtend = fitOptions.ExtendRatio * glyphHeight;
+            }
+            else
+            {
+                thickness = Math.Max(1.0, highlighterWidth);
+                if (lineHeight > 0)
+                    thickness = Math.Min(thickness, lineHeight * 1.15);
+                thickness = Math.Max(1.0, Math.Min(thickness, lineHeight * 1.5));
+                gestureExtend = Math.Max(0, highlighterWidth) * 0.5;
+            }
+
+            // 自适应模式下用字形外扩重算左右边界：外扩量通常大于固定模式，
+            // 但不允许越出文字行自身的左右边界太多（避免刷到相邻文本框上）。
+            if (fitOptions != null)
+            {
+                double relaxedLeft = Math.Max(bestLine.Rect.Left - gestureExtend, gestureLeft - gestureExtend);
+                double relaxedRight = Math.Min(bestLine.Rect.Right + gestureExtend, gestureRight + gestureExtend);
+                if (relaxedRight - relaxedLeft >= 2)
+                {
+                    left = relaxedLeft;
+                    right = relaxedRight;
+                }
+            }
+
+            if (right - left < 2)
+            {
+                reason = "横向有效长度过短";
+                return null;
+            }
 
             double centerY = bestLine.GlyphCenterY;
             double top = centerY - thickness / 2.0;
@@ -425,6 +514,9 @@ namespace Ink_Canvas.Helpers
                     {
                         Rect = rect,
                         GlyphCenterY = glyph.Y,
+                        // 逐形状字形占比必须跟着换算走，否则自适应模式下会退回默认值，
+                        // 大字号行的条又会变细。
+                        GlyphHeightRatio = line.GlyphHeightRatio,
                         ShapeName = line.ShapeName
                     });
                 }
@@ -441,13 +533,34 @@ namespace Ink_Canvas.Helpers
         /// 从字形外接矩形推断「视觉上像一行字」的纵向中心。
         /// </summary>
         /// <remarks>
-        /// PPT 的文字行外接矩形包含行距上方的空白，直接取矩形中心会把高亮条抬高一截；
-        /// 实测中，字形实际占据的区域约在行盒的 0.5%~82% 之间，取其中心更接近用户直觉。
+        /// 先前这里用的是 0.16 + 0.66/2 这组西文行盒系数，导致中文场景下条整体偏上。
+        /// 改用中文字形实测分布重新推导：在「字号 = 1」的坐标系里，
+        /// 中文字迹从约上 0.10 延伸到下 0.98（微软雅黑例外，重心偏下），
+        /// 折算到行盒需先知道字形占行盒的比例 <paramref name="glyphHeightRatio"/>。
+        ///
+        /// 行盒上留白 ≈ (1 - 字形占比) × 行高 × 0.75（中文行距默认偏上对齐，
+        /// 上方留白少于下方），中心 = 上缘 + 字形高度 / 2。
         /// </remarks>
-        public static double EstimateGlyphCenterY(double lineTop, double lineHeight)
+        /// <param name="lineTop">行盒上缘。</param>
+        /// <param name="lineHeight">行盒高度。</param>
+        /// <param name="glyphHeightRatio">字形实际高度占行盒的比例；传 0 或负数则用默认估值。</param>
+        public static double EstimateGlyphCenterY(double lineTop, double lineHeight, double glyphHeightRatio = 0)
         {
             if (lineHeight <= 0) return lineTop;
-            return lineTop + lineHeight * 0.16 + lineHeight * 0.66 / 2.0;
+
+            double ratio = glyphHeightRatio;
+            if (ratio <= 0 || double.IsNaN(ratio) || double.IsInfinity(ratio))
+                ratio = DefaultGlyphHeightRatio;
+
+            // 限制在合理区间，防止异常字号把中心推到行外。
+            ratio = Math.Max(0.5, Math.Min(1.0, ratio));
+
+            double glyphHeight = lineHeight * ratio;
+            double leading = lineHeight - glyphHeight;
+            if (leading < 0) leading = 0;
+
+            // 中文行距的留白偏上：上方 40%，下方 60%。
+            return lineTop + leading * 0.4 + glyphHeight * 0.5;
         }
 
         /// <summary>
@@ -469,13 +582,19 @@ namespace Ink_Canvas.Helpers
 
                 if (shape.Lines != null && shape.Lines.Count > 0)
                 {
+                    // 同一文本框内各行字号一致，用该形状的字体比例统一估算，避免逐行抖动。
+                    double shapeRatio = shape.GlyphHeightRatio > 0
+                        ? shape.GlyphHeightRatio
+                        : DefaultGlyphHeightRatio;
+
                     foreach (var lineRect in shape.Lines)
                     {
                         if (lineRect.IsEmpty || lineRect.Width <= 0 || lineRect.Height <= 0) continue;
                         result.Add(new PptTextLineRect
                         {
                             Rect = lineRect,
-                            GlyphCenterY = EstimateGlyphCenterY(lineRect.Top, lineRect.Height),
+                            GlyphCenterY = EstimateGlyphCenterY(lineRect.Top, lineRect.Height, shapeRatio),
+                            GlyphHeightRatio = shape.GlyphHeightRatio,
                             ShapeName = shape.ShapeName
                         });
                     }
@@ -485,7 +604,10 @@ namespace Ink_Canvas.Helpers
                     result.Add(new PptTextLineRect
                     {
                         Rect = shape.ShapeRect,
+                        // 退化成整个文本框时行高已包含大量留白，字形中心不能再按行盒推算，
+                        // 直接用几何中心更稳。
                         GlyphCenterY = shape.ShapeRect.Top + shape.ShapeRect.Height / 2.0,
+                        GlyphHeightRatio = shape.GlyphHeightRatio,
                         ShapeName = shape.ShapeName
                     });
                 }
@@ -508,5 +630,46 @@ namespace Ink_Canvas.Helpers
 
         /// <summary>逐行文字外接矩形；为空表示无法逐行获取，将退化为 <see cref="ShapeRect"/>。</summary>
         public List<Rect> Lines { get; set; }
+
+        /// <summary>
+        /// 该形状字形实际高度占行盒的比例；≤0 表示未知，用 <see cref="PptHighlighterSnapper.DefaultGlyphHeightRatio"/> 兜底。
+        /// </summary>
+        /// <remarks>
+        /// 由「字号 × 中文字形占 Em 的比例」除以行盒高度得到。
+        /// 不同字号、不同行距下这个比例差别很大，是大字号场景「条太细」的根源，
+        /// 因此逐形状计算而不是全局写死。
+        /// </remarks>
+        public double GlyphHeightRatio { get; set; }
+    }
+
+    /// <summary>
+    /// 「自动贴合文字大小」的参数。
+    /// </summary>
+    /// <remarks>
+    /// 关闭该选项时给算法传 <c>null</c>，高亮条厚度回到跟随荧光笔宽度。
+    /// </remarks>
+    public sealed class PptTextFitOptions
+    {
+        /// <summary>字形高度占行盒的比例；≤0 时用默认估值。</summary>
+        public double GlyphHeightRatio { get; set; } = PptHighlighterSnapper.DefaultGlyphHeightRatio;
+
+        /// <summary>纵向铺满系数。1.0 = 恰好等于字形高度；&gt;1 会更饱满。</summary>
+        public double FillRatio { get; set; } = 1.15;
+
+        /// <summary>横向外扩量，单位是「字形高度」的倍数。</summary>
+        public double ExtendRatio { get; set; } = 0.15;
+
+        /// <summary>按设置值构造，并做区间夹紧，避免用户填出离谱数值。</summary>
+        public static PptTextFitOptions FromSettings(double fillRatio, double extendRatio)
+        {
+            if (double.IsNaN(fillRatio) || double.IsInfinity(fillRatio)) fillRatio = 1.15;
+            if (double.IsNaN(extendRatio) || double.IsInfinity(extendRatio)) extendRatio = 0.15;
+
+            return new PptTextFitOptions
+            {
+                FillRatio = Math.Max(0.8, Math.Min(1.4, fillRatio)),
+                ExtendRatio = Math.Max(0, Math.Min(1.5, extendRatio))
+            };
+        }
     }
 }

@@ -100,11 +100,22 @@ namespace Ink_Canvas
                 var lines = GetPptTextLineRectsForCanvas();
                 if (lines == null || lines.Count == 0) return false;
 
+                // 自动贴合文字大小：按文字行自身的字形尺寸决定条厚与长度，
+                // 解决大字号下「条又细又短、只包住一小条」的问题。
+                PptTextFitOptions fitOptions = null;
+                if (Settings.PowerPointSettings.HighlighterSnapFitTextSize)
+                {
+                    fitOptions = PptTextFitOptions.FromSettings(
+                        Settings.PowerPointSettings.HighlighterSnapTextFillRatio,
+                        Settings.PowerPointSettings.HighlighterSnapTextExtendRatio);
+                }
+
                 var snapped = PptHighlighterSnapper.TrySnap(
                     stroke,
                     lines,
                     Settings.Canvas.HighlighterWidth,
                     isHighlighterStroke,
+                    fitOptions,
                     out var reason);
 
                 if (snapped == null)
@@ -283,6 +294,22 @@ namespace Ink_Canvas
             _pptTextLineRectsHwnd = hwnd;
             if (!slideScreenRect.IsEmpty) _pptLastSlideScreenRect = slideScreenRect;
 
+            // 逐行几何数据只在 Trace 等级生效：实机调参（铺满系数、外扩系数）
+            // 只能靠这些数字判断，光看截图猜不出来，但默认日志不该被刷屏。
+            if (LogHelper.LogLevel == LogHelper.LogType.Trace && mapped.Count > 0)
+            {
+                var detail = new System.Text.StringBuilder();
+                detail.Append($"[PptHighlightSnap] 第 {slide} 页文字行明细：");
+                foreach (var line in mapped)
+                {
+                    detail.Append(
+                        $" [{line.ShapeName} x{line.Rect.Left:F0}~{line.Rect.Right:F0} " +
+                        $"y{line.Rect.Top:F0}~{line.Rect.Bottom:F0} " +
+                        $"h{line.Rect.Height:F1} c{line.GlyphCenterY:F1} r{line.GlyphHeightRatio:F3}]");
+                }
+                LogHelper.WriteLogToFile(detail.ToString(), LogHelper.LogType.Trace);
+            }
+
             LogHelper.WriteLogToFile(
                 $"[PptHighlightSnap] 第 {slide} 页载入 {mapped.Count} 行文字区域（原始 {linesInPoints.Count} 行）",
                 LogHelper.LogType.Info);
@@ -406,7 +433,61 @@ namespace Ink_Canvas
                 result.Lines.Clear();
             }
 
+            // 由字号推算字形占行盒的比例：这是「大字号条太细」的关键参数。
+            if (result.Lines.Count > 0)
+            {
+                result.GlyphHeightRatio = EstimateShapeGlyphRatio(shape, result.Lines[0].Height);
+            }
+
             return result;
+        }
+
+        /// <summary>
+        /// 中文字形实际高度占 Em 字号的典型比例。
+        /// </summary>
+        /// <remarks>
+        /// 实测（WPF BuildGeometry，100px 字号）：微软雅黑 0.983、黑体 0.934、
+        /// 宋体 0.930、等线 0.957、楷体 0.913。取 0.93 作为中文字形的代表值，
+        /// 对不出字体的场景误差在 5% 以内。
+        /// </remarks>
+        private const double CjkGlyphEmRatio = 0.93;
+
+        /// <summary>
+        /// 用形状的字号 + 单行行盒高度，估算字形实际高度占行盒的比例。
+        /// </summary>
+        /// <param name="shape">PPT 文本形状。</param>
+        /// <param name="lineHeightPoints">该形状单行行盒的高度（磅）。</param>
+        /// <returns>比例；无法读取字号时返回 0，交由算法层用默认估值。</returns>
+        /// <remarks>
+        /// 中文 PPT 的默认行距约 1.2 倍，此时比例 ≈ 0.93/1.2 ≈ 0.78；
+        /// 而单倍行距时比例接近 0.93。固定写死一个系数会导致大字号、紧行距下条明显偏细，
+        /// 所以这里逐形状算。
+        /// </remarks>
+        private static double EstimateShapeGlyphRatio(Microsoft.Office.Interop.PowerPoint.Shape shape, double lineHeightPoints)
+        {
+            if (lineHeightPoints <= 0) return 0;
+
+            float fontSize = 0;
+            try
+            {
+                // TextFrame2.TextRange.Font.Size 的单位就是磅，与 BoundHeight 一致，无需换算。
+                fontSize = shape.TextFrame2.TextRange.Font.Size;
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
+
+            if (fontSize <= 0 || float.IsNaN(fontSize)) return 0;
+
+            double glyphHeight = fontSize * CjkGlyphEmRatio;
+            double ratio = glyphHeight / lineHeightPoints;
+
+            // 行距极端时比例会失真，夹紧到可解释的区间。
+            if (ratio < 0.45) ratio = 0.45;
+            if (ratio > 1.05) ratio = 1.05;
+
+            return ratio;
         }
 
         #endregion

@@ -217,5 +217,27 @@ namespace Ink_Canvas.Properties
         public static string HighlighterSnap => ResourceManager.GetString(nameof(HighlighterSnap), _resourceCulture);
 
         public static string HighlighterSnapHint => ResourceManager.GetString(nameof(HighlighterSnapHint), _resourceCulture);
+
+        public static string HighlighterSnapFitTextSize => ResourceManager.GetString(nameof(HighlighterSnapFitTextSize), _resourceCulture);
+
+        public static string HighlighterSnapFitTextSizeHint => ResourceManager.GetString(nameof(HighlighterSnapFitTextSizeHint), _resourceCulture);
+
+        public static string HighlighterSnapTuning => ResourceManager.GetString(nameof(HighlighterSnapTuning), _resourceCulture);
+
+        public static string HighlighterSnapTuningHint => ResourceManager.GetString(nameof(HighlighterSnapTuningHint), _resourceCulture);
+
+        public static string HighlighterSnapFillRatio => ResourceManager.GetString(nameof(HighlighterSnapFillRatio), _resourceCulture);
+
+        public static string HighlighterSnapFillRatioHint => ResourceManager.GetString(nameof(HighlighterSnapFillRatioHint), _resourceCulture);
+
+        public static string HighlighterSnapExtendRatio => ResourceManager.GetString(nameof(HighlighterSnapExtendRatio), _resourceCulture);
+
+        public static string HighlighterSnapExtendRatioHint => ResourceManager.GetString(nameof(HighlighterSnapExtendRatioHint), _resourceCulture);
+
+        public static string HighlighterSnapReset => ResourceManager.GetString(nameof(HighlighterSnapReset), _resourceCulture);
+
+        public static string HighlighterSnapResetHint => ResourceManager.GetString(nameof(HighlighterSnapResetHint), _resourceCulture);
+
+        public static string HighlighterSnapResetButton => ResourceManager.GetString(nameof(HighlighterSnapResetButton), _resourceCulture);
     }
 }
