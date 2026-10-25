@@ -642,6 +642,8 @@ namespace Ink_Canvas
 
             LeftSidePanelForPPTNavigation?.SetShadow(enabled, size);
             RightSidePanelForPPTNavigation?.SetShadow(enabled, size);
+            LeftBottomPanelForPPTNavigation?.SetShadow(enabled, size);
+            RightBottomPanelForPPTNavigation?.SetShadow(enabled, size);
         }
 
         /// <summary>
