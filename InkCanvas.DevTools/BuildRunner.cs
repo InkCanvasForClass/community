@@ -76,10 +76,10 @@ namespace InkCanvas.DevTools
         {
             new ProjectDefinition(
                 "InkCanvasForClass（主程序）",
-                "",
+                "Ink Canvas",
                 true,
-                Path.Combine("Ink Canvas", "bin", "Debug", "AnyCPU", Tfm),
-                Path.Combine("Ink Canvas", "bin", "Release", "AnyCPU", Tfm, "publish"),
+                Path.Combine("bin", "Debug", "AnyCPU", Tfm),
+                Path.Combine("bin", "Release", "AnyCPU", Tfm, "publish"),
                 "InkCanvasForClass.exe"),
 
             new ProjectDefinition(
