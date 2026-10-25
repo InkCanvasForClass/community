@@ -302,12 +302,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         /// </summary>
         private void ButtonResetHighlighterSnapTuning_Click(object sender, RoutedEventArgs e)
         {
-            SliderHighlighterSnapFillRatio.Value = 1.15;
-            SliderHighlighterSnapExtendRatio.Value = 0.15;
+            SliderHighlighterSnapFillRatio.Value = 0.95;
+            SliderHighlighterSnapExtendRatio.Value = 0.12;
 
             if (!_isLoaded) return;
-            SettingsManager.Settings.PowerPointSettings.HighlighterSnapTextFillRatio = 1.15;
-            SettingsManager.Settings.PowerPointSettings.HighlighterSnapTextExtendRatio = 0.15;
+            SettingsManager.Settings.PowerPointSettings.HighlighterSnapTextFillRatio = 0.95;
+            SettingsManager.Settings.PowerPointSettings.HighlighterSnapTextExtendRatio = 0.12;
             SettingsManager.SaveSettingsToFile();
         }
 

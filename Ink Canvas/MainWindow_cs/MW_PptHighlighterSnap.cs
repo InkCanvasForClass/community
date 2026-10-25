@@ -433,44 +433,43 @@ namespace Ink_Canvas
                 result.Lines.Clear();
             }
 
-            // 由字号推算字形占行盒的比例：这是「大字号条太细」的关键参数。
+            // 由字号推算字形墨迹高度与占比：这是判断行盒是否可信、以及条该多厚的基准。
             if (result.Lines.Count > 0)
             {
-                result.GlyphHeightRatio = EstimateShapeGlyphRatio(shape, result.Lines[0].Height);
+                double inkHeight = EstimateShapeGlyphInkHeight(shape);
+                result.GlyphInkHeight = inkHeight;
+                result.GlyphHeightRatio = inkHeight > 0 && result.Lines[0].Height > 0
+                    ? inkHeight / result.Lines[0].Height
+                    : 0;
             }
 
             return result;
         }
 
         /// <summary>
-        /// 中文字形实际高度占 Em 字号的典型比例。
+        /// 中文字形实际墨迹高度占 em 字号的比例。
         /// </summary>
         /// <remarks>
-        /// 实测（WPF BuildGeometry，100px 字号）：微软雅黑 0.983、黑体 0.934、
-        /// 宋体 0.930、等线 0.957、楷体 0.913。取 0.93 作为中文字形的代表值，
-        /// 对不出字体的场景误差在 5% 以内。
+        /// 实测（fontprobe，WPF <c>FormattedText.BuildGeometry()</c>，100px 字号）：
+        /// 微软雅黑 0.728、黑体 0.809、宋体 0.802、等线 0.896、楷体 0.778。
+        ///
+        /// 注意这比「汉字的字形撑满 em 方框」的直觉小得多：汉字实际只占 em 的
+        /// 七成到九成，其余是字体设计时故意留的字面边距。先前误用「占 em 0.93」
+        /// 的假设是错的，那个值量的是「墨迹相对自身高度的比例」，不是相对 em。
         /// </remarks>
-        private const double CjkGlyphEmRatio = 0.93;
+        private const double CjkGlyphInkPerEm = 0.80;
 
         /// <summary>
-        /// 用形状的字号 + 单行行盒高度，估算字形实际高度占行盒的比例。
+        /// 由形状的字号推算其字形墨迹高度（磅）。
         /// </summary>
         /// <param name="shape">PPT 文本形状。</param>
-        /// <param name="lineHeightPoints">该形状单行行盒的高度（磅）。</param>
-        /// <returns>比例；无法读取字号时返回 0，交由算法层用默认估值。</returns>
-        /// <remarks>
-        /// 中文 PPT 的默认行距约 1.2 倍，此时比例 ≈ 0.93/1.2 ≈ 0.78；
-        /// 而单倍行距时比例接近 0.93。固定写死一个系数会导致大字号、紧行距下条明显偏细，
-        /// 所以这里逐形状算。
-        /// </remarks>
-        private static double EstimateShapeGlyphRatio(Microsoft.Office.Interop.PowerPoint.Shape shape, double lineHeightPoints)
+        /// <returns>墨迹高度（磅）；读不到字号时返回 0。</returns>
+        private static double EstimateShapeGlyphInkHeight(Microsoft.Office.Interop.PowerPoint.Shape shape)
         {
-            if (lineHeightPoints <= 0) return 0;
-
             float fontSize = 0;
             try
             {
-                // TextFrame2.TextRange.Font.Size 的单位就是磅，与 BoundHeight 一致，无需换算。
+                // TextFrame2.TextRange.Font.Size 单位就是磅，与 BoundHeight 一致，无需换算。
                 fontSize = shape.TextFrame2.TextRange.Font.Size;
             }
             catch (Exception)
@@ -480,14 +479,7 @@ namespace Ink_Canvas
 
             if (fontSize <= 0 || float.IsNaN(fontSize)) return 0;
 
-            double glyphHeight = fontSize * CjkGlyphEmRatio;
-            double ratio = glyphHeight / lineHeightPoints;
-
-            // 行距极端时比例会失真，夹紧到可解释的区间。
-            if (ratio < 0.45) ratio = 0.45;
-            if (ratio > 1.05) ratio = 1.05;
-
-            return ratio;
+            return fontSize * CjkGlyphInkPerEm;
         }
 
         #endregion

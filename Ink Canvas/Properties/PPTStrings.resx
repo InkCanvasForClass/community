@@ -325,7 +325,7 @@
     <value>纵向饱满度</value>
   </data>
   <data name="HighlighterSnapFillRatioHint" xml:space="preserve">
-    <value>1.00 恰好等于字形高度，越大条越厚。建议 1.10 ~ 1.25</value>
+    <value>条厚相对文字行高度的比例，1.00 等于整行高。文字本身在行高里只占约 0.78，所以 0.95 左右最饱满</value>
   </data>
   <data name="HighlighterSnapExtendRatio" xml:space="preserve">
     <value>横向外扩</value>

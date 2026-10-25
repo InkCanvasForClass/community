@@ -94,8 +94,8 @@
                                                VerticalAlignment="Center" FontFamily="Consolas"
                                                TextAlignment="Right" MinWidth="36"/>
                                     <Slider x:Name="SliderHighlighterSnapFillRatio"
-                                            Minimum="0.8" Maximum="1.4" Width="200"
-                                            IsSnapToTickEnabled="True" TickFrequency="0.05" Value="1.15"
+                                            Minimum="0.6" Maximum="1.4" Width="200"
+                                            IsSnapToTickEnabled="True" TickFrequency="0.05" Value="0.95"
                                             TickPlacement="None"
                                             ValueChanged="SliderHighlighterSnapFillRatio_ValueChanged" />
                                 </ikw:SimpleStackPanel>
@@ -109,7 +109,7 @@
                                                TextAlignment="Right" MinWidth="36"/>
                                     <Slider x:Name="SliderHighlighterSnapExtendRatio"
                                             Minimum="0" Maximum="1" Width="200"
-                                            IsSnapToTickEnabled="True" TickFrequency="0.05" Value="0.15"
+                                            IsSnapToTickEnabled="True" TickFrequency="0.05" Value="0.12"
                                             TickPlacement="None"
                                             ValueChanged="SliderHighlighterSnapExtendRatio_ValueChanged" />
                                 </ikw:SimpleStackPanel>

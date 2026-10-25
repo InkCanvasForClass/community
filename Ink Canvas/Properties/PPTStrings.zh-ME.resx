@@ -325,7 +325,7 @@
     <value>吃得多饱</value>
   </data>
   <data name="HighlighterSnapFillRatioHint" xml:space="preserve">
-    <value>1.00 刚好贴着字形，调大就变胖，1.10 ~ 1.25 比较好看</value>
+    <value>条有多厚，1.00 就顶满整行。字本身只占行里的七八成，所以 0.95 上下最饱满</value>
   </data>
   <data name="HighlighterSnapExtendRatio" xml:space="preserve">
     <value>两头多伸一点</value>

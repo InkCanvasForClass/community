@@ -1353,24 +1353,25 @@ namespace Ink_Canvas
         public bool HighlighterSnapFitTextSize { get; set; } = true;
 
         /// <summary>
-        /// 自动贴合时的纵向铺满系数（0.8 ~ 1.4）。
+        /// 自动贴合时的纵向铺满系数（0.6 ~ 1.4），条厚 = 行盒高 × 该值。
         /// </summary>
         /// <remarks>
-        /// 1.0 表示高亮条高度等于文字行的字形高度；由于中文行盒自带上下留白，
-        /// 默认取 1.15 让高亮块视觉上饱满地包住文字，又不至于糊到相邻行。
+        /// 实测中文字形在行盒内只占约 0.78（五款字体，1.2 倍行距），
+        /// 因此取 0.95 就能饱满包住字形，同时不会糊到相邻行。
+        /// 早期误取 1.15（当时把基准当成了字形高度），实际偏大。
         /// </remarks>
         [JsonProperty("highlighterSnapTextFillRatio")]
-        public double HighlighterSnapTextFillRatio { get; set; } = 1.15;
+        public double HighlighterSnapTextFillRatio { get; set; } = 0.95;
 
         /// <summary>
-        /// 自动贴合时的横向外扩系数（0 ~ 1.5 倍字号）。
+        /// 自动贴合时的横向外扩系数，单位是「行盒高度」的倍数。
         /// </summary>
         /// <remarks>
         /// 中文标点右侧有大片留白，按文字行边界刷会显得没包住句号；
-        /// 默认按 0.15 倍行高外扩，把句读也覆盖进去。
+        /// 默认按 0.12 倍行高外扩，把句读也覆盖进去。
         /// </remarks>
         [JsonProperty("highlighterSnapTextExtendRatio")]
-        public double HighlighterSnapTextExtendRatio { get; set; } = 0.15;
+        public double HighlighterSnapTextExtendRatio { get; set; } = 0.12;
     }
 
     /// <summary>

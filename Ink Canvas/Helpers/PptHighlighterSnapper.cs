@@ -26,8 +26,21 @@ namespace Ink_Canvas.Helpers
         /// <remarks>
         /// 逐行携带而不是全局一个值：同一张幻灯片里大小标题字号往往差一倍，
         /// 统一系数会让大字号那行明显偏细、小字号那行偏粗。
+        ///
+        /// 现已不参与条厚计算（条厚改由行盒实测高度推导），仅作诊断信息保留。
         /// </remarks>
         public double GlyphHeightRatio { get; set; }
+
+        /// <summary>
+        /// 由字号推算出的字形墨迹高度（画布单位）；≤0 表示未知。
+        /// </summary>
+        /// <remarks>
+        /// 用来给行盒做交叉校验。PPT 的 <c>BoundHeight</c> 在不同版本、不同行距、
+        /// 不同占位符类型下语义并不统一（有时是「字号」，有时是「字号 × 行距」），
+        /// 单看它无法判断是否可信；而「字号 × 中文字形占 em 的比例」是稳定的物理量，
+        /// 用它反推行盒是否偏小，比猜一个系数可靠。
+        /// </remarks>
+        public double GlyphInkHeight { get; set; }
 
         /// <summary>来源形状名称，仅用于日志定位。</summary>
         public string ShapeName { get; set; }
@@ -69,14 +82,125 @@ namespace Ink_Canvas.Helpers
         private const double MaxSlantAngleDegrees = 45.0;
 
         /// <summary>
+        /// 用字号推算的墨迹高度校验行盒，必要时把行盒高度修正到可信值。
+        /// </summary>
+        /// <remarks>
+        /// 背景：PPT 的 <c>TextRange2.BoundHeight</c> 并非在所有情况下都等于「字号 × 行距」。
+        /// 单倍行距时它常常就约等于字号，而 <c>BoundTop</c> 仍按含行距的排版盒给，
+        /// 结果就是「盒顶偏上、盒高偏小」—— 高亮条压住字的上半截，下缘明显露出。
+        ///
+        /// 判据用稳定物理量：中文字形墨迹高度 ≈ 字号 × <see cref="CjkInkToEmRatio"/>。
+        /// 若行盒明显比墨迹还矮，说明行盒没含行距，此时按「行距 1.2 倍」补足到 字号 × 1.2。
+        /// 这个修正只在异常情况下触发，正常行盒原样保留。
+        /// </remarks>
+        private static double ResolveEffectiveLineHeight(PptTextLineRect line)
+        {
+            double boxHeight = line.Rect.Height;
+            if (boxHeight <= 0) return boxHeight;
+
+            double inkHeight = line.GlyphInkHeight;
+            if (inkHeight <= 0 || double.IsNaN(inkHeight) || double.IsInfinity(inkHeight))
+                return boxHeight;   // 读不到字号，不做修正
+
+            // 行盒比墨迹还矮（或几乎等高）→ 未含行距，按 1.2 倍行距补齐。
+            // 阈值取 1.08：留一点余量，避免单倍行距的正常盒子被误判。
+            if (boxHeight < inkHeight * 1.08)
+            {
+                double expanded = inkHeight * NormalLineSpacing;
+                // 仅当补足后仍落在合理区间才采纳，避免字号读数异常时把条撑爆。
+                if (expanded > boxHeight && expanded <= boxHeight * 2.0)
+                    return expanded;
+            }
+
+            return boxHeight;
+        }
+
+        /// <summary>
+        /// 原始（未修正）行盒的几何中心，作为横向命中判定的参考点。
+        /// </summary>
+        /// <remarks>
+        /// 命中判定必须用一个与「行盒是否被低报」无关的量，否则一行被修正后
+        /// 参考中心会跟着下移，同一笔在修正前后可能得出不同的命中结论。
+        /// </remarks>
+        public static double RawBoxCenterY(PptTextLineRect line)
+        {
+            return line.Rect.Top + line.Rect.Height * GlyphCenterInLineBox;
+        }
+
+        /// <summary>
+        /// 计算最终的纵向中心；行盒被修正过时，中心也要跟着落到修正后的位置。
+        /// </summary>
+        /// <remarks>
+        /// 行盒被修正意味着「盒顶是可信的，但盒高被低报」。
+        /// <para>
+        /// 两个锚点必须对齐：横向命中判定用的是 <see cref="RawBoxCenterY"/>（原始行盒几何中心，
+        /// 也就是 <see cref="GlyphCenterY"/> 的语义），因此修正后的中心必须与它同源 ——
+        /// 同样取「盒顶 + 盒高 × <see cref="GlyphCenterInLineBox"/>」，只是换成修正后的盒高。
+        /// </para>
+        /// <para>
+        /// 不能假设「盒顶代表字形顶部、盒子向下撑高」。实测（见用户截图：条高 68 已能覆盖
+        /// 71 的字形，却整体偏上 18.5px）表明 BoundTop 是含上半个行距的排版盒顶，
+        /// 不是墨迹顶。按墨迹顶对齐会让条整体再上移约半个行距，反而更糟。
+        /// </para>
+        /// </remarks>
+        private static double ResolveEffectiveCenterY(PptTextLineRect line, double effectiveLineHeight, double thickness)
+        {
+            double boxHeight = line.Rect.Height;
+
+            // 行盒未被修正：中心就是行盒几何中心。
+            if (Math.Abs(effectiveLineHeight - boxHeight) < 0.01)
+                return RawBoxCenterY(line);
+
+            // 行盒被撑高：盒顶与本行的几何关系不变，中心随新盒高下移。
+            return line.Rect.Top + effectiveLineHeight * GlyphCenterInLineBox;        }
+
+        /// <summary>
+        /// 中文字形墨迹高度占 em 字号的典型比例。
+        /// </summary>
+        /// <remarks>
+        /// 实测（fontprobe，WPF BuildGeometry，100px 字号）墨迹高度占 em：
+        /// 微软雅黑 0.728、黑体 0.809、宋体 0.802、等线 0.896、楷体 0.778。
+        /// 注意这比「字形撑满 em 框」的直觉小不少 —— 汉字墨迹实际只占 em 的
+        /// 七成到九成，其余是字身故意留的字面边距。
+        /// 取 0.80 作代表值，用于判断行盒是否可信。
+        /// </remarks>
+        private const double CjkInkToEmRatio = 0.80;
+
+        /// <summary>PPT 单倍行距下，行盒高度相对字号的倍数。</summary>
+        private const double NormalLineSpacing = 1.2;
+
+        /// <summary>
+        /// 行盒里「字形墨迹中心」的相对位置（相对行盒高度的 0~1）。
+        /// </summary>
+        /// <remarks>
+        /// 0.50 = 几何中心。依据实测（fontprobe，五款中文字体，行距 1.0）：
+        /// 墨迹中线分别为 0.537 / 0.502 / 0.499 / 0.476 / 0.505，均值 0.504。
+        /// 中文墨迹几乎撑满 em 框，不存在「ascent 以上大量内部留白」的情况，
+        /// 因此不存在需要补偿的系统性上偏。
+        /// </remarks>
+        public const double GlyphCenterInLineBox = 0.50;
+
+        /// <summary>
+        /// 中文 PPT 常见行距（约 1.2 倍）下，字形墨迹占行盒的典型比例。
+        /// </summary>
+        /// <remarks>
+        /// 0.80（墨迹高占 em 的比例，五款字体实测 0.73~0.90）× 1/1.2 ≈ 0.67，
+        /// 实测 1.2 倍行盒下占比 0.74~0.80。此处取 0.78 作为参考值，
+        /// 仅用于日志诊断，不参与条厚计算 —— 条厚改由行盒实测高度推导。
+        /// </remarks>
+        public const double GlyphTypicalRatio = 0.78;
+
+        /// <summary>
         /// 中文行盒里「字形实际墨迹」的纵向占比的兜底估值。
         /// </summary>
         /// <remarks>
         /// 实测中文字体（WPF BuildGeometry，100px 字号）墨迹高度占 Em：
         /// 微软雅黑 0.983、黑体 0.934、宋体 0.930、等线 0.957、楷体 0.913。
         /// 而 PPT 的文字行 BoundHeight 通常等于「字号 × 行距」，自带上下留白，
-        /// 因此字形在行盒内只占其中一部分。0.85 是取中偏保守的估值：
-        /// 略小会让条稍窄，绝不会糊到相邻行，是「宁可欠一点」的安全侧。
+        /// 因此字形在行盒内只占其中一部分。0.85 是取中偏保守的估值。
+        ///
+        /// 注意：条厚与纵坐标已不再依赖该值（改由行盒实测尺寸推导），
+        /// 它只作为行距异常时的微调参考。
         /// </remarks>
         public const double DefaultGlyphHeightRatio = 0.85;
 
@@ -192,7 +316,7 @@ namespace Ink_Canvas.Helpers
                 double overlapRatio = overlap / Math.Max(1.0, Math.Min(bounds.Width, line.Rect.Width));
                 if (overlapRatio < MinHorizontalOverlapRatio) continue;
 
-                double drift = Math.Abs(bounds.Top + bounds.Height / 2.0 - line.GlyphCenterY);
+                double drift = Math.Abs(bounds.Top + bounds.Height / 2.0 - RawBoxCenterY(line));
                 if (drift > Math.Max(1.0, line.Rect.Height) * MaxCenterDriftRatio) continue;
 
                 if (overlap > bestOverlap)
@@ -261,29 +385,38 @@ namespace Ink_Canvas.Helpers
             }
 
             // 6) 高亮条尺寸。
-            //    自适应模式：按文字行的字形尺寸铺满，解决「字大条细、只包住一小条」的问题；
+            //    自适应模式：按文字行自身的实际高度铺满，解决「字大条细、只包住一小条」的问题；
             //    固定模式：沿用荧光笔宽度，字号大时条会明显偏细。
             double lineHeight = bestLine.Rect.Height;
             double thickness;
             double gestureExtend;
 
+            // 实际参与排版的行高。固定模式直接就是行盒高度；
+            // 自适应模式下会被 ResolveEffectiveLineHeight 自校准（见下）。
+            double effectiveLineHeight = lineHeight;
+
             if (fitOptions != null)
             {
-                // 字形在行盒内的实际高度。优先用该行自己算出的比例，
-                // 拿不到才退回调用方给的默认值 —— 大字号行用统一系数会明显偏细。
-                double glyphRatio = bestLine.GlyphHeightRatio > 0
-                    ? bestLine.GlyphHeightRatio
-                    : fitOptions.GlyphHeightRatio;
-                double glyphHeight = lineHeight * glyphRatio;
-                thickness = glyphHeight * fitOptions.FillRatio;
+                // 先用字号推算的墨迹高度校验行盒：PPT 的 BoundHeight 在部分版本/行距/占位符下
+                // 只等于字号而不含行距，导致行盒偏小、中心偏上（条压住字的上半截）。
+                // 墨迹高度是稳定物理量，用它反推才靠得住。
+                effectiveLineHeight = ResolveEffectiveLineHeight(bestLine);
+
+                // 条厚直接由「行盒高度 × 铺满系数」决定。
+                //
+                // 曾经这里算的是 lineHeight × glyphRatio，而 glyphRatio 又是
+                // fontSize × 0.93 ÷ lineHeight —— 代入后 lineHeight 被约掉，
+                // 结果等于 fontSize × 0.93，行盒尺寸完全没参与计算。
+                // 一旦 Font.Size 读数偏小（主题字号、占位符缩放、混排都会导致），
+                // 条就整体偏小且偏上。改用行盒这个「看得见、量得准」的量作基准。
+                thickness = effectiveLineHeight * fitOptions.FillRatio;
 
                 // 上下限兜底：至少能看见，也别超过行高的 1.5 倍。
                 thickness = Math.Max(1.5, thickness);
-                thickness = Math.Min(thickness, lineHeight * 1.5);
+                thickness = Math.Min(thickness, effectiveLineHeight * fitOptions.MaxThicknessRatio);
 
-                // 横向外扩按字号走（行高的主要成分就是字号），
-                // 中文标点右侧留白靠这一步才能覆盖到。
-                gestureExtend = fitOptions.ExtendRatio * glyphHeight;
+                // 横向外扩同样按行盒高走，中文标点右侧留白靠这一步才能覆盖到。
+                gestureExtend = fitOptions.ExtendRatio * effectiveLineHeight;
             }
             else
             {
@@ -313,7 +446,7 @@ namespace Ink_Canvas.Helpers
                 return null;
             }
 
-            double centerY = bestLine.GlyphCenterY;
+            double centerY = ResolveEffectiveCenterY(bestLine, effectiveLineHeight, thickness);
             double top = centerY - thickness / 2.0;
 
             var rect = new Rect(left, top, right - left, thickness);
@@ -517,6 +650,8 @@ namespace Ink_Canvas.Helpers
                         // 逐形状字形占比必须跟着换算走，否则自适应模式下会退回默认值，
                         // 大字号行的条又会变细。
                         GlyphHeightRatio = line.GlyphHeightRatio,
+                        // 墨迹高度是按磅给出的，换到画布坐标要走同样的纵向缩放。
+                        GlyphInkHeight = line.GlyphInkHeight * (rect.Height / Math.Max(1e-6, line.Rect.Height)),
                         ShapeName = line.ShapeName
                     });
                 }
@@ -530,37 +665,35 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 从字形外接矩形推断「视觉上像一行字」的纵向中心。
+        /// 从行盒推断「视觉上像一行字」的纵向中心。
         /// </summary>
         /// <remarks>
-        /// 先前这里用的是 0.16 + 0.66/2 这组西文行盒系数，导致中文场景下条整体偏上。
-        /// 改用中文字形实测分布重新推导：在「字号 = 1」的坐标系里，
-        /// 中文字迹从约上 0.10 延伸到下 0.98（微软雅黑例外，重心偏下），
-        /// 折算到行盒需先知道字形占行盒的比例 <paramref name="glyphHeightRatio"/>。
+        /// 直接用行盒的几何中心 —— 这是量出来的，不是推的。
         ///
-        /// 行盒上留白 ≈ (1 - 字形占比) × 行高 × 0.75（中文行距默认偏上对齐，
-        /// 上方留白少于下方），中心 = 上缘 + 字形高度 / 2。
+        /// 实测方法（fontprobe，WPF <c>FormattedText.BuildGeometry()</c>，100px 字号，
+        /// 行距 1.0）：汉字墨迹在行盒内纵向占据的区间与中线如下
+        /// <list type="bullet">
+        /// <item>微软雅黑 0.173~0.901，中线 0.537</item>
+        /// <item>黑体 0.097~0.906，中线 0.502</item>
+        /// <item>宋体 0.098~0.900，中线 0.499</item>
+        /// <item>等线 0.028~0.924，中线 0.476</item>
+        /// <item>楷体 0.116~0.894，中线 0.505</item>
+        /// </list>
+        /// 五款字体中线均值 0.504，即墨迹中心与行盒几何中心重合，没有系统性偏移。
+        ///
+        /// 曾经这里写过 0.71，依据是「ascent 以上有内部留白所以重心偏下」的推断 ——
+        /// 实测证明这个推断是错的：中文字体的墨迹几乎撑满 em 框，
+        /// 上缘就在 ascent 附近，不存在显著的上部内部留白。
+        /// 用推断值会把整条高亮推到字形上方，正是「条偏上、字从下面露出来」的成因。
         /// </remarks>
         /// <param name="lineTop">行盒上缘。</param>
         /// <param name="lineHeight">行盒高度。</param>
-        /// <param name="glyphHeightRatio">字形实际高度占行盒的比例；传 0 或负数则用默认估值。</param>
+        /// <param name="glyphHeightRatio">保留参数以兼容旧调用；不再参与计算。</param>
         public static double EstimateGlyphCenterY(double lineTop, double lineHeight, double glyphHeightRatio = 0)
         {
             if (lineHeight <= 0) return lineTop;
 
-            double ratio = glyphHeightRatio;
-            if (ratio <= 0 || double.IsNaN(ratio) || double.IsInfinity(ratio))
-                ratio = DefaultGlyphHeightRatio;
-
-            // 限制在合理区间，防止异常字号把中心推到行外。
-            ratio = Math.Max(0.5, Math.Min(1.0, ratio));
-
-            double glyphHeight = lineHeight * ratio;
-            double leading = lineHeight - glyphHeight;
-            if (leading < 0) leading = 0;
-
-            // 中文行距的留白偏上：上方 40%，下方 60%。
-            return lineTop + leading * 0.4 + glyphHeight * 0.5;
+            return lineTop + lineHeight * GlyphCenterInLineBox;
         }
 
         /// <summary>
@@ -595,6 +728,7 @@ namespace Ink_Canvas.Helpers
                             Rect = lineRect,
                             GlyphCenterY = EstimateGlyphCenterY(lineRect.Top, lineRect.Height, shapeRatio),
                             GlyphHeightRatio = shape.GlyphHeightRatio,
+                            GlyphInkHeight = shape.GlyphInkHeight,
                             ShapeName = shape.ShapeName
                         });
                     }
@@ -608,6 +742,7 @@ namespace Ink_Canvas.Helpers
                         // 直接用几何中心更稳。
                         GlyphCenterY = shape.ShapeRect.Top + shape.ShapeRect.Height / 2.0,
                         GlyphHeightRatio = shape.GlyphHeightRatio,
+                        GlyphInkHeight = shape.GlyphInkHeight,
                         ShapeName = shape.ShapeName
                     });
                 }
@@ -632,14 +767,22 @@ namespace Ink_Canvas.Helpers
         public List<Rect> Lines { get; set; }
 
         /// <summary>
-        /// 该形状字形实际高度占行盒的比例；≤0 表示未知，用 <see cref="PptHighlighterSnapper.DefaultGlyphHeightRatio"/> 兜底。
+        /// 该形状字形实际高度占行盒的比例；≤0 表示未知。
         /// </summary>
         /// <remarks>
-        /// 由「字号 × 中文字形占 Em 的比例」除以行盒高度得到。
-        /// 不同字号、不同行距下这个比例差别很大，是大字号场景「条太细」的根源，
-        /// 因此逐形状计算而不是全局写死。
+        /// 由「字号 × 中文字形占 em 的比例」除以行盒高度得到。
+        /// 现主要用于诊断，不参与条厚计算。
         /// </remarks>
         public double GlyphHeightRatio { get; set; }
+
+        /// <summary>
+        /// 由字号推算的字形墨迹高度（与 <see cref="Lines"/> 同一坐标系，单位同为磅）。
+        /// </summary>
+        /// <remarks>
+        /// 用于交叉校验行盒高度是否可信：<c>BoundHeight</c> 在部分情况下只等于字号，
+        /// 而墨迹高度 ≈ 字号 × 0.8 是稳定物理量，据此可判断盒高是否被低报。
+        /// </remarks>
+        public double GlyphInkHeight { get; set; }
     }
 
     /// <summary>
@@ -650,24 +793,33 @@ namespace Ink_Canvas.Helpers
     /// </remarks>
     public sealed class PptTextFitOptions
     {
-        /// <summary>字形高度占行盒的比例；≤0 时用默认估值。</summary>
+        /// <summary>字形高度占行盒的比例；保留以兼容旧设置，不再参与条厚计算。</summary>
         public double GlyphHeightRatio { get; set; } = PptHighlighterSnapper.DefaultGlyphHeightRatio;
 
-        /// <summary>纵向铺满系数。1.0 = 恰好等于字形高度；&gt;1 会更饱满。</summary>
-        public double FillRatio { get; set; } = 1.15;
+        /// <summary>
+        /// 纵向铺满系数：条厚 = 行盒高 × 该系数。
+        /// </summary>
+        /// <remarks>
+        /// 1.0 = 与行盒等高。中文行盒自带上下留白，字形在盒内只占约 0.78，
+        /// 因此取略小于 1 就能饱满包住字形又不会糊到相邻行。
+        /// </remarks>
+        public double FillRatio { get; set; } = 0.95;
 
-        /// <summary>横向外扩量，单位是「字形高度」的倍数。</summary>
-        public double ExtendRatio { get; set; } = 0.15;
+        /// <summary>条厚上限相对行盒高的倍数，防止异常行距把条撑到糊住邻行。</summary>
+        public double MaxThicknessRatio { get; set; } = 1.5;
+
+        /// <summary>横向外扩量，单位是「行盒高度」的倍数。</summary>
+        public double ExtendRatio { get; set; } = 0.12;
 
         /// <summary>按设置值构造，并做区间夹紧，避免用户填出离谱数值。</summary>
         public static PptTextFitOptions FromSettings(double fillRatio, double extendRatio)
         {
-            if (double.IsNaN(fillRatio) || double.IsInfinity(fillRatio)) fillRatio = 1.15;
-            if (double.IsNaN(extendRatio) || double.IsInfinity(extendRatio)) extendRatio = 0.15;
+            if (double.IsNaN(fillRatio) || double.IsInfinity(fillRatio)) fillRatio = 0.95;
+            if (double.IsNaN(extendRatio) || double.IsInfinity(extendRatio)) extendRatio = 0.12;
 
             return new PptTextFitOptions
             {
-                FillRatio = Math.Max(0.8, Math.Min(1.4, fillRatio)),
+                FillRatio = Math.Max(0.6, Math.Min(1.4, fillRatio)),
                 ExtendRatio = Math.Max(0, Math.Min(1.5, extendRatio))
             };
         }

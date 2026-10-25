@@ -325,7 +325,7 @@
     <value>Vertical fill</value>
   </data>
   <data name="HighlighterSnapFillRatioHint" xml:space="preserve">
-    <value>1.00 equals the glyph height; larger means a thicker bar. 1.10 ~ 1.25 works well</value>
+    <value>Bar thickness relative to the line height; 1.00 equals the full line. Glyphs occupy only about 0.78 of it, so around 0.95 looks fullest</value>
   </data>
   <data name="HighlighterSnapExtendRatio" xml:space="preserve">
     <value>Horizontal extension</value>
