@@ -8,6 +8,7 @@
     <UseWPF>true</UseWPF>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
+    <NoWarn>$(NoWarn);NETSDK1138</NoWarn>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <Configurations>Debug;Release</Configurations>
     <Platforms>AnyCPU;x64;x86</Platforms>

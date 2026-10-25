@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,13 +32,13 @@ namespace InkCanvas.DevTools
         /// <summary>是否产出可执行文件（false 表示只产出 dll）。</summary>
         public bool IsExecutable { get; }
 
-        /// <summary>Debug 构建产物目录（相对项目目录）。</summary>
+        /// <summary>Debug 产物搜索根目录（相对项目目录，不含目标框架层）。</summary>
         public string DebugOutputDirectory { get; }
 
-        /// <summary>Release 构建产物目录（相对项目目录）。</summary>
+        /// <summary>Release 产物搜索根目录（相对项目目录，不含目标框架层）。</summary>
         public string ReleaseOutputDirectory { get; }
 
-        /// <summary>Publish 产物目录（相对项目目录）。</summary>
+        /// <summary>Publish 产物搜索根目录（相对项目目录，实际产物位于其下 publish 子目录）。</summary>
         public string PublishOutputDirectory { get; }
 
         /// <summary>可执行文件名。</summary>
@@ -71,10 +72,10 @@ namespace InkCanvas.DevTools
         /// <summary>仓库根目录（community），即解决方案所在目录。</summary>
         public string RepositoryRoot { get; }
 
-        private const string Tfm = "net10.0-windows10.0.19041.0";
-
         /// <summary>
         /// 可选项目列表（均使用 dotnet build 可构建的 SDK 风格项目）。
+        /// 输出目录只写到配置/平台层，目标框架目录（net6.0 / net10.0 ...）在运行时自动查找，
+        /// 以便同一份代码在 net6 / net10 分支都能正确定位产物。
         /// </summary>
         public static IReadOnlyList<ProjectDefinition> Projects { get; } = new[]
         {
@@ -82,9 +83,9 @@ namespace InkCanvas.DevTools
                 "InkCanvasForClass（主程序）",
                 "Ink Canvas",
                 true,
-                Path.Combine("bin", "Debug", "AnyCPU", Tfm),
-                Path.Combine("bin", "Release", "AnyCPU", Tfm),
-                Path.Combine("bin", "Release", "AnyCPU", Tfm, "publish"),
+                Path.Combine("bin", "Debug", "AnyCPU"),
+                Path.Combine("bin", "Release", "AnyCPU"),
+                Path.Combine("bin", "Release", "AnyCPU"),
                 "InkCanvasForClass.exe"),
 
             new ProjectDefinition(
@@ -118,18 +119,18 @@ namespace InkCanvas.DevTools
                 "InkCanvas.SettingsTreeView",
                 "InkCanvas.SettingsTreeView",
                 true,
-                Path.Combine("bin", "Debug", Tfm),
-                Path.Combine("bin", "Release", Tfm),
-                Path.Combine("bin", "Release", Tfm, "publish"),
+                Path.Combine("bin", "Debug"),
+                Path.Combine("bin", "Release"),
+                Path.Combine("bin", "Release"),
                 "InkCanvas.SettingsTreeView.exe"),
 
             new ProjectDefinition(
                 "InkCanvas.LiquidGlassMagHost",
                 "InkCanvas.LiquidGlassMagHost",
                 true,
-                Path.Combine("bin", "Debug", Tfm),
-                Path.Combine("bin", "Release", Tfm),
-                Path.Combine("bin", "Release", Tfm, "publish"),
+                Path.Combine("bin", "Debug"),
+                Path.Combine("bin", "Release"),
+                Path.Combine("bin", "Release"),
                 "InkCanvas.LiquidGlassMagHost.exe")
         };
 
@@ -166,7 +167,8 @@ namespace InkCanvas.DevTools
         }
 
         /// <summary>
-        /// 获取构建产物（exe）的绝对路径。仅对可执行项目有效。
+        /// 查找构建产物（exe）的绝对路径。仅对可执行项目有效；找不到时返回 null。
+        /// 目标框架目录名按实际产物动态匹配，避免写死 net6.0 / net10.0。
         /// </summary>
         public string GetExecutablePath(ProjectDefinition project, BuildMode mode)
         {
@@ -189,7 +191,20 @@ namespace InkCanvas.DevTools
                     throw new ArgumentOutOfRangeException(nameof(mode));
             }
 
-            return Path.Combine(RepositoryRoot, project.ProjectDirectory, relativeDir, project.ExecutableName);
+            string baseDir = Path.Combine(RepositoryRoot, project.ProjectDirectory, relativeDir);
+            if (!Directory.Exists(baseDir))
+                return null;
+
+            var candidates = Directory
+                .GetFiles(baseDir, project.ExecutableName, SearchOption.AllDirectories)
+                .Where(p =>
+                {
+                    bool inPublish = p.IndexOf("\\publish\\", StringComparison.OrdinalIgnoreCase) >= 0;
+                    return mode == BuildMode.Publish ? inPublish : !inPublish;
+                })
+                .OrderByDescending(File.GetLastWriteTimeUtc);
+
+            return candidates.FirstOrDefault();
         }
 
         /// <summary>
@@ -281,13 +296,9 @@ namespace InkCanvas.DevTools
 
             if (string.IsNullOrEmpty(exePath))
             {
-                message = $"项目 {project.DisplayName} 只输出 DLL，没有可启动的可执行文件。";
-                return false;
-            }
-
-            if (!File.Exists(exePath))
-            {
-                message = $"未找到可执行文件：{exePath}";
+                message = project.IsExecutable
+                    ? $"未找到 {project.DisplayName} 的可执行文件，请先编译。"
+                    : $"项目 {project.DisplayName} 只输出 DLL，没有可启动的可执行文件。";
                 return false;
             }
 
