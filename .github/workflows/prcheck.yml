@@ -70,6 +70,10 @@ jobs:
       - name: Build the Solution
         run: msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Debug" /p:GitFlow="$GITFLOW" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
 
+      # 测试项目已加入 sln；restore 已在前面步骤以 --locked-mode 完成（测试项目无 lock 文件，不受 locked-mode 约束）
+      - name: Run Tests
+        run: dotnet test Tests/InkCanvasForClass.Tests/InkCanvasForClass.Tests.csproj -c Debug
+
       - name: Build VSTO Add-in
         shell: pwsh
         run: |
