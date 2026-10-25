@@ -708,9 +708,7 @@ namespace Ink_Canvas
         {
             if (eraserOverlayCanvas != null)
             {
-                eraserOverlayCanvas.ReleaseMouseCapture();
-                eraserOverlayCanvas.ReleaseStylusCapture();
-                eraserOverlayCanvas.ReleaseAllTouchCaptures();
+                InputCaptureHelper.ReleaseOwnedCaptures(eraserOverlayCanvas);
                 eraserOverlayCanvas.IsHitTestVisible = false;
                 eraserOverlayCanvas.Visibility = Visibility.Collapsed;
             }
