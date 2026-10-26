@@ -15,6 +15,12 @@ namespace Ink_Canvas.Controls
         BottomRight
     }
 
+    public enum SelectionOverlayMode
+    {
+        Element,
+        Stroke
+    }
+
     public class ImageResizeDeltaEventArgs : EventArgs
     {
         public ImageResizeCorner Corner { get; }
@@ -125,6 +131,19 @@ namespace Ink_Canvas.Controls
         /// Position overlay so its logical rect (width × height) is centered at centerCanvas,
         /// then rotated by rotationAngleDegrees around that center to match the target element.
         /// </summary>
+        public void SetMode(SelectionOverlayMode mode)
+        {
+            bool isElementMode = mode == SelectionOverlayMode.Element;
+
+            OverlayRoot.Background = isElementMode ? Brushes.Transparent : null;
+            MoveSurface.IsHitTestVisible = isElementMode;
+            FrameBorder.Visibility = isElementMode ? Visibility.Visible : Visibility.Collapsed;
+            TopLeftHandle.Visibility = isElementMode ? Visibility.Visible : Visibility.Collapsed;
+            TopRightHandle.Visibility = isElementMode ? Visibility.Visible : Visibility.Collapsed;
+            BottomLeftHandle.Visibility = isElementMode ? Visibility.Visible : Visibility.Collapsed;
+            BottomRightHandle.Visibility = isElementMode ? Visibility.Visible : Visibility.Collapsed;
+        }
+
         public void UpdateFrame(Point centerCanvas, double width, double height, double rotationAngleDegrees)
         {
             if (width <= 0 || height <= 0) return;

@@ -386,10 +386,13 @@ namespace Ink_Canvas.Helpers
                 sb.Children.Add(fadeOutAnimation);
                 sb.Children.Add(slideAnimation);
 
-                sb.Completed += (s, e) =>
+                EventHandler completedHandler = null;
+                completedHandler = (s, e) =>
                 {
+                    sb.Completed -= completedHandler;  // 解除订阅，释放 lambda 闭包
                     element.Visibility = Visibility.Collapsed;
                 };
+                sb.Completed += completedHandler;
 
                 target.RenderTransform = new TranslateTransform();
                 sb.Begin((FrameworkElement)target);
@@ -416,10 +419,13 @@ namespace Ink_Canvas.Helpers
 
             sb.Children.Add(fadeOutAnimation);
 
-            sb.Completed += (s, e) =>
+            EventHandler completedHandler = null;
+            completedHandler = (s, e) =>
             {
+                sb.Completed -= completedHandler;  // 解除订阅，释放 lambda 闭包
                 element.Visibility = Visibility.Collapsed;
             };
+            sb.Completed += completedHandler;
 
             sb.Begin((FrameworkElement)element);
         }
@@ -521,12 +527,15 @@ namespace Ink_Canvas.Helpers
                 sb.Children.Add(fadeOutAnimation);
                 sb.Children.Add(slideAnimation);
 
-                sb.Completed += (s, e) =>
+                EventHandler completedHandler = null;
+                completedHandler = (s, e) =>
                 {
+                    sb.Completed -= completedHandler;  // 解除订阅，释放 lambda 闭包
                     popup.IsOpen = false;
                     child.Opacity = targetOpacity;
                     child.RenderTransform = new TranslateTransform();
                 };
+                sb.Completed += completedHandler;
 
                 child.RenderTransform = new TranslateTransform();
                 sb.Begin(child);

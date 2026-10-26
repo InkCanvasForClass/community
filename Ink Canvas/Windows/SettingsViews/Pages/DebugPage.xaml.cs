@@ -1,6 +1,7 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
+using System.Threading.Tasks;
 using System.Windows;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using Page = iNKORE.UI.WPF.Modern.Controls.Page;
@@ -69,7 +70,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void BtnTestCrash_Click(object sender, RoutedEventArgs e)
         {
-            var result = MessageBox.Show(
+            var result = MessageBoxHelper.Show(this,
                 "确定要触发一次模拟崩溃吗？\n\n应用将立即退出并尝试自动重启。",
                 "崩溃测试确认",
                 MessageBoxButton.YesNo,
@@ -82,7 +83,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void BtnTestHeartbeatTimeout_Click(object sender, RoutedEventArgs e)
         {
-            var result = MessageBox.Show(
+            var result = MessageBoxHelper.Show(this,
                 "确定要停止心跳计时器吗？\n\n约10秒后守护检查将检测到心跳超时并触发重启。",
                 "心跳超时测试确认",
                 MessageBoxButton.YesNo,
@@ -96,7 +97,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             StartupCount.Reset();
             LogHelper.WriteLogToFile("[Debug] 熔断计数器已手动重置", LogHelper.LogType.Warning);
-            MessageBox.Show("熔断计数器已重置为 0。", "重置完成", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBoxHelper.Show(this, "熔断计数器已重置为 0。", "重置完成", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         // Issue #546 排查辅助:输出详细内存占用清单到 Logs 目录并写一行摘要到 LogHelper。
@@ -125,12 +126,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         }
 
         // Issue #546 排查辅助:强制 GC 一次,记录前后 Working Set。不可滥用,仅用于诊断。
-        private void BtnForceGC_Click(object sender, RoutedEventArgs e)
+        private async void BtnForceGC_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 BtnForceGC.IsEnabled = false;
-                var summary = MemoryBreakdownHelper.ForceFullGc();
+                var summary = await Task.Run(MemoryBreakdownHelper.ForceFullGc);
                 LogHelper.WriteLogToFile($"[MemoryBreakdown] 强制 GC 触发 - {summary}", LogHelper.LogType.Info);
             }
             catch (Exception ex)

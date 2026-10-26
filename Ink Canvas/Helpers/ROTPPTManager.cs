@@ -68,6 +68,21 @@ namespace Ink_Canvas.Helpers
         private DateTime _nextReconnectAttemptUtc = DateTime.MinValue;
         #endregion
 
+        #region Throttled diagnostics
+        private static int _diagExceptionCount;
+
+        /// <summary>
+        /// 高频路径（500ms 轮询循环 / 窗口枚举回调 / 连续翻页）用的节流日志。
+        /// 坏设备下每轮都会抛，直接写 Info 会瞬间刷爆 5MB 日志并触发 LogHelper 清空整个 Logs 目录。
+        /// </summary>
+        private static void LogCallbackException(string what, Exception ex)
+        {
+            var n = Interlocked.Increment(ref _diagExceptionCount);
+            if (n == 1 || n % 100 == 0)
+                LogHelper.WriteLogToFile($"[PPT] {what} 异常（累计 {n} 次）: {ex.Message}", LogHelper.LogType.Info);
+        }
+        #endregion
+
         #region Constructor & Initialization
         public ROTPPTManager()
         {
@@ -318,7 +333,10 @@ namespace Ink_Canvas.Helpers
                                 {
                                     activeSlideShowWindow = activePresentation.SlideShowWindow;
                                 }
-                                catch { }
+                                catch (Exception ex)
+                                {
+                                    LogCallbackException("轮询中读取 activePresentation.SlideShowWindow 失败", ex);
+                                }
 
                                 if (activeSlideShowWindow != null)
                                 {
@@ -744,8 +762,9 @@ namespace Ink_Canvas.Helpers
             {
                 var hr = (uint)comEx.HResult;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[PPT] 连接后补发 SlideShowBegin 时访问 SlideShowWindows 失败: {ex.Message}", LogHelper.LogType.Info);
             }
             finally
             {
@@ -787,14 +806,18 @@ namespace Ink_Canvas.Helpers
                             app.PresentationBeforeClose -= new EApplication_PresentationBeforeCloseEventHandler(OnPresentationBeforeClose);
                         }
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
+                        LogHelper.WriteLogToFile($"[PPT] 解绑 COM 事件（SlideShowNextSlide/Begin/End/PresentationBeforeClose）失败: {ex.Message}", LogHelper.LogType.Info);
                     }
 
                     _bindingEvents = false;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[PPT] UnbindEvents 重置事件绑定标记失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         private static bool IsObjectNull(object comObject)
@@ -895,7 +918,10 @@ namespace Ink_Canvas.Helpers
                     Marshal.ReleaseComObject(comObject);
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogCallbackException("安全释放 COM 对象（无名称重载）失败", ex);
+            }
         }
 
         private void SafeReleaseComObject(object comObject, string objectName)
@@ -970,7 +996,10 @@ namespace Ink_Canvas.Helpers
                             refCount = Marshal.ReleaseComObject(comObject);
                         }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[PPT] 终态释放回退为循环 ReleaseComObject 失败（{objectName}）: {ex.Message}", LogHelper.LogType.Info);
+                    }
                 }
             }
             catch (InvalidComObjectException)
@@ -1085,8 +1114,9 @@ namespace Ink_Canvas.Helpers
                                                 CurrentSlide = viewObj.Slide;
                                             }
                                         }
-                                        catch (Exception)
+                                        catch (Exception ex)
                                         {
+                                            LogCallbackException("演示中通过 _pptSlideShowWindow.View.Slide 读取当前页失败", ex);
                                         }
                                     }
                                     else
@@ -1203,7 +1233,10 @@ namespace Ink_Canvas.Helpers
                         _pptActivePresentation = PPTApplication.ActivePresentation;
                         _updateTime = DateTime.Now;
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[PPT] PresentationOpen 时读取 ActivePresentation 失败: {ex.Message}", LogHelper.LogType.Info);
+                    }
                 }
 
                 UpdateCurrentPresentationInfo();
@@ -1243,8 +1276,9 @@ namespace Ink_Canvas.Helpers
                             app.PresentationBeforeClose -= new EApplication_PresentationBeforeCloseEventHandler(OnPresentationBeforeClose);
                         }
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
+                        LogHelper.WriteLogToFile($"[PPT] PresentationBeforeClose 时解绑 COM 事件失败: {ex.Message}", LogHelper.LogType.Info);
                     }
 
                     _bindingEvents = false;
@@ -1524,7 +1558,10 @@ namespace Ink_Canvas.Helpers
                                 {
                                     sswObj.Activate();
                                 }
-                                catch { }
+                                catch (Exception ex)
+                                {
+                                    LogCallbackException("翻到下一页前激活放映窗口 sswObj.Activate() 失败", ex);
+                                }
                                 try
                                 {
                                     object view = sswObj.View;
@@ -1534,7 +1571,10 @@ namespace Ink_Canvas.Helpers
                                         viewObj.Next();
                                     }
                                 }
-                                catch { }
+                                catch (Exception ex)
+                                {
+                                    LogCallbackException("调用 viewObj.Next() 翻到下一页失败", ex);
+                                }
                                 SafeReleaseComObject(slideShowWindow);
                             }
                             SafeReleaseComObject(slideShowWindows);
@@ -1590,7 +1630,10 @@ namespace Ink_Canvas.Helpers
                                 {
                                     sswObj.Activate();
                                 }
-                                catch { }
+                                catch (Exception ex)
+                                {
+                                    LogCallbackException("翻到上一页前激活放映窗口 sswObj.Activate() 失败", ex);
+                                }
                                 try
                                 {
                                     object view = sswObj.View;
@@ -1600,7 +1643,10 @@ namespace Ink_Canvas.Helpers
                                         viewObj.Previous();
                                     }
                                 }
-                                catch { }
+                                catch (Exception ex)
+                                {
+                                    LogCallbackException("调用 viewObj.Previous() 翻到上一页失败", ex);
+                                }
                                 SafeReleaseComObject(slideShowWindow);
                             }
                             SafeReleaseComObject(slideShowWindows);
@@ -2388,7 +2434,10 @@ namespace Ink_Canvas.Helpers
                             }
                         }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        LogCallbackException("EnumWindows 回调中读取单个窗口信息失败", ex);
+                    }
                     return true;
                 }, IntPtr.Zero);
 
@@ -2526,19 +2575,23 @@ namespace Ink_Canvas.Helpers
                 // 确保清理状态
                 if (CurrentSlide != null && Marshal.IsComObject(CurrentSlide))
                 {
-                    try { Marshal.ReleaseComObject(CurrentSlide); } catch { }
+                    try { Marshal.ReleaseComObject(CurrentSlide); }
+                    catch (Exception ex) { LogHelper.WriteLogToFile($"[PPT] 结束WPS进程后释放 CurrentSlide 失败: {ex.Message}", LogHelper.LogType.Info); }
                 }
                 if (CurrentSlides != null && Marshal.IsComObject(CurrentSlides))
                 {
-                    try { Marshal.ReleaseComObject(CurrentSlides); } catch { }
+                    try { Marshal.ReleaseComObject(CurrentSlides); }
+                    catch (Exception ex) { LogHelper.WriteLogToFile($"[PPT] 结束WPS进程后释放 CurrentSlides 失败: {ex.Message}", LogHelper.LogType.Info); }
                 }
                 if (CurrentPresentation != null && Marshal.IsComObject(CurrentPresentation))
                 {
-                    try { Marshal.ReleaseComObject(CurrentPresentation); } catch { }
+                    try { Marshal.ReleaseComObject(CurrentPresentation); }
+                    catch (Exception ex) { LogHelper.WriteLogToFile($"[PPT] 结束WPS进程后释放 CurrentPresentation 失败: {ex.Message}", LogHelper.LogType.Info); }
                 }
                 if (PPTApplication != null && Marshal.IsComObject(PPTApplication))
                 {
-                    try { Marshal.ReleaseComObject(PPTApplication); } catch { }
+                    try { Marshal.ReleaseComObject(PPTApplication); }
+                    catch (Exception ex) { LogHelper.WriteLogToFile($"[PPT] 结束WPS进程后释放 PPTApplication 失败: {ex.Message}", LogHelper.LogType.Info); }
                 }
 
                 CurrentSlide = null;
@@ -2699,7 +2752,10 @@ namespace Ink_Canvas.Helpers
                 var proc = Process.GetProcessById((int)processId);
                 windowInfo.ProcessName = proc.ProcessName.ToLower();
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[PPT] GetWindowInfo 取进程名失败（pid={processId}，进程可能已退出）: {ex.Message}", LogHelper.LogType.Info);
+            }
 
             return windowInfo;
         }
@@ -2914,8 +2970,9 @@ namespace Ink_Canvas.Helpers
                         ret = GetPPTHwndWin32(fullName, appName);
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    LogHelper.WriteLogToFile($"[PPT] GetPPTHwnd 备用路径读取 pres.FullName/PPTApplication.Name 失败: {ex.Message}", LogHelper.LogType.Info);
                 }
             }
 
@@ -2950,13 +3007,15 @@ namespace Ink_Canvas.Helpers
                         int hwndVal = ssw.HWND;
                         hwnd = new IntPtr(hwndVal);
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
+                        LogHelper.WriteLogToFile($"[PPT] GetPPTHwndFromSlideShowWindow 走 dynamic 读 HWND 失败: {ex.Message}", LogHelper.LogType.Info);
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[PPT] GetPPTHwndFromSlideShowWindow 强类型转换或读取 HWND 失败: {ex.Message}", LogHelper.LogType.Info);
             }
 
             return hwnd;

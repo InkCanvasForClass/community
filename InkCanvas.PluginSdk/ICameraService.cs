@@ -61,8 +61,11 @@ namespace Ink_Canvas.Plugins
     /// </summary>
     public sealed class PluginResolutionInfo
     {
+        /// <summary>分辨率宽度（像素）。</summary>
         public int Width { get; set; }
+        /// <summary>分辨率高度（像素）。</summary>
         public int Height { get; set; }
+        /// <summary>帧率（FPS）。</summary>
         public int FrameRate { get; set; }
     }
 }

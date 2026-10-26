@@ -358,6 +358,7 @@ namespace Ink_Canvas.Windows
             }
 
             DialogResult = true;
+            LogHelper.WriteLogToFile($"[Oobe] 用户选择预设方案完成向导: {presetWindow.SelectedPreset}", LogHelper.LogType.Info);
             Close();
         }
 
@@ -367,6 +368,7 @@ namespace Ink_Canvas.Windows
             {
                 ApplySelection();
                 DialogResult = true;
+                LogHelper.WriteLogToFile("[Oobe] 首次启动向导已完成", LogHelper.LogType.Info);
                 Close();
                 return;
             }

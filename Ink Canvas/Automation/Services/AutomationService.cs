@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Ink_Canvas.Helpers;
 using Ink_Canvas.WorkflowAutomation.Abstractions;
 using Ink_Canvas.WorkflowAutomation.Models;
 using Newtonsoft.Json;
@@ -127,8 +128,9 @@ namespace Ink_Canvas.WorkflowAutomation.Services
                     var json = File.ReadAllText(CurrentConfigPath);
                     Workflows = JsonConvert.DeserializeObject<ObservableCollection<Workflow>>(json) ?? new ObservableCollection<Workflow>();
                 }
-                catch
+                catch (Exception ex)
                 {
+                    LogHelper.WriteLogToFile($"[Automation] 读取并反序列化配置失败，已回退为空工作流列表: {ex.Message}", LogHelper.LogType.Info);
                     Workflows = new ObservableCollection<Workflow>();
                 }
             }
@@ -143,6 +145,9 @@ namespace Ink_Canvas.WorkflowAutomation.Services
                 LoadWorkflow(workflow);
             }
             Workflows.CollectionChanged += WorkflowsOnCollectionChanged;
+            LogHelper.WriteLogToFile(
+                $"[Automation] 配置已加载: {CurrentConfig}, 工作流 {Workflows.Count} 个",
+                LogHelper.LogType.Info);
         }
 
         /// <summary>
@@ -155,9 +160,10 @@ namespace Ink_Canvas.WorkflowAutomation.Services
                 var json = JsonConvert.SerializeObject(Workflows, Formatting.Indented);
                 File.WriteAllText(CurrentConfigPath, json);
             }
-            catch
+            catch (Exception ex)
             {
                 // 忽略保存失败
+                LogHelper.WriteLogToFile($"[Automation] 配置保存失败 [{note}]: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
 
@@ -261,8 +267,9 @@ namespace Ink_Canvas.WorkflowAutomation.Services
                         settingsReal = jToken.ToObject(triggerInfo.SettingsType);
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
+                    LogHelper.WriteLogToFile($"[Automation] 加载触发器 \"{trigger.Id}\" 的设置反序列化失败，已回退为默认设置: {ex.Message}", LogHelper.LogType.Info);
                     settingsReal = Activator.CreateInstance(triggerInfo.SettingsType);
                 }
 
@@ -288,9 +295,10 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             {
                 triggerInstance.Loaded();
             }
-            catch
+            catch (Exception ex)
             {
                 // 触发器加载失败不影响其他
+                LogHelper.WriteLogToFile($"[Automation] 加载触发器 \"{trigger.Id}\" 的 Loaded() 失败，该触发器不生效: {ex.Message}", LogHelper.LogType.Info);
             }
 
             return;
@@ -319,7 +327,10 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             {
                 trigger.TriggerInstance.UnLoaded();
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Automation] 卸载触发器 \"{trigger.Id}\" 的 UnLoaded() 失败: {ex.Message}", LogHelper.LogType.Info);
+            }
 
             trigger.TriggerInstance.Triggered -= TriggerTriggered;
             trigger.TriggerInstance.TriggeredRecover -= TriggerTriggeredRecover;
@@ -345,6 +356,9 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             }
 
             ActionService.Invoke(workflow.ActionSet);
+            LogHelper.WriteLogToFile(
+                $"[Automation] 触发器已执行工作流: 触发器 {workflow.Triggers?.Count ?? 0} 个, 动作 {workflow.ActionSet?.Actions?.Count ?? 0} 个",
+                LogHelper.LogType.Info);
             SaveConfig("TriggerTriggered");
         }
 

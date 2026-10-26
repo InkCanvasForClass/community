@@ -176,7 +176,10 @@
                         <!-- LayoutTransform 用于旋转：旋转 90/270 时 WPF 自动重新布局（宽高交换），
                              避免画面被裁剪；缩放/位移仍走 RenderTransform -->
                         <helpers:CapturableVideoCaptureElement.LayoutTransform>
-                            <RotateTransform x:Name="VideoPresenterFullCanvasRotation" Angle="0" />
+                            <TransformGroup>
+                                <ScaleTransform x:Name="VideoPresenterFullCanvasMirror" ScaleX="1" ScaleY="1" />
+                                <RotateTransform x:Name="VideoPresenterFullCanvasRotation" Angle="0" />
+                            </TransformGroup>
                         </helpers:CapturableVideoCaptureElement.LayoutTransform>
                         <helpers:CapturableVideoCaptureElement.RenderTransform>
                             <TransformGroup>
@@ -186,21 +189,26 @@
                         </helpers:CapturableVideoCaptureElement.RenderTransform>
                     </helpers:CapturableVideoCaptureElement>
                     <!-- 拍照后冻结画面：覆盖在 VideoCaptureElement 之上，显示拍照的照片，
-                         让用户在照片上批注。LayoutTransform/RenderTransform 与 VideoCaptureElement 同步。 -->
-                    <Image x:Name="VideoPresenterFrozenFrameImage"
+                         让用户在照片上批注。用 FillImage（重写 MeasureOverride 返回 availableSize）
+                         让照片像 VideoCaptureElement 一样填满容器，使 LayoutTransform 旋转、
+                         RenderTransform 缩放/平移、墨迹旋转中心都和实时画面走完全相同的管线。 -->
+                    <helpers:FillImage x:Name="VideoPresenterFrozenFrameImage"
                            Stretch="Uniform"
                            RenderTransformOrigin="0,0"
                            Visibility="Collapsed">
-                        <Image.LayoutTransform>
-                            <RotateTransform x:Name="VideoPresenterFrozenFrameRotation" Angle="0" />
-                        </Image.LayoutTransform>
-                        <Image.RenderTransform>
+                        <helpers:FillImage.LayoutTransform>
+                            <TransformGroup>
+                                <ScaleTransform x:Name="VideoPresenterFrozenFrameMirror" ScaleX="1" ScaleY="1" />
+                                <RotateTransform x:Name="VideoPresenterFrozenFrameRotation" Angle="0" />
+                            </TransformGroup>
+                        </helpers:FillImage.LayoutTransform>
+                        <helpers:FillImage.RenderTransform>
                             <TransformGroup>
                                 <ScaleTransform x:Name="VideoPresenterFrozenFrameScale" ScaleX="1" ScaleY="1" />
                                 <TranslateTransform x:Name="VideoPresenterFrozenFrameTranslate" X="0" Y="0" />
                             </TransformGroup>
-                        </Image.RenderTransform>
-                    </Image>
+                        </helpers:FillImage.RenderTransform>
+                    </helpers:FillImage>
                     <!-- 没找到摄像头时的占位文字 -->
                     <TextBlock x:Name="VideoPresenterSearchingText"
                                HorizontalAlignment="Center"
@@ -208,6 +216,10 @@
                                FontSize="24"
                                Foreground="#CCCCCC"
                                Text="正在查找展台设备..." />
+                    <!-- A4 纸实时识别框覆盖层：仅当矫正开关开启时显示，不拦截鼠标/触摸事件 -->
+                    <Canvas x:Name="PaperDetectOverlayCanvas"
+                            IsHitTestVisible="False"
+                            Visibility="Collapsed" />
                 </Grid>
             </Grid>
         </Grid>
@@ -256,32 +268,99 @@
             <!-- 边缘扩展画布提示按钮（书写贴近边缘时浮现）。
                  用 Popup 实现，确保永远在最顶层且不被 InkCanvasGridForInkReplay 的兄弟节点
                  （如 GridInkCanvasSelectionCover）遮挡命中测试。PlacementTarget 设为 inkCanvas，
-                 Placement=RelativePoint 让 HorizontalOffset/VerticalOffset 直接对应画布坐标。 -->
+                 Placement=RelativePoint 让 HorizontalOffset/VerticalOffset 直接对应画布坐标。
+                 按钮贴边停靠（Fluent 胶囊样式、Fade 入场动画），由 ShowEdgeExpandHint
+                 计算位置并避让白板工具栏 / 浮动工具栏等可见 UI。 -->
             <Popup x:Name="EdgeExpandHintPopup"
                    Placement="RelativePoint"
                    PlacementTarget="{Binding ElementName=inkCanvas}"
                    AllowsTransparency="True"
                    StaysOpen="True"
                    IsOpen="False"
-                   PopupAnimation="None"
+                   PopupAnimation="Fade"
                    HorizontalOffset="0"
                    VerticalOffset="0">
                 <Button x:Name="EdgeExpandHintButton"
                         Content="..."
-                        Width="64" Height="64"
-                        Padding="0"
-                        FontSize="14"
+                        MinWidth="56" Height="40"
+                        Padding="8,0"
+                        FontSize="13"
                         FontWeight="SemiBold"
-                        Foreground="White"
-                        Background="#CC2D2D30"
-                        BorderBrush="#992D2D30"
-                        BorderThickness="1"
+                        Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                        Background="{DynamicResource FloatingBarBackgroundBrush}"
+                        BorderBrush="{DynamicResource FloatingBarBorderBrush}"
+                        BorderThickness="1.5"
+                        SnapsToDevicePixels="True"
                         Visibility="Visible"
                         IsHitTestVisible="True"
                         Cursor="Hand"
                         Click="EdgeExpandHintButton_Click"
-                        Opacity="0.9"
-                        ToolTip="扩展画布" />
+                        MouseEnter="EdgeExpandHintButton_MouseEnter"
+                        MouseLeave="EdgeExpandHintButton_MouseLeave"
+                        ToolTip="{x:Static props:FloatingBarStrings.Canvas_EdgeExpandHint_Button}">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Opacity" Value="0.85" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="HintBorder"
+                                                CornerRadius="10"
+                                                Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                Padding="{TemplateBinding Padding}">
+                                            <Border.Effect>
+                                                <DropShadowEffect BlurRadius="14" ShadowDepth="2" Opacity="0.35" />
+                                            </Border.Effect>
+                                            <ContentPresenter HorizontalAlignment="Center"
+                                                              VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="HintBorder" Property="BorderBrush"
+                                                        Value="{DynamicResource FloatingBarForegroundBrush}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Opacity" Value="1" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Opacity" Value="0.95" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Popup>
+
+            <!-- 批注状态指示小圆点：带圆角容器的短促渐显/渐隐图标，指示当前处于批注状态。
+                 Placement=RelativePoint 相对 inkCanvas，避免 DPI 缩放导致的位置偏差。 -->
+            <Popup x:Name="AnnotationDotIndicatorPopup"
+                   Placement="RelativePoint"
+                   PlacementTarget="{Binding ElementName=inkCanvas}"
+                   AllowsTransparency="True"
+                   StaysOpen="True"
+                   IsOpen="False"
+                   HorizontalOffset="0"
+                   VerticalOffset="0">
+                <Border x:Name="AnnotationDotIndicatorBorder"
+                        Width="28" Height="28"
+                        CornerRadius="14"
+                        Background="#B0303030"
+                        BorderBrush="#40FFFFFF"
+                        BorderThickness="1"
+                        SnapsToDevicePixels="True"
+                        Opacity="0">
+                    <Ellipse Width="12" Height="12"
+                             Fill="#FF2563EB"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center" />
+                </Border>
             </Popup>
 
             <!-- 快抽悬浮按钮 -->
@@ -292,7 +371,7 @@
                     Visibility="Collapsed"  d:Visibility="Visible"
                     Panel.ZIndex="1001"/>
         </Grid>
-        <Canvas IsHitTestVisible="False">
+        <Canvas x:Name="WhiteboardTipsOverlayCanvas" IsHitTestVisible="False">
             <ikw:SimpleStackPanel Canvas.Left="25" Canvas.Top="15" Orientation="Vertical">
                 <TextBlock Text="{Binding nowTime}" Name="WaterMarkTime" Visibility="Collapsed"  d:Visibility="Visible" FontSize="30"
                            FontWeight="Bold" Foreground="White" Opacity="0.6" />
@@ -306,6 +385,7 @@
         <Grid Visibility="{Binding ElementName=inkCanvas, Path=Visibility}">
             <Grid Name="GridInkCanvasSelectionCover" Visibility="Collapsed" IsHitTestVisible="False" Margin="1,0,-1,0" />
             <Border Name="BorderStrokeSelectionControl"
+                    Panel.ZIndex="1001"
                     HorizontalAlignment="Left" VerticalAlignment="Top" Margin="800,400,0,0"
                     CornerRadius="5" Height="80"
                     Background="{DynamicResource FloatingBarBackgroundBrush}" d:BorderBrush="Red" d:Background="Green"
@@ -635,7 +715,7 @@
                 </Grid>
             </Border>
 
-            <!-- 图片选择覆盖层（缩放/移动/旋转） -->
+            <!-- 自定义选中覆盖层（元素缩放/移动/旋转，墨迹旋转锚点） -->
             <localControls:ImageSelectionOverlay x:Name="ImageSelectionOverlay"
                                             Visibility="Collapsed"  d:Visibility="Visible"
                                             Panel.ZIndex="1000" />

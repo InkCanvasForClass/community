@@ -1066,8 +1066,10 @@ namespace Ink_Canvas.Windows
                     SetQuickTime(0, minutes, seconds);
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile(
+                    $"[Timer] 应用最近计时记录 {timeString} 失败: {ex.Message}", LogHelper.LogType.Info);
                 // 如果解析失败，忽略
             }
         }
@@ -1121,8 +1123,10 @@ namespace Ink_Canvas.Windows
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile(
+                    $"[Timer] 刷新最近计时显示失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -1161,8 +1165,11 @@ namespace Ink_Canvas.Windows
                     Array.Fill(_recentTimers, "--:--");
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile(
+                    $"[Timer] 从 JSON 加载最近计时记录失败（已回退为默认 --:--）: {ex.Message}",
+                    LogHelper.LogType.Info);
                 Array.Fill(_recentTimers, "--:--");
             }
         }
@@ -1193,8 +1200,11 @@ namespace Ink_Canvas.Windows
                 string jsonContent = JsonConvert.SerializeObject(data, Formatting.Indented);
                 File.WriteAllText(RecentTimersJsonPath, jsonContent);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile(
+                    $"[Timer] 保存最近计时记录到 {RecentTimersJsonPath} 失败: {ex.Message}",
+                    LogHelper.LogType.Info);
             }
         }
 
@@ -1207,8 +1217,10 @@ namespace Ink_Canvas.Windows
                     MainBorder.SetResourceReference(Border.BorderBrushProperty, "CardStrokeColorDefaultBrush");
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile(
+                    $"[Timer] 刷新计时器窗口边框资源失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -1254,8 +1266,10 @@ namespace Ink_Canvas.Windows
                 DragMove();
                 e.Handled = true;
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile(
+                    $"[Timer] 计时器窗口拖动 DragMove 失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 

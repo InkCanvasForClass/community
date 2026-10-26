@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,9 +27,14 @@ namespace Ink_Canvas.UInk
                 else
                     File.Move(tmp, path);
             }
-            catch
+            catch (Exception ex)
             {
-                try { if (File.Exists(tmp)) File.Delete(tmp); } catch { }
+                LogHelper.WriteLogToFile($"[UInk] 写入主文件失败（临时文件 {tmp} 未提交）: {path}, 原因: {ex.Message}", LogHelper.LogType.Info);
+                try { if (File.Exists(tmp)) File.Delete(tmp); }
+                catch (Exception cleanupEx)
+                {
+                    LogHelper.WriteLogToFile($"[UInk] 写入主文件失败后删除临时文件失败: {tmp}, 原因: {cleanupEx.Message}", LogHelper.LogType.Info);
+                }
                 throw;
             }
         }

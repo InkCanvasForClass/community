@@ -46,9 +46,11 @@ namespace Ink_Canvas
             {
                 AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
                 AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderDrawShape);
+                LogHelper.WriteLogToFile("[Shape] 几何工具面板已关闭", LogHelper.LogType.Info);
             }
             else
             {
+                LogHelper.WriteLogToFile($"[Shape] 几何工具面板已打开 (mode={currentMode})", LogHelper.LogType.Info);
                 HideSubPanels();
                 if (currentMode == 0)
                 {
@@ -1144,7 +1146,8 @@ namespace Ink_Canvas
         private void inkCanvas_TouchMove(object sender, TouchEventArgs e)
         {
             // 视频展台特殊模式：触摸移动交给 VideoPresenterSpecialModeContainer 的 Manipulation 处理
-            if (_isVideoPresenterSpecialMode) return;
+            // 图形绘制模式例外：需要走正常绘制流程
+            if (_isVideoPresenterSpecialMode && drawingShapeMode == 0) return;
 
             if (isSingleFingerDragMode) return;
             if (drawingShapeMode != 0)
@@ -2645,6 +2648,15 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (e.ChangedButton == MouseButton.Left && inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
+            {
+                BeginSecAgentStrokeErase(e.GetPosition(inkCanvas));
+                if (MoveSecAgentStrokeErase(e.GetPosition(inkCanvas)))
+                {
+                    e.Handled = true;
+                    return;
+                }
+            }
             if (IsBoardRoamingMode && e.ChangedButton == MouseButton.Left)
             {
                 inkCanvas.CaptureMouse();
@@ -2689,6 +2701,13 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_MouseMove(object sender, MouseEventArgs e)
         {
+            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke
+                && e.LeftButton == MouseButtonState.Pressed
+                && MoveSecAgentStrokeErase(e.GetPosition(inkCanvas)))
+            {
+                e.Handled = true;
+                return;
+            }
             // 视频展台特殊模式：鼠标拖动摄像头预览画面
             if (_isBoothMouseDragging)
             {
@@ -2750,6 +2769,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            EndSecAgentStrokeErase();
             // 视频展台特殊模式：结束鼠标拖动
             if (_isBoothMouseDragging)
             {
@@ -2768,6 +2788,8 @@ namespace Ink_Canvas
                 e.Handled = true;
                 return;
             }
+
+            var completedShapeMode = drawingShapeMode;
 
             if (_isMouseRealtimeInking)
             {
@@ -2914,7 +2936,7 @@ namespace Ink_Canvas
                                 opFlag = false;
                                 break;
                             case OptionalOperation.Ask:
-                                opFlag = MessageBox.Show(Properties.CanvasStrings.Shape_RemoveAsymptote, "Ink Canvas", MessageBoxButton.YesNo) !=
+                                opFlag = MessageBoxHelper.Show(this, Properties.CanvasStrings.Shape_RemoveAsymptote, "Ink Canvas", MessageBoxButton.YesNo) !=
                                          MessageBoxResult.Yes;
                                 break;
                         }
@@ -2949,6 +2971,12 @@ namespace Ink_Canvas
                 else if (lastTempStroke != null) collection = new StrokeCollection { lastTempStroke };
                 if (collection != null) timeMachine.CommitStrokeUserInputHistory(collection);
             }
+
+            if (completedShapeMode == 1 && lastTempStroke != null &&
+                inkCanvas.Strokes.Contains(lastTempStroke))
+                PublishPluginCanvasLineCandidate(
+                    lastTempStroke,
+                    Plugins.CanvasLineSource.GeometryLine);
 
             lastTempStroke = null;
             lastTempStrokeCollection = null;

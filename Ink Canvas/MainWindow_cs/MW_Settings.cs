@@ -119,8 +119,9 @@ namespace Ink_Canvas
                 {
                     client.DefaultRequestHeaders.UserAgent.ParseAdd("InkCanvas-Hitokoto/1.0");
                 }
-                catch
+                catch (Exception ex)
                 {
+                    LogHelper.WriteLogToFile($"[Settings] 创建一言 HttpClient 时设置 User-Agent 头失败: {ex.Message}", LogHelper.LogType.Info);
                 }
                 return client;
             }
@@ -873,6 +874,7 @@ namespace Ink_Canvas
             }
 
             CheckEnableTwoFingerGestureBtnColorPrompt();
+            PushWinRTInkGateSnapshots();
             SaveSettingsToFile();
         }
 
@@ -887,6 +889,10 @@ namespace Ink_Canvas
                 Settings.Gesture.IsEnableMultiTouchModeBoard = isOn;
             else
                 Settings.Gesture.IsEnableMultiTouchMode = isOn;
+
+            // 切换多指书写会改变触摸的采集方式：先清掉上一次留下的采集/捕获残余状态，
+            // 否则残留的活动触点集合与触摸捕获会影响后续手势判定
+            ResetTouchInputStateForMultiTouchToggle();
 
             if (isOn)
             {
@@ -991,6 +997,7 @@ namespace Ink_Canvas
             }
 
             CheckEnableTwoFingerGestureBtnColorPrompt();
+            PushWinRTInkGateSnapshots();
             SaveSettingsToFile();
         }
 
@@ -1015,6 +1022,7 @@ namespace Ink_Canvas
             }
 
             CheckEnableTwoFingerGestureBtnColorPrompt();
+            PushWinRTInkGateSnapshots();
             SaveSettingsToFile();
         }
 
@@ -1039,10 +1047,32 @@ namespace Ink_Canvas
             }
 
             CheckEnableTwoFingerGestureBtnColorPrompt();
+            PushWinRTInkGateSnapshots();
             SaveSettingsToFile();
         }
 
+        /// <summary>
+        /// 多指书写开关切换时的状态清理。
+        /// 多指书写依赖"每个触点独立采集"：若上一次书写有触点未正常抬手（TouchLeave / 异常路径），
+        /// 活动集合、触摸捕获、dec 计数会残留，进而影响之后的手势判定
+        /// （典型现象：关掉多指书写后单指触摸却仍然平移/缩放预览）。
+        /// 这里统一清掉这些运行时状态；并在展台模式下丢弃"触摸前编辑模式"的保存值，
+        /// 让当前工具自身决定编辑模式，避免恢复到过期状态。
+        /// </summary>
+        private void ResetTouchInputStateForMultiTouchToggle()
+        {
+            try { AbortAllActiveTouchInputs(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+            try { inkCanvas?.ReleaseAllTouchCaptures(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+            try { dec.Clear(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+            _boothDownTouchIds.Clear();
 
+            isMultiTouchTimerActive = false;
+            isSingleFingerDragMode = false;
+
+            // 展台模式：丢弃上一次触摸保存的编辑模式，之后由工具/设置自身保持自洽
+            if (_isVideoPresenterSpecialMode)
+                _boothTouchSavedInkEditingMode = null;
+        }
 
         #endregion
 
@@ -1222,8 +1252,9 @@ namespace Ink_Canvas
                     if (!ok) return;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Settings] 重置为推荐设置前的密码/TOTP 校验调用失败，将继续重置: {ex.Message}", LogHelper.LogType.Info);
             }
 
             try
@@ -1245,7 +1276,11 @@ namespace Ink_Canvas
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
-            try { ShowNotification(Properties.MainWindowStrings.Main_Settings_ResetDone); } catch { }
+            try { ShowNotification(Properties.MainWindowStrings.Main_Settings_ResetDone); }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Settings] 重置为推荐设置完成后弹出「重置完成」通知失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         private async void SpecialVersionResetToSuggestion_Click()

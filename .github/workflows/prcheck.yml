@@ -3,7 +3,7 @@ name: PR Check
 on:
   pull_request:
     types: [opened, synchronize]
-    branches: [main, net6]
+    branches: [net6, net10]
     paths-ignore:
       - "**/*.md"
 
@@ -78,7 +78,7 @@ jobs:
             /p:SignManifests=true `
             /p:ManifestCertificateThumbprint=$env:SIGN_THUMBPRINT `
             /verbosity:minimal -maxcpucount
-          $pptAgentDir = "Ink Canvas\bin\Debug\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\ppt-agent"
+          $pptAgentDir = "Ink Canvas\bin\Debug\${{ matrix.architecture }}\net10.0-windows10.0.19041.0\ppt-agent"
           New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
           Copy-Item "InkCanvas.PowerPointAddIn\bin\Debug\*" $pptAgentDir -Recurse -Force
           Copy-Item "InkCanvas.PPTAgent.Contracts\bin\Debug\netstandard2.0\InkCanvas.PPTAgent.Contracts.dll" $pptAgentDir -Force
@@ -100,16 +100,13 @@ jobs:
       - name: Check if exe file is generated
         id: check-exe
         run: |
-          $exePath = "Ink Canvas\bin\Debug\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\InkCanvasForClass.exe"
+          $exePath = "Ink Canvas\bin\Debug\${{ matrix.architecture }}\net10.0-windows10.0.19041.0\InkCanvasForClass.exe"
 
           if (Test-Path $exePath) {
             echo "build_success=true" >> $env:GITHUB_OUTPUT
           } else {
             echo "build_success=false" >> $env:GITHUB_OUTPUT
-
-            if ("${{ github.event_name }}" -eq "workflow_dispatch") {
-              exit 1
-            }
+            exit 1
           }
 
       - name: Create Package (if build succeeded)
@@ -128,7 +125,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: InkCanvasForClass.CE.debug.${{ matrix.architecture }}
-          path: "Ink Canvas/bin/Debug/${{ matrix.architecture }}/net6.0-windows10.0.19041.0/*"
+          path: "Ink Canvas/bin/Debug/${{ matrix.architecture }}/net10.0-windows10.0.19041.0/*"
 
       - name: Create Summary
         if: always()

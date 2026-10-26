@@ -24,6 +24,9 @@ namespace Ink_Canvas.Helpers
 
         public bool IsUsingWindowChromeRendering => _useWindowChromeRendering && _dwmEnabled;
 
+        public string TransparentHitTestState
+            => $"chrome={IsUsingWindowChromeRendering} hwnd={_hwnd != IntPtr.Zero} passThrough={_transparentHitThrough}";
+
         public PerformanceTransparentWin()
         {
             WindowStyle = WindowStyle.None;

@@ -10,8 +10,9 @@ namespace Ink_Canvas
 {
     /// <summary>
     /// 处理 icc: URL 协议命令
-    /// 支持：收纳/展开/切换、彻底隐藏、点名/计时器/白板、工具状态切换与查询、配置方案列表与切换。
+    /// 支持：收纳/展开/切换、彻底隐藏、点名/计时器/白板/展台/批注、工具状态切换与查询、配置方案列表与切换。
     /// 支持：重启/退出、清空墨迹、撤销/重做、翻页/新建/删除白板页、截图、选择工具。
+    /// 展台：icc://booth 打开白板并弹出展台菜单；icc://videopresenter 直接进全屏预览（不弹菜单）。
     /// 配置方案：icc://config-profile/list 输出列表到 %TEMP%\InkCanvasConfigProfileList.json；
     ///          icc://config-profile/switch?name=方案名 切换方案，结果写入 %TEMP%\InkCanvasConfigProfileSwitchResult.txt。
     /// </summary>
@@ -24,6 +25,18 @@ namespace Ink_Canvas
         };
         private static readonly Dictionary<string, DateTime> _uriCommandLastExecuted = new Dictionary<string, DateTime>();
         private static readonly TimeSpan _uriCommandDebounceWindow = TimeSpan.FromSeconds(3);
+
+        // 打开/关闭类命令的点击缓冲：1s 内重复触发（频繁点击 URL/快捷方式）只处理一次，
+        // 避免"刚打开又被关闭"。基准为"上次被处理的时刻"：间隔 0.999s 重复触发仍只处理一次，
+        // 间隔 ≥1.001s 后才再次处理。
+        private static readonly HashSet<string> _uriToggleCommands = new HashSet<string>
+        {
+            "fold", "unfold", "show", "toggle",
+            "thoroughhideon", "thoroughhideoff", "thoroughhidetoggle",
+            "board", "whiteboard", "booth", "videopresenter",
+            "rand", "randone", "timer", "annotate", "annotation"
+        };
+        private static readonly TimeSpan _uriToggleDebounceWindow = TimeSpan.FromSeconds(1);
 
         // URL 启动去抖：同一 URI 在 300ms 内重复到达（如双击快捷方式/链接触发两次启动）时忽略后一次
         private static readonly object _uriRepeatLock = new object();
@@ -64,6 +77,18 @@ namespace Ink_Canvas
 
                 string path = command;
                 string pathLower = path.ToLowerInvariant();
+
+                // 打开/关闭类命令：1s 内重复触发（频繁点击 URL/快捷方式）只处理一次，避免"刚打开又被关闭"
+                if (_uriToggleCommands.Contains(pathLower))
+                {
+                    if (_uriCommandLastExecuted.TryGetValue(pathLower, out DateTime lastToggleTime)
+                        && DateTime.Now - lastToggleTime < _uriToggleDebounceWindow)
+                    {
+                        LogHelper.WriteLogToFile($"URI 打开/关闭命令在 {_uriToggleDebounceWindow.TotalMilliseconds:0}ms 内重复触发，已忽略: {pathLower}", LogHelper.LogType.Warning);
+                        return;
+                    }
+                    _uriCommandLastExecuted[pathLower] = DateTime.Now;
+                }
 
                 // 防止危险命令（restart/exit等）在短时间内重复执行
                 if (_uriNonRepeatableCommands.Contains(pathLower))
@@ -138,6 +163,33 @@ namespace Ink_Canvas
                     case "whiteboard":
                     case "board":
                         ImageBlackboard_MouseUp(null, null);
+                        return;
+                    case "booth":
+                        // 与浮动栏「视频展台」按钮一致：按配置模式启动对应展台
+                        var boothMode = Settings.Canvas.VideoBoothMode;
+                        if (boothMode == VideoBoothMode.Seewo || (boothMode == VideoBoothMode.BuiltIn && Settings.Canvas.LaunchSeewoVideoShowcaseForWhiteboardBooth == true))
+                        {
+                            SoftwareLauncher.LaunchEasiCamera("希沃视频展台");
+                        }
+                        else if (boothMode == VideoBoothMode.Custom)
+                        {
+                            SoftwareLauncher.LaunchCustomBooth(Settings.Canvas.VideoBoothCustomAppPath, Settings.Canvas.VideoBoothCustomAppArgs);
+                        }
+                        else
+                        {
+                            ImageBlackboard_MouseUp(null, null);
+                            ToggleVideoPresenterSidebarPublic();
+                        }
+                        return;
+                    case "videopresenter":
+                        // 与 booth 的区别：走硬件按钮热键同款入口（插件 IVideoBoothService.Toggle）——
+                        // 直接进内置展台全屏预览，不弹出展台菜单，也不受「希沃视频展台」设置影响
+                        ToggleVideoBooth();
+                        return;
+                    case "annotate":
+                    case "annotation":
+                        // 批注：切换到画笔模式
+                        PenIcon_Click(null, null);
                         return;
                     case "restart":
                         ShowNotification(Properties.MainWindowStrings.Main_Uri_Restart);
@@ -396,7 +448,10 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                try { File.WriteAllText(resultPath, "error: " + ex.Message, System.Text.Encoding.UTF8); } catch { }
+                try { File.WriteAllText(resultPath, "error: " + ex.Message, System.Text.Encoding.UTF8); } catch (Exception inner)
+                {
+                    LogHelper.WriteLogToFile($"[Nav] 写入 URI 结果文件失败: {inner.Message}", LogHelper.LogType.Info);
+                }
                 LogHelper.WriteLogToFile($"URI 切换配置方案失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }

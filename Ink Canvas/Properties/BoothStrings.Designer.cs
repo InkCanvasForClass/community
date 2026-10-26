@@ -44,6 +44,22 @@ namespace Ink_Canvas.Properties
 
         public static string Capture => ResourceManager.GetString(nameof(Capture), _resourceCulture);
 
+        public static string BackToCapture => ResourceManager.GetString(nameof(BackToCapture), _resourceCulture);
+
+        public static string ToolbarMenu => ResourceManager.GetString(nameof(ToolbarMenu), _resourceCulture);
+
+        public static string ExpandAlbum => ResourceManager.GetString(nameof(ExpandAlbum), _resourceCulture);
+
+        public static string Acceleration => ResourceManager.GetString(nameof(Acceleration), _resourceCulture);
+
+        public static string Acceleration_Tooltip => ResourceManager.GetString(nameof(Acceleration_Tooltip), _resourceCulture);
+
+        public static string AccelerationCpu => ResourceManager.GetString(nameof(AccelerationCpu), _resourceCulture);
+
+        public static string AccelerationOpenCL => ResourceManager.GetString(nameof(AccelerationOpenCL), _resourceCulture);
+
+        public static string AccelerationCUDA => ResourceManager.GetString(nameof(AccelerationCUDA), _resourceCulture);
+
         public static string CapturedPhotos => ResourceManager.GetString(nameof(CapturedPhotos), _resourceCulture);
 
         public static string Close => ResourceManager.GetString(nameof(Close), _resourceCulture);
@@ -57,5 +73,45 @@ namespace Ink_Canvas.Properties
         public static string Rotate => ResourceManager.GetString(nameof(Rotate), _resourceCulture);
 
         public static string Title => ResourceManager.GetString(nameof(Title), _resourceCulture);
+
+        public static string Brightness => ResourceManager.GetString(nameof(Brightness), _resourceCulture);
+
+        public static string Brightness_Tooltip => ResourceManager.GetString(nameof(Brightness_Tooltip), _resourceCulture);
+
+        public static string BrightnessNotSupported => ResourceManager.GetString(nameof(BrightnessNotSupported), _resourceCulture);
+
+        public static string ProMode => ResourceManager.GetString(nameof(ProMode), _resourceCulture);
+
+        public static string ProMode_Tooltip => ResourceManager.GetString(nameof(ProMode_Tooltip), _resourceCulture);
+
+        public static string Contrast => ResourceManager.GetString(nameof(Contrast), _resourceCulture);
+
+        public static string Saturation => ResourceManager.GetString(nameof(Saturation), _resourceCulture);
+
+        public static string WhiteBalance => ResourceManager.GetString(nameof(WhiteBalance), _resourceCulture);
+
+        public static string WhiteBalance_Tooltip => ResourceManager.GetString(nameof(WhiteBalance_Tooltip), _resourceCulture);
+
+        public static string Gain => ResourceManager.GetString(nameof(Gain), _resourceCulture);
+
+        public static string Gain_Tooltip => ResourceManager.GetString(nameof(Gain_Tooltip), _resourceCulture);
+
+        public static string Focus => ResourceManager.GetString(nameof(Focus), _resourceCulture);
+
+        public static string Focus_Tooltip => ResourceManager.GetString(nameof(Focus_Tooltip), _resourceCulture);
+
+        public static string Exposure => ResourceManager.GetString(nameof(Exposure), _resourceCulture);
+
+        public static string Exposure_Tooltip => ResourceManager.GetString(nameof(Exposure_Tooltip), _resourceCulture);
+
+        public static string PropNotSupported => ResourceManager.GetString(nameof(PropNotSupported), _resourceCulture);
+
+        public static string ResetDefault => ResourceManager.GetString(nameof(ResetDefault), _resourceCulture);
+
+        public static string Mirror => ResourceManager.GetString(nameof(Mirror), _resourceCulture);
+
+        public static string MirrorHorizontal => ResourceManager.GetString(nameof(MirrorHorizontal), _resourceCulture);
+
+        public static string MirrorVertical => ResourceManager.GetString(nameof(MirrorVertical), _resourceCulture);
     }
 }

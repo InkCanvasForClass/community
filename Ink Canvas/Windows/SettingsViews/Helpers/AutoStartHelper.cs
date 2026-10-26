@@ -1,4 +1,5 @@
 using IWshRuntimeLibrary;
+using Ink_Canvas.Helpers;
 using System;
 using File = System.IO.File;
 
@@ -20,7 +21,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 shortcut.Save();
                 return true;
             }
-            catch (Exception) { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[Settings] 创建开机自启快捷方式 {exeName}.lnk 失败: {ex.Message}", LogHelper.LogType.Info);
+            }
 
             return false;
         }
@@ -33,7 +38,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                             ".lnk");
                 return true;
             }
-            catch (Exception) { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[Settings] 删除开机自启快捷方式 {exeName}.lnk 失败: {ex.Message}", LogHelper.LogType.Info);
+            }
 
             return false;
         }

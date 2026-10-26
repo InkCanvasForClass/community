@@ -2,7 +2,7 @@
 
 ## 位置与命名空间
 
-插件 SDK 位于 `InkCanvas.PluginSdk/`，命名空间 **`Ink_Canvas.Plugins`**，目标框架 net6.0-windows10.0.19041.0。
+插件 SDK 位于 `InkCanvas.PluginSdk/`，命名空间 **`Ink_Canvas.Plugins`**，当前 net10 分支目标框架为 net10.0-windows10.0.19041.0；net6 维护分支保持 net6 目标。
 SDK 已发布到 nuget.org（包名 `InkCanvas.PluginSdk`），用 Nerdbank.GitVersioning 生成版本号（自引用 NBGV，防 NU1504）。
 
 > 给 SDK 加接口/改接口 = 对外契约变更，发布后旧插件可能不兼容。新增能力优先**加新接口**而非改旧接口；接口方法签名变更需同步更新插件市场内受影响插件。
@@ -182,10 +182,13 @@ SecurityVerdict verdict = host.EvaluateTrust(packagePath, expectedSha256, declar
 | `ISettingsService` | 读取/写入设置（Settings.json 的 JsonKey 结构） |
 | `IConfigProfileService` | 配置方案（列表/切换） |
 | `IBackupService` | 自动备份 |
-| `IFileAssociationService` | 文件关联（HKCU 泛化注册，受保护扩展名黑名单） |
+| `IFileAssociationService` | 文件关联（HKCU 泛化注册，受保护扩展名黑名单；归属插件可打开派发） |
 | `IFileDialogService` | 文件对话框（**无 Owner 属性**，对话框默认以主窗口为宿主） |
 | `IClipboardService` | 剪贴板读写（`PasteClipboardImageAsync` 返回 `Task`） |
 | `IScreenshotService` | 截图 |
+| `IScreenElementService` | UI Automation 只读快照：按屏幕点/窗口读取名称、AutomationId、控件类型和屏幕物理像素边界；不返回可操作的 AutomationElement |
+| `ICanvasCoordinateService` | 屏幕物理像素与画布 DIP 坐标互转，处理当前 DPI、多屏和负坐标 |
+| `IInkTextService` | 将文字渲染为 `StrokeCollection` 或直接作为可撤销真实墨迹插入画布 |
 | `ICameraService` | 摄像头 |
 | `INameRosterService` | 花名册 |
 | `IUpdateService` | 应用更新（`PluginUpdateChannel`） |
@@ -219,6 +222,42 @@ uri.OpenUri("icc://settings/CanvasPage?key=inkFadeSpeedMultiplier");
 - 未处理（插件未注册/未加载/处理器返回 false）仅写日志，不弹通知
 - 处理器与 `OpenUri` 均在 **UI 线程**执行，可安全操作画布/窗口
 
+## 文件关联（自定义扩展名）
+
+插件可注册任意扩展名的 Windows 文件关联（写 `HKCU\Software\Classes`，仅当前用户，无需管理员权限）。双击该扩展名文件时系统拉起宿主 exe 并传入文件路径，宿主据此把路径派发回注册该扩展名的插件。
+
+### 注册（`IFileAssociationService`）
+
+```csharp
+var assoc = host.GetService<IFileAssociationService>();
+
+// extension：扩展名（可带/不带点，忽略大小写）；progId：程序标识符
+// iconPath 可选；pluginId：归属插件 ID（见下）
+var ok = assoc.Register(".abc", "MyPlugin.Abc", "ABC 文档", pluginId: Id);
+assoc.Unregister(".abc");
+assoc.IsRegistered(".abc");   // 是否已注册且命令指向宿主 exe
+```
+
+- **`pluginId` 必须传**：注册发生在 `Initialize` 之外（如设置页）时，宿主无法自动识别调用方，不传则 Windows 关联仍生效、但宿主不知道把打开的文件派发给谁（只写日志，不打开）。推荐传插件自身 `Id`（`Manifest.Id`）。`Initialize` 内调用可不传，宿主按当前加载插件识别。
+- 宿主把归属插件 ID 写在扩展名注册表键的 `InkCanvasPluginId` 命名值里；注销时随键一并删除。
+
+### 派发（宿主侧 `FileAssociationManager`）
+
+- 冷启动或已运行实例收到该扩展名文件参数 → 宿主解析归属插件 → 构造 `icc://plugin/<pluginId>/open?path=<urlencoded>` → `PluginManager.TryDispatchUri(pluginId, "open", uri)`。
+- 因此插件要接收文件打开，只需在 `Initialize` 注册子路径 `open` 的 URI 处理器，并从 `request.Query["path"]` 取文件路径：
+
+```csharp
+var uri = host.GetService<IPluginUriService>();
+uri.RegisterHandler("open", req => {
+    string path = req.Query.TryGetValue("path", out var p) ? p : "";
+    OpenFile(path);
+    return true;
+});
+```
+
+- 文件打开派发**不走** `HandleUriCommand`，不受「启用 URI 协议」（`IsEnableUriScheme`）开关门禁。
+- **受保护扩展名不可覆盖**：`.exe/.dll/.bat/.cmd/.com/.msi/.msp/.ps1/.vbs/.js/.scr/.lnk/.url/.htt/.hta/...` 及宿主自有 `.icstk` 等，注册返回 false。
+
 ## 插件目录结构（宿主侧）
 
 | 目录 | 用途 |
@@ -239,3 +278,5 @@ uri.OpenUri("icc://settings/CanvasPage?key=inkFadeSpeedMultiplier");
 4. 新增服务接口 = 对外契约变更，走 NuGet 发版，同步更新插件市场
 5. UI 文案做 i18n（默认/en-US/zh-ME），插件内同理
 6. 修改 `InkCanvas.PluginSdk` 后构建校验：主解决方案 Debug x64 + PowerPointAddIn 双构建
+7. 当前 net10 分支新增屏幕元素、坐标和文字墨迹接口后，`HostApiRequirement.CurrentApiVersion` 为 `1.13.0`；插件 manifest 应声明 `ApiVersion: 1.13.0`。
+8. 屏幕截图/UIA 数据属于敏感上下文：插件默认只在用户主动触发时读取，发送到模型前应在 UI 中明确提示并提供关闭选项。

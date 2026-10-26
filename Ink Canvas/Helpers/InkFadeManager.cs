@@ -108,12 +108,15 @@ namespace Ink_Canvas.Helpers
                     Interval = TimeSpan.FromMilliseconds(FadeTime)
                 };
 
-                timer.Tick += (sender, e) =>
+                EventHandler tickHandler = null;
+                tickHandler = (sender, e) =>
                 {
+                    timer.Tick -= tickHandler;  // 解除订阅，打破 timer → lambda → timer 循环引用
                     StartFadeAnimation(stroke);
                     timer.Stop();
                     _fadeTimers.Remove(stroke);
                 };
+                timer.Tick += tickHandler;
 
                 _fadeTimers[stroke] = timer;
                 timer.Start();
@@ -300,6 +303,7 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public void Enable()
         {
+            LogHelper.WriteLogToFile("[Ink] 墨迹渐隐已启用", LogHelper.LogType.Info);
             IsEnabled = true;
         }
 
@@ -308,6 +312,7 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public void Disable()
         {
+            LogHelper.WriteLogToFile("[Ink] 墨迹渐隐已禁用", LogHelper.LogType.Info);
             IsEnabled = false;
         }
         #endregion
@@ -556,8 +561,14 @@ namespace Ink_Canvas.Helpers
                     scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnimation);
                 }
 
-                // 添加动画完成事件
-                fadeAnimation.Completed += (sender, e) => OnAnimationCompleted(visual, stroke);
+                // 添加动画完成事件（OnAnimationCompleted 内部会解除动画时钟）
+                EventHandler completedHandler = null;
+                completedHandler = (sender, e) =>
+                {
+                    fadeAnimation.Completed -= completedHandler;
+                    OnAnimationCompleted(visual, stroke);
+                };
+                fadeAnimation.Completed += completedHandler;
 
                 // 应用透明度动画
                 visual.BeginAnimation(UIElement.OpacityProperty, fadeAnimation);
@@ -739,8 +750,10 @@ namespace Ink_Canvas.Helpers
                     };
 
                     int segmentIndex = i;
-                    timer.Tick += (sender, e) =>
+                    EventHandler tickHandler = null;
+                    tickHandler = (sender, e) =>
                     {
+                        timer.Tick -= tickHandler;  // 解除订阅，打破循环引用
                         StartSingleSegmentFadeAnimation(segment, segmentDuration, () =>
                         {
                             lock (completedSegments)
@@ -755,6 +768,7 @@ namespace Ink_Canvas.Helpers
                         });
                         timer.Stop();
                     };
+                    timer.Tick += tickHandler;
 
                     timer.Start();
                 }
@@ -765,11 +779,14 @@ namespace Ink_Canvas.Helpers
                     Interval = TimeSpan.FromMilliseconds(safetyTimeout)
                 };
 
-                safetyTimer.Tick += (sender, e) =>
+                EventHandler safetyTickHandler = null;
+                safetyTickHandler = (sender, e) =>
                 {
+                    safetyTimer.Tick -= safetyTickHandler;  // 解除订阅，打破循环引用
                     CleanupSegmentedAnimation(segments, originalStroke, originalVisual, container);
                     safetyTimer.Stop();
                 };
+                safetyTimer.Tick += safetyTickHandler;
 
                 safetyTimer.Start();
             }
@@ -799,10 +816,16 @@ namespace Ink_Canvas.Helpers
                 // 添加动画完成事件
                 if (onCompleted != null)
                 {
-                    fadeAnimation.Completed += (sender, e) =>
+                    EventHandler completedHandler = null;
+                    completedHandler = (sender, e) =>
                     {
+                        // 解除订阅，避免 lambda 闭包持有 fadeAnimation/segment
+                        fadeAnimation.Completed -= completedHandler;
+                        // 解除动画时钟，释放 AnimationClock
+                        segment.BeginAnimation(UIElement.OpacityProperty, null);
                         onCompleted?.Invoke();
                     };
+                    fadeAnimation.Completed += completedHandler;
                 }
 
                 // 只应用透明度动画，不改变墨迹大小
@@ -856,7 +879,14 @@ namespace Ink_Canvas.Helpers
                     EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
                 };
 
-                fadeAnimation.Completed += (sender, e) => OnAnimationCompleted(visual, stroke);
+                // 添加动画完成事件（OnAnimationCompleted 内部会解除动画时钟）
+                EventHandler completedHandler = null;
+                completedHandler = (sender, e) =>
+                {
+                    fadeAnimation.Completed -= completedHandler;
+                    OnAnimationCompleted(visual, stroke);
+                };
+                fadeAnimation.Completed += completedHandler;
                 visual.BeginAnimation(UIElement.OpacityProperty, fadeAnimation);
             }
             catch (Exception ex)
@@ -946,6 +976,17 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
+                // 先解除动画时钟，释放 AnimationClock 持有的 fadeAnimation + Completed lambda 闭包（捕获 visual/stroke）
+                // 不解除会导致 DoubleAnimation/EventHandler 无法被 GC 回收
+                visual.BeginAnimation(UIElement.OpacityProperty, null);
+
+                // 同样解除可能的缩放动画
+                if (visual.RenderTransform is ScaleTransform scaleTransform)
+                {
+                    scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+                    scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+                }
+
                 // 从父容器中移除墨迹
                 var parent = _mainWindow.inkCanvas?.Parent as Panel;
                 if (parent != null && parent.Children.Contains(visual))
@@ -956,6 +997,9 @@ namespace Ink_Canvas.Helpers
                 {
                     _mainWindow.inkCanvas.Children.Remove(visual);
                 }
+
+                // 清除 RenderTransform 引用
+                visual.RenderTransform = null;
 
                 RemoveStroke(stroke);
             }

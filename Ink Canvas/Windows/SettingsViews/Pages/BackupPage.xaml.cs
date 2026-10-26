@@ -97,12 +97,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 File.WriteAllText(backupPath, settingsJson);
 
                 LogHelper.WriteLogToFile($"成功创建设置备份: {backupPath}");
-                MessageBox.Show(string.Format(StorageStrings.Backup_SuccessMsg, backupPath), StorageStrings.Backup_SuccessTitle, MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBoxHelper.Show(this, string.Format(StorageStrings.Backup_SuccessMsg, backupPath), StorageStrings.Backup_SuccessTitle, MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"创建设置备份时出错: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show(string.Format(StorageStrings.Backup_CreateFailedMsg, ex.Message), StorageStrings.Backup_FailedTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBoxHelper.Show(this, string.Format(StorageStrings.Backup_CreateFailedMsg, ex.Message), StorageStrings.Backup_FailedTitle, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -115,7 +115,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 string backupDir = Path.Combine(App.RootPath, "Backups");
                 if (!Directory.Exists(backupDir))
                 {
-                    MessageBox.Show(StorageStrings.Restore_NoBackupFound, StorageStrings.Restore_FailedTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBoxHelper.Show(this, StorageStrings.Restore_NoBackupFound, StorageStrings.Restore_FailedTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -131,7 +131,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                     if (backupSettings != null && IsBackupSettingsStructurallyValid(backupSettings))
                     {
-                        if (MessageBox.Show(StorageStrings.Restore_ConfirmMsg, StorageStrings.Restore_ConfirmTitle,
+                        if (MessageBoxHelper.Show(this, StorageStrings.Restore_ConfirmMsg, StorageStrings.Restore_ConfirmTitle,
                                 MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                         {
                             string currentSettingsJson = Newtonsoft.Json.JsonConvert.SerializeObject(SettingsManager.Settings, Newtonsoft.Json.Formatting.Indented);
@@ -144,19 +144,19 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                             SettingsActionHub.OnReloadSettingsFromFile();
 
                             LogHelper.WriteLogToFile($"成功从备份还原设置: {dlg.FileName}");
-                            MessageBox.Show(StorageStrings.Restore_SuccessMsg, StorageStrings.Restore_SuccessTitle, MessageBoxButton.OK, MessageBoxImage.Information);
+                            MessageBoxHelper.Show(this, StorageStrings.Restore_SuccessMsg, StorageStrings.Restore_SuccessTitle, MessageBoxButton.OK, MessageBoxImage.Information);
                         }
                     }
                     else
                     {
-                        MessageBox.Show(StorageStrings.Restore_ParseFailed, StorageStrings.Restore_FailedTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBoxHelper.Show(this, StorageStrings.Restore_ParseFailed, StorageStrings.Restore_FailedTitle, MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"还原设置备份时出错: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show(string.Format(StorageStrings.Restore_FailedMsg, ex.Message), StorageStrings.Restore_FailedTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBoxHelper.Show(this, string.Format(StorageStrings.Restore_FailedMsg, ex.Message), StorageStrings.Restore_FailedTitle, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

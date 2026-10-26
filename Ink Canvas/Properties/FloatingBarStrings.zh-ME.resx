@@ -627,6 +627,9 @@
   <data name="BoardToolbarPage_GroupVideoBooth" xml:space="preserve">
     <value>投影法阵</value>
   </data>
+  <data name="BoardToolbarPage_ShowInBoothOnly" xml:space="preserve">
+    <value>仅在投影法阵模式显现</value>
+  </data>
   <data name="BoardToolbarPage_GroupGesture" xml:space="preserve">
     <value>结印与贴膜</value>
   </data>
@@ -665,6 +668,60 @@
   </data>
   <data name="Canvas_EdgeExpandHint_Settings_TranslateStep" xml:space="preserve">
     <value>一下腾出多少地方（像素）</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_WhiteboardOnly" xml:space="preserve">
+    <value>只在白板里才提示</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_WhiteboardOnlyHint" xml:space="preserve">
+    <value>关了的话，桌面批注、PPT 这些地方写嗨了也会弹出来。</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_AutoHideDelay" xml:space="preserve">
+    <value>多久之后自己藏起来</value>
+  </data>
+  <data name="Canvas_EdgeExpandHint_Settings_AutoHideDelayHint" xml:space="preserve">
+    <value>停笔之后提示按钮再待多久就消失；接着写会重新计时，鼠标放上去先不数。</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Text" xml:space="preserve">
+    <value>现在是在屏幕批注中哦&#xA;要与其它应用交互，需要先退出批注状态</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Keep" xml:space="preserve">
+    <value>保持</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Exit" xml:space="preserve">
+    <value>退出批注</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_Enable" xml:space="preserve">
+    <value>批注状态点提示</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_EnableHint" xml:space="preserve">
+    <value>批注中 30 秒没写字时，点画布会闪出状态小圆点；短时间内连点到次数，才会跳出「正在批注」的提示。写长一点的笔迹会重新计时。</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_ClusterRadius" xml:space="preserve">
+    <value>连续点击范围大小</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_StrokeLength" xml:space="preserve">
+    <value>单次触发笔迹长度</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_ClickCount" xml:space="preserve">
+    <value>点击次数阈值</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_DisplayDuration" xml:space="preserve">
+    <value>提示显示时长</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_Preview" xml:space="preserve">
+    <value>触发区域预览与测试</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_PreviewHint" xml:space="preserve">
+    <value>在下面点点看，中间那个圈就是触发范围。在圈里点够次数就会触发了。</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_PreviewPlaceholder" xml:space="preserve">
+    <value>在这里点点看</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_PreviewLabel" xml:space="preserve">
+    <value>在圈里点 {0} 下就会触发提示</value>
+  </data>
+  <data name="Canvas_AnnotationDotHint_Settings_PreviewTriggered" xml:space="preserve">
+    <value>✓ 已触发提示</value>
   </data>
   <data name="IdleMiniBar_StartAnnotate" xml:space="preserve">
     <value>写点啥</value>

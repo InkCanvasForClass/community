@@ -79,6 +79,7 @@ namespace Ink_Canvas
 
             InvalidateVisual();
             RefreshOtherWindowsTheme();
+            LogHelper.WriteLogToFile($"[Theme] 主题已应用: {theme} (自动切换图标={autoSwitchIcon})", LogHelper.LogType.Info);
         }
 
         void LoadImageResourceDictionary(string path)
@@ -93,6 +94,8 @@ namespace Ink_Canvas
             {
                 FloatBarForegroundColor = (Color)Application.Current.FindResource("FloatBarForegroundColor");
                 RefreshFloatingBarButtonColors();
+                // 主题切换后浮动栏背景变化，重新评估批注图标描边是否需要
+                UpdatePenIconColor();
             }
             catch (Exception)
             {
@@ -109,8 +112,9 @@ namespace Ink_Canvas
                 LeftSidePanel?.InvalidateVisual();
                 RightSidePanel?.InvalidateVisual();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 刷新快捷面板图标失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -159,8 +163,9 @@ namespace Ink_Canvas
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 刷新浮动栏高亮配色失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -249,8 +254,9 @@ namespace Ink_Canvas
                         break;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 刷新浮动栏按钮配色失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -367,8 +373,9 @@ namespace Ink_Canvas
                 UpdateFloatingBarIcon();
                 UpdateFloatingBarIconComboBox();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 按主题自动切换浮动栏图标失败 (theme={theme}): {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -388,8 +395,9 @@ namespace Ink_Canvas
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 同步浮动栏图标下拉框失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -416,8 +424,9 @@ namespace Ink_Canvas
                     BorderStrokeSelectionControl.InvalidateVisual();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 刷新墨迹选择栏图标失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -430,8 +439,9 @@ namespace Ink_Canvas
                     BorderImageSelectionControl.InvalidateVisual();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 刷新图片选择栏图标失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -444,8 +454,9 @@ namespace Ink_Canvas
                     CheckEnableTwoFingerGestureBtnColorPrompt();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 刷新手势按钮图标失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -464,8 +475,9 @@ namespace Ink_Canvas
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Theme] 刷新其它窗口主题失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
     }

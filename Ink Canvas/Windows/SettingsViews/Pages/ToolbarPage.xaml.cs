@@ -226,7 +226,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var existing = ToolbarRegistry.ListConfigFiles();
             if (existing.Contains(name, StringComparer.OrdinalIgnoreCase))
             {
-                MessageBox.Show(FloatingBarStrings.ToolbarPage_DuplicateConfigExists, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBoxHelper.Show(this, FloatingBarStrings.ToolbarPage_DuplicateConfigExists, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -257,7 +257,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var existing = ToolbarRegistry.ListConfigFiles();
             if (existing.Contains(name, StringComparer.OrdinalIgnoreCase))
             {
-                MessageBox.Show(FloatingBarStrings.ToolbarPage_DuplicateConfigExists, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBoxHelper.Show(this, FloatingBarStrings.ToolbarPage_DuplicateConfigExists, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -278,11 +278,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var files = ToolbarRegistry.ListConfigFiles();
             if (files.Count <= 1)
             {
-                MessageBox.Show(FloatingBarStrings.ToolbarPage_AtLeastOneConfig, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBoxHelper.Show(this, FloatingBarStrings.ToolbarPage_AtLeastOneConfig, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (MessageBox.Show($"{FloatingBarStrings.ToolbarPage_ConfirmDeleteConfig} \"{name}\"?", FloatingBarStrings.ToolbarPage_ConfirmDelete,
+            if (MessageBoxHelper.Show(this, $"{FloatingBarStrings.ToolbarPage_ConfirmDeleteConfig} \"{name}\"?", FloatingBarStrings.ToolbarPage_ConfirmDelete,
                 MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
                 return;
 
@@ -574,10 +574,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ApplyRedStyleSetting(string key, bool value)
         {
             if (!_isLoaded || ActiveEntry == null || _suppressSave) return;
-            if (value)
-                ActiveEntry.SetSetting(key, true);
-            else
-                ActiveEntry.Settings?.Remove(key);
+            // 显式保存关闭状态，避免两个键都缺失时被旧配置迁移恢复为默认红色。
+            ActiveEntry.SetSetting(key, value);
             SaveSettings();
         }
 

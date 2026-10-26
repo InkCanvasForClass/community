@@ -87,11 +87,26 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        public static void WriteLine(string line)
+        public static void WriteLine(string line, ConsoleColor? color = null)
         {
             if (!IsVisible) return;
-            try { Console.WriteLine(line); }
-            catch { }
+            try
+            {
+                if (color.HasValue)
+                {
+                    Console.ForegroundColor = color.Value;
+                    Console.WriteLine(line);
+                    Console.ResetColor();
+                }
+                else
+                {
+                    Console.WriteLine(line);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[UI] 写入调试控制台失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
     }
 }

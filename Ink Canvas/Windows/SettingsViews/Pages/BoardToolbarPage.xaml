@@ -298,6 +298,9 @@
 
                         <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentProperties}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
 
+                        <!-- 组件自定义设置面板（动态生成，如截图组件的全局设置） -->
+                        <StackPanel x:Name="PanelPluginCustomSettings" Visibility="Collapsed"/>
+
                         <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_Size}" FontSize="14" FontWeight="SemiBold" Margin="0,12,0,4"/>
                         <Grid Margin="0,0,0,4">
                             <Grid.ColumnDefinitions>
@@ -347,6 +350,12 @@
                                          TextChanged="ComponentSetting_TextChanged"/>
                             </StackPanel>
                         </Grid>
+
+                        <!-- 显示条件：仅视频展台模式显示（用于展台专用组件等） -->
+                        <CheckBox x:Name="CheckBoxShowInBoothOnly" Margin="0,4,0,0" FontSize="12"
+                                  Content="{x:Static props:FloatingBarStrings.BoardToolbarPage_ShowInBoothOnly}"
+                                  Checked="ComponentSetting_CheckChanged"
+                                  Unchecked="ComponentSetting_CheckChanged"/>
 
                         <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_Margin}" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,4"/>
                         <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_MarginHint}" FontSize="12" Opacity="0.65" Margin="0,0,0,4"/>

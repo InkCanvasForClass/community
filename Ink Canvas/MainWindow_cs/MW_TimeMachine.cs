@@ -3,6 +3,8 @@ using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
+using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
@@ -239,6 +241,13 @@ namespace Ink_Canvas
                                 canvas.Strokes.Remove(currentStroke);
                 }
             }
+            else if (item.CommitType == TimeMachineHistoryType.ElementEdit)
+            {
+                var state = item.StrokeHasBeenCleared ? item.PreviousElementState : item.CurrentElementState;
+                var replacement = RestoreEditedElement(item.EditedElement, state, canvas);
+                if (replacement != null)
+                    item.EditedElement = replacement;
+            }
             else if (item.CommitType == TimeMachineHistoryType.ElementInsert)
             {
                 var targetCanvas = canvas ?? inkCanvas;
@@ -309,6 +318,34 @@ namespace Ink_Canvas
                     }
                 }
             }
+            else if (item.CommitType == TimeMachineHistoryType.PluginStateChange && applyCanvas == null)
+            {
+                ApplyPluginUndoState(
+                    item.PluginId,
+                    item.StrokeHasBeenCleared ? item.PluginStateBefore : item.PluginStateAfter);
+            }
+            else if (item.CommitType == TimeMachineHistoryType.PluginInkConversion)
+            {
+                if (item.StrokeHasBeenCleared)
+                {
+                    if (item.CurrentStroke != null)
+                        foreach (var stroke in item.CurrentStroke)
+                            if (canvas.Strokes.Contains(stroke))
+                                canvas.Strokes.Remove(stroke);
+                }
+                else
+                {
+                    if (item.CurrentStroke != null)
+                        foreach (var stroke in item.CurrentStroke)
+                            if (!canvas.Strokes.Contains(stroke))
+                                canvas.Strokes.Add(stroke);
+                }
+
+                if (applyCanvas == null)
+                    ApplyPluginUndoState(
+                        item.PluginId,
+                        item.StrokeHasBeenCleared ? item.PluginStateAfter : item.PluginStateBefore);
+            }
 
             _currentCommitType = CommitReason.UserInput;
         }
@@ -322,6 +359,158 @@ namespace Ink_Canvas
         /// 创建一个临时画布，应用历史记录，然后返回画布中的笔画集合
         /// 只处理笔画历史，不处理图片元素历史
         /// </remarks>
+        private FrameworkElement RestoreEditedElement(UIElement current, string serializedState, InkCanvas canvas)
+        {
+            if (current is not FrameworkElement currentElement || string.IsNullOrWhiteSpace(serializedState) || canvas == null)
+                return current as FrameworkElement;
+
+            var parent = currentElement.Parent as Panel;
+            var directCanvas = currentElement.Parent as InkCanvas;
+            var index = parent?.Children.IndexOf(currentElement)
+                ?? directCanvas?.Children.IndexOf(currentElement)
+                ?? canvas.Children.Count;
+            var left = InkCanvas.GetLeft(currentElement);
+            var top = InkCanvas.GetTop(currentElement);
+            var transform = currentElement.RenderTransform?.Clone();
+
+            if (IsEmptyEditableState(serializedState))
+            {
+                if (ReferenceEquals(currentSelectedElement, currentElement))
+                {
+                    UnselectElement(currentElement);
+                    currentSelectedElement = null;
+                }
+                if (parent != null && parent.Children.Contains(currentElement))
+                    parent.Children.Remove(currentElement);
+                else if (directCanvas != null && directCanvas.Children.Contains(currentElement))
+                    directCanvas.Children.Remove(currentElement);
+                return currentElement;
+            }
+
+            try
+            {
+                var type = currentElement.GetType();
+                FrameworkElement replacement;
+                if (!TryInvokeSerializedElementFactory(type, "FromSerializedScene", serializedState, out replacement)
+                    && !TryInvokeSerializedElementFactory(type, "FromSerializedElement", serializedState, out replacement))
+                {
+                    return currentElement;
+                }
+
+                if (ReferenceEquals(currentSelectedElement, currentElement))
+                {
+                    UnselectElement(currentElement);
+                    currentSelectedElement = null;
+                }
+                if (parent != null && parent.Children.Contains(currentElement))
+                    parent.Children.Remove(currentElement);
+                else if (directCanvas != null && directCanvas.Children.Contains(currentElement))
+                    directCanvas.Children.Remove(currentElement);
+                if (!double.IsNaN(left)) InkCanvas.SetLeft(replacement, left);
+                if (!double.IsNaN(top)) InkCanvas.SetTop(replacement, top);
+                replacement.Name = currentElement.Name;
+                replacement.RenderTransform = transform;
+                if (parent != null)
+                    parent.Children.Insert(Math.Min(index, parent.Children.Count), replacement);
+                else if (directCanvas != null)
+                    directCanvas.Children.Insert(Math.Min(index, directCanvas.Children.Count), replacement);
+                else
+                    canvas.Children.Insert(Math.Min(index, canvas.Children.Count), replacement);
+                InitializeElementTransformIfMissing(replacement);
+                BindElementEvents(replacement);
+                return replacement;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"RestoreEditableElement failed: {ex.Message}");
+                return currentElement;
+            }
+        }
+
+        private static bool TryInvokeSerializedElementFactory(
+            Type elementType,
+            string factoryName,
+            string serializedState,
+            out FrameworkElement element)
+        {
+            element = null;
+            if (elementType == null || string.IsNullOrWhiteSpace(factoryName)
+                || string.IsNullOrWhiteSpace(serializedState))
+            {
+                return false;
+            }
+
+            var factory = elementType.GetMethod(
+                factoryName,
+                BindingFlags.Public | BindingFlags.Static,
+                binder: null,
+                types: new[] { typeof(string), typeof(double) },
+                modifiers: null);
+            if (factory != null)
+            {
+                return TryInvokeSerializedElementFactory(
+                    factory,
+                    new object[] { serializedState, 1d },
+                    out element);
+            }
+
+            factory = elementType.GetMethod(
+                factoryName,
+                BindingFlags.Public | BindingFlags.Static,
+                binder: null,
+                types: new[] { typeof(string) },
+                modifiers: null);
+            return factory != null
+                && TryInvokeSerializedElementFactory(
+                    factory,
+                    new object[] { serializedState },
+                    out element);
+        }
+
+        private static bool TryInvokeSerializedElementFactory(
+            MethodInfo factory,
+            object[] parameters,
+            out FrameworkElement element)
+        {
+            element = null;
+            try
+            {
+                if (factory.Invoke(null, parameters) is FrameworkElement frameworkElement)
+                {
+                    element = frameworkElement;
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Serialized element factory failed: {ex.Message}");
+            }
+
+            return false;
+        }
+
+        private static bool IsEmptyEditableState(string serializedState)
+        {
+            try
+            {
+                using var document = JsonDocument.Parse(serializedState);
+                var root = document.RootElement;
+                return root.TryGetProperty("elements", out var elements)
+                    && elements.ValueKind == JsonValueKind.Array
+                    && elements.GetArrayLength() == 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void InitializeElementTransformIfMissing(FrameworkElement element)
+        {
+            if (element.RenderTransform == null || element.RenderTransform.Value.IsIdentity)
+                InitializeElementTransform(element);
+        }
+
         private StrokeCollection ApplyHistoriesToNewStrokeCollection(TimeMachineHistory[] items)
         {
             InkCanvas fakeInkCanv = new InkCanvas
@@ -337,7 +526,8 @@ namespace Ink_Canvas
                 {
                     // 只处理笔画历史，不处理图片元素历史
                     // 因为页面预览只需要显示笔画，图片元素会影响主画布
-                    if (timeMachineHistory.CommitType != TimeMachineHistoryType.ElementInsert)
+                    if (timeMachineHistory.CommitType != TimeMachineHistoryType.ElementInsert &&
+                        timeMachineHistory.CommitType != TimeMachineHistoryType.PluginStateChange)
                     {
                         ApplyHistoryToCanvas(timeMachineHistory, fakeInkCanv);
                     }
@@ -365,8 +555,18 @@ namespace Ink_Canvas
                 EditingMode = InkCanvasEditingMode.None,
             };
 
+            var latestPluginStates = new Dictionary<string, TimeMachineHistory>(StringComparer.OrdinalIgnoreCase);
             foreach (var item in history)
+            {
+                if (item.CommitType == TimeMachineHistoryType.PluginStateChange ||
+                    item.CommitType == TimeMachineHistoryType.PluginInkConversion)
+                {
+                    if (!string.IsNullOrWhiteSpace(item.PluginId)) latestPluginStates[item.PluginId] = item;
+                    if (item.CommitType == TimeMachineHistoryType.PluginStateChange) continue;
+                }
+
                 ApplyHistoryToCanvas(item, fakeInkCanv, removed);
+            }
 
             var list = new List<TimeMachineHistory>();
             if (fakeInkCanv.Strokes.Count > 0)
@@ -381,6 +581,13 @@ namespace Ink_Canvas
                     list.Add(new TimeMachineHistory(child, TimeMachineHistoryType.ElementInsert));
                     fakeInkCanv.Children.Remove(child);
                 }
+            }
+            foreach (var item in latestPluginStates.Values)
+            {
+                var finalState = item.StrokeHasBeenCleared
+                    ? item.PluginStateBefore
+                    : item.PluginStateAfter;
+                list.Add(new TimeMachineHistory(item.PluginId, string.Empty, finalState));
             }
             return list.Count == 0 ? null : list.ToArray();
         }
@@ -453,6 +660,13 @@ namespace Ink_Canvas
         /// </remarks>
         private void StrokesOnStrokesChanged(object sender, StrokeCollectionChangedEventArgs e)
         {
+            // 视频展台旋转时程序替换墨迹，不重置基准
+            if (_isVideoPresenterSpecialMode && !_isApplyingRotationToStrokes)
+            {
+                // 用户手动绘制/擦除墨迹，重置旋转基准，下次旋转重新保存基准
+                ResetRotationBaseline();
+            }
+
             if (IsCurrentPageFrozen && _currentCommitType != CommitReason.CodeInput)
             {
                 var previousCommitType = _currentCommitType;
@@ -539,6 +753,11 @@ namespace Ink_Canvas
 
             if (e.Added.Count != 0 || e.Removed.Count != 0)
                 MarkCurrentPageInkChanged();
+
+            // 长按撤销清屏：清空前已显式提交可撤销历史，这里吞掉事件路径的自动重复提交
+            // （含点擦分支的批量收集），避免产生重复历史或污染橡皮擦批处理。
+            if (_suppressClearHistoryCommit && _currentCommitType == CommitReason.ClearingCanvas)
+                return;
 
             if ((e.Added.Count != 0 || e.Removed.Count != 0) && IsEraseByPoint)
             {
@@ -674,6 +893,22 @@ namespace Ink_Canvas
                 return;
             }
 
+            // 视频展台旋转墨迹时（_isApplyingRotationToStrokes=true），不提交操作历史，
+            // 否则撤销/重做会尝试恢复旋转前的墨迹位置，与已旋转的视频画面不同步。
+            // 旋转后 StrokeInitialHistory 已在 RotateBoothStrokesFromBaseline 中更新。
+            if (_isApplyingRotationToStrokes)
+                return;
+
+            // 视频展台模式：拖动/缩放摄像头预览导致的墨迹变换是视图操作，不是墨迹编辑，
+            // 不提交到 TimeMachine。撤销应直接撤销绘制（在当前位置删除墨迹），
+            // 而不是先回退移动/旋转再撤销绘制。
+            // 只更新 StrokeInitialHistory 为当前位置，避免后续退出展台后操作初始值错误。
+            if (_isVideoPresenterSpecialMode)
+            {
+                StrokeInitialHistory[sender as Stroke] = (sender as Stroke).StylusPoints.Clone();
+                return;
+            }
+
             var selectedStrokes = inkCanvas.GetSelectedStrokes();
             var count = selectedStrokes.Count;
             if (count == 0) count = inkCanvas.Strokes.Count;
@@ -686,16 +921,33 @@ namespace Ink_Canvas
             StrokeManipulationHistory[sender as Stroke] =
                 new Tuple<StylusPointCollection, StylusPointCollection>(StrokeInitialHistory[sender as Stroke],
                     (sender as Stroke).StylusPoints.Clone());
-            if ((StrokeManipulationHistory.Count == count || sender == null) && dec.Count == 0)
+            if ((StrokeManipulationHistory.Count == count || sender == null)
+                && dec.Count == 0
+                && !_isStrokeRotationOverlayActive)
             {
-                timeMachine.CommitStrokeManipulationHistory(StrokeManipulationHistory);
-                foreach (var item in StrokeManipulationHistory)
-                {
-                    StrokeInitialHistory[item.Key] = item.Value.Item2;
-                }
-
-                StrokeManipulationHistory = null;
+                CommitPendingStrokeManipulationHistory();
             }
+        }
+
+        /// <summary>
+        /// 提交待处理的墨迹操作历史（拖动/缩放结束后调用）。
+        /// 将 StrokeManipulationHistory 一次性提交到 TimeMachine，避免逐帧提交产生大量历史条目。
+        /// </summary>
+        private void CommitPendingStrokeManipulationHistory()
+        {
+            if (StrokeManipulationHistory == null || StrokeManipulationHistory.Count == 0) return;
+
+            timeMachine.CommitStrokeManipulationHistory(StrokeManipulationHistory);
+            foreach (var item in StrokeManipulationHistory)
+            {
+                StrokeInitialHistory[item.Key] = item.Value.Item2;
+            }
+
+            StrokeManipulationHistory = null;
+
+            // 视频展台模式：墨迹被移动/缩放后，旋转基准已过期，重置以便下次旋转重新保存
+            if (_isVideoPresenterSpecialMode && !_isApplyingRotationToStrokes)
+                ResetRotationBaseline();
         }
     }
 }

@@ -123,7 +123,9 @@
 │   └── 快捷键
 │       ├── InfoBar: 快捷键说明
 │       ├── TextBlock "鼠标模式"
-│       │   └── LabeledSettingsCard: 鼠标模式下启用快捷键 → ToggleSwitch
+│       │   ├── LabeledSettingsCard: 鼠标模式下启用快捷键 → ToggleSwitch
+│       │   ├── LabeledSettingsCard: 绘制模式下滚轮穿透 → ToggleSwitch
+│       │   └── LabeledSettingsCard: PPT 放映时接管 PageUp/PageDown → ToggleSwitch
 │       ├── TextBlock "基本操作"
 │       │   ├── HotkeyItem: 撤销
 │       │   ├── HotkeyItem: 重做
@@ -511,7 +513,11 @@
 │   │   ├── LabeledSettingsCard: 使用外部调用 → ToggleSwitch
 │   │   ├── SettingsCard: 外部调用类型 → ComboBox
 │   │   ├── SettingsCard: 单次关闭延迟 → Slider
-│   │   └── SettingsCard: 单次最大人数 → Slider
+│   │   ├── SettingsCard: 单次最大人数 → Slider
+│   │   └── SettingsExpander: 快抽结果滑动 → ToggleSwitch（开则展开）
+│   │       ├── SettingsCard: 触发概率 → Slider
+│   │       ├── SettingsCard: 跳变间隔（秒） → Slider
+│   │       └── SettingsCard: 跳动动画 → ToggleSwitch
 │   ├── TextBlock "背景设置"
 │   │   └── SettingsCard: 背景选择 → Button × 2 + ComboBox
 │   ├── TextBlock "新 UI"

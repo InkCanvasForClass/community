@@ -32,6 +32,8 @@ By using this version of InkCanvasForClass, you agree to assume all potential is
 
 **Smart Education Alliance InkCanvasForClass Community Edition Section:** [forum.smart-teach.cn/t/icc-ce](https://forum.smart-teach.cn/t/icc-ce). This is where we post version update logs. You are also welcome to ask questions or share your experience here, provided you comply with the forum management rules and the section's terms of service.
 
+**Official Website Address:** [iccce.ink](https://iccce.ink).
+
 ## ⚠️ Important Notice
 
 Before using and distributing this software, please make sure you understand the relevant open-source licenses. This software is modified based on <https://github.com/InkCanvasForClass/icc-20240610-stable>, which in turn is modified based on <https://github.com/ChangSakura/Ink-Canvas>. Meanwhile, ICA is based on <https://github.com/WXRIW/Ink-Canvas> with additional features including, but not limited to, hiding to the sidebar, alongside modified UI and software interaction logic. For feedback regarding ink writing functionality or features unique to ICA, it is recommended to check <https://github.com/WXRIW/Ink-Canvas/issues> first. **Please bring your brain along before using.**
@@ -70,7 +72,7 @@ If it still doesn't run, please [install `Microsoft Office`](https://www.coolhub
 
 ## ✏️ Contribution Guidelines
 
-**Please note that when contributing code, you _must_ submit all changes to the _net6_ branch to ensure that the net6 version is always ahead of the main branch.**
+**Please note that when contributing code, you _must_ submit all changes to the _net10_ branch to ensure that the net10 version is always ahead of the main branch.**
 
 ## Todo LIST
 
@@ -118,6 +120,7 @@ If it still doesn't run, please [install `Microsoft Office`](https://www.coolhub
     <tr>
       <td align="center" valign="top" width="20%"><a href="https://github.com/Makitoid"><img src="https://avatars.githubusercontent.com/u/123004192?v=4?s=100" width="100px;" alt="Makitoid Wang"/><br /><sub><b>Makitoid Wang</b></sub></a><br /><a href="https://github.com/InkCanvasForClass/community/commits?author=Makitoid" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="20%"><a href="https://hhh2309.github.io/"><img src="https://avatars.githubusercontent.com/u/179317266?v=4?s=100" width="100px;" alt="HHH2309"/><br /><sub><b>HHH2309</b></sub></a><br /><a href="https://github.com/InkCanvasForClass/community/commits?author=HHH2309" title="Code">💻</a></td>
+      <td align="center" valign="top" width="20%"><a href="https://github.com/Huoxing-Rusty"><img src="https://avatars.githubusercontent.com/u/220455872?v=4?s=100" width="100px;" alt="Rusty"/><br /><sub><b>Rusty</b></sub></a><br /><a href="https://github.com/InkCanvasForClass/community/commits?author=Huoxing-Rusty" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>

@@ -13,7 +13,7 @@ namespace Ink_Canvas.Helpers
 {
     /// <summary>
     /// 基于 DirectShow (DirectShowLib) FilterGraph + SampleGrabber 的摄像头服务实现。
-    /// 不依赖 AForge.Video / WinRT，纯 DirectShow + GDI+。兼容 Win7 SP1+。
+    /// 纯 DirectShow + GDI+，兼容 Win7 SP1+。
     /// ScreenshotSelectorWindow 使用此实现（不创建 UI 控件，纯帧事件路径）。
     /// 视频展台特殊模式（全屏预览）仍走 MainWindow.VideoPresenterFullCanvasImage (WPFMediaKit VideoCaptureElement)。
     /// </summary>
@@ -33,6 +33,29 @@ namespace Ink_Canvas.Helpers
         private readonly object _frameLock = new object();
         private Dispatcher _dispatcher;
         private int _rotationAngle = 0;
+
+        // === 摄像头属性控制（手机专业模式：亮度/对比度/饱和度/色温/增益/焦距/快门）===
+        // 通过 DirectShow IAMVideoProcAmp / IAMCameraControl 写入摄像头硬件。
+        // 用一个常驻"不抢占设备"的 FilterGraphNoThread + source filter 同时持有两个接口；
+        // 与 EnumerateResolutionsAsync 同构（不调用 Run()，不连接 capture pin），可与 VideoCaptureElement 流式预览共存。
+        private readonly Dictionary<BoothCameraProperty, CameraPropState> _cameraPropStates =
+            new Dictionary<BoothCameraProperty, CameraPropState>();
+        private IFilterGraph2 _propGraph;
+        private IBaseFilter _propSourceFilter;
+        private IAMVideoProcAmp _propVideoProcAmp;
+        private IAMCameraControl _propCameraControl;
+
+        /// <summary>每个属性到 DirectShow 接口类别 + 原生 property 枚举的映射表。</summary>
+        private static readonly (BoothCameraProperty prop, bool isVideoProcAmp, object nativeProp)[] PropSpecs =
+        {
+            (BoothCameraProperty.Brightness,   true,  VideoProcAmpProperty.Brightness),
+            (BoothCameraProperty.Contrast,     true,  VideoProcAmpProperty.Contrast),
+            (BoothCameraProperty.Saturation,   true,  VideoProcAmpProperty.Saturation),
+            (BoothCameraProperty.WhiteBalance, true,  VideoProcAmpProperty.WhiteBalance),
+            (BoothCameraProperty.Gain,         true,  VideoProcAmpProperty.Gain),
+            (BoothCameraProperty.Focus,        false, CameraControlProperty.Focus),
+            (BoothCameraProperty.Exposure,     false, CameraControlProperty.Exposure),
+        };
 
         private readonly List<CameraInfo> _cameras = new List<CameraInfo>();
         private readonly List<ResolutionInfo> _nativeResolutions = new List<ResolutionInfo>();
@@ -60,6 +83,348 @@ namespace Ink_Canvas.Helpers
         {
             get => _rotationAngle;
             set => _rotationAngle = Math.Max(0, Math.Min(3, value));
+        }
+
+        // ====================================================================
+        // 摄像头属性控制（统一实现：IAMVideoProcAmp + IAMCameraControl）
+        // ====================================================================
+
+        /// <summary>亮度（曝光度）归一化值 -100..100，0=摄像头默认。等价于 GetCameraPropertyValue(Brightness)。</summary>
+        public int Brightness
+        {
+            get => GetCameraPropertyValue(BoothCameraProperty.Brightness);
+            set => SetCameraPropertyValue(BoothCameraProperty.Brightness, value);
+        }
+
+        /// <summary>当前摄像头是否支持亮度调节。等价于 IsCameraPropertySupported(Brightness)。</summary>
+        public bool BrightnessSupported => IsCameraPropertySupported(BoothCameraProperty.Brightness);
+
+        /// <summary>探测全部属性。等价于 ProbeCameraPropertiesAsync。</summary>
+        public Task ProbeBrightnessSupportAsync() => ProbeCameraPropertiesAsync();
+
+        /// <summary>应用 Brightness。等价于 ApplyCameraPropertyAsync(Brightness)。</summary>
+        public Task<bool> ApplyBrightnessAsync() => ApplyCameraPropertyAsync(BoothCameraProperty.Brightness);
+
+        /// <summary>释放属性控制资源。等价于 ReleaseCameraPropertyControl。</summary>
+        public void ReleaseBrightnessControl() => ReleaseCameraPropertyControl();
+
+        /// <inheritdoc/>
+        public IReadOnlyDictionary<BoothCameraProperty, CameraPropState> CameraProperties => _cameraPropStates;
+
+        /// <inheritdoc/>
+        public int GetCameraPropertyValue(BoothCameraProperty prop)
+        {
+            return _cameraPropStates.TryGetValue(prop, out var s) && s.Supported
+                ? s.NormalizedValue
+                : 0;
+        }
+
+        /// <inheritdoc/>
+        public bool IsCameraPropertySupported(BoothCameraProperty prop)
+        {
+            return _cameraPropStates.TryGetValue(prop, out var s) && s.Supported;
+        }
+
+        /// <inheritdoc/>
+        public void SetCameraPropertyValue(BoothCameraProperty prop, int value)
+        {
+            if (!_cameraPropStates.TryGetValue(prop, out var s) || !s.Supported) return;
+            int v = Math.Max(-100, Math.Min(100, value));
+            if (v == s.NormalizedValue) return;
+            s.NormalizedValue = v;
+            // 异步应用到硬件，不阻塞 UI 线程（slider 拖动响应灵敏）
+            _ = ApplyCameraPropertyAsync(prop);
+        }
+
+        /// <summary>
+        /// 探测当前摄像头支持的全部属性，构建常驻"不抢占设备"的图同时持有 IAMVideoProcAmp 与 IAMCameraControl。
+        /// 复用 EnumerateResolutionsAsync 的 FilterGraphNoThread + AddSourceFilterForMoniker 方式，不调用 Run()。
+        /// </summary>
+        public Task ProbeCameraPropertiesAsync()
+        {
+            return Task.Run(() =>
+            {
+                try
+                {
+                    // 切换摄像头/重复探测前先释放旧图与状态
+                    ReleaseCameraPropertyControl();
+                    foreach (var key in _cameraPropStates.Keys.ToList())
+                    {
+                        _cameraPropStates[key].Supported = false;
+                    }
+
+                    if (_cameras.Count == 0)
+                    {
+                        RefreshCameraListAsync().GetAwaiter().GetResult();
+                    }
+                    if (_cameras.Count == 0 || CurrentCamera == null)
+                    {
+                        LogHelper.WriteLogToFile("[DirectShow] ProbeCameraProperties: 无可用摄像头", LogHelper.LogType.Info);
+                        return;
+                    }
+
+                    // 通过 MonikerString/Name 重新枚举 DsDevice，拿到 IMoniker 用于 AddSourceFilterForMoniker
+                    var devices = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
+                    DsDevice target = null;
+                    for (int i = 0; i < devices.Length; i++)
+                    {
+                        if (string.Equals(devices[i].DevicePath, CurrentCamera.MonikerString, StringComparison.OrdinalIgnoreCase)
+                            || string.Equals(devices[i].Name, CurrentCamera.MonikerString, StringComparison.OrdinalIgnoreCase)
+                            || string.Equals(devices[i].Name, CurrentCamera.Name, StringComparison.OrdinalIgnoreCase))
+                        {
+                            target = devices[i];
+                            break;
+                        }
+                    }
+                    if (target == null)
+                    {
+                        LogHelper.WriteLogToFile(
+                            $"[DirectShow] ProbeCameraProperties: 找不到摄像头 {CurrentCamera.Name}",
+                            LogHelper.LogType.Warning);
+                        return;
+                    }
+
+                    IGraphBuilder graphBuilder = null;
+                    ICaptureGraphBuilder2 captureGraphBuilder = null;
+                    IBaseFilter sourceFilter = null;
+                    try
+                    {
+                        graphBuilder = (IGraphBuilder)new FilterGraphNoThread();
+                        captureGraphBuilder = (ICaptureGraphBuilder2)new CaptureGraphBuilder2();
+                        DsError.ThrowExceptionForHR(captureGraphBuilder.SetFiltergraph(graphBuilder));
+                        DsError.ThrowExceptionForHR(((IFilterGraph2)graphBuilder).AddSourceFilterForMoniker(
+                            target.Mon, null, target.Name, out sourceFilter));
+
+                        // IAMVideoProcAmp / IAMCameraControl 通常在 filter 上，兜底从 capture pin 取
+                        IAMVideoProcAmp vpa = sourceFilter as IAMVideoProcAmp;
+                        IAMCameraControl cc = sourceFilter as IAMCameraControl;
+                        if (vpa == null || cc == null)
+                        {
+                            try
+                            {
+                                var capPin = DsFindPin.ByCategory(sourceFilter, PinCategory.Capture, 0);
+                                if (vpa == null) vpa = capPin as IAMVideoProcAmp;
+                                if (cc == null) cc = capPin as IAMCameraControl;
+                            }
+                            catch (Exception ex)
+                            {
+                                LogHelper.WriteLogToFile($"[Booth] 探测摄像头属性时从采集 pin 获取 IAMVideoProcAmp/IAMCameraControl 失败: {ex.Message}", LogHelper.LogType.Info);
+                            }
+                        }
+
+                        // 遍历属性规格表，对每个属性调用对应接口的 GetRange
+                        int supportedCount = 0;
+                        foreach (var spec in PropSpecs)
+                        {
+                            if (!_cameraPropStates.TryGetValue(spec.prop, out var state))
+                            {
+                                state = new CameraPropState();
+                                _cameraPropStates[spec.prop] = state;
+                            }
+                            state.Supported = false;
+                            state.NormalizedValue = 0;
+                            state.SupportsAuto = false;
+
+                            if (spec.isVideoProcAmp)
+                            {
+                                if (vpa == null) continue;
+                                int hr = vpa.GetRange((VideoProcAmpProperty)spec.nativeProp,
+                                    out int min, out int max, out int step, out int def, out VideoProcAmpFlags flags);
+                                if (hr != 0 || (flags & VideoProcAmpFlags.Manual) == 0)
+                                {
+                                    LogHelper.WriteLogToFile(
+                                        $"[DirectShow] ProbeProps: {spec.prop} 不支持 (hr=0x{hr:X}, flags={flags}, {CurrentCamera.Name})",
+                                        LogHelper.LogType.Info);
+                                    continue;
+                                }
+                                state.HwMin = min;
+                                state.HwMax = max;
+                                state.HwDefault = def;
+                                state.SupportsAuto = (flags & VideoProcAmpFlags.Auto) != 0;
+                                state.Supported = true;
+                                supportedCount++;
+                            }
+                            else
+                            {
+                                if (cc == null) continue;
+                                int hr = cc.GetRange((CameraControlProperty)spec.nativeProp,
+                                    out int min, out int max, out int step, out int def, out CameraControlFlags flags);
+                                if (hr != 0 || (flags & CameraControlFlags.Manual) == 0)
+                                {
+                                    LogHelper.WriteLogToFile(
+                                        $"[DirectShow] ProbeProps: {spec.prop} 不支持 (hr=0x{hr:X}, flags={flags}, {CurrentCamera.Name})",
+                                        LogHelper.LogType.Info);
+                                    continue;
+                                }
+                                state.HwMin = min;
+                                state.HwMax = max;
+                                state.HwDefault = def;
+                                state.SupportsAuto = (flags & CameraControlFlags.Auto) != 0;
+                                state.Supported = true;
+                                supportedCount++;
+                            }
+                        }
+
+                        if (supportedCount == 0)
+                        {
+                            LogHelper.WriteLogToFile(
+                                $"[DirectShow] ProbeCameraProperties: {CurrentCamera.Name} 不支持任何手动属性",
+                                LogHelper.LogType.Info);
+                            // 不保留图（无任何属性可调）
+                            return;
+                        }
+
+                        // 保持常驻图：转移所有权（不在 finally 中释放）
+                        _propGraph = (IFilterGraph2)graphBuilder;
+                        _propSourceFilter = sourceFilter;
+                        _propVideoProcAmp = vpa;
+                        _propCameraControl = cc;
+                        graphBuilder = null;
+                        sourceFilter = null;
+
+                        LogHelper.WriteLogToFile(
+                            $"[DirectShow] ProbeCameraProperties 成功: {CurrentCamera.Name}, 支持属性数={supportedCount}",
+                            LogHelper.LogType.Info);
+
+                        // 探测成功后立即把所有已支持属性当前值应用一次（切换摄像头时恢复用户上次设置）
+                        foreach (var spec in PropSpecs)
+                        {
+                            if (_cameraPropStates.TryGetValue(spec.prop, out var s) && s.Supported)
+                            {
+                                _ = ApplyCameraPropertyInternal(spec.prop);
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        // 仅释放未转移所有权的对象
+                        if (sourceFilter != null) Marshal.ReleaseComObject(sourceFilter);
+                        if (captureGraphBuilder != null) Marshal.ReleaseComObject(captureGraphBuilder);
+                        if (graphBuilder != null) Marshal.ReleaseComObject(graphBuilder);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[DirectShow] ProbeCameraPropertiesAsync 异常: {ex.Message}", LogHelper.LogType.Warning);
+                }
+            });
+        }
+
+        /// <inheritdoc/>
+        public Task<bool> ApplyCameraPropertyAsync(BoothCameraProperty prop)
+        {
+            return Task.Run(() => ApplyCameraPropertyInternal(prop));
+        }
+
+        private bool ApplyCameraPropertyInternal(BoothCameraProperty prop)
+        {
+            if (!_cameraPropStates.TryGetValue(prop, out var state) || !state.Supported) return false;
+            try
+            {
+                // 归一化 -100..100 映射到硬件 [min,max]：
+                //   0 = 默认（Auto）：写 Auto 标志让摄像头回到自动控制（驱动不支持 Auto 时退化为 Manual + 默认值）；
+                //   value>0: def → max 插值；value<0: min → def 插值
+                bool useAuto = state.NormalizedValue == 0 && state.SupportsAuto;
+                int hwValue;
+                if (state.NormalizedValue == 0)
+                {
+                    hwValue = state.HwDefault;
+                }
+                else if (state.NormalizedValue > 0)
+                {
+                    hwValue = state.HwDefault
+                        + (int)Math.Round((state.NormalizedValue / 100.0) * (state.HwMax - state.HwDefault));
+                }
+                else
+                {
+                    hwValue = state.HwDefault
+                        + (int)Math.Round((state.NormalizedValue / 100.0) * (state.HwDefault - state.HwMin));
+                }
+                hwValue = Math.Max(state.HwMin, Math.Min(state.HwMax, hwValue));
+
+                // 查规格表，拿到接口与原生 property 枚举
+                bool isVideoProcAmp = false;
+                object nativeProp = null;
+                foreach (var spec in PropSpecs)
+                {
+                    if (spec.prop == prop)
+                    {
+                        isVideoProcAmp = spec.isVideoProcAmp;
+                        nativeProp = spec.nativeProp;
+                        break;
+                    }
+                }
+                if (nativeProp == null) return false;
+
+                int hr;
+                if (isVideoProcAmp)
+                {
+                    if (_propVideoProcAmp == null) return false;
+                    // 0（默认）写 Auto 让摄像头回到自动控制；非 0 写 Manual（色温/焦距/快门等需切到手动模式）
+                    var flags = useAuto ? VideoProcAmpFlags.Auto : VideoProcAmpFlags.Manual;
+                    hr = _propVideoProcAmp.Set((VideoProcAmpProperty)nativeProp, hwValue, flags);
+                }
+                else
+                {
+                    if (_propCameraControl == null) return false;
+                    var flags = useAuto ? CameraControlFlags.Auto : CameraControlFlags.Manual;
+                    hr = _propCameraControl.Set((CameraControlProperty)nativeProp, hwValue, flags);
+                }
+                if (hr != 0)
+                {
+                    LogHelper.WriteLogToFile($"[DirectShow] 设置 {prop} 失败 hr=0x{hr:X}", LogHelper.LogType.Warning);
+                    return false;
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[DirectShow] ApplyCameraPropertyInternal({prop}) 异常: {ex.Message}", LogHelper.LogType.Warning);
+                return false;
+            }
+        }
+
+        /// <inheritdoc/>
+        public void ReleaseCameraPropertyControl()
+        {
+            if (_propVideoProcAmp != null)
+            {
+                try { Marshal.ReleaseComObject(_propVideoProcAmp); }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Booth] 释放 IAMVideoProcAmp COM 引用失败: {ex.Message}", LogHelper.LogType.Info);
+                }
+                _propVideoProcAmp = null;
+            }
+            if (_propCameraControl != null)
+            {
+                try { Marshal.ReleaseComObject(_propCameraControl); }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Booth] 释放 IAMCameraControl COM 引用失败: {ex.Message}", LogHelper.LogType.Info);
+                }
+                _propCameraControl = null;
+            }
+            if (_propSourceFilter != null)
+            {
+                try { Marshal.ReleaseComObject(_propSourceFilter); }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Booth] 释放属性探测用 source filter COM 引用失败: {ex.Message}", LogHelper.LogType.Info);
+                }
+                _propSourceFilter = null;
+            }
+            if (_propGraph != null)
+            {
+                try { Marshal.ReleaseComObject(_propGraph); }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Booth] 释放属性探测用 FilterGraphNoThread COM 引用失败: {ex.Message}", LogHelper.LogType.Info);
+                }
+                _propGraph = null;
+            }
+            // 不清 _cameraPropStates 的 Supported 状态：调用方切换摄像头后会重新 Probe 覆盖；
+            // 退出展台时整个 service 被 Dispose，状态随对象回收。
         }
 
         public int SelectedResolutionIndex
@@ -126,7 +491,10 @@ namespace Ink_Canvas.Helpers
                 }
                 result.Sort((a, b) => b.CompareTo(a)); // 降序，常用 60fps 在前
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Booth] 汇总指定分辨率({width}x{height})支持的帧率列表失败: {ex.Message}", LogHelper.LogType.Info);
+            }
             return result;
         }
 
@@ -926,7 +1294,11 @@ namespace Ink_Canvas.Helpers
             {
                 if (_mediaControl != null)
                 {
-                    try { _mediaControl.Stop(); } catch { }
+                    try { _mediaControl.Stop(); }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Booth] 内部停止预览时停止 IMediaControl 图失败: {ex.Message}", LogHelper.LogType.Info);
+                    }
                 }
                 CleanupGraph();
                 _isCapturing = false;
@@ -948,7 +1320,11 @@ namespace Ink_Canvas.Helpers
 
                 if (_mediaControl != null)
                 {
-                    try { _mediaControl.Stop(); } catch { }
+                    try { _mediaControl.Stop(); }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Booth] 停止摄像头预览时停止 IMediaControl 图失败: {ex.Message}", LogHelper.LogType.Info);
+                    }
                 }
                 CleanupGraph();
 
@@ -980,7 +1356,11 @@ namespace Ink_Canvas.Helpers
                     // 先断开 sample grabber 回调，避免释放过程中触发
                     if (_sampleGrabber != null)
                     {
-                        try { _sampleGrabber.SetCallback(null, 0); } catch { }
+                        try { _sampleGrabber.SetCallback(null, 0); }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"[Booth] 清理 DirectShow 图前断开 SampleGrabber 回调失败: {ex.Message}", LogHelper.LogType.Info);
+                        }
                     }
 
                     // 释放子 filter RCW（每个是独立的 RCW）
@@ -1336,6 +1716,7 @@ namespace Ink_Canvas.Helpers
         public void Dispose()
         {
             StopPreview();
+            ReleaseCameraPropertyControl();
         }
     }
 }

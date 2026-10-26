@@ -6,15 +6,16 @@ name: Publish SDK to NuGet
 #   - push tag `sdk-v<version>`（如 sdk-v1.7.19.9）：以 tag 内版本号强制发包（等价于 -p:NBGV_OverrideVersion）。
 #   - workflow_dispatch：可手动输入版本号（留空则使用 NBGV 依据 git 状态计算的版本）。
 #
-# 依赖仓库 Secrets：NUGET_API_KEY（nuget.org 发布 API Key）。
+# nuget.org 使用 Trusted Publishing（OIDC），不再需要长期保存 NUGET_API_KEY。
+# 仓库 Secrets：NUGET_USER（nuget.org 用户名/个人资料名，不是邮箱）。
 
 on:
   workflow_dispatch:
     inputs:
       branch:
-        description: '打包来源分支（默认 net6）'
+        description: '打包来源分支（默认 net10）'
         required: false
-        default: 'net6'
+        default: 'net10'
         type: string
       version:
         description: 'NuGet 包版本号（如 1.7.19.9）。留空则使用 NBGV 依据 git 状态计算的版本。'
@@ -27,8 +28,10 @@ on:
 
 permissions:
   contents: read
-  # GHCR NuGet 推送需要 packages: write（GITHUB_TOKEN 自带）。
+  # GitHub Packages 推送需要 packages: write。
   packages: write
+  # nuget.org Trusted Publishing 通过 GitHub OIDC 换取短期 API Key。
+  id-token: write
 
 concurrency:
   group: publish-sdk-nuget
@@ -41,13 +44,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6.0.2
         with:
-          # tag 触发时（push）ref 留空，自动检出被推送的 tag；手动触发时默认检出 net6。
-          ref: ${{ github.event_name == 'push' && '' || github.event.inputs.branch || 'net6' }}
+          # tag 触发时（push）ref 留空，自动检出被推送的 tag；手动触发时默认检出 net10。
+          ref: ${{ github.event_name == 'push' && '' || github.event.inputs.branch || 'net10' }}
 
-      - name: Setup .NET 6
+      - name: Setup .NET 10
         uses: actions/setup-dotnet@v5.2.0
         with:
-          dotnet-version: '6.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Resolve package version
         shell: pwsh
@@ -82,18 +85,29 @@ jobs:
           dotnet @args
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+      # 使用 OIDC 向 nuget.org 换取约 1 小时有效的临时 API Key。
+      - name: NuGet login (Trusted Publishing)
+        id: nuget-login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
       - name: Push to NuGet.org
         shell: pwsh
+        env:
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
         run: |
-          $files = Get-ChildItem "$env:GITHUB_WORKSPACE/dist" -Filter *.nupkg
-          if (-not $files) { throw "No .nupkg files found in dist" }
+          $ErrorActionPreference = "Stop"
+          $files = @(Get-ChildItem "$env:GITHUB_WORKSPACE/dist" -Filter "*.nupkg" -File |
+            Where-Object { $_.Name -notlike "*.snupkg" })
+          if ($files.Count -eq 0) { throw "No NuGet packages found in dist" }
           foreach ($file in $files) {
             Write-Host "Pushing $($file.Name) to nuget.org"
-            dotnet nuget push $file.FullName --source https://api.nuget.org/v3/index.json --api-key $env:NUGET_API_KEY --skip-duplicate
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            dotnet nuget push $file.FullName --source "https://api.nuget.org/v3/index.json" --api-key $env:NUGET_API_KEY --skip-duplicate
+            if ($LASTEXITCODE -ne 0) {
+              throw "Failed to publish $($file.Name) to nuget.org (exit code $LASTEXITCODE)"
+            }
           }
-        env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
       - name: Push to GitHub Packages
         # 同步推一份到 GitHub Packages NuGet 源，让仓库侧栏 Packages 区块亮起。

@@ -31,6 +31,7 @@ namespace Ink_Canvas
         public void ReloadSettingsFromFile()
         {
             LoadSettings(false, skipAutoUpdateCheck: true);
+            SyncWhiteboardTipsAutoHide();
         }
 
         /// <summary>
@@ -57,6 +58,7 @@ namespace Ink_Canvas
 
                         if (Settings != null)
                         {
+                            LogHelper.SetLogLevel(Settings?.Advanced?.LogLevel);
                             CleanupObsoleteSettings(text);
                         }
 
@@ -151,6 +153,7 @@ namespace Ink_Canvas
 
             // Migrate legacy chicken soup source setting to new multi-source format
             SettingsManager.MigrateChickenSoupSettings();
+            SettingsManager.MigrateVideoBoothSettings();
 
             try
             {
@@ -172,8 +175,9 @@ namespace Ink_Canvas
             {
                 ProcessProtectionManager.ApplyFromSettings();
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[ProcGuard] 按设置应用进程保护失败: {ex.Message}", LogHelper.LogType.Info);
             }
 
             // Startup
@@ -642,6 +646,9 @@ namespace Ink_Canvas
                 UpdateQuickColorPaletteIndicator(inkCanvas.DefaultDrawingAttributes.Color);
             }), System.Windows.Threading.DispatcherPriority.Loaded);
 
+            LogHelper.WriteLogToFile(
+                $"[Settings] 设置加载完成: isStartup={isStartup}, theme={Settings.Appearance?.Theme}, language={Settings.Appearance?.Language}, pptLink={Settings.PowerPointSettings?.PPTLinkMode}",
+                LogHelper.LogType.Info);
         }
 
         /// <summary>

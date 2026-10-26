@@ -1,4 +1,4 @@
-using H.NotifyIcon;
+﻿using H.NotifyIcon;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Plugins;
 using Ink_Canvas.Properties;
@@ -29,7 +29,7 @@ using Windows.Win32.UI.Accessibility;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
 using SplashScreen = Ink_Canvas.Windows.SplashScreen;
-using Timer = System.Threading.Timer;
+using Timer = System.Threading.Timer;   
 
 namespace Ink_Canvas
 {
@@ -104,6 +104,9 @@ namespace Ink_Canvas
         }
 
         public static string[] StartArgs;
+
+        /// <summary>从文件关联双击打开的插件关联文件路径；插件加载完成后派发给注册该扩展名的插件。</summary>
+        internal static string PendingPluginFilePath;
         public static string RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
         /// <summary>
@@ -232,8 +235,9 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile("App | UIAccess 进程跳过 SetCurrentProcessExplicitAppUserModelID（规避 Shell/COM 堆损坏）", LogHelper.LogType.Info);
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[App] 设置 AppUserModelID 失败（任务栏分组可能异常）: {ex.Message}", LogHelper.LogType.Info);
             }
 
             // 配置TLS协议以支持Windows 7
@@ -317,6 +321,7 @@ namespace Ink_Canvas
             DispatcherUnhandledException += App_DispatcherUnhandledException;
             Exit += App_Exit;
             StartHeartbeatMonitor();
+            LogHelper.WriteLogToFile("[Crash] 已注册应用启动、退出和未处理异常事件", LogHelper.LogType.Info);
 
             // 初始化全局异常和进程结束处理
             InitializeCrashListeners();
@@ -347,7 +352,7 @@ namespace Ink_Canvas
                 // 复用 _pluginEventService 实例：App_Exit 广播 AppExiting 时，插件经 DI 拿到的就是同一实例
                 (typeof(Plugins.IEventService),           _pluginEventService),
                 (typeof(Plugins.ISettingsService),        new Plugins.SettingsService()),
-                (typeof(Plugins.IHotkeyService),          new Plugins.HotkeyService(mainWindow.GlobalHotkeyManagerInstance)),
+                (typeof(Plugins.IHotkeyService),          new Plugins.HotkeyService(mainWindow)),
                 (typeof(Plugins.INotificationService),    new Plugins.NotificationService(mainWindow)),
                 (typeof(Plugins.IFileAssociationService),      new Plugins.FileAssociationService()),
                 (typeof(Plugins.IWindowOverviewService),        new Plugins.WindowOverviewService(mainWindow.WindowOverviewModel)),
@@ -368,11 +373,23 @@ namespace Ink_Canvas
                 (typeof(Plugins.INameRosterService),      new Plugins.NameRosterService()),
                 (typeof(Plugins.IInkEffectService),       new Plugins.InkEffectService(mainWindow)),
                 (typeof(Plugins.ICameraService),          new Plugins.CameraService()),
+                (typeof(Plugins.IVideoBoothService),      new Plugins.VideoBoothService(mainWindow)),
                 (typeof(Plugins.ISystemInfoService),      new Plugins.SystemInfoService()),
                 (typeof(Plugins.IBackupService),          new Plugins.BackupService()),
                 (typeof(Plugins.IFileDialogService),      new Plugins.FileDialogService(mainWindow)),
                 (typeof(Plugins.IThemeService),           new Plugins.ThemeService()),
                 (typeof(Plugins.IAnnouncementService),    new Plugins.AnnouncementService()),
+                (typeof(Plugins.ICanvasAppearanceService),       new Plugins.CanvasAppearanceService(mainWindow)),
+                (typeof(Plugins.IFocusInteractionService),       new Plugins.FocusInteractionService(mainWindow)),
+                (typeof(Plugins.ICanvasLayerService),            new Plugins.CanvasLayerService(mainWindow)),
+                (typeof(Plugins.ICanvasToolService),             new Plugins.CanvasToolService(mainWindow)),
+                (typeof(Plugins.ICanvasLineConversionService),   new Plugins.CanvasLineConversionService(mainWindow)),
+                (typeof(Plugins.ICanvasViewportService),         new Plugins.CanvasViewportService(mainWindow)),
+                (typeof(Plugins.ICanvasCoordinateService),       new Plugins.CanvasCoordinateService(mainWindow)),
+                (typeof(Plugins.IInkTextService),                new Plugins.InkTextService(mainWindow)),
+                (typeof(Plugins.IScreenElementService),          new Plugins.ScreenElementService()),
+                (typeof(Plugins.IUndoService),                   new Plugins.UndoService(mainWindow)),
+                (typeof(Plugins.IWhiteboardDocumentService),     new Plugins.WhiteboardDocumentService(mainWindow)),
             };
 
             foreach (var (iface, impl) in services)
@@ -399,7 +416,8 @@ namespace Ink_Canvas
 
                 if (isWindows7)
                 {
-
+                    // Win7 专用旧式网络栈配置；net10 不再支持 Win7，此分支仅为历史遗留兼容而保留
+#pragma warning disable SYSLIB0014
                     // 启用所有TLS版本以支持Windows 7
                     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
@@ -407,15 +425,16 @@ namespace Ink_Canvas
                     ServicePointManager.DefaultConnectionLimit = 10;
                     ServicePointManager.Expect100Continue = false;
                     ServicePointManager.UseNagleAlgorithm = false;
-
+#pragma warning restore SYSLIB0014
                 }
                 else
                 {
                     // 对于更新的Windows版本，不进行任何TLS配置，使用系统默认设置
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[App] TLS 兼容配置失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -424,6 +443,7 @@ namespace Ink_Canvas
         {
             if (crashListenersInitialized) return;
 
+            LogHelper.WriteLogToFile("[Crash] 开始初始化崩溃与进程退出监听器", LogHelper.LogType.Info);
             try
             {
                 // 确保崩溃日志目录存在
@@ -467,7 +487,7 @@ namespace Ink_Canvas
                 }
 
                 crashListenersInitialized = true;
-                LogHelper.WriteLogToFile("已初始化崩溃监听器");
+                LogHelper.WriteLogToFile("[Crash] 崩溃与进程退出监听器初始化完成", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
@@ -502,8 +522,9 @@ namespace Ink_Canvas
                 Current.MainWindow.SourceInitialized -= MainWindow_SourceInitialized;
                 Current.MainWindow.SourceInitialized += MainWindow_SourceInitialized;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Crash] 绑定主窗口 SourceInitialized 事件失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -524,8 +545,9 @@ namespace Ink_Canvas
 
                 RegisterMainWindowDestroyHook();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Crash] 注册主窗口销毁监听失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -581,8 +603,9 @@ namespace Ink_Canvas
                     processDestroyHook = new UnhookWinEventSafeHandle();
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[Crash] 卸载窗口销毁 WinEvent 钩子失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -699,6 +722,10 @@ namespace Ink_Canvas
             try
             {
                 var exception = e.ExceptionObject as Exception;
+                var exceptionTypeName = exception == null ? "<unknown>" : exception.GetType().FullName;
+                LogHelper.WriteLogToFile(
+                    $"[Crash] 捕获非 UI 线程未处理异常: type={exceptionTypeName}, terminating={e.IsTerminating}",
+                    LogHelper.LogType.Info);
 
                 if (exception is System.Runtime.InteropServices.COMException comEx)
                 {
@@ -744,6 +771,7 @@ namespace Ink_Canvas
 
                 string errorMessage = exception?.ToString() ?? "未知异常";
                 lastErrorMessage = errorMessage;
+                LogHelper.WriteLogToFile("[Crash] 非 UI 异常未被安全分类，写入崩溃记录", LogHelper.LogType.Info);
 
                 WriteCrashLog($"捕获到未处理的异常: {errorMessage}");
 
@@ -775,6 +803,7 @@ namespace Ink_Canvas
             CleanupTerminationMonitoring();
             TimeSpan runDuration = DateTime.Now - appStartTime;
             string durationText = FormatTimeSpan(runDuration);
+            LogHelper.WriteLogToFile($"[Exit] 进程退出事件: duration={durationText}", LogHelper.LogType.Info);
             WriteCrashLog($"应用程序退出，运行时长: {durationText}");
 
             // 如果有最后错误消息，记录到日志
@@ -1010,14 +1039,25 @@ namespace Ink_Canvas
             try
             {
                 int crashAction = 2;
-                try { crashAction = (int)(parsedSettings?["startup"]?["crashAction"] ?? 2); } catch { }
+                try { crashAction = (int)(parsedSettings?["startup"]?["crashAction"] ?? 2); }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[App] 解析崩溃后动作设置失败，改用默认值 2: {ex.Message}", LogHelper.LogType.Info);
+                }
                 CrashAction = (CrashActionType)crashAction;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[App] 同步崩溃后动作失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
+            var uiExceptionTypeName = e.Exception == null ? "<unknown>" : e.Exception.GetType().FullName;
+            LogHelper.WriteLogToFile(
+                $"[Crash] 捕获 UI 线程未处理异常: type={uiExceptionTypeName}",
+                LogHelper.LogType.Info);
             if (e.Exception is System.Runtime.InteropServices.COMException comEx)
             {
                 var hr = (uint)comEx.HResult;
@@ -1079,6 +1119,7 @@ namespace Ink_Canvas
             e.Handled = true;
 
             SyncCrashActionFromSettings(); // 崩溃时同步最新设置
+            LogHelper.WriteLogToFile($"[Crash] UI 异常处理策略: {CrashAction}", LogHelper.LogType.Info);
 
             if (CrashAction == CrashActionType.ShowCrashWindow)
             {
@@ -1117,6 +1158,9 @@ namespace Ink_Canvas
         async void App_Startup(object sender, StartupEventArgs e)
         {
             appStartTime = DateTime.Now;
+            LogHelper.WriteLogToFile(
+                $"[Startup] App_Startup 开始，参数 {e.Args.Length} 个: {string.Join(" ", e.Args)}",
+                LogHelper.LogType.Info);
 
             // ARM64 渲染模式自适应：Surface Pro X 等 ARM64 设备走 WARP 软件光栅，
             // WPF 默认按 GPU 路径会触发无效 GPU 句柄的探测耗时与偶发 fallback。
@@ -1145,7 +1189,14 @@ namespace Ink_Canvas
             CurrentStartupMode = GetStartupModeFromParsed(parsedSettings);
             LogHelper.WriteLogToFile($"App | 启动模式: {CurrentStartupMode}");
 
+            // 照片矫正加速模式：CUDA 模式下设置 OPENCV_OPENCL_DEVICE 强制使用 NVIDIA OpenCL 平台。
+            // 必须在 OpenCV 第一次创建 UMat 之前设置才能生效（OpenCL 上下文进程级别单初始化）。
+            ApplyPhotoCorrectionAccelerationFromParsed(parsedSettings);
+
             TryApplyPreferredLanguageFromParsedSettings(parsedSettings);
+
+            // 应用 Windows 系统个性化强调色到全局主题管理器，使强调按钮与弹窗确认按钮自动匹配系统强调色
+            ThemeHelper.ApplySystemAccentColor();
 
             // 根据设置决定是否显示启动画面（复用已解析的设置对象）
             if (ShouldShowSplashScreenFromParsed(parsedSettings) && !IsLaunchByFileOrUri(e.Args))
@@ -1397,6 +1448,21 @@ namespace Ink_Canvas
                             LogHelper.WriteLogToFile("通过IPC发送文件路径失败", LogHelper.LogType.Warning);
                         }
                     }
+                    // 检查是否有插件关联文件参数（文件关联打开）
+                    else if (!string.IsNullOrEmpty(FileAssociationManager.GetPluginFileFromArgs(e.Args)))
+                    {
+                        string pluginFile = FileAssociationManager.GetPluginFileFromArgs(e.Args);
+                        LogHelper.WriteLogToFile($"检测到已运行实例，尝试通过IPC发送插件关联文件: {pluginFile}", LogHelper.LogType.Event);
+
+                        if (FileAssociationManager.TrySendPluginFileToExistingInstance(pluginFile))
+                        {
+                            LogHelper.WriteLogToFile("插件关联文件路径已通过IPC发送给已运行实例", LogHelper.LogType.Event);
+                        }
+                        else
+                        {
+                            LogHelper.WriteLogToFile("通过IPC发送插件关联文件路径失败", LogHelper.LogType.Warning);
+                        }
+                    }
                     // 检查是否有--board参数
                     else if (hasBoardArg)
                     {
@@ -1498,6 +1564,11 @@ namespace Ink_Canvas
 
             StartArgs = e.Args;
 
+            // 文件关联双击打开插件关联文件：记录待打开路径，等插件加载完成后派发给注册该扩展名的插件。
+            PendingPluginFilePath = FileAssociationManager.GetPluginFileFromArgs(e.Args);
+            if (!string.IsNullOrEmpty(PendingPluginFilePath))
+                LogHelper.WriteLogToFile($"App | 检测到插件文件关联启动，待插件加载后打开: {PendingPluginFilePath}", LogHelper.LogType.Event);
+
             // 在非更新模式下创建主窗口
             if (_isSplashScreenShown)
             {
@@ -1522,6 +1593,7 @@ namespace Ink_Canvas
             }
             var mainWindow = new MainWindow();
             MainWindow = mainWindow;
+            LogHelper.WriteLogToFile($"[Startup] 主窗口已创建，启动模式={CurrentStartupMode}", LogHelper.LogType.Info);
 
             // 最快模式将插件服务注册延迟到首帧显示之后，其他模式在显示主窗口前注册。
             if (!IsFastestStartupMode)
@@ -1570,6 +1642,7 @@ namespace Ink_Canvas
 
             mainWindow.Show();
             MemoryBreakdownHelper.StartAutomaticDumpMonitor();
+            LogHelper.WriteLogToFile("[Startup] 主窗口已显示，进入应用级延迟任务阶段", LogHelper.LogType.Info);
 
             if (IsFastestStartupMode)
             {
@@ -1711,6 +1784,27 @@ namespace Ink_Canvas
                     {
                         LogHelper.WriteLogToFile($"启动插件 IPC 总线失败: {ipcEx.Message}", LogHelper.LogType.Warning);
                     }
+
+                    // 文件关联双击插件关联文件：插件已加载（相关插件在 Initialize 注册了 "open" URI 处理器），
+                    // 把路径派发给注册该扩展名的插件。不走 HandleUriCommand，避免受「启用 URI 协议」设置门禁。
+                    if (!string.IsNullOrEmpty(PendingPluginFilePath))
+                    {
+                        try
+                        {
+                            string pending = PendingPluginFilePath;
+                            PendingPluginFilePath = null;
+                            bool handled = Helpers.FileAssociationManager.DispatchPluginFileOpen(pending);
+                            if (handled)
+                                LogHelper.WriteLogToFile($"App | 已派发插件关联文件: {pending}", LogHelper.LogType.Event);
+                            else
+                                LogHelper.WriteLogToFile($"App | 派发插件关联文件失败（插件未加载或未注册处理器）: {pending}", LogHelper.LogType.Warning);
+                        }
+                        catch (Exception pluginFileEx)
+                        {
+                            LogHelper.WriteLogToFile($"App | 派发插件关联文件失败: {pluginFileEx.Message}", LogHelper.LogType.Error);
+                        }
+                    }
+
                     LogHelper.WriteLogToFile(string.Format("插件加载完成，共加载 {0} 个插件", PluginManager.Instance.Plugins.Count));
                 }
                 catch (Exception ex)
@@ -1806,6 +1900,32 @@ namespace Ink_Canvas
             }
 
             return StartupMode.Default;
+        }
+
+        /// <summary>
+        /// 根据 Settings.json 中的 photoCorrectionAcceleration 设置 OPENCV_OPENCL_DEVICE 环境变量。
+        /// CUDA 模式（值=2）下强制使用 NVIDIA OpenCL 平台（NVIDIA OpenCL 底层由 CUDA 驱动）。
+        /// 必须在 OpenCV 第一次创建 UMat 之前调用——OpenCL 上下文一旦初始化无法重置。
+        /// </summary>
+        private static void ApplyPhotoCorrectionAccelerationFromParsed(dynamic parsedSettings)
+        {
+            try
+            {
+                int mode = 0; // 默认 CPU
+                var v = parsedSettings?["automation"]?["photoCorrectionAcceleration"];
+                if (v != null) mode = (int)v;
+                if (mode == 2) // CUDA = NVIDIA OpenCL
+                {
+                    Environment.SetEnvironmentVariable("OPENCV_OPENCL_DEVICE", "NVIDIA:GPU:");
+                    LogHelper.WriteLogToFile(
+                        "App | 照片矫正加速: CUDA 模式，已设置 OPENCV_OPENCL_DEVICE=NVIDIA:GPU: 强制 NVIDIA OpenCL 平台",
+                        LogHelper.LogType.Trace);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"App | 应用照片矫正加速设置失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
         }
 
         private void TryApplyPreferredLanguageFromParsedSettings(dynamic parsedSettings)
@@ -2143,6 +2263,9 @@ namespace Ink_Canvas
         private void App_Exit(object sender, ExitEventArgs e)
         {
             isAppExiting = true;
+            LogHelper.WriteLogToFile(
+                $"[Exit] 开始应用退出清理: user={IsAppExitByUser}, code={e.ApplicationExitCode}, crashAction={CrashAction}",
+                LogHelper.LogType.Info);
 
             // 在卸载插件前广播 AppExiting，让插件有机会清理自身资源。
             try
@@ -2154,15 +2277,23 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"广播插件 AppExiting 失败: {ex.Message}", LogHelper.LogType.Warning);
             }
 
-            try { heartbeatTimer?.Stop(); } catch { }
-            try { watchdogTimer?.Change(Timeout.Infinite, Timeout.Infinite); watchdogTimer?.Dispose(); } catch { }
+            try { heartbeatTimer?.Stop(); } catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Exit] 停止心跳计时器失败: {ex.Message}", LogHelper.LogType.Info);
+            }
+            try { watchdogTimer?.Change(Timeout.Infinite, Timeout.Infinite); watchdogTimer?.Dispose(); } catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Exit] 释放看门狗计时器失败: {ex.Message}", LogHelper.LogType.Info);
+            }
             MemoryBreakdownHelper.StopAutomaticDumpMonitor();
 
             CleanupTerminationMonitoring();
 
             try
             {
+                LogHelper.WriteLogToFile("[Exit] 开始释放 IACore IPC 客户端", LogHelper.LogType.Info);
                 IpcIACoreClient.Instance.Dispose();
+                LogHelper.WriteLogToFile("[Exit] IACore IPC 客户端已释放", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
@@ -2178,14 +2309,17 @@ namespace Ink_Canvas
                     mutex = null;
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Exit] 释放单实例互斥体失败: {ex.Message}", LogHelper.LogType.Info);
+            }
 
             // 卸载所有插件
             try
             {
-                LogHelper.WriteLogToFile("正在卸载插件...");
+                LogHelper.WriteLogToFile("[Exit] 开始卸载插件", LogHelper.LogType.Info);
                 PluginManager.Instance.UnloadAll();
-                LogHelper.WriteLogToFile("插件卸载完成");
+                LogHelper.WriteLogToFile("[Exit] 插件卸载完成", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
@@ -2230,6 +2364,10 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile($"记录设备标识符退出信息失败: {deviceEx.Message}", LogHelper.LogType.Error);
                 }
 
+                LogHelper.WriteLogToFile(
+                    $"[Exit] 记录退出状态完成: user={IsAppExitByUser}, watchdog={(IsAppExitByUser ? "signal" : "preserved")}",
+                    LogHelper.LogType.Info);
+
                 if (IsAppExitByUser)
                 {
                     // 写入退出信号文件，通知看门狗正常退出
@@ -2250,6 +2388,8 @@ namespace Ink_Canvas
                 }
                 catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
             }
+
+            LogHelper.WriteLogToFile("[Exit] 应用退出清理流程结束", LogHelper.LogType.Info);
         }
     }
 }

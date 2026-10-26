@@ -100,7 +100,14 @@ namespace Ink_Canvas.Helpers
             }
             finally
             {
-                try { if (File.Exists(tempPath)) File.Delete(tempPath); } catch { }
+                try
+                {
+                    if (File.Exists(tempPath)) File.Delete(tempPath);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Theme] 清理主题安装临时包 {tempPath} 失败（将残留于临时目录）: {ex.Message}", LogHelper.LogType.Info);
+                }
             }
         }
     }

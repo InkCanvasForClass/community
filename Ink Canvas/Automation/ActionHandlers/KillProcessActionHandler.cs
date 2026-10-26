@@ -1,5 +1,7 @@
+using Ink_Canvas.Helpers;
 using Ink_Canvas.WorkflowAutomation.Abstractions;
 using Ink_Canvas.WorkflowAutomation.Actions;
+using System;
 using System.Diagnostics;
 
 namespace Ink_Canvas.WorkflowAutomation.ActionHandlers
@@ -17,10 +19,17 @@ namespace Ink_Canvas.WorkflowAutomation.ActionHandlers
                 {
                     foreach (var process in Process.GetProcessesByName(s.ProcessName))
                     {
-                        try { process.Kill(); } catch { }
+                        try { process.Kill(); }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"[Automation] 结束进程 处理器: 结束进程 \"{s.ProcessName}\" 中的某个进程失败: {ex.Message}", LogHelper.LogType.Info);
+                        }
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Automation] 结束进程 处理器: 枚举进程 \"{s.ProcessName}\" 失败: {ex.Message}", LogHelper.LogType.Info);
+                }
             });
         }
     }

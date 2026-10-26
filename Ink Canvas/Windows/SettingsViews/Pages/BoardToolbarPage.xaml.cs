@@ -174,11 +174,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var files = BoardToolbarRegistry.ListConfigFiles();
             if (files.Count <= 1)
             {
-                MessageBox.Show(FloatingBarStrings.ToolbarPage_AtLeastOneConfig, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBoxHelper.Show(this, FloatingBarStrings.ToolbarPage_AtLeastOneConfig, FloatingBarStrings.ToolbarPage_Hint, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (MessageBox.Show($"{FloatingBarStrings.ToolbarPage_ConfirmDeleteConfig} \"{name}\"?", FloatingBarStrings.ToolbarPage_ConfirmDelete,
+            if (MessageBoxHelper.Show(this, $"{FloatingBarStrings.ToolbarPage_ConfirmDeleteConfig} \"{name}\"?", FloatingBarStrings.ToolbarPage_ConfirmDelete,
                 MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
                 return;
 
@@ -453,6 +453,16 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (entry == null) return;
             _suppressSave = true;
 
+            // 组件自定义设置面板（动态生成，如截图组件的全局设置）
+            PanelPluginCustomSettings.Children.Clear();
+            PanelPluginCustomSettings.Visibility = Visibility.Collapsed;
+            var builtinItem = BoardToolbarRegistry.FindItem(entry.Id);
+            if (builtinItem?.CustomSettingsPanelFactory != null)
+            {
+                PanelPluginCustomSettings.Visibility = Visibility.Visible;
+                PanelPluginCustomSettings.Children.Add(builtinItem.CustomSettingsPanelFactory());
+            }
+
             TextBoxFixedWidth.Text = entry.GetSettingDouble("fixedWidth")?.ToString() ?? "";
             TextBoxFixedHeight.Text = entry.GetSettingDouble("fixedHeight")?.ToString() ?? "";
             TextBoxMinWidth.Text = entry.GetSettingDouble("minWidth")?.ToString() ?? "";
@@ -463,11 +473,22 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             TextBoxMarginTop.Text = entry.GetSettingDouble("marginTop")?.ToString() ?? "";
             TextBoxMarginRight.Text = entry.GetSettingDouble("marginRight")?.ToString() ?? "";
             TextBoxMarginBottom.Text = entry.GetSettingDouble("marginBottom")?.ToString() ?? "";
+            CheckBoxShowInBoothOnly.IsChecked =
+                entry.GetSettingBool(BoardToolbarRegistry.ShowInBoothOnlySettingKey)
+                || BoardToolbarRegistry.IsBoothItem(entry.Id);
 
             _suppressSave = false;
         }
 
         private void ComponentSetting_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!_isLoaded || SelectedEntry == null || _suppressSave) return;
+            WriteComponentSettingsFromUI(SelectedEntry);
+            SaveSettings();
+        }
+
+        /// <summary>复选框类组件设置的变更入口（如「仅在视频展台显示」）。</summary>
+        private void ComponentSetting_CheckChanged(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded || SelectedEntry == null || _suppressSave) return;
             WriteComponentSettingsFromUI(SelectedEntry);
@@ -486,6 +507,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             WriteDoubleIfNotEmpty(entry, "marginTop", TextBoxMarginTop.Text);
             WriteDoubleIfNotEmpty(entry, "marginRight", TextBoxMarginRight.Text);
             WriteDoubleIfNotEmpty(entry, "marginBottom", TextBoxMarginBottom.Text);
+
+            if (CheckBoxShowInBoothOnly.IsChecked == true)
+                entry.SetSetting(BoardToolbarRegistry.ShowInBoothOnlySettingKey, true);
+            else
+                entry.Settings?.Remove(BoardToolbarRegistry.ShowInBoothOnlySettingKey);
         }
 
         private static void WriteDoubleIfNotEmpty(BoardToolbarComponentEntry entry, string key, string text)

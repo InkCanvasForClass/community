@@ -1,5 +1,6 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Ink;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -27,6 +28,14 @@ namespace Ink_Canvas
         /// 存储触摸设备ID的列表
         /// </summary>
         private List<int> dec = new List<int>();
+        /// <summary>
+        /// 视频展台：自己维护的"当前按下的触点"集合。
+        /// 不能用 e.Manipulators.Count() 作为"几根手指"的判据 —— 多指书写收笔后
+        /// WPF 的操纵会话可能残留接触，导致之后单指触摸被报成 2 个 manipulator，
+        /// 从而把"单指写字"误判成"双指平移/缩放"。
+        /// 本集合在 PreviewTouchDown 无条件加入、PreviewTouchUp 无条件移除，成对可靠。
+        /// </summary>
+        private readonly HashSet<int> _boothDownTouchIds = new HashSet<int>();
         /// <summary>
         /// 是否处于单指拖动模式
         /// </summary>
@@ -1844,19 +1853,29 @@ namespace Ink_Canvas
             }
         }
 
-        /// <summary>
-        /// 获取触摸边界宽度方法
-        /// </summary>
-        /// <param name="e">触摸事件参数</param>
-        /// <returns>返回触摸边界宽度</returns>
-        /// <remarks>
-        /// 手掌擦阈值与特殊屏 <c>TouchMultiplier</c> 在激活逻辑中单独参与计算，此处仅返回几何接触尺寸。
-        /// </remarks>
-        public double GetTouchBoundWidth(TouchEventArgs e)
+        private PalmEraserPolicy BuildPalmEraserPolicy()
         {
-            var args = e.GetTouchPoint(null).Bounds;
-            if (!Settings.Advanced.IsQuadIR) return args.Width;
-            return Math.Sqrt(args.Width * args.Height);
+            var canvas = Settings.Canvas;
+            var advanced = Settings.Advanced;
+            var isNib = Settings.Startup.IsEnableNibMode;
+
+            return new PalmEraserPolicy(
+                enabled: canvas.EnablePalmEraser,
+                isActive: isPalmEraserActive,
+                isQuadIr: advanced.IsQuadIR,
+                isSpecialScreen: advanced.IsSpecialScreen,
+                boundsWidthDip: BoundsWidth,
+                thresholdFactor: isNib
+                    ? advanced.NibModeBoundsWidthThresholdValue
+                    : advanced.FingerModeBoundsWidthThresholdValue,
+                sensitivityMultiplier: PalmEraserCalculator.GetSensitivityMultiplier(
+                    canvas.PalmEraserSensitivity),
+                eraserSizeFactor: isNib
+                    ? advanced.NibModeBoundsWidthEraserSize
+                    : advanced.FingerModeBoundsWidthEraserSize,
+                touchMultiplier: advanced.TouchMultiplier,
+                maximumEraserWidthDip: EraserSizeCalculator.GetMaximumPresetWidthDip(
+                    isEraserCircleShape));
         }
 
         /// <summary>
@@ -1887,49 +1906,98 @@ namespace Ink_Canvas
                 return;
 
             // 视频展台特殊模式：
-            //   - 单指：笔模式让 InkCanvas/原生湿墨正常画墨迹；选择/橡皮擦模式临时切 None 抑制框选
-            //   - 双指（第二指落下）：双指手势用于缩放/平移预览画面（画面与墨迹同步），
-            //     不应产生墨迹。此时取消第一指正在画的未提交墨迹（原生湿墨 CancelAll +
-            //     临时切 None 抑制 WPF Stylus 墨迹），避免双指捏合留下"多余的一条墨迹"。
+            //   - 几何图形绘制：走图形起点初始化，图形不受展台预览手势影响
+            //   - 多指书写开启且可书写：落到通用手写采集路径，每个触点独立成笔（双指同时写字）
+            //   - 其余情况：单指让 InkCanvas/原生湿墨正常画墨迹；选择/橡皮擦模式临时切 None 抑制框选；
+            //     双指（第二指落下）交给预览平移/缩放，此时取消第一指正在画的未提交墨迹
             // 注意：不能用 e.Handled = true —— 这样会同时阻断 Manipulation 事件的提升，
             //      导致 VideoPresenterSpecialMode_ManipulationDelta 永远收不到事件（Q7 根因）。
             // 仍维护 dec，保证 InkCanvas_PreviewTouchUp 中的 dec.Remove 配对。
             if (_isVideoPresenterSpecialMode)
             {
-                bool isSecondFinger = dec.Count >= 1;
-                dec.Add(e.TouchDevice.Id);
+                // 展台：触点按下先无条件记账，后续一切判定都用它作为"几根手指"的依据
+                _boothDownTouchIds.Add(e.TouchDevice.Id);
 
-                if (isSecondFinger)
+                // 几何图形绘制：与普通模式一致，走图形起点初始化（图形不受展台预览手势影响）
+                if (drawingShapeMode != 0)
                 {
-                    // 第二指落下 = 双指手势开始：临时切 None，让 WPF 内置 Ink（legacy 湿墨 EditingMode==Ink）
-                    // 不再把第二指当新墨迹；仅在第一次进双指时保存用户模式，PreviewTouchUp 在所有手指抬起后恢复
-                    if (inkCanvas != null
-                        && inkCanvas.EditingMode != InkCanvasEditingMode.None
-                        && !_boothTouchSavedInkEditingMode.HasValue)
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    SetCursorBasedOnEditingMode(inkCanvas);
+                    inkCanvas.CaptureTouch(e.TouchDevice);
+                    ViewboxFloatingBar.IsHitTestVisible = false;
+                    BlackboardUIGridForInkReplay.IsHitTestVisible = false;
+                    isTouchDown = true;
+
+                    if (dec.Count == 0)
                     {
-                        _boothTouchSavedInkEditingMode = inkCanvas.EditingMode;
+                        var inkTouchPoint = e.GetTouchPoint(inkCanvas);
+                        if (drawingShapeMode == 24 || drawingShapeMode == 25)
+                        {
+                            if (drawMultiStepShapeCurrentStep == 0)
+                                iniP = inkTouchPoint.Position;
+                        }
+                        else
+                        {
+                            iniP = inkTouchPoint.Position;
+                        }
+                        lastTouchDownStrokeCollection = inkCanvas.Strokes.Clone();
                     }
-                    if (inkCanvas != null && inkCanvas.EditingMode != InkCanvasEditingMode.None)
+                    dec.Add(e.TouchDevice.Id);
+                    return;
+                }
+
+                // 多指书写开启且当前是可书写模式：与普通模式一致，落到下方的通用手写采集路径，
+                // 由通用逻辑为每个触点建立独立 StrokeVisual（双指同时写字），双指不再接管预览手势。
+                // 此分支不 return，也不设 e.Handled（否则会阻断 Manipulation 提升）。
+                bool boothCollectTouchInk = MultiTouchWritingEnabled
+                    && inkCanvas != null
+                    && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
+                    && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
+                    && inkCanvas.EditingMode != InkCanvasEditingMode.Select;
+
+                if (!boothCollectTouchInk)
+                {
+                    bool isSecondFinger = dec.Count >= 1;
+                    dec.Add(e.TouchDevice.Id);
+
+                    if (isSecondFinger)
                     {
+                        // 第二指落下 = 双指手势开始：临时切 None，让 WPF 内置 Ink（legacy 湿墨 EditingMode==Ink）
+                        // 不再把第二指当新墨迹；仅在第一次进双指时保存用户模式，PreviewTouchUp 在所有手指抬起后恢复
+                        if (inkCanvas != null
+                            && inkCanvas.EditingMode != InkCanvasEditingMode.None
+                            && !_boothTouchSavedInkEditingMode.HasValue)
+                        {
+                            _boothTouchSavedInkEditingMode = inkCanvas.EditingMode;
+                        }
+                        if (inkCanvas != null && inkCanvas.EditingMode != InkCanvasEditingMode.None)
+                        {
+                            inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                        }
+                    }
+                    else if (inkCanvas != null
+                        && inkCanvas.EditingMode != InkCanvasEditingMode.Ink
+                        && inkCanvas.EditingMode != InkCanvasEditingMode.None
+                        && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
+                        && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
+                    {
+                        // 第一指 + 选择模式：临时切 None 抑制 InkCanvas 内部框选。
+                        // 橡皮擦模式除外——让 InkCanvas 正常执行擦除（否则线擦/点擦在展台会被当作拖动预览）
+                        if (!_boothTouchSavedInkEditingMode.HasValue)
+                        {
+                            _boothTouchSavedInkEditingMode = inkCanvas.EditingMode;
+                        }
                         inkCanvas.EditingMode = InkCanvasEditingMode.None;
                     }
+                    // 不设置 e.Handled = true，让 WPF 把触摸提升为 Manipulation 事件
+                    return;
                 }
-                else if (inkCanvas != null
-                    && inkCanvas.EditingMode != InkCanvasEditingMode.Ink
-                    && inkCanvas.EditingMode != InkCanvasEditingMode.None
-                    && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
-                    && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
-                {
-                    // 第一指 + 选择模式：临时切 None 抑制 InkCanvas 内部框选。
-                    // 橡皮擦模式除外——让 InkCanvas 正常执行擦除（否则线擦/点擦在展台会被当作拖动预览）
-                    if (!_boothTouchSavedInkEditingMode.HasValue)
-                    {
-                        _boothTouchSavedInkEditingMode = inkCanvas.EditingMode;
-                    }
-                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                }
-                // 不设置 e.Handled = true，让 WPF 把触摸提升为 Manipulation 事件
-                return;
+
+                // 通用路径会把 EditingMode 临时压成 None；这里先保存原模式，供抬手时恢复
+                // （否则 RestoreBoothInkEditingMode 无值可恢复，画布会永久停在 None）
+                if (!_boothTouchSavedInkEditingMode.HasValue)
+                    _boothTouchSavedInkEditingMode = inkCanvas.EditingMode;
+                TouchDownPointsList[e.TouchDevice.Id] = InkCanvasEditingMode.None;
             }
 
             if (IsCurrentPageFrozen)
@@ -2025,7 +2093,7 @@ namespace Ink_Canvas
                 return;
             }
 
-            if ((isInMultiTouchMode || (currentMode == 1 ? Settings.Gesture.IsEnableMultiTouchModeBoard : Settings.Gesture.IsEnableMultiTouchMode))
+            if (MultiTouchWritingEnabled
                 && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
                 && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
                 && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
@@ -2163,14 +2231,52 @@ namespace Ink_Canvas
         /// </remarks>
         private void InkCanvas_PreviewTouchUp(object sender, TouchEventArgs e)
         {
+            // 展台：触点抬起先无条件记账（必须在 FinishPalmTouch 提前返回之前），
+            // 保证 _boothDownTouchIds 与真实手指状态始终一致
+            _boothDownTouchIds.Remove(e.TouchDevice.Id);
+
             if (FinishPalmTouch(e)) return;
 
             // 视频展台特殊模式：所有手指抬起后恢复用户原本的 EditingMode
             // （PreviewTouchDown 中为了抑制 InkCanvas 内部框选临时切到了 None）
             if (_isVideoPresenterSpecialMode)
             {
+                // 多指书写：提交该触点累积的笔迹（与普通模式共用同一条提交路径）
+                CommitManualTouchStroke(e.TouchDevice.Id);
+
                 dec.Remove(e.TouchDevice.Id);
-                if (dec.Count == 0)
+
+                if (drawingShapeMode != 0 && dec.Count == 0)
+                {
+                    // 几何图形收尾：与普通模式一致，抬手时生成最终图形
+                    isTouchDown = false;
+                    if (drawingShapeMode == 24 || drawingShapeMode == 25)
+                    {
+                        if (drawMultiStepShapeCurrentStep == 0)
+                        {
+                            drawMultiStepShapeCurrentStep = 1;
+                        }
+                        else
+                        {
+                            var mouseArgs = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left)
+                            {
+                                RoutedEvent = MouseLeftButtonUpEvent,
+                                Source = inkCanvas
+                            };
+                            inkCanvas_MouseUp(inkCanvas, mouseArgs);
+                        }
+                    }
+                    else
+                    {
+                        var mouseArgs = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left)
+                        {
+                            RoutedEvent = MouseLeftButtonUpEvent,
+                            Source = inkCanvas
+                        };
+                        inkCanvas_MouseUp(inkCanvas, mouseArgs);
+                    }
+                }
+                else if (dec.Count == 0)
                 {
                     // 恢复触摸前保存的 EditingMode（失败时保证不会把画布留在 None）
                     RestoreBoothInkEditingMode("touch-up");
@@ -2183,74 +2289,7 @@ namespace Ink_Canvas
             }
 
             var touchId = e.TouchDevice.Id;
-            if (_activeRealtimeTouchStrokeIds.Contains(touchId))
-            {
-                StrokeVisual sv = null;
-                try
-                {
-                    sv = GetStrokeVisual(touchId);
-                    RealtimeInkFrameScheduler.Flush(sv);
-                    var stroke = sv?.Stroke;
-                    if (stroke != null)
-                    {
-                        if (!stroke.ContainsPropertyData(RealtimeVelocityBrushTipAppliedGuid))
-                            stroke.AddPropertyData(RealtimeVelocityBrushTipAppliedGuid, true);
-                        inkCanvas.Strokes.Add(stroke);
-                        inkCanvas_StrokeCollected(inkCanvas, new InkCanvasStrokeCollectedEventArgs(stroke));
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine(ex);
-                }
-                finally
-                {
-                    RealtimeInkFrameScheduler.Cancel(sv);
-                    if (VisualCanvasList.TryGetValue(touchId, out var visualCanvas) && inkCanvas.Children.Contains(visualCanvas))
-                        inkCanvas.Children.Remove(visualCanvas);
-                    StrokeVisualList.Remove(touchId);
-                    VisualCanvasList.Remove(touchId);
-                    TouchDownPointsList.Remove(touchId);
-                    CleanupRealtimeBrushTipState(touchId);
-                    CancelPauseStraightenTimer(touchId);
-                    _activeRealtimeTouchStrokeIds.Remove(touchId);
-                    RealtimeInkPerformanceMonitor.EndStroke(sv);
-                    EndTouchInkInputIfIdle();
-                }
-            }
-            else if (_activeTouchStrokeIds.Contains(touchId))
-            {
-                StrokeVisual sv = null;
-                try
-                {
-                    sv = GetStrokeVisual(touchId);
-                    RealtimeInkFrameScheduler.Flush(sv);
-                    var stroke = sv?.Stroke;
-                    if (stroke != null)
-                    {
-                        inkCanvas.Strokes.Add(stroke);
-                        inkCanvas_StrokeCollected(inkCanvas, new InkCanvasStrokeCollectedEventArgs(stroke));
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine(ex);
-                }
-                finally
-                {
-                    RealtimeInkFrameScheduler.Cancel(sv);
-                    if (VisualCanvasList.TryGetValue(touchId, out var visualCanvas) && inkCanvas.Children.Contains(visualCanvas))
-                        inkCanvas.Children.Remove(visualCanvas);
-                    StrokeVisualList.Remove(touchId);
-                    VisualCanvasList.Remove(touchId);
-                    TouchDownPointsList.Remove(touchId);
-                    CleanupRealtimeBrushTipState(touchId);
-                    CancelPauseStraightenTimer(touchId);
-                    _activeTouchStrokeIds.Remove(touchId);
-                    RealtimeInkPerformanceMonitor.EndStroke(sv);
-                    EndTouchInkInputIfIdle();
-                }
-            }
+            CommitManualTouchStroke(touchId);
 
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint && !isPalmEraserActive)
             {
@@ -2337,6 +2376,53 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 提交一次手动采集的触摸笔画（多指书写 / 实时笔锋）。
+        /// 把 StrokeVisual 中累积的笔迹落到 inkCanvas.Strokes，并清理该触点的采集状态。
+        /// 普通模式与视频展台模式共用同一条路径，保证两边行为一致。
+        /// </summary>
+        /// <param name="touchId">触摸设备 ID；若不在活动采集集合中则什么都不做。</param>
+        private void CommitManualTouchStroke(int touchId)
+        {
+            bool isRealtime = _activeRealtimeTouchStrokeIds.Contains(touchId);
+            if (!isRealtime && !_activeTouchStrokeIds.Contains(touchId)) return;
+
+            StrokeVisual sv = null;
+            try
+            {
+                sv = GetStrokeVisual(touchId);
+                RealtimeInkFrameScheduler.Flush(sv);
+                var stroke = sv?.Stroke;
+                if (stroke != null)
+                {
+                    // 实时笔锋路径需打标记，供后续处理识别该笔已应用速度笔锋
+                    if (isRealtime && !stroke.ContainsPropertyData(RealtimeVelocityBrushTipAppliedGuid))
+                        stroke.AddPropertyData(RealtimeVelocityBrushTipAppliedGuid, true);
+                    inkCanvas.Strokes.Add(stroke);
+                    inkCanvas_StrokeCollected(inkCanvas, new InkCanvasStrokeCollectedEventArgs(stroke));
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
+            finally
+            {
+                RealtimeInkFrameScheduler.Cancel(sv);
+                if (VisualCanvasList.TryGetValue(touchId, out var visualCanvas) && inkCanvas.Children.Contains(visualCanvas))
+                    inkCanvas.Children.Remove(visualCanvas);
+                StrokeVisualList.Remove(touchId);
+                VisualCanvasList.Remove(touchId);
+                TouchDownPointsList.Remove(touchId);
+                CleanupRealtimeBrushTipState(touchId);
+                CancelPauseStraightenTimer(touchId);
+                _activeRealtimeTouchStrokeIds.Remove(touchId);
+                _activeTouchStrokeIds.Remove(touchId);
+                RealtimeInkPerformanceMonitor.EndStroke(sv);
+                EndTouchInkInputIfIdle();
+            }
+        }
+
+        /// <summary>
         /// InkCanvas的操作开始事件处理方法
         /// </summary>
         /// <param name="sender">事件发送者</param>
@@ -2383,6 +2469,8 @@ namespace Ink_Canvas
             // PreviewTouchUp 已经在所有手指抬起后恢复用户原本的模式
             if (_isVideoPresenterSpecialMode)
             {
+                // 操纵会话结束 = 手指已全部抬起，清空触点记账，避免残留影响后续判定
+                _boothDownTouchIds.Clear();
                 return;
             }
 
@@ -2456,17 +2544,17 @@ namespace Ink_Canvas
             // 根本到不了 Container 上的处理器，必须在此转发。
             if (_isVideoPresenterSpecialMode && inkCanvas != null)
             {
-                int manipulatorCount = e.Manipulators?.Count() ?? 0;
-                bool penInkSingleFinger = inkCanvas.EditingMode == InkCanvasEditingMode.Ink && manipulatorCount < 2;
-                // 橡皮擦单指：让 InkCanvas 正常执行擦除，不转发到预览拖动/缩放
-                bool eraserSingleFinger = (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
-                    || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
-                    && manipulatorCount < 2;
-                if (!penInkSingleFinger && !eraserSingleFinger)
-                {
-                    VideoPresenterSpecialMode_ManipulationDelta(sender, e);
-                    return;
-                }
+                int manipulatorCount = ResolveBoothGestureFingerCount(e.Manipulators?.Count() ?? 0);
+                // 图形绘制优先：绘制几何图形时不把触摸转发为预览拖动/缩放
+                if (drawingShapeMode != 0) return;
+                // 多指书写开启：双指留给墨迹，不转发为预览拖动/缩放。
+                // 这里只看"当前设置 + 真实触点数"，不看 _active*StrokeIds 集合
+                // —— 集合是运行时状态，一旦有残留就会长期误拦/误放
+                if (manipulatorCount >= 2 && MultiTouchWritingEnabled) return;
+                // 单指 + 书写/擦除工具：不转发为预览拖动/缩放（与 VideoPresenterSpecialMode_ManipulationStarting 判定一致）
+                if (manipulatorCount < 2 && !AllowBoothSingleFingerPreview()) return;
+                VideoPresenterSpecialMode_ManipulationDelta(sender, e);
+                return;
             }
 
             if (IsCurrentPageFrozen)
@@ -2477,8 +2565,8 @@ namespace Ink_Canvas
             }
 
             if (IsBoardRoamingMode
-                && (_boardRoamingContactIds.Count > 0
-                    || _isBoardRoamingMultiTouchSuppressed
+                && (_boardRoamingContacts.Count > 0
+                    || _isBoardRoamingTwoFingerGesture
                     || (e.Manipulators?.Count() ?? 0) != 1))
             {
                 e.Handled = true;

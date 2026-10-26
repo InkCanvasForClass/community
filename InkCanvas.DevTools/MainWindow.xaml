@@ -1,0 +1,108 @@
+<Window x:Class="InkCanvas.DevTools.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        Title="InkCanvas 开发者调试工具"
+        Height="600"
+        Width="820"
+        MinHeight="460"
+        MinWidth="640"
+        WindowStartupLocation="CenterScreen"
+        ui:ThemeManager.IsThemeAware="True"
+        ui:TitleBar.ExtendViewIntoTitleBar="True"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        ui:WindowHelper.CornerStyle="Round">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- 标题 -->
+        <TextBlock Grid.Row="0"
+                   Text="InkCanvas 开发调试"
+                   FontSize="22"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,16" />
+
+        <!-- 项目与模式选择 -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
+            <TextBlock Text="项目："
+                       VerticalAlignment="Center"
+                       Margin="0,0,8,0" />
+
+            <ComboBox x:Name="ProjectComboBox"
+                      Width="320"
+                      VerticalAlignment="Center"
+                      SelectedIndex="0"
+                      Margin="0,0,20,0"
+                      SelectionChanged="ProjectComboBox_SelectionChanged" />
+
+            <TextBlock Text="模式：" VerticalAlignment="Center" Margin="0,0,8,0" />
+
+            <ComboBox x:Name="ModeComboBox"
+                      Width="120"
+                      VerticalAlignment="Center"
+                      SelectedIndex="0">
+                <ComboBoxItem Content="Debug" />
+                <ComboBoxItem Content="Release" />
+                <ComboBoxItem Content="Publish" />
+            </ComboBox>
+        </StackPanel>
+
+        <!-- 操作按钮 -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,16">
+            <Button x:Name="BuildButton"
+                    Content="编译"
+                    Width="90"
+                    Margin="0,0,8,0"
+                    Click="BuildButton_Click" />
+
+            <Button x:Name="RunButton"
+                    Content="运行"
+                    Width="90"
+                    Margin="0,0,8,0"
+                    Click="RunButton_Click" />
+
+            <Button x:Name="BuildAndRunButton"
+                    Content="编译并运行"
+                    Width="110"
+                    Margin="0,0,8,0"
+                    Click="BuildAndRunButton_Click" />
+
+            <Button x:Name="KillButton"
+                    Content="杀进程"
+                    Width="90"
+                    Margin="0,0,16,0"
+                    Click="KillButton_Click" />
+
+            <CheckBox x:Name="AutoWrapCheckBox"
+                      Content="自动换行"
+                      VerticalAlignment="Center"
+                      IsChecked="False"
+                      Checked="AutoWrapCheckBox_Changed"
+                      Unchecked="AutoWrapCheckBox_Changed" />
+        </StackPanel>
+
+        <!-- 输出日志 -->
+        <Border Grid.Row="3"
+                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="6"
+                Background="{DynamicResource ControlFillColorDefaultBrush}">
+            <TextBox x:Name="OutputTextBox"
+                     IsReadOnly="True"
+                     AcceptsReturn="True"
+                     VerticalScrollBarVisibility="Auto"
+                     HorizontalScrollBarVisibility="Auto"
+                     TextWrapping="NoWrap"
+                     FontFamily="Consolas, Cascadia Code, monospace"
+                     FontSize="13"
+                     Padding="10"
+                     Background="Transparent"
+                     BorderThickness="0" />
+        </Border>
+    </Grid>
+</Window>

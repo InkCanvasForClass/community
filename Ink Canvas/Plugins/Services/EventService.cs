@@ -34,6 +34,8 @@ namespace Ink_Canvas.Plugins
             }
         }
 
+        public bool IsWhiteboardMode => _mainWindow?.IsWhiteboardMode == true;
+
         private void OnSlideShowStateChanged(bool isActive)
         {
             if (isActive) OnSlideShowStarted();

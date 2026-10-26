@@ -118,10 +118,13 @@ namespace Ink_Canvas.Windows
                 EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
             };
 
-            fadeOutAnimation.Completed += (s, e) =>
+            EventHandler completedHandler = null;
+            completedHandler = (s, e) =>
             {
+                fadeOutAnimation.Completed -= completedHandler;  // 解除订阅
                 this.Close();
             };
+            fadeOutAnimation.Completed += completedHandler;
 
             this.BeginAnimation(OpacityProperty, fadeOutAnimation);
         }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using InkCanvas.PowerPointAddIn.Core;
 using InkCanvas.PowerPointAddIn.IPC;
 using InkCanvasPPTAgent.Contracts;

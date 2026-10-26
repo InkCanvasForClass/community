@@ -120,11 +120,14 @@ namespace Ink_Canvas
             frozenPages[pageIndex] = true;
             if (pageIndex == GetCurrentFreezePageIndex())
             {
+                CancelActiveWinRTInk();
+                PushWinRTInkGateSnapshots();
                 ApplyFreezeStateToCurrentStrokes();
                 EnsureCurrentFrozenEditingState();
             }
 
             UpdateInkFreezeButtonState();
+            LogHelper.WriteLogToFile($"[Ink] 页面已冻结: page={pageIndex}", LogHelper.LogType.Info);
             if (notify) ShowNotification(pageIndex == 0 ? MainWindowStrings.Main_Freeze_AnnotationPageFrozen : string.Format(MainWindowStrings.Main_Freeze_WhiteboardPageFrozen, pageIndex));
         }
 
@@ -153,7 +156,10 @@ namespace Ink_Canvas
 
             frozenPages[pageIndex] = false;
             if (pageIndex == GetCurrentFreezePageIndex())
+            {
+                PushWinRTInkGateSnapshots();
                 ApplyFreezeStateToCurrentStrokes();
+            }
 
             UpdateInkFreezeButtonState();
             if (notify) ShowNotification(pageIndex == 0 ? MainWindowStrings.Main_Freeze_PageUnfrozen : string.Format(MainWindowStrings.Main_Freeze_WhiteboardPageUnfrozen, pageIndex));

@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <!-- 声明支持的全部 RID：CI include_runtime 分支用 dotnet publish -r win-x64/win-x86
          （带 no-restore）时，RID 会以全局属性传给 ProjectReference 的 MagHost。
          不声明 RuntimeIdentifiers，restore 就不会为 MagHost 生成对应的 RID 目标，
@@ -19,6 +20,7 @@
     <!-- 不生成 PDB -->
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
+    <CetCompat>false</CetCompat>
     <!-- 输出到自己的 bin\$(Configuration)\$(TargetFramework)\，
          由主项目 CopyLiquidGlassMagHost 在 Build/Publish 后复制到主程序输出目录。
          与 IACoreHelper 的 Copy target 模式一致，AnyCPU(=x64 产物)/x86/x64 的 CI 构建都能带上 exe。 -->
