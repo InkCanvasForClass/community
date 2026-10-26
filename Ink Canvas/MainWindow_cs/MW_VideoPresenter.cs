@@ -599,6 +599,20 @@ namespace Ink_Canvas
                     inkCanvas.IsManipulationEnabled = true;
                 }
 
+                // 展台批注默认使用红色笔：只改笔色与颜色指示器，不强制切到笔模式，
+                // 避免破坏进入展台前选择的工具状态。
+                try
+                {
+                    if (currentMode != 0) lastBoardInkColor = 1;
+                    else lastDesktopInkColor = 1;
+                    CheckColorTheme();
+                    UpdateBoardPenIconColor();
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Booth] 设置展台默认红色笔失败: {ex.Message}", LogHelper.LogType.Info);
+                }
+
                 // 不强制切 EditingMode：保留用户当前模式。
                 //   - 笔模式（Ink）：用户可在预览画面上绘制墨迹批注，触摸手势不会拖动预览
                 //     （Main_Grid_ManipulationDelta 在 Ink 模式下走正常墨迹绘制路径，不走特殊模式缩放）
@@ -644,6 +658,36 @@ namespace Ink_Canvas
                 // 重建后按钮是全新的，需要重新套用展台分页状态
                 // （"新页面"按钮在此位置复用为"展开页码预览"）
                 UpdateBoothPageInfoDisplay();
+
+                // 同步逻辑工具与工具栏高亮。必须放在 RebuildBoardToolbar() 之后：
+                // 重建会生成全新的按钮实例，之前套用的选中背景会丢失。
+                // 另外进入展台时物理 EditingMode 可能已是 Ink，但 _currentToolMode 仍是初始值
+                // "cursor"，会导致笔按钮没有蓝色背景（点一次"选择"再点回"笔"才恢复）。
+                if (inkCanvas != null)
+                {
+                    string logicalMode;
+                    switch (inkCanvas.EditingMode)
+                    {
+                        case InkCanvasEditingMode.Ink:
+                            logicalMode = drawingAttributes?.IsHighlighter == true ? "color" : "pen";
+                            break;
+                        case InkCanvasEditingMode.Select:
+                            logicalMode = "select";
+                            break;
+                        case InkCanvasEditingMode.EraseByPoint:
+                            logicalMode = "eraser";
+                            break;
+                        case InkCanvasEditingMode.EraseByStroke:
+                            logicalMode = "eraserByStrokes";
+                            break;
+                        default:
+                            logicalMode = _currentToolMode;
+                            break;
+                    }
+                    UpdateCurrentToolMode(logicalMode);
+                    // HideSubPanels 同时负责浮动栏和板工具栏按钮的高亮（含 pen 的蓝色背景）
+                    HideSubPanels(logicalMode, true);
+                }
             }
             catch (Exception ex)
             {
@@ -3449,6 +3493,8 @@ namespace Ink_Canvas
             Settings.Automation.IsEnablePhotoCorrection = true;
             SaveSettingsToFile();
             StartPaperDetectTimer();
+            // 展台菜单里的开关变化也要同步到展台工具栏的矫正组件（背景高亮）
+            UpdateBoothToolbarItemStates();
         }
 
         /// <summary>
@@ -3461,6 +3507,8 @@ namespace Ink_Canvas
             Settings.Automation.IsEnablePhotoCorrection = false;
             SaveSettingsToFile();
             StopPaperDetectTimer();
+            // 同步展台工具栏矫正组件的背景高亮
+            UpdateBoothToolbarItemStates();
         }
 
         /// <summary>
@@ -3988,6 +4036,15 @@ namespace Ink_Canvas
                 return;
             }
 
+            // 书写/擦除进行中不做检测：
+            // CopyBackBuffer 是 GPU→CPU 的全帧同步拷贝（4K 一帧约 33MB，且在 UI 线程执行），
+            // 与墨迹渲染抢 UI 线程会造成笔迹卡顿。分辨率越高拷贝越贵，所以只在空闲时检测。
+            if (System.Windows.Input.Mouse.LeftButton == System.Windows.Input.MouseButtonState.Pressed
+                || _activeTouchStrokeIds.Count > 0
+                || _activeRealtimeTouchStrokeIds.Count > 0
+                || _activeRealtimeStylusStrokeIds.Count > 0)
+                return;
+
             // 防重入：上一次后台检测还在跑就跳过
             if (System.Threading.Interlocked.CompareExchange(ref _paperDetectRunning, 1, 0) != 0) return;
 
@@ -4010,14 +4067,28 @@ namespace Ink_Canvas
             int frameW = frameSrc.PixelWidth;
             int frameH = frameSrc.PixelHeight;
 
-            // 后台线程做检测（TryDetectPaperCorners 内部会下采样，~30ms）
+            // CPU/OpenCL/CUDA 三套检测器内部都只把图缩到 500px 宽（PaperDetectTargetWidth）再做检测，
+            // 所以先在 WPF 侧用 TransformedBitmap 等比缩小，避免把 4K 帧完整复制成托管 Bitmap 再交给 OpenCV 缩放。
+            // 这一步只减少拷贝/传输量，不改变检测分辨率与精度。
+            BitmapSource detectSrc = frameSrc;
+            double detectScale = 1.0;
+            int maxSide = Math.Max(frameW, frameH);
+            if (maxSide > PaperDetectTargetWidth)
+            {
+                detectScale = (double)PaperDetectTargetWidth / maxSide;
+                var scaled = new TransformedBitmap(frameSrc, new ScaleTransform(detectScale, detectScale));
+                scaled.Freeze();
+                detectSrc = scaled;
+            }
+
+            // 后台线程做检测（~30ms）
             System.Threading.Tasks.Task.Run(() =>
             {
                 Bitmap bmp = null;
                 List<OpenCvSharp.Point> corners = null;
                 try
                 {
-                    bmp = BitmapSourceToBitmap(frameSrc);
+                    bmp = BitmapSourceToBitmap(detectSrc);
                     if (bmp != null)
                     {
                         // verbose=false：实时检测不输出日志/不保存诊断图，避免每 400ms 刷屏
@@ -4033,14 +4104,27 @@ namespace Ink_Canvas
                 // 回到 UI 线程映射角点并画框（映射依赖 WPF 元素布局，必须在 UI 线程执行）
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
+                    // 期间可能已切到照片页或退出展台：丢弃这次结果，
+                    // 避免检测任务晚于 StopPaperDetectTimer 返回、把红色框又画回照片上。
+                    if (!_isVideoPresenterSpecialMode
+                        || VideoPresenterFullCanvasImage == null
+                        || VideoPresenterFullCanvasImage.Visibility != Visibility.Visible
+                        || (VideoPresenterFrozenFrameImage != null
+                            && VideoPresenterFrozenFrameImage.Visibility == Visibility.Visible))
+                    {
+                        System.Threading.Interlocked.Exchange(ref _paperDetectRunning, 0);
+                        return;
+                    }
+
                     System.Windows.Point[] overlayPts = null;
                     if (corners != null && corners.Count == 4)
                     {
                         overlayPts = new System.Windows.Point[4];
                         for (int i = 0; i < 4; i++)
                         {
+                            // 角点是缩小后图像的坐标，先还原回原始帧坐标
                             overlayPts[i] = MapFramePointToOverlay(
-                                corners[i].X, corners[i].Y, frameW, frameH);
+                                corners[i].X / detectScale, corners[i].Y / detectScale, frameW, frameH);
                         }
                     }
 
@@ -4471,6 +4555,10 @@ namespace Ink_Canvas
                 VideoPresenterProviderImage.Visibility = Visibility.Collapsed;
             }
 
+            // 照片页没有实时帧可检测：停掉识别定时器并清空红色识别框，
+            // 否则最后一帧的框会残留在照片上（返回直播页时再重新启动）。
+            StopPaperDetectTimer();
+
             // 拍照按钮变灰（在照片预览页不允许拍照）
             if (BtnCapturePhoto != null)
             {
@@ -4590,6 +4678,12 @@ namespace Ink_Canvas
 
             // 恢复直播页墨迹快照（与照片页墨迹相互独立）
             RestoreBoothStrokesFromSlot(-1);
+
+            // 回到直播页后恢复 A4 纸实时识别框（进入照片页时已停止）
+            if (IsBoothPhotoCorrectionEnabled)
+            {
+                StartPaperDetectTimer();
+            }
 
             // 拍照按钮恢复为「拍照」
             UpdateBoothToolbarItemStates();

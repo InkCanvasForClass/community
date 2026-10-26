@@ -637,11 +637,11 @@ namespace Ink_Canvas
         /// </summary>
         internal void ApplyPPTNavBarShadow()
         {
-            bool enabled = Settings.PowerPointSettings.EnablePPTNavBarShadow;
-            double size = Settings.PowerPointSettings.PPTNavBarShadowSize;
-
-            LeftSidePanelForPPTNavigation?.SetShadow(enabled, size);
-            RightSidePanelForPPTNavigation?.SetShadow(enabled, size);
+            var ppt = Settings.PowerPointSettings;
+            LeftSidePanelForPPTNavigation?.ApplyShadowSettings(ppt);
+            RightSidePanelForPPTNavigation?.ApplyShadowSettings(ppt);
+            LeftBottomPanelForPPTNavigation?.ApplyShadowSettings(ppt);
+            RightBottomPanelForPPTNavigation?.ApplyShadowSettings(ppt);
         }
 
         /// <summary>

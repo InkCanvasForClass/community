@@ -199,12 +199,10 @@ namespace Ink_Canvas.Windows.SettingsViews
             RightBottomPanelForPPTNavigation.ApplyTheme(rbBlackBg);
 
             // 7. Apply shadow (Issue #569)
-            bool shadowEnabled = SettingsManager.Settings.PowerPointSettings.EnablePPTNavBarShadow;
-            double shadowSize = SettingsManager.Settings.PowerPointSettings.PPTNavBarShadowSize;
-            LeftSidePanelForPPTNavigation.SetShadow(shadowEnabled, shadowSize);
-            RightSidePanelForPPTNavigation.SetShadow(shadowEnabled, shadowSize);
-            LeftBottomPanelForPPTNavigation.SetShadow(shadowEnabled, shadowSize);
-            RightBottomPanelForPPTNavigation.SetShadow(shadowEnabled, shadowSize);
+            LeftSidePanelForPPTNavigation.ApplyShadowSettings(ppt);
+            RightSidePanelForPPTNavigation.ApplyShadowSettings(ppt);
+            LeftBottomPanelForPPTNavigation.ApplyShadowSettings(ppt);
+            RightBottomPanelForPPTNavigation.ApplyShadowSettings(ppt);
         }
     }
 }
