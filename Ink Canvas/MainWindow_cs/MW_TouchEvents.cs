@@ -2550,7 +2550,8 @@ namespace Ink_Canvas
                 // 多指书写开启：双指留给墨迹，不转发为预览拖动/缩放。
                 // 这里只看"当前设置 + 真实触点数"，不看 _active*StrokeIds 集合
                 // —— 集合是运行时状态，一旦有残留就会长期误拦/误放
-                if (manipulatorCount >= 2 && MultiTouchWritingEnabled) return;
+                // 漫游模式下双指是导航手势，不是写字，仍应驱动展台预览缩放
+                if (manipulatorCount >= 2 && MultiTouchWritingEnabled && !IsBoardRoamingMode) return;
                 // 单指 + 书写/擦除工具：不转发为预览拖动/缩放（与 VideoPresenterSpecialMode_ManipulationStarting 判定一致）
                 if (manipulatorCount < 2 && !AllowBoothSingleFingerPreview()) return;
                 VideoPresenterSpecialMode_ManipulationDelta(sender, e);

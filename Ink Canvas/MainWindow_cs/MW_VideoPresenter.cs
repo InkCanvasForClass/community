@@ -481,6 +481,12 @@ namespace Ink_Canvas
         /// </summary>
         private int ResolveBoothGestureFingerCount(int reportedCount)
         {
+            // 非多指书写时，WPF 报 >=2 个 manipulator 就按双指处理。
+            // 原来的 min(reported, _boothDownTouchIds.Count) 在第二指 PreviewTouchDown
+            // 被浮动栏命中/时序漏记时会退化成 1，导致捏合只平移不缩放。
+            if (reportedCount >= 2 && !MultiTouchWritingEnabled)
+                return reportedCount;
+
             int downCount = _boothDownTouchIds.Count;
             if (downCount <= 0) return reportedCount;
             return Math.Min(reportedCount, downCount);
@@ -1871,7 +1877,8 @@ namespace Ink_Canvas
             // 真正的单指抑制放在每帧都会重新评估触点数的地方
             // （Main_Grid_ManipulationDelta 与 VideoPresenterSpecialMode_ManipulationDelta）。
             // 多指书写开启时，双指留给墨迹，不接管预览手势
-            if (manipulatorCount >= 2 && MultiTouchWritingEnabled)
+            // 漫游模式下双指是导航手势，仍交给展台预览缩放
+            if (manipulatorCount >= 2 && MultiTouchWritingEnabled && !IsBoardRoamingMode)
             {
                 e.Mode = ManipulationModes.None;
                 e.Handled = true;
@@ -1914,11 +1921,17 @@ namespace Ink_Canvas
                 if (manipulatorCount < 2 && !AllowBoothSingleFingerPreview()) return;
 
                 // 多指书写开启：双指留给墨迹，不操作预览
-                if (manipulatorCount >= 2 && MultiTouchWritingEnabled) return;
+                // 漫游模式下双指是导航手势，仍应缩放/平移展台预览
+                if (manipulatorCount >= 2 && MultiTouchWritingEnabled && !IsBoardRoamingMode) return;
 
                 // 双指移动/缩放由手势开关控制（单指拖动预览始终可用）
+                double scaleFactor = delta.Scale.Length > 0
+                    ? (delta.Scale.X + delta.Scale.Y) / 2.0
+                    : 1.0;
+                bool hasScaleDelta = Math.Abs(scaleFactor - 1.0) >= 0.001;
                 bool translateEnabled = manipulatorCount < 2 || BoothTwoFingerTranslateEnabled;
-                bool zoomEnabled = manipulatorCount >= 2 && BoothTwoFingerZoomEnabled;
+                // WPF 实际报告了缩放增量时也允许缩放，避免触点记账偏少把捏合误判成单指
+                bool zoomEnabled = BoothTwoFingerZoomEnabled && (manipulatorCount >= 2 || hasScaleDelta);
 
                 // 锚点：ManipulationOrigin（容器坐标）
                 // - 单指时是手指位置
@@ -1955,10 +1968,7 @@ namespace Ink_Canvas
                 }
 
                 // === 2. 处理缩放（仅双指）===
-                double scaleFactor = delta.Scale.Length > 0
-                    ? (delta.Scale.X + delta.Scale.Y) / 2.0
-                    : 1.0;
-                if (zoomEnabled && Math.Abs(scaleFactor - 1.0) >= 0.001)
+                if (zoomEnabled && hasScaleDelta)
                 {
                     // 限制缩放范围 0.1 - 10.0
                     double newScale = Math.Max(0.1, Math.Min(10.0, _boothPreviewScale * scaleFactor));
