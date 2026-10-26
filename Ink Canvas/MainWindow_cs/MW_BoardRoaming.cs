@@ -508,7 +508,7 @@ namespace Ink_Canvas
             BoardRoamingPopupContent.ViewportDragCompleted += EndBoardRoamingPopupDrag;
             if (BoardRoamingPopupContent.CloseButtonControl != null)
             {
-                BoardRoamingPopupContent.CloseButtonControl.Click += (s, e) => CloseBoardRoamingPopup();
+                BoardRoamingPopupContent.CloseButtonControl.Click += (s, e) => ExitBoardRoamingMode();
                 // 按下阶段立即关闭，避免首次点击被拖拽/捕获等逻辑吞掉导致需要点两次。
                 BoardRoamingPopupContent.CloseButtonControl.PreviewMouseLeftButtonDown +=
                     BoardRoamingCloseButton_PreviewInputDown;
