@@ -467,14 +467,6 @@ namespace Ink_Canvas
                 snapshot.CurrentSecond.X,
                 snapshot.CurrentSecond.Y);
 
-            // 展台特殊模式优先：漫游时双指是导航手势，不是写字；
-            // 如果先走 roaming 分支，漫游双指只会缩放墨迹，展台画面不会缩放。
-            if (_isVideoPresenterSpecialMode)
-            {
-                ApplyWinRTVideoPresenterGesture(previousFirst, previousSecond, currentFirst, currentSecond);
-                return;
-            }
-
             // Board roaming has a dedicated contact-point state machine. Normally WinRT ink
             // is shut down before entering roaming, but keeping this route makes the bridge
             // safe when a mode switch races with the overlay input thread.
@@ -486,6 +478,12 @@ namespace Ink_Canvas
                 MoveBoardRoamingContact(
                     unchecked((int)snapshot.SecondPointerId),
                     currentSecond);
+                return;
+            }
+
+            if (_isVideoPresenterSpecialMode)
+            {
+                ApplyWinRTVideoPresenterGesture(previousFirst, previousSecond, currentFirst, currentSecond);
                 return;
             }
 
