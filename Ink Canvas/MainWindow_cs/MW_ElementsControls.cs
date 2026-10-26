@@ -218,18 +218,35 @@ namespace Ink_Canvas
                     return;
                 }
 
-                // 取消之前选中的元素
-                if (currentSelectedElement != null && currentSelectedElement != element)
+                bool isMultiSelect = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
+                if (isMultiSelect)
                 {
-                    // 保存当前编辑模式
-                    var previousEditingMode = inkCanvas.EditingMode;
-                    UnselectElement(currentSelectedElement);
-                    // 恢复编辑模式
-                    inkCanvas.EditingMode = previousEditingMode;
+                    if (_selectedElements.Contains(element))
+                    {
+                        UnselectElement(element);
+                    }
+                    else
+                    {
+                        SelectElement(element, true);
+                    }
+                    e.Handled = true;
+                    return;
                 }
 
-                // 选中当前元素
-                SelectElement(element);
+                if (_selectedElements.Contains(element) && (_selectedElements.Count > 1 || (inkCanvas != null && inkCanvas.GetSelectedStrokes().Count > 0)))
+                {
+                    // 点击已经在多选集合中的元素，保留整体选区以便一同拖动
+                }
+                else
+                {
+                    if (currentSelectedElement != null && currentSelectedElement != element)
+                    {
+                        var previousEditingMode = inkCanvas.EditingMode;
+                        UnselectElement(currentSelectedElement);
+                        inkCanvas.EditingMode = previousEditingMode;
+                    }
+                    SelectElement(element, false);
+                }
 
                 // 开始拖动
                 isDragging = true;
@@ -741,22 +758,49 @@ namespace Ink_Canvas
         /// - 禁用InkCanvas的选择功能，去除控制点
         /// - 保持选择模式，这样用户可以直接点击墨迹来选择
         /// </remarks>
-        private void SelectElement(FrameworkElement element)
+        private void SelectElement(FrameworkElement element, bool isMultiSelect = false)
         {
-            currentSelectedElement = element;
-
-            // 根据元素类型显示不同的选择工具栏
-            if (IsBitmapLikeCanvasElement(element))
+            if (!isMultiSelect)
             {
-                // 显示图片选择工具栏并设置位置
+                _selectedElements.Clear();
+                _selectedElements.Add(element);
+                currentSelectedElement = element;
+
+                if (inkCanvas != null && (inkCanvas.GetSelectedStrokes() == null || inkCanvas.GetSelectedStrokes().Count == 0))
+                {
+                    inkCanvas.Select(new StrokeCollection());
+                }
+            }
+            else
+            {
+                if (!_selectedElements.Contains(element))
+                {
+                    _selectedElements.Add(element);
+                }
+                currentSelectedElement = (_selectedElements.Count == 1 && (inkCanvas == null || inkCanvas.GetSelectedStrokes().Count == 0))
+                    ? element
+                    : null;
+            }
+
+            bool hasStrokes = inkCanvas != null && inkCanvas.GetSelectedStrokes().Count > 0;
+            if (_selectedElements.Count > 1 || (hasStrokes && _selectedElements.Count > 0))
+            {
                 if (BorderImageSelectionControl != null)
                 {
-                    // 计算工具栏位置（内部会同步 PDF 右侧栏位置）
+                    BorderImageSelectionControl.Visibility = Visibility.Collapsed;
+                }
+                UpdateSelectionDisplay();
+                return;
+            }
+
+            if (IsBitmapLikeCanvasElement(element))
+            {
+                if (BorderImageSelectionControl != null)
+                {
                     UpdateImageSelectionToolbarPosition(element);
                     BorderImageSelectionControl.Visibility = Visibility.Visible;
                 }
 
-                // 显示图片缩放选择点
                 ShowImageResizeHandles(element);
 
                 if (BorderStrokeSelectionControl != null)
@@ -766,13 +810,11 @@ namespace Ink_Canvas
             }
             else
             {
-                // 隐藏图片选择工具栏
                 if (BorderImageSelectionControl != null)
                 {
                     BorderImageSelectionControl.Visibility = Visibility.Collapsed;
                 }
 
-                // 隐藏图片缩放选择点
                 HideImageResizeHandles();
 
                 if (BorderStrokeSelectionControl != null)
@@ -781,18 +823,13 @@ namespace Ink_Canvas
                 }
             }
 
-            // 确保选择框不显示，避免蓝色边框
             if (GridInkCanvasSelectionCover != null)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
             }
 
-            // 禁用InkCanvas的选择功能，去除控制点
-            if (inkCanvas != null)
+            if (inkCanvas != null && !hasStrokes)
             {
-                // 清除当前选择
-                inkCanvas.Select(new StrokeCollection());
-                // 保持选择模式，这样用户可以直接点击墨迹来选择
                 inkCanvas.EditingMode = InkCanvasEditingMode.Select;
             }
 
@@ -803,23 +840,28 @@ namespace Ink_Canvas
         /// 取消选中元素
         /// </summary>
         /// <param name="element">要取消选中的元素</param>
-        /// <remarks>
-        /// - 隐藏图片选择工具栏
-        /// - 隐藏图片缩放选择点
-        /// - 确保选择框隐藏
-        /// - 确保InkCanvas处于选择模式，这样用户可以直接点击墨迹来选择
-        /// </remarks>
         private void UnselectElement(FrameworkElement element)
         {
-            // 去除选中效果
+            _selectedElements.Remove(element);
+            if (currentSelectedElement == element)
+            {
+                bool hasStrokes = inkCanvas != null && inkCanvas.GetSelectedStrokes().Count > 0;
+                currentSelectedElement = (_selectedElements.Count == 1 && !hasStrokes)
+                    ? _selectedElements.First()
+                    : null;
+            }
 
-            // 隐藏图片选择工具栏
+            if (_selectedElements.Count > 0 || (inkCanvas != null && inkCanvas.GetSelectedStrokes().Count > 0))
+            {
+                UpdateSelectionDisplay();
+                return;
+            }
+
             if (BorderImageSelectionControl != null)
             {
                 BorderImageSelectionControl.Visibility = Visibility.Collapsed;
             }
 
-            // 隐藏图片缩放选择点
             HideImageResizeHandles();
 
             if (BorderStrokeSelectionControl != null && (inkCanvas == null || inkCanvas.GetSelectedStrokes().Count == 0))
@@ -827,13 +869,11 @@ namespace Ink_Canvas
                 BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
             }
 
-            // 确保选择框隐藏
             if (GridInkCanvasSelectionCover != null)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
             }
 
-            // 确保InkCanvas处于选择模式，这样用户可以直接点击墨迹来选择
             if (inkCanvas != null)
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.Select;
@@ -991,15 +1031,35 @@ namespace Ink_Canvas
                 // 对选中的图片元素应用矩阵变换
                 ApplyMatrixTransformToElement(element, matrix, false);
 
-                // 对选中的笔画应用变换
-                var selectedStrokes = inkCanvas.GetSelectedStrokes();
-                foreach (var stroke in selectedStrokes)
+                if (_selectedElements.Count > 1)
                 {
-                    stroke.Transform(matrix, false);
+                    foreach (var other in _selectedElements)
+                    {
+                        if (other != element)
+                        {
+                            ApplyMatrixTransformToElement(other, matrix, false);
+                        }
+                    }
                 }
 
-                // 更新选择框的位置（如果有选择框）
-                UpdateSelectionBorderPosition(delta);
+                // 对选中的笔画应用变换
+                var selectedStrokes = inkCanvas.GetSelectedStrokes();
+                if (selectedStrokes != null)
+                {
+                    foreach (var stroke in selectedStrokes)
+                    {
+                        stroke.Transform(matrix, false);
+                    }
+                }
+
+                if (_selectedElements.Count > 1 || (selectedStrokes != null && selectedStrokes.Count > 0))
+                {
+                    UpdateCompositeSelectionOverlay();
+                }
+                else
+                {
+                    UpdateSelectionBorderPosition(delta);
+                }
 
 
             }
@@ -1123,11 +1183,30 @@ namespace Ink_Canvas
                 // 应用变换到元素
                 ApplyMatrixTransformToElement(element, matrix, false);
 
-                // 应用变换到选中的笔画
-                var selectedStrokes = inkCanvas.GetSelectedStrokes();
-                foreach (var stroke in selectedStrokes)
+                if (_selectedElements.Count > 1)
                 {
-                    stroke.Transform(matrix, false);
+                    foreach (var other in _selectedElements)
+                    {
+                        if (other != element)
+                        {
+                            ApplyMatrixTransformToElement(other, matrix, false);
+                        }
+                    }
+                }
+
+                // 对选中的笔画应用变换
+                var selectedStrokes = inkCanvas.GetSelectedStrokes();
+                if (selectedStrokes != null)
+                {
+                    foreach (var stroke in selectedStrokes)
+                    {
+                        stroke.Transform(matrix, false);
+                    }
+                }
+
+                if (_selectedElements.Count > 1 || (selectedStrokes != null && selectedStrokes.Count > 0))
+                {
+                    UpdateCompositeSelectionOverlay();
                 }
 
 
@@ -2790,34 +2869,36 @@ namespace Ink_Canvas
 
         private void ImageSelectionOverlay_InteractionStarted(object sender, EventArgs e)
         {
-            if (currentSelectedElement == null && inkCanvas != null && inkCanvas.GetSelectedStrokes().Count > 0)
-            {
-                PrepareStrokeTransformBaseline();
-            }
+            PrepareCompositeTransformBaseline();
         }
 
         private void ImageSelectionOverlay_InteractionEnded(object sender, EventArgs e)
         {
-            if (currentSelectedElement == null && inkCanvas != null && _strokeTransformInitialPoints.Count > 0)
+            try
             {
-                var history = new System.Collections.Generic.Dictionary<Stroke, Tuple<StylusPointCollection, StylusPointCollection>>();
-                foreach (var stroke in inkCanvas.GetSelectedStrokes())
+                if (inkCanvas != null && _strokeTransformInitialPoints.Count > 0)
                 {
-                    if (_strokeTransformInitialPoints.TryGetValue(stroke, out var initialPoints))
+                    var history = new System.Collections.Generic.Dictionary<Stroke, Tuple<StylusPointCollection, StylusPointCollection>>();
+                    foreach (var stroke in inkCanvas.GetSelectedStrokes())
                     {
-                        history[stroke] = Tuple.Create(initialPoints, stroke.StylusPoints.Clone());
+                        if (_strokeTransformInitialPoints.TryGetValue(stroke, out var initialPoints))
+                        {
+                            history[stroke] = Tuple.Create(initialPoints, stroke.StylusPoints.Clone());
+                        }
+                    }
+                    if (history.Count > 0)
+                    {
+                        timeMachine.CommitStrokeManipulationHistory(history);
+                        foreach (var item in history)
+                        {
+                            StrokeInitialHistory[item.Key] = item.Value.Item2;
+                        }
                     }
                 }
-                if (history.Count > 0)
-                {
-                    timeMachine.CommitStrokeManipulationHistory(history);
-                    foreach (var item in history)
-                    {
-                        StrokeInitialHistory[item.Key] = item.Value.Item2;
-                    }
-                }
-                _strokeTransformInitialPoints.Clear();
-                ResetStrokeTransformBaseline();
+            }
+            finally
+            {
+                ResetCompositeTransformBaseline();
             }
         }
         private void AttachOverlayTracking(FrameworkElement element)
@@ -2983,17 +3064,14 @@ namespace Ink_Canvas
             if (TryBlockFrozenPageMutation("缩放")) return;
             try
             {
-                if (currentSelectedElement != null && IsBitmapLikeCanvasElement(currentSelectedElement))
+                bool isSingleElement = currentSelectedElement != null && _selectedElements.Count <= 1 && (inkCanvas == null || inkCanvas.GetSelectedStrokes().Count == 0);
+                if (isSingleElement && IsBitmapLikeCanvasElement(currentSelectedElement))
                 {
                     ResizeImageByCorner(currentSelectedElement, e.CanvasDelta, e.Corner, e.LockAspectRatio);
                     return;
                 }
 
-                if (inkCanvas != null && inkCanvas.GetSelectedStrokes().Count > 0)
-                {
-                    ResizeSelectedStrokesByCorner(e.CanvasDelta, e.Corner, e.LockAspectRatio);
-                    return;
-                }
+                ResizeCompositeSelectionByCorner(e.CanvasDelta, e.Corner, e.LockAspectRatio);
             }
             catch (Exception ex)
             {
@@ -3006,7 +3084,8 @@ namespace Ink_Canvas
             if (TryBlockFrozenPageMutation("移动")) return;
             try
             {
-                if (currentSelectedElement != null)
+                bool isSingleElement = currentSelectedElement != null && _selectedElements.Count <= 1 && (inkCanvas == null || inkCanvas.GetSelectedStrokes().Count == 0);
+                if (isSingleElement)
                 {
                     if (currentSelectedElement.RenderTransform is TransformGroup tg)
                     {
@@ -3031,11 +3110,7 @@ namespace Ink_Canvas
                     return;
                 }
 
-                if (inkCanvas != null && inkCanvas.GetSelectedStrokes().Count > 0)
-                {
-                    MoveSelectedStrokes(e.CanvasDelta);
-                    return;
-                }
+                MoveCompositeSelection(e.CanvasDelta);
             }
             catch (Exception ex)
             {
@@ -3048,7 +3123,8 @@ namespace Ink_Canvas
             if (TryBlockFrozenPageMutation("旋转")) return;
             try
             {
-                if (currentSelectedElement != null)
+                bool isSingleElement = currentSelectedElement != null && _selectedElements.Count <= 1 && (inkCanvas == null || inkCanvas.GetSelectedStrokes().Count == 0);
+                if (isSingleElement)
                 {
                     ApplyRotateTransform(currentSelectedElement, e.AngleDelta);
                     UpdateImageResizeHandlesPosition(default);
@@ -3057,11 +3133,7 @@ namespace Ink_Canvas
                     return;
                 }
 
-                if (inkCanvas != null && inkCanvas.GetSelectedStrokes().Count > 0)
-                {
-                    RotateSelectedStrokes(e.AngleDelta);
-                    return;
-                }
+                RotateCompositeSelection(e.AngleDelta);
             }
             catch (Exception ex)
             {
