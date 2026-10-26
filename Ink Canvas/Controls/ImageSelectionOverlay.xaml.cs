@@ -65,6 +65,10 @@ namespace Ink_Canvas.Controls
         private Point _lastPoint;
         private double _lastRotationAngle;
 
+        // 触摸与鼠标互斥状态，防止触摸屏上系统同时派发 Touch 事件和合成的虚拟 Mouse 事件导致抖动/抽搐
+        private int? _activeTouchDeviceId;
+        private bool _isMouseInteracting;
+
         public ImageSelectionOverlay()
         {
             InitializeComponent();
@@ -173,8 +177,10 @@ namespace Ink_Canvas.Controls
 
         private void BeginResize(ImageResizeCorner corner, MouseButtonEventArgs e, Ellipse handle)
         {
+            if (_activeTouchDeviceId.HasValue) return; // 忽略触摸提升的合成鼠标点击
             var source = GetSource();
             if (source == null) return;
+            _isMouseInteracting = true;
             _isResizing = true;
             _activeCorner = corner;
             _lastPoint = e.GetPosition(source);
@@ -185,30 +191,35 @@ namespace Ink_Canvas.Controls
 
         private void ResizeMove(object sender, MouseEventArgs e)
         {
+            if (_activeTouchDeviceId.HasValue) return;
             if (!_isResizing || !(sender is Ellipse handle) || !handle.IsMouseCaptured) return;
             var source = GetSource();
             if (source == null) return;
             var current = e.GetPosition(source);
             var delta = current - _lastPoint;
             bool lockAspect = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift;
-            ResizeDelta?.Invoke(this, new ImageResizeDeltaEventArgs(_activeCorner, delta, lockAspect));
             _lastPoint = current;
+            ResizeDelta?.Invoke(this, new ImageResizeDeltaEventArgs(_activeCorner, delta, lockAspect));
             e.Handled = true;
         }
 
         private void EndResize(object sender, MouseButtonEventArgs e)
         {
+            if (_activeTouchDeviceId.HasValue) return;
             if (!_isResizing) return;
             if (sender is Ellipse handle) handle.ReleaseMouseCapture();
             _isResizing = false;
+            _isMouseInteracting = false;
             InteractionEnded?.Invoke(this, EventArgs.Empty);
             e.Handled = true;
         }
 
         private void BeginRotate(object sender, MouseButtonEventArgs e)
         {
+            if (_activeTouchDeviceId.HasValue) return;
             var source = GetSource();
             if (source == null) return;
+            _isMouseInteracting = true;
             _isRotating = true;
             var p = e.GetPosition(source);
             _lastRotationAngle = AngleFromCenter(p);
@@ -219,6 +230,7 @@ namespace Ink_Canvas.Controls
 
         private void RotateMove(object sender, MouseEventArgs e)
         {
+            if (_activeTouchDeviceId.HasValue) return;
             if (!_isRotating || !RotationHandle.IsMouseCaptured) return;
             var source = GetSource();
             if (source == null) return;
@@ -234,17 +246,21 @@ namespace Ink_Canvas.Controls
 
         private void EndRotate(object sender, MouseButtonEventArgs e)
         {
+            if (_activeTouchDeviceId.HasValue) return;
             if (!_isRotating) return;
             RotationHandle.ReleaseMouseCapture();
             _isRotating = false;
+            _isMouseInteracting = false;
             InteractionEnded?.Invoke(this, EventArgs.Empty);
             e.Handled = true;
         }
 
         private void BeginResizeTouch(ImageResizeCorner corner, TouchEventArgs e, Ellipse handle)
         {
+            if (_isMouseInteracting) return;
             var source = GetSource();
             if (source == null) return;
+            _activeTouchDeviceId = e.TouchDevice.Id;
             _isResizing = true;
             _activeCorner = corner;
             _lastPoint = e.GetTouchPoint(source).Position;
@@ -255,30 +271,34 @@ namespace Ink_Canvas.Controls
 
         private void ResizeMoveTouch(object sender, TouchEventArgs e)
         {
-            if (!_isResizing || !(sender is Ellipse handle) || !handle.AreAnyTouchesCaptured) return;
+            if (!_isResizing || _activeTouchDeviceId != e.TouchDevice.Id) return;
+            if (!(sender is Ellipse handle) || !handle.AreAnyTouchesCaptured) return;
             var source = GetSource();
             if (source == null) return;
             var current = e.GetTouchPoint(source).Position;
             var delta = current - _lastPoint;
             bool lockAspect = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift;
-            ResizeDelta?.Invoke(this, new ImageResizeDeltaEventArgs(_activeCorner, delta, lockAspect));
             _lastPoint = current;
+            ResizeDelta?.Invoke(this, new ImageResizeDeltaEventArgs(_activeCorner, delta, lockAspect));
             e.Handled = true;
         }
 
         private void EndResizeTouch(object sender, TouchEventArgs e)
         {
-            if (!_isResizing) return;
+            if (!_isResizing || _activeTouchDeviceId != e.TouchDevice.Id) return;
             if (sender is Ellipse handle) handle.ReleaseTouchCapture(e.TouchDevice);
             _isResizing = false;
+            _activeTouchDeviceId = null;
             InteractionEnded?.Invoke(this, EventArgs.Empty);
             e.Handled = true;
         }
 
         private void BeginRotateTouch(object sender, TouchEventArgs e)
         {
+            if (_isMouseInteracting) return;
             var source = GetSource();
             if (source == null) return;
+            _activeTouchDeviceId = e.TouchDevice.Id;
             _isRotating = true;
             var p = e.GetTouchPoint(source).Position;
             _lastRotationAngle = AngleFromCenter(p);
@@ -289,7 +309,8 @@ namespace Ink_Canvas.Controls
 
         private void RotateMoveTouch(object sender, TouchEventArgs e)
         {
-            if (!_isRotating || !RotationHandle.AreAnyTouchesCaptured) return;
+            if (!_isRotating || _activeTouchDeviceId != e.TouchDevice.Id) return;
+            if (!RotationHandle.AreAnyTouchesCaptured) return;
             var source = GetSource();
             if (source == null) return;
             var p = e.GetTouchPoint(source).Position;
@@ -304,17 +325,20 @@ namespace Ink_Canvas.Controls
 
         private void EndRotateTouch(object sender, TouchEventArgs e)
         {
-            if (!_isRotating) return;
+            if (!_isRotating || _activeTouchDeviceId != e.TouchDevice.Id) return;
             RotationHandle.ReleaseTouchCapture(e.TouchDevice);
             _isRotating = false;
+            _activeTouchDeviceId = null;
             InteractionEnded?.Invoke(this, EventArgs.Empty);
             e.Handled = true;
         }
 
         private void BeginMoveTouch(object sender, TouchEventArgs e)
         {
+            if (_isMouseInteracting) return;
             var source = GetSource();
             if (source == null) return;
+            _activeTouchDeviceId = e.TouchDevice.Id;
             _isMoving = true;
             _lastPoint = e.GetTouchPoint(source).Position;
             MoveSurface.CaptureTouch(e.TouchDevice);
@@ -324,7 +348,8 @@ namespace Ink_Canvas.Controls
 
         private void MoveMoveTouch(object sender, TouchEventArgs e)
         {
-            if (!_isMoving || !MoveSurface.AreAnyTouchesCaptured) return;
+            if (!_isMoving || _activeTouchDeviceId != e.TouchDevice.Id) return;
+            if (!MoveSurface.AreAnyTouchesCaptured) return;
             var source = GetSource();
             if (source == null) return;
             var current = e.GetTouchPoint(source).Position;
@@ -336,17 +361,20 @@ namespace Ink_Canvas.Controls
 
         private void EndMoveTouch(object sender, TouchEventArgs e)
         {
-            if (!_isMoving) return;
+            if (!_isMoving || _activeTouchDeviceId != e.TouchDevice.Id) return;
             MoveSurface.ReleaseTouchCapture(e.TouchDevice);
             _isMoving = false;
+            _activeTouchDeviceId = null;
             InteractionEnded?.Invoke(this, EventArgs.Empty);
             e.Handled = true;
         }
 
         private void BeginMove(object sender, MouseButtonEventArgs e)
         {
+            if (_activeTouchDeviceId.HasValue) return;
             var source = GetSource();
             if (source == null) return;
+            _isMouseInteracting = true;
             _isMoving = true;
             _lastPoint = e.GetPosition(source);
             MoveSurface.CaptureMouse();
@@ -356,6 +384,7 @@ namespace Ink_Canvas.Controls
 
         private void MoveMove(object sender, MouseEventArgs e)
         {
+            if (_activeTouchDeviceId.HasValue) return;
             if (!_isMoving || !MoveSurface.IsMouseCaptured) return;
             var source = GetSource();
             if (source == null) return;
@@ -368,9 +397,11 @@ namespace Ink_Canvas.Controls
 
         private void EndMove(object sender, MouseButtonEventArgs e)
         {
+            if (_activeTouchDeviceId.HasValue) return;
             if (!_isMoving) return;
             MoveSurface.ReleaseMouseCapture();
             _isMoving = false;
+            _isMouseInteracting = false;
             InteractionEnded?.Invoke(this, EventArgs.Empty);
             e.Handled = true;
         }

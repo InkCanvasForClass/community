@@ -1,4 +1,4 @@
-using Ink_Canvas.Controls;
+﻿using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Microsoft.Win32;
@@ -2792,11 +2792,7 @@ namespace Ink_Canvas
         {
             if (currentSelectedElement == null && inkCanvas != null && inkCanvas.GetSelectedStrokes().Count > 0)
             {
-                _strokeTransformInitialPoints.Clear();
-                foreach (var stroke in inkCanvas.GetSelectedStrokes())
-                {
-                    _strokeTransformInitialPoints[stroke] = stroke.StylusPoints.Clone();
-                }
+                PrepareStrokeTransformBaseline();
             }
         }
 
@@ -2821,9 +2817,9 @@ namespace Ink_Canvas
                     }
                 }
                 _strokeTransformInitialPoints.Clear();
+                ResetStrokeTransformBaseline();
             }
         }
-
         private void AttachOverlayTracking(FrameworkElement element)
         {
             if (_overlayTrackedElement == element) return;

@@ -1,4 +1,4 @@
-using Ink_Canvas.Controls;
+﻿using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
@@ -1238,6 +1238,7 @@ namespace Ink_Canvas
                 // 4. 重置缓存
                 StrokesSelectionClone?.Clear();
                 _strokeTransformInitialPoints?.Clear();
+                ResetStrokeTransformBaseline();
 
                 // 5. 再次抑制原生选择修饰器
                 SuppressNativeInkCanvasSelectionAdorners();
@@ -1248,9 +1249,49 @@ namespace Ink_Canvas
             }
         }
 
+        private Rect _strokeTransformInitialBounds;
+        private Point _strokeTransformPivot;
+        private Vector _accumulatedStrokeResizeDelta;
+        private Vector _accumulatedStrokeMoveDelta;
+        private double _accumulatedStrokeRotateAngle;
+        private ImageResizeCorner? _activeStrokeResizeCorner;
+
+        /// <summary>
+        /// 为选中的墨迹建立交互变换基准快照（原始笔画点与初始选区边界）。
+        /// 彻底杜绝每帧递推变换导致的舍入误差雪崩和 Issue 654 墨迹缩成一坨的问题。
+        /// </summary>
+        public void PrepareStrokeTransformBaseline()
+        {
+            if (inkCanvas == null) return;
+            var selected = inkCanvas.GetSelectedStrokes();
+            if (selected.Count == 0) return;
+
+            _strokeTransformInitialPoints.Clear();
+            foreach (var stroke in selected)
+            {
+                _strokeTransformInitialPoints[stroke] = stroke.StylusPoints.Clone();
+            }
+
+            _strokeTransformInitialBounds = inkCanvas.GetSelectionBounds();
+            _accumulatedStrokeResizeDelta = new Vector(0, 0);
+            _accumulatedStrokeMoveDelta = new Vector(0, 0);
+            _accumulatedStrokeRotateAngle = 0;
+            _activeStrokeResizeCorner = null;
+        }
+
+        public void ResetStrokeTransformBaseline()
+        {
+            _strokeTransformInitialBounds = Rect.Empty;
+            _accumulatedStrokeResizeDelta = new Vector(0, 0);
+            _accumulatedStrokeMoveDelta = new Vector(0, 0);
+            _accumulatedStrokeRotateAngle = 0;
+            _activeStrokeResizeCorner = null;
+        }
+
         /// <summary>
         /// 抑制 WPF InkCanvas 内部原生选择修饰器（InkCanvasSelectionAdorner），
-        /// 彻底消除新旧两套选择框共存的问题。
+        /// 仅隐藏墨迹选中的原生把手/选择框，保持 AdornerLayer 本身可见，
+        /// 避免破坏套索选择（Lasso Selection）的橡皮筋交互。
         /// </summary>
         private void SuppressNativeInkCanvasSelectionAdorners()
         {
@@ -1272,23 +1313,41 @@ namespace Ink_Canvas
             for (int i = 0; i < count; i++)
             {
                 var child = VisualTreeHelper.GetChild(parent, i);
-                if (child is System.Windows.Documents.AdornerDecorator adornerDecorator && adornerDecorator.AdornerLayer != null)
+                if (child is System.Windows.Documents.AdornerLayer adornerLayer)
                 {
-                    adornerDecorator.AdornerLayer.Visibility = Visibility.Collapsed;
-                    adornerDecorator.AdornerLayer.Opacity = 0;
-                    adornerDecorator.AdornerLayer.IsHitTestVisible = false;
-                }
-                else if (child is System.Windows.Documents.AdornerLayer adornerLayer)
-                {
-                    adornerLayer.Visibility = Visibility.Collapsed;
-                    adornerLayer.Opacity = 0;
-                    adornerLayer.IsHitTestVisible = false;
+                    // 确保 AdornerLayer 始终处于正常显示与命中状态，让套索线可正常绘制
+                    if (adornerLayer.Visibility != Visibility.Visible)
+                        adornerLayer.Visibility = Visibility.Visible;
+                    if (adornerLayer.Opacity < 1.0)
+                        adornerLayer.Opacity = 1.0;
+                    if (!adornerLayer.IsHitTestVisible)
+                        adornerLayer.IsHitTestVisible = true;
+
+                    int adornerCount = VisualTreeHelper.GetChildrenCount(adornerLayer);
+                    for (int j = 0; j < adornerCount; j++)
+                    {
+                        var adornerChild = VisualTreeHelper.GetChild(adornerLayer, j);
+                        if (adornerChild is System.Windows.Documents.Adorner adorner)
+                        {
+                            var typeName = adorner.GetType().Name;
+                            if (typeName.Contains("SelectionAdorner") || typeName.Contains("InkCanvasSelection"))
+                            {
+                                adorner.Visibility = Visibility.Collapsed;
+                                adorner.Opacity = 0;
+                                adorner.IsHitTestVisible = false;
+                            }
+                        }
+                    }
                 }
                 else if (child is System.Windows.Documents.Adorner adorner)
                 {
-                    adorner.Visibility = Visibility.Collapsed;
-                    adorner.Opacity = 0;
-                    adorner.IsHitTestVisible = false;
+                    var typeName = adorner.GetType().Name;
+                    if (typeName.Contains("SelectionAdorner") || typeName.Contains("InkCanvasSelection"))
+                    {
+                        adorner.Visibility = Visibility.Collapsed;
+                        adorner.Opacity = 0;
+                        adorner.IsHitTestVisible = false;
+                    }
                 }
                 SuppressVisualTreeAdorners(child);
             }
@@ -1302,12 +1361,27 @@ namespace Ink_Canvas
                 var selectedStrokes = inkCanvas?.GetSelectedStrokes();
                 if (selectedStrokes == null || selectedStrokes.Count == 0) return;
 
-                var matrix = new Matrix();
-                matrix.Translate(delta.X, delta.Y);
+                if (_strokeTransformInitialPoints.Count == 0)
+                {
+                    PrepareStrokeTransformBaseline();
+                }
+
+                _accumulatedStrokeMoveDelta += delta;
 
                 foreach (var stroke in selectedStrokes)
                 {
-                    stroke.Transform(matrix, false);
+                    if (_strokeTransformInitialPoints.TryGetValue(stroke, out var initialPoints))
+                    {
+                        var newPoints = new StylusPointCollection();
+                        for (int i = 0; i < initialPoints.Count; i++)
+                        {
+                            newPoints.Add(new StylusPoint(
+                                initialPoints[i].X + _accumulatedStrokeMoveDelta.X,
+                                initialPoints[i].Y + _accumulatedStrokeMoveDelta.Y,
+                                initialPoints[i].PressureFactor));
+                        }
+                        stroke.StylusPoints = newPoints;
+                    }
                 }
 
                 UpdateStrokeSelectionOverlay();
@@ -1327,16 +1401,32 @@ namespace Ink_Canvas
                 var selectedStrokes = inkCanvas?.GetSelectedStrokes();
                 if (selectedStrokes == null || selectedStrokes.Count == 0) return;
 
-                var bounds = inkCanvas.GetSelectionBounds();
-                if (bounds.IsEmpty || bounds.Width <= 0 || bounds.Height <= 0) return;
+                if (_strokeTransformInitialPoints.Count == 0 || _strokeTransformInitialBounds.IsEmpty)
+                {
+                    PrepareStrokeTransformBaseline();
+                }
 
-                var center = new Point(bounds.Left + bounds.Width / 2, bounds.Top + bounds.Height / 2);
+                _accumulatedStrokeRotateAngle += angleDelta;
+
+                var center = new Point(
+                    _strokeTransformInitialBounds.Left + _strokeTransformInitialBounds.Width / 2,
+                    _strokeTransformInitialBounds.Top + _strokeTransformInitialBounds.Height / 2);
+
                 var matrix = new Matrix();
-                matrix.RotateAt(angleDelta, center.X, center.Y);
+                matrix.RotateAt(_accumulatedStrokeRotateAngle, center.X, center.Y);
 
                 foreach (var stroke in selectedStrokes)
                 {
-                    stroke.Transform(matrix, false);
+                    if (_strokeTransformInitialPoints.TryGetValue(stroke, out var initialPoints))
+                    {
+                        var newPoints = new StylusPointCollection();
+                        for (int i = 0; i < initialPoints.Count; i++)
+                        {
+                            var pt = matrix.Transform(new Point(initialPoints[i].X, initialPoints[i].Y));
+                            newPoints.Add(new StylusPoint(pt.X, pt.Y, initialPoints[i].PressureFactor));
+                        }
+                        stroke.StylusPoints = newPoints;
+                    }
                 }
 
                 UpdateStrokeSelectionOverlay();
@@ -1344,7 +1434,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"旋��墨迹失败: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"旋转墨迹失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -1356,74 +1446,102 @@ namespace Ink_Canvas
                 var selectedStrokes = inkCanvas?.GetSelectedStrokes();
                 if (selectedStrokes == null || selectedStrokes.Count == 0) return;
 
-                var bounds = inkCanvas.GetSelectionBounds();
-                if (bounds.IsEmpty || bounds.Width <= 0 || bounds.Height <= 0)
+                // 如果交互开始时快照尚未建立，立即保底建立一次
+                if (_strokeTransformInitialPoints.Count == 0 || _strokeTransformInitialBounds.IsEmpty || _strokeTransformInitialBounds.Width <= 0 || _strokeTransformInitialBounds.Height <= 0)
                 {
-                    LogHelper.WriteLogToFile(
-                        $"[Ink] 缩放锚点：选区边界退化，已跳过本次变换 (bounds={bounds}, selected={selectedStrokes.Count})",
-                        LogHelper.LogType.Warning);
+                    PrepareStrokeTransformBaseline();
+                }
+
+                if (_strokeTransformInitialBounds.IsEmpty || _strokeTransformInitialBounds.Width <= 0 || _strokeTransformInitialBounds.Height <= 0)
+                {
+                    LogHelper.WriteLogToFile($"[Ink] 缩放锚点：选区初始边界非法，已跳过变换", LogHelper.LogType.Warning);
                     return;
                 }
 
-                double curW = bounds.Width;
-                double curH = bounds.Height;
-                double newW = curW;
-                double newH = curH;
-                Point pivot = new Point(0, 0);
+                if (_activeStrokeResizeCorner != corner)
+                {
+                    _activeStrokeResizeCorner = corner;
+                    switch (corner)
+                    {
+                        case ImageResizeCorner.TopLeft:
+                            _strokeTransformPivot = new Point(_strokeTransformInitialBounds.Right, _strokeTransformInitialBounds.Bottom);
+                            break;
+                        case ImageResizeCorner.TopRight:
+                            _strokeTransformPivot = new Point(_strokeTransformInitialBounds.Left, _strokeTransformInitialBounds.Bottom);
+                            break;
+                        case ImageResizeCorner.BottomLeft:
+                            _strokeTransformPivot = new Point(_strokeTransformInitialBounds.Right, _strokeTransformInitialBounds.Top);
+                            break;
+                        case ImageResizeCorner.BottomRight:
+                            _strokeTransformPivot = new Point(_strokeTransformInitialBounds.Left, _strokeTransformInitialBounds.Top);
+                            break;
+                    }
+                }
+
+                _accumulatedStrokeResizeDelta += canvasDelta;
+
+                double origW = _strokeTransformInitialBounds.Width;
+                double origH = _strokeTransformInitialBounds.Height;
+                double newW = origW;
+                double newH = origH;
 
                 switch (corner)
                 {
                     case ImageResizeCorner.TopLeft:
-                        newW = curW - canvasDelta.X;
-                        newH = curH - canvasDelta.Y;
-                        pivot = new Point(bounds.Right, bounds.Bottom);
+                        newW = origW - _accumulatedStrokeResizeDelta.X;
+                        newH = origH - _accumulatedStrokeResizeDelta.Y;
                         break;
                     case ImageResizeCorner.TopRight:
-                        newW = curW + canvasDelta.X;
-                        newH = curH - canvasDelta.Y;
-                        pivot = new Point(bounds.Left, bounds.Bottom);
+                        newW = origW + _accumulatedStrokeResizeDelta.X;
+                        newH = origH - _accumulatedStrokeResizeDelta.Y;
                         break;
                     case ImageResizeCorner.BottomLeft:
-                        newW = curW - canvasDelta.X;
-                        newH = curH + canvasDelta.Y;
-                        pivot = new Point(bounds.Right, bounds.Top);
+                        newW = origW - _accumulatedStrokeResizeDelta.X;
+                        newH = origH + _accumulatedStrokeResizeDelta.Y;
                         break;
                     case ImageResizeCorner.BottomRight:
-                        newW = curW + canvasDelta.X;
-                        newH = curH + canvasDelta.Y;
-                        pivot = new Point(bounds.Left, bounds.Top);
+                        newW = origW + _accumulatedStrokeResizeDelta.X;
+                        newH = origH + _accumulatedStrokeResizeDelta.Y;
                         break;
                 }
 
-                // 强制最小尺寸，避免退化为 0 或负数（彻底杜绝 Issue 654）
-                const double minDimension = 10.0;
+                // 强制最小尺寸 15 像素，杜绝退化为 0 或负数翻折（彻底根治 Issue 654）
+                const double minDimension = 15.0;
                 newW = Math.Max(minDimension, newW);
                 newH = Math.Max(minDimension, newH);
 
-                if (lockAspect && curW > 0 && curH > 0)
+                if (lockAspect && origW > 0 && origH > 0)
                 {
-                    double uniform = Math.Min(newW / curW, newH / curH);
-                    newW = curW * uniform;
-                    newH = curH * uniform;
+                    double uniform = Math.Min(newW / origW, newH / origH);
+                    newW = origW * uniform;
+                    newH = origH * uniform;
                 }
 
-                double scaleX = newW / curW;
-                double scaleY = newH / curH;
+                double scaleX = newW / origW;
+                double scaleY = newH / origH;
 
                 if (!double.IsFinite(scaleX) || !double.IsFinite(scaleY) || scaleX <= 0 || scaleY <= 0)
                 {
-                    LogHelper.WriteLogToFile(
-                        $"[Ink] 缩放锚点：缩放系数非法，已跳过本次变换 (scaleX={scaleX}, scaleY={scaleY}, curW={curW}, curH={curH}, newW={newW}, newH={newH})",
-                        LogHelper.LogType.Warning);
+                    LogHelper.WriteLogToFile($"[Ink] 缩放系数非法: scaleX={scaleX}, scaleY={scaleY}", LogHelper.LogType.Warning);
                     return;
                 }
 
                 var matrix = new Matrix();
-                matrix.ScaleAt(scaleX, scaleY, pivot.X, pivot.Y);
+                matrix.ScaleAt(scaleX, scaleY, _strokeTransformPivot.X, _strokeTransformPivot.Y);
 
+                // 基于初始快照点集进行精确映射，无递推舍入误差，绝不漂移与抖动
                 foreach (var stroke in selectedStrokes)
                 {
-                    stroke.Transform(matrix, false);
+                    if (_strokeTransformInitialPoints.TryGetValue(stroke, out var initialPoints))
+                    {
+                        var newPoints = new StylusPointCollection();
+                        for (int i = 0; i < initialPoints.Count; i++)
+                        {
+                            var pt = matrix.Transform(new Point(initialPoints[i].X, initialPoints[i].Y));
+                            newPoints.Add(new StylusPoint(pt.X, pt.Y, initialPoints[i].PressureFactor));
+                        }
+                        stroke.StylusPoints = newPoints;
+                    }
                 }
 
                 UpdateStrokeSelectionOverlay();
@@ -1434,6 +1552,7 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"缩放墨迹失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
+
 
         #endregion
     }
