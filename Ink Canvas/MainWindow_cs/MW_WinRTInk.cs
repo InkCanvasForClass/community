@@ -34,7 +34,7 @@ namespace Ink_Canvas
         private Ink.WinRT.ChromeInputForwarder _chromeInputForwarder;
         private Ink.WinRT.WpfRenderFrameFence _winRTInkFrameFence;
         private readonly Ink.WinRT.InkWindowInputRegion _winRTInputRegion = new();
-        private bool _winRTInputRegionUpdateQueued;
+        private DispatcherCoalescedAction _winRTInputRegionUpdate;
 
         // Cached on the UI thread at pipeline start: the chrome-forwarding callbacks run on
         // the ink input thread and must not touch WPF objects (WindowInteropHelper throws).
@@ -59,6 +59,9 @@ namespace Ink_Canvas
 
         internal bool IsWinRTInkPipelineAvailable =>
             _winRTInkStarted && !_winRTInkDisabled;
+        private bool ShouldDeferLegacyCanvasInput => IsWinRTInkPipelineAvailable
+            && ResolveLogicalInkTool() == LogicalInkTool.Pen
+            && !IsPluginCanvasToolActive && !_isVideoPresenterSpecialMode;
 
         /// <summary>
         /// 逐指针 / 逐手势增量热路径的异常计数。坏设备下这些回调可能每帧抛异常，
@@ -151,6 +154,14 @@ namespace Ink_Canvas
                         uiDispatcher.BeginInvoke(new Action(() =>
                         {
                             CancelStartupFoldVerification();
+                            if (!ReferenceEquals(_winRTInkInputGate, inputGate)) return;
+                            // The ink HWND is NOACTIVATE. A deliberate board ink press must
+                            // give routed keyboard commands back to the board, not a stale popup.
+                            if (currentMode != 0 && IsVisible && WindowState != WindowState.Minimized)
+                            {
+                                if (!IsActive) Activate();
+                                if (!inkCanvas.IsKeyboardFocusWithin) System.Windows.Input.Keyboard.Focus(inkCanvas);
+                            }
                             OnWinRTInkPausePress(pointerId, p.X, p.Y);
                         }));
                     },
@@ -327,6 +338,10 @@ namespace Ink_Canvas
 
         private void WireWinRTInkGeometryListeners()
         {
+            _winRTInputRegionUpdate ??= new DispatcherCoalescedAction(Dispatcher, TimeSpan.FromMilliseconds(50), () =>
+            {
+                if (_winRTInkStarted && _winRTInkOverlay != null) UpdateWinRTInkInputRegion();
+            });
             if (_winRTInkLocationChangedHandler == null)
             {
                 _winRTInkLocationChangedHandler = (_, __) => UpdateWinRTInkTarget();
@@ -353,6 +368,8 @@ namespace Ink_Canvas
 
         private void UnwireWinRTInkGeometryListeners()
         {
+            _winRTInputRegionUpdate?.Dispose();
+            _winRTInputRegionUpdate = null;
             if (_winRTInkLocationChangedHandler != null)
             {
                 LocationChanged -= _winRTInkLocationChangedHandler;
@@ -377,15 +394,7 @@ namespace Ink_Canvas
 
         private void WinRTInk_LayoutUpdated(object sender, EventArgs e)
         {
-            if (!_winRTInkStarted || _winRTInputRegionUpdateQueued) return;
-            _winRTInputRegionUpdateQueued = true;
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                _winRTInputRegionUpdateQueued = false;
-                if (!_winRTInkStarted || _winRTInkOverlay == null) return;
-                try { UpdateWinRTInkInputRegion(); }
-                catch (Exception ex) { DisableWinRTInkAfterFailure(ex, notify: true); }
-            }), DispatcherPriority.Loaded);
+            if (_winRTInkStarted) _winRTInputRegionUpdate?.Request();
         }
 
         private void UpdateWinRTInkInputRegion()
@@ -399,16 +408,11 @@ namespace Ink_Canvas
                     bounds.Width * config.DpiScaleX, bounds.Height * config.DpiScaleY);
             }
             var holes = new List<Rect>();
-            foreach (var name in new[] { "ViewboxFloatingBar", "ViewboxBlackboardLeftSide", "ViewboxBlackboardCenterSide",
-                "ViewboxBlackboardRightSide", "BlackboardLeftSide", "BlackboardCenterSide", "BlackboardRightSide",
-                "BorderInkReplayToolBox", "IdleMiniBar", "EdgeExpandHint", "PPTControlsGrid", "GridPPTControlLeft",
-                "GridPPTControlRight", "LeftBottomPanelForPPTNavigation", "RightBottomPanelForPPTNavigation",
-                "LeftSidePanelForPPTNavigation", "RightSidePanelForPPTNavigation", "PPTQuickPanelContainer",
-                "GridInkCanvasSelectionCover" })
+            foreach (var name in CanvasChromeGeometry.Names)
             {
-                if (FindName(name) is FrameworkElement element && element.IsVisible && element.IsHitTestVisible
-                    && element.ActualWidth > 0 && element.ActualHeight > 0)
-                    holes.Add(Bounds(element));
+                if (FindName(name) is FrameworkElement element && CanvasChromeGeometry.TryGetBounds(element, this, out var bounds))
+                    holes.Add(new Rect(bounds.X * config.DpiScaleX, bounds.Y * config.DpiScaleY,
+                        bounds.Width * config.DpiScaleX, bounds.Height * config.DpiScaleY));
             }
             _winRTInputRegion.Update(_winRTInkOverlay.OverlayHandle,
                 IsPluginCanvasToolActive ? Rect.Empty : Bounds(inkCanvas), holes);
@@ -1107,6 +1111,8 @@ namespace Ink_Canvas
                 ? Settings.Gesture.IsEnableMultiTouchMode || isInMultiTouchMode
                 : Settings.Gesture.IsEnableMultiTouchModeBoard || isInMultiTouchMode;
             _winRTInkInputGate.TwoFingerGestureAllowed = ResolveTwoFingerGestureAllowed();
+            _winRTInkInputGate.ForwardTouchPositions = IsBoardRoamingMode;
+            _winRTInkInputGate.ForwardInkMovement = Settings.Canvas.PauseStraightenLine && drawingShapeMode == 0;
             _winRTInkInputGate.PalmProfile = CreatePalmEraserProfile("Pointer");
             _winRTInkInputGate.PalmEraserEnabled = CanStartPalmEraser();
         }
@@ -1254,6 +1260,14 @@ namespace Ink_Canvas
                     detail += " [foreign-top-window]";
                     return CanvasHitZone.Outside;
                 }
+
+                foreach (var name in CanvasChromeGeometry.Names)
+                    if (FindName(name) is FrameworkElement chrome && CanvasChromeGeometry.TryGetBounds(chrome, this, out var bounds)
+                        && bounds.Contains(windowPoint))
+                    {
+                        detail += " [reserved-chrome:" + name + "]";
+                        return CanvasHitZone.UiChrome;
+                    }
 
                 if (hit != null
                     && (IsUnderNamed(hit, "EraserOverlayCanvas")
@@ -1753,6 +1767,7 @@ namespace Ink_Canvas
             WinRTInkConfig config,
             IReadOnlyList<WinRTInkPauseMetadata> pauseMetadata)
         {
+            using var uiWork = _uiResponsivenessMonitor?.EnterOperation("winrt-dry-commit");
             if (IsCurrentPageFrozen)
             {
                 TryBlockFrozenPageMutation("书写");

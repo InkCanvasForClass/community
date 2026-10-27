@@ -24,6 +24,7 @@ namespace Ink_Canvas
         {
             public int Index;
             public byte[] Ink;
+            public Ink.StrokeSaveSnapshot StrokeSnapshot;
             public Dictionary<string, string> Sidecars = new();
         }
 
@@ -39,8 +40,10 @@ namespace Ink_Canvas
                 if (newNotice) ShowNotification(MainWindowStrings.Main_Strokes_SaveFailed);
                 return;
             }
+            IDisposable captureWork = null;
             try
             {
+                captureWork = _uiResponsivenessMonitor?.EnterOperation("save-snapshot-capture");
                 bool xml = Settings.Automation.IsSaveStrokesAsXML;
                 bool images = !xml && Settings.Automation.IsSaveFullPageStrokes;
                 bool whiteBackground = Settings.Canvas.UsingWhiteboard;
@@ -61,9 +64,7 @@ namespace Ink_Canvas
                     else if (ppt) strokes = _singlePPTInkManager?.LoadSlideStrokes(index) ?? new StrokeCollection();
                     else strokes = TimeMachineHistories[index] == null ? new StrokeCollection()
                         : ApplyHistoriesToNewStrokeCollection(TimeMachineHistories[index]);
-                    using var buffer = new MemoryStream();
-                    strokes.Save(buffer);
-                    var page = new SavedPageSnapshot { Index = index, Ink = buffer.ToArray() };
+                    var page = new SavedPageSnapshot { Index = index, StrokeSnapshot = Ink.StrokeSaveSnapshot.Capture(strokes) };
                     if (currentMode != 0)
                     {
                         page.Sidecars[".plugins.json"] = _pluginWhiteboardStateStore.ExportDocumentJson(index, 1);
@@ -93,6 +94,17 @@ namespace Ink_Canvas
                     currentFrame = frame;
                 }
                 bool zip = pageCount > 1 && (images || (xml && !ppt));
+                captureWork?.Dispose();
+                // Capture metadata and any live visual before yielding. Compression only
+                // consumes deep copies; editing/changing pages cannot alter this save.
+                await Task.Run(() =>
+                {
+                    foreach (var page in pages)
+                    {
+                        page.Ink = page.StrokeSnapshot.Encode();
+                        page.StrokeSnapshot = null;
+                    }
+                });
                 string directory = zip ? Path.Combine(Path.GetTempPath(), "ICC_Save_" + Guid.NewGuid().ToString("N"))
                     : Path.GetDirectoryName(path);
                 var savedPaths = new List<string>();
@@ -177,7 +189,7 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"[Save] {ex}", LogHelper.LogType.Error);
                 ShowNotification(MainWindowStrings.Main_Strokes_SaveFailed);
             }
-            finally { _documentSaveGate.Release(); }
+            finally { captureWork?.Dispose(); _documentSaveGate.Release(); }
         }
 
         private static async Task UploadSavedDocumentAsync(string path)

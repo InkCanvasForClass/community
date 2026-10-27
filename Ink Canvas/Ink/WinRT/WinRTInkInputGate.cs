@@ -102,6 +102,8 @@ namespace Ink_Canvas.Ink.WinRT
         private volatile bool _multiTouchWriting;
         private volatile bool _twoFingerGestureAllowed;
         private volatile bool _palmEraserEnabled;
+        private volatile bool _forwardTouchPositions = true;
+        private volatile bool _forwardInkMovement = true;
         private PalmEraserProfile _palmProfile = new();
         private int _cancelRequested;
 
@@ -186,6 +188,8 @@ namespace Ink_Canvas.Ink.WinRT
         public bool MultiTouchWriting { set => _multiTouchWriting = value; }
         public bool TwoFingerGestureAllowed { set => _twoFingerGestureAllowed = value; }
         public bool PalmEraserEnabled { set => _palmEraserEnabled = value; }
+        internal bool ForwardTouchPositions { set => _forwardTouchPositions = value; }
+        internal bool ForwardInkMovement { set => _forwardInkMovement = value; }
         internal PalmEraserProfile PalmProfile { set => Volatile.Write(ref _palmProfile, value); }
         public bool IsGestureInProgress => _isGestureInProgress;
 
@@ -282,7 +286,7 @@ namespace Ink_Canvas.Ink.WinRT
                     return;
                 }
 
-                try { _onTouchPointerPress?.Invoke(pointerId, position); }
+                try { if (_forwardTouchPositions) _onTouchPointerPress?.Invoke(pointerId, position); }
                 catch (Exception ex) { LogCallbackException("转发触摸按下", ex); }
             }
 
@@ -323,7 +327,7 @@ namespace Ink_Canvas.Ink.WinRT
                     return;
                 }
 
-                try { _onTouchPointerMove?.Invoke(pointerId, position); }
+                try { if (_forwardTouchPositions) _onTouchPointerMove?.Invoke(pointerId, position); }
                 catch (Exception ex) { LogCallbackException("转发触摸移动", ex); }
             }
 
@@ -338,7 +342,7 @@ namespace Ink_Canvas.Ink.WinRT
                 return;
             }
 
-            if (_inkingPointers.Contains(pointerId))
+            if (_inkingPointers.Contains(pointerId) && _forwardInkMovement)
             {
                 // Pause-straighten movement feed. Each pointer has its own throttle so
                 // simultaneous touch contacts cannot starve one another.
@@ -438,7 +442,7 @@ namespace Ink_Canvas.Ink.WinRT
                 // drops the contact there (the second flush in EndTwoFingerGesture is a no-op).
                 if (_gesturePointers.Contains(pointerId))
                     EmitGestureDelta(force: true);
-                try { _onTouchPointerRelease?.Invoke(pointerId, position); }
+                try { if (_forwardTouchPositions) _onTouchPointerRelease?.Invoke(pointerId, position); }
                 catch (Exception ex) { LogCallbackException("转发触摸抬起", ex); }
             }
 

@@ -9,6 +9,9 @@
   <ItemGroup>
     <Compile Include="../../Ink Canvas/Helpers/AutoFontSizeHelper.cs" Link="Production/AutoFontSizeHelper.cs" />
     <Compile Include="../../Ink Canvas/Helpers/DispatcherCoalescedAction.cs" Link="Production/DispatcherCoalescedAction.cs" />
+    <Compile Include="../../Ink Canvas/Helpers/UiResponsivenessMonitor.cs" Link="Production/UiResponsivenessMonitor.cs" />
+    <Compile Include="../../Ink Canvas/Ink/StrokeSaveSnapshot.cs" Link="Production/StrokeSaveSnapshot.cs" />
+    <Compile Include="../../Ink Canvas/Ink/WinRT/CanvasChromeGeometry.cs" Link="Production/CanvasChromeGeometry.cs" />
     <Compile Include="../../Ink Canvas/Ink/PalmEraserEngine.cs" Link="Production/PalmEraserEngine.cs" />
     <Compile Include="../../Ink Canvas/Ink/PalmEraserProfiles.cs" Link="Production/PalmEraserProfiles.cs" />
     <Compile Include="../../Ink Canvas/Ink/PalmInputMailbox.cs" Link="Production/PalmInputMailbox.cs" />

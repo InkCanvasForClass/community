@@ -799,6 +799,7 @@ namespace Ink_Canvas
 
             // 初始化墨迹渐隐管理器
             _inkFadeManager = new InkFadeManager(this);
+            InitializeCanvasInputRecovery();
 
             // 注册输入事件
             inkCanvas.PreviewMouseDown += inkCanvas_PreviewMouseDown;
@@ -1546,6 +1547,8 @@ namespace Ink_Canvas
             }
             // 加载设置
             LoadSettings(true);
+            _uiResponsivenessMonitor ??= new UiResponsivenessMonitor(Dispatcher,
+                message => LogHelper.WriteLogToFile(message, LogHelper.LogType.Warning));
             InitializePalmRawInput();
             LogHelper.WriteLogToFile("[Startup] 设置加载完成", LogHelper.LogType.Info);
             // 启动性能监测（如果已启用）。最快模式下延迟到首帧之后。
@@ -1995,6 +1998,7 @@ namespace Ink_Canvas
         /// <param name="e">关闭事件的参数（未使用）。</param>
         private void Window_Closed(object sender, EventArgs e)
         {
+            _uiResponsivenessMonitor?.Dispose();
             _palmRawSubscription?.Dispose();
             _palmRawSubscription = null;
             _palmRawMailbox?.Dispose();
@@ -2545,6 +2549,7 @@ namespace Ink_Canvas
         // 手写笔输入
         private void inkCanvas_StylusDown(object sender, StylusDownEventArgs e)
         {
+            if (ShouldDeferLegacyCanvasInput && !e.StylusDevice.Inverted) { e.Handled = true; return; }
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
             {
                 if (BeginSecAgentStrokeErase(e.GetPosition(inkCanvas)))
@@ -2558,8 +2563,6 @@ namespace Ink_Canvas
             if (IsBoardRoamingMode)
             {
                 inkCanvas.CaptureStylus();
-                ViewboxFloatingBar.IsHitTestVisible = false;
-                BlackboardUIGridForInkReplay.IsHitTestVisible = false;
                 BeginBoardRoamingContact(e.StylusDevice.Id, e.GetPosition(inkCanvas));
                 e.Handled = true;
                 return;
@@ -2578,6 +2581,7 @@ namespace Ink_Canvas
 
         private void inkCanvas_StylusMove(object sender, StylusEventArgs e)
         {
+            if (ShouldDeferLegacyCanvasInput) { e.Handled = true; return; }
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke
                 && MoveSecAgentStrokeErase(e.GetPosition(inkCanvas)))
             {
@@ -2593,6 +2597,7 @@ namespace Ink_Canvas
         // 手写笔抬起事件（用于橡皮擦自动切换）
         private void inkCanvas_StylusUp(object sender, StylusEventArgs e)
         {
+            if (ShouldDeferLegacyCanvasInput) { e.Handled = true; return; }
             EndSecAgentStrokeErase();
             if (_isBoardRoamingPointerDown || _isBoardRoamingTwoFingerGesture || _boardRoamingContacts.Count > 0)
             {

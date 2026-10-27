@@ -33,6 +33,7 @@ internal static class Program
                 Check(OfficeLifecycleGuard.Verify(args[0]) >= 3, "Office monitor lifecycle guard failed");
             GateRegression();
             CoalescedUiRegression();
+            InputRecoveryRegression.Run(Check);
             AutoFontLifetimeRegression();
             PalmRegression();
             PalmEngineRegression.Run(Check);

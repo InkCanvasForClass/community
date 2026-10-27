@@ -371,6 +371,7 @@ namespace Ink_Canvas
         /// </summary>
         private void ProcessCommittedStroke(Stroke stroke)
         {
+            using var uiWork = _uiResponsivenessMonitor?.EnterOperation("stroke-postprocess");
             if (stroke == null)
                 return;
 
