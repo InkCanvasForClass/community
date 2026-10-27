@@ -133,7 +133,10 @@ namespace Ink_Canvas.Controls
         /// </summary>
         public void SetMode(SelectionOverlayMode mode)
         {
-            bool isElementMode = mode == SelectionOverlayMode.Element;
+            bool isElementMode = true;
+            RotationHandle.Visibility = Visibility.Visible;
+            RotationLine.Visibility = Visibility.Visible;
+            MoveSurface.Visibility = Visibility.Visible;
 
             OverlayRoot.Background = isElementMode ? Brushes.Transparent : null;
             MoveSurface.IsHitTestVisible = isElementMode;

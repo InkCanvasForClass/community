@@ -1,4 +1,4 @@
-﻿using Ink_Canvas.Controls;
+using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
@@ -1075,7 +1075,7 @@ namespace Ink_Canvas
             drawingShapeMode = 0;
             // 使用集中化的工具模式切换方法
             SetCurrentToolMode(InkCanvasEditingMode.Select);
-            inkCanvas.IsManipulationEnabled = true;
+            inkCanvas.IsManipulationEnabled = false;
             SetCursorBasedOnEditingMode(inkCanvas);
         }
 
@@ -1281,6 +1281,7 @@ namespace Ink_Canvas
                 // 复合选区（墨迹+图片、或多图片、或纯墨迹）
                 DetachOverlayTracking();
                 var center = new Point(bounds.Left + bounds.Width / 2, bounds.Top + bounds.Height / 2);
+                ImageSelectionOverlay.SetMode(SelectionOverlayMode.Element);
                 ImageSelectionOverlay.UpdateFrame(center, bounds.Width, bounds.Height, 0);
                 ImageSelectionOverlay.Visibility = Visibility.Visible;
 

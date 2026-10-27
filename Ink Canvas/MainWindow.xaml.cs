@@ -3564,6 +3564,17 @@ namespace Ink_Canvas
 
                 // 执行模式切换
                 inkCanvas.EditingMode = newMode;
+                if (newMode == InkCanvasEditingMode.Select)
+                {
+                    if (!_isVideoPresenterSpecialMode)
+                    {
+                        inkCanvas.IsManipulationEnabled = false;
+                    }
+                }
+                else if (newMode == InkCanvasEditingMode.Ink)
+                {
+                    inkCanvas.IsManipulationEnabled = true;
+                }
                 SyncWinRTInkPipelineWithLogicalTool();
 
                 // 根据模式确定是否为鼠标模式（无工具模式）
