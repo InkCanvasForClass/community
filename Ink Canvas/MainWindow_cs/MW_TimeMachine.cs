@@ -660,6 +660,13 @@ namespace Ink_Canvas
         /// </remarks>
         private void StrokesOnStrokesChanged(object sender, StrokeCollectionChangedEventArgs e)
         {
+            // WPF adds the stroke before StrokeCollected. Mark its transient identity here
+            // so neither the addition nor the later fade removal enters undo history.
+            if (_currentCommitType != CommitReason.CodeInput && penType == 2 && Settings.Canvas.EnableInkFade)
+                foreach (Stroke stroke in e.Added)
+                    if (!stroke.ContainsPropertyData(Ink.WinRT.WinRTStrokeConverter.NativeWetInkCommittedGuid)
+                        && !InkFadeManager.IsLaserStroke(stroke))
+                        stroke.AddPropertyData(InkFadeManager.LaserRenderModeGuid, true);
             // 视频展台旋转时程序替换墨迹，不重置基准
             if (_isVideoPresenterSpecialMode && !_isApplyingRotationToStrokes)
             {
@@ -738,7 +745,11 @@ namespace Ink_Canvas
 
             if (_currentCommitType == CommitReason.CodeInput || _currentCommitType == CommitReason.ShapeDrawing) return;
 
-            if (e.Added.Count != 0 || e.Removed.Count != 0)
+            var persistentAdded = Ink.PersistentStrokePolicy.Filter(e.Added);
+            var persistentRemoved = Ink.PersistentStrokePolicy.Filter(e.Removed);
+            if (persistentAdded.Count == 0 && persistentRemoved.Count == 0) return;
+
+            if (persistentAdded.Count != 0 || persistentRemoved.Count != 0)
                 MarkCurrentPageInkChanged();
 
             // 长按撤销清屏：清空前已显式提交可撤销历史，这里吞掉事件路径的自动重复提交
@@ -746,37 +757,37 @@ namespace Ink_Canvas
             if (_suppressClearHistoryCommit && _currentCommitType == CommitReason.ClearingCanvas)
                 return;
 
-            if ((e.Added.Count != 0 || e.Removed.Count != 0) && IsEraseByPoint)
+            if ((persistentAdded.Count != 0 || persistentRemoved.Count != 0) && IsEraseByPoint)
             {
                 if (AddedStroke == null) AddedStroke = new StrokeCollection();
                 if (ReplacedStroke == null) ReplacedStroke = new StrokeCollection();
-                AddedStroke.Add(e.Added);
-                ReplacedStroke.Add(e.Removed);
+                AddedStroke.Add(persistentAdded);
+                ReplacedStroke.Add(persistentRemoved);
                 return;
             }
 
-            if (e.Added.Count != 0)
+            if (persistentAdded.Count != 0)
             {
                 if (_currentCommitType == CommitReason.ShapeRecognition)
                 {
-                    timeMachine.CommitStrokeShapeHistory(ReplacedStroke, e.Added);
+                    timeMachine.CommitStrokeShapeHistory(ReplacedStroke, persistentAdded);
                     ReplacedStroke = null;
                     return;
                 }
 
-                timeMachine.CommitStrokeUserInputHistory(e.Added);
+                timeMachine.CommitStrokeUserInputHistory(persistentAdded);
                 return;
             }
 
-            if (e.Removed.Count != 0)
+            if (persistentRemoved.Count != 0)
             {
                 if (_currentCommitType == CommitReason.ShapeRecognition)
                 {
-                    ReplacedStroke = e.Removed;
+                    ReplacedStroke = persistentRemoved;
                 }
                 else if (!IsEraseByPoint || _currentCommitType == CommitReason.ClearingCanvas)
                 {
-                    timeMachine.CommitStrokeEraseHistory(e.Removed);
+                    timeMachine.CommitStrokeEraseHistory(persistentRemoved);
                 }
             }
         }

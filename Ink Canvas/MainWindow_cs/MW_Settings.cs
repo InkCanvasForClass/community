@@ -759,6 +759,9 @@ namespace Ink_Canvas
                 drawingAttributes.Height = value;
                 Settings.Canvas.LaserPenWidth = value;
             }
+            inkCanvas.DefaultDrawingAttributes.Width = drawingAttributes.Width;
+            inkCanvas.DefaultDrawingAttributes.Height = drawingAttributes.Height;
+            UpdateWinRTInkStyle();
             SaveSettingsToFile();
         }
 

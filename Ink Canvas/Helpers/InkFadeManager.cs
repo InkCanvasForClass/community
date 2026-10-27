@@ -46,6 +46,9 @@ namespace Ink_Canvas.Helpers
         private readonly Dictionary<Stroke, Point> _strokeStartPoints;
         private readonly Dictionary<Stroke, Point> _strokeEndPoints;
         private readonly Dictionary<Stroke, int> _strokeAnimationDurations;
+        private readonly Dictionary<Stroke, long> _expiry = new();
+        private readonly Dictionary<Stroke, UIElement> _segmentVisuals = new();
+        private readonly DispatcherTimer _expiryTimer;
         #endregion
 
         #region Constructor
@@ -58,6 +61,14 @@ namespace Ink_Canvas.Helpers
             _strokeStartPoints = new Dictionary<Stroke, Point>();
             _strokeEndPoints = new Dictionary<Stroke, Point>();
             _strokeAnimationDurations = new Dictionary<Stroke, int>();
+            _expiryTimer = new DispatcherTimer(DispatcherPriority.Background, _dispatcher)
+                { Interval = TimeSpan.FromMilliseconds(100) };
+            _expiryTimer.Tick += (_, _) =>
+            {
+                long now = Environment.TickCount64;
+                foreach (var stroke in new List<Stroke>(_expiry.Keys))
+                    if (_expiry.TryGetValue(stroke, out long deadline) && now >= deadline) RemoveStroke(stroke);
+            };
         }
         #endregion
 
@@ -70,17 +81,22 @@ namespace Ink_Canvas.Helpers
         /// <param name="endPoint">抬笔点</param>
         public void AddFadingStroke(Stroke stroke, Point startPoint, Point endPoint, long strokeDurationMs = 0)
         {
-            if (!IsEnabled || stroke == null)
+            if (!_dispatcher.CheckAccess())
+            { _dispatcher.BeginInvoke(new Action(() => AddFadingStroke(stroke, startPoint, endPoint, strokeDurationMs))); return; }
+            TryAddFadingStroke(stroke, startPoint, endPoint, strokeDurationMs);
+        }
+
+        public bool TryAddFadingStroke(Stroke stroke, Point startPoint, Point endPoint, long strokeDurationMs = 0)
+        {
+            _dispatcher.VerifyAccess();
+            if (stroke == null || (!IsEnabled && !IsLaserStroke(stroke)))
             {
-                return;
+                return false;
             }
 
             try
             {
-                if (_mainWindow.inkCanvas.EditingMode != InkCanvasEditingMode.Ink)
-                {
-                    _mainWindow.inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                }
+                RemoveStroke(stroke);
 
                 _strokeStartPoints[stroke] = startPoint;
                 _strokeEndPoints[stroke] = endPoint;
@@ -88,8 +104,8 @@ namespace Ink_Canvas.Helpers
                 int animationDuration;
                 if (strokeDurationMs > 0)
                 {
-                    if (FadeSpeedMultiplier <= 0) FadeSpeedMultiplier = 1.0;
-                    animationDuration = Math.Max(20, (int)(strokeDurationMs / FadeSpeedMultiplier));
+                    double speed = double.IsFinite(FadeSpeedMultiplier) && FadeSpeedMultiplier > 0 ? FadeSpeedMultiplier : 1;
+                    animationDuration = (int)Math.Clamp(strokeDurationMs / speed, 20, int.MaxValue);
                 }
                 else
                 {
@@ -99,13 +115,18 @@ namespace Ink_Canvas.Helpers
                 _strokeAnimationDurations[stroke] = animationDuration;
 
                 var strokeVisual = CreateStrokeVisual(stroke);
-                if (strokeVisual == null) return;
+                if (strokeVisual == null)
+                    strokeVisual = new InkPresenter { Strokes = new StrokeCollection { stroke.Clone() }, IsHitTestVisible = false };
+                strokeVisual.IsHitTestVisible = false;
 
                 _strokeVisuals[stroke] = strokeVisual;
+                int holdMs = Math.Clamp(FadeTime, 1, int.MaxValue);
+                _expiry[stroke] = Environment.TickCount64 + holdMs + (long)animationDuration;
+                _expiryTimer.Start();
 
                 var timer = new DispatcherTimer
                 {
-                    Interval = TimeSpan.FromMilliseconds(FadeTime)
+                    Interval = TimeSpan.FromMilliseconds(holdMs)
                 };
 
                 EventHandler tickHandler = null;
@@ -126,7 +147,8 @@ namespace Ink_Canvas.Helpers
                 {
                     try
                     {
-                        if (_mainWindow.inkCanvas != null)
+                        if (_mainWindow.inkCanvas != null && _strokeVisuals.TryGetValue(stroke, out var current)
+                            && ReferenceEquals(current, strokeVisual))
                         {
                             // 将墨迹添加到 inkCanvas 的父容器中，而不是 inkCanvas.Children
                             // 这样可以避免坐标系统问题
@@ -147,10 +169,13 @@ namespace Ink_Canvas.Helpers
                         LogHelper.WriteLogToFile($"添加墨迹视觉元素到画布失败: {ex}", LogHelper.LogType.Error);
                     }
                 });
+                return true;
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"添加渐隐墨迹失败: {ex}", LogHelper.LogType.Error);
+                RemoveStroke(stroke);
+                return false;
             }
         }
 
@@ -161,6 +186,7 @@ namespace Ink_Canvas.Helpers
         public void RemoveStroke(Stroke stroke)
         {
             if (stroke == null) return;
+            if (!_dispatcher.CheckAccess()) { _dispatcher.BeginInvoke(new Action(() => RemoveStroke(stroke))); return; }
 
             try
             {
@@ -172,29 +198,13 @@ namespace Ink_Canvas.Helpers
 
                 if (_strokeVisuals.TryGetValue(stroke, out var visual))
                 {
-                    _dispatcher.InvokeAsync(() =>
-                    {
-                        try
-                        {
-                            // 从父容器中移除墨迹
-                            var parent = _mainWindow.inkCanvas?.Parent as Panel;
-                            if (parent != null && parent.Children.Contains(visual))
-                            {
-                                parent.Children.Remove(visual);
-                            }
-                            else if (_mainWindow.inkCanvas != null && _mainWindow.inkCanvas.Children.Contains(visual))
-                            {
-                                _mainWindow.inkCanvas.Children.Remove(visual);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            LogHelper.WriteLogToFile($"从画布移除墨迹视觉元素失败: {ex}", LogHelper.LogType.Error);
-                        }
-                    });
+                    DetachFadeVisual(visual);
 
                     _strokeVisuals.Remove(stroke);
                 }
+                if (_segmentVisuals.Remove(stroke, out var segments)) DetachFadeVisual(segments);
+                _expiry.Remove(stroke);
+                if (_expiry.Count == 0) _expiryTimer.Stop();
 
                 _strokeStartPoints.Remove(stroke);
                 _strokeEndPoints.Remove(stroke);
@@ -211,40 +221,20 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public void ClearAllFadingStrokes()
         {
+            if (!_dispatcher.CheckAccess()) { _dispatcher.BeginInvoke(new Action(ClearAllFadingStrokes)); return; }
             try
             {
+                foreach (var visual in new List<UIElement>(_strokeVisuals.Values)) DetachFadeVisual(visual);
+                foreach (var visual in new List<UIElement>(_segmentVisuals.Values)) DetachFadeVisual(visual);
+                _segmentVisuals.Clear();
+                _expiry.Clear();
+                _expiryTimer.Stop();
                 foreach (var timer in _fadeTimers.Values)
                 {
                     timer.Stop();
                 }
 
                 _fadeTimers.Clear();
-
-                _dispatcher.InvokeAsync(() =>
-                {
-                    try
-                    {
-                        if (_mainWindow.inkCanvas != null)
-                        {
-                            var parent = _mainWindow.inkCanvas.Parent as Panel;
-                            foreach (var visual in _strokeVisuals.Values)
-                            {
-                                if (parent != null && parent.Children.Contains(visual))
-                                {
-                                    parent.Children.Remove(visual);
-                                }
-                                else if (_mainWindow.inkCanvas.Children.Contains(visual))
-                                {
-                                    _mainWindow.inkCanvas.Children.Remove(visual);
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"清除所有墨迹视觉元素失败: {ex}", LogHelper.LogType.Error);
-                    }
-                });
 
                 _strokeVisuals.Clear();
                 _strokeStartPoints.Clear();
@@ -263,7 +253,8 @@ namespace Ink_Canvas.Helpers
         /// <param name="fadeTime">新的渐隐时间（毫秒）</param>
         public void UpdateFadeTime(int fadeTime)
         {
-            FadeTime = fadeTime;
+            _dispatcher.VerifyAccess();
+            FadeTime = Math.Clamp(fadeTime, 1, int.MaxValue);
 
             foreach (var kvp in _fadeTimers)
             {
@@ -273,6 +264,7 @@ namespace Ink_Canvas.Helpers
                 timer.Stop();
                 timer.Interval = TimeSpan.FromMilliseconds(FadeTime);
                 timer.Start();
+                _expiry[stroke] = Environment.TickCount64 + (long)FadeTime + GetStrokeAnimationDuration(stroke);
             }
         }
 
@@ -283,8 +275,8 @@ namespace Ink_Canvas.Helpers
 
         private int GetEffectiveAnimationDuration()
         {
-            if (FadeSpeedMultiplier <= 0) FadeSpeedMultiplier = 1.0;
-            return Math.Max(20, (int)(AnimationDuration / FadeSpeedMultiplier));
+            double speed = double.IsFinite(FadeSpeedMultiplier) && FadeSpeedMultiplier > 0 ? FadeSpeedMultiplier : 1;
+            return (int)Math.Clamp(AnimationDuration / speed, 20, int.MaxValue);
         }
 
         private int GetStrokeAnimationDuration(Stroke stroke)
@@ -380,7 +372,7 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        private bool IsLaserStroke(Stroke stroke)
+        internal static bool IsLaserStroke(Stroke stroke)
         {
             return stroke != null
                 && stroke.ContainsPropertyData(LaserRenderModeGuid);
@@ -499,30 +491,26 @@ namespace Ink_Canvas.Helpers
         private void StartFadeAnimation(Stroke stroke)
         {
             if (!_strokeVisuals.TryGetValue(stroke, out var visual)) return;
+            if (_expiry.TryGetValue(stroke, out long deadline) && Environment.TickCount64 >= deadline)
+            { RemoveStroke(stroke); return; }
 
             try
             {
-                _dispatcher.InvokeAsync(() =>
-                {
-                    var currentOpacity = visual.Opacity;
-                    var isHighlighter = stroke.DrawingAttributes.IsHighlighter;
-                    var isLaser = IsLaserStroke(stroke);
+                var currentOpacity = visual.Opacity;
+                var isHighlighter = stroke.DrawingAttributes.IsHighlighter;
+                var isLaser = IsLaserStroke(stroke);
 
-                    int animDuration = GetStrokeAnimationDuration(stroke);
+                int animDuration = GetStrokeAnimationDuration(stroke);
 
-                    if (isHighlighter || isLaser)
-                    {
-                        StartUnifiedFadeAnimation(visual, stroke, currentOpacity, animDuration);
-                    }
-                    else
-                    {
-                        StartProgressiveFadeAnimation(visual, stroke, currentOpacity, animDuration);
-                    }
-                });
+                if (isHighlighter || isLaser)
+                    StartUnifiedFadeAnimation(visual, stroke, currentOpacity, animDuration);
+                else
+                    StartProgressiveFadeAnimation(visual, stroke, currentOpacity, animDuration);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"开始渐隐动画失败: {ex}", LogHelper.LogType.Error);
+                RemoveStroke(stroke);
             }
         }
 
@@ -623,6 +611,7 @@ namespace Ink_Canvas.Helpers
                 originalVisual.Visibility = Visibility.Hidden;
 
                 var segmentContainer = new System.Windows.Controls.Canvas();
+                _segmentVisuals[stroke] = segmentContainer;
                 var originalAlpha = stroke.DrawingAttributes.Color.A;
                 segmentContainer.Opacity = originalAlpha / 255.0 * opacity;
 
@@ -974,6 +963,7 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         private void OnAnimationCompleted(UIElement visual, Stroke stroke)
         {
+            if (!_strokeVisuals.TryGetValue(stroke, out var current) || !ReferenceEquals(current, visual)) return;
             try
             {
                 // 先解除动画时钟，释放 AnimationClock 持有的 fadeAnimation + Completed lambda 闭包（捕获 visual/stroke）
@@ -1007,6 +997,20 @@ namespace Ink_Canvas.Helpers
             {
                 LogHelper.WriteLogToFile($"渐隐动画完成后清理墨迹失败: {ex}", LogHelper.LogType.Error);
             }
+        }
+
+        private void DetachFadeVisual(UIElement visual)
+        {
+            visual.BeginAnimation(UIElement.OpacityProperty, null);
+            if (visual.RenderTransform is ScaleTransform scale)
+            {
+                scale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+                scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+            }
+            if (visual is Panel panel)
+                foreach (UIElement child in panel.Children) child.BeginAnimation(UIElement.OpacityProperty, null);
+            if (VisualTreeHelper.GetParent(visual) is Panel parent) parent.Children.Remove(visual);
+            else if (_mainWindow.inkCanvas?.Children.Contains(visual) == true) _mainWindow.inkCanvas.Children.Remove(visual);
         }
         #endregion
     }

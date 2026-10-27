@@ -118,6 +118,7 @@ namespace Ink_Canvas.Ink.WinRT
         private readonly PalmEraserEngine _palmEngine = new();
         private readonly HashSet<uint> _palmSuppressedPointers = new();
         private readonly HashSet<uint> _palmCanceledPointers = new();
+        private readonly Action<uint> _onPointerStrokeCanceled;
         private uint? _palmPointer;
         private WinRTInkPalmEvent _lastPalmSample;
         private int _palmRevision;
@@ -158,7 +159,8 @@ namespace Ink_Canvas.Ink.WinRT
             Action onTwoFingerGestureCompleted,
             Action<uint> onStrokeEnded,
             Action onStrokeCanceled,
-            Action<WinRTInkPalmEvent> onPalmPointer = null)
+            Action<WinRTInkPalmEvent> onPalmPointer = null,
+            Action<uint> onPointerStrokeCanceled = null)
         {
             _classifyPointer = classifyPointer ?? throw new ArgumentNullException(nameof(classifyPointer));
             _onChromePointerDown = onChromePointerDown;
@@ -176,6 +178,7 @@ namespace Ink_Canvas.Ink.WinRT
             _onStrokeEnded = onStrokeEnded ?? throw new ArgumentNullException(nameof(onStrokeEnded));
             _onStrokeCanceled = onStrokeCanceled ?? throw new ArgumentNullException(nameof(onStrokeCanceled));
             _onPalmPointer = onPalmPointer;
+            _onPointerStrokeCanceled = onPointerStrokeCanceled;
         }
 
         public bool CanvasInputEnabled { set => _canvasInputEnabled = value; }
@@ -386,6 +389,7 @@ namespace Ink_Canvas.Ink.WinRT
                 || _gesturePointers.Contains(pointerId))
             {
                 e.Handled = true;
+                _onPointerStrokeCanceled?.Invoke(pointerId);
                 _onStrokeCanceled();
                 return false;
             }
@@ -396,6 +400,7 @@ namespace Ink_Canvas.Ink.WinRT
 
         public void OnStrokeCanceled(InkStrokeInput sender, PointerEventArgs e)
         {
+            _onPointerStrokeCanceled?.Invoke(e.CurrentPoint.PointerId);
             _canceledStrokePointers.Remove(e.CurrentPoint.PointerId);
             _onStrokeCanceled();
         }

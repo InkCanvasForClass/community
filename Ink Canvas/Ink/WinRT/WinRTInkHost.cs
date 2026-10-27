@@ -74,6 +74,8 @@ namespace Ink_Canvas.Ink.WinRT
         /// CoCreates the host and queues the OS presenter creation on the ink thread.
         /// Blocks until the presenter is ready (or fails). UI thread only.
         /// </summary>
+        internal WinRTInkConfig AppliedConfig { get; private set; }
+
         public void Start(IntPtr ownerHwnd, WinRTInkConfig config)
         {
             if (ownerHwnd == IntPtr.Zero)
@@ -162,6 +164,7 @@ namespace Ink_Canvas.Ink.WinRT
             _presenter.InputProcessingConfiguration.Mode = InkInputProcessingMode.Inking;
             _presenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
             _presenter.UpdateDefaultDrawingAttributes(config.ToInkDrawingAttributes());
+            AppliedConfig = config;
 
             _inkSynchronizer = _presenter.ActivateCustomDrying();
             // Custom drying is required before the WinRT multiple-pointer configuration.
@@ -265,11 +268,14 @@ namespace Ink_Canvas.Ink.WinRT
             });
         }
 
-        public void UpdateDrawingAttributes(InkDrawingAttributes attributes)
+        internal void UpdateDrawingAttributes(WinRTInkConfig config)
         {
-            if (attributes == null)
-                throw new ArgumentNullException(nameof(attributes));
-            RunOnInkThread(p => p.UpdateDefaultDrawingAttributes(attributes));
+            if (config == null) throw new ArgumentNullException(nameof(config));
+            RunOnInkThread(p =>
+            {
+                p.UpdateDefaultDrawingAttributes(config.ToInkDrawingAttributes());
+                AppliedConfig = config;
+            });
         }
 
         public void SetSize(float widthPx, float heightPx)

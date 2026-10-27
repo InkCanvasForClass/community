@@ -1165,6 +1165,7 @@ namespace Ink_Canvas
             {
                 drawingAttributes.IsHighlighter = !toggle.IsOn;
                 inkCanvas.DefaultDrawingAttributes.IsHighlighter = !toggle.IsOn;
+                UpdateWinRTInkStyle();
             }
             SaveSettingsToFile();
         }

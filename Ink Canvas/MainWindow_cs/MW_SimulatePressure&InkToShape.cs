@@ -405,48 +405,33 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"批注点提示判定失败: {ex.Message}", LogHelper.LogType.Warning);
             }
 
-            if (Settings.Canvas.EnableInkFade)
+            bool nativeStroke = stroke.ContainsPropertyData(WinRTStrokeConverter.NativeWetInkCommittedGuid);
+            if (!nativeStroke && penType == 2 && Settings.Canvas.EnableInkFade
+                && !stroke.ContainsPropertyData(InkFadeManager.LaserRenderModeGuid))
+                stroke.AddPropertyData(InkFadeManager.LaserRenderModeGuid, true);
+            if (InkFadeManager.IsLaserStroke(stroke) || (!nativeStroke && Settings.Canvas.EnableInkFade))
             {
                 // 获取墨迹的起点和终点
                 var startPoint = e.Stroke.StylusPoints.Count > 0 ? e.Stroke.StylusPoints[0].ToPoint() : new Point();
                 var endPoint = e.Stroke.StylusPoints.Count > 0 ? e.Stroke.StylusPoints[e.Stroke.StylusPoints.Count - 1].ToPoint() : new Point();
 
-                if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink)
-                {
-                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                }
-
                 // 添加到墨迹渐隐管理器
-                if (_inkFadeManager != null)
+                _inkFadeManager ??= new InkFadeManager(this);
+                long strokeDurationMs = 0;
+                if (nativeStroke && stroke.ContainsPropertyData(WinRTStrokeConverter.StrokeDurationGuid))
+                    strokeDurationMs = stroke.GetPropertyData(WinRTStrokeConverter.StrokeDurationGuid) is long measured ? measured : 0;
+                else if (!nativeStroke && _stylusDownTimestamp > 0)
                 {
-                    if (penType == 2
-                        && !e.Stroke.ContainsPropertyData(InkFadeManager.LaserRenderModeGuid))
-                    {
-                        e.Stroke.AddPropertyData(InkFadeManager.LaserRenderModeGuid, true);
-                    }
-
-                    long strokeDurationMs = 0;
-                    if (_stylusDownTimestamp > 0)
-                    {
-                        strokeDurationMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _stylusDownTimestamp;
-                        _stylusDownTimestamp = 0;
-                    }
-                    _inkFadeManager.AddFadingStroke(e.Stroke, startPoint, endPoint, strokeDurationMs);
+                    strokeDurationMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _stylusDownTimestamp;
+                    _stylusDownTimestamp = 0;
                 }
-                else
-                {
-                    LogHelper.WriteLogToFile("StrokeCollected: 墨迹渐隐管理器为空，无法添加墨迹", LogHelper.LogType.Error);
-                }
+                if (!_inkFadeManager.TryAddFadingStroke(e.Stroke, startPoint, endPoint, strokeDurationMs))
+                    LogHelper.WriteLogToFile("StrokeCollected: transient stroke could not be rendered; removing it.", LogHelper.LogType.Error);
 
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     try
                     {
-                        if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink)
-                        {
-                            inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                        }
-
                         if (inkCanvas.Strokes.Contains(e.Stroke))
                         {
                             inkCanvas.Strokes.Remove(e.Stroke);

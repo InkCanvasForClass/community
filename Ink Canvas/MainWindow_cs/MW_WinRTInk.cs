@@ -46,7 +46,8 @@ namespace Ink_Canvas
 
         private WinRTInkConfig _winRTInkConfig;
         private readonly Queue<Action> _winRTInkPendingDry = new Queue<Action>();
-        private readonly ConcurrentQueue<uint> _winRTInkEndedPointerIds = new ConcurrentQueue<uint>();
+        private readonly ConcurrentQueue<(uint Id, WinRTInkConfig Config, long Duration)> _winRTInkEndedPointerIds = new();
+        private readonly Ink.StrokeSessionTracker<WinRTInkConfig> _winRTStrokeSessions = new();
         private bool _winRTInkDryInProgress;
         private bool _winRTInkDryEndQueued;
         private long _winRTInkDryId;
@@ -146,6 +147,7 @@ namespace Ink_Canvas
                     },
                     onInkPointerPress: (pointerId, device, p) =>
                     {
+                        _winRTStrokeSessions.Begin(pointerId, _winRTInkHost?.AppliedConfig);
                         uiDispatcher.BeginInvoke(new Action(() =>
                         {
                             CancelStartupFoldVerification();
@@ -178,7 +180,8 @@ namespace Ink_Canvas
                     },
                     onStrokeEnded: OnWinRTInkStrokeEnded,
                     onStrokeCanceled: OnWinRTInkStrokeCanceled,
-                    onPalmPointer: palmDispatcher.Post);
+                    onPalmPointer: palmDispatcher.Post,
+                    onPointerStrokeCanceled: _winRTStrokeSessions.Cancel);
 
                 if (_winRTInkOverlay == null)
                     _winRTInkOverlay = new WetInkOverlayWindow(hwnd, IsCanvasPoint);
@@ -286,6 +289,8 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"[WinRTInk] 卸载管线时释放墨迹宿主失败: {ex.Message}", LogHelper.LogType.Info);
             }
             _winRTInkHost = null;
+            _winRTStrokeSessions.Clear();
+            while (_winRTInkEndedPointerIds.TryDequeue(out _)) { }
 
             // Keep the overlay HWND alive (cloaked) across tool switches: it is expensive to
             // recreate (window + DComp device + cross-screen move = the entry flash) and a
@@ -424,7 +429,7 @@ namespace Ink_Canvas
                 var config = BuildWinRTInkConfig();
                 _winRTInkConfig = config;
                 _winRTInkHost.SetSize(config.WidthPx, config.HeightPx);
-                _winRTInkHost.UpdateDrawingAttributes(config.ToInkDrawingAttributes());
+                _winRTInkHost.UpdateDrawingAttributes(config);
                 _winRTInkHost.SetInputEnabled(IsVisible && WindowState != WindowState.Minimized);
 
                 var bounds = ScreenBoundsFromConfig(config);
@@ -457,7 +462,7 @@ namespace Ink_Canvas
             {
                 var config = BuildWinRTInkConfig();
                 _winRTInkConfig = config;
-                _winRTInkHost.UpdateDrawingAttributes(config.ToInkDrawingAttributes());
+                _winRTInkHost.UpdateDrawingAttributes(config);
                 PushWinRTInkGateSnapshots();
             }
             catch (Exception ex)
@@ -797,14 +802,18 @@ namespace Ink_Canvas
 
         private readonly struct WinRTInkPauseMetadata
         {
-            public WinRTInkPauseMetadata(bool hasPause, Point pausePosition)
+            public WinRTInkPauseMetadata(bool hasPause, Point pausePosition, WinRTInkConfig config = null, long durationMs = 0)
             {
                 HasPause = hasPause;
                 PausePosition = pausePosition;
+                Config = config;
+                DurationMs = durationMs;
             }
 
             public bool HasPause { get; }
             public Point PausePosition { get; }
+            public WinRTInkConfig Config { get; }
+            public long DurationMs { get; }
         }
 
         private readonly Dictionary<uint, WinRTInkPauseState> _winRTInkPauseStates =
@@ -909,7 +918,6 @@ namespace Ink_Canvas
             foreach (var state in _winRTInkPauseStates.Values)
                 state.Timer?.Stop();
             _winRTInkPauseStates.Clear();
-            while (_winRTInkEndedPointerIds.TryDequeue(out _)) { }
         }
 
         /// <summary>
@@ -922,22 +930,23 @@ namespace Ink_Canvas
             var metadata = new List<WinRTInkPauseMetadata>(Math.Max(0, strokeCount));
             for (var i = 0; i < strokeCount; i++)
             {
-                if (!_winRTInkEndedPointerIds.TryDequeue(out var pointerId))
+                if (!_winRTInkEndedPointerIds.TryDequeue(out var ended))
                 {
                     metadata.Add(default(WinRTInkPauseMetadata));
                     continue;
                 }
 
+                var pointerId = ended.Id;
                 if (_winRTInkPauseStates.TryGetValue(pointerId, out var state))
                 {
-                    metadata.Add(new WinRTInkPauseMetadata(state.Pending, state.PausePos));
+                    metadata.Add(new WinRTInkPauseMetadata(state.Pending, state.PausePos, ended.Config, ended.Duration));
                     state.Pending = false;
                     if (!state.Tracking)
                         RemoveWinRTInkPauseState(pointerId);
                 }
                 else
                 {
-                    metadata.Add(default(WinRTInkPauseMetadata));
+                    metadata.Add(new WinRTInkPauseMetadata(false, default, ended.Config, ended.Duration));
                 }
             }
 
@@ -1077,25 +1086,13 @@ namespace Ink_Canvas
         private WinRTStrokeStyleSnapshot CaptureWinRTStrokeStyleSnapshot()
         {
             var attrs = inkCanvas.DefaultDrawingAttributes;
-            var color = attrs.Color;
-
-            var tipRectangle = attrs.StylusTip == StylusTip.Rectangle
-                               || attrs.IsHighlighter
-                               || penType == 1;
             var useVelocity = ShouldUseRealtimeVelocityBrushTip()
                               && penType != 1
                               && drawingShapeMode == 0
                               && !isPalmEraserActive;
 
-            return new WinRTStrokeStyleSnapshot(
-                color,
-                Math.Max(0.1, attrs.Width),
-                Math.Max(0.1, attrs.Height),
-                isHighlighter: attrs.IsHighlighter || penType == 1,
-                ignorePressure: Settings.Canvas.DisablePressure,
-                tipRectangle,
-                useVelocityBrushTip: useVelocity,
-                isLaser: penType == 2);
+            return PenToolStylePolicy.Capture(attrs, penType, Settings.Canvas.HighlighterWidth,
+                Settings.Canvas.HighlighterOverlapEnabled, Settings.Canvas.DisablePressure, useVelocity);
         }
 
         private void PushWinRTInkGateSnapshots()
@@ -1651,10 +1648,11 @@ namespace Ink_Canvas
             }
         }
 
-        /// <summary>Ink-thread StrokeEnded for a live stroke. Queue only the pointer ID;</summary>
+        /// <summary>Ink-thread completion preserves the applied style and duration until drying.</summary>
         private void OnWinRTInkStrokeEnded(uint pointerId)
         {
-            _winRTInkEndedPointerIds.Enqueue(pointerId);
+            var session = _winRTStrokeSessions.End(pointerId);
+            _winRTInkEndedPointerIds.Enqueue((pointerId, session.State, session.DurationMs));
         }
 
         /// <summary>
@@ -1771,38 +1769,39 @@ namespace Ink_Canvas
                     var pause = pauseMetadata != null && i < pauseMetadata.Count
                         ? pauseMetadata[i]
                         : default(WinRTInkPauseMetadata);
+                    var strokeConfig = pause.Config ?? config;
                     if (TrySplitBatchOnPauseStraighten(
                             pointBatches[i],
-                            config,
+                            strokeConfig,
                             pause,
                             out var straightened,
                             out var continuation))
                     {
                         strokes.Add(WinRTStrokeConverter.CreateStroke(
                             straightened,
-                            config.Style,
-                            config.DpiScaleX,
-                            config.DpiScaleY,
-                            config.CanvasOriginDip,
-                            pauseStraightened: true));
+                            strokeConfig.Style,
+                            strokeConfig.DpiScaleX,
+                            strokeConfig.DpiScaleY,
+                            strokeConfig.CanvasOriginDip,
+                            pauseStraightened: true, durationMs: pause.DurationMs));
                         if (continuation != null)
                         {
                             strokes.Add(WinRTStrokeConverter.CreateStroke(
                                 continuation,
-                                config.Style,
-                                config.DpiScaleX,
-                                config.DpiScaleY,
-                                config.CanvasOriginDip));
+                                strokeConfig.Style,
+                                strokeConfig.DpiScaleX,
+                                strokeConfig.DpiScaleY,
+                                strokeConfig.CanvasOriginDip, durationMs: pause.DurationMs));
                         }
                     }
                     else
                     {
                         strokes.Add(WinRTStrokeConverter.CreateStroke(
                             pointBatches[i],
-                            config.Style,
-                            config.DpiScaleX,
-                            config.DpiScaleY,
-                            config.CanvasOriginDip));
+                            strokeConfig.Style,
+                            strokeConfig.DpiScaleX,
+                            strokeConfig.DpiScaleY,
+                            strokeConfig.CanvasOriginDip, durationMs: pause.DurationMs));
                     }
                 }
 
