@@ -281,7 +281,7 @@ namespace Ink_Canvas
                 {
                     StopPowerPointProcessMonitoring();
                     _powerPointProcessMonitorTimer = null;
-                    ClosePowerPointApplication();
+                    DisconnectPowerPointApplication();
                     ClearStaticInteropState();
                 }
                 catch (Exception ex)
@@ -456,8 +456,8 @@ namespace Ink_Canvas
                 // 停止应用程序监控定时器
                 _powerPointProcessMonitorTimer?.Stop();
 
-                // 关闭PowerPoint应用程序（包括关机时）
-                ClosePowerPointApplication(isShutdown);
+                // 解除 PowerPoint 引用（包括关机时，不退出 Office）
+                DisconnectPowerPointApplication(isShutdown);
 
                 LogHelper.WriteLogToFile("[PPT] PowerPoint 应用程序守护已停止", LogHelper.LogType.Info);
             }
@@ -473,7 +473,8 @@ namespace Ink_Canvas
         /// 创建并初始化一个隐藏的 PowerPoint 应用程序 COM 实例，并在可用时将该实例注入到当前的 PPT 管理器中。
         /// </summary>
         /// <remarks>
-        /// 如果配置为使用 ROT 链接或已有有效的 PowerPoint 实例，则不会创建新实例。创建的实例会被设置为不可见并最小化；在实例准备就绪后会通过延迟调用将其设置到 PPT 管理器（SetPPTManagerApplication）。任何创建或注入失败的情况会被记录日志，但不会抛出异常给调用者。
+        /// 使用后台 STA 获取应用引用并绑定管理器。PowerPoint 是可复用的 COM 服务，
+        /// 创建调用可能返回用户已有的实例，因此不改变其窗口状态，也不负责关闭该应用。
         /// </remarks>
         private async void CreatePowerPointApplication()
         {
@@ -491,8 +492,8 @@ namespace Ink_Canvas
                     bool published = false;
                     try
                     {
-                        application.Visible = MsoTriState.msoFalse;
-                        application.WindowState = PpWindowState.ppWindowMinimized;
+                        // Never hide/minimize or take ownership of the shared Office server.
+                        // Visible=false can throw 0x80048240 on a user-owned PowerPoint window.
                         Microsoft.Office.Interop.PowerPoint.Application previous;
                         lock (_powerPointOwnershipSync)
                         {
@@ -512,8 +513,7 @@ namespace Ink_Canvas
                     {
                         if (!published)
                         {
-                            try { application.Quit(); }
-                            finally { if (Marshal.IsComObject(application)) Marshal.ReleaseComObject(application); }
+                            if (Marshal.IsComObject(application)) Marshal.ReleaseComObject(application);
                         }
                     }
                 });
@@ -603,42 +603,30 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 关闭PowerPoint应用程序
+        /// 解除 PowerPoint 应用引用
         /// </summary>
         /// <remarks>
-        /// 关闭当前的 PowerPoint 应用程序及其所有打开的演示文稿，释放相关 COM 资源并清理静态互操作状态。</summary>
-        /// 会尝试关闭所有打开的演示文稿、退出 PowerPoint 进程、释放 COM 对象引用，并将内部 PowerPoint 互操作状态重置为初始值；操作结果会被记录到日志，发生异常时会记录错误并仍然尝试清理互操作状态。
+        /// 解除增强模式持有的应用引用并清理静态互操作状态。
+        /// 不关闭演示文稿或退出 PowerPoint：COM 引用并不代表对进程的独占所有权。
         /// </remarks>
-        private void ClosePowerPointApplication(bool isShutdown = false)
+        private void DisconnectPowerPointApplication(bool isShutdown = false)
         {
             var application = Interlocked.Exchange(ref pptApplication, null);
             ClearStaticInteropState();
-            if (application != null) _ = CloseOwnedPowerPointAsync(application);
+            if (application != null) _ = ReleasePowerPointApplicationAsync(application);
         }
 
-        private static async Task CloseOwnedPowerPointAsync(Microsoft.Office.Interop.PowerPoint.Application application)
+        private static async Task ReleasePowerPointApplicationAsync(Microsoft.Office.Interop.PowerPoint.Application application)
         {
             try
             {
                 await PptStaWorker.RunAsync(() =>
                 {
-                    try
-                    {
-                        for (int i = application.Presentations.Count; i >= 1; i--)
-                        {
-                            try { application.Presentations[i].Close(); }
-                            catch (Exception ex) { LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Warning); }
-                        }
-                        application.Quit();
-                    }
-                    finally
-                    {
-                        if (Marshal.IsComObject(application)) Marshal.ReleaseComObject(application);
-                    }
+                    if (Marshal.IsComObject(application)) Marshal.ReleaseComObject(application);
                     return true;
                 });
             }
-            catch (Exception ex) { LogHelper.WriteLogToFile($"[PPT close] {ex}", LogHelper.LogType.Warning); }
+            catch (Exception ex) { LogHelper.WriteLogToFile($"[PPT disconnect] {ex}", LogHelper.LogType.Warning); }
         }
         /// <summary>
         /// 释放并清理与 PowerPoint COM 互操作相关的引用（演示文稿、Slides、当前幻灯片），并将幻灯片计数重置为 0。

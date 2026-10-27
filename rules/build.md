@@ -98,6 +98,7 @@ dotnet build "InkCanvas.SettingsTreeView\InkCanvas.SettingsTreeView.csproj"
 
 ```powershell
 dotnet run --project build/ReliabilityTests/ReliabilityTests.csproj -c Release
+dotnet run --project build/ReliabilityTests/ReliabilityTests.csproj -c Release -- "Ink Canvas/bin/Debug/x64/net10.0-windows10.0.19041.0/InkCanvasForClass.dll"
 dotnet build build/VstoTransportCompile/VstoTransportCompile.csproj -c Release
 ```
 
@@ -110,6 +111,8 @@ WinRT 运行状态应与设置开关区分：普通画笔下，`InkCanvasForClas
 手工复测应包含：反复打开/关闭设置、首次搜索过程中继续输入与清空/关闭、持续拖动工具栏缩放滑块后立即关闭设置、工具栏快速展开/折叠与拖动、启动后立刻书写并等待超过 15 秒、存储统计时离开页面后重新进入。慢操作诊断使用 `[UI slow operation]`，记录超过 250ms 的设置导航、搜索页构造和工具栏重建；正常输入不新增同步磁盘写入。
 
 `VstoTransportCompile` 仅校验实际加载项 IPC 源码在 net472 下的兼容性，**不能代替完整 VSTO 构建、清单签名或 Office 加载验证**。完整 VSTO 验证仍按上文命令执行，需要安装 Office 开发工具。
+
+向 `ReliabilityTests` 传入主程序集路径时，还会扫描实际编译产物中 PowerPoint 增强守护的异步体和委托体，禁止调用 Office 的 `Quit`、演示文稿 `Close`、`Visible`/`WindowState` 写入。PowerPoint 的 COM 创建可能复用用户已有实例；增强功能的启停、失败和取消清理只能释放自身引用，不能据此关闭用户的应用或演示文稿。该回归在旧产物上失败，在修复后通过。
 
 必须另做的实机验证：两块触摸屏在复制显示下持续书写后点击工具栏；100%/150%/200% 缩放与负坐标副屏；弹出菜单、冻结、切页、失焦、最小化及 WinRT 开关；摄像头拔插与驱动无响应；Office 忙碌、翻页和退出；XML/ISF/UInk/多页 ZIP 的保存及导入。
 

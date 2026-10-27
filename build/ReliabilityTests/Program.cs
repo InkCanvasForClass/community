@@ -19,7 +19,7 @@ internal static class Program
     }
 
     [STAThread]
-    private static int Main()
+    private static int Main(string[] args)
     {
         var directory = Path.Combine(Path.GetTempPath(), "ICC_Reliability_" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(directory);
@@ -28,6 +28,8 @@ internal static class Program
         LogHelper.SuppressCallerInfo = false;
         try
         {
+            if (args.Length > 0)
+                Check(OfficeLifecycleGuard.Verify(args[0]) >= 3, "Office monitor lifecycle guard failed");
             GateRegression();
             CoalescedUiRegression();
             AutoFontLifetimeRegression();
