@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Ink Canvas/Helpers/AutoFontSizeHelper.cs" Link="Production/AutoFontSizeHelper.cs" />
+    <Compile Include="../../Ink Canvas/Helpers/DispatcherCoalescedAction.cs" Link="Production/DispatcherCoalescedAction.cs" />
+    <Compile Include="../../Ink Canvas/Ink/PalmEraserContactTracker.cs" Link="Production/PalmEraserContactTracker.cs" />
+    <Compile Include="../../Ink Canvas/Ink/WinRT/WinRTInkPalmDispatcher.cs" Link="Production/WinRTInkPalmDispatcher.cs" />
+    <Compile Include="../../Ink Canvas/Helpers/LegacyInkXmlCodec.cs" Link="Production/LegacyInkXmlCodec.cs" />
+    <Compile Include="../../Ink Canvas/Helpers/StreamDeadline.cs" Link="Production/StreamDeadline.cs" />
+    <Compile Include="../../Ink Canvas/Helpers/AtomicFileWriter.cs" Link="Production/AtomicFileWriter.cs" />
+    <Compile Include="../../Ink Canvas/Helpers/LogHelper.cs" Link="Production/LogHelper.cs" />
+    <Compile Include="../../Ink Canvas/Helpers/PptStaWorker.cs" Link="Production/PptStaWorker.cs" />
+    <Compile Include="../../Ink Canvas/Helpers/HardwareAcceleratedInkProcessor.cs" Link="Production/HardwareAcceleratedInkProcessor.cs" />
+    <Compile Include="../../Ink Canvas/Ink/WinRT/ChromeInputForwarder.cs" Link="Production/ChromeInputForwarder.cs" />
+    <Compile Include="../../Ink Canvas/Ink/WinRT/InkWindowInputRegion.cs" Link="Production/InkWindowInputRegion.cs" />
+    <Compile Include="../../Ink Canvas/Ink/WinRT/WpfRenderFrameFence.cs" Link="Production/WpfRenderFrameFence.cs" />
+    <Compile Include="../../Ink Canvas/Ink/WinRT/WinRTInkInputGate.cs" Link="Production/WinRTInkInputGate.cs" />
+    <Compile Include="../../InkCanvas.PPTAgent.Contracts/PipeFrame.cs" Link="Production/PipeFrame.cs" />
+    <Compile Include="../../InkCanvas.PPTAgent.Contracts/PipeConstants.cs" Link="Production/PipeConstants.cs" />
+  </ItemGroup>
+</Project>

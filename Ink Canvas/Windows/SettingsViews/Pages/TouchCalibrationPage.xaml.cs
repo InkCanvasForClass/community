@@ -541,7 +541,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _nib.Reset();
             _step = 4; ShowStep();
         }
-        private void Next(object sender, RoutedEventArgs e)
+        private async void Next(object sender, RoutedEventArgs e)
         {
             if (_contacts.Count != 0) { Status.Text = Text("CalibrationLift"); return; }
             if (!CheckEnvironment()) return;
@@ -561,7 +561,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 if (_draft?.IsValid() != true) { Status.Text = Text("CalibrationOverlap"); return; }
                 int? nib = _nib.IsComplete ? (int)Math.Clamp(Math.Round(Math.Sqrt(_nib.MedianPeak()) * 1.5), 1, 50) : null;
-                if (!SettingsManager.TrySaveCalibration(_draft, nib))
+                if (!await SettingsManager.TrySaveCalibrationAsync(_draft, nib))
                 { Status.Text = Text("CalibrationSaveFailed"); return; }
                 ReturnToSettings(sender, e);
                 return;

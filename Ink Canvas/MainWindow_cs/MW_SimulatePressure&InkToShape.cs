@@ -295,7 +295,7 @@ namespace Ink_Canvas
 
                     if (inkCanvas.Strokes.Contains(e.Stroke))
                     {
-                        if (Settings.Canvas.UseAsyncInkSmoothing && _inkSmoothingManager != null)
+                        if (_inkSmoothingManager != null)
                         {
                             Debug.WriteLine("使用异步墨迹平滑");
                             _ = ProcessStrokeAsync(e.Stroke);

@@ -26,6 +26,7 @@ namespace Ink_Canvas
         private double _palmPreviousWidth;
         private double _palmHeight;
         private Point? _palmLastPoint;
+        private uint? _winRTInkPalmPointer;
 
         private bool CanStartPalmEraser()
         {
@@ -44,19 +45,25 @@ namespace Ink_Canvas
         private bool UpdatePalmContact(PalmEraserContactTracker contact, double width, double height,
             out double eraserW, out double eraserH, string source = "WPF")
         {
+            ResolvePalmEraserMetrics(source, out double threshold, out double scale);
+            return contact.Update(width, height, threshold, scale, isEraserCircleShape, out eraserW, out eraserH);
+        }
+
+        private void ResolvePalmEraserMetrics(string source, out double threshold, out double scale)
+        {
 #if ICC_NATIVE_WET_INK
             var policy = BuildPalmRoutePolicy(source);
-            double threshold = Math.Max(policy.BoundsWidthDip,
+            threshold = Math.Max(policy.BoundsWidthDip,
                 policy.BoundsWidthDip * policy.ThresholdFactor * policy.SensitivityMultiplier);
-            double scale = policy.EraserSizeFactor * (policy.IsSpecialScreen ? policy.TouchMultiplier : 1);
+            scale = policy.EraserSizeFactor * (policy.IsSpecialScreen ? policy.TouchMultiplier : 1);
 #else
             var advanced = Settings.Advanced;
             bool nib = Settings.Startup.IsEnableNibMode;
             double sensitivity = Settings.Canvas.PalmEraserSensitivity == 0 ? 3
                 : Settings.Canvas.PalmEraserSensitivity == 1 ? 2.5 : 2;
             double factor = nib ? advanced.NibModeBoundsWidthThresholdValue : advanced.FingerModeBoundsWidthThresholdValue;
-            double threshold = Math.Max(BoundsWidth, BoundsWidth * factor * sensitivity);
-            double scale = (nib ? advanced.NibModeBoundsWidthEraserSize : advanced.FingerModeBoundsWidthEraserSize)
+            threshold = Math.Max(BoundsWidth, BoundsWidth * factor * sensitivity);
+            scale = (nib ? advanced.NibModeBoundsWidthEraserSize : advanced.FingerModeBoundsWidthEraserSize)
                 * (advanced.IsSpecialScreen ? advanced.TouchMultiplier : 1);
             if (TouchCalibrationPolicy.TryResolve(advanced.TouchCalibration,
                 TouchCalibrationDisplay.Capture(this, source), Settings.Canvas.PalmEraserSensitivity,
@@ -66,7 +73,40 @@ namespace Ink_Canvas
                 scale = calibratedScale;
             }
 #endif
-            return contact.Update(width, height, threshold, scale, isEraserCircleShape, out eraserW, out eraserH);
+        }
+
+        private void HandleWinRTInkPalm(Ink.WinRT.WinRTInkPalmEvent input)
+        {
+            if (input.Phase == Ink.WinRT.WinRTInkPalmPhase.End)
+            {
+                if (_winRTInkPalmPointer.HasValue && (input.PointerId == 0 || _winRTInkPalmPointer == input.PointerId))
+                {
+                    try
+                    {
+                        // A release can carry a final point not delivered by PointerMoving.
+                        // Cancellation/overflow events have no dimensions and must not erase.
+                        if (input.WidthDip > 0 && input.HeightDip > 0 && CanStartPalmEraser())
+                            MovePalmEraser(WinRTInkPointToCanvasDip(input.Position.X, input.Position.Y), input.WidthDip, input.HeightDip);
+                    }
+                    finally { EndPalmEraser(); }
+                }
+                return;
+            }
+            if (!CanStartPalmEraser())
+            {
+                if (_winRTInkPalmPointer.HasValue) EndPalmEraser();
+                return;
+            }
+            var position = WinRTInkPointToCanvasDip(input.Position.X, input.Position.Y);
+            if (!_winRTInkPalmPointer.HasValue && !isPalmEraserActive)
+            {
+                _winRTInkPalmPointer = input.PointerId;
+                CancelStartupFoldVerification();
+                ShutdownWinRTInkPauseStraighten();
+                BeginPalmEraser(position, input.WidthDip, input.HeightDip);
+            }
+            else if (_winRTInkPalmPointer == input.PointerId)
+                MovePalmEraser(position, input.WidthDip, input.HeightDip);
         }
 
         private bool TryHandlePalmTouch(TouchEventArgs e, bool down)
@@ -242,20 +282,24 @@ namespace Ink_Canvas
             inkCanvas.LostTouchCapture -= PalmEraser_LostTouchCapture;
             _palmTouchDevice = null;
             _palmNativePointer = null;
+            _winRTInkPalmPointer = null;
             _palmContact = null;
             _palmLastPoint = null;
-            DisableEraserOverlay();
-            eraserWidth = _palmPreviousWidth;
-            isUsingStrokesEraser = _palmPreviousStrokeEraser;
-            inkCanvas.IsManipulationEnabled = _palmPreviousManipulation;
-            _changingPalmMode = true;
-            try
+            try { DisableEraserOverlay(); }
+            finally
             {
-                if (restoreMode && inkCanvas.EditingMode == InkCanvasEditingMode.None && !IsCurrentPageFrozen)
-                    inkCanvas.EditingMode = palmEraserPreviousEditingMode;
+                eraserWidth = _palmPreviousWidth;
+                isUsingStrokesEraser = _palmPreviousStrokeEraser;
+                inkCanvas.IsManipulationEnabled = _palmPreviousManipulation;
+                _changingPalmMode = true;
+                try
+                {
+                    if (restoreMode && inkCanvas.EditingMode == InkCanvasEditingMode.None && !IsCurrentPageFrozen)
+                        inkCanvas.EditingMode = palmEraserPreviousEditingMode;
+                }
+                finally { _changingPalmMode = false; }
+                SetCursorBasedOnEditingMode(inkCanvas);
             }
-            finally { _changingPalmMode = false; }
-            SetCursorBasedOnEditingMode(inkCanvas);
         }
 
         private readonly Dictionary<uint, PalmEraserContactTracker> _nativePalmContacts = new();

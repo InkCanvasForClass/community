@@ -141,7 +141,15 @@ namespace Ink_Canvas.Plugins
             }
 
             // 串行化：等待其它授权请求完成，避免并发弹窗。
-            _authorizationGate.Wait();
+            // A background requester can own this gate while waiting for the UI.
+            // Never let the UI wait for that requester: an overlapping request is
+            // conservatively denied and can be retried after the active prompt.
+            var dispatcher = Application.Current?.Dispatcher;
+            if (!_authorizationGate.Wait(dispatcher?.CheckAccess() == true ? 0 : 10000))
+            {
+                LogHelper.WriteLogToFile($"[Plugin authorization] Another authorization is pending: {pluginId}", LogHelper.LogType.Warning);
+                return false;
+            }
             try
             {
                 // 再次检查持久化授权，可能在等待期间被其它线程写入。
@@ -205,7 +213,8 @@ namespace Ink_Canvas.Plugins
             dispatcher.Invoke(() =>
             {
                 result = ShowAuthorizationDialog(plugin, assemblyPath, messageTemplate, fileName);
-            });
+            }, System.Windows.Threading.DispatcherPriority.Normal,
+                CancellationToken.None, TimeSpan.FromSeconds(10));
             return result;
         }
 

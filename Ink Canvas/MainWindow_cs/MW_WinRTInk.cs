@@ -33,6 +33,8 @@ namespace Ink_Canvas
         private WinRTInkInputGate _winRTInkInputGate;
         private Ink.WinRT.ChromeInputForwarder _chromeInputForwarder;
         private Ink.WinRT.WpfRenderFrameFence _winRTInkFrameFence;
+        private readonly Ink.WinRT.InkWindowInputRegion _winRTInputRegion = new();
+        private bool _winRTInputRegionUpdateQueued;
 
         // Cached on the UI thread at pipeline start: the chrome-forwarding callbacks run on
         // the ink input thread and must not touch WPF objects (WindowInteropHelper throws).
@@ -108,6 +110,7 @@ namespace Ink_Canvas
 
             try
             {
+                RecoverAbandonedTouchCaptures();
                 var hwnd = new WindowInteropHelper(this).Handle;
                 if (hwnd == IntPtr.Zero)
                     return;
@@ -116,7 +119,12 @@ namespace Ink_Canvas
                 _winRTInkFrameFence = new Ink.WinRT.WpfRenderFrameFence(Dispatcher);
                 _chromeInputForwarder = new Ink.WinRT.ChromeInputForwarder();
                 var uiDispatcher = Dispatcher;
-                _winRTInkInputGate = new WinRTInkInputGate(
+                WinRTInkInputGate inputGate = null;
+                var palmDispatcher = new WinRTInkPalmDispatcher(uiDispatcher, input =>
+                {
+                    if (ReferenceEquals(_winRTInkInputGate, inputGate)) HandleWinRTInkPalm(input);
+                });
+                _winRTInkInputGate = inputGate = new WinRTInkInputGate(
                     classifyPointer: ClassifyWinRTInkPointer,
                     onChromePointerDown: ForwardWinRTInkChromePointerDown,
                     onChromePointerMove: ForwardWinRTInkChromePointerMove,
@@ -139,7 +147,10 @@ namespace Ink_Canvas
                     onInkPointerPress: (pointerId, device, p) =>
                     {
                         uiDispatcher.BeginInvoke(new Action(() =>
-                            OnWinRTInkPausePress(pointerId, p.X, p.Y)));
+                        {
+                            CancelStartupFoldVerification();
+                            OnWinRTInkPausePress(pointerId, p.X, p.Y);
+                        }));
                     },
                     onInkPointerMove: (pointerId, device, p) =>
                     {
@@ -166,13 +177,21 @@ namespace Ink_Canvas
                         uiDispatcher.BeginInvoke(new Action(OnWinRTInkTwoFingerGestureCompleted));
                     },
                     onStrokeEnded: OnWinRTInkStrokeEnded,
-                    onStrokeCanceled: OnWinRTInkStrokeCanceled);
+                    onStrokeCanceled: OnWinRTInkStrokeCanceled,
+                    onPalmPointer: palmDispatcher.Post);
 
                 if (_winRTInkOverlay == null)
                     _winRTInkOverlay = new WetInkOverlayWindow(hwnd, IsCanvasPoint);
                 _winRTInkHost = new WinRTInkHost(_winRTInkOverlay, _winRTInkInputGate);
-                _winRTInkHost.OnDryAvailable = OnWinRTInkDryAvailable;
-                _winRTInkHost.OnDryFailed = ex => DisableWinRTInkAfterFailure(ex, notify: true);
+                var currentHost = _winRTInkHost;
+                currentHost.OnDryAvailable = points =>
+                {
+                    if (ReferenceEquals(_winRTInkHost, currentHost)) OnWinRTInkDryAvailable(points);
+                };
+                currentHost.OnDryFailed = ex =>
+                {
+                    if (ReferenceEquals(_winRTInkHost, currentHost)) DisableWinRTInkAfterFailure(ex, notify: true);
+                };
 
                 var config = BuildWinRTInkConfig();
                 _winRTInkConfig = config;
@@ -208,7 +227,7 @@ namespace Ink_Canvas
 
                 LogHelper.WriteLogToFile(
                     $"[WinRTInk] 新墨迹管线已挂载: 覆盖层 {config.WidthPx}x{config.HeightPx}px, 已通知失败={_winRTInkDisabled}",
-                    LogHelper.LogType.Info);
+                    LogHelper.LogType.Trace);
             }
             catch (Exception ex)
             {
@@ -227,6 +246,7 @@ namespace Ink_Canvas
 
             LogHelper.WriteLogToFile("[WinRTInk] 开始卸载新墨迹管线", LogHelper.LogType.Info);
             UnwireWinRTInkGeometryListeners();
+            if (_winRTInkPalmPointer.HasValue) EndPalmEraser();
             ShutdownWinRTInkPauseStraighten();
             _winRTInkTwoFingerGestureActive = false;
 
@@ -294,7 +314,7 @@ namespace Ink_Canvas
 
             LogHelper.WriteLogToFile(
                 $"[WinRTInk] 新墨迹管线已卸载，回退到旧墨迹 (editingMode={inkCanvas?.EditingMode})",
-                LogHelper.LogType.Info);
+                LogHelper.LogType.Trace);
         }
 
         private void WireWinRTInkGeometryListeners()
@@ -319,6 +339,8 @@ namespace Ink_Canvas
 
             StateChanged -= WinRTInk_StateChanged;
             StateChanged += WinRTInk_StateChanged;
+            LayoutUpdated -= WinRTInk_LayoutUpdated;
+            LayoutUpdated += WinRTInk_LayoutUpdated;
         }
 
         private void UnwireWinRTInkGeometryListeners()
@@ -342,6 +364,46 @@ namespace Ink_Canvas
             }
 
             StateChanged -= WinRTInk_StateChanged;
+            LayoutUpdated -= WinRTInk_LayoutUpdated;
+        }
+
+        private void WinRTInk_LayoutUpdated(object sender, EventArgs e)
+        {
+            if (!_winRTInkStarted || _winRTInputRegionUpdateQueued) return;
+            _winRTInputRegionUpdateQueued = true;
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                _winRTInputRegionUpdateQueued = false;
+                if (!_winRTInkStarted || _winRTInkOverlay == null) return;
+                try { UpdateWinRTInkInputRegion(); }
+                catch (Exception ex) { DisableWinRTInkAfterFailure(ex, notify: true); }
+            }), DispatcherPriority.Loaded);
+        }
+
+        private void UpdateWinRTInkInputRegion()
+        {
+            var config = _winRTInkConfig;
+            if (config == null || _winRTInkOverlay == null) return;
+            Rect Bounds(FrameworkElement element)
+            {
+                var bounds = element.TransformToAncestor(this).TransformBounds(new Rect(element.RenderSize));
+                return new Rect(bounds.X * config.DpiScaleX, bounds.Y * config.DpiScaleY,
+                    bounds.Width * config.DpiScaleX, bounds.Height * config.DpiScaleY);
+            }
+            var holes = new List<Rect>();
+            foreach (var name in new[] { "ViewboxFloatingBar", "ViewboxBlackboardLeftSide", "ViewboxBlackboardCenterSide",
+                "ViewboxBlackboardRightSide", "BlackboardLeftSide", "BlackboardCenterSide", "BlackboardRightSide",
+                "BorderInkReplayToolBox", "IdleMiniBar", "EdgeExpandHint", "PPTControlsGrid", "GridPPTControlLeft",
+                "GridPPTControlRight", "LeftBottomPanelForPPTNavigation", "RightBottomPanelForPPTNavigation",
+                "LeftSidePanelForPPTNavigation", "RightSidePanelForPPTNavigation", "PPTQuickPanelContainer",
+                "GridInkCanvasSelectionCover" })
+            {
+                if (FindName(name) is FrameworkElement element && element.IsVisible && element.IsHitTestVisible
+                    && element.ActualWidth > 0 && element.ActualHeight > 0)
+                    holes.Add(Bounds(element));
+            }
+            _winRTInputRegion.Update(_winRTInkOverlay.OverlayHandle,
+                IsPluginCanvasToolActive ? Rect.Empty : Bounds(inkCanvas), holes);
         }
 
         private void WinRTInk_StateChanged(object sender, EventArgs e)
@@ -364,6 +426,7 @@ namespace Ink_Canvas
 
                 var bounds = ScreenBoundsFromConfig(config);
                 _winRTInkOverlay.SetBounds(bounds.X, bounds.Y, bounds.Width, bounds.Height);
+                UpdateWinRTInkInputRegion();
 
                 PushWinRTInkGateSnapshots();
                 RefreshWinRTInkOverlayVisibility();
@@ -1044,19 +1107,11 @@ namespace Ink_Canvas
                 ? Settings.Gesture.IsEnableMultiTouchMode || isInMultiTouchMode
                 : Settings.Gesture.IsEnableMultiTouchModeBoard || isInMultiTouchMode;
             _winRTInkInputGate.TwoFingerGestureAllowed = ResolveTwoFingerGestureAllowed();
-            _winRTInkInputGate.PalmEraserEnabled = Settings.Canvas.EnablePalmEraser;
-
-            var palm = BuildPalmEraserPolicy();
-            _winRTInkInputGate.PalmEraserThresholdDip = palm.Enabled
-                ? PalmThresholdDip(palm)
-                : double.MaxValue;
-        }
-
-        private static double PalmThresholdDip(Ink.PalmEraserPolicy policy)
-        {
-            // Approximation of PalmEraserCalculator's threshold: bounds * thresholdFactor *
-            // sensitivity. Exact recognition is evaluated per-contact in the gate.
-            return policy.BoundsWidthDip * policy.ThresholdFactor * policy.SensitivityMultiplier;
+            ResolvePalmEraserMetrics("Pointer", out double threshold, out double scale);
+            _winRTInkInputGate.PalmEraserThresholdDip = threshold;
+            _winRTInkInputGate.PalmEraserSizeFactor = scale;
+            _winRTInkInputGate.PalmEraserEllipse = isEraserCircleShape;
+            _winRTInkInputGate.PalmEraserEnabled = CanStartPalmEraser();
         }
 
         private void EnsureWinRTInkPhysicalEditingMode()
@@ -1242,7 +1297,7 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 detail = $"ResolveHitZone exception: {ex.GetType().Name}: {ex.Message}";
-                return CanvasHitZone.CanvasSurface;
+                return CanvasHitZone.Outside;
             }
         }
 
@@ -1354,7 +1409,9 @@ namespace Ink_Canvas
                     LogHelper.LogType.Event);
 
                 if (!classified)
-                    return Ink.WinRT.PointerGateResult.BlockSilently;
+                    // UI work can temporarily exceed the classifier budget. Queue the
+                    // original interaction to its HWND instead of swallowing a toolbar tap.
+                    return Ink.WinRT.PointerGateResult.BlockAndForward;
                 if (zone == CanvasHitZone.CanvasSurface)
                     return Ink.WinRT.PointerGateResult.AllowInk;
                 // UiChrome / SelectionOverlay / EraserOverlay / Outside (e.g. an open popup
@@ -1824,6 +1881,7 @@ namespace Ink_Canvas
                         // operations must return to the UI dispatcher before draining the next batch.
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
+                            if (!ReferenceEquals(_winRTInkHost, host)) return;
                             try
                             {
                                 _winRTInkDryEndQueued = false;
@@ -1861,14 +1919,22 @@ namespace Ink_Canvas
             _winRTInkDisabled = true;
             try
             {
-                _winRTInkInputGate.CanvasInputEnabled = false;
+                if (_winRTInkInputGate != null) _winRTInkInputGate.CanvasInputEnabled = false;
                 _winRTInkHost?.SetInputEnabled(false);
-                _winRTInkOverlay?.SetOnScreen(false);
             }
             catch (Exception cleanupEx)
             {
                 LogHelper.WriteLogToFile($"[WinRTInk] 失败后关闭输入门控/宿主输入/隐藏覆盖层失败: {cleanupEx.Message}", LogHelper.LogType.Info);
             }
+            try
+            {
+                if (_winRTInkOverlay != null)
+                {
+                    _winRTInputRegion.Update(_winRTInkOverlay.OverlayHandle, Rect.Empty, Array.Empty<Rect>());
+                    _winRTInkOverlay.SetOnScreen(false);
+                }
+            }
+            catch (Exception cleanupEx) { LogHelper.WriteLogToFile(cleanupEx.ToString(), LogHelper.LogType.Warning); }
             try { CancelActiveWinRTInk(); }
             catch (Exception cleanupEx)
             {

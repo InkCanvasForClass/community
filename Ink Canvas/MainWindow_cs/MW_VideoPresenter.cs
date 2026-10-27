@@ -1313,7 +1313,7 @@ namespace Ink_Canvas
                     }
                 }
 
-                Dispatcher.BeginInvoke(new Action(() =>
+                void PresentFrame()
                 {
                     // 左上角侧栏预览已移除（VideoPresenterPreviewImage 已从 XAML 删除），
                     // 不再需要把 e.Frame 同步到侧栏 Image。
@@ -1337,7 +1337,9 @@ namespace Ink_Canvas
 
                     // 实时上屏：刷新当前页的画面元素
                     TryUpdateLiveFrameOnCanvas(e.Frame);
-                }));
+                }
+                if (Dispatcher.CheckAccess()) PresentFrame();
+                else Dispatcher.BeginInvoke(new Action(PresentFrame));
             }
             catch
             {

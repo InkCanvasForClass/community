@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Ink;
@@ -17,6 +19,7 @@ namespace Ink_Canvas.Helpers
         private readonly RenderTargetBitmap _renderTarget;
         private readonly DrawingVisual _drawingVisual;
         private bool _isInitialized;
+        private readonly SemaphoreSlim _processingGate = new SemaphoreSlim(1, 1);
 
         public HardwareAcceleratedInkProcessor(int width = 1920, int height = 1080)
         {
@@ -40,30 +43,38 @@ namespace Ink_Canvas.Helpers
         /// 是 DispatcherObject 但不是 Freezable——为安全起见不再用 Task.Run，避免跨线程访问
         /// 触发 "必须在创建线程使用" 异常。仅 DrawingAttributes (Freezable) 被克隆并冻结。
         /// </summary>
-        public Task<Stroke> SmoothStrokeWithGPU(Stroke originalStroke)
+        public async Task<Stroke> SmoothStrokeWithGPU(Stroke originalStroke)
         {
             if (!_isInitialized || originalStroke == null || originalStroke.StylusPoints.Count < 2)
-                return Task.FromResult(originalStroke);
+                return originalStroke;
+
+            // Take an immutable snapshot on the owning thread. Geometry construction
+            // and flattening are CPU work even though the old method was called GPU.
+            if (originalStroke.StylusPoints.Count > 32768 || !await _processingGate.WaitAsync(0))
+                return originalStroke;
 
             try
             {
                 // 使用PathGeometry进行硬件加速的曲线拟合
-                var pathGeometry = CreateSmoothPathGeometry(originalStroke.StylusPoints);
-
-                // 将PathGeometry转换回StylusPoint集合
-                var smoothedPoints = ConvertPathGeometryToStylusPoints(pathGeometry, originalStroke.StylusPoints);
-
+                var points = originalStroke.StylusPoints.ToArray();
                 var da = originalStroke.DrawingAttributes.Clone();
+                var smoothedPoints = await Task.Run(() =>
+                {
+                    var local = new StylusPointCollection(points);
+                    var pathGeometry = CreateSmoothPathGeometry(local);
+                    return ConvertPathGeometryToStylusPoints(pathGeometry, local);
+                });
                 var result = new Stroke(new StylusPointCollection(smoothedPoints))
                 {
                     DrawingAttributes = da
                 };
-                return Task.FromResult(result);
+                return result;
             }
             catch
             {
-                return Task.FromResult(originalStroke);
+                return originalStroke;
             }
+            finally { _processingGate.Release(); }
         }
 
         /// <summary>

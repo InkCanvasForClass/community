@@ -92,6 +92,29 @@ dotnet build "InkCanvas.SettingsTreeView\InkCanvas.SettingsTreeView.csproj"
 5. 确保没有未使用的 resx 资源键
 6. 新增/修改 UI 文案一律走 i18n，不允许硬编码中文字符串
 
+## 卡顿与触摸回归检查
+
+当前 `net10` 分支可在 Windows 上执行以下自动检查（独立于主程序启动）：
+
+```powershell
+dotnet run --project build/ReliabilityTests/ReliabilityTests.csproj -c Release
+dotnet build build/VstoTransportCompile/VstoTransportCompile.csproj -c Release
+```
+
+`ReliabilityTests` 直接编译生产代码中的输入门控、原生窗口区域、坐标转发、渲染等待、管道、文件写入、日志、平滑和 Office STA 调度器；测试替身仅覆盖应用配置及不可直接构造的 WinRT 事件边界。它会创建隐藏窗口及临时命名管道，不启动主程序或 Office。文件测试涵盖并发合并、写入失败保留原文件及恢复；STA 测试涵盖线程复用、排队取消及消息循环。手掌擦测试涵盖启动实际擦除回调、移动中升级识别、接触缩小保持橡皮、双指竞争、丢失/抬起/取消恢复、拒绝误写笔迹及 UI 队列溢出恢复。
+
+WinRT 运行状态应与设置开关区分：普通画笔下，`InkCanvasForClass.WinRTInkOverlay.v1` 原生窗口存在说明宿主窗口已创建；可见且未被 DWM cloak 才可能承接当前书写。新构建在 Trace 等级记录“新墨迹管线已挂载”、`Native pointer input confirmed` 及卸载/失败信息；输入确认才说明实际收到原生指针。仅加载 `Windows.UI.Input.Inking.dll` 或配置 `UseWinRTInk=true` 不能证明运行中正在使用 WinRT。
+
+设置与工具栏稳定性检查还涵盖：一万次 UI 更新合并后保留最终值、退出前强制提交、跨线程请求共用调度器、持续输入下定期提交、回调异常后恢复、释放后拒绝旧回调，以及自动字体适配控件未显示/卸载后的可回收性。字体监听滞留测试在修复前失败、修复后通过。可将回归进程限制到单个逻辑处理器运行，检查资源受限时的调度行为；这不能代替真实低性能设备上的帧率和交互延迟测量。
+
+手工复测应包含：反复打开/关闭设置、首次搜索过程中继续输入与清空/关闭、持续拖动工具栏缩放滑块后立即关闭设置、工具栏快速展开/折叠与拖动、启动后立刻书写并等待超过 15 秒、存储统计时离开页面后重新进入。慢操作诊断使用 `[UI slow operation]`，记录超过 250ms 的设置导航、搜索页构造和工具栏重建；正常输入不新增同步磁盘写入。
+
+`VstoTransportCompile` 仅校验实际加载项 IPC 源码在 net472 下的兼容性，**不能代替完整 VSTO 构建、清单签名或 Office 加载验证**。完整 VSTO 验证仍按上文命令执行，需要安装 Office 开发工具。
+
+必须另做的实机验证：两块触摸屏在复制显示下持续书写后点击工具栏；100%/150%/200% 缩放与负坐标副屏；弹出菜单、冻结、切页、失焦、最小化及 WinRT 开关；摄像头拔插与驱动无响应；Office 忙碌、翻页和退出；XML/ISF/UInk/多页 ZIP 的保存及导入。
+
+边界：同进程旧插件仍可在 UI 回调内死循环，任意 COM/摄像头驱动调用也无法被托管取消令牌强制终止。后台有界队列保护主界面，但不保证挂起的第三方组件自行恢复；完全隔离需独立进程。测试通过不等于这些硬件及第三方路径已经验证。
+
 ## 常见编译错误修复
 
 | 错误 | 原因 | 修复方法 |

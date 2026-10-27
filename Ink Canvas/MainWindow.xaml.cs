@@ -1993,6 +1993,9 @@ namespace Ink_Canvas
         /// <param name="e">关闭事件的参数（未使用）。</param>
         private void Window_Closed(object sender, EventArgs e)
         {
+            CancelStartupFoldVerification();
+            _floatingBarReposition?.Dispose();
+            ++_floatingBarPositionVersion;
             LogHelper.WriteLogToFile("[Exit] 主窗口 Closed，开始释放资源", LogHelper.LogType.Info);
             RealtimeInkFrameScheduler.Clear();
             try
@@ -2991,7 +2994,7 @@ namespace Ink_Canvas
             // 窗口失活时，触点若走 TouchLeave 而非 TouchUp，触摸活动集合会残留，
             // 导致 EndTouchInkInputIfIdle 永远不退出、IsManipulationEnabled 永远不恢复。
             // 调用 AbortAllActiveTouchInputs 兜底。
-            try { AbortAllActiveTouchInputs(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+            try { RecoverAbandonedTouchCaptures(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
 
@@ -3495,12 +3498,12 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile($"检测到命令行参数中的.icstk文件: {icstkFile}", LogHelper.LogType.Event);
 
                     // 延迟执行，确保UI已完全加载
-                    Dispatcher.BeginInvoke(new Action(() =>
+                    Dispatcher.BeginInvoke(new Action(async () =>
                     {
                         try
                         {
                             // 打开文件
-                            OpenSingleStrokeFile(icstkFile);
+                            await OpenSingleStrokeFileAsync(icstkFile);
                             ShowNotification(string.Format(Properties.MainWindowStrings.Main_StrokesFileLoaded, Path.GetFileName(icstkFile)));
                         }
                         catch (Exception ex)

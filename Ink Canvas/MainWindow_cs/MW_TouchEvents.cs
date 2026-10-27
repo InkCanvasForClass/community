@@ -231,6 +231,17 @@ namespace Ink_Canvas
             EndTouchInkInputIfIdle();
         }
 
+        private void RecoverAbandonedTouchCaptures()
+        {
+            AbortAllActiveTouchInputs();
+            inkCanvas?.ReleaseAllTouchCaptures();
+            inkCanvas?.ReleaseStylusCapture();
+            dec.Clear();
+            isTouchDown = false;
+            if (ViewboxFloatingBar != null) ViewboxFloatingBar.IsHitTestVisible = true;
+            if (BlackboardUIGridForInkReplay != null) BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+        }
+
         internal void EnsureRealtimeStylusPipelineBinding()
         {
             if (inkCanvas == null) return;
@@ -1899,6 +1910,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void InkCanvas_PreviewTouchDown(object sender, TouchEventArgs e)
         {
+            CancelStartupFoldVerification();
             var touchPointForBar = e.GetTouchPoint(this);
             var floatingBarBounds = ViewboxFloatingBar.TransformToAncestor(this).TransformBounds(
                 new Rect(0, 0, ViewboxFloatingBar.ActualWidth, ViewboxFloatingBar.ActualHeight));

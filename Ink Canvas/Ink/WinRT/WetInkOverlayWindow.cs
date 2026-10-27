@@ -186,6 +186,7 @@ namespace Ink_Canvas.Ink.WinRT
                 if (_cloaked)
                     SetCloaked(false);
                 ApplyBounds(force: false);
+                PlaceBelowOwnedPopups();
             }
             else if (!_cloaked)
             {
@@ -201,9 +202,36 @@ namespace Ink_Canvas.Ink.WinRT
                 return;
             }
             var value = cloaked ? 1 : 0;
-            DwmSetWindowAttribute(_overlayHwnd, DwmwaCloak, ref value, sizeof(int));
+            var hr = DwmSetWindowAttribute(_overlayHwnd, DwmwaCloak, ref value, sizeof(int));
+            // Never report a successful cloak when DWM rejected it. The fallback also
+            // removes the HWND from hit-testing on systems where cloaking is unavailable.
+            if (hr < 0)
+                ShowWindow(_overlayHwnd, cloaked ? 0 /* SW_HIDE */ : 4 /* SW_SHOWNOACTIVATE */);
             _cloaked = cloaked;
         }
+
+        private void PlaceBelowOwnedPopups()
+        {
+            // Keep our wet surface above its owner but below the owner's visible
+            // palettes/dialogs. Do not globally raise the overlay over other apps.
+            IntPtr lowestPopup = IntPtr.Zero;
+            for (var window = GetTopWindow(IntPtr.Zero); window != IntPtr.Zero;
+                window = GetWindow(window, 2 /* GW_HWNDNEXT */))
+            {
+                if (window == _ownerHwnd) break;
+                if (window != _overlayHwnd && IsWindowVisible(window)
+                    && GetAncestor(window, 3 /* GA_ROOTOWNER */) == _ownerHwnd)
+                    lowestPopup = window;
+            }
+            if (lowestPopup != IntPtr.Zero)
+                SetWindowPos(_overlayHwnd, lowestPopup, 0, 0, 0, 0,
+                    0x0001 /* SWP_NOSIZE */ | 0x0002 /* SWP_NOMOVE */ | 0x0010 /* SWP_NOACTIVATE */);
+        }
+
+        [DllImport("user32.dll")] private static extern IntPtr GetTopWindow(IntPtr hwnd);
+        [DllImport("user32.dll")] private static extern IntPtr GetWindow(IntPtr hwnd, uint command);
+        [DllImport("user32.dll")] private static extern IntPtr GetAncestor(IntPtr hwnd, uint flags);
+        [DllImport("user32.dll")] private static extern bool IsWindowVisible(IntPtr hwnd);
 
         private void ApplyBounds(bool force)
         {
@@ -217,14 +245,16 @@ namespace Ink_Canvas.Ink.WinRT
                 && _lastAppliedW == w && _lastAppliedH == h)
                 return;
 
-            SetWindowPos(
+            if (!SetWindowPos(
                 _overlayHwnd,
                 IntPtr.Zero,
                 _boundsX,
                 _boundsY,
                 w,
                 h,
-                0x0010 /* SWP_NOACTIVATE */ | 0x0004 /* SWP_NOZORDER */ | 0x0040 /* SWP_SHOWWINDOW */);
+                0x0010 /* SWP_NOACTIVATE */ | 0x0004 /* SWP_NOZORDER */
+                | (_cloaked ? 0u : 0x0040u /* SWP_SHOWWINDOW */)))
+                throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
             _lastAppliedX = _boundsX;
             _lastAppliedY = _boundsY;
             _lastAppliedW = w;
@@ -448,6 +478,9 @@ namespace Ink_Canvas.Ink.WinRT
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool DestroyWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int command);
 
         [DllImport("user32.dll", CharSet = CharSet.Unicode)]
         private static extern IntPtr DefWindowProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);

@@ -507,9 +507,8 @@ namespace Ink_Canvas.Helpers
 
                 if (!isShutdown)
                 {
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    GC.Collect();
+                    GC.Collect(2, GCCollectionMode.Optimized, blocking: false);
+                    // COM/plugin finalizers must not hold up a UI disconnect.
                 }
 
                 _isModuleUnloading = true;
@@ -538,9 +537,7 @@ namespace Ink_Canvas.Helpers
                                 return;
                             }
 
-                            GC.Collect();
-                            GC.WaitForPendingFinalizers();
-                            GC.Collect();
+                            GC.Collect(2, GCCollectionMode.Optimized, blocking: false);
 
                             Thread.Sleep(1000);
 
@@ -1938,8 +1935,7 @@ namespace Ink_Canvas.Helpers
 
                 // 第四步：强制垃圾回收及等待终结器执行
                 LogHelper.WriteLogToFile("执行强制垃圾回收", LogHelper.LogType.Trace);
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
+                GC.Collect(2, GCCollectionMode.Optimized, blocking: false);
 
                 // 等待一段时间让COM对象完全释放
                 Thread.Sleep(1000);

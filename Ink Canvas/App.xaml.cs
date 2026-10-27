@@ -2262,6 +2262,9 @@ namespace Ink_Canvas
 
         private void App_Exit(object sender, ExitEventArgs e)
         {
+            global::Ink_Canvas.Windows.SettingsViews.Helpers.SettingsManager.FlushPendingSettings();
+            Helpers.AtomicFileWriter.Flush(TimeSpan.FromSeconds(2));
+            Helpers.LogHelper.Flush(TimeSpan.FromSeconds(1));
             isAppExiting = true;
             LogHelper.WriteLogToFile(
                 $"[Exit] 开始应用退出清理: user={IsAppExitByUser}, code={e.ApplicationExitCode}, crashAction={CrashAction}",
@@ -2390,6 +2393,8 @@ namespace Ink_Canvas
             }
 
             LogHelper.WriteLogToFile("[Exit] 应用退出清理流程结束", LogHelper.LogType.Info);
+            Helpers.AtomicFileWriter.Flush(TimeSpan.FromSeconds(2));
+            Helpers.LogHelper.Flush(TimeSpan.FromSeconds(1));
         }
     }
 }

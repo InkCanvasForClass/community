@@ -10,7 +10,8 @@ namespace InkCanvas.PowerPointAddIn.IPC
     public sealed class PipeHost : IDisposable
     {
         private readonly Func<string, string> _dispatch;
-        private readonly object _sendLock = new object();
+        private readonly SemaphoreSlim _sendGate = new SemaphoreSlim(1, 1);
+        private int _queuedFrames;
         private CancellationTokenSource _cts;
         private NamedPipeServerStream _currentPipe;
         private volatile bool _clientConnected;
@@ -31,17 +32,34 @@ namespace InkCanvas.PowerPointAddIn.IPC
         {
             var pipe = _currentPipe;
             if (pipe == null || !pipe.IsConnected || string.IsNullOrEmpty(json)) return;
+            if (Interlocked.Increment(ref _queuedFrames) > 64)
+            {
+                Interlocked.Decrement(ref _queuedFrames);
+                return;
+            }
+            _ = SendFrameAsync(pipe, json);
+        }
 
-            lock (_sendLock)
+        private async Task SendFrameAsync(NamedPipeServerStream pipe, string json)
+        {
+            bool entered = false;
+            using (var timeout = new CancellationTokenSource(PipeConstants.RequestTimeoutMilliseconds))
             {
                 try
                 {
-                    if (pipe.IsConnected)
-                        PipeFrame.WriteFrame(pipe, json);
+                    await _sendGate.WaitAsync(timeout.Token).ConfigureAwait(false);
+                    entered = true;
+                    using (timeout.Token.Register(() => { try { pipe.Dispose(); } catch { } }))
+                    {
+                        if (!ReferenceEquals(pipe, _currentPipe)) return;
+                        await InkCanvasPPTAgent.Contracts.PipeFrame.WriteFrameAsync(pipe, json, timeout.Token).ConfigureAwait(false);
+                    }
                 }
-                catch (Exception ex)
+                catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+                finally
                 {
-                    System.Diagnostics.Debug.WriteLine($"ICC PPT Agent push error: {ex.Message}");
+                    if (entered) _sendGate.Release();
+                    Interlocked.Decrement(ref _queuedFrames);
                 }
             }
         }
@@ -56,6 +74,7 @@ namespace InkCanvas.PowerPointAddIn.IPC
         public void Stop()
         {
             try { _cts?.Cancel(); } catch { }
+            try { _currentPipe?.Dispose(); } catch { }
             _cts?.Dispose();
             _cts = null;
             _clientConnected = false;
@@ -113,11 +132,7 @@ namespace InkCanvas.PowerPointAddIn.IPC
                     string responseJson = _dispatch.Invoke(requestJson);
                     if (!string.IsNullOrEmpty(responseJson))
                     {
-                        lock (_sendLock)
-                        {
-                            if (pipe.IsConnected)
-                                PipeFrame.WriteFrame(pipe, responseJson);
-                        }
+                        SendFrame(responseJson);
                     }
                 }
                 catch (IOException) { break; }

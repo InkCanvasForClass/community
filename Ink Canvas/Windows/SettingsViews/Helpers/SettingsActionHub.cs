@@ -326,10 +326,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                     effectiveScale = actualScale * MainWindow.CompactFloatingBarScaleFactor;
                 mw.ViewboxFloatingBarScaleTransform.ScaleX = effectiveScale;
                 mw.ViewboxFloatingBarScaleTransform.ScaleY = effectiveScale;
-                if (mw.IsInPPTPresentationMode)
-                    mw.ViewboxFloatingBarMarginAnimation(60);
-                else
-                    mw.ViewboxFloatingBarMarginAnimation(100, true);
+                  mw.RequestFloatingBarReposition();
             }
         }
 
@@ -563,7 +560,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 mw.PPTManager.SkipAnimationsWhenNavigating = isOn;
         }
 
-        public static void OnPPTLinkModeChanged()
+        public static async void OnPPTLinkModeChanged()
         {
             var mw = GetMainWindow();
             if (mw == null) return;
@@ -586,7 +583,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 // 切换到 Agent 模式时，自动注册 VSTO 插件
                 if (ppt.PPTLinkMode == PPTLinkMode.Agent)
                 {
-                    if (!VstoRegistrationHelper.EnsureRegistered())
+                    if (!await VstoRegistrationHelper.EnsureRegisteredAsync())
                     {
                         LogHelper.WriteLogToFile("VSTO 插件注册失败，Agent 模式可能无法正常工作", LogHelper.LogType.Warning);
                     }
