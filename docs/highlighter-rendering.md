@@ -47,3 +47,9 @@ crossing colours, ISF roundtrips, opacity coefficients for the native layer, the
 integrated InkCanvas, attribute invalidation, selection identity, removal, page
 replacement and point erasing. Native composition coefficients are tested; these
 tests do not capture the actual DirectComposition output on a touch device.
+
+The pixel suite requires an available interactive desktop renderer. A disconnected
+Windows/RDP session can return an entirely transparent bitmap even for a plain white
+background. A baseline check reports this as an unavailable test environment instead
+of misdiagnosing it as a highlighter regression; the suite does not count that run
+as passed. Pixel comparisons also check the alpha channel.

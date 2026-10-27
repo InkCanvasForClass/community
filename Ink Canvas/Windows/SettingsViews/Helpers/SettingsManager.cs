@@ -81,10 +81,25 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         }
 
         public static bool TrySaveSettingsToFile()
+            => TrySaveSettingsToFileAsync().GetAwaiter().GetResult();
+
+        /// <summary>Capture on the UI thread, then await the ordered atomic writer.</summary>
+        public static async System.Threading.Tasks.Task<bool> TrySaveSettingsToFileAsync()
         {
-            var text = JsonConvert.SerializeObject(Settings, Formatting.Indented);
-            return AtomicFileWriter.WriteLatestAsync(Path.Combine(App.RootPath, SettingsFileName), text)
-                .GetAwaiter().GetResult();
+            try
+            {
+                FlushPendingSettings();
+                var text = JsonConvert.SerializeObject(Settings, Formatting.Indented);
+                bool saved = await AtomicFileWriter.WriteLatestAsync(Path.Combine(App.RootPath, SettingsFileName), text)
+                    .ConfigureAwait(false);
+                if (saved) App.UpdateCachedSettingsJson(text);
+                return saved;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Settings save] {ex}", LogHelper.LogType.Error);
+                return false;
+            }
         }
 
         private static readonly System.Threading.SemaphoreSlim CalibrationGate = new(1, 1);

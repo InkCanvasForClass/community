@@ -32,6 +32,7 @@ internal static class Program
             if (args.Length > 0)
                 Check(OfficeLifecycleGuard.Verify(args[0]) >= 3, "Office monitor lifecycle guard failed");
             GateRegression();
+            FloatingWindowSafetyRegression.Run(Check);
             CoalescedUiRegression();
             InputRecoveryRegression.Run(Check);
             AutoFontLifetimeRegression();

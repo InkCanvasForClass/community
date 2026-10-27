@@ -1272,7 +1272,7 @@ namespace Ink_Canvas
                 var configName = SettingsManager.Settings?.ToolbarConfigName ?? "default";
                 ToolbarRegistry.SaveConfigFile(configName, ToolbarRegistry.CreateDefaultLayout());
 
-                LoadSettings(isStartup: false, skipAutoUpdateCheck: true);
+                LoadSettings(isStartup: false, skipAutoUpdateCheck: true, readFromFile: false);
 
                 // 重置后重建工具栏
                 RebuildToolbar();
@@ -1304,7 +1304,7 @@ namespace Ink_Canvas
                 var configName = SettingsManager.Settings?.ToolbarConfigName ?? "default";
                 ToolbarRegistry.SaveConfigFile(configName, ToolbarRegistry.CreateDefaultLayout());
 
-                LoadSettings(isStartup: false, skipAutoUpdateCheck: true);
+                LoadSettings(isStartup: false, skipAutoUpdateCheck: true, readFromFile: false);
 
                 // 重置后重建工具栏
                 RebuildToolbar();

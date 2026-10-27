@@ -44,8 +44,8 @@ namespace Ink_Canvas
             BtnResetToSuggestion_Click(null, null);
         }
 
-        /// <param name="skipAutoUpdateCheck">指示是否跳过自动更新检查；为 true 时不会在加载设置后执行自动更新检测。</param>
-        private void LoadSettings(bool isStartup = false, bool skipAutoUpdateCheck = false)
+        /// <summary>Read the persisted snapshot; only startup may reuse the startup cache.</summary>
+        private void ReadSettingsSnapshot(bool isStartup)
         {
             try
             {
@@ -53,7 +53,7 @@ namespace Ink_Canvas
                 {
                     try
                     {
-                        string text = App.CachedSettingsJson ?? File.ReadAllText(App.RootPath + settingsFileName);
+                        string text = (isStartup ? App.CachedSettingsJson : null) ?? File.ReadAllText(App.RootPath + settingsFileName);
                         Settings = JsonConvert.DeserializeObject<Settings>(text);
 
                         if (Settings != null)
@@ -150,6 +150,12 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
             }
+        }
+
+        /// <summary>Apply current settings, optionally replacing them from disk first.</summary>
+        private void LoadSettings(bool isStartup = false, bool skipAutoUpdateCheck = false, bool readFromFile = true)
+        {
+            if (readFromFile) ReadSettingsSnapshot(isStartup);
 
             // Migrate legacy chicken soup source setting to new multi-source format
             SettingsManager.MigrateChickenSoupSettings();

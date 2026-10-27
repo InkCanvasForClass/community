@@ -12,6 +12,7 @@ AllocConsole
 FreeConsole
 GetConsoleWindow
 ShowWindow
+ShowWindowAsync
 GetSystemMenu
 DeleteMenu
 SetConsoleTitle

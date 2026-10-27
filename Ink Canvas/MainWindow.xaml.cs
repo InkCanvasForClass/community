@@ -865,17 +865,20 @@ namespace Ink_Canvas
 
                             var oobeWindow = new OobeWindow(Settings);
                             oobeWindow.Owner = this;
+                            bool completed;
                             try
                             {
                                 App.IsOobeShowing = true;
-                                oobeWindow.ShowDialog();
+                                completed = oobeWindow.ShowDialog() == true;
                             }
                             finally
                             {
                                 App.IsOobeShowing = false;
                             }
 
-                            OnOobeCompleted();
+                            if (completed) OnOobeCompleted();
+                            else if (ViewboxFloatingBar != null && currentMode == 0)
+                                ViewboxFloatingBar.Visibility = Visibility.Visible;
                         }
                         catch (Exception ex)
                         {
@@ -900,19 +903,15 @@ namespace Ink_Canvas
         /// 处理完成首次引导（OOBE）后的状态更新与界面恢复。
         /// </summary>
         /// <remarks>
-        /// 将启动配置标记为已显示 OOBE 并持久化；在常规模式（currentMode == 0）下恢复并显示浮动工具栏（并触发边距动画）；记录完成事件或在出错时记录错误信息。
+        /// 向导已完成持久化；应用当前设置，并在常规模式下恢复浮动工具栏。
         /// </remarks>
         private void OnOobeCompleted()
         {
             try
             {
-                if (Settings?.Startup != null)
-                {
-                    Settings.Startup.HasShownOobe = true;
-                    SaveSettingsToFile();
-                }
-
-                LoadSettings(false, skipAutoUpdateCheck: true);
+                // The dialog has already durably saved the completion flag. Apply the
+                // current object instead of replacing it with a stale disk/cache copy.
+                LoadSettings(false, skipAutoUpdateCheck: true, readFromFile: false);
 
                 if (ViewboxFloatingBar != null && currentMode == 0)
                 {

@@ -305,12 +305,12 @@ namespace Ink_Canvas.Helpers
 
         private readonly Dictionary<InterceptType, InterceptRule> _interceptRules;
         private readonly Dictionary<IntPtr, InterceptType> _interceptedWindows;
-        private readonly Dictionary<IntPtr, RECT> _originalWindowBounds = new Dictionary<IntPtr, RECT>();
+        private readonly Dictionary<IntPtr, WindowIdentity> _windowIdentities = new();
         private readonly Dictionary<IntPtr, FailedInterceptState> _failedWindows = new Dictionary<IntPtr, FailedInterceptState>();
         private readonly object _scanLock = new object();
         private readonly Timer _scanTimer;
         private readonly Dispatcher _dispatcher;
-        private bool _isRunning;
+        private volatile bool _isRunning;
         private bool _disposed;
 
         // 简化的性能统计
@@ -395,7 +395,7 @@ namespace Ink_Canvas.Helpers
                 {
                     // 实测悬浮窗物理尺寸 = 550x200 * 窗口 DPI。不要加全屏匹配，全屏尺寸是主窗口的特征。
                     new WindowSizeMatch { MatchType = WindowSizeMatchType.DpiScale, Width = 550, Height = 200 },
-                    new WindowSizeMatch { MatchType = WindowSizeMatchType.Scale, Width = 550, Height = 200 }
+                    new WindowSizeMatch { MatchType = WindowSizeMatchType.Exact, Width = 550, Height = 200 }
                 },
                 ExactTitleMatch = false,
                 ExactClassNameMatch = false
@@ -418,7 +418,7 @@ namespace Ink_Canvas.Helpers
                 WindowSizeMatches = new List<WindowSizeMatch>
                 {
                     new WindowSizeMatch { MatchType = WindowSizeMatchType.DpiScale, Width = 550, Height = 200 },
-                    new WindowSizeMatch { MatchType = WindowSizeMatchType.Scale, Width = 550, Height = 200 }
+                    new WindowSizeMatch { MatchType = WindowSizeMatchType.Exact, Width = 550, Height = 200 }
                 },
                 ExactTitleMatch = false,
                 ExactClassNameMatch = false
@@ -784,20 +784,14 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public void Stop()
         {
-            if (!_isRunning) return;
+            if (_disposed) return;
 
             _isRunning = false;
             _scanTimer.Change(Timeout.Infinite, Timeout.Infinite);
 
-            // 自动更新重启时由新进程接管拦截，避免旧进程退出瞬间把目标窗口恢复并抢到前台。
-            if (!App.IsUpdateInstalling)
-            {
-                RestoreAllWindows();
-            }
-            else
-            {
-                LogHelper.WriteLogToFile("自动更新期间跳过恢复悬浮窗", LogHelper.LogType.Trace);
-            }
+            // The replacement process does not inherit our HWND identities. Restore
+            // our windows on update too; SHOWNA does not steal the foreground.
+            RestoreAllWindows();
         }
 
         /// <summary>
@@ -805,59 +799,62 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public void SetInterceptRule(InterceptType type, bool enabled)
         {
-            if (_interceptRules.ContainsKey(type))
+            lock (_scanLock)
             {
-                var rule = _interceptRules[type];
-                rule.IsEnabled = enabled;
-
-                // 如果规则被禁用，恢复相关的被拦截窗口
-                if (!enabled)
+                if (_interceptRules.ContainsKey(type))
                 {
-                    RestoreWindowsByType(type);
-                }
+                    var rule = _interceptRules[type];
+                    rule.IsEnabled = enabled;
 
-                // 如果是父规则被禁用，则禁用所有子规则
-                if (!enabled && rule.ChildTypes.Count > 0)
-                {
-                    foreach (var childType in rule.ChildTypes)
+                    // 如果规则被禁用，恢复相关的被拦截窗口
+                    if (!enabled)
                     {
-                        if (_interceptRules.ContainsKey(childType))
+                        RestoreWindowsByType(type);
+                    }
+
+                    // 如果是父规则被禁用，则禁用所有子规则
+                    if (!enabled && rule.ChildTypes.Count > 0)
+                    {
+                        foreach (var childType in rule.ChildTypes)
                         {
-                            _interceptRules[childType].IsEnabled = false;
-                            RestoreWindowsByType(childType);
+                            if (_interceptRules.ContainsKey(childType))
+                            {
+                                _interceptRules[childType].IsEnabled = false;
+                                RestoreWindowsByType(childType);
+                            }
                         }
                     }
-                }
-                // 如果是父规则被启用，则启用所有子规则
-                else if (enabled && rule.ChildTypes.Count > 0)
-                {
-                    foreach (var childType in rule.ChildTypes)
+                    // 如果是父规则被启用，则启用所有子规则
+                    else if (enabled && rule.ChildTypes.Count > 0)
                     {
-                        if (_interceptRules.ContainsKey(childType))
+                        foreach (var childType in rule.ChildTypes)
                         {
-                            _interceptRules[childType].IsEnabled = true;
+                            if (_interceptRules.ContainsKey(childType))
+                            {
+                                _interceptRules[childType].IsEnabled = true;
+                            }
                         }
                     }
-                }
-                // 如果是子规则被禁用，检查是否需要禁用父规则
-                else if (!enabled && rule.ParentType.HasValue)
-                {
-                    var parentRule = _interceptRules[rule.ParentType.Value];
-                    // 检查是否还有其他启用的子规则
-                    bool hasEnabledChildren = parentRule.ChildTypes.Any(childType =>
-                        _interceptRules.ContainsKey(childType) && _interceptRules[childType].IsEnabled);
-
-                    // 如果没有启用的子规则，则禁用父规则
-                    if (!hasEnabledChildren)
+                    // 如果是子规则被禁用，检查是否需要禁用父规则
+                    else if (!enabled && rule.ParentType.HasValue)
                     {
-                        parentRule.IsEnabled = false;
+                        var parentRule = _interceptRules[rule.ParentType.Value];
+                        // 检查是否还有其他启用的子规则
+                        bool hasEnabledChildren = parentRule.ChildTypes.Any(childType =>
+                            _interceptRules.ContainsKey(childType) && _interceptRules[childType].IsEnabled);
+
+                        // 如果没有启用的子规则，则禁用父规则
+                        if (!hasEnabledChildren)
+                        {
+                            parentRule.IsEnabled = false;
+                        }
                     }
-                }
-                // 如果是子规则被启用，则启用父规则
-                else if (enabled && rule.ParentType.HasValue)
-                {
-                    var parentRule = _interceptRules[rule.ParentType.Value];
-                    parentRule.IsEnabled = true;
+                    // 如果是子规则被启用，则启用父规则
+                    else if (enabled && rule.ParentType.HasValue)
+                    {
+                        var parentRule = _interceptRules[rule.ParentType.Value];
+                        parentRule.IsEnabled = true;
+                    }
                 }
             }
         }
@@ -946,48 +943,42 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public bool RestoreWindow(IntPtr hWnd)
         {
-            if (!_interceptedWindows.ContainsKey(hWnd)) return false;
-
-            var interceptType = _interceptedWindows[hWnd];
-            var hwnd = new HWND(hWnd);
-
-            if (PInvoke.IsWindow(hwnd))
+            lock (_scanLock)
             {
-                // 如果之前为了隐藏移出过屏幕可视区，恢复其原始坐标与大小
-                if (_originalWindowBounds.TryGetValue(hWnd, out var origRect))
+                if (!_interceptedWindows.TryGetValue(hWnd, out var type)) return false;
+                var hwnd = new HWND(hWnd);
+                if (!_windowIdentities.TryGetValue(hWnd, out var identity)
+                    || ReadWindowIdentity(hwnd) != identity)
                 {
-                    int width = origRect.right - origRect.left;
-                    int height = origRect.bottom - origRect.top;
-                    PInvoke.SetWindowPos(hwnd, HWND.Null, origRect.left, origRect.top, width, height,
-                        SET_WINDOW_POS_FLAGS.SWP_NOZORDER | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE |
-                        SET_WINDOW_POS_FLAGS.SWP_SHOWWINDOW);
-                    _originalWindowBounds.Remove(hWnd);
+                    ForgetWindow(hWnd);
+                    return false;
                 }
-
-                // 恢复显示但不抢前台，也不改变窗口原有的 Z 序
-                PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_RESTORE);
-                PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_SHOWNOACTIVATE);
-                PInvoke.SetWindowPos(hwnd, HWND.Null, 0, 0, 0, 0,
-                    SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE |
-                    SET_WINDOW_POS_FLAGS.SWP_NOZORDER | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE |
-                    SET_WINDOW_POS_FLAGS.SWP_SHOWWINDOW);
-
-                _interceptedWindows.Remove(hWnd);
-
-                WindowRestored?.Invoke(this, new WindowRestoredEventArgs
-                {
-                    WindowHandle = hWnd,
-                    InterceptType = interceptType
-                });
-
+                // Queue after any pending hide on the owning thread. SHOWNA preserves
+                // the target's position/state and does not activate another application.
+                if (!PInvoke.ShowWindowAsync(hwnd, SHOW_WINDOW_CMD.SW_SHOWNA)) return false;
+                ForgetWindow(hWnd);
+                WindowRestored?.Invoke(this, new WindowRestoredEventArgs { WindowHandle = hWnd, InterceptType = type });
                 return true;
             }
-
-            _interceptedWindows.Remove(hWnd);
-            _originalWindowBounds.Remove(hWnd);
-            return false;
         }
 
+        private readonly record struct WindowIdentity(uint ProcessId, uint ThreadId, string ClassName);
+
+        private WindowIdentity? ReadWindowIdentity(HWND hwnd)
+        {
+            if (!PInvoke.IsWindow(hwnd)) return null;
+            uint threadId = PInvoke.GetWindowThreadProcessId(hwnd, out uint processId);
+            string className = ReadWindowClassName(hwnd);
+            return threadId == 0 || processId == 0 || className.Length == 0
+                ? null : new WindowIdentity(processId, threadId, className);
+        }
+
+        private void ForgetWindow(IntPtr hwnd)
+        {
+            _interceptedWindows.Remove(hwnd);
+            _windowIdentities.Remove(hwnd);
+            _failedWindows.Remove(hwnd);
+        }
         #endregion
 
         #region 私有方法
@@ -998,20 +989,30 @@ namespace Ink_Canvas.Helpers
         private void CleanupInvalidWindows()
         {
             var invalidWindows = new List<IntPtr>();
+            var protectedWindows = new List<IntPtr>();
 
             foreach (var kvp in _interceptedWindows)
             {
                 var hWnd = kvp.Key;
-                if (!PInvoke.IsWindow(new HWND(hWnd)))
+                if (!_windowIdentities.TryGetValue(hWnd, out var identity)
+                    || ReadWindowIdentity(new HWND(hWnd)) != identity)
                 {
                     invalidWindows.Add(hWnd);
+                }
+                else if (IsSeewoWhiteboardRule(kvp.Value) && !IsSafeSeewoTarget(new HWND(hWnd)))
+                {
+                    // Some applications reuse a floating HWND for their teaching
+                    // surface. Undo our hide if that HWND stops being a known popup.
+                    protectedWindows.Add(hWnd);
                 }
             }
             foreach (var hWnd in invalidWindows)
             {
-                _interceptedWindows.Remove(hWnd);
-                _originalWindowBounds.Remove(hWnd);
+                ForgetWindow(hWnd);
             }
+            foreach (var hWnd in protectedWindows)
+                if (RestoreWindow(hWnd))
+                    LogHelper.WriteLogToFile($"[WindowInterceptor] Restored a protected/repurposed teaching window: 0x{hWnd.ToInt64():X}", LogHelper.LogType.Info);
 
             var invalidFailed = _failedWindows.Keys.Where(h => !PInvoke.IsWindow(new HWND(h))).ToList();
             foreach (var h in invalidFailed)
@@ -1091,11 +1092,16 @@ namespace Ink_Canvas.Helpers
 
         private BOOL EnumWindowsCallback(HWND hWnd, LPARAM lParam)
         {
+            // EnumChildWindows already visits all descendants. Recursing with this
+            // callback duplicated nested subtrees and could make a scan very expensive.
+            PInvoke.EnumChildWindows(hWnd, InspectWindow, lParam);
+            return InspectWindow(hWnd, lParam);
+        }
+
+        private BOOL InspectWindow(HWND hWnd, LPARAM lParam)
+        {
             try
             {
-                // 递归枚举子窗口
-                PInvoke.EnumChildWindows(hWnd, EnumWindowsCallback, lParam);
-
                 // 基本检查
                 if (!PInvoke.IsWindow(hWnd) || !PInvoke.IsWindowVisible(hWnd)) return true;
 
@@ -1181,12 +1187,18 @@ namespace Ink_Canvas.Helpers
                         return false;
                 }
 
+                if (IsSeewoWhiteboardRule(rule.Type) && !IsSafeSeewoTarget(hwnd)) return false;
+
                 // 检查类名
                 if (!string.IsNullOrEmpty(rule.ClassNamePattern))
                 {
                     var classNameStr = ReadWindowClassName(hwnd);
 
-                    if (rule.ExactClassNameMatch)
+                    if (IsSeewoWhiteboardRule(rule.Type))
+                    {
+                        if (!classNameStr.StartsWith(rule.ClassNamePattern, StringComparison.OrdinalIgnoreCase)) return false;
+                    }
+                    else if (rule.ExactClassNameMatch)
                     {
                         if (!classNameStr.Equals(rule.ClassNamePattern, StringComparison.OrdinalIgnoreCase))
                             return false;
@@ -1285,23 +1297,11 @@ namespace Ink_Canvas.Helpers
 
                 case WindowSizeMatchType.DpiScale:
                     if (windowSize.Width <= 0 || windowSize.Height <= 0) return false;
-
-                    var hdc = PInvoke.GetDC(hwnd);
-                    if (hdc == IntPtr.Zero) return false;
-                    try
-                    {
-                        var horizontalDpi = PInvoke.GetDeviceCaps(hdc, GET_DEVICE_CAPS_INDEX.LOGPIXELSX);
-                        var verticalDpi = PInvoke.GetDeviceCaps(hdc, GET_DEVICE_CAPS_INDEX.LOGPIXELSY);
-                        var scale = (horizontalDpi + verticalDpi) / 2.0f / 96.0f;
-                        var scaledWidth = (int)(windowSize.Width * scale);
-                        var scaledHeight = (int)(windowSize.Height * scale);
-                        // 容差 2px：覆盖目标窗口 SetWindowPos 的整数取整误差。
-                        return Math.Abs(scaledWidth - width) <= 2 && Math.Abs(scaledHeight - height) <= 2;
-                    }
-                    finally
-                    {
-                        PInvoke.ReleaseDC(hwnd, hdc);
-                    }
+                    uint dpi = PInvoke.GetDpiForWindow(hwnd);
+                    if (dpi == 0) return false;
+                    double scale = dpi / 96.0;
+                    return Math.Abs(Math.Round(windowSize.Width * scale) - width) <= 2
+                        && Math.Abs(Math.Round(windowSize.Height * scale) - height) <= 2;
 
                 case WindowSizeMatchType.FullScreen:
                     var screen = System.Windows.Forms.Screen.FromHandle((IntPtr)hwnd);
@@ -1334,6 +1334,21 @@ namespace Ink_Canvas.Helpers
             }
 
             return PInvoke.GetWindowRect(hwnd, out rect);
+        }
+
+        private static bool IsSeewoWhiteboardRule(InterceptType type) => type is
+            InterceptType.SeewoWhiteboard3Floating or InterceptType.SeewoWhiteboard5Floating
+                or InterceptType.SeewoWhiteboard5CFloating;
+
+        private bool IsSafeSeewoTarget(HWND hwnd)
+        {
+            if (!TryGetWindowBounds(hwnd, out var bounds)) return false;
+            var monitor = System.Windows.Forms.Screen.FromHandle((IntPtr)hwnd).Bounds;
+            return FloatingWindowSafetyPolicy.IsSafeSeewoTarget(
+                unchecked((uint)PInvoke.GetWindowLong(hwnd, WINDOW_LONG_PTR_INDEX.GWL_STYLE)),
+                unchecked((uint)PInvoke.GetWindowLong(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE)),
+                ReadWindowText(hwnd), bounds.right - bounds.left, bounds.bottom - bounds.top,
+                PInvoke.GetDpiForWindow(hwnd), monitor.Width, monitor.Height);
         }
 
         private string GetWindowProcessName(HWND hwnd)
@@ -1396,114 +1411,44 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                HWND hwnd = new HWND(hWnd);
-                if (!PInvoke.IsWindow(hwnd) || !IsWindowVisibleToUser(hwnd))
+                var hwnd = new HWND(hWnd);
+                // Enumerated HWNDs can change size, purpose or process before this call.
+                // Validate again immediately before sending a hide request.
+                if (!rule.IsEnabled || !IsWindowVisibleToUser(hwnd) || !MatchesRulePrecise(hWnd, rule)) return;
+                var identity = ReadWindowIdentity(hwnd);
+                if (!identity.HasValue) return;
+                if (_windowIdentities.TryGetValue(hWnd, out var previous) && previous != identity.Value)
+                    ForgetWindow(hWnd);
+
+                // A blocked target must never block our scan/Stop path. Do not force
+                // minimize, close, move off-screen, resize or change its Z order.
+                if (!PInvoke.ShowWindowAsync(hwnd, SHOW_WINDOW_CMD.SW_HIDE))
                 {
-                    if (_interceptedWindows.ContainsKey(hWnd))
+                    int error = Marshal.GetLastWin32Error();
+                    _failedWindows[hWnd] = new FailedInterceptState
                     {
-                        _interceptedWindows.Remove(hWnd);
-                        _originalWindowBounds.Remove(hWnd);
-                    }
-                    _failedWindows.Remove(hWnd);
-                    return;
-                }
-
-                // 尝试记录原始位置供后续恢复或移出屏幕时使用
-                if (!_originalWindowBounds.ContainsKey(hWnd) && TryGetWindowBounds(hwnd, out var currentBounds))
-                {
-                    if (currentBounds.left > -10000 && currentBounds.top > -10000)
-                    {
-                        _originalWindowBounds[hWnd] = currentBounds;
-                    }
-                }
-
-                // 直接隐藏窗口，不发送关闭消息；如果窗口仍报告可见，再用 SetWindowPos 补一次隐藏。
-                // 部分悬浮窗（如希沃白板5 的 WPF 悬浮窗）在跨进程调用 ShowWindow 时会异步处理，
-                // 单次调用后立即查询 IsWindowVisible 可能仍是 true，因此这里做多次重试。
-                for (int attempt = 0; attempt < 3; attempt++)
-                {
-                    PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_HIDE);
-                    if (!PInvoke.IsWindowVisible(hwnd))
-                        break;
-
-                    PInvoke.SetWindowPos(hwnd, HWND.Null, 0, 0, 0, 0,
-                        SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOSIZE |
-                        SET_WINDOW_POS_FLAGS.SWP_NOZORDER | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE |
-                        SET_WINDOW_POS_FLAGS.SWP_HIDEWINDOW);
-                    if (!PInvoke.IsWindowVisible(hwnd))
-                        break;
-
-                    if (attempt < 2)
-                        Thread.Sleep(50);
-                }
-
-                // 仍然可见：目标窗口所在线程可能无响应，ShowWindow 的隐藏请求无法完成。
-                // SW_FORCEMINIMIZE 明确支持跨线程强制最小化，作为最后手段让窗口离开屏幕；
-                // 随后再尝试一次隐藏，能隐藏则彻底隐藏，否则保留最小化状态（同样不可见）。
-                if (IsWindowVisibleToUser(hwnd))
-                {
-                    PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_FORCEMINIMIZE);
-                    if (PInvoke.IsIconic(hwnd))
-                    {
-                        PInvoke.ShowWindow(hwnd, SHOW_WINDOW_CMD.SW_HIDE);
-                    }
-                }
-
-                // 兜底手段：如果无边框浮窗（如希沃无最小化样式的 WPF 浮窗）依然顽固可见，尝试将其移出屏幕可视范围（-32000, -32000）
-                if (IsWindowVisibleToUser(hwnd))
-                {
-                    PInvoke.SetWindowPos(hwnd, HWND.Null, -32000, -32000, 0, 0,
-                        SET_WINDOW_POS_FLAGS.SWP_NOSIZE | SET_WINDOW_POS_FLAGS.SWP_NOZORDER | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE);
-                }
-
-                if (IsWindowVisibleToUser(hwnd))
-                {
-                    int win32Error = Marshal.GetLastWin32Error();
-                    if (!_failedWindows.TryGetValue(hWnd, out var failState))
-                    {
-                        failState = new FailedInterceptState();
-                        _failedWindows[hWnd] = failState;
-                    }
-                    failState.FailureCount++;
-                    int cooldownSeconds = failState.FailureCount switch
-                    {
-                        1 => 30,
-                        2 => 60,
-                        _ => 180
+                        FailureCount = 1,
+                        NextRetryUtc = DateTime.UtcNow.AddSeconds(30)
                     };
-                    failState.NextRetryUtc = DateTime.UtcNow.AddSeconds(cooldownSeconds);
-
-                    // 仅在首次失败或达到退避阈值时记录警告日志，杜绝每 2 秒高频刷屏
-                    if (failState.FailureCount <= 2 || failState.FailureCount % 10 == 0)
-                    {
-                        string reason = win32Error == 5
-                            ? "拒绝访问 (Win32 Error 5)。目标窗口拥有更高的管理员权限，请尝试以管理员身份运行 Ink Canvas 以完成拦截"
-                            : $"Win32错误码: {win32Error}";
-                        LogHelper.WriteLogToFile($"隐藏悬浮窗失败: 0x{hWnd.ToInt64():X8} ({rule.Type})，{reason}，将在 {cooldownSeconds} 秒后重试", LogHelper.LogType.Warning);
-                    }
+                    LogHelper.WriteLogToFile($"[WindowInterceptor] Hide request failed: 0x{hWnd.ToInt64():X}, {rule.Type}, Win32={error}", LogHelper.LogType.Warning);
                     return;
                 }
-
-                // 成功隐藏：清除失败记录，登记到已拦截窗口
+                bool firstRequest = !_interceptedWindows.ContainsKey(hWnd);
                 _failedWindows.Remove(hWnd);
+                _windowIdentities[hWnd] = identity.Value;
                 _interceptedWindows[hWnd] = rule.Type;
-
-                // 触发事件
-                WindowIntercepted?.Invoke(this, new WindowInterceptedEventArgs
-                {
-                    WindowHandle = hWnd,
-                    InterceptType = rule.Type,
-                    Rule = rule,
-                    WindowTitle = GetWindowTitle(hWnd)
-                });
-
+                if (firstRequest)
+                    WindowIntercepted?.Invoke(this, new WindowInterceptedEventArgs
+                    {
+                        WindowHandle = hWnd, InterceptType = rule.Type, Rule = rule,
+                        WindowTitle = GetWindowTitle(hWnd)
+                    });
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"拦截窗口时发生错误: {ex.Message}", LogHelper.LogType.Error);
             }
         }
-
         private string GetWindowTitle(IntPtr hWnd)
         {
             try
@@ -1600,12 +1545,6 @@ namespace Ink_Canvas.Helpers
 
             Stop();
             _scanTimer?.Dispose();
-
-            // 自动更新时保持隐藏状态交给新进程接管，正常退出才恢复窗口。
-            if (!App.IsUpdateInstalling)
-            {
-                RestoreAllWindows();
-            }
 
             _disposed = true;
         }

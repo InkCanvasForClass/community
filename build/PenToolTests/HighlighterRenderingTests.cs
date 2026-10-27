@@ -11,6 +11,11 @@ internal static class HighlighterRenderingTests
 {
     internal static void Run(Action<bool, string> check, Action pump)
     {
+        var baseline = Read(Render(new StrokeCollection(), Colors.White), 40, 40);
+        if (baseline.A == 0)
+            throw new PlatformNotSupportedException("WPF returned a transparent bitmap for a plain white background; desktop rendering is unavailable.");
+        if (!Near(baseline, Colors.White))
+            throw new InvalidOperationException($"WPF baseline rendering failed: {baseline}");
         foreach (byte alpha in new byte[] { 0, 64, 128, 255 })
         foreach (bool overlap in new[] { false, true })
         foreach (Color background in new[] { Colors.White, Colors.Black, Color.FromRgb(30, 70, 110) })
@@ -110,11 +115,11 @@ internal static class HighlighterRenderingTests
     private static Color Read(RenderTargetBitmap bitmap, int x, int y)
     {
         var pixel = new byte[4]; bitmap.CopyPixels(new Int32Rect(x, y, 1, 1), pixel, 4, 0);
-        return Color.FromRgb(pixel[2], pixel[1], pixel[0]);
+        return Color.FromArgb(pixel[3], pixel[2], pixel[1], pixel[0]);
     }
     private static Color Mix(Color background, Color foreground, double opacity) => Color.FromRgb(
         (byte)Math.Round(background.R * (1 - opacity) + foreground.R * opacity),
         (byte)Math.Round(background.G * (1 - opacity) + foreground.G * opacity),
         (byte)Math.Round(background.B * (1 - opacity) + foreground.B * opacity));
-    private static bool Near(Color a, Color b) => Math.Abs(a.R - b.R) <= 2 && Math.Abs(a.G - b.G) <= 2 && Math.Abs(a.B - b.B) <= 2;
+    private static bool Near(Color a, Color b) => a.A == b.A && Math.Abs(a.R - b.R) <= 2 && Math.Abs(a.G - b.G) <= 2 && Math.Abs(a.B - b.B) <= 2;
 }
