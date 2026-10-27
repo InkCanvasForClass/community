@@ -164,6 +164,7 @@ namespace Ink_Canvas.Ink.WinRT
             _presenter.InputProcessingConfiguration.Mode = InkInputProcessingMode.Inking;
             _presenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
             _presenter.UpdateDefaultDrawingAttributes(config.ToInkDrawingAttributes());
+            _overlay.SetInkOpacity(config.Style.WetOpacity);
             AppliedConfig = config;
 
             _inkSynchronizer = _presenter.ActivateCustomDrying();
@@ -274,6 +275,7 @@ namespace Ink_Canvas.Ink.WinRT
             RunOnInkThread(p =>
             {
                 p.UpdateDefaultDrawingAttributes(config.ToInkDrawingAttributes());
+                _overlay.SetInkOpacity(config.Style.WetOpacity);
                 AppliedConfig = config;
             });
         }

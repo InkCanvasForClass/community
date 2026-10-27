@@ -23,6 +23,7 @@ internal static class Program
     [STAThread]
     private static int Main()
     {
+        HighlighterRenderingTests.Run(Check, () => Pump());
         var attributes = new DrawingAttributes { Color = Color.FromArgb(120, 255, 220, 0), Width = 5, Height = 5 };
         foreach (bool overlap in new[] { false, true })
             foreach (double width in new[] { 4.0, 20.0, 50.0 })

@@ -7,6 +7,8 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="../../Ink Canvas/Ink/HighlighterRendering.cs" Link="Production/HighlighterRendering.cs" />
+    <Compile Include="../../Ink Canvas/Controls/HighlighterInkCanvas.cs" Link="Production/HighlighterInkCanvas.cs" />
     <Compile Include="../../Ink Canvas/Ink/StrokeSessionTracker.cs" Link="Production/StrokeSessionTracker.cs" />
     <Compile Include="../../Ink Canvas/Ink/PersistentStrokePolicy.cs" Link="Production/PersistentStrokePolicy.cs" />
     <Compile Include="../../Ink Canvas/Ink/WinRT/PenToolStylePolicy.cs" Link="Production/PenToolStylePolicy.cs" />

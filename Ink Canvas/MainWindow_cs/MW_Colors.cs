@@ -806,6 +806,7 @@ namespace Ink_Canvas
             drawingAttributes.Height = Settings.Canvas.InkWidth;
             drawingAttributes.StylusTip = StylusTip.Ellipse;
             drawingAttributes.IsHighlighter = false;
+            Ink.HighlighterRendering.SetTool(drawingAttributes, false);
 
             Settings.Canvas.EnableInkFade = false;
             if (_inkFadeManager != null)
@@ -833,6 +834,7 @@ namespace Ink_Canvas
             drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
             drawingAttributes.StylusTip = StylusTip.Rectangle;
             drawingAttributes.IsHighlighter = !Settings.Canvas.HighlighterOverlapEnabled;
+            Ink.HighlighterRendering.SetTool(drawingAttributes, true);
 
             Settings.Canvas.EnableInkFade = false;
             if (_inkFadeManager != null)
@@ -854,6 +856,7 @@ namespace Ink_Canvas
             drawingAttributes.Height = Settings.Canvas.LaserPenWidth;
             drawingAttributes.StylusTip = StylusTip.Ellipse;
             drawingAttributes.IsHighlighter = false;
+            Ink.HighlighterRendering.SetTool(drawingAttributes, false);
 
             Settings.Canvas.EnableInkFade = true;
             if (_inkFadeManager != null)

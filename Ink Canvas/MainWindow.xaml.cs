@@ -1165,7 +1165,9 @@ namespace Ink_Canvas
             if (penType == 1)
             {
                 drawingAttributes.IsHighlighter = !toggle.IsOn;
+                Ink.HighlighterRendering.SetTool(drawingAttributes, true);
                 inkCanvas.DefaultDrawingAttributes.IsHighlighter = !toggle.IsOn;
+                Ink.HighlighterRendering.SetTool(inkCanvas.DefaultDrawingAttributes, true);
                 UpdateWinRTInkStyle();
             }
             SaveSettingsToFile();

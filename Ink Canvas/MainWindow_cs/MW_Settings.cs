@@ -789,6 +789,8 @@ namespace Ink_Canvas
             var NowG = drawingAttributes.Color.G;
             var NowB = drawingAttributes.Color.B;
             drawingAttributes.Color = Color.FromArgb((byte)value, NowR, NowG, NowB);
+            inkCanvas.DefaultDrawingAttributes.Color = drawingAttributes.Color;
+            UpdateWinRTInkStyle();
 
             if (penType == 0)
             {

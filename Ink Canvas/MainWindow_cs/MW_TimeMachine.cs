@@ -112,7 +112,7 @@ namespace Ink_Canvas
         private void ApplyHistoryToCanvas(TimeMachineHistory item, InkCanvas applyCanvas = null, HashSet<UIElement> elementsRemovedInThisPage = null)
         {
             _currentCommitType = CommitReason.CodeInput;
-            var canvas = inkCanvas;
+            InkCanvas canvas = inkCanvas;
             if (applyCanvas != null && applyCanvas is InkCanvas)
             {
                 canvas = applyCanvas;

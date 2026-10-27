@@ -16,7 +16,8 @@ namespace Ink_Canvas.Ink.WinRT
             return new(attributes.Color, Math.Max(0.1, width), Math.Max(0.1, height),
                 isHighlighter: highlighter && !overlapEnabled, ignorePressure: ignorePressure,
                 tipRectangle: highlighter || (penType != 2 && attributes.StylusTip == StylusTip.Rectangle),
-                useVelocityBrushTip: velocityTip && !highlighter, isLaser: penType == 2);
+                useVelocityBrushTip: velocityTip && !highlighter, isLaser: penType == 2,
+                isHighlighterTool: highlighter);
         }
     }
 }

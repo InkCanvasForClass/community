@@ -63,6 +63,8 @@ namespace Ink_Canvas.Ink.WinRT
         private bool _disposed;
 
         private IDCompositionDevice _compositionDevice;
+        private IDCompositionVisual _opacityRoot;
+        private IDCompositionEffectGroup _opacityEffect;
         private IDCompositionDevice3 _compositionDevice3;
         private IDCompositionTarget _compositionTarget;
         private IDCompositionVisual _compositionVisual;
@@ -271,7 +273,19 @@ namespace Ink_Canvas.Ink.WinRT
             _compositionDevice.CreateTargetForHwnd(_overlayHwnd, true, out _compositionTarget)
                 .CheckError();
             _compositionDevice.CreateVisual(out _compositionVisual).CheckError();
-            _compositionTarget.SetRoot(_compositionVisual).CheckError();
+            _compositionDevice.CreateVisual(out _opacityRoot).CheckError();
+            _compositionDevice.CreateEffectGroup(out _opacityEffect).CheckError();
+            _opacityRoot.SetEffect(_opacityEffect).CheckError();
+            _opacityRoot.AddVisual(_compositionVisual, false, null).CheckError();
+            _compositionTarget.SetRoot(_opacityRoot).CheckError();
+            _compositionDevice.Commit().CheckError();
+        }
+
+        // Called on the ink thread together with UpdateDefaultDrawingAttributes. The
+        // parent is separate from the presenter's root, which Windows Ink owns.
+        internal void SetInkOpacity(double opacity)
+        {
+            _opacityEffect.SetOpacity((float)Math.Clamp(opacity, 0, 1)).CheckError();
             _compositionDevice.Commit().CheckError();
         }
 
@@ -282,6 +296,16 @@ namespace Ink_Canvas.Ink.WinRT
             _disposed = true;
 
             var hwndForEntry = _overlayHwnd;
+            try { _opacityRoot?.Dispose(); } catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[WinRTInk] 释放透明度视觉对象失败: {ex.Message}", LogHelper.LogType.Info);
+            }
+            _opacityRoot = null;
+            try { _opacityEffect?.Dispose(); } catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[WinRTInk] 释放透明度效果失败: {ex.Message}", LogHelper.LogType.Info);
+            }
+            _opacityEffect = null;
 
             if (_compositionVisual != null)
             {

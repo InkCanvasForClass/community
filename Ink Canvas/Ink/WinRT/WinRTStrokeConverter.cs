@@ -78,6 +78,7 @@ namespace Ink_Canvas.Ink.WinRT
             };
 
             var stroke = new Stroke(points, attributes);
+            HighlighterRendering.SetTool(attributes, style.IsHighlighterTool);
             if (durationMs > 0) stroke.AddPropertyData(StrokeDurationGuid, durationMs);
             if (!stroke.ContainsPropertyData(NativeWetInkCommittedGuid))
                 stroke.AddPropertyData(NativeWetInkCommittedGuid, true);
@@ -120,7 +121,8 @@ namespace Ink_Canvas.Ink.WinRT
             bool ignorePressure,
             bool tipRectangle,
             bool useVelocityBrushTip,
-            bool isLaser)
+            bool isLaser,
+            bool isHighlighterTool = false)
         {
             Color = color;
             WidthDip = widthDip;
@@ -130,6 +132,7 @@ namespace Ink_Canvas.Ink.WinRT
             TipRectangle = tipRectangle;
             UseVelocityBrushTip = useVelocityBrushTip;
             IsLaser = isLaser;
+            IsHighlighterTool = isHighlighterTool || isHighlighter;
         }
 
         public Color Color { get; }
@@ -140,5 +143,8 @@ namespace Ink_Canvas.Ink.WinRT
         public bool TipRectangle { get; }
         public bool UseVelocityBrushTip { get; }
         public bool IsLaser { get; }
+        public bool IsHighlighterTool { get; }
+        public double WetOpacity => IsHighlighterTool
+            ? (IsHighlighter ? Color.A / 255.0 : HighlighterRendering.Opacity(Color.A)) : 1.0;
     }
 }
