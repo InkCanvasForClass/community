@@ -1662,6 +1662,9 @@ namespace Ink_Canvas
 
     public class Advanced
     {
+        [JsonProperty("palmEraser")]
+        public Ink.PalmEraserOptions PalmEraser { get; set; } = new();
+
         [JsonProperty("touchCalibration")]
         [JsonConverter(typeof(Ink.TouchCalibrationRecordConverter))]
         public Ink.TouchCalibrationRecord TouchCalibration { get; set; }
@@ -1669,6 +1672,9 @@ namespace Ink_Canvas
         [System.Runtime.Serialization.OnDeserialized]
         private void ValidateCalibration(System.Runtime.Serialization.StreamingContext context)
         {
+            // Missing fields in existing settings receive TouchSuite defaults. Sanitization
+            // is idempotent and contains malformed numeric/enum values at the load boundary.
+            PalmEraser = (PalmEraser ?? new()).Sanitize();
             // Missing records remain null; invalid/unknown versions never block old profiles.
             if (TouchCalibration?.IsValid() != true) TouchCalibration = null;
         }

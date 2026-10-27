@@ -5,6 +5,7 @@ using Ink_Canvas.Ink.Native;
 #endif
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -14,12 +15,13 @@ namespace Ink_Canvas
 {
     public partial class MainWindow
     {
-        private readonly Dictionary<int, PalmEraserContactTracker> _palmContacts = new();
+        private readonly PalmEraserEngine _palmEngine = new();
         private readonly HashSet<int> _palmSuppressedTouches = new();
         private readonly HashSet<uint> _palmSuppressedPointers = new();
-        private PalmEraserContactTracker _palmContact;
         private TouchDevice _palmTouchDevice;
+#if ICC_NATIVE_WET_INK
         private uint? _palmNativePointer;
+#endif
         private bool _changingPalmMode;
         private bool _palmPreviousManipulation;
         private bool _palmPreviousStrokeEraser;
@@ -27,10 +29,100 @@ namespace Ink_Canvas
         private double _palmHeight;
         private Point? _palmLastPoint;
         private uint? _winRTInkPalmPointer;
+        private int _palmRevision;
+        private IDisposable _palmRawSubscription;
+        private PalmInputMailbox<(RawPalmContact Contact, Rect Pixels)> _palmRawMailbox;
+        private Ink.WinRT.WinRTInkInputGate _palmRawGate;
+        private readonly Dictionary<(string Device, int Id), (bool Canvas, long Time)> _palmRawRegions = new();
+
+        private void InitializePalmRawInput()
+        {
+            if (_palmRawSubscription != null) return;
+            try { _palmRawSubscription = PalmRawHidSource.Subscribe(OnRawPalmContact); }
+            catch (Exception ex) { LogHelper.WriteLogToFile("[PalmHid] Initialization failed: " + ex.Message, LogHelper.LogType.Warning); }
+        }
+
+        private void OnRawPalmContact(RawPalmContact sample)
+        {
+            var key = (sample.Device, sample.Id);
+            if (sample.Released) _palmRawRegions.Remove(key);
+            if (!CanStartPalmEraser() || !IsVisible || !IsEnabled) return;
+            var screen = System.Windows.Forms.SystemInformation.VirtualScreen;
+            var environment = TouchCalibrationDisplay.Capture(this, "RawHID");
+            var profile = CreatePalmEraserProfile("RawHID");
+            var size = PalmEraserEngine.HidDimensions(sample.Width, sample.Height, sample.WidthMaximum,
+                sample.HeightMaximum, environment.PixelWidth, environment.PixelHeight, profile.Options.HidScale);
+            var physical = new Point(screen.Left + sample.X * screen.Width, screen.Top + sample.Y * screen.Height);
+            if (!double.IsFinite(physical.X) || !double.IsFinite(physical.Y)) return;
+            if (!sample.Released)
+            {
+                long now = Environment.TickCount64;
+                if (!_palmRawRegions.TryGetValue(key, out var region) || now - region.Time > 300)
+                {
+                    foreach (var expired in _palmRawRegions.Where(p => now - p.Value.Time > 300).Select(p => p.Key).ToArray())
+                        _palmRawRegions.Remove(expired);
+                    if (_palmRawRegions.Count >= 128) return;
+                    Point windowPoint = PointFromScreen(physical);
+                    // Classify the down once; moving samples must not repeatedly walk the
+                    // visual tree on a low-powered device, or turn a toolbar tap into erase.
+                    region = (ResolveHitZone(windowPoint.X, windowPoint.Y, out _) == CanvasHitZone.CanvasSurface, now);
+                }
+                _palmRawRegions[key] = (region.Canvas, now);
+                if (!region.Canvas) return;
+            }
+            if (_winRTInkInputGate != null && _winRTInkHost != null && _winRTInkStarted)
+            {
+                if (_palmRawGate != _winRTInkInputGate)
+                {
+                    _palmRawMailbox?.Dispose();
+                    _palmRawGate = _winRTInkInputGate;
+                    var gate = _palmRawGate;
+                    var host = _winRTInkHost;
+                    _palmRawMailbox = new(action => host.RunOnInkThread(_ => action()),
+                        frame => gate.SubmitRawPalm(frame.Contact.Id, frame.Pixels, frame.Contact.Pressure,
+                            frame.Contact.Released, frame.Contact.Device), gate.CancelActiveStrokes);
+                }
+                // Native presenter positions are physical pixels relative to the host HWND.
+                Point origin = PointToScreen(new Point());
+                var pixels = new Rect(physical.X - origin.X - size.Width / 2,
+                    physical.Y - origin.Y - size.Height / 2, size.Width, size.Height);
+                _palmRawMailbox.Post((sample, pixels));
+                return;
+            }
+            _palmEngine.Configure(profile);
+            if (!_palmEngine.AcceptDevice(sample.Device)) return;
+            if (sample.Released)
+            {
+                _palmEngine.Remove(PalmContactSource.RawHid, sample.Id);
+                if (isPalmEraserActive) { _palmLastPoint = null; EndPalmEraser(); }
+                return;
+            }
+            Point local = inkCanvas.PointFromScreen(physical);
+            _palmEngine.NotePressure(sample.Pressure);
+            _palmEngine.Submit(PalmContactSource.RawHid, sample.Id,
+                new Rect(local.X * profile.DpiX - size.Width / 2, local.Y * profile.DpiY - size.Height / 2,
+                    size.Width, size.Height), false, sample.Device);
+            if (!_palmEngine.TryGetNearestEraser(new Point(local.X * profile.DpiX, local.Y * profile.DpiY), out var eraser))
+            {
+                if (_palmEngine.ActiveSource == PalmContactSource.RawHid && isPalmEraserActive) EndPalmEraser();
+                return;
+            }
+            // Raw input never captures chrome: require a corresponding canvas contact.
+            if (dec.Count == 0 && !_palmSuppressedTouches.Any()) return;
+            foreach (int id in dec) { CancelPalmTouchPreview(id); _palmSuppressedTouches.Add(id); }
+            var position = new Point(eraser.CenterPx.X / profile.DpiX, eraser.CenterPx.Y / profile.DpiY);
+            if (!isPalmEraserActive) BeginPalmEraser(position, eraser.WidthPx / profile.DpiX, eraser.HeightPx / profile.DpiY);
+            else
+            {
+                if (eraser.Revision != _palmRevision) BreakPalmEraserPath();
+                MovePalmEraser(position, eraser.WidthPx / profile.DpiX, eraser.HeightPx / profile.DpiY);
+            }
+            _palmRevision = eraser.Revision;
+        }
 
         private bool CanStartPalmEraser()
         {
-            return Settings.Canvas.EnablePalmEraser && !IsCurrentPageFrozen
+            return Settings.Canvas.EnablePalmEraser && !IsCurrentPageFrozen && !IsPluginCanvasToolActive
                 && !_isVideoPresenterSpecialMode && !IsBoardRoamingMode
                 && !isSingleFingerDragMode && drawingShapeMode == 0
 #if ICC_NATIVE_WET_INK
@@ -42,11 +134,12 @@ namespace Ink_Canvas
                 && !(currentMode == 1 ? Settings.Gesture.IsEnableMultiTouchModeBoard : Settings.Gesture.IsEnableMultiTouchMode);
         }
 
-        private bool UpdatePalmContact(PalmEraserContactTracker contact, double width, double height,
-            out double eraserW, out double eraserH, string source = "WPF")
+        private PalmEraserProfile CreatePalmEraserProfile(string source)
         {
             ResolvePalmEraserMetrics(source, out double threshold, out double scale);
-            return contact.Update(width, height, threshold, scale, isEraserCircleShape, out eraserW, out eraserH);
+            return PalmEraserProfiles.Create(Settings.Advanced.TouchCalibration,
+                TouchCalibrationDisplay.Capture(this, Settings.Advanced.TouchCalibration?.Environment?.Source ?? "WPF"), Settings.Advanced.PalmEraser,
+                isEraserCircleShape, threshold, scale);
         }
 
         private void ResolvePalmEraserMetrics(string source, out double threshold, out double scale)
@@ -98,6 +191,7 @@ namespace Ink_Canvas
                 return;
             }
             var position = WinRTInkPointToCanvasDip(input.Position.X, input.Position.Y);
+            if (input.BreakPath && isPalmEraserActive) BreakPalmEraserPath();
             if (!_winRTInkPalmPointer.HasValue && !isPalmEraserActive)
             {
                 _winRTInkPalmPointer = input.PointerId;
@@ -112,47 +206,51 @@ namespace Ink_Canvas
         private bool TryHandlePalmTouch(TouchEventArgs e, bool down)
         {
             int id = e.TouchDevice.Id;
-            if (isPalmEraserActive)
+            if (!CanStartPalmEraser()) { if (isPalmEraserActive) EndPalmEraser(); return false; }
+            if (!down && !dec.Contains(id) && !_palmSuppressedTouches.Contains(id)) return false;
+            var profile = CreatePalmEraserProfile("WPF");
+            _palmEngine.Configure(profile);
+            if (down) _palmEngine.Remove(PalmContactSource.Software, id);
+            var touch = e.GetTouchPoint(inkCanvas);
+            _palmEngine.Submit(PalmContactSource.Software, id,
+                new Rect((touch.Position.X - touch.Bounds.Width / 2) * profile.DpiX,
+                    (touch.Position.Y - touch.Bounds.Height / 2) * profile.DpiY,
+                    touch.Bounds.Width * profile.DpiX, touch.Bounds.Height * profile.DpiY));
+            bool erase = _palmEngine.ActiveSource == PalmContactSource.RawHid
+                ? _palmEngine.TryGetNearestEraser(new Point(touch.Position.X * profile.DpiX, touch.Position.Y * profile.DpiY), out var frame)
+                : _palmEngine.TryGetEraser(id, out frame);
+            if (!erase)
             {
-                if (!CanStartPalmEraser())
-                    EndPalmEraser();
-                else if (_palmTouchDevice == e.TouchDevice)
-                {
-                    var point = e.GetTouchPoint(inkCanvas);
-                    if (UpdatePalmContact(_palmContact, point.Bounds.Width, point.Bounds.Height, out var w, out var h))
-                        MovePalmEraser(point.Position, w, h);
-                }
+                if (_palmTouchDevice == e.TouchDevice) EndPalmEraser();
+                if (!isPalmEraserActive && !_palmSuppressedTouches.Contains(id)) return false;
                 _palmSuppressedTouches.Add(id);
                 e.Handled = true;
                 return true;
             }
-            if (_palmSuppressedTouches.Contains(id))
-            {
-                e.Handled = true;
-                return true;
-            }
-            if (!CanStartPalmEraser() || (!down && !dec.Contains(id))
-                || (_pluginCanvasGestureHandler != null && dec.Count > 1)
-                || (!down && dec.Count > 1))
+            var position = new Point(frame.CenterPx.X / profile.DpiX, frame.CenterPx.Y / profile.DpiY);
+            double width = frame.WidthPx / profile.DpiX, height = frame.HeightPx / profile.DpiY;
+            if (!IsUsablePalmSize(width, height))
                 return false;
-
-            if (!_palmContacts.TryGetValue(id, out var contact))
-            {
-                contact = new PalmEraserContactTracker();
-                _palmContacts[id] = contact;
-            }
-            var touch = e.GetTouchPoint(inkCanvas);
-            if (!UpdatePalmContact(contact, touch.Bounds.Width, touch.Bounds.Height, out var width, out var height))
-                return false;
-
             // 接触由书写升级为手掌时，丢弃尚未提交的预览，不删除已有干墨。
-            CancelPalmTouchPreview(id);
-            _palmTouchDevice = e.TouchDevice;
-            _palmContact = contact;
+            foreach (int palmId in _palmEngine.ActiveSource == PalmContactSource.RawHid ? dec.ToArray() : _palmEngine.PalmIds)
+            {
+                CancelPalmTouchPreview(palmId);
+                _palmSuppressedTouches.Add(palmId);
+            }
             _palmSuppressedTouches.Add(id);
-            BeginPalmEraser(touch.Position, width, height);
-            inkCanvas.LostTouchCapture += PalmEraser_LostTouchCapture;
-            inkCanvas.CaptureTouch(e.TouchDevice);
+            if (!isPalmEraserActive)
+            {
+                _palmTouchDevice = e.TouchDevice;
+                BeginPalmEraser(position, width, height);
+                inkCanvas.LostTouchCapture += PalmEraser_LostTouchCapture;
+                inkCanvas.CaptureTouch(e.TouchDevice);
+            }
+            else
+            {
+                if (frame.Revision != _palmRevision) BreakPalmEraserPath();
+                MovePalmEraser(position, width, height);
+            }
+            _palmRevision = frame.Revision;
             e.Handled = true;
             return true;
         }
@@ -186,7 +284,7 @@ namespace Ink_Canvas
         private bool FinishPalmTouch(TouchEventArgs e)
         {
             int id = e.TouchDevice.Id;
-            _palmContacts.Remove(id);
+            _palmEngine.Remove(PalmContactSource.Software, id);
             bool suppressed = _palmSuppressedTouches.Remove(id);
             if (_palmTouchDevice == e.TouchDevice)
                 EndPalmEraser();
@@ -195,6 +293,7 @@ namespace Ink_Canvas
             inkCanvas.ReleaseTouchCapture(e.TouchDevice);
             if (dec.Count == 0)
             {
+                EndPalmEraser();
                 ViewboxFloatingBar.IsHitTestVisible = true;
                 BlackboardUIGridForInkReplay.IsHitTestVisible = true;
             }
@@ -204,15 +303,14 @@ namespace Ink_Canvas
 
         private void PalmEraser_LostTouchCapture(object sender, TouchEventArgs e)
         {
-            var contact = _palmContact;
             var device = e.TouchDevice;
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                if (isPalmEraserActive && _palmContact == contact && _palmTouchDevice == device
+                if (isPalmEraserActive && _palmTouchDevice == device
                     && device.Captured != inkCanvas)
                 {
                     dec.Remove(device.Id);
-                    _palmContacts.Remove(device.Id);
+                    _palmEngine.Remove(PalmContactSource.Software, device.Id);
                     EndPalmEraser();
                     ViewboxFloatingBar.IsHitTestVisible = true;
                     BlackboardUIGridForInkReplay.IsHitTestVisible = true;
@@ -222,6 +320,7 @@ namespace Ink_Canvas
 
         private void BeginPalmEraser(Point position, double width, double height)
         {
+            if (!IsUsablePalmSize(width, height)) return;
             palmEraserPreviousEditingMode = inkCanvas.EditingMode;
             _palmPreviousWidth = eraserWidth;
             _palmPreviousStrokeEraser = isUsingStrokesEraser;
@@ -247,6 +346,7 @@ namespace Ink_Canvas
 
         private void MovePalmEraser(Point position, double width, double height)
         {
+            if (!IsUsablePalmSize(width, height) || !double.IsFinite(position.X) || !double.IsFinite(position.Y)) return;
             if (IsCurrentPageFrozen)
             {
                 EndPalmEraser();
@@ -275,15 +375,28 @@ namespace Ink_Canvas
             _palmLastPoint = position;
         }
 
+        private void BreakPalmEraserPath()
+        {
+            _palmLastPoint = null;
+            if (hitTester != null)
+            {
+                hitTester.StrokeHit -= EraserGeometry_StrokeHit;
+                hitTester.EndHitTesting();
+            }
+            hitTester = inkCanvas.Strokes.GetIncrementalStrokeHitTester(CreateGeometryEraserShape());
+            hitTester.StrokeHit += EraserGeometry_StrokeHit;
+        }
+
         private void EndPalmEraser(bool restoreMode = true)
         {
             if (!isPalmEraserActive) return;
             isPalmEraserActive = false;
             inkCanvas.LostTouchCapture -= PalmEraser_LostTouchCapture;
             _palmTouchDevice = null;
+#if ICC_NATIVE_WET_INK
             _palmNativePointer = null;
+#endif
             _winRTInkPalmPointer = null;
-            _palmContact = null;
             _palmLastPoint = null;
             try { DisableEraserOverlay(); }
             finally
@@ -302,16 +415,23 @@ namespace Ink_Canvas
             }
         }
 
-        private readonly Dictionary<uint, PalmEraserContactTracker> _nativePalmContacts = new();
-        internal void ResetTouchCalibrationInput() => ResetPalmEraser();
+        private static bool IsUsablePalmSize(double width, double height) =>
+            double.IsFinite(width) && double.IsFinite(height) && width >= 0.003 && height >= 0.003
+            && width <= 100000 && height <= 100000;
+        internal void ResetTouchCalibrationInput()
+        {
+            ResetPalmEraser();
+            _winRTInkInputGate?.CancelActiveStrokes();
+            PushWinRTInkGateSnapshots();
+        }
 
         private void ResetPalmEraser()
         {
             EndPalmEraser();
-            _nativePalmContacts.Clear();
-            _palmContacts.Clear();
+            _palmEngine.Clear();
             _palmSuppressedTouches.Clear();
             _palmSuppressedPointers.Clear();
+            _palmRawRegions.Clear();
         }
 
 #if ICC_NATIVE_WET_INK
@@ -333,30 +453,25 @@ namespace Ink_Canvas
                 CancelNativePalmInk(batch.PointerId);
                 return false;
             }
-            if (isPalmEraserActive)
-            {
-                _palmSuppressedPointers.Add(batch.PointerId);
-                CancelNativePalmInk(batch.PointerId);
-                if (!CanStartPalmEraser() || HasCanceledFlag(facts))
-                    EndPalmEraser();
-                else if (_palmNativePointer == batch.PointerId
-                    && UpdatePalmContact(_palmContact, facts.ContactWidthDip, facts.ContactHeightDip, out var w, out var h, "Pointer"))
-                    MovePalmEraser(TranslatePoint(new Point(facts.XDip, facts.YDip), inkCanvas), w, h);
-                return true;
-            }
-            if (_palmSuppressedPointers.Contains(batch.PointerId)) return true;
             if (!canStart || !CanStartPalmEraser() || HasCanceledFlag(facts)) return false;
-            if (!_nativePalmContacts.TryGetValue(batch.PointerId, out var contact))
-                _nativePalmContacts[batch.PointerId] = contact = new PalmEraserContactTracker();
-            if (!UpdatePalmContact(contact, facts.ContactWidthDip, facts.ContactHeightDip, out var width, out var height, "Pointer"))
-                return false;
-            _nativePointerUpdatePump?.DiscardPointer(batch.PointerId);
-            _nativeInkController?.Cancel(batch.PointerId);
-            _wetInkWindowHost?.SignalWork();
-            _palmContact = contact;
+            var profile = CreatePalmEraserProfile("Pointer");
+            _palmEngine.Configure(profile);
+            Point position = TranslatePoint(new Point(facts.XDip, facts.YDip), inkCanvas);
+            _palmEngine.Submit(PalmContactSource.Software, unchecked((int)batch.PointerId),
+                new Rect((position.X - facts.ContactWidthDip / 2) * profile.DpiX,
+                    (position.Y - facts.ContactHeightDip / 2) * profile.DpiY,
+                    facts.ContactWidthDip * profile.DpiX, facts.ContactHeightDip * profile.DpiY));
+            if (!_palmEngine.TryGetEraser(unchecked((int)batch.PointerId), out var frame))
+            {
+                if (_palmNativePointer == batch.PointerId) EndPalmEraser();
+                return _palmSuppressedPointers.Contains(batch.PointerId);
+            }
+            CancelNativePalmInk(batch.PointerId);
             _palmNativePointer = batch.PointerId;
             _palmSuppressedPointers.Add(batch.PointerId);
-            BeginPalmEraser(TranslatePoint(new Point(facts.XDip, facts.YDip), inkCanvas), width, height);
+            position = new Point(frame.CenterPx.X / profile.DpiX, frame.CenterPx.Y / profile.DpiY);
+            if (!isPalmEraserActive) BeginPalmEraser(position, frame.WidthPx / profile.DpiX, frame.HeightPx / profile.DpiY);
+            else MovePalmEraser(position, frame.WidthPx / profile.DpiX, frame.HeightPx / profile.DpiY);
             return true;
         }
 
@@ -371,7 +486,7 @@ namespace Ink_Canvas
         private bool FinishNativePalm(NativePointerInputBatch batch)
         {
             if (batch.IsWpfFallback || batch.InputKind != NativeInkInputKind.Touch) return false;
-            _nativePalmContacts.Remove(batch.PointerId);
+            _palmEngine.Remove(PalmContactSource.Software, unchecked((int)batch.PointerId));
             bool suppressed = _palmSuppressedPointers.Remove(batch.PointerId);
             if (suppressed) CancelNativePalmInk(batch.PointerId);
             if (_palmNativePointer == batch.PointerId) EndPalmEraser();

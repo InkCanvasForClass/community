@@ -275,4 +275,32 @@
   <data name="Debug_MemoryBreakdownForceGC_Button" xml:space="preserve">
     <value>Force GC</value>
   </data>
+  <data name="PalmSource" xml:space="preserve"><value>Contact source</value></data>
+  <data name="PalmAuto" xml:space="preserve"><value>Auto (lock after observation)</value></data>
+  <data name="PalmRaw" xml:space="preserve"><value>Raw HID</value></data>
+  <data name="PalmSoftware" xml:space="preserve"><value>Software WPF / WinRT</value></data>
+  <data name="PalmDevice" xml:space="preserve"><value>HID device path (blank: lock first device)</value></data>
+  <data name="PalmHidScale" xml:space="preserve"><value>HID size scaling</value></data>
+  <data name="PalmStretch" xml:space="preserve"><value>Stretch to display</value></data>
+  <data name="PalmIsotropic" xml:space="preserve"><value>Isotropic (same area)</value></data>
+  <data name="PalmFollow" xml:space="preserve"><value>Follow contact area</value></data>
+  <data name="PalmLock" xml:space="preserve"><value>Lock palm classification and peak area</value></data>
+  <data name="PalmSmooth" xml:space="preserve"><value>Smooth pressure and size jitter</value></data>
+  <data name="PalmLimit" xml:space="preserve"><value>Limit relative to calibrated palm area</value></data>
+  <data name="PalmUnlimited" xml:space="preserve"><value>No limit</value></data>
+  <data name="PalmFloor" xml:space="preserve"><value>At least calibrated palm</value></data>
+  <data name="PalmCap" xml:space="preserve"><value>At most calibrated palm</value></data>
+  <data name="PalmPressure" xml:space="preserve"><value>Use measured palm pressure</value></data>
+  <data name="PalmPressureThreshold" xml:space="preserve"><value>Pressure gain threshold</value></data>
+  <data name="PalmPressureMaximum" xml:space="preserve"><value>Maximum pressure gain</value></data>
+  <data name="PalmArea" xml:space="preserve"><value>Classify by contact area</value></data>
+  <data name="PalmAreaThreshold" xml:space="preserve"><value>Area threshold (physical px²; blank: calibration midpoint)</value></data>
+  <data name="PalmAspect" xml:space="preserve"><value>Eraser aspect ratio</value></data>
+  <data name="PalmContactAspect" xml:space="preserve"><value>Contact dimensions</value></data>
+  <data name="PalmTraceAspect" xml:space="preserve"><value>Palm outline</value></data>
+  <data name="PalmCustomAspect" xml:space="preserve"><value>Custom</value></data>
+  <data name="PalmCustomRatio" xml:space="preserve"><value>Custom width / height</value></data>
+  <data name="PalmInvalidNumber" xml:space="preserve"><value>Enter finite numbers; area may be zero, aspect ratio must be positive.</value></data>
+  <data name="PalmPolicy" xml:space="preserve"><value>Area threshold {0:F1} physical px² · effective area multiplier {1:F2}</value></data>
+  <data name="PalmObserving" xml:space="preserve"><value>Observing contact sources. Keep contact for at least 300 milliseconds.</value></data>
 </root>

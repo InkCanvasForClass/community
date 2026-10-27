@@ -11,7 +11,7 @@ namespace Ink_Canvas.Ink
         public double DpiX { get; set; }
         public double DpiY { get; set; }
 
-        public bool IsValid() => (Source == "Pointer" || Source == "WPF")
+        public bool IsValid() => (Source == "Pointer" || Source == "WPF" || Source == "RawHID")
             && !string.IsNullOrWhiteSpace(Display) && PixelWidth > 0 && PixelHeight > 0
             && TouchCalibrationRecord.Positive(DpiX) && TouchCalibrationRecord.Positive(DpiY);
 
@@ -47,8 +47,7 @@ namespace Ink_Canvas.Ink
         {
             thresholdWidth = sizeFactor = 0;
             if (record?.IsValid() != true || !record.Environment.Matches(environment)) return false;
-            double fraction = sensitivity == 0 ? 0.65 : sensitivity == 1 ? 0.5 : 0.35;
-            thresholdWidth = Math.Sqrt(record.FingerArea + (record.PalmArea - record.FingerArea) * fraction);
+            thresholdWidth = Math.Sqrt((record.FingerArea + record.PalmArea) / 2);
             sizeFactor = Math.Sqrt(record.AreaMultiplier * record.SizeAdjustment);
             return true;
         }

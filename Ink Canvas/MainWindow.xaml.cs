@@ -1545,6 +1545,7 @@ namespace Ink_Canvas
             }
             // 加载设置
             LoadSettings(true);
+            InitializePalmRawInput();
             LogHelper.WriteLogToFile("[Startup] 设置加载完成", LogHelper.LogType.Info);
             // 启动性能监测（如果已启用）。最快模式下延迟到首帧之后。
             // 实时笔迹详细调试日志独立于性能监测，由 Debug 页开关控制，默认关闭。
@@ -1993,6 +1994,9 @@ namespace Ink_Canvas
         /// <param name="e">关闭事件的参数（未使用）。</param>
         private void Window_Closed(object sender, EventArgs e)
         {
+            _palmRawSubscription?.Dispose();
+            _palmRawSubscription = null;
+            _palmRawMailbox?.Dispose();
             CancelStartupFoldVerification();
             _floatingBarReposition?.Dispose();
             ++_floatingBarPositionVersion;

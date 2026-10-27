@@ -276,4 +276,32 @@
   <data name="Debug_MemoryBreakdownForceGC_Button" xml:space="preserve">
     <value>强制 GC</value>
   </data>
+  <data name="PalmSource" xml:space="preserve"><value>接触来源</value></data>
+  <data name="PalmAuto" xml:space="preserve"><value>自适应（稳定后锁定）</value></data>
+  <data name="PalmRaw" xml:space="preserve"><value>原始 HID</value></data>
+  <data name="PalmSoftware" xml:space="preserve"><value>软件 WPF / WinRT</value></data>
+  <data name="PalmDevice" xml:space="preserve"><value>HID 设备路径（留空锁定第一台）</value></data>
+  <data name="PalmHidScale" xml:space="preserve"><value>HID 尺寸换算</value></data>
+  <data name="PalmStretch" xml:space="preserve"><value>按屏幕宽高拉伸</value></data>
+  <data name="PalmIsotropic" xml:space="preserve"><value>等比例（面积不变）</value></data>
+  <data name="PalmFollow" xml:space="preserve"><value>擦除大小跟随接触面积</value></data>
+  <data name="PalmLock" xml:space="preserve"><value>锁定本次手掌判定及最大面积</value></data>
+  <data name="PalmSmooth" xml:space="preserve"><value>平滑压力及尺寸抖动</value></data>
+  <data name="PalmLimit" xml:space="preserve"><value>相对标定手掌面积的限制</value></data>
+  <data name="PalmUnlimited" xml:space="preserve"><value>不限</value></data>
+  <data name="PalmFloor" xml:space="preserve"><value>不小于标定手掌</value></data>
+  <data name="PalmCap" xml:space="preserve"><value>不大于标定手掌</value></data>
+  <data name="PalmPressure" xml:space="preserve"><value>手掌擦使用实测压力</value></data>
+  <data name="PalmPressureThreshold" xml:space="preserve"><value>压力放大起点</value></data>
+  <data name="PalmPressureMaximum" xml:space="preserve"><value>最大压力倍率</value></data>
+  <data name="PalmArea" xml:space="preserve"><value>按接触面积识别手掌</value></data>
+  <data name="PalmAreaThreshold" xml:space="preserve"><value>面积阈值（物理像素²；留空取标定中值）</value></data>
+  <data name="PalmAspect" xml:space="preserve"><value>擦除区长宽比来源</value></data>
+  <data name="PalmContactAspect" xml:space="preserve"><value>跟随接触框</value></data>
+  <data name="PalmTraceAspect" xml:space="preserve"><value>手掌描摹</value></data>
+  <data name="PalmCustomAspect" xml:space="preserve"><value>自定义</value></data>
+  <data name="PalmCustomRatio" xml:space="preserve"><value>自定义宽 / 高</value></data>
+  <data name="PalmInvalidNumber" xml:space="preserve"><value>请输入有效数字；面积可为 0，长宽比必须大于 0。</value></data>
+  <data name="PalmPolicy" xml:space="preserve"><value>面积阈值 {0:F1} 物理像素² · 生效面积倍率 {1:F2}</value></data>
+  <data name="PalmObserving" xml:space="preserve"><value>正在观察接触来源，请保持按压至少 300 毫秒。</value></data>
 </root>

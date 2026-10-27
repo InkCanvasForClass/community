@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Ink.WinRT;
+using Ink_Canvas.Ink;
 using InkCanvasPPTAgent.Contracts;
 using Windows.Devices.Input;
 using Windows.UI.Core;
@@ -34,6 +35,7 @@ internal static class Program
             CoalescedUiRegression();
             AutoFontLifetimeRegression();
             PalmRegression();
+            PalmEngineRegression.Run(Check);
             CoordinateRegression();
             InputRegionAndRenderFenceRegression();
             SmoothingRegression();
@@ -186,8 +188,8 @@ internal static class Program
             null, null, null, null, null, null, _ => gestures++, null, null,
             _ => inkEnded++, () => { }, events.Add)
         {
-            PalmEraserEnabled = true, PalmEraserThresholdDip = 20, PalmEraserSizeFactor = 1,
-            PalmEraserEllipse = false, TwoFingerGestureAllowed = true
+            PalmEraserEnabled = true, TwoFingerGestureAllowed = true,
+            PalmProfile = new() { Options = new() { AreaThresholdPx2 = 400, LockSize = true, MultiTouch = false } }
         };
         PointerEventArgs Contact(uint id, double width, double height, double x = 0)
         {

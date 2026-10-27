@@ -241,6 +241,9 @@ namespace Ink_Canvas
 
         private void ShutdownWinRTInkPipeline()
         {
+            _palmRawMailbox?.Dispose();
+            _palmRawMailbox = null;
+            _palmRawGate = null;
             if (!_winRTInkStarted && _winRTInkHost == null)
                 return;
 
@@ -1107,10 +1110,7 @@ namespace Ink_Canvas
                 ? Settings.Gesture.IsEnableMultiTouchMode || isInMultiTouchMode
                 : Settings.Gesture.IsEnableMultiTouchModeBoard || isInMultiTouchMode;
             _winRTInkInputGate.TwoFingerGestureAllowed = ResolveTwoFingerGestureAllowed();
-            ResolvePalmEraserMetrics("Pointer", out double threshold, out double scale);
-            _winRTInkInputGate.PalmEraserThresholdDip = threshold;
-            _winRTInkInputGate.PalmEraserSizeFactor = scale;
-            _winRTInkInputGate.PalmEraserEllipse = isEraserCircleShape;
+            _winRTInkInputGate.PalmProfile = CreatePalmEraserProfile("Pointer");
             _winRTInkInputGate.PalmEraserEnabled = CanStartPalmEraser();
         }
 

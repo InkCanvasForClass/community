@@ -89,15 +89,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
 
         private static readonly System.Threading.SemaphoreSlim CalibrationGate = new(1, 1);
 
-        public static async System.Threading.Tasks.Task<bool> TrySaveCalibrationAsync(Ink.TouchCalibrationRecord record, int? nibWidth = null)
+        public static async System.Threading.Tasks.Task<bool> TrySaveCalibrationAsync(Ink.TouchCalibrationRecord record, int? nibWidth = null,
+            Ink.PalmEraserOptions palmOptions = null)
         {
             if (record != null && !record.IsValid()) return false;
             if (!await CalibrationGate.WaitAsync(0)) return false;
             var previous = Settings.Advanced.TouchCalibration;
             var previousNib = Settings.Advanced.NibModeBoundsWidth;
+            var previousOptions = Settings.Advanced.PalmEraser;
             try
             {
                 Settings.Advanced.TouchCalibration = record;
+                if (palmOptions != null) Settings.Advanced.PalmEraser = palmOptions.Sanitize();
                 if (nibWidth.HasValue) Settings.Advanced.NibModeBoundsWidth = Math.Clamp(nibWidth.Value, 1, 50);
                 var text = JsonConvert.SerializeObject(Settings, Formatting.Indented);
                 if (await AtomicFileWriter.WriteLatestAsync(Path.Combine(App.RootPath, SettingsFileName), text))
@@ -108,6 +111,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                     return true;
                 }
                 Settings.Advanced.TouchCalibration = previous;
+                Settings.Advanced.PalmEraser = previousOptions;
                 Settings.Advanced.NibModeBoundsWidth = previousNib;
                 SaveSettingsToFile();
                 return false;
@@ -115,6 +119,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             catch (Exception ex)
             {
                 Settings.Advanced.TouchCalibration = previous;
+                Settings.Advanced.PalmEraser = previousOptions;
                 Settings.Advanced.NibModeBoundsWidth = previousNib;
                 SaveSettingsToFile();
                 LogHelper.WriteLogToFile($"[Calibration save] {ex}", LogHelper.LogType.Error);

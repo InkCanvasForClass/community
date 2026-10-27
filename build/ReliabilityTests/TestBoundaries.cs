@@ -37,7 +37,7 @@ namespace Windows.UI.Core
         public Windows.Devices.Input.PointerDevice PointerDevice { get; set; }
         public PointerProperties Properties { get; set; } = new();
     }
-    public sealed class PointerProperties { public ContactRect ContactRect { get; set; } }
+    public sealed class PointerProperties { public ContactRect ContactRect { get; set; } public float Pressure { get; set; } = 0.5f; }
     public struct ContactRect { public double Width, Height; }
 }
 namespace Windows.UI.Input.Inking { public sealed class InkStrokeInput { } }

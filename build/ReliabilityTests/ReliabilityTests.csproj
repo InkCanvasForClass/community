@@ -9,7 +9,10 @@
   <ItemGroup>
     <Compile Include="../../Ink Canvas/Helpers/AutoFontSizeHelper.cs" Link="Production/AutoFontSizeHelper.cs" />
     <Compile Include="../../Ink Canvas/Helpers/DispatcherCoalescedAction.cs" Link="Production/DispatcherCoalescedAction.cs" />
-    <Compile Include="../../Ink Canvas/Ink/PalmEraserContactTracker.cs" Link="Production/PalmEraserContactTracker.cs" />
+    <Compile Include="../../Ink Canvas/Ink/PalmEraserEngine.cs" Link="Production/PalmEraserEngine.cs" />
+    <Compile Include="../../Ink Canvas/Ink/PalmEraserProfiles.cs" Link="Production/PalmEraserProfiles.cs" />
+    <Compile Include="../../Ink Canvas/Ink/PalmInputMailbox.cs" Link="Production/PalmInputMailbox.cs" />
+    <Compile Include="../../Ink Canvas/Ink/TouchCalibrationRecord.cs" Link="Production/TouchCalibrationRecord.cs" />
     <Compile Include="../../Ink Canvas/Ink/WinRT/WinRTInkPalmDispatcher.cs" Link="Production/WinRTInkPalmDispatcher.cs" />
     <Compile Include="../../Ink Canvas/Helpers/LegacyInkXmlCodec.cs" Link="Production/LegacyInkXmlCodec.cs" />
     <Compile Include="../../Ink Canvas/Helpers/StreamDeadline.cs" Link="Production/StreamDeadline.cs" />

@@ -15,7 +15,7 @@ namespace Ink_Canvas.Ink.WinRT
     internal enum WinRTInkPalmPhase { Begin, Move, End }
 
     internal readonly record struct WinRTInkPalmEvent(uint PointerId, WinRTInkPalmPhase Phase,
-        Point Position, double WidthDip, double HeightDip);
+        Point Position, double WidthDip, double HeightDip, bool BreakPath = false);
     /// <summary>
     /// A pair of physical-pixel touch positions captured on the ink thread. The UI thread uses
     /// the previous/current pair to apply one atomic two-finger gesture increment.
@@ -102,9 +102,7 @@ namespace Ink_Canvas.Ink.WinRT
         private volatile bool _multiTouchWriting;
         private volatile bool _twoFingerGestureAllowed;
         private volatile bool _palmEraserEnabled;
-        private long _palmEraserThresholdDipBits;
-        private long _palmEraserSizeFactorBits = BitConverter.DoubleToInt64Bits(1);
-        private volatile bool _palmEraserEllipse = true;
+        private PalmEraserProfile _palmProfile = new();
         private int _cancelRequested;
 
         // Ink-thread only.
@@ -117,10 +115,12 @@ namespace Ink_Canvas.Ink.WinRT
         private readonly HashSet<uint> _inkingPointers = new HashSet<uint>();
         private readonly Dictionary<uint, long> _lastInkMoveForwardTicks = new Dictionary<uint, long>();
         private uint _mouseForwardingPointerId;
-        private readonly Dictionary<uint, PalmEraserContactTracker> _palmContacts = new();
+        private readonly PalmEraserEngine _palmEngine = new();
         private readonly HashSet<uint> _palmSuppressedPointers = new();
+        private readonly HashSet<uint> _palmCanceledPointers = new();
         private uint? _palmPointer;
         private WinRTInkPalmEvent _lastPalmSample;
+        private int _palmRevision;
         private bool _inputConfirmed;
         private uint _gestureFirstPointerId;
         private uint _gestureSecondPointerId;
@@ -183,17 +183,7 @@ namespace Ink_Canvas.Ink.WinRT
         public bool MultiTouchWriting { set => _multiTouchWriting = value; }
         public bool TwoFingerGestureAllowed { set => _twoFingerGestureAllowed = value; }
         public bool PalmEraserEnabled { set => _palmEraserEnabled = value; }
-        public double PalmEraserThresholdDip
-        {
-            set => _palmEraserThresholdDipBits = BitConverter.DoubleToInt64Bits(value);
-            get => BitConverter.Int64BitsToDouble(
-                Interlocked.Read(ref _palmEraserThresholdDipBits));
-        }
-        public double PalmEraserSizeFactor
-        {
-            set => Interlocked.Exchange(ref _palmEraserSizeFactorBits, BitConverter.DoubleToInt64Bits(value));
-        }
-        public bool PalmEraserEllipse { set => _palmEraserEllipse = value; }
+        internal PalmEraserProfile PalmProfile { set => Volatile.Write(ref _palmProfile, value); }
         public bool IsGestureInProgress => _isGestureInProgress;
 
         public void CancelActiveStrokes()
@@ -205,6 +195,8 @@ namespace Ink_Canvas.Ink.WinRT
         private void ApplyPendingCancellation()
         {
             if (Interlocked.Exchange(ref _cancelRequested, 0) == 0) return;
+            _palmEngine.Clear();
+            foreach (var id in _activeTouchPointers) _palmCanceledPointers.Add(id);
             foreach (var pointerId in _inkingPointers)
                 _canceledStrokePointers.Add(pointerId);
             if (_palmPointer is uint palmId)
@@ -226,7 +218,8 @@ namespace Ink_Canvas.Ink.WinRT
             // cancellation marker suppress the new stroke.
             _canceledStrokePointers.Remove(pointerId);
             _palmSuppressedPointers.Remove(pointerId);
-            _palmContacts.Remove(pointerId);
+            _palmCanceledPointers.Remove(pointerId);
+            _palmEngine.Remove(PalmContactSource.Software, unchecked((int)pointerId));
 
             // Resolve chrome before touching the touch-contact/gesture state. If the first
             // contact lands on a toolbar and the second contact lands on the canvas, the
@@ -414,7 +407,7 @@ namespace Ink_Canvas.Ink.WinRT
             var position = GetPosition(e);
             var device = e.CurrentPoint.PointerDevice.PointerDeviceType;
 
-            _palmContacts.Remove(pointerId);
+            _palmEngine.Remove(PalmContactSource.Software, unchecked((int)pointerId));
             if (_palmSuppressedPointers.Remove(pointerId))
             {
                 e.Handled = true;
@@ -422,7 +415,8 @@ namespace Ink_Canvas.Ink.WinRT
                 if (_palmPointer == pointerId)
                 {
                     _palmPointer = null;
-                    EmitPalm(new(pointerId, WinRTInkPalmPhase.End, position, _lastPalmSample.WidthDip, _lastPalmSample.HeightDip));
+                    // Lost/exiting input must not draw an additional erase segment.
+                    EmitPalm(new(pointerId, WinRTInkPalmPhase.End, default, 0, 0));
                 }
                 _inkingPointers.Remove(pointerId);
                 _lastInkMoveForwardTicks.Remove(pointerId);
@@ -501,30 +495,47 @@ namespace Ink_Canvas.Ink.WinRT
         private bool TryRoutePalm(PointerEventArgs e, Point position)
         {
             uint id = e.CurrentPoint.PointerId;
-            if (_palmSuppressedPointers.Contains(id) && _palmPointer != id)
-            {
-                e.Handled = true;
-                return true;
-            }
-            if (_palmPointer.HasValue && _palmPointer != id)
-            {
-                _palmSuppressedPointers.Add(id);
-                _canceledStrokePointers.Add(id);
-                e.Handled = true;
-                return true;
-            }
             if (!_palmEraserEnabled || _onPalmPointer == null) return false;
-            if (!_palmContacts.TryGetValue(id, out var contact))
-                _palmContacts[id] = contact = new PalmEraserContactTracker();
+            if (_palmCanceledPointers.Contains(id)) return false;
+            var profile = Volatile.Read(ref _palmProfile);
+            _palmEngine.Configure(profile);
             var rect = e.CurrentPoint.Properties.ContactRect;
-            // ContactRect is in DIPs; the position is converted separately by the UI bridge.
-            if (!contact.Update(rect.Width, rect.Height, PalmEraserThresholdDip,
-                BitConverter.Int64BitsToDouble(Interlocked.Read(ref _palmEraserSizeFactorBits)),
-                _palmEraserEllipse, out double width, out double height)) return false;
+            double x = profile.DpiX, y = profile.DpiY;
+            if (_palmEngine.ActiveSource != PalmContactSource.RawHid)
+                _palmEngine.NotePressure(e.CurrentPoint.Properties.Pressure);
+            _palmEngine.Submit(PalmContactSource.Software, unchecked((int)id),
+                new Rect(position.X - rect.Width * x / 2, position.Y - rect.Height * y / 2,
+                    rect.Width * x, rect.Height * y));
+            bool erase = _palmEngine.ActiveSource == PalmContactSource.RawHid
+                ? _palmEngine.TryGetNearestEraser(position, out var frame)
+                : _palmEngine.TryGetEraser(unchecked((int)id), out frame);
+            if (!erase)
+            {
+                if (_palmPointer == id)
+                {
+                    _palmPointer = null;
+                    EmitPalm(new(id, WinRTInkPalmPhase.End, default, 0, 0));
+                }
+                if (_palmPointer.HasValue || _palmSuppressedPointers.Contains(id))
+                {
+                    _palmSuppressedPointers.Add(id);
+                    _canceledStrokePointers.Add(id);
+                    e.Handled = true;
+                    return true;
+                }
+                return false;
+            }
+            uint owner = _palmEngine.ActiveSource == PalmContactSource.RawHid
+                ? _palmPointer ?? id : unchecked((uint)frame.Id);
+            if (_palmPointer.HasValue && _palmPointer != owner)
+            {
+                EmitPalm(new(_palmPointer.Value, WinRTInkPalmPhase.End, default, 0, 0));
+                _palmPointer = null;
+            }
             bool begin = !_palmPointer.HasValue;
             if (begin)
             {
-                _palmPointer = id;
+                _palmPointer = owner;
                 foreach (uint touchId in _activeTouchPointers)
                 {
                     _palmSuppressedPointers.Add(touchId);
@@ -533,9 +544,52 @@ namespace Ink_Canvas.Ink.WinRT
                 if (_isGestureInProgress) EndTwoFingerGesture();
                 _gesturePointers.Clear();
             }
+            _palmSuppressedPointers.Add(id);
+            _canceledStrokePointers.Add(id);
             e.Handled = true;
-            EmitPalm(new(id, begin ? WinRTInkPalmPhase.Begin : WinRTInkPalmPhase.Move, position, width, height));
+            bool breakPath = frame.Revision != _palmRevision;
+            _palmRevision = frame.Revision;
+            EmitPalm(new(owner, begin ? WinRTInkPalmPhase.Begin : WinRTInkPalmPhase.Move,
+                frame.CenterPx, frame.WidthPx / x, frame.HeightPx / y, breakPath));
             return true;
+        }
+
+        // Called only by the bounded mailbox on the independent ink thread.
+        internal void SubmitRawPalm(int id, Rect pixels, double? pressure, bool released, string device)
+        {
+            ApplyPendingCancellation();
+            _palmEngine.Configure(Volatile.Read(ref _palmProfile));
+            if (!_palmEngine.AcceptDevice(device)) return;
+            if (released) _palmEngine.Remove(PalmContactSource.RawHid, id);
+            else
+            {
+                _palmEngine.NotePressure(pressure);
+                _palmEngine.Submit(PalmContactSource.RawHid, id, pixels, false, device);
+            }
+            if (_palmEngine.ActiveSource != PalmContactSource.RawHid) return;
+            if (!_palmEraserEnabled || !_canvasInputEnabled || _pageFrozen || _activeTouchPointers.Count == 0
+                || _palmCanceledPointers.Count > 0) return;
+            if (!_palmEngine.TryGetNearestEraser(_lastPalmSample.Position, out var frame))
+            {
+                if (_palmPointer is uint owner)
+                {
+                    _palmPointer = null;
+                    EmitPalm(new(owner, WinRTInkPalmPhase.End, default, 0, 0));
+                }
+                return;
+            }
+            uint pointer = _palmPointer ?? _touchPointerOrder[0];
+            bool begin = !_palmPointer.HasValue;
+            _palmPointer = pointer;
+            foreach (uint touch in _activeTouchPointers)
+            { _palmSuppressedPointers.Add(touch); _canceledStrokePointers.Add(touch); }
+            if (_isGestureInProgress) EndTwoFingerGesture();
+            _gesturePointers.Clear();
+            var profile = Volatile.Read(ref _palmProfile);
+            bool breakPath = frame.Revision != _palmRevision;
+            _palmRevision = frame.Revision;
+            EmitPalm(new(pointer, begin ? WinRTInkPalmPhase.Begin : WinRTInkPalmPhase.Move,
+                frame.CenterPx, frame.WidthPx / profile.DpiX, frame.HeightPx / profile.DpiY, breakPath));
         }
 
         private void EmitPalm(WinRTInkPalmEvent input)
@@ -550,11 +604,13 @@ namespace Ink_Canvas.Ink.WinRT
             _activeTouchPointers.Add(pointerId);
             _touchPoints[pointerId] = position;
             _touchPointerOrder.Remove(pointerId);
+            _palmCanceledPointers.Remove(pointerId);
             _touchPointerOrder.Add(pointerId);
         }
 
         private void RemoveTouch(uint pointerId)
         {
+            _palmCanceledPointers.Remove(pointerId);
             _activeTouchPointers.Remove(pointerId);
             _touchPoints.Remove(pointerId);
             _touchPointerOrder.Remove(pointerId);
