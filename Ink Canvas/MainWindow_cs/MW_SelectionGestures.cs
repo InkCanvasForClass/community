@@ -1475,6 +1475,15 @@ namespace Ink_Canvas
         /// 仅隐藏墨迹选中的原生把手/选择框，保持 AdornerLayer 本身可见，
         /// 避免破坏套索选择（Lasso Selection）的橡皮筋交互。
         /// </summary>
+        /// <remarks>
+        /// 重要：只能用 Opacity=0 隐藏，绝不能设置 Visibility=Collapsed 或 IsHitTestVisible=false。
+        /// 实测（.NET 10 WPF，最小复现注入鼠标套索验证）：
+        ///   - Visibility=Collapsed 或 IsHitTestVisible=false 会让 InkCanvas 的套索状态机
+        ///     完全无法启动（StartLasso 不执行）——拖动无虚线反馈、松手不触发 SelectionChanged、
+        ///     GetSelectedStrokes 恒为空，触屏与鼠标同时失效；
+        ///   - 仅 Opacity=0 时套索功能完整（LassoHelper 的点串视觉挂在 InkPresenter 上，
+        ///     不经过该 Adorner），原生选中框/把手不可见，由 ImageSelectionOverlay 接管。
+        /// </remarks>
         private void SuppressNativeInkCanvasSelectionAdorners()
         {
             if (inkCanvas == null) return;
@@ -1513,9 +1522,8 @@ namespace Ink_Canvas
                             var typeName = adorner.GetType().Name;
                             if (typeName.Contains("SelectionAdorner") || typeName.Contains("InkCanvasSelection"))
                             {
-                                adorner.Visibility = Visibility.Collapsed;
+                                // 仅用透明度隐藏；Collapsed/IsHitTestVisible=false 会杀死套索（见方法注释）
                                 adorner.Opacity = 0;
-                                adorner.IsHitTestVisible = false;
                             }
                         }
                     }
@@ -1525,9 +1533,7 @@ namespace Ink_Canvas
                     var typeName = adorner.GetType().Name;
                     if (typeName.Contains("SelectionAdorner") || typeName.Contains("InkCanvasSelection"))
                     {
-                        adorner.Visibility = Visibility.Collapsed;
                         adorner.Opacity = 0;
-                        adorner.IsHitTestVisible = false;
                     }
                 }
                 SuppressVisualTreeAdorners(child);
