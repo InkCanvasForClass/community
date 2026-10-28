@@ -15,14 +15,16 @@ internal static class FloatingWindowSafetyRegression
             check(!FloatingWindowSafetyPolicy.IsSafeSeewoTarget(floatingStyle, 0, "", width + 10, height + 10, dpi, 7680, 4320),
                 "Unknown floating size accepted by aspect ratio");
         }
-        foreach (uint extra in new uint[] { 0x40000000, 0x00C00000, 0x00040000, 0x01000000, 0x20000000 })
+        foreach (uint extra in new uint[] { 0x40000000, 0x00C00000, 0x00040000, 0x01000000, 0x20000000, 0x08000000 })
             check(!FloatingWindowSafetyPolicy.IsSafeSeewoTarget(floatingStyle | extra, 0, "", 550, 200, 96, 1920, 1080),
                 "Child, captioned, resizable, maximized or minimized teaching window accepted");
         check(!FloatingWindowSafetyPolicy.IsSafeSeewoTarget(floatingStyle, 0x00040000, "", 550, 200, 96, 1920, 1080),
             "Taskbar application window accepted");
-        foreach (string title in new[] { "希沃白板", "Note", "课程 - 希沃白板5", "设置", "Login" })
+        foreach (string title in new[] { "希沃白板", "Note", "课程 - 希沃白板5", "设置", "Login", "手机传图", "图片上传", "扫码上传" })
             check(!FloatingWindowSafetyPolicy.IsSafeSeewoTarget(floatingStyle, 0, title, 550, 200, 96, 1920, 1080),
                 "Titled teaching/dialog window accepted");
+        check(!FloatingWindowSafetyPolicy.IsSafeSeewoTarget(floatingStyle, 1, "", 550, 200, 96, 1920, 1080),
+            "Untitled modal-frame upload dialog accepted");
         foreach (var monitor in new[] { (1920, 1080), (3840, 2160), (550, 200), (1100, 400) })
             check(!FloatingWindowSafetyPolicy.IsSafeSeewoTarget(floatingStyle, 0, "", monitor.Item1, monitor.Item2, 192,
                 monitor.Item1, monitor.Item2), "Borderless full-screen window accepted");

@@ -9,9 +9,10 @@ namespace Ink_Canvas.Helpers
             int width, int height, uint dpi, int monitorWidth, int monitorHeight)
         {
             const uint Child = 0x40000000, Caption = 0x00C00000, ThickFrame = 0x00040000;
-            const uint Minimized = 0x20000000, Maximized = 0x01000000, AppWindow = 0x00040000;
-            if ((style & (Child | Caption | ThickFrame | Minimized | Maximized)) != 0
-                || (extendedStyle & AppWindow) != 0 || !string.IsNullOrWhiteSpace(title)) return false;
+            const uint Minimized = 0x20000000, Maximized = 0x01000000, Disabled = 0x08000000;
+            const uint AppWindow = 0x00040000, DialogModalFrame = 0x00000001;
+            if ((style & (Child | Caption | ThickFrame | Minimized | Maximized | Disabled)) != 0
+                || (extendedStyle & (AppWindow | DialogModalFrame)) != 0 || !string.IsNullOrWhiteSpace(title)) return false;
             if (width <= 0 || height <= 0 || monitorWidth <= 0 || monitorHeight <= 0 || dpi < 96 || dpi > 768)
                 return false;
             // Never treat a full-screen/near-full-screen teaching surface as a popup,

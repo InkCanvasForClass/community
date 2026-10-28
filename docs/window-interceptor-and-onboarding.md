@@ -15,6 +15,21 @@ provide enough evidence to distinguish a floating control from a teaching surfac
 New versions with different floating-window signatures may also be skipped until
 their exact characteristics are verified.
 
+Upload/QR dialogs are also protected by their modal state: disabled windows,
+`WS_EX_DLGMODALFRAME`, and windows with any disabled HWND owner in their owner chain
+are excluded. This covers an untitled modal upload dialog even when its size and
+style exactly match the floating bar. An ordinary owned floating bar remains eligible
+after the modal operation finishes. These checks identify modal behavior rather than
+guessing a localized dialog title. A modeless, untitled dialog identical in process,
+class, style and dimensions still requires its actual HWND characteristics to tell
+it apart; these tests do not establish a blanket guarantee for every Seewo version.
+Local inspection of the installed Seewo 5.2.4.11441 components identified a
+full-screen photo-display path and a QR viewer that follows its owner's bounds.
+That static inspection is not a live capture of a phone upload, its QR dialog or
+all possible minimized/display modes. The upload-specific regressions deliberately
+use an untitled 550 × 200 fixture, so protection is tested without assuming a
+particular upload dialog title or dimensions.
+
 Candidates are checked again immediately before interception. If a tracked EasiNote
 HWND subsequently becomes a teaching window, the next scan restores it. PID, thread
 and class identity are checked before restoring a tracked HWND, so stale handles are

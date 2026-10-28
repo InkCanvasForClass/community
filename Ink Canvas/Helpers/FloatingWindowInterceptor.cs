@@ -1342,6 +1342,16 @@ namespace Ink_Canvas.Helpers
 
         private bool IsSafeSeewoTarget(HWND hwnd)
         {
+            // ShowDialog commonly disables its owner while leaving the dialog itself
+            // enabled. Protect those windows even if an untitled upload/QR dialog
+            // happens to have exactly the same dimensions/style as the floating bar.
+            var owner = PInvoke.GetWindow(hwnd, GET_WINDOW_CMD.GW_OWNER);
+            int depth = 0;
+            while (owner != IntPtr.Zero)
+            {
+                if (++depth > 16 || !PInvoke.IsWindow(owner) || !PInvoke.IsWindowEnabled(owner)) return false;
+                owner = PInvoke.GetWindow(owner, GET_WINDOW_CMD.GW_OWNER);
+            }
             if (!TryGetWindowBounds(hwnd, out var bounds)) return false;
             var monitor = System.Windows.Forms.Screen.FromHandle((IntPtr)hwnd).Bounds;
             return FloatingWindowSafetyPolicy.IsSafeSeewoTarget(

@@ -36,6 +36,17 @@ internal static class FloatingWindowNativeRegression
         check(!Matches(appWindow), "Actual application/taskbar HWND matched the floating rule");
         using var child = Make("", FloatingStyle | 0x40000000, 0, popup.Handle);
         check(!Matches(child), "Actual child HWND matched the floating rule");
+        using var modalFrame = Make("", FloatingStyle, ToolNoActivate | 1);
+        check(!Matches(modalFrame), "Untitled modal-frame upload dialog matched the floating rule");
+        using var ownerWindow = Make("授课窗口", FloatingStyle, ToolNoActivate);
+        using var uploadDialog = Make("", FloatingStyle, ToolNoActivate, ownerWindow.Handle);
+        check(Matches(uploadDialog), "Ownership alone should not reject an otherwise known floating bar");
+        EnableWindow(ownerWindow.Handle, false);
+        check(!Matches(uploadDialog), "Untitled upload dialog with an actual disabled owner matched the floating rule");
+        using var nestedDialog = Make("", FloatingStyle, ToolNoActivate, uploadDialog.Handle);
+        check(!Matches(nestedDialog), "Nested upload dialog bypassed the disabled-owner protection");
+        EnableWindow(ownerWindow.Handle, true);
+        check(Matches(uploadDialog), "Completed modal operation left the floating bar permanently excluded");
 
         // Our own cloaked fixture process deliberately stops pumping its window
         // thread. Hide/restore must return without waiting for that thread to recover.
@@ -138,6 +149,7 @@ internal static class FloatingWindowNativeRegression
     }
 
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern bool SetWindowText(IntPtr hwnd, string text);
+    [DllImport("user32.dll")] private static extern bool EnableWindow(IntPtr hwnd, bool enable);
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern int GetClassName(IntPtr hwnd, System.Text.StringBuilder text, int count);
     [DllImport("user32.dll", EntryPoint = "GetWindowLongW")] private static extern uint GetWindowLong(IntPtr hwnd, int index);
     [DllImport("user32.dll", EntryPoint = "SetWindowLongW")] private static extern uint SetWindowLong(IntPtr hwnd, int index, uint value);

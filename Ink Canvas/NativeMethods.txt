@@ -23,6 +23,7 @@ EnumWindows
 EnumChildWindows
 GetWindowThreadProcessId
 IsWindowVisible
+IsWindowEnabled
 IsWindow
 GetWindowText
 GetClassName
