@@ -1,4 +1,5 @@
 using Ink_Canvas.WorkflowAutomation.Abstractions;
+using System;
 using System.Timers;
 
 namespace Ink_Canvas.WorkflowAutomation.Triggers
@@ -30,7 +31,9 @@ namespace Ink_Canvas.WorkflowAutomation.Triggers
 
         public override void Loaded()
         {
-            _timer = new Timer(Settings.IntervalSeconds * 1000);
+            var interval = Settings.IntervalSeconds;
+            if (!double.IsFinite(interval) || interval < 0.1) interval = 0.1;
+            _timer = new Timer(Math.Min(interval, 86400) * 1000);
             _timer.Elapsed += OnTimerElapsed;
             _timer.AutoReset = !Settings.TriggerOnce;
             _timer.Start();

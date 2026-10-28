@@ -12,6 +12,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         public static Settings Settings { get; set; } = new Settings();
 
         public static string SettingsFileName { get; } = Path.Combine("Configs", "Settings.json");
+        private static DispatcherCoalescedAction _pendingSave;
+        private static int _initialSavePosted;
 
         public static bool ReadEnableWindowChromeRendering()
         {
@@ -31,94 +33,115 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             }
         }
 
-        // 全局 SaveSettingsToFile 串行化：419 个调用点跨 UI 线程、公告轮询线程、插件线程，
-        // 互相 File.WriteAllText 同路径写时部分抛 IOException 被 catch 吞掉只记日志，用户感知不到
-        // 设置已丢失。先到先写、后到排队。
-        private static readonly object _saveGate = new object();
-
-        public static void SaveSettingsToFile() => TrySaveSettingsToFile();
-
-        public static bool TrySaveSettingsToFile()
+        public static void SaveSettingsToFile()
         {
-            lock (_saveGate)
+            var dispatcher = System.Windows.Application.Current?.Dispatcher;
+            if (dispatcher == null || dispatcher.HasShutdownStarted)
             {
-                try
-                {
-                    var text = JsonConvert.SerializeObject(Settings, Formatting.Indented);
-                    string configsDir = Path.Combine(App.RootPath, "Configs");
-                    if (!Directory.Exists(configsDir))
+                SaveSettingsSnapshot();
+                return;
+            }
+            if (!dispatcher.CheckAccess())
+            {
+                // Reuse the existing scheduler once initialized; no callback per slider tick.
+                var pending = System.Threading.Volatile.Read(ref _pendingSave);
+                if (pending != null) pending.Request();
+                else if (System.Threading.Interlocked.Exchange(ref _initialSavePosted, 1) == 0)
+                    _ = dispatcher.BeginInvoke(new Action(() =>
                     {
-                        ProcessProtectionManager.WithWriteAccess(configsDir, () => Directory.CreateDirectory(configsDir));
-                    }
+                        System.Threading.Interlocked.Exchange(ref _initialSavePosted, 0);
+                        SaveSettingsToFile();
+                    }));
+                return;
+            }
+            _pendingSave ??= new DispatcherCoalescedAction(dispatcher, TimeSpan.FromMilliseconds(150), SaveSettingsSnapshot);
+            _pendingSave.Request();
+        }
 
-                    var path = Path.Combine(App.RootPath, SettingsFileName);
-                    // 临时文件 + File.Replace 原子替换，避免断电/进程被杀导致 Settings.json 半截。
-                    // 同目录移动替换是原子操作（Windows 同卷 NTFS 保证）。
-                    var tmpPath = path + ".tmp";
-                    try
-                    {
-                        ProcessProtectionManager.WithWriteAccess(tmpPath, () => File.WriteAllText(tmpPath, text));
-                        if (File.Exists(path))
-                        {
-                            ProcessProtectionManager.WithWriteAccess(path, () => File.Replace(tmpPath, path, null));
-                        }
-                        else
-                        {
-                            ProcessProtectionManager.WithWriteAccess(path, () => File.Move(tmpPath, path));
-                        }
-                    }
-                    catch
-                    {
-                        try { if (File.Exists(tmpPath)) File.Delete(tmpPath); }
-                        catch (Exception ex)
-                        {
-                            LogHelper.WriteLogToFile(
-                                $"[Settings] 保存设置失败后清理临时文件 {tmpPath} 失败: {ex.Message}",
-                                LogHelper.LogType.Info);
-                        }
-                        throw; // Keep the last complete settings file if atomic replacement fails.
-                    }
-
-                    App.UpdateCachedSettingsJson(text);
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    // 设置保存失败不能静默：用户感知不到 = 下次启动设置丢失
-                    try
-                    {
-                        LogHelper.WriteLogToFile($"保存 Settings.json 失败: {ex.Message}", LogHelper.LogType.Error);
-                    }
-                    catch
-                    {
-                        System.Diagnostics.Debug.WriteLine(ex);
-                    }
-                    return false;
-                }
+        internal static void FlushPendingSettings()
+        {
+            if (System.Windows.Application.Current?.Dispatcher.CheckAccess() == true)
+            {
+                if (System.Threading.Interlocked.Exchange(ref _initialSavePosted, 0) != 0)
+                    SaveSettingsSnapshot();
+                _pendingSave?.Flush();
             }
         }
 
-        public static bool TrySaveCalibration(Ink.TouchCalibrationRecord record, int? nibWidth = null)
+        private static void SaveSettingsSnapshot()
+        {
+            try
+            {
+                // Capture on the caller's owning thread; only immutable JSON reaches disk I/O.
+                var text = JsonConvert.SerializeObject(Settings, Formatting.Indented);
+                AtomicFileWriter.WriteLatest(Path.Combine(App.RootPath, SettingsFileName), text);
+                App.UpdateCachedSettingsJson(text);
+            }
+            catch (Exception ex) { LogHelper.WriteLogToFile($"[Settings save] {ex}", LogHelper.LogType.Error); }
+        }
+
+        public static bool TrySaveSettingsToFile()
+            => TrySaveSettingsToFileAsync().GetAwaiter().GetResult();
+
+        /// <summary>Capture on the UI thread, then await the ordered atomic writer.</summary>
+        public static async System.Threading.Tasks.Task<bool> TrySaveSettingsToFileAsync()
+        {
+            try
+            {
+                FlushPendingSettings();
+                var text = JsonConvert.SerializeObject(Settings, Formatting.Indented);
+                bool saved = await AtomicFileWriter.WriteLatestAsync(Path.Combine(App.RootPath, SettingsFileName), text)
+                    .ConfigureAwait(false);
+                if (saved) App.UpdateCachedSettingsJson(text);
+                return saved;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Settings save] {ex}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
+        private static readonly System.Threading.SemaphoreSlim CalibrationGate = new(1, 1);
+
+        public static async System.Threading.Tasks.Task<bool> TrySaveCalibrationAsync(Ink.TouchCalibrationRecord record, int? nibWidth = null,
+            Ink.PalmEraserOptions palmOptions = null)
         {
             if (record != null && !record.IsValid()) return false;
-            lock (_saveGate)
+            if (!await CalibrationGate.WaitAsync(0)) return false;
+            var previous = Settings.Advanced.TouchCalibration;
+            var previousNib = Settings.Advanced.NibModeBoundsWidth;
+            var previousOptions = Settings.Advanced.PalmEraser;
+            try
             {
-                var previous = Settings.Advanced.TouchCalibration;
-                var previousNib = Settings.Advanced.NibModeBoundsWidth;
                 Settings.Advanced.TouchCalibration = record;
+                if (palmOptions != null) Settings.Advanced.PalmEraser = palmOptions.Sanitize();
                 if (nibWidth.HasValue) Settings.Advanced.NibModeBoundsWidth = Math.Clamp(nibWidth.Value, 1, 50);
-                if (TrySaveSettingsToFile())
+                var text = JsonConvert.SerializeObject(Settings, Formatting.Indented);
+                if (await AtomicFileWriter.WriteLatestAsync(Path.Combine(App.RootPath, SettingsFileName), text))
                 {
+                    App.UpdateCachedSettingsJson(text);
                     (System.Windows.Application.Current.MainWindow as MainWindow)?.ResetTouchCalibrationInput();
                     SettingsActionHub.OnNibModeBoundsWidthChanged();
                     return true;
                 }
                 Settings.Advanced.TouchCalibration = previous;
+                Settings.Advanced.PalmEraser = previousOptions;
                 Settings.Advanced.NibModeBoundsWidth = previousNib;
+                SaveSettingsToFile();
                 return false;
             }
+            catch (Exception ex)
+            {
+                Settings.Advanced.TouchCalibration = previous;
+                Settings.Advanced.PalmEraser = previousOptions;
+                Settings.Advanced.NibModeBoundsWidth = previousNib;
+                SaveSettingsToFile();
+                LogHelper.WriteLogToFile($"[Calibration save] {ex}", LogHelper.LogType.Error);
+                return false;
+            }
+            finally { CalibrationGate.Release(); }
         }
-
         public static void MigrateChickenSoupSettings()
         {
             if (Settings?.Appearance == null) return;

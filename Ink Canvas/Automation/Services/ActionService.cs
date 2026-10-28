@@ -3,6 +3,8 @@ using Ink_Canvas.WorkflowAutomation.Models;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using ActionModel = Ink_Canvas.WorkflowAutomation.Models.Action;
 
@@ -13,6 +15,48 @@ namespace Ink_Canvas.WorkflowAutomation.Services
     /// </summary>
     public class ActionService : IActionService
     {
+        private sealed class ExecutionState
+        {
+            public readonly object Sync = new();
+            public bool Running;
+            public (bool Revert, ActionModel[] Actions)? Pending;
+        }
+        private readonly ConditionalWeakTable<ActionSet, ExecutionState> _executions = new();
+
+        private void Schedule(ActionSet set, bool revert)
+        {
+            var state = _executions.GetOrCreateValue(set);
+            lock (state.Sync)
+            {
+                // A slow action has at most one pending state, rather than an
+                // unbounded number of workers waiting to invoke the UI dispatcher.
+                state.Pending = (revert, set.Actions.ToArray());
+                if (state.Running) return;
+                state.Running = true;
+            }
+            _ = Task.Run(() =>
+            {
+                while (true)
+                {
+                    (bool Revert, ActionModel[] Actions) work;
+                    lock (state.Sync)
+                    {
+                        if (!state.Pending.HasValue) { state.Running = false; return; }
+                        work = state.Pending.Value;
+                        state.Pending = null;
+                    }
+                    foreach (var action in work.Actions)
+                    {
+                        try
+                        {
+                            if (work.Revert) RevertAction(action);
+                            else InvokeAction(action);
+                        }
+                        catch (Exception ex) { action.Exception = ex; }
+                    }
+                }
+            });
+        }
         /// <summary>
         /// 触发行动组
         /// </summary>
@@ -32,13 +76,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             }
 
             // 异步执行行动，避免阻塞 UI 线程
-            Task.Run(() =>
-            {
-                foreach (var action in actionSet.Actions)
-                {
-                    InvokeAction(action);
-                }
-            });
+            Schedule(actionSet, revert: false);
         }
 
         /// <summary>
@@ -55,13 +93,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             actionSet.IsOn = false;
 
             // 异步执行恢复，避免阻塞 UI 线程
-            Task.Run(() =>
-            {
-                foreach (var action in actionSet.Actions)
-                {
-                    RevertAction(action);
-                }
-            });
+            Schedule(actionSet, revert: true);
         }
 
         /// <summary>

@@ -436,6 +436,8 @@ namespace Ink_Canvas
 
         private void SymbolIconEmoji_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            CancelStartupFoldVerification();
+            ++_floatingBarPositionVersion;
             if (isViewboxFloatingBarMarginAnimationRunning)
             {
                 ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
@@ -1965,6 +1967,18 @@ namespace Ink_Canvas
         /// 浮动工具栏边距动画是否正在运行
         /// </summary>
         private bool isViewboxFloatingBarMarginAnimationRunning;
+        private int _floatingBarPositionVersion;
+        private DispatcherCoalescedAction _floatingBarReposition;
+
+        internal void RequestFloatingBarReposition()
+        {
+            _floatingBarReposition ??= new DispatcherCoalescedAction(Dispatcher, TimeSpan.FromMilliseconds(80), () =>
+            {
+                if (Dispatcher.HasShutdownStarted || isFloatingBarFolded || currentMode != 0) return;
+                ViewboxFloatingBarMarginAnimation(IsInPPTPresentationMode ? 60 : 100, !IsInPPTPresentationMode);
+            });
+            _floatingBarReposition.Request();
+        }
         private bool isFloatingBarHeadOnRight;
         private bool isFloatingBarHeadOnBottom;
         private double _cachedFloatingBarHeight;
@@ -2719,7 +2733,37 @@ namespace Ink_Canvas
         /// <param name="MarginFromEdge">边缘边距</param>
         /// <param name="PosXCaculatedWithTaskbarHeight">是否考虑任务栏高度计算位置</param>
         /// <param name="skipAnimation">是否跳过动画直接定位（用于启动时快速恢复位置）</param>
+        private async Task RunFloatingBarAnimationAsync(Func<Task> animation)
+        {
+            int generation = -1;
+            try
+            {
+                if (Dispatcher.HasShutdownStarted) return;
+                if (Dispatcher.CheckAccess())
+                {
+                    generation = _floatingBarPositionVersion + 1;
+                    await animation();
+                }
+                else
+                    await Dispatcher.InvokeAsync(() =>
+                    {
+                        generation = _floatingBarPositionVersion + 1;
+                        return animation();
+                    }).Task.Unwrap();
+            }
+            catch (OperationCanceledException) when (Dispatcher.HasShutdownStarted) { }
+            catch (Exception ex)
+            {
+                if (generation == _floatingBarPositionVersion) isViewboxFloatingBarMarginAnimationRunning = false;
+                LogHelper.WriteLogToFile($"[Toolbar positioning] {ex}", LogHelper.LogType.Warning);
+            }
+        }
+
         public async void ViewboxFloatingBarMarginAnimation(int MarginFromEdge,
+            bool PosXCaculatedWithTaskbarHeight = false, bool skipAnimation = false)
+            => await RunFloatingBarAnimationAsync(() => ViewboxFloatingBarMarginAnimationAsync(MarginFromEdge, PosXCaculatedWithTaskbarHeight, skipAnimation));
+
+        private async Task ViewboxFloatingBarMarginAnimationAsync(int MarginFromEdge,
             bool PosXCaculatedWithTaskbarHeight = false, bool skipAnimation = false)
         {
             if (currentMode == 1)
@@ -2728,23 +2772,30 @@ namespace Ink_Canvas
             }
 
             if (MarginFromEdge == 60) MarginFromEdge = 55;
+            int animationVersion = ++_floatingBarPositionVersion;
+            Point animationTarget = default;
 
             await Dispatcher.InvokeAsync(() =>
             {
+                if (animationVersion != _floatingBarPositionVersion) return;
                 if (skipAnimation)
                 {
                     ViewboxFloatingBarMarginAnimationCore(MarginFromEdge, PosXCaculatedWithTaskbarHeight, false);
+                    animationTarget = pos;
                     return;
                 }
 
                 ViewboxFloatingBarMarginAnimationCore(MarginFromEdge, PosXCaculatedWithTaskbarHeight, true);
+                animationTarget = pos;
             });
 
             await Task.Delay(skipAnimation ? 0 : 200);
 
             await Dispatcher.InvokeAsync(() =>
             {
-                ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
+                if (animationVersion != _floatingBarPositionVersion) return;
+                if (currentMode == 1) { isViewboxFloatingBarMarginAnimationRunning = false; return; }
+                ViewboxFloatingBar.Margin = new Thickness(animationTarget.X, animationTarget.Y, -2000, -200);
                 ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
                 isViewboxFloatingBarMarginAnimationRunning = false;
                 if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
@@ -3027,6 +3078,9 @@ namespace Ink_Canvas
         /// 桌面模式下的浮动工具栏边距动画处理
         /// </summary>
         public async void PureViewboxFloatingBarMarginAnimationInDesktopMode()
+            => await RunFloatingBarAnimationAsync(PureViewboxFloatingBarMarginAnimationInDesktopModeAsync);
+
+        private async Task PureViewboxFloatingBarMarginAnimationInDesktopModeAsync()
         {
             // 在白板模式下不执行浮动栏动画
             if (currentMode == 1)
@@ -3034,8 +3088,11 @@ namespace Ink_Canvas
                 return;
             }
 
+            int animationVersion = ++_floatingBarPositionVersion;
+            Point animationTarget = default;
             await Dispatcher.InvokeAsync(() =>
             {
+                if (animationVersion != _floatingBarPositionVersion) return;
                 ViewboxFloatingBar.Visibility = Visibility.Visible;
                 ViewboxFloatingBar.UpdateLayout();
                 isViewboxFloatingBarMarginAnimationRunning = true;
@@ -3144,13 +3201,18 @@ namespace Ink_Canvas
                     EasingFunction = new CircleEase()
                 };
                 ViewboxFloatingBar.BeginAnimation(MarginProperty, marginAnimation);
+                animationTarget = pos;
             });
 
             await Task.Delay(349);
 
             await Dispatcher.InvokeAsync(() =>
             {
-                ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
+                if (animationVersion != _floatingBarPositionVersion) return;
+                if (currentMode == 1) { isViewboxFloatingBarMarginAnimationRunning = false; return; }
+                ViewboxFloatingBar.Margin = new Thickness(animationTarget.X, animationTarget.Y, -2000, -200);
+                ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
+                isViewboxFloatingBarMarginAnimationRunning = false;
 
                 if (!string.IsNullOrEmpty(_currentToolMode))
                 {
@@ -3164,6 +3226,9 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="isRetry">是否为重试操作</param>
         public async void PureViewboxFloatingBarMarginAnimationInPPTMode(bool isRetry = false)
+            => await RunFloatingBarAnimationAsync(() => PureViewboxFloatingBarMarginAnimationInPPTModeAsync(isRetry));
+
+        private async Task PureViewboxFloatingBarMarginAnimationInPPTModeAsync(bool isRetry)
         {
             // 新增：在白板模式下不执行浮动栏动画
             if (currentMode == 1)
@@ -3171,8 +3236,11 @@ namespace Ink_Canvas
                 return;
             }
 
+            int animationVersion = ++_floatingBarPositionVersion;
+            Point animationTarget = default;
             await Dispatcher.InvokeAsync(() =>
             {
+                if (animationVersion != _floatingBarPositionVersion) return;
                 ViewboxFloatingBar.Visibility = Visibility.Visible;
                 ViewboxFloatingBar.UpdateLayout();
                 isViewboxFloatingBarMarginAnimationRunning = true;
@@ -3260,13 +3328,18 @@ namespace Ink_Canvas
                     EasingFunction = new CircleEase()
                 };
                 ViewboxFloatingBar.BeginAnimation(MarginProperty, marginAnimation);
+                animationTarget = pos;
             });
 
             await Task.Delay(349);
 
             await Dispatcher.InvokeAsync(() =>
             {
-                ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
+                if (animationVersion != _floatingBarPositionVersion) return;
+                if (currentMode == 1) { isViewboxFloatingBarMarginAnimationRunning = false; return; }
+                ViewboxFloatingBar.Margin = new Thickness(animationTarget.X, animationTarget.Y, -2000, -200);
+                ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
+                isViewboxFloatingBarMarginAnimationRunning = false;
 
                 if (!string.IsNullOrEmpty(_currentToolMode))
                 {
@@ -3277,6 +3350,7 @@ namespace Ink_Canvas
             if (Settings.ModeSettings.IsPPTOnlyMode && !isRetry)
             {
                 await Task.Delay(2000); // 等待动画完成后再检查
+                if (animationVersion != _floatingBarPositionVersion || isFloatingBarFolded) return;
 
                 bool isFloatingBarVisible = false;
                 await Dispatcher.InvokeAsync(() =>

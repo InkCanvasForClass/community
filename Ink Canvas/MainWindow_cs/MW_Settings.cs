@@ -759,6 +759,9 @@ namespace Ink_Canvas
                 drawingAttributes.Height = value;
                 Settings.Canvas.LaserPenWidth = value;
             }
+            inkCanvas.DefaultDrawingAttributes.Width = drawingAttributes.Width;
+            inkCanvas.DefaultDrawingAttributes.Height = drawingAttributes.Height;
+            UpdateWinRTInkStyle();
             SaveSettingsToFile();
         }
 
@@ -786,6 +789,8 @@ namespace Ink_Canvas
             var NowG = drawingAttributes.Color.G;
             var NowB = drawingAttributes.Color.B;
             drawingAttributes.Color = Color.FromArgb((byte)value, NowR, NowG, NowB);
+            inkCanvas.DefaultDrawingAttributes.Color = drawingAttributes.Color;
+            UpdateWinRTInkStyle();
 
             if (penType == 0)
             {
@@ -1267,7 +1272,7 @@ namespace Ink_Canvas
                 var configName = SettingsManager.Settings?.ToolbarConfigName ?? "default";
                 ToolbarRegistry.SaveConfigFile(configName, ToolbarRegistry.CreateDefaultLayout());
 
-                LoadSettings(isStartup: false, skipAutoUpdateCheck: true);
+                LoadSettings(isStartup: false, skipAutoUpdateCheck: true, readFromFile: false);
 
                 // 重置后重建工具栏
                 RebuildToolbar();
@@ -1299,7 +1304,7 @@ namespace Ink_Canvas
                 var configName = SettingsManager.Settings?.ToolbarConfigName ?? "default";
                 ToolbarRegistry.SaveConfigFile(configName, ToolbarRegistry.CreateDefaultLayout());
 
-                LoadSettings(isStartup: false, skipAutoUpdateCheck: true);
+                LoadSettings(isStartup: false, skipAutoUpdateCheck: true, readFromFile: false);
 
                 // 重置后重建工具栏
                 RebuildToolbar();

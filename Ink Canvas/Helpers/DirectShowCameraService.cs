@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -28,7 +29,14 @@ namespace Ink_Canvas.Helpers
         private IMediaControl _mediaControl;
 
         // === 状态 ===
-        private bool _isCapturing;
+        private volatile bool _isCapturing;
+        private readonly SemaphoreSlim _lifecycleGate = new SemaphoreSlim(1, 1);
+        private readonly SemaphoreSlim _refreshGate = new SemaphoreSlim(1, 1);
+        private int _frameUpdatePending;
+        private int _previewGeneration;
+        private readonly object _stopSync = new();
+        private Task _stopTask = Task.CompletedTask;
+        private int _disposed;
         private Bitmap _currentFrame;
         private readonly object _frameLock = new object();
         private Dispatcher _dispatcher;
@@ -57,7 +65,7 @@ namespace Ink_Canvas.Helpers
             (BoothCameraProperty.Exposure,     false, CameraControlProperty.Exposure),
         };
 
-        private readonly List<CameraInfo> _cameras = new List<CameraInfo>();
+        private List<CameraInfo> _cameras = new List<CameraInfo>();
         private readonly List<ResolutionInfo> _nativeResolutions = new List<ResolutionInfo>();
         private int _selectedResolutionIndex = -1;
 
@@ -602,22 +610,31 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>刷新可用摄像头列表（DirectShow 同步完成）。</summary>
-        public Task RefreshCameraListAsync()
+        public async Task RefreshCameraListAsync()
+        {
+            if (!await _refreshGate.WaitAsync(0).ConfigureAwait(false)) return;
+            try { await Task.Run(RefreshCameraList).ConfigureAwait(false); }
+            finally { _refreshGate.Release(); }
+        }
+
+        private void RefreshCameraList()
         {
             try
             {
-                _cameras.Clear();
+                var cameras = new List<CameraInfo>();
                 var devices = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
                 foreach (var dev in devices)
                 {
-                    _cameras.Add(new CameraInfo
+                    cameras.Add(new CameraInfo
                     {
                         Name = string.IsNullOrWhiteSpace(dev.Name) ? "Camera" : dev.Name,
                         // DevicePath 是设备路径（与 WPFMediaKit MultimediaUtil.VideoInputDevices 一致）；
                         // 内部 CreateSourceFilter 会用 DsDevice.Mon 重新 BindToObject
                         MonikerString = dev.DevicePath ?? dev.Name
                     });
+                    dev.Dispose();
                 }
+                Volatile.Write(ref _cameras, cameras);
 
                 LogHelper.WriteLogToFile(
                     $"[DirectShow] RefreshCameraList 完成，共 {_cameras.Count} 个摄像头",
@@ -628,17 +645,20 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"[DirectShow] 刷新摄像头列表失败: {ex.Message}", LogHelper.LogType.Error);
                 ErrorOccurred?.Invoke(this, $"刷新摄像头列表失败: {ex.Message}");
             }
-            return Task.CompletedTask;
         }
 
         /// <summary>启动指定摄像头的预览。DirectShow 同步实现，但返回 Task 以保持接口一致。</summary>
-        public Task<bool> StartPreviewAsync(int cameraIndex = 0)
+        public async Task<bool> StartPreviewAsync(int cameraIndex = 0)
         {
-            return Task.Run(() => StartPreviewCore(cameraIndex));
+            if (Volatile.Read(ref _disposed) != 0) return false;
+            if (!await _lifecycleGate.WaitAsync(0).ConfigureAwait(false)) return false;
+            try { return await Task.Run(() => StartPreviewCore(cameraIndex)).ConfigureAwait(false); }
+            finally { _lifecycleGate.Release(); }
         }
 
         private bool StartPreviewCore(int cameraIndex)
         {
+            if (Volatile.Read(ref _disposed) != 0) return false;
             try
             {
                 if (_cameras.Count == 0)
@@ -1290,33 +1310,46 @@ namespace Ink_Canvas.Helpers
 
         private Task StopPreviewAsyncInternal()
         {
-            try
-            {
-                if (_mediaControl != null)
-                {
-                    try { _mediaControl.Stop(); }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[Booth] 内部停止预览时停止 IMediaControl 图失败: {ex.Message}", LogHelper.LogType.Info);
-                    }
-                }
-                CleanupGraph();
-                _isCapturing = false;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[DirectShow] StopPreviewAsyncInternal 失败: {ex.Message}", LogHelper.LogType.Error);
-            }
-            return Task.CompletedTask;
+            return StopPreviewAsync();
         }
 
         /// <summary>停止预览并清理 DirectShow 图。</summary>
         public void StopPreview()
         {
+            if (_dispatcher.CheckAccess())
+            {
+                _ = StopPreviewAsync();
+                return;
+            }
+            StopPreviewCore();
+        }
+
+        public Task StopPreviewAsync()
+        {
+            _isCapturing = false;
+            Interlocked.Increment(ref _previewGeneration);
+            lock (_stopSync)
+                return _stopTask.IsCompleted ? _stopTask = StopPreviewAsyncCore() : _stopTask;
+        }
+
+        private async Task StopPreviewAsyncCore()
+        {
+            try
+            {
+                await _lifecycleGate.WaitAsync().ConfigureAwait(false);
+                try { await Task.Run(StopPreviewCore).ConfigureAwait(false); }
+                finally { _lifecycleGate.Release(); }
+            }
+            catch (Exception ex) { LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Warning); }
+        }
+
+        private void StopPreviewCore()
+        {
             try
             {
                 // 先标记停止，让 BufferCB 立即短路返回，避免访问正在被释放的 COM 对象
                 _isCapturing = false;
+                Interlocked.Increment(ref _previewGeneration);
 
                 if (_mediaControl != null)
                 {
@@ -1427,6 +1460,11 @@ namespace Ink_Canvas.Helpers
                 int width, height, stride;
                 if (!TryGetNegotiatedVideoFormat(out width, out height, out stride)) return 0;
 
+                // At most one frame may wait for the UI. This bounds latency and memory
+                // when the driver produces faster than WPF can present.
+                if (Interlocked.CompareExchange(ref _frameUpdatePending, 1, 0) != 0) return 0;
+                var generation = Volatile.Read(ref _previewGeneration);
+
                 bool needRotate = _rotationAngle != 0;
                 int srcWidth = width;
                 int srcHeight = height;
@@ -1468,7 +1506,7 @@ namespace Ink_Canvas.Helpers
                 }
 
                 // === 2. 通知 UI 线程更新 WriteableBitmap / BitmapSource ===
-                byte[] bufferCopy = _reusableBuffer;
+                byte[] bufferCopy = (byte[])_reusableBuffer.Clone();
                 int bw = srcWidth, bh = srcHeight, bstride = actualStride;
                 bool rotate = needRotate;
                 int rotation = _rotationAngle;
@@ -1477,6 +1515,7 @@ namespace Ink_Canvas.Helpers
                 {
                     try
                     {
+                        if (!_isCapturing || generation != Volatile.Read(ref _previewGeneration)) return;
                         BitmapSource frameSource;
                         if (!rotate)
                         {
@@ -1552,11 +1591,13 @@ namespace Ink_Canvas.Helpers
                     {
                         LogHelper.WriteLogToFile($"[DirectShow] FrameReceived 分发失败: {ex.Message}", LogHelper.LogType.Error);
                     }
+                    finally { Interlocked.Exchange(ref _frameUpdatePending, 0); }
                 }));
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"[DirectShow] BufferCB 失败: {ex.Message}", LogHelper.LogType.Error);
+                Interlocked.Exchange(ref _frameUpdatePending, 0);
             }
             return 0;
         }
@@ -1715,8 +1756,14 @@ namespace Ink_Canvas.Helpers
 
         public void Dispose()
         {
-            StopPreview();
-            ReleaseCameraPropertyControl();
+            if (Interlocked.Exchange(ref _disposed, 1) != 0) return;
+            _ = DisposeAsyncCore();
+        }
+
+        private async Task DisposeAsyncCore()
+        {
+            await StopPreviewAsync().ConfigureAwait(false);
+            await Task.Run(ReleaseCameraPropertyControl).ConfigureAwait(false);
         }
     }
 }

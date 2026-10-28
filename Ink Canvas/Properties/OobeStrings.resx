@@ -377,4 +377,6 @@
   <data name="Oobe_SummaryLogEnabled" xml:space="preserve">
     <value>启用日志</value>
   </data>
+  <data name="Oobe_SaveFailedTitle" xml:space="preserve"><value>设置保存失败</value></data>
+  <data name="Oobe_SaveFailedMessage" xml:space="preserve"><value>无法保存首次设置。请确认程序所在目录可写、磁盘空间充足后重试；当前选择已保留。</value></data>
 </root>

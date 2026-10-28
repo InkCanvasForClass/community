@@ -226,7 +226,7 @@
         <Grid Name="GridTransparencyFakeBackground" Opacity="0" />
         <Label Name="Label" Visibility="Collapsed" Foreground="Gray" Content="0" />
         <Grid Name="InkCanvasGridForInkReplay" d:Visibility="Collapsed">
-            <InkCanvas x:Name="inkCanvas" ForceCursor="True" UseCustomCursor="True"
+            <localControls:HighlighterInkCanvas x:Name="inkCanvas" ForceCursor="True" UseCustomCursor="True"
                        TouchDown="Main_Grid_TouchDown"
                        TouchMove="inkCanvas_TouchMove"
                        ManipulationDelta="Main_Grid_ManipulationDelta"

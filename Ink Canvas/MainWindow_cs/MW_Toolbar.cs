@@ -426,6 +426,7 @@ namespace Ink_Canvas
 
         internal void RebuildToolbar()
         {
+            var rebuildTime = System.Diagnostics.Stopwatch.StartNew();
             LogHelper.WriteLogToFile("MW_Toolbar: RebuildToolbar 开始", LogHelper.LogType.Info);
             try
             {
@@ -450,6 +451,11 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"MW_Toolbar: RebuildToolbar 异常: {ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}", LogHelper.LogType.Error);
+            }
+            finally
+            {
+                if (rebuildTime.ElapsedMilliseconds >= 250)
+                    LogHelper.WriteLogToFile($"[UI slow operation] Toolbar rebuild: elapsedMs={rebuildTime.ElapsedMilliseconds}", LogHelper.LogType.Warning);
             }
         }
 

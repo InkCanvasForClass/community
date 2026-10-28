@@ -13,7 +13,8 @@ namespace Ink_Canvas.IPC
 {
     public sealed class PPTAgentPipeClient : IDisposable
     {
-        private readonly object _sendLock = new object();
+        private readonly SemaphoreSlim _sendGate = new SemaphoreSlim(1, 1);
+        private int _queuedCommands;
         private readonly ConcurrentDictionary<string, TaskCompletionSource<JToken>> _pendingRequests = new ConcurrentDictionary<string, TaskCompletionSource<JToken>>();
 
         private CancellationTokenSource _cts;
@@ -66,11 +67,26 @@ namespace Ink_Canvas.IPC
                 RequestId = Guid.NewGuid().ToString("N")
             };
 
-            var sent = TrySendMessage(message);
+            // Commands are accepted into a bounded async sender; never wait for a pipe
+            // consumer on a WPF click/event thread.
+            if (!IsConnected) return false;
+            if (Interlocked.Increment(ref _queuedCommands) > 64)
+            {
+                Interlocked.Decrement(ref _queuedCommands);
+                return false;
+            }
+            _ = SendQueuedCommandAsync(message);
+            var sent = true;
             LogHelper.WriteLogToFile(
                 $"[PPT-Agent] 命令{(sent ? "已发送" : "发送失败")}: {command}",
                 sent ? LogHelper.LogType.Info : LogHelper.LogType.Warning);
             return sent;
+        }
+
+        private async Task SendQueuedCommandAsync(PPTPipeMessage<object> message)
+        {
+            try { await TrySendMessageAsync(message, CancellationToken.None).ConfigureAwait(false); }
+            finally { Interlocked.Decrement(ref _queuedCommands); }
         }
 
         public async Task<T> SendRequestAsync<T>(string command, object data = null, int timeoutMilliseconds = PipeConstants.RequestTimeoutMilliseconds)
@@ -87,20 +103,22 @@ namespace Ink_Canvas.IPC
                 RequestId = requestId
             };
 
-            if (!TrySendMessage(message))
-            {
-                _pendingRequests.TryRemove(requestId, out _);
-                return default;
-            }
-
+            using var timeout = new CancellationTokenSource(timeoutMilliseconds);
+            var connection = _pipe;
             try
             {
-                var completed = await Task.WhenAny(tcs.Task, Task.Delay(timeoutMilliseconds))
+                if (!await TrySendMessageAsync(message, timeout.Token).ConfigureAwait(false)) return default;
+                var completed = await Task.WhenAny(tcs.Task, Task.Delay(Timeout.Infinite, timeout.Token))
                     .ConfigureAwait(false);
 
                 if (completed != tcs.Task)
                 {
                     _pendingRequests.TryRemove(requestId, out _);
+                    if (connection != null && ReferenceEquals(Interlocked.CompareExchange(ref _pipe, null, connection), connection))
+                    {
+                        connection.Dispose();
+                        SetConnected(false);
+                    }
                     LogHelper.WriteLogToFile($"PPT Agent 命令超时: {command}", LogHelper.LogType.Warning);
                     return default;
                 }
@@ -245,29 +263,40 @@ namespace Ink_Canvas.IPC
             }
         }
 
-        private bool TrySendMessage<T>(PPTPipeMessage<T> message)
+        private async Task<bool> TrySendMessageAsync<T>(PPTPipeMessage<T> message, CancellationToken cancellationToken)
         {
+            var pipe = _pipe;
+            bool entered = false;
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeout.CancelAfter(PipeConstants.RequestTimeoutMilliseconds);
             try
             {
-                var pipe = _pipe;
                 if (pipe == null || !pipe.IsConnected)
                     return false;
 
                 var json = JsonConvert.SerializeObject(message);
-                lock (_sendLock)
+                await _sendGate.WaitAsync(timeout.Token).ConfigureAwait(false);
+                entered = true;
+                // A canceled/partial frame cannot be reused by the next sender.
+                using (timeout.Token.Register(() => { try { pipe.Dispose(); } catch { } }))
                 {
-                    if (pipe == null || !pipe.IsConnected)
+                    if (!ReferenceEquals(pipe, _pipe) || !pipe.IsConnected)
                         return false;
-                    PipeFrame.WriteFrame(pipe, json);
+                    await PipeFrame.WriteFrameAsync(pipe, json, timeout.Token).ConfigureAwait(false);
                 }
                 return true;
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"发送 PPT Agent Pipe 消息失败: {ex.Message}", LogHelper.LogType.Warning);
-                ClosePipe();
+                if (entered && ReferenceEquals(Interlocked.CompareExchange(ref _pipe, null, pipe), pipe))
+                {
+                    pipe?.Dispose();
+                    SetConnected(false);
+                }
                 return false;
             }
+            finally { if (entered) _sendGate.Release(); }
         }
 
         private void SetConnected(bool connected)

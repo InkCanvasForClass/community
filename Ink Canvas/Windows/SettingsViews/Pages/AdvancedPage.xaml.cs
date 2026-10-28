@@ -168,11 +168,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 settingsWindow.NavigateToPage("TouchCalibrationPage");
         }
 
-        private void ClearCalibration_Click(object sender, RoutedEventArgs e)
+        private async void ClearCalibration_Click(object sender, RoutedEventArgs e)
         {
             if (MessageBox.Show(AdvancedStrings.GetString("CalibrationClearConfirm"), AdvancedStrings.CalibrationTitle,
                 MessageBoxButton.YesNo) != MessageBoxResult.Yes) return;
-            if (!SettingsManager.TrySaveCalibration(null))
+            if (!await SettingsManager.TrySaveCalibrationAsync(null))
                 TextCalibrateStatus.Text = AdvancedStrings.GetString("CalibrationSaveFailed");
             else UpdateCalibrationStatus();
         }

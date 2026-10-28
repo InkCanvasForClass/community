@@ -851,7 +851,7 @@ namespace Ink_Canvas
                 }
 
                 // 墨迹已按背景缩放并平移到位，直接绘制。
-                foreach (Stroke stroke in strokes) stroke.Draw(context);
+                Ink.HighlighterRendering.Draw(context, strokes);
             }
 
             var bitmap = new RenderTargetBitmap(pixelWidth, pixelHeight, 96, 96, PixelFormats.Pbgra32);

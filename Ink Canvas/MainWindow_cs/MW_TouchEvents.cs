@@ -231,6 +231,19 @@ namespace Ink_Canvas
             EndTouchInkInputIfIdle();
         }
 
+        private void RecoverAbandonedTouchCaptures()
+        {
+            AbortAllActiveTouchInputs();
+            CancelAbandonedMouseInk();
+            inkCanvas?.ReleaseMouseCapture();
+            inkCanvas?.ReleaseAllTouchCaptures();
+            inkCanvas?.ReleaseStylusCapture();
+            dec.Clear();
+            isTouchDown = false;
+            if (ViewboxFloatingBar != null) ViewboxFloatingBar.IsHitTestVisible = true;
+            if (BlackboardUIGridForInkReplay != null) BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+        }
+
         internal void EnsureRealtimeStylusPipelineBinding()
         {
             if (inkCanvas == null) return;
@@ -242,6 +255,7 @@ namespace Ink_Canvas
             inkCanvas.StylusDown += MainWindow_StylusDown;
             inkCanvas.StylusMove += MainWindow_StylusMove;
             inkCanvas.StylusUp += MainWindow_StylusUp;
+            if (ShouldDeferLegacyCanvasInput) return;
 
             // 手动 StrokeVisual 采集（实时笔锋 / 多指书写）要求 InkCanvas 自身不收集笔画；
             // 其余情况保持 Ink，由 InkCanvas 内建采集，两者不可同时生效。
@@ -1130,7 +1144,7 @@ namespace Ink_Canvas
         /// 3. 如果当前处于图形绘制模式，则：
         ///    - 设置InkCanvas编辑模式为None
         ///    - 设置触摸状态为按下
-        ///    - 禁用浮动栏和黑板UI网格的命中测试
+        ///    - 保持工具栏和黑板UI网格可交互
         ///    - 设置起始点坐标
         ///    - 直接返回
         /// 4. 否则，设置触摸按下点的编辑模式为None
@@ -1138,6 +1152,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void MainWindow_TouchDown(object sender, TouchEventArgs e)
         {
+            if (ShouldDeferLegacyCanvasInput) return;
             // 视频展台特殊模式：所有触摸交给 VideoPresenterSpecialModeContainer 的 Manipulation 处理，
             // 不进入下面的 EditingMode 切换逻辑（避免把 Ink 切到 None 干扰预览绘制）。
             if (_isVideoPresenterSpecialMode) return;
@@ -1157,8 +1172,6 @@ namespace Ink_Canvas
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
 
                 isTouchDown = true;
-                ViewboxFloatingBar.IsHitTestVisible = false;
-                BlackboardUIGridForInkReplay.IsHitTestVisible = false;
 
                 // 设置起始点
                 if (NeedUpdateIniP()) iniP = e.GetTouchPoint(inkCanvas).Position;
@@ -1186,17 +1199,18 @@ namespace Ink_Canvas
         /// 2. 根据手写笔是否倒置自动切换橡皮擦/画笔模式：
         ///    - 如果手写笔倒置，设置编辑模式为EraseByPoint
         ///    - 如果手写笔正常：
-        ///       - 如果当前处于图形绘制模式，设置编辑模式为None，设置触摸状态为按下，禁用浮动栏和黑板UI网格的命中测试，设置起始点坐标并返回
+        ///       - 如果当前处于图形绘制模式，设置编辑模式为None，设置触摸状态为按下，保持工具栏和黑板UI网格可交互，设置起始点坐标并返回
         ///       - 如果当前不是线擦模式，设置编辑模式为Ink
         ///       - 否则，保持当前线擦模式
         /// 3. 捕获手写笔输入
-        /// 4. 禁用浮动栏和黑板UI网格的命中测试
+        /// 4. 保持工具栏和黑板UI网格可交互
         /// 5. 根据编辑模式设置光标
         /// 6. 如果当前处于橡皮擦模式或选择模式，则直接返回
         /// 7. 设置触摸按下点的编辑模式为None
         /// </remarks>
         private void MainWindow_StylusDown(object sender, StylusDownEventArgs e)
         {
+            if (ShouldDeferLegacyCanvasInput && !e.StylusDevice.Inverted) return;
             if (IsTouchStylusDevice(e.StylusDevice))
                 return;
 
@@ -1232,8 +1246,6 @@ namespace Ink_Canvas
                     inkCanvas.EditingMode = InkCanvasEditingMode.None;
 
                     isTouchDown = true;
-                    ViewboxFloatingBar.IsHitTestVisible = false;
-                    BlackboardUIGridForInkReplay.IsHitTestVisible = false;
 
                     // 设置起始点
                     if (NeedUpdateIniP()) iniP = e.GetPosition(inkCanvas);
@@ -1254,8 +1266,6 @@ namespace Ink_Canvas
                 }
             }
             inkCanvas.CaptureStylus();
-            ViewboxFloatingBar.IsHitTestVisible = false;
-            BlackboardUIGridForInkReplay.IsHitTestVisible = false;
 
             SetCursorBasedOnEditingMode(inkCanvas);
 
@@ -1280,8 +1290,6 @@ namespace Ink_Canvas
 
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
                 inkCanvas.CaptureStylus();
-                ViewboxFloatingBar.IsHitTestVisible = false;
-                BlackboardUIGridForInkReplay.IsHitTestVisible = false;
                 SetCursorBasedOnEditingMode(inkCanvas);
 
                 var p = e.GetPosition(inkCanvas);
@@ -1333,6 +1341,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void MainWindow_StylusUp(object sender, StylusEventArgs e)
         {
+            if (ShouldDeferLegacyCanvasInput) return;
             if (IsTouchStylusDevice(e.StylusDevice))
                 return;
 
@@ -1503,6 +1512,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void MainWindow_StylusMove(object sender, StylusEventArgs e)
         {
+            if (ShouldDeferLegacyCanvasInput) return;
             try
             {
                 if (IsTouchStylusDevice(e.StylusDevice))
@@ -1778,7 +1788,7 @@ namespace Ink_Canvas
         /// 5. 如果当前处于图形绘制模式：
         ///    - 设置编辑模式为None
         ///    - 设置触摸状态为按下
-        ///    - 禁用浮动栏和黑板UI网格的命中测试
+        ///    - 保持工具栏和黑板UI网格可交互
         ///    - 设置起始点坐标
         ///    - 直接返回
         /// 6. 如果当前处于选择模式、墨水模式或线擦模式，则直接返回
@@ -1786,6 +1796,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void Main_Grid_TouchDown(object sender, TouchEventArgs e)
         {
+            if (ShouldDeferLegacyCanvasInput) { e.Handled = true; return; }
             // 视频展台特殊模式：不在此处切换 EditingMode，
             // PreviewTouchDown 已临时切到 None 抑制 InkCanvas 框选/绘制；
             // 这里再切会覆盖 None → Ink，导致特殊模式下仍画出墨迹（Q7 真正根因）。
@@ -1826,8 +1837,6 @@ namespace Ink_Canvas
 
                 // 设置触摸状态，类似鼠标事件处理
                 isTouchDown = true;
-                ViewboxFloatingBar.IsHitTestVisible = false;
-                BlackboardUIGridForInkReplay.IsHitTestVisible = false;
 
                 // 设置起始点
                 if (NeedUpdateIniP()) iniP = e.GetTouchPoint(inkCanvas).Position;
@@ -1886,7 +1895,7 @@ namespace Ink_Canvas
         /// <remarks>
         /// 处理InkCanvas的预览触摸按下事件，包括以下逻辑：
         /// 1. 捕获触摸输入
-        /// 2. 禁用浮动栏和黑板UI网格的命中测试
+        /// 2. 保持工具栏和黑板UI网格可交互
         /// 3. 将触摸设备ID添加到dec列表中
         /// 4. 当只有一个触摸设备时：
         ///    - 记录中心点坐标
@@ -1899,6 +1908,8 @@ namespace Ink_Canvas
         /// </remarks>
         private void InkCanvas_PreviewTouchDown(object sender, TouchEventArgs e)
         {
+            if (ShouldDeferLegacyCanvasInput) { e.Handled = true; return; }
+            CancelStartupFoldVerification();
             var touchPointForBar = e.GetTouchPoint(this);
             var floatingBarBounds = ViewboxFloatingBar.TransformToAncestor(this).TransformBounds(
                 new Rect(0, 0, ViewboxFloatingBar.ActualWidth, ViewboxFloatingBar.ActualHeight));
@@ -1924,8 +1935,6 @@ namespace Ink_Canvas
                     inkCanvas.EditingMode = InkCanvasEditingMode.None;
                     SetCursorBasedOnEditingMode(inkCanvas);
                     inkCanvas.CaptureTouch(e.TouchDevice);
-                    ViewboxFloatingBar.IsHitTestVisible = false;
-                    BlackboardUIGridForInkReplay.IsHitTestVisible = false;
                     isTouchDown = true;
 
                     if (dec.Count == 0)
@@ -2019,8 +2028,6 @@ namespace Ink_Canvas
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
                 SetCursorBasedOnEditingMode(inkCanvas);
                 inkCanvas.CaptureTouch(e.TouchDevice);
-                ViewboxFloatingBar.IsHitTestVisible = false;
-                BlackboardUIGridForInkReplay.IsHitTestVisible = false;
 
                 isTouchDown = true;
 
@@ -2044,8 +2051,6 @@ namespace Ink_Canvas
 
             SetCursorBasedOnEditingMode(inkCanvas);
             inkCanvas.CaptureTouch(e.TouchDevice);
-            ViewboxFloatingBar.IsHitTestVisible = false;
-            BlackboardUIGridForInkReplay.IsHitTestVisible = false;
             lastTouchDownTime = DateTime.Now;
             dec.Add(e.TouchDevice.Id);
 
@@ -2171,6 +2176,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void InkCanvas_PreviewTouchMove(object sender, TouchEventArgs e)
         {
+            if (ShouldDeferLegacyCanvasInput) { e.Handled = true; return; }
             if (TryHandlePalmTouch(e, false)) return;
 
             var touchId = e.TouchDevice.Id;
@@ -2231,6 +2237,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void InkCanvas_PreviewTouchUp(object sender, TouchEventArgs e)
         {
+            if (ShouldDeferLegacyCanvasInput) { e.Handled = true; return; }
             // 展台：触点抬起先无条件记账（必须在 FinishPalmTouch 提前返回之前），
             // 保证 _boothDownTouchIds 与真实手指状态始终一致
             _boothDownTouchIds.Remove(e.TouchDevice.Id);
@@ -2295,7 +2302,7 @@ namespace Ink_Canvas
             {
                 return;
             }
-            inkCanvas.ReleaseAllTouchCaptures();
+            inkCanvas.ReleaseTouchCapture(e.TouchDevice);
             ViewboxFloatingBar.IsHitTestVisible = true;
             BlackboardUIGridForInkReplay.IsHitTestVisible = true;
 

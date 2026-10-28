@@ -2,6 +2,7 @@ using Microsoft.Win32;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Ink_Canvas.Helpers
 {
@@ -11,6 +12,15 @@ namespace Ink_Canvas.Helpers
     /// </summary>
     public static class VstoRegistrationHelper
     {
+        private static readonly object RegistrationSync = new();
+        private static Task<bool> _registration;
+
+        public static Task<bool> EnsureRegisteredAsync()
+        {
+            lock (RegistrationSync)
+                return _registration == null || _registration.IsCompleted
+                    ? _registration = Task.Run(EnsureRegistered) : _registration;
+        }
         private const string AddInKeyName = @"Software\Microsoft\Office\PowerPoint\Addins\InkCanvas.PowerPointAddIn";
         private const string AddInDllName = "InkCanvas.PowerPointAddIn.dll";
         private const string AddInVstoName = "InkCanvas.PowerPointAddIn.vsto";
@@ -150,13 +160,21 @@ namespace Ink_Canvas.Helpers
                     RedirectStandardError = true,
                     CreateNoWindow = true
                 };
-                var process = Process.Start(psi);
+                using var process = Process.Start(psi);
                 if (process == null) return false;
 
-                string stderr = process.StandardError.ReadToEnd();
-                process.WaitForExit(30000);
+                var stderrTask = process.StandardError.ReadToEndAsync();
+                var stdoutTask = process.StandardOutput.ReadToEndAsync();
+                if (!process.WaitForExit(30000))
+                {
+                    try { process.Kill(entireProcessTree: true); } catch (Exception ex) { Debug.WriteLine(ex); }
+                    throw new TimeoutException("regasm exceeded its execution deadline.");
+                }
+                if (!Task.WaitAll(new Task[] { stderrTask, stdoutTask }, 1000))
+                    throw new TimeoutException("regasm output streams did not close.");
+                string stderr = stderrTask.GetAwaiter().GetResult();
+                _ = stdoutTask.GetAwaiter().GetResult();
                 int exitCode = process.ExitCode;
-                process.Dispose();
 
                 if (exitCode == 0)
                 {

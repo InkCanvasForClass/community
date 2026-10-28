@@ -865,14 +865,14 @@ namespace Ink_Canvas.Helpers
                             LogHelper.WriteLogToFile($"IPC接收到文件路径: {filePath}", LogHelper.LogType.Event);
 
                             // 在UI线程中处理文件打开
-                            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                            Application.Current.Dispatcher.BeginInvoke(new Action(async () =>
                             {
                                 try
                                 {
                                     // 获取主窗口并打开文件
                                     if (Application.Current.MainWindow is MainWindow mainWindow)
                                     {
-                                        mainWindow.OpenSingleStrokeFile(filePath);
+                                        await mainWindow.OpenSingleStrokeFileAsync(filePath);
                                         mainWindow.ShowNotification(string.Format(AutomationStrings.FileAssoc_LoadedStrokesFile, Path.GetFileName(filePath)));
                                     }
                                 }
