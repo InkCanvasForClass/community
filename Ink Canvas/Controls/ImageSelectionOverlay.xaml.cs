@@ -50,7 +50,11 @@ namespace Ink_Canvas.Controls
     public partial class ImageSelectionOverlay : UserControl
     {
         private const double HandleSize = 12;
-        private const double RotationHandleSize = 14;
+        // RotationHandle 的命中区是 XAML 中 28×28 的 Grid（内部才是 14×14 的视觉圆点）。
+        // 定位必须用命中区尺寸取中心：若误用视觉点尺寸的一半去定位 Grid 左上角，
+        // Grid（连同内部圆点）的中心会相对连线端点右偏/下偏各 7px —— 即"旋转手柄与连线错位"。
+        // 注意：修改 ImageSelectionOverlay.xaml 中该 Grid 的 Width/Height 时必须同步此常量。
+        private const double RotationHandleHitAreaSize = 28;
         private const double RotationHandleOffset = 28;
 
         public event EventHandler<ImageResizeDeltaEventArgs> ResizeDelta;
@@ -184,7 +188,7 @@ namespace Ink_Canvas.Controls
             System.Windows.Controls.Canvas.SetLeft(BottomRightHandle, width - h);
             System.Windows.Controls.Canvas.SetTop(BottomRightHandle, height - h);
 
-            double rh = RotationHandleSize / 2;
+            double rh = RotationHandleHitAreaSize / 2;
             double midX = width / 2;
             System.Windows.Controls.Canvas.SetLeft(RotationHandle, midX - rh);
             System.Windows.Controls.Canvas.SetTop(RotationHandle, -RotationHandleOffset - rh);
