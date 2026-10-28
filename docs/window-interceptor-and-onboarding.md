@@ -24,9 +24,15 @@ guessing a localized dialog title. A modeless, untitled dialog identical in proc
 class, style and dimensions still requires its actual HWND characteristics to tell
 it apart; these tests do not establish a blanket guarantee for every Seewo version.
 Local inspection of the installed Seewo 5.2.4.11441 components identified a
-full-screen photo-display path and a QR viewer that follows its owner's bounds.
-That static inspection is not a live capture of a phone upload, its QR dialog or
-all possible minimized/display modes. The upload-specific regressions deliberately
+full-screen `PhotoShowsWindow` and a `DesktopPhotoShowsWindow` declared maximized
+and transparent. Collapsing the photo viewer displays a 108 × 108 icon inside that
+large HWND; it does not turn that HWND into a 550 × 200 toolbar. Both photo-display
+states are excluded by the existing full-screen/maximized protections. Dedicated
+policy tests cover landscape, portrait, 4K, working-area and DPI variants. Native
+HWND fixtures verify that a small icon inside a monitor-sized surface does not
+change the match result. No production rule needed loosening for this viewer.
+A separate QR viewer follows its owner's bounds. This static inspection is not
+an end-to-end phone upload test or a guarantee for other versions. The upload-specific regressions deliberately
 use an untitled 550 × 200 fixture, so protection is tested without assuming a
 particular upload dialog title or dimensions.
 

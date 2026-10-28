@@ -47,6 +47,21 @@ internal static class FloatingWindowNativeRegression
         check(!Matches(nestedDialog), "Nested upload dialog bypassed the disabled-owner protection");
         EnableWindow(ownerWindow.Handle, true);
         check(Matches(uploadDialog), "Completed modal operation left the floating bar permanently excluded");
+        var monitorInfo = new NativeMonitorInfo { Size = Marshal.SizeOf<NativeMonitorInfo>() };
+        if (!GetMonitorInfo(MonitorFromWindow(popup.Handle, 2), ref monitorInfo))
+            throw new InvalidOperationException("Could not obtain fixture monitor bounds");
+        using var photoSurface = Make("", FloatingStyle, ToolNoActivate,
+            width: monitorInfo.Monitor.Right - monitorInfo.Monitor.Left, height: monitorInfo.Monitor.Bottom - monitorInfo.Monitor.Top);
+        // Rendering a tiny icon must not make the enclosing full-screen HWND look
+        // like a toolbar to the matcher. No visible desktop window is created.
+        var icon = new System.Windows.Media.DrawingVisual();
+        using (var context = icon.RenderOpen())
+            context.DrawRectangle(System.Windows.Media.Brushes.Blue, null, new System.Windows.Rect(0, 0, 108, 108));
+        photoSurface.RootVisual = icon;
+        check(!Matches(photoSurface), "Photo surface containing a small desktop icon matched the floating rule");
+        using var collapsedPhoto = Make("", FloatingStyle | 0x01000000, ToolNoActivate,
+            width: monitorInfo.Work.Right - monitorInfo.Work.Left, height: monitorInfo.Work.Bottom - monitorInfo.Work.Top);
+        check(!Matches(collapsedPhoto), "Maximized transparent photo surface matched the floating rule");
 
         // Our own cloaked fixture process deliberately stops pumping its window
         // thread. Hide/restore must return without waiting for that thread to recover.
@@ -133,11 +148,12 @@ internal static class FloatingWindowNativeRegression
         return 0;
     }
 
-    private static HwndSource Make(string title, int style, int extended, IntPtr parent = default, int x = -20000)
+    private static HwndSource Make(string title, int style, int extended, IntPtr parent = default, int x = -20000,
+        int width = 550, int height = 200)
     {
         var source = new HwndSource(new HwndSourceParameters(title)
         {
-            Width = 550, Height = 200, PositionX = x, PositionY = 0,
+            Width = width, Height = height, PositionX = x, PositionY = 0,
             WindowStyle = style, ExtendedWindowStyle = extended, ParentWindow = parent
         });
         // CreateWindow adds WS_CAPTION to an overlapped HWND; EasiNote removes that
@@ -157,6 +173,9 @@ internal static class FloatingWindowNativeRegression
     [DllImport("user32.dll")] private static extern uint GetDpiForWindow(IntPtr hwnd);
     [DllImport("user32.dll")] private static extern bool GetWindowRect(IntPtr hwnd, out NativeRect rect);
     [StructLayout(LayoutKind.Sequential)] private struct NativeRect { public int Left, Top, Right, Bottom; }
+    [StructLayout(LayoutKind.Sequential)] private struct NativeMonitorInfo { public int Size; public NativeRect Monitor, Work; public uint Flags; }
+    [DllImport("user32.dll")] private static extern IntPtr MonitorFromWindow(IntPtr hwnd, uint flags);
+    [DllImport("user32.dll", EntryPoint = "GetMonitorInfoW")] private static extern bool GetMonitorInfo(IntPtr monitor, ref NativeMonitorInfo info);
     [DllImport("dwmapi.dll")] private static extern int DwmSetWindowAttribute(IntPtr hwnd, uint attribute, ref int value, uint size);
     [DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr hwnd, int command);
 }
