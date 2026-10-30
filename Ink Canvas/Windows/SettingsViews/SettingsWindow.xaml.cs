@@ -770,7 +770,8 @@ namespace Ink_Canvas.Windows.SettingsViews
                     {
                         if (!feRoot.IsLoaded)
                         {
-                            try { feRoot.ApplyTemplate(); } catch (Exception ex)
+                            try { feRoot.ApplyTemplate(); }
+                            catch (Exception ex)
                             {
                                 LogHelper.WriteLogToFile($"[Settings] 预展开页面模板失败，搜索索引可能不完整 (tag={tag}): {ex.Message}", LogHelper.LogType.Info);
                             }
@@ -876,7 +877,8 @@ namespace Ink_Canvas.Windows.SettingsViews
             {
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    try { fe.BringIntoView(); } catch (Exception ex)
+                    try { fe.BringIntoView(); }
+                    catch (Exception ex)
                     {
                         LogHelper.WriteLogToFile($"[Settings] 滚动到搜索命中的设置项失败: {ex.Message}", LogHelper.LogType.Info);
                     }
@@ -1107,7 +1109,8 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         private void FlashHighlight(FrameworkElement target)
         {
-            try { target.BringIntoView(); } catch (Exception ex)
+            try { target.BringIntoView(); }
+            catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"[Settings] 高亮前滚动到目标设置项失败: {ex.Message}", LogHelper.LogType.Info);
             }
@@ -1389,7 +1392,8 @@ namespace Ink_Canvas.Windows.SettingsViews
                 string pageTag = GetCurrentPageTag();
                 string uri = BuildSettingsUri(pageTag, key);
 
-                try { Clipboard.SetText(uri); } catch (Exception ex)
+                try { Clipboard.SetText(uri); }
+                catch (Exception ex)
                 {
                     LogHelper.WriteLogToFile($"[Settings] 复制设置项 URL 到剪贴板失败: {ex.Message}", LogHelper.LogType.Info);
                 }

@@ -320,15 +320,15 @@ namespace Ink_Canvas
             switch (node.Type.ToLowerInvariant())
             {
                 case "group":
-                {
-                    var group = new TransformGroup();
-                    foreach (var child in node.Children ?? new List<PersistedTransformNode>())
                     {
-                        var transform = DeserializeTransformNode(child);
-                        if (transform != null) group.Children.Add(transform);
+                        var group = new TransformGroup();
+                        foreach (var child in node.Children ?? new List<PersistedTransformNode>())
+                        {
+                            var transform = DeserializeTransformNode(child);
+                            if (transform != null) group.Children.Add(transform);
+                        }
+                        return group;
                     }
-                    return group;
-                }
                 case "scale" when values.Length >= 4:
                     return new ScaleTransform(values[0], values[1], values[2], values[3]);
                 case "translate" when values.Length >= 2:

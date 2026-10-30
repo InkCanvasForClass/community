@@ -1,14 +1,9 @@
-using Ink_Canvas.Helpers;
+using Ink_Canvas.Services.Shell;
 using System;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Forms;
-using System.Windows.Ink;
 using System.Windows.Media.Imaging;
 
 namespace Ink_Canvas
@@ -18,147 +13,28 @@ namespace Ink_Canvas
         /// <summary>
         /// 在切页/加页场景下使用：先捕获当前画面到内存并克隆墨迹，然后立即返回；截图与墨迹保存在后台异步执行，不阻塞切页。
         /// 调用方应在调用本方法后立即执行 SaveStrokes、ClearStrokes、切页、RestoreStrokes 等逻辑。
+        /// 壳：本体已搬入 <see cref="ScreenshotService"/>（M15）。
         /// </summary>
         /// <param name="isHideNotification">是否隐藏保存成功通知</param>
         /// <param name="fileName">截图文件名（可选）</param>
         private void CaptureAndEnqueueScreenshotSave(bool isHideNotification, string fileName = null)
-        {
-            var savePath = Settings.Automation.IsSaveScreenshotsInDateFolders
-                ? GetDateFolderPath(fileName)
-                : GetDefaultFolderPath();
-
-            System.Drawing.Bitmap bitmap = null;
-            StrokeCollection strokesToSave = null;
-            int pageIndexForStrokes = 0;
-            string strokeSavePath = null;
-
-            try
-            {
-                bitmap = CaptureScreenshotToBitmap();
-                if (bitmap == null) return;
-
-                if (Settings.Automation.IsAutoSaveStrokesAtScreenshot && inkCanvas.Strokes.Count > 0)
-                {
-                    strokesToSave = inkCanvas.Strokes.Clone();
-                    pageIndexForStrokes = CurrentWhiteboardIndex;
-                    var basePath = Settings.Automation.AutoSavedStrokesLocation
-                        + @"\Auto Saved - BlackBoard Strokes";
-                    if (!Directory.Exists(basePath)) Directory.CreateDirectory(basePath);
-                    string stem;
-                    if (Settings.Automation.IsUseCustomSaveFileName)
-                    {
-                        stem = SaveFileNameHelper.Render(Settings.Automation.CustomSaveFileNameTemplate,
-                            new SaveFileNameContext
-                            {
-                                Mode = "BlackBoard",
-                                Type = "Auto",
-                                Page = pageIndexForStrokes,
-                                Count = strokesToSave.Count
-                            });
-                    }
-                    else
-                    {
-                        stem = $"{DateTime.Now:yyyy-MM-dd HH-mm-ss-fff} Page-{pageIndexForStrokes} StrokesCount-{strokesToSave.Count}";
-                    }
-                    strokeSavePath = Path.Combine(basePath, stem + ".icstk");
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"CaptureAndEnqueueScreenshotSave 捕获失败: {ex}", LogHelper.LogType.Error);
-                bitmap?.Dispose();
-                return;
-            }
-
-            var bitmapToSave = bitmap;
-            var path = savePath;
-            var hideNotification = isHideNotification;
-
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    if (bitmapToSave != null)
-                    {
-                        var directory = Path.GetDirectoryName(path);
-                        if (!Directory.Exists(directory))
-                            Directory.CreateDirectory(directory);
-                        Helpers.ScreenshotImageSaveHelper.Save(bitmapToSave, path);
-                        bitmapToSave.Dispose();
-                    }
-
-                    if (strokesToSave != null && !string.IsNullOrEmpty(strokeSavePath))
-                    {
-                        // 原子写：tmp + File.Replace/Move，避免 FileMode.Create 直接截断后
-                        // 写入中途失败（磁盘满/进程被杀）让 .icstk 停在 0 字节。
-                        var tmpStrokePath = strokeSavePath + ".tmp";
-                        try
-                        {
-                            using (var fs = new FileStream(tmpStrokePath, FileMode.Create))
-                            {
-                                strokesToSave.Save(fs);
-                            }
-                            if (File.Exists(strokeSavePath))
-                                File.Replace(tmpStrokePath, strokeSavePath, null);
-                            else
-                                File.Move(tmpStrokePath, strokeSavePath);
-                        }
-                        catch
-                        {
-                            try { if (File.Exists(tmpStrokePath)) File.Delete(tmpStrokePath); } catch (Exception ex)
-                            {
-                                LogHelper.WriteLogToFile($"[Screenshot] 清理临时笔画文件失败: {ex.Message}", LogHelper.LogType.Info);
-                            }
-                            throw;
-                        }
-                    }
-
-                    if (!hideNotification && !string.IsNullOrEmpty(path))
-                    {
-                        Dispatcher.Invoke(() => ShowNotification(string.Format(Properties.MainWindowStrings.Main_Screenshot_SaveSuccess, path)));
-                    }
-
-                    // 使用上传帮助类上传到所有启用的服务
-                    await Helpers.UploadHelper.UploadFileAsync(path);
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"后台保存截图/墨迹失败: {ex}", LogHelper.LogType.Error);
-                    bitmapToSave?.Dispose();
-                }
-            });
-        }
-
-        /// <summary>
-        /// 将当前屏幕内容捕获为位图（仅内存，不写文件）。调用方或后台任务负责 Dispose。
-        /// </summary>
-        private System.Drawing.Bitmap CaptureScreenshotToBitmap()
-        {
-            var rc = SystemInformation.VirtualScreen;
-            var bitmap = new System.Drawing.Bitmap(rc.Width, rc.Height, PixelFormat.Format32bppArgb);
-            using (var memoryGraphics = Graphics.FromImage(bitmap))
-            {
-                memoryGraphics.CompositingQuality = CompositingQuality.HighQuality;
-                memoryGraphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                memoryGraphics.SmoothingMode = SmoothingMode.HighQuality;
-                memoryGraphics.CompositingMode = CompositingMode.SourceOver;
-                memoryGraphics.CopyFromScreen(rc.X, rc.Y, 0, 0, rc.Size, CopyPixelOperation.SourceCopy);
-            }
-            return bitmap;
-        }
+            => _screenshotService.CaptureAndEnqueueScreenshotSave(isHideNotification, fileName);
 
         /// <summary>
         /// 供插件截图服务调用的全屏捕获入口（调用方负责 Dispose 返回值）。
+        /// 壳：本体已搬入 <see cref="ScreenshotService"/>（M15）。
         /// </summary>
-        internal System.Drawing.Bitmap CapturePluginFullScreen() => CaptureScreenshotToBitmap();
+        internal System.Drawing.Bitmap CapturePluginFullScreen() => ScreenshotService.CaptureScreenshotToBitmap();
 
         /// <summary>
         /// 供插件截图服务调用的区域捕获入口（调用方负责 Dispose 返回值）。
+        /// 壳：本体已搬入 <see cref="ScreenshotService"/>（M15）。
         /// </summary>
-        internal System.Drawing.Bitmap CapturePluginScreenArea(Rectangle area) => CaptureScreenArea(area);
+        internal System.Drawing.Bitmap CapturePluginScreenArea(Rectangle area) => ScreenshotService.CaptureScreenArea(area);
 
         /// <summary>
         /// 保存截图
+        /// 壳：本体已搬入 <see cref="ScreenshotService"/>（M15）。
         /// </summary>
         /// <param name="isHideNotification">是否隐藏通知</param>
         /// <param name="fileName">文件名</param>
@@ -169,63 +45,11 @@ namespace Ink_Canvas
         /// 3. 如果设置了自动保存墨迹，调用SaveInkCanvasStrokes方法保存墨迹
         /// </remarks>
         private void SaveScreenShot(bool isHideNotification, string fileName = null)
-        {
-            var savePath = Settings.Automation.IsSaveScreenshotsInDateFolders
-                ? GetDateFolderPath(fileName)
-                : GetDefaultFolderPath();
-
-            CaptureAndSaveScreenshot(savePath, isHideNotification);
-
-            if (Settings.Automation.IsAutoSaveStrokesAtScreenshot)
-                SaveInkCanvasStrokes(false);
-        }
-
-        /// <summary>
-        /// 获取截图保存目录。
-        /// 仅当"截图保存到指定位置"开关开启时使用自定义位置，否则回退到桌面。
-        /// </summary>
-        private string GetScreenshotSaveDirectory()
-        {
-            if (Settings.Automation.IsSaveScreenshotToCustomLocation)
-            {
-                var location = Settings.Automation.ScreenshotSaveLocation;
-                if (!string.IsNullOrWhiteSpace(location))
-                    return location;
-            }
-            return Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-        }
-
-        /// <summary>
-        /// 将截图写入剪贴板，同时提供 PNG 流、Bitmap、FileDrop 三种格式。
-        /// 仅写入 Bitmap 格式时 Win+V 剪贴板历史不收录、资源管理器右键也不能粘贴为文件，
-        /// 故用 DataObject 多格式写入：
-        /// - PNG 流：Win+V 历史 / 现代应用可识别
-        /// - Bitmap：老式应用兼容
-        /// - FileDrop：资源管理器右键可粘贴为 .png 文件（需传入已保存的文件路径）
-        /// 注意：带上 FileDrop 后，部分聊天软件可能优先把贴图当作发送文件处理。
-        /// </summary>
-        private static void CopyImageToClipboard(BitmapSource image, string filePath = null)
-        {
-            if (image == null) return;
-
-            var pngStream = new MemoryStream();
-            var encoder = new PngBitmapEncoder();
-            encoder.Frames.Add(BitmapFrame.Create(image));
-            encoder.Save(pngStream);
-            pngStream.Position = 0;
-
-            var data = new System.Windows.DataObject();
-            data.SetData("PNG", pngStream);                              // Win+V 历史 / 现代应用
-            data.SetData(System.Windows.DataFormats.Bitmap, image);    // 老式 Bitmap 兼容
-            if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
-            {
-                data.SetData(System.Windows.DataFormats.FileDrop, new[] { filePath }); // 资源管理器右键粘贴为文件
-            }
-            System.Windows.Clipboard.SetDataObject(data, true);
-        }
+            => _screenshotService.SaveScreenShot(isHideNotification, fileName);
 
         /// <summary>
         /// 保存截图到配置的保存目录
+        /// 壳：本体已搬入 <see cref="ScreenshotService"/>（M15）。
         /// </summary>
         /// <remarks>
         /// 该方法会：
@@ -234,17 +58,7 @@ namespace Ink_Canvas
         /// 3. 如果设置了截图后复制到剪贴板，将截图复制到剪贴板
         /// 4. 如果设置了自动保存墨迹，调用SaveInkCanvasStrokes方法保存墨迹
         /// </remarks>
-        internal void SaveScreenShotToDesktop()
-        {
-            var savePath = Path.Combine(
-                GetScreenshotSaveDirectory(),
-                $"{GetScreenshotFileNameStem()}.png");
-
-            CaptureAndSaveScreenshot(savePath, false, Settings.Automation.IsCopyScreenshotToClipboard);
-
-            if (Settings.Automation.IsAutoSaveStrokesAtScreenshot)
-                SaveInkCanvasStrokes(false);
-        }
+        internal void SaveScreenShotToDesktop() => _screenshotService.SaveScreenShotToDesktop();
 
         internal async Task SaveAreaScreenShotToDesktop()
         {
@@ -276,75 +90,18 @@ namespace Ink_Canvas
                 }
 
                 var savePath = Path.Combine(
-                    GetScreenshotSaveDirectory(),
-                    $"{GetScreenshotFileNameStem()}.png");
+                    _screenshotService.GetScreenshotSaveDirectory(),
+                    $"{_screenshotService.GetScreenshotFileNameStem()}.png");
 
-                using (var originalBitmap = CaptureScreenArea(screenshotResult.Value.Area))
+                // 执行段（捕获→叠墨→遮罩→落盘→剪贴板）已搬入 ScreenshotService（M15）；
+                // 成功/失败通知保持原有相对顺序：落盘（+剪贴板）之后、自动保存墨迹之前。
+                if (!_screenshotService.SaveAreaScreenshot(screenshotResult.Value, savePath, Settings.Automation.IsCopyScreenshotToClipboard))
                 {
-                    if (originalBitmap == null)
-                    {
-                        ShowNotification(Properties.MainWindowStrings.Main_Screenshot_Failed);
-                        return;
-                    }
-
-                    Bitmap finalBitmap = originalBitmap;
-                    bool needDisposeFinalBitmap = false;
-
-                    try
-                    {
-                        if (screenshotResult.Value.IncludeInk && screenshotResult.Value.InkOverlayBitmapSource != null)
-                        {
-                            var withInkBitmap = OverlayInkOnCapturedBitmap(finalBitmap, screenshotResult.Value.Area, screenshotResult.Value.InkOverlayBitmapSource);
-                            if (withInkBitmap != null && withInkBitmap != finalBitmap)
-                            {
-                                if (needDisposeFinalBitmap && finalBitmap != originalBitmap)
-                                {
-                                    finalBitmap.Dispose();
-                                }
-                                finalBitmap = withInkBitmap;
-                                needDisposeFinalBitmap = true;
-                            }
-                        }
-
-                        if (screenshotResult.Value.Path != null && screenshotResult.Value.Path.Count > 0)
-                        {
-                            var maskedBitmap = ApplyShapeMask(finalBitmap, screenshotResult.Value.Path, screenshotResult.Value.Area);
-                            if (maskedBitmap != null && maskedBitmap != finalBitmap)
-                            {
-                                if (needDisposeFinalBitmap && finalBitmap != originalBitmap)
-                                {
-                                    finalBitmap.Dispose();
-                                }
-                                finalBitmap = maskedBitmap;
-                                needDisposeFinalBitmap = true;
-                            }
-                        }
-
-                        var directory = Path.GetDirectoryName(savePath);
-                        if (!Directory.Exists(directory))
-                        {
-                            Directory.CreateDirectory(directory);
-                        }
-
-                        finalBitmap.Save(savePath, ImageFormat.Png);
-
-                        // 截图后复制到剪贴板
-                        if (Settings.Automation.IsCopyScreenshotToClipboard)
-                        {
-                            try { CopyImageToClipboard(ConvertBitmapToBitmapSource(finalBitmap), savePath); }
-                            catch (Exception ex) { LogHelper.WriteLogToFile($"截图复制到剪贴板失败: {ex}", LogHelper.LogType.Warning); }
-                        }
-
-                        ShowNotification(string.Format(Properties.MainWindowStrings.Main_Screenshot_SaveSuccess, savePath));
-                    }
-                    finally
-                    {
-                        if (needDisposeFinalBitmap && finalBitmap != originalBitmap)
-                        {
-                            finalBitmap.Dispose();
-                        }
-                    }
+                    ShowNotification(Properties.MainWindowStrings.Main_Screenshot_Failed);
+                    return;
                 }
+
+                ShowNotification(string.Format(Properties.MainWindowStrings.Main_Screenshot_SaveSuccess, savePath));
 
                 if (Settings.Automation.IsAutoSaveStrokesAtScreenshot)
                     SaveInkCanvasStrokes(false);
@@ -453,173 +210,6 @@ namespace Ink_Canvas
             BtnWhiteBoardAdd_Click(null, new RoutedEventArgs());
 
             await InsertBitmapSourceToCanvas(bitmapSourceForClipboard);
-        }
-
-        /// <summary>
-        /// 提取公共的截图和保存逻辑
-        /// </summary>
-        /// <param name="savePath">保存路径</param>
-        /// <param name="isHideNotification">是否隐藏通知</param>
-        /// <param name="copyToClipboard">是否在保存后复制到剪贴板</param>
-        /// <remarks>
-        /// 该方法会：
-        /// 1. 获取虚拟屏幕边界
-        /// 2. 创建位图并设置高质量渲染
-        /// 3. 从屏幕复制内容到位图
-        /// 4. 确保保存目录存在
-        /// 5. 保存为PNG格式
-        /// 6. 若 copyToClipboard 为真，将截图复制到剪贴板
-        /// 7. 如果不隐藏通知，显示保存成功通知
-        /// 8. 异步上传截图到Dlass
-        /// </remarks>
-        private void CaptureAndSaveScreenshot(string savePath, bool isHideNotification, bool copyToClipboard = false)
-        {
-            var rc = SystemInformation.VirtualScreen;
-
-            using (var bitmap = new Bitmap(rc.Width, rc.Height, PixelFormat.Format32bppArgb))
-            using (var memoryGraphics = Graphics.FromImage(bitmap))
-            {
-                // 设置高质量渲染
-                memoryGraphics.CompositingQuality = CompositingQuality.HighQuality;
-                memoryGraphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                memoryGraphics.SmoothingMode = SmoothingMode.HighQuality;
-                memoryGraphics.CompositingMode = CompositingMode.SourceOver;
-
-                memoryGraphics.CopyFromScreen(rc.X, rc.Y, 0, 0, rc.Size, CopyPixelOperation.SourceCopy);
-
-                // 确保目录存在
-                var directory = Path.GetDirectoryName(savePath);
-                if (!Directory.Exists(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
-
-                // 使用PNG格式保存，确保透明度信息不丢失
-                bitmap.Save(savePath, ImageFormat.Png);
-                LogHelper.WriteLogToFile(
-                    $"[Screenshot] 截图已保存: {savePath} ({rc.Width}x{rc.Height}), 复制到剪贴板={copyToClipboard}",
-                    LogHelper.LogType.Info);
-
-                // 截图后复制到剪贴板
-                if (copyToClipboard)
-                {
-                    try { CopyImageToClipboard(ConvertBitmapToBitmapSource(bitmap), savePath); }
-                    catch (Exception ex) { LogHelper.WriteLogToFile($"截图复制到剪贴板失败: {ex}", LogHelper.LogType.Warning); }
-                }
-            }
-
-            if (!isHideNotification)
-            {
-                Task.Delay(100).ContinueWith(t =>
-                {
-                    Dispatcher.Invoke(() =>
-                    {
-                        ShowNotification(string.Format(Properties.MainWindowStrings.Main_Screenshot_SaveSuccess, savePath));
-                    });
-                });
-            }
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    // 使用上传帮助类上传到所有启用的服务
-                    await Helpers.UploadHelper.UploadFileAsync(savePath);
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"[Screenshot] 截图上传失败（本地文件已保存）: {ex.Message}", LogHelper.LogType.Info);
-                }
-            });
-        }
-
-        /// <summary>
-        /// 获取日期文件夹路径
-        /// </summary>
-        /// <param name="fileName">文件名</param>
-        /// <returns>日期文件夹路径</returns>
-        /// <remarks>
-        /// 该方法会：
-        /// 1. 如果文件名为空，使用当前时间作为文件名
-        /// 2. 获取基础路径和日期文件夹名
-        /// 3. 组合路径并返回
-        /// </remarks>
-        private string GetDateFolderPath(string fileName)
-        {
-            if (string.IsNullOrWhiteSpace(fileName))
-            {
-                fileName = Settings.Automation.IsUseCustomSaveFileName
-                    ? SaveFileNameHelper.Render(Settings.Automation.CustomSaveFileNameTemplate,
-                        new SaveFileNameContext { Mode = "Screenshot", Type = "Auto", Count = inkCanvas?.Strokes?.Count })
-                    : DateTime.Now.ToString("HH-mm-ss");
-            }
-
-            var basePath = Settings.Automation.AutoSavedStrokesLocation;
-            var dateFolder = DateTime.Now.ToString("yyyyMMdd");
-            var safeRelativePath = SanitizeScreenshotRelativePath(fileName);
-
-            return Path.Combine(
-                basePath,
-                "Auto Saved - Screenshots",
-                dateFolder,
-                safeRelativePath + Helpers.ScreenshotImageSaveHelper.GetExtension());
-        }
-
-        private static string SanitizeScreenshotRelativePath(string relativePath)
-        {
-            if (string.IsNullOrWhiteSpace(relativePath)) return DateTime.Now.ToString("HH-mm-ss");
-
-            var separators = new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
-            var parts = relativePath
-                .Split(separators, StringSplitOptions.RemoveEmptyEntries)
-                .Select(SanitizePathPart)
-                .Where(part => !string.IsNullOrWhiteSpace(part));
-
-            var sanitized = Path.Combine(parts.ToArray());
-            return string.IsNullOrWhiteSpace(sanitized) ? DateTime.Now.ToString("HH-mm-ss") : sanitized;
-        }
-
-        private static string SanitizePathPart(string pathPart)
-        {
-            var invalidChars = Path.GetInvalidFileNameChars();
-            var chars = pathPart.Select(c => invalidChars.Contains(c) ? '_' : c).ToArray();
-            var sanitized = new string(chars).Trim().TrimEnd('.', ' ');
-            return sanitized == "." || sanitized == ".." ? "_" : sanitized;
-        }
-
-        /// <summary>
-        /// 获取默认文件夹路径
-        /// </summary>
-        /// <returns>默认文件夹路径</returns>
-        /// <remarks>
-        /// 该方法会：
-        /// 1. 获取基础路径
-        /// 2. 组合截图文件夹路径
-        /// 3. 确保截图文件夹存在
-        /// 4. 生成文件名并组合完整路径返回
-        /// </remarks>
-        private string GetDefaultFolderPath()
-        {
-            var basePath = Settings.Automation.AutoSavedStrokesLocation;
-            var screenshotsFolder = Path.Combine(basePath, "Auto Saved - Screenshots");
-
-            if (!Directory.Exists(screenshotsFolder))
-            {
-                Directory.CreateDirectory(screenshotsFolder);
-            }
-
-            return Path.Combine(
-                screenshotsFolder,
-                GetScreenshotFileNameStem() + Helpers.ScreenshotImageSaveHelper.GetExtension());
-        }
-
-        private string GetScreenshotFileNameStem()
-        {
-            if (Settings.Automation.IsUseCustomSaveFileName)
-            {
-                return SaveFileNameHelper.Render(Settings.Automation.CustomSaveFileNameTemplate,
-                    new SaveFileNameContext { Mode = "Screenshot", Type = "Auto", Count = inkCanvas?.Strokes?.Count });
-            }
-            return DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
         }
     }
 }

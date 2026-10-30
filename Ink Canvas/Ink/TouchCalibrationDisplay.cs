@@ -13,9 +13,12 @@ namespace Ink_Canvas.Ink
             var dpi = VisualTreeHelper.GetDpi(window);
             return new TouchCalibrationEnvironment
             {
-                Source = source, Display = screen.DeviceName,
-                PixelWidth = screen.Bounds.Width, PixelHeight = screen.Bounds.Height,
-                DpiX = dpi.DpiScaleX, DpiY = dpi.DpiScaleY
+                Source = source,
+                Display = screen.DeviceName,
+                PixelWidth = screen.Bounds.Width,
+                PixelHeight = screen.Bounds.Height,
+                DpiX = dpi.DpiScaleX,
+                DpiY = dpi.DpiScaleY
             };
         }
     }

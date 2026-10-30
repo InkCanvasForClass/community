@@ -1,5 +1,6 @@
 using Ink_Canvas.Helpers;
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -471,6 +472,38 @@ namespace Ink_Canvas
         private void KeyHide(object sender, ExecutedRoutedEventArgs e)
         {
             SymbolIconEmoji_MouseUp(null, null);
+        }
+
+        /// <summary>
+        /// 构建内置热键「名称 → 触发回调」字典（M16：HotkeyService 构造注入，
+        /// 替代原 GlobalHotkeyManager.GetActionByName 的 switch 硬编码）。
+        /// 键集合与原 switch 完全一致；Pen1-5 的笔型映射复刻原 SwitchToPenType：
+        /// 0/3/4→默认笔、1→荧光笔、2→激光笔（原为反射调用，此处直接调用，等价）。
+        /// </summary>
+        private Dictionary<string, Action> BuildBuiltinHotkeyActions()
+        {
+            return new Dictionary<string, Action>(StringComparer.Ordinal)
+            {
+                { "Undo", () => SymbolIconUndo_MouseUp(null, null) },
+                { "Redo", () => SymbolIconRedo_MouseUp(null, null) },
+                { "Clear", () => SymbolIconDelete_MouseUp(null, null) },
+                { "Paste", () => HandleGlobalPaste(null, null) },
+                { "SelectTool", () => SwitchToSelectFromHotkey() },
+                { "DrawTool", () => PenIcon_Click(null, null) },
+                { "EraserTool", () => SwitchToEraserFromHotkey() },
+                { "BlackboardTool", () => ImageBlackboard_MouseUp(null, null) },
+                { "QuitDrawTool", () => KeyChangeToQuitDrawTool(null, null) },
+                { "Pen1", () => SwitchToDefaultPen(null, null) },
+                { "Pen2", () => SwitchToHighlighterPen(null, null) },
+                { "Pen3", () => SwitchToLaserPen(null, null) },
+                { "Pen4", () => SwitchToDefaultPen(null, null) },
+                { "Pen5", () => SwitchToDefaultPen(null, null) },
+                { "DrawLine", () => DrawLineFromHotkey() },
+                { "Screenshot", () => SaveScreenShotToDesktop() },
+                { "QuickDraw", () => OpenQuickDrawFromHotkey() },
+                { "Hide", () => SymbolIconEmoji_MouseUp(null, null) },
+                { "Exit", () => KeyExit(null, null) },
+            };
         }
     }
 }
