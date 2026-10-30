@@ -234,6 +234,12 @@ namespace Ink_Canvas
         internal void EnsureRealtimeStylusPipelineBinding()
         {
             if (inkCanvas == null) return;
+            // 课件套索沿用逻辑 select，不能被设置刷新重新打开内建墨迹采集。
+            if (_presentationElementSelection || IsExternalAnnotationActive)
+            {
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                return;
+            }
 
             inkCanvas.StylusDown -= MainWindow_StylusDown;
             inkCanvas.StylusMove -= MainWindow_StylusMove;
@@ -1138,6 +1144,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void MainWindow_TouchDown(object sender, TouchEventArgs e)
         {
+            if (IsExternalAnnotationActive) return;
             // 视频展台特殊模式：所有触摸交给 VideoPresenterSpecialModeContainer 的 Manipulation 处理，
             // 不进入下面的 EditingMode 切换逻辑（避免把 Ink 切到 None 干扰预览绘制）。
             if (_isVideoPresenterSpecialMode) return;
@@ -1197,6 +1204,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void MainWindow_StylusDown(object sender, StylusDownEventArgs e)
         {
+            if (IsExternalAnnotationActive) return;
             if (IsTouchStylusDevice(e.StylusDevice))
                 return;
 

@@ -629,6 +629,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void TimeMachine_OnUndoStateChanged(bool status)
         {
+            if (IsExternalAnnotationActive) return;
             IsUndoEnabled = status;
             RaisePluginEvent(PluginUndoRedoStateChanged, IsUndoEnabled, IsRedoEnabled, nameof(PluginUndoRedoStateChanged));
         }
@@ -642,6 +643,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void TimeMachine_OnRedoStateChanged(bool status)
         {
+            if (IsExternalAnnotationActive) return;
             IsRedoEnabled = status;
             RaisePluginEvent(PluginUndoRedoStateChanged, IsUndoEnabled, IsRedoEnabled, nameof(PluginUndoRedoStateChanged));
         }

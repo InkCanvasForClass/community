@@ -195,6 +195,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void ClearStrokes(bool isErasedByCode)
         {
+            if (!isErasedByCode && TryPresentationAnnotationCommand("clear")) return;
             _currentCommitType = CommitReason.ClearingCanvas;
             if (isErasedByCode) _currentCommitType = CommitReason.CodeInput;
 
@@ -216,6 +217,7 @@ namespace Ink_Canvas
         /// </summary>
         internal void ClearCanvasContentFromAutomation()
         {
+            if (TryPresentationAnnotationCommand("clear")) return;
             ClearStrokes(true);
         }
 
