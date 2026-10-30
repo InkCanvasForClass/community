@@ -1620,38 +1620,38 @@ namespace Ink_Canvas
         {
             try
             {
-            if (pointBatches == null)
-            {
-                // Defensive null batch — the presenter still requires a matching EndDry only
-                // when BeginDry returned successfully, so a null batch is treated as failure.
-                DisableWinRTInkAfterFailure(
-                    new InvalidOperationException("WinRT InkSynchronizer returned a null dry batch."),
-                    notify: true);
-                return;
-            }
+                if (pointBatches == null)
+                {
+                    // Defensive null batch — the presenter still requires a matching EndDry only
+                    // when BeginDry returned successfully, so a null batch is treated as failure.
+                    DisableWinRTInkAfterFailure(
+                        new InvalidOperationException("WinRT InkSynchronizer returned a null dry batch."),
+                        notify: true);
+                    return;
+                }
 
-            if (pointBatches.Count == 0)
-            {
-                // A successful BeginDry can return no strokes; it still needs exactly one EndDry.
-                CompleteWinRTInkDry();
-                return;
-            }
+                if (pointBatches.Count == 0)
+                {
+                    // A successful BeginDry can return no strokes; it still needs exactly one EndDry.
+                    CompleteWinRTInkDry();
+                    return;
+                }
 
-            var config = _winRTInkConfig;
-            if (config == null)
-            {
-                CompleteWinRTInkDry();
-                DisableWinRTInkAfterFailure(
-                    new InvalidOperationException("WinRT Ink configuration was unavailable while drying."),
-                    notify: true);
-                return;
-            }
+                var config = _winRTInkConfig;
+                if (config == null)
+                {
+                    CompleteWinRTInkDry();
+                    DisableWinRTInkAfterFailure(
+                        new InvalidOperationException("WinRT Ink configuration was unavailable while drying."),
+                        notify: true);
+                    return;
+                }
 
-            var pauseMetadata = CaptureWinRTInkPauseMetadata(pointBatches.Count);
-            var pendingDry = new Action(() =>
-                MaterializeWinRTInkDry(pointBatches, config, pauseMetadata));
-            _winRTInkPendingDry.Enqueue(pendingDry);
-            DrainWinRTInkPendingDry();
+                var pauseMetadata = CaptureWinRTInkPauseMetadata(pointBatches.Count);
+                var pendingDry = new Action(() =>
+                    MaterializeWinRTInkDry(pointBatches, config, pauseMetadata));
+                _winRTInkPendingDry.Enqueue(pendingDry);
+                DrainWinRTInkPendingDry();
             }
             catch (Exception ex)
             {

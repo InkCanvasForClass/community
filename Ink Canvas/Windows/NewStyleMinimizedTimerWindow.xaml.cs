@@ -164,7 +164,7 @@ namespace Ink_Canvas.Windows
 
         private void ToggleTransparency_Click(object sender, RoutedEventArgs e)
         {
-            if(SettingsManager.Settings.Timer.IsOpenTransparency)
+            if (SettingsManager.Settings.Timer.IsOpenTransparency)
             {
                 MainBorder.Background = (Brush)FindResource("NewTimerWindowBackground");
                 SettingsManager.Settings.Timer.IsOpenTransparency = false;

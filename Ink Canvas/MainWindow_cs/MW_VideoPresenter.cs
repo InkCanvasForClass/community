@@ -1070,8 +1070,8 @@ namespace Ink_Canvas
                         LogHelper.WriteLogToFile(
                             $"[BoothDiag] StrokesBBox: before=[{beforeBBox.X:F1},{beforeBBox.Y:F1},{beforeBBox.Width:F1}x{beforeBBox.Height:F1}], " +
                             $"after=[{afterBBox.X:F1},{afterBBox.Y:F1},{afterBBox.Width:F1}x{afterBBox.Height:F1}], " +
-                            $"visualCenter=({cx:F1},{cy:F1}), beforeCenter=({beforeBBox.X+beforeBBox.Width/2:F1},{beforeBBox.Y+beforeBBox.Height/2:F1}), " +
-                            $"afterCenter=({afterBBox.X+afterBBox.Width/2:F1},{afterBBox.Y+afterBBox.Height/2:F1})",
+                            $"visualCenter=({cx:F1},{cy:F1}), beforeCenter=({beforeBBox.X + beforeBBox.Width / 2:F1},{beforeBBox.Y + beforeBBox.Height / 2:F1}), " +
+                            $"afterCenter=({afterBBox.X + afterBBox.Width / 2:F1},{afterBBox.Y + afterBBox.Height / 2:F1})",
                             LogHelper.LogType.Info);
                     }
                     catch { }
@@ -2859,7 +2859,7 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-/// 把 WPF BitmapSource 转换为 System.Drawing.Bitmap（直接像素拷贝，无 PNG 编解码）。
+        /// 把 WPF BitmapSource 转换为 System.Drawing.Bitmap（直接像素拷贝，无 PNG 编解码）。
         /// 用于 D3DImage 拍照路径需要做照片矫正时：OpenCvSharp 的 BitmapConverter.ToMat 只接受 System.Drawing.Bitmap。
         /// 性能：相比 PNG 编解码省 15-25ms（4K 帧从 ~30ms 降到 ~5ms），实时检测关键路径。
         /// 原理：BitmapSource.CopyPixels 直接拷贝 GPU→CPU 的像素数据，用 Stride 对齐构造 Bitmap。
@@ -3138,13 +3138,13 @@ namespace Ink_Canvas
             if (content == null) return null;
             switch (prop)
             {
-                case BoothCameraProperty.Brightness:   return content.BrightnessSlider;
-                case BoothCameraProperty.Contrast:     return content.ContrastSlider;
-                case BoothCameraProperty.Saturation:   return content.SaturationSlider;
+                case BoothCameraProperty.Brightness: return content.BrightnessSlider;
+                case BoothCameraProperty.Contrast: return content.ContrastSlider;
+                case BoothCameraProperty.Saturation: return content.SaturationSlider;
                 case BoothCameraProperty.WhiteBalance: return content.WhiteBalanceSlider;
-                case BoothCameraProperty.Gain:         return content.GainSlider;
-                case BoothCameraProperty.Focus:        return content.FocusSlider;
-                case BoothCameraProperty.Exposure:     return content.ExposureSlider;
+                case BoothCameraProperty.Gain: return content.GainSlider;
+                case BoothCameraProperty.Focus: return content.FocusSlider;
+                case BoothCameraProperty.Exposure: return content.ExposureSlider;
             }
             return null;
         }
@@ -3156,13 +3156,13 @@ namespace Ink_Canvas
             if (content == null) return null;
             switch (prop)
             {
-                case BoothCameraProperty.Brightness:   return content.BrightnessValueText;
-                case BoothCameraProperty.Contrast:     return content.ContrastValueText;
-                case BoothCameraProperty.Saturation:   return content.SaturationValueText;
+                case BoothCameraProperty.Brightness: return content.BrightnessValueText;
+                case BoothCameraProperty.Contrast: return content.ContrastValueText;
+                case BoothCameraProperty.Saturation: return content.SaturationValueText;
                 case BoothCameraProperty.WhiteBalance: return content.WhiteBalanceValueText;
-                case BoothCameraProperty.Gain:         return content.GainValueText;
-                case BoothCameraProperty.Focus:        return content.FocusValueText;
-                case BoothCameraProperty.Exposure:     return content.ExposureValueText;
+                case BoothCameraProperty.Gain: return content.GainValueText;
+                case BoothCameraProperty.Focus: return content.FocusValueText;
+                case BoothCameraProperty.Exposure: return content.ExposureValueText;
             }
             return null;
         }
@@ -3174,13 +3174,13 @@ namespace Ink_Canvas
             if (canvas == null) return 0;
             switch (prop)
             {
-                case BoothCameraProperty.Brightness:   return canvas.VideoPresenterBrightness;
-                case BoothCameraProperty.Contrast:     return canvas.VideoPresenterContrast;
-                case BoothCameraProperty.Saturation:   return canvas.VideoPresenterSaturation;
+                case BoothCameraProperty.Brightness: return canvas.VideoPresenterBrightness;
+                case BoothCameraProperty.Contrast: return canvas.VideoPresenterContrast;
+                case BoothCameraProperty.Saturation: return canvas.VideoPresenterSaturation;
                 case BoothCameraProperty.WhiteBalance: return canvas.VideoPresenterWhiteBalance;
-                case BoothCameraProperty.Gain:         return canvas.VideoPresenterGain;
-                case BoothCameraProperty.Focus:        return canvas.VideoPresenterFocus;
-                case BoothCameraProperty.Exposure:     return canvas.VideoPresenterExposure;
+                case BoothCameraProperty.Gain: return canvas.VideoPresenterGain;
+                case BoothCameraProperty.Focus: return canvas.VideoPresenterFocus;
+                case BoothCameraProperty.Exposure: return canvas.VideoPresenterExposure;
             }
             return 0;
         }
@@ -3192,13 +3192,13 @@ namespace Ink_Canvas
             if (canvas == null) return;
             switch (prop)
             {
-                case BoothCameraProperty.Brightness:   canvas.VideoPresenterBrightness = value; break;
-                case BoothCameraProperty.Contrast:     canvas.VideoPresenterContrast = value; break;
-                case BoothCameraProperty.Saturation:   canvas.VideoPresenterSaturation = value; break;
+                case BoothCameraProperty.Brightness: canvas.VideoPresenterBrightness = value; break;
+                case BoothCameraProperty.Contrast: canvas.VideoPresenterContrast = value; break;
+                case BoothCameraProperty.Saturation: canvas.VideoPresenterSaturation = value; break;
                 case BoothCameraProperty.WhiteBalance: canvas.VideoPresenterWhiteBalance = value; break;
-                case BoothCameraProperty.Gain:         canvas.VideoPresenterGain = value; break;
-                case BoothCameraProperty.Focus:        canvas.VideoPresenterFocus = value; break;
-                case BoothCameraProperty.Exposure:     canvas.VideoPresenterExposure = value; break;
+                case BoothCameraProperty.Gain: canvas.VideoPresenterGain = value; break;
+                case BoothCameraProperty.Focus: canvas.VideoPresenterFocus = value; break;
+                case BoothCameraProperty.Exposure: canvas.VideoPresenterExposure = value; break;
             }
         }
 

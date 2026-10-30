@@ -100,7 +100,8 @@ namespace Ink_Canvas.Helpers
                     if (_lockedDirs.TryGetValue(d, out var handle))
                     {
                         _lockedDirs.Remove(d);
-                        try { handle.Dispose(); } catch (Exception ex)
+                        try { handle.Dispose(); }
+                        catch (Exception ex)
                         {
                             LogHelper.WriteLogToFile($"[ProcGuard] 释放目录锁句柄失败 (path={d}): {ex.Message}", LogHelper.LogType.Info);
                         }
@@ -117,7 +118,8 @@ namespace Ink_Canvas.Helpers
                     if (_lockedFiles.TryGetValue(fp, out var fs))
                     {
                         _lockedFiles.Remove(fp);
-                        try { fs.Dispose(); } catch (Exception ex)
+                        try { fs.Dispose(); }
+                        catch (Exception ex)
                         {
                             LogHelper.WriteLogToFile($"[ProcGuard] 释放文件锁句柄失败 (path={fp}): {ex.Message}", LogHelper.LogType.Info);
                         }
