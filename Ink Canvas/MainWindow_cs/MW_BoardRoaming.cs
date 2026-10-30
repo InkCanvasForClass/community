@@ -42,7 +42,14 @@ namespace Ink_Canvas
         {
             if (IsBoardRoamingMode)
             {
-                ExitBoardRoamingMode();
+                if (BoardRoamingPopup != null && BoardRoamingPopup.IsOpen)
+                {
+                    BoardRoamingPopup.IsOpen = false;
+                }
+                else
+                {
+                    ShowBoardRoamingPopup();
+                }
                 return;
             }
 
@@ -70,7 +77,6 @@ namespace Ink_Canvas
             HideSubPanels("roaming");
             UpdateBoardRoamingButtonState();
             SetCursorBasedOnEditingMode(inkCanvas);
-            ShowBoardRoamingPopup();
         }
 
         private bool IsBoardRoamingMode
@@ -125,6 +131,7 @@ namespace Ink_Canvas
             _isBoardRoamingPointerDown = false;
             CommitBoardRoamingHistory();
             CompletePluginCanvasViewportTransform();
+            RefreshBoardRoamingPopup();
             inkCanvas.Cursor = IsBoardRoamingMode ? Cursors.Hand : Cursors.Arrow;
         }
 
@@ -143,6 +150,8 @@ namespace Ink_Canvas
             else
                 EndBoardRoaming();
         }
+
+        private void ResetBoardRoamingContactState() => ResetBoardRoamingGestureState();
 
         private void ResetBoardRoamingGestureState()
         {
@@ -558,11 +567,19 @@ namespace Ink_Canvas
             if (updateBounds || _boardRoamingWorldBounds.IsEmpty)
             {
                 var contentBounds = GetBoardRoamingContentBounds();
+                if (!contentBounds.IsEmpty)
+                {
+                    contentBounds.Offset(_boardRoamingViewportWorldPosition.X, _boardRoamingViewportWorldPosition.Y);
+                }
                 var horizontalPadding = Math.Max(viewport.Width * 0.5, 1);
                 var verticalPadding = Math.Max(viewport.Height * 0.5, 1);
 
                 _boardRoamingWorldBounds = Rect.Union(viewport, contentBounds);
                 _boardRoamingWorldBounds.Inflate(horizontalPadding, verticalPadding);
+            }
+            else if (!_boardRoamingWorldBounds.Contains(viewport))
+            {
+                _boardRoamingWorldBounds = Rect.Union(_boardRoamingWorldBounds, viewport);
             }
 
             const double previewWidth = 352;
@@ -643,11 +660,17 @@ namespace Ink_Canvas
                     var background = GridBackgroundCover.Background ?? Brushes.White;
                     context.DrawRectangle(background, null, _boardRoamingPreviewMovementBounds);
 
+                    var canvasViewbox = new Rect(
+                        worldBounds.X - _boardRoamingViewportWorldPosition.X,
+                        worldBounds.Y - _boardRoamingViewportWorldPosition.Y,
+                        worldBounds.Width,
+                        worldBounds.Height);
+
                     var visualBrush = new VisualBrush(inkCanvas)
                     {
                         Stretch = Stretch.Fill,
                         ViewboxUnits = BrushMappingMode.Absolute,
-                        Viewbox = worldBounds,
+                        Viewbox = canvasViewbox,
                         ViewportUnits = BrushMappingMode.Absolute,
                         Viewport = _boardRoamingPreviewMovementBounds
                     };

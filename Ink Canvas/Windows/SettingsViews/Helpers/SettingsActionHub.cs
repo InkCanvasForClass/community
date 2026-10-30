@@ -731,6 +731,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         {
             var mw = GetMainWindow();
             mw?.UpdatePPTUIManagerSettings();
+            mw?.ApplyPPTNavBarShadow();
             PPTPageFlipPreviewWindow.ActiveInstance?.UpdatePreview();
         }
 

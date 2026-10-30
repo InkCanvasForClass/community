@@ -4508,6 +4508,10 @@ namespace Ink_Canvas
 
             var item = timeMachine.Undo();
             ApplyHistoryToCanvas(item);
+            if (IsBoardRoamingMode)
+            {
+                RefreshBoardRoamingPopup();
+            }
         }
 
         /// <summary>
@@ -4526,6 +4530,10 @@ namespace Ink_Canvas
 
             var item = timeMachine.Redo();
             ApplyHistoryToCanvas(item);
+            if (IsBoardRoamingMode)
+            {
+                RefreshBoardRoamingPopup();
+            }
         }
 
         /// <summary>
@@ -6342,6 +6350,11 @@ namespace Ink_Canvas
         private void UpdateCurrentToolMode(string mode)
         {
             if (mode != "select") LeavePresentationElementSelection();
+            if (!string.Equals(mode, "roaming", StringComparison.Ordinal) && IsBoardRoamingMode)
+            {
+                EndBoardRoaming();
+                ResetBoardRoamingContactState();
+            }
             _currentToolMode = NormalizeToolModeForFreeze(mode);
             if (IsExternalAnnotationActive)
             {
