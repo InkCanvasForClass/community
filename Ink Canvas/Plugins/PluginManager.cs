@@ -82,6 +82,8 @@ namespace Ink_Canvas.Plugins
         private PluginIpcService _ipc;
         // 当前正在 Initialize 的插件，用于 RegisterToolbarItem / RegisterUriHandler 等回调识别调用方
         private PluginInfo _currentLoadingPlugin;
+        private bool? _isFirstToolbarRegistrationForCurrentLoad;
+        private bool _registeredToolbarDuringCurrentLoad;
 
         // 插件 URI 处理器注册表：pluginId -> (subPath -> handler)
         private readonly Dictionary<string, Dictionary<string, Func<PluginUriRequest, bool>>> _uriHandlers =
@@ -1040,12 +1042,21 @@ namespace Ink_Canvas.Plugins
                 _registrationScopes[info.Id] = scope;
 
                 _currentLoadingPlugin = info;
+                // 在 Initialize 开始时固定首次注册状态，避免同一插件的第一个组件
+                // 写入标记后，后续组件（包括另一种工具栏）被误判为非首次注册。
+                _isFirstToolbarRegistrationForCurrentLoad = IsFirstToolbarRegistration();
+                _registeredToolbarDuringCurrentLoad = false;
                 try
                 {
                     pluginInstance.Initialize(pluginHost);
+                    // 初始化成功后再持久化；失败回滚不能留下阻止重试自动添加的标记。
+                    if (_registeredToolbarDuringCurrentLoad && _isFirstToolbarRegistrationForCurrentLoad == true)
+                        MarkToolbarRegistered();
                 }
                 finally
                 {
+                    _isFirstToolbarRegistrationForCurrentLoad = null;
+                    _registeredToolbarDuringCurrentLoad = false;
                     _currentLoadingPlugin = null;
                 }
                 Log(string.Format("Plugin loaded: {0} v{1} by {2}", info.Name, info.Version, info.Author));
@@ -2123,7 +2134,10 @@ namespace Ink_Canvas.Plugins
             }
             if (isFirstRegistration)
             {
-                MarkToolbarRegistered();
+                if (_isFirstToolbarRegistrationForCurrentLoad.HasValue)
+                    _registeredToolbarDuringCurrentLoad = true;
+                else
+                    MarkToolbarRegistered();
             }
 
             var itemId = itemInfo.Id;
@@ -2161,7 +2175,7 @@ namespace Ink_Canvas.Plugins
             }
 
             Log(string.Format("Plugin registered toolbar item: {0} (surface={1}, autoAdd={2})",
-                itemInfo.Id, targetSurface, isFirstRegistration));
+                itemInfo.Id, targetSurface, autoAddToActiveConfig));
         }
 
         private void UnregisterToolbarItems(string pluginId)
@@ -2219,6 +2233,8 @@ namespace Ink_Canvas.Plugins
         /// </summary>
         private bool IsFirstToolbarRegistration()
         {
+            if (_isFirstToolbarRegistrationForCurrentLoad.HasValue)
+                return _isFirstToolbarRegistrationForCurrentLoad.Value;
             var pluginFolder = _currentLoadingPlugin?.PluginFolderPath;
             if (string.IsNullOrEmpty(pluginFolder) || !Directory.Exists(pluginFolder))
                 return true; // 无法确定时默认按首次注册处理，保持向后兼容
