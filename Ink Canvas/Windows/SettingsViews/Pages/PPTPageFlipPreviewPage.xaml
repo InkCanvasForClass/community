@@ -187,6 +187,7 @@
                         <ui:SettingsExpander x:Name="ExpanderPPTNavBarShadow"
                                              Header="{x:Static props:ThemeStrings.Theme_PPTNavBarShadow}"
                                              Description="{x:Static props:ThemeStrings.Theme_PPTNavBarShadowHint}"
+                                             IsEnabled="{Binding IsEnabled, ElementName=PositionSettingsPanel}"
                                              IsExpanded="{Binding IsOn, ElementName=ToggleSwitchPPTNavBarShadow, Mode=OneWay}">
                             <ui:ToggleSwitch x:Name="ToggleSwitchPPTNavBarShadow" d:IsOn="True"
                                              Toggled="ToggleSwitchPPTNavBarShadow_Toggled"/>

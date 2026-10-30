@@ -615,16 +615,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             {
                 bool legacy = entry.GetSettingBool(ComponentSettingKeys.UseRedStyle);
                 entry.Settings.Remove(ComponentSettingKeys.UseRedStyle);
-                if (legacy)
-                {
-                    entry.Settings[ComponentSettingKeys.RedStyleIcon] = true;
-                    entry.Settings[ComponentSettingKeys.RedStyleText] = true;
-                }
-                else
-                {
-                    entry.Settings.Remove(ComponentSettingKeys.RedStyleIcon);
-                    entry.Settings.Remove(ComponentSettingKeys.RedStyleText);
-                }
+                // 关闭也必须保留键，否则下次加载清空组件时会被当作未迁移的旧配置。
+                entry.SetSetting(ComponentSettingKeys.RedStyleIcon, legacy);
+                entry.SetSetting(ComponentSettingKeys.RedStyleText, legacy);
                 changed = true;
             }
             else if (entry.Id == "builtin.clear"

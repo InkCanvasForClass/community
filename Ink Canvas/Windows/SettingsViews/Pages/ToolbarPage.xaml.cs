@@ -574,10 +574,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ApplyRedStyleSetting(string key, bool value)
         {
             if (!_isLoaded || ActiveEntry == null || _suppressSave) return;
-            if (value)
-                ActiveEntry.SetSetting(key, true);
-            else
-                ActiveEntry.Settings?.Remove(key);
+            // 显式保存关闭状态，避免两个键都缺失时被旧配置迁移恢复为默认红色。
+            ActiveEntry.SetSetting(key, value);
             SaveSettings();
         }
 

@@ -947,6 +947,9 @@ namespace Ink_Canvas
         [JsonProperty("enableHotkeysInMouseMode")]
         public bool EnableHotkeysInMouseMode { get; set; } = false;
 
+        [JsonProperty("keepDrawingHotkeysInMouseMode")]
+        public bool KeepDrawingHotkeysInMouseMode { get; set; } = false;
+
         [JsonProperty("passThroughMouseWheelInDrawingMode")]
         public bool PassThroughMouseWheelInDrawingMode { get; set; } = false;
 
@@ -1105,6 +1108,71 @@ namespace Ink_Canvas
 
         [JsonProperty("pptNavBarShadowSize")]
         public double PPTNavBarShadowSize { get; set; } = 16;
+
+        // 旧配置没有位置阴影字段时，保留原先所有位置共用的阴影值。
+        [JsonProperty("pptLSShadowEnabled")]
+        public bool? PPTLSShadowEnabled { get; set; }
+
+        [JsonProperty("pptRSShadowEnabled")]
+        public bool? PPTRSShadowEnabled { get; set; }
+
+        [JsonProperty("pptLBShadowEnabled")]
+        public bool? PPTLBShadowEnabled { get; set; }
+
+        [JsonProperty("pptRBShadowEnabled")]
+        public bool? PPTRBShadowEnabled { get; set; }
+
+        [JsonProperty("pptLSShadowSize")]
+        public double? PPTLSShadowSize { get; set; }
+
+        [JsonProperty("pptRSShadowSize")]
+        public double? PPTRSShadowSize { get; set; }
+
+        [JsonProperty("pptLBShadowSize")]
+        public double? PPTLBShadowSize { get; set; }
+
+        [JsonProperty("pptRBShadowSize")]
+        public double? PPTRBShadowSize { get; set; }
+
+        public (bool Enabled, double Size) GetPPTNavBarShadow(Controls.PPTNavBar.NavDirection direction)
+        {
+            var global = (Enabled: EnablePPTNavBarShadow, Size: PPTNavBarShadowSize);
+            return direction switch
+            {
+                Controls.PPTNavBar.NavDirection.LeftSide when !PPTLSUseGlobalSettings =>
+                    (PPTLSShadowEnabled ?? global.Enabled, PPTLSShadowSize ?? global.Size),
+                Controls.PPTNavBar.NavDirection.RightSide when !PPTRSUseGlobalSettings =>
+                    (PPTRSShadowEnabled ?? global.Enabled, PPTRSShadowSize ?? global.Size),
+                Controls.PPTNavBar.NavDirection.LeftBottom when !PPTLBUseGlobalSettings =>
+                    (PPTLBShadowEnabled ?? global.Enabled, PPTLBShadowSize ?? global.Size),
+                Controls.PPTNavBar.NavDirection.RightBottom when !PPTRBUseGlobalSettings =>
+                    (PPTRBShadowEnabled ?? global.Enabled, PPTRBShadowSize ?? global.Size),
+                _ => global
+            };
+        }
+
+        public void SetPPTNavBarShadow(Controls.PPTNavBar.NavDirection direction, bool enabled, double size)
+        {
+            switch (direction)
+            {
+                case Controls.PPTNavBar.NavDirection.LeftSide:
+                    PPTLSShadowEnabled = enabled;
+                    PPTLSShadowSize = size;
+                    break;
+                case Controls.PPTNavBar.NavDirection.RightSide:
+                    PPTRSShadowEnabled = enabled;
+                    PPTRSShadowSize = size;
+                    break;
+                case Controls.PPTNavBar.NavDirection.LeftBottom:
+                    PPTLBShadowEnabled = enabled;
+                    PPTLBShadowSize = size;
+                    break;
+                case Controls.PPTNavBar.NavDirection.RightBottom:
+                    PPTRBShadowEnabled = enabled;
+                    PPTRBShadowSize = size;
+                    break;
+            }
+        }
 
         // 全局默认设置（各位置"使用全局设置"开启时引用这些值）
         [JsonProperty("pptGlobalButtonEnabled")]
