@@ -63,7 +63,11 @@ namespace Ink_Canvas
             ShapeDrawFloatingBarBtn = btn;
             BorderDrawShape.PlacementTarget = btn;
         }
-        internal void AttachSymbolIconUndo(ToolbarImageButton btn) => SymbolIconUndo = btn;
+        internal void AttachSymbolIconUndo(ToolbarImageButton btn)
+        {
+            SymbolIconUndo = btn;
+            AttachUndoLongPressHandlers(btn);
+        }
         internal void AttachSymbolIconRedo(ToolbarImageButton btn) => SymbolIconRedo = btn;
         internal void AttachCursorWithDelBtn(ToolbarImageButton btn) => CursorWithDelFloatingBarBtn = btn;
         internal void AttachWhiteboardBtn(ToolbarImageButton btn) => WhiteboardFloatingBarBtn = btn;
@@ -450,6 +454,15 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 插件注册/注销后重建浮动与白板两套插件工具栏（调用方通常经 Dispatcher 排队调用）。
+        /// </summary>
+        internal void RebuildPluginToolbars()
+        {
+            RebuildToolbar();
+            RebuildBoardToolbar();
+        }
+
+        /// <summary>
         /// 紧凑模式浮动栏整体缩放倍率（相对用户设置的倍率再缩小至此比例，保持纵横比）。
         /// </summary>
         public const double CompactFloatingBarScaleFactor = 0.85;
@@ -624,11 +637,11 @@ namespace Ink_Canvas
         /// </summary>
         internal void ApplyPPTNavBarShadow()
         {
-            bool enabled = Settings.PowerPointSettings.EnablePPTNavBarShadow;
-            double size = Settings.PowerPointSettings.PPTNavBarShadowSize;
-
-            LeftSidePanelForPPTNavigation?.SetShadow(enabled, size);
-            RightSidePanelForPPTNavigation?.SetShadow(enabled, size);
+            var ppt = Settings.PowerPointSettings;
+            LeftSidePanelForPPTNavigation?.ApplyShadowSettings(ppt);
+            RightSidePanelForPPTNavigation?.ApplyShadowSettings(ppt);
+            LeftBottomPanelForPPTNavigation?.ApplyShadowSettings(ppt);
+            RightBottomPanelForPPTNavigation?.ApplyShadowSettings(ppt);
         }
 
         /// <summary>

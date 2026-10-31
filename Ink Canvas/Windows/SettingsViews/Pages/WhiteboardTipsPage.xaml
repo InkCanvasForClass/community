@@ -90,6 +90,40 @@
                         </ComboBox>
                     </ui:SettingsCard>
 
+                    <controls:LabeledSettingsCard x:Name="CardEnableAutoHideOnInteraction"
+                            Header="{x:Static props:ThemeStrings.Theme_Tips_AutoHideOnInteraction}"
+                            Description="{x:Static props:ThemeStrings.Theme_Tips_AutoHideOnInteractionHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Hide}"
+                            SwitchName="ToggleSwitchEnableAutoHideOnInteraction"
+                            Toggled="ToggleSwitchEnableAutoHideOnInteraction_Toggled" />
+
+                    <controls:LabeledSettingsCard x:Name="CardEnableInstantRestore"
+                            Header="{x:Static props:ThemeStrings.Theme_Tips_AutoHideInstantRestore}"
+                            Description="{x:Static props:ThemeStrings.Theme_Tips_AutoHideInstantRestoreHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Play}"
+                            SwitchName="ToggleSwitchEnableInstantRestore"
+                            Toggled="ToggleSwitchEnableInstantRestore_Toggled" />
+
+                    <ui:SettingsCard x:Name="CardAutoHideRestoreDelay"
+                            Header="{x:Static props:ThemeStrings.Theme_Tips_AutoHideRestoreDelay}"
+                            Description="{x:Static props:ThemeStrings.Theme_Tips_AutoHideRestoreDelayHint}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Stopwatch}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ComboBox x:Name="ComboBoxAutoHideRestoreDelay"
+                                  IsEditable="True"
+                                  MinWidth="120"
+                                  SelectionChanged="ComboBoxAutoHideRestoreDelay_SelectionChanged">
+                            <ComboBoxItem Content="1" />
+                            <ComboBoxItem Content="3" />
+                            <ComboBoxItem Content="5" />
+                            <ComboBoxItem Content="10" />
+                            <ComboBoxItem Content="15" />
+                            <ComboBoxItem Content="30" />
+                            <ComboBoxItem Content="60" />
+                        </ComboBox>
+                    </ui:SettingsCard>
+
                     <!-- Section 2: 信仰の源出自 Where? -->
                     <Grid Margin="1,30,0,6">
                         <Grid.ColumnDefinitions>

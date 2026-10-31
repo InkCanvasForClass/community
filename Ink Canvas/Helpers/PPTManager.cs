@@ -84,6 +84,7 @@ namespace Ink_Canvas.Helpers
         public PPTManager()
         {
             InitializeConnectionTimer();
+            LogHelper.WriteLogToFile("[PPT] PPT 管理器已创建", LogHelper.LogType.Info);
         }
 
         private void InitializeConnectionTimer()
@@ -98,7 +99,7 @@ namespace Ink_Canvas.Helpers
             if (!_disposed)
             {
                 _unifiedPPTTimer?.Start();
-                LogHelper.WriteLogToFile("PPT监控已启动", LogHelper.LogType.Trace);
+                LogHelper.WriteLogToFile("[PPT] 监控已启动", LogHelper.LogType.Info);
             }
         }
 
@@ -107,7 +108,7 @@ namespace Ink_Canvas.Helpers
             _unifiedPPTTimer?.Stop();
             StopWpsProcessCheckTimer();
             DisconnectFromPPT(isShutdown);
-            LogHelper.WriteLogToFile("PPT监控已停止", LogHelper.LogType.Trace);
+            LogHelper.WriteLogToFile($"[PPT] 监控已停止 (isShutdown={isShutdown})", LogHelper.LogType.Info);
         }
         #endregion
 
@@ -341,6 +342,9 @@ namespace Ink_Canvas.Helpers
             {
                 PPTApplication = application;
                 _cachedIsConnected = true;
+                LogHelper.WriteLogToFile(
+                    $"[PPT] 已连接到 {(IsSupportWPS ? "PowerPoint/WPS" : "PowerPoint")} 应用程序",
+                    LogHelper.LogType.Info);
 
                 // 在主线程中注册事件，确保COM对象在正确的线程中。
                 // 使用连接代际和捕获的实例，避免断开/重连后旧回调继续操作共享属性。
@@ -375,7 +379,9 @@ namespace Ink_Canvas.Helpers
                 // 触发连接成功事件
                 PPTConnectionChanged?.Invoke(true);
 
-                LogHelper.WriteLogToFile("成功连接到PPT应用程序", LogHelper.LogType.Event);
+                LogHelper.WriteLogToFile(
+                    $"[PPT] 连接完成: presentation={GetPresentationName()}, slides={SlidesCount}, slideshow={_cachedIsInSlideShow}",
+                    LogHelper.LogType.Info);
 
                 RefreshIsInSlideShowFromCom();
                 if (_cachedIsInSlideShow)
@@ -450,11 +456,19 @@ namespace Ink_Canvas.Helpers
 
         private void DisconnectFromPPT(bool isShutdown = false)
         {
+            var hadConnection = _cachedIsConnected || PPTApplication != null;
             var application = PPTApplication;
             Interlocked.Increment(ref _connectionGeneration);
 
             try
             {
+                if (hadConnection)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"[PPT] 开始断开连接 (isShutdown={isShutdown}, presentation={GetPresentationName()})",
+                        LogHelper.LogType.Info);
+                }
+
                 if (application != null)
                 {
                     if (isShutdown)
@@ -503,7 +517,12 @@ namespace Ink_Canvas.Helpers
 
                 PPTConnectionChanged?.Invoke(false);
 
-                LogHelper.WriteLogToFile("已断开PPT连接，暂时卸载模块以确保COM完全释放", LogHelper.LogType.Event);
+                if (hadConnection)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"[PPT] 连接已断开，开始释放 COM 状态 (isShutdown={isShutdown})",
+                        LogHelper.LogType.Info);
+                }
 
                 if (!isShutdown && !_disposed)
                 {
@@ -539,7 +558,7 @@ namespace Ink_Canvas.Helpers
                                 LogHelper.WriteLogToFile("PPT联动模块重载时计时器已释放，跳过重启", LogHelper.LogType.Trace);
                             }
 
-                            LogHelper.WriteLogToFile("PPT联动模块已重新加载", LogHelper.LogType.Trace);
+                            LogHelper.WriteLogToFile("[PPT] 联动模块已重新加载", LogHelper.LogType.Info);
                         }
                         catch (Exception ex)
                         {
@@ -917,7 +936,7 @@ namespace Ink_Canvas.Helpers
                 UpdateCurrentPresentationInfo();
                 RunPPTComDebugProbeIfEnabled("PresentationOpen", 0);
                 PresentationOpen?.Invoke(pres);
-                LogHelper.WriteLogToFile($"演示文稿已打开: {pres?.Name}", LogHelper.LogType.Event);
+                LogHelper.WriteLogToFile($"[PPT] 演示文稿已打开: {pres?.Name}", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
@@ -930,6 +949,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 PresentationClose?.Invoke(pres);
+                LogHelper.WriteLogToFile($"[PPT] 演示文稿关闭: {pres?.Name}", LogHelper.LogType.Info);
                 RunPPTComDebugProbeIfEnabled("PresentationClose", 0);
 
                 DisconnectFromPPT();
@@ -946,6 +966,9 @@ namespace Ink_Canvas.Helpers
             try
             {
                 UpdateCurrentPresentationInfo();
+                LogHelper.WriteLogToFile(
+                    $"[PPT] 放映开始: slide={GetCurrentSlideNumber()}, slides={SlidesCount}",
+                    LogHelper.LogType.Info);
                 RunPPTComDebugProbeIfEnabled("SlideShowBegin", 0);
                 SlideShowBegin?.Invoke(wn);
             }
@@ -960,6 +983,9 @@ namespace Ink_Canvas.Helpers
             try
             {
                 UpdateCurrentPresentationInfo();
+                LogHelper.WriteLogToFile(
+                    $"[PPT] 放映翻页: slide={GetCurrentSlideNumber()}, slides={SlidesCount}",
+                    LogHelper.LogType.Info);
                 RunPPTComDebugProbeIfEnabled("SlideShowNextSlide", 0);
                 SlideShowNextSlide?.Invoke(wn);
             }
@@ -974,6 +1000,7 @@ namespace Ink_Canvas.Helpers
             _cachedIsInSlideShow = false;
             try
             {
+                LogHelper.WriteLogToFile("[PPT] 放映结束", LogHelper.LogType.Info);
                 // 记录WPS进程用于后续管理
                 if (IsSupportWPS && PPTApplication != null)
                 {
@@ -1021,6 +1048,7 @@ namespace Ink_Canvas.Helpers
                                 {
                                     dynamic viewObj = view;
                                     viewObj.GotoSlide(slideNumber);
+                                    LogHelper.WriteLogToFile($"[PPT] 已跳转到幻灯片 {slideNumber}", LogHelper.LogType.Info);
                                     return true;
                                 }
                             }
@@ -1044,6 +1072,7 @@ namespace Ink_Canvas.Helpers
                                 {
                                     dynamic viewObj = windowView;
                                     viewObj.GotoSlide(slideNumber);
+                                    LogHelper.WriteLogToFile($"[PPT] 已跳转到幻灯片 {slideNumber}", LogHelper.LogType.Info);
                                     return true;
                                 }
                             }
@@ -1101,6 +1130,7 @@ namespace Ink_Canvas.Helpers
                         {
                             dynamic viewObj = view;
                             viewObj.Next();
+                            LogHelper.WriteLogToFile("[PPT] 已执行下一页", LogHelper.LogType.Info);
                             return true;
                         }
                     }
@@ -1151,6 +1181,7 @@ namespace Ink_Canvas.Helpers
                         {
                             dynamic viewObj = view;
                             viewObj.Previous();
+                            LogHelper.WriteLogToFile("[PPT] 已执行上一页", LogHelper.LogType.Info);
                             return true;
                         }
                     }
@@ -1201,6 +1232,7 @@ namespace Ink_Canvas.Helpers
                         {
                             dynamic viewObj = view;
                             viewObj.Exit();
+                            LogHelper.WriteLogToFile("[PPT] 已请求结束放映", LogHelper.LogType.Info);
                             return true;
                         }
                     }
@@ -1238,6 +1270,7 @@ namespace Ink_Canvas.Helpers
                 if (!Marshal.IsComObject(PPTApplication) || !Marshal.IsComObject(CurrentPresentation)) return false;
 
                 CurrentPresentation.SlideShowSettings.Run();
+                LogHelper.WriteLogToFile("[PPT] 已请求开始放映", LogHelper.LogType.Info);
                 return true;
             }
             catch (COMException comEx)
@@ -2296,12 +2329,14 @@ namespace Ink_Canvas.Helpers
         {
             if (!_disposed)
             {
+                LogHelper.WriteLogToFile("[PPT] 开始释放 PPT 管理器", LogHelper.LogType.Info);
                 if (!_isModuleUnloading)
                     StopMonitoring(isShutdown: true);
 
                 _unifiedPPTTimer?.Dispose();
 
                 _disposed = true;
+                LogHelper.WriteLogToFile("[PPT] PPT 管理器已释放", LogHelper.LogType.Info);
             }
         }
         #endregion

@@ -183,4 +183,31 @@
   <data name="UpdatePackageArchitectureHint" xml:space="preserve">
     <value>选要下载的更新包架构，默认跟当前软件架构走</value>
   </data>
+  <data name="ExternalProtocol_ShortcutCreate" xml:space="preserve">
+    <value>快捷方式造一个</value>
+  </data>
+  <data name="ExternalProtocol_ShortcutCreateHint" xml:space="preserve">
+    <value>点一下图标，把对应功能的桌面快捷方式带回家</value>
+  </data>
+  <data name="ExternalProtocol_Shortcut_Board" xml:space="preserve">
+    <value>白板</value>
+  </data>
+  <data name="ExternalProtocol_Shortcut_Booth" xml:space="preserve">
+    <value>展台</value>
+  </data>
+  <data name="ExternalProtocol_Shortcut_Random" xml:space="preserve">
+    <value>抽选</value>
+  </data>
+  <data name="ExternalProtocol_Shortcut_Settings" xml:space="preserve">
+    <value>设置</value>
+  </data>
+  <data name="ExternalProtocol_Shortcut_Annotate" xml:space="preserve">
+    <value>批注</value>
+  </data>
+  <data name="ExternalProtocol_Shortcut_Created" xml:space="preserve">
+    <value>桌面快捷方式已就位：{0}</value>
+  </data>
+  <data name="ExternalProtocol_Shortcut_Failed" xml:space="preserve">
+    <value>快捷方式没造出来，瞅一眼日志呗</value>
+  </data>
 </root>

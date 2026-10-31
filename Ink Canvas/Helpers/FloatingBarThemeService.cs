@@ -143,6 +143,8 @@ namespace Ink_Canvas.Helpers
                     LogHelper.WriteLogToFile($"加载浮动栏主题失败: {manifestPath}, {ex.Message}", LogHelper.LogType.Warning);
                 }
             }
+
+            LogHelper.WriteLogToFile($"[Theme] 浮动栏主题已加载: {Themes.Count} 个", LogHelper.LogType.Info);
         }
 
         public void ApplySavedTheme()

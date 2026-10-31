@@ -54,6 +54,17 @@ namespace Ink_Canvas.Helpers
         private const int MaxHistoryCount = 30;
         private const int SamplingIntervalMs = 5000;
 
+        // 采样定时器（每 5 秒一次）里被吞掉的异常做节流记录：
+        // 坏环境下每次采样都抛会瞬间写爆 5MB 日志上限，触发 LogHelper 清理整个 Logs 目录。
+        private static int _diagExceptionCount;
+
+        private static void LogCallbackException(string what, Exception ex)
+        {
+            var n = Interlocked.Increment(ref _diagExceptionCount);
+            if (n == 1 || n % 100 == 0)
+                LogHelper.WriteLogToFile($"[Perf] {what} 异常（累计 {n} 次）: {ex.Message}", LogHelper.LogType.Info);
+        }
+
         /// <summary>Current session's average CPU percent (updated on each sample).</summary>
         public static double CurrentAvgCpu { get; private set; }
 
@@ -118,11 +129,13 @@ namespace Ink_Canvas.Helpers
                 _isMonitoring = true;
 
                 _samplingTimer = new Timer(OnSample, null, SamplingIntervalMs, SamplingIntervalMs);
+                LogHelper.WriteLogToFile("[Perf] 性能监测已启动", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"PerformanceMonitorHelper.Start: {ex.Message}");
                 _isMonitoring = false;
+                LogHelper.WriteLogToFile($"[Perf] 性能监测启动失败: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
 
@@ -242,7 +255,10 @@ namespace Ink_Canvas.Helpers
                         _lastUserTime = userTime;
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    LogCallbackException("读取系统整体 CPU 时间(GetSystemTimes)", ex);
+                }
 
                 // Refresh process info to get updated memory
                 _currentProcess.Refresh();
@@ -256,7 +272,10 @@ namespace Ink_Canvas.Helpers
                         memoryMb = counters.PrivateUsage.ToInt64() / (1024.0 * 1024.0);
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    LogCallbackException("获取进程专用内存(GetProcessMemoryInfo)", ex);
+                }
                 if (memoryMb <= 0)
                     memoryMb = _currentProcess.PrivateMemorySize64 / (1024.0 * 1024.0);
 

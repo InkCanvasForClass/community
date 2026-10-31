@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <RootNamespace>Ink_Canvas.Controls</RootNamespace>
@@ -38,7 +38,7 @@
   <ItemGroup>
     <PackageReference Include="iNKORE.UI.WPF.Modern.Controls" Version="0.10.2.1-icc.4" />
     <PackageReference Include="iNKORE.UI.WPF" Version="1.2.8" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.303" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>

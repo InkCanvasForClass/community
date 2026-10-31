@@ -9,7 +9,7 @@ on:
       version_type:
         description: "Version bump type"
         required: true
-        default: "patch"
+        default: "build"
         type: choice
         options:
           - patch
@@ -28,8 +28,8 @@ on:
         type: boolean
       include_runtime:
         description: "Publish as self-contained single-file build with .NET runtime"
-        required: false
-        default: false
+        required: true
+        default: true
         type: boolean
 
 concurrency:
@@ -220,6 +220,7 @@ jobs:
       - name: Setup dotnet
         uses: actions/setup-dotnet@v5
         with:
+          dotnet-version: "*"
           cache: true
           cache-dependency-path: "**/packages.lock.json"
 
@@ -258,10 +259,10 @@ jobs:
               -p:EnforceProcessCountAcrossBuilds=true `
               -p:RunAnalyzers=false
           } else {
-            msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
+            dotnet msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
 
             New-Item -ItemType Directory -Path $publishDir -Force
-            Copy-Item "Ink Canvas\bin\Release\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\*" $publishDir -Recurse -Force
+            Copy-Item "Ink Canvas\bin\Release\${{ matrix.architecture }}\net10.0-windows10.0.19041.0\*" $publishDir -Recurse -Force
           }
 
       - name: Install VSTO Runtime
@@ -841,5 +842,5 @@ jobs:
             /repos/InkCanvasForClass/community/contents/AutomaticUpdateVersionControl.txt \
             -f message="Update AutomaticUpdateVersionControl.txt" \
             -f content="$CONTENT" \
-            -f branch="net6" \
+            -f branch="net10" \
             ${SHA:+-f sha="$SHA"}

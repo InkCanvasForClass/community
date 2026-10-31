@@ -29,6 +29,12 @@ namespace Ink_Canvas.Helpers
         private const string IpcBoardModePrefix = "InkCanvasBoardMode_";
         private const string IpcShowModePrefix = "InkCanvasShowMode_";
         private const string IpcUriCommandPrefix = "InkCanvasUriCommand_";
+        // 插件文件打开（文件关联双击）的 IPC 前缀
+        private const string IpcPluginFileOpenPrefix = "InkCanvasPluginFileOpen_";
+
+        /// <summary>插件文件关联在 HKCU\Software\Classes\.ext 扩展名键下记录的归属插件 ID 命名值。</summary>
+        private const string PluginIdRegistryValueName = "InkCanvasPluginId";
+
         private const int IpcTimeout = 5000; // 5秒超时
 
         /// <summary>
@@ -192,9 +198,11 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 注册自定义文件扩展名关联（供插件使用）。
         /// 写入 <c>HKCU\Software\Classes</c>（无需管理员权限），把该扩展名的打开命令指向宿主 exe。
+        /// <paramref name="pluginId"/> 非空时在扩展名键下写入 <see cref="PluginIdRegistryValueName"/>，
+        /// 使宿主在双击打开该扩展名文件时能把路径派发回对应插件。
         /// </summary>
         /// <returns>是否注册成功；扩展名/ProgId 无效或扩展名受保护时返回 false。</returns>
-        public static bool RegisterFileAssociation(string extension, string progId, string description, string iconPath = null)
+        public static bool RegisterFileAssociation(string extension, string progId, string description, string iconPath = null, string pluginId = null)
         {
             try
             {
@@ -235,6 +243,9 @@ namespace Ink_Canvas.Helpers
                 using (RegistryKey extensionKey = Registry.CurrentUser.CreateSubKey(@"Software\Classes\" + normalizedExtension))
                 {
                     extensionKey.SetValue("", normalizedProgId);
+                    // 记录归属插件：宿主要据此把该扩展名文件派发回对应插件
+                    if (!string.IsNullOrWhiteSpace(pluginId))
+                        extensionKey.SetValue(PluginIdRegistryValueName, pluginId.Trim());
                 }
 
                 // 刷新系统文件关联缓存
@@ -401,6 +412,104 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
+        /// 读取某扩展名注册的归属插件 ID（插件文件关联用）。
+        /// 从 <c>HKCU\Software\Classes\.ext</c> 扩展名键的 <see cref="PluginIdRegistryValueName"/> 命名值读取。
+        /// </summary>
+        /// <param name="extension">文件扩展名（可带或不带点，忽略大小写）。</param>
+        /// <returns>归属插件 ID；扩展名无效/受保护/未记录时返回 null。</returns>
+        public static string GetPluginIdForExtension(string extension)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(extension)) return null;
+
+                string normalizedExtension = NormalizeExtension(extension);
+                if (IsProtectedExtension(normalizedExtension)) return null;
+
+                using (RegistryKey extensionKey = Registry.CurrentUser.OpenSubKey(@"Software\Classes\" + normalizedExtension))
+                {
+                    if (extensionKey == null) return null;
+                    string pluginId = extensionKey.GetValue(PluginIdRegistryValueName) as string;
+                    return string.IsNullOrWhiteSpace(pluginId) ? null : pluginId.Trim();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"读取扩展名归属插件失败: {ex.Message}", LogHelper.LogType.Warning);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 处理命令行参数中「已注册插件文件关联」的文件路径（文件关联打开）。
+        /// 只有扩展名能映射到某个插件（注册表记录了归属插件 ID）的现存文件才会被识别。
+        /// </summary>
+        /// <param name="args">命令行参数</param>
+        /// <returns>找到的插件文件路径；没有则返回 null。</returns>
+        public static string GetPluginFileFromArgs(string[] args)
+        {
+            if (args == null || args.Length == 0) return null;
+
+            foreach (string arg in args)
+            {
+                if (string.IsNullOrEmpty(arg)) continue;
+
+                string extension = Path.GetExtension(arg);
+                if (string.IsNullOrEmpty(extension)) continue;
+
+                if (string.IsNullOrEmpty(GetPluginIdForExtension(extension))) continue;
+
+                if (File.Exists(arg))
+                {
+                    LogHelper.WriteLogToFile($"从命令行参数中找到插件关联文件: {arg}", LogHelper.LogType.Event);
+                    return arg;
+                }
+
+                LogHelper.WriteLogToFile($"命令行参数中的插件关联文件不存在: {arg}", LogHelper.LogType.Warning);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 把一个插件关联文件（双击打开）派发给注册该扩展名的插件。
+        /// 构造 <c>icc://plugin/&lt;pluginId&gt;/open?path=&lt;urlencoded&gt;</c> 直接 <see cref="Plugins.PluginManager.TryDispatchUri"/>，
+        /// 不走 <c>MainWindow.HandleUriCommand</c>，避免受「启用 URI 协议」设置门禁。
+        /// </summary>
+        /// <param name="filePath">要打开的文件路径。</param>
+        /// <returns>是否已派发（插件未注册处理器或未加载返回 false）。</returns>
+        public static bool DispatchPluginFileOpen(string filePath)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(filePath)) return false;
+
+                string extension = Path.GetExtension(filePath);
+                if (string.IsNullOrEmpty(extension)) return false;
+
+                string pluginId = GetPluginIdForExtension(extension);
+                if (string.IsNullOrEmpty(pluginId))
+                {
+                    LogHelper.WriteLogToFile($"无法派发文件（扩展名 {extension} 未记录归属插件）: {filePath}", LogHelper.LogType.Warning);
+                    return false;
+                }
+
+                string uri = "icc://plugin/" + pluginId + "/open?path=" + Uri.EscapeDataString(filePath);
+                bool handled = Plugins.PluginManager.Instance.TryDispatchUri(pluginId, "open", uri);
+                if (handled)
+                    LogHelper.WriteLogToFile($"已派发文件给插件 {pluginId}: {filePath}", LogHelper.LogType.Event);
+                else
+                    LogHelper.WriteLogToFile($"派发文件打开失败（插件 {pluginId} 未注册处理器或未加载）: {uri}", LogHelper.LogType.Warning);
+                return handled;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"派发插件文件打开失败: {ex.Message}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
+        /// <summary>
         /// 尝试通过IPC将文件路径发送给已运行的实例
         /// </summary>
         /// <param name="filePath">要打开的文件路径</param>
@@ -447,6 +556,53 @@ namespace Ink_Canvas.Helpers
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"通过IPC发送文件路径失败: {ex.Message}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 尝试通过IPC将插件关联文件路径发送给已运行的实例（从文件关联打开）。
+        /// 已运行实例收到后在 UI 线程把路径派发给注册该扩展名的插件。
+        /// </summary>
+        /// <param name="filePath">要打开的插件关联文件路径</param>
+        /// <returns>是否成功发送</returns>
+        public static bool TrySendPluginFileToExistingInstance(string filePath)
+        {
+            try
+            {
+                LogHelper.WriteLogToFile($"尝试通过IPC发送插件关联文件路径给已运行实例: {filePath}", LogHelper.LogType.Event);
+
+                string tempDir = Path.GetTempPath();
+                string ipcFileName = IpcPluginFileOpenPrefix + Guid.NewGuid().ToString("N") + ".tmp";
+                string ipcFilePath = Path.Combine(tempDir, ipcFileName);
+
+                File.WriteAllText(ipcFilePath, filePath, Encoding.UTF8);
+
+                using (EventWaitHandle ipcEvent = new EventWaitHandle(false, EventResetMode.ManualReset, IpcEventName))
+                {
+                    ipcEvent.Set();
+                }
+
+                Thread.Sleep(1000);
+
+                try
+                {
+                    if (File.Exists(ipcFilePath))
+                    {
+                        File.Delete(ipcFilePath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"清理插件文件 IPC 失败: {ex.Message}", LogHelper.LogType.Warning);
+                }
+
+                LogHelper.WriteLogToFile("插件文件 IPC 路径发送完成", LogHelper.LogType.Event);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"通过IPC发送插件关联文件路径失败: {ex.Message}", LogHelper.LogType.Error);
                 return false;
             }
         }
@@ -610,7 +766,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 string tempDir = Path.GetTempPath();
-                string[] prefixes = { IpcFilePrefix, IpcBoardModePrefix, IpcShowModePrefix, IpcUriCommandPrefix };
+                string[] prefixes = { IpcFilePrefix, IpcBoardModePrefix, IpcShowModePrefix, IpcUriCommandPrefix, IpcPluginFileOpenPrefix };
                 int cleaned = 0;
                 foreach (string prefix in prefixes)
                 {
@@ -735,6 +891,50 @@ namespace Ink_Canvas.Helpers
                         LogHelper.WriteLogToFile($"处理IPC文件失败: {ex.Message}", LogHelper.LogType.Warning);
 
                         // 尝试删除损坏的IPC文件
+                        try
+                        {
+                            if (File.Exists(ipcFile))
+                            {
+                                File.Delete(ipcFile);
+                            }
+                        }
+                        catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
+                    }
+                }
+
+                // 处理插件关联文件路径IPC文件（文件关联打开）
+                string[] pluginOpenFiles = Directory.GetFiles(tempDir, IpcPluginFileOpenPrefix + "*.tmp");
+                foreach (string ipcFile in pluginOpenFiles)
+                {
+                    try
+                    {
+                        string filePath = File.ReadAllText(ipcFile, Encoding.UTF8);
+
+                        if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
+                        {
+                            LogHelper.WriteLogToFile($"IPC接收到插件关联文件路径: {filePath}", LogHelper.LogType.Event);
+
+                            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                try
+                                {
+                                    // 派发给注册该扩展名的插件。不走 MainWindow.HandleUriCommand，
+                                    // 避免受「启用 URI 协议」设置门禁；PluginManager.TryDispatchUri 本身无该守卫。
+                                    DispatchPluginFileOpen(filePath);
+                                }
+                                catch (Exception ex)
+                                {
+                                    LogHelper.WriteLogToFile($"IPC处理插件文件打开失败: {ex.Message}", LogHelper.LogType.Error);
+                                }
+                            }));
+                        }
+
+                        File.Delete(ipcFile);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"处理插件文件 IPC 失败: {ex.Message}", LogHelper.LogType.Warning);
+
                         try
                         {
                             if (File.Exists(ipcFile))

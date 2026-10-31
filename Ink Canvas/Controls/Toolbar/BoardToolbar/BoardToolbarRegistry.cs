@@ -10,7 +10,10 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
 {
@@ -20,6 +23,27 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
         private static readonly List<PluginToolbarItemInfo> _pluginItems = new List<PluginToolbarItemInfo>();
         private static readonly string ConfigSubDir = Path.Combine("Configs", "BoardToolbarConfigs");
 
+        #region 视频展台专用组件
+
+        public const string BoothCaptureItemId = "board.boothCapture";
+        public const string BoothRotateItemId = "board.boothRotate";
+        public const string BoothCorrectionItemId = "board.boothCorrection";
+        public const string BoothMenuItemId = "board.boothMenu";
+        public const string BoothExpandItemId = "board.boothExpand";
+
+        /// <summary>是否属于"仅视频展台模式显示"的组件。</summary>
+        public static bool IsBoothItem(string id)
+            => !string.IsNullOrEmpty(id)
+               && id.StartsWith("board.booth", StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// 本次渲染是否处于视频展台模式。用于让设置了「仅视频展台显示」的组件
+        /// 在非展台模式下隐藏（渲染前由 MainWindow 设置）。
+        /// </summary>
+        public static bool RenderInBoothMode { get; set; }
+
+        #endregion
+
         public static IReadOnlyList<IBoardToolbarItem> Discover()
         {
             if (_items != null) return _items;
@@ -27,7 +51,8 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             var itemType = typeof(IBoardToolbarItem);
             _items = Assembly.GetExecutingAssembly()
                 .GetTypes()
-                .Where(t => !t.IsAbstract && !t.IsInterface && itemType.IsAssignableFrom(t))
+                .Where(t => !t.IsAbstract && !t.IsInterface && itemType.IsAssignableFrom(t)
+                            && t.GetConstructor(Type.EmptyTypes) != null)
                 .Select(t =>
                 {
                     try { return (IBoardToolbarItem)Activator.CreateInstance(t); }
@@ -43,6 +68,13 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             // 追加插件注册的白板工具栏组件。
             foreach (var pluginItem in _pluginItems)
             {
+                if (_items.Any(item => string.Equals(item.Id, pluginItem.Id, StringComparison.OrdinalIgnoreCase)))
+                {
+                    LogHelper.WriteLogToFile(
+                        $"BoardToolbarRegistry: 插件白板工具栏项 ID 冲突 [{pluginItem.Id}]",
+                        LogHelper.LogType.Warning);
+                    continue;
+                }
                 _items.Add(new PluginBoardToolbarItemWrapper(pluginItem));
             }
 
@@ -61,23 +93,28 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
         /// 注册一个插件白板工具栏组件。首个注册的插件启动时把组件追加进 active 配置（默认 center→tools），
         /// 后续启动只加入组件库，避免用户删除组件后重启又被自动加回。
         /// </summary>
-        public static void RegisterPluginItem(PluginToolbarItemInfo itemInfo, bool autoAddToActiveConfig = true)
+        public static bool RegisterPluginItem(
+            PluginToolbarItemInfo itemInfo,
+            bool autoAddToActiveConfig = true)
         {
-            if (itemInfo == null || string.IsNullOrEmpty(itemInfo.Id)) return;
-            if (_pluginItems.Any(item => string.Equals(item.Id, itemInfo.Id, StringComparison.OrdinalIgnoreCase))) return;
+            if (itemInfo == null || string.IsNullOrWhiteSpace(itemInfo.Id)) return false;
+            if (_pluginItems.Any(item =>
+                    string.Equals(item.Id, itemInfo.Id, StringComparison.OrdinalIgnoreCase))) return false;
 
             _pluginItems.Add(itemInfo);
             LogHelper.WriteLogToFile($"BoardToolbarRegistry: 插件注册白板工具栏组件 [{itemInfo.Id}] (autoAddToActiveConfig={autoAddToActiveConfig})", LogHelper.LogType.Info);
-
-            if (autoAddToActiveConfig)
+            if (autoAddToActiveConfig) EnsurePluginItemInActiveConfig(itemInfo.Id);
+            if (_items == null) return true;
+            if (_items.Any(item => string.Equals(item.Id, itemInfo.Id, StringComparison.OrdinalIgnoreCase)))
             {
-                EnsurePluginItemInActiveConfig(itemInfo.Id);
+                LogHelper.WriteLogToFile(
+                    $"BoardToolbarRegistry: 插件白板工具栏项 ID 冲突 [{itemInfo.Id}]",
+                    LogHelper.LogType.Warning);
+                _pluginItems.Remove(itemInfo);
+                return false;
             }
-
-            if (_items != null)
-            {
-                _items.Add(new PluginBoardToolbarItemWrapper(itemInfo));
-            }
+            _items.Add(new PluginBoardToolbarItemWrapper(itemInfo));
+            return true;
         }
 
         private static void EnsurePluginItemInActiveConfig(string itemId)
@@ -322,6 +359,12 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             if (opacity.HasValue)
                 view.Opacity = Math.Clamp(opacity.Value, 0, 1);
 
+            // 按规则隐藏：仅在视频展台模式下显示的组件，在普通白板模式下不渲染。
+            // 展台专用组件（board.booth*）本身也只服务于展台，一律遵循该规则。
+            bool boothOnly = entry.GetSettingBool(ShowInBoothOnlySettingKey) || IsBoothItem(entry.Id);
+            if (boothOnly && !RenderInBoothMode)
+                view.Visibility = Visibility.Collapsed;
+
             // 插件自定义设置：通过 PluginToolbarItemInfo.ApplySettings 回调应用。
             var pluginItem = _pluginItems.FirstOrDefault(p => p.Id == entry.Id);
             if (pluginItem != null)
@@ -431,7 +474,11 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                 }
                 catch (Exception innerEx)
                 {
-                    try { if (File.Exists(tmpPath)) File.Delete(tmpPath); } catch { }
+                    try { if (File.Exists(tmpPath)) File.Delete(tmpPath); }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Toolbar] BoardToolbarRegistry 原子写入失败后删除临时文件 {Path.GetFileName(tmpPath)} 失败: {ex.Message}", LogHelper.LogType.Info);
+                    }
                     throw new Exception($"原子写入失败: {innerEx.Message}", innerEx);
                 }
                 LogHelper.WriteLogToFile($"BoardToolbarRegistry: 保存配置 [{name}] 成功", LogHelper.LogType.Info);
@@ -534,6 +581,171 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
 
         #endregion
 
+        #region 视频展台组件首次播种
+
+        /// <summary>
+        /// 首次运行时把展台专用组件播种到"中间区域末尾（中间栏最右侧）"的独立分组里，只播一次。
+        /// 播种后用户如果手动删除了它们，不会再次自动恢复。
+        /// 另外会把旧版本误放在右侧区域的同名分组迁移到中间区域。
+        /// </summary>
+        public static void EnsureBoothComponentsSeeded()
+        {
+            try
+            {
+                if (SettingsManager.Settings == null) return;
+
+                var configName = SettingsManager.Settings.BoardToolbarConfigName;
+                if (string.IsNullOrWhiteSpace(configName)) configName = "default";
+
+                var layout = LoadConfigFile(configName);
+                if (layout == null) return;
+                layout.Areas ??= new List<BoardToolbarAreaEntry>();
+
+                var centerArea = layout.Areas.FirstOrDefault(a => string.Equals(a.Id, "center", StringComparison.OrdinalIgnoreCase));
+                bool changed = false;
+
+                // 迁移：旧版本把分组放在右侧区域，这里搬到中间区域末尾。
+                // 仅在中间区域还没有该分组时执行，避免用户之后手动摆放的位置被反复挪动。
+                var hasCenterGroup = centerArea?.Groups?.Any(g => string.Equals(g.Id, "videoBooth", StringComparison.OrdinalIgnoreCase)) == true;
+                var rightArea = layout.Areas.FirstOrDefault(a => string.Equals(a.Id, "right", StringComparison.OrdinalIgnoreCase));
+                var misplaced = rightArea?.Groups?.FirstOrDefault(g => string.Equals(g.Id, "videoBooth", StringComparison.OrdinalIgnoreCase));
+                if (misplaced != null && !hasCenterGroup)
+                {
+                    rightArea.Groups.Remove(misplaced);
+                    if (centerArea == null)
+                    {
+                        centerArea = new BoardToolbarAreaEntry { Id = "center", Groups = new List<BoardToolbarGroupEntry>() };
+                        layout.Areas.Add(centerArea);
+                    }
+                    centerArea.Groups ??= new List<BoardToolbarGroupEntry>();
+                    centerArea.Groups.Add(misplaced);
+                    changed = true;
+                    LogHelper.WriteLogToFile("BoardToolbarRegistry: 展台分组已从右侧区域迁移到中间区域", LogHelper.LogType.Info);
+                }
+
+                // 播种（只做一次）：用户删掉后不再补回
+                if (!SettingsManager.Settings.BoothToolbarSeeded)
+                {
+                    if (centerArea == null)
+                    {
+                        centerArea = new BoardToolbarAreaEntry { Id = "center", Groups = new List<BoardToolbarGroupEntry>() };
+                        layout.Areas.Add(centerArea);
+                    }
+                    centerArea.Groups ??= new List<BoardToolbarGroupEntry>();
+
+                    var group = centerArea.Groups.FirstOrDefault(g => string.Equals(g.Id, "videoBooth", StringComparison.OrdinalIgnoreCase));
+                    if (group == null)
+                    {
+                        group = new BoardToolbarGroupEntry
+                        {
+                            Id = "videoBooth",
+                            Components = new List<BoardToolbarComponentEntry>()
+                        };
+                        // 追加到中间区域末尾 = 中间栏最右侧（紧跟在原有工具之后）
+                        centerArea.Groups.Add(group);
+                    }
+                    group.Components ??= new List<BoardToolbarComponentEntry>();
+
+                    foreach (var id in BoothToolbarComponentIds)
+                    {
+                        if (group.Components.Any(c => string.Equals(c.Id, id, StringComparison.OrdinalIgnoreCase)))
+                            continue;
+
+                        var entry = new BoardToolbarComponentEntry { Id = id };
+                        entry.SetSetting(ShowInBoothOnlySettingKey, true);
+                        group.Components.Add(entry);
+                        changed = true;
+                    }
+
+                    SettingsManager.Settings.BoothToolbarSeeded = true;
+                    SettingsManager.SaveSettingsToFile();
+                    LogHelper.WriteLogToFile(
+                        $"BoardToolbarRegistry: 已把展台组件播种到 center→videoBooth（末尾）(配置={configName})",
+                        LogHelper.LogType.Info);
+                }
+
+                if (changed)
+                    SaveConfigFile(configName, layout);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"BoardToolbarRegistry: 播种展台组件失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        /// <summary>
+        /// 首次运行时把独立的「展开」组件放到右侧区域最左侧（"新页面"按钮所在组的第一个位置）。
+        /// 展台模式下"新页面"被隐藏，正好由它占位；只播一次，用户删除后不再补回。
+        /// </summary>
+        public static void EnsureBoothExpandSeeded()
+        {
+            try
+            {
+                if (SettingsManager.Settings == null) return;
+                if (SettingsManager.Settings.BoothExpandToolbarSeeded) return;
+
+                var configName = SettingsManager.Settings.BoardToolbarConfigName;
+                if (string.IsNullOrWhiteSpace(configName)) configName = "default";
+
+                var layout = LoadConfigFile(configName);
+                if (layout == null) return;
+                layout.Areas ??= new List<BoardToolbarAreaEntry>();
+
+                var rightArea = layout.Areas.FirstOrDefault(a => string.Equals(a.Id, "right", StringComparison.OrdinalIgnoreCase));
+                if (rightArea == null)
+                {
+                    rightArea = new BoardToolbarAreaEntry { Id = "right", Groups = new List<BoardToolbarGroupEntry>() };
+                    layout.Areas.Add(rightArea);
+                }
+                rightArea.Groups ??= new List<BoardToolbarGroupEntry>();
+
+                var addGroup = rightArea.Groups.FirstOrDefault(g => string.Equals(g.Id, "addPage", StringComparison.OrdinalIgnoreCase));
+                if (addGroup == null)
+                {
+                    addGroup = new BoardToolbarGroupEntry
+                    {
+                        Id = "addPage",
+                        Components = new List<BoardToolbarComponentEntry>()
+                    };
+                    rightArea.Groups.Insert(0, addGroup);
+                }
+                addGroup.Components ??= new List<BoardToolbarComponentEntry>();
+
+                if (!addGroup.Components.Any(c => string.Equals(c.Id, BoothExpandItemId, StringComparison.OrdinalIgnoreCase)))
+                {
+                    var entry = new BoardToolbarComponentEntry { Id = BoothExpandItemId };
+                    entry.SetSetting(ShowInBoothOnlySettingKey, true);
+                    // 放在"新页面"左侧，展台下正好占据被隐藏按钮的位置
+                    addGroup.Components.Insert(0, entry);
+                    SaveConfigFile(configName, layout);
+                }
+
+                SettingsManager.Settings.BoothExpandToolbarSeeded = true;
+                SettingsManager.SaveSettingsToFile();
+                LogHelper.WriteLogToFile(
+                    $"BoardToolbarRegistry: 已把「展开」组件放到 right→addPage 首位 (配置={configName})",
+                    LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"BoardToolbarRegistry: 播种「展开」组件失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        /// <summary>组件设置键：仅在视频展台模式下显示该组件。</summary>
+        public const string ShowInBoothOnlySettingKey = "showInBoothOnly";
+
+        /// <summary>播种到中间栏末尾分组的展台组件（顺序即默认显示顺序）。</summary>
+        private static readonly string[] BoothToolbarComponentIds =
+        {
+            BoothCaptureItemId,
+            BoothRotateItemId,
+            BoothCorrectionItemId,
+            BoothMenuItemId
+        };
+
+        #endregion
+
         #region Rebuild methods
 
         public static void RebuildToolbar(IBoardToolbarHost host, Panel leftContainer, Panel centerContainer, Panel rightContainer)
@@ -542,10 +754,16 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             RebuildToolbar(host, leftContainer, centerContainer, rightContainer, layout);
         }
 
-        public static void RebuildToolbar(IBoardToolbarHost host, Panel leftContainer, Panel centerContainer, Panel rightContainer, BoardToolbarLayoutSettings layout)
+        /// <summary>
+        /// 重建白板工具栏。<paramref name="boothMode"/> 决定「仅视频展台显示」的组件是否可见。
+        /// </summary>
+        public static void RebuildToolbar(IBoardToolbarHost host, Panel leftContainer, Panel centerContainer, Panel rightContainer,
+            BoardToolbarLayoutSettings layout, bool boothMode = false)
         {
             if (layout == null)
                 layout = BoardToolbarLayoutSettings.CreateDefault();
+
+            RenderInBoothMode = boothMode;
 
             foreach (var area in layout.Areas)
             {
@@ -574,6 +792,9 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             foreach (var group in area.Groups)
             {
                 var views = BuildGroup(host, group.Components, area.Id);
+                // 整组都被"按规则隐藏"时（如非展台模式下的展台分组）不渲染空胶囊
+                if (views.Count > 0 && views.All(v => v.Visibility == Visibility.Collapsed))
+                    continue;
                 if (views.Count > 0)
                 {
                     var groupBorder = CreateGroupBorder(views);
@@ -623,7 +844,130 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             {
                 _info.ApplyOrientation?.Invoke(view, Orientation.Horizontal);
             }
+
+            // 与浮动工具栏 PluginToolbarItemWrapper 对齐：插件提供了弹窗内容工厂时，
+            // 宿主自动创建 Popup 并把 BoardToolbarButton 的点击接到弹窗开合上。
+            if (_info.PopupContentFactory != null && view is BoardToolbarButton btn)
+            {
+                var popup = new Popup
+                {
+                    Name = "BoardPluginPopup_" + _info.Id.Replace('.', '_'),
+                    AllowsTransparency = true,
+                    StaysOpen = true,
+                    Focusable = true,
+                    IsOpen = false,
+                    PlacementTarget = btn,
+                    Placement = PlacementMode.Custom
+                };
+
+                var popupContent = _info.PopupContentFactory();
+                if (popupContent != null)
+                    popup.Child = popupContent;
+
+                popup.CustomPopupPlacementCallback = (popupSize, targetSize, offset) =>
+                {
+                    return new[]
+                    {
+                        new CustomPopupPlacement(
+                            new Point(targetSize.Width / 2 - popupSize.Width / 2, -popupSize.Height - 8),
+                            PopupPrimaryAxis.Vertical)
+                    };
+                };
+
+                // 注册到 PopupManagerHelper，宿主点击画布/切换面板时统一收起。
+                btn.Loaded += (s, e) =>
+                {
+                    var window = Window.GetWindow(btn);
+                    if (window is MainWindow mw)
+                    {
+                        mw.GetPopupManager()?.RegisterPopup(popup);
+                    }
+                };
+
+                void SetPopupOpen(bool isOpen)
+                {
+                    if (popup.IsOpen == isOpen) return;
+
+                    if (isOpen)
+                    {
+                        var window = Window.GetWindow(btn);
+                        if (window is MainWindow mw)
+                        {
+                            mw.CloseAllPopups();
+                        }
+                        AnimationsHelper.ShowPopupWithSlideAndFade(popup);
+                        popup.Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            if (popup.Child is UIElement child)
+                            {
+                                child.Focus();
+                                Keyboard.Focus(child);
+                                child.MoveFocus(new TraversalRequest(FocusNavigationDirection.First));
+                            }
+                        }), DispatcherPriority.Input);
+                    }
+                    else
+                    {
+                        popup.IsOpen = false;
+                    }
+                }
+
+                btn.ButtonMouseUp += (s, e) => SetPopupOpen(!popup.IsOpen);
+
+                // 把弹窗开合回调交给插件，插件可程序化打开/收起（例如函数编辑请求、工具激活时）。
+                _info.BindPopupController?.Invoke(SetPopupOpen);
+
+                // 通知插件弹窗实际开合状态。
+                popup.Opened += (s, e) => _info.PopupStateChanged?.Invoke(true);
+                popup.Closed += (s, e) => _info.PopupStateChanged?.Invoke(false);
+
+                // 弹窗关闭按钮支持（PopupShellContent / PopupTabShellContent / 嵌套 UserControl）。
+                if (popupContent is PopupShellContent shell)
+                {
+                    shell.CloseButtonControl.Click += (s, e) => popup.IsOpen = false;
+                }
+                else if (popupContent is PopupTabShellContent tabShell)
+                {
+                    tabShell.CloseButtonControl.Click += (s, e) => popup.IsOpen = false;
+                }
+                else if (popupContent is FrameworkElement contentElement)
+                {
+                    WireNestedShellCloseButton(contentElement, popup);
+                    popup.Opened += (s, e) => WireNestedShellCloseButton(contentElement, popup);
+                }
+            }
+
             return view;
+        }
+
+        /// <summary>在弹窗内容里递归查找 PopupShellContent，把它的标题栏关闭按钮接到 popup 收起。</summary>
+        private static void WireNestedShellCloseButton(FrameworkElement content, Popup popup)
+        {
+            if (content == null || popup == null) return;
+
+            foreach (var nestedShell in FindVisualChildren<PopupShellContent>(content))
+            {
+                var closeButton = nestedShell.CloseButtonControl;
+                if (closeButton == null) continue;
+
+                if (ReferenceEquals(closeButton.Tag, popup)) return;
+                closeButton.Tag = popup;
+                closeButton.Click += (s, e) => popup.IsOpen = false;
+                return; // 只接最外层那个 Shell
+            }
+        }
+
+        private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) yield break;
+            int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childrenCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T result) yield return result;
+                foreach (var descendant in FindVisualChildren<T>(child))
+                    yield return descendant;
+            }
         }
 
         public void ApplyPosition(FrameworkElement view, ButtonPosition position)

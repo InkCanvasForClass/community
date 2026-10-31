@@ -1,4 +1,4 @@
-using Ink_Canvas.Controls;
+﻿using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Microsoft.Win32;
@@ -212,24 +212,50 @@ namespace Ink_Canvas
                     e.Handled = false;
                     return;
                 }
-                if (inkCanvas.EditingMode != InkCanvasEditingMode.Select)
+                // Mouse mode normally lets the board receive clicks without entering the
+                // selection workflow. An already-selected inserted SVG is the exception: its
+                // group remains draggable without switching to the select tool first.
+                var canDragSelectedInMouseMode = inkCanvas.EditingMode == InkCanvasEditingMode.None
+                    && ReferenceEquals(currentSelectedElement, element);
+                if (inkCanvas.EditingMode != InkCanvasEditingMode.Select && !canDragSelectedInMouseMode)
                 {
                     e.Handled = false;
                     return;
                 }
 
-                // 取消之前选中的元素
-                if (currentSelectedElement != null && currentSelectedElement != element)
+                bool isMultiSelect = (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) != 0;
+                if (isMultiSelect)
                 {
-                    // 保存当前编辑模式
-                    var previousEditingMode = inkCanvas.EditingMode;
-                    UnselectElement(currentSelectedElement);
-                    // 恢复编辑模式
-                    inkCanvas.EditingMode = previousEditingMode;
+                    if (_selectedElements.Contains(element))
+                    {
+                        UnselectElement(element);
+                    }
+                    else
+                    {
+                        SelectElement(element, true);
+                    }
+                    e.Handled = true;
+                    return;
                 }
 
-                // 选中当前元素
-                SelectElement(element);
+                if (_selectedElements.Contains(element) && (_selectedElements.Count > 1 || (inkCanvas != null && inkCanvas.GetSelectedStrokes().Count > 0)))
+                {
+                    // 点击已经在多选集合中的元素，保留整体选区以便一同拖动
+                }
+                else
+                {
+                    if (currentSelectedElement != null && currentSelectedElement != element)
+                    {
+                        var previousEditingMode = inkCanvas.EditingMode;
+                        UnselectElement(currentSelectedElement);
+                        inkCanvas.EditingMode = previousEditingMode;
+                    }
+                    SelectElement(element, false);
+                    if (canDragSelectedInMouseMode)
+                    {
+                        inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    }
+                }
 
                 // 开始拖动
                 isDragging = true;
@@ -300,7 +326,11 @@ namespace Ink_Canvas
         /// </remarks>
         private void Element_MouseMove(object sender, MouseEventArgs e)
         {
-            if (sender is FrameworkElement element && isDragging && element.IsMouseCaptured)
+            if (sender is FrameworkElement element
+                && (inkCanvas.EditingMode == InkCanvasEditingMode.Select
+                    || (inkCanvas.EditingMode == InkCanvasEditingMode.None
+                        && ReferenceEquals(currentSelectedElement, element)))
+                && isDragging && element.IsMouseCaptured)
             {
                 var currentPoint = e.GetPosition(inkCanvas);
 
@@ -346,6 +376,17 @@ namespace Ink_Canvas
 
 
                 // 使用滚轮缩放的核心机制
+                // Select mode keeps the existing behavior. In pen/mouse mode, only the
+                // explicitly selected element may consume the wheel event.
+                var canScaleInCurrentMode = inkCanvas.EditingMode == InkCanvasEditingMode.Select
+                    || ((inkCanvas.EditingMode == InkCanvasEditingMode.Ink
+                         || inkCanvas.EditingMode == InkCanvasEditingMode.None)
+                        && ReferenceEquals(currentSelectedElement, element));
+                if (!canScaleInCurrentMode)
+                {
+                    e.Handled = false;
+                    return;
+                }
                 ApplyWheelScaleTransform(element, e);
 
                 // 如果是图片元素，更新工具栏位置
@@ -741,54 +782,78 @@ namespace Ink_Canvas
         /// - 禁用InkCanvas的选择功能，去除控制点
         /// - 保持选择模式，这样用户可以直接点击墨迹来选择
         /// </remarks>
-        private void SelectElement(FrameworkElement element)
+        private void SelectElement(FrameworkElement element, bool isMultiSelect = false)
         {
-            currentSelectedElement = element;
-
-            // 根据元素类型显示不同的选择工具栏
-            if (IsBitmapLikeCanvasElement(element))
+            if (!isMultiSelect)
             {
-                // 显示图片选择工具栏并设置位置
+                _selectedElements.Clear();
+                _selectedElements.Add(element);
+                currentSelectedElement = element;
+
+                if (inkCanvas != null && (inkCanvas.GetSelectedStrokes() == null || inkCanvas.GetSelectedStrokes().Count == 0))
+                {
+                    inkCanvas.Select(new StrokeCollection());
+                }
+            }
+            else
+            {
+                if (!_selectedElements.Contains(element))
+                {
+                    _selectedElements.Add(element);
+                }
+                currentSelectedElement = (_selectedElements.Count == 1 && (inkCanvas == null || inkCanvas.GetSelectedStrokes().Count == 0))
+                    ? element
+                    : null;
+            }
+
+            bool hasStrokes = inkCanvas != null && inkCanvas.GetSelectedStrokes().Count > 0;
+            if (_selectedElements.Count > 1 || (hasStrokes && _selectedElements.Count > 0))
+            {
                 if (BorderImageSelectionControl != null)
                 {
-                    // 计算工具栏位置（内部会同步 PDF 右侧栏位置）
+                    BorderImageSelectionControl.Visibility = Visibility.Collapsed;
+                }
+                UpdateSelectionDisplay();
+                return;
+            }
+
+            if (IsBitmapLikeCanvasElement(element))
+            {
+                if (BorderImageSelectionControl != null)
+                {
                     UpdateImageSelectionToolbarPosition(element);
                     BorderImageSelectionControl.Visibility = Visibility.Visible;
                 }
 
-                // 显示图片缩放选择点
                 ShowImageResizeHandles(element);
 
-                // 墨迹选择工具栏通过GridInkCanvasSelectionCover的可见性来控制
-                // 不需要直接设置BorderStrokeSelectionControl.Visibility
+                if (BorderStrokeSelectionControl != null)
+                {
+                    BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
+                }
             }
             else
             {
-                // 隐藏图片选择工具栏
                 if (BorderImageSelectionControl != null)
                 {
                     BorderImageSelectionControl.Visibility = Visibility.Collapsed;
                 }
 
-                // 隐藏图片缩放选择点
                 HideImageResizeHandles();
 
-                // 墨迹选择工具栏通过GridInkCanvasSelectionCover的可见性来控制
-                // 不需要直接设置BorderStrokeSelectionControl.Visibility
+                if (BorderStrokeSelectionControl != null)
+                {
+                    BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
+                }
             }
 
-            // 确保选择框不显示，避免蓝色边框
             if (GridInkCanvasSelectionCover != null)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
             }
 
-            // 禁用InkCanvas的选择功能，去除控制点
-            if (inkCanvas != null)
+            if (inkCanvas != null && !hasStrokes)
             {
-                // 清除当前选择
-                inkCanvas.Select(new StrokeCollection());
-                // 保持选择模式，这样用户可以直接点击墨迹来选择
                 inkCanvas.EditingMode = InkCanvasEditingMode.Select;
             }
 
@@ -799,35 +864,40 @@ namespace Ink_Canvas
         /// 取消选中元素
         /// </summary>
         /// <param name="element">要取消选中的元素</param>
-        /// <remarks>
-        /// - 隐藏图片选择工具栏
-        /// - 隐藏图片缩放选择点
-        /// - 确保选择框隐藏
-        /// - 确保InkCanvas处于选择模式，这样用户可以直接点击墨迹来选择
-        /// </remarks>
         private void UnselectElement(FrameworkElement element)
         {
-            // 去除选中效果
+            _selectedElements.Remove(element);
+            if (currentSelectedElement == element)
+            {
+                bool hasStrokes = inkCanvas != null && inkCanvas.GetSelectedStrokes().Count > 0;
+                currentSelectedElement = (_selectedElements.Count == 1 && !hasStrokes)
+                    ? _selectedElements.First()
+                    : null;
+            }
 
-            // 隐藏图片选择工具栏
+            if (_selectedElements.Count > 0 || (inkCanvas != null && inkCanvas.GetSelectedStrokes().Count > 0))
+            {
+                UpdateSelectionDisplay();
+                return;
+            }
+
             if (BorderImageSelectionControl != null)
             {
                 BorderImageSelectionControl.Visibility = Visibility.Collapsed;
             }
 
-            // 隐藏图片缩放选择点
             HideImageResizeHandles();
 
-            // 墨迹选择工具栏通过GridInkCanvasSelectionCover的可见性来控制
-            // 不需要直接设置BorderStrokeSelectionControl.Visibility
+            if (BorderStrokeSelectionControl != null && (inkCanvas == null || inkCanvas.GetSelectedStrokes().Count == 0))
+            {
+                BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
+            }
 
-            // 确保选择框隐藏
             if (GridInkCanvasSelectionCover != null)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
             }
 
-            // 确保InkCanvas处于选择模式，这样用户可以直接点击墨迹来选择
             if (inkCanvas != null)
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.Select;
@@ -985,15 +1055,35 @@ namespace Ink_Canvas
                 // 对选中的图片元素应用矩阵变换
                 ApplyMatrixTransformToElement(element, matrix, false);
 
-                // 对选中的笔画应用变换
-                var selectedStrokes = inkCanvas.GetSelectedStrokes();
-                foreach (var stroke in selectedStrokes)
+                if (_selectedElements.Count > 1)
                 {
-                    stroke.Transform(matrix, false);
+                    foreach (var other in _selectedElements)
+                    {
+                        if (other != element)
+                        {
+                            ApplyMatrixTransformToElement(other, matrix, false);
+                        }
+                    }
                 }
 
-                // 更新选择框的位置（如果有选择框）
-                UpdateSelectionBorderPosition(delta);
+                // 对选中的笔画应用变换
+                var selectedStrokes = inkCanvas.GetSelectedStrokes();
+                if (selectedStrokes != null)
+                {
+                    foreach (var stroke in selectedStrokes)
+                    {
+                        stroke.Transform(matrix, false);
+                    }
+                }
+
+                if (_selectedElements.Count > 1 || (selectedStrokes != null && selectedStrokes.Count > 0))
+                {
+                    UpdateCompositeSelectionOverlay();
+                }
+                else
+                {
+                    UpdateSelectionBorderPosition(delta);
+                }
 
 
             }
@@ -1117,11 +1207,30 @@ namespace Ink_Canvas
                 // 应用变换到元素
                 ApplyMatrixTransformToElement(element, matrix, false);
 
-                // 应用变换到选中的笔画
-                var selectedStrokes = inkCanvas.GetSelectedStrokes();
-                foreach (var stroke in selectedStrokes)
+                if (_selectedElements.Count > 1)
                 {
-                    stroke.Transform(matrix, false);
+                    foreach (var other in _selectedElements)
+                    {
+                        if (other != element)
+                        {
+                            ApplyMatrixTransformToElement(other, matrix, false);
+                        }
+                    }
+                }
+
+                // 对选中的笔画应用变换
+                var selectedStrokes = inkCanvas.GetSelectedStrokes();
+                if (selectedStrokes != null)
+                {
+                    foreach (var stroke in selectedStrokes)
+                    {
+                        stroke.Transform(matrix, false);
+                    }
+                }
+
+                if (_selectedElements.Count > 1 || (selectedStrokes != null && selectedStrokes.Count > 0))
+                {
+                    UpdateCompositeSelectionOverlay();
                 }
 
 
@@ -1148,7 +1257,10 @@ namespace Ink_Canvas
         /// <summary>与图片选择工具栏、缩放控制点联动的画布位图类元素（普通图片、多页 PDF 嵌入或媒体控件）。</summary>
         private static bool IsBitmapLikeCanvasElement(FrameworkElement fe)
         {
-            return fe is Image || fe is PdfEmbeddedView || fe is CanvasMediaControl;
+            return fe is Image || fe is PdfEmbeddedView || fe is CanvasMediaControl
+                || string.Equals(fe?.GetType().FullName, "Ink_Canvas.SecAgent.Plugin.SvgCanvasElement", StringComparison.Ordinal)
+                || string.Equals(fe?.GetType().FullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneElement", StringComparison.Ordinal)
+                || string.Equals(fe?.GetType().FullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneGroup", StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -1795,13 +1907,16 @@ namespace Ink_Canvas
                 if (element == null || element.ActualWidth <= 0 || element.ActualHeight <= 0)
                 {
                     // 如果元素尺寸无效，等待加载完成后再处理
-                    element.Loaded += (sender, e) =>
+                    RoutedEventHandler loadedHandler = null;
+                    loadedHandler = (sender, e) =>
                     {
+                        element.Loaded -= loadedHandler;  // 一次性订阅，解除后释放 lambda 闭包
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
                             CenterAndScaleElement(element);
                         }), DispatcherPriority.Loaded);
                     };
+                    element.Loaded += loadedHandler;
                     return;
                 }
 
@@ -2768,6 +2883,8 @@ namespace Ink_Canvas
 
         private bool _imageOverlayHooked;
         private FrameworkElement _overlayTrackedElement;
+        private readonly System.Collections.Generic.Dictionary<Stroke, StylusPointCollection> _strokeTransformInitialPoints = new();
+        private bool _isStrokeRotationOverlayActive;
 
         private void EnsureImageOverlayHooks()
         {
@@ -2776,9 +2893,45 @@ namespace Ink_Canvas
             ImageSelectionOverlay.ResizeDelta += ImageSelectionOverlay_ResizeDelta;
             ImageSelectionOverlay.MoveDelta += ImageSelectionOverlay_MoveDelta;
             ImageSelectionOverlay.RotateDelta += ImageSelectionOverlay_RotateDelta;
+            ImageSelectionOverlay.InteractionStarted += ImageSelectionOverlay_InteractionStarted;
+            ImageSelectionOverlay.InteractionEnded += ImageSelectionOverlay_InteractionEnded;
             _imageOverlayHooked = true;
         }
 
+        private void ImageSelectionOverlay_InteractionStarted(object sender, EventArgs e)
+        {
+            PrepareCompositeTransformBaseline();
+        }
+
+        private void ImageSelectionOverlay_InteractionEnded(object sender, EventArgs e)
+        {
+            try
+            {
+                if (inkCanvas != null && _strokeTransformInitialPoints.Count > 0)
+                {
+                    var history = new System.Collections.Generic.Dictionary<Stroke, Tuple<StylusPointCollection, StylusPointCollection>>();
+                    foreach (var stroke in inkCanvas.GetSelectedStrokes())
+                    {
+                        if (_strokeTransformInitialPoints.TryGetValue(stroke, out var initialPoints))
+                        {
+                            history[stroke] = Tuple.Create(initialPoints, stroke.StylusPoints.Clone());
+                        }
+                    }
+                    if (history.Count > 0)
+                    {
+                        timeMachine.CommitStrokeManipulationHistory(history);
+                        foreach (var item in history)
+                        {
+                            StrokeInitialHistory[item.Key] = item.Value.Item2;
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                ResetCompositeTransformBaseline();
+            }
+        }
         private void AttachOverlayTracking(FrameworkElement element)
         {
             if (_overlayTrackedElement == element) return;
@@ -2810,6 +2963,7 @@ namespace Ink_Canvas
             {
                 if (ImageSelectionOverlay == null || element == null) return;
                 EnsureImageOverlayHooks();
+                ImageSelectionOverlay.SetMode(SelectionOverlayMode.Element);
                 AttachOverlayTracking(element);
                 UpdateImageResizeHandlesPosition(default);
                 ImageSelectionOverlay.Visibility = Visibility.Visible;
@@ -2939,65 +3093,83 @@ namespace Ink_Canvas
 
         private void ImageSelectionOverlay_ResizeDelta(object sender, ImageResizeDeltaEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("缩放图片")) return;
+            if (TryBlockFrozenPageMutation("缩放")) return;
             try
             {
-                if (!IsBitmapLikeCanvasElement(currentSelectedElement)) return;
-                ResizeImageByCorner(currentSelectedElement, e.CanvasDelta, e.Corner, e.LockAspectRatio);
+                bool isSingleElement = currentSelectedElement != null && _selectedElements.Count <= 1 && (inkCanvas == null || inkCanvas.GetSelectedStrokes().Count == 0);
+                if (isSingleElement && IsBitmapLikeCanvasElement(currentSelectedElement))
+                {
+                    ResizeImageByCorner(currentSelectedElement, e.CanvasDelta, e.Corner, e.LockAspectRatio);
+                    return;
+                }
+
+                ResizeCompositeSelectionByCorner(e.CanvasDelta, e.Corner, e.LockAspectRatio);
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"图片缩放失败: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"缩放失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
         private void ImageSelectionOverlay_MoveDelta(object sender, ImageMoveDeltaEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("移动图片")) return;
+            if (TryBlockFrozenPageMutation("移动")) return;
             try
             {
-                if (currentSelectedElement == null) return;
-                if (currentSelectedElement.RenderTransform is TransformGroup tg)
+                bool isSingleElement = currentSelectedElement != null && _selectedElements.Count <= 1 && (inkCanvas == null || inkCanvas.GetSelectedStrokes().Count == 0);
+                if (isSingleElement)
                 {
-                    var tt = tg.Children.OfType<TranslateTransform>().FirstOrDefault();
-                    var rt = tg.Children.OfType<RotateTransform>().FirstOrDefault();
-                    if (tt != null)
+                    if (currentSelectedElement.RenderTransform is TransformGroup tg)
                     {
-                        tt.X += e.CanvasDelta.X;
-                        tt.Y += e.CanvasDelta.Y;
-                        // Keep rotation center locked to the visual center so the element
-                        // translates rigidly instead of swinging around an old pivot.
-                        if (rt != null)
+                        var tt = tg.Children.OfType<TranslateTransform>().FirstOrDefault();
+                        var rt = tg.Children.OfType<RotateTransform>().FirstOrDefault();
+                        if (tt != null)
                         {
-                            rt.CenterX += e.CanvasDelta.X;
-                            rt.CenterY += e.CanvasDelta.Y;
+                            tt.X += e.CanvasDelta.X;
+                            tt.Y += e.CanvasDelta.Y;
+                            // Keep rotation center locked to the visual center so the element
+                            // translates rigidly instead of swinging around an old pivot.
+                            if (rt != null)
+                            {
+                                rt.CenterX += e.CanvasDelta.X;
+                                rt.CenterY += e.CanvasDelta.Y;
+                            }
                         }
                     }
+                    UpdateImageResizeHandlesPosition(default);
+                    if (BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                        UpdateImageSelectionToolbarPosition(currentSelectedElement);
+                    return;
                 }
-                UpdateImageResizeHandlesPosition(default);
-                if (BorderImageSelectionControl?.Visibility == Visibility.Visible)
-                    UpdateImageSelectionToolbarPosition(currentSelectedElement);
+
+                MoveCompositeSelection(e.CanvasDelta);
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"图片拖动失败: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"拖动失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
         private void ImageSelectionOverlay_RotateDelta(object sender, ImageRotateDeltaEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("旋转图片")) return;
+            if (TryBlockFrozenPageMutation("旋转")) return;
             try
             {
-                if (currentSelectedElement == null) return;
-                ApplyRotateTransform(currentSelectedElement, e.AngleDelta);
-                UpdateImageResizeHandlesPosition(default);
-                if (BorderImageSelectionControl?.Visibility == Visibility.Visible)
-                    UpdateImageSelectionToolbarPosition(currentSelectedElement);
+                bool isSingleElement = currentSelectedElement != null && _selectedElements.Count <= 1 && (inkCanvas == null || inkCanvas.GetSelectedStrokes().Count == 0);
+                if (isSingleElement)
+                {
+                    ApplyRotateTransform(currentSelectedElement, e.AngleDelta);
+                    UpdateImageResizeHandlesPosition(default);
+                    if (BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                        UpdateImageSelectionToolbarPosition(currentSelectedElement);
+                    return;
+                }
+
+                RotateCompositeSelection(e.AngleDelta);
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"图片旋转失败: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"旋转失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -3011,6 +3183,11 @@ namespace Ink_Canvas
             }
 
             if (element is PdfEmbeddedView)
+                lockAspect = true;
+
+            // Editable SVG scenes are inserted as a fixed-aspect composition. Their text,
+            // paths and table geometry must scale uniformly when a corner handle is dragged.
+            if (IsSecAgentSceneCanvasElement(element))
                 lockAspect = true;
 
             if (!(element.RenderTransform is TransformGroup transformGroup)) return;
@@ -3108,6 +3285,14 @@ namespace Ink_Canvas
             UpdateImageResizeHandlesPosition(default);
             if (BorderImageSelectionControl?.Visibility == Visibility.Visible)
                 UpdateImageSelectionToolbarPosition(element);
+        }
+
+        private static bool IsSecAgentSceneCanvasElement(FrameworkElement element)
+        {
+            var fullName = element?.GetType().FullName;
+            return string.Equals(fullName, "Ink_Canvas.SecAgent.Plugin.SvgCanvasElement", StringComparison.Ordinal)
+                || string.Equals(fullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneElement", StringComparison.Ordinal)
+                || string.Equals(fullName, "Ink_Canvas.SecAgent.Plugin.SvgSceneGroup", StringComparison.Ordinal);
         }
 
         // Canvas position of element-local point (lx, ly) under the given transform.

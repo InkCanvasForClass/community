@@ -280,7 +280,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"RefreshUsbDrives error: {ex.Message}");
-                MessageBox.Show($"Refresh USB drives failed. Info:\n{ex.Message}\n\nStack:\n{ex.StackTrace}", SecurityStrings.Security_InfoBarTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBoxHelper.Show(this, $"Refresh USB drives failed. Info:\n{ex.Message}\n\nStack:\n{ex.StackTrace}", SecurityStrings.Security_InfoBarTitle, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -321,7 +321,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 if (string.IsNullOrEmpty(drive.SerialNumber))
                 {
-                    MessageBox.Show(SecurityStrings.Security_UsbPromptNoValidSn, SecurityStrings.Security_InfoBarTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBoxHelper.Show(this, SecurityStrings.Security_UsbPromptNoValidSn, SecurityStrings.Security_InfoBarTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
@@ -332,17 +332,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 }
                 else if (current.Contains(drive.SerialNumber))
                 {
-                    MessageBox.Show(SecurityStrings.Security_UsbPromptAlreadyAuthorized, SecurityStrings.Security_InfoBarTitle, MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBoxHelper.Show(this, SecurityStrings.Security_UsbPromptAlreadyAuthorized, SecurityStrings.Security_InfoBarTitle, MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
                     TextBoxUsbAuthorizedSns.Text = current + "," + drive.SerialNumber;
                 }
-                MessageBox.Show(SecurityStrings.Security_UsbPromptAuthorizeSuccess, SecurityStrings.Security_InfoBarTitle, MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBoxHelper.Show(this, SecurityStrings.Security_UsbPromptAuthorizeSuccess, SecurityStrings.Security_InfoBarTitle, MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
             {
-                MessageBox.Show(SecurityStrings.Security_UsbPromptSelectDrive, SecurityStrings.Security_InfoBarTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBoxHelper.Show(this, SecurityStrings.Security_UsbPromptSelectDrive, SecurityStrings.Security_InfoBarTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
     }

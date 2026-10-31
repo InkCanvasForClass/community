@@ -25,12 +25,16 @@
               IsHitTestVisible="False"
               SnapsToDevicePixels="True" />
 
-        <Ellipse x:Name="RotationHandle"
-                 Width="14" Height="14"
-                 Fill="#22D3A9"
-                 Stroke="White"
-                 StrokeThickness="2"
-                 Cursor="Hand" />
+        <Grid x:Name="RotationHandle"
+              Width="28" Height="28"
+              Background="Transparent"
+              Cursor="Hand">
+            <Ellipse Width="14" Height="14"
+                     Fill="#22D3A9"
+                     Stroke="White"
+                     StrokeThickness="2"
+                     IsHitTestVisible="False" />
+        </Grid>
 
         <Ellipse x:Name="TopLeftHandle"
                  Width="12" Height="12"

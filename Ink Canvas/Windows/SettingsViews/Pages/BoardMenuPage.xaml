@@ -138,41 +138,64 @@
                       ResizeDirection="Rows" ResizeBehavior="PreviousAndNext"
                       Cursor="SizeNS" Margin="0,1,0,1"/>
 
-        <!-- ===== Section 3: 可添加的菜单项 ===== -->
-        <DockPanel Grid.Row="3" LastChildFill="True">
-            <DockPanel DockPanel.Dock="Top" LastChildFill="False" Margin="0,4,0,6">
-                <TextBlock Text="{x:Static props:NavStrings.Menu_AvailableItems}" FontSize="14" FontWeight="SemiBold"
-                           DockPanel.Dock="Left"/>
-                <TextBlock x:Name="LibraryLimitHint"
-                           Text="{x:Static props:NavStrings.Menu_LimitReached}"
-                           FontSize="13" Opacity="0.65"
-                           VerticalAlignment="Center" Margin="12,0,0,0"
-                           Visibility="Collapsed"
-                           DockPanel.Dock="Left"/>
-            </DockPanel>
-            <ui:ListView x:Name="LibraryList"
-                     ItemTemplate="{StaticResource LibraryItemTemplate}"
-                     dd:DragDrop.IsDragSource="True"
-                     touch:TouchAwareDragDropHelper.IsEnabled="True"
-                     Background="Transparent" BorderThickness="0"
-                     SelectionMode="Single"
-                     SelectionChanged="LibraryList_SelectionChanged">
-                <ui:ListView.ItemContainerStyle>
-                    <Style TargetType="ui:ListViewItem">
-                        <Setter Property="Padding" Value="0"/>
-                        <Setter Property="MinHeight" Value="0"/>
-                        <Setter Property="Margin" Value="1.5"/>
-                        <EventSetter Event="Loaded" Handler="ListViewItem_Loaded"/>
-                    </Style>
-                </ui:ListView.ItemContainerStyle>
-                <ui:ListView.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel Orientation="Horizontal"
-                                   helpers:WrapPanelAutoResize.TargetWidth="225"/>
-                    </ItemsPanelTemplate>
-                </ui:ListView.ItemsPanel>
-            </ui:ListView>
-        </DockPanel>
+        <!-- ===== Section 3: 组件库 / 组件设置 ===== -->
+        <TabControl Grid.Row="3" x:Name="SettingsTabControl" Margin="0,4,0,0"
+                    Style="{StaticResource {x:Static ui:ThemeKeys.TabControlPivotStyleKey}}">
+            <TabControl.Resources>
+                <Style TargetType="TabItem" BasedOn="{StaticResource {x:Static ui:ThemeKeys.TabItemPivotStyleKey}}">
+                    <Setter Property="Height" Value="32"/>
+                </Style>
+            </TabControl.Resources>
+
+            <!-- ===== Tab 1: 组件库 ===== -->
+            <TabItem Header="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentLibrary}">
+                <DockPanel LastChildFill="True">
+                    <DockPanel DockPanel.Dock="Top" LastChildFill="False" Margin="0,4,0,6">
+                        <TextBlock Text="{x:Static props:NavStrings.Menu_AvailableItems}" FontSize="14" FontWeight="SemiBold"
+                                   DockPanel.Dock="Left"/>
+                        <TextBlock x:Name="LibraryLimitHint"
+                                   Text="{x:Static props:NavStrings.Menu_LimitReached}"
+                                   FontSize="13" Opacity="0.65"
+                                   VerticalAlignment="Center" Margin="12,0,0,0"
+                                   Visibility="Collapsed"
+                                   DockPanel.Dock="Left"/>
+                    </DockPanel>
+                    <ui:ListView x:Name="LibraryList"
+                             ItemTemplate="{StaticResource LibraryItemTemplate}"
+                             dd:DragDrop.IsDragSource="True"
+                             touch:TouchAwareDragDropHelper.IsEnabled="True"
+                             Background="Transparent" BorderThickness="0"
+                             SelectionMode="Single"
+                             SelectionChanged="LibraryList_SelectionChanged">
+                        <ui:ListView.ItemContainerStyle>
+                            <Style TargetType="ui:ListViewItem">
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="MinHeight" Value="0"/>
+                                <Setter Property="Margin" Value="1.5"/>
+                                <EventSetter Event="Loaded" Handler="ListViewItem_Loaded"/>
+                            </Style>
+                        </ui:ListView.ItemContainerStyle>
+                        <ui:ListView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal"
+                                           helpers:WrapPanelAutoResize.TargetWidth="225"/>
+                            </ItemsPanelTemplate>
+                        </ui:ListView.ItemsPanel>
+                    </ui:ListView>
+                </DockPanel>
+            </TabItem>
+
+            <!-- ===== Tab 2: 组件设置 ===== -->
+            <TabItem x:Name="ComponentSettingsTab" Header="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentSettings}">
+                <ScrollViewer PanningMode="VerticalFirst" VerticalScrollBarVisibility="Auto">
+                    <ikw:SimpleStackPanel Spacing="4" Margin="0,8,0,0">
+                        <TextBlock Text="{x:Static props:FloatingBarStrings.ToolbarPage_ComponentProperties}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                        <!-- 组件自定义设置面板（动态生成，如截图组件的全局设置） -->
+                        <StackPanel x:Name="PanelPluginCustomSettings" Visibility="Collapsed"/>
+                    </ikw:SimpleStackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
 
         <!-- ===== Section 4: 恢复默认布局 ===== -->
         <Button Grid.Row="4" Content="{x:Static props:NavStrings.Menu_ResetLayout}" Click="ButtonReset_Click"

@@ -1,6 +1,7 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
+using Ink_Canvas.Plugins;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -194,15 +195,29 @@ namespace Ink_Canvas
         /// </remarks>
         private void ClearStrokes(bool isErasedByCode)
         {
+            ClearAllSelection();
             _currentCommitType = CommitReason.ClearingCanvas;
             if (isErasedByCode) _currentCommitType = CommitReason.CodeInput;
 
+            // SecAgent editable scenes are WPF children, not InkCanvas.Strokes. Remove them
+            // here as well so page switches, loads and code/UI clears cannot leave them behind.
+            ClearSecAgentSceneElements();
             inkCanvas.Strokes.Clear();
             // 只隐藏 hint，不暂停（ClearStrokes 在切换页面、保存加载时都会被调用，
             // 设置 _edgeExpandHintSuspended 会导致后续书写永远无法触发提示）。
             HideEdgeExpandHint();
 
             _currentCommitType = CommitReason.UserInput;
+        }
+
+        /// <summary>
+        /// Clears ink strokes and SecAgent editable scene elements for automation and toolbar
+        /// integrations. The old automation action only cleared InkCanvas.Strokes, which left
+        /// SVG scene groups visible because they are WPF children.
+        /// </summary>
+        internal void ClearCanvasContentFromAutomation()
+        {
+            ClearStrokes(true);
         }
 
         private static HashSet<UIElement> CollectRemovedElementsFromHistory(TimeMachineHistory[] history)
@@ -232,16 +247,9 @@ namespace Ink_Canvas
         {
             try
             {
-                // 隐藏图片选择工具栏
-                if (currentSelectedElement != null)
-                {
-                    // 保存当前编辑模式
-                    var previousEditingMode = inkCanvas.EditingMode;
-                    UnselectElement(currentSelectedElement);
-                    // 恢复编辑模式
-                    inkCanvas.EditingMode = previousEditingMode;
-                    currentSelectedElement = null;
-                }
+                var previousEditingMode = inkCanvas.EditingMode;
+                ClearAllSelection();
+                inkCanvas.EditingMode = previousEditingMode;
 
                 var targetIndex = isBackupMain ? 0 : CurrentWhiteboardIndex;
 
@@ -435,6 +443,32 @@ namespace Ink_Canvas
         /// - 处理右侧页面列表按钮点击：显示或隐藏右侧页面列表
         /// - 显示页面列表时会刷新列表内容并滚动到当前页面
         /// </remarks>
+        /// <summary>
+        /// 打开页列表面板前，按屏幕高度与页码按钮位置调整面板尺寸：
+        /// 目标约为屏幕高度的 60%（上限 640），面板底部钉在按钮上方，
+        /// 增加的高度通过上移面板吸收，顶部至少保留约 24px。
+        /// </summary>
+        private void EnsurePageListPanelHeight(Border panel, ScrollViewer scrollViewer, FrameworkElement anchorButton)
+        {
+            if (panel == null || scrollViewer == null || anchorButton == null) return;
+
+            var screenHeight = SystemParameters.WorkArea.Height;
+            var desiredHeight = Math.Min(screenHeight * 0.6, 640);
+
+            // 按钮顶部位置限制可上移空间（原始布局：-465 顶部边距 + 460 高度，
+            // 面板底部正好在按钮上方 5px，高度增量全部向上扩展）
+            var buttonTop = anchorButton.TransformToAncestor(this).Transform(new Point(0, 0)).Y;
+            var height = Math.Min(desiredHeight, Math.Max(320, buttonTop + 20));
+
+            scrollViewer.Height = height;
+
+            var baseMargin = panel.Tag is Thickness tag ? tag : panel.Margin;
+            panel.Margin = new Thickness(baseMargin.Left,
+                baseMargin.Top - (height - 460),
+                baseMargin.Right,
+                baseMargin.Bottom);
+        }
+
         private async void BtnWhiteBoardPageIndex_Click(object sender, EventArgs e)
         {
             var BtnLeftPageListWB = FindView("board.pageList.leftBtn") as Border;
@@ -461,6 +495,7 @@ namespace Ink_Canvas
                         RefreshBoothPageListView();
                     else
                         RefreshBlackBoardSidePageListView();
+                    EnsurePageListPanelHeight(BoardBorderLeftPageListView, BlackBoardLeftSidePageListScrollViewer, BtnLeftPageListWB);
                     AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderLeftPageListView);
                     await Task.Delay(1);
                     if (BlackBoardLeftSidePageListView != null)
@@ -486,29 +521,64 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
-                    // 视频展台特殊模式：刷新虚拟分页项（直播页文字 + 照片缩略图），不刷新普通白板页
-                    if (_isVideoPresenterSpecialMode)
-                        RefreshBoothPageListView();
-                    else
-                        RefreshBlackBoardSidePageListView();
-                    AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderRightPageListView);
-                    await Task.Delay(1);
-                    if (BlackBoardRightSidePageListView != null)
-                    {
-                        int scrollIndex = _isVideoPresenterSpecialMode
-                            ? (_boothCurrentPhotoIndex + 1)
-                            : CurrentWhiteboardIndex - 1;
-                        var rightContainer = BlackBoardRightSidePageListView.ItemContainerGenerator.ContainerFromIndex(
-                            scrollIndex) as ListViewItem;
-                        if (rightContainer != null)
-                        {
-                            ScrollViewToVerticalTop(rightContainer, BlackBoardRightSidePageListScrollViewer);
-                        }
-                    }
+                    ShowPageListRightPanel();
                 }
             }
 
+        }
+
+        /// <summary>
+        /// 展开右侧页码面板（与点击右侧页码按钮的展开行为一致）。
+        /// <para>
+        /// 视频展台拍照完成后自动调用：刷新虚拟分页项（直播页文字 + 照片缩略图），
+        /// 并把面板滚动到最新一张照片（scrollToLastPhoto=true）或当前虚拟页。
+        /// 面板已展开时直接返回（内容由调用方负责刷新）。
+        /// </para>
+        /// </summary>
+        internal async void ShowPageListRightPanel(bool scrollToLastPhoto = false)
+        {
+            try
+            {
+                var BtnRightPageListWB = FindView("board.pageList.rightBtn") as Border;
+                var BoardBorderLeftPageListView = FindView("board.pageList.leftBorder") as Border;
+                var BoardBorderRightPageListView = FindView("board.pageList.rightBorder") as Border;
+                var BlackBoardRightSidePageListView = FindView("board.pageList.right") as System.Windows.Controls.ListView;
+                var BlackBoardRightSidePageListScrollViewer = FindView("board.pageList.rightScrollViewer") as ScrollViewer;
+
+                if (BoardBorderRightPageListView == null) return;
+                if (BoardBorderRightPageListView.Visibility == Visibility.Visible) return;
+
+                AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
+                // 视频展台特殊模式：刷新虚拟分页项（直播页文字 + 照片缩略图），不刷新普通白板页
+                // 否则 RefreshBlackBoardSidePageListView 会用普通白板页的墨迹预览覆盖虚拟分页项
+                if (_isVideoPresenterSpecialMode)
+                    RefreshBoothPageListView();
+                else
+                    RefreshBlackBoardSidePageListView();
+                EnsurePageListPanelHeight(BoardBorderRightPageListView, BlackBoardRightSidePageListScrollViewer, BtnRightPageListWB);
+                AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderRightPageListView);
+                await Task.Delay(1);
+                if (BlackBoardRightSidePageListView != null)
+                {
+                    int scrollIndex = scrollToLastPhoto
+                        // 展开最新一张照片（刚拍摄完追加到列表末尾）
+                        ? blackBoardSidePageListViewObservableCollection.Count - 1
+                        // 特殊模式下滚动到当前虚拟页（-1=直播页→0，0..N-1=照片页→index+1）
+                        : (_isVideoPresenterSpecialMode
+                            ? (_boothCurrentPhotoIndex + 1)
+                            : CurrentWhiteboardIndex - 1);
+                    var rightContainer = BlackBoardRightSidePageListView.ItemContainerGenerator.ContainerFromIndex(
+                        scrollIndex) as ListViewItem;
+                    if (rightContainer != null)
+                    {
+                        ScrollViewToVerticalTop(rightContainer, BlackBoardRightSidePageListScrollViewer);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"展开右侧页码面板失败: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -535,25 +605,21 @@ namespace Ink_Canvas
 
             if (CurrentWhiteboardIndex <= 1) return;
 
-            // 隐藏图片选择工具栏
-            if (currentSelectedElement != null)
-            {
-                // 保存当前编辑模式
-                var previousEditingMode = inkCanvas.EditingMode;
-                UnselectElement(currentSelectedElement);
-                // 恢复编辑模式
-                inkCanvas.EditingMode = previousEditingMode;
-                currentSelectedElement = null;
-            }
+            var previousEditingMode = inkCanvas.EditingMode;
+            ClearAllSelection();
+            inkCanvas.EditingMode = previousEditingMode;
 
             VideoPresenter_BeforePageLeave();
             PauseAllCanvasMediaPlayback();
+            var previousPluginPageIndex = CurrentWhiteboardIndex;
+            BeginPluginWhiteboardPageChange(CurrentWhiteboardIndex - 1);
             SaveStrokes();
 
             ClearStrokes(true);
             CurrentWhiteboardIndex--;
 
             RestoreStrokes();
+            CompletePluginWhiteboardPageChange(previousPluginPageIndex);
             VideoPresenter_OnPageChanged();
 
             UpdateIndexInfoDisplay();
@@ -590,25 +656,21 @@ namespace Ink_Canvas
                 return;
             }
 
-            // 隐藏图片选择工具栏
-            if (currentSelectedElement != null)
-            {
-                // 保存当前编辑模式
-                var previousEditingMode = inkCanvas.EditingMode;
-                UnselectElement(currentSelectedElement);
-                // 恢复编辑模式
-                inkCanvas.EditingMode = previousEditingMode;
-                currentSelectedElement = null;
-            }
+            var previousEditingMode = inkCanvas.EditingMode;
+            ClearAllSelection();
+            inkCanvas.EditingMode = previousEditingMode;
 
             VideoPresenter_BeforePageLeave();
             PauseAllCanvasMediaPlayback();
+            var previousPluginPageIndex = CurrentWhiteboardIndex;
+            BeginPluginWhiteboardPageChange(CurrentWhiteboardIndex + 1);
             SaveStrokes();
 
             ClearStrokes(true);
             CurrentWhiteboardIndex++;
 
             RestoreStrokes();
+            CompletePluginWhiteboardPageChange(previousPluginPageIndex);
             VideoPresenter_OnPageChanged();
 
             UpdateIndexInfoDisplay();
@@ -637,24 +699,21 @@ namespace Ink_Canvas
                 inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
                 CaptureAndEnqueueScreenshotSave(isHideNotification: true);
 
-            // 隐藏图片选择工具栏
-            if (currentSelectedElement != null)
-            {
-                // 保存当前编辑模式
-                var previousEditingMode = inkCanvas.EditingMode;
-                UnselectElement(currentSelectedElement);
-                // 恢复编辑模式
-                inkCanvas.EditingMode = previousEditingMode;
-                currentSelectedElement = null;
-            }
+            var previousEditingMode = inkCanvas.EditingMode;
+            ClearAllSelection();
+            inkCanvas.EditingMode = previousEditingMode;
 
             VideoPresenter_BeforePageLeave();
             PauseAllCanvasMediaPlayback();
+            var previousPluginPageIndex = CurrentWhiteboardIndex;
+            var newPluginPageId = CreatePluginWhiteboardPageId();
+            BeginPluginWhiteboardPageChange(CurrentWhiteboardIndex + 1, newPluginPageId);
             SaveStrokes();
             ClearStrokes(true);
 
             WhiteboardTotalCount++;
             CurrentWhiteboardIndex++;
+            InsertPluginWhiteboardPageId(CurrentWhiteboardIndex, newPluginPageId);
 
             if (CurrentWhiteboardIndex != WhiteboardTotalCount)
             {
@@ -674,6 +733,7 @@ namespace Ink_Canvas
 
             // 恢复新页面（这会清空画布，因为历史记录为null）
             RestoreStrokes();
+            CompletePluginWhiteboardPageChange(previousPluginPageIndex);
             VideoPresenter_OnPageChanged();
 
             UpdateIndexInfoDisplay();
@@ -712,13 +772,14 @@ namespace Ink_Canvas
                 return;
             }
 
-            if (currentSelectedElement != null)
-            {
-                var previousEditingMode = inkCanvas.EditingMode;
-                UnselectElement(currentSelectedElement);
-                inkCanvas.EditingMode = previousEditingMode;
-                currentSelectedElement = null;
-            }
+            var previousEditingMode = inkCanvas.EditingMode;
+            ClearAllSelection();
+            inkCanvas.EditingMode = previousEditingMode;
+
+            var oldPluginPageCount = WhiteboardTotalCount;
+            var deletingCurrentPluginPage = pageIndex == CurrentWhiteboardIndex;
+            if (deletingCurrentPluginPage) CaptureCurrentPluginPageStates();
+            var removedPluginPage = RemovePluginWhiteboardPageId(pageIndex, oldPluginPageCount);
 
             if (pageIndex == CurrentWhiteboardIndex)
             {
@@ -744,6 +805,7 @@ namespace Ink_Canvas
                 TimeMachineHistories[oldTotal] = null;
                 WhiteboardTotalCount--;
                 RestoreStrokes();
+                RestoreCurrentPluginPageStates();
             }
             else if (pageIndex < CurrentWhiteboardIndex)
             {
@@ -773,6 +835,16 @@ namespace Ink_Canvas
 
             frozenPages[WhiteboardTotalCount + 1] = false;
             pageLastUserInkMutationUtc[WhiteboardTotalCount + 1] = DateTime.MinValue;
+
+            if (deletingCurrentPluginPage)
+            {
+                PluginWhiteboardDocumentChanged?.Invoke(this, new WhiteboardPageChangedEventArgs
+                {
+                    PreviousPage = removedPluginPage,
+                    CurrentPage = CreatePluginWhiteboardPageInfo(CurrentWhiteboardIndex)
+                });
+            }
+            NotifyPluginWhiteboardPageRemoved(removedPluginPage);
 
             UpdateIndexInfoDisplay();
             if (WhiteboardTotalCount < 99) BtnWhiteBoardAdd.IsEnabled = true;

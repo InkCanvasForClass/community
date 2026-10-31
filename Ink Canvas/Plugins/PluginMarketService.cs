@@ -22,6 +22,19 @@ namespace Ink_Canvas.Plugins
         private static readonly Lazy<PluginMarketService> _lazy = new Lazy<PluginMarketService>(() => new PluginMarketService());
         public static PluginMarketService Instance => _lazy.Value;
 
+        #region 诊断日志（列表渲染热路径节流）
+
+        private static int _diagExceptionCount;
+
+        private static void LogCallbackException(string what, Exception ex)
+        {
+            var n = System.Threading.Interlocked.Increment(ref _diagExceptionCount);
+            if (n == 1 || n % 100 == 0)
+                LogHelper.WriteLogToFile($"[Plugin] {what} 异常（累计 {n} 次）: {ex.Message}", LogHelper.LogType.Info);
+        }
+
+        #endregion
+
         // 备用官方索引地址
         private const string OfficialIndexUrl = "https://github.com/InkCanvasForClass/PluginIndex/releases/download/latest/index.json";
 
@@ -182,9 +195,10 @@ namespace Ink_Canvas.Plugins
                                 index = JsonConvert.DeserializeObject<PluginMarketIndex>(cached);
                                 LogHelper.WriteLogToFile("PluginMarket | 使用缓存索引");
                             }
-                            catch
+                            catch (Exception cacheEx)
                             {
                                 // 缓存也损坏了
+                                LogHelper.WriteLogToFile($"[Plugin] 插件市场索引缓存读取或反序列化失败，索引将为空: {IndexCachePath}, 原因: {cacheEx.Message}", LogHelper.LogType.Info);
                             }
                         }
                     }
@@ -278,9 +292,10 @@ namespace Ink_Canvas.Plugins
                         var ts = File.GetLastWriteTime(path);
                         if (ts < cutoff) File.Delete(path);
                     }
-                    catch
+                    catch (Exception ex)
                     {
                         // 单文件清理失败不影响其他文件
+                        LogHelper.WriteLogToFile($"[Plugin] 清理过期残留包中的单个文件失败（不影响其余文件）: {path}, 原因: {ex.Message}", LogHelper.LogType.Info);
                     }
                 }
             }
@@ -518,7 +533,11 @@ namespace Ink_Canvas.Plugins
 
                 if (task.IsCancelled)
                 {
-                    try { File.Delete(tempFile); } catch { }
+                    try { File.Delete(tempFile); }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Plugin] 插件下载取消后删除临时文件失败: {tempFile}, 原因: {ex.Message}", LogHelper.LogType.Info);
+                    }
                     return false;
                 }
 
@@ -529,7 +548,11 @@ namespace Ink_Canvas.Plugins
                     if (!string.Equals(hash, merged.MarketEntry.DownloadSha256, StringComparison.OrdinalIgnoreCase))
                     {
                         task.Error = "文件校验失败，可能已损坏。";
-                        try { File.Delete(tempFile); } catch { }
+                        try { File.Delete(tempFile); }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"[Plugin] 插件包 SHA256 校验失败后删除临时文件失败: {tempFile}, 原因: {ex.Message}", LogHelper.LogType.Info);
+                        }
                         return false;
                     }
                 }
@@ -554,9 +577,10 @@ namespace Ink_Canvas.Plugins
                         File.Move(tempFile, targetPath);
                     });
                 }
-                catch
+                catch (Exception ex)
                 {
                     // 移动失败：保留 tempFile 改名以便下次重试恢复，**不**删除新下载的包。
+                    LogHelper.WriteLogToFile($"[Plugin] 插件包移动到 PluginPackages 失败，改为改名保留供下次重试: {id} -> {targetPath}, 原因: {ex.Message}", LogHelper.LogType.Info);
                     try
                     {
                         if (File.Exists(tempFile))
@@ -565,9 +589,10 @@ namespace Ink_Canvas.Plugins
                             File.Move(tempFile, retained);
                         }
                     }
-                    catch
+                    catch (Exception retainEx)
                     {
                         // 两次移动都失败（极小概率）—— 至少保留 tempFile 留给下次启动扫描。
+                        LogHelper.WriteLogToFile($"[Plugin] 移动失败后改名保留下载包也失败，tempFile 留给下次启动扫描: {tempFile}, 原因: {retainEx.Message}", LogHelper.LogType.Info);
                     }
                     throw;
                 }
@@ -733,7 +758,10 @@ namespace Ink_Canvas.Plugins
                 var json = JsonConvert.DeserializeAnonymousType(File.ReadAllText(IndexMetaPath), new { lastRefresh = "" });
                 if (DateTime.TryParse(json?.lastRefresh, out var dt)) return dt;
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Plugin] 读取插件市场索引最后刷新时间失败（将视为无刷新时间）: {IndexMetaPath}, 原因: {ex.Message}", LogHelper.LogType.Info);
+            }
             return null;
         }
 
@@ -761,8 +789,9 @@ namespace Ink_Canvas.Plugins
                 File.WriteAllBytes(localPath, data);
                 return localPath;
             }
-            catch
+            catch (Exception ex)
             {
+                LogCallbackException($"下载插件 \"{pluginId}\" 的市场图标", ex);
                 return null;
             }
         }

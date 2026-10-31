@@ -4,7 +4,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>Ink_Canvas</RootNamespace>
     <AssemblyName>InkCanvasForClass</AssemblyName>
-    <TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
@@ -29,8 +29,8 @@
     <EmbeddedOnlyCultures>en-US;zh-ME</EmbeddedOnlyCultures>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <Configurations>Debug;Release</Configurations>
-    <Platforms>AnyCPU;x86;x64</Platforms>
-    <LangVersion>10</LangVersion>
+    <Platforms>AnyCPU;x86;x64;ARM64;ARM64EC</Platforms>
+    <LangVersion>12</LangVersion>
     <NoWarn>$(NoWarn);CA1416;NU1701;MSB3270;CS8012;NETSDK1138;CS9269</NoWarn>
     <!-- PolySharp (传递依赖，经 Vortice→SharpGen.Runtime 引入) 在 .NET 10 SDK 下与既有的
          UnscopedRefAttribute 定义冲突 (CS0101/CS0579)。该 polyfill 类型已由其他来源提供，
@@ -40,6 +40,7 @@
     <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <CetCompat>false</CetCompat>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>embedded</DebugType>
@@ -60,13 +61,13 @@
     <OutputPath>bin\$(Configuration)\$(Platform)\</OutputPath>
     <DebugType>embedded</DebugType>
     <PlatformTarget>x86</PlatformTarget>
-    <Prefer32Bit>true</Prefer32Bit>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\$(Configuration)\$(Platform)\</OutputPath>
     <DebugType>embedded</DebugType>
     <PlatformTarget>x86</PlatformTarget>
-    <Prefer32Bit>true</Prefer32Bit>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -122,7 +123,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="gong-wpf-dragdrop" Version="4.0.0" />
-    <PackageReference Include="H.NotifyIcon.Wpf" Version="2.1.4" />
+    <PackageReference Include="H.NotifyIcon.Wpf" Version="2.4.1" />
     <PackageReference Include="iNKORE.UI.WPF.Modern.Controls" Version="0.10.2.1-icc.4" />
     <PackageReference Include="iNKORE.UI.WPF" Version="1.2.8" />
     <PackageReference Include="MdXaml" Version="1.27.0" />
@@ -136,7 +137,6 @@
     <PackageReference Include="Microsoft.International.Converters.PinYinConverter" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
     <PackageReference Include="System.ComponentModel.Composition" Version="10.0.11" />
     <PackageReference Include="System.Composition.AttributedModel" Version="10.0.11" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
@@ -148,11 +148,10 @@
     <PackageReference Include="OSVersionExt" Version="4.1.0" />
     <!-- PDFsharp 6.1.x 是最后一个以 net6.0 为目标框架的版本；用于插件「背景 + 墨迹」导出 PDF -->
     <PackageReference Include="PDFsharp" Version="6.2.4" />
-    <!-- AForge.Imaging / AForge.Math 仅用于照片校正（Grayscale/CannyEdgeDetector/BlobCounter/QuadrilateralTransformation）；摄像头采集已切换到 DirectShow（DirectShowLib） -->
-    <PackageReference Include="AForge.Imaging" Version="2.2.5" />
-    <PackageReference Include="AForge.Math" Version="2.2.5" />
-    <PackageReference Include="System.Private.Uri" Version="4.3.2" />
-    <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
+    <!-- 照片校正：OpenCvSharp4（OpenCV 4.13 封装，.NET 10 原生、MIT 免费），用于纸张角点检测 + 透视矫正 -->
+    <PackageReference Include="OpenCvSharp4.Windows" Version="4.13.0.20260627" />
+    <PackageReference Include="OpenCvSharp4.Extensions" Version="4.13.0.20260627" />
+
     <PackageReference Include="WebDav.Client" Version="2.9.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.11" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
@@ -160,8 +159,8 @@
     <PackageReference Include="Vortice.Direct3D11" Version="3.8.3" />
     <PackageReference Include="Vortice.DirectComposition" Version="3.8.3" />
     <PackageReference Include="Vortice.DXGI" Version="3.8.3" />
-    <!-- 视频展台：DirectShow + VMR9 Renderless + D3DImage 零拷贝 GPU 渲染（兼容 Win7 SP1+ 和 Win10+） -->
-    <PackageReference Include="JerryShaw.WPFMediaKit" Version="1.0.1" />
+    <!-- 视频展台：DirectShow + VMR9 Renderless + D3DImage 零拷贝 GPU 渲染 -->
+    <PackageReference Include="WPFMediaKit" Version="3.0.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\InkCanvas.PluginSdk\InkCanvas.PluginSdk.csproj" />
@@ -482,15 +481,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="AssemblyInfo.cs" />
-    <!-- 新墨迹系统（原生 WM_POINTER + DirectComposition 湿墨管线）已于 1.7.19.9 回退，
-         代码文件保留原地供后续复用/测试（InkCanvas.NativeInk.Tests 通过 Link 单独编译），
-         此处仅从主项目排除编译。 -->
-    <Compile Remove="Ink\Native\**" />
-    <Compile Remove="MainWindow_cs\MW_NativeWetInk.cs" />
-    <!-- 实时墨迹 FPS/延迟 HUD 与新墨迹渲染配套，数据源（WetInkWindowHost）已排除，一并保留文件、排除编译。 -->
-    <Compile Remove="Helpers\InkPerformanceMonitor.cs" />
-    <Compile Remove="Helpers\RealtimeInkFpsOverlay.cs" />
-    <Compile Remove="MainWindow_cs\MW_RealtimeInkFpsOverlay.cs" />
   </ItemGroup>
 
   <ItemGroup>

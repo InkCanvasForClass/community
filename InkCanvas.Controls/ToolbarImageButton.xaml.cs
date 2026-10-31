@@ -58,6 +58,52 @@ namespace Ink_Canvas.Controls
             set => SetValue(IconBrushProperty, value);
         }
 
+        private GeometryDrawing _iconInnerOutlineOverlay;
+
+        /// <summary>
+        /// 为图标添加向内描边：描边完全位于图标轮廓内部，不会改变图标的视觉大小。
+        /// 实现方式为以 2 倍线宽居中描边，并将整层裁剪到图标轮廓内，外半圈被裁掉，只保留向内的半圈。
+        /// </summary>
+        /// <param name="outlineBrush">描边颜色</param>
+        /// <param name="width">描边可见宽度（图标 24x24 坐标系单位）</param>
+        public void SetIconInnerOutline(Brush outlineBrush, double width)
+        {
+            if (IconGeometryInternal == null || IconClipGroup == null) return;
+            var geometry = IconGeometryInternal.Geometry;
+            if (geometry == null) return;
+
+            if (_iconInnerOutlineOverlay == null)
+            {
+                _iconInnerOutlineOverlay = new GeometryDrawing();
+                IconClipGroup.Children.Add(_iconInnerOutlineOverlay);
+            }
+
+            IconClipGroup.ClipGeometry = geometry;
+            _iconInnerOutlineOverlay.Geometry = geometry;
+            _iconInnerOutlineOverlay.Brush = null;
+            _iconInnerOutlineOverlay.Pen = new Pen(outlineBrush, width * 2)
+            {
+                StartLineCap = PenLineCap.Round,
+                EndLineCap = PenLineCap.Round,
+                LineJoin = PenLineJoin.Round
+            };
+        }
+
+        /// <summary>
+        /// 移除图标描边。
+        /// </summary>
+        public void ClearIconInnerOutline()
+        {
+            if (IconClipGroup == null) return;
+
+            IconClipGroup.ClipGeometry = null;
+            if (_iconInnerOutlineOverlay != null)
+            {
+                IconClipGroup.Children.Remove(_iconInnerOutlineOverlay);
+                _iconInnerOutlineOverlay = null;
+            }
+        }
+
         public static readonly DependencyProperty LabelBrushProperty = DependencyProperty.Register(
             nameof(LabelBrush), typeof(Brush), typeof(ToolbarImageButton),
             new PropertyMetadata(null, (d, e) =>

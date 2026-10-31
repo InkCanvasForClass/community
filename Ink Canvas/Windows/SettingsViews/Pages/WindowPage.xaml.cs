@@ -226,7 +226,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 SettingsManager.SaveSettingsToFile();
 
                 var msg = WindowStrings.Window_WindowChromeRendering_RestartRequired;
-                var result = MessageBox.Show(msg, "Ink Canvas", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                var result = MessageBoxHelper.Show(this, msg, "Ink Canvas", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
                 if (result == MessageBoxResult.Yes)
                 {
@@ -327,7 +327,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 UpdateUIAModeVisibility();
 
                 var msg = StartupStrings.TopMostMode_Normal_RestartRequired;
-                var result = MessageBox.Show(msg, "Ink Canvas", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                var result = MessageBoxHelper.Show(this, msg, "Ink Canvas", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
                 if (result == MessageBoxResult.Yes)
                 {
@@ -359,7 +359,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 UpdateUIAModeVisibility();
 
                 var msg = StartupStrings.TopMostMode_UIA_RestartRequired;
-                var result = MessageBox.Show(msg, "Ink Canvas", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                var result = MessageBoxHelper.Show(this, msg, "Ink Canvas", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
                 if (result == MessageBoxResult.Yes)
                 {
@@ -388,7 +388,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 // 切换方案需要重启才能生效
                 var msg = StartupStrings.TopMostMode_UIA_RestartRequired;
-                var result = MessageBox.Show(msg, "Ink Canvas", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                var result = MessageBoxHelper.Show(this, msg, "Ink Canvas", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
                 if (result == MessageBoxResult.Yes)
                 {

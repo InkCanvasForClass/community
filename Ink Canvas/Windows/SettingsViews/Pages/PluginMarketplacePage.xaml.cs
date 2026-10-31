@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using Ink_Canvas.Plugins;
 using Ink_Canvas.Properties;
 using Microsoft.Win32;
@@ -561,7 +562,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 var stillPending = _market.MergedPlugins?.FirstOrDefault(p => p.Id == _selectedPlugin.Id);
                 if (stillPending?.RestartRequired == true)
                 {
-                    var restart = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                    var restart = MessageBoxHelper.Show(this,
                         PluginStrings.Market_HotInstallFailedRestart,
                         PluginStrings.Market_RestartTitle,
                         MessageBoxButton.YesNo, MessageBoxImage.Warning);
@@ -576,7 +577,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
             catch (Exception ex)
             {
-                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                MessageBoxHelper.Show(this,
                     string.Format(PluginStrings.Market_InstallLocalFailed, ex.Message),
                     PluginStrings.Market_Title,
                     MessageBoxButton.OK, MessageBoxImage.Error);
@@ -597,7 +598,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (deps.Count > 0)
             {
                 var msg = string.Format(PluginStrings.Market_DependencyWarning, string.Join(", ", deps));
-                var result = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(msg, PluginStrings.Market_DependencyTitle, MessageBoxButton.YesNo, MessageBoxImage.Question);
+                var result = MessageBoxHelper.Show(this, msg, PluginStrings.Market_DependencyTitle, MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result != MessageBoxResult.Yes) return;
                 foreach (var dep in deps)
                     await _market.RequestDownloadPluginAsync(dep);
@@ -612,7 +613,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     if (verdict.TrustLevel == PluginTrustLevel.Unknown && verdict.Reasons.Count > 0)
                     {
                         var confirmMsg = PluginStrings.Market_SecurityWarning + Environment.NewLine + string.Join(Environment.NewLine, verdict.Reasons);
-                        var securityResult = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(confirmMsg,
+                        var securityResult = MessageBoxHelper.Show(this, confirmMsg,
                             PluginStrings.Market_SecurityTitle,
                             MessageBoxButton.YesNo,
                             MessageBoxImage.Warning);
@@ -670,7 +671,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                         verdict.PackageSha256,
                         permissions,
                         reasons);
-                    var result = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                    var result = MessageBoxHelper.Show(this,
                         warning,
                         PluginStrings.Market_SecurityTitle,
                         MessageBoxButton.YesNo,
@@ -695,7 +696,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
                 var stillPending = !string.IsNullOrWhiteSpace(verdict.PluginId)
                     && PluginManager.Instance.GetPendingPackagePluginIds().Contains(verdict.PluginId);
-                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                MessageBoxHelper.Show(this,
                     stillPending ? PluginStrings.Market_HotInstallPending : PluginStrings.Market_InstallLocalSuccess,
                     PluginStrings.Market_Title,
                     MessageBoxButton.OK,
@@ -703,7 +704,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
             catch (Exception ex)
             {
-                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(string.Format(PluginStrings.Market_InstallLocalFailed, ex.Message), PluginStrings.Market_Title, MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBoxHelper.Show(this, string.Format(PluginStrings.Market_InstallLocalFailed, ex.Message), PluginStrings.Market_Title, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -711,7 +712,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void AskRestart()
         {
-            var result = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+            var result = MessageBoxHelper.Show(this,
                 PluginStrings.Market_RestartMessage, PluginStrings.Market_RestartTitle,
                 MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
@@ -725,7 +726,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 catch (Exception ex)
                 {
                     App.IsAppExitByUser = false;
-                    iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                    MessageBoxHelper.Show(this,
                         string.Format(PluginStrings.Market_RestartFailed, ex.Message),
                         PluginStrings.Market_RestartTitle, MessageBoxButton.OK, MessageBoxImage.Error);
                 }

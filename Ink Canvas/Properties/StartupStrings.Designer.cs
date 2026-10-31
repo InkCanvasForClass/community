@@ -133,5 +133,23 @@ namespace Ink_Canvas.Properties
         public static string UpdatePackageArchitecture => ResourceManager.GetString(nameof(UpdatePackageArchitecture), _resourceCulture);
 
         public static string UpdatePackageArchitectureHint => ResourceManager.GetString(nameof(UpdatePackageArchitectureHint), _resourceCulture);
+
+        public static string ExternalProtocol_ShortcutCreate => ResourceManager.GetString(nameof(ExternalProtocol_ShortcutCreate), _resourceCulture);
+
+        public static string ExternalProtocol_ShortcutCreateHint => ResourceManager.GetString(nameof(ExternalProtocol_ShortcutCreateHint), _resourceCulture);
+
+        public static string ExternalProtocol_Shortcut_Board => ResourceManager.GetString(nameof(ExternalProtocol_Shortcut_Board), _resourceCulture);
+
+        public static string ExternalProtocol_Shortcut_Booth => ResourceManager.GetString(nameof(ExternalProtocol_Shortcut_Booth), _resourceCulture);
+
+        public static string ExternalProtocol_Shortcut_Random => ResourceManager.GetString(nameof(ExternalProtocol_Shortcut_Random), _resourceCulture);
+
+        public static string ExternalProtocol_Shortcut_Settings => ResourceManager.GetString(nameof(ExternalProtocol_Shortcut_Settings), _resourceCulture);
+
+        public static string ExternalProtocol_Shortcut_Annotate => ResourceManager.GetString(nameof(ExternalProtocol_Shortcut_Annotate), _resourceCulture);
+
+        public static string ExternalProtocol_Shortcut_Created => ResourceManager.GetString(nameof(ExternalProtocol_Shortcut_Created), _resourceCulture);
+
+        public static string ExternalProtocol_Shortcut_Failed => ResourceManager.GetString(nameof(ExternalProtocol_Shortcut_Failed), _resourceCulture);
     }
 }

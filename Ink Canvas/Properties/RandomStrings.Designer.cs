@@ -329,6 +329,18 @@ namespace Ink_Canvas.Properties
 
         public static string Random_QuickDraw_UseExternal => ResourceManager.GetString(nameof(Random_QuickDraw_UseExternal), _resourceCulture);
 
+        public static string Random_QuickDraw_FinalJump => ResourceManager.GetString(nameof(Random_QuickDraw_FinalJump), _resourceCulture);
+
+        public static string Random_QuickDraw_FinalJumpProbability => ResourceManager.GetString(nameof(Random_QuickDraw_FinalJumpProbability), _resourceCulture);
+
+        public static string Random_QuickDraw_FinalJumpDelay => ResourceManager.GetString(nameof(Random_QuickDraw_FinalJumpDelay), _resourceCulture);
+
+        public static string Random_QuickDraw_FinalJumpPulse => ResourceManager.GetString(nameof(Random_QuickDraw_FinalJumpPulse), _resourceCulture);
+
+        public static string Random_QuickDraw_FinalJumpPulseHint => ResourceManager.GetString(nameof(Random_QuickDraw_FinalJumpPulseHint), _resourceCulture);
+
+        public static string Random_QuickDraw_FinalJumpHint => ResourceManager.GetString(nameof(Random_QuickDraw_FinalJumpHint), _resourceCulture);
+
         public static string Random_QuickDraw_Title => ResourceManager.GetString(nameof(Random_QuickDraw_Title), _resourceCulture);
 
         public static string Random_Rand_ClickToImport => ResourceManager.GetString(nameof(Random_Rand_ClickToImport), _resourceCulture);

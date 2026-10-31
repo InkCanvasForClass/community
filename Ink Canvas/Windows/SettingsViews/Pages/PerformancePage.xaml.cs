@@ -216,7 +216,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private async void CardClearHistory_Click(object sender, RoutedEventArgs e)
         {
-            var result = await MessageBox.ShowAsync(
+            var result = await MessageBoxHelper.ShowAsync(
+                this,
                 PerformanceStrings.ClearHistoryConfirm,
                 PerformanceStrings.ClearHistory,
                 MessageBoxButton.OKCancel,

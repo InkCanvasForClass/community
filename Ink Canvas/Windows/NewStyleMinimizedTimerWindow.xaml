@@ -32,6 +32,7 @@
                     Background="Transparent" BorderThickness="0"
                     Click="CloseButton_Click"
                     Cursor="Hand" Opacity="0.7">
+                
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}" CornerRadius="12">
@@ -46,6 +47,32 @@
                     </ControlTemplate>
                 </Button.Template>
                 <TextBlock Text="✕" FontSize="12" FontWeight="Bold"
+                           Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Button>
+
+            <!-- ToggleTransparency button -->
+            <Button x:Name="ToggleTransparency"
+                    Width="24" Height="24"
+                    HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                    Margin="0,6,10,0"
+                    Background="Transparent" BorderThickness="0"
+                    Click="ToggleTransparency_Click"
+                    Cursor="Hand" Opacity="0.7">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="12">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E81123"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Button.Template>
+                <TextBlock Text="💡" FontSize="14"
                            Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}"
                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Button>

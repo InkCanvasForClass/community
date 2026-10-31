@@ -189,6 +189,8 @@ namespace Ink_Canvas.Windows
 
                 if (inkCanvas != null && inkCanvas.Children is INotifyCollectionChanged notifyCollection)
                 {
+                    // 订阅前先解绑，防止重复订阅导致委托累积
+                    notifyCollection.CollectionChanged -= InkCanvasChildren_CollectionChanged;
                     notifyCollection.CollectionChanged += InkCanvasChildren_CollectionChanged;
                 }
             }
@@ -560,8 +562,9 @@ namespace Ink_Canvas.Windows
                 device.Activate(ref IID_IAudioEndpointVolume, 0, IntPtr.Zero, out interfacePointer);
                 _audioEndpointVolume = interfacePointer as IAudioEndpointVolume;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[PPT] 初始化默认音频端点音量接口失败（音量控制将不可用）: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 

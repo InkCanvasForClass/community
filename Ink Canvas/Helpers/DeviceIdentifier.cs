@@ -260,8 +260,9 @@ namespace Ink_Canvas.Helpers
                     return serialNumber.ToString("X8");
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"[DeviceId] 读取系统盘卷序列号失败（硬件指纹的 DISK 段将退化为其它来源）: {ex.Message}", LogHelper.LogType.Info);
             }
 
             return null;
@@ -379,8 +380,9 @@ namespace Ink_Canvas.Helpers
                             return info;
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        LogHelper.WriteLogToFile($"[DeviceId] 解析设备ID文件({filePath})中的 JSON 内容失败，将回退按纯文本读取: {ex.Message}", LogHelper.LogType.Info);
                     }
 
                     if (IsValidDeviceId(content))

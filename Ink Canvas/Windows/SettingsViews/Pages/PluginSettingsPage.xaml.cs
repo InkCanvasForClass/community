@@ -16,6 +16,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             set
             {
                 _currentPlugin = value;
+                if (_currentPlugin == null)
+                {
+                    PluginSettingsContent.Content = null;
+                    return;
+                }
                 if (IsLoaded && _currentPlugin != null)
                 {
                     LoadPluginSettings();

@@ -159,6 +159,69 @@
   <data name="Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint" xml:space="preserve">
     <value>When enabled, the whiteboard toolbar Booth button launches Seewo Video Showcase (must be installed). When disabled, the built-in booth is used.</value>
   </data>
+  <data name="Canvas_VideoBoothMode" xml:space="preserve">
+    <value>Video presenter mode</value>
+  </data>
+  <data name="Canvas_VideoBoothModeHint" xml:space="preserve">
+    <value>Choose the behavior when clicking the Video Presenter button on the whiteboard or toolbar</value>
+  </data>
+  <data name="Canvas_VideoBoothMode_BuiltIn" xml:space="preserve">
+    <value>Built-in presenter</value>
+  </data>
+  <data name="Canvas_VideoBoothMode_Seewo" xml:space="preserve">
+    <value>Seewo Video Showcase</value>
+  </data>
+  <data name="Canvas_VideoBoothMode_Custom" xml:space="preserve">
+    <value>Custom third-party software</value>
+  </data>
+  <data name="Canvas_VideoBoothCustomAppPath" xml:space="preserve">
+    <value>Program path</value>
+  </data>
+  <data name="Canvas_VideoBoothCustomAppPathHint" xml:space="preserve">
+    <value>Select the executable file (.exe) of the third-party presenter software</value>
+  </data>
+  <data name="Canvas_VideoBoothSelectApp" xml:space="preserve">
+    <value>Browse...</value>
+  </data>
+  <data name="Canvas_VideoBoothCustomAppArgs" xml:space="preserve">
+    <value>Launch arguments</value>
+  </data>
+  <data name="Canvas_VideoBoothCustomAppArgsHint" xml:space="preserve">
+    <value>Command-line arguments to pass to the external program (optional)</value>
+  </data>
+  <data name="Canvas_VideoBoothTestLaunch" xml:space="preserve">
+    <value>Test launch</value>
+  </data>
+  <data name="Canvas_VideoBoothCustomAppNotConfigured" xml:space="preserve">
+    <value>Third-party presenter path is not configured. Please configure it in Settings > Canvas.</value>
+  </data>
+  <data name="Canvas_VideoBoothCustomAppNotFound" xml:space="preserve">
+    <value>The specified presenter executable was not found:&#xA;{0}&#xA;Please check if the path is correct.</value>
+  </data>
+  <data name="Canvas_VideoBoothCustomAppLaunchFailed" xml:space="preserve">
+    <value>Failed to launch third-party presenter software: </value>
+  </data>
+  <data name="Canvas_SelectCustomBoothApp" xml:space="preserve">
+    <value>Select Video Presenter Executable</value>
+  </data>
+  <data name="Canvas_CustomBoothAppFilter" xml:space="preserve">
+    <value>Executable files (*.exe)|*.exe|All files (*.*)|*.*</value>
+  </data>
+  <data name="Canvas_LongPressUndoClear" xml:space="preserve">
+    <value>Long-press undo to clear canvas</value>
+  </data>
+  <data name="Canvas_LongPressUndoClearHint" xml:space="preserve">
+    <value>Press and hold the undo button for about 0.8 seconds to clear the canvas — you can still undo it afterwards; a quick click performs a normal undo</value>
+  </data>
+  <data name="Canvas_LongPressUndoClearNotification" xml:space="preserve">
+    <value>Canvas cleared by long-pressing the undo button — click undo to restore</value>
+  </data>
+  <data name="Canvas_LongPressUndoClearNotify" xml:space="preserve">
+    <value>Notify after clearing</value>
+  </data>
+  <data name="Canvas_LongPressUndoClearNotifyHint" xml:space="preserve">
+    <value>Show a message in the notification center after clearing via long-press undo</value>
+  </data>
   <data name="Canvas_MergeInkSmoothingWithUndo" xml:space="preserve">
     <value>Merge ink smoothing into undo</value>
   </data>
@@ -362,6 +425,15 @@
   </data>
   <data name="Canvas_DarkMode" xml:space="preserve">
     <value>Dark</value>
+  </data>
+  <data name="Canvas_UseWinRTInk" xml:space="preserve">
+    <value>Use WinRT ink engine (experimental)</value>
+  </data>
+  <data name="Canvas_UseWinRTInkHint" xml:space="preserve">
+    <value>Uses the system Wet Ink rendering and a dedicated ink thread; takes effect in pen tool. When off, falls back to WPF native ink. Experimental: may be incompatible with some devices.</value>
+  </data>
+  <data name="Canvas_WetInkRendererFailed" xml:space="preserve">
+    <value>Ink rendering failed to initialize; reverted to default ink mode</value>
   </data>
   <data name="Shape_RemoveAsymptote" xml:space="preserve">
     <value>Remove asymptote lines?</value>

@@ -38,6 +38,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             UpdateSliderText(MLAvoidanceWeightSlider, MLAvoidanceWeightText, "{0:F1}");
             UpdateSliderText(TimerVolumeSlider, TimerVolumeText, "{0:F1}");
             UpdateSliderText(ProgressiveReminderVolumeSlider, ProgressiveReminderVolumeText, "{0:F1}");
+            UpdateQuickDrawFinalJumpProbabilityText();
+            UpdateSliderText(QuickDrawFinalJumpDelaySlider, QuickDrawFinalJumpDelayText, "{0:F1}");
         }
 
         private void UpdateSliderText(Slider slider, TextBlock textBlock, string format)
@@ -62,6 +64,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ToggleSwitchShowRandomAndSingleDraw.IsOn = settings.RandSettings.ShowRandomAndSingleDraw;
             ToggleSwitchEnableQuickDraw.IsOn = settings.RandSettings.EnableQuickDraw;
             ToggleSwitchQuickDrawExternalCaller.IsOn = settings.RandSettings.QuickDrawExternalCaller;
+            ToggleSwitchQuickDrawFinalJump.IsOn = settings.RandSettings.EnableQuickDrawFinalJump;
+            QuickDrawFinalJumpProbabilitySlider.Value = settings.RandSettings.QuickDrawFinalJumpProbability * 100;
+            QuickDrawFinalJumpDelaySlider.Value = settings.RandSettings.QuickDrawFinalJumpSettleDelaySeconds;
+            ToggleSwitchQuickDrawFinalJumpPulse.IsOn = settings.RandSettings.EnableQuickDrawFinalJumpPulse;
             ToggleSwitchExternalCaller.IsOn = settings.RandSettings.DirectCallCiRand;
             ComboBoxExternalCallerType.SelectedIndex = settings.RandSettings.ExternalCallerType;
 
@@ -144,6 +150,53 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
             SettingsManager.Settings.RandSettings.QuickDrawExternalCaller = ToggleSwitchQuickDrawExternalCaller.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchQuickDrawFinalJump_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            // 概率滑杆的展开/收起由 LabeledSettingsCard 的 ExpandableContent 按 IsOn 自动处理
+            SettingsManager.Settings.RandSettings.EnableQuickDrawFinalJump = ToggleSwitchQuickDrawFinalJump.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void QuickDrawFinalJumpProbabilitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            UpdateQuickDrawFinalJumpProbabilityText();
+            if (!_isLoaded) return;
+            var slider = QuickDrawFinalJumpProbabilitySlider;
+            var val = Math.Round(slider.Value);
+            // 仅当四舍五入纠正了显示值时才回写；那次 set 会重入 ValueChanged 完成保存。
+            if (slider.Value != val)
+            {
+                slider.Value = val;
+                return;
+            }
+            SettingsManager.Settings.RandSettings.QuickDrawFinalJumpProbability = val / 100.0;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void UpdateQuickDrawFinalJumpProbabilityText()
+        {
+            if (QuickDrawFinalJumpProbabilitySlider == null || QuickDrawFinalJumpProbabilityText == null) return;
+            QuickDrawFinalJumpProbabilityText.Text = $"{(int)Math.Round(QuickDrawFinalJumpProbabilitySlider.Value)}%";
+        }
+
+        private void ToggleSwitchQuickDrawFinalJumpPulse_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.RandSettings.EnableQuickDrawFinalJumpPulse = ToggleSwitchQuickDrawFinalJumpPulse.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void QuickDrawFinalJumpDelaySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            UpdateSliderText(QuickDrawFinalJumpDelaySlider, QuickDrawFinalJumpDelayText, "{0:F1}");
+            if (!_isLoaded) return;
+            var val = Math.Round(QuickDrawFinalJumpDelaySlider.Value, 2);
+            QuickDrawFinalJumpDelaySlider.Value = val;
+            SettingsManager.Settings.RandSettings.QuickDrawFinalJumpSettleDelaySeconds = val;
             SettingsManager.SaveSettingsToFile();
         }
 
@@ -468,7 +521,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 SettingsManager.Settings.RandSettings.CustomTimerSoundPath = openFileDialog.FileName;
                 SettingsManager.SaveSettingsToFile();
-                MessageBox.Show(RandomStrings.Random_CustomAlarmSuccess, RandomStrings.Random_AlarmSetupSuccess, MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBoxHelper.Show(this, RandomStrings.Random_CustomAlarmSuccess, RandomStrings.Random_AlarmSetupSuccess, MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -476,7 +529,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             SettingsManager.Settings.RandSettings.CustomTimerSoundPath = "";
             SettingsManager.SaveSettingsToFile();
-            MessageBox.Show(RandomStrings.Random_ResetAlarmSuccess, RandomStrings.Random_ResetSuccess, MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBoxHelper.Show(this, RandomStrings.Random_ResetAlarmSuccess, RandomStrings.Random_ResetSuccess, MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void ToggleSwitchEnableProgressiveReminder_Toggled(object sender, RoutedEventArgs e)

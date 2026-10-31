@@ -669,7 +669,7 @@ namespace Ink_Canvas
                 if (mode != "clear")
                 {
                     if (Cursor_Icon != null) { if (!ToolbarRegistry.GetUseRedStyle(Cursor_Icon)) Cursor_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); Cursor_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("cursor", false)); }
-                    if (Pen_Icon != null) { if (!ToolbarRegistry.GetUseRedStyle(Pen_Icon)) Pen_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); Pen_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("pen", false)); }
+                    if (Pen_Icon != null) { if (!ToolbarRegistry.GetUseRedStyle(Pen_Icon)) Pen_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); Pen_Icon.ClearIconInnerOutline(); Pen_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("pen", false)); }
                     if (EraserByStrokes_Icon != null) { if (!ToolbarRegistry.GetUseRedStyle(EraserByStrokes_Icon)) EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); EraserByStrokes_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("eraserStroke", false)); }
                     if (Eraser_Icon != null) { if (!ToolbarRegistry.GetUseRedStyle(Eraser_Icon)) Eraser_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); Eraser_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("eraserCircle", false)); }
                     if (SymbolIconSelect != null) { if (!ToolbarRegistry.GetUseRedStyle(SymbolIconSelect)) SymbolIconSelect.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); SymbolIconSelect.Icon.Geometry = Geometry.Parse(GetCorrectIcon("lassoSelect", false)); }
@@ -723,6 +723,11 @@ namespace Ink_Canvas
                                         Pen_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
                                 }
                                 Pen_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("pen", true));
+                                // 几何更新后再应用描边，确保描边跟随当前图标几何
+                                if (Settings.Appearance.ShowPenColorOnFloatingBarIcon)
+                                    ApplyPenIconOutlineForContrast();
+                                else
+                                    Pen_Icon.ClearIconInnerOutline();
                             }
                             if (boardPen != null)
                             {
@@ -1049,6 +1054,7 @@ namespace Ink_Canvas
                     }
                 }, TaskScheduler.FromCurrentSynchronizationContext());
                 StartChickenSoupAutoRotation();
+                StartWhiteboardTipsAutoHide();
 
                 if (Settings.Canvas.UsingWhiteboard)
                 {
@@ -1118,6 +1124,7 @@ namespace Ink_Canvas
                 }
 
                 StopChickenSoupAutoRotation();
+                StopWhiteboardTipsAutoHide();
                 WaterMarkTime.Visibility = Visibility.Collapsed;
                 WaterMarkDate.Visibility = Visibility.Collapsed;
                 BlackBoardWaterMark.Visibility = Visibility.Collapsed;
@@ -1226,12 +1233,39 @@ namespace Ink_Canvas
         internal void SymbolIconDelete_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (TryBlockFrozenPageMutation("清除冻结页面内容")) return;
-            if (inkCanvas.GetSelectedStrokes().Count > 0)
+            var selectedStrokes = inkCanvas.GetSelectedStrokes();
+            bool hasStrokes = selectedStrokes != null && selectedStrokes.Count > 0;
+            bool hasElements = _selectedElements != null && _selectedElements.Count > 0;
+
+            if (hasStrokes || hasElements)
             {
-                inkCanvas.Strokes.Remove(inkCanvas.GetSelectedStrokes());
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+                if (hasStrokes)
+                {
+                    timeMachine.CommitStrokeEraseHistory(selectedStrokes);
+                    inkCanvas.Strokes.Remove(selectedStrokes);
+                }
+
+                if (hasElements)
+                {
+                    var elementsToDelete = _selectedElements.ToList();
+                    foreach (var elem in elementsToDelete)
+                    {
+                        if (elem is CanvasMediaControl mediaControl)
+                        {
+                            mediaControl.PausePlayback();
+                        }
+                        if (inkCanvas.Children.Contains(elem))
+                        {
+                            timeMachine.CommitElementRemoveHistory(elem);
+                            inkCanvas.Children.Remove(elem);
+                        }
+                    }
+                    _selectedElements.Clear();
+                }
+
+                ClearAllSelection();
             }
-            else if (inkCanvas.Strokes.Count > 0)
+            else if (inkCanvas.Strokes.Count > 0 || HasSecAgentSceneElementsOnCanvas())
             {
                 if (Settings.Automation.IsAutoSaveScreenshotAtClear &&
                     inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
@@ -1579,7 +1613,7 @@ namespace Ink_Canvas
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(string.Format(Properties.MainWindowStrings.Main_RollCall_CannotCallExternal, ex.Message));
+                    MessageBoxHelper.Show(this, string.Format(Properties.MainWindowStrings.Main_RollCall_CannotCallExternal, ex.Message));
 
                     // 调用失败时回退到相应的点名窗口
                     if (Settings.RandSettings.UseNewRollCallUI)
@@ -2970,6 +3004,23 @@ namespace Ink_Canvas
                             pointDesktop = pos;
                     }
                 }
+
+                // 自动翻转启用且主按钮位于右侧时，以右侧（主按钮）为固定点重新计算水平位置。
+                // 批注状态变更时工具栏组件显隐会使宽度变化，若沿用居中或保存的左侧位置，
+                // 主按钮会被推出屏幕边缘造成意外遮挡；此处与拖动时的实时翻转逻辑保持一致。
+                if (MarginFromEdge >= 0
+                    && Settings.Appearance.AutoFlipWhenSpaceInsufficient
+                    && !IsVerticalToolbar
+                    && isFloatingBarHeadOnRight)
+                {
+                    RefreshFloatingBarSizeCache(true);
+                    var headLeft = ViewboxFloatingBar.Margin.Left
+                                   + Math.Max(0, _cachedFloatingBarWidth - _cachedFloatingBarHeadWidth);
+                    pos.X = ClampFloatingBarLeft(
+                        headLeft - Math.Max(0, floatingBarWidth - _cachedFloatingBarHeadWidth),
+                        floatingBarWidth,
+                        screenWidth);
+                }
             }
             else if (IsVerticalToolbar)
             {
@@ -3496,9 +3547,31 @@ namespace Ink_Canvas
                 else CaptureAndEnqueueScreenshotSave(true);
             }
 
+            // 鼠标工具下如果仍有已选中的图片/SVG，不能把整个 InkCanvas 设为不可命中。
+            // 这些元素位于 InkCanvas 的子树中；否则即使元素仍显示、选框仍显示，
+            // 元素本身及其透明外接矩形也都收不到拖动事件。
+            bool keepSelectedCanvasElementInteractive = currentSelectedElement != null
+                && IsBitmapLikeCanvasElement(currentSelectedElement);
+            // SVG scenes are hosted inside InkCanvas alongside ordinary annotation strokes.
+            // Collapsing InkCanvas for the cursor tool used to hide both the inserted scene
+            // and all annotation immediately after the user left the pen tool.  Keep the
+            // canvas visually present while a scene exists; it remains click-through unless
+            // that scene is currently selected.
+            bool keepSecAgentSceneVisible = HasSecAgentSceneElementsOnCanvas();
+
             if (!IsInPPTPresentationMode)
             {
-                if (Settings.Canvas.HideStrokeWhenSelecting)
+                if (keepSelectedCanvasElementInteractive)
+                {
+                    inkCanvas.Visibility = Visibility.Visible;
+                    inkCanvas.IsHitTestVisible = true;
+                }
+                else if (keepSecAgentSceneVisible)
+                {
+                    inkCanvas.Visibility = Visibility.Visible;
+                    inkCanvas.IsHitTestVisible = false;
+                }
+                else if (Settings.Canvas.HideStrokeWhenSelecting)
                 {
                     inkCanvas.Visibility = Visibility.Collapsed;
                 }
@@ -3510,7 +3583,17 @@ namespace Ink_Canvas
             }
             else
             {
-                if (Settings.PowerPointSettings.IsShowStrokeOnSelectInPowerPoint)
+                if (keepSelectedCanvasElementInteractive)
+                {
+                    inkCanvas.Visibility = Visibility.Visible;
+                    inkCanvas.IsHitTestVisible = true;
+                }
+                else if (keepSecAgentSceneVisible)
+                {
+                    inkCanvas.Visibility = Visibility.Visible;
+                    inkCanvas.IsHitTestVisible = false;
+                }
+                else if (Settings.PowerPointSettings.IsShowStrokeOnSelectInPowerPoint)
                 {
                     inkCanvas.Visibility = Visibility.Visible;
                     inkCanvas.IsHitTestVisible = true;
@@ -3531,7 +3614,13 @@ namespace Ink_Canvas
 
             GridTransparencyFakeBackground.Opacity = 0;
             GridTransparencyFakeBackground.Background = Brushes.Transparent;
-            SetTransparentHitThrough();
+            // Keep the window interactive while an SVG is selected so a click outside its
+            // full rectangular hit area can cancel the selection. Once it is cleared,
+            // HandleSelectedSecAgentSceneMouseDown restores click-through for the next click.
+            if (keepSelectedCanvasElementInteractive)
+                SetTransparentNotHitThrough();
+            else
+                SetTransparentHitThrough();
 
             GridBackgroundCoverHolder.Visibility = Visibility.Collapsed;
 
@@ -3541,10 +3630,13 @@ namespace Ink_Canvas
             inkCanvas.Select(new StrokeCollection());
             GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
 
-            if (currentMode != 0)
+            // 视频展台特殊模式下不执行 SaveStrokes/RestoreStrokes，
+            // 否则会清空 timeMachine 历史并 Children.Clear() 移除直播帧，
+            // 导致撤销变灰色且视频预览消失
+            if (currentMode != 0 && !_isVideoPresenterSpecialMode)
             {
                 SaveStrokes();
-                RestoreStrokes(true);
+                RestoreStrokes();
             }
 
             if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
@@ -3582,17 +3674,12 @@ namespace Ink_Canvas
         {
             if (TryBlockFrozenPageMutation("切换到画笔")) return;
 
-            EndBoardRoaming();
+            CancelBoardRoamingInteraction();
 
             if (lastBorderMouseDownObject is Panel panel)
                 panel.Background = new SolidColorBrush(Colors.Transparent);
 
-            // 如果当前有选中的图片元素，先取消选中
-            if (currentSelectedElement != null)
-            {
-                UnselectElement(currentSelectedElement);
-                currentSelectedElement = null;
-            }
+            ClearAllSelection();
 
             // 禁用高级橡皮擦系统
             DisableEraserOverlay();
@@ -3792,7 +3879,8 @@ namespace Ink_Canvas
                 else
                 {
                     // 切换到批注模式时，确保保存当前图片信息
-                    if (currentMode != 0)
+                    // 视频展台特殊模式下不执行 SaveStrokes，否则会清空 timeMachine 历史
+                    if (currentMode != 0 && !_isVideoPresenterSpecialMode)
                     {
                         SaveStrokes();
                     }
@@ -4410,11 +4498,7 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void BtnUndo_Click(object sender, RoutedEventArgs e)
         {
-            if (inkCanvas.GetSelectedStrokes().Count != 0)
-            {
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-                inkCanvas.Select(new StrokeCollection());
-            }
+            ClearAllSelection();
 
             var item = timeMachine.Undo();
             ApplyHistoryToCanvas(item);
@@ -4431,11 +4515,7 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void BtnRedo_Click(object sender, RoutedEventArgs e)
         {
-            if (inkCanvas.GetSelectedStrokes().Count != 0)
-            {
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-                inkCanvas.Select(new StrokeCollection());
-            }
+            ClearAllSelection();
 
             var item = timeMachine.Redo();
             ApplyHistoryToCanvas(item);
@@ -4493,11 +4573,11 @@ namespace Ink_Canvas
         {
             if (Settings.Advanced.IsSecondConfirmWhenShutdownApp)
             {
-                if (MessageBox.Show(Properties.MainWindowStrings.Main_CloseConfirm_Level1, "InkCanvasForClass",
+                if (MessageBoxHelper.Show(this, Properties.MainWindowStrings.Main_CloseConfirm_Level1, "InkCanvasForClass",
                         MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.Cancel) return;
-                if (MessageBox.Show(Properties.MainWindowStrings.Main_CloseConfirm_Level2, "InkCanvasForClass",
+                if (MessageBoxHelper.Show(this, Properties.MainWindowStrings.Main_CloseConfirm_Level2, "InkCanvasForClass",
                         MessageBoxButton.OKCancel, MessageBoxImage.Error) == MessageBoxResult.Cancel) return;
-                if (MessageBox.Show(Properties.MainWindowStrings.Main_CloseConfirm_Level3, "InkCanvasForClass",
+                if (MessageBoxHelper.Show(this, Properties.MainWindowStrings.Main_CloseConfirm_Level3, "InkCanvasForClass",
                         MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.Cancel) return;
             }
 
@@ -4554,7 +4634,23 @@ namespace Ink_Canvas
 
         private void BtnClear_Click(object sender, RoutedEventArgs e)
         {
+            PerformCanvasClear();
+        }
+
+        /// <summary>
+        /// 清空画布内容（清屏按钮与长按撤销清屏共用）。
+        /// 清屏历史默认由 StrokesChanged 事件路径按 <see cref="TimeMachineHistoryType.Clear"/> 提交；
+        /// 长按撤销清屏在调用前已显式提交并置 <see cref="_suppressClearHistoryCommit"/> 抑制重复提交。
+        /// </summary>
+        /// <param name="preserveClearHistory">
+        /// true 时即使「清空墨迹时删除墨迹历史记录」开启也保留本次清屏的撤销记录
+        /// （长按撤销清屏使用，保证清屏后仍可通过撤销恢复墨迹）。
+        /// </param>
+        private void PerformCanvasClear(bool preserveClearHistory = false)
+        {
             if (TryBlockFrozenPageMutation("清空冻结页面内容")) return;
+            ClearAllSelection();
+            NotifyPluginWhiteboardPageClearing();
             forceEraser = false;
             //BorderClearInDelete.Visibility = Visibility.Collapsed;
 
@@ -4569,24 +4665,18 @@ namespace Ink_Canvas
                 if (Pen_Icon.Background == null) PenIcon_Click(null, null);
             }
 
-            if (inkCanvas.Strokes.Count != 0)
-            {
-                // 注入历史记录以便支持撤销
-                var whiteboardIndex = CurrentWhiteboardIndex;
-                if (currentMode == 0) whiteboardIndex = 0;
-            }
-
             ClearStrokes(false);
             // 保存非笔画元素（如图片）
             var preservedElements = PreserveNonStrokeElements();
             inkCanvas.Children.Clear();
             // 恢复非笔画元素
             RestoreNonStrokeElements(preservedElements);
+            ClearSecAgentSceneElements();
 
-            if (Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
+            if (Settings.Canvas.ClearCanvasAndClearTimeMachine && !preserveClearHistory)
+                timeMachine.ClearStrokeHistory();
 
             CancelSingleFingerDragMode();
-
         }
 
         private bool lastIsInMultiTouchMode;
@@ -5346,16 +5436,95 @@ namespace Ink_Canvas
         /// </summary>
         internal void UpdatePenIconColor()
         {
-            if (!Settings.Appearance.ShowPenColorOnFloatingBarIcon) return;
             if (Pen_Icon == null || Pen_Icon.Icon == null) return;
-            if (_currentToolMode != "pen" && _currentToolMode != "color") return;
+
+            if (!Settings.Appearance.ShowPenColorOnFloatingBarIcon
+                || (_currentToolMode != "pen" && _currentToolMode != "color"))
+            {
+                Pen_Icon.ClearIconInnerOutline();
+                return;
+            }
 
             try
             {
                 var inkColor = inkCanvas.DefaultDrawingAttributes.Color;
                 Pen_Icon.Icon.Brush = new SolidColorBrush(inkColor);
+                ApplyPenIconOutlineForContrast();
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Toolbar] 更新浮动栏批注图标颜色为当前画笔颜色失败: {ex.Message}", LogHelper.LogType.Info);
+            }
+        }
+
+        /// <summary>
+        /// 计算两个颜色之间的 WCAG 相对对比度（范围约 1~21，值越大对比越强）。
+        /// </summary>
+        private static double GetColorContrastRatio(Color color1, Color color2)
+        {
+            static double Luminance(Color c)
+            {
+                double Channel(double v)
+                {
+                    v /= 255d;
+                    return v <= 0.03928 ? v / 12.92 : Math.Pow((v + 0.055) / 1.055, 2.4);
+                }
+
+                return 0.2126 * Channel(c.R) + 0.7152 * Channel(c.G) + 0.0722 * Channel(c.B);
+            }
+
+            double l1 = Luminance(color1);
+            double l2 = Luminance(color2);
+            return (Math.Max(l1, l2) + 0.05) / (Math.Min(l1, l2) + 0.05);
+        }
+
+        /// <summary>
+        /// 获取浮动栏当前背景色（跟随主题），用于判断批注图标是否清晰可见。
+        /// </summary>
+        private Color GetFloatingBarBackgroundColor()
+        {
+            try
+            {
+                if (Application.Current.TryFindResource("FloatBarBackground") is SolidColorBrush backgroundBrush)
+                    return backgroundBrush.Color;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Toolbar] 读取浮动栏背景色资源 FloatBarBackground 失败，将按主题推断: {ex.Message}", LogHelper.LogType.Info);
+            }
+
+            bool isDarkTheme = Settings.Appearance.Theme == 1 ||
+                                (Settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
+            return isDarkTheme ? Color.FromRgb(0x1A, 0x1C, 0x1E) : Colors.White;
+        }
+
+        /// <summary>
+        /// 当批注图标使用画笔颜色且与浮动栏背景对比度过低时，为图标添加向内描边，
+        /// 避免图标与背景融为一体导致“消失”；对比度足够时移除描边。
+        /// 注意：需在图标 Geometry 更新之后调用，描边才能跟随当前几何。
+        /// </summary>
+        private void ApplyPenIconOutlineForContrast()
+        {
+            if (Pen_Icon == null || Pen_Icon.Icon == null) return;
+
+            try
+            {
+                var inkColor = inkCanvas.DefaultDrawingAttributes.Color;
+                if (GetColorContrastRatio(inkColor, GetFloatingBarBackgroundColor()) < 2.5)
+                {
+                    // 描边使用浮动栏前景色（浅色主题为黑色、深色主题为白色），保证与背景形成足够反差；
+                    // 向内描边不会改变图标的视觉大小
+                    Pen_Icon.SetIconInnerOutline(new SolidColorBrush(FloatBarForegroundColor), 1.0);
+                }
+                else
+                {
+                    Pen_Icon.ClearIconInnerOutline();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Toolbar] 按对比度为浮动栏批注图标添加/移除内描边失败: {ex.Message}", LogHelper.LogType.Info);
+            }
         }
 
         /// <summary>
@@ -5365,6 +5534,7 @@ namespace Ink_Canvas
         private ToolbarImageButton _lastHighlightButton;
         private int _indicatorAnimationGeneration;
         private Storyboard _activeIndicatorStoryboard;
+        private EventHandler _activeIndicatorCompletedHandler;
         private string _pendingHighlightMode;
         private int _highlightPositionVersion;
         private int _highlightLayoutRetryCount;
@@ -5410,6 +5580,7 @@ namespace Ink_Canvas
                     if (button == null) return;
                     if (!ToolbarRegistry.GetUseRedStyle(button))
                         button.Icon.Brush = foregroundBrush;
+                    button.ClearIconInnerOutline();
                     button.Icon.Geometry = Geometry.Parse(GetCorrectIcon(iconType, false));
                 }
 
@@ -5460,6 +5631,11 @@ namespace Ink_Canvas
                             targetButton.Icon.Brush = new SolidColorBrush(highlightBarColor);
                     }
                     targetButton.Icon.Geometry = Geometry.Parse(GetCorrectIcon(targetIconType, true));
+                    // 几何更新后再应用描边，确保描边跟随当前图标几何
+                    if (Settings.Appearance.ShowPenColorOnFloatingBarIcon && targetButton == Pen_Icon)
+                        ApplyPenIconOutlineForContrast();
+                    else
+                        targetButton.ClearIconInnerOutline();
                 }
             }
             catch (Exception ex)
@@ -5663,7 +5839,20 @@ namespace Ink_Canvas
                 {
                     var oldStoryboard = _activeIndicatorStoryboard;
                     _activeIndicatorStoryboard = null;
-                    try { oldStoryboard.Stop(indicatorBar); } catch { }
+                    try
+                    {
+                        oldStoryboard.Stop(indicatorBar);
+                        // 解除 Completed 订阅，避免 lambda 闭包持有 indicatorBar 长期存活
+                        if (_activeIndicatorCompletedHandler != null)
+                        {
+                            oldStoryboard.Completed -= _activeIndicatorCompletedHandler;
+                            _activeIndicatorCompletedHandler = null;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[Toolbar] 切换浮动栏高亮指示条位置时停止旧动画并解绑 Completed 失败: {ex.Message}", LogHelper.LogType.Info);
+                    }
                     indicatorBar.RenderTransform = null;
                     indicatorBar.Opacity = 1.0;
                 }
@@ -5746,12 +5935,17 @@ namespace Ink_Canvas
 
                 int currentGeneration = _indicatorAnimationGeneration;
                 _activeIndicatorStoryboard = storyboard;
-                storyboard.Completed += (s, e) =>
+                EventHandler completedHandler = null;
+                completedHandler = (s, e) =>
                 {
+                    storyboard.Completed -= completedHandler;
+                    _activeIndicatorCompletedHandler = null;
                     if (currentGeneration != _indicatorAnimationGeneration) return;
                     _activeIndicatorStoryboard = null;
                     indicatorBar.RenderTransform = null;
                 };
+                _activeIndicatorCompletedHandler = completedHandler;
+                storyboard.Completed += completedHandler;
 
                 storyboard.Begin(indicatorBar, true);
                 storyboard.Pause(indicatorBar);
@@ -6142,6 +6336,13 @@ namespace Ink_Canvas
                 ResetBoardRoamingContactState();
             }
             _currentToolMode = NormalizeToolModeForFreeze(mode);
+
+            // 工具切换为非笔模式（橡皮/框选/图形/漫游/鼠标）时，扩展画布提示立即消失
+            if (_currentToolMode != "pen" && _currentToolMode != "color")
+            {
+                HideEdgeExpandHint();
+            }
+
             UpdateBoardRoamingButtonState();
 
             // Issue #285 更小批注栏：根据当前工具模式刷新迷你栏显示状态
@@ -6157,6 +6358,8 @@ namespace Ink_Canvas
             // 工具模式变化后同步刷新工具栏形态（批注/鼠标布局按 IsAnnotating 决定），
             // 否则会出现指示器已切到鼠标、形态仍停在批注的失步（退出白板时的两步走流程即如此）。
             UpdateToolbarComponentVisibility();
+
+            SyncWinRTInkPipelineWithLogicalTool();
         }
 
         /// <summary>

@@ -542,8 +542,10 @@ namespace Ink_Canvas
                 InitializeInkCanvasSelectionSettings();
 
                 // 等待图片加载完成后再进行居中处理
-                image.Loaded += (sender, e) =>
+                RoutedEventHandler loadedHandler = null;
+                loadedHandler = (sender, e) =>
                 {
+                    image.Loaded -= loadedHandler;  // 一次性订阅，解除后释放 lambda 闭包
                     // 确保在UI线程中执行
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
@@ -552,6 +554,7 @@ namespace Ink_Canvas
                         BindScreenshotEvents(image);
                     }), DispatcherPriority.Loaded);
                 };
+                image.Loaded += loadedHandler;
 
                 // 添加到画布
                 inkCanvas.Children.Add(image);
@@ -625,8 +628,10 @@ namespace Ink_Canvas
                 InitializeInkCanvasSelectionSettings();
 
                 // 等待图片加载完成后再进行居中处理
-                image.Loaded += (sender, e) =>
+                RoutedEventHandler loadedHandler = null;
+                loadedHandler = (sender, e) =>
                 {
+                    image.Loaded -= loadedHandler;  // 一次性订阅，解除后释放 lambda 闭包
                     // 确保在UI线程中执行
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
@@ -635,6 +640,7 @@ namespace Ink_Canvas
                         BindScreenshotEvents(image);
                     }), DispatcherPriority.Loaded);
                 };
+                image.Loaded += loadedHandler;
 
                 // 添加到画布
                 inkCanvas.Children.Add(image);

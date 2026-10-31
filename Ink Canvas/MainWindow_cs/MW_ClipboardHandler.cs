@@ -89,6 +89,7 @@ namespace Ink_Canvas
                 else
                     SourceInitialized += OnSourceInitializedForClipboard;
                 Dispatcher.BeginInvoke(new Action(EnsureClipboardHookInstalled), DispatcherPriority.Loaded);
+                LogHelper.WriteLogToFile("[Clipboard] 剪贴板监控已启用", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
@@ -331,8 +332,10 @@ namespace Ink_Canvas
                 inkCanvas.Children.Add(image);
 
                 // 等待图片加载完成后再进行居中处理
-                image.Loaded += (sender, e) =>
+                RoutedEventHandler loadedHandler = null;
+                loadedHandler = (sender, e) =>
                 {
+                    image.Loaded -= loadedHandler;  // 一次性订阅，解除后释放 lambda 闭包
                     // 确保在UI线程中执行
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
@@ -368,6 +371,7 @@ namespace Ink_Canvas
                         }
                     }), DispatcherPriority.Loaded);
                 };
+                image.Loaded += loadedHandler;
 
                 // 提交到历史记录
                 timeMachine.CommitElementInsertHistory(image);

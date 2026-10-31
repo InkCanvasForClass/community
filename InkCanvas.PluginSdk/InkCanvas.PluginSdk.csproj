@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <UseWPF>true</UseWPF>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
@@ -35,7 +35,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.303" PrivateAssets="All" />
     <!-- 自包含引用 Nerdbank.GitVersioning：HostApiRequirement 使用 ThisAssembly.AssemblyFileVersion（NBGV 源生成）。
          独立构建本 SDK（如 InkCanvas.PluginSdk 仓库的 sync-and-build 工作流）时不会带上仓库根 Directory.Build.props，
          必须在此显式引用才能生成 ThisAssembly。
@@ -46,7 +46,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="InkCanvas.PluginSdk.targets" Pack="True" PackagePath="build\net6.0-windows10.0.19041.0" />
+    <None Include="InkCanvas.PluginSdk.targets" Pack="True" PackagePath="build\net10.0-windows10.0.19041.0" />
     <!-- NuGet 包图标（128x128 PNG，复用仓库 icc.png）。 -->
     <None Include="icon.png" Pack="True" PackagePath="" />
     <!-- NuGet 包详情页显示的 README。 -->

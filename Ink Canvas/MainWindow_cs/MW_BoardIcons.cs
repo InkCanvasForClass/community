@@ -389,24 +389,26 @@ namespace Ink_Canvas
             PenIcon_Click(null, null);
             SymbolIconDelete_MouseUp(null, null);
 
+            // Editable SecAgent rows/lines are children rather than InkCanvas strokes.
+            // Remove them explicitly before the image-preservation branch.
+            ClearSecAgentSceneElements();
+
             // 根据设置决定是否清空图片
             if (Settings.Canvas.ClearCanvasAlsoClearImages)
             {
                 // 如果设置为清空图片，则直接清空所有子元素
-                Debug.WriteLine("BoardSymbolIconDelete: Clearing all children including images");
                 ShutdownAllCanvasMediaElements();
                 inkCanvas.Children.Clear();
+                ClearAllSelection();
             }
             else
             {
                 // 保存非笔画元素（如图片）
-                Debug.WriteLine("BoardSymbolIconDelete: Preserving non-stroke elements (images)");
                 var preservedElements = PreserveNonStrokeElements();
-                Debug.WriteLine($"BoardSymbolIconDelete: Preserved elements count: {preservedElements.Count}");
                 inkCanvas.Children.Clear();
                 // 恢复非笔画元素
                 RestoreNonStrokeElements(preservedElements);
-                Debug.WriteLine($"BoardSymbolIconDelete: inkCanvas.Children.Count after restore: {inkCanvas.Children.Count}");
+                ClearSecAgentSceneElements();
             }
         }
         /// <summary>
@@ -429,24 +431,25 @@ namespace Ink_Canvas
             SymbolIconDelete_MouseUp(null, null);
             if (!Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
 
+            // Editable SecAgent rows/lines are children rather than InkCanvas strokes.
+            ClearSecAgentSceneElements();
+
             // 根据设置决定是否清空图片
             if (Settings.Canvas.ClearCanvasAlsoClearImages)
             {
                 // 如果设置为清空图片，则直接清空所有子元素
-                Debug.WriteLine("BoardSymbolIconDeleteInkAndHistories: Clearing all children including images");
                 ShutdownAllCanvasMediaElements();
                 inkCanvas.Children.Clear();
+                ClearAllSelection();
             }
             else
             {
                 // 保存非笔画元素（如图片）
-                Debug.WriteLine("BoardSymbolIconDeleteInkAndHistories: Preserving non-stroke elements (images)");
                 var preservedElements = PreserveNonStrokeElements();
-                Debug.WriteLine($"BoardSymbolIconDeleteInkAndHistories: Preserved elements count: {preservedElements.Count}");
                 inkCanvas.Children.Clear();
                 // 恢复非笔画元素
                 RestoreNonStrokeElements(preservedElements);
-                Debug.WriteLine($"BoardSymbolIconDeleteInkAndHistories: inkCanvas.Children.Count after restore: {inkCanvas.Children.Count}");
+                ClearSecAgentSceneElements();
             }
         }
 

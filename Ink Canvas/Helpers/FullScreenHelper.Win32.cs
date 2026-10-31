@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 
 // 由衷感謝 lindexi 提供的 《WPF 稳定的全屏化窗口方法》

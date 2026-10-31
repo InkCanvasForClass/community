@@ -19,6 +19,32 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         internal static volatile bool SuppressCallerInfo;
 
+        /// <summary>
+        /// 当前日志输出等级，低于该等级的日志会被过滤。默认 Trace（仅过滤最低级的 Info/Event 日志）。
+        /// </summary>
+        public static LogType LogLevel { get; set; } = LogType.Trace;
+
+        public static void SetLogLevel(string level)
+        {
+            if (Enum.TryParse<LogType>(level, true, out var parsed)) LogLevel = parsed;
+        }
+
+        private static int Severity(LogType type) => type switch
+        {
+            LogType.Trace => 1,
+            LogType.Warning => 2,
+            LogType.Error => 3,
+            _ => 0 // Info / Event 为最低等级
+        };
+
+        private static ConsoleColor? GetConsoleColor(LogType type) => type switch
+        {
+            LogType.Trace => ConsoleColor.Green,
+            LogType.Warning => ConsoleColor.Yellow,
+            LogType.Error => ConsoleColor.Red,
+            _ => null // Info / Event 使用默认（无色）
+        };
+
         public static void NewLog(string str)
         {
             WriteLogToFile(str);
@@ -62,6 +88,8 @@ namespace Ink_Canvas.Helpers
         private static void WriteLogToFileCore(string str, LogType logType)
         {
             if (MainWindow.Settings != null && MainWindow.Settings.Advanced != null && !MainWindow.Settings.Advanced.IsLogEnabled) return;
+
+            if (Severity(logType) < Severity(LogLevel)) return;
 
             string strLogType = logType.ToString();
             try
@@ -110,7 +138,7 @@ namespace Ink_Canvas.Helpers
                     }
                 }
                 string logLine = string.Format("{0} [T{1}] [{2}] [{3}] {4}", DateTime.Now.ToString("O"), threadId, strLogType, callerInfo, str);
-                DebugConsoleManager.WriteLine(logLine);
+                DebugConsoleManager.WriteLine(logLine, GetConsoleColor(logType));
                 ProcessProtectionManager.WithWriteAccess(file, () =>
                 {
                     using (StreamWriter sw = new StreamWriter(file, true))

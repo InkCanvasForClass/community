@@ -22,6 +22,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private DispatcherTimer _usageRefreshTimer;
         private long _savedTotalSeconds;
         private DateTime _sessionStartTime;
+        private static int _usageRefreshDiagCount;
 
         public AboutPage()
         {
@@ -94,7 +95,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 long currentSessionSeconds = (long)(DateTime.Now - _sessionStartTime).TotalSeconds;
                 TotalUsageTextBlock.Text = DeviceIdentifier.FormatDuration(_savedTotalSeconds + currentSessionSeconds);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                // 计时器每次 Tick 都会走到这里，节流避免刷爆日志
+                var n = System.Threading.Interlocked.Increment(ref _usageRefreshDiagCount);
+                if (n == 1 || n % 100 == 0)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"[Settings] 关于页面刷新累计使用时长失败（累计 {n} 次）: {ex.Message}",
+                        LogHelper.LogType.Info);
+                }
+            }
         }
 
         private void LoadSettings()

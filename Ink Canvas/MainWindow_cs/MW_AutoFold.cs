@@ -127,6 +127,8 @@ namespace Ink_Canvas
             {
                 isFloatingBarChangingHideMode = true;
                 isFloatingBarFolded = true;
+                LogHelper.WriteLogToFile($"[Toolbar] 浮动栏已折叠: 用户触发={foldFloatingBarByUser}, 自动折叠命令={isAutoFoldCommand}", LogHelper.LogType.Info);
+                HideEdgeExpandHint(); // 浮动栏收起后批注界面整体隐藏，扩展画布提示立即消失
                 if (currentMode != 0) CloseWhiteboardImmediately();
                 if (IsAnnotating)
                     if (foldFloatingBarByUser && inkCanvas.Strokes.Count > 2)
@@ -400,6 +402,7 @@ namespace Ink_Canvas
             {
                 isFloatingBarChangingHideMode = true;
                 isFloatingBarFolded = false;
+                LogHelper.WriteLogToFile($"[Toolbar] 浮动栏已展开: 用户触发={unfoldFloatingBarByUser}", LogHelper.LogType.Info);
             });
 
             await Task.Delay(0);
@@ -660,7 +663,48 @@ namespace Ink_Canvas
         /// </summary>
         private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
+            HandleSelectedSecAgentSceneMouseDown(e);
             HandleAutoCollapseOnMouseDown(e);
+        }
+
+        /// <summary>
+        /// In cursor mode an inserted SVG owns a rectangular hit area, including transparent
+        /// pixels. A click outside that rectangle clears the SVG selection, even when the
+        /// point is visually transparent and would otherwise be handled by a click-through
+        /// layer. Selection toolbar/floating-bar clicks stay attached to the selected item.
+        /// </summary>
+        private void HandleSelectedSecAgentSceneMouseDown(MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton != MouseButton.Left
+                || inkCanvas?.EditingMode != System.Windows.Controls.InkCanvasEditingMode.None
+                || currentSelectedElement == null
+                || (!IsSecAgentEditableSceneElement(currentSelectedElement)
+                    && !IsSecAgentEditableSceneGroup(currentSelectedElement)))
+                return;
+
+            var source = e.OriginalSource as DependencyObject;
+            if (IsDescendantOf(source, BorderImageSelectionControl)
+                || IsDescendantOf(source, ImageSelectionOverlay)
+                || IsDescendantOf(source, ViewboxFloatingBar))
+            {
+                return;
+            }
+
+            var point = e.GetPosition(inkCanvas);
+            var bounds = GetSceneElementBounds(currentSelectedElement);
+            var inside = bounds.Contains(point);
+            if (inside) return;
+
+            var oldElement = currentSelectedElement;
+            UnselectElement(oldElement);
+            currentSelectedElement = null;
+            // UnselectElement is also used by the annotation selector and therefore
+            // defaults to Select. In this cursor-only path keep the cursor tool active.
+            inkCanvas.EditingMode = System.Windows.Controls.InkCanvasEditingMode.None;
+            // The selected-scene mode temporarily disables HWND click-through so this
+            // window can receive the outside click. Restore pass-through immediately after
+            // clearing the selection; the next click then reaches the underlying desktop.
+            SetTransparentHitThrough();
         }
 
         private bool IsFloatingBarUiAbsentFromScreens()

@@ -3,11 +3,71 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using Ink_Canvas.Properties;
 
 namespace Ink_Canvas.Helpers
 {
     internal static class SoftwareLauncher
     {
+        /// <summary>启动指定的第三方视频展台软件。</summary>
+        public static bool LaunchCustomBooth(string executablePath, string arguments = null, bool showMessageOnError = true)
+        {
+            if (string.IsNullOrWhiteSpace(executablePath))
+            {
+                if (showMessageOnError)
+                {
+                    MessageBox.Show(
+                        CanvasStrings.Canvas_VideoBoothCustomAppNotConfigured ?? "未配置第三方视频展台程序路径，请前往设置进行配置。",
+                        "Ink Canvas",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+                return false;
+            }
+
+            if (!File.Exists(executablePath))
+            {
+                if (showMessageOnError)
+                {
+                    string notFoundFmt = CanvasStrings.Canvas_VideoBoothCustomAppNotFound ?? "未找到指定的视频展台程序文件：\n{0}\n请检查路径是否正确。";
+                    MessageBox.Show(
+                        string.Format(notFoundFmt, executablePath),
+                        "Ink Canvas",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                }
+                return false;
+            }
+
+            try
+            {
+                var directory = Path.GetDirectoryName(executablePath);
+                var psi = new ProcessStartInfo
+                {
+                    FileName = executablePath,
+                    Arguments = arguments ?? string.Empty,
+                    UseShellExecute = true,
+                    WorkingDirectory = string.IsNullOrEmpty(directory) ? Environment.SystemDirectory : directory
+                };
+                Process.Start(psi);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"无法启动第三方视频展台: {ex.Message}", LogHelper.LogType.Error);
+                if (showMessageOnError)
+                {
+                    string failPrefix = CanvasStrings.Canvas_VideoBoothCustomAppLaunchFailed ?? "无法启动第三方视频展台：";
+                    MessageBox.Show(
+                        failPrefix + ex.Message,
+                        "Ink Canvas",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                }
+                return false;
+            }
+        }
+
         /// <summary>与 ICA 一致：在「程序和功能」卸载列表中按 DisplayName 匹配后启动 sweclauncher.exe。</summary>
         public static void LaunchEasiCamera(string softwareName)
         {

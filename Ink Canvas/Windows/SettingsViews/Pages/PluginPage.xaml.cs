@@ -209,27 +209,29 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             };
             actionPanel.Children.Add(folderBtn);
 
-            // 热重载按钮：卸载插件注册并重新从磁盘加载，无需重启应用。
-            var reloadBtn = new Button
+            // 卸载/加载按钮：根据插件当前状态切换动作与提示。
+            var isLoaded = pluginInfo.LoadStatus == PluginLoadStatus.Loaded;
+            var toggleBtn = new Button
             {
                 Padding = new Thickness(6),
                 Margin = new Thickness(0, 0, 4, 0),
-                ToolTip = PluginStrings.Plugin_Reload,
+                ToolTip = isLoaded ? PluginStrings.Plugin_Unload : PluginStrings.Plugin_Load,
                 Tag = pluginInfo
             };
-            reloadBtn.Click += ReloadPlugin_Click;
-            reloadBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
+            toggleBtn.Click += TogglePluginLoad_Click;
+            toggleBtn.Content = new iNKORE.UI.WPF.Modern.Controls.FontIcon
             {
-                Icon = SegoeFluentIcons.Refresh,
+                Icon = isLoaded ? SegoeFluentIcons.Upload : SegoeFluentIcons.Download,
                 FontSize = 14
             };
-            actionPanel.Children.Add(reloadBtn);
+            actionPanel.Children.Add(toggleBtn);
 
             // 待应用更新：尝试热安装；失败时才提供重启
             if (hasPendingUpdate)
             {
                 var applyBtn = new Button
                 {
+                    Style = Application.Current.TryFindResource("AccentButtonStyle") as Style,
                     Padding = new Thickness(6),
                     Margin = new Thickness(0, 0, 4, 0),
                     ToolTip = PluginStrings.Market_ApplyPendingUpdate,
@@ -248,6 +250,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 // 有新版本可更新
                 var updateBtn = new Button
                 {
+                    Style = Application.Current.TryFindResource("AccentButtonStyle") as Style,
                     Padding = new Thickness(6),
                     Margin = new Thickness(0, 0, 4, 0),
                     ToolTip = PluginStrings.Plugin_Update,
@@ -351,10 +354,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (Directory.Exists(info.PluginFolderPath))
                     Process.Start(new ProcessStartInfo { FileName = info.PluginFolderPath, UseShellExecute = true });
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"[Settings] 打开插件目录 {info.PluginFolderPath} 失败: {ex.Message}",
+                    LogHelper.LogType.Info);
+            }
         }
 
-        private void ReloadPlugin_Click(object sender, RoutedEventArgs e)
+        private void TogglePluginLoad_Click(object sender, RoutedEventArgs e)
         {
             var btn = sender as FrameworkElement;
             var info = btn?.Tag as PluginInfo;
@@ -362,38 +370,42 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             try
             {
-                var result = PluginManager.Instance.ReloadPlugin(info.Id);
-                LoadPlugins();
-
-                if (!result.Success)
+                var pluginManager = PluginManager.Instance;
+                if (info.LoadStatus == PluginLoadStatus.Loaded)
                 {
-                    iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
-                        string.Format(PluginStrings.Plugin_ReloadFailed, result.ErrorMessage ?? "Unknown error"),
-                        PluginStrings.Plugin_Reload,
+                    pluginManager.UnloadPlugin(info, keepInList: true);
+                    RebuildToolbarsAfterPluginChange();
+                    LoadPlugins();
+                    MessageBoxHelper.Show(this,
+                        PluginStrings.Plugin_UnloadSuccess,
+                        PluginStrings.Plugin_Unload,
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                var loaded = pluginManager.LoadPlugin(info.Id);
+                LoadPlugins();
+                if (!loaded)
+                {
+                    MessageBoxHelper.Show(this,
+                        string.Format(PluginStrings.Plugin_LoadFailed,
+                            info.Exception?.Message ?? "Unknown error"),
+                        PluginStrings.Plugin_Load,
                         MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
-                if (!result.FullyUnloaded)
-                {
-                    iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
-                        PluginStrings.Plugin_ReloadPartial,
-                        PluginStrings.Plugin_Reload,
-                        MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
-                    PluginStrings.Plugin_ReloadSuccess,
-                    PluginStrings.Plugin_Reload,
+                MessageBoxHelper.Show(this,
+                    PluginStrings.Plugin_LoadSuccess,
+                    PluginStrings.Plugin_Load,
                     MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"Plugin | 热重载失败: {info.Id} - {ex.Message}", LogHelper.LogType.Error);
-                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
-                    string.Format(PluginStrings.Plugin_ReloadFailed, ex.Message),
-                    PluginStrings.Plugin_Reload,
+                LogHelper.WriteLogToFile($"Plugin | 加载状态切换失败: {info.Id} - {ex.Message}", LogHelper.LogType.Error);
+                MessageBoxHelper.Show(this,
+                    string.Format(PluginStrings.Plugin_LoadFailed, ex.Message),
+                    PluginStrings.Plugin_Load,
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -404,7 +416,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var marketInfo = btn?.Tag as MergedPluginInfo;
             if (marketInfo == null) return;
 
-            var result = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+            var result = MessageBoxHelper.Show(this,
                 string.Format(PluginStrings.Plugin_UpdateAvailable, marketInfo.MarketVersion) + "\n\n" + PluginStrings.Market_HotUpdateMessage,
                 PluginStrings.Plugin_Update,
                 MessageBoxButton.YesNo, MessageBoxImage.Question);
@@ -423,7 +435,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var pending = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PluginPackages", marketInfo.Id + ".icpx");
             if (File.Exists(pending))
             {
-                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                MessageBoxHelper.Show(this,
                     PluginStrings.Market_HotInstallPending,
                     PluginStrings.Plugin_Update,
                     MessageBoxButton.OK, MessageBoxImage.Information);
@@ -444,7 +456,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 var pending = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "PluginPackages", pluginId + ".icpx");
                 if (File.Exists(pending))
                 {
-                    var restart = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                    var restart = MessageBoxHelper.Show(this,
                         PluginStrings.Market_HotInstallFailedRestart,
                         PluginStrings.Market_RestartTitle,
                         MessageBoxButton.YesNo, MessageBoxImage.Warning);
@@ -455,7 +467,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"Plugin | 热安装失败: {pluginId} - {ex.Message}", LogHelper.LogType.Error);
-                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                MessageBoxHelper.Show(this,
                     string.Format(PluginStrings.Market_InstallLocalFailed, ex.Message),
                     PluginStrings.Plugin_Update,
                     MessageBoxButton.OK, MessageBoxImage.Error);
@@ -468,7 +480,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var info = btn?.Tag as PluginInfo;
             if (info == null) return;
 
-            var result = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+            var result = MessageBoxHelper.Show(this,
                 string.Format(PluginStrings.Plugin_DeleteConfirm, info.Name),
                 PluginStrings.Plugin_DeleteTitle,
                 MessageBoxButton.YesNo, MessageBoxImage.Warning);
@@ -499,7 +511,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"Plugin | 删除插件失败: {info.Id} - {ex.Message}", LogHelper.LogType.Error);
-                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                MessageBoxHelper.Show(this,
                     string.Format(PluginStrings.Market_InstallLocalFailed, ex.Message),
                     PluginStrings.Plugin_DeleteTitle,
                     MessageBoxButton.OK, MessageBoxImage.Error);
@@ -528,7 +540,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void AskRestart()
         {
-            var result = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+            var result = MessageBoxHelper.Show(this,
                 PluginStrings.Market_RestartMessage,
                 PluginStrings.Market_RestartTitle,
                 MessageBoxButton.YesNo, MessageBoxImage.Question);
@@ -545,7 +557,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 catch (Exception ex)
                 {
                     App.IsAppExitByUser = false;
-                    iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                    MessageBoxHelper.Show(this,
                         string.Format(PluginStrings.Market_RestartFailed, ex.Message),
                         PluginStrings.Market_RestartTitle,
                         MessageBoxButton.OK, MessageBoxImage.Error);
@@ -569,13 +581,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             try
             {
                 PluginManager.Instance.ConfigIo.Export(info, dialog.FileName);
-                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                MessageBoxHelper.Show(this,
                     string.Format(PluginStrings.Plugin_ExportSuccess, dialog.FileName),
                     PluginStrings.Plugin_ExportTitle, MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                MessageBoxHelper.Show(this,
                     string.Format(PluginStrings.Plugin_ExportFailed, ex.Message),
                     PluginStrings.Plugin_ExportTitle, MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -596,14 +608,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             try
             {
                 var written = PluginManager.Instance.ConfigIo.Import(dialog.FileName, info.PluginConfigFolder, overwrite: true);
-                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                MessageBoxHelper.Show(this,
                     string.Format(PluginStrings.Plugin_ImportSuccess, written),
                     PluginStrings.Plugin_ImportTitle, MessageBoxButton.OK, MessageBoxImage.Information);
                 LoadPlugins();
             }
             catch (Exception ex)
             {
-                iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                MessageBoxHelper.Show(this,
                     string.Format(PluginStrings.Plugin_ImportFailed, ex.Message),
                     PluginStrings.Plugin_ImportTitle, MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -624,7 +636,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     PluginErrorRecoveryService.FailureThreshold)
                 : PluginStrings.Plugin_ErrorResetConfirm;
 
-            var result = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+            var result = MessageBoxHelper.Show(this,
                 msg, PluginStrings.Plugin_ErrorTitle,
                 MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result != MessageBoxResult.Yes) return;
@@ -633,7 +645,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             LoadPlugins();
             if (!reloaded)
             {
-                var restart = iNKORE.UI.WPF.Modern.Controls.MessageBox.Show(
+                var restart = MessageBoxHelper.Show(this,
                     PluginStrings.Market_HotInstallFailedRestart,
                     PluginStrings.Market_RestartTitle,
                     MessageBoxButton.YesNo, MessageBoxImage.Warning);

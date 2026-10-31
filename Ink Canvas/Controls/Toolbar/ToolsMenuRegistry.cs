@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows;
 
 namespace Ink_Canvas.Controls.Toolbar
 {
@@ -14,6 +15,12 @@ namespace Ink_Canvas.Controls.Toolbar
         public string LocalizationKey { get; set; }
         public string Description { get; set; }
         public string IconGeometry { get; set; }
+
+        /// <summary>
+        /// 自定义设置面板工厂。若提供，菜单页面将在"组件设置"中显示此工厂返回的 UI。
+        /// 适用于需要呈现全局设置的菜单项（如截图）。
+        /// </summary>
+        public Func<FrameworkElement> CustomSettingsPanelFactory { get; set; }
 
         public string DisplayName => Strings.GetString(LocalizationKey) ?? LocalizationKey;
     }
@@ -39,7 +46,7 @@ namespace Ink_Canvas.Controls.Toolbar
             new ToolsMenuItemInfo { Id = "save", LocalizationKey = "Tools_Save", Description = "保存", IconGeometry = XamlGraphicsIconGeometries.SaveIconGeometry },
             new ToolsMenuItemInfo { Id = "open", LocalizationKey = "Tools_Open", Description = "打开", IconGeometry = XamlGraphicsIconGeometries.OpenIconGeometry },
             new ToolsMenuItemInfo { Id = "replay", LocalizationKey = "Tools_Replay", Description = "回放", IconGeometry = XamlGraphicsIconGeometries.ReplayIconGeometry },
-            new ToolsMenuItemInfo { Id = "screenshot", LocalizationKey = "Tools_Screenshot", Description = "截图", IconGeometry = XamlGraphicsIconGeometries.ScreenshotIconGeometry },
+            new ToolsMenuItemInfo { Id = "screenshot", LocalizationKey = "Tools_Screenshot", Description = "截图", IconGeometry = XamlGraphicsIconGeometries.ScreenshotIconGeometry, CustomSettingsPanelFactory = ScreenshotSettingsPanelBuilder.Build },
             new ToolsMenuItemInfo { Id = "shapeDraw", LocalizationKey = "FloatingBar_Geometry", Description = "几何图形", IconGeometry = XamlGraphicsIconGeometries.ShapesIcon },
             new ToolsMenuItemInfo { Id = "redo", LocalizationKey = "Board_Redo", Description = "重做", IconGeometry = XamlGraphicsIconGeometries.RedoIcon },
             new ToolsMenuItemInfo { Id = "manual", LocalizationKey = "Tools_Manual", Description = "使用指南", IconGeometry = XamlGraphicsIconGeometries.ManualIconGeometry },

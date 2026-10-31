@@ -104,6 +104,7 @@ namespace Ink_Canvas.Helpers
 
         public void ClearStrokeHistory()
         {
+            LogHelper.WriteLogToFile($"[Ink] 撤销历史已清空 (原有 {_currentStrokeHistory.Count} 条)", LogHelper.LogType.Info);
             _currentStrokeHistory.Clear();
             _currentIndex = -1;
             NotifyUndoRedoState();
@@ -148,6 +149,7 @@ namespace Ink_Canvas.Helpers
 
         public bool ImportTimeMachineHistory(TimeMachineHistory[] sourceHistory)
         {
+            LogHelper.WriteLogToFile($"[Ink] 撤销历史已导入: {sourceHistory?.Length ?? 0} 条", LogHelper.LogType.Info);
             _currentStrokeHistory.Clear();
             _currentStrokeHistory.AddRange(sourceHistory);
             _currentIndex = _currentStrokeHistory.Count - 1;
@@ -165,6 +167,37 @@ namespace Ink_Canvas.Helpers
 
         /// <summary>当前历史是否允许重做。</summary>
         public bool CanRedo => _currentStrokeHistory.Count > 0 && _currentStrokeHistory.Count - _currentIndex - 1 > 0;
+
+        /// <summary>
+        /// 对当前页历史中所有不在画布上的 Stroke 应用变换矩阵。
+        /// 用于视频展台模式：旋转/移动/缩放摄像头预览时，画布上的笔画已被
+        /// inkCanvas.Strokes.Transform 变换，但历史中已移出画布的 Stroke
+        /// （如形状识别的 ReplacedStroke、已撤销的 CurrentStroke）不会被变换。
+        /// 撤销/重做时这些 Stroke 加回画布会出现在旧位置，因此需要同步变换。
+        /// 注意：同一个 Stroke 可能出现在多个历史条目中（如条目1的 CurrentStroke
+        /// 和条目2的 ReplacedStroke 是同一引用），用 HashSet 去重避免双重变换。
+        /// </summary>
+        public void TransformStrokesInHistory(Matrix matrix, StrokeCollection canvasStrokes)
+        {
+            var transformed = new HashSet<Stroke>();
+            foreach (var item in _currentStrokeHistory)
+            {
+                TransformStrokeCollectionIfNotOnCanvas(item.ReplacedStroke, matrix, canvasStrokes, transformed);
+                TransformStrokeCollectionIfNotOnCanvas(item.CurrentStroke, matrix, canvasStrokes, transformed);
+            }
+        }
+
+        private static void TransformStrokeCollectionIfNotOnCanvas(StrokeCollection strokes, Matrix matrix, StrokeCollection canvasStrokes, HashSet<Stroke> transformed)
+        {
+            if (strokes == null) return;
+            foreach (Stroke stroke in strokes)
+            {
+                if (!canvasStrokes.Contains(stroke) && transformed.Add(stroke))
+                {
+                    stroke.Transform(matrix, false);
+                }
+            }
+        }
     }
 
     public class TimeMachineHistory
@@ -173,10 +206,16 @@ namespace Ink_Canvas.Helpers
         public bool StrokeHasBeenCleared;
         public StrokeCollection CurrentStroke;
         public StrokeCollection ReplacedStroke;
+        public UIElement EditedElement;
+        public string PreviousElementState;
+        public string CurrentElementState;
         //这里说一下 Tuple的 Value1 是初始值 ; Value 2 是改变值
         public Dictionary<Stroke, Tuple<StylusPointCollection, StylusPointCollection>> StylusPointDictionary;
         public Dictionary<Stroke, Tuple<DrawingAttributes, DrawingAttributes>> DrawingAttributes;
         public UIElement InsertedElement; // 新增
+        public string PluginId;
+        public string PluginStateBefore;
+        public string PluginStateAfter;
         public TimeMachineHistory(StrokeCollection currentStroke, TimeMachineHistoryType commitType, bool strokeHasBeenCleared)
         {
             CommitType = commitType;
@@ -194,6 +233,15 @@ namespace Ink_Canvas.Helpers
             CommitType = commitType;
             DrawingAttributes = drawingAttributes;
         }
+        public TimeMachineHistory(UIElement element, string previousState, string currentState)
+        {
+            CommitType = TimeMachineHistoryType.ElementEdit;
+            EditedElement = element;
+            PreviousElementState = previousState;
+            CurrentElementState = currentState;
+            StrokeHasBeenCleared = false;
+        }
+
         public TimeMachineHistory(StrokeCollection currentStroke, TimeMachineHistoryType commitType, bool strokeHasBeenCleared, StrokeCollection replacedStroke)
         {
             CommitType = commitType;
@@ -206,16 +254,39 @@ namespace Ink_Canvas.Helpers
             CommitType = commitType;
             InsertedElement = element;
         }
+        public TimeMachineHistory(string pluginId, string beforeState, string afterState)
+        {
+            CommitType = TimeMachineHistoryType.PluginStateChange;
+            PluginId = pluginId;
+            PluginStateBefore = beforeState;
+            PluginStateAfter = afterState;
+        }
+        public TimeMachineHistory(
+            string pluginId,
+            string beforeState,
+            string afterState,
+            StrokeCollection consumedStrokes)
+        {
+            CommitType = TimeMachineHistoryType.PluginInkConversion;
+            PluginId = pluginId;
+            PluginStateBefore = beforeState;
+            PluginStateAfter = afterState;
+            CurrentStroke = consumedStrokes;
+            StrokeHasBeenCleared = true;
+        }
     }
 
     public enum TimeMachineHistoryType
     {
+        ElementEdit,
         UserInput,
         ShapeRecognition,
         Clear,
         Manipulation,
         DrawingAttributes,
-        ElementInsert // 新增
+        ElementInsert, // 新增
+        PluginStateChange,
+        PluginInkConversion
     }
 
     public partial class TimeMachine // 新增partial，便于扩展
@@ -244,27 +315,67 @@ namespace Ink_Canvas.Helpers
             NotifyUndoRedoState();
         }
 
+        public void CommitPluginStateHistory(string pluginId, string beforeState, string afterState)
+        {
+            if (string.IsNullOrWhiteSpace(pluginId))
+                throw new ArgumentException("Plugin ID is required.", nameof(pluginId));
+            if (beforeState == null) throw new ArgumentNullException(nameof(beforeState));
+            if (afterState == null) throw new ArgumentNullException(nameof(afterState));
+
+            if (_currentIndex + 1 < _currentStrokeHistory.Count)
+            {
+                _currentStrokeHistory.RemoveRange(_currentIndex + 1, (_currentStrokeHistory.Count - 1) - _currentIndex);
+            }
+
+            _currentStrokeHistory.Add(new TimeMachineHistory(pluginId, beforeState, afterState));
+            _currentIndex = _currentStrokeHistory.Count - 1;
+            NotifyUndoRedoState();
+        }
+
         /// <summary>
         /// 把历史中保存的墨迹按 matrix 同步变换（撤销/重做时能回到正确几何），
         /// 跳过仍在画布上的笔迹（它们由 inkCanvas.Strokes.Transform 直接处理）。
         /// </summary>
-        public void TransformStrokesInHistory(Matrix matrix, StrokeCollection canvasStrokes)
+        public void CommitElementEditHistory(UIElement element, string previousState, string currentState)
         {
-            if (canvasStrokes == null) return;
-            var transformed = new HashSet<Stroke>();
-            foreach (var item in _currentStrokeHistory)
-            {
-                TransformStrokesInCollection(item.ReplacedStroke, matrix, canvasStrokes, transformed);
-                TransformStrokesInCollection(item.CurrentStroke, matrix, canvasStrokes, transformed);
-            }
+            if (element == null || string.IsNullOrWhiteSpace(previousState) || string.IsNullOrWhiteSpace(currentState)
+                || string.Equals(previousState, currentState, StringComparison.Ordinal))
+                return;
+            if (_currentIndex + 1 < _currentStrokeHistory.Count)
+                _currentStrokeHistory.RemoveRange(_currentIndex + 1, (_currentStrokeHistory.Count - 1) - _currentIndex);
+            _currentStrokeHistory.Add(new TimeMachineHistory(element, previousState, currentState));
+            _currentIndex = _currentStrokeHistory.Count - 1;
+            NotifyUndoRedoState();
         }
 
-        private static void TransformStrokesInCollection(StrokeCollection strokes, Matrix matrix, StrokeCollection canvasStrokes, HashSet<Stroke> transformed)
+        public void CommitPluginInkConversionHistory(
+            string pluginId,
+            string beforeState,
+            string afterState,
+            StrokeCollection consumedStrokes)
         {
-            if (strokes == null) return;
-            foreach (Stroke stroke in strokes)
-                if (!canvasStrokes.Contains(stroke) && transformed.Add(stroke))
-                    stroke.Transform(matrix, false);
+            if (string.IsNullOrWhiteSpace(pluginId))
+                throw new ArgumentException("Plugin ID is required.", nameof(pluginId));
+            if (beforeState == null) throw new ArgumentNullException(nameof(beforeState));
+            if (afterState == null) throw new ArgumentNullException(nameof(afterState));
+            if (consumedStrokes == null) throw new ArgumentNullException(nameof(consumedStrokes));
+            if (consumedStrokes.Count == 0)
+                throw new ArgumentException("At least one consumed stroke is required.", nameof(consumedStrokes));
+
+            if (_currentIndex + 1 < _currentStrokeHistory.Count)
+            {
+                _currentStrokeHistory.RemoveRange(
+                    _currentIndex + 1,
+                    (_currentStrokeHistory.Count - 1) - _currentIndex);
+            }
+
+            _currentStrokeHistory.Add(new TimeMachineHistory(
+                pluginId,
+                beforeState,
+                afterState,
+                consumedStrokes));
+            _currentIndex = _currentStrokeHistory.Count - 1;
+            NotifyUndoRedoState();
         }
     }
 }
