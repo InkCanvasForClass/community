@@ -57,9 +57,9 @@
       },
       "InkCanvasForClass.UI.WPF.Modern": {
         "type": "Direct",
-        "requested": "[0.11.0-icc.1, )",
-        "resolved": "0.11.0-icc.1",
-        "contentHash": "nteVzdUjKCx0Te4enzlT+cLgkHq56rEtwJJrm8beBxoTVhH0Q1a2P0l0LWJXpPLz1oMzQp5q86eLz+ieimdt/A==",
+        "requested": "[0.11.0-icc.7df536a, )",
+        "resolved": "0.11.0-icc.7df536a",
+        "contentHash": "6USS/LrkXX956szojxl+YF980XsJHmgvUm7j+alRTZS/3ShTPC3sNCnwAhe7n2Rl17aQAS1h32/H+FMImwX9yg==",
         "dependencies": {
           "iNKORE.UI.WPF": "1.2.8"
         }
@@ -547,7 +547,7 @@
       "inkcanvas.controls": {
         "type": "Project",
         "dependencies": {
-          "InkCanvasForClass.UI.WPF.Modern": "[0.11.0-icc.1, )",
+          "InkCanvasForClass.UI.WPF.Modern": "[0.11.0-icc.7df536a, )",
           "iNKORE.UI.WPF": "[1.2.8, )"
         }
       },

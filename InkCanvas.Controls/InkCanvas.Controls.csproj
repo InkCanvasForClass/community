@@ -38,7 +38,7 @@
   <ItemGroup>
     <!-- 组织维护的非官方 fork：包 ID 为 InkCanvasForClass.UI.WPF.Modern，程序集仍叫 iNKORE.UI.WPF.Modern。
          走普通包引用后，本工程打包（InkCanvas.Controls）生成的 nuspec 依赖也指向这个包，符合预期。 -->
-    <PackageReference Include="InkCanvasForClass.UI.WPF.Modern" Version="0.11.0-icc.1" />
+    <PackageReference Include="InkCanvasForClass.UI.WPF.Modern" Version="0.11.0-icc.7df536a" />
   </ItemGroup>
 
   <ItemGroup>
