@@ -612,11 +612,7 @@ namespace Ink_Canvas
                 }
                 // VideoCaptureElement 自己管理渲染（VMR9 + D3DImage），不需要清空 Source
                 // 若之前的预览仍在运行，先停止避免设备占用
-                try { VideoPresenterFullCanvasImage?.Stop(); }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"[Booth] 进入展台特殊模式前停止上一次的实时预览失败: {ex.Message}", LogHelper.LogType.Info);
-                }
+                try { VideoPresenterFullCanvasImage?.Stop(); } catch (Exception ex) { LogService.LogException(ex); }
 
                 // 重置缩放
                 _boothPreviewScale = 1.0;
@@ -664,7 +660,7 @@ namespace Ink_Canvas
                             logicalMode = "eraserByStrokes";
                             break;
                         default:
-                            logicalMode = _currentToolMode;
+                            logicalMode = ToolModeMapping.ToInternalString(_currentToolModeEnum);
                             break;
                     }
                     UpdateCurrentToolMode(logicalMode);
@@ -729,22 +725,14 @@ namespace Ink_Canvas
                 _liveStrokesSnapshot.Clear();
                 foreach (var p in _capturedPhotos)
                 {
-                    try { p?.Strokes?.Clear(); }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[Booth] 退出特殊模式时清空已拍摄照片槽位中的墨迹失败: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    try { p?.Strokes?.Clear(); } catch (Exception ex) { LogService.LogException(ex); }
                 }
 
                 // 清理鼠标拖动状态（防止退出时鼠标仍被捕获）
                 if (_isBoothMouseDragging)
                 {
                     _isBoothMouseDragging = false;
-                    try { inkCanvas?.ReleaseMouseCapture(); }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[Booth] 退出特殊模式时释放画布鼠标捕获失败: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    try { inkCanvas?.ReleaseMouseCapture(); } catch (Exception ex) { LogService.LogException(ex); }
                 }
                 _boothTouchSavedInkEditingMode = null;
 
@@ -752,11 +740,7 @@ namespace Ink_Canvas
                 RebuildBoardToolbar();
 
                 // 停止 VideoCaptureElement 预览，释放 DirectShow 图
-                try { VideoPresenterFullCanvasImage?.Stop(); }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"[Booth] 退出特殊模式时停止展台实时预览失败: {ex.Message}", LogHelper.LogType.Info);
-                }
+                try { VideoPresenterFullCanvasImage?.Stop(); } catch (Exception ex) { LogService.LogException(ex); }
                 // 释放摄像头属性控制占用的常驻 FilterGraphNoThread 资源。
                 // 必须延迟到后台线程执行：VideoCaptureElement.Stop() 是异步的（WPFMediaKit 内部异步清理 FilterGraph），
                 // 立即同步释放 source filter 的 COM 对象会与 VideoCaptureElement 的 DirectShow 图清理竞争设备锁，
@@ -1022,7 +1006,7 @@ namespace Ink_Canvas
                             LogHelper.LogType.Info);
                     }
                 }
-                catch { }
+                catch (Exception ex) { LogService.LogException(ex); }
 
                 _isApplyingRotationToStrokes = true;
                 var prevCommitType = _currentCommitType;
@@ -1054,11 +1038,11 @@ namespace Ink_Canvas
                         LogHelper.WriteLogToFile(
                             $"[BoothDiag] StrokesBBox: before=[{beforeBBox.X:F1},{beforeBBox.Y:F1},{beforeBBox.Width:F1}x{beforeBBox.Height:F1}], " +
                             $"after=[{afterBBox.X:F1},{afterBBox.Y:F1},{afterBBox.Width:F1}x{afterBBox.Height:F1}], " +
-                            $"visualCenter=({cx:F1},{cy:F1}), beforeCenter=({beforeBBox.X+beforeBBox.Width/2:F1},{beforeBBox.Y+beforeBBox.Height/2:F1}), " +
-                            $"afterCenter=({afterBBox.X+afterBBox.Width/2:F1},{afterBBox.Y+afterBBox.Height/2:F1})",
+                            $"visualCenter=({cx:F1},{cy:F1}), beforeCenter=({beforeBBox.X + beforeBBox.Width / 2:F1},{beforeBBox.Y + beforeBBox.Height / 2:F1}), " +
+                            $"afterCenter=({afterBBox.X + afterBBox.Width / 2:F1},{afterBBox.Y + afterBBox.Height / 2:F1})",
                             LogHelper.LogType.Info);
                     }
-                    catch { }
+                    catch (Exception ex) { LogService.LogException(ex); }
                 }
                 finally
                 {
@@ -1114,17 +1098,11 @@ namespace Ink_Canvas
                             VideoPresenterSearchingText.Text = "正在查找展台设备...";
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[Booth] 展台临时提示 2.5s 后自动隐藏失败: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    catch (Exception ex) { LogService.LogException(ex); }
                 };
                 timer.Start();
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Booth] 显示展台临时提示失败: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
         }
 
         /// <summary>
@@ -1352,10 +1330,7 @@ namespace Ink_Canvas
                     "[VideoPresenter] MediaOpened: 摄像头已打开，隐藏占位文字",
                     LogHelper.LogType.Info);
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Booth] MediaOpened 处理失败（隐藏占位文字/启用拍照按钮）: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
         }
 
         /// <summary>
@@ -1381,10 +1356,7 @@ namespace Ink_Canvas
                     LogHelper.LogType.Error);
                 ErrorOccurredRelay?.Invoke(this, $"摄像头打开失败: {msg}");
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Booth] MediaFailed 处理失败（写日志/抛出失败通知）: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
         }
 
         /// <summary>
@@ -2346,20 +2318,12 @@ namespace Ink_Canvas
                     }
 
                     // 若已在播放同一设备，先停止
-                    try { VideoPresenterFullCanvasImage.Stop(); }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[Booth] 重建预览图前停止同设备的实时预览失败: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    try { VideoPresenterFullCanvasImage.Stop(); } catch (Exception ex) { LogService.LogException(ex); }
                     // 关键：显式将 VideoCaptureDevice 置为 null，强制依赖属性变化回调触发 CleanUp()。
                     // 否则后续 VideoCaptureDevice = device（同一个 DsDevice 引用）会被 WPF 依赖属性系统判定为
                     // "未变化"，OnVideoCaptureDeviceChanged 不触发，WPFMediaKit 不会重建 FilterGraph，
                     // 导致切换分辨率/帧率时 DesiredPixelWidth/Height/FPS 不生效（仍是旧分辨率）。
-                    try { VideoPresenterFullCanvasImage.VideoCaptureDevice = null; }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[Booth] 重建预览图前把 VideoCaptureDevice 置空以强制 CleanUp 失败: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    try { VideoPresenterFullCanvasImage.VideoCaptureDevice = null; } catch (Exception ex) { LogService.LogException(ex); }
                     // 等待 FilterGraph 完全释放设备占用：
                     // WPFMediaKit 的 Stop() + CleanUp() 是异步的，FilterGraph 释放需要时间。
                     // 立即 BeginInit/EndInit/Play 会导致设备仍被占用，新图构建失败，
@@ -2474,10 +2438,7 @@ namespace Ink_Canvas
                                             _ = StartVideoCaptureElementPreviewAsync(camIdx).ConfigureAwait(false);
                                         }
                                     }
-                                    catch (Exception ex)
-                                    {
-                                        LogHelper.WriteLogToFile($"[Booth] MediaOpened 兜底定时器（1.5s 未触发则重启预览）处理失败: {ex.Message}", LogHelper.LogType.Info);
-                                    }
+                                    catch (Exception ex) { LogService.LogException(ex); }
                                 };
                                 fallbackTimer.Start();
                             }
@@ -2843,7 +2804,7 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-/// 把 WPF BitmapSource 转换为 System.Drawing.Bitmap（直接像素拷贝，无 PNG 编解码）。
+        /// 把 WPF BitmapSource 转换为 System.Drawing.Bitmap（直接像素拷贝，无 PNG 编解码）。
         /// 用于 D3DImage 拍照路径需要做照片矫正时：OpenCvSharp 的 BitmapConverter.ToMat 只接受 System.Drawing.Bitmap。
         /// 性能：相比 PNG 编解码省 15-25ms（4K 帧从 ~30ms 降到 ~5ms），实时检测关键路径。
         /// 原理：BitmapSource.CopyPixels 直接拷贝 GPU→CPU 的像素数据，用 Stride 对齐构造 Bitmap。
@@ -3006,7 +2967,7 @@ namespace Ink_Canvas
                             $"scale={_boothPreviewScale}, translate=({_boothPreviewTranslateX},{_boothPreviewTranslateY})",
                             LogHelper.LogType.Info);
                     }
-                    catch { }
+                    catch (Exception ex) { LogService.LogException(ex); }
                     VideoPresenterFullCanvasRotation.Angle = (VideoPresenterFullCanvasRotation.Angle + 90.0) % 360.0;
                     // 传视觉角度（cameraRotation*90 + Angle）给墨迹变换，
                     // 因为 GetBoothRotationMatrix 按"实时画面 0° 基准"算缩放，照片预览需用视觉角度
@@ -3019,7 +2980,7 @@ namespace Ink_Canvas
                             $"photo.ActualSize={VideoPresenterFrozenFrameImage.ActualWidth}x{VideoPresenterFrozenFrameImage.ActualHeight}",
                             LogHelper.LogType.Info);
                     }
-                    catch { }
+                    catch (Exception ex) { LogService.LogException(ex); }
                     return;
                 }
 
@@ -3092,10 +3053,7 @@ namespace Ink_Canvas
                 if (accelIdx >= 0 && accelIdx < cb.Items.Count && cb.SelectedIndex != accelIdx)
                     cb.SelectedIndex = accelIdx;
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Booth] 同步相片校正加速度下拉框选中项失败: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
         }
 
         // ====================================================================
@@ -3122,13 +3080,13 @@ namespace Ink_Canvas
             if (content == null) return null;
             switch (prop)
             {
-                case BoothCameraProperty.Brightness:   return content.BrightnessSlider;
-                case BoothCameraProperty.Contrast:     return content.ContrastSlider;
-                case BoothCameraProperty.Saturation:   return content.SaturationSlider;
+                case BoothCameraProperty.Brightness: return content.BrightnessSlider;
+                case BoothCameraProperty.Contrast: return content.ContrastSlider;
+                case BoothCameraProperty.Saturation: return content.SaturationSlider;
                 case BoothCameraProperty.WhiteBalance: return content.WhiteBalanceSlider;
-                case BoothCameraProperty.Gain:         return content.GainSlider;
-                case BoothCameraProperty.Focus:        return content.FocusSlider;
-                case BoothCameraProperty.Exposure:     return content.ExposureSlider;
+                case BoothCameraProperty.Gain: return content.GainSlider;
+                case BoothCameraProperty.Focus: return content.FocusSlider;
+                case BoothCameraProperty.Exposure: return content.ExposureSlider;
             }
             return null;
         }
@@ -3140,13 +3098,13 @@ namespace Ink_Canvas
             if (content == null) return null;
             switch (prop)
             {
-                case BoothCameraProperty.Brightness:   return content.BrightnessValueText;
-                case BoothCameraProperty.Contrast:     return content.ContrastValueText;
-                case BoothCameraProperty.Saturation:   return content.SaturationValueText;
+                case BoothCameraProperty.Brightness: return content.BrightnessValueText;
+                case BoothCameraProperty.Contrast: return content.ContrastValueText;
+                case BoothCameraProperty.Saturation: return content.SaturationValueText;
                 case BoothCameraProperty.WhiteBalance: return content.WhiteBalanceValueText;
-                case BoothCameraProperty.Gain:         return content.GainValueText;
-                case BoothCameraProperty.Focus:        return content.FocusValueText;
-                case BoothCameraProperty.Exposure:     return content.ExposureValueText;
+                case BoothCameraProperty.Gain: return content.GainValueText;
+                case BoothCameraProperty.Focus: return content.FocusValueText;
+                case BoothCameraProperty.Exposure: return content.ExposureValueText;
             }
             return null;
         }
@@ -3158,13 +3116,13 @@ namespace Ink_Canvas
             if (canvas == null) return 0;
             switch (prop)
             {
-                case BoothCameraProperty.Brightness:   return canvas.VideoPresenterBrightness;
-                case BoothCameraProperty.Contrast:     return canvas.VideoPresenterContrast;
-                case BoothCameraProperty.Saturation:   return canvas.VideoPresenterSaturation;
+                case BoothCameraProperty.Brightness: return canvas.VideoPresenterBrightness;
+                case BoothCameraProperty.Contrast: return canvas.VideoPresenterContrast;
+                case BoothCameraProperty.Saturation: return canvas.VideoPresenterSaturation;
                 case BoothCameraProperty.WhiteBalance: return canvas.VideoPresenterWhiteBalance;
-                case BoothCameraProperty.Gain:         return canvas.VideoPresenterGain;
-                case BoothCameraProperty.Focus:        return canvas.VideoPresenterFocus;
-                case BoothCameraProperty.Exposure:     return canvas.VideoPresenterExposure;
+                case BoothCameraProperty.Gain: return canvas.VideoPresenterGain;
+                case BoothCameraProperty.Focus: return canvas.VideoPresenterFocus;
+                case BoothCameraProperty.Exposure: return canvas.VideoPresenterExposure;
             }
             return 0;
         }
@@ -3176,13 +3134,13 @@ namespace Ink_Canvas
             if (canvas == null) return;
             switch (prop)
             {
-                case BoothCameraProperty.Brightness:   canvas.VideoPresenterBrightness = value; break;
-                case BoothCameraProperty.Contrast:     canvas.VideoPresenterContrast = value; break;
-                case BoothCameraProperty.Saturation:   canvas.VideoPresenterSaturation = value; break;
+                case BoothCameraProperty.Brightness: canvas.VideoPresenterBrightness = value; break;
+                case BoothCameraProperty.Contrast: canvas.VideoPresenterContrast = value; break;
+                case BoothCameraProperty.Saturation: canvas.VideoPresenterSaturation = value; break;
                 case BoothCameraProperty.WhiteBalance: canvas.VideoPresenterWhiteBalance = value; break;
-                case BoothCameraProperty.Gain:         canvas.VideoPresenterGain = value; break;
-                case BoothCameraProperty.Focus:        canvas.VideoPresenterFocus = value; break;
-                case BoothCameraProperty.Exposure:     canvas.VideoPresenterExposure = value; break;
+                case BoothCameraProperty.Gain: canvas.VideoPresenterGain = value; break;
+                case BoothCameraProperty.Focus: canvas.VideoPresenterFocus = value; break;
+                case BoothCameraProperty.Exposure: canvas.VideoPresenterExposure = value; break;
             }
         }
 
@@ -3214,10 +3172,7 @@ namespace Ink_Canvas
 
                 RefreshBoothPropSlidersEnabled();
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Booth] 刷新摄像头属性滑块取值失败: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
         }
 
         /// <summary>按 _cameraService 支持情况启用/禁用全部属性滑块并刷新 tooltip。</summary>
@@ -3236,10 +3191,7 @@ namespace Ink_Canvas
                         : Ink_Canvas.Properties.BoothStrings.ResourceManager.GetString(b.notSupportedTooltipKey, Ink_Canvas.Properties.BoothStrings.Culture);
                 }
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Booth] 按摄像头支持情况刷新属性滑块启用状态与 tooltip 失败: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
         }
 
         /// <summary>
@@ -4005,10 +3957,7 @@ namespace Ink_Canvas
                     VideoPresenterFrozenFrameImage.RenderTransform = _frozenFrameOriginalRenderTransform;
                 // VideoPresenterFrozenOverlay（旧全屏蒙版）和 VideoPresenterFrozenThumbnail（侧栏小预览）均已从 XAML 移除
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Booth] 清除展台冻结画面（恢复实时预览）失败: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
         }
 
         /// <summary>
@@ -4059,7 +4008,7 @@ namespace Ink_Canvas
                         $"strokesCount={inkCanvas?.Strokes?.Count ?? 0}",
                         LogHelper.LogType.Info);
                 }
-                catch { }
+                catch (Exception ex) { LogService.LogException(ex); }
 
                 VideoPresenterFrozenFrameImage.Source = photo.Image;
                 VideoPresenterFrozenFrameImage.Visibility = Visibility.Visible;
@@ -4101,18 +4050,14 @@ namespace Ink_Canvas
                         $"photo.ActualSize={VideoPresenterFrozenFrameImage.ActualWidth}x{VideoPresenterFrozenFrameImage.ActualHeight}",
                         LogHelper.LogType.Info);
                 }
-                catch { }
+                catch (Exception ex) { LogService.LogException(ex); }
             }
 
             // 停止并隐藏 VideoCaptureElement，只显示冻结照片
             // （Stretch=Uniform 留黑边处会看到底层实时画面，必须停止+隐藏）
             if (VideoPresenterFullCanvasImage != null)
             {
-                try { VideoPresenterFullCanvasImage.Stop(); }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"[Booth] 切换到照片预览页时停止展台实时预览失败: {ex.Message}", LogHelper.LogType.Info);
-                }
+                try { VideoPresenterFullCanvasImage.Stop(); } catch (Exception ex) { LogService.LogException(ex); }
                 VideoPresenterFullCanvasImage.Visibility = Visibility.Collapsed;
             }
 

@@ -170,57 +170,57 @@ namespace Ink_Canvas.UInk
                 case (int)UInkShapeType.Line:
                 case (int)UInkShapeType.Polyline:
                 case (int)UInkShapeType.Polygon:
-                {
-                    if (geometry is UInkLineGeometry line && line.Points.Count >= 2)
                     {
-                        foreach (var p in line.Points)
-                            list.Add((p.X, p.Y));
-                        if (shapeType == (int)UInkShapeType.Polygon && line.Points.Count >= 3)
-                            list.Add((line.Points[0].X, line.Points[0].Y)); // 闭合
+                        if (geometry is UInkLineGeometry line && line.Points.Count >= 2)
+                        {
+                            foreach (var p in line.Points)
+                                list.Add((p.X, p.Y));
+                            if (shapeType == (int)UInkShapeType.Polygon && line.Points.Count >= 3)
+                                list.Add((line.Points[0].X, line.Points[0].Y)); // 闭合
+                        }
+                        break;
                     }
-                    break;
-                }
                 case (int)UInkShapeType.Rectangle:
                 case (int)UInkShapeType.Ellipse:
-                {
-                    if (geometry is UInkRectGeometry r)
                     {
-                        var rx = r.Width / 2f;
-                        var ry = r.Height / 2f;
-                        if (shapeType == (int)UInkShapeType.Rectangle)
+                        if (geometry is UInkRectGeometry r)
                         {
-                            AddCorner(list, r.CenterX, r.CenterY, rx, ry, r.Rotation ?? 0f, -1, -1);
-                            AddCorner(list, r.CenterX, r.CenterY, rx, ry, r.Rotation ?? 0f, +1, -1);
-                            AddCorner(list, r.CenterX, r.CenterY, rx, ry, r.Rotation ?? 0f, +1, +1);
-                            AddCorner(list, r.CenterX, r.CenterY, rx, ry, r.Rotation ?? 0f, -1, +1);
-                            AddCorner(list, r.CenterX, r.CenterY, rx, ry, r.Rotation ?? 0f, -1, -1); // 闭合
+                            var rx = r.Width / 2f;
+                            var ry = r.Height / 2f;
+                            if (shapeType == (int)UInkShapeType.Rectangle)
+                            {
+                                AddCorner(list, r.CenterX, r.CenterY, rx, ry, r.Rotation ?? 0f, -1, -1);
+                                AddCorner(list, r.CenterX, r.CenterY, rx, ry, r.Rotation ?? 0f, +1, -1);
+                                AddCorner(list, r.CenterX, r.CenterY, rx, ry, r.Rotation ?? 0f, +1, +1);
+                                AddCorner(list, r.CenterX, r.CenterY, rx, ry, r.Rotation ?? 0f, -1, +1);
+                                AddCorner(list, r.CenterX, r.CenterY, rx, ry, r.Rotation ?? 0f, -1, -1); // 闭合
+                            }
+                            else
+                            {
+                                AddEllipsePoints(list, r.CenterX, r.CenterY, rx, ry, r.Rotation ?? 0f);
+                            }
                         }
-                        else
-                        {
-                            AddEllipsePoints(list, r.CenterX, r.CenterY, rx, ry, r.Rotation ?? 0f);
-                        }
+                        break;
                     }
-                    break;
-                }
                 case (int)UInkShapeType.Square:
-                {
-                    if (geometry is UInkSquareGeometry s)
                     {
-                        var half = s.Size / 2f;
-                        AddCorner(list, s.CenterX, s.CenterY, half, half, s.Rotation ?? 0f, -1, -1);
-                        AddCorner(list, s.CenterX, s.CenterY, half, half, s.Rotation ?? 0f, +1, -1);
-                        AddCorner(list, s.CenterX, s.CenterY, half, half, s.Rotation ?? 0f, +1, +1);
-                        AddCorner(list, s.CenterX, s.CenterY, half, half, s.Rotation ?? 0f, -1, +1);
-                        AddCorner(list, s.CenterX, s.CenterY, half, half, s.Rotation ?? 0f, -1, -1);
+                        if (geometry is UInkSquareGeometry s)
+                        {
+                            var half = s.Size / 2f;
+                            AddCorner(list, s.CenterX, s.CenterY, half, half, s.Rotation ?? 0f, -1, -1);
+                            AddCorner(list, s.CenterX, s.CenterY, half, half, s.Rotation ?? 0f, +1, -1);
+                            AddCorner(list, s.CenterX, s.CenterY, half, half, s.Rotation ?? 0f, +1, +1);
+                            AddCorner(list, s.CenterX, s.CenterY, half, half, s.Rotation ?? 0f, -1, +1);
+                            AddCorner(list, s.CenterX, s.CenterY, half, half, s.Rotation ?? 0f, -1, -1);
+                        }
+                        break;
                     }
-                    break;
-                }
                 case (int)UInkShapeType.Circle:
-                {
-                    if (geometry is UInkCircleGeometry c)
-                        AddEllipsePoints(list, c.CenterX, c.CenterY, c.Radius, c.Radius, 0f);
-                    break;
-                }
+                    {
+                        if (geometry is UInkCircleGeometry c)
+                            AddEllipsePoints(list, c.CenterX, c.CenterY, c.Radius, c.Radius, 0f);
+                        break;
+                    }
             }
             return list;
         }

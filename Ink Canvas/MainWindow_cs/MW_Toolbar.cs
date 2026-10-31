@@ -1,6 +1,7 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Models;
 using System;
 using System.Linq;
 using System.Windows;
@@ -421,7 +422,7 @@ namespace Ink_Canvas
                     break;
             }
 
-            SetFloatingBarHighlightPosition(_currentToolMode);
+            SetFloatingBarHighlightPosition(ToolModeMapping.ToInternalString(_currentToolModeEnum));
         }
 
         internal void RebuildToolbar()
@@ -434,10 +435,10 @@ namespace Ink_Canvas
                 ToolbarRegistry.ClearInjected(StackPanelFloatingBarRoot);
                 InitializeToolbarPlugins();
                 UpdateToolbarComponentVisibility();
-                ApplyFloatingBarIconHighlightImmediate(_currentToolMode);
+                ApplyFloatingBarIconHighlightImmediate(ToolModeMapping.ToInternalString(_currentToolModeEnum));
                 RefreshFloatingBarButtonColors();
                 RefreshGestureButtonIcon();
-                SetFloatingBarHighlightPosition(_currentToolMode);
+                SetFloatingBarHighlightPosition(ToolModeMapping.ToInternalString(_currentToolModeEnum));
                 ApplyCompactFloatingBarMode(Settings.Appearance.CompactFloatingBar);
                 ApplyHideFloatingBarBorder(Settings.Appearance.HideFloatingBarBorder);
                 ApplyFloatingBarBorderColor();
@@ -664,7 +665,7 @@ namespace Ink_Canvas
             }
         }
 
-        internal bool IsAnnotating => _currentToolMode != "cursor";
+        internal bool IsAnnotating => _currentToolModeEnum != ToolMode.Cursor;
 
         internal void UpdateToolbarComponentVisibility()
         {

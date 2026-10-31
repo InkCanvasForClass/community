@@ -1,6 +1,7 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Ink;
 using Ink_Canvas.Ink.WinRT;
+using Ink_Canvas.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -1079,23 +1080,23 @@ namespace Ink_Canvas
             if (IsBoardRoamingMode)
                 return LogicalInkTool.BoardRoam;
             if (drawingShapeMode != 0
-                || string.Equals(_currentToolMode, "shape", StringComparison.OrdinalIgnoreCase))
+                || _currentToolModeEnum == ToolMode.Shape)
                 return LogicalInkTool.Shape;
 
-            switch (_currentToolMode)
+            switch (_currentToolModeEnum)
             {
-                case "pen":
-                case "color":
+                case ToolMode.Pen:
+                case ToolMode.Color:
                     return LogicalInkTool.Pen;
-                case "eraser":
+                case ToolMode.Eraser:
                     return LogicalInkTool.PointEraser;
-                case "eraserByStrokes":
+                case ToolMode.EraserByStrokes:
                     return LogicalInkTool.StrokeEraser;
-                case "select":
+                case ToolMode.Select:
                     return LogicalInkTool.Select;
-                case "roaming":
+                case ToolMode.Roaming:
                     return LogicalInkTool.BoardRoam;
-                case "cursor":
+                case ToolMode.Cursor:
                 default:
                     return LogicalInkTool.Cursor;
             }
@@ -1620,38 +1621,38 @@ namespace Ink_Canvas
         {
             try
             {
-            if (pointBatches == null)
-            {
-                // Defensive null batch — the presenter still requires a matching EndDry only
-                // when BeginDry returned successfully, so a null batch is treated as failure.
-                DisableWinRTInkAfterFailure(
-                    new InvalidOperationException("WinRT InkSynchronizer returned a null dry batch."),
-                    notify: true);
-                return;
-            }
+                if (pointBatches == null)
+                {
+                    // Defensive null batch — the presenter still requires a matching EndDry only
+                    // when BeginDry returned successfully, so a null batch is treated as failure.
+                    DisableWinRTInkAfterFailure(
+                        new InvalidOperationException("WinRT InkSynchronizer returned a null dry batch."),
+                        notify: true);
+                    return;
+                }
 
-            if (pointBatches.Count == 0)
-            {
-                // A successful BeginDry can return no strokes; it still needs exactly one EndDry.
-                CompleteWinRTInkDry();
-                return;
-            }
+                if (pointBatches.Count == 0)
+                {
+                    // A successful BeginDry can return no strokes; it still needs exactly one EndDry.
+                    CompleteWinRTInkDry();
+                    return;
+                }
 
-            var config = _winRTInkConfig;
-            if (config == null)
-            {
-                CompleteWinRTInkDry();
-                DisableWinRTInkAfterFailure(
-                    new InvalidOperationException("WinRT Ink configuration was unavailable while drying."),
-                    notify: true);
-                return;
-            }
+                var config = _winRTInkConfig;
+                if (config == null)
+                {
+                    CompleteWinRTInkDry();
+                    DisableWinRTInkAfterFailure(
+                        new InvalidOperationException("WinRT Ink configuration was unavailable while drying."),
+                        notify: true);
+                    return;
+                }
 
-            var pauseMetadata = CaptureWinRTInkPauseMetadata(pointBatches.Count);
-            var pendingDry = new Action(() =>
-                MaterializeWinRTInkDry(pointBatches, config, pauseMetadata));
-            _winRTInkPendingDry.Enqueue(pendingDry);
-            DrainWinRTInkPendingDry();
+                var pauseMetadata = CaptureWinRTInkPauseMetadata(pointBatches.Count);
+                var pendingDry = new Action(() =>
+                    MaterializeWinRTInkDry(pointBatches, config, pauseMetadata));
+                _winRTInkPendingDry.Enqueue(pendingDry);
+                DrainWinRTInkPendingDry();
             }
             catch (Exception ex)
             {
