@@ -116,6 +116,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="InkCanvas.Calibration.Tests" />
     <None Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>

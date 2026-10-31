@@ -54,12 +54,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private TouchCalibrationSampler Sampler => _step == 1 ? _palm : _step == 2 ? _finger : _nib;
 
         private Window _host;
-        private bool _simulationOnly;
+        private bool _initialized;
+        private bool _pointOnly;
         private readonly PalmContactGroupTracker _groupTracker = new();
         private readonly Dictionary<long, Stroke> _groupStrokes = new();
         private readonly DispatcherTimer _groupTimer = new() { Interval = TimeSpan.FromMilliseconds(16) };
         private long? _groupAnchor;
-        private bool UsesPointGrouping => _step == 4 && (_simulationOnly || SimulateErase.IsChecked == true);
+        private bool UsesPointGrouping => _step == 4 && (_pointOnly || SimulateErase.IsChecked == true);
         private double _simulationWidth;
         private double _simulationHeight;
         private iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode _previousPaneMode;
@@ -67,6 +68,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         public TouchCalibrationPage()
         {
             InitializeComponent();
+            _initialized = true;
             SetResourceReference(PreviewInkBrushProperty, iNKORE.UI.WPF.Modern.ThemeKeys.TextFillColorPrimaryBrushKey);
             Loaded += PageLoaded;
             Unloaded += PageUnloaded;
@@ -99,7 +101,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 NativeSample, dpi.DpiScaleX, dpi.DpiScaleY, registerRawMouse: false);
 #endif
             _step = 0;
-            _simulationOnly = false;
+            _pointOnly = false;
             _environment = null;
             _draft = null;
             _palm.Reset(); _finger.Reset(); _nib.Reset();
@@ -137,6 +139,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void ContentSizeChanged(object sender, SizeChangedEventArgs e)
         {
+            if (!_initialized) return;
             bool narrow = e.NewSize.Width < 700;
             OptionsColumn.Width = narrow ? new GridLength(0) : new GridLength(300);
             OptionsRow.Height = narrow ? new GridLength(Math.Min(220, e.NewSize.Height * 0.45)) : new GridLength(0);
@@ -158,14 +161,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             PreviewPanel.Visibility = _step == 4 ? Visibility.Visible : Visibility.Collapsed;
             SkipButton.Visibility = _step == 3 ? Visibility.Visible : Visibility.Collapsed;
             BackButton.IsEnabled = _step > 0;
-            NextButton.Content = Text(_step == 4 ? "CalibrationApply" : "CalibrationNext");
-            if (_simulationOnly)
+            if (_pointOnly)
             {
                 StepTitle.Text = Text("CalibrationSimulate");
                 Hint.Text = Text("CalibrationSimulateHint");
             }
-            NextButton.Visibility = _simulationOnly ? Visibility.Collapsed : Visibility.Visible;
-            SimulateErase.IsEnabled = !_simulationOnly;
+            NextButton.Content = Text(_step == 0 ? "CalibrationAreaRoute" : "CalibrationNext");
+            NextButton.Visibility = _step == 4 ? Visibility.Collapsed : Visibility.Visible;
+            SaveButton.Visibility = _step == 4 ? Visibility.Visible : Visibility.Collapsed;
+            SimulateErase.IsEnabled = !_pointOnly;
             Status.Text = Text("CalibrationReady");
             UpdatePreviewPolicy();
             UpdateSimulationMode();
@@ -184,7 +188,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _draft = null;
             _palm.Reset(); _finger.Reset(); _nib.Reset();
             _step = 0;
-            _simulationOnly = false;
+            _pointOnly = false;
             SimulateErase.IsChecked = false;
             OutlineWidth.Clear();
             OutlineHeight.Clear();
@@ -406,8 +410,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!TryOutline(out _simulationWidth, out _simulationHeight))
             { Status.Text = Text("CalibrationInvalidOutline"); return; }
-            _simulationOnly = true;
-            _draft = null; // Simulation is not device calibration and must never be saved.
+            _pointOnly = true;
+            _environment = TouchCalibrationDisplay.Capture(_host, "WPF");
+            _draft = new TouchCalibrationRecord
+            {
+                UsePointGrouping = true,
+                OutlineWidth = _simulationWidth,
+                OutlineHeight = _simulationHeight,
+                Environment = _environment
+            };
             _step = 4;
             ShowStep();
             SimulateErase.IsChecked = true;
@@ -415,7 +426,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void SimulationModeChanged(object sender, RoutedEventArgs e)
         {
-            if (Surface == null) return;
+            if (!_initialized) return;
             CancelPress();
             UpdateSimulationMode();
         }
@@ -427,7 +438,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void GroupOptionsChanged(object sender, RoutedEventArgs e)
         {
-            if (Surface != null) CancelPress();
+            if (!_initialized) return;
+            CancelPress();
         }
 
         private void BeginPointGroup(long id, Point position)
@@ -435,8 +447,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _groupTracker.MinimumContacts = GroupCount.SelectedIndex + 2;
             _groupTracker.WindowMilliseconds = (int)GroupWindow.Value;
             _groupTracker.Tolerance = GroupTolerance.Value;
-            _groupTracker.Width = _simulationOnly ? _simulationWidth : _draft?.OutlineWidth ?? 0;
-            _groupTracker.Height = _simulationOnly ? _simulationHeight : _draft?.OutlineHeight ?? 0;
+            _groupTracker.Width = _pointOnly ? _simulationWidth : _draft?.OutlineWidth ?? 0;
+            _groupTracker.Height = _pointOnly ? _simulationHeight : _draft?.OutlineHeight ?? 0;
             _groupTracker.Down(id, position.X, position.Y, Environment.TickCount64);
             var points = new StylusPointCollection { new StylusPoint(position.X, position.Y) };
             var stroke = new Stroke(points, Surface.DefaultDrawingAttributes.Clone());
@@ -484,8 +496,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void SimulateAt(Point point)
         {
             if (!Inside(point)) { _lastErase = null; ContactBox.Visibility = Visibility.Collapsed; return; }
-            double width = _simulationOnly ? _simulationWidth : _draft?.OutlineWidth ?? 0;
-            double height = _simulationOnly ? _simulationHeight : _draft?.OutlineHeight ?? 0;
+            double width = _pointOnly ? _simulationWidth : _draft?.OutlineWidth ?? 0;
+            double height = _pointOnly ? _simulationHeight : _draft?.OutlineHeight ?? 0;
             bool ellipse = SettingsManager.Settings.Canvas.EraserShapeType == 0;
             if (!PalmEraserContactTracker.TryGetEraserSize(width, height, 0.01,
                 Math.Sqrt(SizeAdjustment.Value), ellipse, out var w, out var h)) return;
@@ -501,7 +513,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void UpdatePreviewPolicy()
         {
             if (PreviewPolicy == null) return;
-            if (_simulationOnly) { PreviewPolicy.Text = Text("CalibrationSimulationOnly"); return; }
+            if (_pointOnly) { PreviewPolicy.Text = Text("CalibrationSimulationOnly"); return; }
             if (_draft == null) return;
             TouchCalibrationPolicy.TryResolve(_draft, _environment, SettingsManager.Settings.Canvas.PalmEraserSensitivity,
                 out var threshold, out var factor);
@@ -510,7 +522,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         }
         private void SizeAdjustmentChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (Surface == null) return;
+            if (!_initialized) return;
             CancelPress();
             if (_draft != null) _draft.SizeAdjustment = e.NewValue;
             UpdatePreviewPolicy();
@@ -525,9 +537,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void Back(object sender, RoutedEventArgs e)
         {
             if (_contacts.Count != 0) { Status.Text = Text("CalibrationLift"); return; }
-            if (_simulationOnly)
+            if (_pointOnly)
             {
-                _simulationOnly = false;
+                _pointOnly = false;
                 _step = 0;
                 SimulateErase.IsChecked = false;
                 ShowStep();
@@ -543,6 +555,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         }
         private void Next(object sender, RoutedEventArgs e)
         {
+            if (_step >= 4) return;
             if (_contacts.Count != 0) { Status.Text = Text("CalibrationLift"); return; }
             if (!CheckEnvironment()) return;
             if (_step == 0 && (!TryOutline(out _, out _)))
@@ -557,17 +570,29 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 { Status.Text = Text("CalibrationOverlap"); return; }
                 _draft.SizeAdjustment = SizeAdjustment.Value;
             }
-            if (_step == 4)
-            {
-                if (_draft?.IsValid() != true) { Status.Text = Text("CalibrationOverlap"); return; }
-                int? nib = _nib.IsComplete ? (int)Math.Clamp(Math.Round(Math.Sqrt(_nib.MedianPeak()) * 1.5), 1, 50) : null;
-                if (!SettingsManager.TrySaveCalibration(_draft, nib))
-                { Status.Text = Text("CalibrationSaveFailed"); return; }
-                ReturnToSettings(sender, e);
-                return;
-            }
             _step++; ShowStep();
         }
+
+        private void SaveCalibration(object sender, RoutedEventArgs e)
+        {
+            if (_step != 4) return;
+            if (_contacts.Count != 0) { Status.Text = Text("CalibrationLift"); return; }
+            if (!CheckEnvironment()) return;
+            if (_draft == null) { Status.Text = Text("CalibrationOverlap"); return; }
+            _draft.UsePointGrouping = UsesPointGrouping;
+            _draft.MinimumContacts = GroupCount.SelectedIndex + 2;
+            _draft.WindowMilliseconds = (int)GroupWindow.Value;
+            _draft.GroupTolerance = GroupTolerance.Value;
+            _draft.SizeAdjustment = SizeAdjustment.Value;
+            if (!_draft.IsValid()) { Status.Text = Text("CalibrationOverlap"); return; }
+            int? nib = !_pointOnly && _nib.IsComplete
+                ? (int)Math.Clamp(Math.Round(Math.Sqrt(_nib.MedianPeak()) * 1.5), 1, 50) : null;
+            if (!SettingsManager.TrySaveCalibration(_draft, nib))
+            { Status.Text = Text("CalibrationSaveFailed"); return; }
+            Status.Text = Text("CalibrationSaved");
+            ReturnToSettings(sender, e);
+        }
+
         private bool TryOutline(out double width, out double height)
         {
             bool w = double.TryParse(OutlineWidth.Text, out width);

@@ -1386,13 +1386,13 @@ namespace Ink_Canvas
 
         /// <summary>
         /// 是否处于批注模式（供 Automation 规则/触发器判断）。
-        /// 新墨迹系统撤回后，批注 = InkCanvas 物理编辑模式为 Ink。
+        /// 手掌擦的临时输入模式不改变用户当前的批注状态。
         /// </summary>
         internal bool IsAnnotationModeActive()
         {
             try
             {
-                return inkCanvas?.EditingMode == InkCanvasEditingMode.Ink
+                return GetPalmLogicalEditingMode() == InkCanvasEditingMode.Ink
                        || ResolveLogicalInkTool() == LogicalInkTool.Pen;
             }
             catch
@@ -1404,9 +1404,10 @@ namespace Ink_Canvas
         private void inkCanvas_EditingModeChanged(object sender, RoutedEventArgs e)
         {
             var inkCanvas1 = sender as InkCanvas;
-            if (inkCanvas1 == null) return;
+            if (inkCanvas1 == null || _changingPalmMode) return;
 
-            if (isPalmEraserActive && !_changingPalmMode)
+            if (_palmGroupSavedMode.HasValue) CancelPalmGroup(false);
+            if (isPalmEraserActive)
                 EndPalmEraser(false);
 
             NotifyPluginPenModeChanged(inkCanvas1.EditingMode);
