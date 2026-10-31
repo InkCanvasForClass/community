@@ -305,6 +305,7 @@ namespace Ink_Canvas.Helpers
                     bool hasValidPageCount = slidesCount > 0;
 
                     bool shouldShowButtons = ShowPPTButton &&
+                                          !_mainWindow.IsWhiteboardMode &&
                                           _mainWindow.IsInPPTPresentationMode &&
                                           isInSlideShow &&
                                           hasValidPageCount &&
