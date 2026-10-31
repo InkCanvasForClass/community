@@ -178,6 +178,12 @@ namespace Ink_Canvas.Plugins
 
         /// <summary>弹窗实际打开或关闭时由宿主通知插件。</summary>
         public Action<bool> PopupStateChanged { get; set; }
+
+        /// <summary>
+        /// 是否在插件首次注册时自动添加到当前活跃工具栏配置中。
+        /// 默认为 true。若设为 false，则仅添加到工具栏组件库，需用户在设置中手动添加。
+        /// </summary>
+        public bool AutoAddToActiveConfig { get; set; } = true;
     }
 
     /// <summary>
