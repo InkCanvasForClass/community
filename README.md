@@ -142,6 +142,29 @@
 
 GPLv3
 
+## 第三方组件
+
+本项目以 NuGet 包方式引用以下第三方组件，随程序编译分发，特此声明并致谢：
+
+### iNKORE.UI.WPF.Modern
+
+- **Project Name**: iNKORE.UI.WPF.Modern
+- **Authors**: iNKORE Studios and all iNKORE.UI.WPF.Modern contributors
+- **Repository**: <https://github.com/iNKORE-NET/UI.WPF.Modern>
+- **License**: [iNKORE.UI.WPF.Modern Software License](https://github.com/iNKORE-NET/UI.WPF.Modern/blob/main/LICENSE.md)（自定义许可证，非 OSI 认证）
+
+本项目通过组织维护的非官方派生包 **InkCanvasForClass.UI.WPF.Modern** 引用该组件（程序集与命名空间仍为 `iNKORE.UI.WPF.Modern`，代码无需改动）。该派生包由组织在 <https://github.com/InkCanvasForClass/UI.WPF.Modern> 构建并发布，保留上游的 `LICENSE.md`、版权声明与署名信息，未修改许可证条款，也不代表 iNKORE Studios 发布或背书。
+
+### iNKORE.UI.WPF
+
+- **License**: LGPL-2.1-or-later
+- **Repository**: <https://github.com/iNKORE-NET/UI.WPF>
+
+### Fluent System Icons（随 iNKORE.UI.WPF.Modern 分发）
+
+- **Copyright**: Copyright (c) 2020 Microsoft Corporation
+- **License**: MIT
+
 ## 项目引用
 
 [Alan-CRL/DesktopDrawpadBlocker](https://github.com/Alan-CRL/DesktopDrawpadBlocker)  

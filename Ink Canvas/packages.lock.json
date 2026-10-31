@@ -55,20 +55,20 @@
           "H.NotifyIcon": "2.1.4"
         }
       },
+      "InkCanvasForClass.UI.WPF.Modern": {
+        "type": "Direct",
+        "requested": "[0.11.0-icc.1, )",
+        "resolved": "0.11.0-icc.1",
+        "contentHash": "Oa2RDZ3ErDQTcYD+Pxpd6v/QBKKCYD9Srxp9o/PxbmNCgPsANfl1yTE8vIxZ2aXDY0DrJVToLnl8m7/bCSNgJQ==",
+        "dependencies": {
+          "iNKORE.UI.WPF": "1.2.8"
+        }
+      },
       "iNKORE.UI.WPF": {
         "type": "Direct",
         "requested": "[1.2.8, )",
         "resolved": "1.2.8",
         "contentHash": "7b+z25JFdhGAfyJqlVIF0vLbmgsRvqDZMvhGPTz20gzQigDPMqVUOoCCKB5824GtYsjFCYNilmaowb+4yWATkQ=="
-      },
-      "iNKORE.UI.WPF.Modern": {
-        "type": "Direct",
-        "requested": "[0.11.0, )",
-        "resolved": "0.11.0",
-        "contentHash": "F6DdPt6ibY+Bo5vgfeRlPPJBAr+xjMeOpGtrBlEUh61g1XXUrf+1YfWKYKsJlGHrJAjQ25W+UldYwIvDu+wH7A==",
-        "dependencies": {
-          "iNKORE.UI.WPF": "1.2.8"
-        }
       },
       "JerryShaw.WPFMediaKit": {
         "type": "Direct",
@@ -547,8 +547,8 @@
       "inkcanvas.controls": {
         "type": "Project",
         "dependencies": {
-          "iNKORE.UI.WPF": "[1.2.8, )",
-          "iNKORE.UI.WPF.Modern": "[0.11.0, )"
+          "InkCanvasForClass.UI.WPF.Modern": "[0.11.0-icc.1, )",
+          "iNKORE.UI.WPF": "[1.2.8, )"
         }
       },
       "inkcanvas.pluginsdk": {
