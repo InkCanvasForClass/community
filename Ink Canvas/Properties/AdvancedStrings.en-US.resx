@@ -219,6 +219,7 @@
   <data name="Debug_SimulateCrash_Button" xml:space="preserve">
     <value>Trigger Crash</value>
   </data>
+  <!-- Legacy resource keys retained for compatibility; the heartbeat test UI has been removed. -->
   <data name="Debug_SimulateHeartbeatTimeout_Header" xml:space="preserve">
     <value>Simulate Heartbeat Timeout</value>
   </data>

@@ -220,6 +220,7 @@
   <data name="Debug_SimulateCrash_Button" xml:space="preserve">
     <value>触发崩溃</value>
   </data>
+  <!-- Legacy resource keys retained for compatibility; the heartbeat test UI has been removed. -->
   <data name="Debug_SimulateHeartbeatTimeout_Header" xml:space="preserve">
     <value>模拟心跳超时</value>
   </data>

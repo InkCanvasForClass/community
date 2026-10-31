@@ -81,18 +81,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             throw new System.InvalidOperationException("[Debug] 用户手动触发的模拟崩溃异常");
         }
 
-        private void BtnTestHeartbeatTimeout_Click(object sender, RoutedEventArgs e)
-        {
-            var result = MessageBox.Show(
-                "确定要停止心跳计时器吗？\n\n约10秒后守护检查将检测到心跳超时并触发重启。",
-                "心跳超时测试确认",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
-            if (result != MessageBoxResult.Yes) return;
-
-            App.DebugStopHeartbeat();
-        }
-
         private void BtnResetStartupCount_Click(object sender, RoutedEventArgs e)
         {
             StartupCount.Reset();

@@ -825,15 +825,7 @@ namespace Ink_Canvas
 
                             var oobeWindow = new OobeWindow(Settings);
                             oobeWindow.Owner = this;
-                            try
-                            {
-                                App.IsOobeShowing = true;
-                                oobeWindow.ShowDialog();
-                            }
-                            finally
-                            {
-                                App.IsOobeShowing = false;
-                            }
+                            oobeWindow.ShowDialog();
 
                             OnOobeCompleted();
                         }
