@@ -11,6 +11,8 @@ namespace Ink_Canvas
 {
     public class Settings
     {
+        [JsonProperty("wordLink")]
+        public WordLinkSettings WordLink { get; set; } = new WordLinkSettings();
         [JsonProperty("advanced")]
         public Advanced Advanced { get; set; } = new Advanced();
 
@@ -86,6 +88,53 @@ namespace Ink_Canvas
 
         [JsonProperty("miniWhiteboard")]
         public MiniWhiteboardSettings MiniWhiteboard { get; set; } = new MiniWhiteboardSettings();
+    }
+
+    public sealed class WordLinkSettings
+    {
+        [JsonProperty("autoEnterFocusMode")]
+        public bool AutoEnterFocusMode { get; set; }
+        [JsonProperty("focusToolbarOpacity")]
+        public double FocusToolbarOpacity { get; set; } = .5;
+        [JsonProperty("enabled")]
+        public bool Enabled { get; set; } = false;
+        [JsonProperty("showNavigation")]
+        public bool ShowNavigation { get; set; } = true;
+        [JsonProperty("usePptAppearance")]
+        public bool UsePptAppearance { get; set; } = true;
+        [JsonProperty("showZoom")]
+        public bool ShowZoom { get; set; } = true;
+        [JsonProperty("followWordWindow")]
+        public bool FollowWordWindow { get; set; } = true;
+        [JsonProperty("showPageNumber")]
+        public bool ShowPageNumber { get; set; } = true;
+        [JsonProperty("darkBackground")]
+        public bool DarkBackground { get; set; }
+        [JsonProperty("navigationScale")]
+        public double NavigationScale { get; set; } = 1;
+        [JsonProperty("navigationOpacity")]
+        public double NavigationOpacity { get; set; } = 1;
+        [JsonProperty("navigationShadow")]
+        public bool NavigationShadow { get; set; } = true;
+        [JsonProperty("shadowSize")]
+        public double ShadowSize { get; set; } = 16;
+        [JsonProperty("horizontalInset")]
+        public double HorizontalInset { get; set; } = 6;
+        [JsonProperty("bottomInset")]
+        public double BottomInset { get; set; } = 6;
+
+        public void Normalize()
+        {
+            FocusToolbarOpacity = Bounded(FocusToolbarOpacity, .1, 1, .5);
+            NavigationScale = Bounded(NavigationScale, .5, 2, 1);
+            NavigationOpacity = Bounded(NavigationOpacity, .1, 1, 1);
+            ShadowSize = Bounded(ShadowSize, 0, 60, 16);
+            HorizontalInset = Bounded(HorizontalInset, 0, 300, 6);
+            BottomInset = Bounded(BottomInset, 0, 200, 6);
+        }
+        private static double Bounded(double value, double min, double max, double fallback)
+            => double.IsFinite(value) ? Math.Clamp(value, min, max) : fallback;
+        [OnDeserialized] private void OnDeserialized(StreamingContext context) => Normalize();
     }
 
     public class PerformanceSettings

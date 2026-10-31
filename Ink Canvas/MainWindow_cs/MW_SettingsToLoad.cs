@@ -160,6 +160,8 @@ namespace Ink_Canvas
             // Migrate legacy chicken soup source setting to new multi-source format
             SettingsManager.MigrateChickenSoupSettings();
             SettingsManager.MigrateVideoBoothSettings();
+            SettingsManager.MigrateWordLinkSettings();
+            ApplyWordLinkSettings();
 
             try
             {
@@ -925,7 +927,7 @@ namespace Ink_Canvas
         /// </summary>
         internal void ApplyFloatingBarMenuOpacity()
         {
-            double opacity = currentMode == 2
+            double opacity = currentMode == 2 || IsWordFocusToolbarActive
                 ? Settings.Appearance.FloatingBarMenuOpacityInPPT
                 : Settings.Appearance.FloatingBarMenuOpacity;
 

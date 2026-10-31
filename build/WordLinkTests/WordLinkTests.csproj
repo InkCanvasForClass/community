@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ <PropertyGroup>
+  <OutputType>Exe</OutputType><TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+  <UseWPF>true</UseWPF><ImplicitUsings>enable</ImplicitUsings><Nullable>disable</Nullable>
+  <AssemblyName>InkCanvas.WordLinkTests</AssemblyName><ApplicationManifest>../../InkCanvas.WordLinkHost/app.manifest</ApplicationManifest>
+ </PropertyGroup>
+ <ItemGroup>
+  <ProjectReference Include="../../InkCanvas.WordLinkHost/InkCanvas.WordLinkHost.csproj"/>
+  <Compile Include="../../Ink Canvas/WordLink/*.cs" Link="Production/%(Filename)%(Extension)"/>
+  <Compile Include="../../Ink Canvas/Helpers/AtomicFileWriter.cs" Link="Production/AtomicFileWriter.cs"/>
+  <Compile Include="../../Ink Canvas/Helpers/MouseWheelForwarder.cs" Link="Production/MouseWheelForwarder.cs"/>
+  <Compile Include="../../Ink Canvas/Controls/HighlighterInkCanvas.cs" Link="Production/HighlighterInkCanvas.cs"/>
+  <Compile Include="../../Ink Canvas/Ink/HighlighterRendering.cs" Link="Production/HighlighterRendering.cs"/>
+ </ItemGroup>
+</Project>

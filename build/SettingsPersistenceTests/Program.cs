@@ -28,6 +28,17 @@ internal static class Program
         {
             Ink_Canvas.App.RootPath = root + Path.DirectorySeparatorChar;
             SettingsManager.Settings = new Settings();
+            if (args.Contains("--word-navigation-only"))
+            {
+                WordNavigationRegression.Run(Check);
+                Check(Wait(SettingsManager.TrySaveSettingsToFileAsync()), "Word navigation preferences could not be saved");
+                var savedNavigation = Newtonsoft.Json.JsonConvert.DeserializeObject<Settings>(File.ReadAllText(Path.Combine(root, SettingsManager.SettingsFileName))).WordLink;
+                Check(savedNavigation.NavigationScale == 1.1 && savedNavigation.HorizontalInset == 40 && savedNavigation.BottomInset == 30
+                    && !savedNavigation.ShowZoom && !savedNavigation.UsePptAppearance && savedNavigation.AutoEnterFocusMode
+                    && savedNavigation.FocusToolbarOpacity == .35, "Word navigation preferences did not survive a restart");
+                Console.WriteLine($"PASS: {_checks} Word navigation and settings checks");
+                return 0;
+            }
             FloatingWindowNativeRegression.Run(Check);
             Check(Wait(SettingsManager.TrySaveSettingsToFileAsync()), "Initial settings could not be written");
             string path = Path.Combine(root, SettingsManager.SettingsFileName);

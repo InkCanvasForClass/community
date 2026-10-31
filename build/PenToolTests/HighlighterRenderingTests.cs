@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -79,6 +80,34 @@ internal static class HighlighterRenderingTests
         ordinary.DrawingAttributes.IsHighlighter = false; pump();
         check(Near(Read(RenderCanvas(canvas), 20, 60), Mix(Colors.White, Colors.Red, 128 / 255.0)),
             "Changing highlighter back to ordinary ink failed to restore WPF rendering");
+        canvas.EditingMode = InkCanvasEditingMode.Ink;
+        canvas.PausePresentation(true); canvas.PausePresentation(true); pump();
+        check(Near(Read(RenderCanvas(canvas), 20, 60), Colors.White)
+            && ReferenceEquals(canvas.Strokes[0], ordinary) && canvas.EditingMode == InkCanvasEditingMode.Ink,
+            "Pausing Word scroll presentation changed editing data or left stale pixels");
+        ordinary.Transform(new Matrix(1, 0, 0, 1, 0, -20), false); pump();
+        check(Near(Read(RenderCanvas(canvas), 20, 40), Colors.White), "A pending view update resurrected paused ink");
+        canvas.PausePresentation(false); pump();
+        check(Near(Read(RenderCanvas(canvas), 20, 40), Mix(Colors.White, Colors.Red, 128 / 255.0)),
+            "Restoring scroll presentation lost current geometry or opacity");
+        int invalidations = 0;
+        ordinary.Invalidated += (_, _) => invalidations++;
+        var originalPoint = ordinary.StylusPoints[0];
+        for (int i = 0; i < 300; i++) canvas.SetPresentationTransform(new Matrix(1, 0, 0, 1, 0, i % 21));
+        canvas.SetPresentationTransform(new Matrix(1, 0, 0, 1, 0, 20)); pump();
+        check(invalidations == 0 && ordinary.StylusPoints[0] == originalPoint
+            && Near(Read(RenderCanvas(canvas), 20, 40), Colors.White)
+            && Near(Read(RenderCanvas(canvas), 20, 60), Mix(Colors.White, Colors.Red, 128 / 255.0)),
+            "Presentation-only scrolling hid ink or rebuilt stroke geometry");
+        canvas.SetPresentationTransform(null); pump();
+        check(Near(Read(RenderCanvas(canvas), 20, 40), Mix(Colors.White, Colors.Red, 128 / 255.0))
+            && canvas.EditingMode == InkCanvasEditingMode.Ink, "Ending scroll preview did not restore pen coordinates");
+        canvas.Strokes.Clear();
+        canvas.Strokes.Add(Make(128, false, false)); canvas.Strokes.Add(Make(128, false, true));
+        canvas.SetPresentationTransform(new Matrix(1, 0, 0, 1, 10, 10)); pump();
+        check(Near(Read(RenderCanvas(canvas), 50, 50), Mix(Colors.White, Colors.Yellow, HighlighterRendering.Opacity(128))),
+            "Scroll preview lost highlighter alpha or non-darkening overlap");
+        canvas.SetPresentationTransform(null);
         canvas.Strokes.Clear();
     }
 

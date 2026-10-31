@@ -538,6 +538,7 @@ namespace Ink_Canvas
         /// <summary>进入视频展台特殊模式：白板背景变 #333333，隐藏所有选择框，准备全屏预览。</summary>
         private void EnterVideoPresenterSpecialMode()
         {
+            SuspendWordLecture();
             if (_isVideoPresenterSpecialMode) return;
             _isVideoPresenterSpecialMode = true;
             // 清空触点记账，避免上一次展台会话残留影响手势判定

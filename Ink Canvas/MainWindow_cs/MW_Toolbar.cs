@@ -313,6 +313,8 @@ namespace Ink_Canvas
                 }
 
                 // 填充工具栏组件
+                Exit_Icon = null;
+                _wordFocusExitFallback = null;
                 ToolbarRegistry.Populate(ToolbarHost, StackPanelFloatingBarRoot, layout, orientation);
 
                 // 根据位置设置拖动图标的位置
@@ -674,8 +676,26 @@ namespace Ink_Canvas
 
         internal void UpdateToolbarComponentVisibility()
         {
+            if (IsWordFocusToolbarActive && Exit_Icon == null)
+                _wordFocusExitFallback = ToolbarRegistry.AddPresentationExit(ToolbarHost, StackPanelFloatingBarRoot, StackPanelFloatingBarRoot.Orientation);
+            if (!IsWordFocusToolbarActive && _wordFocusExitFallback != null)
+            {
+                StackPanelFloatingBarRoot.Children.Remove(_wordFocusExitFallback);
+                _wordFocusExitFallback = null; Exit_Icon = null;
+            }
+            if (IsWordFocusToolbarActive && Exit_Icon != null)
+            {
+                if (_wordFocusExitView != Exit_Icon)
+                { _wordFocusExitView = Exit_Icon; _wordFocusExitLabel = Exit_Icon.Label; }
+                Exit_Icon.Label = Properties.WordStrings.ExitFocus;
+            }
+            else if (_wordFocusExitView != null)
+            {
+                _wordFocusExitView.Label = _wordFocusExitLabel;
+                _wordFocusExitView = null;
+            }
             var isPPT = IsInPPTPresentationMode;
-            ToolbarRegistry.UpdateVisibilityByMode(StackPanelFloatingBarRoot, IsAnnotating, isPPT);
+            ToolbarRegistry.UpdateVisibilityByMode(StackPanelFloatingBarRoot, IsAnnotating, isPPT, IsWordFocusToolbarActive, Exit_Icon);
         }
 
         private void UpdateToolbarDimensions(Orientation orientation)

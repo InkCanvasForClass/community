@@ -54,6 +54,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             { "CloudStoragePage", typeof(CloudStoragePage) },
             { "AutomationWorkflowPage", typeof(AutomationWorkflowPage) },
             { "PowerPointPage", typeof(PowerPointPage) },
+            { "WordPage", typeof(WordPage) },
             { "RandomDrawPage", typeof(RandomDrawPage) },
             { "CanvasPage", typeof(CanvasPage) },
             { "InkRecognitionPage", typeof(InkRecognitionPage) },

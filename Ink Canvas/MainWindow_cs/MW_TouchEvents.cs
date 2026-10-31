@@ -2540,6 +2540,13 @@ namespace Ink_Canvas
         /// </remarks>
         private void Main_Grid_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
         {
+            if (_wordOwnsCanvas)
+            {
+                // Page geometry belongs to Word. Canvas gestures must not move ink
+                // independently of its document; navigation uses Word mouse mode.
+                e.Handled = true;
+                return;
+            }
             // 视频展台特殊模式：
             //   - 单指（笔模式）：在预览画面上绘制墨迹批注，走正常墨迹绘制路径，不拦截
             //   - 双指（任意模式）：用于拖动/缩放预览画面（画面与墨迹同步变换）

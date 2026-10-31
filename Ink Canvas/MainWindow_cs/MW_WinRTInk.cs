@@ -59,7 +59,7 @@ namespace Ink_Canvas
 
         internal bool IsWinRTInkPipelineAvailable =>
             _winRTInkStarted && !_winRTInkDisabled;
-        private bool ShouldDeferLegacyCanvasInput => IsWinRTInkPipelineAvailable
+        private bool ShouldDeferLegacyCanvasInput => _wordLecture?.BlocksInput == true || IsWinRTInkPipelineAvailable
             && ResolveLogicalInkTool() == LogicalInkTool.Pen
             && !IsPluginCanvasToolActive && !_isVideoPresenterSpecialMode;
 
@@ -84,6 +84,7 @@ namespace Ink_Canvas
             if (inkCanvas == null)
                 return;
             if (Settings?.Canvas?.UseWinRTInk == true
+                && !_wordOwnsCanvas
                 && ResolveLogicalInkTool() == LogicalInkTool.Pen)
             {
                 if (_winRTInkStarted && !_winRTInkDisabled)
@@ -103,6 +104,7 @@ namespace Ink_Canvas
 
         internal void TryStartWinRTInkPipeline()
         {
+            if (_wordOwnsCanvas) return;
             if (Settings?.Canvas?.UseWinRTInk != true)
                 return;
             if (inkCanvas == null)

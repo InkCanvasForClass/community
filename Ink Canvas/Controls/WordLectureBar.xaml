@@ -1,0 +1,70 @@
+<UserControl x:Class="Ink_Canvas.Controls.WordLectureBar"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:local="clr-namespace:Ink_Canvas.Controls"
+ xmlns:p="clr-namespace:Ink_Canvas.Properties"
+ Visibility="Collapsed" UseLayoutRounding="True" SnapsToDevicePixels="True"
+ Foreground="{DynamicResource WordNavForeground}"
+ AutomationProperties.Name="{x:Static p:WordStrings.Title}">
+ <UserControl.Resources>
+  <SolidColorBrush x:Key="WordNavForeground" Color="#27272a"/>
+  <SolidColorBrush x:Key="WordNavBackground" Color="#f4f4f5"/>
+  <SolidColorBrush x:Key="WordNavBorder" Color="#a1a1aa"/>
+  <SolidColorBrush x:Key="WordNavFeedback" Color="#18181b"/>
+  <Style TargetType="Button">
+   <Setter Property="MinWidth" Value="50"/>
+   <Setter Property="Height" Value="50"/>
+   <Setter Property="Padding" Value="12,0"/>
+   <Setter Property="Background" Value="Transparent"/>
+   <Setter Property="Foreground" Value="{DynamicResource WordNavForeground}"/>
+   <Setter Property="BorderThickness" Value="0"/>
+   <Setter Property="HorizontalContentAlignment" Value="Center"/>
+   <Setter Property="VerticalContentAlignment" Value="Center"/>
+   <Setter Property="Template">
+    <Setter.Value>
+     <ControlTemplate TargetType="Button">
+      <Grid Background="Transparent">
+       <Border x:Name="Feedback" Margin="3" CornerRadius="5" Background="{DynamicResource WordNavFeedback}" Opacity="0"/>
+       <Border x:Name="Focus" Margin="3" CornerRadius="5" BorderBrush="Transparent" BorderThickness="1"/>
+       <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                         VerticalAlignment="{TemplateBinding VerticalContentAlignment}" RecognizesAccessKey="True"/>
+      </Grid>
+      <ControlTemplate.Triggers>
+       <Trigger Property="IsPressed" Value="True"><Setter TargetName="Feedback" Property="Opacity" Value="0.15"/></Trigger>
+       <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Focus" Property="BorderBrush" Value="#2563eb"/></Trigger>
+       <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.35"/></Trigger>
+      </ControlTemplate.Triggers>
+     </ControlTemplate>
+    </Setter.Value>
+   </Setter>
+  </Style>
+ </UserControl.Resources>
+ <StackPanel>
+  <Border x:Name="StatusPanel" Background="{DynamicResource WordNavBackground}" BorderBrush="{DynamicResource WordNavBorder}"
+          BorderThickness="1" CornerRadius="6" Padding="12,10" MaxWidth="320" Margin="0,0,0,8" HorizontalAlignment="Left">
+   <StackPanel>
+    <TextBlock x:Name="StatusText" FontSize="12" LineHeight="19" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
+    <Button x:Name="ResumeButton" Content="{x:Static p:WordStrings.Resume}" AutomationProperties.Name="{x:Static p:WordStrings.Resume}"
+            Height="44" Margin="0,6,0,-4" HorizontalAlignment="Right" Visibility="Collapsed" Click="ResumeClick"/>
+   </StackPanel>
+  </Border>
+  <StackPanel x:Name="Navigation" Orientation="Horizontal" HorizontalAlignment="Left">
+   <local:PPTNavBar x:Name="PageNavigation" Direction="LeftBottom" VerticalAlignment="Center"/>
+    <StackPanel x:Name="ZoomControls" Orientation="Horizontal">
+     <Border Width="1" Height="22" Background="{DynamicResource WordNavBorder}" Margin="2,0" VerticalAlignment="Center"/>
+     <Button x:Name="ZoomOutButton" Width="50" Padding="0" Click="ZoomOutClick"
+             ToolTip="{x:Static p:WordStrings.ZoomOut}" AutomationProperties.Name="{x:Static p:WordStrings.ZoomOut}">
+      <Path Data="M2,10 H18" Width="20" Height="20" Stroke="{DynamicResource WordNavForeground}" StrokeThickness="2"
+            StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+     </Button>
+     <TextBlock x:Name="ZoomText" Text="—" MinWidth="44" FontSize="12" VerticalAlignment="Center" TextAlignment="Center"
+                ToolTip="{x:Static p:WordStrings.DocumentZoom}" AutomationProperties.Name="{x:Static p:WordStrings.DocumentZoom}"/>
+     <Button x:Name="ZoomInButton" Width="50" Padding="0" Click="ZoomInClick"
+             ToolTip="{x:Static p:WordStrings.ZoomIn}" AutomationProperties.Name="{x:Static p:WordStrings.ZoomIn}">
+      <Path Data="M2,10 H18 M10,2 V18" Width="20" Height="20" Stroke="{DynamicResource WordNavForeground}" StrokeThickness="2"
+            StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+     </Button>
+    </StackPanel>
+  </StackPanel>
+ </StackPanel>
+</UserControl>

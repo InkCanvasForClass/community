@@ -134,6 +134,8 @@
                         </Image>
                     </Grid>
                 </Border>
+                <ContentPresenter Content="{Binding AdditionalContent, RelativeSource={RelativeSource AncestorType=local:PPTNavBar}}"
+                                  VerticalAlignment="Center"/>
             </ikw:SimpleStackPanel>
         </DockPanel>
     </Border>

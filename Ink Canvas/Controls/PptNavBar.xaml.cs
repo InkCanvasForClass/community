@@ -37,6 +37,13 @@ namespace Ink_Canvas.Controls
         public static readonly DependencyProperty CurrentSlideProperty = DependencyProperty.Register(
             nameof(CurrentSlide), typeof(int), typeof(PPTNavBar),
             new PropertyMetadata(0, OnPageChanged));
+        public static readonly DependencyProperty AdditionalContentProperty = DependencyProperty.Register(
+            nameof(AdditionalContent), typeof(object), typeof(PPTNavBar), new PropertyMetadata(null));
+        public object AdditionalContent
+        {
+            get => GetValue(AdditionalContentProperty);
+            set => SetValue(AdditionalContentProperty, value);
+        }
 
         public static readonly DependencyProperty TotalSlidesProperty = DependencyProperty.Register(
             nameof(TotalSlides), typeof(int), typeof(PPTNavBar),
@@ -410,6 +417,14 @@ namespace Ink_Canvas.Controls
         }
 
         public void SetPageButtonVisibility(Visibility v) => PageButtonBorder.Visibility = v;
+        public void SetNavigationAvailability(bool previous, bool next, bool pageClickable = true)
+        {
+            PreviousButtonBorder.IsEnabled = previous;
+            NextButtonBorder.IsEnabled = next;
+            PreviousButtonBorder.Opacity = previous ? 1 : .35;
+            NextButtonBorder.Opacity = next ? 1 : .35;
+            PageButtonBorder.IsHitTestVisible = pageClickable;
+        }
         public void SetBarOpacity(double opacity)
         {
             _collapsedOpacity = opacity;

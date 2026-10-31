@@ -164,6 +164,7 @@ namespace Ink_Canvas
                     EndPluginCanvasTool(_activePluginCanvasToolSession);
                 }
 
+                SuspendWordLecture();
                 _pluginToolPreviousLogicalMode = _currentToolMode;
                 _pluginCanvasToolActive = true;
                 // 插件画布工具接管输入前取消 WinRT 墨迹管线在途湿墨（如启用），

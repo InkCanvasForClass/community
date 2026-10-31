@@ -743,7 +743,9 @@ namespace Ink_Canvas
                 StrokeInitialHistory[stroke] = stroke.StylusPoints.Clone();
             }
 
-            if (_currentCommitType == CommitReason.CodeInput || _currentCommitType == CommitReason.ShapeDrawing) return;
+            // Word owns document-coordinate history. Its projected strokes must
+            // not also enter desktop history or dirty the desktop page.
+            if (_wordOwnsCanvas || _currentCommitType == CommitReason.CodeInput || _currentCommitType == CommitReason.ShapeDrawing) return;
 
             var persistentAdded = Ink.PersistentStrokePolicy.Filter(e.Added);
             var persistentRemoved = Ink.PersistentStrokePolicy.Filter(e.Removed);
@@ -802,6 +804,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void Stroke_DrawingAttributesChanged(object sender, PropertyDataChangedEventArgs e)
         {
+            if (_wordOwnsCanvas) return;
             if (IsCurrentPageFrozen && _currentCommitType != CommitReason.CodeInput)
             {
                 TryBlockFrozenPageMutation("修改冻结页面");
@@ -868,6 +871,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void Stroke_StylusPointsReplaced(object sender, StylusPointsReplacedEventArgs e)
         {
+            if (_wordOwnsCanvas) return;
             StrokeInitialHistory[sender as Stroke] = e.NewStylusPoints.Clone();
         }
 
@@ -885,6 +889,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void Stroke_StylusPointsChanged(object sender, EventArgs e)
         {
+            if (_wordOwnsCanvas) return;
             if (IsCurrentPageFrozen && _currentCommitType != CommitReason.CodeInput)
             {
                 TryBlockFrozenPageMutation("修改冻结页面");

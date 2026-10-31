@@ -385,7 +385,7 @@ namespace Ink_Canvas
                 var currentMargin = ViewboxFloatingBar.Margin;
                 if (IsInPPTPresentationMode)
                     pointPPT = new Point(currentMargin.Left, currentMargin.Top);
-                else
+                else if (!IsWordFocusToolbarActive)
                     pointDesktop = new Point(currentMargin.Left, currentMargin.Top);
                 _userHasDraggedFloatingBar = true;
 
@@ -2720,6 +2720,7 @@ namespace Ink_Canvas
 
         private void SaveFloatingBarPositionPoint()
         {
+            if (IsWordFocusToolbarActive) return;
             var currentPoint = new Point(ViewboxFloatingBar.Margin.Left, ViewboxFloatingBar.Margin.Top);
             if (IsInPPTPresentationMode)
                 pointPPT = currentPoint;
@@ -2813,6 +2814,12 @@ namespace Ink_Canvas
         private void ViewboxFloatingBarMarginAnimationCore(int MarginFromEdge,
             bool PosXCaculatedWithTaskbarHeight = false, bool animate = false)
         {
+            if (IsWordFocusToolbarActive && MarginFromEdge >= 0 && !isFloatingBarFolded)
+            {
+                _wordFocusToolbarPresentation.Refresh();
+                pos = new Point(ViewboxFloatingBar.Margin.Left, ViewboxFloatingBar.Margin.Top);
+                return;
+            }
             if (Topmost)
             {
                 ViewboxFloatingBar.Visibility = Visibility.Visible;
@@ -3082,6 +3089,7 @@ namespace Ink_Canvas
 
         private async Task PureViewboxFloatingBarMarginAnimationInDesktopModeAsync()
         {
+            if (IsWordFocusToolbarActive) { _wordFocusToolbarPresentation.Refresh(); return; }
             // 在白板模式下不执行浮动栏动画
             if (currentMode == 1)
             {
@@ -3677,7 +3685,8 @@ namespace Ink_Canvas
             // 点击鼠标按钮退出批注模式时的全屏还原
             RestoreFullScreenOnExitAnnotationMode();
 
-            inkCanvas.Select(new StrokeCollection());
+            if (_wordOwnsCanvas) WordLink.WordInkProjection.ClearSelection(inkCanvas);
+            else inkCanvas.Select(new StrokeCollection());
             GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
 
             // 视频展台特殊模式下不执行 SaveStrokes/RestoreStrokes，
@@ -4553,6 +4562,7 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void BtnUndo_Click(object sender, RoutedEventArgs e)
         {
+            if (_wordLecture?.Undo(false) == true) return;
             if (inkCanvas.GetSelectedStrokes().Count != 0)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
@@ -4574,6 +4584,7 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void BtnRedo_Click(object sender, RoutedEventArgs e)
         {
+            if (_wordLecture?.Undo(true) == true) return;
             if (inkCanvas.GetSelectedStrokes().Count != 0)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
@@ -4791,7 +4802,7 @@ namespace Ink_Canvas
             if (Settings.Advanced.IsEnableAvoidFullScreenHelper &&
                 isFullScreenApplied &&
                 currentMode == 0 && // 不在白板模式
-                !IsInPPTPresentationMode) // 不在PPT放映模式
+                !IsInPPTPresentationMode && !IsWordFocusToolbarActive) // 不在演示布局中
             {
                 // 恢复为非画板模式，重新启用全屏限制
                 AvoidFullScreenHelper.SetBoardMode(false);
@@ -4817,6 +4828,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void SwitchBackground(object sender, RoutedEventArgs e)
         {
+            SuspendWordLecture();
             if (GridTransparencyFakeBackground.Background == Brushes.Transparent)
             {
                 if (currentMode == 0)

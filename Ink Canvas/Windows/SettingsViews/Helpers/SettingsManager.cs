@@ -166,6 +166,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             }
         }
 
+        public static void MigrateWordLinkSettings()
+        {
+            if (Settings == null || Settings.WordLink != null) return;
+            Settings.WordLink = new WordLinkSettings();
+            SaveSettingsToFile();
+        }
+
         public static void MigrateVideoBoothSettings()
         {
             if (Settings?.Canvas == null) return;

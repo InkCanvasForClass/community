@@ -159,7 +159,22 @@ namespace Ink_Canvas
         internal Image LeftUnFoldBtnImgChevron => LeftSidePanel?.ChevronIcon;
         internal Image RightUnFoldBtnImgChevron => RightSidePanel?.ChevronIcon;
 
-        internal bool IsInPPTPresentationMode { get; set; }
+        private volatile bool _isInPptPresentationMode;
+        internal bool IsInPPTPresentationMode
+        {
+            get => _isInPptPresentationMode;
+            set
+            {
+                bool entering = value && !_isInPptPresentationMode;
+                _isInPptPresentationMode = value;
+                if (entering && _wordLecture != null)
+                {
+                    if (Dispatcher.CheckAccess()) SuspendWordLecture();
+                    else if (!Dispatcher.HasShutdownStarted)
+                        Dispatcher.BeginInvoke(new Action(SuspendWordLecture), DispatcherPriority.Send);
+                }
+            }
+        }
         internal bool ArePPTControlsVisible { get; set; }
 
         internal static readonly DependencyProperty IsUndoEnabledProperty =
@@ -1999,6 +2014,8 @@ namespace Ink_Canvas
         /// <param name="e">关闭事件的参数（未使用）。</param>
         private void Window_Closed(object sender, EventArgs e)
         {
+            _mouseWheelForwarder?.Dispose();
+            DisposeWordLecture();
             _uiResponsivenessMonitor?.Dispose();
             _palmRawSubscription?.Dispose();
             _palmRawSubscription = null;
@@ -2902,6 +2919,7 @@ namespace Ink_Canvas
 
             InitializeClipboardMonitoring();
             InitializeFloatingWindowInterceptor();
+            InitializeWordLecture();
             InitializeGlobalHotkeyManager();
 
             _ = TelemetryUploader.UploadTelemetryIfNeededAsync();

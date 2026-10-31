@@ -22,6 +22,7 @@ internal static class Program
     [STAThread]
     private static int Main(string[] args)
     {
+        if (args.Contains("--wheel-fixture")) return MouseWheelRegression.RunFixture();
         var directory = Path.Combine(Path.GetTempPath(), "ICC_Reliability_" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(directory);
         Ink_Canvas.App.RootPath = directory + Path.DirectorySeparatorChar;
@@ -32,6 +33,7 @@ internal static class Program
             if (args.Length > 0)
                 Check(OfficeLifecycleGuard.Verify(args[0]) >= 3, "Office monitor lifecycle guard failed");
             GateRegression();
+            MouseWheelRegression.Run(Check);
             FloatingWindowSafetyRegression.Run(Check);
             CoalescedUiRegression();
             InputRecoveryRegression.Run(Check);

@@ -3558,6 +3558,7 @@ namespace Ink_Canvas
         /// </remarks>
         internal async void ImagePPTControlEnd_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (IsWordFocusToolbarActive) { _wordLecture?.RequestFocusMode(false); return; }
             await ExitPPTPresentation();
         }
 

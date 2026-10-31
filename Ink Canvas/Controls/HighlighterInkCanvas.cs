@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Ink;
+using System.Windows.Media;
 using System.Windows.Threading;
 using Ink_Canvas.Ink;
 
@@ -17,6 +18,41 @@ namespace Ink_Canvas.Controls
         private readonly HashSet<Stroke> _observed = new();
         private readonly HashSet<Stroke> _presentedHighlighters = new();
         private DispatcherOperation _refresh;
+        private bool _presentationPaused;
+        private double _presentationOpacity;
+        private Transform _originalPresentationTransform;
+        private MatrixTransform _viewTransform;
+
+        internal void SetPresentationTransform(Matrix? matrix)
+        {
+            if (matrix.HasValue)
+            {
+                if (_viewTransform == null)
+                {
+                    _originalPresentationTransform = InkPresenter.RenderTransform;
+                    _viewTransform = new MatrixTransform();
+                    var transforms = new TransformGroup();
+                    transforms.Children.Add(_originalPresentationTransform);
+                    transforms.Children.Add(_viewTransform);
+                    InkPresenter.RenderTransform = transforms;
+                }
+                _viewTransform.Matrix = matrix.Value;
+            }
+            else if (_viewTransform != null)
+            {
+                InkPresenter.RenderTransform = _originalPresentationTransform;
+                _originalPresentationTransform = null;
+                _viewTransform = null;
+            }
+        }
+
+        internal void PausePresentation(bool paused)
+        {
+            if (_presentationPaused == paused) return;
+            _presentationPaused = paused;
+            if (paused) { _presentationOpacity = InkPresenter.Opacity; InkPresenter.Opacity = 0; }
+            else InkPresenter.Opacity = _presentationOpacity;
+        }
 
         public HighlighterInkCanvas()
         {

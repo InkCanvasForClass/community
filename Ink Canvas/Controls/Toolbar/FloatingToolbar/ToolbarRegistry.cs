@@ -1052,17 +1052,21 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
         }
 
         public static void UpdateVisibilityByMode(Panel rootPanel, bool isAnnotating, bool isPPTMode)
+            => UpdateVisibilityByMode(rootPanel, isAnnotating, isPPTMode, false, null);
+
+        public static void UpdateVisibilityByMode(Panel rootPanel, bool isAnnotating, bool isPPTMode, bool isWordFocusMode, FrameworkElement focusExit)
         {
             var context = new Dictionary<string, bool>
             {
                 ["isAnnotating"] = isAnnotating,
                 ["isPPTMode"] = isPPTMode,
+                ["isWordFocusMode"] = isWordFocusMode,
                 ["isContentCollapsedByUser"] = _isContentCollapsedByUser
             };
-            UpdatePanelVisibility(rootPanel, context);
+            UpdatePanelVisibility(rootPanel, context, focusExit);
         }
 
-        private static void UpdatePanelVisibility(Panel panel, Dictionary<string, bool> context)
+        private static void UpdatePanelVisibility(Panel panel, Dictionary<string, bool> context, FrameworkElement focusExit)
         {
             if (panel == null) return;
 
@@ -1077,19 +1081,19 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     }
                     else
                     {
-                        bool shouldHide = EvaluateRuleset(ruleset, context);
+                        bool shouldHide = !(ReferenceEquals(child, focusExit) && context["isWordFocusMode"]) && EvaluateRuleset(ruleset, context);
                         child.Visibility = shouldHide ? Visibility.Collapsed : Visibility.Visible;
                     }
                     if (child is Panel innerPanel)
                     {
-                        UpdatePanelVisibility(innerPanel, context);
+                        UpdatePanelVisibility(innerPanel, context, focusExit);
                     }
                 }
                 if (child is Border border && border.Tag as string == ContentBorderTag)
                 {
                     if (border.Child is StackPanel sp && sp.Tag as string == ContentPanelTag)
                     {
-                        UpdatePanelVisibility(sp, context);
+                        UpdatePanelVisibility(sp, context, focusExit);
                         bool anyVisible = HasVisibleLeafContent(sp);
                         border.Visibility = anyVisible ? Visibility.Visible : Visibility.Collapsed;
                     }
@@ -1099,7 +1103,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                         {
                             if (gridChild is StackPanel sp2 && sp2.Tag as string == ContentPanelTag)
                             {
-                                UpdatePanelVisibility(sp2, context);
+                                UpdatePanelVisibility(sp2, context, focusExit);
                             }
                         }
                         bool anyVisible = false;
@@ -1136,6 +1140,19 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 return HasVisibleLeafContent(borderChild);
             }
             return true;
+        }
+
+        internal static FrameworkElement AddPresentationExit(IToolbarHost host, Panel root, Orientation orientation)
+        {
+            var view = BuildAndRegister(host, new Items.ExitToolItem(), orientation);
+            if (view == null) return null;
+            var rules = ToolbarRuleset.PPTOnly();
+            SetHidingRuleset(view, rules);
+            SetPreventHideOnDragClick(view, true);
+            var wrapper = WrapInSeparateBorder(view, rules, true, orientation);
+            wrapper.Margin = orientation == Orientation.Horizontal ? new Thickness(3, 0, 0, 0) : new Thickness(0, 3, 0, 0);
+            root.Children.Add(wrapper);
+            return wrapper;
         }
 
         private static FrameworkElement BuildAndRegister(IToolbarHost host, IToolbarItem item, Orientation orientation = Orientation.Horizontal)

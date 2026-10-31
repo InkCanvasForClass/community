@@ -646,6 +646,7 @@ namespace Ink_Canvas
         /// </summary>
         public void UpdatePPTUIManagerSettings()
         {
+            if (_wordLecture != null && Settings.WordLink?.UsePptAppearance == true) ApplyWordLinkSettings();
             if (_pptUIManager != null)
             {
                 _pptUIManager.SyncSettings();

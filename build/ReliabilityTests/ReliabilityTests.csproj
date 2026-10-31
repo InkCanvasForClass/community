@@ -7,6 +7,7 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="../../Ink Canvas/Helpers/MouseWheelForwarder.cs" Link="Production/MouseWheelForwarder.cs" />
     <Compile Include="../../Ink Canvas/Helpers/FloatingWindowSafetyPolicy.cs" Link="Production/FloatingWindowSafetyPolicy.cs" />
     <Compile Include="../../Ink Canvas/Helpers/AutoFontSizeHelper.cs" Link="Production/AutoFontSizeHelper.cs" />
     <Compile Include="../../Ink Canvas/Helpers/DispatcherCoalescedAction.cs" Link="Production/DispatcherCoalescedAction.cs" />

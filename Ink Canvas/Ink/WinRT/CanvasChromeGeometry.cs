@@ -12,7 +12,7 @@ namespace Ink_Canvas.Ink.WinRT
             "BorderInkReplayToolBox", "IdleMiniBar", "EdgeExpandHint", "PPTControlsGrid", "GridPPTControlLeft",
             "GridPPTControlRight", "LeftBottomPanelForPPTNavigation", "RightBottomPanelForPPTNavigation",
             "LeftSidePanelForPPTNavigation", "RightSidePanelForPPTNavigation", "PPTQuickPanelContainer",
-            "GridInkCanvasSelectionCover"
+            "GridInkCanvasSelectionCover", "WordLectureControls", "RightBottomWordLectureControls"
         };
 
         // Disabled controls still occupy UI space. They must never become writable canvas,
