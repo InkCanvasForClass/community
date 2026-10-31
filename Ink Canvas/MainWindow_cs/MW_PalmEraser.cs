@@ -21,7 +21,9 @@ namespace Ink_Canvas
         private readonly HashSet<uint> _palmSuppressedPointers = new();
         private PalmEraserContactTracker _palmContact;
         private TouchDevice _palmTouchDevice;
+#if ICC_NATIVE_WET_INK
         private uint? _palmNativePointer;
+#endif
         private bool _changingPalmMode;
         private bool _palmPreviousManipulation;
         private bool _palmPreviousStrokeEraser;
@@ -404,7 +406,9 @@ namespace Ink_Canvas
                     if (_palmTouchDevice.Captured == inkCanvas) inkCanvas.ReleaseTouchCapture(_palmTouchDevice);
                 }
                 _palmTouchDevice = null;
+#if ICC_NATIVE_WET_INK
                 _palmNativePointer = null;
+#endif
                 _palmContact = null;
                 _palmLastPoint = null;
                 DisableEraserOverlay();

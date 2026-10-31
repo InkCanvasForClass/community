@@ -45,7 +45,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private TouchCalibrationRecord _draft;
         private int _step;
         private long? _pressId;
+#if ICC_NATIVE_WET_INK
         private long _lastNativeTimestamp = -1;
+#endif
         private bool _invalidPress;
         private bool _endingTouch;
         private StylusPointCollection _previewPoints;
@@ -229,7 +231,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
             _pressId = id;
             _invalidPress = false;
+#if ICC_NATIVE_WET_INK
             _lastNativeTimestamp = -1;
+#endif
             _previewTracker.Reset();
             _lastErase = null;
             _previewPoints = new StylusPointCollection();
@@ -299,7 +303,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _palm.CancelPress(); _finger.CancelPress(); _nib.CancelPress();
             _contacts.Clear(); _pressId = null;
             _invalidPress = false;
+#if ICC_NATIVE_WET_INK
             _lastNativeTimestamp = -1;
+#endif
             _previewTracker.Reset();
             _lastErase = null;
             if (_previewStroke != null) Surface.Strokes.Remove(_previewStroke);
