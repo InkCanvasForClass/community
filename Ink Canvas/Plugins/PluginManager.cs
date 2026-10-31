@@ -1246,20 +1246,22 @@ namespace Ink_Canvas.Plugins
                         string.Format("Plugin {0} canvas cleanup failed", plugin.Name),
                         cleanupEx));
 
-                UnregisterToolbarItems(plugin.Id);
-
                 // 撤销该插件在宿主留下的所有注册（工具栏组件、IPC 处理器、DI 服务、URI 处理器等）。
                 // 这一步是 ALC 能否真正卸载的关键：漏掉任何一条，宿主就还握着插件程序集里的委托，
                 // 可回收 ALC 便不会释放，DLL 也就仍被占用。
                 //
-                // 同时收集注册过的工具栏组件 Id，用于从 *.json 配置文件里清除残留条目。
-                // 必须在 UndoAll 之前抓快照：撤销后内部列表已被清空。
+                // 真正删除时只清理当前插件的组件；必须在注销前保存归属信息。
+                // 退出、禁用及重载仅释放运行时引用，保留用户布局与首次注册标记。
                 var itemIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                foreach (var item in Controls.Toolbar.FloatingToolbar.ToolbarRegistry.GetPluginItems())
-                    itemIds.Add(item.Id);
-                foreach (var item in Controls.Toolbar.BoardToolbar.BoardToolbarRegistry.GetPluginItems())
-                    itemIds.Add(item.Id);
-                itemIds.Add(plugin.Id);
+                if (deleteFolder)
+                {
+                    if (_pluginToolbarItems.TryGetValue(plugin.Id, out var registrations))
+                        foreach (var registration in registrations)
+                            itemIds.Add(registration.Value);
+                    itemIds.Add(plugin.Id);
+                }
+
+                UnregisterToolbarItems(plugin.Id);
 
                 if (_registrationScopes.TryGetValue(plugin.Id, out var scope))
                 {
@@ -1300,8 +1302,8 @@ namespace Ink_Canvas.Plugins
                     }
                 }
 
-                // 删除插件目录下的首注册标记，确保重装或重载会再次自动追加组件到工具栏。
-                TryDeleteToolbarRegisteredMarker(plugin);
+                // 真正卸载后重装才重新执行首次自动添加。
+                if (deleteFolder) TryDeleteToolbarRegisteredMarker(plugin);
 
                 if (_assemblyContexts.TryGetValue(plugin.Id, out var alc))
                 {
@@ -1889,8 +1891,8 @@ namespace Ink_Canvas.Plugins
 
         /// <summary>
         /// 移除插件目录下的 .toolbar_registered 标记。这一标记的作用是「插件首次
-        /// 注册工具栏项时自动加入激活配置」——卸载后它会残留在插件目录里，
-        /// 下次重装/重载时便不再自动追加，违背用户预期。这里在卸载时主动清理。
+        /// 注册工具栏项时自动加入激活配置」。仅在真正删除插件时清理，
+        /// 正常退出、禁用和重载必须保留，避免覆盖用户移除组件的选择。
         /// </summary>
         private void TryDeleteToolbarRegisteredMarker(PluginInfo plugin)
         {
