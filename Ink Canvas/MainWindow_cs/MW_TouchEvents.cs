@@ -173,7 +173,8 @@ namespace Ink_Canvas
 
         internal bool ShouldUseRealtimeVelocityBrushTipForMouse()
         {
-            return ShouldUseRealtimeVelocityBrushTip()
+            return inkCanvas?.EditingMode == InkCanvasEditingMode.Ink
+                   && ShouldUseRealtimeVelocityBrushTip()
                    && drawingShapeMode == 0
                    && !isPalmEraserActive;
         }
@@ -1197,6 +1198,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void MainWindow_StylusDown(object sender, StylusDownEventArgs e)
         {
+            if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
             if (IsTouchStylusDevice(e.StylusDevice))
                 return;
 
@@ -1333,6 +1335,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void MainWindow_StylusUp(object sender, StylusEventArgs e)
         {
+            if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
             if (IsTouchStylusDevice(e.StylusDevice))
                 return;
 
@@ -1505,7 +1508,8 @@ namespace Ink_Canvas
         {
             try
             {
-                if (IsTouchStylusDevice(e.StylusDevice))
+                if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
+            if (IsTouchStylusDevice(e.StylusDevice))
                     return;
 
                 if (drawingShapeMode != 0)
@@ -1800,6 +1804,7 @@ namespace Ink_Canvas
                 new Rect(0, 0, ViewboxFloatingBar.ActualWidth, ViewboxFloatingBar.ActualHeight));
 
             // 如果触摸发生在浮动栏区域，不阻止事件传播，让浮动栏按钮能够接收触摸事件
+            if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
             if (floatingBarBounds.Contains(touchPoint.Position))
             {
                 // 不设置 ViewboxFloatingBar.IsHitTestVisible = false，让浮动栏按钮能够接收触摸事件
@@ -2007,7 +2012,7 @@ namespace Ink_Canvas
                 return;
             }
 
-            if ((inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
+            if ((inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint || inkCanvas.EditingMode == InkCanvasEditingMode.Select
                  || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
                 && !isPalmEraserActive)
             {
@@ -2291,7 +2296,7 @@ namespace Ink_Canvas
             var touchId = e.TouchDevice.Id;
             CommitManualTouchStroke(touchId);
 
-            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint && !isPalmEraserActive)
+            if ((inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint || inkCanvas.EditingMode == InkCanvasEditingMode.Select) && !isPalmEraserActive)
             {
                 return;
             }

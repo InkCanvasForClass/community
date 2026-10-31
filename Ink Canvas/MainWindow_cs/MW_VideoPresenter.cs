@@ -806,23 +806,7 @@ namespace Ink_Canvas
         /// <summary>隐藏所有选择框（墨迹选择框、图片选择框、图片缩放手柄）。</summary>
         private void HideAllSelectionOverlays()
         {
-            if (GridInkCanvasSelectionCover != null)
-            {
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-            }
-            if (BorderStrokeSelectionControl != null)
-            {
-                BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
-            }
-            if (BorderImageSelectionControl != null)
-            {
-                BorderImageSelectionControl.Visibility = Visibility.Collapsed;
-            }
-            HideImageResizeHandles();
-            if (ImageSelectionOverlay != null)
-            {
-                ImageSelectionOverlay.Visibility = Visibility.Collapsed;
-            }
+            ClearAllSelection();
         }
 
         /// <summary>把当前 _boothPreviewScale / Translate 应用到全屏预览 Image 的 RenderTransform。</summary>

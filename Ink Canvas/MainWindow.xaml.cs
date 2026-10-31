@@ -809,6 +809,8 @@ namespace Ink_Canvas
             inkCanvas.MouseRightButtonUp += InkCanvas_MouseRightButtonUp;
             // 注册橡皮擦操作结束事件
             inkCanvas.StylusUp += inkCanvas_StylusUp;
+            inkCanvas.Loaded += (s, e) => SuppressNativeInkCanvasSelectionAdorners();
+            inkCanvas.SelectionChanging += (s, e) => SuppressNativeInkCanvasSelectionAdorners();
 
             // 初始化第一页Canvas
             var firstCanvas = new System.Windows.Controls.Canvas();
@@ -1409,6 +1411,15 @@ namespace Ink_Canvas
 
             NotifyPluginPenModeChanged(inkCanvas1.EditingMode);
 
+            if (inkCanvas1.EditingMode != InkCanvasEditingMode.Select)
+            {
+                ClearAllSelection();
+            }
+            else
+            {
+                SuppressNativeInkCanvasSelectionAdorners();
+            }
+
             if (IsCurrentPageFrozen && IsFreezeMutatingMode(inkCanvas1.EditingMode))
             {
                 TryBlockFrozenPageMutation("修改冻结页面");
@@ -1534,6 +1545,7 @@ namespace Ink_Canvas
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             LogHelper.WriteLogToFile($"[Startup] 主窗口加载开始，启动模式={App.CurrentStartupMode}", LogHelper.LogType.Info);
+            SuppressNativeInkCanvasSelectionAdorners();
             loadPenCanvas();
             // 工具栏插件化按钮先注入到容器，确保 LoadSettings 内部对 Cursor_Icon / Pen_Icon 等的访问非空。
             // Settings.Toolbar 此时尚为默认值（全部可见），与旧 XAML 行为一致。
@@ -3544,8 +3556,25 @@ namespace Ink_Canvas
                     DisableEraserOverlay();
                 }
 
+                // 如果切换到非选择模式，清除所有选择状态并隐藏选择框
+                if (newMode != InkCanvasEditingMode.Select)
+                {
+                    ClearAllSelection();
+                }
+
                 // 执行模式切换
                 inkCanvas.EditingMode = newMode;
+                if (newMode == InkCanvasEditingMode.Select)
+                {
+                    if (!_isVideoPresenterSpecialMode)
+                    {
+                        inkCanvas.IsManipulationEnabled = false;
+                    }
+                }
+                else if (newMode == InkCanvasEditingMode.Ink)
+                {
+                    inkCanvas.IsManipulationEnabled = true;
+                }
                 SyncWinRTInkPipelineWithLogicalTool();
 
                 // 根据模式确定是否为鼠标模式（无工具模式）
