@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="iNKORE.UI.WPF.Modern.Controls" Version="0.10.2.1-icc.4" />
+    <PackageReference Include="iNKORE.UI.WPF.Modern" Version="0.11.0" />
     <PackageReference Include="iNKORE.UI.WPF" Version="1.2.8" />
   </ItemGroup>
 

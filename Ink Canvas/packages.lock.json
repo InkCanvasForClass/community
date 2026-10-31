@@ -38,14 +38,13 @@
         "resolved": "1.2.8",
         "contentHash": "7b+z25JFdhGAfyJqlVIF0vLbmgsRvqDZMvhGPTz20gzQigDPMqVUOoCCKB5824GtYsjFCYNilmaowb+4yWATkQ=="
       },
-      "iNKORE.UI.WPF.Modern.Controls": {
+      "iNKORE.UI.WPF.Modern": {
         "type": "Direct",
-        "requested": "[0.10.2.1-icc.4, )",
-        "resolved": "0.10.2.1-icc.4",
-        "contentHash": "094jZnm+Fg0rckruqWW7wBHQhlUonU26+188HQ/IkNADoT4erw0xuzInQdl1UqV7pbf8Tq04Mw6dwgv/6xEkwg==",
+        "requested": "[0.11.0, )",
+        "resolved": "0.11.0",
+        "contentHash": "F6DdPt6ibY+Bo5vgfeRlPPJBAr+xjMeOpGtrBlEUh61g1XXUrf+1YfWKYKsJlGHrJAjQ25W+UldYwIvDu+wH7A==",
         "dependencies": {
-          "iNKORE.UI.WPF": "1.2.8",
-          "iNKORE.UI.WPF.Modern": "0.10.2.1-icc.4"
+          "iNKORE.UI.WPF": "1.2.8"
         }
       },
       "MdXaml": {
@@ -279,14 +278,6 @@
           "H.GeneratedIcons.System.Drawing": "2.4.1"
         }
       },
-      "iNKORE.UI.WPF.Modern": {
-        "type": "Transitive",
-        "resolved": "0.10.2.1-icc.4",
-        "contentHash": "FaqBNxWQamGvG1NU6uDa8HkGzBVOalf5q+Gb2HntetYCisJKEAG0aowhVy7a7fp4eHelyLZJKEEhABaybx31YQ==",
-        "dependencies": {
-          "iNKORE.UI.WPF": "1.2.8"
-        }
-      },
       "MdXaml.Plugins": {
         "type": "Transitive",
         "resolved": "1.27.0",
@@ -393,7 +384,7 @@
         "type": "Project",
         "dependencies": {
           "iNKORE.UI.WPF": "[1.2.8, )",
-          "iNKORE.UI.WPF.Modern.Controls": "[0.10.2.1-icc.4, )"
+          "iNKORE.UI.WPF.Modern": "[0.11.0, )"
         }
       },
       "inkcanvas.pluginsdk": {
