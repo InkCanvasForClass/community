@@ -2936,7 +2936,7 @@ namespace Ink_Canvas
 
                         if (!opFlag)
                         {
-                            foreach (var asymptoteStroke in asymptoteStrokes)
+                            foreach (var asymptoteStroke in new StrokeCollection(asymptoteStrokes))
                             {
                                 if (inkCanvas.Strokes.Contains(asymptoteStroke)) inkCanvas.Strokes.Remove(asymptoteStroke);
                                 // 已移除的渐近线不应进入最终图形的撤销/重做记录。
