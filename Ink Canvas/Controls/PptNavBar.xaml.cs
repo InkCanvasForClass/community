@@ -431,7 +431,11 @@ namespace Ink_Canvas.Controls
             ApplyRootOpacity();
         }
 
-        private void ApplyRootOpacity() => RootBorder.Opacity = IsPreviewExpanded ? 1 : _collapsedOpacity;
+        // 透明度必须作用在带 DropShadowEffect 的 RootBorder 的祖先上（这里用控件自身），
+        // 与浮动栏（ViewboxFloatingBar.Opacity + 子级阴影）保持一致。
+        // 若把 Opacity 和 Effect 放在同一个元素上，WPF 会先按半透明轮廓生成阴影，
+        // 阴影透过样式半透明的填充显示出来，背景就会发灰发脏。
+        private void ApplyRootOpacity() => Opacity = IsPreviewExpanded ? 1 : _collapsedOpacity;
 
         public void SetBarScale(double scale)
         {

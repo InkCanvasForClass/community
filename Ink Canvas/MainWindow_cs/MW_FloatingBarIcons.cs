@@ -1,4 +1,4 @@
-using Ink_Canvas.Controls;
+﻿using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
@@ -1235,13 +1235,37 @@ namespace Ink_Canvas
         internal void SymbolIconDelete_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (TryBlockFrozenPageMutation("清除冻结页面内容")) return;
-            if (inkCanvas.GetSelectedStrokes().Count > 0)
+            var selectedStrokes = inkCanvas.GetSelectedStrokes();
+            bool hasStrokes = selectedStrokes != null && selectedStrokes.Count > 0;
+            bool hasElements = _selectedElements != null && _selectedElements.Count > 0;
+
+            if (hasStrokes || hasElements)
             {
-                var selectedStrokes = inkCanvas.GetSelectedStrokes();
-                inkCanvas.Select(new StrokeCollection());
-                inkCanvas.Strokes.Remove(selectedStrokes);
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-                HideSelectionDisplay();
+                if (hasStrokes)
+                {
+                    timeMachine.CommitStrokeEraseHistory(selectedStrokes);
+                    inkCanvas.Strokes.Remove(selectedStrokes);
+                }
+
+                if (hasElements)
+                {
+                    var elementsToDelete = _selectedElements.ToList();
+                    foreach (var elem in elementsToDelete)
+                    {
+                        if (elem is CanvasMediaControl mediaControl)
+                        {
+                            mediaControl.PausePlayback();
+                        }
+                        if (inkCanvas.Children.Contains(elem))
+                        {
+                            timeMachine.CommitElementRemoveHistory(elem);
+                            inkCanvas.Children.Remove(elem);
+                        }
+                    }
+                    _selectedElements.Clear();
+                }
+
+                ClearAllSelection();
             }
             else if (inkCanvas.Strokes.Count > 0 || HasSecAgentSceneElementsOnCanvas())
             {
@@ -1365,7 +1389,7 @@ namespace Ink_Canvas
                             break;
                         case "QuickColorOrange":
                         case "QuickColorOrangeSingle":
-                            border.Background = new SolidColorBrush(Color.FromRgb(251, 150, 80));
+                            border.Background = new SolidColorBrush(Color.FromRgb(255, 165, 0));
                             break;
                         case "QuickColorYellow":
                         case "QuickColorYellowSingle":
@@ -3738,12 +3762,7 @@ namespace Ink_Canvas
             if (lastBorderMouseDownObject is Panel panel)
                 panel.Background = new SolidColorBrush(Colors.Transparent);
 
-            // 如果当前有选中的图片元素，先取消选中
-            if (currentSelectedElement != null)
-            {
-                UnselectElement(currentSelectedElement);
-                currentSelectedElement = null;
-            }
+            ClearAllSelection();
 
             // 禁用高级橡皮擦系统
             DisableEraserOverlay();
@@ -4252,7 +4271,7 @@ namespace Ink_Canvas
         /// </summary>
         private void QuickColorOrange_Click(object sender, RoutedEventArgs e)
         {
-            SetQuickColor(Color.FromRgb(251, 150, 80)); // 橙色
+            SetQuickColor(Color.FromRgb(255, 165, 0)); // 橙色
             ScheduleBrushAutoRestore();
         }
 
@@ -4317,7 +4336,7 @@ namespace Ink_Canvas
                 "Black" => Colors.Black,
                 "White" => Colors.White,
                 "Red" => Colors.Red,
-                "Orange" => Color.FromRgb(251, 150, 80),
+                "Orange" => Color.FromRgb(255, 165, 0),
                 "Yellow" => Colors.Yellow,
                 "Green" => Color.FromRgb(22, 163, 74),
                 "Blue" => Color.FromRgb(37, 99, 235),
@@ -4416,7 +4435,7 @@ namespace Ink_Canvas
             {
                 // 桌面模式
                 if (color == Colors.White) lastDesktopInkColor = 5;
-                else if (color == Color.FromRgb(251, 150, 80)) lastDesktopInkColor = 8; // 橙色
+                else if (color == Color.FromRgb(255, 165, 0) || color == Color.FromRgb(251, 150, 80)) lastDesktopInkColor = 8; // 橙色
                 else if (color == Colors.Yellow) lastDesktopInkColor = 4;
                 else if (color == Colors.Black) lastDesktopInkColor = 0;
                 else if (color == Color.FromRgb(37, 99, 235)) lastDesktopInkColor = 3; // 蓝色
@@ -4428,7 +4447,7 @@ namespace Ink_Canvas
             {
                 // 白板模式
                 if (color == Colors.White) lastBoardInkColor = 5;
-                else if (color == Color.FromRgb(251, 150, 80)) lastBoardInkColor = 8; // 橙色
+                else if (color == Color.FromRgb(255, 165, 0) || color == Color.FromRgb(251, 150, 80)) lastBoardInkColor = 8; // 橙色
                 else if (color == Colors.Yellow) lastBoardInkColor = 4;
                 else if (color == Colors.Black) lastBoardInkColor = 0;
                 else if (color == Color.FromRgb(37, 99, 235)) lastBoardInkColor = 3; // 蓝色
@@ -4563,11 +4582,7 @@ namespace Ink_Canvas
         private void BtnUndo_Click(object sender, RoutedEventArgs e)
         {
             if (_wordLecture?.Undo(false) == true) return;
-            if (inkCanvas.GetSelectedStrokes().Count != 0)
-            {
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-                inkCanvas.Select(new StrokeCollection());
-            }
+            ClearAllSelection();
 
             var item = timeMachine.Undo();
             ApplyHistoryToCanvas(item);
@@ -4585,11 +4600,7 @@ namespace Ink_Canvas
         private void BtnRedo_Click(object sender, RoutedEventArgs e)
         {
             if (_wordLecture?.Undo(true) == true) return;
-            if (inkCanvas.GetSelectedStrokes().Count != 0)
-            {
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-                inkCanvas.Select(new StrokeCollection());
-            }
+            ClearAllSelection();
 
             var item = timeMachine.Redo();
             ApplyHistoryToCanvas(item);
@@ -4724,6 +4735,7 @@ namespace Ink_Canvas
         private void PerformCanvasClear(bool preserveClearHistory = false)
         {
             if (TryBlockFrozenPageMutation("清空冻结页面内容")) return;
+            ClearAllSelection();
             NotifyPluginWhiteboardPageClearing();
             forceEraser = false;
             //BorderClearInDelete.Visibility = Visibility.Collapsed;

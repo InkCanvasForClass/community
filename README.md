@@ -76,6 +76,7 @@
 ## ✏️ 贡献指南
 
 **请注意，在贡献代码时，_务必_ 将所有代码提交到 _net10_ 分支，以保证net10版本总是新于main版本。**
+**Fix类修复移至net6分支，如果net6分支没有相关功能（即功能仅存在于net10）时则提交至net10。**
 
 ## Todo LIST
 
@@ -124,6 +125,7 @@
       <td align="center" valign="top" width="20%"><a href="https://github.com/Makitoid"><img src="https://avatars.githubusercontent.com/u/123004192?v=4?s=100" width="100px;" alt="Makitoid Wang"/><br /><sub><b>Makitoid Wang</b></sub></a><br /><a href="https://github.com/InkCanvasForClass/community/commits?author=Makitoid" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="20%"><a href="https://hhh2309.github.io/"><img src="https://avatars.githubusercontent.com/u/179317266?v=4?s=100" width="100px;" alt="HHH2309"/><br /><sub><b>HHH2309</b></sub></a><br /><a href="https://github.com/InkCanvasForClass/community/commits?author=HHH2309" title="Code">💻</a></td>
       <td align="center" valign="top" width="20%"><a href="https://github.com/Huoxing-Rusty"><img src="https://avatars.githubusercontent.com/u/220455872?v=4?s=100" width="100px;" alt="Rusty"/><br /><sub><b>Rusty</b></sub></a><br /><a href="https://github.com/InkCanvasForClass/community/commits?author=Huoxing-Rusty" title="Code">💻</a></td>
+      <td align="center" valign="top" width="20%"><a href="https://github.com/aTwTz"><img src="https://avatars.githubusercontent.com/u/37306278?v=4?s=100" width="100px;" alt="aTwTz"/><br /><sub><b>aTwTz</b></sub></a><br /><a href="https://github.com/InkCanvasForClass/community/commits?author=aTwTz" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>

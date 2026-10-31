@@ -214,31 +214,7 @@ namespace Ink_Canvas
                 {
                     if (inkColor == 1)
                         // Red
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 239, 68, 68);
-                    else if (inkColor == 2)
-                        // Green
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 34, 197, 94);
-                    else if (inkColor == 3)
-                        // Blue
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 59, 130, 246);
-                    else if (inkColor == 4)
-                        // Yellow
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 250, 204, 21);
-                    else if (inkColor == 6)
-                        // Pink
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 236, 72, 153);
-                    else if (inkColor == 7)
-                        // Teal (亮色)
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 20, 184, 166);
-                    else if (inkColor == 8)
-                        // Orange (亮色)
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 249, 115, 22);
-                }
-                else
-                {
-                    if (inkColor == 1)
-                        // Red
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 220, 38, 38);
+                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 255, 0, 0);
                     else if (inkColor == 2)
                         // Green
                         inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 22, 163, 74);
@@ -247,7 +223,31 @@ namespace Ink_Canvas
                         inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 37, 99, 235);
                     else if (inkColor == 4)
                         // Yellow
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 234, 179, 8);
+                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 255, 255, 0);
+                    else if (inkColor == 6)
+                        // Pink
+                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 147, 51, 234);
+                    else if (inkColor == 7)
+                        // Teal (亮色)
+                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 20, 184, 166);
+                    else if (inkColor == 8)
+                        // Orange (亮色)
+                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 255, 165, 0);
+                }
+                else
+                {
+                    if (inkColor == 1)
+                        // Red
+                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 255, 0, 0);
+                    else if (inkColor == 2)
+                        // Green
+                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 22, 163, 74);
+                    else if (inkColor == 3)
+                        // Blue
+                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 37, 99, 235);
+                    else if (inkColor == 4)
+                        // Yellow
+                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 255, 255, 0);
                     else if (inkColor == 6)
                         // Pink ( Purple )
                         inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 147, 51, 234);
@@ -256,7 +256,7 @@ namespace Ink_Canvas
                         inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 13, 148, 136);
                     else if (inkColor == 8)
                         // Orange (暗色)
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 234, 88, 12);
+                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 255, 165, 0);
                 }
             }
             else if (penType == 1)
@@ -291,36 +291,36 @@ namespace Ink_Canvas
                 else if (isUselightThemeColor)
                 {
                     if (inkColor == 1)
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 239, 68, 68);
-                    else if (inkColor == 2)
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 34, 197, 94);
-                    else if (inkColor == 3)
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 59, 130, 246);
-                    else if (inkColor == 4)
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 250, 204, 21);
-                    else if (inkColor == 6)
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 236, 72, 153);
-                    else if (inkColor == 7)
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 20, 184, 166);
-                    else if (inkColor == 8)
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 249, 115, 22);
-                }
-                else
-                {
-                    if (inkColor == 1)
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 220, 38, 38);
+                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 255, 0, 0);
                     else if (inkColor == 2)
                         inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 22, 163, 74);
                     else if (inkColor == 3)
                         inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 37, 99, 235);
                     else if (inkColor == 4)
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 234, 179, 8);
+                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 255, 255, 0);
+                    else if (inkColor == 6)
+                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 147, 51, 234);
+                    else if (inkColor == 7)
+                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 20, 184, 166);
+                    else if (inkColor == 8)
+                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 255, 165, 0);
+                }
+                else
+                {
+                    if (inkColor == 1)
+                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 255, 0, 0);
+                    else if (inkColor == 2)
+                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 22, 163, 74);
+                    else if (inkColor == 3)
+                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 37, 99, 235);
+                    else if (inkColor == 4)
+                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 255, 255, 0);
                     else if (inkColor == 6)
                         inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 147, 51, 234);
                     else if (inkColor == 7)
                         inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 13, 148, 136);
                     else if (inkColor == 8)
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 234, 88, 12);
+                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 255, 165, 0);
                 }
             }
 
@@ -328,42 +328,42 @@ namespace Ink_Canvas
             {
                 // 亮系
                 // 亮色的红色
-                BorderPenColorRed.Color = Color.FromRgb(239, 68, 68);
-                BoardBorderPenColorRed.Color = Color.FromRgb(239, 68, 68);
+                BorderPenColorRed.Color = Color.FromRgb(255, 0, 0);
+                BoardBorderPenColorRed.Color = Color.FromRgb(255, 0, 0);
                 // 亮色的绿色
-                BorderPenColorGreen.Color = Color.FromRgb(34, 197, 94);
-                BoardBorderPenColorGreen.Color = Color.FromRgb(34, 197, 94);
+                BorderPenColorGreen.Color = Color.FromRgb(22, 163, 74);
+                BoardBorderPenColorGreen.Color = Color.FromRgb(22, 163, 74);
                 // 亮色的蓝色
-                BorderPenColorBlue.Color = Color.FromRgb(59, 130, 246);
-                BoardBorderPenColorBlue.Color = Color.FromRgb(59, 130, 246);
+                BorderPenColorBlue.Color = Color.FromRgb(37, 99, 235);
+                BoardBorderPenColorBlue.Color = Color.FromRgb(37, 99, 235);
                 // 亮色的黄色
-                BorderPenColorYellow.Color = Color.FromRgb(250, 204, 21);
-                BoardBorderPenColorYellow.Color = Color.FromRgb(250, 204, 21);
+                BorderPenColorYellow.Color = Color.FromRgb(255, 255, 0);
+                BoardBorderPenColorYellow.Color = Color.FromRgb(255, 255, 0);
                 // 亮色的粉色
-                BorderPenColorPink.Color = Color.FromRgb(236, 72, 153);
-                BoardBorderPenColorPink.Color = Color.FromRgb(236, 72, 153);
+                BorderPenColorPink.Color = Color.FromRgb(147, 51, 234);
+                BoardBorderPenColorPink.Color = Color.FromRgb(147, 51, 234);
                 // 亮色的Teal
                 BorderPenColorTeal.Color = Color.FromRgb(20, 184, 166);
                 BoardBorderPenColorTeal.Color = Color.FromRgb(20, 184, 166);
                 // 亮色的Orange
-                BorderPenColorOrange.Color = Color.FromRgb(249, 115, 22);
-                BoardBorderPenColorOrange.Color = Color.FromRgb(249, 115, 22);
+                BorderPenColorOrange.Color = Color.FromRgb(255, 165, 0);
+                BoardBorderPenColorOrange.Color = Color.FromRgb(255, 165, 0);
 
                 // 更新激光笔颜色
-                LaserPenColorRed.Color = Color.FromRgb(239, 68, 68);
-                BoardLaserPenColorRed.Color = Color.FromRgb(239, 68, 68);
-                LaserPenColorGreen.Color = Color.FromRgb(34, 197, 94);
-                BoardLaserPenColorGreen.Color = Color.FromRgb(34, 197, 94);
-                LaserPenColorBlue.Color = Color.FromRgb(59, 130, 246);
-                BoardLaserPenColorBlue.Color = Color.FromRgb(59, 130, 246);
-                LaserPenColorYellow.Color = Color.FromRgb(250, 204, 21);
-                BoardLaserPenColorYellow.Color = Color.FromRgb(250, 204, 21);
-                LaserPenColorPink.Color = Color.FromRgb(236, 72, 153);
-                BoardLaserPenColorPink.Color = Color.FromRgb(236, 72, 153);
+                LaserPenColorRed.Color = Color.FromRgb(255, 0, 0);
+                BoardLaserPenColorRed.Color = Color.FromRgb(255, 0, 0);
+                LaserPenColorGreen.Color = Color.FromRgb(22, 163, 74);
+                BoardLaserPenColorGreen.Color = Color.FromRgb(22, 163, 74);
+                LaserPenColorBlue.Color = Color.FromRgb(37, 99, 235);
+                BoardLaserPenColorBlue.Color = Color.FromRgb(37, 99, 235);
+                LaserPenColorYellow.Color = Color.FromRgb(255, 255, 0);
+                BoardLaserPenColorYellow.Color = Color.FromRgb(255, 255, 0);
+                LaserPenColorPink.Color = Color.FromRgb(147, 51, 234);
+                BoardLaserPenColorPink.Color = Color.FromRgb(147, 51, 234);
                 LaserPenColorTeal.Color = Color.FromRgb(20, 184, 166);
                 BoardLaserPenColorTeal.Color = Color.FromRgb(20, 184, 166);
-                LaserPenColorOrange.Color = Color.FromRgb(249, 115, 22);
-                BoardLaserPenColorOrange.Color = Color.FromRgb(249, 115, 22);
+                LaserPenColorOrange.Color = Color.FromRgb(255, 165, 0);
+                BoardLaserPenColorOrange.Color = Color.FromRgb(255, 165, 0);
 
                 var newImageSource = new BitmapImage();
                 newImageSource.BeginInit();
@@ -384,8 +384,8 @@ namespace Ink_Canvas
             {
                 // 暗系
                 // 暗色的红色
-                BorderPenColorRed.Color = Color.FromRgb(220, 38, 38);
-                BoardBorderPenColorRed.Color = Color.FromRgb(220, 38, 38);
+                BorderPenColorRed.Color = Color.FromRgb(255, 0, 0);
+                BoardBorderPenColorRed.Color = Color.FromRgb(255, 0, 0);
                 // 暗色的绿色
                 BorderPenColorGreen.Color = Color.FromRgb(22, 163, 74);
                 BoardBorderPenColorGreen.Color = Color.FromRgb(22, 163, 74);
@@ -393,8 +393,8 @@ namespace Ink_Canvas
                 BorderPenColorBlue.Color = Color.FromRgb(37, 99, 235);
                 BoardBorderPenColorBlue.Color = Color.FromRgb(37, 99, 235);
                 // 暗色的黄色
-                BorderPenColorYellow.Color = Color.FromRgb(234, 179, 8);
-                BoardBorderPenColorYellow.Color = Color.FromRgb(234, 179, 8);
+                BorderPenColorYellow.Color = Color.FromRgb(255, 255, 0);
+                BoardBorderPenColorYellow.Color = Color.FromRgb(255, 255, 0);
                 // 暗色的紫色对应亮色的粉色
                 BorderPenColorPink.Color = Color.FromRgb(147, 51, 234);
                 BoardBorderPenColorPink.Color = Color.FromRgb(147, 51, 234);
@@ -402,24 +402,24 @@ namespace Ink_Canvas
                 BorderPenColorTeal.Color = Color.FromRgb(13, 148, 136);
                 BoardBorderPenColorTeal.Color = Color.FromRgb(13, 148, 136);
                 // 暗色的Orange
-                BorderPenColorOrange.Color = Color.FromRgb(234, 88, 12);
-                BoardBorderPenColorOrange.Color = Color.FromRgb(234, 88, 12);
+                BorderPenColorOrange.Color = Color.FromRgb(255, 165, 0);
+                BoardBorderPenColorOrange.Color = Color.FromRgb(255, 165, 0);
 
                 // 更新激光笔颜色
-                LaserPenColorRed.Color = Color.FromRgb(220, 38, 38);
-                BoardLaserPenColorRed.Color = Color.FromRgb(220, 38, 38);
+                LaserPenColorRed.Color = Color.FromRgb(255, 0, 0);
+                BoardLaserPenColorRed.Color = Color.FromRgb(255, 0, 0);
                 LaserPenColorGreen.Color = Color.FromRgb(22, 163, 74);
                 BoardLaserPenColorGreen.Color = Color.FromRgb(22, 163, 74);
                 LaserPenColorBlue.Color = Color.FromRgb(37, 99, 235);
                 BoardLaserPenColorBlue.Color = Color.FromRgb(37, 99, 235);
-                LaserPenColorYellow.Color = Color.FromRgb(234, 179, 8);
-                BoardLaserPenColorYellow.Color = Color.FromRgb(234, 179, 8);
+                LaserPenColorYellow.Color = Color.FromRgb(255, 255, 0);
+                BoardLaserPenColorYellow.Color = Color.FromRgb(255, 255, 0);
                 LaserPenColorPink.Color = Color.FromRgb(147, 51, 234);
                 BoardLaserPenColorPink.Color = Color.FromRgb(147, 51, 234);
                 LaserPenColorTeal.Color = Color.FromRgb(13, 148, 136);
                 BoardLaserPenColorTeal.Color = Color.FromRgb(13, 148, 136);
-                LaserPenColorOrange.Color = Color.FromRgb(234, 88, 12);
-                BoardLaserPenColorOrange.Color = Color.FromRgb(234, 88, 12);
+                LaserPenColorOrange.Color = Color.FromRgb(255, 165, 0);
+                BoardLaserPenColorOrange.Color = Color.FromRgb(255, 165, 0);
 
                 var newImageSource = new BitmapImage();
                 newImageSource.BeginInit();
@@ -435,6 +435,21 @@ namespace Ink_Canvas
                 BoardColorThemeSwitchTextBlock.Text = Properties.MainWindowStrings.Main_Colors_LightTheme;
                 LaserPenColorThemeSwitchTextBlock.Text = Properties.MainWindowStrings.Main_Colors_LightTheme;
                 BoardLaserPenColorThemeSwitchTextBlock.Text = Properties.MainWindowStrings.Main_Colors_LightTheme;
+            }
+
+            var quickPalette = QuickColorPalette;
+            if (quickPalette != null)
+            {
+                quickPalette.QuickColorRed.Color = Color.FromRgb(255, 0, 0);
+                quickPalette.QuickColorRedSingle.Color = Color.FromRgb(255, 0, 0);
+                quickPalette.QuickColorOrange.Color = Color.FromRgb(255, 165, 0);
+                quickPalette.QuickColorOrangeSingle.Color = Color.FromRgb(255, 165, 0);
+                quickPalette.QuickColorYellow.Color = Color.FromRgb(255, 255, 0);
+                quickPalette.QuickColorYellowSingle.Color = Color.FromRgb(255, 255, 0);
+                quickPalette.QuickColorGreen.Color = Color.FromRgb(22, 163, 74);
+                quickPalette.QuickColorGreenSingle.Color = Color.FromRgb(22, 163, 74);
+                quickPalette.QuickColorBlue.Color = Color.FromRgb(37, 99, 235);
+                quickPalette.QuickColorPurple.Color = Color.FromRgb(147, 51, 234);
             }
 
             // 改变选中提示
