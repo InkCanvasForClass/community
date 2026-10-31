@@ -38,8 +38,8 @@ namespace Ink_Canvas.Controls
             InitializeComponent();
             // Keep command names in Word's XAML namescope, then host them inside
             // the shared PPT surface so scaling/opacity/shadow apply exactly once.
-            Navigation.Children.Remove(ZoomControls);
-            PageNavigation.AdditionalContent = ZoomControls;
+            Navigation.Children.Remove(ExtraControls);
+            PageNavigation.AdditionalContent = ExtraControls;
             PageNavigation.PreviousClick += (_, _) => (_source ?? this).Navigate?.Invoke(-1);
             PageNavigation.NextClick += (_, _) => (_source ?? this).Navigate?.Invoke(1);
         }

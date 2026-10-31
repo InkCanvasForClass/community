@@ -427,9 +427,12 @@ namespace Ink_Canvas
                 return;
             }
 
+            var pageRects = _pluginVisiblePages.Select(page => page.ContentRect).ToArray();
+            var inkBounds = canvasInk.GetBounds();
             foreach (var (pageIndex, rect) in _pluginVisiblePages)
             {
-                var cropped = CropStrokesToRect(canvasInk, rect);
+                var captureRect = Helpers.PluginPageInkBounds.ExpandHorizontally(rect, pageRects, inkBounds);
+                var cropped = CropStrokesToRect(canvasInk, captureRect);
                 // 转页面局部坐标：墨迹减去页矩形原点。
                 _pluginPageInk[pageIndex] = TranslateStrokes(cropped, -rect.X, -rect.Y);
             }

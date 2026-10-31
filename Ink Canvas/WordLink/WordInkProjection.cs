@@ -190,7 +190,7 @@ namespace Ink_Canvas.WordLink
             var rects = frame.Pages.Select(page => Rect.Intersect(AnnotationBounds(frame, page), viewport))
                 .Where(rect => !rect.IsEmpty).ToArray();
             if (ReferenceEquals(_canvas.Clip, _lastClip) && rects.SequenceEqual(_clipRects)) return;
-            var clip = new GeometryGroup();
+            var clip = new GeometryGroup { FillRule = FillRule.Nonzero };
             foreach (var rect in rects) clip.Children.Add(new RectangleGeometry(rect));
             clip.Freeze(); _canvas.Clip = clip;
             _lastClip = clip; _clipRects = rects;
@@ -210,7 +210,6 @@ namespace Ink_Canvas.WordLink
         {
             Rect paper = RectFor(page.Bounds), viewport = RectFor(frame.Viewport);
             double left = viewport.Left, right = viewport.Right;
-            double center = paper.Left + paper.Width / 2;
             foreach (var other in frame.Pages)
             {
                 if (other.Number == page.Number) continue;
@@ -218,9 +217,10 @@ namespace Ink_Canvas.WordLink
                 if (neighbor.Bottom <= paper.Top || neighbor.Top >= paper.Bottom) continue;
                 // Facing pages share the gutter at its midpoint. Outer margins
                 // belong to the adjacent page, including negative page-space X.
-                if (neighbor.Left + neighbor.Width / 2 < center)
+                if (neighbor.Right <= paper.Left + 2)
                     left = Math.Max(left, (neighbor.Right + paper.Left) / 2);
-                else right = Math.Min(right, (paper.Right + neighbor.Left) / 2);
+                else if (neighbor.Left >= paper.Right - 2)
+                    right = Math.Min(right, (paper.Right + neighbor.Left) / 2);
             }
             return right > left ? new Rect(left, paper.Top, right - left, paper.Height) : Rect.Empty;
         }

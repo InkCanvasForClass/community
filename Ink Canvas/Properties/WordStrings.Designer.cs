@@ -4,6 +4,10 @@ namespace Ink_Canvas.Properties
 {
     public static class WordStrings
     {
+        public static string History => Get(nameof(History));
+        public static string HistoryConfirm => Get(nameof(HistoryConfirm));
+        public static string HistoryFailed => Get(nameof(HistoryFailed));
+        public static string WpsUnavailable => Get(nameof(WpsUnavailable));
         private static readonly ResourceManager Manager = new("Ink_Canvas.Properties.WordStrings", typeof(WordStrings).Assembly);
         public static string Get(string key) => Manager.GetString(key, CultureInfo.CurrentUICulture) ?? Manager.GetString("Unavailable", CultureInfo.CurrentUICulture);
         public static string Title => Get(nameof(Title));

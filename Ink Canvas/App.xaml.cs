@@ -1,4 +1,4 @@
-﻿using H.NotifyIcon;
+using H.NotifyIcon;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Plugins;
 using Ink_Canvas.Properties;
@@ -42,6 +42,8 @@ namespace Ink_Canvas
 
         public void ReleaseMutexForRestart()
         {
+            if (MainWindow is MainWindow window && !window.SaveWordBeforeRestart())
+                throw new IOException("Word annotation save failed; restart cancelled.");
             try
             {
                 if (mutex != null)
@@ -209,6 +211,27 @@ namespace Ink_Canvas
             }
             catch
             {
+            }
+
+            // Associated-file launches only forward, before UIAccess, splash or watchdog startup.
+            var forwardingArgs = Environment.GetCommandLineArgs().Skip(1).ToArray();
+            if (!forwardingArgs.Any(a => a is "-m" or "--watchdog" or "--final-app"
+                    or "--update-mode" or "--skip-mutex-check" or "--enable-uia-topmost-helper"))
+            {
+                string associatedFile = FileAssociationManager.GetPluginFileFromArgs(forwardingArgs);
+                if (!string.IsNullOrEmpty(associatedFile)
+                    && Mutex.TryOpenExisting(StandardMutexName, out var existingMutex))
+                {
+                    using (existingMutex)
+                    {
+                        if (FileAssociationManager.TrySendPluginFileToExistingInstance(associatedFile))
+                        {
+                            // Never write the running instance's watchdog exit signal.
+                            Environment.Exit(0);
+                            return;
+                        }
+                    }
+                }
             }
 
             System.Windows.Forms.Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
@@ -1743,16 +1766,6 @@ namespace Ink_Canvas
 
                 try
                 {
-                    LogHelper.WriteLogToFile("启动IPC监听器");
-                    FileAssociationManager.StartIpcListener();
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"启动IPC监听器时出错: {ex.Message}", LogHelper.LogType.Error);
-                }
-
-                try
-                {
                     LogHelper.WriteLogToFile("初始化上传帮助类");
                     Helpers.UploadHelper.Initialize();
                 }
@@ -1811,6 +1824,8 @@ namespace Ink_Canvas
                 {
                     LogHelper.WriteLogToFile(string.Format("加载插件时出错: {0}", ex.Message), LogHelper.LogType.Error);
                 }
+                // URI handlers are now ready. Drain files queued during startup as well.
+                FileAssociationManager.StartIpcListener();
 
                 try
                 {

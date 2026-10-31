@@ -7,7 +7,7 @@ using Ink_Canvas.WordLink;
 
 internal static class LiveWordTests
 {
-    internal static void Run(Action<bool, string> check, bool wheelOnly = false, bool focusOnly = false)
+    internal static void Run(Action<bool, string> check, bool wheelOnly = false, bool focusOnly = false, bool trackingOnly = false, bool stabilityOnly = false)
     {
         var type = Type.GetTypeFromProgID("Word.Application") ?? throw new InvalidOperationException("Microsoft Word is not registered");
         var existing = Process.GetProcessesByName("WINWORD").Select(p => { int id = p.Id; p.Dispose(); return id; }).ToHashSet();
@@ -27,6 +27,8 @@ internal static class LiveWordTests
             document = documents.Add();
             range = document.Content;
             range.Text = string.Join("\r", Enumerable.Range(1, 160).Select(i => $"ICC Word lecture fixture line {i}: coordinates and page tracking."));
+            if (trackingOnly) range.Text = string.Join("\f", Enumerable.Range(1, 10).Select(page =>
+                string.Join("\r", Enumerable.Range(1, 24).Select(line => $"Page {page} line {line}: Word continuous scroll tracking."))));
             window = document.ActiveWindow;
             window.WindowState = 0;
             window.Left = 20; window.Top = 20; window.Width = 800; window.Height = 600;
@@ -42,12 +44,19 @@ internal static class LiveWordTests
             check(WordWindowSelector.IsWordWindow(hwnd) && !WordWindowSelector.IsWordWindow(IntPtr.Zero), "Word window validation accepted a stale handle or rejected the real document");
             int cloak = 1; DwmSetWindowAttribute(hwnd, 13, ref cloak, 4);
             document.Repaginate();
-            using var observer = new WordObserver();
+            var traceWatch = Stopwatch.StartNew();
+            using var observer = new WordObserver(Environment.GetEnvironmentVariable("ICC_WORD_TEST_TRACE") == "1"
+                ? stage => Console.WriteLine($"TRACE {traceWatch.ElapsedMilliseconds}: {stage}") : null);
             WordFrame frame = null;
             for (int i = 0; i < 4; i++) { frame = observer.Read(new WordRequest { WindowHandle = hwnd.ToInt64() }); if (frame.Status == "Ready") break; Thread.Sleep(250); }
             Console.WriteLine($"Live Word: {frame.Status}, pages={frame.PageCount}, visible={frame.Pages.Count}");
             if (frame.Status != "Ready") Console.WriteLine(observer.LastDiagnostic);
             check(frame.Status == "Ready" && frame.IsValid() && frame.PageCount >= 2, "Live Word page discovery failed");
+            if (trackingOnly)
+            {
+                WordTrackingLiveTests.Run((object)app, (object)document, (object)window, observer, frame, check, stabilityOnly);
+                return;
+            }
             if (focusOnly)
             {
                 int focusVisible = 0; DwmSetWindowAttribute(hwnd, 13, ref focusVisible, 4);
@@ -119,6 +128,7 @@ internal static class LiveWordTests
             var preview = observer.Read(new WordRequest { WindowHandle = hwnd.ToInt64(), ExpectedDocumentKey = frame.DocumentKey,
                 ScrollPreview = true, DeferContentCheck = true });
             previewWatch.Stop();
+            Console.WriteLine($"Warm preview: {preview.Status}; previews={observer.PreviewReads - previewReads}; discoveries={observer.DiscoverySamples - samples}; content={observer.ContentReads - contentReads}; {observer.LastDiagnostic}");
             check(preview.Status == "Ready" && observer.PreviewReads == previewReads + 1
                 && observer.ContentReads == contentReads && observer.DiscoverySamples == samples,
                 "Warm scroll preview repeated full document discovery or content scanning");

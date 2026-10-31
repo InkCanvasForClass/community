@@ -48,6 +48,16 @@ internal static partial class Program
         document.Pages = projection.Capture(frame, document);
         Check(document.Pages[1].Count == 2 && document.Pages[2].Count == 2,
             "Facing-page margins were lost, duplicated or assigned across the gutter");
+        // Sampling during motion can briefly put vertically stacked pages on top
+        // of one another. Never interpret that as a horizontal gutter, and use
+        // a union so their overlap does not punch a hole in the canvas clip.
+        frame.Pages[1].Bounds = new WordRect { X = 100, Y = 700, Width = 300, Height = 700 };
+        projection.Reset(); projection.Show(frame, new WordInkDocument());
+        Check(canvas.Clip.FillContains(Local(350, 750)) && canvas.Clip.FillContains(Local(700, 750)),
+            "Overlapping stacked pages cut off the right half or cancelled the shared clip");
+        Check(WordPageGeometry.HasOverlappingPages(frame.Pages), "Mixed-time overlapping paper geometry was accepted");
+        frame.Pages[1].Bounds.Y = 798;
+        Check(!WordPageGeometry.HasOverlappingPages(frame.Pages), "Two pixels of edge rounding rejected adjacent pages");
         projection.Reset();
     }
 
@@ -65,6 +75,27 @@ internal static partial class Program
         controller.Configure(true, true); Wait(controller.PollAsync());
         Point p = canvas.PointFromScreen(new Point(30, 150)); canvas.Strokes.Add(Stroke(p.X, p.Y)); Pump();
         var visible = canvas.Strokes[0];
+        var overlap = Frame(); overlap.Pages.Add(new WordPageFrame { Number = 2,
+            WidthPoints = 500, HeightPoints = 700, Bounds = new WordRect { X = 100, Y = 600, Width = 500, Height = 700 } });
+        transport.Frame = overlap; Wait(controller.PollAsync());
+        Check(controller.BlocksInput && ReferenceEquals(visible, canvas.Strokes[0]),
+            "Incoherent geometry became editable or replaced the canonical ink projection");
+        transport.Frame = Frame(); Wait(controller.PollAsync());
+        Check(transport.LastRequest.Recalibrate && !controller.BlocksInput && ReferenceEquals(visible, canvas.Strokes[0]),
+            "Overlapping geometry did not recover with an authoritative recalibration");
+        var locating = Frame(); locating.Status = "Locating";
+        transport.Frame = locating; Wait(controller.PollAsync());
+        Check(controller.BlocksInput && !paused && ReferenceEquals(visible, canvas.Strokes[0]),
+            "A same-document geometry gap flashed existing ink or enabled stale input");
+        typeof(WordLectureController).GetField("_geometryGapAt", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+            .SetValue(controller, Environment.TickCount64 - 600);
+        Wait(controller.PollAsync());
+        Check(paused && controller.BlocksInput && ReferenceEquals(visible, canvas.Strokes[0]),
+            "Prolonged geometry loss showed stale editable ink or discarded stored strokes");
+        var gapGate = (WordRefreshGate)typeof(WordLectureController).GetField("_refreshGate", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(controller);
+        Check(gapGate.Delay(Environment.TickCount64) >= 200, "Prolonged geometry loss repeatedly woke Word at the fast recovery rate");
+        transport.Frame = Frame(); Wait(controller.PollAsync());
+        Check(!controller.BlocksInput && !paused, "Same-document geometry recovery did not restore input");
         foreach (string status in new[] { "Busy", "Timeout", "Locating" })
         {
             transport.Frame = new WordFrame { Status = status }; Wait(controller.PollAsync());

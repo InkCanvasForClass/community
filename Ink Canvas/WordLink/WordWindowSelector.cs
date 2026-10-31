@@ -51,7 +51,7 @@ namespace Ink_Canvas.WordLink
             try
             {
                 using var process = Process.GetProcessById((int)pid);
-                return process.ProcessName.Equals("WINWORD", StringComparison.OrdinalIgnoreCase);
+                return InkCanvasWordLink.WordProcessPolicy.IsSupported(process.ProcessName);
             }
             catch (Exception ex) when (ex is ArgumentException or InvalidOperationException or System.ComponentModel.Win32Exception) { return false; }
         }

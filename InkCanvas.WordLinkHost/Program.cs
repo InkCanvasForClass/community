@@ -52,9 +52,10 @@ internal static class Program
                 { frame = new WordFrame { Status = "Busy" }; }
                 catch (Exception ex)
                 {
+                    bool wps = observer.IsWps;
                     observer.ResetConnection();
                     Console.Error.WriteLine($"[WordLinkHost] {ex.GetType().Name}: 0x{ex.HResult:X8}");
-                    frame = new WordFrame { Status = "Unavailable" };
+                    frame = new WordFrame { Status = wps ? "WpsUnavailable" : "Unavailable" };
                 }
                 TraceStage(null);
                 Console.WriteLine(JsonSerializer.Serialize(frame));

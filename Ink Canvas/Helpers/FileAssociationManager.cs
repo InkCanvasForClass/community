@@ -583,19 +583,7 @@ namespace Ink_Canvas.Helpers
                     ipcEvent.Set();
                 }
 
-                Thread.Sleep(1000);
-
-                try
-                {
-                    if (File.Exists(ipcFilePath))
-                    {
-                        File.Delete(ipcFilePath);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"清理插件文件 IPC 失败: {ex.Message}", LogHelper.LogType.Warning);
-                }
+                // 接收端负责删除；宿主忙碌或插件尚在加载时不能丢弃请求。
 
                 LogHelper.WriteLogToFile("插件文件 IPC 路径发送完成", LogHelper.LogType.Event);
                 return true;
@@ -773,7 +761,15 @@ namespace Ink_Canvas.Helpers
                     string[] files = Directory.GetFiles(tempDir, prefix + "*.tmp");
                     foreach (string file in files)
                     {
-                        try { File.Delete(file); cleaned++; }
+                        try
+                        {
+                            // Preserve newly queued plugin opens during cold startup.
+                            if (prefix == IpcPluginFileOpenPrefix &&
+                                DateTime.UtcNow - File.GetLastWriteTimeUtc(file) < TimeSpan.FromMinutes(5))
+                                continue;
+                            File.Delete(file);
+                            cleaned++;
+                        }
                         catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                     }
                 }
@@ -806,17 +802,16 @@ namespace Ink_Canvas.Helpers
                         {
                             // 重置事件，清除可能残留的信号
                             ipcEvent.Reset();
+                            ProcessIpcFiles();
 
                             while (true)
                             {
                                 // 等待IPC事件
                                 if (ipcEvent.WaitOne(IpcTimeout))
                                 {
-                                    // 处理IPC文件
-                                    ProcessIpcFiles();
-
-                                    // 重置事件
+                                    // Reset before draining so a concurrent sender cannot lose its wake-up.
                                     ipcEvent.Reset();
+                                    ProcessIpcFiles();
                                 }
 
                                 // 检查应用是否还在运行

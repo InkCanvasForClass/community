@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.IO;
 using InkCanvasWordLink;
 
 namespace InkCanvasWordLinkHost;
@@ -35,6 +36,9 @@ internal sealed class WordObserver : IDisposable
     private bool _focusMode, _focusCommandSupported = true;
     private Native.Rect _focusViewport;
     private long _focusCheckedAt;
+    private bool _namedDispatch;
+    internal bool IsWps => _namedDispatch;
+    private readonly WpsConnection _wps = new();
     internal int NativeAttachments { get; private set; }
     internal int PreviewReads { get; private set; }
     internal int DiscoverySamples { get; private set; }
@@ -49,12 +53,33 @@ internal sealed class WordObserver : IDisposable
         if (!Native.IsWindow(root) || Native.IsIconic(root) || !Native.IsWindowVisible(root)) return new();
         Native.GetWindowThreadProcessId(root, out uint pid);
         using var process = Process.GetProcessById((int)pid);
-        if (!process.ProcessName.Equals("WINWORD", StringComparison.OrdinalIgnoreCase)) return new();
+        if (!WordProcessPolicy.IsSupported(process.ProcessName)) return new();
+        bool wps = WordProcessPolicy.IsWps(process.ProcessName);
         IntPtr documentHwnd = Native.FindDocument(root);
+        if (documentHwnd == IntPtr.Zero && wps) documentHwnd = root;
         if (documentHwnd == IntPtr.Zero) return new WordFrame { Status = "Waiting" };
-        using var scope = new ComScope();
+        using var scope = new ComScope(wps);
         Guid dispatch = new("00020400-0000-0000-C000-000000000046");
-        if (_boundWindow == null || _boundRoot != root || _boundDocument != documentHwnd || _boundProcess != pid)
+        if (wps)
+        {
+            if (_boundRoot != root || _boundProcess != pid) ResetConnection();
+            object native;
+            try { native = _wps.Window(root, documentHwnd); }
+            catch (Exception ex) when (ex is InvalidOperationException or MissingMemberException
+                || ex is COMException com && !OfficeMessageFilter.IsBusy(com.HResult))
+            {
+                LastDiagnostic = $"WPS binding unavailable: {ex.GetType().Name}";
+                return new WordFrame { Status = "WpsUnavailable" };
+            }
+            if (ReferenceEquals(native, _boundWindow)) Marshal.ReleaseComObject(native);
+            else
+            {
+                if (_boundWindow != null) Marshal.ReleaseComObject(_boundWindow);
+                _boundWindow = native; NativeAttachments++;
+            }
+            _namedDispatch = true; _boundRoot = root; _boundDocument = documentHwnd; _boundProcess = pid;
+        }
+        else if (_boundWindow == null || _boundRoot != root || _boundDocument != documentHwnd || _boundProcess != pid)
         {
             ResetConnection();
             _trace?.Invoke("native-attach");
@@ -70,7 +95,7 @@ internal sealed class WordObserver : IDisposable
         _trace?.Invoke("document");
         // Retain the native window only on this helper's STA. Recreating the
         // automation binding for every poll needlessly re-enters Office setup.
-        var window = new OfficeObject(_boundWindow);
+        var window = new OfficeObject(_boundWindow, _namedDispatch);
         // Keep one owning RCW reference between requests. Releasing the last
         // document reference lets its proxy identity change on the next poll,
         // which falsely invalidates every anchor and document revision cache.
@@ -81,12 +106,12 @@ internal sealed class WordObserver : IDisposable
             if (_boundDocumentObject != null) Marshal.ReleaseComObject(_boundDocumentObject);
             _boundDocumentObject = currentDocument;
         }
-        var document = new OfficeObject(_boundDocumentObject);
+        var document = new OfficeObject(_boundDocumentObject, _namedDispatch);
         IntPtr documentIdentity = Marshal.GetIUnknownForObject(document.Value);
         long identityValue;
         try { identityValue = documentIdentity.ToInt64(); }
         finally { Marshal.Release(documentIdentity); }
-        if ((request.ScrollPreview || request.VerifyCachedView) && request.TargetPage == 0 && request.TargetZoomPercentage == 0 && request.TargetFocusMode == null
+        if (!request.Recalibrate && (request.ScrollPreview || request.VerifyCachedView) && request.TargetPage == 0 && request.TargetZoomPercentage == 0 && request.TargetFocusMode == null
             && _lastReadyFrame?.NeedsRefinement == false
             && _lastReadyFrame.WindowHandle == request.WindowHandle
             && request.ExpectedDocumentKey == _lastReadyFrame.DocumentKey && identityValue == _lastDocumentIdentity)
@@ -95,13 +120,15 @@ internal sealed class WordObserver : IDisposable
             if (preview != null) return preview;
             // Crossing a page can invalidate every cached character. Discovery
             // is still needed, but never perform a full search on every wheel tick.
-            if (Environment.TickCount64 < _previewFallbackAt) return new WordFrame { Status = "Locating" };
-            _previewFallbackAt = Environment.TickCount64 + 500;
+            if (Environment.TickCount64 < _previewFallbackAt)
+                return new WordFrame { Status = "Locating", DocumentKey = _lastReadyFrame.DocumentKey,
+                    Revision = _lastReadyFrame.Revision, WindowHandle = request.WindowHandle };
+            _previewFallbackAt = Environment.TickCount64 + 80;
         }
         var view = scope.Keep(window.Get<object>("View"));
         var panes = scope.Keep(window.Get<object>("Panes"));
         if (view.Get<int>("Type") != 3 || panes.Get<int>("Count") != 1) return new WordFrame { Status = "PrintLayoutRequired" };
-        string path = document.Get<string>("Path");
+        string path = document.Get<string>("Path") ?? "";
         string name = document.Get<string>("Name");
         string identity = path.Length > 0 ? (document.Get<string>("FullName")).ToUpperInvariant()
             : $"unsaved:{pid}:{process.StartTime.ToUniversalTime().Ticks}:{root.ToInt64()}:{name}";
@@ -130,8 +157,8 @@ internal sealed class WordObserver : IDisposable
         }
         int total = _pageCount;
         if (total <= 0) return new WordFrame { Status = "Locating" };
-        if (request.TargetFocusMode is { } focusTarget && request.ExpectedDocumentKey == key
-            && Native.GetWindowRect(documentHwnd, out var focusViewport)
+        if (!_namedDispatch && request.TargetFocusMode is { } focusTarget && request.ExpectedDocumentKey == key
+            && TryViewport(documentHwnd, out var focusViewport)
             && ReadFocusMode(scope, window, view, focusViewport, force: true) != focusTarget)
         {
             if (_focusCommandSupported)
@@ -142,7 +169,7 @@ internal sealed class WordObserver : IDisposable
                 var activeWindow = scope.Keep(application.Get<object>("ActiveWindow"));
                 if (activeWindow.Get<int>("Hwnd") != window.Get<int>("Hwnd"))
                     return new WordFrame { Status = "Locating" };
-                new OfficeObject(_focusCommandBars).Call("ExecuteMso", "ViewFocusModeView");
+                new OfficeObject(_focusCommandBars, _namedDispatch).Call("ExecuteMso", "ViewFocusModeView");
             }
             else view.Set("FullScreen", focusTarget);
             _focusCheckedAt = 0;
@@ -169,14 +196,32 @@ internal sealed class WordObserver : IDisposable
             navigationRange = target.Value;
             _anchors.Clear();
         }
-        if (!Native.GetWindowRect(documentHwnd, out var viewport)) return new WordFrame { Status = "Locating" };
+        if (!TryViewport(documentHwnd, out var viewport)) return new WordFrame { Status = _namedDispatch ? "WpsUnavailable" : "Locating" };
         _trace?.Invoke("geometry");
         double scale = Native.GetDpiForWindow(root) / 72.0 * percentage / 100.0;
         bool discover = Environment.TickCount64 - _lastDiscovery >= 2000 || Math.Abs(scale - _lastScale) > .001;
         _lastScale = scale;
         var frame = new WordFrame { DocumentKey = key, DocumentName = name, WindowHandle = root.ToInt64(), PageCount = total,
-            SessionKey = sessionKey, Viewport = viewport.ToDto(), Revision = _revision, ZoomPercentage = percentage };
+            SessionKey = sessionKey, Viewport = viewport.ToDto(), Revision = _revision, ZoomPercentage = percentage, SupportsFocusMode = !_namedDispatch };
         var candidates = new List<WordAnchor>();
+        int freshCenterPage = 0;
+        // After a large scroll, old characters are often far offscreen. Probe
+        // the visible centre before paying for every obsolete cached range.
+        if ((request.ScrollPreview || request.Recalibrate) && _lastReadyFrame != null && navigationRange == null)
+        {
+            try
+            {
+                DiscoverySamples++;
+                var hit = scope.Keep(window.Call("RangeFromPoint", (viewport.Left + viewport.Right) / 2, (viewport.Top + viewport.Bottom) / 2));
+                if (hit?.IsRange == true)
+                {
+                    var range = scope.Keep(hit.Get<object>("Duplicate"));
+                    var visible = ReadAnchor(window.Value, range.Value);
+                    if (visible.HasValue) { candidates.Add(visible.Value); freshCenterPage = visible.Value.Page; }
+                }
+            }
+            catch (Exception ex) when (IsUnavailablePoint(ex)) { }
+        }
         if (navigationRange != null)
         {
             try
@@ -188,6 +233,7 @@ internal sealed class WordObserver : IDisposable
         }
         foreach (var old in _anchors)
         {
+            if ((request.ScrollPreview || request.Recalibrate) && candidates.Count > 0 && candidates.All(a => a.Page != old.Page)) continue;
             // A previously calibrated character plus the current DPI/zoom gives
             // a scroll origin. Avoid sampling two points at different animation
             // instants; full stationary queries still validate multiple anchors.
@@ -199,6 +245,7 @@ internal sealed class WordObserver : IDisposable
                 var range = scope.Keep(document.Call("Range", old.Start, old.Start + 1));
                 int left = 0, top = 0, width = 0, height = 0;
                 window.GetPoint(out left, out top, out width, out height, range);
+                if (width < 0 || height <= 0) continue;
                 candidates.Add(old with { ScreenX = left, ScreenY = top });
             }
             catch (COMException ex) when (!OfficeMessageFilter.IsBusy(ex.HResult)) { }
@@ -215,6 +262,7 @@ internal sealed class WordObserver : IDisposable
             }
         centerPage = known.Where(p => p.Bounds.X <= centerX && centerX <= p.Bounds.X + p.Bounds.Width
             && p.Bounds.Y <= centerY && centerY <= p.Bounds.Y + p.Bounds.Height).Select(p => p.Number).FirstOrDefault();
+        if (centerPage == 0) centerPage = freshCenterPage;
         bool knownSpread = known.Count > 1 && known.Any(p => known.Any(other => p.Number != other.Number
             && Math.Abs(p.Bounds.Y - other.Bounds.Y) < 10 && p.Bounds.Y <= centerY && centerY <= p.Bounds.Y + p.Bounds.Height));
         // Cached geometry is enough while it covers the centre. Immediately
@@ -242,8 +290,11 @@ internal sealed class WordObserver : IDisposable
         bool firstPage = _lastReadyFrame == null && candidates.Count > 0 && request.TargetPage == 0;
         bool exposedEdge = known.Count > 0 && (known.Min(p => p.Number) > 1 && known.Min(p => p.Bounds.Y) > viewport.Top + 20
             || known.Max(p => p.Number) < total && known.Max(p => p.Bounds.Y + p.Bounds.Height) < viewport.Bottom - 20);
-        if (!firstPage && (known.Count == 0 || candidates.Count == 0 || _anchors.Count == 0
-            || exposedEdge || (discover && !request.ScrollPreview) || (centerPage > 0 && !_anchors.Any(a => a.Page == centerPage))))
+        bool freshVisiblePage = request.ScrollPreview && candidates.Count > 0 && candidates.All(a => !_pageLayouts.ContainsKey(a.Page));
+        // Settling already sampled a fresh centre. Only discover uncovered
+        // edges here; periodic background discovery belongs to ordinary reads.
+        if (!firstPage && !freshVisiblePage && (known.Count == 0 || candidates.Count == 0 || _anchors.Count == 0
+            || exposedEdge || (discover && !request.ScrollPreview && !request.Recalibrate)))
         {
             _lastDiscovery = Environment.TickCount64;
             var seen = candidates.Select(a => a.Start).ToHashSet();
@@ -325,7 +376,9 @@ internal sealed class WordObserver : IDisposable
             }
             catch (COMException ex) when (!OfficeMessageFilter.IsBusy(ex.HResult)) { }
         }
+        frame.Pages.RemoveAll(page => !IntersectsViewport(page.Bounds, frame.Viewport));
         WordPageGeometry.RetainVisibleNeighbours(_lastReadyFrame, frame);
+        if (WordPageGeometry.HasOverlappingPages(frame.Pages)) { frame.Status = "Locating"; return frame; }
         var previousAnchors = _anchors.ToArray();
         _anchors.Clear();
         var reliable = candidates.Where(a => frame.Pages.Count == 0 || frame.Pages.Any(p => p.Number == a.Page
@@ -367,6 +420,7 @@ internal sealed class WordObserver : IDisposable
             catch (COMException ex) when (!OfficeMessageFilter.IsBusy(ex.HResult)) { }
         }
         frame.CurrentPage = _currentPage = WordPageGeometry.SelectCurrentPage(frame.Pages, frame.Viewport, centerPage, preferredPage);
+        if (frame.CurrentPage == 0) { frame.Status = "Locating"; return frame; }
         frame.IsFocusMode = ReadFocusMode(scope, window, view, viewport);
         frame.Status = "Ready";
         frame.NeedsRefinement = firstPage;
@@ -380,9 +434,9 @@ internal sealed class WordObserver : IDisposable
     {
         _trace?.Invoke("scroll-preview");
         PreviewReads++;
-        var window = new OfficeObject(windowObject);
-        var document = new OfficeObject(documentObject);
-        if (!Native.GetWindowRect(documentHwnd, out var viewport)) return null;
+        var window = new OfficeObject(windowObject, _namedDispatch);
+        var document = new OfficeObject(documentObject, _namedDispatch);
+        if (!TryViewport(documentHwnd, out var viewport)) return null;
         var view = scope.Keep(window.Get<object>("View"));
         if (view.Get<int>("Type") != 3) return new WordFrame { Status = "PrintLayoutRequired" };
         var zoom = scope.Keep(view.Get<object>("Zoom"));
@@ -390,35 +444,40 @@ internal sealed class WordObserver : IDisposable
         double scale = Native.GetDpiForWindow(root) / 72.0 * percentage / 100.0;
         var frame = new WordFrame { DocumentKey = _lastReadyFrame.DocumentKey, DocumentName = _lastReadyFrame.DocumentName,
             SessionKey = _lastReadyFrame.SessionKey, Revision = _lastReadyFrame.Revision, PageCount = _lastReadyFrame.PageCount,
-            WindowHandle = root.ToInt64(), Viewport = viewport.ToDto(), ZoomPercentage = percentage };
+            WindowHandle = root.ToInt64(), Viewport = viewport.ToDto(), ZoomPercentage = percentage, SupportsFocusMode = !_namedDispatch };
         var measuredAnchors = new Dictionary<int, WordAnchor>();
-        foreach (var group in _anchors.GroupBy(a => a.Page))
+        bool lostAnchor = false;
+        foreach (var group in _anchors.GroupBy(a => a.Page).OrderByDescending(g => g.Key == _currentPage))
         {
             if (!_pageLayouts.TryGetValue(group.Key, out var layout)) continue;
             var measured = new List<WordAnchor>();
             foreach (var anchor in group.OrderBy(a => Math.Abs(a.ScreenY - (viewport.Top + viewport.Bottom) / 2.0)))
             {
+                if (!verify && lostAnchor) break;
                 try
                 {
                     var range = scope.Keep(document.Call("Range", anchor.Start, anchor.Start + 1));
                     int x = 0, y = 0, width = 0, height = 0;
                     window.GetPoint(out x, out y, out width, out height, range);
+                    if (width < 0 || height <= 0) { lostAnchor = true; continue; }
+                    if (!IntersectsViewport(new WordRect { X = x, Y = y, Width = Math.Max(1, width), Height = Math.Max(1, height) }, frame.Viewport)) continue;
                     measured.Add(anchor with { ScreenX = x, ScreenY = y });
                     measuredAnchors[anchor.Start] = measured[^1];
                     if (!verify) break;
                 }
-                catch (COMException ex) when (!OfficeMessageFilter.IsBusy(ex.HResult)) { }
+                catch (COMException ex) when (!OfficeMessageFilter.IsBusy(ex.HResult)) { lostAnchor = true; }
             }
             var bounds = WordPageGeometry.Solve(measured, layout.WidthPoints, layout.HeightPoints, scale);
             if (bounds != null)
                 frame.Pages.Add(new WordPageFrame { Number = layout.Number, Start = layout.Start, End = layout.End,
                     WidthPoints = layout.WidthPoints, HeightPoints = layout.HeightPoints, Bounds = bounds });
+            if (!verify && frame.Pages.Count > 0) break;
         }
-        for (int i = 0; i < _anchors.Count; i++)
-            if (measuredAnchors.TryGetValue(_anchors[i].Start, out var measured)) _anchors[i] = measured;
-        if (frame.Pages.Count == 0) return null;
+        if (frame.Pages.Count == 0) { LastDiagnostic = "preview: no visible anchor"; return null; }
         WordPageGeometry.RetainVisibleNeighbours(_lastReadyFrame, frame);
-        if (WordPageGeometry.NeedsAdjacentPage(frame.Pages, frame.Viewport, frame.PageCount)) return null;
+        if (WordPageGeometry.HasOverlappingPages(frame.Pages)) return null;
+        if (WordPageGeometry.NeedsAdjacentPage(frame.Pages, frame.Viewport, frame.PageCount))
+        { LastDiagnostic = "preview: exposed edge " + string.Join(";", frame.Pages.Select(p => $"{p.Number}:{p.Bounds.Y},{p.Bounds.Height}")); return null; }
         // If the centre exposes an unknown page, let the bounded full discovery
         // find it. Known text at an edge must not keep the old page active forever.
         double centerY = frame.Viewport.Y + frame.Viewport.Height / 2;
@@ -429,17 +488,25 @@ internal sealed class WordObserver : IDisposable
             && frame.Pages.Any(below => below.Number == above.Number + 1 && below.Bounds.Y >= centerY
                 && below.Bounds.X <= centerX && centerX <= below.Bounds.X + below.Bounds.Width));
         if (centerRow.Length == 0 ? !measuredPageGap : centerX < centerRow.Min(p => p.Bounds.X)
-            || centerX > centerRow.Max(p => p.Bounds.X + p.Bounds.Width)) return null;
+            || centerX > centerRow.Max(p => p.Bounds.X + p.Bounds.Width)) { LastDiagnostic = "preview: uncovered centre"; return null; }
         frame.Pages = frame.Pages.OrderBy(p => p.Number).ToList();
-        frame.CurrentPage = WordPageGeometry.SelectCurrentPage(frame.Pages, frame.Viewport, preferredPage: _currentPage);
+        frame.CurrentPage = _currentPage = WordPageGeometry.SelectCurrentPage(frame.Pages, frame.Viewport, preferredPage: _currentPage);
+        if (frame.CurrentPage == 0) return null;
         frame.IsFocusMode = ReadFocusMode(scope, window, view, viewport);
         frame.Status = "Ready";
         frame.CachedGeometry = true;
+        for (int i = 0; i < _anchors.Count; i++)
+            if (measuredAnchors.TryGetValue(_anchors[i].Start, out var measured)) _anchors[i] = measured;
+        _lastReadyFrame = frame;
         return frame;
     }
 
+    private static bool IntersectsViewport(WordRect bounds, WordRect viewport) => bounds.X < viewport.X + viewport.Width
+        && bounds.X + bounds.Width > viewport.X && bounds.Y < viewport.Y + viewport.Height && bounds.Y + bounds.Height > viewport.Y;
+
     private bool ReadFocusMode(ComScope scope, OfficeObject window, OfficeObject view, Native.Rect viewport, bool force = false)
     {
+        if (_namedDispatch) return false;
         bool changed = viewport.Left != _focusViewport.Left || viewport.Top != _focusViewport.Top
             || viewport.Right != _focusViewport.Right || viewport.Bottom != _focusViewport.Bottom;
         // Focus changes the document viewport. Keep these Office UI reads off
@@ -458,7 +525,7 @@ internal sealed class WordObserver : IDisposable
                     _focusCommandBars = application.Get<object>("CommandBars");
                 }
                 // Microsoft's Office control identifier for Word's Focus toggle.
-                focus = Convert.ToBoolean(new OfficeObject(_focusCommandBars).Call("GetPressedMso", "ViewFocusModeView"));
+                focus = Convert.ToBoolean(new OfficeObject(_focusCommandBars, _namedDispatch).Call("GetPressedMso", "ViewFocusModeView"));
             }
             catch (COMException ex) when (!OfficeMessageFilter.IsBusy(ex.HResult)) { _focusCommandSupported = false; }
         }
@@ -475,8 +542,8 @@ internal sealed class WordObserver : IDisposable
 
     private WordAnchor? ReadAnchor(object windowObject, object rangeObject)
     {
-        var window = new OfficeObject(windowObject);
-        var range = new OfficeObject(rangeObject);
+        var window = new OfficeObject(windowObject, _namedDispatch);
+        var range = new OfficeObject(rangeObject, _namedDispatch);
         if (range.Get<int>("StoryType") != 1) return null;
         range.Call("Collapse", 1);
         _trace?.Invoke("anchor-information");
@@ -489,6 +556,7 @@ internal sealed class WordObserver : IDisposable
         int left = 0, top = 0, width = 0, height = 0;
         _trace?.Invoke("anchor-screen-point");
         window.GetPoint(out left, out top, out width, out height, range);
+        if (width < 0 || height <= 0) return null;
         return new WordAnchor(page, start, px, py, left, top);
     }
 
@@ -522,6 +590,7 @@ internal sealed class WordObserver : IDisposable
     private static string Hash(string text) => Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(text)));
     internal void ResetConnection()
     {
+        _wps.Dispose(); _namedDispatch = false;
         if (_focusCommandBars != null)
         {
             try { Marshal.ReleaseComObject(_focusCommandBars); } catch (InvalidComObjectException) { }
@@ -544,13 +613,16 @@ internal sealed class WordObserver : IDisposable
     }
     public void Dispose() { ResetConnection(); _revisions.Clear(); }
 
-    private sealed class ComScope : IDisposable
+    private bool TryViewport(IntPtr document, out Native.Rect viewport) => _namedDispatch && document == _boundRoot
+        ? _wps.TryViewport(_boundRoot, out viewport) : Native.GetWindowRect(document, out viewport);
+
+    private sealed class ComScope(bool namedDispatch = false) : IDisposable
     {
         private readonly List<object> _objects = new();
         internal OfficeObject Keep(object value)
         {
             if (value != null && Marshal.IsComObject(value) && !_objects.Any(o => ReferenceEquals(o, value))) _objects.Add(value);
-            return value == null ? null : new OfficeObject(value);
+            return value == null ? null : new OfficeObject(value, namedDispatch);
         }
         public void Dispose()
         {

@@ -44,9 +44,10 @@ namespace Ink_Canvas.WordLink
                 // back to a high frequency after one unusually fast response.
                 _scrollCost = Math.Max(Math.Clamp(elapsed, 0, 500), _scrollCost * 3 / 4);
                 // Scale continuously: a small timing fluctuation must not turn
-                // a smooth stream into a long pause. Reserve twice the recent
-                // query cost for Word input/rendering, with a 16ms minimum cycle.
-                _nextQuery = now + Math.Max(8, Math.Max(16 - _scrollCost, _scrollCost * 2));
+                // a smooth stream into a long pause. Proven lightweight queries
+                // reserve one query cost; slower work retains twice the budget.
+                long reserve = cachedGeometry == true && _scrollCost <= 24 ? _scrollCost : _scrollCost * 2;
+                _nextQuery = now + Math.Max(8, Math.Max(16 - _scrollCost, reserve));
             }
             else
             {

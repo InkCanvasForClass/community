@@ -3,7 +3,7 @@
   <data name="Enable" xml:space="preserve"><value>Enable Word lecture annotations</value></data>
   <data name="EnableHint" xml:space="preserve"><value>Follow the foreground Microsoft Word document and save ink per page.</value></data>
   <data name="ShowNavigation" xml:space="preserve"><value>Show Word navigation</value></data>
-  <data name="ScopeHint" xml:space="preserve"><value>Supports Microsoft Word Print Layout with one pane. Word annotations use the WPF canvas; the native ink setting is preserved and restored afterwards. Avoid editing document text or layout during a lecture; detected changes pause annotations.</value></data>
+  <data name="ScopeHint" xml:space="preserve"><value>Supports Microsoft Word print layout with one pane. WPS Writer requires compatible automation and accessibility interfaces. Uses WPF ink; verify annotation versions and positions after editing text or layout.</value></data>
   <data name="StorageHint" xml:space="preserve"><value>Annotations are stored separately under WordAnnotations in the application folder. Word files are not modified. Input is paused during connection, save failures or uncertain page positioning.</value></data>
   <data name="Previous" xml:space="preserve"><value>Previous</value></data>
   <data name="Next" xml:space="preserve"><value>Next</value></data>
@@ -49,4 +49,8 @@
   <data name="AutoEnterFocusModeHint" xml:space="preserve"><value>Enter Focus after connecting. Manually exiting prevents automatic re-entry for that document.</value></data>
   <data name="FocusToolbarOpacity" xml:space="preserve"><value>Toolbar opacity in Focus mode</value></data>
   <data name="ExitFocus" xml:space="preserve"><value>Exit Focus</value></data>
+  <data name="History" xml:space="preserve"><value>Annotation history</value></data>
+  <data name="HistoryConfirm" xml:space="preserve"><value>Restore this annotation version? Current annotations will be backed up and the historical file kept. Text or layout may have changed; verify annotation positions after restoring.</value></data>
+  <data name="WpsUnavailable" xml:space="preserve"><value>This WPS window does not expose a usable automation interface or document viewport. Open a local WPS Writer document and check that automation components are available.</value></data>
+  <data name="HistoryFailed" xml:space="preserve"><value>Annotation history could not be restored. The original history file is preserved. Check storage permissions and logs.</value></data>
 </root>

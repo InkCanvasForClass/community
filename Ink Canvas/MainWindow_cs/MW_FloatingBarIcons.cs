@@ -3593,7 +3593,7 @@ namespace Ink_Canvas
             SetFloatingBarHighlightPosition("cursor");
 
             // 切换前自动截图保存墨迹
-            if (inkCanvas.Strokes.Count > 0 &&
+            if (!_wordAutoToolChanging && inkCanvas.Strokes.Count > 0 &&
                 inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
             {
                 if (IsInPPTPresentationMode)
@@ -3712,7 +3712,7 @@ namespace Ink_Canvas
 
             // 注意：快捷调色盘的可见性现在完全由工具栏规则集管理，不需要手动设置
 
-            if (!isFloatingBarFolded)
+            if (!isFloatingBarFolded && !_wordAutoToolChanging)
             {
                 HideSubPanels("cursor", true);
                 await Task.Delay(50);
@@ -4655,6 +4655,7 @@ namespace Ink_Canvas
                         MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.Cancel) return;
             }
 
+            if (!SaveWordBeforeRestart()) return;
             Process.Start(System.Windows.Forms.Application.ExecutablePath, "-m");
             _forceCloseFromExitOrRestartButton = true;
             _exitApplicationRequested = true;
@@ -6404,6 +6405,7 @@ namespace Ink_Canvas
         /// <param name="mode">模式名称</param>
         private void UpdateCurrentToolMode(string mode)
         {
+            if (!_wordAutoToolChanging) _wordBoundaryTool.UserSelectedTool();
             if (!string.Equals(mode, "roaming", StringComparison.Ordinal) && IsBoardRoamingMode)
             {
                 EndBoardRoaming();

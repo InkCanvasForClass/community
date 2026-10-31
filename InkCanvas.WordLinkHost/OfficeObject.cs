@@ -6,10 +6,19 @@ using System.Runtime.InteropServices;
 namespace InkCanvasWordLinkHost;
 
 /// <summary>Late-bound IDispatch calls without per-call-site dynamic binder compilation.</summary>
-internal sealed class OfficeObject(object value)
+internal sealed class OfficeObject(object value, bool namedDispatch = false)
 {
     internal object Value { get; } = value;
-    internal bool IsRange => Supports(new Guid("0002095e-0000-0000-c000-000000000046"));
+    internal bool IsRange
+    {
+        get
+        {
+            if (!namedDispatch) return Supports(new Guid("0002095e-0000-0000-c000-000000000046"));
+            try { _ = Get<int>("Start"); _ = Get<int>("StoryType"); return true; }
+            catch (MissingMemberException) { return false; }
+            catch (COMException ex) when (!OfficeMessageFilter.IsBusy(ex.HResult)) { return false; }
+        }
+    }
     internal bool Supports(Guid iid)
     {
         IntPtr unknown = Marshal.GetIUnknownForObject(Value);
@@ -22,7 +31,11 @@ internal sealed class OfficeObject(object value)
         finally { Marshal.Release(unknown); }
     }
     internal T Get<T>(string name, params object[] arguments)
-        => (T)Invoke(name, BindingFlags.GetProperty, arguments);
+    {
+        object result = Invoke(name, BindingFlags.GetProperty, arguments);
+        if (result == null) return default;
+        return result is T typed ? typed : (T)Convert.ChangeType(result, typeof(T), CultureInfo.InvariantCulture);
+    }
     internal void Set(string name, object value) => Invoke(name, BindingFlags.SetProperty, new[] { value });
     internal object Call(string name, params object[] arguments)
         => Invoke(name, BindingFlags.InvokeMethod, arguments);
@@ -39,7 +52,7 @@ internal sealed class OfficeObject(object value)
     {
         try
         {
-            return Value.GetType().InvokeMember(DispatchName(name, flags), flags | BindingFlags.OptionalParamBinding,
+            return Value.GetType().InvokeMember(namedDispatch ? (name == "FontName" ? "Name" : name) : DispatchName(name, flags), flags | BindingFlags.OptionalParamBinding,
                 null, Value, args, modifiers, CultureInfo.CurrentCulture, null);
         }
         catch (TargetInvocationException ex) when (ex.InnerException != null)

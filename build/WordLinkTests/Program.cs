@@ -41,17 +41,25 @@ internal static partial class Program
         Directory.CreateDirectory(root);
         try
         {
-            if (args.Contains("--live-only") || args.Contains("--focus-live-only"))
+            if (args.Contains("--save-race-only"))
             {
-                LiveWordTests.Run(Check, focusOnly: args.Contains("--focus-live-only"));
+                for (int i = 0; i < 12; i++) SaveDestinationTests(Path.Combine(root, "race-" + i));
+                Console.WriteLine($"PASS: {_checks} repeated save-destination checks"); return 0;
+            }
+            if (args.Contains("--live-only") || args.Contains("--focus-live-only") || args.Contains("--tracking-live-only") || args.Contains("--stability-live-only"))
+            {
+                LiveWordTests.Run(Check, focusOnly: args.Contains("--focus-live-only"),
+                    trackingOnly: args.Contains("--tracking-live-only") || args.Contains("--stability-live-only"),
+                    stabilityOnly: args.Contains("--stability-live-only"));
                 Console.WriteLine($"PASS: {_checks} Microsoft Word checks");
                 return 0;
             }
-            GeometryTests(); StoreTests(root); SaveDestinationTests(root); LocalInkCommitTests(root); CanonicalSnapshotTests(root); MarginInkTests(root); TransientRecoveryTests(root); LiveProjectionTests(root); ProjectionTests(root); ProjectionLoadTests(); ToolHandoffTests(root); NavigationTests(root); ScrollSchedulingTests(root); HostTests();
+            WordInputRegionTests(); GeometryTests(); StoreTests(root); SaveDestinationTests(root); LocalInkCommitTests(root); DeferredInkPostprocessTests(root); CanonicalSnapshotTests(root); MarginInkTests(root); TransientRecoveryTests(root); LiveProjectionTests(root); ProjectionTests(root); ProjectionLoadTests(); ToolHandoffTests(root); NavigationTests(root); ScrollSchedulingTests(root); HostTests();
             TouchStartupTests(root);
             ZoomTests(root);
             PlacementTests(root);
             FocusTests(root);
+            RestartRecoveryTests(root);
             if (args.Contains("--live")) LiveWordTests.Run(Check);
             if (args.Contains("--wheel-live")) LiveWordTests.Run(Check, wheelOnly: true);
             Console.WriteLine($"PASS: {_checks} Word link checks" + (args.Contains("--live") || args.Contains("--wheel-live") ? " including Microsoft Word" : ""));
@@ -88,6 +96,9 @@ internal static partial class Program
         Check(WordPageGeometry.Solve(unstable.Take(2).ToArray(), 595.3, 841.9, 120.0 / 72) == null,
             "Conflicting points were guessed without a strict majority");
         var invalid = Frame(); invalid.Pages[0].Bounds.Width = double.NaN;
+        var rounded = WordPageGeometry.Solve(new[] { new WordAnchor(1, 0, 50, 50, 175, 175), new WordAnchor(1, 1, 90, 90, 236, 236) }, 600, 800, 1.5);
+        Check(rounded != null && rounded.Width == 900 && rounded.Height == 1200,
+            "Pixel rounding was amplified into a different full-page zoom");
         Check(!invalid.IsValid(), "Untrusted frame accepted non-finite geometry");
         invalid = Frame(); invalid.Pages.Add(invalid.Pages[0]); Check(!invalid.IsValid(), "Duplicate page accepted");
         invalid = Frame(); invalid.DocumentKey = "../../private"; Check(!invalid.IsValid(), "Unsafe storage key accepted");
@@ -100,6 +111,8 @@ internal static partial class Program
         Check(WordPageGeometry.SelectCurrentPage(pages, viewport) == 2, "Offscreen page centres overrode the mostly visible current page");
         Check(WordPageGeometry.SelectCurrentPage(pages, viewport, 1) == 2, "Nearest text from another page was mistaken for the centre page");
         Check(WordPageGeometry.SelectCurrentPage(pages, viewport, 9) == 2, "Unknown centre page displaced a visible page");
+        Check(WordPageGeometry.SelectCurrentPage(pages, new WordRect { X = 0, Y = 20000, Width = 800, Height = 600 }, preferredPage: 2) == 0,
+            "An offscreen cached page was reported as the current page");
         var spread = new[]
         {
             new WordPageFrame { Number = 3, Bounds = new WordRect { X = 0, Y = 0, Width = 240, Height = 300 } },
@@ -364,9 +377,11 @@ internal static partial class Program
             annotationEnabled: () => annotation, automaticPolling: false);
         controller.Configure(true, true); Wait(controller.PollAsync());
         Check(canvas.EditingMode == InkCanvasEditingMode.None && !canvas.IsHitTestVisible, "Entering Word consumed cursor input");
+        Check(controller.AnnotationViewport != null, "Cursor mode lost the Word rendering viewport and would hide existing ink");
         annotation = true; canvas.EditingMode = InkCanvasEditingMode.Ink; Wait(controller.PollAsync());
         target = 0; Wait(controller.PollAsync());
         Check(canvas.EditingMode == InkCanvasEditingMode.Ink && canvas.IsHitTestVisible, "Leaving Word restored a stale cursor state over the pen");
+        Check(controller.AnnotationViewport == null, "Inactive Word retained a document input region");
         target = 10; Wait(controller.PollAsync());
         annotation = false; canvas.EditingMode = InkCanvasEditingMode.None; Wait(controller.PollAsync());
         target = 0; Wait(controller.PollAsync());
@@ -397,6 +412,8 @@ internal static partial class Program
     private static void ScrollSchedulingTests(string root)
     {
         var gate = new WordRefreshGate();
+        var cached = new WordRefreshGate(); cached.Scrolled(0); cached.Complete(20, 20, true, true);
+        Check(cached.Delay(20) == 20, "Verified light geometry kept an unnecessary two-query-cost delay");
         var fast = new WordRefreshGate();
         fast.Scrolled(0); fast.Complete(4, 4, true);
         Check(fast.Delay(4) == 12, "Cheap view queries remained capped by a 50ms idle gap");
@@ -442,6 +459,10 @@ internal static partial class Program
         while (controller.BlocksInput && Environment.TickCount64 < deadline) Pump();
         Check(!paused && !controller.BlocksInput && canvas.IsHitTestVisible,
             "Post-scroll sync did not restore editable coordinates");
+        before = transport.Calls;
+        Pump(350);
+        Check(transport.Calls == before && !controller.BlocksInput,
+            "Delayed settling verification entered Office while a pen contact was active");
         contact = false;
         before = transport.Calls;
         for (int i = 0; i < 1000; i++) controller.NotifyViewChanged();

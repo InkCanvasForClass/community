@@ -39,6 +39,16 @@ internal static partial class Program
         double settledY = canvas.PointFromScreen(new Point(150, 31)).Y;
         Check(!projection.IsPreviewing && Math.Abs(shown[0].StylusPoints[0].Y - settledY) < .01
             && document.Pages[1][0].StylusPoints[0].Y == 50, "Settling the view accumulated transforms or changed stored ink");
+        for (int i = 0; i < 100; i++)
+        {
+            frame.Pages[0].Bounds.Y = i % 2 == 0 ? -580 : 100;
+            projection.TryPreview(frame, document);
+            projection.Show(frame, document);
+        }
+        Check(Math.Abs(shown[0].StylusPoints[0].Y - canvas.PointFromScreen(new Point(150, 150)).Y) < .01
+            && canvas.Clip.FillContains(canvas.PointFromScreen(new Point(550, 150)))
+            && document.Pages[1][0].StylusPoints[0].Y == 50,
+            "Repeated reversed previews accumulated ink offsets or retained a partial final clip");
         frame.Pages[0].Bounds.Width *= 1.5; frame.Pages[0].Bounds.Height *= 1.5;
         Check(projection.TryPreview(frame, document), "Zoom preview did not reuse the presentation");
         projection.Show(frame, document);
@@ -46,6 +56,12 @@ internal static partial class Program
             && shown[0].DrawingAttributes.Width == originalWidth,
             "Zoom settlement applied the pen width twice");
         projection.Reset(); canvas.Strokes.Clear();
+        canvas.SetPresentationTransform(new Matrix(1, 0, 0, 1, 0, 5)); Pump(10);
+        canvas.SetPresentationTransform(new Matrix(1, 0, 0, 1, 0, 25)); Pump(50);
+        var animated = (MatrixTransform)typeof(HighlighterInkCanvas).GetField("_viewTransform", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(canvas);
+        Check(animated.Matrix.OffsetY == 25 && animated.Matrix.M11 == 1, "Scroll interpolation did not settle on the authoritative transform");
+        canvas.SetPresentationTransform(null);
+        Check(!animated.HasAnimatedProperties, "A settled or reset scroll retained an animation clock");
 
         frame.Viewport = new InkCanvasWordLink.WordRect { X = 200, Y = 200, Width = 200, Height = 200 };
         projection.Show(frame, document);
@@ -81,6 +97,12 @@ internal static partial class Program
         double controllerSettledY = canvas.PointFromScreen(new Point(150, 200)).Y;
         Check(!controller.BlocksInput && canvas.IsHitTestVisible && Math.Abs(committed.StylusPoints[0].Y - controllerSettledY) < .01,
             "Settled scrolling did not restore exact editing coordinates");
+        Check(transport.LastRequest.Recalibrate && transport.LastRequest.DeferContentCheck,
+            "Recovery from lost geometry failed to recalibrate without scanning document contents");
+        Pump(270); Wait(controller.PollAsync());
+        Check(transport.LastRequest.Recalibrate, "Word's delayed final layout was never rechecked");
+        Wait(controller.PollAsync());
+        Check(!transport.LastRequest.Recalibrate, "A completed settle verification kept forcing full Office reads");
         controller.Undo(false); controller.Undo(true);
         Check(canvas.Strokes.Count == 1 && Math.Abs(canvas.Strokes[0].StylusPoints[0].Y - controllerSettledY) < .01,
             "Live scrolling polluted undo history or restored ink at stale coordinates");

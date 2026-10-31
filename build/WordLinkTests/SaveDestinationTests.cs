@@ -28,7 +28,9 @@ internal static partial class Program
         while (!File.Exists(path) && Environment.TickCount64 < deadline) Pump(10);
         Check(File.Exists(path), "Save As while saving never persisted the new document destination");
         var store = new WordAnnotationStore(storage);
-        Check(Wait(store.LoadAsync(key, revision)).Pages[1].Count == 1, "Save As persisted stale ink");
+        var savedAs = Wait(store.LoadAsync(key, revision));
+        if (savedAs.Pages.GetValueOrDefault(1)?.Count != 1) Console.WriteLine("Save As ink count=" + savedAs.Pages.GetValueOrDefault(1)?.Count + "; canvas=" + canvas.Strokes.Count);
+        Check(savedAs.Pages[1].Count == 1, "Save As persisted stale ink");
         canvas.Strokes.Add(Stroke(200, 200)); Wait(controller.PollAsync());
         source.Frame.Pages[0].End++;
         Wait(controller.PollAsync());
@@ -37,7 +39,9 @@ internal static partial class Program
         deadline = Environment.TickCount64 + 3000;
         while (Wait(store.LoadAsync(key, revision)).Pages.Count != 0 && Environment.TickCount64 < deadline) Pump(20);
         Pump(300);
-        Check(Wait(store.LoadAsync(key, revision)).Pages.Count == 0, "Superseded background save overwrote the fresh layout session");
+        var afterResume = Wait(store.LoadAsync(key, revision));
+        if (afterResume.Pages.Count != 0) Console.WriteLine("After resume ink=" + afterResume.Pages.Sum(p => p.Value.Count) + "; canvas=" + canvas.Strokes.Count + "; status=" + bar.Status);
+        Check(afterResume.Pages.Count == 0, "Superseded background save overwrote the fresh layout session");
         var archives = Directory.GetFiles(Path.Combine(storage, key), "*.json").Where(p => p != path).ToArray();
         Check(archives.Length == 1 && Wait(store.LoadAsync(key, Path.GetFileNameWithoutExtension(archives[0]))).Pages[1].Count == 2,
             "Layout recovery failed to preserve the previous annotation snapshot");

@@ -57,6 +57,11 @@ internal static class WordNavigationRegression
             && ((Border)navigation.FindName("RootBorder")).Opacity == .9
             && ((System.Windows.Media.Effects.DropShadowEffect)((Border)navigation.FindName("RootBorder")).Effect).BlurRadius == 8,
             "Independent Word appearance or right-side zoom was not applied");
+        var zoomControls = (StackPanel)word.FindName("ZoomControls");
+        zoomControls.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        check(zoomControls.DesiredSize.Width <= 112 && ((Button)word.FindName("ZoomInButton")).Width == 34,
+            "Document zoom controls are no longer compact");
+        check(word.FindName("HistoryButton") == null, "The removed history button is still present");
 
         var page = new WordPage(); page.RaiseEvent(new RoutedEventArgs(FrameworkElement.LoadedEvent));
         page.Measure(new Size(1100, 900)); page.Arrange(new Rect(0, 0, 1100, 900));

@@ -20,6 +20,8 @@ namespace Ink_Canvas.Plugins
         Shape = 4,
         /// <summary>漫游（抓手，仅白板模式有效）。</summary>
         Roaming = 5,
+        /// <summary>桌面鼠标模式，退出白板并允许操作其他窗口。</summary>
+        Mouse = 6,
     }
 
     /// <summary>

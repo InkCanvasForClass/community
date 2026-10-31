@@ -34,6 +34,28 @@ namespace Ink_Canvas.WordLink
         private long _scrollVersion;
         private readonly Action<bool> _pausePresentation;
         private readonly Func<bool> _allowed, _inputActive;
+        private int _pendingInkPostprocess;
+        private bool IsInkInputActive => _pendingInkPostprocess > 0 || _inputActive();
+
+        // Capture replaces editable strokes with page projections. Keep the original
+        // stroke alive until pressure/shape processing has finished using its reference.
+        internal IDisposable DeferInkCommit()
+        {
+            if (_disposed || !IsActive) return null;
+            int generation = _generation;
+            ++_pendingInkPostprocess;
+            return new InkPostprocessLease(() =>
+            {
+                if (_disposed || generation != _generation) return;
+                --_pendingInkPostprocess;
+                if (_pendingInkPostprocess == 0) NotifyInkInputCompleted();
+            });
+        }
+
+        private sealed class InkPostprocessLease(Action completed) : IDisposable
+        {
+            public void Dispose() => Interlocked.Exchange(ref completed, null)?.Invoke();
+        }
         private readonly Func<bool> _annotationEnabled;
         private readonly bool _automaticPolling;
         private readonly Action<bool> _ownershipChanged;
@@ -50,6 +72,8 @@ namespace Ink_Canvas.WordLink
         private string _focusDocumentKey, _focusCommandKey;
         private readonly HashSet<string> _autoFocusAttempted = new();
         internal long WindowHandle => _lastWindow;
+        internal WordRect AnnotationViewport => IsActive ? _frame?.Viewport : null;
+        internal event Action InputRegionChanged;
         private readonly Dictionary<string, WordInkDocument> _cache = new();
         private readonly CancellationTokenSource _shutdown = new();
         private StrokeCollection _desktop;
@@ -71,6 +95,9 @@ namespace Ink_Canvas.WordLink
         private Task _hostWarmup = Task.CompletedTask;
         private bool _inkCommitQueued;
         private bool _transientPaused;
+        private long _geometryGapAt;
+        private long _settleVerificationAt;
+        private bool _recalibratePending;
         private int _transientFailures;
         private long _lastInkInput;
         private long _lastFullViewCheck;
@@ -157,7 +184,8 @@ namespace Ink_Canvas.WordLink
         {
             if (_disposed || !_enabled) return;
             ++_scrollVersion;
-            if (IsActive && !_inputActive() && !_scrollPendingView)
+            _settleVerificationAt = 0;
+            if (IsActive && !IsInkInputActive && !_scrollPendingView)
             {
                 _scrollPendingView = true;
                 _canvas.IsHitTestVisible = false;
@@ -187,8 +215,11 @@ namespace Ink_Canvas.WordLink
         {
             if (_busy || _disposed || !_enabled) return;
             int delay = _refreshGate.Delay(Environment.TickCount64);
-            if (_automaticPolling && delay > 0)
+            bool verifyDue = _settleVerificationAt != 0 && Environment.TickCount64 >= _settleVerificationAt;
+            if (_automaticPolling && delay > 0 && !verifyDue)
             {
+                if (_settleVerificationAt != 0)
+                    delay = Math.Min(delay, (int)Math.Clamp(_settleVerificationAt - Environment.TickCount64, 16, 250));
                 _timer.Interval = TimeSpan.FromMilliseconds(delay);
                 if (!_timer.IsEnabled) _timer.Start();
                 return;
@@ -203,7 +234,13 @@ namespace Ink_Canvas.WordLink
             try
             {
                 if (!_allowed()) { Suspend(); return; }
-                if (_inputActive() && !_scrollPendingView && !_transientPaused) return;
+                if (_pendingInkPostprocess > 0 || (IsInkInputActive && !_scrollPendingView && !_transientPaused))
+                {
+                    // A delayed verification must neither move ink under an
+                    // active pen nor wake the dispatcher every frame until lift.
+                    if (verifyDue) _settleVerificationAt = Environment.TickCount64 + 250;
+                    return;
+                }
                 Capture();
                 if (_document?.Dirty == true && !_document.Saving && Environment.TickCount64 >= _document.RetryAfter)
                     _ = SaveAsync(_key, _revision, _document);
@@ -220,29 +257,36 @@ namespace Ink_Canvas.WordLink
                 // its confirmed view is idle. Native view events wake geometry
                 // queries. After new input, a slower fallback detects missed
                 // events/edits without continuously waking a completely idle Word.
-                if (_automaticPolling && _frame?.WindowHandle == target && !BlocksInput && _targetPage == 0
+                if (_automaticPolling && !verifyDue && !_recalibratePending && _frame?.WindowHandle == target && !BlocksInput && _targetPage == 0
                     && _viewVersion == _confirmedViewVersion && (_confirmedInputStamp == inputStamp
                         || Environment.TickCount64 - _lastConfirmedViewAt < 5000))
                     return;
                 if (Environment.TickCount64 < _readRetryAfter) { _bar.SetState("LoadFailed", "", 0, 0, false); return; }
+                bool settling = !_refreshGate.IsScrolling(Environment.TickCount64) && _scrollPendingView;
+                // A verified cached view can restore editing promptly. Rebuild
+                // anchors once Word's animation has settled; an incoherent view
+                // must instead recalibrate before input is enabled at all.
+                if ((settling && _transientPaused) || verifyDue) { _recalibratePending = true; _settleVerificationAt = 0; }
                 var request = new WordRequest { WindowHandle = target, TargetPage = _targetFocus != null ? 0 : _targetPage,
+                    Recalibrate = _recalibratePending && !_refreshGate.IsScrolling(Environment.TickCount64),
                     ExpectedDocumentKey = _targetFocus != null ? _focusCommandKey : _key,
                     TargetZoomPercentage = _targetFocus != null ? 0 : _targetZoom,
                     TargetFocusMode = _targetFocus,
                     ScrollPreview = _refreshGate.IsScrolling(Environment.TickCount64),
                     VerifyCachedView = !_refreshGate.IsScrolling(Environment.TickCount64) && _frame != null && (_scrollPendingView
                         || Environment.TickCount64 - _lastFullViewCheck < 5000),
-                    DeferContentCheck = _targetZoom > 0 || _scrollPendingView || Environment.TickCount64 - _lastViewChange < 700 || _navigationTarget > 0
+                    DeferContentCheck = _recalibratePending || _targetZoom > 0 || _scrollPendingView || Environment.TickCount64 - _lastViewChange < 700 || _navigationTarget > 0
                         || Environment.TickCount64 - _lastInkInput < 1500 };
                 _targetPage = 0;
                 long viewVersion = _viewVersion, scrollVersion = _scrollVersion;
                 await _hostWarmup;
                 if (_disposed || generation != _generation || !_enabled) return;
                 var frame = await _host.ExchangeAsync(request, _shutdown.Token);
+                if (frame?.Status == "Ready" && WordPageGeometry.HasOverlappingPages(frame.Pages)) frame.Status = "Locating";
                 waitingForDocument = frame?.Status == "Waiting";
                 if (frame?.Status == "Ready") cachedGeometry = frame.CachedGeometry;
                 if (_disposed || generation != _generation || !_enabled || !_allowed()) return;
-                if (_inputActive() && !_scrollPendingView && !_transientPaused) return;
+                if (_pendingInkPostprocess > 0 || (IsInkInputActive && !_scrollPendingView && !_transientPaused)) return;
                 // The user may have switched applications during the helper request.
                 if (_targetWindow(target) != target) { Suspend(); return; }
                 bool scrolling = _refreshGate.IsScrolling(Environment.TickCount64) || scrollVersion != _scrollVersion;
@@ -285,13 +329,20 @@ namespace Ink_Canvas.WordLink
                 _discardedViewFrame = false;
                 if (frame == null || frame.Status != "Ready")
                 {
-                    if (frame?.Status == "Locating" && scrolling && _frame != null && !_transientPaused)
+                    if (frame?.Status == "Locating" && _frame != null && frame.WindowHandle == target
+                        && frame.DocumentKey == _key && frame.Revision == _revision && _targetFocus == null
+                        && _targetZoom == 0 && _navigationTarget == 0)
                     {
                         // A text anchor can leave the viewport between samples.
                         // Retain the last visual during motion rather than flash
                         // an empty canvas; editing still requires a settled frame.
                         _scrollPendingView = true;
                         _canvas.IsHitTestVisible = false;
+                        _transientPaused = true;
+                        _transientFailures = 0;
+                        if (_geometryGapAt == 0) _geometryGapAt = Environment.TickCount64;
+                        PausePresentation(Environment.TickCount64 - _geometryGapAt > 500);
+                        _bar.SetState("Locating", _frame.DocumentName, 0, _frame.PageCount, false, _frame.ZoomPercentage);
                         return;
                     }
                     if (frame?.Status is "Busy" or "Timeout" or "Locating")
@@ -308,6 +359,7 @@ namespace Ink_Canvas.WordLink
                             _frame?.PageCount ?? 0, false, _frame?.ZoomPercentage ?? 0);
                         return;
                     }
+                    _settleVerificationAt = 0; _recalibratePending = false;
                     _targetZoom = 0; _zoomWindow = 0;
                     _targetFocus = null;
                     SetFocusMode(false);
@@ -318,6 +370,7 @@ namespace Ink_Canvas.WordLink
                     return;
                 }
                 _lastWindow = frame.WindowHandle;
+                _geometryGapAt = 0;
                 _focusDocumentKey = frame.DocumentKey;
                 SetFocusMode(frame.IsFocusMode);
                 if (_navigationTarget == frame.CurrentPage && _targetPage == 0) _navigationTarget = 0;
@@ -344,6 +397,7 @@ namespace Ink_Canvas.WordLink
                 }
                 if (_layoutPaused)
                 {
+                    _settleVerificationAt = 0; _recalibratePending = false;
                     _bar.SetState("LayoutChanged", frame.DocumentName, frame.CurrentPage, frame.PageCount, true);
                     return;
                 }
@@ -386,11 +440,16 @@ namespace Ink_Canvas.WordLink
                 viewMoved = moved;
                 _frame = frame;
                 _sessionKey = frame.SessionKey;
-                _confirmedViewVersion = _viewVersion;
+                _confirmedViewVersion = scrollVersion == _scrollVersion ? _viewVersion : viewVersion;
                 _lastConfirmedViewAt = Environment.TickCount64;
                 _confirmedInputStamp = inputStamp;
-                if ((!request.ScrollPreview && !request.VerifyCachedView) || changedDocument)
+                if (request.Recalibrate || (!request.ScrollPreview && !request.VerifyCachedView) || changedDocument)
                     _lastFullViewCheck = Environment.TickCount64;
+                if (request.Recalibrate && !scrolling)
+                {
+                    _recalibratePending = false;
+                }
+                if (settling && !scrolling) _settleVerificationAt = Environment.TickCount64 + 250;
                 bool previewed = scrolling && _projection.TryPreview(frame, _document);
                 if (!previewed && (moved || _projection.IsPreviewing))
                     _mutate(() => { _clearTransient(); _projection.Show(frame, _document); });
@@ -400,7 +459,7 @@ namespace Ink_Canvas.WordLink
                 _canvas.IsHitTestVisible = !BlocksInput && _annotationEnabled();
                 _bar.SetState(_savingFailed ? "SaveFailed" : "Ready", frame.DocumentName, frame.CurrentPage, frame.PageCount, false, frame.ZoomPercentage);
                 PublishHistory();
-                if (_autoEnterFocus && !frame.NeedsRefinement && _targetFocus == null && !_inputActive()
+                if (_autoEnterFocus && frame.SupportsFocusMode && !frame.NeedsRefinement && _targetFocus == null && !IsInkInputActive
                     && !_autoFocusAttempted.Contains(FocusDocumentKey(frame)))
                 {
                     if (_autoFocusAttempted.Count >= 128) _autoFocusAttempted.Clear();
@@ -409,6 +468,7 @@ namespace Ink_Canvas.WordLink
             }
             catch (Exception ex)
             {
+                _settleVerificationAt = 0; _recalibratePending = false;
                 _discardedViewFrame = false;
                 _readRetryAfter = Environment.TickCount64 + 5000;
                 Helpers.LogHelper.WriteLogToFile($"[WordLink] Session paused: {ex.GetType().Name}", Helpers.LogHelper.LogType.Error);
@@ -419,15 +479,20 @@ namespace Ink_Canvas.WordLink
             finally
             {
                 _busy = false;
+                InputRegionChanged?.Invoke();
                 long now = Environment.TickCount64;
                 _refreshGate.Complete(now, now - cycleStarted, viewMoved, cachedGeometry);
                 if (_discardedViewFrame) _refreshGate.RetryAfter(now, 16);
-                else if (_transientPaused) _refreshGate.RetryAfter(now, Math.Min(1500, 150 * Math.Max(1, _transientFailures)));
+                else if (_transientPaused) _refreshGate.RetryAfter(now, _transientFailures == 0
+                    ? (now - _geometryGapAt > 500 ? 250 : 40) : Math.Min(1500, 150 * _transientFailures));
                 else if (_scrollPendingView && !_refreshGate.IsScrolling(now)) _refreshGate.RetryAfter(now, 16);
                 else if (_targetPage > 0 || _targetZoom > 0 || _targetFocus != null) _refreshGate.RetryAfter(now, 16);
                 else if (_frame?.NeedsRefinement == true) _refreshGate.RetryAfter(now, 16);
+                else if (_recalibratePending) _refreshGate.RetryAfter(now, 40);
                 else if (waitingForDocument) _refreshGate.RetryAfter(now, 150);
-                _timer.Interval = TimeSpan.FromMilliseconds(Math.Max(16, _refreshGate.Delay(now)));
+                int nextDelay = _refreshGate.Delay(now);
+                if (_settleVerificationAt != 0) nextDelay = Math.Min(nextDelay, (int)Math.Clamp(_settleVerificationAt - now, 0, 250));
+                _timer.Interval = TimeSpan.FromMilliseconds(Math.Max(16, nextDelay));
                 if (_automaticPolling && _enabled && !_disposed) _timer.Start();
             }
         }
@@ -446,6 +511,9 @@ namespace Ink_Canvas.WordLink
 
         internal void Suspend()
         {
+            _pendingInkPostprocess = 0;
+            _settleVerificationAt = 0; _recalibratePending = false;
+            _geometryGapAt = 0;
             SetFocusMode(false);
             _viewWatcher.Dispose();
             _placementTarget = 0; _placeWindow(0);
@@ -463,6 +531,7 @@ namespace Ink_Canvas.WordLink
             bool hitTest = annotation == _desktopAnnotationEnabled ? _desktopHitTest : annotation;
             _mutate(() => { WordInkProjection.ClearSelection(_canvas); _canvas.Strokes.Clear(); _canvas.Strokes.Add(_desktop); _canvas.Clip = _desktopClip; _canvas.IsHitTestVisible = hitTest; });
             _desktop = null; _desktopClip = null; _frame = null; _document = null;
+            InputRegionChanged?.Invoke();
             _key = _revision = _sessionKey = null; _layoutPaused = false; _targetPage = _navigationTarget = 0;
             _targetZoom = 0; _zoomWindow = 0;
             _targetFocus = null; _focusCommandWindow = 0;
@@ -482,7 +551,7 @@ namespace Ink_Canvas.WordLink
         private static string FocusDocumentKey(WordFrame frame) => frame.DocumentKey + ":" + frame.WindowHandle;
         internal void RequestFocusMode(bool focus)
         {
-            if (!_enabled || _inputActive() || !WordFrame.IsHash(_focusDocumentKey)
+            if (!_enabled || IsInkInputActive || !WordFrame.IsHash(_focusDocumentKey)
                 || (_frame == null && (focus || !_focusMode))) return;
             Capture();
             _autoFocusAttempted.Add(_focusDocumentKey + ":" + _lastWindow);
@@ -511,7 +580,7 @@ namespace Ink_Canvas.WordLink
             {
                 _inkCommitQueued = false;
                 if (_disposed || generation != _generation || !_enabled || !IsActive
-                    || _inputActive() || BlocksInput) return;
+                    || IsInkInputActive || BlocksInput) return;
                 try { Capture(); }
                 catch (Exception ex)
                 {
@@ -580,7 +649,7 @@ namespace Ink_Canvas.WordLink
         internal bool Undo(bool redo)
         {
             if (!IsActive) return false;
-            if (_inputActive() || _frame == null || _document == null || _layoutPaused) return true;
+            if (IsInkInputActive || _frame == null || _document == null || _layoutPaused) return true;
             Capture();
             var source = redo ? _document.Redo : _document.Undo;
             var target = redo ? _document.Undo : _document.Redo;
@@ -609,7 +678,7 @@ namespace Ink_Canvas.WordLink
         }
         private void Navigate(int delta)
         {
-            if (_frame == null || _inputActive()) return;
+            if (_frame == null || IsInkInputActive) return;
             Capture();
             int from = _navigationTarget > 0 ? _navigationTarget : _frame.CurrentPage;
             _targetPage = _navigationTarget = Math.Clamp(from + delta, 1, _frame.PageCount);
@@ -618,7 +687,7 @@ namespace Ink_Canvas.WordLink
         }
         private void Zoom(int delta)
         {
-            if (_frame == null || _inputActive() || _layoutPaused || _savingFailed || _transientPaused
+            if (_frame == null || IsInkInputActive || _layoutPaused || _savingFailed || _transientPaused
                 || _frame.NeedsRefinement || _frame.ZoomPercentage is < 10 or > 500) return;
             int target = Math.Clamp((_targetZoom > 0 ? _targetZoom : _frame.ZoomPercentage) + delta, 10, 500);
             if (target == (_targetZoom > 0 ? _targetZoom : _frame.ZoomPercentage)) return;
@@ -653,6 +722,17 @@ namespace Ink_Canvas.WordLink
                 && Math.Abs(pair.First.Bounds.Y - pair.Second.Bounds.Y) < .25
                 && Math.Abs(pair.First.Bounds.Width - pair.Second.Bounds.Width) < .25
                 && Math.Abs(pair.First.Bounds.Height - pair.Second.Bounds.Height) < .25);
+
+        internal bool FlushForRestart()
+        {
+            if (_disposed) return true;
+            Capture();
+            var saves = _cache.Where(p => p.Value.Dirty).Select(entry =>
+                _store.SaveCanonicalAsync(entry.Key[..64], entry.Key[64..], entry.Value)).ToArray();
+            if (saves.Length == 0) return _store.Flush(TimeSpan.FromSeconds(3));
+            var completed = Task.WhenAll(saves);
+            return completed.Wait(TimeSpan.FromSeconds(3)) && completed.Result.All(saved => saved);
+        }
 
         public void Dispose()
         {

@@ -4,10 +4,59 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Interop;
+using System.Windows.Input;
 using Ink_Canvas.WordLink;
 
 internal static partial class Program
 {
+    private static void DeferredInkPostprocessTests(string root)
+    {
+        var canvas = new InkCanvas();
+        using var surface = new HwndSource(new HwndSourceParameters("Word deferred pressure fixture") { Width = 1200, Height = 1000 });
+        surface.RootVisual = canvas;
+        canvas.Measure(new Size(1200, 1000)); canvas.Arrange(new Rect(0, 0, 1200, 1000));
+        var transport = new FrameSource { Frame = Frame() };
+        string storage = Path.Combine(root, "deferred-pressure");
+        using var controller = new WordLectureController(canvas, new Ink_Canvas.Controls.WordLectureBar(), storage,
+            () => true, () => false, _ => { }, action => action(), (_, _) => { }, transport, _ => 10, automaticPolling: false);
+        controller.Configure(true, true); Wait(controller.PollAsync());
+        var origin = canvas.PointFromScreen(new Point(180, 200));
+        var stroke = new Stroke(new StylusPointCollection(Enumerable.Range(0, 20)
+            .Select(i => new StylusPoint(origin.X + i * 3, origin.Y + i, .5f))));
+        var outer = controller.DeferInkCommit();
+        var recognition = controller.DeferInkCommit();
+        canvas.Strokes.Add(stroke);
+        outer.Dispose(); outer.Dispose();
+        Pump();
+        int calls = transport.Calls;
+        Wait(controller.PollAsync());
+        Check(ReferenceEquals(canvas.Strokes.Single(), stroke) && transport.Calls == calls,
+            "Word replaced an input stroke before asynchronous pressure processing completed");
+        var points = stroke.StylusPoints.Clone();
+        for (int i = 0; i < points.Count; i++)
+        {
+            var point = points[i]; point.PressureFactor = .8f - .7f * i / (points.Count - 1); points[i] = point;
+        }
+        stroke.StylusPoints = points;
+        stroke.DrawingAttributes.IgnorePressure = false;
+        recognition.Dispose(); Pump();
+        Check(canvas.Strokes.Count == 1 && canvas.Strokes[0].StylusPoints[0].PressureFactor > .7
+            && canvas.Strokes[0].StylusPoints[^1].PressureFactor < .2 && !canvas.Strokes[0].DrawingAttributes.IgnorePressure,
+            "Delayed brush-tip pressure was lost during the page projection");
+        Check(controller.FlushForRestart(), "Finished pressure stroke could not be saved");
+        var saved = Wait(new WordAnnotationStore(storage).LoadAsync(new string('a', 64), new string('b', 64)));
+        Check(saved.Pages[1][0].StylusPoints[^1].PressureFactor < .2, "Saved Word ink lost its tapered tip");
+        var stale = controller.DeferInkCommit();
+        controller.Suspend();
+        Wait(controller.PollAsync());
+        var current = controller.DeferInkCommit();
+        stale.Dispose();
+        var nextStroke = Stroke(origin.X + 100, origin.Y); canvas.Strokes.Add(nextStroke); Pump();
+        Check(canvas.Strokes.Contains(nextStroke), "An old session's completion released the new session's input guard");
+        current.Dispose(); Pump();
+        Check(controller.FlushForRestart(), "A stale completion left ink commits permanently paused");
+    }
+
     private static void LocalInkCommitTests(string root)
     {
         var canvas = new InkCanvas();

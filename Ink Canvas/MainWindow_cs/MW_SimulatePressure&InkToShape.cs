@@ -1,4 +1,4 @@
-using Ink_Canvas.Helpers;
+﻿using Ink_Canvas.Helpers;
 using Ink_Canvas.Ink.WinRT;
 using System;
 using System.Collections.Generic;
@@ -370,6 +370,12 @@ namespace Ink_Canvas
         /// Keeps fade / pressure / velocity tip / straighten / shape / handwriting / edge expand order.
         /// </summary>
         private void ProcessCommittedStroke(Stroke stroke)
+        {
+            using var wordCommit = _wordOwnsCanvas ? _wordLecture?.DeferInkCommit() : null;
+            ProcessCommittedStrokeCore(stroke);
+        }
+
+        private void ProcessCommittedStrokeCore(Stroke stroke)
         {
             using var uiWork = _uiResponsivenessMonitor?.EnterOperation("stroke-postprocess");
             if (stroke == null)
@@ -1007,28 +1013,39 @@ namespace Ink_Canvas
                         // WinRT 路径若同步等待还可能与贴回 UI 的延续死锁（见类注释 InkToShapeSerial）。
                         var strokeHw = strokeForHandwritingBeautify;
                         var wsTail = wasStraightened;
+                        var wordCommit = _wordOwnsCanvas ? _wordLecture?.DeferInkCommit() : null;
                         // ApplicationIdle：在更高优先级（布局/输入/本帧渲染）之后执行，减轻抬笔瞬间主线程“顶死”感。
-                        Dispatcher.BeginInvoke(new Action(async () =>
+                        try
                         {
-                            try
+                            var operation = Dispatcher.BeginInvoke(new Action(async () =>
                             {
-                                await InkToShapeProcessCoreAsync();
-                                var strokeAfterTail = RunStrokeCollectedPostShapeRecognitionTail(e, wsTail);
-                                if (wsTail && strokeHw != null && inkCanvas.Strokes.Contains(strokeHw))
-                                    PublishPluginCanvasLineCandidate(
-                                        strokeHw,
-                                        Plugins.CanvasLineSource.AutoStraightenedInk);
-                                if (Settings.InkToShape.EnableWinRtHandwritingStrokeBeautify)
+                                try
                                 {
-                                    var canvasStrokeForHw = wsTail ? strokeHw : strokeAfterTail;
-                                    ScheduleHandwritingGlyphReplaceAfterStrokeCollected(canvasStrokeForHw);
+                                    await InkToShapeProcessCoreAsync();
+                                    var strokeAfterTail = RunStrokeCollectedPostShapeRecognitionTail(e, wsTail);
+                                    if (wsTail && strokeHw != null && inkCanvas.Strokes.Contains(strokeHw))
+                                        PublishPluginCanvasLineCandidate(
+                                            strokeHw,
+                                            Plugins.CanvasLineSource.AutoStraightenedInk);
+                                    if (Settings.InkToShape.EnableWinRtHandwritingStrokeBeautify)
+                                    {
+                                        var canvasStrokeForHw = wsTail ? strokeHw : strokeAfterTail;
+                                        ScheduleHandwritingGlyphReplaceAfterStrokeCollected(canvasStrokeForHw);
+                                    }
                                 }
-                            }
-                            catch (Exception ex)
-                            {
-                                System.Diagnostics.Debug.WriteLine(ex);
-                            }
-                        }), DispatcherPriority.ApplicationIdle);
+                                catch (Exception ex)
+                                {
+                                    System.Diagnostics.Debug.WriteLine(ex);
+                                }
+                                finally { wordCommit?.Dispose(); }
+                            }), DispatcherPriority.ApplicationIdle);
+                            operation.Aborted += (_, _) => wordCommit?.Dispose();
+                        }
+                        catch
+                        {
+                            wordCommit?.Dispose();
+                            throw;
+                        }
                         return true;
                     }
 

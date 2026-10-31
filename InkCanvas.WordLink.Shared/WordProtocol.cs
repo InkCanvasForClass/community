@@ -4,6 +4,11 @@ using System.Linq;
 
 namespace InkCanvasWordLink
 {
+    public static class WordProcessPolicy
+    {
+        public static bool IsWps(string name) => string.Equals(name, "wps", StringComparison.OrdinalIgnoreCase);
+        public static bool IsSupported(string name) => IsWps(name) || string.Equals(name, "WINWORD", StringComparison.OrdinalIgnoreCase);
+    }
     public sealed class WordRequest
     {
         public int Version { get; set; } = 1;
@@ -15,6 +20,7 @@ namespace InkCanvasWordLink
         public bool DeferContentCheck { get; set; }
         public bool ScrollPreview { get; set; }
         public bool VerifyCachedView { get; set; }
+        public bool Recalibrate { get; set; }
         public bool Handshake { get; set; }
         public bool ReleaseDocument { get; set; }
     }
@@ -34,6 +40,7 @@ namespace InkCanvasWordLink
         public bool NeedsRefinement { get; set; }
         public bool CachedGeometry { get; set; }
         public bool IsFocusMode { get; set; }
+        public bool SupportsFocusMode { get; set; } = true;
         public WordRect Viewport { get; set; } = new();
         public List<WordPageFrame> Pages { get; set; } = new();
         public bool IsValid() => Version == 1 && DocumentName != null && Pages != null && Viewport != null
@@ -76,6 +83,19 @@ namespace InkCanvasWordLink
 
     public static class WordPageGeometry
     {
+        // Physical paper rectangles cannot overlap in print layout. More than
+        // two screen pixels indicates samples taken at different scroll instants.
+        public static bool HasOverlappingPages(IReadOnlyList<WordPageFrame> pages)
+        {
+            for (int i = 0; i < pages.Count; i++)
+                for (int j = i + 1; j < pages.Count; j++)
+                {
+                    var a = pages[i].Bounds; var b = pages[j].Bounds;
+                    if (Math.Min(a.X + a.Width, b.X + b.Width) - Math.Max(a.X, b.X) > 2
+                        && Math.Min(a.Y + a.Height, b.Y + b.Height) - Math.Max(a.Y, b.Y) > 2) return true;
+                }
+            return false;
+        }
         // A page margin can remain visible after every sampled character has
         // scrolled offscreen. Move that previously measured page with a common
         // visible neighbour; never invent a page gap or carry across reflow/zoom.
@@ -121,7 +141,11 @@ namespace InkCanvasWordLink
             double centerX = viewport.X + viewport.Width / 2, centerY = viewport.Y + viewport.Height / 2;
             if (pages.Any(p => p.Number == centerPage && p.Bounds.X <= centerX && centerX <= p.Bounds.X + p.Bounds.Width
                 && p.Bounds.Y <= centerY && centerY <= p.Bounds.Y + p.Bounds.Height)) return centerPage;
+            var containing = pages.FirstOrDefault(p => p.Bounds.X <= centerX && centerX <= p.Bounds.X + p.Bounds.Width
+                && p.Bounds.Y <= centerY && centerY <= p.Bounds.Y + p.Bounds.Height);
+            if (containing != null) return containing.Number;
             double largest = pages.Max(VisibleArea);
+            if (largest <= 0) return 0;
             // At a side-by-side page gap, tiny pixel-rounding differences must
             // not override an explicit navigation target or make the label flap.
             if (pages.Any(p => p.Number == preferredPage && VisibleArea(p) > 0 && VisibleArea(p) >= largest * .9)) return preferredPage;
@@ -155,6 +179,18 @@ namespace InkCanvasWordLink
 
         private static WordRect SolveConsistent(IReadOnlyList<WordAnchor> anchors, double width, double height, double expectedScale)
         {
+            // GetPoint rounds to screen pixels. Fitting a new zoom from a few
+            // rounded characters magnifies that noise over the full page and
+            // disagrees with the single-anchor scroll path. Prefer the known
+            // DPI/Word zoom whenever the measurements support it.
+            double fixedX = anchors.Average(a => a.ScreenX - a.PageX * expectedScale);
+            double fixedY = anchors.Average(a => a.ScreenY - a.PageY * expectedScale);
+            if (anchors.All(a => Math.Abs(a.ScreenX - fixedX - a.PageX * expectedScale) <= 4
+                && Math.Abs(a.ScreenY - fixedY - a.PageY * expectedScale) <= 4))
+            {
+                var fixedBounds = new WordRect { X = fixedX, Y = fixedY, Width = width * expectedScale, Height = height * expectedScale };
+                return fixedBounds.IsValid() ? fixedBounds : null;
+            }
             double sx = FitScale(anchors, false, expectedScale), sy = FitScale(anchors, true, expectedScale);
             if (sx is < 0.05 or > 20 || sy is < 0.05 or > 20 || Math.Abs(sx / sy - 1) > 0.08) return null;
             double x = anchors.Average(a => a.ScreenX - a.PageX * sx);

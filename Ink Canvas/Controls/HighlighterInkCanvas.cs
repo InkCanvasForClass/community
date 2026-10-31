@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using Ink_Canvas.Ink;
 
@@ -22,6 +24,7 @@ namespace Ink_Canvas.Controls
         private double _presentationOpacity;
         private Transform _originalPresentationTransform;
         private MatrixTransform _viewTransform;
+        private long _presentationSampleAt;
 
         internal void SetPresentationTransform(Matrix? matrix)
         {
@@ -36,13 +39,44 @@ namespace Ink_Canvas.Controls
                     transforms.Children.Add(_viewTransform);
                     InkPresenter.RenderTransform = transforms;
                 }
-                _viewTransform.Matrix = matrix.Value;
+                long now = Environment.TickCount64;
+                Matrix displayed = _viewTransform.Matrix, target = matrix.Value;
+                bool smooth = _presentationSampleAt != 0 && now - _presentationSampleAt is >= 8 and <= 150
+                    && displayed.M11 == target.M11 && displayed.M22 == target.M22
+                    && displayed.M12 == target.M12 && displayed.M21 == target.M21
+                    && Math.Abs(displayed.OffsetY - target.OffsetY) < Math.Max(100, ActualHeight / 2)
+                    && Math.Abs(displayed.OffsetX - target.OffsetX) < Math.Max(100, ActualWidth / 2);
+                _viewTransform.BeginAnimation(MatrixTransform.MatrixProperty, null);
+                _viewTransform.Matrix = target;
+                if (smooth && displayed != target)
+                {
+                    // Bounded interpolation between measured samples; never predict
+                    // motion, move editable points, or animate zoom/page jumps.
+                    var animation = new TranslationAnimation(displayed, target)
+                    { Duration = TimeSpan.FromMilliseconds(Math.Clamp(now - _presentationSampleAt, 8, 32)), FillBehavior = FillBehavior.Stop };
+                    _viewTransform.BeginAnimation(MatrixTransform.MatrixProperty, animation);
+                }
+                _presentationSampleAt = now;
             }
             else if (_viewTransform != null)
             {
+                _viewTransform.BeginAnimation(MatrixTransform.MatrixProperty, null);
                 InkPresenter.RenderTransform = _originalPresentationTransform;
                 _originalPresentationTransform = null;
                 _viewTransform = null;
+                _presentationSampleAt = 0;
+            }
+        }
+
+        private sealed class TranslationAnimation(Matrix from, Matrix to) : MatrixAnimationBase
+        {
+            protected override Freezable CreateInstanceCore() => new TranslationAnimation(from, to);
+            protected override Matrix GetCurrentValueCore(Matrix defaultOriginValue, Matrix defaultDestinationValue, AnimationClock clock)
+            {
+                double progress = clock.CurrentProgress ?? 1;
+                return new Matrix(to.M11, to.M12, to.M21, to.M22,
+                    from.OffsetX + (to.OffsetX - from.OffsetX) * progress,
+                    from.OffsetY + (to.OffsetY - from.OffsetY) * progress);
             }
         }
 

@@ -59,6 +59,25 @@ namespace Ink_Canvas.WordLink
             return result;
         });
 
+        internal Task<(string Revision, DateTime Modified)[]> HistoryAsync(string key, string revision) => Task.Run(() =>
+        {
+            _ = PathFor(key, revision);
+            string directory = Path.Combine(_root, key);
+            if (!Directory.Exists(directory)) return Array.Empty<(string, DateTime)>();
+            try
+            {
+                return new DirectoryInfo(directory).EnumerateFiles("*.json").Where(file => file.Length > 32 && file.Name != revision + ".json"
+                    && WordFrame.IsHash(Path.GetFileNameWithoutExtension(file.Name)))
+                    .OrderByDescending(file => file.LastWriteTimeUtc).Take(32)
+                    .Select(file => (Path.GetFileNameWithoutExtension(file.Name), file.LastWriteTime)).ToArray();
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                Helpers.LogHelper.WriteLogToFile($"[WordLink] History listing failed: {ex.GetType().Name}", Helpers.LogHelper.LogType.Warning);
+                return Array.Empty<(string, DateTime)>();
+            }
+        });
+
         internal Task<bool> SaveAsync(string key, string revision, WordInkDocument document)
         {
             // Stroke data is cloned on its owning UI thread. Serialization and disk I/O

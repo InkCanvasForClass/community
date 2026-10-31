@@ -50,20 +50,22 @@
   </Border>
   <StackPanel x:Name="Navigation" Orientation="Horizontal" HorizontalAlignment="Left">
    <local:PPTNavBar x:Name="PageNavigation" Direction="LeftBottom" VerticalAlignment="Center"/>
+    <StackPanel x:Name="ExtraControls" Orientation="Horizontal">
     <StackPanel x:Name="ZoomControls" Orientation="Horizontal">
      <Border Width="1" Height="22" Background="{DynamicResource WordNavBorder}" Margin="2,0" VerticalAlignment="Center"/>
-     <Button x:Name="ZoomOutButton" Width="50" Padding="0" Click="ZoomOutClick"
+     <Button x:Name="ZoomOutButton" Width="34" MinWidth="34" Height="40" Padding="0" Click="ZoomOutClick"
              ToolTip="{x:Static p:WordStrings.ZoomOut}" AutomationProperties.Name="{x:Static p:WordStrings.ZoomOut}">
-      <Path Data="M2,10 H18" Width="20" Height="20" Stroke="{DynamicResource WordNavForeground}" StrokeThickness="2"
+      <Path Data="M2,10 H18" Width="16" Height="16" Stroke="{DynamicResource WordNavForeground}" StrokeThickness="2"
             StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
      </Button>
-     <TextBlock x:Name="ZoomText" Text="—" MinWidth="44" FontSize="12" VerticalAlignment="Center" TextAlignment="Center"
+     <TextBlock x:Name="ZoomText" Text="—" MinWidth="36" FontSize="11" VerticalAlignment="Center" TextAlignment="Center"
                 ToolTip="{x:Static p:WordStrings.DocumentZoom}" AutomationProperties.Name="{x:Static p:WordStrings.DocumentZoom}"/>
-     <Button x:Name="ZoomInButton" Width="50" Padding="0" Click="ZoomInClick"
+     <Button x:Name="ZoomInButton" Width="34" MinWidth="34" Height="40" Padding="0" Click="ZoomInClick"
              ToolTip="{x:Static p:WordStrings.ZoomIn}" AutomationProperties.Name="{x:Static p:WordStrings.ZoomIn}">
-      <Path Data="M2,10 H18 M10,2 V18" Width="20" Height="20" Stroke="{DynamicResource WordNavForeground}" StrokeThickness="2"
+      <Path Data="M2,10 H18 M10,2 V18" Width="16" Height="16" Stroke="{DynamicResource WordNavForeground}" StrokeThickness="2"
             StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
      </Button>
+    </StackPanel>
     </StackPanel>
   </StackPanel>
  </StackPanel>

@@ -1521,13 +1521,32 @@ namespace Ink_Canvas
         /// <summary>
         /// 供插件全屏服务调用的入口：进入/退出全屏（包装 FullScreenHelper，保存/恢复窗口状态）。
         /// </summary>
+        private bool _pluginSuspendedAvoidFullScreen;
+
         internal void SetPluginFullScreen(bool isFullScreen)
         {
             try
             {
-                if (isFullScreen == isFullScreenApplied) return;
-                if (isFullScreen) Helpers.FullScreenHelper.StartFullScreen(this);
-                else Helpers.FullScreenHelper.EndFullScreen(this);
+                if (isFullScreen)
+                {
+                    if (Helpers.AvoidFullScreenHelper.GetIsAvoidFullScreenEnabled(this))
+                    {
+                        _pluginSuspendedAvoidFullScreen = true;
+                        Helpers.AvoidFullScreenHelper.StopAvoidFullScreen(this);
+                    }
+                    Helpers.FullScreenHelper.StartFullScreen(this);
+                }
+                else
+                {
+                    Helpers.FullScreenHelper.EndFullScreen(this);
+                    if (_pluginSuspendedAvoidFullScreen)
+                    {
+                        _pluginSuspendedAvoidFullScreen = false;
+                        Helpers.AvoidFullScreenHelper.StartAvoidFullScreen(this);
+                    }
+                }
+                Helpers.FullScreenHelper.MarkFullscreenWindowTaskbarList(
+                    new WindowInteropHelper(this).Handle, isFullScreen);
                 isFullScreenApplied = isFullScreen;
             }
             catch (Exception ex)
