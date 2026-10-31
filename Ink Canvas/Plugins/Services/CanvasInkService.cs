@@ -81,6 +81,24 @@ namespace Ink_Canvas.Plugins
         public bool InsertImage()
             => RunOnUi(() => _mainWindow.InsertPluginImage());
 
+        public async System.Threading.Tasks.Task<bool> InsertImageFromFileAsync(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path)) return false;
+            try
+            {
+                if (_mainWindow.Dispatcher.CheckAccess())
+                    return await _mainWindow.InsertPluginImageFromFileAsync(path);
+
+                return await (await _mainWindow.Dispatcher.InvokeAsync(
+                    () => _mainWindow.InsertPluginImageFromFileAsync(path))).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Helpers.LogHelper.WriteLogToFile($"CanvasInkService.InsertImageFromFileAsync failed: {ex.Message}", Helpers.LogHelper.LogType.Warning);
+                return false;
+            }
+        }
+
         public void ChangeBackgroundColor()
             => RunOnUi(() => _mainWindow.ChangePluginBackgroundColor());
 
