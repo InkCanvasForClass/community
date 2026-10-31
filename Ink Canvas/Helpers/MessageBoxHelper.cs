@@ -280,7 +280,8 @@ namespace Ink_Canvas.Helpers
                 };
                 autoCloseTimer.Tick += (s, e) =>
                 {
-                    try { box.Close(MessageBoxResult.None); } catch (Exception ex)
+                    try { box.Close(MessageBoxResult.None); }
+                    catch (Exception ex)
                     {
                         LogHelper.WriteLogToFile($"[UI] 自动关闭消息框失败: {ex.Message}", LogHelper.LogType.Info);
                     }

@@ -401,47 +401,47 @@ namespace Ink_Canvas.UInk
                 case (int)UInkShapeType.Line:
                 case (int)UInkShapeType.Polyline:
                 case (int)UInkShapeType.Polygon:
-                {
-                    var line = (UInkLineGeometry)g;
-                    w.WriteMapHeader(1);
-                    w.Write("points");
-                    w.WriteArrayHeader(line.Points.Count);
-                    foreach (var p in line.Points) WriteShapePoint(ref w, p);
-                    break;
-                }
+                    {
+                        var line = (UInkLineGeometry)g;
+                        w.WriteMapHeader(1);
+                        w.Write("points");
+                        w.WriteArrayHeader(line.Points.Count);
+                        foreach (var p in line.Points) WriteShapePoint(ref w, p);
+                        break;
+                    }
                 case (int)UInkShapeType.Rectangle:
                 case (int)UInkShapeType.Ellipse:
-                {
-                    var rect = (UInkRectGeometry)g;
-                    int n = rect.Rotation.HasValue ? 5 : 4;
-                    w.WriteMapHeader(n);
-                    w.Write("centerX"); w.Write(rect.CenterX);
-                    w.Write("centerY"); w.Write(rect.CenterY);
-                    w.Write("width"); w.Write(rect.Width);
-                    w.Write("height"); w.Write(rect.Height);
-                    if (rect.Rotation.HasValue) { w.Write("rotation"); w.Write(rect.Rotation.Value); }
-                    break;
-                }
+                    {
+                        var rect = (UInkRectGeometry)g;
+                        int n = rect.Rotation.HasValue ? 5 : 4;
+                        w.WriteMapHeader(n);
+                        w.Write("centerX"); w.Write(rect.CenterX);
+                        w.Write("centerY"); w.Write(rect.CenterY);
+                        w.Write("width"); w.Write(rect.Width);
+                        w.Write("height"); w.Write(rect.Height);
+                        if (rect.Rotation.HasValue) { w.Write("rotation"); w.Write(rect.Rotation.Value); }
+                        break;
+                    }
                 case (int)UInkShapeType.Square:
-                {
-                    var sq = (UInkSquareGeometry)g;
-                    int n = sq.Rotation.HasValue ? 4 : 3;
-                    w.WriteMapHeader(n);
-                    w.Write("centerX"); w.Write(sq.CenterX);
-                    w.Write("centerY"); w.Write(sq.CenterY);
-                    w.Write("size"); w.Write(sq.Size);
-                    if (sq.Rotation.HasValue) { w.Write("rotation"); w.Write(sq.Rotation.Value); }
-                    break;
-                }
+                    {
+                        var sq = (UInkSquareGeometry)g;
+                        int n = sq.Rotation.HasValue ? 4 : 3;
+                        w.WriteMapHeader(n);
+                        w.Write("centerX"); w.Write(sq.CenterX);
+                        w.Write("centerY"); w.Write(sq.CenterY);
+                        w.Write("size"); w.Write(sq.Size);
+                        if (sq.Rotation.HasValue) { w.Write("rotation"); w.Write(sq.Rotation.Value); }
+                        break;
+                    }
                 case (int)UInkShapeType.Circle:
-                {
-                    var ci = (UInkCircleGeometry)g;
-                    w.WriteMapHeader(3);
-                    w.Write("centerX"); w.Write(ci.CenterX);
-                    w.Write("centerY"); w.Write(ci.CenterY);
-                    w.Write("radius"); w.Write(ci.Radius);
-                    break;
-                }
+                    {
+                        var ci = (UInkCircleGeometry)g;
+                        w.WriteMapHeader(3);
+                        w.Write("centerX"); w.Write(ci.CenterX);
+                        w.Write("centerY"); w.Write(ci.CenterY);
+                        w.Write("radius"); w.Write(ci.Radius);
+                        break;
+                    }
                 default:
                     w.WriteMapHeader(0);
                     break;
@@ -456,72 +456,72 @@ namespace Ink_Canvas.UInk
                 case (int)UInkShapeType.Line:
                 case (int)UInkShapeType.Polyline:
                 case (int)UInkShapeType.Polygon:
-                {
-                    var line = new UInkLineGeometry();
-                    for (int i = 0; i < count; i++)
                     {
-                        var key = r.ReadString();
-                        if (key == "points")
+                        var line = new UInkLineGeometry();
+                        for (int i = 0; i < count; i++)
                         {
-                            int len = r.ReadArrayHeader();
-                            for (int j = 0; j < len; j++) line.Points.Add(ReadShapePoint(ref r));
+                            var key = r.ReadString();
+                            if (key == "points")
+                            {
+                                int len = r.ReadArrayHeader();
+                                for (int j = 0; j < len; j++) line.Points.Add(ReadShapePoint(ref r));
+                            }
+                            else r.Skip();
                         }
-                        else r.Skip();
+                        return line;
                     }
-                    return line;
-                }
                 case (int)UInkShapeType.Rectangle:
                 case (int)UInkShapeType.Ellipse:
-                {
-                    var rect = new UInkRectGeometry();
-                    for (int i = 0; i < count; i++)
                     {
-                        var key = r.ReadString();
-                        switch (key)
+                        var rect = new UInkRectGeometry();
+                        for (int i = 0; i < count; i++)
                         {
-                            case "centerX": rect.CenterX = ReadSingleTolerant(ref r); break;
-                            case "centerY": rect.CenterY = ReadSingleTolerant(ref r); break;
-                            case "width": rect.Width = ReadSingleTolerant(ref r); break;
-                            case "height": rect.Height = ReadSingleTolerant(ref r); break;
-                            case "rotation": rect.Rotation = ReadSingleTolerant(ref r); break;
-                            default: r.Skip(); break;
+                            var key = r.ReadString();
+                            switch (key)
+                            {
+                                case "centerX": rect.CenterX = ReadSingleTolerant(ref r); break;
+                                case "centerY": rect.CenterY = ReadSingleTolerant(ref r); break;
+                                case "width": rect.Width = ReadSingleTolerant(ref r); break;
+                                case "height": rect.Height = ReadSingleTolerant(ref r); break;
+                                case "rotation": rect.Rotation = ReadSingleTolerant(ref r); break;
+                                default: r.Skip(); break;
+                            }
                         }
+                        return rect;
                     }
-                    return rect;
-                }
                 case (int)UInkShapeType.Square:
-                {
-                    var sq = new UInkSquareGeometry();
-                    for (int i = 0; i < count; i++)
                     {
-                        var key = r.ReadString();
-                        switch (key)
+                        var sq = new UInkSquareGeometry();
+                        for (int i = 0; i < count; i++)
                         {
-                            case "centerX": sq.CenterX = ReadSingleTolerant(ref r); break;
-                            case "centerY": sq.CenterY = ReadSingleTolerant(ref r); break;
-                            case "size": sq.Size = ReadSingleTolerant(ref r); break;
-                            case "rotation": sq.Rotation = ReadSingleTolerant(ref r); break;
-                            default: r.Skip(); break;
+                            var key = r.ReadString();
+                            switch (key)
+                            {
+                                case "centerX": sq.CenterX = ReadSingleTolerant(ref r); break;
+                                case "centerY": sq.CenterY = ReadSingleTolerant(ref r); break;
+                                case "size": sq.Size = ReadSingleTolerant(ref r); break;
+                                case "rotation": sq.Rotation = ReadSingleTolerant(ref r); break;
+                                default: r.Skip(); break;
+                            }
                         }
+                        return sq;
                     }
-                    return sq;
-                }
                 case (int)UInkShapeType.Circle:
-                {
-                    var ci = new UInkCircleGeometry();
-                    for (int i = 0; i < count; i++)
                     {
-                        var key = r.ReadString();
-                        switch (key)
+                        var ci = new UInkCircleGeometry();
+                        for (int i = 0; i < count; i++)
                         {
-                            case "centerX": ci.CenterX = ReadSingleTolerant(ref r); break;
-                            case "centerY": ci.CenterY = ReadSingleTolerant(ref r); break;
-                            case "radius": ci.Radius = ReadSingleTolerant(ref r); break;
-                            default: r.Skip(); break;
+                            var key = r.ReadString();
+                            switch (key)
+                            {
+                                case "centerX": ci.CenterX = ReadSingleTolerant(ref r); break;
+                                case "centerY": ci.CenterY = ReadSingleTolerant(ref r); break;
+                                case "radius": ci.Radius = ReadSingleTolerant(ref r); break;
+                                default: r.Skip(); break;
+                            }
                         }
+                        return ci;
                     }
-                    return ci;
-                }
                 default:
                     for (int i = 0; i < count; i++) { r.ReadString(); r.Skip(); }
                     return null;
@@ -563,12 +563,12 @@ namespace Ink_Canvas.UInk
                     case "opacity": s.Opacity = ReadSingleTolerant(ref r); break;
                     case "width": s.Width = ReadSingleTolerant(ref r); break;
                     case "dashArray":
-                    {
-                        int len = r.ReadArrayHeader();
-                        s.DashArray = new List<float>(len);
-                        for (int j = 0; j < len; j++) s.DashArray.Add(ReadSingleTolerant(ref r));
-                        break;
-                    }
+                        {
+                            int len = r.ReadArrayHeader();
+                            s.DashArray = new List<float>(len);
+                            for (int j = 0; j < len; j++) s.DashArray.Add(ReadSingleTolerant(ref r));
+                            break;
+                        }
                     case "dashOffset": s.DashOffset = ReadSingleTolerant(ref r); break;
                     case "startMarker": s.StartMarker = ReadInt32Tolerant(ref r); break;
                     case "endMarker": s.EndMarker = ReadInt32Tolerant(ref r); break;
@@ -688,19 +688,19 @@ namespace Ink_Canvas.UInk
                     case "name": ext.Name = reader.ReadString(); break;
                     case "explanation": ext.Explanation = reader.ReadString(); break;
                     case "devices":
-                    {
-                        int len = reader.ReadArrayHeader();
-                        ext.Devices = new List<UInkDevice>(len);
-                        for (int j = 0; j < len; j++) ext.Devices.Add(UInkFmt.ReadDevice(ref reader));
-                        break;
-                    }
+                        {
+                            int len = reader.ReadArrayHeader();
+                            ext.Devices = new List<UInkDevice>(len);
+                            for (int j = 0; j < len; j++) ext.Devices.Add(UInkFmt.ReadDevice(ref reader));
+                            break;
+                        }
                     case "workspaces":
-                    {
-                        int len = reader.ReadArrayHeader();
-                        ext.Workspaces = new List<UInkWorkspace>(len);
-                        for (int j = 0; j < len; j++) ext.Workspaces.Add(UInkFmt.ReadWorkspace(ref reader));
-                        break;
-                    }
+                        {
+                            int len = reader.ReadArrayHeader();
+                            ext.Workspaces = new List<UInkWorkspace>(len);
+                            for (int j = 0; j < len; j++) ext.Workspaces.Add(UInkFmt.ReadWorkspace(ref reader));
+                            break;
+                        }
                     case "extra": ext.Extra = UInkFmt.ReadStringMap(ref reader); break;
                     default: reader.Skip(); break;
                 }
@@ -824,12 +824,12 @@ namespace Ink_Canvas.UInk
                     case "opacity": ink.Opacity = UInkFmt.ReadSingleTolerant(ref reader); break;
                     case "texture": ink.Texture = UInkFmt.ReadInt32Tolerant(ref reader); break;
                     case "points":
-                    {
-                        int len = reader.ReadArrayHeader();
-                        ink.Points = new List<UInkInkPoint>(len);
-                        for (int j = 0; j < len; j++) ink.Points.Add(ReadInkPoint(ref reader));
-                        break;
-                    }
+                        {
+                            int len = reader.ReadArrayHeader();
+                            ink.Points = new List<UInkInkPoint>(len);
+                            for (int j = 0; j < len; j++) ink.Points.Add(ReadInkPoint(ref reader));
+                            break;
+                        }
                     case "renderOnlyWhenLatest": ink.RenderOnlyWhenLatest = UInkFmt.ReadBoolTolerant(ref reader); break;
                     case "extra": ink.Extra = UInkFmt.ReadStringMap(ref reader); break;
                     default: reader.Skip(); break;
@@ -976,14 +976,14 @@ namespace Ink_Canvas.UInk
                     case "width": media.Width = UInkFmt.ReadSingleTolerant(ref reader); break;
                     case "height": media.Height = UInkFmt.ReadSingleTolerant(ref reader); break;
                     case "transform":
-                    {
-                        int len = reader.ReadArrayHeader();
-                        media.Transform = new float[6];
-                        for (int j = 0; j < 6; j++)
-                            media.Transform[j] = j < len ? UInkFmt.ReadSingleTolerant(ref reader) : (j == 0 || j == 3 ? 1f : 0f);
-                        for (int j = 6; j < len; j++) reader.Skip();
-                        break;
-                    }
+                        {
+                            int len = reader.ReadArrayHeader();
+                            media.Transform = new float[6];
+                            for (int j = 0; j < 6; j++)
+                                media.Transform[j] = j < len ? UInkFmt.ReadSingleTolerant(ref reader) : (j == 0 || j == 3 ? 1f : 0f);
+                            for (int j = 6; j < len; j++) reader.Skip();
+                            break;
+                        }
                     case "opacity": media.Opacity = UInkFmt.ReadSingleTolerant(ref reader); break;
                     case "pageCount": media.PageCount = UInkFmt.ReadUInt32Tolerant(ref reader); break;
                     case "pageIndex": media.PageIndex = UInkFmt.ReadUInt32Tolerant(ref reader); break;

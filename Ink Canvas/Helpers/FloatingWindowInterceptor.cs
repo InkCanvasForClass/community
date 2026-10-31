@@ -1029,62 +1029,62 @@ namespace Ink_Canvas.Helpers
                 if (!_isRunning) return;
 
                 try
-            {
-                // 简化的扫描逻辑
-                var interceptedCount = 0;
-                CleanupInvalidWindows();
-
-                // 重置所有规则的发现状态
-                foreach (var rule in _interceptRules.Values)
                 {
-                    rule.FoundWindows.Clear();
-                    rule.foundHwnd = false;
-                    rule.outHwnd = IntPtr.Zero;
-                }
+                    // 简化的扫描逻辑
+                    var interceptedCount = 0;
+                    CleanupInvalidWindows();
 
-                // 枚举所有窗口
-                PInvoke.EnumWindows(EnumWindowsCallback, IntPtr.Zero);
-
-                // 处理找到的窗口
-                foreach (var rule in _interceptRules.Values)
-                {
-                    if (!rule.IsEnabled || rule.FoundWindows.Count == 0) continue;
-
-                    foreach (var hWnd in rule.FoundWindows)
+                    // 重置所有规则的发现状态
+                    foreach (var rule in _interceptRules.Values)
                     {
-                        // 若处于失败冷却期，跳过重试以防日志刷屏
-                        if (_failedWindows.TryGetValue(hWnd, out var failState) && DateTime.UtcNow < failState.NextRetryUtc)
-                        {
-                            continue;
-                        }
+                        rule.FoundWindows.Clear();
+                        rule.foundHwnd = false;
+                        rule.outHwnd = IntPtr.Zero;
+                    }
 
-                        bool shouldIntercept = !_interceptedWindows.ContainsKey(hWnd) ||
-                                             (_interceptedWindows.ContainsKey(hWnd) && IsWindowVisibleToUser(new HWND(hWnd)));
+                    // 枚举所有窗口
+                    PInvoke.EnumWindows(EnumWindowsCallback, IntPtr.Zero);
 
-                        if (shouldIntercept)
+                    // 处理找到的窗口
+                    foreach (var rule in _interceptRules.Values)
+                    {
+                        if (!rule.IsEnabled || rule.FoundWindows.Count == 0) continue;
+
+                        foreach (var hWnd in rule.FoundWindows)
                         {
-                            InterceptWindow(hWnd, rule);
-                            interceptedCount++;
+                            // 若处于失败冷却期，跳过重试以防日志刷屏
+                            if (_failedWindows.TryGetValue(hWnd, out var failState) && DateTime.UtcNow < failState.NextRetryUtc)
+                            {
+                                continue;
+                            }
+
+                            bool shouldIntercept = !_interceptedWindows.ContainsKey(hWnd) ||
+                                                 (_interceptedWindows.ContainsKey(hWnd) && IsWindowVisibleToUser(new HWND(hWnd)));
+
+                            if (shouldIntercept)
+                            {
+                                InterceptWindow(hWnd, rule);
+                                interceptedCount++;
+                            }
                         }
                     }
-                }
 
-                // 更新统计
-                if (interceptedCount == 0)
+                    // 更新统计
+                    if (interceptedCount == 0)
+                    {
+                        _consecutiveEmptyScans++;
+                    }
+                    else
+                    {
+                        _consecutiveEmptyScans = 0;
+                        _lastSuccessfulScan = DateTime.Now;
+                    }
+                }
+                catch (Exception ex)
                 {
+                    LogHelper.WriteLogToFile($"扫描窗口时发生错误: {ex.Message}", LogHelper.LogType.Error);
                     _consecutiveEmptyScans++;
                 }
-                else
-                {
-                    _consecutiveEmptyScans = 0;
-                    _lastSuccessfulScan = DateTime.Now;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"扫描窗口时发生错误: {ex.Message}", LogHelper.LogType.Error);
-                _consecutiveEmptyScans++;
-            }
             }
         }
 

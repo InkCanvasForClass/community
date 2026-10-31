@@ -8,7 +8,7 @@
     <AssemblyName>InkCanvas.Controls</AssemblyName>
     <UseWPF>true</UseWPF>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
-    <LangVersion>10</LangVersion>
+    <LangVersion>12</LangVersion>
     <NoWarn>CA1416;CS1591</NoWarn>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>

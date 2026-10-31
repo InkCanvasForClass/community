@@ -201,7 +201,8 @@ namespace Ink_Canvas.Ink.WinRT
                         try { OnDryAvailable?.Invoke(snapshot); }
                         catch (Exception ex)
                         {
-                            try { OnDryFailed?.Invoke(ex); } catch (Exception inner)
+                            try { OnDryFailed?.Invoke(ex); }
+                            catch (Exception inner)
                             {
                                 LogHelper.WriteLogToFile($"[WinRTInk] 干墨回调异常后，失败通知也未能送达（将无法回退到旧墨迹）: {inner.Message}", LogHelper.LogType.Info);
                             }
@@ -213,13 +214,15 @@ namespace Ink_Canvas.Ink.WinRT
                     // BeginDry may have succeeded while point snapshot failed. This handler is
                     // still on the ink thread, so end the batch synchronously before reporting
                     // the failure to the UI.
-                    try { _inkSynchronizer?.EndDry(); } catch (Exception inner)
+                    try { _inkSynchronizer?.EndDry(); }
+                    catch (Exception inner)
                     {
                         LogHelper.WriteLogToFile($"[WinRTInk] BeginDry 失败后 EndDry 收尾也失败（墨迹批次可能悬挂）: {inner.Message}", LogHelper.LogType.Info);
                     }
                     _overlay.InvokeOnUiThread(() =>
                     {
-                        try { OnDryFailed?.Invoke(ex); } catch (Exception inner)
+                        try { OnDryFailed?.Invoke(ex); }
+                        catch (Exception inner)
                         {
                             LogHelper.WriteLogToFile($"[WinRTInk] 干墨失败通知未能送达 UI 线程: {inner.Message}", LogHelper.LogType.Info);
                         }
