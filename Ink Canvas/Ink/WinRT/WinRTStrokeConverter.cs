@@ -38,6 +38,7 @@ namespace Ink_Canvas.Ink.WinRT
         /// </summary>
         internal static readonly Guid LaserRenderModeGuid =
             new Guid("A69B0C9D-9A3A-4F91-8BE3-8E2DBB9AD4F7");
+        internal static readonly Guid StrokeDurationGuid = new("8DFBE3C8-7B89-45E0-9E1E-AF98AC0E3122");
 
         public static Stroke CreateStroke(
             IReadOnlyList<global::Windows.UI.Input.Inking.InkPoint> inkPoints,
@@ -45,7 +46,8 @@ namespace Ink_Canvas.Ink.WinRT
             double dpiScaleX,
             double dpiScaleY,
             System.Windows.Point canvasOriginDip,
-            bool pauseStraightened = false)
+            bool pauseStraightened = false,
+            long durationMs = 0)
         {
             if (inkPoints == null || inkPoints.Count == 0)
                 throw new ArgumentException("Stroke must contain points.", nameof(inkPoints));
@@ -76,6 +78,8 @@ namespace Ink_Canvas.Ink.WinRT
             };
 
             var stroke = new Stroke(points, attributes);
+            HighlighterRendering.SetTool(attributes, style.IsHighlighterTool);
+            if (durationMs > 0) stroke.AddPropertyData(StrokeDurationGuid, durationMs);
             if (!stroke.ContainsPropertyData(NativeWetInkCommittedGuid))
                 stroke.AddPropertyData(NativeWetInkCommittedGuid, true);
             if (pauseStraightened && !stroke.ContainsPropertyData(PauseStraightenedGuid))
@@ -117,7 +121,8 @@ namespace Ink_Canvas.Ink.WinRT
             bool ignorePressure,
             bool tipRectangle,
             bool useVelocityBrushTip,
-            bool isLaser)
+            bool isLaser,
+            bool isHighlighterTool = false)
         {
             Color = color;
             WidthDip = widthDip;
@@ -127,6 +132,7 @@ namespace Ink_Canvas.Ink.WinRT
             TipRectangle = tipRectangle;
             UseVelocityBrushTip = useVelocityBrushTip;
             IsLaser = isLaser;
+            IsHighlighterTool = isHighlighterTool || isHighlighter;
         }
 
         public Color Color { get; }
@@ -137,5 +143,8 @@ namespace Ink_Canvas.Ink.WinRT
         public bool TipRectangle { get; }
         public bool UseVelocityBrushTip { get; }
         public bool IsLaser { get; }
+        public bool IsHighlighterTool { get; }
+        public double WetOpacity => IsHighlighterTool
+            ? (IsHighlighter ? Color.A / 255.0 : HighlighterRendering.Opacity(Color.A)) : 1.0;
     }
 }

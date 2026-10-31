@@ -2,6 +2,7 @@ using Ink_Canvas.Helpers;
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
@@ -32,11 +33,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private long _coreSize, _logsSize, _inkSize, _backupsSize,
                      _customSize, _pluginsSize, _updateSize, _otherSize,
                      _themeSize;
+        private bool _refreshing;
+        private CancellationTokenSource _scanCancellation;
 
         public StoragePage()
         {
             InitializeComponent();
             Loaded += StoragePage_Loaded;
+            Unloaded += (_, _) => _scanCancellation?.Cancel();
         }
 
         private async void StoragePage_Loaded(object sender, RoutedEventArgs e)
@@ -67,20 +71,31 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private async Task RefreshAsync()
         {
+            if (_refreshing) return;
+            _refreshing = true;
+            using var cancellation = new CancellationTokenSource();
+            _scanCancellation = cancellation;
             SetAllSizesText(LocalizationHelper.GetString("Storage_Calculating"));
             try
             {
-                await Task.Run(() => CalculateSizes());
-                UpdateUI();
+                await Task.Run(() => CalculateSizes(cancellation.Token));
+                if (IsLoaded && !cancellation.IsCancellationRequested) UpdateUI();
             }
+            catch (OperationCanceledException) { }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"计算存储占用失败: {ex.Message}", LogHelper.LogType.Error);
-                SetAllSizesText(LocalizationHelper.GetString("Storage_CalculateFailed"));
+                if (IsLoaded) SetAllSizesText(LocalizationHelper.GetString("Storage_CalculateFailed"));
+            }
+            finally
+            {
+                _scanCancellation = null;
+                _refreshing = false;
+                if (cancellation.IsCancellationRequested && IsLoaded) _ = RefreshAsync();
             }
         }
 
-        private void CalculateSizes()
+        private void CalculateSizes(CancellationToken cancellationToken)
         {
             _coreSize = _logsSize = _inkSize = _backupsSize =
                 _customSize = _pluginsSize = _updateSize = _otherSize = _themeSize = 0;
@@ -91,8 +106,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // 顶层目录归类
             foreach (var dir in SafeEnumerateDirectories(root))
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 string name = Path.GetFileName(dir);
-                long size = GetDirectorySize(dir);
+                long size = GetDirectorySize(dir, cancellationToken);
 
                 if (LogDirs.Any(n => string.Equals(n, name, StringComparison.OrdinalIgnoreCase)))
                     _logsSize += size;
@@ -117,6 +133,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // 顶层文件按扩展名归类
             foreach (var file in SafeEnumerateFiles(root))
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 long size = SafeFileLength(file);
                 string ext = Path.GetExtension(file).ToLowerInvariant();
                 if (CoreFileExtensions.Contains(ext))
@@ -288,14 +305,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         #region 工具方法
 
-        private static long GetDirectorySize(string path)
+        private static long GetDirectorySize(string path, CancellationToken cancellationToken)
         {
             long total = 0;
             try
             {
                 foreach (var file in SafeEnumerateFiles(path, recursive: true))
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
                     total += SafeFileLength(file);
+                }
             }
+            catch (OperationCanceledException) { throw; }
             catch (Exception ex)
             {
                 LogStorageDiagException($"统计目录占用 {Path.GetFileName(path)} 失败", ex);
@@ -305,7 +326,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private static System.Collections.Generic.IEnumerable<string> SafeEnumerateDirectories(string path)
         {
-            try { return Directory.EnumerateDirectories(path); }
+            try { return Directory.EnumerateDirectories(path, "*", new EnumerationOptions
+                { IgnoreInaccessible = true, AttributesToSkip = FileAttributes.ReparsePoint }); }
             catch (Exception ex)
             {
                 LogStorageDiagException($"枚举目录 {Path.GetFileName(path)} 失败", ex);
@@ -317,8 +339,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             try
             {
-                return Directory.EnumerateFiles(path, "*",
-                    recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+                return Directory.EnumerateFiles(path, "*", new EnumerationOptions
+                {
+                    RecurseSubdirectories = recursive, IgnoreInaccessible = true,
+                    AttributesToSkip = FileAttributes.ReparsePoint
+                });
             }
             catch (Exception ex)
             {

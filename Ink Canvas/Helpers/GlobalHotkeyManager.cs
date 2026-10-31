@@ -3,6 +3,7 @@ using NHotkey.Wpf;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows;
@@ -1011,7 +1012,9 @@ namespace Ink_Canvas.Helpers
                 // 无论屏幕是否变化，都检查热键状态
                 // 这样可以确保热键状态始终与当前上下文保持一致
                 bool shouldEnableHotkeys = ShouldEnableHotkeysBasedOnContext();
-                bool currentlyHasHotkeys = _registeredHotkeys.Count > 0;
+                // Plugin registrations survive context changes. Their presence must not
+                // prevent built-in shortcuts being restored when the board gains focus.
+                bool currentlyHasHotkeys = _registeredHotkeys.Keys.Any(name => !_pluginHotkeyIds.Contains(name));
 
                 if (shouldEnableHotkeys && !currentlyHasHotkeys)
                 {

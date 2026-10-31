@@ -40,6 +40,8 @@ namespace Ink_Canvas.Properties
             return ResourceManager.GetString(key, _resourceCulture);
         }
 
+        public static string Oobe_SaveFailedTitle => ResourceManager.GetString(nameof(Oobe_SaveFailedTitle), _resourceCulture);
+        public static string Oobe_SaveFailedMessage => ResourceManager.GetString(nameof(Oobe_SaveFailedMessage), _resourceCulture);
         public static string Oobe_WelcomeTitle => ResourceManager.GetString(nameof(Oobe_WelcomeTitle), _resourceCulture);
         public static string Oobe_WelcomeDesc => ResourceManager.GetString(nameof(Oobe_WelcomeDesc), _resourceCulture);
         public static string Oobe_StepCount => ResourceManager.GetString(nameof(Oobe_StepCount), _resourceCulture);

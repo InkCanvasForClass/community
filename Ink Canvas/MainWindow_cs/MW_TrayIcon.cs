@@ -392,6 +392,7 @@ namespace Ink_Canvas
             var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin != null && mainWin.IsLoaded)
             {
+                if (!mainWin.SaveWordBeforeRestart()) return;
                 IsAppExitByUser = true;
 
                 try

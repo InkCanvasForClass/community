@@ -1,4 +1,4 @@
-using Ink_Canvas.Controls;
+﻿using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Models;
@@ -159,7 +159,22 @@ namespace Ink_Canvas
         internal Image LeftUnFoldBtnImgChevron => LeftSidePanel?.ChevronIcon;
         internal Image RightUnFoldBtnImgChevron => RightSidePanel?.ChevronIcon;
 
-        internal bool IsInPPTPresentationMode { get; set; }
+        private volatile bool _isInPptPresentationMode;
+        internal bool IsInPPTPresentationMode
+        {
+            get => _isInPptPresentationMode;
+            set
+            {
+                bool entering = value && !_isInPptPresentationMode;
+                _isInPptPresentationMode = value;
+                if (entering && _wordLecture != null)
+                {
+                    if (Dispatcher.CheckAccess()) SuspendWordLecture();
+                    else if (!Dispatcher.HasShutdownStarted)
+                        Dispatcher.BeginInvoke(new Action(SuspendWordLecture), DispatcherPriority.Send);
+                }
+            }
+        }
         internal bool ArePPTControlsVisible { get; set; }
 
         internal static readonly DependencyProperty IsUndoEnabledProperty =
@@ -799,6 +814,7 @@ namespace Ink_Canvas
 
             // 初始化墨迹渐隐管理器
             _inkFadeManager = new InkFadeManager(this);
+            InitializeCanvasInputRecovery();
 
             // 注册输入事件
             inkCanvas.PreviewMouseDown += inkCanvas_PreviewMouseDown;
@@ -866,9 +882,11 @@ namespace Ink_Canvas
 
                             var oobeWindow = new OobeWindow(Settings);
                             oobeWindow.Owner = this;
-                            oobeWindow.ShowDialog();
+                            bool completed = oobeWindow.ShowDialog() == true;
 
-                            OnOobeCompleted();
+                            if (completed) OnOobeCompleted();
+                            else if (ViewboxFloatingBar != null && currentMode == 0)
+                                ViewboxFloatingBar.Visibility = Visibility.Visible;
                         }
                         catch (Exception ex)
                         {
@@ -893,19 +911,15 @@ namespace Ink_Canvas
         /// 处理完成首次引导（OOBE）后的状态更新与界面恢复。
         /// </summary>
         /// <remarks>
-        /// 将启动配置标记为已显示 OOBE 并持久化；在常规模式（currentMode == 0）下恢复并显示浮动工具栏（并触发边距动画）；记录完成事件或在出错时记录错误信息。
+        /// 向导已完成持久化；应用当前设置，并在常规模式下恢复浮动工具栏。
         /// </remarks>
         private void OnOobeCompleted()
         {
             try
             {
-                if (Settings?.Startup != null)
-                {
-                    Settings.Startup.HasShownOobe = true;
-                    SaveSettingsToFile();
-                }
-
-                LoadSettings(false, skipAutoUpdateCheck: true);
+                // The dialog has already durably saved the completion flag. Apply the
+                // current object instead of replacing it with a stale disk/cache copy.
+                LoadSettings(false, skipAutoUpdateCheck: true, readFromFile: false);
 
                 if (ViewboxFloatingBar != null && currentMode == 0)
                 {
@@ -1158,7 +1172,10 @@ namespace Ink_Canvas
             if (penType == 1)
             {
                 drawingAttributes.IsHighlighter = !toggle.IsOn;
+                Ink.HighlighterRendering.SetTool(drawingAttributes, true);
                 inkCanvas.DefaultDrawingAttributes.IsHighlighter = !toggle.IsOn;
+                Ink.HighlighterRendering.SetTool(inkCanvas.DefaultDrawingAttributes, true);
+                UpdateWinRTInkStyle();
             }
             SaveSettingsToFile();
         }
@@ -1398,9 +1415,9 @@ namespace Ink_Canvas
             var inkCanvas1 = sender as InkCanvas;
             if (inkCanvas1 == null || _changingPalmMode) return;
 
-            if (_palmGroupSavedMode.HasValue) CancelPalmGroup(false);
             if (isPalmEraserActive)
                 EndPalmEraser(false);
+            _palmEngine.Clear();
 
             NotifyPluginPenModeChanged(inkCanvas1.EditingMode);
 
@@ -1507,13 +1524,32 @@ namespace Ink_Canvas
         /// <summary>
         /// 供插件全屏服务调用的入口：进入/退出全屏（包装 FullScreenHelper，保存/恢复窗口状态）。
         /// </summary>
+        private bool _pluginSuspendedAvoidFullScreen;
+
         internal void SetPluginFullScreen(bool isFullScreen)
         {
             try
             {
-                if (isFullScreen == isFullScreenApplied) return;
-                if (isFullScreen) Helpers.FullScreenHelper.StartFullScreen(this);
-                else Helpers.FullScreenHelper.EndFullScreen(this);
+                if (isFullScreen)
+                {
+                    if (Helpers.AvoidFullScreenHelper.GetIsAvoidFullScreenEnabled(this))
+                    {
+                        _pluginSuspendedAvoidFullScreen = true;
+                        Helpers.AvoidFullScreenHelper.StopAvoidFullScreen(this);
+                    }
+                    Helpers.FullScreenHelper.StartFullScreen(this);
+                }
+                else
+                {
+                    Helpers.FullScreenHelper.EndFullScreen(this);
+                    if (_pluginSuspendedAvoidFullScreen)
+                    {
+                        _pluginSuspendedAvoidFullScreen = false;
+                        Helpers.AvoidFullScreenHelper.StartAvoidFullScreen(this);
+                    }
+                }
+                Helpers.FullScreenHelper.MarkFullscreenWindowTaskbarList(
+                    new WindowInteropHelper(this).Handle, isFullScreen);
                 isFullScreenApplied = isFullScreen;
             }
             catch (Exception ex)
@@ -1550,6 +1586,9 @@ namespace Ink_Canvas
             }
             // 加载设置
             LoadSettings(true);
+            _uiResponsivenessMonitor ??= new UiResponsivenessMonitor(Dispatcher,
+                message => LogHelper.WriteLogToFile(message, LogHelper.LogType.Warning));
+            InitializePalmRawInput();
             LogHelper.WriteLogToFile("[Startup] 设置加载完成", LogHelper.LogType.Info);
             // 启动性能监测（如果已启用）。最快模式下延迟到首帧之后。
             // 实时笔迹详细调试日志独立于性能监测，由 Debug 页开关控制，默认关闭。
@@ -1998,6 +2037,15 @@ namespace Ink_Canvas
         /// <param name="e">关闭事件的参数（未使用）。</param>
         private void Window_Closed(object sender, EventArgs e)
         {
+            _mouseWheelForwarder?.Dispose();
+            DisposeWordLecture();
+            _uiResponsivenessMonitor?.Dispose();
+            _palmRawSubscription?.Dispose();
+            _palmRawSubscription = null;
+            _palmRawMailbox?.Dispose();
+            CancelStartupFoldVerification();
+            _floatingBarReposition?.Dispose();
+            ++_floatingBarPositionVersion;
             LogHelper.WriteLogToFile("[Exit] 主窗口 Closed，开始释放资源", LogHelper.LogType.Info);
             RealtimeInkFrameScheduler.Clear();
             try
@@ -2542,6 +2590,7 @@ namespace Ink_Canvas
         // 手写笔输入
         private void inkCanvas_StylusDown(object sender, StylusDownEventArgs e)
         {
+            if (ShouldDeferLegacyCanvasInput && !e.StylusDevice.Inverted) { e.Handled = true; return; }
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
             {
                 if (BeginSecAgentStrokeErase(e.GetPosition(inkCanvas)))
@@ -2555,8 +2604,6 @@ namespace Ink_Canvas
             if (IsBoardRoamingMode)
             {
                 inkCanvas.CaptureStylus();
-                ViewboxFloatingBar.IsHitTestVisible = false;
-                BlackboardUIGridForInkReplay.IsHitTestVisible = false;
                 BeginBoardRoamingContact(e.StylusDevice.Id, e.GetPosition(inkCanvas));
                 e.Handled = true;
                 return;
@@ -2575,6 +2622,7 @@ namespace Ink_Canvas
 
         private void inkCanvas_StylusMove(object sender, StylusEventArgs e)
         {
+            if (ShouldDeferLegacyCanvasInput) { e.Handled = true; return; }
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke
                 && MoveSecAgentStrokeErase(e.GetPosition(inkCanvas)))
             {
@@ -2590,6 +2638,7 @@ namespace Ink_Canvas
         // 手写笔抬起事件（用于橡皮擦自动切换）
         private void inkCanvas_StylusUp(object sender, StylusEventArgs e)
         {
+            if (ShouldDeferLegacyCanvasInput) { e.Handled = true; return; }
             EndSecAgentStrokeErase();
             if (_isBoardRoamingPointerDown || _isBoardRoamingTwoFingerGesture || _boardRoamingContacts.Count > 0)
             {
@@ -2893,6 +2942,7 @@ namespace Ink_Canvas
 
             InitializeClipboardMonitoring();
             InitializeFloatingWindowInterceptor();
+            InitializeWordLecture();
             InitializeGlobalHotkeyManager();
 
             _ = TelemetryUploader.UploadTelemetryIfNeededAsync();
@@ -2996,7 +3046,7 @@ namespace Ink_Canvas
             // 窗口失活时，触点若走 TouchLeave 而非 TouchUp，触摸活动集合会残留，
             // 导致 EndTouchInkInputIfIdle 永远不退出、IsManipulationEnabled 永远不恢复。
             // 调用 AbortAllActiveTouchInputs 兜底。
-            try { AbortAllActiveTouchInputs(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+            try { RecoverAbandonedTouchCaptures(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
 
@@ -3500,12 +3550,12 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile($"检测到命令行参数中的.icstk文件: {icstkFile}", LogHelper.LogType.Event);
 
                     // 延迟执行，确保UI已完全加载
-                    Dispatcher.BeginInvoke(new Action(() =>
+                    Dispatcher.BeginInvoke(new Action(async () =>
                     {
                         try
                         {
                             // 打开文件
-                            OpenSingleStrokeFile(icstkFile);
+                            await OpenSingleStrokeFileAsync(icstkFile);
                             ShowNotification(string.Format(Properties.MainWindowStrings.Main_StrokesFileLoaded, Path.GetFileName(icstkFile)));
                         }
                         catch (Exception ex)

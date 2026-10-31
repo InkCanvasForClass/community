@@ -8,6 +8,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="../build/ReliabilityTests/PalmEngineRegression.cs" Link="PalmEngineRegression.cs" />
     <ProjectReference Include="..\Ink Canvas\InkCanvasForClass.csproj" />
   </ItemGroup>
 </Project>

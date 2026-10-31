@@ -290,7 +290,7 @@ namespace Ink_Canvas.Helpers
                     LogHelper.WriteLogToFile($"[ProcGuard] 写入门控结束后恢复文件锁失败: {ex.Message}", LogHelper.LogType.Info);
                 }
 
-                Interlocked.Exchange(ref _writeGate, 0);
+                if (--_writeDepth == 0) Interlocked.Exchange(ref _writeGate, 0);
             }
         }
 
@@ -301,6 +301,7 @@ namespace Ink_Canvas.Helpers
         /// <returns>`true` 如果在指定时间内成功获取到写入门控，`false` 否则。</returns>
         private static bool TryEnterWriteGate(int timeoutMs)
         {
+            if (_writeDepth > 0) { _writeDepth++; return true; }
             if (timeoutMs <= 0) timeoutMs = 1;
 
             var start = Environment.TickCount;
@@ -312,8 +313,11 @@ namespace Ink_Canvas.Helpers
                 if (elapsed < 2000) Thread.Sleep(10);
                 else Thread.Sleep(50);
             }
+            _writeDepth = 1;
             return true;
         }
+
+        [ThreadStatic] private static int _writeDepth;
 
         /// <summary>
         /// 启用进程保护并对应用根路径进行完整重扫描以锁定需要保护的目录和文件。

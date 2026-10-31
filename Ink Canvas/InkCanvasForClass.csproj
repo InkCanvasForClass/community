@@ -1,4 +1,25 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\InkCanvas.WordLinkHost\InkCanvas.WordLinkHost.csproj" ReferenceOutputAssembly="false" />
+    <Compile Include="..\InkCanvas.WordLink.Shared\WordProtocol.cs" Link="WordLink\WordProtocol.cs" />
+  </ItemGroup>
+  <PropertyGroup>
+    <WordHostOutput>$(MSBuildProjectDirectory)\..\InkCanvas.WordLinkHost\bin\$(Platform)\$(Configuration)\net10.0-windows10.0.19041.0\$(RuntimeIdentifier)\</WordHostOutput>
+    <WordHostOutput Condition="'$(Platform)' == 'AnyCPU'">$(MSBuildProjectDirectory)\..\InkCanvas.WordLinkHost\bin\$(Configuration)\net10.0-windows10.0.19041.0\$(RuntimeIdentifier)\</WordHostOutput>
+  </PropertyGroup>
+  <Target Name="CopyWordLinkHost" AfterTargets="Build" Condition="'$(PublishSingleFile)' != 'true'">
+    <ItemGroup><WordHostFiles Include="$(WordHostOutput)InkCanvas.WordLinkHost.*" Exclude="$(WordHostOutput)*.pdb" /></ItemGroup>
+    <Copy SourceFiles="@(WordHostFiles)" DestinationFolder="$(OutDir)word-link\" SkipUnchangedFiles="true" />
+  </Target>
+  <Target Name="PublishWordLinkHost" AfterTargets="Publish" Condition="'$(PublishSingleFile)' == 'true'">
+    <MSBuild Projects="$(MSBuildProjectDirectory)\..\InkCanvas.WordLinkHost\InkCanvas.WordLinkHost.csproj" Targets="Publish"
+      Properties="Configuration=$(Configuration);Platform=$(Platform);RuntimeIdentifier=$(RuntimeIdentifier);SelfContained=$(SelfContained);PublishSingleFile=true;IncludeNativeLibrariesForSelfExtract=true;PublishDir=$(PublishDir)word-link\" />
+  </Target>
+  <Target Name="CopyWordLinkHostToPublish" AfterTargets="Publish" Condition="'$(PublishSingleFile)' != 'true'">
+    <ItemGroup><WordHostPublishFiles Include="$(WordHostOutput)InkCanvas.WordLinkHost.*" Exclude="$(WordHostOutput)*.pdb" /></ItemGroup>
+    <Error Condition="'@(WordHostPublishFiles)' == ''" Text="Word link helper output is missing." />
+    <Copy SourceFiles="@(WordHostPublishFiles)" DestinationFolder="$(PublishDir)word-link\" SkipUnchangedFiles="true" />
+  </Target>
   <PropertyGroup>
     <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
     <OutputType>WinExe</OutputType>

@@ -4,7 +4,9 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.IO.Pipes;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Media;
@@ -85,6 +87,50 @@ namespace Ink_Canvas.Helpers
         }
 
         public bool IsAvailable => _available && _helperProcess != null && !_helperProcess.HasExited;
+
+        // Only serialized snapshots cross the worker boundary. Results are mapped back
+        // to the caller's original strokes after resuming its synchronization context.
+        public async Task<InkShapeRecognitionResult> RecognizeAsync(StrokeCollection strokes)
+        {
+            var originals = strokes.ToArray();
+            var bytes = SnapshotStrokes(strokes);
+            var result = await Task.Run(() =>
+            {
+                using var stream = new MemoryStream(bytes, writable: false);
+                var local = new StrokeCollection(stream);
+                var recognized = Recognize(local);
+                return (recognized.ShapeName, recognized.Centroid, Points: recognized.HotPoints.ToArray(),
+                    recognized.ShapeWidth, recognized.ShapeHeight,
+                    Indices: recognized.StrokesToRemove.Select(s => local.IndexOf(s)).ToArray());
+            });
+            return new InkShapeRecognitionResult(result.ShapeName, result.Centroid,
+                new PointCollection(result.Points), result.ShapeWidth, result.ShapeHeight,
+                new StrokeCollection(result.Indices.Where(i => i >= 0 && i < originals.Length).Select(i => originals[i])));
+        }
+
+        public async Task<HandwritingRecognitionResult> RecognizeTextAsync(StrokeCollection strokes, IacoreTextHint hint)
+        {
+            var originals = strokes.ToArray();
+            var bytes = SnapshotStrokes(strokes);
+            var words = await Task.Run(() =>
+            {
+                using var stream = new MemoryStream(bytes, writable: false);
+                var local = new StrokeCollection(stream);
+                return RecognizeText(local, hint).Words.Select(word =>
+                    (word.Text, Candidates: word.TextCandidates.ToArray(), word.BoundingRectangle,
+                    Indices: word.Strokes.Select(s => local.IndexOf(s)).ToArray())).ToArray();
+            });
+            return new HandwritingRecognitionResult(words.Select(word => new HandwritingWordSegment(
+                word.Text, word.Candidates, word.BoundingRectangle,
+                word.Indices.Where(i => i >= 0 && i < originals.Length).Select(i => originals[i]).ToArray())).ToArray());
+        }
+
+        private static byte[] SnapshotStrokes(StrokeCollection strokes)
+        {
+            using var stream = new MemoryStream();
+            strokes.Save(stream);
+            return stream.ToArray();
+        }
 
         public InkShapeRecognitionResult Recognize(StrokeCollection strokes)
         {
@@ -213,6 +259,7 @@ namespace Ink_Canvas.Helpers
             int requestLength = WriteRequestToSharedMemory(strokes);
 
             using (var client = new NamedPipeClientStream(".", PipeName, PipeDirection.InOut))
+            using (var deadline = new StreamDeadline(client, IpcTimeoutMs))
             {
                 client.Connect(IpcTimeoutMs);
 
@@ -248,6 +295,7 @@ namespace Ink_Canvas.Helpers
             int requestLength = WriteTextRequestToSharedMemory(strokes, hint);
 
             using (var client = new NamedPipeClientStream(".", PipeName, PipeDirection.InOut))
+            using (var deadline = new StreamDeadline(client, IpcTimeoutMs))
             {
                 client.Connect(IpcTimeoutMs);
 
@@ -559,6 +607,7 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     using (var client = new NamedPipeClientStream(".", PipeName, PipeDirection.InOut))
+                    using (var deadline = new StreamDeadline(client, IpcTimeoutMs))
                     {
                         client.Connect(IpcTimeoutMs);
                         using (var w = new BinaryWriter(client, System.Text.Encoding.UTF8, leaveOpen: true))

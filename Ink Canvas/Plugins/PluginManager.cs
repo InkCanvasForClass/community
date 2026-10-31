@@ -352,6 +352,7 @@ namespace Ink_Canvas.Plugins
 
                         try
                         {
+                            await System.Windows.Threading.Dispatcher.Yield(System.Windows.Threading.DispatcherPriority.Background);
                             LoadPlugin(info);
                         }
                         catch (Exception ex)
@@ -1501,8 +1502,9 @@ namespace Ink_Canvas.Plugins
         /// </summary>
         private void ForceGarbageCollection()
         {
-            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true);
-            GC.WaitForPendingFinalizers();
+            // Finalizers are arbitrary managed/native code. Never wait for all of
+            // them from a plugin button or an application shutdown callback.
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Optimized, blocking: false);
         }
 
         /// <summary>
@@ -1627,10 +1629,10 @@ namespace Ink_Canvas.Plugins
             if (string.IsNullOrEmpty(pluginId)) return true;
             if (!_unloadingContexts.TryGetValue(pluginId, out var weakRef)) return true;
 
-            for (var attempt = 0; attempt < maxAttempts; attempt++)
+            var onUiThread = Application.Current?.Dispatcher?.CheckAccess() == true;
+            for (var attempt = 0; attempt < (onUiThread ? 1 : maxAttempts); attempt++)
             {
-                GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true);
-                GC.WaitForPendingFinalizers();
+                GC.Collect(GC.MaxGeneration, GCCollectionMode.Optimized, blocking: false);
 
                 if (!weakRef.IsAlive)
                 {
@@ -1641,14 +1643,14 @@ namespace Ink_Canvas.Plugins
 
                 // loader 与 native DLL 缓存未必在第一轮 GC 内释放，多给几轮机会。
                 // 间隔递增到 50ms 便于应付 loader latch。
-                System.Threading.Thread.Sleep(Math.Min(50 * (attempt + 1), 200));
+                if (!onUiThread) System.Threading.Thread.Sleep(Math.Min(50 * (attempt + 1), 200));
             }
 
             // 仍存活：emit 诊断信息，后端可以照此定位是哪个宿主对象还握有引用。
             LogError(string.Format(
                 "Plugin ALC for {0} is still alive after {1} GC passes; some host reference is pinning it (hot reload will fall back to restart).",
                 pluginId, maxAttempts));
-            DiagnoseLivePluginReferences(pluginId);
+            if (!onUiThread) DiagnoseLivePluginReferences(pluginId);
             return false;
         }
 

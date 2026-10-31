@@ -1,4 +1,4 @@
-using Ink_Canvas.Helpers;
+﻿using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Pages;
@@ -6,6 +6,8 @@ using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -52,6 +54,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             { "CloudStoragePage", typeof(CloudStoragePage) },
             { "AutomationWorkflowPage", typeof(AutomationWorkflowPage) },
             { "PowerPointPage", typeof(PowerPointPage) },
+            { "WordPage", typeof(WordPage) },
             { "RandomDrawPage", typeof(RandomDrawPage) },
             { "CanvasPage", typeof(CanvasPage) },
             { "InkRecognitionPage", typeof(InkRecognitionPage) },
@@ -80,6 +83,12 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         private bool _isNavigating = false;
         private bool _updateBadgeDismissed = false;
+        private readonly CancellationTokenSource _lifetime = new();
+        private CancellationTokenSource _searchDelay;
+        private volatile bool _closed;
+        private Task _indexBuildTask;
+        private int _searchIndexVersion;
+        private DispatcherCoalescedAction _pluginNavigationRefresh;
 
         /// <summary>
         /// 若为 true，则跳过 Loaded 中默认导航到 HomePage 的行为。
@@ -109,55 +118,10 @@ namespace Ink_Canvas.Windows.SettingsViews
         public SettingsWindow()
         {
             InitializeComponent();
+            _pluginNavigationRefresh = new DispatcherCoalescedAction(Dispatcher, TimeSpan.FromMilliseconds(100), LoadPluginSettingsPages);
 
             ApplyCurrentTheme();
             global::Ink_Canvas.Helpers.WindowBackdropHelper.Apply(this, Helpers.SettingsManager.Settings);
-
-            // 初始化内置页面映射
-            _pageTypes = new Dictionary<string, Type>
-            {
-                { "HomePage", typeof(HomePage) },
-                { "StartupPage", typeof(StartupPage) },
-                { "ClockPage", typeof(ClockPage) },
-                { "PrivacyPage", typeof(PrivacyPage) },
-                { "SecurityPage", typeof(SecurityPage) },
-                { "WindowPage", typeof(WindowPage) },
-                { "AppearancePage", typeof(AppearancePage) },
-                { "SidebarPage", typeof(SidebarPage) },
-                { "HotkeyPage", typeof(HotkeyPage) },
-                { "ToolbarPage", typeof(ToolbarPage) },
-                { "ToolbarAppearancePage", typeof(ToolbarAppearancePage) },
-            { "FloatingBarThemePage", typeof(FloatingBarThemePage) },
-            { "FloatingBarThemeMarketPage", typeof(FloatingBarThemeMarketPage) },
-                { "ToolbarMenuPage", typeof(ToolbarMenuPage) },
-                { "BoardToolbarPage", typeof(BoardToolbarPage) },
-                { "BoardAppearancePage", typeof(BoardAppearancePage) },
-                { "BoardMenuPage", typeof(BoardMenuPage) },
-                { "WhiteboardTipsPage", typeof(WhiteboardTipsPage) },
-                { "UpdatePage", typeof(UpdatePage) },
-                { "NotificationPage", typeof(NotificationPage) },
-                { "AnnouncementCenterPage", typeof(AnnouncementCenterPage) },
-                { "ExperimentalPage", typeof(ExperimentalPage) },
-                { "AdvancedPage", typeof(AdvancedPage) },
-                { "StoragePage", typeof(StoragePage) },
-                { "BackupPage", typeof(BackupPage) },
-                { "CloudStoragePage", typeof(CloudStoragePage) },
-                { "AutomationWorkflowPage", typeof(AutomationWorkflowPage) },
-                { "PowerPointPage", typeof(PowerPointPage) },
-                { "RandomDrawPage", typeof(RandomDrawPage) },
-                { "CanvasPage", typeof(CanvasPage) },
-                { "InkRecognitionPage", typeof(InkRecognitionPage) },
-                { "PerformancePage", typeof(PerformancePage) },
-                { "DebugPage", typeof(DebugPage) },
-                { "FriendlyLinksPage", typeof(FriendlyLinksPage) },
-                { "AboutPage", typeof(AboutPage) },
-                { "Settings", typeof(SettingsPage) },
-                { "PluginPage", typeof(PluginPage) },
-                { "PluginSettingsPage", typeof(PluginSettingsPage) },
-                { "PluginMarketplacePage", typeof(PluginMarketplacePage) },
-                { "PPTPageFlipPreviewPage", typeof(PPTPageFlipPreviewPage) },
-            { "TouchCalibrationPage", typeof(TouchCalibrationPage) }
-            };
 
             // 初始页面统一在 Loaded 阶段导航，避免构造阶段与深链接导航互相覆盖。
             UpdateAppTitleBarMargin();
@@ -169,6 +133,7 @@ namespace Ink_Canvas.Windows.SettingsViews
 
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
+                    if (_closed) return;
                     if (!SuppressInitialNavigation)
                     {
                         NavigateToPage("HomePage");
@@ -178,6 +143,7 @@ namespace Ink_Canvas.Windows.SettingsViews
 
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
+                        if (_closed) return;
                         LoadPluginSettingsPages();
                         UpdateUpdateBadgeVisibility();
                         UpdateAnnouncementUnreadBadge();
@@ -186,7 +152,6 @@ namespace Ink_Canvas.Windows.SettingsViews
                     }), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
                 }), System.Windows.Threading.DispatcherPriority.Normal);
 
-                _ = PreloadAllPagesAsync();
             };
 
             AnnouncementService.UnreadCountChanged += UpdateAnnouncementUnreadBadge;
@@ -195,6 +160,12 @@ namespace Ink_Canvas.Windows.SettingsViews
 
             this.Closed += (sender, e) =>
             {
+                _closed = true;
+                _lifetime.Cancel();
+                _searchDelay?.Cancel();
+                _copyUriInfoBarTimer?.Stop();
+                _pluginNavigationRefresh?.Dispose();
+                Helpers.SettingsManager.FlushPendingSettings();
                 AnnouncementService.UnreadCountChanged -= UpdateAnnouncementUnreadBadge;
                 Ink_Canvas.Plugins.PluginManager.Instance.PluginLoaded -= PluginManager_PluginsChanged;
                 Ink_Canvas.Plugins.PluginManager.Instance.PluginUnloaded -= PluginManager_PluginsChanged;
@@ -430,6 +401,8 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         public void NavigateToPage(string pageTag, Ink_Canvas.Plugins.PluginInfo pluginInfo = null)
         {
+            if (_closed) return;
+            var navigationTime = System.Diagnostics.Stopwatch.StartNew();
             if (!_pageTypes.TryGetValue(pageTag, out Type pageType))
             {
                 LogHelper.WriteLogToFile($"SettingsWindow: NavigateToPage 找不到页面类型 [{pageTag}]，已注册: [{string.Join(", ", _pageTypes.Keys)}]", LogHelper.LogType.Warning);
@@ -475,6 +448,8 @@ namespace Ink_Canvas.Windows.SettingsViews
             finally
             {
                 _isNavigating = false;
+                if (navigationTime.ElapsedMilliseconds >= 250)
+                    LogHelper.WriteLogToFile($"[UI slow operation] Settings navigation: page={pageTag}, elapsedMs={navigationTime.ElapsedMilliseconds}", LogHelper.LogType.Warning);
             }
         }
 
@@ -738,10 +713,19 @@ namespace Ink_Canvas.Windows.SettingsViews
         private List<SearchEntry> _searchIndex;
         private bool _indexBuilt;
 
-        private void EnsureSearchIndexBuilt()
+        private async Task EnsureSearchIndexBuiltAsync()
+        {
+            if (_indexBuilt) return;
+            if (_indexBuildTask == null || _indexBuildTask.IsCompleted)
+                _indexBuildTask = BuildSearchIndexAsync();
+            await _indexBuildTask;
+        }
+
+        private async Task BuildSearchIndexAsync()
         {
             if (_indexBuilt && _searchIndex != null) return;
-            _searchIndex = new List<SearchEntry>(256);
+            int version = _searchIndexVersion;
+            var index = new List<SearchEntry>(256);
 
             foreach (var item in GetAllNavigationItems())
             {
@@ -749,12 +733,14 @@ namespace Ink_Canvas.Windows.SettingsViews
                 var tag = item.Tag as string;
                 if (!string.IsNullOrWhiteSpace(text) && !string.IsNullOrEmpty(tag))
                 {
-                    _searchIndex.Add(new SearchEntry { Text = text.Trim(), PageTag = tag });
+                    index.Add(new SearchEntry { Text = text.Trim(), PageTag = tag });
                 }
             }
 
             foreach (var kv in _pageTypes.ToList())
             {
+                await Dispatcher.Yield(DispatcherPriority.Background);
+                _lifetime.Token.ThrowIfCancellationRequested();
                 var tag = kv.Key;
                 if (tag == "Settings") continue;
                 if (kv.Value == typeof(PluginSettingsPage)) continue;
@@ -763,8 +749,11 @@ namespace Ink_Canvas.Windows.SettingsViews
                 {
                     if (!_pages.TryGetValue(tag, out var page))
                     {
+                        var constructionTime = System.Diagnostics.Stopwatch.StartNew();
                         page = Activator.CreateInstance(kv.Value);
                         _pages[tag] = page;
+                        if (constructionTime.ElapsedMilliseconds >= 250)
+                            LogHelper.WriteLogToFile($"[UI slow operation] Settings search page construction: page={tag}, elapsedMs={constructionTime.ElapsedMilliseconds}", LogHelper.LogType.Warning);
                     }
                     if (page is FrameworkElement feRoot)
                     {
@@ -775,7 +764,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                                 LogHelper.WriteLogToFile($"[Settings] 预展开页面模板失败，搜索索引可能不完整 (tag={tag}): {ex.Message}", LogHelper.LogType.Info);
                             }
                         }
-                        CollectEntriesFromPage(feRoot, tag);
+                        CollectEntriesFromPage(feRoot, tag, index);
                     }
                 }
                 catch (Exception ex)
@@ -791,14 +780,15 @@ namespace Ink_Canvas.Windows.SettingsViews
                 var name = info?.Name;
                 if (!string.IsNullOrWhiteSpace(name))
                 {
-                    _searchIndex.Add(new SearchEntry { Text = string.Format(NavStrings.Nav_PluginSettingsFormat, name), PageTag = pageTag });
+                    index.Add(new SearchEntry { Text = string.Format(NavStrings.Nav_PluginSettingsFormat, name), PageTag = pageTag });
                 }
             }
 
-            _indexBuilt = true;
+            _searchIndex = index;
+            _indexBuilt = version == _searchIndexVersion;
         }
 
-        private void CollectEntriesFromPage(DependencyObject root, string pageTag)
+        private void CollectEntriesFromPage(DependencyObject root, string pageTag, List<SearchEntry> index)
         {
             foreach (var node in EnumerateLogicalDescendants(root))
             {
@@ -825,7 +815,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                         foreach (var seItem in seItems)
                         {
                             if (seItem is DependencyObject seItemDep)
-                                CollectEntriesFromPage(seItemDep, pageTag);
+                                CollectEntriesFromPage(seItemDep, pageTag, index);
                         }
                     }
                 }
@@ -833,7 +823,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 if (!string.IsNullOrWhiteSpace(header) && target != null)
                 {
                     var key = SettingsNavigator.GetSettingsKey(target);
-                    _searchIndex.Add(new SearchEntry
+                    index.Add(new SearchEntry
                     {
                         Text = header.Trim(),
                         PageTag = pageTag,
@@ -884,12 +874,15 @@ namespace Ink_Canvas.Windows.SettingsViews
             }
         }
 
-        private void OnControlsSearchBoxQuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        private async void OnControlsSearchBoxQuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
-            EnsureSearchIndexBuilt();
-
             string raw = (args.ChosenSuggestion as string) ?? args.QueryText;
             if (string.IsNullOrWhiteSpace(raw)) return;
+            _searchDelay?.Cancel();
+            try { await EnsureSearchIndexBuiltAsync(); }
+            catch (OperationCanceledException) { return; }
+            catch (Exception ex) { LogHelper.WriteLogToFile($"[Settings search] {ex}", LogHelper.LogType.Warning); return; }
+            if (_closed || !string.Equals(sender.Text?.Trim(), args.QueryText?.Trim(), StringComparison.Ordinal)) return;
 
             string query = raw.Trim();
 
@@ -899,18 +892,30 @@ namespace Ink_Canvas.Windows.SettingsViews
             NavigateToSearchEntry(entry);
         }
 
-        private void OnControlsSearchBoxTextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        private async void OnControlsSearchBoxTextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
             if (args.Reason != AutoSuggestionBoxTextChangeReason.UserInput) return;
 
-            EnsureSearchIndexBuilt();
-
+            _searchDelay?.Cancel();
             string query = sender.Text?.Trim() ?? string.Empty;
             if (string.IsNullOrEmpty(query))
             {
                 sender.ItemsSource = null;
                 return;
             }
+
+            using var delay = CancellationTokenSource.CreateLinkedTokenSource(_lifetime.Token);
+            _searchDelay = delay;
+            try
+            {
+                await Task.Delay(180, delay.Token);
+                await EnsureSearchIndexBuiltAsync();
+                delay.Token.ThrowIfCancellationRequested();
+                if (_closed) return;
+            }
+            catch (OperationCanceledException) { return; }
+            catch (Exception ex) { LogHelper.WriteLogToFile($"[Settings search] {ex}", LogHelper.LogType.Warning); return; }
+            finally { if (ReferenceEquals(_searchDelay, delay)) _searchDelay = null; }
 
             var suggestions = _searchIndex
                 .Where(e => e.Text.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0)
@@ -953,6 +958,9 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         private void LoadPluginSettingsPages()
         {
+            if (_closed) return;
+            _searchIndexVersion++;
+            _indexBuilt = false;
             var staleTags = _pluginPages.Keys.ToList();
             foreach (var tag in staleTags)
             {
@@ -998,9 +1006,8 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         private void PluginManager_PluginsChanged(object sender, Ink_Canvas.Plugins.PluginInfo e)
         {
-            Dispatcher.BeginInvoke(
-                new Action(LoadPluginSettingsPages),
-                System.Windows.Threading.DispatcherPriority.Background);
+            if (_closed) return;
+            _pluginNavigationRefresh?.Request();
         }
         #endregion
 
@@ -1049,8 +1056,6 @@ namespace Ink_Canvas.Windows.SettingsViews
 
             try
             {
-                EnsureSearchIndexBuilt();
-
                 var entry = _searchIndex?.FirstOrDefault(e =>
                     string.Equals(e.PageTag, GetCurrentPageTag(), StringComparison.OrdinalIgnoreCase)
                     && string.Equals(e.SettingKey, settingKey, StringComparison.OrdinalIgnoreCase));
@@ -1457,55 +1462,9 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         #endregion
 
-        private async System.Threading.Tasks.Task PreloadAllPagesAsync()
-        {
-            await System.Threading.Tasks.Task.Delay(1000);
-
-            try
-            {
-                var tags = _pageTypes.Keys.ToList();
-                int count = 0;
-                foreach (var tag in tags)
-                {
-                    if (_pages.ContainsKey(tag))
-                        continue;
-                    if (!_pageTypes.TryGetValue(tag, out var type))
-                        continue;
-                    if (type == typeof(PluginSettingsPage))
-                        continue;
-
-                    try
-                    {
-                        if (!_pages.ContainsKey(tag))
-                        {
-                            var page = Activator.CreateInstance(type);
-                            _pages[tag] = page;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine(string.Format(NavStrings.Nav_PreloadPageFailed, tag, ex.Message));
-                    }
-
-                    // 每加载一页后让出 UI 线程，保持设置窗口响应。
-                    if (++count % 3 == 0)
-                    {
-                        await System.Threading.Tasks.Task.Delay(50);
-                    }
-                    else
-                    {
-                        await System.Windows.Threading.Dispatcher.Yield(System.Windows.Threading.DispatcherPriority.ApplicationIdle);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(string.Format(NavStrings.Nav_PreloadPagesFailed, ex.Message));
-            }
-        }
-
         public void UpdateUpdateBadgeVisibility()
         {
+            if (_closed) return;
             try
             {
                 var mainWindow = Application.Current.Windows.OfType<MainWindow>().FirstOrDefault();
@@ -1525,8 +1484,10 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         public void UpdateAnnouncementUnreadBadge()
         {
+            if (_closed) return;
             Dispatcher.InvokeAsync(() =>
             {
+                if (_closed) return;
                 try
                 {
                     var count = AnnouncementService.GetUnreadCount(Helpers.SettingsManager.Settings);

@@ -538,6 +538,7 @@ namespace Ink_Canvas
         /// <summary>进入视频展台特殊模式：白板背景变 #333333，隐藏所有选择框，准备全屏预览。</summary>
         private void EnterVideoPresenterSpecialMode()
         {
+            SuspendWordLecture();
             if (_isVideoPresenterSpecialMode) return;
             _isVideoPresenterSpecialMode = true;
             // 清空触点记账，避免上一次展台会话残留影响手势判定
@@ -1297,7 +1298,7 @@ namespace Ink_Canvas
                     }
                 }
 
-                Dispatcher.BeginInvoke(new Action(() =>
+                void PresentFrame()
                 {
                     // 左上角侧栏预览已移除（VideoPresenterPreviewImage 已从 XAML 删除），
                     // 不再需要把 e.Frame 同步到侧栏 Image。
@@ -1321,7 +1322,9 @@ namespace Ink_Canvas
 
                     // 实时上屏：刷新当前页的画面元素
                     TryUpdateLiveFrameOnCanvas(e.Frame);
-                }));
+                }
+                if (Dispatcher.CheckAccess()) PresentFrame();
+                else Dispatcher.BeginInvoke(new Action(PresentFrame));
             }
             catch
             {

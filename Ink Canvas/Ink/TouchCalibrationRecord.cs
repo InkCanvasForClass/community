@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace Ink_Canvas.Ink
 {
@@ -11,7 +11,7 @@ namespace Ink_Canvas.Ink
         public double DpiX { get; set; }
         public double DpiY { get; set; }
 
-        public bool IsValid() => (Source == "Pointer" || Source == "WPF")
+        public bool IsValid() => (Source == "Pointer" || Source == "WPF" || Source == "RawHID")
             && !string.IsNullOrWhiteSpace(Display) && PixelWidth > 0 && PixelHeight > 0
             && TouchCalibrationRecord.Positive(DpiX) && TouchCalibrationRecord.Positive(DpiY);
 

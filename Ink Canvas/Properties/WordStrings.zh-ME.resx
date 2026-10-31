@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?><root><resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>2.0</value></resheader><resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader><resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="Title" xml:space="preserve"><value>Word / WPS 联动</value></data>
+  <data name="Enable" xml:space="preserve"><value>启用 Word / WPS 讲解批注</value></data>
+  <data name="EnableHint" xml:space="preserve"><value>识别前台 Microsoft Word 文档，按页面保存并跟随滚动、缩放。</value></data>
+  <data name="ShowNavigation" xml:space="preserve"><value>显示 Word 翻页面板</value></data>
+  <data name="ScopeHint" xml:space="preserve"><value>支援 Microsoft Word 列印版面配置、單一窗格；WPS 文字需可用的自動化及無障礙介面。批註使用 WPF 墨跡，修改正文或版面配置後請核對批註版本與位置。</value></data>
+  <data name="StorageHint" xml:space="preserve"><value>批注独立保存在程序目录 WordAnnotations 中，不修改 Word 文件。首次连接、保存失败和页面定位不确定时将暂停输入。</value></data>
+  <data name="Previous" xml:space="preserve"><value>上一页</value></data>
+  <data name="Next" xml:space="preserve"><value>下一页</value></data>
+  <data name="MouseMode" xml:space="preserve"><value>操作 Word</value></data>
+  <data name="Resume" xml:space="preserve"><value>按当前版式继续</value></data>
+  <data name="PageFormat" xml:space="preserve"><value>{0} / {1}</value></data>
+  <data name="Waiting" xml:space="preserve"><value>等待 Word 文档</value></data>
+  <data name="Unavailable" xml:space="preserve"><value>Word 连接不可用，将自动重试</value></data>
+  <data name="Timeout" xml:space="preserve"><value>Word 暂未响应，批注已暂停</value></data>
+  <data name="Busy" xml:space="preserve"><value>Word 正忙，批注暂时暂停，稍后自动恢复</value></data>
+  <data name="HelperMissing" xml:space="preserve"><value>缺少 Word / WPS 联动组件，请完整替换程序目录后重启</value></data>
+  <data name="HelperMismatch" xml:space="preserve"><value>Word / WPS 联动组件版本不匹配，请完整替换程序目录后重启</value></data>
+  <data name="PrintLayoutRequired" xml:space="preserve"><value>请使用 Word 打印布局，并关闭拆分窗格</value></data>
+  <data name="Locating" xml:space="preserve"><value>正在定位页面，请将正文滚动到可见区域</value></data>
+  <data name="Ready" xml:space="preserve"><value>Word / WPS 讲解批注</value></data>
+  <data name="Loading" xml:space="preserve"><value>正在恢复批注</value></data>
+  <data name="LayoutChanged" xml:space="preserve"><value>文档内容或分页发生变化，旧批注已保留。确认后可按新版式继续。</value></data>
+  <data name="LoadFailed" xml:space="preserve"><value>批注加载失败，已暂停输入以保留原数据</value></data>
+  <data name="SaveFailed" xml:space="preserve"><value>批注保存失败，请检查目录权限和磁盘空间</value></data>
+  <data name="ZoomOut" xml:space="preserve"><value>缩小 Word 文档</value></data>
+  <data name="ZoomIn" xml:space="preserve"><value>放大 Word 文档</value></data>
+  <data name="DocumentZoom" xml:space="preserve"><value>Word 文档显示比例</value></data>
+  <data name="NavigationAppearance" xml:space="preserve"><value>导航外观与位置</value></data>
+  <data name="Preview" xml:space="preserve"><value>预览</value></data>
+  <data name="UsePptAppearance" xml:space="preserve"><value>外观跟随 PPT 联动</value></data>
+  <data name="UsePptAppearanceHint" xml:space="preserve"><value>使用 PPT 左下和右下导航的配色、页码、大小、透明度与阴影设置。可在 PPT 翻页按钮设置中调整。</value></data>
+  <data name="ShowZoom" xml:space="preserve"><value>显示右侧文档缩放</value></data>
+  <data name="FollowWindow" xml:space="preserve"><value>跟随 Word 窗口</value></data>
+  <data name="FollowWindowHint" xml:space="preserve"><value>关闭后固定在当前画布的左右下角。</value></data>
+  <data name="ShowPageNumber" xml:space="preserve"><value>显示页码</value></data>
+  <data name="DarkBackground" xml:space="preserve"><value>深色背景</value></data>
+  <data name="NavigationScale" xml:space="preserve"><value>导航大小</value></data>
+  <data name="NavigationOpacity" xml:space="preserve"><value>不透明度</value></data>
+  <data name="NavigationShadow" xml:space="preserve"><value>显示阴影</value></data>
+  <data name="ShadowSize" xml:space="preserve"><value>阴影范围</value></data>
+  <data name="HorizontalInset" xml:space="preserve"><value>左右边距</value></data>
+  <data name="BottomInset" xml:space="preserve"><value>底部边距</value></data>
+  <data name="ResetNavigation" xml:space="preserve"><value>恢复默认导航设置</value></data>
+  <data name="NavigationLayout" xml:space="preserve"><value>显示与位置</value></data>
+  <data name="CustomAppearance" xml:space="preserve"><value>独立外观</value></data>
+  <data name="FocusModeSettings" xml:space="preserve"><value>专注模式</value></data>
+  <data name="AutoEnterFocusMode" xml:space="preserve"><value>连接文档后自动进入专注模式</value></data>
+  <data name="AutoEnterFocusModeHint" xml:space="preserve"><value>连接成功后自动进入专注；手动退出后不会对当前文档反复自动进入。</value></data>
+  <data name="FocusToolbarOpacity" xml:space="preserve"><value>专注模式工具栏不透明度</value></data>
+  <data name="ExitFocus" xml:space="preserve"><value>退出专注</value></data>
+  <data name="History" xml:space="preserve"><value>歷史批註</value></data>
+  <data name="HistoryConfirm" xml:space="preserve"><value>還原所選歷史版本的批註？目前批註會先備份，原歷史檔案會保留。正文或版面配置可能已改變，還原後請核對批註位置。</value></data>
+  <data name="WpsUnavailable" xml:space="preserve"><value>目前 WPS 視窗未提供可用的自動化介面或文件視口。請在本機 WPS 文字中開啟文件，並確認自動化元件可用。</value></data>
+  <data name="HistoryFailed" xml:space="preserve"><value>歷史批註還原未完成，原歷史檔案已保留。請檢查儲存權限及記錄。</value></data>
+</root>
