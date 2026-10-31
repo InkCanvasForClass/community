@@ -1060,6 +1060,15 @@ namespace Ink_Canvas.Plugins
                 {
                     LogError(string.Format("Plugin {0} raised an error while rolling back failed initialization", info.Name), shutdownEx);
                 }
+                // Initialize 中途失败时可能已经注册了 camera provider，这里一并清理
+                try
+                {
+                    CameraProviderRegistry.Instance.UnregisterByProviderId(info.Id);
+                }
+                catch (Exception providerCleanupEx)
+                {
+                    LogError(string.Format("Plugin {0} camera provider cleanup failed", info.Name), providerCleanupEx);
+                }
                 PluginCanvasResourceCleanup.Release(
                     info.Id,
                     GetService<ICanvasToolService>(),
@@ -1221,6 +1230,19 @@ namespace Ink_Canvas.Plugins
                 catch (Exception shutdownEx)
                 {
                     LogError(string.Format("Plugin {0} raised an error during Shutdown", plugin.Name), shutdownEx);
+                }
+
+                // 插件卸载时兜底清理它注册的虚拟摄像头提供者（camera provider）：
+                // 停止正在推流的摄像头并从视频展台下拉框移除，避免宿主继续持有插件程序集里的委托
+                // （漏掉这一步会让可回收 AssemblyLoadContext 无法卸载）。
+                // ProviderId 约定等于插件 manifest.Id（见 ICameraProviderService 文档）。
+                try
+                {
+                    CameraProviderRegistry.Instance.UnregisterByProviderId(plugin.Id);
+                }
+                catch (Exception providerCleanupEx)
+                {
+                    LogError(string.Format("Plugin {0} camera provider cleanup failed", plugin.Name), providerCleanupEx);
                 }
 
                 PluginCanvasResourceCleanup.Release(
