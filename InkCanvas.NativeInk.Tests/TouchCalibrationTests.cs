@@ -139,6 +139,39 @@ namespace InkCanvas.NativeInk.Tests
             group.Down(1, 0, 0, 0); group.Down(2, 130, 0, 0); group.Evaluate(200);
             Check(group.IsPalm(1), "Count and tolerance controls");
             group.Reset(); group.Down(1, double.NaN, 0, 0); Check(group.Count == 0, "Reject invalid positions");
+            var legacy = JsonConvert.DeserializeObject<TouchCalibrationRecord>(
+                "{\"Version\":1,\"FingerArea\":100,\"PalmArea\":900,\"OutlineWidth\":60,\"OutlineHeight\":60,\"AreaMultiplier\":4,"
+                + "\"Environment\":{\"Source\":\"WPF\",\"Display\":\"DISPLAY1\",\"PixelWidth\":1920,\"PixelHeight\":1080,\"DpiX\":1.5,\"DpiY\":1.5}}");
+            Check(legacy.IsValid() && !legacy.UsePointGrouping && legacy.MinimumContacts == 3
+                && legacy.WindowMilliseconds == 200 && legacy.GroupTolerance == 1, "Existing profiles retain the area policy and defaults");
+            var pointRecord = new TouchCalibrationRecord
+            {
+                UsePointGrouping = true, OutlineWidth = 100, OutlineHeight = 80,
+                MinimumContacts = 4, WindowMilliseconds = 300, GroupTolerance = 1.5,
+                SizeAdjustment = 1.5, Environment = Environment()
+            };
+            Check(pointRecord.IsValid(), "Position-only calibration does not require area samples");
+            Check(!TouchCalibrationPolicy.TryResolve(pointRecord, Environment(), 1, out _, out _), "Position-only policy must not use an area threshold");
+            var pointRestored = JsonConvert.DeserializeObject<Profile>(JsonConvert.SerializeObject(
+                new Profile { Preserved = 42, Calibration = pointRecord })).Calibration;
+            Check(pointRestored.IsValid() && pointRestored.UsePointGrouping && pointRestored.MinimumContacts == 4
+                && pointRestored.WindowMilliseconds == 300 && pointRestored.GroupTolerance == 1.5, "Position-only settings survive the settings converter");
+            var restoredTracker = new PalmContactGroupTracker
+            {
+                Width = pointRestored.OutlineWidth, Height = pointRestored.OutlineHeight,
+                MinimumContacts = pointRestored.MinimumContacts, WindowMilliseconds = pointRestored.WindowMilliseconds,
+                Tolerance = pointRestored.GroupTolerance
+            };
+            for (int id = 1; id <= 3; id++) restoredTracker.Down(id, id * 30, id * 10, 0);
+            restoredTracker.Evaluate(300);
+            Check(!restoredTracker.IsPalm(1), "Saved minimum contact count is applied");
+            restoredTracker.Down(4, 130, 20, 100);
+            restoredTracker.Evaluate(300);
+            Check(restoredTracker.IsPalm(4), "Saved grouping settings trigger the actual tracker");
+            pointRestored.MinimumContacts = 1; Check(!pointRestored.IsValid(), "Reject invalid contact count"); pointRestored.MinimumContacts = 4;
+            pointRestored.WindowMilliseconds = -1; Check(!pointRestored.IsValid(), "Reject invalid time window"); pointRestored.WindowMilliseconds = 300;
+            pointRestored.GroupTolerance = double.NaN; Check(!pointRestored.IsValid(), "Reject invalid group tolerance");
+            Console.WriteLine("PASS CalibrationRoutes (area, position-only, migration, persistence, runtime policy)");
             Console.WriteLine("PASS PalmContactGroupTracker (count, time, extent, latch, reset)");
             Console.WriteLine("PASS TouchCalibrationTests (sampling, policy, environment, tracker, persistence)");
         }

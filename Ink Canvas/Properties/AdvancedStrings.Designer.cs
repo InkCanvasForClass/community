@@ -52,6 +52,8 @@ namespace Ink_Canvas.Properties
         public static string CalibrationSkip => GetString(nameof(CalibrationSkip));
         public static string CalibrationNext => GetString(nameof(CalibrationNext));
         public static string CalibrationCancel => GetString(nameof(CalibrationCancel));
+        public static string CalibrationApply => GetString(nameof(CalibrationApply));
+        public static string CalibrationAreaRoute => GetString(nameof(CalibrationAreaRoute));
 
         public static string AvoidFullScreenHelper => ResourceManager.GetString(nameof(AvoidFullScreenHelper), _resourceCulture);
 

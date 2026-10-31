@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
   <data name="CalibrationReturnSettings" xml:space="preserve"><value>Back to advanced settings</value></data>
-  <data name="CalibrationSimulate" xml:space="preserve"><value>Simulate with traced area</value></data>
+  <data name="CalibrationSimulate" xml:space="preserve"><value>Route 2: traced dimensions + multiple contacts</value></data>
+  <data name="CalibrationAreaRoute" xml:space="preserve"><value>Route 1: sample contact area</value></data>
   <data name="CalibrationSimulateHint" xml:space="preserve"><value>Trace your palm or enter its dimensions. Write with a mouse or a few contacts. Enough contacts pressed within the time window and clustered within the traced palm bounds automatically erase, without contact-area reports.</value></data>
   <data name="CalibrationSimulateErase" xml:space="preserve"><value>Detect palms from multiple contacts</value></data>
-  <data name="CalibrationSimulationOnly" xml:space="preserve"><value>The traced area sets eraser size; contact count, timing and spatial bounds trigger erasing. Decisions persist until lift-off. Preview only; device calibration is not overwritten.</value></data>
+  <data name="CalibrationSimulationOnly" xml:space="preserve"><value>Traced dimensions set eraser size; contact count, timing and spatial bounds trigger erasing. Decisions persist until lift-off. Save and apply to use these settings when annotating.</value></data>
   <data name="CalibrationGroupCount" xml:space="preserve"><value>Minimum contacts</value></data>
   <data name="CalibrationGroupWindow" xml:space="preserve"><value>Press time window</value></data>
   <data name="CalibrationGroupTolerance" xml:space="preserve"><value>Palm bounds multiplier</value></data>
@@ -37,7 +38,7 @@
   <data name="CalibrationSkip" xml:space="preserve"><value>Skip nib</value></data>
   <data name="CalibrationNext" xml:space="preserve"><value>Next</value></data>
   <data name="CalibrationCancel" xml:space="preserve"><value>Cancel</value></data>
-  <data name="CalibrationApply" xml:space="preserve"><value>Confirm and apply</value></data>
+  <data name="CalibrationApply" xml:space="preserve"><value>Save and apply</value></data>
   <data name="CalibrationReady" xml:space="preserve"><value>Waiting for input. The first press locks the input source and display environment.</value></data>
   <data name="CalibrationEnvironmentChanged" xml:space="preserve"><value>Display or DPI changed. Collection was interrupted. Please resample.</value></data>
   <data name="CalibrationMultipleContacts" xml:space="preserve"><value>Multiple contact boxes detected; this press was discarded. The device must report a single palm box. Separate finger areas cannot be added together.</value></data>

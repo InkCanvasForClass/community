@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
   <data name="CalibrationReturnSettings" xml:space="preserve"><value>返回高级设置</value></data>
-  <data name="CalibrationSimulate" xml:space="preserve"><value>使用手绘面积模拟</value></data>
+  <data name="CalibrationSimulate" xml:space="preserve"><value>路线二：手绘尺寸 + 多触点校准</value></data>
+  <data name="CalibrationAreaRoute" xml:space="preserve"><value>路线一：采样接触面积</value></data>
   <data name="CalibrationSimulateHint" xml:space="preserve"><value>描摹手掌或填写宽高后即可测试。用鼠标或少量触点书写；在时间窗口内按下足够多、集中在手绘手掌范围内的触点，会自动触发手掌擦，无需设备上报接触面积。</value></data>
   <data name="CalibrationSimulateErase" xml:space="preserve"><value>多触点自动判定手掌</value></data>
-  <data name="CalibrationSimulationOnly" xml:space="preserve"><value>手绘面积决定擦除大小，触点数量、按下时间及聚集范围决定是否擦除。判定保持到抬手。本页仅预览，不覆盖设备校准。</value></data>
+  <data name="CalibrationSimulationOnly" xml:space="preserve"><value>手绘尺寸决定擦除大小，触点数量、按下时间及聚集范围决定是否擦除。判定保持到抬手。确认后将保存这些参数，并用于实际批注。</value></data>
   <data name="CalibrationGroupCount" xml:space="preserve"><value>最少触点数</value></data>
   <data name="CalibrationGroupWindow" xml:space="preserve"><value>按下时间窗口</value></data>
   <data name="CalibrationGroupTolerance" xml:space="preserve"><value>手掌范围倍率</value></data>
@@ -37,7 +38,7 @@
   <data name="CalibrationSkip" xml:space="preserve"><value>跳过笔尖</value></data>
   <data name="CalibrationNext" xml:space="preserve"><value>下一步</value></data>
   <data name="CalibrationCancel" xml:space="preserve"><value>取消</value></data>
-  <data name="CalibrationApply" xml:space="preserve"><value>确认应用</value></data>
+  <data name="CalibrationApply" xml:space="preserve"><value>保存并应用</value></data>
   <data name="CalibrationReady" xml:space="preserve"><value>等待输入。首次有效按压锁定输入来源和显示环境。</value></data>
   <data name="CalibrationEnvironmentChanged" xml:space="preserve"><value>屏幕或 DPI 已改变，已中断采集。请重新采样。</value></data>
   <data name="CalibrationMultipleContacts" xml:space="preserve"><value>检测到多个接触框，本次作废。设备须提供单一手掌接触框；不能把多个手指面积相加。</value></data>

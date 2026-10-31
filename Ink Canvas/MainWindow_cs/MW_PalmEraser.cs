@@ -5,6 +5,8 @@ using Ink_Canvas.Ink.Native;
 #endif
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Ink;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -26,6 +28,21 @@ namespace Ink_Canvas
         private double _palmPreviousWidth;
         private double _palmHeight;
         private Point? _palmLastPoint;
+        private readonly PalmContactGroupTracker _palmGroupTracker = new();
+        private readonly Dictionary<int, Stroke> _palmGroupStrokes = new();
+        private readonly Dictionary<int, TouchDevice> _palmGroupDevices = new();
+        private DispatcherTimer _palmGroupTimer;
+        private InkCanvasEditingMode? _palmGroupSavedMode;
+        private bool _palmGroupSavedManipulation;
+        private string _palmGroupSource;
+
+        private InkCanvasEditingMode GetPalmLogicalEditingMode()
+        {
+            var mode = inkCanvas?.EditingMode ?? InkCanvasEditingMode.None;
+            if (mode != InkCanvasEditingMode.None) return mode;
+            if (_palmGroupSavedMode.HasValue) return _palmGroupSavedMode.Value;
+            return isPalmEraserActive || _changingPalmMode ? palmEraserPreviousEditingMode : mode;
+        }
 
         private bool CanStartPalmEraser()
         {
@@ -35,7 +52,8 @@ namespace Ink_Canvas
 #if ICC_NATIVE_WET_INK
                 && ResolveLogicalInkTool() == LogicalInkTool.Pen
 #else
-                && (_currentToolMode == "pen" || _currentToolMode == "color")
+                && (_currentToolMode == "pen" || _currentToolMode == "color"
+                    || GetPalmLogicalEditingMode() == InkCanvasEditingMode.Ink)
 #endif
                 && !isInMultiTouchMode
                 && !(currentMode == 1 ? Settings.Gesture.IsEnableMultiTouchModeBoard : Settings.Gesture.IsEnableMultiTouchMode);
@@ -72,6 +90,7 @@ namespace Ink_Canvas
         private bool TryHandlePalmTouch(TouchEventArgs e, bool down)
         {
             int id = e.TouchDevice.Id;
+            if (TryHandlePalmGroupTouch(e, down)) return true;
             if (isPalmEraserActive)
             {
                 if (!CanStartPalmEraser())
@@ -117,6 +136,140 @@ namespace Ink_Canvas
             return true;
         }
 
+        private bool TryHandlePalmGroupTouch(TouchEventArgs e, bool down)
+        {
+            var record = Settings.Advanced.TouchCalibration;
+            if (record?.UsePointGrouping != true || !record.IsValid() || !CanStartPalmEraser()) return false;
+            if (!record.Environment.Matches(TouchCalibrationDisplay.Capture(this, "WPF"))) return false;
+            if (_pluginCanvasGestureHandler != null) return false;
+            int id = e.TouchDevice.Id;
+            var point = e.GetTouchPoint(inkCanvas).Position;
+            if (down)
+            {
+                if (!_palmGroupSavedMode.HasValue)
+                {
+                    _palmGroupSavedMode = inkCanvas.EditingMode;
+                    _palmGroupSavedManipulation = inkCanvas.IsManipulationEnabled;
+                    _palmGroupSource = "WPF";
+                    _changingPalmMode = true;
+                    try { inkCanvas.EditingMode = InkCanvasEditingMode.None; }
+                    finally { _changingPalmMode = false; }
+                    inkCanvas.IsManipulationEnabled = false;
+                }
+                _palmGroupTracker.MinimumContacts = record.MinimumContacts;
+                _palmGroupTracker.WindowMilliseconds = record.WindowMilliseconds;
+                _palmGroupTracker.Tolerance = record.GroupTolerance;
+                _palmGroupTracker.Width = record.OutlineWidth;
+                _palmGroupTracker.Height = record.OutlineHeight;
+                _palmGroupTracker.Down(id, point.X, point.Y, Environment.TickCount64);
+                _palmGroupDevices[id] = e.TouchDevice;
+                CancelPalmTouchPreview(id);
+                _palmGroupStrokes[id] = new Stroke(new StylusPointCollection { new StylusPoint(point.X, point.Y) },
+                    inkCanvas.DefaultDrawingAttributes.Clone());
+                GetStrokeVisual(id).Stroke = _palmGroupStrokes[id];
+                RealtimeInkFrameScheduler.RequestRedraw(GetStrokeVisual(id));
+                inkCanvas.LostTouchCapture -= PalmGroup_LostTouchCapture;
+                inkCanvas.LostTouchCapture += PalmGroup_LostTouchCapture;
+                inkCanvas.CaptureTouch(e.TouchDevice);
+                _palmGroupTimer ??= new DispatcherTimer(TimeSpan.FromMilliseconds(16), DispatcherPriority.Input,
+                    (_, _) => EvaluatePalmGroup(), Dispatcher);
+                _palmGroupTimer.Start();
+            }
+            else
+            {
+                if (!_palmGroupDevices.ContainsKey(id)) return false;
+                _palmGroupTracker.Move(id, point.X, point.Y);
+                if (_palmGroupStrokes.TryGetValue(id, out var stroke))
+                {
+                    stroke.StylusPoints.Add(new StylusPoint(point.X, point.Y));
+                    RealtimeInkFrameScheduler.RequestRedraw(GetStrokeVisual(id));
+                }
+            }
+            EvaluatePalmGroup();
+            e.Handled = true;
+            return true;
+        }
+
+        private void EvaluatePalmGroup()
+        {
+            var record = Settings.Advanced.TouchCalibration;
+            if (!_palmGroupSavedMode.HasValue) return;
+            if (!CanStartPalmEraser() || record?.IsValid() != true
+                || !record.Environment.Matches(TouchCalibrationDisplay.Capture(this, _palmGroupSource)))
+            {
+                CancelPalmGroup();
+                return;
+            }
+            _palmGroupTracker.Evaluate(Environment.TickCount64);
+            foreach (int id in _palmGroupTracker.PalmIds.Select(id => (int)id).ToArray())
+            {
+                if (_palmGroupStrokes.Remove(id)) CancelPalmTouchPreview(id);
+            }
+            if (!_palmGroupTracker.TryGetCenter(out var x, out var y)) return;
+            if (!PalmEraserContactTracker.TryGetEraserSize(record.OutlineWidth, record.OutlineHeight, 0.01,
+                Math.Sqrt(record.SizeAdjustment), isEraserCircleShape, out var width, out var height)) return;
+            if (!isPalmEraserActive) BeginPalmEraser(new Point(x, y), width, height);
+            else MovePalmEraser(new Point(x, y), width, height);
+        }
+
+        private bool FinishPalmGroupTouch(TouchEventArgs e, bool canceled = false)
+        {
+            int id = e.TouchDevice.Id;
+            if (!_palmGroupDevices.Remove(id)) return false;
+            if (_palmGroupStrokes.Remove(id, out var stroke))
+            {
+                CancelPalmTouchPreview(id);
+                if (!canceled)
+                {
+                    inkCanvas.Strokes.Add(stroke);
+                    inkCanvas_StrokeCollected(inkCanvas, new InkCanvasStrokeCollectedEventArgs(stroke));
+                }
+            }
+            _palmGroupTracker.Up(id);
+            dec.Remove(id);
+            // Lifting changes the centroid: do not erase a line across the jump.
+            _palmLastPoint = null;
+            if (inkCanvas != null) inkCanvas.ReleaseTouchCapture(e.TouchDevice);
+            if (!_palmGroupTracker.TryGetCenter(out _, out _)) EndPalmEraser();
+            if (_palmGroupDevices.Count == 0) CancelPalmGroup();
+            e.Handled = true;
+            return true;
+        }
+
+        private void PalmGroup_LostTouchCapture(object sender, TouchEventArgs e)
+        {
+            if (e.TouchDevice.Captured != inkCanvas) FinishPalmGroupTouch(e, true);
+        }
+
+        private void CancelPalmGroup(bool restoreMode = true)
+        {
+            _palmGroupTimer?.Stop();
+            if (!_palmGroupSavedMode.HasValue) return;
+            EndPalmEraser(false);
+            inkCanvas.LostTouchCapture -= PalmGroup_LostTouchCapture;
+            foreach (var device in _palmGroupDevices.Values)
+            {
+                dec.Remove(device.Id);
+                if (device.Captured == inkCanvas) inkCanvas.ReleaseTouchCapture(device);
+            }
+            foreach (int id in _palmGroupStrokes.Keys) CancelPalmTouchPreview(id);
+            _palmGroupDevices.Clear();
+            _palmGroupStrokes.Clear();
+            _palmGroupTracker.Reset();
+            inkCanvas.IsManipulationEnabled = _palmGroupSavedManipulation;
+            _changingPalmMode = true;
+            try
+            {
+                if (restoreMode && inkCanvas.EditingMode == InkCanvasEditingMode.None && !IsCurrentPageFrozen)
+                    inkCanvas.EditingMode = _palmGroupSavedMode.Value;
+            }
+            finally { _changingPalmMode = false; }
+            _palmGroupSavedMode = null;
+            if (ViewboxFloatingBar != null) ViewboxFloatingBar.IsHitTestVisible = true;
+            if (BlackboardUIGridForInkReplay != null) BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+            SetCursorBasedOnEditingMode(inkCanvas);
+        }
+
         private void CancelPalmTouchPreview(int id)
         {
             if (StrokeVisualList.TryGetValue(id, out var visual))
@@ -145,6 +298,7 @@ namespace Ink_Canvas
 
         private bool FinishPalmTouch(TouchEventArgs e)
         {
+            if (FinishPalmGroupTouch(e)) return true;
             int id = e.TouchDevice.Id;
             _palmContacts.Remove(id);
             bool suppressed = _palmSuppressedTouches.Remove(id);
@@ -186,6 +340,8 @@ namespace Ink_Canvas
             _palmPreviousWidth = eraserWidth;
             _palmPreviousStrokeEraser = isUsingStrokesEraser;
             _palmPreviousManipulation = inkCanvas.IsManipulationEnabled;
+            // EditingModeChanged is synchronous; publish the logical palm state before switching input mode.
+            isPalmEraserActive = true;
             _changingPalmMode = true;
             try
             {
@@ -193,7 +349,6 @@ namespace Ink_Canvas
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
             }
             finally { _changingPalmMode = false; }
-            isPalmEraserActive = true;
             inkCanvas.IsManipulationEnabled = false;
             isUsingStrokesEraser = false;
             eraserWidth = width;
@@ -238,23 +393,31 @@ namespace Ink_Canvas
         private void EndPalmEraser(bool restoreMode = true)
         {
             if (!isPalmEraserActive) return;
-            isPalmEraserActive = false;
-            inkCanvas.LostTouchCapture -= PalmEraser_LostTouchCapture;
-            _palmTouchDevice = null;
-            _palmNativePointer = null;
-            _palmContact = null;
-            _palmLastPoint = null;
-            DisableEraserOverlay();
-            eraserWidth = _palmPreviousWidth;
-            isUsingStrokesEraser = _palmPreviousStrokeEraser;
-            inkCanvas.IsManipulationEnabled = _palmPreviousManipulation;
             _changingPalmMode = true;
             try
             {
+                isPalmEraserActive = false;
+                inkCanvas.LostTouchCapture -= PalmEraser_LostTouchCapture;
+                if (_palmTouchDevice != null)
+                {
+                    dec.Remove(_palmTouchDevice.Id);
+                    if (_palmTouchDevice.Captured == inkCanvas) inkCanvas.ReleaseTouchCapture(_palmTouchDevice);
+                }
+                _palmTouchDevice = null;
+                _palmNativePointer = null;
+                _palmContact = null;
+                _palmLastPoint = null;
+                DisableEraserOverlay();
+                eraserWidth = _palmPreviousWidth;
+                isUsingStrokesEraser = _palmPreviousStrokeEraser;
+                inkCanvas.IsManipulationEnabled = _palmPreviousManipulation;
                 if (restoreMode && inkCanvas.EditingMode == InkCanvasEditingMode.None && !IsCurrentPageFrozen)
                     inkCanvas.EditingMode = palmEraserPreviousEditingMode;
             }
             finally { _changingPalmMode = false; }
+            if (ViewboxFloatingBar != null) ViewboxFloatingBar.IsHitTestVisible = true;
+            if (BlackboardUIGridForInkReplay != null) BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+            if (eraserOverlayCanvas != null) eraserOverlayCanvas.IsHitTestVisible = false;
             SetCursorBasedOnEditingMode(inkCanvas);
         }
 
@@ -263,6 +426,7 @@ namespace Ink_Canvas
 
         private void ResetPalmEraser()
         {
+            CancelPalmGroup();
             EndPalmEraser();
             _nativePalmContacts.Clear();
             _palmContacts.Clear();

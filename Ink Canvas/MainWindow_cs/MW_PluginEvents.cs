@@ -42,6 +42,7 @@ namespace Ink_Canvas
 
         private void NotifyPluginPenModeChanged(InkCanvasEditingMode editingMode)
         {
+            if (_changingPalmMode) return;
             bool? isPenMode = editingMode switch
             {
                 InkCanvasEditingMode.Ink => true,
