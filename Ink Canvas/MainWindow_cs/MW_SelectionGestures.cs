@@ -1176,8 +1176,11 @@ namespace Ink_Canvas
         {
             if (inkCanvas.GetSelectedStrokes().Count == 0)
             {
-                HideSelectionDisplay();
-                return;
+                var strokeBounds = inkCanvas.GetSelectionBounds();
+                if (!strokeBounds.IsEmpty && strokeBounds.Width > 0 && strokeBounds.Height > 0)
+                {
+                    unionBounds = strokeBounds;
+                }
             }
 
             GridInkCanvasSelectionCover.Visibility = Visibility.Visible;
