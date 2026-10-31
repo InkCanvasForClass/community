@@ -59,7 +59,7 @@
         "type": "Direct",
         "requested": "[0.11.0-icc.1, )",
         "resolved": "0.11.0-icc.1",
-        "contentHash": "Oa2RDZ3ErDQTcYD+Pxpd6v/QBKKCYD9Srxp9o/PxbmNCgPsANfl1yTE8vIxZ2aXDY0DrJVToLnl8m7/bCSNgJQ==",
+        "contentHash": "nteVzdUjKCx0Te4enzlT+cLgkHq56rEtwJJrm8beBxoTVhH0Q1a2P0l0LWJXpPLz1oMzQp5q86eLz+ieimdt/A==",
         "dependencies": {
           "iNKORE.UI.WPF": "1.2.8"
         }
