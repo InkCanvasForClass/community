@@ -396,6 +396,7 @@ namespace Ink_Canvas
                 Debug.WriteLine("BoardSymbolIconDelete: Clearing all children including images");
                 ShutdownAllCanvasMediaElements();
                 inkCanvas.Children.Clear();
+                ClearAllSelection();
             }
             else
             {
@@ -436,6 +437,7 @@ namespace Ink_Canvas
                 Debug.WriteLine("BoardSymbolIconDeleteInkAndHistories: Clearing all children including images");
                 ShutdownAllCanvasMediaElements();
                 inkCanvas.Children.Clear();
+                ClearAllSelection();
             }
             else
             {

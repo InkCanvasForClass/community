@@ -1144,6 +1144,7 @@ namespace Ink_Canvas
         private void inkCanvas_TouchMove(object sender, TouchEventArgs e)
         {
             // 视频展台特殊模式：触摸移动交给 VideoPresenterSpecialModeContainer 的 Manipulation 处理
+            if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
             if (_isVideoPresenterSpecialMode) return;
 
             if (isSingleFingerDragMode) return;
@@ -2645,6 +2646,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
             if (IsBoardRoamingMode && e.ChangedButton == MouseButton.Left)
             {
                 inkCanvas.CaptureMouse();
@@ -2689,6 +2691,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_MouseMove(object sender, MouseEventArgs e)
         {
+            if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
             // 视频展台特殊模式：鼠标拖动摄像头预览画面
             if (_isBoothMouseDragging)
             {

@@ -1226,10 +1226,37 @@ namespace Ink_Canvas
         internal void SymbolIconDelete_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (TryBlockFrozenPageMutation("清除冻结页面内容")) return;
-            if (inkCanvas.GetSelectedStrokes().Count > 0)
+            var selectedStrokes = inkCanvas.GetSelectedStrokes();
+            bool hasStrokes = selectedStrokes != null && selectedStrokes.Count > 0;
+            bool hasElements = _selectedElements != null && _selectedElements.Count > 0;
+
+            if (hasStrokes || hasElements)
             {
-                inkCanvas.Strokes.Remove(inkCanvas.GetSelectedStrokes());
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+                if (hasStrokes)
+                {
+                    timeMachine.CommitStrokeEraseHistory(selectedStrokes);
+                    inkCanvas.Strokes.Remove(selectedStrokes);
+                }
+
+                if (hasElements)
+                {
+                    var elementsToDelete = _selectedElements.ToList();
+                    foreach (var elem in elementsToDelete)
+                    {
+                        if (elem is CanvasMediaControl mediaControl)
+                        {
+                            mediaControl.PausePlayback();
+                        }
+                        if (inkCanvas.Children.Contains(elem))
+                        {
+                            timeMachine.CommitElementRemoveHistory(elem);
+                            inkCanvas.Children.Remove(elem);
+                        }
+                    }
+                    _selectedElements.Clear();
+                }
+
+                ClearAllSelection();
             }
             else if (inkCanvas.Strokes.Count > 0)
             {
@@ -3587,12 +3614,7 @@ namespace Ink_Canvas
             if (lastBorderMouseDownObject is Panel panel)
                 panel.Background = new SolidColorBrush(Colors.Transparent);
 
-            // 如果当前有选中的图片元素，先取消选中
-            if (currentSelectedElement != null)
-            {
-                UnselectElement(currentSelectedElement);
-                currentSelectedElement = null;
-            }
+            ClearAllSelection();
 
             // 禁用高级橡皮擦系统
             DisableEraserOverlay();
@@ -4410,11 +4432,7 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void BtnUndo_Click(object sender, RoutedEventArgs e)
         {
-            if (inkCanvas.GetSelectedStrokes().Count != 0)
-            {
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-                inkCanvas.Select(new StrokeCollection());
-            }
+            ClearAllSelection();
 
             var item = timeMachine.Undo();
             ApplyHistoryToCanvas(item);
@@ -4431,11 +4449,7 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void BtnRedo_Click(object sender, RoutedEventArgs e)
         {
-            if (inkCanvas.GetSelectedStrokes().Count != 0)
-            {
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-                inkCanvas.Select(new StrokeCollection());
-            }
+            ClearAllSelection();
 
             var item = timeMachine.Redo();
             ApplyHistoryToCanvas(item);
@@ -4555,6 +4569,7 @@ namespace Ink_Canvas
         private void BtnClear_Click(object sender, RoutedEventArgs e)
         {
             if (TryBlockFrozenPageMutation("清空冻结页面内容")) return;
+            ClearAllSelection();
             forceEraser = false;
             //BorderClearInDelete.Visibility = Visibility.Collapsed;
 
