@@ -303,4 +303,43 @@
   <data name="SmartModeHint" xml:space="preserve">
     <value>自动检测 PPT 中的视频控件区域，鼠标进入时切指针形态，离开后恢复批注形态（所有联动架构都能用）</value>
   </data>
+  <data name="HighlighterSnap" xml:space="preserve">
+    <value>荧光笔纠偏神器</value>
+  </data>
+  <data name="HighlighterSnapHint" xml:space="preserve">
+    <value>放映时一划拉，手抖画歪的高亮线自动被掰直、啪地拍进文字上；画圈画竖线它就不插手啦</value>
+  </data>
+  <data name="HighlighterSnapFitTextSize" xml:space="preserve">
+    <value>让条条自己长成字那么大</value>
+  </data>
+  <data name="HighlighterSnapFitTextSizeHint" xml:space="preserve">
+    <value>字有多大，条就多粗多长，整行文字一口吃掉，不再只包住一条细缝；关掉的话条就只跟着荧光笔粗细走啦</value>
+  </data>
+  <data name="HighlighterSnapTuning" xml:space="preserve">
+    <value>手感微调</value>
+  </data>
+  <data name="HighlighterSnapTuningHint" xml:space="preserve">
+    <value>嫌条太瘦、或者胖到糊住隔壁行，都在这儿拧两下，立刻见效</value>
+  </data>
+  <data name="HighlighterSnapFillRatio" xml:space="preserve">
+    <value>吃得多饱</value>
+  </data>
+  <data name="HighlighterSnapFillRatioHint" xml:space="preserve">
+    <value>条有多厚，1.00 就顶满整行。字本身只占行里的七八成，所以 0.95 上下最饱满</value>
+  </data>
+  <data name="HighlighterSnapExtendRatio" xml:space="preserve">
+    <value>两头多伸一点</value>
+  </data>
+  <data name="HighlighterSnapExtendRatioHint" xml:space="preserve">
+    <value>条的两端各往外探出多少，单位是「一个字高」的倍数，逗号句号就不会露在外头</value>
+  </data>
+  <data name="HighlighterSnapReset" xml:space="preserve">
+    <value>一键回魂</value>
+  </data>
+  <data name="HighlighterSnapResetHint" xml:space="preserve">
+    <value>拧乱了不要紧，点一下回到按中文字形实测出来的推荐值</value>
+  </data>
+  <data name="HighlighterSnapResetButton" xml:space="preserve">
+    <value>回去</value>
+  </data>
 </root>

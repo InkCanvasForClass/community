@@ -2187,6 +2187,9 @@ namespace Ink_Canvas
                 inkCanvas.Strokes.Transform(matrix, false);
                 // 同步变换历史中不在画布上的笔画（如形状识别的 ReplacedStroke）
                 timeMachine?.TransformStrokesInHistory(matrix, inkCanvas.Strokes);
+                // PPT 荧光笔纠正映射里的笔画同样不在画布上时也要跟着变换，
+                // 否则撤销会还原出缩放前尺寸的高亮条。
+                TransformPptHighlighterSnapMapping(matrix);
                 // 墨迹大小已改变，旋转基准过期，重置以便下次旋转重新保存
                 ResetRotationBaseline();
             }

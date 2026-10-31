@@ -274,77 +274,84 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private async void UpdateChannelSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!_isLoaded) return;
-            if (_isChangingUpdateChannelInternally) return;
-            if (!(UpdateChannelSelector.SelectedItem is ComboBoxItem cbi) || cbi.Tag == null) return;
-
-            var oldChannel = SettingsManager.Settings.Startup.UpdateChannel;
-            string channel = cbi.Tag.ToString();
-            UpdateChannel newChannel = channel == "Beta" ? UpdateChannel.Beta
-                : channel == "Preview" ? UpdateChannel.Preview
-                : UpdateChannel.Release;
-
-            if (SettingsManager.Settings.Startup.UpdateChannel == newChannel)
-                return;
-
-            bool isTestChannel = newChannel == UpdateChannel.Preview || newChannel == UpdateChannel.Beta;
-
-            if (isTestChannel && !SettingsManager.Settings.Startup.HasAcceptedTelemetryPrivacy)
+            try
             {
-                MessageBoxHelper.Show(this,
-                    UpdateStrings.Channel_PrivacyRequired,
-                    UpdateStrings.Channel_PrivacyRequiredTitle,
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                if (!_isLoaded) return;
+                if (_isChangingUpdateChannelInternally) return;
+                if (!(UpdateChannelSelector.SelectedItem is ComboBoxItem cbi) || cbi.Tag == null) return;
 
-                SettingsManager.Settings.Startup.UpdateChannel = oldChannel;
-                RevertChannelSelection(oldChannel);
-                SettingsManager.SaveSettingsToFile();
-                LogHelper.WriteLogToFile("Settings | User not accepted privacy, reverted update channel");
-                return;
-            }
+                var oldChannel = SettingsManager.Settings.Startup.UpdateChannel;
+                string channel = cbi.Tag.ToString();
+                UpdateChannel newChannel = channel == "Beta" ? UpdateChannel.Beta
+                    : channel == "Preview" ? UpdateChannel.Preview
+                    : UpdateChannel.Release;
 
-            if (isTestChannel && SettingsManager.Settings.Startup.TelemetryUploadLevel == TelemetryUploadLevel.None)
-            {
-                var result = MessageBoxHelper.Show(this,
-                    UpdateStrings.Channel_TelemetryRequired,
-                    UpdateStrings.Channel_TelemetryRequiredTitle,
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Warning);
+                if (SettingsManager.Settings.Startup.UpdateChannel == newChannel)
+                    return;
 
-                if (result == MessageBoxResult.Yes)
+                bool isTestChannel = newChannel == UpdateChannel.Preview || newChannel == UpdateChannel.Beta;
+
+                if (isTestChannel && !SettingsManager.Settings.Startup.HasAcceptedTelemetryPrivacy)
                 {
-                    SettingsManager.Settings.Startup.TelemetryUploadLevel = TelemetryUploadLevel.Basic;
-                    SettingsManager.SaveSettingsToFile();
-                    LogHelper.WriteLogToFile("Settings | Telemetry enabled (Basic) for preview/beta update channel");
-                }
-                else
-                {
+                    MessageBoxHelper.Show(this,
+                        UpdateStrings.Channel_PrivacyRequired,
+                        UpdateStrings.Channel_PrivacyRequiredTitle,
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+
                     SettingsManager.Settings.Startup.UpdateChannel = oldChannel;
                     RevertChannelSelection(oldChannel);
                     SettingsManager.SaveSettingsToFile();
-                    LogHelper.WriteLogToFile("Settings | User declined telemetry, reverted update channel");
+                    LogHelper.WriteLogToFile("Settings | User not accepted privacy, reverted update channel");
                     return;
                 }
+
+                if (isTestChannel && SettingsManager.Settings.Startup.TelemetryUploadLevel == TelemetryUploadLevel.None)
+                {
+                    var result = MessageBoxHelper.Show(this,
+                        UpdateStrings.Channel_TelemetryRequired,
+                        UpdateStrings.Channel_TelemetryRequiredTitle,
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Warning);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        SettingsManager.Settings.Startup.TelemetryUploadLevel = TelemetryUploadLevel.Basic;
+                        SettingsManager.SaveSettingsToFile();
+                        LogHelper.WriteLogToFile("Settings | Telemetry enabled (Basic) for preview/beta update channel");
+                    }
+                    else
+                    {
+                        SettingsManager.Settings.Startup.UpdateChannel = oldChannel;
+                        RevertChannelSelection(oldChannel);
+                        SettingsManager.SaveSettingsToFile();
+                        LogHelper.WriteLogToFile("Settings | User declined telemetry, reverted update channel");
+                        return;
+                    }
+                }
+
+                SettingsManager.Settings.Startup.UpdateChannel = newChannel;
+                DeviceIdentifier.UpdateUsageChannel(newChannel);
+                LogHelper.WriteLogToFile($"Settings | Update channel changed to {SettingsManager.Settings.Startup.UpdateChannel}");
+                SettingsManager.SaveSettingsToFile();
+
+                // 通道切换后强制刷新更新日志和历史版本缓存
+                _isHistoryLoaded = false;
+                _versionList.Clear();
+                VersionComboBox.ItemsSource = null;
+                ReleaseNotesViewer.Markdown = "";
+                await LoadChangelogAsync();
+
+                if (SettingsManager.Settings.Startup.IsAutoUpdate)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | Channel changed to {newChannel}, performing immediate update check");
+
+                    SettingsActionHub.OnUpdateChannelChanged();
+                }
             }
-
-            SettingsManager.Settings.Startup.UpdateChannel = newChannel;
-            DeviceIdentifier.UpdateUsageChannel(newChannel);
-            LogHelper.WriteLogToFile($"Settings | Update channel changed to {SettingsManager.Settings.Startup.UpdateChannel}");
-            SettingsManager.SaveSettingsToFile();
-
-            // 通道切换后强制刷新更新日志和历史版本缓存
-            _isHistoryLoaded = false;
-            _versionList.Clear();
-            VersionComboBox.ItemsSource = null;
-            ReleaseNotesViewer.Markdown = "";
-            await LoadChangelogAsync();
-
-            if (SettingsManager.Settings.Startup.IsAutoUpdate)
+            catch (Exception __ex)
             {
-                LogHelper.WriteLogToFile($"AutoUpdate | Channel changed to {newChannel}, performing immediate update check");
-
-                SettingsActionHub.OnUpdateChannelChanged();
+                LogHelper.WriteLogToFile($"[AsyncGuard] UpdateChannelSelector_SelectionChanged 执行异常: {__ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -756,18 +763,32 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private async void UpdateTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (e.OriginalSource != UpdateTabControl) return;
-            if (UpdateTabControl.SelectedItem == HistoryTabItem && !_isHistoryLoaded)
+            try
             {
-                await LoadHistoryAsync();
+                if (e.OriginalSource != UpdateTabControl) return;
+                if (UpdateTabControl.SelectedItem == HistoryTabItem && !_isHistoryLoaded)
+                {
+                    await LoadHistoryAsync();
+                }
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] UpdateTabControl_SelectionChanged 执行异常: {__ex.Message}", LogHelper.LogType.Error);
             }
         }
 
         private async void HistoryTabItem_GotFocus(object sender, RoutedEventArgs e)
         {
-            // 兼容用户首次切到历史版本 Tab 时再加载
-            if (_isHistoryLoaded) return;
-            await LoadHistoryAsync();
+            try
+            {
+                // 兼容用户首次切到历史版本 Tab 时再加载
+                if (_isHistoryLoaded) return;
+                await LoadHistoryAsync();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] HistoryTabItem_GotFocus 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private async System.Threading.Tasks.Task LoadHistoryAsync()

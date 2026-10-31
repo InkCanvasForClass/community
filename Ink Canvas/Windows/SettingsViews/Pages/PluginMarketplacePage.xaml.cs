@@ -538,16 +538,30 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private async void InstallButton_Click(object sender, RoutedEventArgs e)
         {
-            var btn = sender as FrameworkElement;
-            var id = btn?.Tag as string;
-            if (string.IsNullOrEmpty(id)) return;
-            await InstallPluginAsync(id);
+            try
+            {
+                var btn = sender as FrameworkElement;
+                var id = btn?.Tag as string;
+                if (string.IsNullOrEmpty(id)) return;
+                await InstallPluginAsync(id);
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] InstallButton_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private async void DetailInstall_Click(object sender, RoutedEventArgs e)
         {
-            if (_selectedPlugin == null) return;
-            await InstallPluginAsync(_selectedPlugin.Id);
+            try
+            {
+                if (_selectedPlugin == null) return;
+                await InstallPluginAsync(_selectedPlugin.Id);
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] DetailInstall_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private void DetailApplyPending_Click(object sender, RoutedEventArgs e)
@@ -633,13 +647,20 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private async void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
-            LoadingBar.Visibility = Visibility.Visible;
-            LoadingBar.IsIndeterminate = true;
-            await _market.RefreshIndexAsync();
-            LoadingBar.Visibility = Visibility.Collapsed;
-            LoadingBar.IsIndeterminate = false;
-            _allPlugins = _market.MergedPlugins ?? new List<MergedPluginInfo>();
-            RefreshList();
+            try
+            {
+                LoadingBar.Visibility = Visibility.Visible;
+                LoadingBar.IsIndeterminate = true;
+                await _market.RefreshIndexAsync();
+                LoadingBar.Visibility = Visibility.Collapsed;
+                LoadingBar.IsIndeterminate = false;
+                _allPlugins = _market.MergedPlugins ?? new List<MergedPluginInfo>();
+                RefreshList();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] RefreshButton_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private void OpenFolderButton_Click(object sender, RoutedEventArgs e)

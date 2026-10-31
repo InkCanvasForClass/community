@@ -198,43 +198,50 @@ namespace Ink_Canvas
         /// </remarks>
         private async void Image_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (TryBlockFrozenPageMutation("绘制几何图形"))
+            try
             {
-                e.Handled = true;
-                return;
+                if (TryBlockFrozenPageMutation("绘制几何图形"))
+                {
+                    e.Handled = true;
+                    return;
+                }
+                lastMouseDownSender = sender;
+                lastMouseDownTime = DateTime.Now;
+
+                await Task.Delay(500);
+
+                if (lastMouseDownSender == sender)
+                {
+                    lastMouseDownSender = null;
+                    var dA = new DoubleAnimation(1, 0.3, new Duration(TimeSpan.FromMilliseconds(100)));
+                    ((UIElement)sender).BeginAnimation(OpacityProperty, dA);
+
+                    forcePointEraser = false;
+                    DisableEraserOverlay();
+
+                    forceEraser = true;
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    inkCanvas.IsManipulationEnabled = true;
+                    if (sender == ImageDrawLine || sender == BoardImageDrawLine)
+                        drawingShapeMode = 1;
+                    else if (sender == ImageDrawDashedLine || sender == BoardImageDrawDashedLine)
+                        drawingShapeMode = 8;
+                    else if (sender == ImageDrawDotLine || sender == BoardImageDrawDotLine)
+                        drawingShapeMode = 18;
+                    else if (sender == ImageDrawArrow || sender == BoardImageDrawArrow)
+                        drawingShapeMode = 2;
+                    else if (sender == ImageDrawParallelLine || sender == BoardImageDrawParallelLine) drawingShapeMode = 15;
+
+                    // 更新模式缓存
+                    UpdateCurrentToolMode("shape");
+
+                    isLongPressSelected = true;
+                    if (isSingleFingerDragMode) ToggleFingerDragMode(null, null);
+                }
             }
-            lastMouseDownSender = sender;
-            lastMouseDownTime = DateTime.Now;
-
-            await Task.Delay(500);
-
-            if (lastMouseDownSender == sender)
+            catch (Exception __ex)
             {
-                lastMouseDownSender = null;
-                var dA = new DoubleAnimation(1, 0.3, new Duration(TimeSpan.FromMilliseconds(100)));
-                ((UIElement)sender).BeginAnimation(OpacityProperty, dA);
-
-                forcePointEraser = false;
-                DisableEraserOverlay();
-
-                forceEraser = true;
-                inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                inkCanvas.IsManipulationEnabled = true;
-                if (sender == ImageDrawLine || sender == BoardImageDrawLine)
-                    drawingShapeMode = 1;
-                else if (sender == ImageDrawDashedLine || sender == BoardImageDrawDashedLine)
-                    drawingShapeMode = 8;
-                else if (sender == ImageDrawDotLine || sender == BoardImageDrawDotLine)
-                    drawingShapeMode = 18;
-                else if (sender == ImageDrawArrow || sender == BoardImageDrawArrow)
-                    drawingShapeMode = 2;
-                else if (sender == ImageDrawParallelLine || sender == BoardImageDrawParallelLine) drawingShapeMode = 15;
-
-                // 更新模式缓存
-                UpdateCurrentToolMode("shape");
-
-                isLongPressSelected = true;
-                if (isSingleFingerDragMode) ToggleFingerDragMode(null, null);
+                LogHelper.WriteLogToFile($"[AsyncGuard] Image_MouseDown 执行异常: {__ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -303,31 +310,38 @@ namespace Ink_Canvas
         /// </remarks>
         public async void BtnDrawLine_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            if (lastMouseDownSender == sender)
+            try
             {
-                forcePointEraser = false;
-                DisableEraserOverlay();
-
-                forceEraser = true;
-                drawingShapeMode = 1;
-                inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                inkCanvas.IsManipulationEnabled = true;
-                CancelSingleFingerDragMode();
-            }
-
-            lastMouseDownSender = null;
-            if (isLongPressSelected)
-            {
-                if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
-                if (sender is UIElement ui)
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                if (lastMouseDownSender == sender)
                 {
-                    var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
-                    ui.BeginAnimation(OpacityProperty, dA);
-                }
-            }
+                    forcePointEraser = false;
+                    DisableEraserOverlay();
 
-            DrawShapePromptToPen();
+                    forceEraser = true;
+                    drawingShapeMode = 1;
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    inkCanvas.IsManipulationEnabled = true;
+                    CancelSingleFingerDragMode();
+                }
+
+                lastMouseDownSender = null;
+                if (isLongPressSelected)
+                {
+                    if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
+                    if (sender is UIElement ui)
+                    {
+                        var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
+                        ui.BeginAnimation(OpacityProperty, dA);
+                    }
+                }
+
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawLine_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -345,31 +359,38 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawDashedLine_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            if (lastMouseDownSender == sender)
+            try
             {
-                forcePointEraser = false;
-                DisableEraserOverlay();
-
-                forceEraser = true;
-                drawingShapeMode = 8;
-                inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                inkCanvas.IsManipulationEnabled = true;
-                CancelSingleFingerDragMode();
-            }
-
-            lastMouseDownSender = null;
-            if (isLongPressSelected)
-            {
-                if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
-                if (sender is UIElement ui)
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                if (lastMouseDownSender == sender)
                 {
-                    var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
-                    ui.BeginAnimation(OpacityProperty, dA);
-                }
-            }
+                    forcePointEraser = false;
+                    DisableEraserOverlay();
 
-            DrawShapePromptToPen();
+                    forceEraser = true;
+                    drawingShapeMode = 8;
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    inkCanvas.IsManipulationEnabled = true;
+                    CancelSingleFingerDragMode();
+                }
+
+                lastMouseDownSender = null;
+                if (isLongPressSelected)
+                {
+                    if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
+                    if (sender is UIElement ui)
+                    {
+                        var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
+                        ui.BeginAnimation(OpacityProperty, dA);
+                    }
+                }
+
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawDashedLine_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -387,31 +408,38 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawDotLine_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            if (lastMouseDownSender == sender)
+            try
             {
-                forcePointEraser = false;
-                DisableEraserOverlay();
-
-                forceEraser = true;
-                drawingShapeMode = 18;
-                inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                inkCanvas.IsManipulationEnabled = true;
-                CancelSingleFingerDragMode();
-            }
-
-            lastMouseDownSender = null;
-            if (isLongPressSelected)
-            {
-                if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
-                if (sender is UIElement ui)
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                if (lastMouseDownSender == sender)
                 {
-                    var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
-                    ui.BeginAnimation(OpacityProperty, dA);
-                }
-            }
+                    forcePointEraser = false;
+                    DisableEraserOverlay();
 
-            DrawShapePromptToPen();
+                    forceEraser = true;
+                    drawingShapeMode = 18;
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    inkCanvas.IsManipulationEnabled = true;
+                    CancelSingleFingerDragMode();
+                }
+
+                lastMouseDownSender = null;
+                if (isLongPressSelected)
+                {
+                    if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
+                    if (sender is UIElement ui)
+                    {
+                        var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
+                        ui.BeginAnimation(OpacityProperty, dA);
+                    }
+                }
+
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawDotLine_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -429,31 +457,38 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawArrow_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            if (lastMouseDownSender == sender)
+            try
             {
-                forcePointEraser = false;
-                DisableEraserOverlay();
-
-                forceEraser = true;
-                drawingShapeMode = 2;
-                inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                inkCanvas.IsManipulationEnabled = true;
-                CancelSingleFingerDragMode();
-            }
-
-            lastMouseDownSender = null;
-            if (isLongPressSelected)
-            {
-                if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
-                if (sender is UIElement ui)
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                if (lastMouseDownSender == sender)
                 {
-                    var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
-                    ui.BeginAnimation(OpacityProperty, dA);
-                }
-            }
+                    forcePointEraser = false;
+                    DisableEraserOverlay();
 
-            DrawShapePromptToPen();
+                    forceEraser = true;
+                    drawingShapeMode = 2;
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    inkCanvas.IsManipulationEnabled = true;
+                    CancelSingleFingerDragMode();
+                }
+
+                lastMouseDownSender = null;
+                if (isLongPressSelected)
+                {
+                    if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
+                    if (sender is UIElement ui)
+                    {
+                        var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
+                        ui.BeginAnimation(OpacityProperty, dA);
+                    }
+                }
+
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawArrow_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -471,31 +506,38 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawParallelLine_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            if (lastMouseDownSender == sender)
+            try
             {
-                forcePointEraser = false;
-                DisableEraserOverlay();
-
-                forceEraser = true;
-                drawingShapeMode = 15;
-                inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                inkCanvas.IsManipulationEnabled = true;
-                CancelSingleFingerDragMode();
-            }
-
-            lastMouseDownSender = null;
-            if (isLongPressSelected)
-            {
-                if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
-                if (sender is UIElement ui)
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                if (lastMouseDownSender == sender)
                 {
-                    var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
-                    ui.BeginAnimation(OpacityProperty, dA);
-                }
-            }
+                    forcePointEraser = false;
+                    DisableEraserOverlay();
 
-            DrawShapePromptToPen();
+                    forceEraser = true;
+                    drawingShapeMode = 15;
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    inkCanvas.IsManipulationEnabled = true;
+                    CancelSingleFingerDragMode();
+                }
+
+                lastMouseDownSender = null;
+                if (isLongPressSelected)
+                {
+                    if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
+                    if (sender is UIElement ui)
+                    {
+                        var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
+                        ui.BeginAnimation(OpacityProperty, dA);
+                    }
+                }
+
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawParallelLine_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -517,16 +559,23 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawCoordinate1_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            forcePointEraser = false;
-            DisableEraserOverlay();
+            try
+            {
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                forcePointEraser = false;
+                DisableEraserOverlay();
 
-            forceEraser = true;
-            drawingShapeMode = 11;
-            inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            inkCanvas.IsManipulationEnabled = true;
-            CancelSingleFingerDragMode();
-            DrawShapePromptToPen();
+                forceEraser = true;
+                drawingShapeMode = 11;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                inkCanvas.IsManipulationEnabled = true;
+                CancelSingleFingerDragMode();
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawCoordinate1_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -548,16 +597,23 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawCoordinate2_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            forcePointEraser = false;
-            DisableEraserOverlay();
+            try
+            {
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                forcePointEraser = false;
+                DisableEraserOverlay();
 
-            forceEraser = true;
-            drawingShapeMode = 12;
-            inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            inkCanvas.IsManipulationEnabled = true;
-            CancelSingleFingerDragMode();
-            DrawShapePromptToPen();
+                forceEraser = true;
+                drawingShapeMode = 12;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                inkCanvas.IsManipulationEnabled = true;
+                CancelSingleFingerDragMode();
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawCoordinate2_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -579,16 +635,23 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawCoordinate3_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            forcePointEraser = false;
-            DisableEraserOverlay();
+            try
+            {
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                forcePointEraser = false;
+                DisableEraserOverlay();
 
-            forceEraser = true;
-            drawingShapeMode = 13;
-            inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            inkCanvas.IsManipulationEnabled = true;
-            CancelSingleFingerDragMode();
-            DrawShapePromptToPen();
+                forceEraser = true;
+                drawingShapeMode = 13;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                inkCanvas.IsManipulationEnabled = true;
+                CancelSingleFingerDragMode();
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawCoordinate3_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -610,16 +673,23 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawCoordinate4_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            forcePointEraser = false;
-            DisableEraserOverlay();
+            try
+            {
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                forcePointEraser = false;
+                DisableEraserOverlay();
 
-            forceEraser = true;
-            drawingShapeMode = 14;
-            inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            inkCanvas.IsManipulationEnabled = true;
-            CancelSingleFingerDragMode();
-            DrawShapePromptToPen();
+                forceEraser = true;
+                drawingShapeMode = 14;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                inkCanvas.IsManipulationEnabled = true;
+                CancelSingleFingerDragMode();
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawCoordinate4_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -641,16 +711,23 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawCoordinate5_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            forcePointEraser = false;
-            DisableEraserOverlay();
+            try
+            {
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                forcePointEraser = false;
+                DisableEraserOverlay();
 
-            forceEraser = true;
-            drawingShapeMode = 17;
-            inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            inkCanvas.IsManipulationEnabled = true;
-            CancelSingleFingerDragMode();
-            DrawShapePromptToPen();
+                forceEraser = true;
+                drawingShapeMode = 17;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                inkCanvas.IsManipulationEnabled = true;
+                CancelSingleFingerDragMode();
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawCoordinate5_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -672,16 +749,23 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawRectangle_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            forcePointEraser = false;
-            DisableEraserOverlay();
+            try
+            {
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                forcePointEraser = false;
+                DisableEraserOverlay();
 
-            forceEraser = true;
-            drawingShapeMode = 3;
-            inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            inkCanvas.IsManipulationEnabled = true;
-            CancelSingleFingerDragMode();
-            DrawShapePromptToPen();
+                forceEraser = true;
+                drawingShapeMode = 3;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                inkCanvas.IsManipulationEnabled = true;
+                CancelSingleFingerDragMode();
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawRectangle_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -703,16 +787,23 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawRectangleCenter_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            forcePointEraser = false;
-            DisableEraserOverlay();
+            try
+            {
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                forcePointEraser = false;
+                DisableEraserOverlay();
 
-            forceEraser = true;
-            drawingShapeMode = 19;
-            inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            inkCanvas.IsManipulationEnabled = true;
-            CancelSingleFingerDragMode();
-            DrawShapePromptToPen();
+                forceEraser = true;
+                drawingShapeMode = 19;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                inkCanvas.IsManipulationEnabled = true;
+                CancelSingleFingerDragMode();
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawRectangleCenter_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -734,16 +825,23 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawEllipse_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            forcePointEraser = false;
-            DisableEraserOverlay();
+            try
+            {
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                forcePointEraser = false;
+                DisableEraserOverlay();
 
-            forceEraser = true;
-            drawingShapeMode = 4;
-            inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            inkCanvas.IsManipulationEnabled = true;
-            CancelSingleFingerDragMode();
-            DrawShapePromptToPen();
+                forceEraser = true;
+                drawingShapeMode = 4;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                inkCanvas.IsManipulationEnabled = true;
+                CancelSingleFingerDragMode();
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawEllipse_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -765,16 +863,23 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawCircle_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            forcePointEraser = false;
-            DisableEraserOverlay();
+            try
+            {
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                forcePointEraser = false;
+                DisableEraserOverlay();
 
-            forceEraser = true;
-            drawingShapeMode = 5;
-            inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            inkCanvas.IsManipulationEnabled = true;
-            CancelSingleFingerDragMode();
-            DrawShapePromptToPen();
+                forceEraser = true;
+                drawingShapeMode = 5;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                inkCanvas.IsManipulationEnabled = true;
+                CancelSingleFingerDragMode();
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawCircle_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -796,16 +901,23 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawCenterEllipse_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            forcePointEraser = false;
-            DisableEraserOverlay();
+            try
+            {
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                forcePointEraser = false;
+                DisableEraserOverlay();
 
-            forceEraser = true;
-            drawingShapeMode = 16;
-            inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            inkCanvas.IsManipulationEnabled = true;
-            CancelSingleFingerDragMode();
-            DrawShapePromptToPen();
+                forceEraser = true;
+                drawingShapeMode = 16;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                inkCanvas.IsManipulationEnabled = true;
+                CancelSingleFingerDragMode();
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawCenterEllipse_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -827,16 +939,23 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawCenterEllipseWithFocalPoint_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            forcePointEraser = false;
-            DisableEraserOverlay();
+            try
+            {
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                forcePointEraser = false;
+                DisableEraserOverlay();
 
-            forceEraser = true;
-            drawingShapeMode = 23;
-            inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            inkCanvas.IsManipulationEnabled = true;
-            CancelSingleFingerDragMode();
-            DrawShapePromptToPen();
+                forceEraser = true;
+                drawingShapeMode = 23;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                inkCanvas.IsManipulationEnabled = true;
+                CancelSingleFingerDragMode();
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawCenterEllipseWithFocalPoint_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -858,16 +977,23 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawDashedCircle_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            forcePointEraser = false;
-            DisableEraserOverlay();
+            try
+            {
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                forcePointEraser = false;
+                DisableEraserOverlay();
 
-            forceEraser = true;
-            drawingShapeMode = 10;
-            inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            inkCanvas.IsManipulationEnabled = true;
-            CancelSingleFingerDragMode();
-            DrawShapePromptToPen();
+                forceEraser = true;
+                drawingShapeMode = 10;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                inkCanvas.IsManipulationEnabled = true;
+                CancelSingleFingerDragMode();
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawDashedCircle_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -890,17 +1016,24 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawHyperbola_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            forcePointEraser = false;
-            DisableEraserOverlay();
+            try
+            {
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                forcePointEraser = false;
+                DisableEraserOverlay();
 
-            forceEraser = true;
-            drawingShapeMode = 24;
-            drawMultiStepShapeCurrentStep = 0;
-            inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            inkCanvas.IsManipulationEnabled = true;
-            CancelSingleFingerDragMode();
-            DrawShapePromptToPen();
+                forceEraser = true;
+                drawingShapeMode = 24;
+                drawMultiStepShapeCurrentStep = 0;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                inkCanvas.IsManipulationEnabled = true;
+                CancelSingleFingerDragMode();
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawHyperbola_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -923,17 +1056,24 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawHyperbolaWithFocalPoint_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            forcePointEraser = false;
-            DisableEraserOverlay();
+            try
+            {
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                forcePointEraser = false;
+                DisableEraserOverlay();
 
-            forceEraser = true;
-            drawingShapeMode = 25;
-            drawMultiStepShapeCurrentStep = 0;
-            inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            inkCanvas.IsManipulationEnabled = true;
-            CancelSingleFingerDragMode();
-            DrawShapePromptToPen();
+                forceEraser = true;
+                drawingShapeMode = 25;
+                drawMultiStepShapeCurrentStep = 0;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                inkCanvas.IsManipulationEnabled = true;
+                CancelSingleFingerDragMode();
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawHyperbolaWithFocalPoint_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -955,16 +1095,23 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawParabola1_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            forcePointEraser = false;
-            DisableEraserOverlay();
+            try
+            {
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                forcePointEraser = false;
+                DisableEraserOverlay();
 
-            forceEraser = true;
-            drawingShapeMode = 20;
-            inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            inkCanvas.IsManipulationEnabled = true;
-            CancelSingleFingerDragMode();
-            DrawShapePromptToPen();
+                forceEraser = true;
+                drawingShapeMode = 20;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                inkCanvas.IsManipulationEnabled = true;
+                CancelSingleFingerDragMode();
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawParabola1_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -986,16 +1133,23 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawParabolaWithFocalPoint_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            forcePointEraser = false;
-            DisableEraserOverlay();
+            try
+            {
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                forcePointEraser = false;
+                DisableEraserOverlay();
 
-            forceEraser = true;
-            drawingShapeMode = 22;
-            inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            inkCanvas.IsManipulationEnabled = true;
-            CancelSingleFingerDragMode();
-            DrawShapePromptToPen();
+                forceEraser = true;
+                drawingShapeMode = 22;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                inkCanvas.IsManipulationEnabled = true;
+                CancelSingleFingerDragMode();
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawParabolaWithFocalPoint_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -1017,16 +1171,23 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawParabola2_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            forcePointEraser = false;
-            DisableEraserOverlay();
+            try
+            {
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                forcePointEraser = false;
+                DisableEraserOverlay();
 
-            forceEraser = true;
-            drawingShapeMode = 21;
-            inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            inkCanvas.IsManipulationEnabled = true;
-            CancelSingleFingerDragMode();
-            DrawShapePromptToPen();
+                forceEraser = true;
+                drawingShapeMode = 21;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                inkCanvas.IsManipulationEnabled = true;
+                CancelSingleFingerDragMode();
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawParabola2_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -1048,16 +1209,23 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawCylinder_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            forcePointEraser = false;
-            DisableEraserOverlay();
+            try
+            {
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                forcePointEraser = false;
+                DisableEraserOverlay();
 
-            forceEraser = true;
-            drawingShapeMode = 6;
-            inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            inkCanvas.IsManipulationEnabled = true;
-            CancelSingleFingerDragMode();
-            DrawShapePromptToPen();
+                forceEraser = true;
+                drawingShapeMode = 6;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                inkCanvas.IsManipulationEnabled = true;
+                CancelSingleFingerDragMode();
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawCylinder_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -1079,16 +1247,23 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawCone_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            forcePointEraser = false;
-            DisableEraserOverlay();
+            try
+            {
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                forcePointEraser = false;
+                DisableEraserOverlay();
 
-            forceEraser = true;
-            drawingShapeMode = 7;
-            inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            inkCanvas.IsManipulationEnabled = true;
-            CancelSingleFingerDragMode();
-            DrawShapePromptToPen();
+                forceEraser = true;
+                drawingShapeMode = 7;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                inkCanvas.IsManipulationEnabled = true;
+                CancelSingleFingerDragMode();
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawCone_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -1112,19 +1287,26 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnDrawCuboid_Click(object sender, MouseButtonEventArgs e)
         {
-            if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
-            forcePointEraser = false;
-            DisableEraserOverlay();
+            try
+            {
+                if (!await CheckIsDrawingShapesInMultiTouchMode()) return;
+                forcePointEraser = false;
+                DisableEraserOverlay();
 
-            forceEraser = true;
-            drawingShapeMode = 9;
-            isFirstTouchCuboid = true;
-            CuboidFrontRectIniP = new Point();
-            CuboidFrontRectEndP = new Point();
-            inkCanvas.EditingMode = InkCanvasEditingMode.None;
-            inkCanvas.IsManipulationEnabled = true;
-            CancelSingleFingerDragMode();
-            DrawShapePromptToPen();
+                forceEraser = true;
+                drawingShapeMode = 9;
+                isFirstTouchCuboid = true;
+                CuboidFrontRectIniP = new Point();
+                CuboidFrontRectEndP = new Point();
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                inkCanvas.IsManipulationEnabled = true;
+                CancelSingleFingerDragMode();
+                DrawShapePromptToPen();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnDrawCuboid_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         #endregion

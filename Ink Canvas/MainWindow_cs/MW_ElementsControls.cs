@@ -64,64 +64,71 @@ namespace Ink_Canvas
         /// </remarks>
         private async void BtnImageInsert_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = MainWindowStrings.Main_FileInsert_OpenDialogFilter;
-
-            if (openFileDialog.ShowDialog() == true)
+            try
             {
-                string filePath = openFileDialog.FileName;
-                string extension = Path.GetExtension(filePath);
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Filter = MainWindowStrings.Main_FileInsert_OpenDialogFilter;
 
-                FrameworkElement element = IsSupportedMediaExtension(extension)
-                    ? await CreateMediaElementAsync(filePath)
-                    : await CreateAndCompressImageAsync(filePath);
-
-                if (element != null)
+                if (openFileDialog.ShowDialog() == true)
                 {
-                    string timestamp = IsCanvasMediaElement(element)
-                        ? "media_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff")
-                        : "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
-                    if (string.IsNullOrEmpty(element.Name)) element.Name = timestamp;
+                    string filePath = openFileDialog.FileName;
+                    string extension = Path.GetExtension(filePath);
 
-                    // 设置图片属性，避免被InkCanvas选择系统处理
-                    element.IsHitTestVisible = true;
-                    element.Focusable = false;
+                    FrameworkElement element = IsSupportedMediaExtension(extension)
+                        ? await CreateMediaElementAsync(filePath)
+                        : await CreateAndCompressImageAsync(filePath);
 
-                    // 初始化InkCanvas选择设置
-                    InitializeInkCanvasSelectionSettings();
-
-                    // 先添加到画布
-                    inkCanvas.Children.Add(element);
-
-                    // 等待图片加载完成后再进行后续处理
-                    element.Loaded += (s, args) =>
+                    if (element != null)
                     {
-                        Dispatcher.BeginInvoke(new Action(() =>
+                        string timestamp = IsCanvasMediaElement(element)
+                            ? "media_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff")
+                            : "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
+                        if (string.IsNullOrEmpty(element.Name)) element.Name = timestamp;
+
+                        // 设置图片属性，避免被InkCanvas选择系统处理
+                        element.IsHitTestVisible = true;
+                        element.Focusable = false;
+
+                        // 初始化InkCanvas选择设置
+                        InitializeInkCanvasSelectionSettings();
+
+                        // 先添加到画布
+                        inkCanvas.Children.Add(element);
+
+                        // 等待图片加载完成后再进行后续处理
+                        element.Loaded += (s, args) =>
                         {
-                            // 初始化TransformGroup
-                            InitializeElementTransform(element);
+                            Dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                // 初始化TransformGroup
+                                InitializeElementTransform(element);
 
-                            // 居中缩放
-                            CenterAndScaleElement(element);
+                                // 居中缩放
+                                CenterAndScaleElement(element);
 
-                            // 最后绑定事件处理器
-                            BindElementEvents(element);
+                                // 最后绑定事件处理器
+                                BindElementEvents(element);
 
-                            if (element is PdfEmbeddedView)
-                                _pdfSidebarNextPositionUseHostTransform = true;
-                            SyncPdfPageSidebarWithCanvas();
+                                if (element is PdfEmbeddedView)
+                                    _pdfSidebarNextPositionUseHostTransform = true;
+                                SyncPdfPageSidebarWithCanvas();
 
-                            LogHelper.WriteLogToFile($"图片插入完成: {element.Name}");
-                        }), DispatcherPriority.Loaded);
-                    };
+                                LogHelper.WriteLogToFile($"图片插入完成: {element.Name}");
+                            }), DispatcherPriority.Loaded);
+                        };
 
-                    timeMachine.CommitElementInsertHistory(element);
+                        timeMachine.CommitElementInsertHistory(element);
 
-                    // 插入图片后切换到选择模式并刷新浮动栏高光显示
-                    SetCurrentToolMode(InkCanvasEditingMode.Select);
-                    UpdateCurrentToolMode("select");
-                    HideSubPanels("select");
+                        // 插入图片后切换到选择模式并刷新浮动栏高光显示
+                        SetCurrentToolMode(InkCanvasEditingMode.Select);
+                        UpdateCurrentToolMode("select");
+                        HideSubPanels("select");
+                    }
                 }
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnImageInsert_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -1553,32 +1560,39 @@ namespace Ink_Canvas
         /// <param name="e">事件参数</param>
         private async void BtnMediaInsert_Click(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = MainWindowStrings.Main_MediaInsert_OpenDialogFilter;
-
-            if (openFileDialog.ShowDialog() == true)
+            try
             {
-                string filePath = openFileDialog.FileName;
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Filter = MainWindowStrings.Main_MediaInsert_OpenDialogFilter;
 
-                FrameworkElement mediaElement = await CreateMediaElementAsync(filePath);
-
-                if (mediaElement != null)
+                if (openFileDialog.ShowDialog() == true)
                 {
-                    InitializeInkCanvasSelectionSettings();
-                    InitializeElementTransform(mediaElement);
-                    CenterAndScaleElement(mediaElement);
-                    BindElementEvents(mediaElement);
+                    string filePath = openFileDialog.FileName;
 
-                    InkCanvas.SetLeft(mediaElement, 0);
-                    InkCanvas.SetTop(mediaElement, 0);
-                    inkCanvas.Children.Add(mediaElement);
+                    FrameworkElement mediaElement = await CreateMediaElementAsync(filePath);
 
-                    timeMachine.CommitElementInsertHistory(mediaElement);
+                    if (mediaElement != null)
+                    {
+                        InitializeInkCanvasSelectionSettings();
+                        InitializeElementTransform(mediaElement);
+                        CenterAndScaleElement(mediaElement);
+                        BindElementEvents(mediaElement);
 
-                    SetCurrentToolMode(InkCanvasEditingMode.Select);
-                    UpdateCurrentToolMode("select");
-                    HideSubPanels("select");
+                        InkCanvas.SetLeft(mediaElement, 0);
+                        InkCanvas.SetTop(mediaElement, 0);
+                        inkCanvas.Children.Add(mediaElement);
+
+                        timeMachine.CommitElementInsertHistory(mediaElement);
+
+                        SetCurrentToolMode(InkCanvasEditingMode.Select);
+                        UpdateCurrentToolMode("select");
+                        HideSubPanels("select");
+                    }
                 }
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnMediaInsert_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
             }
         }
 

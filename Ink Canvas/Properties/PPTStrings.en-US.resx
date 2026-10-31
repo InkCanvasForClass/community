@@ -303,4 +303,43 @@
   <data name="SmartModeHint" xml:space="preserve">
     <value>Auto-detect video controls in PPT slides; switch to pointer mode when the cursor enters a video region, and restore annotation mode when it leaves</value>
   </data>
+  <data name="HighlighterSnap" xml:space="preserve">
+    <value>Highlighter ink correction</value>
+  </data>
+  <data name="HighlighterSnapHint" xml:space="preserve">
+    <value>While presenting, highlighter strokes are automatically squared up into horizontal bars that hug the text lines; circles, vertical lines and other non-horizontal strokes are left untouched</value>
+  </data>
+  <data name="HighlighterSnapFitTextSize" xml:space="preserve">
+    <value>Fit bar size to the text</value>
+  </data>
+  <data name="HighlighterSnapFitTextSizeHint" xml:space="preserve">
+    <value>Bar thickness and length follow the font size so the whole line is covered; turn off to size the bar by the highlighter width instead</value>
+  </data>
+  <data name="HighlighterSnapTuning" xml:space="preserve">
+    <value>Fine-tune the fit</value>
+  </data>
+  <data name="HighlighterSnapTuningHint" xml:space="preserve">
+    <value>Adjust when the bar looks too thin or too thick; changes apply immediately</value>
+  </data>
+  <data name="HighlighterSnapFillRatio" xml:space="preserve">
+    <value>Vertical fill</value>
+  </data>
+  <data name="HighlighterSnapFillRatioHint" xml:space="preserve">
+    <value>Bar thickness relative to the line height; 1.00 equals the full line. Glyphs occupy only about 0.78 of it, so around 0.95 looks fullest</value>
+  </data>
+  <data name="HighlighterSnapExtendRatio" xml:space="preserve">
+    <value>Horizontal extension</value>
+  </data>
+  <data name="HighlighterSnapExtendRatioHint" xml:space="preserve">
+    <value>How far the bar overshoots each end of the stroke, in multiples of glyph height, so trailing punctuation is covered too</value>
+  </data>
+  <data name="HighlighterSnapReset" xml:space="preserve">
+    <value>Restore defaults</value>
+  </data>
+  <data name="HighlighterSnapResetHint" xml:space="preserve">
+    <value>Go back to the values measured from CJK glyph geometry</value>
+  </data>
+  <data name="HighlighterSnapResetButton" xml:space="preserve">
+    <value>Restore</value>
+  </data>
 </root>

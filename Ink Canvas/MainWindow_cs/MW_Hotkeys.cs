@@ -302,13 +302,20 @@ namespace Ink_Canvas
         /// <param name="e">执行路由事件参数</param>
         internal async void KeyExit(object sender, ExecutedRoutedEventArgs e)
         {
-            if (currentMode != 0)
+            try
             {
-                ImageBlackboard_MouseUp(lastBorderMouseDownObject, null);
-                return;
-            }
+                if (currentMode != 0)
+                {
+                    ImageBlackboard_MouseUp(lastBorderMouseDownObject, null);
+                    return;
+                }
 
-            if (IsInPPTPresentationMode) await ExitPPTPresentation();
+                if (IsInPPTPresentationMode) await ExitPPTPresentation();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] KeyExit 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -318,11 +325,18 @@ namespace Ink_Canvas
         /// <param name="e">执行路由事件参数</param>
         private async void KeyChangeToDrawTool(object sender, ExecutedRoutedEventArgs e)
         {
-            if (isFloatingBarFolded)
+            try
             {
-                await UnFoldFloatingBar(new object());
+                if (isFloatingBarFolded)
+                {
+                    await UnFoldFloatingBar(new object());
+                }
+                PenIcon_Click(lastBorderMouseDownObject, null);
             }
-            PenIcon_Click(lastBorderMouseDownObject, null);
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] KeyChangeToDrawTool 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -371,20 +385,27 @@ namespace Ink_Canvas
         /// <remarks>仅当画布控件面板可见时生效，根据当前橡皮擦状态选择相应的橡皮擦模式</remarks>
         private async void KeyChangeToEraser(object sender, ExecutedRoutedEventArgs e)
         {
-            if (isFloatingBarFolded)
+            try
             {
-                await UnFoldFloatingBar(new object());
-            }
+                if (isFloatingBarFolded)
+                {
+                    await UnFoldFloatingBar(new object());
+                }
 
-            if (!IsAnnotating)
+                if (!IsAnnotating)
+                {
+                    PenIcon_Click(lastBorderMouseDownObject, null);
+                }
+
+                if (Eraser_Icon.Background != null)
+                    EraserIconByStrokes_Click(lastBorderMouseDownObject, null);
+                else
+                    EraserIcon_Click(lastBorderMouseDownObject, null);
+            }
+            catch (Exception __ex)
             {
-                PenIcon_Click(lastBorderMouseDownObject, null);
+                LogHelper.WriteLogToFile($"[AsyncGuard] KeyChangeToEraser 执行异常: {__ex.Message}", LogHelper.LogType.Error);
             }
-
-            if (Eraser_Icon.Background != null)
-                EraserIconByStrokes_Click(lastBorderMouseDownObject, null);
-            else
-                EraserIcon_Click(lastBorderMouseDownObject, null);
         }
 
         /// <summary>
@@ -420,47 +441,68 @@ namespace Ink_Canvas
 
         internal async void DrawLineFromHotkey()
         {
-            if (isFloatingBarFolded)
+            try
             {
-                await UnFoldFloatingBar(new object());
-            }
+                if (isFloatingBarFolded)
+                {
+                    await UnFoldFloatingBar(new object());
+                }
 
-            if (!IsAnnotating)
+                if (!IsAnnotating)
+                {
+                    PenIcon_Click(lastBorderMouseDownObject, null);
+                }
+
+                BtnDrawLine_Click(lastMouseDownSender, null);
+            }
+            catch (Exception __ex)
             {
-                PenIcon_Click(lastBorderMouseDownObject, null);
+                LogHelper.WriteLogToFile($"[AsyncGuard] DrawLineFromHotkey 执行异常: {__ex.Message}", LogHelper.LogType.Error);
             }
-
-            BtnDrawLine_Click(lastMouseDownSender, null);
         }
 
         internal async void SwitchToEraserFromHotkey()
         {
-            if (isFloatingBarFolded)
+            try
             {
-                await UnFoldFloatingBar(new object());
-            }
+                if (isFloatingBarFolded)
+                {
+                    await UnFoldFloatingBar(new object());
+                }
 
-            if (!IsAnnotating)
+                if (!IsAnnotating)
+                {
+                    PenIcon_Click(lastBorderMouseDownObject, null);
+                }
+
+                EraserIcon_Click(lastBorderMouseDownObject, null);
+            }
+            catch (Exception __ex)
             {
-                PenIcon_Click(lastBorderMouseDownObject, null);
+                LogHelper.WriteLogToFile($"[AsyncGuard] SwitchToEraserFromHotkey 执行异常: {__ex.Message}", LogHelper.LogType.Error);
             }
-
-            EraserIcon_Click(lastBorderMouseDownObject, null);
         }
 
         internal async void SwitchToSelectFromHotkey()
         {
-            if (isFloatingBarFolded)
+            try
             {
-                await UnFoldFloatingBar(new object());
-            }
+                if (isFloatingBarFolded)
+                {
+                    await UnFoldFloatingBar(new object());
+                }
 
-            if (!IsAnnotating)
+                if (!IsAnnotating)
+                {
+                    PenIcon_Click(lastBorderMouseDownObject, null);
+                }
+
+                SymbolIconSelect_MouseUp(lastBorderMouseDownObject, null);
+            }
+            catch (Exception __ex)
             {
-                PenIcon_Click(lastBorderMouseDownObject, null);
+                LogHelper.WriteLogToFile($"[AsyncGuard] SwitchToSelectFromHotkey 执行异常: {__ex.Message}", LogHelper.LogType.Error);
             }
-
-            SymbolIconSelect_MouseUp(lastBorderMouseDownObject, null);
         }
 
         /// <summary>

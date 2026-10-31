@@ -45,71 +45,85 @@ namespace Ink_Canvas.Controls
 
         private async void ShowSuccessAnimation()
         {
-            var copyScaleAnim = new DoubleAnimation
+            try
             {
-                To = 0,
-                Duration = TimeSpan.FromMilliseconds(150)
-            };
-            ScaleTransform_Copy.BeginAnimation(ScaleTransform.ScaleXProperty, copyScaleAnim);
+                var copyScaleAnim = new DoubleAnimation
+                {
+                    To = 0,
+                    Duration = TimeSpan.FromMilliseconds(150)
+                };
+                ScaleTransform_Copy.BeginAnimation(ScaleTransform.ScaleXProperty, copyScaleAnim);
 
-            var copyOpacityAnim = new DoubleAnimation
+                var copyOpacityAnim = new DoubleAnimation
+                {
+                    To = 0,
+                    BeginTime = TimeSpan.FromMilliseconds(100),
+                    Duration = TimeSpan.FromMilliseconds(10)
+                };
+                FontIcon_Copy.BeginAnimation(UIElement.OpacityProperty, copyOpacityAnim);
+
+                await Task.Delay(150);
+                var successScaleAnim = new DoubleAnimation
+                {
+                    To = 1,
+                    Duration = TimeSpan.FromMilliseconds(150),
+                    EasingFunction = new BackEase { EasingMode = EasingMode.EaseOut, Amplitude = 0.2 }
+                };
+                ScaleTransform_Success.BeginAnimation(ScaleTransform.ScaleXProperty, successScaleAnim);
+
+                var successOpacityAnim = new DoubleAnimation
+                {
+                    To = 1,
+                    Duration = TimeSpan.FromMilliseconds(15)
+                };
+                FontIcon_Success.BeginAnimation(UIElement.OpacityProperty, successOpacityAnim);
+
+                await Task.Delay(1000);
+                ShowCopyAnimation();
+            }
+            catch (Exception __ex)
             {
-                To = 0,
-                BeginTime = TimeSpan.FromMilliseconds(100),
-                Duration = TimeSpan.FromMilliseconds(10)
-            };
-            FontIcon_Copy.BeginAnimation(UIElement.OpacityProperty, copyOpacityAnim);
-
-            await Task.Delay(150);
-            var successScaleAnim = new DoubleAnimation
-            {
-                To = 1,
-                Duration = TimeSpan.FromMilliseconds(150),
-                EasingFunction = new BackEase { EasingMode = EasingMode.EaseOut, Amplitude = 0.2 }
-            };
-            ScaleTransform_Success.BeginAnimation(ScaleTransform.ScaleXProperty, successScaleAnim);
-
-            var successOpacityAnim = new DoubleAnimation
-            {
-                To = 1,
-                Duration = TimeSpan.FromMilliseconds(15)
-            };
-            FontIcon_Success.BeginAnimation(UIElement.OpacityProperty, successOpacityAnim);
-
-            await Task.Delay(1000);
-            ShowCopyAnimation();
+                System.Diagnostics.Debug.WriteLine($"[AsyncGuard] ShowSuccessAnimation 执行异常: {__ex.Message}");
+            }
         }
 
         private async void ShowCopyAnimation()
         {
-            var successOpacityAnim = new DoubleAnimation
+            try
             {
-                To = 0,
-                Duration = TimeSpan.FromMilliseconds(150)
-            };
-            FontIcon_Success.BeginAnimation(UIElement.OpacityProperty, successOpacityAnim);
+                var successOpacityAnim = new DoubleAnimation
+                {
+                    To = 0,
+                    Duration = TimeSpan.FromMilliseconds(150)
+                };
+                FontIcon_Success.BeginAnimation(UIElement.OpacityProperty, successOpacityAnim);
 
-            await Task.Delay(150);
-            var copyScaleAnim = new DoubleAnimation
-            {
-                To = 1,
-                Duration = TimeSpan.Zero
-            };
-            ScaleTransform_Copy.BeginAnimation(ScaleTransform.ScaleXProperty, copyScaleAnim);
+                await Task.Delay(150);
+                var copyScaleAnim = new DoubleAnimation
+                {
+                    To = 1,
+                    Duration = TimeSpan.Zero
+                };
+                ScaleTransform_Copy.BeginAnimation(ScaleTransform.ScaleXProperty, copyScaleAnim);
 
-            var copyOpacityAnim = new DoubleAnimation
-            {
-                To = 1,
-                Duration = TimeSpan.FromMilliseconds(150)
-            };
-            FontIcon_Copy.BeginAnimation(UIElement.OpacityProperty, copyOpacityAnim);
+                var copyOpacityAnim = new DoubleAnimation
+                {
+                    To = 1,
+                    Duration = TimeSpan.FromMilliseconds(150)
+                };
+                FontIcon_Copy.BeginAnimation(UIElement.OpacityProperty, copyOpacityAnim);
 
-            var successScaleAnim = new DoubleAnimation
+                var successScaleAnim = new DoubleAnimation
+                {
+                    To = 0,
+                    Duration = TimeSpan.Zero
+                };
+                ScaleTransform_Success.BeginAnimation(ScaleTransform.ScaleXProperty, successScaleAnim);
+            }
+            catch (Exception __ex)
             {
-                To = 0,
-                Duration = TimeSpan.Zero
-            };
-            ScaleTransform_Success.BeginAnimation(ScaleTransform.ScaleXProperty, successScaleAnim);
+                System.Diagnostics.Debug.WriteLine($"[AsyncGuard] ShowCopyAnimation 执行异常: {__ex.Message}");
+            }
         }
     }
 }

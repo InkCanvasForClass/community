@@ -40,12 +40,19 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private async void CloudStoragePage_Loaded(object sender, RoutedEventArgs e)
         {
-            EnsureSettingsObjects();
-            InitializeClassSelectionPlaceholder(CloudStorageStrings.CloudStorage_WaitingForConnection);
-            LoadAllSettings();
-            InitializeApiClient();
-            PromptDlassRegistrationIfNeeded();
-            await TestConnectionAsync();
+            try
+            {
+                EnsureSettingsObjects();
+                InitializeClassSelectionPlaceholder(CloudStorageStrings.CloudStorage_WaitingForConnection);
+                LoadAllSettings();
+                InitializeApiClient();
+                PromptDlassRegistrationIfNeeded();
+                await TestConnectionAsync();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] CloudStoragePage_Loaded 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private void CloudStoragePage_Unloaded(object sender, RoutedEventArgs e)
@@ -517,7 +524,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private async void BtnTestToken_Click(object sender, RoutedEventArgs e)
         {
-            await TestConnectionAsync();
+            try
+            {
+                await TestConnectionAsync();
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] BtnTestToken_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private void BtnOpenDlassDashboard_Click(object sender, RoutedEventArgs e)

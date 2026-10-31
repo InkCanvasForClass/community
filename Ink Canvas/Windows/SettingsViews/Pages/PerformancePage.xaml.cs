@@ -216,19 +216,26 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private async void CardClearHistory_Click(object sender, RoutedEventArgs e)
         {
-            var result = await MessageBoxHelper.ShowAsync(
-                this,
-                PerformanceStrings.ClearHistoryConfirm,
-                PerformanceStrings.ClearHistory,
-                MessageBoxButton.OKCancel,
-                MessageBoxImage.Warning);
-
-            if (result == MessageBoxResult.OK)
+            try
             {
-                PerformanceMonitorHelper.ClearHistory();
-                SettingsManager.Settings.Performance.History.Clear();
-                SettingsManager.SaveSettingsToFile();
-                RefreshHistoryDisplay();
+                var result = await MessageBoxHelper.ShowAsync(
+                    this,
+                    PerformanceStrings.ClearHistoryConfirm,
+                    PerformanceStrings.ClearHistory,
+                    MessageBoxButton.OKCancel,
+                    MessageBoxImage.Warning);
+
+                if (result == MessageBoxResult.OK)
+                {
+                    PerformanceMonitorHelper.ClearHistory();
+                    SettingsManager.Settings.Performance.History.Clear();
+                    SettingsManager.SaveSettingsToFile();
+                    RefreshHistoryDisplay();
+                }
+            }
+            catch (Exception __ex)
+            {
+                LogHelper.WriteLogToFile($"[AsyncGuard] CardClearHistory_Click 执行异常: {__ex.Message}", LogHelper.LogType.Error);
             }
         }
 

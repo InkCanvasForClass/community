@@ -1401,6 +1401,42 @@ namespace Ink_Canvas
         public bool ShowPPTModePrompt { get; set; } = false;
         [JsonProperty("enableSmartMode")]
         public bool EnableSmartMode { get; set; } = false;
+
+        /// <summary>
+        /// PPT 放映时用荧光笔书写，自动把笔迹规整成贴合文字的横向高亮条。
+        /// </summary>
+        [JsonProperty("enableHighlighterSnapToText")]
+        public bool EnableHighlighterSnapToText { get; set; } = false;
+
+        /// <summary>
+        /// 纠正时自动贴合文字大小：高亮条的厚度与长度随文字行自适应，而不是固定跟随荧光笔宽度。
+        /// </summary>
+        /// <remarks>
+        /// 字号较大时固定笔宽会显得「只包住一小条」，开启后按文字行的实际字形尺寸铺满。
+        /// </remarks>
+        [JsonProperty("highlighterSnapFitTextSize")]
+        public bool HighlighterSnapFitTextSize { get; set; } = true;
+
+        /// <summary>
+        /// 自动贴合时的纵向铺满系数（0.6 ~ 1.4），条厚 = 行盒高 × 该值。
+        /// </summary>
+        /// <remarks>
+        /// 实测中文字形在行盒内只占约 0.78（五款字体，1.2 倍行距），
+        /// 因此取 0.95 就能饱满包住字形，同时不会糊到相邻行。
+        /// 早期误取 1.15（当时把基准当成了字形高度），实际偏大。
+        /// </remarks>
+        [JsonProperty("highlighterSnapTextFillRatio")]
+        public double HighlighterSnapTextFillRatio { get; set; } = 0.95;
+
+        /// <summary>
+        /// 自动贴合时的横向外扩系数，单位是「行盒高度」的倍数。
+        /// </summary>
+        /// <remarks>
+        /// 中文标点右侧有大片留白，按文字行边界刷会显得没包住句号；
+        /// 默认按 0.12 倍行高外扩，把句读也覆盖进去。
+        /// </remarks>
+        [JsonProperty("highlighterSnapTextExtendRatio")]
+        public double HighlighterSnapTextExtendRatio { get; set; } = 0.12;
     }
 
     /// <summary>

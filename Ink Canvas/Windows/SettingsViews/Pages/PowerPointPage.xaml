@@ -66,6 +66,63 @@
                             Icon="{x:Static ui:SegoeFluentIcons.TouchPointer}"
                             Toggled="ToggleSwitchEnableSmartMode_Toggled"/>
 
+                    <controls:LabeledSettingsCard x:Name="CardEnableHighlighterSnap"
+                            Header="{x:Static props:PPTStrings.HighlighterSnap}"
+                            Description="{x:Static props:PPTStrings.HighlighterSnapHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.Highlight}"
+                            Toggled="ToggleSwitchEnableHighlighterSnap_Toggled"/>
+
+                    <controls:LabeledSettingsCard x:Name="CardHighlighterSnapFitTextSize"
+                            Header="{x:Static props:PPTStrings.HighlighterSnapFitTextSize}"
+                            Description="{x:Static props:PPTStrings.HighlighterSnapFitTextSizeHint}"
+                            Icon="{x:Static ui:SegoeFluentIcons.FontSize}"
+                            Toggled="ToggleSwitchHighlighterSnapFitTextSize_Toggled"/>
+
+                    <ui:SettingsExpander x:Name="ExpanderHighlighterSnapTuning"
+                            Header="{x:Static props:PPTStrings.HighlighterSnapTuning}"
+                            Description="{x:Static props:PPTStrings.HighlighterSnapTuningHint}"
+                            IsExpanded="False">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Equalizer}" />
+                        </ui:SettingsExpander.HeaderIcon>
+
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="{x:Static props:PPTStrings.HighlighterSnapFillRatio}"
+                                            Description="{x:Static props:PPTStrings.HighlighterSnapFillRatioHint}">
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock x:Name="TextHighlighterSnapFillRatio"
+                                               VerticalAlignment="Center" FontFamily="Consolas"
+                                               TextAlignment="Right" MinWidth="36"/>
+                                    <Slider x:Name="SliderHighlighterSnapFillRatio"
+                                            Minimum="0.6" Maximum="1.4" Width="200"
+                                            IsSnapToTickEnabled="True" TickFrequency="0.05" Value="0.95"
+                                            TickPlacement="None"
+                                            ValueChanged="SliderHighlighterSnapFillRatio_ValueChanged" />
+                                </ikw:SimpleStackPanel>
+                            </ui:SettingsCard>
+
+                            <ui:SettingsCard Header="{x:Static props:PPTStrings.HighlighterSnapExtendRatio}"
+                                            Description="{x:Static props:PPTStrings.HighlighterSnapExtendRatioHint}">
+                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock x:Name="TextHighlighterSnapExtendRatio"
+                                               VerticalAlignment="Center" FontFamily="Consolas"
+                                               TextAlignment="Right" MinWidth="36"/>
+                                    <Slider x:Name="SliderHighlighterSnapExtendRatio"
+                                            Minimum="0" Maximum="1" Width="200"
+                                            IsSnapToTickEnabled="True" TickFrequency="0.05" Value="0.12"
+                                            TickPlacement="None"
+                                            ValueChanged="SliderHighlighterSnapExtendRatio_ValueChanged" />
+                                </ikw:SimpleStackPanel>
+                            </ui:SettingsCard>
+
+                            <ui:SettingsCard Header="{x:Static props:PPTStrings.HighlighterSnapReset}"
+                                            Description="{x:Static props:PPTStrings.HighlighterSnapResetHint}">
+                                <Button Content="{x:Static props:PPTStrings.HighlighterSnapResetButton}"
+                                        Click="ButtonResetHighlighterSnapTuning_Click" />
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
+
                     <controls:LabeledSettingsCard x:Name="CardSupportWPS"
                             Header="{x:Static props:PPTStrings.SupportWPS}"
                             Icon="{x:Static ui:SegoeFluentIcons.Document}"
