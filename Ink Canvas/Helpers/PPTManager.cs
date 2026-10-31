@@ -479,8 +479,28 @@ namespace Ink_Canvas.Helpers
                     SafeReleaseComObject(CurrentSlides, "CurrentSlides");
                     SafeReleaseComObject(CurrentPresentation, "CurrentPresentation");
 
-                    // PPTApplication 的 COM 生命周期由 MW_PPT.ClosePowerPointApplication 管理，
-                    // 此处仅清空引用，避免双重释放共享 RCW。
+                    // PPTApplication 的 COM 生命周期由 MW_PPT.ClosePowerPointApplication 管理。
+                    // 但当通过 OleActiveObject.GetActiveObject 获取实例时（正常 COM 轮询），
+                    // 此处必须显式释放 RCW，否则旧 RCW 残留会导致新连接和旧订阅并存，
+                    // 产生断开→重连循环。详见 issue #729。
+                    // 我们仅在捕获的局部变量上操作，不影响 MW_PPT.pptApplication。
+                    try
+                    {
+                        if (Marshal.IsComObject(application))
+                        {
+                            Marshal.FinalReleaseComObject(application);
+                        }
+                    }
+                    catch
+                    {
+                        try
+                        {
+                            int refCount = Marshal.ReleaseComObject(application);
+                            while (refCount > 0)
+                                refCount = Marshal.ReleaseComObject(application);
+                        }
+                        catch { }
+                    }
                 }
 
                 _cachedIsConnected = false;
