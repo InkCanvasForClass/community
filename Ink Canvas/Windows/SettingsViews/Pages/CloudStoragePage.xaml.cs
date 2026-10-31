@@ -639,8 +639,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 SetConnectionStatus(string.Format(CloudStorageStrings.CloudStorage_ConnectedFormat, whiteboards.Count), Color.FromRgb(34, 197, 94));
                 LoadClasses(whiteboards, result.User);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException ex)
             {
+                LogService.LogException(ex);
             }
             catch (Exception ex)
             {
@@ -669,8 +670,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile(
-                    $"[Settings] 取消云存储连接测试失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
             finally
             {

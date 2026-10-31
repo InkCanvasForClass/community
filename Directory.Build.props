@@ -12,5 +12,9 @@
       <PrivateAssets>all</PrivateAssets>
       <Version>3.9.50</Version>
     </PackageReference>
+    <!-- ISyncService 等重构产物为 internal（新类默认 internal），
+         测试项目实现/访问它们需要友元授权。按项目名条件注入，仅影响主项目编译期元数据，
+         不改变运行时行为；主项目目录内文件零改动。 -->
+    <InternalsVisibleTo Include="InkCanvasForClass.Tests" Condition="'$(MSBuildProjectName)' == 'InkCanvasForClass'" />
   </ItemGroup>
 </Project>

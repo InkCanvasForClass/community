@@ -1,0 +1,63 @@
+# 质量门：提交前门（对应 CLAUDE.md「命令 → 提交前门」）。
+# 安全要求：
+#   1. GITHUB_TOKEN 权限最小化——只给本工作流真正需要的 scope。
+#   2. 所有第三方 action 上线前 pin 到完整 commit SHA（在 tag 后加 @<40位SHA>），防供应链篡改。
+#   3. 不在 pull_request_target 里 checkout PR 分支代码执行；PR 分支的 .claude/、.mcp.json、
+#      工作流脚本一律视为不可信输入。
+name: quality-gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: windows-latest   # WPF / net*-windows 目标需要 Windows 构建机
+    steps:
+      - uses: actions/checkout@v4   # TODO(owner): pin to full commit SHA before production use
+
+      - uses: actions/setup-dotnet@v4   # TODO(owner): pin to full commit SHA
+        with:
+          dotnet-version: |   # TODO(owner): 与全局.json / 各 csproj 的 TargetFramework 对齐
+            8.0.x
+
+      - name: cache nuget
+        uses: actions/cache@v4   # TODO(owner): pin to full commit SHA
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/*.sln', '**/packages.lock.json') }}
+
+      - name: restore
+        run: dotnet restore
+
+      - name: format check
+        run: dotnet format --verify-no-changes
+
+      - name: build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: test
+        run: dotnet test --configuration Release --no-restore --no-build
+
+# —— 以下为可选：CI 内跑编码代理（Claude Code GitHub Action 等）时的权限模板 ——
+# 取消注释并删除不需要的 scope：
+# permissions:
+#   contents: write        # 读代码 + 推送分支/提交
+#   issues: write          # 读/更新 issue
+#   pull-requests: write   # 创建/更新 PR
+#   actions: read          # 查工作流状态
+#   id-token: write        # OIDC 认证（GitHub App 或自定义 token 场景）
+# 注意：
+#   - 代理的 push/commit 默认不触发 GITHUB_TOKEN 的 CI；需 GitHub App 认证或自定义 token。
+#   - pull_request_target 自 2025-12 起强制使用默认分支的工作流文件；2026-11-02 起公共仓库默认禁用该触发器。
+
+# —— 可选：机密扫描（纵深防御的 CI 层；与仓库 Secret scanning + Push protection 配合使用）——
+# 在 gate 作业的 steps 里追加（上线前 pin SHA）：
+#   - name: secret scan
+#     uses: gitleaks/gitleaks-action@v2   # TODO(owner): pin to full commit SHA
+#     env:
+#       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

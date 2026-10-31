@@ -59,10 +59,7 @@ namespace Ink_Canvas
                         LogHelper.WriteLogToFile($"[SmartMode] COM 回退: Slide={_smartModeSlideWidth}x{_smartModeSlideHeight}磅", LogHelper.LogType.Info);
                     }
                 }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"[Settings] 智慧模式 BuildSmartModeRects 回退1 经 COM 读取幻灯片尺寸失败: {ex.Message}", LogHelper.LogType.Info);
-                }
+                catch (Exception ex) { LogService.LogException(ex); }
 
                 // 回退2：通过 _pptManager
                 if (_smartModeSlideWidth <= 0)
@@ -77,10 +74,7 @@ namespace Ink_Canvas
                             LogHelper.WriteLogToFile($"[SmartMode] PPTManager 回退: Slide={_smartModeSlideWidth}x{_smartModeSlideHeight}磅", LogHelper.LogType.Info);
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[Settings] 智慧模式 BuildSmartModeRects 回退2 经 _pptManager 读取幻灯片尺寸失败: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    catch (Exception ex) { LogService.LogException(ex); }
                 }
 
                 // 回退3：使用标准 16:9 尺寸
@@ -102,25 +96,14 @@ namespace Ink_Canvas
                     {
                         dynamic app = appObj;
                         dynamic ssw = null;
-                        try { ssw = app.ActivePresentation?.SlideShowWindow; }
-                        catch (Exception ex)
-                        {
-                            LogHelper.WriteLogToFile($"[Settings] 智慧模式 BuildSmartModeRects 经 dynamic 读取 ActivePresentation.SlideShowWindow 失败: {ex.Message}", LogHelper.LogType.Info);
-                        }
+                        try { ssw = app.ActivePresentation?.SlideShowWindow; } catch (Exception ex) { LogService.LogException(ex); }
                         if (ssw != null)
                         {
-                            try { _smartModeSlideShowHwnd = new IntPtr(ssw.HWND); }
-                            catch (Exception ex)
-                            {
-                                LogHelper.WriteLogToFile($"[Settings] 智慧模式 BuildSmartModeRects 读取放映窗口 HWND 失败: {ex.Message}", LogHelper.LogType.Info);
-                            }
+                            try { _smartModeSlideShowHwnd = new IntPtr(ssw.HWND); } catch (Exception ex) { LogService.LogException(ex); }
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"[Settings] 智慧模式 BuildSmartModeRects 经 _pptManager 取 PPT 应用对象失败: {ex.Message}", LogHelper.LogType.Info);
-                }
+                catch (Exception ex) { LogService.LogException(ex); }
 
                 if (_smartModeSlideShowHwnd == IntPtr.Zero)
                 {
@@ -143,11 +126,7 @@ namespace Ink_Canvas
             }
 
             uint dpi = 96;
-            try { dpi = PInvoke.GetDpiForWindow(new HWND(_smartModeSlideShowHwnd)); }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Settings] 智慧模式 BuildSmartModeRects 获取放映窗口 DPI 失败，按 96 DPI 处理: {ex.Message}", LogHelper.LogType.Info);
-            }
+            try { dpi = PInvoke.GetDpiForWindow(new HWND(_smartModeSlideShowHwnd)); } catch (Exception ex) { LogService.LogException(ex); }
             double dpiScale = dpi / 96.0;
 
             double winLeft = winRect.left;

@@ -19,6 +19,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InkCanvas.LiquidGlassMagHos
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InkCanvas.DevTools", "InkCanvas.DevTools\InkCanvas.DevTools.csproj", "{837C70D3-14E8-42B3-8B7E-784BE324BD28}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InkCanvasForClass.Tests", "Tests\InkCanvasForClass.Tests\InkCanvasForClass.Tests.csproj", "{F9178C6D-BA45-458A-83E1-0823BD8988EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -193,9 +197,32 @@ Global
 		{837C70D3-14E8-42B3-8B7E-784BE324BD28}.Release|x64.Build.0 = Release|x64
 		{837C70D3-14E8-42B3-8B7E-784BE324BD28}.Release|x86.ActiveCfg = Release|x86
 		{837C70D3-14E8-42B3-8B7E-784BE324BD28}.Release|x86.Build.0 = Release|x86
+		{F9178C6D-BA45-458A-83E1-0823BD8988EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9178C6D-BA45-458A-83E1-0823BD8988EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9178C6D-BA45-458A-83E1-0823BD8988EF}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{F9178C6D-BA45-458A-83E1-0823BD8988EF}.Debug|ARM.Build.0 = Debug|Any CPU
+		{F9178C6D-BA45-458A-83E1-0823BD8988EF}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{F9178C6D-BA45-458A-83E1-0823BD8988EF}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{F9178C6D-BA45-458A-83E1-0823BD8988EF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F9178C6D-BA45-458A-83E1-0823BD8988EF}.Debug|x64.Build.0 = Debug|Any CPU
+		{F9178C6D-BA45-458A-83E1-0823BD8988EF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F9178C6D-BA45-458A-83E1-0823BD8988EF}.Debug|x86.Build.0 = Debug|Any CPU
+		{F9178C6D-BA45-458A-83E1-0823BD8988EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9178C6D-BA45-458A-83E1-0823BD8988EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9178C6D-BA45-458A-83E1-0823BD8988EF}.Release|ARM.ActiveCfg = Release|Any CPU
+		{F9178C6D-BA45-458A-83E1-0823BD8988EF}.Release|ARM.Build.0 = Release|Any CPU
+		{F9178C6D-BA45-458A-83E1-0823BD8988EF}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{F9178C6D-BA45-458A-83E1-0823BD8988EF}.Release|ARM64.Build.0 = Release|Any CPU
+		{F9178C6D-BA45-458A-83E1-0823BD8988EF}.Release|x64.ActiveCfg = Release|Any CPU
+		{F9178C6D-BA45-458A-83E1-0823BD8988EF}.Release|x64.Build.0 = Release|Any CPU
+		{F9178C6D-BA45-458A-83E1-0823BD8988EF}.Release|x86.ActiveCfg = Release|Any CPU
+		{F9178C6D-BA45-458A-83E1-0823BD8988EF}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F9178C6D-BA45-458A-83E1-0823BD8988EF} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {89B9DD11-110D-428C-AB08-859B7F4B4E19}

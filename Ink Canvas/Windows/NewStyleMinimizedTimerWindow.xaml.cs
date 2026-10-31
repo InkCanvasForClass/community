@@ -139,8 +139,7 @@ namespace Ink_Canvas.Windows
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile(
-                    $"[Timer] 最小化计时器窗口拖动 DragMove 失败: {ex.Message}", LogHelper.LogType.Info);
+                Helpers.LogService.LogException(ex);
             }
         }
 
@@ -164,7 +163,7 @@ namespace Ink_Canvas.Windows
 
         private void ToggleTransparency_Click(object sender, RoutedEventArgs e)
         {
-            if(SettingsManager.Settings.Timer.IsOpenTransparency)
+            if (SettingsManager.Settings.Timer.IsOpenTransparency)
             {
                 MainBorder.Background = (Brush)FindResource("NewTimerWindowBackground");
                 SettingsManager.Settings.Timer.IsOpenTransparency = false;

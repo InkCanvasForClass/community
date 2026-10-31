@@ -161,7 +161,7 @@ namespace Ink_Canvas.WorkflowAutomation
                 try { Shutdown(); }
                 catch (Exception shutdownEx)
                 {
-                    LogHelper.WriteLogToFile($"[Automation] 初始化失败后回滚 Shutdown 也失败: {shutdownEx.Message}", LogHelper.LogType.Info);
+                    Helpers.LogService.LogException(shutdownEx);
                 }
                 throw;
             }
