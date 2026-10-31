@@ -15,6 +15,12 @@ namespace Ink_Canvas
 {
     public partial class MainWindow
     {
+        private InkCanvasEditingMode GetPalmLogicalEditingMode()
+        {
+            var mode = inkCanvas?.EditingMode ?? InkCanvasEditingMode.None;
+            return mode == InkCanvasEditingMode.None && (isPalmEraserActive || _changingPalmMode)
+                ? palmEraserPreviousEditingMode : mode;
+        }
         private readonly PalmEraserEngine _palmEngine = new();
         private readonly HashSet<int> _palmSuppressedTouches = new();
         private readonly HashSet<uint> _palmSuppressedPointers = new();
@@ -392,6 +398,12 @@ namespace Ink_Canvas
             if (!isPalmEraserActive) return;
             isPalmEraserActive = false;
             inkCanvas.LostTouchCapture -= PalmEraser_LostTouchCapture;
+            if (_palmTouchDevice != null)
+            {
+                dec.Remove(_palmTouchDevice.Id);
+                _palmSuppressedTouches.Remove(_palmTouchDevice.Id);
+                if (_palmTouchDevice.Captured == inkCanvas) inkCanvas.ReleaseTouchCapture(_palmTouchDevice);
+            }
             _palmTouchDevice = null;
 #if ICC_NATIVE_WET_INK
             _palmNativePointer = null;
@@ -411,6 +423,9 @@ namespace Ink_Canvas
                         inkCanvas.EditingMode = palmEraserPreviousEditingMode;
                 }
                 finally { _changingPalmMode = false; }
+                if (ViewboxFloatingBar != null) ViewboxFloatingBar.IsHitTestVisible = true;
+                if (BlackboardUIGridForInkReplay != null) BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+                if (eraserOverlayCanvas != null) eraserOverlayCanvas.IsHitTestVisible = false;
                 SetCursorBasedOnEditingMode(inkCanvas);
             }
         }

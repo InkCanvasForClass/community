@@ -1,4 +1,4 @@
-using Ink_Canvas.Controls;
+﻿using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Models;
@@ -882,16 +882,7 @@ namespace Ink_Canvas
 
                             var oobeWindow = new OobeWindow(Settings);
                             oobeWindow.Owner = this;
-                            bool completed;
-                            try
-                            {
-                                App.IsOobeShowing = true;
-                                completed = oobeWindow.ShowDialog() == true;
-                            }
-                            finally
-                            {
-                                App.IsOobeShowing = false;
-                            }
+                            bool completed = oobeWindow.ShowDialog() == true;
 
                             if (completed) OnOobeCompleted();
                             else if (ViewboxFloatingBar != null && currentMode == 0)
@@ -1404,13 +1395,13 @@ namespace Ink_Canvas
 
         /// <summary>
         /// 是否处于批注模式（供 Automation 规则/触发器判断）。
-        /// 新墨迹系统撤回后，批注 = InkCanvas 物理编辑模式为 Ink。
+        /// 手掌擦的临时输入模式不改变用户当前的批注状态。
         /// </summary>
         internal bool IsAnnotationModeActive()
         {
             try
             {
-                return inkCanvas?.EditingMode == InkCanvasEditingMode.Ink
+                return GetPalmLogicalEditingMode() == InkCanvasEditingMode.Ink
                        || ResolveLogicalInkTool() == LogicalInkTool.Pen;
             }
             catch
@@ -1422,10 +1413,11 @@ namespace Ink_Canvas
         private void inkCanvas_EditingModeChanged(object sender, RoutedEventArgs e)
         {
             var inkCanvas1 = sender as InkCanvas;
-            if (inkCanvas1 == null) return;
+            if (inkCanvas1 == null || _changingPalmMode) return;
 
-            if (isPalmEraserActive && !_changingPalmMode)
+            if (isPalmEraserActive)
                 EndPalmEraser(false);
+            _palmEngine.Clear();
 
             NotifyPluginPenModeChanged(inkCanvas1.EditingMode);
 

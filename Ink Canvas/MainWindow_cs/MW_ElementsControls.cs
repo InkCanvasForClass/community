@@ -2884,7 +2884,6 @@ namespace Ink_Canvas
         private bool _imageOverlayHooked;
         private FrameworkElement _overlayTrackedElement;
         private readonly System.Collections.Generic.Dictionary<Stroke, StylusPointCollection> _strokeTransformInitialPoints = new();
-        private bool _isStrokeRotationOverlayActive;
 
         private void EnsureImageOverlayHooks()
         {

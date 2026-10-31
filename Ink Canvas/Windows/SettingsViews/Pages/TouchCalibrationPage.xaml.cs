@@ -174,7 +174,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 StepTitle.Text = Text("CalibrationSimulate");
                 Hint.Text = Text("CalibrationSimulateHint");
             }
-            NextButton.Visibility = _simulationOnly ? Visibility.Collapsed : Visibility.Visible;
+            NextButton.Visibility = _step < 4 ? Visibility.Visible : Visibility.Collapsed;
+            SaveButton.Visibility = _step == 4 ? Visibility.Visible : Visibility.Collapsed;
             SimulateErase.IsEnabled = !_simulationOnly;
             Status.Text = Text("CalibrationReady");
             UpdatePreviewPolicy();
@@ -571,7 +572,23 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
             if (_step == 4)
             {
+                if (_simulationOnly)
+                {
+                    // Saving is explicit: preview alone does not fabricate measured
+                    // contact areas. Position-only calibration feeds the TouchSuite
+                    // grouping path, retaining the actual display/DPI identity.
+                    _draft = new TouchCalibrationRecord
+                    {
+                        Environment = TouchCalibrationDisplay.Capture(_host ?? Window.GetWindow(this), "WPF"),
+                        OutlineWidth = _simulationWidth, OutlineHeight = _simulationHeight,
+                        UsePointGrouping = true, AreaMultiplier = 1, SizeAdjustment = SizeAdjustment.Value
+                    };
+                    _options = _options with { MultiTouch = true, AreaEnabled = false };
+                }
                 if (_draft?.IsValid() != true) { Status.Text = Text("CalibrationOverlap"); return; }
+                _draft.MinimumContacts = GroupCount.SelectedIndex + 2;
+                _draft.WindowMilliseconds = (int)GroupWindow.Value;
+                _draft.GroupTolerance = GroupTolerance.Value;
                 if (_draft.Environment.Source == "RawHID" && _rawDevice.Length > 0)
                     _options = _options with { HidDevice = _rawDevice };
                 int? nib = _nib.IsComplete ? (int)Math.Clamp(Math.Round(Math.Sqrt(_nib.MedianPeak()) * 1.5), 1, 50) : null;
@@ -581,6 +598,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 return;
             }
             _step++; ShowStep();
+        }
+
+        private void SaveCalibration(object sender, RoutedEventArgs e)
+        {
+            if (_step == 4) Next(sender, e);
         }
         private bool TryOutline(out double width, out double height)
         {

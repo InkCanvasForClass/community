@@ -14,6 +14,15 @@ namespace Ink_Canvas.Ink
             double x = environment?.DpiX > 0 ? environment.DpiX : 1;
             double y = environment?.DpiY > 0 ? environment.DpiY : 1;
             if (calibration?.IsValid() == true && calibration.Environment.Matches(environment))
+            {
+                if (calibration.UsePointGrouping)
+                    options = options with
+                    {
+                        MultiTouch = true, AreaEnabled = false,
+                        MinimumContacts = calibration.MinimumContacts,
+                        GroupWindowMs = calibration.WindowMilliseconds,
+                        GroupTolerance = calibration.GroupTolerance
+                    };
                 return new()
                 {
                     Options = options with { AreaTrim = Math.Clamp(options.AreaTrim * calibration.SizeAdjustment, 0.5, 2) },
@@ -23,6 +32,7 @@ namespace Ink_Canvas.Ink
                     PalmContactAreaPx2 = calibration.PalmArea * x * y,
                     FingerContactAreaPx2 = calibration.FingerArea * x * y
                 };
+            }
 
             // Existing installations can still erase before recalibration. This fallback is
             // deliberately isolated from calibrated TouchSuite area/threshold calculations.
