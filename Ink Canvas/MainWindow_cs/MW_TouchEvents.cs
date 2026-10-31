@@ -235,6 +235,12 @@ namespace Ink_Canvas
         internal void EnsureRealtimeStylusPipelineBinding()
         {
             if (inkCanvas == null) return;
+            // 课件套索沿用逻辑 select，不能被设置刷新重新打开内建墨迹采集。
+            if (_presentationElementSelection)
+            {
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                return;
+            }
 
             inkCanvas.StylusDown -= MainWindow_StylusDown;
             inkCanvas.StylusMove -= MainWindow_StylusMove;
