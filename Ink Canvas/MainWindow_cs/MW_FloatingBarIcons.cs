@@ -1387,7 +1387,7 @@ namespace Ink_Canvas
                             break;
                         case "QuickColorOrange":
                         case "QuickColorOrangeSingle":
-                            border.Background = new SolidColorBrush(Color.FromRgb(251, 150, 80));
+                            border.Background = new SolidColorBrush(Color.FromRgb(255, 165, 0));
                             break;
                         case "QuickColorYellow":
                         case "QuickColorYellowSingle":
@@ -4188,7 +4188,7 @@ namespace Ink_Canvas
         /// </summary>
         private void QuickColorOrange_Click(object sender, RoutedEventArgs e)
         {
-            SetQuickColor(Color.FromRgb(251, 150, 80)); // 橙色
+            SetQuickColor(Color.FromRgb(255, 165, 0)); // 橙色
             ScheduleBrushAutoRestore();
         }
 
@@ -4253,7 +4253,7 @@ namespace Ink_Canvas
                 "Black" => Colors.Black,
                 "White" => Colors.White,
                 "Red" => Colors.Red,
-                "Orange" => Color.FromRgb(251, 150, 80),
+                "Orange" => Color.FromRgb(255, 165, 0),
                 "Yellow" => Colors.Yellow,
                 "Green" => Color.FromRgb(22, 163, 74),
                 "Blue" => Color.FromRgb(37, 99, 235),
@@ -4352,7 +4352,7 @@ namespace Ink_Canvas
             {
                 // 桌面模式
                 if (color == Colors.White) lastDesktopInkColor = 5;
-                else if (color == Color.FromRgb(251, 150, 80)) lastDesktopInkColor = 8; // 橙色
+                else if (color == Color.FromRgb(255, 165, 0) || color == Color.FromRgb(251, 150, 80)) lastDesktopInkColor = 8; // 橙色
                 else if (color == Colors.Yellow) lastDesktopInkColor = 4;
                 else if (color == Colors.Black) lastDesktopInkColor = 0;
                 else if (color == Color.FromRgb(37, 99, 235)) lastDesktopInkColor = 3; // 蓝色
@@ -4364,7 +4364,7 @@ namespace Ink_Canvas
             {
                 // 白板模式
                 if (color == Colors.White) lastBoardInkColor = 5;
-                else if (color == Color.FromRgb(251, 150, 80)) lastBoardInkColor = 8; // 橙色
+                else if (color == Color.FromRgb(255, 165, 0) || color == Color.FromRgb(251, 150, 80)) lastBoardInkColor = 8; // 橙色
                 else if (color == Colors.Yellow) lastBoardInkColor = 4;
                 else if (color == Colors.Black) lastBoardInkColor = 0;
                 else if (color == Color.FromRgb(37, 99, 235)) lastBoardInkColor = 3; // 蓝色

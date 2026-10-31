@@ -1017,7 +1017,7 @@ namespace Ink_Canvas
             if (n.Length == 6)
             {
                 if (n == "ffffff") return Color.FromArgb(alpha, 255, 255, 255);
-                if (n == "fb9650") return Color.FromArgb(alpha, 251, 150, 80);   // 251,150,80 橙
+                if (n == "ffa500" || n == "fb9650") return Color.FromArgb(alpha, 255, 165, 0);   // 橙
                 if (n == "ffff00") return Color.FromArgb(alpha, 255, 255, 0);
                 if (n == "000000") return Color.FromArgb(alpha, 0, 0, 0);
                 if (n == "2563eb") return Color.FromArgb(alpha, 37, 99, 235);    // 37,99,235 蓝
@@ -1033,7 +1033,7 @@ namespace Ink_Canvas
                 {
                     byte r = parsed.R, g = parsed.G, b = parsed.B;
                     if (r == 255 && g == 255 && b == 255) return Color.FromArgb(alpha, 255, 255, 255);
-                    if (r == 251 && g == 150 && b == 80) return Color.FromArgb(alpha, 251, 150, 80);
+                    if ((r == 255 && g == 165 && b == 0) || (r == 251 && g == 150 && b == 80)) return Color.FromArgb(alpha, 255, 165, 0);
                     if (r == 255 && g == 255 && b == 0) return Color.FromArgb(alpha, 255, 255, 0);
                     if (r == 0 && g == 0 && b == 0) return Color.FromArgb(alpha, 0, 0, 0);
                     if (r == 37 && g == 99 && b == 235) return Color.FromArgb(alpha, 37, 99, 235);
@@ -1080,7 +1080,7 @@ namespace Ink_Canvas
                 if (currentMode == 0)
                 {
                     if (rgbColor == Colors.White) lastDesktopInkColor = 5;
-                    else if (rgbColor == Color.FromRgb(251, 150, 80)) lastDesktopInkColor = 8;
+                    else if (rgbColor == Color.FromRgb(255, 165, 0) || rgbColor == Color.FromRgb(251, 150, 80)) lastDesktopInkColor = 8;
                     else if (rgbColor == Colors.Yellow) lastDesktopInkColor = 4;
                     else if (rgbColor == Colors.Black) lastDesktopInkColor = 0;
                     else if (rgbColor == Color.FromRgb(37, 99, 235)) lastDesktopInkColor = 3;
@@ -1091,7 +1091,7 @@ namespace Ink_Canvas
                 else
                 {
                     if (rgbColor == Colors.White) lastBoardInkColor = 5;
-                    else if (rgbColor == Color.FromRgb(251, 150, 80)) lastBoardInkColor = 8;
+                    else if (rgbColor == Color.FromRgb(255, 165, 0) || rgbColor == Color.FromRgb(251, 150, 80)) lastBoardInkColor = 8;
                     else if (rgbColor == Colors.Yellow) lastBoardInkColor = 4;
                     else if (rgbColor == Colors.Black) lastBoardInkColor = 0;
                     else if (rgbColor == Color.FromRgb(37, 99, 235)) lastBoardInkColor = 3;
