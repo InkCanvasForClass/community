@@ -225,6 +225,7 @@
   <data name="Debug_SimulateCrash_Button" xml:space="preserve">
     <value>💥 自爆一下</value>
   </data>
+  <!-- Legacy resource keys retained for compatibility; the heartbeat test UI has been removed. -->
   <data name="Debug_SimulateHeartbeatTimeout_Header" xml:space="preserve">
     <value>假装心跳停了装死中</value>
   </data>

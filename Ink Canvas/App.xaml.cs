@@ -29,7 +29,6 @@ using Windows.Win32.UI.Accessibility;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
 using SplashScreen = Ink_Canvas.Windows.SplashScreen;
-using Timer = System.Threading.Timer;   
 
 namespace Ink_Canvas
 {
@@ -158,8 +157,6 @@ namespace Ink_Canvas
         public static bool IsUIAccessTopMostEnabled;
         // UIA helper 启动失败后，普通用户子进程使用此标记执行一次性回退。
         public static bool IsUIAccessFallbackLaunch { get; private set; }
-        // 新增：标记是否正在显示 OOBE（首次启动向导），看门狗在此期间不判定为卡死/假死
-        public static bool IsOobeShowing;
         // 新增：退出信号文件路径
         private static string watchdogExitSignalFile = Path.Combine(Path.GetTempPath(), "icc_watchdog_exit_" + Process.GetCurrentProcess().Id + ".flag");
         // 新增：崩溃日志文件路径
@@ -320,7 +317,7 @@ namespace Ink_Canvas
             SessionEnding += App_SessionEnding;
             DispatcherUnhandledException += App_DispatcherUnhandledException;
             Exit += App_Exit;
-            StartHeartbeatMonitor();
+            UpdateCpuUsageSnapshot();
             LogHelper.WriteLogToFile("[Crash] 已注册应用启动、退出和未处理异常事件", LogHelper.LogType.Info);
 
             // 初始化全局异常和进程结束处理
@@ -910,7 +907,6 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile("启动画面对象创建成功，准备显示...");
                 _splashScreen.Show();
                 _isSplashScreenShown = true;
-                splashScreenStartTime = DateTime.Now;
                 splashStopwatch.Restart();
                 LogHelper.WriteLogToFile("启动画面已显示");
             }
@@ -1175,7 +1171,6 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile("App | ARM64 detected, RenderMode=SoftwareOnly");
             }
 
-            appStartupStartTime = DateTime.Now;
             startupStopwatch.Restart();
 
             // 启动阶段跳过昂贵的 StackTrace 采集
@@ -1602,23 +1597,18 @@ namespace Ink_Canvas
             }
 
             // 主窗口加载完成后关闭启动画面
-            mainWindow.Loaded += (s, args) =>
+            mainWindow.Loaded += async (s, args) =>
             {
-                isStartupComplete = true;
-                startupCompleteHeartbeat = DateTime.Now;
-
                 // 启动完成，恢复日志调用栈采集
                 LogHelper.SuppressCallerInfo = false;
 
-                // 这里只记录启动完成；重启计数会在应用稳定运行并保持心跳正常后清零，避免启动后立即崩溃绕过熔断。
-
                 if (_isSplashScreenShown && splashStopwatch.IsRunning)
                 {
-                    LogHelper.WriteLogToFile($"启动完成心跳已记录，启动画面显示时长: {splashStopwatch.Elapsed.TotalSeconds:F2}秒");
+                    LogHelper.WriteLogToFile($"主窗口加载完成，启动画面显示时长: {splashStopwatch.Elapsed.TotalSeconds:F2}秒");
                 }
                 else
                 {
-                    LogHelper.WriteLogToFile($"启动完成心跳已记录");
+                    LogHelper.WriteLogToFile("主窗口加载完成");
                 }
                 LogHelper.WriteLogToFile($"启动时长: {startupStopwatch.Elapsed.TotalSeconds:F2}秒");
 
@@ -1626,7 +1616,7 @@ namespace Ink_Canvas
                 {
                     SetSplashMessage("启动完成！");
                     SetSplashProgress(100);
-                    Task.Delay(100).ContinueWith(_ =>
+                    _ = Task.Delay(100).ContinueWith(_ =>
                     {
                         Dispatcher.Invoke(() =>
                         {
@@ -1637,6 +1627,15 @@ namespace Ink_Canvas
                             });
                         });
                     });
+                }
+
+                // 启动后立即崩溃时保留计数；稳定运行30秒后仅清零一次，不再进行无响应检测。
+                await Task.Delay(TimeSpan.FromSeconds(30));
+                if (!IsAppExitByUser && !Dispatcher.HasShutdownStarted && !Dispatcher.HasShutdownFinished &&
+                    StartupCount.GetCount() > 0)
+                {
+                    StartupCount.Reset();
+                    LogHelper.WriteLogToFile("应用已稳定运行30秒，重置崩溃重启计数器");
                 }
             };
 
@@ -2067,125 +2066,6 @@ namespace Ink_Canvas
             Environment.Exit(1);
         }
 
-        // 心跳相关
-        private static DispatcherTimer heartbeatTimer;
-        private static DateTime lastHeartbeat = DateTime.Now;
-        private static Timer watchdogTimer;
-        private static bool isStartupComplete = false;
-        private static DateTime startupCompleteHeartbeat = DateTime.MinValue;
-        private static DateTime splashScreenStartTime = DateTime.MinValue;
-        private static DateTime appStartupStartTime = DateTime.MinValue;
-        private static volatile bool isAppExiting = false;
-
-        /// <summary>
-        /// [调试用] 停止心跳计时器，模拟主线程无响应，下一次守护检查将触发心跳超时重启。
-        /// </summary>
-        internal static void DebugStopHeartbeat()
-        {
-            try
-            {
-                heartbeatTimer?.Stop();
-                LogHelper.WriteLogToFile("[Debug] 心跳计时器已手动停止，等待守护检查检测超时", LogHelper.LogType.Warning);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Debug] 停止心跳计时器失败: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 启动并管理应用的心跳与守护检查定时器，监测启动阶段与主线程是否无响应，并在符合配置的情况下尝试静默重启应用。
-        /// </summary>
-        /// <remarks>
-        /// - 启动一个每秒更新心跳时间戳的调度定时器和一个每3秒运行的守护定时器。  
-        /// - 守护定时器在首次运行的启动阶段若检测到超过两分钟未完成启动，会根据 CrashAction 配置尝试静默重启。  
-        /// - 在启动完成后若检测到主线程超过10秒无响应，会根据 CrashAction 配置尝试静默重启。  
-        /// - 对连续重启次数有保护：若重启计数达到或超过5次，会弹出提示并停止自动重启（重置重启计数并退出进程）。  
-        /// - 在 OOBE（首次引导）展示期间不执行守护检查。  
-        /// - 该方法会产生外部可观察的副作用：可能启动新进程并调用 Environment.Exit 终止当前进程，或显示消息框。
-        /// - 重启前会等待1秒以确保旧进程资源已释放，避免多实例竞争条件。
-        /// </remarks>
-        private void StartHeartbeatMonitor()
-        {
-            UpdateCpuUsageSnapshot();
-
-            heartbeatTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(1)
-            };
-            heartbeatTimer.Tick += (_, __) =>
-            {
-                lastHeartbeat = DateTime.Now;
-                UpdateCpuUsageSnapshot();
-            };
-            heartbeatTimer.Start();
-
-            watchdogTimer = new Timer(_ =>
-            {
-                if (isAppExiting)
-                    return;
-                if (IsOobeShowing)
-                    return;
-
-                if (!isStartupComplete && appStartupStartTime != DateTime.MinValue)
-                {
-                    DateTime startTime = _isSplashScreenShown && splashScreenStartTime != DateTime.MinValue
-                        ? splashScreenStartTime
-                        : appStartupStartTime;
-                    TimeSpan elapsedSinceStart = DateTime.Now - startTime;
-                    if (elapsedSinceStart.TotalMinutes >= 2)
-                    {
-                        string timeType = _isSplashScreenShown ? "启动画面已显示" : "应用启动开始";
-                        string restartReason = $"检测到启动假死：{timeType}{elapsedSinceStart.TotalMinutes:F2}分钟，但未收到启动完成心跳，自动重启。";
-                        LogHelper.WriteLogToFile(restartReason, LogHelper.LogType.Error);
-                        WriteCrashLog(restartReason);
-                        SyncCrashActionFromSettings();
-                        if (CrashAction == CrashActionType.SilentRestart)
-                        {
-                            TryRestartWithBreaker(restartReason);
-                        }
-                        return;
-                    }
-                }
-
-                if (isStartupComplete)
-                {
-                    var now = DateTime.Now;
-                    var sinceHeartbeat = now - lastHeartbeat;
-                    var sinceStartupComplete = startupCompleteHeartbeat == DateTime.MinValue
-                        ? TimeSpan.Zero
-                        : now - startupCompleteHeartbeat;
-
-                    if (sinceStartupComplete.TotalSeconds < 30)
-                    {
-                        return;
-                    }
-
-                    // 只有主窗口完成启动且持续保持心跳正常，才认为本次启动稳定，清除连续重启计数。
-                    // 若此时已无响应，必须保留计数让熔断机制生效。
-                    if (sinceHeartbeat.TotalSeconds <= 10)
-                    {
-                        if (StartupCount.GetCount() > 0)
-                        {
-                            StartupCount.Reset();
-                            LogHelper.WriteLogToFile("应用已稳定运行30秒，重置崩溃重启计数器");
-                        }
-
-                        return;
-                    }
-
-                    string restartReason = $"检测到主线程无响应，自动重启。心跳超时 {sinceHeartbeat.TotalSeconds:F1} 秒。";
-                    LogHelper.NewLog(restartReason);
-                    WriteCrashLog(restartReason);
-                    SyncCrashActionFromSettings();
-                    if (CrashAction == CrashActionType.SilentRestart)
-                    {
-                        TryRestartWithBreaker(restartReason);
-                    }
-                }
-            }, null, 0, 3000);
-        }
-
         // 看门狗进程
         public static void StartWatchdogIfNeeded()
         {
@@ -2262,7 +2142,6 @@ namespace Ink_Canvas
 
         private void App_Exit(object sender, ExitEventArgs e)
         {
-            isAppExiting = true;
             LogHelper.WriteLogToFile(
                 $"[Exit] 开始应用退出清理: user={IsAppExitByUser}, code={e.ApplicationExitCode}, crashAction={CrashAction}",
                 LogHelper.LogType.Info);
@@ -2277,14 +2156,6 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"广播插件 AppExiting 失败: {ex.Message}", LogHelper.LogType.Warning);
             }
 
-            try { heartbeatTimer?.Stop(); } catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Exit] 停止心跳计时器失败: {ex.Message}", LogHelper.LogType.Info);
-            }
-            try { watchdogTimer?.Change(Timeout.Infinite, Timeout.Infinite); watchdogTimer?.Dispose(); } catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Exit] 释放看门狗计时器失败: {ex.Message}", LogHelper.LogType.Info);
-            }
             MemoryBreakdownHelper.StopAutomaticDumpMonitor();
 
             CleanupTerminationMonitoring();

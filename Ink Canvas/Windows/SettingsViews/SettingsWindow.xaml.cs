@@ -1487,7 +1487,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                         System.Diagnostics.Debug.WriteLine(string.Format(NavStrings.Nav_PreloadPageFailed, tag, ex.Message));
                     }
 
-                    // 每加载一页后让出 UI 线程，防止阻塞心跳定时器
+                    // 每加载一页后让出 UI 线程，保持设置窗口响应。
                     if (++count % 3 == 0)
                     {
                         await System.Threading.Tasks.Task.Delay(50);

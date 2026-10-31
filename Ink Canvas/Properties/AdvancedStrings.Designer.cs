@@ -143,6 +143,7 @@ namespace Ink_Canvas.Properties
 
         public static string Debug_SimulateCrash_Button => ResourceManager.GetString(nameof(Debug_SimulateCrash_Button), _resourceCulture);
 
+        // 心跳测试入口已移除，保留旧资源访问器以兼容既有调用。
         public static string Debug_SimulateHeartbeatTimeout_Header => ResourceManager.GetString(nameof(Debug_SimulateHeartbeatTimeout_Header), _resourceCulture);
 
         public static string Debug_SimulateHeartbeatTimeout_Desc => ResourceManager.GetString(nameof(Debug_SimulateHeartbeatTimeout_Desc), _resourceCulture);

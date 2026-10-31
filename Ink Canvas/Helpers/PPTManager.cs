@@ -132,6 +132,8 @@ namespace Ink_Canvas.Helpers
                     CheckAndConnectToPPT();
                 }
 
+                if (_isModuleUnloading) return;
+
                 RunPPTComDebugProbeIfEnabled("TimerTick", tick);
 
                 if (IsConnected)
@@ -164,12 +166,14 @@ namespace Ink_Canvas.Helpers
 
             lock (_lockObject)
             {
+                Microsoft.Office.Interop.PowerPoint.Application pptApp = null;
+                bool connectionAdopted = false;
                 try
                 {
                     if (_isModuleUnloading) return;
 
                     // 尝试连接到PowerPoint
-                    var pptApp = TryConnectToPowerPoint();
+                    pptApp = TryConnectToPowerPoint();
                     if (pptApp == null && IsSupportWPS)
                     {
                         // 如果PowerPoint连接失败且支持WPS，尝试连接WPS
@@ -181,6 +185,7 @@ namespace Ink_Canvas.Helpers
                         RunPPTComDebugProbeIfEnabled("BeforeConnect", 0, pptApp);
 
                         // 有可用的PPT/WPS应用程序且当前未连接，建立连接
+                        connectionAdopted = true;
                         ConnectToPPT(pptApp);
                     }
                     else if (pptApp == null && IsConnected)
@@ -200,6 +205,14 @@ namespace Ink_Canvas.Helpers
                     if (PPTApplication != null)
                     {
                         DisconnectFromPPT();
+                    }
+                }
+                finally
+                {
+                    // 已连接时，轮询获取的额外引用不属于当前连接，必须成对释放。
+                    if (!connectionAdopted)
+                    {
+                        SafeReleaseComObject(pptApp, "PPTConnectionProbe");
                     }
                 }
             }
@@ -281,14 +294,17 @@ namespace Ink_Canvas.Helpers
 
         private Microsoft.Office.Interop.PowerPoint.Application TryConnectToPowerPoint()
         {
+            Microsoft.Office.Interop.PowerPoint.Application pptApp = null;
             try
             {
-                var pptApp = (Microsoft.Office.Interop.PowerPoint.Application)OleActiveObject.GetActiveObject("PowerPoint.Application");
+                pptApp = (Microsoft.Office.Interop.PowerPoint.Application)OleActiveObject.GetActiveObject("PowerPoint.Application");
 
                 if (pptApp != null && Marshal.IsComObject(pptApp))
                 {
                     var _ = pptApp.Name;
-                    return pptApp;
+                    var application = pptApp;
+                    pptApp = null;
+                    return application;
                 }
                 return null;
             }
@@ -303,19 +319,26 @@ namespace Ink_Canvas.Helpers
             catch (Exception)
             {
                 return null;
+            }
+            finally
+            {
+                SafeReleaseComObject(pptApp, "PowerPointConnectionProbe");
             }
         }
 
         private Microsoft.Office.Interop.PowerPoint.Application TryConnectToWPS()
         {
+            Microsoft.Office.Interop.PowerPoint.Application wpsApp = null;
             try
             {
-                var wpsApp = (Microsoft.Office.Interop.PowerPoint.Application)OleActiveObject.GetActiveObject("kwpp.Application");
+                wpsApp = (Microsoft.Office.Interop.PowerPoint.Application)OleActiveObject.GetActiveObject("kwpp.Application");
 
                 if (wpsApp != null && Marshal.IsComObject(wpsApp))
                 {
                     var _ = wpsApp.Name;
-                    return wpsApp;
+                    var application = wpsApp;
+                    wpsApp = null;
+                    return application;
                 }
                 return null;
             }
@@ -330,6 +353,10 @@ namespace Ink_Canvas.Helpers
             catch (Exception)
             {
                 return null;
+            }
+            finally
+            {
+                SafeReleaseComObject(wpsApp, "WpsConnectionProbe");
             }
         }
 
@@ -398,9 +425,7 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"连接PPT应用程序失败: {ex}", LogHelper.LogType.Error);
                 if (ReferenceEquals(PPTApplication, application))
                 {
-                    Interlocked.Increment(ref _connectionGeneration);
-                    _cachedIsConnected = false;
-                    PPTApplication = null;
+                    DisconnectFromPPT();
                 }
             }
         }
@@ -456,8 +481,40 @@ namespace Ink_Canvas.Helpers
 
         private void DisconnectFromPPT(bool isShutdown = false)
         {
+            var dispatcher = Application.Current?.Dispatcher;
+            if (!isShutdown && dispatcher != null && !dispatcher.CheckAccess() &&
+                !dispatcher.HasShutdownStarted && !dispatcher.HasShutdownFinished)
+            {
+                if (_isModuleUnloading) return;
+
+                _isModuleUnloading = true;
+                _cachedIsConnected = false;
+                _cachedIsInSlideShow = false;
+                _unifiedPPTTimer?.Stop();
+                int generation = Interlocked.Increment(ref _connectionGeneration);
+                try
+                {
+                    dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        if (generation == Volatile.Read(ref _connectionGeneration))
+                        {
+                            DisconnectFromPPT(isShutdown: _disposed);
+                        }
+                    }), DispatcherPriority.Normal);
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"调度PPT连接清理失败: {ex}", LogHelper.LogType.Warning);
+                }
+            }
+
             var hadConnection = _cachedIsConnected || PPTApplication != null;
             var application = PPTApplication;
+            _cachedIsConnected = false;
+            _cachedIsInSlideShow = false;
+            _isModuleUnloading = true;
+            _unifiedPPTTimer?.Stop();
             Interlocked.Increment(ref _connectionGeneration);
 
             try
@@ -471,30 +528,15 @@ namespace Ink_Canvas.Helpers
 
                 if (application != null)
                 {
-                    if (isShutdown)
-                    {
-                        UnregisterPptEvents(application);
-                    }
-                    else if (Marshal.IsComObject(application))
-                    {
-                        try
-                        {
-                            Application.Current?.Dispatcher?.BeginInvoke(
-                                new Action(() => UnregisterPptEvents(application)),
-                                DispatcherPriority.Normal);
-                        }
-                        catch (Exception ex)
-                        {
-                            LogHelper.WriteLogToFile($"取消PPT事件注册失败: {ex}", LogHelper.LogType.Warning);
-                        }
-                    }
+                    // 与事件注册使用同一线程，先解绑再释放，重连在清理完成后启动。
+                    UnregisterPptEvents(application);
 
                     SafeReleaseComObject(CurrentSlide, "CurrentSlide");
                     SafeReleaseComObject(CurrentSlides, "CurrentSlides");
                     SafeReleaseComObject(CurrentPresentation, "CurrentPresentation");
 
-                    // PPTApplication 的 COM 生命周期由 MW_PPT.ClosePowerPointApplication 管理，
-                    // 此处仅清空引用，避免双重释放共享 RCW。
+                    // 恢复应用引用的清理，但不强制终止其他调用者共享的 RCW。
+                    SafeReleaseComObject(application, "PPTApplication");
                 }
 
                 _cachedIsConnected = false;
@@ -504,16 +546,6 @@ namespace Ink_Canvas.Helpers
                 CurrentSlides = null;
                 CurrentSlide = null;
                 SlidesCount = 0;
-
-                if (!isShutdown)
-                {
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    GC.Collect();
-                }
-
-                _isModuleUnloading = true;
-                _unifiedPPTTimer?.Stop();
 
                 PPTConnectionChanged?.Invoke(false);
 
