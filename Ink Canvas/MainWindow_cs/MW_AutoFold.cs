@@ -156,12 +156,19 @@ namespace Ink_Canvas
                 SidePannelMarginAnimation(-10);
             });
 
-            // 新增：如果开启了彻底隐藏，则隐藏主窗口
+            // 新增：如果开启了彻底隐藏，则隐藏主窗口。
+            // 需等浮动栏（0.35s）与侧边栏收纳动画播放完成后再隐藏，
             if (Settings.Automation.ThoroughlyHideWhenFolded)
             {
+                await Task.Delay(400);
+
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    this.Visibility = Visibility.Hidden;
+                    // 等待期间若浮动栏已被重新展开，则不再隐藏主窗口
+                    if (isFloatingBarFolded)
+                    {
+                        this.Visibility = Visibility.Hidden;
+                    }
                 });
             }
         }
