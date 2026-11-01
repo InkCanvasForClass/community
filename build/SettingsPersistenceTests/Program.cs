@@ -28,6 +28,11 @@ internal static class Program
         {
             Ink_Canvas.App.RootPath = root + Path.DirectorySeparatorChar;
             SettingsManager.Settings = new Settings();
+            if (args.Contains("--input-latency-only"))
+            {
+                InputLatencyRegression.Run(Check);
+                Console.WriteLine($"PASS: {_checks} input latency behavior checks"); return 0;
+            }
             if (args.Contains("--drawing-segment-only"))
             {
                 DrawingSystemRegression.SegmentFingerprint(Check);
