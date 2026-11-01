@@ -113,6 +113,29 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             }
         }
 
+        public static bool MigrateAutoStartSetting()
+        {
+            try
+            {
+                if (Settings == null) return false;
+
+                Settings.Startup ??= new Startup();
+                if (Settings.Startup.HasExplicitRunAtStartup) return false;
+
+                bool hasExistingRegistration = AutoStartHelper.HasAnyRegistration();
+                Settings.Startup.RunAtStartup = hasExistingRegistration;
+                LogHelper.WriteLogToFile(
+                    $"[AutoStart] 已迁移开机自启设置，检测到已有快捷方式: {hasExistingRegistration}",
+                    LogHelper.LogType.Info);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[AutoStart] 迁移开机自启设置失败: {ex.Message}", LogHelper.LogType.Warning);
+                return false;
+            }
+        }
+
         public static void MigrateChickenSoupSettings()
         {
             if (Settings?.Appearance == null) return;

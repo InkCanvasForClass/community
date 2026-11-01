@@ -34,8 +34,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 var settings = SettingsManager.Settings;
 
-                bool runAtStartup = AutoStartHelper.IsAutoStartEnabled("Ink Canvas Annotation");
-                ToggleSwitchRunAtStartup.IsOn = runAtStartup;
+                ToggleSwitchRunAtStartup.IsOn = settings.Startup?.RunAtStartup ?? false;
 
                 ToggleSwitchExternalProtocol.IsOn = settings.Advanced.IsEnableUriScheme;
 
@@ -90,25 +89,45 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!_isLoaded) return;
 
+            SettingsManager.Settings.Startup ??= new Startup();
+            bool previousState = SettingsManager.Settings.Startup.RunAtStartup;
+            bool newState = ToggleSwitchRunAtStartup.IsOn;
+
             try
             {
-                bool newState = ToggleSwitchRunAtStartup.IsOn;
+                if (!AutoStartHelper.TrySetEnabled(newState))
+                {
+                    RestoreRunAtStartupToggle(previousState);
+                    return;
+                }
 
-                if (newState)
-                {
-                    AutoStartHelper.StartAutomaticallyDel("InkCanvas");
-                    AutoStartHelper.StartAutomaticallyCreate("Ink Canvas Annotation");
-                }
-                else
-                {
-                    AutoStartHelper.StartAutomaticallyDel("InkCanvas");
-                    AutoStartHelper.StartAutomaticallyDel("Ink Canvas Annotation");
-                }
+                SettingsManager.Settings.Startup.RunAtStartup = newState;
+                if (SettingsManager.TrySaveSettingsToFile()) return;
+
+                SettingsManager.Settings.Startup.RunAtStartup = previousState;
+                bool rollbackSucceeded = AutoStartHelper.TrySetEnabled(previousState);
+                RestoreRunAtStartupToggle(previousState);
+                LogHelper.WriteLogToFile(
+                    $"[AutoStart] 保存开机自启设置失败，系统状态回滚{(rollbackSucceeded ? "成功" : "失败")}",
+                    LogHelper.LogType.Error);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"设置开机启动时出错: {ex.Message}");
+                SettingsManager.Settings.Startup.RunAtStartup = previousState;
+                bool rollbackSucceeded = AutoStartHelper.TrySetEnabled(previousState);
+                RestoreRunAtStartupToggle(previousState);
+                LogHelper.WriteLogToFile(
+                    $"[AutoStart] 设置开机自启时出错，系统状态回滚{(rollbackSucceeded ? "成功" : "失败")}: {ex.Message}",
+                    LogHelper.LogType.Error);
             }
+        }
+
+        private void RestoreRunAtStartupToggle(bool state)
+        {
+            bool wasLoaded = _isLoaded;
+            _isLoaded = false;
+            ToggleSwitchRunAtStartup.IsOn = state;
+            _isLoaded = wasLoaded;
         }
 
         private void ToggleSwitchFoldAtStartup_Toggled(object sender, RoutedEventArgs e)
