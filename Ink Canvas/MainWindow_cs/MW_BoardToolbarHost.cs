@@ -43,19 +43,23 @@ namespace Ink_Canvas
         {
             if (FindView("board.pen") is not BoardToolbarButton penButton) return;
 
-            var brush = Settings.Appearance.ShowPenColorOnBoardToolbarIcon
-                ? new SolidColorBrush(inkCanvas.DefaultDrawingAttributes.Color)
-                : Application.Current.TryFindResource("FloatingBarForegroundBrush") as Brush;
-            penButton.IconBrush = brush;
+            ApplyBoardPenIconPresentation(penButton);
 
             // 工具栏在模式切换时可能会异步重建，确保重建后的视图也应用颜色。
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 if (FindView("board.pen") is BoardToolbarButton currentPenButton)
-                    currentPenButton.IconBrush = Settings.Appearance.ShowPenColorOnBoardToolbarIcon
-                        ? new SolidColorBrush(inkCanvas.DefaultDrawingAttributes.Color)
-                        : Application.Current.TryFindResource("FloatingBarForegroundBrush") as Brush;
+                    ApplyBoardPenIconPresentation(currentPenButton);
             }), System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+
+        private void ApplyBoardPenIconPresentation(BoardToolbarButton button)
+        {
+            var color = inkCanvas.DefaultDrawingAttributes.Color;
+            var foreground = Application.Current.TryFindResource("FloatingBarForegroundBrush") as Brush ?? Brushes.Black;
+            bool showColor = Settings.Appearance.ShowPenColorOnBoardToolbarIcon;
+            bool outline = showColor && (color.A < 128 || GetColorContrastRatio(color, GetFloatingBarBackgroundColor()) < 2.5);
+            BoardPenIconPresentation.Apply(button, showColor ? new SolidColorBrush(color) : foreground, foreground, outline);
         }
 
         public void SwitchToPreviousPage()

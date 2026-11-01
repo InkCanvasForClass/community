@@ -28,6 +28,28 @@ internal static class Program
         {
             Ink_Canvas.App.RootPath = root + Path.DirectorySeparatorChar;
             SettingsManager.Settings = new Settings();
+            if (args.Contains("--board-pen-icon-only"))
+            {
+                var button = new Ink_Canvas.Controls.BoardToolbarButton { IconGeometry = "M4,4 L20,4 20,20 4,20Z" };
+                var apply = typeof(Ink_Canvas.MainWindow).Assembly.GetType("Ink_Canvas.Helpers.BoardPenIconPresentation")
+                    .GetMethod("Apply", BindingFlags.NonPublic | BindingFlags.Static);
+                void Apply(System.Windows.Media.Brush color, System.Windows.Media.Brush outline, bool needed) => apply.Invoke(null, new object[] { button, color, outline, needed });
+                Apply(System.Windows.Media.Brushes.White, System.Windows.Media.Brushes.Black, true);
+                Check(button.IconGeometryDrawing.Pen != null && button.IconBrush == System.Windows.Media.Brushes.White,
+                    "White pen lost its silhouette or changed the ink indicator color");
+                button.Measure(new Size(60, 50)); button.Arrange(new Rect(0, 0, 60, 50)); button.UpdateLayout();
+                var bitmap = new System.Windows.Media.Imaging.RenderTargetBitmap(60, 50, 96, 96, System.Windows.Media.PixelFormats.Pbgra32);
+                bitmap.Render(button);
+                var pixels = new byte[60 * 50 * 4]; bitmap.CopyPixels(pixels, 60 * 4, 0);
+                Check(Enumerable.Range(0, 60 * 50).Any(i => pixels[i * 4 + 3] > 128 && pixels[i * 4] < 60), "Rendered white pen had no visible contrasting pixels");
+                Apply(System.Windows.Media.Brushes.Red, System.Windows.Media.Brushes.Black, false);
+                Check(button.IconGeometryDrawing.Pen == null, "Vivid pen retained a stale contrast outline");
+                Apply(System.Windows.Media.Brushes.Transparent, System.Windows.Media.Brushes.Black, true);
+                Check(button.IconGeometryDrawing.Pen != null, "Transparent pen lost its silhouette");
+                Apply(System.Windows.Media.Brushes.Black, System.Windows.Media.Brushes.White, true);
+                Check(button.IconGeometryDrawing.Pen.Brush == System.Windows.Media.Brushes.White, "Dark toolbar contrast outline did not follow foreground");
+                Console.WriteLine($"PASS: {_checks} board pen icon rendering checks"); return 0;
+            }
             if (args.Contains("--booth-history-only"))
             {
                 var history = new Ink_Canvas.Helpers.TimeMachine();
