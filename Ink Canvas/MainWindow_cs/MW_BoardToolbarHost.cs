@@ -19,6 +19,7 @@ namespace Ink_Canvas
     public partial class MainWindow : IBoardToolbarHost
     {
         private Dictionary<string, FrameworkElement> _boardToolbarViews = new Dictionary<string, FrameworkElement>();
+        private bool _boardPenIconRefreshQueued;
 
         MainWindow IBoardToolbarHost.Window => this;
 
@@ -46,8 +47,11 @@ namespace Ink_Canvas
             ApplyBoardPenIconPresentation(penButton);
 
             // 工具栏在模式切换时可能会异步重建，确保重建后的视图也应用颜色。
+            if (_boardPenIconRefreshQueued) return;
+            _boardPenIconRefreshQueued = true;
             Dispatcher.BeginInvoke(new Action(() =>
             {
+                _boardPenIconRefreshQueued = false;
                 if (FindView("board.pen") is BoardToolbarButton currentPenButton)
                     ApplyBoardPenIconPresentation(currentPenButton);
             }), System.Windows.Threading.DispatcherPriority.Loaded);
@@ -265,7 +269,7 @@ namespace Ink_Canvas
                 // 视频展台模式：让"仅展台显示"的组件（右侧展台分组）显示出来
                 BoardToolbarRegistry.RebuildToolbar(
                     host, BlackboardLeftSidePanel, BlackboardCenterSidePanel, BlackboardRightSidePanel,
-                    BoardToolbarRegistry.LoadActiveConfig(), _isVideoPresenterSpecialMode);
+                    BoardToolbarRegistry.LoadRenderLayout(), _isVideoPresenterSpecialMode);
 
                 BindPopupPlacementTargets();
                 BindPageInfoClickHandler();

@@ -29,17 +29,54 @@ namespace Ink_Canvas.Ink
         internal static double Opacity(byte alpha) => 0.5 * alpha / 255.0;
 
         internal static StrokeCollection CreatePresentation(StrokeCollection source)
+            => new PresentationCache().Create(source);
+
+        internal sealed class PresentationCache
         {
-            var result = new StrokeCollection();
-            // Match WPF's ordering: highlighter groups underneath ordinary ink. Alpha is
-            // part of the key so changing the slider never changes existing strokes.
-            foreach (var group in source.Where(IsHighlighter).Where(s => s.DrawingAttributes.IsHighlighter)
-                         .GroupBy(s => s.DrawingAttributes.Color))
-                result.Add(new RenderStroke(group.ToArray(), group.Key));
-            foreach (var stroke in source.Where(IsHighlighter).Where(s => !s.DrawingAttributes.IsHighlighter))
-                result.Add(new RenderStroke(new[] { stroke }, stroke.DrawingAttributes.Color));
-            foreach (var stroke in source.Where(s => !IsHighlighter(s))) result.Add(stroke);
-            return result;
+            private readonly Dictionary<Stroke, Geometry> _geometry = new();
+            private Dictionary<(Color, Stroke), RenderStroke> _groups = new();
+            private Dictionary<Stroke, (Color, Stroke)> _membership = new();
+            internal void Invalidate(Stroke stroke)
+            {
+                _geometry.Remove(stroke);
+                if (_membership.TryGetValue(stroke, out var key)) _groups.Remove(key);
+            }
+            internal void Clear() { _geometry.Clear(); _groups.Clear(); _membership.Clear(); }
+
+            internal StrokeCollection Create(StrokeCollection source)
+            {
+                var result = new StrokeCollection();
+                var live = source.ToHashSet();
+                foreach (var old in _geometry.Keys.Where(s => !live.Contains(s)).ToArray()) _geometry.Remove(old);
+                var next = new Dictionary<(Color, Stroke), RenderStroke>();
+                var membership = new Dictionary<Stroke, (Color, Stroke)>();
+                RenderStroke Group(Stroke[] strokes, Color color, Stroke individual = null)
+                {
+                    var geometry = strokes.Select(stroke =>
+                    {
+                        if (!_geometry.TryGetValue(stroke, out var shape))
+                            _geometry[stroke] = shape = stroke.GetGeometry();
+                        return shape;
+                    }).ToArray();
+                    var key = (color, individual);
+                    foreach (var stroke in strokes) membership[stroke] = key;
+                    if (!_groups.TryGetValue(key, out var cached) || !cached.Matches(geometry))
+                        cached = new RenderStroke(geometry, color);
+                    next[key] = cached;
+                    return cached;
+                }
+                // Match WPF's ordering: highlighter groups underneath ordinary ink. Alpha is
+                // part of the key so changing the slider never changes existing strokes.
+                foreach (var group in source.Where(IsHighlighter).Where(s => s.DrawingAttributes.IsHighlighter)
+                             .GroupBy(s => s.DrawingAttributes.Color))
+                    result.Add(Group(group.ToArray(), group.Key));
+                foreach (var stroke in source.Where(IsHighlighter).Where(s => !s.DrawingAttributes.IsHighlighter))
+                    result.Add(Group(new[] { stroke }, stroke.DrawingAttributes.Color, stroke));
+                foreach (var stroke in source.Where(s => !IsHighlighter(s))) result.Add(stroke);
+                _groups = next;
+                _membership = membership;
+                return result;
+            }
         }
 
         internal static void Draw(DrawingContext context, StrokeCollection source)
@@ -56,12 +93,14 @@ namespace Ink_Canvas.Ink
             private readonly double _opacity;
             private readonly Rect _bounds;
 
-            internal RenderStroke(Stroke[] strokes, Color color)
+            internal bool Matches(Geometry[] geometry) => _geometry.SequenceEqual(geometry);
+
+            internal RenderStroke(Geometry[] geometry, Color color)
                 : base(new StylusPointCollection { new StylusPoint(0, 0) })
             {
-                _geometry = strokes.Select(s => s.GetGeometry()).ToArray();
+                _geometry = geometry;
                 _bounds = Rect.Empty;
-                foreach (var geometry in _geometry) _bounds.Union(geometry.Bounds);
+                foreach (var shape in _geometry) _bounds.Union(shape.Bounds);
                 _brush = new SolidColorBrush(Color.FromRgb(color.R, color.G, color.B));
                 _brush.Freeze();
                 _opacity = Opacity(color.A);

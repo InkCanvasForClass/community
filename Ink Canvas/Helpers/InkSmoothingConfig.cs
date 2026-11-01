@@ -90,7 +90,7 @@ namespace Ink_Canvas.Helpers
                     InterpolationSteps = 4;
                     UseAdaptiveInterpolation = false;
                     CurveTension = 0.15;
-                    MaxConcurrentTasks = Math.Max(1, Environment.ProcessorCount / 2);
+                    MaxConcurrentTasks = Math.Clamp(Environment.ProcessorCount / 2, 1, 4);
                     UseHardwareAcceleration = true;
                     UseAsyncProcessing = userAsyncPreference;
                     break;
@@ -101,7 +101,7 @@ namespace Ink_Canvas.Helpers
                     InterpolationSteps = 8;
                     UseAdaptiveInterpolation = true;
                     CurveTension = 0.25;
-                    MaxConcurrentTasks = Environment.ProcessorCount;
+                    MaxConcurrentTasks = Math.Clamp(Environment.ProcessorCount - 1, 1, 4);
                     UseHardwareAcceleration = true;
                     UseAsyncProcessing = userAsyncPreference;
                     break;
@@ -112,7 +112,7 @@ namespace Ink_Canvas.Helpers
                     InterpolationSteps = 15;
                     UseAdaptiveInterpolation = true;
                     CurveTension = 0.35;
-                    MaxConcurrentTasks = Environment.ProcessorCount;
+                    MaxConcurrentTasks = Math.Clamp(Environment.ProcessorCount - 1, 1, 4);
                     UseHardwareAcceleration = true;
                     UseAsyncProcessing = userAsyncPreference;
                     break;

@@ -2834,6 +2834,8 @@ namespace Ink_Canvas
             }
         }
 
+        private bool _boardStartupInitialized;
+        private bool _boardStartupQueued;
         private void InitializeRealtimeAndBoardForStartup()
         {
             try
@@ -2845,6 +2847,24 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"[MainWindow] RealtimeStylus 管线绑定出错: {ex.Message}", LogHelper.LogType.Error);
             }
 
+            if (_boardStartupInitialized) return;
+            if (currentMode == 0 && !App.StartWithBoardMode)
+            {
+                if (_boardStartupQueued) return;
+                _boardStartupQueued = true;
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    _boardStartupQueued = false;
+                    InitializeBoardForStartup();
+                }), DispatcherPriority.Background);
+                return;
+            }
+            InitializeBoardForStartup();
+        }
+
+        private void InitializeBoardForStartup()
+        {
+            if (_boardStartupInitialized) return;
             try
             {
                 var leftPageListView = FindView("board.pageList.left") as System.Windows.Controls.ListView;
@@ -2852,6 +2872,7 @@ namespace Ink_Canvas
                 if (leftPageListView != null) leftPageListView.ItemsSource = blackBoardSidePageListViewObservableCollection;
                 if (rightPageListView != null) rightPageListView.ItemsSource = blackBoardSidePageListViewObservableCollection;
                 InitializeBoardToolbar();
+                _boardStartupInitialized = true;
 
                 var boardInkFreezeBtn = FindView("board.inkFreeze") as BoardToolbarButton;
                 if (boardInkFreezeBtn != null) AttachBoardInkFreezeBtn(boardInkFreezeBtn);

@@ -21,6 +21,13 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
     {
         private static List<IBoardToolbarItem> _items;
         private static readonly List<PluginToolbarItemInfo> _pluginItems = new List<PluginToolbarItemInfo>();
+        private sealed class ViewCache
+        {
+            public ViewCache() { }
+            internal readonly Dictionary<string, BoardToolbarButton> Buttons = new();
+            internal readonly HashSet<string> Used = new();
+        }
+        private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<IBoardToolbarHost, ViewCache> ViewCaches = new();
         private static readonly string ConfigSubDir = Path.Combine("Configs", "BoardToolbarConfigs");
 
         #region 视频展台专用组件
@@ -273,7 +280,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             }
         }
 
-        public static List<FrameworkElement> BuildGroup(IBoardToolbarHost host, List<BoardToolbarComponentEntry> components, string areaId = null)
+        public static List<FrameworkElement> BuildGroup(IBoardToolbarHost host, List<BoardToolbarComponentEntry> components, string areaId = null, string cacheScope = null)
         {
             var views = new List<FrameworkElement>();
             var items = Discover();
@@ -292,13 +299,26 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                 try
                 {
                     FrameworkElement view;
+                    var cache = ViewCaches.GetOrCreateValue(host);
+                    string cacheKey = cacheScope == null ? null : cacheScope + ":" + i + ":" + entry.Id + ":"
+                        + System.Globalization.CultureInfo.CurrentUICulture.Name + ":" + SettingsManager.Settings.Appearance.Theme
+                        + ":" + Application.Current?.TryFindResource("FloatingBarForegroundBrush")
+                        + ":" + JsonConvert.SerializeObject(entry);
+                    if (cacheKey != null) cache.Used.Add(cacheKey);
                     if (item is Items.BoardPageInfoToolItem pageInfoItem)
                     {
                         view = Items.BoardPageInfoToolItem.BuildPageInfoView(host, areaId);
                     }
+                    else if (cacheKey != null && item is not PluginBoardToolbarItemWrapper && cache.Buttons.TryGetValue(cacheKey, out var reused))
+                    {
+                        if (VisualTreeHelper.GetParent(reused) is Panel oldParent) oldParent.Children.Remove(reused);
+                        view = reused;
+                    }
                     else
                     {
                         view = item.BuildView(host);
+                        if (cacheKey != null && item is not PluginBoardToolbarItemWrapper && view is BoardToolbarButton button)
+                            cache.Buttons[cacheKey] = button;
                     }
 
                     if (view != null)
@@ -364,6 +384,8 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             bool boothOnly = entry.GetSettingBool(ShowInBoothOnlySettingKey) || IsBoothItem(entry.Id);
             if (boothOnly && !RenderInBoothMode)
                 view.Visibility = Visibility.Collapsed;
+            else if (boothOnly)
+                view.Visibility = Visibility.Visible;
 
             // 插件自定义设置：通过 PluginToolbarItemInfo.ApplySettings 回调应用。
             var pluginItem = _pluginItems.FirstOrDefault(p => p.Id == entry.Id);
@@ -452,6 +474,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
 
         public static void SaveConfigFile(string name, BoardToolbarLayoutSettings layout)
         {
+            _renderLayoutKey = null;
             try
             {
                 var dir = GetConfigDirectory();
@@ -555,6 +578,24 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             }
 
             _defaultConfigEnsured = true;
+        }
+
+        private static string _renderLayoutKey;
+        private static BoardToolbarLayoutSettings _renderLayout;
+        internal static BoardToolbarLayoutSettings LoadRenderLayout()
+        {
+            string name = SettingsManager.Settings?.BoardToolbarConfigName;
+            if (string.IsNullOrWhiteSpace(name)) name = "default";
+            string Stamp(string config)
+            {
+                var file = new FileInfo(GetConfigFilePath(config));
+                return file.FullName + ":" + (file.Exists ? file.LastWriteTimeUtc.Ticks + ":" + file.Length : "missing");
+            }
+            string key = Stamp(name) + "|" + Stamp("default");
+            if (_renderLayoutKey == key && _renderLayout != null) return _renderLayout;
+            var layout = LoadActiveConfig();
+            _renderLayout = layout; _renderLayoutKey = key;
+            return layout;
         }
 
         public static BoardToolbarLayoutSettings LoadActiveConfig()
@@ -750,7 +791,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
 
         public static void RebuildToolbar(IBoardToolbarHost host, Panel leftContainer, Panel centerContainer, Panel rightContainer)
         {
-            var layout = LoadActiveConfig();
+            var layout = LoadRenderLayout();
             RebuildToolbar(host, leftContainer, centerContainer, rightContainer, layout);
         }
 
@@ -764,6 +805,8 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                 layout = BoardToolbarLayoutSettings.CreateDefault();
 
             RenderInBoothMode = boothMode;
+            var cache = ViewCaches.GetOrCreateValue(host);
+            cache.Used.Clear();
 
             foreach (var area in layout.Areas)
             {
@@ -780,6 +823,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
                         break;
                 }
             }
+            foreach (string stale in cache.Buttons.Keys.Where(key => !cache.Used.Contains(key)).ToArray()) cache.Buttons.Remove(stale);
         }
 
         private static void RebuildArea(IBoardToolbarHost host, Panel container, BoardToolbarAreaEntry area)
@@ -789,9 +833,10 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             container.Children.Clear();
 
             bool isFirst = true;
+            int groupIndex = 0;
             foreach (var group in area.Groups)
             {
-                var views = BuildGroup(host, group.Components, area.Id);
+                var views = BuildGroup(host, group.Components, area.Id, area.Id + ":" + groupIndex++);
                 // 整组都被"按规则隐藏"时（如非展台模式下的展台分组）不渲染空胶囊
                 if (views.Count > 0 && views.All(v => v.Visibility == Visibility.Collapsed))
                     continue;

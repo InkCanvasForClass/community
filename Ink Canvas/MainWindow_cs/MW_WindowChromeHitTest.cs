@@ -240,6 +240,8 @@ namespace Ink_Canvas
             {
                 Interval = TimeSpan.FromMilliseconds(16)
             };
+            System.Drawing.Point? previousPosition = null;
+            int stationaryTicks = 0;
             _mediaPassthroughTimer.Tick += (s, e) =>
             {
                 if (!_isMediaRegionMouseMode || _mediaPassthroughRects.Count == 0)
@@ -250,6 +252,9 @@ namespace Ink_Canvas
 
                 // 获取鼠标在窗口内的位置
                 var mousePos = System.Windows.Forms.Cursor.Position;
+                stationaryTicks = previousPosition.HasValue && previousPosition.Value == mousePos ? stationaryTicks + 1 : 0;
+                previousPosition = mousePos;
+                _mediaPassthroughTimer.Interval = TimeSpan.FromMilliseconds(stationaryTicks >= 8 ? 64 : 16);
                 Point windowPoint;
                 try { windowPoint = PointFromScreen(new Point(mousePos.X, mousePos.Y)); }
                 catch { return; }

@@ -737,6 +737,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 }
             }
 
+            var declarations = await Task.Run(() => SettingsSearchMetadata.Read(typeof(SettingsWindow).Assembly, _lifetime.Token), _lifetime.Token);
             foreach (var kv in _pageTypes.ToList())
             {
                 await Dispatcher.Yield(DispatcherPriority.Background);
@@ -747,25 +748,12 @@ namespace Ink_Canvas.Windows.SettingsViews
 
                 try
                 {
-                    if (!_pages.TryGetValue(tag, out var page))
-                    {
-                        var constructionTime = System.Diagnostics.Stopwatch.StartNew();
-                        page = Activator.CreateInstance(kv.Value);
-                        _pages[tag] = page;
-                        if (constructionTime.ElapsedMilliseconds >= 250)
-                            LogHelper.WriteLogToFile($"[UI slow operation] Settings search page construction: page={tag}, elapsedMs={constructionTime.ElapsedMilliseconds}", LogHelper.LogType.Warning);
-                    }
-                    if (page is FrameworkElement feRoot)
-                    {
-                        if (!feRoot.IsLoaded)
-                        {
-                            try { feRoot.ApplyTemplate(); } catch (Exception ex)
-                            {
-                                LogHelper.WriteLogToFile($"[Settings] 预展开页面模板失败，搜索索引可能不完整 (tag={tag}): {ex.Message}", LogHelper.LogType.Info);
-                            }
-                        }
+                    foreach (var entry in declarations.Where(e => e.PageType == kv.Value.FullName))
+                        index.Add(new SearchEntry { Text = entry.Text, PageTag = tag, SettingKey = entry.SettingKey });
+                    // Runtime-only headers are available once their page has actually
+                    // been visited; indexing itself never creates or loads a page.
+                    if (_pages.TryGetValue(tag, out var page) && page is FrameworkElement feRoot)
                         CollectEntriesFromPage(feRoot, tag, index);
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -854,7 +842,10 @@ namespace Ink_Canvas.Windows.SettingsViews
         {
             if (entry == null) return;
 
+            if (entry.Target == null && !string.IsNullOrEmpty(entry.SettingKey))
+                _pendingHighlightKey = entry.SettingKey;
             NavigateToPage(entry.PageTag);
+            if (GetCurrentPageTag() == entry.PageTag) TryApplyPendingHighlight();
             var navItem = FindNavigationViewItemByTag(entry.PageTag);
             if (navItem != null && NavigationViewControl.SelectedItem != navItem)
             {

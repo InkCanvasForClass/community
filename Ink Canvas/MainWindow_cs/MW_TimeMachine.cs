@@ -753,7 +753,7 @@ namespace Ink_Canvas
                 stroke.StylusPointsChanged += Stroke_StylusPointsChanged;
                 stroke.StylusPointsReplaced += Stroke_StylusPointsReplaced;
                 stroke.DrawingAttributesChanged += Stroke_DrawingAttributesChanged;
-                StrokeInitialHistory[stroke] = stroke.StylusPoints.Clone();
+                if (!_wordOwnsCanvas) StrokeInitialHistory[stroke] = stroke.StylusPoints.Clone();
             }
 
             // Word owns document-coordinate history. Its projected strokes must

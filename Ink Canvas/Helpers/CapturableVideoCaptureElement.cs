@@ -21,6 +21,65 @@ namespace Ink_Canvas.Helpers
     /// </remarks>
     public class CapturableVideoCaptureElement : VideoCaptureElement
     {
+        private bool _analysisEnabled;
+        private int _analysisVersion;
+        private long _analysisAt;
+        private sealed record AnalysisFrame(BitmapSource Image, long At);
+        private AnalysisFrame _analysisFrame;
+
+        internal bool AnalysisEnabled
+        {
+            set
+            {
+                if (System.Threading.Volatile.Read(ref _analysisEnabled) == value) return;
+                System.Threading.Volatile.Write(ref _analysisEnabled, value);
+                System.Threading.Interlocked.Increment(ref _analysisVersion);
+                System.Threading.Volatile.Write(ref _analysisFrame, null);
+            }
+        }
+
+        internal BitmapSource GetAnalysisFrame()
+        {
+            var frame = System.Threading.Volatile.Read(ref _analysisFrame);
+            return frame != null && Environment.TickCount64 - frame.At < 1000 ? frame.Image : null;
+        }
+
+        public CapturableVideoCaptureElement()
+        {
+            NewVideoSample += (_, e) =>
+            {
+                if (!System.Threading.Volatile.Read(ref _analysisEnabled) || e?.VideoFrame == null) return;
+                long now = Environment.TickCount64, previous = System.Threading.Interlocked.Read(ref _analysisAt);
+                if (now - previous < 400 || System.Threading.Interlocked.CompareExchange(ref _analysisAt, now, previous) != previous) return;
+                int version = System.Threading.Volatile.Read(ref _analysisVersion);
+                try
+                {
+                    var image = CreateAnalysisFrame(e.VideoFrame);
+                    if (version == System.Threading.Volatile.Read(ref _analysisVersion) && System.Threading.Volatile.Read(ref _analysisEnabled))
+                        System.Threading.Volatile.Write(ref _analysisFrame, new AnalysisFrame(image, now));
+                }
+                catch (Exception ex) { Debug.WriteLine($"Video analysis frame: {ex.Message}"); }
+            };
+        }
+
+        internal static BitmapSource CreateAnalysisFrame(System.Drawing.Bitmap source)
+        {
+            double ratio = Math.Min(1, 500.0 / Math.Max(source.Width, source.Height));
+            int width = Math.Max(1, (int)(source.Width * ratio)), height = Math.Max(1, (int)(source.Height * ratio));
+            using var bitmap = new System.Drawing.Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            using (var graphics = System.Drawing.Graphics.FromImage(bitmap)) graphics.DrawImage(source, 0, 0, width, height);
+            var data = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, width, height), System.Drawing.Imaging.ImageLockMode.ReadOnly, bitmap.PixelFormat);
+            try
+            {
+                var bytes = new byte[data.Stride * height];
+                System.Runtime.InteropServices.Marshal.Copy(data.Scan0, bytes, 0, bytes.Length);
+                var image = BitmapSource.Create(width, height, 96, 96, System.Windows.Media.PixelFormats.Bgr24, null, bytes, data.Stride);
+                image.Freeze();
+                return image;
+            }
+            finally { bitmap.UnlockBits(data); }
+        }
+
         /// <summary>
         /// 从当前 D3DImage 拷贝一帧为 BitmapSource（线程安全，可跨线程使用）。
         /// 返回 null 表示当前没有可用帧（如设备未打开/前端缓冲未就绪）。

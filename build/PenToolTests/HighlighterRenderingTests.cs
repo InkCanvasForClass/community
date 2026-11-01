@@ -39,6 +39,36 @@ internal static class HighlighterRenderingTests
         }
 
         var canvas = new HighlighterInkCanvas { Width = 80, Height = 80, Background = Brushes.Transparent };
+        var cache = new HighlighterRendering.PresentationCache();
+        var yellow = Make(128, false, false);
+        var blue = Make(128, false, true); blue.DrawingAttributes.Color = Colors.Blue;
+        var cachedSource = new StrokeCollection { yellow, blue };
+        var initial = cache.Create(cachedSource);
+        var repeated = cache.Create(cachedSource);
+        check(ReferenceEquals(initial[0], repeated[0]) && ReferenceEquals(initial[1], repeated[1]),
+            "Unchanged highlighter groups were rebuilt");
+        yellow.StylusPoints[0] = new StylusPoint(5, 5); cache.Invalidate(yellow);
+        var edited = cache.Create(cachedSource);
+        check(!ReferenceEquals(initial[0], edited[0]) && ReferenceEquals(initial[1], edited[1]),
+            "Editing one highlighter invalidated another color group or failed to update its own geometry");
+        cachedSource.Remove(yellow);
+        var removed = cache.Create(cachedSource);
+        check(removed.Count == 1 && ReferenceEquals(removed[0], initial[1]), "Removed highlighter left a stale render group");
+        cache.Clear();
+        check(!ReferenceEquals(cache.Create(cachedSource)[0], initial[1]), "Page replacement retained a stale group cache");
+        var dense = new StrokeCollection(Enumerable.Range(0, 500).Select(_ => Make(128, false, false)));
+        var denseCache = new HighlighterRendering.PresentationCache();
+        denseCache.Create(dense);
+        long allocated = GC.GetAllocatedBytesForCurrentThread();
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        for (int i = 0; i < 30; i++) denseCache.Create(dense);
+        watch.Stop();
+        long reusedBytes = GC.GetAllocatedBytesForCurrentThread() - allocated;
+        double reusedMs = watch.Elapsed.TotalMilliseconds;
+        allocated = GC.GetAllocatedBytesForCurrentThread(); watch.Restart();
+        for (int i = 0; i < 30; i++) HighlighterRendering.CreatePresentation(dense);
+        watch.Stop();
+        Console.WriteLine($"Highlighter 500 strokes / 30 presentations: cache {reusedMs:F1}ms / {reusedBytes:N0}B; recreate {watch.Elapsed.TotalMilliseconds:F1}ms / {GC.GetAllocatedBytesForCurrentThread() - allocated:N0}B");
         var first = Make(128, false, false);
         var second = Make(128, false, true);
         canvas.Strokes.Add(first); canvas.Strokes.Add(second);
@@ -47,6 +77,13 @@ internal static class HighlighterRenderingTests
         canvas.Measure(new Size(80, 80)); canvas.Arrange(new Rect(0, 0, 80, 80)); canvas.UpdateLayout(); pump();
         check(Near(Read(RenderCanvas(canvas), 40, 40), Mix(Colors.White, Colors.Yellow, HighlighterRendering.Opacity(128))),
             "Integrated InkCanvas still used WPF fixed opacity");
+        var beforeOrdinary = Read(RenderCanvas(canvas), 40, 72);
+        var appendedOrdinary = new Stroke(new StylusPointCollection { new StylusPoint(10, 72), new StylusPoint(70, 72) })
+            { DrawingAttributes = new DrawingAttributes { Color = Colors.Red, Width = 4, Height = 4 } };
+        canvas.Strokes.Add(appendedOrdinary); pump();
+        check(Near(Read(RenderCanvas(canvas), 40, 72), Colors.Red), "Fast ordinary-pen append was hidden behind highlighter groups");
+        canvas.Strokes.Remove(appendedOrdinary); pump();
+        check(Near(Read(RenderCanvas(canvas), 40, 72), beforeOrdinary), "Fast ordinary-pen removal damaged the existing highlighter presentation");
         first.DrawingAttributes.Color = Color.FromArgb(64, 255, 255, 0); pump();
         check(Near(Read(RenderCanvas(canvas), 20, 40), Mix(Colors.White, Colors.Yellow, HighlighterRendering.Opacity(64))),
             "Attribute changes did not invalidate the presentation");

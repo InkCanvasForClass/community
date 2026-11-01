@@ -70,6 +70,10 @@ namespace Ink_Canvas
                         timeMachine = _wordDesktopHistory ?? timeMachine;
                         _wordDesktopHistory = null;
                         IsUndoEnabled = _wordDesktopUndo; IsRedoEnabled = _wordDesktopRedo;
+                        // Word projections never use desktop point-history snapshots.
+                        // Rebuild them once when the desktop collection is restored.
+                        foreach (var stroke in inkCanvas.Strokes)
+                            StrokeInitialHistory[stroke] = stroke.StylusPoints.Clone();
                     }
                     if (!_wordDisposing) SyncWinRTInkPipelineWithLogicalTool();
                 },

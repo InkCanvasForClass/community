@@ -41,6 +41,12 @@ internal static partial class Program
         Directory.CreateDirectory(root);
         try
         {
+            if (args.Contains("--projection-perf-only"))
+            {
+                ProjectionLoadTests();
+                LiveProjectionTests(root);
+                Console.WriteLine($"PASS: {_checks} projection checks"); return 0;
+            }
             if (args.Contains("--save-race-only"))
             {
                 for (int i = 0; i < 12; i++) SaveDestinationTests(Path.Combine(root, "race-" + i));

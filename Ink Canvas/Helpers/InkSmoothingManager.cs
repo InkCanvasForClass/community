@@ -121,7 +121,7 @@ namespace Ink_Canvas.Helpers
                 stopwatch.Stop();
                 if (!_config.UseAsyncProcessing)
                     _performanceMonitor.RecordProcessingTime(stopwatch.Elapsed);
-                PerformanceMonitorHelper.UpdateSmoothingStats(GetDetailedStats());
+                PublishSmoothingStats();
             }
 
             return result;
@@ -142,32 +142,8 @@ namespace Ink_Canvas.Helpers
             {
                 if (_config.UseHardwareAcceleration)
                 {
-                    // GPU 平滑为异步任务，此处是同步 API 的向后兼容入口；
-                    // 用带超时的 GetAwaiter().GetResult() 有界等待，超时/失败/取消回退原始笔画。
-                    // 注意：调用方在 UI 线程上时仍会发生 sync-over-async 阻塞，调用方应优先走 SmoothStrokeAsync。
-                    var task = _hardwareProcessor.SmoothStrokeWithGPU(originalStroke);
-                    using (var cts = new CancellationTokenSource(5000))
-                    {
-                        try
-                        {
-                            result = task.WaitAsync(cts.Token).GetAwaiter().GetResult();
-                        }
-                        catch (TimeoutException)
-                        {
-                            LogHelper.WriteLogToFile("墨迹平滑超时，返回原始笔画", LogHelper.LogType.Warning);
-                            result = originalStroke;
-                        }
-                        catch (OperationCanceledException)
-                        {
-                            Debug.WriteLine("同步墨迹平滑被取消，返回原始笔画");
-                            result = originalStroke;
-                        }
-                        catch (Exception hwEx)
-                        {
-                            Debug.WriteLine($"硬件加速平滑失败，回退原始笔画: {hwEx.Message}");
-                            result = originalStroke;
-                        }
-                    }
+                    // This compatibility API must not wait for an async continuation on its own Dispatcher.
+                    result = _hardwareProcessor.SmoothStrokeInline(originalStroke);
                 }
                 else
                 {
@@ -190,7 +166,7 @@ namespace Ink_Canvas.Helpers
             {
                 stopwatch.Stop();
                 _performanceMonitor.RecordProcessingTime(stopwatch.Elapsed);
-                PerformanceMonitorHelper.UpdateSmoothingStats(GetDetailedStats());
+                PublishSmoothingStats();
             }
 
             return result;
@@ -235,12 +211,19 @@ namespace Ink_Canvas.Helpers
         public void ResetPerformanceStats()
         {
             _performanceMonitor.Reset();
-            PerformanceMonitorHelper.UpdateSmoothingStats(GetDetailedStats());
+            PublishSmoothingStats(true);
         }
 
-        /// <summary>
-        /// 获取详细的墨迹纠正性能统计
-        /// </summary>
+        private long _lastStatsPublish;
+        private void PublishSmoothingStats(bool force = false)
+        {
+            long now = Environment.TickCount64;
+            long previous = Interlocked.Read(ref _lastStatsPublish);
+            if (!force && (now - previous < 1000 || Interlocked.CompareExchange(ref _lastStatsPublish, now, previous) != previous)) return;
+            if (force) Interlocked.Exchange(ref _lastStatsPublish, now);
+            PerformanceMonitorHelper.UpdateSmoothingStats(GetDetailedStats());
+        }
+        /// <summary>获取详细的墨迹纠正性能统计。</summary>
         public InkSmoothingDetailedStats GetDetailedStats()
         {
             return new InkSmoothingDetailedStats

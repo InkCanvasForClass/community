@@ -19,6 +19,7 @@ namespace Ink_Canvas.Controls
     {
         private readonly HashSet<Stroke> _observed = new();
         private readonly HashSet<Stroke> _presentedHighlighters = new();
+        private readonly HighlighterRendering.PresentationCache _presentationCache = new();
         private DispatcherOperation _refresh;
         private bool _presentationPaused;
         private double _presentationOpacity;
@@ -96,6 +97,7 @@ namespace Ink_Canvas.Controls
 
         protected override void OnStrokesReplaced(InkCanvasStrokesReplacedEventArgs e)
         {
+            _presentationCache.Clear();
             e.PreviousStrokes.StrokesChanged -= SourceChanged;
             e.NewStrokes.StrokesChanged += SourceChanged;
             RefreshPresentation();
@@ -106,6 +108,7 @@ namespace Ink_Canvas.Controls
         {
             foreach (var stroke in e.Removed)
             {
+                _presentationCache.Invalidate(stroke);
                 stroke.Invalidated -= StrokeInvalidated;
                 _observed.Remove(stroke);
             }
@@ -115,6 +118,17 @@ namespace Ink_Canvas.Controls
             // does no page scan or geometry work, even on very long pages.
             if (ReferenceEquals(InkPresenter.Strokes, Strokes)
                 && !e.Added.Any(HighlighterRendering.IsHighlighter)) return;
+            if (_presentedHighlighters.Count > 0 && _refresh?.Status != DispatcherOperationStatus.Pending
+                && !e.Added.Any(HighlighterRendering.IsHighlighter) && !e.Removed.Any(HighlighterRendering.IsHighlighter)
+                && Strokes.Skip(Math.Max(0, Strokes.Count - e.Added.Count)).SequenceEqual(e.Added))
+            {
+                // The usual pen-up/removal path does not change any highlighter
+                // group. Keep the source order; non-tail inserts use the full path.
+                var presented = InkPresenter.Strokes;
+                foreach (var stroke in e.Removed) presented.Remove(stroke);
+                foreach (var stroke in e.Added) presented.Add(stroke);
+                return;
+            }
             RefreshPresentation(false);
         }
 
@@ -124,8 +138,9 @@ namespace Ink_Canvas.Controls
             // identity. Their point/pressure/colour updates need no group rebuild.
             if (sender is Stroke stroke && !HighlighterRendering.IsHighlighter(stroke)
                 && !_presentedHighlighters.Contains(stroke)) return;
+            if (sender is Stroke changed) _presentationCache.Invalidate(changed);
             if (_refresh?.Status == DispatcherOperationStatus.Pending) return;
-            _refresh = Dispatcher.BeginInvoke(DispatcherPriority.Render, new Action(RefreshPresentation));
+            _refresh = Dispatcher.BeginInvoke(DispatcherPriority.Render, new Action(() => RefreshPresentation(false)));
         }
 
         private void RefreshPresentation() => RefreshPresentation(true);
@@ -147,10 +162,11 @@ namespace Ink_Canvas.Controls
                 _presentedHighlighters.Add(stroke);
             if (_presentedHighlighters.Count == 0)
             {
+                _presentationCache.Clear();
                 InkPresenter.Strokes = Strokes;
                 return;
             }
-            var desired = HighlighterRendering.CreatePresentation(Strokes);
+            var desired = _presentationCache.Create(Strokes);
             if (ReferenceEquals(InkPresenter.Strokes, Strokes))
             {
                 InkPresenter.Strokes = desired;

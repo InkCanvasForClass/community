@@ -213,7 +213,7 @@ namespace Ink_Canvas.Helpers
         public AsyncAdvancedBezierSmoothing(Dispatcher uiDispatcher)
         {
             _uiDispatcher = uiDispatcher;
-            _maxConcurrentTasks = Math.Max(1, Environment.ProcessorCount);
+            _maxConcurrentTasks = Math.Clamp(Environment.ProcessorCount - 1, 1, 4);
             _processingLimiter = new DynamicConcurrencyLimiter(_maxConcurrentTasks);
             _processingTasks = new ConcurrentDictionary<Stroke, CancellationTokenSource>();
         }
@@ -246,7 +246,12 @@ namespace Ink_Canvas.Helpers
                 return originalStroke;
 
             if (_processingTasks.Count >= 64) return originalStroke;
-            var snapshot = originalStroke.Clone();
+            // One immutable point snapshot instead of cloning a Stroke on the UI
+            // thread and copying its points a second time on the worker.
+            long copyStarted = System.Diagnostics.Stopwatch.GetTimestamp();
+            var snapshot = originalStroke.StylusPoints.ToArray();
+            double snapshotCopyMs = ToMilliseconds(System.Diagnostics.Stopwatch.GetTimestamp() - copyStarted);
+            var attributes = originalStroke.DrawingAttributes.Clone();
 
             // 取消之前对同一笔画的处理
             if (_processingTasks.TryGetValue(originalStroke, out var existingCts))
@@ -285,7 +290,7 @@ namespace Ink_Canvas.Helpers
                     sample.ThreadPoolQueueMs = ToMilliseconds(
                         System.Diagnostics.Stopwatch.GetTimestamp() - queueStartedAt);
                     var computeWatch = System.Diagnostics.Stopwatch.StartNew();
-                    var result = ProcessStrokeInternal(snapshot, cts.Token);
+                    var result = ProcessStrokeInternal(snapshot, attributes, snapshotCopyMs, cts.Token);
                     computeWatch.Stop();
                     sample.ComputeMs = computeWatch.Elapsed.TotalMilliseconds;
                     sample.ComputeCompletedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
@@ -298,6 +303,7 @@ namespace Ink_Canvas.Helpers
                 sample.StrokeConstructionMs = computation.StrokeConstructionMs;
                 sample.InputPointCount = computation.InputPointCount;
                 sample.OutputPointCount = computation.OutputPointCount;
+                var processedStroke = computation.Stroke ?? originalStroke;
 
                 if (onCompleted != null && !cts.Token.IsCancellationRequested)
                 {
@@ -311,7 +317,7 @@ namespace Ink_Canvas.Helpers
                         var callbackWatch = System.Diagnostics.Stopwatch.StartNew();
                         try
                         {
-                            onCompleted(originalStroke, computation.Stroke);
+                            onCompleted(originalStroke, processedStroke);
                         }
                         finally
                         {
@@ -322,7 +328,7 @@ namespace Ink_Canvas.Helpers
                     });
                 }
 
-                return computation.Stroke;
+                return processedStroke;
             }
             catch (OperationCanceledException)
             {
@@ -347,13 +353,10 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        private SmoothingComputationResult ProcessStrokeInternal(Stroke stroke, CancellationToken cancellationToken)
+        private SmoothingComputationResult ProcessStrokeInternal(StylusPoint[] originalPoints, DrawingAttributes attributes,
+            double pointCopyMs, CancellationToken cancellationToken)
         {
-            var result = new SmoothingComputationResult { Stroke = stroke };
-            var pointCopyWatch = System.Diagnostics.Stopwatch.StartNew();
-            var originalPoints = stroke.StylusPoints.ToArray();
-            pointCopyWatch.Stop();
-            result.PointCopyMs = pointCopyWatch.Elapsed.TotalMilliseconds;
+            var result = new SmoothingComputationResult { PointCopyMs = pointCopyMs };
             result.InputPointCount = originalPoints.Length;
 
             if (originalPoints.Length < 3)
@@ -399,7 +402,7 @@ namespace Ink_Canvas.Helpers
             var constructionWatch = System.Diagnostics.Stopwatch.StartNew();
             result.Stroke = new Stroke(new StylusPointCollection(smoothedPoints))
             {
-                DrawingAttributes = stroke.DrawingAttributes.Clone()
+                DrawingAttributes = attributes.Clone()
             };
             constructionWatch.Stop();
             result.StrokeConstructionMs = constructionWatch.Elapsed.TotalMilliseconds;

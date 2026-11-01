@@ -3552,6 +3552,7 @@ namespace Ink_Canvas
         private void StartPaperDetectTimer()
         {
             if (PaperDetectOverlayCanvas == null) return;
+            if (VideoPresenterFullCanvasImage != null) VideoPresenterFullCanvasImage.AnalysisEnabled = true;
             // 显示覆盖层（即使还没检测到角点，也保持可见，检测到时再画框）
             PaperDetectOverlayCanvas.Visibility = Visibility.Visible;
 
@@ -3572,6 +3573,7 @@ namespace Ink_Canvas
         /// </summary>
         private void StopPaperDetectTimer()
         {
+            if (VideoPresenterFullCanvasImage != null) VideoPresenterFullCanvasImage.AnalysisEnabled = false;
             if (_paperDetectTimer != null && _paperDetectTimer.IsEnabled)
                 _paperDetectTimer.Stop();
             StopOverlayAnim();
@@ -3627,11 +3629,16 @@ namespace Ink_Canvas
 
             // 拿当前帧（D3DImage.CopyBackBuffer）
             BitmapSource frameSrc = null;
-            try { frameSrc = VideoPresenterFullCanvasImage.CaptureCurrentFrame(); }
+            var captureWatch = System.Diagnostics.Stopwatch.StartNew();
+            try { frameSrc = VideoPresenterFullCanvasImage.GetAnalysisFrame() ?? VideoPresenterFullCanvasImage.CaptureCurrentFrame(); }
             catch (Exception ex)
             {
                 LogBoothCallbackException("纸框实时检测 Tick 中抓取当前帧", ex);
             }
+            captureWatch.Stop();
+            if (_paperDetectTimer != null)
+                _paperDetectTimer.Interval = TimeSpan.FromMilliseconds(Math.Clamp(captureWatch.Elapsed.TotalMilliseconds * 12,
+                    PaperDetectIntervalMs, 2000));
             if (frameSrc == null)
             {
                 System.Threading.Interlocked.Exchange(ref _paperDetectRunning, 0);

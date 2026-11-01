@@ -3,6 +3,9 @@
     <ProjectReference Include="..\InkCanvas.WordLinkHost\InkCanvas.WordLinkHost.csproj" ReferenceOutputAssembly="false" />
     <Compile Include="..\InkCanvas.WordLink.Shared\WordProtocol.cs" Link="WordLink\WordProtocol.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Windows/SettingsViews/Pages/*.xaml" LogicalName="SettingsSearch.%(Filename).xaml" />
+  </ItemGroup>
   <PropertyGroup>
     <WordHostOutput>$(MSBuildProjectDirectory)\..\InkCanvas.WordLinkHost\bin\$(Platform)\$(Configuration)\net10.0-windows10.0.19041.0\$(RuntimeIdentifier)\</WordHostOutput>
     <WordHostOutput Condition="'$(Platform)' == 'AnyCPU'">$(MSBuildProjectDirectory)\..\InkCanvas.WordLinkHost\bin\$(Configuration)\net10.0-windows10.0.19041.0\$(RuntimeIdentifier)\</WordHostOutput>

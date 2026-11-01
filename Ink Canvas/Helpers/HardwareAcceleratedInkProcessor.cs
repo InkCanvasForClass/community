@@ -7,41 +7,27 @@ using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace Ink_Canvas.Helpers
 {
     /// <summary>
-    /// 硬件加速的墨迹处理器，利用WPF的GPU渲染能力
+    /// CPU geometry smoothing. The legacy API name is retained for compatibility.
     /// </summary>
     public class HardwareAcceleratedInkProcessor : IDisposable
     {
-        private readonly RenderTargetBitmap _renderTarget;
-        private readonly DrawingVisual _drawingVisual;
         private bool _isInitialized;
         private readonly SemaphoreSlim _processingGate = new SemaphoreSlim(1, 1);
 
         public HardwareAcceleratedInkProcessor(int width = 1920, int height = 1080)
         {
-            // 创建硬件加速的渲染目标
-            _renderTarget = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
-            _drawingVisual = new DrawingVisual();
-
-            // 启用硬件加速
-            RenderOptions.SetBitmapScalingMode(_drawingVisual, BitmapScalingMode.HighQuality);
-            RenderOptions.SetEdgeMode(_drawingVisual, EdgeMode.Aliased);
-
+            // Width/height remain in the public signature; smoothing never renders
+            // into a bitmap, so an unused full-screen render target is unnecessary.
             _isInitialized = true;
         }
 
         /// <summary>
-        /// 使用GPU加速的贝塞尔曲线平滑
-        /// </summary>
-        /// <summary>
-        /// 使用GPU加速的贝塞尔曲线平滑。
-        /// 注意：本方法在 UI 线程调用（来自 StrokeCollected 路径），WPF Stroke / StylusPointCollection
-        /// 是 DispatcherObject 但不是 Freezable——为安全起见不再用 Task.Run，避免跨线程访问
-        /// 触发 "必须在创建线程使用" 异常。仅 DrawingAttributes (Freezable) 被克隆并冻结。
+        /// Snapshot input on the calling thread and compute CPU geometry on a worker.
+        /// The legacy method name is retained for compatibility.
         /// </summary>
         public async Task<Stroke> SmoothStrokeWithGPU(Stroke originalStroke)
         {
@@ -55,7 +41,7 @@ namespace Ink_Canvas.Helpers
 
             try
             {
-                // 使用PathGeometry进行硬件加速的曲线拟合
+                // Fit and flatten the curve without accessing the source stroke on the worker.
                 var points = originalStroke.StylusPoints.ToArray();
                 var da = originalStroke.DrawingAttributes.Clone();
                 var smoothedPoints = await Task.Run(() =>
@@ -74,6 +60,19 @@ namespace Ink_Canvas.Helpers
             {
                 return originalStroke;
             }
+            finally { _processingGate.Release(); }
+        }
+
+        internal Stroke SmoothStrokeInline(Stroke originalStroke)
+        {
+            if (!_isInitialized || originalStroke == null || originalStroke.StylusPoints.Count < 2
+                || originalStroke.StylusPoints.Count > 32768 || !_processingGate.Wait(0)) return originalStroke;
+            try
+            {
+                var points = ConvertPathGeometryToStylusPoints(CreateSmoothPathGeometry(originalStroke.StylusPoints), originalStroke.StylusPoints);
+                return new Stroke(new StylusPointCollection(points)) { DrawingAttributes = originalStroke.DrawingAttributes.Clone() };
+            }
+            catch { return originalStroke; }
             finally { _processingGate.Release(); }
         }
 
@@ -202,25 +201,11 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 释放GPU相关资源。
-        /// 先冻结 RenderTargetBitmap 让 WPF 停止依赖 GPU surface，再主动 Dispose 释放底层 GPU 句柄。
-        /// DrawingVisual 仅在 WeakReference 由 GC 回收，无显式释放 API，依靠 GC。
+        /// Stop accepting work. In-flight computations retain their semaphore lease.
         /// </summary>
         public void Dispose()
         {
             _isInitialized = false;
-            try
-            {
-                if (_renderTarget != null)
-                {
-                    if (_renderTarget.CanFreeze) _renderTarget.Freeze();
-                    _renderTarget.Clear();
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Ink] 释放 GPU 墨迹渲染资源失败: {ex.Message}", LogHelper.LogType.Info);
-            }
         }
     }
 

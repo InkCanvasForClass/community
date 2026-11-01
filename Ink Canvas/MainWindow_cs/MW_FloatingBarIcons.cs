@@ -937,6 +937,7 @@ namespace Ink_Canvas
         /// <param name="e">鼠标按钮事件参数</param>
         internal void ImageBlackboard_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            InitializeBoardForStartup();
 
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;

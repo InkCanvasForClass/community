@@ -28,6 +28,11 @@ internal static class Program
         {
             Ink_Canvas.App.RootPath = root + Path.DirectorySeparatorChar;
             SettingsManager.Settings = new Settings();
+            if (args.Contains("--performance-only"))
+            {
+                PerformanceRegression.Run(Check);
+                Console.WriteLine($"PASS: {_checks} performance behavior checks"); return 0;
+            }
             if (args.Contains("--board-pen-icon-only"))
             {
                 var button = new Ink_Canvas.Controls.BoardToolbarButton { IconGeometry = "M4,4 L20,4 20,20 4,20Z" };
