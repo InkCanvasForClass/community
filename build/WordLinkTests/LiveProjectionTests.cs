@@ -100,9 +100,15 @@ internal static partial class Program
         Check(transport.LastRequest.Recalibrate && transport.LastRequest.DeferContentCheck,
             "Recovery from lost geometry failed to recalibrate without scanning document contents");
         int beforeVerification = transport.Calls;
-        Pump(270); Wait(controller.PollAsync());
-        Check(transport.Calls > beforeVerification && transport.LastRequest.VerifyCachedView && !transport.LastRequest.Recalibrate,
-            "Delayed layout confirmation skipped cached-anchor verification or forced full discovery");
+        Pump(270);
+        var verificationReply = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        transport.BeforeReply = () => verificationReply.Task;
+        var verification = controller.PollAsync();
+        Check(!verification.IsCompleted && controller.BlocksInput && !canvas.IsHitTestVisible,
+            "Delayed recalibration accepted drawing against an unverified page origin");
+        verificationReply.SetResult(); Wait(verification); transport.BeforeReply = null;
+        Check(transport.Calls > beforeVerification && transport.LastRequest.Recalibrate,
+            "Delayed layout confirmation trusted stale page-space anchors instead of recalibrating");
         Wait(controller.PollAsync());
         Check(!transport.LastRequest.Recalibrate, "A completed settle verification kept forcing full Office reads");
         controller.Undo(false); controller.Undo(true);

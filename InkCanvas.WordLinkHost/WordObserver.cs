@@ -233,7 +233,8 @@ internal sealed class WordObserver : IDisposable
         }
         foreach (var old in _anchors)
         {
-            if ((request.ScrollPreview || request.Recalibrate) && candidates.Count > 0 && candidates.All(a => a.Page != old.Page)) continue;
+            if (request.ScrollPreview && candidates.Count > 0 && candidates.All(a => a.Page != old.Page)) continue;
+            if (request.Recalibrate && candidates.Count(a => a.Page == old.Page) >= 2) continue;
             // A previously calibrated character plus the current DPI/zoom gives
             // a scroll origin. Avoid sampling two points at different animation
             // instants; full stationary queries still validate multiple anchors.
@@ -243,6 +244,15 @@ internal sealed class WordObserver : IDisposable
             try
             {
                 var range = scope.Keep(document.Call("Range", old.Start, old.Start + 1));
+                if (request.Recalibrate)
+                {
+                    // A final Word reflow can move the same character within a
+                    // page, or onto another page. Refresh BOTH coordinate spaces;
+                    // updating screen coordinates alone preserves a stale origin.
+                    var fresh = ReadAnchor(window.Value, range.Value);
+                    if (fresh.HasValue) candidates.Add(fresh.Value);
+                    continue;
+                }
                 int left = 0, top = 0, width = 0, height = 0;
                 window.GetPoint(out left, out top, out width, out height, range);
                 if (width < 0 || height <= 0) continue;

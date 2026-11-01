@@ -107,7 +107,7 @@ namespace Ink_Canvas.WordLink
         private long _nativeMotionUntil;
         private (bool Undo, bool Redo)? _publishedHistory;
         internal bool IsActive => _desktop != null;
-        internal bool BlocksInput => IsActive && (_frame == null || _frame.NeedsRefinement || _targetFocus != null || _targetZoom > 0 || _layoutPaused || _savingFailed || _discardedViewFrame || _scrollPendingView || _transientPaused);
+        internal bool BlocksInput => IsActive && (_frame == null || _frame.NeedsRefinement || _targetFocus != null || _targetZoom > 0 || _layoutPaused || _savingFailed || _discardedViewFrame || _scrollPendingView || _transientPaused || _recalibratePending);
 
         internal WordLectureController(InkCanvas canvas, WordLectureBar bar, string storage,
             Func<bool> allowed, Func<bool> inputActive, Action<bool> ownershipChanged,
@@ -266,7 +266,10 @@ namespace Ink_Canvas.WordLink
                 // A verified cached view can restore editing promptly. Rebuild
                 // anchors once Word's animation has settled; an incoherent view
                 // must instead recalibrate before input is enabled at all.
-                if (settling && _transientPaused) _recalibratePending = true;
+                // Cached screen anchors cannot prove that Word's final pagination
+                // kept the same page-space offsets. Recalibrate once after motion,
+                // while retaining the slow-server recovery deadline.
+                if ((settling && _transientPaused) || verifyDue) _recalibratePending = true;
                 if (verifyDue) _settleVerificationAt = 0;
                 var request = new WordRequest { WindowHandle = target, TargetPage = _targetFocus != null ? 0 : _targetPage,
                     Recalibrate = _recalibratePending && !_refreshGate.IsScrolling(Environment.TickCount64),
@@ -279,6 +282,7 @@ namespace Ink_Canvas.WordLink
                     DeferContentCheck = _recalibratePending || _targetZoom > 0 || _scrollPendingView || Environment.TickCount64 - _lastViewChange < 700 || _navigationTarget > 0
                         || Environment.TickCount64 - _lastInkInput < 1500 };
                 _targetPage = 0;
+                if (request.Recalibrate) _canvas.IsHitTestVisible = false;
                 long viewVersion = _viewVersion, scrollVersion = _scrollVersion;
                 await _hostWarmup;
                 if (_disposed || generation != _generation || !_enabled) return;

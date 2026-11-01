@@ -66,7 +66,7 @@ namespace Ink_Canvas.WordLink
                 }
                 stage = "Word request";
                 var requestWatch = Stopwatch.StartNew();
-                deadline.CancelAfter(RequestTimeout(connecting || _readyWindow == 0 || _readyWindow != request.WindowHandle,
+                deadline.CancelAfter(RequestTimeout(connecting || request.Recalibrate || _readyWindow == 0 || _readyWindow != request.WindowHandle,
                     request.DeferContentCheck));
                 await process.StandardInput.WriteLineAsync(JsonSerializer.Serialize(request).AsMemory(), deadline.Token).ConfigureAwait(false);
                 await process.StandardInput.FlushAsync(deadline.Token).ConfigureAwait(false);

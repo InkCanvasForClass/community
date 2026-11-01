@@ -57,6 +57,7 @@ internal static class LiveWordTests
                 WordTrackingLiveTests.Run((object)app, (object)document, (object)window, observer, frame, check, stabilityOnly);
                 if (stabilityOnly)
                 {
+                    ReflowCalibrationTest((object)document, (object)window, hwnd, observer, check);
                     check((int)documents.Count == 1, "Another document appeared in the isolated close fixture");
                     document.Close(0);
                     check((int)documents.Count == 0, "The isolated test document did not close");
@@ -220,6 +221,36 @@ internal static class LiveWordTests
             }
             foreach (object value in new object[] { range, window, document, documents, app })
                 if (value != null && Marshal.IsComObject(value)) try { Marshal.ReleaseComObject(value); } catch { }
+        }
+    }
+    private static void ReflowCalibrationTest(object documentObject, object windowObject, IntPtr hwnd,
+        WordObserver observer, Action<bool, string> check)
+    {
+        dynamic document = documentObject, window = windowObject;
+        dynamic navigation = null, first = null, paragraph = null, view = null, zoom = null;
+        try
+        {
+            navigation = document.GoTo(1, 1, 1); navigation.Select();
+            view = window.View; zoom = view.Zoom; zoom.Percentage = 60;
+            document.Repaginate(); Program.Pump(150);
+            var baseline = observer.Read(new WordRequest { WindowHandle = hwnd.ToInt64(), Recalibrate = true, DeferContentCheck = true });
+            check(baseline.Status == "Ready", "Could not seed cached page-space anchors before reflow");
+            first = document.Range(0, 1); paragraph = first.ParagraphFormat;
+            paragraph.SpaceBefore = 24;
+            document.Repaginate(); Program.Pump(150);
+            var recalibrated = observer.Read(new WordRequest { WindowHandle = hwnd.ToInt64(),
+                ExpectedDocumentKey = baseline.DocumentKey, Recalibrate = true, DeferContentCheck = true });
+            using var fresh = new WordObserver();
+            var oracle = fresh.Read(new WordRequest { WindowHandle = hwnd.ToInt64() });
+            check(recalibrated.Status == "Ready" && oracle.Status == "Ready", "Reflow calibration did not produce a confirmed view");
+            var common = recalibrated.Pages.Join(oracle.Pages, p => p.Number, p => p.Number, (a, b) => (a, b)).ToArray();
+            check(common.Length > 0 && common.All(p => Math.Abs(p.a.Bounds.Y - p.b.Bounds.Y) <= 3
+                && Math.Abs(p.a.Bounds.X - p.b.Bounds.X) <= 3), "Recalibration retained stale page origins after paragraph reflow");
+        }
+        finally
+        {
+            foreach (object value in new object[] { zoom, view, paragraph, first, navigation })
+                if (value != null && Marshal.IsComObject(value)) Marshal.ReleaseComObject(value);
         }
     }
     private static void FocusModeTests(object applicationObject, object windowObject, WordObserver observer, Action<bool, string> check)
