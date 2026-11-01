@@ -5,7 +5,7 @@ namespace Ink_Canvas.WordLink
     /// <summary>Bound live scroll queries without postponing them until scrolling stops.</summary>
     internal sealed class WordRefreshGate
     {
-        private long _nextQuery, _scrollQuietUntil;
+        private long _nextQuery, _scrollQuietUntil, _slowQueryUntil;
         private bool _scrollPending;
         private long _scrollCost;
         private bool _probedAfterDiscovery;
@@ -15,14 +15,17 @@ namespace Ink_Canvas.WordLink
             _scrollPending = true; _scrollQuietUntil = now + 120;
         }
         internal bool IsScrolling(long now) => _scrollPending && now < _scrollQuietUntil;
-        internal void Immediate() { _nextQuery = 0; _scrollPending = false; _scrollCost = 0; _probedAfterDiscovery = false; }
+        internal void Immediate() { _nextQuery = 0; _slowQueryUntil = 0; _scrollPending = false; _scrollCost = 0; _probedAfterDiscovery = false; }
         internal void InputChanged(long now) => _nextQuery = Math.Min(_nextQuery, now + 16);
         internal void RetryAfter(long now, int delay) => _nextQuery = now + delay;
         // Throttling during motion must never delay the final settled view.
         internal int Delay(long now) => (int)Math.Clamp(
-            (_scrollPending ? Math.Min(_nextQuery, _scrollQuietUntil) : _nextQuery) - now, 0, 2000);
+            Math.Max(_slowQueryUntil, _scrollPending ? Math.Min(_nextQuery, _scrollQuietUntil) : _nextQuery) - now, 0, 2000);
         internal void Complete(long now, long elapsed, bool moved, bool? cachedGeometry = null)
         {
+            // Neither event echoes nor the controller's fast settle/retry path
+            // may immediately re-enter an Office server that just stalled.
+            if (elapsed >= 250) _slowQueryUntil = now + Math.Clamp(elapsed, 250, 2000);
             // A slow query must not immediately start another slow query. Hints
             // emitted by Office itself cannot bypass this cooldown.
             if (IsScrolling(now))

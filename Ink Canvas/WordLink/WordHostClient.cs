@@ -42,8 +42,8 @@ namespace Ink_Canvas.WordLink
 
         public async Task<WordFrame> ExchangeAsync(WordRequest request, CancellationToken cancellationToken)
         {
-            await _detaching.WaitAsync(cancellationToken);
-            if (_disposed || !await _exchange.WaitAsync(0, cancellationToken)) return null;
+            await _detaching.WaitAsync(cancellationToken).ConfigureAwait(false);
+            if (_disposed || !await _exchange.WaitAsync(0, cancellationToken).ConfigureAwait(false)) return null;
             Interlocked.Increment(ref _activity);
             using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             int generation = Volatile.Read(ref _generation);
@@ -59,18 +59,18 @@ namespace Ink_Canvas.WordLink
                     process = _process;
                     using var startup = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                     startup.CancelAfter(TimeSpan.FromSeconds(5));
-                    await process.StandardInput.WriteLineAsync(JsonSerializer.Serialize(new WordRequest { Handshake = true }).AsMemory(), startup.Token);
-                    await process.StandardInput.FlushAsync(startup.Token);
-                    var greeting = await ReadFrameAsync(process, startup.Token);
+                    await process.StandardInput.WriteLineAsync(JsonSerializer.Serialize(new WordRequest { Handshake = true }).AsMemory(), startup.Token).ConfigureAwait(false);
+                    await process.StandardInput.FlushAsync(startup.Token).ConfigureAwait(false);
+                    var greeting = await ReadFrameAsync(process, startup.Token).ConfigureAwait(false);
                     if (greeting.Status != "HostReady") throw new NotSupportedException("Word helper handshake mismatch; update the word-link folder.");
                 }
                 stage = "Word request";
                 var requestWatch = Stopwatch.StartNew();
                 deadline.CancelAfter(RequestTimeout(connecting || _readyWindow == 0 || _readyWindow != request.WindowHandle,
                     request.DeferContentCheck));
-                await process.StandardInput.WriteLineAsync(JsonSerializer.Serialize(request).AsMemory(), deadline.Token);
-                await process.StandardInput.FlushAsync(deadline.Token);
-                var frame = await ReadFrameAsync(process, deadline.Token);
+                await process.StandardInput.WriteLineAsync(JsonSerializer.Serialize(request).AsMemory(), deadline.Token).ConfigureAwait(false);
+                await process.StandardInput.FlushAsync(deadline.Token).ConfigureAwait(false);
+                var frame = await ReadFrameAsync(process, deadline.Token).ConfigureAwait(false);
                 if (frame.Status == "Ready" && generation == Volatile.Read(ref _generation)
                     && ReferenceEquals(_process, process)) _readyWindow = frame.WindowHandle;
                 if (requestWatch.ElapsedMilliseconds >= 250)
@@ -99,7 +99,14 @@ namespace Ink_Canvas.WordLink
                     : ex is NotSupportedException ? "HelperMismatch" : "Unavailable";
                 return new WordFrame { Status = _retryStatus };
             }
-            finally { _exchange.Release(); }
+            finally
+            {
+                // Stop/Dispose can now run while transport continuations execute
+                // off the dispatcher. Retire any late-started old-generation host
+                // before another exchange can acquire this semaphore.
+                if (_disposed || generation != Volatile.Read(ref _generation)) ResetHost(false);
+                _exchange.Release();
+            }
         }
 
         public async Task WarmAsync(CancellationToken token)
@@ -152,7 +159,7 @@ namespace Ink_Canvas.WordLink
             var buffer = new char[2048];
             while (line.Length <= 131072)
             {
-                int count = await process.StandardOutput.ReadAsync(buffer.AsMemory(), token);
+                int count = await process.StandardOutput.ReadAsync(buffer.AsMemory(), token).ConfigureAwait(false);
                 if (count == 0) throw new EndOfStreamException();
                 int newline = Array.IndexOf(buffer, '\n', 0, count);
                 line.Append(buffer, 0, newline >= 0 ? newline : count);

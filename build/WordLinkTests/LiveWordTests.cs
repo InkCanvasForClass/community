@@ -55,6 +55,17 @@ internal static class LiveWordTests
             if (trackingOnly)
             {
                 WordTrackingLiveTests.Run((object)app, (object)document, (object)window, observer, frame, check, stabilityOnly);
+                if (stabilityOnly)
+                {
+                    check((int)documents.Count == 1, "Another document appeared in the isolated close fixture");
+                    document.Close(0);
+                    check((int)documents.Count == 0, "The isolated test document did not close");
+                    app.Quit(0);
+                    var closed = observer.Read(new WordRequest { WindowHandle = hwnd.ToInt64(), DeferContentCheck = true });
+                    check(closed.Status != "Ready", "The observer accepted a closed native Word window");
+                    observer.ResetConnection();
+                    check(true, "Closed Word COM references could not be released");
+                }
                 return;
             }
             if (focusOnly)

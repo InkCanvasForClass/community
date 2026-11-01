@@ -62,6 +62,7 @@ internal static partial class Program
             }
             WordInputRegionTests(); GeometryTests(); StoreTests(root); SaveDestinationTests(root); LocalInkCommitTests(root); DeferredInkPostprocessTests(root); CanonicalSnapshotTests(root); MarginInkTests(root); TransientRecoveryTests(root); LiveProjectionTests(root); ProjectionTests(root); ProjectionLoadTests(); ToolHandoffTests(root); NavigationTests(root); ScrollSchedulingTests(root); HostTests();
             TouchStartupTests(root);
+            WindowCloseTests(root);
             ZoomTests(root);
             PlacementTests(root);
             FocusTests(root);
@@ -333,6 +334,36 @@ internal static partial class Program
             Check(Wait(client.ExchangeAsync(new WordRequest(), CancellationToken.None))?.Status == "Waiting",
                 "An old stopped request imposed failure backoff on a newly enabled connection");
         }
+        Environment.SetEnvironmentVariable("ICC_WORD_FAKE_MODE", "valid");
+        using (var client = new WordHostClient(Environment.ProcessPath, TimeSpan.FromMilliseconds(300)))
+        {
+            var blocked = new BlockedContext();
+            var previous = SynchronizationContext.Current;
+            Task<WordFrame> response;
+            try
+            {
+                SynchronizationContext.SetSynchronizationContext(blocked);
+                response = client.ExchangeAsync(new WordRequest(), CancellationToken.None);
+            }
+            finally { SynchronizationContext.SetSynchronizationContext(previous); }
+            Check(response.Wait(4000) && response.Result.Status == "Waiting" && blocked.Posts == 0,
+                "Helper transport depended on a blocked UI synchronization context");
+        }
+        Environment.SetEnvironmentVariable("ICC_WORD_FAKE_MODE", "hang");
+        using (var client = new WordHostClient(Environment.ProcessPath, TimeSpan.FromMilliseconds(300)))
+        {
+            var blocked = new BlockedContext();
+            var previous = SynchronizationContext.Current;
+            Task<WordFrame> response;
+            try
+            {
+                SynchronizationContext.SetSynchronizationContext(blocked);
+                response = client.ExchangeAsync(new WordRequest(), CancellationToken.None);
+            }
+            finally { SynchronizationContext.SetSynchronizationContext(previous); }
+            Check(response.Wait(4000) && response.Result.Status == "Timeout" && blocked.Posts == 0,
+                "A hung helper could not time out while the UI context was blocked");
+        }
         Environment.SetEnvironmentVariable("ICC_WORD_FAKE_MODE", null);
     }
     private static void ProjectionLoadTests()
@@ -438,11 +469,15 @@ internal static partial class Program
         Check(gate.Delay(800) > 0, "Slow Word calls immediately started another slow call");
         var slowScroll = new WordRefreshGate();
         slowScroll.Scrolled(1000); slowScroll.Complete(1010, 500, true);
-        Check(slowScroll.Delay(1119) == 1 && slowScroll.Delay(1120) == 0,
-            "The post-scroll confirmation waited for the three-second motion cooldown");
+        Check(slowScroll.Delay(1119) > 0 && slowScroll.Delay(1510) == 0,
+            "The settle deadline bypassed the measured slow-server recovery budget");
         slowScroll.Scrolled(1100);
-        Check(slowScroll.Delay(1120) > 0 && slowScroll.Delay(1220) == 0,
-            "Continuing input did not extend the settle deadline");
+        Check(slowScroll.Delay(1220) > 0 && slowScroll.Delay(1510) == 0,
+            "Continuing input bypassed the slow-server recovery budget");
+        slowScroll.RetryAfter(1100, 16); slowScroll.InputChanged(1101);
+        Check(slowScroll.Delay(1200) > 0, "Fast retry/input feedback bypassed the slow-server deadline");
+        slowScroll.Complete(1510, 10, true, true);
+        Check(slowScroll.Delay(1600) == 0, "A recovered cheap query kept the old hard cooldown");
 
         var canvas = new InkCanvas();
         using var surface = new HwndSource(new HwndSourceParameters("Word scroll scheduling fixture") { Width = 1200, Height = 1000 });
@@ -526,6 +561,11 @@ internal static partial class Program
     };
     internal static Stroke Stroke(double x, double y) => new(new StylusPointCollection
     { new StylusPoint(x, y, .5f), new StylusPoint(x + 20, y + 20, .7f) });
+    private sealed class BlockedContext : SynchronizationContext
+    {
+        internal int Posts;
+        public override void Post(SendOrPostCallback callback, object state) => Interlocked.Increment(ref Posts);
+    }
     private sealed class FrameSource : IWordFrameSource
     {
         internal WordFrame Frame;

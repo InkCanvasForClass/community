@@ -99,8 +99,10 @@ internal static partial class Program
             "Settled scrolling did not restore exact editing coordinates");
         Check(transport.LastRequest.Recalibrate && transport.LastRequest.DeferContentCheck,
             "Recovery from lost geometry failed to recalibrate without scanning document contents");
+        int beforeVerification = transport.Calls;
         Pump(270); Wait(controller.PollAsync());
-        Check(transport.LastRequest.Recalibrate, "Word's delayed final layout was never rechecked");
+        Check(transport.Calls > beforeVerification && transport.LastRequest.VerifyCachedView && !transport.LastRequest.Recalibrate,
+            "Delayed layout confirmation skipped cached-anchor verification or forced full discovery");
         Wait(controller.PollAsync());
         Check(!transport.LastRequest.Recalibrate, "A completed settle verification kept forcing full Office reads");
         controller.Undo(false); controller.Undo(true);

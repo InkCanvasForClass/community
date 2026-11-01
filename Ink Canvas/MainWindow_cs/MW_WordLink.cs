@@ -180,6 +180,17 @@ namespace Ink_Canvas
         private void WordBoundaryTick(object sender, EventArgs e)
         {
             if (_wordDisposing || !_wordInputRegion.IsApplied) return;
+            if (_wordOwnsCanvas && _wordLecture is { } lecture && !WordWindowInputRegion.IsAlive(lecture.WindowHandle))
+            {
+                try
+                {
+                    _wordTouches.Clear();
+                    lecture.NotifyWindowClosed(lecture.WindowHandle);
+                    UpdateWordInputRegion();
+                }
+                catch (Exception ex) { LogHelper.WriteLogToFile($"[WordLink] Closed-window recovery failed: {ex}", LogHelper.LogType.Error); }
+                return;
+            }
             if (currentMode != 0 || Settings.WordLink?.Enabled != true || IsInPPTPresentationMode
                 || _isVideoPresenterSpecialMode || IsPluginCanvasToolActive) return;
             if (_wordTouches.Count > 0 || Mouse.LeftButton == MouseButtonState.Pressed

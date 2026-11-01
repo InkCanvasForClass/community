@@ -12,11 +12,14 @@ internal static partial class Program
     {
         var gate = new WordRefreshGate();
         gate.Scrolled(1000); gate.Complete(1010, 400, true, false);
-        Check(gate.Delay(1010) == 16, "Newly discovered anchors inherited the expensive discovery cooldown");
+        Check(gate.Delay(1010) == 400, "Slow discovery bypassed the server recovery deadline");
         gate.Scrolled(1030); gate.Complete(1040, 400, true, false);
         Check(gate.Delay(1040) > 16, "Repeated expensive discovery bypassed backpressure");
-        gate.Scrolled(1050); gate.Complete(1060, 4, true, true);
-        Check(gate.Delay(1060) == 12, "A cached touch frame retained the old pagination cost");
+        gate.Scrolled(1450); gate.Complete(1454, 4, true, true);
+        Check(gate.Delay(1454) == 12, "A recovered cached touch frame retained the old pagination cost");
+        var cheapDiscovery = new WordRefreshGate();
+        cheapDiscovery.Scrolled(1000); cheapDiscovery.Complete(1010, 100, true, false);
+        Check(cheapDiscovery.Delay(1010) == 16, "Cheap discovery lost its prompt cached-anchor probe");
 
         string storage = Path.Combine(root, "touch-startup");
         var source = new FrameSource { Frame = Frame() };

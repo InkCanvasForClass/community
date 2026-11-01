@@ -266,14 +266,15 @@ namespace Ink_Canvas.WordLink
                 // A verified cached view can restore editing promptly. Rebuild
                 // anchors once Word's animation has settled; an incoherent view
                 // must instead recalibrate before input is enabled at all.
-                if ((settling && _transientPaused) || verifyDue) { _recalibratePending = true; _settleVerificationAt = 0; }
+                if (settling && _transientPaused) _recalibratePending = true;
+                if (verifyDue) _settleVerificationAt = 0;
                 var request = new WordRequest { WindowHandle = target, TargetPage = _targetFocus != null ? 0 : _targetPage,
                     Recalibrate = _recalibratePending && !_refreshGate.IsScrolling(Environment.TickCount64),
                     ExpectedDocumentKey = _targetFocus != null ? _focusCommandKey : _key,
                     TargetZoomPercentage = _targetFocus != null ? 0 : _targetZoom,
                     TargetFocusMode = _targetFocus,
                     ScrollPreview = _refreshGate.IsScrolling(Environment.TickCount64),
-                    VerifyCachedView = !_refreshGate.IsScrolling(Environment.TickCount64) && _frame != null && (_scrollPendingView
+                    VerifyCachedView = !_refreshGate.IsScrolling(Environment.TickCount64) && _frame != null && (verifyDue || _scrollPendingView
                         || Environment.TickCount64 - _lastFullViewCheck < 5000),
                     DeferContentCheck = _recalibratePending || _targetZoom > 0 || _scrollPendingView || Environment.TickCount64 - _lastViewChange < 700 || _navigationTarget > 0
                         || Environment.TickCount64 - _lastInkInput < 1500 };
@@ -507,6 +508,16 @@ namespace Ink_Canvas.WordLink
             _desktopAnnotationEnabled = _annotationEnabled();
             _ownershipChanged(true);
             _mutate(() => { WordInkProjection.ClearSelection(_canvas); _canvas.Strokes.Clear(); _canvas.Clip = Geometry.Empty; _canvas.IsHitTestVisible = false; });
+        }
+
+        internal void NotifyWindowClosed(long window)
+        {
+            if (_disposed || !IsActive || window == 0 || window != _lastWindow) return;
+            // The native window watcher must be able to detach while PollAsync
+            // awaits a blocked Office call. Never wait for that stale reply.
+            _host.Stop();
+            Suspend();
+            _lastWindow = 0;
         }
 
         internal void Suspend()
