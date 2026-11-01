@@ -1,4 +1,4 @@
-using Ink_Canvas.Controls;
+﻿using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Ink;
 using System;
@@ -70,7 +70,6 @@ namespace Ink_Canvas
         private bool _hasStoredInkCanvasManipulationStateForTouchInk;
 
         private readonly Dictionary<int, DispatcherTimer> _pauseStraightenTimers = new Dictionary<int, DispatcherTimer>();
-        private readonly Dictionary<int, long> _pauseStraightenLastInput = new();
         private const int PauseStraightenDelayMs = 300;
 
         private sealed class OneEuroFilter
@@ -123,9 +122,7 @@ namespace Ink_Canvas
             public float LastRawX { get; set; }
             public float LastRawY { get; set; }
             public long LastTimestampMs { get; set; }
-            public int? LastPacketTimestamp { get; set; }
-            public int? LastTouchEventTimestamp { get; set; }
-            public List<Point> InterpolationPoints { get; } = new(24);
+            public long LastTouchInputTimestampTicks { get; set; }
             public float SmoothedSampleRateHz { get; set; } = 120f;
             public bool SawPressureVariation { get; set; }
             public bool HasSeed { get; set; }
@@ -234,7 +231,6 @@ namespace Ink_Canvas
                 timerEntry.Value.Stop();
             }
             _pauseStraightenTimers.Clear();
-            _pauseStraightenLastInput.Clear();
             EndTouchInkInputIfIdle();
         }
 
@@ -295,6 +291,7 @@ namespace Ink_Canvas
                 LastRawX = (float)startPoint.X,
                 LastRawY = (float)startPoint.Y,
                 LastTimestampMs = RealtimeNowMs(),
+                LastTouchInputTimestampTicks = Stopwatch.GetTimestamp(),
                 HasTouchPoint = true,
                 LastTouchPoint = startPoint
             };
@@ -318,6 +315,7 @@ namespace Ink_Canvas
                 LastRawX = (float)startPoint.X,
                 LastRawY = (float)startPoint.Y,
                 LastTimestampMs = RealtimeNowMs(),
+                LastTouchInputTimestampTicks = Stopwatch.GetTimestamp(),
                 HasTouchPoint = true,
                 LastTouchPoint = startPoint
             };
@@ -553,22 +551,12 @@ namespace Ink_Canvas
             if (!ShouldUseRealtimeVelocityBrushTip() || strokeVisual == null || e?.StylusDevice == null)
                 return false;
 
-            return ProcessRealtimeStylusPacket(strokeVisual, e.StylusDevice.Id,
-                e.GetStylusPoints(inkCanvas), e.Timestamp);
-        }
-
-        private bool ProcessRealtimeStylusPacket(StrokeVisual strokeVisual, int stylusId,
-            StylusPointCollection stylusPointCollection, int timestamp)
-        {
-            if (!_realtimeBrushTipStates.TryGetValue(stylusId, out var state))
+            if (!_realtimeBrushTipStates.TryGetValue(e.StylusDevice.Id, out var state))
                 return false;
 
+            var stylusPointCollection = e.GetStylusPoints(this);
             if (stylusPointCollection == null || stylusPointCollection.Count == 0)
                 return true;
-
-            var packetDt = InkPacketTiming.SampleInterval(timestamp, state.LastPacketTimestamp,
-                stylusPointCollection.Count, state.SmoothedSampleRateHz);
-            state.LastPacketTimestamp = timestamp;
 
             var startedAt = RealtimeInkPerformanceMonitor.IsDebugLoggingEnabled ? Stopwatch.GetTimestamp() : 0L;
             var addedPointCount = 0L;
@@ -582,7 +570,8 @@ namespace Ink_Canvas
                 foreach (StylusPoint rawPoint in stylusPointCollection)
                 {
                     var nowMs = RealtimeNowMs();
-                    var dt = packetDt;
+                    var dtMs = Math.Max(1L, nowMs - state.LastTimestampMs);
+                    var dt = dtMs / 1000f;
                     var sampleRate = 1f / Math.Max(1e-4f, dt);
                     state.SmoothedSampleRateHz = state.SmoothedSampleRateHz * 0.85f + sampleRate * 0.15f;
 
@@ -613,7 +602,7 @@ namespace Ink_Canvas
                         : speedPressure;
                     pressure = RealtimeClamp(pressure, 0.08f, 1f);
                     pressure = state.FilterPressure.Filter(pressure, dt, speed);
-                    strokeVisual.SetInputPreviewTip(new StylusPoint(filteredX, filteredY, pressure), new Point(rawX, rawY));
+                    strokeVisual.SetPreviewTip(new StylusPoint(filteredX, filteredY, pressure));
 
                     var minDist = GetRealtimeBrushTipMinDistance(state.SmoothedSampleRateHz);
                     if (dist < minDist && state.HasSeed)
@@ -755,7 +744,7 @@ namespace Ink_Canvas
                 : speedPressure;
             pressure = RealtimeClamp(pressure, 0.08f, 1f);
             pressure = state.FilterPressure.Filter(pressure, dt, speed);
-            strokeVisual.SetInputPreviewTip(new StylusPoint(filteredX, filteredY, pressure), new Point(rawX, rawY));
+            strokeVisual.SetPreviewTip(new StylusPoint(filteredX, filteredY, pressure));
 
             var minDist = GetRealtimeBrushTipMinDistance(state.SmoothedSampleRateHz);
             if (dist < minDist && state.HasSeed && strokeId == MouseRealtimeStrokeId)
@@ -800,7 +789,7 @@ namespace Ink_Canvas
             return true;
         }
 
-        private bool TryAppendRealtimeVelocityBrushTipInterpolatedPoints(StrokeVisual strokeVisual, int strokeId, Point point, int timestamp, float rawPressure = 0.5f)
+        private bool TryAppendRealtimeVelocityBrushTipInterpolatedPoints(StrokeVisual strokeVisual, int strokeId, Point point, float rawPressure = 0.5f)
         {
             if (!_realtimeBrushTipStates.TryGetValue(strokeId, out var state))
                 return TryAppendRealtimeVelocityBrushTipPoint(strokeVisual, strokeId, point, rawPressure);
@@ -814,19 +803,25 @@ namespace Ink_Canvas
                 {
                     state.HasTouchPoint = true;
                     state.LastTouchPoint = point;
-                    state.LastTouchEventTimestamp = timestamp;
+                    state.LastTouchInputTimestampTicks = Stopwatch.GetTimestamp();
                     return TryAppendRealtimeVelocityBrushTipPointCore(strokeVisual, strokeId, point, rawPressure);
                 }
 
                 var isTouchVelocity = _activeRealtimeTouchStrokeIds.Contains(strokeId);
                 if (isTouchVelocity)
                 {
-                    var eventDt = InkPacketTiming.SampleInterval(timestamp, state.LastTouchEventTimestamp, 1, 60);
+                    var touchInputTimestampTicks = Stopwatch.GetTimestamp();
+                    var eventDt = state.LastTouchInputTimestampTicks > 0
+                        ? Math.Max(
+                            0.001f,
+                            (float)((touchInputTimestampTicks - state.LastTouchInputTimestampTicks)
+                                    / (double)Stopwatch.Frequency))
+                        : 1f / 60f;
                     var eventChord = point - state.LastTouchPoint;
                     if (eventChord.Length < 0.1)
                     {
                         UpdateTouchInterpolationState(state, point);
-                        state.LastTouchEventTimestamp = timestamp;
+                        state.LastTouchInputTimestampTicks = touchInputTimestampTicks;
                         return false;
                     }
 
@@ -862,23 +857,18 @@ namespace Ink_Canvas
                             false);
                     }
                     UpdateTouchInterpolationState(state, point);
-                    state.LastTouchEventTimestamp = timestamp;
+                    state.LastTouchInputTimestampTicks = touchInputTimestampTicks;
                 }
                 else
                 {
-                    var eventDt = InkPacketTiming.SampleInterval(timestamp, state.LastTouchEventTimestamp, 1, 120);
-                    var points = state.InterpolationPoints;
-                    points.Clear();
-                    points.AddRange(InterpolateTouchPoints(state, point));
-                    var eventSpeed = (float)((point - state.LastTouchPoint).Length / eventDt);
-                    state.SmoothedSampleRateHz = state.SmoothedSampleRateHz * .85f + .15f / eventDt;
-                    foreach (var p in points)
+                    foreach (var p in InterpolateTouchPoints(state, point))
                     {
                         appended |= TryAppendRealtimeVelocityBrushTipPointCore(
-                            strokeVisual, strokeId, p, rawPressure, eventSpeed,
-                            eventDt / Math.Max(1, points.Count), false);
+                            strokeVisual,
+                            strokeId,
+                            p,
+                            rawPressure);
                     }
-                    state.LastTouchEventTimestamp = timestamp;
                     UpdateTouchInterpolationState(state, point);
                 }
                 return appended;
@@ -1315,7 +1305,7 @@ namespace Ink_Canvas
                 InitializeRealtimeBrushTipState(stylusId, e);
                 var sv = GetStrokeVisual(stylusId);
                 RealtimeInkPerformanceMonitor.BeginStroke(sv, RealtimeInkInputKind.Stylus);
-                TryAppendRealtimeVelocityBrushTipPoints(sv, e);
+                TryAppendRealtimeVelocityBrushTipInterpolatedPoints(sv, stylusId, p);
                 RealtimeInkFrameScheduler.RequestRedraw(sv);
                 _pauseStraightenInkModeStartPos = p;
                 _pauseStraightenInkModeTracking = true;
@@ -1552,8 +1542,9 @@ namespace Ink_Canvas
                 {
                     try
                     {
+                        var p = e.GetPosition(inkCanvas);
                         var sv = GetStrokeVisual(stylusId);
-                        if (TryAppendRealtimeVelocityBrushTipPoints(sv, e))
+                        if (TryAppendRealtimeVelocityBrushTipInterpolatedPoints(sv, stylusId, p))
                             RealtimeInkFrameScheduler.RequestRedraw(sv);
                         ResetPauseStraightenTimer(stylusId);
                         e.Handled = true;
@@ -1640,24 +1631,22 @@ namespace Ink_Canvas
         private void ResetPauseStraightenTimer(int stylusId)
         {
             if (!Settings.Canvas.PauseStraightenLine) return;
-            _pauseStraightenLastInput[stylusId] = Environment.TickCount64;
-            if (_pauseStraightenTimers.ContainsKey(stylusId)) return;
-            var timer = new DispatcherTimer(DispatcherPriority.Background)
+            Debug.WriteLine($"ResetPauseStraightenTimer: id={stylusId}");
+            if (_pauseStraightenTimers.TryGetValue(stylusId, out var existing))
             {
-                Interval = TimeSpan.FromMilliseconds(Math.Max(1, Settings.Canvas.PauseStraightenDelay))
-            };
-            timer.Tick += (_, _) =>
+                existing.Stop();
+                existing.Interval = TimeSpan.FromMilliseconds(Settings.Canvas.PauseStraightenDelay);
+                existing.Start();
+                return;
+            }
+            var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(Settings.Canvas.PauseStraightenDelay) };
+            var capturedId = stylusId;
+            timer.Tick += (s, e) =>
             {
-                var remaining = Settings.Canvas.PauseStraightenDelay
-                    - (Environment.TickCount64 - _pauseStraightenLastInput[stylusId]);
-                if (Settings.Canvas.PauseStraightenLine && remaining > 0)
-                {
-                    timer.Interval = TimeSpan.FromMilliseconds(remaining);
-                    return;
-                }
-                CancelPauseStraightenTimer(stylusId);
-                if (stylusId == -200001) TryPauseStraightenInkMode();
-                else TryPauseStraighten(stylusId);
+                timer.Stop();
+                _pauseStraightenTimers.Remove(capturedId);
+                Debug.WriteLine($"PauseStraightenTimer fired: id={capturedId}");
+                TryPauseStraighten(capturedId);
             };
             _pauseStraightenTimers[stylusId] = timer;
             timer.Start();
@@ -1665,8 +1654,25 @@ namespace Ink_Canvas
 
         private void ResetPauseStraightenTimerInkMode(Point currentPos)
         {
+            if (!Settings.Canvas.PauseStraightenLine) return;
+            const int inkModeId = -200001;
             _pauseStraightenInkModeLastPos = currentPos;
-            ResetPauseStraightenTimer(-200001);
+            if (_pauseStraightenTimers.TryGetValue(inkModeId, out var existing))
+            {
+                existing.Stop();
+                existing.Interval = TimeSpan.FromMilliseconds(Settings.Canvas.PauseStraightenDelay);
+                existing.Start();
+                return;
+            }
+            var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(Settings.Canvas.PauseStraightenDelay) };
+            timer.Tick += (s, e) =>
+            {
+                timer.Stop();
+                _pauseStraightenTimers.Remove(inkModeId);
+                TryPauseStraightenInkMode();
+            };
+            _pauseStraightenTimers[inkModeId] = timer;
+            timer.Start();
         }
 
         private Point _pauseStraightenInkModeLastPos;
@@ -1709,7 +1715,6 @@ namespace Ink_Canvas
 
         private void CancelPauseStraightenTimer(int stylusId)
         {
-            _pauseStraightenLastInput.Remove(stylusId);
             if (_pauseStraightenTimers.TryGetValue(stylusId, out var timer))
             {
                 timer.Stop();
@@ -2091,7 +2096,7 @@ namespace Ink_Canvas
                     InitializeRealtimeBrushTipStateFromPoint(touchId, p);
                     var sv = GetStrokeVisual(touchId);
                     RealtimeInkPerformanceMonitor.BeginStroke(sv, RealtimeInkInputKind.TouchVelocity);
-                    TryAppendRealtimeVelocityBrushTipInterpolatedPoints(sv, touchId, p, e.Timestamp);
+                    TryAppendRealtimeVelocityBrushTipInterpolatedPoints(sv, touchId, p);
                     RealtimeInkFrameScheduler.RequestRedraw(sv);
                 }
                 catch (Exception ex)
@@ -2189,7 +2194,7 @@ namespace Ink_Canvas
                 {
                     var p = e.GetTouchPoint(inkCanvas).Position;
                     var sv = GetStrokeVisual(touchId);
-                    if (TryAppendRealtimeVelocityBrushTipInterpolatedPoints(sv, touchId, p, e.Timestamp))
+                    if (TryAppendRealtimeVelocityBrushTipInterpolatedPoints(sv, touchId, p))
                         RealtimeInkFrameScheduler.RequestRedraw(sv);
                 }
                 catch (Exception ex)

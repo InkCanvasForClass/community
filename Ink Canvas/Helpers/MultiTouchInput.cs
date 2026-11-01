@@ -69,8 +69,6 @@ namespace Ink_Canvas.Helpers
         private DrawingVisual _activeVisual;
         private DrawingVisual _tipVisual;
         private StylusPoint? _previewTip;
-        private Point? _previewPosition;
-        internal bool HasDrawnPreview { get; private set; }
         private VisualCanvas _visualCanvas;
         private readonly Dictionary<Color, SolidColorBrush> _brushCache =
             new Dictionary<Color, SolidColorBrush>();
@@ -165,22 +163,7 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        internal void SetPreviewTip(StylusPoint? point)
-        {
-            _previewTip = point;
-            _previewPosition = null;
-        }
-
-        internal void SetInputPreviewTip(StylusPoint filtered, Point raw)
-        {
-            _previewTip = filtered;
-            var correction = raw - filtered.ToPoint();
-            // A small, visual-only correction reduces filter lag without exposing
-            // an unbounded raw-input jump. Stored points and pressure stay filtered.
-            double limit = Math.Max(.5, (Stroke?.DrawingAttributes ?? _drawingAttributes).Width * .5);
-            if (correction.Length > limit) correction *= limit / correction.Length;
-            _previewPosition = filtered.ToPoint() + correction;
-        }
+        internal void SetPreviewTip(StylusPoint? point) => _previewTip = point;
 
         internal void CommitPreviewTip()
         {
@@ -190,7 +173,6 @@ namespace Ink_Canvas.Helpers
                 if (last.X != point.X || last.Y != point.Y || last.PressureFactor != point.PressureFactor) Add(point);
             }
             _previewTip = null;
-            _previewPosition = null;
         }
 
         private void DrawPreviewTip()
@@ -204,12 +186,11 @@ namespace Ink_Canvas.Helpers
             using var drawing = _tipVisual.RenderOpen();
             if (_previewTip is not StylusPoint tip || Stroke.StylusPoints.Count == 0) return;
             var last = Stroke.StylusPoints[Stroke.StylusPoints.Count - 1];
-            var position = _previewPosition ?? tip.ToPoint();
-            if (last.X == position.X && last.Y == position.Y) return;
+            if (last.X == tip.X && last.Y == tip.Y) return;
             var attributes = Stroke.DrawingAttributes;
             double width = Math.Max(.35, attributes.Width * (PressureToVisualScale(last.PressureFactor, attributes.IgnorePressure)
                 + PressureToVisualScale(tip.PressureFactor, attributes.IgnorePressure)) / 2);
-            drawing.DrawLine(GetPen(attributes.Color, width), new Point(last.X, last.Y), position);
+            drawing.DrawLine(GetPen(attributes.Color, width), new Point(last.X, last.Y), new Point(tip.X, tip.Y));
         }
 
         /// <summary>
@@ -345,7 +326,6 @@ namespace Ink_Canvas.Helpers
                     committed = true;
                 }
                 DrawPreviewTip();
-                HasDrawnPreview = true;
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
             finally
@@ -369,7 +349,6 @@ namespace Ink_Canvas.Helpers
         public void ForceRedraw()
         {
             _previewTip = null;
-            _previewPosition = null;
             if (Stroke == null || _visualCanvas == null) return;
 
             RealtimeInkFrameScheduler.RecordInkTick();

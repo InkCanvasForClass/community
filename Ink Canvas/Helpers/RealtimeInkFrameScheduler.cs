@@ -205,15 +205,6 @@ namespace Ink_Canvas.Helpers
             // 这里仅保留事件 raise 以便其他订阅者使用。
             RaiseInkTick(now);
 
-            // Only the first normal preview bypasses frame coalescing. Do not
-            // Flush here: that would finalize the temporary tip into source ink.
-            if (requestKind == RedrawRequestKind.Normal && !strokeVisual.HasDrawnPreview
-                && !PendingRedraws.ContainsKey(strokeVisual))
-            {
-                ExecuteRedraw(strokeVisual, requestKind);
-                return;
-            }
-
             if (PendingRedraws.TryGetValue(strokeVisual, out var pending))
             {
                 if (requestKind == RedrawRequestKind.Force)
