@@ -65,6 +65,10 @@ namespace Ink_Canvas.Helpers
 
         private static void SetIsAdjusting(DependencyObject element, bool value) => element.SetValue(IsAdjustingProperty, value);
         private static bool GetIsAdjusting(DependencyObject element) => (bool)element.GetValue(IsAdjustingProperty);
+        private static readonly DependencyProperty ContentListenerAttachedProperty = DependencyProperty.RegisterAttached(
+            "ContentListenerAttached", typeof(bool), typeof(AutoFontSizeHelper), new PropertyMetadata(false));
+        private static readonly DependencyProperty AdjustmentPendingProperty = DependencyProperty.RegisterAttached(
+            "AdjustmentPending", typeof(bool), typeof(AutoFontSizeHelper), new PropertyMetadata(false));
 
         public static readonly DependencyProperty OriginalFontSizeProperty =
             DependencyProperty.RegisterAttached(
@@ -92,9 +96,8 @@ namespace Ink_Canvas.Helpers
                 fe.SizeChanged += Element_OnSizeChanged;
                 fe.Loaded += Element_OnLoaded;
                 fe.Unloaded += Element_OnUnloaded;
-                TryHookContentChanged(fe, true);
-
-                fe.Dispatcher.BeginInvoke(new Action(() => TryAdjust(fe)), DispatcherPriority.Loaded);
+                if (fe.IsLoaded) TryHookContentChanged(fe, true);
+                QueueAdjustment(fe);
             }
             else
             {
@@ -109,7 +112,7 @@ namespace Ink_Canvas.Helpers
         {
             if (d is FrameworkElement fe && GetIsEnabled(fe))
             {
-                fe.Dispatcher.BeginInvoke(new Action(() => TryAdjust(fe)), DispatcherPriority.Loaded);
+                QueueAdjustment(fe);
             }
         }
 
@@ -117,30 +120,32 @@ namespace Ink_Canvas.Helpers
         {
             if (sender is FrameworkElement fe)
             {
-                fe.Dispatcher.BeginInvoke(new Action(() => TryAdjust(fe)), DispatcherPriority.Loaded);
+                TryHookContentChanged(fe, true);
+                QueueAdjustment(fe);
             }
         }
 
         private static void Element_OnUnloaded(object sender, RoutedEventArgs e)
         {
-            // No extra cleanup required here.
+            if (sender is FrameworkElement fe) TryHookContentChanged(fe, false);
         }
 
         private static void Element_OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (sender is FrameworkElement fe) TryAdjust(fe);
+            if (sender is FrameworkElement fe) QueueAdjustment(fe);
         }
 
         private static void Element_OnTextChanged(object sender, EventArgs e)
         {
             if (sender is FrameworkElement fe)
             {
-                fe.Dispatcher.BeginInvoke(new Action(() => TryAdjust(fe)), DispatcherPriority.Loaded);
+                QueueAdjustment(fe);
             }
         }
 
         private static void TryHookContentChanged(FrameworkElement fe, bool add)
         {
+            if ((bool)fe.GetValue(ContentListenerAttachedProperty) == add) return;
             try
             {
                 DependencyPropertyDescriptor dpd = null;
@@ -156,11 +161,23 @@ namespace Ink_Canvas.Helpers
                 if (dpd == null) return;
                 if (add) dpd.AddValueChanged(fe, Element_OnTextChanged);
                 else dpd.RemoveValueChanged(fe, Element_OnTextChanged);
+                fe.SetValue(ContentListenerAttachedProperty, add);
             }
             catch
             {
                 // Ignore descriptor issues in rare runtime cases.
             }
+        }
+
+        private static void QueueAdjustment(FrameworkElement fe)
+        {
+            if (!fe.IsLoaded || !GetIsEnabled(fe) || (bool)fe.GetValue(AdjustmentPendingProperty)) return;
+            fe.SetValue(AdjustmentPendingProperty, true);
+            _ = fe.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
+            {
+                fe.SetValue(AdjustmentPendingProperty, false);
+                if (fe.IsLoaded) TryAdjust(fe);
+            }));
         }
 
         private static void TryAdjust(FrameworkElement fe)

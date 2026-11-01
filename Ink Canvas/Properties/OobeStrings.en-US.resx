@@ -377,4 +377,6 @@
   <data name="Oobe_SummaryLogEnabled" xml:space="preserve">
     <value>Enable Logging</value>
   </data>
+  <data name="Oobe_SaveFailedTitle" xml:space="preserve"><value>Unable to save settings</value></data>
+  <data name="Oobe_SaveFailedMessage" xml:space="preserve"><value>Initial setup could not be saved. Check that the application folder is writable and the disk has free space, then try again. Your current selections have been retained.</value></data>
 </root>

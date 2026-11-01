@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Interop;
@@ -153,6 +153,7 @@ namespace Ink_Canvas.Helpers
 
         public static void ShowWithFadeIn(UIElement element, double duration = 0.15)
         {
+            if (element is Controls.PPTNavBar bar) { bar.ShowWithConfiguredOpacity(duration); return; }
             if (element.Visibility == Visibility.Visible) return;
 
             if (element == null)
@@ -550,7 +551,7 @@ namespace Ink_Canvas.Helpers
         {
             var settings = Ink_Canvas.Windows.SettingsViews.Helpers.SettingsManager.Settings;
             var mw = Application.Current.MainWindow as Ink_Canvas.MainWindow;
-            bool isPPTMode = mw != null && mw.currentMode == 2;
+            bool isPPTMode = mw != null && mw.IsPresentationToolbarActive;
 
             // 浮动栏菜单
             string name = popup.Name;

@@ -98,10 +98,11 @@ namespace Ink_Canvas.Helpers
                 else
                 {
                     // 回退到传统同步处理
+                    var snapshot = originalStroke.Clone();
                     result = await Task.Run(() =>
                     {
                         var traditionalSmoothing = new AdvancedBezierSmoothing();
-                        return traditionalSmoothing.SmoothStroke(originalStroke);
+                        return traditionalSmoothing.SmoothStroke(snapshot);
                     }, cancellationToken);
                     onCompleted?.Invoke(originalStroke, result);
                 }

@@ -1,4 +1,4 @@
-using Ink_Canvas.Helpers;
+﻿using Ink_Canvas.Helpers;
 using System;
 using System.Windows;
 
@@ -184,7 +184,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         public static void OnFloatingBarMenuOpacityInPPTChanged(double value)
         {
             var mw = GetMainWindow();
-            if (mw != null && mw.currentMode == 2)
+            if (mw != null && mw.IsPresentationToolbarActive)
                 mw.ApplyFloatingBarMenuOpacity();
         }
 
@@ -326,24 +326,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                     effectiveScale = actualScale * MainWindow.CompactFloatingBarScaleFactor;
                 mw.ViewboxFloatingBarScaleTransform.ScaleX = effectiveScale;
                 mw.ViewboxFloatingBarScaleTransform.ScaleY = effectiveScale;
-                if (mw.IsInPPTPresentationMode)
-                    mw.ViewboxFloatingBarMarginAnimation(60);
-                else
-                    mw.ViewboxFloatingBarMarginAnimation(100, true);
+                  mw.RequestFloatingBarReposition();
             }
         }
 
         public static void OnFloatingBarOpacityChanged(double value)
         {
             var mw = GetMainWindow();
-            if (mw != null) mw.ViewboxFloatingBar.Opacity = value;
+            if (mw != null) mw.ApplyCurrentFloatingBarOpacity();
         }
 
         public static void OnFloatingBarOpacityInPPTChanged(double value)
         {
             var mw = GetMainWindow();
-            if (mw != null && mw.currentMode == 2)
-                mw.ViewboxFloatingBar.Opacity = value;
+            if (mw != null && mw.IsPresentationToolbarActive)
+                mw.ApplyCurrentFloatingBarOpacity();
         }
 
         public static void OnToolbarPositionChanged(ToolbarPosition position)
@@ -563,7 +560,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 mw.PPTManager.SkipAnimationsWhenNavigating = isOn;
         }
 
-        public static void OnPPTLinkModeChanged()
+        public static async void OnPPTLinkModeChanged()
         {
             var mw = GetMainWindow();
             if (mw == null) return;
@@ -586,7 +583,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 // 切换到 Agent 模式时，自动注册 VSTO 插件
                 if (ppt.PPTLinkMode == PPTLinkMode.Agent)
                 {
-                    if (!VstoRegistrationHelper.EnsureRegistered())
+                    if (!await VstoRegistrationHelper.EnsureRegisteredAsync())
                     {
                         LogHelper.WriteLogToFile("VSTO 插件注册失败，Agent 模式可能无法正常工作", LogHelper.LogType.Warning);
                     }

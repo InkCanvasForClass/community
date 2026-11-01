@@ -1,5 +1,5 @@
-using System;
-using System.Collections.Generic;
+﻿global using System;
+global using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -22,6 +22,7 @@ namespace InkCanvas.Calibration.Tests
         private static int Main()
         {
             var app = new Application();
+            System.Threading.SynchronizationContext.SetSynchronizationContext(new System.Windows.Threading.DispatcherSynchronizationContext());
             app.Resources[typeof(TextBlock)] = new Style(typeof(TextBlock));
             string testRoot = Path.Combine(AppContext.BaseDirectory, "test-data", Guid.NewGuid().ToString("N"));
             App.RootPath = testRoot;
@@ -51,6 +52,15 @@ namespace InkCanvas.Calibration.Tests
         private static Button SaveButton(TouchCalibrationPage page) =>
             (page.FindName("SaveButton") ?? page.FindName("NextButton")) as Button;
 
+        private static void SaveAndWait(TouchCalibrationPage page)
+        {
+            SaveButton(page).RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+            Ink_Canvas.Helpers.AtomicFileWriter.Flush(TimeSpan.FromSeconds(3));
+            var frame = new System.Windows.Threading.DispatcherFrame();
+            var timer = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(30) };
+            timer.Tick += (_, _) => { timer.Stop(); frame.Continue = false; };
+            timer.Start(); System.Windows.Threading.Dispatcher.PushFrame(frame);
+        }
         private static void PageConstruction() => _ = new TouchCalibrationPage();
 
         private static void PointRouteSaves()
@@ -66,7 +76,7 @@ namespace InkCanvas.Calibration.Tests
             Field<Slider>(page, "GroupWindow").Value = 300;
             Field<Slider>(page, "GroupTolerance").Value = 1.5;
             Field<Slider>(page, "SizeAdjustment").Value = 1.5;
-            save.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+            SaveAndWait(page);
             var record = SettingsManager.Settings.Advanced.TouchCalibration;
             Check(record?.IsValid() == true, "Position-only calibration was not saved");
             var restored = ReadSaved();
@@ -82,10 +92,7 @@ namespace InkCanvas.Calibration.Tests
             var page = new TouchCalibrationPage();
             Field<TextBox>(page, "OutlineWidth").Text = "60";
             Field<TextBox>(page, "OutlineHeight").Text = "60";
-            Set(page, "_environment", new TouchCalibrationEnvironment
-            {
-                Source = "WPF", Display = "DISPLAY1", PixelWidth = 1920, PixelHeight = 1080, DpiX = 1, DpiY = 1
-            });
+            Set(page, "_host", new Window()); Set(page, "_environment", TouchCalibrationDisplay.Capture(Field<Window>(page, "_host"), "WPF"));
             Field<Button>(page, "NextButton").RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
             AddPresses(Field<TouchCalibrationSampler>(page, "_palm"), 30);
             Field<Button>(page, "NextButton").RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
@@ -94,7 +101,7 @@ namespace InkCanvas.Calibration.Tests
             Field<Button>(page, "SkipButton").RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
             var save = SaveButton(page);
             Check(save.Visibility == Visibility.Visible && save.IsEnabled, "Area calibration has no usable save button");
-            save.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+            SaveAndWait(page);
             Check(ReadSaved()?.PalmArea == 900, "Area calibration was not persisted");
         }
 
@@ -117,7 +124,7 @@ namespace InkCanvas.Calibration.Tests
             App.RootPath = blocked;
             try
             {
-                SaveButton(page).RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+                SaveAndWait(page);
                 Check(ReferenceEquals(SettingsManager.Settings.Advanced.TouchCalibration, previous), "Failed save changed the live calibration");
                 Check(ReferenceEquals(Field<TouchCalibrationRecord>(page, "_draft"), draft), "Failed save discarded the draft");
                 Check(SaveButton(page).Visibility == Visibility.Visible, "Failed save removed the retry button");
@@ -143,7 +150,7 @@ namespace InkCanvas.Calibration.Tests
         private static MainWindow PalmWindow()
         {
             var window = (MainWindow)RuntimeHelpers.GetUninitializedObject(typeof(MainWindow));
-            Set(window, "inkCanvas", new System.Windows.Controls.InkCanvas { EditingMode = InkCanvasEditingMode.None });
+            Set(window, "inkCanvas", new Ink_Canvas.Controls.HighlighterInkCanvas { EditingMode = InkCanvasEditingMode.None });
             Set(window, "isPalmEraserActive", true);
             Set(window, "palmEraserPreviousEditingMode", InkCanvasEditingMode.Ink);
             Set(window, "_changingPalmMode", true);
@@ -164,9 +171,9 @@ namespace InkCanvas.Calibration.Tests
             var window = PalmWindow();
             Set(window, "isPalmEraserActive", false);
             Set(window, "_changingPalmMode", false);
-            Set(window, "_palmGroupSavedMode", (InkCanvasEditingMode?)InkCanvasEditingMode.Ink);
+            Set(window, "_currentToolMode", "pen");
             Check((bool)Call(window, "IsAnnotationModeActive"), "Waiting for the grouping window falsely reports annotation exit");
-            Set(window, "_palmGroupSavedMode", null);
+            Set(window, "_currentToolMode", "cursor");
             Check(!(bool)Call(window, "IsAnnotationModeActive"), "Ending the group must not hide a real annotation exit");
         }
 

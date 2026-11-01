@@ -427,9 +427,12 @@ namespace Ink_Canvas
                 return;
             }
 
+            var pageRects = _pluginVisiblePages.Select(page => page.ContentRect).ToArray();
+            var inkBounds = canvasInk.GetBounds();
             foreach (var (pageIndex, rect) in _pluginVisiblePages)
             {
-                var cropped = CropStrokesToRect(canvasInk, rect);
+                var captureRect = Helpers.PluginPageInkBounds.ExpandHorizontally(rect, pageRects, inkBounds);
+                var cropped = CropStrokesToRect(canvasInk, captureRect);
                 // 转页面局部坐标：墨迹减去页矩形原点。
                 _pluginPageInk[pageIndex] = TranslateStrokes(cropped, -rect.X, -rect.Y);
             }
@@ -851,7 +854,7 @@ namespace Ink_Canvas
                 }
 
                 // 墨迹已按背景缩放并平移到位，直接绘制。
-                foreach (Stroke stroke in strokes) stroke.Draw(context);
+                Ink.HighlighterRendering.Draw(context, strokes);
             }
 
             var bitmap = new RenderTargetBitmap(pixelWidth, pixelHeight, 96, 96, PixelFormats.Pbgra32);

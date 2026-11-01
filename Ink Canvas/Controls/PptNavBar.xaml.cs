@@ -16,12 +16,6 @@ namespace Ink_Canvas.Controls
     /// </summary>
     public partial class PPTNavBar : UserControl
     {
-        public sealed class PreviewItem
-        {
-            public int SlideNumber { get; set; }
-            public BitmapImage Thumbnail { get; set; }
-        }
-
         public enum NavDirection
         {
             LeftBottom,
@@ -37,6 +31,13 @@ namespace Ink_Canvas.Controls
         public static readonly DependencyProperty CurrentSlideProperty = DependencyProperty.Register(
             nameof(CurrentSlide), typeof(int), typeof(PPTNavBar),
             new PropertyMetadata(0, OnPageChanged));
+        public static readonly DependencyProperty AdditionalContentProperty = DependencyProperty.Register(
+            nameof(AdditionalContent), typeof(object), typeof(PPTNavBar), new PropertyMetadata(null));
+        public object AdditionalContent
+        {
+            get => GetValue(AdditionalContentProperty);
+            set => SetValue(AdditionalContentProperty, value);
+        }
 
         public static readonly DependencyProperty TotalSlidesProperty = DependencyProperty.Register(
             nameof(TotalSlides), typeof(int), typeof(PPTNavBar),
@@ -88,6 +89,33 @@ namespace Ink_Canvas.Controls
         public event EventHandler NextPressedDown;
         public event EventHandler PressEnded;
         public event EventHandler<bool> PreviewExpandedChanged;
+        public event EventHandler<PreviewItem> PreviewThumbnailRequested;
+        public event EventHandler<PreviewItem> PreviewThumbnailReleased;
+        private static readonly DependencyProperty PreviewLeaseProperty = DependencyProperty.RegisterAttached(
+            "PreviewLease", typeof(PreviewItem), typeof(PPTNavBar));
+
+        private void UpdatePreviewLease(FrameworkElement image, PreviewItem next)
+        {
+            var previous = (PreviewItem)image.GetValue(PreviewLeaseProperty);
+            if (ReferenceEquals(previous, next)) return;
+            image.SetValue(PreviewLeaseProperty, next);
+            if (previous != null) PreviewThumbnailReleased?.Invoke(this, previous);
+            if (next != null) PreviewThumbnailRequested?.Invoke(this, next);
+        }
+
+        private void PreviewThumbnail_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement image) UpdatePreviewLease(image, image.DataContext as PreviewItem);
+        }
+        private void PreviewThumbnail_Unloaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement image) UpdatePreviewLease(image, null);
+        }
+        private void PreviewThumbnail_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (sender is FrameworkElement image)
+                UpdatePreviewLease(image, image.IsLoaded ? e.NewValue as PreviewItem : null);
+        }
 
         // 静态几何（左下/右下：水平箭头；左侧/右侧：垂直箭头）
         private static readonly Geometry HArrowLeft = Geometry.Parse("F0 M24,24z M0,0z M3.3994,12.9642C2.86687,12.4317,2.86687,11.5683,3.3994,11.0358L9.94485,4.49031C10.4774,3.95777 11.3408,3.95777 11.8733,4.49031 12.4059,5.02284 12.4059,5.88625 11.8733,6.41878L7.65575,10.6364 19.6364,10.6364C20.3895,10.6364 21,11.2469 21,12 21,12.7531 20.3895,13.3636 19.6364,13.3636L7.65575,13.3636 11.8733,17.5812C12.4059,18.1137 12.4059,18.9772 11.8733,19.5097 11.3408,20.0422 10.4774,20.0422 9.94485,19.5097L3.3994,12.9642z");
@@ -410,9 +438,17 @@ namespace Ink_Canvas.Controls
         }
 
         public void SetPageButtonVisibility(Visibility v) => PageButtonBorder.Visibility = v;
+        public void SetNavigationAvailability(bool previous, bool next, bool pageClickable = true)
+        {
+            PreviousButtonBorder.IsEnabled = previous;
+            NextButtonBorder.IsEnabled = next;
+            PreviousButtonBorder.Opacity = previous ? 1 : .35;
+            NextButtonBorder.Opacity = next ? 1 : .35;
+            PageButtonBorder.IsHitTestVisible = pageClickable;
+        }
         public void SetBarOpacity(double opacity)
         {
-            _collapsedOpacity = opacity;
+            _collapsedOpacity = double.IsFinite(opacity) ? Math.Clamp(opacity, .1, 1) : 1;
             ApplyRootOpacity();
         }
 
@@ -420,7 +456,20 @@ namespace Ink_Canvas.Controls
         // 与浮动栏（ViewboxFloatingBar.Opacity + 子级阴影）保持一致。
         // 若把 Opacity 和 Effect 放在同一个元素上，WPF 会先按半透明轮廓生成阴影，
         // 阴影透过样式半透明的填充显示出来，背景就会发灰发脏。
-        private void ApplyRootOpacity() => Opacity = IsPreviewExpanded ? 1 : _collapsedOpacity;
+        private void ApplyRootOpacity()
+        {
+            BeginAnimation(OpacityProperty, null);
+            Opacity = IsPreviewExpanded ? 1 : _collapsedOpacity;
+        }
+
+        internal void ShowWithConfiguredOpacity(double duration)
+        {
+            if (IsVisible) return;
+            Visibility = Visibility.Visible;
+            ApplyRootOpacity();
+            BeginAnimation(OpacityProperty, new System.Windows.Media.Animation.DoubleAnimation(0, Opacity,
+                TimeSpan.FromSeconds(duration)) { FillBehavior = System.Windows.Media.Animation.FillBehavior.Stop });
+        }
 
         public void SetBarScale(double scale)
         {

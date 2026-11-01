@@ -147,6 +147,12 @@ namespace Ink_Canvas
         {
             switch (tool)
             {
+                case PluginInkTool.Mouse:
+                    if (currentMode != 0) SwitchToBoardMode();
+                    SetPluginFullScreen(false);
+                    CursorIcon_Click(null, null);
+                    return inkCanvas.EditingMode == InkCanvasEditingMode.None;
+
                 case PluginInkTool.Select:
                     return SetCurrentToolMode(InkCanvasEditingMode.Select, () =>
                     {

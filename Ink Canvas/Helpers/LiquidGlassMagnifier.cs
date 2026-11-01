@@ -2,6 +2,8 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -29,6 +31,7 @@ namespace Ink_Canvas.Helpers
         private const int ResponseHeaderBytes = 20;
 
         private static readonly object Sync = new object();
+        private static readonly SemaphoreSlim CaptureGate = new SemaphoreSlim(1, 1);
         private static bool _available = true;
         private static Process _host;
         private static Stream _stdin;
@@ -55,7 +58,14 @@ namespace Ink_Canvas.Helpers
         /// 抓取源矩形（桌面坐标，物理像素）下、排除 excludeHwnd 后的画面。
         /// 必须在 UI 线程调用。失败返回 null（调用方走 Hide/Show 回退）。
         /// </summary>
-        internal static BitmapSource CaptureRegion(IntPtr excludeHwnd, int left, int top, int width, int height)
+        internal static async Task<BitmapSource> CaptureRegionAsync(IntPtr excludeHwnd, int left, int top, int width, int height)
+        {
+            if (!await CaptureGate.WaitAsync(0).ConfigureAwait(false)) return null;
+            try { return await Task.Run(() => CaptureRegionCore(excludeHwnd, left, top, width, height)).ConfigureAwait(false); }
+            finally { CaptureGate.Release(); }
+        }
+
+        private static BitmapSource CaptureRegionCore(IntPtr excludeHwnd, int left, int top, int width, int height)
         {
             if (width <= 0 || height <= 0) return null;
             if (excludeHwnd == IntPtr.Zero) return null;
@@ -83,6 +93,9 @@ namespace Ink_Canvas.Helpers
                     stdin = _stdin;
                     stdout = _stdout;
                 }
+
+                using var writeDeadline = new StreamDeadline(stdin, 2000);
+                using var readDeadline = new StreamDeadline(stdout, 2000);
 
                 try
                 {
@@ -119,7 +132,9 @@ namespace Ink_Canvas.Helpers
                 int outStride = BitConverter.ToInt32(header, 12);
                 int bytesLen = BitConverter.ToInt32(header, 16);
 
-                if (status != 0 || bytesLen <= 0 || outW <= 0 || outH <= 0)
+                if (status != 0 || bytesLen <= 0 || bytesLen > 32 * 1024 * 1024
+                    || outW <= 0 || outH <= 0 || outStride < (long)outW * 4
+                    || (long)outStride * outH != bytesLen)
                 {
                     if (status == 2)
                     {
@@ -158,6 +173,7 @@ namespace Ink_Canvas.Helpers
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"液态玻璃放大镜异常: {ex.Message}", LogHelper.LogType.Warning);
+                MarkHostDead();
                 return null;
             }
         }

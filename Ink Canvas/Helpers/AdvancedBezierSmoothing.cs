@@ -245,6 +245,9 @@ namespace Ink_Canvas.Helpers
             if (originalStroke == null || originalStroke.StylusPoints.Count < 2)
                 return originalStroke;
 
+            if (_processingTasks.Count >= 64) return originalStroke;
+            var snapshot = originalStroke.Clone();
+
             // 取消之前对同一笔画的处理
             if (_processingTasks.TryGetValue(originalStroke, out var existingCts))
             {
@@ -282,7 +285,7 @@ namespace Ink_Canvas.Helpers
                     sample.ThreadPoolQueueMs = ToMilliseconds(
                         System.Diagnostics.Stopwatch.GetTimestamp() - queueStartedAt);
                     var computeWatch = System.Diagnostics.Stopwatch.StartNew();
-                    var result = ProcessStrokeInternal(originalStroke, cts.Token);
+                    var result = ProcessStrokeInternal(snapshot, cts.Token);
                     computeWatch.Stop();
                     sample.ComputeMs = computeWatch.Elapsed.TotalMilliseconds;
                     sample.ComputeCompletedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");

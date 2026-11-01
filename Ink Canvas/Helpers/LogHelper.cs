@@ -2,6 +2,9 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using System.Threading.Channels;
+using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 namespace Ink_Canvas.Helpers
 {
@@ -11,7 +14,29 @@ namespace Ink_Canvas.Helpers
         private static string LogsFolder = "Logs";
         private static string AppStartTime = DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss");
         private static readonly long MaxLogsFolderSizeBytes = 5 * 1024 * 1024; // 5MB
-        private static int _isWritingLog = 0;
+        [ThreadStatic] private static bool _isWritingLog;
+        private static readonly Channel<Action> Writes = Channel.CreateBounded<Action>(2048);
+        private static readonly Task Writer = Task.Run(DrainAsync);
+        private static int _dropped;
+        private static DateTime _lastCleanupUtc;
+
+        private static async Task DrainAsync()
+        {
+            await foreach (var write in Writes.Reader.ReadAllAsync())
+            {
+                _isWritingLog = true;
+                try { write(); }
+                catch (Exception ex) { Debug.WriteLine(ex); }
+                finally { _isWritingLog = false; }
+            }
+        }
+
+        internal static bool Flush(TimeSpan timeout)
+        {
+            // A disposed event must not be referenced by a late writer after timeout.
+            var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            return Writes.Writer.TryWrite(() => completion.TrySetResult(true)) && completion.Task.Wait(timeout);
+        }
 
         /// <summary>
         /// 启动阶段设为 true 可跳过昂贵的 StackTrace 采集，减少启动耗时。
@@ -67,25 +92,18 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         /// <param name="str">要记录的日志文本消息。</param>
         /// <param name="logType">日志的类型/等级，用于在日志条目中标识（例如 Info、Error、Warning 等）。</param>
-        public static void WriteLogToFile(string str, LogType logType = LogType.Info)
+        public static void WriteLogToFile(string str, LogType logType = LogType.Info,
+            [CallerMemberName] string caller = "")
         {
-            if (Interlocked.CompareExchange(ref _isWritingLog, 1, 0) != 0)
-            {
-                System.Diagnostics.Debug.WriteLine($"[LogHelper] Recursive logging detected: {str}");
-                return;
-            }
-
-            try
-            {
-                WriteLogToFileCore(str, logType);
-            }
-            finally
-            {
-                Interlocked.Exchange(ref _isWritingLog, 0);
-            }
+            if (_isWritingLog || Severity(logType) < Severity(LogLevel)) return;
+            if (MainWindow.Settings?.Advanced?.IsLogEnabled == false) return;
+            var threadId = Environment.CurrentManagedThreadId;
+            var timestamp = DateTime.Now;
+            if (!Writes.Writer.TryWrite(() => WriteLogToFileCore(str, logType, timestamp, threadId, caller)))
+                Interlocked.Increment(ref _dropped);
         }
 
-        private static void WriteLogToFileCore(string str, LogType logType)
+        private static void WriteLogToFileCore(string str, LogType logType, DateTime timestamp, int threadId, string caller)
         {
             if (MainWindow.Settings != null && MainWindow.Settings.Advanced != null && !MainWindow.Settings.Advanced.IsLogEnabled) return;
 
@@ -107,7 +125,11 @@ namespace Ink_Canvas.Helpers
                     }
 
                     // 检查Logs文件夹大小，如果超过5MB则清空
-                    CheckAndCleanLogsFolder(logsPath);
+                    if (DateTime.UtcNow - _lastCleanupUtc > TimeSpan.FromMinutes(1))
+                    {
+                        CheckAndCleanLogsFolder(logsPath);
+                        _lastCleanupUtc = DateTime.UtcNow;
+                    }
 
                     // 使用软件启动时间作为日志文件名
                     file = Path.Combine(logsPath, $"Log_{AppStartTime}.txt");
@@ -122,22 +144,10 @@ namespace Ink_Canvas.Helpers
                     ProcessProtectionManager.WithWriteAccess(App.RootPath, () => Directory.CreateDirectory(App.RootPath));
                 }
 
-                var threadId = Thread.CurrentThread.ManagedThreadId;
-                string callerInfo = "<startup>";
-                if (!SuppressCallerInfo)
-                {
-                    var callingMethod = new StackTrace(2, true).GetFrame(0);
-                    if (callingMethod != null)
-                    {
-                        var method = callingMethod.GetMethod();
-                        if (method != null)
-                        {
-                            var className = method.DeclaringType != null ? method.DeclaringType.FullName : "<no class>";
-                            callerInfo = $"{className}.{method.Name}";
-                        }
-                    }
-                }
-                string logLine = string.Format("{0} [T{1}] [{2}] [{3}] {4}", DateTime.Now.ToString("O"), threadId, strLogType, callerInfo, str);
+                string callerInfo = SuppressCallerInfo ? "<startup>" : caller;
+                var dropped = Interlocked.Exchange(ref _dropped, 0);
+                if (dropped > 0) str = $"[Log queue overflow: {dropped} entries] {str}";
+                string logLine = string.Format("{0} [T{1}] [{2}] [{3}] {4}", timestamp.ToString("O"), threadId, strLogType, callerInfo, str);
                 DebugConsoleManager.WriteLine(logLine, GetConsoleColor(logType));
                 ProcessProtectionManager.WithWriteAccess(file, () =>
                 {

@@ -1,5 +1,6 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
+using Ink_Canvas.Windows.SettingsViews.Helpers;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using System;
 using System.Linq;
@@ -339,8 +340,9 @@ namespace Ink_Canvas.Windows
             NavigateTo(0, direction: 1);
         }
 
-        private void BtnUsePreset_Click(object sender, RoutedEventArgs e)
+        private async void BtnUsePreset_Click(object sender, RoutedEventArgs e)
         {
+            if (_isCompleting) return;
             var presetWindow = new OobePresetWindow { Owner = this };
             bool? result = presetWindow.ShowDialog();
             if (result != true) return;
@@ -357,16 +359,19 @@ namespace Ink_Canvas.Windows
                     return;
             }
 
+            if (!await PersistCompletionAsync()) return;
             DialogResult = true;
             LogHelper.WriteLogToFile($"[Oobe] 用户选择预设方案完成向导: {presetWindow.SelectedPreset}", LogHelper.LogType.Info);
             Close();
         }
 
-        private void BtnConfirm_Click(object sender, RoutedEventArgs e)
+        private async void BtnConfirm_Click(object sender, RoutedEventArgs e)
         {
+            if (_isCompleting) return;
             if (_currentStep == FinishIndex)
             {
                 ApplySelection();
+                if (!await PersistCompletionAsync()) return;
                 DialogResult = true;
                 LogHelper.WriteLogToFile("[Oobe] 首次启动向导已完成", LogHelper.LogType.Info);
                 Close();
@@ -599,7 +604,31 @@ namespace Ink_Canvas.Windows
 
         private void OobeWindow_OnClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            if (_isCompleting) { e.Cancel = true; return; }
             UnregisterDpiChangedListener();
+        }
+
+        private bool _isCompleting;
+
+        private async System.Threading.Tasks.Task<bool> PersistCompletionAsync()
+        {
+            _isCompleting = true;
+            IsEnabled = false;
+            bool previous = _settings.Startup.HasShownOobe;
+            try
+            {
+                _settings.Startup.HasShownOobe = true;
+                if (await SettingsManager.TrySaveSettingsToFileAsync()) return true;
+                _settings.Startup.HasShownOobe = previous;
+                MessageBoxHelper.Show(this, OobeStrings.Oobe_SaveFailedMessage, OobeStrings.Oobe_SaveFailedTitle,
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            finally
+            {
+                IsEnabled = true;
+                _isCompleting = false;
+            }
         }
 
         private void OobeWindow_OnLoaded(object sender, RoutedEventArgs e)

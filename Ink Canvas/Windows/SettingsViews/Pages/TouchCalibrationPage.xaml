@@ -45,6 +45,7 @@
             </Border>
             <ScrollViewer x:Name="OptionsPanel" Grid.Column="1" Margin="20,0,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" PanningMode="VerticalOnly">
                 <StackPanel>
+                    <StackPanel x:Name="SourceOptionsPanel" Margin="0,0,0,12"/>
                     <StackPanel x:Name="OutlinePanel" Margin="0,0,0,12">
                         <TextBlock Text="{x:Static p:AdvancedStrings.CalibrationWidth}"/>
                         <TextBox x:Name="OutlineWidth" Margin="0,6,0,12"/>
@@ -54,6 +55,7 @@
                         <TextBlock x:Name="SimulationHint" TextWrapping="Wrap" Margin="0,8,0,0"/>
                     </StackPanel>
                     <StackPanel x:Name="PreviewPanel" Visibility="Collapsed" Margin="0,0,0,12">
+                        <StackPanel x:Name="PalmOptionsPanel"/>
                         <TextBlock x:Name="PreviewPolicy" TextWrapping="Wrap"/>
                         <TextBlock Text="{x:Static p:AdvancedStrings.CalibrationSize}" Margin="0,12,0,8"/>
                         <Slider x:Name="SizeAdjustment" Minimum="0.5" Maximum="2" Value="1" TickFrequency="0.1" IsSnapToTickEnabled="True" ValueChanged="SizeAdjustmentChanged"/>

@@ -2512,8 +2512,7 @@ namespace Ink_Canvas.Helpers
                 }
 
                 // 第四步：强制垃圾回收及等待终结器执行
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
+                GC.Collect(2, GCCollectionMode.Optimized, blocking: false);
 
                 // 等待一段时间让COM对象完全释放
                 Thread.Sleep(1000);

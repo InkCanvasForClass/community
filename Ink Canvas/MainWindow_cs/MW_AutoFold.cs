@@ -23,6 +23,14 @@ namespace Ink_Canvas
         private bool isFloatingBarChangingHideMode;
 
         private int _sidePanelAnimVersion = 0;
+        private CancellationTokenSource _startupFoldVerification;
+
+        private void CancelStartupFoldVerification()
+        {
+            var pending = Interlocked.Exchange(ref _startupFoldVerification, null);
+            try { pending?.Cancel(); }
+            catch (ObjectDisposedException) { }
+        }
 
         /// <summary>
         /// 自动收起侧栏计时器
@@ -57,11 +65,13 @@ namespace Ink_Canvas
             SwitchBackground(null, null);
             { /* Old UI removed */ }
             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
-            new Thread(() =>
-            {
-                Thread.Sleep(200);
-                Application.Current.Dispatcher.Invoke(() => { isDisplayingOrHidingBlackboard = false; });
-            }).Start();
+            _ = ResetBlackboardTransitionAsync();
+        }
+
+        private async Task ResetBlackboardTransitionAsync()
+        {
+            await Task.Delay(200);
+            isDisplayingOrHidingBlackboard = false;
         }
 
         /// <summary>
@@ -71,6 +81,7 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数。</param>
         public async void FoldFloatingBar_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (e != null) CancelStartupFoldVerification();
             await FoldFloatingBar(sender);
         }
 
@@ -95,6 +106,22 @@ namespace Ink_Canvas
         /// </remarks>
         public async Task FoldFloatingBar(object sender, bool isAutoFoldCommand = false)
         {
+            try
+            {
+                if (!Dispatcher.CheckAccess())
+                    await Dispatcher.InvokeAsync(() => FoldFloatingBar(sender, isAutoFoldCommand)).Task.Unwrap();
+                else await FoldFloatingBarCoreAsync(sender, isAutoFoldCommand);
+            }
+            catch (OperationCanceledException) when (Dispatcher.HasShutdownStarted) { }
+            catch (Exception ex)
+            {
+                isFloatingBarChangingHideMode = false;
+                LogHelper.WriteLogToFile($"[Toolbar fold] {ex}", LogHelper.LogType.Warning);
+            }
+        }
+
+        private async Task FoldFloatingBarCoreAsync(object sender, bool isAutoFoldCommand)
+        {
 
             // FloatingBarIcons_MouseUp_New(sender);
             if (sender == null)
@@ -113,6 +140,9 @@ namespace Ink_Canvas
             await Dispatcher.InvokeAsync(() =>
             {
                 InkCanvasForInkReplay.Visibility = Visibility.Collapsed;
+                ++_floatingBarPositionVersion;
+                isViewboxFloatingBarMarginAnimationRunning = false;
+                ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
                 InkCanvasGridForInkReplay.Visibility = Visibility.Visible;
                 InkCanvasGridForInkReplay.IsHitTestVisible = true;
                 FloatingbarUIForInkReplay.Visibility = Visibility.Visible;
@@ -379,6 +409,23 @@ namespace Ink_Canvas
         /// </remarks>
         public async Task UnFoldFloatingBar(object sender)
         {
+            try
+            {
+                if (!Dispatcher.CheckAccess())
+                    await Dispatcher.InvokeAsync(() => UnFoldFloatingBar(sender)).Task.Unwrap();
+                else await UnFoldFloatingBarCoreAsync(sender);
+            }
+            catch (OperationCanceledException) when (Dispatcher.HasShutdownStarted) { }
+            catch (Exception ex)
+            {
+                isFloatingBarChangingHideMode = false;
+                LogHelper.WriteLogToFile($"[Toolbar unfold] {ex}", LogHelper.LogType.Warning);
+            }
+        }
+
+        private async Task UnFoldFloatingBarCoreAsync(object sender)
+        {
+            if (sender != null) CancelStartupFoldVerification();
             // 新增：如果之前彻底隐藏了，先恢复显示
             if (this.Visibility != Visibility.Visible)
             {
@@ -448,18 +495,10 @@ namespace Ink_Canvas
                 // 新只在屏幕模式下显示浮动栏
                 if (currentMode == 0)
                 {
-                    // 强制更新布局以确保ActualWidth正确
-                    ViewboxFloatingBar.UpdateLayout();
-
-                    // 等待一小段时间让布局完全更新
-                    Task.Delay(50);
-
-                    // 再次强制更新布局
-                    ViewboxFloatingBar.UpdateLayout();
-
-                    // 强制重新测量和排列
-                    ViewboxFloatingBar.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-                    ViewboxFloatingBar.Arrange(new Rect(ViewboxFloatingBar.DesiredSize));
+                    // Let WPF arrange within the real parent constraints; measuring with
+                    // infinity here invalidates the whole window again on the next frame.
+                    if (!ViewboxFloatingBar.IsMeasureValid || !ViewboxFloatingBar.IsArrangeValid)
+                        ViewboxFloatingBar.UpdateLayout();
 
                     if (IsInPPTPresentationMode)
                         ViewboxFloatingBarMarginAnimation(60);
@@ -509,47 +548,53 @@ namespace Ink_Canvas
         private async void SidePannelMarginAnimation(int MarginFromEdge, bool isNoAnimation = false) // Possible value: -50, -10
         {
             int thisVersion = ++_sidePanelAnimVersion;
-
-            await Dispatcher.InvokeAsync(() =>
+            try
             {
-                if (MarginFromEdge == -10)
+
+                await Dispatcher.InvokeAsync(() =>
                 {
-                    if (isFloatingBarFolded)
-                        LeftSidePanel.Visibility = Visibility.Visible;
-                    else
-                        LeftSidePanel.Visibility = Visibility.Collapsed;
-                }
+                    if (_sidePanelAnimVersion != thisVersion) return;
+                    if (MarginFromEdge == -10)
+                    {
+                        if (isFloatingBarFolded)
+                            LeftSidePanel.Visibility = Visibility.Visible;
+                        else
+                            LeftSidePanel.Visibility = Visibility.Collapsed;
+                    }
 
-                var LeftSidePanelmarginAnimation = new ThicknessAnimation
+                    var LeftSidePanelmarginAnimation = new ThicknessAnimation
+                    {
+                        Duration = isNoAnimation ? TimeSpan.FromSeconds(0) : TimeSpan.FromSeconds(0.175),
+                        From = LeftSidePanel.Margin,
+                        To = new Thickness(MarginFromEdge, 0, 0, Settings.Appearance.QuickPanelBottomOffset)
+                    };
+                    LeftSidePanelmarginAnimation.EasingFunction = new CubicEase();
+                    var RightSidePanelmarginAnimation = new ThicknessAnimation
+                    {
+                        Duration = isNoAnimation ? TimeSpan.FromSeconds(0) : TimeSpan.FromSeconds(0.175),
+                        From = RightSidePanel.Margin,
+                        To = new Thickness(0, 0, MarginFromEdge, Settings.Appearance.QuickPanelBottomOffset)
+                    };
+                    RightSidePanelmarginAnimation.EasingFunction = new CubicEase();
+                    LeftSidePanel.BeginAnimation(MarginProperty, LeftSidePanelmarginAnimation);
+                    RightSidePanel.BeginAnimation(MarginProperty, RightSidePanelmarginAnimation);
+                });
+
+                await Task.Delay(600);
+
+                if (_sidePanelAnimVersion != thisVersion) return;
+
+                await Dispatcher.InvokeAsync(() =>
                 {
-                    Duration = isNoAnimation ? TimeSpan.FromSeconds(0) : TimeSpan.FromSeconds(0.175),
-                    From = LeftSidePanel.Margin,
-                    To = new Thickness(MarginFromEdge, 0, 0, Settings.Appearance.QuickPanelBottomOffset)
-                };
-                LeftSidePanelmarginAnimation.EasingFunction = new CubicEase();
-                var RightSidePanelmarginAnimation = new ThicknessAnimation
-                {
-                    Duration = isNoAnimation ? TimeSpan.FromSeconds(0) : TimeSpan.FromSeconds(0.175),
-                    From = RightSidePanel.Margin,
-                    To = new Thickness(0, 0, MarginFromEdge, Settings.Appearance.QuickPanelBottomOffset)
-                };
-                RightSidePanelmarginAnimation.EasingFunction = new CubicEase();
-                LeftSidePanel.BeginAnimation(MarginProperty, LeftSidePanelmarginAnimation);
-                RightSidePanel.BeginAnimation(MarginProperty, RightSidePanelmarginAnimation);
-            });
+                    if (_sidePanelAnimVersion != thisVersion) return;
+                    LeftSidePanel.Margin = new Thickness(MarginFromEdge, 0, 0, Settings.Appearance.QuickPanelBottomOffset);
+                    RightSidePanel.Margin = new Thickness(0, 0, MarginFromEdge, Settings.Appearance.QuickPanelBottomOffset);
 
-            await Task.Delay(600);
-
-            if (_sidePanelAnimVersion != thisVersion) return;
-
-            await Dispatcher.InvokeAsync(() =>
-            {
-                LeftSidePanel.Margin = new Thickness(MarginFromEdge, 0, 0, Settings.Appearance.QuickPanelBottomOffset);
-                RightSidePanel.Margin = new Thickness(0, 0, MarginFromEdge, Settings.Appearance.QuickPanelBottomOffset);
-
-                if (MarginFromEdge == -50) LeftSidePanel.Visibility = Visibility.Collapsed;
-            });
-            isFloatingBarChangingHideMode = false;
+                    if (MarginFromEdge == -50) LeftSidePanel.Visibility = Visibility.Collapsed;
+                });
+            }
+            catch (Exception ex) { LogHelper.WriteLogToFile($"[Toolbar animation] {ex}", LogHelper.LogType.Warning); }
+            finally { if (_sidePanelAnimVersion == thisVersion) isFloatingBarChangingHideMode = false; }
         }
 
         /// <summary>
@@ -670,6 +715,7 @@ namespace Ink_Canvas
         /// </summary>
         private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
+            CancelStartupFoldVerification();
             HandleSelectedSecAgentSceneMouseDown(e);
             HandleAutoCollapseOnMouseDown(e);
         }
@@ -733,47 +779,56 @@ namespace Ink_Canvas
             }
         }
 
-        private async Task WaitUntilFloatingBarHideModeIdleAsync(TimeSpan timeout)
+        private async Task WaitUntilFloatingBarHideModeIdleAsync(TimeSpan timeout, CancellationToken cancellationToken)
         {
             var start = DateTime.UtcNow;
             while (DateTime.UtcNow - start < timeout)
             {
-                bool busy = await Dispatcher.InvokeAsync(() => isFloatingBarChangingHideMode);
+                cancellationToken.ThrowIfCancellationRequested();
+                bool busy = await Dispatcher.InvokeAsync(() => isFloatingBarChangingHideMode, DispatcherPriority.Background, cancellationToken);
                 if (!busy) return;
-                await Task.Delay(50).ConfigureAwait(false);
+                await Task.Delay(50, cancellationToken).ConfigureAwait(false);
             }
         }
 
 
-        private async Task WaitForStartupFoldSettledAsync(TimeSpan timeout)
+        private async Task WaitForStartupFoldSettledAsync(TimeSpan timeout, CancellationToken cancellationToken)
         {
             var start = DateTime.UtcNow;
             while (DateTime.UtcNow - start < timeout)
             {
-                var settled = await Dispatcher.InvokeAsync(() => isFloatingBarFolded && !isFloatingBarChangingHideMode);
+                cancellationToken.ThrowIfCancellationRequested();
+                var settled = await Dispatcher.InvokeAsync(() => isFloatingBarFolded && !isFloatingBarChangingHideMode, DispatcherPriority.Background, cancellationToken);
                 if (settled) return;
-                await Task.Delay(50).ConfigureAwait(false);
+                await Task.Delay(50, cancellationToken).ConfigureAwait(false);
             }
         }
 
 
-        private async Task VerifyStartupFoldAbsenceAfterDelayAsync()
+        private async Task VerifyStartupFoldAbsenceAfterDelayAsync(CancellationTokenSource pending)
         {
+            var cancellationToken = pending.Token;
             try
             {
                 if (!Settings.Startup.IsFoldAtStartup || App.StartWithBoardMode || App.StartWithShowMode)
                     return;
 
                 // 第一次校验：等待初始收纳稳定后，确认折叠状态是否真正落到不可见
-                await RunStartupFoldVerificationPassAsync();
+                await RunStartupFoldVerificationPassAsync(cancellationToken);
 
                 // 第二次校验：15s 后再跑一遍，覆盖启动阶段后续可能出现的浮动栏异常重排/泄漏
-                await Task.Delay(15000).ConfigureAwait(false);
-                await RunStartupFoldVerificationPassAsync();
+                await Task.Delay(15000, cancellationToken).ConfigureAwait(false);
+                await RunStartupFoldVerificationPassAsync(cancellationToken);
             }
+            catch (OperationCanceledException) { }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"启动收纳校验失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+            finally
+            {
+                Interlocked.CompareExchange(ref _startupFoldVerification, null, pending);
+                pending.Dispose();
             }
         }
 
@@ -781,31 +836,34 @@ namespace Ink_Canvas
         /// 执行单次启动收纳校验：等待浮动栏折叠稳定 3s 后检查是否真的不可见，
         /// 若仍可见则展开并重新收纳一次。
         /// </summary>
-        private async Task RunStartupFoldVerificationPassAsync()
+        private async Task RunStartupFoldVerificationPassAsync(CancellationToken cancellationToken)
         {
-            await WaitForStartupFoldSettledAsync(TimeSpan.FromSeconds(30)).ConfigureAwait(false);
-            await Task.Delay(3000).ConfigureAwait(false);
+            await WaitForStartupFoldSettledAsync(TimeSpan.FromSeconds(30), cancellationToken).ConfigureAwait(false);
+            await Task.Delay(3000, cancellationToken).ConfigureAwait(false);
 
             bool needRetry = await Dispatcher.InvokeAsync(() =>
             {
                 if (!isFloatingBarFolded) return false;
                 if (currentMode != 0) return false;
                 return !IsFloatingBarUiAbsentFromScreens();
-            });
+            }, DispatcherPriority.Background, cancellationToken);
 
             if (!needRetry) return;
 
             LogHelper.WriteLogToFile("启动收纳校验：检测到浮动栏仍在屏幕上，将展开后等待 0.2s 再次收纳", LogHelper.LogType.Event);
 
-            await UnFoldFloatingBar(null);
-            await WaitUntilFloatingBarHideModeIdleAsync(TimeSpan.FromSeconds(15)).ConfigureAwait(false);
-            await Task.Delay(200).ConfigureAwait(false);
-            await FoldFloatingBar(new object()).ConfigureAwait(false);
+            await Dispatcher.InvokeAsync(() => UnFoldFloatingBar(null), DispatcherPriority.Background, cancellationToken).Task.Unwrap();
+            await WaitUntilFloatingBarHideModeIdleAsync(TimeSpan.FromSeconds(15), cancellationToken).ConfigureAwait(false);
+            await Task.Delay(200, cancellationToken).ConfigureAwait(false);
+            await Dispatcher.InvokeAsync(() => FoldFloatingBar(null, isAutoFoldCommand: true), DispatcherPriority.Background, cancellationToken).Task.Unwrap();
         }
 
         private void ScheduleStartupFoldAbsenceVerification()
         {
-            _ = VerifyStartupFoldAbsenceAfterDelayAsync();
+            CancelStartupFoldVerification();
+            var pending = new CancellationTokenSource();
+            _startupFoldVerification = pending;
+            _ = VerifyStartupFoldAbsenceAfterDelayAsync(pending);
         }
 
     }

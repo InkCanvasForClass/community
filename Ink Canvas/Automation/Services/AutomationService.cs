@@ -158,7 +158,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             try
             {
                 var json = JsonConvert.SerializeObject(Workflows, Formatting.Indented);
-                File.WriteAllText(CurrentConfigPath, json);
+                AtomicFileWriter.WriteLatest(CurrentConfigPath, json);
             }
             catch (Exception ex)
             {
@@ -359,7 +359,7 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             LogHelper.WriteLogToFile(
                 $"[Automation] 触发器已执行工作流: 触发器 {workflow.Triggers?.Count ?? 0} 个, 动作 {workflow.ActionSet?.Actions?.Count ?? 0} 个",
                 LogHelper.LogType.Info);
-            SaveConfig("TriggerTriggered");
+            // Execution flags are transient. Persist configuration edits, not every tick.
         }
 
         private void TriggerTriggeredRecover(object sender, EventArgs e)
@@ -375,7 +375,6 @@ namespace Ink_Canvas.WorkflowAutomation.Services
             if (!workflow.ActionSet.IsOn) return;
 
             ActionService.Revert(workflow.ActionSet);
-            SaveConfig("TriggerTriggeredRecover");
         }
     }
 }

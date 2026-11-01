@@ -283,7 +283,11 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
-                <!-- 更新设置 -->
+                  <ui:NavigationViewItem Content="{x:Static props:WordStrings.Title}" Tag="WordPage"
+                      ToolTipService.ToolTip="{x:Static props:WordStrings.EnableHint}">
+                      <ui:NavigationViewItem.Icon><ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Document}"/></ui:NavigationViewItem.Icon>
+                  </ui:NavigationViewItem>
+                  <!-- 更新设置 -->
                 <ui:NavigationViewItem
                     x:Name="UpdatePageItem"
                     Content="{x:Static props:NotificationStrings.Type_Update}"

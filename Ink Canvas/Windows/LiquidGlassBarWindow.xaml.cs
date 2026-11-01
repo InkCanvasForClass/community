@@ -271,7 +271,7 @@ namespace Ink_Canvas
             try
             {
                 // —— 路径 1：Magnifier（首选，零闪烁）——
-                if (TryCaptureViaMagnifier())
+                if (await TryCaptureViaMagnifierAsync())
                 {
                     UpdateEffectParameters();
                     return;
@@ -302,7 +302,7 @@ namespace Ink_Canvas
         /// 成功时直接把小图挂到画刷上（Viewbox 置满），返回 true；失败返回 false。
         /// 必须在 UI 线程调用（Magnification API 非线程安全）。
         /// </summary>
-        private bool TryCaptureViaMagnifier()
+        private async Task<bool> TryCaptureViaMagnifierAsync()
         {
             if (_backdropBrush == null || GlassRoot == null) return false;
             if (WindowState == WindowState.Minimized) return false;
@@ -349,8 +349,8 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"液态玻璃放大镜坐标诊断异常: {ex.Message}", LogHelper.LogType.Warning);
             }
 
-            var bitmap = LiquidGlassMagnifier.CaptureRegion(hwnd, left, top, width, height);
-            if (bitmap == null) return false;
+            var bitmap = await LiquidGlassMagnifier.CaptureRegionAsync(hwnd, left, top, width, height);
+            if (bitmap == null || _isClosing || !IsVisible) return false;
 
             // 小图本身就是栏区域：Viewbox 置满整张图，不再依赖虚拟屏原点裁剪。
             // 不 Publish 到 LiquidGlassCapture.Snapshot——那是整屏帧的槽位；

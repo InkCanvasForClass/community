@@ -1,4 +1,4 @@
-using Microsoft.Office.Interop.PowerPoint;
+﻿using Microsoft.Office.Interop.PowerPoint;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -535,8 +535,8 @@ namespace Ink_Canvas.Helpers
                     SafeReleaseComObject(CurrentSlides, "CurrentSlides");
                     SafeReleaseComObject(CurrentPresentation, "CurrentPresentation");
 
-                    // 恢复应用引用的清理，但不强制终止其他调用者共享的 RCW。
-                    SafeReleaseComObject(application, "PPTApplication");
+                    // PPTApplication 的 COM 生命周期由 MW_PPT.DisconnectPowerPointApplication 管理，
+                    // 此处仅清空引用，避免双重释放共享 RCW。
                 }
 
                 _cachedIsConnected = false;
@@ -570,9 +570,7 @@ namespace Ink_Canvas.Helpers
                                 return;
                             }
 
-                            GC.Collect();
-                            GC.WaitForPendingFinalizers();
-                            GC.Collect();
+                            GC.Collect(2, GCCollectionMode.Optimized, blocking: false);
 
                             Thread.Sleep(1000);
 
@@ -1970,8 +1968,7 @@ namespace Ink_Canvas.Helpers
 
                 // 第四步：强制垃圾回收及等待终结器执行
                 LogHelper.WriteLogToFile("执行强制垃圾回收", LogHelper.LogType.Trace);
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
+                GC.Collect(2, GCCollectionMode.Optimized, blocking: false);
 
                 // 等待一段时间让COM对象完全释放
                 Thread.Sleep(1000);

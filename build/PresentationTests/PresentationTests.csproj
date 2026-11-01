@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <UseWPF>true</UseWPF><ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Ink Canvas/Helpers/PresentationPreviewCache.cs" Link="Production/PresentationPreviewCache.cs" />
+    <Compile Include="../../Ink Canvas/Controls/PptPreviewItem.cs" Link="Production/PptPreviewItem.cs" />
+    <Compile Include="../../Ink Canvas/Helpers/ToolbarOpacityPresentation.cs" Link="Production/ToolbarOpacityPresentation.cs" />
+  </ItemGroup>
+</Project>

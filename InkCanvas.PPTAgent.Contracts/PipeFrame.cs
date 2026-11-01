@@ -1,11 +1,26 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace InkCanvasPPTAgent.Contracts
 {
     public static class PipeFrame
     {
+        public static async Task WriteFrameAsync(Stream stream, string json, CancellationToken cancellationToken)
+        {
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
+            if (json == null) throw new ArgumentNullException(nameof(json));
+            var data = Encoding.UTF8.GetBytes(json);
+            if (data.Length <= 0 || data.Length > PipeConstants.MaxFrameSize)
+                throw new InvalidOperationException("Invalid frame size.");
+            var length = BitConverter.GetBytes(data.Length);
+            await stream.WriteAsync(length, 0, length.Length, cancellationToken).ConfigureAwait(false);
+            await stream.WriteAsync(data, 0, data.Length, cancellationToken).ConfigureAwait(false);
+            await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
+        }
+
         public static void WriteFrame(Stream stream, string json)
         {
             if (stream == null) throw new ArgumentNullException(nameof(stream));

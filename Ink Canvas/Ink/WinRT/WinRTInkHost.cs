@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using Windows.UI.Input.Inking;
 using Windows.UI.Input.Inking.Core;
 using Windows.UI.Core;
@@ -47,7 +48,7 @@ namespace Ink_Canvas.Ink.WinRT
         private TypedEventHandler<InkStrokeInput, PointerEventArgs> _onStrokeCanceled;
         private TypedEventHandler<InkPresenter, InkStrokesCollectedEventArgs> _onStrokesCollected;
 
-        private bool _disposed;
+        private volatile bool _disposed;
 
         public WinRTInkHost(
             WetInkOverlayWindow overlay,
@@ -73,6 +74,8 @@ namespace Ink_Canvas.Ink.WinRT
         /// CoCreates the host and queues the OS presenter creation on the ink thread.
         /// Blocks until the presenter is ready (or fails). UI thread only.
         /// </summary>
+        internal WinRTInkConfig AppliedConfig { get; private set; }
+
         public void Start(IntPtr ownerHwnd, WinRTInkConfig config)
         {
             if (ownerHwnd == IntPtr.Zero)
@@ -90,8 +93,10 @@ namespace Ink_Canvas.Ink.WinRT
                 _commitHandler = new InkCommitRequestHandler(_overlay.CompositionDevice);
                 _host = InkDesktopHostInterop.CreateHost();
 
-                using (var ready = new ManualResetEventSlim(false))
+                // The completion can arrive after the startup timeout. Unlike a
+                // disposable wait handle, it remains valid for that late callback.
                 {
+                    var ready = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
                     Exception threadError = null;
                     QueueWorkItemCore(() =>
                     {
@@ -105,11 +110,11 @@ namespace Ink_Canvas.Ink.WinRT
                         }
                         finally
                         {
-                            ready.Set();
+                            ready.TrySetResult(true);
                         }
                     });
 
-                    if (!ready.Wait(TimeSpan.FromSeconds(5)))
+                    if (!ready.Task.Wait(TimeSpan.FromSeconds(5)))
                         throw new TimeoutException("WinRT ink presenter failed to initialize on the ink thread.");
                     if (threadError != null)
                         throw new InvalidOperationException(
@@ -159,6 +164,8 @@ namespace Ink_Canvas.Ink.WinRT
             _presenter.InputProcessingConfiguration.Mode = InkInputProcessingMode.Inking;
             _presenter.InputProcessingConfiguration.RightDragAction = InkInputRightDragAction.LeaveUnprocessed;
             _presenter.UpdateDefaultDrawingAttributes(config.ToInkDrawingAttributes());
+            _overlay.SetInkOpacity(config.Style.WetOpacity);
+            AppliedConfig = config;
 
             _inkSynchronizer = _presenter.ActivateCustomDrying();
             // Custom drying is required before the WinRT multiple-pointer configuration.
@@ -198,6 +205,7 @@ namespace Ink_Canvas.Ink.WinRT
                     var snapshot = SnapshotStrokes(strokes);
                     _overlay.InvokeOnUiThread(() =>
                     {
+                        if (_disposed) return;
                         try { OnDryAvailable?.Invoke(snapshot); }
                         catch (Exception ex)
                         {
@@ -219,6 +227,7 @@ namespace Ink_Canvas.Ink.WinRT
                     }
                     _overlay.InvokeOnUiThread(() =>
                     {
+                        if (_disposed) return;
                         try { OnDryFailed?.Invoke(ex); } catch (Exception inner)
                         {
                             LogHelper.WriteLogToFile($"[WinRTInk] 干墨失败通知未能送达 UI 线程: {inner.Message}", LogHelper.LogType.Info);
@@ -260,11 +269,15 @@ namespace Ink_Canvas.Ink.WinRT
             });
         }
 
-        public void UpdateDrawingAttributes(InkDrawingAttributes attributes)
+        internal void UpdateDrawingAttributes(WinRTInkConfig config)
         {
-            if (attributes == null)
-                throw new ArgumentNullException(nameof(attributes));
-            RunOnInkThread(p => p.UpdateDefaultDrawingAttributes(attributes));
+            if (config == null) throw new ArgumentNullException(nameof(config));
+            RunOnInkThread(p =>
+            {
+                p.UpdateDefaultDrawingAttributes(config.ToInkDrawingAttributes());
+                _overlay.SetInkOpacity(config.Style.WetOpacity);
+                AppliedConfig = config;
+            });
         }
 
         public void SetSize(float widthPx, float heightPx)
@@ -323,7 +336,7 @@ namespace Ink_Canvas.Ink.WinRT
         /// moving/releasing events are marked Handled). The presenter drops them.</summary>
         public void CancelActiveStrokes()
         {
-            _inputGate.CancelActiveStrokes();
+            if (!_disposed) RunOnInkThread(_ => _inputGate.CancelActiveStrokes());
         }
 
         /// <summary>
@@ -390,7 +403,17 @@ namespace Ink_Canvas.Ink.WinRT
             if (_disposed)
                 return;
             _disposed = true;
+            OnDryAvailable = null;
+            OnDryFailed = null;
 
+            if (_host == null) return;
+            if (IsInkThread) { ReleaseOnInkThread(); return; }
+            try { QueueWorkItemCore(ReleaseOnInkThread); }
+            catch (Exception ex) { LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Warning); }
+        }
+
+        private void ReleaseOnInkThread()
+        {
             lock (_startSync)
             {
                 if (_independentInput != null)

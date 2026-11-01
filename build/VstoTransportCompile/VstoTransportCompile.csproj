@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../InkCanvas.PPTAgent.Contracts/InkCanvas.PPTAgent.Contracts.csproj" />
+    <Compile Include="../../InkCanvas.PowerPointAddIn/IPC/PipeHost.cs" Link="PipeHost.cs" />
+    <Compile Include="../../InkCanvas.PowerPointAddIn/IPC/PipeFrame.cs" Link="PipeFrame.cs" />
+  </ItemGroup>
+</Project>

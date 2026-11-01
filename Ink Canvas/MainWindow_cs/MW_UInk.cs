@@ -24,8 +24,13 @@ namespace Ink_Canvas
         // ==================== 保存 ====================
 
         /// <summary>把当前 ICC 状态保存为 .uink（多页白板/PPT 幻灯片逐页、单页批注单页）。</summary>
-        internal void SaveCurrentStateToUInk(string path, bool newNotice)
+        internal async Task SaveCurrentStateToUInkAsync(string path, bool newNotice)
         {
+            if (!await _documentSaveGate.WaitAsync(0))
+            {
+                if (newNotice) ShowNotification(MainWindowStrings.Main_Strokes_SaveFailed);
+                return;
+            }
             try
             {
                 var devices = UInkIccMapper.BuildDisplayDevices();
@@ -102,14 +107,18 @@ namespace Ink_Canvas
                 foreach (var (m, src) in currentMedia)
                     resources.Add((m.Path, src));
 
-                UInkSaveService.SaveFull(doc, path, resources);
+                await Task.Run(() =>
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(path));
+                    UInkSaveService.SaveFull(doc, path, resources);
+                });
                 LogHelper.WriteLogToFile(
                     $"[UInk] 保存完成: {path}, {pages.Count} 页, 资源 {resources.Count} 个, 媒体 {currentMedia.Count} 个",
                     LogHelper.LogType.Info);
 
                 if (newNotice)
                 {
-                    Task.Delay(100).ContinueWith(t =>
+                    _ = Task.Delay(100).ContinueWith(t =>
                     {
                         Dispatcher.Invoke(() =>
                         {
@@ -123,6 +132,7 @@ namespace Ink_Canvas
                 ShowNotification(MainWindowStrings.Main_Strokes_SaveUInkFailed);
                 LogHelper.WriteLogToFile($"UInk 保存失败 | {ex}", LogHelper.LogType.Error);
             }
+            finally { _documentSaveGate.Release(); }
         }
 
         /// <summary>遍历 inkCanvas 子元素，收集文件型媒体为 UInkMedia + 源文件（剪贴板/内存位图无源文件则跳过）。</summary>
@@ -193,12 +203,12 @@ namespace Ink_Canvas
         // ==================== 打开 ====================
 
         /// <summary>打开 .uink 主文件（含 .uink.extra 资源包）。</summary>
-        private void OpenUInkFile(string path)
+        private async Task OpenUInkFileAsync(string path)
         {
             if (TryBlockFrozenPageMutation("打开 UInk 文件")) return;
             try
             {
-                var doc = UInkReader.Load(path);
+                var doc = await Task.Run(() => UInkReader.Load(path));
                 if (doc == null)
                 {
                     LogHelper.WriteLogToFile($"[UInk] 打开失败：文件头校验不通过 {path}", LogHelper.LogType.Warning);
@@ -216,8 +226,11 @@ namespace Ink_Canvas
                 if (File.Exists(extraPath))
                 {
                     extractDir = Path.Combine(Path.GetTempPath(), "UInkOpen_" + Guid.NewGuid().ToString("N"));
-                    Directory.CreateDirectory(extractDir);
-                    extraMap = UInkExtraArchive.ExtractWithBudget(extraPath, extractDir);
+                    extraMap = await Task.Run(() =>
+                    {
+                        Directory.CreateDirectory(extractDir);
+                        return UInkExtraArchive.ExtractWithBudget(extraPath, extractDir);
+                    });
                     if (extraMap == null)
                         LogHelper.WriteLogToFile($"UInk 资源包预算/安全校验失败，仅加载墨迹: {extraPath}", LogHelper.LogType.Warning);
                 }

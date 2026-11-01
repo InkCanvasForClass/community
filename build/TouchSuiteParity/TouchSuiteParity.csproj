@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <ReferenceSources>$(MSBuildThisFileDirectory)../../artifacts/tests/TouchSuiteParity</ReferenceSources>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Ink Canvas/Ink/PalmEraserEngine.cs" Link="Production/PalmEraserEngine.cs" />
+    <Compile Include="$(ReferenceSources)/EraserEngine.cs" Link="Reference/EraserEngine.cs" />
+    <Compile Include="$(ReferenceSources)/ContactTypes.cs" Link="Reference/ContactTypes.cs" />
+  </ItemGroup>
+  <Target Name="RequireReference" BeforeTargets="CoreCompile" Condition="!Exists('$(ReferenceSources)/EraserEngine.cs')">
+    <Error Text="Run build/TestTouchSuiteParity.ps1 with the pinned TouchSuite checkout first." />
+  </Target>
+</Project>

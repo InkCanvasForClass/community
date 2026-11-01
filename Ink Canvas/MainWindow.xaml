@@ -226,7 +226,7 @@
         <Grid Name="GridTransparencyFakeBackground" Opacity="0" />
         <Label Name="Label" Visibility="Collapsed" Foreground="Gray" Content="0" />
         <Grid Name="InkCanvasGridForInkReplay" d:Visibility="Collapsed">
-            <InkCanvas x:Name="inkCanvas" ForceCursor="True" UseCustomCursor="True"
+            <localControls:HighlighterInkCanvas x:Name="inkCanvas" ForceCursor="True" UseCustomCursor="True"
                        TouchDown="Main_Grid_TouchDown"
                        TouchMove="inkCanvas_TouchMove"
                        ManipulationDelta="Main_Grid_ManipulationDelta"
@@ -371,6 +371,12 @@
                     Visibility="Collapsed"  d:Visibility="Visible"
                     Panel.ZIndex="1001"/>
         </Grid>
+        <Canvas x:Name="WordNavigationOverlay" Panel.ZIndex="1002" ClipToBounds="True">
+            <localControls:WordLectureBar x:Name="WordLectureControls" ShowZoom="False"
+                Canvas.Left="-10000" Canvas.Top="-10000"/>
+            <localControls:WordLectureBar x:Name="RightBottomWordLectureControls"
+                Canvas.Left="-10000" Canvas.Top="-10000"/>
+        </Canvas>
         <Canvas x:Name="WhiteboardTipsOverlayCanvas" IsHitTestVisible="False">
             <ikw:SimpleStackPanel Canvas.Left="25" Canvas.Top="15" Orientation="Vertical">
                 <TextBlock Text="{Binding nowTime}" Name="WaterMarkTime" Visibility="Collapsed"  d:Visibility="Visible" FontSize="30"

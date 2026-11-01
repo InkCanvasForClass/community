@@ -16,6 +16,12 @@ namespace Ink_Canvas.Plugins.Services
         private readonly Dispatcher _dispatcher;
         private PresentationSourceDescriptor _activeSource;
         private readonly object _lock = new();
+        private PresentationPreviewCache _previewCache;
+        internal System.Collections.Generic.IList<Controls.PPTNavBar.PreviewItem> PreviewItems => _previewCache?.Items;
+        internal void RetainPreview(Controls.PPTNavBar.PreviewItem item)
+        { if (_previewCache?.Owns(item) == true) _previewCache.Retain(item.SlideNumber); }
+        internal void ReleasePreview(Controls.PPTNavBar.PreviewItem item)
+        { if (_previewCache?.Owns(item) == true) _previewCache.Release(item.SlideNumber); }
 
         public bool IsActive
         {
@@ -70,6 +76,9 @@ namespace Ink_Canvas.Plugins.Services
                     _activeSource = descriptor;
                     CurrentPage = Math.Max(1, Math.Min(descriptor.CurrentPage, descriptor.PageCount));
                 }
+                if (descriptor.AllowPageNumberClick && descriptor.RenderPreviewAsync != null && descriptor.SelectPageAsync != null)
+                    _previewCache = new PresentationPreviewCache(descriptor.PageCount, descriptor.RenderPreviewAsync,
+                        ex => LogHelper.WriteLogToFile($"外部演示源缩略图失败: {ex.Message}", LogHelper.LogType.Warning));
 
                 // 触发宿主放映模式：设置标志 + 显示翻页条 + 工具栏布局切换
                 _mainWindow.IsInPPTPresentationMode = true;
@@ -135,6 +144,8 @@ namespace Ink_Canvas.Plugins.Services
                 CurrentPage = 0;
             }
 
+            _previewCache?.Dispose(); _previewCache = null;
+            _mainWindow.CloseExternalPresentationPreviews();
             _mainWindow.IsInPPTPresentationMode = false;
             _mainWindow.ArePPTControlsVisible = false;
             _mainWindow.UpdateToolbarComponentVisibility();
@@ -172,18 +183,19 @@ namespace Ink_Canvas.Plugins.Services
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                lock (_lock)
-                {
-                    if (_activeSource == null) return;
-
-                    if (pageCount > 0)
-                        _activeSource.PageCount = pageCount;
-
-                    CurrentPage = Math.Max(1, Math.Min(currentPage, _activeSource.PageCount));
-                }
-
-                _mainWindow.PPTUIManager?.UpdateCurrentSlideNumber(CurrentPage, PageCount);
+                UpdatePageCore(currentPage, pageCount);
             }).Task;
+        }
+
+        private void UpdatePageCore(int currentPage, int pageCount = 0, PresentationSourceDescriptor expectedSource = null)
+        {
+            lock (_lock)
+            {
+                if (_activeSource == null || (expectedSource != null && !ReferenceEquals(expectedSource, _activeSource))) return;
+                if (pageCount > 0) _activeSource.PageCount = pageCount;
+                CurrentPage = Math.Max(1, Math.Min(currentPage, _activeSource.PageCount));
+            }
+            _mainWindow.PPTUIManager?.UpdateCurrentSlideNumber(CurrentPage, PageCount);
         }
 
         /// <summary>
@@ -207,7 +219,11 @@ namespace Ink_Canvas.Plugins.Services
                     .ConfigureAwait(false);
                 if (newPage <= 0) return false;
 
-                await UpdatePageAsync(newPage, 0, cancellationToken).ConfigureAwait(false);
+                await _dispatcher.InvokeAsync(() =>
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    UpdatePageCore(newPage, expectedSource: descriptor);
+                });
                 return true;
             }
             catch (Exception ex)
@@ -245,6 +261,15 @@ namespace Ink_Canvas.Plugins.Services
             {
                 return _activeSource != null && !_activeSource.AllowPageNumberClick;
             }
+        }
+
+        internal async Task SelectPageAsync(int page)
+        {
+            var source = _activeSource;
+            if (source?.SelectPageAsync == null || page < 1 || page > source.PageCount) return;
+            int selected = await source.SelectPageAsync(page, CancellationToken.None);
+            if (selected > 0)
+                await _dispatcher.InvokeAsync(() => UpdatePageCore(selected, expectedSource: source));
         }
     }
 }

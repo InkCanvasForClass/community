@@ -20,10 +20,15 @@ namespace Ink_Canvas.Ink.WinRT
         private readonly Dictionary<long, PendingFence> _pending = new Dictionary<long, PendingFence>();
         private bool _subscribed;
         private bool _disposed;
+        private readonly DispatcherTimer _deadlineTimer;
+        private TimeSpan _lastRenderingTime = TimeSpan.MinValue;
 
         public WpfRenderFrameFence(Dispatcher dispatcher)
         {
             _dispatcher = dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
+            _deadlineTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Background,
+                OnDeadline, dispatcher);
+            _deadlineTimer.Stop();
         }
 
         public void Arm(long key, Action onNextFrame)
@@ -79,6 +84,11 @@ namespace Ink_Canvas.Ink.WinRT
 
         private void OnRendering(object sender, EventArgs e)
         {
+            if (e is RenderingEventArgs rendering)
+            {
+                if (_lastRenderingTime == rendering.RenderingTime) return;
+                _lastRenderingTime = rendering.RenderingTime;
+            }
             List<Action> callbacks = null;
             lock (_sync)
             {
@@ -131,6 +141,7 @@ namespace Ink_Canvas.Ink.WinRT
             if (_subscribed)
                 return;
             CompositionTarget.Rendering += OnRendering;
+            _deadlineTimer.Start();
             _subscribed = true;
         }
 
@@ -139,6 +150,7 @@ namespace Ink_Canvas.Ink.WinRT
             if (!_subscribed)
                 return;
             CompositionTarget.Rendering -= OnRendering;
+            _deadlineTimer.Stop();
             _subscribed = false;
         }
 
@@ -146,6 +158,25 @@ namespace Ink_Canvas.Ink.WinRT
         {
             if (_disposed)
                 throw new ObjectDisposedException(nameof(WpfRenderFrameFence));
+        }
+
+        private void OnDeadline(object sender, EventArgs e)
+        {
+            var callbacks = new List<Action>();
+            lock (_sync)
+            {
+                var expired = new List<long>();
+                foreach (var pair in _pending)
+                    if (DateTime.UtcNow >= pair.Value.DeadlineUtc)
+                    { expired.Add(pair.Key); callbacks.Add(pair.Value.Callback); }
+                foreach (var key in expired) _pending.Remove(key);
+                if (_pending.Count == 0) Unsubscribe_NoLock();
+            }
+            foreach (var callback in callbacks)
+            {
+                try { callback(); }
+                catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+            }
         }
 
         private sealed class PendingFence
@@ -157,6 +188,7 @@ namespace Ink_Canvas.Ink.WinRT
             }
 
             public Action Callback { get; }
+            public DateTime DeadlineUtc { get; } = DateTime.UtcNow.AddMilliseconds(750);
             public int RemainingFrames { get; set; }
         }
     }

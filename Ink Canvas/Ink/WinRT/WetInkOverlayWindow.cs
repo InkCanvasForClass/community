@@ -63,6 +63,8 @@ namespace Ink_Canvas.Ink.WinRT
         private bool _disposed;
 
         private IDCompositionDevice _compositionDevice;
+        private IDCompositionVisual _opacityRoot;
+        private IDCompositionEffectGroup _opacityEffect;
         private IDCompositionDevice3 _compositionDevice3;
         private IDCompositionTarget _compositionTarget;
         private IDCompositionVisual _compositionVisual;
@@ -186,6 +188,7 @@ namespace Ink_Canvas.Ink.WinRT
                 if (_cloaked)
                     SetCloaked(false);
                 ApplyBounds(force: false);
+                PlaceBelowOwnedPopups();
             }
             else if (!_cloaked)
             {
@@ -201,9 +204,36 @@ namespace Ink_Canvas.Ink.WinRT
                 return;
             }
             var value = cloaked ? 1 : 0;
-            DwmSetWindowAttribute(_overlayHwnd, DwmwaCloak, ref value, sizeof(int));
+            var hr = DwmSetWindowAttribute(_overlayHwnd, DwmwaCloak, ref value, sizeof(int));
+            // Never report a successful cloak when DWM rejected it. The fallback also
+            // removes the HWND from hit-testing on systems where cloaking is unavailable.
+            if (hr < 0)
+                ShowWindow(_overlayHwnd, cloaked ? 0 /* SW_HIDE */ : 4 /* SW_SHOWNOACTIVATE */);
             _cloaked = cloaked;
         }
+
+        private void PlaceBelowOwnedPopups()
+        {
+            // Keep our wet surface above its owner but below the owner's visible
+            // palettes/dialogs. Do not globally raise the overlay over other apps.
+            IntPtr lowestPopup = IntPtr.Zero;
+            for (var window = GetTopWindow(IntPtr.Zero); window != IntPtr.Zero;
+                window = GetWindow(window, 2 /* GW_HWNDNEXT */))
+            {
+                if (window == _ownerHwnd) break;
+                if (window != _overlayHwnd && IsWindowVisible(window)
+                    && GetAncestor(window, 3 /* GA_ROOTOWNER */) == _ownerHwnd)
+                    lowestPopup = window;
+            }
+            if (lowestPopup != IntPtr.Zero)
+                SetWindowPos(_overlayHwnd, lowestPopup, 0, 0, 0, 0,
+                    0x0001 /* SWP_NOSIZE */ | 0x0002 /* SWP_NOMOVE */ | 0x0010 /* SWP_NOACTIVATE */);
+        }
+
+        [DllImport("user32.dll")] private static extern IntPtr GetTopWindow(IntPtr hwnd);
+        [DllImport("user32.dll")] private static extern IntPtr GetWindow(IntPtr hwnd, uint command);
+        [DllImport("user32.dll")] private static extern IntPtr GetAncestor(IntPtr hwnd, uint flags);
+        [DllImport("user32.dll")] private static extern bool IsWindowVisible(IntPtr hwnd);
 
         private void ApplyBounds(bool force)
         {
@@ -217,14 +247,16 @@ namespace Ink_Canvas.Ink.WinRT
                 && _lastAppliedW == w && _lastAppliedH == h)
                 return;
 
-            SetWindowPos(
+            if (!SetWindowPos(
                 _overlayHwnd,
                 IntPtr.Zero,
                 _boundsX,
                 _boundsY,
                 w,
                 h,
-                0x0010 /* SWP_NOACTIVATE */ | 0x0004 /* SWP_NOZORDER */ | 0x0040 /* SWP_SHOWWINDOW */);
+                0x0010 /* SWP_NOACTIVATE */ | 0x0004 /* SWP_NOZORDER */
+                | (_cloaked ? 0u : 0x0040u /* SWP_SHOWWINDOW */)))
+                throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
             _lastAppliedX = _boundsX;
             _lastAppliedY = _boundsY;
             _lastAppliedW = w;
@@ -241,7 +273,19 @@ namespace Ink_Canvas.Ink.WinRT
             _compositionDevice.CreateTargetForHwnd(_overlayHwnd, true, out _compositionTarget)
                 .CheckError();
             _compositionDevice.CreateVisual(out _compositionVisual).CheckError();
-            _compositionTarget.SetRoot(_compositionVisual).CheckError();
+            _compositionDevice.CreateVisual(out _opacityRoot).CheckError();
+            _compositionDevice.CreateEffectGroup(out _opacityEffect).CheckError();
+            _opacityRoot.SetEffect(_opacityEffect).CheckError();
+            _opacityRoot.AddVisual(_compositionVisual, false, null).CheckError();
+            _compositionTarget.SetRoot(_opacityRoot).CheckError();
+            _compositionDevice.Commit().CheckError();
+        }
+
+        // Called on the ink thread together with UpdateDefaultDrawingAttributes. The
+        // parent is separate from the presenter's root, which Windows Ink owns.
+        internal void SetInkOpacity(double opacity)
+        {
+            _opacityEffect.SetOpacity((float)Math.Clamp(opacity, 0, 1)).CheckError();
             _compositionDevice.Commit().CheckError();
         }
 
@@ -252,6 +296,16 @@ namespace Ink_Canvas.Ink.WinRT
             _disposed = true;
 
             var hwndForEntry = _overlayHwnd;
+            try { _opacityRoot?.Dispose(); } catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[WinRTInk] 释放透明度视觉对象失败: {ex.Message}", LogHelper.LogType.Info);
+            }
+            _opacityRoot = null;
+            try { _opacityEffect?.Dispose(); } catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[WinRTInk] 释放透明度效果失败: {ex.Message}", LogHelper.LogType.Info);
+            }
+            _opacityEffect = null;
 
             if (_compositionVisual != null)
             {
@@ -448,6 +502,9 @@ namespace Ink_Canvas.Ink.WinRT
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern bool DestroyWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int command);
 
         [DllImport("user32.dll", CharSet = CharSet.Unicode)]
         private static extern IntPtr DefWindowProc(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);

@@ -42,21 +42,31 @@ namespace Ink_Canvas.Plugins
             else OnSlideShowEnded();
         }
 
-        internal void OnWhiteboardModeChanged(bool isBoard) => WhiteboardModeChanged?.Invoke(isBoard);
-        internal void OnPenModeChanged(bool isPen) => PenModeChanged?.Invoke(isPen);
-        internal void OnSlideChanged(int slide) => SlideChanged?.Invoke(slide);
-        internal void OnSlideShowStarted() => SlideShowStarted?.Invoke();
-        internal void OnSlideShowEnded() => SlideShowEnded?.Invoke();
-        internal void OnTopMostChanged(bool topMost) => TopMostChanged?.Invoke(topMost);
-        internal void OnAppExiting() => AppExiting?.Invoke();
+        private static void Publish(Delegate handlers, Action<Delegate> invoke)
+        {
+            if (handlers == null) return;
+            foreach (var handler in handlers.GetInvocationList())
+            {
+                try { invoke(handler); }
+                catch (Exception ex) { Helpers.LogHelper.WriteLogToFile($"[Plugin event] {handler.Method}: {ex}", Helpers.LogHelper.LogType.Warning); }
+            }
+        }
+
+        internal void OnWhiteboardModeChanged(bool isBoard) => Publish(WhiteboardModeChanged, h => ((Action<bool>)h)(isBoard));
+        internal void OnPenModeChanged(bool isPen) => Publish(PenModeChanged, h => ((Action<bool>)h)(isPen));
+        internal void OnSlideChanged(int slide) => Publish(SlideChanged, h => ((Action<int>)h)(slide));
+        internal void OnSlideShowStarted() => Publish(SlideShowStarted, h => ((Action)h)());
+        internal void OnSlideShowEnded() => Publish(SlideShowEnded, h => ((Action)h)());
+        internal void OnTopMostChanged(bool topMost) => Publish(TopMostChanged, h => ((Action<bool>)h)(topMost));
+        internal void OnAppExiting() => Publish(AppExiting, h => ((Action)h)());
 
         internal void OnStrokesChanged(StrokeCollection added, StrokeCollection removed)
-            => StrokesChanged?.Invoke(added, removed);
+            => Publish(StrokesChanged, h => ((Action<StrokeCollection, StrokeCollection>)h)(added, removed));
 
         internal void OnWhiteboardPageChanged(int pageIndex, int pageCount)
-            => WhiteboardPageChanged?.Invoke(pageIndex, pageCount);
+            => Publish(WhiteboardPageChanged, h => ((Action<int, int>)h)(pageIndex, pageCount));
 
         internal void OnUndoRedoStateChanged(bool canUndo, bool canRedo)
-            => UndoRedoStateChanged?.Invoke(canUndo, canRedo);
+            => Publish(UndoRedoStateChanged, h => ((Action<bool, bool>)h)(canUndo, canRedo));
     }
 }

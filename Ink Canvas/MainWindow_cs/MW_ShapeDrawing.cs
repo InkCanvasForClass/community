@@ -1,4 +1,4 @@
-using Ink_Canvas.Helpers;
+﻿using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
@@ -1208,7 +1208,7 @@ namespace Ink_Canvas
         /// <remarks>
         /// 当鼠标或触摸在画布上移动时：
         /// 1. 禁用原有的FitToCurve，使用新的高级贝塞尔曲线平滑
-        /// 2. 在绘制过程中禁用浮动栏交互，避免干扰绘制
+        /// 2. 工具栏保留命中，避免丢失抬起事件后无法操作
         /// 3. 根据当前的绘制模式，生成不同的形状：
         ///    - 直线
         ///    - 虚线
@@ -1236,9 +1236,7 @@ namespace Ink_Canvas
         {
             // 禁用原有的FitToCurve，使用新的高级贝塞尔曲线平滑
             if (Settings.Canvas.FitToCurve) drawingAttributes.FitToCurve = false;
-            // 在绘制过程中禁用浮动栏交互，避免干扰绘制
-            ViewboxFloatingBar.IsHitTestVisible = false;
-            BlackboardUIGridForInkReplay.IsHitTestVisible = false;
+            // 工具栏保留命中，避免丢失抬起事件后无法操作
             List<Point> pointList;
             StylusPointCollection point;
             Stroke stroke;
@@ -2653,12 +2651,13 @@ namespace Ink_Canvas
         /// <remarks>
         /// 当在墨水画布上按下鼠标时：
         /// 1. 捕获鼠标输入
-        /// 2. 禁用浮动栏和黑板UI的命中测试，避免干扰绘制
+        /// 2. 保持工具栏和黑板UI可交互，避免干扰绘制
         /// 3. 设置鼠标按下状态标志
         /// 4. 如果需要更新起始点，则更新起始点为当前鼠标位置
         /// </remarks>
         private void inkCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (ShouldDeferLegacyCanvasInput) return;
             if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
             if (e.ChangedButton == MouseButton.Left && inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
             {
@@ -2672,8 +2671,6 @@ namespace Ink_Canvas
             if (IsBoardRoamingMode && e.ChangedButton == MouseButton.Left)
             {
                 inkCanvas.CaptureMouse();
-                ViewboxFloatingBar.IsHitTestVisible = false;
-                BlackboardUIGridForInkReplay.IsHitTestVisible = false;
                 BeginBoardRoaming(e.GetPosition(inkCanvas));
                 e.Handled = true;
                 return;
@@ -2694,8 +2691,6 @@ namespace Ink_Canvas
             }
 
             inkCanvas.CaptureMouse();
-            ViewboxFloatingBar.IsHitTestVisible = false;
-            BlackboardUIGridForInkReplay.IsHitTestVisible = false;
 
             isMouseDown = true;
             if (NeedUpdateIniP()) iniP = e.GetPosition(inkCanvas);
@@ -2713,6 +2708,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_MouseMove(object sender, MouseEventArgs e)
         {
+            if (ShouldDeferLegacyCanvasInput) return;
             if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke
                 && e.LeftButton == MouseButtonState.Pressed
@@ -2782,6 +2778,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (ShouldDeferLegacyCanvasInput) return;
             EndSecAgentStrokeErase();
             // 视频展台特殊模式：结束鼠标拖动
             if (_isBoothMouseDragging)

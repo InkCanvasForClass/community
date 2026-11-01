@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?><root><resheader name="resmimetype"><value>text/microsoft-resx</value></resheader><resheader name="version"><value>2.0</value></resheader><resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader><resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="Title" xml:space="preserve"><value>Word integration</value></data>
+  <data name="Enable" xml:space="preserve"><value>Enable Word lecture annotations</value></data>
+  <data name="EnableHint" xml:space="preserve"><value>Follow the foreground Microsoft Word document and save ink per page.</value></data>
+  <data name="ShowNavigation" xml:space="preserve"><value>Show Word navigation</value></data>
+  <data name="ScopeHint" xml:space="preserve"><value>Supports Microsoft Word print layout with one pane. WPS Writer requires compatible automation and accessibility interfaces. Uses WPF ink; verify annotation versions and positions after editing text or layout.</value></data>
+  <data name="StorageHint" xml:space="preserve"><value>Annotations are stored separately under WordAnnotations in the application folder. Word files are not modified. Input is paused during connection, save failures or uncertain page positioning.</value></data>
+  <data name="Previous" xml:space="preserve"><value>Previous</value></data>
+  <data name="Next" xml:space="preserve"><value>Next</value></data>
+  <data name="MouseMode" xml:space="preserve"><value>Interact with Word</value></data>
+  <data name="Resume" xml:space="preserve"><value>Continue with current layout</value></data>
+  <data name="PageFormat" xml:space="preserve"><value>{0} / {1}</value></data>
+  <data name="Waiting" xml:space="preserve"><value>Waiting for a Word document</value></data>
+  <data name="Unavailable" xml:space="preserve"><value>Word connection unavailable; retrying automatically</value></data>
+  <data name="Timeout" xml:space="preserve"><value>Word is not responding; annotations paused</value></data>
+  <data name="Busy" xml:space="preserve"><value>Word is busy; annotations paused and will resume automatically</value></data>
+  <data name="HelperMissing" xml:space="preserve"><value>Word link helper is missing. Replace the complete application folder and restart.</value></data>
+  <data name="HelperMismatch" xml:space="preserve"><value>Word link helper version mismatch. Replace the complete application folder and restart.</value></data>
+  <data name="PrintLayoutRequired" xml:space="preserve"><value>Use Word Print Layout with a single pane</value></data>
+  <data name="Locating" xml:space="preserve"><value>Locating pages; bring document content into view</value></data>
+  <data name="Ready" xml:space="preserve"><value>Word lecture annotations</value></data>
+  <data name="Loading" xml:space="preserve"><value>Restoring annotations</value></data>
+  <data name="LayoutChanged" xml:space="preserve"><value>Document content or pagination changed. Previous annotations are preserved; confirm to continue with the new layout.</value></data>
+  <data name="LoadFailed" xml:space="preserve"><value>Annotations could not be loaded; input paused to preserve existing data</value></data>
+  <data name="SaveFailed" xml:space="preserve"><value>Annotations could not be saved; check folder permissions and disk space</value></data>
+  <data name="ZoomOut" xml:space="preserve"><value>Zoom out in Word</value></data>
+  <data name="ZoomIn" xml:space="preserve"><value>Zoom in in Word</value></data>
+  <data name="DocumentZoom" xml:space="preserve"><value>Word document zoom</value></data>
+  <data name="NavigationAppearance" xml:space="preserve"><value>Navigation appearance and position</value></data>
+  <data name="Preview" xml:space="preserve"><value>Preview</value></data>
+  <data name="UsePptAppearance" xml:space="preserve"><value>Match PowerPoint navigation</value></data>
+  <data name="UsePptAppearanceHint" xml:space="preserve"><value>Use the colors, page numbers, size, opacity and shadow of the corresponding PowerPoint navigation controls.</value></data>
+  <data name="ShowZoom" xml:space="preserve"><value>Show document zoom on the right</value></data>
+  <data name="FollowWindow" xml:space="preserve"><value>Follow the Word window</value></data>
+  <data name="FollowWindowHint" xml:space="preserve"><value>When off, anchor navigation to the bottom corners of the current canvas.</value></data>
+  <data name="ShowPageNumber" xml:space="preserve"><value>Show page numbers</value></data>
+  <data name="DarkBackground" xml:space="preserve"><value>Dark background</value></data>
+  <data name="NavigationScale" xml:space="preserve"><value>Navigation size</value></data>
+  <data name="NavigationOpacity" xml:space="preserve"><value>Opacity</value></data>
+  <data name="NavigationShadow" xml:space="preserve"><value>Show shadow</value></data>
+  <data name="ShadowSize" xml:space="preserve"><value>Shadow size</value></data>
+  <data name="HorizontalInset" xml:space="preserve"><value>Horizontal inset</value></data>
+  <data name="BottomInset" xml:space="preserve"><value>Bottom inset</value></data>
+  <data name="ResetNavigation" xml:space="preserve"><value>Reset navigation settings</value></data>
+  <data name="NavigationLayout" xml:space="preserve"><value>Visibility and position</value></data>
+  <data name="CustomAppearance" xml:space="preserve"><value>Custom appearance</value></data>
+  <data name="FocusModeSettings" xml:space="preserve"><value>Focus mode</value></data>
+  <data name="AutoEnterFocusMode" xml:space="preserve"><value>Automatically enter Focus when connecting</value></data>
+  <data name="AutoEnterFocusModeHint" xml:space="preserve"><value>Enter Focus after connecting. Manually exiting prevents automatic re-entry for that document.</value></data>
+  <data name="FocusToolbarOpacity" xml:space="preserve"><value>Toolbar opacity in Focus mode</value></data>
+  <data name="ExitFocus" xml:space="preserve"><value>Exit Focus</value></data>
+  <data name="History" xml:space="preserve"><value>Annotation history</value></data>
+  <data name="HistoryConfirm" xml:space="preserve"><value>Restore this annotation version? Current annotations will be backed up and the historical file kept. Text or layout may have changed; verify annotation positions after restoring.</value></data>
+  <data name="WpsUnavailable" xml:space="preserve"><value>This WPS window does not expose a usable automation interface or document viewport. Open a local WPS Writer document and check that automation components are available.</value></data>
+  <data name="HistoryFailed" xml:space="preserve"><value>Annotation history could not be restored. The original history file is preserved. Check storage permissions and logs.</value></data>
+</root>

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
@@ -437,7 +437,8 @@ namespace Ink_Canvas.Helpers
             {
                 try
                 {
-                    _mainWindow.ViewboxFloatingBar.Opacity = opacity;
+                    ToolbarOpacityPresentation.Apply(_mainWindow.ViewboxFloatingBar,
+                        _mainWindow.FloatingbarUIForInkReplay, opacity);
                 }
                 catch (Exception ex)
                 {

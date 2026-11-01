@@ -65,13 +65,13 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        public Task<InkShapeRecognitionResult> RecognizeShapeAsync(
+        public async Task<InkShapeRecognitionResult> RecognizeShapeAsync(
             StrokeCollection strokes,
             ShapeRecognitionEngineMode mode)
         {
             EnsureInitialized();
             if (!_isInitialized || strokes == null || strokes.Count == 0)
-                return Task.FromResult(InkShapeRecognitionResult.Empty);
+                return InkShapeRecognitionResult.Empty;
 
             try
             {
@@ -83,7 +83,7 @@ namespace Ink_Canvas.Helpers
                         _lastLoggedBackend = "WinRT";
                         LogHelper.WriteLogToFile("[Ink] 形状识别后端: WinRT", LogHelper.LogType.Info);
                     }
-                    return RecognizeShapeWinRtOnDispatcherContext(strokes);
+                    return await RecognizeShapeWinRtOnDispatcherContext(strokes);
                 }
 
                 // IACore 必须走 IPC 辅助进程（x86/.NET 4.7.2）。
@@ -93,13 +93,12 @@ namespace Ink_Canvas.Helpers
                     _lastLoggedBackend = "IACore";
                     LogHelper.WriteLogToFile("[Ink] 形状识别后端: IACore (IPC 辅助进程)", LogHelper.LogType.Info);
                 }
-                var ipcResult = IpcIACoreClient.Instance.Recognize(strokes);
-                return Task.FromResult(ipcResult);
+                return await IpcIACoreClient.Instance.RecognizeAsync(strokes);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile("墨迹形状识别失败: " + ex.Message, LogHelper.LogType.Error);
-                return Task.FromResult(InkShapeRecognitionResult.Empty);
+                return InkShapeRecognitionResult.Empty;
             }
         }
 
@@ -173,13 +172,13 @@ namespace Ink_Canvas.Helpers
         /// 文字识别引擎跟随形状识别引擎（传入的 <paramref name="mode"/>）：IACore 走 IPC 辅助进程（可注入 Factoid/WordList/WordMode
         /// 等上下文层，UWP WinRT 无法访问）；WinRT 在本进程跑 Windows.UI.Input.Inking.Analysis.InkAnalyzer。
         /// </summary>
-        public Task<HandwritingRecognitionResult> RecognizeHandwritingAsync(
+        public async Task<HandwritingRecognitionResult> RecognizeHandwritingAsync(
             StrokeCollection strokes,
             ShapeRecognitionEngineMode mode)
         {
             EnsureInitialized();
             if (!_isInitialized || strokes == null || strokes.Count == 0)
-                return Task.FromResult(HandwritingRecognitionResult.Empty);
+                return HandwritingRecognitionResult.Empty;
 
             try
             {
@@ -190,13 +189,12 @@ namespace Ink_Canvas.Helpers
                     // 辅助进程不可用或识别失败时回落 WinRT（若可用），保证功能不丢失。
                     try
                     {
-                        IpcIACoreClient.Instance.Start();
-                        if (IpcIACoreClient.Instance.IsAvailable)
+                        if (await Task.Run(() => IpcIACoreClient.Instance.Start()))
                         {
                             var hint = BuildIacoreTextHint();
-                            var ipcResult = IpcIACoreClient.Instance.RecognizeText(strokes, hint);
+                            var ipcResult = await IpcIACoreClient.Instance.RecognizeTextAsync(strokes, hint);
                             if (ipcResult != null && ipcResult.IsSuccess)
-                                return Task.FromResult(ipcResult);
+                                return ipcResult;
 
                             LogHelper.WriteLogToFile(
                                 "[手写识别] IACore IPC 文字识别返回空，回落 WinRT。笔画数=" + strokes.Count,
@@ -212,14 +210,14 @@ namespace Ink_Canvas.Helpers
                 }
 
                 if (!WinRtHandwritingRecognizer.IsApiAvailable)
-                    return Task.FromResult(HandwritingRecognitionResult.Empty);
+                    return HandwritingRecognitionResult.Empty;
 
-                return WinRtHandwritingRecognizer.RecognizeHandwritingAsync(strokes);
+                return await WinRtHandwritingRecognizer.RecognizeHandwritingAsync(strokes);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile("手写识别失败: " + ex.Message, LogHelper.LogType.Error);
-                return Task.FromResult(HandwritingRecognitionResult.Empty);
+                return HandwritingRecognitionResult.Empty;
             }
         }
 

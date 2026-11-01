@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Ink_Canvas.Ink;
 using Newtonsoft.Json;
 
@@ -95,18 +95,7 @@ namespace InkCanvas.Calibration.Tests
             record.AreaMultiplier = double.NaN; Check(!record.IsValid(), "Invalid multiplier"); record.AreaMultiplier = 4;
             record.PalmArea = 50; Check(!record.IsValid(), "Overlapping representative areas"); record.PalmArea = 900;
 
-            var tracker = new PalmEraserContactTracker();
-            Check(!tracker.Update(10, 10, threshold, scale, false, out _, out _), "Finger must not erase");
-            tracker.Reset();
-            Check(tracker.Update(30, 30, threshold, scale, false, out var w, out var h), "Palm activates");
-            Near(w * h, 3600);
-            Check(tracker.Update(double.NaN, 30, threshold, scale, false, out w, out h), "Invalid frame retains latch");
-            Near(w * h, 3600);
-            Check(tracker.Update(5, 5, threshold, scale, false, out _, out _), "Palm latches");
-            tracker.Reset(); Check(!tracker.IsPalm, "Reset latch");
-            Check(PalmEraserContactTracker.TryGetEraserSize(30, 30, threshold, scale, true, out w, out h), "Ellipse");
-            Near(Math.PI / 4 * w * h, 3600);
-            Check(!PalmEraserContactTracker.TryGetEraserSize(100, 1, threshold, scale, false, out _, out _), "Thin wide contact is not palm");
+            global::PalmEngineRegression.Run(Check);
             var validJson = JsonConvert.SerializeObject(new Profile { Preserved = 42, Calibration = record });
             Check(JsonConvert.DeserializeObject<Profile>(validJson).Calibration.IsValid(), "Calibration round trip");
             foreach (string broken in new[] { "null", "\"bad\"", "[]", "{\"PalmArea\":\"bad\"}", "{\"Version\":999}" })
@@ -121,24 +110,6 @@ namespace InkCanvas.Calibration.Tests
                 60, 60, Environment(), out _) == TouchCalibrationBuildError.DistributionsOverlap, "Reject overlapping distributions");
             Check(TouchCalibrationCalculator.TryBuild(Samples(10), Samples(30, 30, 30),
                 60, 60, Environment(), out _) == TouchCalibrationBuildError.MissingFinger, "Require three presses");
-            var group = new PalmContactGroupTracker { Width = 100, Height = 80 };
-            group.Down(1, 10, 10, 0); group.Down(2, 30, 20, 40); group.Down(3, 50, 30, 80);
-            group.Evaluate(199); Check(!group.IsPalm(1), "Wait for group window");
-            group.Evaluate(200); Check(group.IsPalm(1) && group.IsPalm(2) && group.IsPalm(3), "Position-only palm without contact area");
-            Check(group.TryGetCenter(out var cx, out var cy), "Group center"); Near(cx, 30); Near(cy, 20);
-            group.Up(2); group.Up(3); group.Move(1, 500, 500); group.Evaluate(400);
-            Check(group.IsPalm(1), "Palm decision persists until lift");
-            group.Up(1); Check(!group.TryGetCenter(out _, out _), "Lift removes group");
-            group.Down(1, 0, 0, 500); group.Down(2, 200, 0, 500); group.Down(3, 0, 200, 500);
-            group.Evaluate(700); Check(group.IsDecided(1) && !group.IsPalm(1), "Separated fingers stay writing");
-            group.Move(2, 5, 5); group.Move(3, 6, 6); group.Evaluate(1000);
-            Check(!group.IsPalm(1), "Writing decision cannot flip");
-            group.Reset(); group.Down(1, 0, 0, 0); group.Down(2, 10, 0, 300); group.Down(3, 0, 10, 600);
-            group.Evaluate(1000); Check(!group.IsPalm(1) && !group.IsPalm(2), "Separate presses cannot form palm");
-            group.Reset(); group.MinimumContacts = 2; group.Tolerance = 1.5;
-            group.Down(1, 0, 0, 0); group.Down(2, 130, 0, 0); group.Evaluate(200);
-            Check(group.IsPalm(1), "Count and tolerance controls");
-            group.Reset(); group.Down(1, double.NaN, 0, 0); Check(group.Count == 0, "Reject invalid positions");
             var legacy = JsonConvert.DeserializeObject<TouchCalibrationRecord>(
                 "{\"Version\":1,\"FingerArea\":100,\"PalmArea\":900,\"OutlineWidth\":60,\"OutlineHeight\":60,\"AreaMultiplier\":4,"
                 + "\"Environment\":{\"Source\":\"WPF\",\"Display\":\"DISPLAY1\",\"PixelWidth\":1920,\"PixelHeight\":1080,\"DpiX\":1.5,\"DpiY\":1.5}}");
@@ -156,23 +127,16 @@ namespace InkCanvas.Calibration.Tests
                 new Profile { Preserved = 42, Calibration = pointRecord })).Calibration;
             Check(pointRestored.IsValid() && pointRestored.UsePointGrouping && pointRestored.MinimumContacts == 4
                 && pointRestored.WindowMilliseconds == 300 && pointRestored.GroupTolerance == 1.5, "Position-only settings survive the settings converter");
-            var restoredTracker = new PalmContactGroupTracker
-            {
-                Width = pointRestored.OutlineWidth, Height = pointRestored.OutlineHeight,
-                MinimumContacts = pointRestored.MinimumContacts, WindowMilliseconds = pointRestored.WindowMilliseconds,
-                Tolerance = pointRestored.GroupTolerance
-            };
-            for (int id = 1; id <= 3; id++) restoredTracker.Down(id, id * 30, id * 10, 0);
-            restoredTracker.Evaluate(300);
-            Check(!restoredTracker.IsPalm(1), "Saved minimum contact count is applied");
-            restoredTracker.Down(4, 130, 20, 100);
-            restoredTracker.Evaluate(300);
-            Check(restoredTracker.IsPalm(4), "Saved grouping settings trigger the actual tracker");
+            var restoredProfile = PalmEraserProfiles.Create(pointRestored, Environment(), new PalmEraserOptions(), false);
+            Check(restoredProfile.Options.MultiTouch && !restoredProfile.Options.AreaEnabled
+                && restoredProfile.Options.MinimumContacts == 4 && restoredProfile.Options.GroupWindowMs == 300
+                && restoredProfile.Options.GroupTolerance == 1.5, "Saved point settings feed the TouchSuite engine");
+            Near(restoredProfile.PalmWidthPx, 150);
             pointRestored.MinimumContacts = 1; Check(!pointRestored.IsValid(), "Reject invalid contact count"); pointRestored.MinimumContacts = 4;
             pointRestored.WindowMilliseconds = -1; Check(!pointRestored.IsValid(), "Reject invalid time window"); pointRestored.WindowMilliseconds = 300;
             pointRestored.GroupTolerance = double.NaN; Check(!pointRestored.IsValid(), "Reject invalid group tolerance");
             Console.WriteLine("PASS CalibrationRoutes (area, position-only, migration, persistence, runtime policy)");
-            Console.WriteLine("PASS PalmContactGroupTracker (count, time, extent, latch, reset)");
+            Console.WriteLine("PASS TouchSuitePalmEngine (area, grouping, source locking, migration)");
             Console.WriteLine("PASS TouchCalibrationTests (sampling, policy, environment, tracker, persistence)");
         }
     }

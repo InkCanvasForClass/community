@@ -5,6 +5,8 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -51,6 +53,7 @@ namespace Ink_Canvas.Helpers
         private static DispatcherTimer _automaticDumpTimer;
         private static DateTime _lastAutomaticDumpTime = DateTime.MinValue;
         private static bool _wasAboveAutomaticDumpThreshold;
+        private static int _automaticDumpPending;
 
         public static void StartAutomaticDumpMonitor()
         {
@@ -107,7 +110,12 @@ namespace Ink_Canvas.Helpers
                     LogHelper.WriteLogToFile(
                         $"[MemoryBreakdown] 检测到进程内存占用 {memoryMb:F1} MB，超过 {AutomaticDumpThresholdMb:F0} MB，自动输出内存清单",
                         LogHelper.LogType.Warning);
-                    DumpToFile();
+                    if (Interlocked.CompareExchange(ref _automaticDumpPending, 1, 0) == 0)
+                        _ = Task.Run(() =>
+                        {
+                            try { DumpToFileCore(includeUi: false); }
+                            finally { Interlocked.Exchange(ref _automaticDumpPending, 0); }
+                        });
                 }
             }
             catch (Exception ex)
@@ -120,6 +128,9 @@ namespace Ink_Canvas.Helpers
         /// Build the report. Does NOT mutate process state (no GC, no file IO).
         /// </summary>
         public static string BuildReport()
+            => BuildReportCore(includeUi: true);
+
+        private static string BuildReportCore(bool includeUi)
         {
             var sb = new StringBuilder(8192);
             var now = DateTime.Now;
@@ -137,8 +148,11 @@ namespace Ink_Canvas.Helpers
 
             AppendProcessSection(sb, ref privateUsageMb);
             AppendGcSection(sb, ref gcHeapMb);
-            AppendWpfSection(sb);
-            AppendAppCacheSection(sb, privateUsageMb, gcHeapMb);
+            if (includeUi)
+            {
+                AppendWpfSection(sb);
+                AppendAppCacheSection(sb, privateUsageMb, gcHeapMb);
+            }
             AppendAssembliesSection(sb);
 
             return sb.ToString();
@@ -149,10 +163,13 @@ namespace Ink_Canvas.Helpers
         /// Also logs a one-line summary through LogHelper.
         /// </summary>
         public static string DumpToFile()
+            => DumpToFileCore(includeUi: true);
+
+        private static string DumpToFileCore(bool includeUi)
         {
             try
             {
-                var report = BuildReport();
+                var report = BuildReportCore(includeUi);
                 var logsDir = Path.Combine(App.RootPath, FolderName);
                 if (!Directory.Exists(logsDir))
                 {
