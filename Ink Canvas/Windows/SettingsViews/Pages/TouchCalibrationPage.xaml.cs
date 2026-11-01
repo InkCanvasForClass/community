@@ -83,6 +83,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SetResourceReference(PreviewInkBrushProperty, iNKORE.UI.WPF.Modern.ThemeKeys.TextFillColorPrimaryBrushKey);
             Loaded += PageLoaded;
             Unloaded += PageUnloaded;
+            IsVisibleChanged += CalibrationPage_IsVisibleChanged;
             ReturnButton.Content = Text("CalibrationReturnSettings");
             SimulateButton.Content = Text("CalibrationSimulate");
             SimulationHint.Text = Text("CalibrationSimulateHint");
@@ -95,7 +96,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void PageLoaded(object sender, RoutedEventArgs e)
         {
-            if (_host != null) return;
+            if (_host != null)
+            {
+                EnsureHidCalibrationSubscription();
+                return;
+            }
             _host = Window.GetWindow(this);
             if (_host == null) return;
             _host.LocationChanged += HostEnvironmentChanged;
@@ -111,19 +116,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _native = new NativePointerInputSource((HwndSource)PresentationSource.FromVisual(_host),
                 NativeSample, dpi.DpiScaleX, dpi.DpiScaleY, registerRawMouse: false);
 #endif
-            try
-            {
-                _hidCalibrationSubscription = PalmRawHidSource.Subscribe(OnHidCalibrationContact);
-                _hidCalibrationActive = true;
-                (Application.Current.MainWindow as MainWindow)?.SuspendPalmInput(true);
-            }
-            catch (Exception ex)
-            {
-                _hidCalibrationActive = false;
-                Ink_Canvas.Helpers.LogHelper.WriteLogToFile(
-                    "[TouchCalibration] HID sampling unavailable: " + ex.Message,
-                    Ink_Canvas.Helpers.LogHelper.LogType.Warning);
-            }
+            EnsureHidCalibrationSubscription();
             _step = 0;
             _pointOnly = false;
             _environment = null;
@@ -139,11 +132,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void PageUnloaded(object sender, RoutedEventArgs e)
         {
             CancelPress();
-            _hidCalibrationSubscription?.Dispose();
-            _hidCalibrationSubscription = null;
-            _hidCalibrationActive = false;
+            ReleaseHidCalibrationSubscription();
             ResetHidPress();
-            (Application.Current.MainWindow as MainWindow)?.SuspendPalmInput(false);
 #if ICC_NATIVE_WET_INK
             _native?.Dispose();
             _native = null;
@@ -155,6 +145,46 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (_host is SettingsWindow settings)
                 settings.NavigationViewControl.PaneDisplayMode = _previousPaneMode;
             _host = null;
+        }
+
+        private void CalibrationPage_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (!IsLoaded) return;
+            if (IsVisible) EnsureHidCalibrationSubscription();
+            else ReleaseHidCalibrationSubscription();
+        }
+
+        /// <summary>
+        /// HID 采样与主窗口的 HID 书写不能同时注册 Raw Input（Windows 只把设备发给最后注册的窗口）。
+        /// 进入校准页时先让主窗口让出注册，退出时必须恢复。
+        /// </summary>
+        private void EnsureHidCalibrationSubscription()
+        {
+            if (_hidCalibrationSubscription != null) return;
+            try
+            {
+                (Application.Current.MainWindow as MainWindow)?.SuspendHidTouchInputForCalibration();
+                _hidCalibrationSubscription = PalmRawHidSource.Subscribe(OnHidCalibrationContact);
+                _hidCalibrationActive = true;
+            }
+            catch (Exception ex)
+            {
+                _hidCalibrationActive = false;
+                (Application.Current.MainWindow as MainWindow)?.ResumeHidTouchInputAfterCalibration();
+                Ink_Canvas.Helpers.LogHelper.WriteLogToFile(
+                    "[TouchCalibration] HID sampling unavailable: " + ex.Message,
+                    Ink_Canvas.Helpers.LogHelper.LogType.Warning);
+            }
+        }
+
+        private void ReleaseHidCalibrationSubscription()
+        {
+            if (_hidCalibrationSubscription == null) return;
+            _hidCalibrationSubscription.Dispose();
+            _hidCalibrationSubscription = null;
+            _hidCalibrationActive = false;
+            ResetHidPress();
+            (Application.Current.MainWindow as MainWindow)?.ResumeHidTouchInputAfterCalibration();
         }
 
         private void HostEnvironmentChanged(object sender, EventArgs e) => CheckEnvironment();
@@ -369,7 +399,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 if (_hidPressId == contact.Id)
                 {
                     if (_hidPressStep == _step && _hidPressPeak > 0)
+                    {
                         (_step == 1 ? _hidPalmAreas : _hidFingerAreas).Add(_hidPressPeak);
+                    }
                     ResetHidPress();
                 }
             }

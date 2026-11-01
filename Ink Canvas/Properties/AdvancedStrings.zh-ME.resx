@@ -266,7 +266,7 @@
     <value>觸控輸入通道</value>
   </data>
   <data name="TouchInput_ChannelHint" xml:space="preserve">
-    <value>HID 與 Pointer 是兩套原始輸入：HID 讀觸控，Pointer 讀滑鼠/筆；滑鼠/筆不跟隨 HID 開關。</value>
+    <value>HID 與 Pointer 是兩套原始輸入：HID 讀觸控（開啟雙指手勢時，任意時刻落下兩指即清除目前所有手指墨跡並進入平移/旋轉/縮放；關閉後才支援多指同時書寫），Pointer 讀滑鼠/筆；滑鼠/筆不跟隨 HID 開關。</value>
   </data>
   <data name="TouchInput_PalmSizeTitle" xml:space="preserve">
     <value>手掌擦尺寸倍率</value>
@@ -298,4 +298,17 @@
   <data name="TouchInput_MouseWritingHint" xml:space="preserve">
     <value>Raw HID / Pointer 模式下滑鼠走 WM_INPUT（Raw HID），筆走 WM_POINTER；都不使用 WPF 畫墨跡，壓感與取樣率來自原始輸入。</value>
   </data>
+  <data name="TouchInput_DebugHint" xml:space="preserve"><value>在視窗右上角顯示 HID 觸點、手勢工作階段與 WPF 擷取狀態，僅用於排查問題。</value></data>
+  <data name="TouchInput_DebugTitle" xml:space="preserve"><value>觸控除錯浮窗</value></data>
+  <data name="TouchInput_HidFallback" xml:space="preserve"><value>HID 未註冊成功，觸控書寫已回退 WPF。</value></data>
+  <data name="TouchInput_WidthModeContact" xml:space="preserve"><value>接觸原始尺寸</value></data>
+  <data name="TouchInput_WidthModeContactScaled" xml:space="preserve"><value>接觸尺寸 × 倍率</value></data>
+  <data name="TouchInput_WidthModeFixed" xml:space="preserve"><value>固定筆寬（目前畫筆）</value></data>
+  <data name="TouchInput_WidthModeHint" xml:space="preserve"><value>選擇觸控筆跡寬度的來源。固定筆寬使用目前畫筆；接觸尺寸使用 HID/觸控上報的接觸寬高；速度模擬依運筆速度產生筆鋒。</value></data>
+  <data name="TouchInput_WidthModeSimulated" xml:space="preserve"><value>速度模擬（筆鋒）</value></data>
+  <data name="TouchInput_WidthModeTitle" xml:space="preserve"><value>墨跡粗細</value></data>
+  <data name="TouchInput_WidthPressureHint" xml:space="preserve"><value>0 = 完全忽略壓感；1 = 完全依壓感/模擬速度改變粗細。</value></data>
+  <data name="TouchInput_WidthPressureTitle" xml:space="preserve"><value>壓感影響</value></data>
+  <data name="TouchInput_WidthScaleHint" xml:space="preserve"><value>僅「接觸尺寸 × 倍率」生效。觸控螢幕上報 4×4 時，2× 約等於 8px。</value></data>
+  <data name="TouchInput_WidthScaleTitle" xml:space="preserve"><value>接觸尺寸倍率</value></data>
 </root>

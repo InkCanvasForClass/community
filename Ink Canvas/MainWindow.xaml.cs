@@ -2766,6 +2766,7 @@ namespace Ink_Canvas
 
             InitializeClipboardMonitoring();
             InitializePalmInputSource();
+            InitializeTouchDebugOverlay();
             InitializeFloatingWindowInterceptor();
             InitializeGlobalHotkeyManager();
 

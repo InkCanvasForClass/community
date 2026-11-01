@@ -10,6 +10,7 @@ using Ink_Canvas;
 using Ink_Canvas.Ink;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Pages;
+using iNKORE.UI.WPF.Modern.Controls;
 using Newtonsoft.Json;
 
 namespace InkCanvas.Calibration.Tests
@@ -122,6 +123,7 @@ namespace InkCanvas.Calibration.Tests
             Check(page.FindName("CmbTouchWriting") is ComboBox, "Touch input page is missing the touch writing source selector");
             Check(page.FindName("CmbPalmEraser") is ComboBox, "Touch input page is missing the palm eraser source selector");
             Check(page.FindName("CmbMouseWriting") is ComboBox, "Touch input page is missing the mouse/pen source selector");
+            Check(page.FindName("ToggleSwitchTouchDebug") is ToggleSwitch, "Touch input page is missing the touch debug overlay switch");
         }
 
         private static void PointRouteSaves()

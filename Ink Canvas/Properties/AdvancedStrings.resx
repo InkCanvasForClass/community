@@ -181,8 +181,7 @@
     <value>在下方区域内用笔尖点击以估计触摸大小倍数</value>
   </data>
   <data name="TouchMultiplierHint" xml:space="preserve">
-    <value>可在手指触摸画板时显示圆形橡皮或手掌触摸画板时显示的橡皮比
-手掌大很多时调整</value>
+    <value>可在手指触摸画板时显示圆形橡皮或手掌触摸画板时显示的橡皮比</value>
   </data>
   <data name="TouchMultiplierValueHint" xml:space="preserve">
     <value>数值仅供参考</value>
@@ -288,7 +287,7 @@
     <value>触摸输入通道</value>
   </data>
   <data name="TouchInput_ChannelHint" xml:space="preserve">
-    <value>HID 与 Pointer 是两套原始输入：HID 读触摸，Pointer 读鼠标/笔；鼠标/笔不跟随 HID 开关。</value>
+    <value>HID 与 Pointer 是两套原始输入：HID 读触摸（开启双指手势时，任意时刻落下两指即清除当前所有手指墨迹并进入平移/旋转/缩放；关闭后才支持多指同时书写），Pointer 读鼠标/笔；鼠标/笔不跟随 HID 开关。</value>
   </data>
   <data name="TouchInput_PalmSizeTitle" xml:space="preserve">
     <value>手掌擦尺寸倍率</value>
@@ -320,4 +319,18 @@
   <data name="TouchInput_MouseWritingHint" xml:space="preserve">
     <value>Raw HID / Pointer 模式下鼠标走 WM_INPUT（Raw HID），笔走 WM_POINTER；都不用 WPF 画墨迹，压感与采样率来自原始输入。</value>
   </data>
+  <data name="TouchInput_DebugHint" xml:space="preserve"><value>在窗口右上角显示 HID 触点、手势会话与 WPF 捕获状态，仅用于排查问题。</value></data>
+  <data name="TouchInput_DebugTitle" xml:space="preserve"><value>触摸调试浮窗</value></data>
+  <data name="TouchInput_HidFallback" xml:space="preserve"><value>HID 未注册成功，触摸书写已回退 WPF。</value></data>
+  <data name="TouchInput_WidthModeContact" xml:space="preserve"><value>接触原始尺寸</value></data>
+  <data name="TouchInput_WidthModeContactScaled" xml:space="preserve"><value>接触尺寸 × 倍率</value></data>
+  <data name="TouchInput_WidthModeFixed" xml:space="preserve"><value>固定笔宽（当前画笔）</value></data>
+  <data name="TouchInput_WidthModeHint" xml:space="preserve"><value>选择触摸笔迹宽度的来源。固定笔宽使用当前画笔；接触尺寸使用 HID/触摸上报的接触宽高；速度模拟按运笔速度产生笔锋。</value></data>
+  <data name="TouchInput_WidthModeSimulated" xml:space="preserve"><value>速度模拟（笔锋）</value></data>
+  <data name="TouchInput_WidthModeTitle" xml:space="preserve"><value>墨迹粗细</value></data>
+  <data name="TouchInput_WidthPressureHint" xml:space="preserve"><value>0 = 完全忽略压感；1 = 完全按压感/模拟速度改变粗细。</value></data>
+  <data name="TouchInput_WidthPressureTitle" xml:space="preserve"><value>压感影响</value></data>
+  <data name="TouchInput_WidthScaleHint" xml:space="preserve"><value>仅“接触尺寸 × 倍率”生效。触摸屏上报 4×4 时，2× 约等于 8px。</value></data>
+  <data name="TouchInput_WidthScaleTitle" xml:space="preserve"><value>接触尺寸倍率</value></data>
+  <data name="手掌大很多时调整" xml:space="preserve"><value></value></data>
 </root>

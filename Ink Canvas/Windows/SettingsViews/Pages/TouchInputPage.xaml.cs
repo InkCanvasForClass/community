@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using Ink_Canvas.Ink;
 using Ink_Canvas.Properties;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
@@ -15,6 +16,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
     {
         private static readonly string[] TouchSourceNames = { "WPF 触摸", "HID 原始触摸" };
         private static readonly string[] MouseSourceNames = { "WPF 鼠标/笔", "Raw HID / Pointer（鼠标+笔）" };
+        private static readonly string[] WidthModeKeys =
+        {
+            "TouchInput_WidthModeFixed",
+            "TouchInput_WidthModeContact",
+            "TouchInput_WidthModeContactScaled",
+            "TouchInput_WidthModeSimulated"
+        };
         private bool _loaded;
         private bool _updating;
 
@@ -28,6 +36,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
             for (int i = 0; i < MouseSourceNames.Length; i++)
                 CmbMouseWriting.Items.Add(new ComboBoxItem { Content = MouseSourceNames[i] });
+            for (int i = 0; i < WidthModeKeys.Length; i++)
+                CmbWidthMode.Items.Add(new ComboBoxItem { Content = AdvancedStrings.GetString(WidthModeKeys[i]) });
             Loaded += TouchInputPage_Loaded;
         }
 
@@ -39,6 +49,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private static int MouseWritingChannel =>
             Math.Clamp(SettingsManager.Settings.Advanced.MouseWritingChannel, 0, 1);
+
+        private static int WidthMode =>
+            Math.Clamp(SettingsManager.Settings.Advanced.TouchWidthMode, 0, 3);
 
         private void TouchInputPage_Loaded(object sender, RoutedEventArgs e)
         {
@@ -59,6 +72,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 CmbTouchWriting.SelectedIndex = TouchWritingChannel;
                 CmbPalmEraser.SelectedIndex = PalmEraserChannel;
                 CmbMouseWriting.SelectedIndex = MouseWritingChannel;
+                CmbWidthMode.SelectedIndex = WidthMode;
+                SliderWidthScale.Value = Math.Clamp(advanced.TouchWidthScale, 0.25, 4.0);
+                SliderPressureInfluence.Value = Math.Clamp(advanced.TouchPressureInfluence, 0.0, 1.0);
+                ToggleSwitchTouchDebug.IsOn = advanced.ShowTouchDebugOverlay;
+                UpdateWidthText();
             }
             finally
             {
@@ -89,6 +107,45 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SaveAndReload();
         }
 
+        private void CmbWidthMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_loaded || _updating || CmbWidthMode.SelectedIndex < 0) return;
+            SettingsManager.Settings.Advanced.TouchWidthMode = CmbWidthMode.SelectedIndex;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void SliderWidthScale_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!_loaded || _updating) return;
+            SettingsManager.Settings.Advanced.TouchWidthScale = Math.Round(e.NewValue, 2);
+            SettingsManager.SaveSettingsToFile();
+            UpdateWidthText();
+        }
+
+        private void SliderPressureInfluence_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!_loaded || _updating) return;
+            SettingsManager.Settings.Advanced.TouchPressureInfluence = Math.Round(e.NewValue, 2);
+            SettingsManager.SaveSettingsToFile();
+            UpdateWidthText();
+        }
+
+        private void ToggleSwitchTouchDebug_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_loaded || _updating) return;
+            SettingsManager.Settings.Advanced.ShowTouchDebugOverlay = ToggleSwitchTouchDebug.IsOn;
+            SettingsManager.SaveSettingsToFile();
+            (Application.Current.MainWindow as MainWindow)?.UpdateTouchDebugOverlayVisibility();
+        }
+
+        private void UpdateWidthText()
+        {
+            if (TextWidthScale != null)
+                TextWidthScale.Text = SettingsManager.Settings.Advanced.TouchWidthScale.ToString("0.00") + "×";
+            if (TextPressureInfluence != null)
+                TextPressureInfluence.Text = SettingsManager.Settings.Advanced.TouchPressureInfluence.ToString("P0");
+        }
+
         private void SaveAndReload()
         {
             SettingsManager.SaveSettingsToFile();
@@ -100,11 +157,19 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (BarStatus == null) return;
             string format = AdvancedStrings.GetString("TouchInput_StatusFormat");
-            BarStatus.Message = string.Format(format,
+            string message = string.Format(format,
                 TouchSourceNames[TouchWritingChannel],
                 TouchSourceNames[PalmEraserChannel],
                 MouseSourceNames[MouseWritingChannel]);
-            BarStatus.Severity = iNKORE.UI.WPF.Modern.Controls.InfoBarSeverity.Informational;
+            bool hidFallback = (TouchWritingChannel == 1 || PalmEraserChannel == 1)
+                && (Application.Current.MainWindow as MainWindow)?.IsHidTouchActive != true;
+            if (hidFallback)
+                message += " " + AdvancedStrings.GetString("TouchInput_HidFallback");
+            BarStatus.Message = message;
+            BarStatus.Severity = hidFallback
+                ? iNKORE.UI.WPF.Modern.Controls.InfoBarSeverity.Warning
+                : iNKORE.UI.WPF.Modern.Controls.InfoBarSeverity.Informational;
         }
+
     }
 }

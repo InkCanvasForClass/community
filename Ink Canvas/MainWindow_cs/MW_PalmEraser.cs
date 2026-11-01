@@ -3,6 +3,7 @@ using Ink_Canvas.Ink;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Ink;
 using System.Windows;
 using System.Windows.Controls;
@@ -31,14 +32,12 @@ namespace Ink_Canvas
         private double _palmHeight;
         private Point? _palmLastPoint;
         private int _palmRevision;
-        private IDisposable _palmHidSubscription;
         private bool _palmHidActive;
         private PointerWritingSource _palmPointerWritingSource;
         private bool _palmPointerWritingActive;
         private RawMouseWritingSource _palmRawMouseWritingSource;
         private bool _palmRawMouseWritingActive;
         private readonly Dictionary<int, ExternalTouchStroke> _palmExternalStrokes = new();
-        private long _palmLastHidContactTicks;
         private int _palmNextExternalVisualId = -100000;
         private DispatcherTimer _palmHidTimer;
         private PalmEraserProfile _palmCachedProfile;
@@ -46,7 +45,6 @@ namespace Ink_Canvas
         private long _palmCachedProfileStamp;
         private bool _palmInputHooked;
         private bool _palmExternalErasing;
-        private bool _palmInputSuspended;
 
         /// <summary>HID 接触对应的外部墨迹；HID 书写时由这里接管 WPF 触摸不画的笔迹。</summary>
         private sealed class ExternalTouchStroke
@@ -54,6 +52,11 @@ namespace Ink_Canvas
             public StrokeVisual Visual;
             public int VisualId;
             public long LastTicks;
+            public double ContactWidthDip;
+            public double ContactHeightDip;
+            public float SimulatedPressure = 0.5f;
+            public Point LastPoint;
+            public long LastSampleTicks;
         }
         private int _palmInputChannel = -1;
 #if ICC_NATIVE_WET_INK
@@ -175,6 +178,7 @@ namespace Ink_Canvas
             if (_palmInputHooked) return;
             _palmInputHooked = true;
             Closed += (s, e) => DisposePalmInputSource();
+            InitializeHidTouchInput();
             if (new WindowInteropHelper(this).Handle == IntPtr.Zero)
                 SourceInitialized += PalmInputSource_SourceInitialized;
             else
@@ -220,8 +224,9 @@ namespace Ink_Canvas
                 try
                 {
                     // HID 同时接管触摸书写与手掌擦；鼠标/笔仍走 Windows Pointer。
-                    _palmHidSubscription = PalmRawHidSource.Subscribe(OnPalmRawContact);
-                    _palmHidActive = _palmHidSubscription != null;
+                    InitializeHidTouchInput();
+                    ReloadHidTouchInput();
+                    _palmHidActive = _hidTouchRegistered;
                     if (_palmHidActive) StartPalmHidTimer();
                 }
                 catch (Exception ex)
@@ -260,9 +265,7 @@ namespace Ink_Canvas
         private void DisposePalmInputSource()
         {
             StopPalmHidTimer();
-            try { _palmHidSubscription?.Dispose(); } catch { }
-            _palmHidSubscription = null;
-            _palmHidActive = false;
+            ShutdownHidTouchInput();
             try { _palmPointerWritingSource?.Dispose(); } catch { }
             _palmPointerWritingSource = null;
             _palmPointerWritingActive = false;
@@ -293,6 +296,11 @@ namespace Ink_Canvas
         private void PalmHidTimer_Tick(object sender, EventArgs e)
         {
             _palmEngine.Tick();
+            // 手势会话的看门狗：Up 丢失时，所有非手掌手指都不在了就强制收尾，
+            // 避免会话永久卡住导致后续 HID 书写全部失效。
+            if (_hidGestureSessionActive
+                && !_hidTouches.Values.Any(t => t.Down && !t.IsPalm))
+                EndHidGestureSession();
             long now = Environment.TickCount64;
             foreach (int id in _palmExternalStrokes.Keys.ToArray())
             {
@@ -302,90 +310,6 @@ namespace Ink_Canvas
             if (isPalmEraserActive && _palmExternalErasing && !_palmEngine.PalmIds.Any())
                 FinishExternalPalmIfIdle();
             RestoreTouchChromeIfIdle();
-        }
-
-        /// <summary>
-        /// 校准页需要独占 HID 触摸采样：挂起时不再把接触送进引擎或绘制外部笔迹。
-        /// </summary>
-        internal void SuspendPalmInput(bool suspended)
-        {
-            _palmInputSuspended = suspended;
-            if (!suspended) return;
-            _palmEngine.Clear();
-            if (_palmExternalErasing)
-            {
-                _palmExternalErasing = false;
-                EndPalmEraser();
-            }
-            RestoreTouchChromeIfIdle();
-        }
-
-        private void OnPalmRawContact(RawPalmContact contact)
-        {
-            if (_palmInputSuspended)
-            {
-                if (contact.Released) FinishExternalTouchStroke(contact.Id, true);
-                return;
-            }
-            _palmLastHidContactTicks = Environment.TickCount64;
-            int id = contact.Id;
-            if (contact.Released)
-            {
-                FinishExternalTouchStroke(id, true);
-                if (Settings.Canvas.EnablePalmEraser && HasValidPalmCalibration())
-                {
-                    _palmEngine.Remove(PalmContactSource.RawHid, id);
-                    FinishExternalPalmIfIdle();
-                }
-                return;
-            }
-
-            if (!IsActive) return;
-
-            var screen = System.Windows.Forms.SystemInformation.VirtualScreen;
-            if (screen.Width <= 0 || screen.Height <= 0) return;
-
-            Point dip = inkCanvas.PointFromScreen(
-                new Point(screen.Left + contact.X * screen.Width, screen.Top + contact.Y * screen.Height));
-            if (!IsUsablePalmSize(dip.X, dip.Y)) return;
-            if (inkCanvas.ActualWidth > 0 && inkCanvas.ActualHeight > 0
-                && !new Rect(0, 0, inkCanvas.ActualWidth, inkCanvas.ActualHeight).Contains(dip))
-                return;
-            if (IsOverFloatingChrome(dip)) return;
-
-            PalmEraserProfile profile = null;
-            bool palmReady = CurrentPalmEraserChannel == 1
-                && Settings.Canvas.EnablePalmEraser && CanStartPalmEraser()
-                && TryGetCachedPalmProfile(out profile);
-            if (palmReady)
-            {
-                _palmEngine.Configure(profile);
-                var dimensions = PalmEraserEngine.HidDimensions(contact.Width, contact.Height,
-                    contact.WidthMaximum, contact.HeightMaximum, screen.Width, screen.Height,
-                    profile.Options.HidScale);
-                if (dimensions.Width > 0 && dimensions.Height > 0)
-                {
-                    var center = new Point(dip.X * profile.DpiX, dip.Y * profile.DpiY);
-                    var rect = new Rect(center.X - dimensions.Width / 2.0,
-                        center.Y - dimensions.Height / 2.0, dimensions.Width, dimensions.Height);
-                    if (contact.Pressure.HasValue) _palmEngine.NotePressure(contact.Pressure.Value);
-                    if (_palmEngine.Submit(PalmContactSource.RawHid, id, rect, true, contact.Device)
-                        && _palmEngine.TryGetNearestEraser(center, out var frame))
-                    {
-                        // 这个接触已被判定为手掌：丢弃此前可能画出的外部预览墨迹。
-                        FinishExternalTouchStroke(id, false);
-                        ShowExternalPalmFrame(frame, profile);
-                        return;
-                    }
-                }
-            }
-
-            if (CurrentTouchWritingChannel != 1) return;
-
-            // WPF 触摸事件可能比 WM_INPUT 先到；发现 HID 样本时把刚落下的 WPF 预览墨迹收掉，
-            // 避免同一根手指被画两遍。只在还没有 HID 外部笔迹时做一次。
-            if (_palmExternalStrokes.Count == 0) AbortWpfTouchInkForHid();
-            AppendExternalTouchPoint(id, dip, contact.Pressure);
         }
 
         /// <summary>
@@ -404,6 +328,7 @@ namespace Ink_Canvas
 
             if (!CanAcceptExternalWriting()) return false;
             if (inkCanvas == null) return false;
+            if (!IsPointOverThisWindow(contact.X, contact.Y)) return false;
 
             Point dip = inkCanvas.PointFromScreen(new Point(contact.X, contact.Y));
             if (inkCanvas.ActualWidth > 0 && inkCanvas.ActualHeight > 0
@@ -451,18 +376,49 @@ namespace Ink_Canvas
             {
                 CancelPalmTouchPreview(touchId);
                 dec.Remove(touchId);
+                _palmSuppressedTouches.Add(touchId);
             }
             foreach (int touchId in _activeTouchStrokeIds.ToArray())
             {
                 CancelPalmTouchPreview(touchId);
                 dec.Remove(touchId);
+                _palmSuppressedTouches.Add(touchId);
             }
         }
+
+        /// <summary>
+        /// Raw contact input is global. Ignore it while another window (settings, dialogs,
+        /// calibration) is active so touches there cannot draw or erase behind the window.
+        /// </summary>
+        /// <summary>
+        /// Raw HID/pointer contacts carry screen coordinates. Only accept them when the top
+        /// window under the point is this board; otherwise a touch on the settings window or
+        /// toolbar would draw/erase behind it.
+        /// </summary>
+        private bool IsPointOverThisWindow(int screenX, int screenY)
+        {
+            IntPtr hwnd = WindowFromPoint(new NativePoint { X = screenX, Y = screenY });
+            if (hwnd == IntPtr.Zero) return false;
+            return GetAncestor(hwnd, 2) == new WindowInteropHelper(this).Handle;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct NativePoint
+        {
+            public int X;
+            public int Y;
+        }
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr WindowFromPoint(NativePoint point);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetAncestor(IntPtr hwnd, uint flags);
 
         private bool CanAcceptExternalWriting()
         {
             if ((!_palmHidActive && !_palmPointerWritingActive && !_palmRawMouseWritingActive)
-                || !IsActive || inkCanvas == null || IsCurrentPageFrozen) return false;
+                || inkCanvas == null || IsCurrentPageFrozen) return false;
             if (drawingShapeMode != 0) return false;
             var mode = inkCanvas.EditingMode;
             return mode != InkCanvasEditingMode.Select
@@ -489,26 +445,60 @@ namespace Ink_Canvas
             }
         }
 
-        private void AppendExternalTouchPoint(int id, Point dip, double? pressure)
+        private void AppendExternalTouchPoint(
+            int id, Point dip, double? pressure, double contactWidthDip = 0, double contactHeightDip = 0)
         {
-            if (!CanAcceptExternalWriting()) return;
+            // 双指手势会话期间任何源都不允许再往画布上添笔迹。
+            if (_hidGestureSessionActive)
+            {
+                return;
+            }
+            if (!CanAcceptExternalWriting())
+            {
+                return;
+            }
 
+            long now = Environment.TickCount64;
             if (!_palmExternalStrokes.TryGetValue(id, out var state))
             {
                 int visualId = _palmNextExternalVisualId--;
-                var visual = GetStrokeVisual(visualId);
-                state = new ExternalTouchStroke { Visual = visual, VisualId = visualId };
+                var attributes = TouchStrokeWidthPolicy.CreateAttributes(
+                    inkCanvas.DefaultDrawingAttributes, contactWidthDip, contactHeightDip);
+                var visual = GetStrokeVisual(visualId, attributes);
+                state = new ExternalTouchStroke
+                {
+                    Visual = visual,
+                    VisualId = visualId,
+                    ContactWidthDip = contactWidthDip,
+                    ContactHeightDip = contactHeightDip,
+                    LastPoint = dip,
+                    LastSampleTicks = now
+                };
                 _palmExternalStrokes[id] = state;
                 BeginTouchInkInput();
                 RealtimeInkPerformanceMonitor.BeginStroke(visual, RealtimeInkInputKind.TouchInterpolated);
             }
 
-            float pressureFactor = pressure.HasValue
-                ? (float)Math.Clamp(pressure.Value, 0.01, 1.0)
-                : 0.5f;
+            float pressureFactor;
+            if (TouchStrokeWidthPolicy.Mode == TouchStrokeWidthPolicy.Simulated)
+            {
+                double dt = Math.Max(1.0, now - state.LastSampleTicks);
+                double distance = (dip - state.LastPoint).Length;
+                state.SimulatedPressure = TouchStrokeWidthPolicy.SimulatedPressure(
+                    distance / dt, state.SimulatedPressure);
+                pressureFactor = TouchStrokeWidthPolicy.AdjustPressure(state.SimulatedPressure);
+            }
+            else
+            {
+                pressureFactor = TouchStrokeWidthPolicy.AdjustPressure(
+                    pressure.HasValue ? (float)pressure.Value : 0.5f);
+            }
+
+            state.LastPoint = dip;
+            state.LastSampleTicks = now;
             var point = new StylusPoint(dip.X, dip.Y) { PressureFactor = pressureFactor };
             state.Visual.Add(point);
-            state.LastTicks = Environment.TickCount64;
+            state.LastTicks = now;
             RealtimeInkFrameScheduler.RequestRedraw(state.Visual);
         }
 
@@ -565,12 +555,14 @@ namespace Ink_Canvas
         {
             if (CurrentTouchWritingChannel != 1 || !_palmHidActive) return false;
             if (inkCanvas == null) return false;
+            if (drawingShapeMode != 0) return false;
             var mode = inkCanvas.EditingMode;
             if (mode == InkCanvasEditingMode.Select
                 || mode == InkCanvasEditingMode.EraseByPoint
                 || mode == InkCanvasEditingMode.EraseByStroke) return false;
-            if (_palmExternalStrokes.Count > 0 || _palmExternalErasing) return true;
-            return Environment.TickCount64 - _palmLastHidContactTicks <= 1500;
+            // 选了 HID 触摸书写后，WPF 触摸一律不画：HID 样本可能比 WPF 事件晚到，
+            // 若按“最近有样本”判断，WPF 会先提交一笔，随后 HID 再提交一笔（直线双笔的根因）。
+            return true;
         }
 
         private void ShowExternalPalmFrame(PalmEraserFrame frame, PalmEraserProfile profile)
@@ -609,21 +601,17 @@ namespace Ink_Canvas
             if (BlackboardUIGridForInkReplay != null) BlackboardUIGridForInkReplay.IsHitTestVisible = true;
         }
 
-        /// <summary>
-        /// HID 通道下 WPF 触摸不再画墨迹（由 HID 样本驱动 StrokeVisual）；
-        /// HID 源不可用或长时间无样本时返回 false，让 WPF 触摸继续作为回退。
-        /// </summary>
-        private bool TryHandleExternalPalmTouch(TouchEventArgs e, bool down)
-        {
-            if (!ShouldSuppressWpfTouchForHid()) return false;
-            if (down) _palmSuppressedTouches.Add(e.TouchDevice.Id);
-            e.Handled = true;
-            return true;
-        }
-
         private bool TryHandlePalmTouch(TouchEventArgs e, bool down)
         {
+            // HID 手势会话期间 WPF 触摸必须让路，避免同一根手指同时进 WPF 预览和 HID 手势。
             int id = e.TouchDevice.Id;
+            // 手势会话期间 WPF 触摸一律不画，也不允许继续扩展预览。
+            if (CurrentTouchWritingChannel == 1 && _hidGestureSessionActive)
+            {
+                if (down) _palmSuppressedTouches.Add(id);
+                e.Handled = true;
+                return true;
+            }
             if (!down && !dec.Contains(id) && !_palmSuppressedTouches.Contains(id)) return false;
 
             if (CurrentPalmEraserChannel == 0)
@@ -692,7 +680,8 @@ namespace Ink_Canvas
                     _palmEngine.Configure(profile);
                     var touch = e.GetTouchPoint(inkCanvas);
                     var center = new Point(touch.Position.X * profile.DpiX, touch.Position.Y * profile.DpiY);
-                    if (_palmEngine.TryGetNearestEraser(center, out var frame))
+                    if (_palmEngine.TryGetNearestEraser(center, out var frame)
+                        && (frame.CenterPx - center).Length <= Math.Max(frame.WidthPx, frame.HeightPx) * 0.75)
                     {
                         CancelPalmTouchPreview(id);
                         _palmSuppressedTouches.Add(id);
@@ -741,6 +730,56 @@ namespace Ink_Canvas
             _nativeInkController?.Cancel(pointer);
             _wetInkWindowHost?.SignalWork();
 #endif
+        }
+
+        /// <summary>
+        /// HID 触摸书写通道下，WPF 触摸抬起时绝不能再提交自己的预览笔迹；
+        /// 否则同一根手指会被 HID 和 WPF 各提交一次，表现为“一条弯的一条直的”。
+        /// </summary>
+        internal bool TrySuppressHidTouchUp(TouchEventArgs e)
+        {
+            if (CurrentTouchWritingChannel != 1 || !_palmHidActive || inkCanvas == null)
+            {
+                return false;
+            }
+            // 手势会话优先于工具状态：不管当前是笔、几何还是选择，都不允许 WPF 提交/续画。
+            if (_hidGestureSessionActive)
+            {
+                int gestureId = e.TouchDevice.Id;
+                CancelPalmTouchPreview(gestureId);
+                _palmEngine.Remove(PalmContactSource.Software, gestureId);
+                if (_palmTouchDevice == e.TouchDevice) EndPalmEraser();
+                FinishExternalPalmIfIdle();
+                _palmSuppressedTouches.Remove(gestureId);
+                dec.Remove(gestureId);
+                inkCanvas.ReleaseTouchCapture(e.TouchDevice);
+                RestoreTouchChromeIfIdle();
+                e.Handled = true;
+                return true;
+            }
+            if (drawingShapeMode != 0)
+            {
+                return false;
+            }
+            var mode = inkCanvas.EditingMode;
+            if (mode == InkCanvasEditingMode.Select
+                || mode == InkCanvasEditingMode.EraseByPoint
+                || mode == InkCanvasEditingMode.EraseByStroke)
+            {
+                return false;
+            }
+
+            int id = e.TouchDevice.Id;
+            CancelPalmTouchPreview(id);
+            _palmEngine.Remove(PalmContactSource.Software, id);
+            if (_palmTouchDevice == e.TouchDevice) EndPalmEraser();
+            FinishExternalPalmIfIdle();
+            _palmSuppressedTouches.Remove(id);
+            dec.Remove(id);
+            inkCanvas.ReleaseTouchCapture(e.TouchDevice);
+            RestoreTouchChromeIfIdle();
+            e.Handled = true;
+            return true;
         }
 
         private bool FinishPalmTouch(TouchEventArgs e)

@@ -215,5 +215,255 @@ namespace Ink_Canvas.Properties
         public static string TouchInput_StatusFormat => ResourceManager.GetString(nameof(TouchInput_StatusFormat), _resourceCulture);
 
         public static string TouchInput_CalibrationHint => ResourceManager.GetString(nameof(TouchInput_CalibrationHint), _resourceCulture);
-    }
+
+        /// <summary>
+        ///   本地化字符串 CalibrationClearConfirm。
+        /// </summary>
+        public static string CalibrationClearConfirm => ResourceManager.GetString(nameof(CalibrationClearConfirm), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationEnvironmentChanged。
+        /// </summary>
+        public static string CalibrationEnvironmentChanged => ResourceManager.GetString(nameof(CalibrationEnvironmentChanged), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationFinger。
+        /// </summary>
+        public static string CalibrationFinger => ResourceManager.GetString(nameof(CalibrationFinger), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationGroupCount。
+        /// </summary>
+        public static string CalibrationGroupCount => ResourceManager.GetString(nameof(CalibrationGroupCount), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationGroupPalm。
+        /// </summary>
+        public static string CalibrationGroupPalm => ResourceManager.GetString(nameof(CalibrationGroupPalm), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationGroupStatus。
+        /// </summary>
+        public static string CalibrationGroupStatus => ResourceManager.GetString(nameof(CalibrationGroupStatus), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationGroupTolerance。
+        /// </summary>
+        public static string CalibrationGroupTolerance => ResourceManager.GetString(nameof(CalibrationGroupTolerance), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationGroupWindow。
+        /// </summary>
+        public static string CalibrationGroupWindow => ResourceManager.GetString(nameof(CalibrationGroupWindow), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationGroupWriting。
+        /// </summary>
+        public static string CalibrationGroupWriting => ResourceManager.GetString(nameof(CalibrationGroupWriting), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationInvalidOutline。
+        /// </summary>
+        public static string CalibrationInvalidOutline => ResourceManager.GetString(nameof(CalibrationInvalidOutline), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationLift。
+        /// </summary>
+        public static string CalibrationLift => ResourceManager.GetString(nameof(CalibrationLift), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationLive。
+        /// </summary>
+        public static string CalibrationLive => ResourceManager.GetString(nameof(CalibrationLive), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationMismatch。
+        /// </summary>
+        public static string CalibrationMismatch => ResourceManager.GetString(nameof(CalibrationMismatch), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationMultipleContacts。
+        /// </summary>
+        public static string CalibrationMultipleContacts => ResourceManager.GetString(nameof(CalibrationMultipleContacts), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationNeedThree。
+        /// </summary>
+        public static string CalibrationNeedThree => ResourceManager.GetString(nameof(CalibrationNeedThree), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationNib。
+        /// </summary>
+        public static string CalibrationNib => ResourceManager.GetString(nameof(CalibrationNib), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationNibHint。
+        /// </summary>
+        public static string CalibrationNibHint => ResourceManager.GetString(nameof(CalibrationNibHint), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationNoArea。
+        /// </summary>
+        public static string CalibrationNoArea => ResourceManager.GetString(nameof(CalibrationNoArea), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationNone。
+        /// </summary>
+        public static string CalibrationNone => ResourceManager.GetString(nameof(CalibrationNone), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationOutline。
+        /// </summary>
+        public static string CalibrationOutline => ResourceManager.GetString(nameof(CalibrationOutline), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationOutlineHint。
+        /// </summary>
+        public static string CalibrationOutlineHint => ResourceManager.GetString(nameof(CalibrationOutlineHint), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationOverlap。
+        /// </summary>
+        public static string CalibrationOverlap => ResourceManager.GetString(nameof(CalibrationOverlap), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationPalm。
+        /// </summary>
+        public static string CalibrationPalm => ResourceManager.GetString(nameof(CalibrationPalm), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationPolicy。
+        /// </summary>
+        public static string CalibrationPolicy => ResourceManager.GetString(nameof(CalibrationPolicy), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationPressHint。
+        /// </summary>
+        public static string CalibrationPressHint => ResourceManager.GetString(nameof(CalibrationPressHint), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationPreview。
+        /// </summary>
+        public static string CalibrationPreview => ResourceManager.GetString(nameof(CalibrationPreview), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationPreviewHint。
+        /// </summary>
+        public static string CalibrationPreviewHint => ResourceManager.GetString(nameof(CalibrationPreviewHint), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationReady。
+        /// </summary>
+        public static string CalibrationReady => ResourceManager.GetString(nameof(CalibrationReady), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationRecorded。
+        /// </summary>
+        public static string CalibrationRecorded => ResourceManager.GetString(nameof(CalibrationRecorded), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationReturnSettings。
+        /// </summary>
+        public static string CalibrationReturnSettings => ResourceManager.GetString(nameof(CalibrationReturnSettings), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationSaveFailed。
+        /// </summary>
+        public static string CalibrationSaveFailed => ResourceManager.GetString(nameof(CalibrationSaveFailed), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationSaved。
+        /// </summary>
+        public static string CalibrationSaved => ResourceManager.GetString(nameof(CalibrationSaved), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationSimulate。
+        /// </summary>
+        public static string CalibrationSimulate => ResourceManager.GetString(nameof(CalibrationSimulate), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationSimulateErase。
+        /// </summary>
+        public static string CalibrationSimulateErase => ResourceManager.GetString(nameof(CalibrationSimulateErase), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationSimulateHint。
+        /// </summary>
+        public static string CalibrationSimulateHint => ResourceManager.GetString(nameof(CalibrationSimulateHint), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationSimulationOnly。
+        /// </summary>
+        public static string CalibrationSimulationOnly => ResourceManager.GetString(nameof(CalibrationSimulationOnly), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 CalibrationStep。
+        /// </summary>
+        public static string CalibrationStep => ResourceManager.GetString(nameof(CalibrationStep), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 TouchInput_DebugHint。
+        /// </summary>
+        public static string TouchInput_DebugHint => ResourceManager.GetString(nameof(TouchInput_DebugHint), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 TouchInput_DebugTitle。
+        /// </summary>
+        public static string TouchInput_DebugTitle => ResourceManager.GetString(nameof(TouchInput_DebugTitle), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 TouchInput_HidFallback。
+        /// </summary>
+        public static string TouchInput_HidFallback => ResourceManager.GetString(nameof(TouchInput_HidFallback), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 TouchInput_WidthModeContact。
+        /// </summary>
+        public static string TouchInput_WidthModeContact => ResourceManager.GetString(nameof(TouchInput_WidthModeContact), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 TouchInput_WidthModeContactScaled。
+        /// </summary>
+        public static string TouchInput_WidthModeContactScaled => ResourceManager.GetString(nameof(TouchInput_WidthModeContactScaled), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 TouchInput_WidthModeFixed。
+        /// </summary>
+        public static string TouchInput_WidthModeFixed => ResourceManager.GetString(nameof(TouchInput_WidthModeFixed), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 TouchInput_WidthModeHint。
+        /// </summary>
+        public static string TouchInput_WidthModeHint => ResourceManager.GetString(nameof(TouchInput_WidthModeHint), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 TouchInput_WidthModeSimulated。
+        /// </summary>
+        public static string TouchInput_WidthModeSimulated => ResourceManager.GetString(nameof(TouchInput_WidthModeSimulated), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 TouchInput_WidthModeTitle。
+        /// </summary>
+        public static string TouchInput_WidthModeTitle => ResourceManager.GetString(nameof(TouchInput_WidthModeTitle), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 TouchInput_WidthPressureHint。
+        /// </summary>
+        public static string TouchInput_WidthPressureHint => ResourceManager.GetString(nameof(TouchInput_WidthPressureHint), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 TouchInput_WidthPressureTitle。
+        /// </summary>
+        public static string TouchInput_WidthPressureTitle => ResourceManager.GetString(nameof(TouchInput_WidthPressureTitle), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 TouchInput_WidthScaleHint。
+        /// </summary>
+        public static string TouchInput_WidthScaleHint => ResourceManager.GetString(nameof(TouchInput_WidthScaleHint), _resourceCulture);
+
+        /// <summary>
+        ///   本地化字符串 TouchInput_WidthScaleTitle。
+        /// </summary>
+        public static string TouchInput_WidthScaleTitle => ResourceManager.GetString(nameof(TouchInput_WidthScaleTitle), _resourceCulture);
+}
 }

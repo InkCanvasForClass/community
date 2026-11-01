@@ -87,7 +87,10 @@ namespace Ink_Canvas.Ink
             switch (msg)
             {
                 case WmLeftButtonDown:
-                    if (TryGetClientPoint(hwnd, out int downX, out int downY)
+                    // Touch is promoted to mouse messages as well. It must not start a mouse
+                    // stroke or take capture; the raw HID touch path owns that contact.
+                    if (IsPromotedTouch()) break;
+                    if (TryGetScreenPoint(out int downX, out int downY)
                         && _handler(new RawMouseContact(downX, downY, true, false)))
                     {
                         _inContact = true;
@@ -97,9 +100,10 @@ namespace Ink_Canvas.Ink
                     break;
 
                 case WmLeftButtonUp:
+                    if (IsPromotedTouch()) break;
                     if (_inContact)
                     {
-                        if (TryGetClientPoint(hwnd, out int upX, out int upY))
+                        if (TryGetScreenPoint(out int upX, out int upY))
                             _handler(new RawMouseContact(upX, upY, false, true));
                         _inContact = false;
                         ReleaseCapture();
@@ -122,7 +126,7 @@ namespace Ink_Canvas.Ink
                     if (!_inContact) return IntPtr.Zero;
                     if (!TryReadRawMouse(lParam, out bool leftDown, out bool leftUp)) return IntPtr.Zero;
                     if (leftDown || leftUp) return IntPtr.Zero; // 生命周期由上面的按钮消息负责
-                    if (TryGetClientPoint(hwnd, out int moveX, out int moveY))
+                    if (TryGetScreenPoint(out int moveX, out int moveY))
                     {
                         // 高频移动样本；即使 WPF 也收到 WM_MOUSEMOVE，没有按下状态也不会起笔。
                         _handler(new RawMouseContact(moveX, moveY, false, false));
@@ -132,11 +136,16 @@ namespace Ink_Canvas.Ink
             return IntPtr.Zero;
         }
 
-        private static bool TryGetClientPoint(IntPtr hwnd, out int x, out int y)
+        private static bool IsPromotedTouch()
+        {
+            long extra = GetMessageExtraInfo().ToInt64();
+            return ((ulong)extra & SignatureMask) == MiWpSignature;
+        }
+
+        private static bool TryGetScreenPoint(out int x, out int y)
         {
             x = y = 0;
             if (!GetCursorPos(out var point)) return false;
-            if (!ScreenToClient(hwnd, ref point)) return false;
             x = point.X;
             y = point.Y;
             return true;
@@ -182,11 +191,11 @@ namespace Ink_Canvas.Ink
         private static extern uint GetRawInputData(
             IntPtr rawInput, uint command, IntPtr data, ref uint size, uint headerSize);
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool GetCursorPos(out Point point);
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetMessageExtraInfo();
 
         [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool ScreenToClient(IntPtr hwnd, ref Point point);
+        private static extern bool GetCursorPos(out Point point);
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern IntPtr SetCapture(IntPtr hwnd);

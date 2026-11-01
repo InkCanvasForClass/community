@@ -54,8 +54,50 @@
                                   SelectionChanged="CmbMouseWriting_SelectionChanged" />
                     </ui:SettingsCard>
 
+                    <ui:SettingsCard Header="{x:Static props:AdvancedStrings.TouchInput_WidthModeTitle}"
+                                     Description="{x:Static props:AdvancedStrings.TouchInput_WidthModeHint}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ComboBox x:Name="CmbWidthMode" Width="240"
+                                  SelectionChanged="CmbWidthMode_SelectionChanged" />
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard Header="{x:Static props:AdvancedStrings.TouchInput_WidthScaleTitle}"
+                                     Description="{x:Static props:AdvancedStrings.TouchInput_WidthScaleHint}">
+                        <StackPanel Orientation="Horizontal">
+                            <Slider x:Name="SliderWidthScale" Width="220"
+                                    Minimum="0.25" Maximum="4.0"
+                                    TickFrequency="0.05" IsSnapToTickEnabled="True"
+                                    ValueChanged="SliderWidthScale_ValueChanged" />
+                            <TextBlock x:Name="TextWidthScale" Margin="12,0,0,0"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard Header="{x:Static props:AdvancedStrings.TouchInput_WidthPressureTitle}"
+                                     Description="{x:Static props:AdvancedStrings.TouchInput_WidthPressureHint}">
+                        <StackPanel Orientation="Horizontal">
+                            <Slider x:Name="SliderPressureInfluence" Width="220"
+                                    Minimum="0.0" Maximum="1.0"
+                                    TickFrequency="0.05" IsSnapToTickEnabled="True"
+                                    ValueChanged="SliderPressureInfluence_ValueChanged" />
+                            <TextBlock x:Name="TextPressureInfluence" Margin="12,0,0,0"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </ui:SettingsCard>
+
                     <ui:InfoBar x:Name="BarStatus" IsClosable="False"
                                 Severity="Informational" />
+
+                    <ui:SettingsCard Header="{x:Static props:AdvancedStrings.TouchInput_DebugTitle}"
+                                     Description="{x:Static props:AdvancedStrings.TouchInput_DebugHint}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ui:ToggleSwitch x:Name="ToggleSwitchTouchDebug"
+                                         Toggled="ToggleSwitchTouchDebug_Toggled" />
+                    </ui:SettingsCard>
 
                     <ui:InfoBar IsClosable="False" IsOpen="True" Severity="Informational"
                                 Message="{x:Static props:AdvancedStrings.TouchInput_CalibrationHint}" />

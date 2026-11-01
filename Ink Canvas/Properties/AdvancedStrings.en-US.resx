@@ -115,7 +115,7 @@
     <value>Enable DPIChangeDetection</value>
   </data>
   <data name="DPIChangeDetectionHint" xml:space="preserve">
-    <value>When a system DPI change is detected, it tries to keep FloatingBar visible. If it goes off-screen, it will attempt to move it into the visible area. (Increasing DPI may trigger this; decreasing DPI won&apos;t auto-move—adjust manually.)</value>
+    <value>When a system DPI change is detected, it tries to keep FloatingBar visible. If it goes off-screen, it will attempt to move it into the visible area. (Increasing DPI may trigger this; decreasing DPI won't auto-move—adjust manually.)</value>
   </data>
   <data name="EdgeGestureUtil" xml:space="preserve">
     <value>Enable EdgeGestureUtil</value>
@@ -139,7 +139,7 @@
     <value>Enable ForceFullScreen</value>
   </data>
   <data name="ForceFullScreenHint" xml:space="preserve">
-    <value>When a window size change is detected, automatically uses Win32 API to set this window size to the primary monitor size (in device pixels). Turn it off if you don&apos;t need it; takes effect immediately.</value>
+    <value>When a window size change is detected, automatically uses Win32 API to set this window size to the primary monitor size (in device pixels). Turn it off if you don't need it; takes effect immediately.</value>
   </data>
   <data name="FullScreenHelper" xml:space="preserve">
     <value>Enable FullScreenHelper</value>
@@ -187,7 +187,7 @@
     <value>Value is for reference only</value>
   </data>
   <data name="Debug_ShowConsole_Desc" xml:space="preserve">
-    <value>Show a separate console window for live log output (takes effect immediately; if &quot;Enable logging&quot; is off in settings, no content will be emitted).</value>
+    <value>Show a separate console window for live log output (takes effect immediately; if "Enable logging" is off in settings, no content will be emitted).</value>
   </data>
   <data name="Debug_ShowConsole_Header" xml:space="preserve">
     <value>Show debug console</value>
@@ -287,7 +287,7 @@
     <value>Touch input channel</value>
   </data>
   <data name="TouchInput_ChannelHint" xml:space="preserve">
-    <value>HID and Pointer are separate raw inputs: HID reads touch, Pointer reads mouse/pen. Mouse/pen are not affected by the HID switch.</value>
+    <value>HID and Pointer are separate raw inputs: HID reads touch (when two-finger gestures are enabled, a second finger landing at any time clears all current finger ink and starts pan/rotate/zoom; multi-finger writing requires gestures off). Pointer reads mouse/pen; mouse/pen are not affected by the HID switch.</value>
   </data>
   <data name="TouchInput_PalmSizeTitle" xml:space="preserve">
     <value>Palm eraser size multiplier</value>
@@ -319,4 +319,17 @@
   <data name="TouchInput_MouseWritingHint" xml:space="preserve">
     <value>In Raw HID / Pointer mode the mouse is read via WM_INPUT (raw HID) and pens via WM_POINTER; neither uses WPF ink, so pressure and sampling come from the raw devices.</value>
   </data>
+  <data name="TouchInput_DebugHint" xml:space="preserve"><value>Shows HID contacts, gesture session and WPF capture state in the top-right corner. For troubleshooting only.</value></data>
+  <data name="TouchInput_DebugTitle" xml:space="preserve"><value>Touch debug overlay</value></data>
+  <data name="TouchInput_HidFallback" xml:space="preserve"><value>HID registration failed; touch writing fell back to WPF.</value></data>
+  <data name="TouchInput_WidthModeContact" xml:space="preserve"><value>Raw contact size</value></data>
+  <data name="TouchInput_WidthModeContactScaled" xml:space="preserve"><value>Contact size × scale</value></data>
+  <data name="TouchInput_WidthModeFixed" xml:space="preserve"><value>Fixed pen width (current pen)</value></data>
+  <data name="TouchInput_WidthModeHint" xml:space="preserve"><value>Choose the source of touch stroke width. Fixed uses the current pen; contact uses the reported contact size; simulated derives taper from pen speed.</value></data>
+  <data name="TouchInput_WidthModeSimulated" xml:space="preserve"><value>Simulated speed (taper)</value></data>
+  <data name="TouchInput_WidthModeTitle" xml:space="preserve"><value>Ink thickness</value></data>
+  <data name="TouchInput_WidthPressureHint" xml:space="preserve"><value>0 ignores pressure; 1 applies full pressure/simulated-speed variation.</value></data>
+  <data name="TouchInput_WidthPressureTitle" xml:space="preserve"><value>Pressure influence</value></data>
+  <data name="TouchInput_WidthScaleHint" xml:space="preserve"><value>Applies to Contact size × scale. A 4×4 touchscreen contact at 2× is about 8 px.</value></data>
+  <data name="TouchInput_WidthScaleTitle" xml:space="preserve"><value>Contact size scale</value></data>
 </root>

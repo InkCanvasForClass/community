@@ -1444,6 +1444,22 @@ namespace Ink_Canvas
         [JsonProperty("palmSizeMultiplier")]
         public double PalmSizeMultiplier { get; set; } = 1.0;
 
+        /// <summary>触摸墨迹粗细来源：0=固定笔宽，1=接触原始尺寸，2=接触尺寸×倍率，3=速度模拟。</summary>
+        [JsonProperty("touchWidthMode")]
+        public int TouchWidthMode { get; set; } = 0;
+
+        /// <summary>接触尺寸倍率，仅 mode=2 生效。</summary>
+        [JsonProperty("touchWidthScale")]
+        public double TouchWidthScale { get; set; } = 1.0;
+
+        /// <summary>压感对粗细的影响，0=忽略，1=最大。</summary>
+        [JsonProperty("touchPressureInfluence")]
+        public double TouchPressureInfluence { get; set; } = 0.5;
+
+        /// <summary>在窗口右上角显示触摸调试浮窗（触点/手势/通道状态）。</summary>
+        [JsonProperty("showTouchDebugOverlay")]
+        public bool ShowTouchDebugOverlay { get; set; } = false;
+
         [JsonProperty("isSpecialScreen")]
         public bool IsSpecialScreen { get; set; }
 

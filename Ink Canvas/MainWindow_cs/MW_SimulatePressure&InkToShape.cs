@@ -380,7 +380,6 @@ namespace Ink_Canvas
         {
             if (stroke == null)
                 return;
-
             var e = new InkCanvasStrokeCollectedEventArgs(stroke);
             var strokeDrawingAttributes = e.Stroke?.DrawingAttributes;
 
@@ -631,8 +630,8 @@ namespace Ink_Canvas
                             straightStroke.AddPropertyData(Helpers.ModernInkAnalyzer.ShapeStrokePropertyGuid, true);
 
                             // Replace the original stroke with the straightened one
+                            bool originalInCanvas = inkCanvas.Strokes.Contains(e.Stroke);
                             ReplaceStrokesSafely(null, straightStroke, e.Stroke);
-
                             straightStrokeForHandwritingKey = straightStroke;
 
                             // We can't modify e.Stroke directly, but we need to update newStrokes

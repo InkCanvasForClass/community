@@ -1,5 +1,6 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Ink;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Ink;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -57,6 +59,7 @@ namespace Ink_Canvas
         private readonly HashSet<int> _activeRealtimeTouchStrokeIds = new HashSet<int>();
         private readonly HashSet<int> _activeRealtimeStylusStrokeIds = new HashSet<int>();
         private readonly HashSet<int> _activeTouchStrokeIds = new HashSet<int>();
+        private readonly Dictionary<int, Point> _touchContactSizes = new Dictionary<int, Point>();
         private bool _isInkCanvasManipulationEnabledBeforeTouchInk;
         private bool _hasStoredInkCanvasManipulationStateForTouchInk;
 
@@ -187,6 +190,8 @@ namespace Ink_Canvas
 
         private void EndTouchInkInputIfIdle()
         {
+            // HID 双指手势会话期间必须保持 WPF 操纵关闭，否则手势会和 WPF 的 ManipulationDelta 打架。
+            if (_hidGestureSessionActive) return;
             if (_activeRealtimeTouchStrokeIds.Count != 0 || _activeRealtimeStylusStrokeIds.Count != 0 || _activeTouchStrokeIds.Count != 0)
                 return;
             if (!_hasStoredInkCanvasManipulationStateForTouchInk)
@@ -1581,7 +1586,20 @@ namespace Ink_Canvas
         {
             if (StrokeVisualList.TryGetValue(id, out var visual)) return visual;
 
-            var strokeVisual = new StrokeVisual(inkCanvas.DefaultDrawingAttributes.Clone());
+            var attributes = inkCanvas.DefaultDrawingAttributes.Clone();
+            if (TouchStrokeWidthPolicy.Mode != TouchStrokeWidthPolicy.Fixed
+                && _touchContactSizes.TryGetValue(id, out var contact))
+            {
+                attributes = TouchStrokeWidthPolicy.CreateAttributes(attributes, contact.X, contact.Y);
+            }
+            return GetStrokeVisual(id, attributes);
+        }
+
+        private StrokeVisual GetStrokeVisual(int id, DrawingAttributes attributes)
+        {
+            if (StrokeVisualList.TryGetValue(id, out var visual)) return visual;
+
+            var strokeVisual = new StrokeVisual(attributes ?? inkCanvas.DefaultDrawingAttributes.Clone());
             StrokeVisualList[id] = strokeVisual;
             var visualCanvas = new VisualCanvas();
             strokeVisual.SetVisualCanvas(visualCanvas);
@@ -1885,6 +1903,12 @@ namespace Ink_Canvas
         /// </remarks>
         private void InkCanvas_PreviewTouchDown(object sender, TouchEventArgs e)
         {
+            // 双指手势会话期间，WPF 触摸一律不参与，避免边转边画。
+            if (CurrentTouchWritingChannel == 1 && _hidGestureSessionActive)
+            {
+                e.Handled = true;
+                return;
+            }
             var touchPointForBar = e.GetTouchPoint(this);
             var floatingBarBounds = ViewboxFloatingBar.TransformToAncestor(this).TransformBounds(
                 new Rect(0, 0, ViewboxFloatingBar.ActualWidth, ViewboxFloatingBar.ActualHeight));
@@ -1943,6 +1967,14 @@ namespace Ink_Canvas
                 e.Handled = true;
                 return;
             }
+
+            // 记录本触点的接触尺寸，供 GetStrokeVisual 统一计算笔宽。
+            try
+            {
+                var contact = e.GetTouchPoint(inkCanvas).Bounds;
+                _touchContactSizes[e.TouchDevice.Id] = new Point(contact.Width, contact.Height);
+            }
+            catch { }
 
             if ((inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint || inkCanvas.EditingMode == InkCanvasEditingMode.Select
                  || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
@@ -2014,6 +2046,7 @@ namespace Ink_Canvas
                     inkCanvas.EditingMode = InkCanvasEditingMode.None;
                     var touchId = e.TouchDevice.Id;
                     var p = e.GetTouchPoint(inkCanvas).Position;
+                    if (CurrentTouchWritingChannel == 1)
                     _activeRealtimeTouchStrokeIds.Add(touchId);
                     BeginTouchInkInput();
                     CancelPauseStraightenTimer(touchId);
@@ -2108,6 +2141,12 @@ namespace Ink_Canvas
         /// </remarks>
         private void InkCanvas_PreviewTouchMove(object sender, TouchEventArgs e)
         {
+            var movePoint = e.GetTouchPoint(inkCanvas).Position;
+            if (CurrentTouchWritingChannel == 1 && _hidGestureSessionActive)
+            {
+                e.Handled = true;
+                return;
+            }
             if (TryHandlePalmTouch(e, false)) return;
 
             var touchId = e.TouchDevice.Id;
@@ -2168,6 +2207,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void InkCanvas_PreviewTouchUp(object sender, TouchEventArgs e)
         {
+            if (TrySuppressHidTouchUp(e)) return;
             if (FinishPalmTouch(e)) return;
 
             // 视频展台特殊模式：所有手指抬起后恢复用户原本的 EditingMode
