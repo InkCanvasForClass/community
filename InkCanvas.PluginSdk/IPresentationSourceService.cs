@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 
 namespace Ink_Canvas.Plugins
 {
@@ -111,5 +112,13 @@ namespace Ink_Canvas.Plugins
         /// 置为 <c>false</c> 时宿主会禁用页码点击与增强预览。
         /// </summary>
         public bool AllowPageNumberClick { get; set; }
+        /// <summary>
+        /// 可选的按需缩略图回调。页码从 1 开始，返回不超过 256×256 的冻结位图。
+        /// 宿主只请求可见目录项；项目移出视口或演示源结束时会取消请求。
+        /// 回调不能同步阻塞 UI 线程。
+        /// </summary>
+        public Func<int, CancellationToken, Task<BitmapSource>> RenderPreviewAsync { get; set; }
+        /// <summary>可选的绝对跳页回调。参数和成功返回的页码均从 1 开始；返回 0 表示失败。</summary>
+        public Func<int, CancellationToken, Task<int>> SelectPageAsync { get; set; }
     }
 }

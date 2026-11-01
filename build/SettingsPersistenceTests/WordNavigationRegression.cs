@@ -41,7 +41,7 @@ internal static class WordNavigationRegression
         check(((SolidColorBrush)((Border)navigation.FindName("RootBorder")).Background).Color
             == ((SolidColorBrush)((Border)reference.FindName("RootBorder")).Background).Color
             && ((ScaleTransform)navigation.FindName("NavBarScaleTransform")).ScaleX == 1.25
-            && ((Border)navigation.FindName("RootBorder")).Opacity == .65
+            && navigation.Opacity == .65 && ((Border)navigation.FindName("RootBorder")).Opacity == 1
             && ((Border)navigation.FindName("RootBorder")).Effect == null
             && ((Border)navigation.FindName("PageButtonBorder")).Visibility == Visibility.Collapsed,
             "Word's inherited appearance differed from the equivalent PPT control");
@@ -54,7 +54,7 @@ internal static class WordNavigationRegression
         settings.NavigationShadow = true; settings.ShadowSize = 8;
         Invoke(word, "ApplySettings", settings, ppt, true);
         check(word.ShowZoom && ((ScaleTransform)navigation.FindName("NavBarScaleTransform")).ScaleX == .75
-            && ((Border)navigation.FindName("RootBorder")).Opacity == .9
+            && navigation.Opacity == .9 && ((Border)navigation.FindName("RootBorder")).Opacity == 1
             && ((System.Windows.Media.Effects.DropShadowEffect)((Border)navigation.FindName("RootBorder")).Effect).BlurRadius == 8,
             "Independent Word appearance or right-side zoom was not applied");
         var zoomControls = (StackPanel)word.FindName("ZoomControls");

@@ -673,6 +673,15 @@ namespace Ink_Canvas
         }
 
         internal bool IsAnnotating => _currentToolMode != "cursor";
+        internal bool IsPresentationToolbarActive => IsInPPTPresentationMode || currentMode == 2 || IsWordFocusToolbarActive;
+
+        internal void ApplyCurrentFloatingBarOpacity()
+        {
+            if (IsWordFocusToolbarActive) { _wordFocusToolbarPresentation.Refresh(); return; }
+            Helpers.ToolbarOpacityPresentation.Apply(ViewboxFloatingBar, FloatingbarUIForInkReplay,
+                IsPresentationToolbarActive ? Settings.Appearance.ViewboxFloatingBarOpacityInPPTValue
+                    : Settings.Appearance.ViewboxFloatingBarOpacityValue);
+        }
 
         internal void UpdateToolbarComponentVisibility()
         {
@@ -696,6 +705,8 @@ namespace Ink_Canvas
             }
             var isPPT = IsInPPTPresentationMode;
             ToolbarRegistry.UpdateVisibilityByMode(StackPanelFloatingBarRoot, IsAnnotating, isPPT, IsWordFocusToolbarActive, Exit_Icon);
+            ApplyCurrentFloatingBarOpacity();
+            ApplyFloatingBarMenuOpacity();
         }
 
         private void UpdateToolbarDimensions(Orientation orientation)

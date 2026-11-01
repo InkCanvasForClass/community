@@ -1,4 +1,4 @@
-using Ink_Canvas.Helpers;
+﻿using Ink_Canvas.Helpers;
 using System;
 using System.Windows;
 
@@ -184,7 +184,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         public static void OnFloatingBarMenuOpacityInPPTChanged(double value)
         {
             var mw = GetMainWindow();
-            if (mw != null && mw.currentMode == 2)
+            if (mw != null && mw.IsPresentationToolbarActive)
                 mw.ApplyFloatingBarMenuOpacity();
         }
 
@@ -333,14 +333,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         public static void OnFloatingBarOpacityChanged(double value)
         {
             var mw = GetMainWindow();
-            if (mw != null) mw.ViewboxFloatingBar.Opacity = value;
+            if (mw != null) mw.ApplyCurrentFloatingBarOpacity();
         }
 
         public static void OnFloatingBarOpacityInPPTChanged(double value)
         {
             var mw = GetMainWindow();
-            if (mw != null && mw.currentMode == 2)
-                mw.ViewboxFloatingBar.Opacity = value;
+            if (mw != null && mw.IsPresentationToolbarActive)
+                mw.ApplyCurrentFloatingBarOpacity();
         }
 
         public static void OnToolbarPositionChanged(ToolbarPosition position)

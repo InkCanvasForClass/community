@@ -21,7 +21,9 @@
                                    FontSize="12" FontWeight="SemiBold"
                                    Foreground="{DynamicResource PPTNavBarItemForeground}"
                                    Text="{Binding SlideNumber}"/>
-                        <Image Grid.Column="1" Source="{Binding Thumbnail}" Stretch="Uniform"/>
+                        <Image Grid.Column="1" Source="{Binding Thumbnail}" Stretch="Uniform" Height="130"
+                               Loaded="PreviewThumbnail_Loaded" Unloaded="PreviewThumbnail_Unloaded"
+                               DataContextChanged="PreviewThumbnail_DataContextChanged"/>
                     </Grid>
                 </Border>
             </Grid>
@@ -64,6 +66,8 @@
         </Border.Effect>
         <DockPanel x:Name="LayoutRoot" LastChildFill="True">
             <ListBox x:Name="PreviewList"
+                     VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
+                     VirtualizingPanel.ScrollUnit="Item" ScrollViewer.CanContentScroll="True"
                      Visibility="Collapsed"
                      Background="Transparent" BorderThickness="0"
                      Padding="6,8,6,4"

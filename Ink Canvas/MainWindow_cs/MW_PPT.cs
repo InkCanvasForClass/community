@@ -2709,17 +2709,15 @@ namespace Ink_Canvas
         /// <summary>由 PPTNavBar 控件 PageClick 事件触发的页码点击逻辑。</summary>
         private async Task OnPPTNavBarPageClickAsync(Controls.PPTNavBar bar)
         {
-            if (!Settings.PowerPointSettings.EnablePPTButtonPageClickable) return;
-
-            // 外部演示源没有幻灯片导航对话框，也没有缩略图来源；
-            // 未显式允许时直接忽略点击，避免走下面依赖 PPT COM 的分支。
+            // 插件提供缩略图和跳页回调时复用目录，不访问 PPT COM。
             if (_presentationSourceService?.IsActive == true)
             {
                 if (_presentationSourceService.IsPageNumberClickDisabled()) return;
-                LogHelper.WriteLogToFile("外部演示源允许页码点击，但宿主未提供跳页 UI，已忽略。",
-                    LogHelper.LogType.Info);
+                ToggleExternalPresentationPreview(bar);
                 return;
             }
+
+            if (!Settings.PowerPointSettings.EnablePPTButtonPageClickable) return;
 
             if (_pptManager?.IsConnected != true || _pptManager?.IsInSlideShow != true)
             {
@@ -2805,11 +2803,15 @@ namespace Ink_Canvas
             }
         }
 
-        private void OnPPTNavBarSlideSelected(Controls.PPTNavBar bar, int slideNumber)
+        private async void OnPPTNavBarSlideSelected(Controls.PPTNavBar bar, int slideNumber)
         {
-            try { _pptManager?.TryNavigateToSlide(slideNumber); }
+            if (bar != null) bar.IsPreviewExpanded = false;
+            try
+            {
+                if (_presentationSourceService?.IsActive == true) await _presentationSourceService.SelectPageAsync(slideNumber);
+                else _pptManager?.TryNavigateToSlide(slideNumber);
+            }
             catch (Exception ex) { LogHelper.WriteLogToFile($"PPT增强预览跳转异常: {ex}", LogHelper.LogType.Error); }
-            finally { if (bar != null) bar.IsPreviewExpanded = false; }
         }
 
         /// <summary>
@@ -3000,6 +3002,8 @@ namespace Ink_Canvas
                 bar.PageClick += async (s, e) => await OnPPTNavBarPageClickAsync(captured);
                 bar.SlideSelected += (s, slideNumber) => OnPPTNavBarSlideSelected(captured, slideNumber);
                 bar.PreviewExpandedChanged += (s, expanded) => OnPPTNavBarPreviewExpandedChanged(captured, expanded);
+                bar.PreviewThumbnailRequested += (_, page) => _presentationSourceService?.RetainPreview(page);
+                bar.PreviewThumbnailReleased += (_, page) => _presentationSourceService?.ReleasePreview(page);
             }
 
             _pptNavBarsWired = true;
@@ -3009,6 +3013,7 @@ namespace Ink_Canvas
 
         private void OnPPTNavBarPreviewExpandedChanged(Controls.PPTNavBar bar, bool expanded)
         {
+            if (!expanded && _presentationSourceService?.IsActive == true) bar.PreviewItems = null;
             if (_suppressPreviewExpandedSync) return;
             try
             {

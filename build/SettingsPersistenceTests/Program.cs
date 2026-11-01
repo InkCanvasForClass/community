@@ -28,6 +28,12 @@ internal static class Program
         {
             Ink_Canvas.App.RootPath = root + Path.DirectorySeparatorChar;
             SettingsManager.Settings = new Settings();
+            if (args.Contains("--presentation-only"))
+            {
+                PresentationNavigationRegression.Run(Check);
+                Console.WriteLine($"PASS: {_checks} production presentation navigation checks");
+                return 0;
+            }
             if (args.Contains("--word-navigation-only"))
             {
                 WordNavigationRegression.Run(Check);

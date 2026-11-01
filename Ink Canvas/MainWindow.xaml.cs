@@ -3789,27 +3789,27 @@ namespace Ink_Canvas
                     case 0: // 浅色主题
                         ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
                         SetTheme("Light", true);
-                        // 浅色主题下设置浮动栏为完全不透明
-                        ViewboxFloatingBar.Opacity = 1.0;
+                        // 切换主题后保留当前场景的透明度设置。
+                        ApplyCurrentFloatingBarOpacity();
                         break;
                     case 1: // 深色主题
                         ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
                         SetTheme("Dark", true);
-                        // 深色主题下设置浮动栏为完全不透明
-                        ViewboxFloatingBar.Opacity = 1.0;
+                        // 切换主题后保留当前场景的透明度设置。
+                        ApplyCurrentFloatingBarOpacity();
                         break;
                     case 2: // 跟随系统
                         if (ThemeHelper.IsSystemThemeLight())
                         {
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
                             SetTheme("Light", true);
-                            ViewboxFloatingBar.Opacity = 1.0;
+                            ApplyCurrentFloatingBarOpacity();
                         }
                         else
                         {
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
                             SetTheme("Dark", true);
-                            ViewboxFloatingBar.Opacity = 1.0;
+                            ApplyCurrentFloatingBarOpacity();
                         }
                         break;
                 }

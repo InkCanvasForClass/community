@@ -1,4 +1,4 @@
-using Ink_Canvas.Helpers;
+﻿using Ink_Canvas.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -277,7 +277,7 @@ namespace Ink_Canvas
                         ViewboxFloatingBarScaleTransform.ScaleY = actualScale;
                     }
 
-                    ViewboxFloatingBar.Opacity = Settings.Appearance.ViewboxFloatingBarOpacityValue;
+                    ApplyCurrentFloatingBarOpacity();
 
                     ViewboxBlackboardCenterSideScaleTransform.ScaleX = Settings.Appearance.ViewboxBlackBoardScaleTransformValue;
                     ViewboxBlackboardCenterSideScaleTransform.ScaleY = Settings.Appearance.ViewboxBlackBoardScaleTransformValue;
@@ -927,7 +927,7 @@ namespace Ink_Canvas
         /// </summary>
         internal void ApplyFloatingBarMenuOpacity()
         {
-            double opacity = currentMode == 2 || IsWordFocusToolbarActive
+            double opacity = IsPresentationToolbarActive
                 ? Settings.Appearance.FloatingBarMenuOpacityInPPT
                 : Settings.Appearance.FloatingBarMenuOpacity;
 

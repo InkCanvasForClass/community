@@ -1,4 +1,4 @@
-using Ink_Canvas.Controls;
+﻿using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern;
@@ -361,7 +361,7 @@ namespace Ink_Canvas
             // 窗口级 RequestedTheme 同步翻转，否则切换后会出现深浅混搭
             ThemeManager.Current.ApplicationTheme = systemLight ? ApplicationTheme.Light : ApplicationTheme.Dark;
             SetTheme(systemLight ? ThemeLight : ThemeDark, autoSwitchIcon: true);
-            ViewboxFloatingBar.Opacity = 1.0;
+            ApplyCurrentFloatingBarOpacity();
             RefreshNotificationColors();
         }
 
