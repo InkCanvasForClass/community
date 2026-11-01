@@ -82,7 +82,20 @@ internal static class HighlighterRenderingTests
             { DrawingAttributes = new DrawingAttributes { Color = Colors.Red, Width = 4, Height = 4 } };
         canvas.Strokes.Add(appendedOrdinary); pump();
         check(Near(Read(RenderCanvas(canvas), 40, 72), Colors.Red), "Fast ordinary-pen append was hidden behind highlighter groups");
-        canvas.Strokes.Remove(appendedOrdinary); pump();
+        var later = appendedOrdinary.Clone(); later.DrawingAttributes.Color = Colors.Blue;
+        canvas.Strokes.Add(later); pump();
+        var processed = appendedOrdinary.Clone(); processed.DrawingAttributes.Color = Colors.Green;
+        int notifications = 0;
+        System.Windows.Ink.StrokeCollectionChangedEventHandler changed = (_, _) => notifications++;
+        canvas.Strokes.StrokesChanged += changed;
+        canvas.Strokes.Replace(appendedOrdinary, new StrokeCollection { processed }); pump();
+        canvas.Strokes.StrokesChanged -= changed;
+        check(notifications == 1 && canvas.Strokes.IndexOf(processed) < canvas.Strokes.IndexOf(later),
+            "Replacing processed ink split notifications or changed its paint order");
+        check(Near(Read(RenderCanvas(canvas), 40, 72), Colors.Blue), "Late processed ink painted over a later stroke");
+        canvas.Strokes.Remove(later); pump();
+        check(Near(Read(RenderCanvas(canvas), 40, 72), Colors.Green), "Atomic ordinary-ink replacement was absent from a mixed highlighter presentation");
+        canvas.Strokes.Remove(processed); pump();
         check(Near(Read(RenderCanvas(canvas), 40, 72), beforeOrdinary), "Fast ordinary-pen removal damaged the existing highlighter presentation");
         first.DrawingAttributes.Color = Color.FromArgb(64, 255, 255, 0); pump();
         check(Near(Read(RenderCanvas(canvas), 20, 40), Mix(Colors.White, Colors.Yellow, HighlighterRendering.Opacity(64))),

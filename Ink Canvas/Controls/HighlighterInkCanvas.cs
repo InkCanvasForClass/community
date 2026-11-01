@@ -119,15 +119,22 @@ namespace Ink_Canvas.Controls
             if (ReferenceEquals(InkPresenter.Strokes, Strokes)
                 && !e.Added.Any(HighlighterRendering.IsHighlighter)) return;
             if (_presentedHighlighters.Count > 0 && _refresh?.Status != DispatcherOperationStatus.Pending
-                && !e.Added.Any(HighlighterRendering.IsHighlighter) && !e.Removed.Any(HighlighterRendering.IsHighlighter)
-                && Strokes.Skip(Math.Max(0, Strokes.Count - e.Added.Count)).SequenceEqual(e.Added))
+                && !e.Added.Any(HighlighterRendering.IsHighlighter) && !e.Removed.Any(HighlighterRendering.IsHighlighter))
             {
+                var presented = InkPresenter.Strokes;
+                if (e.Added.Count == 1 && e.Removed.Count == 1 && presented.Contains(e.Removed[0]))
+                {
+                    presented.Replace(e.Removed[0], e.Added);
+                    return;
+                }
                 // The usual pen-up/removal path does not change any highlighter
                 // group. Keep the source order; non-tail inserts use the full path.
-                var presented = InkPresenter.Strokes;
-                foreach (var stroke in e.Removed) presented.Remove(stroke);
-                foreach (var stroke in e.Added) presented.Add(stroke);
-                return;
+                if (Strokes.Skip(Math.Max(0, Strokes.Count - e.Added.Count)).SequenceEqual(e.Added))
+                {
+                    foreach (var stroke in e.Removed) presented.Remove(stroke);
+                    foreach (var stroke in e.Added) presented.Add(stroke);
+                    return;
+                }
             }
             RefreshPresentation(false);
         }

@@ -87,7 +87,7 @@ namespace Ink_Canvas.Helpers
                 if (_config.UseAsyncProcessing)
                 {
                     // 使用异步处理
-                    result = await _asyncSmoothing.SmoothStrokeAsync(originalStroke, onCompleted, cancellationToken);
+                    result = await _asyncSmoothing.SmoothStrokeAsync(originalStroke, onCompleted, cancellationToken).ConfigureAwait(false);
                 }
                 else if (_config.UseHardwareAcceleration)
                 {

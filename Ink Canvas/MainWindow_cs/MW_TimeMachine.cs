@@ -785,7 +785,9 @@ namespace Ink_Canvas
             {
                 if (_currentCommitType == CommitReason.ShapeRecognition)
                 {
-                    timeMachine.CommitStrokeShapeHistory(ReplacedStroke, persistentAdded);
+                    // Atomic Replace supplies both sides in one event; legacy
+                    // remove/add callers still use the pending removed collection.
+                    timeMachine.CommitStrokeShapeHistory(persistentRemoved.Count > 0 ? persistentRemoved : ReplacedStroke, persistentAdded);
                     ReplacedStroke = null;
                     return;
                 }

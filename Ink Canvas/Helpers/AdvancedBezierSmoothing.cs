@@ -242,7 +242,7 @@ namespace Ink_Canvas.Helpers
             Action<Stroke, Stroke> onCompleted = null,
             CancellationToken cancellationToken = default)
         {
-            if (originalStroke == null || originalStroke.StylusPoints.Count < 2)
+            if (originalStroke == null || cancellationToken.IsCancellationRequested || originalStroke.StylusPoints.Count < 2)
                 return originalStroke;
 
             if (_processingTasks.Count >= 64) return originalStroke;
@@ -325,7 +325,7 @@ namespace Ink_Canvas.Helpers
                             sample.UiCallbackMs = callbackWatch.Elapsed.TotalMilliseconds;
                             sample.UiCallbackCompletedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
                         }
-                    });
+                    }, DispatcherPriority.Background, cts.Token);
                 }
 
                 return processedStroke;
@@ -894,8 +894,8 @@ namespace Ink_Canvas.Helpers
             // 如果初始间隔产生过多点，逐步放大间隔而不是放弃平滑结果。
             for (int attempt = 0; attempt < 8; attempt++)
             {
-                var result = ResampleEquidistantOnce(points, interval);
-                if (result.Length <= maxPoints)
+                var result = ResampleEquidistantOnce(points, interval, maxPoints);
+                if (result != null)
                 {
                     return result;
                 }
@@ -907,7 +907,7 @@ namespace Ink_Canvas.Helpers
             return ResampleByPointCount(points, maxPoints);
         }
 
-        private StylusPoint[] ResampleEquidistantOnce(StylusPoint[] points, double interval)
+        private StylusPoint[] ResampleEquidistantOnce(StylusPoint[] points, double interval, int maxPoints)
         {
             var result = new List<StylusPoint>(points.Length) { points[0] };
             double accumulated = 0;
@@ -938,6 +938,10 @@ namespace Ink_Canvas.Helpers
                         startY + ratio * (current.Y - startY),
                         Math.Max((float)(startPressure * (1 - ratio) + current.PressureFactor * ratio), 0.1f));
                     result.Add(point);
+                    // This attempt would be discarded by the caller. Stop before
+                    // producing an oversized list/array; retry the same input with
+                    // the existing larger-interval policy.
+                    if (result.Count > maxPoints) return null;
 
                     startX = point.X;
                     startY = point.Y;
@@ -962,6 +966,7 @@ namespace Ink_Canvas.Helpers
                 Math.Abs(lastResult.Y - last.Y) > 1e-6)
             {
                 result.Add(last);
+                if (result.Count > maxPoints) return null;
             }
 
             return result.ToArray();

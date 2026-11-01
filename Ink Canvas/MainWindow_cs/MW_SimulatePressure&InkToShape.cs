@@ -1090,21 +1090,16 @@ namespace Ink_Canvas
                         // 平滑器创建的新 Stroke 只克隆 DrawingAttributes，需补回 property data
                         //（LaserRenderModeGuid 等，否则激光笔迹失效）。
                         InkSmoothingManager.CopyPropertyData(original, smoothed);
-                        if (Settings.Canvas.MergeInkSmoothingWithUndo
-                            && (_wordOwnsCanvas || timeMachine.TryReplaceUserInputStroke(original, smoothed)))
+                        var previousCommitType = _currentCommitType;
+                        try
                         {
-                            _currentCommitType = CommitReason.CodeInput;
-                            inkCanvas.Strokes.Remove(original);
-                            inkCanvas.Strokes.Add(smoothed);
-                            _currentCommitType = CommitReason.UserInput;
+                            bool mergeHistory = Settings.Canvas.MergeInkSmoothingWithUndo
+                                && (_wordOwnsCanvas || timeMachine.TryReplaceUserInputStroke(original, smoothed));
+                            _currentCommitType = mergeHistory ? CommitReason.CodeInput : CommitReason.ShapeRecognition;
+                            // One change notification, retaining the source's paint order.
+                            inkCanvas.Strokes.Replace(original, new StrokeCollection { smoothed });
                         }
-                        else
-                        {
-                            _currentCommitType = CommitReason.ShapeRecognition;
-                            inkCanvas.Strokes.Remove(original);
-                            inkCanvas.Strokes.Add(smoothed);
-                            _currentCommitType = CommitReason.UserInput;
-                        }
+                        finally { _currentCommitType = previousCommitType; }
                         // 平滑后的识别快照由回调在画布替换完成后生成，避免防抖线程读取平滑前的旧点。
                         MigrateHandwritingBeautifyCanvasStrokeReference(original, smoothed);
                         UpdateHandwritingBeautifyRecognitionSnapshot(smoothed);

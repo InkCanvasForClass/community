@@ -28,6 +28,16 @@ internal static class Program
         {
             Ink_Canvas.App.RootPath = root + Path.DirectorySeparatorChar;
             SettingsManager.Settings = new Settings();
+            if (args.Contains("--ink-resampling-only"))
+            {
+                InkBurstRegression.Resampling(Check);
+                Console.WriteLine($"PASS: {_checks} resampling bounds and quality checks"); return 0;
+            }
+            if (args.Contains("--ink-burst-only"))
+            {
+                InkBurstRegression.Run(Check);
+                Console.WriteLine($"PASS: {_checks} input-priority and smoothing-burst checks"); return 0;
+            }
             if (args.Contains("--ink-focus-only"))
             {
                 InkRenderingRegression.Run(Check);
