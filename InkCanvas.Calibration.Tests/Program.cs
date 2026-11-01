@@ -1,15 +1,20 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using Ink_Canvas;
+using Ink_Canvas.Helpers;
 using Ink_Canvas.Ink;
 using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Pages;
+using InkCanvasPPTAgent.Contracts;
 using Newtonsoft.Json;
 
 namespace InkCanvas.Calibration.Tests
@@ -29,12 +34,12 @@ namespace InkCanvas.Calibration.Tests
             int failed = 0;
             foreach (var test in new Action[] { PageConstruction, PointRouteSaves, AreaRouteSaves, FailedSaveRetainsDraft,
                 TemporaryPalmModePreservesAnnotation, PendingPointGroupPreservesAnnotation, TemporaryPalmModeDoesNotNotifyPlugin,
-                EraserSizeSelectionAppliesImmediately })
+                EraserSizeSelectionAppliesImmediately, PptEndUsesManagedSnapshot, PptEndRequestDoesNotBlockCaller })
             {
                 try { test(); Console.WriteLine("PASS " + test.Method.Name); }
                 catch (Exception ex) { failed++; Console.WriteLine("FAIL " + test.Method.Name + ": " + ex.GetBaseException()); }
             }
-            if (Directory.Exists(testRoot)) Directory.Delete(testRoot, true);
+            DeleteDirectoryWithRetry(testRoot);
             Console.WriteLine($"Calibration UI: {failed} failures");
             return failed == 0 ? 0 : 1;
         }
@@ -42,6 +47,24 @@ namespace InkCanvas.Calibration.Tests
         private static void Check(bool condition, string message)
         {
             if (!condition) throw new InvalidOperationException(message);
+        }
+
+        private static void DeleteDirectoryWithRetry(string path)
+        {
+            if (!Directory.Exists(path)) return;
+
+            for (int attempt = 0; attempt < 10; attempt++)
+            {
+                try
+                {
+                    Directory.Delete(path, true);
+                    return;
+                }
+                catch (IOException) when (attempt < 9)
+                {
+                    Thread.Sleep(50);
+                }
+            }
         }
 
         private static T Field<T>(object target, string name) => (T)target.GetType().GetField(name, Members).GetValue(target);
@@ -195,6 +218,114 @@ namespace InkCanvas.Calibration.Tests
             Check(savedIndices.Count == 5, $"Five eraser size choices saved only {savedIndices.Count} distinct index value(s)");
             Check(eventWidths.Count == 5,
                 $"Five eraser size choices produced only {eventWidths.Count} actual hit-test width(s): {string.Join(", ", eventWidths)}");
+        }
+
+        private static void PptEndRequestDoesNotBlockCaller()
+        {
+            using var manager = new BlockingPptLinkManager();
+            var window = (MainWindow)FormatterServices.GetUninitializedObject(typeof(MainWindow));
+            Set(window, "_pptManager", manager);
+            Set(window, "_pptEndSlideShowTaskLock", new object());
+
+            var stopwatch = Stopwatch.StartNew();
+            Call(window, "QueueEndSlideShow");
+            stopwatch.Stop();
+
+            Check(stopwatch.ElapsedMilliseconds < 500,
+                $"QueueEndSlideShow blocked its caller for {stopwatch.ElapsedMilliseconds} ms");
+            Check(manager.Started.Wait(TimeSpan.FromSeconds(2)),
+                "The PPT end request never reached its worker");
+            Check(manager.WorkerApartment == ApartmentState.STA,
+                $"The PPT end request ran in {manager.WorkerApartment} instead of STA");
+
+            var task = Field<Task<bool>>(window, "_pptEndSlideShowTask");
+            manager.Release.Set();
+            Check(task.Wait(TimeSpan.FromSeconds(2)) && task.Result,
+                "The background PPT end request did not complete");
+        }
+
+        private sealed class BlockingPptLinkManager : IPPTLinkManager
+        {
+            public readonly ManualResetEventSlim Started = new ManualResetEventSlim();
+            public readonly ManualResetEventSlim Release = new ManualResetEventSlim();
+            public ApartmentState WorkerApartment { get; private set; }
+
+            public event Action<object> SlideShowBegin { add { } remove { } }
+            public event Action<object> SlideShowNextSlide { add { } remove { } }
+            public event Action<object> SlideShowEnd { add { } remove { } }
+            public event Action<object> PresentationOpen { add { } remove { } }
+            public event Action<object> PresentationClose { add { } remove { } }
+            public event Action<bool> PPTConnectionChanged { add { } remove { } }
+            public event Action<bool> SlideShowStateChanged { add { } remove { } }
+
+            public bool IsConnected => true;
+            public bool IsInSlideShow => true;
+            public bool IsSupportWPS { get; set; }
+            public bool SkipAnimationsWhenNavigating { get; set; }
+            public int SlidesCount => 1;
+            public object PPTApplication => null;
+
+            public void StartMonitoring() { }
+            public void StopMonitoring(bool isShutdown = false) { }
+            public void ReloadConnection() { }
+            public bool TryStartSlideShow() => true;
+            public bool TryEndSlideShow()
+            {
+                WorkerApartment = Thread.CurrentThread.GetApartmentState();
+                Started.Set();
+                return Release.Wait(TimeSpan.FromSeconds(5));
+            }
+            public bool TryNavigateToSlide(int slideNumber) => true;
+            public bool TryNavigateNext() => true;
+            public bool TryNavigatePrevious() => true;
+            public int GetCurrentSlideNumber() => 1;
+            public string GetPresentationName() => "Regression.pptx";
+            public string GetPresentationPath() => @"C:\Presentations\Regression.pptx";
+            public bool TryShowSlideNavigation() => true;
+            public object GetCurrentActivePresentation() => null;
+            public List<PPTSlideThumbnail> ExportSlideThumbnails(
+                int width,
+                int height,
+                IProgress<double> progress = null,
+                CancellationToken cancellationToken = default) => new List<PPTSlideThumbnail>();
+
+            public void Dispose()
+            {
+                Release.Set();
+                Started.Dispose();
+                Release.Dispose();
+            }
+        }
+
+        private static void PptEndUsesManagedSnapshot()
+        {
+            var linkManager = new ComPPTLinkManager();
+            try
+            {
+                var manager = Field<PPTManager>(linkManager, "_inner");
+                Set(manager, "_cachedPresentationName", "Regression.pptx");
+                Set(manager, "_cachedPresentationPath", @"C:\Presentations\Regression.pptx");
+                Set(manager, "_cachedCurrentSlideNumber", 7);
+                manager.GetType().GetProperty(nameof(PPTManager.SlidesCount), Members).SetValue(manager, 12);
+
+                object payload = null;
+                linkManager.SlideShowEnd += value => payload = value;
+                Call(manager, "OnSlideShowEnd", (object)null);
+
+                Check(manager.GetPresentationName() == "Regression.pptx",
+                    "Cached presentation name was lost before slideshow-end cleanup");
+                Check(manager.GetPresentationPath() == @"C:\Presentations\Regression.pptx",
+                    "Cached presentation path was lost before slideshow-end cleanup");
+                Check(payload is PPTState state &&
+                      state.PresentationName == "Regression.pptx" &&
+                      state.PresentationFullName == @"C:\Presentations\Regression.pptx" &&
+                      state.SlideIndex == 7 && state.TotalSlides == 12,
+                    "COM slideshow-end leaked a live Presentation instead of a managed snapshot");
+            }
+            finally
+            {
+                linkManager.Dispose();
+            }
         }
 
         private static void TemporaryPalmModeDoesNotNotifyPlugin()

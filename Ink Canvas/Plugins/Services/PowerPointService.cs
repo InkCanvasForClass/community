@@ -139,7 +139,13 @@ namespace Ink_Canvas.Plugins
 
         public void StopSlideshow()
         {
-            try { _mainWindow?.PPTManager?.TryEndSlideShow(); }
+            try
+            {
+                if (_mainWindow != null)
+                {
+                    _ = _mainWindow.ExitPPTPresentation();
+                }
+            }
             catch (Exception ex) { LogHelper.WriteLogToFile($"PowerPointService.StopSlideshow failed: {ex.Message}", LogHelper.LogType.Warning); }
         }
 

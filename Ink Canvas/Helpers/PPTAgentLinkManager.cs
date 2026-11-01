@@ -3,6 +3,7 @@ using InkCanvasPPTAgent.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Ink_Canvas.Helpers
 {
@@ -92,12 +93,19 @@ namespace Ink_Canvas.Helpers
 
         public object GetCurrentActivePresentation() => null;
 
-        public List<PPTSlideThumbnail> ExportSlideThumbnails(int width, int height, IProgress<double> progress = null)
+        public List<PPTSlideThumbnail> ExportSlideThumbnails(
+            int width,
+            int height,
+            IProgress<double> progress = null,
+            CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var response = _client?.SendRequest<ExportSlideThumbnailsResponse>(
                 PPTCommands.ExportSlideThumbnails,
                 new ExportSlideThumbnailsRequest { Width = width, Height = height });
 
+            cancellationToken.ThrowIfCancellationRequested();
             if (response?.Slides == null)
                 return new List<PPTSlideThumbnail>();
 

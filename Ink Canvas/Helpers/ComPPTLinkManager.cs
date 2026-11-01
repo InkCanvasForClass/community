@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Ink_Canvas.Helpers
 {
@@ -13,9 +14,9 @@ namespace Ink_Canvas.Helpers
 
             _inner.SlideShowBegin += wn => SlideShowBegin?.Invoke(wn);
             _inner.SlideShowNextSlide += wn => SlideShowNextSlide?.Invoke(wn);
-            _inner.SlideShowEnd += pres => SlideShowEnd?.Invoke(pres);
+            _inner.SlideShowEnd += _ => SlideShowEnd?.Invoke(_inner.GetStateSnapshot());
             _inner.PresentationOpen += pres => PresentationOpen?.Invoke(pres);
-            _inner.PresentationClose += pres => PresentationClose?.Invoke(pres);
+            _inner.PresentationClose += _ => PresentationClose?.Invoke(_inner.GetStateSnapshot());
             _inner.PPTConnectionChanged += connected => PPTConnectionChanged?.Invoke(connected);
             _inner.SlideShowStateChanged += inSlideShow => SlideShowStateChanged?.Invoke(inSlideShow);
         }
@@ -101,7 +102,12 @@ namespace Ink_Canvas.Helpers
 
         public object GetCurrentActivePresentation() => _inner.GetCurrentActivePresentation();
 
-        public List<PPTSlideThumbnail> ExportSlideThumbnails(int width, int height, IProgress<double> progress = null) => _inner.ExportSlideThumbnails(width, height, progress);
+        public List<PPTSlideThumbnail> ExportSlideThumbnails(
+            int width,
+            int height,
+            IProgress<double> progress = null,
+            CancellationToken cancellationToken = default) =>
+            _inner.ExportSlideThumbnails(width, height, progress, cancellationToken);
         #endregion
 
         #region IDisposable
