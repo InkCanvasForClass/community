@@ -1954,7 +1954,6 @@ namespace Ink_Canvas
                         {
                             iniP = inkTouchPoint.Position;
                         }
-                        lastTouchDownStrokeCollection = inkCanvas.Strokes.Clone();
                     }
                     dec.Add(e.TouchDevice.Id);
                     return;
@@ -2048,7 +2047,6 @@ namespace Ink_Canvas
                     {
                         iniP = inkTouchPoint.Position;
                     }
-                    lastTouchDownStrokeCollection = inkCanvas.Strokes.Clone();
                 }
                 dec.Add(e.TouchDevice.Id);
                 return;
@@ -2133,7 +2131,6 @@ namespace Ink_Canvas
             {
                 var touchPoint = e.GetTouchPoint(inkCanvas);
                 centerPoint = touchPoint.Position;
-                lastTouchDownStrokeCollection = inkCanvas.Strokes.Clone();
             }
 
             if (dec.Count > 1 || isSingleFingerDragMode || !Settings.Gesture.IsEnableTwoFingerGesture)
@@ -2378,13 +2375,6 @@ namespace Ink_Canvas
             }
 
             inkCanvas.Opacity = 1;
-
-            if (dec.Count == 0)
-                if (lastTouchDownStrokeCollection.Count() != inkCanvas.Strokes.Count() &&
-                    !(drawingShapeMode == 9 && !isFirstTouchCuboid))
-                {
-                    // 笔画数量已变化（书写/擦除操作完成）
-                }
         }
 
         /// <summary>

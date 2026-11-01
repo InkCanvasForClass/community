@@ -28,6 +28,11 @@ internal static class Program
         {
             Ink_Canvas.App.RootPath = root + Path.DirectorySeparatorChar;
             SettingsManager.Settings = new Settings();
+            if (args.Contains("--ink-focus-only"))
+            {
+                InkRenderingRegression.Run(Check);
+                Console.WriteLine($"PASS: {_checks} production wet-ink rendering and history checks"); return 0;
+            }
             if (args.Contains("--performance-only"))
             {
                 PerformanceRegression.Run(Check);
@@ -53,6 +58,17 @@ internal static class Program
                 Check(button.IconGeometryDrawing.Pen != null, "Transparent pen lost its silhouette");
                 Apply(System.Windows.Media.Brushes.Black, System.Windows.Media.Brushes.White, true);
                 Check(button.IconGeometryDrawing.Pen.Brush == System.Windows.Media.Brushes.White, "Dark toolbar contrast outline did not follow foreground");
+                var retainedPen = button.IconGeometryDrawing.Pen;
+                int invalidations = 0;
+                button.IconGeometryDrawing.Changed += (_, _) => invalidations++;
+                for (int i = 0; i < 1000; i++)
+                    Apply(new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Black),
+                        new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.White), true);
+                Check(invalidations == 0 && ReferenceEquals(retainedPen, button.IconGeometryDrawing.Pen),
+                    "Repeated contrast updates rebuilt or invalidated an unchanged icon");
+                Apply(System.Windows.Media.Brushes.Black, System.Windows.Media.Brushes.Red, true);
+                Check(button.IconGeometryDrawing.Pen.Brush == System.Windows.Media.Brushes.Red && invalidations > 0,
+                    "Contrast cache ignored an actual foreground/theme change");
                 Console.WriteLine($"PASS: {_checks} board pen icon rendering checks"); return 0;
             }
             if (args.Contains("--booth-history-only"))

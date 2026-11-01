@@ -52,6 +52,24 @@ namespace Ink_Canvas.Helpers
             return true;
         }
 
+        internal bool TryReplaceUserInputStroke(Stroke source, Stroke replacement)
+        {
+            if (source == null || replacement == null) return false;
+            // Async smoothing may finish after later strokes. Match the applied
+            // source entry instead of overwriting the newest user-input entry.
+            for (int i = _currentIndex; i >= 0; i--)
+            {
+                var item = _currentStrokeHistory[i];
+                if (item.CommitType != TimeMachineHistoryType.UserInput || item.StrokeHasBeenCleared
+                    || item.CurrentStroke == null || !item.CurrentStroke.Contains(source)) continue;
+                var strokes = new StrokeCollection(item.CurrentStroke);
+                strokes.Replace(source, new StrokeCollection { replacement });
+                item.CurrentStroke = strokes;
+                return true;
+            }
+            return false;
+        }
+
         public void CommitStrokeShapeHistory(StrokeCollection strokeToBeReplaced, StrokeCollection generatedStroke)
         {
             if (_currentIndex + 1 < _currentStrokeHistory.Count)

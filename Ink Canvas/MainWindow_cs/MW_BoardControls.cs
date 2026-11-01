@@ -27,11 +27,6 @@ namespace Ink_Canvas
         /// </summary>
         private bool[] whiteboadLastModeIsRedo = new bool[101];
 
-        /// <summary>
-        /// 存储最后一次触摸按下时的墨迹集合
-        /// </summary>
-        private StrokeCollection lastTouchDownStrokeCollection = new StrokeCollection();
-
         private int _currentWhiteboardIndex = 1;
 
         /// <summary>

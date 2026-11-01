@@ -63,7 +63,14 @@ namespace Ink_Canvas
             var foreground = Application.Current.TryFindResource("FloatingBarForegroundBrush") as Brush ?? Brushes.Black;
             bool showColor = Settings.Appearance.ShowPenColorOnBoardToolbarIcon;
             bool outline = showColor && (color.A < 128 || GetColorContrastRatio(color, GetFloatingBarBackgroundColor()) < 2.5);
-            BoardPenIconPresentation.Apply(button, showColor ? new SolidColorBrush(color) : foreground, foreground, outline);
+            Brush fill = foreground;
+            if (showColor)
+            {
+                var inkBrush = new SolidColorBrush(color);
+                inkBrush.Freeze();
+                fill = inkBrush;
+            }
+            BoardPenIconPresentation.Apply(button, fill, foreground, outline);
         }
 
         public void SwitchToPreviousPage()

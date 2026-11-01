@@ -53,7 +53,7 @@ namespace Ink_Canvas
         /// 在笔画收集完成后调用，判定当前书写位置是否贴近画布边缘。
         /// 若触发条件成立，刷新 hint 按钮的位置、可见性，并重置自动隐藏计时器。
         /// </summary>
-        internal void HandleEdgeExpandHintAfterStroke(IList<Point> strokePoints)
+        internal void HandleEdgeExpandHintAfterStroke(StylusPointCollection strokePoints)
         {
             try
             {
@@ -68,7 +68,7 @@ namespace Ink_Canvas
                 var threshold = ClampThreshold(Settings.Canvas.EdgeExpandThreshold);
 
                 // 找到最贴近边缘的触点位置及触发的方向
-                Point anchor = strokePoints[0];
+                Point anchor = new Point(strokePoints[0].X, strokePoints[0].Y);
                 double minDist = double.PositiveInfinity;
                 EdgeExpandDirection direction = EdgeExpandDirection.None;
 
@@ -94,7 +94,7 @@ namespace Ink_Canvas
                     if (minEdgeDist < minDist)
                     {
                         minDist = minEdgeDist;
-                        anchor = p;
+                        anchor = new Point(p.X, p.Y);
                         direction = ResolveEdgeDirection(distLeft, distRight, distTop, distBottom, threshold);
                     }
                 }

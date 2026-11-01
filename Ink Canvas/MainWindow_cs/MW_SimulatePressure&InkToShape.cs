@@ -308,7 +308,6 @@ namespace Ink_Canvas
                             {
                                 // 补回平滑器未复制的 property data（激光笔迹标记），否则激光笔迹失效。
                                 InkSmoothingManager.CopyPropertyData(e.Stroke, smoothedStroke);
-                                SetNewBackupOfStroke();
                                 // 平滑始终走 TryReplaceLastUserInputHistory（1步撤销），
                                 // 替换原笔画为平滑后笔画，撤销时直接撤销整笔（不区分平滑前/后）。
                                 _currentCommitType = CommitReason.CodeInput;
@@ -390,12 +389,7 @@ namespace Ink_Canvas
             // HandleEdgeExpandHintAfterStroke 内部已做 eligible 检查与异常吞咽。
             try
             {
-                if (e.Stroke?.StylusPoints != null && e.Stroke.StylusPoints.Count > 0)
-                {
-                    var strokePoints = new System.Collections.Generic.List<Point>(e.Stroke.StylusPoints.Count);
-                    foreach (var sp in e.Stroke.StylusPoints) strokePoints.Add(sp.ToPoint());
-                    HandleEdgeExpandHintAfterStroke(strokePoints);
-                }
+                HandleEdgeExpandHintAfterStroke(e.Stroke.StylusPoints);
             }
             catch (Exception ex)
             {
@@ -466,13 +460,7 @@ namespace Ink_Canvas
 
                 if (Settings.Canvas.DisablePressure || isPauseStraightened)
                 {
-                    var uniformPoints = new StylusPointCollection();
-                    foreach (StylusPoint point in e.Stroke.StylusPoints)
-                    {
-                        StylusPoint newPoint = new StylusPoint(point.X, point.Y, 0.5f); // 统一压感值为0.5
-                        uniformPoints.Add(newPoint);
-                    }
-                    e.Stroke.StylusPoints = uniformPoints;
+                    Ink.StrokePressure.Normalize(e.Stroke);
                 }
                 else if (Settings.Canvas.EnablePressureTouchMode)
                 {
@@ -1085,6 +1073,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async Task ProcessStrokeAsync(Stroke originalStroke)
         {
+            using var guard = new Ink.StrokeProcessingGuard(originalStroke);
             try
             {
                 Debug.WriteLine($"异步平滑开始: 原始点数={originalStroke.StylusPoints.Count}");
@@ -1095,19 +1084,18 @@ namespace Ink_Canvas
                     Debug.WriteLine($"画布包含原始墨迹: {inkCanvas.Strokes.Contains(original)}");
 
                     // 在UI线程上执行笔画替换
-                    if (inkCanvas.Strokes.Contains(original) && smoothed != original)
+                    if (!guard.HasChanged && inkCanvas.Strokes.Contains(original) && smoothed != original)
                     {
                         Debug.WriteLine("异步替换原始笔画为平滑后的笔画");
                         // 平滑器创建的新 Stroke 只克隆 DrawingAttributes，需补回 property data
                         //（LaserRenderModeGuid 等，否则激光笔迹失效）。
                         InkSmoothingManager.CopyPropertyData(original, smoothed);
-                        SetNewBackupOfStroke();
-                        if (Settings.Canvas.MergeInkSmoothingWithUndo)
+                        if (Settings.Canvas.MergeInkSmoothingWithUndo
+                            && (_wordOwnsCanvas || timeMachine.TryReplaceUserInputStroke(original, smoothed)))
                         {
                             _currentCommitType = CommitReason.CodeInput;
                             inkCanvas.Strokes.Remove(original);
                             inkCanvas.Strokes.Add(smoothed);
-                            timeMachine.TryReplaceLastUserInputHistory(new StrokeCollection { smoothed });
                             _currentCommitType = CommitReason.UserInput;
                         }
                         else
@@ -1123,7 +1111,7 @@ namespace Ink_Canvas
                     }
                     else
                     {
-                        Debug.WriteLine($"异步平滑后的笔画与原始笔画相同，未进行替换 (contains={inkCanvas.Strokes.Contains(original)}, different={smoothed != original})");
+                        Debug.WriteLine($"未应用平滑结果 (sourceChanged={guard.HasChanged}, contains={inkCanvas.Strokes.Contains(original)}, different={smoothed != original})");
                     }
                 });
             }
@@ -2196,21 +2184,6 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 设置新的笔画备份
-        /// </summary>
-        /// <remarks>
-        /// 设置新的笔画备份的流程：
-        /// 1. 克隆当前墨水画布的笔画集合
-        /// 2. 获取当前白板索引
-        /// 3. 如果当前模式为0，则将白板索引设置为0
-        /// 4. 将克隆的笔画集合存储到strokeCollections中对应索引的位置
-        /// </remarks>
-        private void SetNewBackupOfStroke()
-        {
-            lastTouchDownStrokeCollection = inkCanvas.Strokes.Clone();
-        }
-
-        /// <summary>
         /// 计算两点之间的距离
         /// </summary>
         /// <param name="point1">第一个点</param>
@@ -2295,7 +2268,6 @@ namespace Ink_Canvas
             if (replacementStroke == null) return;
             try
             {
-                SetNewBackupOfStroke();
                 _currentCommitType = CommitReason.ShapeRecognition;
 
                 if (strokesToRemove != null && strokesToRemove.Count > 0)
@@ -2317,7 +2289,6 @@ namespace Ink_Canvas
             if (replacementStrokes == null || replacementStrokes.Count == 0) return;
             try
             {
-                SetNewBackupOfStroke();
                 _currentCommitType = CommitReason.ShapeRecognition;
 
                 if (strokesToRemove != null && strokesToRemove.Count > 0)
@@ -3175,7 +3146,6 @@ namespace Ink_Canvas
                 rectangleStroke.AddPropertyData(Helpers.ModernInkAnalyzer.ShapeStrokePropertyGuid, true);
 
                 // 移除原有的四条直线
-                SetNewBackupOfStroke();
                 _currentCommitType = CommitReason.ShapeRecognition;
 
                 foreach (var line in lines)
@@ -3461,8 +3431,6 @@ namespace Ink_Canvas
 
                 if (!anyInputStillPresent)
                     return;
-
-                SetNewBackupOfStroke();
                 _currentCommitType = CommitReason.ShapeRecognition;
                 foreach (Stroke s in canvasStrokes)
                 {
