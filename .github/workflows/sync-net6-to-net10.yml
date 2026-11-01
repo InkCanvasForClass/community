@@ -4,6 +4,8 @@ name: Sync net6 to net10
 # 如果编译失败（可能是 net6 新增的包不支持 net10），则自动升级 NuGet 包到最新稳定版并重试
 #
 # 策略：
+#   0. 提交信息（标题或正文）里带 net6-only 标记（如 "[net6-only] fix: ..." 或 "net6 only"）的提交
+#      只属于 net6，不同步到 net10：合并后在 net10 上自动回滚该提交的改动
 #   1. 合并 net6 → net10（冲突自动解决：csproj 取 net6 + TFM 改回 net10）
 #   2. 删除旧 packages.lock.json
 #   3. 先尝试 restore + build（大多数包同时支持 net6/net10，无需升级）
@@ -46,11 +48,39 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Fetch net6 and merge
+        id: merge
         shell: pwsh
         env:
           ERROR_ACTION_PREFERENCE: Continue
         run: |
           git fetch origin net6
+
+          # 找出本次要同步的提交，以及其中带 net6-only 标记、不该同步到 net10 的提交
+          $skipPattern = '(?i)\[?net6[ -]only\]?'
+          $incoming = @(git rev-list origin/net10..origin/net6)
+          $skipped = @()
+          foreach ($sha in $incoming) {
+            $message = (git log -1 --format=%B $sha | Out-String)
+            if ($message -match $skipPattern) {
+              $skipped += $sha
+              Write-Host "将跳过 net6-only 提交: $(git log -1 --format='%h %s' $sha)"
+            }
+          }
+
+          $syncNeeded = ($incoming.Count -gt 0 -and $skipped.Count -lt $incoming.Count)
+          "skipped_shas=$($skipped -join ',')" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "skipped_count=$($skipped.Count)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "sync_needed=$($syncNeeded.ToString().ToLower())" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+          if ($incoming.Count -eq 0) {
+            Write-Host "::notice::net6 没有需要同步到 net10 的新提交"
+            exit 0
+          }
+          if (-not $syncNeeded) {
+            Write-Host "::notice::本次 net6 提交全部带 net6-only 标记，不同步到 net10"
+            exit 0
+          }
+
           $mergeOutput = git merge origin/net6 --no-edit 2>&1
           Write-Host $mergeOutput
           $mergeExit = $LASTEXITCODE
@@ -188,6 +218,29 @@ jobs:
             git add -A
             git commit -m "fix: restore net10.0 TFM after merge from net6 [skip ci]"
           }
+
+      - name: Revert commits marked net6-only
+        if: steps.merge.outputs.sync_needed == 'true' && steps.merge.outputs.skipped_count != '0'
+        shell: pwsh
+        run: |
+          $shas = @("${{ steps.merge.outputs.skipped_shas }}" -split ',' | Where-Object { $_ })
+          foreach ($sha in $shas) {
+            Write-Host "回滚 net6-only 提交: $(git log -1 --format='%h %s' $sha)"
+            git revert --no-commit $sha
+            if ($LASTEXITCODE -ne 0) {
+              Write-Error "::error::回滚 $sha 失败，该提交的改动可能已被后续提交依赖，需要人工介入"
+              git revert --abort 2>$null
+              exit 1
+            }
+          }
+
+          if (-not (git diff --cached --name-only)) {
+            Write-Host "::notice::net6-only 提交的回滚没有产生实际改动"
+            exit 0
+          }
+
+          git commit -m "chore(sync): skip commits marked net6-only [skip ci]"
+          Write-Host "::notice::已回滚 $($shas.Count) 个 net6-only 提交，其余 net6 改动正常同步"
 
       - name: Delete stale packages.lock.json
         shell: pwsh
