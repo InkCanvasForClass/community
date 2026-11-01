@@ -3618,7 +3618,8 @@ namespace Ink_Canvas
             // 书写/擦除进行中不做检测：
             // CopyBackBuffer 是 GPU→CPU 的全帧同步拷贝（4K 一帧约 33MB，且在 UI 线程执行），
             // 与墨迹渲染抢 UI 线程会造成笔迹卡顿。分辨率越高拷贝越贵，所以只在空闲时检测。
-            if (System.Windows.Input.Mouse.LeftButton == System.Windows.Input.MouseButtonState.Pressed
+            if (!DrawingActivity.IsQuiet(250)
+                || System.Windows.Input.Mouse.LeftButton == System.Windows.Input.MouseButtonState.Pressed
                 || _activeTouchStrokeIds.Count > 0
                 || _activeRealtimeTouchStrokeIds.Count > 0
                 || _activeRealtimeStylusStrokeIds.Count > 0)

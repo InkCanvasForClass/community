@@ -19,6 +19,7 @@ namespace Ink_Canvas
     public partial class MainWindow
     {
         private readonly SemaphoreSlim _documentSaveGate = new(1, 1);
+        private readonly Ink.InactiveStrokeSnapshotCache<TimeMachineHistory[]> _inactiveSaveSnapshots = new();
 
         private sealed class SavedPageSnapshot
         {
@@ -56,15 +57,25 @@ namespace Ink_Canvas
                 CollectCanvasElementsMetadata(elements);
                 string elementsJson = JsonConvert.SerializeObject(elements, Formatting.Indented);
                 var pages = new List<SavedPageSnapshot>();
+                if (currentMode != 0 && currentPage < TimeMachineHistories.Length && TimeMachineHistories[currentPage] is { } activeHistory)
+                    _inactiveSaveSnapshots.Invalidate(activeHistory);
                 if (currentMode != 0) CaptureCurrentPluginPageStates();
                 for (int index = 1; index <= Math.Max(1, pageCount); index++)
                 {
-                    StrokeCollection strokes;
-                    if (pageCount == 1 || index == currentPage) strokes = inkCanvas.Strokes;
-                    else if (ppt) strokes = _singlePPTInkManager?.LoadSlideStrokes(index) ?? new StrokeCollection();
-                    else strokes = TimeMachineHistories[index] == null ? new StrokeCollection()
-                        : ApplyHistoriesToNewStrokeCollection(TimeMachineHistories[index]);
-                    var page = new SavedPageSnapshot { Index = index, StrokeSnapshot = Ink.StrokeSaveSnapshot.Capture(strokes) };
+                    bool inactiveBoard = !ppt && currentMode != 0 && pageCount > 1 && index != currentPage;
+                    var history = inactiveBoard ? TimeMachineHistories[index] : null;
+                    Ink.StrokeSaveSnapshot snapshot = null;
+                    if (history != null)
+                        snapshot = _inactiveSaveSnapshots.Capture(history, () => ApplyHistoriesToNewStrokeCollection(history));
+                    if (snapshot == null)
+                    {
+                        StrokeCollection strokes;
+                        if (pageCount == 1 || index == currentPage) strokes = inkCanvas.Strokes;
+                        else if (ppt) strokes = _singlePPTInkManager?.LoadSlideStrokes(index) ?? new StrokeCollection();
+                        else strokes = history == null ? new StrokeCollection() : ApplyHistoriesToNewStrokeCollection(history);
+                        snapshot = Ink.StrokeSaveSnapshot.Capture(strokes);
+                    }
+                    var page = new SavedPageSnapshot { Index = index, StrokeSnapshot = snapshot };
                     if (currentMode != 0)
                     {
                         page.Sidecars[".plugins.json"] = _pluginWhiteboardStateStore.ExportDocumentJson(index, 1);

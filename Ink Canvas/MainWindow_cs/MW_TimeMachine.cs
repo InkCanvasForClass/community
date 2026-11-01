@@ -176,7 +176,7 @@ namespace Ink_Canvas
                     {
                         if (canvas.Strokes.Contains(currentStroke.Key))
                         {
-                            currentStroke.Key.StylusPoints = currentStroke.Value.Item2;
+                            currentStroke.Key.StylusPoints = currentStroke.Value.Item2.Clone();
                         }
                     }
                 }
@@ -186,7 +186,7 @@ namespace Ink_Canvas
                     {
                         if (canvas.Strokes.Contains(currentStroke.Key))
                         {
-                            currentStroke.Key.StylusPoints = currentStroke.Value.Item1;
+                            currentStroke.Key.StylusPoints = currentStroke.Value.Item1.Clone();
                         }
                     }
                 }
@@ -199,7 +199,7 @@ namespace Ink_Canvas
                     {
                         if (canvas.Strokes.Contains(currentStroke.Key))
                         {
-                            currentStroke.Key.DrawingAttributes = currentStroke.Value.Item2;
+                            currentStroke.Key.DrawingAttributes = currentStroke.Value.Item2.Clone();
                         }
                     }
                 }
@@ -209,7 +209,7 @@ namespace Ink_Canvas
                     {
                         if (canvas.Strokes.Contains(currentStroke.Key))
                         {
-                            currentStroke.Key.DrawingAttributes = currentStroke.Value.Item1;
+                            currentStroke.Key.DrawingAttributes = currentStroke.Value.Item1.Clone();
                         }
                     }
                 }
@@ -904,7 +904,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void Stroke_StylusPointsChanged(object sender, EventArgs e)
         {
-            if (_wordOwnsCanvas) return;
+            if (_wordOwnsCanvas || _isApplyingBoardRoamingTransform) return;
             if (IsCurrentPageFrozen && _currentCommitType != CommitReason.CodeInput)
             {
                 TryBlockFrozenPageMutation("修改冻结页面");
@@ -938,9 +938,9 @@ namespace Ink_Canvas
 
             StrokeManipulationHistory[sender as Stroke] =
                 new Tuple<StylusPointCollection, StylusPointCollection>(StrokeInitialHistory[sender as Stroke],
-                    (sender as Stroke).StylusPoints.Clone());
+                    (sender as Stroke).StylusPoints);
             if ((StrokeManipulationHistory.Count == count || sender == null)
-                && dec.Count == 0)
+                && dec.Count == 0 && !isGridInkCanvasSelectionCoverMouseDown)
             {
                 CommitPendingStrokeManipulationHistory();
             }

@@ -10,6 +10,7 @@ namespace Ink_Canvas
         private void InitializeCanvasInputRecovery()
         {
             inkCanvas.AddHandler(UIElement.LostMouseCaptureEvent, new MouseEventHandler(CanvasLostMouseCapture), true);
+            GridInkCanvasSelectionCover.LostMouseCapture += SelectionCoverLostMouseCapture;
             inkCanvas.AddHandler(UIElement.LostStylusCaptureEvent, new StylusEventHandler(CanvasLostStylusCapture), true);
             inkCanvas.AddHandler(UIElement.LostTouchCaptureEvent, new EventHandler<TouchEventArgs>(CanvasLostTouchCapture), true);
         }
@@ -25,6 +26,7 @@ namespace Ink_Canvas
         private void CanvasLostMouseCapture(object sender, MouseEventArgs e)
         {
             if (Mouse.Captured == inkCanvas) return;
+            if (_isBoardRoamingPointerDown) CancelBoardRoamingInteraction();
             CancelAbandonedMouseInk();
         }
 

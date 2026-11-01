@@ -650,6 +650,7 @@ namespace Ink_Canvas
             }
 
             isGridInkCanvasSelectionCoverMouseDown = false;
+            CommitPendingStrokeManipulationHistory();
 
             // 只有在没有选中墨迹时才隐藏选中栏
             if (inkCanvas.GetSelectedStrokes().Count == 0)
@@ -662,6 +663,15 @@ namespace Ink_Canvas
                 CommitPendingStrokeManipulationHistory();
                 RefreshStrokeSelectionChrome();
             }
+        }
+
+        private void SelectionCoverLostMouseCapture(object sender, MouseEventArgs e)
+        {
+            if (!isGridInkCanvasSelectionCoverMouseDown) return;
+            isGridInkCanvasSelectionCoverMouseDown = false;
+            isStrokeDragging = false;
+            GridInkCanvasSelectionCover.Cursor = Cursors.Arrow;
+            CommitPendingStrokeManipulationHistory();
         }
 
         /// <summary>

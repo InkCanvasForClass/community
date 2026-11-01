@@ -28,6 +28,9 @@ namespace Ink_Canvas.Controls
         private long _presentationSampleAt;
 
         internal void SetPresentationTransform(Matrix? matrix)
+            => SetPresentationTransform(matrix, true);
+
+        internal void SetPresentationTransform(Matrix? matrix, bool animate)
         {
             if (matrix.HasValue)
             {
@@ -42,7 +45,7 @@ namespace Ink_Canvas.Controls
                 }
                 long now = Environment.TickCount64;
                 Matrix displayed = _viewTransform.Matrix, target = matrix.Value;
-                bool smooth = _presentationSampleAt != 0 && now - _presentationSampleAt is >= 8 and <= 150
+                bool smooth = animate && _presentationSampleAt != 0 && now - _presentationSampleAt is >= 8 and <= 150
                     && displayed.M11 == target.M11 && displayed.M22 == target.M22
                     && displayed.M12 == target.M12 && displayed.M21 == target.M21
                     && Math.Abs(displayed.OffsetY - target.OffsetY) < Math.Max(100, ActualHeight / 2)

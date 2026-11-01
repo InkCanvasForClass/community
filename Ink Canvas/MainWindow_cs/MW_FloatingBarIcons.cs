@@ -6421,7 +6421,7 @@ namespace Ink_Canvas
             if (!_wordAutoToolChanging) _wordBoundaryTool.UserSelectedTool();
             if (!string.Equals(mode, "roaming", StringComparison.Ordinal) && IsBoardRoamingMode)
             {
-                EndBoardRoaming();
+                CancelBoardRoamingInteraction();
                 ResetBoardRoamingContactState();
             }
             _currentToolMode = NormalizeToolModeForFreeze(mode);

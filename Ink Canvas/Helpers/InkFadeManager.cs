@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,6 +17,25 @@ namespace Ink_Canvas.Helpers
     /// </summary>
     public class InkFadeManager
     {
+        private sealed class FadeDrawingHost : FrameworkElement
+        {
+            private readonly DrawingVisual _visual = new();
+            private readonly Drawing _drawing;
+            internal FadeDrawingHost(Drawing drawing)
+            {
+                _drawing = drawing;
+                using (var context = _visual.RenderOpen()) context.DrawDrawing(drawing);
+                AddVisualChild(_visual);
+            }
+            protected override int VisualChildrenCount => 1;
+            protected override Visual GetVisualChild(int index) => index == 0 ? _visual : throw new ArgumentOutOfRangeException(nameof(index));
+            internal void StopAnimations()
+            {
+                if (_drawing is DrawingGroup group)
+                    foreach (var child in group.Children)
+                        if (child is DrawingGroup segment) segment.BeginAnimation(DrawingGroup.OpacityProperty, null);
+            }
+        }
         /// <summary>
         /// 激光笔迹标记 GUID（原由新墨迹系统 WpfStrokeCommitter 写入，撤回后本地持有以保证激光渐隐生效）。
         /// </summary>
@@ -610,12 +629,13 @@ namespace Ink_Canvas.Helpers
 
                 originalVisual.Visibility = Visibility.Hidden;
 
-                var segmentContainer = new System.Windows.Controls.Canvas();
+                var segmentDrawing = new DrawingGroup();
+                var segmentContainer = new FadeDrawingHost(segmentDrawing);
                 _segmentVisuals[stroke] = segmentContainer;
                 var originalAlpha = stroke.DrawingAttributes.Color.A;
                 segmentContainer.Opacity = originalAlpha / 255.0 * opacity;
 
-                var segments = new List<UIElement>();
+                var segments = new List<DrawingGroup>();
 
                 for (int i = 0; i < segmentCount; i++)
                 {
@@ -637,7 +657,7 @@ namespace Ink_Canvas.Helpers
                     if (segment != null)
                     {
                         segments.Add(segment);
-                        segmentContainer.Children.Add(segment);
+                        segmentDrawing.Children.Add(segment);
                     }
                 }
 
@@ -662,7 +682,7 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 创建墨迹分段
         /// </summary>
-        private UIElement CreateStrokeSegment(Stroke originalStroke, int startIndex, int endIndex,
+        private DrawingGroup CreateStrokeSegment(Stroke originalStroke, int startIndex, int endIndex,
             bool isFirstSegment, bool isLastSegment)
         {
             try
@@ -687,26 +707,17 @@ namespace Ink_Canvas.Helpers
                 var isHighlighter = drawingAttribs.IsHighlighter;
                 var opaqueColor = Color.FromArgb(255, drawingAttribs.Color.R, drawingAttribs.Color.G, drawingAttribs.Color.B);
 
-                if (IsLaserStroke(originalStroke))
+                var brush = new SolidColorBrush(opaqueColor); brush.Freeze();
+                var pen = new Pen(brush, drawingAttribs.Width)
                 {
-                    return CreateLaserStrokeVisual(segmentStroke);
-                }
-
-                var path = new Path
-                {
-                    Data = geometry,
-                    Stroke = new SolidColorBrush(opaqueColor),
-                    StrokeThickness = drawingAttribs.Width,
-                    StrokeStartLineCap = isFirstSegment ? (isHighlighter ? PenLineCap.Flat : PenLineCap.Round) : PenLineCap.Flat,
-                    StrokeEndLineCap = isLastSegment ? (isHighlighter ? PenLineCap.Flat : PenLineCap.Round) : PenLineCap.Flat,
-                    StrokeLineJoin = isHighlighter ? PenLineJoin.Miter : PenLineJoin.Round,
-                    Fill = isHighlighter ? new SolidColorBrush(opaqueColor) : null,
-                    Opacity = 1.0,
-                    UseLayoutRounding = false,
-                    SnapsToDevicePixels = false
+                    StartLineCap = isFirstSegment ? (isHighlighter ? PenLineCap.Flat : PenLineCap.Round) : PenLineCap.Flat,
+                    EndLineCap = isLastSegment ? (isHighlighter ? PenLineCap.Flat : PenLineCap.Round) : PenLineCap.Flat,
+                    LineJoin = isHighlighter ? PenLineJoin.Miter : PenLineJoin.Round
                 };
-
-                return path;
+                pen.Freeze();
+                var drawing = new DrawingGroup();
+                drawing.Children.Add(new GeometryDrawing(isHighlighter ? brush : null, pen, geometry));
+                return drawing;
             }
             catch (Exception)
             {
@@ -717,14 +728,14 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 开始分段渐隐动画
         /// </summary>
-        private void StartSegmentedFadeAnimation(List<UIElement> segments, Stroke originalStroke, UIElement originalVisual, int totalDuration, FrameworkElement container)
+        private void StartSegmentedFadeAnimation(List<DrawingGroup> segments, Stroke originalStroke, UIElement originalVisual, int totalDuration, FrameworkElement container)
         {
             try
             {
                 var segmentDuration = CalculateOptimalSegmentDuration(totalDuration, segments.Count);
                 var animationCurve = CreateAppleStyleAnimationCurve(segments.Count, totalDuration);
 
-                var completedSegments = new HashSet<UIElement>();
+                var completedSegments = new HashSet<DrawingGroup>();
                 var totalSegments = segments.Count;
 
                 for (int i = 0; i < segments.Count; i++)
@@ -733,51 +744,14 @@ namespace Ink_Canvas.Helpers
 
                     var delay = animationCurve[i];
 
-                    var timer = new DispatcherTimer
+                    StartSingleSegmentFadeAnimation(segment, segmentDuration, () =>
                     {
-                        Interval = TimeSpan.FromMilliseconds(delay)
-                    };
-
-                    int segmentIndex = i;
-                    EventHandler tickHandler = null;
-                    tickHandler = (sender, e) =>
-                    {
-                        timer.Tick -= tickHandler;  // 解除订阅，打破循环引用
-                        StartSingleSegmentFadeAnimation(segment, segmentDuration, () =>
-                        {
-                            lock (completedSegments)
-                            {
-                                completedSegments.Add(segment);
-
-                                if (completedSegments.Count >= totalSegments)
-                                {
-                                    CleanupSegmentedAnimation(segments, originalStroke, originalVisual, container);
-                                }
-                            }
-                        });
-                        timer.Stop();
-                    };
-                    timer.Tick += tickHandler;
-
-                    timer.Start();
+                        completedSegments.Add(segment);
+                        if (completedSegments.Count == totalSegments)
+                            CleanupSegmentedAnimation(segments, originalStroke, originalVisual, container);
+                    }, delay);
                 }
-
-                var safetyTimeout = totalDuration + (segments.Count * segmentDuration) + 500;
-                var safetyTimer = new DispatcherTimer
-                {
-                    Interval = TimeSpan.FromMilliseconds(safetyTimeout)
-                };
-
-                EventHandler safetyTickHandler = null;
-                safetyTickHandler = (sender, e) =>
-                {
-                    safetyTimer.Tick -= safetyTickHandler;  // 解除订阅，打破循环引用
-                    CleanupSegmentedAnimation(segments, originalStroke, originalVisual, container);
-                    safetyTimer.Stop();
-                };
-                safetyTimer.Tick += safetyTickHandler;
-
-                safetyTimer.Start();
+                // The manager's shared expiry timer bounds the whole stroke lifetime.
             }
             catch (Exception ex)
             {
@@ -789,7 +763,7 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 单个分段的渐隐动画
         /// </summary>
-        private void StartSingleSegmentFadeAnimation(UIElement segment, int duration, Action onCompleted = null)
+        private void StartSingleSegmentFadeAnimation(DrawingGroup segment, int duration, Action onCompleted = null, int delay = 0)
         {
             try
             {
@@ -797,6 +771,7 @@ namespace Ink_Canvas.Helpers
                 var fadeAnimation = new DoubleAnimation
                 {
                     From = segment.Opacity,
+                    BeginTime = TimeSpan.FromMilliseconds(Math.Max(0, delay)),
                     To = 0.0,
                     Duration = TimeSpan.FromMilliseconds(duration),
                     EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut } // 更平滑的缓动
@@ -811,14 +786,15 @@ namespace Ink_Canvas.Helpers
                         // 解除订阅，避免 lambda 闭包持有 fadeAnimation/segment
                         fadeAnimation.Completed -= completedHandler;
                         // 解除动画时钟，释放 AnimationClock
-                        segment.BeginAnimation(UIElement.OpacityProperty, null);
+                        segment.Opacity = 0;
+                        segment.BeginAnimation(DrawingGroup.OpacityProperty, null);
                         onCompleted?.Invoke();
                     };
                     fadeAnimation.Completed += completedHandler;
                 }
 
                 // 只应用透明度动画，不改变墨迹大小
-                segment.BeginAnimation(UIElement.OpacityProperty, fadeAnimation);
+                segment.BeginAnimation(DrawingGroup.OpacityProperty, fadeAnimation);
             }
             catch (Exception ex)
             {
@@ -831,7 +807,7 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 清理分段动画
         /// </summary>
-        private void CleanupSegmentedAnimation(List<UIElement> segments, Stroke originalStroke, UIElement originalVisual, FrameworkElement container)
+        private void CleanupSegmentedAnimation(List<DrawingGroup> segments, Stroke originalStroke, UIElement originalVisual, FrameworkElement container)
         {
             try
             {
@@ -1001,6 +977,7 @@ namespace Ink_Canvas.Helpers
 
         private void DetachFadeVisual(UIElement visual)
         {
+            if (visual is FadeDrawingHost host) host.StopAnimations();
             visual.BeginAnimation(UIElement.OpacityProperty, null);
             if (visual.RenderTransform is ScaleTransform scale)
             {

@@ -3627,6 +3627,8 @@ namespace Ink_Canvas
                 }
 
                 // 执行模式切换
+                CommitPendingStrokeManipulationHistory();
+                CancelShapePreview();
                 inkCanvas.EditingMode = newMode;
                 if (newMode == InkCanvasEditingMode.Select)
                 {

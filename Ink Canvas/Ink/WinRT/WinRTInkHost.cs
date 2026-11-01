@@ -178,8 +178,12 @@ namespace Ink_Canvas.Ink.WinRT
             CheckHr(presenterDesktop.SetCommitRequestHandler(_commitHandler), "SetCommitRequestHandler");
 
             _independentInput = CoreInkIndependentInputSource.Create(_presenter);
-            _onPointerPressing = (s, e) => _inputGate.OnPointerPressing(s, e);
-            _onPointerMoving = (s, e) => _inputGate.OnPointerMoving(s, e);
+            _onPointerPressing = (s, e) => { Ink_Canvas.Helpers.DrawingActivity.Record(); _inputGate.OnPointerPressing(s, e); };
+            _onPointerMoving = (s, e) =>
+            {
+                if (e.CurrentPoint.IsInContact) Ink_Canvas.Helpers.DrawingActivity.Record();
+                _inputGate.OnPointerMoving(s, e);
+            };
             _onPointerReleasing = (s, e) => _inputGate.OnPointerReleasing(s, e);
             _onPointerLost = (s, e) => _inputGate.OnPointerLost(s, e);
             _onPointerExiting = (s, e) => _inputGate.OnPointerExiting(s, e);

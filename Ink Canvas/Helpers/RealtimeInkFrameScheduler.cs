@@ -152,6 +152,8 @@ namespace Ink_Canvas.Helpers
             }
 
             UnsubscribeIfIdle();
+            if (requestKind == RedrawRequestKind.Force) strokeVisual.SetPreviewTip(null);
+            else strokeVisual.CommitPreviewTip();
             ExecuteRedraw(strokeVisual, requestKind);
             // Flush 也是一次墨迹入帧:笔尖起跳/收尾即应计 1 帧。
             RaiseInkTick(Stopwatch.GetTimestamp());
@@ -189,6 +191,7 @@ namespace Ink_Canvas.Helpers
 
         private static void Request(StrokeVisual strokeVisual, RedrawRequestKind requestKind)
         {
+            DrawingActivity.Record();
             if (strokeVisual == null)
                 return;
 

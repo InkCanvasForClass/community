@@ -86,6 +86,13 @@ namespace Ink_Canvas.Helpers
 
         public void CommitStrokeManipulationHistory(Dictionary<Stroke, Tuple<StylusPointCollection, StylusPointCollection>> stylusPointDictionary)
         {
+            // Own both endpoints once at commit. Callers can track live final
+            // points during a gesture without cloning on every input packet.
+            foreach (var stroke in new List<Stroke>(stylusPointDictionary.Keys))
+            {
+                var value = stylusPointDictionary[stroke];
+                stylusPointDictionary[stroke] = Tuple.Create(value.Item1.Clone(), value.Item2.Clone());
+            }
             if (_currentIndex + 1 < _currentStrokeHistory.Count)
             {
                 _currentStrokeHistory.RemoveRange(_currentIndex + 1, (_currentStrokeHistory.Count - 1) - _currentIndex);

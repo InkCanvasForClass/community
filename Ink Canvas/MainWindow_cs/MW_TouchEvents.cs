@@ -211,6 +211,8 @@ namespace Ink_Canvas
         /// </summary>
         internal void AbortAllActiveTouchInputs()
         {
+            CancelBoardRoamingInteraction();
+            CancelShapePreview();
             ResetPalmEraser();
             if (_activeRealtimeTouchStrokeIds.Count > 0)
             {
@@ -600,6 +602,7 @@ namespace Ink_Canvas
                         : speedPressure;
                     pressure = RealtimeClamp(pressure, 0.08f, 1f);
                     pressure = state.FilterPressure.Filter(pressure, dt, speed);
+                    strokeVisual.SetPreviewTip(new StylusPoint(filteredX, filteredY, pressure));
 
                     var minDist = GetRealtimeBrushTipMinDistance(state.SmoothedSampleRateHz);
                     if (dist < minDist && state.HasSeed)
@@ -741,6 +744,7 @@ namespace Ink_Canvas
                 : speedPressure;
             pressure = RealtimeClamp(pressure, 0.08f, 1f);
             pressure = state.FilterPressure.Filter(pressure, dt, speed);
+            strokeVisual.SetPreviewTip(new StylusPoint(filteredX, filteredY, pressure));
 
             var minDist = GetRealtimeBrushTipMinDistance(state.SmoothedSampleRateHz);
             if (dist < minDist && state.HasSeed && strokeId == MouseRealtimeStrokeId)
@@ -1515,6 +1519,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void MainWindow_StylusMove(object sender, StylusEventArgs e)
         {
+            DrawingActivity.Record();
             if (ShouldDeferLegacyCanvasInput) return;
             try
             {
@@ -2178,6 +2183,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void InkCanvas_PreviewTouchMove(object sender, TouchEventArgs e)
         {
+            DrawingActivity.Record();
             if (ShouldDeferLegacyCanvasInput) { e.Handled = true; return; }
             if (TryHandlePalmTouch(e, false)) return;
 

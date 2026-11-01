@@ -263,9 +263,12 @@ namespace Ink_Canvas
         /// 全程不动窗口状态，因此不闪。失败（缺 DLL / 合成全黑 / 驱动不支持）时
         /// 回退到 Hide → BitBlt → Show 老路径。
         /// </summary>
+        private long _backdropNextCaptureAt;
+        private int _backdropCaptureFailures;
         private async Task CaptureBehindSelfAsync()
         {
             if (_isCapturing) return;
+            if (Environment.TickCount64 < _backdropNextCaptureAt) return;
             _isCapturing = true;
 
             try
@@ -273,6 +276,8 @@ namespace Ink_Canvas
                 // —— 路径 1：Magnifier（首选，零闪烁）——
                 if (await TryCaptureViaMagnifierAsync())
                 {
+                    _backdropCaptureFailures = 0;
+                    _backdropNextCaptureAt = 0;
                     UpdateEffectParameters();
                     return;
                 }
@@ -283,6 +288,8 @@ namespace Ink_Canvas
 
                 // —— 路径 2：WDA 已排除自身时直接整屏 BitBlt（分层窗口上通常走不到）——
                 // —— 路径 3：Hide/Show 回退（会闪，仅作兜底）——
+                _backdropCaptureFailures = Math.Min(3, _backdropCaptureFailures + 1);
+                _backdropNextCaptureAt = Environment.TickCount64 + (1000L << _backdropCaptureFailures);
                 await CaptureViaHideShowAsync();
                 CropBackdropToWindow();
                 UpdateEffectParameters();

@@ -49,8 +49,8 @@ internal static class HighlighterRenderingTests
             "Unchanged highlighter groups were rebuilt");
         yellow.StylusPoints[0] = new StylusPoint(5, 5); cache.Invalidate(yellow);
         var edited = cache.Create(cachedSource);
-        check(!ReferenceEquals(initial[0], edited[0]) && ReferenceEquals(initial[1], edited[1]),
-            "Editing one highlighter invalidated another color group or failed to update its own geometry");
+        check(ReferenceEquals(initial[0], edited[0]) && ReferenceEquals(initial[1], edited[1]),
+            "Editing a highlighter replaced a cached color group instead of updating its drawing");
         cachedSource.Remove(yellow);
         var removed = cache.Create(cachedSource);
         check(removed.Count == 1 && ReferenceEquals(removed[0], initial[1]), "Removed highlighter left a stale render group");

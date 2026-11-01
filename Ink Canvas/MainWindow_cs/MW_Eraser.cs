@@ -428,7 +428,7 @@ namespace Ink_Canvas
                 if (inverse is not null)
                 {
                     var localPoint = inverse.Transform(canvasPoint);
-                    if (InvokeSceneHitTest(element, "HitTestLocalPoint", localPoint, 4d))
+                    if (InvokeSceneHitTest(element, localPoint, 4d))
                         return true;
                     if (IsSecAgentSceneLocalBoundsHit(element, localPoint, 4d))
                     {
@@ -524,7 +524,7 @@ namespace Ink_Canvas
                     var localPoint = inverse.Transform(canvasPoint);
                     if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
                     {
-                        if (InvokeSceneHitTest(element, "HitTestLocalPoint", localPoint, 4d))
+                        if (InvokeSceneHitTest(element, localPoint, 4d))
                             return true;
                         if (IsSecAgentSceneLocalBoundsHit(element, localPoint, 4d))
                         {
@@ -534,7 +534,7 @@ namespace Ink_Canvas
                     }
 
                     var localRect = inverse.TransformBounds(canvasRect);
-                    if (InvokeSceneRectTest(element, "IntersectsLocalRect", localRect, 4d))
+                    if (InvokeSceneRectTest(element, localRect, 4d))
                         return true;
                     if (IsSecAgentSceneLocalBoundsHit(element, localRect, 4d))
                     {
@@ -551,16 +551,49 @@ namespace Ink_Canvas
             return canvasRect.IntersectsWith(GetSceneElementBounds(element));
         }
 
-        private static bool InvokeSceneHitTest(FrameworkElement element, string methodName, Point point, double tolerance)
+        private static bool InvokeSceneHitTest(FrameworkElement element, Point point, double tolerance)
         {
-            var method = element.GetType().GetMethod(methodName, new[] { typeof(Point), typeof(double) });
+            var adapter = SceneHitAdapters.GetValue(element, target => new SceneHitAdapter(target));
+            if (adapter.Point != null) return adapter.Point(point, tolerance);
+            var method = adapter.Metadata.Point;
             return method?.Invoke(element, new object[] { point, tolerance }) is bool result && result;
         }
 
-        private static bool InvokeSceneRectTest(FrameworkElement element, string methodName, Rect rectangle, double tolerance)
+        private static bool InvokeSceneRectTest(FrameworkElement element, Rect rectangle, double tolerance)
         {
-            var method = element.GetType().GetMethod(methodName, new[] { typeof(Rect), typeof(double) });
+            var adapter = SceneHitAdapters.GetValue(element, target => new SceneHitAdapter(target));
+            if (adapter.Rectangle != null) return adapter.Rectangle(rectangle, tolerance);
+            var method = adapter.Metadata.Rectangle;
             return method?.Invoke(element, new object[] { rectangle, tolerance }) is bool result && result;
+        }
+
+        private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Type, SceneHitMetadata> SceneHitMethods = new();
+        private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<FrameworkElement, SceneHitAdapter> SceneHitAdapters = new();
+        private sealed class SceneHitAdapter
+        {
+            internal readonly SceneHitMetadata Metadata;
+            internal readonly Func<Point, double, bool> Point;
+            internal readonly Func<Rect, double, bool> Rectangle;
+            internal SceneHitAdapter(FrameworkElement target)
+            {
+                Metadata = SceneHitMethods.GetValue(target.GetType(), type => new SceneHitMetadata(type));
+                if (Metadata.Point?.ReturnType == typeof(bool))
+                    Point = Metadata.Point.IsStatic ? Metadata.Point.CreateDelegate<Func<Point, double, bool>>()
+                        : Metadata.Point.CreateDelegate<Func<Point, double, bool>>(target);
+                if (Metadata.Rectangle?.ReturnType == typeof(bool))
+                    Rectangle = Metadata.Rectangle.IsStatic ? Metadata.Rectangle.CreateDelegate<Func<Rect, double, bool>>()
+                        : Metadata.Rectangle.CreateDelegate<Func<Rect, double, bool>>(target);
+            }
+        }
+        private sealed class SceneHitMetadata
+        {
+            internal readonly System.Reflection.MethodInfo Point;
+            internal readonly System.Reflection.MethodInfo Rectangle;
+            internal SceneHitMetadata(Type type)
+            {
+                Point = type.GetMethod("HitTestLocalPoint", new[] { typeof(Point), typeof(double) });
+                Rectangle = type.GetMethod("IntersectsLocalRect", new[] { typeof(Rect), typeof(double) });
+            }
         }
 
         private static bool IsSecAgentSceneLocalBoundsHit(FrameworkElement element, Point localPoint, double tolerance)

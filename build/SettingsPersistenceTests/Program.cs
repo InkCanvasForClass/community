@@ -28,6 +28,16 @@ internal static class Program
         {
             Ink_Canvas.App.RootPath = root + Path.DirectorySeparatorChar;
             SettingsManager.Settings = new Settings();
+            if (args.Contains("--drawing-segment-only"))
+            {
+                DrawingSystemRegression.SegmentFingerprint(Check);
+                Console.WriteLine($"PASS: {_checks} fade geometry checks"); return 0;
+            }
+            if (args.Contains("--drawing-system-only"))
+            {
+                DrawingSystemRegression.Run(Check);
+                Console.WriteLine($"PASS: {_checks} drawing-system behavior checks"); return 0;
+            }
             if (args.Contains("--ink-resampling-only"))
             {
                 InkBurstRegression.Resampling(Check);

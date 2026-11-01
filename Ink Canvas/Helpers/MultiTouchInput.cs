@@ -67,6 +67,8 @@ namespace Ink_Canvas.Helpers
         private int _lastCommittedPointCount = 0;
         private const int COMMIT_POINT_THRESHOLD = 48;
         private DrawingVisual _activeVisual;
+        private DrawingVisual _tipVisual;
+        private StylusPoint? _previewTip;
         private VisualCanvas _visualCanvas;
         private readonly Dictionary<Color, SolidColorBrush> _brushCache =
             new Dictionary<Color, SolidColorBrush>();
@@ -161,6 +163,36 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        internal void SetPreviewTip(StylusPoint? point) => _previewTip = point;
+
+        internal void CommitPreviewTip()
+        {
+            if (_previewTip is StylusPoint point && Stroke?.StylusPoints.Count > 0)
+            {
+                var last = Stroke.StylusPoints[Stroke.StylusPoints.Count - 1];
+                if (last.X != point.X || last.Y != point.Y || last.PressureFactor != point.PressureFactor) Add(point);
+            }
+            _previewTip = null;
+        }
+
+        private void DrawPreviewTip()
+        {
+            if (_tipVisual == null && !_previewTip.HasValue) return;
+            if (_tipVisual == null)
+            {
+                _tipVisual = CreateDrawingVisual();
+                _visualCanvas.AddVisual(_tipVisual);
+            }
+            using var drawing = _tipVisual.RenderOpen();
+            if (_previewTip is not StylusPoint tip || Stroke.StylusPoints.Count == 0) return;
+            var last = Stroke.StylusPoints[Stroke.StylusPoints.Count - 1];
+            if (last.X == tip.X && last.Y == tip.Y) return;
+            var attributes = Stroke.DrawingAttributes;
+            double width = Math.Max(.35, attributes.Width * (PressureToVisualScale(last.PressureFactor, attributes.IgnorePressure)
+                + PressureToVisualScale(tip.PressureFactor, attributes.IgnorePressure)) / 2);
+            drawing.DrawLine(GetPen(attributes.Color, width), new Point(last.X, last.Y), new Point(tip.X, tip.Y));
+        }
+
         /// <summary>
         /// 绘制点段到新的DrawingVisual
         /// </summary>
@@ -198,6 +230,7 @@ namespace Ink_Canvas.Helpers
             };
             if (pen.CanFreeze)
                 pen.Freeze();
+            if (_activePenCache.Count >= 128) _activePenCache.Clear();
             _activePenCache[key] = pen;
             return pen;
         }
@@ -251,7 +284,9 @@ namespace Ink_Canvas.Helpers
 
             _lastCommittedPointCount = currentPointCount;
             _activeVisual = null;
-            _activePenCache.Clear();
+            // Uniform-width strokes reuse their frozen pen across chunks;
+            // varying-pressure strokes retain only the current chunk's resources.
+            if (_activePenCache.Count > 1) _activePenCache.Clear();
         }
 
         /// <summary>
@@ -290,6 +325,7 @@ namespace Ink_Canvas.Helpers
                     CommitActiveVisual(currentPointCount);
                     committed = true;
                 }
+                DrawPreviewTip();
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
             finally
@@ -312,6 +348,7 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public void ForceRedraw()
         {
+            _previewTip = null;
             if (Stroke == null || _visualCanvas == null) return;
 
             RealtimeInkFrameScheduler.RecordInkTick();
@@ -322,6 +359,7 @@ namespace Ink_Canvas.Helpers
             if (currentPointCount < _lastCommittedPointCount)
             {
                 _visualCanvas.Clear();
+                _tipVisual = null;
                 _activeVisual = null;
                 _activePenCache.Clear();
                 _lastCommittedPointCount = 0;

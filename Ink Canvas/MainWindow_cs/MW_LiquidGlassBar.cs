@@ -146,6 +146,7 @@ namespace Ink_Canvas
 
         private void LiquidGlassRefreshTimer_Tick(object sender, EventArgs e)
         {
+            if (!DrawingActivity.IsQuiet(300)) return;
             if (_liquidGlassBar == null || !_liquidGlassBar.IsVisible) return;
             // 鼠标在栏上时不重抓：隐藏/显示会打断悬停与点击
             if (_liquidGlassBar.IsMouseOver) return;

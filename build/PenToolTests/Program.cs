@@ -87,7 +87,16 @@ internal static class Program
         Check(window.Surface.Children.Count == 2, "Duplicate fade registration orphaned an old visual");
         Pump(250);
         Check(window.Surface.Children.Count == 1, "Laser did not expire without a rendered animation completion");
-        fade.ClearAllFadingStrokes(); window.Close();
+        fade.ClearAllFadingStrokes();
+        fade.IsEnabled = true; fade.FadeTime = 10; fade.AnimationDuration = 2000;
+        var progressive = new Stroke(new StylusPointCollection(Enumerable.Range(0, 250).Select(i => new StylusPoint(i, 40 + Math.Sin(i) * 10))));
+        Check(fade.TryAddFadingStroke(progressive, new Point(), new Point(250, 40)), "Progressive fade did not register");
+        Pump(80);
+        var hosts = window.Surface.Children.OfType<System.Windows.FrameworkElement>().Where(e => e.GetType().Name == "FadeDrawingHost").ToArray();
+        Check(hosts.Length == 1 && VisualTreeHelper.GetChildrenCount(hosts[0]) == 1, "Progressive fade created a control per segment or failed to attach its drawing host");
+        fade.ClearAllFadingStrokes(); Pump();
+        Check(window.Surface.Children.Count == 1, "Clearing progressive drawing left a visual attached");
+        window.Close();
         Console.WriteLine($"PASS: {_checks} pen style and fade checks (real Windows Ink attributes and WPF dispatcher)");
         return 0;
     }
