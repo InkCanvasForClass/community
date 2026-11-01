@@ -1862,7 +1862,11 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        public List<PPTSlideThumbnail> ExportSlideThumbnails(int width, int height, IProgress<double> progress = null)
+        public List<PPTSlideThumbnail> ExportSlideThumbnails(
+            int width,
+            int height,
+            IProgress<double> progress = null,
+            CancellationToken cancellationToken = default)
         {
             var result = new List<PPTSlideThumbnail>();
             string tempDir = null;
@@ -1870,6 +1874,8 @@ namespace Ink_Canvas.Helpers
 
             try
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 object activePresentation = CurrentPresentation;
                 if (activePresentation == null || !Marshal.IsComObject(activePresentation)) return result;
 
@@ -1886,6 +1892,8 @@ namespace Ink_Canvas.Helpers
 
                 for (int i = 1; i <= count; i++)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     object slide = null;
                     try
                     {
@@ -1893,11 +1901,16 @@ namespace Ink_Canvas.Helpers
                         dynamic slideObj = slide;
                         var imagePath = Path.Combine(tempDir, $"slide_{i:0000}.png");
                         slideObj.Export(imagePath, "PNG", width, height);
+                        cancellationToken.ThrowIfCancellationRequested();
                         result.Add(new PPTSlideThumbnail
                         {
                             SlideNumber = i,
                             PngBytes = File.ReadAllBytes(imagePath)
                         });
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
                     }
                     catch (Exception ex)
                     {
@@ -1910,6 +1923,10 @@ namespace Ink_Canvas.Helpers
 
                     progress?.Report((double)i / count);
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
