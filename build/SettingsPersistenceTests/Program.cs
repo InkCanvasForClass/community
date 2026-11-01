@@ -28,6 +28,26 @@ internal static class Program
         {
             Ink_Canvas.App.RootPath = root + Path.DirectorySeparatorChar;
             SettingsManager.Settings = new Settings();
+            if (args.Contains("--booth-history-only"))
+            {
+                var history = new Ink_Canvas.Helpers.TimeMachine();
+                var strokes = new System.Windows.Ink.StrokeCollection {
+                    new System.Windows.Ink.Stroke(new System.Windows.Input.StylusPointCollection {
+                        new System.Windows.Input.StylusPoint(10, 20), new System.Windows.Input.StylusPoint(30, 40) }) };
+                history.CommitStrokeUserInputHistory(strokes);
+                history.CommitStrokeUserInputHistory(new System.Windows.Ink.StrokeCollection());
+                history.Undo();
+                var type = history.GetType();
+                var snapshot = type.GetMethod("CaptureContext", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(history, null);
+                history.ClearStrokeHistory();
+                Check(!history.CanUndo && !history.CanRedo, "Booth inherited board undo history");
+                history.CommitStrokeUserInputHistory(new System.Windows.Ink.StrokeCollection());
+                type.GetMethod("RestoreContext", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(history, new[] { snapshot });
+                Check(history.CanUndo && history.CanRedo, "Board undo/redo position was lost across booth session");
+                Check(ReferenceEquals(history.Undo().CurrentStroke, strokes), "Restored history lost original board stroke references");
+                Check(!history.CanUndo && history.CanRedo, "Undo after returning from booth was inconsistent");
+                Console.WriteLine($"PASS: {_checks} booth history isolation checks"); return 0;
+            }
             if (args.Contains("--presentation-only"))
             {
                 PresentationNavigationRegression.Run(Check);

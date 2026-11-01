@@ -559,6 +559,7 @@ namespace Ink_Canvas
             {
                 // 保存当前 inkCanvas EditingMode，退出时恢复
                 _inkEditingModeBeforeSpecialMode = inkCanvas?.EditingMode ?? InkCanvasEditingMode.Ink;
+                SuspendInkForVideoBooth();
 
                 // 显示深色背景容器
                 if (VideoPresenterSpecialModeContainer != null)
@@ -783,6 +784,13 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"ExitVideoPresenterSpecialMode 异常: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            // Restore outside camera cleanup so a device failure cannot strand board ink or pen color.
+            try { RestoreInkAfterVideoBooth(); }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"恢复展台前墨迹和笔色失败: {ex}", LogHelper.LogType.Error);
             }
 
             // 退出特殊模式后恢复白板正常页码显示。
