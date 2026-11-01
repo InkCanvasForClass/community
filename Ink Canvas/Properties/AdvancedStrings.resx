@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <data name="CalibrationReturnSettings" xml:space="preserve"><value>返回高级设置</value></data>
+  <data name="CalibrationReturnSettings" xml:space="preserve"><value>返回手掌擦设置</value></data>
   <data name="CalibrationSimulate" xml:space="preserve"><value>路线二：手绘尺寸 + 多触点校准</value></data>
   <data name="CalibrationAreaRoute" xml:space="preserve"><value>路线一：采样接触面积</value></data>
   <data name="CalibrationSimulateHint" xml:space="preserve"><value>描摹手掌或填写宽高后即可测试。用鼠标或少量触点书写；在时间窗口内按下足够多、集中在手绘手掌范围内的触点，会自动触发手掌擦，无需设备上报接触面积。</value></data>
@@ -16,10 +16,10 @@
   <data name="CalibrationDescription" xml:space="preserve"><value>描摹手掌，多次按压取样，并在独立画布上试写试擦；应用前不会修改设置。</value></data>
   <data name="CalibrationStart" xml:space="preserve"><value>开始 / 重新校准</value></data>
   <data name="CalibrationClear" xml:space="preserve"><value>清除校准</value></data>
-  <data name="CalibrationClearConfirm" xml:space="preserve"><value>清除校准并恢复旧触摸策略？</value></data>
-  <data name="CalibrationNone" xml:space="preserve"><value>未校准，使用旧触摸策略。</value></data>
+  <data name="CalibrationClearConfirm" xml:space="preserve"><value>清除校准后手掌擦将不可用，确定清除？</value></data>
+  <data name="CalibrationNone" xml:space="preserve"><value>未校准，手掌擦不会生效。</value></data>
   <data name="CalibrationSaved" xml:space="preserve"><value>已校准。仅在匹配的屏幕、DPI 和输入来源上生效。</value></data>
-  <data name="CalibrationMismatch" xml:space="preserve"><value>显示环境不匹配，请在使用的屏幕上重新校准。</value></data>
+  <data name="CalibrationMismatch" xml:space="preserve"><value>显示环境不匹配，手掌擦不会生效，请重新校准。</value></data>
   <data name="CalibrationStep" xml:space="preserve"><value>步骤 {0} / {1}</value></data>
   <data name="CalibrationOutline" xml:space="preserve"><value>描摹或输入手掌尺寸</value></data>
   <data name="CalibrationPalm" xml:space="preserve"><value>手掌按压</value></data>
@@ -45,12 +45,21 @@
   <data name="CalibrationNoArea" xml:space="preserve"><value>没有有效接触尺寸。仅压力数据不能用于面积校准；请确认硬件支持，或跳过可选笔尖。</value></data>
   <data name="CalibrationLive" xml:space="preserve"><value>{0:F1} × {1:F1} DIP · {2:F1} DIP² · 已完成 {3} / 3 次 · 来源 {4}</value></data>
   <data name="CalibrationRecorded" xml:space="preserve"><value>已完成 {0} / 3 次 · 峰值中位数 {1:F1} DIP²</value></data>
-  <data name="CalibrationPolicy" xml:space="preserve"><value>面积阈值 {0:F1} DIP² · 面积倍率 {1:F2} · 当前敏感度 {2}（0 低 / 1 中 / 2 高）</value></data>
+  <data name="CalibrationPolicy" xml:space="preserve"><value>面积阈值 {0:F1} DIP² · 面积倍率 {1:F2}</value></data>
   <data name="CalibrationLift" xml:space="preserve"><value>请先抬起所有接触，再切换步骤。</value></data>
   <data name="CalibrationInvalidOutline" xml:space="preserve"><value>请输入有效宽高（大于 0 且不超过 4096 DIP）。</value></data>
   <data name="CalibrationNeedThree" xml:space="preserve"><value>至少完成三次有效按压后才能继续。</value></data>
   <data name="CalibrationOverlap" xml:space="preserve"><value>手掌和手指样本重叠或数据无效。请返回重采；此设备可能无法按面积区分手掌。</value></data>
   <data name="CalibrationSaveFailed" xml:space="preserve"><value>保存失败，原设置未改变。草稿已保留，请检查配置目录权限后重试。</value></data>
+  <data name="PalmEraser_Title" xml:space="preserve"><value>手掌擦</value></data>
+  <data name="PalmEraser_CalibrationSection" xml:space="preserve"><value>校准</value></data>
+  <data name="PalmEraser_EnableHint" xml:space="preserve"><value>开启后，识别到的手掌接触会切换为几何擦除；手指仍按普通笔或触摸处理。</value></data>
+  <data name="PalmEraser_CalibrationRequired" xml:space="preserve"><value>手掌擦必须依赖有效校准：未校准或环境不匹配时不会擦除，手掌触摸仍按普通笔处理。</value></data>
+  <data name="PalmEraser_StatusNone" xml:space="preserve"><value>尚未校准，手掌擦不会生效。</value></data>
+  <data name="PalmEraser_StatusReady" xml:space="preserve"><value>已校准，可在当前屏幕使用。</value></data>
+  <data name="PalmEraser_StatusMismatch" xml:space="preserve"><value>校准与当前屏幕、DPI 或输入来源不匹配，请重新校准。</value></data>
+  <data name="PalmEraser_StatusHidFallback" xml:space="preserve"><value>已校准，但未记录 HID 触摸面积，HID 通道会沿用 WPF 校准数据。</value></data>
+  <data name="PalmEraser_GroupingHint" xml:space="preserve"><value>点组校准只记录位置，由多点接触的数量、时间窗和聚集范围判定手掌；面积校准还会测量接触面积和描摹尺寸。两者都以物理像素参与引擎计算。</value></data>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
@@ -271,5 +280,44 @@
   </data>
   <data name="Debug_MemoryBreakdownForceGC_Button" xml:space="preserve">
     <value>强制 GC</value>
+  </data>
+  <data name="TouchInput_Title" xml:space="preserve">
+    <value>触摸输入</value>
+  </data>
+  <data name="TouchInput_ChannelTitle" xml:space="preserve">
+    <value>触摸输入通道</value>
+  </data>
+  <data name="TouchInput_ChannelHint" xml:space="preserve">
+    <value>HID 与 Pointer 是两套原始输入：HID 读触摸，Pointer 读鼠标/笔；鼠标/笔不跟随 HID 开关。</value>
+  </data>
+  <data name="TouchInput_PalmSizeTitle" xml:space="preserve">
+    <value>手掌擦尺寸倍率</value>
+  </data>
+  <data name="TouchInput_PalmSizeHint" xml:space="preserve">
+    <value>在标定轮廓的基础上整体放大或缩小手掌擦；旧版本偏小时可调大。</value>
+  </data>
+  <data name="TouchInput_StatusFormat" xml:space="preserve">
+    <value>触摸屏书写：{0}；手掌擦：{1}；鼠标/笔：{2}</value>
+  </data>
+  <data name="TouchInput_CalibrationHint" xml:space="preserve">
+    <value>校准与通道相互独立：切换通道不会丢失校准，但手掌擦仍要求当前屏幕存在有效校准。</value>
+  </data>
+  <data name="TouchInput_TouchWritingTitle" xml:space="preserve">
+    <value>触摸屏书写</value>
+  </data>
+  <data name="TouchInput_TouchWritingHint" xml:space="preserve">
+    <value>触摸屏手指书写使用的输入源。HID 直接读取原始触摸，WPF 使用系统触摸事件。</value>
+  </data>
+  <data name="TouchInput_PalmEraserTitle" xml:space="preserve">
+    <value>手掌擦</value>
+  </data>
+  <data name="TouchInput_PalmEraserHint" xml:space="preserve">
+    <value>手掌识别使用的输入源，可与书写选择不同来源。</value>
+  </data>
+  <data name="TouchInput_MouseWritingTitle" xml:space="preserve">
+    <value>鼠标/笔书写</value>
+  </data>
+  <data name="TouchInput_MouseWritingHint" xml:space="preserve">
+    <value>Raw HID / Pointer 模式下鼠标走 WM_INPUT（Raw HID），笔走 WM_POINTER；都不用 WPF 画墨迹，压感与采样率来自原始输入。</value>
   </data>
 </root>

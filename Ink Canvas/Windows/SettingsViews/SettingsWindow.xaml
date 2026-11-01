@@ -261,6 +261,24 @@ Title="{x:Static props:NavStrings.Nav_SettingsWindow_Title}"
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
                         <ui:NavigationViewItem
+                            x:Name="PalmEraserPageItem"
+                            Content="{x:Static props:AdvancedStrings.PalmEraser_Title}"
+                            Tag="PalmEraserPage"
+                            ToolTipService.ToolTip="{x:Static props:AdvancedStrings.PalmEraser_EnableHint}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EraseTool}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
+                            x:Name="TouchInputPageItem"
+                            Content="{x:Static props:AdvancedStrings.TouchInput_Title}"
+                            Tag="TouchInputPage"
+                            ToolTipService.ToolTip="{x:Static props:AdvancedStrings.TouchInput_ChannelHint}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Touch}"/>
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                        <ui:NavigationViewItem
                             x:Name="InkRecognitionPageItem"
                             Content="{x:Static props:CanvasStrings.InkRecog_Title}"
                             Tag="InkRecognitionPage"

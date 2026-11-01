@@ -287,27 +287,6 @@
                             SwitchName="ToggleSwitchEnableTwoFingerRotationOnSelection"
                             helpers:SettingsBinder.PropertyPath="Gesture.IsEnableTwoFingerRotationOnSelection" />
 
-                    <ui:SettingsExpander x:Name="ExpanderEnablePalmEraser"
-                            Header="{x:Static props:GestureStrings.Gesture_EnablePalmEraser}"
-                            Description="{x:Static props:GestureStrings.Gesture_PalmHint}"
-                            IsExpanded="{Binding IsOn, ElementName=ToggleSwitchEnablePalmEraser, Mode=OneWay}"
-                            d:Visibility="Visible" d:IsExpanded="True">
-                        <ui:SettingsExpander.HeaderIcon>
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.EraseTool}" />
-                        </ui:SettingsExpander.HeaderIcon>
-                        <ui:ToggleSwitch x:Name="ToggleSwitchEnablePalmEraser"
-                                helpers:SettingsBinder.PropertyPath="Canvas.EnablePalmEraser" />
-                        <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="{x:Static props:GestureStrings.Gesture_PalmSensitivity}">
-                                <ComboBox helpers:SettingsBinder.PropertyPath="Canvas.PalmEraserSensitivity">
-                                    <ComboBoxItem Content="{x:Static props:GestureStrings.Gesture_PalmSensitivityLow}" />
-                                    <ComboBoxItem Content="{x:Static props:GestureStrings.Gesture_PalmSensitivityMedium}" />
-                                    <ComboBoxItem Content="{x:Static props:GestureStrings.Gesture_PalmSensitivityHigh}" />
-                                </ComboBox>
-                            </ui:SettingsCard>
-                        </ui:SettingsExpander.Items>
-                    </ui:SettingsExpander>
-
                     <Rectangle Height="48" />
 
                 </ikw:SimpleStackPanel>

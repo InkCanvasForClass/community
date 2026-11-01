@@ -30,6 +30,11 @@ namespace Ink_Canvas.Ink
         public double OutlineHeight { get; set; }
         public double AreaMultiplier { get; set; }
         public double SizeAdjustment { get; set; } = 1;
+        // Raw HID contact extents are in device units and are not interchangeable with WPF
+        // touch bounds. Keep a second sample set so switching the palm input source keeps the
+        // area threshold meaningful. Zero means "not recorded; fall back to the WPF set".
+        public double HidFingerArea { get; set; }
+        public double HidPalmArea { get; set; }
         // Missing fields in existing version-1 records retain the original area-based policy.
         public bool UsePointGrouping { get; set; }
         public int MinimumContacts { get; set; } = 3;
@@ -38,12 +43,14 @@ namespace Ink_Canvas.Ink
         public TouchCalibrationEnvironment Environment { get; set; }
 
         public static bool Positive(double value) => double.IsFinite(value) && value > 0;
+        public bool HasHidAreas => Positive(HidFingerArea) && Positive(HidPalmArea) && HidPalmArea > HidFingerArea;
         public bool IsValid() => Version == 1 && Environment?.IsValid() == true
             && Positive(OutlineWidth) && OutlineWidth <= 4096 && Positive(OutlineHeight) && OutlineHeight <= 4096
             && SizeAdjustment >= 0.5 && SizeAdjustment <= 2
             && MinimumContacts >= 2 && MinimumContacts <= 5
             && WindowMilliseconds >= 0 && WindowMilliseconds <= 1000
             && GroupTolerance >= 1 && GroupTolerance <= 2
+            && (HidPalmArea == 0 && HidFingerArea == 0 || HasHidAreas)
             && (UsePointGrouping || (Positive(FingerArea) && Positive(PalmArea) && PalmArea > FingerArea
                 && Positive(AreaMultiplier)
                 && Math.Abs(AreaMultiplier - OutlineWidth * OutlineHeight / PalmArea) <= AreaMultiplier * 0.000001));
@@ -52,12 +59,16 @@ namespace Ink_Canvas.Ink
     internal static class TouchCalibrationPolicy
     {
         public static bool TryResolve(TouchCalibrationRecord record, TouchCalibrationEnvironment environment,
-            int sensitivity, out double thresholdWidth, out double sizeFactor)
+            int sensitivity, out double thresholdWidth, out double sizeFactor,
+            double? fingerArea = null, double? palmArea = null)
         {
             thresholdWidth = sizeFactor = 0;
             if (record?.IsValid() != true || record.UsePointGrouping || !record.Environment.Matches(environment)) return false;
+            double finger = TouchCalibrationRecord.Positive(fingerArea ?? 0) ? fingerArea.Value : record.FingerArea;
+            double palm = TouchCalibrationRecord.Positive(palmArea ?? 0) ? palmArea.Value : record.PalmArea;
+            if (!TouchCalibrationRecord.Positive(finger) || !TouchCalibrationRecord.Positive(palm) || palm <= finger) return false;
             double fraction = sensitivity == 0 ? 0.65 : sensitivity == 1 ? 0.5 : 0.35;
-            thresholdWidth = Math.Sqrt(record.FingerArea + (record.PalmArea - record.FingerArea) * fraction);
+            thresholdWidth = Math.Sqrt(finger + (palm - finger) * fraction);
             sizeFactor = Math.Sqrt(record.AreaMultiplier * record.SizeAdjustment);
             return true;
         }

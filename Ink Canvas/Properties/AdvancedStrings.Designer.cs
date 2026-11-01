@@ -55,6 +55,16 @@ namespace Ink_Canvas.Properties
         public static string CalibrationApply => GetString(nameof(CalibrationApply));
         public static string CalibrationAreaRoute => GetString(nameof(CalibrationAreaRoute));
 
+        public static string PalmEraser_Title => GetString(nameof(PalmEraser_Title));
+        public static string PalmEraser_CalibrationSection => GetString(nameof(PalmEraser_CalibrationSection));
+        public static string PalmEraser_EnableHint => GetString(nameof(PalmEraser_EnableHint));
+        public static string PalmEraser_CalibrationRequired => GetString(nameof(PalmEraser_CalibrationRequired));
+        public static string PalmEraser_StatusNone => GetString(nameof(PalmEraser_StatusNone));
+        public static string PalmEraser_StatusReady => GetString(nameof(PalmEraser_StatusReady));
+        public static string PalmEraser_StatusMismatch => GetString(nameof(PalmEraser_StatusMismatch));
+        public static string PalmEraser_StatusHidFallback => GetString(nameof(PalmEraser_StatusHidFallback));
+        public static string PalmEraser_GroupingHint => GetString(nameof(PalmEraser_GroupingHint));
+
         public static string AvoidFullScreenHelper => ResourceManager.GetString(nameof(AvoidFullScreenHelper), _resourceCulture);
 
         public static string AvoidFullScreenHelperHint => ResourceManager.GetString(nameof(AvoidFullScreenHelperHint), _resourceCulture);
@@ -178,5 +188,32 @@ namespace Ink_Canvas.Properties
         public static string Debug_MemoryBreakdownForceGC_Desc => ResourceManager.GetString(nameof(Debug_MemoryBreakdownForceGC_Desc), _resourceCulture);
 
         public static string Debug_MemoryBreakdownForceGC_Button => ResourceManager.GetString(nameof(Debug_MemoryBreakdownForceGC_Button), _resourceCulture);
+
+        public static string TouchInput_Title => ResourceManager.GetString(nameof(TouchInput_Title), _resourceCulture);
+
+        public static string TouchInput_ChannelTitle => ResourceManager.GetString(nameof(TouchInput_ChannelTitle), _resourceCulture);
+
+        public static string TouchInput_ChannelHint => ResourceManager.GetString(nameof(TouchInput_ChannelHint), _resourceCulture);
+
+        public static string TouchInput_TouchWritingTitle => ResourceManager.GetString(nameof(TouchInput_TouchWritingTitle), _resourceCulture);
+
+        public static string TouchInput_TouchWritingHint => ResourceManager.GetString(nameof(TouchInput_TouchWritingHint), _resourceCulture);
+
+        public static string TouchInput_PalmEraserTitle => ResourceManager.GetString(nameof(TouchInput_PalmEraserTitle), _resourceCulture);
+
+        public static string TouchInput_PalmEraserHint => ResourceManager.GetString(nameof(TouchInput_PalmEraserHint), _resourceCulture);
+
+        public static string TouchInput_MouseWritingTitle => ResourceManager.GetString(nameof(TouchInput_MouseWritingTitle), _resourceCulture);
+
+        public static string TouchInput_MouseWritingHint => ResourceManager.GetString(nameof(TouchInput_MouseWritingHint), _resourceCulture);
+
+
+        public static string TouchInput_PalmSizeTitle => ResourceManager.GetString(nameof(TouchInput_PalmSizeTitle), _resourceCulture);
+
+        public static string TouchInput_PalmSizeHint => ResourceManager.GetString(nameof(TouchInput_PalmSizeHint), _resourceCulture);
+
+        public static string TouchInput_StatusFormat => ResourceManager.GetString(nameof(TouchInput_StatusFormat), _resourceCulture);
+
+        public static string TouchInput_CalibrationHint => ResourceManager.GetString(nameof(TouchInput_CalibrationHint), _resourceCulture);
     }
 }

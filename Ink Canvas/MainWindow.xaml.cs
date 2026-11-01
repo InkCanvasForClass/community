@@ -1355,7 +1355,6 @@ namespace Ink_Canvas
             var inkCanvas1 = sender as InkCanvas;
             if (inkCanvas1 == null || _changingPalmMode) return;
 
-            if (_palmGroupSavedMode.HasValue) CancelPalmGroup(false);
             if (isPalmEraserActive)
                 EndPalmEraser(false);
 
@@ -2766,6 +2765,7 @@ namespace Ink_Canvas
             }
 
             InitializeClipboardMonitoring();
+            InitializePalmInputSource();
             InitializeFloatingWindowInterceptor();
             InitializeGlobalHotkeyManager();
 

@@ -1413,6 +1413,37 @@ namespace Ink_Canvas
             // Missing records remain null; invalid/unknown versions never block old profiles.
             if (TouchCalibration?.IsValid() != true) TouchCalibration = null;
         }
+
+        /// <summary>
+        /// 触摸屏书写输入源：0=WPF 触摸，1=Raw HID。
+        /// 与手掌擦来源独立，可以一个用 WPF、一个用 HID。
+        /// </summary>
+        [JsonProperty("touchWritingChannel")]
+        public int TouchWritingChannel { get; set; } = 0;
+
+        /// <summary>手掌擦输入源：0=WPF 触摸，1=Raw HID。</summary>
+        [JsonProperty("palmEraserChannel")]
+        public int PalmEraserChannel { get; set; } = 0;
+
+        /// <summary>鼠标/笔书写输入源：0=WPF，1=Windows Pointer（WM_POINTER）。</summary>
+        [JsonProperty("mouseWritingChannel")]
+        public int MouseWritingChannel { get; set; } = 0;
+
+        /// <summary>旧版单一通道设置，仅用于迁移，不再参与运行时。</summary>
+        [JsonProperty("palmInputChannel")]
+        public int PalmInputChannel { get; set; } = 0;
+
+        [JsonProperty("palmHidDevice")]
+        public string PalmHidDevice { get; set; } = "";
+
+        /// <summary>0=拉伸，1=等比。</summary>
+        [JsonProperty("palmHidScale")]
+        public int PalmHidScale { get; set; } = 0;
+
+        /// <summary>手掌擦尺寸全局倍率，叠加在标定轮廓/面积上。</summary>
+        [JsonProperty("palmSizeMultiplier")]
+        public double PalmSizeMultiplier { get; set; } = 1.0;
+
         [JsonProperty("isSpecialScreen")]
         public bool IsSpecialScreen { get; set; }
 

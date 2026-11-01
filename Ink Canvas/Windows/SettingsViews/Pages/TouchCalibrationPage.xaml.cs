@@ -66,6 +66,15 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private double _simulationWidth;
         private double _simulationHeight;
         private iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode _previousPaneMode;
+        // Raw HID samples are recorded alongside the WPF ones so both palm input sources keep
+        // a meaningful area threshold after a single calibration run.
+        private IDisposable _hidCalibrationSubscription;
+        private bool _hidCalibrationActive;
+        private long? _hidPressId;
+        private double _hidPressPeak;
+        private int _hidPressStep;
+        private readonly List<double> _hidPalmAreas = new();
+        private readonly List<double> _hidFingerAreas = new();
 
         public TouchCalibrationPage()
         {
@@ -102,11 +111,25 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _native = new NativePointerInputSource((HwndSource)PresentationSource.FromVisual(_host),
                 NativeSample, dpi.DpiScaleX, dpi.DpiScaleY, registerRawMouse: false);
 #endif
+            try
+            {
+                _hidCalibrationSubscription = PalmRawHidSource.Subscribe(OnHidCalibrationContact);
+                _hidCalibrationActive = true;
+                (Application.Current.MainWindow as MainWindow)?.SuspendPalmInput(true);
+            }
+            catch (Exception ex)
+            {
+                _hidCalibrationActive = false;
+                Ink_Canvas.Helpers.LogHelper.WriteLogToFile(
+                    "[TouchCalibration] HID sampling unavailable: " + ex.Message,
+                    Ink_Canvas.Helpers.LogHelper.LogType.Warning);
+            }
             _step = 0;
             _pointOnly = false;
             _environment = null;
             _draft = null;
             _palm.Reset(); _finger.Reset(); _nib.Reset();
+            _hidPalmAreas.Clear(); _hidFingerAreas.Clear(); ResetHidPress();
             OutlineWidth.Clear(); OutlineHeight.Clear();
             SimulateErase.IsChecked = false;
             SizeAdjustment.Value = 1;
@@ -116,6 +139,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void PageUnloaded(object sender, RoutedEventArgs e)
         {
             CancelPress();
+            _hidCalibrationSubscription?.Dispose();
+            _hidCalibrationSubscription = null;
+            _hidCalibrationActive = false;
+            ResetHidPress();
+            (Application.Current.MainWindow as MainWindow)?.SuspendPalmInput(false);
 #if ICC_NATIVE_WET_INK
             _native?.Dispose();
             _native = null;
@@ -136,7 +164,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void ReturnToSettings(object sender, RoutedEventArgs e)
         {
             CancelPress();
-            if (Window.GetWindow(this) is SettingsWindow settings) settings.NavigateToPage("AdvancedPage");
+            if (Window.GetWindow(this) is SettingsWindow settings) settings.NavigateToPage("PalmEraserPage");
         }
 
         private void ContentSizeChanged(object sender, SizeChangedEventArgs e)
@@ -172,6 +200,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             NextButton.Visibility = _step == 4 ? Visibility.Collapsed : Visibility.Visible;
             SaveButton.Visibility = _step == 4 ? Visibility.Visible : Visibility.Collapsed;
             SimulateErase.IsEnabled = !_pointOnly;
+            if (_step == 1) _hidPalmAreas.Clear();
+            if (_step == 2) _hidFingerAreas.Clear();
+            if (_step == 4) ApplyHidAreasToDraft();
             Status.Text = Text("CalibrationReady");
             UpdatePreviewPolicy();
             UpdateSimulationMode();
@@ -293,6 +324,91 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
         }
 
+        private void OnHidCalibrationContact(RawPalmContact contact)
+        {
+            if (!_hidCalibrationActive || _host == null) return;
+            if (_step != 1 && _step != 2)
+            {
+                if (contact.Released) ResetHidPress();
+                return;
+            }
+
+            try
+            {
+                var screen = System.Windows.Forms.SystemInformation.VirtualScreen;
+                if (screen.Width <= 0 || screen.Height <= 0) return;
+                Point dip = Surface.PointFromScreen(new Point(
+                    screen.Left + contact.X * screen.Width, screen.Top + contact.Y * screen.Height));
+                if (!Inside(dip))
+                {
+                    if (contact.Released) ResetHidPress();
+                    return;
+                }
+
+                var dpi = VisualTreeHelper.GetDpi(this);
+                var dimensions = PalmEraserEngine.HidDimensions(contact.Width, contact.Height,
+                    contact.WidthMaximum, contact.HeightMaximum, screen.Width, screen.Height,
+                    SettingsManager.Settings.Advanced.PalmHidScale == 1
+                        ? PalmHidScale.Isotropic
+                        : PalmHidScale.Stretch);
+                double width = dimensions.Width / (dpi.DpiScaleX > 0 ? dpi.DpiScaleX : 1);
+                double height = dimensions.Height / (dpi.DpiScaleY > 0 ? dpi.DpiScaleY : 1);
+                double area = width * height;
+                if (area >= 0.25)
+                {
+                    if (_hidPressId != contact.Id)
+                    {
+                        _hidPressId = contact.Id;
+                        _hidPressPeak = 0;
+                        _hidPressStep = _step;
+                    }
+                    if (_hidPressStep == _step && area > _hidPressPeak) _hidPressPeak = area;
+                }
+
+                if (!contact.Released) return;
+                if (_hidPressId == contact.Id)
+                {
+                    if (_hidPressStep == _step && _hidPressPeak > 0)
+                        (_step == 1 ? _hidPalmAreas : _hidFingerAreas).Add(_hidPressPeak);
+                    ResetHidPress();
+                }
+            }
+            catch (Exception ex)
+            {
+                Ink_Canvas.Helpers.LogHelper.WriteLogToFile(
+                    "[TouchCalibration] HID sample ignored: " + ex.Message,
+                    Ink_Canvas.Helpers.LogHelper.LogType.Warning);
+            }
+        }
+
+        private void ResetHidPress()
+        {
+            _hidPressId = null;
+            _hidPressPeak = 0;
+            _hidPressStep = 0;
+        }
+
+        private void ApplyHidAreasToDraft()
+        {
+            if (_pointOnly || _draft == null) return;
+            if (_hidPalmAreas.Count < 3 || _hidFingerAreas.Count < 3) return;
+            double hidPalm = Median(_hidPalmAreas);
+            double hidFinger = Median(_hidFingerAreas);
+            if (hidPalm > hidFinger)
+            {
+                _draft.HidPalmArea = hidPalm;
+                _draft.HidFingerArea = hidFinger;
+            }
+        }
+
+        private static double Median(List<double> values)
+        {
+            if (values == null || values.Count == 0) return 0;
+            var sorted = values.OrderBy(v => v).ToList();
+            int middle = sorted.Count / 2;
+            return sorted.Count % 2 == 1 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+        }
+
         private void CancelPress()
         {
             _groupTimer.Stop();
@@ -388,8 +504,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void Preview(Point position, double width, double height)
         {
-            if (!TouchCalibrationPolicy.TryResolve(_draft, _environment,
-                SettingsManager.Settings.Canvas.PalmEraserSensitivity, out var threshold, out var factor)) return;
+            // 运行时引擎使用面积中点作为阈值，不再读取“敏感度”。预览用同一中点，
+            // 避免校准预览和实际擦除的判定不一致。
+            bool hidAreas = _draft?.HasHidAreas == true
+                && SettingsManager.Settings.Advanced.PalmEraserChannel == 1;
+            if (!TouchCalibrationPolicy.TryResolve(_draft, _environment, 1, out var threshold, out var factor,
+                hidAreas ? _draft.HidFingerArea : (double?)null,
+                hidAreas ? _draft.HidPalmArea : (double?)null)) return;
             bool ellipse = SettingsManager.Settings.Canvas.EraserShapeType == 0;
             if (_previewTracker.Update(width, height, threshold, factor, ellipse, out var w, out var h))
             {
@@ -521,10 +642,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (PreviewPolicy == null) return;
             if (_pointOnly) { PreviewPolicy.Text = Text("CalibrationSimulationOnly"); return; }
             if (_draft == null) return;
-            TouchCalibrationPolicy.TryResolve(_draft, _environment, SettingsManager.Settings.Canvas.PalmEraserSensitivity,
-                out var threshold, out var factor);
-            PreviewPolicy.Text = string.Format(Text("CalibrationPolicy"), threshold * threshold, factor * factor,
-                SettingsManager.Settings.Canvas.PalmEraserSensitivity);
+            // 运行时引擎使用面积中点作为阈值，这里也用中点，不再显示敏感度。
+            bool hidAreas = _draft.HasHidAreas
+                && SettingsManager.Settings.Advanced.PalmEraserChannel == 1;
+            TouchCalibrationPolicy.TryResolve(_draft, _environment, 1, out var threshold, out var factor,
+                hidAreas ? _draft.HidFingerArea : (double?)null,
+                hidAreas ? _draft.HidPalmArea : (double?)null);
+            PreviewPolicy.Text = string.Format(Text("CalibrationPolicy"), threshold * threshold, factor * factor);
         }
         private void SizeAdjustmentChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
@@ -590,6 +714,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _draft.WindowMilliseconds = (int)GroupWindow.Value;
             _draft.GroupTolerance = GroupTolerance.Value;
             _draft.SizeAdjustment = SizeAdjustment.Value;
+            ApplyHidAreasToDraft();
             if (!_draft.IsValid()) { Status.Text = Text("CalibrationOverlap"); return; }
             int? nib = !_pointOnly && _nib.IsComplete
                 ? (int)Math.Clamp(Math.Round(Math.Sqrt(_nib.MedianPeak()) * 1.5), 1, 50) : null;

@@ -23,12 +23,15 @@ namespace InkCanvas.Calibration.Tests
         {
             var app = new Application();
             app.Resources[typeof(TextBlock)] = new Style(typeof(TextBlock));
+            // The settings pages inherit from the shell theme normally; the test host has no merged dictionaries.
+            app.Resources["BodyStrongTextBlockStyle"] = new Style(typeof(TextBlock));
             string testRoot = Path.Combine(AppContext.BaseDirectory, "test-data", Guid.NewGuid().ToString("N"));
             App.RootPath = testRoot;
             SettingsManager.Settings = new Settings();
             int failed = 0;
-            foreach (var test in new Action[] { PageConstruction, PointRouteSaves, AreaRouteSaves, FailedSaveRetainsDraft,
-                TemporaryPalmModePreservesAnnotation, PendingPointGroupPreservesAnnotation, TemporaryPalmModeDoesNotNotifyPlugin })
+            foreach (var test in new Action[] { PageConstruction, PalmEraserPageConstruction, TouchInputPageConstruction, PointRouteSaves, AreaRouteSaves, FailedSaveRetainsDraft,
+                TemporaryPalmModePreservesAnnotation, PendingPointGroupPreservesAnnotation, TemporaryPalmModeDoesNotNotifyPlugin,
+                HidCalibrationRecordKeepsBothSets, PalmProfileUsesHidAreas })
             {
                 try { test(); Console.WriteLine("PASS " + test.Method.Name); }
                 catch (Exception ex) { failed++; Console.WriteLine("FAIL " + test.Method.Name + ": " + ex.GetBaseException()); }
@@ -50,7 +53,76 @@ namespace InkCanvas.Calibration.Tests
         private static Button SaveButton(TouchCalibrationPage page) =>
             (page.FindName("SaveButton") ?? page.FindName("NextButton")) as Button;
 
+        private static TouchCalibrationRecord DualSourceRecord() => new TouchCalibrationRecord
+        {
+            OutlineWidth = 100,
+            OutlineHeight = 60,
+            FingerArea = 100,
+            PalmArea = 4000,
+            AreaMultiplier = 1.5,
+            SizeAdjustment = 1,
+            HidFingerArea = 50,
+            HidPalmArea = 1500,
+            Environment = new TouchCalibrationEnvironment
+            {
+                Source = "WPF",
+                Display = "test",
+                PixelWidth = 1920,
+                PixelHeight = 1080,
+                DpiX = 1,
+                DpiY = 1
+            }
+        };
+
+        private static void HidCalibrationRecordKeepsBothSets()
+        {
+            var record = DualSourceRecord();
+            Check(record.IsValid(), "record with both WPF and HID area sets should be valid");
+            Check(record.HasHidAreas, "HID area set should be detected");
+            var roundtrip = JsonConvert.DeserializeObject<TouchCalibrationRecord>(
+                JsonConvert.SerializeObject(record));
+            Check(roundtrip != null && roundtrip.IsValid() && roundtrip.HasHidAreas,
+                "HID area set should survive JSON roundtrip");
+            Check(Math.Abs(roundtrip.HidPalmArea - 1500) < 0.001, "HID palm area should roundtrip");
+        }
+
+        private static void PalmProfileUsesHidAreas()
+        {
+            var record = DualSourceRecord();
+            var assembly = typeof(TouchCalibrationRecord).Assembly;
+            var profiles = assembly.GetType("Ink_Canvas.Ink.PalmEraserProfiles");
+            var method = profiles?.GetMethod("TryCreate", BindingFlags.Static | BindingFlags.NonPublic);
+            Check(method != null, "PalmEraserProfiles.TryCreate should exist");
+            var options = Activator.CreateInstance(assembly.GetType("Ink_Canvas.Ink.PalmEraserOptions"));
+            var args = new object[] { record, record.Environment, options, false, null, 50.0, 1500.0 };
+            Check((bool)method.Invoke(null, args), "profile should build with HID areas");
+            var profile = args[4];
+            double palm = (double)profile.GetType().GetProperty("PalmContactAreaPx2").GetValue(profile);
+            double finger = (double)profile.GetType().GetProperty("FingerContactAreaPx2").GetValue(profile);
+            Check(Math.Abs(palm - 1500) < 0.001 && Math.Abs(finger - 50) < 0.001,
+                "profile should use the supplied HID areas");
+        }
+
         private static void PageConstruction() => _ = new TouchCalibrationPage();
+
+        private static void PalmEraserPageConstruction()
+        {
+            var page = new PalmEraserPage();
+            Check(page.FindName("ToggleSwitchEnablePalmEraser") != null, "Palm page is missing the enable toggle");
+            Check(page.FindName("BarCalibrationRequired") != null, "Palm page is missing the calibration warning");
+            Check(page.FindName("BtnStartCalibrate") is Button, "Palm page is missing the calibration start button");
+            Check(page.FindName("BtnClearCalibration") is Button, "Palm page is missing the calibration clear button");
+            Check(page.FindName("SliderPalmSize") is Slider, "Palm page is missing the palm size slider");
+            Check(page.FindName("TextPalmSize") is TextBlock, "Palm page is missing the palm size label");
+        }
+
+        private static void TouchInputPageConstruction()
+        {
+            var page = new TouchInputPage();
+            Check(page.FindName("CmbTouchWriting") is ComboBox, "Touch input page is missing the touch writing source selector");
+            Check(page.FindName("CmbPalmEraser") is ComboBox, "Touch input page is missing the palm eraser source selector");
+            Check(page.FindName("CmbMouseWriting") is ComboBox, "Touch input page is missing the mouse/pen source selector");
+        }
 
         private static void PointRouteSaves()
         {
@@ -160,13 +232,14 @@ namespace InkCanvas.Calibration.Tests
 
         private static void PendingPointGroupPreservesAnnotation()
         {
+            // 点组触点现在由 PalmEraserEngine 在每一帧上决定，适配层不再为“等待分组”
+            // 保存编辑模式。这里锁定该契约，避免旧状态被重新引入。
             var window = PalmWindow();
             Set(window, "isPalmEraserActive", false);
             Set(window, "_changingPalmMode", false);
-            Set(window, "_palmGroupSavedMode", (InkCanvasEditingMode?)InkCanvasEditingMode.Ink);
-            Check((bool)Call(window, "IsAnnotationModeActive"), "Waiting for the grouping window falsely reports annotation exit");
-            Set(window, "_palmGroupSavedMode", null);
-            Check(!(bool)Call(window, "IsAnnotationModeActive"), "Ending the group must not hide a real annotation exit");
+            Check(!(bool)Call(window, "IsAnnotationModeActive"), "Idle palm state must not report annotation mode");
+            Check(typeof(MainWindow).GetField("_palmGroupSavedMode", Members) == null,
+                "Pending point groups must not reintroduce a saved editing mode");
         }
 
         private static void TemporaryPalmModeDoesNotNotifyPlugin()

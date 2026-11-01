@@ -116,18 +116,6 @@
                         IsOn="True"
                         Toggled="ToggleSwitchIsQuadIR_Toggled"/>
 
-                    <ui:SettingsCard x:Name="CardAutoCalibrate"
-                                     Header="{x:Static props:AdvancedStrings.CalibrationTitle}"
-                                     Description="{x:Static props:AdvancedStrings.CalibrationDescription}">
-                        <StackPanel>
-                            <TextBlock x:Name="TextCalibrateStatus" TextWrapping="Wrap" MaxWidth="300" Margin="0,0,0,8"/>
-                            <WrapPanel>
-                                <Button Content="{x:Static props:AdvancedStrings.CalibrationStart}" Click="BtnStartCalibrate_Click" Margin="0,0,8,0"/>
-                                <Button Content="{x:Static props:AdvancedStrings.CalibrationClear}" Click="ClearCalibration_Click"/>
-                            </WrapPanel>
-                        </StackPanel>
-                    </ui:SettingsCard>
-
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:AdvancedStrings.Logging}" />
 

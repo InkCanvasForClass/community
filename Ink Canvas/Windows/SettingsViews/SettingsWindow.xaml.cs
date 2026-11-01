@@ -54,6 +54,8 @@ namespace Ink_Canvas.Windows.SettingsViews
             { "PowerPointPage", typeof(PowerPointPage) },
             { "RandomDrawPage", typeof(RandomDrawPage) },
             { "CanvasPage", typeof(CanvasPage) },
+            { "PalmEraserPage", typeof(PalmEraserPage) },
+            { "TouchInputPage", typeof(TouchInputPage) },
             { "InkRecognitionPage", typeof(InkRecognitionPage) },
             { "PerformancePage", typeof(PerformancePage) },
             { "DebugPage", typeof(DebugPage) },
@@ -146,6 +148,8 @@ namespace Ink_Canvas.Windows.SettingsViews
                 { "PowerPointPage", typeof(PowerPointPage) },
                 { "RandomDrawPage", typeof(RandomDrawPage) },
                 { "CanvasPage", typeof(CanvasPage) },
+                { "PalmEraserPage", typeof(PalmEraserPage) },
+                { "TouchInputPage", typeof(TouchInputPage) },
                 { "InkRecognitionPage", typeof(InkRecognitionPage) },
                 { "PerformancePage", typeof(PerformancePage) },
                 { "DebugPage", typeof(DebugPage) },
@@ -468,7 +472,7 @@ namespace Ink_Canvas.Windows.SettingsViews
 
         private void OnNavigationViewBackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
         {
-            if (rootFrame.Content is TouchCalibrationPage) NavigateToPage("AdvancedPage");
+            if (rootFrame.Content is TouchCalibrationPage) NavigateToPage("PalmEraserPage");
             else if (rootFrame.CanGoBack) rootFrame.GoBack();
         }
         private void OnRootFrameNavigated(object sender, NavigationEventArgs e)
@@ -489,11 +493,6 @@ namespace Ink_Canvas.Windows.SettingsViews
                 NavigationViewControl.PaneDisplayMode = iNKORE.UI.WPF.Modern.Controls.NavigationViewPaneDisplayMode.Auto;
             }
 
-            if (_isNavigating)
-            {
-                return;
-            }
-
             // 处理设置项的选中状态
             if (currentPageType == typeof(SettingsPage))
             {
@@ -502,19 +501,26 @@ namespace Ink_Canvas.Windows.SettingsViews
                 return;
             }
 
-            // 同步其他页面的选中状态
+            // 同步其他页面的选中状态。程序化导航（例如校准页返回手掌擦页）也走这里，
+            // 否则标题会停留在上一个页面。
             foreach (var kvp in _pageTypes)
             {
                 if (kvp.Value == currentPageType)
                 {
                     var targetItem = FindNavigationViewItemByTag(kvp.Key);
-                    if (targetItem != null && NavigationViewControl.SelectedItem != targetItem)
+                    if (targetItem != null)
                     {
-                        NavigationViewControl.SelectedItem = targetItem;
+                        if (NavigationViewControl.SelectedItem != targetItem)
+                            NavigationViewControl.SelectedItem = targetItem;
                         NavigationViewControl.Header = targetItem.Content;
                     }
                     break;
                 }
+            }
+
+            if (_isNavigating)
+            {
+                return;
             }
 
             // 重置当前页面的选中设置项（页面可在 Loaded 中再设置）

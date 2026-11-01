@@ -72,7 +72,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             ToggleSwitchIsSecondConfimeWhenShutdownApp.IsOn = settings.Advanced.IsSecondConfirmWhenShutdownApp;
 
             CardTouchMultiplier.IsExpanded = settings.Advanced.IsSpecialScreen;
-            UpdateCalibrationStatus();
         }
 
         #region Special Screen & Touch Multiplier
@@ -148,39 +147,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (!_isLoaded) return;
             SettingsManager.Settings.Advanced.IsQuadIR = ToggleSwitchIsQuadIR.IsOn;
             SettingsManager.SaveSettingsToFile();
-        }
-
-        #endregion
-
-        #region Auto Calibrate
-
-        private void BtnStartCalibrate_Click(object sender, RoutedEventArgs e)
-        {
-            GetMainWindow()?.ResetTouchCalibrationInput();
-            if (Window.GetWindow(this) is SettingsWindow settingsWindow)
-                settingsWindow.NavigateToPage("TouchCalibrationPage");
-        }
-
-        private void ClearCalibration_Click(object sender, RoutedEventArgs e)
-        {
-            if (MessageBox.Show(AdvancedStrings.GetString("CalibrationClearConfirm"), AdvancedStrings.CalibrationTitle,
-                MessageBoxButton.YesNo) != MessageBoxResult.Yes) return;
-            if (!SettingsManager.TrySaveCalibration(null))
-                TextCalibrateStatus.Text = AdvancedStrings.GetString("CalibrationSaveFailed");
-            else UpdateCalibrationStatus();
-        }
-
-        private void UpdateCalibrationStatus()
-        {
-            var record = SettingsManager.Settings.Advanced.TouchCalibration;
-            string key = "CalibrationNone";
-            if (record?.IsValid() == true)
-            {
-                var window = GetMainWindow() ?? Window.GetWindow(this);
-                key = record.Environment.Matches(Ink.TouchCalibrationDisplay.Capture(window, record.Environment.Source))
-                    ? "CalibrationSaved" : "CalibrationMismatch";
-            }
-            TextCalibrateStatus.Text = AdvancedStrings.GetString(key);
         }
 
         #endregion
