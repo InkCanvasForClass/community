@@ -1,198 +1,36 @@
-using Ink_Canvas.Windows.SettingsViews.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
-using System;
-using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Interop;
 using System.Windows.Media;
-using System.Windows.Shell;
-using Windows.Win32;
-using Windows.Win32.Foundation;
-using Windows.Win32.UI.WindowsAndMessaging;
 
 namespace Ink_Canvas.Helpers
 {
     /// <summary>
-    /// Main-window base that can use WindowChrome for DWM-backed transparent rendering.
+    /// Per-pixel transparent overlay. Transparent pixels must pass input to
+    /// windows in other processes, while visible controls remain interactive.
     /// </summary>
     public partial class PerformanceTransparentWin : Window
     {
-        private readonly bool _useWindowChromeRendering;
-        private readonly bool _dwmEnabled;
-        private IntPtr _hwnd;
-        private bool _transparentHitThrough;
+        // Preserve the public surface for existing callers/plugins. The former
+        // DWM backend used constant HWND alpha with HTTRANSPARENT, which searches
+        // only the same thread and therefore blocked the desktop. A persisted
+        // preference must never reactivate that unsafe input model.
+        public bool IsUsingWindowChromeRendering => false;
 
-        public bool IsUsingWindowChromeRendering => _useWindowChromeRendering && _dwmEnabled;
-
-        public string TransparentHitTestState
-            => $"chrome={IsUsingWindowChromeRendering} hwnd={_hwnd != IntPtr.Zero} passThrough={_transparentHitThrough}";
+        public string TransparentHitTestState => "chrome=False perPixel=True";
 
         public PerformanceTransparentWin()
         {
             WindowStyle = WindowStyle.None;
             ResizeMode = ResizeMode.NoResize;
-
-            _useWindowChromeRendering = SettingsManager.ReadEnableWindowChromeRendering();
-            _dwmEnabled = DwmCompositionHelper.IsCompositionEnabled();
-
-            if (IsUsingWindowChromeRendering)
-            {
-                ConfigureWindowChromeRendering();
-            }
-            else
-            {
-                AllowsTransparency = true;
-                Background = Brushes.Transparent;
-            }
-        }
-
-        private void ConfigureWindowChromeRendering()
-        {
-            WindowChrome.SetWindowChrome(this, new WindowChrome
-            {
-                GlassFrameThickness = WindowChrome.GlassFrameCompleteThickness,
-                CaptionHeight = 0,
-                CornerRadius = new CornerRadius(0),
-                ResizeBorderThickness = new Thickness(0)
-            });
-
-            var root = new FrameworkElementFactory(typeof(Border));
-            root.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(BackgroundProperty));
-
-            var decorator = new FrameworkElementFactory(typeof(AdornerDecorator));
-            var presenter = new FrameworkElementFactory(typeof(ContentPresenter));
-            presenter.SetValue(UIElement.ClipToBoundsProperty, true);
-            decorator.AppendChild(presenter);
-            root.AppendChild(decorator);
-
-            Template = new ControlTemplate
-            {
-                TargetType = typeof(Window),
-                VisualTree = root
-            };
-
+            AllowsTransparency = true;
             Background = Brushes.Transparent;
-            SourceInitialized += PerformanceTransparentWin_SourceInitialized;
         }
 
-        private void PerformanceTransparentWin_SourceInitialized(object sender, EventArgs e)
-        {
-            if (!IsUsingWindowChromeRendering) return;
-
-            _hwnd = new WindowInteropHelper(this).Handle;
-            EnsureLayeredWindowStyle();
-            if (HwndSource.FromHwnd(_hwnd) is HwndSource source)
-            {
-                source.AddHook(WindowChromeStyleHook);
-            }
-        }
-
-        private IntPtr WindowChromeStyleHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
-        {
-            if (msg == (int)WindowMessage.StyleChanging && wParam.ToInt32() == GwlExStyle)
-            {
-                var styleStruct = Marshal.PtrToStructure<StyleStruct>(lParam);
-                styleStruct.StyleNew |= (int)WsExLayered;
-                Marshal.StructureToPtr(styleStruct, lParam, false);
-                handled = true;
-            }
-            else if (msg == (int)WindowMessage.NcHitTest && _transparentHitThrough
-                     && WindowStyle == WindowStyle.None
-                     && ContentDialog.GetOpenDialog(this) == null)
-            {
-                var point = PointFromScreen(GetPointFromLParam(lParam));
-                if (!ShouldHandleWindowChromeHitTest(point))
-                {
-                    handled = true;
-                    return new IntPtr(HtTransparent);
-                }
-            }
-
-            return IntPtr.Zero;
-        }
-
-        public void SetTransparentHitThrough()
-        {
-            if (!IsUsingWindowChromeRendering) return;
-            _transparentHitThrough = true;
-            EnsureLayeredWindowStyle();
-        }
-
-        public void SetTransparentNotHitThrough()
-        {
-            if (!IsUsingWindowChromeRendering) return;
-            _transparentHitThrough = false;
-            EnsureLayeredWindowStyle();
-        }
+        // WPF owns both the per-pixel alpha and the hit-test surface. Changing
+        // WS_EX_LAYERED or its constant alpha here breaks that contract.
+        public void SetTransparentHitThrough() { }
+        public void SetTransparentNotHitThrough() { }
 
         protected virtual bool ShouldHandleWindowChromeHitTest(Point windowPoint)
-        {
-            return InputHitTest(windowPoint) != null;
-        }
-
-        private const int GwlExStyle = -20;
-        private const long WsExLayered = 0x00080000L;
-        private const int HtTransparent = -1;
-
-        private enum WindowMessage
-        {
-            NcHitTest = 0x0084,
-            StyleChanging = 0x007C
-        }
-
-        private static Point GetPointFromLParam(IntPtr lParam)
-        {
-            var value = lParam.ToInt64();
-            var x = unchecked((short)(value & 0xffff));
-            var y = unchecked((short)((value >> 16) & 0xffff));
-            return new Point(x, y);
-        }
-
-        private void EnsureLayeredWindowStyle()
-        {
-            if (!IsUsingWindowChromeRendering || _hwnd == IntPtr.Zero) return;
-
-            var exStyle = GetWindowLongPtr(_hwnd, GwlExStyle).ToInt64();
-            if ((exStyle & WsExLayered) == 0)
-                SetWindowLongPtr(_hwnd, GwlExStyle, new IntPtr(exStyle | WsExLayered));
-            // Adding WS_EX_LAYERED to an existing HWND does not initialize its
-            // alpha. Preserve WPF's current attributes/animations when present.
-            if (!GetLayeredWindowAttributes(_hwnd, out _, out _, out uint flags) || flags == 0)
-                SetLayeredWindowAttributes(_hwnd, 0, (byte)Math.Round(Math.Clamp(Opacity, 0, 1) * 255), 2);
-        }
-
-        [DllImport("user32.dll")] private static extern bool GetLayeredWindowAttributes(IntPtr window, out uint key, out byte alpha, out uint flags);
-        [DllImport("user32.dll")] private static extern bool SetLayeredWindowAttributes(IntPtr window, uint key, byte alpha, uint flags);
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct StyleStruct
-        {
-            public int StyleOld;
-            public int StyleNew;
-        }
-
-        private static IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex)
-        {
-            return new IntPtr(PInvoke.GetWindowLong(new HWND(hWnd), (WINDOW_LONG_PTR_INDEX)nIndex));
-        }
-
-        private static IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
-        {
-            return new IntPtr(PInvoke.SetWindowLong(new HWND(hWnd), (WINDOW_LONG_PTR_INDEX)nIndex, dwNewLong.ToInt32()));
-        }
-
-        //[DllImport("user32.dll", EntryPoint = "GetWindowLong", SetLastError = true)]
-        //private static extern int GetWindowLong32(IntPtr hWnd, int nIndex);
-
-        //[DllImport("user32.dll", EntryPoint = "GetWindowLongPtr", SetLastError = true)]
-        //private static extern IntPtr GetWindowLongPtr64(IntPtr hWnd, int nIndex);
-
-        //[DllImport("user32.dll", EntryPoint = "SetWindowLong", SetLastError = true)]
-        //private static extern int SetWindowLong32(IntPtr hWnd, int nIndex, int dwNewLong);
-
-        //[DllImport("user32.dll", EntryPoint = "SetWindowLongPtr", SetLastError = true)]
-        //private static extern IntPtr SetWindowLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+            => InputHitTest(windowPoint) != null;
     }
 }

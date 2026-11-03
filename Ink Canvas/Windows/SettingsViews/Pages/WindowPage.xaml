@@ -53,6 +53,7 @@
                             Toggled="ToggleSwitchWindowMode_Toggled" />
 
                     <controls:LabeledSettingsCard x:Name="CardWindowChromeRendering"
+                            Visibility="Collapsed"
                             Header="{x:Static props:WindowStrings.Window_WindowChromeRendering}"
                             Description="{x:Static props:WindowStrings.Window_WindowChromeRenderingHint}"
                             Icon="{x:Static ui:SegoeFluentIcons.SpeedHigh}"

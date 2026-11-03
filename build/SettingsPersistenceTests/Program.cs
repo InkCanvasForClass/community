@@ -18,6 +18,7 @@ internal static class Program
     [STAThread]
     private static int Main(string[] args)
     {
+        if (args.Contains("--desktop-click-fixture")) return DesktopInputRegression.RunFixture();
         if (args.Contains("--interceptor-fixture")) return FloatingWindowNativeRegression.RunFixture();
         var app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
         string root = Path.Combine(Path.GetTempPath(), "ICC_SettingsRegression_" + Guid.NewGuid().ToString("N"));
@@ -28,10 +29,20 @@ internal static class Program
         {
             Ink_Canvas.App.RootPath = root + Path.DirectorySeparatorChar;
             SettingsManager.Settings = new Settings();
-            if (args.Contains("--native-caption-only"))
+            if (args.Contains("--desktop-contract-only"))
             {
-                NativeCaptionRegression.Run(Check);
-                Console.WriteLine($"PASS: {_checks} native caption checks"); return 0;
+                DesktopInputRegression.Contract(Check);
+                Console.WriteLine($"PASS: {_checks} transparent HWND contract checks"); return 0;
+            }
+            if (args.Contains("--desktop-surface-only"))
+            {
+                DesktopInputRegression.Surface(Check);
+                Console.WriteLine($"PASS: {_checks} transparent input-surface checks"); return 0;
+            }
+            if (args.Contains("--desktop-input-only") || args.Contains("--native-caption-only"))
+            {
+                DesktopInputRegression.Run(Check);
+                Console.WriteLine($"PASS: {_checks} cross-process desktop input checks"); return 0;
             }
             if (args.Contains("--drawing-segment-only"))
             {
