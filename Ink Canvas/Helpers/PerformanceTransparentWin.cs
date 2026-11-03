@@ -99,6 +99,7 @@ namespace Ink_Canvas.Helpers
                 handled = true;
             }
             else if (msg == (int)WindowMessage.NcHitTest && _transparentHitThrough
+                     && WindowStyle == WindowStyle.None
                      && ContentDialog.GetOpenDialog(this) == null)
             {
                 var point = PointFromScreen(GetPointFromLParam(lParam));

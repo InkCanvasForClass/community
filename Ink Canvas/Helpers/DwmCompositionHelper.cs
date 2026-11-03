@@ -7,15 +7,14 @@ namespace Ink_Canvas.Helpers
     {
         private const string LibraryName = "dwmapi.dll";
 
-        [DllImport(LibraryName, ExactSpelling = true, PreserveSig = false)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool DwmIsCompositionEnabledCore();
+        [DllImport(LibraryName, EntryPoint = "DwmIsCompositionEnabled", ExactSpelling = true)]
+        private static extern int DwmIsCompositionEnabledCore([MarshalAs(UnmanagedType.Bool)] out bool enabled);
 
         public static bool IsCompositionEnabled()
         {
             try
             {
-                return DwmIsCompositionEnabledCore();
+                return DwmIsCompositionEnabledCore(out bool enabled) >= 0 && enabled;
             }
             catch (DllNotFoundException)
             {

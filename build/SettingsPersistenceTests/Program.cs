@@ -28,6 +28,11 @@ internal static class Program
         {
             Ink_Canvas.App.RootPath = root + Path.DirectorySeparatorChar;
             SettingsManager.Settings = new Settings();
+            if (args.Contains("--native-caption-only"))
+            {
+                NativeCaptionRegression.Run(Check);
+                Console.WriteLine($"PASS: {_checks} native caption checks"); return 0;
+            }
             if (args.Contains("--drawing-segment-only"))
             {
                 DrawingSystemRegression.SegmentFingerprint(Check);
