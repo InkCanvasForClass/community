@@ -11,12 +11,16 @@ internal static class NativeCaptionRegression
         SettingsManager.Settings.Startup.EnableWindowChromeRendering = true;
         var window = new TestWindow { Width = 800, Height = 600,
             WindowStyle = WindowStyle.SingleBorderWindow, ResizeMode = ResizeMode.CanResize,
-            ShowActivated = false, ShowInTaskbar = false, Opacity = 0 };
+            ShowActivated = false, ShowInTaskbar = false, Opacity = 1 };
         System.Windows.Shell.WindowChrome.SetWindowChrome(window, null);
         try
         {
             window.Show(); window.SetTransparentHitThrough();
             var handle = new WindowInteropHelper(window).Handle;
+            bool visible = GetLayeredWindowAttributes(handle, out _, out byte alpha, out uint flags);
+            check(visible && alpha == 255 && (flags & 2) != 0,
+                $"Opaque WindowChrome alpha: valid={visible}, alpha={alpha}, flags={flags}, opacity={window.Opacity}, chrome={window.IsUsingWindowChromeRendering}");
+            window.Opacity = 0;
             check(GetWindowRect(handle, out var rectangle), "Native test window has no bounds");
             int x = rectangle.Right - 20, y = rectangle.Top + 15;
             var hit = SendMessage(handle, 0x84, IntPtr.Zero,
@@ -50,4 +54,5 @@ internal static class NativeCaptionRegression
     [StructLayout(LayoutKind.Sequential)] private struct Rect { public int Left, Top, Right, Bottom; }
     [DllImport("user32.dll")] private static extern bool GetWindowRect(IntPtr window, out Rect rectangle);
     [DllImport("user32.dll")] private static extern IntPtr SendMessage(IntPtr window, uint message, IntPtr wParam, IntPtr lParam);
+    [DllImport("user32.dll")] private static extern bool GetLayeredWindowAttributes(IntPtr window, out uint key, out byte alpha, out uint flags);
 }

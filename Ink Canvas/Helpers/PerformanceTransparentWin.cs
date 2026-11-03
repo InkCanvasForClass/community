@@ -157,7 +157,14 @@ namespace Ink_Canvas.Helpers
             var exStyle = GetWindowLongPtr(_hwnd, GwlExStyle).ToInt64();
             if ((exStyle & WsExLayered) == 0)
                 SetWindowLongPtr(_hwnd, GwlExStyle, new IntPtr(exStyle | WsExLayered));
+            // Adding WS_EX_LAYERED to an existing HWND does not initialize its
+            // alpha. Preserve WPF's current attributes/animations when present.
+            if (!GetLayeredWindowAttributes(_hwnd, out _, out _, out uint flags) || flags == 0)
+                SetLayeredWindowAttributes(_hwnd, 0, (byte)Math.Round(Math.Clamp(Opacity, 0, 1) * 255), 2);
         }
+
+        [DllImport("user32.dll")] private static extern bool GetLayeredWindowAttributes(IntPtr window, out uint key, out byte alpha, out uint flags);
+        [DllImport("user32.dll")] private static extern bool SetLayeredWindowAttributes(IntPtr window, uint key, byte alpha, uint flags);
 
         [StructLayout(LayoutKind.Sequential)]
         private struct StyleStruct
