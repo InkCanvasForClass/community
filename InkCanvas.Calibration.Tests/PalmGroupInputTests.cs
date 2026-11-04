@@ -34,6 +34,12 @@ namespace InkCanvas.Calibration.Tests
 
         public static void RunAll()
         {
+            CheckPalmSession(false);
+            CheckPalmSession(true);
+        }
+
+        private static void CheckPalmSession(bool fingerAlreadyPending)
+        {
             var previous = SettingsManager.Settings;
             SettingsManager.Settings = new Settings();
             SettingsManager.Settings.Canvas.EnablePalmEraser = true;
@@ -72,24 +78,45 @@ namespace InkCanvas.Calibration.Tests
                     Call(tracker, "Up", (long)id);
                     Call(tracker, "Down", (long)id, contact.Position.X, contact.Position.Y, long.MaxValue);
                 }
+                var remainingFinger = new Contact(4, 40, 20);
+                if (fingerAlreadyPending)
+                {
+                    Call(window, "TryHandlePalmTouch", new TouchEventArgs(remainingFinger, 0) { RoutedEvent = UIElement.PreviewTouchDownEvent }, true);
+                    Call(tracker, "Up", 4L);
+                    Call(tracker, "Down", 4L, 40d, 20d, long.MaxValue);
+                }
+                long downTime = Environment.TickCount64 - 201;
                 for (int id = 1; id <= 3; id++)
                 {
                     Call(tracker, "Up", (long)id);
-                    Call(tracker, "Down", (long)id, id * 10d, 20d, Environment.TickCount64 - 201);
+                    Call(tracker, "Down", (long)id, id * 10d, 20d, downTime);
                 }
                 Call(window, "EvaluatePalmGroup");
                 Check((bool)Field("isPalmEraserActive").GetValue(window), "Three nearby contacts did not activate palm erasing");
                 Check(canvas.Children.Count == 0, "Recognized palm contacts retained ink previews");
 
-                var remainingFinger = new Contact(4, 40, 20);
-                Call(window, "TryHandlePalmTouch", new TouchEventArgs(remainingFinger, 0) { RoutedEvent = UIElement.PreviewTouchDownEvent }, true);
+                if (!fingerAlreadyPending)
+                    Call(window, "TryHandlePalmTouch", new TouchEventArgs(remainingFinger, 0) { RoutedEvent = UIElement.PreviewTouchDownEvent }, true);
                 remainingFinger.Position = new Point(60, 30);
                 Call(window, "TryHandlePalmTouch", new TouchEventArgs(remainingFinger, 0) { RoutedEvent = UIElement.PreviewTouchMoveEvent }, false);
                 Check(canvas.Children.Count == 0,
                     $"Palm erasing leaked {canvas.Children.Count} finger ink preview(s) after another contact arrived");
+                for (int id = 1; id <= 3; id++)
+                    Call(window, "FinishPalmTouch", new TouchEventArgs(new Contact(id, id * 10, 20), 0)
+                        { RoutedEvent = UIElement.PreviewTouchUpEvent });
+                Check(!(bool)Field("isPalmEraserActive").GetValue(window), "Palm eraser remained active after its group lifted");
+                Call(window, "TryHandlePalmTouch", new TouchEventArgs(remainingFinger, 0) { RoutedEvent = UIElement.PreviewTouchMoveEvent }, false);
+                var laterFinger = new Contact(5, 50, 20);
+                Call(window, "TryHandlePalmTouch", new TouchEventArgs(laterFinger, 0) { RoutedEvent = UIElement.PreviewTouchDownEvent }, true);
+                Check(canvas.Children.Count == 0, "A remaining contact resumed writing before the entire session lifted");
+                Call(window, "FinishPalmTouch", new TouchEventArgs(laterFinger, 0) { RoutedEvent = UIElement.PreviewTouchUpEvent });
                 Call(window, "FinishPalmTouch", new TouchEventArgs(remainingFinger, 0) { RoutedEvent = UIElement.PreviewTouchUpEvent });
                 Check(canvas.Strokes.Count == 0, "The remaining finger committed ink on lift");
-                Console.WriteLine("PASS PalmGroupInput (late finger has no preview or committed ink)");
+                Check(canvas.EditingMode == InkCanvasEditingMode.Ink, "Lifting all contacts did not restore writing mode");
+                var nextFinger = new Contact(6, 60, 20);
+                Call(window, "TryHandlePalmTouch", new TouchEventArgs(nextFinger, 0) { RoutedEvent = UIElement.PreviewTouchDownEvent }, true);
+                Check(canvas.Children.Count == 1, "A new single-finger stroke was still suppressed after the palm session ended");
+                Console.WriteLine($"PASS PalmGroupInput (pending={fingerAlreadyPending}, no leaked ink, lift order, next stroke)");
             }
             finally
             {

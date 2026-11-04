@@ -62,6 +62,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private readonly Dictionary<long, Stroke> _groupStrokes = new();
         private readonly DispatcherTimer _groupTimer = new() { Interval = TimeSpan.FromMilliseconds(16) };
         private long? _groupAnchor;
+        private bool _groupErasing;
         private bool UsesPointGrouping => _step == 4 && (_pointOnly || SimulateErase.IsChecked == true);
         private double _simulationWidth;
         private double _simulationHeight;
@@ -300,6 +301,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             _groupStrokes.Clear();
             _groupTracker.Reset();
             _groupAnchor = null;
+            _groupErasing = false;
             _palm.CancelPress(); _finger.CancelPress(); _nib.CancelPress();
             _contacts.Clear(); _pressId = null;
             _invalidPress = false;
@@ -314,6 +316,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             try { Surface.ReleaseAllTouchCaptures(); }
             finally { _endingTouch = false; }
             if (ContactBox != null) ContactBox.Visibility = Visibility.Collapsed;
+            UpdateSimulationMode();
         }
 
 #if ICC_NATIVE_WET_INK
@@ -439,7 +442,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void UpdateSimulationMode()
         {
-            if (_step == 4) Surface.EditingMode = InkCanvasEditingMode.Ink;
+            if (_step == 4)
+                Surface.EditingMode = UsesPointGrouping && _contacts.Count > 0
+                    ? InkCanvasEditingMode.None : InkCanvasEditingMode.Ink;
         }
 
         private void GroupOptionsChanged(object sender, RoutedEventArgs e)
@@ -450,16 +455,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void BeginPointGroup(long id, Point position)
         {
+            // 触摸由分组预览手动采集，不能同时启用 InkCanvas 的内建采墨。
+            UpdateSimulationMode();
             _groupTracker.MinimumContacts = GroupCount.SelectedIndex + 2;
             _groupTracker.WindowMilliseconds = (int)GroupWindow.Value;
             _groupTracker.Tolerance = GroupTolerance.Value;
             _groupTracker.Width = _pointOnly ? _simulationWidth : _draft?.OutlineWidth ?? 0;
             _groupTracker.Height = _pointOnly ? _simulationHeight : _draft?.OutlineHeight ?? 0;
             _groupTracker.Down(id, position.X, position.Y, Environment.TickCount64);
-            var points = new StylusPointCollection { new StylusPoint(position.X, position.Y) };
-            var stroke = new Stroke(points, Surface.DefaultDrawingAttributes.Clone());
-            _groupStrokes[id] = stroke;
-            Surface.Strokes.Add(stroke);
+            if (!_groupErasing)
+            {
+                var points = new StylusPointCollection { new StylusPoint(position.X, position.Y) };
+                var stroke = new Stroke(points, Surface.DefaultDrawingAttributes.Clone());
+                _groupStrokes[id] = stroke;
+                Surface.Strokes.Add(stroke);
+            }
             _groupTimer.Start();
             EvaluatePointGroup();
         }
@@ -477,13 +487,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (!UsesPointGrouping || !CheckEnvironment()) return;
             _groupTracker.Evaluate(Environment.TickCount64);
-            foreach (long id in _groupTracker.PalmIds.ToArray())
-                if (_groupStrokes.Remove(id, out var stroke)) Surface.Strokes.Remove(stroke);
             var ids = _groupTracker.PalmIds.ToArray();
             long? anchor = ids.Length == 0 ? null : ids.Min();
             if (anchor != _groupAnchor) _lastErase = null;
             _groupAnchor = anchor;
-            if (_groupTracker.TryGetCenter(out var x, out var y)) SimulateAt(new Point(x, y));
+            if (_groupTracker.TryGetCenter(out var x, out var y))
+            {
+                // 与主画布一致：识别为手掌后，整轮触摸都不能留下笔迹。
+                _groupErasing = true;
+                foreach (var stroke in _groupStrokes.Values) Surface.Strokes.Remove(stroke);
+                _groupStrokes.Clear();
+                SimulateAt(new Point(x, y));
+            }
             else { _lastErase = null; ContactBox.Visibility = Visibility.Collapsed; }
             Status.Text = string.Format(Text("CalibrationGroupStatus"), _groupTracker.Count,
                 _groupTracker.MinimumContacts, anchor.HasValue ? Text("CalibrationGroupPalm") : Text("CalibrationGroupWriting"));
@@ -494,8 +509,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (_groupStrokes.Remove(id, out var stroke) && canceled) Surface.Strokes.Remove(stroke);
             _groupTracker.Up(id);
             _contacts.Remove(id);
+            UpdateSimulationMode();
             _lastErase = null; // Lifting a contact changes the centroid; do not erase the jump.
-            if (_groupTracker.Count == 0) _groupTimer.Stop();
+            if (_groupTracker.Count == 0)
+            {
+                _groupTimer.Stop();
+                _groupErasing = false;
+            }
             EvaluatePointGroup();
         }
 
