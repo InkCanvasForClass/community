@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Ink_Canvas.Helpers
 {
@@ -63,7 +64,11 @@ namespace Ink_Canvas.Helpers
         string GetPresentationPath();
         bool TryShowSlideNavigation();
         object GetCurrentActivePresentation();
-        List<PPTSlideThumbnail> ExportSlideThumbnails(int width, int height, IProgress<double> progress = null);
+        List<PPTSlideThumbnail> ExportSlideThumbnails(
+            int width,
+            int height,
+            IProgress<double> progress = null,
+            CancellationToken cancellationToken = default);
     }
 }
 

@@ -1,3 +1,4 @@
+using InkCanvasPPTAgent.Contracts;
 using Microsoft.Office.Interop.PowerPoint;
 using System;
 using System.Collections.Generic;
@@ -70,6 +71,9 @@ namespace Ink_Canvas.Helpers
         private DateTime _lastPPTComDebugProbeTime = DateTime.MinValue;
         private volatile bool _cachedIsConnected;
         private volatile bool _cachedIsInSlideShow;
+        private string _cachedPresentationName = string.Empty;
+        private string _cachedPresentationPath = string.Empty;
+        private int _cachedCurrentSlideNumber;
         private int _connectionGeneration;
         private readonly object _lockObject = new object();
         private bool _disposed;
@@ -367,6 +371,7 @@ namespace Ink_Canvas.Helpers
 
             try
             {
+                ClearPresentationMetadataCache();
                 PPTApplication = application;
                 _cachedIsConnected = true;
                 LogHelper.WriteLogToFile(
@@ -438,6 +443,56 @@ namespace Ink_Canvas.Helpers
                    generation == Volatile.Read(ref _connectionGeneration) &&
                    ReferenceEquals(PPTApplication, application) &&
                    Marshal.IsComObject(application);
+        }
+
+        private void UpdatePresentationMetadataCache(Presentation presentation)
+        {
+            if (presentation == null) return;
+
+            try
+            {
+                var name = presentation.Name;
+                if (!string.IsNullOrEmpty(name))
+                {
+                    Volatile.Write(ref _cachedPresentationName, name);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"缓存PPT演示文稿名称失败: {ex.Message}", LogHelper.LogType.Trace);
+            }
+
+            try
+            {
+                var path = presentation.FullName;
+                if (!string.IsNullOrEmpty(path))
+                {
+                    Volatile.Write(ref _cachedPresentationPath, path);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"缓存PPT演示文稿路径失败: {ex.Message}", LogHelper.LogType.Trace);
+            }
+        }
+
+        private void ClearPresentationMetadataCache()
+        {
+            Volatile.Write(ref _cachedPresentationName, string.Empty);
+            Volatile.Write(ref _cachedPresentationPath, string.Empty);
+            Volatile.Write(ref _cachedCurrentSlideNumber, 0);
+        }
+
+        internal PPTState GetStateSnapshot()
+        {
+            return new PPTState
+            {
+                SlideIndex = Volatile.Read(ref _cachedCurrentSlideNumber),
+                TotalSlides = SlidesCount,
+                IsRunning = _cachedIsInSlideShow,
+                PresentationName = Volatile.Read(ref _cachedPresentationName),
+                PresentationFullName = Volatile.Read(ref _cachedPresentationPath)
+            };
         }
 
         private void UnregisterPptEvents(
@@ -548,6 +603,7 @@ namespace Ink_Canvas.Helpers
                 SlidesCount = 0;
 
                 PPTConnectionChanged?.Invoke(false);
+                ClearPresentationMetadataCache();
 
                 if (hadConnection)
                 {
@@ -667,6 +723,11 @@ namespace Ink_Canvas.Helpers
                         {
                             SafeReleaseComObject(CurrentPresentation, "CurrentPresentation");
                             CurrentPresentation = activePresentation as Presentation;
+                            if (string.IsNullOrEmpty(Volatile.Read(ref _cachedPresentationName)) ||
+                                string.IsNullOrEmpty(Volatile.Read(ref _cachedPresentationPath)))
+                            {
+                                UpdatePresentationMetadataCache(CurrentPresentation);
+                            }
                             CurrentSlides = CurrentPresentation.Slides;
 
                             try
@@ -705,6 +766,8 @@ namespace Ink_Canvas.Helpers
                                             if (view != null)
                                             {
                                                 dynamic viewObj = view;
+                                                int slideNumber = viewObj.CurrentShowPosition;
+                                                Volatile.Write(ref _cachedCurrentSlideNumber, slideNumber);
                                                 CurrentSlide = viewObj.Slide as Slide;
                                             }
                                         }
@@ -727,6 +790,7 @@ namespace Ink_Canvas.Helpers
                                                 int slideNumber = sr.SlideNumber;
                                                 if (slideNumber > 0 && slideNumber <= SlidesCount)
                                                 {
+                                                    Volatile.Write(ref _cachedCurrentSlideNumber, slideNumber);
                                                     CurrentSlide = CurrentSlides[slideNumber];
                                                 }
                                             }
@@ -735,6 +799,7 @@ namespace Ink_Canvas.Helpers
 
                                     if (CurrentSlide == null && SlidesCount > 0)
                                     {
+                                        Volatile.Write(ref _cachedCurrentSlideNumber, 1);
                                         CurrentSlide = CurrentSlides[1];
                                     }
                                 }
@@ -749,6 +814,7 @@ namespace Ink_Canvas.Helpers
 
                                 if (SlidesCount > 0)
                                 {
+                                    Volatile.Write(ref _cachedCurrentSlideNumber, 1);
                                     CurrentSlide = CurrentSlides[1];
                                 }
                             }
@@ -759,6 +825,7 @@ namespace Ink_Canvas.Helpers
                             CurrentSlides = null;
                             CurrentSlide = null;
                             SlidesCount = 0;
+                            ClearPresentationMetadataCache();
                         }
                     }
                     catch (COMException comEx)
@@ -815,6 +882,14 @@ namespace Ink_Canvas.Helpers
         private void RunPPTComDebugProbeIfEnabled(string reason, int tick, object application = null)
         {
             if (!IsPPTComDebugProbeEnabled) return;
+            if (reason == "PresentationClose" || reason == "SlideShowEnd")
+            {
+                var snapshot = GetStateSnapshot();
+                LogHelper.WriteLogToFile(
+                    $"[PPT-COM-Probe] {reason} cached state: connected={_cachedIsConnected}, slideshow={snapshot.IsRunning}, slides={snapshot.TotalSlides}",
+                    LogHelper.LogType.Trace);
+                return;
+            }
             if (reason == "TimerTick" && DateTime.Now - _lastPPTComDebugProbeTime < TimeSpan.FromSeconds(4)) return;
 
             _lastPPTComDebugProbeTime = DateTime.Now;
@@ -965,10 +1040,14 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
+                if (!ReferenceEquals(pres, CurrentPresentation))
+                {
+                    ClearPresentationMetadataCache();
+                }
                 UpdateCurrentPresentationInfo();
                 RunPPTComDebugProbeIfEnabled("PresentationOpen", 0);
                 PresentationOpen?.Invoke(pres);
-                LogHelper.WriteLogToFile($"[PPT] 演示文稿已打开: {pres?.Name}", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"[PPT] 演示文稿已打开: {GetPresentationName()}", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
@@ -981,14 +1060,44 @@ namespace Ink_Canvas.Helpers
             try
             {
                 PresentationClose?.Invoke(pres);
-                LogHelper.WriteLogToFile($"[PPT] 演示文稿关闭: {pres?.Name}", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"[PPT] 演示文稿关闭: {GetPresentationName()}", LogHelper.LogType.Info);
                 RunPPTComDebugProbeIfEnabled("PresentationClose", 0);
-
-                DisconnectFromPPT();
+                QueueDisconnectAfterPresentationClose();
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"处理演示文稿关闭事件失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void QueueDisconnectAfterPresentationClose()
+        {
+            if (_isModuleUnloading) return;
+
+            _cachedIsConnected = false;
+            _cachedIsInSlideShow = false;
+            _isModuleUnloading = true;
+            _unifiedPPTTimer?.Stop();
+            Interlocked.Increment(ref _connectionGeneration);
+
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher == null || dispatcher.HasShutdownStarted || dispatcher.HasShutdownFinished)
+            {
+                DisconnectFromPPT();
+                return;
+            }
+
+            try
+            {
+                dispatcher.BeginInvoke(
+                    new Action(() => DisconnectFromPPT()),
+                    DispatcherPriority.Background);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"调度PPT关闭后清理失败: {ex}", LogHelper.LogType.Warning);
+                _isModuleUnloading = false;
+                DisconnectFromPPT();
             }
         }
 
@@ -999,7 +1108,7 @@ namespace Ink_Canvas.Helpers
             {
                 UpdateCurrentPresentationInfo();
                 LogHelper.WriteLogToFile(
-                    $"[PPT] 放映开始: slide={GetCurrentSlideNumber()}, slides={SlidesCount}",
+                    $"[PPT] 放映开始: slide={Volatile.Read(ref _cachedCurrentSlideNumber)}, slides={SlidesCount}",
                     LogHelper.LogType.Info);
                 RunPPTComDebugProbeIfEnabled("SlideShowBegin", 0);
                 SlideShowBegin?.Invoke(wn);
@@ -1016,7 +1125,7 @@ namespace Ink_Canvas.Helpers
             {
                 UpdateCurrentPresentationInfo();
                 LogHelper.WriteLogToFile(
-                    $"[PPT] 放映翻页: slide={GetCurrentSlideNumber()}, slides={SlidesCount}",
+                    $"[PPT] 放映翻页: slide={Volatile.Read(ref _cachedCurrentSlideNumber)}, slides={SlidesCount}",
                     LogHelper.LogType.Info);
                 RunPPTComDebugProbeIfEnabled("SlideShowNextSlide", 0);
                 SlideShowNextSlide?.Invoke(wn);
@@ -1375,7 +1484,11 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        public List<PPTSlideThumbnail> ExportSlideThumbnails(int width, int height, IProgress<double> progress = null)
+        public List<PPTSlideThumbnail> ExportSlideThumbnails(
+            int width,
+            int height,
+            IProgress<double> progress = null,
+            CancellationToken cancellationToken = default)
         {
             var result = new List<PPTSlideThumbnail>();
             string tempDir = null;
@@ -1385,6 +1498,8 @@ namespace Ink_Canvas.Helpers
 
             try
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 activePresentation = CurrentPresentation;
                 if (activePresentation == null || !Marshal.IsComObject(activePresentation))
                 {
@@ -1404,17 +1519,24 @@ namespace Ink_Canvas.Helpers
 
                 for (int i = 1; i <= count; i++)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+
                     Slide slide = null;
                     try
                     {
                         slide = slides[i];
                         var imagePath = Path.Combine(tempDir, $"slide_{i:0000}.png");
                         slide.Export(imagePath, "PNG", width, height);
+                        cancellationToken.ThrowIfCancellationRequested();
                         result.Add(new PPTSlideThumbnail
                         {
                             SlideNumber = i,
                             PngBytes = File.ReadAllBytes(imagePath)
                         });
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
                     }
                     catch (Exception ex)
                     {
@@ -1427,6 +1549,10 @@ namespace Ink_Canvas.Helpers
 
                     progress?.Report((double)i / count);
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -1539,52 +1665,12 @@ namespace Ink_Canvas.Helpers
 
         public string GetPresentationName()
         {
-            try
-            {
-                if (CurrentPresentation == null || !Marshal.IsComObject(CurrentPresentation)) return "";
-
-                return CurrentPresentation.Name ?? "";
-            }
-            catch (COMException comEx)
-            {
-                var hr = (uint)comEx.HResult;
-                if (!IsPPTBusyHResult(hr) && (hr == 0x8001010E || hr == 0x80004005))
-                    DisconnectFromPPT();
-                if (!IsPPTBusyHResult(hr))
-                    LogHelper.WriteLogToFile($"获取演示文稿名称失败: {comEx.Message}", LogHelper.LogType.Warning);
-                return "";
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"获取演示文稿名称失败: {ex}", LogHelper.LogType.Error);
-                return "";
-            }
+            return Volatile.Read(ref _cachedPresentationName) ?? string.Empty;
         }
 
         public string GetPresentationPath()
         {
-            try
-            {
-                if (CurrentPresentation == null || !Marshal.IsComObject(CurrentPresentation)) return "";
-
-                return CurrentPresentation.FullName ?? "";
-            }
-            catch (COMException comEx)
-            {
-                var hr = (uint)comEx.HResult;
-                if (hr == 0x8001010E || hr == 0x80004005)
-                {
-                    // COM对象已失效，触发断开连接
-                    DisconnectFromPPT();
-                }
-                LogHelper.WriteLogToFile($"获取演示文稿路径失败: {comEx.Message}", LogHelper.LogType.Warning);
-                return "";
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"获取演示文稿路径失败: {ex}", LogHelper.LogType.Error);
-                return "";
-            }
+            return Volatile.Read(ref _cachedPresentationPath) ?? string.Empty;
         }
 
         public bool TryShowSlideNavigation()

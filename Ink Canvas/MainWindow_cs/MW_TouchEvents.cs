@@ -173,8 +173,9 @@ namespace Ink_Canvas
 
         internal bool ShouldUseRealtimeVelocityBrushTipForMouse()
         {
-            return inkCanvas?.EditingMode == InkCanvasEditingMode.Ink
-                   && ShouldUseRealtimeVelocityBrushTip()
+            // 鼠标实时笔锋启动后会把 InkCanvas 切到 None，由 StrokeVisual 手动采集；
+            // 因此不能在持续采样条件中要求 Ink 模式。选择模式由鼠标事件入口拦截。
+            return ShouldUseRealtimeVelocityBrushTip()
                    && drawingShapeMode == 0
                    && !isPalmEraserActive;
         }
