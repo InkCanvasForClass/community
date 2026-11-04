@@ -2824,7 +2824,7 @@ namespace Ink_Canvas
                 ViewboxFloatingBar.Margin = new Thickness(animationTarget.X, animationTarget.Y, -2000, -200);
                 ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
                 isViewboxFloatingBarMarginAnimationRunning = false;
-                if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
+                if (!CanShowPresentationFloatingBar) ViewboxFloatingBar.Visibility = Visibility.Hidden;
 
                 if (!string.IsNullOrEmpty(_currentToolMode))
                 {
@@ -2836,6 +2836,8 @@ namespace Ink_Canvas
             });
         }
 
+        private bool CanShowPresentationFloatingBar => Topmost || WindowTopmostManager.IsTopmostSuppressed;
+
         private void ViewboxFloatingBarMarginAnimationCore(int MarginFromEdge,
             bool PosXCaculatedWithTaskbarHeight = false, bool animate = false)
         {
@@ -2845,7 +2847,7 @@ namespace Ink_Canvas
                 pos = new Point(ViewboxFloatingBar.Margin.Left, ViewboxFloatingBar.Margin.Top);
                 return;
             }
-            if (Topmost)
+            if (CanShowPresentationFloatingBar)
             {
                 ViewboxFloatingBar.Visibility = Visibility.Visible;
                 ViewboxFloatingBar.UpdateLayout();
@@ -2878,8 +2880,8 @@ namespace Ink_Canvas
                 toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
             }
 
-            // 非置顶时使用 rcWork 获取的任务栏高度，确保浮动栏完全隐藏到屏幕底部以下
-            if (!Topmost)
+            // 工具栏不可用时，将其移到任务栏下方。
+            if (!CanShowPresentationFloatingBar)
                 MarginFromEdge = -60 - (int)Math.Round(toolbarHeight);
 
             double baseWidth = ViewboxFloatingBar.ActualWidth;
@@ -3103,7 +3105,7 @@ namespace Ink_Canvas
             }
 
             if (!animate) isViewboxFloatingBarMarginAnimationRunning = false;
-            if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
+            if (!CanShowPresentationFloatingBar) ViewboxFloatingBar.Visibility = Visibility.Hidden;
         }
 
         /// <summary>
