@@ -408,7 +408,7 @@ namespace Ink_Canvas
             {
                 _popupManager = new PopupManagerHelper();
 
-                _popupManager.ShouldBeTopmost = () => Settings.Advanced.IsAlwaysOnTop;
+                _popupManager.ShouldBeTopmost = () => Settings.Advanced.IsAlwaysOnTop && !WindowTopmostManager.IsTopmostSuppressed;
 
                 _popupManager.RegisterPopup(BorderTools);
                 _popupManager.RegisterPopup(BoardBorderToolsPopup);

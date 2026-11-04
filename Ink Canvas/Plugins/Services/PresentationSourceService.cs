@@ -12,6 +12,7 @@ namespace Ink_Canvas.Plugins.Services
     /// </summary>
     internal class PresentationSourceService : IPresentationSourceService
     {
+        private const string PdfSourceId = "com.icc.pdf-reader";
         private readonly MainWindow _mainWindow;
         private readonly Dispatcher _dispatcher;
         private PresentationSourceDescriptor _activeSource;
@@ -88,8 +89,11 @@ namespace Ink_Canvas.Plugins.Services
                 // 浮动栏像真实 PPT 放映一样重新定位（居中、缩进）。
                 _mainWindow.UpdateToolbarPosition();
 
-                // 外部放映期间开启主窗口置顶维护，确保工具栏和翻页条始终悬浮于课件视窗上方
-                WindowTopmostManager.StartTopmostMaintenance(_mainWindow);
+                // PDF 绘制在宿主窗口内，阅读时按普通窗口参与 Z 序。
+                if (descriptor.Id == PdfSourceId)
+                    WindowTopmostManager.SetTopmostSuppressed(_mainWindow, true);
+                else
+                    WindowTopmostManager.StartTopmostMaintenance(_mainWindow);
 
                 _mainWindow.PPTUIManager?.UpdateSlideShowStatus(
                     isInSlideShow: true,
@@ -158,7 +162,10 @@ namespace Ink_Canvas.Plugins.Services
             _mainWindow.UpdateToolbarPosition();
 
             // 退出外部放映，停止置顶维护
-            WindowTopmostManager.StopTopmostMaintenance();
+            if (activeId == PdfSourceId)
+                WindowTopmostManager.SetTopmostSuppressed(_mainWindow, false);
+            else
+                WindowTopmostManager.StopTopmostMaintenance();
 
             LogHelper.WriteLogToFile(
                 $"外部演示源 [{activeId}] 已结束。",

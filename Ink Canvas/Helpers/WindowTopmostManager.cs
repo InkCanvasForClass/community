@@ -28,6 +28,7 @@ namespace Ink_Canvas.Helpers
         private static bool _isPaused;
         private static bool _mainWindowTopmostEnabled;
         private static bool _topmostMaintenanceEnabled;
+        internal static bool IsTopmostSuppressed { get; private set; }
         private static long _zOrderSeed;
 
         private sealed class ManagedWindow
@@ -75,6 +76,7 @@ namespace Ink_Canvas.Helpers
                     _topmostMaintenanceEnabled = false;
                     _mainWindowTopmostEnabled = false;
                     _isPaused = false;
+                    IsTopmostSuppressed = false;
 
                     foreach (var managedWindow in ManagedWindows.ToList())
                     {
@@ -104,6 +106,18 @@ namespace Ink_Canvas.Helpers
                     ApplyZOrderCore();
                 }
             });
+        }
+
+        internal static void SetTopmostSuppressed(Window mainWindow, bool suppressed)
+        {
+            mainWindow.Dispatcher.VerifyAccess();
+            lock (SyncRoot)
+            {
+                if (IsTopmostSuppressed == suppressed) return;
+                IsTopmostSuppressed = suppressed;
+                mainWindow.CoerceValue(Window.TopmostProperty);
+                ApplyZOrderCore();
+            }
         }
 
         public static void StartTopmostMaintenance(Window mainWindow)
@@ -271,7 +285,7 @@ namespace Ink_Canvas.Helpers
             {
                 lock (SyncRoot)
                 {
-                    if (_isPaused) return;
+                    if (_isPaused || IsTopmostSuppressed) return;
 
                     if (_mainWindowTopmostEnabled || _topmostMaintenanceEnabled)
                     {
@@ -475,7 +489,7 @@ namespace Ink_Canvas.Helpers
                 .ToList();
 
             // Z序规范：主窗口先置顶，子窗口按打开顺序逐级覆盖（后打开的高于先打开的）
-            if (_mainWindowTopmostEnabled || _topmostMaintenanceEnabled)
+            if (!IsTopmostSuppressed && (_mainWindowTopmostEnabled || _topmostMaintenanceEnabled))
             {
                 // 1) 主窗口先设为 TOPMOST
                 if (mainWindow != null && NativeWindowHelper.IsWindowReady(mainWindow.Handle))
@@ -506,9 +520,10 @@ namespace Ink_Canvas.Helpers
             {
                 if (mainWindow != null && NativeWindowHelper.IsWindowReady(mainWindow.Handle))
                 {
-                    if (mainWindow.AppliedTopmost || mainWindow.Window.Topmost)
+                    if (mainWindow.AppliedTopmost || mainWindow.Window.Topmost ||
+                        (IsTopmostSuppressed && IsTopmostApplied(mainWindow.Handle)))
                     {
-                        mainWindow.Window.Topmost = false;
+                        if (!IsTopmostSuppressed) mainWindow.Window.Topmost = false;
                         NativeWindowHelper.SetNotTopmost(mainWindow.Handle);
                         mainWindow.AppliedTopmost = false;
                     }

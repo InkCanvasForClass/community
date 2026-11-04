@@ -43,6 +43,12 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Ink_Canvas.Helpers.PerformanceTransparentWin
     {
+        static MainWindow()
+        {
+            TopmostProperty.OverrideMetadata(typeof(MainWindow), new FrameworkPropertyMetadata(false,
+                null, (_, value) => WindowTopmostManager.IsTopmostSuppressed ? false : value));
+        }
+
         // 每一页一个Canvas对象
         private List<System.Windows.Controls.Canvas> whiteboardPages = new List<System.Windows.Controls.Canvas>();
         private int currentPageIndex;
