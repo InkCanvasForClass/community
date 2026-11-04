@@ -16,6 +16,7 @@ using Ink_Canvas.Windows.SettingsViews.Helpers;
 using Ink_Canvas.Windows.SettingsViews.Pages;
 using InkCanvasPPTAgent.Contracts;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace InkCanvas.Calibration.Tests
 {
@@ -34,7 +35,11 @@ namespace InkCanvas.Calibration.Tests
             int failed = 0;
             foreach (var test in new Action[] { PageConstruction, PointRouteSaves, AreaRouteSaves, FailedSaveRetainsDraft,
                 TemporaryPalmModePreservesAnnotation, PendingPointGroupPreservesAnnotation, TemporaryPalmModeDoesNotNotifyPlugin,
-                EraserSizeSelectionAppliesImmediately, PptEndUsesManagedSnapshot, PptEndRequestDoesNotBlockCaller })
+                EraserSizeSelectionAppliesImmediately, PptEndUsesManagedSnapshot, PptEndRequestDoesNotBlockCaller,
+                AutoStartMigrationPreservesOtherSettings, AutoStartMigrationKeepsExplicitValues,
+                AutoStartMigrationRetriesAfterWriteFailure, AutoStartMigrationPreservesInvalidConfig,
+                AutoStartMigrationCreatesMissingConfig, AutoStartMigrationReadsCurrentConfig,
+                AutoStartMigrationHandlesMissingStartup })
             {
                 try { test(); Console.WriteLine("PASS " + test.Method.Name); }
                 catch (Exception ex) { failed++; Console.WriteLine("FAIL " + test.Method.Name + ": " + ex.GetBaseException()); }
@@ -73,6 +78,172 @@ namespace InkCanvas.Calibration.Tests
 
         private static Button SaveButton(TouchCalibrationPage page) =>
             (page.FindName("SaveButton") ?? page.FindName("NextButton")) as Button;
+
+        private static void WithAutoStartSettings(string json, Action<string> test)
+        {
+            string previousRoot = App.RootPath;
+            var previousSettings = SettingsManager.Settings;
+            const BindingFlags flags = BindingFlags.Static | BindingFlags.NonPublic;
+            var cachedJsonProperty = typeof(App).GetProperty("CachedSettingsJson", flags);
+            var parsedCacheField = typeof(App).GetField("_cachedParsedSettings", flags);
+            object previousJson = cachedJsonProperty.GetValue(null);
+            object previousParsed = parsedCacheField.GetValue(null);
+            App.RootPath = Path.Combine(previousRoot, "auto-start", Guid.NewGuid().ToString("N"));
+            SettingsManager.Settings = new Settings();
+            string path = Path.Combine(App.RootPath, SettingsManager.SettingsFileName);
+            try
+            {
+                if (json != null)
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(path));
+                    File.WriteAllText(path, json);
+                }
+                test(path);
+            }
+            finally
+            {
+                App.RootPath = previousRoot;
+                SettingsManager.Settings = previousSettings;
+                cachedJsonProperty.SetValue(null, previousJson);
+                parsedCacheField.SetValue(null, previousParsed);
+            }
+        }
+
+        private static JObject ParseRawSettings(string json) =>
+            JsonConvert.DeserializeObject<JObject>(json, new JsonSerializerSettings
+            {
+                DateParseHandling = DateParseHandling.None
+            });
+
+        private static string CachedSettingsJson() => (string)typeof(App)
+            .GetProperty("CachedSettingsJson", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+
+        private static void AutoStartMigrationPreservesOtherSettings()
+        {
+            const string json = "{\"startup\":{\"isAutoUpdate\":false,\"futureStartup\":{\"enabled\":true}},"
+                + "\"appearance\":{\"language\":\"en-US\"},\"futureOptions\":{\"names\":[\"one\",\"two\"],"
+                + "\"timestamp\":\"2026-11-03T07:55:38.0362429+08:00\"}}";
+            WithAutoStartSettings(json, path =>
+            {
+                SettingsManager.Settings = JsonConvert.DeserializeObject<Settings>(json);
+                bool expectedEnabled = AutoStartHelper.HasAnyRegistration();
+                // 允许写入但不允许删除，确保迁移没有使用 File.Replace。
+                using (var handle = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    Check(SettingsManager.MigrateAutoStartSetting(), "Auto-start migration could not write the existing file");
+                }
+                var expected = ParseRawSettings(json);
+                expected["startup"]["runAtStartup"] = expectedEnabled;
+                string saved = File.ReadAllText(path);
+                Check(JToken.DeepEquals(expected, ParseRawSettings(saved)), "Auto-start migration changed unrelated settings");
+                Check(SettingsManager.Settings.Startup.RunAtStartup == expectedEnabled, "Auto-start migration did not update live settings");
+                Check(CachedSettingsJson() == saved, "Auto-start migration did not update the settings cache");
+                Check(!File.Exists(path + ".tmp"), "Auto-start migration created a replacement file");
+                using (var handle = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    Check(!SettingsManager.MigrateAutoStartSetting(), "Auto-start migration ran more than once");
+                }
+                Check(File.ReadAllText(path) == saved, "Repeated auto-start migration rewrote the file");
+            });
+        }
+
+        private static void AutoStartMigrationKeepsExplicitValues()
+        {
+            foreach (bool enabled in new[] { false, true })
+            {
+                string json = JsonConvert.SerializeObject(new { startup = new { runAtStartup = enabled }, futureOption = 17 });
+                WithAutoStartSettings(json, path =>
+                {
+                    SettingsManager.Settings = JsonConvert.DeserializeObject<Settings>(json);
+                    using (var handle = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        Check(!SettingsManager.MigrateAutoStartSetting(), "Auto-start migration ignored an explicit setting");
+                    }
+                    Check(SettingsManager.Settings.Startup.RunAtStartup == enabled, "Auto-start migration changed an explicit value");
+                    Check(File.ReadAllText(path) == json, "Auto-start migration rewrote an explicit setting");
+                });
+            }
+        }
+
+        private static void AutoStartMigrationRetriesAfterWriteFailure()
+        {
+            const string json = "{\"startup\":{\"isAutoUpdate\":false},\"futureOption\":17}";
+            WithAutoStartSettings(json, path =>
+            {
+                SettingsManager.Settings = JsonConvert.DeserializeObject<Settings>(json);
+                bool expectedEnabled = AutoStartHelper.HasAnyRegistration();
+                string previousCache = CachedSettingsJson();
+                using (var handle = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    Check(!SettingsManager.MigrateAutoStartSetting(), "Blocked auto-start migration reported success");
+                    Check(File.ReadAllText(path) == json, "Blocked auto-start migration changed the original file");
+                    Check(SettingsManager.Settings.Startup.RunAtStartup == expectedEnabled, "Failed migration lost the detected auto-start state");
+                    Check(CachedSettingsJson() == previousCache, "Failed migration changed the settings cache");
+                }
+                Check(SettingsManager.MigrateAutoStartSetting(), "Auto-start migration could not retry after a write failure");
+            });
+        }
+
+        private static void AutoStartMigrationPreservesInvalidConfig()
+        {
+            foreach (string json in new[] { "{", "null", "{\"startup\":[1,2],\"futureOption\":17}" })
+            {
+                WithAutoStartSettings(json, path =>
+                {
+                    Check(!SettingsManager.MigrateAutoStartSetting(), "Auto-start migration replaced an invalid config");
+                    Check(File.ReadAllText(path) == json, "Auto-start migration discarded an invalid config");
+                    File.WriteAllText(path, "{\"startup\":{}}");
+                    Check(SettingsManager.MigrateAutoStartSetting(), "Auto-start migration could not retry after config repair");
+                });
+            }
+        }
+
+        private static void AutoStartMigrationCreatesMissingConfig()
+        {
+            WithAutoStartSettings(null, path =>
+            {
+                bool expectedEnabled = AutoStartHelper.HasAnyRegistration();
+                Check(SettingsManager.MigrateAutoStartSetting(), "Auto-start migration did not create the missing config");
+                var saved = ParseRawSettings(File.ReadAllText(path));
+                Check(saved.Count == 1 && saved["startup"] is JObject startup && startup.Count == 1,
+                    "Auto-start migration serialized unrelated defaults into the new config");
+                Check(saved["startup"]["runAtStartup"].Value<bool>() == expectedEnabled, "The new config has the wrong auto-start state");
+            });
+        }
+
+        private static void AutoStartMigrationReadsCurrentConfig()
+        {
+            const string original = "{\"startup\":{\"isAutoUpdate\":false},\"futureOption\":17}";
+            const string latest = "{\"startup\":{\"isAutoUpdate\":true},\"futureOption\":42,\"addedOption\":\"keep\"}";
+            WithAutoStartSettings(original, path =>
+            {
+                SettingsManager.Settings = JsonConvert.DeserializeObject<Settings>(original);
+                typeof(App).GetMethod("UpdateCachedSettingsJson", BindingFlags.Static | BindingFlags.NonPublic)
+                    .Invoke(null, new object[] { original });
+                File.WriteAllText(path, latest);
+                bool expectedEnabled = AutoStartHelper.HasAnyRegistration();
+                Check(SettingsManager.MigrateAutoStartSetting(), "Auto-start migration failed with a newer config");
+                var expected = ParseRawSettings(latest);
+                expected["startup"]["runAtStartup"] = expectedEnabled;
+                Check(JToken.DeepEquals(expected, ParseRawSettings(File.ReadAllText(path))), "Auto-start migration overwrote newer file contents");
+            });
+        }
+
+        private static void AutoStartMigrationHandlesMissingStartup()
+        {
+            foreach (string json in new[] { "{\"futureOption\":17}", "{\"Startup\":null,\"futureOption\":17}" })
+            {
+                WithAutoStartSettings(json, path =>
+                {
+                    SettingsManager.Settings = JsonConvert.DeserializeObject<Settings>(json);
+                    Check(SettingsManager.MigrateAutoStartSetting(), "Auto-start migration could not add a missing startup section");
+                    var saved = ParseRawSettings(File.ReadAllText(path));
+                    Check(saved.Count == 2 && saved["futureOption"].Value<int>() == 17, "Auto-start migration changed unrelated root settings");
+                    Check(saved.GetValue("startup", StringComparison.OrdinalIgnoreCase) is JObject startup && startup.Count == 1,
+                        "Auto-start migration did not preserve the startup property name");
+                });
+            }
+        }
 
         private static void PageConstruction() => _ = new TouchCalibrationPage();
 
