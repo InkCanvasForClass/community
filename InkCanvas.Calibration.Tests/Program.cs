@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Threading;
@@ -9,6 +10,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Ink;
+using System.Windows.Input;
 using Ink_Canvas;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Ink;
@@ -34,7 +37,7 @@ namespace InkCanvas.Calibration.Tests
             SettingsManager.Settings = new Settings();
             int failed = 0;
             var tests = new Action[] { PageConstruction, PointRouteSaves, AreaRouteSaves, FailedSaveRetainsDraft,
-                PalmGroupInputTests.RunAll,
+                PalmGroupInputTests.RunAll, CalibrationPreviewSuppressesRemainingFingers, CalibrationPreviewOwnsTouchInput,
                 TemporaryPalmModePreservesAnnotation, PendingPointGroupPreservesAnnotation, TemporaryPalmModeDoesNotNotifyPlugin,
                 EraserSizeSelectionAppliesImmediately, PptEndUsesManagedSnapshot, PptEndRequestDoesNotBlockCaller,
                 AutoStartMigrationPreservesOtherSettings, AutoStartMigrationKeepsExplicitValues,
@@ -42,6 +45,8 @@ namespace InkCanvas.Calibration.Tests
                 AutoStartMigrationCreatesMissingConfig, AutoStartMigrationReadsCurrentConfig,
                 AutoStartMigrationHandlesMissingStartup };
             if (Array.IndexOf(args, "--palm-only") >= 0) tests = new Action[] { PalmGroupInputTests.RunAll };
+            if (Array.IndexOf(args, "--calibration-preview-only") >= 0)
+                tests = new Action[] { CalibrationPreviewSuppressesRemainingFingers, CalibrationPreviewOwnsTouchInput };
             foreach (var test in tests)
             {
                 try { test(); Console.WriteLine("PASS " + test.Method.Name); }
@@ -249,6 +254,92 @@ namespace InkCanvas.Calibration.Tests
         }
 
         private static void PageConstruction() => _ = new TouchCalibrationPage();
+
+        private static TouchCalibrationPage PointPreviewPage()
+        {
+            var page = new TouchCalibrationPage();
+            Set(page, "_host", new Window());
+            Field<TextBox>(page, "OutlineWidth").Text = "100";
+            Field<TextBox>(page, "OutlineHeight").Text = "80";
+            Field<Button>(page, "SimulateButton").RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+            var surface = Field<System.Windows.Controls.InkCanvas>(page, "Surface");
+            surface.Measure(new Size(500, 500));
+            surface.Arrange(new Rect(0, 0, 500, 500));
+            return page;
+        }
+
+        private static void PreviewDown(TouchCalibrationPage page, long id, double x, double y) =>
+            Call(page, "Begin", id, "WPF", new Point(x, y), 1d, 1d);
+
+        private static void CalibrationPreviewSuppressesRemainingFingers()
+        {
+            foreach (bool pending in new[] { false, true })
+            {
+                var page = PointPreviewPage();
+                var surface = Field<System.Windows.Controls.InkCanvas>(page, "Surface");
+                var tracker = Field<object>(page, "_groupTracker");
+                var existing = new Stroke(new StylusPointCollection { new StylusPoint(450, 450), new StylusPoint(480, 450) });
+                surface.Strokes.Add(existing);
+                try
+                {
+                    for (long id = 1; id <= 3; id++)
+                    {
+                        PreviewDown(page, id, id * 10, 20);
+                        Call(tracker, "Up", id);
+                        Call(tracker, "Down", id, id * 10d, 20d, long.MaxValue);
+                    }
+                    if (pending)
+                    {
+                        PreviewDown(page, 4, 200, 200);
+                        Call(tracker, "Up", 4L);
+                        Call(tracker, "Down", 4L, 200d, 200d, long.MaxValue);
+                    }
+                    long downTime = Environment.TickCount64 - 201;
+                    for (long id = 1; id <= 3; id++)
+                    {
+                        Call(tracker, "Up", id);
+                        Call(tracker, "Down", id, id * 10d, 20d, downTime);
+                    }
+                    Call(page, "EvaluatePointGroup");
+                    Check((bool)Call(tracker, "IsPalm", 1L), "Calibration preview did not recognize the palm");
+                    if (!pending) PreviewDown(page, 4, 200, 200);
+                    Call(page, "Move", 4L, "WPF", new Point(220, 220), 1d, 1d);
+                    Check(surface.Strokes.Count == 1 && surface.Strokes[0].StylusPoints.SequenceEqual(existing.StylusPoints),
+                        $"Calibration preview leaked {surface.Strokes.Count - 1} finger stroke(s), pending={pending}");
+                    for (long id = 1; id <= 3; id++) Call(page, "End", id, false);
+                    Call(page, "Move", 4L, "WPF", new Point(240, 240), 1d, 1d);
+                    PreviewDown(page, 5, 300, 300);
+                    Check(surface.Strokes.Count == 1, "Calibration preview resumed writing before all palm-session contacts lifted");
+                    Call(page, "End", 5L, false);
+                    Call(page, "End", 4L, false);
+                    Check(surface.Strokes.Count == 1 && surface.Strokes[0].StylusPoints.SequenceEqual(existing.StylusPoints), "Calibration preview left ink after lift or removed unrelated ink");
+                    PreviewDown(page, 6, 200, 200);
+                    Call(page, "Move", 6L, "WPF", new Point(220, 220), 1d, 1d);
+                    Call(page, "End", 6L, false);
+                    Check(surface.Strokes.Count == 2, "Calibration preview did not restore single-finger drawing after palm erasing");
+                }
+                finally { Call(page, "CancelPress"); }
+            }
+        }
+
+        private static void CalibrationPreviewOwnsTouchInput()
+        {
+            var page = PointPreviewPage();
+            var surface = Field<System.Windows.Controls.InkCanvas>(page, "Surface");
+            try
+            {
+                Check(surface.EditingMode == InkCanvasEditingMode.Ink, "Idle calibration preview must allow drawing reference ink");
+                PreviewDown(page, 1, 20, 20);
+                Check(surface.EditingMode == InkCanvasEditingMode.None,
+                    "Calibration preview leaves WPF built-in ink enabled while manually collecting touch strokes");
+                Call(page, "End", 1L, false);
+                Check(surface.EditingMode == InkCanvasEditingMode.Ink, "Lifting the final touch did not restore reference drawing");
+                PreviewDown(page, 2, 20, 20);
+                Call(page, "CancelPress");
+                Check(surface.EditingMode == InkCanvasEditingMode.Ink, "Canceling calibration input did not restore reference drawing");
+            }
+            finally { Call(page, "CancelPress"); }
+        }
 
         private static void PointRouteSaves()
         {
