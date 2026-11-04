@@ -16,6 +16,11 @@ namespace Ink_Canvas.Helpers
         private static readonly Dictionary<string, SafeFileHandle> _lockedDirs = new Dictionary<string, SafeFileHandle>(StringComparer.OrdinalIgnoreCase);
         private static bool _enabled;
         private static int _writeGate;
+        // 写入门控按线程记录嵌套深度。清理旧配置（CleanupObsoleteSettings）在
+        // SaveSettingsToFile 的 WithWriteAccess 内可能再次进入 WithWriteAccess；
+        // 若内层再等待同一个门闩会超时并走降级路径，其恢复文件锁的动作会让外层
+        // 的临时文件替换失败。内层直接复用门闩，仅最外层负责释放。
+        [ThreadStatic] private static int _writeDepth;
         private static readonly string[] _excludedSubDirectories = new[]
         {
             "Configs",
@@ -135,7 +140,8 @@ namespace Ink_Canvas.Helpers
         /// <param name="action">执行写入的操作委托，不能为空。</param>
         /// <remarks>
         /// 如果 ProcessProtectionManager.Enabled 为 false，会直接执行 <paramref name="action"/>；
-        /// 若在有限时间内无法获取写入门闩，会记录警告并降级为直接执行 <paramref name="action"/>。方法在内部处理异常，不会抛出异常给调用者。
+        /// 同线程重入时复用外层已持有的写入门闩（内层不会超时、也不会重新加锁导致外层替换失败）；
+        /// 若在有限时间内无法获取写入门闩，会记录警告并降级为释放目标路径锁后执行 <paramref name="action"/>。方法在内部处理异常，不会抛出异常给调用者。
         /// </remarks>
         public static void WithWriteAccess(string targetPath, Action action)
         {
@@ -143,6 +149,14 @@ namespace Ink_Canvas.Helpers
 
             if (!Enabled)
             {
+                action();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(targetPath))
+            {
+                // 未指定目标（例如清理逻辑里的删除动作）时无法定位需要临时释放的锁；
+                // 直接执行，避免无意义地争抢写入门闩。调用方需自行保证目标路径可写。
                 action();
                 return;
             }
@@ -292,7 +306,7 @@ namespace Ink_Canvas.Helpers
                     LogHelper.WriteLogToFile($"[ProcGuard] 写入门控结束后恢复文件锁失败: {ex.Message}", LogHelper.LogType.Info);
                 }
 
-                Interlocked.Exchange(ref _writeGate, 0);
+                if (--_writeDepth == 0) Interlocked.Exchange(ref _writeGate, 0);
             }
         }
 
@@ -303,6 +317,13 @@ namespace Ink_Canvas.Helpers
         /// <returns>`true` 如果在指定时间内成功获取到写入门控，`false` 否则。</returns>
         private static bool TryEnterWriteGate(int timeoutMs)
         {
+            if (_writeDepth > 0)
+            {
+                // 同线程重入：门闩已由外层持有，直接复用，避免自等待超时。
+                _writeDepth++;
+                return true;
+            }
+
             if (timeoutMs <= 0) timeoutMs = 1;
 
             var start = Environment.TickCount;
@@ -314,6 +335,8 @@ namespace Ink_Canvas.Helpers
                 if (elapsed < 2000) Thread.Sleep(10);
                 else Thread.Sleep(50);
             }
+
+            _writeDepth = 1;
             return true;
         }
 

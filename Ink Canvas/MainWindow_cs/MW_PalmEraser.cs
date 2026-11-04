@@ -37,6 +37,7 @@ namespace Ink_Canvas
         private InkCanvasEditingMode? _palmGroupSavedMode;
         private bool _palmGroupSavedManipulation;
         private string _palmGroupSource;
+        private bool _palmGroupErasing;
 
         private InkCanvasEditingMode GetPalmLogicalEditingMode()
         {
@@ -166,10 +167,13 @@ namespace Ink_Canvas
                 _palmGroupTracker.Down(id, point.X, point.Y, Environment.TickCount64);
                 _palmGroupDevices[id] = e.TouchDevice;
                 CancelPalmTouchPreview(id);
-                _palmGroupStrokes[id] = new Stroke(new StylusPointCollection { new StylusPoint(point.X, point.Y) },
-                    inkCanvas.DefaultDrawingAttributes.Clone());
-                GetStrokeVisual(id).Stroke = _palmGroupStrokes[id];
-                RealtimeInkFrameScheduler.RequestRedraw(GetStrokeVisual(id));
+                if (!_palmGroupErasing)
+                {
+                    _palmGroupStrokes[id] = new Stroke(new StylusPointCollection { new StylusPoint(point.X, point.Y) },
+                        inkCanvas.DefaultDrawingAttributes.Clone());
+                    GetStrokeVisual(id).Stroke = _palmGroupStrokes[id];
+                    RealtimeInkFrameScheduler.RequestRedraw(GetStrokeVisual(id));
+                }
                 inkCanvas.LostTouchCapture -= PalmGroup_LostTouchCapture;
                 inkCanvas.LostTouchCapture += PalmGroup_LostTouchCapture;
                 inkCanvas.CaptureTouch(e.TouchDevice);
@@ -203,11 +207,12 @@ namespace Ink_Canvas
                 return;
             }
             _palmGroupTracker.Evaluate(Environment.TickCount64);
-            foreach (int id in _palmGroupTracker.PalmIds.Select(id => (int)id).ToArray())
-            {
-                if (_palmGroupStrokes.Remove(id)) CancelPalmTouchPreview(id);
-            }
             if (!_palmGroupTracker.TryGetCenter(out var x, out var y)) return;
+            // 与面积路线一致：手掌一旦激活，本轮所有触点都不再书写，直到全部抬起。
+            // 后到或未纳入分组的手指也必须丢弃预览，不能在收笔时提交为干墨。
+            _palmGroupErasing = true;
+            foreach (int id in _palmGroupStrokes.Keys.ToArray()) CancelPalmTouchPreview(id);
+            _palmGroupStrokes.Clear();
             if (!PalmEraserContactTracker.TryGetEraserSize(record.OutlineWidth, record.OutlineHeight, 0.01,
                 Math.Sqrt(record.SizeAdjustment), isEraserCircleShape, out var width, out var height)) return;
             if (!isPalmEraserActive) BeginPalmEraser(new Point(x, y), width, height);
@@ -258,6 +263,7 @@ namespace Ink_Canvas
             _palmGroupDevices.Clear();
             _palmGroupStrokes.Clear();
             _palmGroupTracker.Reset();
+            _palmGroupErasing = false;
             inkCanvas.IsManipulationEnabled = _palmGroupSavedManipulation;
             _changingPalmMode = true;
             try

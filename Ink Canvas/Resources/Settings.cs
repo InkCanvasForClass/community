@@ -737,6 +737,8 @@ namespace Ink_Canvas
     {
         private StartupMode _startupMode = StartupMode.Default;
         private bool _hasExplicitStartupMode;
+        private bool _runAtStartup;
+        private bool _hasExplicitRunAtStartup;
 
         [JsonProperty("isAutoUpdate")]
         public bool IsAutoUpdate { get; set; } = true;
@@ -760,6 +762,21 @@ namespace Ink_Canvas
         public bool IsEnableNibMode { get; set; }
         [JsonProperty("isFoldAtStartup")]
         public bool IsFoldAtStartup { get; set; }
+        [JsonProperty("runAtStartup")]
+        public bool RunAtStartup
+        {
+            get => _runAtStartup;
+            set
+            {
+                _runAtStartup = value;
+                _hasExplicitRunAtStartup = true;
+            }
+        }
+        [JsonIgnore]
+        internal bool HasExplicitRunAtStartup => _hasExplicitRunAtStartup;
+
+        internal void SetInferredRunAtStartup(bool value) => _runAtStartup = value;
+
         [JsonProperty("startupMode")]
         public StartupMode StartupMode
         {
