@@ -152,10 +152,7 @@ namespace Ink_Canvas
             // Migrate legacy chicken soup source setting to new multi-source format
             SettingsManager.MigrateChickenSoupSettings();
 
-            if (SettingsManager.MigrateAutoStartSetting() && !SettingsManager.TrySaveSettingsToFile())
-            {
-                LogHelper.WriteLogToFile("[AutoStart] 迁移后的开机自启设置保存失败", LogHelper.LogType.Warning);
-            }
+            SettingsManager.MigrateAutoStartSetting();
 
             if (isStartup && !AutoStartHelper.TryReconcile(Settings.Startup.RunAtStartup))
             {

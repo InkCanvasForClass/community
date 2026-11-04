@@ -620,6 +620,9 @@ namespace Ink_Canvas
         }
         [JsonIgnore]
         internal bool HasExplicitRunAtStartup => _hasExplicitRunAtStartup;
+
+        internal void SetInferredRunAtStartup(bool value) => _runAtStartup = value;
+
         [JsonProperty("startupMode")]
         public StartupMode StartupMode
         {
