@@ -25,7 +25,7 @@ namespace InkCanvas.Calibration.Tests
         private const BindingFlags Members = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
         [STAThread]
-        private static int Main()
+        private static int Main(string[] args)
         {
             var app = new Application();
             app.Resources[typeof(TextBlock)] = new Style(typeof(TextBlock));
@@ -33,13 +33,16 @@ namespace InkCanvas.Calibration.Tests
             App.RootPath = testRoot;
             SettingsManager.Settings = new Settings();
             int failed = 0;
-            foreach (var test in new Action[] { PageConstruction, PointRouteSaves, AreaRouteSaves, FailedSaveRetainsDraft,
+            var tests = new Action[] { PageConstruction, PointRouteSaves, AreaRouteSaves, FailedSaveRetainsDraft,
+                PalmGroupInputTests.RunAll,
                 TemporaryPalmModePreservesAnnotation, PendingPointGroupPreservesAnnotation, TemporaryPalmModeDoesNotNotifyPlugin,
                 EraserSizeSelectionAppliesImmediately, PptEndUsesManagedSnapshot, PptEndRequestDoesNotBlockCaller,
                 AutoStartMigrationPreservesOtherSettings, AutoStartMigrationKeepsExplicitValues,
                 AutoStartMigrationRetriesAfterWriteFailure, AutoStartMigrationPreservesInvalidConfig,
                 AutoStartMigrationCreatesMissingConfig, AutoStartMigrationReadsCurrentConfig,
-                AutoStartMigrationHandlesMissingStartup })
+                AutoStartMigrationHandlesMissingStartup };
+            if (Array.IndexOf(args, "--palm-only") >= 0) tests = new Action[] { PalmGroupInputTests.RunAll };
+            foreach (var test in tests)
             {
                 try { test(); Console.WriteLine("PASS " + test.Method.Name); }
                 catch (Exception ex) { failed++; Console.WriteLine("FAIL " + test.Method.Name + ": " + ex.GetBaseException()); }
