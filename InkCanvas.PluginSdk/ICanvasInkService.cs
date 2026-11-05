@@ -113,6 +113,14 @@ namespace Ink_Canvas.Plugins
         /// </summary>
         bool InsertImage();
 
+        /// <summary>
+        /// 从本地文件异步插入图片到完成导入时的当前屏幕批注/白板，不打开文件对话框、不使用剪贴板。
+        /// 复用宿主依赖文件保存及图片压缩，完成居中缩放、交互绑定和撤销记录后显示画布并切换到选择模式。
+        /// </summary>
+        /// <param name="path">图片文件路径，支持 PNG、JPG/JPEG、BMP、GIF、TIF/TIFF、ICO。</param>
+        /// <returns>图片已添加到画布时返回 true；无效路径、不支持的格式、加载失败或冻结页返回 false。</returns>
+        System.Threading.Tasks.Task<bool> InsertImageFromFileAsync(string path);
+
         /// <summary>更换当前画布背景色（打开颜色选择）。</summary>
         void ChangeBackgroundColor();
 
