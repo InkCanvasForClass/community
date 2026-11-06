@@ -9,7 +9,7 @@ namespace Ink_Canvas.Helpers
     {
         public static string LogFile = "Log.txt";
         private static string LogsFolder = "Logs";
-        private static string AppStartTime = DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss");
+        private static string AppStartTime = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
         private static readonly long MaxLogsFolderSizeBytes = 5 * 1024 * 1024; // 5MB
         private static int _isWritingLog = 0;
 
