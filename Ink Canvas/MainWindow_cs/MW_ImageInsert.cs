@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Services.Shell;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -292,56 +293,12 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 截取指定屏幕区域
+        /// 截取指定屏幕区域。
+        /// 壳：本体已搬入 <see cref="ScreenshotService"/>。
         /// </summary>
         /// <param name="area">要截取的屏幕区域</param>
         /// <returns>截取的位图</returns>
-        /// <remarks>
-        /// 该方法会：
-        /// 1. 确保区域在有效范围内
-        /// 2. 调整区域边界，确保不超出屏幕范围
-        /// 3. 创建支持透明度的位图
-        /// 4. 设置高质量渲染
-        /// 5. 截取屏幕区域
-        /// </remarks>
-        private Bitmap CaptureScreenArea(Rectangle area)
-        {
-            try
-            {
-                // 确保区域在有效范围内
-                var virtualScreen = SystemInformation.VirtualScreen;
-
-                // 调整区域边界，确保不超出屏幕范围
-                int x = Math.Max(area.X, virtualScreen.X);
-                int y = Math.Max(area.Y, virtualScreen.Y);
-                int right = Math.Min(area.Right, virtualScreen.Right);
-                int bottom = Math.Min(area.Bottom, virtualScreen.Bottom);
-
-                int width = Math.Max(1, right - x);
-                int height = Math.Max(1, bottom - y);
-
-                // 创建支持透明度的位图
-                var bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
-                using (var graphics = Graphics.FromImage(bitmap))
-                {
-                    // 设置高质量渲染
-                    graphics.CompositingQuality = CompositingQuality.HighQuality;
-                    graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                    graphics.SmoothingMode = SmoothingMode.HighQuality;
-                    graphics.CompositingMode = CompositingMode.SourceOver;
-
-                    // 截取屏幕区域
-                    graphics.CopyFromScreen(x, y, 0, 0, new Size(width, height), CopyPixelOperation.SourceCopy);
-                }
-
-                return bitmap;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"截取屏幕区域失败: {ex.Message}", LogHelper.LogType.Error);
-                return null;
-            }
-        }
+        private Bitmap CaptureScreenArea(Rectangle area) => ScreenshotService.CaptureScreenArea(area);
 
         private BitmapSource CreateInkOverlayPreviewBitmapSource()
         {
@@ -402,82 +359,19 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 在捕获位图上叠加墨迹预览。
+        /// 壳：本体已搬入 <see cref="ScreenshotService"/>。
+        /// </summary>
         private Bitmap OverlayInkOnCapturedBitmap(Bitmap capturedBitmap, Rectangle captureArea, BitmapSource inkOverlayBitmapSource)
-        {
-            if (capturedBitmap == null || inkOverlayBitmapSource == null)
-            {
-                return capturedBitmap;
-            }
+            => ScreenshotService.OverlayInkOnCapturedBitmap(capturedBitmap, captureArea, inkOverlayBitmapSource);
 
-            try
-            {
-                var virtualScreen = SystemInformation.VirtualScreen;
-                var sourceRect = new Rectangle(
-                    captureArea.X - virtualScreen.X,
-                    captureArea.Y - virtualScreen.Y,
-                    captureArea.Width,
-                    captureArea.Height);
-
-                sourceRect.Intersect(new Rectangle(0, 0, inkOverlayBitmapSource.PixelWidth, inkOverlayBitmapSource.PixelHeight));
-                if (sourceRect.Width <= 0 || sourceRect.Height <= 0)
-                {
-                    return capturedBitmap;
-                }
-
-                using (var inkOverlayBitmap = ConvertBitmapSourceToBitmap(inkOverlayBitmapSource))
-                {
-                    if (inkOverlayBitmap == null)
-                    {
-                        return capturedBitmap;
-                    }
-
-                    Bitmap resultBitmap = null;
-                    try
-                    {
-                        resultBitmap = new Bitmap(capturedBitmap.Width, capturedBitmap.Height, PixelFormat.Format32bppArgb);
-                        using (var g = Graphics.FromImage(resultBitmap))
-                        {
-                            g.DrawImage(capturedBitmap, 0, 0, capturedBitmap.Width, capturedBitmap.Height);
-
-                            var targetRect = new Rectangle(0, 0, Math.Min(sourceRect.Width, capturedBitmap.Width), Math.Min(sourceRect.Height, capturedBitmap.Height));
-                            g.DrawImage(inkOverlayBitmap, targetRect, sourceRect, GraphicsUnit.Pixel);
-                        }
-
-                        return resultBitmap;
-                    }
-                    catch
-                    {
-                        resultBitmap?.Dispose();
-                        throw;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"叠加截图墨迹失败: {ex.Message}", LogHelper.LogType.Warning);
-                return capturedBitmap;
-            }
-        }
-
+        /// <summary>
+        /// 将 WPF BitmapSource 转换为 System.Drawing.Bitmap。
+        /// 壳：本体已搬入 <see cref="ScreenshotService"/>。
+        /// </summary>
         private Bitmap ConvertBitmapSourceToBitmap(BitmapSource bitmapSource)
-        {
-            if (bitmapSource == null)
-            {
-                return null;
-            }
-
-            using (var memoryStream = new MemoryStream())
-            {
-                var encoder = new PngBitmapEncoder();
-                encoder.Frames.Add(BitmapFrame.Create(bitmapSource));
-                encoder.Save(memoryStream);
-                memoryStream.Position = 0;
-                using (var tempBitmap = new Bitmap(memoryStream))
-                {
-                    return new Bitmap(tempBitmap);
-                }
-            }
-        }
+            => ScreenshotService.ConvertBitmapSourceToBitmap(bitmapSource);
 
         /// <summary>
         /// 将截图插入到画布
@@ -845,302 +739,16 @@ namespace Ink_Canvas
         /// 11. 重置裁剪区域，确保后续操作不受影响
         /// </remarks>
         private Bitmap ApplyShapeMask(Bitmap bitmap, List<Point> path, Rectangle area)
-        {
-            try
-            {
-                // 验证路径参数
-                if (path == null || path.Count < 3)
-                {
-                    LogHelper.WriteLogToFile("路径点数不足，无法应用形状遮罩", LogHelper.LogType.Warning);
-                    return bitmap;
-                }
-
-                // 获取DPI缩放比例
-                var dpiScale = GetDpiScale();
-                var virtualScreen = SystemInformation.VirtualScreen;
-
-                // 创建结果位图，确保支持透明度
-                var resultBitmap = new Bitmap(bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb);
-
-                // 首先将整个位图设置为透明
-                using (var resultGraphics = Graphics.FromImage(resultBitmap))
-                {
-                    // 清除位图，设置为完全透明
-                    resultGraphics.Clear(Color.Transparent);
-
-                    // 设置高质量渲染
-                    resultGraphics.SmoothingMode = SmoothingMode.AntiAlias;
-                    resultGraphics.CompositingQuality = CompositingQuality.HighQuality;
-                    resultGraphics.CompositingMode = CompositingMode.SourceOver;
-
-                    // 创建路径
-                    using (var pathGraphics = new GraphicsPath())
-                    {
-                        // 转换WPF坐标到GDI+坐标，考虑DPI缩放和屏幕偏移
-                        var points = new PointF[path.Count];
-                        for (int i = 0; i < path.Count; i++)
-                        {
-                            // 将WPF坐标转换为实际屏幕坐标，然后相对于截图区域计算偏移
-                            double screenX = (path[i].X * dpiScale) + virtualScreen.Left;
-                            double screenY = (path[i].Y * dpiScale) + virtualScreen.Top;
-
-                            // 计算相对于截图区域的坐标
-                            float relativeX = (float)(screenX - area.X);
-                            float relativeY = (float)(screenY - area.Y);
-
-                            // 确保坐标在有效范围内
-                            relativeX = Math.Max(0, Math.Min(relativeX, bitmap.Width - 1));
-                            relativeY = Math.Max(0, Math.Min(relativeY, bitmap.Height - 1));
-
-                            points[i] = new PointF(relativeX, relativeY);
-                        }
-
-                        // 添加路径 - 使用FillMode.Winding确保路径正确填充
-                        pathGraphics.FillMode = FillMode.Winding;
-                        pathGraphics.AddPolygon(points);
-
-                        // 验证路径是否有效
-                        if (!pathGraphics.IsVisible(0, 0) && pathGraphics.GetBounds().Width > 0 && pathGraphics.GetBounds().Height > 0)
-                        {
-                            // 设置裁剪区域为路径内部
-                            resultGraphics.SetClip(pathGraphics);
-
-                            // 在裁剪区域内绘制原始图像
-                            resultGraphics.DrawImage(bitmap, 0, 0);
-
-                            // 重置裁剪区域，确保后续操作不受影响
-                            resultGraphics.ResetClip();
-                        }
-                        else
-                        {
-                            LogHelper.WriteLogToFile("生成的路径无效，返回透明图像", LogHelper.LogType.Warning);
-                            // 如果路径无效，返回透明图像
-                            return resultBitmap;
-                        }
-                    }
-                }
-
-                return resultBitmap;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"应用形状遮罩失败: {ex.Message}", LogHelper.LogType.Error);
-                return bitmap;
-            }
-        }
+            => _screenshotService.ApplyShapeMask(bitmap, path, area);
 
         /// <summary>
-        /// 将System.Drawing.Bitmap转换为WPF BitmapSource
+        /// 将System.Drawing.Bitmap转换为WPF BitmapSource。
+        /// 壳：本体（含备用/最简两条降级路径）已搬入 <see cref="ScreenshotService"/>。
         /// </summary>
         /// <param name="bitmap">要转换的位图</param>
         /// <returns>转换后的BitmapSource</returns>
-        /// <remarks>
-        /// 该方法会：
-        /// 1. 验证位图有效性
-        /// 2. 验证位图尺寸
-        /// 3. 使用更安全的方法转换位图
-        /// 4. 根据像素格式选择合适的WPF像素格式
-        /// 5. 创建BitmapSource
-        /// 6. 冻结BitmapSource以提高性能
-        /// 7. 如果转换失败，尝试使用备用方法
-        /// </remarks>
         private BitmapSource ConvertBitmapToBitmapSource(Bitmap bitmap)
-        {
-            try
-            {
-                // 验证位图有效性
-                if (bitmap == null)
-                    return null;
-
-                // 验证位图尺寸
-                if (bitmap.Width <= 0 || bitmap.Height <= 0)
-                    return null;
-
-                // 使用更安全的方法转换位图
-                var bitmapData = bitmap.LockBits(
-                    new Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                    ImageLockMode.ReadOnly,
-                    bitmap.PixelFormat);
-
-                try
-                {
-                    // 根据像素格式选择合适的WPF像素格式
-                    System.Windows.Media.PixelFormat wpfPixelFormat;
-                    switch (bitmap.PixelFormat)
-                    {
-                        case PixelFormat.Format24bppRgb:
-                            wpfPixelFormat = PixelFormats.Bgr24;
-                            break;
-                        case PixelFormat.Format32bppArgb:
-                            wpfPixelFormat = PixelFormats.Bgra32;
-                            break;
-                        case PixelFormat.Format32bppRgb:
-                            wpfPixelFormat = PixelFormats.Bgr32;
-                            break;
-                        default:
-                            wpfPixelFormat = PixelFormats.Bgr24;
-                            break;
-                    }
-
-                    var bitmapSource = BitmapSource.Create(
-                        bitmapData.Width,
-                        bitmapData.Height,
-                        bitmap.HorizontalResolution,
-                        bitmap.VerticalResolution,
-                        wpfPixelFormat,
-                        null,
-                        bitmapData.Scan0,
-                        bitmapData.Stride * bitmapData.Height,
-                        bitmapData.Stride);
-
-                    bitmapSource.Freeze();
-                    return bitmapSource;
-                }
-                finally
-                {
-                    bitmap.UnlockBits(bitmapData);
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"转换位图失败: {ex.Message}", LogHelper.LogType.Error);
-
-                // 尝试使用备用方法：内存流转换
-                try
-                {
-                    return ConvertBitmapToBitmapSourceFallback(bitmap);
-                }
-                catch (Exception fallbackEx)
-                {
-                    LogHelper.WriteLogToFile($"备用转换方法也失败: {fallbackEx.Message}", LogHelper.LogType.Error);
-
-                    // 最后尝试：使用最简单的转换方法
-                    try
-                    {
-                        return ConvertBitmapToBitmapSourceSimple(bitmap);
-                    }
-                    catch (Exception simpleEx)
-                    {
-                        LogHelper.WriteLogToFile($"简单转换方法也失败: {simpleEx.Message}", LogHelper.LogType.Error);
-                        throw;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// 备用的位图转换方法（使用内存流）
-        /// </summary>
-        /// <param name="bitmap">要转换的位图</param>
-        /// <returns>转换后的BitmapSource</returns>
-        /// <remarks>
-        /// 该方法会：
-        /// 1. 验证位图有效性
-        /// 2. 创建一个新的位图，确保格式正确
-        /// 3. 在内存流中保存为PNG格式
-        /// 4. 创建BitmapImage并加载内存流中的数据
-        /// 5. 冻结BitmapImage以提高性能
-        /// </remarks>
-        private BitmapSource ConvertBitmapToBitmapSourceFallback(Bitmap bitmap)
-        {
-            try
-            {
-                // 验证位图有效性
-                if (bitmap == null || bitmap.Width <= 0 || bitmap.Height <= 0)
-                    return null;
-
-                // 创建一个新的位图，确保保留Alpha通道
-                using (var convertedBitmap = new Bitmap(bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb))
-                {
-                    using (var graphics = Graphics.FromImage(convertedBitmap))
-                    {
-                        graphics.CompositingMode = CompositingMode.SourceCopy;
-                        graphics.DrawImage(bitmap, 0, 0);
-                    }
-
-                    using (var memory = new MemoryStream())
-                    {
-                        convertedBitmap.Save(memory, ImageFormat.Png);
-                        memory.Position = 0;
-
-                        var bitmapImage = new BitmapImage();
-                        bitmapImage.BeginInit();
-                        bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                        bitmapImage.StreamSource = memory;
-                        bitmapImage.EndInit();
-                        bitmapImage.Freeze();
-
-                        return bitmapImage;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"备用转换方法失败: {ex.Message}", LogHelper.LogType.Error);
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// 最简单的位图转换方法
-        /// </summary>
-        /// <param name="bitmap">要转换的位图</param>
-        /// <returns>转换后的BitmapSource</returns>
-        /// <remarks>
-        /// 该方法会：
-        /// 1. 验证位图有效性
-        /// 2. 使用最基础的方法：直接保存为PNG然后加载
-        /// 3. 创建临时文件
-        /// 4. 将位图保存为PNG格式到临时文件
-        /// 5. 创建BitmapImage并加载临时文件
-        /// 6. 冻结BitmapImage以提高性能
-        /// 7. 清理临时文件
-        /// </remarks>
-        private BitmapSource ConvertBitmapToBitmapSourceSimple(Bitmap bitmap)
-        {
-            try
-            {
-                if (bitmap == null)
-                    return null;
-
-                // 使用最基础的方法：直接保存为PNG然后加载
-                var tempFile = Path.GetTempFileName() + ".png";
-
-                try
-                {
-                    bitmap.Save(tempFile, ImageFormat.Png);
-
-                    var bitmapImage = new BitmapImage();
-                    bitmapImage.BeginInit();
-                    bitmapImage.UriSource = new Uri(tempFile);
-                    bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmapImage.EndInit();
-                    bitmapImage.Freeze();
-
-                    return bitmapImage;
-                }
-                finally
-                {
-                    // 清理临时文件
-                    try
-                    {
-                        if (File.Exists(tempFile))
-                        {
-                            File.Delete(tempFile);
-                        }
-                    }
-                    catch (Exception deleteEx)
-                    {
-                        LogHelper.WriteLogToFile($"删除临时文件失败: {deleteEx.Message}", LogHelper.LogType.Warning);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"简单转换方法失败: {ex.Message}", LogHelper.LogType.Error);
-                throw;
-            }
-        }
+            => ScreenshotService.ConvertBitmapToBitmapSource(bitmap);
 
         /// <summary>
         /// 获取DPI缩放比例

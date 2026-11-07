@@ -1,8 +1,9 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Models;
+using Ink_Canvas.Services.Classroom;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using System;
 using System.Media;
-using System.Timers;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -20,8 +21,14 @@ namespace Ink_Canvas
             InitializeComponent();
             AnimationsHelper.ShowWithSlideFromBottomAndFade(this, 0.25);
 
-            timer.Elapsed += Timer_Elapsed;
-            timer.Interval = 50;
+            _timerService = new TimerService(
+                TimerService.LegacyIntervalForTotal,
+                () => MainWindow.Settings.RandSettings?.EnableOvertimeCountUp == true,
+                () => false);
+            // 原字段初始值：hour=0, minute=1, second=0
+            _timerService.Minute = 1;
+            _timerService.StateChanged += OnTimerStateChanged;
+
             InitializeUI();
 
             // 应用主题
@@ -33,109 +40,87 @@ namespace Ink_Canvas
             return new CountdownTimerWindow();
         }
 
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        // 计时状态机已提取至 TimerService；本窗口仅订阅状态并渲染。
+        private readonly TimerService _timerService;
+
+        private void OnTimerStateChanged(TimerState state)
         {
-            if (!isTimerRunning || isPaused)
+            Application.Current.Dispatcher.Invoke(() => RenderTick(state));
+        }
+
+        private void RenderTick(TimerState state)
+        {
+            if (!state.IsOvertimeMode || state.JustEnteredOvertime)
             {
-                timer.Stop();
-                return;
+                TimeSpan leftTimeSpan = state.Remaining;
+
+                ProcessBarTime.CurrentValue = 1 - state.SpentPercent;
+                TextBlockHour.Text = leftTimeSpan.Hours.ToString("00");
+                TextBlockMinute.Text = leftTimeSpan.Minutes.ToString("00");
+                TextBlockSecond.Text = leftTimeSpan.Seconds.ToString("00");
+                TbCurrentTime.Text = leftTimeSpan.ToString(@"hh\:mm\:ss");
+
+                if (state.JustEnteredOvertime)
+                {
+                    ProcessBarTime.CurrentValue = 0;
+                    ProcessBarTime.Visibility = Visibility.Collapsed;
+                    BorderStopTime.Visibility = Visibility.Collapsed;
+
+                    // 播放提醒音
+                    PlayTimerSound();
+                }
+                else if (state.JustCompleted)
+                {
+                    ProcessBarTime.CurrentValue = 0;
+                    TextBlockHour.Text = "00";
+                    TextBlockMinute.Text = "00";
+                    TextBlockSecond.Text = "00";
+                    FontIconStart.Icon = SegoeFluentIcons.Play;
+                    BtnStartCover.Visibility = Visibility.Visible;
+                    var textForeground = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+                    if (textForeground != null)
+                    {
+                        TextBlockHour.Foreground = textForeground;
+                    }
+                    else
+                    {
+                        TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                    }
+                    BorderStopTime.Visibility = Visibility.Collapsed;
+
+                    // 播放提醒音
+                    PlayTimerSound();
+                }
             }
-
-            TimeSpan timeSpan = DateTime.Now - startTime;
-            TimeSpan totalTimeSpan = new TimeSpan(hour, minute, second);
-            double spentTimePercent = timeSpan.TotalMilliseconds / (totalSeconds * 1000.0);
-
-            Application.Current.Dispatcher.Invoke(() =>
+            else
             {
-                if (!isOvertimeMode)
+                TimeSpan overtimeSpan = state.Overtime;
+                TextBlockHour.Text = overtimeSpan.Hours.ToString("00");
+                TextBlockMinute.Text = overtimeSpan.Minutes.ToString("00");
+                TextBlockSecond.Text = overtimeSpan.Seconds.ToString("00");
+                TbCurrentTime.Text = overtimeSpan.ToString(@"hh\:mm\:ss");
+
+                if (MainWindow.Settings.RandSettings?.EnableOvertimeRedText == true)
                 {
-                    TimeSpan leftTimeSpan = totalTimeSpan - timeSpan;
-                    if (leftTimeSpan.Milliseconds > 0) leftTimeSpan += new TimeSpan(0, 0, 1);
-
-                    ProcessBarTime.CurrentValue = 1 - spentTimePercent;
-                    TextBlockHour.Text = leftTimeSpan.Hours.ToString("00");
-                    TextBlockMinute.Text = leftTimeSpan.Minutes.ToString("00");
-                    TextBlockSecond.Text = leftTimeSpan.Seconds.ToString("00");
-                    TbCurrentTime.Text = leftTimeSpan.ToString(@"hh\:mm\:ss");
-
-                    if (spentTimePercent >= 1 && MainWindow.Settings.RandSettings?.EnableOvertimeCountUp == true)
-                    {
-                        isOvertimeMode = true;
-                        ProcessBarTime.CurrentValue = 0;
-                        ProcessBarTime.Visibility = Visibility.Collapsed;
-                        BorderStopTime.Visibility = Visibility.Collapsed;
-
-                        // 播放提醒音
-                        PlayTimerSound();
-                    }
-                    else if (spentTimePercent >= 1)
-                    {
-                        ProcessBarTime.CurrentValue = 0;
-                        TextBlockHour.Text = "00";
-                        TextBlockMinute.Text = "00";
-                        TextBlockSecond.Text = "00";
-                        timer.Stop();
-                        isTimerRunning = false;
-                        FontIconStart.Icon = SegoeFluentIcons.Play;
-                        BtnStartCover.Visibility = Visibility.Visible;
-                        var textForeground = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
-                        if (textForeground != null)
-                        {
-                            TextBlockHour.Foreground = textForeground;
-                        }
-                        else
-                        {
-                            TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
-                        }
-                        BorderStopTime.Visibility = Visibility.Collapsed;
-
-                        // 播放提醒音
-                        PlayTimerSound();
-                    }
+                    TextBlockHour.Foreground = Brushes.Red;
+                    TextBlockMinute.Foreground = Brushes.Red;
+                    TextBlockSecond.Foreground = Brushes.Red;
                 }
-                else
-                {
-                    TimeSpan overtimeSpan = timeSpan - totalTimeSpan;
-                    TextBlockHour.Text = overtimeSpan.Hours.ToString("00");
-                    TextBlockMinute.Text = overtimeSpan.Minutes.ToString("00");
-                    TextBlockSecond.Text = overtimeSpan.Seconds.ToString("00");
-                    TbCurrentTime.Text = overtimeSpan.ToString(@"hh\:mm\:ss");
-
-                    if (MainWindow.Settings.RandSettings?.EnableOvertimeRedText == true)
-                    {
-                        TextBlockHour.Foreground = Brushes.Red;
-                        TextBlockMinute.Foreground = Brushes.Red;
-                        TextBlockSecond.Foreground = Brushes.Red;
-                    }
-                }
-            });
+            }
         }
 
         SoundPlayer player = new SoundPlayer();
         MediaPlayer mediaPlayer = new MediaPlayer();
 
-        int hour = 0;
-        int minute = 1;
-        int second = 0;
-        int totalSeconds = 60;
-
-        DateTime startTime = DateTime.Now;
-        DateTime pauseTime = DateTime.Now;
-
-        bool isTimerRunning = false;
-        bool isPaused = false;
         bool useLegacyUI = false;
-        bool isOvertimeMode = false;
-
-        Timer timer = new Timer();
 
         private void Grid_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (isTimerRunning) return;
+            if (_timerService.IsRunning) return;
 
             var textForeground = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
 
-            if (ProcessBarTime.Visibility == Visibility.Visible && isTimerRunning == false)
+            if (ProcessBarTime.Visibility == Visibility.Visible && _timerService.IsRunning == false)
             {
                 ProcessBarTime.Visibility = Visibility.Collapsed;
                 GridAdjustHour.Visibility = Visibility.Visible;
@@ -161,96 +146,96 @@ namespace Ink_Canvas
                     TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
                 }
 
-                if (hour == 0 && minute == 0 && second == 0)
+                if (_timerService.Hour == 0 && _timerService.Minute == 0 && _timerService.Second == 0)
                 {
-                    second = 1;
-                    TextBlockSecond.Text = second.ToString("00");
+                    _timerService.Second = 1;
+                    TextBlockSecond.Text = _timerService.Second.ToString("00");
                 }
             }
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            hour++;
-            if (hour >= 100) hour = 0;
-            TextBlockHour.Text = hour.ToString("00");
+            _timerService.Hour++;
+            if (_timerService.Hour >= 100) _timerService.Hour = 0;
+            TextBlockHour.Text = _timerService.Hour.ToString("00");
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            hour += 5;
-            if (hour >= 100) hour = 0;
-            TextBlockHour.Text = hour.ToString("00");
+            _timerService.Hour += 5;
+            if (_timerService.Hour >= 100) _timerService.Hour = 0;
+            TextBlockHour.Text = _timerService.Hour.ToString("00");
         }
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
-            hour--;
-            if (hour < 0) hour = 99;
-            TextBlockHour.Text = hour.ToString("00");
+            _timerService.Hour--;
+            if (_timerService.Hour < 0) _timerService.Hour = 99;
+            TextBlockHour.Text = _timerService.Hour.ToString("00");
         }
 
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            hour -= 5;
-            if (hour < 0) hour = 99;
-            TextBlockHour.Text = hour.ToString("00");
+            _timerService.Hour -= 5;
+            if (_timerService.Hour < 0) _timerService.Hour = 99;
+            TextBlockHour.Text = _timerService.Hour.ToString("00");
         }
 
         private void Button_Click_4(object sender, RoutedEventArgs e)
         {
-            minute++;
-            if (minute >= 60) minute = 0;
-            TextBlockMinute.Text = minute.ToString("00");
+            _timerService.Minute++;
+            if (_timerService.Minute >= 60) _timerService.Minute = 0;
+            TextBlockMinute.Text = _timerService.Minute.ToString("00");
         }
 
         private void Button_Click_5(object sender, RoutedEventArgs e)
         {
-            minute += 5;
-            if (minute >= 60) minute = 0;
-            TextBlockMinute.Text = minute.ToString("00");
+            _timerService.Minute += 5;
+            if (_timerService.Minute >= 60) _timerService.Minute = 0;
+            TextBlockMinute.Text = _timerService.Minute.ToString("00");
         }
 
         private void Button_Click_6(object sender, RoutedEventArgs e)
         {
-            minute--;
-            if (minute < 0) minute = 59;
-            TextBlockMinute.Text = minute.ToString("00");
+            _timerService.Minute--;
+            if (_timerService.Minute < 0) _timerService.Minute = 59;
+            TextBlockMinute.Text = _timerService.Minute.ToString("00");
         }
 
         private void Button_Click_7(object sender, RoutedEventArgs e)
         {
-            minute -= 5;
-            if (minute < 0) minute = 59;
-            TextBlockMinute.Text = minute.ToString("00");
+            _timerService.Minute -= 5;
+            if (_timerService.Minute < 0) _timerService.Minute = 59;
+            TextBlockMinute.Text = _timerService.Minute.ToString("00");
         }
 
         private void Button_Click_8(object sender, RoutedEventArgs e)
         {
-            second += 5;
-            if (second >= 60) second = 0;
-            TextBlockSecond.Text = second.ToString("00");
+            _timerService.Second += 5;
+            if (_timerService.Second >= 60) _timerService.Second = 0;
+            TextBlockSecond.Text = _timerService.Second.ToString("00");
         }
 
         private void Button_Click_9(object sender, RoutedEventArgs e)
         {
-            second++;
-            if (second >= 60) second = 0;
-            TextBlockSecond.Text = second.ToString("00");
+            _timerService.Second++;
+            if (_timerService.Second >= 60) _timerService.Second = 0;
+            TextBlockSecond.Text = _timerService.Second.ToString("00");
         }
 
         private void Button_Click_10(object sender, RoutedEventArgs e)
         {
-            second--;
-            if (second < 0) second = 59;
-            TextBlockSecond.Text = second.ToString("00");
+            _timerService.Second--;
+            if (_timerService.Second < 0) _timerService.Second = 59;
+            TextBlockSecond.Text = _timerService.Second.ToString("00");
         }
 
         private void Button_Click_11(object sender, RoutedEventArgs e)
         {
-            second -= 5;
-            if (second < 0) second = 59;
-            TextBlockSecond.Text = second.ToString("00");
+            _timerService.Second -= 5;
+            if (_timerService.Second < 0) _timerService.Second = 59;
+            TextBlockSecond.Text = _timerService.Second.ToString("00");
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -276,11 +261,11 @@ namespace Ink_Canvas
 
         private void BtnReset_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (!isTimerRunning)
+            if (!_timerService.IsRunning)
             {
-                TextBlockHour.Text = hour.ToString("00");
-                TextBlockMinute.Text = minute.ToString("00");
-                TextBlockSecond.Text = second.ToString("00");
+                TextBlockHour.Text = _timerService.Hour.ToString("00");
+                TextBlockMinute.Text = _timerService.Minute.ToString("00");
+                TextBlockSecond.Text = _timerService.Second.ToString("00");
                 BtnResetCover.Visibility = Visibility.Visible;
                 BtnStartCover.Visibility = Visibility.Collapsed;
                 BorderStopTime.Visibility = Visibility.Collapsed;
@@ -290,14 +275,14 @@ namespace Ink_Canvas
                 else
                     TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
 
-                isOvertimeMode = false;
+                _timerService.Reset();
                 ProcessBarTime.Visibility = Visibility.Visible;
             }
-            else if (isTimerRunning && isPaused)
+            else if (_timerService.IsRunning && _timerService.IsPaused)
             {
-                TextBlockHour.Text = hour.ToString("00");
-                TextBlockMinute.Text = minute.ToString("00");
-                TextBlockSecond.Text = second.ToString("00");
+                TextBlockHour.Text = _timerService.Hour.ToString("00");
+                TextBlockMinute.Text = _timerService.Minute.ToString("00");
+                TextBlockSecond.Text = _timerService.Second.ToString("00");
                 BtnResetCover.Visibility = Visibility.Visible;
                 BtnStartCover.Visibility = Visibility.Collapsed;
                 BorderStopTime.Visibility = Visibility.Collapsed;
@@ -307,27 +292,22 @@ namespace Ink_Canvas
                 else
                     TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
                 FontIconStart.Icon = SegoeFluentIcons.Play;
-                isTimerRunning = false;
-                timer.Stop();
-                isPaused = false;
+                _timerService.Reset();
                 ProcessBarTime.CurrentValue = 0;
                 ProcessBarTime.IsPaused = false;
 
-                isOvertimeMode = false;
                 ProcessBarTime.Visibility = Visibility.Visible;
             }
             else
             {
                 UpdateStopTime();
-                startTime = DateTime.Now;
-                Timer_Elapsed(timer, null);
+                _timerService.Restart();
             }
         }
 
         void UpdateStopTime()
         {
-            TimeSpan totalTimeSpan = new TimeSpan(hour, minute, second);
-            TextBlockStopTime.Text = (startTime + totalTimeSpan).ToString("t");
+            TextBlockStopTime.Text = (_timerService.StartTime + _timerService.GetTotalTimeSpan()).ToString("t");
         }
 
         private Color StringToColor(string colorStr)
@@ -353,10 +333,10 @@ namespace Ink_Canvas
 
         private void BtnStart_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (isPaused && isTimerRunning)
+            if (_timerService.IsPaused && _timerService.IsRunning)
             {
                 //继续
-                startTime += DateTime.Now - pauseTime;
+                _timerService.Resume();
                 ProcessBarTime.IsPaused = false;
                 var textForeground1 = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
                 if (textForeground1 != null)
@@ -364,15 +344,13 @@ namespace Ink_Canvas
                 else
                     TextBlockHour.Foreground = Brushes.Black;
                 FontIconStart.Icon = SegoeFluentIcons.Pause;
-                isPaused = false;
-                timer.Start();
                 UpdateStopTime();
                 BorderStopTime.Visibility = Visibility.Visible;
             }
-            else if (isTimerRunning)
+            else if (_timerService.IsRunning)
             {
                 //暂停
-                pauseTime = DateTime.Now;
+                _timerService.Pause();
                 ProcessBarTime.IsPaused = true;
                 var textForeground3 = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
                 if (textForeground3 != null)
@@ -381,14 +359,11 @@ namespace Ink_Canvas
                     TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
                 FontIconStart.Icon = SegoeFluentIcons.Play;
                 BorderStopTime.Visibility = Visibility.Collapsed;
-                isPaused = true;
-                timer.Stop();
             }
             else
             {
                 //从头开始
-                startTime = DateTime.Now;
-                totalSeconds = ((hour * 60) + minute) * 60 + second;
+                _timerService.Start();
                 ProcessBarTime.IsPaused = false;
                 var textForeground2 = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
                 if (textForeground2 != null)
@@ -397,29 +372,7 @@ namespace Ink_Canvas
                     TextBlockHour.Foreground = Brushes.Black;
                 FontIconStart.Icon = SegoeFluentIcons.Pause;
                 BtnResetCover.Visibility = Visibility.Collapsed;
-
-                if (totalSeconds <= 10)
-                {
-                    timer.Interval = 20;
-                }
-                else if (totalSeconds <= 60)
-                {
-                    timer.Interval = 30;
-                }
-                else if (totalSeconds <= 120)
-                {
-                    timer.Interval = 50;
-                }
-                else
-                {
-                    timer.Interval = 100;
-                }
-
-                isPaused = false;
-                isTimerRunning = true;
-                isOvertimeMode = false;
                 ProcessBarTime.Visibility = Visibility.Visible;
-                timer.Start();
                 UpdateStopTime();
                 BorderStopTime.Visibility = Visibility.Visible;
             }
@@ -556,7 +509,7 @@ namespace Ink_Canvas
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            isTimerRunning = false;
+            _timerService.MarkStopped();
         }
 
         private void BtnClose_MouseUp(object sender, MouseButtonEventArgs e)

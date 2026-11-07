@@ -180,11 +180,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile(
-                    $"[Settings] 统计存储占用时读取磁盘容量失败: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
             DiskPercentTextBlock.Text = "—";
         }
 
@@ -356,8 +352,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         }
 
         // 上述遍历/删除辅助方法对磁盘上每个文件调用一次，坏设备（掉盘、权限拒绝、文件被占）
-        // 下会连续抛成千上万次，直接写日志会瞬间刷爆 5MB 日志并触发 LogHelper 清空整个
-        // Logs 目录把现场证据一起清掉，因此统一节流：只记第 1 次和每 100 次。
+        // 下会连续抛成千上万次，直接写日志会瞬间刷爆日志文件，因此统一节流：只记第 1 次和每 100 次。
         private static int _storageDiagCount;
 
         private static void LogStorageDiagException(string what, Exception ex)
@@ -365,9 +360,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             var n = System.Threading.Interlocked.Increment(ref _storageDiagCount);
             if (n == 1 || n % 100 == 0)
             {
-                LogHelper.WriteLogToFile(
-                    $"[Settings] 存储清理/统计时 {what}（累计 {n} 次）: {ex.Message}",
-                    LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 

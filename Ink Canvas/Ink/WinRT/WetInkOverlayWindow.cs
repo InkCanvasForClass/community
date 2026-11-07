@@ -255,34 +255,22 @@ namespace Ink_Canvas.Ink.WinRT
 
             if (_compositionVisual != null)
             {
-                try { _compositionVisual.Dispose(); } catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"[WinRTInk] 释放合成视觉对象失败: {ex.Message}", LogHelper.LogType.Info);
-                }
+                try { _compositionVisual.Dispose(); } catch (Exception ex) { Helpers.LogService.LogException(ex); }
                 _compositionVisual = null;
             }
             if (_compositionTarget != null)
             {
-                try { _compositionTarget.Dispose(); } catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"[WinRTInk] 释放合成目标失败: {ex.Message}", LogHelper.LogType.Info);
-                }
+                try { _compositionTarget.Dispose(); } catch (Exception ex) { Helpers.LogService.LogException(ex); }
                 _compositionTarget = null;
             }
             if (_compositionDevice3 != null)
             {
-                try { _compositionDevice3.Dispose(); } catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"[WinRTInk] 释放合成设备(D3D11)失败: {ex.Message}", LogHelper.LogType.Info);
-                }
+                try { _compositionDevice3.Dispose(); } catch (Exception ex) { Helpers.LogService.LogException(ex); }
                 _compositionDevice3 = null;
             }
             if (_compositionDevice != null)
             {
-                try { _compositionDevice.Dispose(); } catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"[WinRTInk] 释放合成设备失败: {ex.Message}", LogHelper.LogType.Info);
-                }
+                try { _compositionDevice.Dispose(); } catch (Exception ex) { Helpers.LogService.LogException(ex); }
                 _compositionDevice = null;
             }
 

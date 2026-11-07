@@ -32,8 +32,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile(
-                    $"[UI] 操作指引窗口 RefreshTheme 应用主题失败: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
     }
