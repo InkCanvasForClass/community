@@ -1,4 +1,6 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Models;
+using Ink_Canvas.Services.Classroom;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using System;
@@ -33,8 +35,14 @@ namespace Ink_Canvas.Windows
         {
             InitializeComponent();
 
-            timer.Elapsed += Timer_Elapsed;
-            timer.Interval = 50;
+            _timerService = new TimerService(
+                _ => 50,
+                () => MainWindow.Settings.RandSettings?.EnableOvertimeCountUp == true,
+                () => MainWindow.Settings.RandSettings?.EnableProgressiveReminder == true);
+            // 原字段初始值：hour=0, minute=5, second=0
+            _timerService.Minute = 5;
+            _timerService.StateChanged += OnTimerStateChanged;
+
             InitializeUI();
 
             // 应用主题
@@ -119,8 +127,7 @@ namespace Ink_Canvas.Windows
             {
                 LogHelper.WriteLogToFile($"NewStyleTimerWindow | 取消系统事件订阅失败: {ex.Message}", LogHelper.LogType.Warning);
             }
-            timer?.Stop();
-            timer?.Dispose();
+            _timerService.Dispose();
             hideTimer?.Stop();
             hideTimer?.Dispose();
             mediaPlayer?.Close();
@@ -163,129 +170,97 @@ namespace Ink_Canvas.Windows
         #endregion
 
 
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        // 计时状态机已提取至 TimerService（M14）；本窗口仅订阅状态并渲染。
+        private void OnTimerStateChanged(TimerState state)
         {
-            if (!isTimerRunning || isPaused)
+            Application.Current.Dispatcher.Invoke(() => RenderTick(state));
+        }
+
+        private void RenderTick(TimerState state)
+        {
+            if (!state.IsOvertimeMode || state.JustEnteredOvertime)
             {
-                timer.Stop();
-                return;
+                TimeSpan leftTimeSpan = state.Remaining;
+
+                int totalHours = (int)leftTimeSpan.TotalHours;
+                int displayHours = totalHours;
+
+                if (displayHours > 99) displayHours = 99;
+
+                SetDigitDisplay("Digit1Display", displayHours / 10);
+                SetDigitDisplay("Digit2Display", displayHours % 10);
+                SetDigitDisplay("Digit3Display", leftTimeSpan.Minutes / 10);
+                SetDigitDisplay("Digit4Display", leftTimeSpan.Minutes % 10);
+                SetDigitDisplay("Digit5Display", leftTimeSpan.Seconds / 10);
+                SetDigitDisplay("Digit6Display", leftTimeSpan.Seconds % 10);
+
+                SetColonDisplay(false);
+
+                if (state.ProgressiveReminderDue)
+                {
+                    PlayProgressiveReminderSound();
+                }
+
+                if (state.JustEnteredOvertime)
+                {
+                    PlayTimerSound();
+                }
+                else if (state.JustCompleted)
+                {
+                    ApplyResetStateAfterStop();
+
+                    PlayTimerSound();
+
+                    TimerCompleted?.Invoke(this, EventArgs.Empty);
+                    HandleTimerCompletion();
+                }
             }
-
-            TimeSpan timeSpan = DateTime.Now - startTime;
-            TimeSpan totalTimeSpan = new TimeSpan(hour, minute, second);
-            double spentTimePercent = timeSpan.TotalMilliseconds / (totalTimeSpan.TotalMilliseconds);
-
-            Application.Current.Dispatcher.Invoke(() =>
+            else
             {
-                if (!isOvertimeMode)
-                {
-                    TimeSpan leftTimeSpan = totalTimeSpan - timeSpan;
-                    if (leftTimeSpan.Milliseconds > 0) leftTimeSpan += new TimeSpan(0, 0, 1);
+                TimeSpan overtimeSpan = state.Overtime;
+                int totalHours = (int)overtimeSpan.TotalHours;
+                int displayHours = totalHours;
 
-                    int totalHours = (int)leftTimeSpan.TotalHours;
-                    int displayHours = totalHours;
+                if (displayHours > 99) displayHours = 99;
+                if (displayHours < 0) displayHours = 0;
 
-                    if (displayHours > 99) displayHours = 99;
+                bool shouldShowRed = MainWindow.Settings.RandSettings?.EnableOvertimeRedText == true;
 
-                    SetDigitDisplay("Digit1Display", displayHours / 10);
-                    SetDigitDisplay("Digit2Display", displayHours % 10);
-                    SetDigitDisplay("Digit3Display", leftTimeSpan.Minutes / 10);
-                    SetDigitDisplay("Digit4Display", leftTimeSpan.Minutes % 10);
-                    SetDigitDisplay("Digit5Display", leftTimeSpan.Seconds / 10);
-                    SetDigitDisplay("Digit6Display", leftTimeSpan.Seconds % 10);
+                int hoursTens = Math.Max(0, Math.Min(9, Math.Abs(displayHours / 10) % 10));
+                int hoursOnes = Math.Max(0, Math.Min(9, (displayHours % 10 + 10) % 10));
+                int minutesTens = Math.Max(0, Math.Min(9, Math.Abs(overtimeSpan.Minutes) / 10));
+                int minutesOnes = Math.Max(0, Math.Min(9, Math.Abs(overtimeSpan.Minutes) % 10));
+                int secondsTens = Math.Max(0, Math.Min(9, Math.Abs(overtimeSpan.Seconds) / 10));
+                int secondsOnes = Math.Max(0, Math.Min(9, Math.Abs(overtimeSpan.Seconds) % 10));
 
-                    SetColonDisplay(false);
+                SetDigitDisplay("Digit1Display", hoursTens, shouldShowRed);
+                SetDigitDisplay("Digit2Display", hoursOnes, shouldShowRed);
+                SetDigitDisplay("Digit3Display", minutesTens, shouldShowRed);
+                SetDigitDisplay("Digit4Display", minutesOnes, shouldShowRed);
+                SetDigitDisplay("Digit5Display", secondsTens, shouldShowRed);
+                SetDigitDisplay("Digit6Display", secondsOnes, shouldShowRed);
 
-                    if (leftTimeSpan.TotalSeconds <= 6 && leftTimeSpan.TotalSeconds > 0 &&
-                        MainWindow.Settings.RandSettings?.EnableProgressiveReminder == true &&
-                        !hasPlayedProgressiveReminder)
-                    {
-                        PlayProgressiveReminderSound();
-                        hasPlayedProgressiveReminder = true;
-                    }
-
-                    if (leftTimeSpan.TotalSeconds <= 0 && MainWindow.Settings.RandSettings?.EnableOvertimeCountUp == true)
-                    {
-                        isOvertimeMode = true;
-                        PlayTimerSound();
-                    }
-                    else if (leftTimeSpan.TotalSeconds <= 0)
-                    {
-                        timer.Stop();
-                        isTimerRunning = false;
-                        isPaused = false;
-                        isOvertimeMode = false;
-
-                        ApplyResetStateAfterStop();
-
-                        PlayTimerSound();
-
-                        TimerCompleted?.Invoke(this, EventArgs.Empty);
-                        HandleTimerCompletion();
-                    }
-                }
-                else
-                {
-                    TimeSpan overtimeSpan = timeSpan - totalTimeSpan;
-                    int totalHours = (int)overtimeSpan.TotalHours;
-                    int displayHours = totalHours;
-
-                    if (displayHours > 99) displayHours = 99;
-                    if (displayHours < 0) displayHours = 0;
-
-                    bool shouldShowRed = MainWindow.Settings.RandSettings?.EnableOvertimeRedText == true;
-
-                    int hoursTens = Math.Max(0, Math.Min(9, Math.Abs(displayHours / 10) % 10));
-                    int hoursOnes = Math.Max(0, Math.Min(9, (displayHours % 10 + 10) % 10));
-                    int minutesTens = Math.Max(0, Math.Min(9, Math.Abs(overtimeSpan.Minutes) / 10));
-                    int minutesOnes = Math.Max(0, Math.Min(9, Math.Abs(overtimeSpan.Minutes) % 10));
-                    int secondsTens = Math.Max(0, Math.Min(9, Math.Abs(overtimeSpan.Seconds) / 10));
-                    int secondsOnes = Math.Max(0, Math.Min(9, Math.Abs(overtimeSpan.Seconds) % 10));
-
-                    SetDigitDisplay("Digit1Display", hoursTens, shouldShowRed);
-                    SetDigitDisplay("Digit2Display", hoursOnes, shouldShowRed);
-                    SetDigitDisplay("Digit3Display", minutesTens, shouldShowRed);
-                    SetDigitDisplay("Digit4Display", minutesOnes, shouldShowRed);
-                    SetDigitDisplay("Digit5Display", secondsTens, shouldShowRed);
-                    SetDigitDisplay("Digit6Display", secondsOnes, shouldShowRed);
-
-                    SetColonDisplay(shouldShowRed);
-                }
-            });
+                SetColonDisplay(shouldShowRed);
+            }
         }
 
         SoundPlayer player = new SoundPlayer();
         MediaPlayer mediaPlayer = new MediaPlayer();
 
-        int hour = 0;
-        int minute = 5;
-        int second = 0;
-        int cachedStartHour = 0;
-        int cachedStartMinute = 5;
-        int cachedStartSecond = 0;
-
-        DateTime startTime = DateTime.Now;
-        DateTime pauseTime = DateTime.Now;
-
-        bool isTimerRunning = false;
-        bool isPaused = false;
-        bool isOvertimeMode = false;
-        TimeSpan remainingTime = TimeSpan.Zero;
-        bool hasPlayedProgressiveReminder = false;
-
-        Timer timer = new Timer();
         private Timer hideTimer;
         private DateTime lastActivityTime;
+
+        // 计时状态机（M14 提取）。设定时间经 Hour/Minute/Second 属性读写。
+        private readonly TimerService _timerService;
+
         public TimeSpan? GetTotalTimeSpan()
         {
-            return new TimeSpan(hour, minute, second);
+            return _timerService.GetTotalTimeSpan();
         }
 
         public TimeSpan? GetElapsedTime()
         {
-            if (isPaused) return null;
-
-            return DateTime.Now - startTime;
+            return _timerService.GetElapsedTime();
         }
 
         // 最近计时记录（使用数组简化重复代码）
@@ -341,27 +316,23 @@ namespace Ink_Canvas.Windows
         }
 
         /// <summary>
-        /// 依据当前计时器状态刷新数字显示：
-        /// 运行中按 DateTime.Now、暂停中按 pauseTime 推算；处于超时模式时按超时值渲染；未启动时回退到初始设定值。
-        /// 供主题切换等场景直接复用 Timer_Elapsed 的渲染分支。
+        /// 依据当前计时器状态刷新数字显示：渲染数据取自 TimerService 的快照
+        /// （运行中按当前时钟、暂停中按暂停时刻推算；超时模式按超时值渲染；未启动时回退到初始设定值）。
+        /// 供主题切换等场景直接复用 tick 的渲染分支。
         /// </summary>
         private void RefreshDigitDisplayForCurrentState()
         {
-            if (!isTimerRunning)
+            if (!_timerService.IsRunning)
             {
                 UpdateDigitDisplays();
                 return;
             }
 
-            DateTime referenceTime = isPaused ? pauseTime : DateTime.Now;
-            TimeSpan timeSpan = referenceTime - startTime;
-            TimeSpan totalTimeSpan = new TimeSpan(hour, minute, second);
+            TimerState snapshot = _timerService.Snapshot();
 
-            if (!isOvertimeMode)
+            if (!snapshot.IsOvertimeMode)
             {
-                TimeSpan leftTimeSpan = totalTimeSpan - timeSpan;
-                if (leftTimeSpan.Milliseconds > 0) leftTimeSpan += new TimeSpan(0, 0, 1);
-                if (leftTimeSpan < TimeSpan.Zero) leftTimeSpan = TimeSpan.Zero;
+                TimeSpan leftTimeSpan = snapshot.Remaining;
 
                 int displayHours = Math.Min(99, (int)leftTimeSpan.TotalHours);
                 SetDigitDisplay("Digit1Display", displayHours / 10);
@@ -374,8 +345,7 @@ namespace Ink_Canvas.Windows
             }
             else
             {
-                TimeSpan overtimeSpan = timeSpan - totalTimeSpan;
-                if (overtimeSpan < TimeSpan.Zero) overtimeSpan = TimeSpan.Zero;
+                TimeSpan overtimeSpan = snapshot.Overtime;
 
                 int displayHours = Math.Max(0, Math.Min(99, (int)overtimeSpan.TotalHours));
                 bool shouldShowRed = MainWindow.Settings?.RandSettings?.EnableOvertimeRedText == true;
@@ -399,106 +369,28 @@ namespace Ink_Canvas.Windows
 
         private void UpdateDigitDisplays()
         {
-            SetDigitDisplay("Digit1Display", hour / 10);
-            SetDigitDisplay("Digit2Display", hour % 10);
-            SetDigitDisplay("Digit3Display", minute / 10);
-            SetDigitDisplay("Digit4Display", minute % 10);
-            SetDigitDisplay("Digit5Display", second / 10);
-            SetDigitDisplay("Digit6Display", second % 10);
+            SetDigitDisplay("Digit1Display", _timerService.Hour / 10);
+            SetDigitDisplay("Digit2Display", _timerService.Hour % 10);
+            SetDigitDisplay("Digit3Display", _timerService.Minute / 10);
+            SetDigitDisplay("Digit4Display", _timerService.Minute % 10);
+            SetDigitDisplay("Digit5Display", _timerService.Second / 10);
+            SetDigitDisplay("Digit6Display", _timerService.Second % 10);
 
             SetColonDisplay(false);
         }
 
-        // 更新剩余时间
-        private void UpdateRemainingTime()
-        {
-            if (isTimerRunning && !isPaused)
-            {
-                // 获取当前剩余时间
-                TimeSpan? currentRemaining = GetRemainingTime();
-                if (currentRemaining.HasValue)
-                {
-                    // 计算已经过去的时间
-                    TimeSpan elapsedTime = DateTime.Now - startTime;
-
-                    // 计算新的总时间
-                    TimeSpan newTotalTime = new TimeSpan(hour, minute, second);
-
-                    // 如果新设置的时间小于已经过去的时间，则设置为0
-                    if (newTotalTime <= elapsedTime)
-                    {
-                        remainingTime = TimeSpan.Zero;
-                    }
-                    else
-                    {
-                        // 否则，剩余时间 = 新总时间 - 已经过去的时间
-                        remainingTime = newTotalTime - elapsedTime;
-                    }
-                }
-                else
-                {
-                    // 如果没有剩余时间信息，直接设置新的剩余时间
-                    remainingTime = new TimeSpan(hour, minute, second);
-                }
-            }
-        }
-
-        // 更新特定时间单位的剩余时间
-        private void UpdateSpecificTimeUnit(int newHour, int newMinute, int newSecond)
-        {
-            if (isTimerRunning && !isPaused)
-            {
-                // 获取当前剩余时间
-                TimeSpan? currentRemaining = GetRemainingTime();
-                if (currentRemaining.HasValue)
-                {
-                    // 计算已经过去的时间
-                    TimeSpan elapsedTime = DateTime.Now - startTime;
-
-                    // 计算新的总时间
-                    TimeSpan newTotalTime = new TimeSpan(newHour, newMinute, newSecond);
-
-                    // 如果新设置的时间小于已经过去的时间，则设置为0
-                    if (newTotalTime <= elapsedTime)
-                    {
-                        remainingTime = TimeSpan.Zero;
-                    }
-                    else
-                    {
-                        // 否则，剩余时间 = 新总时间 - 已经过去的时间
-                        remainingTime = newTotalTime - elapsedTime;
-                    }
-                }
-                else
-                {
-                    // 如果没有剩余时间信息，直接设置新的剩余时间
-                    remainingTime = new TimeSpan(newHour, newMinute, newSecond);
-                }
-            }
-        }
-
-        public bool IsTimerRunning => isTimerRunning;
+        public bool IsTimerRunning => _timerService.IsRunning;
 
         public TimeSpan? GetRemainingTime()
         {
-            if (isPaused) return null;
-
-            var elapsed = DateTime.Now - startTime;
-            var totalTimeSpan = new TimeSpan(hour, minute, second);
-            var leftTimeSpan = totalTimeSpan - elapsed;
-
-            if (leftTimeSpan.Milliseconds > 0) leftTimeSpan += new TimeSpan(0, 0, 1);
-
-            return leftTimeSpan;
+            return _timerService.GetRemainingTime();
         }
 
         public void StopTimer()
         {
-            timer.Stop();
-            isTimerRunning = false;
+            _timerService.Stop();
             StartPauseIcon.Data = Geometry.Parse(PlayIconData);
         }
-
 
         /// <summary>
         /// 根据数字值设置SVG数字显示
@@ -592,40 +484,40 @@ namespace Ink_Canvas.Windows
         // 第1位数字（小时十位）
         private void Digit1Plus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
+            if (_timerService.IsRunning) return;
             UpdateActivityTime();
-            int currentHour = hour;
+            int currentHour = _timerService.Hour;
             int hourTens = currentHour / 10;
             int hourOnes = currentHour % 10;
 
             hourTens++;
             if (hourTens >= 10) hourTens = 0;
 
-            hour = hourTens * 10 + hourOnes;
+            _timerService.Hour = hourTens * 10 + hourOnes;
             UpdateDigitDisplays();
         }
 
         private void Digit1Minus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
+            if (_timerService.IsRunning) return;
             UpdateActivityTime();
-            int currentHour = hour;
+            int currentHour = _timerService.Hour;
             int hourTens = currentHour / 10;
             int hourOnes = currentHour % 10;
 
             hourTens--;
             if (hourTens < 0) hourTens = 9;
 
-            hour = hourTens * 10 + hourOnes;
+            _timerService.Hour = hourTens * 10 + hourOnes;
             UpdateDigitDisplays();
         }
 
         // 第2位数字（小时个位）
         private void Digit2Plus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
+            if (_timerService.IsRunning) return;
             UpdateActivityTime();
-            int currentHour = hour;
+            int currentHour = _timerService.Hour;
             int hourTens = currentHour / 10;
             int hourOnes = currentHour % 10;
 
@@ -637,15 +529,15 @@ namespace Ink_Canvas.Windows
                 if (hourTens >= 10) hourTens = 0;
             }
 
-            hour = hourTens * 10 + hourOnes;
+            _timerService.Hour = hourTens * 10 + hourOnes;
             UpdateDigitDisplays();
         }
 
         private void Digit2Minus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
+            if (_timerService.IsRunning) return;
             UpdateActivityTime();
-            int currentHour = hour;
+            int currentHour = _timerService.Hour;
             int hourTens = currentHour / 10;
             int hourOnes = currentHour % 10;
 
@@ -657,47 +549,47 @@ namespace Ink_Canvas.Windows
                 if (hourTens < 0) hourTens = 9;
             }
 
-            hour = hourTens * 10 + hourOnes;
+            _timerService.Hour = hourTens * 10 + hourOnes;
             UpdateDigitDisplays();
         }
 
         // 第3位数字（分钟十位）
         private void Digit3Plus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
+            if (_timerService.IsRunning) return;
             UpdateActivityTime();
-            int currentMinute = minute;
+            int currentMinute = _timerService.Minute;
             int minuteTens = currentMinute / 10;
             int minuteOnes = currentMinute % 10;
 
             minuteTens++;
             if (minuteTens >= 6) minuteTens = 0;
 
-            minute = minuteTens * 10 + minuteOnes;
+            _timerService.Minute = minuteTens * 10 + minuteOnes;
             UpdateDigitDisplays();
         }
 
         private void Digit3Minus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
+            if (_timerService.IsRunning) return;
             UpdateActivityTime();
-            int currentMinute = minute;
+            int currentMinute = _timerService.Minute;
             int minuteTens = currentMinute / 10;
             int minuteOnes = currentMinute % 10;
 
             minuteTens--;
             if (minuteTens < 0) minuteTens = 5;
 
-            minute = minuteTens * 10 + minuteOnes;
+            _timerService.Minute = minuteTens * 10 + minuteOnes;
             UpdateDigitDisplays();
         }
 
         // 第4位数字（分钟个位）
         private void Digit4Plus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
+            if (_timerService.IsRunning) return;
             UpdateActivityTime();
-            int currentMinute = minute;
+            int currentMinute = _timerService.Minute;
             int minuteTens = currentMinute / 10;
             int minuteOnes = currentMinute % 10;
 
@@ -709,15 +601,15 @@ namespace Ink_Canvas.Windows
                 if (minuteTens >= 6) minuteTens = 0;
             }
 
-            minute = minuteTens * 10 + minuteOnes;
+            _timerService.Minute = minuteTens * 10 + minuteOnes;
             UpdateDigitDisplays();
         }
 
         private void Digit4Minus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
+            if (_timerService.IsRunning) return;
             UpdateActivityTime();
-            int currentMinute = minute;
+            int currentMinute = _timerService.Minute;
             int minuteTens = currentMinute / 10;
             int minuteOnes = currentMinute % 10;
 
@@ -729,47 +621,47 @@ namespace Ink_Canvas.Windows
                 if (minuteTens < 0) minuteTens = 5;
             }
 
-            minute = minuteTens * 10 + minuteOnes;
+            _timerService.Minute = minuteTens * 10 + minuteOnes;
             UpdateDigitDisplays();
         }
 
         // 第5位数字（秒十位）
         private void Digit5Plus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
+            if (_timerService.IsRunning) return;
             UpdateActivityTime();
-            int currentSecond = second;
+            int currentSecond = _timerService.Second;
             int secondTens = currentSecond / 10;
             int secondOnes = currentSecond % 10;
 
             secondTens++;
             if (secondTens >= 6) secondTens = 0;
 
-            second = secondTens * 10 + secondOnes;
+            _timerService.Second = secondTens * 10 + secondOnes;
             UpdateDigitDisplays();
         }
 
         private void Digit5Minus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
+            if (_timerService.IsRunning) return;
             UpdateActivityTime();
-            int currentSecond = second;
+            int currentSecond = _timerService.Second;
             int secondTens = currentSecond / 10;
             int secondOnes = currentSecond % 10;
 
             secondTens--;
             if (secondTens < 0) secondTens = 5;
 
-            second = secondTens * 10 + secondOnes;
+            _timerService.Second = secondTens * 10 + secondOnes;
             UpdateDigitDisplays();
         }
 
         // 第6位数字（秒个位）
         private void Digit6Plus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
+            if (_timerService.IsRunning) return;
             UpdateActivityTime();
-            int currentSecond = second;
+            int currentSecond = _timerService.Second;
             int secondTens = currentSecond / 10;
             int secondOnes = currentSecond % 10;
 
@@ -781,15 +673,15 @@ namespace Ink_Canvas.Windows
                 if (secondTens >= 6) secondTens = 0;
             }
 
-            second = secondTens * 10 + secondOnes;
+            _timerService.Second = secondTens * 10 + secondOnes;
             UpdateDigitDisplays();
         }
 
         private void Digit6Minus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
+            if (_timerService.IsRunning) return;
             UpdateActivityTime();
-            int currentSecond = second;
+            int currentSecond = _timerService.Second;
             int secondTens = currentSecond / 10;
             int secondOnes = currentSecond % 10;
 
@@ -801,7 +693,7 @@ namespace Ink_Canvas.Windows
                 if (secondTens < 0) secondTens = 5;
             }
 
-            second = secondTens * 10 + secondOnes;
+            _timerService.Second = secondTens * 10 + secondOnes;
             UpdateDigitDisplays();
         }
 
@@ -812,42 +704,29 @@ namespace Ink_Canvas.Windows
         private void StartPause_Click(object sender, RoutedEventArgs e)
         {
             UpdateActivityTime();
-            if (isPaused && isTimerRunning)
+            if (_timerService.IsPaused && _timerService.IsRunning)
             {
                 // 继续计时
-                startTime += DateTime.Now - pauseTime;
+                _timerService.Resume();
                 StartPauseIcon.Data = Geometry.Parse(PauseIconData);
-                isPaused = false;
-                timer.Start();
             }
-            else if (isTimerRunning)
+            else if (_timerService.IsRunning)
             {
                 // 暂停计时
-                pauseTime = DateTime.Now;
+                _timerService.Pause();
                 StartPauseIcon.Data = Geometry.Parse(PlayIconData);
-                isPaused = true;
-                timer.Stop();
             }
             else
             {
                 // 开始计时
-                if (hour == 0 && minute == 0 && second == 0)
+                if (_timerService.Hour == 0 && _timerService.Minute == 0 && _timerService.Second == 0)
                 {
-                    second = 1;
+                    _timerService.Second = 1;
                     UpdateDigitDisplays();
                 }
 
-                cachedStartHour = hour;
-                cachedStartMinute = minute;
-                cachedStartSecond = second;
-
-                startTime = DateTime.Now;
+                _timerService.Start();
                 StartPauseIcon.Data = Geometry.Parse(PauseIconData);
-                isPaused = false;
-                isTimerRunning = true;
-                isOvertimeMode = false;
-                hasPlayedProgressiveReminder = false;
-                timer.Start();
 
                 // 启动隐藏定时器
                 hideTimer.Start();
@@ -873,7 +752,7 @@ namespace Ink_Canvas.Windows
                 StartPauseIcon.Data = Geometry.Parse(PlayIconData);
             }
 
-            hasPlayedProgressiveReminder = false;
+            _timerService.ResetProgressiveReminderFlag();
 
             // 禁用全屏按钮
             if (FullscreenBtn != null)
@@ -886,12 +765,10 @@ namespace Ink_Canvas.Windows
         {
             UpdateActivityTime();
 
-            if (isTimerRunning)
+            if (_timerService.IsRunning)
             {
-                // 停止计时器
-                timer.Stop();
-                isTimerRunning = false;
-                isPaused = false;
+                // 停止计时器并复位运行/暂停/超时标志
+                _timerService.Reset();
 
                 if (hideTimer != null)
                 {
@@ -899,8 +776,10 @@ namespace Ink_Canvas.Windows
                 }
                 _minimizedWindow?.Close();
             }
-
-            isOvertimeMode = false;
+            else
+            {
+                _timerService.Reset();
+            }
 
             ApplyResetStateAfterStop();
         }
@@ -987,42 +866,42 @@ namespace Ink_Canvas.Windows
         // 常用计时事件处理
         private void Common5Min_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning && !isPaused) return;
+            if (_timerService.IsRunning && !_timerService.IsPaused) return;
             UpdateActivityTime();
             SetQuickTime(0, 5, 0);
         }
 
         private void Common10Min_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning && !isPaused) return;
+            if (_timerService.IsRunning && !_timerService.IsPaused) return;
             UpdateActivityTime();
             SetQuickTime(0, 10, 0);
         }
 
         private void Common15Min_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning && !isPaused) return;
+            if (_timerService.IsRunning && !_timerService.IsPaused) return;
             UpdateActivityTime();
             SetQuickTime(0, 15, 0);
         }
 
         private void Common30Min_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning && !isPaused) return;
+            if (_timerService.IsRunning && !_timerService.IsPaused) return;
             UpdateActivityTime();
             SetQuickTime(0, 30, 0);
         }
 
         private void Common45Min_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning && !isPaused) return;
+            if (_timerService.IsRunning && !_timerService.IsPaused) return;
             UpdateActivityTime();
             SetQuickTime(0, 45, 0);
         }
 
         private void Common60Min_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning && !isPaused) return;
+            if (_timerService.IsRunning && !_timerService.IsPaused) return;
             UpdateActivityTime();
             SetQuickTime(1, 0, 0);
         }
@@ -1030,7 +909,7 @@ namespace Ink_Canvas.Windows
         // 最近计时事件处理（统一处理方法）
         private void HandleRecentTimerClick(int index)
         {
-            if ((isTimerRunning && !isPaused) || _recentTimers[index] == "--:--") return;
+            if ((_timerService.IsRunning && !_timerService.IsPaused) || _recentTimers[index] == "--:--") return;
             UpdateActivityTime();
             ApplyRecentTimer(_recentTimers[index]);
         }
@@ -1045,9 +924,9 @@ namespace Ink_Canvas.Windows
         // 设置快捷时间
         private void SetQuickTime(int h, int m, int s)
         {
-            hour = h;
-            minute = m;
-            second = s;
+            _timerService.Hour = h;
+            _timerService.Minute = m;
+            _timerService.Second = s;
             UpdateDigitDisplays();
         }
 
@@ -1077,9 +956,9 @@ namespace Ink_Canvas.Windows
         // 保存最近计时记录
         private void SaveRecentTimer()
         {
-            if (hour == 0 && minute == 0 && second == 0) return;
+            if (_timerService.Hour == 0 && _timerService.Minute == 0 && _timerService.Second == 0) return;
 
-            string currentTime = $"{minute:D2}:{second:D2}";
+            string currentTime = $"{_timerService.Minute:D2}:{_timerService.Second:D2}";
 
             // 检查是否已存在相同的时间
             int existingIndex = Array.IndexOf(_recentTimers, currentTime);
@@ -1237,7 +1116,7 @@ namespace Ink_Canvas.Windows
                 return;
             }
 
-            if (isTimerRunning && !isPaused)
+            if (_timerService.IsRunning && !_timerService.IsPaused)
             {
                 fullscreenWindow = new FullscreenTimerWindow(this);
                 fullscreenWindow.Closed += (s, args) => { fullscreenWindow = null; };
@@ -1298,23 +1177,17 @@ namespace Ink_Canvas.Windows
 
         private void ApplyResetTimerState()
         {
-            // 停止计时器
-            if (isTimerRunning)
-            {
-                timer.Stop();
-                isTimerRunning = false;
-                isPaused = false;
+            // 停止计时器并复位到起始设定时间快照（状态部分在 TimerService）
+            bool wasRunning = _timerService.IsRunning;
+            _timerService.ResetToStartSnapshot();
 
+            if (wasRunning)
+            {
                 if (hideTimer != null)
                 {
                     hideTimer.Stop();
                 }
             }
-
-            // 重置时间到默认值
-            hour = cachedStartHour;
-            minute = cachedStartMinute;
-            second = cachedStartSecond;
 
             // 更新显示
             UpdateDigitDisplays();
@@ -1325,10 +1198,6 @@ namespace Ink_Canvas.Windows
             {
                 StartPauseIcon.Data = Geometry.Parse(PlayIconData);
             }
-
-            // 重置状态标志
-            isOvertimeMode = false;
-            hasPlayedProgressiveReminder = false;
 
             // 禁用全屏按钮
             if (FullscreenBtn != null)
@@ -1341,7 +1210,7 @@ namespace Ink_Canvas.Windows
 
         private void HideTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (!isTimerRunning || isPaused) return;
+            if (!_timerService.IsRunning || _timerService.IsPaused) return;
 
             var timeSinceLastActivity = DateTime.Now - lastActivityTime;
             if (timeSinceLastActivity.TotalSeconds >= 5)
@@ -1360,7 +1229,7 @@ namespace Ink_Canvas.Windows
                     {
                         _minimizedWindow = new NewStyleMinimizedTimerWindow(
                         () => GetRemainingTime(),
-                        () => !isTimerRunning || isPaused,
+                        () => !_timerService.IsRunning || _timerService.IsPaused,
                         () =>
                         {
                             Show();

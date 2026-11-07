@@ -1510,7 +1510,7 @@ namespace Ink_Canvas
             try
             {
                 if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
-            if (IsTouchStylusDevice(e.StylusDevice))
+                if (IsTouchStylusDevice(e.StylusDevice))
                     return;
 
                 if (drawingShapeMode != 0)

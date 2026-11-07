@@ -654,7 +654,8 @@ namespace Ink_Canvas.Helpers
                 foreach (System.Windows.Ink.Stroke stroke in collection)
                 {
                     strokeCount++;
-                    try { pointCount += stroke.StylusPoints.Count; } catch (Exception ex)
+                    try { pointCount += stroke.StylusPoints.Count; }
+                    catch (Exception ex)
                     {
                         LogHelper.WriteLogToFile($"[Memory] 读取 Stroke 采样点数失败: {ex.Message}", LogHelper.LogType.Info);
                     }
@@ -665,7 +666,8 @@ namespace Ink_Canvas.Helpers
             if (value is System.Windows.Ink.Stroke strokeValue)
             {
                 strokeCount++;
-                try { pointCount += strokeValue.StylusPoints.Count; } catch (Exception ex)
+                try { pointCount += strokeValue.StylusPoints.Count; }
+                catch (Exception ex)
                 {
                     LogHelper.WriteLogToFile($"[Memory] 读取 Stroke 采样点数失败: {ex.Message}", LogHelper.LogType.Info);
                 }
