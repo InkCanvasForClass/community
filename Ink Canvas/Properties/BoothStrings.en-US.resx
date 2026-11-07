@@ -51,6 +51,9 @@
   <data name="BackToCapture" xml:space="preserve">
     <value>Back</value>
   </data>
+  <data name="Import" xml:space="preserve">
+    <value>Import</value>
+  </data>
   <data name="ToolbarMenu" xml:space="preserve">
     <value>Booth Menu</value>
   </data>

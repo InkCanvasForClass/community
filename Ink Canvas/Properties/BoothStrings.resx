@@ -51,6 +51,9 @@
   <data name="BackToCapture" xml:space="preserve">
     <value>返回拍照</value>
   </data>
+  <data name="Import" xml:space="preserve">
+    <value>导入</value>
+  </data>
   <data name="ToolbarMenu" xml:space="preserve">
     <value>展台菜单</value>
   </data>
