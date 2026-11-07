@@ -786,8 +786,8 @@ namespace Ink_Canvas
                 try
                 {
                     string timeStr = (appStartTime != default(DateTime) && appStartTime != DateTime.MinValue)
-                        ? appStartTime.ToString("yyyy-MM-dd-HH-mm-ss")
-                        : DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss");
+                        ? appStartTime.ToString("yyyy-MM-dd_HH-mm-ss")
+                        : DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
                     File.AppendAllText(
                         Path.Combine(crashLogFile, $"Crash_{timeStr}.txt"),
                         $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] 记录未处理异常时发生错误: {ex.Message}\r\n"
@@ -981,8 +981,8 @@ namespace Ink_Canvas
                 }
 
                 string appStartTimeStr = (appStartTime != default(DateTime) && appStartTime != DateTime.MinValue)
-                    ? appStartTime.ToString("yyyy-MM-dd-HH-mm-ss")
-                    : DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss");
+                    ? appStartTime.ToString("yyyy-MM-dd_HH-mm-ss")
+                    : DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
                 string logFileName = Path.Combine(crashLogFile, $"Crash_{appStartTimeStr}.txt");
 
                 // 收集系统状态信息
