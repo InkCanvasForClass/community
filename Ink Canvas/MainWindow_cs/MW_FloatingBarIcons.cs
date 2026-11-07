@@ -1171,7 +1171,6 @@ namespace Ink_Canvas
                 CursorIcon_Click(null, null);
 
             { /* Old UI removed */ }
-            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
 
             new Thread(() =>
             {
@@ -4776,25 +4775,7 @@ namespace Ink_Canvas
                     RestoreStrokes(true);
 
 
-                    if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
-                    {
-                        { /* Old UI removed */ }
-                        { /* Old UI removed */ }
-                    }
-                    else
-                    {
-                        { /* Old UI removed */ }
-                        if (isPresentationHaveBlackSpace)
-                        {
-                            { /* Old UI removed */ }
-                            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
-                        }
-                        else
-                        {
-                            { /* Old UI removed */ }
-                            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
-                        }
-                    }
+                    // 演示背景只影响画布，不改变用户配置的应用主题。
 
                     { /* Old UI removed */ }
 
@@ -4870,26 +4851,7 @@ namespace Ink_Canvas
                             });
                         }
 
-                        if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
-                        {
-                            { /* Old UI removed */ }
-                            { /* Old UI removed */ }
-                            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
-                        }
-                        else
-                        {
-                            { /* Old UI removed */ }
-                            if (isPresentationHaveBlackSpace)
-                            {
-                                { /* Old UI removed */ }
-                                ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
-                            }
-                            else
-                            {
-                                { /* Old UI removed */ }
-                                ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
-                            }
-                        }
+                        // 退出白板时保持用户配置的应用主题。
 
                         { /* Old UI removed */ }
                         Topmost = true;
@@ -4926,16 +4888,6 @@ namespace Ink_Canvas
                         ViewboxFloatingBar.Visibility = Visibility.Collapsed;
 
                         { /* Old UI removed */ }
-                        if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
-                        {
-                            { /* Old UI removed */ }
-                            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
-                        }
-                        else
-                        {
-                            { /* Old UI removed */ }
-                            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
-                        }
 
                         if (Settings.Canvas.UsingWhiteboard)
                         {
