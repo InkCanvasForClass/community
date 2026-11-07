@@ -230,6 +230,7 @@ namespace Ink_Canvas.Properties
             dict["Booth_CameraDevices"] = ("BoothStrings", "CameraDevices");
             dict["Booth_Capture"] = ("BoothStrings", "Capture");
             dict["Booth_BackToCapture"] = ("BoothStrings", "BackToCapture");
+            dict["Booth_Import"] = ("BoothStrings", "Import");
             dict["Booth_ToolbarMenu"] = ("BoothStrings", "ToolbarMenu");
             dict["Booth_ExpandAlbum"] = ("BoothStrings", "ExpandAlbum");
             dict["Booth_CapturedPhotos"] = ("BoothStrings", "CapturedPhotos");

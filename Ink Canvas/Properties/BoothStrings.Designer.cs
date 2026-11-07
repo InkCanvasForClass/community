@@ -46,6 +46,8 @@ namespace Ink_Canvas.Properties
 
         public static string BackToCapture => ResourceManager.GetString(nameof(BackToCapture), _resourceCulture);
 
+        public static string Import => ResourceManager.GetString(nameof(Import), _resourceCulture);
+
         public static string ToolbarMenu => ResourceManager.GetString(nameof(ToolbarMenu), _resourceCulture);
 
         public static string ExpandAlbum => ResourceManager.GetString(nameof(ExpandAlbum), _resourceCulture);

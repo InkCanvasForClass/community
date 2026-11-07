@@ -81,6 +81,13 @@ namespace Ink_Canvas
         [JsonProperty("boothExpandToolbarSeeded")]
         public bool BoothExpandToolbarSeeded { get; set; } = false;
 
+        /// <summary>
+        /// 是否已把「导入」组件播种到中间栏展台分组（仅播一次，删除后不再补回）。
+        /// 与 BoothToolbarSeeded 分开，保证老用户升级后也能看到新增的展台导入按钮。
+        /// </summary>
+        [JsonProperty("boothImportToolbarSeeded")]
+        public bool BoothImportToolbarSeeded { get; set; } = false;
+
         [JsonProperty("performance")]
         public PerformanceSettings Performance { get; set; } = new PerformanceSettings();
 
