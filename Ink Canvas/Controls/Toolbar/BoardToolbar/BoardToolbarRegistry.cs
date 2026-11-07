@@ -30,6 +30,7 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
         public const string BoothCorrectionItemId = "board.boothCorrection";
         public const string BoothMenuItemId = "board.boothMenu";
         public const string BoothExpandItemId = "board.boothExpand";
+        public const string BoothImportItemId = "board.boothImport";
 
         /// <summary>是否属于"仅视频展台模式显示"的组件。</summary>
         public static bool IsBoothItem(string id)
@@ -729,6 +730,79 @@ namespace Ink_Canvas.Controls.Toolbar.BoardToolbar
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"BoardToolbarRegistry: 播种「展开」组件失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        /// <summary>
+        /// 首次运行时把「导入」组件播种到中间栏展台分组（boothCorrection 之后、boothMenu 之前）。
+        /// 与 EnsureBoothComponentsSeeded 分开且只播一次，保证老用户升级后也能看到导入按钮；
+        /// 用户删除后不再补回，位置可随后在设置页自由调整。
+        /// </summary>
+        public static void EnsureBoothImportSeeded()
+        {
+            try
+            {
+                if (SettingsManager.Settings == null) return;
+                if (SettingsManager.Settings.BoothImportToolbarSeeded) return;
+
+                var configName = SettingsManager.Settings.BoardToolbarConfigName;
+                if (string.IsNullOrWhiteSpace(configName)) configName = "default";
+
+                var layout = LoadConfigFile(configName);
+                if (layout == null) return;
+                layout.Areas ??= new List<BoardToolbarAreaEntry>();
+
+                var centerArea = layout.Areas.FirstOrDefault(a => string.Equals(a.Id, "center", StringComparison.OrdinalIgnoreCase));
+                if (centerArea == null)
+                {
+                    centerArea = new BoardToolbarAreaEntry { Id = "center", Groups = new List<BoardToolbarGroupEntry>() };
+                    layout.Areas.Add(centerArea);
+                }
+                centerArea.Groups ??= new List<BoardToolbarGroupEntry>();
+
+                var group = centerArea.Groups.FirstOrDefault(g => string.Equals(g.Id, "videoBooth", StringComparison.OrdinalIgnoreCase));
+                if (group == null)
+                {
+                    group = new BoardToolbarGroupEntry
+                    {
+                        Id = "videoBooth",
+                        Components = new List<BoardToolbarComponentEntry>()
+                    };
+                    centerArea.Groups.Add(group);
+                }
+                group.Components ??= new List<BoardToolbarComponentEntry>();
+
+                if (!group.Components.Any(c => string.Equals(c.Id, BoothImportItemId, StringComparison.OrdinalIgnoreCase)))
+                {
+                    var entry = new BoardToolbarComponentEntry { Id = BoothImportItemId };
+                    entry.SetSetting(ShowInBoothOnlySettingKey, true);
+
+                    // 默认插入「矫正」之后、「展台菜单」之前；找不到锚点则追加到组末尾
+                    int insertIndex = group.Components.FindIndex(
+                        c => string.Equals(c.Id, BoothCorrectionItemId, StringComparison.OrdinalIgnoreCase));
+                    if (insertIndex >= 0)
+                    {
+                        insertIndex += 1;
+                    }
+                    else
+                    {
+                        insertIndex = group.Components.FindIndex(
+                            c => string.Equals(c.Id, BoothMenuItemId, StringComparison.OrdinalIgnoreCase));
+                        if (insertIndex < 0) insertIndex = group.Components.Count;
+                    }
+                    group.Components.Insert(insertIndex, entry);
+                    SaveConfigFile(configName, layout);
+                }
+
+                SettingsManager.Settings.BoothImportToolbarSeeded = true;
+                SettingsManager.SaveSettingsToFile();
+                LogHelper.WriteLogToFile(
+                    $"BoardToolbarRegistry: 已把「导入」组件播种到 center→videoBooth (配置={configName})",
+                    LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"BoardToolbarRegistry: 播种「导入」组件失败: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
 

@@ -51,6 +51,9 @@
   <data name="BackToCapture" xml:space="preserve">
     <value>回到咔嚓现场</value>
   </data>
+  <data name="Import" xml:space="preserve">
+    <value>收入相簿</value>
+  </data>
   <data name="ToolbarMenu" xml:space="preserve">
     <value>投影法阵菜单</value>
   </data>

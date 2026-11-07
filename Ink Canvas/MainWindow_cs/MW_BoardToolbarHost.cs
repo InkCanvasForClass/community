@@ -224,6 +224,8 @@ namespace Ink_Canvas
                 BoardToolbarRegistry.EnsureBoothComponentsSeeded();
                 // 独立的「展开」组件：放在右侧"新页面"位置（展台下"新页面"隐藏，由它占位）
                 BoardToolbarRegistry.EnsureBoothExpandSeeded();
+                // 独立的「导入」组件：放进中间栏展台分组（矫正之后、展台菜单之前），老用户也能拿到
+                BoardToolbarRegistry.EnsureBoothImportSeeded();
 
                 var host = (IBoardToolbarHost)this;
 
