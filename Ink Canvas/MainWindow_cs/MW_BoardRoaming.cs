@@ -363,14 +363,14 @@ namespace Ink_Canvas
             var trans = currentMidpoint - previousMidpoint;
             m.Translate(trans.X, trans.Y);
 
-            TransformBoardRoamingContent(m, trans, scale);
+            TransformBoardRoamingContent(m, trans, scale, previousMidpoint);
         }
 
         /// <summary>
         /// 对板书内容应用任意矩阵（平移/等比缩放/旋转），同步图片、圆圈标注、插件视口、
         /// 视口世界坐标与视频展台预览。平移分量单独传给展台（展台不支持缩放旋转）。
         /// </summary>
-        private void TransformBoardRoamingContent(Matrix matrix, Vector translationDelta, double scale)
+        private void TransformBoardRoamingContent(Matrix matrix, Vector translationDelta, double scale, Point? boothScaleAnchor = null)
         {
             var previousCommitType = _currentCommitType;
             _currentCommitType = CommitReason.CodeInput;
@@ -407,8 +407,35 @@ namespace Ink_Canvas
 
                 if (_isVideoPresenterSpecialMode)
                 {
-                    _boothPreviewTranslateX += translationDelta.X;
-                    _boothPreviewTranslateY += translationDelta.Y;
+                    // 漫游双指缩放：画面/照片预览也要跟随板书一起缩放。
+                    // 之前这里只同步平移（“展台不支持缩放”的旧假设），所以漫游里
+                    // 墨迹能缩放、实时画面和相册照片不动。
+                    if (boothScaleAnchor.HasValue && Math.Abs(scale - 1.0) > 0.0001)
+                    {
+                        var anchor = boothScaleAnchor.Value;
+                        try
+                        {
+                            if (inkCanvas != null && VideoPresenterSpecialModeContainer != null)
+                                anchor = inkCanvas.TranslatePoint(anchor, VideoPresenterSpecialModeContainer);
+                        }
+                        catch { }
+
+                        double newScale = Math.Max(0.1, Math.Min(10.0, _boothPreviewScale * scale));
+                        double ratio = newScale / Math.Max(0.0001, _boothPreviewScale);
+                        _boothPreviewTranslateX = anchor.X
+                            - (anchor.X - _boothPreviewTranslateX) * ratio
+                            + translationDelta.X;
+                        _boothPreviewTranslateY = anchor.Y
+                            - (anchor.Y - _boothPreviewTranslateY) * ratio
+                            + translationDelta.Y;
+                        _boothPreviewScale = newScale;
+                    }
+                    else
+                    {
+                        _boothPreviewTranslateX += translationDelta.X;
+                        _boothPreviewTranslateY += translationDelta.Y;
+                    }
+
                     ApplyBoothPreviewTransform();
                     ResetRotationBaseline();
                 }
