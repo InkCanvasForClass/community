@@ -25,7 +25,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Theme] 订阅系统外观偏好变化事件失败，系统深浅色/强调色将不再自动跟随: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
         }
 
@@ -67,7 +67,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Theme] 读取 DWM 强调色注册表值失败，改用下一级回退来源: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
 
             try
@@ -92,7 +92,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Theme] 读取资源管理器 Accent 注册表值失败，改用窗口玻璃色作为最终来源: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
 
             try
@@ -142,7 +142,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"[Theme] 读取系统深浅色注册表值(AppsUseLightTheme)失败，按浅色处理: {ex.Message}", LogHelper.LogType.Info);
+                LogService.LogException(ex);
             }
             return true;
         }

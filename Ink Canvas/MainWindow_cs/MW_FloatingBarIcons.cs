@@ -1,6 +1,7 @@
 using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Models;
 using Ink_Canvas.Properties;
 using Ink_Canvas.WorkflowAutomation;
 using iNKORE.UI.WPF.Modern;
@@ -35,7 +36,7 @@ namespace Ink_Canvas
         /// <summary>
         /// 当前工具模式
         /// </summary>
-        private string _currentToolMode = "cursor";
+        private ToolMode _currentToolModeEnum = ToolMode.Cursor;
 
         private static Windows.SettingsViews.SettingsWindow _settingsWindow = null;
 
@@ -486,7 +487,7 @@ namespace Ink_Canvas
             }
 
             // 每次点击或拖动结束后都重新定位高光
-            SetFloatingBarHighlightPosition(_currentToolMode);
+            SetFloatingBarHighlightPosition(ToolModeMapping.ToInternalString(_currentToolModeEnum));
 
             GridForFloatingBarDraging.Visibility = Visibility.Collapsed;
         }
@@ -1014,8 +1015,9 @@ namespace Ink_Canvas
                         {
                             LogHelper.WriteLogToFile($"进入白板模式时更新名言失败: {t.Exception?.GetBaseException().Message}", LogHelper.LogType.Warning);
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            LogService.LogException(ex);
                         }
                         if (Settings.Appearance.EnableChickenSoupInWhiteboardMode && Settings.Appearance.ChickenSoupSource != 3)
                         {
@@ -1188,7 +1190,7 @@ namespace Ink_Canvas
             {
                 UpdateIndexInfoDisplay();
 
-                // 进入白板模式时显式切换到笔模式：SwitchBackground 不会更新 _currentToolMode，
+                // 进入白板模式时显式切换到笔模式：SwitchBackground 不会更新 _currentToolModeEnum，
                 // 这里需要复用 PenIcon_Click 的完整切笔逻辑，但应避免被误判为"再次点击笔"而弹出笔设置面板。
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink
                     && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
@@ -2220,7 +2222,7 @@ namespace Ink_Canvas
 
             isFloatingBarHeadOnRight = headOnRight;
 
-            SetFloatingBarHighlightPosition(_currentToolMode);
+            SetFloatingBarHighlightPosition(ToolModeMapping.ToInternalString(_currentToolModeEnum));
         }
 
         private void SetFloatingBarHeadPlacementVertical(bool headOnBottom)
@@ -2299,7 +2301,7 @@ namespace Ink_Canvas
 
             isFloatingBarHeadOnBottom = headOnBottom;
 
-            SetFloatingBarHighlightPosition(_currentToolMode);
+            SetFloatingBarHighlightPosition(ToolModeMapping.ToInternalString(_currentToolModeEnum));
         }
 
         internal void UpdateToolbarPosition()
@@ -2773,9 +2775,9 @@ namespace Ink_Canvas
                 isViewboxFloatingBarMarginAnimationRunning = false;
                 if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
 
-                if (!string.IsNullOrEmpty(_currentToolMode))
+                if (_currentToolModeEnum != ToolMode.Unknown)
                 {
-                    SetFloatingBarHighlightPosition(_currentToolMode);
+                    SetFloatingBarHighlightPosition(ToolModeMapping.ToInternalString(_currentToolModeEnum));
                 }
 
                 // Issue #285：动画会重新显示完整浮动栏，若此时应处于迷你栏状态则重新接管
@@ -3176,9 +3178,9 @@ namespace Ink_Canvas
             {
                 ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
 
-                if (!string.IsNullOrEmpty(_currentToolMode))
+                if (_currentToolModeEnum != ToolMode.Unknown)
                 {
-                    SetFloatingBarHighlightPosition(_currentToolMode);
+                    SetFloatingBarHighlightPosition(ToolModeMapping.ToInternalString(_currentToolModeEnum));
                 }
             });
         }
@@ -3292,9 +3294,9 @@ namespace Ink_Canvas
             {
                 ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
 
-                if (!string.IsNullOrEmpty(_currentToolMode))
+                if (_currentToolModeEnum != ToolMode.Unknown)
                 {
-                    SetFloatingBarHighlightPosition(_currentToolMode);
+                    SetFloatingBarHighlightPosition(ToolModeMapping.ToInternalString(_currentToolModeEnum));
                 }
             });
 
@@ -5439,7 +5441,7 @@ namespace Ink_Canvas
             if (Pen_Icon == null || Pen_Icon.Icon == null) return;
 
             if (!Settings.Appearance.ShowPenColorOnFloatingBarIcon
-                || (_currentToolMode != "pen" && _currentToolMode != "color"))
+                || (_currentToolModeEnum != ToolMode.Pen && _currentToolModeEnum != ToolMode.Color))
             {
                 Pen_Icon.ClearIconInnerOutline();
                 return;
@@ -5451,10 +5453,7 @@ namespace Ink_Canvas
                 Pen_Icon.Icon.Brush = new SolidColorBrush(inkColor);
                 ApplyPenIconOutlineForContrast();
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Toolbar] 更新浮动栏批注图标颜色为当前画笔颜色失败: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
         }
 
         /// <summary>
@@ -5488,10 +5487,7 @@ namespace Ink_Canvas
                 if (Application.Current.TryFindResource("FloatBarBackground") is SolidColorBrush backgroundBrush)
                     return backgroundBrush.Color;
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Toolbar] 读取浮动栏背景色资源 FloatBarBackground 失败，将按主题推断: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
 
             bool isDarkTheme = Settings.Appearance.Theme == 1 ||
                                 (Settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
@@ -5521,10 +5517,7 @@ namespace Ink_Canvas
                     Pen_Icon.ClearIconInnerOutline();
                 }
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Toolbar] 按对比度为浮动栏批注图标添加/移除内描边失败: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch (Exception ex) { LogService.LogException(ex); }
         }
 
         /// <summary>
@@ -5849,10 +5842,7 @@ namespace Ink_Canvas
                             _activeIndicatorCompletedHandler = null;
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[Toolbar] 切换浮动栏高亮指示条位置时停止旧动画并解绑 Completed 失败: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    catch (Exception ex) { LogService.LogException(ex); }
                     indicatorBar.RenderTransform = null;
                     indicatorBar.Opacity = 1.0;
                 }
@@ -6267,9 +6257,9 @@ namespace Ink_Canvas
             try
             {
                 // 优先使用缓存的模式，避免在浮动栏刷新时返回过时的模式信息
-                if (!string.IsNullOrEmpty(_currentToolMode))
+                if (_currentToolModeEnum != ToolMode.Unknown)
                 {
-                    return _currentToolMode;
+                    return ToolModeMapping.ToInternalString(_currentToolModeEnum);
                 }
 
                 // 如果缓存为空，则从inkCanvas状态推断模式
@@ -6306,9 +6296,9 @@ namespace Ink_Canvas
                 {
                     // Native freehand keeps physical EditingMode at None while logical
                     // tool remains pen/color. Prefer cached mode; fall back to cursor.
-                    if (!string.IsNullOrEmpty(_currentToolMode)
-                        && !string.Equals(_currentToolMode, "cursor", StringComparison.OrdinalIgnoreCase))
-                        return _currentToolMode;
+                    if (_currentToolModeEnum != ToolMode.Unknown
+                        && _currentToolModeEnum != ToolMode.Cursor)
+                        return ToolModeMapping.ToInternalString(_currentToolModeEnum);
                     return "cursor";
                 }
                 else if (drawingShapeMode != 0)
@@ -6335,10 +6325,10 @@ namespace Ink_Canvas
                 EndBoardRoaming();
                 ResetBoardRoamingContactState();
             }
-            _currentToolMode = NormalizeToolModeForFreeze(mode);
+            _currentToolModeEnum = ToolModeMapping.FromInternalString(NormalizeToolModeForFreeze(mode));
 
             // 工具切换为非笔模式（橡皮/框选/图形/漫游/鼠标）时，扩展画布提示立即消失
-            if (_currentToolMode != "pen" && _currentToolMode != "color")
+            if (_currentToolModeEnum != ToolMode.Pen && _currentToolModeEnum != ToolMode.Color)
             {
                 HideEdgeExpandHint();
             }
@@ -6365,7 +6355,7 @@ namespace Ink_Canvas
         /// <summary>
         /// 自动化「切换批注模式」动作入口：进入/退出批注模式。
         /// 与画笔/光标按钮保持一致的 SetCurrentToolMode + UpdateCurrentToolMode 序列，
-        /// 保证 _currentToolMode（逻辑工具）与原生湿墨迹管线同步。
+        /// 保证 _currentToolModeEnum（逻辑工具）与原生湿墨迹管线同步。
         /// </summary>
         internal void SetAnnotationModeFromAutomation(bool enterAnnotation)
         {

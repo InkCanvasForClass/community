@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- 与主项目 InkCanvasForClass.csproj 同 TFM，否则无法 ProjectReference（主项目为 19041） -->
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <!-- 沿用主项目开关，避免风格漂移 -->
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <!-- WPF 类型可见性需要 -->
+    <UseWPF>true</UseWPF>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>InkCanvasForClass.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Ink Canvas\InkCanvasForClass.csproj" />
+  </ItemGroup>
+
+</Project>

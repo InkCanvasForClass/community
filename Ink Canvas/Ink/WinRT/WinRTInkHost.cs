@@ -201,7 +201,8 @@ namespace Ink_Canvas.Ink.WinRT
                         try { OnDryAvailable?.Invoke(snapshot); }
                         catch (Exception ex)
                         {
-                            try { OnDryFailed?.Invoke(ex); } catch (Exception inner)
+                            try { OnDryFailed?.Invoke(ex); }
+                            catch (Exception inner)
                             {
                                 LogHelper.WriteLogToFile($"[WinRTInk] 干墨回调异常后，失败通知也未能送达（将无法回退到旧墨迹）: {inner.Message}", LogHelper.LogType.Info);
                             }
@@ -213,13 +214,15 @@ namespace Ink_Canvas.Ink.WinRT
                     // BeginDry may have succeeded while point snapshot failed. This handler is
                     // still on the ink thread, so end the batch synchronously before reporting
                     // the failure to the UI.
-                    try { _inkSynchronizer?.EndDry(); } catch (Exception inner)
+                    try { _inkSynchronizer?.EndDry(); }
+                    catch (Exception inner)
                     {
                         LogHelper.WriteLogToFile($"[WinRTInk] BeginDry 失败后 EndDry 收尾也失败（墨迹批次可能悬挂）: {inner.Message}", LogHelper.LogType.Info);
                     }
                     _overlay.InvokeOnUiThread(() =>
                     {
-                        try { OnDryFailed?.Invoke(ex); } catch (Exception inner)
+                        try { OnDryFailed?.Invoke(ex); }
+                        catch (Exception inner)
                         {
                             LogHelper.WriteLogToFile($"[WinRTInk] 干墨失败通知未能送达 UI 线程: {inner.Message}", LogHelper.LogType.Info);
                         }
@@ -403,10 +406,7 @@ namespace Ink_Canvas.Ink.WinRT
                         _independentInput.PointerLost -= _onPointerLost;
                         _independentInput.PointerExiting -= _onPointerExiting;
                     }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[WinRTInk] 取消输入源事件订阅失败: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    catch (Exception ex) { LogService.LogException(ex); }
                     _independentInput = null;
                 }
 
@@ -418,10 +418,7 @@ namespace Ink_Canvas.Ink.WinRT
                         _presenter.StrokeInput.StrokeCanceled -= _onStrokeCanceled;
                         _presenter.StrokesCollected -= _onStrokesCollected;
                     }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[WinRTInk] 取消 Presenter 事件订阅失败: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    catch (Exception ex) { LogService.LogException(ex); }
                     _presenter = null;
                 }
 
@@ -440,10 +437,7 @@ namespace Ink_Canvas.Ink.WinRT
                 if (_host != null)
                 {
                     try { Marshal.FinalReleaseComObject(_host); }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[WinRTInk] 释放 InkDesktopHost COM 对象失败: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    catch (Exception ex) { LogService.LogException(ex); }
                     _host = null;
                 }
             }

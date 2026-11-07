@@ -55,11 +55,9 @@ namespace Ink_Canvas.Windows
                     Process.Start(new ProcessStartInfo(item.ActionUrl) { UseShellExecute = true });
                     return;
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
-                    LogHelper.WriteLogToFile(
-                        $"[Announcement] 公告详情点击打开链接 {item.ActionUrl} 失败: {ex.Message}",
-                        LogHelper.LogType.Info);
+                    LogService.LogException(ex);
                 }
             }
 

@@ -1,3 +1,4 @@
+using iNKORE.UI.WPF.Modern;
 using iNKORE.UI.WPF.Modern.Common;
 using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using System;
@@ -94,12 +95,13 @@ namespace Ink_Canvas.Helpers
             }
 
             var owner = GetDefaultOwner(context);
-            if (owner != null && owner.IsLoaded && owner.IsVisible)
-            {
-                return MessageBox.Show(owner, messageBoxText, caption, button, icon, defaultResult);
-            }
+            if (owner != null && (!owner.IsLoaded || !owner.IsVisible)) owner = null;
 
-            return MessageBox.Show(messageBoxText, caption, button, icon, defaultResult);
+            // 自行实例化（镜像库内静态 Show 的初始化逻辑），以便锁定弹窗主题：
+            // 库的静态 Show 拿不到实例，新窗口只能按应用级 ApplicationTheme 渲染，
+            // 而白板逻辑会将其强制设为 Dark 且不恢复，导致浅色窗口中弹出深色对话框。
+            var box = CreateThemedMessageBox(owner, messageBoxText, caption, button, icon);
+            return box.ShowDialog();
         }
 
         public static MessageBoxResult Show(
@@ -145,12 +147,12 @@ namespace Ink_Canvas.Helpers
             }
 
             var owner = GetDefaultOwner(context);
-            if (owner != null && owner.IsLoaded && owner.IsVisible)
-            {
-                return await MessageBox.ShowAsync(owner, messageBoxText, caption, button, icon, defaultResult);
-            }
+            if (owner != null && (!owner.IsLoaded || !owner.IsVisible)) owner = null;
 
-            return await MessageBox.ShowAsync(messageBoxText, caption, button, icon, defaultResult);
+            // 与同步 Show 一致：库的 ShowAsync 内部也是 Dispatcher.Invoke(同步 Show)，
+            // 模态语义不变，只是改为自行实例化以锁定主题。
+            var box = CreateThemedMessageBox(owner, messageBoxText, caption, button, icon);
+            return box.ShowDialog();
         }
 
         public static Task<MessageBoxResult> ShowAsync(
@@ -280,10 +282,7 @@ namespace Ink_Canvas.Helpers
                 };
                 autoCloseTimer.Tick += (s, e) =>
                 {
-                    try { box.Close(MessageBoxResult.None); } catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[UI] 自动关闭消息框失败: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    try { box.Close(MessageBoxResult.None); } catch (Exception ex) { LogService.LogException(ex); }
                 };
                 autoCloseTimer.Start();
             }
@@ -313,6 +312,58 @@ namespace Ink_Canvas.Helpers
             }
 
             return box;
+        }
+
+        /// <summary>
+        /// 构建 MessageBox 实例（镜像库内静态 Show 的初始化逻辑），并将弹窗主题锁定为
+        /// Owner 窗口的实际主题；Owner 缺失或其主题为 Default 时回落到用户设置的有效主题。
+        /// </summary>
+        private static MessageBox CreateThemedMessageBox(
+            Window owner,
+            string messageBoxText, string caption,
+            MessageBoxButton button, MessageBoxImage icon)
+        {
+            var box = new MessageBox
+            {
+                Owner = owner,
+                Content = messageBoxText,
+                Caption = caption ?? string.Empty,
+                MessageBoxButtons = button,
+                IconSource = CreateIconSource(icon),
+                WindowStartupLocation = owner != null ? WindowStartupLocation.CenterOwner : WindowStartupLocation.CenterScreen,
+            };
+
+            if (MessageBox.MakeSound)
+            {
+                box.SystemSoundOnLoaded = CreateSystemSound(icon);
+            }
+
+            ApplyEffectiveTheme(box, owner);
+            return box;
+        }
+
+        /// <summary>
+        /// 将弹窗主题锁定为 Owner 窗口的实际主题（窗口级 RequestedTheme 解析结果），
+        /// 使其不随应用级 ApplicationTheme 漂移（白板进出会将其强制设为 Dark 且不恢复）。
+        /// </summary>
+        private static void ApplyEffectiveTheme(MessageBox box, Window owner)
+        {
+            try
+            {
+                var theme = owner != null ? ThemeManager.GetActualTheme(owner) : ElementTheme.Default;
+                if (theme == ElementTheme.Default)
+                {
+                    theme = ThemeHelper.GetEffectiveTheme(Windows.SettingsViews.Helpers.SettingsManager.Settings);
+                }
+                if (theme != ElementTheme.Default)
+                {
+                    ThemeManager.SetRequestedTheme(box, theme);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogService.LogException(ex);
+            }
         }
 
         /// <summary>
@@ -351,6 +402,7 @@ namespace Ink_Canvas.Helpers
                 box.SystemSoundOnLoaded = CreateSystemSound(icon);
             }
 
+            ApplyEffectiveTheme(box, owner);
             box.ContentRendered += (s, e) => ClampToWorkArea(box);
             return box;
         }

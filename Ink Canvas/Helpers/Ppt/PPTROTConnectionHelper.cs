@@ -116,14 +116,15 @@ namespace Ink_Canvas.Helpers
                         {
                             var _ = pptApp.Name;
                         }
-                        catch (COMException)
+                        catch (COMException ex)
                         {
+                            LogService.LogException(ex);
                         }
                         return pptApp;
                     }
                 }
-                catch (COMException) { }
-                catch (InvalidCastException) { }
+                catch (COMException ex) { LogService.LogException(ex); }
+                catch (InvalidCastException ex) { LogService.LogException(ex); }
 
                 if (isSupportWPS)
                 {
@@ -136,14 +137,15 @@ namespace Ink_Canvas.Helpers
                             {
                                 var _ = wpsApp.Name;
                             }
-                            catch (COMException)
+                            catch (COMException ex)
                             {
+                                LogService.LogException(ex);
                             }
                             return wpsApp;
                         }
                     }
-                    catch (COMException) { }
-                    catch (InvalidCastException) { }
+                    catch (COMException ex) { LogService.LogException(ex); }
+                    catch (InvalidCastException ex) { LogService.LogException(ex); }
                 }
 
                 return null;
