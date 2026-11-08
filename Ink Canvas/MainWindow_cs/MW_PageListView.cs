@@ -79,9 +79,6 @@ namespace Ink_Canvas
         /// </remarks>
         private void RefreshBlackBoardSidePageListView()
         {
-            var leftPageListView = FindView("board.pageList.left") as ListView;
-            var rightPageListView = FindView("board.pageList.right") as ListView;
-
             if (blackBoardSidePageListViewObservableCollection.Count == WhiteboardTotalCount)
             {
                 foreach (int index in Enumerable.Range(1, WhiteboardTotalCount))
@@ -121,8 +118,7 @@ namespace Ink_Canvas
             };
             blackBoardSidePageListViewObservableCollection[CurrentWhiteboardIndex - 1] = _pitem;
 
-            if (leftPageListView != null) leftPageListView.SelectedIndex = CurrentWhiteboardIndex - 1;
-            if (rightPageListView != null) rightPageListView.SelectedIndex = CurrentWhiteboardIndex - 1;
+            SyncPageListSelection(CurrentWhiteboardIndex - 1);
         }
 
         /// <summary>
@@ -131,9 +127,6 @@ namespace Ink_Canvas
         /// </summary>
         private void RefreshBoothPageListView()
         {
-            var leftPageListView = FindView("board.pageList.left") as ListView;
-            var rightPageListView = FindView("board.pageList.right") as ListView;
-
             blackBoardSidePageListViewObservableCollection.Clear();
 
             // 第 0 项：直播页，显示提示文字（点击会切换回直播画面）
@@ -162,8 +155,7 @@ namespace Ink_Canvas
             if (selectedIndex < 0) selectedIndex = 0;
             if (selectedIndex >= blackBoardSidePageListViewObservableCollection.Count)
                 selectedIndex = blackBoardSidePageListViewObservableCollection.Count - 1;
-            if (leftPageListView != null) leftPageListView.SelectedIndex = selectedIndex;
-            if (rightPageListView != null) rightPageListView.SelectedIndex = selectedIndex;
+            SyncPageListSelection(selectedIndex);
         }
 
         /// <summary>
@@ -171,7 +163,7 @@ namespace Ink_Canvas
         /// - index=0（直播页项）：切回直播页。
         /// - index>=1（照片项）：切到对应照片预览页。
         /// </summary>
-        private void HandleBoothPageListClick(int index, ListView leftPageListView, ListView rightPageListView)
+        private void HandleBoothPageListClick(int index)
         {
             if (index < 0 || index >= blackBoardSidePageListViewObservableCollection.Count) return;
 
@@ -212,8 +204,7 @@ namespace Ink_Canvas
             if (selectedIndex < 0) selectedIndex = 0;
             if (selectedIndex >= blackBoardSidePageListViewObservableCollection.Count)
                 selectedIndex = blackBoardSidePageListViewObservableCollection.Count - 1;
-            if (leftPageListView != null) leftPageListView.SelectedIndex = selectedIndex;
-            if (rightPageListView != null) rightPageListView.SelectedIndex = selectedIndex;
+            SyncPageListSelection(selectedIndex);
         }
 
         /// <summary>
@@ -230,10 +221,6 @@ namespace Ink_Canvas
         private void TrySwitchWhiteboardPageByTouchPoint(ListView listView, ScrollViewer scrollViewer, Point pointInScrollViewer)
         {
             if (listView == null || scrollViewer == null) return;
-            var leftBorder = FindView("board.pageList.leftBorder") as Border;
-            var rightBorder = FindView("board.pageList.rightBorder") as Border;
-            var leftPageListView = FindView("board.pageList.left") as ListView;
-            var rightPageListView = FindView("board.pageList.right") as ListView;
             try
             {
                 var transform = scrollViewer.TransformToVisual(listView);
@@ -247,13 +234,12 @@ namespace Ink_Canvas
                 if (index < 0 || index >= blackBoardSidePageListViewObservableCollection.Count) return;
                 var item = blackBoardSidePageListViewObservableCollection[index];
                 if (item == null) return;
-                if (leftBorder != null) AnimationsHelper.HideWithSlideAndFade(leftBorder);
-                if (rightBorder != null) AnimationsHelper.HideWithSlideAndFade(rightBorder);
+                HideAllPageListPanels();
 
                 // 视频展台特殊模式：走虚拟分页点击切换，不走普通白板分页逻辑
                 if (_isVideoPresenterSpecialMode)
                 {
-                    HandleBoothPageListClick(index, leftPageListView, rightPageListView);
+                    HandleBoothPageListClick(index);
                     return;
                 }
 
@@ -272,8 +258,7 @@ namespace Ink_Canvas
                     CompletePluginWhiteboardPageChange(previousPluginPageIndex);
                     UpdateIndexInfoDisplay();
                 }
-                if (leftPageListView != null) leftPageListView.SelectedIndex = index;
-                if (rightPageListView != null) rightPageListView.SelectedIndex = index;
+                SyncPageListSelection(index);
             }
             catch
             {
@@ -323,119 +308,47 @@ namespace Ink_Canvas
 
 
         /// <summary>
-        /// 左侧页面列表视图的鼠标释放事件处理
+        /// 页码预览列表的鼠标释放事件处理（任意工具栏区域通用）。
         /// </summary>
-        /// <param name="sender">发送者</param>
+        /// <param name="areaId">该列表所属的工具栏区域（left / right / center …）。</param>
         /// <param name="e">鼠标按钮事件参数</param>
         /// <remarks>
-        /// 该方法会：
-        /// 1. 隐藏左右侧页面边框
-        /// 2. 获取选中的项目和索引
-        /// 3. 只有当选择的页面与当前页面不同时才进行切换
-        /// 4. 如果有选中的元素，先取消选择
-        /// 5. 保存当前页面的笔画
-        /// 6. 清空画布
-        /// 7. 更新当前白板索引
-        /// 8. 恢复新页面的笔画
-        /// 9. 更新索引信息显示
-        /// 10. 更新选择索引
+        /// 该方法会隐藏全部区域的页码面板，并按该列表当前选中项切换白板页（视频展台特殊模式转走虚拟分页逻辑）。
         /// </remarks>
-        private void BlackBoardLeftSidePageListView_OnMouseUp(object sender, MouseButtonEventArgs e)
+        private void HandlePageListMouseUp(string areaId, MouseButtonEventArgs e)
         {
-            var leftBorder = FindView("board.pageList.leftBorder") as Border;
-            var rightBorder = FindView("board.pageList.rightBorder") as Border;
-            var leftPageListView = FindView("board.pageList.left") as ListView;
-            var rightPageListView = FindView("board.pageList.right") as ListView;
-            if (leftPageListView == null) return;
+            var listView = FindView(PageListViewKey(areaId)) as ListView;
+            if (listView == null) return;
 
-            if (leftBorder != null) AnimationsHelper.HideWithSlideAndFade(leftBorder);
-            if (rightBorder != null) AnimationsHelper.HideWithSlideAndFade(rightBorder);
-            var item = leftPageListView.SelectedItem;
-            var index = leftPageListView.SelectedIndex;
-            if (item != null)
+            HideAllPageListPanels();
+
+            var item = listView.SelectedItem;
+            var index = listView.SelectedIndex;
+            if (item == null) return;
+
+            // 视频展台特殊模式：走虚拟分页点击切换，不走普通白板分页逻辑
+            if (_isVideoPresenterSpecialMode)
             {
-                // 视频展台特殊模式：走虚拟分页点击切换，不走普通白板分页逻辑
-                if (_isVideoPresenterSpecialMode)
-                {
-                    HandleBoothPageListClick(index, leftPageListView, rightPageListView);
-                    return;
-                }
-
-                if (index + 1 != CurrentWhiteboardIndex)
-                {
-                    var previousEditingMode = inkCanvas.EditingMode;
-                    ClearAllSelection();
-                    inkCanvas.EditingMode = previousEditingMode;
-
-                    var previousPluginPageIndex = CurrentWhiteboardIndex;
-                    BeginPluginWhiteboardPageChange(index + 1);
-                    SaveStrokes();
-                    ClearStrokes(true);
-                    CurrentWhiteboardIndex = index + 1;
-                    RestoreStrokes();
-                    CompletePluginWhiteboardPageChange(previousPluginPageIndex);
-                    UpdateIndexInfoDisplay();
-                }
-                leftPageListView.SelectedIndex = index;
+                HandleBoothPageListClick(index);
+                return;
             }
-        }
 
-        /// <summary>
-        /// 右侧页面列表视图的鼠标释放事件处理
-        /// </summary>
-        /// <param name="sender">发送者</param>
-        /// <param name="e">鼠标按钮事件参数</param>
-        /// <remarks>
-        /// 该方法会：
-        /// 1. 隐藏左右侧页面边框
-        /// 2. 获取选中的项目和索引
-        /// 3. 只有当选择的页面与当前页面不同时才进行切换
-        /// 4. 如果有选中的元素，先取消选择
-        /// 5. 保存当前页面的笔画
-        /// 6. 清空画布
-        /// 7. 更新当前白板索引
-        /// 8. 恢复新页面的笔画
-        /// 9. 更新索引信息显示
-        /// 10. 更新选择索引
-        /// </remarks>
-        private void BlackBoardRightSidePageListView_OnMouseUp(object sender, MouseButtonEventArgs e)
-        {
-            var leftBorder = FindView("board.pageList.leftBorder") as Border;
-            var rightBorder = FindView("board.pageList.rightBorder") as Border;
-            var leftPageListView = FindView("board.pageList.left") as ListView;
-            var rightPageListView = FindView("board.pageList.right") as ListView;
-            if (rightPageListView == null) return;
-
-            if (leftBorder != null) AnimationsHelper.HideWithSlideAndFade(leftBorder);
-            if (rightBorder != null) AnimationsHelper.HideWithSlideAndFade(rightBorder);
-            var item = rightPageListView.SelectedItem;
-            var index = rightPageListView.SelectedIndex;
-            if (item != null)
+            if (index + 1 != CurrentWhiteboardIndex)
             {
-                // 视频展台特殊模式：走虚拟分页点击切换，不走普通白板分页逻辑
-                if (_isVideoPresenterSpecialMode)
-                {
-                    HandleBoothPageListClick(index, leftPageListView, rightPageListView);
-                    return;
-                }
+                var previousEditingMode = inkCanvas.EditingMode;
+                ClearAllSelection();
+                inkCanvas.EditingMode = previousEditingMode;
 
-                if (index + 1 != CurrentWhiteboardIndex)
-                {
-                    var previousEditingMode = inkCanvas.EditingMode;
-                    ClearAllSelection();
-                    inkCanvas.EditingMode = previousEditingMode;
-
-                    var previousPluginPageIndex = CurrentWhiteboardIndex;
-                    BeginPluginWhiteboardPageChange(index + 1);
-                    SaveStrokes();
-                    ClearStrokes(true);
-                    CurrentWhiteboardIndex = index + 1;
-                    RestoreStrokes();
-                    CompletePluginWhiteboardPageChange(previousPluginPageIndex);
-                    UpdateIndexInfoDisplay();
-                }
-                rightPageListView.SelectedIndex = index;
+                var previousPluginPageIndex = CurrentWhiteboardIndex;
+                BeginPluginWhiteboardPageChange(index + 1);
+                SaveStrokes();
+                ClearStrokes(true);
+                CurrentWhiteboardIndex = index + 1;
+                RestoreStrokes();
+                CompletePluginWhiteboardPageChange(previousPluginPageIndex);
+                UpdateIndexInfoDisplay();
             }
+            SyncPageListSelection(index);
         }
 
         /// <summary>
@@ -628,9 +541,7 @@ namespace Ink_Canvas
             }
 
             // 指示线只在用户拖拽的这一侧列表显示
-            _pageListDragIndicator = FindView("board.pageList.left") == listView
-                ? FindView("board.pageList.left.dragIndicator") as Border
-                : FindView("board.pageList.right.dragIndicator") as Border;
+            _pageListDragIndicator = listView.Tag as Border;
         }
 
         /// <summary>拖拽移动：被拖项跟随指针；指示线标记落点（k&lt;起点在其上方，k&gt;起点在其下方）。</summary>

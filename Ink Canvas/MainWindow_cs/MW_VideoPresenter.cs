@@ -219,7 +219,7 @@ namespace Ink_Canvas
         /// </summary>
         public void ToggleBoothPageListPanel()
         {
-            var rightPanel = FindView("board.pageList.rightBorder") as Border;
+            var rightPanel = FindView(PageListBorderViewKey("right")) as Border;
             if (rightPanel != null && rightPanel.Visibility == Visibility.Visible)
             {
                 AnimationsHelper.HideWithSlideAndFade(rightPanel);
@@ -4309,10 +4309,7 @@ namespace Ink_Canvas
             UpdateBoothPageInfoDisplay();
             // 同步页码列表 SelectedIndex 到照片项（index=photoIndex+1）
             int selectedIndex = photoIndex + 1;
-            var leftPageListView = FindView("board.pageList.left") as System.Windows.Controls.ListView;
-            var rightPageListView = FindView("board.pageList.right") as System.Windows.Controls.ListView;
-            if (leftPageListView != null) leftPageListView.SelectedIndex = selectedIndex;
-            if (rightPageListView != null) rightPageListView.SelectedIndex = selectedIndex;
+            SyncPageListSelection(selectedIndex);
 
             // 切换后恢复该照片的墨迹（每张照片独立保存，互不干扰）
             RestoreBoothStrokesFromSlot(photoIndex);
@@ -4385,10 +4382,7 @@ namespace Ink_Canvas
             // 页码显示 0/1
             UpdateBoothPageInfoDisplay();
             // 同步侧栏页码列表 SelectedIndex 到直播页项（index=0）
-            var leftPageListView = FindView("board.pageList.left") as System.Windows.Controls.ListView;
-            var rightPageListView = FindView("board.pageList.right") as System.Windows.Controls.ListView;
-            if (leftPageListView != null) leftPageListView.SelectedIndex = 0;
-            if (rightPageListView != null) rightPageListView.SelectedIndex = 0;
+            SyncPageListSelection(0);
 
             // 恢复直播页墨迹快照（与照片页墨迹相互独立）
             RestoreBoothStrokesFromSlot(-1);
