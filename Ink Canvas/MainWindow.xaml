@@ -984,7 +984,9 @@
                     <ScaleTransform x:Name="ViewboxFloatingBarScaleTransform" ScaleX="1" ScaleY="1" />
                 </Viewbox.LayoutTransform>
                 <Grid Name="GridFloatingBarContainer">
-                    <ikw:SimpleStackPanel Name="StackPanelFloatingBarRoot" Orientation="Horizontal" >
+                    <!-- 使用 WrapPanel：单行时行为与 StackPanel 一致；屏幕空间不足时可由
+                         MW_FloatingBarFit 设置 MaxWidth/MaxHeight 触发换行，实现两行布局 -->
+                    <WrapPanel Name="StackPanelFloatingBarRoot" Orientation="Horizontal" >
                         <Border Name="BorderFloatingBarMoveControls" Margin="0" Padding="0"
                                 Width="58" Height="58"
                                 Background="{DynamicResource FloatingBarBackgroundBrush}"
@@ -998,7 +1000,7 @@
                                    HorizontalAlignment="Center" VerticalAlignment="Center"
                                    RenderOptions.BitmapScalingMode="HighQuality" />
                         </Border>
-                    </ikw:SimpleStackPanel>
+                    </WrapPanel>
                     <Canvas Name="CanvasFloatingBarSelection" IsHitTestVisible="False">
                         <Border Name="SelectionBGFloatingBar"
                                 Visibility="Hidden"

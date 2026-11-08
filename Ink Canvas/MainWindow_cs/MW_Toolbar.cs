@@ -322,6 +322,9 @@ namespace Ink_Canvas
                 ApplyFloatingBarBorderColor();
                 ApplyFloatingBarShadow();
                 ApplyPPTNavBarShadow();
+
+                // 工具栏内容变化后，提前做 UI 重叠检测并按需自动缩放/切换两行布局
+                EvaluateFloatingBarFit();
             }
             catch (Exception ex)
             {
@@ -479,10 +482,18 @@ namespace Ink_Canvas
                 btn.ApplyCompactMode(compact);
             }
 
-            // 浮动栏整体等比缩小（保持纵横比）
+            // 紧凑模式会改变各按钮尺寸，先跑重叠检测：最终缩放由 EvaluateFloatingBarFit
+            // 统一决定（用户缩放 × 紧凑系数 × 屏幕自适应系数，且不低于 DPI 最小缩放）。
+            if (!_floatingBarFitEvaluating)
+            {
+                EvaluateFloatingBarFit();
+                return;
+            }
+
+            // 处于评估流程内部时（由 EvaluateFloatingBarFit 触发），按缓存的自适应系数直接应用。
             double baseScale = Settings.Appearance.ViewboxFloatingBarScaleTransformValue;
             if (Math.Abs(baseScale) < 0.01) baseScale = 1.0;
-            double effectiveScale = compact ? baseScale * CompactFloatingBarScaleFactor : baseScale;
+            double effectiveScale = (compact ? baseScale * CompactFloatingBarScaleFactor : baseScale) * _autoFitScaleFactor;
             ApplyRawFloatingBarScale(effectiveScale);
         }
 
@@ -670,6 +681,9 @@ namespace Ink_Canvas
         {
             var isPPT = IsInPPTPresentationMode;
             ToolbarRegistry.UpdateVisibilityByMode(StackPanelFloatingBarRoot, IsAnnotating, isPPT);
+
+            // 工具可见性随模式变化会改变浮动栏所需宽度，重新做重叠检测
+            EvaluateFloatingBarFit();
         }
 
         private void UpdateToolbarDimensions(Orientation orientation)

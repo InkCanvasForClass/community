@@ -330,6 +330,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                     mw.ViewboxFloatingBarMarginAnimation(60);
                 else
                     mw.ViewboxFloatingBarMarginAnimation(100, true);
+
+                // 用户缩放变化后重新做重叠检测（可能触发自动缩小或两行布局）
+                mw.EvaluateFloatingBarFit();
             }
         }
 
