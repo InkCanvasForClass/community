@@ -130,6 +130,8 @@ namespace Ink_Canvas
         private System.Windows.Point[] _lastOverlayCorners;
         // 实时检测任务防重入标志（上一次后台检测未完成时不启动新的）
         private int _paperDetectRunning;
+        private int _paperDetectStableCount = 0;
+        private const int PaperDetectIdleIntervalMs = 1200;
 
         // 预览兜底重启次数上限：
         // StartVideoCaptureElementPreviewAsync 内的 1.5s 兜底定时器在 MediaOpened 未触发时会
@@ -3740,8 +3742,13 @@ namespace Ink_Canvas
         /// </summary>
         private void StopPaperDetectTimer()
         {
-            if (_paperDetectTimer != null && _paperDetectTimer.IsEnabled)
-                _paperDetectTimer.Stop();
+            if (_paperDetectTimer != null)
+            {
+                if (_paperDetectTimer.IsEnabled)
+                    _paperDetectTimer.Stop();
+                _paperDetectTimer.Interval = TimeSpan.FromMilliseconds(PaperDetectIntervalMs);
+            }
+            _paperDetectStableCount = 0;
             StopOverlayAnim();
             if (PaperDetectOverlayCanvas != null)
             {
@@ -3785,10 +3792,17 @@ namespace Ink_Canvas
             // CopyBackBuffer 是 GPU→CPU 的全帧同步拷贝（4K 一帧约 33MB，且在 UI 线程执行），
             // 与墨迹渲染抢 UI 线程会造成笔迹卡顿。分辨率越高拷贝越贵，所以只在空闲时检测。
             if (System.Windows.Input.Mouse.LeftButton == System.Windows.Input.MouseButtonState.Pressed
+                || _boothDownTouchIds.Count > 0
+                || dec.Count > 0
+                || isTouchDown
                 || _activeTouchStrokeIds.Count > 0
                 || _activeRealtimeTouchStrokeIds.Count > 0
-                || _activeRealtimeStylusStrokeIds.Count > 0)
+                || _activeRealtimeStylusStrokeIds.Count > 0
+                || (DateTime.UtcNow - _boothLastStrokeEndTime).TotalMilliseconds < 400)
+            {
+                StopOverlayAnim();
                 return;
+            }
 
             // 防重入：上一次后台检测还在跑就跳过
             if (System.Threading.Interlocked.CompareExchange(ref _paperDetectRunning, 1, 0) != 0) return;
@@ -3870,6 +3884,41 @@ namespace Ink_Canvas
                             // 角点是缩小后图像的坐标，先还原回原始帧坐标
                             overlayPts[i] = MapFramePointToOverlay(
                                 corners[i].X / detectScale, corners[i].Y / detectScale, frameW, frameH);
+                        }
+                    }
+
+                    // 静止降频：如果角点连续稳定（纸张静止未被移动），降频到 1200ms 减少 GPU 显存拷贝与 CPU 开销；
+                    // 一旦纸张移动或角点丢失，立即恢复为 200ms 高灵敏跟随
+                    if (_paperDetectTimer != null)
+                    {
+                        if (overlayPts != null && overlayPts.Length == 4 && _lastOverlayCorners != null && _lastOverlayCorners.Length == 4)
+                        {
+                            double maxDelta = 0;
+                            for (int i = 0; i < 4; i++)
+                            {
+                                double dx = overlayPts[i].X - _lastOverlayCorners[i].X;
+                                double dy = overlayPts[i].Y - _lastOverlayCorners[i].Y;
+                                double dist = Math.Sqrt(dx * dx + dy * dy);
+                                if (dist > maxDelta) maxDelta = dist;
+                            }
+                            if (maxDelta < 6.0)
+                            {
+                                _paperDetectStableCount++;
+                                if (_paperDetectStableCount >= 2)
+                                {
+                                    _paperDetectTimer.Interval = TimeSpan.FromMilliseconds(PaperDetectIdleIntervalMs);
+                                }
+                            }
+                            else
+                            {
+                                _paperDetectStableCount = 0;
+                                _paperDetectTimer.Interval = TimeSpan.FromMilliseconds(PaperDetectIntervalMs);
+                            }
+                        }
+                        else
+                        {
+                            _paperDetectStableCount = 0;
+                            _paperDetectTimer.Interval = TimeSpan.FromMilliseconds(PaperDetectIntervalMs);
                         }
                     }
 

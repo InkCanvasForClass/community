@@ -68,6 +68,7 @@ namespace Ink_Canvas
         private readonly HashSet<int> _activeTouchStrokeIds = new HashSet<int>();
         private bool _isInkCanvasManipulationEnabledBeforeTouchInk;
         private bool _hasStoredInkCanvasManipulationStateForTouchInk;
+        private DateTime _boothLastStrokeEndTime = DateTime.MinValue;
 
         private readonly Dictionary<int, DispatcherTimer> _pauseStraightenTimers = new Dictionary<int, DispatcherTimer>();
         private const int PauseStraightenDelayMs = 300;
@@ -197,7 +198,7 @@ namespace Ink_Canvas
 
         private void EndTouchInkInputIfIdle()
         {
-            if (_activeRealtimeTouchStrokeIds.Count != 0 || _activeRealtimeStylusStrokeIds.Count != 0 || _activeTouchStrokeIds.Count != 0)
+            if (_activeRealtimeTouchStrokeIds.Count != 0 || _activeRealtimeStylusStrokeIds.Count != 0 || _activeTouchStrokeIds.Count != 0 || dec.Count != 0 || _boothDownTouchIds.Count != 0)
                 return;
             if (!_hasStoredInkCanvasManipulationStateForTouchInk)
                 return;
@@ -1995,6 +1996,14 @@ namespace Ink_Canvas
                         }
                         inkCanvas.EditingMode = InkCanvasEditingMode.None;
                     }
+                    else if (inkCanvas != null
+                        && (inkCanvas.EditingMode == InkCanvasEditingMode.Ink
+                            || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
+                            || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke))
+                    {
+                        // 第一指 + 笔/橡皮擦：临时禁用 Manipulation，绕过手势引擎延迟缓冲，实现无延迟跟手书写
+                        BeginTouchInkInput();
+                    }
                     // 不设置 e.Handled = true，让 WPF 把触摸提升为 Manipulation 事件
                     return;
                 }
@@ -2251,6 +2260,11 @@ namespace Ink_Canvas
                 CommitManualTouchStroke(e.TouchDevice.Id);
 
                 dec.Remove(e.TouchDevice.Id);
+                _boothLastStrokeEndTime = DateTime.UtcNow;
+                if (dec.Count == 0)
+                {
+                    EndTouchInkInputIfIdle();
+                }
 
                 if (drawingShapeMode != 0 && dec.Count == 0)
                 {
