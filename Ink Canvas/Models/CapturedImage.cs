@@ -107,7 +107,7 @@ namespace Ink_Canvas.Models
             if (image.IsFrozen)
                 return image;
 
-            var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+            var encoder = new System.Windows.Media.Imaging.BmpBitmapEncoder();
             encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(image));
 
             var stream = new System.IO.MemoryStream();
