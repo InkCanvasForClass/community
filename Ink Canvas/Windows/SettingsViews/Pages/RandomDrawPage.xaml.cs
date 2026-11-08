@@ -179,7 +179,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 {
                     Content = RandomStrings.Random_Roster_None,
                     Tag = "",
-                    FontFamily = new FontFamily("Microsoft YaHei UI")
                 };
                 ComboBoxNameRoster.Items.Add(noneItem);
 
@@ -195,7 +194,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                         {
                             Content = roster.Name,
                             Tag = roster.Guid ?? "",
-                            FontFamily = new FontFamily("Microsoft YaHei UI")
                         };
                         ComboBoxNameRoster.Items.Add(item);
                         if (!string.IsNullOrEmpty(selectedGuid) &&
@@ -290,7 +288,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             {
                 ComboBoxItem item = new ComboBoxItem();
                 item.Content = background.Name;
-                item.FontFamily = new FontFamily("Microsoft YaHei UI");
                 ComboBoxPickNameBackground.Items.Add(item);
             }
         }

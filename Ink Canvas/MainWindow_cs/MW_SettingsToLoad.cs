@@ -177,6 +177,15 @@ namespace Ink_Canvas
 
             try
             {
+                GlobalFontHelper.Apply(Settings?.Appearance?.GlobalUIFontFamily);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"从配置应用界面字体失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            try
+            {
                 ProcessProtectionManager.ApplyFromSettings();
             }
             catch

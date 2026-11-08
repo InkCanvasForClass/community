@@ -177,6 +177,24 @@
   <data name="Theme_LanguageLabel" xml:space="preserve">
     <value>UI 母语</value>
   </data>
+  <data name="Theme_UIFont_Default" xml:space="preserve">
+    <value>默认 (Segoe UI)</value>
+  </data>
+  <data name="Theme_UIFont_Description" xml:space="preserve">
+    <value>挑个顺眼的字体，或者自己扔个 .ttf/.ttc 进来</value>
+  </data>
+  <data name="Theme_UIFont_Import" xml:space="preserve">
+    <value>添个字体…</value>
+  </data>
+  <data name="Theme_UIFont_ImportFailed" xml:space="preserve">
+    <value>这字体添不进来</value>
+  </data>
+  <data name="Theme_UIFont_Remove" xml:space="preserve">
+    <value>踹掉字体</value>
+  </data>
+  <data name="Theme_UIFontLabel" xml:space="preserve">
+    <value>字体</value>
+  </data>
   <data name="Theme_Light" xml:space="preserve">
     <value>刺眼但精神</value>
   </data>

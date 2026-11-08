@@ -154,7 +154,7 @@
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Sync}" />
                     </ui:SettingsCard.HeaderIcon>
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock x:Name="UpdateDurationText" VerticalAlignment="Center" FontFamily="Consolas" />
+                        <TextBlock x:Name="UpdateDurationText" VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" />
                         <Slider x:Name="UpdateDurationSlider"
                                 Width="220"
                                 Minimum="1"
@@ -171,7 +171,7 @@
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Warning}" />
                     </ui:SettingsCard.HeaderIcon>
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock x:Name="UrgentDurationText" VerticalAlignment="Center" FontFamily="Consolas" />
+                        <TextBlock x:Name="UrgentDurationText" VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" />
                         <Slider x:Name="UrgentDurationSlider"
                                 Width="220"
                                 Minimum="3"
@@ -188,7 +188,7 @@
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Important}" />
                     </ui:SettingsCard.HeaderIcon>
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock x:Name="ImportantDurationText" VerticalAlignment="Center" FontFamily="Consolas" />
+                        <TextBlock x:Name="ImportantDurationText" VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" />
                         <Slider x:Name="ImportantDurationSlider"
                                 Width="220"
                                 Minimum="3"
@@ -205,7 +205,7 @@
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Stopwatch}" />
                     </ui:SettingsCard.HeaderIcon>
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock x:Name="ReminderDurationText" VerticalAlignment="Center" FontFamily="Consolas" />
+                        <TextBlock x:Name="ReminderDurationText" VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" />
                         <Slider x:Name="ReminderDurationSlider"
                                 Width="220"
                                 Minimum="3"
@@ -222,7 +222,7 @@
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Info}" />
                     </ui:SettingsCard.HeaderIcon>
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBlock x:Name="OtherDurationText" VerticalAlignment="Center" FontFamily="Consolas" />
+                        <TextBlock x:Name="OtherDurationText" VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" />
                         <Slider x:Name="OtherDurationSlider"
                                 Width="220"
                                 Minimum="1"

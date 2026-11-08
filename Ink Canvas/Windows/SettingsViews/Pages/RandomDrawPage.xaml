@@ -70,7 +70,7 @@
                     <ui:SettingsCard Header="{x:Static props:RandomStrings.Random_OnceCloseDelay}">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="RandWindowOnceCloseLatencyText"
-                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                       VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                             <Slider x:Name="RandWindowOnceCloseLatencySlider"
                                     Minimum="0.5" Maximum="8" Width="200"
                                     IsSnapToTickEnabled="True" Value="2.5"
@@ -82,7 +82,7 @@
                     <ui:SettingsCard Header="{x:Static props:RandomStrings.Random_OnceMaxStudents}">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="RandWindowOnceMaxStudentsText"
-                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                       VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                             <Slider x:Name="RandWindowOnceMaxStudentsSlider"
                                     Minimum="0" Maximum="20" Width="200"
                                     IsSnapToTickEnabled="True" Value="10" TickFrequency="1"
@@ -138,7 +138,7 @@
                     <ui:SettingsCard Header="{x:Static props:RandomStrings.Random_ML_HistoryCount}">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="MLAvoidanceHistoryText"
-                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                       VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                             <Slider x:Name="MLAvoidanceHistorySlider"
                                     Minimum="5" Maximum="50" Width="200"
                                     IsSnapToTickEnabled="True" Value="50" TickFrequency="5"
@@ -150,7 +150,7 @@
                     <ui:SettingsCard Header="{x:Static props:RandomStrings.Random_ML_Weight}">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="MLAvoidanceWeightText"
-                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                       VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                             <Slider x:Name="MLAvoidanceWeightSlider"
                                     Minimum="0.1" Maximum="1.0" Width="200"
                                     IsSnapToTickEnabled="True" Value="1.0" TickFrequency="0.1"
@@ -187,7 +187,7 @@
                     <ui:SettingsCard Header="{x:Static props:TimerStrings.Timer_Volume}">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="TimerVolumeText"
-                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                       VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                             <Slider x:Name="TimerVolumeSlider"
                                     Minimum="0" Maximum="1" Width="200"
                                     IsSnapToTickEnabled="True" Value="1" TickFrequency="0.1"
@@ -211,7 +211,7 @@
                     <ui:SettingsCard Header="{x:Static props:TimerStrings.Timer_ProgressiveVolume}">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="ProgressiveReminderVolumeText"
-                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                       VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                             <Slider x:Name="ProgressiveReminderVolumeSlider"
                                     Minimum="0" Maximum="1" Width="200"
                                     IsSnapToTickEnabled="True" Value="1" TickFrequency="0.1"

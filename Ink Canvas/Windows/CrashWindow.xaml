@@ -111,7 +111,7 @@
 
         <Grid Grid.Row="2" Margin="40,16,40,16">
             <TextBox x:Name="TextBoxCrashInfo"
-                     FontFamily="Consolas"
+                     FontFamily="{StaticResource MonoUIFontFamily}"
                      FontSize="12"
                      TextWrapping="NoWrap"
                      AcceptsReturn="True"

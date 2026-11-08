@@ -1141,6 +1141,7 @@ namespace Ink_Canvas
             LogHelper.WriteLogToFile($"App | 启动模式: {CurrentStartupMode}");
 
             TryApplyPreferredLanguageFromParsedSettings(parsedSettings);
+            TryApplyGlobalUIFontFromParsedSettings(parsedSettings);
 
             // 根据设置决定是否显示启动画面（复用已解析的设置对象）
             if (ShouldShowSplashScreenFromParsed(parsedSettings) && !IsLaunchByFileOrUri(e.Args))
@@ -1821,6 +1822,19 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"启动时预加载语言失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void TryApplyGlobalUIFontFromParsedSettings(dynamic parsedSettings)
+        {
+            try
+            {
+                string font = parsedSettings?["appearance"]?["globalUIFontFamily"]?.ToString();
+                GlobalFontHelper.Apply(font);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"启动时应用全局字体失败: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
 

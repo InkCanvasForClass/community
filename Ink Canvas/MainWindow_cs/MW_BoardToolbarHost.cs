@@ -621,7 +621,7 @@ namespace Ink_Canvas
             indexTextFactory.SetValue(TextBlock.FontSizeProperty, 14.0);
             indexTextFactory.SetValue(TextBlock.HorizontalAlignmentProperty, HorizontalAlignment.Center);
             indexTextFactory.SetValue(TextBlock.VerticalAlignmentProperty, VerticalAlignment.Center);
-            indexTextFactory.SetValue(TextBlock.FontFamilyProperty, new FontFamily("Consolas"));
+            indexTextFactory.SetValue(TextBlock.FontFamilyProperty, GlobalFontHelper.MonoFontFamily);
             indexTextFactory.SetValue(TextBlock.ForegroundProperty, Brushes.White);
             indexTextFactory.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("Index"));
             indexBorderFactory.AppendChild(indexTextFactory);

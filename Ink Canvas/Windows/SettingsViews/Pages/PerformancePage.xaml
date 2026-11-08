@@ -24,7 +24,7 @@
                 </Style>
                 <Style x:Key="MetricValueStyle" TargetType="TextBlock">
                     <Style.Setters>
-                        <Setter Property="FontFamily" Value="Consolas" />
+                        <Setter Property="FontFamily" Value="{StaticResource MonoUIFontFamily}" />
                         <Setter Property="FontSize" Value="14" />
                         <Setter Property="VerticalAlignment" Value="Center" />
                     </Style.Setters>
