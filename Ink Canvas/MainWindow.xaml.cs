@@ -1776,6 +1776,9 @@ namespace Ink_Canvas
                 HandleFloatingBarRecovery();
             }
 
+            // DPI 变化会改变逻辑/物理像素换算，重新做浮动栏重叠检测与最小缩放限制
+            EvaluateFloatingBarFit();
+
             UpdateWinRTInkTarget();
         }
 
