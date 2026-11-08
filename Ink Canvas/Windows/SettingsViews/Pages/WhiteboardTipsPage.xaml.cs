@@ -263,8 +263,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void SchemeCheckBox_Changed(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
-            var scheme = (sender as CheckBox)?.DataContext as TipsScheme;
+            var checkBox = sender as CheckBox;
+            var scheme = checkBox?.DataContext as TipsScheme;
             if (scheme == null) return;
+
+            bool isChecked = checkBox?.IsChecked == true;
+            scheme.IsEnabled = isChecked;
 
             if (scheme.IsPreset)
             {
@@ -272,7 +276,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     SettingsManager.Settings.Appearance.EnabledPresetTipsSources = new List<string>();
 
                 var sources = SettingsManager.Settings.Appearance.EnabledPresetTipsSources;
-                if (scheme.IsEnabled)
+                if (isChecked)
                 {
                     if (!sources.Contains(scheme.PresetId))
                         sources.Add(scheme.PresetId);

@@ -1095,7 +1095,8 @@ namespace Ink_Canvas
             Settings.Appearance.Theme = 0;
             Settings.Appearance.EnableChickenSoupInWhiteboardMode = true;
             Settings.Appearance.EnableTimeDisplayInWhiteboardMode = true;
-            Settings.Appearance.ChickenSoupSource = 1;
+            Settings.Appearance.ChickenSoupSource = -1;
+            Settings.Appearance.EnabledPresetTipsSources = new List<string> { "mottos" };
             Settings.Appearance.ViewboxFloatingBarOpacityValue = 1.0;
             Settings.Appearance.ViewboxFloatingBarOpacityInPPTValue = 1.0;
             Settings.Appearance.EnableTrayIcon = true;
