@@ -887,6 +887,9 @@ namespace Ink_Canvas
         /// </remarks>
         private void Stroke_StylusPointsChanged(object sender, EventArgs e)
         {
+            // 漫游在收尾时统一提交一次历史，不重复克隆点集和自动提交。
+            if (_isCommittingBoardRoaming) return;
+
             if (IsCurrentPageFrozen && _currentCommitType != CommitReason.CodeInput)
             {
                 TryBlockFrozenPageMutation("修改冻结页面");
