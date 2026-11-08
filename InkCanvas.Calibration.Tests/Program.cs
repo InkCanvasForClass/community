@@ -43,8 +43,10 @@ namespace InkCanvas.Calibration.Tests
                 AutoStartMigrationPreservesOtherSettings, AutoStartMigrationKeepsExplicitValues,
                 AutoStartMigrationRetriesAfterWriteFailure, AutoStartMigrationPreservesInvalidConfig,
                 AutoStartMigrationCreatesMissingConfig, AutoStartMigrationReadsCurrentConfig,
-                AutoStartMigrationHandlesMissingStartup };
+                AutoStartMigrationHandlesMissingStartup, BoardRoamingTests.RunAll };
             if (Array.IndexOf(args, "--palm-only") >= 0) tests = new Action[] { PalmGroupInputTests.RunAll };
+            if (Array.IndexOf(args, "--roaming-only") >= 0) tests = new Action[] { BoardRoamingTests.RunAll };
+            if (Array.IndexOf(args, "--roaming-benchmark") >= 0) tests = new Action[] { BoardRoamingTests.Benchmark };
             if (Array.IndexOf(args, "--calibration-preview-only") >= 0)
                 tests = new Action[] { CalibrationPreviewSuppressesRemainingFingers, CalibrationPreviewOwnsTouchInput };
             foreach (var test in tests)

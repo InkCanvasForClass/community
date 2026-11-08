@@ -1774,6 +1774,8 @@ namespace Ink_Canvas
         /// <param name="e">关闭事件参数；方法会在需要中止关闭时将 <c>e.Cancel</c> 设为 <c>true</c>。</param>
         private async void Window_Closing(object sender, CancelEventArgs e)
         {
+            EndBoardRoaming();
+            CancelBoardRoamingPreviewRefresh();
             try
             {
                 if (_isReloadingForLanguageChange)

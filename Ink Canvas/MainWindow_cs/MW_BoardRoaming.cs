@@ -9,6 +9,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 
 namespace Ink_Canvas
 {
@@ -28,6 +29,18 @@ namespace Ink_Canvas
         private readonly HashSet<int> _boardRoamingContactIds = new HashSet<int>();
         private int _boardRoamingPrimaryContactId = -1;
         private bool _isBoardRoamingMultiTouchSuppressed;
+        private Vector _boardRoamingPendingTranslation;
+        private Transform _boardRoamingOriginalRenderTransform;
+        private Matrix _boardRoamingInputInverse;
+        private TranslateTransform _boardRoamingRenderTranslation;
+        private bool _isCommittingBoardRoaming;
+        private bool _isBoardRoamingPopupDrag;
+        private bool _isBoardRoamingManipulation;
+        private bool _boardRoamingInputEventsAttached;
+        private bool _boardRoamingPreviewDirty = true;
+        private DispatcherOperation _boardRoamingPreviewRefreshOperation;
+        private double _boardRoamingBoothStartX;
+        private double _boardRoamingBoothStartY;
 
         internal void ActivateBoardRoamingMode()
         {
@@ -90,31 +103,48 @@ namespace Ink_Canvas
 
         private void BeginBoardRoaming(Point point)
         {
-            if (!IsBoardRoamingMode || _isBoardRoamingPointerDown || IsCurrentPageFrozen) return;
+            if (!IsBoardRoamingMode || _isBoardRoamingPointerDown || IsCurrentPageFrozen
+                || !double.IsFinite(point.X) || !double.IsFinite(point.Y)) return;
 
+            var inputTransform = GetBoardRoamingInputTransform(inkCanvas);
+            if (!inputTransform.HasInverse) return;
+            inputTransform.Invert();
+            _boardRoamingInputInverse = inputTransform;
+            AttachBoardRoamingInputEvents();
             _isBoardRoamingPointerDown = true;
             _boardRoamingLastPoint = point;
-            _boardRoamingStrokeHistory = new Dictionary<Stroke, StylusPointCollection>();
-            foreach (var stroke in inkCanvas.Strokes)
-                _boardRoamingStrokeHistory[stroke] = stroke.StylusPoints.Clone();
-
+            _boardRoamingPendingTranslation = new Vector();
+            _boardRoamingOriginalRenderTransform = inkCanvas.RenderTransform;
+            _boardRoamingRenderTranslation = new TranslateTransform();
+            var transform = new TransformGroup();
+            transform.Children.Add(_boardRoamingRenderTranslation);
+            transform.Children.Add(_boardRoamingOriginalRenderTransform ?? Transform.Identity);
+            inkCanvas.SetCurrentValue(UIElement.RenderTransformProperty, transform);
+            _boardRoamingBoothStartX = _boothPreviewTranslateX;
+            _boardRoamingBoothStartY = _boothPreviewTranslateY;
             inkCanvas.Cursor = Cursors.Hand;
         }
 
         private void MoveBoardRoaming(Point point)
         {
-            if (!_isBoardRoamingPointerDown || !IsBoardRoamingMode) return;
+            if (!_isBoardRoamingPointerDown || !IsBoardRoamingMode
+                || !double.IsFinite(point.X) || !double.IsFinite(point.Y)) return;
 
+            // 使用已应用到视觉树的变换，而非可能尚未完成布局的 RenderTransform 属性。
+            point = _boardRoamingInputInverse.Transform(GetBoardRoamingInputTransform(inkCanvas).Transform(point));
             var delta = point - _boardRoamingLastPoint;
             if (delta.X == 0 && delta.Y == 0) return;
 
             TranslateBoardRoamingContent(delta.X, delta.Y);
-            _boardRoamingViewportWorldPosition = new Point(
-                _boardRoamingViewportWorldPosition.X - delta.X,
-                _boardRoamingViewportWorldPosition.Y - delta.Y);
-
             _boardRoamingLastPoint = point;
-            RefreshBoardRoamingPopup(false);
+        }
+
+        private static Matrix GetBoardRoamingInputTransform(Visual visual)
+        {
+            var matrix = VisualTreeHelper.GetTransform(visual)?.Value ?? Matrix.Identity;
+            var offset = VisualTreeHelper.GetOffset(visual);
+            matrix.Translate(offset.X, offset.Y);
+            return matrix;
         }
 
         private void EndBoardRoaming()
@@ -122,9 +152,54 @@ namespace Ink_Canvas
             if (!_isBoardRoamingPointerDown) return;
 
             _isBoardRoamingPointerDown = false;
-            CommitBoardRoamingHistory();
-            RefreshBoardRoamingPopup();
-            inkCanvas.Cursor = IsBoardRoamingMode ? Cursors.Hand : Cursors.Arrow;
+            CancelBoardRoamingPreviewRefresh();
+            _isBoardRoamingManipulation = false;
+            _isBoardRoamingPopupDrag = false;
+            try
+            {
+                CommitBoardRoamingHistory();
+            }
+            finally
+            {
+                inkCanvas.SetCurrentValue(UIElement.RenderTransformProperty,
+                    _boardRoamingOriginalRenderTransform ?? Transform.Identity);
+                _boardRoamingOriginalRenderTransform = null;
+                _boardRoamingRenderTranslation = null;
+                _boardRoamingPendingTranslation = new Vector();
+                _boardRoamingViewportWorldPosition = new Point();
+                _boardRoamingStrokeHistory = null;
+                _boardRoamingPreviewDirty = true;
+                if (ViewboxFloatingBar != null) ViewboxFloatingBar.IsHitTestVisible = true;
+                if (BlackboardUIGridForInkReplay != null) BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+                inkCanvas.Cursor = IsBoardRoamingMode ? Cursors.Hand : Cursors.Arrow;
+                if (BoardRoamingPopup?.IsOpen == true)
+                    QueueBoardRoamingPreviewRefresh();
+            }
+        }
+
+        private void AttachBoardRoamingInputEvents()
+        {
+            if (_boardRoamingInputEventsAttached) return;
+
+            inkCanvas.LostMouseCapture += (s, e) =>
+            {
+                if (ReferenceEquals(e.OriginalSource, inkCanvas) && !_isBoardRoamingPopupDrag
+                    && _boardRoamingContactIds.Count == 0)
+                    EndBoardRoaming();
+            };
+            inkCanvas.LostStylusCapture += (s, e) =>
+            {
+                if (!ReferenceEquals(e.OriginalSource, inkCanvas) || _isBoardRoamingPopupDrag) return;
+                EndBoardRoaming();
+                ResetBoardRoamingContactState();
+            };
+            inkCanvas.LostTouchCapture += (s, e) =>
+            {
+                if (ReferenceEquals(e.OriginalSource, inkCanvas) && _isBoardRoamingManipulation)
+                    EndBoardRoaming();
+            };
+            inkCanvas.Unloaded += (s, e) => EndBoardRoaming();
+            _boardRoamingInputEventsAttached = true;
         }
 
         private void ResetBoardRoamingContactState()
@@ -214,12 +289,41 @@ namespace Ink_Canvas
 
         private void CommitBoardRoamingHistory()
         {
-            if (_boardRoamingStrokeHistory == null) return;
+            var delta = _boardRoamingPendingTranslation;
+            if (delta.X == 0 && delta.Y == 0) return;
 
-            var history = new Dictionary<Stroke, Tuple<StylusPointCollection, StylusPointCollection>>();
+            var strokes = new StrokeCollection(inkCanvas.Strokes);
+            _boardRoamingStrokeHistory = new Dictionary<Stroke, StylusPointCollection>(strokes.Count);
+            foreach (var stroke in strokes)
+                _boardRoamingStrokeHistory[stroke] = stroke.StylusPoints.Clone();
+
+            var previousCommitType = _currentCommitType;
+            _currentCommitType = CommitReason.CodeInput;
+            _isCommittingBoardRoaming = true;
+            try
+            {
+                var matrix = Matrix.Identity;
+                matrix.Translate(delta.X, delta.Y);
+                foreach (var stroke in strokes)
+                    stroke.Transform(matrix, false);
+                foreach (UIElement child in inkCanvas.Children)
+                {
+                    var transform = child.RenderTransform?.Value ?? Matrix.Identity;
+                    transform.Translate(delta.X, delta.Y);
+                    child.SetCurrentValue(UIElement.RenderTransformProperty, new MatrixTransform(transform));
+                }
+            }
+            finally
+            {
+                _isCommittingBoardRoaming = false;
+                _currentCommitType = previousCommitType;
+            }
+
+            var currentStrokes = new HashSet<Stroke>(inkCanvas.Strokes);
+            var history = new Dictionary<Stroke, Tuple<StylusPointCollection, StylusPointCollection>>(strokes.Count);
             foreach (var item in _boardRoamingStrokeHistory)
             {
-                if (!inkCanvas.Strokes.Contains(item.Key)) continue;
+                if (!currentStrokes.Contains(item.Key)) continue;
 
                 var current = item.Key.StylusPoints.Clone();
                 if (!AreStylusPointsEqual(item.Value, current))
@@ -232,12 +336,10 @@ namespace Ink_Canvas
                 foreach (var item in history)
                     StrokeInitialHistory[item.Key] = item.Value.Item2;
             }
-
             if (history.Count > 0 || inkCanvas.Children.Count > 0)
                 MarkCurrentPageInkChanged();
-
-            _boardRoamingStrokeHistory = null;
-            _boardRoamingViewportWorldPosition = new Point();
+            if (_isVideoPresenterSpecialMode)
+                ResetRotationBaseline();
         }
 
         private void ShowBoardRoamingPopup()
@@ -246,7 +348,7 @@ namespace Ink_Canvas
 
             AttachBoardRoamingPopupEvents();
             BoardRoamingPopup.IsOpen = false;
-            RefreshBoardRoamingPopup();
+            RefreshBoardRoamingPopup(true, true);
             AnimationsHelper.ShowPopupWithSlideAndFade(BoardRoamingPopup);
             _popupManager?.BringToFront(BoardRoamingPopup);
         }
@@ -258,6 +360,11 @@ namespace Ink_Canvas
             BoardRoamingPopupContent.ViewportPositionChanged += BoardRoamingPopupContent_ViewportPositionChanged;
             BoardRoamingPopupContent.ViewportDragStarted += BeginBoardRoamingPopupDrag;
             BoardRoamingPopupContent.ViewportDragCompleted += EndBoardRoamingPopupDrag;
+            BoardRoamingPopup.Closed += (s, e) =>
+            {
+                CancelBoardRoamingPreviewRefresh();
+                BoardRoamingPopupContent.CompleteViewportDrag();
+            };
             if (BoardRoamingPopupContent.CloseButtonControl != null)
                 BoardRoamingPopupContent.CloseButtonControl.Click += (s, e) =>
                 {
@@ -273,56 +380,85 @@ namespace Ink_Canvas
         }
 
         private void RefreshBoardRoamingPopup(bool updateBounds)
+            => RefreshBoardRoamingPopup(updateBounds, false);
+
+        private void RefreshBoardRoamingPopup(bool updateBounds, bool forceRender)
         {
-            if (!IsBoardRoamingMode || BoardRoamingPopupContent == null || inkCanvas.ActualWidth <= 0 || inkCanvas.ActualHeight <= 0)
+            if (!IsBoardRoamingMode || BoardRoamingPopupContent == null || _isUpdatingBoardRoamingPopup
+                || (!forceRender && BoardRoamingPopup?.IsOpen != true)
+                || !double.IsFinite(inkCanvas.ActualWidth) || !double.IsFinite(inkCanvas.ActualHeight)
+                || inkCanvas.ActualWidth <= 0 || inkCanvas.ActualHeight <= 0
+                || !double.IsFinite(_boardRoamingViewportWorldPosition.X)
+                || !double.IsFinite(_boardRoamingViewportWorldPosition.Y))
                 return;
 
-            var viewport = new Rect(_boardRoamingViewportWorldPosition.X, _boardRoamingViewportWorldPosition.Y,
-                inkCanvas.ActualWidth, inkCanvas.ActualHeight);
-            if (updateBounds || _boardRoamingWorldBounds.IsEmpty)
+            var viewport = new Rect(_boardRoamingViewportWorldPosition,
+                new Size(inkCanvas.ActualWidth, inkCanvas.ActualHeight));
+            var worldBounds = _boardRoamingWorldBounds;
+            if (updateBounds || !IsValidBoardRoamingBounds(worldBounds))
             {
                 var contentBounds = GetBoardRoamingContentBounds();
                 if (!contentBounds.IsEmpty)
-                {
-                    contentBounds.Offset(_boardRoamingViewportWorldPosition.X, _boardRoamingViewportWorldPosition.Y);
-                }
-                var horizontalPadding = Math.Max(viewport.Width * 0.5, 1);
-                var verticalPadding = Math.Max(viewport.Height * 0.5, 1);
-
-                _boardRoamingWorldBounds = Rect.Union(viewport, contentBounds);
-                _boardRoamingWorldBounds.Inflate(horizontalPadding, verticalPadding);
+                    contentBounds.Offset(_boardRoamingViewportWorldPosition.X + _boardRoamingPendingTranslation.X,
+                        _boardRoamingViewportWorldPosition.Y + _boardRoamingPendingTranslation.Y);
+                worldBounds = Rect.Union(viewport, contentBounds);
+                worldBounds.Inflate(Math.Max(viewport.Width * 0.5, 1), Math.Max(viewport.Height * 0.5, 1));
             }
-            else if (!_boardRoamingWorldBounds.Contains(viewport))
+            else if (!worldBounds.Contains(viewport))
             {
-                _boardRoamingWorldBounds = Rect.Union(_boardRoamingWorldBounds, viewport);
+                worldBounds.Union(viewport);
             }
+            if (!IsValidBoardRoamingBounds(worldBounds)) return;
 
             const double previewWidth = 352;
             const double previewHeight = 198;
-            _boardRoamingPreviewScale = Math.Min(previewWidth / _boardRoamingWorldBounds.Width, previewHeight / _boardRoamingWorldBounds.Height);
-            var renderedWidth = _boardRoamingWorldBounds.Width * _boardRoamingPreviewScale;
-            var renderedHeight = _boardRoamingWorldBounds.Height * _boardRoamingPreviewScale;
-            var offsetX = (previewWidth - renderedWidth) / 2;
-            var offsetY = (previewHeight - renderedHeight) / 2;
-            _boardRoamingPreviewOffset = new Point(offsetX, offsetY);
-            _boardRoamingPreviewMovementBounds = new Rect(offsetX, offsetY, renderedWidth, renderedHeight);
+            var scale = Math.Min(previewWidth / worldBounds.Width, previewHeight / worldBounds.Height);
+            if (!double.IsFinite(scale) || scale <= 0) return;
+            var renderedWidth = worldBounds.Width * scale;
+            var renderedHeight = worldBounds.Height * scale;
+            var offset = new Point((previewWidth - renderedWidth) / 2, (previewHeight - renderedHeight) / 2);
+            var movementBounds = new Rect(offset, new Size(renderedWidth, renderedHeight));
+            if (!IsValidBoardRoamingBounds(movementBounds)) return;
 
-            _boardRoamingViewportInPreview = new Rect(
-                offsetX + (viewport.X - _boardRoamingWorldBounds.X) * _boardRoamingPreviewScale,
-                offsetY + (viewport.Y - _boardRoamingWorldBounds.Y) * _boardRoamingPreviewScale,
-                viewport.Width * _boardRoamingPreviewScale,
-                viewport.Height * _boardRoamingPreviewScale);
+            var needsBitmap = updateBounds || _boardRoamingPreviewDirty || worldBounds != _boardRoamingWorldBounds
+                || BoardRoamingPopupContent.PreviewImageControl.Source == null;
+            if (needsBitmap && _isBoardRoamingPointerDown && !forceRender
+                && BoardRoamingPopupContent.PreviewImageControl.Source != null)
+            {
+                // 拖动只移动视口框；世界边界扩展的重绘合并到下一帧。
+                UpdateBoardRoamingViewport(viewport);
+                QueueBoardRoamingPreviewRefresh();
+                return;
+            }
 
+            var bitmap = needsBitmap ? RenderBoardRoamingPreview(worldBounds, previewWidth, previewHeight) : null;
+            if (needsBitmap && bitmap == null) return;
+
+            _boardRoamingWorldBounds = worldBounds;
+            _boardRoamingPreviewScale = scale;
+            _boardRoamingPreviewOffset = offset;
+            _boardRoamingPreviewMovementBounds = movementBounds;
+            if (bitmap != null)
+                BoardRoamingPopupContent.PreviewImageControl.Source = bitmap;
+            _boardRoamingPreviewDirty = false;
+            UpdateBoardRoamingViewport(viewport);
+        }
+
+        private void UpdateBoardRoamingViewport(Rect viewport)
+        {
+            if (!IsValidBoardRoamingBounds(_boardRoamingWorldBounds)
+                || !double.IsFinite(_boardRoamingPreviewScale) || _boardRoamingPreviewScale <= 0) return;
+
+            var previewViewport = new Rect(
+                _boardRoamingPreviewOffset.X + (viewport.X - _boardRoamingWorldBounds.X) * _boardRoamingPreviewScale,
+                _boardRoamingPreviewOffset.Y + (viewport.Y - _boardRoamingWorldBounds.Y) * _boardRoamingPreviewScale,
+                viewport.Width * _boardRoamingPreviewScale, viewport.Height * _boardRoamingPreviewScale);
+            if (!IsValidBoardRoamingBounds(previewViewport)) return;
+            _boardRoamingViewportInPreview = previewViewport;
             _isUpdatingBoardRoamingPopup = true;
             try
             {
-                BoardRoamingPopupContent.PreviewImageControl.Source = RenderBoardRoamingPreview(
-                    _boardRoamingWorldBounds,
-                    previewWidth,
-                    previewHeight);
-                BoardRoamingPopupContent.SetViewport(
-                    _boardRoamingViewportInPreview,
-                    _boardRoamingPreviewMovementBounds,
+                BoardRoamingPopupContent.SetViewport(previewViewport, _boardRoamingPreviewMovementBounds,
                     string.Format(FloatingBarStrings.Board_RoamingPanelScale,
                         Math.Round(_boardRoamingWorldBounds.Width / viewport.Width, 1)));
             }
@@ -332,29 +468,82 @@ namespace Ink_Canvas
             }
         }
 
+        private void QueueBoardRoamingPreviewRefresh()
+        {
+            if (_boardRoamingPreviewRefreshOperation?.Status == DispatcherOperationStatus.Pending) return;
+            _boardRoamingPreviewRefreshOperation = inkCanvas.Dispatcher.BeginInvoke(DispatcherPriority.Loaded,
+                new Action(() =>
+                {
+                    _boardRoamingPreviewRefreshOperation = null;
+                    if (BoardRoamingPopup?.IsOpen == true)
+                        RefreshBoardRoamingPopup(false, true);
+                }));
+        }
+
+        private void CancelBoardRoamingPreviewRefresh()
+        {
+            if (_boardRoamingPreviewRefreshOperation?.Status == DispatcherOperationStatus.Pending)
+                _boardRoamingPreviewRefreshOperation.Abort();
+            _boardRoamingPreviewRefreshOperation = null;
+        }
+
+        private static bool IsValidBoardRoamingBounds(Rect bounds)
+            => !bounds.IsEmpty && double.IsFinite(bounds.X) && double.IsFinite(bounds.Y)
+                && double.IsFinite(bounds.Width) && double.IsFinite(bounds.Height)
+                && double.IsFinite(bounds.Right) && double.IsFinite(bounds.Bottom)
+                && bounds.Width > 0 && bounds.Height > 0;
+
         private Rect GetBoardRoamingContentBounds()
         {
             var result = Rect.Empty;
             foreach (var stroke in inkCanvas.Strokes)
-                result.Union(stroke.GetBounds());
-
+            {
+                var bounds = stroke.GetBounds();
+                if (IsValidBoardRoamingBounds(bounds)) result.Union(bounds);
+            }
             foreach (UIElement child in inkCanvas.Children)
             {
-                if (child is not FrameworkElement element) continue;
-                try
+                if (child is FrameworkElement element
+                    && TryGetBoardRoamingElementBounds(element, out var bounds, out var parentTransform))
                 {
-                    var bounds = element.TransformToAncestor(inkCanvas)
-                        .TransformBounds(new Rect(0, 0, element.ActualWidth, element.ActualHeight));
-                    result.Union(bounds);
-                }
-                catch (InvalidOperationException)
-                {
+                    bounds.Transform(parentTransform);
+                    if (IsValidBoardRoamingBounds(bounds)) result.Union(bounds);
                 }
             }
+            return result;
+        }
 
-            return result.IsEmpty
-                ? new Rect(0, 0, inkCanvas.ActualWidth, inkCanvas.ActualHeight)
-                : result;
+        private bool TryGetBoardRoamingElementBounds(FrameworkElement element, out Rect bounds, out Matrix parentTransform)
+        {
+            bounds = Rect.Empty;
+            parentTransform = Matrix.Identity;
+            if (element.Visibility != Visibility.Visible || element.ActualWidth <= 0 || element.ActualHeight <= 0)
+                return false;
+            try
+            {
+                if (VisualTreeHelper.GetParent(element) is not Visual parent) return false;
+                var localBounds = VisualTreeHelper.GetDescendantBounds(element);
+                if (!IsValidBoardRoamingBounds(localBounds)) return false;
+                bounds = element.TransformToAncestor(parent).TransformBounds(localBounds);
+                if (!IsValidBoardRoamingBounds(bounds)) return false;
+
+                var transform = parent.TransformToAncestor(inkCanvas);
+                var origin = transform.Transform(new Point());
+                var xAxis = transform.Transform(new Point(1, 0)) - origin;
+                var yAxis = transform.Transform(new Point(0, 1)) - origin;
+                parentTransform = new Matrix(xAxis.X, xAxis.Y, yAxis.X, yAxis.Y, origin.X, origin.Y);
+                return double.IsFinite(xAxis.X) && double.IsFinite(xAxis.Y)
+                    && double.IsFinite(yAxis.X) && double.IsFinite(yAxis.Y)
+                    && double.IsFinite(origin.X) && double.IsFinite(origin.Y);
+            }
+            catch (InvalidOperationException)
+            {
+                return false;
+            }
+            catch (ArgumentException)
+            {
+                return false;
+            }
         }
 
         private BitmapSource RenderBoardRoamingPreview(
@@ -362,54 +551,74 @@ namespace Ink_Canvas
             double previewWidth,
             double previewHeight)
         {
+            if (!IsValidBoardRoamingBounds(worldBounds)
+                || !double.IsFinite(previewWidth) || !double.IsFinite(previewHeight)
+                || previewWidth <= 0 || previewHeight <= 0
+                || previewWidth > int.MaxValue || previewHeight > int.MaxValue) return null;
+
+            var scale = Math.Min(previewWidth / worldBounds.Width, previewHeight / worldBounds.Height);
+            if (!double.IsFinite(scale) || scale <= 0) return null;
+            var renderedWidth = worldBounds.Width * scale;
+            var renderedHeight = worldBounds.Height * scale;
+            var offset = new Point((previewWidth - renderedWidth) / 2, (previewHeight - renderedHeight) / 2);
+            var movementBounds = new Rect(offset, new Size(renderedWidth, renderedHeight));
+            if (!IsValidBoardRoamingBounds(movementBounds)) return null;
+            var translationX = offset.X + (_boardRoamingViewportWorldPosition.X
+                + _boardRoamingPendingTranslation.X - worldBounds.X) * scale;
+            var translationY = offset.Y + (_boardRoamingViewportWorldPosition.Y
+                + _boardRoamingPendingTranslation.Y - worldBounds.Y) * scale;
+            if (!double.IsFinite(translationX) || !double.IsFinite(translationY)) return null;
+
             try
             {
-                var bitmapWidth = Math.Max(1, (int)Math.Ceiling(previewWidth));
-                var bitmapHeight = Math.Max(1, (int)Math.Ceiling(previewHeight));
                 var drawingVisual = new DrawingVisual();
                 using (var context = drawingVisual.RenderOpen())
                 {
                     context.DrawRectangle(Brushes.Transparent, null, new Rect(0, 0, previewWidth, previewHeight));
-                    var background = GridBackgroundCover.Background ?? Brushes.White;
-                    context.DrawRectangle(background, null, _boardRoamingPreviewMovementBounds);
+                    context.DrawRectangle(GridBackgroundCover.Background ?? Brushes.White, null, movementBounds);
+                    context.PushClip(new RectangleGeometry(movementBounds));
+                    context.PushTransform(new MatrixTransform(new Matrix(scale, 0, 0, scale, translationX, translationY)));
 
-                    var canvasViewbox = new Rect(
-                        worldBounds.X - _boardRoamingViewportWorldPosition.X,
-                        worldBounds.Y - _boardRoamingViewportWorldPosition.Y,
-                        worldBounds.Width,
-                        worldBounds.Height);
-
-                    var visualBrush = new VisualBrush(inkCanvas)
+                    // 子元素的 VisualBrush 已包含自身位移/旋转，按父坐标绘制，避免重复变换。
+                    foreach (UIElement child in inkCanvas.Children)
                     {
-                        Stretch = Stretch.Fill,
-                        ViewboxUnits = BrushMappingMode.Absolute,
-                        Viewbox = canvasViewbox,
-                        ViewportUnits = BrushMappingMode.Absolute,
-                        Viewport = _boardRoamingPreviewMovementBounds
-                    };
-                    context.DrawRectangle(visualBrush, null, _boardRoamingPreviewMovementBounds);
+                        if (child is not FrameworkElement element
+                            || !TryGetBoardRoamingElementBounds(element, out var bounds, out var parentTransform)) continue;
+                        context.PushTransform(new MatrixTransform(parentTransform));
+                        var brush = new VisualBrush(element)
+                        {
+                            AutoLayoutContent = false,
+                            Stretch = Stretch.Fill,
+                            ViewboxUnits = BrushMappingMode.Absolute,
+                            Viewbox = bounds
+                        };
+                        context.DrawRectangle(brush, null, bounds);
+                        context.Pop();
+                    }
+                    // 直接绘制内容，不读取实时 InkCanvas 的空/正在重排的视觉边界。
+                    inkCanvas.Strokes.Draw(context);
+                    context.Pop();
+                    context.Pop();
                 }
-
-                var bitmap = new RenderTargetBitmap(
-                    bitmapWidth,
-                    bitmapHeight,
-                    96,
-                    96,
-                    PixelFormats.Pbgra32);
+                var bitmap = new RenderTargetBitmap((int)Math.Ceiling(previewWidth), (int)Math.Ceiling(previewHeight),
+                    96, 96, PixelFormats.Pbgra32);
                 bitmap.Render(drawingVisual);
                 bitmap.Freeze();
                 return bitmap;
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"生成漫游预览失败: {ex.Message}", LogHelper.LogType.Warning);
+                LogHelper.WriteLogToFile($"生成漫游预览失败: {ex}; world={worldBounds}, preview={previewWidth}x{previewHeight}",
+                    LogHelper.LogType.Warning);
                 return null;
             }
         }
 
         private void BoardRoamingPopupContent_ViewportPositionChanged(Point previewPosition)
         {
-            if (_isUpdatingBoardRoamingPopup || !IsBoardRoamingMode || _boardRoamingPreviewScale <= 0) return;
+            if (_isUpdatingBoardRoamingPopup || !IsBoardRoamingMode || !double.IsFinite(_boardRoamingPreviewScale)
+                || _boardRoamingPreviewScale <= 0 || !double.IsFinite(previewPosition.X)
+                || !double.IsFinite(previewPosition.Y)) return;
 
             var targetViewportX = _boardRoamingWorldBounds.X +
                                   (previewPosition.X - _boardRoamingPreviewOffset.X) / _boardRoamingPreviewScale;
@@ -420,53 +629,37 @@ namespace Ink_Canvas
             if (Math.Abs(deltaX) < 0.01 && Math.Abs(deltaY) < 0.01) return;
 
             TranslateBoardRoamingContent(deltaX, deltaY);
-            _boardRoamingViewportWorldPosition = new Point(targetViewportX, targetViewportY);
         }
 
         private void BeginBoardRoamingPopupDrag()
         {
             if (_isBoardRoamingPointerDown) return;
-
-            _isBoardRoamingPointerDown = true;
-            _boardRoamingStrokeHistory = new Dictionary<Stroke, StylusPointCollection>();
-            foreach (var stroke in inkCanvas.Strokes)
-                _boardRoamingStrokeHistory[stroke] = stroke.StylusPoints.Clone();
+            BeginBoardRoaming(new Point());
+            _isBoardRoamingPopupDrag = _isBoardRoamingPointerDown;
         }
 
         private void EndBoardRoamingPopupDrag()
-        {
-            if (!_isBoardRoamingPointerDown) return;
-
-            _isBoardRoamingPointerDown = false;
-            CommitBoardRoamingHistory();
-            RefreshBoardRoamingPopup();
-        }
+            => EndBoardRoaming();
 
         private void TranslateBoardRoamingContent(double deltaX, double deltaY)
         {
-            var matrix = Matrix.Identity;
-            matrix.Translate(deltaX, deltaY);
-            var previousCommitType = _currentCommitType;
-            _currentCommitType = CommitReason.CodeInput;
-            try
+            if (!_isBoardRoamingPointerDown || _boardRoamingRenderTranslation == null
+                || !double.IsFinite(deltaX) || !double.IsFinite(deltaY)) return;
+
+            var translation = _boardRoamingPendingTranslation + new Vector(deltaX, deltaY);
+            if (!double.IsFinite(translation.X) || !double.IsFinite(translation.Y)) return;
+            _boardRoamingPendingTranslation = translation;
+            _boardRoamingRenderTranslation.X = translation.X;
+            _boardRoamingRenderTranslation.Y = translation.Y;
+            _boardRoamingViewportWorldPosition = new Point(-translation.X, -translation.Y);
+            if (_isVideoPresenterSpecialMode)
             {
-                foreach (var stroke in inkCanvas.Strokes)
-                    stroke.Transform(matrix, false);
-                TransformCanvasImages(matrix);
-                // 视频展台特殊模式：漫游时预览画面与墨迹同步平移
-                // （否则只有墨迹会动，展台背景不动）
-                if (_isVideoPresenterSpecialMode)
-                {
-                    _boothPreviewTranslateX += deltaX;
-                    _boothPreviewTranslateY += deltaY;
-                    ApplyBoothPreviewTransform();
-                    ResetRotationBaseline();
-                }
+                _boothPreviewTranslateX = _boardRoamingBoothStartX + translation.X;
+                _boothPreviewTranslateY = _boardRoamingBoothStartY + translation.Y;
+                ApplyBoothPreviewTransform();
             }
-            finally
-            {
-                _currentCommitType = previousCommitType;
-            }
+            if (!_isBoardRoamingPopupDrag)
+                RefreshBoardRoamingPopup(false);
         }
 
         private static bool AreStylusPointsEqual(StylusPointCollection first, StylusPointCollection second)

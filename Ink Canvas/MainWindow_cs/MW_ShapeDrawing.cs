@@ -2659,10 +2659,13 @@ namespace Ink_Canvas
             if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
             if (IsBoardRoamingMode && e.ChangedButton == MouseButton.Left)
             {
-                inkCanvas.CaptureMouse();
-                ViewboxFloatingBar.IsHitTestVisible = false;
-                BlackboardUIGridForInkReplay.IsHitTestVisible = false;
-                BeginBoardRoaming(e.GetPosition(inkCanvas));
+                if (e.StylusDevice == null && _boardRoamingContactIds.Count == 0)
+                {
+                    inkCanvas.CaptureMouse();
+                    ViewboxFloatingBar.IsHitTestVisible = false;
+                    BlackboardUIGridForInkReplay.IsHitTestVisible = false;
+                    BeginBoardRoaming(e.GetPosition(inkCanvas));
+                }
                 e.Handled = true;
                 return;
             }
@@ -2711,9 +2714,11 @@ namespace Ink_Canvas
             }
 
             // 板漫游：鼠标拖动移动整个板内容
-            if (_isBoardRoamingPointerDown)
+            if (IsBoardRoamingMode && _isBoardRoamingPointerDown)
             {
-                MoveBoardRoaming(e.GetPosition(inkCanvas));
+                if (e.StylusDevice == null && _boardRoamingContactIds.Count == 0
+                    && !_isBoardRoamingPopupDrag && !_isBoardRoamingManipulation)
+                    MoveBoardRoaming(e.GetPosition(inkCanvas));
                 e.Handled = true;
                 return;
             }
@@ -2772,12 +2777,15 @@ namespace Ink_Canvas
             }
 
             // 板漫游：结束拖动
-            if (_isBoardRoamingPointerDown)
+            if (IsBoardRoamingMode && _isBoardRoamingPointerDown)
             {
-                EndBoardRoaming();
-                inkCanvas.ReleaseMouseCapture();
-                ViewboxFloatingBar.IsHitTestVisible = true;
-                BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+                if (e.StylusDevice == null && _boardRoamingContactIds.Count == 0 && !_isBoardRoamingPopupDrag)
+                {
+                    EndBoardRoaming();
+                    inkCanvas.ReleaseMouseCapture();
+                    ViewboxFloatingBar.IsHitTestVisible = true;
+                    BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+                }
                 e.Handled = true;
                 return;
             }

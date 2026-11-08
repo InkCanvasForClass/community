@@ -85,6 +85,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void SaveStrokes(bool isBackupMain = false)
         {
+            EndBoardRoaming();
             ApplyFreezeStateToCurrentStrokes();
 
             // 确保画布上的所有UI元素都被保存到时间机器历史记录中
@@ -194,6 +195,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void ClearStrokes(bool isErasedByCode)
         {
+            EndBoardRoaming();
             ClearAllSelection();
             _currentCommitType = CommitReason.ClearingCanvas;
             if (isErasedByCode) _currentCommitType = CommitReason.CodeInput;

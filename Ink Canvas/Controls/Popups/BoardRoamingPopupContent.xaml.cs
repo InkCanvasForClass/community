@@ -40,10 +40,21 @@ namespace Ink_Canvas.Controls
             PreviewCanvas.StylusMove += PreviewCanvas_StylusMove;
             PreviewCanvas.StylusUp += PreviewCanvas_StylusUp;
             PreviewCanvas.LostStylusCapture += PreviewCanvas_LostStylusCapture;
+            Unloaded += (s, e) => EndDrag();
         }
+
+        internal void CompleteViewportDrag() => EndDrag();
 
         public void SetViewport(Rect viewport, Rect movementBounds, string hint)
         {
+            if (viewport.IsEmpty || movementBounds.IsEmpty
+                || !double.IsFinite(viewport.X) || !double.IsFinite(viewport.Y)
+                || !double.IsFinite(viewport.Width) || !double.IsFinite(viewport.Height)
+                || !double.IsFinite(movementBounds.X) || !double.IsFinite(movementBounds.Y)
+                || !double.IsFinite(movementBounds.Width) || !double.IsFinite(movementBounds.Height)
+                || viewport.Width <= 0 || viewport.Height <= 0
+                || movementBounds.Width <= 0 || movementBounds.Height <= 0) return;
+
             _viewportMovementBounds = movementBounds;
             ViewportBorder.Width = Math.Max(1, Math.Min(PreviewCanvas.Width, viewport.Width));
             ViewportBorder.Height = Math.Max(1, Math.Min(PreviewCanvas.Height, viewport.Height));
@@ -116,11 +127,12 @@ namespace Ink_Canvas.Controls
 
         private void BeginDrag(Point point, DragInputDevice inputDevice)
         {
-            if (_isDragging) return;
+            if (_isDragging || !double.IsFinite(point.X) || !double.IsFinite(point.Y)) return;
 
             _isDragging = true;
             _dragInputDevice = inputDevice;
             _lastDragPoint = point;
+            ViewportDragStarted?.Invoke();
             if (!IsInsideViewport(point))
             {
                 SetViewportPosition(
@@ -128,12 +140,10 @@ namespace Ink_Canvas.Controls
                     point.Y - GetViewportHeight() / 2);
             }
 
-            ViewportDragStarted?.Invoke();
-
-            if (inputDevice == DragInputDevice.Mouse)
-                PreviewCanvas.CaptureMouse();
-            else
-                PreviewCanvas.CaptureStylus();
+            var captured = inputDevice == DragInputDevice.Mouse
+                ? PreviewCanvas.CaptureMouse()
+                : PreviewCanvas.CaptureStylus();
+            if (!captured) EndDrag();
         }
 
         private void MoveDrag(Point point)
@@ -155,6 +165,7 @@ namespace Ink_Canvas.Controls
 
         private void SetViewportPosition(double left, double top)
         {
+            if (!double.IsFinite(left) || !double.IsFinite(top)) return;
             var viewportWidth = GetViewportWidth();
             var viewportHeight = GetViewportHeight();
             var minX = _viewportMovementBounds.IsEmpty ? 0 : _viewportMovementBounds.X;
@@ -174,10 +185,10 @@ namespace Ink_Canvas.Controls
         }
 
         private double GetViewportWidth()
-            => ViewportBorder.ActualWidth > 0 ? ViewportBorder.ActualWidth : ViewportBorder.Width;
+            => double.IsFinite(ViewportBorder.Width) ? ViewportBorder.Width : ViewportBorder.ActualWidth;
 
         private double GetViewportHeight()
-            => ViewportBorder.ActualHeight > 0 ? ViewportBorder.ActualHeight : ViewportBorder.Height;
+            => double.IsFinite(ViewportBorder.Height) ? ViewportBorder.Height : ViewportBorder.ActualHeight;
 
         private void EndDrag()
         {
