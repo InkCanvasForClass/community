@@ -192,6 +192,8 @@ namespace Ink_Canvas
                 Controls.Toolbar.BoardToolbar.Items.BoardBoothCaptureToolItem.UpdateLabel(captureBtn, this);
             if (FindView("board.boothCorrection") is BoardToolbarButton correctionBtn)
                 Controls.Toolbar.BoardToolbar.Items.BoardBoothCorrectionToolItem.UpdateState(correctionBtn, this);
+            if (FindView("board.boothScan") is BoardToolbarButton scanBtn)
+                Controls.Toolbar.BoardToolbar.Items.BoardBoothScanToolItem.UpdateState(scanBtn, this);
             if (FindView("board.videoBooth") is BoardToolbarButton boothBtn)
                 Controls.Toolbar.BoardToolbar.Items.BoardVideoBoothToolItem.UpdateState(boothBtn, this);
         }
@@ -226,6 +228,8 @@ namespace Ink_Canvas
                 BoardToolbarRegistry.EnsureBoothExpandSeeded();
                 // 独立的「导入」组件：放进中间栏展台分组（矫正之后、展台菜单之前），老用户也能拿到
                 BoardToolbarRegistry.EnsureBoothImportSeeded();
+                // 独立的「扫描」组件：放进中间栏展台分组（矫正右边），老用户也能拿到
+                BoardToolbarRegistry.EnsureBoothScanSeeded();
 
                 var host = (IBoardToolbarHost)this;
 

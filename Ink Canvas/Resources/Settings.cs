@@ -88,6 +88,12 @@ namespace Ink_Canvas
         [JsonProperty("boothImportToolbarSeeded")]
         public bool BoothImportToolbarSeeded { get; set; } = false;
 
+        /// <summary>
+        /// 是否已把独立的「扫描」组件播种到中间栏展台分组（仅播一次，老用户升级保障）。
+        /// </summary>
+        [JsonProperty("boothScanToolbarSeeded")]
+        public bool BoothScanToolbarSeeded { get; set; } = false;
+
         [JsonProperty("performance")]
         public PerformanceSettings Performance { get; set; } = new PerformanceSettings();
 
@@ -1439,6 +1445,16 @@ namespace Ink_Canvas
         CUDA = 2
     }
 
+    /// <summary>
+    /// 视频展台扫描增强方案模式：增效彩色（默认）/ 增效黑白 / 灰度模式。
+    /// </summary>
+    public enum ScanColorMode
+    {
+        EnhancedColor = 0,
+        EnhancedBlackWhite = 1,
+        Grayscale = 2
+    }
+
     public class Automation
     {
         [JsonIgnore]
@@ -1588,6 +1604,12 @@ namespace Ink_Canvas
         /// </summary>
         [JsonProperty("photoCorrectionAcceleration")]
         public PhotoCorrectionAccelerationMode PhotoCorrectionAcceleration { get; set; } = PhotoCorrectionAccelerationMode.Cpu;
+
+        [JsonProperty("isEnableScanMode")]
+        public bool IsEnableScanMode { get; set; } = false;
+
+        [JsonProperty("scanColorMode")]
+        public ScanColorMode ScanColorMode { get; set; } = ScanColorMode.EnhancedColor;
 
         [JsonProperty("isAutoClearWhenExitingWritingMode")]
         public bool IsAutoClearWhenExitingWritingMode { get; set; }

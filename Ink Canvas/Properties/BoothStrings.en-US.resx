@@ -156,4 +156,19 @@
   <data name="MirrorVertical" xml:space="preserve">
     <value>Vertical</value>
   </data>
+  <data name="Scan" xml:space="preserve">
+    <value>Scan</value>
+  </data>
+  <data name="ScanMode" xml:space="preserve">
+    <value>Scan Mode</value>
+  </data>
+  <data name="ScanModeEnhancedColor" xml:space="preserve">
+    <value>Enhanced Color</value>
+  </data>
+  <data name="ScanModeEnhancedBlackWhite" xml:space="preserve">
+    <value>Enhanced B&amp;W</value>
+  </data>
+  <data name="ScanModeGrayscale" xml:space="preserve">
+    <value>Grayscale</value>
+  </data>
 </root>

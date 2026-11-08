@@ -100,6 +100,20 @@
                     </ToggleButton>
                 </ikw:SimpleStackPanel>
 
+                <!-- 扫描方案：增效彩色（默认） / 增效黑白 / 灰度模式 -->
+                <ikw:SimpleStackPanel Orientation="Vertical" Spacing="3">
+                    <TextBlock Text="{x:Static props:BoothStrings.ScanMode}"
+                               Foreground="{DynamicResource FloatingBarForegroundBrush}"
+                               FontSize="13" FontWeight="SemiBold" />
+                    <ComboBox x:Name="ScanModeComboBoxCtrl"
+                              MinWidth="260"
+                              SelectedIndex="0">
+                        <ComboBoxItem Content="{x:Static props:BoothStrings.ScanModeEnhancedColor}" />
+                        <ComboBoxItem Content="{x:Static props:BoothStrings.ScanModeEnhancedBlackWhite}" />
+                        <ComboBoxItem Content="{x:Static props:BoothStrings.ScanModeGrayscale}" />
+                    </ComboBox>
+                </ikw:SimpleStackPanel>
+
                 <!-- 专业模式：对比度 / 饱和度 / 色温 / 增益 / 焦距 / 快门 -->
                 <Expander x:Name="ProModeExpanderCtrl"
                           Header="{x:Static props:BoothStrings.ProMode}"
@@ -280,16 +294,21 @@
                     </ikw:SimpleStackPanel>
                 </Expander>
 
-                <!-- 4 个操作按钮：矫正 / 拍照 / 旋转 / 关闭 -->
-                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                <!-- 操作按钮：矫正 / 扫描 / 拍照 / 旋转 / 关闭 -->
+                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="5" HorizontalAlignment="Center">
                     <ToggleButton x:Name="PhotoCorrectionToggleCtrl"
-                                  Padding="10,4"
-                                  MinWidth="64">
+                                  Padding="8,4"
+                                  MinWidth="54">
                         <TextBlock Text="{x:Static props:BoothStrings.Correction}" />
                     </ToggleButton>
+                    <ToggleButton x:Name="ScanToggleCtrl"
+                                  Padding="8,4"
+                                  MinWidth="54">
+                        <TextBlock Text="{x:Static props:BoothStrings.Scan}" />
+                    </ToggleButton>
                     <Button x:Name="CapturePhotoButtonCtrl"
-                            Padding="10,4"
-                            MinWidth="64">
+                            Padding="8,4"
+                            MinWidth="54">
                         <TextBlock Text="{x:Static props:BoothStrings.Capture}" />
                     </Button>
                     <Button x:Name="RotateImageButtonCtrl"

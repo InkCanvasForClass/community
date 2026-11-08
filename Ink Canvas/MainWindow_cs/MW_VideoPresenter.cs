@@ -247,6 +247,7 @@ namespace Ink_Canvas
             // WireUpBoothPopupContentEvents 在 LoadSettings 之前调用，无法读到用户保存的值，
             // 必须在此处（LoadSettings 已完成）同步，避免 ComboBox 始终显示 CPU。
             SyncPhotoCorrectionAccelerationComboBox();
+            SyncBoothScanControls();
             // 同步亮度滑块：从 Settings 读值 + 按摄像头支持情况启用/禁用
             SyncBoothBrightnessSlider();
             // 同步镜像状态（从 Settings 恢复 + 应用到 LayoutTransform）
@@ -2758,7 +2759,7 @@ namespace Ink_Canvas
                                 LogHelper.LogType.Trace);
                         }
 
-                        // 照片矫正（两条路径统一）：检测纸张角点 → 透视矫正
+                        // 1. 照片矫正（独立控制）：检测纸张角点 → 透视矫正
                         bool corrected = false;
                         if (correctionEnabled)
                         {
@@ -2783,6 +2784,23 @@ namespace Ink_Canvas
                             }
                         }
 
+                        // 2. 文档扫描增强（独立控制）：去阴影、增白底、彩色/黑白/灰度增强
+                        bool scanEnabled = Settings?.Automation?.IsEnableScanMode == true;
+                        var scanMode = Settings?.Automation?.ScanColorMode ?? ScanColorMode.EnhancedColor;
+                        bool scanned = false;
+                        if (scanEnabled)
+                        {
+                            var scannedBitmap = Helpers.DocumentScanEnhancer.Enhance(toSave, scanMode);
+                            if (scannedBitmap != null)
+                            {
+                                if (ownsToSave) toSave.Dispose();
+                                toSave = scannedBitmap;
+                                ownsToSave = true;
+                                scanned = true;
+                                LogHelper.WriteLogToFile($"视频展台拍照: 扫描增强处理完成 (模式={scanMode})", LogHelper.LogType.Trace);
+                            }
+                        }
+
                         var bmpImage = ConvertBitmapToBitmapImage(toSave);
                         if (ownsToSave) toSave.Dispose();
                         if (frame != null) frame.Dispose();
@@ -2794,7 +2812,7 @@ namespace Ink_Canvas
                         }
 
                         LogHelper.WriteLogToFile(
-                            $"视频展台拍照: 完成 输出 BitmapImage={bmpImage.PixelWidth}x{bmpImage.PixelHeight} (矫正应用={corrected})",
+                            $"视频展台拍照: 完成 输出 BitmapImage={bmpImage.PixelWidth}x{bmpImage.PixelHeight} (矫正应用={corrected}, 扫描应用={scanned})",
                             LogHelper.LogType.Trace);
 
                         Dispatcher.BeginInvoke(new Action(() =>
@@ -4815,6 +4833,7 @@ namespace Ink_Canvas
             }
 
             SyncPhotoCorrectionAccelerationComboBox();
+            SyncBoothScanControls();
             SyncBoothBrightnessSlider();
             SyncBoothMirrorToggles();
 
@@ -4848,6 +4867,70 @@ namespace Ink_Canvas
         }
 
         /// <summary>当前是否开启照片矫正。供展台工具栏按钮反映开/关状态。</summary>
+        public bool IsBoothScanEnabled => Settings?.Automation?.IsEnableScanMode == true;
+        public ScanColorMode BoothScanColorMode => Settings?.Automation?.ScanColorMode ?? ScanColorMode.EnhancedColor;
+
+        public void VideoBoothToggleScanMode()
+        {
+            if (!_isVideoPresenterSpecialMode) return;
+
+            bool next = !IsBoothScanEnabled;
+            if (ToggleBtnScan != null)
+            {
+                ToggleBtnScan.IsChecked = next;
+                return;
+            }
+
+            if (Settings?.Automation != null)
+            {
+                Settings.Automation.IsEnableScanMode = next;
+                SaveSettingsToFile();
+            }
+            UpdateBoothToolbarItemStates();
+        }
+
+        private void ToggleBtnScan_Checked(object sender, RoutedEventArgs e)
+        {
+            if (Settings?.Automation == null) return;
+            Settings.Automation.IsEnableScanMode = true;
+            SaveSettingsToFile();
+            UpdateBoothToolbarItemStates();
+        }
+
+        private void ToggleBtnScan_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (Settings?.Automation == null) return;
+            Settings.Automation.IsEnableScanMode = false;
+            SaveSettingsToFile();
+            UpdateBoothToolbarItemStates();
+        }
+
+        private void ScanModeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (Settings?.Automation == null) return;
+            if (ScanModeComboBox == null) return;
+
+            var selected = (ScanColorMode)Math.Max(0, ScanModeComboBox.SelectedIndex);
+            Settings.Automation.ScanColorMode = selected;
+            SaveSettingsToFile();
+        }
+
+        private void SyncBoothScanControls()
+        {
+            if (ToggleBtnScan != null)
+            {
+                ToggleBtnScan.IsChecked = Settings?.Automation?.IsEnableScanMode ?? false;
+            }
+            if (ScanModeComboBox != null)
+            {
+                int index = (int)(Settings?.Automation?.ScanColorMode ?? ScanColorMode.EnhancedColor);
+                if (index >= 0 && index < ScanModeComboBox.Items.Count)
+                {
+                    ScanModeComboBox.SelectedIndex = index;
+                }
+            }
+        }
+
         public bool IsBoothPhotoCorrectionEnabled => Settings?.Automation?.IsEnablePhotoCorrection == true;
 
         /// <summary>

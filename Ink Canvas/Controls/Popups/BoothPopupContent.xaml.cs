@@ -19,6 +19,8 @@ namespace Ink_Canvas.Controls
         public Button RotateImageButton => RotateImageButtonCtrl;
         public Button ExitVideoPresenterButton => ExitVideoPresenterButtonCtrl;
         public ToggleButton PhotoCorrectionToggle => PhotoCorrectionToggleCtrl;
+        public ToggleButton ScanToggle => ScanToggleCtrl;
+        public ComboBox ScanModeComboBox => ScanModeComboBoxCtrl;
         public Slider BrightnessSlider => BrightnessSliderCtrl;
         public TextBlock BrightnessValueText => BrightnessValueTextCtrl;
         public Expander ProModeExpander => ProModeExpanderCtrl;
