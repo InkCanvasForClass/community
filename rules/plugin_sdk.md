@@ -184,6 +184,7 @@ SecurityVerdict verdict = host.EvaluateTrust(packagePath, expectedSha256, declar
 | `IBackupService` | 自动备份 |
 | `IFileAssociationService` | 文件关联（HKCU 泛化注册，受保护扩展名黑名单；归属插件可打开派发） |
 | `IFileDialogService` | 文件对话框（**无 Owner 属性**，对话框默认以主窗口为宿主） |
+| `IOpenFileFormatService` | 向工具栏「打开」对话框注册可打开格式（多组，Initialize 阶段注册，卸载自动注销） |
 | `IClipboardService` | 剪贴板读写（`PasteClipboardImageAsync` 返回 `Task`） |
 | `IScreenshotService` | 截图 |
 | `IScreenElementService` | UI Automation 只读快照：按屏幕点/窗口读取名称、AutomationId、控件类型和屏幕物理像素边界；不返回可操作的 AutomationElement |
@@ -258,6 +259,23 @@ uri.RegisterHandler("open", req => {
 - 文件打开派发**不走** `HandleUriCommand`，不受「启用 URI 协议」（`IsEnableUriScheme`）开关门禁。
 - **受保护扩展名不可覆盖**：`.exe/.dll/.bat/.cmd/.com/.msi/.msp/.ps1/.vbs/.js/.scr/.lnk/.url/.htt/.hta/...` 及宿主自有 `.icstk` 等，注册返回 false。
 
+## 打开格式（工具栏「打开」对话框）
+
+插件可向宿主工具栏「打开」按钮的文件对话框注册额外格式，无需写注册表。
+
+```csharp
+// 必须在 Initialize 阶段注册；可多次调用注册多组
+var formats = host.GetService<IOpenFileFormatService>();
+formats.RegisterFormat("希沃白板课件", new[] { ".enb", ".enbx" }, path => OpenEnb(path));
+formats.RegisterFormat("文档", new[] { "docx", "pdf" }, path => OpenDocument(path));
+```
+
+- 对话框第一项「所有支持的文件」= 宿主格式 + 全部插件扩展名，为默认筛选项；其后依次为宿主各格式、插件各组。
+- 用户选中插件扩展名的文件时，宿主在 **UI 线程** 调用 handler；返回 `false` 或抛异常时宿主提示「墨迹打开失败」。插件格式打开后宿主不切换画布模式，界面状态由插件自行处理。
+- 宿主内置扩展名（`.icstk/.xml/.zip/.uink`）不能覆盖；多个插件注册同一扩展名时先注册者生效，后注册者的该扩展名被忽略并写警告日志。
+- 扩展名只允许单段（字母、数字、`_`、`-`），带不带点均可、忽略大小写。
+- 插件卸载/热重载时宿主自动注销其全部格式。
+
 ## 插件目录结构（宿主侧）
 
 | 目录 | 用途 |
@@ -278,5 +296,5 @@ uri.RegisterHandler("open", req => {
 4. 新增服务接口 = 对外契约变更，走 NuGet 发版，同步更新插件市场
 5. UI 文案做 i18n（默认/en-US/zh-ME），插件内同理
 6. 修改 `InkCanvas.PluginSdk` 后构建校验：主解决方案 Debug x64 + PowerPointAddIn 双构建
-7. 当前 net10 分支新增屏幕元素、坐标和文字墨迹接口后，`HostApiRequirement.CurrentApiVersion` 为 `1.13.0`；插件 manifest 应声明 `ApiVersion: 1.13.0`。
+7. 当前 net10 分支新增打开格式接口（`IOpenFileFormatService`）后，`HostApiRequirement.CurrentApiVersion` 为 `1.14.0`；使用该接口的插件 manifest 应声明 `ApiVersion: 1.14.0`。
 8. 屏幕截图/UIA 数据属于敏感上下文：插件默认只在用户主动触发时读取，发送到模型前应在 UI 中明确提示并提供关闭选项。

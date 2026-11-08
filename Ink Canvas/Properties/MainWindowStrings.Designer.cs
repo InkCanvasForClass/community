@@ -73,6 +73,8 @@ namespace Ink_Canvas.Properties
 
         public static string Main_Strokes_OpenFileDialogFilter => ResourceManager.GetString(nameof(Main_Strokes_OpenFileDialogFilter), _resourceCulture);
 
+        public static string Main_Strokes_OpenFileDialogAllSupported => ResourceManager.GetString(nameof(Main_Strokes_OpenFileDialogAllSupported), _resourceCulture);
+
         public static string Main_Strokes_SaveMultiPageXmlSuccess => ResourceManager.GetString(nameof(Main_Strokes_SaveMultiPageXmlSuccess), _resourceCulture);
 
         public static string Main_Strokes_SaveXmlSuccess => ResourceManager.GetString(nameof(Main_Strokes_SaveXmlSuccess), _resourceCulture);

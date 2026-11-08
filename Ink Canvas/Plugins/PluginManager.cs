@@ -89,6 +89,14 @@ namespace Ink_Canvas.Plugins
         private readonly Dictionary<string, Dictionary<string, Func<PluginUriRequest, bool>>> _uriHandlers =
             new Dictionary<string, Dictionary<string, Func<PluginUriRequest, bool>>>(StringComparer.OrdinalIgnoreCase);
 
+        // 插件注册的「打开」对话框格式：按注册顺序保存各组，另按扩展名索引（先到先得）
+        private readonly List<PluginOpenFormat> _openFormats = new List<PluginOpenFormat>();
+        private readonly Dictionary<string, PluginOpenFormat> _openFormatByExtension =
+            new Dictionary<string, PluginOpenFormat>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>宿主工具栏「打开」按钮内置支持的扩展名，插件不能覆盖。</summary>
+        internal static readonly string[] HostOpenExtensions = { ".icstk", ".xml", ".zip", ".uink" };
+
         public static readonly string ManifestFileName = "manifest.json";
         public static readonly string PluginPackageExtension = ".icpx";
         /// <summary>待卸载标记文件名。目录删除失败时写入，下次启动由 CleanupUninstalledPlugins 兜底。</summary>
@@ -1368,6 +1376,12 @@ namespace Ink_Canvas.Plugins
                     Log(string.Format("Plugin unregistered URI handlers: {0}", plugin.Name));
                 }
 
+                // 清理插件注册的打开格式，避免卸载后残留
+                if (RemoveOpenFormats(plugin.Id) > 0)
+                {
+                    Log(string.Format("Plugin unregistered open formats: {0}", plugin.Name));
+                }
+
                 Log(string.Format("Plugin unloaded: {0}", plugin.Name));
                 OnPluginUnloaded(plugin);
                 _market?.RefreshMergedPlugins();
@@ -2321,6 +2335,149 @@ namespace Ink_Canvas.Plugins
         /// 暴露给 UI 的配置导入导出器。
         /// </summary>
         public PluginConfigIo ConfigIo => _configIo;
+
+        #region 插件打开格式
+
+        /// <summary>插件注册的一组可打开格式。</summary>
+        internal sealed class PluginOpenFormat
+        {
+            public string PluginId { get; set; }
+            public string GroupName { get; set; }
+            public List<string> Extensions { get; } = new List<string>();
+            public Func<string, bool> Handler { get; set; }
+        }
+
+        /// <summary>
+        /// 注册一组可打开格式。须在插件 Initialize 阶段调用，通过 <see cref="_currentLoadingPlugin"/> 识别调用方插件。
+        /// 宿主内置扩展名与已被其他组占用的扩展名会被跳过并写警告日志。
+        /// </summary>
+        public bool RegisterOpenFormat(string groupName, IEnumerable<string> extensions, Func<string, bool> handler)
+        {
+            var pluginId = _currentLoadingPlugin?.Id;
+            if (string.IsNullOrEmpty(pluginId))
+            {
+                LogError("RegisterOpenFormat 必须在插件 Initialize 阶段调用（无法确定调用方插件 ID）");
+                return false;
+            }
+            if (string.IsNullOrWhiteSpace(groupName) || extensions == null || handler == null)
+            {
+                LogError(string.Format("插件 {0} 注册打开格式失败：组名、扩展名或处理器为空", pluginId));
+                return false;
+            }
+
+            var format = new PluginOpenFormat
+            {
+                PluginId = pluginId,
+                // 「|」是对话框 Filter 的分隔符，组名里出现会破坏筛选项
+                GroupName = groupName.Trim().Replace('|', '/'),
+                Handler = handler,
+            };
+
+            foreach (var raw in extensions)
+            {
+                var ext = NormalizeOpenExtension(raw);
+                if (ext == null)
+                {
+                    LogOpenFormatWarning(string.Format("插件 {0} 注册打开格式：扩展名无效，已忽略：{1}", pluginId, raw));
+                    continue;
+                }
+                if (Array.IndexOf(HostOpenExtensions, ext) >= 0)
+                {
+                    LogOpenFormatWarning(string.Format("插件 {0} 注册打开格式：{1} 是宿主内置格式，不能覆盖，已忽略", pluginId, ext));
+                    continue;
+                }
+                if (_openFormatByExtension.TryGetValue(ext, out var existing))
+                {
+                    if (!format.Extensions.Contains(ext))
+                    {
+                        LogOpenFormatWarning(string.Format("插件 {0} 注册打开格式：{1} 已被插件 {2} 注册，按先到先得忽略",
+                            pluginId, ext, existing.PluginId));
+                    }
+                    continue;
+                }
+                format.Extensions.Add(ext);
+                _openFormatByExtension[ext] = format;
+            }
+
+            if (format.Extensions.Count == 0)
+            {
+                LogOpenFormatWarning(string.Format("插件 {0} 注册打开格式「{1}」：没有可用的扩展名", pluginId, format.GroupName));
+                return false;
+            }
+
+            _openFormats.Add(format);
+            TrackUndo("openFormat:" + pluginId + "/" + format.GroupName, () => RemoveOpenFormat(format));
+            Log(string.Format("Plugin registered open format: {0} {1} ({2})",
+                pluginId, format.GroupName, string.Join(";", format.Extensions)));
+            return true;
+        }
+
+        /// <summary>当前已注册的插件打开格式（按注册顺序）。UI 线程调用。</summary>
+        internal IReadOnlyList<PluginOpenFormat> GetOpenFormats() => _openFormats.ToList();
+
+        /// <summary>
+        /// 把文件交给注册了该扩展名的插件处理（UI 线程）。
+        /// </summary>
+        /// <returns>没有插件注册该扩展名时返回 null；否则返回处理器结果，处理器异常视为 false。</returns>
+        internal bool? TryOpenWithPluginFormat(string filePath)
+        {
+            var ext = NormalizeOpenExtension(Path.GetExtension(filePath ?? ""));
+            if (ext == null || !_openFormatByExtension.TryGetValue(ext, out var format)) return null;
+
+            try
+            {
+                bool handled = format.Handler(filePath);
+                if (!handled)
+                    LogOpenFormatWarning(string.Format("插件 {0} 未处理文件打开: {1}", format.PluginId, filePath));
+                return handled;
+            }
+            catch (Exception ex)
+            {
+                LogError(string.Format("插件打开格式处理器异常 ({0}): {1}", format.PluginId, filePath), ex);
+                return false;
+            }
+        }
+
+        private void RemoveOpenFormat(PluginOpenFormat format)
+        {
+            if (!_openFormats.Remove(format)) return;
+            foreach (var ext in format.Extensions)
+            {
+                if (_openFormatByExtension.TryGetValue(ext, out var owner) && ReferenceEquals(owner, format))
+                    _openFormatByExtension.Remove(ext);
+            }
+        }
+
+        private int RemoveOpenFormats(string pluginId)
+        {
+            var owned = _openFormats.Where(f => string.Equals(f.PluginId, pluginId, StringComparison.OrdinalIgnoreCase)).ToList();
+            foreach (var format in owned) RemoveOpenFormat(format);
+            return owned.Count;
+        }
+
+        /// <summary>规范化为小写、带点的单段扩展名；含通配符、分隔符等非法字符时返回 null。</summary>
+        private static string NormalizeOpenExtension(string extension)
+        {
+            if (string.IsNullOrWhiteSpace(extension)) return null;
+            var ext = extension.Trim().ToLowerInvariant();
+            if (!ext.StartsWith(".")) ext = "." + ext;
+            if (ext.Length < 2) return null;
+            for (int i = 1; i < ext.Length; i++)
+            {
+                char c = ext[i];
+                if (!(char.IsLetterOrDigit(c) || c == '_' || c == '-')) return null;
+            }
+            return ext;
+        }
+
+        private void LogOpenFormatWarning(string message)
+        {
+            _logger?.Warn("PluginManager", message);
+            OnLogMessage(string.Format("WARN: {0}", message));
+            LogHelper.WriteLogToFile(message, LogHelper.LogType.Warning);
+        }
+
+        #endregion
 
         #region 插件 URI 处理
 
