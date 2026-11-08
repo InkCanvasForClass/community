@@ -132,8 +132,6 @@ namespace Ink_Canvas
         private int _paperDetectRunning;
         private int _paperDetectStableCount = 0;
         private const int PaperDetectIdleIntervalMs = 1200;
-        private Shaders.PerspectiveWarpEffect _boothPerspectiveEffect;
-        private List<OpenCvSharp.Point> _smoothedPaperCorners;
 
         // 预览兜底重启次数上限：
         // StartVideoCaptureElementPreviewAsync 内的 1.5s 兜底定时器在 MediaOpened 未触发时会
@@ -827,43 +825,6 @@ namespace Ink_Canvas
             if (VideoPresenterFrozenFrameScale != null) VideoPresenterFrozenFrameScale.ScaleY = _boothPreviewScale;
             if (VideoPresenterFrozenFrameTranslate != null) VideoPresenterFrozenFrameTranslate.X = _boothPreviewTranslateX;
             if (VideoPresenterFrozenFrameTranslate != null) VideoPresenterFrozenFrameTranslate.Y = _boothPreviewTranslateY;
-
-            // 视口自适应采样控制（EasiCamera 策略）：
-            // 缩小时 (_boothPreviewScale <= 1.0) 开启 LowQuality 双线性降采样，节省显卡纹理下采样带宽与计算量；
-            // 放大时 (_boothPreviewScale > 1.2) 提升为 HighQuality 呈现精细细节。
-            var mode = _boothPreviewScale > 1.2
-                ? System.Windows.Media.BitmapScalingMode.HighQuality
-                : System.Windows.Media.BitmapScalingMode.LowQuality;
-
-            if (VideoPresenterFullCanvasImage != null
-                && System.Windows.Media.RenderOptions.GetBitmapScalingMode(VideoPresenterFullCanvasImage) != mode)
-            {
-                System.Windows.Media.RenderOptions.SetBitmapScalingMode(VideoPresenterFullCanvasImage, mode);
-            }
-
-            if (VideoPresenterFrozenFrameImage != null
-                && System.Windows.Media.RenderOptions.GetBitmapScalingMode(VideoPresenterFrozenFrameImage) != mode)
-            {
-                System.Windows.Media.RenderOptions.SetBitmapScalingMode(VideoPresenterFrozenFrameImage, mode);
-            }
-
-            // 外部导入/拍摄的照片动态分辨率切换（EasiCamera 策略）：
-            // 缩小时 (_boothPreviewScale <= 1.0) 使用降低分辨率的 PreviewImage 节省显存与采样负载；
-            // 放大时 (_boothPreviewScale > 1.2) 动态提升为高清原图 Image
-            if (_boothCurrentPhotoIndex >= 0 && _boothCurrentPhotoIndex < _capturedPhotos.Count)
-            {
-                var currentPhoto = _capturedPhotos[_boothCurrentPhotoIndex];
-                if (currentPhoto != null && VideoPresenterFrozenFrameImage != null)
-                {
-                    var desiredSource = (_boothPreviewScale <= 1.0 && currentPhoto.PreviewImage != null)
-                        ? currentPhoto.PreviewImage
-                        : currentPhoto.Image;
-                    if (!ReferenceEquals(VideoPresenterFrozenFrameImage.Source, desiredSource))
-                    {
-                        VideoPresenterFrozenFrameImage.Source = desiredSource;
-                    }
-                }
-            }
         }
 
         /// <summary>
@@ -2756,18 +2717,7 @@ namespace Ink_Canvas
                         bool corrected = false;
                         if (correctionEnabled)
                         {
-                            List<OpenCvSharp.Point> corners = null;
-                            if (rotationAngle == 0 && !_boothMirrorHorizontal && !_boothMirrorVertical
-                                && _smoothedPaperCorners != null && _smoothedPaperCorners.Count == 4)
-                            {
-                                corners = _smoothedPaperCorners;
-                            }
-                            else
-                            {
-                                TryDetectPaperCorners(toSave, out corners);
-                            }
-
-                            if (corners != null && corners.Count == 4)
+                            if (TryDetectPaperCorners(toSave, out List<OpenCvSharp.Point> corners))
                             {
                                 var correctedBitmap = ApplyPerspectiveCorrection(toSave, corners);
                                 if (correctedBitmap != null)
@@ -2895,7 +2845,6 @@ namespace Ink_Canvas
             Task.Run(() =>
             {
                 var loaded = new List<BitmapImage>();
-                bool correctionEnabled = Settings?.Automation?.IsEnablePhotoCorrection == true;
                 foreach (var path in ordered)
                 {
                     try
@@ -2903,39 +2852,6 @@ namespace Ink_Canvas
                         var bmp = LoadBitmapImageForBoothImport(path);
                         if (bmp != null)
                         {
-                            if (correctionEnabled)
-                            {
-                                Bitmap rawBmp = null;
-                                try
-                                {
-                                    rawBmp = BitmapSourceToBitmap(bmp);
-                                    if (rawBmp != null && TryDetectPaperCorners(rawBmp, out List<OpenCvSharp.Point> corners))
-                                    {
-                                        var correctedBmp = ApplyPerspectiveCorrection(rawBmp, corners);
-                                        if (correctedBmp != null)
-                                        {
-                                            var correctedBmpImg = ConvertBitmapToBitmapImage(correctedBmp);
-                                            correctedBmp.Dispose();
-                                            if (correctedBmpImg != null)
-                                            {
-                                                bmp = correctedBmpImg;
-                                                LogHelper.WriteLogToFile(
-                                                    $"展台导入: 照片矫正成功 {Path.GetFileName(path)}", LogHelper.LogType.Trace);
-                                            }
-                                        }
-                                    }
-                                }
-                                catch (Exception exCorr)
-                                {
-                                    LogHelper.WriteLogToFile(
-                                        $"展台导入: 矫正异常 {Path.GetFileName(path)}: {exCorr.Message}", LogHelper.LogType.Warning);
-                                }
-                                finally
-                                {
-                                    rawBmp?.Dispose();
-                                }
-                            }
-
                             loaded.Add(bmp);
                         }
                         else
@@ -3819,12 +3735,6 @@ namespace Ink_Canvas
             }
             if (!_paperDetectTimer.IsEnabled)
                 _paperDetectTimer.Start();
-
-            if (IsBoothPhotoCorrectionEnabled && VideoPresenterFullCanvasImage != null)
-            {
-                _boothPerspectiveEffect ??= new Shaders.PerspectiveWarpEffect();
-                VideoPresenterFullCanvasImage.Effect = _boothPerspectiveEffect;
-            }
         }
 
         /// <summary>
@@ -3839,13 +3749,6 @@ namespace Ink_Canvas
                 _paperDetectTimer.Interval = TimeSpan.FromMilliseconds(PaperDetectIntervalMs);
             }
             _paperDetectStableCount = 0;
-            if (VideoPresenterFullCanvasImage != null)
-            {
-                VideoPresenterFullCanvasImage.Effect = null;
-            }
-            _boothPerspectiveEffect?.Reset();
-            _smoothedPaperCorners = null;
-
             StopOverlayAnim();
             if (PaperDetectOverlayCanvas != null)
             {
@@ -4017,56 +3920,6 @@ namespace Ink_Canvas
                             _paperDetectStableCount = 0;
                             _paperDetectTimer.Interval = TimeSpan.FromMilliseconds(PaperDetectIntervalMs);
                         }
-                    }
-
-                    // 梯形校正：驱动 GPU 逆透视像素着色器实时放平纸张
-                    if (corners != null && corners.Count == 4)
-                    {
-                        var originalFrameCorners = new List<OpenCvSharp.Point>(4);
-                        for (int i = 0; i < 4; i++)
-                        {
-                            originalFrameCorners.Add(new OpenCvSharp.Point(
-                                (int)Math.Round(corners[i].X / detectScale),
-                                (int)Math.Round(corners[i].Y / detectScale)));
-                        }
-
-                        // 一阶低通滤波平滑角点微抖（位移小用平滑，位移大快速跟踪）
-                        if (_smoothedPaperCorners == null || _smoothedPaperCorners.Count != 4)
-                        {
-                            _smoothedPaperCorners = new List<OpenCvSharp.Point>(originalFrameCorners);
-                        }
-                        else
-                        {
-                            double totalDist = 0;
-                            for (int i = 0; i < 4; i++)
-                            {
-                                double dx = originalFrameCorners[i].X - _smoothedPaperCorners[i].X;
-                                double dy = originalFrameCorners[i].Y - _smoothedPaperCorners[i].Y;
-                                totalDist += Math.Sqrt(dx * dx + dy * dy);
-                            }
-                            double avgDist = totalDist / 4.0;
-                            double alpha = avgDist < 6.0 ? 0.35 : 0.85;
-                            for (int i = 0; i < 4; i++)
-                            {
-                                int sx = (int)Math.Round(_smoothedPaperCorners[i].X + alpha * (originalFrameCorners[i].X - _smoothedPaperCorners[i].X));
-                                int sy = (int)Math.Round(_smoothedPaperCorners[i].Y + alpha * (originalFrameCorners[i].Y - _smoothedPaperCorners[i].Y));
-                                _smoothedPaperCorners[i] = new OpenCvSharp.Point(sx, sy);
-                            }
-                        }
-
-                        if (_boothPerspectiveEffect != null && IsBoothPhotoCorrectionEnabled)
-                        {
-                            _boothPerspectiveEffect.UpdateCorners(_smoothedPaperCorners, frameW, frameH);
-                            if (VideoPresenterFullCanvasImage.Effect != _boothPerspectiveEffect)
-                            {
-                                VideoPresenterFullCanvasImage.Effect = _boothPerspectiveEffect;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        _smoothedPaperCorners = null;
-                        _boothPerspectiveEffect?.Reset();
                     }
 
                     DrawPaperDetectOverlay(overlayPts);
@@ -4436,9 +4289,7 @@ namespace Ink_Canvas
                 }
                 catch { }
 
-                VideoPresenterFrozenFrameImage.Source = (_boothPreviewScale <= 1.0 && photo.PreviewImage != null)
-                    ? photo.PreviewImage
-                    : photo.Image;
+                VideoPresenterFrozenFrameImage.Source = photo.Image;
                 VideoPresenterFrozenFrameImage.Visibility = Visibility.Visible;
                 // FillImage 填满容器，不需要显式 Width/Height 和对齐方式
                 VideoPresenterFrozenFrameImage.Width = double.NaN;

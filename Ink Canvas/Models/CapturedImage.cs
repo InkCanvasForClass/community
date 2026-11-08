@@ -7,7 +7,6 @@ namespace Ink_Canvas.Models
     public class CapturedImage
     {
         public BitmapImage Image { get; }
-        public BitmapImage PreviewImage { get; }
         public BitmapImage Thumbnail { get; }
         public StrokeCollection Strokes { get; }
         public string Timestamp { get; }
@@ -25,7 +24,6 @@ namespace Ink_Canvas.Models
 
             // 确保 Image 被冻结，避免跨线程访问风险
             Image = EnsureFrozen(image);
-            PreviewImage = CreatePreviewImage(Image);
             Thumbnail = CreateThumbnail(Image);
             Strokes = new StrokeCollection();
             Timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
@@ -45,7 +43,6 @@ namespace Ink_Canvas.Models
 
             // 确保 Image 被冻结，避免跨线程访问风险
             Image = EnsureFrozen(image);
-            PreviewImage = CreatePreviewImage(Image);
             Thumbnail = CreateThumbnail(Image);
             Strokes = new StrokeCollection();
             FilePath = filePath;
@@ -132,50 +129,6 @@ namespace Ink_Canvas.Models
         /// <exception cref="ArgumentNullException">当 <paramref name="original"/> 为 <c>null</c> 时抛出。</exception>
         /// <exception cref="ArgumentException">当 <paramref name="original"/> 的像素宽度或高度小于等于 0 时抛出。</exception>
         /// <exception cref="InvalidOperationException">当无法计算出有效的缩放比例（例如结果为 NaN、Infinity 或非正数）时抛出。</exception>
-        private const double PreviewMaxSide = 1920.0;
-
-        /// <summary>
-        /// 生成并返回缩小查看时使用的降低分辨率预览图（最大边长限制在 1920 内）。
-        /// 原图本身不超过 1920 时直接复用原图，避免重复内存开销。
-        /// </summary>
-        private static BitmapImage CreatePreviewImage(BitmapImage original)
-        {
-            if (original == null) return null;
-            if (original.PixelWidth <= 0 || original.PixelHeight <= 0) return original;
-
-            double maxSide = Math.Max(original.PixelWidth, original.PixelHeight);
-            if (maxSide <= PreviewMaxSide)
-            {
-                return original;
-            }
-
-            try
-            {
-                double scale = PreviewMaxSide / maxSide;
-                var scaled = new TransformedBitmap(original, new System.Windows.Media.ScaleTransform(scale, scale));
-                var encoder = new JpegBitmapEncoder { QualityLevel = 85 };
-                encoder.Frames.Add(BitmapFrame.Create(scaled));
-
-                using (var stream = new System.IO.MemoryStream())
-                {
-                    encoder.Save(stream);
-                    stream.Seek(0, System.IO.SeekOrigin.Begin);
-
-                    var result = new BitmapImage();
-                    result.BeginInit();
-                    result.CacheOption = BitmapCacheOption.OnLoad;
-                    result.StreamSource = stream;
-                    result.EndInit();
-                    result.Freeze();
-                    return result;
-                }
-            }
-            catch
-            {
-                return original;
-            }
-        }
-
         private static BitmapImage CreateThumbnail(BitmapImage original)
         {
             if (original == null)
