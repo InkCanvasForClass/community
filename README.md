@@ -86,7 +86,7 @@
 ## 贡献者
 
 > [!NOTE]
-> 此列表通过[All Contributers](https://allcontributors.org/)实现。
+> 此列表通过[All Contributors](https://allcontributors.org/)实现。
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
