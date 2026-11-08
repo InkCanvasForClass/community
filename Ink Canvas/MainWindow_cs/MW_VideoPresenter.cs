@@ -825,6 +825,51 @@ namespace Ink_Canvas
             if (VideoPresenterFrozenFrameScale != null) VideoPresenterFrozenFrameScale.ScaleY = _boothPreviewScale;
             if (VideoPresenterFrozenFrameTranslate != null) VideoPresenterFrozenFrameTranslate.X = _boothPreviewTranslateX;
             if (VideoPresenterFrozenFrameTranslate != null) VideoPresenterFrozenFrameTranslate.Y = _boothPreviewTranslateY;
+
+            // 视口自适应采样控制（EasiCamera 策略）：
+            // 缩小时 (_boothPreviewScale <= 1.0) 开启 LowQuality 双线性降采样，节省显卡纹理下采样带宽与计算量；
+            // 放大时 (_boothPreviewScale > 1.2) 提升为 HighQuality 呈现精细细节。
+            var mode = _boothPreviewScale > 1.2
+                ? System.Windows.Media.BitmapScalingMode.HighQuality
+                : System.Windows.Media.BitmapScalingMode.LowQuality;
+
+            if (VideoPresenterFullCanvasImage != null
+                && System.Windows.Media.RenderOptions.GetBitmapScalingMode(VideoPresenterFullCanvasImage) != mode)
+            {
+                System.Windows.Media.RenderOptions.SetBitmapScalingMode(VideoPresenterFullCanvasImage, mode);
+            }
+
+            if (VideoPresenterFrozenFrameImage != null
+                && System.Windows.Media.RenderOptions.GetBitmapScalingMode(VideoPresenterFrozenFrameImage) != mode)
+            {
+                System.Windows.Media.RenderOptions.SetBitmapScalingMode(VideoPresenterFrozenFrameImage, mode);
+            }
+
+            // 外部导入/拍摄的照片动态分辨率切换（EasiCamera 策略）：
+            // 缩小时 (_boothPreviewScale <= 1.0) 使用降低分辨率的 PreviewImage 节省显存与采样负载；
+            // 放大时 (_boothPreviewScale > 1.2) 动态提升为高清原图 Image；
+            // 1.0 ~ 1.2 为防抖滞后区间，保持当前使用的图源不变。
+            if (_boothCurrentPhotoIndex >= 0 && _boothCurrentPhotoIndex < _capturedPhotos.Count)
+            {
+                var currentPhoto = _capturedPhotos[_boothCurrentPhotoIndex];
+                if (currentPhoto != null && VideoPresenterFrozenFrameImage != null)
+                {
+                    if (_boothPreviewScale <= 1.0 && currentPhoto.PreviewImage != null)
+                    {
+                        if (!ReferenceEquals(VideoPresenterFrozenFrameImage.Source, currentPhoto.PreviewImage))
+                        {
+                            VideoPresenterFrozenFrameImage.Source = currentPhoto.PreviewImage;
+                        }
+                    }
+                    else if (_boothPreviewScale > 1.2)
+                    {
+                        if (!ReferenceEquals(VideoPresenterFrozenFrameImage.Source, currentPhoto.Image))
+                        {
+                            VideoPresenterFrozenFrameImage.Source = currentPhoto.Image;
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -4289,7 +4334,10 @@ namespace Ink_Canvas
                 }
                 catch { }
 
-                VideoPresenterFrozenFrameImage.Source = photo.Image;
+                var initialPhotoSource = (_boothPreviewScale <= 1.0 && photo.PreviewImage != null)
+                    ? photo.PreviewImage
+                    : photo.Image;
+                VideoPresenterFrozenFrameImage.Source = initialPhotoSource;
                 VideoPresenterFrozenFrameImage.Visibility = Visibility.Visible;
                 // FillImage 填满容器，不需要显式 Width/Height 和对齐方式
                 VideoPresenterFrozenFrameImage.Width = double.NaN;
