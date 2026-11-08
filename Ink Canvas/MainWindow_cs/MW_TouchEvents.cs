@@ -1981,6 +1981,12 @@ namespace Ink_Canvas
                         {
                             inkCanvas.EditingMode = InkCanvasEditingMode.None;
                         }
+                        if (inkCanvas != null)
+                        {
+                            // 第二指落下立即恢复 Manipulation，确保双指手势能准时接管平移与缩放，墨迹正常跟随
+                            inkCanvas.IsManipulationEnabled = true;
+                            _hasStoredInkCanvasManipulationStateForTouchInk = false;
+                        }
                     }
                     else if (inkCanvas != null
                         && inkCanvas.EditingMode != InkCanvasEditingMode.Ink
