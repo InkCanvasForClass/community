@@ -2007,8 +2007,9 @@ namespace Ink_Canvas
                             || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
                             || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke))
                     {
-                        // 第一指 + 笔/橡皮擦：临时禁用 Manipulation，绕过手势引擎延迟缓冲，实现无延迟跟手书写
-                        BeginTouchInkInput();
+                        // 展台画笔/橡皮擦模式：必须保持 IsManipulationEnabled 开启，不调用 BeginTouchInkInput()。
+                        // 否则第一指触摸不会被 WPF ManipulationProcessor 追踪，
+                        // 导致随后第二指落下时手势识别器只能识别到单指，双指缩放和移动完全失效。
                     }
                     // 不设置 e.Handled = true，让 WPF 把触摸提升为 Manipulation 事件
                     return;
