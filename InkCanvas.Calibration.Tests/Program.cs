@@ -43,7 +43,10 @@ namespace InkCanvas.Calibration.Tests
                 AutoStartMigrationPreservesOtherSettings, AutoStartMigrationKeepsExplicitValues,
                 AutoStartMigrationRetriesAfterWriteFailure, AutoStartMigrationPreservesInvalidConfig,
                 AutoStartMigrationCreatesMissingConfig, AutoStartMigrationReadsCurrentConfig,
-                AutoStartMigrationHandlesMissingStartup, BoardRoamingTests.RunAll };
+AutoStartMigrationHandlesMissingStartup, BoardRoamingTests.RunAll,
+                ChickenSoupMigrationDoesNotAddMottosWhenCustomSchemeSelectedOrPresetsEmpty,
+                ChickenSoupMigrationPreservesExistingSelectedPresets,
+                ChickenSoupMigrationMigratesLegacySourceToNewFormat };
             if (Array.IndexOf(args, "--palm-only") >= 0) tests = new Action[] { PalmGroupInputTests.RunAll };
             if (Array.IndexOf(args, "--roaming-only") >= 0) tests = new Action[] { BoardRoamingTests.RunAll };
             if (Array.IndexOf(args, "--roaming-benchmark") >= 0) tests = new Action[] { BoardRoamingTests.Benchmark };
@@ -607,6 +610,96 @@ namespace InkCanvas.Calibration.Tests
             Set(window, "isPalmEraserActive", false);
             Call(window, "NotifyPluginPenModeChanged", InkCanvasEditingMode.None);
             Check(events.Count == 1 && !events[0], "Real pen-mode exit must still notify plugins");
+        }
+
+        private static void ChickenSoupMigrationDoesNotAddMottosWhenCustomSchemeSelectedOrPresetsEmpty()
+        {
+            var previous = SettingsManager.Settings;
+            try
+            {
+                SettingsManager.Settings = new Settings
+                {
+                    Appearance = new Appearance
+                    {
+                        ChickenSoupSource = 1,
+                        EnabledPresetTipsSources = new List<string>()
+                    }
+                };
+
+                bool changed = SettingsManager.MigrateChickenSoupSettings();
+                Check(changed, "MigrateChickenSoupSettings should return true to persist migrated state");
+                Check(SettingsManager.Settings.Appearance.EnabledPresetTipsSources.Count == 0,
+                    "MigrateChickenSoupSettings must NOT force-add mottos when presets list is intentionally empty");
+                Check(SettingsManager.Settings.Appearance.ChickenSoupSource == -1,
+                    "MigrateChickenSoupSettings must mark legacy ChickenSoupSource as -1");
+            }
+            finally
+            {
+                SettingsManager.Settings = previous;
+            }
+        }
+
+        private static void ChickenSoupMigrationPreservesExistingSelectedPresets()
+        {
+            var previous = SettingsManager.Settings;
+            try
+            {
+                SettingsManager.Settings = new Settings
+                {
+                    Appearance = new Appearance
+                    {
+                        ChickenSoupSource = 1,
+                        EnabledPresetTipsSources = new List<string> { "hitokoto", "osu" }
+                    }
+                };
+
+                bool changed = SettingsManager.MigrateChickenSoupSettings();
+                Check(changed, "MigrateChickenSoupSettings should mark legacy source as -1");
+                Check(SettingsManager.Settings.Appearance.EnabledPresetTipsSources.Count == 2,
+                    "MigrateChickenSoupSettings must not change existing enabled presets count");
+                Check(SettingsManager.Settings.Appearance.EnabledPresetTipsSources.Contains("hitokoto") &&
+                      SettingsManager.Settings.Appearance.EnabledPresetTipsSources.Contains("osu") &&
+                      !SettingsManager.Settings.Appearance.EnabledPresetTipsSources.Contains("mottos"),
+                    "MigrateChickenSoupSettings must preserve chosen presets and not inject mottos");
+                Check(SettingsManager.Settings.Appearance.ChickenSoupSource == -1,
+                    "Legacy ChickenSoupSource must be normalized to -1");
+            }
+            finally
+            {
+                SettingsManager.Settings = previous;
+            }
+        }
+
+        private static void ChickenSoupMigrationMigratesLegacySourceToNewFormat()
+        {
+            var previous = SettingsManager.Settings;
+            try
+            {
+                SettingsManager.Settings = new Settings
+                {
+                    Appearance = new Appearance
+                    {
+                        ChickenSoupSource = 3,
+                        EnabledPresetTipsSources = null
+                    }
+                };
+
+                bool changed = SettingsManager.MigrateChickenSoupSettings();
+                Check(changed, "MigrateChickenSoupSettings should migrate legacy source");
+                Check(SettingsManager.Settings.Appearance.EnabledPresetTipsSources != null &&
+                      SettingsManager.Settings.Appearance.EnabledPresetTipsSources.Count == 1 &&
+                      SettingsManager.Settings.Appearance.EnabledPresetTipsSources[0] == "hitokoto",
+                    "MigrateChickenSoupSettings must migrate legacy ChickenSoupSource 3 to hitokoto");
+                Check(SettingsManager.Settings.Appearance.ChickenSoupSource == -1,
+                    "MigrateChickenSoupSettings must mark legacy ChickenSoupSource as -1");
+
+                bool secondRun = SettingsManager.MigrateChickenSoupSettings();
+                Check(!secondRun, "Subsequent migration runs should be no-ops");
+            }
+            finally
+            {
+                SettingsManager.Settings = previous;
+            }
         }
     }
 }

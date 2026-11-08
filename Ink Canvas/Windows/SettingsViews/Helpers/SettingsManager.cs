@@ -203,13 +203,12 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             }
         }
 
-        public static void MigrateChickenSoupSettings()
+        public static bool MigrateChickenSoupSettings()
         {
-            if (Settings?.Appearance == null) return;
+            if (Settings?.Appearance == null) return false;
 
             var appearance = Settings.Appearance;
-            if ((appearance.EnabledPresetTipsSources == null || appearance.EnabledPresetTipsSources.Count == 0)
-                && appearance.ChickenSoupSource >= 0)
+            if (appearance.EnabledPresetTipsSources == null && appearance.ChickenSoupSource >= 0)
             {
                 string presetId = null;
                 switch (appearance.ChickenSoupSource)
@@ -220,11 +219,19 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                     case 3: presetId = "hitokoto"; break;
                     case 4: presetId = "phigros"; break;
                 }
-                if (presetId != null)
-                {
-                    appearance.EnabledPresetTipsSources = new List<string> { presetId };
-                }
+                appearance.EnabledPresetTipsSources = presetId != null
+                    ? new List<string> { presetId }
+                    : new List<string> { "mottos" };
+                appearance.ChickenSoupSource = -1;
+                return true;
             }
+            else if (appearance.EnabledPresetTipsSources != null && appearance.ChickenSoupSource >= 0)
+            {
+                appearance.ChickenSoupSource = -1;
+                return true;
+            }
+
+            return false;
         }
 
         public static void MigrateVideoBoothSettings()

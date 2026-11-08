@@ -152,7 +152,10 @@ namespace Ink_Canvas
             }
 
             // Migrate legacy chicken soup source setting to new multi-source format
-            SettingsManager.MigrateChickenSoupSettings();
+            if (SettingsManager.MigrateChickenSoupSettings() && !SettingsManager.TrySaveSettingsToFile())
+            {
+                LogHelper.WriteLogToFile("[ChickenSoup] 迁移名言设置后保存失败", LogHelper.LogType.Warning);
+            }
             SettingsManager.MigrateVideoBoothSettings();
 
             if (SettingsManager.MigrateAutoStartSetting() && !SettingsManager.TrySaveSettingsToFile())
