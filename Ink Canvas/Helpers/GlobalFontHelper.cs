@@ -91,12 +91,71 @@ namespace Ink_Canvas.Helpers
                     {
                         if (sender is Window window) window.FontFamily = CurrentUIFontFamily;
                     }));
+                app.Exit += (_, _) => CleanupPendingDeletes();
             }
             foreach (Window window in app.Windows)
                 window.FontFamily = fontFamily;
         }
 
-        public static string ImportFont(string sourcePath)
+        private static readonly List<string> _pendingDeleteFiles = new List<string>();
+
+        public static void RegisterPendingDelete(string entry)
+        {
+            if (!IsImportedEntry(entry)) return;
+            var fileName = entry.Split('|')[0];
+            if (!_pendingDeleteFiles.Contains(fileName)) _pendingDeleteFiles.Add(fileName);
+        }
+
+        public static void CleanupPendingDeletes()
+        {
+            foreach (var fileName in _pendingDeleteFiles.ToList())
+            {
+                try
+                {
+                    var path = Path.Combine(CustomFontsDirectory, fileName);
+                    if (File.Exists(path))
+                        ProcessProtectionManager.WithWriteAccess(path, () => File.Delete(path));
+                    _pendingDeleteFiles.Remove(fileName);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"延迟删除导入字体失败: {fileName}, {ex.Message}", LogHelper.LogType.Warning);
+                }
+            }
+        }
+
+        public static void CleanupOrphanedFonts(IEnumerable<string> importedEntries)
+        {
+            try
+            {
+                if (!Directory.Exists(CustomFontsDirectory)) return;
+                var referenced = new HashSet<string>(
+                    (importedEntries ?? Enumerable.Empty<string>())
+                    .Where(IsImportedEntry)
+                    .Select(entry => entry.Split('|')[0]),
+                    StringComparer.OrdinalIgnoreCase);
+                foreach (var file in Directory.GetFiles(CustomFontsDirectory))
+                {
+                    if (referenced.Contains(Path.GetFileName(file))) continue;
+                    try
+                    {
+                        var path = file;
+                        ProcessProtectionManager.WithWriteAccess(path, () => File.Delete(path));
+                        LogHelper.WriteLogToFile($"清理无引用的导入字体文件: {file}", LogHelper.LogType.Trace);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"清理无引用的导入字体文件失败: {file}, {ex.Message}", LogHelper.LogType.Warning);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"扫描导入字体目录失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        public static List<string> ImportFont(string sourcePath)
         {
             try
             {
@@ -137,23 +196,24 @@ namespace Ink_Canvas.Helpers
                 }
 
                 var dir = Path.GetDirectoryName(destPath) + Path.DirectorySeparatorChar;
-                var first = Fonts.GetFontFamilies(new Uri(dir, UriKind.Absolute), "./" + fileName).FirstOrDefault();
-                if (first == null)
+                var families = Fonts.GetFontFamilies(new Uri(dir, UriKind.Absolute), "./" + fileName);
+                var entries = new List<string>();
+                foreach (var family in families)
+                {
+                    var familyName = PickLocalizedFamilyName(family);
+                    if (string.IsNullOrWhiteSpace(familyName))
+                        familyName = family.Source.Split('#').Last();
+                    if (string.IsNullOrWhiteSpace(familyName)) continue;
+                    var entry = fileName + "|" + familyName;
+                    if (!entries.Contains(entry)) entries.Add(entry);
+                }
+
+                if (entries.Count == 0)
                 {
                     LogHelper.WriteLogToFile($"导入字体失败，未在文件中解析到字体族: {sourcePath}", LogHelper.LogType.Warning);
                     return null;
                 }
-
-                var familyName = PickLocalizedFamilyName(first);
-                if (string.IsNullOrWhiteSpace(familyName))
-                    familyName = first.Source.Split('#').Last();
-                if (string.IsNullOrWhiteSpace(familyName))
-                {
-                    LogHelper.WriteLogToFile($"导入字体失败，无法确定字体族名: {sourcePath}", LogHelper.LogType.Warning);
-                    return null;
-                }
-
-                return fileName + "|" + familyName;
+                return entries;
             }
             catch (Exception ex)
             {
@@ -162,12 +222,17 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        public static bool RemoveImportedFont(string entry)
+        public static bool RemoveImportedFont(string entry, IEnumerable<string> remainingEntries)
         {
-            if (!IsImportedEntry(entry)) return false;
+            if (!IsImportedEntry(entry)) return true;
+            var fileName = entry.Split('|')[0];
+            var stillReferenced = (remainingEntries ?? Enumerable.Empty<string>())
+                .Where(IsImportedEntry)
+                .Any(other => string.Equals(other.Split('|')[0], fileName, StringComparison.OrdinalIgnoreCase));
+            if (stillReferenced) return true;
             try
             {
-                var path = Path.Combine(CustomFontsDirectory, entry.Split('|')[0]);
+                var path = Path.Combine(CustomFontsDirectory, fileName);
                 if (File.Exists(path))
                     ProcessProtectionManager.WithWriteAccess(path, () => File.Delete(path));
                 return true;

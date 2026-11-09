@@ -173,8 +173,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 };
                 if (dialog.ShowDialog() != true) return;
 
-                var entry = GlobalFontHelper.ImportFont(dialog.FileName);
-                if (entry == null)
+                var entries = GlobalFontHelper.ImportFont(dialog.FileName);
+                if (entries == null || entries.Count == 0)
                 {
                     MessageBox.Show(ThemeStrings.Theme_UIFont_ImportFailed, ThemeStrings.Theme_UIFontLabel,
                         MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -182,21 +182,23 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 }
 
                 var imported = SettingsManager.Settings.Appearance.ImportedUIFonts ??= new List<string>();
-                if (!imported.Contains(entry)) imported.Add(entry);
-                SettingsManager.Settings.Appearance.GlobalUIFontFamily = entry;
+                foreach (var entry in entries)
+                    if (!imported.Contains(entry)) imported.Add(entry);
+                var selected = entries[0];
+                SettingsManager.Settings.Appearance.GlobalUIFontFamily = selected;
                 SettingsManager.SaveSettingsToFile();
 
                 _isApplyingUIFontFromSettings = true;
                 try
                 {
                     LoadUIFontItems();
-                    SelectComboBoxItemByTag(ComboBoxUIFont, entry);
+                    SelectComboBoxItemByTag(ComboBoxUIFont, selected);
                 }
                 finally
                 {
                     _isApplyingUIFontFromSettings = false;
                 }
-                SettingsActionHub.OnGlobalUIFontChanged(entry);
+                SettingsActionHub.OnGlobalUIFontChanged(selected);
             }
             catch (Exception ex)
             {
@@ -214,15 +216,23 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 var entry = (ComboBoxUIFont.SelectedItem as ComboBoxItem)?.Tag?.ToString();
                 if (!GlobalFontHelper.IsImportedEntry(entry)) return;
 
-                var imported = SettingsManager.Settings.Appearance.ImportedUIFonts ??= new List<string>();
-                imported.Remove(entry);
-                GlobalFontHelper.RemoveImportedFont(entry);
-
                 if (string.Equals(SettingsManager.Settings.Appearance.GlobalUIFontFamily, entry,
                         StringComparison.OrdinalIgnoreCase))
                 {
                     SettingsManager.Settings.Appearance.GlobalUIFontFamily = GlobalFontHelper.DefaultUIFontFamily;
                     SettingsActionHub.OnGlobalUIFontChanged(GlobalFontHelper.DefaultUIFontFamily);
+                    Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.Render);
+                }
+
+                var imported = SettingsManager.Settings.Appearance.ImportedUIFonts ??= new List<string>();
+                imported.Remove(entry);
+
+                if (!GlobalFontHelper.RemoveImportedFont(entry, imported))
+                {
+                    GlobalFontHelper.RegisterPendingDelete(entry);
+                    LogHelper.WriteLogToFile($"字体文件正被占用，已登记退出时删除: {entry}", LogHelper.LogType.Warning);
+                    MessageBox.Show(ThemeStrings.Theme_UIFont_RemovePending, ThemeStrings.Theme_UIFontLabel,
+                        MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 SettingsManager.SaveSettingsToFile();
 

@@ -192,6 +192,9 @@
   <data name="Theme_UIFont_Remove" xml:space="preserve">
     <value>Remove font</value>
   </data>
+  <data name="Theme_UIFont_RemovePending" xml:space="preserve">
+    <value>The font is currently in use. The font file will be deleted when the app exits.</value>
+  </data>
   <data name="Theme_UIFontLabel" xml:space="preserve">
     <value>Font</value>
   </data>

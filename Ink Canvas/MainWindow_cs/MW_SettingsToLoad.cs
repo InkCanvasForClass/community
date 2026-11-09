@@ -178,6 +178,7 @@ namespace Ink_Canvas
             try
             {
                 GlobalFontHelper.Apply(Settings?.Appearance?.GlobalUIFontFamily);
+                GlobalFontHelper.CleanupOrphanedFonts(Settings?.Appearance?.ImportedUIFonts);
             }
             catch (Exception ex)
             {

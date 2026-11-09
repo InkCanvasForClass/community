@@ -192,6 +192,9 @@
   <data name="Theme_UIFont_Remove" xml:space="preserve">
     <value>移除字体</value>
   </data>
+  <data name="Theme_UIFont_RemovePending" xml:space="preserve">
+    <value>该字体正在被使用，字体文件将在应用退出时自动删除</value>
+  </data>
   <data name="Theme_UIFontLabel" xml:space="preserve">
     <value>字体</value>
   </data>
