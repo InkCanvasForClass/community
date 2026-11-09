@@ -1076,6 +1076,8 @@ namespace Ink_Canvas
 
         private LogicalInkTool ResolveLogicalInkTool()
         {
+            if (_presentationElementSelection)
+                return LogicalInkTool.Cursor;
             if (IsBoardRoamingMode)
                 return LogicalInkTool.BoardRoam;
             if (drawingShapeMode != 0

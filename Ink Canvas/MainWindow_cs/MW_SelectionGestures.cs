@@ -677,6 +677,8 @@ namespace Ink_Canvas
         /// </remarks>
         private void BtnSelect_Click(object sender, RoutedEventArgs e)
         {
+            if (TryEnterPresentationElementSelection()) return;
+
             forceEraser = true;
             drawingShapeMode = 0;
             // 视频展台特殊模式下必须保持 IsManipulationEnabled=true，
@@ -1050,6 +1052,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void LassoSelect_Click(object sender, RoutedEventArgs e)
         {
+            if (TryEnterPresentationElementSelection()) return;
             forceEraser = false;
             forcePointEraser = false;
             drawingShapeMode = 0;
@@ -1070,6 +1073,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void BtnLassoSelect_Click(object sender, RoutedEventArgs e)
         {
+            if (TryEnterPresentationElementSelection()) return;
             forceEraser = false;
             forcePointEraser = false;
             drawingShapeMode = 0;

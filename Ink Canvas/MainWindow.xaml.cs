@@ -3536,6 +3536,10 @@ namespace Ink_Canvas
         {
             try
             {
+                if (newMode == InkCanvasEditingMode.Select && TryEnterPresentationElementSelection())
+                    return true;
+                LeavePresentationElementSelection();
+
                 if (newMode == InkCanvasEditingMode.EraseByPoint)
                     isUsingStrokesEraser = false;
                 else if (newMode == InkCanvasEditingMode.EraseByStroke)
