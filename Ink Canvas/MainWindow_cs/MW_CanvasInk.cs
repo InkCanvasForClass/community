@@ -217,6 +217,74 @@ namespace Ink_Canvas
             return true;
         }
 
+        /// <summary>从文件导入图片，完成布局后显示当前画布并记录撤销；必须在 UI 线程调用。</summary>
+        internal async System.Threading.Tasks.Task<bool> InsertPluginImageFromFileAsync(string path)
+        {
+            if (inkCanvas == null || string.IsNullOrWhiteSpace(path)) return false;
+            if (TryBlockFrozenPageMutation(FloatingBarStrings.Board_InsertImage)) return false;
+
+            string fullPath = System.IO.Path.GetFullPath(path);
+            if (!System.IO.File.Exists(fullPath)) return false;
+            switch (System.IO.Path.GetExtension(fullPath).ToLowerInvariant())
+            {
+                case ".png":
+                case ".jpg":
+                case ".jpeg":
+                case ".bmp":
+                case ".gif":
+                case ".tif":
+                case ".tiff":
+                case ".ico":
+                    break;
+                default:
+                    return false;
+            }
+
+            var element = await CreateAndCompressImageAsync(fullPath);
+            if (element == null) return false;
+            if (double.IsNaN(element.Width) || double.IsInfinity(element.Width) || element.Width <= 0 ||
+                double.IsNaN(element.Height) || double.IsInfinity(element.Height) || element.Height <= 0) return false;
+            element.Name = "img_" + Guid.NewGuid().ToString("N");
+
+            // 隐藏的桌面批注画布不保证触发 Loaded；用已解码的图片尺寸先完成布局，
+            // 避免切回批注/课件后才以原始像素尺寸显示先前导入的图片。
+            if (TryBlockFrozenPageMutation(FloatingBarStrings.Board_InsertImage)) return false;
+            double canvasWidth = inkCanvas.ActualWidth > 0 ? inkCanvas.ActualWidth : ActualWidth;
+            double canvasHeight = inkCanvas.ActualHeight > 0 ? inkCanvas.ActualHeight : ActualHeight;
+            if (canvasWidth <= 0) canvasWidth = SystemParameters.PrimaryScreenWidth;
+            if (canvasHeight <= 0) canvasHeight = SystemParameters.PrimaryScreenHeight;
+            double scale = Math.Min(1, Math.Min(canvasWidth * 0.7 / element.Width, canvasHeight * 0.7 / element.Height));
+            element.Width *= scale;
+            element.Height *= scale;
+            InitializeElementTransform(element);
+            InkCanvas.SetLeft(element, Math.Max(0, (canvasWidth - element.Width) / 2));
+            InkCanvas.SetTop(element, Math.Max(0, (canvasHeight - element.Height) / 2));
+            element.IsHitTestVisible = true;
+            element.Focusable = false;
+            InitializeInkCanvasSelectionSettings();
+            inkCanvas.Children.Add(element);
+            BindElementEvents(element);
+            timeMachine.CommitElementInsertHistory(element);
+
+            // SetCurrentToolMode 只切工具，不负责退出桌面鼠标穿透或显示隐藏画布。
+            inkCanvas.Visibility = Visibility.Visible;
+            inkCanvas.IsHitTestVisible = true;
+            GridBackgroundCoverHolder.Visibility = Visibility.Visible;
+            GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+            GridTransparencyFakeBackground.Opacity = 1;
+            GridTransparencyFakeBackground.Background = new SolidColorBrush(StringToColor("#01FFFFFF"));
+            SetTransparentNotHitThrough();
+            forceEraser = false;
+            forcePointEraser = false;
+            drawingShapeMode = 0;
+            SetCurrentToolMode(InkCanvasEditingMode.Select);
+            UpdateCurrentToolMode("select");
+            // 从鼠标模式进入选择模式会改变工具栏长度，复用布局更新后的居中流程。
+            HideSubPanels("select", autoAlignCenter: true);
+            LogHelper.WriteLogToFile($"插件图片插入完成: 尺寸({element.Width}x{element.Height}), 画布({canvasWidth}x{canvasHeight})");
+            return true;
+        }
+
         /// <summary>更换当前画布背景色（打开颜色选择）。</summary>
         internal void ChangePluginBackgroundColor()
             => BoardChangeBackgroundColorBtn_MouseUp(null, null);
