@@ -163,6 +163,8 @@ namespace Ink_Canvas.Helpers
                     () => Directory.CreateDirectory(CustomFontsDirectory));
 
                 var fileName = Path.GetFileName(sourcePath);
+                if (fileName.IndexOf('#') >= 0 || fileName.IndexOf('|') >= 0)
+                    fileName = fileName.Replace('#', '_').Replace('|', '_');
                 var destPath = Path.Combine(CustomFontsDirectory, fileName);
 
                 if (!string.Equals(Path.GetFullPath(sourcePath), Path.GetFullPath(destPath),
