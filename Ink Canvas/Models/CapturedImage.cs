@@ -13,6 +13,18 @@ namespace Ink_Canvas.Models
         public string Timestamp { get; }
         public string FilePath { get; }
 
+        /// <summary>该照片在展台预览中的缩放比例（默认 1.0）。</summary>
+        public double Scale { get; set; } = 1.0;
+
+        /// <summary>该照片在展台预览中的水平位移（默认 0.0）。</summary>
+        public double TranslateX { get; set; } = 0.0;
+
+        /// <summary>该照片在展台预览中的垂直位移（默认 0.0）。</summary>
+        public double TranslateY { get; set; } = 0.0;
+
+        /// <summary>该照片在展台预览中的旋转角度（0, 90, 180, 270）。</summary>
+        public double RotationAngle { get; set; } = 0.0;
+
         /// <summary>
         /// 使用指定的位图创建一个 CapturedImage 实例，并为其生成缩略图、空白笔划集合和时间戳。
         /// </summary>

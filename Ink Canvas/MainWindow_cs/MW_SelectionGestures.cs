@@ -689,6 +689,13 @@ namespace Ink_Canvas
             }
             if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
             {
+                // 视频展台特殊模式下禁用双击/再次点击"选择"全选所有墨迹功能，
+                // 避免在展台拖拽/缩放时误触全选弹出庞大选择框
+                if (_isVideoPresenterSpecialMode)
+                {
+                    return;
+                }
+
                 if (inkCanvas.GetSelectedStrokes().Count == inkCanvas.Strokes.Count)
                 {
                     // 使用集中化的工具模式切换方法

@@ -67,10 +67,16 @@ namespace Ink_Canvas
         // 上一帧的 translate，用于计算鼠标移动增量（同步墨迹平移）
         private double _boothMouseLastTranslateX;
         private double _boothMouseLastTranslateY;
-        // 特殊模式下预览图像的缩放比例和位移
+        // 特殊模式下当前画面的缩放比例和位移
         private double _boothPreviewScale = 1.0;
         private double _boothPreviewTranslateX = 0;
         private double _boothPreviewTranslateY = 0;
+        // 直播页独立的缩放与平移状态记忆（切页或退出展台后保留）
+        private double _boothLiveScale = 1.0;
+        private double _boothLiveTranslateX = 0;
+        private double _boothLiveTranslateY = 0;
+        // 展台最后阅读的页面（-1=直播页，0..N-1=照片页）。退出展台时不重置，再次进入时恢复
+        private int _boothLastViewedPhotoIndex = -1;
         // 全屏预览：WriteableBitmap 复用后已不再需要节流字段
         // （OnFrameArrived 直接 WritePixels 更新内容，Image.Source 始终指向同一个 WriteableBitmap，
         //  WPF 合成器通过 AddDirtyRect 自动重绘，不会重新分配 GPU 纹理，不再有 DUCE.Channel.SyncFlush 堆积 OOM 风险）
@@ -554,8 +560,13 @@ namespace Ink_Canvas
                 $"[Booth] 进入视频展台拍摄模式: 页面={_boothCurrentPhotoIndex}, 编辑模式={inkCanvas?.EditingMode}",
                 LogHelper.LogType.Info);
 
-            // 重置虚拟分页状态：进入特殊模式时默认回到直播页，但保留上次拍照列表
-            _boothCurrentPhotoIndex = -1;
+            // 虚拟分页：优先保持上次阅读的页面（若上次在照片页且该照片仍有效，则进入后恢复该照片）
+            int restorePhotoIndex = -1;
+            if (_boothLastViewedPhotoIndex >= 0 && _boothLastViewedPhotoIndex < _capturedPhotos.Count)
+            {
+                restorePhotoIndex = _boothLastViewedPhotoIndex;
+            }
+            _boothCurrentPhotoIndex = restorePhotoIndex;
 
             try
             {
@@ -621,19 +632,29 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile($"[Booth] 进入展台特殊模式前停止上一次的实时预览失败: {ex.Message}", LogHelper.LogType.Info);
                 }
 
-                // 重置缩放
-                _boothPreviewScale = 1.0;
-                _boothPreviewTranslateX = 0;
-                _boothPreviewTranslateY = 0;
-                ApplyBoothPreviewTransform();
+                if (restorePhotoIndex >= 0)
+                {
+                    // 恢复上次阅读的照片页
+                    SwitchBoothToPhotoPage(restorePhotoIndex);
+                }
+                else
+                {
+                    // 恢复直播页缩放与平移（保留上次直播页的缩放位置）
+                    _boothPreviewScale = _boothLiveScale > 0 ? _boothLiveScale : 1.0;
+                    _boothPreviewTranslateX = _boothLiveTranslateX;
+                    _boothPreviewTranslateY = _boothLiveTranslateY;
+                    ApplyBoothPreviewTransform();
 
-                // 虚拟分页：进入特殊模式时页码显示 0/0（无照片）
-                UpdateBoothPageInfoDisplay();
-                // 刷新侧栏页码列表：填充第 0 项（直播页，文字"再次点击返回直播画面"）
-                RefreshBoothPageListView();
+                    // 恢复直播页墨迹
+                    RestoreBoothStrokesFromSlot(-1);
 
-                // 若矫正开关已开启，启动实时识别框定时器
-                if (Settings?.Automation?.IsEnablePhotoCorrection == true)
+                    // 虚拟分页：更新页码与侧边栏
+                    UpdateBoothPageInfoDisplay();
+                    RefreshBoothPageListView();
+                }
+
+                // 若矫正开关已开启且当前在直播页，启动实时识别框定时器
+                if (Settings?.Automation?.IsEnablePhotoCorrection == true && restorePhotoIndex < 0)
                 {
                     StartPaperDetectTimer();
                 }
@@ -690,13 +711,13 @@ namespace Ink_Canvas
             SetBoothGestureRotationUiEnabled(true);
             _boothMediaOpened = false;
             _boothPreviewRestartRetryCount = 0;
-            LogHelper.WriteLogToFile("[Booth] 退出视频展台拍摄模式，已丢弃拍摄态墨迹", LogHelper.LogType.Info);
+            LogHelper.WriteLogToFile("[Booth] 退出视频展台拍摄模式，保留拍摄态墨迹、缩放位置与旋转状态", LogHelper.LogType.Info);
+
+            // 退出前完整保存当前展台页面状态（墨迹、缩放、位移、旋转、最后查看页码）
+            SaveCurrentBoothState();
 
             // 停止 A4 纸实时识别定时器并隐藏覆盖层
             StopPaperDetectTimer();
-
-            // 重置虚拟分页状态：退出后默认回到直播页，但保留照片列表
-            _boothCurrentPhotoIndex = -1;
 
             try
             {
@@ -716,28 +737,15 @@ namespace Ink_Canvas
                     GridBackgroundCover.Visibility = Visibility.Collapsed;
                 }
 
-                // 丢弃特殊模式下绘制的墨迹
+                // 清空画布当前呈现的墨迹以恢复普通白板，展台墨迹安全封存在各槽位中
                 if (inkCanvas != null)
                 {
                     inkCanvas.Strokes.Clear();
-                    // 同步清空 timeMachine 历史，避免 SaveStrokes 保存脏引用
-                    // （strokes 已从画布移除但 history 中仍有引用）
                     timeMachine?.ClearStrokeHistory();
                     inkCanvas.EditingMode = _inkEditingModeBeforeSpecialMode;
                 }
                 // 重置旋转基准
                 ResetRotationBaseline();
-                // 同步清空直播页墨迹快照与每张照片的 Strokes，
-                // 避免下次进入特殊模式时残留上一次的批注
-                _liveStrokesSnapshot.Clear();
-                foreach (var p in _capturedPhotos)
-                {
-                    try { p?.Strokes?.Clear(); }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[Booth] 退出特殊模式时清空已拍摄照片槽位中的墨迹失败: {ex.Message}", LogHelper.LogType.Info);
-                    }
-                }
 
                 // 清理鼠标拖动状态（防止退出时鼠标仍被捕获）
                 if (_isBoothMouseDragging)
@@ -872,6 +880,47 @@ namespace Ink_Canvas
                 }
             }
         }
+
+        /// <summary>
+        /// 保存当前展台页面的全部状态（墨迹、缩放、位移、旋转及最后阅读页码）。
+        /// 在切换页面（照片之间切换、照片与直播切换）或退出展台前调用。
+        /// </summary>
+        private void SaveCurrentBoothState()
+        {
+            if (!_isVideoPresenterSpecialMode) return;
+            try
+            {
+                // 1. 保存当前画布墨迹
+                SaveCurrentBoothStrokesToSlot();
+
+                // 2. 保存当前画面的缩放、平移与旋转
+                if (_boothCurrentPhotoIndex >= 0 && _boothCurrentPhotoIndex < _capturedPhotos.Count)
+                {
+                    var photo = _capturedPhotos[_boothCurrentPhotoIndex];
+                    if (photo != null)
+                    {
+                        photo.Scale = _boothPreviewScale > 0 ? _boothPreviewScale : 1.0;
+                        photo.TranslateX = _boothPreviewTranslateX;
+                        photo.TranslateY = _boothPreviewTranslateY;
+                        photo.RotationAngle = VideoPresenterFullCanvasRotation?.Angle ?? 0.0;
+                    }
+                }
+                else
+                {
+                    _boothLiveScale = _boothPreviewScale > 0 ? _boothPreviewScale : 1.0;
+                    _boothLiveTranslateX = _boothPreviewTranslateX;
+                    _boothLiveTranslateY = _boothPreviewTranslateY;
+                }
+
+                // 3. 记录最后浏览的页码
+                _boothLastViewedPhotoIndex = _boothCurrentPhotoIndex;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(string.Format("[Booth] 保存当前展台页面状态失败: {0}", ex.Message), LogHelper.LogType.Warning);
+            }
+        }
+
 
         /// <summary>
         /// 把当前 inkCanvas.Strokes 保存到当前槽位：
@@ -2233,6 +2282,22 @@ namespace Ink_Canvas
                 var matrix = new System.Windows.Media.Matrix();
                 matrix.ScaleAt(ratio, ratio, inkOrigin.X, inkOrigin.Y);
                 inkCanvas.Strokes.Transform(matrix, false);
+
+                // 同步调整每条笔画的粗细尺寸（DrawingAttributes.Width / Height），
+                // 确保内容放大时墨迹大小也等比跟随放大，真实贴合画面内容
+                if (Math.Abs(ratio - 1.0) >= 0.0001)
+                {
+                    foreach (var stroke in inkCanvas.Strokes)
+                    {
+                        var da = stroke.DrawingAttributes;
+                        if (da != null)
+                        {
+                            da.Width = Math.Max(0.5, Math.Min(100.0, da.Width * ratio));
+                            da.Height = Math.Max(0.5, Math.Min(100.0, da.Height * ratio));
+                        }
+                    }
+                }
+
                 // 同步变换历史中不在画布上的笔画（如形状识别的 ReplacedStroke）
                 timeMachine?.TransformStrokesInHistory(matrix, inkCanvas.Strokes);
                 // 墨迹大小已改变，旋转基准过期，重置以便下次旋转重新保存
@@ -2260,6 +2325,12 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile(
                     $"StartVideoPresenterPreview: cameraIndex={cameraIndex}，IsCapturing={_cameraService.IsCapturing}，SpecialMode={_isVideoPresenterSpecialMode}",
                     LogHelper.LogType.Info);
+
+                // 处于展台特殊模式且正在查看照片时，不启动摄像头预览，避免设备抢占和透光
+                if (_isVideoPresenterSpecialMode && _boothCurrentPhotoIndex >= 0)
+                {
+                    return;
+                }
 
                 if (_isVideoPresenterSpecialMode)
                 {
@@ -3253,6 +3324,15 @@ namespace Ink_Canvas
                     }
                     catch { }
                     VideoPresenterFullCanvasRotation.Angle = (VideoPresenterFullCanvasRotation.Angle + 90.0) % 360.0;
+                    // 同步更新当前照片对象的旋转角度状态
+                    if (_boothCurrentPhotoIndex >= 0 && _boothCurrentPhotoIndex < _capturedPhotos.Count)
+                    {
+                        var currentPhoto = _capturedPhotos[_boothCurrentPhotoIndex];
+                        if (currentPhoto != null)
+                        {
+                            currentPhoto.RotationAngle = VideoPresenterFullCanvasRotation.Angle;
+                        }
+                    }
                     // 传视觉角度（cameraRotation*90 + Angle）给墨迹变换，
                     // 因为 GetBoothRotationMatrix 按"实时画面 0° 基准"算缩放，照片预览需用视觉角度
                     RotateBoothStrokesFromBaseline(GetBoothVisualAngle());
@@ -4328,12 +4408,12 @@ namespace Ink_Canvas
                 return;
             }
 
-            // 切换前保存当前页墨迹到当前槽位（直播页快照或旧照片的 Strokes），
-            // 避免新照片显示旧墨迹或当前墨迹丢失。
-            SaveCurrentBoothStrokesToSlot();
+            // 切换前保存当前展台页面全部状态（墨迹、缩放、位移、旋转、最后浏览页）
+            SaveCurrentBoothState();
             // 切换页面重置旋转基准（新页面的墨迹需要新的基准）
             ResetRotationBaseline();
             _boothCurrentPhotoIndex = photoIndex;
+            _boothLastViewedPhotoIndex = photoIndex;
 
             // 照片预览页直接复用实时画面的变换管线：把 FillImage 的 LayoutTransform/RenderTransform
             // 替换为 VideoCaptureElement 的同名实例（VideoPresenterFullCanvasRotation/Scale/Translate）。
@@ -4378,15 +4458,14 @@ namespace Ink_Canvas
                 if (VideoPresenterFullCanvasImage?.RenderTransform != null)
                     VideoPresenterFrozenFrameImage.RenderTransform = VideoPresenterFullCanvasImage.RenderTransform;
 
-                // 重置变换：与直播页初始状态一致（Scale=1, Translate=0，Stretch 自动 fit 居中）
-                _boothPreviewScale = 1.0;
-                _boothPreviewTranslateX = 0;
-                _boothPreviewTranslateY = 0;
-
-                // 照片内容已在拍照时旋转到正向，预览旋转从 0° 开始
-                // （共享的 VideoPresenterFullCanvasRotation 同时影响已 Collapsed 的 VideoCaptureElement，不影响显示）
+                // 恢复该照片的旋转角度（保留上次阅读旋转状态）
                 if (VideoPresenterFullCanvasRotation != null)
-                    VideoPresenterFullCanvasRotation.Angle = 0;
+                    VideoPresenterFullCanvasRotation.Angle = photo.RotationAngle;
+
+                // 恢复该照片的缩放与平移（保留上次阅读缩放位置）
+                _boothPreviewScale = photo.Scale > 0 ? photo.Scale : 1.0;
+                _boothPreviewTranslateX = photo.TranslateX;
+                _boothPreviewTranslateY = photo.TranslateY;
 
                 ApplyBoothPreviewTransform();
 
@@ -4448,11 +4527,12 @@ namespace Ink_Canvas
         /// </summary>
         private void SwitchBoothToLivePage()
         {
-            // 返回直播前保存当前照片的墨迹到该照片槽位，避免丢失批注
-            SaveCurrentBoothStrokesToSlot();
+            // 切换前保存当前展台页面全部状态（墨迹、缩放、位移、旋转、最后浏览页）
+            SaveCurrentBoothState();
             // 切换页面重置旋转基准
             ResetRotationBaseline();
             _boothCurrentPhotoIndex = -1;
+            _boothLastViewedPhotoIndex = -1;
 
             // 清除冻结照片，并恢复照片 Image 原始的变换实例（解除与 VideoCaptureElement 的共享）
             if (VideoPresenterFrozenFrameImage != null)
@@ -4474,10 +4554,10 @@ namespace Ink_Canvas
                 // （_cameraService.RotationAngle 在照片预览期间未变，直接用它的角度）
                 if (VideoPresenterFullCanvasRotation != null)
                     VideoPresenterFullCanvasRotation.Angle = _cameraService.RotationAngle * 90.0;
-                // 重置缩放/平移为默认状态（直播页与照片页缩放状态不通用）
-                _boothPreviewScale = 1.0;
-                _boothPreviewTranslateX = 0;
-                _boothPreviewTranslateY = 0;
+                // 恢复直播页缩放与平移（保留上次直播页的缩放位置）
+                _boothPreviewScale = _boothLiveScale > 0 ? _boothLiveScale : 1.0;
+                _boothPreviewTranslateX = _boothLiveTranslateX;
+                _boothPreviewTranslateY = _boothLiveTranslateY;
                 ApplyBoothPreviewTransform();
 
                 int page = GetCurrentPageIndex();
@@ -4987,14 +5067,51 @@ namespace Ink_Canvas
             }
         }
 
-        /// <summary>重置展台缩放/平移到默认状态。供 IVideoBoothService 调用，须在 UI 线程。</summary>
+        /// <summary>重置展台缩放/平移到默认状态，并同步逆变换画布墨迹。供 IVideoBoothService 调用，须在 UI 线程。</summary>
         public void VideoBoothResetZoom()
         {
             if (!_isVideoPresenterSpecialMode) return;
-            _boothPreviewScale = 1.0;
-            _boothPreviewTranslateX = 0;
-            _boothPreviewTranslateY = 0;
-            ApplyBoothPreviewTransform();
+            try
+            {
+                double oldScale = _boothPreviewScale;
+                double oldTx = _boothPreviewTranslateX;
+                double oldTy = _boothPreviewTranslateY;
+
+                _boothPreviewScale = 1.0;
+                _boothPreviewTranslateX = 0;
+                _boothPreviewTranslateY = 0;
+                ApplyBoothPreviewTransform();
+
+                // 同步重置墨迹：把墨迹从放大平移后的位置逆变换回 1.0 原始位置
+                if (inkCanvas != null && inkCanvas.Strokes.Count > 0 && oldScale > 0)
+                {
+                    // 1. 逆平移
+                    if (Math.Abs(oldTx) > 0.001 || Math.Abs(oldTy) > 0.001)
+                    {
+                        var translateMatrix = new Matrix();
+                        translateMatrix.Translate(-oldTx, -oldTy);
+                        foreach (var stroke in inkCanvas.Strokes)
+                        {
+                            stroke.Transform(translateMatrix, false);
+                        }
+                        timeMachine?.TransformStrokesInHistory(translateMatrix, inkCanvas.Strokes);
+                    }
+
+                    // 2. 逆缩放（以容器中心为锚点）
+                    if (Math.Abs(oldScale - 1.0) >= 0.001)
+                    {
+                        double containerW = VideoPresenterSpecialModeContainer?.ActualWidth ?? inkCanvas.ActualWidth;
+                        double containerH = VideoPresenterSpecialModeContainer?.ActualHeight ?? inkCanvas.ActualHeight;
+                        var center = new System.Windows.Point(containerW / 2.0, containerH / 2.0);
+                        double invRatio = 1.0 / oldScale;
+                        ScaleInkCanvasStrokes(center, invRatio);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(string.Format("[Booth] 重置展台缩放失败: {0}", ex.Message), LogHelper.LogType.Warning);
+            }
         }
 
         #endregion
