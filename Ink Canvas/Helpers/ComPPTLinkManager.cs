@@ -16,6 +16,7 @@ namespace Ink_Canvas.Helpers
             _inner.SlideShowNextSlide += wn => SlideShowNextSlide?.Invoke(wn);
             _inner.SlideShowEnd += _ => SlideShowEnd?.Invoke(_inner.GetStateSnapshot());
             _inner.PresentationOpen += pres => PresentationOpen?.Invoke(pres);
+            _inner.PresentationOpenedExternally += pres => PresentationOpenedExternally?.Invoke(pres);
             _inner.PresentationClose += _ => PresentationClose?.Invoke(_inner.GetStateSnapshot());
             _inner.PPTConnectionChanged += connected => PPTConnectionChanged?.Invoke(connected);
             _inner.SlideShowStateChanged += inSlideShow => SlideShowStateChanged?.Invoke(inSlideShow);
@@ -26,6 +27,7 @@ namespace Ink_Canvas.Helpers
         public event Action<object> SlideShowNextSlide;
         public event Action<object> SlideShowEnd;
         public event Action<object> PresentationOpen;
+        public event Action<object> PresentationOpenedExternally;
         public event Action<object> PresentationClose;
         public event Action<bool> PPTConnectionChanged;
         public event Action<bool> SlideShowStateChanged;
@@ -79,6 +81,8 @@ namespace Ink_Canvas.Helpers
 
         #region 放映控制
         public bool TryStartSlideShow() => _inner.TryStartSlideShow();
+
+        public bool TryStartSlideShow(string presentationFullName) => _inner.TryStartSlideShow(presentationFullName);
 
         public bool TryEndSlideShow() => _inner.TryEndSlideShow();
         #endregion

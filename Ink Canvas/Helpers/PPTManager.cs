@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Threading;
 using Windows.Win32;
@@ -29,6 +30,7 @@ namespace Ink_Canvas.Helpers
         public event Action<SlideShowWindow> SlideShowNextSlide;
         public event Action<Presentation> SlideShowEnd;
         public event Action<Presentation> PresentationOpen;
+        public event Action<Presentation> PresentationOpenedExternally;
         public event Action<Presentation> PresentationClose;
         public event Action<bool> PPTConnectionChanged;
         public event Action<bool> SlideShowStateChanged;
@@ -82,6 +84,13 @@ namespace Ink_Canvas.Helpers
         private const int ConnectionCheckIntervalTicks = 3;
         private const int SlideShowCheckIntervalTicks = 2;
         private const int WpsCheckIntervalTicks = 6;
+
+        /// <summary>
+        /// 连接探测时未找到任何 PPT/WPS 应用的次数。
+        /// 首次连接时若此前从未探测失败，说明 ICC 启动时演示文稿就已经打开（重连补发，不算用户打开）；
+        /// 反之前面多次探测都找不到，说明 ICC 早已运行、演示文稿是之后才打开的（按用户打开处理）。
+        /// </summary>
+        private int _connectionProbeMisses;
         #endregion
 
         #region Constructor & Initialization
@@ -182,6 +191,11 @@ namespace Ink_Canvas.Helpers
                     {
                         // 如果PowerPoint连接失败且支持WPS，尝试连接WPS
                         pptApp = TryConnectToWPS();
+                    }
+
+                    if (pptApp == null)
+                    {
+                        _connectionProbeMisses++;
                     }
 
                     if (pptApp != null && !IsConnected)
@@ -422,7 +436,22 @@ namespace Ink_Canvas.Helpers
                 }
                 else if (CurrentPresentation != null)
                 {
-                    OnPresentationOpen(CurrentPresentation);
+                    // 判断依据：首次连接前是否出现过探测失败。全程没探测失败=ICC 启动时演示文稿就已打开（重连，不算用户打开）；
+                    // 之前多次探测都找不到应用=演示文稿是 ICC 启动之后才打开的（按用户外部打开处理）。
+                    bool openedAfterIccStarted = _connectionProbeMisses > 0;
+                    if (openedAfterIccStarted)
+                    {
+                        LogHelper.WriteLogToFile(
+                            "[PPT] ICC 运行中检测到新打开的演示文稿，按用户打开处理",
+                            LogHelper.LogType.Trace);
+                        HandlePresentationOpened(CurrentPresentation, userInitiated: false);
+                        // 此前没有已打开文稿的基线（连接时 ActivePresentation 就是目标文稿），等对象模型稳定后直接触发。
+                        QueueExternalOpenDetection(previousPresentationKey: null);
+                    }
+                    else
+                    {
+                        HandlePresentationOpened(CurrentPresentation, userInitiated: false);
+                    }
                 }
             }
             catch (Exception ex)
@@ -1038,8 +1067,23 @@ namespace Ink_Canvas.Helpers
         #region Event Handlers
         private void OnPresentationOpen(Presentation pres)
         {
+            HandlePresentationOpened(pres, userInitiated: true);
+        }
+
+        /// <summary>
+        /// 统一处理演示文稿打开。COM 事件视为用户主动打开；<see cref="ConnectToPPT"/> 中的补发不算。
+        /// </summary>
+        /// <remarks>
+        /// WPS 触发 <c>PresentationOpen</c> 时其对象模型尚未更新：事件参数与 <c>ActivePresentation</c>
+        /// 仍指向打开前的旧文稿。因此这里先记录打开前的文稿标识，再异步轮询 <c>ActivePresentation</c>，
+        /// 等它切换为新文稿后才触发 <see cref="PresentationOpenedExternally"/>，避免自动放映到旧文稿。
+        /// </remarks>
+        private void HandlePresentationOpened(Presentation pres, bool userInitiated)
+        {
             try
             {
+                string previousPresentationKey = GetCachedPresentationKey();
+
                 if (!ReferenceEquals(pres, CurrentPresentation))
                 {
                     ClearPresentationMetadataCache();
@@ -1047,11 +1091,134 @@ namespace Ink_Canvas.Helpers
                 UpdateCurrentPresentationInfo();
                 RunPPTComDebugProbeIfEnabled("PresentationOpen", 0);
                 PresentationOpen?.Invoke(pres);
+                if (userInitiated)
+                {
+                    QueueExternalOpenDetection(previousPresentationKey);
+                }
                 LogHelper.WriteLogToFile($"[PPT] 演示文稿已打开: {GetPresentationName()}", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"处理演示文稿打开事件失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 轮询等待新打开的演示文稿成为活动文稿，再触发 <see cref="PresentationOpenedExternally"/>。
+        /// </summary>
+        /// <param name="previousPresentationKey">
+        /// 打开前活动演示文稿的标识。为空表示此前没有已打开的演示文稿（例如 ICC 运行中 WPS 才启动），
+        /// 此时等待对象模型稳定后直接以当前活动文稿触发。
+        /// </param>
+        private void QueueExternalOpenDetection(string previousPresentationKey)
+        {
+            bool waitForNewPresentation = !string.IsNullOrEmpty(previousPresentationKey);
+            int generation = Volatile.Read(ref _connectionGeneration);
+            _ = Task.Run(async () =>
+            {
+                const int maxAttempts = 20;
+                const int intervalMs = 300;
+                const int settleDelayMs = 1500;
+
+                for (int attempt = 0; attempt < maxAttempts; attempt++)
+                {
+                    int delay = attempt == 0
+                        ? (waitForNewPresentation ? 0 : settleDelayMs)
+                        : intervalMs;
+                    if (delay > 0)
+                    {
+                        try
+                        {
+                            await Task.Delay(delay).ConfigureAwait(false);
+                        }
+                        catch
+                        {
+                            return;
+                        }
+                    }
+
+                    if (generation != Volatile.Read(ref _connectionGeneration)) return;
+                    if (!IsConnected) return;
+
+                    Presentation livePresentation = TryGetActivePresentationLive();
+                    string currentKey = GetPresentationIdentity(livePresentation);
+                    if (string.IsNullOrEmpty(currentKey)) continue;
+                    if (waitForNewPresentation &&
+                        string.Equals(currentKey, previousPresentationKey, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        PresentationOpenedExternally?.Invoke(livePresentation);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"触发外部打开事件失败: {ex.Message}", LogHelper.LogType.Warning);
+                    }
+                    return;
+                }
+
+                LogHelper.WriteLogToFile(
+                    $"[PPT] 未能确认新打开的演示文稿，已跳过自动放映检测: {previousPresentationKey}",
+                    LogHelper.LogType.Trace);
+            });
+        }
+
+        /// <summary>
+        /// 读取缓存的当前演示文稿标识（优先完整路径，回退文件名）。
+        /// </summary>
+        private string GetCachedPresentationKey()
+        {
+            var path = Volatile.Read(ref _cachedPresentationPath);
+            if (!string.IsNullOrEmpty(path)) return path;
+
+            var name = Volatile.Read(ref _cachedPresentationName);
+            return string.IsNullOrEmpty(name) ? null : name;
+        }
+
+        /// <summary>
+        /// 读取演示文稿标识（优先完整路径，回退文件名）。
+        /// </summary>
+        private static string GetPresentationIdentity(Presentation presentation)
+        {
+            if (presentation == null) return null;
+
+            try
+            {
+                var path = presentation.FullName;
+                if (!string.IsNullOrEmpty(path)) return path;
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                var name = presentation.Name;
+                if (!string.IsNullOrEmpty(name)) return name;
+            }
+            catch
+            {
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 实时读取当前活动演示文稿（不使用缓存）。
+        /// </summary>
+        private Presentation TryGetActivePresentationLive()
+        {
+            try
+            {
+                if (PPTApplication == null || !Marshal.IsComObject(PPTApplication)) return null;
+                return PPTApplication.ActivePresentation as Presentation;
+            }
+            catch
+            {
+                return null;
             }
         }
 
@@ -1430,6 +1597,102 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"开始幻灯片放映失败: {ex}", LogHelper.LogType.Error);
                 return false;
             }
+        }
+
+        /// <summary>
+        /// 按完整路径启动指定演示文稿的放映。
+        /// WPS 打开新文稿时 <c>PresentationOpen</c> 事件可能先于其对象模型更新触发，
+        /// 此时缓存的活动演示文稿仍是旧文稿，故这里按路径在已打开的文稿集合中查找目标；
+        /// 目标尚未出现时返回 <c>false</c>，由调用方稍后重试。
+        /// </summary>
+        public bool TryStartSlideShow(string presentationFullName)
+        {
+            if (string.IsNullOrEmpty(presentationFullName)) return TryStartSlideShow();
+
+            try
+            {
+                if (!IsConnected || PPTApplication == null) return false;
+                if (!Marshal.IsComObject(PPTApplication)) return false;
+
+                Presentation target = TryFindOpenedPresentation(presentationFullName);
+                if (target == null)
+                {
+                    LogHelper.WriteLogToFile($"[PPT] 未在已打开文稿中找到放映目标: {presentationFullName}", LogHelper.LogType.Trace);
+                    return false;
+                }
+                if (!Marshal.IsComObject(target)) return false;
+
+                LogHelper.WriteLogToFile($"[PPT] 按路径选中放映目标: {presentationFullName}", LogHelper.LogType.Trace);
+                target.SlideShowSettings.Run();
+                LogHelper.WriteLogToFile("[PPT] 已请求开始放映", LogHelper.LogType.Info);
+                return true;
+            }
+            catch (COMException comEx)
+            {
+                var hr = (uint)comEx.HResult;
+                if (hr == 0x8001010E || hr == 0x80004005)
+                {
+                    // COM对象已失效，触发断开连接
+                    DisconnectFromPPT();
+                }
+                LogHelper.WriteLogToFile($"开始幻灯片放映失败: {comEx.Message}", LogHelper.LogType.Error);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"开始幻灯片放映失败: {ex}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 在已打开的演示文稿中按完整路径（回退到文件名）查找目标文稿。
+        /// 未找到时返回 <c>null</c>。
+        /// </summary>
+        private Presentation TryFindOpenedPresentation(string presentationFullName)
+        {
+            Presentation fallbackByName = null;
+            string fileName = null;
+            try { fileName = Path.GetFileName(presentationFullName); } catch { }
+
+            var presentations = PPTApplication.Presentations;
+            if (presentations == null) return null;
+
+            int count = presentations.Count;
+            for (int i = 1; i <= count; i++)
+            {
+                Presentation candidate = null;
+                try
+                {
+                    candidate = presentations[i];
+                    string fullName = null;
+                    try { fullName = candidate.FullName; } catch { }
+
+                    if (!string.IsNullOrEmpty(fullName) &&
+                        string.Equals(fullName, presentationFullName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return candidate;
+                    }
+
+                    if (fallbackByName == null)
+                    {
+                        string name = null;
+                        try { name = candidate.Name; } catch { }
+                        if (!string.IsNullOrEmpty(name) &&
+                            (string.Equals(name, presentationFullName, StringComparison.OrdinalIgnoreCase) ||
+                             (!string.IsNullOrEmpty(fileName) && string.Equals(name, fileName, StringComparison.OrdinalIgnoreCase))))
+                        {
+                            fallbackByName = candidate;
+                        }
+                    }
+                }
+                catch (COMException)
+                {
+                    candidate = null;
+                }
+            }
+
+            return fallbackByName;
         }
 
         /// <summary>

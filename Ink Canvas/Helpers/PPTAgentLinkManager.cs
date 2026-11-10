@@ -22,6 +22,7 @@ namespace Ink_Canvas.Helpers
         public event Action<object> SlideShowNextSlide;
         public event Action<object> SlideShowEnd;
         public event Action<object> PresentationOpen;
+        public event Action<object> PresentationOpenedExternally;
         public event Action<object> PresentationClose;
         public event Action<bool> PPTConnectionChanged;
         public event Action<bool> SlideShowStateChanged;
@@ -68,6 +69,8 @@ namespace Ink_Canvas.Helpers
         }
 
         public bool TryStartSlideShow() => Send(PPTCommands.StartSlideShow);
+        // PPTAgent 由加载项侧决定要放映的文稿，无法按路径指定，退化为放映当前文稿。
+        public bool TryStartSlideShow(string presentationFullName) => TryStartSlideShow();
         public bool TryEndSlideShow() => Send(PPTCommands.EndSlideShow);
         public bool TryNavigateNext() => Send(PPTCommands.Next);
         public bool TryNavigatePrevious() => Send(PPTCommands.Previous);
@@ -169,6 +172,7 @@ namespace Ink_Canvas.Helpers
             bool raiseShowStateChanged = false;
             bool newShowState = false;
             bool raisePresentationOpen = false;
+            bool raisePresentationOpenedExternally = false;
             bool raisePresentationClose = false;
             bool raiseSlideShowBegin = false;
             bool raiseSlideShowNext = false;
@@ -194,6 +198,8 @@ namespace Ink_Canvas.Helpers
                 if (!string.IsNullOrEmpty(eventName))
                 {
                     raisePresentationOpen = eventName == PPTEvents.PresentationOpen;
+                    // 只有插件真实上报的 PresentationOpen 才算用户打开；状态差集推断出来的不算，避免重连误触发放映。
+                    raisePresentationOpenedExternally = eventName == PPTEvents.PresentationOpen;
                     raisePresentationClose = eventName == PPTEvents.PresentationClose;
                     raiseSlideShowBegin = eventName == PPTEvents.SlideShowBegin;
                     raiseSlideShowNext = eventName == PPTEvents.SlideShowNextSlide;
@@ -217,7 +223,7 @@ namespace Ink_Canvas.Helpers
                 }
             }
 
-            if (raiseConnection || raisePresentationOpen || raisePresentationClose || raiseShowStateChanged || raiseSlideShowBegin || raiseSlideShowNext || raiseSlideShowEnd)
+            if (raiseConnection || raisePresentationOpen || raisePresentationOpenedExternally || raisePresentationClose || raiseShowStateChanged || raiseSlideShowBegin || raiseSlideShowNext || raiseSlideShowEnd)
             {
                 var reportedEvent = string.IsNullOrEmpty(eventName) ? "state" : eventName;
                 LogHelper.WriteLogToFile(
@@ -227,6 +233,7 @@ namespace Ink_Canvas.Helpers
 
             if (raiseConnection) PPTConnectionChanged?.Invoke(true);
             if (raisePresentationOpen) PresentationOpen?.Invoke(state);
+            if (raisePresentationOpenedExternally) PresentationOpenedExternally?.Invoke(state);
             if (raisePresentationClose) PresentationClose?.Invoke(state);
             if (raiseShowStateChanged) SlideShowStateChanged?.Invoke(newShowState);
             if (raiseSlideShowBegin) SlideShowBegin?.Invoke(state);

@@ -19,6 +19,7 @@ namespace Ink_Canvas.Helpers
         public event Action<object> SlideShowNextSlide;
         public event Action<object> SlideShowEnd;
         public event Action<object> PresentationOpen;
+        public event Action<object> PresentationOpenedExternally;
         public event Action<object> PresentationClose;
         public event Action<bool> PPTConnectionChanged;
         public event Action<bool> SlideShowStateChanged;
@@ -66,6 +67,17 @@ namespace Ink_Canvas.Helpers
         private int _lastPolledSlideNumber = -1;
         private int _reconnectFailureCount = 0;
         private DateTime _nextReconnectAttemptUtc = DateTime.MinValue;
+        // ROT 模式没有绑定 PresentationOpen COM 事件，只能靠重连时对比演示文稿身份来识别“新打开”。
+        // 该字段跨断线重连保留；StopMonitoring/Dispose 时清空，避免下一轮监控误触发。
+        private string _lastAttachedPresentationKey;
+
+        /// <summary>
+        /// 轮询时未找到任何 PPT/WPS 应用的次数。
+        /// 首次连接时若此前从未探测失败，说明 ICC 启动时演示文稿就已经打开（重连补发，不算用户打开）；
+        /// 反之前面多次探测都找不到，说明 ICC 早已运行、演示文稿是之后才打开的（按用户打开处理）。
+        /// </summary>
+        private int _probeMisses;
+        private bool _connectHappenedAtStartupAdoption;
         #endregion
 
         #region Throttled diagnostics
@@ -114,6 +126,7 @@ namespace Ink_Canvas.Helpers
             lock (_monitoringLock)
             {
                 _shouldStop = true;
+                _lastAttachedPresentationKey = null;
 
                 if (_monitoringThread != null && _monitoringThread.IsAlive)
                 {
@@ -204,6 +217,11 @@ namespace Ink_Canvas.Helpers
                         }
                     }
 
+                    if (bestApp == null)
+                    {
+                        _probeMisses++;
+                    }
+
                     if (PPTApplication == null && bestApp != null)
                     {
                         needRebind = true;
@@ -246,6 +264,32 @@ namespace Ink_Canvas.Helpers
                         else if (bestApp == null && PPTApplication != null)
                         {
                             DisconnectFromPPT();
+                        }
+                    }
+
+                    // 连接时 ActivePresentation 可能还读不到（如 WPS 刚启动），后续轮询中补绑并判断是否为新打开。
+                    if (PPTApplication != null && _pptActivePresentation == null)
+                    {
+                        try
+                        {
+                            dynamic lateApp = PPTApplication;
+                            dynamic latePresentation = lateApp.ActivePresentation;
+                            if (latePresentation != null)
+                            {
+                                _pptActivePresentation = latePresentation;
+                                _updateTime = DateTime.Now;
+                                _lastPolledSlideNumber = -1;
+                                // 演示文稿是连接之后才出现的，必属用户打开。
+                                _connectHappenedAtStartupAdoption = false;
+                                if (UpdateAttachedPresentationKeyAndDetectNewOpen())
+                                {
+                                    PresentationOpenedExternally?.Invoke(latePresentation);
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            // 尚未就绪，下一轮再试
                         }
                     }
 
@@ -576,6 +620,9 @@ namespace Ink_Canvas.Helpers
                     PPTApplication = pptApp;
                 }
 
+                // 此前从未探测失败，说明是 ICC 启动时就连上的（启动重连）；否则演示文稿是之后才打开的。
+                _connectHappenedAtStartupAdoption = _probeMisses == 0;
+
                 try
                 {
                     dynamic pptAppDynamic = PPTApplication;
@@ -699,6 +746,8 @@ namespace Ink_Canvas.Helpers
                         UpdateCurrentPresentationInfo();
                     }
 
+                    bool openedExternally = UpdateAttachedPresentationKeyAndDetectNewOpen();
+
                     bool wasConnected = _cachedIsConnected;
                     _cachedIsConnected = true;
                     if (!wasConnected)
@@ -717,6 +766,18 @@ namespace Ink_Canvas.Helpers
                     }
 
                     TryRaiseSlideShowBeginOnConnect();
+
+                    if (openedExternally)
+                    {
+                        try
+                        {
+                            PresentationOpenedExternally?.Invoke(_pptActivePresentation);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"触发 PresentationOpenedExternally 失败: {ex.Message}", LogHelper.LogType.Warning);
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -777,6 +838,59 @@ namespace Ink_Canvas.Helpers
                 {
                     SafeReleaseComObject(slideShowWindows);
                 }
+            }
+        }
+
+        /// <summary>
+        /// 记录当前挂接的演示文稿身份，并判断本次连接是否对应一个“新打开的演示文稿”。
+        /// ROT 模式没有绑定 PresentationOpen 事件，打开新演示文稿会先断线再重连，只能在这里对比身份；
+        /// 首次连接（包括 ICC 启动时 PPT 已经打开）返回 false，避免误触发放映。
+        /// </summary>
+        private bool UpdateAttachedPresentationKeyAndDetectNewOpen()
+        {
+            try
+            {
+                if (_pptActivePresentation == null) return false;
+
+                string identity = null;
+                try
+                {
+                    identity = (string)_pptActivePresentation.FullName;
+                }
+                catch
+                {
+                    identity = null;
+                }
+
+                if (string.IsNullOrEmpty(identity))
+                {
+                    try
+                    {
+                        identity = (string)_pptActivePresentation.Name;
+                    }
+                    catch
+                    {
+                        identity = null;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(identity)) return false;
+
+                if (string.IsNullOrEmpty(_lastAttachedPresentationKey))
+                {
+                    _lastAttachedPresentationKey = identity;
+                    // 首次连接：ICC 启动时 PPT 已打开算不上外部打开；但 ICC 早已运行、用户之后才打开时要触发。
+                    return !_connectHappenedAtStartupAdoption;
+                }
+
+                bool openedExternally = !string.Equals(_lastAttachedPresentationKey, identity, StringComparison.OrdinalIgnoreCase);
+                _lastAttachedPresentationKey = identity;
+                return openedExternally;
+            }
+            catch (Exception ex)
+            {
+                LogCallbackException("判断演示文稿是否为外部打开", ex);
+                return false;
             }
         }
 
@@ -1756,6 +1870,94 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"开始幻灯片放映失败: {ex}", LogHelper.LogType.Error);
                 return false;
             }
+        }
+
+        /// <summary>
+        /// 按完整路径启动指定演示文稿的放映。
+        /// WPS 打开新文稿时对象模型可能尚未更新，这里按路径在已打开的文稿集合中查找目标；
+        /// 目标尚未出现时返回 <c>false</c>，由调用方稍后重试。
+        /// </summary>
+        public bool TryStartSlideShow(string presentationFullName)
+        {
+            if (string.IsNullOrEmpty(presentationFullName)) return TryStartSlideShow();
+
+            try
+            {
+                if (!IsConnected || PPTApplication == null) return false;
+                if (!Marshal.IsComObject(PPTApplication)) return false;
+
+                dynamic target = TryFindOpenedPresentation(presentationFullName);
+                if (target == null) return false;
+
+                target.SlideShowSettings.Run();
+                return true;
+            }
+            catch (COMException comEx)
+            {
+                var hr = (uint)comEx.HResult;
+                if (hr == 0x8001010E || hr == 0x80004005)
+                {
+                    // COM对象已失效，触发断开连接
+                    DisconnectFromPPT();
+                }
+                LogHelper.WriteLogToFile($"开始幻灯片放映失败: {comEx.Message}", LogHelper.LogType.Error);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"开始幻灯片放映失败: {ex}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 在已打开的演示文稿中按完整路径（回退到文件名）查找目标文稿。
+        /// 未找到时返回 <c>null</c>。
+        /// </summary>
+        private dynamic TryFindOpenedPresentation(string presentationFullName)
+        {
+            dynamic fallbackByName = null;
+            string fileName = null;
+            try { fileName = Path.GetFileName(presentationFullName); } catch { }
+
+            dynamic presentations = PPTApplication.Presentations;
+            if (presentations == null) return null;
+
+            int count = (int)presentations.Count;
+            for (int i = 1; i <= count; i++)
+            {
+                dynamic candidate = null;
+                try
+                {
+                    candidate = presentations[i];
+                    string fullName = null;
+                    try { fullName = (string)candidate.FullName; } catch { }
+
+                    if (!string.IsNullOrEmpty(fullName) &&
+                        string.Equals(fullName, presentationFullName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return candidate;
+                    }
+
+                    if (fallbackByName == null)
+                    {
+                        string name = null;
+                        try { name = (string)candidate.Name; } catch { }
+                        if (!string.IsNullOrEmpty(name) &&
+                            (string.Equals(name, presentationFullName, StringComparison.OrdinalIgnoreCase) ||
+                             (!string.IsNullOrEmpty(fileName) && string.Equals(name, fileName, StringComparison.OrdinalIgnoreCase))))
+                        {
+                            fallbackByName = candidate;
+                        }
+                    }
+                }
+                catch (COMException)
+                {
+                    candidate = null;
+                }
+            }
+
+            return fallbackByName;
         }
 
         /// <summary>

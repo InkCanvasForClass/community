@@ -54,6 +54,12 @@
   <data name="AutoScreenshotHint" xml:space="preserve">
     <value>开启 自动幻灯片截屏 后将会在幻灯片有墨迹时翻页自动截屏</value>
   </data>
+  <data name="AutoStartSlideShowOnOpen" xml:space="preserve">
+    <value>打开演示文稿时自动开始放映</value>
+  </data>
+  <data name="AutoStartSlideShowOnOpenHint" xml:space="preserve">
+    <value>开启后，新打开一个演示文稿时 ICC 会自动开始放映；ICC 启动时重新连接到已打开的演示文稿不会触发放映</value>
+  </data>
   <data name="BlackBackground" xml:space="preserve">
     <value>黑色背景</value>
   </data>

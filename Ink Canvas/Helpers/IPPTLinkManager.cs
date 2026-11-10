@@ -16,6 +16,11 @@ namespace Ink_Canvas.Helpers
         event Action<object> SlideShowNextSlide;
         event Action<object> SlideShowEnd;
         event Action<object> PresentationOpen;
+        /// <summary>
+        /// 仅在用户真正打开一个演示文稿时触发；ICC 启动/重连时补发的 <see cref="PresentationOpen"/> 不会触发此事件。
+        /// 用于「打开演示文稿时自动开始放映」等只应对真实打开操作生效的逻辑。
+        /// </summary>
+        event Action<object> PresentationOpenedExternally;
         event Action<object> PresentationClose;
         event Action<bool> PPTConnectionChanged;
         event Action<bool> SlideShowStateChanged;
@@ -47,6 +52,17 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         /// <returns><c>true</c> 如果放映已成功启动，<c>false</c> 否则。</returns>
         bool TryStartSlideShow();
+        /// <summary>
+        /// 尝试按完整路径启动指定演示文稿的放映模式。
+        /// </summary>
+        /// <param name="presentationFullName">要放映的演示文稿完整路径；为空时退化为 <see cref="TryStartSlideShow()"/>。</param>
+        /// <remarks>
+        /// WPS 打开新文稿时 <c>PresentationOpen</c> 事件可能先于其对象模型更新触发，
+        /// 此时"当前演示文稿"仍指向旧文稿。按路径查找目标文稿可避免放映错误的文稿；
+        /// 目标文稿尚未出现在集合中时应返回 <c>false</c>，由调用方稍后重试。
+        /// </remarks>
+        /// <returns><c>true</c> 如果放映已成功启动，<c>false</c> 否则。</returns>
+        bool TryStartSlideShow(string presentationFullName);
         /// <summary>
         /// 尝试结束当前正在进行的幻灯片放映。
         /// </summary>
