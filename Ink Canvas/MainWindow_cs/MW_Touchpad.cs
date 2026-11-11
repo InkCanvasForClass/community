@@ -27,7 +27,7 @@ namespace Ink_Canvas
                     _boardTouchpad = new TouchpadManipulation(_boardTouchpadSource,
                         () => currentMode == 1 && IsVisible && !_isVideoPresenterSpecialMode
                             && IsBoardCanvasPoint(Mouse.GetPosition(this)),
-                        ApplyNativeBoardTouchpadDelta, EndBoardTouchpadGesture);
+                        GetBoardTouchpadGestureOptions, ApplyNativeBoardTouchpadDelta, EndBoardTouchpadGesture);
                 }
                 catch (Exception ex) when (ex is COMException || ex is UnauthorizedAccessException
                     || ex is System.ComponentModel.Win32Exception)
@@ -90,10 +90,16 @@ namespace Ink_Canvas
             return IntPtr.Zero;
         }
 
+        private (bool Translate, bool Zoom) GetBoardTouchpadGestureOptions() =>
+            (IsBoardRoamingMode || Settings.Gesture.IsEnableTwoFingerTranslateBoard,
+                IsBoardRoamingMode ? Settings.Gesture.IsEnableTwoFingerZoomRoaming : Settings.Gesture.IsEnableTwoFingerZoomBoard);
+
         private bool HandleBoardTouchpadWheel(int delta, bool horizontal, bool control, Point center)
         {
             if (currentMode != 1 || _isVideoPresenterSpecialMode) return false;
             if (delta == 0 || IsCurrentPageFrozen) return true;
+            var options = GetBoardTouchpadGestureOptions();
+            if (control ? !options.Zoom : !options.Translate) return true;
             var matrix = Matrix.Identity;
             if (control)
             {
@@ -150,7 +156,7 @@ namespace Ink_Canvas
                 _isBoardTouchpadGesture = true;
             }
             TransformBoardRoamingContent(delta, new Vector(delta.OffsetX, delta.OffsetY), delta.M11);
-            RefreshBoardRoamingPopup(false);
+            RefreshBoardRoamingPopup(delta.M11 != 1);
         }
 
         private void EndBoardTouchpadGesture()

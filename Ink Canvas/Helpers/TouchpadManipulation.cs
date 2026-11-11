@@ -18,6 +18,7 @@ namespace Ink_Canvas.Helpers
         private readonly HwndSource _source;
         private IntPtr _inputWindow;
         private readonly Func<bool> _canStart;
+        private readonly Func<(bool Translate, bool Zoom)> _gestureOptions;
         private readonly Action<Matrix> _delta;
         private readonly Action _completed;
         private IDirectManipulationManager _manager;
@@ -34,10 +35,12 @@ namespace Ink_Canvas.Helpers
         private readonly float[] _transform = new float[6];
         private RECT _bounds;
 
-        internal TouchpadManipulation(HwndSource source, Func<bool> canStart, Action<Matrix> delta, Action completed)
+        internal TouchpadManipulation(HwndSource source, Func<bool> canStart,
+            Func<(bool Translate, bool Zoom)> gestureOptions, Action<Matrix> delta, Action completed)
         {
             _source = source;
             _canStart = canStart;
+            _gestureOptions = gestureOptions;
             _delta = delta;
             _completed = completed;
             try
@@ -80,6 +83,11 @@ namespace Ink_Canvas.Helpers
             try
             {
                 Resize();
+                if (!_claimed && !ConfigureGestures())
+                {
+                    handled = true;
+                    return IntPtr.Zero;
+                }
                 _claimed = true;
                 _viewport.SetContact(id);
                 LogHelper.WriteLogToFile("[Touchpad] 已接管精确式触控板手势", LogHelper.LogType.Trace);
@@ -92,6 +100,21 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"[Touchpad] SetContact failed: {ex.Message}", LogHelper.LogType.Warning);
             }
             return IntPtr.Zero;
+        }
+
+        internal bool ConfigureGestures()
+        {
+            var (translate, zoom) = _gestureOptions();
+            if (!translate && !zoom) return false;
+            var configuration = DIRECTMANIPULATION_CONFIGURATION_INTERACTION;
+            if (translate)
+                configuration |= DIRECTMANIPULATION_CONFIGURATION_TRANSLATION_X
+                    | DIRECTMANIPULATION_CONFIGURATION_TRANSLATION_Y | DIRECTMANIPULATION_CONFIGURATION_TRANSLATION_INERTIA;
+            if (zoom) configuration |= DIRECTMANIPULATION_CONFIGURATION_SCALING;
+            // Filter at recognition time: scale offsets also contain the pinch anchor,
+            // so dropping matrix translation afterwards would move the zoom centre.
+            _viewport.ActivateConfiguration(configuration);
+            return true;
         }
 
         private void Resize()

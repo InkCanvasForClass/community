@@ -46,7 +46,8 @@ namespace InkCanvas.Calibration.Tests
                 TouchpadMovesInkWithoutChangingTool, TouchpadZoomKeepsAnchor, TouchpadRespectsFrozenPage,
                 TouchpadCompletionCommitsHistory, WheelCompatibilityHandlesBothAxes,
                 NativeTouchpadInitializesAndDisposes, NativeTouchpadCumulativeTransformBecomesDelta,
-                TouchpadPreservesPreviouslyPannedImage })
+                TouchpadPreservesPreviouslyPannedImage, TouchpadWheelRespectsGestureSettings,
+                TouchpadZoomRefreshesOpenNavigation })
             {
                 try { test(); Console.WriteLine("PASS Roaming " + test.Method.Name); }
                 catch (Exception ex)
@@ -411,8 +412,15 @@ namespace InkCanvas.Calibration.Tests
         {
             using var source = new HwndSource(new HwndSourceParameters("ICC touchpad regression")
                 { Width = 800, Height = 450, WindowStyle = 0 });
-            using var input = new TouchpadManipulation(source, () => false,
+            var options = (Translate: true, Zoom: true);
+            using var input = new TouchpadManipulation(source, () => false, () => options,
                 delta => throw new InvalidOperationException("Idle viewport emitted a gesture"), () => { });
+            foreach (var enabled in new[] { (true, false), (false, true), (true, true), (false, false) })
+            {
+                options = enabled;
+                Check(input.ConfigureGestures() == (enabled.Item1 || enabled.Item2),
+                    "Native viewport failed to configure enabled gestures or accepted all-disabled input");
+            }
             input.Stop();
             input.Stop();
         }
@@ -504,6 +512,64 @@ namespace InkCanvas.Calibration.Tests
             Set(window, "_currentMode", 0);
             Check(!(bool)Call(window, "HandleBoardTouchpadWheel", 120, false, true, new Point()),
                 "Desktop annotation wheel route was intercepted");
+        }
+
+        private static void TouchpadWheelRespectsGestureSettings()
+        {
+            var previous = MainWindow.Settings;
+            try
+            {
+                foreach (var tool in new[] { "pen", "eraser", "roaming" })
+                foreach (bool translate in new[] { false, true })
+                foreach (bool zoom in new[] { false, true })
+                foreach (bool control in new[] { false, true })
+                foreach (bool horizontal in new[] { false, true })
+                {
+                    MainWindow.Settings = new Settings();
+                    var gestures = MainWindow.Settings.Gesture;
+                    gestures.IsEnableTwoFingerTranslateBoard = translate;
+                    // Opposite values catch accidentally reading the other tool's settings.
+                    gestures.IsEnableTwoFingerZoomBoard = tool == "roaming" ? !zoom : zoom;
+                    gestures.IsEnableTwoFingerZoomRoaming = tool == "roaming" ? zoom : !zoom;
+                    var window = CreateWindow(false);
+                    Set(window, "_currentToolMode", tool);
+                    var stroke = StrokeAt(200, 150);
+                    AddInk(window, stroke, true);
+                    bool allowed = control ? zoom : tool == "roaming" || translate;
+                    Check((bool)Call(window, "HandleBoardTouchpadWheel", 120, horizontal, control, new Point(100, 100)),
+                        "Disabled gestures must still consume wheel input to prevent passthrough");
+                    bool moved = stroke.StylusPoints[0].ToPoint() != new Point(200, 150);
+                    Check(moved == allowed, $"{tool}: translate={translate}, zoom={zoom}, pinch={control} ignored settings");
+                    Call(window, "EndBoardTouchpadGesture");
+                    if (!allowed)
+                        Check(Field<TimeMachine>(window, "timeMachine").ExportTimeMachineHistory().Length == 0,
+                            "Disabled gesture created undo history");
+                }
+            }
+            finally { MainWindow.Settings = previous; }
+        }
+
+        private static void TouchpadZoomRefreshesOpenNavigation()
+        {
+            var window = CreateWindow();
+            AddInk(window, StrokeAt(1200, 150));
+            Refresh(window);
+            var popup = Field<BoardRoamingPopupContent>(window, "BoardRoamingPopupContent");
+            var hint = Field<TextBlock>(popup, "ScaleHintText");
+            var before = hint.Text;
+            try
+            {
+                Call(window, "ApplyBoardTouchpadDelta", new Matrix(2, 0, 0, 2, 0, 0));
+                var liveHint = hint.Text;
+                Check(liveHint != before, "Open navigation scale did not update during pinch");
+                Refresh(window);
+                Check(hint.Text == liveHint, "Navigation scale only becomes correct after reopening/rebuilding bounds");
+            }
+            finally
+            {
+                Call(window, "EndBoardTouchpadGesture");
+                Field<Popup>(window, "BoardRoamingPopup").IsOpen = false;
+            }
         }
 
         public static void Benchmark()
