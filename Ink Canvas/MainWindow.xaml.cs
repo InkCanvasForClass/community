@@ -1787,11 +1787,14 @@ namespace Ink_Canvas
                 {
                     var isFloatingBarOutsideScreen = false;
                     var isInPPTPresentationMode = false;
+                    // 必须显式传 CancellationToken：Dispatcher 没有 Invoke(Action, DispatcherPriority, TimeSpan) 重载，
+                    // 否则 TimeSpan 会被绑定到 legacy Invoke(Delegate, priority, params object[]) 当成委托参数，
+                    // UI 线程执行时抛 TargetParameterCountException。
                     Dispatcher.Invoke(() =>
                     {
                         isFloatingBarOutsideScreen = IsOutsideOfScreenHelper.IsOutsideOfScreen(ViewboxFloatingBar);
                         isInPPTPresentationMode = IsInPPTPresentationMode;
-                    }, DispatcherPriority.Normal, TimeSpan.FromSeconds(5));
+                    }, DispatcherPriority.Normal, CancellationToken.None, TimeSpan.FromSeconds(5));
                     if (isFloatingBarOutsideScreen) dpiChangedDelayAction.DebounceAction(3000, null, () =>
                     {
                         if (!isFloatingBarFolded)
