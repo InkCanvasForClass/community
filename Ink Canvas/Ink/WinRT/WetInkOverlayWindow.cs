@@ -83,6 +83,8 @@ namespace Ink_Canvas.Ink.WinRT
 
         public IntPtr OverlayHandle => _overlayHwnd;
 
+        internal Func<uint, IntPtr, IntPtr, bool> TouchpadMessageHandler { get; set; }
+
         public IDCompositionVisual RootVisual => _compositionVisual;
 
         public IDCompositionDevice CompositionDevice => _compositionDevice;
@@ -341,6 +343,10 @@ namespace Ink_Canvas.Ink.WinRT
 
         private static IntPtr OverlayWndProc(IntPtr hwnd, uint msg, IntPtr wParam, IntPtr lParam)
         {
+            // The ink overlay owns hit testing, but board navigation belongs to the main canvas.
+            if ((msg == 0x0250 || msg == 0x020a || msg == 0x020e)
+                && GetWindowInstance(hwnd)?.TouchpadMessageHandler?.Invoke(msg, wParam, lParam) == true)
+                return IntPtr.Zero;
             if (msg == WmNcHitTest)
             {
                 // lParam is screen coordinates packed: LOWORD = x, HIWORD = y.

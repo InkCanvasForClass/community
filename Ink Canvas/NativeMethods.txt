@@ -1,5 +1,12 @@
 ﻿SetCurrentProcessExplicitAppUserModelID
 SetConsoleCtrlHandler
+DirectManipulationManager
+IDirectManipulationManager
+IDirectManipulationUpdateManager
+IDirectManipulationViewport
+GetPointerType
+GetClientRect
+DM_POINTERHITTEST
 GetSystemTimes
 SetWinEventHook
 UnhookWinEvent

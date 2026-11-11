@@ -435,6 +435,7 @@ namespace Ink_Canvas
 
         private void EndBoardRoamingTwoFingerGesture()
         {
+            FinishBoardTouchpadInput();
             _isBoardRoamingTwoFingerGesture = false;
             _isBoardRoamingPointerDown = false;
             CancelBoardRoamingPreviewRefresh();

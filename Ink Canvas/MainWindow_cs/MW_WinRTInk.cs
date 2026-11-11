@@ -170,6 +170,7 @@ namespace Ink_Canvas
 
                 if (_winRTInkOverlay == null)
                     _winRTInkOverlay = new WetInkOverlayWindow(hwnd, IsCanvasPoint);
+                _winRTInkOverlay.TouchpadMessageHandler = HandleOverlayTouchpadMessage;
                 _winRTInkHost = new WinRTInkHost(_winRTInkOverlay, _winRTInkInputGate);
                 _winRTInkHost.OnDryAvailable = OnWinRTInkDryAvailable;
                 _winRTInkHost.OnDryFailed = ex => DisableWinRTInkAfterFailure(ex, notify: true);

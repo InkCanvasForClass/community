@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Ink;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Ink_Canvas;
@@ -41,7 +42,10 @@ namespace InkCanvas.Calibration.Tests
             foreach (var test in new Action[] { PreviewWithNegativeInk, PreviewWithEmptyVisual, PreviewWithPendingLayout,
                 PreviewAfterImmediatePan, PreviewRejectsInvalidBounds, PreviewRetainsTransformedImages,
                 PanDefersPointMutation, PanCommitsOneHistory, PanPreservesOriginalTransform,
-                PanWithoutMovementHasNoHistory, PanCompletesOnCaptureLoss, PopupJumpBelongsToPan })
+                PanWithoutMovementHasNoHistory, PanCompletesOnCaptureLoss, PopupJumpBelongsToPan,
+                TouchpadMovesInkWithoutChangingTool, TouchpadZoomKeepsAnchor, TouchpadRespectsFrozenPage,
+                TouchpadCompletionCommitsHistory, WheelCompatibilityHandlesBothAxes,
+                NativeTouchpadInitializesAndDisposes, NativeTouchpadCumulativeTransformBecomesDelta })
             {
                 try { test(); Console.WriteLine("PASS Roaming " + test.Method.Name); }
                 catch (Exception ex)
@@ -73,7 +77,7 @@ namespace InkCanvas.Calibration.Tests
             Set(window, "pageLastUserInkMutationUtc", new DateTime[101]);
             Set(window, "StrokeInitialHistory", new Dictionary<Stroke, StylusPointCollection>());
             Set(window, "timeMachine", new TimeMachine());
-            foreach (string name in new[] { "dec", "_boardRoamingContactIds" })
+            foreach (string name in new[] { "dec", "_boardRoamingContactIds", "_boardRoamingContacts", "circles" })
             {
                 var field = typeof(MainWindow).GetField(name, Members);
                 field.SetValue(window, Activator.CreateInstance(field.FieldType));
@@ -387,6 +391,95 @@ namespace InkCanvas.Calibration.Tests
             Check(Field<WpfInkCanvas>(window, "inkCanvas").RenderTransform.Value.IsIdentity,
                 "Popup pan left a display transform behind");
             Field<Popup>(window, "BoardRoamingPopup").IsOpen = false;
+        }
+
+        private static void TouchpadMovesInkWithoutChangingTool()
+        {
+            var window = CreateWindow(false);
+            Set(window, "_currentToolMode", "pen");
+            var stroke = StrokeAt(200, 150);
+            AddInk(window, stroke, true);
+            Call(window, "ApplyBoardTouchpadDelta", new Matrix(1, 0, 0, 1, 30, -20));
+            Check(stroke.StylusPoints[0].X == 230 && stroke.StylusPoints[0].Y == 130,
+                "Touchpad must pan both axes while the pen tool is selected");
+            Check(Field<string>(window, "_currentToolMode") == "pen", "Touchpad changed the selected tool");
+            Call(window, "EndBoardTouchpadGesture");
+        }
+
+        private static void NativeTouchpadInitializesAndDisposes()
+        {
+            using var source = new HwndSource(new HwndSourceParameters("ICC touchpad regression")
+                { Width = 800, Height = 450, WindowStyle = 0 });
+            using var input = new TouchpadManipulation(source, () => false,
+                delta => throw new InvalidOperationException("Idle viewport emitted a gesture"), () => { });
+            input.Stop();
+            input.Stop();
+        }
+
+        private static void NativeTouchpadCumulativeTransformBecomesDelta()
+        {
+            var delta = TouchpadManipulation.GetDelta(new Matrix(2, 0, 0, 2, -100, -100),
+                new Matrix(4, 0, 0, 4, -300, -300));
+            var result = delta.Transform(new Point(300, 200));
+            Check(result == new Point(500, 300), "Native cumulative transform was applied twice");
+        }
+
+        private static void TouchpadZoomKeepsAnchor()
+        {
+            var window = CreateWindow(false);
+            var stroke = StrokeAt(200, 150);
+            AddInk(window, stroke);
+            // Two successive 2x deltas around (100, 100): (200,150) -> (300,200) -> (500,300).
+            Call(window, "ApplyBoardTouchpadDelta", new Matrix(2, 0, 0, 2, -100, -100));
+            Call(window, "ApplyBoardTouchpadDelta", new Matrix(2, 0, 0, 2, -100, -100));
+            Check(stroke.StylusPoints[0].X == 500 && stroke.StylusPoints[0].Y == 300,
+                "Successive pinch deltas drifted from the zoom anchor");
+            Call(window, "EndBoardTouchpadGesture");
+        }
+
+        private static void TouchpadRespectsFrozenPage()
+        {
+            var window = CreateWindow(false);
+            var stroke = StrokeAt(200, 150);
+            AddInk(window, stroke);
+            Field<bool[]>(window, "frozenPages")[1] = true;
+            Call(window, "ApplyBoardTouchpadDelta", new Matrix(2, 0, 0, 2, 30, 20));
+            Check(stroke.StylusPoints[0].X == 200 && stroke.StylusPoints[0].Y == 150,
+                "Touchpad mutated a frozen page");
+            Check(Field<TimeMachine>(window, "timeMachine").ExportTimeMachineHistory().Length == 0,
+                "Frozen-page gesture created history");
+        }
+
+        private static void TouchpadCompletionCommitsHistory()
+        {
+            var window = CreateWindow(false);
+            var stroke = StrokeAt(200, 150);
+            AddInk(window, stroke, true);
+            Call(window, "ApplyBoardTouchpadDelta", new Matrix(1, 0, 0, 1, 10, 0));
+            Call(window, "ApplyBoardTouchpadDelta", new Matrix(1, 0, 0, 1, 20, 0));
+            Call(window, "EndBoardTouchpadGesture");
+            var machine = Field<TimeMachine>(window, "timeMachine");
+            Check(machine.ExportTimeMachineHistory().Length == 1, "One touchpad gesture must commit one pan history");
+            Call(window, "ApplyHistoryToCanvas", machine.Undo(), null, null);
+            Check(stroke.StylusPoints[0].X == 200, "Undo did not restore the start of the gesture");
+        }
+
+        private static void WheelCompatibilityHandlesBothAxes()
+        {
+            var window = CreateWindow(false);
+            Set(window, "_currentToolMode", "pen");
+            var stroke = StrokeAt(200, 150);
+            AddInk(window, stroke);
+            Check((bool)Call(window, "HandleBoardTouchpadWheel", 120, false, false, new Point(100, 100)),
+                "Whiteboard vertical wheel was not consumed");
+            Check(stroke.StylusPoints[0].Y > 150, "Positive vertical wheel must move content down");
+            Check((bool)Call(window, "HandleBoardTouchpadWheel", 120, true, false, new Point(100, 100)),
+                "Whiteboard horizontal wheel was not consumed");
+            Check(stroke.StylusPoints[0].X < 200, "Positive horizontal wheel must move content left");
+            Call(window, "EndBoardTouchpadGesture");
+            Set(window, "_currentMode", 0);
+            Check(!(bool)Call(window, "HandleBoardTouchpadWheel", 120, false, true, new Point()),
+                "Desktop annotation wheel route was intercepted");
         }
 
         public static void Benchmark()

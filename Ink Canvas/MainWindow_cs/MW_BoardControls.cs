@@ -43,6 +43,7 @@ namespace Ink_Canvas
             set
             {
                 if (_currentWhiteboardIndex == value) return;
+                EndBoardTouchpadGesture();
                 _currentWhiteboardIndex = value;
                 RaisePluginEvent(PluginWhiteboardPageChanged, _currentWhiteboardIndex, WhiteboardTotalCount, nameof(PluginWhiteboardPageChanged));
             }

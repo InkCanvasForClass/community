@@ -27,6 +27,8 @@ namespace Ink_Canvas
             {
                 if (_currentMode == value) return;
 
+                EndBoardTouchpadGesture();
+
                 bool wasWhiteboardMode = _currentMode == 1;
                 _currentMode = value;
                 bool isWhiteboardMode = _currentMode == 1;
