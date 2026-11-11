@@ -226,7 +226,7 @@
                             <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_RestoreWidth}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="BrushAutoRestoreWidthText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                               VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                                     <Slider x:Name="BrushAutoRestoreWidthSlider" Width="200" Minimum="1" Maximum="20"
                                             TickFrequency="1" IsSnapToTickEnabled="True" Value="5"
                                             helpers:SettingsBinder.PropertyPath="Canvas.BrushAutoRestoreWidth"
@@ -238,7 +238,7 @@
                             <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_RestoreOpacity}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="BrushAutoRestoreAlphaText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                               VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                                     <Slider x:Name="BrushAutoRestoreAlphaSlider" Width="200" Minimum="0" Maximum="255"
                                             TickFrequency="5" IsSnapToTickEnabled="True"
                                             helpers:SettingsBinder.PropertyPath="Canvas.BrushAutoRestoreAlpha"
@@ -265,7 +265,7 @@
                                     Description="{x:Static props:CanvasStrings.Canvas_SwitchBackDelayHint}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="EraserAutoSwitchBackDelayText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                               VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                                     <Slider x:Name="EraserAutoSwitchBackDelaySlider" Width="200" Minimum="1" Maximum="60"
                                             Value="10" TickFrequency="1" IsSnapToTickEnabled="True"
                                             helpers:SettingsBinder.PropertyPath="Canvas.EraserAutoSwitchBackDelaySeconds"
