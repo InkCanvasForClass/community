@@ -6,6 +6,7 @@ IDirectManipulationUpdateManager
 IDirectManipulationViewport
 GetPointerType
 GetClientRect
+ClientToScreen
 DM_POINTERHITTEST
 GetSystemTimes
 SetWinEventHook

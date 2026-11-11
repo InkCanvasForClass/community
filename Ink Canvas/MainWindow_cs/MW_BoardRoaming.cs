@@ -525,7 +525,21 @@ namespace Ink_Canvas
                     }
                 }
 
-                TransformCanvasImages(matrix);
+                foreach (UIElement child in inkCanvas.Children)
+                {
+                    if (child is not FrameworkElement element
+                        || (child is not Image && child is not MediaElement && child is not CanvasMediaControl)) continue;
+                    // Convert the canvas delta to the element's render origin without discarding
+                    // its earlier pan/rotation or growing a transform chain on every input frame.
+                    var origin = VisualTreeHelper.GetOffset(element) + new Vector(
+                        element.RenderTransformOrigin.X * element.ActualWidth,
+                        element.RenderTransformOrigin.Y * element.ActualHeight);
+                    var transform = element.RenderTransform?.Value ?? Matrix.Identity;
+                    transform.Translate(origin.X, origin.Y);
+                    transform.Append(matrix);
+                    transform.Translate(-origin.X, -origin.Y);
+                    element.SetCurrentValue(UIElement.RenderTransformProperty, new MatrixTransform(transform));
+                }
 
                 foreach (var circle in circles)
                 {

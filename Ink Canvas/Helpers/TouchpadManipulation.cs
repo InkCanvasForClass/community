@@ -98,6 +98,10 @@ namespace Ink_Canvas.Helpers
         {
             PInvoke.GetClientRect((HWND)_source.Handle, out var bounds);
             if (bounds.right <= 0 || bounds.bottom <= 0) return;
+            var origin = new System.Drawing.Point();
+            PInvoke.ClientToScreen((HWND)_source.Handle, ref origin);
+            PInvoke.SetWindowPos((HWND)_inputWindow, default, origin.X, origin.Y, bounds.right, bounds.bottom,
+                SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE | SET_WINDOW_POS_FLAGS.SWP_NOZORDER);
             if (bounds.right == _bounds.right && bounds.bottom == _bounds.bottom) return;
             if (_bounds.right > 0) Stop();
             _bounds = bounds;

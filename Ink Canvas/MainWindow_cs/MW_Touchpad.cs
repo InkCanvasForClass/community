@@ -57,7 +57,8 @@ namespace Ink_Canvas
             var hit = InputHitTest(point) as DependencyObject;
             while (hit is Visual)
             {
-                if (ReferenceEquals(hit, inkCanvas)) return true;
+                if (ReferenceEquals(hit, inkCanvas) || ReferenceEquals(hit, eraserOverlayCanvas)
+                    || ReferenceEquals(hit, GridInkCanvasSelectionCover)) return true;
                 hit = VisualTreeHelper.GetParent(hit);
             }
             return false;

@@ -45,7 +45,8 @@ namespace InkCanvas.Calibration.Tests
                 PanWithoutMovementHasNoHistory, PanCompletesOnCaptureLoss, PopupJumpBelongsToPan,
                 TouchpadMovesInkWithoutChangingTool, TouchpadZoomKeepsAnchor, TouchpadRespectsFrozenPage,
                 TouchpadCompletionCommitsHistory, WheelCompatibilityHandlesBothAxes,
-                NativeTouchpadInitializesAndDisposes, NativeTouchpadCumulativeTransformBecomesDelta })
+                NativeTouchpadInitializesAndDisposes, NativeTouchpadCumulativeTransformBecomesDelta,
+                TouchpadPreservesPreviouslyPannedImage })
             {
                 try { test(); Console.WriteLine("PASS Roaming " + test.Method.Name); }
                 catch (Exception ex)
@@ -422,6 +423,29 @@ namespace InkCanvas.Calibration.Tests
                 new Matrix(4, 0, 0, 4, -300, -300));
             var result = delta.Transform(new Point(300, 200));
             Check(result == new Point(500, 300), "Native cumulative transform was applied twice");
+        }
+
+        private static void TouchpadPreservesPreviouslyPannedImage()
+        {
+            var window = CreateWindow(false);
+            var canvas = Field<WpfInkCanvas>(window, "inkCanvas");
+            var image = new Image { Width = 100, Height = 80,
+                RenderTransformOrigin = new Point(0.5, 0.5), RenderTransform = new RotateTransform(20) };
+            WpfInkCanvas.SetLeft(image, 200);
+            WpfInkCanvas.SetTop(image, 100);
+            canvas.Children.Add(image);
+            canvas.UpdateLayout();
+            Call(window, "BeginBoardRoaming", new Point(100, 100));
+            Call(window, "MoveBoardRoaming", InputPoint(canvas, new Point(160, 130)));
+            Call(window, "EndBoardRoaming");
+            canvas.UpdateLayout();
+            var before = image.TransformToAncestor(canvas).Transform(new Point(50, 40));
+            Call(window, "ApplyBoardTouchpadDelta", new Matrix(2, 0, 0, 2, -100, -100));
+            canvas.UpdateLayout();
+            var after = image.TransformToAncestor(canvas).Transform(new Point(50, 40));
+            Check((after - new Point(before.X * 2 - 100, before.Y * 2 - 100)).Length < 0.001,
+                "Touchpad discarded the image's prior pan/rotation or scaled around the wrong origin");
+            Call(window, "EndBoardTouchpadGesture");
         }
 
         private static void TouchpadZoomKeepsAnchor()
