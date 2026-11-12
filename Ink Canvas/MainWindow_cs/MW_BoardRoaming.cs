@@ -27,9 +27,8 @@ namespace Ink_Canvas
         private bool _isUpdatingBoardRoamingPopup;
         private bool _boardRoamingPopupEventsAttached;
         private bool _isSyncingBoardRoamingToggles;
-        // 漫游触摸接触点（StylusDevice.Id -> 最近位置，按落下顺序排列）。
-        // 漫游模式下 Stylus 事件全部标记 Handled，WPF 不会把它们提升为 Touch/Manipulation，
-        // 双指手势必须直接由接触点计算（WispLogic.PromoteMainToOther：Stylus Handled 即跳过提升）。
+        // 漫游接触点（设备 ID -> 最近位置，按落下顺序排列）。
+        // Stylus 与 PreviewTouch 共用接触点状态，双指手势直接从触点计算，不叠加 WPF Manipulation。
         private readonly List<KeyValuePair<int, Point>> _boardRoamingContacts = new List<KeyValuePair<int, Point>>();
         private Matrix _boardRoamingContactInputInverse;
         private bool _isBoardRoamingTwoFingerGesture;
