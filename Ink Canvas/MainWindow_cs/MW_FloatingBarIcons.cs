@@ -539,10 +539,7 @@ namespace Ink_Canvas
             BoardPenPalette.IsOpen = false;
             BoardEraserSizePanel.IsOpen = false;
             EraserSizePanel.IsOpen = false;
-            var leftBorder = FindView("board.pageList.leftBorder") as Border;
-            var rightBorder = FindView("board.pageList.rightBorder") as Border;
-            if (leftBorder != null) leftBorder.Visibility = Visibility.Collapsed;
-            if (rightBorder != null) rightBorder.Visibility = Visibility.Collapsed;
+            HideAllPageListPanelsImmediately();
             BoardImageOptionsPanel.IsOpen = false;
             TwoFingerGestureBorder.IsOpen = false;
             BoardTwoFingerGestureBorder.IsOpen = false;
@@ -644,10 +641,7 @@ namespace Ink_Canvas
             AnimationsHelper.HidePopupWithSlideAndFade(EraserSizePanel);
             AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderDrawShape);
-            var leftBorderAnim = FindView("board.pageList.leftBorder") as Border;
-            var rightBorderAnim = FindView("board.pageList.rightBorder") as Border;
-            if (leftBorderAnim != null) AnimationsHelper.HideWithSlideAndFade(leftBorderAnim);
-            if (rightBorderAnim != null) AnimationsHelper.HideWithSlideAndFade(rightBorderAnim);
+            HideAllPageListPanels();
             AnimationsHelper.HidePopupWithSlideAndFade(BoardImageOptionsPanel);
             AnimationsHelper.HidePopupWithSlideAndFade(TwoFingerGestureBorder);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardTwoFingerGestureBorder);

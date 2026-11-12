@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace Ink_Canvas.Plugins
         {
             var doc = new FlowDocument
             {
-                FontFamily = new FontFamily("Segoe UI, Microsoft YaHei"),
+                FontFamily = GlobalFontHelper.CurrentUIFontFamily,
                 FontSize = 13,
                 LineHeight = 20,
                 PagePadding = new Thickness(0),
@@ -209,7 +210,7 @@ namespace Ink_Canvas.Plugins
 
             var tb = new System.Windows.Controls.TextBlock
             {
-                FontFamily = new FontFamily("Consolas, Cascadia Mono, Courier New"),
+                FontFamily = GlobalFontHelper.MonoFontFamilyChain,
                 FontSize = 12,
                 Foreground = GetBrush("TextFillColorPrimaryBrush"),
                 Text = string.Join(Environment.NewLine, codeLines),
@@ -351,7 +352,7 @@ namespace Ink_Canvas.Plugins
                         var inner = text.Substring(pos + 1, end - pos - 1);
                         var run = new Run(inner)
                         {
-                            FontFamily = new FontFamily("Consolas, Cascadia Mono"),
+                            FontFamily = GlobalFontHelper.MonoFontFamilyChain,
                             Background = GetBrush("ControlFillColorDefaultBrush"),
                             Foreground = GetBrush("TextFillColorPrimaryBrush")
                         };

@@ -178,6 +178,20 @@ namespace Ink_Canvas.Properties
 
         public static string Theme_System => ResourceManager.GetString(nameof(Theme_System), _resourceCulture);
 
+        public static string Theme_UIFont_Default => ResourceManager.GetString(nameof(Theme_UIFont_Default), _resourceCulture);
+
+        public static string Theme_UIFont_Description => ResourceManager.GetString(nameof(Theme_UIFont_Description), _resourceCulture);
+
+        public static string Theme_UIFont_Import => ResourceManager.GetString(nameof(Theme_UIFont_Import), _resourceCulture);
+
+        public static string Theme_UIFont_ImportFailed => ResourceManager.GetString(nameof(Theme_UIFont_ImportFailed), _resourceCulture);
+
+        public static string Theme_UIFont_Remove => ResourceManager.GetString(nameof(Theme_UIFont_Remove), _resourceCulture);
+
+        public static string Theme_UIFont_RemovePending => ResourceManager.GetString(nameof(Theme_UIFont_RemovePending), _resourceCulture);
+
+        public static string Theme_UIFontLabel => ResourceManager.GetString(nameof(Theme_UIFontLabel), _resourceCulture);
+
         public static string Theme_UnfoldButtonIcon => ResourceManager.GetString(nameof(Theme_UnfoldButtonIcon), _resourceCulture);
 
         public static string Theme_UnfoldIcon_Arrow => ResourceManager.GetString(nameof(Theme_UnfoldIcon_Arrow), _resourceCulture);

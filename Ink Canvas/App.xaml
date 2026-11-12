@@ -8,7 +8,8 @@
              ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
         <ResourceDictionary>
-            <ContextMenu Opened="SysTrayMenu_Opened" Closed="SysTrayMenu_Closed" x:Shared="false" x:Key="SysTrayMenu" Padding="6" ui:ThemeManager.RequestedTheme="Light">
+            <ContextMenu Opened="SysTrayMenu_Opened" Closed="SysTrayMenu_Closed" x:Shared="false" x:Key="SysTrayMenu" Padding="6" ui:ThemeManager.RequestedTheme="Light"
+                         FontFamily="{DynamicResource GlobalUIFontFamily}">
                 <MenuItem IsCheckable="True" IsChecked="False" Checked="HideICCMainWindowTrayIconMenuItem_Checked" Unchecked="HideICCMainWindowTrayIconMenuItem_UnChecked" Name="HideICCMainWindowTrayIconMenuItem">
                     <MenuItem.Header>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
@@ -262,6 +263,9 @@
                             TrayLeftMouseDown="TaskbarTrayIcon_TrayLeftMouseDown"
                             TrayRightMouseDown="TaskbarTrayIcon_TrayRightMouseDown"
                             IconSource="/Resources/icc.ico"/>
+            <FontFamily x:Key="GlobalUIFontFamily">Segoe UI</FontFamily>
+            <FontFamily x:Key="ContentControlThemeFontFamily">Segoe UI</FontFamily>
+            <FontFamily x:Key="MonoUIFontFamily">Consolas</FontFamily>
             <ResourceDictionary.MergedDictionaries>
                 <ui:ThemeResources/>
                 <ui:XamlControlsResources />

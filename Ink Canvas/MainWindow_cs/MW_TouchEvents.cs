@@ -245,6 +245,12 @@ namespace Ink_Canvas
             inkCanvas.StylusMove += MainWindow_StylusMove;
             inkCanvas.StylusUp += MainWindow_StylusUp;
 
+            if (IsBoardRoamingMode)
+            {
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                return;
+            }
+
             // 手动 StrokeVisual 采集（实时笔锋 / 多指书写）要求 InkCanvas 自身不收集笔画；
             // 其余情况保持 Ink，由 InkCanvas 内建采集，两者不可同时生效。
             var isManualStylusCollection = ShouldUseRealtimeVelocityBrushTip() || isInMultiTouchMode;
@@ -1140,6 +1146,8 @@ namespace Ink_Canvas
         /// </remarks>
         private void MainWindow_TouchDown(object sender, TouchEventArgs e)
         {
+            if (IsBoardRoamingMode) return;
+
             // 视频展台特殊模式：所有触摸交给 VideoPresenterSpecialModeContainer 的 Manipulation 处理，
             // 不进入下面的 EditingMode 切换逻辑（避免把 Ink 切到 None 干扰预览绘制）。
             if (_isVideoPresenterSpecialMode) return;
@@ -1199,6 +1207,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void MainWindow_StylusDown(object sender, StylusDownEventArgs e)
         {
+            if (IsBoardRoamingMode) return;
             if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
             if (IsTouchStylusDevice(e.StylusDevice))
                 return;
@@ -1336,6 +1345,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void MainWindow_StylusUp(object sender, StylusEventArgs e)
         {
+            if (IsBoardRoamingMode) return;
             if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
             if (IsTouchStylusDevice(e.StylusDevice))
                 return;
@@ -1507,6 +1517,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void MainWindow_StylusMove(object sender, StylusEventArgs e)
         {
+            if (IsBoardRoamingMode) return;
             try
             {
                 if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
@@ -1791,6 +1802,8 @@ namespace Ink_Canvas
         /// </remarks>
         private void Main_Grid_TouchDown(object sender, TouchEventArgs e)
         {
+            if (IsBoardRoamingMode) return;
+
             // 视频展台特殊模式：不在此处切换 EditingMode，
             // PreviewTouchDown 已临时切到 None 抑制 InkCanvas 框选/绘制；
             // 这里再切会覆盖 None → Ink，导致特殊模式下仍画出墨迹（Q7 真正根因）。
@@ -1905,6 +1918,16 @@ namespace Ink_Canvas
         /// </remarks>
         private void InkCanvas_PreviewTouchDown(object sender, TouchEventArgs e)
         {
+            if (IsBoardRoamingMode)
+            {
+                e.Handled = true;
+                BeginBoardRoamingContact(e.TouchDevice.Id, e.GetTouchPoint(inkCanvas).Position);
+                inkCanvas.CaptureTouch(e.TouchDevice);
+                ViewboxFloatingBar.IsHitTestVisible = false;
+                BlackboardUIGridForInkReplay.IsHitTestVisible = false;
+                return;
+            }
+
             var touchPointForBar = e.GetTouchPoint(this);
             var floatingBarBounds = ViewboxFloatingBar.TransformToAncestor(this).TransformBounds(
                 new Rect(0, 0, ViewboxFloatingBar.ActualWidth, ViewboxFloatingBar.ActualHeight));
@@ -2177,6 +2200,13 @@ namespace Ink_Canvas
         /// </remarks>
         private void InkCanvas_PreviewTouchMove(object sender, TouchEventArgs e)
         {
+            if (IsBoardRoamingMode)
+            {
+                MoveBoardRoamingContact(e.TouchDevice.Id, e.GetTouchPoint(inkCanvas).Position);
+                e.Handled = true;
+                return;
+            }
+
             if (TryHandlePalmTouch(e, false)) return;
 
             var touchId = e.TouchDevice.Id;
@@ -2240,6 +2270,19 @@ namespace Ink_Canvas
             // 展台：触点抬起先无条件记账（必须在 FinishPalmTouch 提前返回之前），
             // 保证 _boothDownTouchIds 与真实手指状态始终一致
             _boothDownTouchIds.Remove(e.TouchDevice.Id);
+
+            if (IsBoardRoamingMode)
+            {
+                EndBoardRoamingContact(e.TouchDevice.Id);
+                inkCanvas.ReleaseTouchCapture(e.TouchDevice);
+                if (_boardRoamingContactIds.Count == 0)
+                {
+                    ViewboxFloatingBar.IsHitTestVisible = true;
+                    BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+                }
+                e.Handled = true;
+                return;
+            }
 
             if (FinishPalmTouch(e)) return;
 
@@ -2442,6 +2485,7 @@ namespace Ink_Canvas
             {
                 e.Mode = ManipulationModes.Translate;
                 e.ManipulationContainer = InkCanvasGridForInkReplay;
+                e.Handled = true;
                 return;
             }
 
@@ -2462,7 +2506,13 @@ namespace Ink_Canvas
         /// <remarks>
         /// 空方法，预留用于处理InkCanvas的操作惯性开始事件
         /// </remarks>
-        private void InkCanvas_ManipulationInertiaStarting(object sender, ManipulationInertiaStartingEventArgs e) { }
+        private void InkCanvas_ManipulationInertiaStarting(object sender, ManipulationInertiaStartingEventArgs e)
+        {
+            if (!IsBoardRoamingMode) return;
+            if (Manipulation.IsManipulationActive(inkCanvas))
+                Manipulation.CompleteManipulation(inkCanvas);
+            e.Handled = true;
+        }
 
         /// <summary>
         /// 主网格的操作完成事件处理方法
@@ -2478,11 +2528,9 @@ namespace Ink_Canvas
         /// </remarks>
         private void Main_Grid_ManipulationCompleted(object sender, ManipulationCompletedEventArgs e)
         {
-            if (_isBoardRoamingManipulation || (IsBoardRoamingMode && _isBoardRoamingMultiTouchSuppressed
-                && _boardRoamingContactIds.Count == 0))
+            if (IsBoardRoamingMode)
             {
-                EndBoardRoaming();
-                if (_boardRoamingContactIds.Count == 0) ResetBoardRoamingContactState();
+                // 漫游由原始触点独占，旧手势结束事件不能结束当前触点的拖动。
                 e.Handled = true;
                 return;
             }
@@ -2557,26 +2605,8 @@ namespace Ink_Canvas
         {
             if (IsBoardRoamingMode)
             {
+                // 不接管上一轮多指手势的增量，避免与 PreviewTouch/Stylus 平移叠加。
                 e.Handled = true;
-                var contactCount = e.Manipulators?.Count() ?? 0;
-                if (contactCount > 1 && _isBoardRoamingManipulation)
-                {
-                    _isBoardRoamingMultiTouchSuppressed = true;
-                    EndBoardRoaming();
-                }
-                if (IsCurrentPageFrozen || _boardRoamingContactIds.Count > 0
-                    || _isBoardRoamingMultiTouchSuppressed || contactCount != 1)
-                    return;
-                if (!_isBoardRoamingPointerDown)
-                {
-                    BeginBoardRoaming(new Point());
-                    _isBoardRoamingManipulation = _isBoardRoamingPointerDown;
-                }
-                if (_isBoardRoamingManipulation)
-                {
-                    var translation = _boardRoamingInputInverse.Transform(e.DeltaManipulation.Translation);
-                    TranslateBoardRoamingContent(translation.X, translation.Y);
-                }
                 return;
             }
 
@@ -2607,15 +2637,6 @@ namespace Ink_Canvas
             if (IsCurrentPageFrozen)
             {
                 TryBlockFrozenPageMutation("移动或缩放内容");
-                e.Handled = true;
-                return;
-            }
-
-            if (IsBoardRoamingMode
-                && (_boardRoamingContacts.Count > 0
-                    || _isBoardRoamingTwoFingerGesture
-                    || (e.Manipulators?.Count() ?? 0) != 1))
-            {
                 e.Handled = true;
                 return;
             }
