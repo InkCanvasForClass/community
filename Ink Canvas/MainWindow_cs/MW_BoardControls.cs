@@ -437,13 +437,13 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 处理白板页面索引按钮点击事件，显示或隐藏侧边页面列表
+        /// 处理白板页面索引按钮点击事件，显示或隐藏对应区域的页面列表
         /// </summary>
-        /// <param name="sender">事件发送者</param>
+        /// <param name="sender">触发点击的页码按钮（位于 left / right / center 等任意工具栏区域）</param>
         /// <param name="e">事件参数</param>
         /// <remarks>
-        /// - 处理左侧页面列表按钮点击：显示或隐藏左侧页面列表
-        /// - 处理右侧页面列表按钮点击：显示或隐藏右侧页面列表
+        /// - 从按钮的注册键反查所属区域，只操作该区域的面板
+        /// - 面板已展开时收起，否则先收起其他区域的面板再展开本区域
         /// - 显示页面列表时会刷新列表内容并滚动到当前页面
         /// </remarks>
         /// <summary>
@@ -474,60 +474,61 @@ namespace Ink_Canvas
 
         private async void BtnWhiteBoardPageIndex_Click(object sender, EventArgs e)
         {
-            var BtnLeftPageListWB = FindView("board.pageList.leftBtn") as Border;
-            var BtnRightPageListWB = FindView("board.pageList.rightBtn") as Border;
-            var BoardBorderLeftPageListView = FindView("board.pageList.leftBorder") as Border;
-            var BoardBorderRightPageListView = FindView("board.pageList.rightBorder") as Border;
-            var BlackBoardLeftSidePageListView = FindView("board.pageList.left") as System.Windows.Controls.ListView;
-            var BlackBoardRightSidePageListView = FindView("board.pageList.right") as System.Windows.Controls.ListView;
-            var BlackBoardLeftSidePageListScrollViewer = FindView("board.pageList.leftScrollViewer") as ScrollViewer;
-            var BlackBoardRightSidePageListScrollViewer = FindView("board.pageList.rightScrollViewer") as ScrollViewer;
-
-            if (sender == BtnLeftPageListWB)
+            // 页码按钮可以被自定义到任意工具栏区域，因此从注册键反查是哪个区域触发的点击
+            string areaId = null;
+            foreach (var id in GetPageInfoAreaIds())
             {
-                if (BoardBorderLeftPageListView?.Visibility == Visibility.Visible)
+                if (ReferenceEquals(FindView(PageListButtonViewKey(id)), sender))
                 {
-                    AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
-                }
-                else
-                {
-                    AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
-                    // 视频展台特殊模式：刷新虚拟分页项（直播页文字 + 照片缩略图），不刷新普通白板页
-                    // 否则 RefreshBlackBoardSidePageListView 会用普通白板页的墨迹预览覆盖虚拟分页项
-                    if (_isVideoPresenterSpecialMode)
-                        RefreshBoothPageListView();
-                    else
-                        RefreshBlackBoardSidePageListView();
-                    EnsurePageListPanelHeight(BoardBorderLeftPageListView, BlackBoardLeftSidePageListScrollViewer, BtnLeftPageListWB);
-                    AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderLeftPageListView);
-                    await Task.Delay(1);
-                    if (BlackBoardLeftSidePageListView != null)
-                    {
-                        // 特殊模式下滚动到当前虚拟页（-1=直播页→0，0..N-1=照片页→index+1）
-                        int scrollIndex = _isVideoPresenterSpecialMode
-                            ? (_boothCurrentPhotoIndex + 1)
-                            : CurrentWhiteboardIndex - 1;
-                        var leftContainer = BlackBoardLeftSidePageListView.ItemContainerGenerator.ContainerFromIndex(
-                            scrollIndex) as ListViewItem;
-                        if (leftContainer != null)
-                        {
-                            ScrollViewToVerticalTop(leftContainer, BlackBoardLeftSidePageListScrollViewer);
-                        }
-                    }
+                    areaId = id;
+                    break;
                 }
             }
-            else if (sender == BtnRightPageListWB)
+            if (areaId == null) return;
+
+            var panel = FindView(PageListBorderViewKey(areaId)) as Border;
+            if (panel == null) return;
+
+            if (panel.Visibility == Visibility.Visible)
             {
-                if (BoardBorderRightPageListView?.Visibility == Visibility.Visible)
-                {
-                    AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
-                }
-                else
-                {
-                    ShowPageListRightPanel();
-                }
+                AnimationsHelper.HideWithSlideAndFade(panel);
+                return;
             }
 
+            // 同一时间只展开一个区域的面板
+            HideAllPageListPanels(panel);
+            await ShowPageListPanel(areaId, panel);
+        }
+
+        /// <summary>
+        /// 展开指定区域的页码预览面板：刷新列表内容、滚动到当前页并播放入场动画。
+        /// </summary>
+        /// <param name="areaId">面板所在的工具栏区域。</param>
+        /// <param name="panel">该区域的面板。</param>
+        private async Task ShowPageListPanel(string areaId, Border panel)
+        {
+            // 视频展台特殊模式：刷新虚拟分页项（直播页文字 + 照片缩略图），不刷新普通白板页
+            // 否则 RefreshBlackBoardSidePageListView 会用普通白板页的墨迹预览覆盖虚拟分页项
+            if (_isVideoPresenterSpecialMode)
+                RefreshBoothPageListView();
+            else
+                RefreshBlackBoardSidePageListView();
+
+            EnsurePageListPanelHeight(panel,
+                FindView(PageListScrollViewerKey(areaId)) as ScrollViewer,
+                FindView(PageListButtonViewKey(areaId)) as FrameworkElement);
+            AnimationsHelper.ShowWithSlideFromBottomAndFade(panel);
+            await Task.Delay(1);
+
+            var pageListView = FindView(PageListViewKey(areaId)) as System.Windows.Controls.ListView;
+            if (pageListView == null) return;
+
+            // 特殊模式下滚动到当前虚拟页（-1=直播页→0，0..N-1=照片页→index+1）
+            int scrollIndex = _isVideoPresenterSpecialMode
+                ? (_boothCurrentPhotoIndex + 1)
+                : CurrentWhiteboardIndex - 1;
+            if (pageListView.ItemContainerGenerator.ContainerFromIndex(scrollIndex) is ListViewItem container)
+                ScrollViewToVerticalTop(container, FindView(PageListScrollViewerKey(areaId)) as ScrollViewer);
         }
 
         /// <summary>
@@ -694,8 +695,6 @@ namespace Ink_Canvas
 
         private void BtnWhiteBoardAdd_Click(object sender, RoutedEventArgs e)
         {
-            var BlackBoardLeftSidePageListView = FindView("board.pageList.left") as System.Windows.Controls.ListView;
-
             MarkCurrentPageInkChanged();
             if (WhiteboardTotalCount >= 99) return;
             if (Settings.Automation.IsAutoSaveScreenshotAtClear &&
@@ -743,7 +742,7 @@ namespace Ink_Canvas
 
             if (WhiteboardTotalCount >= 99) BtnWhiteBoardAdd.IsEnabled = false;
 
-            if (BlackBoardLeftSidePageListView?.Visibility == Visibility.Visible)
+            if (IsAnyPageListPanelVisible())
             {
                 RefreshBlackBoardSidePageListView();
             }
@@ -763,9 +762,6 @@ namespace Ink_Canvas
         /// <param name="pageIndex">要删除的页码（1 到 WhiteboardTotalCount）</param>
         private void DeleteWhiteBoardPageByIndex(int pageIndex)
         {
-            var BoardBorderLeftPageListView = FindView("board.pageList.leftBorder") as Border;
-            var BoardBorderRightPageListView = FindView("board.pageList.rightBorder") as Border;
-
             if (WhiteboardTotalCount <= 1 || pageIndex < 1 || pageIndex > WhiteboardTotalCount)
                 return;
 
@@ -851,8 +847,7 @@ namespace Ink_Canvas
 
             UpdateIndexInfoDisplay();
             if (WhiteboardTotalCount < 99) BtnWhiteBoardAdd.IsEnabled = true;
-            if (BoardBorderLeftPageListView?.Visibility == Visibility.Visible ||
-                BoardBorderRightPageListView?.Visibility == Visibility.Visible)
+            if (IsAnyPageListPanelVisible())
                 RefreshBlackBoardSidePageListView();
         }
 

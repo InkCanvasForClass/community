@@ -1147,6 +1147,8 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_TouchMove(object sender, TouchEventArgs e)
         {
+            if (IsBoardRoamingMode) return;
+
             // 视频展台特殊模式：触摸移动交给 VideoPresenterSpecialModeContainer 的 Manipulation 处理
             // 图形绘制模式例外：需要走正常绘制流程
             if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
@@ -2669,9 +2671,11 @@ namespace Ink_Canvas
                     return;
                 }
             }
-            if (IsBoardRoamingMode && e.ChangedButton == MouseButton.Left)
+            if (IsBoardRoamingMode)
             {
-                if (e.StylusDevice == null && _boardRoamingContactIds.Count == 0)
+                if (e.ChangedButton == MouseButton.Left && e.StylusDevice == null
+                    && _boardRoamingContactIds.Count == 0 && !_isBoardRoamingPointerDown
+                    && !_isBoardRoamingMultiTouchSuppressed)
                 {
                     inkCanvas.CaptureMouse();
                     ViewboxFloatingBar.IsHitTestVisible = false;
@@ -2733,10 +2737,10 @@ namespace Ink_Canvas
             }
 
             // 板漫游：鼠标拖动移动整个板内容
-            if (IsBoardRoamingMode && _isBoardRoamingPointerDown)
+            if (IsBoardRoamingMode)
             {
-                if (e.StylusDevice == null && _boardRoamingContactIds.Count == 0
-                    && !_isBoardRoamingPopupDrag && !_isBoardRoamingManipulation)
+                if (_isBoardRoamingPointerDown && e.StylusDevice == null && _boardRoamingContactIds.Count == 0
+                    && !_isBoardRoamingPopupDrag)
                     MoveBoardRoaming(e.GetPosition(inkCanvas));
                 e.Handled = true;
                 return;
@@ -2797,9 +2801,10 @@ namespace Ink_Canvas
             }
 
             // 板漫游：结束拖动
-            if (IsBoardRoamingMode && _isBoardRoamingPointerDown)
+            if (IsBoardRoamingMode)
             {
-                if (e.StylusDevice == null && _boardRoamingContactIds.Count == 0 && !_isBoardRoamingPopupDrag)
+                if (_isBoardRoamingPointerDown && e.ChangedButton == MouseButton.Left && e.StylusDevice == null
+                    && _boardRoamingContactIds.Count == 0 && !_isBoardRoamingPopupDrag)
                 {
                     EndBoardRoaming();
                     inkCanvas.ReleaseMouseCapture();

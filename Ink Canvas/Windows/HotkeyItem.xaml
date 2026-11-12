@@ -17,7 +17,7 @@ mc:Ignorable="d"
         </ui:SettingsCard.HeaderIcon>
         <Button x:Name="BtnSetHotkey"
                 MinWidth="120"
-                FontFamily="Consolas"
+                FontFamily="{StaticResource MonoUIFontFamily}"
                 FontWeight="SemiBold"
                 Click="BtnSetHotkey_Click">
             <TextBlock x:Name="CurrentHotkeyTextBlock" Text="{x:Static props:CommonStrings.Hotkey_NotSet}" />

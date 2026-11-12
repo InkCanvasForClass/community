@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using Ink_Canvas;
 using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Windows.SettingsViews.Helpers;
 using WpfInkCanvas = System.Windows.Controls.InkCanvas;
 
 namespace InkCanvas.Calibration.Tests
@@ -36,6 +37,31 @@ namespace InkCanvas.Calibration.Tests
             if (!condition) throw new InvalidOperationException(message);
         }
 
+        private sealed class Contact : TouchDevice
+        {
+            public Point Position { get; set; }
+            public WpfInkCanvas Canvas { get; set; }
+            public Contact(int id, Point position) : base(id) => Position = position;
+            public override TouchPoint GetTouchPoint(IInputElement relativeTo)
+            {
+                var point = ReferenceEquals(relativeTo, Canvas) ? InputPoint(Canvas, Position) : Position;
+                return new TouchPoint(this, point, new Rect(point, new Size(1, 1)), TouchAction.Move);
+            }
+            public override TouchPointCollection GetIntermediateTouchPoints(IInputElement relativeTo) =>
+                new TouchPointCollection { GetTouchPoint(relativeTo) };
+        }
+
+        private static ManipulationDeltaEventArgs ManipulationDeltaFor(WpfInkCanvas canvas, Vector translation)
+        {
+            var delta = new ManipulationDelta(translation, 0, new Vector(1, 1), new Vector());
+            var velocities = new ManipulationVelocities(new Vector(), 0, new Vector());
+            var args = (ManipulationDeltaEventArgs)typeof(ManipulationDeltaEventArgs)
+                .GetConstructors(Members).Single().Invoke(new object[]
+                { null, 0, canvas, new Point(), delta, delta, velocities, false });
+            Set(args, "_manipulators", new IManipulator[] { new Contact(1, new Point(100, 100)) });
+            return args;
+        }
+
         public static void RunAll()
         {
             int failed = 0;
@@ -47,7 +73,9 @@ namespace InkCanvas.Calibration.Tests
                 TouchpadCompletionCommitsHistory, WheelCompatibilityHandlesBothAxes,
                 NativeTouchpadInitializesAndDisposes, NativeTouchpadCumulativeTransformBecomesDelta,
                 TouchpadPreservesPreviouslyPannedImage, TouchpadWheelRespectsGestureSettings,
-                TouchpadZoomRefreshesOpenNavigation })
+                TouchpadZoomRefreshesOpenNavigation,
+                PopupRepeatedPanKeepsInkVisible, PopupNearEdgeExpandsPreview,
+                LateManipulationDoesNotStartRoaming, PipelineRebindPreservesRoamingMode })
             {
                 try { test(); Console.WriteLine("PASS Roaming " + test.Method.Name); }
                 catch (Exception ex)
@@ -570,6 +598,131 @@ namespace InkCanvas.Calibration.Tests
                 Call(window, "EndBoardTouchpadGesture");
                 Field<Popup>(window, "BoardRoamingPopup").IsOpen = false;
             }
+        }
+
+        private static void CheckInkInPreview(MainWindow window, string step)
+        {
+            var canvas = Field<WpfInkCanvas>(window, "inkCanvas");
+            var popup = Field<BoardRoamingPopupContent>(window, "BoardRoamingPopupContent");
+            var world = Field<Rect>(window, "_boardRoamingWorldBounds");
+            var viewport = Field<Point>(window, "_boardRoamingViewportWorldPosition");
+            var pending = Field<Vector>(window, "_boardRoamingPendingTranslation");
+            var bitmap = (BitmapSource)popup.PreviewImageControl.Source;
+            foreach (var stroke in canvas.Strokes)
+            {
+                var bounds = stroke.GetBounds();
+                bounds.Offset(viewport.X + pending.X, viewport.Y + pending.Y);
+                Check(world.Contains(bounds), $"{step}: ink left the popup preview bounds; ink={bounds}, world={world}");
+                var point = stroke.StylusPoints[0].ToPoint() + pending;
+                Check(HasDarkPixel(bitmap, PreviewPoint(window, point)), $"{step}: popup preview lost ink pixels");
+            }
+        }
+
+        private static void PopupRepeatedPanKeepsInkVisible()
+        {
+            var window = CreateWindow();
+            AddInk(window, StrokeAt(200, 150), true);
+            Refresh(window);
+            Call(window, "AttachBoardRoamingPopupEvents");
+            var popup = Field<BoardRoamingPopupContent>(window, "BoardRoamingPopupContent");
+            var popupHost = Field<Popup>(window, "BoardRoamingPopup");
+            popupHost.Child = popup;
+            popup.UpdateLayout();
+            var inputDevice = Enum.Parse(typeof(BoardRoamingPopupContent)
+                .GetNestedType("DragInputDevice", BindingFlags.NonPublic), "Mouse");
+            try
+            {
+                for (int round = 1; round <= 3; round++)
+                {
+                    var viewport = Field<Rect>(window, "_boardRoamingViewportInPreview");
+                    var point = new Point(viewport.X + viewport.Width / 2, viewport.Y + viewport.Height / 2);
+                    Call(popup, "BeginDrag", point, inputDevice);
+                    Check(Field<bool>(popup, "_isDragging"), "Popup test could not capture the mouse for a real drag");
+                    Call(popup, "MoveDrag", point + new Vector(352, 198));
+                    CheckInkInPreview(window, $"Popup drag {round} before release");
+                    Call(popup, "EndDrag");
+                    // Run the same refresh as the queued post-drag callback, without timing dependencies.
+                    Call(window, "RefreshBoardRoamingPopup", false, true);
+                    CheckInkInPreview(window, $"Popup drag {round} after release");
+                }
+            }
+            finally
+            {
+                Call(popup, "EndDrag");
+                popupHost.IsOpen = false;
+            }
+        }
+
+        private static void PopupNearEdgeExpandsPreview()
+        {
+            var window = CreateWindow();
+            AddInk(window, StrokeAt(200, 150));
+            Refresh(window);
+            Call(window, "AttachBoardRoamingPopupEvents");
+            var popup = Field<BoardRoamingPopupContent>(window, "BoardRoamingPopupContent");
+            var popupHost = Field<Popup>(window, "BoardRoamingPopup");
+            popupHost.Child = popup;
+            popup.UpdateLayout();
+            var inputDevice = Enum.Parse(typeof(BoardRoamingPopupContent)
+                .GetNestedType("DragInputDevice", BindingFlags.NonPublic), "Mouse");
+            var world = Field<Rect>(window, "_boardRoamingWorldBounds");
+            var viewport = Field<Rect>(window, "_boardRoamingViewportInPreview");
+            var movement = Field<Rect>(window, "_boardRoamingPreviewMovementBounds");
+            try
+            {
+                Call(popup, "BeginDrag", new Point(viewport.X + viewport.Width / 2,
+                    viewport.Y + viewport.Height / 2), inputDevice);
+                Check(Field<bool>(popup, "_isDragging"), "Popup expansion test could not start a drag");
+                Call(popup, "SetViewportPosition", movement.Right - viewport.Width * 1.05, viewport.Y);
+                Call(window, "RefreshBoardRoamingPopup", false, true);
+                var expanded = Field<Rect>(window, "_boardRoamingWorldBounds");
+                Check(expanded.Right > world.Right && expanded.Width > world.Width,
+                    $"Dragging near the popup edge did not expand its display area: before={world}, after={expanded}");
+                Check(Field<bool>(popup, "_isDragging"), "Expanding the preview ended the drag");
+                CheckInkInPreview(window, "Popup edge expansion");
+            }
+            finally
+            {
+                Call(popup, "EndDrag");
+                popupHost.IsOpen = false;
+            }
+        }
+
+        private static void LateManipulationDoesNotStartRoaming()
+        {
+            var window = CreateWindow(false);
+            var canvas = Field<WpfInkCanvas>(window, "inkCanvas");
+            AddInk(window, StrokeAt(200, 150));
+            Set(window, "isInMultiTouchMode", true);
+            var args = ManipulationDeltaFor(canvas, new Vector(800, 450));
+            try
+            {
+                Call(window, "Main_Grid_ManipulationDelta", canvas, args);
+                Check(!Field<bool>(window, "_isBoardRoamingPointerDown") && canvas.RenderTransform.Value.IsIdentity,
+                    $"A remaining multi-touch manipulation started an unowned pan: {canvas.RenderTransform.Value}");
+                Check(canvas.Strokes[0].StylusPoints[0].X == 200, "A late manipulation rewrote committed ink");
+            }
+            finally { Call(window, "EndBoardRoaming"); }
+        }
+
+        private static void PipelineRebindPreservesRoamingMode()
+        {
+            var previous = SettingsManager.Settings;
+            SettingsManager.Settings = new Settings();
+            SettingsManager.Settings.Canvas.InkStyle = 0;
+            var window = CreateWindow(false);
+            var canvas = Field<WpfInkCanvas>(window, "inkCanvas");
+            try
+            {
+                foreach (bool multiTouch in new[] { true, false })
+                {
+                    Set(window, "isInMultiTouchMode", multiTouch);
+                    Call(window, "EnsureRealtimeStylusPipelineBinding");
+                    Check(canvas.EditingMode == InkCanvasEditingMode.None,
+                        $"Rebinding the multi-touch pipeline changed roaming to {canvas.EditingMode}, multiTouch={multiTouch}");
+                }
+            }
+            finally { SettingsManager.Settings = previous; }
         }
 
         public static void Benchmark()

@@ -74,6 +74,25 @@
                         </ComboBox>
                     </ui:SettingsCard>
 
+                    <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_UIFontLabel}"
+                            Description="{x:Static props:ThemeStrings.Theme_UIFont_Description}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FontSize}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                            <ComboBox x:Name="ComboBoxUIFont"
+                                      MinWidth="280"
+                                      SelectionChanged="ComboBoxUIFont_SelectionChanged" />
+                            <Button x:Name="BtnImportFont"
+                                    Content="{x:Static props:ThemeStrings.Theme_UIFont_Import}"
+                                    Click="BtnImportFont_Click" />
+                            <Button x:Name="BtnRemoveFont"
+                                    IsEnabled="False"
+                                    Content="{x:Static props:ThemeStrings.Theme_UIFont_Remove}"
+                                    Click="BtnRemoveFont_Click" />
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
                     <Rectangle Height="48" />
                 </ikw:SimpleStackPanel>
             </Grid>

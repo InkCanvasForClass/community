@@ -24,7 +24,7 @@
             <ui:SettingsCard Header="{x:Static props:FloatingBarStrings.MiniWhiteboard_Settings_DefaultSize}">
                 <ikw:SimpleStackPanel Orientation="Vertical" Spacing="8">
                     <TextBlock x:Name="SizeText"
-                               VerticalAlignment="Center" FontFamily="Consolas" />
+                               VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" />
                     <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                         <TextBlock Text="W" Width="16" VerticalAlignment="Center" />
                         <Slider x:Name="WidthSlider"
@@ -46,7 +46,7 @@
             <ui:SettingsCard Header="{x:Static props:FloatingBarStrings.MiniWhiteboard_Settings_Opacity}">
                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                     <TextBlock x:Name="OpacityText"
-                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" />
+                               VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right" />
                     <Slider x:Name="OpacitySlider"
                             Minimum="0.3" Maximum="1"
                             Width="200"

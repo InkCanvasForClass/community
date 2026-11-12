@@ -36,6 +36,73 @@ namespace Ink_Canvas
             return _boardToolbarViews.TryGetValue(id, out var view) ? view : null;
         }
 
+        // 页码按钮 / 页列表面板按工具栏区域（left / right / center …）注册，
+        // 下面的键函数是唯一来源，避免各处硬编码 "board.pageList.left/right"。
+        internal static string PageInfoViewKey(string areaId) => "board.pageInfo." + areaId;
+        internal static string PageListButtonViewKey(string areaId) => "board.pageList." + areaId + "Btn";
+        internal static string PageListBorderViewKey(string areaId) => "board.pageList." + areaId + "Border";
+        internal static string PageListViewKey(string areaId) => "board.pageList." + areaId;
+        internal static string PageListScrollViewerKey(string areaId) => "board.pageList." + areaId + "ScrollViewer";
+
+        /// <summary>
+        /// 取当前工具栏中放了页码按钮的区域（left / right / center …）。
+        /// 区域来自 BoardPageInfoToolItem 的注册键，因此新增区域无需再改这里。
+        /// </summary>
+        internal List<string> GetPageInfoAreaIds()
+        {
+            const string prefix = "board.pageInfo.";
+            var areas = new List<string>();
+            foreach (var id in _boardToolbarViews.Keys)
+            {
+                if (!id.StartsWith(prefix, StringComparison.Ordinal) || id.Length == prefix.Length) continue;
+                var areaId = id.Substring(prefix.Length);
+                if (!areas.Contains(areaId)) areas.Add(areaId);
+            }
+            return areas;
+        }
+
+        /// <summary>是否有任意区域的页码预览面板处于展开状态。</summary>
+        internal bool IsAnyPageListPanelVisible()
+        {
+            foreach (var areaId in GetPageInfoAreaIds())
+            {
+                if (FindView(PageListBorderViewKey(areaId)) is Border panel
+                    && panel.Visibility == Visibility.Visible)
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>立即隐藏所有区域的页码预览面板（无动画）。</summary>
+        internal void HideAllPageListPanelsImmediately(Border except = null)
+        {
+            foreach (var areaId in GetPageInfoAreaIds())
+            {
+                if (FindView(PageListBorderViewKey(areaId)) is Border panel && !ReferenceEquals(panel, except))
+                    panel.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        /// <summary>带动画地隐藏所有区域的页码预览面板。</summary>
+        internal void HideAllPageListPanels(Border except = null)
+        {
+            foreach (var areaId in GetPageInfoAreaIds())
+            {
+                if (FindView(PageListBorderViewKey(areaId)) is Border panel && !ReferenceEquals(panel, except))
+                    AnimationsHelper.HideWithSlideAndFade(panel);
+            }
+        }
+
+        /// <summary>把所有区域的页码列表选中项同步到指定下标。</summary>
+        internal void SyncPageListSelection(int index)
+        {
+            foreach (var areaId in GetPageInfoAreaIds())
+            {
+                if (FindView(PageListViewKey(areaId)) is ListView listView)
+                    listView.SelectedIndex = index;
+            }
+        }
+
         /// <summary>
         /// 更新白板工具栏画笔图标颜色，使其反映当前画笔颜色。
         /// </summary>
@@ -160,8 +227,10 @@ namespace Ink_Canvas
         public void UpdatePageInfo()
         {
             var newText = CurrentPageInfo;
-            foreach (var key in new[] { "board.pageInfo.left", "board.pageInfo.right", "board.pageInfo.center" })
+            // 页码区域可能被自定义到 left / right / center 等任意位置，按实际注册的区域更新
+            foreach (var areaId in GetPageInfoAreaIds())
             {
+                var key = PageInfoViewKey(areaId);
                 var view = FindView(key);
                 if (view == null) continue;
 
@@ -364,184 +433,128 @@ namespace Ink_Canvas
 
         private void BindPageInfoClickHandler()
         {
-            var leftBtn = FindView("board.pageList.leftBtn") as Border;
-            if (leftBtn != null)
+            // 页码按钮可能被放在任意工具栏区域（left / right / center，或以后新增的区域），
+            // 统一按注册键绑定，避免只处理左右两侧导致其他区域点击无反应。
+            foreach (var areaId in GetPageInfoAreaIds())
             {
-                leftBtn.MouseUp += BtnWhiteBoardPageIndex_Click;
+                if (!(FindView(PageListButtonViewKey(areaId)) is Border btn)) continue;
+                btn.MouseUp -= BtnWhiteBoardPageIndex_Click;
+                btn.MouseUp += BtnWhiteBoardPageIndex_Click;
             }
 
-            var rightBtn = FindView("board.pageList.rightBtn") as Border;
-            if (rightBtn != null)
+            // 兼容未指定区域时注册的全局键
+            if (FindView("board.pageListBtn") is Border globalBtn)
             {
-                rightBtn.MouseUp += BtnWhiteBoardPageIndex_Click;
+                globalBtn.MouseUp -= BtnWhiteBoardPageIndex_Click;
+                globalBtn.MouseUp += BtnWhiteBoardPageIndex_Click;
             }
         }
 
         private void CreatePagePreviewUI()
         {
-            CreatePageListView(
-                "board.pageList.leftBorder",
-                "board.pageList.left",
-                "board.pageList.leftScrollViewer",
-                BlackBoardLeftSidePageListView_OnMouseUp,
-                -134, -465, -60, 50,
-                "board.pageList.leftBtn"
-            );
+            foreach (var areaId in GetPageInfoAreaIds())
+            {
+                var capturedAreaId = areaId;
+                // 沿用左右两侧原有偏移：面板贴在按钮旁并向上抬 465px。
+                // 中间栏等新区域同样以按钮为锚点在其上方展开。
+                var marginLeft = areaId == "right" ? -138 : -134;
+                var marginRight = areaId == "right" ? -56 : -60;
 
-            CreatePageListView(
-                "board.pageList.rightBorder",
-                "board.pageList.right",
-                "board.pageList.rightScrollViewer",
-                BlackBoardRightSidePageListView_OnMouseUp,
-                -138, -465, -56, 50,
-                "board.pageList.rightBtn"
-            );
+                CreatePageListView(
+                    PageListBorderViewKey(areaId),
+                    PageListViewKey(areaId),
+                    PageListScrollViewerKey(areaId),
+                    (s, e) => HandlePageListMouseUp(capturedAreaId, e),
+                    marginLeft, -465, marginRight, 50,
+                    PageListButtonViewKey(areaId)
+                );
+            }
 
             AttachPagePreviewTouchHandlers();
         }
 
         private void AttachPagePreviewTouchHandlers()
         {
+            foreach (var areaId in GetPageInfoAreaIds())
+            {
+                AttachPagePreviewTouchHandlers(areaId);
+            }
+        }
+
+        /// <summary>
+        /// 为某个区域的页码列表挂触摸手势：按住拖动滚动、轻点切换页面。
+        /// </summary>
+        private void AttachPagePreviewTouchHandlers(string areaId)
+        {
             const double TouchTapMovementThreshold = 15.0;
 
-            var leftScrollViewer = FindView("board.pageList.leftScrollViewer") as ScrollViewer;
-            var rightScrollViewer = FindView("board.pageList.rightScrollViewer") as ScrollViewer;
-            var leftPageListView = FindView("board.pageList.left") as System.Windows.Controls.ListView;
-            var rightPageListView = FindView("board.pageList.right") as System.Windows.Controls.ListView;
+            var scrollViewer = FindView(PageListScrollViewerKey(areaId)) as ScrollViewer;
+            var pageListView = FindView(PageListViewKey(areaId)) as System.Windows.Controls.ListView;
+            if (scrollViewer == null || pageListView == null) return;
 
-            if (leftScrollViewer != null && leftPageListView != null)
+            double touchStartY = 0;
+            double touchStartX = 0;
+            double scrollStartOffset = 0;
+            bool isTouching = false;
+            bool touchDidScroll = false;
+
+            scrollViewer.TouchDown += (s, e) =>
             {
-                double leftTouchStartY = 0;
-                double leftTouchStartX = 0;
-                double leftScrollStartOffset = 0;
-                bool leftIsTouching = false;
-                bool leftTouchDidScroll = false;
-
-                leftScrollViewer.TouchDown += (s, e) =>
-                {
-                    leftIsTouching = true;
-                    leftTouchDidScroll = false;
-                    var pt = e.GetTouchPoint(leftScrollViewer).Position;
-                    leftTouchStartX = pt.X;
-                    leftTouchStartY = pt.Y;
-                    leftScrollStartOffset = leftScrollViewer.VerticalOffset;
-                    leftScrollViewer.CaptureTouch(e.TouchDevice);
-                    // 长按缩略图进入拖拽排序候选（命中项才生效）
-                    TryBeginPageListDragCandidate(leftPageListView, e.GetTouchPoint(leftPageListView).Position, e.OriginalSource, requireHold: true);
-                    e.Handled = true;
-                };
-                leftScrollViewer.TouchMove += (s, e) =>
-                {
-                    if (leftIsTouching)
-                    {
-                        // 拖拽排序（长按后拖动）优先：等待确认或拖拽中时吞掉事件，不滚动
-                        if (UpdatePageListDrag(leftPageListView, e.GetTouchPoint(leftPageListView).Position))
-                        {
-                            e.Handled = true;
-                            return;
-                        }
-                        var pt = e.GetTouchPoint(leftScrollViewer).Position;
-                        double deltaY = leftTouchStartY - pt.Y;
-                        double deltaX = pt.X - leftTouchStartX;
-                        if (!leftTouchDidScroll && (Math.Abs(deltaY) > TouchTapMovementThreshold || Math.Abs(deltaX) > TouchTapMovementThreshold))
-                            leftTouchDidScroll = true;
-                        if (leftTouchDidScroll)
-                            leftScrollViewer.ScrollToVerticalOffset(leftScrollStartOffset + deltaY);
-                        e.Handled = true;
-                    }
-                };
-                leftScrollViewer.TouchUp += (s, e) =>
-                {
-                    var wasDragging = _pageListDragActive && _pageListDragListView == leftPageListView;
-                    if (wasDragging)
-                    {
-                        EndPageListDrag();
-                    }
-                    else if (_pageListDragCandidate && _pageListDragListView == leftPageListView)
-                    {
-                        CancelPageListDragCandidate();
-                    }
-
-                    if (leftIsTouching && !leftTouchDidScroll && !wasDragging)
-                    {
-                        var pt = e.GetTouchPoint(leftScrollViewer).Position;
-                        double dx = pt.X - leftTouchStartX, dy = pt.Y - leftTouchStartY;
-                        if (dx * dx + dy * dy <= TouchTapMovementThreshold * TouchTapMovementThreshold)
-                            TrySwitchWhiteboardPageByTouchPoint(leftPageListView, leftScrollViewer, pt);
-                    }
-                    leftIsTouching = false;
-                    leftTouchDidScroll = false;
-                    leftScrollViewer.ReleaseTouchCapture(e.TouchDevice);
-                    e.Handled = true;
-                };
-            }
-
-            if (rightScrollViewer != null && rightPageListView != null)
+                isTouching = true;
+                touchDidScroll = false;
+                var pt = e.GetTouchPoint(scrollViewer).Position;
+                touchStartX = pt.X;
+                touchStartY = pt.Y;
+                scrollStartOffset = scrollViewer.VerticalOffset;
+                scrollViewer.CaptureTouch(e.TouchDevice);
+                // 长按缩略图进入拖拽排序候选（命中项才生效）。
+                TryBeginPageListDragCandidate(pageListView, e.GetTouchPoint(pageListView).Position, e.OriginalSource, requireHold: true);
+                e.Handled = true;
+            };
+            scrollViewer.TouchMove += (s, e) =>
             {
-                double rightTouchStartY = 0;
-                double rightTouchStartX = 0;
-                double rightScrollStartOffset = 0;
-                bool rightIsTouching = false;
-                bool rightTouchDidScroll = false;
-
-                rightScrollViewer.TouchDown += (s, e) =>
+                if (isTouching)
                 {
-                    rightIsTouching = true;
-                    rightTouchDidScroll = false;
-                    var pt = e.GetTouchPoint(rightScrollViewer).Position;
-                    rightTouchStartX = pt.X;
-                    rightTouchStartY = pt.Y;
-                    rightScrollStartOffset = rightScrollViewer.VerticalOffset;
-                    rightScrollViewer.CaptureTouch(e.TouchDevice);
-                    // 长按缩略图进入拖拽排序候选（命中项才生效）
-                    TryBeginPageListDragCandidate(rightPageListView, e.GetTouchPoint(rightPageListView).Position, e.OriginalSource, requireHold: true);
-                    e.Handled = true;
-                };
-                rightScrollViewer.TouchMove += (s, e) =>
-                {
-                    if (rightIsTouching)
+                    // 拖拽排序优先：等待确认或拖拽中时吞掉事件，不滚动。
+                    if (UpdatePageListDrag(pageListView, e.GetTouchPoint(pageListView).Position))
                     {
-                        // 拖拽排序（长按后拖动）优先：等待确认或拖拽中时吞掉事件，不滚动
-                        if (UpdatePageListDrag(rightPageListView, e.GetTouchPoint(rightPageListView).Position))
-                        {
-                            e.Handled = true;
-                            return;
-                        }
-                        var pt = e.GetTouchPoint(rightScrollViewer).Position;
-                        double deltaY = rightTouchStartY - pt.Y;
-                        double deltaX = pt.X - rightTouchStartX;
-                        if (!rightTouchDidScroll && (Math.Abs(deltaY) > TouchTapMovementThreshold || Math.Abs(deltaX) > TouchTapMovementThreshold))
-                            rightTouchDidScroll = true;
-                        if (rightTouchDidScroll)
-                            rightScrollViewer.ScrollToVerticalOffset(rightScrollStartOffset + deltaY);
                         e.Handled = true;
+                        return;
                     }
-                };
-                rightScrollViewer.TouchUp += (s, e) =>
-                {
-                    var wasDragging = _pageListDragActive && _pageListDragListView == rightPageListView;
-                    if (wasDragging)
-                    {
-                        EndPageListDrag();
-                    }
-                    else if (_pageListDragCandidate && _pageListDragListView == rightPageListView)
-                    {
-                        CancelPageListDragCandidate();
-                    }
-
-                    if (rightIsTouching && !rightTouchDidScroll && !wasDragging)
-                    {
-                        var pt = e.GetTouchPoint(rightScrollViewer).Position;
-                        double dx = pt.X - rightTouchStartX, dy = pt.Y - rightTouchStartY;
-                        if (dx * dx + dy * dy <= TouchTapMovementThreshold * TouchTapMovementThreshold)
-                            TrySwitchWhiteboardPageByTouchPoint(rightPageListView, rightScrollViewer, pt);
-                    }
-                    rightIsTouching = false;
-                    rightTouchDidScroll = false;
-                    rightScrollViewer.ReleaseTouchCapture(e.TouchDevice);
+                    var pt = e.GetTouchPoint(scrollViewer).Position;
+                    double deltaY = touchStartY - pt.Y;
+                    double deltaX = pt.X - touchStartX;
+                    if (!touchDidScroll && (Math.Abs(deltaY) > TouchTapMovementThreshold || Math.Abs(deltaX) > TouchTapMovementThreshold))
+                        touchDidScroll = true;
+                    if (touchDidScroll)
+                        scrollViewer.ScrollToVerticalOffset(scrollStartOffset + deltaY);
                     e.Handled = true;
-                };
-            }
+                }
+            };
+            scrollViewer.TouchUp += (s, e) =>
+            {
+                var wasDragging = _pageListDragActive && _pageListDragListView == pageListView;
+                if (wasDragging)
+                {
+                    EndPageListDrag();
+                }
+                else if (_pageListDragCandidate && _pageListDragListView == pageListView)
+                {
+                    CancelPageListDragCandidate();
+                }
+
+                if (isTouching && !touchDidScroll && !wasDragging)
+                {
+                    var pt = e.GetTouchPoint(scrollViewer).Position;
+                    double dx = pt.X - touchStartX, dy = pt.Y - touchStartY;
+                    if (dx * dx + dy * dy <= TouchTapMovementThreshold * TouchTapMovementThreshold)
+                        TrySwitchWhiteboardPageByTouchPoint(pageListView, scrollViewer, pt);
+                }
+                isTouching = false;
+                touchDidScroll = false;
+                scrollViewer.ReleaseTouchCapture(e.TouchDevice);
+                e.Handled = true;
+            };
         }
 
         private void CreatePageListView(
@@ -798,7 +811,7 @@ namespace Ink_Canvas
             indexTextFactory.SetValue(TextBlock.FontSizeProperty, 14.0);
             indexTextFactory.SetValue(TextBlock.HorizontalAlignmentProperty, HorizontalAlignment.Center);
             indexTextFactory.SetValue(TextBlock.VerticalAlignmentProperty, VerticalAlignment.Center);
-            indexTextFactory.SetValue(TextBlock.FontFamilyProperty, new FontFamily("Consolas"));
+            indexTextFactory.SetValue(TextBlock.FontFamilyProperty, GlobalFontHelper.MonoFontFamily);
             indexTextFactory.SetValue(TextBlock.ForegroundProperty, Brushes.White);
             indexTextFactory.SetBinding(TextBlock.TextProperty, new System.Windows.Data.Binding("Index"));
             indexBorderFactory.AppendChild(indexTextFactory);
