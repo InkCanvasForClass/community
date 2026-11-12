@@ -168,7 +168,7 @@
                         </ui:SettingsCard.HeaderIcon>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock Text="{Binding ElementName=SliderPPTTimeCapsuleOpacity, Path=Value, StringFormat={}{0:F2}}"
-                                       VerticalAlignment="Center" FontFamily="Consolas"/>
+                                       VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}"/>
                             <Slider x:Name="SliderPPTTimeCapsuleOpacity" Minimum="0.2"
                                     Maximum="1" Width="200"
                                     IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
@@ -183,7 +183,7 @@
                         </ui:SettingsCard.HeaderIcon>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock Text="{Binding ElementName=SliderPPTTimeCapsuleScale, Path=Value, StringFormat={}{0:F1}}"
-                                       VerticalAlignment="Center" FontFamily="Consolas"/>
+                                       VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}"/>
                             <Slider x:Name="SliderPPTTimeCapsuleScale" Minimum="0.5"
                                     Maximum="2.0" Width="200"
                                     IsSnapToTickEnabled="True" Value="1" TickFrequency="0.1"

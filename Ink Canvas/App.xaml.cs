@@ -1189,6 +1189,7 @@ namespace Ink_Canvas
             ApplyPhotoCorrectionAccelerationFromParsed(parsedSettings);
 
             TryApplyPreferredLanguageFromParsedSettings(parsedSettings);
+            TryApplyGlobalUIFontFromParsedSettings(parsedSettings);
 
             // 应用 Windows 系统个性化强调色到全局主题管理器，使强调按钮与弹窗确认按钮自动匹配系统强调色
             ThemeHelper.ApplySystemAccentColor();
@@ -1941,6 +1942,19 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"启动时预加载语言失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void TryApplyGlobalUIFontFromParsedSettings(dynamic parsedSettings)
+        {
+            try
+            {
+                string font = parsedSettings?["appearance"]?["globalUIFontFamily"]?.ToString();
+                GlobalFontHelper.Apply(font);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"启动时应用全局字体失败: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
 

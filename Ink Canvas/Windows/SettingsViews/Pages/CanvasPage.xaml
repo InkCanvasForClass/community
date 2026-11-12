@@ -222,7 +222,7 @@
                                     IsEnabled="{Binding IsOn, ElementName=ToggleSwitchEdgeExpandHint}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="EdgeExpandHintAutoHideDelayText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                               VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                                     <Slider x:Name="EdgeExpandHintAutoHideDelaySlider" Width="200"
                                             Minimum="1" Maximum="30" Value="5"
                                             TickFrequency="1" IsSnapToTickEnabled="True"
@@ -248,7 +248,7 @@
                                     IsEnabled="{Binding IsOn, ElementName=ToggleSwitchAnnotationDotHint}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="AnnotationDotHintClusterRadiusText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="40"/>
+                                               VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right" Width="40"/>
                                     <Slider x:Name="AnnotationDotHintClusterRadiusSlider" Width="200"
                                             Minimum="10" Maximum="200" Value="50"
                                             TickFrequency="10" IsSnapToTickEnabled="True"
@@ -260,7 +260,7 @@
                                     IsEnabled="{Binding IsOn, ElementName=ToggleSwitchAnnotationDotHint}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="AnnotationDotHintStrokeLengthText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="40"/>
+                                               VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right" Width="40"/>
                                     <Slider x:Name="AnnotationDotHintStrokeLengthSlider" Width="200"
                                             Minimum="3" Maximum="30" Value="10"
                                             TickFrequency="1" IsSnapToTickEnabled="True"
@@ -272,7 +272,7 @@
                                     IsEnabled="{Binding IsOn, ElementName=ToggleSwitchAnnotationDotHint}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="AnnotationDotHintClickCountText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="40"/>
+                                               VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right" Width="40"/>
                                     <Slider x:Name="AnnotationDotHintClickCountSlider" Width="200"
                                             Minimum="2" Maximum="10" Value="3"
                                             TickFrequency="1" IsSnapToTickEnabled="True"
@@ -284,7 +284,7 @@
                                     IsEnabled="{Binding IsOn, ElementName=ToggleSwitchAnnotationDotHint}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="AnnotationDotHintDisplayDurationText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="40"/>
+                                               VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right" Width="40"/>
                                     <Slider x:Name="AnnotationDotHintDisplayDurationSlider" Width="200"
                                             Minimum="1" Maximum="30" Value="3"
                                             TickFrequency="1" IsSnapToTickEnabled="True"
@@ -412,7 +412,7 @@
                             <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_RestoreWidth}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="BrushAutoRestoreWidthText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                               VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                                     <Slider x:Name="BrushAutoRestoreWidthSlider" Width="200" Minimum="1" Maximum="20"
                                             TickFrequency="1" IsSnapToTickEnabled="True" Value="5"
                                             helpers:SettingsBinder.PropertyPath="Canvas.BrushAutoRestoreWidth"
@@ -424,7 +424,7 @@
                             <ui:SettingsCard Header="{x:Static props:CanvasStrings.Canvas_RestoreOpacity}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="BrushAutoRestoreAlphaText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                               VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                                     <Slider x:Name="BrushAutoRestoreAlphaSlider" Width="200" Minimum="0" Maximum="255"
                                             TickFrequency="5" IsSnapToTickEnabled="True"
                                             helpers:SettingsBinder.PropertyPath="Canvas.BrushAutoRestoreAlpha"
@@ -451,7 +451,7 @@
                                     Description="{x:Static props:CanvasStrings.Canvas_SwitchBackDelayHint}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="EraserAutoSwitchBackDelayText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                               VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                                     <Slider x:Name="EraserAutoSwitchBackDelaySlider" Width="200" Minimum="1" Maximum="60"
                                             Value="10" TickFrequency="1" IsSnapToTickEnabled="True"
                                             helpers:SettingsBinder.PropertyPath="Canvas.EraserAutoSwitchBackDelaySeconds"

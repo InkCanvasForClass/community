@@ -983,6 +983,12 @@ namespace Ink_Canvas
         [JsonProperty("language")]
         public string Language { get; set; } = "";
 
+        [JsonProperty("globalUIFontFamily")]
+        public string GlobalUIFontFamily { get; set; } = "Segoe UI";
+
+        [JsonProperty("importedUIFonts")]
+        public List<string> ImportedUIFonts { get; set; } = new List<string>();
+
         [JsonProperty("use24HourTimeFormat")]
         public bool Use24HourTimeFormat { get; set; } = false;
 
