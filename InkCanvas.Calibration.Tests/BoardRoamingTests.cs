@@ -39,9 +39,13 @@ namespace InkCanvas.Calibration.Tests
         private sealed class Contact : TouchDevice
         {
             public Point Position { get; set; }
+            public WpfInkCanvas Canvas { get; set; }
             public Contact(int id, Point position) : base(id) => Position = position;
-            public override TouchPoint GetTouchPoint(IInputElement relativeTo) =>
-                new TouchPoint(this, Position, new Rect(Position, new Size(1, 1)), TouchAction.Move);
+            public override TouchPoint GetTouchPoint(IInputElement relativeTo)
+            {
+                var point = ReferenceEquals(relativeTo, Canvas) ? InputPoint(Canvas, Position) : Position;
+                return new TouchPoint(this, point, new Rect(point, new Size(1, 1)), TouchAction.Move);
+            }
             public override TouchPointCollection GetIntermediateTouchPoints(IInputElement relativeTo) =>
                 new TouchPointCollection { GetTouchPoint(relativeTo) };
         }
