@@ -35,7 +35,6 @@ namespace Ink_Canvas
         private TranslateTransform _boardRoamingRenderTranslation;
         private bool _isCommittingBoardRoaming;
         private bool _isBoardRoamingPopupDrag;
-        private bool _isBoardRoamingManipulation;
         private bool _boardRoamingInputEventsAttached;
         private bool _boardRoamingPreviewDirty = true;
         private DispatcherOperation _boardRoamingPreviewRefreshOperation;
@@ -65,8 +64,7 @@ namespace Ink_Canvas
             }
 
             HideEdgeExpandHint();
-            ResetBoardRoamingContactState();
-            ResetTouchStates();
+            ResetBoardRoamingInput();
             CancelSingleFingerDragMode();
             drawingShapeMode = 0;
             forceEraser = false;
@@ -81,6 +79,25 @@ namespace Ink_Canvas
             HideSubPanels("roaming");
             UpdateBoardRoamingButtonState();
             SetCursorBasedOnEditingMode(inkCanvas);
+        }
+
+        private void ResetBoardRoamingInput()
+        {
+            var previewIds = new HashSet<int>(StrokeVisualList.Keys);
+            previewIds.UnionWith(VisualCanvasList.Keys);
+            foreach (var id in previewIds)
+                CancelPalmTouchPreview(id);
+            AbortAllActiveTouchInputs();
+            TouchDownPointsList.Clear();
+            isMouseDown = false;
+            isTouchDown = false;
+            _isMouseRealtimeInking = false;
+            _pauseStraightenInkModeTracking = false;
+            isMultiTouchTimerActive = false;
+            isWaitUntilNextTouchDown = false;
+            ResetBoardRoamingContactState();
+            ResetTouchStates();
+            inkCanvas.ReleaseStylusCapture();
         }
 
         private bool IsBoardRoamingMode
@@ -153,11 +170,17 @@ namespace Ink_Canvas
 
             _isBoardRoamingPointerDown = false;
             CancelBoardRoamingPreviewRefresh();
-            _isBoardRoamingManipulation = false;
             _isBoardRoamingPopupDrag = false;
             try
             {
                 CommitBoardRoamingHistory();
+                // 提交后内容坐标整体平移，缓存边界也必须同步，保持弹窗中的墨迹位置不变。
+                if (IsValidBoardRoamingBounds(_boardRoamingWorldBounds))
+                {
+                    _boardRoamingWorldBounds.Offset(_boardRoamingPendingTranslation.X, _boardRoamingPendingTranslation.Y);
+                    if (!IsValidBoardRoamingBounds(_boardRoamingWorldBounds))
+                        _boardRoamingWorldBounds = Rect.Empty;
+                }
             }
             finally
             {
@@ -189,24 +212,43 @@ namespace Ink_Canvas
             };
             inkCanvas.LostStylusCapture += (s, e) =>
             {
-                if (!ReferenceEquals(e.OriginalSource, inkCanvas) || _isBoardRoamingPopupDrag) return;
-                EndBoardRoaming();
-                ResetBoardRoamingContactState();
+                if (!ReferenceEquals(e.OriginalSource, inkCanvas) || _isBoardRoamingPopupDrag
+                    || IsTouchStylusDevice(e.StylusDevice)) return;
+                CancelBoardRoamingContact(e.StylusDevice.Id);
             };
             inkCanvas.LostTouchCapture += (s, e) =>
             {
-                if (ReferenceEquals(e.OriginalSource, inkCanvas) && _isBoardRoamingManipulation)
-                    EndBoardRoaming();
+                if (ReferenceEquals(e.OriginalSource, inkCanvas) && !_isBoardRoamingPopupDrag)
+                    CancelBoardRoamingContact(e.TouchDevice.Id);
             };
-            inkCanvas.Unloaded += (s, e) => EndBoardRoaming();
+            inkCanvas.Unloaded += (s, e) =>
+            {
+                EndBoardRoaming();
+                ResetBoardRoamingContactState();
+            };
             _boardRoamingInputEventsAttached = true;
         }
 
         private void ResetBoardRoamingContactState()
         {
+            var hadContacts = _boardRoamingContactIds.Count > 0;
             _boardRoamingContactIds.Clear();
             _boardRoamingPrimaryContactId = -1;
             _isBoardRoamingMultiTouchSuppressed = false;
+            if (hadContacts)
+            {
+                inkCanvas.ReleaseStylusCapture();
+                inkCanvas.ReleaseAllTouchCaptures();
+            }
+        }
+
+        private void CancelBoardRoamingContact(int contactId)
+        {
+            if (!_boardRoamingContactIds.Contains(contactId)) return;
+            _isBoardRoamingMultiTouchSuppressed = true;
+            _boardRoamingPrimaryContactId = -1;
+            EndBoardRoaming();
+            EndBoardRoamingContact(contactId);
         }
 
         /// <summary>
@@ -404,9 +446,20 @@ namespace Ink_Canvas
                 worldBounds = Rect.Union(viewport, contentBounds);
                 worldBounds.Inflate(Math.Max(viewport.Width * 0.5, 1), Math.Max(viewport.Height * 0.5, 1));
             }
-            else if (!worldBounds.Contains(viewport))
+            else
             {
-                worldBounds.Union(viewport);
+                // 靠近任一边缘时预留半屏空间，让弹窗内的漫游可以持续向外扩展。
+                var horizontalThreshold = Math.Max(viewport.Width * 0.1, 1);
+                var verticalThreshold = Math.Max(viewport.Height * 0.1, 1);
+                if (viewport.Left - worldBounds.Left <= horizontalThreshold
+                    || worldBounds.Right - viewport.Right <= horizontalThreshold
+                    || viewport.Top - worldBounds.Top <= verticalThreshold
+                    || worldBounds.Bottom - viewport.Bottom <= verticalThreshold)
+                {
+                    var expandedViewport = viewport;
+                    expandedViewport.Inflate(Math.Max(viewport.Width * 0.5, 1), Math.Max(viewport.Height * 0.5, 1));
+                    worldBounds.Union(expandedViewport);
+                }
             }
             if (!IsValidBoardRoamingBounds(worldBounds)) return;
 
@@ -626,7 +679,11 @@ namespace Ink_Canvas
                                   (previewPosition.Y - _boardRoamingPreviewOffset.Y) / _boardRoamingPreviewScale;
             var deltaX = _boardRoamingViewportWorldPosition.X - targetViewportX;
             var deltaY = _boardRoamingViewportWorldPosition.Y - targetViewportY;
-            if (Math.Abs(deltaX) < 0.01 && Math.Abs(deltaY) < 0.01) return;
+            if (Math.Abs(deltaX) < 0.01 && Math.Abs(deltaY) < 0.01)
+            {
+                RefreshBoardRoamingPopup(false);
+                return;
+            }
 
             TranslateBoardRoamingContent(deltaX, deltaY);
         }
@@ -658,8 +715,7 @@ namespace Ink_Canvas
                 _boothPreviewTranslateY = _boardRoamingBoothStartY + translation.Y;
                 ApplyBoothPreviewTransform();
             }
-            if (!_isBoardRoamingPopupDrag)
-                RefreshBoardRoamingPopup(false);
+            RefreshBoardRoamingPopup(false);
         }
 
         private static bool AreStylusPointsEqual(StylusPointCollection first, StylusPointCollection second)

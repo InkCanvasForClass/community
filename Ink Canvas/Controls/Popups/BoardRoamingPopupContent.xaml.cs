@@ -17,6 +17,7 @@ namespace Ink_Canvas.Controls
 
         private bool _isDragging;
         private DragInputDevice _dragInputDevice;
+        private int _dragStylusId = -1;
         private Point _lastDragPoint;
         private Rect _viewportMovementBounds;
 
@@ -65,20 +66,21 @@ namespace Ink_Canvas.Controls
 
         private void PreviewCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            BeginDrag(e.GetPosition(PreviewCanvas), DragInputDevice.Mouse);
+            if (e.StylusDevice == null)
+                BeginDrag(e.GetPosition(PreviewCanvas), DragInputDevice.Mouse);
             e.Handled = true;
         }
 
         private void PreviewCanvas_MouseMove(object sender, MouseEventArgs e)
         {
-            if (_dragInputDevice != DragInputDevice.Mouse || !PreviewCanvas.IsMouseCaptured) return;
+            if (e.StylusDevice != null || _dragInputDevice != DragInputDevice.Mouse || !PreviewCanvas.IsMouseCaptured) return;
             MoveDrag(e.GetPosition(PreviewCanvas));
             e.Handled = true;
         }
 
         private void PreviewCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (_dragInputDevice == DragInputDevice.Mouse)
+            if (e.StylusDevice == null && _dragInputDevice == DragInputDevice.Mouse)
                 EndDrag();
             e.Handled = true;
         }
@@ -91,27 +93,32 @@ namespace Ink_Canvas.Controls
 
         private void PreviewCanvas_StylusDown(object sender, StylusDownEventArgs e)
         {
-            BeginDrag(e.GetPosition(PreviewCanvas), DragInputDevice.Stylus);
+            if (!_isDragging)
+            {
+                _dragStylusId = e.StylusDevice.Id;
+                BeginDrag(e.GetPosition(PreviewCanvas), DragInputDevice.Stylus);
+            }
             e.Handled = true;
         }
 
         private void PreviewCanvas_StylusMove(object sender, StylusEventArgs e)
         {
-            if (_dragInputDevice != DragInputDevice.Stylus || !PreviewCanvas.IsStylusCaptured) return;
+            if (_dragInputDevice != DragInputDevice.Stylus || e.StylusDevice.Id != _dragStylusId
+                || !PreviewCanvas.IsStylusCaptured) return;
             MoveDrag(e.GetPosition(PreviewCanvas));
             e.Handled = true;
         }
 
         private void PreviewCanvas_StylusUp(object sender, StylusEventArgs e)
         {
-            if (_dragInputDevice == DragInputDevice.Stylus)
+            if (_dragInputDevice == DragInputDevice.Stylus && e.StylusDevice.Id == _dragStylusId)
                 EndDrag();
             e.Handled = true;
         }
 
         private void PreviewCanvas_LostStylusCapture(object sender, StylusEventArgs e)
         {
-            if (_dragInputDevice == DragInputDevice.Stylus)
+            if (_dragInputDevice == DragInputDevice.Stylus && e.StylusDevice.Id == _dragStylusId)
                 EndDrag();
         }
 
@@ -196,6 +203,7 @@ namespace Ink_Canvas.Controls
 
             _isDragging = false;
             _dragInputDevice = DragInputDevice.None;
+            _dragStylusId = -1;
             if (PreviewCanvas.IsMouseCaptured)
                 PreviewCanvas.ReleaseMouseCapture();
             if (PreviewCanvas.IsStylusCaptured)

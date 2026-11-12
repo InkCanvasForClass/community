@@ -2436,6 +2436,8 @@ namespace Ink_Canvas
 
             if (IsBoardRoamingMode)
             {
+                // 触摸提升的 Stylus 事件留给 PreviewTouch，不能阻断触摸事件或重复平移。
+                if (IsTouchStylusDevice(e.StylusDevice)) return;
                 inkCanvas.CaptureStylus();
                 ViewboxFloatingBar.IsHitTestVisible = false;
                 BlackboardUIGridForInkReplay.IsHitTestVisible = false;
@@ -2457,7 +2459,7 @@ namespace Ink_Canvas
 
         private void inkCanvas_StylusMove(object sender, StylusEventArgs e)
         {
-            if (!IsBoardRoamingMode || _boardRoamingContactIds.Count == 0) return;
+            if (!IsBoardRoamingMode || IsTouchStylusDevice(e.StylusDevice)) return;
 
             MoveBoardRoamingContact(e.StylusDevice.Id, e.GetPosition(inkCanvas));
             e.Handled = true;
@@ -2466,12 +2468,10 @@ namespace Ink_Canvas
         // 手写笔抬起事件（用于橡皮擦自动切换）
         private void inkCanvas_StylusUp(object sender, StylusEventArgs e)
         {
-            if (_boardRoamingContactIds.Count > 0 || _isBoardRoamingPointerDown)
+            if (IsBoardRoamingMode && IsTouchStylusDevice(e.StylusDevice)) return;
+            if (IsBoardRoamingMode)
             {
-                if (_boardRoamingContactIds.Count > 0)
-                    EndBoardRoamingContact(e.StylusDevice.Id);
-                else
-                    EndBoardRoaming();
+                EndBoardRoamingContact(e.StylusDevice.Id);
 
                 if (_boardRoamingContactIds.Count == 0)
                 {
