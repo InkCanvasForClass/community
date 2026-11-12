@@ -2772,30 +2772,49 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 变换画布上的图片元素，使其与墨迹同步移动
+        /// 按画布坐标变换图片和媒体元素，与墨迹同步平移、缩放和旋转。
         /// </summary>
         private void TransformCanvasImages(Matrix matrix)
         {
             try
             {
-                // 遍历inkCanvas的所有子元素，找到图片元素
                 for (int i = inkCanvas.Children.Count - 1; i >= 0; i--)
                 {
                     var child = inkCanvas.Children[i];
+                    if (child is not FrameworkElement element
+                        || (child is not Image && child is not MediaElement && child is not CanvasMediaControl)) continue;
+                    try
+                    {
+                        // 画布增量换算到元素的渲染原点，保留此前的平移、缩放和旋转。
+                        var origin = VisualTreeHelper.GetOffset(element) + new Vector(
+                            element.RenderTransformOrigin.X * element.ActualWidth,
+                            element.RenderTransformOrigin.Y * element.ActualHeight);
+                        var delta = Matrix.Identity;
+                        delta.Translate(origin.X, origin.Y);
+                        delta.Append(matrix);
+                        delta.Translate(-origin.X, -origin.Y);
 
-                    if (child is Image image)
-                    {
-                        // 应用矩阵变换到图片
-                        ApplyMatrixTransformToImage(image, matrix);
+                        // 保留编辑工具使用的变换节点；克隆避免改动共享或冻结的变换。
+                        var original = element.RenderTransform;
+                        var group = original is TransformGroup existing ? existing.CloneCurrentValue() : new TransformGroup();
+                        if (original != null && original is not TransformGroup)
+                            group.Children.Add(original.CloneCurrentValue());
+                        // 合并末尾增量，避免每个输入帧都增长变换列表。
+                        if (group.Children.Count > 0 && group.Children[group.Children.Count - 1] is MatrixTransform tail)
+                        {
+                            var combined = tail.Matrix;
+                            combined.Append(delta);
+                            tail.Matrix = combined;
+                        }
+                        else
+                        {
+                            group.Children.Add(new MatrixTransform(delta));
+                        }
+                        element.SetCurrentValue(UIElement.RenderTransformProperty, group);
                     }
-                    else if (child is MediaElement mediaElement)
+                    catch (Exception ex)
                     {
-                        // 对媒体元素也应用变换
-                        ApplyMatrixTransformToMediaElement(mediaElement, matrix);
-                    }
-                    else if (child is CanvasMediaControl mediaControl)
-                    {
-                        ApplyMatrixTransformToCanvasMediaControl(mediaControl, matrix);
+                        LogHelper.WriteLogToFile($"变换画布元素失败 ({element.GetType().Name}): {ex.Message}", LogHelper.LogType.Error);
                     }
                 }
             }
@@ -2805,71 +2824,5 @@ namespace Ink_Canvas
             }
         }
 
-        /// <summary>
-        /// 对图片应用矩阵变换
-        /// </summary>
-        private void ApplyMatrixTransformToImage(Image image, Matrix matrix)
-        {
-            try
-            {
-                // 获取图片的RenderTransform，如果不存在则创建新的TransformGroup
-                if (!(image.RenderTransform is TransformGroup transformGroup))
-                {
-                    transformGroup = new TransformGroup();
-                    image.RenderTransform = transformGroup;
-                }
-
-                // 创建新的MatrixTransform并添加到变换组
-                var matrixTransform = new MatrixTransform(matrix);
-                transformGroup.Children.Add(matrixTransform);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"应用图片变换失败: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 对媒体元素应用矩阵变换
-        /// </summary>
-        private void ApplyMatrixTransformToMediaElement(MediaElement mediaElement, Matrix matrix)
-        {
-            try
-            {
-                // 获取媒体元素的RenderTransform，如果不存在则创建新的TransformGroup
-                if (!(mediaElement.RenderTransform is TransformGroup transformGroup))
-                {
-                    transformGroup = new TransformGroup();
-                    mediaElement.RenderTransform = transformGroup;
-                }
-
-                // 创建新的MatrixTransform并添加到变换组
-                var matrixTransform = new MatrixTransform(matrix);
-                transformGroup.Children.Add(matrixTransform);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"应用媒体元素变换失败: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        private void ApplyMatrixTransformToCanvasMediaControl(CanvasMediaControl mediaControl, Matrix matrix)
-        {
-            try
-            {
-                if (!(mediaControl.RenderTransform is TransformGroup transformGroup))
-                {
-                    transformGroup = new TransformGroup();
-                    mediaControl.RenderTransform = transformGroup;
-                }
-
-                var matrixTransform = new MatrixTransform(matrix);
-                transformGroup.Children.Add(matrixTransform);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"应用媒体控件变换失败: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
     }
 }

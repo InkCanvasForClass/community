@@ -73,7 +73,9 @@ namespace InkCanvas.Calibration.Tests
                 TouchpadCompletionCommitsHistory, WheelCompatibilityHandlesBothAxes,
                 NativeTouchpadInitializesAndDisposes, NativeTouchpadCumulativeTransformBecomesDelta,
                 TouchpadPreservesPreviouslyPannedImage, TouchpadWheelRespectsGestureSettings,
-                TouchpadZoomRefreshesOpenNavigation,
+                TouchpadZoomRefreshesOpenNavigation, SharedMediaTransformPreservesCanvasCoordinates,
+                SharedMediaTransformPreservesOtherElements, RoamingContinuesAfterImageTransformFailure,
+                RepeatedCanvasTransformsKeepImagesEditable,
                 PopupRepeatedPanKeepsInkVisible, PopupNearEdgeExpandsPreview,
                 LateManipulationDoesNotStartRoaming, PipelineRebindPreservesRoamingMode })
             {
@@ -482,6 +484,131 @@ namespace InkCanvas.Calibration.Tests
             Check((after - new Point(before.X * 2 - 100, before.Y * 2 - 100)).Length < 0.001,
                 "Touchpad discarded the image's prior pan/rotation or scaled around the wrong origin");
             Call(window, "EndBoardTouchpadGesture");
+        }
+
+        private static void SharedMediaTransformPreservesCanvasCoordinates()
+        {
+            var window = CreateWindow(false);
+            var canvas = Field<WpfInkCanvas>(window, "inkCanvas");
+            foreach (var element in new FrameworkElement[] { new Image(), new MediaElement(), new CanvasMediaControl() })
+            {
+                element.Width = 100;
+                element.Height = 80;
+                element.RenderTransformOrigin = new Point(0.5, 0.5);
+                element.RenderTransform = new RotateTransform(20);
+                WpfInkCanvas.SetLeft(element, 200);
+                WpfInkCanvas.SetTop(element, 100);
+                canvas.Children.Add(element);
+                canvas.UpdateLayout();
+                var points = new[] { new Point(), new Point(50, 40), new Point(100, 80) };
+                var before = points.Select(p => element.TransformToAncestor(canvas).Transform(p)).ToArray();
+
+                // In canvas coordinates: translate (30,-20), scale 2x at (100,100), then rotate 90 degrees there.
+                Call(window, "TransformCanvasImages", new Matrix(1, 0, 0, 1, 30, -20));
+                Call(window, "TransformCanvasImages", new Matrix(2, 0, 0, 2, -100, -100));
+                Call(window, "TransformCanvasImages", new Matrix(0, 1, -1, 0, 200, 0));
+                canvas.UpdateLayout();
+                for (int i = 0; i < points.Length; i++)
+                {
+                    var after = element.TransformToAncestor(canvas).Transform(points[i]);
+                    Check((after - new Point(340 - 2 * before[i].Y, 2 * before[i].X - 40)).Length < 0.001,
+                        $"{element.GetType().Name} lost its previous transform or used the wrong canvas origin");
+                }
+                canvas.Children.Remove(element);
+            }
+        }
+
+        private static void SharedMediaTransformPreservesOtherElements()
+        {
+            var window = CreateWindow(false);
+            var canvas = Field<WpfInkCanvas>(window, "inkCanvas");
+            var shared = new TransformGroup();
+            shared.Children.Add(new RotateTransform(20));
+            shared.Children.Add(new TranslateTransform(10, 5));
+            var image = new Image { RenderTransform = shared };
+            var unrelated = new Border { RenderTransform = shared };
+            canvas.Children.Add(image);
+            canvas.Children.Add(unrelated);
+            var original = shared.Value;
+            Call(window, "TransformCanvasImages", new Matrix(1, 0, 0, 1, 30, -20));
+            Check(unrelated.RenderTransform.Value == original,
+                "Transforming a media element mutated a transform shared with another element");
+            Check(image.RenderTransform.Value.OffsetX == original.OffsetX + 30
+                && image.RenderTransform.Value.OffsetY == original.OffsetY - 20,
+                "Shared transform prevented the image from moving");
+        }
+
+        private static void RepeatedCanvasTransformsKeepImagesEditable()
+        {
+            foreach (bool roaming in new[] { false, true })
+            {
+                var window = CreateWindow(false);
+                var canvas = Field<WpfInkCanvas>(window, "inkCanvas");
+                var group = new TransformGroup();
+                group.Children.Add(new ScaleTransform());
+                group.Children.Add(new TranslateTransform());
+                group.Children.Add(new RotateTransform());
+                var image = new Image { Width = 100, Height = 80, RenderTransform = group };
+                canvas.Children.Add(image);
+                canvas.UpdateLayout();
+                for (int i = 0; i < 100; i++)
+                {
+                    var delta = new Matrix(1, 0, 0, 1, 1, -1);
+                    if (roaming) Call(window, "TransformBoardRoamingContent", delta, new Vector(1, -1), 1.0);
+                    else Call(window, "TransformCanvasImages", delta);
+                }
+                Call(window, "ApplyTranslateTransform", image, 10.0, 5.0);
+                Check(image.RenderTransform.Value.OffsetX == 110 && image.RenderTransform.Value.OffsetY == -95,
+                    "Canvas navigation prevented subsequent image editing");
+                Check(image.RenderTransform is TransformGroup result && result.Children.Count <= 4,
+                    "Repeated canvas navigation grew the transform list per input frame");
+            }
+        }
+
+        private sealed class RejectingTransformImage : Image
+        {
+            public bool RejectTransform { get; set; }
+            public int Rejections { get; private set; }
+
+            static RejectingTransformImage()
+            {
+                RenderTransformProperty.OverrideMetadata(typeof(RejectingTransformImage),
+                    new FrameworkPropertyMetadata(null, null, (target, value) =>
+                    {
+                        var image = (RejectingTransformImage)target;
+                        if (image.RejectTransform)
+                        {
+                            image.Rejections++;
+                            throw new InvalidOperationException("Simulated image transform failure");
+                        }
+                        return value;
+                    }));
+            }
+        }
+
+        private static void RoamingContinuesAfterImageTransformFailure()
+        {
+            var window = CreateWindow(false);
+            var canvas = Field<WpfInkCanvas>(window, "inkCanvas");
+            var first = new Image { Width = 100, Height = 80 };
+            var broken = new RejectingTransformImage { Width = 100, Height = 80 };
+            var last = new Image { Width = 100, Height = 80 };
+            canvas.Children.Add(first);
+            canvas.Children.Add(broken);
+            canvas.Children.Add(last);
+            canvas.UpdateLayout();
+            broken.RejectTransform = true;
+            try
+            {
+                Call(window, "TransformBoardRoamingContent", new Matrix(1, 0, 0, 1, 30, -20), new Vector(30, -20), 1.0);
+                Check(broken.Rejections == 1, "Test did not exercise a failed element transform");
+                foreach (var image in new[] { first, last })
+                    Check(image.RenderTransform.Value.OffsetX == 30 && image.RenderTransform.Value.OffsetY == -20,
+                        "A failing image prevented another image from moving");
+                Check(Field<Point>(window, "_boardRoamingViewportWorldPosition") == new Point(-30, 20),
+                    "A failing image interrupted viewport bookkeeping");
+            }
+            finally { broken.RejectTransform = false; }
         }
 
         private static void TouchpadZoomKeepsAnchor()
