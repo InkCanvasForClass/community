@@ -99,7 +99,10 @@
     <value>Open Strokes File</value>
   </data>
   <data name="Main_Strokes_OpenFileDialogFilter" xml:space="preserve">
-    <value>Ink Canvas Strokes File (*.icstk)|*.icstk|XML Strokes File (*.xml)|*.xml|ICC Archive (*.zip)|*.zip|UInk Strokes File (*.uink)|*.uink|All Supported Files (*.icstk;*.xml;*.zip;*.uink)|*.icstk;*.xml;*.zip;*.uink</value>
+    <value>Ink Canvas Strokes File (*.icstk)|*.icstk|XML Strokes File (*.xml)|*.xml|ICC Archive (*.zip)|*.zip|UInk Strokes File (*.uink)|*.uink</value>
+  </data>
+  <data name="Main_Strokes_OpenFileDialogAllSupported" xml:space="preserve">
+    <value>All Supported Files</value>
   </data>
   <data name="Main_Strokes_SaveMultiPageXmlSuccess" xml:space="preserve">
     <value>Multi-page XML strokes saved as {0} XML files</value>

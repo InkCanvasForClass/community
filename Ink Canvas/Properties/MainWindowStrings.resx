@@ -99,7 +99,10 @@
     <value>打开墨迹文件</value>
   </data>
   <data name="Main_Strokes_OpenFileDialogFilter" xml:space="preserve">
-    <value>Ink Canvas Strokes File (*.icstk)|*.icstk|XML墨迹文件 (*.xml)|*.xml|ICC压缩包 (*.zip)|*.zip|UInk墨迹文件 (*.uink)|*.uink|所有支持的文件 (*.icstk;*.xml;*.zip;*.uink)|*.icstk;*.xml;*.zip;*.uink</value>
+    <value>Ink Canvas Strokes File (*.icstk)|*.icstk|XML墨迹文件 (*.xml)|*.xml|ICC压缩包 (*.zip)|*.zip|UInk墨迹文件 (*.uink)|*.uink</value>
+  </data>
+  <data name="Main_Strokes_OpenFileDialogAllSupported" xml:space="preserve">
+    <value>所有支持的文件</value>
   </data>
   <data name="Main_Strokes_SaveMultiPageXmlSuccess" xml:space="preserve">
     <value>多页面XML墨迹成功保存为 {0} 个XML文件</value>

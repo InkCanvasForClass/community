@@ -96,7 +96,10 @@
     <value>开箱墨迹盲盒</value>
   </data>
   <data name="Main_Strokes_OpenFileDialogFilter" xml:space="preserve">
-    <value>Ink Canvas 墨迹文件 (*.icstk)|*.icstk|XML墨迹文件 (*.xml)|*.xml|ICC压缩包 (*.zip)|*.zip|UInk墨迹文件 (*.uink)|*.uink|啥都能开 (*.icstk;*.xml;*.zip;*.uink)|*.icstk;*.xml;*.zip;*.uink</value>
+    <value>Ink Canvas 墨迹文件 (*.icstk)|*.icstk|XML墨迹文件 (*.xml)|*.xml|ICC压缩包 (*.zip)|*.zip|UInk墨迹文件 (*.uink)|*.uink</value>
+  </data>
+  <data name="Main_Strokes_OpenFileDialogAllSupported" xml:space="preserve">
+    <value>啥都能开</value>
   </data>
   <data name="Main_Strokes_SaveMultiPageXmlSuccess" xml:space="preserve">
     <value>{0} 个 XML 文件批发出货，文档狂魔达成！</value>

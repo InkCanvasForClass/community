@@ -360,6 +360,7 @@ namespace Ink_Canvas
                 (typeof(Plugins.IRecognitionService),      new Plugins.RecognitionService()),
                 (typeof(Plugins.ITrayService),            new Plugins.TrayService(this)),
                 (typeof(Plugins.IPluginUriService),       new Plugins.UriService(host)),
+                (typeof(Plugins.IOpenFileFormatService),  new Plugins.OpenFileFormatService(host)),
                 (typeof(Plugins.IScreenshotService),      new Plugins.ScreenshotService(mainWindow)),
                 (typeof(Plugins.IClipboardService),       new Plugins.ClipboardService()),
                 (typeof(Plugins.IAppInfoService),         new Plugins.AppInfoService()),
