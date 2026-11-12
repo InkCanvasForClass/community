@@ -897,6 +897,7 @@ namespace Ink_Canvas
             forceEraser = true;
             drawingShapeMode = 24;
             drawMultiStepShapeCurrentStep = 0;
+            drawMultiStepShapeSpecialStrokeCollection = null;
             inkCanvas.EditingMode = InkCanvasEditingMode.None;
             inkCanvas.IsManipulationEnabled = true;
             CancelSingleFingerDragMode();
@@ -930,6 +931,7 @@ namespace Ink_Canvas
             forceEraser = true;
             drawingShapeMode = 25;
             drawMultiStepShapeCurrentStep = 0;
+            drawMultiStepShapeSpecialStrokeCollection = null;
             inkCanvas.EditingMode = InkCanvasEditingMode.None;
             inkCanvas.IsManipulationEnabled = true;
             CancelSingleFingerDragMode();
@@ -1147,6 +1149,7 @@ namespace Ink_Canvas
         {
             // 视频展台特殊模式：触摸移动交给 VideoPresenterSpecialModeContainer 的 Manipulation 处理
             // 图形绘制模式例外：需要走正常绘制流程
+            if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
             if (_isVideoPresenterSpecialMode && drawingShapeMode == 0) return;
 
             if (isSingleFingerDragMode) return;
@@ -1710,12 +1713,12 @@ namespace Ink_Canvas
                     else
                     {
                         //第二笔：画双曲线
-                        // 先将第一笔的渐近线添加到strokes中
+                        // 保留第一笔渐近线的引用，保证收尾时移除的是画布上的实际笔画。
                         if (drawMultiStepShapeSpecialStrokeCollection != null && drawMultiStepShapeSpecialStrokeCollection.Count > 0)
                         {
                             foreach (var asymptoteStroke in drawMultiStepShapeSpecialStrokeCollection)
                             {
-                                strokes.Add(asymptoteStroke.Clone());
+                                strokes.Add(asymptoteStroke);
                             }
                         }
 
@@ -1800,13 +1803,21 @@ namespace Ink_Canvas
                         }
                     }
 
-                    try
+                    if (lastTempStrokeCollection != null)
                     {
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                        foreach (var tempStroke in lastTempStrokeCollection)
+                        {
+                            if (inkCanvas.Strokes.Contains(tempStroke)) inkCanvas.Strokes.Remove(tempStroke);
+                        }
                     }
-                    catch
+
+                    // 鼠标第一步收尾会清空 lastTempStrokeCollection，渐近线仍需先移除再加入预览。
+                    if (drawMultiStepShapeSpecialStrokeCollection != null)
                     {
-                        Trace.WriteLine("lastTempStrokeCollection failed.");
+                        foreach (var asymptoteStroke in drawMultiStepShapeSpecialStrokeCollection)
+                        {
+                            if (inkCanvas.Strokes.Contains(asymptoteStroke)) inkCanvas.Strokes.Remove(asymptoteStroke);
+                        }
                     }
 
                     lastTempStrokeCollection = strokes;
@@ -2648,6 +2659,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
             if (e.ChangedButton == MouseButton.Left && inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
             {
                 BeginSecAgentStrokeErase(e.GetPosition(inkCanvas));
@@ -2659,10 +2671,13 @@ namespace Ink_Canvas
             }
             if (IsBoardRoamingMode && e.ChangedButton == MouseButton.Left)
             {
-                inkCanvas.CaptureMouse();
-                ViewboxFloatingBar.IsHitTestVisible = false;
-                BlackboardUIGridForInkReplay.IsHitTestVisible = false;
-                BeginBoardRoaming(e.GetPosition(inkCanvas));
+                if (e.StylusDevice == null && _boardRoamingContactIds.Count == 0)
+                {
+                    inkCanvas.CaptureMouse();
+                    ViewboxFloatingBar.IsHitTestVisible = false;
+                    BlackboardUIGridForInkReplay.IsHitTestVisible = false;
+                    BeginBoardRoaming(e.GetPosition(inkCanvas));
+                }
                 e.Handled = true;
                 return;
             }
@@ -2701,6 +2716,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_MouseMove(object sender, MouseEventArgs e)
         {
+            if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke
                 && e.LeftButton == MouseButtonState.Pressed
                 && MoveSecAgentStrokeErase(e.GetPosition(inkCanvas)))
@@ -2717,9 +2733,11 @@ namespace Ink_Canvas
             }
 
             // 板漫游：鼠标拖动移动整个板内容
-            if (_isBoardRoamingPointerDown)
+            if (IsBoardRoamingMode && _isBoardRoamingPointerDown)
             {
-                MoveBoardRoaming(e.GetPosition(inkCanvas));
+                if (e.StylusDevice == null && _boardRoamingContactIds.Count == 0
+                    && !_isBoardRoamingPopupDrag && !_isBoardRoamingManipulation)
+                    MoveBoardRoaming(e.GetPosition(inkCanvas));
                 e.Handled = true;
                 return;
             }
@@ -2779,12 +2797,15 @@ namespace Ink_Canvas
             }
 
             // 板漫游：结束拖动
-            if (_isBoardRoamingPointerDown)
+            if (IsBoardRoamingMode && _isBoardRoamingPointerDown)
             {
-                EndBoardRoaming();
-                inkCanvas.ReleaseMouseCapture();
-                ViewboxFloatingBar.IsHitTestVisible = true;
-                BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+                if (e.StylusDevice == null && _boardRoamingContactIds.Count == 0 && !_isBoardRoamingPopupDrag)
+                {
+                    EndBoardRoaming();
+                    inkCanvas.ReleaseMouseCapture();
+                    ViewboxFloatingBar.IsHitTestVisible = true;
+                    BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+                }
                 e.Handled = true;
                 return;
             }
@@ -2924,7 +2945,9 @@ namespace Ink_Canvas
                 else
                 {
                     drawMultiStepShapeCurrentStep = 0;
-                    if (drawMultiStepShapeSpecialStrokeCollection != null)
+                    var asymptoteStrokes = drawMultiStepShapeSpecialStrokeCollection;
+                    drawMultiStepShapeSpecialStrokeCollection = null;
+                    if (asymptoteStrokes != null && asymptoteStrokes.Count > 0)
                     {
                         var opFlag = false;
                         switch (Settings.Canvas.HyperbolaAsymptoteOption)
@@ -2941,8 +2964,15 @@ namespace Ink_Canvas
                                 break;
                         }
 
-                        ;
-                        if (!opFlag) inkCanvas.Strokes.Remove(drawMultiStepShapeSpecialStrokeCollection);
+                        if (!opFlag)
+                        {
+                            foreach (var asymptoteStroke in new StrokeCollection(asymptoteStrokes))
+                            {
+                                if (inkCanvas.Strokes.Contains(asymptoteStroke)) inkCanvas.Strokes.Remove(asymptoteStroke);
+                                // 已移除的渐近线不应进入最终图形的撤销/重做记录。
+                                lastTempStrokeCollection?.Remove(asymptoteStroke);
+                            }
+                        }
                     }
 
                     BtnPen_Click(null, null); //画完还原到笔模式

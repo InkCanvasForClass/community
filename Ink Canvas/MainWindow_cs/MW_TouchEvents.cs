@@ -173,6 +173,8 @@ namespace Ink_Canvas
 
         internal bool ShouldUseRealtimeVelocityBrushTipForMouse()
         {
+            // 鼠标实时笔锋启动后会把 InkCanvas 切到 None，由 StrokeVisual 手动采集；
+            // 因此不能在持续采样条件中要求 Ink 模式。选择模式由鼠标事件入口拦截。
             return ShouldUseRealtimeVelocityBrushTip()
                    && drawingShapeMode == 0
                    && !isPalmEraserActive;
@@ -1197,6 +1199,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void MainWindow_StylusDown(object sender, StylusDownEventArgs e)
         {
+            if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
             if (IsTouchStylusDevice(e.StylusDevice))
                 return;
 
@@ -1333,6 +1336,7 @@ namespace Ink_Canvas
         /// </remarks>
         private async void MainWindow_StylusUp(object sender, StylusEventArgs e)
         {
+            if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
             if (IsTouchStylusDevice(e.StylusDevice))
                 return;
 
@@ -1505,7 +1509,8 @@ namespace Ink_Canvas
         {
             try
             {
-                if (IsTouchStylusDevice(e.StylusDevice))
+                if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
+            if (IsTouchStylusDevice(e.StylusDevice))
                     return;
 
                 if (drawingShapeMode != 0)
@@ -1800,6 +1805,7 @@ namespace Ink_Canvas
                 new Rect(0, 0, ViewboxFloatingBar.ActualWidth, ViewboxFloatingBar.ActualHeight));
 
             // 如果触摸发生在浮动栏区域，不阻止事件传播，让浮动栏按钮能够接收触摸事件
+            if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
             if (floatingBarBounds.Contains(touchPoint.Position))
             {
                 // 不设置 ViewboxFloatingBar.IsHitTestVisible = false，让浮动栏按钮能够接收触摸事件
@@ -2007,7 +2013,7 @@ namespace Ink_Canvas
                 return;
             }
 
-            if ((inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
+            if ((inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint || inkCanvas.EditingMode == InkCanvasEditingMode.Select
                  || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
                 && !isPalmEraserActive)
             {
@@ -2291,7 +2297,7 @@ namespace Ink_Canvas
             var touchId = e.TouchDevice.Id;
             CommitManualTouchStroke(touchId);
 
-            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint && !isPalmEraserActive)
+            if ((inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint || inkCanvas.EditingMode == InkCanvasEditingMode.Select) && !isPalmEraserActive)
             {
                 return;
             }
@@ -2432,6 +2438,13 @@ namespace Ink_Canvas
         /// </remarks>
         private void InkCanvas_ManipulationStarting(object sender, ManipulationStartingEventArgs e)
         {
+            if (IsBoardRoamingMode)
+            {
+                e.Mode = ManipulationModes.Translate;
+                e.ManipulationContainer = InkCanvasGridForInkReplay;
+                return;
+            }
+
             // 插件画布手势（如 PDF 阅读器双指缩放/平移）：优先让插件声明手势模式。
             if (_pluginCanvasGestureHandler != null && (e.Manipulators?.Count() ?? 0) >= 2)
             {
@@ -2465,6 +2478,15 @@ namespace Ink_Canvas
         /// </remarks>
         private void Main_Grid_ManipulationCompleted(object sender, ManipulationCompletedEventArgs e)
         {
+            if (_isBoardRoamingManipulation || (IsBoardRoamingMode && _isBoardRoamingMultiTouchSuppressed
+                && _boardRoamingContactIds.Count == 0))
+            {
+                EndBoardRoaming();
+                if (_boardRoamingContactIds.Count == 0) ResetBoardRoamingContactState();
+                e.Handled = true;
+                return;
+            }
+
             // 视频展台特殊模式：不在此处恢复 EditingMode，
             // PreviewTouchUp 已经在所有手指抬起后恢复用户原本的模式
             if (_isVideoPresenterSpecialMode)
@@ -2533,6 +2555,31 @@ namespace Ink_Canvas
         /// </remarks>
         private void Main_Grid_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
         {
+            if (IsBoardRoamingMode)
+            {
+                e.Handled = true;
+                var contactCount = e.Manipulators?.Count() ?? 0;
+                if (contactCount > 1 && _isBoardRoamingManipulation)
+                {
+                    _isBoardRoamingMultiTouchSuppressed = true;
+                    EndBoardRoaming();
+                }
+                if (IsCurrentPageFrozen || _boardRoamingContactIds.Count > 0
+                    || _isBoardRoamingMultiTouchSuppressed || contactCount != 1)
+                    return;
+                if (!_isBoardRoamingPointerDown)
+                {
+                    BeginBoardRoaming(new Point());
+                    _isBoardRoamingManipulation = _isBoardRoamingPointerDown;
+                }
+                if (_isBoardRoamingManipulation)
+                {
+                    var translation = _boardRoamingInputInverse.Transform(e.DeltaManipulation.Translation);
+                    TranslateBoardRoamingContent(translation.X, translation.Y);
+                }
+                return;
+            }
+
             // 视频展台特殊模式：
             //   - 单指（笔模式）：在预览画面上绘制墨迹批注，走正常墨迹绘制路径，不拦截
             //   - 双指（任意模式）：用于拖动/缩放预览画面（画面与墨迹同步变换）

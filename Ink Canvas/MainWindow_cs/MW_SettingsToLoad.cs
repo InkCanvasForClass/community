@@ -152,8 +152,28 @@ namespace Ink_Canvas
             }
 
             // Migrate legacy chicken soup source setting to new multi-source format
-            SettingsManager.MigrateChickenSoupSettings();
+            if (SettingsManager.MigrateChickenSoupSettings() && !SettingsManager.TrySaveSettingsToFile())
+            {
+                LogHelper.WriteLogToFile("[ChickenSoup] 迁移名言设置后保存失败", LogHelper.LogType.Warning);
+            }
             SettingsManager.MigrateVideoBoothSettings();
+
+            if (SettingsManager.MigrateAutoStartSetting() && !SettingsManager.TrySaveSettingsToFile())
+            {
+                LogHelper.WriteLogToFile("[AutoStart] 迁移后的开机自启设置保存失败", LogHelper.LogType.Warning);
+            }
+
+            if (isStartup && !AutoStartHelper.TryReconcile(Settings.Startup.RunAtStartup))
+            {
+                LogHelper.WriteLogToFile("[AutoStart] 启动时校验或修复开机自启快捷方式失败", LogHelper.LogType.Warning);
+            }
+
+            SettingsManager.MigrateAutoStartSetting();
+
+            if (isStartup && !AutoStartHelper.TryReconcile(Settings.Startup.RunAtStartup))
+            {
+                LogHelper.WriteLogToFile("[AutoStart] 启动时校验或修复开机自启快捷方式失败", LogHelper.LogType.Warning);
+            }
 
             try
             {
@@ -757,10 +777,22 @@ namespace Ink_Canvas
                 if (hasChanges)
                 {
                     string cleanedJson = userConfigObj.ToString(Formatting.Indented);
+                    var previousSettings = Settings;
                     Settings = JsonConvert.DeserializeObject<Settings>(cleanedJson);
-                    SaveSettingsToFile();
-                    App.UpdateCachedSettingsJson(cleanedJson);
-                    LogHelper.WriteLogToFile("已清理过期配置项", LogHelper.LogType.Event);
+                    if (SettingsManager.TrySaveSettingsToFile())
+                    {
+                        App.UpdateCachedSettingsJson(cleanedJson);
+                        LogHelper.WriteLogToFile("已清理过期配置项", LogHelper.LogType.Event);
+                    }
+                    else
+                    {
+                        // 写盘失败时回退清理结果，避免内存/启动缓存与磁盘配置分叉，
+                        // 否则后续重载会再次触发同样的替换失败而持续无法保存。
+                        Settings = previousSettings;
+                        LogHelper.WriteLogToFile(
+                            $"清理过期配置项未写入磁盘，已回退为原配置: {SettingsManager.LastSaveError}",
+                            LogHelper.LogType.Warning);
+                    }
                 }
             }
             catch (Exception ex)

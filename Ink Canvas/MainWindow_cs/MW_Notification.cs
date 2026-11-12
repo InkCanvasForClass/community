@@ -227,8 +227,9 @@ namespace Ink_Canvas
                 var position = ViewboxFloatingBar.TransformToAncestor(this).Transform(new Point(0, 0));
                 notificationWidth = DynamicNotification.ActualWidth > 0 ? DynamicNotification.ActualWidth : DynamicNotification.Width;
                 notificationHeight = DynamicNotification.ActualHeight > 0 ? DynamicNotification.ActualHeight : 72;
-                double floatingBarWidth = ViewboxFloatingBar.ActualWidth;
-               left = position.X + floatingBarWidth / 2 - notificationWidth / 2;
+                // 浮动栏的 ActualWidth 不包含 LayoutTransform 缩放，使用视觉宽度定位通知。
+                double floatingBarWidth = GetFloatingBarScaledWidth();
+                left = position.X + floatingBarWidth / 2 - notificationWidth / 2;
                 top = position.Y - notificationHeight - 12;
 
                 left = Math.Max(12, Math.Min(ActualWidth - notificationWidth - 12, left));

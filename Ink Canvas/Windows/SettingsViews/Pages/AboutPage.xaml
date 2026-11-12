@@ -141,6 +141,45 @@
                         </Grid>
                     </Border>
 
+                    <!-- 第三方开源组件声明：iNKORE.UI.WPF.Modern 的许可证第 2 条要求在 README 或面向用户的 About 中清晰署名 -->
+                    <Border Background="{DynamicResource {x:Static ui:ThemeKeys.LayerFillColorDefaultBrushKey}}"
+                            BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.CardStrokeColorDefaultBrushKey}}"
+                            CornerRadius="4" BorderThickness="1" Padding="12,10" TextElement.FontSize="14">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8" Margin="0,3,0,0"
+                                                  TextElement.Foreground="{DynamicResource {x:Static ui:ThemeKeys.AccentTextFillColorPrimaryBrushKey}}">
+                                <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Info}" FontSize="24"/>
+                                <TextBlock FontSize="16" VerticalAlignment="Center" FontWeight="SemiBold"
+                                           Text="第三方组件 / Third-Party Components" />
+                            </ikw:SimpleStackPanel>
+
+                            <ikw:SimpleStackPanel Orientation="Vertical" Spacing="3" Grid.Row="1" Margin="5,10">
+                                <FrameworkElement.Resources>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="LineHeight" Value="21"/>
+                                        <Setter Property="TextWrapping" Value="Wrap"/>
+                                    </Style>
+                                </FrameworkElement.Resources>
+
+                                <TextBlock Text="iNKORE.UI.WPF.Modern" FontSize="16" FontWeight="Bold"/>
+                                <TextBlock Text="Project Name: iNKORE.UI.WPF.Modern" FontSize="12"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <TextBlock Text="Authors: iNKORE Studios and all iNKORE.UI.WPF.Modern contributors" FontSize="12"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                <ui:HyperlinkButton Content="https://github.com/iNKORE-NET/UI.WPF.Modern"
+                                                    NavigateUri="https://github.com/iNKORE-NET/UI.WPF.Modern"
+                                                    HorizontalAlignment="Left" />
+                                <TextBlock Text="License: iNKORE.UI.WPF.Modern Software License（自定义许可证，非 OSI 认证）" FontSize="12"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </ikw:SimpleStackPanel>
+                        </Grid>
+                    </Border>
+
                     <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                         Text="{x:Static props:AboutStrings.DevelopersLabel}" />
 

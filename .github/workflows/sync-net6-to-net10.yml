@@ -57,8 +57,10 @@ jobs:
 
           if ($mergeExit -ne 0) {
             Write-Host "合并存在冲突，开始自动解决..."
-            $status = git status --porcelain
-            $conflicted = $status | Where-Object { $_ -match "^(UU|AA|DU|UD|AU|UA)" }
+            # 用 -z 取“未合并”文件列表：git status 会给含空格的路径加双引号
+            # （例如 "Ink Canvas/InkCanvasForClass.csproj"），把整行去掉前缀当路径用
+            # 会报 pathspec 不匹配，冲突就永远解不掉。--diff-filter=U 只列冲突文件。
+            $conflicted = @((git diff --name-only --diff-filter=U -z) -split "`0" | Where-Object { $_ })
 
             if (-not $conflicted) {
               Write-Error "::error::合并失败但未检测到冲突文件，可能存在其他问题"
@@ -69,46 +71,95 @@ jobs:
             Write-Host "冲突文件列表:"
             $conflicted | ForEach-Object { Write-Host "  $_" }
 
-            # 1) csproj 冲突：取 net6 版本（ theirs ），然后把 TFM 改回 net10
-            $csprojConflicts = $conflicted | Where-Object { $_ -match "\.csproj\s*$" }
-            foreach ($line in $csprojConflicts) {
-              $path = ($line -replace "^.{2}\s+", "").Trim()
-              Write-Host "解决 csproj 冲突（取 net6 + 改 TFM）: $path"
-              git checkout --theirs $path
-              (Get-Content $path -Raw) -replace 'net6\.0-windows10\.0\.19041\.0', 'net10.0-windows10.0.19041.0' | Set-Content $path -NoNewline
-              git add $path
+            # 1) csproj 冲突：git 已经把两边不冲突的改动合进来了，这里只处理冲突块：
+            #    - ours（net10）的行默认保留：net10 独有的包升级、Properties 都在这里面
+            #    - 但 net6 明确删掉的包（例如换了包 ID）要从 ours 里去掉，否则两个同程序集的包会同时被引用
+            #    - theirs（net6）里新增的包（新 ID）补进来
+            #    最后把 TFM 改回 net10。
+            $csprojConflicts = $conflicted | Where-Object { $_ -match "\.csproj$" }
+            foreach ($path in $csprojConflicts) {
+              Write-Host "解决 csproj 冲突（保留 net10 改动 + 应用 net6 的包变更）: $path"
+              $bytes = [IO.File]::ReadAllBytes($path)
+              $hasBom = ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF)
+              $conflictText = [Text.Encoding]::UTF8.GetString($bytes)
+              if ($hasBom) { $conflictText = $conflictText.Substring(1) }
+
+              $baseText = (& git show ":1:$path" 2>$null) -join "`n"
+              $theirsText = (& git show ":3:$path" 2>$null) -join "`n"
+              $baseIds = @([regex]::Matches($baseText, 'PackageReference\s+Include="([^"]+)"') | ForEach-Object { $_.Groups[1].Value })
+              $theirsIds = @([regex]::Matches($theirsText, 'PackageReference\s+Include="([^"]+)"') | ForEach-Object { $_.Groups[1].Value })
+
+              $lines = $conflictText -split "`r`n"
+              $resolved = [System.Collections.Generic.List[string]]::new()
+              $i = 0
+              while ($i -lt $lines.Count) {
+                if ($lines[$i] -notlike '<<<<<<<*') { $resolved.Add($lines[$i]); $i++; continue }
+
+                $ours = @(); $theirs = @(); $inTheirs = $false; $i++
+                while ($i -lt $lines.Count -and $lines[$i] -notlike '>>>>>>>*') {
+                  if ($lines[$i] -eq '=======') { $inTheirs = $true; $i++; continue }
+                  if ($inTheirs) { $theirs += $lines[$i] } else { $ours += $lines[$i] }
+                  $i++
+                }
+                $i++
+
+                foreach ($line in $ours) {
+                  if ($line -match 'PackageReference\s+Include="([^"]+)"') {
+                    $id = $Matches[1]
+                    if (($baseIds -contains $id) -and ($theirsIds -notcontains $id)) { continue }
+                  }
+                  $resolved.Add($line)
+                }
+                foreach ($line in $theirs) {
+                  if ($line -match 'PackageReference\s+Include="([^"]+)"') {
+                    $id = $Matches[1]
+                    $already = @($resolved | Where-Object { $_ -match ('PackageReference\s+Include="' + [regex]::Escape($id) + '"') })
+                    if ($already.Count -gt 0) { continue }
+                  }
+                  $resolved.Add($line)
+                }
+              }
+
+              $finalText = ($resolved -join "`r`n") -replace 'net6\.0-windows10\.0\.19041\.0', 'net10.0-windows10.0.19041.0'
+              [IO.File]::WriteAllText($path, $finalText, [Text.UTF8Encoding]::new($hasBom))
+              git add -- $path
             }
 
             # 2) packages.lock.json 冲突：直接删除，后续 restore 会重新生成
-            $lockConflicts = $conflicted | Where-Object { $_ -match "packages\.lock\.json\s*$" }
-            foreach ($line in $lockConflicts) {
-              $path = ($line -replace "^.{2}\s+", "").Trim()
+            $lockConflicts = $conflicted | Where-Object { $_ -match "packages\.lock\.json$" }
+            foreach ($path in $lockConflicts) {
               Write-Host "删除冲突的 lock 文件（稍后重新生成）: $path"
-              git rm -f $path 2>$null
-              if (Test-Path $path) { Remove-Item $path -Force }
+              git rm -f -- $path 2>$null
+              if (Test-Path -LiteralPath $path) { Remove-Item -LiteralPath $path -Force }
             }
 
             # 3) .yml workflow 冲突：取 net10 版本（ ours ），保留 net10 的触发分支配置
-            $ymlConflicts = $conflicted | Where-Object { $_ -match "\.ya?ml\s*$" }
-            foreach ($line in $ymlConflicts) {
-              $path = ($line -replace "^.{2}\s+", "").Trim()
+            $ymlConflicts = $conflicted | Where-Object { $_ -match "\.ya?ml$" }
+            foreach ($path in $ymlConflicts) {
               Write-Host "解决 yml 冲突（取 net10 版本）: $path"
-              git checkout --ours $path 2>$null
-              git add $path 2>$null
+              git checkout --ours -- $path 2>$null
+              git add -- $path 2>$null
             }
 
             # 4) 其他文件冲突：优先取 net6 版本（ theirs ），保证新功能/修复能同步过来
-            $otherConflicts = $conflicted | Where-Object { $_ -notmatch "\.csproj\s*$" -and $_ -notmatch "packages\.lock\.json\s*$" -and $_ -notmatch "\.ya?ml\s*$" }
-            foreach ($line in $otherConflicts) {
-              $path = ($line -replace "^.{2}\s+", "").Trim()
+            $otherConflicts = $conflicted | Where-Object { $_ -notmatch "\.csproj$" -and $_ -notmatch "packages\.lock\.json$" -and $_ -notmatch "\.ya?ml$" }
+            foreach ($path in $otherConflicts) {
               Write-Host "解决其他冲突（取 net6 版本）: $path"
-              git checkout --theirs $path 2>$null
+              git checkout --theirs -- $path 2>$null
               if ($LASTEXITCODE -eq 0) {
-                git add $path
+                git add -- $path
               } else {
-                git checkout --ours $path 2>$null
-                git add $path 2>$null
+                git checkout --ours -- $path 2>$null
+                git add -- $path 2>$null
               }
+            }
+
+            # 兜底：确认没有残留的未合并文件，否则后面的 commit 必然失败
+            $remaining = @((git diff --name-only --diff-filter=U -z) -split "`0" | Where-Object { $_ })
+            if ($remaining) {
+              Write-Error ("::error::仍有未解决的冲突: " + ($remaining -join ", "))
+              git merge --abort
+              exit 1
             }
 
             git commit --no-edit 2>&1 | Out-Null

@@ -173,6 +173,9 @@ namespace Ink_Canvas
         /// 当前幻灯片放映的位置（页码）。
         /// </summary>
         private int _currentSlideShowPosition = 0;
+        private string _presentationNameSnapshot;
+        private string _presentationFullNameSnapshot;
+        private int _presentationSlideCountSnapshot;
 
         /// <summary>
         /// 当前幻灯片放映位置的公开访问器（0-based）。
@@ -186,6 +189,8 @@ namespace Ink_Canvas
         private Task<List<PPTEnhancedPreviewItem>> _pptEnhancedPreviewBuildTask;
         private CancellationTokenSource _pptEnhancedPreviewCacheCts;
         private int _pptEnhancedPreviewCacheGeneration;
+        private readonly object _pptEndSlideShowTaskLock = new object();
+        private Task<bool> _pptEndSlideShowTask;
         private const int PPTEnhancedPreviewPreloadDelayMs = 100;
         private int _previousSlideID = 0;
 
@@ -1250,9 +1255,13 @@ namespace Ink_Canvas
                         currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
                         totalSlides = _pptManager?.SlidesCount ?? 0;
                         presentationName = _pptManager?.GetPresentationName() ?? activePresentation?.Name;
+                        presentationFullName = _pptManager?.GetPresentationPath();
                     }
                 }
 
+                _presentationNameSnapshot = presentationName;
+                _presentationFullNameSnapshot = presentationFullName;
+                _presentationSlideCountSnapshot = totalSlides;
                 _currentSlideShowPosition = currentSlide;
                 _previousSlideID = currentSlide;
                 NotifyPluginSlideShowStateChanged(true);
@@ -1476,6 +1485,10 @@ namespace Ink_Canvas
                 }
 
                 totalSlides = agentState?.TotalSlides ?? _pptManager?.SlidesCount ?? 0;
+                if (totalSlides > 0)
+                {
+                    _presentationSlideCountSnapshot = totalSlides;
+                }
 
                 if (currentSlide == _previousSlideID) return;
 
@@ -1826,6 +1839,7 @@ namespace Ink_Canvas
             var agentState = payload as PPTState;
             try
             {
+                ResetPPTEnhancedPreviewCache();
                 await Application.Current.Dispatcher.InvokeAsync(() => CollapseAllPPTNavBarPreviews());
 
                 if (Settings.Automation.IsAutoFoldAfterPPTSlideShow && !isFloatingBarFolded)
@@ -1893,9 +1907,32 @@ namespace Ink_Canvas
                     }
                 });
 
-                string presentationNameForSave = agentState?.PresentationName ?? _pptManager?.GetPresentationName() ?? (pres != null ? pres.Name : null);
-                string presentationFullNameForSave = agentState?.PresentationFullName;
-                int totalSlidesForSave = agentState?.TotalSlides ?? _pptManager?.SlidesCount ?? 0;
+                string presentationNameForSave = !string.IsNullOrEmpty(agentState?.PresentationName)
+                    ? agentState.PresentationName
+                    : !string.IsNullOrEmpty(_presentationNameSnapshot)
+                        ? _presentationNameSnapshot
+                        : _pptManager?.GetPresentationName();
+                string presentationFullNameForSave = !string.IsNullOrEmpty(agentState?.PresentationFullName)
+                    ? agentState.PresentationFullName
+                    : _presentationFullNameSnapshot;
+                int totalSlidesForSave = agentState?.TotalSlides > 0
+                    ? agentState.TotalSlides
+                    : _presentationSlideCountSnapshot > 0
+                        ? _presentationSlideCountSnapshot
+                        : _pptManager?.SlidesCount ?? 0;
+
+                if (string.IsNullOrEmpty(presentationNameForSave) && pres != null)
+                {
+                    try
+                    {
+                        presentationNameForSave = pres.Name;
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"读取放映结束演示文稿名称失败: {ex.Message}", LogHelper.LogType.Warning);
+                    }
+                }
+
                 if (totalSlidesForSave <= 0 && pres != null)
                 {
                     try
@@ -3162,12 +3199,29 @@ namespace Ink_Canvas
                     });
                 }
 
-                // 不用 Progress<double>（会走 SynchronizationContext 合并），直接同步调用
+                // Office COM 导出运行在独立 STA 线程；进度回调不能同步等待 UI，
+                // 否则 UI 同时请求结束放映时会形成 UI <-> Office STA 互等。
                 var dispatcher = Application.Current.Dispatcher;
                 IProgress<double> progress = new DirectProgress(v =>
                 {
-                    _pptLoadingProgress = v;
-                    dispatcher.Invoke(() => UpdatePPTLoadingRing());
+                    if (cancellationToken.IsCancellationRequested ||
+                        dispatcher.HasShutdownStarted || dispatcher.HasShutdownFinished)
+                    {
+                        return;
+                    }
+
+                    try
+                    {
+                        dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            if (cancellationToken.IsCancellationRequested) return;
+                            _pptLoadingProgress = v;
+                            UpdatePPTLoadingRing();
+                        }), DispatcherPriority.Background);
+                    }
+                    catch (InvalidOperationException) when (dispatcher.HasShutdownStarted || dispatcher.HasShutdownFinished)
+                    {
+                    }
                 });
                 var slides = await GetOrBuildPPTEnhancedPreviewItemsAsync(cancellationToken, progress);
                 if (!cancellationToken.IsCancellationRequested && slides != null && slides.Count > 0)
@@ -3260,8 +3314,8 @@ namespace Ink_Canvas
 
         private static Task<T> RunOnStaAsync<T>(Func<T> func, CancellationToken cancellationToken = default)
         {
-            // Office interop 要求 STA + COM 单元；Task.Run 跑到 MTA 线程池里会触发 RPC_E_WRONG_THREAD
-            // 等随机 COM 失败，表现为增强预览空白或崩溃。显式创建 STA worker 在其中执行导出。
+            // Office interop 要求 STA + COM 单元；Task.Run 跑到 MTA 线程池里会触发 RPC_E_WRONG_THREAD。
+            // 显式创建 STA worker 执行可能阻塞的 Office COM 操作，避免占用 WPF UI 线程。
             if (cancellationToken.IsCancellationRequested)
                 return Task.FromCanceled<T>(cancellationToken);
 
@@ -3293,6 +3347,64 @@ namespace Ink_Canvas
             return tcs.Task;
         }
 
+        private void QueueEndSlideShow()
+        {
+            Task<bool> endTask;
+            Stopwatch stopwatch;
+
+            lock (_pptEndSlideShowTaskLock)
+            {
+                if (_pptEndSlideShowTask != null && !_pptEndSlideShowTask.IsCompleted)
+                {
+                    LogHelper.WriteLogToFile("PPT结束放映请求仍在执行，忽略重复请求", LogHelper.LogType.Trace);
+                    return;
+                }
+
+                var manager = _pptManager;
+                if (manager == null)
+                {
+                    return;
+                }
+
+                stopwatch = Stopwatch.StartNew();
+                endTask = RunOnStaAsync(() => manager.TryEndSlideShow());
+                _pptEndSlideShowTask = endTask;
+            }
+
+            LogHelper.WriteLogToFile("PPT结束放映请求已转交后台 STA 线程", LogHelper.LogType.Trace);
+            _ = endTask.ContinueWith(completedTask =>
+            {
+                stopwatch.Stop();
+                lock (_pptEndSlideShowTaskLock)
+                {
+                    if (ReferenceEquals(_pptEndSlideShowTask, completedTask))
+                    {
+                        _pptEndSlideShowTask = null;
+                    }
+                }
+
+                if (completedTask.IsFaulted)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"PPT结束放映后台请求失败: {completedTask.Exception?.GetBaseException()}",
+                        LogHelper.LogType.Warning);
+                    return;
+                }
+
+                if (completedTask.IsCanceled || !completedTask.Result)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"PPT结束放映后台请求未完成，耗时 {stopwatch.ElapsedMilliseconds} ms",
+                        LogHelper.LogType.Warning);
+                    return;
+                }
+
+                LogHelper.WriteLogToFile(
+                    $"PPT结束放映后台请求完成，耗时 {stopwatch.ElapsedMilliseconds} ms",
+                    LogHelper.LogType.Trace);
+            }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
+        }
+
         private List<PPTEnhancedPreviewItem> BuildPPTPreviewItems(CancellationToken cancellationToken, IProgress<double> progress = null)
         {
             var result = new List<PPTEnhancedPreviewItem>();
@@ -3303,7 +3415,11 @@ namespace Ink_Canvas
                 var exportProgress = progress != null
                     ? new Progress<double>(p => progress.Report(p * 0.7))
                     : null;
-                var thumbnails = _pptManager?.ExportSlideThumbnails(480, 270, exportProgress);
+                var thumbnails = _pptManager?.ExportSlideThumbnails(
+                    480,
+                    270,
+                    exportProgress,
+                    cancellationToken);
                 if (thumbnails == null || thumbnails.Count == 0) return result;
 
                 // 阶段2：转换为 BitmapImage → 进度 70~100%
@@ -3417,7 +3533,11 @@ namespace Ink_Canvas
                     return;
                 }
 
-                var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
+                ResetPPTEnhancedPreviewCache();
+
+                // 放映结束阶段 PowerPoint 可能已拒绝/断开 COM 调用；使用事件维护的页码快照，
+                // 不在 UI 线程重新读取 SlideShowWindow.View。
+                var currentSlide = _currentSlideShowPosition;
                 if (currentSlide > 0)
                 {
                     // ExitPPTPresentation 通常在 UI 线程上调用。直接在当前线程保存墨迹，
@@ -3467,17 +3587,7 @@ namespace Ink_Canvas
                 await Task.Delay(100);
                 await Application.Current.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.Background);
 
-                _ = Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    try
-                    {
-                        _pptManager?.TryEndSlideShow();
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"结束放映时发生异常: {ex}", LogHelper.LogType.Error);
-                    }
-                }), DispatcherPriority.Normal);
+                QueueEndSlideShow();
 
                 await Task.Delay(150);
                 if (!isFloatingBarFolded)

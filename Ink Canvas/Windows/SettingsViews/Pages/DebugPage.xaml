@@ -72,15 +72,6 @@ mc:Ignorable="d"
                         Padding="14,6"/>
                 </ui:SettingsCard>
 
-                <ui:SettingsCard Header="{x:Static props:AdvancedStrings.Debug_SimulateHeartbeatTimeout_Header}"
-                    Description="{x:Static props:AdvancedStrings.Debug_SimulateHeartbeatTimeout_Desc}">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Stopwatch}"/>
-                    </ui:SettingsCard.HeaderIcon>
-                    <Button Content="{x:Static props:AdvancedStrings.Debug_SimulateHeartbeatTimeout_Button}" Click="BtnTestHeartbeatTimeout_Click"
-                        Padding="14,6"/>
-                </ui:SettingsCard>
-
                 <ui:SettingsCard Header="{x:Static props:AdvancedStrings.Debug_ResetStartupCount_Header}"
                     Description="{x:Static props:AdvancedStrings.Debug_ResetStartupCount_Desc}">
                     <ui:SettingsCard.HeaderIcon>

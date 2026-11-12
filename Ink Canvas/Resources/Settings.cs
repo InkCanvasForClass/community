@@ -81,6 +81,13 @@ namespace Ink_Canvas
         [JsonProperty("boothExpandToolbarSeeded")]
         public bool BoothExpandToolbarSeeded { get; set; } = false;
 
+        /// <summary>
+        /// 是否已把「导入」组件播种到中间栏展台分组（仅播一次，删除后不再补回）。
+        /// 与 BoothToolbarSeeded 分开，保证老用户升级后也能看到新增的展台导入按钮。
+        /// </summary>
+        [JsonProperty("boothImportToolbarSeeded")]
+        public bool BoothImportToolbarSeeded { get; set; } = false;
+
         [JsonProperty("performance")]
         public PerformanceSettings Performance { get; set; } = new PerformanceSettings();
 
@@ -737,6 +744,8 @@ namespace Ink_Canvas
     {
         private StartupMode _startupMode = StartupMode.Default;
         private bool _hasExplicitStartupMode;
+        private bool _runAtStartup;
+        private bool _hasExplicitRunAtStartup;
 
         [JsonProperty("isAutoUpdate")]
         public bool IsAutoUpdate { get; set; } = true;
@@ -760,6 +769,21 @@ namespace Ink_Canvas
         public bool IsEnableNibMode { get; set; }
         [JsonProperty("isFoldAtStartup")]
         public bool IsFoldAtStartup { get; set; }
+        [JsonProperty("runAtStartup")]
+        public bool RunAtStartup
+        {
+            get => _runAtStartup;
+            set
+            {
+                _runAtStartup = value;
+                _hasExplicitRunAtStartup = true;
+            }
+        }
+        [JsonIgnore]
+        internal bool HasExplicitRunAtStartup => _hasExplicitRunAtStartup;
+
+        internal void SetInferredRunAtStartup(bool value) => _runAtStartup = value;
+
         [JsonProperty("startupMode")]
         public StartupMode StartupMode
         {

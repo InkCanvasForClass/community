@@ -399,6 +399,7 @@ namespace Ink_Canvas
                 // 如果设置为清空图片，则直接清空所有子元素
                 ShutdownAllCanvasMediaElements();
                 inkCanvas.Children.Clear();
+                ClearAllSelection();
             }
             else
             {
@@ -439,6 +440,7 @@ namespace Ink_Canvas
                 // 如果设置为清空图片，则直接清空所有子元素
                 ShutdownAllCanvasMediaElements();
                 inkCanvas.Children.Clear();
+                ClearAllSelection();
             }
             else
             {

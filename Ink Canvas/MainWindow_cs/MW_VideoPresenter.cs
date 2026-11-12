@@ -817,23 +817,7 @@ namespace Ink_Canvas
         /// <summary>隐藏所有选择框（墨迹选择框、图片选择框、图片缩放手柄）。</summary>
         private void HideAllSelectionOverlays()
         {
-            if (GridInkCanvasSelectionCover != null)
-            {
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-            }
-            if (BorderStrokeSelectionControl != null)
-            {
-                BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
-            }
-            if (BorderImageSelectionControl != null)
-            {
-                BorderImageSelectionControl.Visibility = Visibility.Collapsed;
-            }
-            HideImageResizeHandles();
-            if (ImageSelectionOverlay != null)
-            {
-                ImageSelectionOverlay.Visibility = Visibility.Collapsed;
-            }
+            ClearAllSelection();
         }
 
         /// <summary>把当前 _boothPreviewScale / Translate 应用到全屏预览 Image 的 RenderTransform。</summary>
@@ -3191,6 +3175,185 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"视频展台拍照失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
+
+        #region 视频展台导入图片到相册
+
+        /// <summary>展台导入支持的图片扩展名（小写）。</summary>
+        private static readonly string[] BoothImportImageExtensions =
+            { ".jpg", ".jpeg", ".png", ".bmp", ".webp", ".gif", ".tif", ".tiff" };
+
+        /// <summary>导入图片解码的最大宽度（像素）：原图更宽时等比下采样，防止超大图片内存暴涨。</summary>
+        private const int BoothImportMaxDecodeWidth = 4096;
+
+        /// <summary>
+        /// 展台导入图片：弹出文件选择对话框（可多选），把选中的图片导入展台相册。
+        /// 导入的照片与拍照的照片完全同权（页码预览、翻页、独立批注、删除）。
+        /// 须在 UI 线程调用。
+        /// </summary>
+        public void VideoBoothImportPhotos()
+        {
+            try
+            {
+                if (!_isVideoPresenterSpecialMode) return;
+
+                var dialog = new Microsoft.Win32.OpenFileDialog
+                {
+                    Title = "导入图片到展台相册",
+                    CheckFileExists = true,
+                    Multiselect = true,
+                    Filter = "图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.webp;*.gif;*.tif;*.tiff|所有文件|*.*"
+                };
+                if (dialog.ShowDialog(this) != true) return;
+
+                ImportPhotosToBoothAlbum(dialog.FileNames);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"展台导入图片失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 把指定图片文件导入展台相册（与拍照照片同权）。须在 UI 线程调用。
+        /// 管线：后台线程逐张解码（失败跳过）→ UI 线程追加到 _capturedPhotos →
+        /// 容量裁剪（从头移除最旧）→ 索引保护 → 刷新页码列表并自动展开。
+        /// </summary>
+        public void ImportPhotosToBoothAlbum(string[] filePaths)
+        {
+            if (filePaths == null || filePaths.Length == 0) return;
+            if (!_isVideoPresenterSpecialMode) return;
+
+            var ordered = filePaths
+                .Where(p => !string.IsNullOrWhiteSpace(p) && File.Exists(p))
+                .Where(p => BoothImportImageExtensions.Contains(Path.GetExtension(p)?.ToLowerInvariant()))
+                .ToArray();
+
+            if (ordered.Length == 0)
+            {
+                ShowBoothTransientMessage("没有可导入的图片");
+                return;
+            }
+
+            LogHelper.WriteLogToFile($"展台导入: 开始 ({ordered.Length} 张)", LogHelper.LogType.Info);
+
+            Task.Run(() =>
+            {
+                var loaded = new List<BitmapImage>();
+                foreach (var path in ordered)
+                {
+                    try
+                    {
+                        var bmp = LoadBitmapImageForBoothImport(path);
+                        if (bmp != null)
+                        {
+                            loaded.Add(bmp);
+                        }
+                        else
+                        {
+                            LogHelper.WriteLogToFile(
+                                $"展台导入: 解码失败(结果为空) {Path.GetFileName(path)}", LogHelper.LogType.Warning);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // 单张失败不拖累其余：跳过并记日志
+                        LogHelper.WriteLogToFile(
+                            $"展台导入: 解码失败 {Path.GetFileName(path)}: {ex.Message}", LogHelper.LogType.Warning);
+                    }
+                }
+
+                if (loaded.Count == 0)
+                {
+                    Dispatcher.BeginInvoke(new Action(() => ShowBoothTransientMessage("没有可导入的图片")));
+                    return;
+                }
+
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        // 预先计算裁剪数（容量上限，从头移除最旧），用于当前照片索引保护
+                        int removed = Math.Max(0, _capturedPhotos.Count + loaded.Count - MaxCapturedPhotos);
+
+                        // 被裁掉的照片包含当前正在看的：先切回直播页再裁剪（与删除照片流程同款防护，
+                        // 避免 SaveCurrentBoothStrokesToSlot 把当前墨迹写进已移除的槽位/错误槽位）
+                        if (_boothCurrentPhotoIndex >= 0 && _boothCurrentPhotoIndex < removed)
+                        {
+                            SwitchBoothToLivePage();
+                        }
+
+                        foreach (var bmp in loaded)
+                        {
+                            // filePath 传 null：与拍照照片保持一致（不持有外部文件引用），时间戳取导入时刻
+                            _capturedPhotos.Add(new CapturedImage(bmp, null));
+                        }
+
+                        while (_capturedPhotos.Count > MaxCapturedPhotos)
+                        {
+                            _capturedPhotos.RemoveAt(0);
+                        }
+
+                        // 当前停留在照片页且列表头部被裁剪：索引同步前移，保证仍指向同一张照片
+                        if (_boothCurrentPhotoIndex >= 0 && removed > 0)
+                        {
+                            _boothCurrentPhotoIndex -= removed;
+                        }
+
+                        LogHelper.WriteLogToFile(
+                            $"展台导入: 完成 新增={loaded.Count}, 裁剪={removed}, 总数={_capturedPhotos.Count}, 当前页={_boothCurrentPhotoIndex}",
+                            LogHelper.LogType.Info);
+
+                        UpdateBoothPageInfoDisplay();
+                        RefreshBoothPageListView();
+                        // 与拍照一致：自动展开页码面板并滚动到最后一张（面板已展开时该方法直接返回）
+                        ShowPageListRightPanel(scrollToLastPhoto: true);
+                        ShowBoothTransientMessage($"已导入 {loaded.Count} 张图片");
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"展台导入: UI 刷新失败: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                }));
+            });
+        }
+
+        /// <summary>
+        /// 为展台导入加载图片文件：OnLoad 一次读完即关闭（不锁源文件）、Freeze 后可跨线程使用、
+        /// 忽略 ICC 颜色配置（与拍照管线一致，且加快解码）；原图宽于上限时等比下采样解码。
+        /// </summary>
+        private static BitmapImage LoadBitmapImageForBoothImport(string path)
+        {
+            int pixelWidth = 0;
+            try
+            {
+                // 延迟创建只读文件头探测原始尺寸（不整图解码），用于决定是否需要下采样
+                using (var probeStream = File.OpenRead(path))
+                {
+                    var probe = BitmapFrame.Create(
+                        probeStream, BitmapCreateOptions.DelayCreation, BitmapCacheOption.None);
+                    pixelWidth = probe.PixelWidth;
+                }
+            }
+            catch
+            {
+                // 探测失败不阻断导入：按未知尺寸走无下采样解码，由外层 catch 兜底
+            }
+
+            var bmp = new BitmapImage();
+            bmp.BeginInit();
+            bmp.CacheOption = BitmapCacheOption.OnLoad;
+            bmp.CreateOptions = BitmapCreateOptions.IgnoreColorProfile;
+            bmp.UriSource = new Uri(path, UriKind.Absolute);
+            if (pixelWidth > BoothImportMaxDecodeWidth)
+            {
+                bmp.DecodePixelWidth = BoothImportMaxDecodeWidth;
+            }
+            bmp.EndInit();
+            bmp.Freeze();
+            return bmp;
+        }
+
+        #endregion
 
         /// <summary>
         /// 对 BitmapSource 应用旋转（0/90/180/270）。

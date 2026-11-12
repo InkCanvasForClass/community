@@ -259,13 +259,10 @@ namespace Ink_Canvas
 
                 if (index + 1 != CurrentWhiteboardIndex)
                 {
-                    if (currentSelectedElement != null)
-                    {
-                        var previousEditingMode = inkCanvas.EditingMode;
-                        UnselectElement(currentSelectedElement);
-                        inkCanvas.EditingMode = previousEditingMode;
-                        currentSelectedElement = null;
-                    }
+                    var previousEditingMode = inkCanvas.EditingMode;
+                    ClearAllSelection();
+                    inkCanvas.EditingMode = previousEditingMode;
+
                     var previousPluginPageIndex = CurrentWhiteboardIndex;
                     BeginPluginWhiteboardPageChange(index + 1);
                     SaveStrokes();
@@ -366,13 +363,9 @@ namespace Ink_Canvas
 
                 if (index + 1 != CurrentWhiteboardIndex)
                 {
-                    if (currentSelectedElement != null)
-                    {
-                        var previousEditingMode = inkCanvas.EditingMode;
-                        UnselectElement(currentSelectedElement);
-                        inkCanvas.EditingMode = previousEditingMode;
-                        currentSelectedElement = null;
-                    }
+                    var previousEditingMode = inkCanvas.EditingMode;
+                    ClearAllSelection();
+                    inkCanvas.EditingMode = previousEditingMode;
 
                     var previousPluginPageIndex = CurrentWhiteboardIndex;
                     BeginPluginWhiteboardPageChange(index + 1);
@@ -428,13 +421,9 @@ namespace Ink_Canvas
 
                 if (index + 1 != CurrentWhiteboardIndex)
                 {
-                    if (currentSelectedElement != null)
-                    {
-                        var previousEditingMode = inkCanvas.EditingMode;
-                        UnselectElement(currentSelectedElement);
-                        inkCanvas.EditingMode = previousEditingMode;
-                        currentSelectedElement = null;
-                    }
+                    var previousEditingMode = inkCanvas.EditingMode;
+                    ClearAllSelection();
+                    inkCanvas.EditingMode = previousEditingMode;
 
                     var previousPluginPageIndex = CurrentWhiteboardIndex;
                     BeginPluginWhiteboardPageChange(index + 1);

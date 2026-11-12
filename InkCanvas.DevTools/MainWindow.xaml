@@ -53,7 +53,7 @@
         </StackPanel>
 
         <!-- 操作按钮 -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,16">
+        <WrapPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,16">
             <Button x:Name="BuildButton"
                     Content="编译"
                     Width="90"
@@ -75,8 +75,15 @@
             <Button x:Name="KillButton"
                     Content="杀进程"
                     Width="90"
-                    Margin="0,0,16,0"
+                    Margin="0,0,8,0"
                     Click="KillButton_Click" />
+
+            <Button x:Name="CleanButton"
+                    Content="删除 bin/obj"
+                    Width="110"
+                    Margin="0,0,16,0"
+                    ToolTip="删除所有子项目中的 bin 和 obj 目录（不包含本工具自身正在使用的产物）"
+                    Click="CleanButton_Click" />
 
             <CheckBox x:Name="AutoWrapCheckBox"
                       Content="自动换行"
@@ -84,7 +91,7 @@
                       IsChecked="False"
                       Checked="AutoWrapCheckBox_Changed"
                       Unchecked="AutoWrapCheckBox_Changed" />
-        </StackPanel>
+        </WrapPanel>
 
         <!-- 输出日志 -->
         <Border Grid.Row="3"

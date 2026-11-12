@@ -58,7 +58,7 @@
             <ScaleTransform x:Name="NavBarScaleTransform"/>
         </Viewbox.LayoutTransform>
     <Border x:Name="RootBorder" BorderThickness="1" BorderBrush="#a1a1aa"
-            Background="#f4f4f5" Opacity="1" CornerRadius="6">
+            Background="#f4f4f5" CornerRadius="6">
         <Border.Effect>
             <DropShadowEffect Color="#000000" BlurRadius="16" ShadowDepth="0" Opacity="0.6"/>
         </Border.Effect>

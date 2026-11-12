@@ -116,6 +116,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="InkCanvas.Calibration.Tests" />
     <None Include="app.manifest" />
   </ItemGroup>
   <ItemGroup>
@@ -124,7 +125,8 @@
     </PackageReference>
     <PackageReference Include="gong-wpf-dragdrop" Version="4.0.0" />
     <PackageReference Include="H.NotifyIcon.Wpf" Version="2.4.1" />
-    <PackageReference Include="iNKORE.UI.WPF.Modern.Controls" Version="0.10.2.1-icc.4" />
+    <!-- 组织维护的非官方 fork：包 ID 为 InkCanvasForClass.UI.WPF.Modern，程序集仍叫 iNKORE.UI.WPF.Modern -->
+    <PackageReference Include="InkCanvasForClass.UI.WPF.Modern" Version="0.11.0-icc.7df536a" />
     <PackageReference Include="iNKORE.UI.WPF" Version="1.2.8" />
     <PackageReference Include="MdXaml" Version="1.27.0" />
     <PackageReference Include="Microsoft.Office.Interop.PowerPoint" Version="15.0.4420.1018" />

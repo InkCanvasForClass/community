@@ -36,12 +36,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
         // 设置已丢失。先到先写、后到排队。
         private static readonly object _saveGate = new object();
 
+        // 最近一次保存失败原因。清理旧配置链路（CleanupObsoleteSettings）保存失败时
+        // 必须回退清理结果并据此决定能否更新启动缓存，否则磁盘仍是旧配置而缓存却是
+        // 清理后的内容，后续 ReloadSettingsFromFile 会继续写失败。
+        internal static string LastSaveError { get; private set; }
+
         public static void SaveSettingsToFile() => TrySaveSettingsToFile();
 
         public static bool TrySaveSettingsToFile()
         {
             lock (_saveGate)
             {
+                LastSaveError = null;
                 try
                 {
                     var text = JsonConvert.SerializeObject(Settings, Formatting.Indented);
@@ -84,6 +90,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 }
                 catch (Exception ex)
                 {
+                    LastSaveError = ex.Message;
                     // 设置保存失败不能静默：用户感知不到 = 下次启动设置丢失
                     try
                     {
@@ -119,13 +126,89 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             }
         }
 
-        public static void MigrateChickenSoupSettings()
+        public static bool MigrateAutoStartSetting()
         {
-            if (Settings?.Appearance == null) return;
+            lock (_saveGate)
+            {
+                try
+                {
+                    if (Settings == null) return false;
+
+                    Settings.Startup ??= new Startup();
+                    if (Settings.Startup.HasExplicitRunAtStartup) return false;
+
+                    bool hasExistingRegistration = AutoStartHelper.HasAnyRegistration();
+                    // 保存失败时仍沿用已有自启状态，但不标记为已持久化，以便重试。
+                    Settings.Startup.SetInferredRunAtStartup(hasExistingRegistration);
+
+                    var path = Path.Combine(App.RootPath, SettingsFileName);
+                    string originalText;
+                    try
+                    {
+                        originalText = File.ReadAllText(path);
+                    }
+                    catch (FileNotFoundException)
+                    {
+                        originalText = null;
+                    }
+                    catch (DirectoryNotFoundException)
+                    {
+                        originalText = null;
+                    }
+
+                    // 只补写迁移字段，保留文件中的其他配置，不重新序列化整个 Settings。
+                    var config = originalText == null
+                        ? new JObject()
+                        : JsonConvert.DeserializeObject<JObject>(originalText, new JsonSerializerSettings
+                        {
+                            DateParseHandling = DateParseHandling.None
+                        });
+                    if (config == null) throw new JsonSerializationException("配置文件必须为 JSON 对象");
+
+                    var startupProperty = config.Property("startup", StringComparison.OrdinalIgnoreCase);
+                    if (startupProperty != null && startupProperty.Value.Type != JTokenType.Null
+                        && startupProperty.Value is not JObject)
+                    {
+                        throw new JsonSerializationException("startup 配置必须为 JSON 对象");
+                    }
+
+                    var startupConfig = startupProperty?.Value as JObject;
+                    if (startupConfig == null)
+                    {
+                        startupConfig = new JObject();
+                        if (startupProperty == null) config["startup"] = startupConfig;
+                        else startupProperty.Value = startupConfig;
+                    }
+                    startupConfig["runAtStartup"] = hasExistingRegistration;
+                    string text = config.ToString(Formatting.Indented);
+                    string configsDir = Path.GetDirectoryName(path);
+                    if (!Directory.Exists(configsDir))
+                    {
+                        ProcessProtectionManager.WithWriteAccess(configsDir, () => Directory.CreateDirectory(configsDir));
+                    }
+                    ProcessProtectionManager.WithWriteAccess(path, () => File.WriteAllText(path, text));
+
+                    Settings.Startup.RunAtStartup = hasExistingRegistration;
+                    App.UpdateCachedSettingsJson(text);
+                    LogHelper.WriteLogToFile(
+                        $"[AutoStart] 已迁移开机自启设置，检测到已有快捷方式: {hasExistingRegistration}",
+                        LogHelper.LogType.Info);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[AutoStart] 迁移开机自启设置失败: {ex.Message}", LogHelper.LogType.Warning);
+                    return false;
+                }
+            }
+        }
+
+        public static bool MigrateChickenSoupSettings()
+        {
+            if (Settings?.Appearance == null) return false;
 
             var appearance = Settings.Appearance;
-            if ((appearance.EnabledPresetTipsSources == null || appearance.EnabledPresetTipsSources.Count == 0)
-                && appearance.ChickenSoupSource >= 0)
+            if (appearance.EnabledPresetTipsSources == null && appearance.ChickenSoupSource >= 0)
             {
                 string presetId = null;
                 switch (appearance.ChickenSoupSource)
@@ -136,11 +219,19 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                     case 3: presetId = "hitokoto"; break;
                     case 4: presetId = "phigros"; break;
                 }
-                if (presetId != null)
-                {
-                    appearance.EnabledPresetTipsSources = new List<string> { presetId };
-                }
+                appearance.EnabledPresetTipsSources = presetId != null
+                    ? new List<string> { presetId }
+                    : new List<string> { "mottos" };
+                appearance.ChickenSoupSource = -1;
+                return true;
             }
+            else if (appearance.EnabledPresetTipsSources != null && appearance.ChickenSoupSource >= 0)
+            {
+                appearance.ChickenSoupSource = -1;
+                return true;
+            }
+
+            return false;
         }
 
         public static void MigrateVideoBoothSettings()

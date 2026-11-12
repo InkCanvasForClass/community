@@ -1,8 +1,10 @@
 using Ink_Canvas.Windows.SettingsViews.Helpers;
+using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Shell;
@@ -59,9 +61,11 @@ namespace Ink_Canvas.Helpers
             var root = new FrameworkElementFactory(typeof(Border));
             root.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(BackgroundProperty));
 
+            var decorator = new FrameworkElementFactory(typeof(AdornerDecorator));
             var presenter = new FrameworkElementFactory(typeof(ContentPresenter));
             presenter.SetValue(UIElement.ClipToBoundsProperty, true);
-            root.AppendChild(presenter);
+            decorator.AppendChild(presenter);
+            root.AppendChild(decorator);
 
             Template = new ControlTemplate
             {
@@ -94,7 +98,8 @@ namespace Ink_Canvas.Helpers
                 Marshal.StructureToPtr(styleStruct, lParam, false);
                 handled = true;
             }
-            else if (msg == (int)WindowMessage.NcHitTest && _transparentHitThrough)
+            else if (msg == (int)WindowMessage.NcHitTest && _transparentHitThrough
+                     && ContentDialog.GetOpenDialog(this) == null)
             {
                 var point = PointFromScreen(GetPointFromLParam(lParam));
                 if (!ShouldHandleWindowChromeHitTest(point))

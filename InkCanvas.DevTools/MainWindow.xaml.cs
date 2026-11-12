@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -8,6 +10,7 @@ namespace InkCanvas.DevTools
     public partial class MainWindow : Window
     {
         private readonly BuildRunner _runner;
+        private readonly CleanRunner _cleaner;
         private bool _isBuilding;
 
         public MainWindow()
@@ -16,6 +19,7 @@ namespace InkCanvas.DevTools
 
             string repoRoot = FindRepositoryRoot();
             _runner = new BuildRunner(repoRoot);
+            _cleaner = new CleanRunner(repoRoot);
 
             foreach (var project in BuildRunner.Projects)
                 ProjectComboBox.Items.Add(project);
@@ -77,6 +81,7 @@ namespace InkCanvas.DevTools
             RunButton.IsEnabled = canRun;
             BuildAndRunButton.IsEnabled = canRun;
             KillButton.IsEnabled = canRun;
+            CleanButton.IsEnabled = !_isBuilding;
             ModeComboBox.IsEnabled = !_isBuilding;
             ProjectComboBox.IsEnabled = !_isBuilding;
         }
@@ -215,6 +220,76 @@ namespace InkCanvas.DevTools
             AppendOutput("========== 杀进程 ==========\n");
             KillAndReport(project);
             AppendOutput("\n");
+        }
+
+        /// <summary>
+        /// 扫描并删除所有子项目的 bin / obj 目录，删除前弹窗确认。
+        /// </summary>
+        private async void CleanButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_isBuilding) return;
+
+            SetBusy(true);
+            try
+            {
+                AppendOutput("========== 清理所有 bin/obj ==========\n");
+
+                var progress = new Progress<string>(line => AppendOutput(line));
+                CleanScanResult scan = await Task.Run(() => _cleaner.Scan());
+
+                foreach (string skipped in scan.SkippedPaths)
+                    AppendOutput($"[跳过] {skipped}（本工具正在运行，产物被占用）\n");
+
+                if (scan.Targets.Count == 0)
+                {
+                    AppendOutput("[完成] 未找到需要清理的 bin/obj 目录。\n\n");
+                    return;
+                }
+
+                AppendOutput($"[扫描] 找到 {scan.Targets.Count} 个目录，共 {CleanRunner.FormatBytes(scan.TotalBytes)}。\n");
+
+                const int previewLimit = 10;
+                string preview = string.Join("\n", scan.Targets.Take(previewLimit).Select(t => "  " + t.RelativePath));
+                if (scan.Targets.Count > previewLimit)
+                    preview += $"\n  ……（其余 {scan.Targets.Count - previewLimit} 个）";
+
+                MessageBoxResult result = MessageBox.Show(
+                    this,
+                    $"将删除以下 {scan.Targets.Count} 个构建产物目录（共 {CleanRunner.FormatBytes(scan.TotalBytes)}）：\n\n{preview}\n\n"
+                        + "提示：正在运行的程序（如主程序、MagHost）会锁住 bin 目录，请先结束相关进程。\n"
+                        + "此操作不可撤销，是否继续？",
+                    "删除所有 bin/obj",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning,
+                    MessageBoxResult.No);
+
+                if (result != MessageBoxResult.Yes)
+                {
+                    AppendOutput("[取消] 已取消清理。\n\n");
+                    return;
+                }
+
+                CleanSummary summary = await Task.Run(() => _cleaner.Delete(scan.Targets, progress));
+
+                AppendOutput($"\n[完成] 删除 {summary.DeletedCount} 个目录，释放 {CleanRunner.FormatBytes(summary.DeletedBytes)}，失败 {summary.FailedCount} 个，用时 {summary.Elapsed.TotalSeconds:0.0} 秒。\n");
+
+                if (summary.FailedCount > 0)
+                {
+                    AppendOutput("[提示] 失败目录通常被正在运行的程序占用，请先结束相关进程后重试。\n");
+                    foreach (string failure in summary.Failures.Take(10))
+                        AppendOutput($"  - {failure}\n");
+                }
+
+                AppendOutput("\n");
+            }
+            catch (Exception ex)
+            {
+                AppendOutput($"\n[异常] {ex.Message}\n\n");
+            }
+            finally
+            {
+                SetBusy(false);
+            }
         }
 
         /// <summary>
