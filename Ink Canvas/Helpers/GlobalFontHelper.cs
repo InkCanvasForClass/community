@@ -161,6 +161,7 @@ namespace Ink_Canvas.Helpers
             {
                 ProcessProtectionManager.WithWriteAccess(CustomFontsDirectory,
                     () => Directory.CreateDirectory(CustomFontsDirectory));
+
                 var fileName = Path.GetFileName(sourcePath);
                 if (fileName.IndexOf('#') >= 0 || fileName.IndexOf('|') >= 0)
                     fileName = fileName.Replace('#', '_').Replace('|', '_');
