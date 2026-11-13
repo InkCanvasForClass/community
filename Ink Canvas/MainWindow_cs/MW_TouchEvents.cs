@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -1147,6 +1148,11 @@ namespace Ink_Canvas
         private void MainWindow_TouchDown(object sender, TouchEventArgs e)
         {
             if (IsBoardRoamingMode) return;
+            if (_canvasGestureOwnsTouchInput)
+            {
+                e.Handled = true;
+                return;
+            }
 
             // 视频展台特殊模式：所有触摸交给 VideoPresenterSpecialModeContainer 的 Manipulation 处理，
             // 不进入下面的 EditingMode 切换逻辑（避免把 Ink 切到 None 干扰预览绘制）。
@@ -1211,6 +1217,11 @@ namespace Ink_Canvas
             if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
             if (IsTouchStylusDevice(e.StylusDevice))
                 return;
+            if (_canvasGestureOwnsTouchInput)
+            {
+                e.Handled = true;
+                return;
+            }
 
             // 检查手写笔点击是否发生在浮动栏区域，如果是则允许事件传播到浮动栏按钮
             var stylusPoint = e.GetPosition(this);
@@ -1349,6 +1360,11 @@ namespace Ink_Canvas
             if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
             if (IsTouchStylusDevice(e.StylusDevice))
                 return;
+            if (_canvasGestureOwnsTouchInput)
+            {
+                e.Handled = true;
+                return;
+            }
 
             var stylusId = e.StylusDevice.Id;
             if (_activeRealtimeStylusStrokeIds.Contains(stylusId))
@@ -1523,6 +1539,11 @@ namespace Ink_Canvas
                 if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
             if (IsTouchStylusDevice(e.StylusDevice))
                     return;
+                if (_canvasGestureOwnsTouchInput)
+                {
+                    e.Handled = true;
+                    return;
+                }
 
                 if (drawingShapeMode != 0)
                 {
@@ -1803,6 +1824,12 @@ namespace Ink_Canvas
         private void Main_Grid_TouchDown(object sender, TouchEventArgs e)
         {
             if (IsBoardRoamingMode) return;
+            if (_canvasGestureOwnsTouchInput || _activeRealtimeTouchStrokeIds.Contains(e.TouchDevice.Id)
+                || _activeTouchStrokeIds.Contains(e.TouchDevice.Id))
+            {
+                e.Handled = true;
+                return;
+            }
 
             // 视频展台特殊模式：不在此处切换 EditingMode，
             // PreviewTouchDown 已临时切到 None 抑制 InkCanvas 框选/绘制；
@@ -2036,15 +2063,19 @@ namespace Ink_Canvas
                 return;
             }
 
+            if (TrackCanvasGestureTouchDown(e)) return;
+
             if ((inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint || inkCanvas.EditingMode == InkCanvasEditingMode.Select
                  || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
                 && !isPalmEraserActive)
             {
+                TryStartCanvasGesture(e);
                 return;
             }
 
             if (drawingShapeMode != 0)
             {
+                if (TryStartCanvasGesture(e)) return;
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
                 SetCursorBasedOnEditingMode(inkCanvas);
                 inkCanvas.CaptureTouch(e.TouchDevice);
@@ -2094,7 +2125,12 @@ namespace Ink_Canvas
                 return;
             }
 
-            if (TryHandlePalmTouch(e, true)) return;
+            if (TryHandlePalmTouch(e, true))
+            {
+                TryStartCanvasGesture(e);
+                return;
+            }
+            if (TryStartCanvasGesture(e)) return;
 
             if (ShouldUseRealtimeVelocityBrushTipForTouch()
                 && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
@@ -2171,7 +2207,8 @@ namespace Ink_Canvas
                         {
                             Dispatcher.Invoke(() =>
                             {
-                                if (dec.Count > 1 && inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
+                                if (!IsCanvasGestureManipulationSuppressed && dec.Count > 1
+                                    && inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
                                     inkCanvas.EditingMode = InkCanvasEditingMode.None;
                                 isMultiTouchTimerActive = false;
                             });
@@ -2207,6 +2244,7 @@ namespace Ink_Canvas
                 return;
             }
 
+            if (TryHandleCanvasGestureTouchMove(e)) return;
             if (TryHandlePalmTouch(e, false)) return;
 
             var touchId = e.TouchDevice.Id;
@@ -2284,6 +2322,7 @@ namespace Ink_Canvas
                 return;
             }
 
+            if (TryHandleCanvasGestureTouchUp(e)) return;
             if (FinishPalmTouch(e)) return;
 
             // 视频展台特殊模式：所有手指抬起后恢复用户原本的 EditingMode
@@ -2489,6 +2528,12 @@ namespace Ink_Canvas
                 return;
             }
 
+            if (IsCanvasGestureManipulationSuppressed)
+            {
+                e.Handled = true;
+                return;
+            }
+
             // 插件画布手势（如 PDF 阅读器双指缩放/平移）：优先让插件声明手势模式。
             if (_pluginCanvasGestureHandler != null && (e.Manipulators?.Count() ?? 0) >= 2)
             {
@@ -2508,7 +2553,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void InkCanvas_ManipulationInertiaStarting(object sender, ManipulationInertiaStartingEventArgs e)
         {
-            if (!IsBoardRoamingMode) return;
+            if (!IsBoardRoamingMode && !IsCanvasGestureManipulationSuppressed) return;
             if (Manipulation.IsManipulationActive(inkCanvas))
                 Manipulation.CompleteManipulation(inkCanvas);
             e.Handled = true;
@@ -2541,6 +2586,12 @@ namespace Ink_Canvas
             {
                 // 操纵会话结束 = 手指已全部抬起，清空触点记账，避免残留影响后续判定
                 _boothDownTouchIds.Clear();
+                return;
+            }
+
+            if (IsCanvasGestureManipulationSuppressed)
+            {
+                e.Handled = true;
                 return;
             }
 
@@ -2652,6 +2703,12 @@ namespace Ink_Canvas
                 }
             }
 
+            if (IsCanvasGestureManipulationSuppressed)
+            {
+                e.Handled = true;
+                return;
+            }
+
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
                 return;
 
@@ -2701,73 +2758,35 @@ namespace Ink_Canvas
                     m.ScaleAt(scale.X, scale.Y, center.X, center.Y); // 缩放
                 }
 
-                var strokes = inkCanvas.GetSelectedStrokes();
-                if (strokes.Count != 0)
+                ApplyCanvasGestureTransformation(m, md.Scale, enableZoom);
+            }
+        }
+
+        private void ApplyCanvasGestureTransformation(Matrix matrix, Vector scale, bool enableZoom,
+            StrokeCollection selectedStrokes = null)
+        {
+            var selection = selectedStrokes ?? inkCanvas.GetSelectedStrokes();
+            var strokes = selection.Count > 0 ? selection : inkCanvas.Strokes;
+            foreach (var stroke in strokes)
+            {
+                stroke.Transform(matrix, false);
+                if (!enableZoom) continue;
+                try
                 {
-                    foreach (var stroke in strokes)
-                    {
-                        stroke.Transform(m, false);
-
-                        foreach (var circle in circles)
-                            if (stroke == circle.Stroke)
-                            {
-                                circle.R = GetDistance(circle.Stroke.StylusPoints[0].ToPoint(),
-                                    circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].ToPoint()) / 2;
-                                circle.Centroid = new Point(
-                                    (circle.Stroke.StylusPoints[0].X +
-                                     circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].X) / 2,
-                                    (circle.Stroke.StylusPoints[0].Y +
-                                     circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].Y) / 2);
-                                break;
-                            }
-
-                        if (!enableZoom) continue;
-                        try
-                        {
-                            stroke.DrawingAttributes.Width *= md.Scale.X;
-                            stroke.DrawingAttributes.Height *= md.Scale.Y;
-                        }
-                        catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
-                    }
+                    stroke.DrawingAttributes.Width *= scale.X;
+                    stroke.DrawingAttributes.Height *= scale.Y;
                 }
-                else
-                {
-                    if (enableZoom)
-                    {
-                        foreach (var stroke in inkCanvas.Strokes)
-                        {
-                            stroke.Transform(m, false);
-                            try
-                            {
-                                stroke.DrawingAttributes.Width *= md.Scale.X;
-                                stroke.DrawingAttributes.Height *= md.Scale.Y;
-                            }
-                            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
-                        }
-
-                        // 同时变换画布上的图片元素
-                        TransformCanvasImages(m);
-                    }
-                    else
-                    {
-                        foreach (var stroke in inkCanvas.Strokes) stroke.Transform(m, false);
-
-                        // 同时变换画布上的图片元素
-                        TransformCanvasImages(m);
-                    }
-
-                    foreach (var circle in circles)
-                    {
-                        circle.R = GetDistance(circle.Stroke.StylusPoints[0].ToPoint(),
-                            circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].ToPoint()) / 2;
-                        circle.Centroid = new Point(
-                            (circle.Stroke.StylusPoints[0].X +
-                             circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].X) / 2,
-                            (circle.Stroke.StylusPoints[0].Y +
-                             circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].Y) / 2
-                        );
-                    }
-                }
+                catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+            }
+            if (selection.Count == 0) TransformCanvasImages(matrix);
+            foreach (var circle in circles)
+            {
+                if (!strokes.Contains(circle.Stroke)) continue;
+                circle.R = GetDistance(circle.Stroke.StylusPoints[0].ToPoint(),
+                    circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].ToPoint()) / 2;
+                circle.Centroid = new Point(
+                    (circle.Stroke.StylusPoints[0].X + circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].X) / 2,
+                    (circle.Stroke.StylusPoints[0].Y + circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].Y) / 2);
             }
         }
 

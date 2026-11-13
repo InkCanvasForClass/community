@@ -68,13 +68,25 @@ namespace Ink_Canvas.Helpers
 
         public void CommitStrokeManipulationHistory(Dictionary<Stroke, Tuple<StylusPointCollection, StylusPointCollection>> stylusPointDictionary)
         {
+            CommitStrokeManipulationHistory(stylusPointDictionary, null, null);
+        }
+
+        public void CommitStrokeManipulationHistory(
+            Dictionary<Stroke, Tuple<StylusPointCollection, StylusPointCollection>> stylusPointDictionary,
+            Dictionary<Stroke, Tuple<DrawingAttributes, DrawingAttributes>> drawingAttributes,
+            Dictionary<UIElement, Tuple<Transform, Transform>> elementTransforms)
+        {
             if (_currentIndex + 1 < _currentStrokeHistory.Count)
             {
                 _currentStrokeHistory.RemoveRange(_currentIndex + 1, (_currentStrokeHistory.Count - 1) - _currentIndex);
             }
             _currentStrokeHistory.Add(
                 new TimeMachineHistory(stylusPointDictionary,
-                    TimeMachineHistoryType.Manipulation));
+                    TimeMachineHistoryType.Manipulation)
+                {
+                    DrawingAttributes = drawingAttributes,
+                    ElementTransforms = elementTransforms
+                });
             _currentIndex = _currentStrokeHistory.Count - 1;
             NotifyUndoRedoState();
         }
@@ -212,6 +224,7 @@ namespace Ink_Canvas.Helpers
         //这里说一下 Tuple的 Value1 是初始值 ; Value 2 是改变值
         public Dictionary<Stroke, Tuple<StylusPointCollection, StylusPointCollection>> StylusPointDictionary;
         public Dictionary<Stroke, Tuple<DrawingAttributes, DrawingAttributes>> DrawingAttributes;
+        public Dictionary<UIElement, Tuple<Transform, Transform>> ElementTransforms;
         public UIElement InsertedElement; // 新增
         public string PluginId;
         public string PluginStateBefore;

@@ -26,6 +26,7 @@ namespace Ink_Canvas
             set
             {
                 if (_currentMode == value) return;
+                if (_canvasGestureOwnsTouchInput) ResetCanvasGestureInput();
 
                 EndBoardTouchpadGesture();
 
