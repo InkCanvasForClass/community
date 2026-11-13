@@ -4617,6 +4617,7 @@ namespace Ink_Canvas
         {
             try
             {
+                ResetCanvasGestureInput();
                 // 清空触摸点计数器
                 dec.Clear();
 
@@ -6145,6 +6146,8 @@ namespace Ink_Canvas
         /// <param name="mode">模式名称</param>
         private void UpdateCurrentToolMode(string mode)
         {
+            if (_canvasGestureOwnsTouchInput && !string.Equals(_currentToolMode, mode, StringComparison.Ordinal))
+                ResetCanvasGestureInput(false);
             if (!string.Equals(mode, "roaming", StringComparison.Ordinal) && IsBoardRoamingMode)
             {
                 EndBoardRoaming();

@@ -26,6 +26,7 @@ namespace Ink_Canvas
             set
             {
                 if (_currentMode == value) return;
+                if (_canvasGestureOwnsTouchInput) ResetCanvasGestureInput();
 
                 bool wasWhiteboardMode = _currentMode == 1;
                 _currentMode = value;
