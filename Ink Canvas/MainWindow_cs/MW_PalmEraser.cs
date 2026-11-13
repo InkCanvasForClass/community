@@ -43,6 +43,7 @@ namespace Ink_Canvas
         {
             var mode = inkCanvas?.EditingMode ?? InkCanvasEditingMode.None;
             if (mode != InkCanvasEditingMode.None) return mode;
+            if (_canvasGestureOwnsTouchInput && _canvasGestureSavedMode.HasValue) return _canvasGestureSavedMode.Value;
             if (_palmGroupSavedMode.HasValue) return _palmGroupSavedMode.Value;
             return isPalmEraserActive || _changingPalmMode ? palmEraserPreviousEditingMode : mode;
         }

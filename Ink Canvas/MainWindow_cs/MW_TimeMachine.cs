@@ -190,6 +190,16 @@ namespace Ink_Canvas
                         }
                     }
                 }
+                if (item.DrawingAttributes != null)
+                    foreach (var attributes in item.DrawingAttributes)
+                        if (canvas.Strokes.Contains(attributes.Key))
+                            attributes.Key.DrawingAttributes = (item.StrokeHasBeenCleared
+                                ? attributes.Value.Item1 : attributes.Value.Item2).Clone();
+                if (item.ElementTransforms != null)
+                    foreach (var transform in item.ElementTransforms)
+                        if (canvas.Children.Contains(transform.Key))
+                            transform.Key.SetCurrentValue(UIElement.RenderTransformProperty,
+                                (item.StrokeHasBeenCleared ? transform.Value.Item1 : transform.Value.Item2).CloneCurrentValue());
             }
             else if (item.CommitType == TimeMachineHistoryType.DrawingAttributes)
             {
@@ -804,6 +814,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void Stroke_DrawingAttributesChanged(object sender, PropertyDataChangedEventArgs e)
         {
+            if (_isApplyingCanvasGesture) return;
             if (IsCurrentPageFrozen && _currentCommitType != CommitReason.CodeInput)
             {
                 TryBlockFrozenPageMutation("修改冻结页面");
@@ -887,8 +898,8 @@ namespace Ink_Canvas
         /// </remarks>
         private void Stroke_StylusPointsChanged(object sender, EventArgs e)
         {
-            // 漫游在收尾时统一提交一次历史，不重复克隆点集和自动提交。
-            if (_isCommittingBoardRoaming) return;
+            // 漫游和原始双指手势在收尾时统一提交历史，不重复克隆点集。
+            if (_isCommittingBoardRoaming || _isApplyingCanvasGesture) return;
 
             if (IsCurrentPageFrozen && _currentCommitType != CommitReason.CodeInput)
             {

@@ -1396,7 +1396,8 @@ namespace Ink_Canvas
         private void inkCanvas_EditingModeChanged(object sender, RoutedEventArgs e)
         {
             var inkCanvas1 = sender as InkCanvas;
-            if (inkCanvas1 == null || _changingPalmMode) return;
+            if (inkCanvas1 == null || _changingPalmMode || _changingCanvasGestureMode) return;
+            if (_canvasGestureOwnsTouchInput) ResetCanvasGestureInput(false);
 
             if (_palmGroupSavedMode.HasValue) CancelPalmGroup(false);
             if (isPalmEraserActive)
@@ -3002,7 +3003,12 @@ namespace Ink_Canvas
             // 窗口失活时，触点若走 TouchLeave 而非 TouchUp，触摸活动集合会残留，
             // 导致 EndTouchInkInputIfIdle 永远不退出、IsManipulationEnabled 永远不恢复。
             // 调用 AbortAllActiveTouchInputs 兜底。
-            try { AbortAllActiveTouchInputs(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+            try
+            {
+                ResetCanvasGestureInput();
+                AbortAllActiveTouchInputs();
+            }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
 

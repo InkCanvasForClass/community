@@ -43,6 +43,7 @@ namespace Ink_Canvas
             set
             {
                 if (_currentWhiteboardIndex == value) return;
+                if (_canvasGestureOwnsTouchInput) ResetCanvasGestureInput();
                 _currentWhiteboardIndex = value;
                 RaisePluginEvent(PluginWhiteboardPageChanged, _currentWhiteboardIndex, WhiteboardTotalCount, nameof(PluginWhiteboardPageChanged));
             }
@@ -86,6 +87,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void SaveStrokes(bool isBackupMain = false)
         {
+            if (_canvasGestureOwnsTouchInput) ResetCanvasGestureInput();
             EndBoardRoaming();
             ApplyFreezeStateToCurrentStrokes();
 
