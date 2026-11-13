@@ -568,6 +568,25 @@ namespace Ink_Canvas
             }
             _boothCurrentPhotoIndex = restorePhotoIndex;
 
+            // 墨迹物理隔离：进入展台前，若处于白板模式，先保存白板当前页的墨迹与内容，
+            // 并清空画布与撤销重做历史，确保展台启动时画布干净，绝不吸附或串入白板墨迹。
+            try
+            {
+                if (currentMode != 0)
+                {
+                    SaveStrokes();
+                }
+                if (inkCanvas != null)
+                {
+                    inkCanvas.Strokes.Clear();
+                    timeMachine?.ClearStrokeHistory();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[Booth] 进入展台前保存并清理白板墨迹失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+
             try
             {
                 // 保存当前 inkCanvas EditingMode，退出时恢复
@@ -618,11 +637,18 @@ namespace Ink_Canvas
                 // 用户可以在视频展台期间随时切换笔/选择工具来改变行为。
 
                 // 显示占位文字（直到摄像头找到并开始预览）
-                // 重置文本（之前可能因没检测到摄像头改成"未检测到摄像头设备"）
+                // 仅当恢复到直播页时才显示正在查找设备；若恢复到照片页，直接隐藏占位文字，严禁启动摄像头
                 if (VideoPresenterSearchingText != null)
                 {
-                    VideoPresenterSearchingText.Text = "正在查找展台设备...";
-                    VideoPresenterSearchingText.Visibility = Visibility.Visible;
+                    if (restorePhotoIndex >= 0)
+                    {
+                        VideoPresenterSearchingText.Visibility = Visibility.Collapsed;
+                    }
+                    else
+                    {
+                        VideoPresenterSearchingText.Text = "正在查找展台设备...";
+                        VideoPresenterSearchingText.Visibility = Visibility.Visible;
+                    }
                 }
                 // VideoCaptureElement 自己管理渲染（VMR9 + D3DImage），不需要清空 Source
                 // 若之前的预览仍在运行，先停止避免设备占用
@@ -634,8 +660,8 @@ namespace Ink_Canvas
 
                 if (restorePhotoIndex >= 0)
                 {
-                    // 恢复上次阅读的照片页
-                    SwitchBoothToPhotoPage(restorePhotoIndex);
+                    // 恢复上次阅读的照片页（isInternalSwitch: false 跳过切换前的保存）
+                    SwitchBoothToPhotoPage(restorePhotoIndex, isInternalSwitch: false);
                 }
                 else
                 {
@@ -811,6 +837,19 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"ExitVideoPresenterSpecialMode 恢复白板状态异常: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            // 墨迹隔离：若退出特殊模式后依然停留在白板中，将白板原本的墨迹与子元素完整恢复到画布
+            if (currentMode == 1)
+            {
+                try
+                {
+                    RestoreStrokes();
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[Booth] 退出展台后恢复白板墨迹失败: {ex.Message}", LogHelper.LogType.Warning);
+                }
             }
         }
 
@@ -1757,10 +1796,18 @@ namespace Ink_Canvas
             // 现在改为：StartVideoCaptureElementPreviewAsync 会把文字改为"正在启动摄像头..."，
             // 直到 MediaOpened 事件触发（画面真的出来）才隐藏。
             // 只把文字从"正在查找..."改为"已找到，正在启动..."让用户知道进度。
+            // 特殊情况：若当前处于展台特殊模式且正在浏览照片页，严禁显示"正在启动摄像头..."
             if (VideoPresenterSearchingText != null)
             {
-                VideoPresenterSearchingText.Text = "正在启动摄像头...";
-                VideoPresenterSearchingText.Visibility = Visibility.Visible;
+                if (_isVideoPresenterSpecialMode && _boothCurrentPhotoIndex >= 0)
+                {
+                    VideoPresenterSearchingText.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    VideoPresenterSearchingText.Text = "正在启动摄像头...";
+                    VideoPresenterSearchingText.Visibility = Visibility.Visible;
+                }
             }
 
             for (int i = 0; i < _cameraService.AvailableCameras.Count; i++)
@@ -1819,6 +1866,17 @@ namespace Ink_Canvas
             // 持久化恢复分辨率：从 Settings.Canvas.VideoPresenterLastResolutionKey 读取，
             // 用 "WxH@FPS" 格式匹配 NativeResolutions 中的项，找不到则保持默认（最接近 1920×1080）
             TryRestoreResolutionFromSettings();
+
+            // 若当前处于展台特殊模式且正在浏览照片页（_boothCurrentPhotoIndex >= 0），
+            // 则不启动摄像头预览，保持静默，只有切到第 0 页直播页才按需启动
+            if (_isVideoPresenterSpecialMode && _boothCurrentPhotoIndex >= 0)
+            {
+                if (VideoPresenterSearchingText != null)
+                {
+                    VideoPresenterSearchingText.Visibility = Visibility.Collapsed;
+                }
+                return;
+            }
 
             // 立即启动预览
             StartVideoPresenterPreview(cameraToSelect);
@@ -2222,20 +2280,33 @@ namespace Ink_Canvas
         /// </remarks>
         private void RestoreBoothInkEditingMode(string source)
         {
-            if (!_boothTouchSavedInkEditingMode.HasValue || inkCanvas == null) return;
+            if (inkCanvas == null) return;
 
-            var savedMode = _boothTouchSavedInkEditingMode.Value;
-            _boothTouchSavedInkEditingMode = null;
+            InkCanvasEditingMode targetMode;
+            if (_boothTouchSavedInkEditingMode.HasValue)
+            {
+                targetMode = _boothTouchSavedInkEditingMode.Value;
+                _boothTouchSavedInkEditingMode = null;
+            }
+            else if (_isVideoPresenterSpecialMode && inkCanvas.EditingMode == InkCanvasEditingMode.None && drawingShapeMode == 0 && !_isBoothMouseDragging)
+            {
+                // 兜底：若没有保存的值，但处于展台且当前模式异常停留在 None，恢复为 Ink
+                targetMode = InkCanvasEditingMode.Ink;
+            }
+            else
+            {
+                return;
+            }
 
             try
             {
-                inkCanvas.EditingMode = savedMode;
+                inkCanvas.EditingMode = targetMode;
                 return;
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile(
-                    $"[Booth] 恢复画布编辑模式失败，尝试保底恢复 (source={source}, saved={savedMode}, current={inkCanvas.EditingMode}): {ex}",
+                    $"[Booth] 恢复画布编辑模式失败，尝试保底恢复 (source={source}, saved={targetMode}, current={inkCanvas.EditingMode}): {ex}",
                     LogHelper.LogType.Warning);
             }
 
@@ -4393,7 +4464,8 @@ namespace Ink_Canvas
         /// 显示指定照片、停止实时预览、页码 (photoIndex+1)/N、拍照按钮变灰。
         /// </summary>
         /// <param name="photoIndex">_capturedPhotos 中的索引（0-based）。</param>
-        private void SwitchBoothToPhotoPage(int photoIndex)
+        /// <param name="isInternalSwitch">是否为展台内部切换（若由进入展台恢复上次照片触发，传 false 跳过保存）。</param>
+        private void SwitchBoothToPhotoPage(int photoIndex, bool isInternalSwitch = true)
         {
             if (photoIndex < 0 || photoIndex >= _capturedPhotos.Count)
             {
@@ -4408,8 +4480,16 @@ namespace Ink_Canvas
                 return;
             }
 
-            // 切换前保存当前展台页面全部状态（墨迹、缩放、位移、旋转、最后浏览页）
-            SaveCurrentBoothState();
+            // 切换前保存当前展台页面全部状态（仅在页面间内部切换时保存；首次进入展台恢复照片时不保存，避免误覆盖）
+            if (isInternalSwitch)
+            {
+                SaveCurrentBoothState();
+            }
+            // 确保正在启动/查找设备的文字在照片页绝对隐藏
+            if (VideoPresenterSearchingText != null)
+            {
+                VideoPresenterSearchingText.Visibility = Visibility.Collapsed;
+            }
             // 切换页面重置旋转基准（新页面的墨迹需要新的基准）
             ResetRotationBaseline();
             _boothCurrentPhotoIndex = photoIndex;

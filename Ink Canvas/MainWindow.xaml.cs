@@ -3564,6 +3564,11 @@ namespace Ink_Canvas
 
                 // 执行模式切换
                 inkCanvas.EditingMode = newMode;
+                if (_isVideoPresenterSpecialMode)
+                {
+                    // 用户主动切换工具，清除临时保存的触摸模式，防止后续抬手误覆盖用户的主动选择
+                    _boothTouchSavedInkEditingMode = null;
+                }
                 if (newMode == InkCanvasEditingMode.Select)
                 {
                     if (!_isVideoPresenterSpecialMode)

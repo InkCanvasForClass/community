@@ -188,6 +188,7 @@ namespace Ink_Canvas
 
         private void BeginTouchInkInput()
         {
+            if (inkCanvas == null) return;
             if (!_hasStoredInkCanvasManipulationStateForTouchInk)
             {
                 _isInkCanvasManipulationEnabledBeforeTouchInk = inkCanvas.IsManipulationEnabled;
@@ -198,7 +199,12 @@ namespace Ink_Canvas
 
         private void EndTouchInkInputIfIdle()
         {
-            if (_activeRealtimeTouchStrokeIds.Count != 0 || _activeRealtimeStylusStrokeIds.Count != 0 || _activeTouchStrokeIds.Count != 0 || dec.Count != 0 || _boothDownTouchIds.Count != 0)
+            if (inkCanvas == null) return;
+            if ((_activeRealtimeTouchStrokeIds?.Count ?? 0) != 0 ||
+                (_activeRealtimeStylusStrokeIds?.Count ?? 0) != 0 ||
+                (_activeTouchStrokeIds?.Count ?? 0) != 0 ||
+                (dec?.Count ?? 0) != 0 ||
+                (_boothDownTouchIds?.Count ?? 0) != 0)
                 return;
             if (!_hasStoredInkCanvasManipulationStateForTouchInk)
                 return;
@@ -232,6 +238,13 @@ namespace Ink_Canvas
             }
             _pauseStraightenTimers.Clear();
             EndTouchInkInputIfIdle();
+
+            if (_isVideoPresenterSpecialMode)
+            {
+                _boothDownTouchIds.Clear();
+                dec.Clear();
+                RestoreBoothInkEditingMode("abort-touch");
+            }
         }
 
         internal void EnsureRealtimeStylusPipelineBinding()
@@ -1955,6 +1968,12 @@ namespace Ink_Canvas
 
                 // 多指书写开启且当前是可书写模式：与普通模式一致，落到下方的通用手写采集路径，
                 // 由通用逻辑为每个触点建立独立 StrokeVisual（双指同时写字），双指不再接管预览手势。
+                // 若之前因手势或异常被临时切为 None 且手指已抬起，在此自动纠正恢复
+                if (dec.Count == 0 && inkCanvas != null && inkCanvas.EditingMode == InkCanvasEditingMode.None && drawingShapeMode == 0 && !_isBoothMouseDragging)
+                {
+                    RestoreBoothInkEditingMode("touch-down-autofix");
+                }
+
                 // 此分支不 return，也不设 e.Handled（否则会阻断 Manipulation 提升）。
                 bool boothCollectTouchInk = MultiTouchWritingEnabled
                     && inkCanvas != null
@@ -2308,6 +2327,11 @@ namespace Ink_Canvas
                     // 恢复触摸前保存的 EditingMode（失败时保证不会把画布留在 None）
                     RestoreBoothInkEditingMode("touch-up");
                 }
+                else if (dec.Count <= 1 && _boothTouchSavedInkEditingMode.HasValue)
+                {
+                    // 兜底防御：若只剩 1 根手指（不再处于多指手势中），且有保存的模式，安全恢复，避免多指手势抬手丢包导致残留 None
+                    RestoreBoothInkEditingMode("touch-up-single-fallback");
+                }
                 // 仍然执行常规清理（释放触摸捕获、恢复浮动栏可见性等）
                 inkCanvas?.ReleaseAllTouchCaptures();
                 if (ViewboxFloatingBar != null) ViewboxFloatingBar.IsHitTestVisible = true;
@@ -2492,12 +2516,16 @@ namespace Ink_Canvas
         /// </remarks>
         private void Main_Grid_ManipulationCompleted(object sender, ManipulationCompletedEventArgs e)
         {
-            // 视频展台特殊模式：不在此处恢复 EditingMode，
-            // PreviewTouchUp 已经在所有手指抬起后恢复用户原本的模式
+            // 视频展台特殊模式：手势操纵结束，清空触点记账并确保恢复用户原本的编辑模式，
+            // 绝不允许由于 WPF Manipulation 截断 TouchUp 导致 EditingMode 永久锁死在 None。
             if (_isVideoPresenterSpecialMode)
             {
-                // 操纵会话结束 = 手指已全部抬起，清空触点记账，避免残留影响后续判定
                 _boothDownTouchIds.Clear();
+                if (dec.Count > 0)
+                {
+                    dec.Clear();
+                }
+                RestoreBoothInkEditingMode("manipulation-completed");
                 return;
             }
 
