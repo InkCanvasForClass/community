@@ -47,9 +47,9 @@ Before using and distributing this software, please make sure you understand the
 
 ## 📗 FAQ
 
-### Why do some icons show up as "□" on systems below Windows 10?
+### Why do some icons show up as "□"?
 
-[Click here to download](https://aka.ms/SegoeFonts "SegoeFonts") the SegoeFonts files. Install the `SegMDL2.ttf` font from the zip archive and restart your system to resolve the issue.
+Install the latest [Segoe Fluent Icons](https://aka.ms/SegoeFluentIcons) and [Segoe MDL2 Assets](https://aka.ms/segoemdl2) fonts: extract them; on Windows 7, simply right-click each `.ttf` file and choose "Install"; on other versions, right-click and choose "Install for all users" to replace the installed fonts. Then restart your system or sign out and back in.
 
 ### The application crashes immediately upon turning a page in PowerPoint slideshow mode
 
