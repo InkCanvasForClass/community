@@ -204,9 +204,13 @@ This project consumes it through the organization-maintained unofficial build **
 
 The program extracts `IACore.dll`, `IALoader.dll` and `IAWinFX.dll` (Microsoft Tablet PC Ink Analysis components, copyright Microsoft Corporation) from embedded resources. These files are not works of this project; their rights and license terms belong to Microsoft. This project only releases them unmodified at runtime.
 
-### Design References
+### Inkeys (智绘教 Inkeys)
 
-Some features and interaction designs of this project take inspiration from the public documentation, screenshots and user experience of similar open-source projects (including Inkeys and Ink Canvas Plus), but **no source code was copied from them**. If any project considers a particular borrowing inappropriate, please open an Issue and we will add attribution or change the implementation.
+This project uses portions of the code from [Inkeys](https://github.com/Alan-CRL/Inkeys). That code is released under GPL-3.0; the copyright belongs to AlanCRL Studio (© 2023–2026). This project retains the copyright notices and publishes the complete corresponding source code under the same license (GPL-3.0).
+
+### ClassIsland
+
+The "component ordering" and "automation" features of this project reference and reuse the implementation of [ClassIsland](https://github.com/ClassIsland/ClassIsland). ClassIsland is released under GPL-3.0; the copyright belongs to the ClassIsland project and its contributors, including [HelloWRC](https://github.com/HelloWRC). This project retains the copyright notices and publishes the complete corresponding source code under the same license (GPL-3.0). In addition, the roll-call feature can invoke ClassIsland for external roll-call through the `classisland://` protocol.
 
 ## Related Projects and External Services
 
@@ -220,20 +224,9 @@ The following are independent projects with no code derivation or affiliation re
 - [Inkeys](https://github.com/Alan-CRL/Inkeys)
 - [DesktopDrawpadBlocker](https://github.com/Alan-CRL/DesktopDrawpadBlocker)
 
-### Relationship with the Inkeys Project
+### Inkeys
 
-[Inkeys (智绘教 Inkeys)](https://github.com/Alan-CRL/Inkeys) is developed and maintained independently by Alan-CRL (AlanCRL Studio) and released under GPL-3.0. This project is not affiliated with Inkeys and is neither a fork nor a derivative work of it; this repository does not contain Inkeys' C++ source code. The two projects interact only at the UI and distribution level:
-
-| Location | Content | Notes |
-| --- | --- | --- |
-| Settings → Friendly links | Inkeys project entry | A friendly link, not an endorsement |
-| Settings → Automation | "Auto-kill 智绘教 Inkeys (new versions only)" option | Compatibility option that terminates `Inkeys.exe` on exit |
-| Settings → Automation | Option icon `Resources/Icons-png/idt.png` | Icon taken from the Inkeys project; copyright AlanCRL Studio |
-| Settings → About | Alan-CRL avatar in the contributor acknowledgements | Avatar taken from their public GitHub profile |
-| Auto-update | Line group `inkeys`, mirror `https://iccce.inkeys.top` | A download mirror under the Inkeys project domain, currently set as the preferred line |
-| Documentation | `https://www.inkeys.top/tutorial/ppt-com.html` | Link to the PPT-COM tutorial |
-
-The names "Inkeys" and "智绘教", the Inkeys icon and related marks belong to AlanCRL Studio. This project uses them only to refer to that software, claims no rights over them, and does not publish or promote under the Inkeys name or imply that Inkeys is part of this project. If any use of these names, icons or mirrors is not permitted, or if the rights holder objects, please tell us via an [Issue](https://github.com/InkCanvasForClass/community/issues) and we will remove the relevant content promptly after verification.
+"Inkeys" (智绘教 Inkeys, <https://github.com/Alan-CRL/Inkeys>) is developed and maintained independently by Alan-CRL (AlanCRL Studio) and released under GPL-3.0. The Inkeys name, icon and related marks are copyright © 2023–2026 AlanCRL Studio; this project claims no rights over them.
 
 ## Star History
 
