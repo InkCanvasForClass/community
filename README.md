@@ -214,9 +214,13 @@
 
 程序通过嵌入资源释放 `IACore.dll`、`IALoader.dll`、`IAWinFX.dll`（Microsoft Tablet PC Ink Analysis 组件，版权归 Microsoft Corporation 所有）。这些文件并非本项目的作品，其权利与许可条款归 Microsoft；本项目仅在运行时按原样释放，不对其进行修改。
 
-### 设计参考
+### Inkeys（智绘教 Inkeys）
 
-本项目的部分功能与交互设计参考了同类开源项目的公开文档、截图与使用体验（包括 Inkeys、Ink Canvas Plus 等），但**未复制这些项目的源代码**。若相关项目认为某处借鉴不当，可通过 Issue 告知，我们会补充来源说明或调整实现。
+本项目使用了 [Inkeys](https://github.com/Alan-CRL/Inkeys) 的部分代码。该部分以 GPL-3.0 发布，著作权归 AlanCRL Studio 所有（© 2023–2026）；本项目保留其版权声明，并以同一许可证（GPL-3.0）公开全部对应源代码。
+
+### ClassIsland
+
+本项目的「组件排序」与「自动化」功能参考并沿用了 [ClassIsland](https://github.com/ClassIsland/ClassIsland) 的实现。ClassIsland 以 GPL-3.0 发布，著作权归 ClassIsland 项目及 [HelloWRC](https://github.com/HelloWRC) 等贡献者所有；本项目保留其版权声明，并以同一许可证（GPL-3.0）公开全部对应源代码。此外，本项目的点名功能支持通过 `classisland://` 协议调用 ClassIsland 完成外部点名。
 
 ## 相关项目与外部服务
 
@@ -230,20 +234,9 @@
 - [Inkeys](https://github.com/Alan-CRL/Inkeys)
 - [DesktopDrawpadBlocker](https://github.com/Alan-CRL/DesktopDrawpadBlocker)
 
-### 与 Inkeys 项目的关系
+### Inkeys
 
-[Inkeys（智绘教 Inkeys）](https://github.com/Alan-CRL/Inkeys) 由 Alan-CRL（AlanCRL Studio）独立开发并以 GPL-3.0 发布。本项目与 Inkeys 无隶属关系，也不是 Inkeys 的分支或衍生作品；本仓库不包含 Inkeys 的 C++ 源代码。双方仅在界面与分发层面存在以下对接：
-
-| 位置 | 内容 | 说明 |
-| --- | --- | --- |
-| 设置 → 友链 | Inkeys 项目入口 | 友情链接，不代表背书 |
-| 设置 → 自动化 | “自动查杀 智绘教 Inkeys（仅限新版）”选项 | 退出时结束 `Inkeys.exe` 进程的兼容性选项 |
-| 设置 → 自动化 | 选项图标 `Resources/Icons-png/idt.png` | 取自 Inkeys 项目的图标，版权归 AlanCRL Studio 所有 |
-| 设置 → 关于 | 贡献者致谢中的 Alan-CRL 头像 | 头像取自其 GitHub 公开资料 |
-| 自动更新 | 线路组 `inkeys`，镜像 `https://iccce.inkeys.top` | Inkeys 项目域名下的下载镜像，当前被设为默认优先线路 |
-| 文档 | `https://www.inkeys.top/tutorial/ppt-com.html` | PPT 联动教程链接 |
-
-“Inkeys”“智绘教”名称、Inkeys 图标及相关标识归 AlanCRL Studio 所有。本项目仅在指代该软件的范围内使用这些名称与图标，不主张任何权利，也不以 Inkeys 名义发布、推广，或暗示 Inkeys 是本项目的组成部分。若上述名称、图标或镜像的使用未获权利人许可，或权利人认为使用不当，请通过 [Issue](https://github.com/InkCanvasForClass/community/issues) 告知，我们将在核实后立即移除相关内容。
+“Inkeys”（智绘教 Inkeys，<https://github.com/Alan-CRL/Inkeys>）由 Alan-CRL（AlanCRL Studio）独立开发并以 GPL-3.0 发布。其名称、图标及相关标识版权归 AlanCRL Studio 所有（© 2023–2026），本项目不主张相关权利。
 
 ## Star History
 
