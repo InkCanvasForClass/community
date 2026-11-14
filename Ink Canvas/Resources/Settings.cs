@@ -1431,6 +1431,8 @@ namespace Ink_Canvas
         public bool ShowPPTModePrompt { get; set; } = false;
         [JsonProperty("enableSmartMode")]
         public bool EnableSmartMode { get; set; } = false;
+        [JsonProperty("autoStartSlideShowOnOpen")]
+        public bool AutoStartSlideShowOnOpen { get; set; } = false;
     }
 
     /// <summary>

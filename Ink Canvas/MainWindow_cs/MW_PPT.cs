@@ -178,6 +178,12 @@ namespace Ink_Canvas
         private int _presentationSlideCountSnapshot;
 
         /// <summary>
+        /// 「打开演示文稿时自动开始放映」的延迟/重试取消令牌。放映开始、演示文稿关闭、新的打开事件、
+        /// 退出 PPT 模式或 ICC 关闭时统一取消，避免延迟任务在错误的演示文稿上启动放映。
+        /// </summary>
+        private CancellationTokenSource _autoSlideShowCts;
+
+        /// <summary>
         /// 当前幻灯片放映位置的公开访问器（0-based）。
         /// 用于小白板等组件获取当前PPT页码。
         /// </summary>
@@ -319,6 +325,7 @@ namespace Ink_Canvas
                 _pptManager.SlideShowNextSlide += OnPPTSlideShowNextSlide;
                 _pptManager.SlideShowEnd += OnPPTSlideShowEnd;
                 _pptManager.PresentationOpen += OnPPTPresentationOpen;
+                _pptManager.PresentationOpenedExternally += OnPPTPresentationOpenedExternally;
                 _pptManager.PresentationClose += OnPPTPresentationClose;
                 _pptManager.SlideShowStateChanged += OnPPTSlideShowStateChanged;
 
@@ -364,6 +371,7 @@ namespace Ink_Canvas
             {
                 _exitPPTModeAfterDisconnectTimer?.Stop();
                 _exitPPTModeAfterDisconnectTimer = null;
+                CancelAutoStartSlideShow();
                 ResetPPTEnhancedPreviewCache();
             }
             catch (Exception ex)
@@ -1057,6 +1065,168 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 处理“用户真正打开了一个演示文稿”的事件，在开关开启时延迟调度自动放映。
+        /// ICC 启动/重连时补发的打开事件不会走到这里，因此不会误触发放映。
+        /// </summary>
+        private void OnPPTPresentationOpenedExternally(object payload)
+        {
+            // 新的打开事件取代上一个尚未执行的自动放映任务。
+            CancelAutoStartSlideShow();
+
+            if (!Settings.PowerPointSettings.PowerPointSupport) return;
+            if (!Settings.PowerPointSettings.AutoStartSlideShowOnOpen) return;
+
+            var pres = payload as Presentation;
+            var agentState = payload as PPTState;
+
+            string presentationFullName = null;
+            string presentationName = null;
+            if (pres != null)
+            {
+                try { presentationFullName = pres.FullName; } catch { }
+                try { presentationName = pres.Name; } catch { }
+            }
+            if (agentState != null)
+            {
+                if (string.IsNullOrEmpty(presentationFullName)) presentationFullName = agentState.PresentationFullName;
+                if (string.IsNullOrEmpty(presentationName)) presentationName = agentState.PresentationName;
+            }
+            if (string.IsNullOrEmpty(presentationFullName) && string.IsNullOrEmpty(presentationName))
+            {
+                presentationName = _pptManager?.GetPresentationName();
+            }
+
+            var pathForExtension = !string.IsNullOrEmpty(presentationFullName) ? presentationFullName : presentationName;
+            LogHelper.WriteLogToFile(
+                $"[PPT] 收到外部打开事件: payload={payload?.GetType().Name}, fullName={presentationFullName}, name={presentationName}",
+                LogHelper.LogType.Trace);
+            var extension = string.IsNullOrEmpty(pathForExtension) ? string.Empty : Path.GetExtension(pathForExtension);
+            if (string.Equals(extension, ".pps", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(extension, ".ppsx", StringComparison.OrdinalIgnoreCase))
+            {
+                LogHelper.WriteLogToFile(
+                    $"[PPT] 打开的是放映格式演示文稿（{extension}），由 PowerPoint 自行放映，跳过自动放映",
+                    LogHelper.LogType.Info);
+                return;
+            }
+
+            var cts = new CancellationTokenSource();
+            Interlocked.Exchange(ref _autoSlideShowCts, cts)?.Cancel();
+            _ = TryAutoStartSlideShowAsync(
+                !string.IsNullOrEmpty(presentationFullName) ? presentationFullName : presentationName,
+                cts.Token);
+        }
+
+        /// <summary>
+        /// 取消尚未执行的自动放映任务（放映开始、演示文稿关闭、新的打开事件、退出 PPT 模式、ICC 关闭时调用）。
+        /// </summary>
+        private void CancelAutoStartSlideShow()
+        {
+            try
+            {
+                Interlocked.Exchange(ref _autoSlideShowCts, null)?.Cancel();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"[PPT] 取消自动放映任务失败: {ex.Message}", LogHelper.LogType.Info);
+            }
+        }
+
+        /// <summary>
+        /// 延迟等待演示文稿加载完成后启动放映；COM 忙（RPC_E_CALL_REJECTED / SERVERCALL_RETRYLATER）时退避重试。
+        /// 放映目标按路径指定，避免 WPS 事件早于对象模型更新时放映到旧文稿。
+        /// 最终失败只写日志，不弹窗、不打断课堂。
+        /// </summary>
+        private async Task TryAutoStartSlideShowAsync(string presentationFullName, CancellationToken token)
+        {
+            // WPS 加载较慢，加大首次等待时间。
+            int delayMs = Settings.PowerPointSettings.IsSupportWPS ? 1200 : 800;
+            int[] retryDelays = { 800, 1500, 2500 };
+
+            for (int attempt = 0; attempt < retryDelays.Length; attempt++)
+            {
+                try
+                {
+                    await Task.Delay(delayMs, token).ConfigureAwait(false);
+                    token.ThrowIfCancellationRequested();
+
+                    if (_pptManager == null) return;
+                    if (_pptManager.IsInSlideShow)
+                    {
+                        LogHelper.WriteLogToFile("[PPT] 已在放映中，跳过自动放映", LogHelper.LogType.Info);
+                        return;
+                    }
+
+                    bool started = await StartSlideShowOnStaThreadAsync(presentationFullName).ConfigureAwait(false);
+                    if (started)
+                    {
+                        LogHelper.WriteLogToFile(
+                            $"[PPT] 已自动开始放映: {presentationFullName}",
+                            LogHelper.LogType.Info);
+                        return;
+                    }
+
+                    LogHelper.WriteLogToFile(
+                        $"[PPT] 自动放映第 {attempt + 1} 次尝试未成功: {presentationFullName}",
+                        LogHelper.LogType.Info);
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
+                catch (COMException comEx)
+                {
+                    var hr = (uint)comEx.HResult;
+                    if (hr != 0x80010001 && hr != 0x8001010A && hr != 0x80004005)
+                    {
+                        LogHelper.WriteLogToFile(
+                            $"[PPT] 自动放映遇到不可重试的 COM 异常 (0x{hr:X8}): {comEx.Message}",
+                            LogHelper.LogType.Info);
+                        return;
+                    }
+                    LogHelper.WriteLogToFile(
+                        $"[PPT] 自动放映第 {attempt + 1} 次尝试遇到 COM 忙 (0x{hr:X8})，稍后重试: {comEx.Message}",
+                        LogHelper.LogType.Info);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"[PPT] 自动放映失败: {ex}", LogHelper.LogType.Info);
+                    return;
+                }
+
+                if (attempt < retryDelays.Length - 1)
+                {
+                    delayMs = retryDelays[attempt];
+                }
+            }
+
+            LogHelper.WriteLogToFile($"[PPT] 自动放映重试次数用尽，已放弃: {presentationFullName}", LogHelper.LogType.Info);
+        }
+
+        /// <summary>
+        /// 在 STA 线程上调用放映方法，避免跨线程调用 COM 触发 0x8001010E (RPC_E_WRONG_THREAD)。
+        /// </summary>
+        private Task<bool> StartSlideShowOnStaThreadAsync(string presentationFullName)
+        {
+            var tcs = new TaskCompletionSource<bool>();
+            var thread = new Thread(() =>
+            {
+                try
+                {
+                    tcs.TrySetResult(_pptManager?.TryStartSlideShow(presentationFullName) == true);
+                }
+                catch (Exception ex)
+                {
+                    tcs.TrySetException(ex);
+                }
+            });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.IsBackground = true;
+            thread.Start();
+            return tcs.Task;
+        }
+
         private string GetPresentationStrokeFolderPath(Presentation presentation, string presentationName, int totalSlides, string presentationFullName = null)
         {
             string basePath = Path.Combine(Settings.Automation.AutoSavedStrokesLocation, "Auto Saved - Presentations");
@@ -1089,6 +1259,7 @@ namespace Ink_Canvas
 
         private void OnPPTPresentationClose(object payload)
         {
+            CancelAutoStartSlideShow();
             try
             {
                 Application.Current.Dispatcher.InvokeAsync(() =>
@@ -1180,6 +1351,8 @@ namespace Ink_Canvas
         /// </remarks>
         private async void OnPPTSlideShowBegin(object payload)
         {
+            // 放映已经开始（用户手动启动，或 .ppsx 自动放映），取消尚未执行的自动放映任务。
+            CancelAutoStartSlideShow();
             var wn = payload as SlideShowWindow;
             var agentState = payload as PPTState;
             try
@@ -3523,6 +3696,7 @@ namespace Ink_Canvas
 
         public async Task ExitPPTPresentation()
         {
+            CancelAutoStartSlideShow();
             try
             {
                 // 外部演示源（插件文档，如 PDF）激活时，退出按钮等价于结束该演示源：

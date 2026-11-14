@@ -48,6 +48,10 @@ namespace Ink_Canvas.Properties
 
         public static string AutoScreenshotHint => ResourceManager.GetString(nameof(AutoScreenshotHint), _resourceCulture);
 
+        public static string AutoStartSlideShowOnOpen => ResourceManager.GetString(nameof(AutoStartSlideShowOnOpen), _resourceCulture);
+
+        public static string AutoStartSlideShowOnOpenHint => ResourceManager.GetString(nameof(AutoStartSlideShowOnOpenHint), _resourceCulture);
+
         public static string BlackBackground => ResourceManager.GetString(nameof(BlackBackground), _resourceCulture);
 
         public static string BottomGroupTitle => ResourceManager.GetString(nameof(BottomGroupTitle), _resourceCulture);

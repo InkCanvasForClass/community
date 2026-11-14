@@ -54,6 +54,12 @@
   <data name="AutoScreenshotHint" xml:space="preserve">
     <value>Automatically take a screenshot when switching slides containing ink.</value>
   </data>
+  <data name="AutoStartSlideShowOnOpen" xml:space="preserve">
+    <value>Auto-start slideshow when a presentation opens</value>
+  </data>
+  <data name="AutoStartSlideShowOnOpenHint" xml:space="preserve">
+    <value>Starts the slideshow automatically when a presentation is newly opened. Reconnecting to an already-open presentation when ICC starts does not trigger it.</value>
+  </data>
   <data name="BlackBackground" xml:space="preserve">
     <value>Black background</value>
   </data>

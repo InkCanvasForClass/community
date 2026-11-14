@@ -54,6 +54,12 @@
   <data name="AutoScreenshotHint" xml:space="preserve">
     <value>开启后，幻灯片有墨迹时翻页就自动咔嚓，证据 +1</value>
   </data>
+  <data name="AutoStartSlideShowOnOpen" xml:space="preserve">
+    <value>打开 PPT 就自动开演</value>
+  </data>
+  <data name="AutoStartSlideShowOnOpenHint" xml:space="preserve">
+    <value>开启后，新开一份演示文稿 ICC 会自动敲锣开场；ICC 启动时重新连上已经开着的 PPT 不会瞎起哄</value>
+  </data>
   <data name="BlackBackground" xml:space="preserve">
     <value>黑化模式</value>
   </data>
