@@ -1407,6 +1407,7 @@ namespace Ink_Canvas
             {
                 // 重置触摸状态
                 isTouchDown = false;
+                inkCanvas.ReleaseStylusCapture();
                 ViewboxFloatingBar.IsHitTestVisible = true;
                 BlackboardUIGridForInkReplay.IsHitTestVisible = true;
 

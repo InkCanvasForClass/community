@@ -2932,29 +2932,39 @@ namespace Ink_Canvas
                     drawMultiStepShapeSpecialStrokeCollection = null;
                     if (asymptoteStrokes != null && asymptoteStrokes.Count > 0)
                     {
-                        var opFlag = false;
                         switch (Settings.Canvas.HyperbolaAsymptoteOption)
                         {
                             case OptionalOperation.Yes:
-                                opFlag = true;
                                 break;
                             case OptionalOperation.No:
-                                opFlag = false;
+                                RemoveHyperbolaAsymptotes(asymptoteStrokes, lastTempStrokeCollection);
                                 break;
                             case OptionalOperation.Ask:
-                                opFlag = MessageBox.Show(Properties.CanvasStrings.Shape_RemoveAsymptote, "Ink Canvas", MessageBoxButton.YesNo) !=
-                                         MessageBoxResult.Yes;
-                                break;
-                        }
+                                StrokeCollection pendingCollection = null;
+                                if (_currentCommitType == CommitReason.ShapeDrawing)
+                                {
+                                    _currentCommitType = CommitReason.UserInput;
+                                    if (lastTempStrokeCollection != null && lastTempStrokeCollection.Count > 0)
+                                        pendingCollection = lastTempStrokeCollection;
+                                    else if (lastTempStroke != null)
+                                        pendingCollection = new StrokeCollection { lastTempStroke };
+                                }
 
-                        if (!opFlag)
-                        {
-                            foreach (var asymptoteStroke in new StrokeCollection(asymptoteStrokes))
-                            {
-                                if (inkCanvas.Strokes.Contains(asymptoteStroke)) inkCanvas.Strokes.Remove(asymptoteStroke);
-                                // 已移除的渐近线不应进入最终图形的撤销/重做记录。
-                                lastTempStrokeCollection?.Remove(asymptoteStroke);
-                            }
+                                // 推迟到当前触摸/手写笔输入事件处理完结后再弹出模态框，避免触摸屏上弹窗按钮无响应。
+                                Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
+                                {
+                                    if (MessageBox.Show(Properties.CanvasStrings.Shape_RemoveAsymptote, "Ink Canvas", MessageBoxButton.YesNo) ==
+                                        MessageBoxResult.Yes)
+                                    {
+                                        RemoveHyperbolaAsymptotes(asymptoteStrokes, pendingCollection);
+                                    }
+
+                                    if (pendingCollection != null && pendingCollection.Count > 0)
+                                    {
+                                        timeMachine.CommitStrokeUserInputHistory(pendingCollection);
+                                    }
+                                }));
+                                break;
                         }
                     }
 
@@ -3009,6 +3019,16 @@ namespace Ink_Canvas
             }
 
             if (Settings.Canvas.FitToCurve == true) drawingAttributes.FitToCurve = true;
+        }
+
+        private void RemoveHyperbolaAsymptotes(StrokeCollection asymptoteStrokes, StrokeCollection commitCollection)
+        {
+            foreach (var asymptoteStroke in new StrokeCollection(asymptoteStrokes))
+            {
+                if (inkCanvas.Strokes.Contains(asymptoteStroke)) inkCanvas.Strokes.Remove(asymptoteStroke);
+                // 已移除的渐近线不应进入最终图形的撤销/重做记录。
+                commitCollection?.Remove(asymptoteStroke);
+            }
         }
 
         /// <summary>
