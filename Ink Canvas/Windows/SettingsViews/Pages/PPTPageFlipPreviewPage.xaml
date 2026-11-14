@@ -52,28 +52,40 @@
 
                         <!-- 左侧翻页按钮预览 -->
                         <Border Background="Transparent" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6,0,0,0"
-                                MouseLeftButtonDown="PreviewLS_MouseLeftButtonDown" Cursor="Hand"
+                                MouseLeftButtonDown="PreviewLS_MouseLeftButtonDown"
+                                MouseMove="PreviewButton_MouseMove" MouseLeftButtonUp="PreviewButton_MouseLeftButtonUp"
+                                TouchDown="PreviewButton_TouchDown" TouchMove="PreviewButton_TouchMove" TouchUp="PreviewButton_TouchUp"
+                                Cursor="Hand"
                                 x:Name="PreviewLSBorder">
                             <ppt:PPTNavBar x:Name="PreviewLS" Direction="LeftSide"
                                            CurrentSlide="3" TotalSlides="10" IsHitTestVisible="False"/>
                         </Border>
                         <!-- 右侧翻页按钮预览 -->
                         <Border Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0"
-                                MouseLeftButtonDown="PreviewRS_MouseLeftButtonDown" Cursor="Hand"
+                                MouseLeftButtonDown="PreviewRS_MouseLeftButtonDown"
+                                MouseMove="PreviewButton_MouseMove" MouseLeftButtonUp="PreviewButton_MouseLeftButtonUp"
+                                TouchDown="PreviewButton_TouchDown" TouchMove="PreviewButton_TouchMove" TouchUp="PreviewButton_TouchUp"
+                                Cursor="Hand"
                                 x:Name="PreviewRSBorder">
                             <ppt:PPTNavBar x:Name="PreviewRS" Direction="RightSide"
                                            CurrentSlide="3" TotalSlides="10" IsHitTestVisible="False"/>
                         </Border>
                         <!-- 左下翻页按钮预览 -->
                         <Border Background="Transparent" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="6,0,0,6"
-                                MouseLeftButtonDown="PreviewLB_MouseLeftButtonDown" Cursor="Hand"
+                                MouseLeftButtonDown="PreviewLB_MouseLeftButtonDown"
+                                MouseMove="PreviewButton_MouseMove" MouseLeftButtonUp="PreviewButton_MouseLeftButtonUp"
+                                TouchDown="PreviewButton_TouchDown" TouchMove="PreviewButton_TouchMove" TouchUp="PreviewButton_TouchUp"
+                                Cursor="Hand"
                                 x:Name="PreviewLBBorder">
                             <ppt:PPTNavBar x:Name="PreviewLB" Direction="LeftBottom"
                                            CurrentSlide="3" TotalSlides="10" IsHitTestVisible="False"/>
                         </Border>
                         <!-- 右下翻页按钮预览 -->
                         <Border Background="Transparent" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,6,6"
-                                MouseLeftButtonDown="PreviewRB_MouseLeftButtonDown" Cursor="Hand"
+                                MouseLeftButtonDown="PreviewRB_MouseLeftButtonDown"
+                                MouseMove="PreviewButton_MouseMove" MouseLeftButtonUp="PreviewButton_MouseLeftButtonUp"
+                                TouchDown="PreviewButton_TouchDown" TouchMove="PreviewButton_TouchMove" TouchUp="PreviewButton_TouchUp"
+                                Cursor="Hand"
                                 x:Name="PreviewRBBorder">
                             <ppt:PPTNavBar x:Name="PreviewRB" Direction="RightBottom"
                                            CurrentSlide="3" TotalSlides="10" IsHitTestVisible="False"/>
