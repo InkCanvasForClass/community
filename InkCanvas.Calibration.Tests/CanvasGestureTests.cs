@@ -292,22 +292,29 @@ namespace InkCanvas.Calibration.Tests
             settings.Gesture.IsEnableTwoFingerZoomBoard = true;
             using var fixture = new Fixture(settings);
             fixture.TrackHistory();
+            // Compare the same canvas point; RenderTransform alone omits the image's layout offset.
+            var imagePoint = fixture.Image.TransformToAncestor(fixture.Canvas).Inverse.Transform(new Point(200, 150));
             fixture.Begin(new Point(300, 200), new Point(500, 200));
             fixture.MovePair(new Point(250, 200), new Point(550, 200));
             fixture.End();
             var machine = Field<TimeMachine>(fixture.Window, "timeMachine");
             var after = fixture.Ink.StylusPoints[0].ToPoint();
+            fixture.Canvas.UpdateLayout();
+            Near(fixture.Image.TransformToAncestor(fixture.Canvas).Transform(imagePoint), after,
+                "Gesture did not keep the image aligned with the ink");
             var history = machine.Undo();
             Check(history != null, "Gesture did not commit undo history");
             Call(fixture.Window, "ApplyHistoryToCanvas", history, null, null);
             Near(fixture.Ink.StylusPoints[0].ToPoint(), new Point(200, 150), "Undo did not restore ink points");
             Check(Math.Abs(fixture.Ink.DrawingAttributes.Width - 4) < 0.01, "Undo did not restore ink thickness");
-            Near(fixture.Image.RenderTransform.Value.Transform(new Point(200, 150)), new Point(200, 150),
+            fixture.Canvas.UpdateLayout();
+            Near(fixture.Image.TransformToAncestor(fixture.Canvas).Transform(imagePoint), new Point(200, 150),
                 "Undo did not restore the image with the ink");
             Check(!machine.CanUndo, "A single gesture created more than one undo step");
             Call(fixture.Window, "ApplyHistoryToCanvas", machine.Redo(), null, null);
             Near(fixture.Ink.StylusPoints[0].ToPoint(), after, "Redo did not restore the gesture");
-            Near(fixture.Image.RenderTransform.Value.Transform(new Point(200, 150)), after,
+            fixture.Canvas.UpdateLayout();
+            Near(fixture.Image.TransformToAncestor(fixture.Canvas).Transform(imagePoint), after,
                 "Redo did not keep the image aligned with the ink");
         }
 

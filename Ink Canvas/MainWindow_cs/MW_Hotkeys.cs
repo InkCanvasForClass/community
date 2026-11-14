@@ -24,6 +24,13 @@ namespace Ink_Canvas
                 return;
             }
 
+            // 白板滚轮由原生触控板入口处理；未命中画布的事件也不能穿透到底层应用。
+            if (currentMode == 1)
+            {
+                e.Handled = true;
+                return;
+            }
+
             // 滚轮事件来源：
             //   - IsAnnotating=true（画笔/橡皮/选择工具）→ 绘制模式，应用穿透（issue #572）
             //   - IsAnnotating=false（鼠标模式）→ 直接 return，保留原 PPT 翻页逻辑

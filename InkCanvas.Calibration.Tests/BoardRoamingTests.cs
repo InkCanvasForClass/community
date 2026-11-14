@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Ink;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Ink_Canvas;
@@ -68,6 +69,14 @@ namespace InkCanvas.Calibration.Tests
                 PreviewAfterImmediatePan, PreviewRejectsInvalidBounds, PreviewRetainsTransformedImages,
                 PanDefersPointMutation, PanCommitsOneHistory, PanPreservesOriginalTransform,
                 PanWithoutMovementHasNoHistory, PanCompletesOnCaptureLoss, PopupJumpBelongsToPan,
+                TouchpadMovesInkWithoutChangingTool, TouchpadZoomKeepsAnchor, TouchpadRespectsFrozenPage,
+                TouchpadCompletionCommitsHistory, TouchpadHistoryIncludesImagesAndAttributes,
+                TouchpadPageSwitchCommitsHistory, TouchpadPanKeepsNavigationVisible, WheelCompatibilityHandlesBothAxes,
+                NativeTouchpadInitializesAndDisposes, NativeTouchpadCumulativeTransformBecomesDelta,
+                TouchpadPreservesPreviouslyPannedImage, TouchpadWheelRespectsGestureSettings,
+                TouchpadZoomRefreshesOpenNavigation, SharedMediaTransformPreservesCanvasCoordinates,
+                SharedMediaTransformPreservesOtherElements, RoamingContinuesAfterImageTransformFailure,
+                RepeatedCanvasTransformsKeepImagesEditable,
                 PopupRepeatedPanKeepsInkVisible, PopupNearEdgeExpandsPreview,
                 LateManipulationDoesNotStartRoaming, PipelineRebindPreservesRoamingMode })
             {
@@ -101,7 +110,7 @@ namespace InkCanvas.Calibration.Tests
             Set(window, "pageLastUserInkMutationUtc", new DateTime[101]);
             Set(window, "StrokeInitialHistory", new Dictionary<Stroke, StylusPointCollection>());
             Set(window, "timeMachine", new TimeMachine());
-            foreach (string name in new[] { "dec", "_boardRoamingContactIds" })
+            foreach (string name in new[] { "dec", "_boardRoamingContactIds", "circles" })
             {
                 var field = typeof(MainWindow).GetField(name, Members);
                 field.SetValue(window, Activator.CreateInstance(field.FieldType));
@@ -415,6 +424,374 @@ namespace InkCanvas.Calibration.Tests
             Check(Field<WpfInkCanvas>(window, "inkCanvas").RenderTransform.Value.IsIdentity,
                 "Popup pan left a display transform behind");
             Field<Popup>(window, "BoardRoamingPopup").IsOpen = false;
+        }
+
+        private static void TouchpadMovesInkWithoutChangingTool()
+        {
+            var window = CreateWindow(false);
+            Set(window, "_currentToolMode", "pen");
+            var stroke = StrokeAt(200, 150);
+            AddInk(window, stroke, true);
+            Call(window, "ApplyBoardTouchpadDelta", new Matrix(1, 0, 0, 1, 30, -20));
+            Check(stroke.StylusPoints[0].X == 230 && stroke.StylusPoints[0].Y == 130,
+                "Touchpad must pan both axes while the pen tool is selected");
+            Check(Field<string>(window, "_currentToolMode") == "pen", "Touchpad changed the selected tool");
+            Call(window, "EndBoardTouchpadGesture");
+        }
+
+        private static void NativeTouchpadInitializesAndDisposes()
+        {
+            using var source = new HwndSource(new HwndSourceParameters("ICC touchpad regression")
+                { Width = 800, Height = 450, WindowStyle = 0 });
+            var options = (Translate: true, Zoom: true);
+            var type = typeof(MainWindow).Assembly.GetType("Ink_Canvas.Helpers.TouchpadManipulation");
+            using var input = (IDisposable)Activator.CreateInstance(type, Members, null,
+                new object[] { source, (Func<bool>)(() => false), (Func<(bool, bool)>)(() => options),
+                    (Action<Matrix>)(delta => throw new InvalidOperationException("Idle viewport emitted a gesture")),
+                    (Action)(() => { }) }, null);
+            foreach (var enabled in new[] { (true, false), (false, true), (true, true), (false, false) })
+            {
+                options = enabled;
+                Check((bool)Call(input, "ConfigureGestures") == (enabled.Item1 || enabled.Item2),
+                    "Native viewport failed to configure enabled gestures or accepted all-disabled input");
+            }
+            Call(input, "Stop");
+            Call(input, "Stop");
+        }
+
+        private static void NativeTouchpadCumulativeTransformBecomesDelta()
+        {
+            var type = typeof(MainWindow).Assembly.GetType("Ink_Canvas.Helpers.TouchpadManipulation");
+            var delta = (Matrix)type.GetMethod("GetDelta", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null,
+                new object[] { new Matrix(2, 0, 0, 2, -100, -100), new Matrix(4, 0, 0, 4, -300, -300) });
+            var result = delta.Transform(new Point(300, 200));
+            Check(result == new Point(500, 300), "Native cumulative transform was applied twice");
+        }
+
+        private static void TouchpadPreservesPreviouslyPannedImage()
+        {
+            var window = CreateWindow(false);
+            var canvas = Field<WpfInkCanvas>(window, "inkCanvas");
+            var image = new Image { Width = 100, Height = 80,
+                RenderTransformOrigin = new Point(0.5, 0.5), RenderTransform = new RotateTransform(20) };
+            WpfInkCanvas.SetLeft(image, 200);
+            WpfInkCanvas.SetTop(image, 100);
+            canvas.Children.Add(image);
+            canvas.UpdateLayout();
+            Call(window, "BeginBoardRoaming", new Point(100, 100));
+            Call(window, "MoveBoardRoaming", InputPoint(canvas, new Point(160, 130)));
+            Call(window, "EndBoardRoaming");
+            canvas.UpdateLayout();
+            var before = image.TransformToAncestor(canvas).Transform(new Point(50, 40));
+            Call(window, "ApplyBoardTouchpadDelta", new Matrix(2, 0, 0, 2, -100, -100));
+            canvas.UpdateLayout();
+            var after = image.TransformToAncestor(canvas).Transform(new Point(50, 40));
+            Check((after - new Point(before.X * 2 - 100, before.Y * 2 - 100)).Length < 0.001,
+                "Touchpad discarded the image's prior pan/rotation or scaled around the wrong origin");
+            Call(window, "EndBoardTouchpadGesture");
+        }
+
+        private static void SharedMediaTransformPreservesCanvasCoordinates()
+        {
+            var window = CreateWindow(false);
+            var canvas = Field<WpfInkCanvas>(window, "inkCanvas");
+            foreach (var element in new FrameworkElement[] { new Image(), new MediaElement(), new CanvasMediaControl() })
+            {
+                element.Width = 100;
+                element.Height = 80;
+                element.RenderTransformOrigin = new Point(0.5, 0.5);
+                element.RenderTransform = new RotateTransform(20);
+                WpfInkCanvas.SetLeft(element, 200);
+                WpfInkCanvas.SetTop(element, 100);
+                canvas.Children.Add(element);
+                canvas.UpdateLayout();
+                var points = new[] { new Point(), new Point(50, 40), new Point(100, 80) };
+                var before = points.Select(p => element.TransformToAncestor(canvas).Transform(p)).ToArray();
+
+                // In canvas coordinates: translate (30,-20), scale 2x at (100,100), then rotate 90 degrees there.
+                Call(window, "TransformCanvasImages", new Matrix(1, 0, 0, 1, 30, -20));
+                Call(window, "TransformCanvasImages", new Matrix(2, 0, 0, 2, -100, -100));
+                Call(window, "TransformCanvasImages", new Matrix(0, 1, -1, 0, 200, 0));
+                canvas.UpdateLayout();
+                for (int i = 0; i < points.Length; i++)
+                {
+                    var after = element.TransformToAncestor(canvas).Transform(points[i]);
+                    Check((after - new Point(340 - 2 * before[i].Y, 2 * before[i].X - 40)).Length < 0.001,
+                        $"{element.GetType().Name} lost its previous transform or used the wrong canvas origin");
+                }
+                canvas.Children.Remove(element);
+            }
+        }
+
+        private static void SharedMediaTransformPreservesOtherElements()
+        {
+            var window = CreateWindow(false);
+            var canvas = Field<WpfInkCanvas>(window, "inkCanvas");
+            var shared = new TransformGroup();
+            shared.Children.Add(new RotateTransform(20));
+            shared.Children.Add(new TranslateTransform(10, 5));
+            var image = new Image { RenderTransform = shared };
+            var unrelated = new Border { RenderTransform = shared };
+            canvas.Children.Add(image);
+            canvas.Children.Add(unrelated);
+            var original = shared.Value;
+            Call(window, "TransformCanvasImages", new Matrix(1, 0, 0, 1, 30, -20));
+            Check(unrelated.RenderTransform.Value == original,
+                "Transforming a media element mutated a transform shared with another element");
+            Check(image.RenderTransform.Value.OffsetX == original.OffsetX + 30
+                && image.RenderTransform.Value.OffsetY == original.OffsetY - 20,
+                "Shared transform prevented the image from moving");
+        }
+
+        private static void RepeatedCanvasTransformsKeepImagesEditable()
+        {
+            foreach (bool roaming in new[] { false, true })
+            {
+                var window = CreateWindow(false);
+                var canvas = Field<WpfInkCanvas>(window, "inkCanvas");
+                var group = new TransformGroup();
+                group.Children.Add(new ScaleTransform());
+                group.Children.Add(new TranslateTransform());
+                group.Children.Add(new RotateTransform());
+                var image = new Image { Width = 100, Height = 80, RenderTransform = group };
+                canvas.Children.Add(image);
+                canvas.UpdateLayout();
+                for (int i = 0; i < 100; i++)
+                {
+                    var delta = new Matrix(1, 0, 0, 1, 1, -1);
+                    if (roaming) Call(window, "ApplyBoardTouchpadDelta", delta);
+                    else Call(window, "TransformCanvasImages", delta);
+                }
+                Call(window, "ApplyTranslateTransform", image, 10.0, 5.0);
+                Check(image.RenderTransform.Value.OffsetX == 110 && image.RenderTransform.Value.OffsetY == -95,
+                    "Canvas navigation prevented subsequent image editing");
+                Check(image.RenderTransform is TransformGroup result && result.Children.Count <= 4,
+                    "Repeated canvas navigation grew the transform list per input frame");
+            }
+        }
+
+        private sealed class RejectingTransformImage : Image
+        {
+            public bool RejectTransform { get; set; }
+            public int Rejections { get; private set; }
+
+            static RejectingTransformImage()
+            {
+                RenderTransformProperty.OverrideMetadata(typeof(RejectingTransformImage),
+                    new FrameworkPropertyMetadata(Transform.Identity, null, (target, value) =>
+                    {
+                        var image = (RejectingTransformImage)target;
+                        if (image.RejectTransform)
+                        {
+                            image.Rejections++;
+                            throw new InvalidOperationException("Simulated image transform failure");
+                        }
+                        return value;
+                    }));
+            }
+        }
+
+        private static void RoamingContinuesAfterImageTransformFailure()
+        {
+            var window = CreateWindow(false);
+            var canvas = Field<WpfInkCanvas>(window, "inkCanvas");
+            var first = new Image { Width = 100, Height = 80 };
+            var broken = new RejectingTransformImage { Width = 100, Height = 80 };
+            var last = new Image { Width = 100, Height = 80 };
+            canvas.Children.Add(first);
+            canvas.Children.Add(broken);
+            canvas.Children.Add(last);
+            canvas.UpdateLayout();
+            broken.RejectTransform = true;
+            try
+            {
+                Call(window, "ApplyBoardTouchpadDelta", new Matrix(1, 0, 0, 1, 30, -20));
+                Check(broken.Rejections == 1, "Test did not exercise a failed element transform");
+                foreach (var image in new[] { first, last })
+                    Check(image.RenderTransform.Value.OffsetX == 30 && image.RenderTransform.Value.OffsetY == -20,
+                        "A failing image prevented another image from moving");
+                Call(window, "EndBoardTouchpadGesture");
+                Check(!Field<bool>(window, "_isBoardTouchpadGesture"),
+                    "A failing image interrupted viewport bookkeeping");
+            }
+            finally { broken.RejectTransform = false; }
+        }
+
+        private static void TouchpadZoomKeepsAnchor()
+        {
+            var window = CreateWindow(false);
+            var stroke = StrokeAt(200, 150);
+            AddInk(window, stroke);
+            // Two successive 2x deltas around (100, 100): (200,150) -> (300,200) -> (500,300).
+            Call(window, "ApplyBoardTouchpadDelta", new Matrix(2, 0, 0, 2, -100, -100));
+            Call(window, "ApplyBoardTouchpadDelta", new Matrix(2, 0, 0, 2, -100, -100));
+            Check(stroke.StylusPoints[0].X == 500 && stroke.StylusPoints[0].Y == 300,
+                "Successive pinch deltas drifted from the zoom anchor");
+            Call(window, "EndBoardTouchpadGesture");
+        }
+
+        private static void TouchpadRespectsFrozenPage()
+        {
+            var window = CreateWindow(false);
+            var stroke = StrokeAt(200, 150);
+            AddInk(window, stroke);
+            Field<bool[]>(window, "frozenPages")[1] = true;
+            Call(window, "ApplyBoardTouchpadDelta", new Matrix(2, 0, 0, 2, 30, 20));
+            Check(stroke.StylusPoints[0].X == 200 && stroke.StylusPoints[0].Y == 150,
+                "Touchpad mutated a frozen page");
+            Check(Field<TimeMachine>(window, "timeMachine").ExportTimeMachineHistory().Length == 0,
+                "Frozen-page gesture created history");
+        }
+
+        private static void TouchpadCompletionCommitsHistory()
+        {
+            var window = CreateWindow(false);
+            var stroke = StrokeAt(200, 150);
+            AddInk(window, stroke, true);
+            Call(window, "ApplyBoardTouchpadDelta", new Matrix(1, 0, 0, 1, 10, 0));
+            Call(window, "ApplyBoardTouchpadDelta", new Matrix(1, 0, 0, 1, 20, 0));
+            Call(window, "EndBoardTouchpadGesture");
+            var machine = Field<TimeMachine>(window, "timeMachine");
+            Check(machine.ExportTimeMachineHistory().Length == 1, "One touchpad gesture must commit one pan history");
+            Call(window, "ApplyHistoryToCanvas", machine.Undo(), null, null);
+            Check(stroke.StylusPoints[0].X == 200, "Undo did not restore the start of the gesture");
+        }
+
+        private static void TouchpadHistoryIncludesImagesAndAttributes()
+        {
+            var window = CreateWindow(false);
+            var canvas = Field<WpfInkCanvas>(window, "inkCanvas");
+            var stroke = StrokeAt(200, 150);
+            AddInk(window, stroke, true);
+            var image = new Image { Width = 100, Height = 80, RenderTransformOrigin = new Point(0.5, 0.5) };
+            WpfInkCanvas.SetLeft(image, 200);
+            WpfInkCanvas.SetTop(image, 150);
+            canvas.Children.Add(image);
+            canvas.UpdateLayout();
+            var before = image.TransformToAncestor(canvas).Transform(new Point());
+            Call(window, "ApplyBoardTouchpadDelta", new Matrix(2, 0, 0, 2, -100, -100));
+            Call(window, "EndBoardTouchpadGesture");
+            var machine = Field<TimeMachine>(window, "timeMachine");
+            Check(machine.ExportTimeMachineHistory().Length == 1, "Pinch must commit one combined history");
+            Call(window, "ApplyHistoryToCanvas", machine.Undo(), null, null);
+            canvas.UpdateLayout();
+            Check(stroke.StylusPoints[0].ToPoint() == new Point(200, 150) && stroke.DrawingAttributes.Width == 16,
+                "Undo did not restore ink geometry and width");
+            Check((image.TransformToAncestor(canvas).Transform(new Point()) - before).Length < 0.001,
+                "Undo did not restore the image");
+            Call(window, "ApplyHistoryToCanvas", machine.Redo(), null, null);
+            canvas.UpdateLayout();
+            Check(stroke.StylusPoints[0].ToPoint() == new Point(300, 200) && stroke.DrawingAttributes.Width == 32,
+                "Redo did not restore the pinch");
+            Check((image.TransformToAncestor(canvas).Transform(new Point())
+                - new Point(before.X * 2 - 100, before.Y * 2 - 100)).Length < 0.001,
+                "Redo did not keep the image aligned");
+        }
+
+        private static void TouchpadPageSwitchCommitsHistory()
+        {
+            var window = CreateWindow(false);
+            AddInk(window, StrokeAt(200, 150), true);
+            Call(window, "ApplyBoardTouchpadDelta", new Matrix(1, 0, 0, 1, 30, 20));
+            typeof(MainWindow).GetProperty("CurrentWhiteboardIndex", Members).SetValue(window, 2);
+            Check(!Field<bool>(window, "_isBoardTouchpadGesture"), "Page switch left touchpad history pending");
+            Check(Field<TimeMachine>(window, "timeMachine").ExportTimeMachineHistory().Length == 1,
+                "Page switch failed to commit touchpad history");
+        }
+
+        private static void TouchpadPanKeepsNavigationVisible()
+        {
+            var window = CreateWindow();
+            AddInk(window, StrokeAt(200, 150));
+            Refresh(window);
+            try
+            {
+                Call(window, "ApplyBoardTouchpadDelta", new Matrix(1, 0, 0, 1, 1600, 900));
+                CheckInkInPreview(window, "Touchpad long pan");
+                Check(Field<Point>(window, "_boardRoamingViewportWorldPosition") == new Point(-1600, -900),
+                    "Touchpad did not move the navigation viewport");
+                Call(window, "EndBoardTouchpadGesture");
+                Call(window, "RefreshBoardRoamingPopup", false);
+                CheckInkInPreview(window, "Touchpad long pan after release");
+                Check(Field<Point>(window, "_boardRoamingViewportWorldPosition") == new Point(),
+                    "Completed touchpad gesture retained temporary viewport coordinates");
+            }
+            finally { Field<Popup>(window, "BoardRoamingPopup").IsOpen = false; }
+        }
+
+        private static void WheelCompatibilityHandlesBothAxes()
+        {
+            var window = CreateWindow(false);
+            Set(window, "_currentToolMode", "pen");
+            var stroke = StrokeAt(200, 150);
+            AddInk(window, stroke);
+            Check((bool)Call(window, "HandleBoardTouchpadWheel", 120, false, false, new Point(100, 100)),
+                "Whiteboard vertical wheel was not consumed");
+            Check(stroke.StylusPoints[0].Y > 150, "Positive vertical wheel must move content down");
+            Check((bool)Call(window, "HandleBoardTouchpadWheel", 120, true, false, new Point(100, 100)),
+                "Whiteboard horizontal wheel was not consumed");
+            Check(stroke.StylusPoints[0].X < 200, "Positive horizontal wheel must move content left");
+            Call(window, "EndBoardTouchpadGesture");
+            Set(window, "_currentMode", 0);
+            Check(!(bool)Call(window, "HandleBoardTouchpadWheel", 120, false, true, new Point()),
+                "Desktop annotation wheel route was intercepted");
+        }
+
+        private static void TouchpadWheelRespectsGestureSettings()
+        {
+            var previous = MainWindow.Settings;
+            try
+            {
+                foreach (var tool in new[] { "pen", "eraser", "roaming" })
+                foreach (bool translate in new[] { false, true })
+                foreach (bool zoom in new[] { false, true })
+                foreach (bool control in new[] { false, true })
+                foreach (bool horizontal in new[] { false, true })
+                {
+                    MainWindow.Settings = new Settings();
+                    var gestures = MainWindow.Settings.Gesture;
+                    gestures.IsEnableTwoFingerTranslateBoard = translate;
+                    // net6 uses the whiteboard zoom setting for all tools.
+                    gestures.IsEnableTwoFingerZoomBoard = zoom;
+                    var window = CreateWindow(false);
+                    Set(window, "_currentToolMode", tool);
+                    var stroke = StrokeAt(200, 150);
+                    AddInk(window, stroke, true);
+                    bool allowed = control ? zoom : tool == "roaming" || translate;
+                    Check((bool)Call(window, "HandleBoardTouchpadWheel", 120, horizontal, control, new Point(100, 100)),
+                        "Disabled gestures must still consume wheel input to prevent passthrough");
+                    bool moved = stroke.StylusPoints[0].ToPoint() != new Point(200, 150);
+                    Check(moved == allowed, $"{tool}: translate={translate}, zoom={zoom}, pinch={control} ignored settings");
+                    Call(window, "EndBoardTouchpadGesture");
+                    if (!allowed)
+                        Check(Field<TimeMachine>(window, "timeMachine").ExportTimeMachineHistory().Length == 0,
+                            "Disabled gesture created undo history");
+                }
+            }
+            finally { MainWindow.Settings = previous; }
+        }
+
+        private static void TouchpadZoomRefreshesOpenNavigation()
+        {
+            var window = CreateWindow();
+            AddInk(window, StrokeAt(1200, 150));
+            Refresh(window);
+            var popup = Field<BoardRoamingPopupContent>(window, "BoardRoamingPopupContent");
+            var hint = Field<TextBlock>(popup, "ScaleHintText");
+            var before = hint.Text;
+            try
+            {
+                Call(window, "ApplyBoardTouchpadDelta", new Matrix(2, 0, 0, 2, 0, 0));
+                var liveHint = hint.Text;
+                Check(liveHint != before, "Open navigation scale did not update during pinch");
+                Refresh(window);
+                Check(hint.Text == liveHint, "Navigation scale only becomes correct after reopening/rebuilding bounds");
+            }
+            finally
+            {
+                Call(window, "EndBoardTouchpadGesture");
+                Field<Popup>(window, "BoardRoamingPopup").IsOpen = false;
+            }
         }
 
         private static void CheckInkInPreview(MainWindow window, string step)
