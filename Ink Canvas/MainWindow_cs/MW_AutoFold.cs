@@ -41,7 +41,7 @@ namespace Ink_Canvas
         /// 5. 隐藏所有水印
         /// 6. 切换到批注模式
         /// 7. 设置退出按钮前景色为白色
-        /// 8. 设置应用主题为深色
+        /// 8. 保持用户配置的应用主题
         /// 9. 200毫秒后重置显示/隐藏黑板的标志为false
         /// </remarks>
         private void CloseWhiteboardImmediately()
@@ -56,7 +56,6 @@ namespace Ink_Canvas
             ICCWaterMarkWhite.Visibility = Visibility.Collapsed;
             SwitchBackground(null, null);
             { /* Old UI removed */ }
-            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
             new Thread(() =>
             {
                 Thread.Sleep(200);
