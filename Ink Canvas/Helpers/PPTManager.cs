@@ -77,6 +77,10 @@ namespace Ink_Canvas.Helpers
         private int _connectionGeneration;
         private readonly object _lockObject = new object();
         private bool _disposed;
+        // 连接诊断状态：仅在连接结果发生变化时输出日志，避免定时器刷屏
+        private string _lastPPTDiagnosticKey;
+        private string _lastPPTFailureDetail;
+        private string _lastPPTConnectedProgId = "PowerPoint/WPS";
         private static bool IsPPTBusyHResult(uint hr) => hr == 0x80010001 || hr == 0x8001010A;
         private static bool IsNoActivePresentationHResult(uint hr) => hr == 0x80048240;
         private const int ConnectionCheckIntervalTicks = 3;
@@ -176,6 +180,8 @@ namespace Ink_Canvas.Helpers
                 {
                     if (_isModuleUnloading) return;
 
+                    _lastPPTFailureDetail = null;
+
                     // 尝试连接到PowerPoint
                     pptApp = TryConnectToPowerPoint();
                     if (pptApp == null && IsSupportWPS)
@@ -183,6 +189,8 @@ namespace Ink_Canvas.Helpers
                         // 如果PowerPoint连接失败且支持WPS，尝试连接WPS
                         pptApp = TryConnectToWPS();
                     }
+
+                    bool instanceFound = pptApp != null;
 
                     if (pptApp != null && !IsConnected)
                     {
@@ -202,6 +210,8 @@ namespace Ink_Canvas.Helpers
                         // PPT/WPS应用程序不可用但PPTApplication对象仍存在，清理无效连接
                         DisconnectFromPPT();
                     }
+
+                    ReportPPTConnectionDiagnostics(instanceFound);
                 }
                 catch (Exception ex)
                 {
@@ -296,6 +306,254 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        #region Connection Diagnostics
+        private const int TokenQueryAccess = 0x0008;
+        private const int TokenElevationTypeClass = 18;
+        private const int TokenElevationClass = 20;
+        private const int TokenIntegrityLevelClass = 25;
+        private const int TokenUIAccessClass = 26;
+
+        private static readonly Lazy<string> _processTokenDiagnostics = new Lazy<string>(
+            BuildProcessTokenDiagnostics, LazyThreadSafetyMode.ExecutionAndPublication);
+
+        [DllImport("advapi32.dll", SetLastError = true)]
+        private static extern bool OpenProcessToken(IntPtr processHandle, uint desiredAccess, out IntPtr tokenHandle);
+
+        [DllImport("advapi32.dll", SetLastError = true)]
+        private static extern bool GetTokenInformation(
+            IntPtr tokenHandle,
+            int tokenInformationClass,
+            IntPtr tokenInformation,
+            uint tokenInformationLength,
+            out uint returnLength);
+
+        [DllImport("advapi32.dll")]
+        private static extern IntPtr GetSidSubAuthorityCount(IntPtr sid);
+
+        [DllImport("advapi32.dll")]
+        private static extern IntPtr GetSidSubAuthority(IntPtr sid, uint subAuthorityIndex);
+
+        [DllImport("kernel32.dll")]
+        private static extern IntPtr GetCurrentProcess();
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool CloseHandle(IntPtr handle);
+
+        /// <summary>
+        /// 只在连接结果发生变化时输出一条日志。连接检查每几秒跑一次，
+        /// 逐次输出会把日志刷满，也会掩盖真正有用的信息。
+        /// </summary>
+        private void ReportPPTConnectionDiagnostics(bool instanceFound)
+        {
+            string key;
+            string message;
+            LogHelper.LogType logType;
+
+            if (IsConnected)
+            {
+                key = "connected:" + _lastPPTConnectedProgId;
+                message = $"[PPT] 连接诊断：已连接到 {_lastPPTConnectedProgId}（{GetProcessTokenDiagnostics()}）";
+                logType = LogHelper.LogType.Info;
+            }
+            else if (instanceFound)
+            {
+                // 找到了 PPT/WPS 实例但没能建立连接，ConnectToPPT 内部已经记录了错误，此处不重复。
+                return;
+            }
+            else
+            {
+                var detail = string.IsNullOrEmpty(_lastPPTFailureDetail)
+                    ? "未获取到活动的 PowerPoint/WPS 实例"
+                    : _lastPPTFailureDetail;
+                var officeProcessRunning = IsPowerPointOrWpsProcessRunning();
+
+                key = "failed:" + detail;
+                if (officeProcessRunning)
+                {
+                    message = $"[PPT] 未能连接 PowerPoint/WPS 联动：{detail}；{GetProcessTokenDiagnostics()}；" +
+                              "提示：以管理员身份运行 ICC 时，无法通过 GetActiveObject 看到以普通权限运行的 PPT/WPS（返回 0x800401E3 MK_E_UNAVAILABLE），请以普通权限启动 ICC；" +
+                              "反过来，若 PPT/WPS 以管理员身份运行，普通权限的 ICC 同样看不到它，请让两者以相同的完整性级别启动";
+                    logType = LogHelper.LogType.Warning;
+                }
+                else
+                {
+                    // 没有 PPT/WPS 进程在运行时连接失败是正常情况，不产生 Warning。
+                    message = $"[PPT] 未检测到运行中的 PowerPoint/WPS 进程：{detail}；{GetProcessTokenDiagnostics()}";
+                    logType = LogHelper.LogType.Trace;
+                }
+            }
+
+            if (key == _lastPPTDiagnosticKey) return;
+
+            _lastPPTDiagnosticKey = key;
+            LogHelper.WriteLogToFile(message, logType);
+        }
+
+        private void RecordPPTFailure(string progId, Exception ex)
+        {
+            string detail;
+            if (ex is COMException comEx)
+            {
+                var hr = (uint)comEx.HResult;
+                detail = $"{progId}: {comEx.GetType().Name} 0x{hr:X8}{DescribeComHResult(hr)}";
+            }
+            else
+            {
+                detail = $"{progId}: {ex.GetType().Name} {ex.Message}";
+            }
+
+            _lastPPTFailureDetail = string.IsNullOrEmpty(_lastPPTFailureDetail)
+                ? detail
+                : _lastPPTFailureDetail + "；" + detail;
+        }
+
+        private static string DescribeComHResult(uint hr)
+        {
+            switch (hr)
+            {
+                case 0x800401E3: return "(MK_E_UNAVAILABLE)";
+                case 0x80080005: return "(CO_E_SERVER_EXEC_FAILURE)";
+                case 0x8001010E: return "(RPC_E_WRONG_THREAD)";
+                case 0x80004005: return "(E_FAIL)";
+                default: return string.Empty;
+            }
+        }
+
+        private static string GetProcessTokenDiagnostics() => _processTokenDiagnostics.Value;
+
+        private static string BuildProcessTokenDiagnostics()
+        {
+            var token = IntPtr.Zero;
+            try
+            {
+                if (!OpenProcessToken(GetCurrentProcess(), TokenQueryAccess, out token))
+                {
+                    return $"当前进程令牌信息不可用（Win32Error={Marshal.GetLastWin32Error()}）";
+                }
+
+                var elevationType = -1;
+                var elevation = -1;
+                var uiAccess = -1;
+                var integrityLevel = -1;
+
+                var buffer = Marshal.AllocHGlobal(sizeof(int));
+                try
+                {
+                    if (GetTokenInformation(token, TokenElevationTypeClass, buffer, sizeof(int), out _))
+                        elevationType = Marshal.ReadInt32(buffer);
+
+                    if (GetTokenInformation(token, TokenElevationClass, buffer, sizeof(int), out _))
+                        elevation = Marshal.ReadInt32(buffer) != 0 ? 1 : 0;
+
+                    if (GetTokenInformation(token, TokenUIAccessClass, buffer, sizeof(int), out _))
+                        uiAccess = Marshal.ReadInt32(buffer) != 0 ? 1 : 0;
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(buffer);
+                }
+
+                // 完整性级别：TOKEN_MANDATORY_LABEL 的 SID 最后一个子权威即 IL 的 RID
+                GetTokenInformation(token, TokenIntegrityLevelClass, IntPtr.Zero, 0, out var needed);
+                if (needed > 0)
+                {
+                    var labelBuffer = Marshal.AllocHGlobal((int)needed);
+                    try
+                    {
+                        if (GetTokenInformation(token, TokenIntegrityLevelClass, labelBuffer, needed, out _))
+                        {
+                            var sid = Marshal.ReadIntPtr(labelBuffer);
+                            if (sid != IntPtr.Zero)
+                            {
+                                var subAuthorityCount = Marshal.ReadByte(GetSidSubAuthorityCount(sid));
+                                if (subAuthorityCount > 0)
+                                {
+                                    var subAuthority = GetSidSubAuthority(sid, (uint)(subAuthorityCount - 1));
+                                    integrityLevel = Marshal.ReadInt32(subAuthority);
+                                }
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        Marshal.FreeHGlobal(labelBuffer);
+                    }
+                }
+
+                return $"ElevationType={DescribeElevationType(elevationType)}({elevationType}) " +
+                       $"TokenElevation={elevation} TokenUIAccess={uiAccess} " +
+                       $"IntegrityLevel={DescribeIntegrityLevel(integrityLevel)}(0x{integrityLevel & 0xFFFF:X4})";
+            }
+            catch (Exception ex)
+            {
+                return $"读取当前进程令牌信息失败: {ex.Message}";
+            }
+            finally
+            {
+                if (token != IntPtr.Zero)
+                {
+                    CloseHandle(token);
+                }
+            }
+        }
+
+        private static string DescribeElevationType(int elevationType)
+        {
+            switch (elevationType)
+            {
+                case 1: return "TokenElevationTypeDefault";
+                case 2: return "TokenElevationTypeFull";
+                case 3: return "TokenElevationTypeLimited";
+                default: return "Unknown";
+            }
+        }
+
+        private static string DescribeIntegrityLevel(int integrityLevel)
+        {
+            switch (integrityLevel)
+            {
+                case 0x0000: return "Untrusted";
+                case 0x1000: return "Low";
+                case 0x2000: return "Medium";
+                case 0x2100: return "MediumPlus";
+                case 0x3000: return "High";
+                case 0x4000: return "System";
+                case 0x5000: return "Protected";
+                default: return "Unknown";
+            }
+        }
+
+        private static bool IsPowerPointOrWpsProcessRunning()
+        {
+            return HasRunningProcess("POWERPNT") || HasRunningProcess("wpp");
+        }
+
+        private static bool HasRunningProcess(string processName)
+        {
+            Process[] processes = null;
+            try
+            {
+                processes = Process.GetProcessesByName(processName);
+                return processes.Length > 0;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"枚举 {processName} 进程失败: {ex.Message}");
+                return false;
+            }
+            finally
+            {
+                if (processes != null)
+                {
+                    foreach (var process in processes)
+                    {
+                        process.Dispose();
+                    }
+                }
+            }
+        }
+        #endregion
+
         private Microsoft.Office.Interop.PowerPoint.Application TryConnectToPowerPoint()
         {
             Microsoft.Office.Interop.PowerPoint.Application pptApp = null;
@@ -308,20 +566,24 @@ namespace Ink_Canvas.Helpers
                     var _ = pptApp.Name;
                     var application = pptApp;
                     pptApp = null;
+                    _lastPPTConnectedProgId = "PowerPoint.Application";
                     return application;
                 }
                 return null;
             }
-            catch (COMException)
+            catch (COMException ex)
             {
+                RecordPPTFailure("PowerPoint.Application", ex);
                 return null;
             }
-            catch (InvalidCastException)
+            catch (InvalidCastException ex)
             {
+                RecordPPTFailure("PowerPoint.Application", ex);
                 return null;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                RecordPPTFailure("PowerPoint.Application", ex);
                 return null;
             }
             finally
@@ -342,20 +604,24 @@ namespace Ink_Canvas.Helpers
                     var _ = wpsApp.Name;
                     var application = wpsApp;
                     wpsApp = null;
+                    _lastPPTConnectedProgId = "kwpp.Application";
                     return application;
                 }
                 return null;
             }
-            catch (COMException)
+            catch (COMException ex)
             {
+                RecordPPTFailure("kwpp.Application", ex);
                 return null;
             }
-            catch (InvalidCastException)
+            catch (InvalidCastException ex)
             {
+                RecordPPTFailure("kwpp.Application", ex);
                 return null;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                RecordPPTFailure("kwpp.Application", ex);
                 return null;
             }
             finally
