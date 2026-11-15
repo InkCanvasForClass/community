@@ -134,7 +134,7 @@ SecurityVerdict verdict = host.EvaluateTrust(packagePath, expectedSha256, declar
 
 ## 宿主提供的服务（经 DI 获取）
 
-约 38 个 `I*Service` 接口，按能力分组。插件通过 `host.GetService<T>()` 获取。
+约 45 个 `I*Service` 接口，按能力分组。插件通过 `host.GetService<T>()` 获取。
 
 ### 画布 / 墨迹
 
@@ -190,12 +190,40 @@ SecurityVerdict verdict = host.EvaluateTrust(packagePath, expectedSha256, declar
 | `ICanvasCoordinateService` | 屏幕物理像素与画布 DIP 坐标互转，处理当前 DPI、多屏和负坐标 |
 | `IInkTextService` | 将文字渲染为 `StrokeCollection` 或直接作为可撤销真实墨迹插入画布 |
 | `ICameraService` | 摄像头 |
+| `ICameraProviderService` | 插件摄像头提供者：把插件采集的画面注册进视频展台摄像头下拉框，宿主负责预览/拍照/分辨率（见下文） |
 | `INameRosterService` | 花名册 |
 | `IUpdateService` | 应用更新（`PluginUpdateChannel`） |
 | `IEventService` | 宿主事件订阅（`TopMostChanged`/`AppExiting`/`CanvasInkChanged` 等） |
 | `IPluginCanvasGestureHandler` | 画布手势处理（作为接口由宿主识别并回调） |
 
-## 深链接：icc://plugin/...
+## 插件摄像头提供者（camera provider，API ≥ 1.14.0）
+
+插件把自己采集的画面（RTSP、视频展台、采集卡、屏幕采集等非 DirectShow 来源）注册成
+宿主「视频展台」摄像头下拉框里的一个摄像头条目，由宿主负责全屏预览、拍照、分辨率切换、
+缩放/旋转/镜像/批注与生命周期。**不需要写原生 COM、不需要注册系统级虚拟摄像头、无需管理员权限。**
+完整说明见 [`docs/camera-provider.md`](../docs/camera-provider.md)。
+
+```csharp
+// Initialize 阶段注册
+var cameraProvider = host.GetService<ICameraProviderService>();
+cameraProvider?.RegisterProvider(new MyCameraProvider());   // 实现 IPluginCameraProvider
+```
+
+要点：
+
+- `IPluginCameraProvider.ProviderId` 建议直接用插件 `manifest.Id`：宿主卸载插件时按它兜底清理。
+- `GetCameras()` 返回 `PluginCameraDescriptor[]`（Id / DisplayName / Capabilities），
+  宿主据此填下拉框与分辨率下拉框；`DisplayName` 建议带「（插件）」后缀以便与 USB 摄像头区分。
+- `StartCamera(cameraId, sink)` 启动采集并保存 `sink`；采集线程调用
+  `sink.Submit(byte[] bgr24, width, height, stride, timestampMs)` 推帧。
+  像素格式固定 **BGR24 / top-down**，`stride = (w*3+3)&~3`。
+- `StopCamera` 应尽快返回；返回后不得再 `Submit`（`Submit` 返回 false 也意味着应停采集）。
+- 分辨率下拉框由 `Capabilities` 填充；`SetCameraFormat` 返回 false 时宿主会重建推流，
+  并按实际帧尺寸渲染。
+- 属性调节（亮度/对比度等）当前对插件摄像头不生效，展台属性滑块自动置灰。
+- 与 DirectShow 虚拟摄像头路线互不冲突，可长期共存：本接口只对宿主可见，随插件安装/卸载。
+
+
 
 插件可注册 URI 处理器，宿主把 `icc://plugin/<pluginId>/<subPath>?<query>` 派发给对应插件。
 

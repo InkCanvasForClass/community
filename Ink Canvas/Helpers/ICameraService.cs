@@ -206,6 +206,19 @@ namespace Ink_Canvas.Helpers
     {
         public string Name { get; set; }
         public string MonikerString { get; set; }
+
+        /// <summary>
+        /// 是否为插件摄像头提供者（camera provider）注册的虚拟摄像头。
+        /// 这类摄像头不经过 DirectShow：预览走 MainWindow 的 WPF Image 路径，
+        /// 拍照取宿主缓存的最近一帧，分辨率来自插件声明的能力列表。
+        /// </summary>
+        public bool IsProviderCamera { get; set; }
+
+        /// <summary>插件摄像头提供者 Id（<see cref="Ink_Canvas.Plugins.IPluginCameraProvider.ProviderId"/>）。</summary>
+        public string ProviderId { get; set; }
+
+        /// <summary>提供者内该摄像头的 Id（<see cref="Ink_Canvas.Plugins.PluginCameraDescriptor.Id"/>）。</summary>
+        public string ProviderCameraId { get; set; }
     }
 
     public class ResolutionInfo
