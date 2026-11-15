@@ -387,125 +387,320 @@
             <Border Name="BorderStrokeSelectionControl"
                     Panel.ZIndex="1001"
                     HorizontalAlignment="Left" VerticalAlignment="Top" Margin="800,400,0,0"
-                    CornerRadius="5" Height="80"
-                    Background="{DynamicResource FloatingBarBackgroundBrush}" d:BorderBrush="Red" d:Background="Green"
+                    CornerRadius="8" Height="48" Padding="4"
+                    Background="{DynamicResource {x:Static ui:ThemeKeys.AcrylicBackgroundFillColorDefaultBrushKey}}"
                     Visibility="Collapsed"
-                    BorderThickness="1" BorderBrush="{DynamicResource FloatingBarBorderBrush}">
-                <Viewbox Margin="0,-2.5">
-                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10" Height="60">
-                        <Border Name="BorderStrokeSelectionClone" Margin="0,2,-9,2" Background="Transparent"
-                                CornerRadius="{Binding ElementName=BorderStrokeSelectionControl, Path=CornerRadius}"
-                                Width="40" MouseDown="Border_MouseDown" MouseUp="BorderStrokeSelectionClone_MouseUp">
-                            <ikw:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Image Source="{DynamicResource StrokeSelectionCloneIcon}"
-                                       RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
-                                <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextClone}" FontSize="10" Foreground="{DynamicResource FloatingBarForegroundBrush}"
-                                           HorizontalAlignment="Center" />
-                            </ikw:SimpleStackPanel>
-                        </Border>
-                        <Border Name="BorderStrokeSelectionCloneToNewBoard" Margin="0,2,-9,2" Background="Transparent"
-                                CornerRadius="{Binding ElementName=BorderStrokeSelectionControl, Path=CornerRadius}"
-                                Width="40" MouseDown="Border_MouseDown"
-                                MouseUp="BorderStrokeSelectionCloneToNewBoard_MouseUp"
-                                Visibility="{Binding Visibility, ElementName=GridBackgroundCover}">
-                            <ikw:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Image Source="{DynamicResource StrokeSelectionCloneToNewBoardIcon}"
-                                       RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
-                                <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextCloneToNewPage}" FontSize="8" Foreground="{DynamicResource FloatingBarForegroundBrush}"
-                                           HorizontalAlignment="Center" />
-                            </ikw:SimpleStackPanel>
-                        </Border>
-                        <Border Name="BorderStrokeSelectionInsertToWhiteboard" Margin="0,2,-9,2" Background="Transparent"
-                                CornerRadius="{Binding ElementName=BorderStrokeSelectionControl, Path=CornerRadius}"
-                                Width="40" MouseDown="Border_MouseDown"
-                                MouseUp="BorderStrokeSelectionInsertToWhiteboard_MouseUp"
-                                Visibility="{Binding Visibility, ElementName=GridBackgroundCover, Converter={StaticResource VisibilityConverter}}">
-                            <ikw:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Image Source="{DynamicResource QuickPanelBlackboardIcon}"
-                                       RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
-                                <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextInsertToWhiteboard}" FontSize="8" Foreground="{DynamicResource FloatingBarForegroundBrush}"
-                                           HorizontalAlignment="Center" />
-                            </ikw:SimpleStackPanel>
-                        </Border>
-                        <Border Width="1" Height="45" BorderBrush="{DynamicResource FloatingBarForegroundBrush}"
-                                Background="{DynamicResource FloatingBarForegroundBrush}" />
-                        <Border CornerRadius="{Binding ElementName=BorderStrokeSelectionControl, Path=CornerRadius}"
-                                Height="40">
-                            <ikw:SimpleStackPanel VerticalAlignment="Center" Spacing="5" Margin="0,-10">
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="10">
-                                    <Image Source="{DynamicResource Rotate45DrawingImage}" Height="22"
-                                           MouseDown="Border_MouseDown" MouseUp="ImageRotate45_MouseUp" />
-                                    <Image Source="{DynamicResource Rotate90DrawingImage}" Height="22"
-                                           MouseDown="Border_MouseDown" MouseUp="ImageRotate90_MouseUp" />
-                                </ikw:SimpleStackPanel>
-                                <TextBlock Text="{x:Static props:BoothStrings.Rotate}" FontSize="10" HorizontalAlignment="Center"
-                                           Foreground="{DynamicResource FloatingBarForegroundBrush}" />
-                            </ikw:SimpleStackPanel>
-                        </Border>
-                        <Border Width="1" Height="45" BorderBrush="{DynamicResource FloatingBarForegroundBrush}"
-                                Background="{DynamicResource FloatingBarForegroundBrush}" />
-                        <Border CornerRadius="{Binding ElementName=BorderStrokeSelectionControl, Path=CornerRadius}"
-                                Height="40">
-                            <ikw:SimpleStackPanel VerticalAlignment="Center" Margin="0,-10">
-                                <ikw:SimpleStackPanel Orientation="Horizontal">
-                                    <Image MouseDown="Border_MouseDown" MouseUp="ImageFlipHorizontal_MouseUp"
-                                           Source="{DynamicResource StrokeSelectionFlipHorizontalIcon}"
-                                           RenderOptions.BitmapScalingMode="HighQuality" Height="30" Width="30" />
-                                    <Image MouseDown="Border_MouseDown" MouseUp="ImageFlipVertical_MouseUp"
-                                           Source="{DynamicResource StrokeSelectionFlipVerticalIcon}"
-                                           RenderOptions.BitmapScalingMode="HighQuality" Height="30" Width="30" />
-                                </ikw:SimpleStackPanel>
-                                <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextFlip}" FontSize="10" HorizontalAlignment="Center"
-                                           Foreground="{DynamicResource FloatingBarForegroundBrush}" />
-                            </ikw:SimpleStackPanel>
-                        </Border>
-                        <Border Width="1" Height="45" BorderBrush="{DynamicResource FloatingBarForegroundBrush}"
-                                Background="{DynamicResource FloatingBarForegroundBrush}" />
-                        <Border CornerRadius="{Binding ElementName=BorderStrokeSelectionControl, Path=CornerRadius}"
-                                Height="40">
-                            <ikw:SimpleStackPanel VerticalAlignment="Center" Spacing="5" Margin="0,-10">
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="5">
-                                    <Grid MouseDown="Border_MouseDown" MouseUp="GridPenWidthDecrease_MouseUp">
-                                        <Image Source="{DynamicResource StrokeSelectionPenWidthIcon}"
-                                               RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
-                                        <TextBlock Text="-" Foreground="{DynamicResource FloatingBarForegroundBrush}"
-                                                   VerticalAlignment="Bottom" HorizontalAlignment="Right"
-                                                   Margin="0,0,-2,-7" FontSize="15" />
-                                    </Grid>
-                                    <Grid MouseDown="Border_MouseDown" MouseUp="GridPenWidthIncrease_MouseUp">
-                                        <Image Source="{DynamicResource StrokeSelectionPenWidthIcon}"
-                                               RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
-                                        <TextBlock Text="+" Foreground="{DynamicResource FloatingBarForegroundBrush}"
-                                                   VerticalAlignment="Bottom" HorizontalAlignment="Right"
-                                                   Margin="0,0,-3,-4" FontSize="11" />
-                                    </Grid>
-                                    <Grid MouseDown="Border_MouseDown" MouseUp="GridPenWidthRestore_MouseUp">
-                                        <Image Source="{DynamicResource StrokeSelectionPenWidthIcon}"
-                                               RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
-                                        <Image Source="{DynamicResource AndroidRefreshDrawingImage}"
-                                               VerticalAlignment="Bottom" HorizontalAlignment="Right"
-                                               Margin="0,0,-2,-2" Width="8" />
-                                    </Grid>
-                                </ikw:SimpleStackPanel>
-                                <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextBrushSize}" FontSize="10" HorizontalAlignment="Center"
-                                           Foreground="{DynamicResource FloatingBarForegroundBrush}" />
-                            </ikw:SimpleStackPanel>
-                        </Border>
-                        <Border Width="1" Height="45" BorderBrush="{DynamicResource FloatingBarForegroundBrush}"
-                                Background="{DynamicResource FloatingBarForegroundBrush}" />
-                        <Border Margin="-8,0,0,0"
-                                CornerRadius="{Binding ElementName=BorderStrokeSelectionControl, Path=CornerRadius}"
-                                Width="40" MouseDown="Border_MouseDown" MouseUp="BorderStrokeSelectionDelete_MouseUp">
-                            <ikw:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Image Source="{DynamicResource StrokeSelectionDeleteIcon}"
-                                       RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
-                                <TextBlock Margin="0,5,0,0" Text="{x:Static props:MainWindowStrings.Main_ContextDelete}" FontSize="10"
-                                           Foreground="{DynamicResource FloatingBarForegroundBrush}"
-                                           HorizontalAlignment="Center" />
-                            </ikw:SimpleStackPanel>
-                        </Border>
-                    </ikw:SimpleStackPanel>
-                </Viewbox>
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.SurfaceStrokeColorFlyoutBrushKey}}">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="16" ShadowDepth="8" Direction="270" Opacity="0.14" Color="#000000" />
+                </Border.Effect>
+                <Border.Resources>
+                    <Style x:Key="WinUICommandBarButtonStyle" TargetType="Button">
+                        <Setter Property="Width" Value="40" />
+                        <Setter Property="Height" Value="40" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Foreground" Value="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" />
+                        <Setter Property="Focusable" Value="False" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="Transparent">
+                                        <Border x:Name="RootBorder" Margin="2" CornerRadius="4"
+                                                Background="{TemplateBinding Background}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="RootBorder" Property="Background"
+                                                    Value="{DynamicResource {x:Static ui:ThemeKeys.SubtleFillColorSecondaryBrushKey}}" />
+                                        </Trigger>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter TargetName="RootBorder" Property="Background"
+                                                    Value="{DynamicResource {x:Static ui:ThemeKeys.SubtleFillColorTertiaryBrushKey}}" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                    <Style x:Key="WinUICommandBarToggleButtonStyle" TargetType="ToggleButton">
+                        <Setter Property="Width" Value="40" />
+                        <Setter Property="Height" Value="40" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Foreground" Value="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" />
+                        <Setter Property="Focusable" Value="False" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Border Background="Transparent">
+                                        <Border x:Name="RootBorder" Margin="2" CornerRadius="4"
+                                                Background="{TemplateBinding Background}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="RootBorder" Property="Background"
+                                                    Value="{DynamicResource {x:Static ui:ThemeKeys.SubtleFillColorSecondaryBrushKey}}" />
+                                        </Trigger>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter TargetName="RootBorder" Property="Background"
+                                                    Value="{DynamicResource {x:Static ui:ThemeKeys.SubtleFillColorTertiaryBrushKey}}" />
+                                        </Trigger>
+                                        <Trigger Property="IsChecked" Value="True">
+                                            <Setter TargetName="RootBorder" Property="Background"
+                                                    Value="{DynamicResource {x:Static ui:ThemeKeys.AccentFillColorDefaultBrushKey}}" />
+                                            <Setter Property="Foreground"
+                                                    Value="{DynamicResource {x:Static ui:ThemeKeys.TextOnAccentFillColorPrimaryBrushKey}}" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Border.Resources>
+                <StackPanel Orientation="Horizontal">
+                    <Button Name="BorderStrokeSelectionClone"
+                            Style="{StaticResource WinUICommandBarButtonStyle}"
+                            ToolTip="{x:Static props:MainWindowStrings.Main_ContextClone}"
+                            Click="BtnStrokeSelectionClone_Click">
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Copy}" FontSize="16" />
+                    </Button>
+                    <Button Name="BorderStrokeSelectionCloneToNewBoard"
+                            Style="{StaticResource WinUICommandBarButtonStyle}"
+                            ToolTip="{x:Static props:MainWindowStrings.Main_ContextCloneToNewPage}"
+                            Click="BtnStrokeSelectionCloneToNewBoard_Click"
+                            Visibility="{Binding Visibility, ElementName=GridBackgroundCover}">
+                        <Image Source="{DynamicResource StrokeSelectionCloneToNewBoardIcon}"
+                               RenderOptions.BitmapScalingMode="HighQuality" Height="18" Width="18" />
+                    </Button>
+                    <Button Name="BorderStrokeSelectionInsertToWhiteboard"
+                            Style="{StaticResource WinUICommandBarButtonStyle}"
+                            ToolTip="{x:Static props:MainWindowStrings.Main_ContextInsertToWhiteboard}"
+                            Click="BtnStrokeSelectionInsertToWhiteboard_Click"
+                            Visibility="{Binding Visibility, ElementName=GridBackgroundCover, Converter={StaticResource VisibilityConverter}}">
+                        <Image Source="{DynamicResource QuickPanelBlackboardIcon}"
+                               RenderOptions.BitmapScalingMode="HighQuality" Height="18" Width="18" />
+                    </Button>
+                    <Button Style="{StaticResource WinUICommandBarButtonStyle}"
+                            ToolTip="{x:Static props:MainWindowStrings.Main_ContextRotate45}"
+                            Click="BtnStrokeSelectionRotate45_Click">
+                        <Grid Width="36" Height="36">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Rotate}" FontSize="16"
+                                         HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <TextBlock Text="45" FontSize="7" FontWeight="SemiBold"
+                                       HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                       Margin="5,0,0,5" />
+                        </Grid>
+                    </Button>
+                    <Button Style="{StaticResource WinUICommandBarButtonStyle}"
+                            ToolTip="{x:Static props:MainWindowStrings.Main_ContextRotate90}"
+                            Click="BtnStrokeSelectionRotate90_Click">
+                        <Grid Width="36" Height="36">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Rotate}" FontSize="16"
+                                         HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <TextBlock Text="90" FontSize="7" FontWeight="SemiBold"
+                                       HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                                       Margin="5,0,0,5" />
+                        </Grid>
+                    </Button>
+                    <Button Style="{StaticResource WinUICommandBarButtonStyle}"
+                            ToolTip="{x:Static props:MainWindowStrings.Main_ContextFlipHorizontal}"
+                            Click="BtnStrokeSelectionFlipHorizontal_Click">
+                        <Path Width="16" Height="16" Stretch="Uniform"
+                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                              Data="M14.9253 12.7629C14.8342 12.9103 14.6733 13 14.5 13H9.5C9.22386 13 9 12.7762 9 12.5V2.50005C9 2.26816 9.15944 2.0667 9.38512 2.01342C9.61081 1.96015 9.84351 2.06903 9.94721 2.27644L14.9472 12.2764C15.0247 12.4314 15.0164 12.6155 14.9253 12.7629ZM10 4.61808V12H13.691L10 4.61808ZM1.5 13C1.32671 13 1.16578 12.9103 1.07468 12.7629C0.983572 12.6155 0.975289 12.4314 1.05279 12.2764L6.05279 2.27644C6.15649 2.06903 6.38919 1.96015 6.61488 2.01342C6.84056 2.0667 7 2.26816 7 2.50005L7 12.5C7 12.7762 6.77614 13 6.5 13H1.5Z" />
+                    </Button>
+                    <Button Style="{StaticResource WinUICommandBarButtonStyle}"
+                            ToolTip="{x:Static props:MainWindowStrings.Main_ContextFlipVertical}"
+                            Click="BtnStrokeSelectionFlipVertical_Click">
+                        <Path Width="16" Height="16" Stretch="Uniform"
+                              Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                              Data="M12.7629 1.07468C12.9103 1.16578 13 1.32671 13 1.5V6.5C13 6.77614 12.7762 7 12.5 7H2.50005C2.26816 7 2.0667 6.84056 2.01342 6.61488C1.96015 6.38919 2.06903 6.15649 2.27644 6.05279L12.2764 1.05279C12.4314 0.97529 12.6155 0.983572 12.7629 1.07468ZM4.61808 6H12V2.30902L4.61808 6ZM13 14.5C13 14.6733 12.9103 14.8342 12.7629 14.9253C12.6155 15.0164 12.4314 15.0247 12.2764 14.9472L2.27644 9.94721C2.06903 9.84351 1.96015 9.61081 2.01342 9.38512C2.0667 9.15944 2.26816 9 2.50005 9H12.5C12.7762 9 13 9.22386 13 9.5V14.5Z" />
+                    </Button>
+                    <Button Style="{StaticResource WinUICommandBarButtonStyle}"
+                            ToolTip="{x:Static props:MainWindowStrings.Main_ContextDelete}"
+                            Click="BtnStrokeSelectionDelete_Click">
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Delete}" FontSize="16" />
+                    </Button>
+                    <ToggleButton Name="BtnStrokeSelectionMore"
+                                  Style="{StaticResource WinUICommandBarToggleButtonStyle}"
+                                  ToolTip="{x:Static props:MainWindowStrings.Main_ContextMore}"
+                                  Click="BtnStrokeSelectionMore_Click">
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.More}" FontSize="16" />
+                    </ToggleButton>
+                </StackPanel>
+            </Border>
+            <!-- WinUI 3 墨迹属性二级悬浮面板 -->
+            <Border Name="BorderStrokeSelectionPropertiesFlyout"
+                    Panel.ZIndex="1001"
+                    HorizontalAlignment="Left" VerticalAlignment="Top" Margin="800,458,0,0"
+                    Width="328" CornerRadius="8" Padding="16,12,16,16"
+                    Background="{DynamicResource {x:Static ui:ThemeKeys.AcrylicBackgroundFillColorDefaultBrushKey}}"
+                    Visibility="Collapsed"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource {x:Static ui:ThemeKeys.SurfaceStrokeColorFlyoutBrushKey}}">
+                <Border.RenderTransform>
+                    <TranslateTransform x:Name="StrokeSelectionFlyoutTranslate" Y="0" />
+                </Border.RenderTransform>
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="16" ShadowDepth="8" Direction="270" Opacity="0.14" Color="#000000" />
+                </Border.Effect>
+                <Border.Resources>
+                    <Style x:Key="WinUISwatchButtonStyle" TargetType="Button">
+                        <Setter Property="Width" Value="40" />
+                        <Setter Property="Height" Value="40" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="BorderThickness" Value="2" />
+                        <Setter Property="BorderBrush" Value="Transparent" />
+                        <Setter Property="Focusable" Value="False" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="OuterRing" Width="40" Height="40" CornerRadius="20"
+                                            Padding="2" BorderThickness="{TemplateBinding BorderThickness}"
+                                            BorderBrush="{TemplateBinding BorderBrush}" Background="Transparent">
+                                        <Border x:Name="SwatchDot" CornerRadius="16"
+                                                Background="{TemplateBinding Background}" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="SwatchDot" Property="Opacity" Value="0.88" />
+                                        </Trigger>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter TargetName="SwatchDot" Property="RenderTransformOrigin" Value="0.5,0.5" />
+                                            <Setter TargetName="SwatchDot" Property="RenderTransform">
+                                                <Setter.Value>
+                                                    <ScaleTransform ScaleX="0.92" ScaleY="0.92" />
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                    <Style x:Key="WinUIFlyoutResetButtonStyle" TargetType="Button">
+                        <Setter Property="Width" Value="32" />
+                        <Setter Property="Height" Value="32" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Foreground" Value="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}" />
+                        <Setter Property="Focusable" Value="False" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="RootBorder" CornerRadius="4" Background="{TemplateBinding Background}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="RootBorder" Property="Background"
+                                                    Value="{DynamicResource {x:Static ui:ThemeKeys.SubtleFillColorSecondaryBrushKey}}" />
+                                        </Trigger>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter TargetName="RootBorder" Property="Background"
+                                                    Value="{DynamicResource {x:Static ui:ThemeKeys.SubtleFillColorTertiaryBrushKey}}" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Border.Resources>
+                <StackPanel>
+                    <!-- Colors -->
+                    <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextColors}"
+                               FontSize="14" FontWeight="SemiBold"
+                               Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}"
+                               Margin="0,0,0,10" />
+                    <StackPanel Name="PanelStrokeSelectionSwatches" Orientation="Horizontal" Margin="-2,0,-2,0">
+                        <Button Style="{StaticResource WinUISwatchButtonStyle}" Background="#FCDB4A" Margin="0,0,12,0"
+                                Tag="#FCDB4A" Click="StrokeSelectionColorSwatch_Click" />
+                        <Button Style="{StaticResource WinUISwatchButtonStyle}" Background="#61C339" Margin="0,0,12,0"
+                                Tag="#61C339" Click="StrokeSelectionColorSwatch_Click" />
+                        <Button Style="{StaticResource WinUISwatchButtonStyle}" Background="#68BCF7" Margin="0,0,12,0"
+                                Tag="#68BCF7" Click="StrokeSelectionColorSwatch_Click" />
+                        <Button Style="{StaticResource WinUISwatchButtonStyle}" Background="#E73E8D" Margin="0,0,12,0"
+                                Tag="#E73E8D" Click="StrokeSelectionColorSwatch_Click" />
+                        <Button Style="{StaticResource WinUISwatchButtonStyle}" Background="#F96D2F" Margin="0,0,12,0"
+                                Tag="#F96D2F" Click="StrokeSelectionColorSwatch_Click" />
+                        <Button Style="{StaticResource WinUISwatchButtonStyle}" Background="#6524CB" Margin="0"
+                                Tag="#6524CB" Click="StrokeSelectionColorSwatch_Click" />
+                    </StackPanel>
+
+                    <!-- Size -->
+                    <Grid Margin="0,16,0,4">
+                        <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextSize}"
+                                   FontSize="14" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}"
+                                   HorizontalAlignment="Left" VerticalAlignment="Center" />
+                        <TextBlock Name="TextStrokeSelectionSizeValue"
+                                   Text="5.0" FontSize="12"
+                                   Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorSecondaryBrushKey}}"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Slider Name="SliderStrokeSelectionSize"
+                                Grid.Column="0"
+                                Minimum="1" Maximum="45" Value="5"
+                                SmallChange="0.5" LargeChange="2"
+                                VerticalAlignment="Center"
+                                ValueChanged="SliderStrokeSelectionSize_ValueChanged"
+                                Thumb.DragCompleted="SliderStrokeSelectionProperty_DragCompleted"
+                                PreviewMouseUp="SliderStrokeSelectionProperty_PreviewMouseUp" />
+                        <Button Grid.Column="1" Margin="8,0,0,0"
+                                Style="{StaticResource WinUIFlyoutResetButtonStyle}"
+                                ToolTip="{x:Static props:MainWindowStrings.Main_ContextReset}"
+                                Click="BtnStrokeSelectionSizeReset_Click">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" FontSize="15" />
+                        </Button>
+                    </Grid>
+
+                    <!-- Opacity -->
+                    <Grid Margin="0,12,0,4">
+                        <TextBlock Text="{x:Static props:MainWindowStrings.Main_ContextOpacity}"
+                                   FontSize="14" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}"
+                                   HorizontalAlignment="Left" VerticalAlignment="Center" />
+                        <TextBlock Name="TextStrokeSelectionOpacityValue"
+                                   Text="100%" FontSize="12"
+                                   Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorSecondaryBrushKey}}"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Slider Name="SliderStrokeSelectionOpacity"
+                                Grid.Column="0"
+                                Minimum="1" Maximum="255" Value="255"
+                                SmallChange="5" LargeChange="25"
+                                IsSnapToTickEnabled="True" TickFrequency="1"
+                                VerticalAlignment="Center"
+                                ValueChanged="SliderStrokeSelectionOpacity_ValueChanged"
+                                Thumb.DragCompleted="SliderStrokeSelectionProperty_DragCompleted"
+                                PreviewMouseUp="SliderStrokeSelectionProperty_PreviewMouseUp" />
+                        <Button Grid.Column="1" Margin="8,0,0,0"
+                                Style="{StaticResource WinUIFlyoutResetButtonStyle}"
+                                ToolTip="{x:Static props:MainWindowStrings.Main_ContextReset}"
+                                Click="BtnStrokeSelectionOpacityReset_Click">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Refresh}" FontSize="15" />
+                        </Button>
+                    </Grid>
+                </StackPanel>
             </Border>
             <!-- 图片选择工具栏 -->
             <Border Name="BorderImageSelectionControl"

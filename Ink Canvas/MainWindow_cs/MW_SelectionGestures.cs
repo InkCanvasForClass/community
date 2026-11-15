@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Point = System.Windows.Point;
 
@@ -61,10 +62,9 @@ namespace Ink_Canvas
         /// 只有当鼠标按下和释放的是同一个对象时才处理
         /// 执行墨迹克隆操作并记录日志
         /// </remarks>
-        private void BorderStrokeSelectionClone_MouseUp(object sender, MouseButtonEventArgs e)
+        private void BtnStrokeSelectionClone_Click(object sender, RoutedEventArgs e)
         {
             if (TryBlockFrozenPageMutation("克隆墨迹")) return;
-            if (lastBorderMouseDownObject != sender) return;
 
             try
             {
@@ -82,35 +82,18 @@ namespace Ink_Canvas
             }
         }
 
-        /// <summary>
-        /// 处理墨迹选择克隆到新画板鼠标释放事件
-        /// </summary>
-        /// <param name="sender">事件发送者</param>
-        /// <param name="e">鼠标按钮事件参数</param>
-        /// <remarks>
-        /// 只有当鼠标按下和释放的是同一个对象时才处理
-        /// 克隆选中的墨迹到新画板并清除当前选择
-        /// </remarks>
-        private void BorderStrokeSelectionCloneToNewBoard_MouseUp(object sender, MouseButtonEventArgs e)
+        private void BtnStrokeSelectionCloneToNewBoard_Click(object sender, RoutedEventArgs e)
         {
             if (TryBlockFrozenPageMutation("克隆墨迹到新页面")) return;
-            if (lastBorderMouseDownObject != sender) return;
 
             var strokes = inkCanvas.GetSelectedStrokes();
             inkCanvas.Select(new StrokeCollection());
             CloneStrokesToNewBoard(strokes);
         }
 
-        /// <summary>
-        /// 处理墨迹选择插入白板鼠标释放事件
-        /// 克隆选中墨迹，弹出目标选择菜单（小白板/常规白板），确认后插入
-        /// </summary>
-        /// <param name="sender">事件发送者</param>
-        /// <param name="e">鼠标按钮事件参数</param>
-        private void BorderStrokeSelectionInsertToWhiteboard_MouseUp(object sender, MouseButtonEventArgs e)
+        private void BtnStrokeSelectionInsertToWhiteboard_Click(object sender, RoutedEventArgs e)
         {
             if (TryBlockFrozenPageMutation("插入墨迹到白板")) return;
-            if (lastBorderMouseDownObject != sender) return;
 
             var strokes = inkCanvas.GetSelectedStrokes();
             if (strokes.Count == 0) return;
@@ -212,10 +195,9 @@ namespace Ink_Canvas
         /// 只有当鼠标按下和释放的是同一个对象时才处理
         /// 调用 SymbolIconDelete_MouseUp 方法执行删除操作
         /// </remarks>
-        private void BorderStrokeSelectionDelete_MouseUp(object sender, MouseButtonEventArgs e)
+        private void BtnStrokeSelectionDelete_Click(object sender, RoutedEventArgs e)
         {
-            if (lastBorderMouseDownObject != sender) return;
-            SymbolIconDelete_MouseUp(sender, e);
+            SymbolIconDelete_MouseUp(sender, null);
         }
 
         /// <summary>
@@ -259,6 +241,21 @@ namespace Ink_Canvas
         /// 确保新的粗细在允许的范围内
         /// 如果有 DrawingAttributesHistory，则提交历史记录
         /// </remarks>
+        private bool _isSyncingStrokeSelectionProperties;
+
+        private void CommitPendingStrokeDrawingAttributesHistory()
+        {
+            if (DrawingAttributesHistory.Count > 0)
+            {
+                timeMachine.CommitStrokeDrawingAttributesHistory(DrawingAttributesHistory);
+                DrawingAttributesHistory = new Dictionary<Stroke, Tuple<DrawingAttributes, DrawingAttributes>>();
+                foreach (var item in DrawingAttributesHistoryFlag)
+                {
+                    item.Value.Clear();
+                }
+            }
+        }
+
         private void ChangeStrokeThickness(double multipler)
         {
             if (TryBlockFrozenPageMutation("修改墨迹粗细")) return;
@@ -273,16 +270,7 @@ namespace Ink_Canvas
                 stroke.DrawingAttributes.Height = newHeight;
             }
 
-            if (DrawingAttributesHistory.Count > 0)
-            {
-
-                timeMachine.CommitStrokeDrawingAttributesHistory(DrawingAttributesHistory);
-                DrawingAttributesHistory = new Dictionary<Stroke, Tuple<DrawingAttributes, DrawingAttributes>>();
-                foreach (var item in DrawingAttributesHistoryFlag)
-                {
-                    item.Value.Clear();
-                }
-            }
+            CommitPendingStrokeDrawingAttributesHistory();
         }
 
         /// <summary>
@@ -294,194 +282,288 @@ namespace Ink_Canvas
         /// 只有当鼠标按下和释放的是同一个对象时才处理
         /// 将选中墨迹的粗细恢复为默认值
         /// </remarks>
-        private void GridPenWidthRestore_MouseUp(object sender, MouseButtonEventArgs e)
+        private void BtnStrokeSelectionSizeReset_Click(object sender, RoutedEventArgs e)
         {
             if (TryBlockFrozenPageMutation("修改墨迹粗细")) return;
-            if (lastBorderMouseDownObject != sender) return;
 
             foreach (var stroke in inkCanvas.GetSelectedStrokes())
             {
                 stroke.DrawingAttributes.Width = inkCanvas.DefaultDrawingAttributes.Width;
                 stroke.DrawingAttributes.Height = inkCanvas.DefaultDrawingAttributes.Height;
             }
+
+            SyncStrokeSelectionPropertiesUI();
+            CommitPendingStrokeDrawingAttributesHistory();
         }
 
-        /// <summary>
-        /// 处理水平翻转鼠标释放事件
-        /// </summary>
-        /// <param name="sender">事件发送者</param>
-        /// <param name="e">鼠标按钮事件参数</param>
-        /// <remarks>
-        /// 只有当鼠标按下和释放的是同一个对象时才处理
-        /// 对选中的墨迹应用水平翻转变换
-        /// 如果有 DrawingAttributesHistory，则提交历史记录
-        /// </remarks>
-        private void ImageFlipHorizontal_MouseUp(object sender, MouseButtonEventArgs e)
+        private void BtnStrokeSelectionMore_Click(object sender, RoutedEventArgs e)
+        {
+            if (BorderStrokeSelectionPropertiesFlyout == null) return;
+
+            var willOpen = BtnStrokeSelectionMore?.IsChecked == true;
+            if (willOpen)
+            {
+                SyncStrokeSelectionPropertiesUI();
+                BorderStrokeSelectionPropertiesFlyout.Visibility = Visibility.Visible;
+                bool isAbove = updateBorderStrokeSelectionControlLocation();
+                AnimateStrokeSelectionPropertiesFlyoutOpen(isAbove);
+            }
+            else
+            {
+                HideStrokeSelectionPropertiesFlyout();
+            }
+        }
+
+        private void AnimateStrokeSelectionPropertiesFlyoutOpen(bool isAbove)
+        {
+            if (BorderStrokeSelectionPropertiesFlyout == null) return;
+
+            var duration = TimeSpan.FromMilliseconds(167);
+            var easing = new CubicEase { EasingMode = EasingMode.EaseOut };
+
+            var opacityAnim = new DoubleAnimation(0, 1, duration) { EasingFunction = easing };
+            BorderStrokeSelectionPropertiesFlyout.BeginAnimation(UIElement.OpacityProperty, opacityAnim);
+
+            if (StrokeSelectionFlyoutTranslate != null)
+            {
+                double startY = isAbove ? 6 : -6;
+                var slideAnim = new DoubleAnimation(startY, 0, duration) { EasingFunction = easing };
+                StrokeSelectionFlyoutTranslate.BeginAnimation(TranslateTransform.YProperty, slideAnim);
+            }
+        }
+
+        private void HideStrokeSelectionPropertiesFlyout()
+        {
+            CommitPendingStrokeDrawingAttributesHistory();
+            if (BorderStrokeSelectionPropertiesFlyout != null)
+            {
+                BorderStrokeSelectionPropertiesFlyout.BeginAnimation(UIElement.OpacityProperty, null);
+                BorderStrokeSelectionPropertiesFlyout.Visibility = Visibility.Collapsed;
+            }
+            if (BtnStrokeSelectionMore != null)
+            {
+                BtnStrokeSelectionMore.IsChecked = false;
+            }
+        }
+
+        private void SyncStrokeSelectionPropertiesUI()
+        {
+            if (inkCanvas == null || BorderStrokeSelectionPropertiesFlyout == null) return;
+            var selectedStrokes = inkCanvas.GetSelectedStrokes();
+            if (selectedStrokes == null || selectedStrokes.Count == 0) return;
+
+            _isSyncingStrokeSelectionProperties = true;
+            try
+            {
+                var firstColor = selectedStrokes[0].DrawingAttributes.Color;
+                bool hasUniformRgb = selectedStrokes.All(s =>
+                    s.DrawingAttributes.Color.R == firstColor.R &&
+                    s.DrawingAttributes.Color.G == firstColor.G &&
+                    s.DrawingAttributes.Color.B == firstColor.B);
+
+                if (PanelStrokeSelectionSwatches != null)
+                {
+                    foreach (var child in PanelStrokeSelectionSwatches.Children.OfType<Button>())
+                    {
+                        bool isMatch = false;
+                        if (hasUniformRgb && child.Tag is string hex)
+                        {
+                            var swatchColor = (Color)ColorConverter.ConvertFromString(hex);
+                            isMatch = swatchColor.R == firstColor.R &&
+                                      swatchColor.G == firstColor.G &&
+                                      swatchColor.B == firstColor.B;
+                        }
+
+                        if (isMatch)
+                        {
+                            child.SetResourceReference(Control.BorderBrushProperty,
+                                iNKORE.UI.WPF.Modern.ThemeKeys.TextFillColorPrimaryBrushKey);
+                        }
+                        else
+                        {
+                            child.BorderBrush = Brushes.Transparent;
+                        }
+                    }
+                }
+
+                double avgWidth = selectedStrokes.Average(s => s.DrawingAttributes.Width);
+                double clampedWidth = Math.Max(SliderStrokeSelectionSize.Minimum,
+                    Math.Min(SliderStrokeSelectionSize.Maximum, avgWidth));
+                if (SliderStrokeSelectionSize != null)
+                {
+                    SliderStrokeSelectionSize.Value = clampedWidth;
+                }
+                if (TextStrokeSelectionSizeValue != null)
+                {
+                    TextStrokeSelectionSizeValue.Text = clampedWidth.ToString("0.0");
+                }
+
+                double avgAlpha = selectedStrokes.Average(s => (double)s.DrawingAttributes.Color.A);
+                double clampedAlpha = Math.Max(SliderStrokeSelectionOpacity.Minimum,
+                    Math.Min(SliderStrokeSelectionOpacity.Maximum, Math.Round(avgAlpha)));
+                if (SliderStrokeSelectionOpacity != null)
+                {
+                    SliderStrokeSelectionOpacity.Value = clampedAlpha;
+                }
+                if (TextStrokeSelectionOpacityValue != null)
+                {
+                    TextStrokeSelectionOpacityValue.Text = $"{Math.Round(clampedAlpha * 100.0 / 255.0)}%";
+                }
+            }
+            finally
+            {
+                _isSyncingStrokeSelectionProperties = false;
+            }
+        }
+
+        private void StrokeSelectionColorSwatch_Click(object sender, RoutedEventArgs e)
+        {
+            if (TryBlockFrozenPageMutation("修改墨迹颜色")) return;
+            if (!(sender is Button swatchButton) || !(swatchButton.Tag is string hex)) return;
+
+            var targetRgb = (Color)ColorConverter.ConvertFromString(hex);
+            foreach (var stroke in inkCanvas.GetSelectedStrokes())
+            {
+                byte alpha = stroke.DrawingAttributes.Color.A;
+                if (alpha == 0) alpha = 255;
+                stroke.DrawingAttributes.Color = Color.FromArgb(alpha, targetRgb.R, targetRgb.G, targetRgb.B);
+            }
+
+            SyncStrokeSelectionPropertiesUI();
+            CommitPendingStrokeDrawingAttributesHistory();
+        }
+
+        private void SliderStrokeSelectionSize_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (_isSyncingStrokeSelectionProperties || inkCanvas == null) return;
+            if (TryBlockFrozenPageMutation("修改墨迹粗细")) return;
+
+            double targetWidth = e.NewValue;
+            if (TextStrokeSelectionSizeValue != null)
+            {
+                TextStrokeSelectionSizeValue.Text = targetWidth.ToString("0.0");
+            }
+
+            foreach (var stroke in inkCanvas.GetSelectedStrokes())
+            {
+                var da = stroke.DrawingAttributes;
+                double ratio = da.Width > 0 ? da.Height / da.Width : 1.0;
+                double targetHeight = Math.Max(DrawingAttributes.MinHeight,
+                    Math.Min(DrawingAttributes.MaxHeight, targetWidth * ratio));
+                da.Width = Math.Max(DrawingAttributes.MinWidth,
+                    Math.Min(DrawingAttributes.MaxWidth, targetWidth));
+                da.Height = targetHeight;
+            }
+        }
+
+        private void SliderStrokeSelectionOpacity_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (_isSyncingStrokeSelectionProperties || inkCanvas == null) return;
+            if (TryBlockFrozenPageMutation("修改墨迹透明度")) return;
+
+            byte alpha = (byte)Math.Max(1, Math.Min(255, Math.Round(e.NewValue)));
+            if (TextStrokeSelectionOpacityValue != null)
+            {
+                TextStrokeSelectionOpacityValue.Text = $"{Math.Round(alpha * 100.0 / 255.0)}%";
+            }
+
+            foreach (var stroke in inkCanvas.GetSelectedStrokes())
+            {
+                var c = stroke.DrawingAttributes.Color;
+                stroke.DrawingAttributes.Color = Color.FromArgb(alpha, c.R, c.G, c.B);
+            }
+        }
+
+        private void SliderStrokeSelectionProperty_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e)
+        {
+            CommitPendingStrokeDrawingAttributesHistory();
+        }
+
+        private void SliderStrokeSelectionProperty_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            CommitPendingStrokeDrawingAttributesHistory();
+        }
+
+        private void BtnStrokeSelectionOpacityReset_Click(object sender, RoutedEventArgs e)
+        {
+            if (TryBlockFrozenPageMutation("修改墨迹透明度")) return;
+
+            foreach (var stroke in inkCanvas.GetSelectedStrokes())
+            {
+                var c = stroke.DrawingAttributes.Color;
+                stroke.DrawingAttributes.Color = Color.FromArgb(255, c.R, c.G, c.B);
+            }
+
+            SyncStrokeSelectionPropertiesUI();
+            CommitPendingStrokeDrawingAttributesHistory();
+        }
+
+        private void BtnStrokeSelectionFlipHorizontal_Click(object sender, RoutedEventArgs e)
         {
             if (TryBlockFrozenPageMutation("翻转墨迹")) return;
-            if (lastBorderMouseDownObject != sender) return;
 
             var m = new Matrix();
-
-            // Find center of element and then transform to get current location of center
-            var fe = e.Source as FrameworkElement;
-            var center = new Point(fe.ActualWidth / 2, fe.ActualHeight / 2);
-            center = new Point(inkCanvas.GetSelectionBounds().Left + inkCanvas.GetSelectionBounds().Width / 2,
+            var center = new Point(inkCanvas.GetSelectionBounds().Left + inkCanvas.GetSelectionBounds().Width / 2,
                 inkCanvas.GetSelectionBounds().Top + inkCanvas.GetSelectionBounds().Height / 2);
-            center = m.Transform(center); // 转换为矩阵缩放和旋转的中心点
+            center = m.Transform(center);
 
-            // Update matrix to reflect translation/rotation
-            m.ScaleAt(-1, 1, center.X, center.Y); // 缩放
+            m.ScaleAt(-1, 1, center.X, center.Y);
 
             var targetStrokes = inkCanvas.GetSelectedStrokes();
             foreach (var stroke in targetStrokes) stroke.Transform(m, false);
 
-            if (DrawingAttributesHistory.Count > 0)
-            {
-                //var collecion = new StrokeCollection();
-                //foreach (var item in DrawingAttributesHistory)
-                //{
-                //    collecion.Add(item.Key);
-                //}
-                timeMachine.CommitStrokeDrawingAttributesHistory(DrawingAttributesHistory);
-                DrawingAttributesHistory = new Dictionary<Stroke, Tuple<DrawingAttributes, DrawingAttributes>>();
-                foreach (var item in DrawingAttributesHistoryFlag)
-                {
-                    item.Value.Clear();
-                }
-            }
-
-            //updateBorderStrokeSelectionControlLocation();
+            CommitPendingStrokeDrawingAttributesHistory();
         }
 
-        /// <summary>
-        /// 处理垂直翻转鼠标释放事件
-        /// </summary>
-        /// <param name="sender">事件发送者</param>
-        /// <param name="e">鼠标按钮事件参数</param>
-        /// <remarks>
-        /// 只有当鼠标按下和释放的是同一个对象时才处理
-        /// 对选中的墨迹应用垂直翻转变换
-        /// 如果有 DrawingAttributesHistory，则提交历史记录
-        /// </remarks>
-        private void ImageFlipVertical_MouseUp(object sender, MouseButtonEventArgs e)
+        private void BtnStrokeSelectionFlipVertical_Click(object sender, RoutedEventArgs e)
         {
             if (TryBlockFrozenPageMutation("翻转墨迹")) return;
-            if (lastBorderMouseDownObject != sender) return;
 
             var m = new Matrix();
-
-            // Find center of element and then transform to get current location of center
-            var fe = e.Source as FrameworkElement;
-            var center = new Point(fe.ActualWidth / 2, fe.ActualHeight / 2);
-            center = new Point(inkCanvas.GetSelectionBounds().Left + inkCanvas.GetSelectionBounds().Width / 2,
+            var center = new Point(inkCanvas.GetSelectionBounds().Left + inkCanvas.GetSelectionBounds().Width / 2,
                 inkCanvas.GetSelectionBounds().Top + inkCanvas.GetSelectionBounds().Height / 2);
-            center = m.Transform(center); // 转换为矩阵缩放和旋转的中心点
+            center = m.Transform(center);
 
-            // Update matrix to reflect translation/rotation
-            m.ScaleAt(1, -1, center.X, center.Y); // 缩放
+            m.ScaleAt(1, -1, center.X, center.Y);
 
             var targetStrokes = inkCanvas.GetSelectedStrokes();
             foreach (var stroke in targetStrokes) stroke.Transform(m, false);
 
-            if (DrawingAttributesHistory.Count > 0)
-            {
-                timeMachine.CommitStrokeDrawingAttributesHistory(DrawingAttributesHistory);
-                DrawingAttributesHistory = new Dictionary<Stroke, Tuple<DrawingAttributes, DrawingAttributes>>();
-                foreach (var item in DrawingAttributesHistoryFlag)
-                {
-                    item.Value.Clear();
-                }
-            }
+            CommitPendingStrokeDrawingAttributesHistory();
         }
 
-        // ... existing code ...
-        /// <summary>
-        /// 处理顺时针旋转45度鼠标释放事件
-        /// </summary>
-        /// <param name="sender">事件发送者</param>
-        /// <param name="e">鼠标按钮事件参数</param>
-        /// <remarks>
-        /// 只有当鼠标按下和释放的是同一个对象时才处理
-        /// 对选中的墨迹应用45度旋转变换
-        /// 如果有 DrawingAttributesHistory，则提交历史记录
-        /// </remarks>
-        private void ImageRotate45_MouseUp(object sender, MouseButtonEventArgs e)
+        private void BtnStrokeSelectionRotate45_Click(object sender, RoutedEventArgs e)
         {
             if (TryBlockFrozenPageMutation("旋转墨迹")) return;
-            if (lastBorderMouseDownObject != sender) return;
 
             var m = new Matrix();
-
-            // Find center of element and then transform to get current location of center
-            var fe = e.Source as FrameworkElement;
-            var center = new Point(fe.ActualWidth / 2, fe.ActualHeight / 2);
-            center = new Point(inkCanvas.GetSelectionBounds().Left + inkCanvas.GetSelectionBounds().Width / 2,
+            var center = new Point(inkCanvas.GetSelectionBounds().Left + inkCanvas.GetSelectionBounds().Width / 2,
                 inkCanvas.GetSelectionBounds().Top + inkCanvas.GetSelectionBounds().Height / 2);
-            center = m.Transform(center); // 转换为矩阵缩放和旋转的中心点
+            center = m.Transform(center);
 
-            // Update matrix to reflect translation/rotation
-            m.RotateAt(45, center.X, center.Y); // 顺时针旋转45度
+            m.RotateAt(45, center.X, center.Y);
 
             var targetStrokes = inkCanvas.GetSelectedStrokes();
             foreach (var stroke in targetStrokes) stroke.Transform(m, false);
 
-            if (DrawingAttributesHistory.Count > 0)
-            {
-                timeMachine.CommitStrokeDrawingAttributesHistory(DrawingAttributesHistory);
-                DrawingAttributesHistory = new Dictionary<Stroke, Tuple<DrawingAttributes, DrawingAttributes>>();
-                foreach (var item in DrawingAttributesHistoryFlag)
-                {
-                    item.Value.Clear();
-                }
-            }
+            CommitPendingStrokeDrawingAttributesHistory();
         }
 
-        /// <summary>
-        /// 处理顺时针旋转90度鼠标释放事件
-        /// </summary>
-        /// <param name="sender">事件发送者</param>
-        /// <param name="e">鼠标按钮事件参数</param>
-        /// <remarks>
-        /// 只有当鼠标按下和释放的是同一个对象时才处理
-        /// 对选中的墨迹应用90度旋转变换
-        /// 如果有 DrawingAttributesHistory，则提交历史记录
-        /// </remarks>
-        private void ImageRotate90_MouseUp(object sender, MouseButtonEventArgs e)
+        private void BtnStrokeSelectionRotate90_Click(object sender, RoutedEventArgs e)
         {
             if (TryBlockFrozenPageMutation("旋转墨迹")) return;
-            if (lastBorderMouseDownObject != sender) return;
 
             var m = new Matrix();
-
-            // Find center of element and then transform to get current location of center
-            var fe = e.Source as FrameworkElement;
-            var center = new Point(fe.ActualWidth / 2, fe.ActualHeight / 2);
-            center = new Point(inkCanvas.GetSelectionBounds().Left + inkCanvas.GetSelectionBounds().Width / 2,
+            var center = new Point(inkCanvas.GetSelectionBounds().Left + inkCanvas.GetSelectionBounds().Width / 2,
                 inkCanvas.GetSelectionBounds().Top + inkCanvas.GetSelectionBounds().Height / 2);
-            center = m.Transform(center); // 转换为矩阵缩放和旋转的中心点
+            center = m.Transform(center);
 
-            // Update matrix to reflect translation/rotation
-            m.RotateAt(90, center.X, center.Y); // 旋转
+            m.RotateAt(90, center.X, center.Y);
 
             var targetStrokes = inkCanvas.GetSelectedStrokes();
             foreach (var stroke in targetStrokes) stroke.Transform(m, false);
 
-            if (DrawingAttributesHistory.Count > 0)
-            {
-                var collecion = new StrokeCollection();
-                foreach (var item in DrawingAttributesHistory)
-                {
-                    collecion.Add(item.Key);
-                }
-
-                timeMachine.CommitStrokeDrawingAttributesHistory(DrawingAttributesHistory);
-                DrawingAttributesHistory = new Dictionary<Stroke, Tuple<DrawingAttributes, DrawingAttributes>>();
-                foreach (var item in DrawingAttributesHistoryFlag)
-                {
-                    item.Value.Clear();
-                }
-            }
+            CommitPendingStrokeDrawingAttributesHistory();
         }
 
         #endregion
@@ -714,11 +796,17 @@ namespace Ink_Canvas
         /// <summary>
         /// 墨迹选择控件宽度
         /// </summary>
-        private double BorderStrokeSelectionControlWidth = 490.0;
+        private double BorderStrokeSelectionControlWidth =>
+            BorderStrokeSelectionControl != null && BorderStrokeSelectionControl.ActualWidth > 0
+                ? BorderStrokeSelectionControl.ActualWidth
+                : 290.0;
         /// <summary>
         /// 墨迹选择控件高度
         /// </summary>
-        private double BorderStrokeSelectionControlHeight = 80.0;
+        private double BorderStrokeSelectionControlHeight =>
+            BorderStrokeSelectionControl != null && BorderStrokeSelectionControl.ActualHeight > 0
+                ? BorderStrokeSelectionControl.ActualHeight
+                : 48.0;
         /// <summary>
         /// 程序更改墨迹选择状态
         /// </summary>
@@ -785,7 +873,7 @@ namespace Ink_Canvas
         /// 如果选中栏会超出屏幕底部，则显示在墨迹上方
         /// 如果上方也没有空间，则显示在顶部
         /// </remarks>
-        private void updateBorderStrokeSelectionControlLocation()
+        private bool updateBorderStrokeSelectionControlLocation()
         {
             var bounds = GetCompositeSelectionBounds();
             if (bounds.IsEmpty || bounds.Width <= 0 || bounds.Height <= 0)
@@ -810,6 +898,34 @@ namespace Ink_Canvas
             }
 
             BorderStrokeSelectionControl.Margin = new Thickness(borderLeft, borderTop, 0, 0);
+
+            bool isFlyoutAbove = false;
+            if (BorderStrokeSelectionPropertiesFlyout != null &&
+                BorderStrokeSelectionPropertiesFlyout.Visibility == Visibility.Visible)
+            {
+                double flyoutWidth = BorderStrokeSelectionPropertiesFlyout.ActualWidth > 0
+                    ? BorderStrokeSelectionPropertiesFlyout.ActualWidth
+                    : BorderStrokeSelectionPropertiesFlyout.Width;
+                double flyoutHeight = BorderStrokeSelectionPropertiesFlyout.ActualHeight > 0
+                    ? BorderStrokeSelectionPropertiesFlyout.ActualHeight
+                    : 260.0;
+
+                double flyoutLeft = borderLeft;
+                if (flyoutLeft + flyoutWidth > Width)
+                    flyoutLeft = Math.Max(0, Width - flyoutWidth);
+
+                double flyoutTop = borderTop + BorderStrokeSelectionControlHeight + 10;
+                if (flyoutTop + flyoutHeight > Height)
+                {
+                    isFlyoutAbove = true;
+                    flyoutTop = borderTop - flyoutHeight - 10;
+                    if (flyoutTop < 0) flyoutTop = 10;
+                }
+
+                BorderStrokeSelectionPropertiesFlyout.Margin = new Thickness(flyoutLeft, flyoutTop, 0, 0);
+            }
+
+            return isFlyoutAbove;
         }
         /// <summary>
         /// 处理墨迹选择覆盖层操作开始事件
@@ -1273,6 +1389,7 @@ namespace Ink_Canvas
                     {
                         BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
                     }
+                    HideStrokeSelectionPropertiesFlyout();
 
                     SuppressNativeInkCanvasSelectionAdorners();
                     return;
@@ -1289,6 +1406,10 @@ namespace Ink_Canvas
                 {
                     BorderStrokeSelectionControl.Visibility = Visibility.Visible;
                     updateBorderStrokeSelectionControlLocation();
+                    if (BorderStrokeSelectionPropertiesFlyout?.Visibility == Visibility.Visible)
+                    {
+                        SyncStrokeSelectionPropertiesUI();
+                    }
                 }
                 if (BorderImageSelectionControl != null)
                 {
@@ -1311,6 +1432,7 @@ namespace Ink_Canvas
                 {
                     BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
                 }
+                HideStrokeSelectionPropertiesFlyout();
                 if (_selectedElements.Count == 0 && currentSelectedElement == null && ImageSelectionOverlay != null)
                 {
                     ImageSelectionOverlay.Visibility = Visibility.Collapsed;
@@ -1365,6 +1487,7 @@ namespace Ink_Canvas
 
                 if (BorderStrokeSelectionControl != null)
                     BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
+                HideStrokeSelectionPropertiesFlyout();
 
                 if (BorderImageSelectionControl != null)
                     BorderImageSelectionControl.Visibility = Visibility.Collapsed;

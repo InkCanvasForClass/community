@@ -68,6 +68,33 @@
   <data name="Main_ContextDelete" xml:space="preserve">
     <value>删库跑路</value>
   </data>
+  <data name="Main_ContextColors" xml:space="preserve">
+    <value>换个皮肤</value>
+  </data>
+  <data name="Main_ContextSize" xml:space="preserve">
+    <value>武器口径</value>
+  </data>
+  <data name="Main_ContextOpacity" xml:space="preserve">
+    <value>隐身术强度</value>
+  </data>
+  <data name="Main_ContextMore" xml:space="preserve">
+    <value>展开面板</value>
+  </data>
+  <data name="Main_ContextReset" xml:space="preserve">
+    <value>一键还原</value>
+  </data>
+  <data name="Main_ContextRotate45" xml:space="preserve">
+    <value>歪头 45°</value>
+  </data>
+  <data name="Main_ContextRotate90" xml:space="preserve">
+    <value>立正 90°</value>
+  </data>
+  <data name="Main_ContextFlipHorizontal" xml:space="preserve">
+    <value>左右横跳</value>
+  </data>
+  <data name="Main_ContextFlipVertical" xml:space="preserve">
+    <value>倒立洗头</value>
+  </data>
   <data name="Main_ContextZoom" xml:space="preserve">
     <value>F5 玩家狂喜镜</value>
   </data>

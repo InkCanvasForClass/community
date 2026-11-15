@@ -298,6 +298,7 @@ namespace Ink_Canvas
                    || ContainsPoint(BlackboardCenterSide, windowPoint)
                    || ContainsPoint(ViewboxBlackboardRightSide, windowPoint)
                    || ContainsPoint(BorderStrokeSelectionControl, windowPoint)
+                   || ContainsPoint(BorderStrokeSelectionPropertiesFlyout, windowPoint)
                    || ContainsPoint(BorderImageSelectionControl, windowPoint)
                    || ContainsPoint(BorderPdfPageSidebar, windowPoint)
                    || ContainsPoint(ImageSelectionOverlay, windowPoint)

@@ -52,6 +52,24 @@ namespace Ink_Canvas.Properties
 
         public static string Main_ContextDelete => ResourceManager.GetString(nameof(Main_ContextDelete), _resourceCulture);
 
+        public static string Main_ContextColors => ResourceManager.GetString(nameof(Main_ContextColors), _resourceCulture);
+
+        public static string Main_ContextSize => ResourceManager.GetString(nameof(Main_ContextSize), _resourceCulture);
+
+        public static string Main_ContextOpacity => ResourceManager.GetString(nameof(Main_ContextOpacity), _resourceCulture);
+
+        public static string Main_ContextMore => ResourceManager.GetString(nameof(Main_ContextMore), _resourceCulture);
+
+        public static string Main_ContextReset => ResourceManager.GetString(nameof(Main_ContextReset), _resourceCulture);
+
+        public static string Main_ContextRotate45 => ResourceManager.GetString(nameof(Main_ContextRotate45), _resourceCulture);
+
+        public static string Main_ContextRotate90 => ResourceManager.GetString(nameof(Main_ContextRotate90), _resourceCulture);
+
+        public static string Main_ContextFlipHorizontal => ResourceManager.GetString(nameof(Main_ContextFlipHorizontal), _resourceCulture);
+
+        public static string Main_ContextFlipVertical => ResourceManager.GetString(nameof(Main_ContextFlipVertical), _resourceCulture);
+
         public static string Main_ContextZoom => ResourceManager.GetString(nameof(Main_ContextZoom), _resourceCulture);
 
         public static string Main_ContextPageTurn => ResourceManager.GetString(nameof(Main_ContextPageTurn), _resourceCulture);

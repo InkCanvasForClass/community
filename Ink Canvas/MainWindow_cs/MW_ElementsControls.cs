@@ -831,6 +831,7 @@ namespace Ink_Canvas
                 {
                     BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
                 }
+                HideStrokeSelectionPropertiesFlyout();
             }
             else
             {
@@ -845,6 +846,7 @@ namespace Ink_Canvas
                 {
                     BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
                 }
+                HideStrokeSelectionPropertiesFlyout();
             }
 
             if (GridInkCanvasSelectionCover != null)
@@ -891,6 +893,7 @@ namespace Ink_Canvas
             if (BorderStrokeSelectionControl != null && (inkCanvas == null || inkCanvas.GetSelectedStrokes().Count == 0))
             {
                 BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
+                HideStrokeSelectionPropertiesFlyout();
             }
 
             if (GridInkCanvasSelectionCover != null)

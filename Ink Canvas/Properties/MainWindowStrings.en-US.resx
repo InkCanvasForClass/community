@@ -68,6 +68,33 @@
   <data name="Main_ContextDelete" xml:space="preserve">
     <value>Delete</value>
   </data>
+  <data name="Main_ContextColors" xml:space="preserve">
+    <value>Colors</value>
+  </data>
+  <data name="Main_ContextSize" xml:space="preserve">
+    <value>Size</value>
+  </data>
+  <data name="Main_ContextOpacity" xml:space="preserve">
+    <value>Opacity</value>
+  </data>
+  <data name="Main_ContextMore" xml:space="preserve">
+    <value>More</value>
+  </data>
+  <data name="Main_ContextReset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="Main_ContextRotate45" xml:space="preserve">
+    <value>Rotate 45°</value>
+  </data>
+  <data name="Main_ContextRotate90" xml:space="preserve">
+    <value>Rotate 90°</value>
+  </data>
+  <data name="Main_ContextFlipHorizontal" xml:space="preserve">
+    <value>Flip horizontal</value>
+  </data>
+  <data name="Main_ContextFlipVertical" xml:space="preserve">
+    <value>Flip vertical</value>
+  </data>
   <data name="Main_ContextZoom" xml:space="preserve">
     <value>Zoom</value>
   </data>
