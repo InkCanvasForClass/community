@@ -81,7 +81,7 @@
                             <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_IdleMiniBarOpacity}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="IdleMiniBarOpacityText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                               VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                                     <Slider x:Name="IdleMiniBarOpacitySlider" Minimum="0.1"
                                             Maximum="1" Width="200"
                                             IsSnapToTickEnabled="True" Value="0.5" TickFrequency="0.05"
@@ -92,7 +92,7 @@
                             <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_IdleMiniBarAutoRestore}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="IdleMiniBarAutoRestoreText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                               VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                                     <Slider x:Name="IdleMiniBarAutoRestoreSlider" Minimum="0"
                                             Maximum="180" Width="200"
                                             IsSnapToTickEnabled="True" Value="60" TickFrequency="5"
@@ -116,7 +116,7 @@
                             <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_LiquidGlassBarOpacity}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="LiquidGlassBarOpacityText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                               VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                                     <Slider x:Name="LiquidGlassBarOpacitySlider" Minimum="0.2"
                                             Maximum="1" Width="200"
                                             IsSnapToTickEnabled="True" Value="0.95" TickFrequency="0.05"
@@ -187,7 +187,7 @@
                             <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_FloatingBarShadowSize}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="FloatingBarShadowSizeText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right" Width="40"/>
+                                               VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right" Width="40"/>
                                     <Slider x:Name="FloatingBarShadowSizeSlider" Minimum="0" Maximum="60" Width="200"
                                             IsSnapToTickEnabled="True" Value="16" TickFrequency="1"
                                             TickPlacement="None" AutoToolTipPlacement="None"
@@ -279,10 +279,10 @@
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                             <TextBlock x:Name="ViewboxFloatingBarActualScaleText"
                                        Text="1.00x"
-                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                       VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                             <TextBlock Text=" (" VerticalAlignment="Center" FontSize="11" Foreground="Gray"/>
                             <TextBlock x:Name="ViewboxFloatingBarScaleSliderText"
-                                       VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                       VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                             <TextBlock Text=")" VerticalAlignment="Center" FontSize="11" Foreground="Gray"/>
                             <Slider x:Name="ViewboxFloatingBarScaleTransformValueSlider" Minimum="0.5"
                                     Maximum="1.25" Width="200"
@@ -301,7 +301,7 @@
                             <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_FloatingBarOpacity}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="ViewboxFloatingBarOpacityText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                               VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                                     <Slider x:Name="ViewboxFloatingBarOpacityValueSlider" Minimum="0.3"
                                             Maximum="1" Width="200"
                                             IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
@@ -316,7 +316,7 @@
                                 </ui:SettingsCard.HeaderIcon>
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="ViewboxFloatingBarOpacityInPPTText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                               VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                                     <Slider x:Name="ViewboxFloatingBarOpacityInPPTValueSlider" Minimum="0.3"
                                             Maximum="1" Width="200"
                                             IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
@@ -337,7 +337,7 @@
                             <ui:SettingsCard Header="{x:Static props:ThemeStrings.Theme_FloatingBarMenuOpacity}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="FloatingBarMenuOpacityText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                               VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                                     <Slider x:Name="FloatingBarMenuOpacitySlider" Minimum="0.3"
                                             Maximum="1" Width="200"
                                             IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"
@@ -351,7 +351,7 @@
                                 </ui:SettingsCard.HeaderIcon>
                                 <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                     <TextBlock x:Name="FloatingBarMenuOpacityInPPTText"
-                                               VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                               VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                                     <Slider x:Name="FloatingBarMenuOpacityInPPTSlider" Minimum="0.3"
                                             Maximum="1" Width="200"
                                             IsSnapToTickEnabled="True" Value="1" TickFrequency="0.05"

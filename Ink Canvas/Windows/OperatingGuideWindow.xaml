@@ -14,7 +14,6 @@
         WindowStartupLocation="CenterScreen"
         Topmost="True"
         ResizeMode="CanResize"
-        FontFamily="Microsoft YaHei UI"
         ui:ThemeManager.IsThemeAware="True"
         ui:TitleBar.ExtendViewIntoTitleBar="True"
         ui:WindowHelper.SystemBackdropType="None"

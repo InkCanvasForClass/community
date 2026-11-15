@@ -86,7 +86,7 @@ mc:Ignorable="d">
                                 Value="5"
                                 TickFrequency="0.1" TickPlacement="None" />
                         <TextBlock x:Name="_PenWidthText" Width="45" TextAlignment="Left"
-                                   FontFamily="Consolas" VerticalAlignment="Center"
+                                   FontFamily="{StaticResource MonoUIFontFamily}" VerticalAlignment="Center"
                                    Margin="10,0,0,0" FontSize="15" />
                     </StackPanel>
                     <!--透明度-->
@@ -99,7 +99,7 @@ mc:Ignorable="d">
                                 IsSnapToTickEnabled="True" Value="255"
                                 TickFrequency="1" TickPlacement="None" />
                         <TextBlock x:Name="_PenAlphaText" Width="45" TextAlignment="Left"
-                                   FontFamily="Consolas" VerticalAlignment="Center"
+                                   FontFamily="{StaticResource MonoUIFontFamily}" VerticalAlignment="Center"
                                    Margin="10,0,0,0" FontSize="15" />
                     </StackPanel>
                     <!--渐隐延迟-->
@@ -112,7 +112,7 @@ mc:Ignorable="d">
                                 Value="3"
                                 TickFrequency="1" TickPlacement="None" />
                         <TextBlock x:Name="_LaserPenFadeTimeText" Width="45" TextAlignment="Left"
-                                   FontFamily="Consolas" VerticalAlignment="Center"
+                                   FontFamily="{StaticResource MonoUIFontFamily}" VerticalAlignment="Center"
                                    Margin="10,0,0,0" FontSize="15" />
                     </StackPanel>
                     <!--渐隐速度倍率-->
@@ -125,7 +125,7 @@ mc:Ignorable="d">
                                 Value="1"
                                 TickFrequency="0.1" TickPlacement="None" />
                         <TextBlock x:Name="_LaserPenFadeSpeedText" Width="45" TextAlignment="Left"
-                                   FontFamily="Consolas" VerticalAlignment="Center"
+                                   FontFamily="{StaticResource MonoUIFontFamily}" VerticalAlignment="Center"
                                    Margin="10,0,0,0" FontSize="15" />
                     </StackPanel>
                 </ikw:SimpleStackPanel>

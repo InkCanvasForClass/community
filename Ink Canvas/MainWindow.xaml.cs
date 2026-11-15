@@ -1009,7 +1009,7 @@ namespace Ink_Canvas
             if (n.Length == 6)
             {
                 if (n == "ffffff") return Color.FromArgb(alpha, 255, 255, 255);
-                if (n == "ffa500" || n == "fb9650") return Color.FromArgb(alpha, 255, 165, 0);   // 橙
+                if (n == "fb9650") return Color.FromArgb(alpha, 251, 150, 80);   // 251,150,80 橙
                 if (n == "ffff00") return Color.FromArgb(alpha, 255, 255, 0);
                 if (n == "000000") return Color.FromArgb(alpha, 0, 0, 0);
                 if (n == "2563eb") return Color.FromArgb(alpha, 37, 99, 235);    // 37,99,235 蓝
@@ -1025,7 +1025,7 @@ namespace Ink_Canvas
                 {
                     byte r = parsed.R, g = parsed.G, b = parsed.B;
                     if (r == 255 && g == 255 && b == 255) return Color.FromArgb(alpha, 255, 255, 255);
-                    if ((r == 255 && g == 165 && b == 0) || (r == 251 && g == 150 && b == 80)) return Color.FromArgb(alpha, 255, 165, 0);
+                    if (r == 251 && g == 150 && b == 80) return Color.FromArgb(alpha, 251, 150, 80);
                     if (r == 255 && g == 255 && b == 0) return Color.FromArgb(alpha, 255, 255, 0);
                     if (r == 0 && g == 0 && b == 0) return Color.FromArgb(alpha, 0, 0, 0);
                     if (r == 37 && g == 99 && b == 235) return Color.FromArgb(alpha, 37, 99, 235);
@@ -1072,7 +1072,7 @@ namespace Ink_Canvas
                 if (currentMode == 0)
                 {
                     if (rgbColor == Colors.White) lastDesktopInkColor = 5;
-                    else if (rgbColor == Color.FromRgb(255, 165, 0) || rgbColor == Color.FromRgb(251, 150, 80)) lastDesktopInkColor = 8;
+                    else if (rgbColor == Color.FromRgb(251, 150, 80)) lastDesktopInkColor = 8;
                     else if (rgbColor == Colors.Yellow) lastDesktopInkColor = 4;
                     else if (rgbColor == Colors.Black) lastDesktopInkColor = 0;
                     else if (rgbColor == Color.FromRgb(37, 99, 235)) lastDesktopInkColor = 3;
@@ -1083,7 +1083,7 @@ namespace Ink_Canvas
                 else
                 {
                     if (rgbColor == Colors.White) lastBoardInkColor = 5;
-                    else if (rgbColor == Color.FromRgb(255, 165, 0) || rgbColor == Color.FromRgb(251, 150, 80)) lastBoardInkColor = 8;
+                    else if (rgbColor == Color.FromRgb(251, 150, 80)) lastBoardInkColor = 8;
                     else if (rgbColor == Colors.Yellow) lastBoardInkColor = 4;
                     else if (rgbColor == Colors.Black) lastBoardInkColor = 0;
                     else if (rgbColor == Color.FromRgb(37, 99, 235)) lastBoardInkColor = 3;
@@ -1396,7 +1396,8 @@ namespace Ink_Canvas
         private void inkCanvas_EditingModeChanged(object sender, RoutedEventArgs e)
         {
             var inkCanvas1 = sender as InkCanvas;
-            if (inkCanvas1 == null || _changingPalmMode) return;
+            if (inkCanvas1 == null || _changingPalmMode || _changingCanvasGestureMode) return;
+            if (_canvasGestureOwnsTouchInput) ResetCanvasGestureInput(false);
 
             if (_palmGroupSavedMode.HasValue) CancelPalmGroup(false);
             if (isPalmEraserActive)
@@ -1787,11 +1788,14 @@ namespace Ink_Canvas
                 {
                     var isFloatingBarOutsideScreen = false;
                     var isInPPTPresentationMode = false;
+                    // 必须显式传 CancellationToken：Dispatcher 没有 Invoke(Action, DispatcherPriority, TimeSpan) 重载，
+                    // 否则 TimeSpan 会被绑定到 legacy Invoke(Delegate, priority, params object[]) 当成委托参数，
+                    // UI 线程执行时抛 TargetParameterCountException。
                     Dispatcher.Invoke(() =>
                     {
                         isFloatingBarOutsideScreen = IsOutsideOfScreenHelper.IsOutsideOfScreen(ViewboxFloatingBar);
                         isInPPTPresentationMode = IsInPPTPresentationMode;
-                    }, DispatcherPriority.Normal, TimeSpan.FromSeconds(5));
+                    }, DispatcherPriority.Normal, CancellationToken.None, TimeSpan.FromSeconds(5));
                     if (isFloatingBarOutsideScreen) dpiChangedDelayAction.DebounceAction(3000, null, () =>
                     {
                         if (!isFloatingBarFolded)
@@ -2556,6 +2560,8 @@ namespace Ink_Canvas
 
             if (IsBoardRoamingMode)
             {
+                // 触摸提升的 Stylus 事件留给 PreviewTouch，不能阻断触摸事件或重复平移。
+                if (IsTouchStylusDevice(e.StylusDevice)) return;
                 inkCanvas.CaptureStylus();
                 ViewboxFloatingBar.IsHitTestVisible = false;
                 BlackboardUIGridForInkReplay.IsHitTestVisible = false;
@@ -2583,7 +2589,7 @@ namespace Ink_Canvas
                 e.Handled = true;
                 return;
             }
-            if (!_isBoardRoamingPointerDown && !_isBoardRoamingTwoFingerGesture && _boardRoamingContacts.Count == 0) return;
+            if (!IsBoardRoamingMode || IsTouchStylusDevice(e.StylusDevice)) return;
 
             MoveBoardRoamingContact(e.StylusDevice.Id, e.GetPosition(inkCanvas));
             e.Handled = true;
@@ -2593,10 +2599,12 @@ namespace Ink_Canvas
         private void inkCanvas_StylusUp(object sender, StylusEventArgs e)
         {
             EndSecAgentStrokeErase();
-            if (_isBoardRoamingPointerDown || _isBoardRoamingTwoFingerGesture || _boardRoamingContacts.Count > 0)
+            if (IsBoardRoamingMode && IsTouchStylusDevice(e.StylusDevice)) return;
+            if (IsBoardRoamingMode)
             {
                 EndBoardRoamingContact(e.StylusDevice.Id);
-                if (_boardRoamingContacts.Count == 0)
+
+                if (_boardRoamingContactIds.Count == 0)
                 {
                     inkCanvas.ReleaseStylusCapture();
                     ViewboxFloatingBar.IsHitTestVisible = true;
@@ -2998,7 +3006,12 @@ namespace Ink_Canvas
             // 窗口失活时，触点若走 TouchLeave 而非 TouchUp，触摸活动集合会残留，
             // 导致 EndTouchInkInputIfIdle 永远不退出、IsManipulationEnabled 永远不恢复。
             // 调用 AbortAllActiveTouchInputs 兜底。
-            try { AbortAllActiveTouchInputs(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+            try
+            {
+                ResetCanvasGestureInput();
+                AbortAllActiveTouchInputs();
+            }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
 

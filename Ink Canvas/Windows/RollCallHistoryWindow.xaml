@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Ink_Canvas"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-        mc:Ignorable="d" FontFamily="Microsoft YaHei UI"
+        mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         Topmost="True"
         Title="{x:Static props:RandomStrings.Random_History_WindowTitle}" Height="500" Width="400"

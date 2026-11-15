@@ -363,7 +363,7 @@
                                             <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Crop}"/>
                                         </ui:SettingsCard.HeaderIcon>
                                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
-                                            <TextBlock x:Name="ScreenshotJpegQualityText" VerticalAlignment="Center" FontFamily="Consolas" TextAlignment="Right"/>
+                                            <TextBlock x:Name="ScreenshotJpegQualityText" VerticalAlignment="Center" FontFamily="{StaticResource MonoUIFontFamily}" TextAlignment="Right"/>
                                             <Slider x:Name="ScreenshotJpegQualitySlider" Width="200" Minimum="50" Maximum="100"
                                                     IsSnapToTickEnabled="True" TickFrequency="1" TickPlacement="None"
                                                     ValueChanged="ScreenshotJpegQualitySlider_ValueChanged"/>

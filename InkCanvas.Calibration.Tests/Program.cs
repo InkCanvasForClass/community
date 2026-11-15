@@ -43,13 +43,25 @@ namespace InkCanvas.Calibration.Tests
                 AutoStartMigrationPreservesOtherSettings, AutoStartMigrationKeepsExplicitValues,
                 AutoStartMigrationRetriesAfterWriteFailure, AutoStartMigrationPreservesInvalidConfig,
                 AutoStartMigrationCreatesMissingConfig, AutoStartMigrationReadsCurrentConfig,
-AutoStartMigrationHandlesMissingStartup, BoardRoamingTests.RunAll,
+                AutoStartMigrationHandlesMissingStartup, BoardRoamingTests.RunAll, CanvasGestureTests.RunAll,
                 ChickenSoupMigrationDoesNotAddMottosWhenCustomSchemeSelectedOrPresetsEmpty,
                 ChickenSoupMigrationPreservesExistingSelectedPresets,
                 ChickenSoupMigrationMigratesLegacySourceToNewFormat };
             if (Array.IndexOf(args, "--palm-only") >= 0) tests = new Action[] { PalmGroupInputTests.RunAll };
             if (Array.IndexOf(args, "--roaming-only") >= 0) tests = new Action[] { BoardRoamingTests.RunAll };
             if (Array.IndexOf(args, "--roaming-benchmark") >= 0) tests = new Action[] { BoardRoamingTests.Benchmark };
+            if (Array.IndexOf(args, "--gesture-only") >= 0) tests = new Action[] { CanvasGestureTests.RunAll };
+            int gestureConfigIndex = Array.IndexOf(args, "--gesture-config");
+            if (gestureConfigIndex >= 0)
+            {
+                if (gestureConfigIndex + 1 >= args.Length)
+                {
+                    Console.WriteLine("--gesture-config requires a settings file path");
+                    return 2;
+                }
+                string configPath = args[gestureConfigIndex + 1];
+                tests = tests.Concat(new Action[] { () => CanvasGestureTests.RunConfiguration(configPath) }).ToArray();
+            }
             if (Array.IndexOf(args, "--calibration-preview-only") >= 0)
                 tests = new Action[] { CalibrationPreviewSuppressesRemainingFingers, CalibrationPreviewOwnsTouchInput };
             foreach (var test in tests)

@@ -539,10 +539,7 @@ namespace Ink_Canvas
             BoardPenPalette.IsOpen = false;
             BoardEraserSizePanel.IsOpen = false;
             EraserSizePanel.IsOpen = false;
-            var leftBorder = FindView("board.pageList.leftBorder") as Border;
-            var rightBorder = FindView("board.pageList.rightBorder") as Border;
-            if (leftBorder != null) leftBorder.Visibility = Visibility.Collapsed;
-            if (rightBorder != null) rightBorder.Visibility = Visibility.Collapsed;
+            HideAllPageListPanelsImmediately();
             BoardImageOptionsPanel.IsOpen = false;
             TwoFingerGestureBorder.IsOpen = false;
             BoardTwoFingerGestureBorder.IsOpen = false;
@@ -644,10 +641,7 @@ namespace Ink_Canvas
             AnimationsHelper.HidePopupWithSlideAndFade(EraserSizePanel);
             AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderDrawShape);
-            var leftBorderAnim = FindView("board.pageList.leftBorder") as Border;
-            var rightBorderAnim = FindView("board.pageList.rightBorder") as Border;
-            if (leftBorderAnim != null) AnimationsHelper.HideWithSlideAndFade(leftBorderAnim);
-            if (rightBorderAnim != null) AnimationsHelper.HideWithSlideAndFade(rightBorderAnim);
+            HideAllPageListPanels();
             AnimationsHelper.HidePopupWithSlideAndFade(BoardImageOptionsPanel);
             AnimationsHelper.HidePopupWithSlideAndFade(TwoFingerGestureBorder);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardTwoFingerGestureBorder);
@@ -1387,7 +1381,7 @@ namespace Ink_Canvas
                             break;
                         case "QuickColorOrange":
                         case "QuickColorOrangeSingle":
-                            border.Background = new SolidColorBrush(Color.FromRgb(255, 165, 0));
+                            border.Background = new SolidColorBrush(Color.FromRgb(251, 150, 80));
                             break;
                         case "QuickColorYellow":
                         case "QuickColorYellowSingle":
@@ -4188,7 +4182,7 @@ namespace Ink_Canvas
         /// </summary>
         private void QuickColorOrange_Click(object sender, RoutedEventArgs e)
         {
-            SetQuickColor(Color.FromRgb(255, 165, 0)); // 橙色
+            SetQuickColor(Color.FromRgb(251, 150, 80)); // 橙色
             ScheduleBrushAutoRestore();
         }
 
@@ -4253,7 +4247,7 @@ namespace Ink_Canvas
                 "Black" => Colors.Black,
                 "White" => Colors.White,
                 "Red" => Colors.Red,
-                "Orange" => Color.FromRgb(255, 165, 0),
+                "Orange" => Color.FromRgb(251, 150, 80),
                 "Yellow" => Colors.Yellow,
                 "Green" => Color.FromRgb(22, 163, 74),
                 "Blue" => Color.FromRgb(37, 99, 235),
@@ -4352,7 +4346,7 @@ namespace Ink_Canvas
             {
                 // 桌面模式
                 if (color == Colors.White) lastDesktopInkColor = 5;
-                else if (color == Color.FromRgb(255, 165, 0) || color == Color.FromRgb(251, 150, 80)) lastDesktopInkColor = 8; // 橙色
+                else if (color == Color.FromRgb(251, 150, 80)) lastDesktopInkColor = 8; // 橙色
                 else if (color == Colors.Yellow) lastDesktopInkColor = 4;
                 else if (color == Colors.Black) lastDesktopInkColor = 0;
                 else if (color == Color.FromRgb(37, 99, 235)) lastDesktopInkColor = 3; // 蓝色
@@ -4364,7 +4358,7 @@ namespace Ink_Canvas
             {
                 // 白板模式
                 if (color == Colors.White) lastBoardInkColor = 5;
-                else if (color == Color.FromRgb(255, 165, 0) || color == Color.FromRgb(251, 150, 80)) lastBoardInkColor = 8; // 橙色
+                else if (color == Color.FromRgb(251, 150, 80)) lastBoardInkColor = 8; // 橙色
                 else if (color == Colors.Yellow) lastBoardInkColor = 4;
                 else if (color == Colors.Black) lastBoardInkColor = 0;
                 else if (color == Color.FromRgb(37, 99, 235)) lastBoardInkColor = 3; // 蓝色
@@ -4698,6 +4692,7 @@ namespace Ink_Canvas
         {
             try
             {
+                ResetCanvasGestureInput();
                 // 清空触摸点计数器
                 dec.Clear();
 
@@ -6330,6 +6325,8 @@ namespace Ink_Canvas
         /// <param name="mode">模式名称</param>
         private void UpdateCurrentToolMode(string mode)
         {
+            if (_canvasGestureOwnsTouchInput && !string.Equals(_currentToolMode, mode, StringComparison.Ordinal))
+                ResetCanvasGestureInput(false);
             if (!string.Equals(mode, "roaming", StringComparison.Ordinal) && IsBoardRoamingMode)
             {
                 EndBoardRoaming();

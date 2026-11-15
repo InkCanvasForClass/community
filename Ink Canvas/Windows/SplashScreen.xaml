@@ -35,7 +35,6 @@
         <TextBlock x:Name="LoadingText" 
                    Text="{x:Static props:HomeStrings.Splash_Starting}" 
                    FontSize="18" 
-                   FontFamily="pack://application:,,,/Resources/Fonts/#LXGW WenKai TC"
                    FontWeight="SemiBold"
                    Foreground="White"
                    HorizontalAlignment="Center"

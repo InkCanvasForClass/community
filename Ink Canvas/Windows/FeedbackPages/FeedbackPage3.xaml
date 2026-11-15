@@ -60,7 +60,7 @@
                                        Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
                             <TextBox x:Name="TextBoxPastebinUrl"
                                      VerticalAlignment="Center"
-                                     FontFamily="Consolas"
+                                     FontFamily="{StaticResource MonoUIFontFamily}"
                                      FontSize="12"/>
                         </ikw:SimpleStackPanel>
                     </ui:SettingsCard>
@@ -124,7 +124,7 @@
                                  IsReadOnly="True"
                                  BorderThickness="0"
                                  Background="Transparent"
-                                 FontFamily="Consolas"
+                                 FontFamily="{StaticResource MonoUIFontFamily}"
                                  FontSize="12"
                                  TextWrapping="Wrap"
                                  AcceptsReturn="True"

@@ -172,7 +172,7 @@
 
                 <!-- 页码 -->
                 <TextBlock x:Name="PageInfoText" Text="1/1"
-                           FontSize="11" FontFamily="Consolas"
+                           FontSize="11" FontFamily="{StaticResource MonoUIFontFamily}"
                            Foreground="{DynamicResource IconForeground}"
                            VerticalAlignment="Center" Margin="2,0"/>
 

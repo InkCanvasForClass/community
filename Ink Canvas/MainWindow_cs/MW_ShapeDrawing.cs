@@ -1147,6 +1147,8 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_TouchMove(object sender, TouchEventArgs e)
         {
+            if (IsBoardRoamingMode) return;
+
             // 视频展台特殊模式：触摸移动交给 VideoPresenterSpecialModeContainer 的 Manipulation 处理
             // 图形绘制模式例外：需要走正常绘制流程
             if (inkCanvas?.EditingMode == InkCanvasEditingMode.Select) return;
@@ -1232,8 +1234,35 @@ namespace Ink_Canvas
         ///    - 长方体
         /// 4. 移除之前的临时笔画，添加新生成的笔画
         /// </remarks>
+        private Point? _lastRawShapeEndP;
+
+        private static bool IsLineShapeMode(int shapeMode) =>
+            shapeMode == 1 || shapeMode == 2 || shapeMode == 8 || shapeMode == 15 || shapeMode == 18;
+
+        private static Point SnapLineEndPointIfShiftPressed(Point startPoint, Point endPoint, int shapeMode)
+        {
+            if (!IsLineShapeMode(shapeMode)) return endPoint;
+            if ((Keyboard.Modifiers & ModifierKeys.Shift) != ModifierKeys.Shift) return endPoint;
+
+            var dx = endPoint.X - startPoint.X;
+            var dy = endPoint.Y - startPoint.Y;
+            return Math.Abs(dx) >= Math.Abs(dy)
+                ? new Point(endPoint.X, startPoint.Y)
+                : new Point(startPoint.X, endPoint.Y);
+        }
+
+        private void RefreshLineShapeDrawingOnShiftToggle()
+        {
+            if ((isMouseDown || isTouchDown) && IsLineShapeMode(drawingShapeMode) && _lastRawShapeEndP.HasValue)
+            {
+                MouseTouchMove(_lastRawShapeEndP.Value);
+            }
+        }
+
         private void MouseTouchMove(Point endP)
         {
+            _lastRawShapeEndP = endP;
+            endP = SnapLineEndPointIfShiftPressed(iniP, endP, drawingShapeMode);
             // 禁用原有的FitToCurve，使用新的高级贝塞尔曲线平滑
             if (Settings.Canvas.FitToCurve) drawingAttributes.FitToCurve = false;
             // 在绘制过程中禁用浮动栏交互，避免干扰绘制
@@ -2669,9 +2698,11 @@ namespace Ink_Canvas
                     return;
                 }
             }
-            if (IsBoardRoamingMode && e.ChangedButton == MouseButton.Left)
+            if (IsBoardRoamingMode)
             {
-                if (e.StylusDevice == null && _boardRoamingContactIds.Count == 0)
+                if (e.ChangedButton == MouseButton.Left && e.StylusDevice == null
+                    && _boardRoamingContactIds.Count == 0 && !_isBoardRoamingPointerDown
+                    && !_isBoardRoamingMultiTouchSuppressed)
                 {
                     inkCanvas.CaptureMouse();
                     ViewboxFloatingBar.IsHitTestVisible = false;
@@ -2733,10 +2764,10 @@ namespace Ink_Canvas
             }
 
             // 板漫游：鼠标拖动移动整个板内容
-            if (IsBoardRoamingMode && _isBoardRoamingPointerDown)
+            if (IsBoardRoamingMode)
             {
-                if (e.StylusDevice == null && _boardRoamingContactIds.Count == 0
-                    && !_isBoardRoamingPopupDrag && !_isBoardRoamingManipulation)
+                if (_isBoardRoamingPointerDown && e.StylusDevice == null && _boardRoamingContactIds.Count == 0
+                    && !_isBoardRoamingPopupDrag)
                     MoveBoardRoaming(e.GetPosition(inkCanvas));
                 e.Handled = true;
                 return;
@@ -2797,9 +2828,10 @@ namespace Ink_Canvas
             }
 
             // 板漫游：结束拖动
-            if (IsBoardRoamingMode && _isBoardRoamingPointerDown)
+            if (IsBoardRoamingMode)
             {
-                if (e.StylusDevice == null && _boardRoamingContactIds.Count == 0 && !_isBoardRoamingPopupDrag)
+                if (_isBoardRoamingPointerDown && e.ChangedButton == MouseButton.Left && e.StylusDevice == null
+                    && _boardRoamingContactIds.Count == 0 && !_isBoardRoamingPopupDrag)
                 {
                     EndBoardRoaming();
                     inkCanvas.ReleaseMouseCapture();
@@ -2949,29 +2981,39 @@ namespace Ink_Canvas
                     drawMultiStepShapeSpecialStrokeCollection = null;
                     if (asymptoteStrokes != null && asymptoteStrokes.Count > 0)
                     {
-                        var opFlag = false;
                         switch (Settings.Canvas.HyperbolaAsymptoteOption)
                         {
                             case OptionalOperation.Yes:
-                                opFlag = true;
                                 break;
                             case OptionalOperation.No:
-                                opFlag = false;
+                                RemoveHyperbolaAsymptotes(asymptoteStrokes, lastTempStrokeCollection);
                                 break;
                             case OptionalOperation.Ask:
-                                opFlag = MessageBoxHelper.Show(this, Properties.CanvasStrings.Shape_RemoveAsymptote, "Ink Canvas", MessageBoxButton.YesNo) !=
-                                         MessageBoxResult.Yes;
-                                break;
-                        }
+                                StrokeCollection pendingCollection = null;
+                                if (_currentCommitType == CommitReason.ShapeDrawing)
+                                {
+                                    _currentCommitType = CommitReason.UserInput;
+                                    if (lastTempStrokeCollection != null && lastTempStrokeCollection.Count > 0)
+                                        pendingCollection = lastTempStrokeCollection;
+                                    else if (lastTempStroke != null)
+                                        pendingCollection = new StrokeCollection { lastTempStroke };
+                                }
 
-                        if (!opFlag)
-                        {
-                            foreach (var asymptoteStroke in new StrokeCollection(asymptoteStrokes))
-                            {
-                                if (inkCanvas.Strokes.Contains(asymptoteStroke)) inkCanvas.Strokes.Remove(asymptoteStroke);
-                                // 已移除的渐近线不应进入最终图形的撤销/重做记录。
-                                lastTempStrokeCollection?.Remove(asymptoteStroke);
-                            }
+                                // 推迟到当前触摸/手写笔输入事件处理完结后再弹出模态框，避免触摸屏上弹窗按钮无响应。
+                                Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
+                                {
+                                    if (MessageBoxHelper.Show(this, Properties.CanvasStrings.Shape_RemoveAsymptote, "Ink Canvas", MessageBoxButton.YesNo) ==
+                                        MessageBoxResult.Yes)
+                                    {
+                                        RemoveHyperbolaAsymptotes(asymptoteStrokes, pendingCollection);
+                                    }
+
+                                    if (pendingCollection != null && pendingCollection.Count > 0)
+                                    {
+                                        timeMachine.CommitStrokeUserInputHistory(pendingCollection);
+                                    }
+                                }));
+                                break;
                         }
                     }
 
@@ -2985,6 +3027,7 @@ namespace Ink_Canvas
             }
 
             isMouseDown = false;
+            _lastRawShapeEndP = null;
             if (ReplacedStroke != null || AddedStroke != null)
             {
                 timeMachine.CommitStrokeEraseHistory(ReplacedStroke, AddedStroke);
@@ -3032,6 +3075,16 @@ namespace Ink_Canvas
             }
 
             if (Settings.Canvas.FitToCurve == true) drawingAttributes.FitToCurve = true;
+        }
+
+        private void RemoveHyperbolaAsymptotes(StrokeCollection asymptoteStrokes, StrokeCollection commitCollection)
+        {
+            foreach (var asymptoteStroke in new StrokeCollection(asymptoteStrokes))
+            {
+                if (inkCanvas.Strokes.Contains(asymptoteStroke)) inkCanvas.Strokes.Remove(asymptoteStroke);
+                // 已移除的渐近线不应进入最终图形的撤销/重做记录。
+                commitCollection?.Remove(asymptoteStroke);
+            }
         }
 
         /// <summary>

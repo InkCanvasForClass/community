@@ -12,7 +12,7 @@
         ResizeMode="NoResize" ui:ThemeManager.RequestedTheme="Light"
         Title="{x:Static props:FeedbackStrings.WindowTitle}"
         Height="550" Width="650"
-        FontFamily="Microsoft YaHei UI">
+        >
     <Grid Margin="30">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -24,7 +24,7 @@
         <Grid Grid.Row="1" VerticalAlignment="Bottom" Margin="0,20,0,0">
             <ikw:SimpleStackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal" Spacing="12">
                 <Button x:Name="ButtonCancel" Content="{x:Static props:FeedbackStrings.BtnCancel}"
-                        Width="100" Height="36" FontFamily="Microsoft YaHei UI" FontSize="14"
+                        Width="100" Height="36" FontSize="14"
                         Click="ButtonCancel_Click">
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
@@ -33,14 +33,14 @@
                     </Button.Style>
                 </Button>
                 <Button x:Name="ButtonNext" Content="{x:Static props:FeedbackStrings.BtnNext}"
-                        Width="120" Height="36" FontFamily="Microsoft YaHei UI" FontSize="14" FontWeight="SemiBold"
+                        Width="120" Height="36" FontSize="14" FontWeight="SemiBold"
                         Click="ButtonNext_Click">
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.AccentButtonStyleKey}}"/>
                     </Button.Style>
                 </Button>
                 <Button x:Name="ButtonBack" Content="{x:Static props:FeedbackStrings.BtnBack}"
-                        Width="100" Height="36" FontFamily="Microsoft YaHei UI" FontSize="14"
+                        Width="100" Height="36" FontSize="14"
                         Click="ButtonBack_Click" Visibility="Collapsed">
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
@@ -49,7 +49,7 @@
                     </Button.Style>
                 </Button>
                 <Button x:Name="ButtonConfirm" Content="{x:Static props:FeedbackStrings.BtnConfirm}"
-                        Width="120" Height="36" FontFamily="Microsoft YaHei UI" FontSize="14" FontWeight="SemiBold"
+                        Width="120" Height="36" FontSize="14" FontWeight="SemiBold"
                         Click="ButtonConfirm_Click" Visibility="Collapsed">
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.AccentButtonStyleKey}}"/>

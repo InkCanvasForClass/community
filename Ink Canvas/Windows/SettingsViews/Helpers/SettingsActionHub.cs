@@ -91,6 +91,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             if (mw != null) mw.ApplyTheme(themeIndex);
         }
 
+        public static void OnGlobalUIFontChanged(string font)
+        {
+            GlobalFontHelper.Apply(font);
+        }
+
         public static void OnLanguageChanged(string language)
         {
             LocalizationHelper.TrySetCulture(language);

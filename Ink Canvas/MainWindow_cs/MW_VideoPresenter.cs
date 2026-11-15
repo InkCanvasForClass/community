@@ -337,10 +337,11 @@ namespace Ink_Canvas
             }
 
             // board.pageInfo.* 在 BoardToolbarRegistry 中会被覆盖注册为 Border（不是 TextBlock），
-            // 需要用 FindTextBlockInVisualTree 在视觉树中查找实际的 TextBlock（与 UpdatePageInfo 逻辑一致）
-            foreach (var key in new[] { "board.pageInfo.left", "board.pageInfo.right", "board.pageInfo.center" })
+            // 需要用 FindTextBlockInVisualTree 在视觉树中查找实际的 TextBlock（与 UpdatePageInfo 逻辑一致）。
+            // 页码区域可以是 left / right / center 等任意位置，按实际注册的区域遍历。
+            foreach (var areaId in GetPageInfoAreaIds())
             {
-                var view = FindView(key);
+                var view = FindView(PageInfoViewKey(areaId));
                 if (view == null) continue;
                 if (view is System.Windows.Controls.TextBlock tb)
                 {
@@ -4309,10 +4310,7 @@ namespace Ink_Canvas
             UpdateBoothPageInfoDisplay();
             // 同步页码列表 SelectedIndex 到照片项（index=photoIndex+1）
             int selectedIndex = photoIndex + 1;
-            var leftPageListView = FindView("board.pageList.left") as System.Windows.Controls.ListView;
-            var rightPageListView = FindView("board.pageList.right") as System.Windows.Controls.ListView;
-            if (leftPageListView != null) leftPageListView.SelectedIndex = selectedIndex;
-            if (rightPageListView != null) rightPageListView.SelectedIndex = selectedIndex;
+            SyncPageListSelection(selectedIndex);
 
             // 切换后恢复该照片的墨迹（每张照片独立保存，互不干扰）
             RestoreBoothStrokesFromSlot(photoIndex);
@@ -4384,11 +4382,8 @@ namespace Ink_Canvas
 
             // 页码显示 0/1
             UpdateBoothPageInfoDisplay();
-            // 同步侧栏页码列表 SelectedIndex 到直播页项（index=0）
-            var leftPageListView = FindView("board.pageList.left") as System.Windows.Controls.ListView;
-            var rightPageListView = FindView("board.pageList.right") as System.Windows.Controls.ListView;
-            if (leftPageListView != null) leftPageListView.SelectedIndex = 0;
-            if (rightPageListView != null) rightPageListView.SelectedIndex = 0;
+            // 同步各区域页码列表 SelectedIndex 到直播页项（index=0）
+            SyncPageListSelection(0);
 
             // 恢复直播页墨迹快照（与照片页墨迹相互独立）
             RestoreBoothStrokesFromSlot(-1);

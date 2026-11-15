@@ -177,6 +177,27 @@
   <data name="Theme_LanguageLabel" xml:space="preserve">
     <value>UI language</value>
   </data>
+  <data name="Theme_UIFont_Default" xml:space="preserve">
+    <value>Default (Segoe UI)</value>
+  </data>
+  <data name="Theme_UIFont_Description" xml:space="preserve">
+    <value>Choose the global UI font, or add a .ttf/.ttc font file from anywhere</value>
+  </data>
+  <data name="Theme_UIFont_Import" xml:space="preserve">
+    <value>Add font...</value>
+  </data>
+  <data name="Theme_UIFont_ImportFailed" xml:space="preserve">
+    <value>The font file could not be added</value>
+  </data>
+  <data name="Theme_UIFont_Remove" xml:space="preserve">
+    <value>Remove font</value>
+  </data>
+  <data name="Theme_UIFont_RemovePending" xml:space="preserve">
+    <value>The font is currently in use. The font file will be deleted when the app exits.</value>
+  </data>
+  <data name="Theme_UIFontLabel" xml:space="preserve">
+    <value>Font</value>
+  </data>
   <data name="Theme_Light" xml:space="preserve">
     <value>Light</value>
   </data>

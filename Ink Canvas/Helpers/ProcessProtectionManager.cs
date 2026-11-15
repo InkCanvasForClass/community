@@ -27,7 +27,8 @@ namespace Ink_Canvas.Helpers
             "Saves",
             "Backups",
             "Logs",
-            "AutoUpdate"
+            "AutoUpdate",
+            "Fonts"
         };
 
         public static bool Enabled
