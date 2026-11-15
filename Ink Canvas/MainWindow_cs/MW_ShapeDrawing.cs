@@ -1234,8 +1234,35 @@ namespace Ink_Canvas
         ///    - 长方体
         /// 4. 移除之前的临时笔画，添加新生成的笔画
         /// </remarks>
+        private Point? _lastRawShapeEndP;
+
+        private static bool IsLineShapeMode(int shapeMode) =>
+            shapeMode == 1 || shapeMode == 2 || shapeMode == 8 || shapeMode == 15 || shapeMode == 18;
+
+        private static Point SnapLineEndPointIfShiftPressed(Point startPoint, Point endPoint, int shapeMode)
+        {
+            if (!IsLineShapeMode(shapeMode)) return endPoint;
+            if ((Keyboard.Modifiers & ModifierKeys.Shift) != ModifierKeys.Shift) return endPoint;
+
+            var dx = endPoint.X - startPoint.X;
+            var dy = endPoint.Y - startPoint.Y;
+            return Math.Abs(dx) >= Math.Abs(dy)
+                ? new Point(endPoint.X, startPoint.Y)
+                : new Point(startPoint.X, endPoint.Y);
+        }
+
+        private void RefreshLineShapeDrawingOnShiftToggle()
+        {
+            if ((isMouseDown || isTouchDown) && IsLineShapeMode(drawingShapeMode) && _lastRawShapeEndP.HasValue)
+            {
+                MouseTouchMove(_lastRawShapeEndP.Value);
+            }
+        }
+
         private void MouseTouchMove(Point endP)
         {
+            _lastRawShapeEndP = endP;
+            endP = SnapLineEndPointIfShiftPressed(iniP, endP, drawingShapeMode);
             // 禁用原有的FitToCurve，使用新的高级贝塞尔曲线平滑
             if (Settings.Canvas.FitToCurve) drawingAttributes.FitToCurve = false;
             // 在绘制过程中禁用浮动栏交互，避免干扰绘制
@@ -3000,6 +3027,7 @@ namespace Ink_Canvas
             }
 
             isMouseDown = false;
+            _lastRawShapeEndP = null;
             if (ReplacedStroke != null || AddedStroke != null)
             {
                 timeMachine.CommitStrokeEraseHistory(ReplacedStroke, AddedStroke);

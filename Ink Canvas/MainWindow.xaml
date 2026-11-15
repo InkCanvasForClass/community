@@ -25,6 +25,7 @@
         Closing="Window_Closing"
         Closed="Window_Closed"
         PreviewKeyDown="Main_Grid_PreviewKeyDown"
+        PreviewKeyUp="Main_Grid_PreviewKeyUp"
         Height="1080" Width="1920"
         MouseWheel="Window_MouseWheel"
         Foreground="{DynamicResource FloatingBarForegroundBrush}"

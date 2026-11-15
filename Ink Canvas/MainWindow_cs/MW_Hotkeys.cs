@@ -243,6 +243,11 @@ namespace Ink_Canvas
         /// <param name="e">键盘事件参数</param>
         private void Main_Grid_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            if (!e.IsRepeat && (e.Key == Key.LeftShift || e.Key == Key.RightShift))
+            {
+                RefreshLineShapeDrawingOnShiftToggle();
+            }
+
             if (!IsInPPTPresentationMode || currentMode != 0) return;
 
             if (e.Key == Key.Down || e.Key == Key.PageDown || e.Key == Key.Right || e.Key == Key.N || e.Key == Key.Space)
@@ -252,6 +257,14 @@ namespace Ink_Canvas
             if (e.Key == Key.Up || e.Key == Key.PageUp || e.Key == Key.Left || e.Key == Key.P)
             {
                 BtnPPTSlidesUp_Click(null, null);
+            }
+        }
+
+        private void Main_Grid_PreviewKeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.LeftShift || e.Key == Key.RightShift)
+            {
+                RefreshLineShapeDrawingOnShiftToggle();
             }
         }
 
