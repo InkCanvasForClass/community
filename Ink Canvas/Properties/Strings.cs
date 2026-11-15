@@ -235,6 +235,7 @@ namespace Ink_Canvas.Properties
             dict["Booth_ExpandAlbum"] = ("BoothStrings", "ExpandAlbum");
             dict["Booth_CapturedPhotos"] = ("BoothStrings", "CapturedPhotos");
             dict["Booth_Correction"] = ("BoothStrings", "Correction");
+            dict["Booth_Scan"] = ("BoothStrings", "Scan");
             dict["Booth_Present"] = ("BoothStrings", "Present");
             dict["Booth_Resolution_Tooltip"] = ("BoothStrings", "Resolution_Tooltip");
             dict["Booth_Rotate"] = ("BoothStrings", "Rotate");

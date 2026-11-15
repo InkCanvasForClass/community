@@ -68,6 +68,16 @@ namespace Ink_Canvas.Properties
 
         public static string Correction => ResourceManager.GetString(nameof(Correction), _resourceCulture);
 
+        public static string Scan => ResourceManager.GetString(nameof(Scan), _resourceCulture) ?? "扫描";
+
+        public static string ScanMode => ResourceManager.GetString(nameof(ScanMode), _resourceCulture) ?? "扫描方案";
+
+        public static string ScanModeEnhancedColor => ResourceManager.GetString(nameof(ScanModeEnhancedColor), _resourceCulture) ?? "增效彩色";
+
+        public static string ScanModeEnhancedBlackWhite => ResourceManager.GetString(nameof(ScanModeEnhancedBlackWhite), _resourceCulture) ?? "增效黑白";
+
+        public static string ScanModeGrayscale => ResourceManager.GetString(nameof(ScanModeGrayscale), _resourceCulture) ?? "灰度模式";
+
         public static string Present => ResourceManager.GetString(nameof(Present), _resourceCulture);
 
         public static string Resolution_Tooltip => ResourceManager.GetString(nameof(Resolution_Tooltip), _resourceCulture);

@@ -156,4 +156,19 @@
   <data name="MirrorVertical" xml:space="preserve">
     <value>垂直鏡像</value>
   </data>
+  <data name="Scan" xml:space="preserve">
+    <value>掃描</value>
+  </data>
+  <data name="ScanMode" xml:space="preserve">
+    <value>掃描方案</value>
+  </data>
+  <data name="ScanModeEnhancedColor" xml:space="preserve">
+    <value>增效彩色</value>
+  </data>
+  <data name="ScanModeEnhancedBlackWhite" xml:space="preserve">
+    <value>增效黑白</value>
+  </data>
+  <data name="ScanModeGrayscale" xml:space="preserve">
+    <value>灰階模式</value>
+  </data>
 </root>
