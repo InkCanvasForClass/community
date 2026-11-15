@@ -1369,7 +1369,9 @@ namespace Ink_Canvas
             var openFileDialog = new OpenFileDialog();
             openFileDialog.InitialDirectory = Settings.Automation.AutoSavedStrokesLocation;
             openFileDialog.Title = MainWindowStrings.Main_Strokes_OpenFileDialogTitle;
-            openFileDialog.Filter = MainWindowStrings.Main_Strokes_OpenFileDialogFilter;
+            openFileDialog.Filter = BuildOpenStrokesFilter();
+            // 第一项是「所有支持的文件」（含插件注册的格式），设为默认筛选项
+            openFileDialog.FilterIndex = 1;
             if (openFileDialog.ShowDialog() != true) return;
             LogHelper.WriteLogToFile($"Strokes Insert: Name: {openFileDialog.FileName}",
                 LogHelper.LogType.Event);
@@ -1377,6 +1379,18 @@ namespace Ink_Canvas
             try
             {
                 string fileExtension = Path.GetExtension(openFileDialog.FileName).ToLower();
+
+                // 宿主内置格式优先；其余扩展名先交给注册了该格式的插件
+                if (Array.IndexOf(Plugins.PluginManager.HostOpenExtensions, fileExtension) < 0)
+                {
+                    bool? pluginHandled = Plugins.PluginManager.Instance.TryOpenWithPluginFormat(openFileDialog.FileName);
+                    if (pluginHandled.HasValue)
+                    {
+                        // 插件格式由插件自行决定后续界面状态，宿主不再切换画布模式
+                        if (!pluginHandled.Value) ShowNotification(MainWindowStrings.Main_Strokes_OpenFailed);
+                        return;
+                    }
+                }
 
                 if (fileExtension == ".uink")
                 {
@@ -1406,6 +1420,28 @@ namespace Ink_Canvas
                 ShowNotification(MainWindowStrings.Main_Strokes_OpenFailed);
                 LogHelper.WriteLogToFile($"墨迹打开失败: {ex}", LogHelper.LogType.Error);
             }
+        }
+
+        /// <summary>
+        /// 拼接「打开墨迹文件」对话框的筛选器：第一项「所有支持的文件」包含宿主与插件的全部扩展名，
+        /// 其后是宿主各格式，再后是插件注册的各组格式。
+        /// </summary>
+        private static string BuildOpenStrokesFilter()
+        {
+            var allExtensions = new List<string>(Plugins.PluginManager.HostOpenExtensions);
+            var pluginGroups = new StringBuilder();
+
+            foreach (var format in Plugins.PluginManager.Instance.GetOpenFormats())
+            {
+                string patterns = string.Join(";", format.Extensions.Select(ext => "*" + ext));
+                pluginGroups.Append('|').Append($"{format.GroupName} ({patterns})|{patterns}");
+                allExtensions.AddRange(format.Extensions);
+            }
+
+            string allPatterns = string.Join(";", allExtensions.Select(ext => "*" + ext));
+            return $"{MainWindowStrings.Main_Strokes_OpenFileDialogAllSupported} ({allPatterns})|{allPatterns}|"
+                   + MainWindowStrings.Main_Strokes_OpenFileDialogFilter
+                   + pluginGroups;
         }
 
         /// <summary>
