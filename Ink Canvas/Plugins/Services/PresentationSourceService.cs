@@ -74,6 +74,7 @@ namespace Ink_Canvas.Plugins.Services
                 // 触发宿主放映模式：设置标志 + 显示翻页条 + 工具栏布局切换
                 _mainWindow.IsInPPTPresentationMode = true;
                 _mainWindow.ArePPTControlsVisible = true;
+                _mainWindow.AttachPresentationSelection(descriptor);
                 _mainWindow.UpdateToolbarComponentVisibility();
 
                 // 浮动栏像真实 PPT 放映一样重新定位（居中、缩进）。
@@ -128,6 +129,7 @@ namespace Ink_Canvas.Plugins.Services
         /// <summary>内部结束逻辑，必须在 UI 线程调用。</summary>
         private void EndAsyncCore(string activeId)
         {
+            _mainWindow.DetachPresentationSelection();
             lock (_lock)
             {
                 if (_activeSource == null || _activeSource.Id != activeId) return;
@@ -137,6 +139,9 @@ namespace Ink_Canvas.Plugins.Services
 
             _mainWindow.IsInPPTPresentationMode = false;
             _mainWindow.ArePPTControlsVisible = false;
+            // 必须在清除放映标志后重走桌面鼠标命中策略，不能保留放映期间的画布快照。
+            if (!_mainWindow.IsAnnotating)
+                _mainWindow.ApplyCursorInputRouting();
             _mainWindow.UpdateToolbarComponentVisibility();
             _mainWindow.PPTUIManager?.UpdateSlideShowStatus(isInSlideShow: false);
             _mainWindow.PPTUIManager?.HideAllNavigationPanels();

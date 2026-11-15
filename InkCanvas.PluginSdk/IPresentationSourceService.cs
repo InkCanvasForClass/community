@@ -111,5 +111,14 @@ namespace Ink_Canvas.Plugins
         /// 置为 <c>false</c> 时宿主会禁用页码点击与增强预览。
         /// </summary>
         public bool AllowPageNumberClick { get; set; }
+
+        /// <summary>是否在本次放映期间显示课件“选择”工具。不涉及宿主墨迹选择。</summary>
+        public bool SupportsElementSelection { get; set; }
+
+        /// <summary>
+        /// 宿主进入或离开课件选择工具时在 UI 线程回调。true 时课件区域输入穿透，
+        /// 工具栏仍可操作；结束放映时一定退出选择。插件应同步自己的播放器交互模式。
+        /// </summary>
+        public Action<bool> ElementSelectionChanged { get; set; }
     }
 }
