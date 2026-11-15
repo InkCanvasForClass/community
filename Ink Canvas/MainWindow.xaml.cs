@@ -550,6 +550,7 @@ namespace Ink_Canvas
             WireUpImageOptionsPopupContentEvents();
             WireUpWhiteboardModeSelectionEvents();
             InitializeWhiteboardTipsAutoHide();
+            InitializeBoardTouchpadInput();
             BoardBorderToolsPopup.CustomPopupPlacementCallback =
                 (popupSize, targetSize, offset) => new[]
                 {
