@@ -150,7 +150,15 @@ namespace Ink_Canvas
                 _changingCanvasGestureCapture = false;
             }
 
-            var strokes = _canvasGestureSelectedStrokes.Count > 0 ? _canvasGestureSelectedStrokes : inkCanvas.Strokes;
+            BeginCanvasGestureHistory(_canvasGestureSelectedStrokes);
+            RebaseCanvasGesture();
+            e.Handled = true;
+            return true;
+        }
+
+        private void BeginCanvasGestureHistory(StrokeCollection selection)
+        {
+            var strokes = selection.Count > 0 ? selection : inkCanvas.Strokes;
             _canvasGestureStrokePoints = new Dictionary<Stroke, StylusPointCollection>();
             _canvasGestureDrawingAttributes = new Dictionary<Stroke, DrawingAttributes>();
             foreach (var stroke in strokes)
@@ -159,13 +167,10 @@ namespace Ink_Canvas
                 _canvasGestureDrawingAttributes[stroke] = stroke.DrawingAttributes.Clone();
             }
             _canvasGestureElementTransforms = new Dictionary<UIElement, Transform>();
-            if (_canvasGestureSelectedStrokes.Count == 0)
+            if (selection.Count == 0)
                 foreach (UIElement child in inkCanvas.Children)
                     if (child is Image || child is MediaElement || child is CanvasMediaControl)
                         _canvasGestureElementTransforms[child] = child.RenderTransform.CloneCurrentValue();
-            RebaseCanvasGesture();
-            e.Handled = true;
-            return true;
         }
 
         private void RebaseCanvasGesture()
