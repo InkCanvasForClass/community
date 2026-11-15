@@ -47,9 +47,9 @@
 
 ## 📗 FAQ
 
-### 在 Windows 10 以下版本系统中，部分图标显示为 「□」 怎么办？
+### 部分图标显示为「□」怎么办？
 
-[点击下载](https://aka.ms/SegoeFonts "SegoeFonts") SegoeFonts 文件，安装压缩包中 `SegMDL2.ttf` 字体后重启即可解决。
+安装最新版 [Segoe Fluent Icons](https://aka.ms/SegoeFluentIcons) 和 [Segoe MDL2 Assets](https://aka.ms/segoemdl2) 字体：解压后，Windows 7 右键 `.ttf` 文件选择「安装」即可；其他系统右键选择「为所有用户安装」并替换已安装字体。完成后重启系统或注销重新登录即可解决。
 
 ### 点击放映后一翻页就闪退
 
