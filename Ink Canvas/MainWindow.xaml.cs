@@ -140,6 +140,8 @@ namespace Ink_Canvas
         internal System.Windows.Controls.Button BtnRotateImage => BoothPopupContent?.RotateImageButton;
         internal System.Windows.Controls.Button BtnExitVideoPresenter => BoothPopupContent?.ExitVideoPresenterButton;
         internal System.Windows.Controls.Primitives.ToggleButton ToggleBtnPhotoCorrection => BoothPopupContent?.PhotoCorrectionToggle;
+        internal System.Windows.Controls.Primitives.ToggleButton ToggleBtnScan => BoothPopupContent?.ScanToggle;
+        internal System.Windows.Controls.ComboBox ScanModeComboBox => BoothPopupContent?.ScanModeComboBox;
 
         /// <summary>
         /// 设置视频展台弹窗的 PlacementTarget。
@@ -479,6 +481,9 @@ namespace Ink_Canvas
             content.ExitVideoPresenterButton.Click += BtnExitVideoPresenter_Click;
             content.PhotoCorrectionToggle.Checked += ToggleBtnPhotoCorrection_Checked;
             content.PhotoCorrectionToggle.Unchecked += ToggleBtnPhotoCorrection_Unchecked;
+            content.ScanToggle.Checked += ToggleBtnScan_Checked;
+            content.ScanToggle.Unchecked += ToggleBtnScan_Unchecked;
+            content.ScanModeComboBox.SelectionChanged += ScanModeComboBox_SelectionChanged;
             content.BrightnessSlider.ValueChanged += BoothBrightnessSlider_ValueChanged;
             content.ContrastSlider.ValueChanged += (s, e) => BoothCameraPropSlider_ValueChanged(BoothCameraProperty.Contrast, e.NewValue, content.ContrastValueText);
             content.SaturationSlider.ValueChanged += (s, e) => BoothCameraPropSlider_ValueChanged(BoothCameraProperty.Saturation, e.NewValue, content.SaturationValueText);
@@ -3579,6 +3584,11 @@ namespace Ink_Canvas
 
                 // 执行模式切换
                 inkCanvas.EditingMode = newMode;
+                if (_isVideoPresenterSpecialMode)
+                {
+                    // 用户主动切换工具，清除临时保存的触摸模式，防止后续抬手误覆盖用户的主动选择
+                    _boothTouchSavedInkEditingMode = null;
+                }
                 if (newMode == InkCanvasEditingMode.Select)
                 {
                     if (!_isVideoPresenterSpecialMode)

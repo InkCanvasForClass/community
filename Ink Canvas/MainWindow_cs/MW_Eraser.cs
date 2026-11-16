@@ -119,7 +119,7 @@ namespace Ink_Canvas
 
         private void EraserOverlay_PointerDown(object sender)
         {
-            _secAgentEraseInitialStates.Clear();
+            _secAgentEraseInitialStates?.Clear();
             if (currentSelectedElement != null)
             {
                 currentSelectedElement.ReleaseMouseCapture();
@@ -319,6 +319,7 @@ namespace Ink_Canvas
 
         private void CommitPendingSecAgentEraseHistory()
         {
+            if (_secAgentEraseInitialStates == null) return;
             foreach (var pair in _secAgentEraseInitialStates.ToArray())
             {
                 var after = ReadSecAgentState(pair.Key);
@@ -735,7 +736,7 @@ namespace Ink_Canvas
             // A tool switch can disable the overlay before PointerUp is delivered. Commit
             // pending SVG scene snapshots here as well, otherwise the visual erase remains
             // but its initial state never enters the undo/redo history.
-            var pendingSceneHistoryCount = _secAgentEraseInitialStates.Count;
+            var pendingSceneHistoryCount = _secAgentEraseInitialStates?.Count ?? 0;
             if (pendingSceneHistoryCount > 0)
             {
                 CommitPendingSecAgentEraseHistory();

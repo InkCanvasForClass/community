@@ -7,10 +7,23 @@ namespace Ink_Canvas.Models
     public class CapturedImage
     {
         public BitmapImage Image { get; }
+        public BitmapImage PreviewImage { get; }
         public BitmapImage Thumbnail { get; }
         public StrokeCollection Strokes { get; }
         public string Timestamp { get; }
         public string FilePath { get; }
+
+        /// <summary>该照片在展台预览中的缩放比例（默认 1.0）。</summary>
+        public double Scale { get; set; } = 1.0;
+
+        /// <summary>该照片在展台预览中的水平位移（默认 0.0）。</summary>
+        public double TranslateX { get; set; } = 0.0;
+
+        /// <summary>该照片在展台预览中的垂直位移（默认 0.0）。</summary>
+        public double TranslateY { get; set; } = 0.0;
+
+        /// <summary>该照片在展台预览中的旋转角度（0, 90, 180, 270）。</summary>
+        public double RotationAngle { get; set; } = 0.0;
 
         /// <summary>
         /// 使用指定的位图创建一个 CapturedImage 实例，并为其生成缩略图、空白笔划集合和时间戳。
@@ -24,6 +37,7 @@ namespace Ink_Canvas.Models
 
             // 确保 Image 被冻结，避免跨线程访问风险
             Image = EnsureFrozen(image);
+            PreviewImage = CreatePreviewImage(Image);
             Thumbnail = CreateThumbnail(Image);
             Strokes = new StrokeCollection();
             Timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
@@ -43,6 +57,7 @@ namespace Ink_Canvas.Models
 
             // 确保 Image 被冻结，避免跨线程访问风险
             Image = EnsureFrozen(image);
+            PreviewImage = CreatePreviewImage(Image);
             Thumbnail = CreateThumbnail(Image);
             Strokes = new StrokeCollection();
             FilePath = filePath;
@@ -104,7 +119,7 @@ namespace Ink_Canvas.Models
             if (image.IsFrozen)
                 return image;
 
-            var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+            var encoder = new System.Windows.Media.Imaging.BmpBitmapEncoder();
             encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(image));
 
             var stream = new System.IO.MemoryStream();
@@ -121,14 +136,50 @@ namespace Ink_Canvas.Models
             return frozenCopy;
         }
 
+        private const double PreviewMaxSide = 1920.0;
+
         /// <summary>
-        /// 生成并返回一个在 290×180 约束内按比例缩放并已冻结的缩略图。
+        /// 生成并返回缩小查看时使用的降低分辨率预览图（最大边长限制在 1920 内）。
+        /// 原图本身不超过 1920 时直接复用原图，避免重复内存开销。
         /// </summary>
-        /// <param name="original">用于生成缩略图的源 <see cref="BitmapImage"/>；不得为 <c>null</c>，且其像素宽度和高度必须大于 0。</param>
-        /// <returns>已冻结的 <see cref="BitmapImage"/> 缩略图，尺寸不超过 290×180 且保持原图纵横比。</returns>
-        /// <exception cref="ArgumentNullException">当 <paramref name="original"/> 为 <c>null</c> 时抛出。</exception>
-        /// <exception cref="ArgumentException">当 <paramref name="original"/> 的像素宽度或高度小于等于 0 时抛出。</exception>
-        /// <exception cref="InvalidOperationException">当无法计算出有效的缩放比例（例如结果为 NaN、Infinity 或非正数）时抛出。</exception>
+        private static BitmapImage CreatePreviewImage(BitmapImage original)
+        {
+            if (original == null) return null;
+            if (original.PixelWidth <= 0 || original.PixelHeight <= 0) return original;
+
+            double maxSide = Math.Max(original.PixelWidth, original.PixelHeight);
+            if (maxSide <= PreviewMaxSide)
+            {
+                return original;
+            }
+
+            try
+            {
+                double scale = PreviewMaxSide / maxSide;
+                var scaled = new TransformedBitmap(original, new System.Windows.Media.ScaleTransform(scale, scale));
+                var encoder = new JpegBitmapEncoder { QualityLevel = 85 };
+                encoder.Frames.Add(BitmapFrame.Create(scaled));
+
+                using (var stream = new System.IO.MemoryStream())
+                {
+                    encoder.Save(stream);
+                    stream.Seek(0, System.IO.SeekOrigin.Begin);
+
+                    var result = new BitmapImage();
+                    result.BeginInit();
+                    result.CacheOption = BitmapCacheOption.OnLoad;
+                    result.StreamSource = stream;
+                    result.EndInit();
+                    result.Freeze();
+                    return result;
+                }
+            }
+            catch
+            {
+                return original;
+            }
+        }
+
         private static BitmapImage CreateThumbnail(BitmapImage original)
         {
             if (original == null)
