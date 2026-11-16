@@ -437,5 +437,10 @@ namespace Ink_Canvas.Properties
 
         public static string Main_OpenInk_ModeBusy => ResourceManager.GetString(nameof(Main_OpenInk_ModeBusy), _resourceCulture);
 
+        public static string Main_OpenInk_PluginConflict => ResourceManager.GetString(nameof(Main_OpenInk_PluginConflict), _resourceCulture);
+
+        public static string Main_OpenInk_ElementFailed => ResourceManager.GetString(nameof(Main_OpenInk_ElementFailed), _resourceCulture);
+
+        public static string Main_OpenInk_PageChanged => ResourceManager.GetString(nameof(Main_OpenInk_PageChanged), _resourceCulture);
     }
 }

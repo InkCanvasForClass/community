@@ -111,6 +111,12 @@ namespace Ink_Canvas
         /// <param name="elementsRemovedInThisPage"></param>
         private void ApplyHistoryToCanvas(TimeMachineHistory item, InkCanvas applyCanvas = null, HashSet<UIElement> elementsRemovedInThisPage = null)
         {
+            if (item.GroupedHistories != null)
+            {
+                foreach (var entry in item.GroupedHistories)
+                    ApplyHistoryToCanvas(entry, applyCanvas, elementsRemovedInThisPage);
+                return;
+            }
             _currentCommitType = CommitReason.CodeInput;
             var canvas = inkCanvas;
             if (applyCanvas != null && applyCanvas is InkCanvas)

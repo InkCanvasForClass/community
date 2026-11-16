@@ -773,15 +773,24 @@
     <value>叠加到当前照片或实时画面</value>
   </data>
   <data name="Main_OpenInk_AppendHint" xml:space="preserve">
-    <value>墨迹将添加到当前页面，可撤销。</value>
+    <value>文件内容将添加到当前页面，可整体撤销。</value>
   </data>
   <data name="Main_OpenInk_Cancel" xml:space="preserve">
     <value>取消</value>
   </data>
   <data name="Main_OpenInk_Empty" xml:space="preserve">
-    <value>此文件不包含可导入的墨迹。</value>
+    <value>此文件不包含可导入的内容。</value>
   </data>
   <data name="Main_OpenInk_ModeBusy" xml:space="preserve">
     <value>正在切换模式，请稍后重新打开文件。</value>
+  </data>
+  <data name="Main_OpenInk_PluginConflict" xml:space="preserve">
+    <value>当前页面已有插件“{0}”的内容，无法安全合并。请在空白页面打开此文件。</value>
+  </data>
+  <data name="Main_OpenInk_ElementFailed" xml:space="preserve">
+    <value>无法读取文件中的某个元素。请检查配套文件及所需插件是否齐全。</value>
+  </data>
+  <data name="Main_OpenInk_PageChanged" xml:space="preserve">
+    <value>目标页面已变化，请重新打开文件。</value>
   </data>
 </root>

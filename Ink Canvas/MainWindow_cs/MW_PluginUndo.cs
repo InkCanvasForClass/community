@@ -53,11 +53,11 @@ namespace Ink_Canvas
         private void ApplyPluginUndoState(string pluginId, string state)
         {
             if (string.IsNullOrWhiteSpace(pluginId) || state == null) return;
-            if (!_pluginUndoStateHandlers.TryGetValue(pluginId, out var handler)) return;
-
             try
             {
-                handler(state);
+                bool hasHandler = _pluginUndoStateHandlers.TryGetValue(pluginId, out var handler);
+                _pluginWhiteboardStateStore.SetPageState(GetPluginWhiteboardPageIndex(), pluginId, state, !hasHandler);
+                handler?.Invoke(state);
             }
             catch (Exception ex)
             {

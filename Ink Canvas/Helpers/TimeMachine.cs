@@ -130,11 +130,17 @@ namespace Ink_Canvas.Helpers
             }
 
             var item = _currentStrokeHistory[_currentIndex];
-            item.StrokeHasBeenCleared = !item.StrokeHasBeenCleared;
-            _currentIndex--;
+            var items = new List<TimeMachineHistory>();
+            do
+            {
+                var entry = _currentStrokeHistory[_currentIndex--];
+                entry.StrokeHasBeenCleared = !entry.StrokeHasBeenCleared;
+                items.Add(entry);
+            } while (item.UndoGroupId != Guid.Empty && _currentIndex >= 0 &&
+                     _currentStrokeHistory[_currentIndex].UndoGroupId == item.UndoGroupId);
             OnUndoStateChanged?.Invoke(CanUndo);
             OnRedoStateChanged?.Invoke(CanRedo);
-            return item;
+            return GroupUndoResult(items);
         }
 
         public TimeMachineHistory Redo()
@@ -144,10 +150,35 @@ namespace Ink_Canvas.Helpers
                 return null;
             }
 
-            var item = _currentStrokeHistory[++_currentIndex];
-            item.StrokeHasBeenCleared = !item.StrokeHasBeenCleared;
+            var item = _currentStrokeHistory[_currentIndex + 1];
+            var items = new List<TimeMachineHistory>();
+            do
+            {
+                var entry = _currentStrokeHistory[++_currentIndex];
+                entry.StrokeHasBeenCleared = !entry.StrokeHasBeenCleared;
+                items.Add(entry);
+            } while (item.UndoGroupId != Guid.Empty && _currentIndex + 1 < _currentStrokeHistory.Count &&
+                     _currentStrokeHistory[_currentIndex + 1].UndoGroupId == item.UndoGroupId);
             NotifyUndoRedoState();
-            return item;
+            return GroupUndoResult(items);
+        }
+
+        private static TimeMachineHistory GroupUndoResult(List<TimeMachineHistory> items) => items.Count == 1
+            ? items[0]
+            : new TimeMachineHistory(new StrokeCollection(), TimeMachineHistoryType.UserInput, false)
+                { GroupedHistories = items.ToArray() };
+
+        // 存储仍是原有的扁平历史，切页、保存和预览无需理解新的历史类型。
+        internal void CommitHistoryGroup(List<TimeMachineHistory> items)
+        {
+            if (items.Count == 0) return;
+            if (_currentIndex + 1 < _currentStrokeHistory.Count)
+                _currentStrokeHistory.RemoveRange(_currentIndex + 1, _currentStrokeHistory.Count - _currentIndex - 1);
+            var groupId = items.Count > 1 ? Guid.NewGuid() : Guid.Empty;
+            foreach (var item in items) item.UndoGroupId = groupId;
+            _currentStrokeHistory.AddRange(items);
+            _currentIndex = _currentStrokeHistory.Count - 1;
+            NotifyUndoRedoState();
         }
 
         public TimeMachineHistory[] ExportTimeMachineHistory()
@@ -214,6 +245,8 @@ namespace Ink_Canvas.Helpers
 
     public class TimeMachineHistory
     {
+        internal Guid UndoGroupId;
+        internal TimeMachineHistory[] GroupedHistories;
         public TimeMachineHistoryType CommitType;
         public bool StrokeHasBeenCleared;
         public StrokeCollection CurrentStroke;

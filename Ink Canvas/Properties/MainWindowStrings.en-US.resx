@@ -773,15 +773,24 @@ Please check if the update was successful.</value>
     <value>Overlay ink on the current photo or live view</value>
   </data>
   <data name="Main_OpenInk_AppendHint" xml:space="preserve">
-    <value>Ink will be added to the current page. You can undo this.</value>
+    <value>File contents will be added to the current page. You can undo the entire import.</value>
   </data>
   <data name="Main_OpenInk_Cancel" xml:space="preserve">
     <value>Cancel</value>
   </data>
   <data name="Main_OpenInk_Empty" xml:space="preserve">
-    <value>This file contains no ink to import.</value>
+    <value>This file contains no content to import.</value>
   </data>
   <data name="Main_OpenInk_ModeBusy" xml:space="preserve">
     <value>A mode change is in progress. Please open the file again shortly.</value>
+  </data>
+  <data name="Main_OpenInk_PluginConflict" xml:space="preserve">
+    <value>The current page already contains data from plugin "{0}" and it cannot be safely merged. Open this file on an empty page.</value>
+  </data>
+  <data name="Main_OpenInk_ElementFailed" xml:space="preserve">
+    <value>An element could not be loaded. Check that companion files and required plugins are available.</value>
+  </data>
+  <data name="Main_OpenInk_PageChanged" xml:space="preserve">
+    <value>The destination page has changed. Please open the file again.</value>
   </data>
 </root>
