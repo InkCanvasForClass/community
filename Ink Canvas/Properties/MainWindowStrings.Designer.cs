@@ -413,5 +413,29 @@ namespace Ink_Canvas.Properties
         public static string Main_ExitVerifyWithTotp => ResourceManager.GetString(nameof(Main_ExitVerifyWithTotp), _resourceCulture);
 
         public static string Main_ExitVerifyPasswordOnly => ResourceManager.GetString(nameof(Main_ExitVerifyPasswordOnly), _resourceCulture);
+        public static string Main_OpenInk_Title => ResourceManager.GetString(nameof(Main_OpenInk_Title), _resourceCulture);
+
+        public static string Main_OpenInk_ChooseDestination => ResourceManager.GetString(nameof(Main_OpenInk_ChooseDestination), _resourceCulture);
+
+        public static string Main_OpenInk_Screen => ResourceManager.GetString(nameof(Main_OpenInk_Screen), _resourceCulture);
+
+        public static string Main_OpenInk_ScreenDescription => ResourceManager.GetString(nameof(Main_OpenInk_ScreenDescription), _resourceCulture);
+
+        public static string Main_OpenInk_Whiteboard => ResourceManager.GetString(nameof(Main_OpenInk_Whiteboard), _resourceCulture);
+
+        public static string Main_OpenInk_WhiteboardDescription => ResourceManager.GetString(nameof(Main_OpenInk_WhiteboardDescription), _resourceCulture);
+
+        public static string Main_OpenInk_Booth => ResourceManager.GetString(nameof(Main_OpenInk_Booth), _resourceCulture);
+
+        public static string Main_OpenInk_BoothDescription => ResourceManager.GetString(nameof(Main_OpenInk_BoothDescription), _resourceCulture);
+
+        public static string Main_OpenInk_AppendHint => ResourceManager.GetString(nameof(Main_OpenInk_AppendHint), _resourceCulture);
+
+        public static string Main_OpenInk_Cancel => ResourceManager.GetString(nameof(Main_OpenInk_Cancel), _resourceCulture);
+
+        public static string Main_OpenInk_Empty => ResourceManager.GetString(nameof(Main_OpenInk_Empty), _resourceCulture);
+
+        public static string Main_OpenInk_ModeBusy => ResourceManager.GetString(nameof(Main_OpenInk_ModeBusy), _resourceCulture);
+
     }
 }
