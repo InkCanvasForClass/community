@@ -142,6 +142,10 @@ namespace Ink_Canvas.Properties
 
         public static string UpdatePackageDotNetVersionHint => ResourceManager.GetString(nameof(UpdatePackageDotNetVersionHint), _resourceCulture);
 
+        public static string CurrentBuild => ResourceManager.GetString(nameof(CurrentBuild), _resourceCulture);
+
+        public static string CurrentBuildHint => ResourceManager.GetString(nameof(CurrentBuildHint), _resourceCulture);
+
         public static string ExternalProtocol_ShortcutCreate => ResourceManager.GetString(nameof(ExternalProtocol_ShortcutCreate), _resourceCulture);
 
         public static string ExternalProtocol_ShortcutCreateHint => ResourceManager.GetString(nameof(ExternalProtocol_ShortcutCreateHint), _resourceCulture);

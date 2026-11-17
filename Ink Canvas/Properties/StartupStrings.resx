@@ -222,4 +222,10 @@
   <data name="UpdatePackageDotNetVersionHint" xml:space="preserve">
     <value>选择更新包跟哪个 .NET 大版本走，默认跟随当前软件版本</value>
   </data>
+  <data name="CurrentBuild" xml:space="preserve">
+    <value>当前版本</value>
+  </data>
+  <data name="CurrentBuildHint" xml:space="preserve">
+    <value>当前正在运行的安装包形态，仅供确认</value>
+  </data>
 </root>
