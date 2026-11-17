@@ -1225,6 +1225,8 @@ namespace Ink_Canvas.Properties
             dict["Update_Channel"] = ("UpdateStrings", "Update_Channel");
             dict["Update_PackageArch_X64"] = ("UpdateStrings", "Update_PackageArch_X64");
             dict["Update_PackageArch_X86"] = ("UpdateStrings", "Update_PackageArch_X86");
+            dict["Update_PackageArch_Auto"] = ("UpdateStrings", "Update_PackageArch_Auto");
+            dict["Update_PackageRuntime_Auto"] = ("UpdateStrings", "Update_PackageRuntime_Auto");
             dict["Update_PackageRuntime_FrameworkDependent"] = ("UpdateStrings", "Update_PackageRuntime_FrameworkDependent");
             dict["Update_PackageRuntime_SelfContained"] = ("UpdateStrings", "Update_PackageRuntime_SelfContained");
             dict["Update_PackageDotNet_Auto"] = ("UpdateStrings", "Update_PackageDotNet_Auto");

@@ -81,8 +81,14 @@
   <data name="Update_PackageArch_X64" xml:space="preserve">
     <value>64-bit (x64)</value>
   </data>
+  <data name="Update_PackageArch_Auto" xml:space="preserve">
+    <value>Follow current version</value>
+  </data>
   <data name="Update_PackageArch_X86" xml:space="preserve">
     <value>32-bit (x86)</value>
+  </data>
+  <data name="Update_PackageRuntime_Auto" xml:space="preserve">
+    <value>Follow current version</value>
   </data>
   <data name="Update_PackageRuntime_FrameworkDependent" xml:space="preserve">
     <value>Without runtime</value>

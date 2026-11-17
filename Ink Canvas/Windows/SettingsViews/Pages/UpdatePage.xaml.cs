@@ -153,7 +153,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     _isChangingUpdatePackageArchInternally = true;
                     try
                     {
-                        string wantTag = settings.Startup.UpdatePackageArchitecture == UpdatePackageArchitecture.X64 ? "X64" : "X86";
+                        string wantTag = settings.Startup.UpdatePackageArchitecture == UpdatePackageArchitecture.X64 ? "X64"
+                            : settings.Startup.UpdatePackageArchitecture == UpdatePackageArchitecture.X86 ? "X86"
+                            : "Auto";
                         foreach (var item in UpdatePackageArchitectureSelector.Items)
                         {
                             if (item is ComboBoxItem cbi && cbi.Tag != null &&
@@ -174,7 +176,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     {
                         string wantRuntimeTag = settings.Startup.UpdatePackageRuntime == UpdatePackageRuntime.SelfContained
                             ? "SelfContained"
-                            : "FrameworkDependent";
+                            : settings.Startup.UpdatePackageRuntime == UpdatePackageRuntime.FrameworkDependent
+                                ? "FrameworkDependent"
+                                : "Auto";
                         foreach (var item in UpdatePackageRuntimeSelector.Items)
                         {
                             if (item is ComboBoxItem cbi && cbi.Tag != null &&
@@ -327,7 +331,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             var newArch = string.Equals(cbi.Tag.ToString(), "X64", StringComparison.OrdinalIgnoreCase)
                 ? UpdatePackageArchitecture.X64
-                : UpdatePackageArchitecture.X86;
+                : string.Equals(cbi.Tag.ToString(), "X86", StringComparison.OrdinalIgnoreCase)
+                    ? UpdatePackageArchitecture.X86
+                    : UpdatePackageArchitecture.Auto;
 
             if (SettingsManager.Settings.Startup.UpdatePackageArchitecture == newArch)
                 return;
@@ -345,7 +351,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             var newRuntime = string.Equals(cbi.Tag.ToString(), "SelfContained", StringComparison.OrdinalIgnoreCase)
                 ? UpdatePackageRuntime.SelfContained
-                : UpdatePackageRuntime.FrameworkDependent;
+                : string.Equals(cbi.Tag.ToString(), "FrameworkDependent", StringComparison.OrdinalIgnoreCase)
+                    ? UpdatePackageRuntime.FrameworkDependent
+                    : UpdatePackageRuntime.Auto;
 
             if (SettingsManager.Settings.Startup.UpdatePackageRuntime == newRuntime)
                 return;
