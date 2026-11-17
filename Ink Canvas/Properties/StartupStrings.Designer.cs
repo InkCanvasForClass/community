@@ -133,5 +133,9 @@ namespace Ink_Canvas.Properties
         public static string UpdatePackageArchitecture => ResourceManager.GetString(nameof(UpdatePackageArchitecture), _resourceCulture);
 
         public static string UpdatePackageArchitectureHint => ResourceManager.GetString(nameof(UpdatePackageArchitectureHint), _resourceCulture);
+
+        public static string UpdatePackageRuntime => ResourceManager.GetString(nameof(UpdatePackageRuntime), _resourceCulture);
+
+        public static string UpdatePackageRuntimeHint => ResourceManager.GetString(nameof(UpdatePackageRuntimeHint), _resourceCulture);
     }
 }

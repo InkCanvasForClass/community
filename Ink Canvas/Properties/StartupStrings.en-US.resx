@@ -183,4 +183,10 @@
   <data name="UpdatePackageArchitectureHint" xml:space="preserve">
     <value>Select the architecture for the update package. By default, it matches the current software architecture.</value>
   </data>
+  <data name="UpdatePackageRuntime" xml:space="preserve">
+    <value>Runtime</value>
+  </data>
+  <data name="UpdatePackageRuntimeHint" xml:space="preserve">
+    <value>Choose whether the update package includes the .NET runtime. Defaults to the current installation.</value>
+  </data>
 </root>

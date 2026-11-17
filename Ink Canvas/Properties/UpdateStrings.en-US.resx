@@ -84,6 +84,12 @@
   <data name="Update_PackageArch_X86" xml:space="preserve">
     <value>32-bit (x86)</value>
   </data>
+  <data name="Update_PackageRuntime_FrameworkDependent" xml:space="preserve">
+    <value>Without runtime</value>
+  </data>
+  <data name="Update_PackageRuntime_SelfContained" xml:space="preserve">
+    <value>With runtime (self-contained)</value>
+  </data>
   <data name="Update_Preview" xml:space="preserve">
     <value>Preview</value>
   </data>

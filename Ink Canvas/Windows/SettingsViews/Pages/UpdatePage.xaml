@@ -250,6 +250,18 @@
                                 </ComboBox>
                             </ui:SettingsCard>
 
+                            <ui:SettingsCard Header="{x:Static props:StartupStrings.UpdatePackageRuntime}"
+                                             Description="{x:Static props:StartupStrings.UpdatePackageRuntimeHint}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <ComboBox x:Name="UpdatePackageRuntimeSelector"
+                                          SelectionChanged="UpdatePackageRuntimeSelector_SelectionChanged">
+                                    <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageRuntime_FrameworkDependent}" Tag="FrameworkDependent" />
+                                    <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageRuntime_SelfContained}" Tag="SelfContained" />
+                                </ComboBox>
+                            </ui:SettingsCard>
+
                             <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                                        Text="{x:Static props:UpdateStrings.Section_Maintenance}" />
 
