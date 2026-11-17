@@ -154,6 +154,11 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile("[ChickenSoup] 迁移名言设置后保存失败", LogHelper.LogType.Warning);
             }
+            if (SettingsManager.MigrateUpdatePackageDefaults() && !SettingsManager.TrySaveSettingsToFile())
+            {
+                LogHelper.WriteLogToFile("[Update] 迁移更新包默认设置后保存失败", LogHelper.LogType.Warning);
+            }
+
             SettingsManager.MigrateAutoStartSetting();
 
             if (isStartup && !AutoStartHelper.TryReconcile(Settings.Startup.RunAtStartup))

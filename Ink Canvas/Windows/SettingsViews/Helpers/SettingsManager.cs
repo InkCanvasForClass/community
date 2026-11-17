@@ -197,6 +197,20 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
             }
         }
 
+        // 旧版本会把自动推导出的架构/运行时写进配置；统一迁回“跟随当前版本”，避免升级后仍锁死在旧值。
+        public static bool MigrateUpdatePackageDefaults()
+        {
+            if (Settings == null) return false;
+            if (Settings.UpdatePackageDefaultsMigrated) return false;
+
+            Settings.Startup ??= new Startup();
+            Settings.Startup.UpdatePackageArchitecture = UpdatePackageArchitecture.Auto;
+            Settings.Startup.UpdatePackageRuntime = UpdatePackageRuntime.Auto;
+            Settings.Startup.UpdatePackageDotNetVersion = UpdatePackageDotNetVersion.Auto;
+            Settings.UpdatePackageDefaultsMigrated = true;
+            return true;
+        }
+
         public static bool MigrateChickenSoupSettings()
         {
             if (Settings?.Appearance == null) return false;

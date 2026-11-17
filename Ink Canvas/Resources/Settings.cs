@@ -11,6 +11,9 @@ namespace Ink_Canvas
 {
     public class Settings
     {
+        [JsonProperty("updatePackageDefaultsMigrated")]
+        public bool UpdatePackageDefaultsMigrated { get; set; }
+
         [JsonProperty("advanced")]
         public Advanced Advanced { get; set; } = new Advanced();
 
