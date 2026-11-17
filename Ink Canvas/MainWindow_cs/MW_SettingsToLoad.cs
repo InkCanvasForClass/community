@@ -163,6 +163,11 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile("[AutoStart] 迁移后的开机自启设置保存失败", LogHelper.LogType.Warning);
             }
 
+            if (SettingsManager.MigrateUpdatePackageDefaults() && !SettingsManager.TrySaveSettingsToFile())
+            {
+                LogHelper.WriteLogToFile("[Update] 迁移更新包默认设置后保存失败", LogHelper.LogType.Warning);
+            }
+
             if (isStartup && !AutoStartHelper.TryReconcile(Settings.Startup.RunAtStartup))
             {
                 LogHelper.WriteLogToFile("[AutoStart] 启动时校验或修复开机自启快捷方式失败", LogHelper.LogType.Warning);
