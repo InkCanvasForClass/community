@@ -238,6 +238,19 @@
                                 </ComboBox>
                             </ui:SettingsCard>
 
+                            <ui:SettingsCard Header="{x:Static props:StartupStrings.UpdatePackageDotNetVersion}"
+                                             Description="{x:Static props:StartupStrings.UpdatePackageDotNetVersionHint}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <ComboBox x:Name="UpdatePackageDotNetVersionSelector"
+                                          SelectionChanged="UpdatePackageDotNetVersionSelector_SelectionChanged">
+                                    <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageDotNet_Auto}" Tag="Auto" />
+                                    <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageDotNet_Net6}" Tag="Net6" />
+                                    <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageDotNet_Net10}" Tag="Net10" />
+                                </ComboBox>
+                            </ui:SettingsCard>
+
                             <ui:SettingsCard Header="{x:Static props:StartupStrings.UpdatePackageArchitecture}"
                                              Description="{x:Static props:StartupStrings.UpdatePackageArchitectureHint}">
                                 <ui:SettingsCard.HeaderIcon>

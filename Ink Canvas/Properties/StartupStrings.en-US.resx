@@ -189,4 +189,10 @@
   <data name="UpdatePackageRuntimeHint" xml:space="preserve">
     <value>Choose whether the update package includes the .NET runtime. Defaults to the current installation.</value>
   </data>
+  <data name="UpdatePackageDotNetVersion" xml:space="preserve">
+    <value>.NET version</value>
+  </data>
+  <data name="UpdatePackageDotNetVersionHint" xml:space="preserve">
+    <value>Choose which .NET major version the update package follows. Defaults to the current app version.</value>
+  </data>
 </root>

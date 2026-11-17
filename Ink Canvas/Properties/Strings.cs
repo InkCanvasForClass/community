@@ -981,6 +981,8 @@ namespace Ink_Canvas.Properties
             dict["Startup_UpdatePackageArchitectureHint"] = ("StartupStrings", "UpdatePackageArchitectureHint");
             dict["Startup_UpdatePackageRuntime"] = ("StartupStrings", "UpdatePackageRuntime");
             dict["Startup_UpdatePackageRuntimeHint"] = ("StartupStrings", "UpdatePackageRuntimeHint");
+            dict["Startup_UpdatePackageDotNetVersion"] = ("StartupStrings", "UpdatePackageDotNetVersion");
+            dict["Startup_UpdatePackageDotNetVersionHint"] = ("StartupStrings", "UpdatePackageDotNetVersionHint");
             dict["Storage_AutoDeleteTitle"] = ("StorageStrings", "Storage_AutoDeleteTitle");
             dict["Storage_AutoSaveInk"] = ("StorageStrings", "Storage_AutoSaveInk");
             dict["Storage_AutoSaveInkOnScreenshot"] = ("StorageStrings", "Storage_AutoSaveInkOnScreenshot");
@@ -1182,6 +1184,9 @@ namespace Ink_Canvas.Properties
             dict["Update_PackageArch_X86"] = ("UpdateStrings", "Update_PackageArch_X86");
             dict["Update_PackageRuntime_FrameworkDependent"] = ("UpdateStrings", "Update_PackageRuntime_FrameworkDependent");
             dict["Update_PackageRuntime_SelfContained"] = ("UpdateStrings", "Update_PackageRuntime_SelfContained");
+            dict["Update_PackageDotNet_Auto"] = ("UpdateStrings", "Update_PackageDotNet_Auto");
+            dict["Update_PackageDotNet_Net6"] = ("UpdateStrings", "Update_PackageDotNet_Net6");
+            dict["Update_PackageDotNet_Net10"] = ("UpdateStrings", "Update_PackageDotNet_Net10");
             dict["Update_Preview"] = ("UpdateStrings", "Update_Preview");
             dict["Update_Release"] = ("UpdateStrings", "Update_Release");
             dict["Status_Loading"] = ("UpdateStrings", "Status_Loading");

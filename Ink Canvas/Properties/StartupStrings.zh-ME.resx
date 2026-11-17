@@ -189,4 +189,10 @@
   <data name="UpdatePackageRuntimeHint" xml:space="preserve">
     <value>选更新包带不带运行时，默认跟当前安装走</value>
   </data>
+  <data name="UpdatePackageDotNetVersion" xml:space="preserve">
+    <value>.NET 版本</value>
+  </data>
+  <data name="UpdatePackageDotNetVersionHint" xml:space="preserve">
+    <value>选更新包跟哪个 .NET 大版本走，默认跟随当前软件版本</value>
+  </data>
 </root>

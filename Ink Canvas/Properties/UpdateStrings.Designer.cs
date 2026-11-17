@@ -72,6 +72,12 @@ namespace Ink_Canvas.Properties
 
         public static string Update_PackageRuntime_SelfContained => ResourceManager.GetString(nameof(Update_PackageRuntime_SelfContained), _resourceCulture);
 
+        public static string Update_PackageDotNet_Auto => ResourceManager.GetString(nameof(Update_PackageDotNet_Auto), _resourceCulture);
+
+        public static string Update_PackageDotNet_Net6 => ResourceManager.GetString(nameof(Update_PackageDotNet_Net6), _resourceCulture);
+
+        public static string Update_PackageDotNet_Net10 => ResourceManager.GetString(nameof(Update_PackageDotNet_Net10), _resourceCulture);
+
         public static string Update_Preview => ResourceManager.GetString(nameof(Update_Preview), _resourceCulture);
 
         public static string Update_Release => ResourceManager.GetString(nameof(Update_Release), _resourceCulture);
