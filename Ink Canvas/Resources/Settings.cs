@@ -729,6 +729,17 @@ namespace Ink_Canvas
         SelfContained = 1
     }
 
+    /// <summary>自动更新要跟随的 .NET 版本渠道。默认跟随当前运行的软件版本。</summary>
+    public enum UpdatePackageDotNetVersion
+    {
+        /// <summary>跟随当前软件版本</summary>
+        Auto = 0,
+        /// <summary>.NET 6 分支</summary>
+        Net6 = 1,
+        /// <summary>.NET 10 分支</summary>
+        Net10 = 2
+    }
+
     /// <summary>
     /// 遥测上传等级
     /// </summary>
@@ -785,6 +796,8 @@ namespace Ink_Canvas
         public UpdatePackageArchitecture UpdatePackageArchitecture { get; set; } = Environment.Is64BitProcess ? UpdatePackageArchitecture.X64 : UpdatePackageArchitecture.X86;
         [JsonProperty("updatePackageRuntime")]
         public UpdatePackageRuntime UpdatePackageRuntime { get; set; } = GetDefaultUpdatePackageRuntime();
+        [JsonProperty("updatePackageDotNetVersion")]
+        public UpdatePackageDotNetVersion UpdatePackageDotNetVersion { get; set; } = UpdatePackageDotNetVersion.Auto;
         [JsonProperty("isSmartUpdate")]
         public bool IsSmartUpdate { get; set; } = true;
         [JsonProperty("skippedVersion")]

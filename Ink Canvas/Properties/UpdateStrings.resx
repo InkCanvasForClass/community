@@ -90,6 +90,15 @@
   <data name="Update_PackageRuntime_SelfContained" xml:space="preserve">
     <value>带运行时（自包含）</value>
   </data>
+  <data name="Update_PackageDotNet_Auto" xml:space="preserve">
+    <value>跟随当前版本</value>
+  </data>
+  <data name="Update_PackageDotNet_Net6" xml:space="preserve">
+    <value>.NET 6</value>
+  </data>
+  <data name="Update_PackageDotNet_Net10" xml:space="preserve">
+    <value>.NET 10</value>
+  </data>
   <data name="Update_Preview" xml:space="preserve">
     <value>预览版 (Preview)</value>
   </data>

@@ -38,6 +38,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private bool _isChangingUpdateChannelInternally;
         private bool _isChangingUpdatePackageArchInternally;
         private bool _isChangingUpdatePackageRuntimeInternally;
+        private bool _isChangingUpdatePackageDotNetVersionInternally;
 
         private UpdateUiState _state = UpdateUiState.Idle;
         private string _remoteVersion;
@@ -126,6 +127,27 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                             UpdateChannelSelector.SelectedItem = cbi;
                             break;
                         }
+                    }
+
+                    _isChangingUpdatePackageDotNetVersionInternally = true;
+                    try
+                    {
+                        string wantTag = settings.Startup.UpdatePackageDotNetVersion == UpdatePackageDotNetVersion.Net6 ? "Net6"
+                            : settings.Startup.UpdatePackageDotNetVersion == UpdatePackageDotNetVersion.Net10 ? "Net10"
+                            : "Auto";
+                        foreach (var item in UpdatePackageDotNetVersionSelector.Items)
+                        {
+                            if (item is ComboBoxItem cbi && cbi.Tag != null &&
+                                string.Equals(cbi.Tag.ToString(), wantTag, StringComparison.OrdinalIgnoreCase))
+                            {
+                                UpdatePackageDotNetVersionSelector.SelectedItem = cbi;
+                                break;
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        _isChangingUpdatePackageDotNetVersionInternally = false;
                     }
 
                     _isChangingUpdatePackageArchInternally = true;
@@ -275,6 +297,27 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         #endregion
 
         #region 更新通道和架构事件处理
+
+        private void UpdatePackageDotNetVersionSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            if (_isChangingUpdatePackageDotNetVersionInternally) return;
+            if (!(UpdatePackageDotNetVersionSelector.SelectedItem is ComboBoxItem cbi) || cbi.Tag == null) return;
+
+            var newVersion = string.Equals(cbi.Tag.ToString(), "Net6", StringComparison.OrdinalIgnoreCase)
+                ? UpdatePackageDotNetVersion.Net6
+                : string.Equals(cbi.Tag.ToString(), "Net10", StringComparison.OrdinalIgnoreCase)
+                    ? UpdatePackageDotNetVersion.Net10
+                    : UpdatePackageDotNetVersion.Auto;
+
+            if (SettingsManager.Settings.Startup.UpdatePackageDotNetVersion == newVersion)
+                return;
+
+            SettingsManager.Settings.Startup.UpdatePackageDotNetVersion = newVersion;
+            SettingsManager.SaveSettingsToFile();
+            AutoUpdateHelper.InvalidateOrderedGroupsCache();
+            LogHelper.WriteLogToFile($"Settings | Update package dotnet version: {newVersion}");
+        }
 
         private void UpdatePackageArchitectureSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
