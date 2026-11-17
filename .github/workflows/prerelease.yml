@@ -665,7 +665,7 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.prepare.outputs.tag_name }}
-          name: ICC CE ${{ needs.prepare.outputs.version }}
+          name: ICC CE ${{ needs.prepare.outputs.version }} (.NET 6)
           body: |
             ${{ steps.enhanced_changelog.outputs.enhanced_changelog }}
           draft: ${{ github.event.inputs.draft || false }}
@@ -750,21 +750,21 @@ jobs:
         run: |
           CONTENT=$(echo -n "${{ needs.prepare.outputs.version }}" | base64 -w0)
 
-          SHA=$(gh api /repos/InkCanvasForClass/community-beta/contents/AutomaticUpdateVersionControl.txt --jq '.sha' 2>/dev/null || echo "")
+          SHA=$(gh api "/repos/InkCanvasForClass/community-beta/contents/AutomaticUpdateVersionControl.txt?ref=net6" --jq '.sha' 2>/dev/null || echo "")
 
           gh api \
             --method PUT \
             /repos/InkCanvasForClass/community-beta/contents/AutomaticUpdateVersionControl.txt \
             -f message="Update AutomaticUpdateVersionControl.txt" \
             -f content="$CONTENT" \
-            -f branch="main" \
+            -f branch="net6" \
             ${SHA:+-f sha="$SHA"}
 
       - name: Create GitHub Release on beta repo
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ needs.prepare.outputs.tag_name }}
-          name: ICC CE ${{ needs.prepare.outputs.version }}
+          name: ICC CE ${{ needs.prepare.outputs.version }} (.NET 6)
           body: |
             ${{ needs.release.outputs.enhanced_changelog }}
           draft: false
@@ -784,7 +784,7 @@ jobs:
         run: |
           CONTENT=$(echo -n "${{ needs.prepare.outputs.version }}" | base64 -w0)
 
-          SHA=$(gh api /repos/InkCanvasForClass/community/contents/AutomaticUpdateVersionControl.txt --jq '.sha' 2>/dev/null || echo "")
+          SHA=$(gh api "/repos/InkCanvasForClass/community/contents/AutomaticUpdateVersionControl.txt?ref=net6" --jq '.sha' 2>/dev/null || echo "")
 
           gh api \
             --method PUT \
