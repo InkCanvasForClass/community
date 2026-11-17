@@ -258,6 +258,7 @@
                                 </ui:SettingsCard.HeaderIcon>
                                 <ComboBox x:Name="UpdatePackageArchitectureSelector"
                                           SelectionChanged="UpdatePackageArchitectureSelector_SelectionChanged">
+                                    <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageArch_Auto}" Tag="Auto" />
                                     <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageArch_X86}" Tag="X86" />
                                     <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageArch_X64}" Tag="X64" />
                                 </ComboBox>
@@ -270,6 +271,7 @@
                                 </ui:SettingsCard.HeaderIcon>
                                 <ComboBox x:Name="UpdatePackageRuntimeSelector"
                                           SelectionChanged="UpdatePackageRuntimeSelector_SelectionChanged">
+                                    <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageRuntime_Auto}" Tag="Auto" />
                                     <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageRuntime_FrameworkDependent}" Tag="FrameworkDependent" />
                                     <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageRuntime_SelfContained}" Tag="SelfContained" />
                                 </ComboBox>

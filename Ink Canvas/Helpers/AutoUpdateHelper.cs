@@ -102,24 +102,32 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                return MainWindow.Settings?.Startup?.UpdatePackageArchitecture == UpdatePackageArchitecture.X64;
+                var configured = MainWindow.Settings?.Startup?.UpdatePackageArchitecture ?? UpdatePackageArchitecture.Auto;
+                if (configured == UpdatePackageArchitecture.X64) return true;
+                if (configured == UpdatePackageArchitecture.X86) return false;
             }
             catch
             {
-                return Environment.Is64BitProcess;
             }
+            return Environment.Is64BitProcess;
         }
 
         public static bool IsSelfContainedUpdatePackageSelected()
         {
             try
             {
-                return MainWindow.Settings?.Startup?.UpdatePackageRuntime == UpdatePackageRuntime.SelfContained;
+                var configured = MainWindow.Settings?.Startup?.UpdatePackageRuntime ?? UpdatePackageRuntime.Auto;
+                if (configured == UpdatePackageRuntime.SelfContained) return true;
+                if (configured == UpdatePackageRuntime.FrameworkDependent) return false;
             }
             catch
             {
-                return false;
             }
+#if SELF_CONTAINED_BUILD
+            return true;
+#else
+            return false;
+#endif
         }
 
         /// <summary>当前应使用的更新分支（net6 / net10）。</summary>

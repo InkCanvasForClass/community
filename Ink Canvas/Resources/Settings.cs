@@ -550,7 +550,9 @@ namespace Ink_Canvas
         /// <summary>32 位包，例如 InkCanvasForClass.CE.1.7.0.0.zip</summary>
         X86 = 0,
         /// <summary>64 位包，例如 InkCanvasForClass.CE.1.7.0.0-x64.zip</summary>
-        X64 = 1
+        X64 = 1,
+        /// <summary>跟随当前软件架构</summary>
+        Auto = 2
     }
 
     /// <summary>自动更新要下载的安装包运行时形态。默认跟随当前安装包：自包含包默认带运行时，框架依赖包默认不带。</summary>
@@ -559,7 +561,9 @@ namespace Ink_Canvas
         /// <summary>不带运行时（框架依赖），例如 InkCanvasForClass.CE.1.7.0.0-x64.zip</summary>
         FrameworkDependent = 0,
         /// <summary>带运行时（自包含），例如 InkCanvasForClass.CE.1.7.0.0-x64-selfcontained.zip</summary>
-        SelfContained = 1
+        SelfContained = 1,
+        /// <summary>跟随当前安装包</summary>
+        Auto = 2
     }
 
     /// <summary>自动更新要跟随的 .NET 版本渠道。默认跟随当前运行的软件版本。</summary>
@@ -601,15 +605,6 @@ namespace Ink_Canvas
 
     public class Startup
     {
-        private static UpdatePackageRuntime GetDefaultUpdatePackageRuntime()
-        {
-#if SELF_CONTAINED_BUILD
-            return UpdatePackageRuntime.SelfContained;
-#else
-            return UpdatePackageRuntime.FrameworkDependent;
-#endif
-        }
-
         private StartupMode _startupMode = StartupMode.Default;
         private bool _hasExplicitStartupMode;
         private bool _runAtStartup;
@@ -626,9 +621,9 @@ namespace Ink_Canvas
         [JsonProperty("updateChannel")]
         public UpdateChannel UpdateChannel { get; set; } = UpdateChannel.Release;
         [JsonProperty("updatePackageArchitecture")]
-        public UpdatePackageArchitecture UpdatePackageArchitecture { get; set; } = Environment.Is64BitProcess ? UpdatePackageArchitecture.X64 : UpdatePackageArchitecture.X86;
+        public UpdatePackageArchitecture UpdatePackageArchitecture { get; set; } = UpdatePackageArchitecture.Auto;
         [JsonProperty("updatePackageRuntime")]
-        public UpdatePackageRuntime UpdatePackageRuntime { get; set; } = GetDefaultUpdatePackageRuntime();
+        public UpdatePackageRuntime UpdatePackageRuntime { get; set; } = UpdatePackageRuntime.Auto;
         [JsonProperty("updatePackageDotNetVersion")]
         public UpdatePackageDotNetVersion UpdatePackageDotNetVersion { get; set; } = UpdatePackageDotNetVersion.Auto;
         [JsonProperty("isSmartUpdate")]

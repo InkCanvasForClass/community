@@ -81,8 +81,14 @@
   <data name="Update_PackageArch_X64" xml:space="preserve">
     <value>64 位 (x64)</value>
   </data>
+  <data name="Update_PackageArch_Auto" xml:space="preserve">
+    <value>跟随当前版本</value>
+  </data>
   <data name="Update_PackageArch_X86" xml:space="preserve">
     <value>32 位 (x86)</value>
+  </data>
+  <data name="Update_PackageRuntime_Auto" xml:space="preserve">
+    <value>跟随当前版本</value>
   </data>
   <data name="Update_PackageRuntime_FrameworkDependent" xml:space="preserve">
     <value>不带运行时</value>
