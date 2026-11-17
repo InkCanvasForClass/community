@@ -52,7 +52,24 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         public UpdatePage()
         {
             InitializeComponent();
+            UpdateCurrentBuildInfo();
             Loaded += UpdatePage_Loaded;
+        }
+
+        private void UpdateCurrentBuildInfo()
+        {
+            string arch = Environment.Is64BitProcess
+                ? UpdateStrings.Update_PackageArch_X64
+                : UpdateStrings.Update_PackageArch_X86;
+            string dotnet = Environment.Version.Major >= 10
+                ? UpdateStrings.Update_PackageDotNet_Net10
+                : UpdateStrings.Update_PackageDotNet_Net6;
+#if SELF_CONTAINED_BUILD
+            string runtime = UpdateStrings.Update_PackageRuntime_SelfContained;
+#else
+            string runtime = UpdateStrings.Update_PackageRuntime_FrameworkDependent;
+#endif
+            CurrentBuildInfoText.Text = $"{arch} · {dotnet} · {runtime}";
         }
 
         private async void UpdatePage_Loaded(object sender, RoutedEventArgs e)

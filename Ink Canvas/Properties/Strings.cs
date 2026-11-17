@@ -983,6 +983,8 @@ namespace Ink_Canvas.Properties
             dict["Startup_UpdatePackageRuntimeHint"] = ("StartupStrings", "UpdatePackageRuntimeHint");
             dict["Startup_UpdatePackageDotNetVersion"] = ("StartupStrings", "UpdatePackageDotNetVersion");
             dict["Startup_UpdatePackageDotNetVersionHint"] = ("StartupStrings", "UpdatePackageDotNetVersionHint");
+            dict["Startup_CurrentBuild"] = ("StartupStrings", "CurrentBuild");
+            dict["Startup_CurrentBuildHint"] = ("StartupStrings", "CurrentBuildHint");
             dict["Storage_AutoDeleteTitle"] = ("StorageStrings", "Storage_AutoDeleteTitle");
             dict["Storage_AutoSaveInk"] = ("StorageStrings", "Storage_AutoSaveInk");
             dict["Storage_AutoSaveInkOnScreenshot"] = ("StorageStrings", "Storage_AutoSaveInkOnScreenshot");

@@ -195,4 +195,10 @@
   <data name="UpdatePackageDotNetVersionHint" xml:space="preserve">
     <value>Choose which .NET major version the update package follows. Defaults to the current app version.</value>
   </data>
+  <data name="CurrentBuild" xml:space="preserve">
+    <value>Current build</value>
+  </data>
+  <data name="CurrentBuildHint" xml:space="preserve">
+    <value>Architecture, .NET version and runtime of the currently running package.</value>
+  </data>
 </root>

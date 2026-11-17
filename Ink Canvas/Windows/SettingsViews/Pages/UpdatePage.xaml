@@ -225,6 +225,13 @@
                             <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                                        Text="{x:Static props:UpdateStrings.Update_Channel}" />
 
+                            <ui:SettingsCard Header="{x:Static props:StartupStrings.CurrentBuild}"
+                                             Description="{x:Static props:StartupStrings.CurrentBuildHint}">
+                                <TextBlock x:Name="CurrentBuildInfoText"
+                                           VerticalAlignment="Center"
+                                           FontWeight="SemiBold" />
+                            </ui:SettingsCard>
+
                             <ui:SettingsCard Header="{x:Static props:UpdateStrings.Update_Channel}"
                                              Description="{x:Static props:StartupStrings.UpdateChannelHint}">
                                 <ui:SettingsCard.HeaderIcon>
