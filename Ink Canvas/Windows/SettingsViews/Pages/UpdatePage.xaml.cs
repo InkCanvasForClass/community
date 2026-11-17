@@ -37,6 +37,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private bool _isLoaded;
         private bool _isChangingUpdateChannelInternally;
         private bool _isChangingUpdatePackageArchInternally;
+        private bool _isChangingUpdatePackageRuntimeInternally;
 
         private UpdateUiState _state = UpdateUiState.Idle;
         private string _remoteVersion;
@@ -144,6 +145,27 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     finally
                     {
                         _isChangingUpdatePackageArchInternally = false;
+                    }
+
+                    _isChangingUpdatePackageRuntimeInternally = true;
+                    try
+                    {
+                        string wantRuntimeTag = settings.Startup.UpdatePackageRuntime == UpdatePackageRuntime.SelfContained
+                            ? "SelfContained"
+                            : "FrameworkDependent";
+                        foreach (var item in UpdatePackageRuntimeSelector.Items)
+                        {
+                            if (item is ComboBoxItem cbi && cbi.Tag != null &&
+                                string.Equals(cbi.Tag.ToString(), wantRuntimeTag, StringComparison.OrdinalIgnoreCase))
+                            {
+                                UpdatePackageRuntimeSelector.SelectedItem = cbi;
+                                break;
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        _isChangingUpdatePackageRuntimeInternally = false;
                     }
                 }
             }
@@ -270,6 +292,24 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.Settings.Startup.UpdatePackageArchitecture = newArch;
             SettingsManager.SaveSettingsToFile();
             LogHelper.WriteLogToFile($"Settings | Update package architecture: {newArch}");
+        }
+
+        private void UpdatePackageRuntimeSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            if (_isChangingUpdatePackageRuntimeInternally) return;
+            if (!(UpdatePackageRuntimeSelector.SelectedItem is ComboBoxItem cbi) || cbi.Tag == null) return;
+
+            var newRuntime = string.Equals(cbi.Tag.ToString(), "SelfContained", StringComparison.OrdinalIgnoreCase)
+                ? UpdatePackageRuntime.SelfContained
+                : UpdatePackageRuntime.FrameworkDependent;
+
+            if (SettingsManager.Settings.Startup.UpdatePackageRuntime == newRuntime)
+                return;
+
+            SettingsManager.Settings.Startup.UpdatePackageRuntime = newRuntime;
+            SettingsManager.SaveSettingsToFile();
+            LogHelper.WriteLogToFile($"Settings | Update package runtime: {newRuntime}");
         }
 
         private async void UpdateChannelSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)

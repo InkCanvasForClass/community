@@ -720,6 +720,15 @@ namespace Ink_Canvas
         X64 = 1
     }
 
+    /// <summary>自动更新要下载的安装包运行时形态。默认跟随当前安装包：自包含包默认带运行时，框架依赖包默认不带。</summary>
+    public enum UpdatePackageRuntime
+    {
+        /// <summary>不带运行时（框架依赖），例如 InkCanvasForClass.CE.1.7.0.0-x64.zip</summary>
+        FrameworkDependent = 0,
+        /// <summary>带运行时（自包含），例如 InkCanvasForClass.CE.1.7.0.0-x64-selfcontained.zip</summary>
+        SelfContained = 1
+    }
+
     /// <summary>
     /// 遥测上传等级
     /// </summary>
@@ -748,6 +757,15 @@ namespace Ink_Canvas
 
     public class Startup
     {
+        private static UpdatePackageRuntime GetDefaultUpdatePackageRuntime()
+        {
+#if SELF_CONTAINED_BUILD
+            return UpdatePackageRuntime.SelfContained;
+#else
+            return UpdatePackageRuntime.FrameworkDependent;
+#endif
+        }
+
         private StartupMode _startupMode = StartupMode.Default;
         private bool _hasExplicitStartupMode;
         private bool _runAtStartup;
@@ -765,6 +783,8 @@ namespace Ink_Canvas
         public UpdateChannel UpdateChannel { get; set; } = UpdateChannel.Release;
         [JsonProperty("updatePackageArchitecture")]
         public UpdatePackageArchitecture UpdatePackageArchitecture { get; set; } = Environment.Is64BitProcess ? UpdatePackageArchitecture.X64 : UpdatePackageArchitecture.X86;
+        [JsonProperty("updatePackageRuntime")]
+        public UpdatePackageRuntime UpdatePackageRuntime { get; set; } = GetDefaultUpdatePackageRuntime();
         [JsonProperty("isSmartUpdate")]
         public bool IsSmartUpdate { get; set; } = true;
         [JsonProperty("skippedVersion")]

@@ -84,6 +84,12 @@
   <data name="Update_PackageArch_X86" xml:space="preserve">
     <value>32 位 (x86)</value>
   </data>
+  <data name="Update_PackageRuntime_FrameworkDependent" xml:space="preserve">
+    <value>不带运行时</value>
+  </data>
+  <data name="Update_PackageRuntime_SelfContained" xml:space="preserve">
+    <value>带运行时（自包含）</value>
+  </data>
   <data name="Update_Preview" xml:space="preserve">
     <value>Preview 尝鲜党冲</value>
   </data>

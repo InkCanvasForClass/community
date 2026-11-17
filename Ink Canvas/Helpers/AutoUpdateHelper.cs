@@ -118,15 +118,35 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        public static bool IsSelfContainedUpdatePackageSelected()
+        {
+            try
+            {
+                return MainWindow.Settings?.Startup?.UpdatePackageRuntime == UpdatePackageRuntime.SelfContained;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private static string NormalizeVersionForUpdate(string version)
         {
             if (string.IsNullOrWhiteSpace(version)) return version;
             return version.Trim().TrimStart('v', 'V');
         }
 
-        public static string AppendX64SuffixBeforeZipExtension(string url)
+        public static string AppendUpdatePackageSuffixBeforeZipExtension(string url)
         {
-            if (string.IsNullOrEmpty(url) || !IsX64UpdatePackageSelected()) return url;
+            if (string.IsNullOrEmpty(url)) return url;
+
+            bool isX64 = IsX64UpdatePackageSelected();
+            bool isSelfContained = IsSelfContainedUpdatePackageSelected();
+            string suffix = isSelfContained
+                ? (isX64 ? "-x64-selfcontained" : "-x86-selfcontained")
+                : (isX64 ? "-x64" : "");
+            if (suffix.Length == 0) return url;
+
             int query = url.IndexOf('?');
             string pathPart = query >= 0 ? url.Substring(0, query) : url;
             string qs = query >= 0 ? url.Substring(query) : "";
@@ -134,24 +154,28 @@ namespace Ink_Canvas.Helpers
             int idx = pathPart.LastIndexOf(ext, StringComparison.OrdinalIgnoreCase);
             if (idx < 0) return url;
             var basePart = pathPart.Substring(0, idx);
-            if (basePart.EndsWith("-x64", StringComparison.OrdinalIgnoreCase)) return url;
-            return basePart + "-x64" + ext + qs;
+            if (basePart.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)) return url;
+            return basePart + suffix + ext + qs;
         }
 
         public static string GetUpdateZipFileName(string version)
         {
             var v = NormalizeVersionForUpdate(version);
-            return IsX64UpdatePackageSelected()
-                ? $"InkCanvasForClass.CE.{v}-x64.zip"
-                : $"InkCanvasForClass.CE.{v}.zip";
+            bool isX64 = IsX64UpdatePackageSelected();
+            bool isSelfContained = IsSelfContainedUpdatePackageSelected();
+
+            if (isSelfContained)
+                return isX64 ? $"InkCanvasForClass.CE.{v}-x64-selfcontained.zip" : $"InkCanvasForClass.CE.{v}-x86-selfcontained.zip";
+
+            return isX64 ? $"InkCanvasForClass.CE.{v}-x64.zip" : $"InkCanvasForClass.CE.{v}.zip";
         }
 
         public static string GetUpdateDownloadStatusFilePath(string version)
         {
             var v = NormalizeVersionForUpdate(version);
-            string name = IsX64UpdatePackageSelected()
-                ? $"DownloadV{v}_x64Status.txt"
-                : $"DownloadV{v}Status.txt";
+            string arch = IsX64UpdatePackageSelected() ? "_x64" : "";
+            string runtime = IsSelfContainedUpdatePackageSelected() ? "_selfcontained" : "";
+            string name = $"DownloadV{v}{arch}{runtime}Status.txt";
             return Path.Combine(updatesFolderPath, name);
         }
 
@@ -160,32 +184,29 @@ namespace Ink_Canvas.Helpers
             return Path.Combine(updatesFolderPath, GetUpdateZipFileName(version));
         }
 
-        private static string PickBrowserDownloadUrlFromAssets(JToken assets)
+        private static string PickBrowserDownloadUrlFromAssets(JToken assets, string version)
         {
             if (assets == null || !assets.Any()) return null;
-            bool wantX64 = IsX64UpdatePackageSelected();
+
+            var v = NormalizeVersionForUpdate(version);
+            string expectedName = GetUpdateZipFileName(version);
+            // 历史版本可能还没有自包含包，回退到同架构的框架依赖包
+            string fallbackName = IsX64UpdatePackageSelected()
+                ? $"InkCanvasForClass.CE.{v}-x64.zip"
+                : $"InkCanvasForClass.CE.{v}.zip";
+            string fallbackUrl = null;
             string anyZip = null;
-            string x64Zip = null;
-            string nonX64Zip = null;
             foreach (JToken a in assets)
             {
                 string name = a["name"]?.ToString();
                 string url = a["browser_download_url"]?.ToString();
                 if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(url)) continue;
                 if (!name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)) continue;
+                if (string.Equals(name, expectedName, StringComparison.OrdinalIgnoreCase)) return url;
+                if (string.Equals(name, fallbackName, StringComparison.OrdinalIgnoreCase)) fallbackUrl = url;
                 if (anyZip == null) anyZip = url;
-                if (name.EndsWith("-x64.zip", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (x64Zip == null) x64Zip = url;
-                }
-                else
-                {
-                    if (nonX64Zip == null) nonX64Zip = url;
-                }
             }
-            if (wantX64)
-                return x64Zip ?? anyZip;
-            return nonX64Zip ?? anyZip;
+            return fallbackUrl ?? anyZip;
         }
 
         // 线路组结构体（包含版本、下载、日志地址）
@@ -563,7 +584,7 @@ namespace Ink_Canvas.Helpers
                     if (!string.IsNullOrEmpty(group.DownloadUrlFormat))
                     {
                         var testUrl = group.DownloadUrlFormat.Replace("{0}", "test");
-                        return AppendX64SuffixBeforeZipExtension(testUrl);
+                        return AppendUpdatePackageSuffixBeforeZipExtension(testUrl);
                     }
                 }
                 catch
@@ -848,7 +869,7 @@ namespace Ink_Canvas.Helpers
                         if (version == targetVersion || version == $"v{targetVersion}" || version == $"V{targetVersion}")
                         {
                             string releaseNotes = release["body"]?.ToString();
-                            string downloadUrl = PickBrowserDownloadUrlFromAssets(release["assets"]);
+                            string downloadUrl = PickBrowserDownloadUrlFromAssets(release["assets"], version);
 
                             // 解析发布时间
                             DateTime? releaseTime = null;
@@ -889,7 +910,7 @@ namespace Ink_Canvas.Helpers
                             var latestRelease = releases[0];
                             string version = latestRelease["tag_name"]?.ToString();
                             string releaseNotes = latestRelease["body"]?.ToString();
-                            string downloadUrl = PickBrowserDownloadUrlFromAssets(latestRelease["assets"]);
+                            string downloadUrl = PickBrowserDownloadUrlFromAssets(latestRelease["assets"], version);
 
                             DateTime? releaseTime = null;
                             if (latestRelease["published_at"] != null && DateTime.TryParse(latestRelease["published_at"].ToString(), out DateTime parsedTime))
@@ -915,7 +936,7 @@ namespace Ink_Canvas.Helpers
                         var json = JObject.Parse(response);
                         string version = json["tag_name"]?.ToString();
                         string releaseNotes = json["body"]?.ToString();
-                        string downloadUrl = PickBrowserDownloadUrlFromAssets(json["assets"]);
+                        string downloadUrl = PickBrowserDownloadUrlFromAssets(json["assets"], version);
 
                         DateTime? releaseTime = null;
                         if (json["published_at"] != null && DateTime.TryParse(json["published_at"].ToString(), out DateTime parsedTime))
@@ -1359,7 +1380,7 @@ namespace Ink_Canvas.Helpers
                     }
                     if (group.GroupName != StartupStrings.SmartUpdate)
                     {
-                        url = AppendX64SuffixBeforeZipExtension(url);
+                        url = AppendUpdatePackageSuffixBeforeZipExtension(url);
                     }
                     // 智教联盟需要先获取真实下载地址
                     if (group.GroupName == "智教联盟")
@@ -2808,7 +2829,7 @@ namespace Ink_Canvas.Helpers
                     {
                         string version = item["tag_name"]?.ToString();
                         string releaseNotes = item["body"]?.ToString();
-                        string downloadUrl = PickBrowserDownloadUrlFromAssets(item["assets"]);
+                        string downloadUrl = PickBrowserDownloadUrlFromAssets(item["assets"], version);
                         if (!string.IsNullOrEmpty(version) && !string.IsNullOrEmpty(downloadUrl))
                             result.Add((version, downloadUrl, releaseNotes));
                     }

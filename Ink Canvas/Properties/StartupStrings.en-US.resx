@@ -210,4 +210,10 @@
   <data name="ExternalProtocol_Shortcut_Failed" xml:space="preserve">
     <value>Failed to create shortcut, check logs for details</value>
   </data>
+  <data name="UpdatePackageRuntime" xml:space="preserve">
+    <value>Runtime</value>
+  </data>
+  <data name="UpdatePackageRuntimeHint" xml:space="preserve">
+    <value>Choose whether the update package includes the .NET runtime. Defaults to the current installation.</value>
+  </data>
 </root>

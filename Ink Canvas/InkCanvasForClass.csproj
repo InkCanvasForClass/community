@@ -5,6 +5,7 @@
     <RootNamespace>Ink_Canvas</RootNamespace>
     <AssemblyName>InkCanvasForClass</AssemblyName>
     <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <DefineConstants Condition="'$(SelfContained)' == 'true'">$(DefineConstants);SELF_CONTAINED_BUILD</DefineConstants>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>

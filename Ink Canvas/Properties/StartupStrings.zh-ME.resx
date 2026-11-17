@@ -210,4 +210,10 @@
   <data name="ExternalProtocol_Shortcut_Failed" xml:space="preserve">
     <value>快捷方式没造出来，瞅一眼日志呗</value>
   </data>
+  <data name="UpdatePackageRuntime" xml:space="preserve">
+    <value>运行时</value>
+  </data>
+  <data name="UpdatePackageRuntimeHint" xml:space="preserve">
+    <value>选更新包带不带运行时，默认跟当前安装走</value>
+  </data>
 </root>

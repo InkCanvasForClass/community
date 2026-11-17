@@ -68,6 +68,10 @@ namespace Ink_Canvas.Properties
 
         public static string Update_PackageArch_X86 => ResourceManager.GetString(nameof(Update_PackageArch_X86), _resourceCulture);
 
+        public static string Update_PackageRuntime_FrameworkDependent => ResourceManager.GetString(nameof(Update_PackageRuntime_FrameworkDependent), _resourceCulture);
+
+        public static string Update_PackageRuntime_SelfContained => ResourceManager.GetString(nameof(Update_PackageRuntime_SelfContained), _resourceCulture);
+
         public static string Update_Preview => ResourceManager.GetString(nameof(Update_Preview), _resourceCulture);
 
         public static string Update_Release => ResourceManager.GetString(nameof(Update_Release), _resourceCulture);
