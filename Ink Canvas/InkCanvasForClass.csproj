@@ -618,21 +618,23 @@
        CI 的 AnyCPU(=x64 产物)/x86 构建都能带上辅助 exe；单文件发布走 Publish 分支。 -->
   <Target Name="CopyLiquidGlassMagHost" AfterTargets="Build" Condition="'$(PublishSingleFile)' != 'true'">
     <ItemGroup>
-      <LiquidGlassMagHostFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.LiquidGlassMagHost\bin\$(Platform)\$(Configuration)\$(TargetFramework)\InkCanvas.LiquidGlassMagHost.*" Condition="'$(Platform)' != 'AnyCPU'" />
+      <LiquidGlassMagHostFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.LiquidGlassMagHost\bin\$(Platform)\$(Configuration)\$(TargetFramework)\InkCanvas.LiquidGlassMagHost.*" Condition="'$(Platform)' != 'AnyCPU' And '$(RuntimeIdentifier)' == ''" />
+      <LiquidGlassMagHostFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.LiquidGlassMagHost\bin\$(Platform)\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\InkCanvas.LiquidGlassMagHost.*" Condition="'$(Platform)' != 'AnyCPU' And '$(RuntimeIdentifier)' != ''" />
       <LiquidGlassMagHostFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.LiquidGlassMagHost\bin\$(Configuration)\$(TargetFramework)\InkCanvas.LiquidGlassMagHost.*" Condition="'$(Platform)' == 'AnyCPU'" />
     </ItemGroup>
     <Copy SourceFiles="@(LiquidGlassMagHostFiles)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" Condition="'@(LiquidGlassMagHostFiles)' != ''" />
   </Target>
 
-  <Target Name="CopyLiquidGlassMagHostToPublishDirectory" AfterTargets="Publish" Condition="'$(PublishSingleFile)' == 'true'">
+  <Target Name="CopyLiquidGlassMagHostToPublishDirectory" AfterTargets="Publish">
     <ItemGroup>
-      <LiquidGlassMagHostPublishFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.LiquidGlassMagHost\bin\$(Platform)\$(Configuration)\$(TargetFramework)\InkCanvas.LiquidGlassMagHost.*" Condition="'$(Platform)' != 'AnyCPU'" />
+      <LiquidGlassMagHostPublishFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.LiquidGlassMagHost\bin\$(Platform)\$(Configuration)\$(TargetFramework)\InkCanvas.LiquidGlassMagHost.*" Condition="'$(Platform)' != 'AnyCPU' And '$(RuntimeIdentifier)' == ''" />
+      <LiquidGlassMagHostPublishFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.LiquidGlassMagHost\bin\$(Platform)\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\InkCanvas.LiquidGlassMagHost.*" Condition="'$(Platform)' != 'AnyCPU' And '$(RuntimeIdentifier)' != ''" />
       <LiquidGlassMagHostPublishFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.LiquidGlassMagHost\bin\$(Configuration)\$(TargetFramework)\InkCanvas.LiquidGlassMagHost.*" Condition="'$(Platform)' == 'AnyCPU'" />
     </ItemGroup>
     <Copy SourceFiles="@(LiquidGlassMagHostPublishFiles)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" Condition="'@(LiquidGlassMagHostPublishFiles)' != ''" />
   </Target>
 
-  <Target Name="CopyIACoreHelperToPublishDirectory" AfterTargets="Publish" Condition="'$(PublishSingleFile)' == 'true'">
+  <Target Name="CopyIACoreHelperToPublishDirectory" AfterTargets="Publish">
     <ItemGroup>
       <IACoreHelperPublishFiles Include="$(MSBuildProjectDirectory)\..\InkCanvas.IACoreHelper\bin\$(Configuration)\*.*" />
     </ItemGroup>

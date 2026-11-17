@@ -26,11 +26,6 @@ on:
         required: true
         default: false
         type: boolean
-      include_runtime:
-        description: "Publish as self-contained single-file build with .NET runtime"
-        required: false
-        default: false
-        type: boolean
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}-${{ github.sha }}
@@ -202,11 +197,37 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        architecture: [AnyCPU, x86]
-    outputs:
-      archive_name: ${{ steps.create_archive.outputs.archive_name }}
-      zip_size: ${{ steps.calculate_size.outputs.zip_size }}
-      installer_size: ${{ steps.calculate_installer_size.outputs.installer_size }}
+        include:
+          # 不带运行时（框架依赖）：沿用旧文件名，保证自动更新兼容
+          - architecture: x64
+            platform: x64
+            rid: ""
+            mode: fd
+            suffix: -x64
+            self_contained: "false"
+            single_file: "false"
+          - architecture: x86
+            platform: x86
+            rid: ""
+            mode: fd
+            suffix: ""
+            self_contained: "false"
+            single_file: "false"
+          # 带运行时（自包含单文件）
+          - architecture: x64
+            platform: x64
+            rid: win-x64
+            mode: sc
+            suffix: -x64-selfcontained
+            self_contained: "true"
+            single_file: "true"
+          - architecture: x86
+            platform: x86
+            rid: win-x86
+            mode: sc
+            suffix: -x86-selfcontained
+            self_contained: "true"
+            single_file: "true"
 
     steps:
       - name: Checkout code
@@ -220,49 +241,37 @@ jobs:
       - name: Setup dotnet
         uses: actions/setup-dotnet@v5
         with:
+          dotnet-version: '6.0.x'
           cache: true
           cache-dependency-path: "**/packages.lock.json"
 
       - name: Restore Package
-        run: |
-          $runtimeIdentifier = if ("${{ matrix.architecture }}" -eq "AnyCPU") { "win-x64" } else { "win-x86" }
-          $includeRuntime = "${{ github.event.inputs.include_runtime }}" -eq "true"
+        run: dotnet restore "Ink Canvas.sln" --locked-mode
 
-          if ($includeRuntime) {
-            dotnet restore "Ink Canvas/InkCanvasForClass.csproj" --locked-mode -p:Platform="${{ matrix.architecture }}"
-          } else {
-            dotnet restore "Ink Canvas.sln" --locked-mode
-          }
-
-      - name: Build or publish app (Release)
+      - name: Publish app (Release)
         env:
           DLASS_TELEMETRY_TOKEN: ${{ secrets.DLASS_TELEMETRY_TOKEN }}
         run: |
-          $runtimeIdentifier = if ("${{ matrix.architecture }}" -eq "AnyCPU") { "win-x64" } else { "win-x86" }
-          $publishDir = "artifacts/publish/${{ matrix.architecture }}"
-          $includeRuntime = "${{ github.event.inputs.include_runtime }}" -eq "true"
-
-          if ($includeRuntime) {
-            dotnet publish "Ink Canvas/InkCanvasForClass.csproj" `
-              --configuration Release `
-              --no-restore `
-              --runtime $runtimeIdentifier `
-              --self-contained true `
-              --output $publishDir `
-              -p:Platform="${{ matrix.architecture }}" `
-              -p:GitFlow="Github Action" `
-              -p:PublishSingleFile=true `
-              -p:PublishTrimmed=false `
-              -p:IncludeNativeLibrariesForSelfExtract=true `
-              -p:UseMultiToolTask=true `
-              -p:EnforceProcessCountAcrossBuilds=true `
-              -p:RunAnalyzers=false
-          } else {
-            msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
-
-            New-Item -ItemType Directory -Path $publishDir -Force
-            Copy-Item "Ink Canvas\bin\Release\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\*" $publishDir -Recurse -Force
+          $publishDir = "artifacts/publish/${{ matrix.architecture }}-${{ matrix.mode }}"
+          $publishArgs = @(
+            "Ink Canvas/InkCanvasForClass.csproj",
+            "--configuration", "Release",
+            "--no-restore",
+            "--self-contained", "${{ matrix.self_contained }}",
+            "--output", $publishDir,
+            "-p:Platform=${{ matrix.platform }}",
+            "-p:GitFlow=Github Action",
+            "-p:PublishSingleFile=${{ matrix.single_file }}",
+            "-p:PublishTrimmed=false",
+            "-p:IncludeNativeLibrariesForSelfExtract=${{ matrix.self_contained }}",
+            "-p:UseMultiToolTask=true",
+            "-p:EnforceProcessCountAcrossBuilds=true",
+            "-p:RunAnalyzers=false"
+          )
+          if ("${{ matrix.rid }}" -ne "") {
+            $publishArgs += @("--runtime", "${{ matrix.rid }}")
           }
+          dotnet publish @publishArgs
 
       - name: Install VSTO Runtime
         shell: pwsh
@@ -302,7 +311,7 @@ jobs:
             /p:SignManifests=true `
             /p:ManifestCertificateThumbprint=$env:SIGN_THUMBPRINT `
             /verbosity:minimal -maxcpucount
-          $publishDir = "artifacts/publish/${{ matrix.architecture }}"
+          $publishDir = "artifacts/publish/${{ matrix.architecture }}-${{ matrix.mode }}"
           $pptAgentDir = "$publishDir\ppt-agent"
           New-Item -ItemType Directory -Force -Path $pptAgentDir | Out-Null
           Copy-Item "InkCanvas.PowerPointAddIn\bin\Release\*" $pptAgentDir -Recurse -Force
@@ -326,7 +335,7 @@ jobs:
       - name: Check if exe file is generated
         id: check-exe
         run: |
-          $exePath = "artifacts/publish/${{ matrix.architecture }}/InkCanvasForClass.exe"
+          $exePath = "artifacts/publish/${{ matrix.architecture }}-${{ matrix.mode }}/InkCanvasForClass.exe"
 
           if (Test-Path $exePath) {
             echo "build_success=true" >> $env:GITHUB_OUTPUT
@@ -355,22 +364,15 @@ jobs:
         if: steps.check-exe.outputs.build_success == 'true'
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
-          $architecture = "${{ matrix.architecture }}"
-
-          # 根据架构生成文件名后缀
-          if ($architecture -eq "AnyCPU") {
-            $suffix = "-x64"
-          } else {
-            $suffix = ""
-          }
+          $suffix = "${{ matrix.suffix }}"
 
           $archiveName = "InkCanvasForClass.CE.$version$suffix.zip"
 
           # 创建发布目录
           New-Item -ItemType Directory -Path "release" -Force
 
-          # 复制发布文件（使用架构特定的发布路径）
-          Copy-Item "artifacts\publish\$architecture\*" "release/" -Recurse -Force
+          # 复制发布文件（使用架构 + 运行时模式特定的发布路径）
+          Copy-Item "artifacts\publish\${{ matrix.architecture }}-${{ matrix.mode }}\*" "release/" -Recurse -Force
 
           # 创建压缩包
           Compress-Archive -Path "release/*" -DestinationPath $archiveName -Force
@@ -381,7 +383,6 @@ jobs:
         if: steps.check-exe.outputs.build_success == 'true'
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
-          $architecture = "${{ matrix.architecture }}"
 
           # 更新 ISS 文件中的版本信息
           $issPath = "build/InkCanvasForClass CE.iss"
@@ -389,6 +390,8 @@ jobs:
 
           # 替换版本信息
           $issContent = $issContent -replace '#define MyAppVersion ".*"', "#define MyAppVersion `"$version`""
+          # 安装器内置的运行时下载任务需要与当前产物架构一致
+          $issContent = $issContent -replace '#define MyAppRuntimeArch ".*"', "#define MyAppRuntimeArch `"${{ matrix.architecture }}`""
 
           # 替换源文件路径为相对路径（考虑到ISS文件在build目录下，需要返回上级目录）
           $issContent = $issContent -replace 'Source: "release\\\*";', 'Source: "../release/*";'
@@ -418,14 +421,7 @@ jobs:
         if: steps.check-exe.outputs.build_success == 'true'
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
-          $architecture = "${{ matrix.architecture }}"
-
-          # 根据架构生成文件名后缀
-          if ($architecture -eq "AnyCPU") {
-            $suffix = "-x64"
-          } else {
-            $suffix = ""
-          }
+          $suffix = "${{ matrix.suffix }}"
 
           $setupFile = "InkCanvasForClass CE Setup.exe"
           $newSetupName = "InkCanvasForClass.CE.$version$suffix.Setup.exe"
@@ -441,14 +437,7 @@ jobs:
         if: steps.check-exe.outputs.build_success == 'true'
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
-          $architecture = "${{ matrix.architecture }}"
-
-          # 根据架构生成文件名后缀
-          if ($architecture -eq "AnyCPU") {
-            $suffix = "-x64"
-          } else {
-            $suffix = ""
-          }
+          $suffix = "${{ matrix.suffix }}"
 
           $archiveName = "InkCanvasForClass.CE.$version$suffix.zip"
 
@@ -462,14 +451,7 @@ jobs:
         if: steps.check-exe.outputs.build_success == 'true'
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
-          $architecture = "${{ matrix.architecture }}"
-
-          # 根据架构生成文件名后缀
-          if ($architecture -eq "AnyCPU") {
-            $suffix = "-x64"
-          } else {
-            $suffix = ""
-          }
+          $suffix = "${{ matrix.suffix }}"
 
           $installerName = "InkCanvasForClass.CE.$version$suffix.Setup.exe"
 
@@ -486,14 +468,7 @@ jobs:
         if: steps.check-exe.outputs.build_success == 'true'
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
-          $architecture = "${{ matrix.architecture }}"
-
-          # 根据架构生成文件名后缀
-          if ($architecture -eq "AnyCPU") {
-            $suffix = "-x64"
-          } else {
-            $suffix = ""
-          }
+          $suffix = "${{ matrix.suffix }}"
 
           $zipFile = "InkCanvasForClass.CE.$version$suffix.zip"
           $setupFile = "InkCanvasForClass.CE.$version$suffix.Setup.exe"
@@ -506,7 +481,7 @@ jobs:
         if: steps.check-exe.outputs.build_success == 'true'
         uses: actions/upload-artifact@v7
         with:
-          name: build-files-${{ needs.prepare.outputs.version }}-${{ matrix.architecture }}
+          name: build-files-${{ needs.prepare.outputs.version }}-${{ matrix.architecture }}-${{ matrix.mode }}
           path: |
             ${{ steps.get_file_names.outputs.zip_file }}
             ${{ steps.get_file_names.outputs.setup_file }}
@@ -525,7 +500,7 @@ jobs:
               echo "**Version:** ${{ needs.prepare.outputs.version }}"
               echo "**Tag:** \`${{ needs.prepare.outputs.tag_name }}\`"
               echo "**Release Type:** ${{ needs.prepare.outputs.is_prerelease == 'true' && 'Pre-release' || 'Release' }}"
-              echo "**Architecture:** ${{ matrix.architecture }}"
+              echo "**Architecture:** ${{ matrix.architecture }} (${{ matrix.mode }})"
               echo "**Commit:** \`${{ github.sha }}\`"
               echo "**Run:** #${{ github.run_number }}"
               echo ""
@@ -543,7 +518,7 @@ jobs:
               echo ""
               echo "**Version:** ${{ needs.prepare.outputs.version }}"
               echo "**Tag:** \`${{ needs.prepare.outputs.tag_name }}\`"
-              echo "**Architecture:** ${{ matrix.architecture }}"
+              echo "**Architecture:** ${{ matrix.architecture }} (${{ matrix.mode }})"
               echo "**Event:** ${{ github.event_name }} (${{ github.event.action || 'N/A' }})"
               echo "**Commit:** \`${{ github.sha }}\`"
               echo "**Run:** #${{ github.run_number }}"
@@ -575,10 +550,14 @@ jobs:
         uses: sigstore/gh-action-sigstore-python@v3.3.0
         with:
           inputs: |
-            build-files-${{ needs.prepare.outputs.version }}-AnyCPU/*.zip
-            build-files-${{ needs.prepare.outputs.version }}-AnyCPU/*.exe
-            build-files-${{ needs.prepare.outputs.version }}-x86/*.zip
-            build-files-${{ needs.prepare.outputs.version }}-x86/*.exe
+            build-files-${{ needs.prepare.outputs.version }}-x64-fd/InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}-x64.zip
+            build-files-${{ needs.prepare.outputs.version }}-x64-fd/InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}-x64.Setup.exe
+            build-files-${{ needs.prepare.outputs.version }}-x86-fd/InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip
+            build-files-${{ needs.prepare.outputs.version }}-x86-fd/InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.Setup.exe
+            build-files-${{ needs.prepare.outputs.version }}-x64-sc/InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}-x64-selfcontained.zip
+            build-files-${{ needs.prepare.outputs.version }}-x64-sc/InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}-x64-selfcontained.Setup.exe
+            build-files-${{ needs.prepare.outputs.version }}-x86-sc/InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}-x86-selfcontained.zip
+            build-files-${{ needs.prepare.outputs.version }}-x86-sc/InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}-x86-selfcontained.Setup.exe
           release-signing-artifacts: true
           upload-signing-artifacts: true
         env:
@@ -589,8 +568,10 @@ jobs:
         with:
           name: signed-files-${{ needs.prepare.outputs.version }}
           path: |
-            build-files-${{ needs.prepare.outputs.version }}-AnyCPU/*.sigstore.json
-            build-files-${{ needs.prepare.outputs.version }}-x86/*.sigstore.json
+            build-files-${{ needs.prepare.outputs.version }}-x64-fd/*.sigstore.json
+            build-files-${{ needs.prepare.outputs.version }}-x86-fd/*.sigstore.json
+            build-files-${{ needs.prepare.outputs.version }}-x64-sc/*.sigstore.json
+            build-files-${{ needs.prepare.outputs.version }}-x86-sc/*.sigstore.json
 
   release:
     needs: [prepare, build, sign]
@@ -631,57 +612,38 @@ jobs:
             originalChangelog="${warningText}${originalChangelog}"
           fi
 
+          # 在 Release 正文最上方标注构建所用的 .NET 版本
+          dotnetNote=$'> **此版本基于 .NET 6 构建**\n\n'
+          originalChangelog="${dotnetNote}${originalChangelog}"
+
+          # 安装包说明
+          packageGuide=$'\n## 安装包说明\n'
+          packageGuide+=$'- `InkCanvasForClass.CE.'"$version"'-x64.zip` / `InkCanvasForClass.CE.'"$version"'-x64.Setup.exe`：x64，**不带运行时**（需安装 .NET 6 Desktop Runtime）\n'
+          packageGuide+=$'- `InkCanvasForClass.CE.'"$version"'-x64-selfcontained.zip` / `InkCanvasForClass.CE.'"$version"'-x64-selfcontained.Setup.exe`：x64，**带运行时**，解压即用\n'
+          packageGuide+=$'- `InkCanvasForClass.CE.'"$version"'.zip` / `InkCanvasForClass.CE.'"$version"'.Setup.exe`：x86，**不带运行时**（需安装 .NET 6 Desktop Runtime）\n'
+          packageGuide+=$'- `InkCanvasForClass.CE.'"$version"'-x86-selfcontained.zip` / `InkCanvasForClass.CE.'"$version"'-x86-selfcontained.Setup.exe`：x86，**带运行时**，解压即用\n'
+
           # 构建文件信息表格
           fileTable=$'\n## 文件信息 (File Information)\n'
           fileTable+=$'| 文件名 | 大小 |\n'
           fileTable+=$'|--------|------|\n'
 
-          # AnyCPU (x64) 架构文件
-          if [ -f "InkCanvasForClass.CE.$version-x64.zip" ]; then
-            zipSize=$(wc -c < "InkCanvasForClass.CE.$version-x64.zip")
-            fileTable+=$'| InkCanvasForClass.CE.'"$version"'-x64.zip | '"$zipSize"' bytes |\n'
-          fi
+          for f in InkCanvasForClass.CE."$version"*.zip InkCanvasForClass.CE."$version"*.Setup.exe; do
+            [ -f "$f" ] || continue
+            fileSize=$(wc -c < "$f")
+            fileTable+=$'| '"$(basename "$f")"$' | '"$fileSize"$' bytes |\n'
+          done
 
-          if [ -f "InkCanvasForClass.CE.$version-x64.Setup.exe" ]; then
-            installerSize=$(wc -c < "InkCanvasForClass.CE.$version-x64.Setup.exe")
-            fileTable+=$'| InkCanvasForClass.CE.'"$version"'-x64.Setup.exe | '"$installerSize"' bytes |\n'
-          fi
-
-          if [ -f "InkCanvasForClass.CE.$version-x64.zip.sigstore.json" ]; then
-            sigstoreSize=$(wc -c < "InkCanvasForClass.CE.$version-x64.zip.sigstore.json")
-            fileTable+=$'| InkCanvasForClass.CE.'"$version"'-x64.zip.sigstore.json | '"$sigstoreSize"' bytes |\n'
-          fi
-
-          if [ -f "InkCanvasForClass.CE.$version-x64.Setup.exe.sigstore.json" ]; then
-            sigstoreSize=$(wc -c < "InkCanvasForClass.CE.$version-x64.Setup.exe.sigstore.json")
-            fileTable+=$'| InkCanvasForClass.CE.'"$version"'-x64.Setup.exe.sigstore.json | '"$sigstoreSize"' bytes |\n'
-          fi
-
-          # x86 架构文件
-          if [ -f "InkCanvasForClass.CE.$version.zip" ]; then
-            zipSize=$(wc -c < "InkCanvasForClass.CE.$version.zip")
-            fileTable+=$'| InkCanvasForClass.CE.'"$version"'.zip | '"$zipSize"' bytes |\n'
-          fi
-
-          if [ -f "InkCanvasForClass.CE.$version.Setup.exe" ]; then
-            installerSize=$(wc -c < "InkCanvasForClass.CE.$version.Setup.exe")
-            fileTable+=$'| InkCanvasForClass.CE.'"$version"'.Setup.exe | '"$installerSize"' bytes |\n'
-          fi
-
-          if [ -f "InkCanvasForClass.CE.$version.zip.sigstore.json" ]; then
-            sigstoreSize=$(wc -c < "InkCanvasForClass.CE.$version.zip.sigstore.json")
-            fileTable+=$'| InkCanvasForClass.CE.'"$version"'.zip.sigstore.json | '"$sigstoreSize"' bytes |\n'
-          fi
-
-          if [ -f "InkCanvasForClass.CE.$version.Setup.exe.sigstore.json" ]; then
-            sigstoreSize=$(wc -c < "InkCanvasForClass.CE.$version.Setup.exe.sigstore.json")
-            fileTable+=$'| InkCanvasForClass.CE.'"$version"'.Setup.exe.sigstore.json | '"$sigstoreSize"' bytes |\n'
-          fi
+          for f in build-files-"$version"-*/*.sigstore.json; do
+            [ -f "$f" ] || continue
+            fileSize=$(wc -c < "$f")
+            fileTable+=$'| '"$(basename "$f")"$' | '"$fileSize"$' bytes |\n'
+          done
 
           fileTable+=$'\n*文件大小信息由GitHub Actions自动生成*\n'
 
           # 将表格附加到原始changelog
-          enhancedChangelog="${originalChangelog}${fileTable}"
+          enhancedChangelog="${originalChangelog}${packageGuide}${fileTable}"
 
           # 输出增强版changelog内容
           {
@@ -709,14 +671,9 @@ jobs:
           draft: ${{ github.event.inputs.draft || false }}
           prerelease: ${{ needs.prepare.outputs.is_prerelease == 'true' }}
           files: |
-            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}-x64.zip
-            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}-x64.Setup.exe
-            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip
-            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.Setup.exe
-            build-files-${{ needs.prepare.outputs.version }}-AnyCPU/InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}-x64.zip.sigstore.json
-            build-files-${{ needs.prepare.outputs.version }}-AnyCPU/InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}-x64.Setup.exe.sigstore.json
-            build-files-${{ needs.prepare.outputs.version }}-x86/InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip.sigstore.json
-            build-files-${{ needs.prepare.outputs.version }}-x86/InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.Setup.exe.sigstore.json
+            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}*.zip
+            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}*.Setup.exe
+            build-files-${{ needs.prepare.outputs.version }}-*/*.sigstore.json
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -763,32 +720,26 @@ jobs:
           cd "$REPO_DIR"
           IS_PRERELEASE="${{ needs.prepare.outputs.is_prerelease }}"
           VERSION="${{ needs.prepare.outputs.version }}"
-          X64_ZIP_FILE="$GITHUB_WORKSPACE/InkCanvasForClass.CE.$VERSION-x64.zip"
-          X86_ZIP_FILE="$GITHUB_WORKSPACE/InkCanvasForClass.CE.$VERSION.zip"
+          ZIP_FILES="InkCanvasForClass.CE.$VERSION-x64.zip InkCanvasForClass.CE.$VERSION.zip InkCanvasForClass.CE.$VERSION-x64-selfcontained.zip InkCanvasForClass.CE.$VERSION-x86-selfcontained.zip"
 
           if [ "$IS_PRERELEASE" == "true" ]; then
             mkdir -p Beta
-            if [ -f "$X64_ZIP_FILE" ]; then
-              cp "$X64_ZIP_FILE" Beta/
-              git add Beta/InkCanvasForClass.CE.$VERSION-x64.zip
-            fi
-            if [ -f "$X86_ZIP_FILE" ]; then
-              cp "$X86_ZIP_FILE" Beta/
-              git add Beta/InkCanvasForClass.CE.$VERSION.zip
-            fi
+            for f in $ZIP_FILES; do
+              if [ -f "$GITHUB_WORKSPACE/$f" ]; then
+                cp "$GITHUB_WORKSPACE/$f" Beta/
+                git add "Beta/$f"
+              fi
+            done
             git commit -m "Add $VERSION PreRelease"
           else
             mkdir -p Release Beta
-            if [ -f "$X64_ZIP_FILE" ]; then
-              cp "$X64_ZIP_FILE" Release/
-              cp "$X64_ZIP_FILE" Beta/
-              git add Release/InkCanvasForClass.CE.$VERSION-x64.zip Beta/InkCanvasForClass.CE.$VERSION-x64.zip
-            fi
-            if [ -f "$X86_ZIP_FILE" ]; then
-              cp "$X86_ZIP_FILE" Release/
-              cp "$X86_ZIP_FILE" Beta/
-              git add Release/InkCanvasForClass.CE.$VERSION.zip Beta/InkCanvasForClass.CE.$VERSION.zip
-            fi
+            for f in $ZIP_FILES; do
+              if [ -f "$GITHUB_WORKSPACE/$f" ]; then
+                cp "$GITHUB_WORKSPACE/$f" Release/
+                cp "$GITHUB_WORKSPACE/$f" Beta/
+                git add "Release/$f" "Beta/$f"
+              fi
+            done
             git commit -m "Add $VERSION Release"
           fi
           git push origin main
@@ -819,8 +770,7 @@ jobs:
           draft: false
           prerelease: ${{ needs.prepare.outputs.is_prerelease == 'true' }}
           files: |
-            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}-x64.zip
-            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip
+            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}*.zip
           fail_on_unmatched_files: false
           repository: "InkCanvasForClass/community-beta"
           token: ${{ steps.octo-sts-beta.outputs.token }}
