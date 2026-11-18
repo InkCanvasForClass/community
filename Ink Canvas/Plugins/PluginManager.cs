@@ -2311,6 +2311,18 @@ namespace Ink_Canvas.Plugins
 
             protected override Assembly Load(AssemblyName assemblyName)
             {
+                // 0. 插件 API（InkCanvas.PluginSdk）必须复用宿主已加载的那一份实例。
+                //    Costura 会把 SDK 内嵌进主程序并用 Assembly.Load(byte[]) 加载到独立 ALC；
+                //    若这里再按名称从 app 目录解析，就会得到第二份 SDK 副本，插件的 PluginBase
+                //    与宿主 IPlugin 变成两个程序集里的类型，FindPluginEntrance 会误判为
+                //    “No plugin entrance class found in assembly”。
+                var hostPluginApi = typeof(IPlugin).Assembly;
+                if (!string.IsNullOrEmpty(assemblyName.Name) &&
+                    string.Equals(assemblyName.Name, hostPluginApi.GetName().Name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return hostPluginApi;
+                }
+
                 // 1. 尝试从依赖的插件加载上下文中查找
                 if (_info?.Manifest?.Dependencies != null && _allContexts != null)
                 {
