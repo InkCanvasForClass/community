@@ -175,7 +175,7 @@
     <value>更新通道</value>
   </data>
   <data name="UpdateChannelHint" xml:space="preserve">
-    <value>稳定版提供可靠更新，预览版提供新功能体验同时拥有较 Beta 版版更强的稳定性，测试版提供新功能抢先体验</value>
+    <value>稳定版提供可靠更新，预览版提供新功能体验同时拥有较 Beta 版本更强的稳定性，测试版提供新功能抢先体验</value>
   </data>
   <data name="UpdatePackageArchitecture" xml:space="preserve">
     <value>软件架构</value>
