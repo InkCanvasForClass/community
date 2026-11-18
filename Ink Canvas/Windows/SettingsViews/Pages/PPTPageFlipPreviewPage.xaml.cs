@@ -3,6 +3,7 @@ using Ink_Canvas.Windows.SettingsViews.Helpers;
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Interop;
 using Windows.Win32;
 using Windows.Win32.Foundation;
@@ -22,6 +23,25 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private DelayAction _sliderDelayAction = new DelayAction();
         private int _originalMainWindowExStyle;
         private bool _originalSettingsWindowTopmost;
+
+        // 内嵌预览内直接拖动翻页按钮（Issue #421 第一期 A 方案）
+        private const double PreviewDesignWidth = 1920.0;
+        private const double DragStartThreshold = 3.0;
+        private const int SideOffsetMin = -500;
+        private const int SideOffsetMax = 500;
+        private const int BottomOffsetMin = -100;
+        private const int BottomOffsetMax = 500;
+        private const int SnapToZeroThreshold = 10;
+        private NavDirection? _dragDirection;
+        private Point _dragStartPoint;
+        private int _dragStartOffset;
+        private bool _isDragging;
+        private bool _dragWritesGlobal;
+        private bool _isSyncingDrag;
+        private bool _positionSettingsDirty;
+        private UIElement _dragMouseCapture;
+        private UIElement _dragTouchCapture;
+        private System.Windows.Input.TouchDevice _dragTouchDevice;
 
         public PPTPageFlipPreviewPage()
         {
@@ -115,6 +135,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
+            EndPreviewDrag();
+
             var settingsWindow = Window.GetWindow(this) as SettingsWindow;
             if (settingsWindow != null)
             {
@@ -156,11 +178,23 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             }
 
             ClosePreviewWindow();
+            SaveDraggedPositionSettings();
         }
 
         private void SettingsWindow_Closed(object sender, EventArgs e)
         {
             ClosePreviewWindow();
+            SaveDraggedPositionSettings();
+        }
+
+        /// <summary>
+        /// 内嵌预览拖动只更新内存中的偏移字段，离开页面时统一落盘。
+        /// </summary>
+        private void SaveDraggedPositionSettings()
+        {
+            if (!_positionSettingsDirty) return;
+            _positionSettingsDirty = false;
+            SettingsManager.SaveSettingsToFile();
         }
 
         private void BlockPreviewInput(object sender, RoutedEventArgs e)
@@ -592,13 +626,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             PreviewLB.SetBarScale(lbScale);
             PreviewRB.SetBarScale(rbScale);
 
-            // 2. Set margins — 内嵌预览不应用位置偏移，仅使用基础边距（按预览宽度比例缩放）
-            double viewScale = (PreviewCanvas.ActualWidth > 0) ? PreviewCanvas.ActualWidth / 1600.0 : 1.0;
+            // 有效偏移：位置 i 若 UseGlobalSettings=true，则采用全局字段值，否则采用位置自身字段值。
+            // 侧边按钮只应用垂直偏移，底部按钮只应用水平偏移（与运行时 PPTUIManager 折算一致）。
+            int lsOffset = ppt.PPTLSUseGlobalSettings ? ppt.PPTGlobalSideButtonPosition : ppt.PPTLSButtonPosition;
+            int rsOffset = ppt.PPTRSUseGlobalSettings ? ppt.PPTGlobalSideButtonPosition : ppt.PPTRSButtonPosition;
+            int lbOffset = ppt.PPTLBUseGlobalSettings ? ppt.PPTGlobalBottomButtonPosition : ppt.PPTLBButtonPosition;
+            int rbOffset = ppt.PPTRBUseGlobalSettings ? ppt.PPTGlobalBottomButtonPosition : ppt.PPTRBButtonPosition;
 
-            PreviewLSBorder.Margin = new Thickness(6 * viewScale, 0, 0, 0);
-            PreviewRSBorder.Margin = new Thickness(0, 0, 6 * viewScale, 0);
-            PreviewLBBorder.Margin = new Thickness(6 * viewScale, 0, 0, 6 * viewScale);
-            PreviewRBBorder.Margin = new Thickness(0, 0, 6 * viewScale, 6 * viewScale);
+            // 2. Set margins — 基础边距按预览宽度比例缩放，位置偏移按 1920 设计宽度折算
+            double viewScale = (PreviewCanvas.ActualWidth > 0) ? PreviewCanvas.ActualWidth / 1600.0 : 1.0;
+            double offsetScale = (PreviewCanvas.ActualWidth > 0) ? PreviewCanvas.ActualWidth / PreviewDesignWidth : 0.0;
+
+            PreviewLSBorder.Margin = new Thickness(6 * viewScale, 0, 0, lsOffset * 2 * offsetScale);
+            PreviewRSBorder.Margin = new Thickness(0, 0, 6 * viewScale, rsOffset * 2 * offsetScale);
+            PreviewLBBorder.Margin = new Thickness(6 * viewScale + lbOffset * offsetScale, 0, 0, 6 * viewScale);
+            PreviewRBBorder.Margin = new Thickness(0, 0, 6 * viewScale + rbOffset * offsetScale, 6 * viewScale);
 
             // 3. Set enabled/disabled visibility (UseGlobalSettings 的位由 PPTGlobalButtonEnabled 决定)
             string displayOption = ppt.PPTButtonsDisplayOption.ToString("D4");
@@ -639,24 +681,235 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             PreviewRB.ApplyShadowSettings(ppt);
         }
 
-        private void PreviewLS_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void PreviewLS_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+            => BeginMouseDrag(NavDirection.LeftSide, sender, e);
+
+        private void PreviewRS_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+            => BeginMouseDrag(NavDirection.RightSide, sender, e);
+
+        private void PreviewLB_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+            => BeginMouseDrag(NavDirection.LeftBottom, sender, e);
+
+        private void PreviewRB_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+            => BeginMouseDrag(NavDirection.RightBottom, sender, e);
+
+        private void BeginMouseDrag(NavDirection direction, object sender, MouseButtonEventArgs e)
         {
-            TabControlPositionSelect.SelectedIndex = 1; // 左侧
+            if (!BeginPreviewDrag(direction, e.GetPosition(PreviewCanvas))) return;
+            _dragMouseCapture = (UIElement)sender;
+            _dragMouseCapture.CaptureMouse();
+            e.Handled = true;
         }
 
-        private void PreviewRS_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void PreviewButton_MouseMove(object sender, MouseEventArgs e)
         {
-            TabControlPositionSelect.SelectedIndex = 2; // 右侧
+            if (_dragDirection == null) return;
+            if (e.LeftButton != MouseButtonState.Pressed)
+            {
+                EndPreviewDrag();
+                return;
+            }
+
+            ProcessPreviewDrag(e.GetPosition(PreviewCanvas));
+            e.Handled = true;
         }
 
-        private void PreviewLB_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void PreviewButton_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            TabControlPositionSelect.SelectedIndex = 3; // 左下
+            if (_dragDirection == null) return;
+            var direction = _dragDirection.Value;
+            bool wasDragging = _isDragging;
+            EndPreviewDrag();
+
+            // 未发生拖动时保留原有点击切换标签的行为（从全局页点击则切到对应位置页）
+            if (!wasDragging && IsGlobalTabSelected)
+                TabControlPositionSelect.SelectedIndex = GetDirectionIndex(direction) + 1;
+
+            e.Handled = true;
         }
 
-        private void PreviewRB_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void PreviewButton_TouchDown(object sender, TouchEventArgs e)
         {
-            TabControlPositionSelect.SelectedIndex = 4; // 右下
+            if (!BeginPreviewDrag(GetDirectionFromSender(sender), e.GetTouchPoint(PreviewCanvas).Position)) return;
+            _dragTouchCapture = (UIElement)sender;
+            _dragTouchDevice = e.TouchDevice;
+            _dragTouchCapture.CaptureTouch(e.TouchDevice);
+            e.Handled = true;
+        }
+
+        private void PreviewButton_TouchMove(object sender, TouchEventArgs e)
+        {
+            if (_dragDirection == null || e.TouchDevice != _dragTouchDevice) return;
+            ProcessPreviewDrag(e.GetTouchPoint(PreviewCanvas).Position);
+            e.Handled = true;
+        }
+
+        private void PreviewButton_TouchUp(object sender, TouchEventArgs e)
+        {
+            if (_dragDirection == null || e.TouchDevice != _dragTouchDevice) return;
+            var direction = _dragDirection.Value;
+            bool wasDragging = _isDragging;
+            EndPreviewDrag();
+
+            if (!wasDragging && IsGlobalTabSelected)
+                TabControlPositionSelect.SelectedIndex = GetDirectionIndex(direction) + 1;
+
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// 开始拖动：需要写入哪个偏移字段由该位置的「使用全局设置」决定；
+        /// 若当前在全局页但目标位置使用独立设置，则切到该位置页以正确显示滑块。
+        /// </summary>
+        private bool BeginPreviewDrag(NavDirection direction, Point position)
+        {
+            var ppt = SettingsManager.Settings.PowerPointSettings;
+            int index = GetDirectionIndex(direction);
+
+            if (!IsGlobalTabSelected && TabControlPositionSelect.SelectedIndex != index + 1)
+            {
+                TabControlPositionSelect.SelectedIndex = index + 1;
+            }
+
+            bool useGlobal = GetUseGlobalSettings(index, ppt);
+            if (IsGlobalTabSelected && !useGlobal)
+            {
+                TabControlPositionSelect.SelectedIndex = index + 1;
+            }
+
+            _dragDirection = direction;
+            _dragStartPoint = position;
+            _dragStartOffset = useGlobal
+                ? (IsSideDirection(direction) ? ppt.PPTGlobalSideButtonPosition : ppt.PPTGlobalBottomButtonPosition)
+                : GetPositionOffset(index, ppt);
+            _dragWritesGlobal = useGlobal;
+            _isDragging = false;
+            return true;
+        }
+
+        private void ProcessPreviewDrag(Point position)
+        {
+            if (_dragDirection == null) return;
+
+            double dx = position.X - _dragStartPoint.X;
+            double dy = _dragStartPoint.Y - position.Y;
+
+            if (!_isDragging)
+            {
+                if (Math.Abs(dx) < DragStartThreshold && Math.Abs(dy) < DragStartThreshold) return;
+                _isDragging = true;
+            }
+
+            double offsetScale = PreviewCanvas.ActualWidth > 0
+                ? PreviewCanvas.ActualWidth / PreviewDesignWidth
+                : 0.0;
+            if (offsetScale <= 0) return;
+
+            int offset;
+            switch (_dragDirection.Value)
+            {
+                case NavDirection.LeftSide:
+                case NavDirection.RightSide:
+                    // 侧边按钮只取垂直位移；运行时的 Margin 变化量是偏移量的 2 倍
+                    offset = _dragStartOffset + (int)Math.Round(dy / offsetScale / 2.0);
+                    break;
+                case NavDirection.LeftBottom:
+                    offset = _dragStartOffset + (int)Math.Round(dx / offsetScale);
+                    break;
+                case NavDirection.RightBottom:
+                    // 右下按钮的偏移增加表示向左移动
+                    offset = _dragStartOffset + (int)Math.Round(-dx / offsetScale);
+                    break;
+                default:
+                    return;
+            }
+
+            ApplyDraggedOffset(_dragDirection.Value, NormalizeDraggedOffset(_dragDirection.Value, offset));
+        }
+
+        private void ApplyDraggedOffset(NavDirection direction, int offset)
+        {
+            var ppt = SettingsManager.Settings.PowerPointSettings;
+            int index = GetDirectionIndex(direction);
+            bool isSide = IsSideDirection(direction);
+
+            if (_dragWritesGlobal)
+            {
+                if (isSide) ppt.PPTGlobalSideButtonPosition = offset;
+                else ppt.PPTGlobalBottomButtonPosition = offset;
+            }
+            else
+            {
+                SetPositionOffset(index, ppt, offset);
+            }
+
+            // 同步滑块显示，但跳过滑块自身的保存/刷新逻辑，避免递归
+            _isSyncingDrag = true;
+            try
+            {
+                if (isSide) SliderOffset.Value = offset;
+                else SliderOffsetBottom.Value = offset;
+            }
+            finally
+            {
+                _isSyncingDrag = false;
+            }
+
+            _positionSettingsDirty = true;
+
+            if (_dragWritesGlobal) SettingsActionHub.OnPPTGlobalSettingsChanged();
+            else SettingsActionHub.OnPPTButtonPositionChanged();
+            UpdatePreviews();
+        }
+
+        private void EndPreviewDrag()
+        {
+            _dragDirection = null;
+            _isDragging = false;
+
+            if (_dragMouseCapture != null)
+            {
+                if (Mouse.Captured == _dragMouseCapture) _dragMouseCapture.ReleaseMouseCapture();
+                _dragMouseCapture = null;
+            }
+
+            if (_dragTouchCapture != null && _dragTouchDevice != null)
+            {
+                _dragTouchCapture.ReleaseTouchCapture(_dragTouchDevice);
+                _dragTouchCapture = null;
+                _dragTouchDevice = null;
+            }
+        }
+
+        private static int NormalizeDraggedOffset(NavDirection direction, int offset)
+        {
+            if (Math.Abs(offset) <= SnapToZeroThreshold) return 0;
+            return IsSideDirection(direction)
+                ? Math.Clamp(offset, SideOffsetMin, SideOffsetMax)
+                : Math.Clamp(offset, BottomOffsetMin, BottomOffsetMax);
+        }
+
+        private static int GetDirectionIndex(NavDirection direction)
+        {
+            switch (direction)
+            {
+                case NavDirection.LeftSide: return 0;
+                case NavDirection.RightSide: return 1;
+                case NavDirection.LeftBottom: return 2;
+                case NavDirection.RightBottom: return 3;
+                default: return 0;
+            }
+        }
+
+        private static bool IsSideDirection(NavDirection direction)
+            => direction == NavDirection.LeftSide || direction == NavDirection.RightSide;
+
+        private NavDirection GetDirectionFromSender(object sender)
+        {
+            if (ReferenceEquals(sender, PreviewRSBorder)) return NavDirection.RightSide;
+            if (ReferenceEquals(sender, PreviewLBBorder)) return NavDirection.LeftBottom;
+            if (ReferenceEquals(sender, PreviewRBBorder)) return NavDirection.RightBottom;
+            return NavDirection.LeftSide;
         }
 
         #endregion
@@ -767,6 +1020,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void SliderOffset_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             UpdateSliderText(SliderOffset, TextBlockOffsetValue, "{0:F0}");
+            if (_isSyncingDrag) return;
             if (!_isLoaded) return;
 
             var ppt = SettingsManager.Settings.PowerPointSettings;
@@ -797,6 +1051,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void SliderOffsetBottom_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             UpdateSliderText(SliderOffsetBottom, TextBlockOffsetBottomValue, "{0:F0}");
+            if (_isSyncingDrag) return;
             if (!_isLoaded) return;
 
             var ppt = SettingsManager.Settings.PowerPointSettings;
