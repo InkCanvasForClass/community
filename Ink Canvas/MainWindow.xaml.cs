@@ -2011,6 +2011,16 @@ namespace Ink_Canvas
         private void Window_Closed(object sender, EventArgs e)
         {
             LogHelper.WriteLogToFile("[Exit] 主窗口 Closed，开始释放资源", LogHelper.LogType.Info);
+
+            // 进入不可逆的退出清理阶段：启动退出保险丝。
+            // 后续清理链（相机/PPT COM/插件卸载等）任一步卡死时，由保险丝超时强制结束进程，
+            // 否则会出现"窗口已关、任务管理器里进程仍挂着"的残留。
+            // 语言切换重载窗口时新主窗口已接管，不进入退出流程，不能装保险丝。
+            if (!_isReloadingForLanguageChange)
+            {
+                App.ArmExitFuse();
+            }
+
             RealtimeInkFrameScheduler.Clear();
             try
             {
