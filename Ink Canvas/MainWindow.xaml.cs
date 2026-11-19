@@ -1515,13 +1515,33 @@ namespace Ink_Canvas
                 PerformanceMonitorHelper.StartIfEnabled();
                 RealtimeInkPerformanceMonitor.StartIfEnabled();
             }
+            // 启动形态一步到位：读完配置就直接决定显示侧边按钮还是工具栏，
+            // 后续流程只做状态收尾，不再"先显示工具栏再收走"或"先露出侧边按钮再隐藏"。
+            bool startFolded = Settings.Startup.IsFoldAtStartup && !App.StartWithBoardMode && !App.StartWithShowMode;
+
             // 根据ToolbarPosition设置更新工具栏结构和位置
             UpdateToolbarPosition();
-            // 启动时直接设置浮动栏位置，跳过动画
+
+            // 首帧形态：收纳 → 只显示侧边按钮；不收纳 → 只显示工具栏（直接定位，不播动画）
             if (currentMode == 0)
             {
-                if (IsInPPTPresentationMode) ViewboxFloatingBarMarginAnimation(60, skipAnimation: true);
-                else ViewboxFloatingBarMarginAnimation(100, true, skipAnimation: true);
+                if (startFolded)
+                {
+                    ViewboxFloatingBar.Visibility = Visibility.Collapsed;
+                    LeftSidePanel.Visibility = Visibility.Visible;
+                    LeftSidePanel.Margin = new Thickness(-10, 0, 0, Settings.Appearance.QuickPanelBottomOffset);
+                    RightSidePanel.Margin = new Thickness(0, 0, -10, Settings.Appearance.QuickPanelBottomOffset);
+                }
+                else
+                {
+                    LeftSidePanel.Visibility = Visibility.Collapsed;
+                    ViewboxFloatingBar.Visibility = Visibility.Visible;
+                    // 先完成一次布局拿到真实宽高，再用 skipAnimation 直接定位；
+                    // 否则按估算宽度算位置，首帧会偏一段距离再滑回来。
+                    ViewboxFloatingBar.UpdateLayout();
+                    if (IsInPPTPresentationMode) ViewboxFloatingBarMarginAnimation(60, skipAnimation: true);
+                    else ViewboxFloatingBarMarginAnimation(100, true, skipAnimation: true);
+                }
             }
 
             // 默认模式沿用 1.7.19.4：通知与自动化在 Window_Loaded 中初始化。
@@ -1609,14 +1629,14 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"MainWindow | 订阅显示设置变化失败，已降级: {ex.Message}", LogHelper.LogType.Warning);
             }
             // 自动收纳到侧边栏（若通过 --board 进入白板模式或 --show 参数则跳过收纳）
-            if (Settings.Startup.IsFoldAtStartup && !App.StartWithBoardMode && !App.StartWithShowMode)
+            if (startFolded)
             {
-                FoldFloatingBar_MouseUp(new object(), null);
-                ScheduleStartupFoldAbsenceVerification();
+                // 只做状态收尾；工具栏保持隐藏，位置直接落到屏幕外（instant，不播动画）
+                _ = FoldFloatingBar(new object(), false, instant: true);
             }
             else
             {
-                UnFoldFloatingBar_MouseUp(new object(), null);
+                _ = UnFoldFloatingBar(new object());
             }
 
             // 显示快抽悬浮按钮
