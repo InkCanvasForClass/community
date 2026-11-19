@@ -66,12 +66,68 @@ namespace Ink_Canvas
         /// 仍以标准名占用互斥体。旧实例可能正处于释放窗口期，故带短重试等待抢占；
         /// 抢不到也返回互斥体对象并继续运行（交接场景旧实例即将退出），仅不做“已有实例则退出”的决策。
         /// </summary>
+        /// <summary>
+        /// 判断是否还有"同 exe 的其他实例"在运行（排除自身）。
+        /// 用于把启动/交接等待从"按设备性能猜的固定延时"改为"等旧实例真正退出"。
+        /// 注意：看门狗子进程同属此 exe，会被一并计入——交接场景本就应该等它一起退出。
+        /// </summary>
+        private static bool HasOtherInstanceOfSelf()
+        {
+            try
+            {
+                using (var self = Process.GetCurrentProcess())
+                {
+                    string name = self.ProcessName;
+                    int selfId = self.Id;
+                    foreach (var p in Process.GetProcessesByName(name))
+                    {
+                        try
+                        {
+                            if (p.Id != selfId) return true;
+                        }
+                        finally
+                        {
+                            p.Dispose();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"App | 检测其他实例失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 事件驱动等待：旧实例/同类进程退出即返回，快设备立即继续，慢设备也不会因固定延时猜短而并发启动。
+        /// </summary>
+        /// <returns>true 表示已无其他同类进程；false 表示等待超时仍有实例存活。</returns>
+        private static async Task<bool> WaitForOtherInstancesToExitAsync(int timeoutMs)
+        {
+            const int pollMs = 100;
+            var stopwatch = Stopwatch.StartNew();
+
+            while (HasOtherInstanceOfSelf())
+            {
+                if (stopwatch.ElapsedMilliseconds >= timeoutMs)
+                {
+                    LogHelper.WriteLogToFile($"App | 等待旧实例退出超时（{timeoutMs}ms），继续启动", LogHelper.LogType.Warning);
+                    return false;
+                }
+
+                await Task.Delay(pollMs);
+            }
+
+            if (stopwatch.ElapsedMilliseconds > 200)
+            {
+                LogHelper.WriteLogToFile($"App | 旧实例已退出，等待耗时 {stopwatch.ElapsedMilliseconds}ms");
+            }
+            return true;
+        }
+
         private static Mutex AcquireStandardMutexWithRetry()
         {
-            // 至多等待 ~2.5s（旧实例正常退出释放互斥体的时间窗口），超时仍继续。
-            const int maxAttempts = 25;
-            const int retryDelayMs = 100;
-
             var standardMutex = new Mutex(true, StandardMutexName, out bool acquired);
             if (acquired)
             {
@@ -79,14 +135,21 @@ namespace Ink_Canvas
                 return standardMutex;
             }
 
-            for (int attempt = 1; attempt <= maxAttempts; attempt++)
+            // 事件驱动：旧实例释放互斥体（进程退出/主动释放）后立即接管，不再按固定次数轮询。
+            // 60 秒只是"旧实例卡死"时的保险上限；正常交接在旧实例退出瞬间完成，与设备性能无关。
+            const int safetyTimeoutMs = 60_000;
+            const int waitSliceMs = 100;
+            var stopwatch = Stopwatch.StartNew();
+            int slice = 0;
+
+            while (stopwatch.ElapsedMilliseconds < safetyTimeoutMs)
             {
                 try
                 {
                     // 旧实例释放后，WaitOne 会拿到所有权；true 表示已持有。
-                    if (standardMutex.WaitOne(retryDelayMs))
+                    if (standardMutex.WaitOne(waitSliceMs))
                     {
-                        LogHelper.WriteLogToFile($"App | 等待 {attempt * retryDelayMs}ms 后占用标准单实例互斥体");
+                        LogHelper.WriteLogToFile($"App | 等待 {stopwatch.ElapsedMilliseconds}ms 后占用标准单实例互斥体");
                         return standardMutex;
                     }
                 }
@@ -96,9 +159,17 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile("App | 检测到被遗弃的互斥体，已接管标准单实例互斥体", LogHelper.LogType.Warning);
                     return standardMutex;
                 }
+
+                // 每秒确认一次是否还有同类进程：没有进程却仍抢不到，说明互斥体是别处遗留的，
+                // 不再空等，直接按交接语义继续启动。
+                if (++slice % 10 == 0 && !HasOtherInstanceOfSelf())
+                {
+                    LogHelper.WriteLogToFile("App | 无其他实例进程但互斥体仍被占用，继续启动（交接场景）", LogHelper.LogType.Warning);
+                    return standardMutex;
+                }
             }
 
-            LogHelper.WriteLogToFile("App | 等待占用标准单实例互斥体超时，继续启动（交接场景）", LogHelper.LogType.Warning);
+            LogHelper.WriteLogToFile($"App | 等待占用标准单实例互斥体超时（{safetyTimeoutMs}ms），继续启动（交接场景）", LogHelper.LogType.Warning);
             return standardMutex;
         }
 
@@ -1237,20 +1308,57 @@ namespace Ink_Canvas
             string updateMarkerFile = Path.Combine(RootPath, "update_in_progress.tmp");
             bool isUpdateInProgress = false;
 
-            // 如果是最终应用启动，立即清理更新标记文件
+            // 如果是最终应用启动：标记文件里记录了交接的更新进程 PID，
+            // 先等它真正退出（事件驱动，与设备性能无关），再清理标记文件。
+            // 原实现直接删掉标记文件、改用固定 1 秒延时兜底：慢设备上更新进程仍未退出，
+            // final-app 会被当成重复实例或抢不到互斥体，快设备则白白多等。
             if (isFinalApp)
             {
+                int handoverPid = 0;
                 try
                 {
                     if (File.Exists(updateMarkerFile))
                     {
+                        if (int.TryParse(File.ReadAllText(updateMarkerFile).Trim(), out int parsedPid) && parsedPid > 0)
+                        {
+                            handoverPid = parsedPid;
+                        }
+
                         File.Delete(updateMarkerFile);
-                        LogHelper.WriteLogToFile("App | 最终应用启动，清理更新标记文件");
+                        LogHelper.WriteLogToFile($"App | 最终应用启动，读取交接进程 PID={handoverPid} 并清理更新标记文件");
                     }
                 }
                 catch (Exception ex)
                 {
                     LogHelper.WriteLogToFile($"App | 清理更新标记文件失败: {ex.Message}", LogHelper.LogType.Warning);
+                }
+
+                if (handoverPid > 0)
+                {
+                    try
+                    {
+                        using (var handoverProcess = Process.GetProcessById(handoverPid))
+                        {
+                            LogHelper.WriteLogToFile($"App | 等待更新交接进程 {handoverPid} 退出...");
+                            if (handoverProcess.WaitForExit(15000))
+                            {
+                                LogHelper.WriteLogToFile("App | 更新交接进程已退出（互斥体交接完成）");
+                            }
+                            else
+                            {
+                                LogHelper.WriteLogToFile($"App | 等待更新交接进程 {handoverPid} 超时（15s），继续启动", LogHelper.LogType.Warning);
+                            }
+                        }
+                    }
+                    catch (ArgumentException)
+                    {
+                        // 进程不存在即已退出，这正是期望的交接完成状态
+                        LogHelper.WriteLogToFile("App | 更新交接进程已不存在（已完成退出）");
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"App | 等待更新交接进程失败: {ex.Message}", LogHelper.LogType.Warning);
+                    }
                 }
 
                 _ = Task.Run(async () =>
@@ -1446,17 +1554,10 @@ namespace Ink_Canvas
 
                     LogHelper.NewLog("Ink Canvas automatically closed");
                     IsAppExitByUser = true; // 多开时标记为用户主动退出
-                    // 写入退出信号，确保看门狗不会重启
-                    try
-                    {
-                        StartupCount.Reset();
-                        File.WriteAllText(watchdogExitSignalFile, "exit");
-                        if (watchdogProcess != null && !watchdogProcess.HasExited)
-                        {
-                            watchdogProcess.Kill();
-                        }
-                    }
-                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+                    // 停止本实例看门狗（写退出信号 + Kill + 等待其退出），
+                    // 确保看门狗先于本进程死亡，避免误判"异常退出"而拉起新实例
+                    StopWatchdog();
+                    StartupCount.Reset();
                     Environment.Exit(0);
                 }
             }
@@ -1485,8 +1586,14 @@ namespace Ink_Canvas
                 // 仅跳过“检测到已有实例则退出”的决策。
                 mutex = AcquireStandardMutexWithRetry();
 
-                // 默认模式沿用 1.7.19.4 的等待时序；优化模式保留当前短等待。
-                await Task.Delay(IsDefaultStartupMode ? 1000 : 100);
+                // 交接等待改为事件驱动：final-app 已精确等待更新进程退出；
+                // 其余交接路径（如 --skip-mutex-check）等同类进程真正消失即继续。
+                // 不再使用按启动模式猜出来的固定延时（默认 1000ms/优化 100ms）——
+                // 快设备会白白多等，慢设备又会因猜短而与旧实例并发初始化。
+                if (!isFinalApp && !isUpdateMode)
+                {
+                    await WaitForOtherInstancesToExitAsync(15000);
+                }
                 LogHelper.WriteLogToFile("App | 特殊模式等待完成，继续启动");
             }
 
@@ -1998,7 +2105,10 @@ namespace Ink_Canvas
                 try
                 {
                     var proc = Process.GetProcessById(pid);
-                    while (!proc.HasExited)
+                    // 事件驱动等待主进程退出：WaitForExit(500) 在进程终止瞬间返回，
+                    // 崩溃感知延迟从固定 2 秒降到最多 0.5 秒（重启更快），
+                    // 同时每 0.5 秒检查一次退出信号（主动退出时看门狗响应也快 4 倍）。
+                    while (!proc.WaitForExit(500))
                     {
                         // 检查退出信号文件
                         if (File.Exists(exitSignalFile))
@@ -2006,7 +2116,6 @@ namespace Ink_Canvas
                             try { File.Delete(exitSignalFile); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                             Environment.Exit(0);
                         }
-                        Thread.Sleep(2000);
                     }
 
                     // 主进程退出后再次检查退出信号，覆盖信号写入与进程退出之间的竞态。
@@ -2122,13 +2231,12 @@ namespace Ink_Canvas
 
                 if (IsAppExitByUser)
                 {
-                    // 写入退出信号文件，通知看门狗正常退出
+                    // 停止看门狗（写退出信号 + Kill + 等待其退出）：
+                    // 仅 Kill 而不等待时，看门狗可能在本进程退出后才被调度终止，
+                    // 其在退出前检测到主进程消失会按"异常退出"拉起新实例，造成退出后自动复活的残留。
+                    StopWatchdog();
+                    // 正常退出会话结束，清零崩溃重启计数
                     StartupCount.Reset();
-                    File.WriteAllText(watchdogExitSignalFile, "exit");
-                    if (watchdogProcess != null && !watchdogProcess.HasExited)
-                    {
-                        watchdogProcess.Kill();
-                    }
                 }
             }
             catch (Exception ex)

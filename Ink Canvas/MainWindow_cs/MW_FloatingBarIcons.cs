@@ -4484,7 +4484,6 @@ namespace Ink_Canvas
         public void ExitApplication(object sender, RoutedEventArgs e)
         {
             App.IsAppExitByUser = true;
-            _exitApplicationRequested = true;
             _forceCloseFromExitOrRestartButton = false;
             // 通过主窗口 Close 进入统一的 Closing 验证流程。
             // Window_Closed 中再显式关闭 Application，确保托盘和隐藏窗口一并退出。
@@ -4508,12 +4507,12 @@ namespace Ink_Canvas
                         MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.Cancel) return;
             }
 
-            Process.Start(System.Windows.Forms.Application.ExecutablePath, "-m");
-            _forceCloseFromExitOrRestartButton = true;
-            _exitApplicationRequested = true;
-            App.IsAppExitByUser = true;
-            CloseIsFromButton = true;
-            Close();
+            // 统一走 AppRestartHelper 的重启时序：先释放互斥体 → 启动并观察新实例存活 → 再退出当前实例。
+            // 原实现"先以 -m 启动新实例再 Close 旧实例"：新旧实例并存期互斥体无主、
+            // 托盘图标/全局热键/Hook 双注册竞态，旧实例退出清理慢时表现为双开残留。
+            // （CloseIsFromButton 是 static 且从不复原，原路径设置后用户后续点 X 将永远跳过二次确认。）
+            _forceCloseFromExitOrRestartButton = true; // 放行后续 Shutdown 触发的 Closing 验证
+            AppRestartHelper.RestartWithCurrentPrivileges();
         }
 
         /// <summary>
