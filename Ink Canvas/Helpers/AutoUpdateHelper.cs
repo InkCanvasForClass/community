@@ -2187,11 +2187,26 @@ namespace Ink_Canvas.Helpers
                         CreateNoWindow = false
                     };
 
-                    Process.Start(startInfo);
+                    Process updateProcess = Process.Start(startInfo);
                     LogHelper.WriteLogToFile("AutoUpdate | 新版本进程启动命令已执行");
 
-                    // 等待一小段时间确保新进程启动
-                    Thread.Sleep(2000);
+                    // 只做短确认（~500ms）取代原来的固定 2 秒等待：
+                    // 更新进程无窗口、启动后立即进入 PerformUpdate 等待旧进程退出，
+                    // 旧进程无需为它留"就绪时间"。本方法运行在旧进程 UI 线程上，
+                    // 固定睡眠会直接表现为"点退出/安装更新后界面卡住"。
+                    if (updateProcess != null)
+                    {
+                        for (int i = 0; i < 5; i++)
+                        {
+                            if (updateProcess.HasExited)
+                            {
+                                LogHelper.WriteLogToFile($"AutoUpdate | 更新进程提前退出 (ExitCode={SafeGetExitCode(updateProcess)})，旧进程将直接退出", LogHelper.LogType.Warning);
+                                break;
+                            }
+                            Thread.Sleep(100);
+                        }
+                        updateProcess.Dispose();
+                    }
 
                     // 关闭当前旧软件进程
                     LogHelper.WriteLogToFile("AutoUpdate | 关闭当前旧软件进程");
@@ -2226,6 +2241,19 @@ namespace Ink_Canvas.Helpers
                 {
                     LogHelper.WriteLogToFile($"[Update] 安装结束后恢复进程保护开关状态失败（可能残留禁用状态）: {ex.Message}", LogHelper.LogType.Info);
                 }
+            }
+        }
+
+        // 安全读取进程退出码（进程句柄可能已失效）
+        private static string SafeGetExitCode(Process process)
+        {
+            try
+            {
+                return process.HasExited ? process.ExitCode.ToString() : "running";
+            }
+            catch
+            {
+                return "unknown";
             }
         }
 
@@ -2303,8 +2331,25 @@ namespace Ink_Canvas.Helpers
                     if (oldProcessId > 0 && !string.IsNullOrEmpty(extractPath) && !string.IsNullOrEmpty(targetPath))
                     {
                         LogHelper.WriteLogToFile("AutoUpdate | 参数验证通过，启动更新任务");
-                        // 启动更新任务
-                        Task.Run(async () => await PerformUpdate(oldProcessId, extractPath, targetPath, isSilence));
+                        // 启动更新任务。更新进程以无窗口模式运行（isUpdateMode 跳过主窗口），
+                        // 无论更新成功还是失败，都必须以退出收尾：PerformUpdate 的失败分支只 return，
+                        // 若不兜底退出，无窗口的更新进程会永久残留（且持有标准互斥体，阻塞后续正常启动）。
+                        // 成功路径在 PerformUpdate 内部自行 Environment.Exit(0)，此 finally 幂等。
+                        Task.Run(async () =>
+                        {
+                            try
+                            {
+                                await PerformUpdate(oldProcessId, extractPath, targetPath, isSilence);
+                            }
+                            catch (Exception updateEx)
+                            {
+                                LogHelper.WriteLogToFile($"AutoUpdate | 更新任务异常退出: {updateEx.Message}", LogHelper.LogType.Error);
+                            }
+                            finally
+                            {
+                                Environment.Exit(0);
+                            }
+                        });
                         return true; // 返回true表示是更新模式
                     }
 
@@ -2327,41 +2372,44 @@ namespace Ink_Canvas.Helpers
             {
                 LogHelper.WriteLogToFile("AutoUpdate | 开始执行更新操作");
 
-                // 等待老进程完全退出
-                LogHelper.WriteLogToFile($"AutoUpdate | 等待老进程 {oldProcessId} 退出");
-                int waitCount = 0;
-                const int maxWaitCount = 30; // 最多等待30秒
+                // 等待老进程完全退出：事件驱动（WaitForExit 在进程终止瞬间返回），
+                // 不再按 1 秒粒度轮询。快设备秒过；慢设备（插件卸载/COM 清理耗时）由上限兜底，
+                // 不再出现"固定 30 秒猜短了就把还在正常清理的老进程强杀"的情况。
+                LogHelper.WriteLogToFile($"AutoUpdate | 等待老进程 {oldProcessId} 退出（事件驱动，上限 60 秒）");
+                bool oldProcessExited = false;
 
-                while (waitCount < maxWaitCount)
+                try
                 {
-                    try
+                    using (Process oldProcess = Process.GetProcessById(oldProcessId))
                     {
-                        Process oldProcess = Process.GetProcessById(oldProcessId);
-                        if (oldProcess.HasExited)
-                        {
-                            LogHelper.WriteLogToFile("AutoUpdate | 老进程已退出");
-                            break;
-                        }
-                        LogHelper.WriteLogToFile($"AutoUpdate | 老进程仍在运行，等待中... ({waitCount + 1}/{maxWaitCount})");
-                        Thread.Sleep(1000);
-                        waitCount++;
+                        oldProcessExited = oldProcess.WaitForExit(60000);
                     }
-                    catch (ArgumentException)
+
+                    if (oldProcessExited)
                     {
-                        // 进程不存在，说明已经退出
-                        LogHelper.WriteLogToFile("AutoUpdate | 老进程已退出（进程不存在）");
-                        break;
+                        LogHelper.WriteLogToFile("AutoUpdate | 老进程已退出");
                     }
                 }
+                catch (ArgumentException)
+                {
+                    // 进程不存在，说明已经退出
+                    LogHelper.WriteLogToFile("AutoUpdate | 老进程已退出（进程不存在）");
+                    oldProcessExited = true;
+                }
 
-                if (waitCount >= maxWaitCount)
+                if (!oldProcessExited)
                 {
                     LogHelper.WriteLogToFile("AutoUpdate | 等待老进程退出超时，尝试强制结束", LogHelper.LogType.Warning);
                     try
                     {
                         Process oldProcess = Process.GetProcessById(oldProcessId);
-                        oldProcess.Kill();
-                        Thread.Sleep(2000); // 等待进程完全结束
+                        // 必须杀整个进程树：老进程的 --watchdog 子进程在强杀路径上收不到退出信号，
+                        // 若只杀主进程，看门狗会按"异常退出"静默拉起新实例，与更新流程随后启动的
+                        // 最终应用并存，表现为更新完成后双开/退出残留。
+                        oldProcess.Kill(entireProcessTree: true);
+                        // 等待句柄真正终止后再复制文件，替代固定 Sleep(2000)：
+                        // 固定等待在进程尚未完全释放文件句柄时照样覆盖失败，在进程提前退出时又白白多等。
+                        oldProcess.WaitForExit(5000);
                     }
                     catch (Exception ex)
                     {
@@ -2473,8 +2521,22 @@ namespace Ink_Canvas.Helpers
                         Process newProcess = Process.Start(startInfo);
                         LogHelper.WriteLogToFile($"AutoUpdate | 最终应用程序启动成功，PID: {newProcess?.Id}，已标记为最终应用");
 
-                        // 等待一小段时间确保最终应用程序启动
-                        Thread.Sleep(2000);
+                        // 只做启动即崩的短确认（~500ms），不再固定 Sleep(2000)：
+                        // 最终应用会读取更新标记文件并事件驱动地等待本进程退出（最长 15 秒），
+                        // 本进程故意多活 2 秒只会拖慢更新后的启动，对交接没有额外收益。
+                        if (newProcess != null)
+                        {
+                            for (int i = 0; i < 5; i++)
+                            {
+                                if (newProcess.HasExited)
+                                {
+                                    LogHelper.WriteLogToFile($"AutoUpdate | 最终应用启动后立即退出 (ExitCode={SafeGetExitCode(newProcess)})", LogHelper.LogType.Error);
+                                    break;
+                                }
+                                Thread.Sleep(100);
+                            }
+                            newProcess.Dispose();
+                        }
 
                         // 结束当前更新进程
                         LogHelper.WriteLogToFile("AutoUpdate | 更新流程完成，结束更新进程");

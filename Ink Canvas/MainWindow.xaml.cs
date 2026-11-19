@@ -1832,8 +1832,8 @@ namespace Ink_Canvas
 
         private bool _allowCloseAfterExitVerification;
         private bool _isExitVerificationInProgress;
-        private bool _forceCloseFromExitOrRestartButton;
-        private bool _exitApplicationRequested;
+        // internal：托盘重启（App 分部类）需要以实例方式设置此标记，放行后续 Closing 验证
+        internal bool _forceCloseFromExitOrRestartButton;
 
         /// <summary>
         /// 处理主窗口的关闭流程：记录关闭事件，按需进行退出密码验证或多次确认并据此取消或允许关闭。
@@ -2098,7 +2098,10 @@ namespace Ink_Canvas
             // 检查是否有待安装的更新
             CheckPendingUpdates();
 
-            if (_exitApplicationRequested && Application.Current != null)
+            // ShutdownMode 为 OnExplicitShutdown，主窗口关闭后必须显式 Shutdown，
+            // 否则窗口全部消失但进程（连同看门狗）残留，用户再启动会被互斥体挡回（误判为重启失败）。
+            // 语言切换重载窗口时新主窗口已先 Show 并接管，此场景跳过。
+            if (Application.Current != null && !_isReloadingForLanguageChange)
             {
                 Application.Current.Shutdown();
             }

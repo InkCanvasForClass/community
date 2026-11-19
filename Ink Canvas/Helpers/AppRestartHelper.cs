@@ -25,6 +25,7 @@ namespace Ink_Canvas.Helpers
 
         public static void RestartApp(bool asAdmin)
         {
+            Process successor = null;
             try
             {
                 App.IsAppExitByUser = true;
@@ -36,25 +37,84 @@ namespace Ink_Canvas.Helpers
                 if (asAdmin)
                 {
                     var psi = new ProcessStartInfo(exePath) { UseShellExecute = true, Verb = "runas" };
-                    Process.Start(psi);
+                    successor = Process.Start(psi);
                 }
-                else
+                else if (IsRunningAsAdmin())
                 {
-                    // 当前已是管理员时，直接通过用户令牌降权启动，避免经由 explorer 中转的延迟
-                    if (IsRunningAsAdmin() && UIAccessHelper.RestartAsNormalUser())
+                    // 优先通过用户令牌直接降权启动，避免经由 explorer 中转的延迟
+                    if (UIAccessHelper.RestartAsNormalUser())
                     {
                         Application.Current.Shutdown();
                         return;
                     }
 
+                    // 降权回退：explorer 以普通用户运行，中转启动可继承普通权限。
+                    // explorer 中转拿不到目标进程句柄，无法做存活观察，只能信任启动结果。
                     Process.Start("explorer.exe", "\"" + exePath + "\"");
+                }
+                else
+                {
+                    // 普通权限直接启动：explorer.exe 中转只会增加延迟与失败面
+                    // （explorer 忙/重启中/被安全软件拦截时新实例根本起不来，表现为"点了重启软件消失"）。
+                    successor = Process.Start(new ProcessStartInfo(exePath) { UseShellExecute = true });
+                }
+
+                if (!WaitForSuccessorToSurvive(successor))
+                {
+                    // 新实例启动后立刻退出：宁可保留当前实例，也不能变成"旧进程退了、新进程没起来"。
+                    throw new InvalidOperationException("重启的新实例在启动观察期内已退出");
                 }
 
                 Application.Current.Shutdown();
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"重启应用时出错: {ex.Message}");
+                // 启动失败（UAC 被取消、新实例秒退等）：回滚退出状态并保留当前实例，
+                // 避免"已标记退出但进程未退"的半退出残留，同时让用户能感知失败原因。
+                App.IsAppExitByUser = false;
+                LogHelper.WriteLogToFile($"重启应用失败，已保留当前实例: {ex.Message}", LogHelper.LogType.Error);
+            }
+            finally
+            {
+                successor?.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// 重启就绪等待：以"新实例进入消息循环（界面就绪）"为完成条件，而不是固定时长。
+        /// 快设备通常几百毫秒内返回，慢设备可一直等到真正就绪；
+        /// 启动即崩（0xC000007b、缺 DLL 等）会在等待期间返回 false，
+        /// 此时保留旧进程，避免出现"旧进程退出、新进程未起来"的重启失败。
+        /// </summary>
+        private static bool WaitForSuccessorToSurvive(Process successor)
+        {
+            if (successor == null) return true; // 无句柄（令牌降权/explorer 中转路径）时无法观察
+
+            try
+            {
+                if (successor.HasExited) return false;
+
+                // WaitForInputIdle 在新实例创建首个窗口、进入消息循环时返回：
+                // 与设备加载速度自适应，替代"固定 1.5 秒观察期"。
+                if (successor.WaitForInputIdle(15000))
+                {
+                    return !successor.HasExited;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"重启 | 等待新实例就绪失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+
+            // 无 UI 消息循环或等待超时：退回轻量确认（启动即崩通常在数百毫秒内暴露）
+            try
+            {
+                System.Threading.Thread.Sleep(300);
+                return !successor.HasExited;
+            }
+            catch
+            {
+                return true;
             }
         }
 

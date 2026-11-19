@@ -379,39 +379,20 @@ namespace Ink_Canvas
         /// <param name="sender">事件发送者</param>
         /// <param name="e">路由事件参数</param>
         /// <remarks>
-        /// 处理重启应用程序托盘菜单项的点击事件，包括以下步骤：
-        /// 1. 获取主窗口实例
-        /// 2. 如果主窗口已加载：
-        ///    - 设置IsAppExitByUser为true，表示用户主动退出
-        ///    - 尝试启动应用程序的新实例，带延迟参数
-        ///    - 捕获并记录启动新实例时可能出现的异常
-        ///    - 关闭当前应用程序实例
+        /// 处理重启应用程序托盘菜单项的点击事件：统一走 AppRestartHelper 的重启时序
+        /// （先释放互斥体 → 启动并观察新实例存活 → 再退出当前实例）。
+        /// 原实现以 "-delay 2000" 启动新实例：该参数从未被实现，新实例启动后立即做
+        /// 单实例互斥体检查，旧实例尚未退出时会被当作"已有实例"而直接 Environment.Exit(0)，
+        /// 表现为点了托盘重启后软件直接消失（重启失败）。
         /// </remarks>
         private void RestartAppTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
             var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin != null && mainWin.IsLoaded)
             {
-                IsAppExitByUser = true;
-
-                try
-                {
-                    // 启动新实例
-                    string exePath = Process.GetCurrentProcess().MainModule.FileName;
-                    ProcessStartInfo startInfo = new ProcessStartInfo();
-                    startInfo.FileName = exePath;
-                    startInfo.UseShellExecute = true;
-
-                    // 启动进程但不等待
-                    Process.Start(new ProcessStartInfo(exePath, "-delay 2000") { UseShellExecute = true });
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.NewLog($"重启程序时出错: {ex.Message}");
-                }
-
-                // 退出当前实例
-                Current.Shutdown();
+                // 让后续 Shutdown 触发的主窗口 Closing 验证直接放行，避免二次弹确认框
+                mainWin._forceCloseFromExitOrRestartButton = true;
+                AppRestartHelper.RestartWithCurrentPrivileges();
             }
         }
 
