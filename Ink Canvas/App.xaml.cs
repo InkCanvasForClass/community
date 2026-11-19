@@ -176,6 +176,48 @@ namespace Ink_Canvas
         public static string[] StartArgs;
         public static string RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
+        private static int _exitFuseArmed;
+
+        /// <summary>
+        /// 退出保险丝：确认退出后启动后台计时，若清理链（窗口清理/插件卸载/COM 释放等）
+        /// 在限定时间内仍未完成，强制结束进程。
+        /// 用于兜底第三方插件 Dispose 卡死等"点退出后任务管理器里永远挂着一个进程"的场景。
+        /// 正常退出时进程结束会自然终止该后台线程（IsBackground=true），无需撤销。
+        /// </summary>
+        public static void ArmExitFuse(int timeoutMs = 12000)
+        {
+            if (Interlocked.Exchange(ref _exitFuseArmed, 1) != 0) return;
+
+            var thread = new Thread(() =>
+            {
+                try
+                {
+                    Thread.Sleep(timeoutMs);
+
+                    try
+                    {
+                        LogHelper.WriteLogToFile($"App | 退出清理超过 {timeoutMs}ms 未完成，强制结束进程以消除残留", LogHelper.LogType.Warning);
+                    }
+                    catch
+                    {
+                    }
+
+                    Environment.Exit(0);
+                }
+                catch
+                {
+                    // 退出期异常不再处理
+                }
+            })
+            {
+                IsBackground = true,
+                Name = "ExitFuse"
+            };
+
+            thread.Start();
+            LogHelper.WriteLogToFile($"App | 已启动退出保险丝（{timeoutMs}ms）", LogHelper.LogType.Trace);
+        }
+
         /// <summary>
         /// 从 DispatcherOperation 提取回调委托的可读方法名。
         /// WPF 内部把委托存在私有字段里，反射枚举拿；失败退回 Priority 类别。
@@ -2145,6 +2187,15 @@ namespace Ink_Canvas
 
         private void App_Exit(object sender, ExitEventArgs e)
         {
+            // 最先停止看门狗（同名 exe 的独立进程，任务管理器里看起来就是"还有一个进程"）。
+            // 原位置排在插件卸载之后：插件 Dispose 一慢或卡死，看门狗就一直活着，
+            // 表现为"点了退出但后台还剩一个同名进程"，极端情况下还会按崩溃拉起新实例。
+            if (IsAppExitByUser)
+            {
+                StopWatchdog();
+                StartupCount.Reset();
+            }
+
             // 在卸载插件前广播 AppExiting，让插件有机会清理自身资源。
             try
             {
