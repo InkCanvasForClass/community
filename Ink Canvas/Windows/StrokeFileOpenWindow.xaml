@@ -5,9 +5,13 @@
         xmlns:props="clr-namespace:Ink_Canvas.Properties"
         xmlns:local="clr-namespace:Ink_Canvas.Windows"
         Title="{x:Static props:MainWindowStrings.Main_OpenInk_Title}"
-        Width="440" SizeToContent="Height" ResizeMode="NoResize"
+        Width="560" SizeToContent="Height" ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False" Topmost="True"
+        UseLayoutRounding="True"
         ui:ThemeManager.IsThemeAware="True"
+        ui:TitleBar.ExtendViewIntoTitleBar="True"
+        ui:TitleBar.Height="40"
+        ui:WindowHelper.SystemBackdropType="None"
         ui:WindowHelper.UseModernWindowStyle="True"
         ui:WindowHelper.CornerStyle="Round">
     <Window.Resources>
@@ -17,58 +21,149 @@
             </ResourceDictionary.MergedDictionaries>
             <Style x:Key="DestinationButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
                 <Setter Property="Padding" Value="16,12" />
-                <Setter Property="MinHeight" Value="72" />
+                <Setter Property="MinHeight" Value="60" />
                 <Setter Property="Margin" Value="0,0,0,10" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="ui:ControlHelper.CornerRadius" Value="8" />
+                <Setter Property="BorderThickness" Value="2" />
+                <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseLowBrush}" />
+                <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" />
+                <Style.Triggers>
+                    <Trigger Property="IsKeyboardFocused" Value="True">
+                        <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundAccentBrush}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <Style x:Key="DestinationIconBackground" TargetType="Border">
+                <Setter Property="Width" Value="40" />
+                <Setter Property="Height" Value="40" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundAccentBrush}" />
+            </Style>
+            <Style x:Key="DestinationDescription" TargetType="TextBlock" BasedOn="{StaticResource BodyTextBlockStyle}">
+                <Setter Property="TextWrapping" Value="Wrap" />
+                <Setter Property="Margin" Value="0,4,0,0" />
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
             </Style>
         </ResourceDictionary>
     </Window.Resources>
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Margin="24,18,24,20">
-            <TextBlock Text="{x:Static props:MainWindowStrings.Main_OpenInk_ChooseDestination}"
-                       FontSize="22" FontWeight="SemiBold" TextWrapping="Wrap" />
-            <TextBlock x:Name="FileNameText" Margin="0,8,0,20" TextTrimming="CharacterEllipsis"
-                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
-            <Button x:Name="ScreenButton" Style="{StaticResource DestinationButton}" Click="Destination_Click"
-                    Tag="{x:Static local:StrokeFileOpenTarget.Screen}"
-                    AutomationProperties.Name="{x:Static props:MainWindowStrings.Main_OpenInk_Screen}">
-                <Grid>
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="36" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.InkingTool}" FontSize="24" VerticalAlignment="Center" />
-                    <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                        <TextBlock Text="{x:Static props:MainWindowStrings.Main_OpenInk_Screen}" FontSize="16" FontWeight="SemiBold" />
-                        <TextBlock Text="{x:Static props:MainWindowStrings.Main_OpenInk_ScreenDescription}" TextWrapping="Wrap" Margin="0,4,0,0" />
-                    </StackPanel>
-                </Grid>
-            </Button>
-            <Button x:Name="WhiteboardButton" Style="{StaticResource DestinationButton}" Click="Destination_Click"
-                    Tag="{x:Static local:StrokeFileOpenTarget.Whiteboard}"
-                    AutomationProperties.Name="{x:Static props:MainWindowStrings.Main_OpenInk_Whiteboard}">
-                <Grid>
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="36" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Edit}" FontSize="24" VerticalAlignment="Center" />
-                    <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                        <TextBlock Text="{x:Static props:MainWindowStrings.Main_OpenInk_Whiteboard}" FontSize="16" FontWeight="SemiBold" />
-                        <TextBlock Text="{x:Static props:MainWindowStrings.Main_OpenInk_WhiteboardDescription}" TextWrapping="Wrap" Margin="0,4,0,0" />
-                    </StackPanel>
-                </Grid>
-            </Button>
-            <Button x:Name="BoothButton" Style="{StaticResource DestinationButton}" Click="Destination_Click"
-                    Tag="{x:Static local:StrokeFileOpenTarget.Booth}"
-                    AutomationProperties.Name="{x:Static props:MainWindowStrings.Main_OpenInk_Booth}">
-                <Grid>
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="36" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Video}" FontSize="24" VerticalAlignment="Center" />
-                    <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                        <TextBlock Text="{x:Static props:MainWindowStrings.Main_OpenInk_Booth}" FontSize="16" FontWeight="SemiBold" />
-                        <TextBlock Text="{x:Static props:MainWindowStrings.Main_OpenInk_BoothDescription}" TextWrapping="Wrap" Margin="0,4,0,0" />
-                    </StackPanel>
-                </Grid>
-            </Button>
-            <TextBlock Text="{x:Static props:MainWindowStrings.Main_OpenInk_AppendHint}" TextWrapping="Wrap"
-                       Margin="0,6,0,18" Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+    <!-- 沿用 OobePresetWindow 的标题栏、说明区、卡片列表和固定页脚。 -->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Border Grid.Row="0" Height="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=(ui:TitleBar.Height)}"
+                Background="Transparent">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Image Source="/Resources/icc.ico" Width="18" Height="18" Margin="16,0,12,0"
+                       RenderOptions.BitmapScalingMode="HighQuality" />
+                <TextBlock Grid.Column="1" Text="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=Title}"
+                           VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                <Rectangle Grid.Column="2"
+                           Width="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=(ui:TitleBar.SystemOverlayRightInset)}" />
+            </Grid>
+        </Border>
+        <Border Grid.Row="1" Padding="24,12" BorderThickness="0,0,0,1"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#1F3B82F6" Offset="0" />
+                    <GradientStop Color="#0A10B981" Offset="1" />
+                </LinearGradientBrush>
+            </Border.Background>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Width="44" Height="44" CornerRadius="10" Margin="0,0,14,0"
+                        Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}">
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.OpenFile}" FontSize="22"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="{x:Static props:MainWindowStrings.Main_OpenInk_ChooseDestination}"
+                               Style="{DynamicResource TitleTextBlockStyle}" TextWrapping="Wrap" />
+                    <TextBlock x:Name="FileNameText" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"
+                               Style="{DynamicResource BodyTextBlockStyle}"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      PanningMode="VerticalFirst" Padding="24,8,24,6">
+            <StackPanel>
+                <Button x:Name="ScreenButton" Style="{StaticResource DestinationButton}" Click="Destination_Click"
+                        Tag="{x:Static local:StrokeFileOpenTarget.Screen}"
+                        AutomationProperties.Name="{x:Static props:MainWindowStrings.Main_OpenInk_Screen}" HorizontalAlignment="Stretch" Margin="0,0,0,10" HorizontalContentAlignment="Stretch">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource DestinationIconBackground}">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.InkingTool}" FontSize="20" Foreground="White"
+                                         HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="{x:Static props:MainWindowStrings.Main_OpenInk_Screen}"
+                                       Style="{DynamicResource BodyStrongTextBlockStyle}" FontSize="16" TextWrapping="Wrap" />
+                            <TextBlock Text="{x:Static props:MainWindowStrings.Main_OpenInk_ScreenDescription}"
+                                       Style="{StaticResource DestinationDescription}" />
+                        </StackPanel>
+                    </Grid>
+                </Button>
+                <Button x:Name="WhiteboardButton" Style="{StaticResource DestinationButton}" Click="Destination_Click"
+                        Tag="{x:Static local:StrokeFileOpenTarget.Whiteboard}"
+                        AutomationProperties.Name="{x:Static props:MainWindowStrings.Main_OpenInk_Whiteboard}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource DestinationIconBackground}">
+                            <Image Source="/Resources/new-icons/blackboard-light.png" Width="24" Height="24"
+                                   RenderOptions.BitmapScalingMode="HighQuality" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="{x:Static props:MainWindowStrings.Main_OpenInk_Whiteboard}"
+                                       Style="{DynamicResource BodyStrongTextBlockStyle}" FontSize="16" TextWrapping="Wrap" />
+                            <TextBlock Text="{x:Static props:MainWindowStrings.Main_OpenInk_WhiteboardDescription}"
+                                       Style="{StaticResource DestinationDescription}" />
+                        </StackPanel>
+                    </Grid>
+                </Button>
+                <Button x:Name="BoothButton" Style="{StaticResource DestinationButton}" Click="Destination_Click"
+                        Tag="{x:Static local:StrokeFileOpenTarget.Booth}"
+                        AutomationProperties.Name="{x:Static props:MainWindowStrings.Main_OpenInk_Booth}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource DestinationIconBackground}">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Camera}" FontSize="20" Foreground="White"
+                                         HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="{x:Static props:MainWindowStrings.Main_OpenInk_Booth}"
+                                       Style="{DynamicResource BodyStrongTextBlockStyle}" FontSize="16" TextWrapping="Wrap" />
+                            <TextBlock Text="{x:Static props:MainWindowStrings.Main_OpenInk_BoothDescription}"
+                                       Style="{StaticResource DestinationDescription}" />
+                        </StackPanel>
+                    </Grid>
+                </Button>
+                <TextBlock Text="{x:Static props:MainWindowStrings.Main_OpenInk_AppendHint}" TextWrapping="Wrap"
+                           Style="{DynamicResource BodyTextBlockStyle}" Margin="3,4,0,0"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+        </ScrollViewer>
+        <Border Grid.Row="3" Padding="24,12,24,8" BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
             <Button x:Name="CancelButton" Content="{x:Static props:MainWindowStrings.Main_OpenInk_Cancel}"
-                    IsCancel="True" MinWidth="88" HorizontalAlignment="Right" />
-        </StackPanel>
-    </ScrollViewer>
+                    IsCancel="True" MinWidth="96" MinHeight="40" Padding="16,8" HorizontalAlignment="Right" />
+        </Border>
+    </Grid>
 </Window>

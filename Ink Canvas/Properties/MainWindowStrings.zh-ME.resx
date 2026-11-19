@@ -755,31 +755,31 @@
     <value>屏幕批注</value>
   </data>
   <data name="Main_OpenInk_ScreenDescription" xml:space="preserve">
-    <value>在屏幕上继续批注</value>
+    <value>屏幕上面继续写</value>
   </data>
   <data name="Main_OpenInk_Whiteboard" xml:space="preserve">
     <value>白板</value>
   </data>
   <data name="Main_OpenInk_WhiteboardDescription" xml:space="preserve">
-    <value>添加到当前白板页面</value>
+    <value>白板里面继续写</value>
   </data>
   <data name="Main_OpenInk_Booth" xml:space="preserve">
     <value>展台</value>
   </data>
   <data name="Main_OpenInk_BoothDescription" xml:space="preserve">
-    <value>叠加到当前照片或实时画面</value>
+    <value>展台打开继续写</value>
   </data>
   <data name="Main_OpenInk_AppendHint" xml:space="preserve">
-    <value>文件内容将添加到当前页面，可整体撤销。</value>
+    <value>点错了可以撤销，没事寄不了</value>
   </data>
   <data name="Main_OpenInk_Cancel" xml:space="preserve">
-    <value>取消</value>
+    <value>溜了溜了</value>
   </data>
   <data name="Main_OpenInk_Empty" xml:space="preserve">
-    <value>此文件不包含可导入的内容。</value>
+    <value>这文件是个啥，空的？</value>
   </data>
   <data name="Main_OpenInk_ModeBusy" xml:space="preserve">
-    <value>正在切换模式，请稍后重新打开文件。</value>
+    <value>换模式ing，客官稍后重新打开一</value>
   </data>
   <data name="Main_OpenInk_PluginConflict" xml:space="preserve">
     <value>当前页面已有插件“{0}”的内容，无法安全合并。请在空白页面打开此文件。</value>
