@@ -445,6 +445,17 @@ namespace Ink_Canvas
                 {
                     UpdateQuickColorPaletteIndicator(inkCanvas.DefaultDrawingAttributes.Color);
                 }), System.Windows.Threading.DispatcherPriority.Loaded);
+
+                // 折叠态保护：插件延迟加载会在启动折叠之后触发本方法，
+                // 重建浮动栏会让已折叠的位置失效（工具栏被拉回屏幕内，直到启动校验才被纠正，
+                // 用户看到的就是"启动后工具栏赖在屏幕上几秒才收起"）。
+                // 重建完成后如果仍处于折叠状态，立即重新应用折叠位置（无动画，用户不可见）。
+                // 注：ApplyCompactFloatingBarMode → ApplyRawFloatingBarScale 内部也有同样保护。
+                if (ReapplyFoldPositionIfFolded())
+                {
+                    LogHelper.WriteLogToFile("MW_Toolbar: 重建后已恢复折叠位置", LogHelper.LogType.Info);
+                }
+
                 LogHelper.WriteLogToFile("MW_Toolbar: RebuildToolbar 完成", LogHelper.LogType.Info);
             }
             catch (Exception ex)
@@ -497,6 +508,12 @@ namespace Ink_Canvas
             pointPPT = new Point(-1, -1);
             ViewboxFloatingBarScaleTransform.ScaleX = scale;
             ViewboxFloatingBarScaleTransform.ScaleY = scale;
+
+            // 折叠态下不执行展开居中：本方法在启动/重建流程中会被多次调用，
+            // 若无条件调到 ViewboxFloatingBarMarginAnimation(100)，会把已折叠的工具栏
+            // 拉回屏幕内（折叠标志保持 true，但工具栏可见——"自动收纳失效"的直接原因）。
+            if (ReapplyFoldPositionIfFolded()) return;
+
             if (IsInPPTPresentationMode)
                 ViewboxFloatingBarMarginAnimation(60);
             else

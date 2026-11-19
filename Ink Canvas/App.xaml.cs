@@ -182,6 +182,33 @@ namespace Ink_Canvas
         private static int _exitFuseArmed;
 
         /// <summary>
+        /// 删除通知区域图标。TaskbarIcon 只有显式 Dispose 才会向 Shell 发送 NIM_DELETE，
+        /// 否则进程退出后图标会残留在通知区域（幽灵图标），鼠标划过才消失。
+        /// 供正常退出（App_Exit）与不经过 Application.Exit 的强制退出路径共用。
+        /// </summary>
+        internal static void DisposeTrayIconSafely()
+        {
+            try
+            {
+                if (Current is App app && app._taskbar != null)
+                {
+                    app._taskbar.Dispose();
+                    app._taskbar = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                try
+                {
+                    LogHelper.WriteLogToFile($"释放托盘图标失败: {ex.Message}", LogHelper.LogType.Warning);
+                }
+                catch
+                {
+                }
+            }
+        }
+
+        /// <summary>
         /// 退出保险丝：确认退出后启动后台计时，若清理链（窗口清理/插件卸载/COM 释放等）
         /// 在限定时间内仍未完成，强制结束进程。
         /// 用于兜底第三方插件 Dispose 卡死等"点退出后任务管理器里永远挂着一个进程"的场景。
@@ -200,6 +227,17 @@ namespace Ink_Canvas
                     try
                     {
                         LogHelper.WriteLogToFile($"App | 退出清理超过 {timeoutMs}ms 未完成，强制结束进程以消除残留", LogHelper.LogType.Warning);
+                    }
+                    catch
+                    {
+                    }
+
+                    // 强制退出前尽力删除托盘图标：先经 Dispatcher 到 UI 线程，
+                    // 带 1s 超时——UI 线程本身就是可能卡死的元凶，不能在这里再次无限等待。
+                    try
+                    {
+                        var disposeOp = Current?.Dispatcher.InvokeAsync(new Action(DisposeTrayIconSafely));
+                        disposeOp?.Task?.Wait(TimeSpan.FromSeconds(1));
                     }
                     catch
                     {
@@ -2210,6 +2248,8 @@ namespace Ink_Canvas
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
                 StartupCount.Reset();
+                // 强制退出不经过 Application.Exit，需显式删除托盘图标，避免留下幽灵图标
+                DisposeTrayIconSafely();
                 Environment.Exit(1);
                 return;
             }
@@ -2218,6 +2258,9 @@ namespace Ink_Canvas
             {
                 // 通知并停止看门狗，防止看门狗检测到进程退出后二次触发重启。
                 StopWatchdog();
+
+                // 重启前删除托盘图标，新实例会创建自己的图标；不删会残留旧图标
+                DisposeTrayIconSafely();
 
                 string exePath = Process.GetCurrentProcess().MainModule.FileName;
                 Process.Start(exePath);
@@ -2320,6 +2363,11 @@ namespace Ink_Canvas
                 StopWatchdog();
                 StartupCount.Reset();
             }
+
+            // 删除通知区域图标：TaskbarIcon 只有显式 Dispose 才会向 Shell 发送 NIM_DELETE，
+            // 否则进程退出后图标残留在通知区域（幽灵图标），鼠标划过才消失。
+            // 放在清理链最前面，保证插件卸载等任何后续步骤变慢都不影响图标立即消失。
+            DisposeTrayIconSafely();
 
             // 在卸载插件前广播 AppExiting，让插件有机会清理自身资源。
             try

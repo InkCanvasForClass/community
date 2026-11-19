@@ -2715,7 +2715,20 @@ namespace Ink_Canvas
         /// <param name="MarginFromEdge">边缘边距</param>
         /// <param name="PosXCaculatedWithTaskbarHeight">是否考虑任务栏高度计算位置</param>
         /// <param name="skipAnimation">是否跳过动画直接定位（用于启动时快速恢复位置）</param>
-        public async void ViewboxFloatingBarMarginAnimation(int MarginFromEdge,
+        public void ViewboxFloatingBarMarginAnimation(int MarginFromEdge,
+            bool PosXCaculatedWithTaskbarHeight = false, bool skipAnimation = false)
+        {
+            _ = ViewboxFloatingBarMarginAnimationAsync(MarginFromEdge, PosXCaculatedWithTaskbarHeight, skipAnimation);
+        }
+
+        private int _marginAnimationVersion;
+
+        /// <summary>
+        /// 可等待版本：动画与最终 Margin 落地后任务才完成。
+        /// 需要"位置生效后再做后续动作"的调用方（如折叠后自检）应 await 本方法，
+        /// 而不是用固定延时猜测动画是否播完。
+        /// </summary>
+        internal async Task ViewboxFloatingBarMarginAnimationAsync(int MarginFromEdge,
             bool PosXCaculatedWithTaskbarHeight = false, bool skipAnimation = false)
         {
             if (currentMode == 1)
@@ -2725,22 +2738,44 @@ namespace Ink_Canvas
 
             if (MarginFromEdge == 60) MarginFromEdge = 55;
 
+            // 版本号：后发起的调用获胜，旧调用在延时结束后发现已被取代则放弃写值。
+            // 启动早期"展开居中"（HideSubPanels 尾部）与"启动收纳折叠"会并发调用本方法，
+            // 二者共享 pos 字段——没有版本控制时，先算出的展开位置会在 200ms 后
+            // 覆盖后算出的折叠位置，表现为"折叠标志已置位但工具栏仍停在屏幕内"。
+            int myVersion = Interlocked.Increment(ref _marginAnimationVersion);
+
+            Point target = default;
             await Dispatcher.InvokeAsync(() =>
             {
                 if (skipAnimation)
                 {
                     ViewboxFloatingBarMarginAnimationCore(MarginFromEdge, PosXCaculatedWithTaskbarHeight, false);
-                    return;
+                }
+                else
+                {
+                    ViewboxFloatingBarMarginAnimationCore(MarginFromEdge, PosXCaculatedWithTaskbarHeight, true);
                 }
 
-                ViewboxFloatingBarMarginAnimationCore(MarginFromEdge, PosXCaculatedWithTaskbarHeight, true);
+                // 在 UI 线程内立即快照本次计算的位置（Core 内部写入共享字段 pos）
+                target = new Point(pos.X, pos.Y);
             });
 
-            await Task.Delay(skipAnimation ? 0 : 200);
+            if (!skipAnimation)
+            {
+                // 等动画层完成：动画时长 0.35s，这里等播放到写最终 Margin 的时机。
+                // 传 0 时 skipAnimation 路径立即返回，不引入等待。
+                await Task.Delay(200);
+            }
+
+            if (myVersion != Volatile.Read(ref _marginAnimationVersion))
+            {
+                // 已被更新的位置操作取代：放弃写值，交给最新一次调用决定最终位置
+                return;
+            }
 
             await Dispatcher.InvokeAsync(() =>
             {
-                ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
+                ViewboxFloatingBar.Margin = new Thickness(target.X, target.Y, -2000, -200);
                 ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
                 isViewboxFloatingBarMarginAnimationRunning = false;
                 if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
@@ -3550,8 +3585,21 @@ namespace Ink_Canvas
 
             // 注意：快捷调色盘的可见性现在完全由工具栏规则集管理，不需要手动设置
 
-            if (!isFloatingBarFolded)
+            // 折叠态下不执行居中：启动初始化会以 (null, null) 程序化触发一次"切鼠标"，
+            // 此时折叠动画可能尚未落地——若在这里发起展开居中，会把折叠位置覆盖掉
+            // （折叠标志保持 true，但工具栏被拉回屏幕内）。
+            // 但用户真实点击图标（sender != null）却仍被折叠标志拦下，只可能是标志与
+            // 实际状态不一致（工具栏明明在屏幕上却停着不居中），此时照常居中修复位置。
+            bool userInitiated = sender != null;
+            if (!isFloatingBarFolded || (userInitiated && !IsFloatingBarUiAbsentFromScreens()))
             {
+                if (userInitiated && isFloatingBarFolded)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"[Toolbar] 折叠标志与实际状态不一致（工具栏仍在屏幕上），重新居中: margin=[{ViewboxFloatingBar?.Margin}]",
+                        LogHelper.LogType.Warning);
+                }
+
                 HideSubPanels("cursor", true);
                 await Task.Delay(50);
 

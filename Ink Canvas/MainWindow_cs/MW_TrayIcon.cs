@@ -1,4 +1,4 @@
-using H.NotifyIcon;
+﻿using H.NotifyIcon;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using iNKORE.UI.WPF.Controls;
@@ -23,6 +23,12 @@ namespace Ink_Canvas
         private const int TrayTemporaryShowMinutes = 2;
 
         private DispatcherTimer _trayTemporaryShowTimer;
+
+        // 实际弹出的托盘菜单实例（SysTrayMenu 是 x:Shared="false"，不能靠资源查找拿实例）
+        private ContextMenu _activeTrayMenu;
+
+        // 菜单打开期间的低级鼠标钩子：点菜单以外的地方收起菜单（无焦点模式下弹窗拿不到捕获）
+        private TrayMenuDismissHook _trayMenuDismissHook;
 
         private bool _trayTemporaryShowRestoreHideChecked;
 
@@ -157,6 +163,16 @@ namespace Ink_Canvas
         private void SysTrayMenu_Opened(object sender, RoutedEventArgs e)
         {
             var s = (ContextMenu)sender;
+            _activeTrayMenu = s;
+
+            // 无焦点/置顶模式下弹窗拿不到鼠标捕获，点桌面或别的程序菜单不会消失。
+            // 用全局低级鼠标钩子识别"点在菜单外"，不依赖前台窗口。
+            _trayMenuDismissHook ??= new TrayMenuDismissHook(Dispatcher, CloseActiveTrayMenuFromHook);
+            _trayMenuDismissHook.Install();
+
+            // Opened 时菜单可能还没完成定位，等布局结束再记录屏幕矩形
+            Dispatcher.BeginInvoke(new Action(UpdateTrayMenuScreenRect), DispatcherPriority.Loaded);
+
             var FoldFloatingBarTrayIconMenuItemIconEyeOff = (Image)((Grid)((MenuItem)s.Items[s.Items.Count - 5]).Icon).Children[0];
             var FoldFloatingBarTrayIconMenuItemIconEyeOn = (Image)((Grid)((MenuItem)s.Items[s.Items.Count - 5]).Icon).Children[1];
             var FoldFloatingBarTrayIconMenuItemHeaderText = (TextBlock)((SimpleStackPanel)((MenuItem)s.Items[s.Items.Count - 5]).Header).Children[0];
@@ -241,6 +257,7 @@ namespace Ink_Canvas
 
         private void TempShowMainWindowTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
+            HideTrayContextMenuImmediately();
             var mainWin = Current.MainWindow as MainWindow;
             if (mainWin?.IsLoaded != true)
                 return;
@@ -321,6 +338,7 @@ namespace Ink_Canvas
 
         private void OpenSettingsTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
+            HideTrayContextMenuImmediately();
             var mainWin = Current.MainWindow as MainWindow;
             if (!EnsureMainWindowReadyForSettings(mainWin))
             {
@@ -340,6 +358,8 @@ namespace Ink_Canvas
 
         private void SysTrayMenu_Closed(object sender, RoutedEventArgs e)
         {
+            _trayMenuDismissHook?.Uninstall();
+            _activeTrayMenu = null;
             var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin != null && mainWin.IsLoaded)
             {
@@ -365,6 +385,10 @@ namespace Ink_Canvas
         /// </remarks>
         private void CloseAppTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
+            // 先关菜单：后面 Close() → 关闭确认 → 清理链会占满 UI 线程，
+            // 不先关的话菜单的淡出动画会卡在半透明状态。
+            HideTrayContextMenuImmediately();
+
             var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin != null && mainWin.IsLoaded)
             {
@@ -387,12 +411,88 @@ namespace Ink_Canvas
         /// </remarks>
         private void RestartAppTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
+            // 同退出：重启要等新实例就绪、旧实例 Shutdown，全程占用 UI 线程，
+            // 菜单必须先关掉，否则淡出动画会卡在半透明状态。
+            HideTrayContextMenuImmediately();
+
             var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin != null && mainWin.IsLoaded)
             {
                 // 让后续 Shutdown 触发的主窗口 Closing 验证直接放行，避免二次弹确认框
                 mainWin._forceCloseFromExitOrRestartButton = true;
                 AppRestartHelper.RestartWithCurrentPrivileges();
+            }
+        }
+
+        /// <summary>
+        /// 关闭托盘上下文菜单，并等它真正关闭后再返回。
+        /// WPF 的 ContextMenu 关闭时会先播约 150ms 的淡出动画（此时 IsOpen 已为 false，
+        /// 窗口仍可见），动画要靠 UI 线程推进。菜单项点击后若立刻在 UI 线程做重活
+        /// （打开设置 / 退出清理 / 等待新实例就绪），动画停在半途，菜单就定格成
+        /// "半透明残留"。这里在关闭后跑一个嵌套消息循环，等 Closed 事件（动画播完）
+        /// 或 300ms 兜底超时，再让调用方继续。
+        /// </summary>
+        private void HideTrayContextMenuImmediately()
+        {
+            var menu = _activeTrayMenu;
+            if (menu == null) return;
+
+            try
+            {
+                var frame = new DispatcherFrame();
+                RoutedEventHandler onClosed = null;
+                var timeout = new DispatcherTimer(DispatcherPriority.Background)
+                {
+                    Interval = TimeSpan.FromMilliseconds(300)
+                };
+
+                onClosed = (s, e) =>
+                {
+                    timeout.Stop();
+                    frame.Continue = false;
+                };
+                timeout.Tick += (s, e) =>
+                {
+                    timeout.Stop();
+                    frame.Continue = false;
+                };
+
+                menu.Closed += onClosed;
+                if (menu.IsOpen) menu.IsOpen = false;
+                timeout.Start();
+                Dispatcher.PushFrame(frame);
+                menu.Closed -= onClosed;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"关闭托盘菜单失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        /// <summary>菜单定位完成后记录它在屏幕上的矩形（物理像素），供钩子判断点击是否落在菜单上。</summary>
+        private void UpdateTrayMenuScreenRect()
+        {
+            try
+            {
+                if (_activeTrayMenu == null || _trayMenuDismissHook == null) return;
+
+                var topLeft = _activeTrayMenu.PointToScreen(new Point(0, 0));
+                var bottomRight = _activeTrayMenu.PointToScreen(
+                    new Point(_activeTrayMenu.ActualWidth, _activeTrayMenu.ActualHeight));
+                _trayMenuDismissHook.UpdateMenuRect(new Rect(topLeft, bottomRight));
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"获取托盘菜单屏幕区域失败: {ex.Message}", LogHelper.LogType.Info);
+            }
+        }
+
+        /// <summary>钩子检测到"点在菜单外"时收起菜单（已由钩子派发到 UI 线程）。</summary>
+        private void CloseActiveTrayMenuFromHook()
+        {
+            if (_activeTrayMenu != null && _activeTrayMenu.IsOpen)
+            {
+                _activeTrayMenu.IsOpen = false;
             }
         }
 
@@ -410,6 +510,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void ForceFullScreenTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
+            HideTrayContextMenuImmediately();
             var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin != null && mainWin.IsLoaded)
             {
@@ -433,6 +534,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void FoldFloatingBarTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
+            HideTrayContextMenuImmediately();
             var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin != null && mainWin.IsLoaded)
                 if (mainWin.isFloatingBarFolded) mainWin.UnFoldFloatingBar_MouseUp(new object(), null);
@@ -455,6 +557,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void ResetFloatingBarPositionTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
+            HideTrayContextMenuImmediately();
             var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin != null && mainWin.IsLoaded)
             {
@@ -494,6 +597,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void HideICCMainWindowTrayIconMenuItem_Checked(object sender, RoutedEventArgs e)
         {
+            HideTrayContextMenuImmediately();
             _trayTemporaryShowTimer?.Stop();
             global::Ink_Canvas.MainWindow.TrayTemporaryShowUntilUtc = null;
             _trayTemporaryShowRestoreHideChecked = false;
@@ -543,6 +647,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void HideICCMainWindowTrayIconMenuItem_UnChecked(object sender, RoutedEventArgs e)
         {
+            HideTrayContextMenuImmediately();
             var mi = (MenuItem)sender;
             var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin != null && mainWin.IsLoaded)
@@ -588,6 +693,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void DisableAllHotkeysMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
+            HideTrayContextMenuImmediately();
             var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin != null && mainWin.IsLoaded)
             {

@@ -670,6 +670,11 @@ namespace Ink_Canvas
 
             Dispatcher.BeginInvoke(new Action(() =>
             {
+                // 折叠态下保持折叠位置，不执行展开居中：
+                // 本回调在 ApplicationIdle 优先级执行，晚于启动折叠，
+                // 无保护时会把工具栏拉回屏幕内（折叠标志仍为 true，用户看到"自动收纳失效"）。
+                if (ReapplyFoldPositionIfFolded()) return;
+
                 if (IsInPPTPresentationMode)
                     ViewboxFloatingBarMarginAnimation(60);
                 else

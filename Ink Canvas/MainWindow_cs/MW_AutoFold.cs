@@ -1,4 +1,4 @@
-using Ink_Canvas.Helpers;
+﻿using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern;
 using System;
 using System.Threading;
@@ -92,7 +92,7 @@ namespace Ink_Canvas
         /// 9. 执行浮动栏和侧边栏的动画
         /// 10. 如果开启了彻底隐藏，则隐藏主窗口
         /// </remarks>
-        public async Task FoldFloatingBar(object sender, bool isAutoFoldCommand = false)
+        public async Task FoldFloatingBar(object sender, bool isAutoFoldCommand = false, bool instant = false)
         {
 
             // FloatingBarIcons_MouseUp_New(sender);
@@ -136,8 +136,12 @@ namespace Ink_Canvas
                 CursorWithDelIcon_Click(sender, null);
             });
 
-            await Task.Delay(300);
+            // 让上一段 UI 状态变更（子面板淡出/可见性切换）在渲染队列中落地，
+            // 而不是固定睡 300ms——UI 空闲即继续，与设备性能无关。
+            await Dispatcher.Yield(DispatcherPriority.Background);
 
+            double taskbarHeightForFold = 0;
+            Task marginTask = null;
             await Dispatcher.InvokeAsync(() =>
             {
                 LeftBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
@@ -149,17 +153,41 @@ namespace Ink_Canvas
                 double dpiScaleYForFold = 1;
                 var srcForFold = PresentationSource.FromVisual(this);
                 if (srcForFold != null) dpiScaleYForFold = srcForFold.CompositionTarget.TransformToDevice.M22;
-                double taskbarHeightForFold = ForegroundWindowInfo.GetTaskbarHeight(GetFloatingBarTargetScreen(), dpiScaleYForFold);
-                ViewboxFloatingBarMarginAnimation(-60 - (int)Math.Round(taskbarHeightForFold));
+                taskbarHeightForFold = ForegroundWindowInfo.GetTaskbarHeight(GetFloatingBarTargetScreen(), dpiScaleYForFold);
+                // instant：启动时直接落到折叠位，不播 0.35s 动画——
+                // 启动阶段播放动画会让工具栏从展开位一路划过屏幕再消失。
+                marginTask = ViewboxFloatingBarMarginAnimationAsync(
+                    -60 - (int)Math.Round(taskbarHeightForFold), skipAnimation: instant);
                 HideSubPanels("cursor");
-                SidePannelMarginAnimation(-10);
+                SidePannelMarginAnimation(-10, instant);
+            });
+
+            // 折叠自检（事件驱动）：等折叠动画与最终 Margin 真正落地后立即复核一次。
+            // 启动早期布局尚未稳定，或与 Loaded 中的初始位置设置并发，
+            // 首次位置计算可能落空（浮动栏停留在屏幕内）——当场重设，用户不可见。
+            if (marginTask != null)
+            {
+                await marginTask;
+            }
+
+            await Dispatcher.InvokeAsync(() =>
+            {
+                if (!isFloatingBarFolded || currentMode != 0) return;
+
+                // 同步布局后再判定，确保读到的是最终位置而不是上一帧
+                ViewboxFloatingBar.UpdateLayout();
+                if (IsFloatingBarUiAbsentFromScreens()) return;
+
+                LogHelper.WriteLogToFile("[Toolbar] 折叠位置未生效，立即重设折叠位置", LogHelper.LogType.Warning);
+                ViewboxFloatingBarMarginAnimationCore(-60 - (int)Math.Round(taskbarHeightForFold));
             });
 
             // 新增：如果开启了彻底隐藏，则隐藏主窗口。
             // 需等浮动栏（0.35s）与侧边栏收纳动画播放完成后再隐藏，
             if (Settings.Automation.ThoroughlyHideWhenFolded)
             {
-                await Task.Delay(400);
+                // 启动 instant 路径没有待播放的动画，不必等 400ms 再隐藏主窗口
+                await Task.Delay(instant ? 0 : 400);
 
                 await Dispatcher.InvokeAsync(() =>
                 {
@@ -709,84 +737,39 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"启动收纳校验：检测浮动栏可见性时出错: {ex.Message}", LogHelper.LogType.Warning);
+                LogHelper.WriteLogToFile($"检测浮动栏可见性时出错: {ex.Message}", LogHelper.LogType.Warning);
                 return true;
             }
         }
 
-        private async Task WaitUntilFloatingBarHideModeIdleAsync(TimeSpan timeout)
+        /// <summary>
+        /// 若当前处于折叠状态，则按当前缩放/任务栏高度重新应用折叠位置并返回 true；
+        /// 未折叠（或非批注模式）返回 false，由调用方继续执行正常的展开居中逻辑。
+        /// 用于"应用缩放""加载设置""重建工具栏"等会顺带重算位置的动作：
+        /// 这些动作发生在启动折叠之后，不做保护会把工具栏拉回屏幕内
+        /// （折叠标志仍为 true，但工具栏实际可见——用户看到"自动收纳失效"）。
+        /// </summary>
+        internal bool ReapplyFoldPositionIfFolded()
         {
-            var start = DateTime.UtcNow;
-            while (DateTime.UtcNow - start < timeout)
-            {
-                bool busy = await Dispatcher.InvokeAsync(() => isFloatingBarChangingHideMode);
-                if (!busy) return;
-                await Task.Delay(50).ConfigureAwait(false);
-            }
-        }
+            if (!isFloatingBarFolded || currentMode != 0) return false;
 
-
-        private async Task WaitForStartupFoldSettledAsync(TimeSpan timeout)
-        {
-            var start = DateTime.UtcNow;
-            while (DateTime.UtcNow - start < timeout)
-            {
-                var settled = await Dispatcher.InvokeAsync(() => isFloatingBarFolded && !isFloatingBarChangingHideMode);
-                if (settled) return;
-                await Task.Delay(50).ConfigureAwait(false);
-            }
-        }
-
-
-        private async Task VerifyStartupFoldAbsenceAfterDelayAsync()
-        {
             try
             {
-                if (!Settings.Startup.IsFoldAtStartup || App.StartWithBoardMode || App.StartWithShowMode)
-                    return;
+                double dpiScaleYForFold = 1;
+                var srcForFold = PresentationSource.FromVisual(this);
+                if (srcForFold != null) dpiScaleYForFold = srcForFold.CompositionTarget.TransformToDevice.M22;
+                double taskbarHeightForFold = ForegroundWindowInfo.GetTaskbarHeight(GetFloatingBarTargetScreen(), dpiScaleYForFold);
 
-                // 第一次校验：等待初始收纳稳定后，确认折叠状态是否真正落到不可见
-                await RunStartupFoldVerificationPassAsync();
-
-                // 第二次校验：15s 后再跑一遍，覆盖启动阶段后续可能出现的浮动栏异常重排/泄漏
-                await Task.Delay(15000).ConfigureAwait(false);
-                await RunStartupFoldVerificationPassAsync();
+                // 同步写入折叠位置（无动画、不展开），并走一次布局让可见性判定读到最终值
+                ViewboxFloatingBarMarginAnimationCore(-60 - (int)Math.Round(taskbarHeightForFold));
+                ViewboxFloatingBar.UpdateLayout();
+                return true;
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"启动收纳校验失败: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"重设折叠位置失败: {ex.Message}", LogHelper.LogType.Warning);
+                return false;
             }
-        }
-
-        /// <summary>
-        /// 执行单次启动收纳校验：等待浮动栏折叠稳定 3s 后检查是否真的不可见，
-        /// 若仍可见则展开并重新收纳一次。
-        /// </summary>
-        private async Task RunStartupFoldVerificationPassAsync()
-        {
-            await WaitForStartupFoldSettledAsync(TimeSpan.FromSeconds(30)).ConfigureAwait(false);
-            await Task.Delay(3000).ConfigureAwait(false);
-
-            bool needRetry = await Dispatcher.InvokeAsync(() =>
-            {
-                if (!isFloatingBarFolded) return false;
-                if (currentMode != 0) return false;
-                return !IsFloatingBarUiAbsentFromScreens();
-            });
-
-            if (!needRetry) return;
-
-            LogHelper.WriteLogToFile("启动收纳校验：检测到浮动栏仍在屏幕上，将展开后等待 0.2s 再次收纳", LogHelper.LogType.Event);
-
-            await UnFoldFloatingBar(null);
-            await WaitUntilFloatingBarHideModeIdleAsync(TimeSpan.FromSeconds(15)).ConfigureAwait(false);
-            await Task.Delay(200).ConfigureAwait(false);
-            await FoldFloatingBar(new object()).ConfigureAwait(false);
-        }
-
-        private void ScheduleStartupFoldAbsenceVerification()
-        {
-            _ = VerifyStartupFoldAbsenceAfterDelayAsync();
         }
 
     }
