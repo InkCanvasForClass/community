@@ -525,11 +525,8 @@ namespace Ink_Canvas
         /// <param name="sender">事件发送者</param>
         /// <param name="e">路由事件参数</param>
         /// <remarks>
-        /// 处理切换浮动栏收纳模式托盘菜单项的点击事件，包括以下步骤：
-        /// 1. 获取主窗口实例
-        /// 2. 如果主窗口已加载：
-        ///    - 如果浮动栏当前处于收纳模式，则调用UnFoldFloatingBar_MouseUp方法退出收纳模式
-        ///    - 否则，调用FoldFloatingBar_MouseUp方法进入收纳模式
+        /// 处理切换浮动栏收纳模式托盘菜单项的点击事件：
+        /// 已折叠则展开，未折叠则收纳；两者都走浮动栏状态机的 ByUser 入口。
         /// </remarks>
         private void FoldFloatingBarTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
