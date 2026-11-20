@@ -268,9 +268,6 @@ namespace Ink_Canvas
         {
             try
             {
-                LogHelper.WriteLogToFile(
-                    $"[PPT] 开始初始化管理器: linkMode={Settings.PowerPointSettings.PPTLinkMode}, supportWps={Settings.PowerPointSettings.IsSupportWPS}",
-                    LogHelper.LogType.Info);
                 // 初始化长按定时器
                 InitializeLongPressTimer();
                 WirePPTNavBars();
@@ -337,9 +334,7 @@ namespace Ink_Canvas
                 _pptUIManager = new PPTUIManager(this);
                 _pptUIManager.SyncSettings();
 
-                LogHelper.WriteLogToFile(
-                    $"[PPT] 管理器初始化完成: manager={_pptManager?.GetType().Name}, autoSaveInk={_singlePPTInkManager?.IsAutoSaveEnabled}",
-                    LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("PPT管理器初始化完成", LogHelper.LogType.Event);
             }
             catch (Exception ex)
             {
@@ -368,7 +363,7 @@ namespace Ink_Canvas
             if (Settings.PowerPointSettings.PowerPointSupport)
             {
                 _pptManager?.StartMonitoring();
-                LogHelper.WriteLogToFile("[PPT] 主窗口已启动 PPT 监控", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("PPT监控已启动", LogHelper.LogType.Event);
             }
         }
 
@@ -383,13 +378,12 @@ namespace Ink_Canvas
                 _exitPPTModeAfterDisconnectTimer = null;
                 ResetPPTEnhancedPreviewCache();
             }
-            catch (Exception ex)
+            catch
             {
-                LogHelper.WriteLogToFile($"[PPT] 停止监控时清理延迟退出定时器/预览缓存失败: {ex.Message}", LogHelper.LogType.Info);
             }
 
             _pptManager?.StopMonitoring();
-            LogHelper.WriteLogToFile("[PPT] 主窗口已停止 PPT 监控", LogHelper.LogType.Info);
+            LogHelper.WriteLogToFile("PPT监控已停止", LogHelper.LogType.Event);
         }
 
         #region PowerPoint Application Management
@@ -419,7 +413,7 @@ namespace Ink_Canvas
                 }
                 _powerPointProcessMonitorTimer.Start();
 
-                LogHelper.WriteLogToFile("[PPT] PowerPoint 应用程序守护已启动", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("PowerPoint应用程序守护已启动", LogHelper.LogType.Event);
             }
             catch (Exception ex)
             {
@@ -440,7 +434,7 @@ namespace Ink_Canvas
                 // 关闭PowerPoint应用程序（包括关机时）
                 ClosePowerPointApplication(isShutdown);
 
-                LogHelper.WriteLogToFile("[PPT] PowerPoint 应用程序守护已停止", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("PowerPoint应用程序守护已停止", LogHelper.LogType.Event);
             }
             catch (Exception ex)
             {
@@ -753,7 +747,7 @@ namespace Ink_Canvas
 
                 StopPPTOnlyVisibilityProbeTimer();
 
-                LogHelper.WriteLogToFile("[PPT] PPT 管理器已释放", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("PPT管理器已释放", LogHelper.LogType.Event);
             }
             catch (Exception ex)
             {
@@ -763,7 +757,6 @@ namespace Ink_Canvas
 
         internal void UnloadPPTModuleForShutdown()
         {
-            LogHelper.WriteLogToFile("[PPT] 开始执行关机清理", LogHelper.LogType.Info);
             try
             {
                 try
@@ -771,7 +764,7 @@ namespace Ink_Canvas
                     _longPressTimer?.Stop();
                     _powerPointProcessMonitorTimer?.Stop();
                     StopPPTOnlyVisibilityProbeTimer();
-                    LogHelper.WriteLogToFile("[PPT] 关机时已停止所有相关定时器", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("关机时已停止所有 PPT 相关定时器", LogHelper.LogType.Event);
                 }
                 catch (Exception ex)
                 {
@@ -782,7 +775,6 @@ namespace Ink_Canvas
                 if (Dispatcher == null || Dispatcher.CheckAccess())
                 {
                     DisposePPTManagers(isShutdown: true);
-                    LogHelper.WriteLogToFile("[PPT] 关机清理完成", LogHelper.LogType.Info);
                     return;
                 }
 
@@ -792,11 +784,7 @@ namespace Ink_Canvas
                     return;
                 }
 
-                Dispatcher.Invoke(() =>
-                {
-                    DisposePPTManagers(isShutdown: true);
-                    LogHelper.WriteLogToFile("[PPT] 关机清理完成", LogHelper.LogType.Info);
-                }, DispatcherPriority.Send);
+                Dispatcher.Invoke(() => DisposePPTManagers(isShutdown: true), DispatcherPriority.Send);
             }
             catch (TaskCanceledException ex)
             {
@@ -905,9 +893,8 @@ namespace Ink_Canvas
             {
                 _pptOnlyVisibilityProbeTimer?.Stop();
             }
-            catch (Exception ex)
+            catch
             {
-                LogHelper.WriteLogToFile($"[PPT] 停止「仅PPT模式」可见性探测定时器失败: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -948,10 +935,8 @@ namespace Ink_Canvas
                             }
                         }
                     }
-                    catch (Exception ex)
+                    catch
                     {
-                        // 枚举回调内：拿不到进程名就可能漏判放映窗口
-                        LogHelper.WriteLogToFile($"[PPT] 读取 POWERPNT 进程信息失败，放映窗口检测可能漏判: {ex.Message}", LogHelper.LogType.Info);
                     }
 
                     return true;
@@ -986,11 +971,11 @@ namespace Ink_Canvas
                         _exitPPTModeAfterDisconnectTimer?.Stop();
                         _exitPPTModeAfterDisconnectTimer = null;
                         SchedulePPTEnhancedPreviewPreload();
-                        LogHelper.WriteLogToFile("[PPT] 连接已建立", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile("PPT连接已建立", LogHelper.LogType.Event);
                     }
                     else
                     {
-                        LogHelper.WriteLogToFile("[PPT] 连接已断开，已安排模式清理", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile("PPT连接已断开", LogHelper.LogType.Event);
                         _singlePPTInkManager?.ClearAllStrokes();
                         CollapseAllPPTNavBarPreviews();
                         ResetPPTEnhancedPreviewCache();
@@ -1065,7 +1050,7 @@ namespace Ink_Canvas
 
                     SchedulePPTEnhancedPreviewPreload();
 
-                    LogHelper.WriteLogToFile($"[PPT] 演示文稿已打开，已清理墨迹: {pres?.Name ?? agentState?.PresentationName ?? _pptManager?.GetPresentationName()}", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile($"已打开新演示文稿: {pres?.Name ?? agentState?.PresentationName ?? _pptManager?.GetPresentationName()}，墨迹状态已清理", LogHelper.LogType.Event);
                 });
             }
             catch (Exception ex)
@@ -1131,9 +1116,8 @@ namespace Ink_Canvas
                 {
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                LogHelper.WriteLogToFile($"[PPT] 处理演示文稿关闭事件时发生非 COM 异常: {ex.Message}", LogHelper.LogType.Info);
             }
         }
 
@@ -1350,9 +1334,8 @@ namespace Ink_Canvas
                         {
                             _singlePPTInkManager.InitializePresentation(activePresentation);
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
-                            LogHelper.WriteLogToFile($"[PPT] 放映开始时初始化演示文稿墨迹管理器失败: {ex.Message}", LogHelper.LogType.Info);
                         }
                     }
 
@@ -1737,10 +1720,7 @@ namespace Ink_Canvas
                             MediaType = (int)shape.MediaType
                         });
                     }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[SmartMode] 读取形状视频区域信息失败，该形状会被跳过: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    catch { }
                 }
                 return regions;
             }
@@ -1769,10 +1749,9 @@ namespace Ink_Canvas
                     if (!PInvoke.IsWindowVisible(hWnd)) return true;
                     if (PInvoke.IsIconic(hWnd)) return true;
 
-                    Span<char> classBuffer = stackalloc char[256];
-                    int classLength = PInvoke.GetClassName(hWnd, classBuffer);
-                    if (classLength == 0) return true;
-                    if (!string.Equals(classBuffer.Slice(0, classLength).ToString(), PowerPointSlideShowWindowClassName, StringComparison.Ordinal)) return true;
+                    var sb = new StringBuilder(64);
+                    if (PInvoke.GetClassName(hWnd, new Span<char>(sb.ToString().ToCharArray())) == 0) return true;
+                    if (!string.Equals(sb.ToString(), PowerPointSlideShowWindowClassName, StringComparison.Ordinal)) return true;
 
                     best = hWnd;
                     return false; // 停止枚举
@@ -1834,10 +1813,7 @@ namespace Ink_Canvas
                                 return true;
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[SmartMode] 读取 OLE 控件 ProgID 失败，将按非视频处理: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    catch { }
                     // 无法确认是否为媒体播放器时，不视为视频，避免把普通 ActiveX 控件误判为视频
                     return false;
                 }
@@ -1850,16 +1826,10 @@ namespace Ink_Canvas
                         if ((int)(object)shape.MediaType == 3)  // ppMediaTypeMovie
                             return true;
                     }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[SmartMode] 读取嵌入式 OLE 形状 MediaType 失败: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    catch { }
                 }
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[SmartMode] 判定形状是否为视频时发生异常: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch { }
             return false;
         }
 
@@ -2176,28 +2146,101 @@ namespace Ink_Canvas
         /// 5. 尝试解析位置文件中的页码
         /// 6. 如果解析成功且页码大于0，则保存上次播放页码并显示跳转提示窗口
         /// 异常会被捕获并记录为错误日志，确保方法执行不会中断。
+        /// </remarks>
+        private TaskCompletionSource<bool> _inlineDialogTcs;
+
         private async Task<bool> ShowInlineYesNoDialog(string title, string content)
         {
-            var result = await MessageBoxHelper.ShowAsync(this, content, title, MessageBoxButton.YesNo, MessageBoxImage.Question);
-            return result == MessageBoxResult.Yes;
+            _inlineDialogTcs = new TaskCompletionSource<bool>();
+
+            InlineDialogTitle.Content = title;
+            InlineDialogContent.Text = content;
+
+            InlineDialogRoot.Opacity = 0;
+            InlineDialogRoot.Visibility = Visibility.Visible;
+            InlineDialogScaleTransform.ScaleX = 1.05;
+            InlineDialogScaleTransform.ScaleY = 1.05;
+
+            var showAnimation = new System.Windows.Media.Animation.Storyboard();
+
+            var opacityAnimation = new System.Windows.Media.Animation.DoubleAnimation(0, 1,
+                TimeSpan.FromMilliseconds(150));
+            opacityAnimation.FillBehavior = System.Windows.Media.Animation.FillBehavior.HoldEnd;
+            System.Windows.Media.Animation.Storyboard.SetTarget(opacityAnimation, InlineDialogRoot);
+            System.Windows.Media.Animation.Storyboard.SetTargetProperty(opacityAnimation,
+                new PropertyPath(Grid.OpacityProperty));
+            showAnimation.Children.Add(opacityAnimation);
+
+            var scaleXAnimation = new System.Windows.Media.Animation.DoubleAnimation(1.05, 1.0,
+                TimeSpan.FromMilliseconds(250));
+            scaleXAnimation.FillBehavior = System.Windows.Media.Animation.FillBehavior.HoldEnd;
+            var ease = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut };
+            scaleXAnimation.EasingFunction = ease;
+            System.Windows.Media.Animation.Storyboard.SetTarget(scaleXAnimation, InlineDialogCard);
+            System.Windows.Media.Animation.Storyboard.SetTargetProperty(scaleXAnimation,
+                new PropertyPath("(UIElement.RenderTransform).(ScaleTransform.ScaleX)"));
+            showAnimation.Children.Add(scaleXAnimation);
+
+            var scaleYAnimation = new System.Windows.Media.Animation.DoubleAnimation(1.05, 1.0,
+                TimeSpan.FromMilliseconds(250));
+            scaleYAnimation.FillBehavior = System.Windows.Media.Animation.FillBehavior.HoldEnd;
+            scaleYAnimation.EasingFunction = ease;
+            System.Windows.Media.Animation.Storyboard.SetTarget(scaleYAnimation, InlineDialogCard);
+            System.Windows.Media.Animation.Storyboard.SetTargetProperty(scaleYAnimation,
+                new PropertyPath("(UIElement.RenderTransform).(ScaleTransform.ScaleY)"));
+            showAnimation.Children.Add(scaleYAnimation);
+
+            showAnimation.Begin(this);
+
+            return await _inlineDialogTcs.Task;
         }
 
         private void HideInlineDialog()
         {
-            if (InlineDialogRoot != null)
+            var hideAnimation = new System.Windows.Media.Animation.Storyboard();
+
+            var opacityAnimation = new System.Windows.Media.Animation.DoubleAnimation(1, 0,
+                TimeSpan.FromMilliseconds(150));
+            opacityAnimation.FillBehavior = System.Windows.Media.Animation.FillBehavior.HoldEnd;
+            System.Windows.Media.Animation.Storyboard.SetTarget(opacityAnimation, InlineDialogRoot);
+            System.Windows.Media.Animation.Storyboard.SetTargetProperty(opacityAnimation,
+                new PropertyPath(Grid.OpacityProperty));
+            hideAnimation.Children.Add(opacityAnimation);
+
+            var scaleXAnimation = new System.Windows.Media.Animation.DoubleAnimation(1.0, 1.05,
+                TimeSpan.FromMilliseconds(100));
+            scaleXAnimation.FillBehavior = System.Windows.Media.Animation.FillBehavior.HoldEnd;
+            System.Windows.Media.Animation.Storyboard.SetTarget(scaleXAnimation, InlineDialogCard);
+            System.Windows.Media.Animation.Storyboard.SetTargetProperty(scaleXAnimation,
+                new PropertyPath("(UIElement.RenderTransform).(ScaleTransform.ScaleX)"));
+            hideAnimation.Children.Add(scaleXAnimation);
+
+            var scaleYAnimation = new System.Windows.Media.Animation.DoubleAnimation(1.0, 1.05,
+                TimeSpan.FromMilliseconds(100));
+            scaleYAnimation.FillBehavior = System.Windows.Media.Animation.FillBehavior.HoldEnd;
+            System.Windows.Media.Animation.Storyboard.SetTarget(scaleYAnimation, InlineDialogCard);
+            System.Windows.Media.Animation.Storyboard.SetTargetProperty(scaleYAnimation,
+                new PropertyPath("(UIElement.RenderTransform).(ScaleTransform.ScaleY)"));
+            hideAnimation.Children.Add(scaleYAnimation);
+
+            hideAnimation.Completed += (s, e) =>
             {
                 InlineDialogRoot.Visibility = Visibility.Collapsed;
-            }
+            };
+
+            hideAnimation.Begin(this);
         }
 
         private void InlineDialogPrimaryButton_Click(object sender, RoutedEventArgs e)
         {
             HideInlineDialog();
+            _inlineDialogTcs?.TrySetResult(true);
         }
 
         private void InlineDialogSecondaryButton_Click(object sender, RoutedEventArgs e)
         {
             HideInlineDialog();
+            _inlineDialogTcs?.TrySetResult(false);
         }
 
         private async void ShowPreviousPageNotification(Presentation pres, PPTState agentState = null)
@@ -2839,10 +2882,8 @@ namespace Ink_Canvas
                     }
                 }
 
-                // 翻页后工具栏要重新贴底：等布局把新的翻页条/预览面板算进去再落位，
-                // 不要用固定延时猜稳定时刻。
-                await Dispatcher.InvokeAsync(() => ShowFloatingBar(FloatingBarPlacement.PptExpanded),
-                    System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                await Task.Delay(100);
+                ShowFloatingBar(FloatingBarPlacement.PptExpanded);
             }
             catch (OperationCanceledException)
             {
@@ -3151,18 +3192,16 @@ namespace Ink_Canvas
             {
                 ctsToCancel?.Cancel();
             }
-            catch (Exception ex)
+            catch
             {
-                LogHelper.WriteLogToFile($"[PPT] 取消增强预览构建任务失败: {ex.Message}", LogHelper.LogType.Info);
             }
 
             try
             {
                 ctsToCancel?.Dispose();
             }
-            catch (Exception ex)
+            catch
             {
-                LogHelper.WriteLogToFile($"[PPT] 释放增强预览取消令牌失败: {ex.Message}", LogHelper.LogType.Info);
             }
 
             DisposePPTEnhancedPreviewItems(cacheToDispose);

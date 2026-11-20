@@ -1,4 +1,4 @@
-using Ink_Canvas.Controls;
+﻿using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
@@ -442,10 +442,6 @@ namespace Ink_Canvas
                 isViewboxFloatingBarMarginAnimationRunning = false;
             }
 
-            // 拖动是直接接管布局位置的交互：先把弹簧偏移归零，
-            // 否则残留的视觉偏移会和鼠标位移叠加，表现为"拖起来发飘"。
-            FloatingBarSpring.SnapToLayout();
-
             isDragDropInEffect = true;
             pos = e.GetPosition(null);
             downPos = e.GetPosition(null);
@@ -667,7 +663,7 @@ namespace Ink_Canvas
                 if (mode != "clear")
                 {
                     if (Cursor_Icon != null) { if (!ToolbarRegistry.GetUseRedStyle(Cursor_Icon)) Cursor_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); Cursor_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("cursor", false)); }
-                    if (Pen_Icon != null) { if (!ToolbarRegistry.GetUseRedStyle(Pen_Icon)) Pen_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); Pen_Icon.ClearIconInnerOutline(); Pen_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("pen", false)); }
+                    if (Pen_Icon != null) { if (!ToolbarRegistry.GetUseRedStyle(Pen_Icon)) Pen_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); Pen_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("pen", false)); }
                     if (EraserByStrokes_Icon != null) { if (!ToolbarRegistry.GetUseRedStyle(EraserByStrokes_Icon)) EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); EraserByStrokes_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("eraserStroke", false)); }
                     if (Eraser_Icon != null) { if (!ToolbarRegistry.GetUseRedStyle(Eraser_Icon)) Eraser_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); Eraser_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("eraserCircle", false)); }
                     if (SymbolIconSelect != null) { if (!ToolbarRegistry.GetUseRedStyle(SymbolIconSelect)) SymbolIconSelect.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor); SymbolIconSelect.Icon.Geometry = Geometry.Parse(GetCorrectIcon("lassoSelect", false)); }
@@ -721,11 +717,6 @@ namespace Ink_Canvas
                                         Pen_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
                                 }
                                 Pen_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("pen", true));
-                                // 几何更新后再应用描边，确保描边跟随当前图标几何
-                                if (Settings.Appearance.ShowPenColorOnFloatingBarIcon)
-                                    ApplyPenIconOutlineForContrast();
-                                else
-                                    Pen_Icon.ClearIconInnerOutline();
                             }
                             if (boardPen != null)
                             {
@@ -974,10 +965,12 @@ namespace Ink_Canvas
                     Not_Enter_Blackboard_fir_Mouse_Click = false;
                 }
                 */
-                // 进入黑板会把工具栏切到白板形态（宽度会变），
-                // 等布局把新宽度算进去再落位；用优先级排队代替 Thread.Sleep 猜时间。
-                _ = Dispatcher.InvokeAsync(() => ShowFloatingBar(FloatingBarPlacement.FullScreenExpanded),
-                    System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                new Thread(() =>
+                {
+                    Thread.Sleep(100);
+                    Application.Current.Dispatcher.Invoke(() =>
+                        ShowFloatingBar(FloatingBarPlacement.FullScreenExpanded));
+                }).Start();
 
                 HideSubPanels();
 
@@ -1065,7 +1058,6 @@ namespace Ink_Canvas
                     }
                 }, TaskScheduler.FromCurrentSynchronizationContext());
                 StartChickenSoupAutoRotation();
-                StartWhiteboardTipsAutoHide();
 
                 if (Settings.Canvas.UsingWhiteboard)
                 {
@@ -1086,7 +1078,30 @@ namespace Ink_Canvas
                 PauseAllCanvasMediaPlayback();
                 HideSubPanelsImmediately();
 
-                // 翻页条在 SwitchBackground 切回屏幕模式后统一恢复。
+                // 只有在PPT放映模式下且页数有效时才显示翻页按钮
+                if (ArePPTControlsVisible &&
+                    IsInPPTPresentationMode &&
+                    PPTManager?.IsInSlideShow == true &&
+                    PPTManager?.SlidesCount > 0)
+                {
+                    var dops = Settings.PowerPointSettings.PPTButtonsDisplayOption.ToString();
+                    var dopsc = dops.ToCharArray();
+                    if (dopsc[0] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(LeftBottomPanelForPPTNavigation);
+                    if (dopsc[1] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(RightBottomPanelForPPTNavigation);
+                    if (dopsc[2] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(LeftSidePanelForPPTNavigation);
+                    if (dopsc[3] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(RightSidePanelForPPTNavigation);
+                }
+                else
+                {
+                    // 如果不在放映模式或页数无效，隐藏所有翻页按钮
+                    LeftBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                }
+
+                // 使用PPT UI管理器来正确更新翻页按钮显示状态，确保遵循用户设置
+                _pptUIManager?.UpdateNavigationPanelsVisibility();
 
                 if (Settings.Automation.IsAutoSaveScreenshotAtClear &&
                     inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber) CaptureAndEnqueueScreenshotSave(true);
@@ -1102,7 +1117,6 @@ namespace Ink_Canvas
                 }
 
                 StopChickenSoupAutoRotation();
-                StopWhiteboardTipsAutoHide();
                 WaterMarkTime.Visibility = Visibility.Collapsed;
                 WaterMarkDate.Visibility = Visibility.Collapsed;
                 BlackBoardWaterMark.Visibility = Visibility.Collapsed;
@@ -1201,10 +1215,8 @@ namespace Ink_Canvas
 
                 if (IsInPPTPresentationMode)
                 {
-                    // 等一次布局（切换画布可见性会改变工具栏宽度），再落位，
-                    // 不用固定延时去猜。
-                    await Dispatcher.InvokeAsync(() => ShowFloatingBar(FloatingBarPlacement.PptExpanded),
-                        System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                    await Task.Delay(100);
+                    ShowFloatingBar(FloatingBarPlacement.PptExpanded);
                 }
             }
         }
@@ -1251,7 +1263,7 @@ namespace Ink_Canvas
 
                 ClearAllSelection();
             }
-            else if (inkCanvas.Strokes.Count > 0 || HasSecAgentSceneElementsOnCanvas())
+            else if (inkCanvas.Strokes.Count > 0)
             {
                 if (Settings.Automation.IsAutoSaveScreenshotAtClear &&
                     inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
@@ -1295,8 +1307,6 @@ namespace Ink_Canvas
 
             if (lastBorderMouseDownObject is Panel panel)
                 panel.Background = new SolidColorBrush(Colors.Transparent);
-
-            if (TryEnterPresentationElementSelection()) return;
 
             // 如果当前不在批注模式，先切换到批注模式
             if (!IsAnnotating)
@@ -1601,7 +1611,7 @@ namespace Ink_Canvas
                 }
                 catch (Exception ex)
                 {
-                    MessageBoxHelper.Show(this, string.Format(Properties.MainWindowStrings.Main_RollCall_CannotCallExternal, ex.Message));
+                    MessageBox.Show(string.Format(Properties.MainWindowStrings.Main_RollCall_CannotCallExternal, ex.Message));
 
                     // 调用失败时回退到相应的点名窗口
                     if (Settings.RandSettings.UseNewRollCallUI)
@@ -2776,16 +2786,28 @@ namespace Ink_Canvas
             // 覆盖后算出的折叠位置，表现为"折叠标志已置位但工具栏仍停在屏幕内"。
             int myVersion = Interlocked.Increment(ref _marginAnimationVersion);
 
-            Task motionTask = Task.CompletedTask;
+            Point target = default;
             await Dispatcher.InvokeAsync(() =>
             {
-                motionTask = ViewboxFloatingBarMarginAnimationCore(
-                    MarginFromEdge, PosXCaculatedWithTaskbarHeight, !skipAnimation);
+                if (skipAnimation)
+                {
+                    ViewboxFloatingBarMarginAnimationCore(MarginFromEdge, PosXCaculatedWithTaskbarHeight, false);
+                }
+                else
+                {
+                    ViewboxFloatingBarMarginAnimationCore(MarginFromEdge, PosXCaculatedWithTaskbarHeight, true);
+                }
+
+                // 在 UI 线程内立即快照本次计算的位置（Core 内部写入共享字段 pos）
+                target = new Point(pos.X, pos.Y);
             });
 
-            // 等弹簧自然静止，而不是拍一个 200ms 的固定延时：
-            // 延时短了会打断动画，长了就是白等，而且完全不受手感设置影响。
-            if (!skipAnimation) await motionTask;
+            if (!skipAnimation)
+            {
+                // 等动画层完成：动画时长 0.35s，这里等播放到写最终 Margin 的时机。
+                // 传 0 时 skipAnimation 路径立即返回，不引入等待。
+                await Task.Delay(200);
+            }
 
             if (myVersion != Volatile.Read(ref _marginAnimationVersion))
             {
@@ -2803,8 +2825,8 @@ namespace Ink_Canvas
 
             await Dispatcher.InvokeAsync(() =>
             {
-                // 不再重复写 Margin：Core 已把布局属性设成终点，弹簧也已静止在同一位置。
-                // 旧的"动画末尾再写一次"只会多触发一次布局，看起来像硬跳一下。
+                ViewboxFloatingBar.Margin = new Thickness(target.X, target.Y, -2000, -200);
+                ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
                 isViewboxFloatingBarMarginAnimationRunning = false;
                 if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
 
@@ -2818,18 +2840,14 @@ namespace Ink_Canvas
             });
         }
 
-        /// <summary>
-        /// 计算目标位置并落位。布局属性一次写到终点，视觉位移交给弹簧在合成线程上收敛。
-        /// </summary>
-        /// <returns>弹簧静止后完成的任务；同步落位时为已完成任务。</returns>
-        private Task ViewboxFloatingBarMarginAnimationCore(int MarginFromEdge,
+        private void ViewboxFloatingBarMarginAnimationCore(int MarginFromEdge,
             bool PosXCaculatedWithTaskbarHeight = false, bool animate = false)
         {
             // 折叠态否决：折叠位是负值，正向边距只可能来自“展开/居中”。
             // 放在最前面，保证任何绕开状态机入口、直接调用本方法的路径也无法把折叠态拉回屏幕内。
             if (IsExpandedEdgeDuringFold(MarginFromEdge))
             {
-                return Task.CompletedTask;
+                return;
             }
 
             if (Topmost)
@@ -3052,38 +3070,33 @@ namespace Ink_Canvas
                             pointDesktop = pos;
                     }
                 }
-
-                // 自动翻转启用且主按钮位于右侧时，以右侧（主按钮）为固定点重新计算水平位置。
-                // 批注状态变更时工具栏组件显隐会使宽度变化，若沿用居中或保存的左侧位置，
-                // 主按钮会被推出屏幕边缘造成意外遮挡；此处与拖动时的实时翻转逻辑保持一致。
-                if (MarginFromEdge >= 0
-                    && Settings.Appearance.AutoFlipWhenSpaceInsufficient
-                    && !IsVerticalToolbar
-                    && isFloatingBarHeadOnRight)
-                {
-                    RefreshFloatingBarSizeCache(true);
-                    var headLeft = ViewboxFloatingBar.Margin.Left
-                                   + Math.Max(0, _cachedFloatingBarWidth - _cachedFloatingBarHeadWidth);
-                    pos.X = ClampFloatingBarLeft(
-                        headLeft - Math.Max(0, floatingBarWidth - _cachedFloatingBarHeadWidth),
-                        floatingBarWidth,
-                        screenWidth);
-                }
             }
             else if (IsVerticalToolbar)
             {
                 pos.X = screenWidth - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleX;
             }
 
-            // 唯一的位置写入路径：布局一次到位 + 弹簧收敛视觉位移。
-            // 旧实现逐帧改 Margin（布局属性），每帧都要重新测量排列，长距离滑动就掉帧；
-            // 缓动又是从零速度开始的固定曲线，被下一次操作打断只能硬切。
-            var motionTask = MoveFloatingBarTo(new Thickness(pos.X, pos.Y, 0, -20), animate);
+            if (animate)
+            {
+                var marginAnimation = new ThicknessAnimation
+                {
+                    Duration = TimeSpan.FromSeconds(0.35),
+                    From = ViewboxFloatingBar.Margin,
+                    To = new Thickness(pos.X, pos.Y, 0, -20),
+                    EasingFunction = new CircleEase()
+                };
+                ViewboxFloatingBar.BeginAnimation(MarginProperty, marginAnimation);
+            }
+            else
+            {
+                // 同步落位前先摘掉动画：动画层比属性值优先级高，
+                // 不摘掉的话上一段展开动画会继续覆盖这里的折叠位（表现为"重设了位置却没动"）。
+                ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
+                ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, 0, -20);
+            }
 
             if (!animate) isViewboxFloatingBarMarginAnimationRunning = false;
             if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
-
-            return motionTask;
         }
 
         /// <summary>
@@ -3107,7 +3120,6 @@ namespace Ink_Canvas
             // 本方法的最终 Margin 在 349ms 后才写，期间若有折叠过渡（或另一次居中）发起，必须作废。
             int myVersion = Interlocked.Increment(ref _marginAnimationVersion);
 
-            Task pendingMotion = Task.CompletedTask;
             await Dispatcher.InvokeAsync(() =>
             {
                 if (isFloatingBarFolded)
@@ -3215,12 +3227,17 @@ namespace Ink_Canvas
                         pointDesktop = pos;
                 }
 
-                // 布局一次落到终点，位移交给弹簧在合成线程上收敛。
-                pendingMotion = MoveFloatingBarTo(new Thickness(pos.X, pos.Y, 0, -20), animate: true);
+                var marginAnimation = new ThicknessAnimation
+                {
+                    Duration = TimeSpan.FromSeconds(0.35),
+                    From = ViewboxFloatingBar.Margin,
+                    To = new Thickness(pos.X, pos.Y, 0, -20),
+                    EasingFunction = new CircleEase()
+                };
+                ViewboxFloatingBar.BeginAnimation(MarginProperty, marginAnimation);
             });
 
-            // 等弹簧自然静止，不再拍 349ms 的固定延时
-            await pendingMotion;
+            await Task.Delay(349);
 
             if (isFloatingBarFolded || myVersion != Volatile.Read(ref _marginAnimationVersion))
             {
@@ -3229,6 +3246,9 @@ namespace Ink_Canvas
 
             await Dispatcher.InvokeAsync(() =>
             {
+                // 先清掉本次动画，避免残留的动画值在后续赋值时重新生效
+                ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
+                ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
                 isViewboxFloatingBarMarginAnimationRunning = false;
 
                 if (!string.IsNullOrEmpty(_currentToolMode))
@@ -3259,7 +3279,6 @@ namespace Ink_Canvas
             // 与 ViewboxFloatingBarMarginAnimationAsync 共用版本号：后发起的写值获胜。
             int myVersion = Interlocked.Increment(ref _marginAnimationVersion);
 
-            Task pendingMotion = Task.CompletedTask;
             await Dispatcher.InvokeAsync(() =>
             {
                 if (isFloatingBarFolded)
@@ -3346,12 +3365,17 @@ namespace Ink_Canvas
                         pointPPT = pos;
                 }
 
-                // 布局一次落到终点，位移交给弹簧在合成线程上收敛。
-                pendingMotion = MoveFloatingBarTo(new Thickness(pos.X, pos.Y, 0, -20), animate: true);
+                var marginAnimation = new ThicknessAnimation
+                {
+                    Duration = TimeSpan.FromSeconds(0.35),
+                    From = ViewboxFloatingBar.Margin,
+                    To = new Thickness(pos.X, pos.Y, 0, -20),
+                    EasingFunction = new CircleEase()
+                };
+                ViewboxFloatingBar.BeginAnimation(MarginProperty, marginAnimation);
             });
 
-            // 等弹簧自然静止，不再拍 349ms 的固定延时
-            await pendingMotion;
+            await Task.Delay(349);
 
             if (isFloatingBarFolded || myVersion != Volatile.Read(ref _marginAnimationVersion))
             {
@@ -3360,6 +3384,9 @@ namespace Ink_Canvas
 
             await Dispatcher.InvokeAsync(() =>
             {
+                // 先清掉本次动画，避免残留的动画值在后续赋值时重新生效
+                ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
+                ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
                 isViewboxFloatingBarMarginAnimationRunning = false;
 
                 if (!string.IsNullOrEmpty(_currentToolMode))
@@ -3617,68 +3644,9 @@ namespace Ink_Canvas
                 else CaptureAndEnqueueScreenshotSave(true);
             }
 
-            ApplyCursorInputRouting();
-
-            // 点击鼠标按钮退出批注模式时的全屏还原
-            RestoreFullScreenOnExitAnnotationMode();
-
-            inkCanvas.Select(new StrokeCollection());
-            GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-
-            // 视频展台特殊模式下不执行 SaveStrokes/RestoreStrokes，
-            // 否则会清空 timeMachine 历史并 Children.Clear() 移除直播帧，
-            // 导致撤销变灰色且视频预览消失
-            if (currentMode != 0 && !_isVideoPresenterSpecialMode)
-            {
-                SaveStrokes();
-                RestoreStrokes();
-            }
-
-            UpdateToolbarComponentVisibility();
-
-            // 注意：快捷调色盘的可见性现在完全由工具栏规则集管理，不需要手动设置
-
-            // 折叠态下不执行居中：启动初始化会以 (null, null) 程序化触发一次"切鼠标"，
-            // 此时折叠动画可能尚未落地——若在这里发起展开居中，会把折叠位置覆盖掉
-            // （折叠标志保持 true，但工具栏被拉回屏幕内）。
-            // 折叠态外观跑偏由 IsFoldedAppearanceIntact / RestoreFoldedAppearance 负责修复，
-            // 这里只按实时场景落位；50ms 内开始的折叠由 ShowFloatingBar 内部否决。
-            if (!isFloatingBarFolded)
-            {
-                HideSubPanels("cursor", true);
-                await Task.Delay(50);
-                ApplyFloatingBarPlacementForCurrentMode();
-            }
-        }
-
-        // 鼠标入口与演示结束共用；不截图、不保存墨迹、不异步切换工具。
-        internal void ApplyCursorInputRouting()
-        {
-            // 鼠标工具下如果仍有已选中的图片/SVG，不能把整个 InkCanvas 设为不可命中。
-            // 这些元素位于 InkCanvas 的子树中；否则即使元素仍显示、选框仍显示，
-            // 元素本身及其透明外接矩形也都收不到拖动事件。
-            bool keepSelectedCanvasElementInteractive = currentSelectedElement != null
-                && IsBitmapLikeCanvasElement(currentSelectedElement);
-            // SVG scenes are hosted inside InkCanvas alongside ordinary annotation strokes.
-            // Collapsing InkCanvas for the cursor tool used to hide both the inserted scene
-            // and all annotation immediately after the user left the pen tool.  Keep the
-            // canvas visually present while a scene exists; it remains click-through unless
-            // that scene is currently selected.
-            bool keepSecAgentSceneVisible = HasSecAgentSceneElementsOnCanvas();
-
             if (!IsInPPTPresentationMode)
             {
-                if (keepSelectedCanvasElementInteractive)
-                {
-                    inkCanvas.Visibility = Visibility.Visible;
-                    inkCanvas.IsHitTestVisible = true;
-                }
-                else if (keepSecAgentSceneVisible)
-                {
-                    inkCanvas.Visibility = Visibility.Visible;
-                    inkCanvas.IsHitTestVisible = false;
-                }
-                else if (Settings.Canvas.HideStrokeWhenSelecting)
+                if (Settings.Canvas.HideStrokeWhenSelecting)
                 {
                     inkCanvas.Visibility = Visibility.Collapsed;
                 }
@@ -3690,17 +3658,7 @@ namespace Ink_Canvas
             }
             else
             {
-                if (keepSelectedCanvasElementInteractive)
-                {
-                    inkCanvas.Visibility = Visibility.Visible;
-                    inkCanvas.IsHitTestVisible = true;
-                }
-                else if (keepSecAgentSceneVisible)
-                {
-                    inkCanvas.Visibility = Visibility.Visible;
-                    inkCanvas.IsHitTestVisible = false;
-                }
-                else if (Settings.PowerPointSettings.IsShowStrokeOnSelectInPowerPoint)
+                if (Settings.PowerPointSettings.IsShowStrokeOnSelectInPowerPoint)
                 {
                     inkCanvas.Visibility = Visibility.Visible;
                     inkCanvas.IsHitTestVisible = true;
@@ -3721,16 +3679,37 @@ namespace Ink_Canvas
 
             GridTransparencyFakeBackground.Opacity = 0;
             GridTransparencyFakeBackground.Background = Brushes.Transparent;
-            // Keep the window interactive while an SVG is selected so a click outside its
-            // full rectangular hit area can cancel the selection. Once it is cleared,
-            // HandleSelectedSecAgentSceneMouseDown restores click-through for the next click.
-            if (keepSelectedCanvasElementInteractive)
-                SetTransparentNotHitThrough();
-            else
-                SetTransparentHitThrough();
+            SetTransparentHitThrough();
 
             GridBackgroundCoverHolder.Visibility = Visibility.Collapsed;
 
+            // 点击鼠标按钮退出批注模式时的全屏还原
+            RestoreFullScreenOnExitAnnotationMode();
+
+            inkCanvas.Select(new StrokeCollection());
+            GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+
+            if (currentMode != 0)
+            {
+                SaveStrokes();
+                RestoreStrokes(true);
+            }
+
+            UpdateToolbarComponentVisibility();
+
+            // 注意：快捷调色盘的可见性现在完全由工具栏规则集管理，不需要手动设置
+
+            // 折叠态下不执行居中：启动初始化会以 (null, null) 程序化触发一次"切鼠标"，
+            // 此时折叠动画可能尚未落地——若在这里发起展开居中，会把折叠位置覆盖掉
+            // （折叠标志保持 true，但工具栏被拉回屏幕内）。
+            // 折叠态外观跑偏由 IsFoldedAppearanceIntact / RestoreFoldedAppearance 负责修复，
+            // 这里只按实时场景落位；50ms 内开始的折叠由 ShowFloatingBar 内部否决。
+            if (!isFloatingBarFolded)
+            {
+                HideSubPanels("cursor", true);
+                await Task.Delay(50);
+                ApplyFloatingBarPlacementForCurrentMode();
+            }
         }
 
         /// <summary>
@@ -3742,7 +3721,7 @@ namespace Ink_Canvas
         {
             if (TryBlockFrozenPageMutation("切换到画笔")) return;
 
-            CancelBoardRoamingInteraction();
+            EndBoardRoaming();
 
             if (lastBorderMouseDownObject is Panel panel)
                 panel.Background = new SolidColorBrush(Colors.Transparent);
@@ -3931,8 +3910,7 @@ namespace Ink_Canvas
                 else
                 {
                     // 切换到批注模式时，确保保存当前图片信息
-                    // 视频展台特殊模式下不执行 SaveStrokes，否则会清空 timeMachine 历史
-                    if (currentMode != 0 && !_isVideoPresenterSpecialMode)
+                    if (currentMode != 0)
                     {
                         SaveStrokes();
                     }
@@ -4624,11 +4602,11 @@ namespace Ink_Canvas
         {
             if (Settings.Advanced.IsSecondConfirmWhenShutdownApp)
             {
-                if (MessageBoxHelper.Show(this, Properties.MainWindowStrings.Main_CloseConfirm_Level1, "InkCanvasForClass",
+                if (MessageBox.Show(Properties.MainWindowStrings.Main_CloseConfirm_Level1, "InkCanvasForClass",
                         MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.Cancel) return;
-                if (MessageBoxHelper.Show(this, Properties.MainWindowStrings.Main_CloseConfirm_Level2, "InkCanvasForClass",
+                if (MessageBox.Show(Properties.MainWindowStrings.Main_CloseConfirm_Level2, "InkCanvasForClass",
                         MessageBoxButton.OKCancel, MessageBoxImage.Error) == MessageBoxResult.Cancel) return;
-                if (MessageBoxHelper.Show(this, Properties.MainWindowStrings.Main_CloseConfirm_Level3, "InkCanvasForClass",
+                if (MessageBox.Show(Properties.MainWindowStrings.Main_CloseConfirm_Level3, "InkCanvasForClass",
                         MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.Cancel) return;
             }
 
@@ -4685,23 +4663,8 @@ namespace Ink_Canvas
 
         private void BtnClear_Click(object sender, RoutedEventArgs e)
         {
-            PerformCanvasClear();
-        }
-
-        /// <summary>
-        /// 清空画布内容（清屏按钮与长按撤销清屏共用）。
-        /// 清屏历史默认由 StrokesChanged 事件路径按 <see cref="TimeMachineHistoryType.Clear"/> 提交；
-        /// 长按撤销清屏在调用前已显式提交并置 <see cref="_suppressClearHistoryCommit"/> 抑制重复提交。
-        /// </summary>
-        /// <param name="preserveClearHistory">
-        /// true 时即使「清空墨迹时删除墨迹历史记录」开启也保留本次清屏的撤销记录
-        /// （长按撤销清屏使用，保证清屏后仍可通过撤销恢复墨迹）。
-        /// </param>
-        private void PerformCanvasClear(bool preserveClearHistory = false)
-        {
             if (TryBlockFrozenPageMutation("清空冻结页面内容")) return;
             ClearAllSelection();
-            NotifyPluginWhiteboardPageClearing();
             forceEraser = false;
             //BorderClearInDelete.Visibility = Visibility.Collapsed;
 
@@ -4716,18 +4679,24 @@ namespace Ink_Canvas
                 if (Pen_Icon.Background == null) PenIcon_Click(null, null);
             }
 
+            if (inkCanvas.Strokes.Count != 0)
+            {
+                // 注入历史记录以便支持撤销
+                var whiteboardIndex = CurrentWhiteboardIndex;
+                if (currentMode == 0) whiteboardIndex = 0;
+            }
+
             ClearStrokes(false);
             // 保存非笔画元素（如图片）
             var preservedElements = PreserveNonStrokeElements();
             inkCanvas.Children.Clear();
             // 恢复非笔画元素
             RestoreNonStrokeElements(preservedElements);
-            ClearSecAgentSceneElements();
 
-            if (Settings.Canvas.ClearCanvasAndClearTimeMachine && !preserveClearHistory)
-                timeMachine.ClearStrokeHistory();
+            if (Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
 
             CancelSingleFingerDragMode();
+
         }
 
         private bool lastIsInMultiTouchMode;
@@ -5406,95 +5375,16 @@ namespace Ink_Canvas
         /// </summary>
         internal void UpdatePenIconColor()
         {
+            if (!Settings.Appearance.ShowPenColorOnFloatingBarIcon) return;
             if (Pen_Icon == null || Pen_Icon.Icon == null) return;
-
-            if (!Settings.Appearance.ShowPenColorOnFloatingBarIcon
-                || (_currentToolMode != "pen" && _currentToolMode != "color"))
-            {
-                Pen_Icon.ClearIconInnerOutline();
-                return;
-            }
+            if (_currentToolMode != "pen" && _currentToolMode != "color") return;
 
             try
             {
                 var inkColor = inkCanvas.DefaultDrawingAttributes.Color;
                 Pen_Icon.Icon.Brush = new SolidColorBrush(inkColor);
-                ApplyPenIconOutlineForContrast();
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Toolbar] 更新浮动栏批注图标颜色为当前画笔颜色失败: {ex.Message}", LogHelper.LogType.Info);
-            }
-        }
-
-        /// <summary>
-        /// 计算两个颜色之间的 WCAG 相对对比度（范围约 1~21，值越大对比越强）。
-        /// </summary>
-        private static double GetColorContrastRatio(Color color1, Color color2)
-        {
-            static double Luminance(Color c)
-            {
-                double Channel(double v)
-                {
-                    v /= 255d;
-                    return v <= 0.03928 ? v / 12.92 : Math.Pow((v + 0.055) / 1.055, 2.4);
-                }
-
-                return 0.2126 * Channel(c.R) + 0.7152 * Channel(c.G) + 0.0722 * Channel(c.B);
-            }
-
-            double l1 = Luminance(color1);
-            double l2 = Luminance(color2);
-            return (Math.Max(l1, l2) + 0.05) / (Math.Min(l1, l2) + 0.05);
-        }
-
-        /// <summary>
-        /// 获取浮动栏当前背景色（跟随主题），用于判断批注图标是否清晰可见。
-        /// </summary>
-        private Color GetFloatingBarBackgroundColor()
-        {
-            try
-            {
-                if (Application.Current.TryFindResource("FloatBarBackground") is SolidColorBrush backgroundBrush)
-                    return backgroundBrush.Color;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Toolbar] 读取浮动栏背景色资源 FloatBarBackground 失败，将按主题推断: {ex.Message}", LogHelper.LogType.Info);
-            }
-
-            bool isDarkTheme = Settings.Appearance.Theme == 1 ||
-                                (Settings.Appearance.Theme == 2 && !ThemeHelper.IsSystemThemeLight());
-            return isDarkTheme ? Color.FromRgb(0x1A, 0x1C, 0x1E) : Colors.White;
-        }
-
-        /// <summary>
-        /// 当批注图标使用画笔颜色且与浮动栏背景对比度过低时，为图标添加向内描边，
-        /// 避免图标与背景融为一体导致“消失”；对比度足够时移除描边。
-        /// 注意：需在图标 Geometry 更新之后调用，描边才能跟随当前几何。
-        /// </summary>
-        private void ApplyPenIconOutlineForContrast()
-        {
-            if (Pen_Icon == null || Pen_Icon.Icon == null) return;
-
-            try
-            {
-                var inkColor = inkCanvas.DefaultDrawingAttributes.Color;
-                if (GetColorContrastRatio(inkColor, GetFloatingBarBackgroundColor()) < 2.5)
-                {
-                    // 描边使用浮动栏前景色（浅色主题为黑色、深色主题为白色），保证与背景形成足够反差；
-                    // 向内描边不会改变图标的视觉大小
-                    Pen_Icon.SetIconInnerOutline(new SolidColorBrush(FloatBarForegroundColor), 1.0);
-                }
-                else
-                {
-                    Pen_Icon.ClearIconInnerOutline();
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"[Toolbar] 按对比度为浮动栏批注图标添加/移除内描边失败: {ex.Message}", LogHelper.LogType.Info);
-            }
+            catch { }
         }
 
         /// <summary>
@@ -5504,7 +5394,6 @@ namespace Ink_Canvas
         private ToolbarImageButton _lastHighlightButton;
         private int _indicatorAnimationGeneration;
         private Storyboard _activeIndicatorStoryboard;
-        private EventHandler _activeIndicatorCompletedHandler;
         private string _pendingHighlightMode;
         private int _highlightPositionVersion;
         private int _highlightLayoutRetryCount;
@@ -5550,7 +5439,6 @@ namespace Ink_Canvas
                     if (button == null) return;
                     if (!ToolbarRegistry.GetUseRedStyle(button))
                         button.Icon.Brush = foregroundBrush;
-                    button.ClearIconInnerOutline();
                     button.Icon.Geometry = Geometry.Parse(GetCorrectIcon(iconType, false));
                 }
 
@@ -5601,11 +5489,6 @@ namespace Ink_Canvas
                             targetButton.Icon.Brush = new SolidColorBrush(highlightBarColor);
                     }
                     targetButton.Icon.Geometry = Geometry.Parse(GetCorrectIcon(targetIconType, true));
-                    // 几何更新后再应用描边，确保描边跟随当前图标几何
-                    if (Settings.Appearance.ShowPenColorOnFloatingBarIcon && targetButton == Pen_Icon)
-                        ApplyPenIconOutlineForContrast();
-                    else
-                        targetButton.ClearIconInnerOutline();
                 }
             }
             catch (Exception ex)
@@ -5718,17 +5601,6 @@ namespace Ink_Canvas
                     nextBarTop = nextTop + 2 + 43 + 2;
                 }
 
-                // 布局未稳定时 TransformToAncestor 会返回 (0,0)，
-                // 直接摆高光就会落在容器左上角——也就是拖动图标那个位置。
-                // 这里用按钮尺寸是否已就绪做判据，不达标就排队等布局。
-                if (nextWidth < 8 || nextHeight < 8 ||
-                    double.IsNaN(nextPos) || double.IsNaN(nextTop) ||
-                    (Math.Abs(nextPos) < 0.5 && Math.Abs(nextTop) < 0.5 && container.ActualWidth > 0))
-                {
-                    DeferFloatingBarHighlightIfLayoutPending(mode);
-                    return;
-                }
-
                 bool isFirstShow = _lastHighlightButton == null;
 
                 if (isFirstShow)
@@ -5820,20 +5692,7 @@ namespace Ink_Canvas
                 {
                     var oldStoryboard = _activeIndicatorStoryboard;
                     _activeIndicatorStoryboard = null;
-                    try
-                    {
-                        oldStoryboard.Stop(indicatorBar);
-                        // 解除 Completed 订阅，避免 lambda 闭包持有 indicatorBar 长期存活
-                        if (_activeIndicatorCompletedHandler != null)
-                        {
-                            oldStoryboard.Completed -= _activeIndicatorCompletedHandler;
-                            _activeIndicatorCompletedHandler = null;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"[Toolbar] 切换浮动栏高亮指示条位置时停止旧动画并解绑 Completed 失败: {ex.Message}", LogHelper.LogType.Info);
-                    }
+                    try { oldStoryboard.Stop(indicatorBar); } catch { }
                     indicatorBar.RenderTransform = null;
                     indicatorBar.Opacity = 1.0;
                 }
@@ -5916,17 +5775,12 @@ namespace Ink_Canvas
 
                 int currentGeneration = _indicatorAnimationGeneration;
                 _activeIndicatorStoryboard = storyboard;
-                EventHandler completedHandler = null;
-                completedHandler = (s, e) =>
+                storyboard.Completed += (s, e) =>
                 {
-                    storyboard.Completed -= completedHandler;
-                    _activeIndicatorCompletedHandler = null;
                     if (currentGeneration != _indicatorAnimationGeneration) return;
                     _activeIndicatorStoryboard = null;
                     indicatorBar.RenderTransform = null;
                 };
-                _activeIndicatorCompletedHandler = completedHandler;
-                storyboard.Completed += completedHandler;
 
                 storyboard.Begin(indicatorBar, true);
                 storyboard.Pause(indicatorBar);
@@ -6313,20 +6167,12 @@ namespace Ink_Canvas
         {
             if (_canvasGestureOwnsTouchInput && !string.Equals(_currentToolMode, mode, StringComparison.Ordinal))
                 ResetCanvasGestureInput(false);
-            if (mode != "select") LeavePresentationElementSelection();
             if (!string.Equals(mode, "roaming", StringComparison.Ordinal) && IsBoardRoamingMode)
             {
                 EndBoardRoaming();
                 ResetBoardRoamingContactState();
             }
             _currentToolMode = NormalizeToolModeForFreeze(mode);
-
-            // 工具切换为非笔模式（橡皮/框选/图形/漫游/鼠标）时，扩展画布提示立即消失
-            if (_currentToolMode != "pen" && _currentToolMode != "color")
-            {
-                HideEdgeExpandHint();
-            }
-
             UpdateBoardRoamingButtonState();
 
             // Issue #285 更小批注栏：根据当前工具模式刷新迷你栏显示状态
@@ -6342,8 +6188,6 @@ namespace Ink_Canvas
             // 工具模式变化后同步刷新工具栏形态（批注/鼠标布局按 IsAnnotating 决定），
             // 否则会出现指示器已切到鼠标、形态仍停在批注的失步（退出白板时的两步走流程即如此）。
             UpdateToolbarComponentVisibility();
-
-            SyncWinRTInkPipelineWithLogicalTool();
         }
 
         /// <summary>
