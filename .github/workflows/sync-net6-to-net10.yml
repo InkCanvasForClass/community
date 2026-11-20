@@ -270,15 +270,15 @@ jobs:
             $subject = ((git log -1 --format='%h %s' $sha) | Out-String).Trim()
             Write-Host "==> 同步 $subject"
 
-            git cherry-pick -x $sha
+            # 合并提交需要 -m 才能 cherry-pick
+            $isMerge = ((git rev-list --parents -n1 $sha) -split ' ').Count -gt 2
+            if ($isMerge) { git cherry-pick -x -m 1 $sha } else { git cherry-pick -x $sha }
             if ($LASTEXITCODE -eq 0) { continue }
 
             $conflicted = Get-ConflictFiles
             if ($conflicted.Count -eq 0) {
-              # 没有冲突也没产生改动：该提交的改动已等价存在于 net10
               Write-Host "::warning::$subject 在 net10 上没有产生改动，跳过"
-              git cherry-pick --skip
-              if ($LASTEXITCODE -ne 0) { git cherry-pick --abort 2>$null; exit 1 }
+              if (Test-Path .git/CHERRY_PICK_HEAD) { git cherry-pick --skip 2>$null }
               continue
             }
 
@@ -386,18 +386,19 @@ jobs:
       - name: Restore and build (after upgrade)
         if: steps.try_build.outcome == 'failure'
         shell: pwsh
+        continue-on-error: true
         run: |
           $ErrorActionPreference = "Continue"
           Write-Host "=== 升级后重新 restore + build ==="
           dotnet restore "Ink Canvas.sln" --verbosity minimal
           if ($LASTEXITCODE -ne 0) {
-            Write-Error "::error::升级后 restore 仍失败，NuGet 包可能不兼容 net10"
-            exit 1
+            Write-Host "::warning::升级后 restore 仍失败，但不阻断同步；代码仍推送，由 dotnet-desktop 工作流报告编译错误"
+            exit 0
           }
           dotnet build "Ink Canvas.sln" -c Release -p:Platform=x64 --no-restore --verbosity minimal
           if ($LASTEXITCODE -ne 0) {
-            Write-Error "::error::升级后 .NET 10 编译仍失败，需要人工介入解决兼容性问题"
-            exit 1
+            Write-Host "::warning::升级后 .NET 10 编译仍失败，但不阻断同步；代码仍推送，由 dotnet-desktop 工作流报告编译错误"
+            exit 0
           }
           Write-Host "::notice::升级后编译通过"
 
