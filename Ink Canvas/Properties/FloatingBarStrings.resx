@@ -523,7 +523,7 @@
     <value>重叠加深</value>
   </data>
   <data name="FloatingBar_Opacity" xml:space="preserve">
-    <value>透明</value>
+    <value>不透明度</value>
   </data>
   <data name="FloatingBar_FadeDelay" xml:space="preserve">
     <value>延迟</value>
