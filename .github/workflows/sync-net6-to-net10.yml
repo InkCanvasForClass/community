@@ -175,7 +175,20 @@ jobs:
                 }
                 $i++
 
+                # ours 块末尾往往缺右括号：冲突块两侧共用同一行 "}"（例如两个枚举定义之间）。
+                # 只拼 ours + theirs 会少一个 "}"，整个文件语法错误，这里按差值补齐。
+                $delta = 0
+                foreach ($line in $ours) {
+                  $delta += ($line.Length - $line.Replace('{', '').Length) - ($line.Length - $line.Replace('}', '').Length)
+                }
                 $merged.AddRange([string[]]$ours)
+                if ($delta -gt 0) {
+                  $indent = ''
+                  foreach ($line in $ours) {
+                    if ($line.Trim()) { $indent = $line.Substring(0, $line.Length - $line.TrimStart().Length); break }
+                  }
+                  for ($k = 0; $k -lt $delta; $k++) { $merged.Add($indent + '}') }
+                }
                 $merged.AddRange([string[]]$theirs)
               }
 
