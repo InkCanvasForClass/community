@@ -124,6 +124,11 @@ namespace Ink_Canvas
         private bool _floatingBarFoldedBeforePPT;
         private bool _hasFloatingBarStateBeforePPT;
 
+        // 放映开始事件执行期间的场景提示：这期间 IsInPPTPresentationMode 还没置位
+        // （要等 UpdateSlideShowStatus 排进 UI 队列执行），按桌面档计算会被陈旧的
+        // pointDesktop 拖拽坐标覆盖，所以整段开始事件都按放映档落位。
+        private bool _pptSlideShowBeginning;
+
         // 长按翻页相关字段
         /// <summary>
         /// 用于处理长按翻页功能的定时器。
@@ -309,14 +314,17 @@ namespace Ink_Canvas
                 _pptManager.IsSupportWPS = Settings.PowerPointSettings.IsSupportWPS;
                 _pptManager.SkipAnimationsWhenNavigating = Settings.PowerPointSettings.SkipAnimationsWhenGoNext;
 
-                // 注册事件
-                _pptManager.PPTConnectionChanged += OnPPTConnectionChanged;
-                _pptManager.SlideShowBegin += OnPPTSlideShowBegin;
-                _pptManager.SlideShowNextSlide += OnPPTSlideShowNextSlide;
-                _pptManager.SlideShowEnd += OnPPTSlideShowEnd;
-                _pptManager.PresentationOpen += OnPPTPresentationOpen;
-                _pptManager.PresentationClose += OnPPTPresentationClose;
-                _pptManager.SlideShowStateChanged += OnPPTSlideShowStateChanged;
+                // 注册事件。各管理器可能在 COM STA 线程、ROT 轮询线程或 Agent 监听线程上直接 raise，
+                // 处理器又是 async void：在非 UI 线程上跑到第一个 await 之后，后续会落在线程池，
+                // 再去访问 ViewboxFloatingBar 就是跨线程访问（日志里的“重设折叠位置失败”）。
+                // 因此在事件边界统一封送回 UI 线程。
+                _pptManager.PPTConnectionChanged += isConnected => DispatchPPTEvent(() => OnPPTConnectionChanged(isConnected));
+                _pptManager.SlideShowBegin += payload => DispatchPPTEvent(() => OnPPTSlideShowBegin(payload));
+                _pptManager.SlideShowNextSlide += payload => DispatchPPTEvent(() => OnPPTSlideShowNextSlide(payload));
+                _pptManager.SlideShowEnd += payload => DispatchPPTEvent(() => OnPPTSlideShowEnd(payload));
+                _pptManager.PresentationOpen += payload => DispatchPPTEvent(() => OnPPTPresentationOpen(payload));
+                _pptManager.PresentationClose += payload => DispatchPPTEvent(() => OnPPTPresentationClose(payload));
+                _pptManager.SlideShowStateChanged += isInSlideShow => DispatchPPTEvent(() => OnPPTSlideShowStateChanged(isInSlideShow));
 
                 _singlePPTInkManager = new PPTInkManager();
                 _singlePPTInkManager.IsAutoSaveEnabled = Settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint;
@@ -333,6 +341,16 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"PPT管理器初始化失败: {ex}", LogHelper.LogType.Error);
             }
         }
+
+        /// <summary>
+        /// 把 PPT 联动事件封送到 UI 线程执行。
+        /// 放映结束事件尤其关键：它由 QueueEndSlideShow 的 STA 线程在 TryEndSlideShow 里直接 raise，
+        /// 处理器开头又 await 了 Dispatcher.InvokeAsync，await 之后没有 SynchronizationContext
+        /// 可以回去，后续代码落到线程池；那里折叠状态机对浮动栏的任何访问都会抛跨线程异常，
+        /// 异常被 catch 吃掉后就是“托盘说已收纳、工具栏却还停在屏幕里、把手也不出来”。
+        /// </summary>
+        private void DispatchPPTEvent(Action handler)
+            => PostToUiThread(handler, "PPT 联动事件");
 
         /// <summary>
         /// 启动PPT监控：当PowerPoint支持功能启用时，启动PPT管理器的监控功能。
@@ -1165,6 +1183,10 @@ namespace Ink_Canvas
         {
             var wn = payload as SlideShowWindow;
             var agentState = payload as PPTState;
+            // 放映已经开始：整个开始事件的执行期间都按放映档落位。
+            // 不提前置 IsInPPTPresentationMode，避免 UpdateSlideShowStatus 误判
+            // wasInSlideShow 而跳过放映提示；用短生命周期的场景标记覆盖这段窗口期。
+            _pptSlideShowBeginning = true;
             try
             {
                 // 进入放映的收纳/展开由 IsAutoFoldInPPTSlideShow 决定，所以必须在它之前记录，
@@ -1405,21 +1427,31 @@ namespace Ink_Canvas
                     }
                 });
 
-                if (!isFloatingBarFolded)
+                // 放映档落位只做一次，而且必须等三件事都排完：
+                //   1. UpdateSlideShowStatus 应用 PPT 模式可见性（Normal 优先级，先于本续体执行）；
+                //   2. 窗口全屏 MoveWindow（PPTUIManager 排在 ApplicationIdle）；
+                //   3. 布局把新的可见性算进 ActualWidth（Render 优先级，早于 ApplicationIdle）。
+                // 用优先级排队而不是固定延时：同优先级 FIFO 保证排在上面的 MoveWindow 之后执行，
+                // 不需要用魔法数字去猜"多久算稳定"。
+                await Dispatcher.InvokeAsync(() =>
                 {
-                    new Thread(() =>
-                    {
-                        Thread.Sleep(100);
-                        Application.Current.Dispatcher.BeginInvoke(() =>
-                        {
-                            ViewboxFloatingBarMarginAnimation(60);
-                        });
-                    }).Start();
-                }
+                    if (isFloatingBarFolded) return;
+
+                    // 幂等对齐可见性：即使模式更新比本回调晚，也不会按旧宽度居中。
+                    UpdateToolbarComponentVisibility();
+                    ViewboxFloatingBar.UpdateLayout();
+                    ShowFloatingBar(IsInPPTPresentationMode
+                        ? FloatingBarPlacement.PptExpanded
+                        : FloatingBarPlacement.DesktopExpanded);
+                }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"处理幻灯片放映开始事件失败: {ex}", LogHelper.LogType.Error);
+            }
+            finally
+            {
+                _pptSlideShowBeginning = false;
             }
         }
 
@@ -1816,15 +1848,8 @@ namespace Ink_Canvas
                 ResetPPTEnhancedPreviewCache();
                 await Application.Current.Dispatcher.InvokeAsync(() => CollapseAllPPTNavBarPreviews());
 
-                if (ShouldFoldAfterPPTSlideShow())
-                {
-                    // hold: 放映引发的收纳由系统决定，不要被自动展开定时器弹回来
-                    if (!isFloatingBarFolded) await FoldFloatingBarByCode(hold: true);
-                }
-                else if (isFloatingBarFolded)
-                {
-                    await UnFoldFloatingBarByCode();
-                }
+                // 形态收敛（折叠/展开）统一交给状态机 helper；这里只描述目标形态，位置由清理段尾部统一落地。
+                await SettleFloatingBarAfterPPTSlideShowAsync(applyFinalPosition: false);
 
                 if (isEnteredSlideShowEndEvent) return;
                 isEnteredSlideShowEndEvent = true;
@@ -2063,27 +2088,12 @@ namespace Ink_Canvas
                     }
                 });
 
-                await Task.Delay(100);
-                await Application.Current.Dispatcher.InvokeAsync(() =>
-                {
-                    if (!isFloatingBarFolded)
-                    {
-                        PureViewboxFloatingBarMarginAnimationInDesktopMode();
-                        if (Settings.Automation.IsAutoEnterAnnotationModeWhenExitFoldMode)
-                        {
-                            Task.Delay(350).ContinueWith(_ =>
-                            {
-                                Application.Current.Dispatcher.BeginInvoke(() =>
-                                {
-                                    if (!isFloatingBarFolded)
-                                    {
-                                        ViewboxFloatingBarMarginAnimation(-60);
-                                    }
-                                });
-                            });
-                        }
-                    }
-                });
+                // 退出时窗口要 MoveWindow 回工作区（PPTUIManager 排在 ApplicationIdle），
+                // 可见性由 UpdateSlideShowStatus 排在 Normal。这里只等一个 ApplicationIdle 空操作：
+                // 同优先级 FIFO 保证窗口几何与布局都已定型，随后按折叠标志落位才是真正的最终位置。
+                // 不要用固定延时去猜“多久算稳定”——猜短了会拿旧窗口尺寸居中，猜长了就是白等。
+                await Dispatcher.InvokeAsync(ApplyFloatingBarFinalPosition,
+                    System.Windows.Threading.DispatcherPriority.ApplicationIdle);
             }
             catch (Exception ex)
             {
@@ -2872,11 +2882,8 @@ namespace Ink_Canvas
                     }
                 }
 
-                if (!isFloatingBarFolded)
-                {
-                    await Task.Delay(100);
-                    ViewboxFloatingBarMarginAnimation(60);
-                }
+                await Task.Delay(100);
+                ShowFloatingBar(FloatingBarPlacement.PptExpanded);
             }
             catch (OperationCanceledException)
             {
@@ -3616,6 +3623,14 @@ namespace Ink_Canvas
                     }
                 }
 
+                // 退出的目标形态此刻已经确定：先按目标收纳，后续 CursorIcon_Click /
+                // 放映结束事件的落位都会被折叠否决，不再出现"先回到任务栏上方或
+                // 放映档底部，再收起"的中间态（用户配置为"从哪来回哪去"且进入前收纳时）。
+                if (ShouldFoldAfterPPTSlideShow() && !isFloatingBarFolded)
+                {
+                    await FoldFloatingBarByCode(hold: true);
+                }
+
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     CursorIcon_Click(null, null);
@@ -3627,18 +3642,10 @@ namespace Ink_Canvas
                 QueueEndSlideShow();
 
                 await Task.Delay(150);
-                if (!isFloatingBarFolded)
-                {
-                    PureViewboxFloatingBarMarginAnimationInDesktopMode();
-                    if (Settings.Automation.IsAutoEnterAnnotationModeWhenExitFoldMode)
-                    {
-                        await Task.Delay(350);
-                        if (!isFloatingBarFolded)
-                        {
-                            ViewboxFloatingBarMarginAnimation(-60);
-                        }
-                    }
-                }
+
+                // 退出后统一收尾：不依赖“幻灯片放映结束”事件与这里的先后顺序，
+                // 由状态机按 ExitPPTFoldMode 幂等地折叠/展开，再显式落地最终位置。
+                await SettleFloatingBarAfterPPTSlideShowAsync();
             }
             catch (Exception ex)
             {
@@ -3654,23 +3661,17 @@ namespace Ink_Canvas
                 });
 
                 // 异常情况下也手动处理自动收纳
+                // HandleManualSlideShowEnd 内部已完成形态收敛与位置落地，这里不再重复收尾，避免两次居中互相覆盖
                 await HandleManualSlideShowEnd();
-
-                await Task.Delay(150);
-                if (!isFloatingBarFolded)
-                {
-                    PureViewboxFloatingBarMarginAnimationInDesktopMode();
-                    if (Settings.Automation.IsAutoEnterAnnotationModeWhenExitFoldMode)
-                    {
-                        await Task.Delay(350);
-                        if (!isFloatingBarFolded)
-                        {
-                            ViewboxFloatingBarMarginAnimation(-60);
-                        }
-                    }
-                }
             }
         }
+
+        /// <summary>
+        /// PPT 放映收尾：按 ExitPPTFoldMode 收敛浮动栏形态（幂等），可选立即落地最终位置。
+        /// 退出按钮、放映结束事件、连接断开三条路径共用，避免各自读一次折叠标志再决定是否居中。
+        /// </summary>
+        private Task SettleFloatingBarAfterPPTSlideShowAsync(bool applyFinalPosition = true)
+            => SettleFloatingBarAfterExitAsync(ShouldFoldAfterPPTSlideShow(), applyFinalPosition, "PPT 放映退出");
 
         /// <summary>
         /// 按用户配置判断退出 PPT 放映后浮动栏是否应收纳。
@@ -3690,28 +3691,21 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 手动处理PPT放映结束时的自动收纳
+        /// 手动处理 PPT 放映结束：收起导航预览后，按用户策略收敛浮动栏形态并落地位置。
         /// </summary>
         private async Task HandleManualSlideShowEnd()
         {
             try
             {
                 await Application.Current.Dispatcher.InvokeAsync(() => CollapseAllPPTNavBarPreviews());
-
-                if (ShouldFoldAfterPPTSlideShow())
-                {
-                    // hold: 放映引发的收纳由系统决定，不要被自动展开定时器弹回来
-                    if (!isFloatingBarFolded) await FoldFloatingBarByCode(hold: true);
-                }
-                else if (isFloatingBarFolded)
-                {
-                    await UnFoldFloatingBarByCode();
-                }
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"手动处理PPT放映结束自动收纳失败: {ex}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"手动处理PPT放映结束收起导航预览失败: {ex}", LogHelper.LogType.Error);
             }
+
+            // 形态收敛与位置落地统一走状态机 helper，重复调用不会重播动画。
+            await SettleFloatingBarAfterPPTSlideShowAsync();
         }
 
         /// <summary>

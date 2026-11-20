@@ -325,10 +325,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                     effectiveScale = actualScale * MainWindow.CompactFloatingBarScaleFactor;
                 mw.ViewboxFloatingBarScaleTransform.ScaleX = effectiveScale;
                 mw.ViewboxFloatingBarScaleTransform.ScaleY = effectiveScale;
-                if (mw.IsInPPTPresentationMode)
-                    mw.ViewboxFloatingBarMarginAnimation(60);
-                else
-                    mw.ViewboxFloatingBarMarginAnimation(100, true);
+                // 折叠态由入口重建折叠位；展开态按当前场景重新居中
+                mw.ApplyFloatingBarPlacementForCurrentMode();
             }
         }
 

@@ -182,7 +182,14 @@ namespace Ink_Canvas
         /// </summary>
         private async Task ApplyFoldedAsync(bool instant, object trigger)
         {
-            if (isFloatingBarFolded && !instant) return;
+            if (isFloatingBarFolded && !instant)
+            {
+                // 标志已置位不代表外观已经落地：退出放映的展开流程可能随后把工具栏
+                // 拉回屏幕内、把侧边栏把手收起（标志仍是折叠）。此时直接返回，用户看到的
+                // 就是"托盘显示收纳态、工具栏却停在屏幕里、又找不到展开把手"的半折叠外观。
+                if (!IsFoldedAppearanceIntact()) RestoreFoldedAppearance();
+                return;
+            }
 
             isFloatingBarFolded = true;
 
@@ -568,10 +575,20 @@ namespace Ink_Canvas
             Task marginTask = Task.CompletedTask;
             if (currentMode == 0)
             {
-                if (IsInPPTPresentationMode)
-                    marginTask = ViewboxFloatingBarMarginAnimationAsync(FloatingBarEdgeExpandedPpt);
-                else
-                    PureViewboxFloatingBarMarginAnimationInDesktopMode();
+                // 放映开始事件的应用段（UpdateSlideShowStatus、退出按钮与 PPT 专用项的可见性）
+                // 还没跑：此刻工具栏还比最终形态窄，按它居中会偏右。如果在这里先摆一次、
+                // 应用段结束再按最终宽度摆第二次，用户看到的就是"工具栏先居中、随后左移"。
+                // 所以窗口期内不落位，由 OnPPTSlideShowBegin 在可见性应用完后统一落位一次。
+                bool isPptBeginWindow = _pptSlideShowBeginning && !IsInPPTPresentationMode;
+                if (!isPptBeginWindow)
+                {
+                    // 其余放映开始窗口期（例如外部演示源）仍走放映档：
+                    // 只认 IsInPPTPresentationMode 会按桌面档算出任务栏上方的位置。
+                    if (IsPptPlacementScene)
+                        marginTask = ViewboxFloatingBarMarginAnimationAsync(FloatingBarEdgeExpandedPpt);
+                    else
+                        PureViewboxFloatingBarMarginAnimationInDesktopMode();
+                }
             }
 
             // 侧边栏回收与工具栏回位同时进行，不要等位置动画播完再收
@@ -754,6 +771,10 @@ namespace Ink_Canvas
                 if (srcForFold != null) dpiScaleYForFold = srcForFold.CompositionTarget.TransformToDevice.M22;
                 double taskbarHeightForFold = ForegroundWindowInfo.GetTaskbarHeight(GetFloatingBarTargetScreen(), dpiScaleYForFold);
 
+                // 作废仍在等待落值的"展开/居中"写值：它们延时结束后只校验版本号、
+                // 不重新判断折叠标志，晚到的正值会把这里刚写好的折叠位覆盖回屏幕内。
+                Interlocked.Increment(ref _marginAnimationVersion);
+
                 // 同步写入折叠位置（无动画、不展开），并走一次布局让可见性判定读到最终值
                 ViewboxFloatingBarMarginAnimationCore(-60 - (int)Math.Round(taskbarHeightForFold));
                 ViewboxFloatingBar.UpdateLayout();
@@ -764,6 +785,149 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"重设折叠位置失败: {ex.Message}", LogHelper.LogType.Warning);
                 return false;
             }
+        }
+
+        /// <summary>
+        /// 折叠态下只允许写折叠边（负值，见 ComputeFoldEdge）。正向边距代表“展开/居中”，
+        /// 折叠期间写入会把折叠位置覆盖成屏幕内的位置，而 isFloatingBarFolded 仍是 true——
+        /// 用户看到的就是“托盘显示收纳态、工具栏却停在屏幕里”。
+        /// </summary>
+        private bool IsExpandedEdgeDuringFold(int marginFromEdge)
+        {
+            return isFloatingBarFolded && marginFromEdge > FloatingBarEdgeHiddenBase;
+        }
+
+        /// <summary>
+        /// 折叠态外观是否完整：工具栏已离开屏幕、侧边栏展开把手可见。
+        /// 两个条件缺一，都说明折叠流程被后来的展开/居中写值覆盖过——
+        /// 只看 isFloatingBarFolded 会把这种半折叠外观当成"已经折叠"而放过。
+        /// </summary>
+        private bool IsFoldedAppearanceIntact()
+        {
+            if (LeftSidePanel.Visibility != Visibility.Visible) return false;
+            return IsFloatingBarUiAbsentFromScreens();
+        }
+
+        /// <summary>
+        /// 只重建折叠态外观（工具栏折叠位 + 侧边栏把手），不重放折叠过渡的其它副作用
+        /// （切回放 UI、清墨迹、关白板等），避免"已经折叠、只是外观跑偏"时误伤用户现场。
+        /// </summary>
+        internal void RestoreFoldedAppearance()
+        {
+            if (!isFloatingBarFolded || currentMode != 0) return;
+
+            if (!Dispatcher.CheckAccess())
+            {
+                // 折叠外观全是 UI 线程独占状态。PPT 联动事件过去在线程池线程上走到这里，
+                // 异常被 ReapplyFoldPositionIfFolded 的 catch 吞掉，标志与外观就此脱节。
+                // 与其静默失败，不如排回 UI 队列补一次（重复执行安全）。
+                PostToUiThread(RestoreFoldedAppearance, "重建折叠外观");
+                return;
+            }
+
+            ReapplyFoldPositionIfFolded();
+
+            // 快捷面板正被用户打开时，把手本来就该收起（-50），不要把它拉回来
+            bool quickPanelOpen = LeftUnFoldButtonQuickPanel.Visibility == Visibility.Visible
+                || RightUnFoldButtonQuickPanel.Visibility == Visibility.Visible;
+            if (!quickPanelOpen)
+            {
+                _ = AnimateSidePanelsAsync(SidePanelEdgePeek, true);
+            }
+        }
+
+        /// <summary>
+        /// 按当前折叠标志把浮动栏落到最终位置：折叠态落折叠位（屏幕外），展开态按桌面位置居中。
+        /// 只用于流程收尾（退出白板/PPT、放映结束事件），不做过渡动画。
+        /// 目标位置固定为桌面位置：退出放映的窗口期内 IsInPPTPresentationMode 可能仍是过期值，
+        /// 用它选位置正是“退出后停在任务栏附近、没有重新居中”的来源之一。
+        /// </summary>
+        internal void ApplyFloatingBarFinalPosition()
+        {
+            if (!Dispatcher.CheckAccess())
+            {
+                PostToUiThread(ApplyFloatingBarFinalPosition, "浮动栏最终落位");
+                return;
+            }
+
+            if (isFloatingBarFolded)
+            {
+                RestoreFoldedAppearance();
+                return;
+            }
+
+            PureViewboxFloatingBarMarginAnimationInDesktopMode();
+        }
+
+        /// <summary>
+        /// 按调用方给出的策略（白板 / PPT 的 ExitFoldMode）收敛浮动栏形态，可选落地最终位置。
+        /// 已处于目标形态时入口会自行拦下，重复调用不会重播动画，因此可以幂等调用。
+        /// </summary>
+        /// <param name="shouldFold">调用方按各自策略计算出的目标形态。</param>
+        /// <param name="applyFinalPosition">收敛后是否调用 <see cref="ApplyFloatingBarFinalPosition"/>。</param>
+        /// <param name="context">日志上下文，例如“PPT 放映退出”。</param>
+        internal async Task SettleFloatingBarAfterExitAsync(bool shouldFold, bool applyFinalPosition, string context)
+        {
+            // 收敛要跑动画与 UI 写值。调用方（放映结束事件）过去可能落在线程池线程上，
+            // 这里先封送回 UI 线程，await 的调用方也就等到了真正的完成。
+            if (!Dispatcher.CheckAccess())
+            {
+                await Dispatcher.InvokeAsync(() => SettleFloatingBarAfterExitAsync(shouldFold, applyFinalPosition, context))
+                    .Task.Unwrap();
+                return;
+            }
+
+            try
+            {
+                if (shouldFold)
+                {
+                    // hold: 由系统决定的收纳，不要被“自动展开”定时器随后弹回来
+                    if (!isFloatingBarFolded) await FoldFloatingBarByCode(hold: true);
+                }
+                else if (isFloatingBarFolded)
+                {
+                    await UnFoldFloatingBarByCode();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"{context}：恢复浮动栏收纳状态失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+
+            if (applyFinalPosition) ApplyFloatingBarFinalPosition();
+        }
+
+        /// <summary>
+        /// 退出白板后的落位策略：要求恢复收纳时走折叠入口，否则原地展开。
+        /// </summary>
+        /// <remarks>
+        /// “原地展开”刻意不调用展开入口：展开入口会按当前场景重新居中，
+        /// 而白板退出时用户希望工具栏留在他自己放的位置上。这里只同步
+        /// 折叠标志、可见性和侧边栏把手，位置一个像素都不动。
+        /// </remarks>
+        /// <param name="restoreFolded">白板退出策略要求恢复收纳时为 true。</param>
+        internal async Task RestoreFloatingBarAfterBoardExitAsync(bool restoreFolded)
+        {
+            if (restoreFolded)
+            {
+                // hold：系统决定的收纳，不要被“自动展开”定时器随后弹回来
+                await FoldFloatingBarByCode(instant: true, hold: true);
+                return;
+            }
+
+            if (isFloatingBarFolded)
+            {
+                // 策略要求展开、当前却处于折叠态：必须走展开入口把工具栏搬回屏幕内。
+                // 只翻标志再改可见性会留下“标志=展开、工具栏仍在屏幕外”的半折叠外观，
+                // 正是托盘与工具栏互相矛盾的那类 bug。
+                await UnFoldFloatingBarByCode();
+                return;
+            }
+
+            // 已是展开态：只做原地恢复。白板退出刻意不重新居中，位置留给用户。
+            foldFloatingBarByUser = false;
+            ViewboxFloatingBar.Visibility = Visibility.Visible;
+            await AnimateSidePanelsAsync(SidePanelEdgeHidden, true);
         }
 
     }

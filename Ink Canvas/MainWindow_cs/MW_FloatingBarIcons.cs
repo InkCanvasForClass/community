@@ -853,29 +853,18 @@ namespace Ink_Canvas
                 // 展开位（isFloatingBarFolded 仍为 true，于是工具栏可见但隐藏按钮点不动）。
                 // 退出白板时会连续触发多次切工具/隐藏面板，每次都调到这里，
                 // 最后那次居中会把刚恢复的收纳覆盖掉。
-                if (autoAlignCenter && !isFloatingBarFolded) // 控制居中
+                if (autoAlignCenter) // 控制居中
                 {
+                    var placement = IsInPPTPresentationMode
+                        ? FloatingBarPlacement.PptExpanded
+                        : Topmost
+                            ? FloatingBarPlacement.DesktopExpanded
+                            : FloatingBarPlacement.FullScreenExpanded;
+
                     // 延迟期间收纳可能刚好发生（退出白板的收纳是异步启动的），
-                    // 所以判断不能只在 Delay 前做一次，调位置前必须再看一眼，
-                    // 否则这次居中会把折叠位覆盖成展开位。
-                    if (IsInPPTPresentationMode)
-                    {
-                        await Task.Delay(50);
-                        if (isFloatingBarFolded) return;
-                        ViewboxFloatingBarMarginAnimation(60);
-                    }
-                    else if (Topmost) //非黑板
-                    {
-                        await Task.Delay(50);
-                        if (isFloatingBarFolded) return;
-                        ViewboxFloatingBarMarginAnimation(100, true);
-                    }
-                    else //黑板
-                    {
-                        await Task.Delay(50);
-                        if (isFloatingBarFolded) return;
-                        ViewboxFloatingBarMarginAnimation(60);
-                    }
+                    // 折叠否决由落位入口在真正写值前判断，而不是只看这里的一次快照。
+                    await Task.Delay(50);
+                    ShowFloatingBar(placement);
                 }
             }
 
@@ -979,7 +968,8 @@ namespace Ink_Canvas
                 new Thread(() =>
                 {
                     Thread.Sleep(100);
-                    Application.Current.Dispatcher.Invoke(() => { ViewboxFloatingBarMarginAnimation(60); });
+                    Application.Current.Dispatcher.Invoke(() =>
+                        ShowFloatingBar(FloatingBarPlacement.FullScreenExpanded));
                 }).Start();
 
                 HideSubPanels();
@@ -1203,7 +1193,7 @@ namespace Ink_Canvas
             if (currentMode == 0 && isFloatingBarFolded)
             {
                 ViewboxFloatingBar.UpdateLayout();
-                ReapplyFoldPositionIfFolded();
+                RestoreFoldedAppearance();
             }
         }
 
@@ -1226,7 +1216,7 @@ namespace Ink_Canvas
                 if (IsInPPTPresentationMode)
                 {
                     await Task.Delay(100);
-                    ViewboxFloatingBarMarginAnimation(60);
+                    ShowFloatingBar(FloatingBarPlacement.PptExpanded);
                 }
             }
         }
@@ -2318,9 +2308,18 @@ namespace Ink_Canvas
 
             RebuildToolbar();
 
-            // 更新工具栏位置
-            if (IsInPPTPresentationMode)
-                ViewboxFloatingBarMarginAnimation(60);
+            // 折叠态先巩固外观：重建工具栏、切换演示源都不应把已收纳的浮动栏拉回屏幕内，
+            // 也不应让侧边栏把手停留在展开流程收走的状态
+            if (isFloatingBarFolded && currentMode == 0)
+            {
+                RestoreFoldedAppearance();
+                return;
+            }
+
+            // 更新工具栏位置。用 IsPptPlacementScene：放映开始事件期间模式还没置位，
+            // 此时只认 IsInPPTPresentationMode 会把工具栏按桌面档摆在任务栏上方。
+            if (IsPptPlacementScene)
+                ShowFloatingBar(FloatingBarPlacement.PptExpanded);
             else
                 PureViewboxFloatingBarMarginAnimationInDesktopMode();
         }
@@ -2774,6 +2773,13 @@ namespace Ink_Canvas
 
             if (MarginFromEdge == 60) MarginFromEdge = 55;
 
+            // 折叠态否决：折叠位是负值，任何正向边距都意味着“展开/居中”。
+            // 折叠期间执行会把工具栏拉回屏幕内，而 isFloatingBarFolded 仍为 true。
+            if (IsExpandedEdgeDuringFold(MarginFromEdge))
+            {
+                return;
+            }
+
             // 版本号：后发起的调用获胜，旧调用在延时结束后发现已被取代则放弃写值。
             // 启动早期"展开居中"（HideSubPanels 尾部）与"启动收纳折叠"会并发调用本方法，
             // 二者共享 pos 字段——没有版本控制时，先算出的展开位置会在 200ms 后
@@ -2809,6 +2815,14 @@ namespace Ink_Canvas
                 return;
             }
 
+            if (IsExpandedEdgeDuringFold(MarginFromEdge))
+            {
+                // 等待期间进入了折叠态：这次"展开/居中"已经过时，不要覆盖折叠位；
+                // 同时复位运行标志，否则拖动判定会一直以为位置动画还在跑
+                await Dispatcher.InvokeAsync(() => { isViewboxFloatingBarMarginAnimationRunning = false; });
+                return;
+            }
+
             await Dispatcher.InvokeAsync(() =>
             {
                 ViewboxFloatingBar.Margin = new Thickness(target.X, target.Y, -2000, -200);
@@ -2829,6 +2843,13 @@ namespace Ink_Canvas
         private void ViewboxFloatingBarMarginAnimationCore(int MarginFromEdge,
             bool PosXCaculatedWithTaskbarHeight = false, bool animate = false)
         {
+            // 折叠态否决：折叠位是负值，正向边距只可能来自“展开/居中”。
+            // 放在最前面，保证任何绕开状态机入口、直接调用本方法的路径也无法把折叠态拉回屏幕内。
+            if (IsExpandedEdgeDuringFold(MarginFromEdge))
+            {
+                return;
+            }
+
             if (Topmost)
             {
                 ViewboxFloatingBar.Visibility = Visibility.Visible;
@@ -2998,8 +3019,10 @@ namespace Ink_Canvas
                     else
                         pos.X = screenWidth - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleX;
                 }
-                else if (IsInPPTPresentationMode)
+                else if (IsPptPlacementScene)
                 {
+                    // 放映档：横向居中并贴屏幕底边。放映开始窗口期也必须走这里，
+                    // 否则桌面档算出的 Y 会落在任务栏上方，随后被陈旧的 pointDesktop 覆盖。
                     switch (toolbarPosition)
                     {
                         case ToolbarPosition.Right:
@@ -3027,7 +3050,7 @@ namespace Ink_Canvas
                     pos.X = NormalizeFloatingBarLeftForScreen(pos.X, floatingBarWidth, screenWidth);
                 }
 
-                if (IsInPPTPresentationMode)
+                if (IsPptPlacementScene)
                 {
                     if (pointPPT.X != -1 || pointPPT.Y != -1)
                     {
@@ -3066,6 +3089,9 @@ namespace Ink_Canvas
             }
             else
             {
+                // 同步落位前先摘掉动画：动画层比属性值优先级高，
+                // 不摘掉的话上一段展开动画会继续覆盖这里的折叠位（表现为"重设了位置却没动"）。
+                ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
                 ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, 0, -20);
             }
 
@@ -3084,8 +3110,23 @@ namespace Ink_Canvas
                 return;
             }
 
+            // 折叠态否决：本方法只负责“展开/居中”，折叠期间执行会把折叠位置覆盖成屏幕内的位置。
+            if (isFloatingBarFolded)
+            {
+                return;
+            }
+
+            // 与 ViewboxFloatingBarMarginAnimationAsync 共用版本号：后发起的写值获胜。
+            // 本方法的最终 Margin 在 349ms 后才写，期间若有折叠过渡（或另一次居中）发起，必须作废。
+            int myVersion = Interlocked.Increment(ref _marginAnimationVersion);
+
             await Dispatcher.InvokeAsync(() =>
             {
+                if (isFloatingBarFolded)
+                {
+                    return;
+                }
+
                 ViewboxFloatingBar.Visibility = Visibility.Visible;
                 ViewboxFloatingBar.UpdateLayout();
                 isViewboxFloatingBarMarginAnimationRunning = true;
@@ -3198,9 +3239,17 @@ namespace Ink_Canvas
 
             await Task.Delay(349);
 
+            if (isFloatingBarFolded || myVersion != Volatile.Read(ref _marginAnimationVersion))
+            {
+                return;
+            }
+
             await Dispatcher.InvokeAsync(() =>
             {
+                // 先清掉本次动画，避免残留的动画值在后续赋值时重新生效
+                ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
                 ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
+                isViewboxFloatingBarMarginAnimationRunning = false;
 
                 if (!string.IsNullOrEmpty(_currentToolMode))
                 {
@@ -3221,8 +3270,22 @@ namespace Ink_Canvas
                 return;
             }
 
+            // 折叠态否决：折叠期间不允许按 PPT 贴边位置把工具栏拉回屏幕内。
+            if (isFloatingBarFolded)
+            {
+                return;
+            }
+
+            // 与 ViewboxFloatingBarMarginAnimationAsync 共用版本号：后发起的写值获胜。
+            int myVersion = Interlocked.Increment(ref _marginAnimationVersion);
+
             await Dispatcher.InvokeAsync(() =>
             {
+                if (isFloatingBarFolded)
+                {
+                    return;
+                }
+
                 ViewboxFloatingBar.Visibility = Visibility.Visible;
                 ViewboxFloatingBar.UpdateLayout();
                 isViewboxFloatingBarMarginAnimationRunning = true;
@@ -3314,9 +3377,17 @@ namespace Ink_Canvas
 
             await Task.Delay(349);
 
+            if (isFloatingBarFolded || myVersion != Volatile.Read(ref _marginAnimationVersion))
+            {
+                return;
+            }
+
             await Dispatcher.InvokeAsync(() =>
             {
+                // 先清掉本次动画，避免残留的动画值在后续赋值时重新生效
+                ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
                 ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
+                isViewboxFloatingBarMarginAnimationRunning = false;
 
                 if (!string.IsNullOrEmpty(_currentToolMode))
                 {
@@ -3631,25 +3702,13 @@ namespace Ink_Canvas
             // 折叠态下不执行居中：启动初始化会以 (null, null) 程序化触发一次"切鼠标"，
             // 此时折叠动画可能尚未落地——若在这里发起展开居中，会把折叠位置覆盖掉
             // （折叠标志保持 true，但工具栏被拉回屏幕内）。
-            // 但用户真实点击图标（sender != null）却仍被折叠标志拦下，只可能是标志与
-            // 实际状态不一致（工具栏明明在屏幕上却停着不居中），此时照常居中修复位置。
-            bool userInitiated = sender != null;
-            if (!isFloatingBarFolded || (userInitiated && !IsFloatingBarUiAbsentFromScreens()))
+            // 折叠态外观跑偏由 IsFoldedAppearanceIntact / RestoreFoldedAppearance 负责修复，
+            // 这里只按实时场景落位；50ms 内开始的折叠由 ShowFloatingBar 内部否决。
+            if (!isFloatingBarFolded)
             {
-                if (userInitiated && isFloatingBarFolded)
-                {
-                    LogHelper.WriteLogToFile(
-                        $"[Toolbar] 折叠标志与实际状态不一致（工具栏仍在屏幕上），重新居中: margin=[{ViewboxFloatingBar?.Margin}]",
-                        LogHelper.LogType.Warning);
-                }
-
                 HideSubPanels("cursor", true);
                 await Task.Delay(50);
-
-                if (IsInPPTPresentationMode)
-                    ViewboxFloatingBarMarginAnimation(60);
-                else
-                    ViewboxFloatingBarMarginAnimation(100, true);
+                ApplyFloatingBarPlacementForCurrentMode();
             }
         }
 
@@ -4807,31 +4866,16 @@ namespace Ink_Canvas
                             $"[Board] 退出白板: 模式={exitFoldMode}, 有记录={_hasFloatingBarStateBeforeBoard}, 进入前收纳={_floatingBarFoldedBeforeBoard}, 恢复收纳={restoreFolded}, ppt={IsInPPTPresentationMode}",
                             LogHelper.LogType.Event);
 
-                        if (restoreFolded && !IsInPPTPresentationMode)
+                        // 落位细节（折叠位/可见性/侧边栏/折叠标记）全部收在状态机里；
+                        // 不要在这里手写 Visibility/Margin——Hidden/Collapsed 会让
+                        // ActualWidth/ActualHeight 为 0，后续重建/主题刷新按 0 尺寸布局，
+                        // 工具栏就会以"未初始化"的样子出现在屏幕内。
+                        _ = RestoreFloatingBarAfterBoardExitAsync(restoreFolded).ContinueWith(t =>
                         {
-                            // 复用既有折叠流程（instant 直接落位、不播动画）：
-                            // 位置、可见性、侧边栏、折叠标记都由 FoldFloatingBar 统一处理。
-                            // 不要在这里手写 Visibility/Margin——Hidden/Collapsed 会让
-                            // ActualWidth/ActualHeight 为 0，后续重建/主题刷新按 0 尺寸布局，
-                            // 工具栏就会以"未初始化"的样子出现在屏幕内。
-                            // hold: 这是系统决定的收纳，不要被"自动展开"定时器在 500ms 后弹回来
-                            var foldTask = FoldFloatingBarByCode(instant: true, hold: true);
-                            // async Task 被丢弃后异常会静默消失，表现为"折叠标志置位但位置没动"，
-                            // 因此单独观察一次，失败时留证据。
-                            _ = foldTask.ContinueWith(t =>
-                            {
-                                LogHelper.WriteLogToFile(
-                                    $"[Board] 退出白板折叠任务异常: {t.Exception?.GetBaseException()}",
-                                    LogHelper.LogType.Error);
-                            }, TaskContinuationOptions.OnlyOnFaulted);
-                        }
-                        else
-                        {
-                            isFloatingBarFolded = false;
-                            foldFloatingBarByUser = false;
-                            ViewboxFloatingBar.Visibility = Visibility.Visible;
-                            SidePannelMarginAnimation(-50, true);
-                        }
+                            LogHelper.WriteLogToFile(
+                                $"[Board] 退出白板恢复浮动栏失败: {t.Exception?.GetBaseException()}",
+                                LogHelper.LogType.Error);
+                        }, TaskContinuationOptions.OnlyOnFaulted);
 
                         _hasFloatingBarStateBeforeBoard = false;
 

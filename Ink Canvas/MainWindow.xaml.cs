@@ -869,7 +869,7 @@ namespace Ink_Canvas
                 if (ViewboxFloatingBar != null && currentMode == 0)
                 {
                     ViewboxFloatingBar.Visibility = Visibility.Visible;
-                    ViewboxFloatingBarMarginAnimation(100, true);
+                    ApplyFloatingBarPlacementForCurrentMode();
                 }
 
                 LogHelper.WriteLogToFile("OOBE 已完成", LogHelper.LogType.Event);
@@ -1539,8 +1539,7 @@ namespace Ink_Canvas
                     // 先完成一次布局拿到真实宽高，再用 skipAnimation 直接定位；
                     // 否则按估算宽度算位置，首帧会偏一段距离再滑回来。
                     ViewboxFloatingBar.UpdateLayout();
-                    if (IsInPPTPresentationMode) ViewboxFloatingBarMarginAnimation(60, skipAnimation: true);
-                    else ViewboxFloatingBarMarginAnimation(100, true, skipAnimation: true);
+                    ApplyFloatingBarPlacementForCurrentMode(skipAnimation: true);
                 }
             }
 
@@ -1632,11 +1631,11 @@ namespace Ink_Canvas
             if (startFolded)
             {
                 // 只做状态收尾；工具栏保持隐藏，位置直接落到屏幕外（instant，不播动画）
-                _ = FoldFloatingBar(new object(), false, instant: true);
+                _ = FoldFloatingBarByUser(instant: true);
             }
             else
             {
-                _ = UnFoldFloatingBar(new object());
+                _ = UnFoldFloatingBarByUser();
             }
 
             // 显示快抽悬浮按钮
@@ -1757,8 +1756,10 @@ namespace Ink_Canvas
                     {
                         if (!isFloatingBarFolded)
                         {
-                            if (isInPPTPresentationMode) ViewboxFloatingBarMarginAnimation(60);
-                            else ViewboxFloatingBarMarginAnimation(100, true);
+                            // 3 秒防抖期间可能已经进入/退出放映，用 UI 线程刚刷新过的状态挑场景
+                            ShowFloatingBar(isInPPTPresentationMode
+                                ? FloatingBarPlacement.PptExpanded
+                                : FloatingBarPlacement.DesktopExpanded);
                         }
                     });
                 }

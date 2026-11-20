@@ -557,20 +557,10 @@ namespace Ink_Canvas
             var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin != null && mainWin.IsLoaded)
             {
-                var isInPPTPresentationMode = false;
-                // 托盘菜单的 Click 事件可能在 UI 线程触发；此处读取主窗口属性已在 UI 线程完成，
-                // 改为本地直接读取，避免在 UI 线程上同步等待自身的 Dispatcher.Invoke 形成自锁。
-                isInPPTPresentationMode = mainWin.IsInPPTPresentationMode;
-                if (!mainWin.isFloatingBarFolded)
-                {
-                    // 清空保存的状态，强制动画走默认位置分支
-                    mainWin._userHasDraggedFloatingBar = false;
-                    mainWin.pointDesktop = new Point(-1, -1);
-                    mainWin.pointPPT = new Point(-1, -1);
-
-                    if (!isInPPTPresentationMode) mainWin.PureViewboxFloatingBarMarginAnimationInDesktopMode();
-                    else mainWin.PureViewboxFloatingBarMarginAnimationInPPTMode();
-                }
+                // 托盘菜单的 Click 事件在 UI 线程触发，直接读主窗口状态，
+                // 避免在 UI 线程上同步等待自身的 Dispatcher.Invoke 形成自锁。
+                // 折叠态下由落位入口重设折叠位，不会把工具栏拉回屏幕。
+                mainWin.ResetFloatingBarToDefaultPlacement(mainWin.CurrentFloatingBarPlacement);
             }
         }
 
