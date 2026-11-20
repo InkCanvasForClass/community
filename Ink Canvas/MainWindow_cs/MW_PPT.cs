@@ -1175,7 +1175,7 @@ namespace Ink_Canvas
                 if (Settings.Automation.IsAutoFoldInPPTSlideShow)
                 {
                     if (!isFloatingBarFolded)
-                        await FoldFloatingBarByCode();
+                        await FoldFloatingBarByCode(hold: true);
                 }
                 else
                 {
@@ -1818,7 +1818,8 @@ namespace Ink_Canvas
 
                 if (ShouldFoldAfterPPTSlideShow())
                 {
-                    if (!isFloatingBarFolded) await FoldFloatingBarByCode();
+                    // hold: 放映引发的收纳由系统决定，不要被自动展开定时器弹回来
+                    if (!isFloatingBarFolded) await FoldFloatingBarByCode(hold: true);
                 }
                 else if (isFloatingBarFolded)
                 {
@@ -3699,7 +3700,8 @@ namespace Ink_Canvas
 
                 if (ShouldFoldAfterPPTSlideShow())
                 {
-                    if (!isFloatingBarFolded) await FoldFloatingBarByCode();
+                    // hold: 放映引发的收纳由系统决定，不要被自动展开定时器弹回来
+                    if (!isFloatingBarFolded) await FoldFloatingBarByCode(hold: true);
                 }
                 else if (isFloatingBarFolded)
                 {
