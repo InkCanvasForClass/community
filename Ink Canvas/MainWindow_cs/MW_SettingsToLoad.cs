@@ -923,6 +923,9 @@ namespace Ink_Canvas
             LeftUnFoldButtonQuickPanel.BeginAnimation(FrameworkElement.MarginProperty, null);
             RightUnFoldButtonQuickPanel.BeginAnimation(FrameworkElement.MarginProperty, null);
 
+            // 这里按 Margin 直接改位置（拖动、加载设置都会走到）：先清掉弹簧偏移再写
+            SnapFloatingBarMotionToLayout();
+
             var leftPanelMargin = LeftSidePanel.Margin;
             LeftSidePanel.Margin = new Thickness(leftPanelMargin.Left, leftPanelMargin.Top, leftPanelMargin.Right, offset);
 

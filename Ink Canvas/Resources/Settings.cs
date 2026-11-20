@@ -895,6 +895,13 @@ namespace Ink_Canvas
         [JsonProperty("disableToolbarAnimation")]
         public bool DisableToolbarAnimation { get; set; } = false;
 
+        /// <summary>
+        /// 浮动栏位移动画的弹簧手感预设：0 = 柔和，1 = 标准，2 = 轻快。
+        /// 越界值按标准处理，见 <c>SpringSpec.FromPreset</c>。
+        /// </summary>
+        [JsonProperty("toolbarMotionPreset")]
+        public int ToolbarMotionPreset { get; set; } = 1;
+
         // Issue #285 —— 更小批注栏（闲置状态下的紧凑圆角批注栏）
         [JsonProperty("enableIdleMiniBar")]
         public bool EnableIdleMiniBar { get; set; } = false;

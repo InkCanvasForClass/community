@@ -1484,6 +1484,11 @@ namespace Ink_Canvas
                 RightQuickPanelShadow.Opacity = 0.3;
             }
 
+            // 拖动把手会直接改这些元素的 Margin（拖拽是位置的真值来源）。
+            // 先把弹簧偏移归零，否则残留的视觉位移会叠加到新 Margin 上，
+            // 表现是"拖动时把手追不上鼠标 / 松手后跳一下"。
+            SnapFloatingBarMotionToLayout();
+
             // Update unfolded/folded margins in real-time
             if (LeftUnFoldButtonQuickPanel != null)
             {
