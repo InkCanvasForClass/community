@@ -457,10 +457,13 @@ namespace Ink_Canvas.Properties
             dict["FloatingInterceptor_App_SeewoPPTTools"] = ("AutomationStrings", "FloatingInterceptor_App_SeewoPPTTools");
             dict["FloatingInterceptor_Enable"] = ("AutomationStrings", "FloatingInterceptor_Enable");
             dict["FloatingInterceptor_Title"] = ("AutomationStrings", "FloatingInterceptor_Title");
-            dict["FoldMode_AutoFoldAfterPPT"] = ("AutomationStrings", "FoldMode_AutoFoldAfterPPT");
-            dict["FoldMode_AutoFoldAfterPPTHint"] = ("AutomationStrings", "FoldMode_AutoFoldAfterPPTHint");
-            dict["FoldMode_AutoFoldAfterWhiteboard"] = ("AutomationStrings", "FoldMode_AutoFoldAfterWhiteboard");
-            dict["FoldMode_AutoFoldAfterWhiteboardHint"] = ("AutomationStrings", "FoldMode_AutoFoldAfterWhiteboardHint");
+            dict["FoldMode_ExitWhiteboard"] = ("AutomationStrings", "FoldMode_ExitWhiteboard");
+            dict["FoldMode_ExitWhiteboardHint"] = ("AutomationStrings", "FoldMode_ExitWhiteboardHint");
+            dict["FoldMode_ExitPPT"] = ("AutomationStrings", "FoldMode_ExitPPT");
+            dict["FoldMode_ExitPPTHint"] = ("AutomationStrings", "FoldMode_ExitPPTHint");
+            dict["FoldMode_ExitFold_Restore"] = ("AutomationStrings", "FoldMode_ExitFold_Restore");
+            dict["FoldMode_ExitFold_Fold"] = ("AutomationStrings", "FoldMode_ExitFold_Fold");
+            dict["FoldMode_ExitFold_Unfold"] = ("AutomationStrings", "FoldMode_ExitFold_Unfold");
             dict["FoldMode_ExitToAnnotation"] = ("AutomationStrings", "FoldMode_ExitToAnnotation");
             dict["FoldMode_ExitToAnnotationHint"] = ("AutomationStrings", "FoldMode_ExitToAnnotationHint");
             dict["AutoFold_Group_Seewo"] = ("AutomationStrings", "AutoFold_Group_Seewo");

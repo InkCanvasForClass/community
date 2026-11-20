@@ -159,6 +159,11 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile("[Update] 迁移更新包默认设置后保存失败", LogHelper.LogType.Warning);
             }
 
+            if (SettingsManager.MigrateExitFoldModeSettings() && !SettingsManager.TrySaveSettingsToFile())
+            {
+                LogHelper.WriteLogToFile("[Fold] 迁移退出白板/PPT 后的浮动栏形态设置失败", LogHelper.LogType.Warning);
+            }
+
             SettingsManager.MigrateAutoStartSetting();
 
             if (isStartup && !AutoStartHelper.TryReconcile(Settings.Startup.RunAtStartup))

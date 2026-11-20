@@ -109,6 +109,15 @@ namespace Ink_Canvas
                 return;
             }
 
+            // 折叠状态在方法入口同步置位，不能等到下面的 await 续延里才设。
+            // 折叠往往由事件处理链调用（退出白板、点收纳按钮），调用方返回后紧接着
+            // 还会执行切工具 / 隐藏子面板等逻辑；这些逻辑用 !isFloatingBarFolded 决定
+            // 是否"居中展开"。若状态滞后，它们仍按展开态排一次 edge=100 的位置写入，
+            // 等折叠落地后再执行，就把工具栏拉回屏幕内——此时 folded 仍为 true，
+            // 表现为"工具栏显示但隐藏按钮点不动"。
+            isFloatingBarChangingHideMode = true;
+            isFloatingBarFolded = true;
+
             await Dispatcher.InvokeAsync(() =>
             {
                 InkCanvasForInkReplay.Visibility = Visibility.Collapsed;
