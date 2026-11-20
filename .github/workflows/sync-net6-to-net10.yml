@@ -149,8 +149,42 @@ jobs:
               git add -- $path 2>$null
             }
 
-            # 4) 其他文件：优先取 net6 版本，保证新功能/修复能同步过来
-            $otherConflicts = $Conflicted | Where-Object { $_ -notmatch "\.csproj$" -and $_ -notmatch "packages\.lock\.json$" -and $_ -notmatch "\.ya?ml$" }
+            # 4) net10 / net6 各自新增内容的文件：冲突块取并集，
+            #    否则 net10 独有的定义（如 ScanColorMode、MigrateVideoBoothSettings）
+            #    会被 net6 版本整文件覆盖，导致 net10 编译失败
+            $unionPattern = '(Resources[\\/]Settings\.cs|SettingsManager\.cs|MW_SettingsToLoad\.cs)$'
+            $unionConflicts = $Conflicted | Where-Object { $_ -match "\.cs$" -and $_ -match $unionPattern }
+            foreach ($path in $unionConflicts) {
+              Write-Host "解决冲突（两边内容取并集）: $path"
+              $bytes = [IO.File]::ReadAllBytes($path)
+              $hasBom = ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF)
+              $text = [Text.Encoding]::UTF8.GetString($bytes)
+              if ($hasBom) { $text = $text.Substring(1) }
+
+              $lines = $text -split "`r`n"
+              $merged = [System.Collections.Generic.List[string]]::new()
+              $i = 0
+              while ($i -lt $lines.Count) {
+                if ($lines[$i] -notlike '<<<<<<<*') { $merged.Add($lines[$i]); $i++; continue }
+
+                $ours = @(); $theirs = @(); $inTheirs = $false; $i++
+                while ($i -lt $lines.Count -and $lines[$i] -notlike '>>>>>>>*') {
+                  if ($lines[$i] -eq '=======') { $inTheirs = $true; $i++; continue }
+                  if ($inTheirs) { $theirs += $lines[$i] } else { $ours += $lines[$i] }
+                  $i++
+                }
+                $i++
+
+                $merged.AddRange([string[]]$ours)
+                $merged.AddRange([string[]]$theirs)
+              }
+
+              [IO.File]::WriteAllText($path, ($merged -join "`r`n"), [Text.UTF8Encoding]::new($hasBom))
+              git add -- $path
+            }
+
+            # 5) 其他文件：优先取 net6 版本，保证新功能/修复能同步过来
+            $otherConflicts = $Conflicted | Where-Object { $_ -notmatch "\.csproj$" -and $_ -notmatch "packages\.lock\.json$" -and $_ -notmatch "\.ya?ml$" -and ($_ -notmatch $unionPattern) }
             foreach ($path in $otherConflicts) {
               Write-Host "解决其他冲突（取 net6 版本）: $path"
               git checkout --theirs -- $path 2>$null
