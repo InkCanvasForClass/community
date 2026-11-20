@@ -159,9 +159,9 @@ PPT：进入放映前在 `OnPPTSlideShowBegin` 记录 `_floatingBarFoldedBeforeP
    折叠必须走 `FoldFloatingBarByCode(instant: true)` —— 它会同时处理位置、可见性、侧栏、折叠标志。
    手写 `Collapsed` 会让 `ActualWidth/ActualHeight` 变成 0，后续重建/主题刷新按 0 尺寸布局，
    工具栏就会以"未初始化"的样子出现在屏幕里。
-2. **不要**用固定延时（`Task.Delay(300/600/700)`）等待折叠/展开完成。
-   入口返回的 `Task` 在动画与最终 Margin 落地后才完成，需要顺序就 `await` 它。
-   侧边栏动画用 `AnimateSidePanelsAsync`，等待的是动画时长本身（0.175s）。
+2. **不要**用固定延时（`Task.Delay(100/200/349/600)`）等待折叠/展开完成。
+   入口返回的 `Task` 在**弹簧自然静止**后才完成，需要顺序就 `await` 它。
+   侧边栏用 `AnimateSidePanelsAsync`，它同样等弹簧静止，没有任何写死的时长。
 3. **不要**在折叠态下做"居中"。
    位置一律走 `ShowFloatingBar` / `ApplyFloatingBarPlacementForCurrentMode`，折叠否决在入口内完成；
    不要用 `if (!isFloatingBarFolded) { ... }` 包一层就自己写位置——await 之后标志可能已经变了。
@@ -183,9 +183,9 @@ PPT：进入放映前在 `OnPPTSlideShowBegin` 记录 `_floatingBarFoldedBeforeP
 - `ViewboxFloatingBarMarginAnimationAsync` / `ViewboxFloatingBarMarginAnimationCore`：
   `IsExpandedEdgeDuringFold(MarginFromEdge)`（= `isFloatingBarFolded && MarginFromEdge > FloatingBarEdgeHiddenBase`）
   直接返回——折叠位是负值，正向边距只可能是“展开/居中”。折叠自检和 `ReapplyFoldPositionIfFolded` 传负值，不受影响。
-- `PureViewboxFloatingBarMarginAnimationInDesktopMode` / `...InPPTMode`：入口判折叠、UI 块内再判一次、
-  `await Task.Delay(349)` 之后再判折叠并校验 `_marginAnimationVersion`；最终写值前
-  `BeginAnimation(MarginProperty, null)` 并复位 `isViewboxFloatingBarMarginAnimationRunning`。
+- `PureViewboxFloatingBarMarginAnimationInDesktopMode` / `...InPPTMode`：入口判折叠、UI 块内再判一次，
+  `await` 弹簧任务之后再次判折叠并校验 `_marginAnimationVersion`，最后复位
+  `isViewboxFloatingBarMarginAnimationRunning`。
 - `CursorIcon_Click`：`HideSubPanels("cursor", true)` 的 50ms 延时后调用
   `ApplyFloatingBarPlacementForCurrentMode()`，由入口在写值前判折叠
   （PPT 退出时 SlideShowEnd 往往正在这一刻收起工具栏）。
@@ -207,12 +207,12 @@ PPT：进入放映前在 `OnPPTSlideShowBegin` 记录 `_floatingBarFoldedBeforeP
   快捷面板正被用户打开（`Left/RightUnFoldButtonQuickPanel` 可见）时把手本应收起，不强行拉回。
 - 把手由 `AnimateSidePanelsAsync` 驱动：`SidePanelEdgePeek`（-10）显示，`SidePanelEdgeHidden`（-50）
   收起并 `Collapsed`。**只重设工具栏位置不够**，折叠收尾必须同时把把手恢复到 peek。
-- `ViewboxFloatingBarMarginAnimationAsync` 在等待结束后除版本号外还会再判一次折叠
-  （等待期间可能刚进入折叠态），并复位 `isViewboxFloatingBarMarginAnimationRunning`。
+- `ViewboxFloatingBarMarginAnimationAsync` 在弹簧静止后除版本号外还会再判一次折叠
+  （期间可能刚进入折叠态），并复位 `isViewboxFloatingBarMarginAnimationRunning`。
 - `ViewboxFloatingBarMarginAnimationCore` 的非动画落位会先 `BeginAnimation(MarginProperty, null)`：
-  WPF 里动画层优先于属性值，不摘掉动画，同步写入的折叠位会被上一段展开动画覆盖。
+  WPF 里动画层优先于属性值，不摘掉动画，同步写入的折叠位会被残留的旧动画覆盖。
 - `ReapplyFoldPositionIfFolded` 写折叠位前会 `Interlocked.Increment(ref _marginAnimationVersion)`，
-  作废那些已在 200ms 等待中、只校验版本号的正向写值。
+  作废那些还在等待、只校验版本号的正向写值。
 
 退出收尾集中在状态机文件 `MW_AutoFold.cs`：
 
@@ -232,3 +232,33 @@ PPT：进入放映前在 `OnPPTSlideShowBegin` 记录 `_floatingBarFoldedBeforeP
 **不要**再写“读一次 `isFloatingBarFolded` 就决定是否居中”或“固定延时后写 -60 把工具栏藏起来”的收尾：
 COM 的 SlideShowEnd 事件可能早到也可能晚到，两次判断的结果会互相覆盖，最后就剩
 “托盘显示收纳态、工具栏停在任务栏附近”这种自相矛盾的状态。
+
+## 位移动画：弹簧 + 合成层
+
+所有浮动部件的位移（主工具栏、左右把手、快捷面板、迷你栏）都走同一套弹簧：
+`Helpers/Motion/SpringMotion.cs`（求解器）+ `MainWindow_cs/MW_FloatingBarMotion.cs`（接入）。
+
+**为什么不直接用 `ThicknessAnimation` 动 `Margin`**：
+`Margin` 是布局属性，每帧变化都会重新测量与排列，动画期间 UI 线程被布局吃满，
+长距离滑动就掉帧；而 `CircleEase` / `CubicEase` 这类固定曲线从零速度起步，
+被下一次操作打断时只能硬切，观感是"顿一下再来"。
+
+**现在的做法**：
+
+- 布局属性**一次**写到终点（只触发布局一次）。
+- 视觉位移交给 `TranslateTransform` 上的弹簧，由合成线程插值，逐帧不再有布局开销。
+- 打断即重定向：新弹簧接手当前偏移与**速度**，运动是连续的，不会回跳。
+- 每个元素一个 `SpringTranslateAnimator`（`SpringTranslateAnimator.For` 缓存），
+  同一元素上的后一次调用接管前一次。
+- 手感由 `Settings.Appearance.ToolbarMotionPreset` 三档预设控制
+  （柔和 / 标准 / 轻快，对应 `SpringSpec.Gentle` / `Standard` / `Snappy`），
+  阻尼比与角频率集中在 `SpringSpec`，不要在调用点写死数字。
+- `DisableToolbarAnimation` 打开时一律直接到位，并 `SnapToLayout()` 清掉残留偏移。
+
+**"等动画结束"必须等弹簧静止**：入口返回的 `Task` 在弹簧满足位移与速度阈值后才完成
+（`SpringSpec.PositionTolerance` / `VelocityTolerance`）。不要再写 `Task.Delay(200/349)`
+去猜动画放完了没有——那既可能打断动画，也会白等，还不受手感预设影响。
+
+**直接接管布局位置的交互要先 `SnapToLayout()`**：拖动、启动首帧定位这类操作是直接改
+`Margin` 的，若此时弹簧还留着偏移，两者会叠加（表现为拖起来发飘）。这些入口在写
+`Margin` 前先调 `FloatingBarSpring.SnapToLayout()`。
