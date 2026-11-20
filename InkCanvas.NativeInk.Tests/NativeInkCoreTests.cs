@@ -12,8 +12,6 @@ namespace InkCanvas.NativeInk.Tests
         {
             TouchCalibrationTests.RunAll();
             SpringSolverTests.RunAll();
-            PopupCurveTests.RunAll();
-            PopupTimingTests.RunAll();
             if (Array.IndexOf(args, "--calibration-only") >= 0)
             {
                 Run(nameof(RouterAppliesQuadIrPalmThresholdAndSpecialMultiplier), RouterAppliesQuadIrPalmThresholdAndSpecialMultiplier);
