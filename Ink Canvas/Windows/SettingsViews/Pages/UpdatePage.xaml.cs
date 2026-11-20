@@ -37,6 +37,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private bool _isLoaded;
         private bool _isChangingUpdateChannelInternally;
         private bool _isChangingUpdatePackageArchInternally;
+        private bool _isChangingUpdatePackageRuntimeInternally;
+        private bool _isChangingUpdatePackageDotNetVersionInternally;
 
         private UpdateUiState _state = UpdateUiState.Idle;
         private string _remoteVersion;
@@ -50,7 +52,24 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         public UpdatePage()
         {
             InitializeComponent();
+            UpdateCurrentBuildInfo();
             Loaded += UpdatePage_Loaded;
+        }
+
+        private void UpdateCurrentBuildInfo()
+        {
+            string arch = Environment.Is64BitProcess
+                ? UpdateStrings.Update_PackageArch_X64
+                : UpdateStrings.Update_PackageArch_X86;
+            string dotnet = Environment.Version.Major >= 10
+                ? UpdateStrings.Update_PackageDotNet_Net10
+                : UpdateStrings.Update_PackageDotNet_Net6;
+#if SELF_CONTAINED_BUILD
+            string runtime = UpdateStrings.Update_PackageRuntime_SelfContained;
+#else
+            string runtime = UpdateStrings.Update_PackageRuntime_FrameworkDependent;
+#endif
+            CurrentBuildInfoText.Text = $"{arch} · {dotnet} · {runtime}";
         }
 
         private async void UpdatePage_Loaded(object sender, RoutedEventArgs e)
@@ -127,10 +146,33 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                         }
                     }
 
+                    _isChangingUpdatePackageDotNetVersionInternally = true;
+                    try
+                    {
+                        string wantTag = settings.Startup.UpdatePackageDotNetVersion == UpdatePackageDotNetVersion.Net6 ? "Net6"
+                            : settings.Startup.UpdatePackageDotNetVersion == UpdatePackageDotNetVersion.Net10 ? "Net10"
+                            : "Auto";
+                        foreach (var item in UpdatePackageDotNetVersionSelector.Items)
+                        {
+                            if (item is ComboBoxItem cbi && cbi.Tag != null &&
+                                string.Equals(cbi.Tag.ToString(), wantTag, StringComparison.OrdinalIgnoreCase))
+                            {
+                                UpdatePackageDotNetVersionSelector.SelectedItem = cbi;
+                                break;
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        _isChangingUpdatePackageDotNetVersionInternally = false;
+                    }
+
                     _isChangingUpdatePackageArchInternally = true;
                     try
                     {
-                        string wantTag = settings.Startup.UpdatePackageArchitecture == UpdatePackageArchitecture.X64 ? "X64" : "X86";
+                        string wantTag = settings.Startup.UpdatePackageArchitecture == UpdatePackageArchitecture.X64 ? "X64"
+                            : settings.Startup.UpdatePackageArchitecture == UpdatePackageArchitecture.X86 ? "X86"
+                            : "Auto";
                         foreach (var item in UpdatePackageArchitectureSelector.Items)
                         {
                             if (item is ComboBoxItem cbi && cbi.Tag != null &&
@@ -144,6 +186,29 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     finally
                     {
                         _isChangingUpdatePackageArchInternally = false;
+                    }
+
+                    _isChangingUpdatePackageRuntimeInternally = true;
+                    try
+                    {
+                        string wantRuntimeTag = settings.Startup.UpdatePackageRuntime == UpdatePackageRuntime.SelfContained
+                            ? "SelfContained"
+                            : settings.Startup.UpdatePackageRuntime == UpdatePackageRuntime.FrameworkDependent
+                                ? "FrameworkDependent"
+                                : "Auto";
+                        foreach (var item in UpdatePackageRuntimeSelector.Items)
+                        {
+                            if (item is ComboBoxItem cbi && cbi.Tag != null &&
+                                string.Equals(cbi.Tag.ToString(), wantRuntimeTag, StringComparison.OrdinalIgnoreCase))
+                            {
+                                UpdatePackageRuntimeSelector.SelectedItem = cbi;
+                                break;
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        _isChangingUpdatePackageRuntimeInternally = false;
                     }
                 }
             }
@@ -254,6 +319,27 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         #region 更新通道和架构事件处理
 
+        private void UpdatePackageDotNetVersionSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            if (_isChangingUpdatePackageDotNetVersionInternally) return;
+            if (!(UpdatePackageDotNetVersionSelector.SelectedItem is ComboBoxItem cbi) || cbi.Tag == null) return;
+
+            var newVersion = string.Equals(cbi.Tag.ToString(), "Net6", StringComparison.OrdinalIgnoreCase)
+                ? UpdatePackageDotNetVersion.Net6
+                : string.Equals(cbi.Tag.ToString(), "Net10", StringComparison.OrdinalIgnoreCase)
+                    ? UpdatePackageDotNetVersion.Net10
+                    : UpdatePackageDotNetVersion.Auto;
+
+            if (SettingsManager.Settings.Startup.UpdatePackageDotNetVersion == newVersion)
+                return;
+
+            SettingsManager.Settings.Startup.UpdatePackageDotNetVersion = newVersion;
+            SettingsManager.SaveSettingsToFile();
+            AutoUpdateHelper.InvalidateOrderedGroupsCache();
+            LogHelper.WriteLogToFile($"Settings | Update package dotnet version: {newVersion}");
+        }
+
         private void UpdatePackageArchitectureSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!_isLoaded) return;
@@ -262,7 +348,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             var newArch = string.Equals(cbi.Tag.ToString(), "X64", StringComparison.OrdinalIgnoreCase)
                 ? UpdatePackageArchitecture.X64
-                : UpdatePackageArchitecture.X86;
+                : string.Equals(cbi.Tag.ToString(), "X86", StringComparison.OrdinalIgnoreCase)
+                    ? UpdatePackageArchitecture.X86
+                    : UpdatePackageArchitecture.Auto;
 
             if (SettingsManager.Settings.Startup.UpdatePackageArchitecture == newArch)
                 return;
@@ -270,6 +358,26 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.Settings.Startup.UpdatePackageArchitecture = newArch;
             SettingsManager.SaveSettingsToFile();
             LogHelper.WriteLogToFile($"Settings | Update package architecture: {newArch}");
+        }
+
+        private void UpdatePackageRuntimeSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            if (_isChangingUpdatePackageRuntimeInternally) return;
+            if (!(UpdatePackageRuntimeSelector.SelectedItem is ComboBoxItem cbi) || cbi.Tag == null) return;
+
+            var newRuntime = string.Equals(cbi.Tag.ToString(), "SelfContained", StringComparison.OrdinalIgnoreCase)
+                ? UpdatePackageRuntime.SelfContained
+                : string.Equals(cbi.Tag.ToString(), "FrameworkDependent", StringComparison.OrdinalIgnoreCase)
+                    ? UpdatePackageRuntime.FrameworkDependent
+                    : UpdatePackageRuntime.Auto;
+
+            if (SettingsManager.Settings.Startup.UpdatePackageRuntime == newRuntime)
+                return;
+
+            SettingsManager.Settings.Startup.UpdatePackageRuntime = newRuntime;
+            SettingsManager.SaveSettingsToFile();
+            LogHelper.WriteLogToFile($"Settings | Update package runtime: {newRuntime}");
         }
 
         private async void UpdateChannelSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)

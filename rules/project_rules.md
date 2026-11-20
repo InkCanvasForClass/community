@@ -25,6 +25,7 @@
 | [plugin_sdk.md](./plugin_sdk.md) | 插件 SDK 开发规范（宿主 API、icc://plugin 路由、PluginLogs） |
 | [popups_menus.md](./popups_menus.md) | 弹出菜单/工具栏规范 |
 | [toolbar.md](./toolbar.md) | 浮动工具栏开发规范 |
+| [floatingbar_fold.md](./floatingbar_fold.md) | 浮动栏收纳/展开状态机（唯一入口、位置常量、白板/PPT 退出策略） |
 | [chat_log_board_toolbar.md](./chat_log_board_toolbar.md) | 聊天记录/白板工具栏规范 |
 | [build.md](./build.md) | 编译规范（Debug x64、PowerPointAddIn、Copy target） |
 | [general.md](./general.md) | 通用开发规范 |
@@ -37,6 +38,7 @@
 - [插件 SDK 规范](./plugin_sdk.md) - 插件开发、宿主服务、icc://plugin 深链接
 - [弹出菜单规范](./popups_menus.md) - 笔菜单、橡皮擦菜单等 Popup 开发
 - [工具栏规范](./toolbar.md) - 浮动工具栏按钮管理
+- [收纳/展开规范](./floatingbar_fold.md) - 折叠状态机唯一入口、位置常量、白板/PPT 退出策略
 - [编译规范](./build.md) - 编译前清理流程、Debug x64 构建校验
 - [消息去重说明](./消息去重说明.md) - 通知去重触发条件
 - [设置完整目录](./Ink%20Canvas%20设置完整目录.md) - 所有设置页面的树状结构

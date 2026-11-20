@@ -1,4 +1,4 @@
-using Ink_Canvas.Helpers;
+﻿using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern;
 using System;
 using System.Threading;
@@ -21,6 +21,36 @@ namespace Ink_Canvas
         /// 浮动栏正在改变隐藏模式的标志，用于防止重复操作。
         /// </summary>
         private bool isFloatingBarChangingHideMode;
+
+        /// <summary>
+        /// 折叠/展开过渡的目标状态：-1 无请求，0 展开，1 折叠。
+        /// 过渡进行中再次请求只更新目标，由正在执行的循环读到最后一次意图后再跑一轮，
+        /// 避免两个动画并发写 Margin 互相覆盖（历史上表现为"折叠了但工具栏还在屏幕上"）。
+        /// </summary>
+        private int _pendingFoldTarget = -1;
+        private bool _pendingFoldInstant;
+        private object _pendingFoldTrigger;
+        private bool _foldTransitionRunning;
+
+        /// <summary>
+        /// 本次收纳是否要挡住"自动展开"定时器（tick 500ms）。
+        /// 白板/PPT 退出、启动收纳由系统决定，定时器不该把它们当成"自动收纳软件已退出"而弹回来；
+        /// 定时器自己触发的收纳则为 false，软件退出后才能自动展开。
+        /// </summary>
+        private bool _holdFoldAgainstAutoUnfold;
+
+        // 热键 / 托盘菜单 / URI 触发时没有真实控件，用它表明"这是用户在操作"。
+        private static readonly object FloatingBarUserTrigger = new object();
+
+        // 浮动栏贴边位置（像素）。折叠位在这个基础上再减去任务栏高度。
+        private const int FloatingBarEdgeExpandedDesktop = 100;
+        private const int FloatingBarEdgeExpandedPpt = 60;
+        private const int FloatingBarEdgeHiddenBase = -60;
+
+        // 侧边栏位置：-50 完全收起，-10 折叠态露出展开按钮。
+        private const int SidePanelEdgeHidden = -50;
+        private const int SidePanelEdgePeek = -10;
+        private static readonly TimeSpan SidePanelAnimationDuration = TimeSpan.FromSeconds(0.175);
 
         private int _sidePanelAnimVersion = 0;
 
@@ -55,7 +85,6 @@ namespace Ink_Canvas
             ICCWaterMarkDark.Visibility = Visibility.Collapsed;
             ICCWaterMarkWhite.Visibility = Visibility.Collapsed;
             SwitchBackground(null, null);
-            { /* Old UI removed */ }
             new Thread(() =>
             {
                 Thread.Sleep(200);
@@ -76,38 +105,86 @@ namespace Ink_Canvas
         /// <summary>
         /// 折叠浮动栏，将其收纳到侧边栏。
         /// </summary>
-        /// <param name="sender">事件发送者。</param>
+        /// <param name="sender">事件发送者；null 表示由代码触发而非用户点击。</param>
         /// <param name="isAutoFoldCommand">是否为自动折叠命令。</param>
-        /// <returns>表示异步操作的任务。</returns>
-        /// <remarks>
-        /// 操作包括：
-        /// 1. 检查是否应该拒绝操作（如点击了折叠图标但上次鼠标按下的对象不是折叠图标）
-        /// 2. 设置折叠/展开标志
-        /// 3. 检查浮动栏是否已经折叠或正在改变隐藏模式，如果是则直接返回
-        /// 4. 处理墨迹重放相关的UI元素
-        /// 5. 设置浮动栏状态标志，关闭白板模式（如果当前在白板模式）
-        /// 6. 如果是用户手动折叠且画布上有较多墨迹，显示通知
-        /// 7. 清空画布墨迹
-        /// 8. 隐藏PPT导航面板和浮动栏拖动网格
-        /// 9. 执行浮动栏和侧边栏的动画
-        /// 10. 如果开启了彻底隐藏，则隐藏主窗口
-        /// </remarks>
-        public async Task FoldFloatingBar(object sender, bool isAutoFoldCommand = false)
+        /// <param name="instant">是否跳过动画直接落位（启动初始化用）。</param>
+        /// <param name="hold">
+        /// 是否挡住"自动展开"定时器。白板/PPT 退出时的收纳必须为 true：
+        /// 定时器看到"已收纳且不是用户收的"就会自动展开，把刚收好的工具栏又弹回来。
+        /// </param>
+        public async Task FoldFloatingBar(object sender, bool isAutoFoldCommand = false, bool instant = false,
+            bool hold = false)
         {
-
-            // FloatingBarIcons_MouseUp_New(sender);
-            if (sender == null)
-                foldFloatingBarByUser = false;
-            else
-                foldFloatingBarByUser = true;
+            foldFloatingBarByUser = sender != null;
+            _holdFoldAgainstAutoUnfold = sender != null || hold;
             unfoldFloatingBarByUser = false;
+            await TransitionFloatingBarAsync(folded: true, instant: instant, trigger: sender);
+        }
 
-            if (isFloatingBarFolded) return;
+        /// <summary>
+        /// 由用户操作触发折叠（热键、托盘菜单、URI），但没有真实控件可以当 sender。
+        /// </summary>
+        internal Task FoldFloatingBarByUser(bool instant = false)
+            => FoldFloatingBar(FloatingBarUserTrigger, false, instant);
 
-            if (isFloatingBarChangingHideMode)
+        /// <summary>
+        /// 由程序决策触发折叠（白板/PPT 退出、启动初始化），不算用户操作。
+        /// </summary>
+        /// <param name="instant">是否跳过动画直接落位。</param>
+        /// <param name="hold">是否挡住自动展开定时器；白板/PPT 退出要传 true。</param>
+        internal Task FoldFloatingBarByCode(bool instant = false, bool hold = false)
+            => FoldFloatingBar(null, false, instant, hold);
+
+        /// <summary>
+        /// 折叠态迁移的唯一入口。过渡进行中再次请求时只更新目标，
+        /// 由正在执行的循环读到最后一次意图后再跑一轮，避免并发动画互相覆盖。
+        /// </summary>
+        private async Task TransitionFloatingBarAsync(bool folded, bool instant, object trigger)
+        {
+            _pendingFoldTarget = folded ? 1 : 0;
+            _pendingFoldInstant = instant;
+            _pendingFoldTrigger = trigger;
+
+            if (_foldTransitionRunning) return;
+
+            _foldTransitionRunning = true;
+            isFloatingBarChangingHideMode = true;
+            try
             {
-                return;
+                while (_pendingFoldTarget >= 0)
+                {
+                    bool target = _pendingFoldTarget == 1;
+                    bool targetInstant = _pendingFoldInstant;
+                    object targetTrigger = _pendingFoldTrigger;
+                    _pendingFoldTarget = -1;
+
+                    if (target)
+                        await ApplyFoldedAsync(targetInstant, targetTrigger);
+                    else
+                        await ApplyUnfoldedAsync();
+                }
             }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"浮动栏折叠/展开失败: {ex}", LogHelper.LogType.Error);
+            }
+            finally
+            {
+                _foldTransitionRunning = false;
+                isFloatingBarChangingHideMode = false;
+            }
+        }
+
+        /// <summary>
+        /// 执行折叠：先同步置位折叠标志，再统一处理可见性、位置与侧边栏。
+        /// 标志必须在第一个 await 之前落下——调用方返回后紧接着的切工具/隐藏子面板
+        /// 逻辑会用 !isFloatingBarFolded 判断是否居中，状态滞后会把折叠位覆盖成展开位。
+        /// </summary>
+        private async Task ApplyFoldedAsync(bool instant, object trigger)
+        {
+            if (isFloatingBarFolded && !instant) return;
+
+            isFloatingBarFolded = true;
 
             await Dispatcher.InvokeAsync(() =>
             {
@@ -124,17 +201,17 @@ namespace Ink_Canvas
 
             await Dispatcher.InvokeAsync(() =>
             {
-                isFloatingBarChangingHideMode = true;
-                isFloatingBarFolded = true;
                 if (currentMode != 0) CloseWhiteboardImmediately();
-                if (IsAnnotating)
-                    if (foldFloatingBarByUser && inkCanvas.Strokes.Count > 2)
-                        ShowNotification(Properties.MainWindowStrings.Main_AutoFold_ClearingAndFolding);
-                lastBorderMouseDownObject = sender;
-                CursorWithDelIcon_Click(sender, null);
+                if (IsAnnotating && foldFloatingBarByUser && inkCanvas.Strokes.Count > 2)
+                    ShowNotification(Properties.MainWindowStrings.Main_AutoFold_ClearingAndFolding);
+                lastBorderMouseDownObject = trigger;
+                CursorWithDelIcon_Click(trigger, null);
             });
 
-            await Task.Delay(300);
+            // 让上面这批 UI 状态变更在渲染队列里落地，而不是固定睡一段时间
+            await Dispatcher.Yield(DispatcherPriority.Background);
+
+            int foldEdge = ComputeFoldEdge();
 
             await Dispatcher.InvokeAsync(() =>
             {
@@ -143,24 +220,86 @@ namespace Ink_Canvas
                 LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
                 RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
                 GridForFloatingBarDraging.Visibility = Visibility.Collapsed;
-                // 使用 rcWork 获取任务栏高度，确保浮动栏完全隐藏到屏幕底部以下
-                double dpiScaleYForFold = 1;
-                var srcForFold = PresentationSource.FromVisual(this);
-                if (srcForFold != null) dpiScaleYForFold = srcForFold.CompositionTarget.TransformToDevice.M22;
-                double taskbarHeightForFold = ForegroundWindowInfo.GetTaskbarHeight(GetFloatingBarTargetScreen(), dpiScaleYForFold);
-                ViewboxFloatingBarMarginAnimation(-60 - (int)Math.Round(taskbarHeightForFold));
                 HideSubPanels("cursor");
-                SidePannelMarginAnimation(-10);
             });
 
-            // 新增：如果开启了彻底隐藏，则隐藏主窗口
+            // 位置动画与侧边栏动画同时开始。串行（先等工具栏滑走 0.35s 再滑侧边栏）
+            // 看起来就是"工具栏先闪一下，侧边栏才出来"。
+            var marginTask = ViewboxFloatingBarMarginAnimationAsync(foldEdge, skipAnimation: instant);
+            var sidePanelTask = AnimateSidePanelsAsync(SidePanelEdgePeek, instant);
+            await Task.WhenAll(marginTask, sidePanelTask);
+
+            // 自检：启动早期布局未稳定时首次位置计算可能落空，当场重设（用户不可见）
+            await Dispatcher.InvokeAsync(() =>
+            {
+                if (!isFloatingBarFolded || currentMode != 0) return;
+
+                ViewboxFloatingBar.UpdateLayout();
+                if (IsFloatingBarUiAbsentFromScreens()) return;
+
+                LogHelper.WriteLogToFile("[Toolbar] 折叠位置未生效，立即重设折叠位置", LogHelper.LogType.Warning);
+                ViewboxFloatingBarMarginAnimationCore(foldEdge);
+            });
+
             if (Settings.Automation.ThoroughlyHideWhenFolded)
             {
-                await Dispatcher.InvokeAsync(() =>
-                {
-                    this.Visibility = Visibility.Hidden;
-                });
+                await Dispatcher.InvokeAsync(() => { this.Visibility = Visibility.Hidden; });
             }
+        }
+
+        /// <summary>
+        /// 计算折叠位：屏幕内坐标之外的隐藏位置（还要减去任务栏高度，避开任务栏遮挡）。
+        /// </summary>
+        private int ComputeFoldEdge()
+        {
+            double dpiScaleY = 1;
+            var source = PresentationSource.FromVisual(this);
+            if (source != null) dpiScaleY = source.CompositionTarget.TransformToDevice.M22;
+            double taskbarHeight = ForegroundWindowInfo.GetTaskbarHeight(GetFloatingBarTargetScreen(), dpiScaleY);
+            return FloatingBarEdgeHiddenBase - (int)Math.Round(taskbarHeight);
+        }
+
+        /// <summary>
+        /// 侧边栏动画并等待落地。等待的是动画时长本身，不是凭经验拍的固定延时。
+        /// </summary>
+        private async Task AnimateSidePanelsAsync(int edge, bool skipAnimation)
+        {
+            int thisVersion = ++_sidePanelAnimVersion;
+
+            await Dispatcher.InvokeAsync(() =>
+            {
+                if (edge == SidePanelEdgePeek)
+                    LeftSidePanel.Visibility = isFloatingBarFolded ? Visibility.Visible : Visibility.Collapsed;
+
+                var duration = skipAnimation ? TimeSpan.Zero : SidePanelAnimationDuration;
+                var leftAnimation = new ThicknessAnimation
+                {
+                    Duration = duration,
+                    From = LeftSidePanel.Margin,
+                    To = new Thickness(edge, 0, 0, Settings.Appearance.QuickPanelBottomOffset),
+                    EasingFunction = new CubicEase()
+                };
+                var rightAnimation = new ThicknessAnimation
+                {
+                    Duration = duration,
+                    From = RightSidePanel.Margin,
+                    To = new Thickness(0, 0, edge, Settings.Appearance.QuickPanelBottomOffset),
+                    EasingFunction = new CubicEase()
+                };
+                LeftSidePanel.BeginAnimation(MarginProperty, leftAnimation);
+                RightSidePanel.BeginAnimation(MarginProperty, rightAnimation);
+            });
+
+            if (!skipAnimation) await Task.Delay(SidePanelAnimationDuration);
+
+            if (_sidePanelAnimVersion != thisVersion) return;
+
+            await Dispatcher.InvokeAsync(() =>
+            {
+                LeftSidePanel.Margin = new Thickness(edge, 0, 0, Settings.Appearance.QuickPanelBottomOffset);
+                RightSidePanel.Margin = new Thickness(0, 0, edge, Settings.Appearance.QuickPanelBottomOffset);
+                if (edge == SidePanelEdgeHidden) LeftSidePanel.Visibility = Visibility.Collapsed;
+            });
         }
 
         /// <summary>
@@ -203,8 +342,7 @@ namespace Ink_Canvas
             }
             else
             {
-                var mouseEventArgs = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left);
-                UnFoldFloatingBar_MouseUp(sender, mouseEventArgs);
+                _ = UnFoldFloatingBarByUser();
             }
         }
 
@@ -248,8 +386,7 @@ namespace Ink_Canvas
             }
             else
             {
-                var mouseEventArgs = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left);
-                UnFoldFloatingBar_MouseUp(sender, mouseEventArgs);
+                _ = UnFoldFloatingBarByUser();
             }
         }
 
@@ -352,30 +489,38 @@ namespace Ink_Canvas
         /// <summary>
         /// 展开浮动栏，将其从侧边栏恢复到正常状态。
         /// </summary>
-        /// <param name="sender">事件发送者。</param>
-        /// <returns>表示异步操作的任务。</returns>
-        /// <remarks>
-        /// 操作包括：
-        /// 1. 如果之前彻底隐藏了主窗口，先恢复显示
-        /// 2. 隐藏左右侧快捷面板
-        /// 3. 设置展开/折叠标志
-        /// 4. 检查浮动栏是否正在改变隐藏模式，如果是则直接返回
-        /// 5. 设置浮动栏状态标志，标记为未折叠
-        /// 6. 根据设置决定是否自动切换至批注模式
-        /// 7. 根据PPT放映模式和设置显示或隐藏翻页按钮
-        /// 8. 在屏幕模式下显示浮动栏并执行动画
-        /// 9. 执行侧边栏动画
-        /// 10. 等待UI完全更新后，重新设置当前选中模式的按钮高亮状态
-        /// </remarks>
+        /// <param name="sender">事件发送者；null 表示由代码触发而非用户点击。</param>
         public async Task UnFoldFloatingBar(object sender)
         {
-            // 新增：如果之前彻底隐藏了，先恢复显示
+            unfoldFloatingBarByUser = sender != null && !ArePPTControlsVisible;
+            foldFloatingBarByUser = false;
+            await TransitionFloatingBarAsync(folded: false, instant: false, trigger: sender);
+        }
+
+        /// <summary>
+        /// 由用户操作触发展开（热键、托盘菜单、URI），但没有真实控件可以当 sender。
+        /// </summary>
+        internal Task UnFoldFloatingBarByUser()
+            => UnFoldFloatingBar(FloatingBarUserTrigger);
+
+        /// <summary>
+        /// 由程序决策触发展开（PPT 开始放映、退出恢复等），不算用户操作。
+        /// </summary>
+        internal Task UnFoldFloatingBarByCode()
+            => UnFoldFloatingBar(null);
+
+        /// <summary>
+        /// 执行展开：恢复窗口与浮动栏可见性，按桌面/PPT 场景复位位置并收走侧边栏。
+        /// </summary>
+        private async Task ApplyUnfoldedAsync()
+        {
+            // 与折叠对称：标志必须在第一个 await 之前落下，
+            // 否则调用方返回后读到的还是"已折叠"，会跳过一次居中/高光复位。
+            isFloatingBarFolded = false;
+
             if (this.Visibility != Visibility.Visible)
             {
-                await Dispatcher.InvokeAsync(() =>
-                {
-                    this.Visibility = Visibility.Visible;
-                });
+                await Dispatcher.InvokeAsync(() => { this.Visibility = Visibility.Visible; });
             }
 
             await Dispatcher.InvokeAsync(() =>
@@ -383,32 +528,12 @@ namespace Ink_Canvas
                 LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
                 RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             });
-            if (sender == null || ArePPTControlsVisible)
-                unfoldFloatingBarByUser = false;
-            else
-                unfoldFloatingBarByUser = true;
-            foldFloatingBarByUser = false;
-
-            if (isFloatingBarChangingHideMode)
-            {
-                return;
-            }
-
-
-            await Dispatcher.InvokeAsync(() =>
-            {
-                isFloatingBarChangingHideMode = true;
-                isFloatingBarFolded = false;
-            });
-
-            await Task.Delay(0);
 
             await Dispatcher.InvokeAsync(() =>
             {
                 // 根据设置决定是否自动切换至批注模式
                 if (Settings.Automation.IsAutoEnterAnnotationModeWhenExitFoldMode && currentMode == 0)
                 {
-                    // 切换至批注模式
                     PenIcon_Click(null, null);
                 }
 
@@ -427,119 +552,49 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    // 如果条件不满足，确保隐藏翻页按钮
                     LeftBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
                     RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
                     LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
                     RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
                 }
 
-                // 新只在屏幕模式下显示浮动栏
                 if (currentMode == 0)
                 {
-                    // 强制更新布局以确保ActualWidth正确
+                    // 布局没刷新时 ActualWidth 还是 0，按 0 尺寸算出来的位置会偏
                     ViewboxFloatingBar.UpdateLayout();
-
-                    // 等待一小段时间让布局完全更新
-                    Task.Delay(50);
-
-                    // 再次强制更新布局
-                    ViewboxFloatingBar.UpdateLayout();
-
-                    // 强制重新测量和排列
-                    ViewboxFloatingBar.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-                    ViewboxFloatingBar.Arrange(new Rect(ViewboxFloatingBar.DesiredSize));
-
-                    if (IsInPPTPresentationMode)
-                        ViewboxFloatingBarMarginAnimation(60);
-                    else
-                        PureViewboxFloatingBarMarginAnimationInDesktopMode();
                 }
-                SidePannelMarginAnimation(-50, !unfoldFloatingBarByUser);
             });
 
-            await Dispatcher.InvokeAsync(async () =>
+            Task marginTask = Task.CompletedTask;
+            if (currentMode == 0)
             {
-                try
-                {
-                    // 等待UI完全更新
-                    await Task.Delay(100);
+                if (IsInPPTPresentationMode)
+                    marginTask = ViewboxFloatingBarMarginAnimationAsync(FloatingBarEdgeExpandedPpt);
+                else
+                    PureViewboxFloatingBarMarginAnimationInDesktopMode();
+            }
 
-                    // 获取当前选中的模式并重新设置高光位置
-                    string selectedToolMode = GetCurrentSelectedMode();
-                    if (!string.IsNullOrEmpty(selectedToolMode))
-                    {
-                        SetFloatingBarHighlightPosition(selectedToolMode);
-                    }
-                }
-                catch (Exception ex)
+            // 侧边栏回收与工具栏回位同时进行，不要等位置动画播完再收
+            await AnimateSidePanelsAsync(SidePanelEdgeHidden, !unfoldFloatingBarByUser);
+            await marginTask;
+
+            await Dispatcher.InvokeAsync(() =>
+            {
+                string selectedToolMode = GetCurrentSelectedMode();
+                if (!string.IsNullOrEmpty(selectedToolMode))
                 {
-                    LogHelper.WriteLogToFile($"浮动栏展开后重新设置按钮高亮状态失败: {ex.Message}", LogHelper.LogType.Error);
+                    SetFloatingBarHighlightPosition(selectedToolMode);
                 }
             });
-
         }
 
         /// <summary>
-        /// 执行侧边栏边距动画，用于折叠或展开侧边栏。
+        /// 侧边栏边距动画（即发即忘）。需要等待动画落地的调用方请用 AnimateSidePanelsAsync。
         /// </summary>
-        /// <param name="MarginFromEdge">侧边栏距边缘的边距值。可能的值：-50（完全折叠）, -10（半展开）</param>
-        /// <param name="isNoAnimation">是否禁用动画效果。</param>
-        /// <remarks>
-        /// 操作包括：
-        /// 1. 如果边距值为-10（半展开），则显示左侧边栏
-        /// 2. 创建并执行左侧边栏的边距动画
-        /// 3. 创建并执行右侧边栏的边距动画
-        /// 4. 等待600毫秒让动画完成
-        /// 5. 直接设置侧边栏的最终边距值
-        /// 6. 如果边距值为-50（完全折叠），则隐藏左侧边栏
-        /// 7. 重置浮动栏正在改变隐藏模式的标志为false
-        /// </remarks>
-        private async void SidePannelMarginAnimation(int MarginFromEdge, bool isNoAnimation = false) // Possible value: -50, -10
-        {
-            int thisVersion = ++_sidePanelAnimVersion;
-
-            await Dispatcher.InvokeAsync(() =>
-            {
-                if (MarginFromEdge == -10)
-                {
-                    if (isFloatingBarFolded)
-                        LeftSidePanel.Visibility = Visibility.Visible;
-                    else
-                        LeftSidePanel.Visibility = Visibility.Collapsed;
-                }
-
-                var LeftSidePanelmarginAnimation = new ThicknessAnimation
-                {
-                    Duration = isNoAnimation ? TimeSpan.FromSeconds(0) : TimeSpan.FromSeconds(0.175),
-                    From = LeftSidePanel.Margin,
-                    To = new Thickness(MarginFromEdge, 0, 0, Settings.Appearance.QuickPanelBottomOffset)
-                };
-                LeftSidePanelmarginAnimation.EasingFunction = new CubicEase();
-                var RightSidePanelmarginAnimation = new ThicknessAnimation
-                {
-                    Duration = isNoAnimation ? TimeSpan.FromSeconds(0) : TimeSpan.FromSeconds(0.175),
-                    From = RightSidePanel.Margin,
-                    To = new Thickness(0, 0, MarginFromEdge, Settings.Appearance.QuickPanelBottomOffset)
-                };
-                RightSidePanelmarginAnimation.EasingFunction = new CubicEase();
-                LeftSidePanel.BeginAnimation(MarginProperty, LeftSidePanelmarginAnimation);
-                RightSidePanel.BeginAnimation(MarginProperty, RightSidePanelmarginAnimation);
-            });
-
-            await Task.Delay(600);
-
-            if (_sidePanelAnimVersion != thisVersion) return;
-
-            await Dispatcher.InvokeAsync(() =>
-            {
-                LeftSidePanel.Margin = new Thickness(MarginFromEdge, 0, 0, Settings.Appearance.QuickPanelBottomOffset);
-                RightSidePanel.Margin = new Thickness(0, 0, MarginFromEdge, Settings.Appearance.QuickPanelBottomOffset);
-
-                if (MarginFromEdge == -50) LeftSidePanel.Visibility = Visibility.Collapsed;
-            });
-            isFloatingBarChangingHideMode = false;
-        }
+        /// <param name="MarginFromEdge">侧边栏距边缘的边距值：-50 完全收起，-10 折叠态露出展开按钮。</param>
+        /// <param name="isNoAnimation">是否跳过动画直接落位。</param>
+        private void SidePannelMarginAnimation(int MarginFromEdge, bool isNoAnimation = false)
+            => _ = AnimateSidePanelsAsync(MarginFromEdge, isNoAnimation);
 
         /// <summary>
         /// 启动自动收起侧栏计时器
@@ -676,84 +731,39 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"启动收纳校验：检测浮动栏可见性时出错: {ex.Message}", LogHelper.LogType.Warning);
+                LogHelper.WriteLogToFile($"检测浮动栏可见性时出错: {ex.Message}", LogHelper.LogType.Warning);
                 return true;
             }
         }
 
-        private async Task WaitUntilFloatingBarHideModeIdleAsync(TimeSpan timeout)
+        /// <summary>
+        /// 若当前处于折叠状态，则按当前缩放/任务栏高度重新应用折叠位置并返回 true；
+        /// 未折叠（或非批注模式）返回 false，由调用方继续执行正常的展开居中逻辑。
+        /// 用于"应用缩放""加载设置""重建工具栏"等会顺带重算位置的动作：
+        /// 这些动作发生在启动折叠之后，不做保护会把工具栏拉回屏幕内
+        /// （折叠标志仍为 true，但工具栏实际可见——用户看到"自动收纳失效"）。
+        /// </summary>
+        internal bool ReapplyFoldPositionIfFolded()
         {
-            var start = DateTime.UtcNow;
-            while (DateTime.UtcNow - start < timeout)
-            {
-                bool busy = await Dispatcher.InvokeAsync(() => isFloatingBarChangingHideMode);
-                if (!busy) return;
-                await Task.Delay(50).ConfigureAwait(false);
-            }
-        }
+            if (!isFloatingBarFolded || currentMode != 0) return false;
 
-
-        private async Task WaitForStartupFoldSettledAsync(TimeSpan timeout)
-        {
-            var start = DateTime.UtcNow;
-            while (DateTime.UtcNow - start < timeout)
-            {
-                var settled = await Dispatcher.InvokeAsync(() => isFloatingBarFolded && !isFloatingBarChangingHideMode);
-                if (settled) return;
-                await Task.Delay(50).ConfigureAwait(false);
-            }
-        }
-
-
-        private async Task VerifyStartupFoldAbsenceAfterDelayAsync()
-        {
             try
             {
-                if (!Settings.Startup.IsFoldAtStartup || App.StartWithBoardMode || App.StartWithShowMode)
-                    return;
+                double dpiScaleYForFold = 1;
+                var srcForFold = PresentationSource.FromVisual(this);
+                if (srcForFold != null) dpiScaleYForFold = srcForFold.CompositionTarget.TransformToDevice.M22;
+                double taskbarHeightForFold = ForegroundWindowInfo.GetTaskbarHeight(GetFloatingBarTargetScreen(), dpiScaleYForFold);
 
-                // 第一次校验：等待初始收纳稳定后，确认折叠状态是否真正落到不可见
-                await RunStartupFoldVerificationPassAsync();
-
-                // 第二次校验：15s 后再跑一遍，覆盖启动阶段后续可能出现的浮动栏异常重排/泄漏
-                await Task.Delay(15000).ConfigureAwait(false);
-                await RunStartupFoldVerificationPassAsync();
+                // 同步写入折叠位置（无动画、不展开），并走一次布局让可见性判定读到最终值
+                ViewboxFloatingBarMarginAnimationCore(-60 - (int)Math.Round(taskbarHeightForFold));
+                ViewboxFloatingBar.UpdateLayout();
+                return true;
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"启动收纳校验失败: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"重设折叠位置失败: {ex.Message}", LogHelper.LogType.Warning);
+                return false;
             }
-        }
-
-        /// <summary>
-        /// 执行单次启动收纳校验：等待浮动栏折叠稳定 3s 后检查是否真的不可见，
-        /// 若仍可见则展开并重新收纳一次。
-        /// </summary>
-        private async Task RunStartupFoldVerificationPassAsync()
-        {
-            await WaitForStartupFoldSettledAsync(TimeSpan.FromSeconds(30)).ConfigureAwait(false);
-            await Task.Delay(3000).ConfigureAwait(false);
-
-            bool needRetry = await Dispatcher.InvokeAsync(() =>
-            {
-                if (!isFloatingBarFolded) return false;
-                if (currentMode != 0) return false;
-                return !IsFloatingBarUiAbsentFromScreens();
-            });
-
-            if (!needRetry) return;
-
-            LogHelper.WriteLogToFile("启动收纳校验：检测到浮动栏仍在屏幕上，将展开后等待 0.2s 再次收纳", LogHelper.LogType.Event);
-
-            await UnFoldFloatingBar(null);
-            await WaitUntilFloatingBarHideModeIdleAsync(TimeSpan.FromSeconds(15)).ConfigureAwait(false);
-            await Task.Delay(200).ConfigureAwait(false);
-            await FoldFloatingBar(new object()).ConfigureAwait(false);
-        }
-
-        private void ScheduleStartupFoldAbsenceVerification()
-        {
-            _ = VerifyStartupFoldAbsenceAfterDelayAsync();
         }
 
     }

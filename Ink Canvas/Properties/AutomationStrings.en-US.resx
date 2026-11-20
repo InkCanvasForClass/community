@@ -216,17 +216,26 @@
   <data name="FloatingInterceptor_Title" xml:space="preserve">
     <value>Floating window interceptor</value>
   </data>
-  <data name="FoldMode_AutoFoldAfterPPT" xml:space="preserve">
-    <value>Auto fold floating bar after PPT show</value>
+  <data name="FoldMode_ExitWhiteboard" xml:space="preserve">
+    <value>Floating bar after leaving whiteboard</value>
   </data>
-  <data name="FoldMode_AutoFoldAfterPPTHint" xml:space="preserve">
-    <value>Automatically hide or fold the toolbar after exiting a presentation.</value>
+  <data name="FoldMode_ExitWhiteboardHint" xml:space="preserve">
+    <value>Choose what the floating bar does after you leave the whiteboard or blackboard.</value>
   </data>
-  <data name="FoldMode_AutoFoldAfterWhiteboard" xml:space="preserve">
-    <value>Auto fold when exiting whiteboard</value>
+  <data name="FoldMode_ExitPPT" xml:space="preserve">
+    <value>Floating bar after PowerPoint show</value>
   </data>
-  <data name="FoldMode_AutoFoldAfterWhiteboardHint" xml:space="preserve">
-    <value>Automatically fold the sidebar when exiting the whiteboard.</value>
+  <data name="FoldMode_ExitPPTHint" xml:space="preserve">
+    <value>Choose what the floating bar does after a PowerPoint slide show ends.</value>
+  </data>
+  <data name="FoldMode_ExitFold_Restore" xml:space="preserve">
+    <value>Follow the previous state (return to where it came from)</value>
+  </data>
+  <data name="FoldMode_ExitFold_Fold" xml:space="preserve">
+    <value>Fold into the sidebar</value>
+  </data>
+  <data name="FoldMode_ExitFold_Unfold" xml:space="preserve">
+    <value>Keep it expanded</value>
   </data>
   <data name="FoldMode_ExitToAnnotation" xml:space="preserve">
     <value>Switch to annotation when exiting fold mode</value>

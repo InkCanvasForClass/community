@@ -102,12 +102,71 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                return MainWindow.Settings?.Startup?.UpdatePackageArchitecture == UpdatePackageArchitecture.X64;
+                var configured = MainWindow.Settings?.Startup?.UpdatePackageArchitecture ?? UpdatePackageArchitecture.Auto;
+                if (configured == UpdatePackageArchitecture.X64) return true;
+                if (configured == UpdatePackageArchitecture.X86) return false;
             }
             catch
             {
-                return Environment.Is64BitProcess;
             }
+            return Environment.Is64BitProcess;
+        }
+
+        public static bool IsSelfContainedUpdatePackageSelected()
+        {
+            try
+            {
+                var configured = MainWindow.Settings?.Startup?.UpdatePackageRuntime ?? UpdatePackageRuntime.Auto;
+                if (configured == UpdatePackageRuntime.SelfContained) return true;
+                if (configured == UpdatePackageRuntime.FrameworkDependent) return false;
+            }
+            catch
+            {
+            }
+#if SELF_CONTAINED_BUILD
+            return true;
+#else
+            return false;
+#endif
+        }
+
+        /// <summary>当前应使用的更新分支（net6 / net10）。</summary>
+        public static string GetUpdateBranch()
+        {
+            UpdatePackageDotNetVersion configured = UpdatePackageDotNetVersion.Auto;
+            try
+            {
+                configured = MainWindow.Settings?.Startup?.UpdatePackageDotNetVersion ?? UpdatePackageDotNetVersion.Auto;
+            }
+            catch
+            {
+            }
+
+            if (configured == UpdatePackageDotNetVersion.Net6) return "net6";
+            if (configured == UpdatePackageDotNetVersion.Net10) return "net10";
+
+#if NET10_0_OR_GREATER
+            return "net10";
+#else
+            return "net6";
+#endif
+        }
+
+        private static bool IsNet6UpdateBranchSelected()
+        {
+            return GetUpdateBranch() == "net6";
+        }
+
+        private static string GetBetaUpdateBranch()
+        {
+            return IsNet6UpdateBranchSelected() ? "net6" : "main";
+        }
+
+        // 线路组模板里用 {stable}/{beta} 占位，按当前选择的 .NET 版本替换成实际分支
+        private static string ApplyUpdateBranch(string url)
+        {
+            if (string.IsNullOrEmpty(url)) return url;
+            return url.Replace("{stable}", GetUpdateBranch()).Replace("{beta}", GetBetaUpdateBranch());
         }
 
         private static string NormalizeVersionForUpdate(string version)
@@ -116,9 +175,17 @@ namespace Ink_Canvas.Helpers
             return version.Trim().TrimStart('v', 'V');
         }
 
-        public static string AppendX64SuffixBeforeZipExtension(string url)
+        public static string AppendUpdatePackageSuffixBeforeZipExtension(string url)
         {
-            if (string.IsNullOrEmpty(url) || !IsX64UpdatePackageSelected()) return url;
+            if (string.IsNullOrEmpty(url)) return url;
+
+            bool isX64 = IsX64UpdatePackageSelected();
+            bool isSelfContained = IsSelfContainedUpdatePackageSelected();
+            string suffix = isSelfContained
+                ? (isX64 ? "-x64-selfcontained" : "-x86-selfcontained")
+                : (isX64 ? "-x64" : "");
+            if (suffix.Length == 0) return url;
+
             int query = url.IndexOf('?');
             string pathPart = query >= 0 ? url.Substring(0, query) : url;
             string qs = query >= 0 ? url.Substring(query) : "";
@@ -126,24 +193,28 @@ namespace Ink_Canvas.Helpers
             int idx = pathPart.LastIndexOf(ext, StringComparison.OrdinalIgnoreCase);
             if (idx < 0) return url;
             var basePart = pathPart.Substring(0, idx);
-            if (basePart.EndsWith("-x64", StringComparison.OrdinalIgnoreCase)) return url;
-            return basePart + "-x64" + ext + qs;
+            if (basePart.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)) return url;
+            return basePart + suffix + ext + qs;
         }
 
         public static string GetUpdateZipFileName(string version)
         {
             var v = NormalizeVersionForUpdate(version);
-            return IsX64UpdatePackageSelected()
-                ? $"InkCanvasForClass.CE.{v}-x64.zip"
-                : $"InkCanvasForClass.CE.{v}.zip";
+            bool isX64 = IsX64UpdatePackageSelected();
+            bool isSelfContained = IsSelfContainedUpdatePackageSelected();
+
+            if (isSelfContained)
+                return isX64 ? $"InkCanvasForClass.CE.{v}-x64-selfcontained.zip" : $"InkCanvasForClass.CE.{v}-x86-selfcontained.zip";
+
+            return isX64 ? $"InkCanvasForClass.CE.{v}-x64.zip" : $"InkCanvasForClass.CE.{v}.zip";
         }
 
         public static string GetUpdateDownloadStatusFilePath(string version)
         {
             var v = NormalizeVersionForUpdate(version);
-            string name = IsX64UpdatePackageSelected()
-                ? $"DownloadV{v}_x64Status.txt"
-                : $"DownloadV{v}Status.txt";
+            string arch = IsX64UpdatePackageSelected() ? "_x64" : "";
+            string runtime = IsSelfContainedUpdatePackageSelected() ? "_selfcontained" : "";
+            string name = $"DownloadV{v}{arch}{runtime}Status.txt";
             return Path.Combine(updatesFolderPath, name);
         }
 
@@ -152,32 +223,29 @@ namespace Ink_Canvas.Helpers
             return Path.Combine(updatesFolderPath, GetUpdateZipFileName(version));
         }
 
-        private static string PickBrowserDownloadUrlFromAssets(JToken assets)
+        private static string PickBrowserDownloadUrlFromAssets(JToken assets, string version)
         {
             if (assets == null || !assets.Any()) return null;
-            bool wantX64 = IsX64UpdatePackageSelected();
+
+            var v = NormalizeVersionForUpdate(version);
+            string expectedName = GetUpdateZipFileName(version);
+            // 历史版本可能还没有自包含包，回退到同架构的框架依赖包
+            string fallbackName = IsX64UpdatePackageSelected()
+                ? $"InkCanvasForClass.CE.{v}-x64.zip"
+                : $"InkCanvasForClass.CE.{v}.zip";
+            string fallbackUrl = null;
             string anyZip = null;
-            string x64Zip = null;
-            string nonX64Zip = null;
             foreach (JToken a in assets)
             {
                 string name = a["name"]?.ToString();
                 string url = a["browser_download_url"]?.ToString();
                 if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(url)) continue;
                 if (!name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)) continue;
+                if (string.Equals(name, expectedName, StringComparison.OrdinalIgnoreCase)) return url;
+                if (string.Equals(name, fallbackName, StringComparison.OrdinalIgnoreCase)) fallbackUrl = url;
                 if (anyZip == null) anyZip = url;
-                if (name.EndsWith("-x64.zip", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (x64Zip == null) x64Zip = url;
-                }
-                else
-                {
-                    if (nonX64Zip == null) nonX64Zip = url;
-                }
             }
-            if (wantX64)
-                return x64Zip ?? anyZip;
-            return nonX64Zip ?? anyZip;
+            return fallbackUrl ?? anyZip;
         }
 
         // 线路组结构体（包含版本、下载、日志地址）
@@ -203,32 +271,32 @@ namespace Ink_Canvas.Helpers
                     new UpdateLineGroup
                     {
                         GroupName = "GitHub主线",
-                        VersionUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/net6/AutomaticUpdateVersionControl.txt",
+                        VersionUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/{stable}/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://github.com/InkCanvasForClass/community/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
                         // GitHub release 流水线配发 sha256 后激活严格校验。
                         // 注：当前 sha256 文件未发布时该字段为 null，跳过校验；配发后填值即可启用。
                         // Sha256UrlFormat = "https://github.com/InkCanvasForClass/community/releases/download/{0}/InkCanvasForClass.CE.{0}.zip.sha256",
-                        LogUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/net6/UpdateLog.md"
+                        LogUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/{stable}/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "bgithub备用",
-                        VersionUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/net6/AutomaticUpdateVersionControl.txt",
+                        VersionUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/{stable}/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://bgithub.xyz/InkCanvasForClass/community/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/net6/UpdateLog.md"
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/{stable}/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "kkgithub线路",
-                        VersionUrl = "https://kkgithub.com/InkCanvasForClass/community/raw/refs/heads/net6/AutomaticUpdateVersionControl.txt",
+                        VersionUrl = "https://kkgithub.com/InkCanvasForClass/community/raw/refs/heads/{stable}/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://kkgithub.com/InkCanvasForClass/community/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://kkgithub.com/InkCanvasForClass/community/raw/refs/heads/net6/UpdateLog.md"
+                        LogUrl = "https://kkgithub.com/InkCanvasForClass/community/raw/refs/heads/{stable}/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "智教联盟",
                         DownloadUrlFormat = "https://get.smart-teach.cn/d/Ningbo-S3/shared/jiangling/community/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/net6/UpdateLog.md",
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/{stable}/UpdateLog.md",
                         // 第三方私有镜像：未配 sha256 时拒绝安装，防止镜像被攻破任意代码执行。
                         RequireIntegrity = true
                     },
@@ -236,36 +304,36 @@ namespace Ink_Canvas.Helpers
                     {
                         GroupName = "inkeys",
                         DownloadUrlFormat = "https://iccce.inkeys.top/Release/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/net6/UpdateLog.md",
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/{stable}/UpdateLog.md",
                         RequireIntegrity = true
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "gh-proxy",
-                        VersionUrl = "https://gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community/refs/heads/net6/AutomaticUpdateVersionControl.txt",
+                        VersionUrl = "https://gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community/refs/heads/{stable}/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://gh-proxy.org/https://github.com/InkCanvasForClass/community/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community/refs/heads/net6/UpdateLog.md"
+                        LogUrl = "https://gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community/refs/heads/{stable}/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "hk.gh-proxy",
-                        VersionUrl = "https://hk.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community/refs/heads/net6/AutomaticUpdateVersionControl.txt",
+                        VersionUrl = "https://hk.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community/refs/heads/{stable}/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://hk.gh-proxy.org/https://github.com/InkCanvasForClass/community/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://hk.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community/refs/heads/net6/UpdateLog.md"
+                        LogUrl = "https://hk.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community/refs/heads/{stable}/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "cdn.gh-proxy",
-                        VersionUrl = "https://cdn.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community/refs/heads/net6/AutomaticUpdateVersionControl.txt",
+                        VersionUrl = "https://cdn.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community/refs/heads/{stable}/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://cdn.gh-proxy.org/https://github.com/InkCanvasForClass/community/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://cdn.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community/refs/heads/net6/UpdateLog.md"
+                        LogUrl = "https://cdn.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community/refs/heads/{stable}/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "edgeone.gh-proxy",
-                        VersionUrl = "https://edgeone.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community/refs/heads/net6/AutomaticUpdateVersionControl.txt",
+                        VersionUrl = "https://edgeone.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community/refs/heads/{stable}/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://edgeone.gh-proxy.org/https://github.com/InkCanvasForClass/community/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://edgeone.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community/refs/heads/net6/UpdateLog.md"
+                        LogUrl = "https://edgeone.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community/refs/heads/{stable}/UpdateLog.md"
                     }
                 }
             },
@@ -274,65 +342,65 @@ namespace Ink_Canvas.Helpers
                     new UpdateLineGroup
                     {
                         GroupName = "GitHub主线",
-                        VersionUrl = "https://github.com/InkCanvasForClass/community-beta/raw/refs/heads/main/AutomaticUpdateVersionControl.txt",
+                        VersionUrl = "https://github.com/InkCanvasForClass/community-beta/raw/refs/heads/{beta}/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://github.com/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://github.com/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
+                        LogUrl = "https://github.com/InkCanvasForClass/community-beta/raw/refs/heads/{beta}/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "bgithub备用",
-                        VersionUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/AutomaticUpdateVersionControl.txt",
+                        VersionUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/{beta}/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://bgithub.xyz/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/{beta}/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "kkgithub线路",
-                        VersionUrl = "https://kkgithub.com/InkCanvasForClass/community-beta/raw/refs/heads/main/AutomaticUpdateVersionControl.txt",
+                        VersionUrl = "https://kkgithub.com/InkCanvasForClass/community-beta/raw/refs/heads/{beta}/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://kkgithub.com/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://kkgithub.com/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
+                        LogUrl = "https://kkgithub.com/InkCanvasForClass/community-beta/raw/refs/heads/{beta}/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "智教联盟",
                         DownloadUrlFormat = "https://get.smart-teach.cn/d/Ningbo-S3/shared/jiangling/community-beta/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md",
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/{beta}/UpdateLog.md",
                         RequireIntegrity = true
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "inkeys",
                         DownloadUrlFormat = "https://iccce.inkeys.top/Beta/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md",
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/{beta}/UpdateLog.md",
                         RequireIntegrity = true
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "gh-proxy",
-                        VersionUrl = "https://gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/main/AutomaticUpdateVersionControl.txt",
+                        VersionUrl = "https://gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/{beta}/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://gh-proxy.org/https://github.com/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/main/UpdateLog.md"
+                        LogUrl = "https://gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/{beta}/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "hk.gh-proxy",
-                        VersionUrl = "https://hk.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/main/AutomaticUpdateVersionControl.txt",
+                        VersionUrl = "https://hk.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/{beta}/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://hk.gh-proxy.org/https://github.com/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://hk.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/main/UpdateLog.md"
+                        LogUrl = "https://hk.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/{beta}/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "cdn.gh-proxy",
-                        VersionUrl = "https://cdn.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/main/AutomaticUpdateVersionControl.txt",
+                        VersionUrl = "https://cdn.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/{beta}/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://cdn.gh-proxy.org/https://github.com/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://cdn.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/main/UpdateLog.md"
+                        LogUrl = "https://cdn.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/{beta}/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "edgeone.gh-proxy",
-                        VersionUrl = "https://edgeone.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/main/AutomaticUpdateVersionControl.txt",
+                        VersionUrl = "https://edgeone.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/{beta}/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://edgeone.gh-proxy.org/https://github.com/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://edgeone.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/main/UpdateLog.md"
+                        LogUrl = "https://edgeone.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/{beta}/UpdateLog.md"
                     }
                 }
             },
@@ -341,65 +409,65 @@ namespace Ink_Canvas.Helpers
                     new UpdateLineGroup
                     {
                         GroupName = "GitHub主线",
-                        VersionUrl = "https://github.com/InkCanvasForClass/community-beta/raw/refs/heads/main/AutomaticUpdateVersionControl.txt",
+                        VersionUrl = "https://github.com/InkCanvasForClass/community-beta/raw/refs/heads/{beta}/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://github.com/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://github.com/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
+                        LogUrl = "https://github.com/InkCanvasForClass/community-beta/raw/refs/heads/{beta}/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "bgithub备用",
-                        VersionUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/AutomaticUpdateVersionControl.txt",
+                        VersionUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/{beta}/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://bgithub.xyz/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/{beta}/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "kkgithub线路",
-                        VersionUrl = "https://kkgithub.com/InkCanvasForClass/community-beta/raw/refs/heads/main/AutomaticUpdateVersionControl.txt",
+                        VersionUrl = "https://kkgithub.com/InkCanvasForClass/community-beta/raw/refs/heads/{beta}/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://kkgithub.com/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://kkgithub.com/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
+                        LogUrl = "https://kkgithub.com/InkCanvasForClass/community-beta/raw/refs/heads/{beta}/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "智教联盟",
                         DownloadUrlFormat = "https://get.smart-teach.cn/d/Ningbo-S3/shared/jiangling/community-beta/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md",
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/{beta}/UpdateLog.md",
                         RequireIntegrity = true
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "inkeys",
                         DownloadUrlFormat = "https://iccce.inkeys.top/Beta/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md",
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/{beta}/UpdateLog.md",
                         RequireIntegrity = true
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "gh-proxy",
-                        VersionUrl = "https://gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/main/AutomaticUpdateVersionControl.txt",
+                        VersionUrl = "https://gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/{beta}/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://gh-proxy.org/https://github.com/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/main/UpdateLog.md"
+                        LogUrl = "https://gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/{beta}/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "hk.gh-proxy",
-                        VersionUrl = "https://hk.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/main/AutomaticUpdateVersionControl.txt",
+                        VersionUrl = "https://hk.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/{beta}/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://hk.gh-proxy.org/https://github.com/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://hk.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/main/UpdateLog.md"
+                        LogUrl = "https://hk.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/{beta}/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "cdn.gh-proxy",
-                        VersionUrl = "https://cdn.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/main/AutomaticUpdateVersionControl.txt",
+                        VersionUrl = "https://cdn.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/{beta}/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://cdn.gh-proxy.org/https://github.com/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://cdn.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/main/UpdateLog.md"
+                        LogUrl = "https://cdn.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/{beta}/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "edgeone.gh-proxy",
-                        VersionUrl = "https://edgeone.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/main/AutomaticUpdateVersionControl.txt",
+                        VersionUrl = "https://edgeone.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/{beta}/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://edgeone.gh-proxy.org/https://github.com/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://edgeone.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/main/UpdateLog.md"
+                        LogUrl = "https://edgeone.gh-proxy.org/https://raw.githubusercontent.com/InkCanvasForClass/community-beta/refs/heads/{beta}/UpdateLog.md"
                     }
                 }
             }
@@ -477,7 +545,7 @@ namespace Ink_Canvas.Helpers
         {
             var cached = TryGetCachedOrderedGroups(channel);
             if (cached != null) return cached;
-            var groups = ChannelLineGroups[channel];
+            var groups = GetChannelLineGroupsForCurrentBranch(channel);
 
             LogHelper.WriteLogToFile($"AutoUpdate | 开始并发检测通道 {channel} 下所有线路组延迟...");
 
@@ -553,7 +621,7 @@ namespace Ink_Canvas.Helpers
                     if (!string.IsNullOrEmpty(group.DownloadUrlFormat))
                     {
                         var testUrl = group.DownloadUrlFormat.Replace("{0}", "test");
-                        return AppendX64SuffixBeforeZipExtension(testUrl);
+                        return AppendUpdatePackageSuffixBeforeZipExtension(testUrl);
                     }
                 }
                 catch
@@ -573,16 +641,32 @@ namespace Ink_Canvas.Helpers
             return (group, delay);
         }
 
-        // 缓存按延迟排序后的线路组，避免短时间内重复测速
-        private static readonly Dictionary<UpdateChannel, (List<UpdateLineGroup> groups, DateTime cachedAt)> _orderedGroupsCache
-            = new Dictionary<UpdateChannel, (List<UpdateLineGroup>, DateTime)>();
+        // 缓存按延迟排序后的线路组，避免短时间内重复测速；按通道 + .NET 分支区分
+        private static readonly Dictionary<string, (List<UpdateLineGroup> groups, DateTime cachedAt)> _orderedGroupsCache
+            = new Dictionary<string, (List<UpdateLineGroup>, DateTime)>();
         private static readonly TimeSpan _orderedGroupsCacheTtl = TimeSpan.FromMinutes(15);
+
+        private static List<UpdateLineGroup> GetChannelLineGroupsForCurrentBranch(UpdateChannel channel)
+        {
+            return ChannelLineGroups[channel].Select(g => new UpdateLineGroup
+            {
+                GroupName = g.GroupName,
+                VersionUrl = ApplyUpdateBranch(g.VersionUrl),
+                DownloadUrlFormat = ApplyUpdateBranch(g.DownloadUrlFormat),
+                LogUrl = ApplyUpdateBranch(g.LogUrl)
+            }).ToList();
+        }
+
+        private static string GetOrderedGroupsCacheKey(UpdateChannel channel)
+        {
+            return $"{channel}:{GetUpdateBranch()}";
+        }
 
         private static List<UpdateLineGroup> TryGetCachedOrderedGroups(UpdateChannel channel)
         {
             lock (_orderedGroupsCache)
             {
-                if (_orderedGroupsCache.TryGetValue(channel, out var entry) &&
+                if (_orderedGroupsCache.TryGetValue(GetOrderedGroupsCacheKey(channel), out var entry) &&
                     entry.groups != null && entry.groups.Count > 0 &&
                     DateTime.UtcNow - entry.cachedAt < _orderedGroupsCacheTtl)
                 {
@@ -597,7 +681,7 @@ namespace Ink_Canvas.Helpers
         {
             lock (_orderedGroupsCache)
             {
-                _orderedGroupsCache[channel] = (new List<UpdateLineGroup>(groups), DateTime.UtcNow);
+                _orderedGroupsCache[GetOrderedGroupsCacheKey(channel)] = (new List<UpdateLineGroup>(groups), DateTime.UtcNow);
             }
         }
 
@@ -838,7 +922,7 @@ namespace Ink_Canvas.Helpers
                         if (version == targetVersion || version == $"v{targetVersion}" || version == $"V{targetVersion}")
                         {
                             string releaseNotes = release["body"]?.ToString();
-                            string downloadUrl = PickBrowserDownloadUrlFromAssets(release["assets"]);
+                            string downloadUrl = PickBrowserDownloadUrlFromAssets(release["assets"], version);
 
                             // 解析发布时间
                             DateTime? releaseTime = null;
@@ -879,7 +963,7 @@ namespace Ink_Canvas.Helpers
                             var latestRelease = releases[0];
                             string version = latestRelease["tag_name"]?.ToString();
                             string releaseNotes = latestRelease["body"]?.ToString();
-                            string downloadUrl = PickBrowserDownloadUrlFromAssets(latestRelease["assets"]);
+                            string downloadUrl = PickBrowserDownloadUrlFromAssets(latestRelease["assets"], version);
 
                             DateTime? releaseTime = null;
                             if (latestRelease["published_at"] != null && DateTime.TryParse(latestRelease["published_at"].ToString(), out DateTime parsedTime))
@@ -905,7 +989,7 @@ namespace Ink_Canvas.Helpers
                         var json = JObject.Parse(response);
                         string version = json["tag_name"]?.ToString();
                         string releaseNotes = json["body"]?.ToString();
-                        string downloadUrl = PickBrowserDownloadUrlFromAssets(json["assets"]);
+                        string downloadUrl = PickBrowserDownloadUrlFromAssets(json["assets"], version);
 
                         DateTime? releaseTime = null;
                         if (json["published_at"] != null && DateTime.TryParse(json["published_at"].ToString(), out DateTime parsedTime))
@@ -1345,7 +1429,7 @@ namespace Ink_Canvas.Helpers
                     }
                     if (group.GroupName != StartupStrings.SmartUpdate)
                     {
-                        url = AppendX64SuffixBeforeZipExtension(url);
+                        url = AppendUpdatePackageSuffixBeforeZipExtension(url);
                     }
                     // 智教联盟需要先获取真实下载地址
                     if (group.GroupName == "智教联盟")
@@ -1832,7 +1916,7 @@ namespace Ink_Canvas.Helpers
                     ? string.Format(group.Sha256UrlFormat, version)
                     : group.Sha256UrlFormat;
                 if (group.GroupName != StartupStrings.SmartUpdate)
-                    shaUrl = AppendX64SuffixBeforeZipExtension(shaUrl);
+                    shaUrl = AppendUpdatePackageSuffixBeforeZipExtension(shaUrl);
 
                 string expectedHash;
                 using (var client = new HttpClient())
@@ -2172,11 +2256,26 @@ namespace Ink_Canvas.Helpers
                         CreateNoWindow = false
                     };
 
-                    Process.Start(startInfo);
+                    Process updateProcess = Process.Start(startInfo);
                     LogHelper.WriteLogToFile("AutoUpdate | 新版本进程启动命令已执行");
 
-                    // 等待一小段时间确保新进程启动
-                    Thread.Sleep(2000);
+                    // 只做短确认（~500ms）取代原来的固定 2 秒等待：
+                    // 更新进程无窗口、启动后立即进入 PerformUpdate 等待旧进程退出，
+                    // 旧进程无需为它留"就绪时间"。本方法运行在旧进程 UI 线程上，
+                    // 固定睡眠会直接表现为"点退出/安装更新后界面卡住"。
+                    if (updateProcess != null)
+                    {
+                        for (int i = 0; i < 5; i++)
+                        {
+                            if (updateProcess.HasExited)
+                            {
+                                LogHelper.WriteLogToFile($"AutoUpdate | 更新进程提前退出 (ExitCode={SafeGetExitCode(updateProcess)})，旧进程将直接退出", LogHelper.LogType.Warning);
+                                break;
+                            }
+                            Thread.Sleep(100);
+                        }
+                        updateProcess.Dispose();
+                    }
 
                     // 关闭当前旧软件进程
                     LogHelper.WriteLogToFile("AutoUpdate | 关闭当前旧软件进程");
@@ -2210,6 +2309,19 @@ namespace Ink_Canvas.Helpers
                 catch
                 {
                 }
+            }
+        }
+
+        // 安全读取进程退出码（进程句柄可能已失效）
+        private static string SafeGetExitCode(Process process)
+        {
+            try
+            {
+                return process.HasExited ? process.ExitCode.ToString() : "running";
+            }
+            catch
+            {
+                return "unknown";
             }
         }
 
@@ -2287,8 +2399,25 @@ namespace Ink_Canvas.Helpers
                     if (oldProcessId > 0 && !string.IsNullOrEmpty(extractPath) && !string.IsNullOrEmpty(targetPath))
                     {
                         LogHelper.WriteLogToFile("AutoUpdate | 参数验证通过，启动更新任务");
-                        // 启动更新任务
-                        Task.Run(async () => await PerformUpdate(oldProcessId, extractPath, targetPath, isSilence));
+                        // 启动更新任务。更新进程以无窗口模式运行（isUpdateMode 跳过主窗口），
+                        // 无论更新成功还是失败，都必须以退出收尾：PerformUpdate 的失败分支只 return，
+                        // 若不兜底退出，无窗口的更新进程会永久残留（且持有标准互斥体，阻塞后续正常启动）。
+                        // 成功路径在 PerformUpdate 内部自行 Environment.Exit(0)，此 finally 幂等。
+                        Task.Run(async () =>
+                        {
+                            try
+                            {
+                                await PerformUpdate(oldProcessId, extractPath, targetPath, isSilence);
+                            }
+                            catch (Exception updateEx)
+                            {
+                                LogHelper.WriteLogToFile($"AutoUpdate | 更新任务异常退出: {updateEx.Message}", LogHelper.LogType.Error);
+                            }
+                            finally
+                            {
+                                Environment.Exit(0);
+                            }
+                        });
                         return true; // 返回true表示是更新模式
                     }
 
@@ -2311,41 +2440,44 @@ namespace Ink_Canvas.Helpers
             {
                 LogHelper.WriteLogToFile("AutoUpdate | 开始执行更新操作");
 
-                // 等待老进程完全退出
-                LogHelper.WriteLogToFile($"AutoUpdate | 等待老进程 {oldProcessId} 退出");
-                int waitCount = 0;
-                const int maxWaitCount = 30; // 最多等待30秒
+                // 等待老进程完全退出：事件驱动（WaitForExit 在进程终止瞬间返回），
+                // 不再按 1 秒粒度轮询。快设备秒过；慢设备（插件卸载/COM 清理耗时）由上限兜底，
+                // 不再出现"固定 30 秒猜短了就把还在正常清理的老进程强杀"的情况。
+                LogHelper.WriteLogToFile($"AutoUpdate | 等待老进程 {oldProcessId} 退出（事件驱动，上限 60 秒）");
+                bool oldProcessExited = false;
 
-                while (waitCount < maxWaitCount)
+                try
                 {
-                    try
+                    using (Process oldProcess = Process.GetProcessById(oldProcessId))
                     {
-                        Process oldProcess = Process.GetProcessById(oldProcessId);
-                        if (oldProcess.HasExited)
-                        {
-                            LogHelper.WriteLogToFile("AutoUpdate | 老进程已退出");
-                            break;
-                        }
-                        LogHelper.WriteLogToFile($"AutoUpdate | 老进程仍在运行，等待中... ({waitCount + 1}/{maxWaitCount})");
-                        Thread.Sleep(1000);
-                        waitCount++;
+                        oldProcessExited = oldProcess.WaitForExit(60000);
                     }
-                    catch (ArgumentException)
+
+                    if (oldProcessExited)
                     {
-                        // 进程不存在，说明已经退出
-                        LogHelper.WriteLogToFile("AutoUpdate | 老进程已退出（进程不存在）");
-                        break;
+                        LogHelper.WriteLogToFile("AutoUpdate | 老进程已退出");
                     }
                 }
+                catch (ArgumentException)
+                {
+                    // 进程不存在，说明已经退出
+                    LogHelper.WriteLogToFile("AutoUpdate | 老进程已退出（进程不存在）");
+                    oldProcessExited = true;
+                }
 
-                if (waitCount >= maxWaitCount)
+                if (!oldProcessExited)
                 {
                     LogHelper.WriteLogToFile("AutoUpdate | 等待老进程退出超时，尝试强制结束", LogHelper.LogType.Warning);
                     try
                     {
                         Process oldProcess = Process.GetProcessById(oldProcessId);
-                        oldProcess.Kill();
-                        Thread.Sleep(2000); // 等待进程完全结束
+                        // 必须杀整个进程树：老进程的 --watchdog 子进程在强杀路径上收不到退出信号，
+                        // 若只杀主进程，看门狗会按"异常退出"静默拉起新实例，与更新流程随后启动的
+                        // 最终应用并存，表现为更新完成后双开/退出残留。
+                        oldProcess.Kill(entireProcessTree: true);
+                        // 等待句柄真正终止后再复制文件，替代固定 Sleep(2000)：
+                        // 固定等待在进程尚未完全释放文件句柄时照样覆盖失败，在进程提前退出时又白白多等。
+                        oldProcess.WaitForExit(5000);
                     }
                     catch (Exception ex)
                     {
@@ -2457,8 +2589,22 @@ namespace Ink_Canvas.Helpers
                         Process newProcess = Process.Start(startInfo);
                         LogHelper.WriteLogToFile($"AutoUpdate | 最终应用程序启动成功，PID: {newProcess?.Id}，已标记为最终应用");
 
-                        // 等待一小段时间确保最终应用程序启动
-                        Thread.Sleep(2000);
+                        // 只做启动即崩的短确认（~500ms），不再固定 Sleep(2000)：
+                        // 最终应用会读取更新标记文件并事件驱动地等待本进程退出（最长 15 秒），
+                        // 本进程故意多活 2 秒只会拖慢更新后的启动，对交接没有额外收益。
+                        if (newProcess != null)
+                        {
+                            for (int i = 0; i < 5; i++)
+                            {
+                                if (newProcess.HasExited)
+                                {
+                                    LogHelper.WriteLogToFile($"AutoUpdate | 最终应用启动后立即退出 (ExitCode={SafeGetExitCode(newProcess)})", LogHelper.LogType.Error);
+                                    break;
+                                }
+                                Thread.Sleep(100);
+                            }
+                            newProcess.Dispose();
+                        }
 
                         // 结束当前更新进程
                         LogHelper.WriteLogToFile("AutoUpdate | 更新流程完成，结束更新进程");
@@ -2876,7 +3022,7 @@ namespace Ink_Canvas.Helpers
                     {
                         string version = item["tag_name"]?.ToString();
                         string releaseNotes = item["body"]?.ToString();
-                        string downloadUrl = PickBrowserDownloadUrlFromAssets(item["assets"]);
+                        string downloadUrl = PickBrowserDownloadUrlFromAssets(item["assets"], version);
                         if (!string.IsNullOrEmpty(version) && !string.IsNullOrEmpty(downloadUrl))
                             result.Add((version, downloadUrl, releaseNotes));
                     }
@@ -2907,7 +3053,7 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile("AutoUpdate | 开始测试Windows 7 TLS连接...");
 
                 // 测试GitHub连接
-                var testUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/net6/AutomaticUpdateVersionControl.txt";
+                var testUrl = $"https://github.com/InkCanvasForClass/community/raw/refs/heads/{GetUpdateBranch()}/AutomaticUpdateVersionControl.txt";
 
                 using (var handler = new HttpClientHandler())
                 {

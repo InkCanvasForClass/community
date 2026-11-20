@@ -11,6 +11,9 @@ namespace Ink_Canvas
 {
     public class Settings
     {
+        [JsonProperty("updatePackageDefaultsMigrated")]
+        public bool UpdatePackageDefaultsMigrated { get; set; }
+
         [JsonProperty("advanced")]
         public Advanced Advanced { get; set; } = new Advanced();
 
@@ -550,7 +553,31 @@ namespace Ink_Canvas
         /// <summary>32 位包，例如 InkCanvasForClass.CE.1.7.0.0.zip</summary>
         X86 = 0,
         /// <summary>64 位包，例如 InkCanvasForClass.CE.1.7.0.0-x64.zip</summary>
-        X64 = 1
+        X64 = 1,
+        /// <summary>跟随当前软件架构</summary>
+        Auto = 2
+    }
+
+    /// <summary>自动更新要下载的安装包运行时形态。默认跟随当前安装包：自包含包默认带运行时，框架依赖包默认不带。</summary>
+    public enum UpdatePackageRuntime
+    {
+        /// <summary>不带运行时（框架依赖），例如 InkCanvasForClass.CE.1.7.0.0-x64.zip</summary>
+        FrameworkDependent = 0,
+        /// <summary>带运行时（自包含），例如 InkCanvasForClass.CE.1.7.0.0-x64-selfcontained.zip</summary>
+        SelfContained = 1,
+        /// <summary>跟随当前安装包</summary>
+        Auto = 2
+    }
+
+    /// <summary>自动更新要跟随的 .NET 版本渠道。默认跟随当前运行的软件版本。</summary>
+    public enum UpdatePackageDotNetVersion
+    {
+        /// <summary>跟随当前软件版本</summary>
+        Auto = 0,
+        /// <summary>.NET 6 分支</summary>
+        Net6 = 1,
+        /// <summary>.NET 10 分支</summary>
+        Net10 = 2
     }
 
     /// <summary>
@@ -597,7 +624,11 @@ namespace Ink_Canvas
         [JsonProperty("updateChannel")]
         public UpdateChannel UpdateChannel { get; set; } = UpdateChannel.Release;
         [JsonProperty("updatePackageArchitecture")]
-        public UpdatePackageArchitecture UpdatePackageArchitecture { get; set; } = Environment.Is64BitProcess ? UpdatePackageArchitecture.X64 : UpdatePackageArchitecture.X86;
+        public UpdatePackageArchitecture UpdatePackageArchitecture { get; set; } = UpdatePackageArchitecture.Auto;
+        [JsonProperty("updatePackageRuntime")]
+        public UpdatePackageRuntime UpdatePackageRuntime { get; set; } = UpdatePackageRuntime.Auto;
+        [JsonProperty("updatePackageDotNetVersion")]
+        public UpdatePackageDotNetVersion UpdatePackageDotNetVersion { get; set; } = UpdatePackageDotNetVersion.Auto;
         [JsonProperty("isSmartUpdate")]
         public bool IsSmartUpdate { get; set; } = true;
         [JsonProperty("skippedVersion")]
@@ -1195,6 +1226,21 @@ namespace Ink_Canvas
         public bool EnableSmartMode { get; set; } = false;
     }
 
+    /// <summary>
+    /// 退出白板（含黑板）或退出 PPT 放映后浮动栏的去向。
+    /// </summary>
+    public enum ExitFoldMode
+    {
+        /// <summary>跟随进入前的形态：原来收纳的还收纳，原来展开的还展开。</summary>
+        RestorePrevious = 0,
+
+        /// <summary>退出后统一收纳到侧边栏。</summary>
+        Fold = 1,
+
+        /// <summary>退出后统一保持展开显示。</summary>
+        Unfold = 2
+    }
+
     public class Automation
     {
         [JsonIgnore]
@@ -1219,8 +1265,15 @@ namespace Ink_Canvas
         [JsonProperty("isAutoEnterAnnotationModeWhenExitFoldMode")]
         public bool IsAutoEnterAnnotationModeWhenExitFoldMode { get; set; }
 
+        // 旧版布尔开关，仅用于迁移到 ExitWhiteboardFoldMode，迁移后置 null 不再写回。
         [JsonProperty("isAutoFoldWhenExitWhiteboard")]
-        public bool IsAutoFoldWhenExitWhiteboard { get; set; }
+        public bool? IsAutoFoldWhenExitWhiteboard { get; set; }
+
+        /// <summary>
+        /// 退出白板（含黑板）后浮动栏的去向。
+        /// </summary>
+        [JsonProperty("exitWhiteboardFoldMode")]
+        public ExitFoldMode ExitWhiteboardFoldMode { get; set; } = ExitFoldMode.RestorePrevious;
 
         [JsonProperty("isAutoFoldInEasiNote")]
         public bool IsAutoFoldInEasiNote { get; set; }
@@ -1281,8 +1334,15 @@ namespace Ink_Canvas
         [JsonProperty("isAutoFoldInPPTSlideShow")]
         public bool IsAutoFoldInPPTSlideShow { get; set; }
 
+        // 旧版布尔开关，仅用于迁移到 ExitPPTFoldMode，迁移后置 null 不再写回。
         [JsonProperty("isAutoFoldAfterPPTSlideShow")]
-        public bool IsAutoFoldAfterPPTSlideShow { get; set; }
+        public bool? IsAutoFoldAfterPPTSlideShow { get; set; }
+
+        /// <summary>
+        /// 退出 PPT 放映后浮动栏的去向。
+        /// </summary>
+        [JsonProperty("exitPPTFoldMode")]
+        public ExitFoldMode ExitPPTFoldMode { get; set; } = ExitFoldMode.RestorePrevious;
 
         [JsonProperty("isAutoKillPPTService")]
         public bool IsAutoKillPPTService { get; set; }

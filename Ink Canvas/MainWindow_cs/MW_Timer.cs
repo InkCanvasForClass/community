@@ -1,4 +1,4 @@
-using Ink_Canvas.Helpers;
+﻿using Ink_Canvas.Helpers;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -1238,11 +1238,11 @@ namespace Ink_Canvas
                 {
                     if (!isFloatingBarFolded)
                     {
-                        FoldFloatingBar_MouseUp(null, null);
+                        _ = FoldFloatingBarByCode();
                     }
                     else if (currentMargin.Left > -50 && !isFloatingBarChangingHideMode)
                     {
-                        FoldFloatingBar_MouseUp(null, null);
+                        _ = FoldFloatingBarByCode();
                     }
                     return;
                 }
@@ -1251,7 +1251,7 @@ namespace Ink_Canvas
                 {
                     if (!unfoldFloatingBarByUser && !isFloatingBarFolded)
                     {
-                        FoldFloatingBar_MouseUp(null, null);
+                        _ = FoldFloatingBarByCode();
                     }
                     return;
                 }
@@ -1270,7 +1270,7 @@ namespace Ink_Canvas
                         return;
                     }
 
-                    if (isFloatingBarFolded && !foldFloatingBarByUser)
+                    if (isFloatingBarFolded && !foldFloatingBarByUser && !_holdFoldAgainstAutoUnfold)
                     {
                         // 检查是否启用了软件退出后保持收纳模式
                         if (Settings.Automation.KeepFoldAfterSoftwareExit)
@@ -1281,7 +1281,7 @@ namespace Ink_Canvas
                         {
                             // schedule unfold if dispatcher still running
                             if (Dispatcher.HasShutdownStarted || Dispatcher.HasShutdownFinished) return;
-                            UnFoldFloatingBar_MouseUp(new object(), null);
+                            _ = UnFoldFloatingBarByCode();
                             unfoldFloatingBarByUser = false;
                         }
                     }

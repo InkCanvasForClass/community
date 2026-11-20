@@ -1,4 +1,4 @@
-using Ink_Canvas.Controls;
+﻿using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
@@ -849,21 +849,31 @@ namespace Ink_Canvas
                 }
 
 
-                if (autoAlignCenter) // 控制居中
+                // 折叠态不做居中：工具栏在屏幕外，居中既无意义，又会把折叠位置覆盖成
+                // 展开位（isFloatingBarFolded 仍为 true，于是工具栏可见但隐藏按钮点不动）。
+                // 退出白板时会连续触发多次切工具/隐藏面板，每次都调到这里，
+                // 最后那次居中会把刚恢复的收纳覆盖掉。
+                if (autoAlignCenter && !isFloatingBarFolded) // 控制居中
                 {
+                    // 延迟期间收纳可能刚好发生（退出白板的收纳是异步启动的），
+                    // 所以判断不能只在 Delay 前做一次，调位置前必须再看一眼，
+                    // 否则这次居中会把折叠位覆盖成展开位。
                     if (IsInPPTPresentationMode)
                     {
                         await Task.Delay(50);
+                        if (isFloatingBarFolded) return;
                         ViewboxFloatingBarMarginAnimation(60);
                     }
                     else if (Topmost) //非黑板
                     {
                         await Task.Delay(50);
+                        if (isFloatingBarFolded) return;
                         ViewboxFloatingBarMarginAnimation(100, true);
                     }
                     else //黑板
                     {
                         await Task.Delay(50);
+                        if (isFloatingBarFolded) return;
                         ViewboxFloatingBarMarginAnimation(60);
                     }
                 }
@@ -930,7 +940,22 @@ namespace Ink_Canvas
             if (isDisplayingOrHidingBlackboard) return;
             isDisplayingOrHidingBlackboard = true;
 
-            UnFoldFloatingBar_MouseUp(null, null);
+            // 本方法开头会先展开工具栏，因此必须在展开之前记录进入前的形态，
+            // 退出白板时才能原样恢复（收纳的还收纳、展开的还展开）。
+            if (currentMode == 0)
+            {
+                _floatingBarFoldedBeforeBoard = isFloatingBarFolded;
+                _hasFloatingBarStateBeforeBoard = true;
+            }
+
+            // 只在进入白板时展开工具栏。退出白板时不能展开：UnFoldFloatingBar 是异步的，
+            // 它的续延（写 isFloatingBarFolded=false、按展开位做 MarginAnimation）会排在
+            // SwitchBackground 恢复收纳之后执行，把刚恢复好的收纳态又改回展开态——
+            // 日志里表现为"退出白板后 20ms 又出现一次 浮动栏已展开"。
+            if (currentMode == 0)
+            {
+                _ = UnFoldFloatingBarByCode();
+            }
 
             if (inkCanvas.EditingMode == InkCanvasEditingMode.Select) PenIcon_Click(null, null);
 
@@ -1091,18 +1116,8 @@ namespace Ink_Canvas
                 if (Settings.Automation.IsAutoSaveScreenshotAtClear &&
                     inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber) CaptureAndEnqueueScreenshotSave(true);
 
-                if (!IsInPPTPresentationMode)
-                    new Thread(() =>
-                    {
-                        Thread.Sleep(300);
-                        Application.Current.Dispatcher.Invoke(() => { ViewboxFloatingBarMarginAnimation(100, true); });
-                    }).Start();
-                else
-                    new Thread(() =>
-                    {
-                        Thread.Sleep(300);
-                        Application.Current.Dispatcher.Invoke(() => { ViewboxFloatingBarMarginAnimation(60); });
-                    }).Start();
+                // 这里不再延时把工具栏展开：展开动作由 SwitchBackground 收尾统一处理，
+                // 否则会出现"先显示工具栏、再收进侧边栏"的两段式。
 
                 if (GetSelectionBGLeft() != 28)
                 {
@@ -1118,8 +1133,7 @@ namespace Ink_Canvas
                 ICCWaterMarkDark.Visibility = Visibility.Collapsed;
                 ICCWaterMarkWhite.Visibility = Visibility.Collapsed;
 
-                // 新增：退出白板模式时恢复基础浮动栏的显示
-                ViewboxFloatingBar.Visibility = Visibility.Visible;
+                // 工具栏形态统一由 SwitchBackground 收尾恢复，这里不再抢先显示。
             }
 
             SwitchBackground(null, null);
@@ -1157,8 +1171,6 @@ namespace Ink_Canvas
             if (currentMode == 0 && inkCanvas.Strokes.Count == 0 && !IsInPPTPresentationMode)
                 CursorIcon_Click(null, null);
 
-            { /* Old UI removed */ }
-
             new Thread(() =>
             {
                 Thread.Sleep(200);
@@ -1182,6 +1194,16 @@ namespace Ink_Canvas
                     suppressNextPenPaletteOpen = true;
                     PenIcon_Click(null, null);
                 }
+            }
+
+            // 退出白板收尾：走到这里时 SwitchToDefaultPen / CheckColorTheme 等可能改写浮动栏位置的
+            // 同步动作都已执行完。这里无条件重设一次折叠位（幂等）——不要用"是否已在屏幕外"来判断：
+            // IsFloatingBarUiAbsentFromScreens 在 Visibility != Visible 时直接返回 true，
+            // 自检会在位置实际仍在屏幕内时误判通过，工具栏就留在屏幕上且隐藏按钮点不动。
+            if (currentMode == 0 && isFloatingBarFolded)
+            {
+                ViewboxFloatingBar.UpdateLayout();
+                ReapplyFoldPositionIfFolded();
             }
         }
 
@@ -2729,7 +2751,20 @@ namespace Ink_Canvas
         /// <param name="MarginFromEdge">边缘边距</param>
         /// <param name="PosXCaculatedWithTaskbarHeight">是否考虑任务栏高度计算位置</param>
         /// <param name="skipAnimation">是否跳过动画直接定位（用于启动时快速恢复位置）</param>
-        public async void ViewboxFloatingBarMarginAnimation(int MarginFromEdge,
+        public void ViewboxFloatingBarMarginAnimation(int MarginFromEdge,
+            bool PosXCaculatedWithTaskbarHeight = false, bool skipAnimation = false)
+        {
+            _ = ViewboxFloatingBarMarginAnimationAsync(MarginFromEdge, PosXCaculatedWithTaskbarHeight, skipAnimation);
+        }
+
+        private int _marginAnimationVersion;
+
+        /// <summary>
+        /// 可等待版本：动画与最终 Margin 落地后任务才完成。
+        /// 需要"位置生效后再做后续动作"的调用方（如折叠后自检）应 await 本方法，
+        /// 而不是用固定延时猜测动画是否播完。
+        /// </summary>
+        internal async Task ViewboxFloatingBarMarginAnimationAsync(int MarginFromEdge,
             bool PosXCaculatedWithTaskbarHeight = false, bool skipAnimation = false)
         {
             if (currentMode == 1)
@@ -2739,22 +2774,44 @@ namespace Ink_Canvas
 
             if (MarginFromEdge == 60) MarginFromEdge = 55;
 
+            // 版本号：后发起的调用获胜，旧调用在延时结束后发现已被取代则放弃写值。
+            // 启动早期"展开居中"（HideSubPanels 尾部）与"启动收纳折叠"会并发调用本方法，
+            // 二者共享 pos 字段——没有版本控制时，先算出的展开位置会在 200ms 后
+            // 覆盖后算出的折叠位置，表现为"折叠标志已置位但工具栏仍停在屏幕内"。
+            int myVersion = Interlocked.Increment(ref _marginAnimationVersion);
+
+            Point target = default;
             await Dispatcher.InvokeAsync(() =>
             {
                 if (skipAnimation)
                 {
                     ViewboxFloatingBarMarginAnimationCore(MarginFromEdge, PosXCaculatedWithTaskbarHeight, false);
-                    return;
+                }
+                else
+                {
+                    ViewboxFloatingBarMarginAnimationCore(MarginFromEdge, PosXCaculatedWithTaskbarHeight, true);
                 }
 
-                ViewboxFloatingBarMarginAnimationCore(MarginFromEdge, PosXCaculatedWithTaskbarHeight, true);
+                // 在 UI 线程内立即快照本次计算的位置（Core 内部写入共享字段 pos）
+                target = new Point(pos.X, pos.Y);
             });
 
-            await Task.Delay(skipAnimation ? 0 : 200);
+            if (!skipAnimation)
+            {
+                // 等动画层完成：动画时长 0.35s，这里等播放到写最终 Margin 的时机。
+                // 传 0 时 skipAnimation 路径立即返回，不引入等待。
+                await Task.Delay(200);
+            }
+
+            if (myVersion != Volatile.Read(ref _marginAnimationVersion))
+            {
+                // 已被更新的位置操作取代：放弃写值，交给最新一次调用决定最终位置
+                return;
+            }
 
             await Dispatcher.InvokeAsync(() =>
             {
-                ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
+                ViewboxFloatingBar.Margin = new Thickness(target.X, target.Y, -2000, -200);
                 ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
                 isViewboxFloatingBarMarginAnimationRunning = false;
                 if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
@@ -3567,22 +3624,25 @@ namespace Ink_Canvas
                 RestoreStrokes(true);
             }
 
-            if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
-            { /* Old UI removed */ }
-            else
-            { /* Old UI removed */ }
-
-            { /* Old UI removed */ }
-            { /* Old UI removed */ }
-            UpdateToolbarComponentVisibility();
-
-
             UpdateToolbarComponentVisibility();
 
             // 注意：快捷调色盘的可见性现在完全由工具栏规则集管理，不需要手动设置
 
-            if (!isFloatingBarFolded)
+            // 折叠态下不执行居中：启动初始化会以 (null, null) 程序化触发一次"切鼠标"，
+            // 此时折叠动画可能尚未落地——若在这里发起展开居中，会把折叠位置覆盖掉
+            // （折叠标志保持 true，但工具栏被拉回屏幕内）。
+            // 但用户真实点击图标（sender != null）却仍被折叠标志拦下，只可能是标志与
+            // 实际状态不一致（工具栏明明在屏幕上却停着不居中），此时照常居中修复位置。
+            bool userInitiated = sender != null;
+            if (!isFloatingBarFolded || (userInitiated && !IsFloatingBarUiAbsentFromScreens()))
             {
+                if (userInitiated && isFloatingBarFolded)
+                {
+                    LogHelper.WriteLogToFile(
+                        $"[Toolbar] 折叠标志与实际状态不一致（工具栏仍在屏幕上），重新居中: margin=[{ViewboxFloatingBar?.Margin}]",
+                        LogHelper.LogType.Warning);
+                }
+
                 HideSubPanels("cursor", true);
                 await Task.Delay(50);
 
@@ -3656,22 +3716,6 @@ namespace Ink_Canvas
 
                 /*if (forceEraser && currentMode == 0)
                     BtnColorRed_Click(sender, null);*/
-
-                if (GridBackgroundCover.Visibility == Visibility.Collapsed)
-                {
-                    if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
-                    { /* Old UI removed */ }
-                    else
-                    { /* Old UI removed */ }
-                    { /* Old UI removed */ }
-                }
-                else
-                {
-                    { /* Old UI removed */ }
-                    { /* Old UI removed */ }
-                }
-
-                { /* Old UI removed */ }
 
                 // 进入批注模式时的全屏处理（仅当未应用过全屏处理时）
                 if (Settings.Advanced.IsEnableAvoidFullScreenHelper && !isFullScreenApplied)
@@ -4484,7 +4528,6 @@ namespace Ink_Canvas
         public void ExitApplication(object sender, RoutedEventArgs e)
         {
             App.IsAppExitByUser = true;
-            _exitApplicationRequested = true;
             _forceCloseFromExitOrRestartButton = false;
             // 通过主窗口 Close 进入统一的 Closing 验证流程。
             // Window_Closed 中再显式关闭 Application，确保托盘和隐藏窗口一并退出。
@@ -4508,12 +4551,12 @@ namespace Ink_Canvas
                         MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.Cancel) return;
             }
 
-            Process.Start(System.Windows.Forms.Application.ExecutablePath, "-m");
-            _forceCloseFromExitOrRestartButton = true;
-            _exitApplicationRequested = true;
-            App.IsAppExitByUser = true;
-            CloseIsFromButton = true;
-            Close();
+            // 统一走 AppRestartHelper 的重启时序：先释放互斥体 → 启动并观察新实例存活 → 再退出当前实例。
+            // 原实现"先以 -m 启动新实例再 Close 旧实例"：新旧实例并存期互斥体无主、
+            // 托盘图标/全局热键/Hook 双注册竞态，旧实例退出清理慢时表现为双开残留。
+            // （CloseIsFromButton 是 static 且从不复原，原路径设置后用户后续点 X 将永远跳过二次确认。）
+            _forceCloseFromExitOrRestartButton = true; // 放行后续 Shutdown 触发的 Closing 验证
+            AppRestartHelper.RestartWithCurrentPrivileges();
         }
 
         /// <summary>
@@ -4697,8 +4740,6 @@ namespace Ink_Canvas
 
                     // 演示背景只影响画布，不改变用户配置的应用主题。
 
-                    { /* Old UI removed */ }
-
                     CheckClipboardImageAndShowPasteNotificationWhenEnteringBoard();
                 }
 
@@ -4752,32 +4793,61 @@ namespace Ink_Canvas
                             isFullScreenApplied = false; // 标记全屏处理已还原
                         }
 
-                        // 在屏幕模式下恢复基础浮动栏的显示
-                        ViewboxFloatingBar.Visibility = Visibility.Visible;
+                        // 退出白板：按用户选定的策略恢复，且一步到位。
+                        // 跟随进入前形态时：进入前收纳的 → 直接停在收纳位（不先显示工具栏再收走）；
+                        // 进入前展开的 → 直接显示在离开时的位置。
+                        // 进入来源未知（--board 启动、IPC 等未经过本方法）时按展开处理。
+                        var exitFoldMode = Settings.Automation.ExitWhiteboardFoldMode;
+                        bool restoreFolded = exitFoldMode == ExitFoldMode.Fold
+                            || (exitFoldMode == ExitFoldMode.RestorePrevious
+                                && _hasFloatingBarStateBeforeBoard
+                                && _floatingBarFoldedBeforeBoard);
 
-                        // 退出白板时自动收纳功能 - 等待浮动栏完全展开后再收纳
-                        // 当处于PPT放映模式时，不自动收纳
-                        if (Settings.Automation.IsAutoFoldWhenExitWhiteboard && !isFloatingBarFolded &&
-                            !IsInPPTPresentationMode)
+                        LogHelper.WriteLogToFile(
+                            $"[Board] 退出白板: 模式={exitFoldMode}, 有记录={_hasFloatingBarStateBeforeBoard}, 进入前收纳={_floatingBarFoldedBeforeBoard}, 恢复收纳={restoreFolded}, ppt={IsInPPTPresentationMode}",
+                            LogHelper.LogType.Event);
+
+                        if (restoreFolded && !IsInPPTPresentationMode)
                         {
-                            // 使用异步延迟，等待浮动栏展开动画完成后再收纳
-                            Task.Run(async () =>
+                            // 复用既有折叠流程（instant 直接落位、不播动画）：
+                            // 位置、可见性、侧边栏、折叠标记都由 FoldFloatingBar 统一处理。
+                            // 不要在这里手写 Visibility/Margin——Hidden/Collapsed 会让
+                            // ActualWidth/ActualHeight 为 0，后续重建/主题刷新按 0 尺寸布局，
+                            // 工具栏就会以"未初始化"的样子出现在屏幕内。
+                            // hold: 这是系统决定的收纳，不要被"自动展开"定时器在 500ms 后弹回来
+                            var foldTask = FoldFloatingBarByCode(instant: true, hold: true);
+                            // async Task 被丢弃后异常会静默消失，表现为"折叠标志置位但位置没动"，
+                            // 因此单独观察一次，失败时留证据。
+                            _ = foldTask.ContinueWith(t =>
                             {
-                                await Task.Delay(700);
-                                await Dispatcher.InvokeAsync(() =>
-                                {
-                                    FoldFloatingBar_MouseUp(new object(), null);
-                                });
-                            });
+                                LogHelper.WriteLogToFile(
+                                    $"[Board] 退出白板折叠任务异常: {t.Exception?.GetBaseException()}",
+                                    LogHelper.LogType.Error);
+                            }, TaskContinuationOptions.OnlyOnFaulted);
+                        }
+                        else
+                        {
+                            isFloatingBarFolded = false;
+                            foldFloatingBarByUser = false;
+                            ViewboxFloatingBar.Visibility = Visibility.Visible;
+                            SidePannelMarginAnimation(-50, true);
                         }
 
-                        // 退出白板时保持用户配置的应用主题。
+                        _hasFloatingBarStateBeforeBoard = false;
 
-                        { /* Old UI removed */ }
                         Topmost = true;
                         break;
                     case 1: //黑板或白板模式
                         currentMode = 1;
+                        // 仅在尚未记录时兜底记录（--board 启动、IPC 等不经过 ImageBlackboard_MouseUp 的路径）。
+                        // 走白板按钮时 ImageBlackboard_MouseUp 已在展开之前记录过：
+                        // 那里随后会调 UnFoldFloatingBar 把 isFloatingBarFolded 置为 false，
+                        // 若无条件在这里再记一次，收纳态会被覆盖成展开态，退出白板就不再收纳。
+                        if (!_hasFloatingBarStateBeforeBoard)
+                        {
+                            _floatingBarFoldedBeforeBoard = isFloatingBarFolded;
+                            _hasFloatingBarStateBeforeBoard = true;
+                        }
                         AutomationBootstrap.Monitor?.NotifyInternalStateChanged();
                         GridBackgroundCover.Visibility = Visibility.Visible;
                         AnimationsHelper.ShowWithSlideFromBottomAndFade(BlackboardLeftSide);
@@ -4807,8 +4877,6 @@ namespace Ink_Canvas
 
                         ViewboxFloatingBar.Visibility = Visibility.Collapsed;
 
-                        { /* Old UI removed */ }
-
                         if (Settings.Canvas.UsingWhiteboard)
                         {
                             // 如果有自定义背景色并且是白板模式，应用自定义背景色
@@ -4829,8 +4897,6 @@ namespace Ink_Canvas
                             ColorSwitchCheck();
                         }
 
-                        { /* Old UI removed */ }
-
                         if (Settings.Advanced.EnableUIAccessTopMost)
                         {
                             Topmost = true;
@@ -4849,7 +4915,10 @@ namespace Ink_Canvas
         }
 
         public int BoundsWidth = 5;
-        private bool _isToolbarOnRightSide = true;
+
+        // 进入白板前的浮动栏形态：退出白板时按它原样恢复（收纳的还收纳，展开的还展开）
+        private bool _floatingBarFoldedBeforeBoard;
+        private bool _hasFloatingBarStateBeforeBoard;
 
         private void BtnHideInkCanvas_Click(object sender, RoutedEventArgs e)
         {
@@ -4865,22 +4934,6 @@ namespace Ink_Canvas
                 GridBackgroundCoverHolder.Visibility = Visibility.Visible;
 
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-
-                if (GridBackgroundCover.Visibility == Visibility.Collapsed)
-                {
-                    if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
-                    { /* Old UI removed */ }
-                    else
-                    { /* Old UI removed */ }
-                    { /* Old UI removed */ }
-                }
-                else
-                {
-                    { /* Old UI removed */ }
-                    { /* Old UI removed */ }
-                }
-
-                { /* Old UI removed */ }
 
                 // 进入批注模式时的全屏处理（仅当未应用过全屏处理时）
                 if (Settings.Advanced.IsEnableAvoidFullScreenHelper && !isFullScreenApplied)
@@ -4955,14 +5008,6 @@ namespace Ink_Canvas
                     SaveStrokes();
                     RestoreStrokes(true);
                 }
-
-                if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
-                { /* Old UI removed */ }
-                else
-                { /* Old UI removed */ }
-
-                { /* Old UI removed */ }
-                { /* Old UI removed */ }
             }
 
             if (GridTransparencyFakeBackground.Background == Brushes.Transparent)
@@ -4984,28 +5029,6 @@ namespace Ink_Canvas
                     ViewboxFloatingBar.Visibility = Visibility.Visible;
                 }
             }
-        }
-
-        private void BtnSwitchSide_Click(object sender, RoutedEventArgs e)
-        {
-            if (_isToolbarOnRightSide)
-            {
-                { /* Old UI removed */ }
-                { /* Old UI removed */ }
-            }
-            else
-            {
-                { /* Old UI removed */ }
-                { /* Old UI removed */ }
-            }
-        }
-
-        private void StackPanel_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if (((StackPanel)sender).Visibility == Visibility.Visible)
-            { /* Old UI removed */ }
-            else
-            { /* Old UI removed */ }
         }
 
         #endregion

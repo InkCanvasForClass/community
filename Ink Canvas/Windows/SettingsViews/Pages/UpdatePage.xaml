@@ -225,6 +225,13 @@
                             <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                                        Text="{x:Static props:UpdateStrings.Update_Channel}" />
 
+                            <ui:SettingsCard Header="{x:Static props:StartupStrings.CurrentBuild}"
+                                             Description="{x:Static props:StartupStrings.CurrentBuildHint}">
+                                <TextBlock x:Name="CurrentBuildInfoText"
+                                           VerticalAlignment="Center"
+                                           FontWeight="SemiBold" />
+                            </ui:SettingsCard>
+
                             <ui:SettingsCard Header="{x:Static props:UpdateStrings.Update_Channel}"
                                              Description="{x:Static props:StartupStrings.UpdateChannelHint}">
                                 <ui:SettingsCard.HeaderIcon>
@@ -238,6 +245,19 @@
                                 </ComboBox>
                             </ui:SettingsCard>
 
+                            <ui:SettingsCard Header="{x:Static props:StartupStrings.UpdatePackageDotNetVersion}"
+                                             Description="{x:Static props:StartupStrings.UpdatePackageDotNetVersionHint}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <ComboBox x:Name="UpdatePackageDotNetVersionSelector"
+                                          SelectionChanged="UpdatePackageDotNetVersionSelector_SelectionChanged">
+                                    <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageDotNet_Auto}" Tag="Auto" />
+                                    <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageDotNet_Net6}" Tag="Net6" />
+                                    <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageDotNet_Net10}" Tag="Net10" />
+                                </ComboBox>
+                            </ui:SettingsCard>
+
                             <ui:SettingsCard Header="{x:Static props:StartupStrings.UpdatePackageArchitecture}"
                                              Description="{x:Static props:StartupStrings.UpdatePackageArchitectureHint}">
                                 <ui:SettingsCard.HeaderIcon>
@@ -245,8 +265,22 @@
                                 </ui:SettingsCard.HeaderIcon>
                                 <ComboBox x:Name="UpdatePackageArchitectureSelector"
                                           SelectionChanged="UpdatePackageArchitectureSelector_SelectionChanged">
+                                    <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageArch_Auto}" Tag="Auto" />
                                     <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageArch_X86}" Tag="X86" />
                                     <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageArch_X64}" Tag="X64" />
+                                </ComboBox>
+                            </ui:SettingsCard>
+
+                            <ui:SettingsCard Header="{x:Static props:StartupStrings.UpdatePackageRuntime}"
+                                             Description="{x:Static props:StartupStrings.UpdatePackageRuntimeHint}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.DeveloperTools}" />
+                                </ui:SettingsCard.HeaderIcon>
+                                <ComboBox x:Name="UpdatePackageRuntimeSelector"
+                                          SelectionChanged="UpdatePackageRuntimeSelector_SelectionChanged">
+                                    <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageRuntime_Auto}" Tag="Auto" />
+                                    <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageRuntime_FrameworkDependent}" Tag="FrameworkDependent" />
+                                    <ComboBoxItem Content="{x:Static props:UpdateStrings.Update_PackageRuntime_SelfContained}" Tag="SelfContained" />
                                 </ComboBox>
                             </ui:SettingsCard>
 

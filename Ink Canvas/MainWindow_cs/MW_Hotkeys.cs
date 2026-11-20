@@ -1,4 +1,4 @@
-using Ink_Canvas.Helpers;
+﻿using Ink_Canvas.Helpers;
 using System;
 using System.Runtime.InteropServices;
 using System.Windows.Input;
@@ -315,7 +315,7 @@ namespace Ink_Canvas
         {
             if (isFloatingBarFolded)
             {
-                await UnFoldFloatingBar(new object());
+                await UnFoldFloatingBarByUser();
             }
             PenIcon_Click(lastBorderMouseDownObject, null);
         }
@@ -368,7 +368,7 @@ namespace Ink_Canvas
         {
             if (isFloatingBarFolded)
             {
-                await UnFoldFloatingBar(new object());
+                await UnFoldFloatingBarByUser();
             }
 
             if (!IsAnnotating)
@@ -417,7 +417,7 @@ namespace Ink_Canvas
         {
             if (isFloatingBarFolded)
             {
-                await UnFoldFloatingBar(new object());
+                await UnFoldFloatingBarByUser();
             }
 
             if (!IsAnnotating)
@@ -432,7 +432,7 @@ namespace Ink_Canvas
         {
             if (isFloatingBarFolded)
             {
-                await UnFoldFloatingBar(new object());
+                await UnFoldFloatingBarByUser();
             }
 
             if (!IsAnnotating)
@@ -447,7 +447,7 @@ namespace Ink_Canvas
         {
             if (isFloatingBarFolded)
             {
-                await UnFoldFloatingBar(new object());
+                await UnFoldFloatingBarByUser();
             }
 
             if (!IsAnnotating)

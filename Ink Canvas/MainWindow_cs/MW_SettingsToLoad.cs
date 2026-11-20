@@ -154,6 +154,16 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile("[ChickenSoup] 迁移名言设置后保存失败", LogHelper.LogType.Warning);
             }
+            if (SettingsManager.MigrateUpdatePackageDefaults() && !SettingsManager.TrySaveSettingsToFile())
+            {
+                LogHelper.WriteLogToFile("[Update] 迁移更新包默认设置后保存失败", LogHelper.LogType.Warning);
+            }
+
+            if (SettingsManager.MigrateExitFoldModeSettings() && !SettingsManager.TrySaveSettingsToFile())
+            {
+                LogHelper.WriteLogToFile("[Fold] 迁移退出白板/PPT 后的浮动栏形态设置失败", LogHelper.LogType.Warning);
+            }
+
             SettingsManager.MigrateAutoStartSetting();
 
             if (isStartup && !AutoStartHelper.TryReconcile(Settings.Startup.RunAtStartup))
@@ -650,6 +660,11 @@ namespace Ink_Canvas
 
             Dispatcher.BeginInvoke(new Action(() =>
             {
+                // 折叠态下保持折叠位置，不执行展开居中：
+                // 本回调在 ApplicationIdle 优先级执行，晚于启动折叠，
+                // 无保护时会把工具栏拉回屏幕内（折叠标志仍为 true，用户看到"自动收纳失效"）。
+                if (ReapplyFoldPositionIfFolded()) return;
+
                 if (IsInPPTPresentationMode)
                     ViewboxFloatingBarMarginAnimation(60);
                 else

@@ -11,22 +11,6 @@ namespace Ink_Canvas.WorkflowAutomation.ActionHandlers
     {
     }
 
-    /// <summary>
-    /// 重置工具栏在桌面模式位置的旧式注册（兼容 Actions 目录）
-    /// </summary>
-    public static class ResetDesktopPositionAction
-    {
-        public const string ActionId = "inkcanvas.resetdesktopposition";
-
-        public static ActionRegistryInfo Register()
-        {
-            var info = new ActionRegistryInfo(ActionId, "重置桌面模式位置", "DockBottom")
-            {
-                SettingsType = typeof(ResetDesktopPositionActionSettings)
-            };
-            return info;
-        }
-    }
 
     /// <summary>
     /// 重置工具栏在桌面模式位置的 ActionHandler，通过 DI 注入 IActionService 注册处理程序。

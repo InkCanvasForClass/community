@@ -3,6 +3,7 @@
 
 #define MyAppName "InkCanvasForClass CE"
 #define MyAppVersion "1.7.18.1"
+#define MyAppRuntimeArch "x64"
 #define MyAppPublisher "CJK_mkp"
 #define MyAppURL "https://inkcanvasforclass.github.io"
 #define MyAppExeName "InkCanvasForClass.exe"
@@ -41,7 +42,7 @@ Name: "english"; MessagesFile: "compiler:Languages\EnglishBritish.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "dotnet6"; Description: "下载并安装 .NET Runtime 6 (运行本程序所需)"; GroupDescription: "运行时组件:"; Flags: unchecked
+Name: "dotnet6"; Description: "下载并安装 .NET 6 Desktop Runtime (运行本程序所需)"; GroupDescription: "运行时组件:"; Flags: unchecked
 
 [Files]
 Source: "release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -68,18 +69,18 @@ var
 
 function GetDotNet6DownloadUrl: String;
 begin
-  if IsWin64 then
-    Result := 'https://builds.dotnet.microsoft.com/dotnet/Runtime/6.0.36/dotnet-runtime-6.0.36-win-x64.exe'
+  if '{#MyAppRuntimeArch}' = 'x64' then
+    Result := 'https://aka.ms/dotnet/6.0/windowsdesktop-runtime-win-x64.exe'
   else
-    Result := 'https://builds.dotnet.microsoft.com/dotnet/Runtime/6.0.36/dotnet-runtime-6.0.36-win-x86.exe';
+    Result := 'https://aka.ms/dotnet/6.0/windowsdesktop-runtime-win-x86.exe';
 end;
 
 function GetDotNet6InstallerName: String;
 begin
-  if IsWin64 then
-    Result := 'dotnet-runtime-6.0.36-win-x64.exe'
+  if '{#MyAppRuntimeArch}' = 'x64' then
+    Result := 'windowsdesktop-runtime-6.0-win-x64.exe'
   else
-    Result := 'dotnet-runtime-6.0.36-win-x86.exe';
+    Result := 'windowsdesktop-runtime-6.0-win-x86.exe';
 end;
 
 procedure InitializeWizard;
@@ -95,7 +96,7 @@ begin
   begin
     if IsTaskSelected('dotnet6') then
     begin
-      WizardForm.StatusLabel.Caption := '正在下载 .NET Runtime 6...';
+      WizardForm.StatusLabel.Caption := '正在下载 .NET 6 Desktop Runtime...';
       WizardForm.StatusLabel.Visible := True;
       DownloadPage.Clear;
       DownloadPage.Add(
@@ -137,9 +138,9 @@ begin
       DotNetInstallerPath := ExpandConstant(Format('{tmp}\%s', [GetDotNet6InstallerName]));
       if FileExists(DotNetInstallerPath) then
       begin
-        WizardForm.StatusLabel.Caption := '正在安装 .NET Runtime 6...';
+        WizardForm.StatusLabel.Caption := '正在安装 .NET 6 Desktop Runtime...';
         WizardForm.StatusLabel.Visible := True;
-        Log('Installing .NET Runtime 6...');
+        Log('Installing .NET 6 Desktop Runtime...');
         Exec(DotNetInstallerPath, '/install /quiet /norestart', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
         Log(Format('Installation completed with code: %d', [ResultCode]));
         WizardForm.StatusLabel.Visible := False;

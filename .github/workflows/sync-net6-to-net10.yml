@@ -1,16 +1,24 @@
 name: Sync net6 to net10
 
-# 当 net6 分支有提交时，自动合并到 net10 分支
+# 当 net6 分支有提交时，把 net6 的提交同步到 net10 分支
 # 如果编译失败（可能是 net6 新增的包不支持 net10），则自动升级 NuGet 包到最新稳定版并重试
 #
 # 策略：
 #   0. 提交信息（标题或正文）里带 net6-only 标记（如 "[net6-only] fix: ..." 或 "net6 only"）的提交
-#      只属于 net6，不同步到 net10：合并后在 net10 上自动回滚该提交的改动
-#   1. 合并 net6 → net10（冲突自动解决：csproj 取 net6 + TFM 改回 net10）
-#   2. 删除旧 packages.lock.json
-#   3. 先尝试 restore + build（大多数包同时支持 net6/net10，无需升级）
-#   4. 如果 build 失败 → 升级所有 NuGet 包到最新稳定版 → 重新 restore + build
-#   5. 编译通过才推送，否则中止报警
+#      只属于 net6，不同步到 net10
+#   1. 提交信息里写 `resync: <sha1> <sha2> ...`（也接受 re-sync / sync-commits / 重新同步）时，
+#      只重新同步这几个提交，忽略 net6-only 标记。用于修正历史后单独补同步
+#   2. 其余情况按提交顺序 cherry-pick `origin/net10..origin/net6` 区间内所有非 net6-only 提交
+#   3. 冲突自动解决：csproj 取 net10 的包升级 + 应用 net6 的包变更、lock 文件删除、
+#      sync 工作流取 net6、其他文件取 net6
+#   4. 删除旧 packages.lock.json，先尝试 restore + build
+#   5. build 失败 → 升级所有 NuGet 包到最新稳定版 → 重新 restore + build
+#   6. 编译通过才推送，否则中止报警
+#
+# 为什么不再用 merge + revert：
+#   net6-only 的提交常被后续 net6 提交改写，merge 到 net10 后再 `git revert` 必然冲突；
+#   若该提交的改动在 net10 上已有等价实现，revert 还会变成空提交直接失败。
+#   从源头 cherry-pick 时跳过这些提交，就不需要事后回滚。
 
 on:
   push:
@@ -47,68 +55,31 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Fetch net6 and merge
-        id: merge
+      - name: Sync net6 commits to net10
+        id: sync
         shell: pwsh
         env:
           ERROR_ACTION_PREFERENCE: Continue
         run: |
-          git fetch origin net6
+          $ErrorActionPreference = 'Continue'
 
-          # 找出本次要同步的提交，以及其中带 net6-only 标记、不该同步到 net10 的提交
-          $skipPattern = '(?i)\[?net6[ -]only\]?'
-          $incoming = @(git rev-list origin/net10..origin/net6)
-          $skipped = @()
-          foreach ($sha in $incoming) {
-            $message = (git log -1 --format=%B $sha | Out-String)
-            if ($message -match $skipPattern) {
-              $skipped += $sha
-              Write-Host "将跳过 net6-only 提交: $(git log -1 --format='%h %s' $sha)"
-            }
+          function Get-ConflictFiles {
+            @((git diff --name-only --diff-filter=U -z) -split "`0" | Where-Object { $_ })
           }
 
-          $syncNeeded = ($incoming.Count -gt 0 -and $skipped.Count -lt $incoming.Count)
-          "skipped_shas=$($skipped -join ',')" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          "skipped_count=$($skipped.Count)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
-          "sync_needed=$($syncNeeded.ToString().ToLower())" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          # 解决 cherry-pick 冲突。返回 $true 表示全部解决，可以 commit --no-edit 收尾。
+          function Resolve-SyncConflicts {
+            param([string[]]$Conflicted)
+            if (-not $Conflicted -or $Conflicted.Count -eq 0) { return $false }
 
-          if ($incoming.Count -eq 0) {
-            Write-Host "::notice::net6 没有需要同步到 net10 的新提交"
-            exit 0
-          }
-          if (-not $syncNeeded) {
-            Write-Host "::notice::本次 net6 提交全部带 net6-only 标记，不同步到 net10"
-            exit 0
-          }
+            Write-Host "冲突文件:"
+            $Conflicted | ForEach-Object { Write-Host "  $_" }
 
-          $mergeOutput = git merge origin/net6 --no-edit 2>&1
-          Write-Host $mergeOutput
-          $mergeExit = $LASTEXITCODE
-
-          if ($mergeExit -ne 0) {
-            Write-Host "合并存在冲突，开始自动解决..."
-            # 用 -z 取“未合并”文件列表：git status 会给含空格的路径加双引号
-            # （例如 "Ink Canvas/InkCanvasForClass.csproj"），把整行去掉前缀当路径用
-            # 会报 pathspec 不匹配，冲突就永远解不掉。--diff-filter=U 只列冲突文件。
-            $conflicted = @((git diff --name-only --diff-filter=U -z) -split "`0" | Where-Object { $_ })
-
-            if (-not $conflicted) {
-              Write-Error "::error::合并失败但未检测到冲突文件，可能存在其他问题"
-              git merge --abort
-              exit 1
-            }
-
-            Write-Host "冲突文件列表:"
-            $conflicted | ForEach-Object { Write-Host "  $_" }
-
-            # 1) csproj 冲突：git 已经把两边不冲突的改动合进来了，这里只处理冲突块：
-            #    - ours（net10）的行默认保留：net10 独有的包升级、Properties 都在这里面
-            #    - 但 net6 明确删掉的包（例如换了包 ID）要从 ours 里去掉，否则两个同程序集的包会同时被引用
-            #    - theirs（net6）里新增的包（新 ID）补进来
-            #    最后把 TFM 改回 net10。
-            $csprojConflicts = $conflicted | Where-Object { $_ -match "\.csproj$" }
+            # 1) csproj：ours（net10）的行默认保留，net6 明确删掉的包从 ours 去掉，
+            #    net6 新增的包补进来，最后把 TFM 改回 net10。
+            $csprojConflicts = $Conflicted | Where-Object { $_ -match "\.csproj$" }
             foreach ($path in $csprojConflicts) {
-              Write-Host "解决 csproj 冲突（保留 net10 改动 + 应用 net6 的包变更）: $path"
+              Write-Host "解决 csproj 冲突: $path"
               $bytes = [IO.File]::ReadAllBytes($path)
               $hasBom = ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF)
               $conflictText = [Text.Encoding]::UTF8.GetString($bytes)
@@ -155,24 +126,78 @@ jobs:
               git add -- $path
             }
 
-            # 2) packages.lock.json 冲突：直接删除，后续 restore 会重新生成
-            $lockConflicts = $conflicted | Where-Object { $_ -match "packages\.lock\.json$" }
+            # 2) packages.lock.json：直接删除，后续 restore 会重新生成
+            $lockConflicts = $Conflicted | Where-Object { $_ -match "packages\.lock\.json$" }
             foreach ($path in $lockConflicts) {
-              Write-Host "删除冲突的 lock 文件（稍后重新生成）: $path"
+              Write-Host "删除冲突的 lock 文件: $path"
               git rm -f -- $path 2>$null
               if (Test-Path -LiteralPath $path) { Remove-Item -LiteralPath $path -Force }
             }
 
-            # 3) .yml workflow 冲突：取 net10 版本（ ours ），保留 net10 的触发分支配置
-            $ymlConflicts = $conflicted | Where-Object { $_ -match "\.ya?ml$" }
+            # 3) yml：同步工作流自身跟 net6 走（保证同步脚本永远是最新版），其他取 net10
+            $ymlConflicts = $Conflicted | Where-Object { $_ -match "\.ya?ml$" }
             foreach ($path in $ymlConflicts) {
-              Write-Host "解决 yml 冲突（取 net10 版本）: $path"
-              git checkout --ours -- $path 2>$null
+              if ($path -match "sync-net6-to-net10\.yml$") {
+                Write-Host "解决 yml 冲突（取 net6 版本）: $path"
+                git checkout --theirs -- $path 2>$null
+                if ($LASTEXITCODE -ne 0) { git checkout --ours -- $path 2>$null }
+              } else {
+                Write-Host "解决 yml 冲突（取 net10 版本）: $path"
+                git checkout --ours -- $path 2>$null
+                if ($LASTEXITCODE -ne 0) { git checkout --theirs -- $path 2>$null }
+              }
               git add -- $path 2>$null
             }
 
-            # 4) 其他文件冲突：优先取 net6 版本（ theirs ），保证新功能/修复能同步过来
-            $otherConflicts = $conflicted | Where-Object { $_ -notmatch "\.csproj$" -and $_ -notmatch "packages\.lock\.json$" -and $_ -notmatch "\.ya?ml$" }
+            # 4) net10 / net6 各自新增内容的文件：冲突块取并集，
+            #    否则 net10 独有的定义（如 ScanColorMode、MigrateVideoBoothSettings）
+            #    会被 net6 版本整文件覆盖，导致 net10 编译失败
+            $unionPattern = '(Resources[\\/]Settings\.cs|SettingsManager\.cs|MW_SettingsToLoad\.cs)$'
+            $unionConflicts = $Conflicted | Where-Object { $_ -match "\.cs$" -and $_ -match $unionPattern }
+            foreach ($path in $unionConflicts) {
+              Write-Host "解决冲突（两边内容取并集）: $path"
+              $bytes = [IO.File]::ReadAllBytes($path)
+              $hasBom = ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF)
+              $text = [Text.Encoding]::UTF8.GetString($bytes)
+              if ($hasBom) { $text = $text.Substring(1) }
+
+              $lines = $text -split "`r`n"
+              $merged = [System.Collections.Generic.List[string]]::new()
+              $i = 0
+              while ($i -lt $lines.Count) {
+                if ($lines[$i] -notlike '<<<<<<<*') { $merged.Add($lines[$i]); $i++; continue }
+
+                $ours = @(); $theirs = @(); $inTheirs = $false; $i++
+                while ($i -lt $lines.Count -and $lines[$i] -notlike '>>>>>>>*') {
+                  if ($lines[$i] -eq '=======') { $inTheirs = $true; $i++; continue }
+                  if ($inTheirs) { $theirs += $lines[$i] } else { $ours += $lines[$i] }
+                  $i++
+                }
+                $i++
+
+                # ours 块末尾往往缺右括号：冲突块两侧共用同一行 "}"（例如两个枚举定义之间）。
+                # 只拼 ours + theirs 会少一个 "}"，整个文件语法错误，这里按差值补齐。
+                $delta = 0
+                foreach ($line in $ours) {
+                  $delta += ($line.Length - $line.Replace('{', '').Length) - ($line.Length - $line.Replace('}', '').Length)
+                }
+                $merged.AddRange([string[]]$ours)
+                if ($delta -gt 0) {
+                  $indent = ''
+                  foreach ($line in $ours) {
+                    if ($line.Trim()) { $indent = $line.Substring(0, $line.Length - $line.TrimStart().Length); break }
+                  }
+                  for ($k = 0; $k -lt $delta; $k++) { $merged.Add($indent + '}') }
+                }
+                $merged.AddRange([string[]]$theirs)
+              }
+
+              [IO.File]::WriteAllText($path, ($merged -join "`r`n"), [Text.UTF8Encoding]::new($hasBom))
+              git add -- $path
+            }
+
+            # 5) 其他文件：优先取 net6 版本，保证新功能/修复能同步过来
+            $otherConflicts = $Conflicted | Where-Object { $_ -notmatch "\.csproj$" -and $_ -notmatch "packages\.lock\.json$" -and $_ -notmatch "\.ya?ml$" -and ($_ -notmatch $unionPattern) }
             foreach ($path in $otherConflicts) {
               Write-Host "解决其他冲突（取 net6 版本）: $path"
               git checkout --theirs -- $path 2>$null
@@ -184,63 +209,116 @@ jobs:
               }
             }
 
-            # 兜底：确认没有残留的未合并文件，否则后面的 commit 必然失败
-            $remaining = @((git diff --name-only --diff-filter=U -z) -split "`0" | Where-Object { $_ })
-            if ($remaining) {
+            $remaining = Get-ConflictFiles
+            if ($remaining.Count -gt 0) {
               Write-Error ("::error::仍有未解决的冲突: " + ($remaining -join ", "))
-              git merge --abort
-              exit 1
+              return $false
             }
-
-            git commit --no-edit 2>&1 | Out-Null
-            if ($LASTEXITCODE -ne 0) {
-              Write-Error "::error::自动解决冲突后仍无法提交，需要人工介入"
-              git merge --abort
-              exit 1
-            }
-            Write-Host "冲突解决完成，合并已提交"
-          } else {
-            Write-Host "合并无冲突"
+            return $true
           }
 
-          # 无论是否有冲突，都检查 TFM 是否被 net6 带回
+          git fetch origin net6
+
+          # ===== 1. 决定本次要同步哪些提交 =====
+          $headMessage = (git log -1 --format=%B origin/net6 | Out-String)
+          $resyncShas = @()
+          foreach ($line in ($headMessage -split "`r?`n")) {
+            if ($line -match '(?i)(?:resync|re-sync|sync-commits?|重新同步)\s*[:：=]?\s*([0-9a-f][0-9a-f\s,、]*)$') {
+              $resyncShas += [regex]::Matches($Matches[1], '[0-9a-f]{7,40}') | ForEach-Object { $_.Value }
+            }
+          }
+          $resyncShas = @($resyncShas | Select-Object -Unique)
+
+          $skipPattern = '(?i)\[?net6[ -]only\]?'
+          $toApply = @()
+
+          if ($resyncShas.Count -gt 0) {
+            Write-Host "::notice::提交信息指定了 resync 哈希，只重新同步: $($resyncShas -join ', ')"
+            $ordered = @()
+            foreach ($sha in $resyncShas) {
+              $full = ((git rev-parse --verify ($sha + '^{commit}') 2>$null) -join '').Trim()
+              if (-not $full) {
+                Write-Error "::error::找不到提交 $sha（resync 只支持 net6 上已存在的提交）"
+                exit 1
+              }
+              $ct = [int64](((git show -s --format=%ct $full) -join '').Trim())
+              $ordered += [pscustomobject]@{ Sha = $full; Time = $ct }
+            }
+            $toApply = @($ordered | Sort-Object Time | ForEach-Object { $_.Sha })
+          } else {
+            $incoming = @(git rev-list --reverse origin/net10..origin/net6)
+            if ($incoming.Count -eq 0) {
+              Write-Host "::notice::net6 没有需要同步到 net10 的新提交"
+              exit 0
+            }
+            foreach ($sha in $incoming) {
+              $message = (git log -1 --format=%B $sha | Out-String)
+              if ($message -match $skipPattern) {
+                Write-Host "跳过 net6-only 提交: $(git log -1 --format='%h %s' $sha)"
+                continue
+              }
+              $toApply += $sha
+            }
+            if ($toApply.Count -eq 0) {
+              Write-Host "::notice::本次 net6 提交全部带 net6-only 标记，不同步到 net10"
+              exit 0
+            }
+          }
+
+          # ===== 2. 逐个 cherry-pick =====
+          foreach ($sha in $toApply) {
+            $subject = ((git log -1 --format='%h %s' $sha) | Out-String).Trim()
+            Write-Host "==> 同步 $subject"
+
+            git cherry-pick -x $sha
+            if ($LASTEXITCODE -eq 0) { continue }
+
+            $conflicted = Get-ConflictFiles
+            if ($conflicted.Count -eq 0) {
+              # 没有冲突也没产生改动：该提交的改动已等价存在于 net10
+              Write-Host "::warning::$subject 在 net10 上没有产生改动，跳过"
+              git cherry-pick --skip
+              if ($LASTEXITCODE -ne 0) { git cherry-pick --abort 2>$null; exit 1 }
+              continue
+            }
+
+            if (-not (Resolve-SyncConflicts -Conflicted $conflicted)) {
+              git cherry-pick --abort 2>$null
+              Write-Error ('::error::解决 ' + $subject + ' 的冲突失败，已中止。修正后可提交 resync: ' + $sha + ' 单独重试')
+              exit 1
+            }
+
+            git add -A
+            git commit --no-edit
+            if ($LASTEXITCODE -ne 0) {
+              git cherry-pick --abort 2>$null
+              Write-Error "::error::$subject 冲突解决后仍无法提交"
+              exit 1
+            }
+            Write-Host "冲突解决完成: $subject"
+          }
+
+          # ===== 3. 同步工作流自身跟随 net6 =====
+          git checkout origin/net6 -- .github/workflows/sync-net6-to-net10.yml 2>$null
+          if ($LASTEXITCODE -eq 0) { git add -- .github/workflows/sync-net6-to-net10.yml }
+
+          # ===== 4. TFM 修复（cherry-pick 可能把 net6 的 TFM 带过来） =====
           $csprojs = Get-ChildItem -Recurse -Filter "*.csproj" | Where-Object { $_.FullName -notmatch "PowerPointAddIn|IACoreHelper" }
           $tfmChanged = $false
           foreach ($csproj in $csprojs) {
             $content = Get-Content $csproj.FullName -Raw
             if ($content -match 'net6\.0-windows10\.0\.19041\.0') {
-              Write-Host "检测到 $($csproj.Name) 的 TFM 被带回 net6，正在修复..."
+              Write-Host "修复 $($csproj.Name) 的 TFM 为 net10"
               $content -replace 'net6\.0-windows10\.0\.19041\.0', 'net10.0-windows10.0.19041.0' | Set-Content $csproj.FullName -NoNewline
               $tfmChanged = $true
             }
           }
-          if ($tfmChanged) {
-            git add -A
-            git commit -m "fix: restore net10.0 TFM after merge from net6 [skip ci]"
-          }
+          if ($tfmChanged) { git add -A }
 
-      - name: Revert commits marked net6-only
-        if: steps.merge.outputs.sync_needed == 'true' && steps.merge.outputs.skipped_count != '0'
-        shell: pwsh
-        run: |
-          $shas = @("${{ steps.merge.outputs.skipped_shas }}" -split ',' | Where-Object { $_ })
-          foreach ($sha in $shas) {
-            Write-Host "回滚 net6-only 提交: $(git log -1 --format='%h %s' $sha)"
-            git revert --no-commit $sha
-            if ($LASTEXITCODE -ne 0) {
-              Write-Error "::error::回滚 $sha 失败，该提交的改动可能已被后续提交依赖，需要人工介入"
-              git revert --abort 2>$null
-              exit 1
-            }
+          # 暂存区还有改动（TFM / 工作流）就单独提交一次
+          if (git diff --cached --name-only) {
+            git commit -m "chore(sync): apply net10 adjustments after syncing from net6 [skip ci]"
           }
-
-          if (-not (git diff --cached --name-only)) {
-            Write-Host "::notice::net6-only 提交的回滚没有产生实际改动"
-            exit 0
-          }
-
-          git commit -m "chore(sync): skip commits marked net6-only [skip ci]"
-          Write-Host "::notice::已回滚 $($shas.Count) 个 net6-only 提交，其余 net6 改动正常同步"
 
       - name: Delete stale packages.lock.json
         shell: pwsh
@@ -287,8 +365,6 @@ jobs:
 
             foreach ($pkg in $packages) {
               Write-Host "  尝试升级 $pkg ..."
-              # 用 --no-restore 避免每次都 restore，最后统一 restore
-              # 用 2>&1 捕获输出，ErrorActionPreference=Continue 防止 stderr 终止脚本
               $output = & dotnet add $csproj.FullName package $pkg --no-restore 2>&1
               $exitCode = $LASTEXITCODE
               $outputStr = ($output | Out-String).Trim()
@@ -300,7 +376,6 @@ jobs:
                   Write-Host "    -> 已是最新或已更新"
                 }
               } else {
-                # 提取最后一行有用的信息
                 $lastLine = ($outputStr -split "`n") | Where-Object { $_.Trim() } | Select-Object -Last 1
                 Write-Host "    跳过: $lastLine"
               }
@@ -337,8 +412,7 @@ jobs:
             git commit -m "chore(sync): apply net10 adjustments after merge from net6 [skip ci]"
           }
 
-          # 关键：检测本地 HEAD 是否领先于 origin/net10（merge commit 可能已自动提交）
-          # 用 rev-list 计算未推送的提交数
+          # 检测本地 HEAD 是否领先于 origin/net10（cherry-pick 会自带提交）
           $unpushed = git rev-list --count origin/net10..HEAD
           Write-Host "未推送的提交数: $unpushed"
           if ([int]$unpushed -gt 0) {
@@ -391,9 +465,9 @@ jobs:
               echo "**Run:** #${{ github.run_number }}"
               echo ""
               if [ "${{ steps.try_build.outcome }}" = "success" ]; then
-                echo "net6 的提交已自动合并到 net10，编译验证通过（无需升级 NuGet 包）。"
+                echo "net6 的提交已同步到 net10，编译验证通过（无需升级 NuGet 包）。"
               else
-                echo "net6 的提交已自动合并到 net10，NuGet 包已升级到最新稳定版，编译验证通过。"
+                echo "net6 的提交已同步到 net10，NuGet 包已升级到最新稳定版，编译验证通过。"
               fi
             else
               echo "## ❌ Sync Failed"
@@ -401,8 +475,8 @@ jobs:
               echo "**Trigger commit:** \`${{ github.sha }}\`"
               echo "**Run:** #${{ github.run_number }}"
               echo ""
-              echo "自动同步失败，请检查日志处理冲突或兼容性问题："
-              echo "- csproj 冲突：检查是否需要手动调整 TFM 或包引用"
+              echo "同步失败，请检查上面的日志（会标出具体是哪个提交、哪个文件）："
+              echo "- 冲突无法自动解决：修正后可提交 \`resync: <sha>\` 单独重试该提交"
               echo "- NuGet 包不兼容：检查 net6 新增的包是否支持 net10"
               echo "- 编译失败：检查代码兼容性"
             fi

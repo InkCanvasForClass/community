@@ -183,4 +183,22 @@
   <data name="UpdatePackageArchitectureHint" xml:space="preserve">
     <value>选要下载的更新包架构，默认跟当前软件架构走</value>
   </data>
+  <data name="UpdatePackageRuntime" xml:space="preserve">
+    <value>运行时</value>
+  </data>
+  <data name="UpdatePackageRuntimeHint" xml:space="preserve">
+    <value>选更新包带不带运行时，默认跟当前安装走</value>
+  </data>
+  <data name="UpdatePackageDotNetVersion" xml:space="preserve">
+    <value>.NET 版本</value>
+  </data>
+  <data name="UpdatePackageDotNetVersionHint" xml:space="preserve">
+    <value>选更新包跟哪个 .NET 大版本走，默认跟随当前软件版本</value>
+  </data>
+  <data name="CurrentBuild" xml:space="preserve">
+    <value>当前版本</value>
+  </data>
+  <data name="CurrentBuildHint" xml:space="preserve">
+    <value>当前跑的这包是 64/32、.NET 6/10、带不带运行时，瞅一眼就行</value>
+  </data>
 </root>

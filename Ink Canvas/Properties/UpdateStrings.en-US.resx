@@ -81,8 +81,29 @@
   <data name="Update_PackageArch_X64" xml:space="preserve">
     <value>64-bit (x64)</value>
   </data>
+  <data name="Update_PackageArch_Auto" xml:space="preserve">
+    <value>Follow current version</value>
+  </data>
   <data name="Update_PackageArch_X86" xml:space="preserve">
     <value>32-bit (x86)</value>
+  </data>
+  <data name="Update_PackageRuntime_Auto" xml:space="preserve">
+    <value>Follow current version</value>
+  </data>
+  <data name="Update_PackageRuntime_FrameworkDependent" xml:space="preserve">
+    <value>Without runtime</value>
+  </data>
+  <data name="Update_PackageRuntime_SelfContained" xml:space="preserve">
+    <value>With runtime (self-contained)</value>
+  </data>
+  <data name="Update_PackageDotNet_Auto" xml:space="preserve">
+    <value>Follow current version</value>
+  </data>
+  <data name="Update_PackageDotNet_Net6" xml:space="preserve">
+    <value>.NET 6</value>
+  </data>
+  <data name="Update_PackageDotNet_Net10" xml:space="preserve">
+    <value>.NET 10</value>
   </data>
   <data name="Update_Preview" xml:space="preserve">
     <value>Preview</value>

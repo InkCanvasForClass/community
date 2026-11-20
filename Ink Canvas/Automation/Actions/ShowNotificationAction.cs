@@ -24,36 +24,10 @@ namespace Ink_Canvas.WorkflowAutomation.Actions
     }
 
     /// <summary>
-    /// 显示通知的行动注册。
+    /// 自动化通知的入队辅助（行动处理器直接调用）。
     /// </summary>
     public static class ShowNotificationAction
     {
-        public const string ActionId = "inkcanvas.shownotification";
-
-        public static ActionRegistryInfo Register()
-        {
-            var info = new ActionRegistryInfo(ActionId, "显示通知", "Message")
-            {
-                SettingsType = typeof(ShowNotificationActionSettings)
-            };
-
-            info.Handle = (settings, guid) =>
-            {
-                var s = settings as ShowNotificationActionSettings;
-                if (s == null || string.IsNullOrEmpty(s.Message)) return;
-
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    ShowAutomationNotification(s);
-                });
-            };
-
-            // 显示通知不支持恢复
-            info.RevertHandle = null;
-
-            return info;
-        }
-
         public static void ShowAutomationNotification(ShowNotificationActionSettings settings)
         {
             if (settings == null || string.IsNullOrEmpty(settings.Message)) return;

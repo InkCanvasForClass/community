@@ -1,4 +1,4 @@
-using Ink_Canvas.Helpers;
+﻿using Ink_Canvas.Helpers;
 using Ink_Canvas.WorkflowAutomation;
 using InkCanvasPPTAgent.Contracts;
 using iNKORE.UI.WPF.Modern;
@@ -119,6 +119,10 @@ namespace Ink_Canvas
         /// 幻灯片放映结束事件重入保护标志，防止重复处理放映结束事件。
         /// </summary>
         private bool isEnteredSlideShowEndEvent;
+
+        // 进入 PPT 放映前的浮动栏形态：退出放映时按"跟随进入前形态"恢复用
+        private bool _floatingBarFoldedBeforePPT;
+        private bool _hasFloatingBarStateBeforePPT;
 
         // 长按翻页相关字段
         /// <summary>
@@ -1163,16 +1167,21 @@ namespace Ink_Canvas
             var agentState = payload as PPTState;
             try
             {
+                // 进入放映的收纳/展开由 IsAutoFoldInPPTSlideShow 决定，所以必须在它之前记录，
+                // 退出放映时才能"从哪来，回哪去"。
+                _floatingBarFoldedBeforePPT = isFloatingBarFolded;
+                _hasFloatingBarStateBeforePPT = true;
+
                 if (Settings.Automation.IsAutoFoldInPPTSlideShow)
                 {
                     if (!isFloatingBarFolded)
-                        FoldFloatingBar_MouseUp(new object(), null);
+                        await FoldFloatingBarByCode(hold: true);
                 }
                 else
                 {
                     if (isFloatingBarFolded)
                     {
-                        await UnFoldFloatingBar(new object());
+                        await UnFoldFloatingBarByCode();
                     }
                 }
 
@@ -1807,9 +1816,14 @@ namespace Ink_Canvas
                 ResetPPTEnhancedPreviewCache();
                 await Application.Current.Dispatcher.InvokeAsync(() => CollapseAllPPTNavBarPreviews());
 
-                if (Settings.Automation.IsAutoFoldAfterPPTSlideShow && !isFloatingBarFolded)
+                if (ShouldFoldAfterPPTSlideShow())
                 {
-                    FoldFloatingBar_MouseUp(new object(), null);
+                    // hold: 放映引发的收纳由系统决定，不要被自动展开定时器弹回来
+                    if (!isFloatingBarFolded) await FoldFloatingBarByCode(hold: true);
+                }
+                else if (isFloatingBarFolded)
+                {
+                    await UnFoldFloatingBarByCode();
                 }
 
                 if (isEnteredSlideShowEndEvent) return;
@@ -3659,6 +3673,23 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 按用户配置判断退出 PPT 放映后浮动栏是否应收纳。
+        /// </summary>
+        private bool ShouldFoldAfterPPTSlideShow()
+        {
+            switch (Settings.Automation.ExitPPTFoldMode)
+            {
+                case ExitFoldMode.Fold:
+                    return true;
+                case ExitFoldMode.Unfold:
+                    return false;
+                default:
+                    // 跟随进入放映前的形态；未记录来源（如放映中途启动）时按展开处理
+                    return _hasFloatingBarStateBeforePPT && _floatingBarFoldedBeforePPT;
+            }
+        }
+
+        /// <summary>
         /// 手动处理PPT放映结束时的自动收纳
         /// </summary>
         private async Task HandleManualSlideShowEnd()
@@ -3667,9 +3698,14 @@ namespace Ink_Canvas
             {
                 await Application.Current.Dispatcher.InvokeAsync(() => CollapseAllPPTNavBarPreviews());
 
-                if (Settings.Automation.IsAutoFoldAfterPPTSlideShow && !isFloatingBarFolded)
+                if (ShouldFoldAfterPPTSlideShow())
                 {
-                    FoldFloatingBar_MouseUp(new object(), null);
+                    // hold: 放映引发的收纳由系统决定，不要被自动展开定时器弹回来
+                    if (!isFloatingBarFolded) await FoldFloatingBarByCode(hold: true);
+                }
+                else if (isFloatingBarFolded)
+                {
+                    await UnFoldFloatingBarByCode();
                 }
             }
             catch (Exception ex)

@@ -261,17 +261,31 @@
                                 </controls:LabeledSettingsCard.HeaderIcon>
                             </controls:LabeledSettingsCard>
 
-                            <controls:LabeledSettingsCard x:Name="CardAutoFoldWhenExitWhiteboard"
-                                Header="{x:Static props:AutomationStrings.FoldMode_AutoFoldAfterWhiteboard}"
-                                Description="{x:Static props:AutomationStrings.FoldMode_AutoFoldAfterWhiteboardHint}"
-                                Icon="{x:Static ui:SegoeFluentIcons.Back}"
-                                Toggled="ToggleSwitchAutoFoldWhenExitWhiteboard_Toggled"/>
+                            <ui:SettingsCard Header="{x:Static props:AutomationStrings.FoldMode_ExitWhiteboard}"
+                                Description="{x:Static props:AutomationStrings.FoldMode_ExitWhiteboardHint}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Back}"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <ComboBox x:Name="ComboBoxExitWhiteboardFoldMode" MinWidth="260"
+                                          SelectionChanged="ComboBoxExitWhiteboardFoldMode_SelectionChanged">
+                                    <ComboBoxItem Content="{x:Static props:AutomationStrings.FoldMode_ExitFold_Restore}"/>
+                                    <ComboBoxItem Content="{x:Static props:AutomationStrings.FoldMode_ExitFold_Fold}"/>
+                                    <ComboBoxItem Content="{x:Static props:AutomationStrings.FoldMode_ExitFold_Unfold}"/>
+                                </ComboBox>
+                            </ui:SettingsCard>
 
-                            <controls:LabeledSettingsCard x:Name="CardAutoFoldAfterPPTSlideShow"
-                                Header="{x:Static props:AutomationStrings.FoldMode_AutoFoldAfterPPT}"
-                                Description="{x:Static props:AutomationStrings.FoldMode_AutoFoldAfterPPTHint}"
-                                IconSource="/Resources/Icons-png/PPTTools.png"
-                                Toggled="ToggleSwitchAutoFoldAfterPPTSlideShow_Toggled"/>
+                            <ui:SettingsCard Header="{x:Static props:AutomationStrings.FoldMode_ExitPPT}"
+                                Description="{x:Static props:AutomationStrings.FoldMode_ExitPPTHint}">
+                                <ui:SettingsCard.HeaderIcon>
+                                    <ui:ImageIcon Source="/Resources/Icons-png/PPTTools.png"/>
+                                </ui:SettingsCard.HeaderIcon>
+                                <ComboBox x:Name="ComboBoxExitPPTFoldMode" MinWidth="260"
+                                          SelectionChanged="ComboBoxExitPPTFoldMode_SelectionChanged">
+                                    <ComboBoxItem Content="{x:Static props:AutomationStrings.FoldMode_ExitFold_Restore}"/>
+                                    <ComboBoxItem Content="{x:Static props:AutomationStrings.FoldMode_ExitFold_Fold}"/>
+                                    <ComboBoxItem Content="{x:Static props:AutomationStrings.FoldMode_ExitFold_Unfold}"/>
+                                </ComboBox>
+                            </ui:SettingsCard>
 
                             <controls:LabeledSettingsCard x:Name="CardKeepFoldAfterSoftwareExit"
                                 Header="{x:Static props:AutomationStrings.Automation_KeepFoldAfterExit}"
