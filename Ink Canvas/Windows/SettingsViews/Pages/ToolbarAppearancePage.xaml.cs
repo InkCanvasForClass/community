@@ -101,6 +101,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 CardDisableToolbarAnimation.IsOn = settings.Appearance.DisableToolbarAnimation;
             }
 
+            // 加载工具栏动画手感（弹簧预设）
+            if (ComboBoxToolbarMotionPreset != null)
+            {
+                ComboBoxToolbarMotionPreset.SelectedIndex =
+                    Math.Max(0, Math.Min(2, settings.Appearance.ToolbarMotionPreset));
+            }
+
             // 加载旧版浮动栏 UI 设置
             if (CardUseLegacyFloatingBarUI != null)
                 CardUseLegacyFloatingBarUI.IsOn = settings.Appearance.UseLegacyFloatingBarUI;
@@ -263,6 +270,18 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             if (CardDisableToolbarAnimation == null) return;
 
             SettingsManager.Settings.Appearance.DisableToolbarAnimation = CardDisableToolbarAnimation.IsOn;
+            SettingsManager.SaveSettingsToFile();
+        }
+
+        private void ComboBoxToolbarMotionPreset_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            if (ComboBoxToolbarMotionPreset == null) return;
+
+            int preset = Math.Max(0, Math.Min(2, ComboBoxToolbarMotionPreset.SelectedIndex));
+            if (SettingsManager.Settings.Appearance.ToolbarMotionPreset == preset) return;
+
+            SettingsManager.Settings.Appearance.ToolbarMotionPreset = preset;
             SettingsManager.SaveSettingsToFile();
         }
 

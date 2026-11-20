@@ -252,6 +252,20 @@
                             Description="开启后非选定工具栏按钮不会自动下沉居中"
                             SwitchName="ToggleSwitchDisableToolbarAnimation"
                             Toggled="DisableToolbarAnimationToggleSwitch_Toggled" />
+                    <Rectangle Height="16" />
+                    <ui:SettingsCard x:Name="CardToolbarMotionPreset"
+                            Header="工具栏动画手感"
+                            Description="收纳、展开与放映贴边的弹簧参数：柔和更慢更稳，轻快响应更迅速">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FullScreen}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ComboBox x:Name="ComboBoxToolbarMotionPreset" MinWidth="140"
+                                  SelectionChanged="ComboBoxToolbarMotionPreset_SelectionChanged">
+                            <ComboBoxItem Content="柔和" />
+                            <ComboBoxItem Content="标准" />
+                            <ComboBoxItem Content="轻快" />
+                        </ComboBox>
+                    </ui:SettingsCard>
 
                     <ui:SettingsExpander x:Name="ExpanderAutoFlipWhenSpaceInsufficient"
                             Header="空间不足时自动翻转" d:IsExpanded="True"

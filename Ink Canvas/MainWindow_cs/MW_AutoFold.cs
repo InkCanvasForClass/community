@@ -50,8 +50,6 @@ namespace Ink_Canvas
         // 侧边栏位置：-50 完全收起，-10 折叠态露出展开按钮。
         private const int SidePanelEdgeHidden = -50;
         private const int SidePanelEdgePeek = -10;
-        private static readonly TimeSpan SidePanelAnimationDuration = TimeSpan.FromSeconds(0.175);
-
         private int _sidePanelAnimVersion = 0;
 
         /// <summary>
@@ -273,38 +271,26 @@ namespace Ink_Canvas
         {
             int thisVersion = ++_sidePanelAnimVersion;
 
+            Task leftMotion = Task.CompletedTask;
             await Dispatcher.InvokeAsync(() =>
             {
                 if (edge == SidePanelEdgePeek)
                     LeftSidePanel.Visibility = isFloatingBarFolded ? Visibility.Visible : Visibility.Collapsed;
 
-                var duration = skipAnimation ? TimeSpan.Zero : SidePanelAnimationDuration;
-                var leftAnimation = new ThicknessAnimation
-                {
-                    Duration = duration,
-                    From = LeftSidePanel.Margin,
-                    To = new Thickness(edge, 0, 0, Settings.Appearance.QuickPanelBottomOffset),
-                    EasingFunction = new CubicEase()
-                };
-                var rightAnimation = new ThicknessAnimation
-                {
-                    Duration = duration,
-                    From = RightSidePanel.Margin,
-                    To = new Thickness(0, 0, edge, Settings.Appearance.QuickPanelBottomOffset),
-                    EasingFunction = new CubicEase()
-                };
-                LeftSidePanel.BeginAnimation(MarginProperty, leftAnimation);
-                RightSidePanel.BeginAnimation(MarginProperty, rightAnimation);
+                // 两个把手都只布局一次到目标位置，位移交给弹簧收敛。
+                // 旧实现逐帧动 Margin（布局属性）并固定睡 0.175s，既掉帧又把时长写死。
+                bool animate = !skipAnimation;
+                leftMotion = MoveLeftSidePanelTo(edge, Settings.Appearance.QuickPanelBottomOffset, animate);
+                _ = MoveRightSidePanelTo(edge, Settings.Appearance.QuickPanelBottomOffset, animate);
             });
 
-            if (!skipAnimation) await Task.Delay(SidePanelAnimationDuration);
+            // 等弹簧自然静止，而不是睡一个写死的动画时长
+            await leftMotion;
 
             if (_sidePanelAnimVersion != thisVersion) return;
 
             await Dispatcher.InvokeAsync(() =>
             {
-                LeftSidePanel.Margin = new Thickness(edge, 0, 0, Settings.Appearance.QuickPanelBottomOffset);
-                RightSidePanel.Margin = new Thickness(0, 0, edge, Settings.Appearance.QuickPanelBottomOffset);
                 if (edge == SidePanelEdgeHidden) LeftSidePanel.Visibility = Visibility.Collapsed;
             });
         }
@@ -327,23 +313,7 @@ namespace Ink_Canvas
                 SidePannelMarginAnimation(-50);
                 HideRightQuickPanel();
                 LeftUnFoldButtonQuickPanel.Visibility = Visibility.Visible;
-                await Dispatcher.InvokeAsync(() =>
-                {
-                    var marginAnimation = new ThicknessAnimation
-                    {
-                        Duration = TimeSpan.FromSeconds(0.1),
-                        From = new Thickness(QuickPanelFoldedMargin, 0, 0, Settings.Appearance.QuickPanelBottomOffset),
-                        To = new Thickness(QuickPanelUnfoldedMargin, 0, 0, Settings.Appearance.QuickPanelBottomOffset)
-                    };
-                    marginAnimation.EasingFunction = new CubicEase();
-                    LeftUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, marginAnimation);
-                });
-                await Task.Delay(100);
-
-                await Dispatcher.InvokeAsync(() =>
-                {
-                    LeftUnFoldButtonQuickPanel.Margin = new Thickness(QuickPanelUnfoldedMargin, 0, 0, Settings.Appearance.QuickPanelBottomOffset);
-                });
+                await MoveQuickPanelTo(LeftUnFoldButtonQuickPanel, QuickPanelUnfoldedMargin, false);
 
                 StartAutoCollapseQuickPanelTimer();
             }
@@ -371,23 +341,7 @@ namespace Ink_Canvas
                 SidePannelMarginAnimation(-50);
                 HideLeftQuickPanel();
                 RightUnFoldButtonQuickPanel.Visibility = Visibility.Visible;
-                await Dispatcher.InvokeAsync(() =>
-                {
-                    var marginAnimation = new ThicknessAnimation
-                    {
-                        Duration = TimeSpan.FromSeconds(0.1),
-                        From = new Thickness(0, 0, QuickPanelFoldedMargin, Settings.Appearance.QuickPanelBottomOffset),
-                        To = new Thickness(0, 0, QuickPanelUnfoldedMargin, Settings.Appearance.QuickPanelBottomOffset)
-                    };
-                    marginAnimation.EasingFunction = new CubicEase();
-                    RightUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, marginAnimation);
-                });
-                await Task.Delay(100);
-
-                await Dispatcher.InvokeAsync(() =>
-                {
-                    RightUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, QuickPanelUnfoldedMargin, Settings.Appearance.QuickPanelBottomOffset);
-                });
+                await MoveQuickPanelTo(RightUnFoldButtonQuickPanel, QuickPanelUnfoldedMargin, true);
 
                 StartAutoCollapseQuickPanelTimer();
             }
@@ -410,24 +364,8 @@ namespace Ink_Canvas
         {
             if (LeftUnFoldButtonQuickPanel.Visibility == Visibility.Visible)
             {
-                await Dispatcher.InvokeAsync(() =>
-                {
-                    var marginAnimation = new ThicknessAnimation
-                    {
-                        Duration = TimeSpan.FromSeconds(0.1),
-                        From = new Thickness(QuickPanelUnfoldedMargin, 0, 0, Settings.Appearance.QuickPanelBottomOffset),
-                        To = new Thickness(QuickPanelFoldedMargin, 0, 0, Settings.Appearance.QuickPanelBottomOffset)
-                    };
-                    marginAnimation.EasingFunction = new CubicEase();
-                    LeftUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, marginAnimation);
-                });
-                await Task.Delay(100);
-
-                await Dispatcher.InvokeAsync(() =>
-                {
-                    LeftUnFoldButtonQuickPanel.Margin = new Thickness(QuickPanelFoldedMargin, 0, 0, Settings.Appearance.QuickPanelBottomOffset);
-                    LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
-                });
+                await MoveQuickPanelTo(LeftUnFoldButtonQuickPanel, QuickPanelFoldedMargin, false);
+                LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -444,24 +382,8 @@ namespace Ink_Canvas
         {
             if (RightUnFoldButtonQuickPanel.Visibility == Visibility.Visible)
             {
-                await Dispatcher.InvokeAsync(() =>
-                {
-                    var marginAnimation = new ThicknessAnimation
-                    {
-                        Duration = TimeSpan.FromSeconds(0.1),
-                        From = new Thickness(0, 0, QuickPanelUnfoldedMargin, Settings.Appearance.QuickPanelBottomOffset),
-                        To = new Thickness(0, 0, QuickPanelFoldedMargin, Settings.Appearance.QuickPanelBottomOffset)
-                    };
-                    marginAnimation.EasingFunction = new CubicEase();
-                    RightUnFoldButtonQuickPanel.BeginAnimation(MarginProperty, marginAnimation);
-                });
-                await Task.Delay(100);
-
-                await Dispatcher.InvokeAsync(() =>
-                {
-                    RightUnFoldButtonQuickPanel.Margin = new Thickness(0, 0, QuickPanelFoldedMargin, Settings.Appearance.QuickPanelBottomOffset);
-                    RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
-                });
+                await MoveQuickPanelTo(RightUnFoldButtonQuickPanel, QuickPanelFoldedMargin, true);
+                RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             }
         }
 

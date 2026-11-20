@@ -728,6 +728,8 @@ namespace Ink_Canvas
                     floatingBarWidth = Math.Max(floatingBarWidth, 820);
                 }
             }
+            // 启动首帧直接定位：先清掉弹簧偏移，避免它与这次布局写入叠加
+            FloatingBarSpring.SnapToLayout();
             ViewboxFloatingBar.Margin = new Thickness(
                 (logicalScreenWidth - floatingBarWidth) / 2,
                 logicalScreenBottom - 60 - logicalScreenTop,

@@ -231,6 +231,8 @@ namespace Ink_Canvas
             left = ClampValue(left, -barW + IdleMiniBarDeepDockVisible, host.Width - IdleMiniBarDeepDockVisible);
             top = ClampValue(top, -barH + IdleMiniBarDeepDockVisible, host.Height - IdleMiniBarDeepDockVisible);
 
+            // 拖动以 Margin 为真值来源：先清掉弹簧偏移，避免视觉位移叠加导致拖不跟手
+            _idleMiniBarSpring?.SnapToLayout();
             IdleMiniBar.Margin = new Thickness(left, top, 0, 0);
         }
 
@@ -357,18 +359,9 @@ namespace Ink_Canvas
                 return;
             }
 
-            var anim = new ThicknessAnimation
-            {
-                To = new Thickness(left, top, 0, 0),
-                Duration = TimeSpan.FromMilliseconds(180),
-                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
-            };
-            anim.Completed += (_, _) =>
-            {
-                IdleMiniBar.BeginAnimation(MarginProperty, null);
-                IdleMiniBar.Margin = new Thickness(left, top, 0, 0);
-            };
-            IdleMiniBar.BeginAnimation(MarginProperty, anim);
+            // 与主工具栏共用同一套弹簧：布局一次到位，位移由合成线程插值，
+            // 不再逐帧改写 Margin，也不再写死 180ms。
+            MoveIdleMiniBarTo(left, top);
         }
 
         private void StartIdleMiniBarRestoreTimer()
