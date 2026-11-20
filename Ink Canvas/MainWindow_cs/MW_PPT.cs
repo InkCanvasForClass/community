@@ -2882,10 +2882,8 @@ namespace Ink_Canvas
                     }
                 }
 
-                // 翻页后工具栏要重新贴底：等布局把新的翻页条/预览面板算进去再落位，
-                // 不要用固定延时猜稳定时刻。
-                await Dispatcher.InvokeAsync(() => ShowFloatingBar(FloatingBarPlacement.PptExpanded),
-                    System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                await Task.Delay(100);
+                ShowFloatingBar(FloatingBarPlacement.PptExpanded);
             }
             catch (OperationCanceledException)
             {

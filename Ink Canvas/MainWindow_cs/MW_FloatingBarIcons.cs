@@ -1,4 +1,4 @@
-using Ink_Canvas.Controls;
+﻿using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
@@ -46,8 +46,7 @@ namespace Ink_Canvas
         /// </summary>
         internal void TwoFingerGestureBorder_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (AnimationsHelper.IsPopupTargetingOpen(TwoFingerGestureBorder)
-                || AnimationsHelper.IsPopupTargetingOpen(BoardTwoFingerGestureBorder))
+            if (TwoFingerGestureBorder.IsOpen || BoardTwoFingerGestureBorder.IsOpen)
             {
                 AnimationsHelper.HidePopupWithSlideAndFade(TwoFingerGestureBorder);
                 AnimationsHelper.HidePopupWithSlideAndFade(BoardTwoFingerGestureBorder);
@@ -443,10 +442,6 @@ namespace Ink_Canvas
                 isViewboxFloatingBarMarginAnimationRunning = false;
             }
 
-            // 拖动是直接接管布局位置的交互：先把弹簧偏移归零，
-            // 否则残留的视觉偏移会和鼠标位移叠加，表现为"拖起来发飘"。
-            FloatingBarSpring.SnapToLayout();
-
             isDragDropInEffect = true;
             pos = e.GetPosition(null);
             downPos = e.GetPosition(null);
@@ -558,9 +553,7 @@ namespace Ink_Canvas
 
             // 上面是按名字硬编码的宿主自带面板；插件注册的弹窗不在其中，
             // 统一交给 PopupManagerHelper 兜底关闭，保证点击空白处时行为一致。
-            // 本方法是「立即隐藏」语义（窗口切走、自动折叠等），所以插件弹窗也必须瞬间消失；
-            // 播放收起动画只会让画面在上层已经消失之后还在空跑一段，纯属浪费。
-            _popupManager?.CloseAllRegisteredPopups(animate: false);
+            _popupManager?.CloseAllRegisteredPopups();
         }
 
         /// <summary>
@@ -652,10 +645,8 @@ namespace Ink_Canvas
             AnimationsHelper.HidePopupWithSlideAndFade(BoardImageOptionsPanel);
             AnimationsHelper.HidePopupWithSlideAndFade(TwoFingerGestureBorder);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardTwoFingerGestureBorder);
-            // 漫游弹窗同样走收起动画：硬置 IsOpen 会截断进行中的动画，画面瞬间消失。
-            // 「收起完成后又把重新打开的菜单关掉」这类竞态已由进度时钟的方向判定兜住
-            // （见 AnimationsHelper.HidePopupWithSlideAndFade 的 HIDE-DONE-SKIPPED 分支）。
-            AnimationsHelper.HidePopupWithSlideAndFade(BoardRoamingPopup);
+            // 漫游弹窗必须同步关闭，避免关闭动画的 Completed 在重新打开后再次将其关闭。
+            BoardRoamingPopup.IsOpen = false;
 
             AnimationsHelper.HidePopupWithSlideAndFade(BackgroundPalette);
 
@@ -974,10 +965,12 @@ namespace Ink_Canvas
                     Not_Enter_Blackboard_fir_Mouse_Click = false;
                 }
                 */
-                // 进入黑板会把工具栏切到白板形态（宽度会变），
-                // 等布局把新宽度算进去再落位；用优先级排队代替 Thread.Sleep 猜时间。
-                _ = Dispatcher.InvokeAsync(() => ShowFloatingBar(FloatingBarPlacement.FullScreenExpanded),
-                    System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                new Thread(() =>
+                {
+                    Thread.Sleep(100);
+                    Application.Current.Dispatcher.Invoke(() =>
+                        ShowFloatingBar(FloatingBarPlacement.FullScreenExpanded));
+                }).Start();
 
                 HideSubPanels();
 
@@ -1222,10 +1215,8 @@ namespace Ink_Canvas
 
                 if (IsInPPTPresentationMode)
                 {
-                    // 等一次布局（切换画布可见性会改变工具栏宽度），再落位，
-                    // 不用固定延时去猜。
-                    await Dispatcher.InvokeAsync(() => ShowFloatingBar(FloatingBarPlacement.PptExpanded),
-                        System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+                    await Task.Delay(100);
+                    ShowFloatingBar(FloatingBarPlacement.PptExpanded);
                 }
             }
         }
@@ -1969,8 +1960,7 @@ namespace Ink_Canvas
         /// <param name="e">鼠标按钮事件参数</param>
         internal void SymbolIconTools_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (AnimationsHelper.IsPopupTargetingOpen(BorderTools)
-                || AnimationsHelper.IsPopupTargetingOpen(BoardBorderToolsPopup))
+            if (BorderTools.IsOpen || BoardBorderToolsPopup.IsOpen)
             {
                 AnimationsHelper.HidePopupWithSlideAndFade(BorderTools);
                 AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
@@ -2796,16 +2786,28 @@ namespace Ink_Canvas
             // 覆盖后算出的折叠位置，表现为"折叠标志已置位但工具栏仍停在屏幕内"。
             int myVersion = Interlocked.Increment(ref _marginAnimationVersion);
 
-            Task motionTask = Task.CompletedTask;
+            Point target = default;
             await Dispatcher.InvokeAsync(() =>
             {
-                motionTask = ViewboxFloatingBarMarginAnimationCore(
-                    MarginFromEdge, PosXCaculatedWithTaskbarHeight, !skipAnimation);
+                if (skipAnimation)
+                {
+                    ViewboxFloatingBarMarginAnimationCore(MarginFromEdge, PosXCaculatedWithTaskbarHeight, false);
+                }
+                else
+                {
+                    ViewboxFloatingBarMarginAnimationCore(MarginFromEdge, PosXCaculatedWithTaskbarHeight, true);
+                }
+
+                // 在 UI 线程内立即快照本次计算的位置（Core 内部写入共享字段 pos）
+                target = new Point(pos.X, pos.Y);
             });
 
-            // 等弹簧自然静止，而不是拍一个 200ms 的固定延时：
-            // 延时短了会打断动画，长了就是白等，而且完全不受手感设置影响。
-            if (!skipAnimation) await motionTask;
+            if (!skipAnimation)
+            {
+                // 等动画层完成：动画时长 0.35s，这里等播放到写最终 Margin 的时机。
+                // 传 0 时 skipAnimation 路径立即返回，不引入等待。
+                await Task.Delay(200);
+            }
 
             if (myVersion != Volatile.Read(ref _marginAnimationVersion))
             {
@@ -2823,8 +2825,8 @@ namespace Ink_Canvas
 
             await Dispatcher.InvokeAsync(() =>
             {
-                // 不再重复写 Margin：Core 已把布局属性设成终点，弹簧也已静止在同一位置。
-                // 旧的"动画末尾再写一次"只会多触发一次布局，看起来像硬跳一下。
+                ViewboxFloatingBar.Margin = new Thickness(target.X, target.Y, -2000, -200);
+                ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
                 isViewboxFloatingBarMarginAnimationRunning = false;
                 if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
 
@@ -2838,18 +2840,14 @@ namespace Ink_Canvas
             });
         }
 
-        /// <summary>
-        /// 计算目标位置并落位。布局属性一次写到终点，视觉位移交给弹簧在合成线程上收敛。
-        /// </summary>
-        /// <returns>弹簧静止后完成的任务；同步落位时为已完成任务。</returns>
-        private Task ViewboxFloatingBarMarginAnimationCore(int MarginFromEdge,
+        private void ViewboxFloatingBarMarginAnimationCore(int MarginFromEdge,
             bool PosXCaculatedWithTaskbarHeight = false, bool animate = false)
         {
             // 折叠态否决：折叠位是负值，正向边距只可能来自“展开/居中”。
             // 放在最前面，保证任何绕开状态机入口、直接调用本方法的路径也无法把折叠态拉回屏幕内。
             if (IsExpandedEdgeDuringFold(MarginFromEdge))
             {
-                return Task.CompletedTask;
+                return;
             }
 
             if (Topmost)
@@ -3078,15 +3076,27 @@ namespace Ink_Canvas
                 pos.X = screenWidth - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleX;
             }
 
-            // 唯一的位置写入路径：布局一次到位 + 弹簧收敛视觉位移。
-            // 旧实现逐帧改 Margin（布局属性），每帧都要重新测量排列，长距离滑动就掉帧；
-            // 缓动又是从零速度开始的固定曲线，被下一次操作打断只能硬切。
-            var motionTask = MoveFloatingBarTo(new Thickness(pos.X, pos.Y, 0, -20), animate);
+            if (animate)
+            {
+                var marginAnimation = new ThicknessAnimation
+                {
+                    Duration = TimeSpan.FromSeconds(0.35),
+                    From = ViewboxFloatingBar.Margin,
+                    To = new Thickness(pos.X, pos.Y, 0, -20),
+                    EasingFunction = new CircleEase()
+                };
+                ViewboxFloatingBar.BeginAnimation(MarginProperty, marginAnimation);
+            }
+            else
+            {
+                // 同步落位前先摘掉动画：动画层比属性值优先级高，
+                // 不摘掉的话上一段展开动画会继续覆盖这里的折叠位（表现为"重设了位置却没动"）。
+                ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
+                ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, 0, -20);
+            }
 
             if (!animate) isViewboxFloatingBarMarginAnimationRunning = false;
             if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
-
-            return motionTask;
         }
 
         /// <summary>
@@ -3110,7 +3120,6 @@ namespace Ink_Canvas
             // 本方法的最终 Margin 在 349ms 后才写，期间若有折叠过渡（或另一次居中）发起，必须作废。
             int myVersion = Interlocked.Increment(ref _marginAnimationVersion);
 
-            Task pendingMotion = Task.CompletedTask;
             await Dispatcher.InvokeAsync(() =>
             {
                 if (isFloatingBarFolded)
@@ -3218,12 +3227,17 @@ namespace Ink_Canvas
                         pointDesktop = pos;
                 }
 
-                // 布局一次落到终点，位移交给弹簧在合成线程上收敛。
-                pendingMotion = MoveFloatingBarTo(new Thickness(pos.X, pos.Y, 0, -20), animate: true);
+                var marginAnimation = new ThicknessAnimation
+                {
+                    Duration = TimeSpan.FromSeconds(0.35),
+                    From = ViewboxFloatingBar.Margin,
+                    To = new Thickness(pos.X, pos.Y, 0, -20),
+                    EasingFunction = new CircleEase()
+                };
+                ViewboxFloatingBar.BeginAnimation(MarginProperty, marginAnimation);
             });
 
-            // 等弹簧自然静止，不再拍 349ms 的固定延时
-            await pendingMotion;
+            await Task.Delay(349);
 
             if (isFloatingBarFolded || myVersion != Volatile.Read(ref _marginAnimationVersion))
             {
@@ -3232,6 +3246,9 @@ namespace Ink_Canvas
 
             await Dispatcher.InvokeAsync(() =>
             {
+                // 先清掉本次动画，避免残留的动画值在后续赋值时重新生效
+                ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
+                ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
                 isViewboxFloatingBarMarginAnimationRunning = false;
 
                 if (!string.IsNullOrEmpty(_currentToolMode))
@@ -3262,7 +3279,6 @@ namespace Ink_Canvas
             // 与 ViewboxFloatingBarMarginAnimationAsync 共用版本号：后发起的写值获胜。
             int myVersion = Interlocked.Increment(ref _marginAnimationVersion);
 
-            Task pendingMotion = Task.CompletedTask;
             await Dispatcher.InvokeAsync(() =>
             {
                 if (isFloatingBarFolded)
@@ -3349,12 +3365,17 @@ namespace Ink_Canvas
                         pointPPT = pos;
                 }
 
-                // 布局一次落到终点，位移交给弹簧在合成线程上收敛。
-                pendingMotion = MoveFloatingBarTo(new Thickness(pos.X, pos.Y, 0, -20), animate: true);
+                var marginAnimation = new ThicknessAnimation
+                {
+                    Duration = TimeSpan.FromSeconds(0.35),
+                    From = ViewboxFloatingBar.Margin,
+                    To = new Thickness(pos.X, pos.Y, 0, -20),
+                    EasingFunction = new CircleEase()
+                };
+                ViewboxFloatingBar.BeginAnimation(MarginProperty, marginAnimation);
             });
 
-            // 等弹簧自然静止，不再拍 349ms 的固定延时
-            await pendingMotion;
+            await Task.Delay(349);
 
             if (isFloatingBarFolded || myVersion != Volatile.Read(ref _marginAnimationVersion))
             {
@@ -3363,6 +3384,9 @@ namespace Ink_Canvas
 
             await Dispatcher.InvokeAsync(() =>
             {
+                // 先清掉本次动画，避免残留的动画值在后续赋值时重新生效
+                ViewboxFloatingBar.BeginAnimation(MarginProperty, null);
+                ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
                 isViewboxFloatingBarMarginAnimationRunning = false;
 
                 if (!string.IsNullOrEmpty(_currentToolMode))
@@ -3858,8 +3882,7 @@ namespace Ink_Canvas
                         }
                     }
 
-                    if (AnimationsHelper.IsPopupTargetingOpen(PenPalette)
-                        || AnimationsHelper.IsPopupTargetingOpen(BoardPenPalette))
+                    if (PenPalette.IsOpen || BoardPenPalette.IsOpen)
                     {
                         AnimationsHelper.HidePopupWithSlideAndFade(PenPalette);
                         AnimationsHelper.HidePopupWithSlideAndFade(BoardPenPalette);
@@ -4017,9 +4040,7 @@ namespace Ink_Canvas
 
             if (isAlreadyEraser)
             {
-                    // IsPopupTargetingOpen(null) 返回 false，正好对应原来 `?.IsOpen != true` 的空值语义。
-                if (!AnimationsHelper.IsPopupTargetingOpen(EraserSizePanel)
-                    && !AnimationsHelper.IsPopupTargetingOpen(BoardEraserSizePanel))
+                if (EraserSizePanel.IsOpen == false && BoardEraserSizePanel?.IsOpen != true)
                 {
                     if (currentMode == 0)
                     {
@@ -4077,9 +4098,7 @@ namespace Ink_Canvas
 
             if (isAlreadyEraser)
             {
-                // 同 EraserIcon_Click：两个橡皮尺寸面板共用一个开关，任一在打开状态就整体收起。
-                if (!AnimationsHelper.IsPopupTargetingOpen(BoardEraserSizePanel)
-                    && !AnimationsHelper.IsPopupTargetingOpen(EraserSizePanel))
+                if (BoardEraserSizePanel?.IsOpen != true && EraserSizePanel.IsOpen == false)
                 {
                     if (currentMode == 0)
                     {
@@ -5062,7 +5081,7 @@ namespace Ink_Canvas
         {
             if (TryBlockFrozenPageMutation(FloatingBarStrings.Board_InsertImage)) return;
             // Check if the image options panel is currently visible
-            bool isImagePanelVisible = AnimationsHelper.IsPopupTargetingOpen(BoardImageOptionsPanel);
+            bool isImagePanelVisible = BoardImageOptionsPanel.IsOpen;
 
             // Toggle the image options panel
             if (isImagePanelVisible)
@@ -5580,17 +5599,6 @@ namespace Ink_Canvas
                     selectionHeight = 43;
                     nextBarLeft = nextPos + Math.Max(0, (nextWidth - indicatorBarSize) / 2);
                     nextBarTop = nextTop + 2 + 43 + 2;
-                }
-
-                // 布局未稳定时 TransformToAncestor 会返回 (0,0)，
-                // 直接摆高光就会落在容器左上角——也就是拖动图标那个位置。
-                // 这里用按钮尺寸是否已就绪做判据，不达标就排队等布局。
-                if (nextWidth < 8 || nextHeight < 8 ||
-                    double.IsNaN(nextPos) || double.IsNaN(nextTop) ||
-                    (Math.Abs(nextPos) < 0.5 && Math.Abs(nextTop) < 0.5 && container.ActualWidth > 0))
-                {
-                    DeferFloatingBarHighlightIfLayoutPending(mode);
-                    return;
                 }
 
                 bool isFirstShow = _lastHighlightButton == null;
