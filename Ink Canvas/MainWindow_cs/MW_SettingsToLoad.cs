@@ -172,6 +172,10 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile("[AutoStart] 启动时校验或修复开机自启快捷方式失败", LogHelper.LogType.Warning);
             }
+            if (SettingsManager.MigrateExitFoldModeSettings() && !SettingsManager.TrySaveSettingsToFile())
+            {
+                LogHelper.WriteLogToFile("[Fold] 迁移退出白板/PPT 后的浮动栏形态设置失败", LogHelper.LogType.Warning);
+            }
 
             SettingsManager.MigrateAutoStartSetting();
 

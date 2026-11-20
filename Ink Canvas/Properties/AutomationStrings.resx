@@ -216,17 +216,26 @@
   <data name="FloatingInterceptor_Title" xml:space="preserve">
     <value>悬浮窗拦截</value>
   </data>
-  <data name="FoldMode_AutoFoldAfterPPT" xml:space="preserve">
-    <value>退出 PPT 放映模式后自动收纳浮动栏</value>
+  <data name="FoldMode_ExitWhiteboard" xml:space="preserve">
+    <value>退出白板后的浮动栏</value>
   </data>
-  <data name="FoldMode_AutoFoldAfterPPTHint" xml:space="preserve">
-    <value>开启后，退出 PPT 放映模式后会自动收纳浮动栏</value>
+  <data name="FoldMode_ExitWhiteboardHint" xml:space="preserve">
+    <value>退出白板（含黑板）后，浮动栏保持进入前的形态，或固定收纳、固定展开</value>
   </data>
-  <data name="FoldMode_AutoFoldAfterWhiteboard" xml:space="preserve">
-    <value>退出白板时自动收纳</value>
+  <data name="FoldMode_ExitPPT" xml:space="preserve">
+    <value>退出 PPT 放映后的浮动栏</value>
   </data>
-  <data name="FoldMode_AutoFoldAfterWhiteboardHint" xml:space="preserve">
-    <value>开启后，退出白板模式时会自动收纳到侧边栏</value>
+  <data name="FoldMode_ExitPPTHint" xml:space="preserve">
+    <value>退出 PPT 放映后，浮动栏保持进入前的形态，或固定收纳、固定展开</value>
+  </data>
+  <data name="FoldMode_ExitFold_Restore" xml:space="preserve">
+    <value>跟随进入前形态（从哪来，回哪去）</value>
+  </data>
+  <data name="FoldMode_ExitFold_Fold" xml:space="preserve">
+    <value>收纳到侧边栏</value>
+  </data>
+  <data name="FoldMode_ExitFold_Unfold" xml:space="preserve">
+    <value>保持展开</value>
   </data>
   <data name="FoldMode_ExitToAnnotation" xml:space="preserve">
     <value>退出收纳模式时自动切换至批注模式</value>

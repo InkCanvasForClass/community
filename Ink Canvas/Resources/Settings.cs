@@ -1491,6 +1491,19 @@ namespace Ink_Canvas
         EnhancedBlackWhite = 1,
         Grayscale = 2
     }
+    /// 退出白板（含黑板）或退出 PPT 放映后浮动栏的去向。
+    /// </summary>
+    public enum ExitFoldMode
+    {
+        /// <summary>跟随进入前的形态：原来收纳的还收纳，原来展开的还展开。</summary>
+        RestorePrevious = 0,
+
+        /// <summary>退出后统一收纳到侧边栏。</summary>
+        Fold = 1,
+
+        /// <summary>退出后统一保持展开显示。</summary>
+        Unfold = 2
+    }
 
     public class Automation
     {
@@ -1516,8 +1529,15 @@ namespace Ink_Canvas
         [JsonProperty("isAutoEnterAnnotationModeWhenExitFoldMode")]
         public bool IsAutoEnterAnnotationModeWhenExitFoldMode { get; set; }
 
+        // 旧版布尔开关，仅用于迁移到 ExitWhiteboardFoldMode，迁移后置 null 不再写回。
         [JsonProperty("isAutoFoldWhenExitWhiteboard")]
-        public bool IsAutoFoldWhenExitWhiteboard { get; set; }
+        public bool? IsAutoFoldWhenExitWhiteboard { get; set; }
+
+        /// <summary>
+        /// 退出白板（含黑板）后浮动栏的去向。
+        /// </summary>
+        [JsonProperty("exitWhiteboardFoldMode")]
+        public ExitFoldMode ExitWhiteboardFoldMode { get; set; } = ExitFoldMode.RestorePrevious;
 
         [JsonProperty("isAutoFoldInEasiNote")]
         public bool IsAutoFoldInEasiNote { get; set; }
@@ -1578,8 +1598,15 @@ namespace Ink_Canvas
         [JsonProperty("isAutoFoldInPPTSlideShow")]
         public bool IsAutoFoldInPPTSlideShow { get; set; }
 
+        // 旧版布尔开关，仅用于迁移到 ExitPPTFoldMode，迁移后置 null 不再写回。
         [JsonProperty("isAutoFoldAfterPPTSlideShow")]
-        public bool IsAutoFoldAfterPPTSlideShow { get; set; }
+        public bool? IsAutoFoldAfterPPTSlideShow { get; set; }
+
+        /// <summary>
+        /// 退出 PPT 放映后浮动栏的去向。
+        /// </summary>
+        [JsonProperty("exitPPTFoldMode")]
+        public ExitFoldMode ExitPPTFoldMode { get; set; } = ExitFoldMode.RestorePrevious;
 
         [JsonProperty("isAutoKillPPTService")]
         public bool IsAutoKillPPTService { get; set; }

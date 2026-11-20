@@ -257,5 +257,41 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                 Settings.Canvas.VideoBoothMode = VideoBoothMode.Seewo;
             }
         }
+        // 旧版"退出白板 / 退出 PPT 时自动收纳"都是布尔开关，新版改成三选一的形态策略。
+        // 只在用户从未写过新字段（仍是默认的"跟随进入前形态"）时把旧值映射成"收纳"，
+        // 映射完清空旧字段，避免之后每次启动都重复覆盖用户的新选择。
+        public static bool MigrateExitFoldModeSettings()
+        {
+            var automation = Settings?.Automation;
+            if (automation == null) return false;
+
+            bool changed = false;
+
+            if (automation.IsAutoFoldWhenExitWhiteboard != null)
+            {
+                if (automation.IsAutoFoldWhenExitWhiteboard == true
+                    && automation.ExitWhiteboardFoldMode == ExitFoldMode.RestorePrevious)
+                {
+                    automation.ExitWhiteboardFoldMode = ExitFoldMode.Fold;
+                }
+
+                automation.IsAutoFoldWhenExitWhiteboard = null;
+                changed = true;
+            }
+
+            if (automation.IsAutoFoldAfterPPTSlideShow != null)
+            {
+                if (automation.IsAutoFoldAfterPPTSlideShow == true
+                    && automation.ExitPPTFoldMode == ExitFoldMode.RestorePrevious)
+                {
+                    automation.ExitPPTFoldMode = ExitFoldMode.Fold;
+                }
+
+                automation.IsAutoFoldAfterPPTSlideShow = null;
+                changed = true;
+            }
+
+            return changed;
+        }
     }
 }

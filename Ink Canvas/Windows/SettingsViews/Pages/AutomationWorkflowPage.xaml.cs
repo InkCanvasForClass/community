@@ -151,8 +151,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             CardAutoEnterAnnotationAfterKillHite.IsOn = auto.IsAutoEnterAnnotationAfterKillHite;
 
             CardAutoEnterAnnotationModeWhenExitFoldMode.IsOn = auto.IsAutoEnterAnnotationModeWhenExitFoldMode;
-            CardAutoFoldWhenExitWhiteboard.IsOn = auto.IsAutoFoldWhenExitWhiteboard;
-            CardAutoFoldAfterPPTSlideShow.IsOn = auto.IsAutoFoldAfterPPTSlideShow;
+            ComboBoxExitWhiteboardFoldMode.SelectedIndex = Math.Max(0, Math.Min(2, (int)auto.ExitWhiteboardFoldMode));
+            ComboBoxExitPPTFoldMode.SelectedIndex = Math.Max(0, Math.Min(2, (int)auto.ExitPPTFoldMode));
             CardKeepFoldAfterSoftwareExit.IsOn = auto.KeepFoldAfterSoftwareExit;
 
             ToggleSwitchSaveScreenshotsInDateFolders.IsOn = auto.IsSaveScreenshotsInDateFolders;
@@ -295,10 +295,20 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode_Toggled(object sender, RoutedEventArgs e)
         { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoEnterAnnotationModeWhenExitFoldMode = CardAutoEnterAnnotationModeWhenExitFoldMode.IsOn; SettingsManager.SaveSettingsToFile(); }
-        private void ToggleSwitchAutoFoldWhenExitWhiteboard_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldWhenExitWhiteboard = CardAutoFoldWhenExitWhiteboard.IsOn; SettingsManager.SaveSettingsToFile(); }
-        private void ToggleSwitchAutoFoldAfterPPTSlideShow_Toggled(object sender, RoutedEventArgs e)
-        { if (!_isLoaded) return; SettingsManager.Settings.Automation.IsAutoFoldAfterPPTSlideShow = CardAutoFoldAfterPPTSlideShow.IsOn; SettingsManager.SaveSettingsToFile(); }
+        private void ComboBoxExitWhiteboardFoldMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Automation.ExitWhiteboardFoldMode =
+                (ExitFoldMode)Math.Max(0, Math.Min(2, ComboBoxExitWhiteboardFoldMode.SelectedIndex));
+            SettingsManager.SaveSettingsToFile();
+        }
+        private void ComboBoxExitPPTFoldMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            SettingsManager.Settings.Automation.ExitPPTFoldMode =
+                (ExitFoldMode)Math.Max(0, Math.Min(2, ComboBoxExitPPTFoldMode.SelectedIndex));
+            SettingsManager.SaveSettingsToFile();
+        }
         private void ToggleSwitchKeepFoldAfterSoftwareExit_Toggled(object sender, RoutedEventArgs e)
         { if (!_isLoaded) return; SettingsManager.Settings.Automation.KeepFoldAfterSoftwareExit = CardKeepFoldAfterSoftwareExit.IsOn; SettingsManager.SaveSettingsToFile(); }
 

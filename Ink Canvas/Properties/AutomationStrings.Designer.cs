@@ -156,13 +156,19 @@ namespace Ink_Canvas.Properties
 
         public static string FloatingInterceptor_Title => ResourceManager.GetString(nameof(FloatingInterceptor_Title), _resourceCulture);
 
-        public static string FoldMode_AutoFoldAfterPPT => ResourceManager.GetString(nameof(FoldMode_AutoFoldAfterPPT), _resourceCulture);
+        public static string FoldMode_ExitWhiteboard => ResourceManager.GetString(nameof(FoldMode_ExitWhiteboard), _resourceCulture);
 
-        public static string FoldMode_AutoFoldAfterPPTHint => ResourceManager.GetString(nameof(FoldMode_AutoFoldAfterPPTHint), _resourceCulture);
+        public static string FoldMode_ExitWhiteboardHint => ResourceManager.GetString(nameof(FoldMode_ExitWhiteboardHint), _resourceCulture);
 
-        public static string FoldMode_AutoFoldAfterWhiteboard => ResourceManager.GetString(nameof(FoldMode_AutoFoldAfterWhiteboard), _resourceCulture);
+        public static string FoldMode_ExitPPT => ResourceManager.GetString(nameof(FoldMode_ExitPPT), _resourceCulture);
 
-        public static string FoldMode_AutoFoldAfterWhiteboardHint => ResourceManager.GetString(nameof(FoldMode_AutoFoldAfterWhiteboardHint), _resourceCulture);
+        public static string FoldMode_ExitPPTHint => ResourceManager.GetString(nameof(FoldMode_ExitPPTHint), _resourceCulture);
+
+        public static string FoldMode_ExitFold_Restore => ResourceManager.GetString(nameof(FoldMode_ExitFold_Restore), _resourceCulture);
+
+        public static string FoldMode_ExitFold_Fold => ResourceManager.GetString(nameof(FoldMode_ExitFold_Fold), _resourceCulture);
+
+        public static string FoldMode_ExitFold_Unfold => ResourceManager.GetString(nameof(FoldMode_ExitFold_Unfold), _resourceCulture);
 
         public static string FoldMode_ExitToAnnotation => ResourceManager.GetString(nameof(FoldMode_ExitToAnnotation), _resourceCulture);
 
