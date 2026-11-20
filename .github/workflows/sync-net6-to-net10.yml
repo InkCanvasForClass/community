@@ -196,8 +196,58 @@ jobs:
               git add -- $path
             }
 
+            # 4.5) resx：逐 <data> 条目取并集。
+            # 整文件取 net6 会静默丢掉 net10 独有的资源条目（如 ShowInBoothOnly、
+            # Canvas_EdgeExpandHint_*、Canvas_AnnotationDotHint_*），而这些条目
+            # 在 net6 上并不存在，删掉后编译仍通过、CI 全绿，问题极难发现。
+            $resxConflicts = $Conflicted | Where-Object { $_ -match "\.resx$" }
+            foreach ($path in $resxConflicts) {
+              Write-Host "解决 resx 冲突（按 <data> 条目取并集）: $path"
+              $oursText = (& git show ":2:$path" 2>$null) -join "`n"
+              $theirsText = (& git show ":3:$path" 2>$null) -join "`n"
+
+              $nameRe = [regex]'<data\s+name="([^"]+)"'
+              $oursNames = @([regex]::Matches($oursText, $nameRe) | ForEach-Object { $_.Groups[1].Value })
+              $theirsNames = @([regex]::Matches($theirsText, $nameRe) | ForEach-Object { $_.Groups[1].Value })
+
+              if (($theirsNames | Where-Object { $oursNames -notcontains $_ }).Count -eq 0) {
+                # theirs 是 ours 的子集：直接用 ours，天然保留双方全部条目
+                git checkout --ours -- $path 2>$null
+              } elseif (($oursNames | Where-Object { $theirsNames -notcontains $_ }).Count -eq 0) {
+                git checkout --theirs -- $path 2>$null
+              } else {
+                # 双方各有独有条目：以 ours 为基，把 theirs 独有的 <data> 块追加进去
+                $lines = ($oursText -split "`n")
+                $extra = @()
+                $idx = 0
+                while ($idx -lt $lines.Count) {
+                  if ($lines[$idx] -match '<data\s+name="([^"]+)"') {
+                    $nm = $Matches[1]
+                    $blk = @($lines[$idx]); $idx++
+                    while ($idx -lt $lines.Count -and $lines[$idx] -notmatch '</data>') { $blk += $lines[$idx]; $idx++ }
+                    if ($idx -lt $lines.Count) { $blk += $lines[$idx]; $idx++ }
+                    if ($theirsNames -contains $nm -and $oursNames -notcontains $nm) { $extra += $blk }
+                  } else { $idx++ }
+                }
+                if ($extra.Count -gt 0) {
+                  $closeIdx = -1
+                  for ($j = $lines.Count - 1; $j -ge 0; $j--) { if ($lines[$j] -match '</root>') { $closeIdx = $j; break } }
+                  if ($closeIdx -gt 0) {
+                    $merged = @($lines[0..($closeIdx - 1)]) + $extra + @($lines[$closeIdx..($lines.Count - 1)])
+                    [IO.File]::WriteAllText((Resolve-Path $path), ($merged -join "`r`n"), [Text.UTF8Encoding]::new($true))
+                  } else { git checkout --ours -- $path 2>$null }
+                } else { git checkout --ours -- $path 2>$null }
+              }
+
+              # 统一 CRLF
+              $txt = [IO.File]::ReadAllText((Resolve-Path $path))
+              $txt = ($txt -split "`r?`n") -join "`r`n"
+              [IO.File]::WriteAllText((Resolve-Path $path), $txt, [Text.UTF8Encoding]::new($true))
+              git add -- $path
+            }
+
             # 5) 其他文件：优先取 net6 版本，保证新功能/修复能同步过来
-            $otherConflicts = $Conflicted | Where-Object { $_ -notmatch "\.csproj$" -and $_ -notmatch "packages\.lock\.json$" -and $_ -notmatch "\.ya?ml$" -and ($_ -notmatch $unionPattern) }
+            $otherConflicts = $Conflicted | Where-Object { $_ -notmatch "\.csproj$" -and $_ -notmatch "packages\.lock\.json$" -and $_ -notmatch "\.ya?ml$" -and $_ -notmatch "\.resx$" -and ($_ -notmatch $unionPattern) }
             foreach ($path in $otherConflicts) {
               Write-Host "解决其他冲突（取 net6 版本）: $path"
               git checkout --theirs -- $path 2>$null
