@@ -860,19 +860,25 @@ namespace Ink_Canvas
                 // 最后那次居中会把刚恢复的收纳覆盖掉。
                 if (autoAlignCenter && !isFloatingBarFolded) // 控制居中
                 {
+                    // 延迟期间收纳可能刚好发生（退出白板的收纳是异步启动的），
+                    // 所以判断不能只在 Delay 前做一次，调位置前必须再看一眼，
+                    // 否则这次居中会把折叠位覆盖成展开位。
                     if (IsInPPTPresentationMode)
                     {
                         await Task.Delay(50);
+                        if (isFloatingBarFolded) return;
                         ViewboxFloatingBarMarginAnimation(60);
                     }
                     else if (Topmost) //非黑板
                     {
                         await Task.Delay(50);
+                        if (isFloatingBarFolded) return;
                         ViewboxFloatingBarMarginAnimation(100, true);
                     }
                     else //黑板
                     {
                         await Task.Delay(50);
+                        if (isFloatingBarFolded) return;
                         ViewboxFloatingBarMarginAnimation(60);
                     }
                 }
