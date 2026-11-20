@@ -1,8 +1,3 @@
-using Ink_Canvas.Helpers;
-using Ink_Canvas.WorkflowAutomation.Models;
-using System;
-using System.Diagnostics;
-
 namespace Ink_Canvas.WorkflowAutomation.Actions
 {
     /// <summary>
@@ -14,51 +9,5 @@ namespace Ink_Canvas.WorkflowAutomation.Actions
         /// 要杀死的进程名称（不含.exe）
         /// </summary>
         public string ProcessName { get; set; } = "";
-    }
-
-    /// <summary>
-    /// 杀进程的行动注册。
-    /// </summary>
-    public static class KillProcessAction
-    {
-        public const string ActionId = "inkcanvas.killprocess";
-
-        public static ActionRegistryInfo Register()
-        {
-            var info = new ActionRegistryInfo(ActionId, "结束进程", "CloseCircleOutline")
-            {
-                SettingsType = typeof(KillProcessActionSettings)
-            };
-
-            info.Handle = (settings, guid) =>
-            {
-                var s = settings as KillProcessActionSettings;
-                if (s == null || string.IsNullOrEmpty(s.ProcessName)) return;
-
-                try
-                {
-                    foreach (var process in Process.GetProcessesByName(s.ProcessName))
-                    {
-                        try
-                        {
-                            process.Kill();
-                        }
-                        catch (Exception ex)
-                        {
-                            LogHelper.WriteLogToFile($"[Automation] 结束进程 行动: 结束进程 \"{s.ProcessName}\" 中的某个进程失败: {ex.Message}", LogHelper.LogType.Info);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"[Automation] 结束进程 行动: 枚举进程 \"{s.ProcessName}\" 失败: {ex.Message}", LogHelper.LogType.Info);
-                }
-            };
-
-            // 杀进程不支持恢复
-            info.RevertHandle = null;
-
-            return info;
-        }
     }
 }

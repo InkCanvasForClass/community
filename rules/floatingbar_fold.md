@@ -22,6 +22,10 @@
 | `UnFoldFloatingBarByCode()` | 程序决策（PPT 开始放映、退出恢复） | false |
 | `FoldFloatingBar_MouseUp` / `UnFoldFloatingBar_MouseUp` | 纯事件壳，只给 XAML / 插件 API 用 | 取决于 sender |
 
+自动化行动（`Automation/ActionHandlers/FoldActionHandler.cs`，行动 ID `inkcanvas.fold`）也走
+`FoldFloatingBarByUser()` / `UnFoldFloatingBarByUser()`；行动只表达"折叠"或"展开"，
+不参与"跟随进入前形态"这类策略判断。
+
 两者最终都进 `TransitionFloatingBarAsync(folded, instant, trigger)`，再分派到 `ApplyFoldedAsync` / `ApplyUnfoldedAsync`。
 
 ### 为什么区分 ByUser / ByCode
