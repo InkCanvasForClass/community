@@ -4869,7 +4869,8 @@ namespace Ink_Canvas
                             // 不要在这里手写 Visibility/Margin——Hidden/Collapsed 会让
                             // ActualWidth/ActualHeight 为 0，后续重建/主题刷新按 0 尺寸布局，
                             // 工具栏就会以"未初始化"的样子出现在屏幕内。
-                            var foldTask = FoldFloatingBarByCode(instant: true);
+                            // hold: 这是系统决定的收纳，不要被"自动展开"定时器在 500ms 后弹回来
+                            var foldTask = FoldFloatingBarByCode(instant: true, hold: true);
                             // async Task 被丢弃后异常会静默消失，表现为"折叠标志置位但位置没动"，
                             // 因此单独观察一次，失败时留证据。
                             _ = foldTask.ContinueWith(t =>

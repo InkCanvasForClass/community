@@ -1297,7 +1297,7 @@ namespace Ink_Canvas
                         return;
                     }
 
-                    if (isFloatingBarFolded && !foldFloatingBarByUser)
+                    if (isFloatingBarFolded && !foldFloatingBarByUser && !_holdFoldAgainstAutoUnfold)
                     {
                         // 检查是否启用了软件退出后保持收纳模式
                         if (Settings.Automation.KeepFoldAfterSoftwareExit)

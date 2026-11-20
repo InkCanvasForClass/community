@@ -32,6 +32,13 @@ namespace Ink_Canvas
         private object _pendingFoldTrigger;
         private bool _foldTransitionRunning;
 
+        /// <summary>
+        /// 本次收纳是否要挡住"自动展开"定时器（tick 500ms）。
+        /// 白板/PPT 退出、启动收纳由系统决定，定时器不该把它们当成"自动收纳软件已退出"而弹回来；
+        /// 定时器自己触发的收纳则为 false，软件退出后才能自动展开。
+        /// </summary>
+        private bool _holdFoldAgainstAutoUnfold;
+
         // 热键 / 托盘菜单 / URI 触发时没有真实控件，用它表明"这是用户在操作"。
         private static readonly object FloatingBarUserTrigger = new object();
 
@@ -101,9 +108,15 @@ namespace Ink_Canvas
         /// <param name="sender">事件发送者；null 表示由代码触发而非用户点击。</param>
         /// <param name="isAutoFoldCommand">是否为自动折叠命令。</param>
         /// <param name="instant">是否跳过动画直接落位（启动初始化用）。</param>
-        public async Task FoldFloatingBar(object sender, bool isAutoFoldCommand = false, bool instant = false)
+        /// <param name="hold">
+        /// 是否挡住"自动展开"定时器。白板/PPT 退出时的收纳必须为 true：
+        /// 定时器看到"已收纳且不是用户收的"就会自动展开，把刚收好的工具栏又弹回来。
+        /// </param>
+        public async Task FoldFloatingBar(object sender, bool isAutoFoldCommand = false, bool instant = false,
+            bool hold = false)
         {
             foldFloatingBarByUser = sender != null;
+            _holdFoldAgainstAutoUnfold = sender != null || hold;
             unfoldFloatingBarByUser = false;
             await TransitionFloatingBarAsync(folded: true, instant: instant, trigger: sender);
         }
@@ -117,8 +130,10 @@ namespace Ink_Canvas
         /// <summary>
         /// 由程序决策触发折叠（白板/PPT 退出、启动初始化），不算用户操作。
         /// </summary>
-        internal Task FoldFloatingBarByCode(bool instant = false)
-            => FoldFloatingBar(null, false, instant);
+        /// <param name="instant">是否跳过动画直接落位。</param>
+        /// <param name="hold">是否挡住自动展开定时器；白板/PPT 退出要传 true。</param>
+        internal Task FoldFloatingBarByCode(bool instant = false, bool hold = false)
+            => FoldFloatingBar(null, false, instant, hold);
 
         /// <summary>
         /// 折叠态迁移的唯一入口。过渡进行中再次请求时只更新目标，
@@ -208,8 +223,11 @@ namespace Ink_Canvas
                 HideSubPanels("cursor");
             });
 
-            await ViewboxFloatingBarMarginAnimationAsync(foldEdge, skipAnimation: instant);
-            await AnimateSidePanelsAsync(SidePanelEdgePeek, instant);
+            // 位置动画与侧边栏动画同时开始。串行（先等工具栏滑走 0.35s 再滑侧边栏）
+            // 看起来就是"工具栏先闪一下，侧边栏才出来"。
+            var marginTask = ViewboxFloatingBarMarginAnimationAsync(foldEdge, skipAnimation: instant);
+            var sidePanelTask = AnimateSidePanelsAsync(SidePanelEdgePeek, instant);
+            await Task.WhenAll(marginTask, sidePanelTask);
 
             // 自检：启动早期布局未稳定时首次位置计算可能落空，当场重设（用户不可见）
             await Dispatcher.InvokeAsync(() =>
@@ -547,15 +565,18 @@ namespace Ink_Canvas
                 }
             });
 
+            Task marginTask = Task.CompletedTask;
             if (currentMode == 0)
             {
                 if (IsInPPTPresentationMode)
-                    await ViewboxFloatingBarMarginAnimationAsync(FloatingBarEdgeExpandedPpt);
+                    marginTask = ViewboxFloatingBarMarginAnimationAsync(FloatingBarEdgeExpandedPpt);
                 else
                     PureViewboxFloatingBarMarginAnimationInDesktopMode();
             }
 
+            // 侧边栏回收与工具栏回位同时进行，不要等位置动画播完再收
             await AnimateSidePanelsAsync(SidePanelEdgeHidden, !unfoldFloatingBarByUser);
+            await marginTask;
 
             await Dispatcher.InvokeAsync(() =>
             {
