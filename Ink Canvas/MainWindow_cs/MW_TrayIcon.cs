@@ -537,8 +537,8 @@ namespace Ink_Canvas
             HideTrayContextMenuImmediately();
             var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin != null && mainWin.IsLoaded)
-                if (mainWin.isFloatingBarFolded) mainWin.UnFoldFloatingBar_MouseUp(new object(), null);
-                else mainWin.FoldFloatingBar_MouseUp(new object(), null);
+                if (mainWin.isFloatingBarFolded) _ = mainWin.UnFoldFloatingBarByUser();
+                else _ = mainWin.FoldFloatingBarByUser();
         }
 
         /// <summary>

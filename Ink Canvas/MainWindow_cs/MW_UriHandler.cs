@@ -1,4 +1,4 @@
-using Ink_Canvas.Helpers;
+﻿using Ink_Canvas.Helpers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -107,7 +107,7 @@ namespace Ink_Canvas
                     case "fold":
                         if (!isFloatingBarFolded)
                         {
-                            FoldFloatingBar_MouseUp(new object(), null);
+                            _ = FoldFloatingBarByUser();
                             ShowNotification(Properties.MainWindowStrings.Main_Uri_EnterFoldMode);
                         }
                         return;
@@ -115,19 +115,19 @@ namespace Ink_Canvas
                     case "show":
                         if (isFloatingBarFolded)
                         {
-                            UnFoldFloatingBar_MouseUp(new object(), null);
+                            _ = UnFoldFloatingBarByUser();
                             ShowNotification(Properties.MainWindowStrings.Main_Uri_ExitFoldMode);
                         }
                         return;
                     case "toggle":
                         if (isFloatingBarFolded)
                         {
-                            UnFoldFloatingBar_MouseUp(new object(), null);
+                            _ = UnFoldFloatingBarByUser();
                             ShowNotification(Properties.MainWindowStrings.Main_Uri_ExitFoldMode);
                         }
                         else
                         {
-                            FoldFloatingBar_MouseUp(new object(), null);
+                            _ = FoldFloatingBarByUser();
                             ShowNotification(Properties.MainWindowStrings.Main_Uri_EnterFoldMode);
                         }
                         return;

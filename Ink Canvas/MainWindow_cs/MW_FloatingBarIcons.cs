@@ -1,4 +1,4 @@
-using Ink_Canvas.Controls;
+﻿using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
@@ -953,7 +953,7 @@ namespace Ink_Canvas
             // 日志里表现为"退出白板后 20ms 又出现一次 浮动栏已展开"。
             if (currentMode == 0)
             {
-                UnFoldFloatingBar_MouseUp(null, null);
+                _ = UnFoldFloatingBarByCode();
             }
 
             if (inkCanvas.EditingMode == InkCanvasEditingMode.Select) PenIcon_Click(null, null);
@@ -1148,8 +1148,6 @@ namespace Ink_Canvas
 
             if (currentMode == 0 && inkCanvas.Strokes.Count == 0 && !IsInPPTPresentationMode)
                 CursorIcon_Click(null, null);
-
-            { /* Old UI removed */ }
 
             new Thread(() =>
             {
@@ -3589,16 +3587,6 @@ namespace Ink_Canvas
                 RestoreStrokes();
             }
 
-            if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
-            { /* Old UI removed */ }
-            else
-            { /* Old UI removed */ }
-
-            { /* Old UI removed */ }
-            { /* Old UI removed */ }
-            UpdateToolbarComponentVisibility();
-
-
             UpdateToolbarComponentVisibility();
 
             // 注意：快捷调色盘的可见性现在完全由工具栏规则集管理，不需要手动设置
@@ -3773,22 +3761,6 @@ namespace Ink_Canvas
 
                 /*if (forceEraser && currentMode == 0)
                     BtnColorRed_Click(sender, null);*/
-
-                if (GridBackgroundCover.Visibility == Visibility.Collapsed)
-                {
-                    if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
-                    { /* Old UI removed */ }
-                    else
-                    { /* Old UI removed */ }
-                    { /* Old UI removed */ }
-                }
-                else
-                {
-                    { /* Old UI removed */ }
-                    { /* Old UI removed */ }
-                }
-
-                { /* Old UI removed */ }
 
                 // 进入批注模式时的全屏处理（仅当未应用过全屏处理时）
                 if (Settings.Advanced.IsEnableAvoidFullScreenHelper && !isFullScreenApplied)
@@ -4823,8 +4795,6 @@ namespace Ink_Canvas
 
                     // 演示背景只影响画布，不改变用户配置的应用主题。
 
-                    { /* Old UI removed */ }
-
                     CheckClipboardImageAndShowPasteNotificationWhenEnteringBoard();
                 }
 
@@ -4899,7 +4869,7 @@ namespace Ink_Canvas
                             // 不要在这里手写 Visibility/Margin——Hidden/Collapsed 会让
                             // ActualWidth/ActualHeight 为 0，后续重建/主题刷新按 0 尺寸布局，
                             // 工具栏就会以"未初始化"的样子出现在屏幕内。
-                            var foldTask = FoldFloatingBar(new object(), false, instant: true);
+                            var foldTask = FoldFloatingBarByCode(instant: true);
                             // async Task 被丢弃后异常会静默消失，表现为"折叠标志置位但位置没动"，
                             // 因此单独观察一次，失败时留证据。
                             _ = foldTask.ContinueWith(t =>
@@ -4919,9 +4889,6 @@ namespace Ink_Canvas
 
                         _hasFloatingBarStateBeforeBoard = false;
 
-                        // 退出白板时保持用户配置的应用主题。
-
-                        { /* Old UI removed */ }
                         Topmost = true;
                         break;
                     case 1: //黑板或白板模式
@@ -4964,8 +4931,6 @@ namespace Ink_Canvas
 
                         ViewboxFloatingBar.Visibility = Visibility.Collapsed;
 
-                        { /* Old UI removed */ }
-
                         if (Settings.Canvas.UsingWhiteboard)
                         {
                             // 如果有自定义背景色并且是白板模式，应用自定义背景色
@@ -4986,8 +4951,6 @@ namespace Ink_Canvas
                             ColorSwitchCheck();
                         }
 
-                        { /* Old UI removed */ }
-
                         if (Settings.Advanced.EnableUIAccessTopMost)
                         {
                             Topmost = true;
@@ -5006,7 +4969,6 @@ namespace Ink_Canvas
         }
 
         public int BoundsWidth = 5;
-        private bool _isToolbarOnRightSide = true;
 
         // 进入白板前的浮动栏形态：退出白板时按它原样恢复（收纳的还收纳，展开的还展开）
         private bool _floatingBarFoldedBeforeBoard;
@@ -5026,22 +4988,6 @@ namespace Ink_Canvas
                 GridBackgroundCoverHolder.Visibility = Visibility.Visible;
 
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-
-                if (GridBackgroundCover.Visibility == Visibility.Collapsed)
-                {
-                    if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
-                    { /* Old UI removed */ }
-                    else
-                    { /* Old UI removed */ }
-                    { /* Old UI removed */ }
-                }
-                else
-                {
-                    { /* Old UI removed */ }
-                    { /* Old UI removed */ }
-                }
-
-                { /* Old UI removed */ }
 
                 // 进入批注模式时的全屏处理（仅当未应用过全屏处理时）
                 if (Settings.Advanced.IsEnableAvoidFullScreenHelper && !isFullScreenApplied)
@@ -5116,14 +5062,6 @@ namespace Ink_Canvas
                     SaveStrokes();
                     RestoreStrokes(true);
                 }
-
-                if (ThemeManager.Current.ApplicationTheme == ApplicationTheme.Dark)
-                { /* Old UI removed */ }
-                else
-                { /* Old UI removed */ }
-
-                { /* Old UI removed */ }
-                { /* Old UI removed */ }
             }
 
             if (GridTransparencyFakeBackground.Background == Brushes.Transparent)
@@ -5145,28 +5083,6 @@ namespace Ink_Canvas
                     ViewboxFloatingBar.Visibility = Visibility.Visible;
                 }
             }
-        }
-
-        private void BtnSwitchSide_Click(object sender, RoutedEventArgs e)
-        {
-            if (_isToolbarOnRightSide)
-            {
-                { /* Old UI removed */ }
-                { /* Old UI removed */ }
-            }
-            else
-            {
-                { /* Old UI removed */ }
-                { /* Old UI removed */ }
-            }
-        }
-
-        private void StackPanel_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            if (((StackPanel)sender).Visibility == Visibility.Visible)
-            { /* Old UI removed */ }
-            else
-            { /* Old UI removed */ }
         }
 
         #endregion

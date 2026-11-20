@@ -197,3 +197,11 @@ private void RebuildMainWindowBoardToolbar()
 - **分组内组件**：`BoardGroupChildrenDropHandler` 处理分组内拖拽
 - **组件设置面板**：位置/尺寸/外观/边距
 - **SyncAreaBack()**：切换区域前同步当前编辑回布局数据
+
+## 收纳 / 展开
+
+浮动栏的折叠与展开有独立的状态机，入口、状态字段、位置常量与禁止事项见
+[floatingbar_fold.md](./floatingbar_fold.md)。
+
+一句话：**不要直接改 `ViewboxFloatingBar.Margin` / `Visibility` / `isFloatingBarFolded`，
+统一走 `FoldFloatingBarByCode` / `UnFoldFloatingBarByCode`（或 `ByUser` 版本）。**
