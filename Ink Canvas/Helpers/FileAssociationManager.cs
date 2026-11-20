@@ -1021,7 +1021,7 @@ namespace Ink_Canvas.Helpers
                                         // 如果当前处于收纳模式，则展开浮动栏
                                         if (mainWindow.isFloatingBarFolded)
                                         {
-                                            await mainWindow.UnFoldFloatingBar(new object());
+                                            await mainWindow.UnFoldFloatingBarByUser();
                                         }
                                         mainWindow.ShowNotification(AutomationStrings.FileAssoc_ExitedFoldMode);
                                     }

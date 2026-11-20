@@ -1,11 +1,11 @@
 # 浮动栏收纳 / 展开规范
 
 > 适用范围：浮动工具栏（`ViewboxFloatingBar`）从屏幕内收进侧边栏、以及从侧边栏展开。
-> 相关文件：`MainWindow_cs/MW_AutoFold.cs`（状态机）、`MW_FloatingBarIcons.cs`（位置计算与白板切换）。
+> 相关文件：`MainWindow_cs/MW_AutoFold.cs`（状态机）、`MainWindow_cs/MW_FloatingBarPlacement.cs`（落位场景入口）、`MW_FloatingBarIcons.cs`（位置计算与白板切换）。
 
 ## 一句话规则
 
-**收纳/展开只能通过 `MW_AutoFold.cs` 的入口调用，不要在别处直接改 `Margin` / `Visibility` / `isFloatingBarFolded`。**
+**收纳/展开只能通过 `MW_AutoFold.cs` 的入口调用；展开后的位置只能通过 `MW_FloatingBarPlacement.cs` 的场景入口写。不要在别处直接改 `Margin` / `Visibility` / `isFloatingBarFolded`。**
 
 历史 bug（"折叠了但工具栏还在屏幕上""隐藏按钮点不动""退出白板后又弹回来"）几乎都是因为有人绕过入口，
 自己写了一次 `ViewboxFloatingBar.Margin = ...` 或提前把标志置了。
@@ -27,6 +27,78 @@
 不参与"跟随进入前形态"这类策略判断。
 
 两者最终都进 `TransitionFloatingBarAsync(folded, instant, trigger)`，再分派到 `ApplyFoldedAsync` / `ApplyUnfoldedAsync`。
+
+## 落位场景入口（ShowFloatingBar）
+
+折叠/展开只决定“在不在屏幕里”；“展开后摆在哪”现在也只有一处入口：
+`MainWindow_cs/MW_FloatingBarPlacement.cs`。
+
+| API | 用途 |
+|-----|------|
+| `FloatingBarPlacement` | 场景枚举：`Folded` / `DesktopExpanded` / `PptExpanded` / `FullScreenExpanded`（白板、黑板） |
+| `ShowFloatingBar(placement, skipAnimation)` | 按场景写位置；`Folded` → `RestoreFoldedAppearance()`；折叠态下的展开请求直接返回 |
+| `ApplyFloatingBarPlacementForCurrentMode(skipAnimation)` | 先 `ReapplyFoldPositionIfFolded()`，否则按实时场景落位；返回是否处于折叠态 |
+| `ResetFloatingBarToDefaultPlacement(placement)` | “恢复默认位置”：清拖动坐标后按场景居中；折叠态只重建折叠外观 |
+| `CurrentFloatingBarPlacement` | 实时场景。折叠优先于 `IsInPPTPresentationMode`（退出放映时它可能还是过期值） |
+| `IsPptPlacementScene` | 是否按放映档落位：`IsInPPTPresentationMode \|\| _pptSlideShowBeginning`，覆盖放映开始事件窗口期 |
+| `PostToUiThread(action, context)` | 唯一封送实现：已在 UI 线程就执行，否则记 Trace 日志后 `BeginInvoke`；Dispatcher 关闭时返回 false |
+
+调用方只声明场景，不要自己写 `if (IsInPPTPresentationMode) 60 else 100`：
+这是同一场景在 N 处的重复编码；退出放映的窗口期内 `IsInPPTPresentationMode` 还是 true，
+按它选 60 就是“退出后停在任务栏附近、没有重新居中”。
+同样，`await Task.Delay(...)` 之后再判 `isFloatingBarFolded` 也不可靠——
+折叠否决已经下沉到 `ShowFloatingBar`，它读的是真正写值那一刻的标志。
+
+### 进 / 出放映不留中间态
+
+- 进放映时工具栏宽度会变：退出按钮、PPT 专用项由 `PPTUIManager.UpdateSlideShowStatus` 在
+  `Normal` 优先级的续体里才应用，晚于展开流程。若展开时先按旧宽度居中（偏右），按钮出现后
+  再补一次居中，用户看到的就是“先居中、随后左移”的横移动画。
+- 因此展开流程在放映开始的窗口期**不落位**：`ApplyUnfoldedAsync` 里
+  `_pptSlideShowBeginning && !IsInPPTPresentationMode` 时 `marginTask` 保持 `CompletedTask`，
+  位置交给 `OnPPTSlideShowBegin` 尾部统一落一次。
+- 这一次落位用调度器优先级排队，不用固定延时：`await Dispatcher.InvokeAsync(...,
+  DispatcherPriority.ApplicationIdle)`。此时 `Normal`（→ `IsInPPTPresentationMode` 与可见性）与
+  `Render`（→ 布局把新可见性算进 `ActualWidth`）都已排完；窗口全屏 `MoveWindow` 由
+  `PPTUIManager` 排在 `ApplicationIdle`，同优先级 FIFO 保证本回调排在它之后，
+  Margin 的屏幕坐标系才与窗口一致。
+- 该回调先幂等 `UpdateToolbarComponentVisibility()`、再 `ViewboxFloatingBar.UpdateLayout()`、
+  最后 `ShowFloatingBar(IsInPPTPresentationMode ? PptExpanded : DesktopExpanded)`：
+  即使状态更新排在更晚，也按 PPT 模式的最终宽度居中，绝不按旧宽度写一次中间位置。
+- 该段决策期间仍用 `_pptSlideShowBeginning` 作短生命周期场景提示，统一用
+  `IsPptPlacementScene`（`IsInPPTPresentationMode || _pptSlideShowBeginning`）判断场景：
+  `ViewboxFloatingBarMarginAnimationCore` 的贴边分支和 `pointPPT` 选择也走放映档。
+  只改 `ApplyUnfoldedAsync` 不够——Core 里若仍只认 `IsInPPTPresentationMode`，
+  就会算出桌面档位置，再被陈旧的 `pointDesktop` 覆盖，表现为“进了 PPT 工具栏停在任务栏上方、没有居中”。
+  不要把 `IsInPPTPresentationMode` 提前置 true：`PPTUIManager.UpdateSlideShowStatus` 用它计算
+  `wasInSlideShow`，提前置位会吞掉“进入放映”的 1000ms 提示。
+- 开始事件尾部不要写“进 PPT 前是否已折叠”的分支：设为自动展开时，收纳态进 PPT 同样会被展开，
+  需要这次落位把位置收敛到放映档；同时尾部也不允许 `await Task.Delay(...)` 后再落位——
+  延时只是在猜“多久算稳定”，宽度未定型时先摆一次就是一次多余的横移。
+- `ExitPPTPresentation` 必须在 `CursorIcon_Click` 之前定下目标形态：策略要求收纳时先
+  `FoldFloatingBarByCode(hold: true)`。否则 `CursorIcon_Click` 尾部会先按展开态摆一次位置，
+  随后 `OnPPTSlideShowEnd` 再折叠——即“先移回任务栏上方再收起”。折叠入口的否决会让中途的展开写值失效。
+- 开始事件尾部统一 `if (!isFloatingBarFolded) ShowFloatingBar(PptExpanded)`，**不要**再按“进 PPT 前是否已折叠”
+  分支：设为自动展开时，收纳态进 PPT 同样会被展开，需要这次落位把位置收敛到放映档。
+
+### 放映联动事件必须封送 UI 线程
+
+PPT 联动事件（`SlideShowBegin/End`、`PPTConnectionChanged`、`PresentationOpen/Close`、
+`SlideShowStateChanged`、`NextSlide`）不得在触发线程上直接处理：
+
+- 事件源在任意线程 raise：`PPTManager` 的 COM 回调（STA）、`ROTPPTManager` 的轮询线程、
+  `ComPPTLinkManager` 的转发、`PPTAgentLinkManager` 的后台线程。
+- 处理器是 `async void`，首句 `await Dispatcher.InvokeAsync(...)` 之后没有
+  `SynchronizationContext`，后续代码全部落在线程池上，再访问 `ViewboxFloatingBar` /
+  `LeftSidePanel` 就抛“调用线程无法访问此对象”。异常被 `ReapplyFoldPositionIfFolded` 的
+  `catch` 吞掉后，折叠标志仍是 true、外观却没恢复——日志里那条
+  “重设折叠位置失败: 调用线程无法访问此对象”就是它。
+- 唯一做法：订阅处一律 `xxx += arg => DispatchPPTEvent(() => OnXxx(arg))`，
+  `DispatchPPTEvent` 内部只调 `PostToUiThread(handler, "PPT 联动事件")`。
+- 同理，落位/外观入口（`ShowFloatingBar`、`ResetFloatingBarToDefaultPlacement`、
+  `RestoreFoldedAppearance`、`ApplyFloatingBarFinalPosition`、`SettleFloatingBarAfterExitAsync`）
+  自己也会检测 `Dispatcher.CheckAccess()` 并排回 UI 队列。新入口照此办理，
+  不要在调用方逐个判断线程。
 
 ### 为什么区分 ByUser / ByCode
 
@@ -91,7 +163,8 @@ PPT：进入放映前在 `OnPPTSlideShowBegin` 记录 `_floatingBarFoldedBeforeP
    入口返回的 `Task` 在动画与最终 Margin 落地后才完成，需要顺序就 `await` 它。
    侧边栏动画用 `AnimateSidePanelsAsync`，等待的是动画时长本身（0.175s）。
 3. **不要**在折叠态下做"居中"。
-   `HideSubPanels` 里的居中分支已经加了 `!isFloatingBarFolded`；新增居中逻辑时同样要判断。
+   位置一律走 `ShowFloatingBar` / `ApplyFloatingBarPlacementForCurrentMode`，折叠否决在入口内完成；
+   不要用 `if (!isFloatingBarFolded) { ... }` 包一层就自己写位置——await 之后标志可能已经变了。
 4. **不要**用 `IsFloatingBarUiAbsentFromScreens()` 反向推断"是否需要折叠"。
    它在 `Visibility != Visible` 时直接返回 true，位置其实还在屏幕里也会被判为"已隐藏"。
 
@@ -102,3 +175,60 @@ PPT：进入放映前在 `OnPPTSlideShowBegin` 记录 `_floatingBarFoldedBeforeP
 - `SidePannelMarginAnimation` 是 `AnimateSidePanelsAsync` 的即发即忘包装，与折叠入口共用 `_sidePanelAnimVersion`：
   后发起的侧栏动画会覆盖前一次，落位只由最后一次执行。
 - 托盘图标 / 热键 / URI 三条入口都走 `ByUser`，它们的 sender 是 `FloatingBarUserTrigger`，不是真实控件。
+
+## 折叠否决与退出收尾
+
+位置写入入口自带折叠否决，折叠期间任何路径都不可能把工具栏“拉回”屏幕内：
+
+- `ViewboxFloatingBarMarginAnimationAsync` / `ViewboxFloatingBarMarginAnimationCore`：
+  `IsExpandedEdgeDuringFold(MarginFromEdge)`（= `isFloatingBarFolded && MarginFromEdge > FloatingBarEdgeHiddenBase`）
+  直接返回——折叠位是负值，正向边距只可能是“展开/居中”。折叠自检和 `ReapplyFoldPositionIfFolded` 传负值，不受影响。
+- `PureViewboxFloatingBarMarginAnimationInDesktopMode` / `...InPPTMode`：入口判折叠、UI 块内再判一次、
+  `await Task.Delay(349)` 之后再判折叠并校验 `_marginAnimationVersion`；最终写值前
+  `BeginAnimation(MarginProperty, null)` 并复位 `isViewboxFloatingBarMarginAnimationRunning`。
+- `CursorIcon_Click`：`HideSubPanels("cursor", true)` 的 50ms 延时后调用
+  `ApplyFloatingBarPlacementForCurrentMode()`，由入口在写值前判折叠
+  （PPT 退出时 SlideShowEnd 往往正在这一刻收起工具栏）。
+- `UpdateToolbarPosition`：`RebuildToolbar()` 后若已折叠（且处于批注模式）就走 `RestoreFoldedAppearance()`
+  并直接返回；否则按实时场景落位。
+- 所有落位入口都只接受 `FloatingBarPlacement`，不要写字面量 60/100
+  （60 在 `ViewboxFloatingBarMarginAnimationAsync` 里会被强制改成 55）。
+
+### 折叠态外观不变量（位置 + 把手）
+
+折叠标志为 true 只代表“应该折叠”，不代表界面已经折叠到位：
+
+- `IsFoldedAppearanceIntact()` = 侧边栏把手（`LeftSidePanel`）可见 **且** 工具栏不在屏幕内
+  （`IsFloatingBarUiAbsentFromScreens()`）。两者缺一，说明折叠流程被后来的展开/居中写值覆盖过。
+- `ApplyFoldedAsync` 的“已经折叠就直接返回”分支会先做这个检查：外观不完整时调用
+  `RestoreFoldedAppearance()` 而不是静默返回。否则用户看到的就是
+  “托盘显示收纳态、工具栏却停在屏幕里、又找不到展开把手”——想展开都没有入口。
+- `RestoreFoldedAppearance()` 只重建外观（折叠位 + 把手），不重放切换回放 UI、清墨迹、关白板等副作用；
+  快捷面板正被用户打开（`Left/RightUnFoldButtonQuickPanel` 可见）时把手本应收起，不强行拉回。
+- 把手由 `AnimateSidePanelsAsync` 驱动：`SidePanelEdgePeek`（-10）显示，`SidePanelEdgeHidden`（-50）
+  收起并 `Collapsed`。**只重设工具栏位置不够**，折叠收尾必须同时把把手恢复到 peek。
+- `ViewboxFloatingBarMarginAnimationAsync` 在等待结束后除版本号外还会再判一次折叠
+  （等待期间可能刚进入折叠态），并复位 `isViewboxFloatingBarMarginAnimationRunning`。
+- `ViewboxFloatingBarMarginAnimationCore` 的非动画落位会先 `BeginAnimation(MarginProperty, null)`：
+  WPF 里动画层优先于属性值，不摘掉动画，同步写入的折叠位会被上一段展开动画覆盖。
+- `ReapplyFoldPositionIfFolded` 写折叠位前会 `Interlocked.Increment(ref _marginAnimationVersion)`，
+  作废那些已在 200ms 等待中、只校验版本号的正向写值。
+
+退出收尾集中在状态机文件 `MW_AutoFold.cs`：
+
+- `ApplyFloatingBarFinalPosition()`：按当前折叠标志落最终位置——折叠态 `RestoreFoldedAppearance()`
+  （折叠位 + 把手），展开态 `PureViewboxFloatingBarMarginAnimationInDesktopMode()`。只用于流程收尾，不做过渡。
+  展开目标固定为桌面位置：退出放映的窗口期内 `IsInPPTPresentationMode` 可能仍是过期值。
+- `SettleFloatingBarAfterExitAsync(shouldFold, applyFinalPosition, context)`：按调用方策略幂等地折叠/展开
+  （折叠走 `FoldFloatingBarByCode(hold: true)`），可选落位，内部记录失败日志。
+- `RestoreFloatingBarAfterBoardExitAsync(restoreFolded)`：白板退出专用。恢复收纳走
+  `FoldFloatingBarByCode(instant: true, hold: true)`；要求展开且当前已折叠时走
+  `UnFoldFloatingBarByCode()`（必须真的搬回屏幕内）；只有本来就展开时才原地恢复——
+  不重新居中，位置留给用户。
+- `MW_PPT.cs` 的 `SettleFloatingBarAfterPPTSlideShowAsync(bool applyFinalPosition = true)` 只是薄委托，
+  传入 `ShouldFoldAfterPPTSlideShow()`。`ExitPPTPresentation` 正常/异常路径、`OnPPTSlideShowEnd`
+  （`applyFinalPosition: false`，位置交给清理段尾部）、`HandleManualSlideShowEnd`、连接断开全部共用。
+
+**不要**再写“读一次 `isFloatingBarFolded` 就决定是否居中”或“固定延时后写 -60 把工具栏藏起来”的收尾：
+COM 的 SlideShowEnd 事件可能早到也可能晚到，两次判断的结果会互相覆盖，最后就剩
+“托盘显示收纳态、工具栏停在任务栏附近”这种自相矛盾的状态。

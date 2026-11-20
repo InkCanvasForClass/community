@@ -510,14 +510,9 @@ namespace Ink_Canvas
             ViewboxFloatingBarScaleTransform.ScaleY = scale;
 
             // 折叠态下不执行展开居中：本方法在启动/重建流程中会被多次调用，
-            // 若无条件调到 ViewboxFloatingBarMarginAnimation(100)，会把已折叠的工具栏
-            // 拉回屏幕内（折叠标志保持 true，但工具栏可见——"自动收纳失效"的直接原因）。
-            if (ReapplyFoldPositionIfFolded()) return;
-
-            if (IsInPPTPresentationMode)
-                ViewboxFloatingBarMarginAnimation(60);
-            else
-                ViewboxFloatingBarMarginAnimation(100, true);
+            // 若无条件居中，会把已折叠的工具栏拉回屏幕内
+            // （折叠标志保持 true，但工具栏可见——"自动收纳失效"的直接原因）。
+            ApplyFloatingBarPlacementForCurrentMode();
         }
 
         /// <summary>

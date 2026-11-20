@@ -26,14 +26,10 @@ namespace Ink_Canvas.WorkflowAutomation.ActionHandlers
                     var mw = Application.Current.MainWindow as MainWindow;
                     if (mw == null) return;
 
-                    // 清空PPT模式保存的坐标，让动画走默认位置分支
-                    mw._userHasDraggedFloatingBar = false;
-                    mw.pointPPT = new Point(-1, -1);
-
-                    // 仅在非折叠且处于PPT模式下执行动画
+                    // 仅在非折叠且处于PPT模式下重置；折叠态由状态机保持折叠位
                     if (!mw.isFloatingBarFolded && mw.IsInPPTPresentationMode)
                     {
-                        mw.PureViewboxFloatingBarMarginAnimationInPPTMode();
+                        mw.ResetFloatingBarToDefaultPlacement(FloatingBarPlacement.PptExpanded);
                     }
                 });
             });
