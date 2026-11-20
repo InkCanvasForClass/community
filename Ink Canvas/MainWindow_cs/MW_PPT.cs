@@ -1,4 +1,4 @@
-using Ink_Canvas.Helpers;
+﻿using Ink_Canvas.Helpers;
 using Ink_Canvas.WorkflowAutomation;
 using InkCanvasPPTAgent.Contracts;
 using iNKORE.UI.WPF.Modern;
@@ -1175,13 +1175,13 @@ namespace Ink_Canvas
                 if (Settings.Automation.IsAutoFoldInPPTSlideShow)
                 {
                     if (!isFloatingBarFolded)
-                        FoldFloatingBar_MouseUp(new object(), null);
+                        await FoldFloatingBarByCode();
                 }
                 else
                 {
                     if (isFloatingBarFolded)
                     {
-                        await UnFoldFloatingBar(new object());
+                        await UnFoldFloatingBarByCode();
                     }
                 }
 
@@ -1818,11 +1818,11 @@ namespace Ink_Canvas
 
                 if (ShouldFoldAfterPPTSlideShow())
                 {
-                    if (!isFloatingBarFolded) FoldFloatingBar_MouseUp(new object(), null);
+                    if (!isFloatingBarFolded) await FoldFloatingBarByCode();
                 }
                 else if (isFloatingBarFolded)
                 {
-                    await UnFoldFloatingBar(new object());
+                    await UnFoldFloatingBarByCode();
                 }
 
                 if (isEnteredSlideShowEndEvent) return;
@@ -3699,11 +3699,11 @@ namespace Ink_Canvas
 
                 if (ShouldFoldAfterPPTSlideShow())
                 {
-                    if (!isFloatingBarFolded) FoldFloatingBar_MouseUp(new object(), null);
+                    if (!isFloatingBarFolded) await FoldFloatingBarByCode();
                 }
                 else if (isFloatingBarFolded)
                 {
-                    await UnFoldFloatingBar(new object());
+                    await UnFoldFloatingBarByCode();
                 }
             }
             catch (Exception ex)
