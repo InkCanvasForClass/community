@@ -523,7 +523,7 @@
     <value>反复涂 Buff</value>
   </data>
   <data name="FloatingBar_Opacity" xml:space="preserve">
-    <value>隐身值</value>
+    <value>不透明度</value>
   </data>
   <data name="FloatingBar_FadeDelay" xml:space="preserve">
     <value>摸鱼延迟</value>
