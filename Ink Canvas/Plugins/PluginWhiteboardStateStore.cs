@@ -243,6 +243,44 @@ namespace Ink_Canvas.Plugins
             _pageIds[pageIndex] = null;
         }
 
+        internal Dictionary<string, string> ReadPageSidecars(string contentPath)
+        {
+            var imported = new PluginWhiteboardStateStore();
+            foreach (var pair in _legacyImporters) imported.RegisterLegacyImporter(pair.Key, pair.Value);
+            var path = Path.ChangeExtension(contentPath, ".plugins.json");
+            if (File.Exists(path)) imported.ImportSinglePageJson(File.ReadAllText(path), 0);
+            imported.ImportLegacyPageSidecars(contentPath, 0, (_, error) => throw error);
+            var pageId = imported.GetPageId(0);
+            return imported._states.ToDictionary(pair => pair.Key, pair => pair.Value[pageId], StringComparer.OrdinalIgnoreCase);
+        }
+
+        internal List<PluginWhiteboardInitialHistory> PreparePageAppend(Dictionary<string, string> incoming, int pageIndex)
+        {
+            var pageId = GetPageId(pageIndex);
+            var result = new List<PluginWhiteboardInitialHistory>();
+            foreach (var pair in incoming)
+            {
+                string empty = _providers.TryGetValue(pair.Key, out var provider) && provider is IWhiteboardInitialHistoryProvider baseline
+                    ? baseline.CaptureEmptyState() ?? string.Empty : string.Empty;
+                var before = _states.TryGetValue(pair.Key, out var states) && states.TryGetValue(pageId, out var current) ? current : empty;
+                if (string.Equals(before, pair.Value, StringComparison.Ordinal)) continue;
+                // 插件状态是不透明数据，宿主不能猜测其合并规则，也不能覆盖已有内容。
+                if (!string.IsNullOrEmpty(before) && !string.Equals(before, empty, StringComparison.Ordinal))
+                    throw new InvalidOperationException(string.Format(Properties.MainWindowStrings.Main_OpenInk_PluginConflict, pair.Key));
+                result.Add(new PluginWhiteboardInitialHistory { PluginId = pair.Key, EmptyState = before, LoadedState = pair.Value });
+            }
+            return result;
+        }
+
+        internal void SetPageState(int pageIndex, string pluginId, string state, bool restore)
+        {
+            var pageId = GetPageId(pageIndex);
+            if (!_states.TryGetValue(pluginId, out var states))
+                _states.Add(pluginId, states = new Dictionary<string, string>(StringComparer.Ordinal));
+            states[pageId] = state;
+            if (restore && _providers.TryGetValue(pluginId, out var provider)) provider.RestoreState(state);
+        }
+
         internal void ResetDocument(int firstPageIndex, int pageCount)
         {
             ValidateDocumentRange(firstPageIndex, pageCount);

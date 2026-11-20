@@ -745,4 +745,49 @@
     <value>哎呀出意外了，InkCanvasForClass 可能要寄了。
 建议赶紧存墨迹然后复活保平安。</value>
   </data>
+  <data name="Main_OpenInk_Title" xml:space="preserve">
+    <value>打开墨迹文件</value>
+  </data>
+  <data name="Main_OpenInk_ChooseDestination" xml:space="preserve">
+    <value>选择打开位置</value>
+  </data>
+  <data name="Main_OpenInk_Screen" xml:space="preserve">
+    <value>屏幕批注</value>
+  </data>
+  <data name="Main_OpenInk_ScreenDescription" xml:space="preserve">
+    <value>屏幕上面继续写</value>
+  </data>
+  <data name="Main_OpenInk_Whiteboard" xml:space="preserve">
+    <value>白板</value>
+  </data>
+  <data name="Main_OpenInk_WhiteboardDescription" xml:space="preserve">
+    <value>白板里面继续写</value>
+  </data>
+  <data name="Main_OpenInk_Booth" xml:space="preserve">
+    <value>展台</value>
+  </data>
+  <data name="Main_OpenInk_BoothDescription" xml:space="preserve">
+    <value>展台打开继续写</value>
+  </data>
+  <data name="Main_OpenInk_AppendHint" xml:space="preserve">
+    <value>点错了可以撤销，没事寄不了</value>
+  </data>
+  <data name="Main_OpenInk_Cancel" xml:space="preserve">
+    <value>溜了溜了</value>
+  </data>
+  <data name="Main_OpenInk_Empty" xml:space="preserve">
+    <value>这文件是个啥，空的？</value>
+  </data>
+  <data name="Main_OpenInk_ModeBusy" xml:space="preserve">
+    <value>换模式ing，客官稍后重新打开一</value>
+  </data>
+  <data name="Main_OpenInk_PluginConflict" xml:space="preserve">
+    <value>当前页面已有插件“{0}”的内容，无法安全合并。请在空白页面打开此文件。</value>
+  </data>
+  <data name="Main_OpenInk_ElementFailed" xml:space="preserve">
+    <value>无法读取文件中的某个元素。请检查配套文件及所需插件是否齐全。</value>
+  </data>
+  <data name="Main_OpenInk_PageChanged" xml:space="preserve">
+    <value>目标页面已变化，请重新打开文件。</value>
+  </data>
 </root>

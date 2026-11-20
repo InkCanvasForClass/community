@@ -176,7 +176,15 @@ namespace Ink_Canvas
 
         private void RestoreSecAgentSceneElement(CanvasElementInfo info)
         {
-            if (info == null || inkCanvas == null || string.IsNullOrWhiteSpace(info.SceneElementJson)) return;
+            var element = CreateSecAgentSceneElement(info);
+            if (element == null) return;
+            inkCanvas.Children.Add(element);
+            RefreshRestoredSecAgentElementLayout(element);
+        }
+
+        private FrameworkElement CreateSecAgentSceneElement(CanvasElementInfo info)
+        {
+            if (info == null || inkCanvas == null || string.IsNullOrWhiteSpace(info.SceneElementJson)) return null;
             try
             {
                 var typeName = string.Equals(info.Type, "SvgSceneGroup", StringComparison.OrdinalIgnoreCase)
@@ -188,20 +196,20 @@ namespace Ink_Canvas
                 var factoryName = string.Equals(info.Type, "SvgSceneGroup", StringComparison.OrdinalIgnoreCase)
                     ? "FromSerializedScene"
                     : "FromSerializedElement";
-                if (!TryInvokeSerializedElementFactory(type, factoryName, info.SceneElementJson, out var element)) return;
+                if (!TryInvokeSerializedElementFactory(type, factoryName, info.SceneElementJson, out var element)) return null;
                 element.Name = "svgscene_restore_" + DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
                 InkCanvas.SetLeft(element, double.IsNaN(info.Left) ? 0 : info.Left);
                 InkCanvas.SetTop(element, double.IsNaN(info.Top) ? 0 : info.Top);
                 InitializeElementTransform(element);
                 RestoreElementTransform(element, info.TransformMatrix);
-                inkCanvas.Children.Add(element);
                 BindElementEvents(element);
-                RefreshRestoredSecAgentElementLayout(element);
+                return element;
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"恢复可编辑 SVG 场景元素失败: {ex}", LogHelper.LogType.Error);
             }
+            return null;
         }
 
         /// <summary>
@@ -404,9 +412,15 @@ namespace Ink_Canvas
 
         private void RestoreMediaFromElementInfo(CanvasElementInfo info)
         {
-            if (info == null || inkCanvas == null) return;
-            if (!string.Equals(info.Type, "Media", StringComparison.OrdinalIgnoreCase)) return;
-            if (string.IsNullOrEmpty(info.SourcePath) || !File.Exists(info.SourcePath)) return;
+            var element = CreateMediaFromElementInfo(info);
+            if (element != null) inkCanvas.Children.Add(element);
+        }
+
+        private CanvasMediaControl CreateMediaFromElementInfo(CanvasElementInfo info)
+        {
+            if (info == null || inkCanvas == null) return null;
+            if (!string.Equals(info.Type, "Media", StringComparison.OrdinalIgnoreCase)) return null;
+            if (string.IsNullOrEmpty(info.SourcePath) || !File.Exists(info.SourcePath)) return null;
 
             try
             {
@@ -436,12 +450,13 @@ namespace Ink_Canvas
                 InkCanvas.SetTop(mediaControl, info.Top);
                 InitializeElementTransform(mediaControl);
                 BindElementEvents(mediaControl);
-                inkCanvas.Children.Add(mediaControl);
+                return mediaControl;
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"从 .elements.json 恢复媒体失败: {ex.Message}", LogHelper.LogType.Error);
             }
+            return null;
         }
 
         /// <summary>

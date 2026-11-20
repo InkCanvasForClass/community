@@ -748,4 +748,49 @@
   <data name="Main_ExitVerifyPasswordOnly" xml:space="preserve">
     <value>请输入安全密码以退出软件。</value>
   </data>
+  <data name="Main_OpenInk_Title" xml:space="preserve">
+    <value>打开墨迹文件</value>
+  </data>
+  <data name="Main_OpenInk_ChooseDestination" xml:space="preserve">
+    <value>选择打开位置</value>
+  </data>
+  <data name="Main_OpenInk_Screen" xml:space="preserve">
+    <value>屏幕批注</value>
+  </data>
+  <data name="Main_OpenInk_ScreenDescription" xml:space="preserve">
+    <value>在屏幕上继续批注</value>
+  </data>
+  <data name="Main_OpenInk_Whiteboard" xml:space="preserve">
+    <value>白板</value>
+  </data>
+  <data name="Main_OpenInk_WhiteboardDescription" xml:space="preserve">
+    <value>添加到当前白板页面</value>
+  </data>
+  <data name="Main_OpenInk_Booth" xml:space="preserve">
+    <value>展台</value>
+  </data>
+  <data name="Main_OpenInk_BoothDescription" xml:space="preserve">
+    <value>叠加到当前照片或实时画面</value>
+  </data>
+  <data name="Main_OpenInk_AppendHint" xml:space="preserve">
+    <value>文件内容将添加到当前页面，可整体撤销。</value>
+  </data>
+  <data name="Main_OpenInk_Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="Main_OpenInk_Empty" xml:space="preserve">
+    <value>此文件不包含可导入的内容。</value>
+  </data>
+  <data name="Main_OpenInk_ModeBusy" xml:space="preserve">
+    <value>正在切换模式，请稍后重新打开文件。</value>
+  </data>
+  <data name="Main_OpenInk_PluginConflict" xml:space="preserve">
+    <value>当前页面已有插件“{0}”的内容，无法安全合并。请在空白页面打开此文件。</value>
+  </data>
+  <data name="Main_OpenInk_ElementFailed" xml:space="preserve">
+    <value>无法读取文件中的某个元素。请检查配套文件及所需插件是否齐全。</value>
+  </data>
+  <data name="Main_OpenInk_PageChanged" xml:space="preserve">
+    <value>目标页面已变化，请重新打开文件。</value>
+  </data>
 </root>

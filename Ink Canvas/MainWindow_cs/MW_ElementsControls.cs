@@ -1469,14 +1469,23 @@ namespace Ink_Canvas
         /// <summary>从保存的 <see cref="CanvasElementInfo"/> 恢复 PDF（与打开墨迹时的图片恢复流程一致，不单独写入时间轴）。</summary>
         private async Task RestorePdfFromElementInfoAsync(CanvasElementInfo info)
         {
-            if (info == null || inkCanvas == null) return;
-            if (!string.Equals(info.Type, "Pdf", StringComparison.OrdinalIgnoreCase)) return;
-            if (string.IsNullOrEmpty(info.SourcePath) || !File.Exists(info.SourcePath)) return;
+            var view = await CreatePdfFromElementInfoAsync(info);
+            if (view == null) return;
+            inkCanvas.Children.Add(view);
+            _pdfSidebarNextPositionUseHostTransform = true;
+            SyncPdfPageSidebarWithCanvas();
+        }
+
+        private async Task<PdfEmbeddedView> CreatePdfFromElementInfoAsync(CanvasElementInfo info)
+        {
+            if (info == null || inkCanvas == null) return null;
+            if (!string.Equals(info.Type, "Pdf", StringComparison.OrdinalIgnoreCase)) return null;
+            if (string.IsNullOrEmpty(info.SourcePath) || !File.Exists(info.SourcePath)) return null;
 
             try
             {
                 uint pageCount = await PdfWinRtHelper.GetPageCountAsync(info.SourcePath);
-                if (pageCount == 0) return;
+                if (pageCount == 0) return null;
 
                 bool compress = isLoaded && Settings.Canvas.IsCompressPicturesUploaded;
                 uint initial = 0;
@@ -1498,14 +1507,13 @@ namespace Ink_Canvas
 
                 InitializeElementTransform(view);
                 BindElementEvents(view);
-                inkCanvas.Children.Add(view);
-                _pdfSidebarNextPositionUseHostTransform = true;
-                SyncPdfPageSidebarWithCanvas();
+                return view;
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"从 .elements.json 恢复 PDF 失败: {ex.Message}", LogHelper.LogType.Error);
             }
+            return null;
         }
 
         /// <summary>为 PdfEmbeddedView 注入墨迹持久化回调，使墨迹跟随 PDF 翻页。</summary>

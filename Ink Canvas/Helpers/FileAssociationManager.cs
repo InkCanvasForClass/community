@@ -872,8 +872,7 @@ namespace Ink_Canvas.Helpers
                                     // 获取主窗口并打开文件
                                     if (Application.Current.MainWindow is MainWindow mainWindow)
                                     {
-                                        mainWindow.OpenSingleStrokeFile(filePath);
-                                        mainWindow.ShowNotification(string.Format(AutomationStrings.FileAssoc_LoadedStrokesFile, Path.GetFileName(filePath)));
+                                        mainWindow.OpenStrokeFileFromShell(filePath);
                                     }
                                 }
                                 catch (Exception ex)

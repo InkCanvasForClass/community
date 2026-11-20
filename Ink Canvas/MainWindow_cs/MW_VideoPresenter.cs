@@ -733,6 +733,8 @@ namespace Ink_Canvas
         private void ExitVideoPresenterSpecialMode()
         {
             if (!_isVideoPresenterSpecialMode) return;
+            // 保存方法依赖展台模式标志，必须在退出模式前调用。
+            SaveCurrentBoothState();
             _isVideoPresenterSpecialMode = false;
             // 退出展台后恢复双指旋转开关
             SetBoothGestureRotationUiEnabled(true);
@@ -740,8 +742,6 @@ namespace Ink_Canvas
             _boothPreviewRestartRetryCount = 0;
             LogHelper.WriteLogToFile("[Booth] 退出视频展台拍摄模式，保留拍摄态墨迹、缩放位置与旋转状态", LogHelper.LogType.Info);
 
-            // 退出前完整保存当前展台页面状态（墨迹、缩放、位移、旋转、最后查看页码）
-            SaveCurrentBoothState();
 
             // 停止 A4 纸实时识别定时器并隐藏覆盖层
             StopPaperDetectTimer();
