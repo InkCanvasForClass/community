@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -577,6 +577,10 @@ namespace Ink_Canvas.Helpers
                 double slideStart = token.CurrentSlide;
                 double opacityStart = token.CurrentOpacity;
 
+                AnimationLog.Log(popup, "SHOW",
+                    $"start={scaleStart:F4} slide={slideStart:F1} op={opacityStart:F2}"
+                    + $" transitioning={token.IsTransitioning}");
+
                 // 起点已经等于终态时，仍要播一次"涨到峰值再回落"，
                 // 否则用户会看到"第二次打开没有任何动画"。
                 token.IsTransitioning = true;
@@ -616,14 +620,15 @@ namespace Ink_Canvas.Helpers
 
                 // To 全部省略：目标就是基值（终态）。
                 // FillBehavior.Stop 让动画播完后释放属性、露出基值——基值已是终态，结果正确。
-                // 时长：按"剩余行程"缩短，但**绝不因此归零**。
-                // 若起点已在终态附近（例如重复打开），remaining≈0，
-                // 若直接按比例算会得到 0s —— 那正是"第二次打开没有动画"的来源。
-                // 这里保底 0.35 倍的完整时长，保证"涨一下再回落"始终看得见。
-                double remaining = Math.Abs(1.0 - scaleStart);
-                double fullDistance = Math.Abs(1.0 - PopupPopInStartScale);
-                double travelRatio = fullDistance > 0.001 ? Math.Min(1.0, remaining / fullDistance) : 0;
-                double effectiveDuration = Math.Max(duration * 0.35, duration * travelRatio);
+                // 时长：固定用完整时长，不按"剩余行程"压缩。
+                //
+                // 之前按 travelRatio 缩短会带来一个副作用：关键帧的百分比位置是固定的，
+                // 时长一缩、行程又短，上升段速度就比正常打开快 1.2 倍以上，
+                // 观感是"打断后突然变急"——正是用户说的"打断好奇怪"。
+                //
+                // 保持完整时长后，打断的只是"起点更靠近终点"，
+                // 每单位时间的变化量与正常打开一致，速度感连续。
+                double effectiveDuration = duration;
 
                 var fadeInAnimation = new DoubleAnimation
                 {
@@ -665,11 +670,24 @@ namespace Ink_Canvas.Helpers
                 double peak = PopupPopInPeakScale;
                 if (scaleStart < peak * 0.995)
                 {
-                    // 峰值位置取自观感序列比例：上升占 8/11、回落占 3/11。
-                    // 段内用线性：序列本身是"每帧等量变化"，用 EaseOut 会让峰值附近
-                    // 变化过慢，看起来像在峰值上"卡住"。
+                    // 峰值时间点按实际行程比例调整，而不是固定 8/11。
+                    //
+                    // 固定比例的问题：起点越接近峰值，上升段行程越短，
+                    // 却仍占用 72.7% 的时间 => 前半段极慢、后半段极快，观感失衡。
+                    // 这里让"上升段/下降段"的时间比等于各自的行程比，
+                    // 两段的速度就自然一致，打断后不会忽快忽慢。
+                    double upDistance = Math.Abs(peak - scaleStart);
+                    double downDistance = Math.Abs(1.0 - peak);
+                    double totalDistance = upDistance + downDistance;
+                    double peakPercent = totalDistance > 0.0001
+                        ? upDistance / totalDistance
+                        : PopupOpenPeakPercent;
+
+                    // 留一点余量，避免峰值贴到 0% 或 100% 时看不出曲线
+                    peakPercent = Math.Max(0.12, Math.Min(0.94, peakPercent));
+
                     scaleAnimation.KeyFrames.Add(new LinearDoubleKeyFrame(
-                        peak, KeyTime.FromPercent(PopupOpenPeakPercent)));
+                        peak, KeyTime.FromPercent(peakPercent)));
                 }
 
                 // 终值：1.0
@@ -686,7 +704,16 @@ namespace Ink_Canvas.Helpers
                 // 让下一次打开能从"6"这样的正确档位继续。
                 sb.Completed += (_, _) =>
                 {
-                    if (!IsCurrent(popup, generation)) return;
+                    if (!IsCurrent(popup, generation))
+                    {
+                        AnimationLog.Log(popup, "SHOW-DONE-STALE",
+                            $"gen={generation} current={token.Generation}");
+                        return;
+                    }
+
+                    AnimationLog.Log(popup, "SHOW-DONE",
+                        $"dur={effectiveDuration:F3}s start={scaleStart:F4}");
+
                     token.CurrentScale = 1.0;
                     token.CurrentSlide = 0;
                     token.CurrentOpacity = targetOpacity;
@@ -730,6 +757,10 @@ namespace Ink_Canvas.Helpers
                 var token = TokenFor(popup);
                 double scaleStart = token.CurrentScale;
                 double slideStart = token.CurrentSlide;
+
+                AnimationLog.Log(popup, "HIDE",
+                    $"start={scaleStart:F4} slide={slideStart:F1} transitioning={token.IsTransitioning}");
+
                 token.IsTransitioning = true;
 
                 child.BeginAnimation(UIElement.OpacityProperty, null);
@@ -814,6 +845,8 @@ namespace Ink_Canvas.Helpers
                     // 把变换上的动画彻底摘掉并归位。若不清理，缩放会停在中间值，
                     // 下次打开时布局按带残留的尺寸测量，popupSize 变小、定位偏下。
                     ClearTransformAnimations(child);
+
+                    AnimationLog.Log(popup, "HIDE-DONE", $"from={scaleStart:F4}");
 
                     // 同步状态机：收起完成后的档位是"最小态"，
                     // 下次打开会从最小态重新长出来（0.72 → 峰值 → 1.0）。
