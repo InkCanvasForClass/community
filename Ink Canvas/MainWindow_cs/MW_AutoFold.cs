@@ -222,7 +222,7 @@ namespace Ink_Canvas
             });
 
             // 让上面这批 UI 状态变更在渲染队列里落地，而不是固定睡一段时间
-            await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.Background);
+            await Dispatcher.Yield(DispatcherPriority.Background);
 
             int foldEdge = ComputeFoldEdge();
 
