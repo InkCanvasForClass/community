@@ -34,12 +34,32 @@ namespace Ink_Canvas.Helpers
             public Border Host;
             public CustomPopupPlacementCallback Original;
             public Size PaddingValue;
+
+            /// <summary>菜单名，仅用于日志。</summary>
+            public string Name = "<unnamed>";
         }
 
         private static readonly ConditionalWeakTable<Popup, Room> Rooms = new ConditionalWeakTable<Popup, Room>();
 
         /// <summary>容器标记，避免重复包装。</summary>
         private const string HostTag = "PopupOverflowRoomHost";
+
+        /// <summary>
+        /// 诊断开关：排查菜单位置问题时置 true，日志会写到 Logs 目录。
+        /// </summary>
+        internal static bool DiagEnabled = true;
+
+        internal static void Diag(string message)
+        {
+            if (!DiagEnabled) return;
+            LogHelper.WriteLogToFile("[PopupRoom] " + message, LogHelper.LogType.Info);
+        }
+
+        internal static string Name(Popup popup)
+        {
+            if (popup == null) return "<null>";
+            return string.IsNullOrEmpty(popup.Name) ? "<unnamed>" : popup.Name;
+        }
 
         /// <summary>
         /// 预留空间并返回应当施加动画的内容元素。
@@ -78,6 +98,7 @@ namespace Ink_Canvas.Helpers
 
             var room = new Room
             {
+                Name = Name(popup),
                 Original = popup.CustomPopupPlacementCallback,
                 PaddingValue = ComputePadding(size, peakScale)
             };
@@ -129,16 +150,31 @@ namespace Ink_Canvas.Helpers
                     Math.Max(0, popupSize.Height - pad.Height * 2));
 
                 var placements = room.Original(contentSize, targetSize, offset);
-                if (placements == null) return null;
+                if (placements == null)
+                {
+                    Diag($"[Placement] popup={room.Name} 原回调返回 null");
+                    return null;
+                }
 
                 // 原回调返回的是"容器左上角应所在的位置"。
                 // 内容在容器内向右下各内缩了一个 padding，要让内容落在原回调算出的位置，
                 // 容器需要再向左上移同样的量。
-                return placements
+                var result = placements
                     .Select(p => new CustomPopupPlacement(
                         new Point(p.Point.X - pad.Width, p.Point.Y - pad.Height),
                         p.PrimaryAxis))
                     .ToArray();
+
+                // 诊断：把决定位置的每个量都打出来，便于对比第一次与后续打开
+                Diag($"[Placement] popup={room.Name}"
+                     + $" popupSize={popupSize.Width:F1}x{popupSize.Height:F1}"
+                     + $" pad={pad.Width:F1},{pad.Height:F1}"
+                     + $" contentSize={contentSize.Width:F1}x{contentSize.Height:F1}"
+                     + $" targetSize={targetSize.Width:F1}x{targetSize.Height:F1}"
+                     + $" raw=({placements[0].Point.X:F1},{placements[0].Point.Y:F1})"
+                     + $" final=({result[0].Point.X:F1},{result[0].Point.Y:F1})");
+
+                return result;
             };
         }
 
