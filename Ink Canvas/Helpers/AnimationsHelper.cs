@@ -532,21 +532,26 @@ namespace Ink_Canvas.Helpers
                 child.BeginAnimation(UIElement.OpacityProperty, null);
                 child.Opacity = targetOpacity;
 
-                // 自愈：先把上一次残留的变换动画彻底摘掉。
-                // 若上次收场被打断（Completed 没跑），缩放/位移会停在中间值，
-                // 而 Popup 打开时会按带残留的尺寸测量布局，导致 popupSize 变小、
-                // 定位计算偏下。这里强制归零，保证每次打开都从干净状态开始。
-                ClearTransformAnimations(child);
+                // 打断支持：若上一段动画（通常是收场）还在播，从它**当前**的视觉状态接续，
+                // 而不是先归位再重来——否则用户会看到"缩回去一半又跳回来"。
+                var (scaleStart, slideStart, opacityStart) = CaptureCurrentVisualState(child);
 
-                var scaleTransform = new ScaleTransform(1, 1);
-                var slideTransform = new TranslateTransform(0, 0);
+                // 清掉旧动画（不再归位），目的是让下面的基值写入能生效。
+                ClearTransformAnimations(child);
+                child.BeginAnimation(UIElement.OpacityProperty, null);
+
+                var scaleTransform = new ScaleTransform(scaleStart, scaleStart);
+                var slideTransform = new TranslateTransform(0, slideStart);
                 var transformGroup = new TransformGroup();
                 transformGroup.Children.Add(scaleTransform);
                 transformGroup.Children.Add(slideTransform);
 
                 child.RenderTransform = transformGroup;
-                // 原点必须是内容自身中心：留白是四周对称的，以中心缩放才不会被单边裁到。
-                child.RenderTransformOrigin = new Point(0.5, 0.5);
+                // 缩放基准点跟随触发按钮：从图标处放大、也缩回图标处。
+                child.RenderTransformOrigin = PopupScaleOrigin.Resolve(popup, child);
+
+                // 从当前视觉状态出发：透明度也要接续，避免中途重开时突然闪一下
+                child.Opacity = opacityStart;
 
                 popup.IsOpen = true;
 
@@ -561,10 +566,17 @@ namespace Ink_Canvas.Helpers
 
                 // To 全部省略：目标就是基值（终态）。
                 // FillBehavior.Stop 让动画播完后释放属性、露出基值——基值已是终态，结果正确。
+                // 时间按"剩余行程"缩短：从 0.9 接续到 1.0 只需走 1/10 的路程，
+                // 仍用完整时长会显得拖沓。打断越快、剩余越少、时长越短。
+                double remaining = Math.Abs(1.0 - scaleStart);
+                double fullDistance = Math.Abs(1.0 - PopupPopInStartScale);
+                double effectiveDuration = Math.Max(0.08,
+                    duration * (fullDistance > 0.001 ? Math.Min(1.0, remaining / fullDistance) : 1.0));
+
                 var fadeInAnimation = new DoubleAnimation
                 {
-                    From = targetOpacity * 0.5,
-                    Duration = AnimationSpeed.ScaleToTimeSpan(duration),
+                    From = opacityStart,
+                    Duration = AnimationSpeed.ScaleToTimeSpan(effectiveDuration),
                     FillBehavior = FillBehavior.Stop
                 };
                 fadeInAnimation.EasingFunction = new CubicEase();
@@ -572,8 +584,8 @@ namespace Ink_Canvas.Helpers
 
                 var slideAnimation = new DoubleAnimation
                 {
-                    From = 10,
-                    Duration = AnimationSpeed.ScaleToTimeSpan(duration),
+                    From = slideStart,
+                    Duration = AnimationSpeed.ScaleToTimeSpan(effectiveDuration),
                     FillBehavior = FillBehavior.Stop
                 };
                 slideAnimation.EasingFunction = new CubicEase();
@@ -582,10 +594,11 @@ namespace Ink_Canvas.Helpers
 
                 // 缩放入场：一条 BackEase 曲线完成"小 → 略大 → 回落"。
                 // 不要拆成两段关键帧：峰值处速度不连续会顿一下，EaseOutBack 本身就先冲过头再回落。
+                // From 用当前缩放值：中途被打断时从这里继续长到 1.0。
                 var scaleAnimation = new DoubleAnimation
                 {
-                    From = PopupPopInStartScale,
-                    Duration = AnimationSpeed.ScaleToTimeSpan(duration),
+                    From = scaleStart,
+                    Duration = AnimationSpeed.ScaleToTimeSpan(effectiveDuration),
                     FillBehavior = FillBehavior.Stop,
                     EasingFunction = new BackEase
                     {
@@ -635,55 +648,65 @@ namespace Ink_Canvas.Helpers
 
                 var sb = new Storyboard();
 
-                // 收场与出场对称：缩放 + 位移 + 淡出，同一条时间轴。
-                // 原来只有淡出和 10px 下移，没有缩放，和出场（缩放+位移+淡入）不对称，
-                // 观感就会"生硬、像被抽走"。
-                //
-                // 基值仍保持终态（缩放 1、位移 0、目标透明度），
-                // 动画只描述"从现在播到 To"，播完由 Closed 重置，
-                // 这样中途被重新打开也不会留下错误状态。
-                child.BeginAnimation(UIElement.OpacityProperty, null);
-                child.Opacity = targetOpacity;
+                // 打断支持：从当前视觉状态接续（通常是出场动画播到一半又点了关闭）
+                var (scaleStart, slideStart, opacityStart) = CaptureCurrentVisualState(child);
 
-                var exitScale = new ScaleTransform(1, 1);
-                var exitSlide = new TranslateTransform(0, 0);
+                child.BeginAnimation(UIElement.OpacityProperty, null);
+
+                var exitScale = new ScaleTransform(scaleStart, scaleStart);
+                var exitSlide = new TranslateTransform(0, slideStart);
                 var exitGroup = new TransformGroup();
                 exitGroup.Children.Add(exitScale);
                 exitGroup.Children.Add(exitSlide);
                 child.RenderTransform = exitGroup;
-                child.RenderTransformOrigin = new Point(0.5, 0.5);
+                // 与出场同一个基准点：缩回图标所在的方向
+                child.RenderTransformOrigin = PopupScaleOrigin.Resolve(popup, child);
+                child.Opacity = opacityStart;
 
-                // 淡出：用 EaseInCubic 起步慢、收尾快，符合"消失"的观感
-                var fadeOutAnimation = new DoubleAnimation
-                {
-                    To = 0,
-                    Duration = AnimationSpeed.ScaleToTimeSpan(duration)
-                };
-                fadeOutAnimation.EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn };
-                Storyboard.SetTargetProperty(fadeOutAnimation, new PropertyPath(UIElement.OpacityProperty));
+                // 收场 = 出场动画的逆过程：
+                //   出场 起始0.72 →(BackEase 冲到1.037)→ 回落 1.0
+                //   收场 1.0 →(BackEase 先涨到1.037)→ 缩到 0.72 并消失
+                // 「先放大一点再缩小」正是 Back 曲线前半段的效果，
+                // 用一条 EaseInBack 就能同时表达这两种感觉，不必拼两段。
+                double exitDuration = Math.Max(0.10,
+                    duration * Math.Min(1.0, Math.Abs(scaleStart - PopupPopInStartScale)
+                                              / Math.Max(0.001, Math.Abs(1.0 - PopupPopInStartScale))));
 
-                // 位移：向下滑出，与出场的向上滑入互为镜像，用 EaseIn 让加速感自然
-                var slideAnimation = new DoubleAnimation
-                {
-                    To = 10,
-                    Duration = AnimationSpeed.ScaleToTimeSpan(duration)
-                };
-                slideAnimation.EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn };
-                Storyboard.SetTargetProperty(slideAnimation,
-                    new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"));
-
-                // 缩小：与出场放大镜像。用 EaseIn 而非 Back，消失不需要回弹
+                // 缩放：EaseInBack 起手先向外涨一点，随后加速缩到底
                 var exitScaleAnimation = new DoubleAnimation
                 {
-                    To = PopupPopOutEndScale,
-                    Duration = AnimationSpeed.ScaleToTimeSpan(duration)
+                    To = PopupPopInStartScale,
+                    Duration = AnimationSpeed.ScaleToTimeSpan(exitDuration),
+                    EasingFunction = new BackEase
+                    {
+                        EasingMode = EasingMode.EaseIn,
+                        Amplitude = PopupPopInBackAmplitude
+                    }
                 };
-                exitScaleAnimation.EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn };
                 Storyboard.SetTargetProperty(exitScaleAnimation,
                     new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"));
                 var exitScaleAnimationY = exitScaleAnimation.Clone();
                 Storyboard.SetTargetProperty(exitScaleAnimationY,
                     new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"));
+
+                // 淡出：与缩放同一条时间轴，缩到最小的时候正好透明
+                var fadeOutAnimation = new DoubleAnimation
+                {
+                    To = 0,
+                    Duration = AnimationSpeed.ScaleToTimeSpan(exitDuration)
+                };
+                fadeOutAnimation.EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn };
+                Storyboard.SetTargetProperty(fadeOutAnimation, new PropertyPath(UIElement.OpacityProperty));
+
+                // 位移：下滑 10px，与出场的上滑镜像
+                var slideAnimation = new DoubleAnimation
+                {
+                    To = 10,
+                    Duration = AnimationSpeed.ScaleToTimeSpan(exitDuration)
+                };
+                slideAnimation.EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn };
+                Storyboard.SetTargetProperty(slideAnimation,
+                    new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"));
 
                 sb.Children.Add(fadeOutAnimation);
                 sb.Children.Add(slideAnimation);
@@ -713,6 +736,51 @@ namespace Ink_Canvas.Helpers
                 sb.Begin(child);
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+        }
+
+        /// <summary>
+        /// 读取菜单当前的视觉状态（缩放、纵向位移、透明度）。
+        /// </summary>
+        /// <remarks>
+        /// 打断动画时要用它作为新动画的起点：从"现在看到的样子"继续，
+        /// 而不是先跳回某个固定起点再重播。
+        /// 读不到有效值时返回初始态（起始缩放、起始位移、半透明），
+        /// 保证首次打开仍然是从小长出来。
+        /// </remarks>
+        private static (double Scale, double Slide, double Opacity) CaptureCurrentVisualState(FrameworkElement child)
+        {
+            double scale = PopupPopInStartScale;
+            double slide = 10;
+            double opacity = child?.Opacity ?? 1.0;
+
+            if (double.IsNaN(opacity) || opacity < 0.05) opacity = 1.0;
+
+            try
+            {
+                if (child?.RenderTransform is TransformGroup group && group.Children.Count >= 2
+                    && group.Children[0] is ScaleTransform st
+                    && group.Children[1] is TranslateTransform tt)
+                {
+                    // 动画进行中时，属性上挂着动画，直接读会拿到动画当前值
+                    double currentScale = st.ScaleX;
+                    double currentSlide = tt.Y;
+
+                    if (!double.IsNaN(currentScale) && currentScale > 0.05 && currentScale < 1.2)
+                    {
+                        scale = currentScale;
+                    }
+                    if (!double.IsNaN(currentSlide) && Math.Abs(currentSlide) < 60)
+                    {
+                        slide = currentSlide;
+                    }
+                }
+            }
+            catch
+            {
+                // 结构异常时用默认起点
+            }
+
+            return (scale, slide, opacity);
         }
 
         /// <summary>
