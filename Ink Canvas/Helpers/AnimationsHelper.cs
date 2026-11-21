@@ -1,5 +1,6 @@
 using System;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -455,45 +456,76 @@ namespace Ink_Canvas.Helpers
         internal const double PopupPopInDurationSeconds = 0.4;
 
         /// <summary>
-        /// 菜单缩放的基准点：设为触发按钮在菜单坐标系里的相对位置。
+        /// 给菜单（Popup.Child，即包含蓝色边框的整个面板）建立统一的变换结构。
         /// </summary>
         /// <remarks>
-        /// Inkeys 的做法是从触发按钮中心"长出来"（anchor = 按钮中心）。
-        /// WPF 的 <see cref="UIElement.RenderTransformOrigin"/> 是 0..1 的相对点，
-        /// 因此要把按钮中心换算成菜单自身的相对坐标。
+        /// 出场与收场必须用**同一个结构**，否则两者会互相破坏：
+        /// 出场按 <c>TransformGroup.Children[i]</c> 绑定动画路径，如果上一次收场把
+        /// <c>RenderTransform</c> 换成了裸 <see cref="TranslateTransform"/>，
+        /// 下一次出场绑定时路径就对不上，位移残留会让菜单停偏。
         ///
-        /// 拿不到按钮（例如菜单由代码直接打开、或触发器不在同一视觉树）时退回中心点，
-        /// 因为"从按钮长出来"只是锦上添花，不能因为换算失败就取消整个动画。
+        /// 缩放原点固定为中心：菜单通常在触发按钮上方，若把原点设在按钮中心，
+        /// 那个点落在菜单坐标系之外，缩放会把整个菜单往菜单外收缩，看起来就是定位跑偏。
         /// </remarks>
-        private static Point ResolvePopupScaleOrigin(Popup popup, FrameworkElement child)
+        private static (ScaleTransform Scale, TranslateTransform Slide) PreparePopupTransform(
+            FrameworkElement child, double startScale, double startSlide)
         {
-            var fallback = new Point(0.5, 0.5);
+            var scale = new ScaleTransform(startScale, startScale);
+            var slide = new TranslateTransform(0, startSlide);
+            var group = new TransformGroup();
+            group.Children.Add(scale);
+            group.Children.Add(slide);
 
-            try
+            // 根元素若自带**有用的**变换，嵌入组内保留，不要直接覆盖——
+            // 直接覆盖会悄悄丢掉布局代码设置的变换。
+            //
+            // 注意两个陷阱：
+            // 1) RenderTransform 未设置时 WPF 返回的是默认的 MatrixTransform（Identity），
+            //    它不是"用户设置的变换"，塞进组里会平白多一层；
+            // 2) 若上次保留过外部变换，这次必须继续保留，不能因为组里已有缩放/位移就丢弃。
+            var existing = child.RenderTransform as Transform;
+            if (existing is TransformGroup previousGroup
+                && IsOurPopupTransform(previousGroup)
+                && previousGroup.Children.Count > 2)
             {
-                if (popup?.PlacementTarget is not FrameworkElement target) return fallback;
-                if (!target.IsLoaded || !child.IsLoaded) return fallback;
-
-                double width = child.ActualWidth;
-                double height = child.ActualHeight;
-                if (width <= 0 || height <= 0) return fallback;
-
-                // 触发按钮中心，换算到菜单坐标系
-                var targetCenter = target.TransformToAncestor(child)
-                    .Transform(new Point(target.ActualWidth / 2, target.ActualHeight / 2));
-
-                double originX = targetCenter.X / width;
-                double originY = targetCenter.Y / height;
-
-                // 触发按钮通常在菜单之外，换算出界后就无法作为缩放基点，退回中心
-                if (originX < -1 || originX > 2 || originY < -1 || originY > 2) return fallback;
-
-                return new Point(originX, originY);
+                // 我们上次建的组里，第 3 项起是保留下来的外部变换
+                for (int i = 2; i < previousGroup.Children.Count; i++)
+                {
+                    group.Children.Add(previousGroup.Children[i]);
+                }
             }
-            catch
+            else if (existing != null
+                     && !IsOurPopupTransform(existing)
+                     && !IsIdentityTransform(existing))
             {
-                return fallback;
+                group.Children.Add(existing);
             }
+
+            child.RenderTransform = group;
+            child.RenderTransformOrigin = new Point(0.5, 0.5);
+
+            return (scale, slide);
+        }
+
+        /// <summary>判断该变换是否属于本方法建立的结构（缩放 + 位移，可能附带原变换）。</summary>
+        private static bool IsOurPopupTransform(Transform transform)
+        {
+            return transform is TransformGroup group
+                && group.Children.Count >= 2
+                && group.Children[0] is ScaleTransform
+                && group.Children[1] is TranslateTransform;
+        }
+
+        /// <summary>
+        /// 是否为"无实际效果"的变换。
+        /// RenderTransform 未显式设置时 WPF 会返回一个 Identity 的 MatrixTransform，
+        /// 不能把它当成用户设置的变换保留下来，否则每次都会多一层。
+        /// </summary>
+        private static bool IsIdentityTransform(Transform transform)
+        {
+            if (transform == null) return true;
+            if (transform is MatrixTransform matrix) return matrix.Matrix.IsIdentity;
+            return transform.Value.IsIdentity;
         }
 
         /// <summary>
@@ -528,18 +560,13 @@ namespace Ink_Canvas.Helpers
                 child.Visibility = Visibility.Visible;
                 child.Opacity = targetOpacity * 0.5;
 
-                // 位移与缩放必须共存，所以用 TransformGroup 而不是直接替换 RenderTransform：
-                // 两段动画分别绑到组内的子变换，互不覆盖。
-                var slideTransform = new TranslateTransform(0, 10);
-                var scaleTransform = new ScaleTransform(PopupPopInStartScale, PopupPopInStartScale);
-                var transformGroup = new TransformGroup();
-                transformGroup.Children.Add(scaleTransform);
-                transformGroup.Children.Add(slideTransform);
-                child.RenderTransform = transformGroup;
-
-                // 缩放原点放在触发按钮中心（Inkeys 的做法），而不是面板中心：
-                // 从按钮位置"长出来"，视线有连续感；用面板中心会像凭空放大。
-                child.RenderTransformOrigin = ResolvePopupScaleOrigin(popup, child);
+                // 位移动画用 Margin 之外的 RenderTransform，缩放原点固定在元素中心。
+                //
+                // 不要把原点设成"触发按钮中心"：那个点在菜单坐标系里通常落在菜单外面
+                // （菜单显示在按钮上方），WPF 会以菜单外的一点为基准做缩放，
+                // 结果是整个菜单朝外收缩——视觉上就是"定位跑偏"。
+                // 菜单自身上下内缩的感觉交给位移补偿，而不是移动缩放原点。
+                PreparePopupTransform(child, PopupPopInStartScale, 10);
 
                 popup.IsOpen = true;
 
@@ -635,19 +662,23 @@ namespace Ink_Canvas.Helpers
                     Duration = TimeSpan.FromSeconds(duration)
                 };
                 slideAnimation.EasingFunction = new CubicEase();
-                Storyboard.SetTargetProperty(slideAnimation, new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.Y)"));
+                Storyboard.SetTargetProperty(slideAnimation,
+                    new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"));
 
                 sb.Children.Add(fadeOutAnimation);
                 sb.Children.Add(slideAnimation);
+
+                // 与出场保持同一套变换结构（缩放 1、位移 0 起点），
+                // 收场结束后把状态复位到"出场前的初值"，下次出场直接从初值开始。
+                PreparePopupTransform(child, 1.0, 0);
 
                 sb.Completed += (s, e) =>
                 {
                     popup.IsOpen = false;
                     child.Opacity = targetOpacity;
-                    child.RenderTransform = new TranslateTransform();
+                    PreparePopupTransform(child, 1.0, 0);
                 };
 
-                child.RenderTransform = new TranslateTransform();
                 sb.Begin(child);
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
