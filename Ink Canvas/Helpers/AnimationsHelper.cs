@@ -813,11 +813,15 @@ namespace Ink_Canvas.Helpers
 
                 child.BeginAnimation(UIElement.OpacityProperty, null);
 
-                // 基值保持终态（缩放 1、位移 0、目标透明度），与出场一致。
-                // 收场的终点由动画的 To 描述，结束后清理归位；不能把基值写成当前状态，
-                // 否则中途被打断时菜单会永久停在缩小状态。
-                var exitScale = new ScaleTransform(1, 1);
-                var exitSlide = new TranslateTransform(0, 0);
+                // 基值必须是**收起的终态**（最小缩放、下滑 10px），不是 1.0。
+                //
+                // 原因：FillBehavior.Stop 在动画结束的瞬间就把属性回落到基值，
+                // 而 Completed 要在这之后才触发。若基值是 1.0，
+                // 那一帧会先画出 1.0 再被 Completed 改成 0.72 —— 肉眼看到"收起后闪一下变大"。
+                // 实测逐帧采样里 0.78 → 1.00 的突跳就是它。
+                // 把基值设成终态后，Stop 回落的位置与动画终点一致，不会闪。
+                var exitScale = new ScaleTransform(PopupPopInStartScale, PopupPopInStartScale);
+                var exitSlide = new TranslateTransform(0, 10);
                 var exitGroup = new TransformGroup();
                 exitGroup.Children.Add(exitScale);
                 exitGroup.Children.Add(exitSlide);
@@ -843,9 +847,25 @@ namespace Ink_Canvas.Helpers
                 // 先涨到峰值（起点已高于峰值时不再上冲）
                 if (scaleStart < PopupPopInPeakScale * 0.995)
                 {
-                    // 收起时先涨到峰值占 3/11，随后用 8/11 缩到底（与打开互逆）
+                    // 峰值时间点必须按**行程比例**分配，不能固定 3/11。
+                    //
+                    // 固定值的问题：起点为 1.0 时，上升到峰值行程仅 0.0367，
+                    // 而下降到最小态行程是 0.3167，相差 8.6 倍；
+                    // 固定 27.3% 的时间给上升段，会让"上涨"只用极短时间，
+                    // 看起来像"刚涨一点就立刻掉头"（实测 37ms 就走完峰值）。
+                    //
+                    // 让时间比 = 行程比后，两段速度一致，转折自然。
+                    double upDistance = Math.Abs(PopupPopInPeakScale - scaleStart);
+                    double downDistance = Math.Abs(PopupPopInPeakScale - PopupPopInStartScale);
+                    double totalDistance = upDistance + downDistance;
+                    double peakPercent = totalDistance > 0.0001
+                        ? upDistance / totalDistance
+                        : PopupClosePeakPercent;
+
+                    peakPercent = Math.Max(0.08, Math.Min(0.92, peakPercent));
+
                     exitScaleAnimation.KeyFrames.Add(new LinearDoubleKeyFrame(
-                        PopupPopInPeakScale, KeyTime.FromPercent(PopupClosePeakPercent)));
+                        PopupPopInPeakScale, KeyTime.FromPercent(peakPercent)));
                 }
                 // 再线性缩到底：终点与打开起点一致（0.72），做到"从哪来回哪去"
                 exitScaleAnimation.KeyFrames.Add(new LinearDoubleKeyFrame(
@@ -901,9 +921,8 @@ namespace Ink_Canvas.Helpers
                     child.BeginAnimation(UIElement.OpacityProperty, null);
                     child.Opacity = targetOpacity;
 
-                    // 把变换上的动画彻底摘掉并归位。若不清理，缩放会停在中间值，
-                    // 下次打开时布局按带残留的尺寸测量，popupSize 变小、定位偏下。
-                    ClearTransformAnimations(child);
+                    // 归位到收起终态（最小缩放），并摘掉动画避免残留影响下次布局测量。
+                    ClearTransformAnimations(child, PopupPopInStartScale, 10);
 
                     AnimationLog.Log(popup, "HIDE-DONE", $"from={scaleStart:F4}");
 
@@ -1031,7 +1050,8 @@ namespace Ink_Canvas.Helpers
         /// 动画对象挂在该 Transform 实例上；即使 Storyboard 结束，动画值仍可能把持属性。
         /// 这一步是幂等的，可以在每次打开前无脑调用。
         /// </remarks>
-        private static void ClearTransformAnimations(FrameworkElement element)
+        private static void ClearTransformAnimations(FrameworkElement element,
+            double scale = 1.0, double slideY = 0.0)
         {
             try
             {
@@ -1043,19 +1063,19 @@ namespace Ink_Canvas.Helpers
 
                 foreach (var transform in group.Children)
                 {
-                    if (transform is ScaleTransform scale)
+                    if (transform is ScaleTransform scaleTransform)
                     {
-                        scale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
-                        scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
-                        scale.ScaleX = 1.0;
-                        scale.ScaleY = 1.0;
+                        scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+                        scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+                        scaleTransform.ScaleX = scale;
+                        scaleTransform.ScaleY = scale;
                     }
                     else if (transform is TranslateTransform translate)
                     {
                         translate.BeginAnimation(TranslateTransform.XProperty, null);
                         translate.BeginAnimation(TranslateTransform.YProperty, null);
                         translate.X = 0;
-                        translate.Y = 0;
+                        translate.Y = slideY;
                     }
                 }
             }
