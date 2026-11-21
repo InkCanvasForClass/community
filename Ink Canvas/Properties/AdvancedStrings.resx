@@ -272,4 +272,19 @@
   <data name="Debug_MemoryBreakdownForceGC_Button" xml:space="preserve">
     <value>强制 GC</value>
   </data>
+  <data name="Debug_PerfSection" xml:space="preserve">
+    <value>性能诊断</value>
+  </data>
+  <data name="Debug_RenderFpsOverlay_Header" xml:space="preserve">
+    <value>显示实时帧率</value>
+  </data>
+  <data name="Debug_RenderFpsOverlay_Desc" xml:space="preserve">
+    <value>在屏幕右上角显示 WPF 真实出帧率、最差帧耗时，并以显示器刷新率作为判读基准。用于排查界面卡顿与动画掉帧。</value>
+  </data>
+  <data name="Debug_UnlimitedFrameRate_Header" xml:space="preserve">
+    <value>按刷新率给足帧预算</value>
+  </data>
+  <data name="Debug_UnlimitedFrameRate_Desc" xml:space="preserve">
+    <value>按显示器刷新率设置单帧时间预算，并记录渲染环境诊断（刷新率/渲染层级/是否软件渲染），配合上方帧率显示使用。说明：WPF 的呈现节奏由合成器 vsync 驱动，显示器刷新率就是物理上限，本项不会、也无法把帧率推高到刷新率以上。</value>
+  </data>
 </root>

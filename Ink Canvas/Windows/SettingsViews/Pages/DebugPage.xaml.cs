@@ -21,6 +21,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ToggleSwitchPPTComDebugProbe.IsOn = SettingsManager.Settings.Advanced.IsPPTComDebugProbeEnabled;
                 ToggleSwitchPPTPageFlipPreview.IsOn = SettingsManager.Settings.Advanced.IsPPTPageFlipPreviewVisible;
                 ToggleSwitchRealtimeInkDebugLog.IsOn = SettingsManager.Settings.Advanced.IsRealtimeInkDebugLogEnabled;
+                ToggleSwitchRenderFpsOverlay.IsOn = SettingsManager.Settings.Advanced.IsRenderFpsOverlayEnabled;
+                ToggleSwitchUnlimitedFrameRate.IsOn = SettingsManager.Settings.Advanced.IsUnlimitedFrameRateEnabled;
                 _isLoaded = true;
             };
             Unloaded += (s, e) => _isLoaded = false;
@@ -66,6 +68,40 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     ? "[Debug] 实时笔迹详细调试日志已开启（落笔后查看 Configs/RealtimeInkDebugLive.json / PerformanceHistory.json）"
                     : "[Debug] 实时笔迹详细调试日志已关闭并尝试保存历史",
                 LogHelper.LogType.Info);
+        }
+
+        private void ToggleSwitchRenderFpsOverlay_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            bool isOn = ToggleSwitchRenderFpsOverlay.IsOn;
+            SettingsManager.Settings.Advanced.IsRenderFpsOverlayEnabled = isOn;
+            SettingsManager.SaveSettingsToFile();
+
+            // 设置页可能与主窗口的 Settings 实例不同步，两个都写一遍
+            var mw = Application.Current?.MainWindow as MainWindow;
+            if (mw != null)
+            {
+                MainWindow.Settings.Advanced.IsRenderFpsOverlayEnabled = isOn;
+                if (isOn) mw.ShowRenderFpsOverlay();
+                else mw.HideRenderFpsOverlay();
+            }
+            else if (isOn)
+            {
+                LogHelper.WriteLogToFile("[Debug] 主窗口尚未就绪，帧率显示将在下次启动时生效", LogHelper.LogType.Warning);
+            }
+        }
+
+        private void ToggleSwitchUnlimitedFrameRate_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!_isLoaded) return;
+            bool isOn = ToggleSwitchUnlimitedFrameRate.IsOn;
+            SettingsManager.Settings.Advanced.IsUnlimitedFrameRateEnabled = isOn;
+            if (MainWindow.Settings?.Advanced != null)
+                MainWindow.Settings.Advanced.IsUnlimitedFrameRateEnabled = isOn;
+            SettingsManager.SaveSettingsToFile();
+
+            RenderPacingController.ProbeDisplayRefreshRate();
+            RenderPacingController.ApplyUnlimitedFrameRate(isOn);
         }
 
         private void BtnTestCrash_Click(object sender, RoutedEventArgs e)
