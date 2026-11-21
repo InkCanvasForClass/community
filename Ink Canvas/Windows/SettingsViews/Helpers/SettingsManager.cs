@@ -101,7 +101,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                                         // fully written, so it is intentionally the last resort.
                                         try
                                         {
-                                            ProcessProtectionManager.WithWriteAccess(path, () => File.WriteAllText(path, text));
+                                            File.WriteAllText(path, text);
                                             try { File.Delete(tmpPath); }
                                             catch (Exception cleanupException)
                                             {
