@@ -31,7 +31,7 @@ namespace Ink_Canvas.Helpers.Motion
         /// <summary>
         /// 决定本次播放使用的时长。
         /// </summary>
-        /// <param name="nominalSeconds">按方向定下的名义时长（打开 0.20s、收起 0.15s）。</param>
+        /// <param name="nominalSeconds">按方向定下的名义时长（打开 0.40s、收起 0.30s）。</param>
         /// <param name="currentSeconds">当前正在使用的时长。</param>
         /// <param name="isRunning">调用本方法时动画是否仍在跑（即这次是否属于打断）。</param>
         /// <returns>
