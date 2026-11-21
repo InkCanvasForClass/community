@@ -19,6 +19,19 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 {
     public static class ToolbarRegistry
     {
+        /// <summary>
+        /// 是否给工具栏组件显隐加过渡动画。
+        /// 尊重「禁止工具栏动画」设置：关掉时一律瞬间切换，保证低端设备与
+        /// 用户明确要求"不要动画"时没有额外开销。
+        /// </summary>
+        private static bool _animateVisibilityChange = true;
+
+        /// <summary>设置组件显隐是否播放过渡动画（对应「禁止工具栏动画」的取反）。</summary>
+        public static void SetVisibilityAnimationEnabled(bool enabled)
+        {
+            _animateVisibilityChange = enabled;
+        }
+
         private static List<IToolbarItem> _items;
         private static readonly List<PluginToolbarItemInfo> _pluginItems = new List<PluginToolbarItemInfo>();
         internal const string InjectedTag = "ToolbarRegistryInjected";
@@ -1073,12 +1086,14 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     var ruleset = GetHidingRuleset(child);
                     if (ruleset == null)
                     {
-                        child.Visibility = Visibility.Visible;
+                        SetAnimatedVisibility(child, Visibility.Visible, _animateVisibilityChange);
                     }
                     else
                     {
                         bool shouldHide = EvaluateRuleset(ruleset, context);
-                        child.Visibility = shouldHide ? Visibility.Collapsed : Visibility.Visible;
+                        SetAnimatedVisibility(child,
+                            shouldHide ? Visibility.Collapsed : Visibility.Visible,
+                            _animateVisibilityChange);
                     }
                     if (child is Panel innerPanel)
                     {
@@ -1091,7 +1106,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                     {
                         UpdatePanelVisibility(sp, context);
                         bool anyVisible = HasVisibleLeafContent(sp);
-                        border.Visibility = anyVisible ? Visibility.Visible : Visibility.Collapsed;
+                        SetAnimatedVisibility(border,
+                            anyVisible ? Visibility.Visible : Visibility.Collapsed,
+                            _animateVisibilityChange);
                     }
                     else if (border.Child is Grid grid)
                     {
@@ -1114,11 +1131,100 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                                 }
                             }
                         }
-                        border.Visibility = anyVisible ? Visibility.Visible : Visibility.Collapsed;
+                        SetAnimatedVisibility(border,
+                            anyVisible ? Visibility.Visible : Visibility.Collapsed,
+                            _animateVisibilityChange);
                     }
                 }
             }
         }
+
+        /// <summary>
+        /// 按目标状态设置 Visibility，并在"从隐藏变为显示"时播放一次出场动画。
+        /// </summary>
+        /// <remarks>
+        /// 直接赋值 Visibility 会让按钮瞬间出现，观感生硬；这里给按钮加一段
+        /// 淡入 + 轻微缩放的过渡。
+        ///
+        /// 只有"由隐藏→显示"才播动画：<see cref="UpdatePanelVisibility"/> 会在每次模式变化时
+        /// 遍历全部子项，若对每次赋值都播动画，已经在屏幕上的按钮会不断重播、整体发虚。
+        ///
+        /// 动画写在按钮自身而不是改布局尺寸：宽度由工具栏布局决定（缩放会挤压相邻按钮），
+        /// 所以用 RenderTransform 做视觉缩放，布局位置保持最终状态不变。
+        /// </remarks>
+        private static void SetAnimatedVisibility(FrameworkElement element, Visibility target, bool animate)
+        {
+            if (element == null) return;
+
+            bool becameVisible = target == Visibility.Visible && element.Visibility != Visibility.Visible;
+            bool becameHidden = target != Visibility.Visible && element.Visibility == Visibility.Visible;
+
+            if (!animate)
+            {
+                element.BeginAnimation(UIElement.OpacityProperty, null);
+                element.Opacity = 1;
+                element.Visibility = target;
+                return;
+            }
+
+            if (becameVisible)
+            {
+                element.Visibility = Visibility.Visible;
+
+                // 淡入
+                var fade = new System.Windows.Media.Animation.DoubleAnimation(0, 1,
+                    TimeSpan.FromMilliseconds(ToolbarItemShowFadeMs))
+                {
+                    EasingFunction = new System.Windows.Media.Animation.CubicEase
+                    {
+                        EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut
+                    }
+                };
+                element.BeginAnimation(UIElement.OpacityProperty, fade);
+
+                // 轻微放大：从略小长到原尺寸，避免"啪一下出现"。
+                // 用 RenderTransform 而不是宽度动画，保证不触发布局、不挤动邻居。
+                if (element.RenderTransform is not ScaleTransform scale)
+                {
+                    scale = new ScaleTransform(1, 1);
+                    element.RenderTransform = scale;
+                    element.RenderTransformOrigin = new Point(0.5, 0.5);
+                }
+
+                var pop = new System.Windows.Media.Animation.DoubleAnimation(ToolbarItemShowStartScale, 1,
+                    TimeSpan.FromMilliseconds(ToolbarItemShowScaleMs))
+                {
+                    EasingFunction = new System.Windows.Media.Animation.CubicEase
+                    {
+                        EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut
+                    }
+                };
+                scale.BeginAnimation(ScaleTransform.ScaleXProperty, pop);
+                scale.BeginAnimation(ScaleTransform.ScaleYProperty, pop);
+                return;
+            }
+
+            if (becameHidden)
+            {
+                // 隐藏不做过渡：收起后要立刻让出布局空间，否则工具栏宽度会滞后于内容。
+                element.BeginAnimation(UIElement.OpacityProperty, null);
+                element.Opacity = 1;
+                element.Visibility = target;
+                return;
+            }
+
+            // 状态未变：不重复播动画
+            element.Visibility = target;
+        }
+
+        /// <summary>按钮出场淡入时长（毫秒）。</summary>
+        internal const int ToolbarItemShowFadeMs = 140;
+
+        /// <summary>按钮出场缩放时长（毫秒）。</summary>
+        internal const int ToolbarItemShowScaleMs = 180;
+
+        /// <summary>按钮出场起始缩放：略小一点即可，过小会显得突兀。</summary>
+        internal const double ToolbarItemShowStartScale = 0.86;
 
         private static bool HasVisibleLeafContent(FrameworkElement element)
         {

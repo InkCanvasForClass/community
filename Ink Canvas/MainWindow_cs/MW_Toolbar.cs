@@ -681,6 +681,12 @@ namespace Ink_Canvas
         internal void UpdateToolbarComponentVisibility()
         {
             var isPPT = IsInPPTPresentationMode;
+
+            // 「禁止工具栏动画」在这里一并生效：它是本方法唯一的下游入口，
+            // 放在这里就不必在每个调用点各同步一次。
+            Controls.Toolbar.FloatingToolbar.ToolbarRegistry.SetVisibilityAnimationEnabled(
+                !Settings.Appearance.DisableToolbarAnimation);
+
             ToolbarRegistry.UpdateVisibilityByMode(StackPanelFloatingBarRoot, IsAnnotating, isPPT);
         }
 
