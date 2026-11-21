@@ -90,6 +90,37 @@ namespace Ink_Canvas.PopupDiagnostics
                 !hasNaN && minOpacity >= PopupCurve.MinOpacityWeight - 1e-12 && maxOpacity <= 1.0 + 1e-12,
                 "区间=[" + F(minOpacity) + ", " + F(maxOpacity) + "]，设计下限 " + F(PopupCurve.MinOpacityWeight));
 
+            // 透明度走独立的 EaseOutSine，必须一路铺满到进度 1，不能跟着几何行程在半途饱和。
+            // 几何在 EaseOutBack 上越过 1.0 后行程恒为 1，若透明度挂在行程上，
+            // 这之后整段就再也不变亮 —— 观感是"先迅速变实，然后空转着抖一下"。
+            var saturatesEarly = false;
+            for (var i = 0; i <= 990; i++)
+                if (PopupCurve.OpacityWeight(i / 1000.0) >= 1.0)
+                {
+                    saturatesEarly = true;
+                    break;
+                }
+            report.Check(
+                "透明度一路铺满到落位，不提前饱和",
+                !saturatesEarly,
+                "progress=0.99 时仍是 " + F(PopupCurve.OpacityWeight(0.99)) + "，到 1.0 才满");
+            report.Check(
+                "透明度下限与独立时间线起点一致",
+                Math.Abs(PopupCurve.OpacityWeight(0.0) - PopupCurve.MinOpacityWeight) < 1e-12,
+                "OpacityWeight(0)=" + F(PopupCurve.OpacityWeight(0.0)));
+
+            // 几何越过 1.0（开始过冲）那一刻的透明度，是"几何先到位、透明度收尾"的量化指标。
+            var crossAt = 0.0;
+            for (var i = 1; i <= 1000; i++)
+                if (PopupCurve.Travel(i / 1000.0) >= 1.0)
+                {
+                    crossAt = i / 1000.0;
+                    break;
+                }
+            report.Note("几何于 progress=" + F(crossAt) + "（" + F(crossAt * OpenSeconds * 1000.0) +
+                        "ms）越过 1.0 开始过冲，此刻透明度才 " + F(PopupCurve.OpacityWeight(crossAt)) +
+                        "，余下 " + F((1.0 - crossAt) * OpenSeconds * 1000.0) + "ms 由透明度独自收尾");
+
             // 向上滑动是否会被窗体裁掉取决于宿主留白，属于几何问题，由 PopupGeometryReport 用真窗口核对；
             // 这里只把数值摊出来，方便和那边的留白对照。
             report.Note("峰值向上的滑移量 " + F(maxUpwardSlide) + " DIP（裁切与否见几何检查）");

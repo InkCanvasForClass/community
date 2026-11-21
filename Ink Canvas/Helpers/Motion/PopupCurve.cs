@@ -9,7 +9,8 @@ namespace Ink_Canvas.Helpers.Motion
     /// 曲线形状移植自 Inkeys（Inkeys/Inkeys/UI/Bar/Bar.Animation.cppm:116 的 EaseOutBack），
     /// 而不是自己拿线性段拼一条"看起来像"的曲线。
     ///
-    /// 整个菜单动画只有这一条曲线，打开与收起共用它、只是播放方向相反：
+    /// 缩放与位移由这一条曲线驱动；透明度另有独立的时间线，见 <see cref="OpacityWeight"/>。
+    /// 打开与收起共用这条曲线，只是播放方向相反：
     ///
     ///   打开 = progress 从当前值推进到 1
     ///   收起 = progress 从当前值倒退到 0
@@ -103,10 +104,34 @@ namespace Ink_Canvas.Helpers.Motion
             return 1.0 + (back + 1.0) * s2 * s + back * s2;
         }
 
+        /// <summary>
+        /// 透明度权重：独立的 EaseOutSine 时间线，与缩放同时长，但不共用行程。
+        /// </summary>
+        /// <remarks>
+        /// 这里曾经写成 MinOpacityWeight + (1-MinOpacityWeight)·clamp01(travel)，即"透明度跟着行程走"。
+        /// 它有个不易察觉的副作用：行程在 EaseOutBack 上越过 1.0 之后就恒为 1，
+        /// 而那件事只发生在进度的 29%（0.40s 里的 117ms）——
+        /// 剩下 283ms 的回落段里透明度一动不动，观感是"先迅速变实，然后空转着抖一下"。
+        /// 更糟的是这个饱和时刻由 <see cref="BackTension"/> 决定：back 从 1.1 调到 3.0，
+        /// 饱和点从 190ms 提前到 100ms，也就是调"弹多狠"会顺带改掉"淡入多快"，两个旋钮绞在一起。
+        ///
+        /// Inkeys 把两者分成两条时间线（Bar.EraserAttributeMotion.cppm:66-67：
+        /// 几何用 EaseOutBack、透明度用 EaseOutSine，时长相同时长），透明度一路铺到进度 1 才满。
+        /// 这里照做：权重只与 progress 有关，因此打断依旧天然连续（同一 progress 必得同一取值），
+        /// 而"几何先到位、透明度慢慢收尾"正是原设计要的节奏。
+        /// </remarks>
+        public static double OpacityWeight(double progress)
+        {
+            // 每帧一次 Math.Sin，作用在单个 Popup 上。Inkeys 避开 pow 是因为它跑在逐图元的
+            // 渲染循环里；这里没有同样的压力，用解析式换可读性是划算的。
+            return MinOpacityWeight +
+                   (1.0 - MinOpacityWeight) * Math.Sin(Clamp01(progress) * Math.PI / 2.0);
+        }
+
         /// <summary>按进度取曲线上的缩放、位移与透明度权重。</summary>
         /// <remarks>
-        /// 三个量共用同一个行程，避免"缩放先快后慢、位移匀速"的错位感。
-        /// 位移与透明度不再按 progress 线性推进，这是相对旧实现的行为变更。
+        /// 缩放与位移共用同一个行程，避免"缩放先快后慢、位移匀速"的错位感。
+        /// 透明度不跟行程走，理由见 <see cref="OpacityWeight"/>。
         /// </remarks>
         public static PopupCurveSample Evaluate(double progress)
         {
@@ -118,11 +143,7 @@ namespace Ink_Canvas.Helpers.Motion
             // 这点位移落在 PopupOverflowRoom 的留白里，不会裁切。
             double slideY = SlideDistance * (1.0 - travel);
 
-            // 行程越过 1 时透明度必须夹住，否则权重 >1 交给 WPF 再被静默裁剪，
-            // 观感上是"最后一段不再变亮"。夹取后的权重单调不减。
-            double opacityWeight = MinOpacityWeight + (1.0 - MinOpacityWeight) * Clamp01(travel);
-
-            return new PopupCurveSample(scale, slideY, opacityWeight);
+            return new PopupCurveSample(scale, slideY, OpacityWeight(progress));
         }
 
         private static double Clamp01(double value)
@@ -141,7 +162,7 @@ namespace Ink_Canvas.Helpers.Motion
         /// <summary>纵向位移（正=向下，负=回弹时越过静止位置）。</summary>
         public readonly double SlideY;
 
-        /// <summary>透明度权重，0.35~1.0。</summary>
+        /// <summary>透明度权重，0.35~1.0，走独立的 EaseOutSine 时间线（见 <see cref="PopupCurve.OpacityWeight"/>）。</summary>
         public readonly double OpacityWeight;
 
         public PopupCurveSample(double scale, double slideY, double opacityWeight)
