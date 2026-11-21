@@ -117,43 +117,23 @@ namespace Ink_Canvas.Helpers
             return (popupSize, targetSize, offset) =>
             {
                 var pad = room.PaddingValue;
-                double padSumX = pad.Width * 2;
-                double padSumY = pad.Height * 2;
 
-                // 补偿恒定成立，不需要"判断 popupSize 是否含留白"。
+                // popupSize 是**容器**尺寸，已经包含两侧留白。
+                // 原回调的语义基于内容尺寸，所以这里换算成内容尺寸再交给它。
                 //
-                // 原因很直接：内容在容器里，四周永远内缩了一个 padding
-                // （内容左上角在容器坐标系中位于 (padX, padY)），这一点与
-                // popupSize 报的是内容尺寸还是容器尺寸无关。
-                //
-                // 所以只要按"内容尺寸"去问原回调，再把结果整体减去 padding，
-                // 内容就必然落在未包装时的位置：
-                //   容器位置 P + 内容内缩 pad = 内容视觉位置 = P - pad + pad = P。
-                //
-                // 之前按 popupSize 是否含留白分两支，走"不补偿"那支时会把
-                // 这个内缩直接暴露出来，表现为菜单偏右偏下（实测正好是 (padX, padY)）。
+                // 注意不要再额外扣减第二次：早先实测（padding=6 时 popupSize=252，
+                // 内容 240）已确认 popupSize 含留白。之前的实现减了两次，
+                // 内容高度被算小，垂直方向误差最大 —— 表现就是"菜单偏下"。
                 var contentSize = new Size(
-                    Math.Max(0, popupSize.Width - padSumX),
-                    Math.Max(0, popupSize.Height - padSumY));
-
-                // popupSize 若其实是内容尺寸，上面这一步会把尺寸算小、居中略有偏差；
-                // 用容器实测尺寸对齐一次，确保喂给原回调的始终是真实内容尺寸。
-                if (room.Host != null)
-                {
-                    double hostW = room.Host.ActualWidth > 0 ? room.Host.ActualWidth : room.Host.DesiredSize.Width;
-                    double hostH = room.Host.ActualHeight > 0 ? room.Host.ActualHeight : room.Host.DesiredSize.Height;
-
-                    if (hostW > padSumX && hostH > padSumY)
-                    {
-                        var fromHost = new Size(hostW - padSumX, hostH - padSumY);
-                        // 与容器推算出的内容尺寸更可信
-                        contentSize = fromHost;
-                    }
-                }
+                    Math.Max(0, popupSize.Width - pad.Width * 2),
+                    Math.Max(0, popupSize.Height - pad.Height * 2));
 
                 var placements = room.Original(contentSize, targetSize, offset);
                 if (placements == null) return null;
 
+                // 原回调返回的是"容器左上角应所在的位置"。
+                // 内容在容器内向右下各内缩了一个 padding，要让内容落在原回调算出的位置，
+                // 容器需要再向左上移同样的量。
                 return placements
                     .Select(p => new CustomPopupPlacement(
                         new Point(p.Point.X - pad.Width, p.Point.Y - pad.Height),
