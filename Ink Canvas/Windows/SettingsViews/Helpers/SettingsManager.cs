@@ -61,12 +61,73 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                     // 临时文件 + File.Replace 原子替换，避免断电/进程被杀导致 Settings.json 半截。
                     // 同目录移动替换是原子操作（Windows 同卷 NTFS 保证）。
                     var tmpPath = path + ".tmp";
+                    var preserveTempFileOnFailure = false;
                     try
                     {
                         ProcessProtectionManager.WithWriteAccess(tmpPath, () => File.WriteAllText(tmpPath, text));
                         if (File.Exists(path))
                         {
-                            ProcessProtectionManager.WithWriteAccess(path, () => File.Replace(tmpPath, path, null));
+                            ProcessProtectionManager.WithWriteAccess(path, () =>
+                            {
+                                try
+                                {
+                                    File.Replace(tmpPath, path, null);
+                                }
+                                catch (IOException replaceException)
+                                {
+                                    // File.Replace requires Windows to remove the destination file.
+                                    // If that fails (for example, due to a file-system filter or an
+                                    // external handle), fall back to overwriting the existing file
+                                    // in place. This is less crash-safe than Replace, but avoids
+                                    // losing an otherwise writable settings file.
+                                    try
+                                    {
+                                        File.Copy(tmpPath, path, true);
+                                        try { File.Delete(tmpPath); }
+                                        catch (Exception cleanupException)
+                                        {
+                                            LogHelper.WriteLogToFile(
+                                                $"[Settings] 回退写入成功，但清理临时文件失败: {cleanupException.Message}",
+                                                LogHelper.LogType.Warning);
+                                        }
+                                        LogHelper.WriteLogToFile(
+                                            $"[Settings] File.Replace 失败，已回退到覆盖写入: {replaceException.Message}",
+                                            LogHelper.LogType.Warning);
+                                    }
+                                    catch (Exception copyException)
+                                    {
+                                        // If copying also fails, make one final attempt to write the
+                                        // serialized settings directly to the destination file.
+                                        // This can truncate the old file before the new content is
+                                        // fully written, so it is intentionally the last resort.
+                                        try
+                                        {
+                                            File.WriteAllText(path, text);
+                                            try { File.Delete(tmpPath); }
+                                            catch (Exception cleanupException)
+                                            {
+                                                LogHelper.WriteLogToFile(
+                                                    $"[Settings] 直接写入成功，但清理临时文件失败: {cleanupException.Message}",
+                                                    LogHelper.LogType.Warning);
+                                            }
+                                            LogHelper.WriteLogToFile(
+                                                $"[Settings] File.Replace 和覆盖写入均失败，已回退到直接写入。Replace: {replaceException.Message}; Copy: {copyException.Message}",
+                                                LogHelper.LogType.Warning);
+                                        }
+                                        catch (Exception directWriteException)
+                                        {
+                                            // The direct write may have truncated the destination.
+                                            // Keep the complete serialized temp file for manual recovery.
+                                            preserveTempFileOnFailure = true;
+                                            throw new AggregateException(
+                                                "File.Replace、覆盖写入和直接写入均失败。",
+                                                replaceException,
+                                                copyException,
+                                                directWriteException);
+                                        }
+                                    }
+                                }
+                            });
                         }
                         else
                         {
@@ -83,6 +144,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                                 LogHelper.LogType.Info);
                         }
                         throw; // Keep the last complete settings file if atomic replacement fails.
+                        if (!preserveTempFileOnFailure)
+                        {
+                            try { if (File.Exists(tmpPath)) File.Delete(tmpPath); } catch { }
+                        }
+                        throw; // Keep the temp file if the final direct write fails, as it may be the only complete copy.
                     }
 
                     App.UpdateCachedSettingsJson(text);
