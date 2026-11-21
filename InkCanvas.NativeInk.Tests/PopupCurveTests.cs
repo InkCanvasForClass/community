@@ -38,6 +38,7 @@ namespace InkCanvas.NativeInk.Tests
             Run(nameof(SixtyFpsOpenStillShowsOvershoot), SixtyFpsOpenStillShowsOvershoot);
             Run(nameof(SixtyFpsCloseStillShowsOvershoot), SixtyFpsCloseStillShowsOvershoot);
             Run(nameof(SlideAndOpacityShareTheTravelOfTheCurve), SlideAndOpacityShareTheTravelOfTheCurve);
+            Run(nameof(OpacityHasItsOwnTimeline), OpacityHasItsOwnTimeline);
         }
 
         private static void TravelMatchesUpstreamInkeysImplementation()
@@ -249,8 +250,9 @@ namespace InkCanvas.NativeInk.Tests
                 Equal(PopupCurve.StartScale + (1.0 - PopupCurve.StartScale) * travel, sample.Scale);
             }
 
-            // 透明度权重越过行程峰值后必须夹住：不夹的话权重 >1 交给 WPF 被静默裁掉，
-            // 观感是"最后一段不再变亮"。夹取后整段单调不减。
+            // 透明度不跟行程走（它有自己的正弦时间线），但必须同样整段单调不减、
+            // 且限制在 [MinOpacityWeight, 1]：权重 >1 交给 WPF 会被静默裁掉，
+            // 观感是"最后一段不再变亮"。
             var previous = PopupCurve.Evaluate(0.0).OpacityWeight;
             for (var i = 1; i <= 1000; i++)
             {
@@ -268,6 +270,43 @@ namespace InkCanvas.NativeInk.Tests
             True(overshootSlide < 0.0);
             True(overshootSlide > -3.0);
             Equal(0.0, PopupCurve.Evaluate(1.0).SlideY);
+        }
+
+        private static void OpacityHasItsOwnTimeline()
+        {
+            // 透明度走独立的 EaseOutSine，不跟几何行程走。这条测试锁的是"两个旋钮别绞在一起"：
+            // 调 BackTension 只该改缩放/位移的形状，不该顺带改掉淡入的速度。
+            //
+            // 曾经的实现是 MinOpacityWeight + (1-MinOpacityWeight)·clamp01(travel)：
+            // 张力 1.1 时透明度在进度 0.476 就满，张力 3.0 时提前到 0.250 ——
+            // 想调"弹多狠"会连带把淡入压缩到 1/4 时长，正是这里要防的回归。
+            for (var i = 0; i <= 1000; i++)
+            {
+                var progress = i / 1000.0;
+                var expected = PopupCurve.MinOpacityWeight +
+                               (1.0 - PopupCurve.MinOpacityWeight) * Math.Sin(progress * Math.PI / 2.0);
+                Equal(expected, PopupCurve.OpacityWeight(progress));
+                Equal(expected, PopupCurve.Evaluate(progress).OpacityWeight);
+            }
+
+            // 对齐 Inkeys 的形状：EaseOutSine(0.5) = √2/2 = 0.7071，权重映射到 [0.35, 1] 后是 0.8096。
+            // 此刻几何已越过 1.0 在过冲，透明度才走到八成 —— "几何先到位、透明度收尾"。
+            True(Math.Abs(PopupCurve.OpacityWeight(0.5) - 0.8096194077712559) < 1e-12);
+
+            // 真正的对照点：几何在 progress 0.293 就已锁在 1.0（back=2.412 时越过 1.0 的位置），
+            // 透明度那时只走到 0.6387（正弦因子 0.4442）—— 剩下 0.36 留给后半段。
+            // 旧实现同一处是 0.9999，即"几何一到位，透明度也满"，这正是要修掉的耦合。
+            True(PopupCurve.OpacityWeight(0.293) < 0.65);
+            True(PopupCurve.OpacityWeight(0.293) > 0.60);
+
+            // 透明度必须一路铺满到进度 1，不能在中途饱和。
+            True(PopupCurve.OpacityWeight(0.9) < 1.0);
+            Equal(1.0, PopupCurve.OpacityWeight(1.0));
+
+            // 几何越界输入同样要夹稳。
+            Equal(PopupCurve.MinOpacityWeight, PopupCurve.OpacityWeight(-5.0));
+            Equal(1.0, PopupCurve.OpacityWeight(9.0));
+            Equal(PopupCurve.MinOpacityWeight, PopupCurve.OpacityWeight(double.NaN));
         }
 
         /// <summary>Inkeys 收起用的 EaseInBack，仅用于验证"倒放"是数学恒等。</summary>
