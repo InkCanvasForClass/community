@@ -1,4 +1,4 @@
-﻿using Ink_Canvas.Controls;
+using Ink_Canvas.Controls;
 using Ink_Canvas.Controls.Toolbar.FloatingToolbar;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
@@ -5569,6 +5569,17 @@ namespace Ink_Canvas
                     selectionHeight = 43;
                     nextBarLeft = nextPos + Math.Max(0, (nextWidth - indicatorBarSize) / 2);
                     nextBarTop = nextTop + 2 + 43 + 2;
+                }
+
+                // 布局未稳定时 TransformToAncestor 会返回 (0,0)，
+                // 直接摆高光就会落在容器左上角——也就是拖动图标那个位置。
+                // 这里用按钮尺寸是否已就绪做判据，不达标就排队等布局。
+                if (nextWidth < 8 || nextHeight < 8 ||
+                    double.IsNaN(nextPos) || double.IsNaN(nextTop) ||
+                    (Math.Abs(nextPos) < 0.5 && Math.Abs(nextTop) < 0.5 && container.ActualWidth > 0))
+                {
+                    DeferFloatingBarHighlightIfLayoutPending(mode);
+                    return;
                 }
 
                 bool isFirstShow = _lastHighlightButton == null;

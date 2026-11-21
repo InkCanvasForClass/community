@@ -1102,23 +1102,58 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             var result = new Dictionary<FrameworkElement, double>();
             if (panel == null) return result;
 
-            foreach (var child in panel.Children.OfType<FrameworkElement>())
-            {
-                if (child.Visibility != Visibility.Visible) continue;
+            // 组件是三层嵌套：ContentBorder(Border) → ContentPanel(StackPanel) → 按钮(InjectedTag)。
+            // 只取直接子项会漏掉真正会移动的按钮，必须递归收集。
+            CollectVisibleLayoutElements(panel, panel, result);
+            return result;
+        }
 
+        /// <summary>
+        /// 递归收集参与横向排布的元素，记录它们相对根面板的横坐标。
+        /// </summary>
+        private static void CollectVisibleLayoutElements(
+            Panel root, FrameworkElement current, Dictionary<FrameworkElement, double> sink)
+        {
+            if (current == null || current.Visibility != Visibility.Visible) return;
+
+            // 记录"真正会移动的组件"：带注入标记的那些（按钮/分隔线/分组面板）。
+            // 不用类型判断：ToolbarImageButton 是 UserControl（属 ContentControl），
+            // 按类型排除会把所有按钮漏掉。
+            // 也不做视觉树深搜：那会在每次显隐时产生数百次查询，得不偿失。
+            if (current.Tag as string == InjectedTag && current != root)
+            {
                 try
                 {
-                    // 取相对于面板的横坐标（不受祖先布局影响）
-                    var point = child.TransformToAncestor(panel).Transform(new Point(0, 0));
-                    result[child] = point.X;
+                    var point = current.TransformToAncestor(root).Transform(new Point(0, 0));
+                    if (point.X > 0.01 || point.Y > 0.01)
+                    {
+                        sink[current] = point.X;
+                    }
                 }
                 catch
                 {
-                    // 尚未进入视觉树时跳过
+                    // 尚未进入视觉树
                 }
+
+                // 带标记的分组面板内部还有按钮，继续往下收
             }
 
-            return result;
+            // 继续向下递归
+            if (current is Panel panel)
+            {
+                foreach (var child in panel.Children.OfType<FrameworkElement>())
+                {
+                    CollectVisibleLayoutElements(root, child, sink);
+                }
+            }
+            else if (current is Border border && border.Child is FrameworkElement borderChild)
+            {
+                CollectVisibleLayoutElements(root, borderChild, sink);
+            }
+            else if (current is ContentControl contentControl && contentControl.Content is FrameworkElement content)
+            {
+                CollectVisibleLayoutElements(root, content, sink);
+            }
         }
 
         /// <summary>
@@ -1190,6 +1225,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
         /// <summary>邻居组件滑到新位置的时长（毫秒），与宽度过渡同节奏。</summary>
         private const int ToolbarSiblingSlideMs = 180;
+
+
 
         /// <summary>出场滑入使用的位移通道。</summary>
         private const int EnterChannelIndex = 0;
