@@ -424,13 +424,89 @@ namespace Ink_Canvas.Helpers
             sb.Begin((FrameworkElement)element);
         }
 
-        /// <summary>菜弹出场时的初始缩放：明显小于 1，才有"由小长出来"的观感。</summary>
-        private const double PopupPopInStartScale = 0.88;
+        // —— 菜单出场参数：对标 Inkeys 的实测值 ——
+        // Inkeys 的弹出面板用自研 EaseOutBack(c=1.1)：峰值 1.0447 出现在 t≈0.651，
+        // 面板实际放大比例 = compact + (1-compact)·f(t)，compact 是"紧凑态宽度比"。
+        // 我们的菜单没有紧凑态概念，取一个视觉上等价的起始比例即可；
+        // 过冲交给 BackEase 产生，不要手写峰值关键帧（那样曲线会两段拼接、手感发硬）。
 
-        /// <summary>过冲峰值：略大于 1，随后回落，构成"变大一点再收回来"的曲线。</summary>
-        private const double PopupPopInOvershootScale = 1.03;
+        /// <summary>菜单出场起始缩放。越小越"从按钮里长出来"。</summary>
+        private const double PopupPopInStartScale = 0.72;
 
-        public static void ShowPopupWithSlideAndFade(Popup popup, double duration = 0.15)
+        /// <summary>
+        /// BackEase 过冲幅度，用于复刻 Inkeys 的 EaseOutBack(c = 1.1) 手感。
+        /// </summary>
+        /// <remarks>
+        /// 注意 WPF 的 <c>Amplitude</c> 与业界 EaseOutBack 的 <c>c</c> **不是同一个量**，
+        /// 直接照抄 c=1.1 会让过冲从 4.5% 变成 43%（实测 Amplitude=1.1 峰值 1.4319）。
+        ///
+        /// 换算方式：先按"目标峰值"反推。Inkeys 的 c=1.1 峰值 1.0447（t≈0.65），
+        /// 实测 WPF Amplitude=0.28 时峰值 1.0446（t≈0.64），曲线形态一致。
+        ///
+        /// 但直接取 0.28 观感偏弱：菜单起始缩放是 0.72，过冲量被
+        /// "start + (1-start)·peak" 压缩后视觉峰值只有 1.0125（过冲 1.25%），
+        /// 肉眼几乎看不出"变大再回落"。
+        /// 因此这里取 0.5，实测视觉峰值 1.0367（过冲 3.67%）——看得出有弹性但不夸张。
+        /// 这个值是**按观感调的，不是 Inkeys 原始参数**；改它请重新实测视觉峰值。
+        /// </remarks>
+        private const double PopupPopInBackAmplitude = 0.5;
+
+        /// <summary>菜单出场时长（秒），对齐 Inkeys 的 0.4s。</summary>
+        internal const double PopupPopInDurationSeconds = 0.4;
+
+        /// <summary>
+        /// 菜单缩放的基准点：设为触发按钮在菜单坐标系里的相对位置。
+        /// </summary>
+        /// <remarks>
+        /// Inkeys 的做法是从触发按钮中心"长出来"（anchor = 按钮中心）。
+        /// WPF 的 <see cref="UIElement.RenderTransformOrigin"/> 是 0..1 的相对点，
+        /// 因此要把按钮中心换算成菜单自身的相对坐标。
+        ///
+        /// 拿不到按钮（例如菜单由代码直接打开、或触发器不在同一视觉树）时退回中心点，
+        /// 因为"从按钮长出来"只是锦上添花，不能因为换算失败就取消整个动画。
+        /// </remarks>
+        private static Point ResolvePopupScaleOrigin(Popup popup, FrameworkElement child)
+        {
+            var fallback = new Point(0.5, 0.5);
+
+            try
+            {
+                if (popup?.PlacementTarget is not FrameworkElement target) return fallback;
+                if (!target.IsLoaded || !child.IsLoaded) return fallback;
+
+                double width = child.ActualWidth;
+                double height = child.ActualHeight;
+                if (width <= 0 || height <= 0) return fallback;
+
+                // 触发按钮中心，换算到菜单坐标系
+                var targetCenter = target.TransformToAncestor(child)
+                    .Transform(new Point(target.ActualWidth / 2, target.ActualHeight / 2));
+
+                double originX = targetCenter.X / width;
+                double originY = targetCenter.Y / height;
+
+                // 触发按钮通常在菜单之外，换算出界后就无法作为缩放基点，退回中心
+                if (originX < -1 || originX > 2 || originY < -1 || originY > 2) return fallback;
+
+                return new Point(originX, originY);
+            }
+            catch
+            {
+                return fallback;
+            }
+        }
+
+        /// <summary>
+        /// EaseOutSine：Inkeys 里透明度用的曲线，起步快、收尾平滑，不带过冲。
+        /// </summary>
+        private static QuadraticEase CreateEaseOutSine()
+        {
+            // WPF 没有内置 Sine 缓动；EaseOutQuad 在 0.4s 的观感上与之接近，
+            // 且同样单调递增、无过冲，符合"透明度绝不能越过目标再回来"的约束。
+            return new QuadraticEase { EasingMode = EasingMode.EaseOut };
+        }
+
+        public static void ShowPopupWithSlideAndFade(Popup popup, double duration = PopupPopInDurationSeconds)
         {
             try
             {
@@ -460,7 +536,10 @@ namespace Ink_Canvas.Helpers
                 transformGroup.Children.Add(scaleTransform);
                 transformGroup.Children.Add(slideTransform);
                 child.RenderTransform = transformGroup;
-                child.RenderTransformOrigin = new Point(0.5, 0.5);
+
+                // 缩放原点放在触发按钮中心（Inkeys 的做法），而不是面板中心：
+                // 从按钮位置"长出来"，视线有连续感；用面板中心会像凭空放大。
+                child.RenderTransformOrigin = ResolvePopupScaleOrigin(popup, child);
 
                 popup.IsOpen = true;
 
@@ -469,13 +548,15 @@ namespace Ink_Canvas.Helpers
 
                 var sb = new Storyboard();
 
+                // 透明度单独用 EaseOutSine：它与缩放的 Back 曲线共用时间轴，
+                // 但绝不能也带过冲——透明度越过 1 再回来会肉眼可见地闪一下。
                 var fadeInAnimation = new DoubleAnimation
                 {
                     From = targetOpacity * 0.5,
                     To = targetOpacity,
-                    Duration = TimeSpan.FromSeconds(duration)
+                    Duration = TimeSpan.FromSeconds(duration),
+                    EasingFunction = CreateEaseOutSine()
                 };
-                fadeInAnimation.EasingFunction = new CubicEase();
                 Storyboard.SetTargetProperty(fadeInAnimation, new PropertyPath(UIElement.OpacityProperty));
 
                 var slideAnimation = new DoubleAnimation
@@ -488,23 +569,20 @@ namespace Ink_Canvas.Helpers
                 Storyboard.SetTargetProperty(slideAnimation,
                     new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"));
 
-                // 缩放入场：小 → 略大 → 目标值。
-                // 用关键帧而不是弹簧，是因为这里的时长本来就很短（0.15s 量级），
-                // 过冲必须显式写出来才可控；弹簧在这么短的时间里过冲点不好摆。
-                var scaleAnimation = new DoubleAnimationUsingKeyFrames
+                // 缩放入场：一条 BackEase 曲线即可完成"小 → 略大 → 回落"。
+                // 不要拆成"升到峰值 + 回落"两个关键帧：那是两段缓动拼接，
+                // 峰值处速度不连续，看起来会顿一下。EaseOutBack 本身就是先冲过头再回落。
+                var scaleAnimation = new DoubleAnimation
                 {
-                    Duration = TimeSpan.FromSeconds(duration)
+                    From = PopupPopInStartScale,
+                    To = 1.0,
+                    Duration = TimeSpan.FromSeconds(duration),
+                    EasingFunction = new BackEase
+                    {
+                        EasingMode = EasingMode.EaseOut,
+                        Amplitude = PopupPopInBackAmplitude
+                    }
                 };
-                scaleAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(
-                    PopupPopInStartScale, KeyTime.FromPercent(0.0)));
-                // 过冲峰值：比目标略大，约整段时长的 55% 处到达
-                scaleAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(
-                    PopupPopInOvershootScale, KeyTime.FromPercent(0.55),
-                    new CubicEase { EasingMode = EasingMode.EaseOut }));
-                // 回落并稳定在 1.0
-                scaleAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(
-                    1.0, KeyTime.FromPercent(1.0),
-                    new CubicEase { EasingMode = EasingMode.EaseOut }));
                 Storyboard.SetTargetProperty(scaleAnimation,
                     new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"));
                 var scaleAnimationY = scaleAnimation.Clone();

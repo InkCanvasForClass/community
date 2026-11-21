@@ -1170,9 +1170,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             {
                 element.Visibility = Visibility.Visible;
 
-                // 淡入
+                // 淡入：透明度和位移共用同一条时间轴，与 Inkeys 的组件显现做法一致。
                 var fade = new System.Windows.Media.Animation.DoubleAnimation(0, 1,
-                    TimeSpan.FromMilliseconds(ToolbarItemShowFadeMs))
+                    TimeSpan.FromMilliseconds(ToolbarItemShowDurationMs))
                 {
                     EasingFunction = new System.Windows.Media.Animation.CubicEase
                     {
@@ -1181,25 +1181,26 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 };
                 element.BeginAnimation(UIElement.OpacityProperty, fade);
 
-                // 轻微放大：从略小长到原尺寸，避免"啪一下出现"。
-                // 用 RenderTransform 而不是宽度动画，保证不触发布局、不挤动邻居。
-                if (element.RenderTransform is not ScaleTransform scale)
+                // 位置滑动而不是缩放：Inkeys 里工具栏按钮显现时不做缩放，
+                // 而是"淡入 + 从侧向滑入"。缩放会让按钮看起来变形，
+                // 且相邻按钮之间的视觉间距会随缩放跳动。
+                // 位移写 RenderTransform，不触发布局、不挤动邻居。
+                if (element.RenderTransform is not TranslateTransform slide)
                 {
-                    scale = new ScaleTransform(1, 1);
-                    element.RenderTransform = scale;
-                    element.RenderTransformOrigin = new Point(0.5, 0.5);
+                    slide = new TranslateTransform(0, 0);
+                    element.RenderTransform = slide;
                 }
 
-                var pop = new System.Windows.Media.Animation.DoubleAnimation(ToolbarItemShowStartScale, 1,
-                    TimeSpan.FromMilliseconds(ToolbarItemShowScaleMs))
+                var slideIn = new System.Windows.Media.Animation.DoubleAnimation(
+                    ToolbarItemShowSlideOffset, 0,
+                    TimeSpan.FromMilliseconds(ToolbarItemShowDurationMs))
                 {
                     EasingFunction = new System.Windows.Media.Animation.CubicEase
                     {
                         EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut
                     }
                 };
-                scale.BeginAnimation(ScaleTransform.ScaleXProperty, pop);
-                scale.BeginAnimation(ScaleTransform.ScaleYProperty, pop);
+                slide.BeginAnimation(TranslateTransform.XProperty, slideIn);
                 return;
             }
 
@@ -1216,14 +1217,15 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             element.Visibility = target;
         }
 
-        /// <summary>按钮出场淡入时长（毫秒）。</summary>
-        internal const int ToolbarItemShowFadeMs = 140;
+        /// <summary>
+        /// 按钮出场时长（毫秒）。
+        /// 对齐 Inkeys 的 0.4s 会显得慢——那是它整套 UI 的统一节奏，
+        /// 而工具栏按钮是被频繁触发的元素，这里折中取 220ms。
+        /// </summary>
+        internal const int ToolbarItemShowDurationMs = 220;
 
-        /// <summary>按钮出场缩放时长（毫秒）。</summary>
-        internal const int ToolbarItemShowScaleMs = 180;
-
-        /// <summary>按钮出场起始缩放：略小一点即可，过小会显得突兀。</summary>
-        internal const double ToolbarItemShowStartScale = 0.86;
+        /// <summary>按钮出场时的水平滑动起始偏移（DIP），0 → 该值反向滑入。</summary>
+        internal const double ToolbarItemShowSlideOffset = -8;
 
         private static bool HasVisibleLeafContent(FrameworkElement element)
         {
