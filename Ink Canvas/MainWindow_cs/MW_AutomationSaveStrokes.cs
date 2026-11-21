@@ -1,7 +1,9 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Windows.Ink;
 
 namespace Ink_Canvas
 {
@@ -21,7 +23,6 @@ namespace Ink_Canvas
 
             try
             {
-                var extension = saveAsXml ? ".xml" : ".icstk";
                 var targetDirectory = string.IsNullOrWhiteSpace(savePath)
                     ? Path.Combine(
                         Settings.Automation.AutoSavedStrokesLocation,
@@ -35,22 +36,112 @@ namespace Ink_Canvas
                     fileName += " Page-" + CurrentWhiteboardIndex;
                 fileName += " StrokesCount-" + inkCanvas.Strokes.Count;
 
-                var targetPath = Path.Combine(targetDirectory, fileName + extension);
-                if (saveAsXml)
+                var targetExtension = saveAsXml ? ".xml" : ".icstk";
+                var targetPath = Path.Combine(targetDirectory, fileName + targetExtension);
+
+                // 与常规保存保持一致：PPT 放映和多页白板都需要收集全部页面的笔画。
+                var hasMultiplePages = false;
+                var isPptMode = IsInPPTPresentationMode && _pptManager?.IsConnected == true;
+                var allPageStrokes = new List<StrokeCollection>();
+
+                if (isPptMode)
                 {
-                    SaveStrokesAsXML(inkCanvas.Strokes, targetPath);
-                }
-                else
-                {
-                    using (var stream = new FileStream(targetPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                    hasMultiplePages = true;
+                    var totalSlides = _pptManager.SlidesCount;
+                    var currentSlide = _pptManager.GetCurrentSlideNumber();
+
+                    for (int i = 1; i <= totalSlides; i++)
                     {
-                        inkCanvas.Strokes.Save(stream);
+                        var slideStrokes = _singlePPTInkManager?.LoadSlideStrokes(i);
+                        if (slideStrokes != null && slideStrokes.Count > 0)
+                        {
+                            allPageStrokes.Add(slideStrokes);
+                        }
+                        else if (i == currentSlide && inkCanvas.Strokes.Count > 0)
+                        {
+                            allPageStrokes.Add(inkCanvas.Strokes.Clone());
+                        }
+                        else
+                        {
+                            allPageStrokes.Add(new StrokeCollection());
+                        }
+                    }
+                }
+                else if (currentMode != 0 && WhiteboardTotalCount > 1)
+                {
+                    hasMultiplePages = true;
+                    for (int i = 1; i <= WhiteboardTotalCount; i++)
+                    {
+                        var strokes = TimeMachineHistories[i] != null
+                            ? ApplyHistoriesToNewStrokeCollection(TimeMachineHistories[i])
+                            : new StrokeCollection();
+                        allPageStrokes.Add(strokes);
                     }
                 }
 
-                LogHelper.WriteLogToFile(
-                    $"[Automation] 笔画已保存：{targetPath}（格式：{(saveAsXml ? "XML" : "ICSTK")}，数量：{inkCanvas.Strokes.Count}）",
-                    LogHelper.LogType.Info);
+                if (hasMultiplePages && allPageStrokes.Count > 0)
+                {
+                    if (saveAsXml && !isPptMode)
+                    {
+                        // 白板 XML 多页格式沿用现有 ZIP 结构，确保可由对应恢复流程读取。
+                        var zipPath = Path.ChangeExtension(targetPath, ".zip");
+                        SaveMultiPageStrokesAsXMLZip(allPageStrokes, zipPath, false);
+                        LogHelper.WriteLogToFile(
+                            $"[Automation] 多页笔画已保存：{zipPath}（格式：XML ZIP，页面数：{allPageStrokes.Count}）",
+                            LogHelper.LogType.Info);
+                    }
+                    else
+                    {
+                        // PPT 每页单独保存 XML；普通多页白板每页单独保存 ICSTK。
+                        var baseName = Path.GetFileNameWithoutExtension(targetPath);
+                        var savedCount = 0;
+                        for (int i = 0; i < allPageStrokes.Count; i++)
+                        {
+                            var strokes = allPageStrokes[i];
+                            if (strokes == null || strokes.Count == 0) continue;
+
+                            var pagePath = Path.Combine(
+                                targetDirectory,
+                                $"{baseName}_Page-{i + 1}{targetExtension}");
+
+                            if (saveAsXml)
+                            {
+                                SaveStrokesAsXML(strokes, pagePath, false);
+                            }
+                            else
+                            {
+                                using (var stream = new FileStream(pagePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                                {
+                                    strokes.Save(stream);
+                                }
+                            }
+
+                            savedCount++;
+                        }
+
+                        LogHelper.WriteLogToFile(
+                            $"[Automation] 多页笔画已保存：目录 {targetDirectory}（格式：{(saveAsXml ? "XML" : "ICSTK")}，页面数：{savedCount}）",
+                            LogHelper.LogType.Info);
+                    }
+                }
+                else
+                {
+                    if (saveAsXml)
+                    {
+                        SaveStrokesAsXML(inkCanvas.Strokes, targetPath);
+                    }
+                    else
+                    {
+                        using (var stream = new FileStream(targetPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                        {
+                            inkCanvas.Strokes.Save(stream);
+                        }
+                    }
+
+                    LogHelper.WriteLogToFile(
+                        $"[Automation] 笔画已保存：{targetPath}（格式：{(saveAsXml ? "XML" : "ICSTK")}，数量：{inkCanvas.Strokes.Count}）",
+                        LogHelper.LogType.Info);
+                }
             }
             catch (Exception ex)
             {
