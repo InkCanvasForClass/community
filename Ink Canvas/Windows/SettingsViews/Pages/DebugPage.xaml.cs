@@ -23,20 +23,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ToggleSwitchRealtimeInkDebugLog.IsOn = SettingsManager.Settings.Advanced.IsRealtimeInkDebugLogEnabled;
                 ToggleSwitchRenderFpsOverlay.IsOn = SettingsManager.Settings.Advanced.IsRenderFpsOverlayEnabled;
                 ToggleSwitchUnlimitedFrameRate.IsOn = SettingsManager.Settings.Advanced.IsUnlimitedFrameRateEnabled;
-
-                // 恢复全局动画播放速度：滑杆位置 = log10(倍率)
-                double multiplier = SettingsManager.Settings.Advanced.AnimationSpeedMultiplier;
-                if (multiplier <= 0) multiplier = 1.0;
-                multiplier = Math.Max(AnimationSpeed.MinMultiplier,
-                    Math.Min(AnimationSpeed.MaxMultiplier, multiplier));
-                if (SliderAnimationSpeed != null)
-                {
-                    SliderAnimationSpeed.Value = Math.Log10(multiplier);
-                }
-                UpdateSpeedLabel(multiplier);
-                AnimationSpeed.Set(multiplier);
-                StartAnimationSpeedSaveTimerIfNeeded();
-
                 _isLoaded = true;
             };
             Unloaded += (s, e) => _isLoaded = false;
@@ -82,71 +68,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     ? "[Debug] 实时笔迹详细调试日志已开启（落笔后查看 Configs/RealtimeInkDebugLive.json / PerformanceHistory.json）"
                     : "[Debug] 实时笔迹详细调试日志已关闭并尝试保存历史",
                 LogHelper.LogType.Info);
-        }
-
-        private void SliderAnimationSpeed_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            // 滑杆位置是 log10(倍率)：[-1, 1] -> [0.1x, 10x]，中点 0 = 1x
-            double multiplier = Math.Pow(10, e.NewValue);
-
-            if (TextAnimationSpeed != null)
-            {
-                // 行内只显示数值，宽度固定不动；
-                // 速度含义放 ToolTip —— 若拼进 Text，文本变长会把滑杆往左挤，
-                // 拖动中滑块会"自己跳"。
-                TextAnimationSpeed.Text = multiplier.ToString("0.##") + "x";
-                string feel = multiplier < 0.99 ? "慢放（动画变慢便于观察，非卡顿）"
-                    : multiplier > 1.01 ? "加速（动画变快）"
-                    : "原始速度";
-                TextAnimationSpeed.ToolTip = $"{multiplier:0.##}x {feel}";
-            }
-
-            if (!_isLoaded) return;
-
-            double applied = AnimationSpeed.Set(multiplier);
-            SettingsManager.Settings.Advanced.AnimationSpeedMultiplier = applied;
-            if (MainWindow.Settings?.Advanced != null)
-                MainWindow.Settings.Advanced.AnimationSpeedMultiplier = applied;
-
-            // 拖动滑块会连续触发，用防抖延后写盘：停手 400ms 后保存一次
-            _animationSpeedSaveTimer?.Stop();
-            _animationSpeedSaveTimer?.Start();
-        }
-
-        private void ButtonResetAnimationSpeed_Click(object sender, RoutedEventArgs e)
-        {
-            if (SliderAnimationSpeed != null)
-            {
-                SliderAnimationSpeed.Value = 0;   // log10(1) = 0，触发 ValueChanged 完成设置
-            }
-        }
-
-        private void UpdateSpeedLabel(double multiplier)
-        {
-            if (TextAnimationSpeed == null) return;
-            TextAnimationSpeed.Text = multiplier.ToString("0.##") + "x";
-            string feel = multiplier < 0.99 ? "慢放（动画变慢便于观察，非卡顿）"
-                : multiplier > 1.01 ? "加速（动画变快）"
-                : "原始速度";
-            TextAnimationSpeed.ToolTip = $"{multiplier:0.##}x {feel}";
-        }
-
-        /// <summary>滑块防抖保存计时器：避免拖动过程中反复写配置文件。</summary>
-        private System.Windows.Threading.DispatcherTimer _animationSpeedSaveTimer;
-
-        private void StartAnimationSpeedSaveTimerIfNeeded()
-        {
-            if (_animationSpeedSaveTimer != null) return;
-
-            _animationSpeedSaveTimer = new System.Windows.Threading.DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(400)
-            };
-            _animationSpeedSaveTimer.Tick += (_, _) =>
-            {
-                _animationSpeedSaveTimer.Stop();
-                SettingsManager.SaveSettingsToFile();
-            };
         }
 
         private void ToggleSwitchRenderFpsOverlay_Toggled(object sender, RoutedEventArgs e)

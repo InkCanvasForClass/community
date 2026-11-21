@@ -1561,9 +1561,6 @@ namespace Ink_Canvas
             // 帧率设置独立于 HUD，不显示 HUD 时也应当生效。
             if (Settings?.Advanced != null)
             {
-                // 恢复全局动画速度倍率（调试设置，影响所有经 AnimationSpeed 换算的动画）
-                Helpers.AnimationSpeed.Set(Settings.Advanced.AnimationSpeedMultiplier);
-
                 Helpers.RenderPacingController.ProbeDisplayRefreshRate();
                 Helpers.RenderPacingController.ApplyUnlimitedFrameRate(
                     Settings.Advanced.IsUnlimitedFrameRateEnabled);

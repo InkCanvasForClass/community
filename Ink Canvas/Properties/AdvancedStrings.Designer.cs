@@ -143,10 +143,6 @@ namespace Ink_Canvas.Properties
 
         public static string Debug_UnlimitedFrameRate_Desc => ResourceManager.GetString(nameof(Debug_UnlimitedFrameRate_Desc), _resourceCulture);
 
-        public static string Debug_AnimationSpeed_Header => ResourceManager.GetString(nameof(Debug_AnimationSpeed_Header), _resourceCulture);
-
-        public static string Debug_AnimationSpeed_Desc => ResourceManager.GetString(nameof(Debug_AnimationSpeed_Desc), _resourceCulture);
-
         public static string Debug_SimulateCrash_Header => ResourceManager.GetString(nameof(Debug_SimulateCrash_Header), _resourceCulture);
 
         public static string Debug_SimulateCrash_Desc => ResourceManager.GetString(nameof(Debug_SimulateCrash_Desc), _resourceCulture);
