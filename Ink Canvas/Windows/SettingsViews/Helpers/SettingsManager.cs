@@ -95,10 +95,32 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                                     }
                                     catch (Exception copyException)
                                     {
-                                        throw new AggregateException(
-                                            "File.Replace 和覆盖写入均失败。",
-                                            replaceException,
-                                            copyException);
+                                        // If copying also fails, make one final attempt to write the
+                                        // serialized settings directly to the destination file.
+                                        // This can truncate the old file before the new content is
+                                        // fully written, so it is intentionally the last resort.
+                                        try
+                                        {
+                                            ProcessProtectionManager.WithWriteAccess(path, () => File.WriteAllText(path, text));
+                                            try { File.Delete(tmpPath); }
+                                            catch (Exception cleanupException)
+                                            {
+                                                LogHelper.WriteLogToFile(
+                                                    $"[Settings] 直接写入成功，但清理临时文件失败: {cleanupException.Message}",
+                                                    LogHelper.LogType.Warning);
+                                            }
+                                            LogHelper.WriteLogToFile(
+                                                $"[Settings] File.Replace 和覆盖写入均失败，已回退到直接写入。Replace: {replaceException.Message}; Copy: {copyException.Message}",
+                                                LogHelper.LogType.Warning);
+                                        }
+                                        catch (Exception directWriteException)
+                                        {
+                                            throw new AggregateException(
+                                                "File.Replace、覆盖写入和直接写入均失败。",
+                                                replaceException,
+                                                copyException,
+                                                directWriteException);
+                                        }
                                     }
                                 }
                             });
