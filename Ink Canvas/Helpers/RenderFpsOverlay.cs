@@ -169,9 +169,10 @@ namespace Ink_Canvas.Helpers
                 _worstText.Text = string.Format(CultureInfo.InvariantCulture, "最差  {0:F1} ms / 平均 {1:F1} ms",
                     snap.WorstFrameMs, snap.AverageFrameMs);
 
-                // 超过一帧预算即说明这一秒内确实掉过帧，标红便于一眼定位
+                // 超过一帧预算即说明这一秒内确实掉过帧，标红便于一眼定位。
+                // 阈值取 1.0 倍预算：60Hz 下 >16.7ms 就是掉帧，不需要系数放大。
                 var budgetMs = RenderPacingController.FrameBudgetMs;
-                _worstText.Foreground = budgetMs > 0 && snap.WorstFrameMs > budgetMs * 1.5
+                _worstText.Foreground = budgetMs > 0 && snap.WorstFrameMs > budgetMs
                     ? new SolidColorBrush(Color.FromRgb(255, 120, 120))
                     : Brushes.White;
             }
