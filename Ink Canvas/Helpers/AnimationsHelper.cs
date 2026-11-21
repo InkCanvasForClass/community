@@ -467,7 +467,7 @@ namespace Ink_Canvas.Helpers
         /// <remarks>
         /// 这是整个动画的核心模型，此前所有打断 bug 都源于违背它：
         ///
-        ///   曲线：progress 0.0 → 1.0 映射 缩放 0.72 → 峰值(1.05) → 1.0
+        ///   曲线：progress 0.0 → 1.0 映射 起点缩放 → 峰值(1.05) → 1.0
         ///   打开 = progress 从当前值推进到 1.0
         ///   收起 = progress 从当前值倒退到 0.0
         ///   打断 = 不重置 progress，只改变推进方向
@@ -504,6 +504,15 @@ namespace Ink_Canvas.Helpers
 
             /// <summary>上一帧的时间，用于按真实帧间隔推进。</summary>
             public System.Diagnostics.Stopwatch Clock = new();
+
+            /// <summary>
+            /// 这条菜单自己的曲线：起点缩放按内容宽度导出，张力与位移跟着它走。
+            /// </summary>
+            /// <remarks>
+            /// 存在 token 上而不是每帧重算，是因为 SetPopupProgress 每帧都要读它；
+            /// 也保证了同一次播放里渲染用的曲线与留白用的曲线是同一组数。
+            /// </remarks>
+            public PopupCurveShape Shape;
         }
 
         private static AnimationToken TokenFor(Popup popup)
@@ -511,31 +520,22 @@ namespace Ink_Canvas.Helpers
             return PopupTokens.GetValue(popup, _ => new AnimationToken());
         }
 
-        /// <summary>菜单出场起始缩放：由小长到正常大小。</summary>
-        /// <remarks>曲线本身在 <see cref="PopupCurve"/> 里，这里保留同义常量只为本类内部引用可读。</remarks>
-        private const double PopupPopInStartScale = PopupCurve.StartScale;
-
         /// <summary>
         /// 缩放过冲峰值。>1 才会出现"变大一点再回落"。
-        /// 必须与实际动画峰值一致：<see cref="PopupOverflowRoom"/> 按它计算留白，
-        /// 低估会导致峰值时四边被裁。
         /// </summary>
         /// <remarks>
-        /// 峰值不是直接写的数，而是由 <see cref="PopupCurve.BackTension"/> 反解出来的：
-        /// 张力取 2.412 时过冲行程正好 17.86%，缩放峰值落在 1.05。
-        /// Inkeys 原值 1.1 配它的 0.4s 时峰值只有 1.0125，肉眼几乎看不出"先放大再回落"；
-        /// 我们要的过冲比它强，所以按目标缩放反解张力，而不是照抄 1.1。
-        ///
-        /// 峰值必须与留白使用同一个常量：留白按 1.05 算，
-        /// 而曲线若只到 1.03，多出来的留白纯属浪费。
+        /// 峰值是**绝对**常量，不随菜单大小变：曲线张力按它反解
+        /// （<see cref="PopupCurve.TensionForPeak"/>），所以小菜单与大菜单的过冲比例相同。
+        /// 曾把张力写死成"起点 0.72 反解出的 2.412"这一个固定组合，
+        /// 于是起点一旦按菜单宽度变化，峰值就会跟着漂 —— 留白按 1.05 算却可能被 1.12 撑破。
+        /// 现在常量留在 <see cref="PopupCurve.PeakScale"/>，本类只负责引用它。
         /// </remarks>
-        private const double PopupPopInPeakScale = PopupCurve.PeakScale;
 
         /// <summary>
         /// 收场时长（秒）。比出场短一点，让关闭显得干脆。
         /// </summary>
         /// <remarks>
-        /// 收起是同一曲线的倒放：先越过 1.0 涨到峰值，再一路缩回 0.72。
+        /// 收起是同一曲线的倒放：先越过 1.0 涨到峰值，再一路缩回起点缩放。
         /// 0.30s 下 60fps 采到 18 帧，其中 12 帧落在过冲段，
         /// 与打开段的过冲占比相当（同一条曲线，只是播放方向相反）。
         ///
@@ -581,8 +581,9 @@ namespace Ink_Canvas.Helpers
 
                 // 先预留溢出空间：Popup 窗口尺寸等于内容布局尺寸，
                 // 不留白的话缩放一旦超过 1.0，四边就会被窗口边界裁掉。
-                var child = PopupOverflowRoom.Ensure(popup, PopupPopInPeakScale)
-                            ?? popup.Child as FrameworkElement;
+                // 顺带拿到这条菜单自己的曲线：起点缩放 = 收起态宽度 / 菜单宽度，
+                // 于是每条菜单收起来时都只有一个工具栏按钮那么大。
+                var child = PopupOverflowRoom.Ensure(popup, out var shape);
                 if (child == null)
                 {
                     popup.IsOpen = true;
@@ -600,13 +601,13 @@ namespace Ink_Canvas.Helpers
                 popup.IsOpen = true;
 
                 // 打开后内容才有真实尺寸：按它校正一次留白
-                PopupOverflowRoom.RefreshPadding(popup, PopupPopInPeakScale);
+                PopupOverflowRoom.RefreshPadding(popup, shape);
 
                 // 记下次要推进的方向：打断排查时，"点了没反应"与"方向没翻转"是两回事，
                 // 日志里能看到同一菜单连续出现 SHOW/HIDE/HIDE/SHOW 才说明方向真的翻转了。
                 AnimationLog.Log(popup, "SHOW", $"progress={TokenFor(popup).Progress:F3} dir=+1");
 
-                DrivePopup(popup, child, opening: true,
+                DrivePopup(popup, child, opening: true, shape,
                     duration, onFullyClosed: null);
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -629,8 +630,7 @@ namespace Ink_Canvas.Helpers
                 // 互相不可见：第一次正常（各自首次都"从零建"），第二次开始状态错乱，
                 // 表现为定位异常 + 打开卡住。
                 // 用 PopupOverflowRoom.Ensure 取回同一个内容元素；未包装时退回 popup.Child。
-                var child = PopupOverflowRoom.Ensure(popup, PopupPopInPeakScale)
-                            ?? popup.Child as FrameworkElement;
+                var child = PopupOverflowRoom.Ensure(popup, out var shape);
                 if (child == null)
                 {
                     popup.IsOpen = false;
@@ -641,7 +641,7 @@ namespace Ink_Canvas.Helpers
                 AnimationLog.Log(popup, "HIDE", $"progress={token.Progress:F3} dir=-1");
 
                 // 收起的"完成动作"：真正关掉 Popup 并复位进度。
-                DrivePopup(popup, child, opening: false,
+                DrivePopup(popup, child, opening: false, shape,
                     duration, onFullyClosed: () =>
                     {
                         // 竞态防护：回调执行时方向若已被 Show 反转为打开，
@@ -660,7 +660,7 @@ namespace Ink_Canvas.Helpers
 
                         popup.IsOpen = false;
                         // 收起终态直接写进变换，避免下一次打开测量到带动画残留的尺寸
-                        ClearTransformAnimations(child, PopupPopInStartScale, 10);
+                        ClearTransformAnimations(child, shape.StartScale, shape.SlideDistance);
                         AnimationLog.Log(popup, "HIDE-DONE", "progress=0");
                     });
             }
@@ -674,7 +674,7 @@ namespace Ink_Canvas.Helpers
         /// 打开与收起不是两段动画，而是同一条曲线的两个播放方向：
         ///
         ///   progress: 0.0 ──────────────▶ 1.0
-        ///   缩放:    0.72 → 峰值(1.05) → 1.0
+        ///   缩放:    起点(按菜单宽度) → 峰值(1.05) → 1.0
         ///   打开 = 向右推进；收起 = 向左倒退。
         ///
         /// 打断 = 再次调用本方法且方向相反：时钟沿用同一个 progress，
@@ -691,9 +691,10 @@ namespace Ink_Canvas.Helpers
         /// 卡顿只会整体变慢，不会让 progress 一步跨过过冲区。
         /// </remarks>
         private static void DrivePopup(Popup popup, FrameworkElement child, bool opening,
-            double durationSeconds, Action onFullyClosed)
+            PopupCurveShape shape, double durationSeconds, Action onFullyClosed)
         {
             var token = TokenFor(popup);
+            token.Shape = shape;
 
             // 首次调用：建立变换结构（此后一直复用，不重建——重建会丢失当前帧状态）
             if (child.RenderTransform is not TransformGroup group
@@ -710,7 +711,7 @@ namespace Ink_Canvas.Helpers
                 group = g;
 
                 // 初始进度写一次，保证"从未动过"的菜单有正确的起始视觉
-                var initial = PopupCurve.Evaluate(token.Progress);
+                var initial = shape.Evaluate(token.Progress);
                 scale.ScaleX = initial.Scale;
                 scale.ScaleY = initial.Scale;
                 slide.Y = initial.SlideY;
@@ -718,7 +719,7 @@ namespace Ink_Canvas.Helpers
 
             // 每次都重新解析缩放基准点：
             // 触发按钮可能不同（同一 Popup 可被多个入口打开），
-            // 且 PointToScreen/TransformToAncestor 受 RenderTransform 影响（实测 0.72 缩放偏移 34px），
+            // 且 PointToScreen/TransformToAncestor 受 RenderTransform 影响（实测起点缩小时偏移数十像素），
             // 残留的变换会让 Resolve 算错。先归位再解析。
             ClearTransformAnimations(child, 1.0, 0.0);
             child.RenderTransformOrigin = PopupScaleOrigin.Resolve(popup, child);
@@ -811,9 +812,9 @@ namespace Ink_Canvas.Helpers
 
             if (child?.RenderTransform is not TransformGroup g || g.Children.Count < 2) return;
 
-            // 缩放、位移、透明度同取一个曲线采样：
-            // 三者若各走各的节奏（缩放先快后慢、位移匀速），会看出"两个东西在各自动"。
-            var sample = PopupCurve.Evaluate(progress);
+            // 缩放、位移同取一个曲线采样：若各走各的节奏（缩放先快后慢、位移匀速），
+            // 会看出"两个东西在各自动"。透明度另有独立时间线，见 PopupCurve.OpacityWeight。
+            var sample = token.Shape.Evaluate(progress);
 
             if (g.Children[0] is ScaleTransform st)
             {

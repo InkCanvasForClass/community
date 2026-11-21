@@ -49,6 +49,7 @@ namespace Ink_Canvas.PopupDiagnostics
         private FrameworkElement _host;
         private ScaleTransform _scale;
         private TranslateTransform _slide;
+        private PopupCurveShape _shape;
 
         private MenuHarness(Popup popup, Button trigger)
         {
@@ -122,14 +123,14 @@ namespace Ink_Canvas.PopupDiagnostics
         /// </summary>
         public Point OpenAndResolveOrigin(double startProgress)
         {
-            _content = PopupOverflowRoom.Ensure(_popup, PopupCurve.PeakScale) ?? _popup.Child as FrameworkElement;
+            _content = PopupOverflowRoom.Ensure(_popup, out _shape) ?? _popup.Child as FrameworkElement;
             _host = _popup.Child as FrameworkElement;
 
             if (_host != null && _host.Visibility != Visibility.Visible) _host.Visibility = Visibility.Visible;
             if (_content != null) _content.Visibility = Visibility.Visible;
 
             _popup.IsOpen = true;
-            PopupOverflowRoom.RefreshPadding(_popup, PopupCurve.PeakScale);
+            PopupOverflowRoom.RefreshPadding(_popup, _shape);
 
             AttachTransform();
             ResetTransform();
@@ -164,6 +165,38 @@ namespace Ink_Canvas.PopupDiagnostics
         /// <summary>菜单停稳后与触发按钮顶边之间的间距（与 PlacementCallback 里的值一致）。</summary>
         internal const double PlacementGapPixels = 8.0;
 
+        /// <summary>
+        /// 本次打开所用的曲线形状：起点按菜单自然宽度导出，峰值与位移都从它派生。
+        /// </summary>
+        /// <remarks>
+        /// 生产路径由 <see cref="PopupOverflowRoom.Ensure"/> 一次算好并放进动画 token；
+        /// 这里在它还没算过时（例如从未打开过就调用 Close）按老菜单的宽度兜个底，
+        /// 免得后续除零或写进 NaN 缩放——NaN 会让 WPF 直接不绘制。
+        /// </remarks>
+        public PopupCurveShape Shape
+        {
+            get
+            {
+                if (_shape.StartScale > 0.0) return _shape;
+                _shape = _content == null
+                    ? PopupCurveShape.ForContentWidth(PopupCurve.CompactWidth)
+                    : PopupCurveShape.ForContentWidth(ContentWidth);
+                return _shape;
+            }
+        }
+
+        /// <summary>菜单内容的自然宽度（DIP）：布局宽度优先，未布局时退回显式 Width。</summary>
+        private double ContentWidth
+        {
+            get
+            {
+                if (_content == null) return PopupCurve.CompactWidth;
+                if (_content.ActualWidth > 0.0) return _content.ActualWidth;
+                if (!double.IsNaN(_content.Width) && _content.Width > 0.0) return _content.Width;
+                return PopupCurve.CompactWidth;
+            }
+        }
+
         /// <summary>当前生效的纵向滑动量（DIP，正=向下）。</summary>
         public double CurrentSlideY
         {
@@ -181,7 +214,7 @@ namespace Ink_Canvas.PopupDiagnostics
         {
             if (_content == null) return;
 
-            var sample = PopupCurve.Evaluate(progress);
+            var sample = Shape.Evaluate(progress);
             _scale.ScaleX = sample.Scale;
             _scale.ScaleY = sample.Scale;
             _slide.Y = sample.SlideY;
