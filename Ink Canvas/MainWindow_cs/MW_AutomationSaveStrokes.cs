@@ -1,5 +1,6 @@
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -110,10 +111,7 @@ namespace Ink_Canvas
                             }
                             else
                             {
-                                using (var stream = new FileStream(pagePath, FileMode.Create, FileAccess.Write, FileShare.None))
-                                {
-                                    strokes.Save(stream);
-                                }
+                                SaveStrokesAsBinary(strokes, pagePath);
                             }
 
                             savedCount++;
@@ -132,10 +130,7 @@ namespace Ink_Canvas
                     }
                     else
                     {
-                        using (var stream = new FileStream(targetPath, FileMode.Create, FileAccess.Write, FileShare.None))
-                        {
-                            inkCanvas.Strokes.Save(stream);
-                        }
+                        SaveStrokesAsBinary(inkCanvas.Strokes, targetPath);
                     }
 
                     LogHelper.WriteLogToFile(
@@ -148,6 +143,39 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"[Automation] 保存笔画失败：{ex}", LogHelper.LogType.Error);
                 throw;
             }
+        }
+
+        /// <summary>
+        /// 以二进制格式保存笔画，并写入与常规保存一致的 .elements.json 伴随文件。
+        /// 先写同目录临时文件再原子替换，避免中途失败在保存目录留下半截文件。
+        /// </summary>
+        private void SaveStrokesAsBinary(StrokeCollection strokes, string targetPath)
+        {
+            var tmpPath = targetPath + ".tmp";
+            try
+            {
+                using (var stream = new FileStream(tmpPath, FileMode.Create))
+                {
+                    strokes.Save(stream);
+                }
+
+                if (File.Exists(targetPath))
+                    File.Replace(tmpPath, targetPath, null);
+                else
+                    File.Move(tmpPath, targetPath);
+            }
+            catch
+            {
+                try { if (File.Exists(tmpPath)) File.Delete(tmpPath); } catch { }
+                throw;
+            }
+
+            // 重新打开 .icstk 时，OpenSingleStrokeFile 依赖该文件恢复图片/PDF/媒体等画布元素。
+            var elementInfos = new List<CanvasElementInfo>();
+            CollectCanvasElementsMetadata(elementInfos);
+            File.WriteAllText(
+                Path.ChangeExtension(targetPath, ".elements.json"),
+                JsonConvert.SerializeObject(elementInfos, Newtonsoft.Json.Formatting.Indented));
         }
     }
 }
