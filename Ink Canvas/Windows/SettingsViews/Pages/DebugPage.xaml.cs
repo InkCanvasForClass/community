@@ -91,9 +91,14 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             if (TextAnimationSpeed != null)
             {
-                // 极慢时动画会持续数秒，界面看起来像"卡住"——明确提示，避免误判成 bug
-                string suffix = multiplier <= 0.34 ? "  (慢放，非卡顿)" : "";
-                TextAnimationSpeed.Text = multiplier.ToString("0.##") + "x" + suffix;
+                // 行内只显示数值，宽度固定不动；
+                // 速度含义放 ToolTip —— 若拼进 Text，文本变长会把滑杆往左挤，
+                // 拖动中滑块会"自己跳"。
+                TextAnimationSpeed.Text = multiplier.ToString("0.##") + "x";
+                string feel = multiplier < 0.99 ? "慢放（动画变慢便于观察，非卡顿）"
+                    : multiplier > 1.01 ? "加速（动画变快）"
+                    : "原始速度";
+                TextAnimationSpeed.ToolTip = $"{multiplier:0.##}x {feel}";
             }
 
             if (!_isLoaded) return;
@@ -119,8 +124,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         private void UpdateSpeedLabel(double multiplier)
         {
             if (TextAnimationSpeed == null) return;
-            string suffix = multiplier <= 0.34 ? "  (慢放，非卡顿)" : "";
-            TextAnimationSpeed.Text = multiplier.ToString("0.##") + "x" + suffix;
+            TextAnimationSpeed.Text = multiplier.ToString("0.##") + "x";
+            string feel = multiplier < 0.99 ? "慢放（动画变慢便于观察，非卡顿）"
+                : multiplier > 1.01 ? "加速（动画变快）"
+                : "原始速度";
+            TextAnimationSpeed.ToolTip = $"{multiplier:0.##}x {feel}";
         }
 
         /// <summary>滑块防抖保存计时器：避免拖动过程中反复写配置文件。</summary>
