@@ -20,10 +20,10 @@ namespace InkCanvas.NativeInk.Tests
         private const double FrameSeconds = 1.0 / 60.0;
 
         /// <summary>出场时长，与 AnimationsHelper.PopupPopInDurationSeconds 一致。</summary>
-        private const double PopInSeconds = 0.20;
+        private const double PopInSeconds = 0.40;
 
         /// <summary>收场时长，与 AnimationsHelper.PopupPopOutDurationSeconds 一致。</summary>
-        private const double PopOutSeconds = 0.15;
+        private const double PopOutSeconds = 0.30;
 
         public static void RunAll()
         {
@@ -186,7 +186,7 @@ namespace InkCanvas.NativeInk.Tests
             // 打断 = 同一 progress 上翻转方向，曲线只与 progress 有关，
             // 所以翻转处两侧取值必然完全相等（不是"接近"，是同一个数）。
             //
-            // 翻转后走的是另一个时长（收起 0.15s、打开 0.20s），
+            // 翻转后走的是另一个时长（收起 0.30s、打开 0.40s），
             // 因此每帧步进的上限要分别对各自时长的整段动画取，
             // 不能拿打开段的上限去要求收起段。
             var closeLimit = MaxFrameStep(0.0, 1.0, PopOutSeconds);
@@ -211,7 +211,7 @@ namespace InkCanvas.NativeInk.Tests
                 if (frame.Scale > 1.0) aboveOne++;
 
             // 60fps 下过冲段至少要采到 4 帧，否则肉眼分辨不出"先放大再回落"。
-            // 实测 0.20s 时是 8 帧 / 141ms。
+            // 实测 0.40s 时是 16 帧 / 267ms。
             True(aboveOne >= 4);
             True(MaxScale(frames) >= PopupCurve.PeakScale - 0.005);
         }
