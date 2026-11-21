@@ -471,8 +471,17 @@ namespace Ink_Canvas.Helpers
                 child.Visibility = Visibility.Visible;
                 child.Opacity = targetOpacity * 0.5;
 
+                // 关键：清掉上一次留下的动画。
+                //
+                // WPF 的动画默认 FillBehavior = HoldEnd，播完后会一直"压住"属性值。
+                // 菜单反复开合时，第二次的 Storyboard 写不进去，表现为"只闪一下"。
+                // 因此在建立新变换之前，把旧动画从内容上摘掉。
+                child.BeginAnimation(UIElement.OpacityProperty, null);
+
                 // 缩放 + 位移共存：用 TransformGroup 承载两段动画，互不覆盖。
                 // 窗外已有 PopupOverflowRoom 预留的留白，峰值 1.0367 不会越界被裁。
+                // 每次都用新的 Transform 实例：旧实例上可能还挂着 HoldEnd 的动画，
+                // 复用旧实例会把残留值一起带进来。
                 var scaleTransform = new ScaleTransform(PopupPopInStartScale, PopupPopInStartScale);
                 var slideTransform = new TranslateTransform(0, 10);
                 var transformGroup = new TransformGroup();
@@ -498,7 +507,9 @@ namespace Ink_Canvas.Helpers
                 {
                     From = targetOpacity * 0.5,
                     To = targetOpacity,
-                    Duration = TimeSpan.FromSeconds(duration)
+                    Duration = TimeSpan.FromSeconds(duration),
+                    // 播完即释放属性，避免 HoldEnd 把值压住导致下次播不进去
+                    FillBehavior = FillBehavior.Stop
                 };
                 fadeInAnimation.EasingFunction = new CubicEase();
                 Storyboard.SetTargetProperty(fadeInAnimation, new PropertyPath(UIElement.OpacityProperty));
@@ -507,7 +518,8 @@ namespace Ink_Canvas.Helpers
                 {
                     From = 10,
                     To = 0,
-                    Duration = TimeSpan.FromSeconds(duration)
+                    Duration = TimeSpan.FromSeconds(duration),
+                    FillBehavior = FillBehavior.Stop
                 };
                 slideAnimation.EasingFunction = new CubicEase();
                 Storyboard.SetTargetProperty(slideAnimation,
@@ -520,6 +532,7 @@ namespace Ink_Canvas.Helpers
                     From = PopupPopInStartScale,
                     To = 1.0,
                     Duration = TimeSpan.FromSeconds(duration),
+                    FillBehavior = FillBehavior.Stop,
                     EasingFunction = new BackEase
                     {
                         EasingMode = EasingMode.EaseOut,
@@ -531,6 +544,24 @@ namespace Ink_Canvas.Helpers
                 var scaleAnimationY = scaleAnimation.Clone();
                 Storyboard.SetTargetProperty(scaleAnimationY,
                     new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"));
+
+                // 用 FillBehavior.Stop 时必须自己把终态写死：
+                // Stop 会在动画结束后把属性弹回 From，菜单就会缩回去。
+                // 这里在结束时显式写入终值，并把动画从属性上摘掉，
+                // 既保证终态正确，也保证下次打开时没有 HoldEnd 残留。
+                sb.Completed += (_, _) =>
+                {
+                    child.BeginAnimation(UIElement.OpacityProperty, null);
+                    child.Opacity = targetOpacity;
+
+                    scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+                    scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+                    scaleTransform.ScaleX = 1.0;
+                    scaleTransform.ScaleY = 1.0;
+
+                    slideTransform.BeginAnimation(TranslateTransform.YProperty, null);
+                    slideTransform.Y = 0;
+                };
 
                 sb.Children.Add(fadeInAnimation);
                 sb.Children.Add(slideAnimation);
