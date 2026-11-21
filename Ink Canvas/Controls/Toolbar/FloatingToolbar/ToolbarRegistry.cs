@@ -244,10 +244,10 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             return _items;
         }
 
-        public static bool RegisterPluginItem(PluginToolbarItemInfo itemInfo, bool autoAddToActiveConfig = true)
+        public static void RegisterPluginItem(PluginToolbarItemInfo itemInfo, bool autoAddToActiveConfig = true)
         {
-            if (itemInfo == null || string.IsNullOrEmpty(itemInfo.Id)) return false;
-            if (_pluginItems.Any(item => string.Equals(item.Id, itemInfo.Id, StringComparison.OrdinalIgnoreCase))) return false;
+            if (itemInfo == null || string.IsNullOrEmpty(itemInfo.Id)) return;
+            if (_pluginItems.Any(item => string.Equals(item.Id, itemInfo.Id, StringComparison.OrdinalIgnoreCase))) return;
 
             _pluginItems.Add(itemInfo);
             LogHelper.WriteLogToFile($"ToolbarRegistry: 插件注册工具栏项 [{itemInfo.Id}] (autoAddToActiveConfig={autoAddToActiveConfig})", LogHelper.LogType.Info);
@@ -261,7 +261,6 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             {
                 _items.Add(new PluginToolbarItemWrapper(itemInfo));
             }
-            return true;
         }
 
         private static void EnsurePluginItemInActiveConfig(string itemId)
@@ -315,11 +314,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 item => string.Equals(item.Id, itemId, StringComparison.OrdinalIgnoreCase)) > 0;
 
             // _items 里存的是包着 PluginToolbarItemInfo 的 wrapper，同样持有插件委托，必须一并移除。
-            if (_items != null)
-            {
-                removed |= _items.RemoveAll(item => item is PluginToolbarItemWrapper
-                                                    && string.Equals(item.Id, itemId, StringComparison.OrdinalIgnoreCase)) > 0;
-            }
+            _items?.RemoveAll(item => item is PluginToolbarItemWrapper
+                                      && string.Equals(item.Id, itemId, StringComparison.OrdinalIgnoreCase));
 
             if (removed)
                 LogHelper.WriteLogToFile($"ToolbarRegistry: 已注销插件工具栏项 [{itemId}]", LogHelper.LogType.Info);
@@ -628,9 +624,16 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             {
                 bool legacy = entry.GetSettingBool(ComponentSettingKeys.UseRedStyle);
                 entry.Settings.Remove(ComponentSettingKeys.UseRedStyle);
-                // 关闭也必须保留键，否则下次加载清空组件时会被当作未迁移的旧配置。
-                entry.SetSetting(ComponentSettingKeys.RedStyleIcon, legacy);
-                entry.SetSetting(ComponentSettingKeys.RedStyleText, legacy);
+                if (legacy)
+                {
+                    entry.Settings[ComponentSettingKeys.RedStyleIcon] = true;
+                    entry.Settings[ComponentSettingKeys.RedStyleText] = true;
+                }
+                else
+                {
+                    entry.Settings.Remove(ComponentSettingKeys.RedStyleIcon);
+                    entry.Settings.Remove(ComponentSettingKeys.RedStyleText);
+                }
                 changed = true;
             }
             else if (entry.Id == "builtin.clear"
@@ -943,10 +946,6 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 }
                 isFirst = false;
             }
-
-            LogHelper.WriteLogToFile(
-                $"[Toolbar] 浮动栏已构建: 条目 {displayItems.Count} 个, 分段 {segments.Count} 个, 组件库 {discovered.Count} 个",
-                LogHelper.LogType.Info);
         }
 
         private static Border CreateContentBorder(List<DisplayItem> items, Orientation orientation = Orientation.Horizontal)
@@ -1072,285 +1071,8 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 ["isPPTMode"] = isPPTMode,
                 ["isContentCollapsedByUser"] = _isContentCollapsedByUser
             };
-
-            if (rootPanel == null) return;
-
-            // 记录切换前的宽度与各子项位置：用于宽度补间与"邻居跟随移动"。
-            double beforeWidth = rootPanel.ActualWidth;
-            var beforeOffsets = _animateVisibilityChange
-                ? CaptureChildOffsets(rootPanel)
-                : null;
-
             UpdatePanelVisibility(rootPanel, context);
-
-            AnimatePanelWidthToFit(rootPanel, beforeWidth);
-
-            if (beforeOffsets != null)
-            {
-                AnimateChildrenToNewOffsets(rootPanel, beforeOffsets);
-            }
         }
-
-        /// <summary>
-        /// 记录面板直接子项当前相对面板左上角的位置。
-        /// </summary>
-        /// <remarks>
-        /// 用于"某个组件显隐后，它后面的组件平滑滑到新位置"。
-        /// 只记录直接子项：工具栏是横向排列，显隐影响的是后面兄弟的横向位置。
-        /// </remarks>
-        private static Dictionary<FrameworkElement, double> CaptureChildOffsets(Panel panel)
-        {
-            var result = new Dictionary<FrameworkElement, double>();
-            if (panel == null) return result;
-
-            // 组件是三层嵌套：ContentBorder(Border) → ContentPanel(StackPanel) → 按钮(InjectedTag)。
-            // 只取直接子项会漏掉真正会移动的按钮，必须递归收集。
-            CollectVisibleLayoutElements(panel, panel, result);
-            return result;
-        }
-
-        /// <summary>
-        /// 递归收集参与横向排布的元素，记录它们相对根面板的横坐标。
-        /// </summary>
-        private static void CollectVisibleLayoutElements(
-            Panel root, FrameworkElement current, Dictionary<FrameworkElement, double> sink)
-        {
-            if (current == null || current.Visibility != Visibility.Visible) return;
-
-            // 记录"真正会移动的组件"：带注入标记的那些（按钮/分隔线/分组面板）。
-            // 不用类型判断：ToolbarImageButton 是 UserControl（属 ContentControl），
-            // 按类型排除会把所有按钮漏掉。
-            // 也不做视觉树深搜：那会在每次显隐时产生数百次查询，得不偿失。
-            if (current.Tag as string == InjectedTag && current != root)
-            {
-                try
-                {
-                    var point = current.TransformToAncestor(root).Transform(new Point(0, 0));
-                    if (point.X > 0.01 || point.Y > 0.01)
-                    {
-                        sink[current] = point.X;
-                    }
-                }
-                catch
-                {
-                    // 尚未进入视觉树
-                }
-
-                // 带标记的分组面板内部还有按钮，继续往下收
-            }
-
-            // 继续向下递归
-            if (current is Panel panel)
-            {
-                foreach (var child in panel.Children.OfType<FrameworkElement>())
-                {
-                    CollectVisibleLayoutElements(root, child, sink);
-                }
-            }
-            else if (current is Border border && border.Child is FrameworkElement borderChild)
-            {
-                CollectVisibleLayoutElements(root, borderChild, sink);
-            }
-            else if (current is ContentControl contentControl && contentControl.Content is FrameworkElement content)
-            {
-                CollectVisibleLayoutElements(root, content, sink);
-            }
-        }
-
-        /// <summary>
-        /// 让子项从"切换前的位置"平滑滑到"切换后的新位置"。
-        /// </summary>
-        /// <remarks>
-        /// 布局一旦重算，子项会瞬间跳到新位置。要让它看起来是滑过去的，
-        /// 就在跳变之后立刻给每个子项叠加一个反向位移，再把这个位移补间回 0。
-        ///
-        /// 位移写 RenderTransform（合成层），不触发布局，比动画 Margin 便宜得多。
-        /// 必须等布局跑完才能量到新位置，所以排到 Loaded 优先级执行。
-        /// </remarks>
-        private static void AnimateChildrenToNewOffsets(
-            Panel panel, Dictionary<FrameworkElement, double> beforeOffsets)
-        {
-            if (panel == null || beforeOffsets == null || beforeOffsets.Count == 0) return;
-
-            panel.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                try
-                {
-                    foreach (var kvp in beforeOffsets)
-                    {
-                        var child = kvp.Key;
-                        if (child == null || child.Visibility != Visibility.Visible) continue;
-
-                        double newOffset;
-                        try
-                        {
-                            newOffset = child.TransformToAncestor(panel).Transform(new Point(0, 0)).X;
-                        }
-                        catch
-                        {
-                            continue;
-                        }
-
-                        double delta = kvp.Value - newOffset;
-                        if (Math.Abs(delta) < 1.0) continue;
-
-                        // 用独立的"邻居让位"通道，不与出场滑入抢同一个 TranslateTransform
-                        var translate = GetOrCreateChannel(child, SiblingChannelIndex);
-
-                        var animation = new System.Windows.Media.Animation.DoubleAnimation
-                        {
-                            From = delta,
-                            To = 0,
-                            Duration = AnimationSpeed.ScaleMilliseconds(ToolbarSiblingSlideMs),
-                            EasingFunction = new System.Windows.Media.Animation.CubicEase
-                            {
-                                EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut
-                            }
-                        };
-
-                        animation.Completed += (_, _) =>
-                        {
-                            translate.BeginAnimation(TranslateTransform.XProperty, null);
-                            translate.X = 0;
-                        };
-
-                        translate.BeginAnimation(TranslateTransform.XProperty, animation);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"[ToolbarRegistry] 邻居滑动动画失败: {ex.Message}");
-                }
-            }), System.Windows.Threading.DispatcherPriority.Loaded);
-        }
-
-        /// <summary>邻居组件滑到新位置的时长（毫秒），与宽度过渡同节奏。</summary>
-        private const int ToolbarSiblingSlideMs = 180;
-
-
-
-        /// <summary>出场滑入使用的位移通道。</summary>
-        private const int EnterChannelIndex = 0;
-
-        /// <summary>邻居让位使用的位移通道。</summary>
-        private const int SiblingChannelIndex = 1;
-
-        /// <summary>
-        /// 取得组件指定通道的位移变换。
-        /// 两个通道分开，避免出场滑入与邻居让位同时发生时互相覆盖。
-        /// </summary>
-        private static TranslateTransform GetOrCreateChannel(FrameworkElement element, int channelIndex)
-        {
-            if (element.RenderTransform is TransformGroup group
-                && group.Children.Count > channelIndex
-                && group.Children[channelIndex] is TranslateTransform existing)
-            {
-                return existing;
-            }
-
-            // 重建两条通道（沿用已有值，避免已在播的动画被抹掉位置）
-            double x0 = 0, x1 = 0;
-            if (element.RenderTransform is TransformGroup old && old.Children.Count > 1)
-            {
-                if (old.Children[0] is TranslateTransform t0) x0 = t0.X;
-                if (old.Children[1] is TranslateTransform t1) x1 = t1.X;
-            }
-
-            var enter = new TranslateTransform(x0, 0);
-            var sibling = new TranslateTransform(x1, 0);
-            var rebuilt = new TransformGroup();
-            rebuilt.Children.Add(enter);
-            rebuilt.Children.Add(sibling);
-            element.RenderTransform = rebuilt;
-
-            return channelIndex == EnterChannelIndex ? enter : sibling;
-        }
-
-        /// <summary>
-        /// 组件显隐后，让工具栏宽度的变化有个过渡，而不是"啪"一下变宽/变窄。
-        /// </summary>
-        /// <remarks>
-        /// 为什么不直接对 Width 逐帧动画：
-        /// 宽度是布局属性，逐帧变化会每帧触发一次 measure/arrange，
-        /// 工具栏里每个按钮都要重新排列，正是掉帧的典型来源。
-        ///
-        /// 这里改用的做法是「一次布局 + 一次补间」：
-        /// 1. 先把面板宽度固定在旧值，避免子项显隐立刻把布局宽度改掉；
-        /// 2. 强制一次布局拿到新内容应有的宽度；
-        /// 3. 用一条短补间把 Width 从旧值推到新值；
-        /// 4. 结束后清掉 Width，让面板回到自动布局。
-        ///
-        /// 期间仍有布局，但只发生在补间的每一帧（不可避免——宽度本来就是布局量），
-        /// 且只涉及这一个面板，不再叠加组件显隐的重复测量。
-        /// 关掉「禁止工具栏动画」时直接跳过，保持原来的瞬时切换。
-        /// </remarks>
-        private static void AnimatePanelWidthToFit(Panel rootPanel, double beforeWidth)
-        {
-            if (rootPanel == null) return;
-            if (!_animateVisibilityChange) return;
-
-            // 竖向工具栏动画的是高度而非宽度，这里不处理
-            if (rootPanel is StackPanel sp && sp.Orientation == Orientation.Vertical) return;
-
-            try
-            {
-                // 先摘掉上一轮可能残留的宽度动画与固定值
-                rootPanel.BeginAnimation(FrameworkElement.WidthProperty, null);
-                rootPanel.ClearValue(FrameworkElement.WidthProperty);
-
-                // 关键：先让布局跑一遍，ActualWidth/DesiredSize 才是**新的**内容宽度。
-                // 只调 Measure 而不 UpdateLayout 时，元素若已参与过布局会复用缓存结果，
-                // 拿到的仍是切换前的旧宽度——之前"新值没拿对"就是这里。
-                rootPanel.UpdateLayout();
-                double targetWidth = rootPanel.ActualWidth;
-                if (targetWidth <= 0)
-                {
-                    rootPanel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-                    targetWidth = rootPanel.DesiredSize.Width;
-                }
-
-                // 新旧宽度差不多就不必补间
-                if (targetWidth <= 0 || beforeWidth <= 0 ||
-                    Math.Abs(targetWidth - beforeWidth) < 1.0)
-                {
-                    return;
-                }
-
-                // 把宽度退回旧值（此时布局已算出新值，写死宽度会立刻生效），
-                // 再用补间推到新值，视觉上就是"慢慢变宽/变窄"。
-                rootPanel.Width = beforeWidth;
-
-                var animation = new System.Windows.Media.Animation.DoubleAnimation
-                {
-                    From = beforeWidth,
-                    To = targetWidth,
-                    Duration = AnimationSpeed.ScaleMilliseconds(ToolbarWidthTransitionMs),
-                    EasingFunction = new System.Windows.Media.Animation.CubicEase
-                    {
-                        EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut
-                    }
-                };
-
-                // 结束后解除固定宽度，交还自动布局（否则之后内容变化会被旧值卡住）
-                animation.Completed += (_, _) =>
-                {
-                    rootPanel.BeginAnimation(FrameworkElement.WidthProperty, null);
-                    rootPanel.ClearValue(FrameworkElement.WidthProperty);
-                };
-
-                rootPanel.BeginAnimation(FrameworkElement.WidthProperty, animation);
-            }
-            catch (Exception ex)
-            {
-                // 补间失败时不能留下固定宽度，否则工具栏会永远卡在旧尺寸
-                rootPanel.BeginAnimation(FrameworkElement.WidthProperty, null);
-                rootPanel.ClearValue(FrameworkElement.WidthProperty);
-                LogHelper.WriteLogToFile($"ToolbarRegistry: 宽度补间失败: {ex.Message}", LogHelper.LogType.Warning);
-            }
-        }
-
-        /// <summary>工具栏宽度过渡时长（毫秒），略短于按钮出场，避免拖沓。</summary>
-        private const int ToolbarWidthTransitionMs = 180;
 
         private static void UpdatePanelVisibility(Panel panel, Dictionary<string, bool> context)
         {
@@ -1448,9 +1170,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             {
                 element.Visibility = Visibility.Visible;
 
-                // 淡入：透明度和位移共用同一条时间轴，与 Inkeys 的组件显现做法一致。
+                // 淡入
                 var fade = new System.Windows.Media.Animation.DoubleAnimation(0, 1,
-                    AnimationSpeed.ScaleMilliseconds(ToolbarItemShowDurationMs))
+                    TimeSpan.FromMilliseconds(ToolbarItemShowFadeMs))
                 {
                     EasingFunction = new System.Windows.Media.Animation.CubicEase
                     {
@@ -1459,24 +1181,25 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 };
                 element.BeginAnimation(UIElement.OpacityProperty, fade);
 
-                // 位置滑动而不是缩放：缩放会让按钮变形，且相邻按钮的视觉间距会跳动。
-                // 位移写 RenderTransform，不触发布局、不挤动邻居。
-                //
-                // 这里用 TransformGroup 划分两个独立通道：
-                //   [0] 出场滑入    [1] 邻居跟随
-                // 分开是因为两者会同时发生（新按钮滑入的同时，它后面的按钮也在让位），
-                // 若共用同一个 TranslateTransform.X 会互相覆盖，只剩其中一个生效。
-                var enterSlide = GetOrCreateChannel(element, EnterChannelIndex);
-                var slideIn = new System.Windows.Media.Animation.DoubleAnimation(
-                    ToolbarItemShowSlideOffset, 0,
-                    AnimationSpeed.ScaleMilliseconds(ToolbarItemShowDurationMs))
+                // 轻微放大：从略小长到原尺寸，避免"啪一下出现"。
+                // 用 RenderTransform 而不是宽度动画，保证不触发布局、不挤动邻居。
+                if (element.RenderTransform is not ScaleTransform scale)
+                {
+                    scale = new ScaleTransform(1, 1);
+                    element.RenderTransform = scale;
+                    element.RenderTransformOrigin = new Point(0.5, 0.5);
+                }
+
+                var pop = new System.Windows.Media.Animation.DoubleAnimation(ToolbarItemShowStartScale, 1,
+                    TimeSpan.FromMilliseconds(ToolbarItemShowScaleMs))
                 {
                     EasingFunction = new System.Windows.Media.Animation.CubicEase
                     {
                         EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut
                     }
                 };
-                enterSlide.BeginAnimation(TranslateTransform.XProperty, slideIn);
+                scale.BeginAnimation(ScaleTransform.ScaleXProperty, pop);
+                scale.BeginAnimation(ScaleTransform.ScaleYProperty, pop);
                 return;
             }
 
@@ -1493,15 +1216,14 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
             element.Visibility = target;
         }
 
-        /// <summary>
-        /// 按钮出场时长（毫秒）。
-        /// 对齐 Inkeys 的 0.4s 会显得慢——那是它整套 UI 的统一节奏，
-        /// 而工具栏按钮是被频繁触发的元素，这里折中取 220ms。
-        /// </summary>
-        internal const int ToolbarItemShowDurationMs = 220;
+        /// <summary>按钮出场淡入时长（毫秒）。</summary>
+        internal const int ToolbarItemShowFadeMs = 140;
 
-        /// <summary>按钮出场时的水平滑动起始偏移（DIP），0 → 该值反向滑入。</summary>
-        internal const double ToolbarItemShowSlideOffset = -8;
+        /// <summary>按钮出场缩放时长（毫秒）。</summary>
+        internal const int ToolbarItemShowScaleMs = 180;
+
+        /// <summary>按钮出场起始缩放：略小一点即可，过小会显得突兀。</summary>
+        internal const double ToolbarItemShowStartScale = 0.86;
 
         private static bool HasVisibleLeafContent(FrameworkElement element)
         {
