@@ -2,8 +2,6 @@ using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using System;
 using System.IO;
-using System.Windows;
-using System.Windows.Ink;
 
 namespace Ink_Canvas
 {
@@ -11,7 +9,7 @@ namespace Ink_Canvas
     {
         /// <summary>
         /// 保存自动化行动指定的笔画，不读取或修改全局保存格式设置。
-        /// SavePath 可以是目录，也可以是带文件名的目标路径；为空时使用默认自动保存目录。
+        /// SavePath 为空时使用默认自动保存目录；否则将其作为目标目录。
         /// </summary>
         public void SaveStrokesForAutomation(string savePath, bool saveAsXml)
         {
@@ -24,39 +22,20 @@ namespace Ink_Canvas
             try
             {
                 var extension = saveAsXml ? ".xml" : ".icstk";
-                string targetPath;
-
-                if (string.IsNullOrWhiteSpace(savePath))
-                {
-                    var defaultDirectory = Path.Combine(
+                var targetDirectory = string.IsNullOrWhiteSpace(savePath)
+                    ? Path.Combine(
                         Settings.Automation.AutoSavedStrokesLocation,
-                        "Automation Saved - " + (currentMode == 0 ? "Annotation Strokes" : "BlackBoard Strokes"));
-                    Directory.CreateDirectory(defaultDirectory);
+                        "Automation Saved - " + (currentMode == 0 ? "Annotation Strokes" : "BlackBoard Strokes"))
+                    : Environment.ExpandEnvironmentVariables(savePath.Trim());
 
-                    var fileName = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss-fff");
-                    if (currentMode != 0)
-                        fileName += " Page-" + CurrentWhiteboardIndex;
-                    fileName += " StrokesCount-" + inkCanvas.Strokes.Count;
+                Directory.CreateDirectory(targetDirectory);
 
-                    targetPath = Path.Combine(defaultDirectory, fileName + extension);
-                }
-                else if (Path.HasExtension(savePath))
-                {
-                    var directory = Path.GetDirectoryName(savePath);
-                    if (!string.IsNullOrEmpty(directory))
-                        Directory.CreateDirectory(directory);
-                    targetPath = Path.ChangeExtension(savePath, extension);
-                }
-                else
-                {
-                    Directory.CreateDirectory(savePath);
-                    var fileName = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss-fff");
-                    if (currentMode != 0)
-                        fileName += " Page-" + CurrentWhiteboardIndex;
-                    fileName += " StrokesCount-" + inkCanvas.Strokes.Count;
-                    targetPath = Path.Combine(savePath, fileName + extension);
-                }
+                var fileName = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss-fff");
+                if (currentMode != 0)
+                    fileName += " Page-" + CurrentWhiteboardIndex;
+                fileName += " StrokesCount-" + inkCanvas.Strokes.Count;
 
+                var targetPath = Path.Combine(targetDirectory, fileName + extension);
                 if (saveAsXml)
                 {
                     SaveStrokesAsXML(inkCanvas.Strokes, targetPath);
