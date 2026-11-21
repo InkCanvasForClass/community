@@ -46,7 +46,8 @@ namespace Ink_Canvas
         /// </summary>
         internal void TwoFingerGestureBorder_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (TwoFingerGestureBorder.IsOpen || BoardTwoFingerGestureBorder.IsOpen)
+            if (AnimationsHelper.IsPopupTargetingOpen(TwoFingerGestureBorder)
+                || AnimationsHelper.IsPopupTargetingOpen(BoardTwoFingerGestureBorder))
             {
                 AnimationsHelper.HidePopupWithSlideAndFade(TwoFingerGestureBorder);
                 AnimationsHelper.HidePopupWithSlideAndFade(BoardTwoFingerGestureBorder);
@@ -557,7 +558,9 @@ namespace Ink_Canvas
 
             // 上面是按名字硬编码的宿主自带面板；插件注册的弹窗不在其中，
             // 统一交给 PopupManagerHelper 兜底关闭，保证点击空白处时行为一致。
-            _popupManager?.CloseAllRegisteredPopups();
+            // 本方法是「立即隐藏」语义（窗口切走、自动折叠等），所以插件弹窗也必须瞬间消失；
+            // 播放收起动画只会让画面在上层已经消失之后还在空跑一段，纯属浪费。
+            _popupManager?.CloseAllRegisteredPopups(animate: false);
         }
 
         /// <summary>
@@ -649,8 +652,10 @@ namespace Ink_Canvas
             AnimationsHelper.HidePopupWithSlideAndFade(BoardImageOptionsPanel);
             AnimationsHelper.HidePopupWithSlideAndFade(TwoFingerGestureBorder);
             AnimationsHelper.HidePopupWithSlideAndFade(BoardTwoFingerGestureBorder);
-            // 漫游弹窗必须同步关闭，避免关闭动画的 Completed 在重新打开后再次将其关闭。
-            BoardRoamingPopup.IsOpen = false;
+            // 漫游弹窗同样走收起动画：硬置 IsOpen 会截断进行中的动画，画面瞬间消失。
+            // 「收起完成后又把重新打开的菜单关掉」这类竞态已由进度时钟的方向判定兜住
+            // （见 AnimationsHelper.HidePopupWithSlideAndFade 的 HIDE-DONE-SKIPPED 分支）。
+            AnimationsHelper.HidePopupWithSlideAndFade(BoardRoamingPopup);
 
             AnimationsHelper.HidePopupWithSlideAndFade(BackgroundPalette);
 
@@ -1950,7 +1955,8 @@ namespace Ink_Canvas
         /// <param name="e">鼠标按钮事件参数</param>
         internal void SymbolIconTools_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (BorderTools.IsOpen || BoardBorderToolsPopup.IsOpen)
+            if (AnimationsHelper.IsPopupTargetingOpen(BorderTools)
+                || AnimationsHelper.IsPopupTargetingOpen(BoardBorderToolsPopup))
             {
                 AnimationsHelper.HidePopupWithSlideAndFade(BorderTools);
                 AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderToolsPopup);
@@ -3903,7 +3909,8 @@ namespace Ink_Canvas
                         }
                     }
 
-                    if (PenPalette.IsOpen || BoardPenPalette.IsOpen)
+                    if (AnimationsHelper.IsPopupTargetingOpen(PenPalette)
+                        || AnimationsHelper.IsPopupTargetingOpen(BoardPenPalette))
                     {
                         AnimationsHelper.HidePopupWithSlideAndFade(PenPalette);
                         AnimationsHelper.HidePopupWithSlideAndFade(BoardPenPalette);
@@ -4062,7 +4069,9 @@ namespace Ink_Canvas
 
             if (isAlreadyEraser)
             {
-                if (EraserSizePanel.IsOpen == false && BoardEraserSizePanel?.IsOpen != true)
+                    // IsPopupTargetingOpen(null) 返回 false，正好对应原来 `?.IsOpen != true` 的空值语义。
+                if (!AnimationsHelper.IsPopupTargetingOpen(EraserSizePanel)
+                    && !AnimationsHelper.IsPopupTargetingOpen(BoardEraserSizePanel))
                 {
                     if (currentMode == 0)
                     {
@@ -4120,7 +4129,9 @@ namespace Ink_Canvas
 
             if (isAlreadyEraser)
             {
-                if (BoardEraserSizePanel?.IsOpen != true && EraserSizePanel.IsOpen == false)
+                // 同 EraserIcon_Click：两个橡皮尺寸面板共用一个开关，任一在打开状态就整体收起。
+                if (!AnimationsHelper.IsPopupTargetingOpen(BoardEraserSizePanel)
+                    && !AnimationsHelper.IsPopupTargetingOpen(EraserSizePanel))
                 {
                     if (currentMode == 0)
                     {
@@ -5112,7 +5123,7 @@ namespace Ink_Canvas
         {
             if (TryBlockFrozenPageMutation(FloatingBarStrings.Board_InsertImage)) return;
             // Check if the image options panel is currently visible
-            bool isImagePanelVisible = BoardImageOptionsPanel.IsOpen;
+            bool isImagePanelVisible = AnimationsHelper.IsPopupTargetingOpen(BoardImageOptionsPanel);
 
             // Toggle the image options panel
             if (isImagePanelVisible)

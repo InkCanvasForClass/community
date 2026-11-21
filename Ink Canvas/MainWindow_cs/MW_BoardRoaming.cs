@@ -26,18 +26,6 @@ namespace Ink_Canvas
         private Rect _boardRoamingPreviewMovementBounds;
         private bool _isUpdatingBoardRoamingPopup;
         private bool _boardRoamingPopupEventsAttached;
-        private bool _isSyncingBoardRoamingToggles;
-        // 漫游接触点（设备 ID -> 最近位置，按落下顺序排列）。
-        // Stylus 与 PreviewTouch 共用接触点状态，双指手势直接从触点计算，不叠加 WPF Manipulation。
-        private readonly List<KeyValuePair<int, Point>> _boardRoamingContacts = new List<KeyValuePair<int, Point>>();
-        private Matrix _boardRoamingContactInputInverse;
-        private bool _isBoardRoamingTwoFingerGesture;
-        private bool _isBoardRoamingPopupDragActive;
-        // 单指拖动挂起：第一指落下后先不拖动，位移超过阈值才激活，
-        // 避免放置第二指过程中的手部漂移带动板书产生异常位移。
-        private bool _isBoardRoamingSingleFingerPending;
-        private Point _boardRoamingPendingStartPoint;
-        private const double BoardRoamingSingleFingerActivationThreshold = 10.0;
         private readonly HashSet<int> _boardRoamingContactIds = new HashSet<int>();
         private int _boardRoamingPrimaryContactId = -1;
         private bool _isBoardRoamingMultiTouchSuppressed;
@@ -57,9 +45,9 @@ namespace Ink_Canvas
         {
             if (IsBoardRoamingMode)
             {
-                if (BoardRoamingPopup != null && BoardRoamingPopup.IsOpen)
+                if (AnimationsHelper.IsPopupTargetingOpen(BoardRoamingPopup))
                 {
-                    BoardRoamingPopup.IsOpen = false;
+                    AnimationsHelper.HidePopupWithSlideAndFade(BoardRoamingPopup);
                 }
                 else
                 {
@@ -143,25 +131,12 @@ namespace Ink_Canvas
             _isBoardRoamingPointerDown = true;
             _boardRoamingLastPoint = point;
             _boardRoamingPendingTranslation = new Vector();
-            if (PluginCanvasViewportTransformChanged == null)
-            {
-                _boardRoamingStrokeHistory = null;
-                _boardRoamingOriginalRenderTransform = inkCanvas.RenderTransform;
-                _boardRoamingRenderTranslation = new TranslateTransform();
-                var transform = new TransformGroup();
-                transform.Children.Add(_boardRoamingRenderTranslation);
-                transform.Children.Add(_boardRoamingOriginalRenderTransform ?? Transform.Identity);
-                inkCanvas.SetCurrentValue(UIElement.RenderTransformProperty, transform);
-            }
-            else
-            {
-                // 插件视口需要每个增量同步，保留实时内容变换，避免重复移动插件子元素。
-                _boardRoamingOriginalRenderTransform = null;
-                _boardRoamingRenderTranslation = null;
-                _boardRoamingStrokeHistory = new Dictionary<Stroke, StylusPointCollection>();
-                foreach (var stroke in inkCanvas.Strokes)
-                    _boardRoamingStrokeHistory[stroke] = stroke.StylusPoints.Clone();
-            }
+            _boardRoamingOriginalRenderTransform = inkCanvas.RenderTransform;
+            _boardRoamingRenderTranslation = new TranslateTransform();
+            var transform = new TransformGroup();
+            transform.Children.Add(_boardRoamingRenderTranslation);
+            transform.Children.Add(_boardRoamingOriginalRenderTransform ?? Transform.Identity);
+            inkCanvas.SetCurrentValue(UIElement.RenderTransformProperty, transform);
             _boardRoamingBoothStartX = _boothPreviewTranslateX;
             _boardRoamingBoothStartY = _boothPreviewTranslateY;
             inkCanvas.Cursor = Cursors.Hand;
@@ -191,21 +166,14 @@ namespace Ink_Canvas
 
         private void EndBoardRoaming()
         {
-            if (_isBoardRoamingTwoFingerGesture)
-            {
-                EndBoardRoamingTwoFingerGesture();
-                return;
-            }
             if (!_isBoardRoamingPointerDown) return;
 
             _isBoardRoamingPointerDown = false;
             CancelBoardRoamingPreviewRefresh();
             _isBoardRoamingPopupDrag = false;
-            _isBoardRoamingPopupDragActive = false;
             try
             {
                 CommitBoardRoamingHistory();
-                CompletePluginCanvasViewportTransform();
                 // 提交后内容坐标整体平移，缓存边界也必须同步，保持弹窗中的墨迹位置不变。
                 if (IsValidBoardRoamingBounds(_boardRoamingWorldBounds))
                 {
@@ -216,9 +184,8 @@ namespace Ink_Canvas
             }
             finally
             {
-                if (_boardRoamingRenderTranslation != null)
-                    inkCanvas.SetCurrentValue(UIElement.RenderTransformProperty,
-                        _boardRoamingOriginalRenderTransform ?? Transform.Identity);
+                inkCanvas.SetCurrentValue(UIElement.RenderTransformProperty,
+                    _boardRoamingOriginalRenderTransform ?? Transform.Identity);
                 _boardRoamingOriginalRenderTransform = null;
                 _boardRoamingRenderTranslation = null;
                 _boardRoamingPendingTranslation = new Vector();
@@ -262,33 +229,12 @@ namespace Ink_Canvas
             _boardRoamingInputEventsAttached = true;
         }
 
-        /// <summary>
-        /// 强制结束漫游交互（单指拖动/双指手势），用于切换工具等场景。
-        /// </summary>
-        private void CancelBoardRoamingInteraction()
+        private void ResetBoardRoamingContactState()
         {
-            // 先记录手势类型，重置触点后仍需提交双指手势历史并结束插件视口变换。
-            var wasTwoFingerGesture = _isBoardRoamingTwoFingerGesture;
-            ResetBoardRoamingGestureState();
-            if (wasTwoFingerGesture)
-                EndBoardRoamingTwoFingerGesture();
-            else
-                EndBoardRoaming();
-        }
-
-        private void ResetBoardRoamingContactState() => ResetBoardRoamingGestureState();
-
-        private void ResetBoardRoamingGestureState()
-        {
-            var hadContacts = _boardRoamingContacts.Count > 0 || _boardRoamingContactIds.Count > 0;
-            _boardRoamingContacts.Clear();
+            var hadContacts = _boardRoamingContactIds.Count > 0;
             _boardRoamingContactIds.Clear();
             _boardRoamingPrimaryContactId = -1;
             _isBoardRoamingMultiTouchSuppressed = false;
-            _isBoardRoamingTwoFingerGesture = false;
-            _isBoardRoamingPopupDragActive = false;
-            _isBoardRoamingPopupDrag = false;
-            _isBoardRoamingSingleFingerPending = false;
             if (hadContacts)
             {
                 inkCanvas.ReleaseStylusCapture();
@@ -306,115 +252,49 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 漫游模式下的接触点落下：第 1 指开始单指拖动，第 2 指切换为双指手势。
+        /// 记录漫游触点。漫游只允许第一根手指拖动；第二根及以后触点会抑制本次多指操作。
         /// </summary>
         private void BeginBoardRoamingContact(int contactId, Point point)
         {
-            if (!IsBoardRoamingMode || !double.IsFinite(point.X) || !double.IsFinite(point.Y)) return;
-            if (_boardRoamingContacts.FindIndex(c => c.Key == contactId) >= 0) return;
-            if (_boardRoamingContacts.Count == 0)
-            {
-                var transform = GetBoardRoamingInputTransform(inkCanvas);
-                if (!IsFinite(transform) || !transform.HasInverse) return;
-                transform.Invert();
-                _boardRoamingContactInputInverse = transform;
-                _boardRoamingPrimaryContactId = contactId;
-            }
-            point = _boardRoamingContactInputInverse.Transform(GetBoardRoamingInputTransform(inkCanvas).Transform(point));
-            _boardRoamingContacts.Add(new KeyValuePair<int, Point>(contactId, point));
-            _boardRoamingContactIds.Add(contactId);
+            if (!IsBoardRoamingMode || !_boardRoamingContactIds.Add(contactId)) return;
 
-            if (_boardRoamingContacts.Count == 1)
+            if (_boardRoamingContactIds.Count == 1 && !_isBoardRoamingMultiTouchSuppressed)
             {
-                // 先挂起，等位移越过激活阈值再启动单指拖动（见 MoveBoardRoamingContact）。
-                _isBoardRoamingSingleFingerPending = true;
-                _boardRoamingPendingStartPoint = point;
+                _boardRoamingPrimaryContactId = contactId;
+                BeginBoardRoaming(point);
+                return;
             }
-            else if (_boardRoamingContacts.Count == 2 && !_isBoardRoamingTwoFingerGesture)
-            {
-                BeginBoardRoamingTwoFingerGesture();
-            }
+
+            _isBoardRoamingMultiTouchSuppressed = true;
+            _boardRoamingPrimaryContactId = -1;
+            if (_isBoardRoamingPointerDown)
+                EndBoardRoaming();
         }
 
         private void MoveBoardRoamingContact(int contactId, Point point)
         {
-            var index = _boardRoamingContacts.FindIndex(c => c.Key == contactId);
-            if (index < 0 || !double.IsFinite(point.X) || !double.IsFinite(point.Y)) return;
-
-            if (!IsBoardRoamingMode)
-            {
-                CancelBoardRoamingInteraction();
+            if (!IsBoardRoamingMode
+                || _isBoardRoamingMultiTouchSuppressed
+                || contactId != _boardRoamingPrimaryContactId)
                 return;
-            }
 
-            var inputPoint = point;
-            // 接触点始终使用首指落下时的坐标系，切换显示层平移/双指手势时不跳变。
-            point = _boardRoamingContactInputInverse.Transform(GetBoardRoamingInputTransform(inkCanvas).Transform(point));
-            var previousPoint = _boardRoamingContacts[index].Value;
-
-            if (_isBoardRoamingTwoFingerGesture && _boardRoamingContacts.Count >= 2)
-            {
-                var previousFirst = _boardRoamingContacts[0].Value;
-                var previousSecond = _boardRoamingContacts[1].Value;
-                _boardRoamingContacts[index] = new KeyValuePair<int, Point>(contactId, point);
-                ApplyBoardRoamingTwoFingerGesture(previousFirst, previousSecond,
-                    _boardRoamingContacts[0].Value, _boardRoamingContacts[1].Value);
-                RefreshBoardRoamingPopup(false);
-                return;
-            }
-
-            _boardRoamingContacts[index] = new KeyValuePair<int, Point>(contactId, point);
-
-            if (_isBoardRoamingTwoFingerGesture)
-            {
-                // 双指手势进行中但仅剩一指：继续按该指平移（与批注态 Manipulation 一致）。
-                var delta = point - previousPoint;
-                if (delta.X != 0 || delta.Y != 0)
-                {
-                    var matrix = Matrix.Identity;
-                    matrix.Translate(delta.X, delta.Y);
-                    TransformBoardRoamingContent(matrix, delta, 1);
-                    RefreshBoardRoamingPopup(false);
-                }
-                return;
-            }
-
-            if (_isBoardRoamingSingleFingerPending)
-            {
-                var offset = point - _boardRoamingPendingStartPoint;
-                if (offset.Length < BoardRoamingSingleFingerActivationThreshold) return;
-
-                // 激活单指拖动：以当前位置为拖动起点，本次移动不产生位移（无跳变）。
-                _isBoardRoamingSingleFingerPending = false;
-                BeginBoardRoaming(inputPoint);
-                return;
-            }
-
-            MoveBoardRoaming(inputPoint);
+            MoveBoardRoaming(point);
         }
 
-        /// <summary>
-        /// 漫游模式下的接触点抬起。全部抬起时提交手势历史。
-        /// </summary>
         private void EndBoardRoamingContact(int contactId)
         {
-            var index = _boardRoamingContacts.FindIndex(c => c.Key == contactId);
-            if (index >= 0) _boardRoamingContacts.RemoveAt(index);
-            _boardRoamingContactIds.Remove(contactId);
-            if (contactId == _boardRoamingPrimaryContactId)
-                _boardRoamingPrimaryContactId = _boardRoamingContacts.Count > 0 ? _boardRoamingContacts[0].Key : -1;
+            if (!_boardRoamingContactIds.Remove(contactId)) return;
 
-            if (_isBoardRoamingTwoFingerGesture)
+            if (_boardRoamingContactIds.Count == 0)
             {
-                if (_boardRoamingContacts.Count == 0)
-                    EndBoardRoamingTwoFingerGesture();
-                return;
+                if (!_isBoardRoamingMultiTouchSuppressed)
+                    EndBoardRoaming();
+                ResetBoardRoamingContactState();
             }
-
-            if (_boardRoamingContacts.Count == 0)
+            else if (contactId == _boardRoamingPrimaryContactId)
             {
-                _isBoardRoamingSingleFingerPending = false;
-                EndBoardRoaming();
+                // 多指操作期间不恢复剩余手指，避免抬起第二指后重新跳动。
+                _boardRoamingPrimaryContactId = -1;
             }
         }
 
@@ -425,25 +305,15 @@ namespace Ink_Canvas
         {
             if (!IsBoardRoamingMode)
             {
-                if (BoardRoamingPopup != null)
-                    BoardRoamingPopup.IsOpen = false;
-                ResetBoardRoamingGestureState();
+                // 走收起动画：硬置 IsOpen 会截断进行中的动画，且漫游弹窗与其他菜单观感应一致。
+                AnimationsHelper.HidePopupWithSlideAndFade(BoardRoamingPopup);
+                ResetBoardRoamingContactState();
                 return;
             }
 
-            var hadActiveBoardRoamingInput = _boardRoamingContacts.Count > 0
-                || _isBoardRoamingPointerDown
-                || _isBoardRoamingTwoFingerGesture
-                || _isBoardRoamingPopupDragActive;
-
-            if (_isBoardRoamingTwoFingerGesture)
-                EndBoardRoamingTwoFingerGesture();
-            else if (_isBoardRoamingPopupDragActive)
-                EndBoardRoamingPopupDrag();
-            else
-                EndBoardRoaming();
-
-            ResetBoardRoamingGestureState();
+            var hadActiveBoardRoamingInput = _boardRoamingContactIds.Count > 0 || _isBoardRoamingPointerDown;
+            EndBoardRoaming();
+            ResetBoardRoamingContactState();
             if (hadActiveBoardRoamingInput)
             {
                 inkCanvas.ReleaseStylusCapture();
@@ -451,201 +321,47 @@ namespace Ink_Canvas
                 ViewboxFloatingBar.IsHitTestVisible = true;
                 BlackboardUIGridForInkReplay.IsHitTestVisible = true;
             }
-            if (BoardRoamingPopup != null)
-                BoardRoamingPopup.IsOpen = false;
+            AnimationsHelper.HidePopupWithSlideAndFade(BoardRoamingPopup);
 
             // 复用现有批注入口，确保编辑模式、工具栏高亮和原生墨迹状态同步。
             PenIcon_Click(null, null);
             SetCursorBasedOnEditingMode(inkCanvas);
         }
 
-        private void BeginBoardRoamingTwoFingerGesture()
+        private void CommitBoardRoamingHistory()
         {
-            // 取消单指挂起并提交可能存在的单指拖动阶段历史，双指手势单独成一步撤销记录。
-            _isBoardRoamingSingleFingerPending = false;
-            EndBoardRoaming();
-            AttachBoardRoamingInputEvents();
+            var delta = _boardRoamingPendingTranslation;
+            if (delta.X == 0 && delta.Y == 0) return;
 
-            _isBoardRoamingTwoFingerGesture = true;
-            _boardRoamingStrokeHistory = new Dictionary<Stroke, StylusPointCollection>();
-            foreach (var stroke in inkCanvas.Strokes)
+            var strokes = new StrokeCollection(inkCanvas.Strokes);
+            _boardRoamingStrokeHistory = new Dictionary<Stroke, StylusPointCollection>(strokes.Count);
+            foreach (var stroke in strokes)
                 _boardRoamingStrokeHistory[stroke] = stroke.StylusPoints.Clone();
-        }
 
-        private void EndBoardRoamingTwoFingerGesture()
-        {
-            _isBoardRoamingTwoFingerGesture = false;
-            _isBoardRoamingPointerDown = false;
-            CancelBoardRoamingPreviewRefresh();
-            try
-            {
-                CommitBoardRoamingHistory();
-                CompletePluginCanvasViewportTransform();
-            }
-            finally
-            {
-                ResetBoardRoamingGestureState();
-                _boardRoamingStrokeHistory = null;
-                _boardRoamingViewportWorldPosition = new Point();
-                _boardRoamingPreviewDirty = true;
-                inkCanvas.Cursor = IsBoardRoamingMode ? Cursors.Hand : Cursors.Arrow;
-                if (BoardRoamingPopup?.IsOpen == true)
-                    QueueBoardRoamingPreviewRefresh();
-            }
-        }
-
-        /// <summary>
-        /// 双指手势：以两指连线中点为锚点——内容跟随指心平移，按两指间距比例
-        /// 等比缩放（非变形，横纵向同比例），旋转按两指角度变化绕中点进行。
-        /// </summary>
-        private void ApplyBoardRoamingTwoFingerGesture(Point previousFirst, Point previousSecond, Point currentFirst, Point currentSecond)
-        {
-            bool enableZoom = Settings.Gesture.IsEnableTwoFingerZoomRoaming;
-            bool enableRotate = Settings.Gesture.IsEnableTwoFingerRotationRoaming;
-
-            var previousMidpoint = new Point(
-                (previousFirst.X + previousSecond.X) / 2,
-                (previousFirst.Y + previousSecond.Y) / 2);
-            var currentMidpoint = new Point(
-                (currentFirst.X + currentSecond.X) / 2,
-                (currentFirst.Y + currentSecond.Y) / 2);
-
-            var m = new Matrix();
-            double scale = 1;
-
-            if (enableZoom)
-            {
-                var previousDistance = GetDistance(previousFirst, previousSecond);
-                var currentDistance = GetDistance(currentFirst, currentSecond);
-                if (previousDistance > 0.001 && currentDistance > 0.001)
-                {
-                    scale = currentDistance / previousDistance;
-                    m.ScaleAt(scale, scale, previousMidpoint.X, previousMidpoint.Y);
-                }
-            }
-
-            if (enableRotate)
-            {
-                var previousAngle = Math.Atan2(previousSecond.Y - previousFirst.Y, previousSecond.X - previousFirst.X) * 180 / Math.PI;
-                var currentAngle = Math.Atan2(currentSecond.Y - currentFirst.Y, currentSecond.X - currentFirst.X) * 180 / Math.PI;
-                m.RotateAt(currentAngle - previousAngle, previousMidpoint.X, previousMidpoint.Y);
-            }
-
-            var trans = currentMidpoint - previousMidpoint;
-            m.Translate(trans.X, trans.Y);
-
-            TransformBoardRoamingContent(m, trans, scale);
-        }
-
-        /// <summary>
-        /// 对板书内容应用任意矩阵（平移/等比缩放/旋转），同步图片、圆圈标注、插件视口、
-        /// 视口世界坐标与视频展台预览。平移分量单独传给展台（展台不支持缩放旋转）。
-        /// </summary>
-        private void TransformBoardRoamingContent(Matrix matrix, Vector translationDelta, double scale)
-        {
             var previousCommitType = _currentCommitType;
-            var previousHistoryCommit = _isCommittingBoardRoaming;
             _currentCommitType = CommitReason.CodeInput;
             _isCommittingBoardRoaming = true;
             try
             {
-                foreach (var stroke in inkCanvas.Strokes)
-                {
+                var matrix = Matrix.Identity;
+                matrix.Translate(delta.X, delta.Y);
+                foreach (var stroke in strokes)
                     stroke.Transform(matrix, false);
-                    if (scale != 1)
-                    {
-                        try
-                        {
-                            stroke.DrawingAttributes.Width *= scale;
-                            stroke.DrawingAttributes.Height *= scale;
-                        }
-                        catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
-                    }
-                }
-
-                TransformCanvasImages(matrix);
-
-                foreach (var circle in circles)
+                foreach (UIElement child in inkCanvas.Children)
                 {
-                    circle.R = GetDistance(circle.Stroke.StylusPoints[0].ToPoint(),
-                        circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].ToPoint()) / 2;
-                    circle.Centroid = new Point(
-                        (circle.Stroke.StylusPoints[0].X +
-                         circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].X) / 2,
-                        (circle.Stroke.StylusPoints[0].Y +
-                         circle.Stroke.StylusPoints[circle.Stroke.StylusPoints.Count / 2].Y) / 2);
-                }
-
-                PublishPluginCanvasViewportTransform(matrix);
-
-                if (_isVideoPresenterSpecialMode)
-                {
-                    _boothPreviewTranslateX += translationDelta.X;
-                    _boothPreviewTranslateY += translationDelta.Y;
-                    ApplyBoothPreviewTransform();
-                    ResetRotationBaseline();
-                }
-
-                // 视口世界坐标跟随内容变换的逆矩阵（纯平移时等价于 pos -= delta，与既有行为一致）。
-                if (matrix.HasInverse)
-                {
-                    var inverse = matrix;
-                    inverse.Invert();
-                    var origin = inverse.Transform(new Point(0, 0));
-                    _boardRoamingViewportWorldPosition = new Point(
-                        _boardRoamingViewportWorldPosition.X + origin.X,
-                        _boardRoamingViewportWorldPosition.Y + origin.Y);
+                    var transform = child.RenderTransform?.Value ?? Matrix.Identity;
+                    transform.Translate(delta.X, delta.Y);
+                    child.SetCurrentValue(UIElement.RenderTransformProperty, new MatrixTransform(transform));
                 }
             }
             finally
             {
-                _isCommittingBoardRoaming = previousHistoryCommit;
+                _isCommittingBoardRoaming = false;
                 _currentCommitType = previousCommitType;
-                _boardRoamingPreviewDirty = true;
-            }
-        }
-
-        private void CommitBoardRoamingHistory()
-        {
-            var delta = _boardRoamingPendingTranslation;
-            if (delta.X != 0 || delta.Y != 0)
-            {
-                var strokes = new StrokeCollection(inkCanvas.Strokes);
-                _boardRoamingStrokeHistory = new Dictionary<Stroke, StylusPointCollection>(strokes.Count);
-                foreach (var stroke in strokes)
-                    _boardRoamingStrokeHistory[stroke] = stroke.StylusPoints.Clone();
-
-                var previousCommitType = _currentCommitType;
-                _currentCommitType = CommitReason.CodeInput;
-                _isCommittingBoardRoaming = true;
-                try
-                {
-                    var matrix = Matrix.Identity;
-                    matrix.Translate(delta.X, delta.Y);
-                    foreach (var stroke in strokes)
-                        stroke.Transform(matrix, false);
-                    foreach (UIElement child in inkCanvas.Children)
-                    {
-                        var transform = child.RenderTransform?.Value ?? Matrix.Identity;
-                        transform.Translate(delta.X, delta.Y);
-                        child.SetCurrentValue(UIElement.RenderTransformProperty, new MatrixTransform(transform));
-                    }
-                    if (circles != null)
-                        foreach (var circle in circles)
-                            circle.Centroid += delta;
-                    PublishPluginCanvasViewportTransform(matrix);
-                }
-                finally
-                {
-                    _isCommittingBoardRoaming = false;
-                    _currentCommitType = previousCommitType;
-                }
             }
 
-            // 双指及插件联动已实时修改内容，复用开始时的快照，不再应用一次平移。
-            if (_boardRoamingStrokeHistory == null) return;
             var currentStrokes = new HashSet<Stroke>(inkCanvas.Strokes);
-            var history = new Dictionary<Stroke, Tuple<StylusPointCollection, StylusPointCollection>>(_boardRoamingStrokeHistory.Count);
+            var history = new Dictionary<Stroke, Tuple<StylusPointCollection, StylusPointCollection>>(strokes.Count);
             foreach (var item in _boardRoamingStrokeHistory)
             {
                 if (!currentStrokes.Contains(item.Key)) continue;
@@ -661,22 +377,10 @@ namespace Ink_Canvas
                 foreach (var item in history)
                     StrokeInitialHistory[item.Key] = item.Value.Item2;
             }
-            // 双指缩放还修改笔宽，几何和绘制属性的历史都需要提交并清理。
-            if (DrawingAttributesHistory?.Count > 0)
-            {
-                timeMachine.CommitStrokeDrawingAttributesHistory(DrawingAttributesHistory);
-                DrawingAttributesHistory = new Dictionary<Stroke, Tuple<DrawingAttributes, DrawingAttributes>>();
-                foreach (var item in DrawingAttributesHistoryFlag)
-                    item.Value.Clear();
-            }
-
             if (history.Count > 0 || inkCanvas.Children.Count > 0)
                 MarkCurrentPageInkChanged();
             if (_isVideoPresenterSpecialMode)
                 ResetRotationBaseline();
-            _boardRoamingStrokeHistory = null;
-            _boardRoamingViewportWorldPosition = new Point();
-            _boardRoamingPreviewDirty = true;
         }
 
         private void ShowBoardRoamingPopup()
@@ -684,27 +388,13 @@ namespace Ink_Canvas
             if (BoardRoamingPopup == null || BoardRoamingPopupContent == null) return;
 
             AttachBoardRoamingPopupEvents();
-            SyncBoardRoamingToggleStates();
+            // 这里是「先硬关再打开」而不是「收起动画」：下面要按内容真实尺寸刷新布局，
+            // 带着未归位的 RenderTransform 量出来的尺寸是错的（详见 PopupOverflowRoom）。
+            // 紧随其后的 ShowPopupWithSlideAndFade 会从当前 progress 重新起播，观感上仍是播放一次出场。
             BoardRoamingPopup.IsOpen = false;
             RefreshBoardRoamingPopup(true, true);
             AnimationsHelper.ShowPopupWithSlideAndFade(BoardRoamingPopup);
             _popupManager?.BringToFront(BoardRoamingPopup);
-        }
-
-        private void SyncBoardRoamingToggleStates()
-        {
-            _isSyncingBoardRoamingToggles = true;
-            try
-            {
-                if (BoardRoamingPopupContent.TwoFingerZoomToggle != null)
-                    BoardRoamingPopupContent.TwoFingerZoomToggle.IsOn = Settings.Gesture.IsEnableTwoFingerZoomRoaming;
-                if (BoardRoamingPopupContent.TwoFingerRotationToggle != null)
-                    BoardRoamingPopupContent.TwoFingerRotationToggle.IsOn = Settings.Gesture.IsEnableTwoFingerRotationRoaming;
-            }
-            finally
-            {
-                _isSyncingBoardRoamingToggles = false;
-            }
         }
 
         private void AttachBoardRoamingPopupEvents()
@@ -720,49 +410,12 @@ namespace Ink_Canvas
                 BoardRoamingPopupContent.CompleteViewportDrag();
             };
             if (BoardRoamingPopupContent.CloseButtonControl != null)
-            {
-                BoardRoamingPopupContent.CloseButtonControl.Click += (s, e) => ExitBoardRoamingMode();
-                // 按下阶段立即关闭，避免首次点击被拖拽/捕获等逻辑吞掉导致需要点两次。
-                BoardRoamingPopupContent.CloseButtonControl.PreviewMouseLeftButtonDown +=
-                    BoardRoamingCloseButton_PreviewInputDown;
-                BoardRoamingPopupContent.CloseButtonControl.PreviewStylusDown +=
-                    BoardRoamingCloseButton_PreviewStylusDown;
-            }
-            if (BoardRoamingPopupContent.TwoFingerZoomToggle != null)
-                BoardRoamingPopupContent.TwoFingerZoomToggle.Toggled += BoardRoamingTwoFingerZoom_Toggled;
-            if (BoardRoamingPopupContent.TwoFingerRotationToggle != null)
-                BoardRoamingPopupContent.TwoFingerRotationToggle.Toggled += BoardRoamingTwoFingerRotation_Toggled;
+                BoardRoamingPopupContent.CloseButtonControl.Click += (s, e) =>
+                {
+                    // 走收起动画：直接置 IsOpen 会截断进行中的动画，画面瞬间消失。
+                    AnimationsHelper.HidePopupWithSlideAndFade(BoardRoamingPopup);
+                };
             _boardRoamingPopupEventsAttached = true;
-        }
-
-        private void BoardRoamingCloseButton_PreviewInputDown(object sender, MouseButtonEventArgs e)
-        {
-            ExitBoardRoamingMode();
-            e.Handled = true;
-        }
-
-        private void BoardRoamingCloseButton_PreviewStylusDown(object sender, StylusDownEventArgs e)
-        {
-            ExitBoardRoamingMode();
-            e.Handled = true;
-        }
-
-        private void BoardRoamingTwoFingerZoom_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (_isSyncingBoardRoamingToggles) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle == null) return;
-            Settings.Gesture.IsEnableTwoFingerZoomRoaming = toggle.IsOn;
-            SaveSettingsToFile();
-        }
-
-        private void BoardRoamingTwoFingerRotation_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (_isSyncingBoardRoamingToggles) return;
-            var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
-            if (toggle == null) return;
-            Settings.Gesture.IsEnableTwoFingerRotationRoaming = toggle.IsOn;
-            SaveSettingsToFile();
         }
 
         private void RefreshBoardRoamingPopup()
@@ -938,9 +591,8 @@ namespace Ink_Canvas
                     && double.IsFinite(yAxis.X) && double.IsFinite(yAxis.Y)
                     && double.IsFinite(origin.X) && double.IsFinite(origin.Y);
             }
-            catch (InvalidOperationException ex)
+            catch (InvalidOperationException)
             {
-                LogHelper.WriteLogToFile($"[Board] 计算子元素边界失败，元素可能不在画布可视树内: {ex.Message}", LogHelper.LogType.Info);
                 return false;
             }
             catch (ArgumentException)
@@ -1040,30 +692,18 @@ namespace Ink_Canvas
 
         private void BeginBoardRoamingPopupDrag()
         {
-            if (_isBoardRoamingPopupDragActive || _isBoardRoamingPointerDown || _boardRoamingContacts.Count > 0) return;
+            if (_isBoardRoamingPointerDown) return;
             BeginBoardRoaming(new Point());
             _isBoardRoamingPopupDrag = _isBoardRoamingPointerDown;
-            _isBoardRoamingPopupDragActive = _isBoardRoamingPointerDown;
         }
 
         private void EndBoardRoamingPopupDrag()
-        {
-            if (!_isBoardRoamingPopupDragActive) return;
-            EndBoardRoaming();
-        }
+            => EndBoardRoaming();
 
         private void TranslateBoardRoamingContent(double deltaX, double deltaY)
         {
-            if (!_isBoardRoamingPointerDown || !double.IsFinite(deltaX) || !double.IsFinite(deltaY)) return;
-
-            if (_boardRoamingRenderTranslation == null)
-            {
-                var matrix = Matrix.Identity;
-                matrix.Translate(deltaX, deltaY);
-                TransformBoardRoamingContent(matrix, new Vector(deltaX, deltaY), 1);
-                if (!_isBoardRoamingPopupDrag) RefreshBoardRoamingPopup(false);
-                return;
-            }
+            if (!_isBoardRoamingPointerDown || _boardRoamingRenderTranslation == null
+                || !double.IsFinite(deltaX) || !double.IsFinite(deltaY)) return;
 
             var translation = _boardRoamingPendingTranslation + new Vector(deltaX, deltaY);
             if (!double.IsFinite(translation.X) || !double.IsFinite(translation.Y)) return;

@@ -42,7 +42,8 @@ namespace Ink_Canvas
                 PenIcon_Click(sender, e);
             }
 
-            if (BorderDrawShape.IsOpen || BoardBorderDrawShape.IsOpen)
+            if (AnimationsHelper.IsPopupTargetingOpen(BorderDrawShape)
+                || AnimationsHelper.IsPopupTargetingOpen(BoardBorderDrawShape))
             {
                 AnimationsHelper.HidePopupWithSlideAndFade(BorderDrawShape);
                 AnimationsHelper.HidePopupWithSlideAndFade(BoardBorderDrawShape);
