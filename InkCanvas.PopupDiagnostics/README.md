@@ -22,6 +22,7 @@ dotnet run --project InkCanvas.PopupDiagnostics
 | 峰值等于 `PopupCurve.PeakScale` | 这个常量同时是宿主留白的依据，对不上就会被窗体裁掉 |
 | 全程不超过 PeakScale | 采样 1000 点，任何一个点超了都会在峰值那几帧被切 |
 | 透明度权重不被截断 | 权重直接乘进 `Visual.Opacity`，超界会被 WPF 静默夹取 |
+| 透明度一路铺满到落位 | 走独立的 EaseOutSine，不能跟着几何行程在 29% 处就饱和 |
 | 逐帧表 | 打开/收起的 scale、slide、透明度序列，调手感时看这个 |
 
 **弹窗几何**（需要真窗口，约 1 秒）
