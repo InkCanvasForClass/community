@@ -580,6 +580,25 @@ namespace Ink_Canvas.Helpers
                 double slideStart = token.CurrentSlide;
                 double opacityStart = token.CurrentOpacity;
 
+                // 打断检测：直接看变换上是否挂着动画，不依赖 IsTransitioning 标志。
+                //
+                // 用标志不可靠：它只在该动画自己的 Completed 里清除，
+                // 若动画因窗口隐藏等原因不再出帧，Completed 可能迟迟不触发，标志就卡住；
+                // 而 HasAnimatedProperties 反映的是"此刻属性是否被动画把持"，语义更准。
+                //
+                // 注意此前用它判断出过错（动画结束后标志仍在），
+                // 那次的问题是**用它决定要不要播动画**；
+                // 这里只用它决定**起点取实际值还是档位值**，
+                // 即使误判为 true，也只是起点取当前视觉值——那本来就等于终态，无害。
+                if (HasRunningAnimation(child))
+                {
+                    var (actualScale, actualSlide) = ReadActualVisual(child);
+                    scaleStart = actualScale;
+                    slideStart = actualSlide;
+                    double actualOpacity = child.Opacity;
+                    if (!double.IsNaN(actualOpacity) && actualOpacity > 0.02) opacityStart = actualOpacity;
+                }
+
                 AnimationLog.Log(popup, "SHOW",
                     $"start={scaleStart:F4} slide={slideStart:F1} op={opacityStart:F2}"
                     + $" transitioning={token.IsTransitioning}");
@@ -779,6 +798,14 @@ namespace Ink_Canvas.Helpers
                 double scaleStart = token.CurrentScale;
                 double slideStart = token.CurrentSlide;
 
+                // 打断检测：取屏幕上实际显示的值，避免从旧档位跳一下
+                if (HasRunningAnimation(child))
+                {
+                    var (actualScale, actualSlide) = ReadActualVisual(child);
+                    scaleStart = actualScale;
+                    slideStart = actualSlide;
+                }
+
                 AnimationLog.Log(popup, "HIDE",
                     $"start={scaleStart:F4} slide={slideStart:F1} transitioning={token.IsTransitioning}");
 
@@ -925,6 +952,76 @@ namespace Ink_Canvas.Helpers
         /// 而不是先跳回某个固定起点再重播。
         /// 读不到有效值时返回初始态（起始缩放、起始位移、半透明），
         /// 保证首次打开仍然是从小长出来。
+
+        /// <summary>
+        /// 读取菜单**当前真实显示**的缩放与位移。
+        /// </summary>
+        /// <remarks>
+        /// 这是打断能否接上的关键：
+        /// 状态机里的 CurrentScale 只在动画 Completed 时更新，
+        /// 动画进行中它仍是**上一次结束时的档位**。
+        /// 若打断时拿它当起点，画面会从当前显示值突然跳到旧档位（实测 0.9 → 0.72）。
+        ///
+        /// 动画进行中读取属性本身会返回动画的当前插值（WPF 属性值 = 动画覆盖基值），
+        /// 所以直接读 ScaleTransform.ScaleX 就能拿到正确起点。
+        /// </remarks>
+        /// <summary>
+        /// 判断变换上当前是否挂着正在跑的动画。
+        /// </summary>
+        /// <remarks>
+        /// 仅用于决定"起点取实际视觉值还是状态机档位"，所以误判的代价很低：
+        /// 误判为 true 时取当前视觉值，而它本就等于终态，结果无害。
+        /// 这与"用它决定是否播动画"不同——那种用法会因动画结束后标志残留而丢动画。
+        /// </remarks>
+        private static bool HasRunningAnimation(FrameworkElement child)
+        {
+            try
+            {
+                if (child == null) return false;
+                if (child.RenderTransform is not TransformGroup group) return false;
+
+                foreach (var transform in group.Children)
+                {
+                    if (transform is ScaleTransform scale && scale.HasAnimatedProperties) return true;
+                    if (transform is TranslateTransform translate && translate.HasAnimatedProperties) return true;
+                }
+            }
+            catch
+            {
+                // 结构异常按"未在动画"处理
+            }
+
+            return false;
+        }
+
+        private static (double Scale, double Slide) ReadActualVisual(FrameworkElement child)
+        {
+            double scale = 1.0;
+            double slide = 0.0;
+
+            try
+            {
+                if (child?.RenderTransform is TransformGroup group && group.Children.Count >= 2)
+                {
+                    if (group.Children[0] is ScaleTransform st)
+                    {
+                        double v = st.ScaleX;
+                        if (!double.IsNaN(v) && v > 0.05 && v < 1.5) scale = v;
+                    }
+                    if (group.Children[1] is TranslateTransform tt)
+                    {
+                        double v = tt.Y;
+                        if (!double.IsNaN(v) && Math.Abs(v) < 80) slide = v;
+                    }
+                }
+            }
+            catch
+            {
+                // 结构异常时退回终态
+            }
+
+            return (scale, slide);
+        }
 
         /// <summary>
         /// 清掉内容变换上的所有动画，并把缩放/位移恢复到单位值。
