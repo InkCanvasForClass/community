@@ -66,7 +66,36 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                         ProcessProtectionManager.WithWriteAccess(tmpPath, () => File.WriteAllText(tmpPath, text));
                         if (File.Exists(path))
                         {
-                            ProcessProtectionManager.WithWriteAccess(path, () => File.Replace(tmpPath, path, null));
+                            ProcessProtectionManager.WithWriteAccess(path, () =>
+                            {
+                                try
+                                {
+                                    File.Replace(tmpPath, path, null);
+                                }
+                                catch (IOException replaceException)
+                                {
+                                    // File.Replace requires Windows to remove the destination file.
+                                    // If that fails (for example, due to a file-system filter or an
+                                    // external handle), fall back to overwriting the existing file
+                                    // in place. This is less crash-safe than Replace, but avoids
+                                    // losing an otherwise writable settings file.
+                                    try
+                                    {
+                                        File.Copy(tmpPath, path, true);
+                                        File.Delete(tmpPath);
+                                        LogHelper.WriteLogToFile(
+                                            $"[Settings] File.Replace 失败，已回退到覆盖写入: {replaceException.Message}",
+                                            LogHelper.LogType.Warning);
+                                    }
+                                    catch (Exception copyException)
+                                    {
+                                        throw new AggregateException(
+                                            "File.Replace 和覆盖写入均失败。",
+                                            replaceException,
+                                            copyException);
+                                    }
+                                }
+                            });
                         }
                         else
                         {
