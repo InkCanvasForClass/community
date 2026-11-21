@@ -87,7 +87,7 @@ mc:Ignorable="d"
                         <!-- 数值区宽度固定：提示语（慢放/极快等）放 ToolTip，不进布局，
                              否则文本一旦变长会把左边的滑杆往左挤，滑块像自己跳了。 -->
                         <TextBlock x:Name="TextAnimationSpeed" Width="46" Margin="10,0,0,0"
-                                   TextAlignment="TextRight"
+                                   TextAlignment="Right"
                                    VerticalAlignment="Center"
                                    Text="1.0x"
                                    ToolTip="1.0x 原始速度" />
