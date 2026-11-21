@@ -61,6 +61,7 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                     // 临时文件 + File.Replace 原子替换，避免断电/进程被杀导致 Settings.json 半截。
                     // 同目录移动替换是原子操作（Windows 同卷 NTFS 保证）。
                     var tmpPath = path + ".tmp";
+                    var preserveTempFileOnFailure = false;
                     try
                     {
                         ProcessProtectionManager.WithWriteAccess(tmpPath, () => File.WriteAllText(tmpPath, text));
@@ -115,6 +116,9 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                                         }
                                         catch (Exception directWriteException)
                                         {
+                                            // The direct write may have truncated the destination.
+                                            // Keep the complete serialized temp file for manual recovery.
+                                            preserveTempFileOnFailure = true;
                                             throw new AggregateException(
                                                 "File.Replace、覆盖写入和直接写入均失败。",
                                                 replaceException,
@@ -132,8 +136,11 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                     }
                     catch
                     {
-                        try { if (File.Exists(tmpPath)) File.Delete(tmpPath); } catch { }
-                        throw; // Keep the last complete settings file if atomic replacement fails.
+                        if (!preserveTempFileOnFailure)
+                        {
+                            try { if (File.Exists(tmpPath)) File.Delete(tmpPath); } catch { }
+                        }
+                        throw; // Keep the temp file if the final direct write fails, as it may be the only complete copy.
                     }
 
                     App.UpdateCachedSettingsJson(text);
