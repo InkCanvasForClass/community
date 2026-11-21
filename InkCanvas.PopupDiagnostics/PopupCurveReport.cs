@@ -17,10 +17,10 @@ namespace Ink_Canvas.PopupDiagnostics
     internal static class PopupCurveReport
     {
         /// <summary>菜单打开时长（秒），与 AnimationsHelper.PopupPopInDurationSeconds 保持一致。</summary>
-        private const double OpenSeconds = 0.20;
+        private const double OpenSeconds = 0.40;
 
         /// <summary>菜单收起时长（秒），与 AnimationsHelper.PopupPopOutDurationSeconds 保持一致。</summary>
-        private const double CloseSeconds = 0.15;
+        private const double CloseSeconds = 0.30;
 
         /// <summary>采样帧率。</summary>
         private const double FrameRate = 60.0;
