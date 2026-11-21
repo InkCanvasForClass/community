@@ -45,9 +45,9 @@ namespace Ink_Canvas
         {
             if (IsBoardRoamingMode)
             {
-                if (BoardRoamingPopup != null && BoardRoamingPopup.IsOpen)
+                if (AnimationsHelper.IsPopupTargetingOpen(BoardRoamingPopup))
                 {
-                    BoardRoamingPopup.IsOpen = false;
+                    AnimationsHelper.HidePopupWithSlideAndFade(BoardRoamingPopup);
                 }
                 else
                 {
@@ -305,8 +305,8 @@ namespace Ink_Canvas
         {
             if (!IsBoardRoamingMode)
             {
-                if (BoardRoamingPopup != null)
-                    BoardRoamingPopup.IsOpen = false;
+                // 走收起动画：硬置 IsOpen 会截断进行中的动画，且漫游弹窗与其他菜单观感应一致。
+                AnimationsHelper.HidePopupWithSlideAndFade(BoardRoamingPopup);
                 ResetBoardRoamingContactState();
                 return;
             }
@@ -321,8 +321,7 @@ namespace Ink_Canvas
                 ViewboxFloatingBar.IsHitTestVisible = true;
                 BlackboardUIGridForInkReplay.IsHitTestVisible = true;
             }
-            if (BoardRoamingPopup != null)
-                BoardRoamingPopup.IsOpen = false;
+            AnimationsHelper.HidePopupWithSlideAndFade(BoardRoamingPopup);
 
             // 复用现有批注入口，确保编辑模式、工具栏高亮和原生墨迹状态同步。
             PenIcon_Click(null, null);
@@ -389,6 +388,9 @@ namespace Ink_Canvas
             if (BoardRoamingPopup == null || BoardRoamingPopupContent == null) return;
 
             AttachBoardRoamingPopupEvents();
+            // 这里是「先硬关再打开」而不是「收起动画」：下面要按内容真实尺寸刷新布局，
+            // 带着未归位的 RenderTransform 量出来的尺寸是错的（详见 PopupOverflowRoom）。
+            // 紧随其后的 ShowPopupWithSlideAndFade 会从当前 progress 重新起播，观感上仍是播放一次出场。
             BoardRoamingPopup.IsOpen = false;
             RefreshBoardRoamingPopup(true, true);
             AnimationsHelper.ShowPopupWithSlideAndFade(BoardRoamingPopup);
@@ -410,8 +412,8 @@ namespace Ink_Canvas
             if (BoardRoamingPopupContent.CloseButtonControl != null)
                 BoardRoamingPopupContent.CloseButtonControl.Click += (s, e) =>
                 {
-                    if (BoardRoamingPopup != null)
-                        BoardRoamingPopup.IsOpen = false;
+                    // 走收起动画：直接置 IsOpen 会截断进行中的动画，画面瞬间消失。
+                    AnimationsHelper.HidePopupWithSlideAndFade(BoardRoamingPopup);
                 };
             _boardRoamingPopupEventsAttached = true;
         }

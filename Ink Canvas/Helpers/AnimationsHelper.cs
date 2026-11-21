@@ -5,6 +5,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using Ink_Canvas.Helpers.Motion;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.WindowsAndMessaging;
@@ -459,7 +460,7 @@ namespace Ink_Canvas.Helpers
         /// <remarks>
         /// 这是整个动画的核心模型，此前所有打断 bug 都源于违背它：
         ///
-        ///   曲线：progress 0.0 → 1.0 映射 缩放 0.72 → 峰值(1.0367) → 1.0
+        ///   曲线：progress 0.0 → 1.0 映射 缩放 0.72 → 峰值(1.05) → 1.0
         ///   打开 = progress 从当前值推进到 1.0
         ///   收起 = progress 从当前值倒退到 0.0
         ///   打断 = 不重置 progress，只改变推进方向
@@ -504,7 +505,8 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>菜单出场起始缩放：由小长到正常大小。</summary>
-        private const double PopupPopInStartScale = 0.72;
+        /// <remarks>曲线本身在 <see cref="PopupCurve"/> 里，这里保留同义常量只为本类内部引用可读。</remarks>
+        private const double PopupPopInStartScale = PopupCurve.StartScale;
 
         /// <summary>
         /// 缩放过冲峰值。>1 才会出现"变大一点再回落"。
@@ -517,9 +519,9 @@ namespace Ink_Canvas.Helpers
         /// 采样点落不到峰值上时，实测最大缩放只有 ~1.02——肉眼分辨不出"先放大再回落"。
         /// 把峰值抬到 1.05，即使采样错过顶点，落点也在 1.02~1.04，过冲依然成立。
         /// 这同时解释了为什么峰值必须与留白使用同一个常量：留白按 1.05 算，
-        /// 而曲线若只到 1.0367，多出来的留白纯属浪费。
+        /// 而曲线若只到 1.03，多出来的留白纯属浪费。
         /// </remarks>
-        private const double PopupPopInPeakScale = 1.05;
+        private const double PopupPopInPeakScale = PopupCurve.PeakScale;
 
         /// <summary>
         /// 收场时长（秒）。比出场短一点，让关闭显得干脆。
@@ -532,6 +534,29 @@ namespace Ink_Canvas.Helpers
         /// 收起刻意比打开快（0.10 vs 0.15）：关闭要显得干脆，打开要从容。
         /// </remarks>
         internal const double PopupPopOutDurationSeconds = 0.10;
+
+        /// <summary>
+        /// 菜单的目标状态：true = 正在（或已经）打开，false = 正在（或已经）收起。
+        /// </summary>
+        /// <remarks>
+        /// 所有 toggle 判定都必须用它，而不是 <see cref="Popup.IsOpen"/>。
+        ///
+        /// 收起是"动画播完才真正 IsOpen = false"，这段时间里 IsOpen 仍为 true。
+        /// 若调用方用 IsOpen 判开合，用户在收起途中再次点击时会再次走收起分支：
+        /// 方向本来就是 -1，再设为 -1 等于什么都没发生，progress 只是一路退到 0。
+        /// 观感就是"打断一次之后再点没反应"，而用户期望的是把方向翻回来
+        /// （1-2-3-4 打断 4-3，再打断就该 3-4-5-6）。
+        ///
+        /// 动画进行中看方向、静止时看 IsOpen，两个阶段都不含糊，
+        /// 于是每一次点击都必然翻转播放方向 —— 这正是"打断"本身。
+        /// </remarks>
+        internal static bool IsPopupTargetingOpen(Popup popup)
+        {
+            if (popup == null) return false;
+
+            var token = TokenFor(popup);
+            return token.Running ? token.Direction > 0 : popup.IsOpen;
+        }
 
         /// <summary>
         /// 打开菜单：progress 从当前位置推进到 1。
@@ -558,7 +583,9 @@ namespace Ink_Canvas.Helpers
                 // 打开后内容才有真实尺寸：按它校正一次留白
                 PopupOverflowRoom.RefreshPadding(popup, PopupPopInPeakScale);
 
-                AnimationLog.Log(popup, "SHOW", $"progress={TokenFor(popup).Progress:F3}");
+                // 记下次要推进的方向：打断排查时，"点了没反应"与"方向没翻转"是两回事，
+                // 日志里能看到同一菜单连续出现 SHOW/HIDE/HIDE/SHOW 才说明方向真的翻转了。
+                AnimationLog.Log(popup, "SHOW", $"progress={TokenFor(popup).Progress:F3} dir=+1");
 
                 DrivePopup(popup, child, opening: true,
                     duration, onFullyClosed: null);
@@ -592,7 +619,7 @@ namespace Ink_Canvas.Helpers
                 }
 
                 var token = TokenFor(popup);
-                AnimationLog.Log(popup, "HIDE", $"progress={token.Progress:F3}");
+                AnimationLog.Log(popup, "HIDE", $"progress={token.Progress:F3} dir=-1");
 
                 // 收起的"完成动作"：真正关掉 Popup 并复位进度。
                 DrivePopup(popup, child, opening: false,
@@ -628,7 +655,7 @@ namespace Ink_Canvas.Helpers
         /// 打开与收起不是两段动画，而是同一条曲线的两个播放方向：
         ///
         ///   progress: 0.0 ──────────────▶ 1.0
-        ///   缩放:    0.72 → 峰值(1.0367) → 1.0
+        ///   缩放:    0.72 → 峰值(1.05) → 1.0
         ///   打开 = 向右推进；收起 = 向左倒退。
         ///
         /// 打断 = 再次调用本方法且方向相反：时钟沿用同一个 progress，
@@ -662,10 +689,10 @@ namespace Ink_Canvas.Helpers
                 group = g;
 
                 // 初始进度写一次，保证"从未动过"的菜单有正确的起始视觉
-                var (s0, y0) = EvaluateCurve(token.Progress);
-                scale.ScaleX = s0;
-                scale.ScaleY = s0;
-                slide.Y = y0;
+                var initial = PopupCurve.Evaluate(token.Progress);
+                scale.ScaleX = initial.Scale;
+                scale.ScaleY = initial.Scale;
+                slide.Y = initial.SlideY;
             }
 
             // 每次都重新解析缩放基准点：
@@ -676,9 +703,14 @@ namespace Ink_Canvas.Helpers
             child.RenderTransformOrigin = PopupScaleOrigin.Resolve(popup, child);
             SetPopupProgress(popup, child, token, token.Progress);
 
-            // 方向与速率：收起走完更快（干脆），打开稍慢（从容）
-            token.DurationSeconds = durationSeconds > 0.001 ? durationSeconds
+            // 方向与速率：收起走完更快（干脆），打开稍慢（从容）。
+            //
+            // 打断时（本来就在跑）沿用当前时长，只翻方向：用户描述打断是「1-2-3-4 打断 4-3-2-1」，
+            // 每一步等长。若打断时按新方向换成另一个时长，反向的那一帧速度就突变了。
+            double nominalDuration = durationSeconds > 0.001 ? durationSeconds
                 : (opening ? PopupPopInDurationSeconds : PopupPopOutDurationSeconds);
+            token.DurationSeconds = PopupTiming.ResolveDuration(
+                nominalDuration, token.DurationSeconds, token.Running);
             token.Direction = opening ? 1 : -1;
 
             // 换目标：收起方向不再需要完成回调；打开方向挂上回调
@@ -690,7 +722,7 @@ namespace Ink_Canvas.Helpers
 
             // 用 CompositionTarget.Rendering 而不是 DispatcherTimer：
             // 后者按时间触发，UI 一忙就会"欠账"，下一次回调带来一个很大的 dt，
-            // progress 一步跨过整个过冲区 —— 实测收起时 1.0367 的峰值整段没被画出来。
+            // progress 一步跨过整个过冲区 —— 实测收起时 1.05 的峰值整段没被画出来。
             // Rendering 与合成帧同拍，每帧只推进一帧的量，曲线必定被完整采样。
             token.RenderingHandler = (_, _) => PopupTick(popup, child, token);
             token.Running = true;
@@ -718,7 +750,7 @@ namespace Ink_Canvas.Helpers
             // 夹住单帧时长：窗口被拖动/系统卡顿时 dt 可能上百毫秒，
             // 不夹的话一帧就能跨过整个过冲区，曲线被"跳"过去。
             // 夹到 40ms 相当于最低 25fps 的表现，宁可短暂整体变慢也不丢曲线形状。
-            if (dt > 0.04) dt = 0.04;
+            if (dt > PopupTiming.MaxFrameSeconds) dt = PopupTiming.MaxFrameSeconds;
 
             // 每秒推进量：1 / 时长。速度倍率在这里生效。
             double step = token.Direction * dt / AnimationSpeed.Scale(token.DurationSeconds);
@@ -758,73 +790,27 @@ namespace Ink_Canvas.Helpers
 
             if (child?.RenderTransform is not TransformGroup g || g.Children.Count < 2) return;
 
-            var (scale, slideY) = EvaluateCurve(progress);
+            // 缩放、位移、透明度同取一个曲线采样：
+            // 三者若各走各的节奏（缩放先快后慢、位移匀速），会看出"两个东西在各自动"。
+            var sample = PopupCurve.Evaluate(progress);
 
             if (g.Children[0] is ScaleTransform st)
             {
                 st.BeginAnimation(ScaleTransform.ScaleXProperty, null);
                 st.BeginAnimation(ScaleTransform.ScaleYProperty, null);
-                st.ScaleX = scale;
-                st.ScaleY = scale;
+                st.ScaleX = sample.Scale;
+                st.ScaleY = sample.Scale;
             }
             if (g.Children[1] is TranslateTransform tt)
             {
                 tt.BeginAnimation(TranslateTransform.YProperty, null);
-                tt.Y = slideY;
+                tt.Y = sample.SlideY;
             }
 
             // 透明度跟随进度：收起时随缩小渐隐，打开时随放大渐显
             double targetOpacity = GetPopupTargetOpacity(popup);
             child.BeginAnimation(UIElement.OpacityProperty, null);
-            child.Opacity = targetOpacity * (0.35 + 0.65 * progress);
-        }
-
-        /// <summary>
-        /// 曲线定义：progress ∈ [0,1] 映射 (缩放, 纵向位移)。
-        /// </summary>
-        /// <remarks>
-        /// 分段：
-        ///   [0, P]   0.72 → 峰值   （上升段）
-        ///   [P, 1]   峰值 → 1.0    （回落段）
-        /// 段内线性——用户给的观感序列（1-2-3-...-9-8-7-6）是每步等量的。
-        /// 正放倒放经过同一组值，因此打开与收起天然互为镜像。
-        ///
-        /// 位移：progress 0（收起）= 下滑 10px；1（打开）= 0。
-        /// </remarks>
-        private static (double Scale, double SlideY) EvaluateCurve(double progress)
-        {
-            progress = Math.Max(0.0, Math.Min(1.0, progress));
-
-            const double peak = PopupPopInPeakScale;
-            const double start = PopupPopInStartScale;
-
-            // 峰值在进度轴上的位置固定为 8/11。
-            //
-            // 这不是随手取的比例，而是用户给出的观感序列：
-            //   打开 1-2-3-4-5-6-7-8-9-8-7-6  => 上升 8 步、回落 3 步、共 11 步
-            //   收起 6-7-8-9-8-7-6-5-4-3-2-1  => 先涨 3 步、再降 8 步
-            // 曲线只有一条，收起就是同一函数倒放，所以 8/11 自动让收起
-            // 也在 3/11 处经过峰值，两个方向都严格符合该序列。
-            //
-            // 曾试过"峰值位置 = 上升行程/总行程"，算出来是 0.896：
-            // 上升段占 89.6% 的时间，收起时"先涨"只剩 10.4%（约 1.4 帧），
-            // 过冲完全看不见 —— 那正是"放大效果没了"的原因。
-            const double peakAt = 8.0 / 11.0;
-
-            double scale;
-            if (progress <= peakAt)
-            {
-                double local = peakAt > 0.0001 ? progress / peakAt : 1.0;
-                scale = start + (peak - start) * local;
-            }
-            else
-            {
-                double local = (progress - peakAt) / Math.Max(0.0001, 1.0 - peakAt);
-                scale = peak + (1.0 - peak) * local;
-            }
-
-            double slideY = 10.0 * (1.0 - progress);
-            return (scale, slideY);
+            child.Opacity = targetOpacity * sample.OpacityWeight;
         }
 
         private static void StopClock(AnimationToken token)

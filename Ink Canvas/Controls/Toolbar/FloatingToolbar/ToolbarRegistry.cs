@@ -1830,9 +1830,9 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
                 btn.ButtonMouseUp += (s, e) =>
                 {
-                    if (popup.IsOpen)
+                    if (AnimationsHelper.IsPopupTargetingOpen(popup))
                     {
-                        popup.IsOpen = false;
+                        AnimationsHelper.HidePopupWithSlideAndFade(popup);
                     }
                     else
                     {
@@ -1861,11 +1861,12 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 // 此时在视觉树里递归查找 Shell 再接线，否则标题栏关闭按钮点了没反应。
                 if (popupContent is PopupShellContent shell)
                 {
-                    shell.CloseButtonControl.Click += (s, e) => popup.IsOpen = false;
+                    // 关闭按钮也要走收起动画：直接置 IsOpen 会截断进行中的动画（画面瞬间消失）。
+                    shell.CloseButtonControl.Click += (s, e) => AnimationsHelper.HidePopupWithSlideAndFade(popup);
                 }
                 else if (popupContent is PopupTabShellContent tabShell)
                 {
-                    tabShell.CloseButtonControl.Click += (s, e) => popup.IsOpen = false;
+                    tabShell.CloseButtonControl.Click += (s, e) => AnimationsHelper.HidePopupWithSlideAndFade(popup);
                 }
                 else if (popupContent is FrameworkElement contentElement)
                 {
@@ -1892,7 +1893,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 // 用 Tag 记录已接线的 popup，避免 Opened 重试时重复订阅导致连关两次。
                 if (ReferenceEquals(closeButton.Tag, popup)) return;
                 closeButton.Tag = popup;
-                closeButton.Click += (s, e) => popup.IsOpen = false;
+                closeButton.Click += (s, e) => AnimationsHelper.HidePopupWithSlideAndFade(popup);
                 return; // 只需接最外层那个 Shell
             }
         }

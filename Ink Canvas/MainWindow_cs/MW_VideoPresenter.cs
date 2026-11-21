@@ -132,7 +132,7 @@ namespace Ink_Canvas
         {
             if (BoothPopup == null) return;
 
-            if (BoothPopup.IsOpen)
+            if (AnimationsHelper.IsPopupTargetingOpen(BoothPopup))
             {
                 // 菜单可见时点击视频展台按钮 = 仅关闭菜单（与右上角 X 一致），
                 // 不退出视频展台模式。完全退出由菜单内"关闭"按钮（BtnExitVideoPresenter_Click）负责。
