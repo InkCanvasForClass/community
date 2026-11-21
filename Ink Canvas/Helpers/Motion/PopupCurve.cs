@@ -95,20 +95,27 @@ namespace Ink_Canvas.Helpers.Motion
         public const double AnchorOffset = 24.5 + 8.0;
 
         /// <summary>
-        /// 完全收起时的透明度权重：0，也就是一开始完全不可见。
+        /// 完全收起时的透明度权重：0.2，也就是菜单永远不会彻底消失。
         /// </summary>
         /// <remarks>
-        /// 这里曾经是 0.35，理由是"菜单一出现就该是有形的，免得像在半空中浮出来"。
-        /// 但 Inkeys 的面板透明度初值就是 0（Bar.EraserAttributeMotion.cppm:95 的 opacity_{0.0}、
-        /// Bar.RenderLoop.cpp:710 的 morePanelOpacity{0.0}），全程 0 → 1 淡入，
-        /// 静止展开态再统一乘 BarDrawAttributeSurfaceOpacity = 0.95（Bar.Main.cpp:75）。
-        /// 也就是说 Inkeys 从来没有"起点就露三成"这回事。
+        /// 这个常量被来回改过三次，每次的理由都值得记下来，否则很容易又改回去：
         ///
-        /// 旧值还有个副作用：进度 0 时菜单已经 35% 可见，于是"弹出"这件事的开头
-        /// 是半透明色块凭空胀出来，而不是从无到有地显现；缩放本身还有个不小的起点，
-        /// 两者叠加就抵消掉了"从小长大"该有的开场感。
+        /// 0.35（最初）：菜单一出现就该是有形的，免得像在半空中浮出来。
+        ///   问题是"弹出"的开头成了半透明色块凭空胀出来，抵消掉"从小长大"的开场感。
+        ///
+        /// 0.0（对齐 Inkeys）：Inkeys 的面板透明度初值确实是 0
+        ///   （Bar.EraserAttributeMotion.cppm:95 的 opacity_{0.0}、
+        ///   Bar.RenderLoop.cpp:710 的 morePanelOpacity{0.0}），全程 0 → 1。
+        ///   但那是**两层**里的底板层——它身后的图标与文字另有 EaseInOutCubic 慢慢显影，
+        ///   底板全透明时内容本来也还没出来，所以看不出问题。
+        ///   我们只有一层，跟着归零的后果是：收起动画的最后三成，菜单在还剩九成尺寸时
+        ///   就已经淡到接近不可见，观感是"还没缩进去就先化没了"，而不是"缩进按钮里"。
+        ///
+        /// 0.2（现在）：留一点残影。收起时菜单一路缩到底边中点、始终有形，
+        ///   最后由 popup.IsOpen = false 一次性摘掉。那一点残影落在 58×45 的尺寸上、
+        ///   只有两成不透明，一帧就没了，看不出跳变；换来的是整段收缩过程都看得见。
         /// </remarks>
-        public const double MinOpacityWeight = 0.0;
+        public const double MinOpacityWeight = 0.2;
 
         /// <summary>按菜单宽度取收起态的缩放：收起来时在屏幕上占 <see cref="CompactWidth"/> 那么宽。</summary>
         /// <remarks>
@@ -199,27 +206,40 @@ namespace Ink_Canvas.Helpers.Motion
         }
 
         /// <summary>
-        /// 透明度权重：独立的 EaseOutSine 时间线，与缩放同时长，但不共用行程。
+        /// 透明度权重：独立的 EaseInOutSine 时间线，与缩放同时长，但不共用行程。
         /// </summary>
         /// <remarks>
-        /// 这里曾经写成 MinOpacityWeight + (1-MinOpacityWeight)·clamp01(travel)，即"透明度跟着行程走"。
+        /// 这里最早写成 MinOpacityWeight + (1-MinOpacityWeight)·clamp01(travel)，即"透明度跟着行程走"。
         /// 它有个不易察觉的副作用：行程在 EaseOutBack 上越过 1.0 之后就恒为 1，
         /// 而那件事只发生在进度的四成左右（0.40s 里的 176ms）——
         /// 剩下大半段回落里透明度一动不动，观感是"先迅速变实，然后空转着抖一下"。
         /// 更糟的是这个饱和时刻由张力决定：张力越大饱和越早，
         /// 也就是调"弹多狠"会顺带改掉"淡入多快"，两个旋钮绞在一起。
+        /// 所以透明度必须有自己的时间线。
         ///
-        /// Inkeys 把两者分成两条时间线（Bar.EraserAttributeMotion.cppm:66-67：
-        /// 几何用 EaseOutBack、透明度用 EaseOutSine，时长相同时长），透明度一路铺到进度 1 才满。
-        /// 这里照做：权重只与 progress 有关，因此打断依旧天然连续（同一 progress 必得同一取值），
-        /// 而"几何先到位、透明度慢慢收尾"正是原设计要的节奏。
+        /// 但"独立"不等于"照抄 Inkeys 那条"：Inkeys 把透明度拆成两层，
+        /// 背板跑 EaseOutSine（Bar.EraserAttributeMotion.cppm:66-67，起手极快，
+        /// 0.4s 里的 0.1s 就到 38%），而图标与文字另跑 EaseInOutCubic
+        /// （Bar.GeometryAttribute.cpp:474，同一时刻只有 6%）。
+        /// 也就是说 Inkeys 的"内容"其实是慢慢显影的，快的是它身后那块底板。
+        ///
+        /// 我们只有一个 Opacity 属性，背板与文字一起变。用 EaseOutSine 就等于让**文字**
+        /// 按底板的节奏瞬间浮出来——半透明的字看起来像残影，而不是"正在显现的菜单"。
+        /// 因此这里取 Inkeys 自己枚举里的另一条 EaseInOutSine（Bar.Animation.cppm 的
+        /// BarUiCurveEnum 里就有），它起手没有 EaseOutSine 那股冲劲，
+        /// 两端导数都为 0，打开与收起（同一条曲线倒放）都不会出现"一帧之内突然实/虚"。
+        ///
+        /// 权重只与 progress 有关，因此打断依旧天然连续（同一 progress 必得同一取值）。
         /// </remarks>
         public static double OpacityWeight(double progress)
         {
-            // 每帧一次 Math.Sin，作用在单个 Popup 上。Inkeys 避开 pow 是因为它跑在逐图元的
-            // 渲染循环里；这里没有同样的压力，用解析式换可读性是划算的。
-            return MinOpacityWeight +
-                   (1.0 - MinOpacityWeight) * Math.Sin(Clamp01(progress) * Math.PI / 2.0);
+            var p = Clamp01(progress);
+
+            // EaseInOutSine：(1 - cos(πp)) / 2。两端导数为 0，中点为 0.5。
+            // 每帧一次 Math.Cos，作用在单个 Popup 上；Inkeys 避开 pow 是因为它跑在
+            // 逐图元的渲染循环里，这里没有同样的压力，用解析式换可读性是划算的。
+            var eased = 0.5 * (1.0 - Math.Cos(p * Math.PI));
+            return MinOpacityWeight + (1.0 - MinOpacityWeight) * eased;
         }
 
         private static double Clamp01(double value)
