@@ -168,7 +168,7 @@ namespace Ink_Canvas.PopupDiagnostics
                 !hasNaN && minOpacity >= PopupCurve.MinOpacityWeight - 1e-12 && maxOpacity <= 1.0 + 1e-12,
                 "区间=[" + F(minOpacity) + ", " + F(maxOpacity) + "]，设计下限 " + F(PopupCurve.MinOpacityWeight));
 
-            // 透明度走独立的 EaseOutSine，必须一路铺满到进度 1，不能跟着几何行程在半途饱和。
+            // 透明度走独立的 EaseInOutSine，必须一路铺满到进度 1，不能跟着几何行程在半途饱和。
             // 几何在 EaseOutBack 上越过 1.0 后行程恒为 1，若透明度挂在行程上，
             // 这之后整段就再也不变亮 —— 观感是"先迅速变实，然后空转着抖一下"。
             var saturatesEarly = false;
@@ -183,9 +183,10 @@ namespace Ink_Canvas.PopupDiagnostics
                 !saturatesEarly,
                 "progress=0.99 时仍是 " + F(PopupCurve.OpacityWeight(0.99)) + "，到 1.0 才满");
             report.Check(
-                "起始完全不可见（与 Inkeys 的 opacity 初值 0 一致）",
-                Math.Abs(PopupCurve.OpacityWeight(0.0)) < 1e-12,
-                "OpacityWeight(0)=" + F(PopupCurve.OpacityWeight(0.0)) + "，收起态不留半透明残影");
+                "收起态保留可见残影，不会先化没再缩进去",
+                PopupCurve.MinOpacityWeight > 0.0 &&
+                Math.Abs(PopupCurve.OpacityWeight(0.0) - PopupCurve.MinOpacityWeight) < 1e-12,
+                "OpacityWeight(0)=" + F(PopupCurve.OpacityWeight(0.0)) + "，缩到按钮大小时仍可见");
 
             // 几何越过 1.0（开始过冲）那一刻的透明度，是"几何先到位、透明度收尾"的量化指标。
             // 越界点有闭式解：行程 1 + (c+1)s³ + c·s² = 1 的非零根是 s = -c/(c+1)，
