@@ -33,7 +33,8 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 }
                 if (TextAnimationSpeed != null)
                 {
-                    TextAnimationSpeed.Text = multiplier.ToString("0.0") + "x";
+                    string suffix = multiplier >= 3.0 ? "  (慢放，非卡顿)" : "";
+                    TextAnimationSpeed.Text = multiplier.ToString("0.1") + "x" + suffix;
                 }
                 AnimationSpeed.Set(multiplier > 0 ? multiplier : 1.0);
                 StartAnimationSpeedSaveTimerIfNeeded();
@@ -89,7 +90,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
         {
             if (TextAnimationSpeed != null)
             {
-                TextAnimationSpeed.Text = e.NewValue.ToString("0.0") + "x";
+                // 高倍率下动画会持续数秒，界面看起来会像"卡住"。
+                // 这里明确提示，避免误判成 bug（先前就发生过这种误判）。
+                string suffix = e.NewValue >= 3.0 ? "  (慢放，非卡顿)" : "";
+                TextAnimationSpeed.Text = e.NewValue.ToString("0.1") + "x" + suffix;
             }
 
             if (!_isLoaded) return;
