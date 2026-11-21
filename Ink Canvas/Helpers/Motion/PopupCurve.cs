@@ -6,31 +6,28 @@ namespace Ink_Canvas.Helpers.Motion
     /// 菜单弹出/收起的进度曲线：把动画进度 progress 映射为缩放、位移与透明度权重。
     /// </summary>
     /// <remarks>
+    /// 曲线形状移植自 Inkeys（Inkeys/Inkeys/UI/Bar/Bar.Animation.cppm:116 的 EaseOutBack），
+    /// 而不是自己拿线性段拼一条"看起来像"的曲线。
+    ///
     /// 整个菜单动画只有这一条曲线，打开与收起共用它、只是播放方向相反：
     ///
     ///   打开 = progress 从当前值推进到 1
     ///   收起 = progress 从当前值倒退到 0
     ///   打断 = 只翻转播放方向
     ///
-    /// "打开与收起互为倒放""打断天然连续"因此由结构本身保证，而不是靠两段动画对齐。
+    /// Inkeys 里打开用 EaseOutBack、收起用 EaseInBack，看似两条曲线，实际严格互为时间反演：
     ///
-    /// 曲线分两层：
+    ///   EaseInBack(t) ≡ 1 - EaseOutBack(1 - t)
     ///
-    /// 1) 时间重映射 <see cref="Remap"/>：progress → u，u 才是在形状上取值的参数。
-    ///    上升段用 EaseOut 幂函数（先快后慢），回落段用 smoothstep（两端速度为零）。
-    ///    用户说的"分段 用曲线 先快 后慢"指的就是这一层：
-    ///    前 20% 的时间走完 50% 的行程，最后一段则是减速落位。
+    /// 所以"收起 = 同一条曲线倒放"与 Inkeys 的行为完全一致，
+    /// "打断天然连续"这一性质也原样保留：曲线只与 progress 有关，与方向无关。
     ///
-    /// 2) 形状曲线 u → 缩放，分段线性：
-    ///      u ∈ [0, PeakAt]   0.72 → 1.05（由小长到略微过大）
-    ///      u ∈ [PeakAt, 1]   1.05 → 1.00（回落到正常大小）
-    ///
-    /// PeakAt = 8/11 来自用户给出的观感序列：
-    ///   打开 1-2-3-4-5-6-7-8-9-8-7-6  => 上升 8 步、回落 3 步、共 11 步
-    ///   收起 6-7-8-9-8-7-6-5-4-3-2-1  => 先涨 3 步、再降 8 步
-    /// 曲线只有一条，收起就是同一函数倒放，所以 8/11 自动让两个方向都符合该序列。
-    /// 曾按"峰值位置 = 上升行程/总行程"算得 0.896：收起时"先涨"只剩 10.4%（约 1.4 帧），
-    /// 过冲完全看不见——那正是"放大效果没了"的原因。
+    /// 用 Back 而不是"分段线性 + 独立缓动重映射"的理由：
+    /// 过冲量、峰值位置、回落段长度全部由 back 一个参数导出，不存在两段各自调参、
+    /// 接缝处速度不连续的可能；峰值处速度为零是曲线自身的极值性质，
+    /// 不是靠上升段动调零、回落段动起零拼出来的。
+    /// 旧的实现要同时维护 RiseEaseExponent、PeakAt、SmoothStep 三处互相制约的参数，
+    /// 改一个就得重算另外两个 —— 那正是"参数越多越难改对"的典型。
     ///
     /// 本类是纯数学、无 WPF 依赖，因此被 InkCanvas.NativeInk.Tests 直接链接做单测（同 SpringSolver）。
     /// 曲线形状的回归必须由 PopupCurveTests 兜住，不要靠肉眼目测。
@@ -46,8 +43,31 @@ namespace Ink_Canvas.Helpers.Motion
         /// </summary>
         public const double PeakScale = 1.05;
 
-        /// <summary>峰值在进度轴上的位置。</summary>
-        public const double PeakAt = 8.0 / 11.0;
+        /// <summary>
+        /// Back 曲线的张力（Inkeys 里叫 back），决定过冲有多"过"。
+        /// </summary>
+        /// <remarks>
+        /// Inkeys 原值 1.1 是配 0.40s 时长用的：行程过冲只有 4.47%，
+        /// 换算到缩放上峰值仅 1.0125 —— 在 0.2s 这个量级的时长下，60fps 采样落不到顶点，
+        /// 肉眼完全看不出"先放大再回落"（用户曾报"放大效果没了"）。
+        ///
+        /// 这里按目标峰值 <see cref="PeakScale"/> 反解。EaseOutBack 的行程峰值是
+        ///   travel(c) = 1 + 4c³ / (27(c+1)²)
+        /// 令 travel = (PeakScale - StartScale) / (1 - StartScale) = 33/28，得三次方程
+        ///   112c³ - 135c² - 270c - 135 = 0
+        /// 取唯一正根 2.4120065841218903，于是 Evaluate(PeakAt).Scale 与 PeakScale
+        /// 只差 2.2e-16（浮点舍入），菜单留白按 PeakScale 算不会裁到峰值。
+        /// </remarks>
+        public const double BackTension = 2.4120065841218903;
+
+        /// <summary>峰值在进度轴上的位置，由 <see cref="BackTension"/> 导出。</summary>
+        /// <remarks>
+        /// 对 EaseOutBack 求导置零得 p = 1 - 2c / (3(c+1))，c = 2.412… 时约 0.5287。
+        /// 它不再是独立可调的常量：改 BackTension 会同时移动峰值位置与回落段长度。
+        /// 0.5287 意味着"越过终点"这件事发生在时间轴中点之前 —— 点下去很快就有"到位"的观感，
+        /// 剩下的一半时间用在回弹落位上。
+        /// </remarks>
+        public const double PeakAt = 1.0 - 2.0 * BackTension / (3.0 * (BackTension + 1.0));
 
         /// <summary>完全收起时相对打开位置的下滑距离（DIP）。</summary>
         public const double SlideDistance = 10.0;
@@ -55,62 +75,54 @@ namespace Ink_Canvas.Helpers.Motion
         /// <summary>完全收起时的透明度权重（再乘以菜单自身的目标透明度）。</summary>
         public const double MinOpacityWeight = 0.35;
 
-        /// <summary>上升段 EaseOut 的幂次：越大越"先快后慢"。</summary>
-        /// <remarks>
-        /// 取 2（EaseOutQuad）：半程行程落在上升段的 29.5%（约 32ms），
-        /// 首帧就有接近 1/4 的行程，点下去立刻有反馈；再大就要靠加速掩盖"跳"。
-        /// </remarks>
-        public const double RiseEaseExponent = 2.0;
-
         /// <summary>
-        /// 时间重映射：把线性进度换成"先快后慢"的进度。
+        /// 曲线行程：0 = 完全收起，1 = 落位，峰值处越过 1 形成回弹。
         /// </summary>
         /// <remarks>
-        /// 上升段用 EaseOut：起点速度最大、到峰值时速度归零，于是过冲顶点是一个
-        /// 自然的"停一下"的节拍（用户序列里那个 9）。
-        /// 回落段用 smoothstep：两端速度都为零，峰值处不会出现折角，
-        /// 落位时也不会突然刹停。
+        /// 首帧速度是全程平均速度的 3 + c ≈ 5.4 倍（g'(0) = 3(c+1) - 2c），
+        /// 末帧速度为零（g'(1) = 0）—— "先快后慢"由曲线本身给出，不需要额外重映射。
         /// </remarks>
-        public static double Remap(double progress)
+        public static double Travel(double progress)
         {
-            progress = Clamp01(progress);
+            return TravelWithBack(BackTension, progress);
+        }
 
-            if (progress <= PeakAt)
-            {
-                double local = PeakAt > 0.0001 ? progress / PeakAt : 1.0;
-                return PeakAt * (1.0 - Math.Pow(1.0 - local, RiseEaseExponent));
-            }
-
-            double fall = (progress - PeakAt) / Math.Max(0.0001, 1.0 - PeakAt);
-            return PeakAt + (1.0 - PeakAt) * SmoothStep(fall);
+        /// <summary>按给定张力取行程。</summary>
+        /// <remarks>
+        /// 通用形态只为验收"移植是否忠实"服务（PopupCurveTests 用它对齐 Inkeys 既有期望值
+        /// EaseOutBack(0.5) = 1.0125），生产路径一律走 <see cref="Travel"/>。
+        ///
+        /// 实现照抄 Inkeys：s = t - 1，返回 1 + (back+1)·s³ + back·s²。
+        /// 用 s2*s 直接展开而不是 Math.Pow —— 这是每帧都跑的路径，
+        /// Inkeys 同样手写展开（Bar.Animation.cppm:102 注释"固定二三幂直接展开，避免逐帧进 pow"）。
+        /// </remarks>
+        public static double TravelWithBack(double back, double progress)
+        {
+            double s = Clamp01(progress) - 1.0;
+            double s2 = s * s;
+            return 1.0 + (back + 1.0) * s2 * s + back * s2;
         }
 
         /// <summary>按进度取曲线上的缩放、位移与透明度权重。</summary>
+        /// <remarks>
+        /// 三个量共用同一个行程，避免"缩放先快后慢、位移匀速"的错位感。
+        /// 位移与透明度不再按 progress 线性推进，这是相对旧实现的行为变更。
+        /// </remarks>
         public static PopupCurveSample Evaluate(double progress)
         {
-            double u = Remap(progress);
+            double travel = Travel(progress);
 
-            double scale;
-            if (u <= PeakAt)
-            {
-                double local = PeakAt > 0.0001 ? u / PeakAt : 1.0;
-                scale = StartScale + (PeakScale - StartScale) * local;
-            }
-            else
-            {
-                double local = (u - PeakAt) / Math.Max(0.0001, 1.0 - PeakAt);
-                scale = PeakScale + (1.0 - PeakScale) * local;
-            }
+            double scale = StartScale + (1.0 - StartScale) * travel;
 
-            double slideY = SlideDistance * (1.0 - u);
-            double opacityWeight = MinOpacityWeight + (1.0 - MinOpacityWeight) * u;
+            // 负值表示回弹时略微越过静止位置再退回（Inkeys 的呼吸感，峰值处约 -1.79 DIP），
+            // 这点位移落在 PopupOverflowRoom 的留白里，不会裁切。
+            double slideY = SlideDistance * (1.0 - travel);
+
+            // 行程越过 1 时透明度必须夹住，否则权重 >1 交给 WPF 再被静默裁剪，
+            // 观感上是"最后一段不再变亮"。夹取后的权重单调不减。
+            double opacityWeight = MinOpacityWeight + (1.0 - MinOpacityWeight) * Clamp01(travel);
+
             return new PopupCurveSample(scale, slideY, opacityWeight);
-        }
-
-        private static double SmoothStep(double t)
-        {
-            t = Clamp01(t);
-            return t * t * (3.0 - 2.0 * t);
         }
 
         private static double Clamp01(double value)
@@ -126,7 +138,7 @@ namespace Ink_Canvas.Helpers.Motion
         /// <summary>缩放倍率。</summary>
         public readonly double Scale;
 
-        /// <summary>纵向位移（正=向下）。</summary>
+        /// <summary>纵向位移（正=向下，负=回弹时越过静止位置）。</summary>
         public readonly double SlideY;
 
         /// <summary>透明度权重，0.35~1.0。</summary>

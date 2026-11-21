@@ -19,7 +19,11 @@ namespace Ink_Canvas.Helpers
     /// 把原点限制在 [0,1] 内，取的是"菜单靠近按钮的那一侧的目标位置"，
     /// 既保留"从按钮方向长出来"的方向感，又不会越界。
     ///
-    /// 换算失败（触发器不在同一视觉树、菜单尚未布局）时退回中心点。
+    /// 坐标系：Popup 内容活在**独立的 HwndSource** 里，与触发按钮不在同一棵视觉树，
+    /// 因此 <see cref="Visual.TransformToAncestor(Visual)"/> 在这里必然抛异常（实测如此），
+    /// 只能借屏幕坐标这唯一的公共坐标系做换算。
+    ///
+    /// 换算失败（菜单尚未布局、没有 PresentationSource）时退回中心点。
     /// </remarks>
     internal static class PopupScaleOrigin
     {
@@ -46,9 +50,14 @@ namespace Ink_Canvas.Helpers
 
             try
             {
-                // 按钮中心换算到菜单坐标系（可能为负：菜单在按钮上方，按钮在菜单之外）
-                var targetCenter = target.TransformToAncestor(menu)
-                    .Transform(new Point(target.ActualWidth / 2, target.ActualHeight / 2));
+                // 按钮中心换算到菜单坐标系（可能为负：菜单在按钮上方，按钮在菜单之外）。
+                //
+                // 必须走屏幕坐标：Popup 内容在独立的 HwndSource 里，
+                // TransformToAncestor 会抛 "指定的 Visual 不是此 Visual 的上级"，
+                // 以前正是被 catch 吞掉后退回中心点 —— 菜单于是一直从中间弹出。
+                var targetCenterOnScreen = target.PointToScreen(
+                    new Point(target.ActualWidth / 2, target.ActualHeight / 2));
+                var targetCenter = menu.PointFromScreen(targetCenterOnScreen);
                 if (double.IsNaN(targetCenter.X) || double.IsNaN(targetCenter.Y)) return center;
 
                 double x = Clamp(targetCenter.X / width, MinOrigin, MaxOrigin);
@@ -57,7 +66,7 @@ namespace Ink_Canvas.Helpers
             }
             catch
             {
-                // 不在同一视觉树 / 尚未完成布局
+                // 尚未完成布局 / 没有 PresentationSource
                 return center;
             }
         }
