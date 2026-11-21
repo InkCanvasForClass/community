@@ -1072,12 +1072,160 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 ["isContentCollapsedByUser"] = _isContentCollapsedByUser
             };
 
-            // 记录切换前的宽度作为补间起点
-            double beforeWidth = rootPanel?.ActualWidth ?? 0;
+            if (rootPanel == null) return;
+
+            // 记录切换前的宽度与各子项位置：用于宽度补间与"邻居跟随移动"。
+            double beforeWidth = rootPanel.ActualWidth;
+            var beforeOffsets = _animateVisibilityChange
+                ? CaptureChildOffsets(rootPanel)
+                : null;
 
             UpdatePanelVisibility(rootPanel, context);
 
             AnimatePanelWidthToFit(rootPanel, beforeWidth);
+
+            if (beforeOffsets != null)
+            {
+                AnimateChildrenToNewOffsets(rootPanel, beforeOffsets);
+            }
+        }
+
+        /// <summary>
+        /// 记录面板直接子项当前相对面板左上角的位置。
+        /// </summary>
+        /// <remarks>
+        /// 用于"某个组件显隐后，它后面的组件平滑滑到新位置"。
+        /// 只记录直接子项：工具栏是横向排列，显隐影响的是后面兄弟的横向位置。
+        /// </remarks>
+        private static Dictionary<FrameworkElement, double> CaptureChildOffsets(Panel panel)
+        {
+            var result = new Dictionary<FrameworkElement, double>();
+            if (panel == null) return result;
+
+            foreach (var child in panel.Children.OfType<FrameworkElement>())
+            {
+                if (child.Visibility != Visibility.Visible) continue;
+
+                try
+                {
+                    // 取相对于面板的横坐标（不受祖先布局影响）
+                    var point = child.TransformToAncestor(panel).Transform(new Point(0, 0));
+                    result[child] = point.X;
+                }
+                catch
+                {
+                    // 尚未进入视觉树时跳过
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 让子项从"切换前的位置"平滑滑到"切换后的新位置"。
+        /// </summary>
+        /// <remarks>
+        /// 布局一旦重算，子项会瞬间跳到新位置。要让它看起来是滑过去的，
+        /// 就在跳变之后立刻给每个子项叠加一个反向位移，再把这个位移补间回 0。
+        ///
+        /// 位移写 RenderTransform（合成层），不触发布局，比动画 Margin 便宜得多。
+        /// 必须等布局跑完才能量到新位置，所以排到 Loaded 优先级执行。
+        /// </remarks>
+        private static void AnimateChildrenToNewOffsets(
+            Panel panel, Dictionary<FrameworkElement, double> beforeOffsets)
+        {
+            if (panel == null || beforeOffsets == null || beforeOffsets.Count == 0) return;
+
+            panel.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    foreach (var kvp in beforeOffsets)
+                    {
+                        var child = kvp.Key;
+                        if (child == null || child.Visibility != Visibility.Visible) continue;
+
+                        double newOffset;
+                        try
+                        {
+                            newOffset = child.TransformToAncestor(panel).Transform(new Point(0, 0)).X;
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+
+                        double delta = kvp.Value - newOffset;
+                        if (Math.Abs(delta) < 1.0) continue;
+
+                        // 用独立的"邻居让位"通道，不与出场滑入抢同一个 TranslateTransform
+                        var translate = GetOrCreateChannel(child, SiblingChannelIndex);
+
+                        var animation = new System.Windows.Media.Animation.DoubleAnimation
+                        {
+                            From = delta,
+                            To = 0,
+                            Duration = TimeSpan.FromMilliseconds(ToolbarSiblingSlideMs),
+                            EasingFunction = new System.Windows.Media.Animation.CubicEase
+                            {
+                                EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut
+                            }
+                        };
+
+                        animation.Completed += (_, _) =>
+                        {
+                            translate.BeginAnimation(TranslateTransform.XProperty, null);
+                            translate.X = 0;
+                        };
+
+                        translate.BeginAnimation(TranslateTransform.XProperty, animation);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[ToolbarRegistry] 邻居滑动动画失败: {ex.Message}");
+                }
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+
+        /// <summary>邻居组件滑到新位置的时长（毫秒），与宽度过渡同节奏。</summary>
+        private const int ToolbarSiblingSlideMs = 180;
+
+        /// <summary>出场滑入使用的位移通道。</summary>
+        private const int EnterChannelIndex = 0;
+
+        /// <summary>邻居让位使用的位移通道。</summary>
+        private const int SiblingChannelIndex = 1;
+
+        /// <summary>
+        /// 取得组件指定通道的位移变换。
+        /// 两个通道分开，避免出场滑入与邻居让位同时发生时互相覆盖。
+        /// </summary>
+        private static TranslateTransform GetOrCreateChannel(FrameworkElement element, int channelIndex)
+        {
+            if (element.RenderTransform is TransformGroup group
+                && group.Children.Count > channelIndex
+                && group.Children[channelIndex] is TranslateTransform existing)
+            {
+                return existing;
+            }
+
+            // 重建两条通道（沿用已有值，避免已在播的动画被抹掉位置）
+            double x0 = 0, x1 = 0;
+            if (element.RenderTransform is TransformGroup old && old.Children.Count > 1)
+            {
+                if (old.Children[0] is TranslateTransform t0) x0 = t0.X;
+                if (old.Children[1] is TranslateTransform t1) x1 = t1.X;
+            }
+
+            var enter = new TranslateTransform(x0, 0);
+            var sibling = new TranslateTransform(x1, 0);
+            var rebuilt = new TransformGroup();
+            rebuilt.Children.Add(enter);
+            rebuilt.Children.Add(sibling);
+            element.RenderTransform = rebuilt;
+
+            return channelIndex == EnterChannelIndex ? enter : sibling;
         }
 
         /// <summary>
@@ -1108,42 +1256,57 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
             try
             {
-                // 先摘掉上一轮可能残留的宽度动画
+                // 先摘掉上一轮可能残留的宽度动画与固定值
                 rootPanel.BeginAnimation(FrameworkElement.WidthProperty, null);
+                rootPanel.ClearValue(FrameworkElement.WidthProperty);
 
-                // 量出内容应有的宽度
-                rootPanel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
-                double targetWidth = rootPanel.DesiredSize.Width;
+                // 关键：先让布局跑一遍，ActualWidth/DesiredSize 才是**新的**内容宽度。
+                // 只调 Measure 而不 UpdateLayout 时，元素若已参与过布局会复用缓存结果，
+                // 拿到的仍是切换前的旧宽度——之前"新值没拿对"就是这里。
+                rootPanel.UpdateLayout();
+                double targetWidth = rootPanel.ActualWidth;
+                if (targetWidth <= 0)
+                {
+                    rootPanel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                    targetWidth = rootPanel.DesiredSize.Width;
+                }
 
-                // 量不到或差异极小时不必补间
+                // 新旧宽度差不多就不必补间
                 if (targetWidth <= 0 || beforeWidth <= 0 ||
                     Math.Abs(targetWidth - beforeWidth) < 1.0)
                 {
-                    rootPanel.Width = double.NaN;
                     return;
                 }
+
+                // 把宽度退回旧值（此时布局已算出新值，写死宽度会立刻生效），
+                // 再用补间推到新值，视觉上就是"慢慢变宽/变窄"。
+                rootPanel.Width = beforeWidth;
 
                 var animation = new System.Windows.Media.Animation.DoubleAnimation
                 {
                     From = beforeWidth,
                     To = targetWidth,
                     Duration = TimeSpan.FromMilliseconds(ToolbarWidthTransitionMs),
-                    FillBehavior = System.Windows.Media.Animation.FillBehavior.Stop,
                     EasingFunction = new System.Windows.Media.Animation.CubicEase
                     {
                         EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut
                     }
                 };
 
-                // 结束后解除固定宽度，回到自动布局（避免之后内容变化被旧值卡住）
-                animation.Completed += (_, _) => rootPanel.Width = double.NaN;
+                // 结束后解除固定宽度，交还自动布局（否则之后内容变化会被旧值卡住）
+                animation.Completed += (_, _) =>
+                {
+                    rootPanel.BeginAnimation(FrameworkElement.WidthProperty, null);
+                    rootPanel.ClearValue(FrameworkElement.WidthProperty);
+                };
 
                 rootPanel.BeginAnimation(FrameworkElement.WidthProperty, animation);
             }
             catch (Exception ex)
             {
                 // 补间失败时不能留下固定宽度，否则工具栏会永远卡在旧尺寸
-                rootPanel.Width = double.NaN;
+                rootPanel.BeginAnimation(FrameworkElement.WidthProperty, null);
+                rootPanel.ClearValue(FrameworkElement.WidthProperty);
                 LogHelper.WriteLogToFile($"ToolbarRegistry: 宽度补间失败: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
@@ -1258,16 +1421,14 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 };
                 element.BeginAnimation(UIElement.OpacityProperty, fade);
 
-                // 位置滑动而不是缩放：Inkeys 里工具栏按钮显现时不做缩放，
-                // 而是"淡入 + 从侧向滑入"。缩放会让按钮看起来变形，
-                // 且相邻按钮之间的视觉间距会随缩放跳动。
+                // 位置滑动而不是缩放：缩放会让按钮变形，且相邻按钮的视觉间距会跳动。
                 // 位移写 RenderTransform，不触发布局、不挤动邻居。
-                if (element.RenderTransform is not TranslateTransform slide)
-                {
-                    slide = new TranslateTransform(0, 0);
-                    element.RenderTransform = slide;
-                }
-
+                //
+                // 这里用 TransformGroup 划分两个独立通道：
+                //   [0] 出场滑入    [1] 邻居跟随
+                // 分开是因为两者会同时发生（新按钮滑入的同时，它后面的按钮也在让位），
+                // 若共用同一个 TranslateTransform.X 会互相覆盖，只剩其中一个生效。
+                var enterSlide = GetOrCreateChannel(element, EnterChannelIndex);
                 var slideIn = new System.Windows.Media.Animation.DoubleAnimation(
                     ToolbarItemShowSlideOffset, 0,
                     TimeSpan.FromMilliseconds(ToolbarItemShowDurationMs))
@@ -1277,7 +1438,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                         EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut
                     }
                 };
-                slide.BeginAnimation(TranslateTransform.XProperty, slideIn);
+                enterSlide.BeginAnimation(TranslateTransform.XProperty, slideIn);
                 return;
             }
 
