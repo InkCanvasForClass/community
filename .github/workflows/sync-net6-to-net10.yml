@@ -339,6 +339,17 @@ jobs:
             }
 
             git add -A
+
+            # 冲突解决后若与 net10 现有内容完全一致（典型情况：该提交早前已同步过，
+            # 本次是重放），git commit 会报 "The previous cherry-pick is now empty" 并以 1 退出，
+            # 让整条同步链失败。这里检测暂存区是否真的有改动，无改动就按跳过处理。
+            git diff --cached --quiet
+            if ($LASTEXITCODE -eq 0) {
+              Write-Host "::warning::$subject 冲突解决后与 net10 现有内容一致，跳过"
+              git cherry-pick --skip 2>$null
+              continue
+            }
+
             git commit --no-edit
             if ($LASTEXITCODE -ne 0) {
               git cherry-pick --abort 2>$null
