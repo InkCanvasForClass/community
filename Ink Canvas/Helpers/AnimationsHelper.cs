@@ -549,14 +549,22 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 收起菜单：progress 从当前位置倒退到 0。
         /// </summary>
-        public static void HidePopupWithSlideAndFade(Popup popup, double duration = PopupPopInDurationSeconds)
+        public static void HidePopupWithSlideAndFade(Popup popup, double duration = PopupPopOutDurationSeconds)
         {
             try
             {
                 if (popup == null) return;
                 if (!popup.IsOpen) return;
 
-                var child = popup.Child as FrameworkElement;
+                // 关键：必须与 Show 操作**同一个元素**。
+                //
+                // 包装后 popup.Child 是外层宿主 Border，而 Show 的动画写在内部内容上。
+                // 若这里直接拿 popup.Child，时钟会写进宿主的变换 —— 两个方法各写一套，
+                // 互相不可见：第一次正常（各自首次都"从零建"），第二次开始状态错乱，
+                // 表现为定位异常 + 打开卡住。
+                // 用 PopupOverflowRoom.Ensure 取回同一个内容元素；未包装时退回 popup.Child。
+                var child = PopupOverflowRoom.Ensure(popup, PopupPopInPeakScale)
+                            ?? popup.Child as FrameworkElement;
                 if (child == null)
                 {
                     popup.IsOpen = false;
@@ -567,10 +575,23 @@ namespace Ink_Canvas.Helpers
                 AnimationLog.Log(popup, "HIDE", $"progress={token.Progress:F3}");
 
                 // 收起的"完成动作"：真正关掉 Popup 并复位进度。
-                // 中途被打开打断时这个回调不会执行（方向已反转，时钟不会到达 0）。
                 DrivePopup(popup, child, opening: false,
                     duration, onFullyClosed: () =>
                     {
+                        // 竞态防护：回调执行时方向若已被 Show 反转为打开，
+                        // 说明用户在收起触底后立刻重新打开 —— 这次关闭作废，
+                        // 否则会把刚打开的 Popup 关掉，表现为"打开后菜单消失/卡住"。
+                        if (token.Direction > 0)
+                        {
+                            AnimationLog.Log(popup, "HIDE-DONE-SKIPPED", "reopened");
+                            return;
+                        }
+
+                        // 关闭前先把 progress=0 的曲线值写进变换：
+                        // 收起中断处(如 0.62)的缩放残留会让 PopupOverflowRoom 的
+                        // 定位补偿按中途尺寸测量，下次打开位置就偏了。
+                        SetPopupProgress(popup, child, token, 0.0);
+
                         popup.IsOpen = false;
                         // 收起终态直接写进变换，避免下一次打开测量到带动画残留的尺寸
                         ClearTransformAnimations(child, PopupPopInStartScale, 10);
@@ -618,7 +639,6 @@ namespace Ink_Canvas.Helpers
                 g.Children.Add(scale);
                 g.Children.Add(slide);
                 child.RenderTransform = g;
-                child.RenderTransformOrigin = PopupScaleOrigin.Resolve(popup, child);
                 group = g;
 
                 // 初始进度写一次，保证"从未动过"的菜单有正确的起始视觉
@@ -627,6 +647,14 @@ namespace Ink_Canvas.Helpers
                 scale.ScaleY = s0;
                 slide.Y = y0;
             }
+
+            // 每次都重新解析缩放基准点：
+            // 触发按钮可能不同（同一 Popup 可被多个入口打开），
+            // 且 PointToScreen/TransformToAncestor 受 RenderTransform 影响（实测 0.72 缩放偏移 34px），
+            // 残留的变换会让 Resolve 算错。先归位再解析。
+            ClearTransformAnimations(child, 1.0, 0.0);
+            child.RenderTransformOrigin = PopupScaleOrigin.Resolve(popup, child);
+            SetPopupProgress(popup, child, token, token.Progress);
 
             // 方向与速率：收起走完更快（干脆），打开稍慢（从容）
             token.DurationSeconds = durationSeconds > 0.001 ? durationSeconds
