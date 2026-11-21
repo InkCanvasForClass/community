@@ -532,6 +532,12 @@ namespace Ink_Canvas.Helpers
                 child.BeginAnimation(UIElement.OpacityProperty, null);
                 child.Opacity = targetOpacity;
 
+                // 自愈：先把上一次残留的变换动画彻底摘掉。
+                // 若上次收场被打断（Completed 没跑），缩放/位移会停在中间值，
+                // 而 Popup 打开时会按带残留的尺寸测量布局，导致 popupSize 变小、
+                // 定位计算偏下。这里强制归零，保证每次打开都从干净状态开始。
+                ClearTransformAnimations(child);
+
                 var scaleTransform = new ScaleTransform(1, 1);
                 var slideTransform = new TranslateTransform(0, 0);
                 var transformGroup = new TransformGroup();
@@ -715,10 +721,30 @@ namespace Ink_Canvas.Helpers
                     child.BeginAnimation(UIElement.OpacityProperty, null);
                     child.Opacity = targetOpacity;
 
-                    // 诊断：收场时必须把变换还原成终态，否则下次打开会带着残留
+                    // 关键：把变换上的动画彻底摘掉并归位。
+                    //
+                    // Storyboard 通过属性路径动画到 TransformGroup 的子里时，
+                    // 动画对象挂在 Transform 上，Storyboard 结束后不会自动释放
+                    // （日志实测 [Close] 后缩放仍停在 0.905）。
+                    // 这个残留会让下次打开时布局按 0.9 倍测量，popupSize 变小、定位偏下，
+                    // 必须在这里显式清除。
+                    exitScale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+                    exitScale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+                    exitSlide.BeginAnimation(TranslateTransform.YProperty, null);
+                    exitScale.ScaleX = 1.0;
+                    exitScale.ScaleY = 1.0;
+                    exitSlide.Y = 0;
+
                     PopupOverflowRoom.Diag(
                         $"[Close] popup={PopupOverflowRoom.Name(popup)} transform={DescribeTransform(child)}");
                 };
+
+                // 收场动画一律 FillBehavior.Stop：结束后靠上面的清理归位，
+                // 不让动画值继续把持属性。
+                fadeOutAnimation.FillBehavior = FillBehavior.Stop;
+                slideAnimation.FillBehavior = FillBehavior.Stop;
+                exitScaleAnimation.FillBehavior = FillBehavior.Stop;
+                exitScaleAnimationY.FillBehavior = FillBehavior.Stop;
 
                 PopupOverflowRoom.Diag(
                     $"[CloseStart] popup={PopupOverflowRoom.Name(popup)} transform={DescribeTransform(child)}");
@@ -726,6 +752,48 @@ namespace Ink_Canvas.Helpers
                 sb.Begin(child);
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+        }
+
+        /// <summary>
+        /// 清掉内容变换上的所有动画，并把缩放/位移恢复到单位值。
+        /// </summary>
+        /// <remarks>
+        /// Storyboard 以属性路径动画到 <see cref="TransformGroup"/> 的子变换时，
+        /// 动画对象挂在该 Transform 实例上；即使 Storyboard 结束，动画值仍可能把持属性。
+        /// 这一步是幂等的，可以在每次打开前无脑调用。
+        /// </remarks>
+        private static void ClearTransformAnimations(FrameworkElement element)
+        {
+            try
+            {
+                if (element?.RenderTransform is not TransformGroup group)
+                {
+                    // 不是我们的结构就不动它，避免破坏别处设置的变换
+                    return;
+                }
+
+                foreach (var transform in group.Children)
+                {
+                    if (transform is ScaleTransform scale)
+                    {
+                        scale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+                        scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+                        scale.ScaleX = 1.0;
+                        scale.ScaleY = 1.0;
+                    }
+                    else if (transform is TranslateTransform translate)
+                    {
+                        translate.BeginAnimation(TranslateTransform.XProperty, null);
+                        translate.BeginAnimation(TranslateTransform.YProperty, null);
+                        translate.X = 0;
+                        translate.Y = 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[AnimationsHelper] ClearTransformAnimations: {ex.Message}");
+            }
         }
 
         /// <summary>诊断用：把内容的变换状态描述成一行，便于比对。</summary>
