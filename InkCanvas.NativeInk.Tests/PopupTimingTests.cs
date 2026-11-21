@@ -14,8 +14,8 @@ namespace InkCanvas.NativeInk.Tests
     /// </remarks>
     internal static class PopupTimingTests
     {
-        private const double PopInSeconds = 0.20;
-        private const double PopOutSeconds = 0.15;
+        private const double PopInSeconds = 0.40;
+        private const double PopOutSeconds = 0.30;
 
         public static void RunAll()
         {
@@ -42,11 +42,11 @@ namespace InkCanvas.NativeInk.Tests
 
         private static void InterruptKeepsDurationSoSpeedDoesNotJump()
         {
-            // 打开途中被打断：开场时长 0.20 正在用，收起时不能用 0.15。
+            // 打开途中被打断：开场时长 0.40 正在用，收起时不能用 0.30。
             var duration = PopupTiming.ResolveDuration(PopOutSeconds, PopInSeconds, isRunning: true);
             Equal(PopInSeconds, duration);
 
-            // 收起途中被打断：同理保持 0.15。
+            // 收起途中被打断：同理保持 0.30。
             var back = PopupTiming.ResolveDuration(PopInSeconds, PopOutSeconds, isRunning: true);
             Equal(PopOutSeconds, back);
         }
