@@ -29,5 +29,8 @@
     <Compile Include="..\Ink Canvas\Ink\Native\WetInkStrokeGeometryState.cs" Link="Ink\Native\WetInkStrokeGeometryState.cs" />
     <!-- 弹簧求解器是纯数学（无 WPF 依赖），直接链源码做单测 -->
     <Compile Include="..\Ink Canvas\Helpers\Motion\SpringSolver.cs" Link="Helpers\Motion\SpringSolver.cs" />
+    <!-- 菜单弹出曲线同样是纯数学（无 WPF 依赖），直接链源码做单测 -->
+    <Compile Include="..\Ink Canvas\Helpers\Motion\PopupCurve.cs" Link="Helpers\Motion\PopupCurve.cs" />
+    <Compile Include="..\Ink Canvas\Helpers\Motion\PopupTiming.cs" Link="Helpers\Motion\PopupTiming.cs" />
   </ItemGroup>
 </Project>
