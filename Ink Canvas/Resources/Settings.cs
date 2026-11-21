@@ -1844,10 +1844,12 @@ namespace Ink_Canvas
         public bool IsUnlimitedFrameRateEnabled { get; set; } = false;
 
         /// <summary>
-        /// 全局动画速度倍率，范围 0.1 ~ 10，默认 1.0。
-        /// 大于 1 变慢（慢放），小于 1 变快。仅用于调试观察动画细节。
+        /// 全局动画播放速度倍率，范围 0.1 ~ 10，默认 1.0。
+        /// 数值即倍速：10 最快，0.1 最慢。仅用于调试观察动画细节。
+        /// 键名带 v2：旧版语义相反（数值大=慢），改名让旧配置自然回落到默认 1.0，
+        /// 避免旧值被反向解释（旧 10x 慢放会被读成 10 倍速）。
         /// </summary>
-        [JsonProperty("animationSpeedMultiplier")]
+        [JsonProperty("animationPlaybackSpeedV2")]
         public double AnimationSpeedMultiplier { get; set; } = 1.0;
 
         [JsonProperty("isPPTComDebugProbeEnabled")]

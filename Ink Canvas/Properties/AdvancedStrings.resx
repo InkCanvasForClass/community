@@ -297,6 +297,6 @@
     <value>全局动画速度</value>
   </data>
   <data name="Debug_AnimationSpeed_Desc" xml:space="preserve">
-    <value>调试用：统一缩放进度的快慢，范围 0.1 ~ 10。1 为原始速度，大于 1 变慢（便于观察细节），小于 1 变快。</value>
+    <value>调试用：统一缩放全部界面动画的播放速度，范围 0.1 ~ 10。数值即倍速：10 最快，0.1 最慢，1 为原始速度。排查完记得点「重置」回到 1。</value>
   </data>
 </root>

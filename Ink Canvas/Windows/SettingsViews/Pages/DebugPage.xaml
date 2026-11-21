@@ -76,14 +76,21 @@ mc:Ignorable="d"
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.SpeedHigh}" />
                     </ui:SettingsCard.HeaderIcon>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <!-- 对数刻度：滑杆位置 = log10(倍率)，[-1, +1]。
+                             1.0x 恰好在正中间，0.1x 和 10x 对称分布在两端，
+                             每一侧的"快/慢手感"等距，线性刻度下 1.0 会挤在最左端。 -->
                         <Slider x:Name="SliderAnimationSpeed" Width="180"
-                                Minimum="0.1" Maximum="10" Value="1"
-                                TickFrequency="0.1" IsSnapToTickEnabled="False"
+                                Minimum="-1" Maximum="1" Value="0"
+                                TickFrequency="0.25" IsSnapToTickEnabled="True"
                                 VerticalAlignment="Center"
                                 ValueChanged="SliderAnimationSpeed_ValueChanged" />
-                        <TextBlock x:Name="TextAnimationSpeed" MinWidth="52" Margin="10,0,0,0"
+                        <TextBlock x:Name="TextAnimationSpeed" MinWidth="58" Margin="10,0,0,0"
                                    VerticalAlignment="Center"
                                    Text="1.0x" />
+                        <Button x:Name="ButtonResetAnimationSpeed" Content="重置" Margin="8,0,0,0"
+                                Padding="10,2" MinHeight="0"
+                                VerticalAlignment="Center"
+                                Click="ButtonResetAnimationSpeed_Click" />
                     </StackPanel>
                 </ui:SettingsCard>
 

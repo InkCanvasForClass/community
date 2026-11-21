@@ -296,6 +296,6 @@
     <value>Global animation speed</value>
   </data>
   <data name="Debug_AnimationSpeed_Desc" xml:space="preserve">
-    <value>Debug aid: scales all animation speeds from 0.1 to 10. 1 is the original speed, above 1 is slower (easier to inspect), below 1 is faster.</value>
+    <value>Debug aid: scales the playback speed of all UI animations from 0.1 to 10. The value is the speed itself: 10 is fastest, 0.1 is slowest, 1 is the original. Press Reset to return to 1 after debugging.</value>
   </data>
 </root>
