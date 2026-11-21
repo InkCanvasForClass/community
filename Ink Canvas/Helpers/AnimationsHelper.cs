@@ -711,15 +711,18 @@ namespace Ink_Canvas.Helpers
                 // 让下一次打开能从"6"这样的正确档位继续。
                 sb.Completed += (_, _) =>
                 {
-                    // 状态机必须跟随**实际视觉状态**同步，不能因为代次过期就跳过。
-                    //
-                    // 日志实测：被打断的 SHOW 会留下 STALE，此时若不同步，
-                    // CurrentScale 还停在 0.72，而菜单实际已经显示为 1.0，
-                    // 于是下次收起会从 0.72 起步（先"缩一下"再收），观感很怪。
-                    // 无论代次如何，只要动画播完，视觉上就已是终态，状态机就该记终态。
                     bool isCurrent = IsCurrent(popup, generation);
                     AnimationLog.Log(popup, isCurrent ? "SHOW-DONE" : "SHOW-DONE-STALE",
                         $"gen={generation} current={token.Generation} start={scaleStart:F4}");
+
+                    // 只有**最新**那次操作才能写档位。
+                    //
+                    // 之前我改成"无条件同步终态"，结果制造了覆盖竞态：
+                    // 被打断的旧 SHOW 的 Completed 会晚于新流程触发，
+                    // 把新流程刚写入的正确档位又改回 1.0；
+                    // 旧 HIDE 的 Completed 更会把档位写成 0.72，
+                    // 而菜单其实已经重新打开了 —— 下次收起就从 0.72 起步。
+                    if (!isCurrent) return;
 
                     token.CurrentScale = 1.0;
                     token.CurrentSlide = 0;
