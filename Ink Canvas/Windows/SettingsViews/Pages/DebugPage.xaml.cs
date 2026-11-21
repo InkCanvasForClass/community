@@ -24,19 +24,17 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ToggleSwitchRenderFpsOverlay.IsOn = SettingsManager.Settings.Advanced.IsRenderFpsOverlayEnabled;
                 ToggleSwitchUnlimitedFrameRate.IsOn = SettingsManager.Settings.Advanced.IsUnlimitedFrameRateEnabled;
 
-                // 恢复全局动画速度倍率
+                // 恢复全局动画播放速度：滑杆位置 = log10(倍率)
                 double multiplier = SettingsManager.Settings.Advanced.AnimationSpeedMultiplier;
+                if (multiplier <= 0) multiplier = 1.0;
+                multiplier = Math.Max(AnimationSpeed.MinMultiplier,
+                    Math.Min(AnimationSpeed.MaxMultiplier, multiplier));
                 if (SliderAnimationSpeed != null)
                 {
-                    SliderAnimationSpeed.Value = Math.Max(AnimationSpeed.MinMultiplier,
-                        Math.Min(AnimationSpeed.MaxMultiplier, multiplier));
+                    SliderAnimationSpeed.Value = Math.Log10(multiplier);
                 }
-                if (TextAnimationSpeed != null)
-                {
-                    string suffix = multiplier >= 3.0 ? "  (慢放，非卡顿)" : "";
-                    TextAnimationSpeed.Text = multiplier.ToString("0.1") + "x" + suffix;
-                }
-                AnimationSpeed.Set(multiplier > 0 ? multiplier : 1.0);
+                UpdateSpeedLabel(multiplier);
+                AnimationSpeed.Set(multiplier);
                 StartAnimationSpeedSaveTimerIfNeeded();
 
                 _isLoaded = true;
@@ -88,17 +86,19 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
         private void SliderAnimationSpeed_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+            // 滑杆位置是 log10(倍率)：[-1, 1] -> [0.1x, 10x]，中点 0 = 1x
+            double multiplier = Math.Pow(10, e.NewValue);
+
             if (TextAnimationSpeed != null)
             {
-                // 高倍率下动画会持续数秒，界面看起来会像"卡住"。
-                // 这里明确提示，避免误判成 bug（先前就发生过这种误判）。
-                string suffix = e.NewValue >= 3.0 ? "  (慢放，非卡顿)" : "";
-                TextAnimationSpeed.Text = e.NewValue.ToString("0.1") + "x" + suffix;
+                // 极慢时动画会持续数秒，界面看起来像"卡住"——明确提示，避免误判成 bug
+                string suffix = multiplier <= 0.34 ? "  (慢放，非卡顿)" : "";
+                TextAnimationSpeed.Text = multiplier.ToString("0.##") + "x" + suffix;
             }
 
             if (!_isLoaded) return;
 
-            double applied = AnimationSpeed.Set(e.NewValue);
+            double applied = AnimationSpeed.Set(multiplier);
             SettingsManager.Settings.Advanced.AnimationSpeedMultiplier = applied;
             if (MainWindow.Settings?.Advanced != null)
                 MainWindow.Settings.Advanced.AnimationSpeedMultiplier = applied;
@@ -106,6 +106,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             // 拖动滑块会连续触发，用防抖延后写盘：停手 400ms 后保存一次
             _animationSpeedSaveTimer?.Stop();
             _animationSpeedSaveTimer?.Start();
+        }
+
+        private void ButtonResetAnimationSpeed_Click(object sender, RoutedEventArgs e)
+        {
+            if (SliderAnimationSpeed != null)
+            {
+                SliderAnimationSpeed.Value = 0;   // log10(1) = 0，触发 ValueChanged 完成设置
+            }
+        }
+
+        private void UpdateSpeedLabel(double multiplier)
+        {
+            if (TextAnimationSpeed == null) return;
+            string suffix = multiplier <= 0.34 ? "  (慢放，非卡顿)" : "";
+            TextAnimationSpeed.Text = multiplier.ToString("0.##") + "x" + suffix;
         }
 
         /// <summary>滑块防抖保存计时器：避免拖动过程中反复写配置文件。</summary>
