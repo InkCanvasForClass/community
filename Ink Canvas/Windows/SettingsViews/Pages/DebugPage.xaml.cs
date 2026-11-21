@@ -23,6 +23,21 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                 ToggleSwitchRealtimeInkDebugLog.IsOn = SettingsManager.Settings.Advanced.IsRealtimeInkDebugLogEnabled;
                 ToggleSwitchRenderFpsOverlay.IsOn = SettingsManager.Settings.Advanced.IsRenderFpsOverlayEnabled;
                 ToggleSwitchUnlimitedFrameRate.IsOn = SettingsManager.Settings.Advanced.IsUnlimitedFrameRateEnabled;
+
+                // 恢复全局动画速度倍率
+                double multiplier = SettingsManager.Settings.Advanced.AnimationSpeedMultiplier;
+                if (SliderAnimationSpeed != null)
+                {
+                    SliderAnimationSpeed.Value = Math.Max(AnimationSpeed.MinMultiplier,
+                        Math.Min(AnimationSpeed.MaxMultiplier, multiplier));
+                }
+                if (TextAnimationSpeed != null)
+                {
+                    TextAnimationSpeed.Text = multiplier.ToString("0.0") + "x";
+                }
+                AnimationSpeed.Set(multiplier > 0 ? multiplier : 1.0);
+                StartAnimationSpeedSaveTimerIfNeeded();
+
                 _isLoaded = true;
             };
             Unloaded += (s, e) => _isLoaded = false;
@@ -68,6 +83,43 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
                     ? "[Debug] 实时笔迹详细调试日志已开启（落笔后查看 Configs/RealtimeInkDebugLive.json / PerformanceHistory.json）"
                     : "[Debug] 实时笔迹详细调试日志已关闭并尝试保存历史",
                 LogHelper.LogType.Info);
+        }
+
+        private void SliderAnimationSpeed_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (TextAnimationSpeed != null)
+            {
+                TextAnimationSpeed.Text = e.NewValue.ToString("0.0") + "x";
+            }
+
+            if (!_isLoaded) return;
+
+            double applied = AnimationSpeed.Set(e.NewValue);
+            SettingsManager.Settings.Advanced.AnimationSpeedMultiplier = applied;
+            if (MainWindow.Settings?.Advanced != null)
+                MainWindow.Settings.Advanced.AnimationSpeedMultiplier = applied;
+
+            // 拖动滑块会连续触发，用防抖延后写盘：停手 400ms 后保存一次
+            _animationSpeedSaveTimer?.Stop();
+            _animationSpeedSaveTimer?.Start();
+        }
+
+        /// <summary>滑块防抖保存计时器：避免拖动过程中反复写配置文件。</summary>
+        private System.Windows.Threading.DispatcherTimer _animationSpeedSaveTimer;
+
+        private void StartAnimationSpeedSaveTimerIfNeeded()
+        {
+            if (_animationSpeedSaveTimer != null) return;
+
+            _animationSpeedSaveTimer = new System.Windows.Threading.DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(400)
+            };
+            _animationSpeedSaveTimer.Tick += (_, _) =>
+            {
+                _animationSpeedSaveTimer.Stop();
+                SettingsManager.SaveSettingsToFile();
+            };
         }
 
         private void ToggleSwitchRenderFpsOverlay_Toggled(object sender, RoutedEventArgs e)
