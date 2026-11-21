@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -470,6 +470,9 @@ namespace Ink_Canvas.Helpers
             /// <summary>是否有打开/收起流程正在进行（用于打断判断）。</summary>
             public bool IsTransitioning;
 
+            /// <summary>收起流程是否在进行中（用于幂等守卫，防止重复播收起动画）。</summary>
+            public bool IsClosing;
+
             /// <summary>代次：后发起的操作自增，旧动画回调据此作废。</summary>
             public int Generation;
         }
@@ -584,6 +587,10 @@ namespace Ink_Canvas.Helpers
                 // 起点已经等于终态时，仍要播一次"涨到峰值再回落"，
                 // 否则用户会看到"第二次打开没有任何动画"。
                 token.IsTransitioning = true;
+
+                // 打开会接管收起流程：清掉守卫标志，
+                // 否则收起被打断后标志会一直留着，导致后续再也收不起来。
+                token.IsClosing = false;
 
                 // 清掉旧动画（不再归位），目的是让下面的基值写入能生效。
                 ClearTransformAnimations(child);
@@ -704,15 +711,15 @@ namespace Ink_Canvas.Helpers
                 // 让下一次打开能从"6"这样的正确档位继续。
                 sb.Completed += (_, _) =>
                 {
-                    if (!IsCurrent(popup, generation))
-                    {
-                        AnimationLog.Log(popup, "SHOW-DONE-STALE",
-                            $"gen={generation} current={token.Generation}");
-                        return;
-                    }
-
-                    AnimationLog.Log(popup, "SHOW-DONE",
-                        $"dur={effectiveDuration:F3}s start={scaleStart:F4}");
+                    // 状态机必须跟随**实际视觉状态**同步，不能因为代次过期就跳过。
+                    //
+                    // 日志实测：被打断的 SHOW 会留下 STALE，此时若不同步，
+                    // CurrentScale 还停在 0.72，而菜单实际已经显示为 1.0，
+                    // 于是下次收起会从 0.72 起步（先"缩一下"再收），观感很怪。
+                    // 无论代次如何，只要动画播完，视觉上就已是终态，状态机就该记终态。
+                    bool isCurrent = IsCurrent(popup, generation);
+                    AnimationLog.Log(popup, isCurrent ? "SHOW-DONE" : "SHOW-DONE-STALE",
+                        $"gen={generation} current={token.Generation} start={scaleStart:F4}");
 
                     token.CurrentScale = 1.0;
                     token.CurrentSlide = 0;
@@ -745,6 +752,17 @@ namespace Ink_Canvas.Helpers
                     popup.IsOpen = false;
                     return;
                 }
+
+                // 幂等守卫：收起动画播放期间 IsOpen 仍是 true，
+                // 而 HideAllPopups 之类的批处理会被反复调用（日志实测同一次操作调了 11 次），
+                // 每次都重播一遍收起动画，表现为"菜单在那儿抖"。
+                // 已处于收起流程中就直接忽略后续请求。
+                var guardToken = TokenFor(popup);
+                if (guardToken.IsClosing)
+                {
+                    return;
+                }
+                guardToken.IsClosing = true;
 
                 // 自增代次：若关闭动画期间用户又打开菜单，这次关闭就应当作废
                 int generation = NextGeneration(popup);
@@ -835,8 +853,19 @@ namespace Ink_Canvas.Helpers
 
                 sb.Completed += (s, e) =>
                 {
+                    // 无论代次是否过期，守卫标志都必须清零。
+                    //
+                    // 之前这里直接 return，导致"收起动画被打断后 IsClosing 永远是 true"，
+                    // 之后所有收起请求都被幂等守卫挡掉——菜单再也收不起来。
+                    token.IsClosing = false;
+
                     // 关闭动画期间被重新打开：本次关闭已过时，不能把菜单关掉
-                    if (!IsCurrent(popup, generation)) return;
+                    if (!IsCurrent(popup, generation))
+                    {
+                        AnimationLog.Log(popup, "HIDE-DONE-STALE",
+                            $"gen={generation} current={token.Generation}");
+                        return;
+                    }
 
                     popup.IsOpen = false;
                     child.BeginAnimation(UIElement.OpacityProperty, null);
@@ -863,8 +892,26 @@ namespace Ink_Canvas.Helpers
                 exitScaleAnimationY.FillBehavior = FillBehavior.Stop;
 
                 sb.Begin(child);
+
+                // 兜底：若 Completed 因任何原因未触发，守卫标志会永久卡住、
+                // 菜单再也收不起来。这里定时强制清零（幂等，不影响正常流程）。
+                var safetyTimer = new System.Windows.Threading.DispatcherTimer
+                {
+                    Interval = AnimationSpeed.ScaleMilliseconds(exitDuration * 1000) + TimeSpan.FromMilliseconds(400)
+                };
+                safetyTimer.Tick += (_, _) =>
+                {
+                    safetyTimer.Stop();
+                    token.IsClosing = false;
+                };
+                safetyTimer.Start();
             }
-            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+            catch (Exception ex)
+            {
+                // 异常路径也必须清零，否则菜单无法再收起
+                TokenFor(popup).IsClosing = false;
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
         }
 
         /// <summary>
