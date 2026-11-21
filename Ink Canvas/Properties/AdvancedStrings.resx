@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <data name="CalibrationReturnSettings" xml:space="preserve"><value>返回高级设置</value></data>
   <data name="CalibrationSimulate" xml:space="preserve"><value>路线二：手绘尺寸 + 多触点校准</value></data>

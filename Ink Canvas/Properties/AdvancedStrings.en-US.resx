@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <data name="CalibrationReturnSettings" xml:space="preserve"><value>Back to advanced settings</value></data>
   <data name="CalibrationSimulate" xml:space="preserve"><value>Route 2: traced dimensions + multiple contacts</value></data>

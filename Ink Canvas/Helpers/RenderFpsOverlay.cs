@@ -33,12 +33,6 @@ namespace Ink_Canvas.Helpers
         private readonly TextBlock _envText;
         private readonly DispatcherTimer _refreshTimer;
         private bool _disposed;
-        private DispatcherTimer _zOrderGuard;
-        private IntPtr _handle;
-
-        // 检查间隔：白板进出、窗口激活都会瞬间改变 Z 序，
-        // 500ms 足以让用户感觉不到，又不至于频繁调 Win32。
-        private static readonly TimeSpan ZOrderGuardInterval = TimeSpan.FromMilliseconds(500);
 
         public RenderFpsOverlay()
         {
@@ -108,12 +102,7 @@ namespace Ink_Canvas.Helpers
             RenderFrameRateMonitor.Start();
             _refreshTimer.Start();
 
-            Loaded += (_, _) =>
-            {
-                PositionBelowSettingsButton();
-                EnsureTopmost();
-                StartZOrderGuard();
-            };
+            Loaded += (_, _) => PositionBelowSettingsButton();
             SizeChanged += (_, _) => PositionBelowSettingsButton();
 
             Closed += (_, _) =>
@@ -122,12 +111,6 @@ namespace Ink_Canvas.Helpers
                 _disposed = true;
                 _refreshTimer.Stop();
                 _refreshTimer.Tick -= RefreshTimer_Tick;
-                _zOrderGuard?.Stop();
-                _zOrderGuard = null;
-                if (Application.Current?.MainWindow != null)
-                {
-                    Application.Current.MainWindow.Activated -= OnMainWindowActivated;
-                }
                 RenderFrameRateMonitor.Stop();
             };
         }
@@ -186,10 +169,9 @@ namespace Ink_Canvas.Helpers
                 _worstText.Text = string.Format(CultureInfo.InvariantCulture, "最差  {0:F1} ms / 平均 {1:F1} ms",
                     snap.WorstFrameMs, snap.AverageFrameMs);
 
-                // 超过一帧预算即说明这一秒内确实掉过帧，标红便于一眼定位。
-                // 阈值取 1.0 倍预算：60Hz 下 >16.7ms 就是掉帧，不需要系数放大。
+                // 超过一帧预算即说明这一秒内确实掉过帧，标红便于一眼定位
                 var budgetMs = RenderPacingController.FrameBudgetMs;
-                _worstText.Foreground = budgetMs > 0 && snap.WorstFrameMs > budgetMs
+                _worstText.Foreground = budgetMs > 0 && snap.WorstFrameMs > budgetMs * 1.5
                     ? new SolidColorBrush(Color.FromRgb(255, 120, 120))
                     : Brushes.White;
             }
@@ -210,74 +192,6 @@ namespace Ink_Canvas.Helpers
             }
             if (RenderPacingController.IsUnlimitedFrameRate) pieces += " / 无限帧率";
             _envText.Text = pieces;
-        }
-
-        /// <summary>
-        /// 把 HUD 提升到 TOPMOST 顶部。
-        /// </summary>
-        /// <remarks>
-        /// 不走 <see cref="WindowTopmostManager"/>：那个管理器服务于"主窗口是否置顶"这一套语义，
-        /// 当主窗口未开「始终置顶」时，它的 ApplyZOrderCore 会走 else 分支主动把子窗口
-        /// 取消置顶——白板下主窗口通常不置顶，注册进去反而会让 HUD 被压下去。
-        ///
-        /// 而 <c>Topmost = true</c> 本身只是标志位：多个 TOPMOST 窗口之间，
-        /// 层级由"谁最后被激活/提升"决定。进白板会激活主窗口，把 HUD 压到它下面。
-        /// 所以这里自己持有 HWND 并定期重新提到 TOPMOST 顶（SWP_NOACTIVATE，不抢焦点）。
-        /// </remarks>
-        private void EnsureTopmost()
-        {
-            try
-            {
-                if (_handle == IntPtr.Zero)
-                    _handle = new WindowInteropHelper(this).Handle;
-
-                if (_handle == IntPtr.Zero) return;
-
-                NativeWindowHelper.SetTopmost(_handle);
-            }
-            catch
-            {
-                // 置顶失败不应影响 HUD 显示
-            }
-        }
-
-        private void StartZOrderGuard()
-        {
-            _zOrderGuard?.Stop();
-            _zOrderGuard = new DispatcherTimer(DispatcherPriority.Background)
-            {
-                Interval = ZOrderGuardInterval
-            };
-            _zOrderGuard.Tick += (_, _) =>
-            {
-                if (_disposed) return;
-                EnsureTopmost();
-            };
-            _zOrderGuard.Start();
-
-            // 只靠定时器轮询有一个可见缺陷：主窗口进白板时会激活并重新提升到 TOPMOST 组首位，
-            // HUD 要等下一次 tick 才回来，中间最长 500ms 被遮住。
-            // 因此再订阅主窗口的 Activated 事件做即时补救。
-            if (Application.Current?.MainWindow != null)
-            {
-                Application.Current.MainWindow.Activated += OnMainWindowActivated;
-            }
-        }
-
-        /// <summary>
-        /// 主窗口被激活（进白板、退出放映、切回应用等）时，TOPMOST 组内它会被提升到顶部，
-        /// HUD 随之被压住。这里立刻把 HUD 重新提到顶部，避免出现最长一个轮询周期的遮挡。
-        /// </summary>
-        private void OnMainWindowActivated(object sender, EventArgs e)
-        {
-            if (_disposed) return;
-
-            // 用 Loaded 优先级排队：等主窗口这次激活引发的 Z 序调整落定后再提升，
-            // 否则刚提上去就被对方随后的激活流程覆盖。
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                if (!_disposed) EnsureTopmost();
-            }), DispatcherPriority.Loaded);
         }
 
         private void PositionBelowSettingsButton()

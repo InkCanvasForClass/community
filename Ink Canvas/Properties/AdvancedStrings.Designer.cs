@@ -89,10 +89,6 @@ namespace Ink_Canvas.Properties
 
         public static string Logging => ResourceManager.GetString(nameof(Logging), _resourceCulture);
 
-        public static string LogLevel => ResourceManager.GetString(nameof(LogLevel), _resourceCulture);
-
-        public static string LogLevelHint => ResourceManager.GetString(nameof(LogLevelHint), _resourceCulture);
-
         public static string LogRotateHint => ResourceManager.GetString(nameof(LogRotateHint), _resourceCulture);
 
         public static string NibModeBoundsWidthHeader => ResourceManager.GetString(nameof(NibModeBoundsWidthHeader), _resourceCulture);
@@ -146,10 +142,6 @@ namespace Ink_Canvas.Properties
         public static string Debug_UnlimitedFrameRate_Header => ResourceManager.GetString(nameof(Debug_UnlimitedFrameRate_Header), _resourceCulture);
 
         public static string Debug_UnlimitedFrameRate_Desc => ResourceManager.GetString(nameof(Debug_UnlimitedFrameRate_Desc), _resourceCulture);
-
-        public static string Debug_AnimationSpeed_Header => ResourceManager.GetString(nameof(Debug_AnimationSpeed_Header), _resourceCulture);
-
-        public static string Debug_AnimationSpeed_Desc => ResourceManager.GetString(nameof(Debug_AnimationSpeed_Desc), _resourceCulture);
 
         public static string Debug_SimulateCrash_Header => ResourceManager.GetString(nameof(Debug_SimulateCrash_Header), _resourceCulture);
 

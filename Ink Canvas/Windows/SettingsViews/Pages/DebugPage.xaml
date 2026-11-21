@@ -69,35 +69,6 @@ mc:Ignorable="d"
                     IsOn="False"
                     Toggled="ToggleSwitchRenderFpsOverlay_Toggled"/>
 
-                <ui:SettingsCard x:Name="CardAnimationSpeed"
-                        Header="{x:Static props:AdvancedStrings.Debug_AnimationSpeed_Header}"
-                        Description="{x:Static props:AdvancedStrings.Debug_AnimationSpeed_Desc}">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.SpeedHigh}" />
-                    </ui:SettingsCard.HeaderIcon>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <!-- 对数刻度：滑杆位置 = log10(倍率)，[-1, +1]。
-                             1.0x 恰好在正中间，0.1x 和 10x 对称分布在两端，
-                             每一侧的"快/慢手感"等距，线性刻度下 1.0 会挤在最左端。 -->
-                        <Slider x:Name="SliderAnimationSpeed" Width="180"
-                                Minimum="-1" Maximum="1" Value="0"
-                                TickFrequency="0.25" IsSnapToTickEnabled="True"
-                                VerticalAlignment="Center"
-                                ValueChanged="SliderAnimationSpeed_ValueChanged" />
-                        <!-- 数值区宽度固定：提示语（慢放/极快等）放 ToolTip，不进布局，
-                             否则文本一旦变长会把左边的滑杆往左挤，滑块像自己跳了。 -->
-                        <TextBlock x:Name="TextAnimationSpeed" Width="46" Margin="10,0,0,0"
-                                   TextAlignment="Right"
-                                   VerticalAlignment="Center"
-                                   Text="1.0x"
-                                   ToolTip="1.0x 原始速度" />
-                        <Button x:Name="ButtonResetAnimationSpeed" Content="重置" Margin="8,0,0,0"
-                                Padding="10,2" MinHeight="0"
-                                VerticalAlignment="Center"
-                                Click="ButtonResetAnimationSpeed_Click" />
-                    </StackPanel>
-                </ui:SettingsCard>
-
                 <controls:LabeledSettingsCard x:Name="ToggleSwitchUnlimitedFrameRate"
                     Header="{x:Static props:AdvancedStrings.Debug_UnlimitedFrameRate_Header}"
                     Description="{x:Static props:AdvancedStrings.Debug_UnlimitedFrameRate_Desc}"
