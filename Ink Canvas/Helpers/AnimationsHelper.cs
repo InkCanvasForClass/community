@@ -425,118 +425,8 @@ namespace Ink_Canvas.Helpers
             sb.Begin((FrameworkElement)element);
         }
 
-        // —— 菜单出场参数：对标 Inkeys 的实测值 ——
-        // Inkeys 的弹出面板用自研 EaseOutBack(c=1.1)：峰值 1.0447 出现在 t≈0.651，
-        // 面板实际放大比例 = compact + (1-compact)·f(t)，compact 是"紧凑态宽度比"。
-        // 我们的菜单没有紧凑态概念，取一个视觉上等价的起始比例即可；
-        // 过冲交给 BackEase 产生，不要手写峰值关键帧（那样曲线会两段拼接、手感发硬）。
-
-        /// <summary>菜单出场起始缩放。越小越"从按钮里长出来"。</summary>
-        private const double PopupPopInStartScale = 0.72;
-
-        /// <summary>
-        /// BackEase 过冲幅度，用于复刻 Inkeys 的 EaseOutBack(c = 1.1) 手感。
-        /// </summary>
-        /// <remarks>
-        /// 注意 WPF 的 <c>Amplitude</c> 与业界 EaseOutBack 的 <c>c</c> **不是同一个量**，
-        /// 直接照抄 c=1.1 会让过冲从 4.5% 变成 43%（实测 Amplitude=1.1 峰值 1.4319）。
-        ///
-        /// 换算方式：先按"目标峰值"反推。Inkeys 的 c=1.1 峰值 1.0447（t≈0.65），
-        /// 实测 WPF Amplitude=0.28 时峰值 1.0446（t≈0.64），曲线形态一致。
-        ///
-        /// 但直接取 0.28 观感偏弱：菜单起始缩放是 0.72，过冲量被
-        /// "start + (1-start)·peak" 压缩后视觉峰值只有 1.0125（过冲 1.25%），
-        /// 肉眼几乎看不出"变大再回落"。
-        /// 因此这里取 0.5，实测视觉峰值 1.0367（过冲 3.67%）——看得出有弹性但不夸张。
-        /// 这个值是**按观感调的，不是 Inkeys 原始参数**；改它请重新实测视觉峰值。
-        /// </remarks>
-        private const double PopupPopInBackAmplitude = 0.5;
-
-        /// <summary>菜单出场时长（秒），对齐 Inkeys 的 0.4s。</summary>
+        /// <summary>菜单出场时长（秒）。</summary>
         internal const double PopupPopInDurationSeconds = 0.4;
-
-        /// <summary>
-        /// 给菜单（Popup.Child，即包含蓝色边框的整个面板）建立统一的变换结构。
-        /// </summary>
-        /// <remarks>
-        /// 出场与收场必须用**同一个结构**，否则两者会互相破坏：
-        /// 出场按 <c>TransformGroup.Children[i]</c> 绑定动画路径，如果上一次收场把
-        /// <c>RenderTransform</c> 换成了裸 <see cref="TranslateTransform"/>，
-        /// 下一次出场绑定时路径就对不上，位移残留会让菜单停偏。
-        ///
-        /// 缩放原点固定为中心：菜单通常在触发按钮上方，若把原点设在按钮中心，
-        /// 那个点落在菜单坐标系之外，缩放会把整个菜单往菜单外收缩，看起来就是定位跑偏。
-        /// </remarks>
-        private static (ScaleTransform Scale, TranslateTransform Slide) PreparePopupTransform(
-            FrameworkElement child, double startScale, double startSlide)
-        {
-            var scale = new ScaleTransform(startScale, startScale);
-            var slide = new TranslateTransform(0, startSlide);
-            var group = new TransformGroup();
-            group.Children.Add(scale);
-            group.Children.Add(slide);
-
-            // 根元素若自带**有用的**变换，嵌入组内保留，不要直接覆盖——
-            // 直接覆盖会悄悄丢掉布局代码设置的变换。
-            //
-            // 注意两个陷阱：
-            // 1) RenderTransform 未设置时 WPF 返回的是默认的 MatrixTransform（Identity），
-            //    它不是"用户设置的变换"，塞进组里会平白多一层；
-            // 2) 若上次保留过外部变换，这次必须继续保留，不能因为组里已有缩放/位移就丢弃。
-            var existing = child.RenderTransform as Transform;
-            if (existing is TransformGroup previousGroup
-                && IsOurPopupTransform(previousGroup)
-                && previousGroup.Children.Count > 2)
-            {
-                // 我们上次建的组里，第 3 项起是保留下来的外部变换
-                for (int i = 2; i < previousGroup.Children.Count; i++)
-                {
-                    group.Children.Add(previousGroup.Children[i]);
-                }
-            }
-            else if (existing != null
-                     && !IsOurPopupTransform(existing)
-                     && !IsIdentityTransform(existing))
-            {
-                group.Children.Add(existing);
-            }
-
-            child.RenderTransform = group;
-            child.RenderTransformOrigin = new Point(0.5, 0.5);
-
-            return (scale, slide);
-        }
-
-        /// <summary>判断该变换是否属于本方法建立的结构（缩放 + 位移，可能附带原变换）。</summary>
-        private static bool IsOurPopupTransform(Transform transform)
-        {
-            return transform is TransformGroup group
-                && group.Children.Count >= 2
-                && group.Children[0] is ScaleTransform
-                && group.Children[1] is TranslateTransform;
-        }
-
-        /// <summary>
-        /// 是否为"无实际效果"的变换。
-        /// RenderTransform 未显式设置时 WPF 会返回一个 Identity 的 MatrixTransform，
-        /// 不能把它当成用户设置的变换保留下来，否则每次都会多一层。
-        /// </summary>
-        private static bool IsIdentityTransform(Transform transform)
-        {
-            if (transform == null) return true;
-            if (transform is MatrixTransform matrix) return matrix.Matrix.IsIdentity;
-            return transform.Value.IsIdentity;
-        }
-
-        /// <summary>
-        /// EaseOutSine：Inkeys 里透明度用的曲线，起步快、收尾平滑，不带过冲。
-        /// </summary>
-        private static QuadraticEase CreateEaseOutSine()
-        {
-            // WPF 没有内置 Sine 缓动；EaseOutQuad 在 0.4s 的观感上与之接近，
-            // 且同样单调递增、无过冲，符合"透明度绝不能越过目标再回来"的约束。
-            return new QuadraticEase { EasingMode = EasingMode.EaseOut };
-        }
 
         public static void ShowPopupWithSlideAndFade(Popup popup, double duration = PopupPopInDurationSeconds)
         {
@@ -560,13 +450,16 @@ namespace Ink_Canvas.Helpers
                 child.Visibility = Visibility.Visible;
                 child.Opacity = targetOpacity * 0.5;
 
-                // 位移动画用 Margin 之外的 RenderTransform，缩放原点固定在元素中心。
+                // 只用位移，不用缩放。
                 //
-                // 不要把原点设成"触发按钮中心"：那个点在菜单坐标系里通常落在菜单外面
-                // （菜单显示在按钮上方），WPF 会以菜单外的一点为基准做缩放，
-                // 结果是整个菜单朝外收缩——视觉上就是"定位跑偏"。
-                // 菜单自身上下内缩的感觉交给位移补偿，而不是移动缩放原点。
-                PreparePopupTransform(child, PopupPopInStartScale, 10);
+                // 缩放会同时破坏两件事，而且都无法在 Popup 里绕过：
+                // 1) Popup 窗口尺寸恒等于内容的布局尺寸（RenderTransform 不参与布局），
+                //    缩放一旦超过 1.0，渲染画面就超出窗口边界被裁掉——"四边不显示"；
+                // 2) 宿主用 CustomPopupPlacementCallback 定位，回调里的 popupSize
+                //    与最终窗口矩形相关，挂上 TransformGroup 后窗口尺寸跟着变，定位随之漂移。
+                //
+                // 所以这里保持与原来完全一致的单一位移结构：结构稳定、定位不受影响。
+                child.RenderTransform = new TranslateTransform(0, 10);
 
                 popup.IsOpen = true;
 
@@ -575,15 +468,13 @@ namespace Ink_Canvas.Helpers
 
                 var sb = new Storyboard();
 
-                // 透明度单独用 EaseOutSine：它与缩放的 Back 曲线共用时间轴，
-                // 但绝不能也带过冲——透明度越过 1 再回来会肉眼可见地闪一下。
                 var fadeInAnimation = new DoubleAnimation
                 {
                     From = targetOpacity * 0.5,
                     To = targetOpacity,
-                    Duration = TimeSpan.FromSeconds(duration),
-                    EasingFunction = CreateEaseOutSine()
+                    Duration = TimeSpan.FromSeconds(duration)
                 };
+                fadeInAnimation.EasingFunction = new CubicEase();
                 Storyboard.SetTargetProperty(fadeInAnimation, new PropertyPath(UIElement.OpacityProperty));
 
                 var slideAnimation = new DoubleAnimation
@@ -594,32 +485,10 @@ namespace Ink_Canvas.Helpers
                 };
                 slideAnimation.EasingFunction = new CubicEase();
                 Storyboard.SetTargetProperty(slideAnimation,
-                    new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"));
-
-                // 缩放入场：一条 BackEase 曲线即可完成"小 → 略大 → 回落"。
-                // 不要拆成"升到峰值 + 回落"两个关键帧：那是两段缓动拼接，
-                // 峰值处速度不连续，看起来会顿一下。EaseOutBack 本身就是先冲过头再回落。
-                var scaleAnimation = new DoubleAnimation
-                {
-                    From = PopupPopInStartScale,
-                    To = 1.0,
-                    Duration = TimeSpan.FromSeconds(duration),
-                    EasingFunction = new BackEase
-                    {
-                        EasingMode = EasingMode.EaseOut,
-                        Amplitude = PopupPopInBackAmplitude
-                    }
-                };
-                Storyboard.SetTargetProperty(scaleAnimation,
-                    new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"));
-                var scaleAnimationY = scaleAnimation.Clone();
-                Storyboard.SetTargetProperty(scaleAnimationY,
-                    new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"));
+                    new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.Y)"));
 
                 sb.Children.Add(fadeInAnimation);
                 sb.Children.Add(slideAnimation);
-                sb.Children.Add(scaleAnimation);
-                sb.Children.Add(scaleAnimationY);
 
                 sb.Begin(child);
             }
@@ -663,20 +532,15 @@ namespace Ink_Canvas.Helpers
                 };
                 slideAnimation.EasingFunction = new CubicEase();
                 Storyboard.SetTargetProperty(slideAnimation,
-                    new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"));
+                    new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.Y)"));
 
                 sb.Children.Add(fadeOutAnimation);
                 sb.Children.Add(slideAnimation);
-
-                // 与出场保持同一套变换结构（缩放 1、位移 0 起点），
-                // 收场结束后把状态复位到"出场前的初值"，下次出场直接从初值开始。
-                PreparePopupTransform(child, 1.0, 0);
 
                 sb.Completed += (s, e) =>
                 {
                     popup.IsOpen = false;
                     child.Opacity = targetOpacity;
-                    PreparePopupTransform(child, 1.0, 0);
                 };
 
                 sb.Begin(child);
