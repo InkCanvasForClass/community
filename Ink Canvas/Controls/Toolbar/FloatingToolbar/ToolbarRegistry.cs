@@ -1201,7 +1201,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                         {
                             From = delta,
                             To = 0,
-                            Duration = TimeSpan.FromMilliseconds(ToolbarSiblingSlideMs),
+                            Duration = AnimationSpeed.ScaleMilliseconds(ToolbarSiblingSlideMs),
                             EasingFunction = new System.Windows.Media.Animation.CubicEase
                             {
                                 EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut
@@ -1324,7 +1324,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 {
                     From = beforeWidth,
                     To = targetWidth,
-                    Duration = TimeSpan.FromMilliseconds(ToolbarWidthTransitionMs),
+                    Duration = AnimationSpeed.ScaleMilliseconds(ToolbarWidthTransitionMs),
                     EasingFunction = new System.Windows.Media.Animation.CubicEase
                     {
                         EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut
@@ -1450,7 +1450,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
 
                 // 淡入：透明度和位移共用同一条时间轴，与 Inkeys 的组件显现做法一致。
                 var fade = new System.Windows.Media.Animation.DoubleAnimation(0, 1,
-                    TimeSpan.FromMilliseconds(ToolbarItemShowDurationMs))
+                    AnimationSpeed.ScaleMilliseconds(ToolbarItemShowDurationMs))
                 {
                     EasingFunction = new System.Windows.Media.Animation.CubicEase
                     {
@@ -1469,7 +1469,7 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 var enterSlide = GetOrCreateChannel(element, EnterChannelIndex);
                 var slideIn = new System.Windows.Media.Animation.DoubleAnimation(
                     ToolbarItemShowSlideOffset, 0,
-                    TimeSpan.FromMilliseconds(ToolbarItemShowDurationMs))
+                    AnimationSpeed.ScaleMilliseconds(ToolbarItemShowDurationMs))
                 {
                     EasingFunction = new System.Windows.Media.Animation.CubicEase
                     {
