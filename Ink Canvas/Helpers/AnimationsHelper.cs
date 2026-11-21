@@ -428,6 +428,43 @@ namespace Ink_Canvas.Helpers
         /// <summary>菜单出场时长（秒）。</summary>
         internal const double PopupPopInDurationSeconds = 0.4;
 
+        /// <summary>
+        /// 每个 Popup 当前的动画代次。
+        /// </summary>
+        /// <remarks>
+        /// 菜单的关闭是"动画播完才真正 IsOpen = false"，这段时间里 Popup 仍算开着。
+        /// 用户在这个窗口期内再次点开菜单时会出现两个问题：
+        /// 1) Show 看到 IsOpen 为 true 就直接返回，动画根本不播；
+        /// 2) 上一段关闭动画的 Completed 随后触发，把刚打开的菜单又关掉。
+        /// 结果就是"闪一下"。
+        ///
+        /// 用代次号解决：每次 Show/Hide 都自增，动画回调里比对代次，
+        /// 只允许最新一次操作生效；同时 Show 不再因为 IsOpen 为 true 而跳过动画。
+        /// </remarks>
+        private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<Popup, AnimationToken> PopupTokens = new();
+
+        private sealed class AnimationToken
+        {
+            public int Generation;
+        }
+
+        private static AnimationToken TokenFor(Popup popup)
+        {
+            return PopupTokens.GetValue(popup, _ => new AnimationToken());
+        }
+
+        /// <summary>当前代次（用于回调里判断是否已被更新的操作取代）。</summary>
+        private static int NextGeneration(Popup popup)
+        {
+            var token = TokenFor(popup);
+            return ++token.Generation;
+        }
+
+        private static bool IsCurrent(Popup popup, int generation)
+        {
+            return PopupTokens.TryGetValue(popup, out var token) && token.Generation == generation;
+        }
+
         /// <summary>菜单出场起始缩放：由小长到正常大小。</summary>
         private const double PopupPopInStartScale = 0.72;
 
@@ -452,7 +489,11 @@ namespace Ink_Canvas.Helpers
                 if (popup == null)
                     throw new ArgumentNullException(nameof(popup));
 
-                if (popup.IsOpen) return;
+                // 注意：这里**不能**因为 IsOpen 为 true 就返回。
+                // 关闭动画播放期间 Popup 仍是打开的（动画结束才置 false），
+                // 用户在此时重新点开菜单，若直接返回就只剩上一段关闭动画在跑——表现为"闪一下"。
+                // 因此允许重入：自增代次，作废仍在等待的关闭回调，然后重新播一遍出场动画。
+                int generation = NextGeneration(popup);
 
                 // 先预留溢出空间：Popup 窗口尺寸等于内容布局尺寸，
                 // 不留白的话缩放一旦超过 1.0，四边就会被窗口边界裁掉。
@@ -551,6 +592,9 @@ namespace Ink_Canvas.Helpers
                 // 既保证终态正确，也保证下次打开时没有 HoldEnd 残留。
                 sb.Completed += (_, _) =>
                 {
+                    // 已被更新的操作取代（例如用户又点了一次开合），不要覆盖当前状态
+                    if (!IsCurrent(popup, generation)) return;
+
                     child.BeginAnimation(UIElement.OpacityProperty, null);
                     child.Opacity = targetOpacity;
 
@@ -589,6 +633,9 @@ namespace Ink_Canvas.Helpers
                     return;
                 }
 
+                // 自增代次：若关闭动画期间用户又打开菜单，这次关闭就应当作废
+                int generation = NextGeneration(popup);
+
                 double targetOpacity = GetPopupTargetOpacity(popup);
 
                 var sb = new Storyboard();
@@ -597,7 +644,8 @@ namespace Ink_Canvas.Helpers
                 {
                     From = targetOpacity,
                     To = 0,
-                    Duration = TimeSpan.FromSeconds(duration)
+                    Duration = TimeSpan.FromSeconds(duration),
+                    FillBehavior = FillBehavior.Stop
                 };
                 fadeOutAnimation.EasingFunction = new CubicEase();
                 Storyboard.SetTargetProperty(fadeOutAnimation, new PropertyPath(UIElement.OpacityProperty));
@@ -627,7 +675,11 @@ namespace Ink_Canvas.Helpers
 
                 sb.Completed += (s, e) =>
                 {
+                    // 关闭动画期间被重新打开：本次关闭已过时，不能把菜单关掉
+                    if (!IsCurrent(popup, generation)) return;
+
                     popup.IsOpen = false;
+                    child.BeginAnimation(UIElement.OpacityProperty, null);
                     child.Opacity = targetOpacity;
                 };
 
