@@ -554,28 +554,6 @@ namespace Ink_Canvas.Helpers
                 // 避免打开前测不到尺寸导致留白偏小、峰值时四边被裁。
                 PopupOverflowRoom.RefreshPadding(popup, PopupPopInPeakScale);
 
-                // 诊断：记录本次打开后的关键状态，便于对比第一次与后续打开的差异。
-                // 用 BeginInvoke 排到布局之后，才能取到真实的实际尺寸与屏幕位置。
-                child.Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    try
-                    {
-                        var hostEl = popup.Child as FrameworkElement;
-                        var screen = child.PointToScreen(new Point(0, 0));
-                        PopupOverflowRoom.Diag(
-                            $"[Open] popup={PopupOverflowRoom.Name(popup)}"
-                            + $" childActual={child.ActualWidth:F1}x{child.ActualHeight:F1}"
-                            + $" hostActual={(hostEl != null ? hostEl.ActualWidth.ToString("F1") : "-")}x{(hostEl != null ? hostEl.ActualHeight.ToString("F1") : "-")}"
-                            + $" padding={(hostEl is Border hb ? hb.Padding.Left.ToString("F1") + "," + hb.Padding.Top.ToString("F1") : "-")}"
-                            + $" screen=({screen.X:F1},{screen.Y:F1})"
-                            + $" transform={DescribeTransform(child)}");
-                    }
-                    catch (Exception ex)
-                    {
-                        PopupOverflowRoom.Diag("[Open] 记录失败: " + ex.Message);
-                    }
-                }), System.Windows.Threading.DispatcherPriority.Loaded);
-
                 // 注意：置顶由 PopupManagerHelper 统一管理，
                 // 此处不再调用 BringPopupToFront，避免重复置顶导致闪烁
 
@@ -721,33 +699,16 @@ namespace Ink_Canvas.Helpers
                     child.BeginAnimation(UIElement.OpacityProperty, null);
                     child.Opacity = targetOpacity;
 
-                    // 关键：把变换上的动画彻底摘掉并归位。
-                    //
-                    // Storyboard 通过属性路径动画到 TransformGroup 的子里时，
-                    // 动画对象挂在 Transform 上，Storyboard 结束后不会自动释放
-                    // （日志实测 [Close] 后缩放仍停在 0.905）。
-                    // 这个残留会让下次打开时布局按 0.9 倍测量，popupSize 变小、定位偏下，
-                    // 必须在这里显式清除。
-                    exitScale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
-                    exitScale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
-                    exitSlide.BeginAnimation(TranslateTransform.YProperty, null);
-                    exitScale.ScaleX = 1.0;
-                    exitScale.ScaleY = 1.0;
-                    exitSlide.Y = 0;
-
-                    PopupOverflowRoom.Diag(
-                        $"[Close] popup={PopupOverflowRoom.Name(popup)} transform={DescribeTransform(child)}");
+                    // 把变换上的动画彻底摘掉并归位。若不清理，缩放会停在 0.9，
+                    // 下次打开时布局按带残留的尺寸测量，popupSize 变小、定位偏下。
+                    ClearTransformAnimations(child);
                 };
 
-                // 收场动画一律 FillBehavior.Stop：结束后靠上面的清理归位，
-                // 不让动画值继续把持属性。
+                // 收场动画一律 FillBehavior.Stop：结束后靠上面的清理归位
                 fadeOutAnimation.FillBehavior = FillBehavior.Stop;
                 slideAnimation.FillBehavior = FillBehavior.Stop;
                 exitScaleAnimation.FillBehavior = FillBehavior.Stop;
                 exitScaleAnimationY.FillBehavior = FillBehavior.Stop;
-
-                PopupOverflowRoom.Diag(
-                    $"[CloseStart] popup={PopupOverflowRoom.Name(popup)} transform={DescribeTransform(child)}");
 
                 sb.Begin(child);
             }
@@ -794,25 +755,6 @@ namespace Ink_Canvas.Helpers
             {
                 System.Diagnostics.Debug.WriteLine($"[AnimationsHelper] ClearTransformAnimations: {ex.Message}");
             }
-        }
-
-        /// <summary>诊断用：把内容的变换状态描述成一行，便于比对。</summary>
-        private static string DescribeTransform(FrameworkElement element)
-        {
-            if (element?.RenderTransform is not TransformGroup group)
-            {
-                return element?.RenderTransform == null ? "none" : element.RenderTransform.GetType().Name;
-            }
-
-            var parts = new System.Text.StringBuilder();
-            foreach (var t in group.Children)
-            {
-                if (t is ScaleTransform st) parts.Append($"S({st.ScaleX:F3})");
-                else if (t is TranslateTransform tt) parts.Append($"T({tt.X:F1},{tt.Y:F1})");
-                else parts.Append(t.GetType().Name);
-                parts.Append(' ');
-            }
-            return parts.ToString().Trim();
         }
 
         /// <summary>
