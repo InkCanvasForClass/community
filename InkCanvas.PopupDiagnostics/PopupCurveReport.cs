@@ -105,9 +105,9 @@ namespace Ink_Canvas.PopupDiagnostics
                 !saturatesEarly,
                 "progress=0.99 时仍是 " + F(PopupCurve.OpacityWeight(0.99)) + "，到 1.0 才满");
             report.Check(
-                "透明度下限与独立时间线起点一致",
-                Math.Abs(PopupCurve.OpacityWeight(0.0) - PopupCurve.MinOpacityWeight) < 1e-12,
-                "OpacityWeight(0)=" + F(PopupCurve.OpacityWeight(0.0)));
+                "起始完全不可见（与 Inkeys 的 opacity 初值 0 一致）",
+                Math.Abs(PopupCurve.OpacityWeight(0.0)) < 1e-12,
+                "OpacityWeight(0)=" + F(PopupCurve.OpacityWeight(0.0)) + "，收起态不留半透明残影");
 
             // 几何越过 1.0（开始过冲）那一刻的透明度，是"几何先到位、透明度收尾"的量化指标。
             var crossAt = 0.0;

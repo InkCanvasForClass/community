@@ -39,6 +39,7 @@ namespace InkCanvas.NativeInk.Tests
             Run(nameof(SixtyFpsCloseStillShowsOvershoot), SixtyFpsCloseStillShowsOvershoot);
             Run(nameof(SlideAndOpacityShareTheTravelOfTheCurve), SlideAndOpacityShareTheTravelOfTheCurve);
             Run(nameof(OpacityHasItsOwnTimeline), OpacityHasItsOwnTimeline);
+            Run(nameof(SlideIsEquivalentToScalingAroundTrigger), SlideIsEquivalentToScalingAroundTrigger);
         }
 
         private static void TravelMatchesUpstreamInkeysImplementation()
@@ -252,7 +253,7 @@ namespace InkCanvas.NativeInk.Tests
 
             // 透明度不跟行程走（它有自己的正弦时间线），但必须同样整段单调不减、
             // 且限制在 [MinOpacityWeight, 1]：权重 >1 交给 WPF 会被静默裁掉，
-            // 观感是"最后一段不再变亮"。
+            // 观感是"最后一段不再变亮"。下限现在是 0，即收起态完全不可见。
             var previous = PopupCurve.Evaluate(0.0).OpacityWeight;
             for (var i = 1; i <= 1000; i++)
             {
@@ -264,12 +265,44 @@ namespace InkCanvas.NativeInk.Tests
 
             Equal(1.0, previous);
 
-            // 位移会先越过 0 再退回来（Inkeys 的呼吸感，峰值处约 -1.79 DIP），
+            // 位移会先越过 0 再退回来（Inkeys 的呼吸感，峰值处约 -1.63 DIP），
             // 这段越位落在菜单留白里；越位量必须小到不会被看成"菜单抖了一下"。
             var overshootSlide = PopupCurve.Evaluate(PopupCurve.PeakAt).SlideY;
             True(overshootSlide < 0.0);
             True(overshootSlide > -3.0);
             Equal(0.0, PopupCurve.Evaluate(1.0).SlideY);
+        }
+
+        private static void SlideIsEquivalentToScalingAroundTrigger()
+        {
+            // 菜单的 RenderTransformOrigin 被夹在 [0,1]，纵向最多只能到底边，
+            // 所以"绕按钮中心缩放"没法直接用原点表达。等价写法是：原点取底边，
+            // 再叠一段位移 SlideDistance = 锚点偏移·(1 - StartScale)。
+            //
+            // 这条测试锁的就是那个等价关系：任意缩放下，合成后的底边位置
+            // 必须等于"绕按钮中心缩放"算出来的底边位置。
+            // 一旦有人把 SlideDistance 改回拍脑袋的整数（比如 10.0），这里立刻失败。
+            const double anchorOffset = PopupCurve.AnchorOffset;
+
+            for (var i = 0; i <= 1000; i++)
+            {
+                var scale = PopupCurve.StartScale + i / 1000.0 * (1.0 - PopupCurve.StartScale);
+                var travel = (scale - PopupCurve.StartScale) / (1.0 - PopupCurve.StartScale);
+
+                // 我们的写法：底边不动，内容整体平移 slideY；底边相对静止位置抬升 load
+                var ourLift = PopupCurve.SlideDistance * (1.0 - travel);
+
+                // 绕锚点缩放的写法：底边抬升 anchorOffset·(1 - scale)
+                var anchorLift = anchorOffset * (1.0 - scale);
+
+                True(Math.Abs(ourLift - anchorLift) < 1e-9);
+            }
+
+            // 常量之间的关系也要钉住：SlideDistance 必须是导出量，不是独立可调的值。
+            Equal(anchorOffset * (1.0 - PopupCurve.StartScale), PopupCurve.SlideDistance);
+
+            // 锚点偏移 = 按钮半高 24.5 + 弹窗间距 8，与诊断工程里的 PlacementGapPixels 同源。
+            Equal(24.5 + 8.0, anchorOffset);
         }
 
         private static void OpacityHasItsOwnTimeline()
@@ -289,15 +322,15 @@ namespace InkCanvas.NativeInk.Tests
                 Equal(expected, PopupCurve.Evaluate(progress).OpacityWeight);
             }
 
-            // 对齐 Inkeys 的形状：EaseOutSine(0.5) = √2/2 = 0.7071，权重映射到 [0.35, 1] 后是 0.8096。
-            // 此刻几何已越过 1.0 在过冲，透明度才走到八成 —— "几何先到位、透明度收尾"。
-            True(Math.Abs(PopupCurve.OpacityWeight(0.5) - 0.8096194077712559) < 1e-12);
+            // 下限是 0，于是 OpacityWeight 就是纯 EaseOutSine：progress=0.5 处恰为 √2/2。
+            // 此刻几何已越过 1.0 在过冲，透明度才走到七成 —— "几何先到位、透明度收尾"。
+            True(Math.Abs(PopupCurve.OpacityWeight(0.5) - Math.Sqrt(0.5)) < 1e-12);
 
             // 真正的对照点：几何在 progress 0.293 就已锁在 1.0（back=2.412 时越过 1.0 的位置），
-            // 透明度那时只走到 0.6387（正弦因子 0.4442）—— 剩下 0.36 留给后半段。
+            // 透明度那时只走到 0.4442 —— 剩下五成多留给后半段。
             // 旧实现同一处是 0.9999，即"几何一到位，透明度也满"，这正是要修掉的耦合。
-            True(PopupCurve.OpacityWeight(0.293) < 0.65);
-            True(PopupCurve.OpacityWeight(0.293) > 0.60);
+            True(PopupCurve.OpacityWeight(0.293) < 0.45);
+            True(PopupCurve.OpacityWeight(0.293) > 0.43);
 
             // 透明度必须一路铺满到进度 1，不能在中途饱和。
             True(PopupCurve.OpacityWeight(0.9) < 1.0);
