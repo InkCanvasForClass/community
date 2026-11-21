@@ -402,38 +402,56 @@ namespace InkCanvas.NativeInk.Tests
 
         private static void OpacityHasItsOwnTimeline()
         {
-            // 透明度走独立的 EaseOutSine，不跟几何行程走。这条测试锁的是"两个旋钮别绞在一起"：
+            // 透明度走独立的 EaseInOutSine，不跟几何行程走。这条测试锁的是"两个旋钮别绞在一起"：
             // 调曲线张力只该改缩放/位移的形状，不该顺带改掉淡入的速度。
             //
             // 曾经的实现是 MinOpacityWeight + (1-MinOpacityWeight)·clamp01(travel)：
             // 张力 1.1 时透明度在进度 0.476 就满，张力 3.0 时提前到 0.250 ——
             // 想调"弹多狠"会连带把淡入压缩到 1/4 时长，正是这里要防的回归。
+            //
+            // 曲线选 EaseInOutSine 而不是 Inkeys 那条 EaseOutSine：Inkeys 的透明度是两层，
+            // 背板跑 EaseOutSine、图标文字另跑 EaseInOutCubic（Bar.GeometryAttribute.cpp:474），
+            // 快的是底板。我们只有一层 Opacity，背板与文字一起变，用 EaseOutSine 会让
+            // 半透明的字先浮出来；EaseInOutSine 两端导数为 0，不会一帧之内突然实/虚。
             var shape = Shape;
             for (var i = 0; i <= 1000; i++)
             {
                 var progress = i / 1000.0;
+                var eased = 0.5 * (1.0 - Math.Cos(progress * Math.PI));
                 var expected = PopupCurve.MinOpacityWeight +
-                               (1.0 - PopupCurve.MinOpacityWeight) * Math.Sin(progress * Math.PI / 2.0);
+                               (1.0 - PopupCurve.MinOpacityWeight) * eased;
                 Equal(expected, PopupCurve.OpacityWeight(progress));
                 Equal(expected, shape.Evaluate(progress).OpacityWeight);
             }
 
-            // 下限是 0，于是 OpacityWeight 就是纯 EaseOutSine：progress=0.5 处恰为 √2/2。
-            // 此刻几何已越过 1.0 在过冲，透明度才走到七成 —— "几何先到位、透明度收尾"。
-            True(Math.Abs(PopupCurve.OpacityWeight(0.5) - Math.Sqrt(0.5)) < 1e-12);
+            // 下限 0.2 之上是纯 EaseInOutSine：中点恰好落在权重的正中 (0.2 + 0.8/2 = 0.6)，
+            // 两端导数为 0，所以起点与终点都没有"突然出现/突然消失"的硬边。
+            True(Math.Abs(PopupCurve.OpacityWeight(0.5) - 0.6) < 1e-12);
+            // 四分之一处的行程是 (1 - cos(π/4)) / 2 ≈ 0.1464，不是 0.5 —— 前半段比线性慢，
+            // 这正是"EaseOutSine 起手就冲到 0.38"要修掉的东西。
+            True(Math.Abs((PopupCurve.OpacityWeight(0.25) - PopupCurve.MinOpacityWeight) /
+                          (1.0 - PopupCurve.MinOpacityWeight) - 0.146446609406726) < 1e-12);
+            // 关于中点对称：op(p) + op(1-p) = 1 + 下限（两个 0.8 因子各占一半）。
+            True(Math.Abs(PopupCurve.OpacityWeight(0.75) + PopupCurve.OpacityWeight(0.25) -
+                          1.0 - PopupCurve.MinOpacityWeight) < 1e-12);
 
             // 真正的对照点：几何越过 1.0 的位置由张力唯一决定，解 1 + (c+1)s³ + c·s² = 1
             // 得 s = -c/(c+1)，即 progress = 1/(c+1)。381 宽菜单张力 1.271，越界点 p ≈ 0.440
-            // （0.40s 里的 176ms），此刻透明度才 0.64 —— 剩下三成多留给后半段。
+            // （0.40s 里的 176ms），此刻透明度才 0.53 —— 剩下过半时长留给透明度独自收尾。
             // 旧实现同一处已是 0.9999，即"几何一到位，透明度也满"，这正是要修掉的耦合。
             var crossing = 1.0 / (shape.Tension + 1.0);
             True(Math.Abs(shape.Evaluate(crossing).Scale - 1.0) < 1e-12);
-            True(PopupCurve.OpacityWeight(crossing) > 0.60);
-            True(PopupCurve.OpacityWeight(crossing) < 0.68);
+            True(PopupCurve.OpacityWeight(crossing) > 0.50);
+            True(PopupCurve.OpacityWeight(crossing) < 0.55);
 
             // 透明度必须一路铺满到进度 1，不能在中途饱和。
             True(PopupCurve.OpacityWeight(0.9) < 1.0);
             Equal(1.0, PopupCurve.OpacityWeight(1.0));
+
+            // 收起态保留可见残影：MenuHarness 在 progress=0 之后才 IsOpen=false，
+            // 若这里归零，最后三成收缩过程就是"还没缩进去就先化没了"。
+            True(PopupCurve.MinOpacityWeight > 0.0);
+            Equal(PopupCurve.MinOpacityWeight, PopupCurve.OpacityWeight(0.0));
 
             // 几何越界输入同样要夹稳。
             Equal(PopupCurve.MinOpacityWeight, PopupCurve.OpacityWeight(-5.0));
