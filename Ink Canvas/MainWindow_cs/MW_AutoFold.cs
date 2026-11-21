@@ -115,6 +115,14 @@ namespace Ink_Canvas
         public async Task FoldFloatingBar(object sender, bool isAutoFoldCommand = false, bool instant = false,
             bool hold = false)
         {
+            // 自动折叠可能由 System.Timers.Timer 在线程池触发；先切回窗口 Dispatcher，
+            // 确保后续状态变更及整个异步过渡都在 UI 线程上执行。
+            if (!Dispatcher.CheckAccess())
+            {
+                await Dispatcher.InvokeAsync(() => FoldFloatingBar(sender, isAutoFoldCommand, instant, hold)).Task.Unwrap();
+                return;
+            }
+
             foldFloatingBarByUser = sender != null;
             _holdFoldAgainstAutoUnfold = sender != null || hold;
             unfoldFloatingBarByUser = false;
@@ -209,7 +217,7 @@ namespace Ink_Canvas
             });
 
             // 让上面这批 UI 状态变更在渲染队列里落地，而不是固定睡一段时间
-            await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.Background);
+            await Dispatcher.Yield(DispatcherPriority.Background);
 
             int foldEdge = ComputeFoldEdge();
 
@@ -492,6 +500,12 @@ namespace Ink_Canvas
         /// <param name="sender">事件发送者；null 表示由代码触发而非用户点击。</param>
         public async Task UnFoldFloatingBar(object sender)
         {
+            if (!Dispatcher.CheckAccess())
+            {
+                await Dispatcher.InvokeAsync(() => UnFoldFloatingBar(sender)).Task.Unwrap();
+                return;
+            }
+
             unfoldFloatingBarByUser = sender != null && !ArePPTControlsVisible;
             foldFloatingBarByUser = false;
             await TransitionFloatingBarAsync(folded: false, instant: false, trigger: sender);
