@@ -82,7 +82,13 @@ namespace Ink_Canvas.Windows.SettingsViews.Helpers
                                     try
                                     {
                                         File.Copy(tmpPath, path, true);
-                                        File.Delete(tmpPath);
+                                        try { File.Delete(tmpPath); }
+                                        catch (Exception cleanupException)
+                                        {
+                                            LogHelper.WriteLogToFile(
+                                                $"[Settings] 回退写入成功，但清理临时文件失败: {cleanupException.Message}",
+                                                LogHelper.LogType.Warning);
+                                        }
                                         LogHelper.WriteLogToFile(
                                             $"[Settings] File.Replace 失败，已回退到覆盖写入: {replaceException.Message}",
                                             LogHelper.LogType.Warning);
