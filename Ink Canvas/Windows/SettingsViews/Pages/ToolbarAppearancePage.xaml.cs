@@ -289,18 +289,6 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
             SettingsManager.SaveSettingsToFile();
         }
 
-        private void ComboBoxToolbarMotionPreset_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (!_isLoaded) return;
-            if (ComboBoxToolbarMotionPreset == null) return;
-
-            int preset = Math.Max(0, Math.Min(2, ComboBoxToolbarMotionPreset.SelectedIndex));
-            if (SettingsManager.Settings.Appearance.ToolbarMotionPreset == preset) return;
-
-            SettingsManager.Settings.Appearance.ToolbarMotionPreset = preset;
-            SettingsManager.SaveSettingsToFile();
-        }
-
         private void ToggleSwitchUseLegacyFloatingBarUI_Toggled(object sender, RoutedEventArgs e)
         {
             if (!_isLoaded) return;
