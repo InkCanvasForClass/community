@@ -182,9 +182,22 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 留白 = 内容尺寸 × 单边溢出比例，向上取整再留 1px 余量。
-        /// 峰值 → 仅一半溢出在单侧（原点在中心，四周对称出界）。
+        /// 留白 = 内容尺寸 × 整份溢出比例，向上取整再留 1px 余量，四边等量。
         /// </summary>
+        /// <remarks>
+        /// 必须按**整份**溢出留，不能除以 2。
+        ///
+        /// 除以 2 的前提是缩放原点在内容正中心，此时四边各溢出半份，对称留白刚好够。
+        /// 但原点是由 <see cref="PopupScaleOrigin"/> 按触发按钮位置算出来的：
+        /// 底部工具栏的菜单原点实测落在 (0.496, 1.0)，即底边中点 ——
+        /// 横向仍近似对称，纵向则是全部溢出都堆在**顶边**（300 × 5% = 15px），
+        /// 而已留白只有 9px，顶部 6px 在峰值那几帧被窗口边界裁掉。
+        ///
+        /// 按原点分四边算需要知道原点，而原点要到播放动画时才有、还会随触发按钮变化；
+        /// 更麻烦的是 Padding 影响布局尺寸，反过来又会改窗口矩形，形成反馈环。
+        /// 所以这里直接按最坏情况（原点贴着任意一条边）给满四边：
+        /// 代价只是弹窗窗口比原来大一圈，而窗口是全透明的，视觉上没有成本。
+        /// </remarks>
         private static Size ComputePadding(Size contentSize, double peakScale)
         {
             // 防御：峰值非法时按常见的 4% 估算，保证仍能显示完整
@@ -193,9 +206,9 @@ namespace Ink_Canvas.Helpers
                 peakScale = 1.04;
             }
 
-            double perSide = (peakScale - 1.0) / 2.0;
-            double padX = Math.Ceiling(contentSize.Width * perSide) + 1;
-            double padY = Math.Ceiling(contentSize.Height * perSide) + 1;
+            double overflow = peakScale - 1.0;
+            double padX = Math.Ceiling(contentSize.Width * overflow) + 1;
+            double padY = Math.Ceiling(contentSize.Height * overflow) + 1;
 
             // 上限保护：极端尺寸下不要把窗口撑得离谱
             padX = Math.Min(padX, 48);
