@@ -424,6 +424,12 @@ namespace Ink_Canvas.Helpers
             sb.Begin((FrameworkElement)element);
         }
 
+        /// <summary>菜弹出场时的初始缩放：明显小于 1，才有"由小长出来"的观感。</summary>
+        private const double PopupPopInStartScale = 0.88;
+
+        /// <summary>过冲峰值：略大于 1，随后回落，构成"变大一点再收回来"的曲线。</summary>
+        private const double PopupPopInOvershootScale = 1.03;
+
         public static void ShowPopupWithSlideAndFade(Popup popup, double duration = 0.15)
         {
             try
@@ -445,7 +451,16 @@ namespace Ink_Canvas.Helpers
 
                 child.Visibility = Visibility.Visible;
                 child.Opacity = targetOpacity * 0.5;
-                child.RenderTransform = new TranslateTransform(0, 10);
+
+                // 位移与缩放必须共存，所以用 TransformGroup 而不是直接替换 RenderTransform：
+                // 两段动画分别绑到组内的子变换，互不覆盖。
+                var slideTransform = new TranslateTransform(0, 10);
+                var scaleTransform = new ScaleTransform(PopupPopInStartScale, PopupPopInStartScale);
+                var transformGroup = new TransformGroup();
+                transformGroup.Children.Add(scaleTransform);
+                transformGroup.Children.Add(slideTransform);
+                child.RenderTransform = transformGroup;
+                child.RenderTransformOrigin = new Point(0.5, 0.5);
 
                 popup.IsOpen = true;
 
@@ -470,10 +485,36 @@ namespace Ink_Canvas.Helpers
                     Duration = TimeSpan.FromSeconds(duration)
                 };
                 slideAnimation.EasingFunction = new CubicEase();
-                Storyboard.SetTargetProperty(slideAnimation, new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.Y)"));
+                Storyboard.SetTargetProperty(slideAnimation,
+                    new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"));
+
+                // 缩放入场：小 → 略大 → 目标值。
+                // 用关键帧而不是弹簧，是因为这里的时长本来就很短（0.15s 量级），
+                // 过冲必须显式写出来才可控；弹簧在这么短的时间里过冲点不好摆。
+                var scaleAnimation = new DoubleAnimationUsingKeyFrames
+                {
+                    Duration = TimeSpan.FromSeconds(duration)
+                };
+                scaleAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(
+                    PopupPopInStartScale, KeyTime.FromPercent(0.0)));
+                // 过冲峰值：比目标略大，约整段时长的 55% 处到达
+                scaleAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(
+                    PopupPopInOvershootScale, KeyTime.FromPercent(0.55),
+                    new CubicEase { EasingMode = EasingMode.EaseOut }));
+                // 回落并稳定在 1.0
+                scaleAnimation.KeyFrames.Add(new EasingDoubleKeyFrame(
+                    1.0, KeyTime.FromPercent(1.0),
+                    new CubicEase { EasingMode = EasingMode.EaseOut }));
+                Storyboard.SetTargetProperty(scaleAnimation,
+                    new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"));
+                var scaleAnimationY = scaleAnimation.Clone();
+                Storyboard.SetTargetProperty(scaleAnimationY,
+                    new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"));
 
                 sb.Children.Add(fadeInAnimation);
                 sb.Children.Add(slideAnimation);
+                sb.Children.Add(scaleAnimation);
+                sb.Children.Add(scaleAnimationY);
 
                 sb.Begin(child);
             }

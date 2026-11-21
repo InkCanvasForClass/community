@@ -271,6 +271,10 @@ namespace Ink_Canvas.Windows.SettingsViews.Pages
 
             SettingsManager.Settings.Appearance.DisableToolbarAnimation = CardDisableToolbarAnimation.IsOn;
             SettingsManager.SaveSettingsToFile();
+
+            // 立即生效：不必等下一次模式切换才把新设置应用到组件显隐
+            Ink_Canvas.Controls.Toolbar.FloatingToolbar.ToolbarRegistry.SetVisibilityAnimationEnabled(
+                !CardDisableToolbarAnimation.IsOn);
         }
 
         private void ComboBoxToolbarMotionPreset_SelectionChanged(object sender, SelectionChangedEventArgs e)
