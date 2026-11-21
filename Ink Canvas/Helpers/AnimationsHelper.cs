@@ -472,19 +472,19 @@ namespace Ink_Canvas.Helpers
             /// <summary>每帧推进的进度增量（正=打开，负=收起）。</summary>
             public double Direction;
 
-            /// <summary>动画时钟；null 表示当前没有动画在跑。</summary>
-            public System.Windows.Threading.DispatcherTimer Timer;
+            /// <summary>是否正在逐帧驱动（false = 当前没有动画在跑）。</summary>
+            public bool Running;
 
             /// <summary>收起动画结束后的回调（由 Hide 流程设置）。</summary>
             public Action OnClosed;
 
-            /// <summary>时钟触发的处理器，解绑时用。</summary>
-            public EventHandler TickHandler;
+            /// <summary>逐帧回调，解绑时用。</summary>
+            public EventHandler RenderingHandler;
 
             /// <summary>该菜单最后一次使用的时长基数（秒），用于算每帧步进。</summary>
             public double DurationSeconds = PopupPopInDurationSeconds;
 
-            /// <summary>上次 tick 的时间戳，用于按真实帧间隔推进。</summary>
+            /// <summary>上一帧的时间，用于按真实帧间隔推进。</summary>
             public System.Diagnostics.Stopwatch Clock = new();
         }
 
@@ -664,25 +664,41 @@ namespace Ink_Canvas.Helpers
             // 换目标：收起方向不再需要完成回调；打开方向挂上回调
             token.OnClosed = opening ? null : onFullyClosed;
 
-            // 重启时钟（沿用当前 progress —— 这就是打断的全部实现）
+            // 重启驱动（沿用当前 progress —— 这就是打断的全部实现）
             StopClock(token);
             token.Clock.Restart();
 
-            token.TickHandler = (_, _) => PopupTick(popup, child, token);
-            token.Timer = new System.Windows.Threading.DispatcherTimer(
-                System.Windows.Threading.DispatcherPriority.Background)
+            // 用 CompositionTarget.Rendering 而不是 DispatcherTimer：
+            // 后者按时间触发，UI 一忙就会"欠账"，下一次回调带来一个很大的 dt，
+            // progress 一步跨过整个过冲区 —— 实测收起时 1.0367 的峰值整段没被画出来。
+            // Rendering 与合成帧同拍，每帧只推进一帧的量，曲线必定被完整采样。
+            token.RenderingHandler = (_, _) => PopupTick(popup, child, token);
+            token.Running = true;
+            CompositionTarget.Rendering += token.RenderingHandler;
+
+            // 防泄漏：Popup 若被外部直接关闭（不走本类流程），
+            // 逐帧回调会一直挂在 CompositionTarget.Rendering 上，
+            // 每帧继续持有 popup/child 引用并推进已不存在的动画。
+            // 这里挂一次性监听，关闭时立刻解绑。
+            void OnPopupClosed(object s, EventArgs e)
             {
-                Interval = TimeSpan.FromMilliseconds(8)
-            };
-            token.Timer.Tick += token.TickHandler;
-            token.Timer.Start();
+                popup.Closed -= OnPopupClosed;
+                StopClock(token);
+            }
+            popup.Closed -= OnPopupClosed;
+            popup.Closed += OnPopupClosed;
         }
 
-        /// <summary>时钟每帧推进 progress 并写入曲线值。</summary>
+        /// <summary>每渲染帧推进 progress 并写入曲线值。</summary>
         private static void PopupTick(Popup popup, FrameworkElement child, AnimationToken token)
         {
             double dt = token.Clock.Elapsed.TotalSeconds;
             token.Clock.Restart();
+
+            // 夹住单帧时长：窗口被拖动/系统卡顿时 dt 可能上百毫秒，
+            // 不夹的话一帧就能跨过整个过冲区，曲线被"跳"过去。
+            // 夹到 40ms 相当于最低 25fps 的表现，宁可短暂整体变慢也不丢曲线形状。
+            if (dt > 0.04) dt = 0.04;
 
             // 每秒推进量：1 / 时长。速度倍率在这里生效。
             double step = token.Direction * dt / AnimationSpeed.Scale(token.DurationSeconds);
@@ -761,10 +777,19 @@ namespace Ink_Canvas.Helpers
 
             const double peak = PopupPopInPeakScale;
             const double start = PopupPopInStartScale;
-            // 峰值时间点 = 上升行程 / 总行程（速度一致，转折自然）
-            double up = peak - start;
-            double down = 1.0 - peak;
-            double peakAt = up + down > 0.0001 ? up / (up + down) : 0.8;
+
+            // 峰值在进度轴上的位置固定为 8/11。
+            //
+            // 这不是随手取的比例，而是用户给出的观感序列：
+            //   打开 1-2-3-4-5-6-7-8-9-8-7-6  => 上升 8 步、回落 3 步、共 11 步
+            //   收起 6-7-8-9-8-7-6-5-4-3-2-1  => 先涨 3 步、再降 8 步
+            // 曲线只有一条，收起就是同一函数倒放，所以 8/11 自动让收起
+            // 也在 3/11 处经过峰值，两个方向都严格符合该序列。
+            //
+            // 曾试过"峰值位置 = 上升行程/总行程"，算出来是 0.896：
+            // 上升段占 89.6% 的时间，收起时"先涨"只剩 10.4%（约 1.4 帧），
+            // 过冲完全看不见 —— 那正是"放大效果没了"的原因。
+            const double peakAt = 8.0 / 11.0;
 
             double scale;
             if (progress <= peakAt)
@@ -784,12 +809,11 @@ namespace Ink_Canvas.Helpers
 
         private static void StopClock(AnimationToken token)
         {
-            if (token.Timer != null)
+            token.Running = false;
+            if (token.RenderingHandler != null)
             {
-                token.Timer.Stop();
-                if (token.TickHandler != null) token.Timer.Tick -= token.TickHandler;
-                token.Timer = null;
-                token.TickHandler = null;
+                CompositionTarget.Rendering -= token.RenderingHandler;
+                token.RenderingHandler = null;
             }
         }
 
