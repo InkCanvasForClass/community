@@ -137,6 +137,16 @@ namespace Ink_Canvas.Properties
 
         public static string Debug_CrashTest_Section => ResourceManager.GetString(nameof(Debug_CrashTest_Section), _resourceCulture);
 
+        public static string Debug_PerfSection => ResourceManager.GetString(nameof(Debug_PerfSection), _resourceCulture);
+
+        public static string Debug_RenderFpsOverlay_Header => ResourceManager.GetString(nameof(Debug_RenderFpsOverlay_Header), _resourceCulture);
+
+        public static string Debug_RenderFpsOverlay_Desc => ResourceManager.GetString(nameof(Debug_RenderFpsOverlay_Desc), _resourceCulture);
+
+        public static string Debug_UnlimitedFrameRate_Header => ResourceManager.GetString(nameof(Debug_UnlimitedFrameRate_Header), _resourceCulture);
+
+        public static string Debug_UnlimitedFrameRate_Desc => ResourceManager.GetString(nameof(Debug_UnlimitedFrameRate_Desc), _resourceCulture);
+
         public static string Debug_SimulateCrash_Header => ResourceManager.GetString(nameof(Debug_SimulateCrash_Header), _resourceCulture);
 
         public static string Debug_SimulateCrash_Desc => ResourceManager.GetString(nameof(Debug_SimulateCrash_Desc), _resourceCulture);

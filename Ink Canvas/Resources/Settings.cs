@@ -1830,6 +1830,18 @@ namespace Ink_Canvas
 
         [JsonProperty("logLevel")]
         public string LogLevel { get; set; } = "Trace";
+        /// <summary>
+        /// 显示渲染帧率 HUD：实时显示 WPF 真实出帧率、最差帧耗时与刷新率基准。
+        /// </summary>
+        [JsonProperty("isRenderFpsOverlayEnabled")]
+        public bool IsRenderFpsOverlayEnabled { get; set; } = false;
+
+        /// <summary>
+        /// 无限帧率：取消应用侧的帧率自限速（动画不被量化到 60fps、渲染优先级不降级）。
+        /// 注意显示器刷新率仍是物理上限，WPF 的呈现节奏由合成器 vsync 驱动。
+        /// </summary>
+        [JsonProperty("isUnlimitedFrameRateEnabled")]
+        public bool IsUnlimitedFrameRateEnabled { get; set; } = false;
 
         [JsonProperty("isPPTComDebugProbeEnabled")]
         public bool IsPPTComDebugProbeEnabled { get; set; } = false;

@@ -60,6 +60,23 @@ mc:Ignorable="d"
                     Toggled="ToggleSwitchRealtimeInkDebugLog_Toggled"/>
 
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                    Text="{x:Static props:AdvancedStrings.Debug_PerfSection}" />
+
+                <controls:LabeledSettingsCard x:Name="ToggleSwitchRenderFpsOverlay"
+                    Header="{x:Static props:AdvancedStrings.Debug_RenderFpsOverlay_Header}"
+                    Description="{x:Static props:AdvancedStrings.Debug_RenderFpsOverlay_Desc}"
+                    Icon="{x:Static ui:SegoeFluentIcons.SpeedHigh}"
+                    IsOn="False"
+                    Toggled="ToggleSwitchRenderFpsOverlay_Toggled"/>
+
+                <controls:LabeledSettingsCard x:Name="ToggleSwitchUnlimitedFrameRate"
+                    Header="{x:Static props:AdvancedStrings.Debug_UnlimitedFrameRate_Header}"
+                    Description="{x:Static props:AdvancedStrings.Debug_UnlimitedFrameRate_Desc}"
+                    Icon="{x:Static ui:SegoeFluentIcons.FullScreen}"
+                    IsOn="False"
+                    Toggled="ToggleSwitchUnlimitedFrameRate_Toggled"/>
+
+                <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
                     Text="{x:Static props:AdvancedStrings.Debug_CrashTest_Section}" />
 
                 <ui:SettingsCard Header="{x:Static props:AdvancedStrings.Debug_SimulateCrash_Header}"

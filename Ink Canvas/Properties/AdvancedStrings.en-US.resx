@@ -277,4 +277,19 @@
   <data name="Debug_MemoryBreakdownForceGC_Button" xml:space="preserve">
     <value>Force GC</value>
   </data>
+  <data name="Debug_PerfSection" xml:space="preserve">
+    <value>Performance diagnostics</value>
+  </data>
+  <data name="Debug_RenderFpsOverlay_Header" xml:space="preserve">
+    <value>Show live frame rate</value>
+  </data>
+  <data name="Debug_RenderFpsOverlay_Desc" xml:space="preserve">
+    <value>Shows WPF's actual render frame rate and worst frame time in the top-right corner, measured against your display refresh rate. Use it to diagnose UI stutter and animation drops.</value>
+  </data>
+  <data name="Debug_UnlimitedFrameRate_Header" xml:space="preserve">
+    <value>Use refresh rate as frame budget</value>
+  </data>
+  <data name="Debug_UnlimitedFrameRate_Desc" xml:space="preserve">
+    <value>Uses the display refresh rate as the per-frame time budget and logs a render environment diagnostic (refresh rate, render tier, software vs hardware). Use it together with the frame rate display above. Note: WPF presentation is driven by compositor vsync, so the display refresh rate is the physical ceiling; this option cannot push the frame rate above it.</value>
+  </data>
 </root>

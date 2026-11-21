@@ -1607,6 +1607,20 @@ namespace Ink_Canvas
                 Helpers.DebugConsoleManager.Show();
             }
 
+            // 启动时恢复性能诊断状态：刷新率探测先于帧率 HUD（HUD 以它为判读基准），
+            // 帧率设置独立于 HUD，不显示 HUD 时也应当生效。
+            if (Settings?.Advanced != null)
+            {
+                Helpers.RenderPacingController.ProbeDisplayRefreshRate();
+                Helpers.RenderPacingController.ApplyUnlimitedFrameRate(
+                    Settings.Advanced.IsUnlimitedFrameRateEnabled);
+
+                if (Settings.Advanced.IsRenderFpsOverlayEnabled)
+                {
+                    ShowRenderFpsOverlay();
+                }
+            }
+
             LoadCustomBackgroundColor();
             SetWindowMode();
 
