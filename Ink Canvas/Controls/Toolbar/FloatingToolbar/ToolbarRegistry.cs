@@ -1071,8 +1071,85 @@ namespace Ink_Canvas.Controls.Toolbar.FloatingToolbar
                 ["isPPTMode"] = isPPTMode,
                 ["isContentCollapsedByUser"] = _isContentCollapsedByUser
             };
+
+            // 记录切换前的宽度作为补间起点
+            double beforeWidth = rootPanel?.ActualWidth ?? 0;
+
             UpdatePanelVisibility(rootPanel, context);
+
+            AnimatePanelWidthToFit(rootPanel, beforeWidth);
         }
+
+        /// <summary>
+        /// 组件显隐后，让工具栏宽度的变化有个过渡，而不是"啪"一下变宽/变窄。
+        /// </summary>
+        /// <remarks>
+        /// 为什么不直接对 Width 逐帧动画：
+        /// 宽度是布局属性，逐帧变化会每帧触发一次 measure/arrange，
+        /// 工具栏里每个按钮都要重新排列，正是掉帧的典型来源。
+        ///
+        /// 这里改用的做法是「一次布局 + 一次补间」：
+        /// 1. 先把面板宽度固定在旧值，避免子项显隐立刻把布局宽度改掉；
+        /// 2. 强制一次布局拿到新内容应有的宽度；
+        /// 3. 用一条短补间把 Width 从旧值推到新值；
+        /// 4. 结束后清掉 Width，让面板回到自动布局。
+        ///
+        /// 期间仍有布局，但只发生在补间的每一帧（不可避免——宽度本来就是布局量），
+        /// 且只涉及这一个面板，不再叠加组件显隐的重复测量。
+        /// 关掉「禁止工具栏动画」时直接跳过，保持原来的瞬时切换。
+        /// </remarks>
+        private static void AnimatePanelWidthToFit(Panel rootPanel, double beforeWidth)
+        {
+            if (rootPanel == null) return;
+            if (!_animateVisibilityChange) return;
+
+            // 竖向工具栏动画的是高度而非宽度，这里不处理
+            if (rootPanel is StackPanel sp && sp.Orientation == Orientation.Vertical) return;
+
+            try
+            {
+                // 先摘掉上一轮可能残留的宽度动画
+                rootPanel.BeginAnimation(FrameworkElement.WidthProperty, null);
+
+                // 量出内容应有的宽度
+                rootPanel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                double targetWidth = rootPanel.DesiredSize.Width;
+
+                // 量不到或差异极小时不必补间
+                if (targetWidth <= 0 || beforeWidth <= 0 ||
+                    Math.Abs(targetWidth - beforeWidth) < 1.0)
+                {
+                    rootPanel.Width = double.NaN;
+                    return;
+                }
+
+                var animation = new System.Windows.Media.Animation.DoubleAnimation
+                {
+                    From = beforeWidth,
+                    To = targetWidth,
+                    Duration = TimeSpan.FromMilliseconds(ToolbarWidthTransitionMs),
+                    FillBehavior = System.Windows.Media.Animation.FillBehavior.Stop,
+                    EasingFunction = new System.Windows.Media.Animation.CubicEase
+                    {
+                        EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut
+                    }
+                };
+
+                // 结束后解除固定宽度，回到自动布局（避免之后内容变化被旧值卡住）
+                animation.Completed += (_, _) => rootPanel.Width = double.NaN;
+
+                rootPanel.BeginAnimation(FrameworkElement.WidthProperty, animation);
+            }
+            catch (Exception ex)
+            {
+                // 补间失败时不能留下固定宽度，否则工具栏会永远卡在旧尺寸
+                rootPanel.Width = double.NaN;
+                LogHelper.WriteLogToFile($"ToolbarRegistry: 宽度补间失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        /// <summary>工具栏宽度过渡时长（毫秒），略短于按钮出场，避免拖沓。</summary>
+        private const int ToolbarWidthTransitionMs = 180;
 
         private static void UpdatePanelVisibility(Panel panel, Dictionary<string, bool> context)
         {
