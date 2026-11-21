@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -41,13 +41,11 @@ namespace Ink_Canvas.Helpers
         /// <summary>容器标记，避免重复包装。</summary>
         private const string HostTag = "PopupOverflowRoomHost";
 
-
-
         /// <summary>
         /// 预留空间并返回应当施加动画的内容元素。
         /// </summary>
         /// <param name="popup">目标菜单。</param>
-        /// <param name="peakScale">动画峰值相对内容尺寸的倍数（≥1，例如 1.05）。</param>
+        /// <param name="peakScale">动画峰值相对内容尺寸的倍数（≥1，例如 1.0367）。</param>
         /// <returns>需要施加变换与动画的元素（内容本身，不是包装容器）。</returns>
         public static FrameworkElement Ensure(Popup popup, double peakScale)
         {
@@ -119,23 +117,56 @@ namespace Ink_Canvas.Helpers
             return (popupSize, targetSize, offset) =>
             {
                 var pad = room.PaddingValue;
+                double padSumX = pad.Width * 2;
+                double padSumY = pad.Height * 2;
 
-                // popupSize 是**容器**尺寸，已经包含两侧留白。
-                // 原回调的语义基于内容尺寸，所以这里换算成内容尺寸再交给它。
+                // 关键：判断 popupSize 是否已经包含留白。
                 //
-                // 注意不要再额外扣减第二次：早先实测（padding=6 时 popupSize=252，
-                // 内容 240）已确认 popupSize 含留白。之前的实现减了两次，
-                // 内容高度被算小，垂直方向误差最大 —— 表现就是"菜单偏下"。
+                // WPF 传给回调的尺寸在下述两种时机不同：
+                // - 首次打开：用的是包装前的内容尺寸（不含留白）；
+                // - 之后重新定位（内容变化、偏移微调）：用的是容器实际尺寸（含留白）。
+                // 若不做区分，一律按"含留白"处理，首次打开就会多减一个留白量，
+                // 菜单朝左上偏移；反之按"不含留白"处理，后续定位又会偏右下。
+                //
+                // 用容器实测尺寸比对即可判定：容器尺寸 ≈ popupSize 时说明已含留白。
+                bool sizeIncludesPadding = false;
+                if (room.Host != null)
+                {
+                    double hostW = room.Host.ActualWidth > 0 ? room.Host.ActualWidth : room.Host.DesiredSize.Width;
+                    double hostH = room.Host.ActualHeight > 0 ? room.Host.ActualHeight : room.Host.DesiredSize.Height;
+
+                    if (hostW > 0 && hostH > 0)
+                    {
+                        // 允许 1px 取整误差
+                        sizeIncludesPadding =
+                            Math.Abs(popupSize.Width - hostW) <= 1 + padSumX * 0.5 ||
+                            Math.Abs(popupSize.Height - hostH) <= 1 + padSumY * 0.5;
+                    }
+                }
+
+                if (!sizeIncludesPadding)
+                {
+                    // 未含留白：原回调拿到的就是内容尺寸，位置也按内容计算，
+                    // 不需要做任何补偿——内容在容器内自带留白偏移，视觉位置本来就是对的。
+                    var asIs = room.Original(popupSize, targetSize, offset);
+                    if (asIs == null) return null;
+
+                    return asIs
+                        .Select(p => new CustomPopupPlacement(
+                            new Point(p.Point.X, p.Point.Y),
+                            p.PrimaryAxis))
+                        .ToArray();
+                }
+
+                // 含留白：扣掉留白按内容尺寸计算，再把结果左/上移一个留白量，
+                // 抵消内容在容器内的内缩，使最终视觉位置与未留白时一致。
                 var contentSize = new Size(
-                    Math.Max(0, popupSize.Width - pad.Width * 2),
-                    Math.Max(0, popupSize.Height - pad.Height * 2));
+                    Math.Max(0, popupSize.Width - padSumX),
+                    Math.Max(0, popupSize.Height - padSumY));
 
                 var placements = room.Original(contentSize, targetSize, offset);
                 if (placements == null) return null;
 
-                // 原回调返回的是"容器左上角应所在的位置"。
-                // 内容在容器内向右下各内缩了一个 padding，要让内容落在原回调算出的位置，
-                // 容器需要再向左上移同样的量。
                 return placements
                     .Select(p => new CustomPopupPlacement(
                         new Point(p.Point.X - pad.Width, p.Point.Y - pad.Height),

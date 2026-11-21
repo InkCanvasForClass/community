@@ -428,6 +428,23 @@ namespace Ink_Canvas.Helpers
         /// <summary>菜单出场时长（秒）。</summary>
         internal const double PopupPopInDurationSeconds = 0.4;
 
+        /// <summary>菜单出场起始缩放：由小长到正常大小。</summary>
+        private const double PopupPopInStartScale = 0.72;
+
+        /// <summary>
+        /// 缩放过冲峰值。>1 才会出现"变大一点再回落"。
+        /// 必须与实际动画峰值一致：<see cref="PopupOverflowRoom"/> 按它计算留白，
+        /// 低估会导致峰值时四边被裁。BackEase(Amplitude=0.5) 从 0.72 起跳的实测峰值为 1.0367。
+        /// </summary>
+        private const double PopupPopInPeakScale = 1.0367;
+
+        /// <summary>
+        /// BackEase 过冲幅度。
+        /// 注意 WPF 的 Amplitude 与业界 EaseOutBack 的 c 不是同一个量（Amplitude=1.1 过冲达 43%），
+        /// 0.5 对应实测峰值 1.0367（过冲 3.67%），与 <see cref="PopupPopInPeakScale"/> 一致。
+        /// </summary>
+        private const double PopupPopInBackAmplitude = 0.5;
+
         public static void ShowPopupWithSlideAndFade(Popup popup, double duration = PopupPopInDurationSeconds)
         {
             try
@@ -437,7 +454,11 @@ namespace Ink_Canvas.Helpers
 
                 if (popup.IsOpen) return;
 
-                var child = popup.Child as FrameworkElement;
+                // 先预留溢出空间：Popup 窗口尺寸等于内容布局尺寸，
+                // 不留白的话缩放一旦超过 1.0，四边就会被窗口边界裁掉。
+                // Ensure 会同时补偿定位（见 PopupOverflowRoom 的说明），视觉位置不变。
+                var child = PopupOverflowRoom.Ensure(popup, PopupPopInPeakScale)
+                            ?? popup.Child as FrameworkElement;
                 if (child == null)
                 {
                     popup.IsOpen = true;
@@ -450,18 +471,23 @@ namespace Ink_Canvas.Helpers
                 child.Visibility = Visibility.Visible;
                 child.Opacity = targetOpacity * 0.5;
 
-                // 只用位移，不用缩放。
-                //
-                // 缩放会同时破坏两件事，而且都无法在 Popup 里绕过：
-                // 1) Popup 窗口尺寸恒等于内容的布局尺寸（RenderTransform 不参与布局），
-                //    缩放一旦超过 1.0，渲染画面就超出窗口边界被裁掉——"四边不显示"；
-                // 2) 宿主用 CustomPopupPlacementCallback 定位，回调里的 popupSize
-                //    与最终窗口矩形相关，挂上 TransformGroup 后窗口尺寸跟着变，定位随之漂移。
-                //
-                // 所以这里保持与原来完全一致的单一位移结构：结构稳定、定位不受影响。
-                child.RenderTransform = new TranslateTransform(0, 10);
+                // 缩放 + 位移共存：用 TransformGroup 承载两段动画，互不覆盖。
+                // 窗外已有 PopupOverflowRoom 预留的留白，峰值 1.0367 不会越界被裁。
+                var scaleTransform = new ScaleTransform(PopupPopInStartScale, PopupPopInStartScale);
+                var slideTransform = new TranslateTransform(0, 10);
+                var transformGroup = new TransformGroup();
+                transformGroup.Children.Add(scaleTransform);
+                transformGroup.Children.Add(slideTransform);
+
+                child.RenderTransform = transformGroup;
+                // 原点必须是内容自身中心：留白是四周对称的，以中心缩放才不会被单边裁到。
+                child.RenderTransformOrigin = new Point(0.5, 0.5);
 
                 popup.IsOpen = true;
+
+                // 打开后内容才有真实尺寸：按它校正一次留白，
+                // 避免打开前测不到尺寸导致留白偏小、峰值时四边被裁。
+                PopupOverflowRoom.RefreshPadding(popup, PopupPopInPeakScale);
 
                 // 注意：置顶由 PopupManagerHelper 统一管理，
                 // 此处不再调用 BringPopupToFront，避免重复置顶导致闪烁
@@ -485,10 +511,31 @@ namespace Ink_Canvas.Helpers
                 };
                 slideAnimation.EasingFunction = new CubicEase();
                 Storyboard.SetTargetProperty(slideAnimation,
-                    new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.Y)"));
+                    new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"));
+
+                // 缩放入场：一条 BackEase 曲线完成"小 → 略大 → 回落"。
+                // 不要拆成两段关键帧：峰值处速度不连续会顿一下，EaseOutBack 本身就先冲过头再回落。
+                var scaleAnimation = new DoubleAnimation
+                {
+                    From = PopupPopInStartScale,
+                    To = 1.0,
+                    Duration = TimeSpan.FromSeconds(duration),
+                    EasingFunction = new BackEase
+                    {
+                        EasingMode = EasingMode.EaseOut,
+                        Amplitude = PopupPopInBackAmplitude
+                    }
+                };
+                Storyboard.SetTargetProperty(scaleAnimation,
+                    new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)"));
+                var scaleAnimationY = scaleAnimation.Clone();
+                Storyboard.SetTargetProperty(scaleAnimationY,
+                    new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)"));
 
                 sb.Children.Add(fadeInAnimation);
                 sb.Children.Add(slideAnimation);
+                sb.Children.Add(scaleAnimation);
+                sb.Children.Add(scaleAnimationY);
 
                 sb.Begin(child);
             }
@@ -531,8 +578,18 @@ namespace Ink_Canvas.Helpers
                     Duration = TimeSpan.FromSeconds(duration)
                 };
                 slideAnimation.EasingFunction = new CubicEase();
+                // 收场与出场必须用同一套变换结构，否则路径对不上、位移会残留
                 Storyboard.SetTargetProperty(slideAnimation,
-                    new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.Y)"));
+                    new PropertyPath("(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)"));
+
+                // 收场从"正常大小、无位移"起步，与出场终态一致
+                var exitScale = new ScaleTransform(1, 1);
+                var exitSlide = new TranslateTransform(0, 0);
+                var exitGroup = new TransformGroup();
+                exitGroup.Children.Add(exitScale);
+                exitGroup.Children.Add(exitSlide);
+                child.RenderTransform = exitGroup;
+                child.RenderTransformOrigin = new Point(0.5, 0.5);
 
                 sb.Children.Add(fadeOutAnimation);
                 sb.Children.Add(slideAnimation);
