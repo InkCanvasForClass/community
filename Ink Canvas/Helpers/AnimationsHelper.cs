@@ -425,8 +425,21 @@ namespace Ink_Canvas.Helpers
             sb.Begin((FrameworkElement)element);
         }
 
-        /// <summary>菜单出场时长（秒）。</summary>
-        internal const double PopupPopInDurationSeconds = 0.4;
+        /// <summary>
+        /// 菜单出场时长（秒）。
+        /// </summary>
+        /// <remarks>
+        /// 时长是「progress 从 0 走到 1」的时间，曲线形状与它无关：
+        /// 缩短只会整体加快，峰值位置(8/11)与过冲量(1.0367)都不变。
+        ///
+        /// 定这个值的依据是过冲段的可辨识度：
+        /// 回落段占时长 3/11，60fps 下必须至少有 4~5 帧，
+        /// 否则过冲一闪而过，看起来就像"没有放大效果"。
+        ///   0.40s => 回落 109ms = 6.5 帧（偏慢，收尾有明显的停滞感）
+        ///   0.30s => 回落  82ms = 4.9 帧（当前取值）
+        ///   0.22s => 回落  60ms = 3.6 帧（过冲开始看不清）
+        /// </remarks>
+        internal const double PopupPopInDurationSeconds = 0.30;
 
         /// <summary>
         /// 每个 Popup 当前的动画代次。
@@ -504,14 +517,15 @@ namespace Ink_Canvas.Helpers
         private const double PopupPopInPeakScale = 1.0367;
 
         /// <summary>
-        /// BackEase 过冲幅度。
-        /// 注意 WPF 的 Amplitude 与业界 EaseOutBack 的 c 不是同一个量（Amplitude=1.1 过冲达 43%），
-        /// 0.5 对应实测峰值 1.0367（过冲 3.67%），与 <see cref="PopupPopInPeakScale"/> 一致。
+        /// 收场时长（秒）。比出场短一点，让关闭显得干脆。
         /// </summary>
-        private const double PopupPopInBackAmplitude = 0.5;
-
-        /// <summary>收场时长（秒）。比出场短一点，让关闭显得干脆。</summary>
-        internal const double PopupPopOutDurationSeconds = 0.22;
+        /// <remarks>
+        /// 收起是同一曲线的倒放，所以"先涨后缩"那段同样占 3/11。
+        /// 0.18s 时该段约 49ms ≈ 3 帧——已经在可辨识的临界值上，
+        /// 再短就必须同步抬高 <see cref="PopupPopInPeakScale"/> 或放宽峰值位置，
+        /// 否则收起的过冲会彻底看不见。
+        /// </remarks>
+        internal const double PopupPopOutDurationSeconds = 0.18;
 
         /// <summary>
         /// 打开菜单：progress 从当前位置推进到 1。
